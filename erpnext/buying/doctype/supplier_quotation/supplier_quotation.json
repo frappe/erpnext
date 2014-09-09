@@ -1,6 +1,5 @@
 {
- "allow_attach": 1, 
- "allow_import": 1, 
+  "allow_import": 1, 
  "autoname": "naming_series:", 
  "creation": "2013-05-21 16:16:45", 
  "docstatus": 0, 
@@ -67,7 +66,7 @@
   }, 
   {
    "fieldname": "contact_mobile", 
-   "fieldtype": "Text", 
+   "fieldtype": "Small Text", 
    "hidden": 1, 
    "label": "Mobile No", 
    "permlevel": 0, 
@@ -75,7 +74,7 @@
   }, 
   {
    "fieldname": "contact_email", 
-   "fieldtype": "Text", 
+   "fieldtype": "Small Text", 
    "hidden": 1, 
    "label": "Contact Email", 
    "permlevel": 0, 
@@ -95,7 +94,7 @@
    "fieldname": "transaction_date", 
    "fieldtype": "Date", 
    "in_filter": 1, 
-   "label": "Quotation Date", 
+   "label": "Date", 
    "oldfieldname": "transaction_date", 
    "oldfieldtype": "Date", 
    "permlevel": 0, 
@@ -104,13 +103,14 @@
   }, 
   {
    "fieldname": "amended_from", 
-   "fieldtype": "Data", 
+   "fieldtype": "Link", 
    "hidden": 1, 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
    "oldfieldtype": "Data", 
+   "options": "Supplier Quotation", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 1, 
@@ -197,6 +197,14 @@
    "print_hide": 1
   }, 
   {
+   "fieldname": "ignore_pricing_rule", 
+   "fieldtype": "Check", 
+   "label": "Ignore Pricing Rule", 
+   "no_copy": 1, 
+   "permlevel": 1, 
+   "print_hide": 1
+  }, 
+  {
    "fieldname": "items", 
    "fieldtype": "Section Break", 
    "label": "Items", 
@@ -221,23 +229,6 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "net_total_import", 
-   "fieldtype": "Currency", 
-   "label": "Net Total", 
-   "no_copy": 0, 
-   "oldfieldname": "net_total_import", 
-   "oldfieldtype": "Currency", 
-   "options": "currency", 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "column_break_24", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "net_total", 
    "fieldtype": "Currency", 
    "label": "Net Total (Company Currency)", 
@@ -249,6 +240,23 @@
    "print_hide": 1, 
    "read_only": 1, 
    "reqd": 0
+  }, 
+  {
+   "fieldname": "column_break_24", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "net_total_import", 
+   "fieldtype": "Currency", 
+   "label": "Net Total", 
+   "no_copy": 0, 
+   "oldfieldname": "net_total_import", 
+   "oldfieldtype": "Currency", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "print_hide": 0, 
+   "read_only": 1
   }, 
   {
    "fieldname": "taxes", 
@@ -296,63 +304,6 @@
    "oldfieldtype": "Section Break", 
    "options": "icon-money", 
    "permlevel": 0
-  }, 
-  {
-   "fieldname": "other_charges_added_import", 
-   "fieldtype": "Currency", 
-   "label": "Taxes and Charges Added", 
-   "no_copy": 0, 
-   "oldfieldname": "other_charges_added_import", 
-   "oldfieldtype": "Currency", 
-   "options": "currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1, 
-   "report_hide": 0
-  }, 
-  {
-   "fieldname": "other_charges_deducted_import", 
-   "fieldtype": "Currency", 
-   "label": "Taxes and Charges Deducted", 
-   "no_copy": 0, 
-   "oldfieldname": "other_charges_deducted_import", 
-   "oldfieldtype": "Currency", 
-   "options": "currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1, 
-   "report_hide": 0
-  }, 
-  {
-   "fieldname": "grand_total_import", 
-   "fieldtype": "Currency", 
-   "in_list_view": 1, 
-   "label": "Grand Total", 
-   "no_copy": 0, 
-   "oldfieldname": "grand_total_import", 
-   "oldfieldtype": "Currency", 
-   "options": "currency", 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "read_only": 1, 
-   "report_hide": 0
-  }, 
-  {
-   "fieldname": "in_words_import", 
-   "fieldtype": "Data", 
-   "label": "In Words", 
-   "oldfieldname": "in_words_import", 
-   "oldfieldtype": "Data", 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "column_break4", 
-   "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "print_hide": 0
   }, 
   {
    "fieldname": "other_charges_added", 
@@ -423,6 +374,68 @@
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break4", 
+   "fieldtype": "Column Break", 
+   "oldfieldtype": "Column Break", 
+   "permlevel": 0, 
+   "print_hide": 0
+  }, 
+  {
+   "fieldname": "other_charges_added_import", 
+   "fieldtype": "Currency", 
+   "label": "Taxes and Charges Added", 
+   "no_copy": 0, 
+   "oldfieldname": "other_charges_added_import", 
+   "oldfieldtype": "Currency", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1, 
+   "report_hide": 0
+  }, 
+  {
+   "fieldname": "other_charges_deducted_import", 
+   "fieldtype": "Currency", 
+   "label": "Taxes and Charges Deducted", 
+   "no_copy": 0, 
+   "oldfieldname": "other_charges_deducted_import", 
+   "oldfieldtype": "Currency", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1, 
+   "report_hide": 0
+  }, 
+  {
+   "fieldname": "grand_total_import", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Grand Total", 
+   "no_copy": 0, 
+   "oldfieldname": "grand_total_import", 
+   "oldfieldtype": "Currency", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "print_hide": 0, 
+   "read_only": 1, 
+   "report_hide": 0
+  }, 
+  {
+   "fieldname": "in_words_import", 
+   "fieldtype": "Data", 
+   "label": "In Words", 
+   "oldfieldname": "in_words_import", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "print_hide": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "fold", 
+   "fieldtype": "Fold", 
+   "permlevel": 0
   }, 
   {
    "fieldname": "terms_section_break", 
@@ -562,7 +575,7 @@
  "icon": "icon-shopping-cart", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:17:10.664189", 
+ "modified": "2014-08-14 02:17:26.401532", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation", 
@@ -598,6 +611,7 @@
   }, 
   {
    "amend": 1, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 0, 
@@ -612,6 +626,7 @@
   }, 
   {
    "amend": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -626,6 +641,7 @@
   }, 
   {
    "amend": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 
@@ -637,6 +653,12 @@
    "role": "Supplier", 
    "submit": 0, 
    "write": 0
+  }, 
+  {
+   "permlevel": 1, 
+   "read": 1, 
+   "role": "Purchase Manager", 
+   "write": 1
   }
  ], 
  "read_only_onload": 1, 

@@ -1,7 +1,8 @@
 {
  "allow_import": 1, 
+ "allow_rename": 1, 
  "autoname": "field:partner_name", 
- "creation": "2013-04-12 15:34:06.000000", 
+ "creation": "2013-04-12 15:34:06", 
  "description": "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -11,6 +12,7 @@
    "fieldname": "partner_name", 
    "fieldtype": "Data", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Sales Partner Name", 
    "oldfieldname": "partner_name", 
    "oldfieldtype": "Data", 
@@ -22,6 +24,7 @@
    "fieldname": "partner_type", 
    "fieldtype": "Select", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Partner Type", 
    "oldfieldname": "partner_type", 
    "oldfieldtype": "Select", 
@@ -33,6 +36,7 @@
    "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
    "fieldname": "territory", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "Territory", 
    "options": "Territory", 
    "permlevel": 0, 
@@ -48,6 +52,7 @@
   {
    "fieldname": "commission_rate", 
    "fieldtype": "Float", 
+   "in_list_view": 1, 
    "label": "Commission Rate", 
    "oldfieldname": "commission_rate", 
    "oldfieldtype": "Currency", 
@@ -184,17 +189,18 @@
    "permlevel": 0
   }, 
   {
+   "default": "partners", 
    "fieldname": "parent_website_route", 
-   "fieldtype": "Link", 
+   "fieldtype": "Read Only", 
    "label": "Parent Website Route", 
-   "options": "Website Route", 
+   "options": "", 
    "permlevel": 0
   }
  ], 
  "icon": "icon-user", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-02-20 18:30:32.000000", 
+ "modified": "2014-09-05 14:54:57.014940", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Partner", 
@@ -202,7 +208,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -216,7 +221,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -230,7 +235,6 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 

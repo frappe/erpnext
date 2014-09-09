@@ -8,6 +8,10 @@ from frappe import msgprint, _, throw
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
 
+form_grid_templates = {
+	"po_details": "templates/form_grid/item_grid.html"
+}
+
 class PurchaseOrder(BuyingController):
 	tname = 'Purchase Order Item'
 	fname = 'po_details'
@@ -24,6 +28,7 @@ class PurchaseOrder(BuyingController):
 			'target_ref_field': 'qty',
 			'source_field': 'qty',
 			'percent_join_field': 'prevdoc_docname',
+			'overflow_type': 'order'
 		}]
 
 	def validate(self):
@@ -45,6 +50,7 @@ class PurchaseOrder(BuyingController):
 
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
+		self.validate_minimum_order_qty()
 		self.create_raw_materials_supplied("po_raw_material_details")
 
 	def validate_with_previous_doc(self):
@@ -60,6 +66,18 @@ class PurchaseOrder(BuyingController):
 				"is_child_table": True
 			}
 		})
+
+	def validate_minimum_order_qty(self):
+		itemwise_min_order_qty = frappe._dict(frappe.db.sql("select name, min_order_qty from tabItem"))
+
+		itemwise_qty = frappe._dict()
+		for d in self.get("po_details"):
+			itemwise_qty.setdefault(d.item_code, 0)
+			itemwise_qty[d.item_code] += flt(d.stock_qty)
+
+		for item_code, qty in itemwise_qty.items():
+			if flt(qty) < flt(itemwise_min_order_qty.get(item_code)):
+				frappe.throw(_("Item #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).").format(item_code))
 
 	def get_schedule_dates(self):
 		for d in self.get('po_details'):
@@ -129,7 +147,7 @@ class PurchaseOrder(BuyingController):
 		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" % ( mod_db[0][0],cstr(self.modified)))
 
 		if date_diff and date_diff[0][0]:
-			msgprint(_("{0} {1} has been modified. Please refresh").format(self.doctype, self.name),
+			msgprint(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name),
 				raise_exception=True)
 
 	def update_status(self, status):
@@ -179,17 +197,19 @@ class PurchaseOrder(BuyingController):
 	def on_update(self):
 		pass
 
+def set_missing_values(source, target):
+	target.ignore_pricing_rule = 1
+	target.run_method("set_missing_values")
+	target.run_method("calculate_taxes_and_totals")
+
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None):
-	def set_missing_values(source, target):
-		target.run_method("set_missing_values")
-		target.run_method("calculate_taxes_and_totals")
-
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.received_qty)
 		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
 		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
-		target.base_amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.base_rate)
+		target.base_amount = (flt(obj.qty) - flt(obj.received_qty)) * \
+			flt(obj.rate) * flt(source_parent.conversion_rate)
 
 	doc = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {
@@ -218,15 +238,10 @@ def make_purchase_receipt(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
-	def set_missing_values(source, target):
-		target.run_method("set_missing_values")
-		target.run_method("calculate_taxes_and_totals")
-
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
-		if flt(obj.base_rate):
-			target.qty = target.base_amount / flt(obj.base_rate)
+		target.qty = target.amount / flt(obj.rate) if flt(obj.rate) else flt(obj.qty)
 
 	doc = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {

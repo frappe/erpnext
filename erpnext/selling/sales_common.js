@@ -16,9 +16,12 @@ frappe.require("assets/erpnext/js/transaction.js");
 erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	onload: function() {
 		this._super();
-		this.toggle_rounded_total();
 		this.setup_queries();
 		this.toggle_editable_price_list_rate();
+	},
+
+	onload_post_render: function() {
+		cur_frm.get_field(this.fname).grid.set_multiple_add("item_code", "qty");
 	},
 
 	setup_queries: function() {
@@ -104,7 +107,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	customer: function() {
-		erpnext.utils.get_party_details(this.frm);
+		var me = this;
+		erpnext.utils.get_party_details(this.frm, null, null, function(){me.apply_pricing_rule()});
 	},
 
 	customer_address: function() {
@@ -119,12 +123,20 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		erpnext.utils.get_contact_details(this.frm);
 	},
 
+	sales_partner: function() {
+		this.apply_pricing_rule();
+	},
+
+	campaign: function() {
+		this.apply_pricing_rule();
+	},
+
 	barcode: function(doc, cdt, cdn) {
 		this.item_code(doc, cdt, cdn);
 	},
 
 	selling_price_list: function() {
-		this.get_price_list_currency("Selling");
+		this.apply_price_list();
 	},
 
 	price_list_rate: function(doc, cdt, cdn) {
@@ -206,22 +218,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
-				method: "erpnext.selling.utils.get_available_qty",
+				method: "erpnext.stock.get_item_details.get_available_qty",
 				child: item,
 				args: {
 					item_code: item.item_code,
 					warehouse: item.warehouse,
 				},
-			});
-		}
-	},
-
-	toggle_rounded_total: function() {
-		var me = this;
-		if(cint(frappe.defaults.get_global_default("disable_rounded_total"))) {
-			$.each(["rounded_total", "rounded_total_export"], function(i, fieldname) {
-				me.frm.set_df_property(fieldname, "print_hide", 1);
-				me.frm.toggle_display(fieldname, false);
 			});
 		}
 	},
@@ -468,7 +470,27 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	set_dynamic_labels: function() {
 		this._super();
-		set_sales_bom_help(this.frm.doc);
+		this.set_sales_bom_help(this.frm.doc);
+	},
+
+	set_sales_bom_help: function(doc) {
+		if(!cur_frm.fields_dict.packing_list) return;
+		if ((doc.packing_details || []).length) {
+			$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
+
+			if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+				help_msg = "<div class='alert alert-warning'>" +
+					__("For 'Sales BOM' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Sales BOM' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.")+
+				"</div>";
+				frappe.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = help_msg;
+			}
+		} else {
+			$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(false);
+			if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+				frappe.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = '';
+			}
+		}
+		refresh_field('sales_bom_help');
 	},
 
 	change_form_labels: function(company_currency) {
@@ -561,26 +583,20 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			var df = frappe.meta.get_docfield(fname[0], fname[1], me.frm.doc.name);
 			if(df) df.label = label;
 		});
-	},
+	}
 });
 
-// Help for Sales BOM items
-var set_sales_bom_help = function(doc) {
-	if(!cur_frm.fields_dict.packing_list) return;
-	if ((doc.packing_details || []).length) {
-		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
-
-		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-			help_msg = "<div class='alert alert-warning'>" +
-				__("For 'Sales BOM' items, warehouse, serial no and batch no will be considered from the 'Packing List' table. If warehouse and batch no are same for all packing items for any 'Sales BOM' item, those values can be entered in the main item table, values will be copied to 'Packing List' table.")+
-			"</div>";
-			frappe.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = help_msg;
+frappe.ui.form.on(cur_frm.doctype,"project_name", function(frm) {
+	frappe.call({
+		method:'erpnext.projects.doctype.project.project.get_cost_center_name' ,
+		args: {	project_name: frm.doc.project_name	},
+		callback: function(r, rt) {
+			if(!r.exc) { 
+				$.each(frm.doc[cur_frm.cscript.fname] || [], function(i, row) {
+					frappe.model.set_value(row.doctype, row.name, "cost_center", r.message);
+					msgprint(__("Cost Center For Item with Item Code '"+row.item_name+"' has been Changed to "+ r.message));
+				})
+			}
 		}
-	} else {
-		$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(false);
-		if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-			frappe.meta.get_docfield(doc.doctype, 'sales_bom_help', doc.name).options = '';
-		}
-	}
-	refresh_field('sales_bom_help');
-}
+	})
+})

@@ -19,7 +19,7 @@ def get_doctypes():
 
 @frappe.whitelist()
 def upload(select_doctype=None, rows=None):
-	from frappe.utils.datautils import read_csv_content_from_uploaded_file
+	from frappe.utils.csvutils import read_csv_content_from_uploaded_file
 	from frappe.model.rename_doc import rename_doc
 
 	if not select_doctype:

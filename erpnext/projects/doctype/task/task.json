@@ -1,8 +1,7 @@
 {
- "allow_attach": 1, 
- "allow_import": 1, 
+  "allow_import": 1, 
  "autoname": "TASK.#####", 
- "creation": "2013-01-29 19:25:50.000000", 
+ "creation": "2013-01-29 19:25:50", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -218,14 +217,14 @@
  "icon": "icon-check", 
  "idx": 1, 
  "max_attachments": 5, 
- "modified": "2014-01-24 13:01:46.000000", 
+ "modified": "2014-05-27 03:49:20.708319", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Task", 
  "owner": "Administrator", 
  "permissions": [
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 

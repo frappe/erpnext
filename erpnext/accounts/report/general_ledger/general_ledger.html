@@ -1,0 +1,47 @@
+<div style="margin-bottom: 7px;" class="text-center">
+	{%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
+</div>
+<h2 class="text-center">{%= __("Statement of Account") %}</h2>
+<h4 class="text-center">{%= filters.account && (filters.account + ", ")  || "" %} {%= filters.company %}</h4>
+<h5 class="text-center">
+	{%= dateutil.str_to_user(filters.from_date) %}
+	{%= __("to") %}
+	{%= dateutil.str_to_user(filters.to_date) %}
+</h5>
+<hr>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th style="width: 15%">{%= __("Date") %}</th>
+			<th style="width: 15%">{%= __("Ref") %}</th>
+			<th style="width: 40%">{%= __("Party") %}</th>
+			<th style="width: 15%">{%= __("Debit") %}</th>
+			<th style="width: 15%">{%= __("Credit") %}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			<tr>
+			{% if(data[i].posting_date) { %}
+				<td>{%= dateutil.str_to_user(data[i].posting_date) %}</td>
+				<td>{%= data[i].voucher_type%}
+					<br>{%= data[i].voucher_no %}</td>
+				<td>{%= data[i].account %}
+					<br>{%= __("Against") %}: {%= data[i].against_account %}
+					<br>{%= __("Remarks") %}: {%= data[i].remarks %}</td>
+				<td style="text-align: right">{%= format_currency(data[i].debit) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i].credit) %}</td>
+			{% } else { %}
+				<td></td>
+				<td></td>
+				<td><b>{%= data[i].account || "&nbsp;" %}</b></td>
+				<td style="text-align: right">
+					{%= data[i].account && format_currency(data[i].debit) %}</td>
+				<td style="text-align: right">
+					{%= data[i].account && format_currency(data[i].credit) %}</td>
+			{% } %}
+			</tr>
+		{% } %}
+	</tbody>
+</table>
+<p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>

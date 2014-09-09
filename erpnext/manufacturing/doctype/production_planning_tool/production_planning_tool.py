@@ -122,7 +122,7 @@ class ProductionPlanningTool(Document):
 		if self.fg_item:
 			item_condition = ' and pi.item_code = "' + self.fg_item + '"'
 
-		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as reserved_warhouse,
+		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
 			(((so_item.qty - ifnull(so_item.delivered_qty, 0)) * pi.qty) / so_item.qty)
 				as pending_qty
 			from `tabSales Order Item` so_item, `tabPacked Item` pi
@@ -250,23 +250,24 @@ class ProductionPlanningTool(Document):
 			bom_wise_item_details = {}
 			if self.use_multi_level_bom:
 				# get all raw materials with sub assembly childs
+				# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 				for d in frappe.db.sql("""select fb.item_code,
-					ifnull(sum(fb.qty_consumed_per_unit), 0) as qty,
+					ifnull(sum(ifnull(fb.qty, 0)/ifnull(bom.quantity, 1)), 0) as qty,
 					fb.description, fb.stock_uom, it.min_order_qty
-					from `tabBOM Explosion Item` fb,`tabItem` it
-					where it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
+					from `tabBOM Explosion Item` fb, `tabBOM` bom, `tabItem` it
+					where bom.name = fb.parent and it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
 					and ifnull(it.is_sub_contracted_item, 'No') = 'No'
-					and fb.docstatus<2 and fb.parent=%s
+					and fb.docstatus<2 and bom.name=%s
 					group by item_code, stock_uom""", bom, as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
 			else:
 				# Get all raw materials considering SA items as raw materials,
 				# so no childs of SA items
 				for d in frappe.db.sql("""select bom_item.item_code,
-					ifnull(sum(bom_item.qty_consumed_per_unit), 0) as qty,
+					ifnull(sum(ifnull(bom_item.qty, 0)/ifnull(bom.quantity, 1)), 0) as qty,
 					bom_item.description, bom_item.stock_uom, item.min_order_qty
-					from `tabBOM Item` bom_item, tabItem item
-					where bom_item.parent = %s and bom_item.docstatus < 2
+					from `tabBOM Item` bom_item, `tabBOM` bom, tabItem item
+					where bom.name = bom_item.parent and bom.name = %s and bom_item.docstatus < 2
 					and bom_item.item_code = item.name
 					group by item_code""", bom, as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
@@ -276,7 +277,7 @@ class ProductionPlanningTool(Document):
 					item_list.append([item, flt(item_details.qty) * so_qty[1], item_details.description,
 						item_details.stock_uom, item_details.min_order_qty, so_qty[0]])
 
-			self.make_items_dict(item_list)
+		self.make_items_dict(item_list)
 
 	def make_items_dict(self, item_list):
 		for i in item_list:
@@ -287,17 +288,16 @@ class ProductionPlanningTool(Document):
 		 	'Quantity Requested for Purchase', 'Ordered Qty', 'Actual Qty']]
 		for item in self.item_dict:
 			total_qty = sum([flt(d[0]) for d in self.item_dict[item]])
-			for item_details in self.item_dict[item]:
-				item_list.append([item, item_details[1], item_details[2], item_details[0]])
-				item_qty = frappe.db.sql("""select warehouse, indented_qty, ordered_qty, actual_qty
-					from `tabBin` where item_code = %s""", item, as_dict=1)
-				i_qty, o_qty, a_qty = 0, 0, 0
-				for w in item_qty:
-					i_qty, o_qty, a_qty = i_qty + flt(w.indented_qty), o_qty + flt(w.ordered_qty), a_qty + flt(w.actual_qty)
-					item_list.append(['', '', '', '', w.warehouse, flt(w.indented_qty),
-						flt(w.ordered_qty), flt(w.actual_qty)])
-				if item_qty:
-					item_list.append(['', '', '', '', 'Total', i_qty, o_qty, a_qty])
+			item_list.append([item, self.item_dict[item][0][1], self.item_dict[item][0][2], total_qty])
+			item_qty = frappe.db.sql("""select warehouse, indented_qty, ordered_qty, actual_qty
+				from `tabBin` where item_code = %s""", item, as_dict=1)
+			i_qty, o_qty, a_qty = 0, 0, 0
+			for w in item_qty:
+				i_qty, o_qty, a_qty = i_qty + flt(w.indented_qty), o_qty + flt(w.ordered_qty), a_qty + flt(w.actual_qty)
+				item_list.append(['', '', '', '', w.warehouse, flt(w.indented_qty),
+					flt(w.ordered_qty), flt(w.actual_qty)])
+			if item_qty:
+				item_list.append(['', '', '', '', 'Total', i_qty, o_qty, a_qty])
 
 		return item_list
 
@@ -325,7 +325,7 @@ class ProductionPlanningTool(Document):
 			total_qty = sum([flt(d[0]) for d in so_item_qty])
 			if total_qty > item_projected_qty.get(item, 0):
 				# shortage
-				requested_qty = total_qty - item_projected_qty.get(item, 0)
+				requested_qty = total_qty - flt(item_projected_qty.get(item))
 				# consider minimum order qty
 				requested_qty = requested_qty > flt(so_item_qty[0][3]) and \
 					requested_qty or flt(so_item_qty[0][3])
@@ -355,8 +355,8 @@ class ProductionPlanningTool(Document):
 	def get_projected_qty(self):
 		items = self.item_dict.keys()
 		item_projected_qty = frappe.db.sql("""select item_code, sum(projected_qty)
-			from `tabBin` where item_code in (%s) group by item_code""" %
-			(", ".join(["%s"]*len(items)),), tuple(items))
+			from `tabBin` where item_code in (%s) and warehouse=%s group by item_code""" %
+			(", ".join(["%s"]*len(items)), '%s'), tuple(items + [self.purchase_request_for_warehouse]))
 
 		return dict(item_projected_qty)
 
@@ -370,10 +370,8 @@ class ProductionPlanningTool(Document):
 		if items_to_be_requested:
 			for item in items_to_be_requested:
 				item_wrapper = frappe.get_doc("Item", item)
-				pr_doc = frappe.get_doc({
-					"doctype": "Material Request",
-					"__islocal": 1,
-					"naming_series": "IDT",
+				pr_doc = frappe.new_doc("Material Request")
+				pr_doc.update({
 					"transaction_date": nowdate(),
 					"status": "Draft",
 					"company": self.company,

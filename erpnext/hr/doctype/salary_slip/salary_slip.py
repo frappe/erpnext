@@ -4,12 +4,12 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, nowdate, _round
+from frappe.utils import add_days, cint, cstr, flt, getdate, nowdate, rounded
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
 from erpnext.setup.utils import get_company_currency
-
+from erpnext.hr.utils import set_employee_name
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -33,8 +33,8 @@ class SalarySlip(TransactionBase):
 		return struct and struct[0][0] or ''
 
 	def pull_sal_struct(self, struct):
-		from erpnext.hr.doctype.salary_structure.salary_structure import get_mapped_doc
-		self.update(get_mapped_doc(struct, self))
+		from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
+		self.update(make_salary_slip(struct, self).as_dict())
 
 	def pull_emp_details(self):
 		emp = frappe.db.get_value("Employee", self.employee,
@@ -146,11 +146,13 @@ class SalarySlip(TransactionBase):
 		company_currency = get_company_currency(self.company)
 		self.total_in_words = money_in_words(self.rounded_total, company_currency)
 
+		set_employee_name(self)
+
 	def calculate_earning_total(self):
 		self.gross_pay = flt(self.arrear_amount) + flt(self.leave_encashment_amount)
 		for d in self.get("earning_details"):
 			if cint(d.e_depends_on_lwp) == 1:
-				d.e_modified_amount = _round(flt(d.e_amount) * flt(self.payment_days)
+				d.e_modified_amount = rounded(flt(d.e_amount) * flt(self.payment_days)
 					/ cint(self.total_days_in_month), 2)
 			elif not self.payment_days:
 				d.e_modified_amount = 0
@@ -162,7 +164,7 @@ class SalarySlip(TransactionBase):
 		self.total_deduction = 0
 		for d in self.get('deduction_details'):
 			if cint(d.d_depends_on_lwp) == 1:
-				d.d_modified_amount = _round(flt(d.d_amount) * flt(self.payment_days)
+				d.d_modified_amount = rounded(flt(d.d_amount) * flt(self.payment_days)
 					/ cint(self.total_days_in_month), 2)
 			elif not self.payment_days:
 				d.d_modified_amount = 0
@@ -175,7 +177,7 @@ class SalarySlip(TransactionBase):
 		self.calculate_earning_total()
 		self.calculate_ded_total()
 		self.net_pay = flt(self.gross_pay) - flt(self.total_deduction)
-		self.rounded_total = _round(self.net_pay)
+		self.rounded_total = rounded(self.net_pay)
 
 	def on_submit(self):
 		if(self.email_check == 1):
@@ -184,109 +186,14 @@ class SalarySlip(TransactionBase):
 
 	def send_mail_funct(self):
 		from frappe.utils.email_lib import sendmail
+
 		receiver = frappe.db.get_value("Employee", self.employee, "company_email")
 		if receiver:
 			subj = 'Salary Slip - ' + cstr(self.month) +'/'+cstr(self.fiscal_year)
-			earn_ret=frappe.db.sql("""select e_type, e_modified_amount from `tabSalary Slip Earning`
-				where parent = %s""", self.name)
-			ded_ret=frappe.db.sql("""select d_type, d_modified_amount from `tabSalary Slip Deduction`
-				where parent = %s""", self.name)
-
-			earn_table = ''
-			ded_table = ''
-			if earn_ret:
-				earn_table += "<table cellspacing=5px cellpadding=5px width='100%%'>"
-
-				for e in earn_ret:
-					if not e[1]:
-						earn_table += '<tr><td>%s</td><td align="right">0.00</td></tr>' % cstr(e[0])
-					else:
-						earn_table += '<tr><td>%s</td><td align="right">%s</td></tr>' \
-							% (cstr(e[0]), cstr(e[1]))
-				earn_table += '</table>'
-
-			if ded_ret:
-
-				ded_table += "<table cellspacing=5px cellpadding=5px width='100%%'>"
-
-				for d in ded_ret:
-					if not d[1]:
-						ded_table +='<tr><td">%s</td><td align="right">0.00</td></tr>' % cstr(d[0])
-					else:
-						ded_table +='<tr><td>%s</td><td align="right">%s</td></tr>' \
-							% (cstr(d[0]), cstr(d[1]))
-				ded_table += '</table>'
-
-			letter_head = frappe.db.get_value("Letter Head", {"is_default": 1, "disabled": 0},
-				"content")
-
-			msg = '''<div> %s <br>
-			<table cellspacing= "5" cellpadding="5"  width = "100%%">
-				<tr>
-					<td width = "100%%" colspan = "2"><h4>Salary Slip</h4></td>
-				</tr>
-				<tr>
-					<td width = "50%%"><b>Employee Code : %s</b></td>
-					<td width = "50%%"><b>Employee Name : %s</b></td>
-				</tr>
-				<tr>
-					<td width = "50%%">Month : %s</td>
-					<td width = "50%%">Fiscal Year : %s</td>
-				</tr>
-				<tr>
-					<td width = "50%%">Department : %s</td>
-					<td width = "50%%">Branch : %s</td>
-				</tr>
-				<tr>
-					<td width = "50%%">Designation : %s</td>
-				</tr>
-				<tr>
-					<td width = "50%%">Bank Account No. : %s</td>
-					<td  width = "50%%">Bank Name : %s</td>
-
-				</tr>
-				<tr>
-					<td  width = "50%%">Arrear Amount : <b>%s</b></td>
-					<td  width = "50%%">Payment days : %s</td>
-
-				</tr>
-			</table>
-			<table border="1px solid #CCC" width="100%%" cellpadding="0px" cellspacing="0px">
-				<tr>
-					<td colspan = 2 width = "50%%" bgcolor="#CCC" align="center">
-						<b>Earnings</b></td>
-					<td colspan = 2 width = "50%%" bgcolor="#CCC" align="center">
-						<b>Deductions</b></td>
-				</tr>
-				<tr>
-					<td colspan = 2 width = "50%%" valign= "top">%s</td>
-					<td colspan = 2 width = "50%%" valign= "top">%s</td>
-				</tr>
-			</table>
-			<table cellspacing= "5" cellpadding="5" width = '100%%'>
-				<tr>
-					<td width = '25%%'><b>Gross Pay :</b> </td>
-					<td width = '25%%' align='right'>%s</td>
-					<td width = '25%%'><b>Total Deduction :</b></td>
-					<td width = '25%%' align='right'> %s</td>
-				</tr>
-				<tr>
-					<tdwidth='25%%'><b>Net Pay : </b></td>
-					<td width = '25%%' align='right'><b>%s</b></td>
-					<td colspan = '2' width = '50%%'></td>
-				</tr>
-				<tr>
-					<td width='25%%'><b>Net Pay(in words) : </td>
-					<td colspan = '3' width = '50%%'>%s</b></td>
-				</tr>
-			</table></div>''' % (cstr(letter_head), cstr(self.employee),
-				cstr(self.employee_name), cstr(self.month), cstr(self.fiscal_year),
-				cstr(self.department), cstr(self.branch), cstr(self.designation),
-				cstr(self.bank_account_no), cstr(self.bank_name),
-				cstr(self.arrear_amount), cstr(self.payment_days), earn_table, ded_table,
-				cstr(flt(self.gross_pay)), cstr(flt(self.total_deduction)),
-				cstr(flt(self.net_pay)), cstr(self.total_in_words))
-
-			sendmail([receiver], subject=subj, msg = msg)
+			sendmail([receiver], subject=subj, msg = _("Please see attachment"),
+				attachments=[{
+					"fname": self.name + ".pdf",
+					"fcontent": frappe.get_print_format(self.doctype, self.name, as_pdf = True)
+				}])
 		else:
 			msgprint(_("Company Email ID not found, hence mail not sent"))

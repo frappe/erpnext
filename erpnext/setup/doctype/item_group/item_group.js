@@ -9,10 +9,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		frappe.set_route("Sales Browser", "Item Group");
 	}, "icon-sitemap")
 
-	if(!doc.__islocal && doc.show_in_website) {
-		cur_frm.appframe.add_button("View In Website", function() {
-			window.open(doc.page_name);
-		}, "icon-globe");
+	if (!doc.__islocal && doc.show_in_website) {
+		cur_frm.set_intro(__("Published on website at: {0}",
+			[repl('<a href="/%(website_route)s" target="_blank">/%(website_route)s</a>', doc.__onload)]));
 	}
 }
 

@@ -1,0 +1,52 @@
+{
+ "creation": "2014-07-11 11:51:00.453717", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "document_type": "", 
+ "fields": [
+  {
+   "fieldname": "description", 
+   "fieldtype": "Small Text", 
+   "in_list_view": 1, 
+   "label": "Description", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "col_break3", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "fieldname": "account", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Account", 
+   "options": "Account", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "amount", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Amount", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "reqd": 1
+  }
+ ], 
+ "istable": 1, 
+ "modified": "2014-08-08 13:12:02.594698", 
+ "modified_by": "Administrator", 
+ "module": "Stock", 
+ "name": "Landed Cost Taxes and Charges", 
+ "name_case": "", 
+ "owner": "Administrator", 
+ "permissions": [], 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
+}

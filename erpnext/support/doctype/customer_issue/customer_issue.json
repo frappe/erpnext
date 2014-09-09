@@ -202,6 +202,7 @@
   {
    "fieldname": "resolved_by", 
    "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
    "in_filter": 1, 
    "label": "Resolved By", 
    "no_copy": 1, 
@@ -379,13 +380,14 @@
   }, 
   {
    "fieldname": "amended_from", 
-   "fieldtype": "Data", 
+   "fieldtype": "Link", 
    "hidden": 1, 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
    "oldfieldtype": "Data", 
+   "options": "Customer Issue", 
    "permlevel": 0, 
    "print_hide": 1, 
    "width": "150px"
@@ -394,7 +396,7 @@
  "icon": "icon-bug", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2014-05-09 02:16:43.267003", 
+ "modified": "2014-07-07 02:47:56.491906", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Customer Issue", 
@@ -402,7 +404,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 

@@ -142,12 +142,12 @@ class JournalVoucher(AccountsController):
 			if self.cheque_date:
 				r.append(_('Reference #{0} dated {1}').format(self.cheque_no, formatdate(self.cheque_date)))
 			else:
-				msgprint(_("Please enter Reference date"), raise_exception=1)
+				msgprint(_("Please enter Reference date"), raise_exception=frappe.MandatoryError)
 
 		for d in self.get('entries'):
 			if d.against_invoice and d.credit:
 				currency = frappe.db.get_value("Sales Invoice", d.against_invoice, "currency")
-				r.append(_("{0} {1} against Invoice {1}").format(currency, fmt_money(flt(d.credit)), d.against_invoice))
+				r.append(_("{0} {1} against Invoice {2}").format(currency, fmt_money(flt(d.credit)), d.against_invoice))
 
 			if d.against_voucher and d.debit:
 				bill_no = frappe.db.sql("""select bill_no, bill_date, currency
@@ -164,7 +164,7 @@ class JournalVoucher(AccountsController):
 		if r:
 			self.remark = ("\n").join(r)
 		else:
-			frappe.msgprint(_("User Remarks is mandatory"), raise_exception=1)
+			frappe.msgprint(_("User Remarks is mandatory"), raise_exception=frappe.MandatoryError)
 
 	def set_aging_date(self):
 		if self.is_opening != 'Yes':
@@ -186,8 +186,13 @@ class JournalVoucher(AccountsController):
 
 	def set_print_format_fields(self):
 		for d in self.get('entries'):
-			account_type, master_type = frappe.db.get_value("Account", d.account,
+			result = frappe.db.get_value("Account", d.account,
 				["account_type", "master_type"])
+
+			if not result:
+				continue
+
+			account_type, master_type = result
 
 			if master_type in ['Supplier', 'Customer']:
 				if not self.pay_to_recd_from:
@@ -198,7 +203,7 @@ class JournalVoucher(AccountsController):
 			if account_type in ['Bank', 'Cash']:
 				company_currency = get_company_currency(self.company)
 				amt = flt(d.debit) and d.debit or d.credit
-				self.total_amount = company_currency + ' ' + cstr(amt)
+				self.total_amount = fmt_money(amt, currency=company_currency)
 				from frappe.utils import money_in_words
 				self.total_amount_in_words = money_in_words(amt, company_currency)
 
@@ -410,7 +415,7 @@ def get_opening_accounts(company):
 	"""get all balance sheet accounts for opening entry"""
 	from erpnext.accounts.utils import get_balance_on
 	accounts = frappe.db.sql_list("""select name from tabAccount
-		where group_or_ledger='Ledger' and report_type='Profit and Loss' and company=%s""", company)
+		where group_or_ledger='Ledger' and report_type='Balance Sheet' and company=%s""", company)
 
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 

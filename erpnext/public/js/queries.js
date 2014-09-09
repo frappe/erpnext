@@ -67,5 +67,11 @@ $.extend(erpnext.queries, {
 
 	employee: function() {
 		return { query: "erpnext.controllers.queries.employee_query" }
+	},
+
+	warehouse: function(doc) {
+		return {
+			filters: [["Warehouse", "company", "in", ["", cstr(doc.company)]]]
+		}
 	}
 });

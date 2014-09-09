@@ -1,6 +1,5 @@
 {
- "allow_attach": 1, 
- "autoname": "naming_series:", 
+  "autoname": "naming_series:", 
  "creation": "2013-02-01 10:36:25", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -92,6 +91,11 @@
    "label": "Thread HTML", 
    "permlevel": 0, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "fold", 
+   "fieldtype": "Fold", 
+   "permlevel": 0
   }, 
   {
    "fieldname": "additional_info", 
@@ -237,7 +241,7 @@
  ], 
  "icon": "icon-ticket", 
  "idx": 1, 
- "modified": "2014-05-06 08:20:28.842404", 
+ "modified": "2014-08-12 05:25:45.420934", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Support Ticket", 
@@ -245,7 +249,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -259,7 +262,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -273,7 +276,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -286,5 +289,6 @@
    "write": 1
   }
  ], 
- "search_fields": "status,customer,allocated_to,subject,raised_by"
+ "search_fields": "status,customer,subject,raised_by", 
+ "title_field": "subject"
 }

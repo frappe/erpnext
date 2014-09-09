@@ -1,0 +1,38 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-10">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			<span class="label label-{%= frappe.utils.guess_style(doc.status) %} filterable"
+				data-filter="status,=,{%= doc.status %}">
+				{%= doc.status %}
+			</span>
+			<span class="label label-{%= frappe.utils.guess_style(doc.priority) %} filterable"
+				data-filter="priority,=,{%= doc.priority %}">
+				{%= doc.priority %}
+			</span>
+			{% if(doc.status==="Open" && doc.completion_date
+				&& frappe.datetime.get_diff(doc.completion_date) <= 0) { %}
+				<span class="label label-danger filterable"
+					data-filter="completion_date,>=,Today"
+					title="{%= doc.get_formatted("completion_date") %}">
+					{%= __("Overdue") %}
+				</span>
+			{% } else if(doc.completion_date) { %}
+				<span class="label label-default filterable"
+					data-filter="completion_date,=,{%= doc.completion_date %}"
+					title="{%= __("Due Date") %}">
+					{%= doc.get_formatted("completion_date") %}
+				</span>
+			{% } %}
+		</div>
+	</div>
+	<div class="col-xs-1 text-right">
+		{% var completed = doc.percent_complete, title = __("% Tasks Completed") %}
+		{% include "templates/form_grid/includes/progress.html" %}
+	</div>
+	<div class="col-xs-1 text-right">
+		{% var completed = doc.percent_milestones_completed,
+			title = __("% Milestones Achieved") %}
+		{% include "templates/form_grid/includes/progress.html" %}
+	</div>
+</div>

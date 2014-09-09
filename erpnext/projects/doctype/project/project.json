@@ -1,6 +1,7 @@
 {
  "allow_attach": 1, 
  "allow_import": 1, 
+ "allow_rename": 1, 
  "autoname": "field:project_name", 
  "creation": "2013-03-07 11:55:07", 
  "docstatus": 0, 
@@ -136,6 +137,13 @@
    "search_index": 0
   }, 
   {
+   "fieldname": "percent_milestones_completed", 
+   "fieldtype": "Percent", 
+   "label": "% Milestones Completed", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "section_break0", 
    "fieldtype": "Section Break", 
    "label": "Project Details", 
@@ -157,7 +165,7 @@
    "fieldname": "percent_complete", 
    "fieldtype": "Percent", 
    "in_list_view": 1, 
-   "label": "Percent Complete", 
+   "label": "% Tasks Completed", 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -199,6 +207,13 @@
    "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "search_index": 0
+  }, 
+  {
+   "fieldname": "cost_center", 
+   "fieldtype": "Link", 
+   "label": "Default Cost Center", 
+   "options": "Cost Center", 
+   "permlevel": 0
   }, 
   {
    "fieldname": "column_break0", 
@@ -258,7 +273,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2014-05-07 06:03:31.085767", 
+ "modified": "2014-08-26 14:59:27.052172", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 
@@ -266,7 +281,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 

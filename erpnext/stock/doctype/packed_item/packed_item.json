@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:28:00.000000", 
+ "creation": "2013-02-22 01:28:00", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -95,6 +95,7 @@
    "permlevel": 0
   }, 
   {
+   "allow_on_submit": 1, 
    "fieldname": "actual_qty", 
    "fieldtype": "Float", 
    "label": "Actual Qty", 
@@ -105,6 +106,7 @@
    "read_only": 1
   }, 
   {
+   "allow_on_submit": 1, 
    "fieldname": "projected_qty", 
    "fieldtype": "Float", 
    "label": "Projected Qty", 
@@ -149,9 +151,10 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:23.000000", 
+ "modified": "2014-08-11 06:23:08.597647", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Packed Item", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }

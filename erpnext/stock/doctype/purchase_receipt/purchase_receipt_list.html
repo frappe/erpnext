@@ -1,0 +1,34 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-10">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			<span style="margin-right: 8px; display: inline-block">
+				<span class="filterable"
+					data-filter="supplier,=,{%= doc.supplier %}">
+					{%= doc.supplier_name %}</span></span>
+			{% if(cint(doc.is_subcontracted)) { %}
+			<span style="margin-right: 8px;"
+				title="{%= __("Subcontracted") %}" class="filterable"
+				data-filter="is_subcontracted,=,Yes">
+				<i class="icon-cog text-muted"></i>
+			</span>
+			{% } %}
+			{% if(doc.transporter_name) { %}
+			<span style="margin-right: 8px;"
+				title="{%= doc.transporter_name %}" class="filterable"
+				data-filter="transporter_name,=,{%= doc.transporter_name %}">
+				<i class="icon-truck text-muted"></i>
+			</span>
+			{% } %}
+			{% if(doc.docstatus===0) { %}
+				<span class="label label-danger filterable"
+					data-filter="docstatus,=,0">{%= __("Draft") %}</span>
+			{% } %}
+		</div>
+	</div>
+	<div class="col-xs-2 text-right">
+		<div class="text-ellipsis" title="{%= doc.get_formatted('grand_total_import') %}">
+			{%= doc.get_formatted("grand_total_import") %}
+		</div>
+	</div>
+</div>

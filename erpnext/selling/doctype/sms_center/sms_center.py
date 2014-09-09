@@ -9,49 +9,49 @@ from frappe import msgprint, _
 
 from frappe.model.document import Document
 
-class SMSCenter(Document):
+from erpnext.setup.doctype.sms_settings.sms_settings import send_sms
 
+class SMSCenter(Document):
 	def create_receiver_list(self):
 		rec, where_clause = '', ''
 		if self.send_to == 'All Customer Contact':
 			where_clause = self.customer and " and customer = '%s'" % \
 				self.customer.replace("'", "\'") or " and ifnull(customer, '') != ''"
 		if self.send_to == 'All Supplier Contact':
-			where_clause = self.supplier and \
-				" and ifnull(is_supplier, 0) = 1 and supplier = '%s'" % \
+			where_clause = self.supplier and " and supplier = '%s'" % \
 				self.supplier.replace("'", "\'") or " and ifnull(supplier, '') != ''"
 		if self.send_to == 'All Sales Partner Contact':
-			where_clause = self.sales_partner and \
-				" and ifnull(is_sales_partner, 0) = 1 and sales_partner = '%s'" % \
+			where_clause = self.sales_partner and " and sales_partner = '%s'" % \
 				self.sales_partner.replace("'", "\'") or " and ifnull(sales_partner, '') != ''"
 
 		if self.send_to in ['All Contact', 'All Customer Contact', 'All Supplier Contact', 'All Sales Partner Contact']:
-			rec = frappe.db.sql("""select CONCAT(ifnull(first_name,''), '', ifnull(last_name,'')), 
-				mobile_no from `tabContact` where ifnull(mobile_no,'')!='' and 
-				docstatus != 2 %s""", where_clause)
-		
+			rec = frappe.db.sql("""select CONCAT(ifnull(first_name,''), ' ', ifnull(last_name,'')),
+				mobile_no from `tabContact` where ifnull(mobile_no,'')!='' and
+				docstatus != 2 %s""" % where_clause)
+
 		elif self.send_to == 'All Lead (Open)':
-			rec = frappe.db.sql("""select lead_name, mobile_no from `tabLead` where 
+			rec = frappe.db.sql("""select lead_name, mobile_no from `tabLead` where
 				ifnull(mobile_no,'')!='' and docstatus != 2 and status='Open'""")
-		
+
 		elif self.send_to == 'All Employee (Active)':
 			where_clause = self.department and " and department = '%s'" % \
 				self.department.replace("'", "\'") or ""
 			where_clause += self.branch and " and branch = '%s'" % \
 				self.branch.replace("'", "\'") or ""
-				
-			rec = frappe.db.sql("""select employee_name, cell_number from 
-				`tabEmployee` where status = 'Active' and docstatus < 2 and 
-				ifnull(cell_number,'')!='' %s""", where_clause)
-		
+
+			rec = frappe.db.sql("""select employee_name, cell_number from
+				`tabEmployee` where status = 'Active' and docstatus < 2 and
+				ifnull(cell_number,'')!='' %s""" % where_clause)
+
 		elif self.send_to == 'All Sales Person':
-			rec = frappe.db.sql("""select sales_person_name, mobile_no from 
+			rec = frappe.db.sql("""select sales_person_name, mobile_no from
 				`tabSales Person` where docstatus!=2 and ifnull(mobile_no,'')!=''""")
-			rec_list = ''
-		
+
+		rec_list = ''
+
 		for d in rec:
 			rec_list += d[0] + ' - ' + d[1] + '\n'
-			self.receiver_list = rec_list
+		self.receiver_list = rec_list
 
 	def get_receiver_nos(self):
 		receiver_nos = []
@@ -64,13 +64,15 @@ class SMSCenter(Document):
 					receiver_nos.append(cstr(receiver_no).strip())
 		else:
 			msgprint(_("Receiver List is empty. Please create Receiver List"))
-		
+
 		return receiver_nos
 
 	def send_sms(self):
+		receiver_list = []
 		if not self.message:
 			msgprint(_("Please enter message before sending"))
 		else:
 			receiver_list = self.get_receiver_nos()
 		if receiver_list:
-			msgprint(frappe.get_doc('SMS Control', 'SMS Control').send_sms(receiver_list, cstr(self.message)))
+			send_sms(receiver_list, cstr(self.message))
+

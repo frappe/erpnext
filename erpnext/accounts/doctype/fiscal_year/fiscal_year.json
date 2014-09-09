@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:year", 
- "creation": "2013-01-22 16:50:25.000000", 
+ "creation": "2013-01-22 16:50:25", 
  "description": "**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -11,6 +11,7 @@
    "description": "For e.g. 2012, 2012-13", 
    "fieldname": "year", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Year Name", 
    "oldfieldname": "year", 
    "oldfieldtype": "Data", 
@@ -20,6 +21,7 @@
   {
    "fieldname": "year_start_date", 
    "fieldtype": "Date", 
+   "in_list_view": 1, 
    "label": "Year Start Date", 
    "no_copy": 1, 
    "oldfieldname": "year_start_date", 
@@ -30,6 +32,7 @@
   {
    "fieldname": "year_end_date", 
    "fieldtype": "Date", 
+   "in_list_view": 1, 
    "label": "Year End Date", 
    "no_copy": 1, 
    "permlevel": 0, 
@@ -40,6 +43,7 @@
    "description": "Entries are not allowed against this Fiscal Year if the year is closed.", 
    "fieldname": "is_fiscal_year_closed", 
    "fieldtype": "Select", 
+   "in_list_view": 1, 
    "label": "Year Closed", 
    "no_copy": 1, 
    "oldfieldname": "is_fiscal_year_closed", 
@@ -51,14 +55,13 @@
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
- "modified": "2014-01-20 17:48:46.000000", 
+ "modified": "2014-07-14 05:30:56.843180", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Fiscal Year", 
  "owner": "Administrator", 
  "permissions": [
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -71,6 +74,7 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 
@@ -78,5 +82,7 @@
    "read": 1, 
    "role": "All"
   }
- ]
+ ], 
+ "sort_field": "name", 
+ "sort_order": "DESC"
 }

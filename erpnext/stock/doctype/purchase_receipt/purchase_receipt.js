@@ -7,7 +7,6 @@ cur_frm.cscript.other_fname = "other_charges";
 
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 {% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
-{% include 'utilities/doctype/sms_control/sms_control.js' %}
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 frappe.provide("erpnext.stock");
@@ -17,14 +16,15 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 
 		if(this.frm.doc.docstatus == 1) {
 			if(this.frm.doc.__onload && !this.frm.doc.__onload.billing_complete) {
-				cur_frm.add_custom_button(__('Make Purchase Invoice'), this.make_purchase_invoice);
+				cur_frm.add_custom_button(__('Make Purchase Invoice'), this.make_purchase_invoice,
+					frappe.boot.doctype_icons["Purchase Invoice"]);
 			}
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms);
+			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms, "icon-mobile-phone", true);
 
 			this.show_stock_ledger();
 			this.show_general_ledger();
 		} else {
-			cur_frm.add_custom_button(__(__('From Purchase Order')),
+			cur_frm.add_custom_button(__('From Purchase Order'),
 				function() {
 					frappe.model.map_current_doc({
 						method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
@@ -37,7 +37,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, "icon-download", "btn-default");
 		}
 	},
 
@@ -65,7 +65,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
 		}
 
-		this._super();
+		this._super(doc, cdt, cdn);
 	},
 
 	rejected_qty: function(doc, cdt, cdn) {
@@ -165,3 +165,9 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(frappe.boot.notification_settings.purchase_receipt))
 		cur_frm.email_doc(frappe.boot.notification_settings.purchase_receipt_message);
 }
+
+cur_frm.cscript.send_sms = function() {
+	frappe.require("assets/erpnext/js/sms_manager.js");
+	var sms_man = new SMSManager(cur_frm.doc);
+}
+

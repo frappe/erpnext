@@ -9,10 +9,10 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 
 {% include 'selling/sales_common.js' %};
 {% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
-{% include 'utilities/doctype/sms_control/sms_control.js' %}
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 frappe.provide("erpnext.stock");
+frappe.provide("erpnext.stock.delivery_note");
 erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
 		this._super();
@@ -38,10 +38,11 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		}
 
 		if(doc.docstatus==0 && !doc.__islocal) {
-			cur_frm.add_custom_button(__('Make Packing Slip'), cur_frm.cscript['Make Packing Slip']);
+			cur_frm.add_custom_button(__('Make Packing Slip'),
+				cur_frm.cscript['Make Packing Slip'], frappe.boot.doctype_icons["Packing Slip"], "btn-default");
 		}
 
-		set_print_hide(doc, dt, dn);
+		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
 
 		// unhide expense_account and cost_center is auto_accounting_for_stock enabled
 		var aii_enabled = cint(sys_defaults.auto_accounting_for_stock)
@@ -62,7 +63,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, "icon-download", "btn-default");
 		}
 
 	},
@@ -119,13 +120,13 @@ cur_frm.fields_dict['transporter_name'].get_query = function(doc) {
 }
 
 cur_frm.cscript['Make Packing Slip'] = function() {
-	n = frappe.model.make_new_doc_and_get_name('Packing Slip');
-	ps = locals["Packing Slip"][n];
-	ps.delivery_note = cur_frm.doc.name;
-	loaddoc('Packing Slip', n);
+	frappe.model.open_mapped_doc({
+		method: "erpnext.stock.doctype.delivery_note.delivery_note.make_packing_slip",
+		frm: cur_frm
+	})
 }
 
-var set_print_hide= function(doc, cdt, cdn){
+erpnext.stock.delivery_note.set_print_hide = function(doc, cdt, cdn){
 	var dn_fields = frappe.meta.docfield_map['Delivery Note'];
 	var dn_item_fields = frappe.meta.docfield_map['Delivery Note Item'];
 	var dn_fields_copy = dn_fields;
@@ -148,7 +149,7 @@ var set_print_hide= function(doc, cdt, cdn){
 }
 
 cur_frm.cscript.print_without_amount = function(doc, cdt, cdn) {
-	set_print_hide(doc, cdt, cdn);
+	erpnext.stock.delivery_note.set_print_hide(doc, cdt, cdn);
 }
 
 
@@ -245,3 +246,9 @@ if (sys_defaults.auto_accounting_for_stock) {
 		}
 	}
 }
+
+cur_frm.cscript.send_sms = function() {
+	frappe.require("assets/erpnext/js/sms_manager.js");
+	var sms_man = new SMSManager(cur_frm.doc);
+}
+

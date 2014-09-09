@@ -1,0 +1,16 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-12">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+
+			{% if(!doc.public) { %}
+			<span style="margin-right: 8px;"
+				title="{%= __("Private") %}" class="filterable"
+				data-filter="public,=,Yes">
+				<i class="icon-lock text-muted"></i>
+			</span>
+			{% } %}
+
+		</div>
+	</div>
+</div>

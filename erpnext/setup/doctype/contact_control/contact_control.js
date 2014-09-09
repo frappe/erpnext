@@ -139,19 +139,10 @@ cur_frm.cscript.delete_doc = function(doctype, name) {
 	var go_ahead = confirm(__("Delete {0} {1}?", [doctype, name]));
 	if (!go_ahead) return;
 
-	return frappe.call({
-		method: 'frappe.model.delete_doc',
-		args: {
-			dt: doctype,
-			dn: name
-		},
-		callback: function(r) {
-			//console.log(r);
-			if (!r.exc) {
-				// run the correct list
-				var list_name = doctype.toLowerCase() + '_list';
-				cur_frm[list_name].run();
-			}
+	frappe.model.delete_doc(doctype, name, function(r) {
+		if (!r.exc) {
+			var list_name = doctype.toLowerCase() + '_list';
+			cur_frm[list_name].run();
 		}
 	});
 }

@@ -16,6 +16,7 @@
   {
    "fieldname": "first_name", 
    "fieldtype": "Data", 
+   "in_list_view": 0, 
    "label": "First Name", 
    "oldfieldname": "first_name", 
    "oldfieldtype": "Data", 
@@ -25,6 +26,7 @@
   {
    "fieldname": "last_name", 
    "fieldtype": "Data", 
+   "in_list_view": 0, 
    "label": "Last Name", 
    "oldfieldname": "last_name", 
    "oldfieldtype": "Data", 
@@ -39,6 +41,7 @@
    "default": "Passive", 
    "fieldname": "status", 
    "fieldtype": "Select", 
+   "in_list_view": 1, 
    "label": "Status", 
    "options": "Passive\nOpen\nReplied", 
    "permlevel": 0
@@ -46,7 +49,7 @@
   {
    "fieldname": "email_id", 
    "fieldtype": "Data", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Email Id", 
    "oldfieldname": "email_id", 
    "oldfieldtype": "Data", 
@@ -100,7 +103,7 @@
    "depends_on": "eval:!doc.supplier && !doc.sales_partner", 
    "fieldname": "customer_name", 
    "fieldtype": "Data", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Customer Name", 
    "permlevel": 0, 
    "read_only": 1
@@ -125,7 +128,7 @@
    "depends_on": "eval:!doc.customer && !doc.sales_partner", 
    "fieldname": "supplier_name", 
    "fieldtype": "Data", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Supplier Name", 
    "permlevel": 0, 
    "read_only": 1
@@ -199,14 +202,13 @@
  "idx": 1, 
  "in_create": 0, 
  "in_dialog": 0, 
- "modified": "2014-05-07 06:39:39.702149", 
+ "modified": "2014-07-30 05:44:25.767076", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Contact", 
  "owner": "Administrator", 
  "permissions": [
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -220,7 +222,6 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -233,7 +234,6 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -246,7 +246,6 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -259,7 +258,6 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -272,7 +270,6 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -285,7 +282,6 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -298,7 +294,7 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -311,7 +307,7 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -324,7 +320,7 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -337,7 +333,7 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 

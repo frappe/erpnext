@@ -8,7 +8,8 @@ from frappe import throw, _
 from frappe.model.document import Document
 
 class Currency(Document):
-	pass
+	def validate(self):
+		frappe.clear_cache()
 
 def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, company):
 	"""common validation for currency and price list currency"""
@@ -16,8 +17,5 @@ def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, c
 	company_currency = frappe.db.get_value("Company", company, "default_currency")
 
 	if not conversion_rate:
-		throw(_('%(conversion_rate_label)s is mandatory. Maybe Currency Exchange record is not created for %(from_currency)s to %(to_currency)s') % {
-			"conversion_rate_label": conversion_rate_label,
-			"from_currency": currency,
-			"to_currency": company_currency
-		})
+		throw(_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.").format(
+			conversion_rate_label, currency, company_currency))

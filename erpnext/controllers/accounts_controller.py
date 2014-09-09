@@ -4,15 +4,18 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import flt, cint, today
-from erpnext.setup.utils import get_company_currency
+from frappe.utils import add_days, cint, cstr, today, date_diff, flt, getdate, nowdate, \
+	get_first_day, get_last_day
+from frappe.model.naming import make_autoname
+from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
 import json
 
 class AccountsController(TransactionBase):
 	def validate(self):
-		self.set_missing_values(for_validate=True)
+		if self.get("_action") and self._action != "update_after_submit":
+			self.set_missing_values(for_validate=True)
 		self.validate_date_with_fiscal_year()
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
@@ -67,7 +70,7 @@ class AccountsController(TransactionBase):
 					self.plc_conversion_rate = 1.0
 
 				elif not self.plc_conversion_rate:
-					self.plc_conversion_rate = self.get_exchange_rate(
+					self.plc_conversion_rate = get_exchange_rate(
 						self.price_list_currency, company_currency)
 
 			# currency
@@ -77,30 +80,32 @@ class AccountsController(TransactionBase):
 			elif self.currency == company_currency:
 				self.conversion_rate = 1.0
 			elif not self.conversion_rate:
-				self.conversion_rate = self.get_exchange_rate(self.currency,
+				self.conversion_rate = get_exchange_rate(self.currency,
 					company_currency)
-
-	def get_exchange_rate(self, from_currency, to_currency):
-		exchange = "%s-%s" % (from_currency, to_currency)
-		return flt(frappe.db.get_value("Currency Exchange", exchange, "exchange_rate"))
 
 	def set_missing_item_details(self):
 		"""set missing item values"""
 		from erpnext.stock.get_item_details import get_item_details
 		if hasattr(self, "fname"):
-			parent_dict = {"doctype": self.doctype}
+			parent_dict = {}
 			for fieldname in self.meta.get_valid_columns():
 				parent_dict[fieldname] = self.get(fieldname)
 
 			for item in self.get(self.fname):
 				if item.get("item_code"):
-					args = item.as_dict()
-					args.update(parent_dict)
+					args = parent_dict.copy()
+					args.update(item.as_dict())
 					ret = get_item_details(args)
+
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and \
 							item.get(fieldname) is None and value is not None:
 								item.set(fieldname, value)
+
+					if ret.get("pricing_rule"):
+						for field in ["base_price_list_rate", "price_list_rate",
+							"discount_percentage", "base_rate", "rate"]:
+								item.set(field, ret.get(field))
 
 	def set_taxes(self, tax_parentfield, tax_master_field):
 		if not self.meta.get_field(tax_parentfield):
@@ -206,7 +211,7 @@ class AccountsController(TransactionBase):
 
 	def calculate_taxes(self):
 		# maintain actual tax rate based on idx
-		actual_tax_dict = dict([[tax.idx, tax.rate] for tax in self.tax_doclist
+		actual_tax_dict = dict([[tax.idx, flt(tax.rate, self.precision("tax_amount", tax))] for tax in self.tax_doclist
 			if tax.charge_type == "Actual"])
 
 		for n, item in enumerate(self.item_doclist):
@@ -409,7 +414,7 @@ class AccountsController(TransactionBase):
 
 					if total_billed_amt - max_allowed_amt > 0.01:
 						reduce_by = total_billed_amt - max_allowed_amt
-						frappe.throw(_("Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in 'Setup' > 'Global Defaults'").format(item.item_code, item.row, max_allowed_amt))
+						frappe.throw(_("Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in Stock Settings").format(item.item_code, item.idx, max_allowed_amt))
 
 	def get_company_default(self, fieldname):
 		from erpnext.accounts.utils import get_company_default
@@ -417,8 +422,7 @@ class AccountsController(TransactionBase):
 
 	def get_stock_items(self):
 		stock_items = []
-		item_codes = list(set(item.item_code for item in
-			self.get(self.fname)))
+		item_codes = list(set(item.item_code for item in self.get(self.fname)))
 		if item_codes:
 			stock_items = [r[0] for r in frappe.db.sql("""select name
 				from `tabItem` where name in (%s) and is_stock_item='Yes'""" % \
@@ -441,7 +445,6 @@ class AccountsController(TransactionBase):
 		total_outstanding = total_outstanding[0][0] if total_outstanding else 0
 		if total_outstanding:
 			frappe.get_doc('Account', account).check_credit_limit(total_outstanding)
-
 
 @frappe.whitelist()
 def get_tax_rate(account_head):

@@ -1,0 +1,22 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-10">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			<span style="margin-right: 8px; display: inline-block">
+				<span class="filterable"
+					data-filter="supplier,=,{%= doc.supplier %}">
+					{%= doc.supplier %}</span>
+				</span>
+			</span>
+			<span class="label {%= doc.status=="Draft" ? "label-danger" :
+				(doc.status=="Ordered" ? "label-success": "label-info") %}
+				filterable"
+				data-filter="status,=,{%= doc.status %}">{%= doc.status %}</span>
+		</div>
+	</div>
+	<div class="col-xs-2 text-right">
+		<div class="text-ellipsis" title="{%= doc.get_formatted('grand_total_import') %}">
+			{%= doc.get_formatted("grand_total_import") %}
+		</div>
+	</div>
+</div>

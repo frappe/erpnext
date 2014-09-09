@@ -1,0 +1,3331 @@
+ (Half Day),
+ and year: ,
+""" does not exists","""Mevcut değildir"
+%  Delivered,% Teslim Edildi
+% Amount Billed,Faturalı% Tutar
+% Billed,% Faturalı
+% Completed,% Tamamlandı
+% Delivered,% Teslim Edildi
+% Installed,% Yüklü
+% Received,% Alınan
+% of materials billed against this Purchase Order.,"Malzemelerin%, bu Satınalma Siparişi karşı fatura."
+% of materials billed against this Sales Order,Bu Satış Siparişi karşı hesap malzemelerin%
+% of materials delivered against this Delivery Note,Bu İrsaliye karşı teslim malzemelerin%
+% of materials delivered against this Sales Order,Bu Satış Siparişi teslim karşı malzemelerin%
+% of materials ordered against this Material Request,Bu Malzeme Request karşı emretti malzemelerin%
+% of materials received against this Purchase Order,Malzemelerin% bu Satınalma Siparişi karşı alınan
+'Actual Start Date' can not be greater than 'Actual End Date',"'Fiili Başlangıç ​​Tarihi', 'Gerçek Bitiş Tarihi' den büyük olamaz"
+'Based On' and 'Group By' can not be same,'Dayalı' ve 'Grup tarafından' aynı olamaz
+'Days Since Last Order' must be greater than or equal to zero,'Son Sipariş yana Gün' den büyük veya sıfıra eşit olmalıdır
+'Entries' cannot be empty,'Yazılar' boş olamaz
+'Expected Start Date' can not be greater than 'Expected End Date',"'Beklenen Başlangıç ​​Tarihi', 'Beklenen Bitiş Tarihi' den büyük olamaz"
+'From Date' is required,'Date' gereklidir
+'From Date' must be after 'To Date','Tarihten itibaren' Tarihi 'sonra olmalıdır
+'Has Serial No' can not be 'Yes' for non-stock item,'Seri No Has' non-stok kalemi için 'Evet' olamaz
+'Notification Email Addresses' not specified for recurring invoice,Faturayı yinelenen için belirlenen 'Bildirim E-posta Adresleri'
+'Profit and Loss' type account {0} not allowed in Opening Entry,'Kar ve Zarar' tipi hesap {0} kaydı Açılış izin yok
+'To Case No.' cannot be less than 'From Case No.','Dava No To' 'Dava No Kimden' den az olamaz
+'To Date' is required,'Tarihi' gereklidir
+'Update Stock' for Sales Invoice {0} must be set,Satış Fatura için 'Güncelle Stok' {0} ayarlanması gerekir
+* Will be calculated in the transaction.,* Işlem hesaplanır olacak.
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,1 Döviz = [?] Kesir  örneğin 1 USD = 100 Cent için
+1. To maintain the customer wise item code and to make them searchable based on their code use this option,1.Standart testler ile ölçülen anlamlı dil yeteneklerinin önemli ölçüde beklenen seviyenin altında olması. Müşteri bilge ürün kodu korumak ve bunların kod kullanımı bu seçenek dayanarak bunları aranabilir hale getirmek
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Ekle / Düzenle </ a>"
+"<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Ekle / Düzenle </ a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Ekle / Düzenle </ a>"
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> Standart Şablon </ h4>  <p> <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Şablon Oluşturma </ a> ve Adres tüm alanları (kullanır Özel alanlar varsa) dahil olmak üzere mevcut olacaktır </ p>  <pre> <code> {{}} address_line1 <br>  {% if address_line2%} {{}} address_line2 <br> { % endif -%}  {{şehir}} <br>  {% eğer devlet%} {{}} devlet <br> {% endif -%}  {% if pinkodu%} PIN: {{}} pinkodu <br> {% endif -%}  {{ülke}} <br>  {% if telefon%} Telefon: {{}} telefon <br> { % endif -%}  {% if%} faks Faks: {{}} faks <br> {% endif -%}  {% email_id%} E-posta ise: {{}} email_id <br> ; {% endif -%}  </ code> </ pre>"
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,Bir Müşteri Grubu aynı adla Müşteri adını değiştirebilir veya Müşteri Grubu yeniden adlandırma lütfen
+A Customer exists with same name,Bir Müşteri aynı adla
+A Lead with this email id should exist,Bu e-posta kimliği ile bir Kurşun bulunmalıdır
+A Product or Service,Bir Ürün veya Hizmet
+A Supplier exists with same name,A Tedarikçi aynı adla
+A symbol for this currency. For e.g. $,Bu para için bir sembol. Örneğin $ için
+AMC Expiry Date,AMC Son Kullanma Tarihi
+Abbr,Kısaltma
+Abbreviation cannot have more than 5 characters,Kısaltma fazla 5 karakter olamaz
+Above Value,Değer üstünde
+Absent,Kimse yok
+Acceptance Criteria,Kabul Kriterleri
+Accepted,Kabul Edilen
+Accepted + Rejected Qty must be equal to Received quantity for Item {0},Kabul + Reddedilen Miktar Ürün Alınan miktara eşit olması gerekir {0}
+Accepted Quantity,Kabul edilen Miktar
+Accepted Warehouse,Kabul Depo
+Account,Hesap
+Account Balance,Hesap Bakiyesi
+Account Created: {0},Hesap Oluşturuldu: {0}
+Account Details,Hesap Detayları
+Account Head,Hesap Başkanı
+Account Name,Hesap adı
+Account Type,Hesap Türü
+"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Hesap bakiyesi zaten Kredi, sen ayarlamak için izin verilmez 'Debit' olarak 'Balance Olmalı'"
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Zaten Debit hesap bakiyesi, siz 'Kredi' Balance Olmalı 'ayarlamak için izin verilmez"
+Account for the warehouse (Perpetual Inventory) will be created under this Account.,Depo (Devamlı Envanter) Hesap bu hesap altında oluşturulacaktır.
+Account head {0} created,Hesap kafa {0} oluşturuldu
+Account must be a balance sheet account,Hesabınız bir bilanço hesabı olmalıdır
+Account with child nodes cannot be converted to ledger,Çocuk düğümleri ile hesap defterine dönüştürülebilir olamaz
+Account with existing transaction can not be converted to group.,Mevcut işlem ile hesap grubuna dönüştürülemez.
+Account with existing transaction can not be deleted,Mevcut işlem ile hesap silinemez
+Account with existing transaction cannot be converted to ledger,Mevcut işlem ile hesap defterine dönüştürülebilir olamaz
+Account {0} cannot be a Group,Hesap {0} Grup olamaz
+Account {0} does not belong to Company {1},Hesap {0} Şirket'e ait olmayan {1}
+Account {0} does not belong to company: {1},Hesap {0} şirkete ait değil: {1}
+Account {0} does not exist,Hesap {0} yok
+Account {0} has been entered more than once for fiscal year {1},Hesap {0} daha fazla mali yıl için birden çok kez girildi {1}
+Account {0} is frozen,Hesap {0} dondu
+Account {0} is inactive,Hesap {0} etkin değil
+Account {0} is not valid,Hesap {0} geçerli değil
+Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Öğe {1} bir Varlık Öğe olduğu gibi hesap {0} türündeki 'Demirbaş' olmalı
+Account {0}: Parent account {1} can not be a ledger,Hesap {0}: Ana hesap {1} bir defter olamaz
+Account {0}: Parent account {1} does not belong to company: {2},Hesap {0}: Ana hesap {1} şirkete ait değil: {2}
+Account {0}: Parent account {1} does not exist,Hesap {0}: Ana hesap {1} yok
+Account {0}: You can not assign itself as parent account,Hesap {0}: Siz ebeveyn hesabı olarak atanamıyor
+Account: {0} can only be updated via \					Stock Transactions,Hesap: \ Stok İşlemler {0} sadece aracılığıyla güncellenebilir
+Accountant,Muhasebeci
+Accounting,Muhasebe
+"Accounting Entries can be made against leaf nodes, called","Muhasebe Yazılar denilen, yaprak düğümlere karşı yapılabilir"
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Muhasebe entry bu tarihe kadar dondurulmuş, kimse / aşağıda belirtilen rolü dışında girdisini değiştirin yapabilirsiniz."
+Accounting journal entries.,Muhasebe günlük girişleri.
+Accounts,Hesaplar
+Accounts Browser,Hesapları Tarayıcı
+Accounts Frozen Upto,Dondurulmuş kadar Hesapları
+Accounts Payable,Borç Hesapları
+Accounts Receivable,Alacak hesapları
+Accounts Settings,Ayarları Hesapları
+Active,Etkin
+Active: Will extract emails from ,
+Activity,Aktivite
+Activity Log,Etkinlik Günlüğü
+Activity Log:,Etkinlik Günlüğü:
+Activity Type,Faaliyet Türü
+Actual,Gerçek
+Actual Budget,Gerçek Bütçe
+Actual Completion Date,Fiili Bitiş Tarihi
+Actual Date,Gerçek Tarih
+Actual End Date,Fiili Bitiş Tarihi
+Actual Invoice Date,Gerçek Fatura Tarihi
+Actual Posting Date,Gerçek Gönderme Tarihi
+Actual Qty,Gerçek Adet
+Actual Qty (at source/target),Fiili Miktar (kaynak / hedef)
+Actual Qty After Transaction,İşlem sonrası gerçek Adet
+Actual Qty: Quantity available in the warehouse.,Gerçek Adet: depoda mevcut miktarı.
+Actual Quantity,Gerçek Miktar
+Actual Start Date,Fiili Başlangıç ​​Tarihi
+Add,Ekle
+Add / Edit Taxes and Charges,Ekle / Düzenle Vergi ve Harçlar
+Add Child,Çocuk Ekle
+Add Serial No,Seri No ekle
+Add Taxes,Vergi Ekle
+Add Taxes and Charges,Vergi ve Masraflar ekle
+Add or Deduct,Ekle veya Düşebilme
+Add rows to set annual budgets on Accounts.,Hesaplarının yıllık bütçelerini ayarlamak için satır eklemek.
+Add to Cart,Sepete ekle
+Add to calendar on this date,Bu tarihte Takvime ekle
+Add/Remove Recipients,Ekle / Kaldır Alıcıları
+Address,İletişim
+Address & Contact,Adres ve İletişim
+Address & Contacts,Adres ve İletişim
+Address Desc,DESC Adresi
+Address Details,Adres Bilgileri
+Address HTML,Adres HTML
+Address Line 1,Adres Satırı 1
+Address Line 2,Adres Satırı 2
+Address Template,Adres Şablon
+Address Title,Adres Başlık
+Address Title is mandatory.,Adres Başlık zorunludur.
+Address Type,Adres Türü
+Address master.,Adres usta.
+Administrative Expenses,Yönetim Giderleri
+Administrative Officer,İdari Memur
+Advance Amount,Avans Tutarı
+Advance amount,Avans miktarı
+Advances,Avanslar
+Advertisement,Reklâm
+Advertising,Reklamcılık
+Aerospace,Havacılık ve Uzay
+After Sale Installations,Satış Sonrası Tesislerin
+Against,Karşı
+Against Account,Hesap karşı
+Against Bill {0} dated {1},Bill {0} tarihli karşı {1}
+Against Docname,Docname karşı
+Against Doctype,DOCTYPE karşı
+Against Document Detail No,Belge Detay Karşı Yok
+Against Document No,Belge No Karşı
+Against Expense Account,Gider Hesap karşı
+Against Income Account,Gelir Hesap karşı
+Against Journal Voucher,Dergi Çeki karşı
+Against Journal Voucher {0} does not have any unmatched {1} entry,Dergi Çeki karşı {0} herhangi bir eşsiz {1} girdi yok
+Against Purchase Invoice,Satınalma Fatura karşı
+Against Sales Invoice,Satış Fatura karşı
+Against Sales Order,Satış Siparişi karşı
+Against Voucher,Çeki karşı
+Against Voucher Type,Fiş Tip Karşı
+Ageing Based On,Dayalı Yaşlanma
+Ageing Date is mandatory for opening entry,Üyelik Yaşlanma girişi açılması için zorunludur
+Ageing date is mandatory for opening entry,Tarih Yaşlanma girişi açılması için zorunludur
+Agent,Temsilci
+Aging Date,Yaşlanma Tarih
+Aging Date is mandatory for opening entry,Üyelik Yaşlanma girişi açılması için zorunludur
+Agriculture,Tarım
+Airline,Havayolu
+All Addresses.,Tüm adresler.
+All Contact,Tüm İletişim
+All Contacts.,Tüm Kişiler.
+All Customer Contact,Tüm Müşteri İletişim
+All Customer Groups,Tüm Müşteri Grupları
+All Day,Tüm Gün
+All Employee (Active),Tüm Çalışan (Aktif)
+All Item Groups,Tüm Ürün Grupları
+All Lead (Open),Tüm Kurşun (Açık)
+All Products or Services.,Tüm Ürünler ve Hizmetler.
+All Sales Partner Contact,Tüm Satış Ortağı İletişim
+All Sales Person,Tüm Satış Kişi
+All Supplier Contact,Tüm Tedarikçi İletişim
+All Supplier Types,Tüm Tedarikçi Türleri
+All Territories,Tüm Bölgeleri
+"All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Para, dönüşüm oranı, ihracat, toplam ihracat genel toplam vb gibi tüm ihracat ile ilgili alanlar İrsaliye, POS, Teklifi, Satış Fatura, Satış Siparişi vb mevcuttur"
+"All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Para, dönüşüm oranı, ithalat, toplam ithalat genel toplam vb gibi tüm ithalat ile ilgili alanlar Satın Alındı, Tedarikçi Teklifi, Satınalma Fatura, Sipariş vb mevcuttur"
+All items have already been invoiced,Tüm öğeler zaten faturalı edilmiştir
+All these items have already been invoiced,Tüm bu öğeler zaten faturalı edilmiştir
+Allocate,Ayırmak
+Allocate leaves for a period.,Bir süre için yaprakları ayırın.
+Allocate leaves for the year.,Yıl yapraklarını ayırın.
+Allocated Amount,Ayrılan Tutar
+Allocated Budget,Ayrılan Bütçe
+Allocated amount,Ayrılan miktarı
+Allocated amount can not be negative,Ayrılan miktar negatif olamaz
+Allocated amount can not greater than unadusted amount,Ayrılan miktarı unadusted değerinden daha yüksek olamaz
+Allow Bill of Materials,Malzeme izin Bill
+Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item,"Malzeme Bill 'Evet' olmalıdır izin verir. Çünkü, bir veya bu öğe için mevcut pek çok aktif BOMs"
+Allow Children,Çocuklara izin
+Allow Dropbox Access,Dropbox erişime izin
+Allow Google Drive Access,Google Drive erişimine izin
+Allow Negative Balance,Negatif Denge izin
+Allow Negative Stock,Negatif Stoku izin
+Allow Production Order,İzin Üretim Sipariş
+Allow User,Kullanıcıya izin
+Allow Users,Kullanıcılar izin
+Allow the following users to approve Leave Applications for block days.,Aşağıdaki kullanıcılar blok gün boyunca bırak Uygulamaları onaylamak için izin verir.
+Allow user to edit Price List Rate in transactions,Kullanıcı işlemlerinde Fiyat Listesi Oranı düzenlemek için izin
+Allowance Percent,Ödeneği Yüzde
+Allowance for over-{0} crossed for Item {1},Ödeneği fazla {0} Ürün için geçti için {1}
+Allowance for over-{0} crossed for Item {1}.,Ödeneği fazla {0} Ürün için geçti için {1}.
+Allowed Role to Edit Entries Before Frozen Date,Dondurulmuş Tarihten Önce Düzenle Girişlerine İzin Rolü
+Amended From,Gönderen Değişik
+Amount,Tutar
+Amount (Company Currency),Tutar (Şirket Para Birimi)
+Amount Paid,Ödenen Tutar
+Amount to Bill,Bill tutarı
+An Customer exists with same name,Bir Müşteri aynı adla
+"An Item Group exists with same name, please change the item name or rename the item group","Bir Ürün Grubu aynı adla, öğe adını değiştirmek veya madde grubu yeniden adlandırmak lütfen"
+"An item exists with same name ({0}), please change the item group name or rename the item","Bir öğe ({0}), madde grubu adını değiştirmek veya öğeyi yeniden adlandırmak lütfen aynı adla"
+Analyst,Analist
+Annual,Yıllık
+Another Period Closing Entry {0} has been made after {1},Başka Dönem Kapanış Giriş {0} sonra yapılmış olan {1}
+Another Salary Structure {0} is active for employee {0}. Please make its status 'Inactive' to proceed.,Başka Maaş Yapısı {0} çalışan için aktif olan {0}. Devam etmek durumunu 'Etkin' olun.
+"Any other comments, noteworthy effort that should go in the records.","Başka yorum, kayıtları gitmek gerekir kayda değer bir çaba."
+Apparel & Accessories,Giyim ve Aksesuar
+Applicability,Uygulanabilirlik
+Applicable For,İçin Uygulanabilir
+Applicable Holiday List,Uygulanabilir Tatil Listesi
+Applicable Territory,Uygulanabilir Territory
+Applicable To (Designation),Uygulanabilir (Tanım)
+Applicable To (Employee),Uygulanabilir (Çalışan)
+Applicable To (Role),Uygulanabilir (Role)
+Applicable To (User),Uygulanabilir (Kullanıcı)
+Applicant Name,Başvuru Adı
+Applicant for a Job.,Bir iş için Başvuru.
+Application of Funds (Assets),Fon uygulaması (Varlıklar)
+Applications for leave.,Izni için Uygulamalar.
+Applies to Company,Şirket için geçerlidir
+Apply On,On Uygula
+Appraisal,Appraisal:Değerlendirme
+Appraisal Goal,Değerleme Gol
+Appraisal Goals,Değerleme Goller
+Appraisal Template,Değerleme Şablon
+Appraisal Template Goal,Değerleme Şablon Gol
+Appraisal Template Title,Değerleme Şablon Başlığı
+Appraisal {0} created for Employee {1} in the given date range,Değerleme {0} {1} verilen tarih aralığında Çalışan için oluşturulan
+Apprentice,Çırak
+Approval Status,Onay Durumu
+Approval Status must be 'Approved' or 'Rejected',Onay Durumu 'Onaylandı' veya 'Reddedildi' olmalı
+Approved,Onaylı
+Approver,Itirafçı
+Approving Role,Onaylanmasının Rolü
+Approving Role cannot be same as role the rule is Applicable To,Rolü Onaylanmasının kural Uygulanabilir olduğu rol olarak aynı olamaz
+Approving User,Onaylanmasının Kullanıcı
+Approving User cannot be same as user the rule is Applicable To,Kullanıcı Onaylanmasının kural Uygulanabilir olduğu kullanıcı olarak aynı olamaz
+Are you sure you want to STOP ,
+Are you sure you want to UNSTOP ,
+Arrear Amount,Arrear Tutar
+"As Production Order can be made for this item, it must be a stock item.","Üretim Sipariş Bu öğe için yapılabilir gibi, bir stok kalemi olmalıdır."
+As per Stock UOM,Stok UOM başı olarak
+"As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Is Stock Item' and 'Valuation Method'","Bu öğe için mevcut hisse senedi işlemleri olduğu gibi, sen 'Seri No Has' değerlerini değiştiremez, ve 'Değerleme Yöntemi' Stok Ürün mı '"
+Asset,Varlık
+Assistant,Asistan
+Associate,Ortak
+Atleast one of the Selling or Buying must be selected,Satış veya Alış en az biri seçilmelidir
+Atleast one warehouse is mandatory,En az bir depo zorunludur
+Attach Image,Resmi takın
+Attach Letterhead,Antetli takın
+Attach Logo,Logo takın
+Attach Your Picture,Kişisel Resim takın
+Attendance,Katılım
+Attendance Date,Seyirci Tarih
+Attendance Details,Seyirci Detayları
+Attendance From Date,Tarihten itibaren katılım
+Attendance From Date and Attendance To Date is mandatory,Tarihi Tarih ve Katılım itibaren katılım zorunludur
+Attendance To Date,Tarihi Devam
+Attendance can not be marked for future dates,Seyirci gelecek tarihler için işaretlenmiş edilemez
+Attendance for employee {0} is already marked,Çalışan Devam {0} zaten işaretlenmiş
+Attendance record.,Seyirci rekoru.
+Authorization Control,Yetki Kontrolü
+Authorization Rule,Yetki Kuralı
+Auto Accounting For Stock Settings,Stok Ayarları için Otomatik Muhasebe
+Auto Material Request,Otomatik Malzeme Talebi
+Auto-raise Material Request if quantity goes below re-order level in a warehouse,Otomatik zam Malzeme Talebi miktarı bir depoda yeniden sipariş seviyesinin altında giderse
+Automatically compose message on submission of transactions.,Otomatik işlemlerin sunulmasına ilişkin mesaj oluşturabilirsiniz.
+Automatically extract Job Applicants from a mail box ,
+Automatically extract Leads from a mail box e.g.,Otomatik olarak bir posta kutusu örneğin itibaren İlanlar ayıklamak
+Automatically updated via Stock Entry of type Manufacture/Repack,Otomatik tipi imalatı / Repack Hazır Entry üzerinden güncellenir
+Automotive,Otomotiv
+Autoreply when a new mail is received,Yeni bir posta alındığında Autoreply zaman
+Available,Uygun
+Available Qty at Warehouse,Warehouse Mevcut Adet
+Available Stock for Packing Items,Ürünleri Ambalaj Stok kullanılabilir
+"Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","BOM, İrsaliye, Fatura Satınalma, Üretim Emri, Sipariş, Satın Alma Makbuzu, Satış Fatura, Satış Siparişi, Stok Girişi, Çizelgesi mevcuttur"
+Average Age,Ortalama Yaş
+Average Commission Rate,Ortalama Komisyon Oranı
+Average Discount,Ortalama İndirim
+Awesome Products,Başar Ürünler
+Awesome Services,Başar Hizmetleri
+BOM Detail No,BOM Detay yok
+BOM Explosion Item,BOM Patlama Ürün
+BOM Item,BOM Ürün
+BOM No,BOM yok
+BOM No. for a Finished Good Item,Bir Biten İyi Ürün için BOM No
+BOM Operation,BOM Operasyonu
+BOM Operations,BOM İşlemleri
+BOM Replace Tool,BOM Aracı değiştirin
+BOM number is required for manufactured Item {0} in row {1},BOM numara imal Öğe için gereklidir {0} üst üste {1}
+BOM number not allowed for non-manufactured Item {0} in row {1},Non-Üretilen Ürün için izin BOM sayı {0} üst üste {1}
+BOM recursion: {0} cannot be parent or child of {2},BOM özyineleme: {0} ebeveyn veya çocuk olamaz {2}
+BOM replaced,BOM yerine
+BOM {0} for Item {1} in row {2} is inactive or not submitted,BOM {0} öğesi için {1} üste {2} teslim inaktif ya da değildir
+BOM {0} is not active or not submitted,BOM {0} teslim aktif ya da değil değil
+BOM {0} is not submitted or inactive BOM for Item {1},BOM {0} teslim veya değildir inaktif BOM Ürün için {1}
+Backup Manager,Backup Manager
+Backup Right Now,Yedekleme Right Now
+Backups will be uploaded to,Yedekler yüklenir
+Balance Qty,Denge Adet
+Balance Sheet,Bilanço
+Balance Value,Denge Değeri
+Balance for Account {0} must always be {1},{0} her zaman olmalı Hesabı dengelemek {1}
+Balance must be,Denge olmalı
+"Balances of Accounts of type ""Bank"" or ""Cash""","Tip ""Banka"" Hesap bakiyeleri veya ""Nakit"""
+Bank,Banka
+Bank / Cash Account,Banka / Kasa Hesabı
+Bank A/C No.,Bank A / C No
+Bank Account,Banka Hesabı
+Bank Account No.,Banka Hesap No
+Bank Accounts,Banka Hesapları
+Bank Clearance Summary,Banka Gümrükleme Özet
+Bank Draft,Banka poliçesi
+Bank Name,Banka Adı
+Bank Overdraft Account,Banka Kredili Mevduat Hesabı
+Bank Reconciliation,Banka Uzlaşma
+Bank Reconciliation Detail,Banka Uzlaşma Detay
+Bank Reconciliation Statement,Banka Uzlaşma Bildirimi
+Bank Voucher,Banka Çeki
+Bank/Cash Balance,Banka / Nakit Dengesi
+Banking,Bankacılık
+Barcode,Barkod
+Barcode {0} already used in Item {1},Barkod {0} zaten Öğe kullanılan {1}
+Based On,Göre
+Basic,Temel
+Basic Info,Temel Bilgiler
+Basic Information,Temel  Bilgi
+Basic Rate,Temel Oranı
+Basic Rate (Company Currency),Basic Rate (Şirket para birimi)
+Batch,Yığın
+Batch (lot) of an Item.,Bir Öğe toplu (lot).
+Batch Finished Date,Toplu bitirdi Tarih
+Batch ID,Toplu Kimliği
+Batch No,Parti No
+Batch Started Date,Toplu Tarihi başladı
+Batch Time Logs for billing.,Fatura için Toplu Saat Kayıtlar.
+Batch-Wise Balance History,Toplu-Wise Dengesi Tarihi
+Batched for Billing,Fatura için batched
+Better Prospects,Iyi Beklentiler
+Bill Date,Bill Tarih
+Bill No,Fatura yok
+Bill No {0} already booked in Purchase Invoice {1},Bill Hayır {0} zaten Satınalma Fatura rezervasyonu {1}
+Bill of Material,Malzeme Listesi
+Bill of Material to be considered for manufacturing,Üretim için dikkat edilmesi gereken Malzeme Bill
+Bill of Materials (BOM),Malzeme Listesi (BOM)
+Billable,Faturalandırılabilir
+Billed,Gagalı
+Billed Amount,Faturalı Tutar
+Billed Amt,Faturalı Tutarı
+Billing,Ödeme
+Billing Address,Fatura Adresi
+Billing Address Name,Fatura Adresi Adı
+Billing Status,Fatura Durumu
+Bills raised by Suppliers.,Tedarikçiler tarafından dile Bono.
+Bills raised to Customers.,Müşteriler kaldırdı Bono.
+Bin,Kutu
+Bio,Bio
+Biotechnology,Biyoteknoloji
+Birthday,Doğum günü
+Block Date,Blok Tarih
+Block Days,Blok Gün
+Block leave applications by department.,Departmanı tarafından izin uygulamaları engellemek.
+Blog Post,Blog Post
+Blog Subscriber,Blog Abone
+Blood Group,Kan grubu
+Both Warehouse must belong to same Company,Hem Depo Aynı Şirkete ait olmalıdır
+Box,Box
+Branch,Şube
+Brand,Marka
+Brand Name,Marka Adı
+Brand master.,Marka usta.
+Brands,Markalar
+Breakdown,Arıza
+Broadcasting,Yayın
+Brokerage,Komisyonculuk
+Budget,Bütçe
+Budget Allocated,Ayrılan Bütçe
+Budget Detail,Bütçe Detay
+Budget Details,Bütçe Ayrıntıları
+Budget Distribution,Bütçe Dağılımı
+Budget Distribution Detail,Bütçe Dağıtım Detayı
+Budget Distribution Details,Bütçe Dağıtım Detayları
+Budget Variance Report,Bütçe Varyans Raporu
+Budget cannot be set for Group Cost Centers,Bütçe Grubu Maliyet Merkezleri için ayarlanamaz
+Build Report,Rapor oluşturmak
+Bundle items at time of sale.,Satış zamanında ürün Bundle.
+Business Development Manager,İş Geliştirme Müdürü
+Buying,Satın alma
+Buying & Selling,Alış ve Satış
+Buying Amount,Tutar Alış
+Buying Settings,Ayarları Alma
+"Buying must be checked, if Applicable For is selected as {0}","Uygulanabilir için seçilmiş ise satın alma, kontrol edilmelidir {0}"
+C-Form,C-Form
+C-Form Applicable,Uygulanabilir C-Formu
+C-Form Invoice Detail,C-Form Fatura Ayrıntısı
+C-Form No,C-Form
+C-Form records,C-Form kayıtları
+CENVAT Capital Goods,CENVAT Sermaye Malı
+CENVAT Edu Cess,CENVAT Edu Cess
+CENVAT SHE Cess,CENVAT SHE Cess
+CENVAT Service Tax,CENVAT Hizmet Vergisi
+CENVAT Service Tax Cess 1,CENVAT Hizmet Vergisi Cess 1
+CENVAT Service Tax Cess 2,CENVAT Hizmet Vergisi Vergisi 2
+Calculate Based On,Tabanlı hesaplayın
+Calculate Total Score,Toplam Puan Hesapla
+Calendar Events,Takvim Olayları
+Call,Çağrı
+Calls,Aramalar
+Campaign,Kampanya
+Campaign Name,Kampanya Adı
+Campaign Name is required,Kampanya Adı gereklidir
+Campaign Naming By,Kampanya İsimlendirme tarafından
+Campaign-.####,Kampanya.# # # #
+Can be approved by {0},{0} tarafından onaylanmış olabilir
+"Can not filter based on Account, if grouped by Account","Hesap göre gruplandırılmış eğer, hesabına dayalı süzemezsiniz"
+"Can not filter based on Voucher No, if grouped by Voucher","Çeki dayalı süzemezsiniz Hayır, Fiş göre gruplandırılmış eğer"
+Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total',Şarj tipi veya 'Sıra Önceki Toplamı' 'Sıra Önceki Tutar Açık' ise satır başvurabilirsiniz
+Cancel Material Visit {0} before cancelling this Customer Issue,İptal Malzeme ziyaret {0} Bu Müşteri Sayımız iptalinden önce
+Cancel Material Visits {0} before cancelling this Maintenance Visit,Bu Bakım Ziyaret iptalinden önce Malzeme Ziyaretler {0} İptal
+Cancelled,İptal
+Cancelling this Stock Reconciliation will nullify its effect.,Bu Stok Uzlaşma Önleyici etkisini geçersiz olacaktır.
+Cannot Cancel Opportunity as Quotation Exists,Teklif Var gibi Fırsat iptal edemez
+Cannot approve leave as you are not authorized to approve leaves on Block Dates,Blok Tarihler yaprakları onaylamaya yetkili değil gibi iznini onayladığınızda olamaz
+Cannot cancel because Employee {0} is already approved for {1},Çalışan {0} zaten onaylanmış olduğundan iptal edemez {1}
+Cannot cancel because submitted Stock Entry {0} exists,Sunulan Stok Giriş {0} varolduğundan iptal edilemiyor
+Cannot carry forward {0},Ileriye taşıyamaz {0}
+Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved.,Mali Yıl Başlangıç ​​Tarihi ve Mali Yılı kaydedildikten sonra Mali Yıl Sonu Tarihi değiştiremezsiniz.
+"Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency.","Mevcut işlemler olduğundan, şirketin varsayılan para birimini değiştiremezsiniz. İşlemler Varsayılan para birimini değiştirmek için iptal edilmelidir."
+Cannot convert Cost Center to ledger as it has child nodes,O çocuk düğümleri olduğu gibi muhasebeye Maliyet Merkezi dönüştürmek olamaz
+Cannot covert to Group because Master Type or Account Type is selected.,"Master Tip veya Hesap Tipi seçilir, çünkü Grup gizli olamaz."
+Cannot deactive or cancle BOM as it is linked with other BOMs,Diğer reçetelerde ile bağlantılı olarak devre dışı bırakınız veya cancle BOM edemez
+"Cannot declare as lost, because Quotation has been made.","Kayıp olarak Kotasyon yapılmış çünkü, ilan edemez."
+Cannot deduct when category is for 'Valuation' or 'Valuation and Total',Kategori 'Değerleme' veya 'Değerleme ve Toplamı' için zaman tenzil edemez
+"Cannot delete Serial No {0} in stock. First remove from stock, then delete.","Stoktaki {0} Seri No silemezsiniz. İlk silin, stok kaldırmak."
+"Cannot directly set amount. For 'Actual' charge type, use the rate field","Doğrudan miktarını ayarlamak olamaz. 'Gerçek' ücret türü için, oran alanını kullanın"
+"Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in Stock Settings","{1} den {0} daha arkaya Item {0} için overbill olamaz. Overbilling izin vermek için, Hazır Ayarlar set lütfen"
+Cannot produce more Item {0} than Sales Order quantity {1},Daha Öğe üretemez {0} daha Satış Sipariş miktarı {1}
+Cannot refer row number greater than or equal to current row number for this Charge type,Bu Şarj türü için daha büyük ya da mevcut satır sayısına eşit satır sayısını ifade edemez
+Cannot return more than {0} for Item {1},Daha dönmek olamaz {0} öğesi için {1}
+Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row,"Ilk satır için 'Önceki Satır Toplamı On', 'Önceki Row On Tutar' ya da şarj tür seçemezsiniz"
+Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for valuation. You can select only 'Total' option for previous row amount or previous row total,"Değerleme için 'Önceki Satır Toplamı On', 'Önceki Row On Tutar' ya da şarj tür seçemezsiniz. Daha önceki satır miktarı veya önceki satır toplamda sadece 'Total' seçeneği"
+Cannot set as Lost as Sales Order is made.,Satış Sipariş yapılmış gibi Kayıp olarak ayarlanmış olamaz.
+Cannot set authorization on basis of Discount for {0},Için İndirim bazında yetkilendirme ayarlanamaz {0}
+Capacity,Kapasite
+Capacity Units,Kapasite Birimleri
+Capital Account,Sermaye hesabı
+Capital Equipments,Sermaye Ekipmanları
+Carry Forward,Nakletmek
+Carry Forwarded Leaves,Yönlendirilen Yapraklar Carry
+Case No(s) already in use. Try from Case No {0},Vaka Hayır (ler) zaten kullanılıyor. Vaka Nr deneyin {0}
+Case No. cannot be 0,Örnek No 0 olamaz
+Cash,Nakit
+Cash In Hand,Hand Nakit
+Cash Voucher,Para yerine geçen belge
+Cash or Bank Account is mandatory for making payment entry,Kasa veya Banka Hesabı ödeme girişi yapmak için zorunludur
+Cash/Bank Account,Kasa / Banka Hesabı
+Casual Leave,Casual bırak
+Cell Number,Hücre sayısı
+Change UOM for an Item.,Bir madde için uom değiştirin.
+Change the starting / current sequence number of an existing series.,Varolan bir serinin başlangıç ​​/ geçerli sıra numarasını değiştirin.
+Channel Partner,Kanal Ortağı
+Charge of type 'Actual' in row {0} cannot be included in Item Rate,Tip arka arkaya {0} 'Gerçek' Charge Öğe Oranı dahil edilemez
+Chargeable,Ücretli
+Charity and Donations,Charity ve Bağışlar
+Chart Name,Grafik Adı
+Chart of Accounts,Hesap Tablosu
+Chart of Cost Centers,Maliyet Merkezlerinin Grafik
+Check how the newsletter looks in an email by sending it to your email.,Bülten e-posta göndererek bir e-posta nasıl göründüğünü kontrol edin.
+"Check if recurring invoice, uncheck to stop recurring or put proper End Date","Fatura yinelenen olmadığını kontrol edin, yinelenen durdurmak veya uygun Bitiş Tarihi koymak işaretini kaldırın"
+"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Otomatik yinelenen faturalar gerek olmadığını kontrol edin. Herhangi bir satış faturası gönderdikten sonra, Tekrarlanan bölüm görünür olacaktır."
+Check if you want to send salary slip in mail to each employee while submitting salary slip,Eğer ücret makbuzu sunarken her çalışanın postayla maaş kayma göndermek istiyorsanız işaretleyin
+Check this if you want to force the user to select a series before saving. There will be no default if you check this.,Eğer kaydetmeden önce bir dizi seçmek için kullanıcıyı zorlamak istiyorsanız bu seçeneği işaretleyin. Bunu kontrol eğer hiçbir varsayılan olacaktır.
+Check this if you want to show in website,"Eğer bir web sitesi göstermek istiyorsanız, bu kontrol"
+Check this to disallow fractions. (for Nos),Kesirler izin vermemek için bu kontrol edin. (Nos için)
+Check this to pull emails from your mailbox,Posta kutunuza gelen e-postaları çekmek için bu kontrol
+Check to activate,Etkinleştirmek için kontrol edin
+Check to make Shipping Address,Kargo Adresi olmak için kontrol edin
+Check to make primary address,Birincil adresi olmak için kontrol edin
+Chemical,Kimyasal
+Cheque,Çek
+Cheque Date,Çek Tarih
+Cheque Number,Çek Numarası
+Child account exists for this account. You can not delete this account.,"Çocuk hesap, bu hesap için var. Bu hesabı silemezsiniz."
+City,İl
+City/Town,İl / İlçe
+Claim Amount,Hasar Tutarı
+Claims for company expense.,Şirket gideri için iddia ediyor.
+Class / Percentage,Sınıf / Yüzde
+Classic,Klasik
+Clear Table,Temizle Tablo
+Clearance Date,Gümrükleme Tarih
+Clearance Date not mentioned,Gümrükleme Tarih belirtilmeyen
+Clearance date cannot be before check date in row {0},Gümrükleme tarih satırının onay tarihinden önce olamaz {0}
+Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Yeni Satış Faturası oluşturmak için 'Satış Fatura Yap' butonuna tıklayın.
+Click on a link to get options to expand get options ,
+Client,Müşteri:
+Close Balance Sheet and book Profit or Loss.,Yakın Bilanço ve kitap Kâr veya Zarar.
+Closed,Kapalı
+Closing (Cr),Kapanış (Cr)
+Closing (Dr),Kapanış (Dr)
+Closing Account Head,Kapanış Hesap Başkanı
+Closing Account {0} must be of type 'Liability',Hesap {0} Kapanış türü 'Sorumluluk' olmalıdır
+Closing Date,Kapanış Tarihi
+Closing Fiscal Year,Mali Yılı Kapanış
+Closing Qty,Kapanış Adet
+Closing Value,Kapanış Değeri
+CoA Help,CoA Yardım
+Code,Kod
+Cold Calling,Soğuk Arama
+Color,Renk
+Column Break,Sütun Arası
+Comma separated list of email addresses,Virgül e-posta adresleri ayrılmış listesi
+Comment,Yorum yap
+Comments,Yorumlar
+Commercial,Ticari
+Commission,Komisyon
+Commission Rate,Komisyon Oranı
+Commission Rate (%),Komisyon Oranı (%)
+Commission on Sales,Satış Komisyonu
+Commission rate cannot be greater than 100,Komisyon oranı 100'den fazla olamaz
+Communication,Iletişim becerisi
+Communication HTML,Haberleşme HTML
+Communication History,İletişim Tarihi
+Communication log.,Iletişim günlüğü.
+Communications,İletişim
+Company,Şirket
+Company (not Customer or Supplier) master.,Şirket (değil Müşteri veya alanı) usta.
+Company Abbreviation,Şirket Kısaltma
+Company Details,Şirket Detayı
+Company Email,Şirket e-posta
+"Company Email ID not found, hence mail not sent","Şirket e-posta kimliği bulunamadı, dolayısıyla gönderilmedi posta"
+Company Info,Şirket Bilgisi
+Company Name,Firma Adı
+Company Settings,Firma Ayarları
+Company is missing in warehouses {0},Şirket depolarda eksik {0}
+Company is required,Firma gereklidir
+Company registration numbers for your reference. Example: VAT Registration Numbers etc.,Referans için şirket kayıt numaraları. Örnek: KDV Sicil Numaraları vs
+Company registration numbers for your reference. Tax numbers etc.,Referans için şirket kayıt numaraları. Vergi numaraları vb
+"Company, Month and Fiscal Year is mandatory","Şirket, Ay ve Mali Yıl zorunludur"
+Compensatory Off,Telafi Kapalı
+Complete,Tamamlandı
+Complete Setup,Kurulum Tamamlandı
+Completed,Tamamlandı
+Completed Production Orders,Tamamlanan Üretim Siparişleri
+Completed Qty,Tamamlanan Adet
+Completion Date,Bitiş Tarihi
+Completion Status,Tamamlanma Durumu
+Computer,Bilgisayar
+Computers,Bilgisayarlar
+Confirmation Date,Onay Tarihi
+Confirmed orders from Customers.,Müşterilerden doğruladı emir.
+Consider Tax or Charge for,Vergisi veya şarj için düşünün
+Considered as Opening Balance,Açılış bakiyesi olarak kabul
+Considered as an Opening Balance,Bir Açılış bakiyesi olarak kabul
+Consultant,Danışman
+Consulting,Danışmanlık
+Consumable,Tüketilir
+Consumable Cost,Sarf Maliyeti
+Consumable cost per hour,Saatte Sarf maliyet
+Consumed Qty,Tüketilen Adet
+Consumer Products,Tüketici Ürünleri
+Contact,İletişim
+Contact Control,İletişim Kontrolü
+Contact Desc,İletişim Desc
+Contact Details,İletişim Bilgileri
+Contact Email,İletişim E-Posta
+Contact HTML,İletişim HTML
+Contact Info,İletişim Bilgileri
+Contact Mobile No,İletişim Mobil yok
+Contact Name,İletişim İsmi
+Contact No.,İletişim No
+Contact Person,İrtibat Kişi
+Contact Type,Kişi türü
+Contact master.,İletişim ustası.
+Contacts,İletişim kişileri
+Content,İçerik
+Content Type,İçerik Türü
+Contra Voucher,Contra Çeki
+Contract,Onay al
+Contract End Date,Sözleşme Bitiş Tarihi
+Contract End Date must be greater than Date of Joining,Sözleşme Bitiş Tarihi Katılma tarihi daha büyük olmalıdır
+Contribution (%),Katkı Payı (%)
+Contribution to Net Total,Net Toplam Katkı
+Conversion Factor,Katsayı
+Conversion Factor is required,Katsayı gereklidir
+Conversion factor cannot be in fractions,Dönüşüm faktörü kesirler olamaz
+Conversion factor for default Unit of Measure must be 1 in row {0},Tedbir varsayılan Birimi için dönüşüm faktörü satırda 1 olmalıdır {0}
+Conversion rate cannot be 0 or 1,Dönüşüm oranı 0 veya 1 olamaz
+Convert into Recurring Invoice,Dönüşümlü Fatura dönüştürmek
+Convert to Group,Grup dönüştürmek
+Convert to Ledger,Ledger dönüştürmek
+Converted,Dönüştürülmüş
+Copy From Item Group,Ürün Grubu From kopyalayın
+Cosmetics,Bakım ürünleri
+Cost Center,Maliyet Merkezi
+Cost Center Details,Merkezi Detayı Maliyet
+Cost Center Name,Maliyet Merkezi Adı
+Cost Center is required for 'Profit and Loss' account {0},Maliyet Merkezi 'Kar ve Zarar hesabı için gerekli olan {0}
+Cost Center is required in row {0} in Taxes table for type {1},Maliyet Merkezi satırda gereklidir {0} Vergiler tabloda türü için {1}
+Cost Center with existing transactions can not be converted to group,Mevcut işlemler ile maliyet Center grubuna dönüştürülemez
+Cost Center with existing transactions can not be converted to ledger,Mevcut işlemler ile maliyet Center defterine dönüştürülebilir olamaz
+Cost Center {0} does not belong to Company {1},Maliyet Merkezi {0} ait değil Şirket {1}
+Cost of Goods Sold,Satışların Maliyeti
+Costing,Maliyetlendirme
+Country,Ülke
+Country Name,Ülke Adı
+Country wise default Address Templates,Ülke bilge varsayılan Adres Şablonları
+"Country, Timezone and Currency","Ülke, Saat Dilimi ve Döviz"
+Create Bank Voucher for the total salary paid for the above selected criteria,Yukarıda seçilen ölçütler için ödenen toplam maaş için banka Fiş oluştur
+Create Customer,Müşteri Oluştur
+Create Material Requests,Malzeme İstekleri Oluştur
+Create New,Yeni Oluştur
+Create Opportunity,Fırsat oluştur
+Create Production Orders,Üretim Emirleri Oluştur
+Create Quotation,Teklif oluşturma
+Create Receiver List,Alıcı listesi oluşturma
+Create Salary Slip,Maaş Kayma oluşturun
+Create Stock Ledger Entries when you submit a Sales Invoice,Bir Satış Faturası gönderdiğinizde Stok Ledger Girdileri
+"Create and manage daily, weekly and monthly email digests.","Oluşturun ve günlük, haftalık ve aylık e-posta sindirir yönetmek."
+Create rules to restrict transactions based on values.,Değerlere dayalı işlemleri kısıtlamak için kurallar oluşturun.
+Created By,Oluşturulan
+Creates salary slip for above mentioned criteria.,Yukarıda belirtilen kriterleri için ücret makbuzu oluşturur.
+Creation Date,Oluşturulma Tarihi
+Creation Document No,Yaratılış Belge No
+Creation Document Type,Yaratılış Belge Türü
+Creation Time,Oluşturma Zamanı
+Credentials,Kimlik Bilgileri
+Credit,Kredi
+Credit Amt,Kredi Tutarı
+Credit Card,Kredi kartı
+Credit Card Voucher,Kredi Kartı Çeki
+Credit Controller,Credit Controller
+Credit Days,Kredi Gün
+Credit Limit,Kredi Limiti
+Credit Note,Kredi mektubu
+Credit To,Kredi için
+Currency,Para birimi
+Currency Exchange,Döviz
+Currency Name,Para Birimi Adı
+Currency Settings,Döviz Ayarları
+Currency and Price List,Döviz ve Fiyat Listesi
+Currency exchange rate master.,Döviz kuru usta.
+Current Address,Güncel Adresi
+Current Address Is,Güncel Adresi mı
+Current Assets,Mevcut Varlıklar
+Current BOM,Güncel BOM
+Current BOM and New BOM can not be same,Cari BOM ve Yeni BOM aynı olamaz
+Current Fiscal Year,Cari Mali Yılı
+Current Liabilities,Kısa Vadeli Borçlar
+Current Stock,Güncel Stok
+Current Stock UOM,Cari Stok UOM
+Current Value,Mevcut değer
+Custom,Özel
+Custom Autoreply Message,Özel Autoreply Mesaj
+Custom Message,Özel Mesaj
+Customer,ceviri1
+Customer (Receivable) Account,Müşteri (Alacak) Hesap
+Customer / Item Name,Müşteri / Ürün İsmi
+Customer / Lead Address,Müşteri / Kurşun Adres
+Customer / Lead Name,Müşteri / Kurşun İsim
+Customer > Customer Group > Territory,Müşteri> Müşteri Grubu> Eyalet
+Customer Account Head,Müşteri Hesap Başkanı
+Customer Acquisition and Loyalty,Müşteri Edinme ve Sadakat
+Customer Address,Müşteri Adresi
+Customer Addresses And Contacts,Müşteri Adresleri Ve İletişim
+Customer Addresses and Contacts,Müşteri Adresler ve İletişim
+Customer Code,Müşteri Kodu
+Customer Codes,Müşteri Kodları
+Customer Details,Müşteri Detayları
+Customer Feedback,Müşteri Görüşleri
+Customer Group,Müşteri Grubu
+Customer Group / Customer,Müşteri Grup / Müşteri
+Customer Group Name,Müşteri Grup Adı
+Customer Intro,Müşteri Giriş
+Customer Issue,Müşteri Sayı
+Customer Issue against Serial No.,Seri No karşı Müşteri Sayı
+Customer Name,Müşteri Adı
+Customer Naming By,Müşteri adlandırma By
+Customer Service,Müşteri Hizmetleri
+Customer database.,Müşteri veritabanı.
+Customer is required,Müşteri gereklidir
+Customer master.,Müşteri usta.
+Customer required for 'Customerwise Discount','Customerwise İndirimi' için gerekli Müşteri
+Customer {0} does not belong to project {1},Müşteri {0} projeye ait değil {1}
+Customer {0} does not exist,Müşteri {0} yok
+Customer's Item Code,Müşterinin Ürün Kodu
+Customer's Purchase Order Date,Müşterinin Sipariş Tarihi
+Customer's Purchase Order No,Müşterinin Sipariş yok
+Customer's Purchase Order Number,Müşterinin Sipariş Numarası
+Customer's Vendor,Müşterinin Satıcı
+Customers Not Buying Since Long Time,Müşteriler uzun zamandan beri Alış değil
+Customerwise Discount,Customerwise İndirim
+Customize,Özelleştirme
+Customize the Notification,Bildirim özelleştirin
+Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.,Bu e-postanın bir parçası olarak gider tanıtım metnini özelleştirin. Her işlem ayrı bir tanıtım metni vardır.
+DN Detail,DN Detay
+Daily,Günlük
+Daily Time Log Summary,Günlük Saat Günlük Özet
+Database Folder ID,Veritabanı Klasör Kimliği
+Database of potential customers.,Potansiyel müşterilerin Veritabanı.
+Date,Tarih
+Date Format,Tarih Biçimi
+Date Of Retirement,Emeklilik Tarihiniz
+Date Of Retirement must be greater than Date of Joining,Emekli Of Tarihi Katılma tarihi daha büyük olmalıdır
+Date is repeated,Tarih tekrarlanır
+Date of Birth,Doğum tarihi
+Date of Issue,Veriliş tarihi
+Date of Joining,Katılma Tarihi
+Date of Joining must be greater than Date of Birth,Katılma Tarihi Doğum tarihi daha büyük olmalıdır
+Date on which lorry started from supplier warehouse,Kamyon tedarikçisi Depodan başladı hangi tarihi
+Date on which lorry started from your warehouse,Kamyon depo başladı hangi tarihi
+Dates,Tarihler
+Days Since Last Order,Gün bu yana Son Sipariş
+Days for which Holidays are blocked for this department.,Holidays Bu bölüm için bloke edildiği gün boyunca.
+Dealer,Satıcı
+Debit,Borç
+Debit Amt,Bankamatik Tutarı
+Debit Note,Borç dekontu
+Debit To,Için banka
+Debit and Credit not equal for this voucher. Difference is {0}.,Banka ve bu fiş için eşit değildir Kredi. Fark {0}.
+Deduct,Düşmek
+Deduction,Kesinti
+Deduction Type,Kesinti Türü
+Deduction1,Deduction1
+Deductions,Kesintiler
+Default,Varsayılan
+Default Account,Varsayılan Hesap
+Default Address Template cannot be deleted,Varsayılan Adres Şablon silinemez
+Default Amount,Standart Tutar
+Default BOM,Standart BOM
+Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,Bu mod seçildiğinde varsayılan Banka / Kasa hesabı otomatik olarak POS Fatura güncellenecektir.
+Default Bank Account,Varsayılan Banka Hesabı
+Default Buying Cost Center,Standart Alış Maliyet Merkezi
+Default Buying Price List,Standart Alış Fiyat Listesi
+Default Cash Account,Standart Kasa Hesabı
+Default Company,Standart Firma
+Default Currency,Geçerli Para Birimi
+Default Customer Group,Varsayılan Müşteri Grubu
+Default Expense Account,Standart Gider Hesabı
+Default Income Account,Standart Gelir Hesabı
+Default Item Group,Standart Ürün Grubu
+Default Price List,Standart Fiyat Listesi
+Default Purchase Account in which cost of the item will be debited.,Öğenin maliyeti tahsil edilecektir hangi varsayılan Satınalma Hesabı.
+Default Selling Cost Center,Standart Satış Maliyet Merkezi
+Default Settings,Varsayılan Ayarlar
+Default Source Warehouse,Varsayılan Kaynak Atölyesi
+Default Stock UOM,Varsayılan Stok UOM
+Default Supplier,Standart Tedarikçi
+Default Supplier Type,Standart Tedarikçi Türü
+Default Target Warehouse,Standart Hedef Depo
+Default Territory,Standart Bölge
+Default Unit of Measure,Ölçü Varsayılan Birim
+"Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module.","Zaten başka UOM ile bazı işlem (ler) yaptık çünkü Ölçü Varsayılan Birim doğrudan değiştirilemez. Varsayılan uom değiştirmek için, Stok modülü altında 'UoM Faydalı değiştirin' aracını kullanın."
+Default Valuation Method,Standart Değerleme Yöntemi
+Default Warehouse,Standart Depo
+Default Warehouse is mandatory for stock Item.,Standart Depo stok Ürün için zorunludur.
+Default settings for accounting transactions.,Muhasebe işlemleri için varsayılan ayarlar.
+Default settings for buying transactions.,Işlemleri satın almak için varsayılan ayarlar.
+Default settings for selling transactions.,Satımın için varsayılan ayarlar.
+Default settings for stock transactions.,Hisse senedi işlemleri için varsayılan ayarlar.
+Defense,Savunma
+"Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","Bu Maliyet Merkezi için Bütçe tanımlayın. Bütçe eylemi ayarlamak için, bir href <bakın = ""#!Liste / Şirket ""> Şirket Usta </ ​​a>"
+Del,Del
+Delete,Sil
+Delete {0} {1}?,Sil {0} {1}?
+Delivered,Teslim Edildi
+Delivered Items To Be Billed,Faturalı To Be teslim Öğeler
+Delivered Qty,Teslim Adet
+Delivered Serial No {0} cannot be deleted,Teslim Seri No {0} silinemez
+Delivery Date,Teslimat Tarihi
+Delivery Details,Teslim Bilgileri
+Delivery Document No,Teslim Belge No
+Delivery Document Type,Teslim Belge Türü
+Delivery Note,Alındı ​​fişi
+Delivery Note Item,Teslim Not Öğe
+Delivery Note Items,Teslim Not Öğeler
+Delivery Note Message,İrsaliye Mesaj
+Delivery Note No,İrsaliye yok
+Delivery Note Required,İrsaliye Gerekli
+Delivery Note Trends,İrsaliye Trendler
+Delivery Note {0} is not submitted,İrsaliye {0} teslim edilmez
+Delivery Note {0} must not be submitted,İrsaliye {0} teslim edilmemelidir
+Delivery Notes {0} must be cancelled before cancelling this Sales Order,Teslim Notları {0} bu Satış Siparişi iptal etmeden önce iptal edilmelidir
+Delivery Status,Teslim Durumu
+Delivery Time,Teslimat süresi
+Delivery To,Için teslim
+Department,Departman
+Department Stores,Alışveriş Merkezleri
+Depends on LWP,LWP bağlıdır
+Depreciation,Amortisman
+Description,Açıklama
+Description HTML,Açıklama HTML
+Designation,Açıklama
+Designer,Tasarlayıcı
+Detailed Breakup of the totals,Toplamları ayrıntılı Dağılması
+Details,Ayrıntılar
+Difference (Dr - Cr),Fark (Dr - Cr)
+Difference Account,Fark Hesabı
+"Difference Account must be a 'Liability' type account, since this Stock Reconciliation is an Opening Entry","Bu Stok Uzlaşma bir açılış girdisi olduğundan Fark Hesabı, bir 'Sorumluluk' tipi hesabı olmalıdır"
+Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,Öğeler için farklı UOM yanlış (Toplam) Net Ağırlık değerine yol açacaktır. Her öğenin Net Ağırlık aynı UOM olduğundan emin olun.
+Direct Expenses,Doğrudan Giderler
+Direct Income,Doğrudan Gelir
+Disable,Devre dışı bırak
+Disable Rounded Total,Yuvarlak toplam devre dışı
+Disabled,Devredışı
+Discount  %,İndirim%
+Discount %,İndirim%
+Discount (%),İndirim (%)
+Discount Amount,İndirim Tutarı
+"Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice","İndirim Alanlar Sipariş, Satın Alma Makbuzu, Satınalma Fatura sunulacak"
+Discount Percentage,İndirim Yüzdesi
+Discount Percentage can be applied either against a Price List or for all Price List.,İndirim Yüzde Fiyat Listesi karşı veya tüm Fiyat Listesi için ya uygulanabilir.
+Discount must be less than 100,İndirim az 100 olmalıdır
+Discount(%),İndirim (%)
+Dispatch,Sevk
+Display all the individual items delivered with the main items,Ana öğeleri ile sağlanan tüm bireysel öğeleri görüntüler
+Distribute transport overhead across items.,Öğeleri arasında ulaşım yükünü dağıtın.
+Distribution,Dağıtım
+Distribution Id,Dağıtım Kimliği
+Distribution Name,Dağıtım Adı
+Distributor,Distribütör
+Divorced,Boşanmış
+Do Not Contact,İletişim Etmeyin
+Do not show any symbol like $ etc next to currencies.,Sonraki paralara $ vb gibi herhangi bir sembol görünmüyor.
+Do really want to unstop production order: ,
+Do you really want to STOP ,
+Do you really want to STOP this Material Request?,Eğer gerçekten bu Malzeme İsteği durdurmak istiyor musunuz?
+Do you really want to Submit all Salary Slip for month {0} and year {1},Eğer gerçekten {0} ve yıl {1} ​​ay boyunca tüm Maaş Kayma Gönder istiyor musunuz
+Do you really want to UNSTOP ,
+Do you really want to UNSTOP this Material Request?,Eğer gerçekten bu Malzeme İsteği unstop istiyor musunuz?
+Do you really want to stop production order: ,
+Doc Name,Doküman adı
+Doc Type,Dok Türü
+Document Description,Belge Açıklaması
+Document Type,Belge Türü
+Documents,Belgeler
+Domain,Etki Alanı
+Don't send Employee Birthday Reminders,Çalışan Doğum Günü Hatırlatmalar göndermek yok
+Download Materials Required,Gerekli Malzemeler indirin
+Download Reconcilation Data,Mutabakatı veri indir
+Download Template,İndir Şablon
+Download a report containing all raw materials with their latest inventory status,En son stok durumu ile tüm hammaddeleri içeren bir raporu indirin
+"Download the Template, fill appropriate data and attach the modified file.","Şablon indir, uygun veri doldurmak ve değiştirilmiş dosya eklemek."
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records","Şablon indir, uygun veri doldurmak ve değiştirilmiş dosya eklemek. Seçilen dönemde tüm tarihler ve çalışanların kombinasyon mevcut katılım kayıtları ile, şablonda gelecek"
+Draft,Taslak
+Dropbox,Dropbox
+Dropbox Access Allowed,İzin Dropbox Erişim
+Dropbox Access Key,Dropbox Erişim Anahtarı
+Dropbox Access Secret,Dropbox Erişim Gizli
+Due Date,Bitiş tarihi
+Due Date cannot be after {0},Due Date sonra olamaz {0}
+Due Date cannot be before Posting Date,Due Date tarihi gönderdiği önce olamaz
+Duplicate Entry. Please check Authorization Rule {0},Girişi çoğaltın. Yetkilendirme Kuralı kontrol edin {0}
+Duplicate Serial No entered for Item {0},Çoğaltın Seri No Ürün için girilen {0}
+Duplicate entry,Girişini çoğaltmak
+Duplicate row {0} with same {1},Yinelenen satır {0} ile aynı {1}
+Duties and Taxes,Görev ve Vergiler
+ERPNext Setup,ERPNext Kur
+Earliest,En erken
+Earnest Money,Kaparo
+Earning,Kazanma
+Earning & Deduction,Kazanç & Kesintisi
+Earning Type,Tip Kazanç
+Earning1,Earning1
+Edit,Düzenle
+Edu. Cess on Excise,Edu. Vergi ile ilgili Cess
+Edu. Cess on Service Tax,Edu. Hizmet Vergisi Cess
+Edu. Cess on TDS,Edu. TDS ile ilgili Cess
+Education,Eğitim
+Educational Qualification,Eğitim Yeterlilik
+Educational Qualification Details,Eğitim Yeterlilik Detaylar
+Eg. smsgateway.com/api/send_sms.cgi,Örn. smsgateway.com / api / send_sms.cgi
+Either debit or credit amount is required for {0},Banka veya kredi tutarı Ya için gereklidir {0}
+Either target qty or target amount is mandatory,Hedef Adet Adet veya hedef tutar Ya zorunludur
+Either target qty or target amount is mandatory.,Hedef Adet Adet veya hedef tutar Ya zorunludur.
+Electrical,Elektrik
+Electricity Cost,Elektrik Maliyeti
+Electricity cost per hour,Saat başına elektrik maliyeti
+Electronics,Elektronik
+Email,E-posta
+Email Digest,E-Digest
+Email Digest Settings,E-Digest Ayarları
+Email Digest: ,
+Email Id,E-posta Kimliği
+"Email Id where a job applicant will email e.g. ""jobs@example.com""","Bir iş başvurusu e-posta göndereceğiz E-posta Kimliği örneğin ""jobs@example.com"""
+Email Notifications,E-posta Bildirimleri
+Email Sent?,Email Sent?
+"Email id must be unique, already exists for {0}","E-posta id benzersiz olmalıdır, zaten var {0}"
+Email ids separated by commas.,E-posta kimlikleri virgülle ayırarak.
+"Email settings to extract Leads from sales email id e.g. ""sales@example.com""","Satış e-posta id örneğin ""sales@example.com"" den İlanlar ayıklamak için e-posta ayarları"
+Emergency Contact,Acil İletişim
+Emergency Contact Details,Acil İletişim Detayları
+Emergency Phone,Acil Telefon
+Employee,Çalışan
+Employee Birthday,Çalışan Doğum Günü
+Employee Details,Çalışan Ayrıntıları
+Employee Education,Çalışan Eğitim
+Employee External Work History,Çalışan Dış İş Geçmişi
+Employee Information,Çalışan Bilgi
+Employee Internal Work History,Çalışan İç Çalışma Geçmişi
+Employee Internal Work Historys,Çalışan İç Çalışma Historys
+Employee Leave Approver,Çalışan bırak Approver
+Employee Leave Balance,Çalışan bırak Dengesi
+Employee Name,Çalışan Adı
+Employee Number,Çalışan sayısı
+Employee Records to be created by,Çalışan Kayıtları tarafından oluşturulacak
+Employee Settings,Çalışan Ayarları
+Employee Type,Çalışan Tipi
+"Employee designation (e.g. CEO, Director etc.).","Çalışan atama (ör. CEO, Müdür vb.)"
+Employee master.,Çalışan usta.
+Employee record is created using selected field. ,
+Employee records.,Çalışan kayıtları.
+Employee relieved on {0} must be set as 'Left',{0} üzerinde rahatlamış Çalışan 'Sol' olarak ayarlanmış olmalıdır
+Employee {0} has already applied for {1} between {2} and {3},Çalışan {0} zaten arasındaki {1} için başvurdu {2} ve {3}
+Employee {0} is not active or does not exist,Çalışan {0} aktif değil veya yok
+Employee {0} was on leave on {1}. Cannot mark attendance.,Çalışan {0} {1} tarihinde izinli oldu. Katılım işaretlemek olamaz.
+Employees Email Id,Çalışanlar ID e-posta
+Employment Details,İstihdam Detayları
+Employment Type,İstihdam Tipi
+Enable / disable currencies.,/ Devre dışı para etkinleştirin.
+Enabled,Etkin
+Encashment Date,Nakit Çekim Tarihi
+End Date,Bitiş Tarihi
+End Date can not be less than Start Date,"Bitiş Tarihi, Başlangıç ​​Tarihinden daha az olamaz"
+End date of current invoice's period,Cari faturanın döneminin bitiş tarihi
+End of Life,Hayatın Sonu
+Energy,Enerji
+Engineer,Mühendis
+Enter Verification Code,Doğrulama kodunu girin
+Enter campaign name if the source of lead is campaign.,Kurşun kaynağıdır kampanya ise kampanya adını girin.
+Enter department to which this Contact belongs,Bu İletişim ait olduğu departmanı girin
+Enter designation of this Contact,Bu İletişim atama giriniz
+"Enter email id separated by commas, invoice will be mailed automatically on particular date","Virgülle ayrılmış e-posta id girin, fatura belirli bir tarihte otomatik olarak gönderilecek olacak"
+Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.,Eğer üretim siparişleri yükseltmek veya analiz için hammadde indirmek istediğiniz öğeleri ve planlı qty girin.
+Enter name of campaign if source of enquiry is campaign,Soruşturma kaynağı kampanyası ise kampanyanın adını girin
+"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)","Burada statik url parametreleri girin (Örn. gönderen = ERPNext, username = ERPNext, şifre = 1234 vb)"
+Enter the company name under which Account Head will be created for this Supplier,Baş Hesap altında şirket adını girin Bu Satıcıya için oluşturulmuş olacak
+Enter url parameter for message,Mesajı için url parametre girin
+Enter url parameter for receiver nos,Alıcı nos için url parametre girin
+Entertainment & Leisure,Eğlence ve Boş Zaman
+Entertainment Expenses,Eğlence Giderleri
+Entries,Yazılar
+Entries against ,
+Entries are not allowed against this Fiscal Year if the year is closed.,"Yıl kapalı ise, bu verileri Mali Yılı karşı izin verilmez."
+Equity,Özkaynak
+Error: {0} > {1},Hata: {0}> {1}
+Estimated Material Cost,Tahmini Malzeme Maliyeti
+"Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","En yüksek önceliğe sahip birden Fiyatlandırması Kuralları olsa bile, o zaman aşağıdaki iç öncelikler uygulanır:"
+Everyone can read,Herkes okuyabilir
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Örnek: ABCD # # # # #  serisi ayarlanır ve Seri No işlemlerde söz değilse, o zaman otomatik seri numarası bu dizi dayalı oluşturulur. Eğer her zaman açıkça bu öğe için Seri Nos bahsetmek istiyorum. Bu boş bırakın."
+Exchange Rate,Para Birimi kurları
+Excise Duty 10,Özel Tüketim Vergisi 10
+Excise Duty 14,Özel Tüketim Vergisi 14
+Excise Duty 4,Tüketim Vergisi 4
+Excise Duty 8,ÖTV 8
+Excise Duty @ 10,@ 10 Özel Tüketim Vergisi
+Excise Duty @ 14,14 @ ÖTV
+Excise Duty @ 4,@ 4 Özel Tüketim Vergisi
+Excise Duty @ 8,@ 8 Özel Tüketim Vergisi
+Excise Duty Edu Cess 2,ÖTV Edu Cess 2
+Excise Duty SHE Cess 1,ÖTV SHE Cess 1
+Excise Page Number,Tüketim Sayfa Numarası
+Excise Voucher,Tüketim Çeki
+Execution,Yerine Getirme
+Executive Search,Executive Search
+Exemption Limit,Muafiyet Sınırı
+Exhibition,Sergi
+Existing Customer,Mevcut Müşteri
+Exit,Çıkış
+Exit Interview Details,Çıkış Görüşmesi Detayları
+Expected,Beklenen
+Expected Completion Date can not be less than Project Start Date,Beklenen Bitiş Tarihi Proje Başlangıç ​​Tarihi az olamaz
+Expected Date cannot be before Material Request Date,Beklenen Tarih Malzeme Talep Tarihi önce olamaz
+Expected Delivery Date,Beklenen Teslim Tarihi
+Expected Delivery Date cannot be before Purchase Order Date,Beklenen Teslim Tarihi Sipariş Tarihinden önce olamaz
+Expected Delivery Date cannot be before Sales Order Date,Beklenen Teslim Tarihi önce Satış Sipariş Tarihi olamaz
+Expected End Date,Beklenen Bitiş Tarihi
+Expected Start Date,Beklenen Başlangıç ​​Tarihi
+Expense,Gider
+Expense / Difference account ({0}) must be a 'Profit or Loss' account,"Gider / Farkı hesabı ({0}), bir 'Kar veya Zarar' hesabı olmalıdır"
+Expense Account,Gider Hesabı
+Expense Account is mandatory,Gider Hesabı zorunludur
+Expense Claim,Gider İddiası
+Expense Claim Approved,Gideri Talep Onaylı
+Expense Claim Approved Message,Gideri Talep Onaylı Mesaj
+Expense Claim Detail,Gideri Talep Detayı
+Expense Claim Details,Gider Talep Detayı
+Expense Claim Rejected,Gider İddia Reddedildi
+Expense Claim Rejected Message,Gider İddia Reddedildi Mesaj
+Expense Claim Type,Gideri Talep Türü
+Expense Claim has been approved.,Gideri Talep onaylandı.
+Expense Claim has been rejected.,Gideri Talep reddedildi.
+Expense Claim is pending approval. Only the Expense Approver can update status.,Gideri Talep onayı bekliyor. Sadece Gider Approver durumunu güncelleyebilirsiniz.
+Expense Date,Gider Tarih
+Expense Details,Gider Detayları
+Expense Head,Gider Başkanı
+Expense account is mandatory for item {0},Gider hesap kalemi için zorunludur {0}
+Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,Gider veya Fark hesabı zorunludur Ürün için {0} etkilediğini genel stok değeri olarak
+Expenses,Giderler
+Expenses Booked,Rezervasyon Giderleri
+Expenses Included In Valuation,Giderleri Değerleme Dahil
+Expenses booked for the digest period,Sindirmek dönemi için rezervasyonu Giderleri
+Expiry Date,Son kullanma tarihi
+Exports,İhracat
+External,Dış
+Extract Emails,E-postalar ayıklayın
+FCFS Rate,FCFS Oranı
+Failed: ,
+Family Background,Aile Arkaplan
+Fax,Faks
+Features Setup,Özellikler Kurulum
+Feed,Beslemek
+Feed Type,Besleme Türü
+Feedback,Geri bildirim
+Female,Kadın
+Fetch exploded BOM (including sub-assemblies),(Alt-montajlar dahil) patladı BOM Fetch
+"Field available in Delivery Note, Quotation, Sales Invoice, Sales Order","İrsaliye, Teklif, Satış Fatura, Satış Siparişi kullanılabilir alan"
+Files Folder ID,Dosyalar Klasör Kimliği
+Fill the form and save it,Formu doldurun ve bunu kaydetmek
+Filter based on customer,Filtre müşteri dayalı
+Filter based on item,Öğeye dayanarak Filtre
+Financial / accounting year.,Finans / Muhasebe yıl.
+Financial Analytics,Mali Analytics
+Financial Services,Finansal Hizmetler
+Financial Year End Date,Mali Yıl Bitiş Tarihi
+Financial Year Start Date,Mali Yıl Başlangıç ​​Tarihi
+Finished Goods,Mamüller
+First Name,Ad
+First Responded On,İlk cevap verdi
+Fiscal Year,Mali yıl
+Fiscal Year Start Date and Fiscal Year End Date are already set in Fiscal Year {0},Mali Yılı Başlangıç ​​Tarihi ve Mali Yıl Bitiş Tarihi zaten Mali Yılı ayarlanır {0}
+Fiscal Year Start Date and Fiscal Year End Date cannot be more than a year apart.,Mali Yılı Başlangıç ​​Tarihi ve Mali Yıl Bitiş Tarihi dışında bir yıldan fazla olamaz.
+Fiscal Year Start Date should not be greater than Fiscal Year End Date,Mali Yıl Başlangıç ​​Tarihi Mali Yıl Sonu tarihden olmamalıdır
+Fixed Asset,Sabit Kıymet
+Fixed Assets,Duran Varlıklar
+Follow via Email,E-posta ile takip
+"Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.","Maddeleri alt iseniz aşağıdaki tablo değerleri gösterecektir - daralmıştır. Bu değerler alt ""Malzeme Listesi"" nin ustadan getirilecek - öğeleri sözleşmeli."
+Food,Yiyecek Grupları
+"Food, Beverage & Tobacco","Gıda, İçecek ve Tütün"
+"For 'Sales BOM' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Sales BOM' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.","'Satış BOM' öğeleri, Depo, Seri No ve Toplu Hayır 'Paketleme Listesi' tablosundan kabul edilecektir. Depo ve Toplu Hayır herhangi bir 'Satış BOM' öğe için tüm ambalaj öğeler için aynı ise, bu değerler ana Öğe tabloda girilebilir, değerler 'Ambalaj' List tabloya kopyalanır."
+For Company,Şirket için
+For Employee,Çalışanlara
+For Employee Name,Çalışan Adı İçin
+For Price List,Fiyat Listesi
+For Production,Üretimi için
+For Reference Only.,Sadece Referans için.
+For Sales Invoice,Satış Faturası için
+For Server Side Print Formats,Server Side Baskı Biçimleri
+For Supplier,Tedarikçi için
+For Warehouse,Depo için
+For Warehouse is required before Submit,Depo gereklidir için önce Gönder
+"For e.g. 2012, 2012-13","Örneğin 2012 için, 2012-13"
+For reference,Referans için
+For reference only.,Sadece referans.
+"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","Müşterilerinin rahatlığı için, bu kodları Faturalar ve Teslimat notları gibi baskı biçimleri kullanılabilir"
+Fraction,Kesir
+Fraction Units,Kesir Üniteleri
+Freeze Stock Entries,Freeze Stok Yazılar
+Freeze Stocks Older Than [Days],Freeze Stoklar Daha Eski [Gün]
+Freight and Forwarding Charges,Yük ve Yönlendirme Ücretleri
+Friday,Cuma
+From,Itibaren
+From Bill of Materials,Malzeme Bill
+From Company,Şirket Gönderen
+From Currency,Para Gönderen
+From Currency and To Currency cannot be same,Para itibaren ve Para için aynı olamaz
+From Customer,Müşteri Gönderen
+From Customer Issue,Müşteri Sayı Gönderen
+From Date,Tarih
+From Date cannot be greater than To Date,Tarihten itibaren için daha büyük olamaz
+From Date must be before To Date,Tarihten itibaren önce olmalıdır
+From Date should be within the Fiscal Year. Assuming From Date = {0},Tarih Mali Yılı içinde olmalıdır. Tarihten itibaren varsayarsak = {0}
+From Delivery Note,Teslim Not
+From Employee,Çalışanlara
+From Lead,Kurşun gelen
+From Maintenance Schedule,Bakım Programı Gönderen
+From Material Request,Malzeme istek
+From Opportunity,Fırsat
+From Package No.,Paket No Gönderen
+From Purchase Order,Satınalma Siparişi Gönderen
+From Purchase Receipt,Satın Alındı ​​Gönderen
+From Quotation,Teklifimizin Gönderen
+From Sales Order,Satış Siparişi Gönderen
+From Supplier Quotation,Tedarikçi Teklifimizin Gönderen
+From Time,Time
+From Value,Değer itibaren
+From and To dates required,Gerekli tarihleri ​​Başlangıç ​​ve
+From value must be less than to value in row {0},Değerden üst üste değerine daha az olmalıdır {0}
+Frozen,Dondurulmuş
+Frozen Accounts Modifier,Dondurulmuş Hesapları Değiştirici
+Fulfilled,Karşılanan
+Full Name,Tam Adı
+Full-time,Tam gün
+Fully Billed,Tam Faturalı
+Fully Completed,Tamamen Tamamlandı
+Fully Delivered,Tamamen Teslim
+Furniture and Fixture,Mobilya ve Fikstürü
+Further accounts can be made under Groups but entries can be made against Ledger,Ek hesaplar Gruplar altında yapılabilir ancak girdiler Ledger karşı yapılabilir
+"Further accounts can be made under Groups, but entries can be made against Ledger","Ek hesaplar Gruplar altında yapılabilir, ancak girdiler Ledger karşı yapılabilir"
+Further nodes can be only created under 'Group' type nodes,Dahası düğümleri sadece 'Grup' tipi düğüm altında oluşturulabilir
+GL Entry,GL Girişi
+Gantt Chart,Gantt Chart
+Gantt chart of all tasks.,Tüm görevlerin Gantt grafiği.
+Gender,Cinsiyet
+General,Genel
+General Ledger,Genel Muhasebe
+Generate Description HTML,Açıklama Generate HTML
+Generate Material Requests (MRP) and Production Orders.,Malzeme İstekleri (MRP) ve Üretim Emirleri oluşturun.
+Generate Salary Slips,Maaş Fiş Üret
+Generate Schedule,Programı oluşturmak
+Generates HTML to include selected image in the description,Açıklamasında seçilen görüntüyü eklemek için HTML üretir
+Get Advances Paid,Avanslar Para Kazanın
+Get Advances Received,Alınan avanslar alın
+Get Current Stock,Cari Stok alın
+Get Items,Öğeler alın
+Get Items From Sales Orders,Satış Siparişleri Öğeleri alın
+Get Items from BOM,BOM Öğeleri alın
+Get Last Purchase Rate,Son Alım puanla alın
+Get Outstanding Invoices,Üstün Faturalar alın
+Get Relevant Entries,İlgili başlıklar alın
+Get Sales Orders,Satış Siparişleri alın
+Get Specification Details,Şartname Detayı alın
+Get Stock and Rate,Stok ve Oranı alın
+Get Template,Şablon alın
+Get Terms and Conditions,Şartları alın
+Get Unreconciled Entries,Uzlaşmayan başlıklar alın
+Get Weekly Off Dates,Tarihler Haftalık Off alın
+"Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.","Sözü gönderme tarih-zaman kaynak / hedef depoda değerleme oranı ve mevcut stok alın. Öğeyi tefrika varsa, seri nos girdikten sonra bu düğmeye basınız."
+Global Defaults,Küresel Varsayılanları
+Global POS Setting {0} already created for company {1},Küresel POS Ayar {0} zaten oluşturulan şirket {1}
+Global Settings,Genel Ayarlar
+"Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts and create a new Account Ledger (by clicking on Add Child) of type ""Bank""","Uygun gruba (Fon genellikle Uygulama> Dönen Varlıklar> Banka Hesapları gidin ve ""Bankası"" türü Child ekle tıklayarak yeni Hesabı Ledger () oluşturmak"
+"Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties and create a new Account Ledger (by clicking on Add Child) of type ""Tax"" and do mention the Tax rate.","Uygun gruba (Fon genellikle Kaynağı> Yükümlülükler> Vergi ve Görevleri gidin ve türü ""Vergi"" ve Ledger (tıklayarak Çocuk ekle) yeni bir hesap oluşturmak ve Vergi oranı söz yok."
+Goal,Hedef
+Goals,Hedefleri
+Goods received from Suppliers.,Eşya Sanayicileri aldı.
+Google Drive,Google Drive
+Google Drive Access Allowed,Google Drive Erişim İzin
+Government,Devlet
+Graduate,Mezun
+Grand Total,Genel Toplam
+Grand Total (Company Currency),Genel Toplam (Şirket para birimi)
+"Grid ""","Izgara """
+Grocery,Bakkal
+Gross Margin %,Brüt Kar Marjı%
+Gross Margin Value,Brüt Kar Marjı Değer
+Gross Pay,Brüt Ücret
+Gross Pay + Arrear Amount +Encashment Amount - Total Deduction,Brüt Ücret + geciken Tutar + Nakit Çekim Tutarı - Toplam Kesintisi
+Gross Profit,Brüt kazanç
+Gross Profit (%),Brüt kazanç (%)
+Gross Weight,Brüt ağırlık
+Gross Weight UOM,Brüt Ağırlık UOM
+Group,Grup
+Group by Account,Hesap tarafından Grup
+Group by Voucher,Çeki ile grup
+Group or Ledger,Grup veya Ledger
+Groups,Gruplar
+HR Manager,İK Yöneticisi
+HR Settings,İK Ayarları
+HTML / Banner that will show on the top of product list.,Ürün listesinin üstünde gösterecektir HTML / Banner.
+Half Day,Yarım Gün
+Half Yearly,Yarım Yıllık
+Half-yearly,Yarıyıllık
+Happy Birthday!,Doğum günün kutlu olsun!
+Hardware,Donanım
+Has Batch No,Toplu hayır vardır
+Has Child Node,Çocuk düğüm olan
+Has Serial No,Seri no Has
+Head of Marketing and Sales,Pazarlama ve Satış Müdürü
+Header,Başlık
+Health Care,Sağlık hizmeti
+Health Concerns,Sağlık Sorunları
+Health Details,Sağlık Bilgileri
+Held On,Açık Tutulacak
+Help HTML,Yardım HTML
+"Help: To link to another record in the system, use ""#Form/Note/[Note Name]"" as the Link URL. (don't use ""http://"")","Yardım: sistemindeki başka bir kayda bağlamak için, ""# Form / Not / [İsim Not]"" Bağlantı URL olarak kullanın. (""Http://"" kullanmayın)"
+"Here you can maintain family details like name and occupation of parent, spouse and children","Burada ebeveyn, eş ve çocukların isim ve meslek gibi aile ayrıntıları koruyabilirsiniz"
+"Here you can maintain height, weight, allergies, medical concerns etc","Burada boy, kilo, alerji, tıbbi endişeler vb koruyabilirsiniz"
+Hide Currency Symbol,Para birimi simgesi gizle
+High,Yüksek
+History In Company,Şirket Tarihçe
+Hold,Muhafaza et
+Holiday,Tatil
+Holiday List,Tatil Listesi
+Holiday List Name,Tatil Listesi Adı
+Holiday master.,Tatil usta.
+Holidays,Bayram
+Home,Ana Sayfa
+Host,Host
+"Host, Email and Password required if emails are to be pulled","E-postalar çekti isteniyorsa konak, E-posta ve Şifre gereklidir"
+Hour,Saat
+Hour Rate,Saat Hızı
+Hour Rate Labour,Saat Hızı Çalışma
+Hours,Saat
+How Pricing Rule is applied?,Nasıl Fiyatlandırma Kural uygulanır?
+How frequently?,Ne sıklıkla?
+"How should this currency be formatted? If not set, will use system defaults","Bu nasıl para biçimlendirilmiş olmalıdır? Set değilse, sistem varsayılan kullanacak"
+Human Resources,Insan kaynakları
+Identification of the package for the delivery (for print),(Baskı için) verilmesi için ambalajın tanımlanması
+If Income or Expense,Eğer Gelir veya Gider
+If Monthly Budget Exceeded,Aylık Bütçe aşıldı eğer
+"If Sale BOM is defined, the actual BOM of the Pack is displayed as table. Available in Delivery Note and Sales Order","Satış BOM tanımlanmış ise, Pack gerçek BOM tablo olarak görüntülenir. İrsaliye ve Satış Sipariş mevcuttur"
+"If Supplier Part Number exists for given Item, it gets stored here","Tedarikçi Parça Numarası verilen parçanın varsa, burada depolanır"
+If Yearly Budget Exceeded,Yıllık Bütçe aşıldı eğer
+"If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.","Eğer işaretli ise, alt-montaj kalemleri için BOM hammadde almak için kabul edilecektir. Aksi takdirde, tüm alt-montaj öğeler bir hammadde olarak kabul edilecektir."
+"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day","Eğer seçilirse, toplam yok. Çalışma gün ve tatiller dahil olacak ve bu Maaş Günlük değerini azaltacaktır"
+"If checked, the tax amount will be considered as already included in the Print Rate / Print Amount","Kontrol eğer zaten Baskı Hızı / Baskı Tutar dahil olarak, vergi tutarı olarak kabul edilecektir"
+If different than customer address,Eğer müşteri adres farklı
+"If disable, 'Rounded Total' field will not be visible in any transaction","Devre dışı ise, 'Yuvarlak Total' alanı herhangi bir işlem görünür olmayacak"
+"If enabled, the system will post accounting entries for inventory automatically.","Etkinse, sistem otomatik olarak envanter için muhasebe kayıtları yayınlayacağız."
+If more than one package of the same type (for print),Eğer (baskı için) aynı türden birden fazla paketi
+"If multiple Pricing Rules continue to prevail, users are asked to set Priority manually to resolve conflict.","Birden Fiyatlandırma Kurallar hakim devam ederse, kullanıcılar çatışmayı çözmek için el Öncelik ayarlamanız istenir."
+"If no change in either Quantity or Valuation Rate, leave the cell blank.","Miktar veya Değerleme Oranı da hiçbir değişiklik, hücre boş bırakırsanız."
+If not applicable please enter: NA,Eğer uygulanamaz yazınız: NA
+"If not checked, the list will have to be added to each Department where it has to be applied.","Kontrol edilmez ise, liste bu uygulanması gereken her bölüm için ilave edilmesi gerekecektir."
+"If selected Pricing Rule is made for 'Price', it will overwrite Price List. Pricing Rule price is the final price, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.","Seçilen Fiyatlandırma Kural 'Fiyat' için yapılmış ise, Fiyat Listesi üzerine yazılır. Fiyatlandırma Kural fiyat nihai fiyat, yani başka hiçbir indirim uygulanmalıdır. Bu nedenle, Satış Emri, Sipariş vb gibi işlemlerde, oldukça 'Fiyat Listesi Derece' alanına daha, 'Derece' alanına getirilecek."
+"If specified, send the newsletter using this email address","Belirtilen varsa, bu e-posta adresini kullanarak bülten göndermek"
+"If the account is frozen, entries are allowed to restricted users.","Hesap donmuş ise, girişleri sınırlı kullanıcılara izin verilir."
+"If this Account represents a Customer, Supplier or Employee, set it here.","Bu Hesap Müşteri, tedarikçi ya da çalışan temsil ediyorsa, burada ayarlayın."
+"If two or more Pricing Rules are found based on the above conditions, Priority is applied. Priority is a number between 0 to 20 while default value is zero (blank). Higher number means it will take precedence if there are multiple Pricing Rules with same conditions.","Iki veya daha fazla Fiyatlandırması Kuralları yukarıdaki koşullara dayalı bulunursa, Öncelik uygulanır. Varsayılan değer sıfır (boş) ise Öncelik 0-20 arasında bir sayıdır. Daha fazla sayıda aynı koşullarda birden Fiyatlandırması Kuralları vardır eğer öncelik alacak demektir."
+If you follow Quality Inspection. Enables Item QA Required and QA No in Purchase Receipt,Kalite Tetkiki izleyin. Hayır Satın Alma Makbuzu Öğe QA Gerekli ve QA sağlar
+If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,Eğer Satış Ekibi ve Satış Ortakları (Kanal Ortakları) varsa onlar etiketlendi ve satış faaliyetleri kendi katkılarını sürdürmek olabilir
+"If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.","Eğer Satınalma Vergi ve Masraflar Master standart bir şablon oluşturduk varsa, birini seçin ve aşağıdaki butona tıklayın."
+"If you have created a standard template in Sales Taxes and Charges Master, select one and click on the button below.","Eğer Satış Vergi ve Masraflar Master standart bir şablon oluşturduk varsa, birini seçin ve aşağıdaki butona tıklayın."
+"If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page","Uzun baskı biçimleri varsa, bu özellik, her sayfada tüm üstbilgi ve altbilgi ile birden fazla sayfa yazdırılacak sayfayı bölmek için kullanılabilir"
+If you involve in manufacturing activity. Enables Item 'Is Manufactured',Eğer üretim faaliyeti dahil edin. Öğe sağlayan 'Üretildi'
+Ignore,Yoksay
+Ignore Pricing Rule,Fiyatlandırma Kuralı Yoksay
+Ignored: ,
+Image,Resim
+Image View,Resim Görüntüle
+Implementation Partner,Uygulama Ortağı
+Import Attendance,İthalat Devam
+Import Failed!,İthalat Başarısız!
+Import Log,İthalat Günlüğü
+Import Successful!,Başarılı İthalat!
+Imports,İthalat
+In Hours,Saatleri
+In Process,Süreci
+In Qty,Adet
+In Value,Değer
+In Words,Kelimeler
+In Words (Company Currency),Kelimeler (Firma para birimi) olarak
+In Words (Export) will be visible once you save the Delivery Note.,Eğer Teslim Not kaydetmek kez Words (İhracat) görünür olacaktır.
+In Words will be visible once you save the Delivery Note.,Eğer Teslim Not kez kaydedin Kelimeler görünür olacak.
+In Words will be visible once you save the Purchase Invoice.,Eğer Alış Fatura kez kaydedin Kelimeler görünür olacak.
+In Words will be visible once you save the Purchase Order.,Eğer Satınalma Siparişi kez kaydedin Kelimeler görünür olacak.
+In Words will be visible once you save the Purchase Receipt.,Eğer Satınalma Makbuz kez kaydedin Kelimeler görünür olacak.
+In Words will be visible once you save the Quotation.,Eğer Teklif kez kaydedin Kelimeler görünür olacak.
+In Words will be visible once you save the Sales Invoice.,Eğer Satış Faturası kez kaydedin Kelimeler görünür olacak.
+In Words will be visible once you save the Sales Order.,Eğer Satış Siparişi kez kaydedin Kelimeler görünür olacak.
+Incentives,Teşvikler
+Include Reconciled Entries,Uzlaşılan başlıklar şunlardır
+Include holidays in Total no. of Working Days,Hiçbir Toplam tatilleri dahil. Çalışma Günleri
+Income,Gelir
+Income / Expense,Gelir / Gider
+Income Account,Gelir Hesabı
+Income Booked,Gelir rezervasyonu
+Income Tax,Gelir vergisi
+Income Year to Date,Tarih Gelir Yıl
+Income booked for the digest period,Sindirmek dönemi için rezervasyonu Gelir
+Incoming,Alınıyor!
+Incoming Rate,Gelen Oranı
+Incoming quality inspection.,Gelen kalite kontrol.
+Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction.,Genel Muhasebe Yazılar Yanlış sayısı bulundu. Siz işlemde yanlış Hesabı seçmiş olabilirsiniz.
+Incorrect or Inactive BOM {0} for Item {1} at row {2},Yanlış veya Kapalı BOM {0} öğesi için {1} satırdaki {2}
+Indicates that the package is a part of this delivery (Only Draft),Paketi Bu teslim bir parçası olduğunu gösterir (Sadece Taslak)
+Indirect Expenses,Dolaylı Giderler
+Indirect Income,Dolaylı Gelir
+Individual,Tek
+Industry,Sanayi
+Industry Type,Sanayi Tipi
+Inspected By,Tarafından denetlenir
+Inspection Criteria,Muayene Kriterleri
+Inspection Required,Muayene Gerekli
+Inspection Type,Muayene Türü
+Installation Date,Kurulum Tarihi
+Installation Note,Kurulum Not
+Installation Note Item,Kurulum Not Öğe
+Installation Note {0} has already been submitted,Kurulum Not {0} zaten gönderildi
+Installation Status,Kurulum Durumu
+Installation Time,Kurulum Zaman
+Installation date cannot be before delivery date for Item {0},Kurulum tarih Ürün için teslim tarihinden önce olamaz {0}
+Installation record for a Serial No.,Bir Seri No için kurulum rekor
+Installed Qty,Yüklü Miktar
+Instructions,Talimat
+Integrate incoming support emails to Support Ticket,Ticket Destek gelen destek e-postaları entegre
+Interested,Ilgili
+Intern,Stajyer
+Internal,Iç
+Internet Publishing,İnternet Yayıncılık
+Introduction,Giriş
+Invalid Barcode,Geçersiz Barkod
+Invalid Barcode or Serial No,Geçersiz Barkod veya Seri No
+Invalid Mail Server. Please rectify and try again.,Geçersiz Mail Server. Düzeltmek ve tekrar deneyin.
+Invalid Master Name,Geçersiz Usta İsmi
+Invalid User Name or Support Password. Please rectify and try again.,Geçersiz Kullanıcı Adı veya Şifre Destek. Düzeltmek ve tekrar deneyin.
+Invalid quantity specified for item {0}. Quantity should be greater than 0.,Öğesi için belirtilen geçersiz miktar {0}. Miktar 0'dan büyük olmalıdır.
+Inventory,Stok
+Inventory & Support,Envanter ve Destek
+Investment Banking,Yatırım Bankacılığı
+Investments,Yatırımlar
+Invoice Date,Fatura Tarihi
+Invoice Details,Fatura Ayrıntıları
+Invoice No,Hiçbir fatura
+Invoice Number,Fatura Numarası
+Invoice Period From,Gönderen Fatura Dönemi
+Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Faturayı yinelenen zorunlu tarihler için ve Fatura Dönemi itibaren Fatura Dönemi
+Invoice Period To,Için Fatura Dönemi
+Invoice Type,Fatura Türü
+Invoice/Journal Voucher Details,Fatura / Dergi Çeki Detayları
+Invoiced Amount (Exculsive Tax),Faturalanan Tutar (Exculsive Vergisi)
+Is Active,Aktif Is
+Is Advance,Advance mı
+Is Cancelled,İptal edilir
+Is Carry Forward,İleri Carry mı
+Is Default,Standart
+Is Encash,Bozdurmak mı
+Is Fixed Asset Item,Sabit Kıymet öğedir
+Is LWP,LWP mı
+Is Opening,Açılış mı
+Is Opening Entry,Entry Açılış mı
+Is POS,POS
+Is Primary Contact,Birincil İletişim mi
+Is Purchase Item,Satınalma Ürün mı
+Is Sales Item,Satış Ürün mı
+Is Service Item,Servis Ürün mı
+Is Stock Item,Stok Ürün mı
+Is Sub Contracted Item,Alt Sözleşmeli öğedir
+Is Subcontracted,Taşeron mı
+Is this Tax included in Basic Rate?,Bu Vergi Temel Puan dahil mi?
+Issue,Sayı
+Issue Date,Veriliş tarihi
+Issue Details,Sorun Ayrıntıları
+Issued Items Against Production Order,Üretim Emri Karşı İhraç Ürünleri
+It can also be used to create opening stock entries and to fix stock value.,Ayrıca açılış stok girişleri oluşturmak ve stok değerini düzeltmek için kullanılabilir.
+Item,Ürün
+Item Advanced,Ürün Gelişmiş
+Item Barcode,Öğe Barkod
+Item Batch Nos,Ürün Toplu Nos
+Item Code,Ürün Kodu
+Item Code > Item Group > Brand,Ürün Kodu> Ürün Grubu> Marka
+Item Code and Warehouse should already exist.,Ürün Kodu ve Depo zaten var.
+Item Code cannot be changed for Serial No.,Ürün Kodu Seri No için değiştirilemez
+Item Code is mandatory because Item is not automatically numbered,Ürün otomatik olarak numaralandırılmış değil çünkü Ürün Kodu zorunludur
+Item Code required at Row No {0},Sıra No gerekli Ürün Kodu {0}
+Item Customer Detail,Ürün Müşteri Detay
+Item Description,Ürün Açıklaması
+Item Desription,Ürün Desription
+Item Details,Ürün Detayları
+Item Group,Ürün Grubu
+Item Group Name,Ürün Grup Adı
+Item Group Tree,Ürün Grubu Ağacı
+Item Group not mentioned in item master for item {0},Öğe için öğe ana belirtilmeyen Ürün Grubu {0}
+Item Groups in Details,Ayrıntılar Ürün Grupları
+Item Image (if not slideshow),Ürün Görüntü (yoksa slayt)
+Item Name,Nesne Adı
+Item Naming By,Ürün adlandırma By
+Item Price,Ürün Fiyatı
+Item Prices,Ürün Fiyatları
+Item Quality Inspection Parameter,Ürün Kalite Kontrol Parametre
+Item Reorder,Ürün Reorder
+Item Serial No,Ürün Seri No
+Item Serial Nos,Ürün Seri Nos
+Item Shortage Report,Ürün yetersizliği Raporu
+Item Supplier,Ürün Tedarikçi
+Item Supplier Details,Ürün Tedarikçi Ayrıntılar
+Item Tax,Ürün Vergi
+Item Tax Amount,Ürün Vergi Tutarı
+Item Tax Rate,Ürün Vergi Oranı
+Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,Ürün Vergi Row {0} türü Vergisi veya Gelir veya gider veya Ücretli bir hesabınız olması gerekir
+Item Tax1,Ürün MWST.1
+Item To Manufacture,Imalatı için Öğe
+Item UOM,Ürün UOM
+Item Website Specification,Öğe Web Sitesi Özellikleri
+Item Website Specifications,Öğe Web Sitesi Özellikleri
+Item Wise Tax Detail,Ürün Wise Vergi Detayı
+Item Wise Tax Detail ,
+Item is required,Ürün gereklidir
+Item is updated,Ürün güncellenir
+Item master.,Ürün usta.
+"Item must be a purchase item, as it is present in one or many Active BOMs","Bu bir veya birçok Active reçetelerde mevcut olduğu gibi öğe, bir satın alma öğe olmalı"
+Item or Warehouse for row {0} does not match Material Request,Satır için öğe veya Depo {0} Malzeme İsteği eşleşmiyor
+Item table can not be blank,Ürün masa boş olamaz
+Item to be manufactured or repacked,Üretilen veya repacked Öğe
+Item valuation updated,Ürün değerleme güncellendi
+Item will be saved by this name in the data base.,Ürün veri tabanı bu isim ile kaydedilir.
+Item {0} appears multiple times in Price List {1},Item {0} Fiyat Listesi birden çok kez görüntülenir {1}
+Item {0} does not exist,Ürün {0} yok
+Item {0} does not exist in the system or has expired,Item {0} sistemde yoksa veya süresi doldu
+Item {0} does not exist in {1} {2},Item {0} yok {1} {2}
+Item {0} has already been returned,Item {0} zaten iade edilmiş
+Item {0} has been entered multiple times against same operation,Item {0} aynı operasyona karşı birden çok kez girildi
+Item {0} has been entered multiple times with same description or date,Item {0} aynı açıklama ya da tarih ile birden çok kez girildi
+Item {0} has been entered multiple times with same description or date or warehouse,Item {0} aynı açıklama veya tarihe depo ile birden çok kez girildi
+Item {0} has been entered twice,Item {0} kez girildi
+Item {0} has reached its end of life on {1},Item {0} üzerindeki ömrünün sonuna gelmiştir {1}
+Item {0} ignored since it is not a stock item,Bir stok kalemi olmadığı Item {0} yok
+Item {0} is cancelled,Item {0} iptal edilir
+Item {0} is not Purchase Item,Item {0} Öğe satın değil
+Item {0} is not a serialized Item,Item {0} bir tefrika değil Öğe
+Item {0} is not a stock Item,"Item {0}, bir hisse senedi değil Öğe"
+Item {0} is not active or end of life has been reached,Item {0} aktif değil ise veya hayatın sonuna gelindi
+Item {0} is not setup for Serial Nos. Check Item master,Item {0} Seri No Kontrol Ürün usta için kurulum değil
+Item {0} is not setup for Serial Nos. Column must be blank,Item {0} Seri No Kolon için kurulum boş olmalı değil
+Item {0} must be Sales Item,Item {0} Satış Ürün olmalı
+Item {0} must be Sales or Service Item in {1},Item {0} Satış veya Servis Ürün olmalıdır {1}
+Item {0} must be Service Item,Item {0} Service Ürün olmalı
+Item {0} must be a Purchase Item,Item {0} Satınalma Ürün olmalı
+Item {0} must be a Sales Item,Item {0} Satış Ürün olmalı
+Item {0} must be a Service Item.,Item {0} Service Ürün olmalıdır.
+Item {0} must be a Sub-contracted Item,Item {0} bir taşeronluk Ürün olmalı
+Item {0} must be a stock Item,Item {0} bir stok Ürün olmalı
+Item {0} must be manufactured or sub-contracted,Item {0} imal edilmeli veya taşeronluk
+Item {0} not found,Item {0} bulunamadı
+Item {0} with Serial No {1} is already installed,Item {0} Seri No ile {1} zaten yüklü
+Item {0} with same description entered twice,Item {0} aynı açıklama ile iki kez girdi
+"Item, Warranty, AMC (Annual Maintenance Contract) details will be automatically fetched when Serial Number is selected.","Seri Numarası seçildiğinde Öğe, Garanti, AMC (Yıllık Bakım Sözleşme) bilgilerini otomatik olarak zorlama olacaktır."
+Item-wise Price List Rate,Madde-bilge Fiyat Listesi Oranı
+Item-wise Purchase History,Madde-bilge Satın Alma Geçmişi
+Item-wise Purchase Register,Madde-bilge Alım Kayıt
+Item-wise Sales History,Madde-bilge Satış Tarihi
+Item-wise Sales Register,Madde-bilge Satış Kayıt
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry","Ürün: {0} toplu-bilge yönetilen kullanarak mutabakat olamaz \ Stock Uzlaşma yerine, stok girişi kullanın"
+Item: {0} not found in the system,Ürün: {0} sistemde bulunamadı
+Items,Ürünler
+Items To Be Requested,İstenen To Be ürün
+Items required,Gerekli Öğeler
+"Items to be requested which are ""Out of Stock"" considering all warehouses based on projected qty and minimum order qty","""Stokta"" olan talep edilecek kalemler öngörülen qty ve minimum sipariş adet dayalı tüm depolar dikkate"
+Items which do not exist in Item master can also be entered on customer's request,Ürün master yoktur öğeler de müşterinin isteği üzerine girilebilir
+Itemwise Discount,Itemwise İndirim
+Itemwise Recommended Reorder Level,Itemwise Yeniden Sipariş Seviye Önerilen
+Job Applicant,İş Başvuru
+Job Opening,İş Açılış
+Job Profile,İş Profili
+Job Title,Iş unvanı
+"Job profile, qualifications required etc.","Gerekli iş profili, nitelikleri vb"
+Jobs Email Settings,İşler E-posta Ayarları
+Journal Entries,Dergi Yazılar
+Journal Entry,Journal Entry
+Journal Voucher,Dergi Çeki
+Journal Voucher Detail,Dergi Çeki Detay
+Journal Voucher Detail No,Dergi Çeki Detay yok
+Journal Voucher {0} does not have account {1} or already matched,Dergi Çeki {0} hesabı yok {1} ya da zaten eşleşti
+Journal Vouchers {0} are un-linked,Dergi Fişler {0} un-bağlantılı
+Keep a track of communication related to this enquiry which will help for future reference.,Ileride yardımcı olacak bu soruşturma ile ilgili bir iletişim takip edin.
+Keep it web friendly 900px (w) by 100px (h),100px tarafından web dostu 900px (w) it Keep (h)
+Key Performance Area,Anahtar Performans Alanı
+Key Responsibility Area,Key Sorumluluk Alanı
+Kg,Kilogram
+LR Date,LR Tarih
+LR No,Hayır LR
+Label,Etiket
+Landed Cost Item,Indi Maliyet Kalemi
+Landed Cost Items,Maliyet Kalemleri indi
+Landed Cost Purchase Receipt,Maliyet Satınalma Makbuzu indi
+Landed Cost Purchase Receipts,Maliyet Satınalma Makbuzlar indi
+Landed Cost Wizard,Indi Maliyet Sihirbazı
+Landed Cost updated successfully,Indi Maliyet başarıyla güncellendi
+Language,Dil
+Last Name,Soyad
+Last Purchase Rate,Son Alım Oranı
+Latest,Son
+Lead,Talep
+Lead Details,Kurşun Detaylar
+Lead Id,Kurşun Kimliği
+Lead Name,Kurşun Adı
+Lead Owner,Kurşun Owner
+Lead Source,Kurşun Kaynak
+Lead Status,Kurşun Durum
+Lead Time Date,Kurşun Zaman Tarih
+Lead Time Days,Saat Gün Kurşun
+Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,"Lead Time gün bu öğe depoda beklenen hangi gün sayısıdır. Bu öğeyi seçtiğinizde, bu gün Malzeme İsteği getirildi."
+Lead Type,Kurşun Tipi
+Lead must be set if Opportunity is made from Lead,Fırsat Lead yapılmış ise kurşun ayarlanmalıdır
+Leave Allocation,Tahsisi bırakın
+Leave Allocation Tool,Tahsis Aracı bırakın
+Leave Application,Uygulama bırakın
+Leave Approver,Onaylayan bırakın
+Leave Approvers,Onaylayanlar bırakın
+Leave Balance Before Application,Uygulama Öncesi Dengesi bırakın
+Leave Block List,Blok Listesi bırakın
+Leave Block List Allow,Blok Liste İzin bırakın
+Leave Block List Allowed,Blok Liste İzin bırakın
+Leave Block List Date,Blok Liste Tarihi bırakın
+Leave Block List Dates,Blok Liste Tarihler bırakın
+Leave Block List Name,Blok Liste Adını bırak
+Leave Blocked,Bırakın Engellendi
+Leave Control Panel,Kontrol Panelinin bırakın
+Leave Encashed?,Encashed bırakın?
+Leave Encashment Amount,Nakit Çekim Tutar bırakın
+Leave Type,Tip bırakın
+Leave Type Name,Tür Ad bırakın
+Leave Without Pay,Pay Without Leave
+Leave application has been approved.,Bırak başvuru onaylandı.
+Leave application has been rejected.,Bırak başvuru reddedildi.
+Leave approver must be one of {0},Bırakın onaylayan biri olmalıdır {0}
+Leave blank if considered for all branches,Tüm branşlarda için kabul ise boş bırakın
+Leave blank if considered for all departments,Tüm bölümler için kabul ise boş bırakın
+Leave blank if considered for all designations,Tüm tanımları için kabul ise boş bırakın
+Leave blank if considered for all employee types,Tüm çalışan tipleri için kabul ise boş bırakın
+"Leave can be approved by users with Role, ""Leave Approver""","Bırakın Rolü kullanıcılar tarafından onaylanmış olabilir, ""Onaylayan bırakın"""
+Leave of type {0} cannot be longer than {1},Türü bırak {0} daha uzun olamaz {1}
+Leaves Allocated Successfully for {0},Yapraklar Başarıyla Ayrılan {0}
+Leaves for type {0} already allocated for Employee {1} for Fiscal Year {0},Yapraklar türü için {0} zaten Çalışanlara için tahsis {1} Mali Yılı için {0}
+Leaves must be allocated in multiples of 0.5,Yapraklar 0.5 katları tahsis edilmelidir
+Ledger,Defteri kebir
+Ledgers,Defterleri
+Left,Sol
+Legal,Yasal
+Legal Expenses,Yasal Giderler
+Letter Head,Mektubu Başkanı
+Letter Heads for print templates.,Baskı şablonları için mektup Başkanları.
+Level,Seviye
+Lft,Lft
+Liability,Borç
+List a few of your customers. They could be organizations or individuals.,Müşterilerinizin birkaç listeleyin. Onlar kuruluşlar veya bireyler olabilir.
+List a few of your suppliers. They could be organizations or individuals.,Lütfen tedarikçilerin az listeleyin. Onlar kuruluşlar veya bireyler olabilir.
+List items that form the package.,Paketi oluşturmak liste öğeleri.
+List this Item in multiple groups on the website.,Web sitesinde birden fazla grup içinde bu Öğe listeleyin.
+"List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start.","Ürün ya da satın almak veya satmak hizmetleri sıralayın. Başlattığınızda Ürün Grubu, Ölçü ve diğer özellikleri Birimi kontrol ettiğinizden emin olun."
+"List your tax heads (e.g. VAT, Excise; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later.","Ve standart oranları; vergi başlarını (onlar benzersiz adları olması gerekir, örneğin KDV, Özel Tüketim) listeleyin. Bu düzenlemek ve daha sonra ekleyebileceğiniz standart bir şablon oluşturmak olacaktır."
+Loading...,Yükleniyor...
+Loans (Liabilities),Krediler (Yükümlülükler)
+Loans and Advances (Assets),Krediler ve avanslar (Varlıklar)
+Local,Yerel
+Login,Giriş
+Login with your new User ID,Yeni Kullanıcı ID ile giriş
+Logo,Logo
+Logo and Letter Heads,Logo ve Letter Başkanları
+Lost,Kayıp
+Lost Reason,Kayıp Nedeni
+Low,Düşük
+Lower Income,Alt Gelir
+MTN Details,MTN Detaylar
+Main,Ana
+Main Reports,Ana Raporlar
+Maintain Same Rate Throughout Sales Cycle,Satış döngüsü boyunca aynı puanla koruyun
+Maintain same rate throughout purchase cycle,Satın alma döngüsü boyunca aynı oranı korumak
+Maintenance,Bakım
+Maintenance Date,Bakım tarihi
+Maintenance Details,Bakım Ayrıntıları
+Maintenance Schedule,Bakım Programı
+Maintenance Schedule Detail,Bakım Programı Detay
+Maintenance Schedule Item,Bakım Programı Ürün
+Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule',Bakım Programı tüm öğeler için oluşturulur. 'Oluştur Takviminde tıklayınız
+Maintenance Schedule {0} exists against {0},Bakım Programı {0} karşı var {0}
+Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,Bakım Programı {0} bu Satış Siparişi iptal etmeden önce iptal edilmelidir
+Maintenance Schedules,Bakım Çizelgeleri
+Maintenance Status,Bakım Durumu
+Maintenance Time,Bakım Zamanı
+Maintenance Type,Bakım Türü
+Maintenance Visit,Bakım Ziyaret
+Maintenance Visit Purpose,Bakım ziyaret Amaç
+Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Bakım ziyaret {0} bu Satış Siparişi iptal etmeden önce iptal edilmelidir
+Maintenance start date can not be before delivery date for Serial No {0},Bakım başlangıç ​​tarihi Seri No için teslim tarihinden önce olamaz {0}
+Major/Optional Subjects,Binbaşı / Opsiyonel Konular
+Make ,
+Make Accounting Entry For Every Stock Movement,Her Stok Hareketi İçin Muhasebe kaydı yapmak
+Make Bank Voucher,Banka Çeki olun
+Make Credit Note,Kredi Not olun
+Make Debit Note,Bankamatik Not olun
+Make Delivery,Teslim olun
+Make Difference Entry,Fark Girişi yapın
+Make Excise Invoice,Tüketim fatura yapmak
+Make Installation Note,Kurulum Not olun
+Make Invoice,Fatura olun
+Make Maint. Schedule,Bakým olun. Program
+Make Maint. Visit,Bakým olun. Ziyaret
+Make Maintenance Visit,Bakım Ziyaret olun
+Make Packing Slip,Ambalaj Slip olun
+Make Payment,Ödeme Yap
+Make Payment Entry,Ödeme Girişi yapın
+Make Purchase Invoice,Satınalma fatura yapmak
+Make Purchase Order,Yapmak Sipariş
+Make Purchase Receipt,Alım yapmak Makbuz
+Make Salary Slip,Maaş Kayma olun
+Make Salary Structure,Maaş Yapısı olun
+Make Sales Invoice,Satış Faturası olun
+Make Sales Order,Make Satış Sipariş
+Make Supplier Quotation,Tedarikçi Teklif Yap
+Make Time Log Batch,Saat Günlük Toplu olun
+Male,Erkek
+Manage Customer Group Tree.,Müşteri Grup Ağacını Yönet.
+Manage Sales Partners.,Satış Ortakları yönetmek.
+Manage Sales Person Tree.,Satış Elemanı Ağacını Yönet.
+Manage Territory Tree.,Eyalet Ağacını Yönet.
+Manage cost of operations,Operasyonlarının maliyetini yönetmek
+Management,Yönetim
+Manager,Yönetici
+"Mandatory if Stock Item is ""Yes"". Also the default warehouse where reserved quantity is set from Sales Order.","Zorunlu eğer Stok Ürün ""Evet"". Ayrıca saklıdır miktar Satış Siparişi ayarlanır varsayılan depo."
+Manufacture against Sales Order,Satış Siparişi karşı Manufacture
+Manufacture/Repack,Imalatı / Repack
+Manufactured Qty,Üretilmiş Adet
+Manufactured quantity will be updated in this warehouse,Üretilmiş miktar bu depoda güncellenecektir
+Manufactured quantity {0} cannot be greater than planned quanitity {1} in Production Order {2},Üretilmiş miktar {0} planlanan quanitity daha büyük olamaz {1} Üretim Sipariş {2}
+Manufacturer,Üretici
+Manufacturer Part Number,Üretici Parça Numarası
+Manufacturing,İmalat
+Manufacturing Quantity,Üretim Miktarı
+Manufacturing Quantity is mandatory,Üretim Miktarı zorunludur
+Margin,Kenar
+Marital Status,Medeni durum
+Market Segment,Pazar Segment
+Marketing,Pazarlama
+Marketing Expenses,Pazarlama Giderleri
+Married,Evli
+Mass Mailing,Toplu Posta
+Master Name,Usta İsmi
+Master Name is mandatory if account type is Warehouse,Hesap türü Depo ise usta ismi zorunludur
+Master Type,Master Tip
+Masters,Masters
+Match non-linked Invoices and Payments.,Olmayan bağlantılı Faturalar ve Ödemeler Maç.
+Material Issue,Malzeme Sayı
+Material Receipt,Malzeme Alındı
+Material Request,Malzeme Talebi
+Material Request Detail No,Malzeme Talebi Detay yok
+Material Request For Warehouse,Depo için Malzeme Talebi
+Material Request Item,Malzeme Talebi Ürün
+Material Request Items,Malzeme Talebi Öğeler
+Material Request No,Malzeme Talebi Yok
+Material Request Type,Malzeme İstek Türü
+Material Request of maximum {0} can be made for Item {1} against Sales Order {2},Maksimum Malzeme Talebi {0} öğesi için {1} karşı yapılabilir Satış Sipariş {2}
+Material Request used to make this Stock Entry,Malzeme Talebi Bu stok girişi yapmak için kullanılır
+Material Request {0} is cancelled or stopped,Malzeme Talebi {0} iptal veya durdurulur
+Material Requests for which Supplier Quotations are not created,Tedarikçi Özlü Sözler oluşturulan olmadığı için malzeme isteği
+Material Requests {0} created,Malzeme İstekler {0} oluşturuldu
+Material Requirement,Malzeme İhtiyaç
+Material Transfer,Materyal Transfer
+Materials,Materyaller
+Materials Required (Exploded),Gerekli Malzemeler (patlamış)
+Max 5 characters,Max 5 karakter
+Max Days Leave Allowed,Max Gün bırak İzin
+Max Discount (%),Max İndirim (%)
+Max Qty,Max Adet
+Max discount allowed for item: {0} is {1}%,Max indirim kalemi için izin: {0} {1}% ve
+Maximum Amount,Maksimum Tutar
+Maximum allowed credit is {0} days after posting date,Maksimum izin verilen kredi tarihini yazdıktan sonra {0} gün
+Maximum {0} rows allowed,Maksimum {0} satırlar izin
+Maxiumm discount for Item {0} is {1}%,Ürün için Maxiumm indirimli {0} {1}% olan
+Medical,Tıbbi
+Medium,Orta
+"Merging is only possible if following properties are same in both records. Group or Ledger, Root Type, Company","Aşağıdaki özelliklerin her ikisi, kayıtlar aynı ise birleştirme mümkündür. Grup veya Ledger, Kök Tipi, Şirket"
+Message,Mesaj
+Message Parameter,İleti Parametre
+Message Sent,Gönderilen Mesaj
+Message updated,Mesaj güncellendi
+Messages,Mesajlar
+Messages greater than 160 characters will be split into multiple messages,160 karakterden daha büyük mesajlar birden fazla mesaj bölünecektir
+Middle Income,Orta Gelir
+Milestone,Aşama
+Milestone Date,Milestone Tarih
+Milestones,Kilometre Taşları
+Milestones will be added as Events in the Calendar,Kilometre Taşları Takvim Olaylar olarak eklenecektir
+Min Order Qty,Min Sipariş Adedi
+Min Qty,Minimum Adet
+Min Qty can not be greater than Max Qty,Minimum Adet Max Miktar daha büyük olamaz
+Minimum Amount,Minimum Tutar
+Minimum Order Qty,Minimum Sipariş Adedi
+Minute,Dakika
+Misc Details,Çeşitli Detaylar
+Miscellaneous Expenses,Çeşitli Giderler
+Miscelleneous,Miscelleneous
+Mobile No,Mobil yok
+Mobile No.,Cep No
+Mode of Payment,Ödeme Şekli
+Modern,Çağdaş
+Monday,Pazartesi
+Month,Ay
+Monthly,Aylık
+Monthly Attendance Sheet,Aylık Hazirun Cetveli
+Monthly Earning & Deduction,Aylık Kazanç & Kesintisi
+Monthly Salary Register,Aylık Maaş Ol
+Monthly salary statement.,Aylık maaş beyanı.
+More Details,Daha Fazla Bilgi
+More Info,Daha Fazla Bilgi
+Motion Picture & Video,Motion Picture & Video
+Moving Average,Hareketli Ortalama
+Moving Average Rate,Hareketli Ortalama Kur
+Mr,Bay
+Ms,Bayan
+Multiple Item prices.,Çoklu Ürün fiyatları.
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}","Çoklu Fiyat Kural aynı kriterler ile var, çözmek lütfen \ öncelik atayarak çatışma. Fiyat Kuralları: {0}"
+Music,Müzik
+Must be Whole Number,Tüm Numarası olmalı
+Name,İsim
+Name and Description,Ad ve Açıklama
+Name and Employee ID,Ad ve Çalışan kimliği
+"Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master","Yeni Hesap adı. Not: Müşteriler ve Tedarikçiler için hesap oluşturmak etmeyin, onlar Müşteri ve Tedarikçi ustadan otomatik olarak oluşturulur"
+Name of person or organization that this address belongs to.,Bu adres ait kişi veya kuruluşun adı.
+Name of the Budget Distribution,Bütçe Dağıtım Adı
+Naming Series,Seri adlandırma
+Negative Quantity is not allowed,Negatif Miktar izin verilmez
+Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},Negatif Stok Hata ({6}) Ürün için {0} Atölyesi {1} tarihinde {2} {3} de {4} {5}
+Negative Valuation Rate is not allowed,Negatif Değerleme Oranı izin verilmez
+Negative balance in Batch {0} for Item {1} at Warehouse {2} on {3} {4},Toplu Negatif denge {0} öğesi için {1} Warehouse {2} tarihinde {3} {4}
+Net Pay,Net Ödeme
+Net Pay (in words) will be visible once you save the Salary Slip.,Eğer Maaş Kayma kez kaydedin (kelimelerle) Net Ücret görünür olacaktır.
+Net Profit / Loss,Net Kar / Zararı
+Net Total,Net Toplam
+Net Total (Company Currency),Net Toplam (Şirket para birimi)
+Net Weight,Net ağırlığı
+Net Weight UOM,Net Ağırlık UOM
+Net Weight of each Item,Her Ürün Net Ağırlığı
+Net pay cannot be negative,Net ödeme negatif olamaz
+Never,Asla
+New ,
+New Account,Yeni Hesap
+New Account Name,Yeni Hesap Adı
+New BOM,Yeni BOM
+New Communications,Yeni İletişim
+New Company,Yeni Şirket
+New Cost Center,Yeni Maliyet Merkezi
+New Cost Center Name,Yeni Maliyet Merkezi Adı
+New Delivery Notes,Yeni Teslim Notlar
+New Enquiries,Yeni Sorular
+New Leads,Yeni İlanlar
+New Leave Application,Yeni bırak Uygulama
+New Leaves Allocated,Tahsis Yeni Yapraklar
+New Leaves Allocated (In Days),(Gün olarak) Ayrılan Yeni Yapraklar
+New Material Requests,Yeni Malzeme İstekler
+New Projects,Yeni Projeler
+New Purchase Orders,Yeni Satınalma Siparişleri
+New Purchase Receipts,Yeni Alım Makbuzlar
+New Quotations,Yeni Sözler
+New Sales Orders,Yeni Satış Siparişleri
+New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,Yeni Seri No Warehouse olamaz. Depo Stok Giriş veya Satın Alma Makbuzu tarafından ayarlanması gerekir
+New Stock Entries,Yeni Stok Yazılar
+New Stock UOM,Yeni Stok UOM
+New Stock UOM is required,Yeni Stok UoM gereklidir
+New Stock UOM must be different from current stock UOM,Yeni Stok UOM mevcut stok UOM farklı olmalıdır
+New Supplier Quotations,Yeni Tedarikçi Özlü Sözler
+New Support Tickets,Yeni Destek Biletleri
+New UOM must NOT be of type Whole Number,Yeni UOM tipi tam sayı olması OLMAMALI
+New Workplace,Yeni İşyeri
+Newsletter,Bülten
+Newsletter Content,Bülten İçerik
+Newsletter Status,Bülten Durum
+Newsletter has already been sent,Haber zaten gönderildi
+"Newsletters to contacts, leads.","Kişilere haber bültenleri, yol açar."
+Newspaper Publishers,Gazete Yayıncılar
+Next,Sonraki
+Next Contact By,Sonraki İletişim tarafından
+Next Contact Date,Sonraki İletişim Tarihi
+Next Date,Sonraki Tarihi
+Next email will be sent on:,Sonraki e-posta gönderilebilir olacak:
+No,Hayır
+No Customer Accounts found.,Hiçbir Müşteri Hesapları bulunamadı.
+No Customer or Supplier Accounts found,Hiçbir müşteri veya Faaliyet Hesapları bulundu
+No Expense Approvers. Please assign 'Expense Approver' Role to atleast one user,Hiçbir Gider Onaylayanlar. En az bir kullanıcı için 'Gider Approver Rolü atayın
+No Item with Barcode {0},Barkod ile hayır Ürün {0}
+No Item with Serial No {0},Seri No No Kalem {0}
+No Items to pack,Paketi yok Öğeler
+No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user,Hayır bırak Onaylayanlar. En az bir kullanıcıya 'bırak editör'ün Rolü atayın
+No Permission,İzin Yok
+No Production Orders created,Oluşturulan Hayır Üretim Siparişleri
+No Supplier Accounts found. Supplier Accounts are identified based on 'Master Type' value in account record.,Hiçbir Tedarikçi Hesapları bulunamadı. Tedarikçi Hesapları hesap kayıtlarında 'Usta Type' değerine göre tespit edilir.
+No accounting entries for the following warehouses,Aşağıdaki depolar için hiçbir muhasebe kayıtları
+No addresses created,Yarattığı hiçbir adresleri
+No contacts created,Yaratılan kişi yok
+No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template.,Hayır varsayılan Adres Şablon bulundu. Ayarlar> Baskı ve Markalaşma bir yenisini> Adres şablonu oluşturun.
+No default BOM exists for Item {0},Hayır Varsayılan BOM var Ürün için {0}
+No description given,Verilen hiçbir açıklaması
+No employee found,Hiçbir işçi
+No employee found!,Hiçbir çalışan bulunamadı!
+No of Requested SMS,İstenen SMS yok
+No of Sent SMS,Gönderilen SMS yok
+No of Visits,Ziyaretlerinin yok
+No permission,Izni yok
+No record found,Kayıt bulunamadı
+No records found in the Invoice table,Fatura tablosunda kayıt bulunamadı
+No records found in the Payment table,Ödeme tablosunda kayıt bulunamadı
+No salary slip found for month: ,
+Non Profit,Kar
+Nos,Nos
+Not Active,Aktif değil
+Not Applicable,Uygulanamaz
+Not Available,Mevcut değil
+Not Billed,Faturalı Değil
+Not Delivered,Teslim Edilmedi
+Not Set,Not Set
+Not allowed to update stock transactions older than {0},Daha hisse senedi işlemleri büyük güncellemek için izin {0}
+Not authorized to edit frozen Account {0},Dondurulmuş Hesabı düzenlemek için yetkiniz yok {0}
+Not authroized since {0} exceeds limits,{0} sınırlarını aştığı Authroized değil
+Not permitted,İzin verilmez
+Note,Not
+Note User,Not Kullanıcı
+"Note: Backups and files are not deleted from Dropbox, you will have to delete them manually.","Not: Yedekleme ve dosyaları Dropbox silinmez, bunları elle silmeniz gerekir."
+"Note: Backups and files are not deleted from Google Drive, you will have to delete them manually.","Not: Yedekleme ve dosyalar Google Drive silinmez, bunları elle silmeniz gerekir."
+Note: Due Date exceeds the allowed credit days by {0} day(s),Not: Due Date {0} gün (ler) tarafından izin verilen kredi gün aşıyor
+Note: Email will not be sent to disabled users,Not: E-posta engelli kullanıcılara gönderilecektir olmayacak
+Note: Item {0} entered multiple times,Not: Ürün {0} birden çok kez girilmiş
+Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified,Not: Ödeme Entry 'Kasa veya Banka Hesabı' belirtilmedi bu yana oluşturulmuş olmayacak
+Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0,Not: Sistem Ürün için teslimat ve aşırı-rezervasyon kontrol olmaz {0} nicelik ya da miktar olarak 0'dır
+Note: There is not enough leave balance for Leave Type {0},Not: bırak türü için yeterli izni denge yok {0}
+Note: This Cost Center is a Group. Cannot make accounting entries against groups.,Not: Bu Maliyet Merkezi bir Grup. Gruplara karşı muhasebe kayıtlarını yapamazsınız.
+Note: {0},Not: {0}
+Notes,Notlar
+Notes:,Notlar:
+Nothing to request,Istemek için hiçbir şey
+Notice (days),Bildirimi (gün)
+Notification Control,Bildirim Kontrolü
+Notification Email Address,Bildirim E-posta Adresi
+Notify by Email on creation of automatic Material Request,Otomatik Malzeme Talebi oluşturulması üzerinde e-posta ile bildir
+Number Format,Sayı Biçimi
+Offer Date,Teklif Tarihi
+Office,Ofis
+Office Equipments,Büro Gereçleri
+Office Maintenance Expenses,Büro Bakım ve Onarım Giderleri
+Office Rent,Ofis Kiraları
+Old Parent,Eski Ebeveyn
+On Net Total,Net toplam
+On Previous Row Amount,Sıra Önceki Tutar
+On Previous Row Total,Önceki Satır Toplamı üzerinde
+Online Auctions,Online Müzayede
+Only Leave Applications with status 'Approved' can be submitted,Sadece teslim edilebilir 'Onaylı' statüsü ile Uygulamalar bırakın
+"Only Serial Nos with status ""Available"" can be delivered.","Durumu ile yalnızca Seri Nos ""Available"" teslim edilebilir."
+Only leaf nodes are allowed in transaction,Sadece yaprak düğümleri işlem izin verilir
+Only the selected Leave Approver can submit this Leave Application,Sadece seçilen bırak Approver bu bırak Uygulama sunabilirsiniz
+Open,Aç
+Open Production Orders,Açık Üretim Siparişleri
+Open Tickets,Açık Biletleri
+Opening (Cr),Açılış (Cr)
+Opening (Dr),Açılış (Dr)
+Opening Date,Açılış Tarihi
+Opening Entry,Giriş deliği
+Opening Qty,Açılış Adet
+Opening Time,Açılış Zaman
+Opening Value,Açılış Değer
+Opening for a Job.,Bir iş için açılması.
+Operating Cost,İşletme Maliyeti
+Operation Description,Operasyon Açıklaması
+Operation No,İşletim Hayır
+Operation Time (mins),Çalışma Süresi (dakika)
+Operation {0} is repeated in Operations Table,Çalışma {0} Operations Tablo tekrarlanır
+Operation {0} not present in Operations Table,Operasyon Tablo Operasyon {0} mevcut değil
+Operations,Operasyonlar
+Opportunity,Fırsat
+Opportunity Date,Fırsat tarihi
+Opportunity From,Fırsat itibaren
+Opportunity Item,Fırsat Ürün
+Opportunity Items,Fırsat Ürünleri
+Opportunity Lost,Kayıp Fırsat
+Opportunity Type,Fırsat Türü
+Optional. This setting will be used to filter in various transactions.,"İsteğe bağlı. Bu ayar, çeşitli işlemler filtrelemek için kullanılacaktır."
+Order Type,Sipariş Türü
+Order Type must be one of {0},Sipariş Tipi biri olmalıdır {0}
+Ordered,Sipariş Edildi
+Ordered Items To Be Billed,Faturalı To Be ürünler sipariş
+Ordered Items To Be Delivered,Sunulacak ürünler sipariş
+Ordered Qty,Adet sipariş
+"Ordered Qty: Quantity ordered for purchase, but not received.","Adet emretti: Miktar satın almak için sipariş, ama almadım."
+Ordered Quantity,Sıralı Miktar
+Orders released for production.,Üretim için serbest Siparişler.
+Organization Name,Kuruluş Adı
+Organization Profile,Şirket Profili
+Organization branch master.,Organizasyon şube usta.
+Organization unit (department) master.,Organizasyon birimi (bölge) usta.
+Other,Diğer
+Other Details,Diğer Detaylar
+Others,Diğer
+Out Qty,Miktar Out
+Out Value,Değer Out
+Out of AMC,AMC Out
+Out of Warranty,Garanti Out
+Outgoing,Giden
+Outstanding Amount,Üstün Tutar
+Outstanding for {0} cannot be less than zero ({1}),Üstün {0} en az sıfır olamaz için ({1})
+Overhead,Havai
+Overheads,Genel giderler
+Overlapping conditions found between:,Arasında bulunan örtüşen durumlar:
+Overview,Genel Bakış
+Owned,Hisseli
+Owner,Sahibi
+P L A - Cess Portion,PLA - Cess Porsiyon
+PL or BS,PL veya BS
+PO Date,PO Tarih
+PO No,PO yok
+POP3 Mail Server,POP3 Mail Server
+POP3 Mail Settings,POP3 Posta Ayarları
+POP3 mail server (e.g. pop.gmail.com),POP3 posta sunucusu (örneğin pop.gmail.com)
+POP3 server e.g. (pop.gmail.com),"POP3 sunucusu, örneğin (pop.gmail.com)"
+POS Setting,POS Ayarı
+POS Setting required to make POS Entry,POS giriş yapmak için gerekli POS Ayarı
+POS Setting {0} already created for user: {1} and company {2},POS Ayar {0} zaten kullanıcı için oluşturulan: {1} ve şirket {2}
+POS View,POS görüntüle
+PR Detail,PR Detay
+Package Item Details,Paket Ürün Detayları
+Package Items,Paket Öğeler
+Package Weight Details,Paket Ağırlığı Detayları
+Packed Item,Paketli Ürün
+Packed quantity must equal quantity for Item {0} in row {1},{0} üst üste {1} Paketli miktar Ürün için bir miktar eşit olmalıdır
+Packing Details,Paketleme Detayları
+Packing List,Paket listesi
+Packing Slip,Ambalaj Kayma
+Packing Slip Item,Ambalaj Kayma Ürün
+Packing Slip Items,Kayma Ürünleri Paketleme
+Packing Slip(s) cancelled,Ambalaj Kayma (ler) iptal
+Page Break,Sayfa Sonu
+Page Name,Sayfa Adı
+Paid Amount,Ödenen Tutar
+Paid amount + Write Off Amount can not be greater than Grand Total,Ödenen miktar + Tutar yaz Off Büyük Toplam daha büyük olamaz
+Pair,Çift
+Parameter,Parametre
+Parent Account,Ebeveyn Hesap
+Parent Cost Center,Veli Maliyet Merkezi
+Parent Customer Group,Ana Müşteri Grubu
+Parent Detail docname,Veli Detay docname
+Parent Item,Üst Öğe
+Parent Item Group,Veli Ürün Grubu
+Parent Item {0} must be not Stock Item and must be a Sales Item,Üst Öğe {0} Hazır değil Öğe olmalı ve Satış Ürün olmalı
+Parent Party Type,Veli Parti Türü
+Parent Sales Person,Ebeveyn Satış Elemanı
+Parent Territory,Veli Territory
+Parent Website Page,Veli Web Sayfası
+Parent Website Route,Ebeveyn Sitesi Rota
+Parenttype,Parenttype
+Part-time,Part time
+Partially Completed,Kısmen Tamamlandı
+Partly Billed,Kısmen Faturalı
+Partly Delivered,Kısmen Teslim
+Partner Target Detail,Ortak Hedef Detay
+Partner Type,Ortağı Türü
+Partner's Website,Ortağın Sitesi
+Party,Parti
+Party Account,Parti Hesap
+Party Type,Parti Türü
+Party Type Name,Parti Tür Ad
+Passive,Pasif
+Passport Number,Pasaport Numarası
+Password,Parola
+Pay To / Recd From,Gönderen / RECD için ödeme
+Payable,Ödenecek
+Payables,Ödenecekler
+Payables Group,Borçlar Grubu
+Payment Days,Ödeme Gün
+Payment Due Date,Son Ödeme Tarihi
+Payment Period Based On Invoice Date,Fatura Tarihi Dayalı Ödeme Süresi
+Payment Reconciliation,Ödeme Uzlaşma
+Payment Reconciliation Invoice,Ödeme Uzlaşma Fatura
+Payment Reconciliation Invoices,Ödeme Uzlaşma Faturalar
+Payment Reconciliation Payment,Ödeme Uzlaşma Ödeme
+Payment Reconciliation Payments,Ödeme Uzlaşma Ödemeler
+Payment Type,Ödeme Şekli
+Payment cannot be made for empty cart,Ödeme boş sepeti için yapılmış olamaz
+Payment of salary for the month {0} and year {1},Ay için maaş ödeme {0} ve yıl {1}
+Payments,Ödemeler
+Payments Made,Yapılan Ödemeler
+Payments Received,Alınan Ödemeler
+Payments made during the digest period,Sindirmek dönemde yapılan ödemeler
+Payments received during the digest period,Sindirmek döneminde alınan ödemeler
+Payroll Settings,Bordro Ayarları
+Pending,Bekliyor
+Pending Amount,Bekleyen Tutar
+Pending Items {0} updated,Bekleyen Öğeler {0} güncellendi
+Pending Review,Bekleyen İnceleme
+Pending SO Items For Purchase Request,Satınalma İste SO Öğeler Bekliyor
+Pension Funds,Emeklilik Fonları
+Percent Complete,Yüzde Tamamlandı
+Percentage Allocation,Yüzde Tahsisi
+Percentage Allocation should be equal to 100%,Yüzde Tahsis% 100'e eşit olmalıdır
+Percentage variation in quantity to be allowed while receiving or delivering this item.,Bu öğeyi aldıktan veya sunarken miktarda Yüzde varyasyon izin verilmesi için.
+Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.,Eğer miktar karşı daha fazla almak veya teslim etmek için izin Yüzde emretti. Örneğin: 100 adet sipariş varsa. ve Ödeneği sonra 110 adet almak için 10% izin edilir.
+Performance appraisal.,Performans değerlendirme.
+Period,Dönem
+Period Closing Voucher,Dönem Kapanış Çeki
+Periodicity,Periyodik olarak tekrarlanma
+Permanent Address,Daimi Adres
+Permanent Address Is,Kalıcı Adres mı
+Permission,Izin
+Personal,Kişisel
+Personal Details,Kişisel Bilgileri
+Personal Email,Kişisel E-posta
+Pharmaceutical,İlaç
+Pharmaceuticals,İlaç sekt
+Phone,Telefon
+Phone No,Telefon yok
+Piecework,Parça başı iş
+Pincode,Pinkodu
+Place of Issue,Verildiği yer
+Plan for maintenance visits.,Bakım ziyaretleri planlıyoruz.
+Planned Qty,Planlanan Adet
+"Planned Qty: Quantity, for which, Production Order has been raised, but is pending to be manufactured.","Planlanan Miktar: Miktar, bunun için, Üretim Sipariş gündeme gelmiştir, ancak imal edilecek beklemede."
+Planned Quantity,Planlanan Miktar
+Planning,Planlama
+Plant,Tesis
+Plant and Machinery,Bitki ve Makina
+Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,Tüm Hesap Başkanlarına sonek olarak eklenecektir gibi düzgün Kısaltma veya Kısa Adı girin lütfen.
+Please Update SMS Settings,SMS Ayarlarını Güncelleme Lütfen
+Please add expense voucher details,Gider pusulası ayrıntılarını ekleyin
+Please add to Modes of Payment from Setup.,Kur dan Ödeme Şekilleri ekleyiniz.
+Please check 'Is Advance' against Account {0} if this is an advance entry.,Hesap karşı 'Advance mi' kontrol edin {0} bu bir avans girdi ise.
+Please click on 'Generate Schedule','Oluştur Takviminde tıklayınız
+Please click on 'Generate Schedule' to fetch Serial No added for Item {0},Seri No Ürün için eklenen getirmek için 'Oluştur Takviminde tıklayınız {0}
+Please click on 'Generate Schedule' to get schedule,Programı almak için 'Oluştur Takviminde tıklayınız
+Please create Customer from Lead {0},Lead adlı Müşteri yaratmak Lütfen {0}
+Please create Salary Structure for employee {0},Çalışan Maaş Yapı oluşturmak Lütfen {0}
+Please create new account from Chart of Accounts.,Hesap Planı yeni bir hesap oluşturun.
+Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.,Müşteriler ve Tedarikçiler için Hesabı (Defterler) oluşturmak etmeyin lütfen. Onlar Müşteri / Tedarikçi ustalardan doğrudan oluşturulur.
+Please enter 'Expected Delivery Date','Beklenen Teslim Tarihi' girin
+Please enter 'Is Subcontracted' as Yes or No,Girin Evet veya Hayır olarak 'Taşeron mı'
+Please enter 'Repeat on Day of Month' field value,Alan değerinin 'ayın günü Repeat' girin
+Please enter Account Receivable/Payable group in company master,Şirket master Hesap Alacak / Borç grup girin
+Please enter Approving Role or Approving User,Rolü Onaylanmasının veya Kullanıcı Onaylanmasının giriniz
+Please enter BOM for Item {0} at row {1},Ürün için BOM giriniz {0} satırdaki {1}
+Please enter Company,Şirket girin
+Please enter Cost Center,Maliyet Merkezi giriniz
+Please enter Delivery Note No or Sales Invoice No to proceed,Devam etmek İrsaliye No veya Satış Fatura No girin
+Please enter Employee Id of this sales parson,Bu satış Parson Çalışan Kimliği girin
+Please enter Expense Account,Gider Hesabı girin
+Please enter Item Code to get batch no,Hiçbir toplu almak için Ürün Kodu girin
+Please enter Item Code.,Ürün Kodu girin.
+Please enter Item first,İlk Öğe girin
+Please enter Maintaince Details first,Maintaince Ayrıntıları İlk giriniz
+Please enter Master Name once the account is created.,Hesap oluşturulduktan sonra Usta Adı girin.
+Please enter Planned Qty for Item {0} at row {1},Ürün için Planlanan Adet giriniz {0} satırdaki {1}
+Please enter Production Item first,İlk Üretim Ürün giriniz
+Please enter Purchase Receipt No to proceed,Hayır devam Satınalma Faturası giriniz
+Please enter Reference date,Başvuru tarihi girin
+Please enter Warehouse for which Material Request will be raised,Malzeme Talebi yükseltilmiş olacaktır hangi Depo giriniz
+Please enter Write Off Account,Hesap Kapalı yaz giriniz
+Please enter atleast 1 invoice in the table,Tabloda en az 1 fatura girin
+Please enter company first,İlk şirketi girin
+Please enter company name first,İlk şirket adını giriniz
+Please enter default Unit of Measure,Tedbir varsayılan Birimi giriniz
+Please enter default currency in Company Master,Şirket Master varsayılan para birimini girin
+Please enter email address,E-posta adresinizi girin
+Please enter item details,Öğesi ayrıntılarını girin
+Please enter message before sending,Göndermeden önce mesaj giriniz
+Please enter parent account group for warehouse account,Depo hesabı için ana hesap grubu girin
+Please enter parent cost center,Ebeveyn maliyet merkezi giriniz
+Please enter quantity for Item {0},Ürün için bir miktar giriniz {0}
+Please enter relieving date.,Tarihi giderici girin.
+Please enter sales order in the above table,Yukarıdaki tabloda satış siparişi giriniz
+Please enter valid Company Email,Geçerli Şirket E-posta giriniz
+Please enter valid Email Id,Geçerli bir e-posta id girin
+Please enter valid Personal Email,Geçerli Kişisel E-posta giriniz
+Please enter valid mobile nos,Geçerli bir cep telefonu nos giriniz
+Please find attached Sales Invoice #{0},Ektedir Satış Faturası # {0}
+Please install dropbox python module,Dropbox python modülü kurun
+Please mention no of visits required,Belirtin gerekli ziyaret hayır
+Please pull items from Delivery Note,İrsaliye öğeleri çekin lütfen
+Please save the Newsletter before sending,Göndermeden önce Haber saklayın
+Please save the document before generating maintenance schedule,Bakım programı oluşturmadan önce belgeyi saklayın
+Please see attachment,Eki bakın
+Please select Bank Account,Banka Hesabı seçiniz
+Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Ayrıca bir önceki mali yılın bilançosu bu mali yıl için yaprakları eklemek istiyorsanız ileriye taşımak seçiniz
+Please select Category first,İlk Kategori seçiniz
+Please select Charge Type first,Şarj Tipi İlk seçiniz
+Please select Fiscal Year,Mali Yıl seçiniz
+Please select Group or Ledger value,Grup veya Ledger değer seçiniz
+Please select Incharge Person's name,Incharge Kişinin adı seçiniz
+Please select Invoice Type and Invoice Number in atleast one row,En az bir satırda Fatura Tipi ve Fatura Numarası seçiniz
+"Please select Item where ""Is Stock Item"" is ""No"" and ""Is Sales Item"" is ""Yes"" and there is no other Sales BOM","""Stok Öğe mi"" ""Hayır"" ve ""Satış Item mi"" ""Evet"" ve başka hiçbir Satış BOM var Öğe seçiniz"
+Please select Price List,Fiyat Listesi Lütfen seçiniz
+Please select Start Date and End Date for Item {0},Başlangıç ​​Tarihi ve Öğe için Bitiş Tarihi seçiniz {0}
+Please select Time Logs.,Zaman Kayıtlar seçiniz.
+Please select a csv file,Bir csv dosya seçiniz
+Please select a valid csv file with data,Veri ile geçerli bir csv dosya seçiniz
+Please select a value for {0} quotation_to {1},Için bir değer seçiniz {0} quotation_to {1}
+"Please select an ""Image"" first","Ilk önce bir ""Image"" seçiniz"
+Please select charge type first,İlk şarj türünü seçiniz
+Please select company first,İlk şirketi seçiniz
+Please select company first.,İlk şirketi seçiniz.
+Please select item code,Ürün kodu seçiniz
+Please select month and year,Ay ve yılı seçiniz
+Please select prefix first,İlk önek seçiniz
+Please select the document type first,İlk belge türünü seçiniz
+Please select weekly off day,Haftalık kapalı bir gün seçiniz
+Please select {0},Lütfen seçin {0}
+Please select {0} first,İlk {0} seçiniz
+Please select {0} first.,İlk {0} seçiniz.
+Please set Dropbox access keys in your site config,Siteniz config Dropbox erişim tuşlarını ayarlamak Lütfen
+Please set Google Drive access keys in {0},Google Drive erişim tuşlarını ayarlamak Lütfen {0}
+Please set default Cash or Bank account in Mode of Payment {0},Ödeme Şekilleri varsayılan Kasa veya Banka hesabı ayarlamak Lütfen {0}
+Please set default value {0} in Company {0},Varsayılan değeri ayarlamak Lütfen {0} Şirketi {0}
+Please set {0},Set Lütfen {0}
+Please setup Employee Naming System in Human Resource > HR Settings,İnsan Kaynakları Lütfen kurulum Çalışan İsimlendirme Sistemi> HR Ayarları
+Please setup numbering series for Attendance via Setup > Numbering Series,Kurulum> Numaralandırma Serisi yoluyla Katılım için lütfen kurulum numaralandırma serisi
+Please setup your chart of accounts before you start Accounting Entries,Eğer Muhasebe başlıklar başlamadan önce Kur hesapları sizin grafik Lütfen
+Please specify,Lütfen belirtiniz
+Please specify Company,Şirket belirtiniz
+Please specify Company to proceed,Devam etmek için Firma belirtin
+Please specify Default Currency in Company Master and Global Defaults,Şirket Lisans ve Global Varsayılanlarını Standart Para belirtiniz
+Please specify a,Lütfen belirtiniz
+Please specify a valid 'From Case No.','Dava No Kimden' geçerli bir belirtin
+Please specify a valid Row ID for {0} in row {1},Arka arkaya {0} için geçerli bir satır kimliğini belirtin {1}
+Please specify either Quantity or Valuation Rate or both,Miktar veya Değerleme Oranı ya da her ikisini de belirtiniz
+Please submit to update Leave Balance.,Bırak Denge güncellemek için gönderin.
+Plot,Konu
+Plot By,By arsa
+Point of Sale,Satış Noktası
+Point-of-Sale Setting,Point-of-Sale Ayarı
+Post Graduate,Lisansüstü
+Postal,Posta
+Postal Expenses,Posta Giderleri
+Posting Date,Üyelik Gönderme
+Posting Time,Zaman Gönderme
+Posting date and posting time is mandatory,Gönderme tarih ve gönderme zamanı zorunludur
+Posting timestamp must be after {0},Gönderme timestamp sonra olmalıdır {0}
+Potential opportunities for selling.,Satış için potansiyel fırsatlar.
+Preferred Billing Address,Tercih Fatura Adresi
+Preferred Shipping Address,Tercih Teslimat Adresi
+Prefix,Önek
+Present,Tanıt
+Prevdoc DocType,Prevdoc DocType
+Prevdoc Doctype,Prevdoc Doctype
+Preview,Önizleme
+Previous,Önceki
+Previous Work Experience,Önceki İş Deneyimi
+Price,Fiyat
+Price / Discount,Fiyat / İndirim
+Price List,Fiyat listesi
+Price List Currency,Fiyat Listesi Döviz
+Price List Currency not selected,Fiyat Listesi Döviz seçili değil
+Price List Exchange Rate,Fiyat Listesi Döviz Kuru
+Price List Name,Fiyat Listesi Adı
+Price List Rate,Fiyat Listesi Oranı
+Price List Rate (Company Currency),Fiyat Listesi Oranı (Şirket para birimi)
+Price List master.,Fiyat Listesi usta.
+Price List must be applicable for Buying or Selling,Fiyat Listesi Alış veya Satış için geçerli olmalı
+Price List not selected,Fiyat Listesi seçili değil
+Price List {0} is disabled,Fiyat Listesi {0} devre dışı
+Price or Discount,Fiyat veya İndirim
+Pricing Rule,Fiyatlandırma Kural
+Pricing Rule Help,Fiyatlandırma Kural Yardım
+"Pricing Rule is first selected based on 'Apply On' field, which can be Item, Item Group or Brand.","Fiyatlandırma Kural İlk Ürün, Ürün Grubu veya Marka olabilir, hangi alanda 'On Uygula' göre seçilir."
+"Pricing Rule is made to overwrite Price List / define discount percentage, based on some criteria.","Fiyatlandırma Kural, bazı kriterlere dayalı, Fiyat Listesi / indirim yüzdesini tanımlamak üzerine yazmak için yapılır."
+Pricing Rules are further filtered based on quantity.,Fiyatlandırma Kurallar daha miktarına göre süzülür.
+Print Format Style,Baskı Biçim Stili
+Print Heading,Baskı Başlık
+Print Without Amount,Tutarı olmadan yazdır
+Print and Stationary,Baskı ve Kırtasiye
+Printing and Branding,Baskı ve Markalaşma
+Priority,Öncelik
+Private Equity,Özel Sermaye
+Privilege Leave,Privilege bırak
+Probation,Deneme Süresi
+Process Payroll,Süreç Bordro
+Produced,Üretilmiş
+Produced Quantity,Üretilen Miktar
+Product Enquiry,Ürün Sorgulama
+Production,Üretim
+Production Order,Üretim Sipariş
+Production Order status is {0},Üretim Sipariş durumu {0}
+Production Order {0} must be cancelled before cancelling this Sales Order,Üretim Sipariş {0} bu Satış Siparişi iptal etmeden önce iptal edilmelidir
+Production Order {0} must be submitted,Üretim Sipariş {0} sunulmalıdır
+Production Orders,Üretim Siparişleri
+Production Orders in Progress,Devam Üretim Siparişleri
+Production Plan Item,Üretim Planı Ürün
+Production Plan Items,Üretim Planı Öğeler
+Production Plan Sales Order,Üretim Planı Satış Sipariş
+Production Plan Sales Orders,Üretim Planı Satış Siparişleri
+Production Planning Tool,Üretim Planlama Aracı
+Products,Ürünler
+"Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.","Ürünler varsayılan aramalarında ağırlık yaşa göre sıralanır. Daha ağırlık-yaş, yüksek ürün listesinde görünecektir."
+Professional Tax,Profesyonel Vergi
+Profit and Loss,Kar ve Zarar
+Profit and Loss Statement,Kar ve Zarar Tablosu
+Project,Proje
+Project Costing,Proje Maliyetlendirme
+Project Details,Proje Detayları
+Project Manager,Proje Müdürü
+Project Milestone,Proje Milestone
+Project Milestones,Proje Aşamaları
+Project Name,Proje Adı
+Project Start Date,Proje Başlangıç ​​Tarihi
+Project Type,Proje Tipi
+Project Value,Proje Bedeli
+Project activity / task.,Proje faaliyeti / görev.
+Project master.,Proje usta.
+Project will get saved and will be searchable with project name given,Proje kaydedilir alacak ve verilen bir proje adı ile aranabilir olacak
+Project wise Stock Tracking,Proje bilge Stok Takibi
+Project-wise data is not available for Quotation,Proje bilge veri Teklifimizin mevcut değildir
+Projected,Öngörülen
+Projected Qty,Adet Öngörülen
+Projects,Projeler
+Projects & System,Projeler ve Sistem
+Prompt for Email on Submission of,Başvuru üzerine E-posta için İstemi
+Proposal Writing,Teklifi Yazma
+Provide email id registered in company,E-posta id şirkette kayıtlı sağlayın
+Provisional Profit / Loss (Credit),Geçici Kar / Zarar (Kredi)
+Public,Genel
+Published on website at: {0},De internet sitesinde yayımlanan: {0}
+Publishing,Yayıncılık
+Pull sales orders (pending to deliver) based on the above criteria,Yukarıdaki kriterlere göre (sunmak için bekleyen) satış emirleri çekin
+Purchase,Satın Alım
+Purchase / Manufacture Details,Satınalma / İmalat Detayları
+Purchase Analytics,Satınalma Analytics
+Purchase Common,Ortak Satın Alma
+Purchase Details,Satınalma Detaylar
+Purchase Discounts,İndirimler Satınalma
+Purchase Invoice,Satınalma Fatura
+Purchase Invoice Advance,Fatura peşin alım
+Purchase Invoice Advances,Satınalma Fatura avanslar
+Purchase Invoice Item,Satınalma Fatura Ürün
+Purchase Invoice Trends,Fatura Eğilimler Satınalma
+Purchase Invoice {0} is already submitted,Satınalma Fatura {0} zaten teslim edilir
+Purchase Order,Satın alma emri
+Purchase Order Item,Sipariş Ürün
+Purchase Order Item No,Sipariş Ürün No
+Purchase Order Item Supplied,Sipariş Ürün Tedarik
+Purchase Order Items,Sipariş Öğeler
+Purchase Order Items Supplied,Verilen Sipariş Kalemleri
+Purchase Order Items To Be Billed,Faturalı To Be Sipariş Kalemleri
+Purchase Order Items To Be Received,Alınan To Be Sipariş Kalemleri
+Purchase Order Message,Sipariş Mesaj
+Purchase Order Required,Sipariş gerekli satın alma
+Purchase Order Trends,Sipariş Eğilimler Satınalma
+Purchase Order number required for Item {0},Sipariş numarası Ürün için gerekli {0}
+Purchase Order {0} is 'Stopped',{0} 'Durduruldu' olduğunu Satınalma Siparişi
+Purchase Order {0} is not submitted,Sipariş {0} teslim edilmez
+Purchase Orders given to Suppliers.,Tedarikçiler verilen Satınalma Siparişleri.
+Purchase Receipt,Satın Alındı
+Purchase Receipt Item,Satın Alındı ​​Ürün
+Purchase Receipt Item Supplied,Satın Alındı ​​Ürün Tedarik
+Purchase Receipt Item Supplieds,Satın Alındı ​​Ürün Supplieds
+Purchase Receipt Items,Satın Alındı ​​Öğeler
+Purchase Receipt Message,Satın Alındı ​​Mesaj
+Purchase Receipt No,Satın Alındı ​​yok
+Purchase Receipt Required,Gerekli Satın Alındı
+Purchase Receipt Trends,Satın Alındı ​​Trendler
+Purchase Receipt number required for Item {0},Ürün için gerekli Satın Alındı ​​numarası {0}
+Purchase Receipt {0} is not submitted,Satın Alındı ​​{0} teslim edilmez
+Purchase Register,Üye olun Satınalma
+Purchase Return,Satın dön
+Purchase Returned,RETURNED Satınalma
+Purchase Taxes and Charges,Alım Vergi ve Harçlar
+Purchase Taxes and Charges Master,Alım Vergi ve Harçlar Usta
+Purchse Order number required for Item {0},Purchse Sipariş Numarası Ürün için gerekli {0}
+Purpose,Amaç
+Purpose must be one of {0},Amaç biri olmalıdır {0}
+QA Inspection,QA Muayene
+Qty,Adet
+Qty Consumed Per Unit,Miktar Birim Başına Tüketilen
+Qty To Manufacture,Imalatı için Adet
+Qty as per Stock UOM,Adet Stok UOM başına
+Qty to Deliver,Sunun için Adet
+Qty to Order,Adet Sipariş
+Qty to Receive,Alma Adet
+Qty to Transfer,Transfer Adet
+Qualification,{0}Yeterlilik{/0} {1} {/1}
+Quality,Kalite
+Quality Inspection,Kalite Kontrol
+Quality Inspection Parameters,Kalite Kontrol Parametreleri
+Quality Inspection Reading,Kalite Kontrol Okuma
+Quality Inspection Readings,Kalite Kontrol Okumalar
+Quality Inspection required for Item {0},Ürün için gerekli Kalite Kontrol {0}
+Quality Management,Kalite Yönetimi
+Quantity,Miktar
+Quantity Requested for Purchase,Alım için İstenen miktar
+Quantity and Rate,Miktarı ve Oranı
+Quantity and Warehouse,Miktar ve Depo
+Quantity cannot be a fraction in row {0},Miktarı satırına bir fraksiyonu olamaz {0}
+Quantity for Item {0} must be less than {1},Adet Ürün için {0} daha az olmalıdır {1}
+Quantity in row {0} ({1}) must be same as manufactured quantity {2},Miktarı satırına {0} ({1}) aynı olmalıdır üretilen miktar {2}
+Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,Hammadde verilen miktarlarından repacking / üretim sonrası elde edilen ürünün miktarı
+Quantity required for Item {0} in row {1},Ürün için gerekli miktar {0} üst üste {1}
+Quarter,Çeyrek
+Quarterly,Çeyrek Senelik
+Quick Help,Hızlı Yardım
+Quotation,Kotasyon
+Quotation Item,Teklif Ürün
+Quotation Items,Teklif Öğeler
+Quotation Lost Reason,Teklif Kayıp Nedeni
+Quotation Message,Teklif Mesaj
+Quotation To,Için tırnak
+Quotation Trends,Teklif Trendler
+Quotation {0} is cancelled,Tırnak {0} iptal edilir
+Quotation {0} not of type {1},Tırnak {0} değil türünde {1}
+Quotations received from Suppliers.,Özlü Sözler Tedarikçiler alınan.
+Quotes to Leads or Customers.,Teklifleri veya Müşteriler tırnak.
+Raise Material Request when stock reaches re-order level,Hisse senedi yeniden sipariş seviyesine ulaştığında Malzeme İsteği Raise
+Raised By,By Yükseltilmiş
+Raised By (Email),(E) tarafından Yükseltilmiş
+Random,Rasgele
+Range,Aralık
+Rate,Oran
+Rate ,
+Rate (%),Oranı (%)
+Rate (Company Currency),Oranı (Şirket para birimi)
+Rate Of Materials Based On,Malzemeler Tabanlı On Of Oranı
+Rate and Amount,Hızı ve Miktarı
+Rate at which Customer Currency is converted to customer's base currency,Müşteri Döviz müşteri tabanı para birimine dönüştürülür oran hangi
+Rate at which Price list currency is converted to company's base currency,Fiyat listesi para şirketin baz para birimine dönüştürülür oran hangi
+Rate at which Price list currency is converted to customer's base currency,Fiyat listesi para müşteri tabanı para birimine dönüştürülür oran hangi
+Rate at which customer's currency is converted to company's base currency,Müşterinin para şirketin baz para birimine dönüştürülür oran hangi
+Rate at which supplier's currency is converted to company's base currency,Tedarikçinin para şirketin baz para birimine dönüştürülür oran hangi
+Rate at which this tax is applied,Bu vergi tatbik edildiği
+Raw Material,Hammadde
+Raw Material Item Code,Hammadde Ürün Kodu
+Raw Materials Supplied,Tedarik Hammaddeler
+Raw Materials Supplied Cost,Hammadde Tedarik Maliyeti
+Raw material cannot be same as main Item,Hammadde ana öğe olarak aynı olamaz
+Re-Order Level,Yeniden Sipariş Seviyesi
+Re-Order Qty,Re-Sipariş Miktar
+Re-order,Yeniden sipariş
+Re-order Level,Yeniden sipariş seviyesi
+Re-order Qty,Yeniden sipariş Adet
+Read,Okunmuş
+Reading 1,1 Okuma
+Reading 10,10 Okuma
+Reading 2,2 Okuma
+Reading 3,Reading 3
+Reading 4,4 Okuma
+Reading 5,5 Okuma
+Reading 6,6 Okuma
+Reading 7,7 Okuma
+Reading 8,8 Okuma
+Reading 9,9 Okuma
+Real Estate,Gayrimenkul
+Reason,Nedeni
+Reason for Leaving,Ayrılma Nedeni
+Reason for Resignation,İstifa Nedeni
+Reason for losing,Kaybetme nedeni
+Recd Quantity,Recd Miktar
+Receivable,Alacak
+Receivable / Payable account will be identified based on the field Master Type,Alacak / Borç hesabı alan Usta Türü göre tespit edilecektir
+Receivables,Alacaklar
+Receivables / Payables,Alacaklar / Borçlar
+Receivables Group,Alacaklar Grubu
+Received Date,Alınan Tarih
+Received Items To Be Billed,Faturalı To Be Alınan Öğeler
+Received Qty,Adet aldı
+Received and Accepted,Alınan ve Kabul
+Receiver List,Alıcı Listesi
+Receiver List is empty. Please create Receiver List,Alıcı listesi boş. Alıcı listesi oluşturmanız
+Receiver Parameter,Alıcı Parametre
+Recipients,Alıcılar
+Reconcile,Uzlaştırmak
+Reconciliation Data,Uzlaşma Veri
+Reconciliation HTML,Uzlaşma HTML
+Reconciliation JSON,Uzlaşma JSON
+Record item movement.,Tutanak madde hareketi.
+Recurring Id,Tekrarlanan Kimliği
+Recurring Invoice,Dönüşümlü Fatura
+Recurring Type,Tekrarlanan Türü
+Reduce Deduction for Leave Without Pay (LWP),Izinde için Kesintisi azaltın (YSP)
+Reduce Earning for Leave Without Pay (LWP),Izinde için Kazanç azaltın (YSP)
+Ref,Ref
+Ref Code,Referans Kodu
+Ref SQ,Ref SQ
+Reference,Referans
+Reference #{0} dated {1},Referans # {0} tarihli {1}
+Reference Date,Başvuru Tarihi
+Reference Name,Referans Adı
+Reference No & Reference Date is required for {0},Referans No ve Referans Tarih için gereklidir {0}
+Reference No is mandatory if you entered Reference Date,Eğer Başvuru Tarihi girdiyseniz Referans No zorunludur
+Reference Number,Referans Numarası
+Reference Row #,Referans Row #
+Refresh,Yenile
+Registration Details,Kayıt Detayları
+Registration Info,Kayıt Bilgileri
+Rejected,Reddedildi
+Rejected Quantity,Reddedilen Miktar
+Rejected Serial No,Seri No Reddedildi
+Rejected Warehouse,Reddedilen Depo
+Rejected Warehouse is mandatory against regected item,Reddedilen Depo regected öğe karşı zorunludur
+Relation,Ilişki
+Relieving Date,Üyelik Giderme
+Relieving Date must be greater than Date of Joining,Üyelik giderici Katılma tarihi daha büyük olmalıdır
+Remark,Dikkat
+Remarks,Açıklamalar
+Remarks Custom,Açıklamalar Özel
+Rename,Yeniden adlandır
+Rename Log,Giris yeniden adlandırma
+Rename Tool,Aracı yeniden adlandırma
+Rent Cost,Kira Bedeli
+Rent per hour,Saatte kiralamak
+Rented,Kiralanmış
+Repeat on Day of Month,Ayın günü tekrarlayın
+Replace,Değiştir
+Replace Item / BOM in all BOMs,Tüm reçetelerde Ürün / BOM değiştirin
+Replied,Cevap
+Report Date,Rapor Tarihi
+Report Type,Rapor Türü
+Report Type is mandatory,Rapor Tipi zorunludur
+Reports to,Raporlar
+Reqd By Date,Reqd Date
+Reqd by Date,Reqd Tarih
+Request Type,İstek Türü
+Request for Information,Bilgi İstek
+Request for purchase.,Satın almak için isteyin.
+Requested,Talep
+Requested For,Için talep
+Requested Items To Be Ordered,Sıralı To Be talep Ürünleri
+Requested Items To Be Transferred,Transfer edilmesini istedi Ürünleri
+Requested Qty,İstenen Adet
+"Requested Qty: Quantity requested for purchase, but not ordered.","İstenen Miktar: Miktar sipariş alımı için istenen, ancak değil."
+Requests for items.,Öğeler için istekleri.
+Required By,By Gerekli
+Required Date,Gerekli Tarih
+Required Qty,Gerekli Adet
+Required only for sample item.,Sadece örnek öğe için gereklidir.
+Required raw materials issued to the supplier for producing a sub - contracted item.,Bir alt üretmek için tedarikçiye verilen Gerekli hammaddeler - sözleşmeli öğe.
+Research,Araştırma
+Research & Development,Araştırma ve Geliştirme
+Researcher,Araştırmacı
+Reseller,Bayi
+Reserved,Reserved
+Reserved Qty,Rezerve Adet
+"Reserved Qty: Quantity ordered for sale, but not delivered.","Rezerve Miktar: Miktar satışı emretti, ama teslim."
+Reserved Quantity,Rezerve Miktarı
+Reserved Warehouse,Rezerve Depo
+Reserved Warehouse in Sales Order / Finished Goods Warehouse,Satış Sipariş / Mamul Depo saklıdır Atölyesi
+Reserved Warehouse is missing in Sales Order,Rezerve Depo Satış Siparişi eksik
+Reserved Warehouse required for stock Item {0} in row {1},Stok Öğe için gerekli saklıdır Depo {0} üst üste {1}
+Reserved warehouse required for stock item {0},Stok kalemi için gerekli rezerve depo {0}
+Reserves and Surplus,Yedekler ve Fazlası
+Reset Filters,Filtreleri Sıfırla
+Resignation Letter Date,İstifa Mektubu Tarih
+Resolution,Karar
+Resolution Date,Karar Tarihi
+Resolution Details,Çözünürlük Detaylar
+Resolved By,Tarafından Çözülmüş
+Rest Of The World,World Of istirahat
+Retail,Perakende
+Retail & Wholesale,Toptan ve Perakende Satış
+Retailer,Perakendeci
+Review Date,İnceleme tarihi
+Rgt,Rgt
+Role Allowed to edit frozen stock,Rol dondurulmuş stok düzenlemek için İzin
+Role that is allowed to submit transactions that exceed credit limits set.,Set kredi limitlerini aşan işlemleri göndermek için izin verilir rolü.
+Root Type,Kök Tipi
+Root Type is mandatory,Kök Tipi zorunludur
+Root account can not be deleted,Root hesabı silinemez
+Root cannot be edited.,Kök düzenlenemez.
+Root cannot have a parent cost center,Kök bir üst maliyet merkezi olamaz
+Rounded Off,Yuvarlak Kapalı
+Rounded Total,Yuvarlak Toplam
+Rounded Total (Company Currency),Yuvarlak Toplam (Şirket para birimi)
+Row # ,
+Row # {0}: ,
+Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Satır # {0}: Sıralı Adet Adet (öğe master tanımlanan) öğesinin minimum sipariş adet daha az olamaz.
+Row #{0}: Please specify Serial No for Item {1},Satır # {0}: Ürün seri no belirtiniz {1}
+Row {0}: Account does not match with \						Purchase Invoice Credit To account,Satır {0}: \ Satın Fatura Kredi hesabı için Hesabı ile uyuşmuyor
+Row {0}: Account does not match with \						Sales Invoice Debit To account,Satır {0}: \ Satış Faturası banka hesabı için Hesap ile uyuşmuyor
+Row {0}: Conversion Factor is mandatory,Satır {0}: Katsayı zorunludur
+Row {0}: Credit entry can not be linked with a Purchase Invoice,Satır {0}: Kredi girişi Satınalma Fatura ile bağlantılı olamaz
+Row {0}: Debit entry can not be linked with a Sales Invoice,Satır {0}: Banka giriş Satış Fatura ile bağlantılı olamaz
+Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,Satır {0}: Ödeme tutarı veya daha az kalan miktar fatura eşittir olmalıdır. Aşağıda dikkat bakınız.
+Row {0}: Qty is mandatory,Satır {0}: Miktar zorunludur
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}","Satır {0}: Miktar depoda Avalable {1} değil {2} {3}. Mevcut Adet: {4}, Adet aktarın: {5}"
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}","Satır {0}: ayarlamak için {1}, sıklığı, yeri ve tarihi arasındaki fark, \ daha büyük ya da eşit olmalıdır {2}"
+Row {0}:Start Date must be before End Date,Satır {0}: Başlangıç ​​Tarihi Bitiş Tarihinden önce olmalıdır
+Rules for adding shipping costs.,Nakliye maliyetleri eklemek için Kurallar.
+Rules for applying pricing and discount.,Fiyatlandırma ve indirim uygulanması için kurallar.
+Rules to calculate shipping amount for a sale,Bir satış için nakliye miktarını hesaplamak için Kurallar
+S.O. No.,SO No
+SHE Cess on Excise,SHE Tüketim Vergisi ile ilgili
+SHE Cess on Service Tax,SHE Hizmet Vergisi Cess
+SHE Cess on TDS,SHE TDS ile ilgili Cess
+SMS Center,SMS Merkezi
+SMS Gateway URL,SMS Gateway URL
+SMS Log,SMS Log
+SMS Parameter,SMS Parametre
+SMS Sender Name,SMS Sender Adı
+SMS Settings,SMS Ayarları
+SO Date,SO Tarih
+SO Pending Qty,SO Bekleyen Adet
+SO Qty,SO Adet
+Salary,Maaş
+Salary Information,Maaş Bilgi
+Salary Manager,Maaş Müdürü
+Salary Mode,Maaş Modu
+Salary Slip,Maaş Kayma
+Salary Slip Deduction,Maaş Kayma Kesintisi
+Salary Slip Earning,Maaş Kayma Kazanç
+Salary Slip of employee {0} already created for this month,Çalışanın Maaş Kayma {0} zaten bu ay için oluşturulan
+Salary Structure,Maaş Yapısı
+Salary Structure Deduction,Maaş Yapısı Kesintisi
+Salary Structure Earning,Maaş Yapısı Kazanç
+Salary Structure Earnings,Maaş Yapısı Kazanç
+Salary breakup based on Earning and Deduction.,Maaş çöküş Kazanç ve Kesintisi göre.
+Salary components.,Maaş bileşenleri.
+Salary template master.,Maaş şablon usta.
+Sales,Satışlar
+Sales Analytics,Satış Analytics
+Sales BOM,Satış BOM
+Sales BOM Help,Satış BOM Yardım
+Sales BOM Item,Satış BOM Ürün
+Sales BOM Items,Satış BOM Öğeler
+Sales Browser,Satış Tarayıcı
+Sales Details,Satış Ayrıntılar
+Sales Discounts,Satış İndirimleri
+Sales Email Settings,Satış E-posta Ayarları
+Sales Expenses,Satış Giderleri
+Sales Extras,Satış Ekstralar
+Sales Funnel,Satış Huni
+Sales Invoice,Satış Faturası
+Sales Invoice Advance,Satış Fatura Avans
+Sales Invoice Item,Satış Fatura Ürün
+Sales Invoice Items,Satış Fatura Öğeler
+Sales Invoice Message,Satış Faturası Mesaj
+Sales Invoice No,Satış Fatura No
+Sales Invoice Trends,Satış Faturası Trendler
+Sales Invoice {0} has already been submitted,Satış Faturası {0} zaten gönderildi
+Sales Invoice {0} must be cancelled before cancelling this Sales Order,Satış Faturası {0} bu Satış Siparişi iptal etmeden önce iptal edilmelidir
+Sales Order,Satış Sipariş
+Sales Order Date,Satış Sipariş Tarihi
+Sales Order Item,Satış Sipariş Ürün
+Sales Order Items,Satış Sipariş Öğeler
+Sales Order Message,Satış Sipariş Mesaj
+Sales Order No,Satış Sipariş yok
+Sales Order Required,Satış Sipariş Gerekli
+Sales Order Trends,Satış Sipariş Trendler
+Sales Order required for Item {0},Ürün için gerekli Satış Sipariş {0}
+Sales Order {0} is not submitted,Satış Sipariş {0} teslim edilmez
+Sales Order {0} is not valid,Satış Sipariş {0} geçerli değil
+Sales Order {0} is stopped,Satış Sipariş {0} durduruldu
+Sales Partner,Satış Ortağı
+Sales Partner Name,Satış Ortak Adı
+Sales Partner Target,Satış Ortağı Hedef
+Sales Partners Commission,Satış Ortakları Komisyonu
+Sales Person,Satış Kişi
+Sales Person Name,Satış Kişi Adı
+Sales Person Target Variance Item Group-Wise,Satış Kişi Hedef Varyans Ürün Grup-Wise
+Sales Person Targets,Satış Kişi Hedefler
+Sales Person-wise Transaction Summary,Satış Kişi-bilge İşlem Özeti
+Sales Register,Satış Kayıt
+Sales Return,Satış İade
+Sales Returned,Satış İade
+Sales Taxes and Charges,Satış Vergi ve Harçlar
+Sales Taxes and Charges Master,Satış Vergi ve Harçlar Usta
+Sales Team,Satış Ekibi
+Sales Team Details,Satış Ekibi Ayrıntıları
+Sales Team1,Satış Team1
+Sales and Purchase,Satış ve Satın Alma
+Sales campaigns.,Satış kampanyaları.
+Salutation,Selamlama
+Sample Size,Örneklem Büyüklüğü
+Sanctioned Amount,Yaptırıma Tutar
+Saturday,Cumartesi
+Schedule,Program
+Schedule Date,Program Tarih
+Schedule Details,Program Detayları
+Scheduled,Tarifeli
+Scheduled Date,Tarifeli Tarih
+Scheduled to send to {0},Göndermek için Tarifeli {0}
+Scheduled to send to {0} recipients,{0} alıcıya göndermek için Tarifeli
+Scheduler Failed Events,Zamanlayıcı Başarısız Olaylar
+School/University,Okul / Üniversite
+Score (0-5),Skor (0-5)
+Score Earned,Puan Kazanılan
+Score must be less than or equal to 5,Skor ya da daha az 5 eşit olmalıdır
+Scrap %,Hurda%
+Seasonality for setting budgets.,Bütçelerini ayarlamak için mevsimsellik.
+Secretary,Sekreter
+Secured Loans,Teminatlı Krediler
+Securities & Commodity Exchanges,Menkul Kıymetler ve Borsalar
+Securities and Deposits,Menkul Kıymetler ve Mevduat
+"See ""Rate Of Materials Based On"" in Costing Section","Bölüm Maliyet ""On esaslı malzemelerin Rate"" bakın"
+"Select ""Yes"" for sub - contracting items","Alt için ""Evet"" seçeneğini seçin - öğeleri sözleşme"
+"Select ""Yes"" if this item is used for some internal purpose in your company.","Bu öğeyi şirket bazı iç amaç için kullanılan ""Evet"" seçeneğini seçin."
+"Select ""Yes"" if this item represents some work like training, designing, consulting etc.","Bu madde vb danışmanlık eğitim, tasarım, gibi bazı işler temsil ediyorsa ""Evet"" i seçin"
+"Select ""Yes"" if you are maintaining stock of this item in your Inventory.","Eğer Envanter Bu ürünün stok muhafaza eğer ""Evet"" seçeneğini seçin."
+"Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.","Bu öğeyi üretmek için tedarikçi için hammadde kaynağı ise ""Evet"" seçeneğini seçin."
+Select Brand...,Marka Seçiniz ...
+Select Budget Distribution to unevenly distribute targets across months.,Dengesiz ay boyunca hedeflerini dağıtmak için Bütçe Dağıtım seçin.
+"Select Budget Distribution, if you want to track based on seasonality.","Mevsimsellik dayalı izlemek istiyorsanız, Bütçe Dağıtım seçin."
+Select Company...,Firma Seç ...
+Select DocType,Seç DocType
+Select Fiscal Year...,Mali Yıl Seçin ...
+Select Items,Öğeleri seçmek
+Select Project...,Projesi Seçiniz ...
+Select Purchase Receipts,Satınalma Makbuzlar Seçiniz
+Select Sales Orders,Seç Satış Siparişleri
+Select Sales Orders from which you want to create Production Orders.,Eğer Üretim Emirleri oluşturmak istediğiniz seçin Satış Siparişleri.
+Select Time Logs and Submit to create a new Sales Invoice.,Zaman Kayıtlar seçin ve yeni Satış Faturası oluşturmak için gönderin.
+Select Transaction,İşlem Seçin
+Select Warehouse...,Warehouse Seçiniz ...
+Select Your Language,Dil Seçiniz
+Select account head of the bank where cheque was deposited.,Çek tevdi edilmiş banka hesap başkanı seçin.
+Select company name first.,Ilk şirket adını seçin.
+Select template from which you want to get the Goals,Eğer Goller almak istediğiniz şablonu seçin
+Select the Employee for whom you are creating the Appraisal.,Eğer Değerleme oluştururken kimin için Çalışan seçin.
+Select the period when the invoice will be generated automatically,Fatura otomatik olarak oluşturulur dönemi seçin
+Select the relevant company name if you have multiple companies,Eğer birden fazla şirket varsa ilgili şirket adını seçin
+Select the relevant company name if you have multiple companies.,Eğer birden fazla şirket varsa ilgili şirket adını seçin.
+Select who you want to send this newsletter to,Eğer bu bülten göndermek istediğiniz kişiyi seçin
+Select your home country and check the timezone and currency.,Ev ülkeyi seçin ve saat dilimini ve para birimini kontrol edin.
+"Selecting ""Yes"" will allow this item to appear in Purchase Order , Purchase Receipt.","""Evet"" seçildiğinde bu öğe Sipariş, Satın Alma Makbuzu görünmesini sağlayacaktır."
+"Selecting ""Yes"" will allow this item to figure in Sales Order, Delivery Note","""Evet"" seçildiğinde bu öğe Satış Sipariş, İrsaliye rakam sağlayacak"
+"Selecting ""Yes"" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.","""Evet"" seçilmesi hammadde ve bu öğeyi üretimi için katlanılan operasyonel maliyetleri gösteren Malzeme Bill oluşturmanızı sağlayacak."
+"Selecting ""Yes"" will allow you to make a Production Order for this item.","""Evet"" seçildiğinde bu öğe için bir üretim Sipariş olanak sağlayacak."
+"Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.","""Evet"" seçilmesi Seri No master görülebilir Bu ürünün her varlık için benzersiz bir kimlik verecek."
+Selling,Satış
+Selling Settings,Ayarları Satış
+"Selling must be checked, if Applicable For is selected as {0}","Uygulanabilir için olarak seçilirse satış, kontrol edilmelidir {0}"
+Send,Gönder
+Send Autoreply,AutoReply Gönder
+Send Email,E-posta Gönder
+Send From,Gönderen Gönder
+Send Notifications To,To Bildirimleri Gönder
+Send Now,Şimdi Gönder
+Send SMS,SMS gönder
+Send To,Gönder
+Send To Type,Yazın Gönder
+Send mass SMS to your contacts,Kişilerinize toplu SMS gönder
+Send to this list,Bu listeye Gönder
+Sender Name,Gönderenin Adı
+Sent On,On Sent
+Separate production order will be created for each finished good item.,Ayrı üretim emri her mamul madde için oluşturulur.
+Serial No,Seri No
+Serial No / Batch,Seri No / Toplu
+Serial No Details,Seri No Detaylar
+Serial No Service Contract Expiry,Seri No Hizmet Sözleşmesi Vade
+Serial No Status,Seri No Durumu
+Serial No Warranty Expiry,Seri No Garanti Bitiş
+Serial No is mandatory for Item {0},Seri No Ürün için zorunludur {0}
+Serial No {0} created,Seri No {0} oluşturuldu
+Serial No {0} does not belong to Delivery Note {1},Seri No {0} İrsaliye ait değil {1}
+Serial No {0} does not belong to Item {1},Seri No {0} Ürün ait değil {1}
+Serial No {0} does not belong to Warehouse {1},Seri No {0} Atölyesi'ne ait değil {1}
+Serial No {0} does not exist,Seri No {0} yok
+Serial No {0} has already been received,Seri No {0} alındıktan
+Serial No {0} is under maintenance contract upto {1},Seri No {0} taneye kadar bakım sözleşmesi altında {1}
+Serial No {0} is under warranty upto {1},Seri No {0} kadar garanti altındadır {1}
+Serial No {0} not in stock,Seri No {0} değil stock
+Serial No {0} quantity {1} cannot be a fraction,Seri No {0} {1} miktar kesir olamaz
+Serial No {0} status must be 'Available' to Deliver,Seri No {0} durum sunun için 'Uygun' olmalı
+Serial Nos Required for Serialized Item {0},Tefrika Ürün Serial Nos Zorunlu {0}
+Serial Number Series,Seri Numarası Serisi
+Serial number {0} entered more than once,Seri numarası {0} kez daha girdi
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,Tefrika Öğe {0} güncelleme olamaz \ Stock Uzlaşma kullanarak
+Series,Sürümler
+Series List for this Transaction,Bu İşlem için Serisi Listesi
+Series Updated,Serisi Güncel
+Series Updated Successfully,Serisi Başarıyla Güncellendi
+Series is mandatory,Series zorunludur
+Series {0} already used in {1},Series {0} kullanılan {1}
+Service,Servis
+Service Address,Servis Adres
+Service Tax,Hizmet Vergisi
+Services,Servisler
+Set,Ayarla
+"Set Default Values like Company, Currency, Current Fiscal Year, etc.","Vb Şirket, Para, mevcut mali yılın gibi ayarla Varsayılan Değerler"
+Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,Bu toprakları üzerinde Ürün Grup-bilge bütçeleri ayarlayın. Ayrıca ayar Dağıtım tarafından mevsimsellik içerebilir.
+Set Status as Available,Olarak mevcut ayarla Durum
+Set as Default,Varsayılan olarak ayarla
+Set as Lost,Kayıp olarak ayarla
+Set prefix for numbering series on your transactions,Işlemlerinizi dizi numaralama için belirlenen önek
+Set targets Item Group-wise for this Sales Person.,"Set hedefleri Ürün Grup-bilge, bu satış kişi için."
+Setting Account Type helps in selecting this Account in transactions.,Hesap Türünü Ayarlama işlemlerinde bu Hesap seçiminde yardımcı olur.
+Setting this Address Template as default as there is no other default,Başka hiçbir varsayılan olduğu gibi varsayılan olarak bu Adres Template ayarlanması
+Setting up...,Kurma ...
+Settings,Ayarlar
+Settings for HR Module,İK Modülü Ayarları
+"Settings to extract Job Applicants from a mailbox e.g. ""jobs@example.com""","Bir posta kutusu örneğin ""jobs@example.com"" dan İş Başvuru ayıklamak için Ayarlar"
+Setup,Kurulum
+Setup Already Complete!!,Kur Zaten Tamamlandı!
+Setup Complete,Kurulum Tamamlandı
+Setup SMS gateway settings,Kurulum SMS ağ geçidi ayarları
+Setup Series,Kurulum Serisi
+Setup Wizard,Kurulum Sihirbazı
+Setup incoming server for jobs email id. (e.g. jobs@example.com),"Işler e-posta id için kurulum gelen sunucu. (Örneğin, jobs@example.com)"
+Setup incoming server for sales email id. (e.g. sales@example.com),"Satış e-posta id için kurulum gelen sunucu. (Örneğin, sales@example.com)"
+Setup incoming server for support email id. (e.g. support@example.com),"Destek e-posta id için kurulum gelen sunucu. (Örneğin, support@example.com)"
+Share,Paylaş
+Share With,Ile paylaş
+Shareholders Funds,Hissedarlar Fonlar
+Shipments to customers.,Müşterilere yapılan sevkiyatlar.
+Shipping,Nakliye
+Shipping Account,Nakliye Hesap
+Shipping Address,Teslimat Adresi
+Shipping Amount,Kargo Tutarı
+Shipping Rule,Kargo Kural
+Shipping Rule Condition,Kargo Kural Durum
+Shipping Rule Conditions,Kargo Kural Koşullar
+Shipping Rule Label,Kargo Kural Etiket
+Shop,Mağaza
+Shopping Cart,Alışveriş Sepeti
+Short biography for website and other publications.,Web sitesi ve diğer yayınlar için kısa biyografi.
+"Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.","""Stok"" göstermek veya ""Not Stock"" bu depoda mevcut stok göre."
+"Show / Hide features like Serial Nos, POS etc.","Vb Seri Nos, POS gibi göster / gizle özellikleri"
+Show In Website,Sitedeki Göster
+Show a slideshow at the top of the page,Sayfanın üstünde bir slayt ABS
+Show in Website,Web sitesi Göster
+Show rows with zero values,Sıfır değerleri ile Satırları göster
+Show this slideshow at the top of the page,Sayfanın üstündeki bu slayt göster
+Sick Leave,Hastalık izni
+Signature,İmza
+Signature to be appended at the end of every email,Her e-postanın sonuna eklenecek imza
+Single,Tek
+Single unit of an Item.,Bir madde tek birim.
+Sit tight while your system is being setup. This may take a few moments.,Sistem kurulum edilirken otur. Bu işlem birkaç dakika sürebilir.
+Slideshow,Slayt
+Soap & Detergent,Sabun ve Deterjan
+Software,Yazılım
+Software Developer,Yazılım Geliştirici
+"Sorry, Serial Nos cannot be merged","Üzgünüz, Seri Nos birleştirilmiş olamaz"
+"Sorry, companies cannot be merged","Üzgünüz, şirketler birleşti edilemez"
+Source,Kaynak
+Source File,Kaynak Dosyası
+Source Warehouse,Kaynak Atölyesi
+Source and target warehouse cannot be same for row {0},Kaynak ve hedef depo satır için aynı olamaz {0}
+Source of Funds (Liabilities),Fon kaynağı (Yükümlülükleri)
+Source warehouse is mandatory for row {0},Kaynak depo satır için zorunludur {0}
+Spartan,Spartalı
+"Special Characters except ""-"" and ""/"" not allowed in naming series","Dışında özel karakterler ""-"" ve ""/"" serisi adlandırma izin yok"
+Specification Details,Özellikler Detayı
+Specifications,Özellikler
+"Specify a list of Territories, for which, this Price List is valid","Toprakları bir listesini belirtin, bunun için, bu Fiyat Listesi geçerlidir"
+"Specify a list of Territories, for which, this Shipping Rule is valid","Toprakları bir listesini belirtin, bunun için, bu Kargo Kural geçerlidir"
+"Specify a list of Territories, for which, this Taxes Master is valid","Toprakları bir listesini belirtin, bunun için, bu Usta geçerlidir Vergiler"
+"Specify the operations, operating cost and give a unique Operation no to your operations.","Işlemleri, işletme maliyeti belirtin ve operasyon için benzersiz bir operasyon hayır verir."
+Split Delivery Note into packages.,Paketler halinde teslim Not Split.
+Sports,Spor
+Sr,Sr
+Standard,Standart
+Standard Buying,Standart Satın Alma
+Standard Reports,Standart Raporlar
+Standard Selling,Standart Satış
+Standard contract terms for Sales or Purchase.,Satış veya Satın Alma için standart sözleşme şartları.
+Start,Başlangıç
+Start Date,Başlangıç Tarihi
+Start date of current invoice's period,Cari faturanın döneminin başlangıç ​​tarihi
+Start date should be less than end date for Item {0},Başlangıç ​​tarihi Ürün için bitiş tarihinden daha az olmalıdır {0}
+State,Devlet
+Statement of Account,Hesap Tablosu
+Static Parameters,Statik Parametreleri
+Status,Durum
+Status must be one of {0},Durum biri olmalıdır {0}
+Status of {0} {1} is now {2},{0} {1} şimdi durumu {2}
+Status updated to {0},Durum güncellendi {0}
+Statutory info and other general information about your Supplier,Yasal bilgi ve Tedarikçi ile ilgili diğer genel bilgiler
+Stay Updated,Güncel Kalın
+Stock,Stok
+Stock Adjustment,Stok Ayarı
+Stock Adjustment Account,Stok Düzeltme Hesabı
+Stock Ageing,Stok Yaşlanma
+Stock Analytics,Stok Analytics
+Stock Assets,Hazır Varlıklar
+Stock Balance,Stok Bakiye
+Stock Entries already created for Production Order ,
+Stock Entry,Stok Giriş
+Stock Entry Detail,Stok Giriş Detay
+Stock Expenses,Stok Giderleri
+Stock Frozen Upto,Stok Dondurulmuş e kadar
+Stock Ledger,Hisse senedi defteri
+Stock Ledger Entry,Stok Ledger Entry
+Stock Ledger entries balances updated,Stok Ledger güncellendi dengelerini girişleri
+Stock Level,Stok Düzeyi
+Stock Liabilities,Stok Yükümlülükler
+Stock Projected Qty,Stok Adet Öngörülen
+Stock Queue (FIFO),Stok Kuyruk (FIFO)
+Stock Received But Not Billed,Stok Alınan Ama Faturalı değil
+Stock Reconcilation Data,Stok mutabakatı Verileri
+Stock Reconcilation Template,Stok mutabakatı Şablon
+Stock Reconciliation,Stok Uzlaşma
+"Stock Reconciliation can be used to update the stock on a particular date, usually as per physical inventory.","Stok Uzlaşma genellikle fiziksel envanter başına, belirli bir tarihte stok güncellemek için kullanılabilir."
+Stock Settings,Stok Ayarları
+Stock UOM,Stok UOM
+Stock UOM Replace Utility,Stok UOM Utility değiştirin
+Stock UOM updatd for Item {0},Ürün için stok UoM updatd {0}
+Stock Uom,Stok uom
+Stock Value,Stok Değer
+Stock Value Difference,Stok Değer Farkı
+Stock balances updated,Stok bakiyeleri güncellendi
+Stock cannot be updated against Delivery Note {0},Stok İrsaliye karşı güncellenen olamaz {0}
+Stock entries exist against warehouse {0} cannot re-assign or modify 'Master Name',Stok girişleri {0} 'Usta Adı' yeniden atamak ya da değiştiremez ambarında mevcuttur
+Stock transactions before {0} are frozen,{0} önce hisse senedi işlemleri dondurulur
+Stop,Durdur
+Stop Birthday Reminders,Dur Birthday Reminders
+Stop Material Request,Dur Malzeme Talebi
+Stop users from making Leave Applications on following days.,Şu günlerde bırak Uygulamaları yapmasını durdurmak.
+Stop!,Durun!
+Stopped,Durduruldu
+Stopped order cannot be cancelled. Unstop to cancel.,Durduruldu sipariş iptal edilemez. Iptal etmek için unstop.
+Stores,Mağazalar
+Stub,Koçan
+Sub Assemblies,Alt Kurullar
+"Sub-currency. For e.g. ""Cent""","Alt birimi. Örneğin ""içinCent """
+Subcontract,Alt sözleşme
+Subject,Konu
+Submit Salary Slip,Maaş Kayma Gönder
+Submit all salary slips for the above selected criteria,Yukarıda seçilen ölçütler için tüm maaş bordroları Gönder
+Submit this Production Order for further processing.,Daha fazla işlem için bu Üretim Siparişi gönderin.
+Submitted,Ekleyen
+Subsidiary,Yardımcı
+Successful: ,
+Successfully Reconciled,Başarıyla uzlaşmış
+Suggestions,Öneriler
+Sunday,Pazar
+Supplier,Satıcı
+Supplier (Payable) Account,Tedarikçi (Ödenecek) Hesap
+Supplier (vendor) name as entered in supplier master,Tedarikçi master girilen alanı (satıcı) isim olarak
+Supplier > Supplier Type,Tedarikçi> Tedarikçi Türü
+Supplier Account Head,Tedarikçi Hesap Başkanı
+Supplier Address,Tedarikçi Adresi
+Supplier Addresses and Contacts,Tedarikçi Adresler ve İletişim
+Supplier Details,Tedarikçi Ayrıntılar
+Supplier Intro,Tedarikçi Intro
+Supplier Invoice Date,Tedarikçi Fatura Tarihi
+Supplier Invoice No,Tedarikçi Fatura No
+Supplier Name,Tedarikçi Adı
+Supplier Naming By,Tedarikçi İsimlendirme tarafından
+Supplier Part Number,Tedarikçi Parça Numarası
+Supplier Quotation,Tedarikçi Teklif
+Supplier Quotation Item,Tedarikçi Teklif Ürün
+Supplier Reference,Tedarikçi Başvuru
+Supplier Type,Tedarikçi Türü
+Supplier Type / Supplier,Tedarikçi Türü / Tedarikçi
+Supplier Type master.,Tedarikçi Türü usta.
+Supplier Warehouse,Tedarikçi Depo
+Supplier Warehouse mandatory for sub-contracted Purchase Receipt,Taşeronluk Satın Alma Makbuzu için zorunlu alanı Depo
+Supplier database.,Tedarikçi veritabanı.
+Supplier master.,Tedarikçi usta.
+Supplier warehouse where you have issued raw materials for sub - contracting,Eğer alt için hammadde yayınladı alanı depo - müteahhitlik
+Supplier-Wise Sales Analytics,Tedarikçi-Wise Satış Analytics
+Support,Destek
+Support Analtyics,Destek Analtyics
+Support Analytics,Destek Analytics
+Support Email,Destek E-posta
+Support Email Settings,Destek E-posta Ayarları
+Support Password,Destek Şifre
+Support Ticket,Destek Bildirimi
+Support queries from customers.,Müşterilerden gelen desteği sorgular.
+Symbol,Sembol
+Sync Support Mails,Sync Destek Postalar
+Sync with Dropbox,Dropbox ile senkronize
+Sync with Google Drive,Google Drive ile senkronize
+System,Sistem
+System Settings,Sistem Ayarları
+"System User (login) ID. If set, it will become default for all HR forms.","Sistem kullanıcı (giriş) kimliği. Ayarlarsanız, tüm İK formları için varsayılan olacaktır."
+TDS (Advertisement),TDS (Reklam)
+TDS (Commission),TDS (Komisyon)
+TDS (Contractor),TDS (Müteahhit)
+TDS (Interest),TDS (Faiz)
+TDS (Rent),TDS (Kiralık)
+TDS (Salary),TDS (Maaş)
+Target  Amount,Hedef Tutarı
+Target Detail,Detay Hedef
+Target Details,Hedef Detayları
+Target Details1,Hedef detayları1
+Target Distribution,Hedef Dağıtım
+Target On,Hedef On
+Target Qty,Hedef Adet
+Target Warehouse,Hedef Depo
+Target warehouse in row {0} must be same as Production Order,Arka arkaya Hedef depo {0} aynı olmalıdır Üretim Sipariş
+Target warehouse is mandatory for row {0},Hedef depo satır için zorunludur {0}
+Task,Görev
+Task Details,Görev Detayları
+Tasks,Görevler
+Tax,Vergi
+Tax Amount After Discount Amount,İndirim Tutarı Vergi Sonrası Tutar
+Tax Assets,Vergi Varlığı
+Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,Vergi Kategori 'değerleme' veya 'Değerleme ve Total' tüm öğeleri olmayan stok öğeler gibi olamaz
+Tax Rate,Vergi oranı
+Tax and other salary deductions.,Vergi ve diğer kesintiler maaş.
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,Vergi detay tablo bir dize olarak madde ustadan getirilen ve bu alanda saklanır. Vergi ve Ücretleri Kullanılmış
+Tax template for buying transactions.,Işlemleri satın almak için vergi şablonu.
+Tax template for selling transactions.,Satımın için vergi şablonu.
+Taxable,Vergiye tabi
+Taxes,Vergiler
+Taxes and Charges,Vergi ve Harçlar
+Taxes and Charges Added,Eklenen Vergi ve Harçlar
+Taxes and Charges Added (Company Currency),Eklenen Vergi ve Harçlar (Company Para)
+Taxes and Charges Calculation,Vergiler ve Ücretleri Hesaplama
+Taxes and Charges Deducted,Mahsup Vergi ve Harçlar
+Taxes and Charges Deducted (Company Currency),Mahsup Vergi ve Harçlar (Company Para)
+Taxes and Charges Total,Vergi ve Harçlar Toplam
+Taxes and Charges Total (Company Currency),Vergi ve Ücretler Toplamı (Şirket para birimi)
+Technology,Teknoloji
+Telecommunications,Telekomünikasyon
+Telephone Expenses,Telefon Giderleri
+Television,Televizyon
+Template,Şablon
+Template for performance appraisals.,Performans değerlendirmeleri için şablon.
+Template of terms or contract.,Hüküm veya sözleşme şablonu.
+Temporary Accounts (Assets),Geçici Hesaplar (Varlıklar)
+Temporary Accounts (Liabilities),Geçici Hesaplar (Yükümlülükler)
+Temporary Assets,Geçici Varlıklar
+Temporary Liabilities,Geçici Yükümlülükler
+Term Details,Dönem Ayrıntıları
+Terms,Tanımlar
+Terms and Conditions,Şartlar ve koşullar
+Terms and Conditions Content,Şartlar ve Koşullar İçerik
+Terms and Conditions Details,Şartlar ve Koşullar Detayları
+Terms and Conditions Template,Şartlar ve Koşullar Şablon
+Terms and Conditions1,Şartlar ve Conditions1
+Terretory,Terretory
+Territory,Bölge
+Territory / Customer,Eyalet / Müşteri
+Territory Manager,Bölge Müdürü
+Territory Name,Bölge Adı
+Territory Target Variance Item Group-Wise,Eyalet Hedef Varyans Ürün Grup-Wise
+Territory Targets,Eyalet Hedefler
+Test,Test
+Test Email Id,Testi E-posta Kimliği
+Test the Newsletter,Haber sınayın
+The BOM which will be replaced,Değiştirilecektir BOM
+The First User: You,İlk Kullanıcı: Sen
+"The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""","Paketi temsil Item. ""Hayır"" ve ""Evet"" olarak ""Satış Item Is"" Bu Öğe ""Stok Öğe mi"" olmalı"
+The Organization,Organizasyon
+"The account head under Liability, in which Profit/Loss will be booked","Kar / Zarar rezerve edileceği Sorumluluk altında hesap kafası,"
+The date on which next invoice will be generated. It is generated on submit.,Sonraki fatura oluşturulur hangi tarih. Bu teslim oluşturulur.
+The date on which recurring invoice will be stop,Yinelenen fatura durdurmak edileceği tarih
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",
+The day(s) on which you are applying for leave are holiday. You need not apply for leave.,Eğer izni için başvuran hangi gün (ler) tatil vardır. Sen izin talebinde gerekmez.
+The first Leave Approver in the list will be set as the default Leave Approver,Listedeki ilk bırak Approver varsayılan bırak Approver olarak kurulacaktır
+The first user will become the System Manager (you can change that later).,İlk kullanıcı (bunu daha sonra değiştirebilirsiniz) Sistem Yöneticisi olacaktır.
+The gross weight of the package. Usually net weight + packaging material weight. (for print),Paketin brüt ağırlığı. Genellikle net ağırlığı + ambalaj malzemesi ağırlığı. (Baskı için)
+The name of your company for which you are setting up this system.,Bu sistemi kurmak için hangi şirket ismi.
+The net weight of this package. (calculated automatically as sum of net weight of items),Bu paketin net ağırlığı. (Öğelerin net ağırlığı toplamı otomatik olarak hesaplanır)
+The new BOM after replacement,Değiştirilmesinden sonra yeni BOM
+The rate at which Bill Currency is converted into company's base currency,Bill Döviz şirketin temel para birimi haline dönüştürüldüğü oranı
+The unique id for tracking all recurring invoices. It is generated on submit.,Tüm yinelenen faturaların takibi için benzersiz kimliği. Bu teslim oluşturulur.
+"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.","Sonra Fiyatlandırma Kurallar Müşteri dayalı filtre edilir, Müşteri Grubu, Territory, Tedarikçi, Tedarikçi Tipi, Kampanya, Satış Ortağı vb"
+There are more holidays than working days this month.,Bu ay iş günü daha tatil vardır.
+"There can only be one Shipping Rule Condition with 0 or blank value for ""To Value""","Sadece ""değerini"" için 0 veya boş değere sahip bir Nakliye Kural Durumu olabilir"
+There is not enough leave balance for Leave Type {0},Bırak Tip için yeterli izni denge yok {0}
+There is nothing to edit.,Düzenlemek için bir şey yok.
+There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,Bir hata oluştu. Bir muhtemel nedeni formu kaydettiğiniz değil ki olabilir. Sorun devam ederse support@erpnext.com başvurun.
+There were errors.,Hataları vardı.
+This Currency is disabled. Enable to use in transactions,Bu para devre dışı bırakılır. Işlemler kullanmak için etkinleştirin
+This Leave Application is pending approval. Only the Leave Apporver can update status.,Bu bırak Uygulama onayı bekliyor. Sadece bırak Apporver durumunu güncelleyebilirsiniz.
+This Time Log Batch has been billed.,Bu Saat Günlük Toplu fatura edilmiştir.
+This Time Log Batch has been cancelled.,Bu Saat Günlük Toplu iptal edildi.
+This Time Log conflicts with {0},This Time Log ile çakışan {0}
+This format is used if country specific format is not found,Ülkeye özgü biçimi bulunamadı değilse bu formatı kullanılır
+This is a root account and cannot be edited.,Bu root hesabı ve düzenlenemez.
+This is a root customer group and cannot be edited.,Bu bir kök müşteri grubu ve düzenlenemez.
+This is a root item group and cannot be edited.,Bu bir kök öğe grup ve düzenlenemez.
+This is a root sales person and cannot be edited.,Bu bir kök satış kişi ve düzenlenemez.
+This is a root territory and cannot be edited.,Bu bir kök bölge ve düzenlenemez.
+This is an example website auto-generated from ERPNext,Bu ERPNext itibaren otomatik olarak üretilen bir örnek web sitesi
+This is the number of the last created transaction with this prefix,"Bu, bu önek ile son oluşturulan işlem sayısı"
+This will be used for setting rule in HR module,Bu HR modülünde kural ayarlanması için kullanılacak
+Thread HTML,Konu HTML
+Thursday,Perşembe
+Time Log,Zaman yap
+Time Log Batch,Saat Günlük Toplu
+Time Log Batch Detail,Saat Günlük Toplu Detay
+Time Log Batch Details,Saat Günlük Toplu Detayları
+Time Log Batch {0} must be 'Submitted',Saat Günlük Toplu {0} 'Ekleyen' olmalı
+Time Log Status must be Submitted.,Zaman Günlüğü Durum gönderildi gerekir.
+Time Log for tasks.,Görevler için Zaman yap.
+Time Log is not billable,Zaman yap faturalandırılabilir değil
+Time Log {0} must be 'Submitted',Zaman yap {0} 'Ekleyen' olmalı
+Time Zone,Saat Dilimi
+Time Zones,Saat Dilimleri
+Time and Budget,Zaman ve Bütçe
+Time at which items were delivered from warehouse,Ürün depodan teslim edildi hangi zaman
+Time at which materials were received,Malzemeler alındı ​​hangi zaman
+Title,Başlık
+Titles for print templates e.g. Proforma Invoice.,Baskı şablonları için Başlıklar Proforma Fatura örneğin.
+To,Kime
+To Currency,Para Birimi
+To Date,Bugüne kadar
+To Date should be same as From Date for Half Day leave,Tarih Yarım Gün izni Tarihten itibaren aynı olmalıdır
+To Date should be within the Fiscal Year. Assuming To Date = {0},Tarih Mali Yılı içinde olmalıdır. Tarihi varsayarsak = {0}
+To Discuss,Görüşecek
+To Do List,Yapılacaklar Listesi
+To Package No.,No Paketi
+To Produce,Üretiliyor
+To Time,Time
+To Value,Değer Vermek
+To Warehouse,Atölyesi'ne
+"To add child nodes, explore tree and click on the node under which you want to add more nodes.","Alt düğümlerin eklemek için, ağaç keşfetmek ve daha fazla düğüm eklemek istediğiniz altında düğüm üzerine tıklayın."
+"To assign this issue, use the ""Assign"" button in the sidebar.","Bu sorunu atamak kenar çubuğunda ""Ata"" düğmesini kullanın."
+To create a Bank Account,Banka Hesabı oluşturmak için
+To create a Tax Account,Vergi Hesabı oluşturmak için
+"To create an Account Head under a different company, select the company and save customer.","Farklı bir şirket altında bir Hesap Başkanı oluşturmak için, şirket seçmek ve müşteri kaydedin."
+To date cannot be before from date,Tarihten itibaren bugüne kadar önce olamaz
+To enable <b>Point of Sale</b> features,Satılık </ b> özelliklerinin <b> Noktası etkinleştirmek için
+To enable <b>Point of Sale</b> view,Satış </ b> bakış <b> Noktası etkinleştirmek için
+To get Item Group in details table,Detayları tabloda Ürün Grubu almak
+"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Arka arkaya vergi dahil {0} Ürün fiyatına, satırlara vergiler {1} da dahil edilmelidir"
+"To merge, following properties must be same for both items","Birleştirmek için, aşağıdaki özellikleri hem öğeler için aynı olmalıdır"
+"To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled.","Belirli bir işlem Fiyatlandırma Kuralı uygulamak değil, tüm uygulanabilir Fiyatlandırması Kuralları devre dışı bırakılmalıdır."
+"To set this Fiscal Year as Default, click on 'Set as Default'","Varsayılan olarak bu Mali Yılı ayarlamak için, 'Varsayılan olarak ayarla' seçeneğini tıklayın"
+To track any installation or commissioning related work after sales,Satış sonrası herhangi bir kurulum veya ilgili çalışmayı devreye izlemek için
+"To track brand name in the following documents Delivery Note, Opportunity, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No","Aşağıdaki dokümanlar İrsaliye, Fırsat, Malzeme Request, Öğe, Sipariş, Satın Alma Fişi, Alıcı Alındı, Teklifi, Satış Fatura, Satış BOM, Satış Siparişi, Seri No markası izlemek için"
+To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,Bunların seri nos dayalı satış ve satın alma belgeleri öğeyi izlemek için. Bu da ürünün garanti bilgilerini izlemek için kullanılabilir olduğunu.
+To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,Satış öğeleri izlemek ve toplu nos <br> <b> Tercih Sanayi ile belgeleri satın almak için: Kimya vb </ b>
+To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,Barkod kullanarak öğeleri izlemek için. Siz ürünün barkodu tarayarak İrsaliye ve Fatura Satış öğeleri girmek mümkün olacak.
+Too many columns. Export the report and print it using a spreadsheet application.,Çok fazla sütun. Raporu vermek ve bir elektronik tablo uygulaması kullanarak yazdırın.
+Tools,Araçlar
+Total,Toplam
+Total ({0}),Toplam ({0})
+Total Advance,Toplam Advance
+Total Amount,Toplam Tutar
+Total Amount To Pay,Pay Tutarı
+Total Amount in Words,Kelimeler Toplam Tutar
+Total Billing This Year: ,
+Total Characters,Toplam Karakterler
+Total Claimed Amount,Toplam İddia Tutar
+Total Commission,Toplam Komisyonu
+Total Cost,Toplam Maliyet
+Total Credit,Toplam Kredi
+Total Debit,Toplam Borç
+Total Debit must be equal to Total Credit. The difference is {0},"Toplam Bankamatik Toplam Kredi eşit olmalıdır. Aradaki fark, {0}"
+Total Deduction,Toplam Kesintisi
+Total Earning,Toplam Kazanç
+Total Experience,Toplam Deneyimi
+Total Hours,Toplam Saat
+Total Hours (Expected),Toplam Saat (Beklenen)
+Total Invoiced Amount,Toplam FaturalanmıĢ Tutar
+Total Leave Days,Toplam bırak Günler
+Total Leaves Allocated,Ayrılan toplam Yapraklar
+Total Message(s),Toplam Mesaj (lar)
+Total Operating Cost,Toplam İşletme Maliyeti
+Total Points,Toplam Puan
+Total Raw Material Cost,Toplam Hammadde Maliyeti
+Total Sanctioned Amount,Toplam Yaptırıma Tutar
+Total Score (Out of 5),Toplam Puan (5 üzerinden)
+Total Tax (Company Currency),Toplam Vergi (Şirket para birimi)
+Total Taxes and Charges,Toplam Vergi ve Harçlar
+Total Taxes and Charges (Company Currency),Toplam Vergi ve Harçlar (Company Para)
+Total allocated percentage for sales team should be 100,Satış ekibi için ayrılan toplam yüzde 100 olmalıdır
+Total amount of invoices received from suppliers during the digest period,Sindirmek dönemde tedarikçilerden alınan faturaların toplam tutarı
+Total amount of invoices sent to the customer during the digest period,Özet döneminde müşteriye gönderilen faturaların toplam tutarı
+Total cannot be zero,Toplam sıfır olamaz
+Total in words,Bir deyişle toplam
+Total points for all goals should be 100. It is {0},Tüm hedefler için toplam puan 100 olmalıdır. Bu {0}
+Total valuation for manufactured or repacked item(s) can not be less than total valuation of raw materials,Üretilen veya repacked öğe (ler) için Toplam değerleme hammadde toplam değerlemesi az olamaz
+Total weightage assigned should be 100%. It is {0},Atanan toplam weightage% 100 olmalıdır. Bu {0}
+Totals,Toplamları
+Track Leads by Industry Type.,Parça Sanayi Türüne göre Talepleri.
+Track this Delivery Note against any Project,Herhangi Projesi karşı bu Teslim Not Takip
+Track this Sales Order against any Project,Herhangi Projesi karşı bu Satış Sipariş Takip
+Transaction,Işlem
+Transaction Date,İşlem Tarihi
+Transaction not allowed against stopped Production Order {0},İşlem durduruldu Üretim Emri karşı izin {0}
+Transfer,Transfer
+Transfer Material,Transferi Malzeme
+Transfer Raw Materials,Hammaddeleri Transferi
+Transferred Qty,Adet Aktarılan
+Transportation,Taşıma
+Transporter Info,Transporter Bilgi
+Transporter Name,Transporter Adı
+Transporter lorry number,Transporter kamyon sayısı
+Travel,Gezi
+Travel Expenses,Seyahat Giderleri
+Tree Type,Ağaç Type
+Tree of Item Groups.,Ürün Grupları ağaç.
+Tree of finanial Cost Centers.,Finanial Maliyet Merkezlerinin ağaç.
+Tree of finanial accounts.,Finanial hesapların ağaç.
+Trial Balance,Mizan
+Tuesday,Salı
+Type,Tip
+Type of document to rename.,Yeniden adlandırmak için belge türü.
+"Type of leaves like casual, sick etc.","Casual, hasta vs gibi yaprakların Türü"
+Types of Expense Claim.,Gider İstem Türleri.
+Types of activities for Time Sheets,Time Sheets için faaliyetlerin Türleri
+"Types of employment (permanent, contract, intern etc.).","Istihdam (daimi, sözleşmeli, stajyer vb) Türleri."
+UOM Conversion Detail,UOM Dönüşüm Detay
+UOM Conversion Details,UOM Dönüşüm Detaylar
+UOM Conversion Factor,UOM Dönüşüm Faktörü
+UOM Conversion factor is required in row {0},UOM Dönüşüm faktörü satırda gereklidir {0}
+UOM Name,UOM Adı
+UOM coversion factor required for UOM: {0} in Item: {1},UOM için gerekli UoM coversion faktörü: {0} Öğe: {1}
+Under AMC,AMC altında
+Under Graduate,Lisans Altında
+Under Warranty,Garanti Altında
+Unit,Birim
+Unit of Measure,Ölçü Birimi
+Unit of Measure {0} has been entered more than once in Conversion Factor Table,Ölçü Birimi {0} daha Katsayı Tablo kez daha girildi
+"Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","Bu madde (örneğin Kg, Ünitesi, Hayır, Pair) ölçü birimi."
+Units/Hour,Birimler / Saat
+Units/Shifts,Birimler / Kayması
+Unpaid,Ödenmemiş
+Unreconciled Payment Details,Uzlaşmayan Ödeme Ayrıntıları
+Unscheduled,Plânlanmamış
+Unsecured Loans,Teminatsız Krediler
+Unstop,Tıpasını çıkarmak
+Unstop Material Request,Dolgusu Malzeme Talebi
+Unstop Purchase Order,Dolgusu Sipariş
+Unsubscribed,Abonelikten
+Update,Güncelleme
+Update Clearance Date,Güncelleme Tarihi Gümrükleme
+Update Cost,Güncelleme Maliyeti
+Update Finished Goods,Güncelleme Mamüller
+Update Landed Cost,Güncelleme Maliyet indi
+Update Series,Update Serisi
+Update Series Number,Update Serisi Sayı
+Update Stock,Stok güncellemek
+Update bank payment dates with journals.,Dergi ile banka ödeme tarihleri ​​güncelleyin.
+Update clearance date of Journal Entries marked as 'Bank Vouchers',Journal Entries Update temizlenme tarihi 'Banka Fişler' olarak işaretlenmiş
+Updated,Güncellenmiş
+Updated Birthday Reminders,Güncelleme Birthday Reminders
+Upload Attendance,Seyirci yükle
+Upload Backups to Dropbox,Dropbox Yedekler yükle
+Upload Backups to Google Drive,Google Drive'a Yedekler yükle
+Upload HTML,Yükleme HTML
+Upload a .csv file with two columns: the old name and the new name. Max 500 rows.,Eski adı ve yeni adı:. İki sütunlu bir csv dosyası yükleyin. Max 500 satırlar.
+Upload attendance from a .csv file,Bir. Csv dosyasından katılım yükle
+Upload stock balance via csv.,Csv üzerinden stok dengesini yükleyin.
+Upload your letter head and logo - you can edit them later.,Mektup baş ve logo yükleyin - daha sonra bunları düzenleyebilirsiniz.
+Upper Income,Üst Gelir
+Urgent,Acil
+Use Multi-Level BOM,Kullanım Multi-Level BOM
+Use SSL,SSL kullanın
+Used for Production Plan,Üretim Planı için kullanılan
+User,Kullanıcı
+User ID,Kullanıcı kimliği
+User ID not set for Employee {0},Kullanıcı kimliği Çalışanlara ayarlı değil {0}
+User Name,Kullanıcı Adı
+User Name or Support Password missing. Please enter and try again.,Kullanıcı Adı veya Destek Şifre eksik. Girin ve tekrar deneyin.
+User Remark,Kullanıcı Açıklama
+User Remark will be added to Auto Remark,Kullanıcı Açıklama Otomatik Remark eklenecektir
+User Remarks is mandatory,Kullanıcı zorunludur Açıklamalar
+User Specific,Kullanıcı Özgül
+User must always select,Kullanıcı her zaman seçmelisiniz
+User {0} is already assigned to Employee {1},Kullanıcı {0} zaten Çalışan atanmış {1}
+User {0} is disabled,Kullanıcı {0} devre dışı
+Username,Kullanıcı Adı
+Users with this role are allowed to create / modify accounting entry before frozen date,Bu role sahip kullanıcılar dondurulmuş tarihten önce muhasebe girdisini değiştirmek / oluşturmak için izin verilir
+Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,Bu role sahip kullanıcılar dondurulmuş hesaplara karşı muhasebe kayıtlarını değiştirmek / dondurulmuş hesapları ayarlamak ve oluşturmak için izin verilir
+Utilities,Programlar
+Utility Expenses,Yardımcı Giderleri
+Valid For Territories,Toprakları için geçerli
+Valid From,Itibaren geçerli
+Valid Upto,Geçerli e kadar
+Valid for Territories,Toprakları için geçerli
+Validate,Onayla
+Valuation,Değerleme
+Valuation Method,Değerleme Yöntemi
+Valuation Rate,Değerleme Oranı
+Valuation Rate required for Item {0},Ürün için gerekli Değerleme Oranı {0}
+Valuation and Total,Değerleme ve Toplam
+Value,Değer
+Value or Qty,Değer veya Adet
+Vehicle Dispatch Date,Araç Sevk Tarihi
+Vehicle No,Araç yok
+Venture Capital,Girişim Sermayesi
+Verified By,Onaylı
+View Ledger,Görünüm Ledger
+View Now,Şimdi görüntüle
+Visit report for maintenance call.,Bakım çağrısı için rapor edin.
+Voucher #,Çeki #
+Voucher Detail No,Fiş Detay yok
+Voucher Detail Number,Fiş Detay Numarası
+Voucher ID,Çeki Kimliği
+Voucher No,Fiş No
+Voucher Type,Fiş Türü
+Voucher Type and Date,Fiş Tipi ve Tarih
+Walk In,Walk In
+Warehouse,Depo
+Warehouse Contact Info,Depo İletişim Bilgileri
+Warehouse Detail,Depo Detay
+Warehouse Name,Depo Adı
+Warehouse and Reference,Depo ve Referans
+Warehouse can not be deleted as stock ledger entry exists for this warehouse.,"Hisse senedi defteri girişi, bu depo için var gibi depo silinemez."
+Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,Depo sadece Stok Giriş / İrsaliye / Satın Alma Makbuzu ile değiştirilebilir
+Warehouse cannot be changed for Serial No.,Depo Seri No için değiştirilemez
+Warehouse is mandatory for stock Item {0} in row {1},Depo stok Ürün için zorunludur {0} üst üste {1}
+Warehouse is missing in Purchase Order,Depo Satınalma Siparişi eksik
+Warehouse not found in the system,Sistemde bulunan değildir Depo
+Warehouse required for stock Item {0},Stok Öğe için gerekli depo {0}
+Warehouse where you are maintaining stock of rejected items,Eğer reddedilen öğelerin stok sürdürdüğünüz Atölyesi
+Warehouse {0} can not be deleted as quantity exists for Item {1},Ürün miktarı için var gibi depo {0} silinemez {1}
+Warehouse {0} does not belong to company {1},Depo {0} ait değil şirket {1}
+Warehouse {0} does not exist,Depo {0} yok
+Warehouse {0}: Company is mandatory,Depo {0}: Şirket zorunludur
+Warehouse {0}: Parent account {1} does not bolong to the company {2},Depo {0}: Ana hesap {1} şirkete BOLONG gelmez {2}
+Warehouse-Wise Stock Balance,Depo-Wise Stok Bakiye
+Warehouse-wise Item Reorder,Depo-bilge Ürün Reorder
+Warehouses,Depolar
+Warehouses.,Depolar.
+Warn,Uyarmak
+Warning: Leave application contains following block dates,Uyarı: Uygulama aşağıdaki blok tarih içeriyor bırak
+Warning: Material Requested Qty is less than Minimum Order Qty,Uyarı: Adet İstenen Malzeme Minimum Sipariş Miktar az
+Warning: Sales Order {0} already exists against same Purchase Order number,Uyarı: Satış Sipariş {0} zaten Aynı Sipariş sayıda karşı var
+Warning: System will not check overbilling since amount for Item {0} in {1} is zero,Uyarı: Sistem {0} {1} sıfır olarak Ürün için bir miktar beri overbilling kontrol olmaz
+Warranty / AMC Details,Garanti / AMC Detayları
+Warranty / AMC Status,Garanti / AMC Durum
+Warranty Expiry Date,Garanti Son Kullanma Tarihi
+Warranty Period (Days),Garanti Süresi (Gün)
+Warranty Period (in days),(Gün) Garanti Süresi
+We buy this Item,Bu Ürün satın
+We sell this Item,Biz bu Ürün satmak
+Website,Web sitesi
+Website Description,Web Sitesi Açıklaması
+Website Item Group,Web Sitesi Ürün Grubu
+Website Item Groups,Web Sitesi Ürün Grupları
+Website Settings,Web Sitesi Ayarları
+Website Warehouse,Web Sitesi Depo
+Wednesday,Çarşamba
+Weekly,Haftalık
+Weekly Off,Haftalık Kapalı
+Weight UOM,Ağırlık UOM
+"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Ağırlık belirtilen, \n ""Ağırlık uom"" belirtiniz çok"
+Weightage,Weightage
+Weightage (%),Weightage (%)
+Welcome,Hoşgeldiniz
+Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!,ERPNext hoşgeldiniz. Önümüzdeki birkaç dakika içinde biz size kurulum sizin ERPNext hesap yardımcı olacaktır. Deneyin ve biraz uzun sürecek olsa bile sahip olduğu kadar çok bilgi doldurun. Bu size daha sonra çok zaman kazandıracak. Iyi şanslar!
+Welcome to ERPNext. Please select your language to begin the Setup Wizard.,ERPNext hoşgeldiniz. Kurulum Sihirbazı başlatmak için dilinizi seçiniz.
+What does it do?,Ne yapar?
+"When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.","Kontrol işlemlerin herhangi bir ""gönderildi"" zaman, bir e-posta pop-up otomatik ek olarak işlem ile, bu işlem ilişkili ""İletişim"" bir e-posta göndermek için açıldı. Kullanıcı veya e-posta göndermek olmayabilir."
+"When submitted, the system creates difference entries to set the given stock and valuation on this date.","Teslim olduğunda, sistem bu tarihte verilen stok ve değerleme ayarlamak için fark girdilerini oluşturur."
+Where items are stored.,Ürün yerlerde saklanır.
+Where manufacturing operations are carried out.,Imalat işlemleri yürütülmektedir nerede.
+Widowed,Dul
+Will be calculated automatically when you enter the details,Eğer bilgilerinizi girdiğinizde otomatik olarak hesaplanır
+Will be updated after Sales Invoice is Submitted.,Satış Faturası Ekleyen sonra güncellenecektir.
+Will be updated when batched.,Batched zaman güncellenecektir.
+Will be updated when billed.,Gagalı zaman güncellenecektir.
+Wire Transfer,Elektronik transfer
+With Operations,Operasyon ile
+With Period Closing Entry,Dönem Kapanış Girişi ile
+Work Details,İş Detayları
+Work Done,Çalışma Bitti
+Work In Progress,Work in Progress
+Work-in-Progress Warehouse,Work-in-Progress Warehouse
+Work-in-Progress Warehouse is required before Submit,Work-in-Progress Warehouse sun önce gerekli
+Working,Çalışıyor
+Working Days,Çalışma Günleri
+Workstation,İş İstasyonu
+Workstation Name,İş İstasyonu Adı
+Write Off Account,Hesabı Kapalı yaz
+Write Off Amount,Tutar Kapalı yaz
+Write Off Amount <=,Tutar Kapalı yaz <=
+Write Off Based On,Tabanlı Açık Kapalı yazın
+Write Off Cost Center,Maliyet Merkezi Kapalı yaz
+Write Off Outstanding Amount,Üstün Tutar Kapalı yaz
+Write Off Voucher,Fiş Kapalı yaz
+Wrong Template: Unable to find head row.,Yanlış Şablon: kafa satır bulmak için açılamıyor.
+Year,Yıl
+Year Closed,Yıl Kapalı
+Year End Date,Yıl Bitiş Tarihi
+Year Name,Yıl Adı
+Year Start Date,Yıl Başlangıç ​​Tarihi
+Year of Passing,Passing Yılı
+Yearly,Yıllık
+Yes,Evet
+You are not authorized to add or update entries before {0},Sen önce girdilerini eklemek veya güncellemek için yetkiniz yok {0}
+You are not authorized to set Frozen value,Sen Frozen değerini ayarlamak için yetkiniz yok
+You are the Expense Approver for this record. Please Update the 'Status' and Save,Siz bu kayıt için Gider Onaylayan vardır. 'Durum' güncelleyin ve kaydet Lütfen
+You are the Leave Approver for this record. Please Update the 'Status' and Save,Siz bu kayıt için bırak Onaylayan vardır. 'Durum' güncelleyin ve kaydet Lütfen
+You can enter any date manually,Sen elle herhangi bir tarih girebilirsiniz
+You can enter the minimum quantity of this item to be ordered.,"Sipariş edilmesi, bu maddenin asgari miktarı girebilirsiniz."
+You can not change rate if BOM mentioned agianst any item,BOM herhangi bir öğenin agianst söz eğer hızını değiştiremezsiniz
+You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Hayır hem Teslim Not giremezsiniz ve Satış Fatura No birini girin.
+You can not enter current voucher in 'Against Journal Voucher' column,Sen sütununda 'Journal Fiş Karşı' cari fiş giremezsiniz
+You can set Default Bank Account in Company master,Siz Firma master Varsayılan Banka Hesap ayarlayabilirsiniz
+You can start by selecting backup frequency and granting access for sync,Yedekleme sıklığını seçme ve senkronizasyon için erişim sağlayarak başlayabilirsiniz
+You can submit this Stock Reconciliation.,Bu Stok Uzlaşma gönderebilirsiniz.
+You can update either Quantity or Valuation Rate or both.,Siz Miktar veya Değerleme Oranı ya da her ikisini güncelleyebilirsiniz.
+You cannot credit and debit same account at the same time,Sen kredi ve aynı anda aynı hesap borçlandıramıyoruz
+You have entered duplicate items. Please rectify and try again.,Sen yinelenen öğeleri girdiniz. Düzeltmek ve tekrar deneyin.
+You may need to update: {0},Güncellemeniz gerekebilir: {0}
+You must Save the form before proceeding,Ilerlemeden önce formu kaydedin gerekir
+Your Customer's TAX registration numbers (if applicable) or any general information,Müşterinin VERGİ kayıt numaraları (varsa) ya da herhangi bir genel bilgiler
+Your Customers,Müşterileriniz
+Your Login Id,Sizin Giriş Kimliği
+Your Products or Services,Sizin ürün veya hizmetler
+Your Suppliers,Sizin Tedarikçiler
+Your email address,Eposta adresiniz
+Your financial year begins on,Sizin mali yıl başlıyor
+Your financial year ends on,Sizin mali yıl sona eriyor
+Your sales person who will contact the customer in future,Gelecekte müşteri irtibata geçecektir satış kişi
+Your sales person will get a reminder on this date to contact the customer,Sizin satış kişi müşteri iletişim için bu tarihte bir hatırlatma alacak
+Your setup is complete. Refreshing...,Kurulum tamamlandı. Yenileniyor ...
+Your support email id - must be a valid email - this is where your emails will come!,Sizin destek e-posta id - geçerli bir email olmalı - e-postalar gelecektir yerdir!
+[Error],[Hata]
+[Select],[Seç]
+`Freeze Stocks Older Than` should be smaller than %d days.,`Daha Eski Freeze Hisse`% d gün daha küçük olmalıdır.
+and,ve
+are not allowed.,izin verilmez.
+assigned by,tarafından atanan
+cannot be greater than 100,100 'den daha büyük olamaz
+"e.g. ""Build tools for builders""","örneğin """"Inşaatçılar için araçlar inşa"
+"e.g. ""MC""","örneğin ""MC """
+"e.g. ""My Company LLC""","örneğin ""Benim Company LLC """
+e.g. 5,örneğin 5
+"e.g. Bank, Cash, Credit Card","örn: Banka, Nakit, Kredi Kartı"
+"e.g. Kg, Unit, Nos, m","örneğin Kg, Birimi, Nos, m"
+e.g. VAT,örneğin KDV
+eg. Cheque Number,örn. Çek Numarası
+example: Next Day Shipping,örnek: Next Day Shipping
+lft,lft
+old_parent,old_parent
+rgt,rgt
+subject,konu
+to,(hesaba)
+website page link,web sayfa linki
+{0} '{1}' not in Fiscal Year {2},{0} '{1}' değil Mali Yılı {2}
+{0} Credit limit {0} crossed,{0} Kredi limiti {0} geçti
+{0} Serial Numbers required for Item {0}. Only {0} provided.,{0} öğesi için gerekli Seri Numaraları {0}. Sadece {0} sağlanmaktadır.
+{0} budget for Account {1} against Cost Center {2} will exceed by {3},{0} Hesabı için bütçe {1} Maliyet Merkezi karşı {2} {3} tarafından aşacaktır
+{0} can not be negative,{0} negatif olamaz
+{0} created,{0} oluşturuldu
+{0} does not belong to Company {1},{0} Şirket'e ait olmayan {1}
+{0} entered twice in Item Tax,{0} Ürün Vergi iki kez girdi
+{0} is an invalid email address in 'Notification Email Address',{0} 'Bildirim E-posta Adresi' Geçersiz bir e-posta adresi
+{0} is mandatory,{0} zorunludur
+{0} is mandatory for Item {1},{0} Ürün için zorunludur {1}
+{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} zorunludur. Belki Döviz rekor {2} ile {1} için yaratılmış değildir.
+{0} is not a stock Item,"{0}, bir hisse senedi değil Öğe"
+{0} is not a valid Batch Number for Item {1},{0} Ürün için geçerli bir parti numarası değil {1}
+{0} is not a valid Leave Approver. Removing row #{1}.,{0} geçerli bir ara Onaylayan değildir. Çıkarma satır # {1}.
+{0} is not a valid email id,{0} geçerli bir e-posta id değil
+{0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.,{0} şimdi varsayılan Mali Yılı. Etkili olması değişim için tarayıcınızı yenileyin.
+{0} is required,{0} gereklidir
+{0} must be a Purchased or Sub-Contracted Item in row {1},{0} aralıksız bir satın veya Alt-Sözleşmeli Ürün olmalı {1}
+{0} must be reduced by {1} or you should increase overflow tolerance,{0} {1} azaltılabilir olmalıdır ya taşma toleransını artırmak gerekir
+{0} must have role 'Leave Approver',{0} rol 'bırak Approver' olmalı
+{0} valid serial nos for Item {1},Ürün için {0} geçerli bir seri no {1}
+{0} {1} against Bill {2} dated {3},{0} {1} Bill karşı {2} tarihli {3}
+{0} {1} against Invoice {2},{0} {1} Faturaya karşı {2}
+{0} {1} has already been submitted,{0} {1} zaten gönderildi
+{0} {1} has been modified. Please refresh.,"{0}, {1} modifiye edilmiştir. Lütfen yenileyin."
+{0} {1} is not submitted,{0} {1} teslim edilmez
+{0} {1} must be submitted,{0} {1} sunulmalıdır
+{0} {1} not in any Fiscal Year,{0} {1} hiçbir Mali Yılı
+{0} {1} status is 'Stopped',{0} {1} status 'Durduruldu' olduğunu
+{0} {1} status is Stopped,{0} {1} durumu Durduruldu
+{0} {1} status is Unstopped,{0} {1} durumu Unstopped olduğunu
+{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Maliyet Merkezi Ürün için zorunludur {2}
+{0}: {1} not found in Invoice Details table,{0}: {1} Fatura Ayrıntıları tablosunda bulunamadı

@@ -1,2 +1,2 @@
-frappe==4.0.1
+frappe
 unidecode

@@ -10,9 +10,9 @@ def get_columns(filters, trans):
 	validate_filters(filters)
 
 	# get conditions for based_on filter cond
-	based_on_details = based_wise_colums_query(filters.get("based_on"), trans)
+	based_on_details = based_wise_columns_query(filters.get("based_on"), trans)
 	# get conditions for periodic filter cond
-	period_cols, period_select = period_wise_colums_query(filters, trans)
+	period_cols, period_select = period_wise_columns_query(filters, trans)
 	# get conditions for grouping filter cond
 	group_by_cols = group_wise_column(filters.get("group_by"))
 
@@ -23,7 +23,7 @@ def get_columns(filters, trans):
 
 	conditions = {"based_on_select": based_on_details["based_on_select"], "period_wise_select": period_select,
 		"columns": columns, "group_by": based_on_details["based_on_group_by"], "grbc": group_by_cols, "trans": trans,
-		"addl_tables": based_on_details["addl_tables"]}
+		"addl_tables": based_on_details["addl_tables"], "addl_tables_relational_cond": based_on_details.get("addl_tables_relational_cond", "")}
 
 	return conditions
 
@@ -60,10 +60,10 @@ def get_data(filters, conditions):
 			inc = 1
 		data1 = frappe.db.sql(""" select %s from `tab%s` t1, `tab%s Item` t2 %s
 					where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s and
-					t1.docstatus = 1 %s
+					t1.docstatus = 1 %s %s
 					group by %s
 				""" % (query_details,  conditions["trans"],  conditions["trans"], conditions["addl_tables"], "%s",
-					"%s", cond, conditions["group_by"]), (filters.get("company"),
+					"%s", conditions.get("addl_tables_relational_cond"), cond, conditions["group_by"]), (filters.get("company"),
 					filters["fiscal_year"]),as_list=1)
 
 		for d in range(len(data1)):
@@ -75,10 +75,10 @@ def get_data(filters, conditions):
 			#to get distinct value of col specified by group_by in filter
 			row = frappe.db.sql("""select DISTINCT(%s) from `tab%s` t1, `tab%s Item` t2 %s
 						where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s
-						and t1.docstatus = 1 and %s = %s
+						and t1.docstatus = 1 and %s = %s %s
 					""" %
 					(sel_col,  conditions["trans"],  conditions["trans"], conditions["addl_tables"],
-						"%s", "%s", conditions["group_by"], "%s"),
+						"%s", "%s", conditions["group_by"], "%s", conditions.get("addl_tables_relational_cond")),
 					(filters.get("company"), filters.get("fiscal_year"), data1[d][0]), as_list=1)
 
 			for i in range(len(row)):
@@ -87,11 +87,11 @@ def get_data(filters, conditions):
 				#get data for group_by filter
 				row1 = frappe.db.sql(""" select %s , %s from `tab%s` t1, `tab%s Item` t2 %s
 							where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s
-							and t1.docstatus = 1 and %s = %s and %s = %s
+							and t1.docstatus = 1 and %s = %s and %s = %s %s
 						""" %
 						(sel_col, conditions["period_wise_select"], conditions["trans"],
 						 	conditions["trans"], conditions["addl_tables"], "%s", "%s", sel_col,
-							"%s", conditions["group_by"], "%s"),
+							"%s", conditions["group_by"], "%s", conditions.get("addl_tables_relational_cond")),
 						(filters.get("company"), filters.get("fiscal_year"), row[i][0],
 							data1[d][0]), as_list=1)
 
@@ -103,11 +103,11 @@ def get_data(filters, conditions):
 	else:
 		data = frappe.db.sql(""" select %s from `tab%s` t1, `tab%s Item` t2 %s
 					where t2.parent = t1.name and t1.company = %s and t1.fiscal_year = %s and
-					t1.docstatus = 1 %s
+					t1.docstatus = 1 %s %s
 					group by %s
 				""" %
 				(query_details, conditions["trans"], conditions["trans"], conditions["addl_tables"],
-					"%s", "%s", cond,conditions["group_by"]),
+					"%s", "%s", cond, conditions.get("addl_tables_relational_cond", ""), conditions["group_by"]),
 				(filters.get("company"), filters.get("fiscal_year")), as_list=1)
 
 	return data
@@ -115,7 +115,7 @@ def get_data(filters, conditions):
 def get_mon(dt):
 	return getdate(dt).strftime("%b")
 
-def period_wise_colums_query(filters, trans):
+def period_wise_columns_query(filters, trans):
 	query_details = ''
 	pwc = []
 	bet_dates = get_period_date_ranges(filters.get("period"), filters.get("fiscal_year"))
@@ -132,9 +132,9 @@ def period_wise_colums_query(filters, trans):
 	else:
 		pwc = [filters.get("fiscal_year") + " (Qty):Float:120",
 			filters.get("fiscal_year") + " (Amt):Currency:120"]
-		query_details = " SUM(t2.qty), SUM(t1.grand_total),"
+		query_details = " SUM(t2.qty), SUM(t2.base_amount),"
 
-	query_details += 'SUM(t2.qty), SUM(t1.grand_total)'
+	query_details += 'SUM(t2.qty), SUM(t2.base_amount)'
 	return pwc, query_details
 
 def get_period_wise_columns(bet_dates, period, pwc):
@@ -147,7 +147,7 @@ def get_period_wise_columns(bet_dates, period, pwc):
 
 def get_period_wise_query(bet_dates, trans_date, query_details):
 	query_details += """SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.qty, NULL)),
-					SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t1.grand_total, NULL)),
+					SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.base_amount, NULL)),
 				""" % {"trans_date": trans_date, "sd": bet_dates[0],"ed": bet_dates[1]}
 	return query_details
 
@@ -191,7 +191,7 @@ def get_period_month_ranges(period, fiscal_year):
 
 	return period_month_ranges
 
-def based_wise_colums_query(based_on, trans):
+def based_wise_columns_query(based_on, trans):
 	based_on_details = {}
 
 	# based_on_cols, based_on_select, based_on_group_by, addl_tables
@@ -224,12 +224,14 @@ def based_wise_colums_query(based_on, trans):
 		based_on_details["based_on_select"] = "t1.supplier, t3.supplier_type,"
 		based_on_details["based_on_group_by"] = 't1.supplier'
 		based_on_details["addl_tables"] = ',`tabSupplier` t3'
+		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 
 	elif based_on == 'Supplier Type':
 		based_on_details["based_on_cols"] = ["Supplier Type:Link/Supplier Type:140"]
 		based_on_details["based_on_select"] = "t3.supplier_type,"
 		based_on_details["based_on_group_by"] = 't3.supplier_type'
-		based_on_details["addl_tables"] =',`tabSupplier` t3'
+		based_on_details["addl_tables"] = ',`tabSupplier` t3'
+		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 
 	elif based_on == "Territory":
 		based_on_details["based_on_cols"] = ["Territory:Link/Territory:120"]

@@ -190,7 +190,7 @@
   {
    "fieldname": "default_currency", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Currency", 
    "no_copy": 1, 
    "options": "Currency", 
@@ -199,7 +199,7 @@
   {
    "fieldname": "default_price_list", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Price List", 
    "options": "Price List", 
    "permlevel": 0
@@ -207,7 +207,7 @@
   {
    "fieldname": "default_taxes_and_charges", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Taxes and Charges", 
    "options": "Sales Taxes and Charges Master", 
    "permlevel": 0
@@ -246,7 +246,7 @@
   {
    "fieldname": "default_sales_partner", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Sales Partner", 
    "oldfieldname": "default_sales_partner", 
    "oldfieldtype": "Link", 
@@ -282,7 +282,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2014-05-07 05:36:46.466246", 
+ "modified": "2014-08-07 06:57:25.248707", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Customer", 
@@ -290,7 +290,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -311,7 +311,6 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -319,8 +318,8 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "restrict": 1, 
    "role": "Sales Master Manager", 
+   "set_user_permissions": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -333,5 +332,6 @@
    "write": 1
   }
  ], 
- "search_fields": "customer_name,customer_group,territory"
+ "search_fields": "customer_name,customer_group,territory", 
+ "title_field": "customer_name"
 }

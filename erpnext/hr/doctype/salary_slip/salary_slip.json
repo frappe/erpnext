@@ -74,16 +74,11 @@
   {
    "fieldname": "letter_head", 
    "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
    "label": "Letter Head", 
    "options": "Letter Head", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "column_break1", 
-   "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
    "permlevel": 0, 
-   "width": "50%"
+   "print_hide": 1
   }, 
   {
    "fieldname": "fiscal_year", 
@@ -108,6 +103,13 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "column_break1", 
+   "fieldtype": "Column Break", 
+   "oldfieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
    "fieldname": "month", 
    "fieldtype": "Select", 
    "in_filter": 1, 
@@ -123,8 +125,8 @@
   }, 
   {
    "fieldname": "total_days_in_month", 
-   "fieldtype": "Data", 
-   "label": "Total Working Days In The Month", 
+   "fieldtype": "Float", 
+   "label": "Working Days", 
    "oldfieldname": "total_days_in_month", 
    "oldfieldtype": "Int", 
    "permlevel": 0, 
@@ -180,13 +182,14 @@
   }, 
   {
    "fieldname": "amended_from", 
-   "fieldtype": "Data", 
+   "fieldtype": "Link", 
    "hidden": 0, 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
    "oldfieldtype": "Data", 
+   "options": "Salary Slip", 
    "permlevel": 0, 
    "print_hide": 1, 
    "report_hide": 0
@@ -208,6 +211,12 @@
    "width": "50%"
   }, 
   {
+   "fieldname": "html_21", 
+   "fieldtype": "HTML", 
+   "options": "<label>Earnings</label>", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "earning_details", 
    "fieldtype": "Table", 
    "label": "Salary Structure Earnings", 
@@ -223,6 +232,12 @@
    "oldfieldtype": "Column Break", 
    "permlevel": 0, 
    "width": "50%"
+  }, 
+  {
+   "fieldname": "html_24", 
+   "fieldtype": "HTML", 
+   "options": "<label>Deductions</label>", 
+   "permlevel": 0
   }, 
   {
    "fieldname": "deduction_details", 
@@ -241,11 +256,14 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "column_break2", 
+   "fieldname": "column_break_25", 
    "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "width": "50%"
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "column_break_26", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
   }, 
   {
    "fieldname": "arrear_amount", 
@@ -286,13 +304,6 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "column_break3", 
-   "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "width": "50%"
-  }, 
-  {
    "description": "Gross Pay + Arrear Amount +Encashment Amount - Total Deduction", 
    "fieldname": "net_pay", 
    "fieldtype": "Currency", 
@@ -325,7 +336,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:17:14.634335", 
+ "modified": "2014-08-27 06:38:10.006224", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip", 
@@ -333,6 +344,7 @@
  "permissions": [
   {
    "amend": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -342,6 +354,7 @@
    "report": 1, 
    "role": "HR User", 
    "submit": 1, 
+   "user_permission_doctypes": "[\"Branch\",\"Company\",\"Department\",\"Designation\",\"Fiscal Year\",\"Salary Slip\"]", 
    "write": 1
   }, 
   {
@@ -359,9 +372,9 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
-   "restricted": 0, 
    "role": "Employee"
   }
  ], 

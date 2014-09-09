@@ -1,0 +1,31 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-10">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			<span style="margin-right: 8px; display: inline-block">
+				<span class="filterable"
+					data-filter="{%= doc.quotation_to.toLowerCase() %},=,{%= doc[doc.quotation_to.toLowerCase()] %}">
+					{%= doc.customer_name %}</span> ({%= doc.quotation_to %})
+				</span>
+			</span>
+			<span style="margin-right: 8px; display: inline-block"
+				title="{%= doc.order_type %}" class="filterable"
+				data-filter="order_type,=,{%= doc.order_type %}">
+			{% if(doc.order_type==="Service") { %}
+				<i class="icon-wrench"></i>
+			{% } else { %}
+				<i class="icon-tag"></i>
+			{% } %}
+			</span>
+			<span class="label {%= doc.status=="Draft" ? "label-danger" :
+				(doc.status=="Ordered" ? "label-success": "label-info") %}
+				filterable"
+				data-filter="status,=,{%= doc.status %}">{%= doc.status %}</span>
+		</div>
+	</div>
+	<div class="col-xs-2 text-right">
+		<div class="text-ellipsis" title="{%= doc.get_formatted('grand_total_export') %}">
+			{%= doc.get_formatted("grand_total_export") %}
+		</div>
+	</div>
+</div>

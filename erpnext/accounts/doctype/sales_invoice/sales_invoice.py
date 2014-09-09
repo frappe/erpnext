@@ -14,9 +14,13 @@ from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.controllers.stock_controller import update_gl_entries_after
 from frappe.model.mapper import get_mapped_doc
 
-month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
+from erpnext.controllers.recurring_document import *
 
 from erpnext.controllers.selling_controller import SellingController
+
+form_grid_templates = {
+	"entries": "templates/form_grid/item_grid.html"
+}
 
 class SalesInvoice(SellingController):
 	tname = 'Sales Invoice Item'
@@ -36,7 +40,8 @@ class SalesInvoice(SellingController):
 			'join_field': 'so_detail',
 			'percent_join_field': 'sales_order',
 			'status_field': 'billing_status',
-			'keyword': 'Billed'
+			'keyword': 'Billed',
+			'overflow_type': 'billing'
 		}]
 
 	def validate(self):
@@ -70,7 +75,7 @@ class SalesInvoice(SellingController):
 		self.set_against_income_account()
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
-		self.validate_recurring_invoice()
+		validate_recurring_document(self)
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount",
 			"delivery_note_details")
 
@@ -98,7 +103,7 @@ class SalesInvoice(SellingController):
 
 		self.update_c_form()
 		self.update_time_log_batch(self.name)
-		self.convert_to_recurring()
+		convert_to_recurring(self, "RECINV.#####", self.posting_date)
 
 	def before_cancel(self):
 		self.update_time_log_batch(None)
@@ -116,7 +121,7 @@ class SalesInvoice(SellingController):
 		self.update_prevdoc_status()
 		self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 
-		self.make_cancel_gl_entries()
+		self.make_gl_entries_on_cancel()
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -134,12 +139,13 @@ class SalesInvoice(SellingController):
 				'keyword':'Delivered',
 				'second_source_dt': 'Delivery Note Item',
 				'second_source_field': 'qty',
-				'second_join_field': 'prevdoc_detail_docname'
+				'second_join_field': 'prevdoc_detail_docname',
+				'overflow_type': 'delivery'
 			})
 
 	def on_update_after_submit(self):
-		self.validate_recurring_invoice()
-		self.convert_to_recurring()
+		validate_recurring_document(self)
+		convert_to_recurring(self, "RECINV.#####", self.posting_date)
 
 	def get_portal_page(self):
 		return "invoice" if self.docstatus==1 else None
@@ -262,11 +268,11 @@ class SalesInvoice(SellingController):
 		"""Validate Fixed Asset and whether Income Account Entered Exists"""
 		for d in self.get('entries'):
 			item = frappe.db.sql("""select name,is_asset_item,is_sales_item from `tabItem`
-				where name = %s and (ifnull(end_of_life,'')='' or end_of_life > now())""", d.item_code)
-			acc =	frappe.db.sql("""select account_type from `tabAccount`
+				where name = %s""", d.item_code)
+			acc = frappe.db.sql("""select account_type from `tabAccount`
 				where name = %s and docstatus != 2""", d.income_account)
-			if item and item[0][1] == 'Yes' and not acc[0][0] == 'Fixed Asset':
-				msgprint(_("Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item").format(d.item_code), raise_exception=True)
+			if item and item[0][1] == 'Yes' and acc and acc[0][0] != 'Fixed Asset':
+				msgprint(_("Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item").format(acc[0][0], d.item_code), raise_exception=True)
 
 	def validate_with_previous_doc(self):
 		super(SalesInvoice, self).validate_with_previous_doc(self.tname, {
@@ -339,8 +345,8 @@ class SalesInvoice(SellingController):
 
 	def validate_pos(self):
 		if not self.cash_bank_account and flt(self.paid_amount):
-			msgprint(_("Cash or Bank Account is mandatory for making payment entry"))
-			raise Exception
+			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))
+
 		if flt(self.paid_amount) + flt(self.write_off_amount) \
 				- flt(self.grand_total) > 1/(10**(self.precision("grand_total") + 1)):
 			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
@@ -383,20 +389,20 @@ class SalesInvoice(SellingController):
 
 
 	def get_warehouse(self):
-		w = frappe.db.sql("""select warehouse from `tabPOS Setting`
-			where ifnull(user,'') = %s and company = %s""",
-			(frappe.session['user'], self.company))
-		w = w and w[0][0] or ''
-		if not w:
-			ps = frappe.db.sql("""select name, warehouse from `tabPOS Setting`
+		user_pos_setting = frappe.db.sql("""select name, warehouse from `tabPOS Setting`
+			where ifnull(user,'') = %s and company = %s""", (frappe.session['user'], self.company))
+		warehouse = user_pos_setting[0][1] if user_pos_setting else None
+
+		if not warehouse:
+			global_pos_setting = frappe.db.sql("""select name, warehouse from `tabPOS Setting`
 				where ifnull(user,'') = '' and company = %s""", self.company)
-			if not ps:
+
+			if global_pos_setting:
+				warehouse = global_pos_setting[0][1]
+			elif not user_pos_setting:
 				msgprint(_("POS Setting required to make POS Entry"), raise_exception=True)
-			elif not ps[0][1]:
-				msgprint(_("Warehouse required in POS Setting"))
-			else:
-				w = ps[0][1]
-		return w
+
+		return warehouse
 
 	def on_update(self):
 		if cint(self.update_stock) == 1:
@@ -431,8 +437,7 @@ class SalesInvoice(SellingController):
 				submitted = frappe.db.sql("""select name from `tabSales Order`
 					where docstatus = 1 and name = %s""", d.sales_order)
 				if not submitted:
-					msgprint(_("Sales Order {0} is not submitted").format(d.sales_order))
-					raise Exception
+					frappe.throw(_("Sales Order {0} is not submitted").format(d.sales_order))
 
 			if d.delivery_note:
 				submitted = frappe.db.sql("""select name from `tabDelivery Note`
@@ -587,170 +592,6 @@ class SalesInvoice(SellingController):
 				grand_total = %s where invoice_no = %s and parent = %s""",
 				(self.name, self.amended_from, self.c_form_no))
 
-	def validate_recurring_invoice(self):
-		if self.convert_into_recurring_invoice:
-			self.validate_notification_email_id()
-
-			if not self.recurring_type:
-				msgprint(_("Please select {0}").format(self.meta.get_label("recurring_type")),
-				raise_exception=1)
-
-			elif not (self.invoice_period_from_date and \
-					self.invoice_period_to_date):
-				throw(_("Invoice Period From and Invoice Period To dates mandatory for recurring invoice"))
-
-	def convert_to_recurring(self):
-		if self.convert_into_recurring_invoice:
-			if not self.recurring_id:
-				frappe.db.set(self, "recurring_id",
-					make_autoname("RECINV/.#####"))
-
-			self.set_next_date()
-
-		elif self.recurring_id:
-			frappe.db.sql("""update `tabSales Invoice`
-				set convert_into_recurring_invoice = 0
-				where recurring_id = %s""", (self.recurring_id,))
-
-	def validate_notification_email_id(self):
-		if self.notification_email_address:
-			email_list = filter(None, [cstr(email).strip() for email in
-				self.notification_email_address.replace("\n", "").split(",")])
-
-			from frappe.utils import validate_email_add
-			for email in email_list:
-				if not validate_email_add(email):
-					throw(_("{0} is an invalid email address in 'Notification Email Address'").format(email))
-
-		else:
-			throw(_("'Notification Email Addresses' not specified for recurring invoice"))
-
-	def set_next_date(self):
-		""" Set next date on which auto invoice will be created"""
-		if not self.repeat_on_day_of_month:
-			msgprint(_("Please enter 'Repeat on Day of Month' field value"), raise_exception=1)
-
-		next_date = get_next_date(self.posting_date,
-			month_map[self.recurring_type], cint(self.repeat_on_day_of_month))
-
-		frappe.db.set(self, 'next_date', next_date)
-
-def get_next_date(dt, mcount, day=None):
-	dt = getdate(dt)
-
-	from dateutil.relativedelta import relativedelta
-	dt += relativedelta(months=mcount, day=day)
-
-	return dt
-
-def manage_recurring_invoices(next_date=None, commit=True):
-	"""
-		Create recurring invoices on specific date by copying the original one
-		and notify the concerned people
-	"""
-	next_date = next_date or nowdate()
-	recurring_invoices = frappe.db.sql("""select name, recurring_id
-		from `tabSales Invoice` where ifnull(convert_into_recurring_invoice, 0)=1
-		and docstatus=1 and next_date=%s
-		and next_date <= ifnull(end_date, '2199-12-31')""", next_date)
-
-	exception_list = []
-	for ref_invoice, recurring_id in recurring_invoices:
-		if not frappe.db.sql("""select name from `tabSales Invoice`
-				where posting_date=%s and recurring_id=%s and docstatus=1""",
-				(next_date, recurring_id)):
-			try:
-				ref_wrapper = frappe.get_doc('Sales Invoice', ref_invoice)
-				new_invoice_wrapper = make_new_invoice(ref_wrapper, next_date)
-				send_notification(new_invoice_wrapper)
-				if commit:
-					frappe.db.commit()
-			except:
-				if commit:
-					frappe.db.rollback()
-
-					frappe.db.begin()
-					frappe.db.sql("update `tabSales Invoice` set \
-						convert_into_recurring_invoice = 0 where name = %s", ref_invoice)
-					notify_errors(ref_invoice, ref_wrapper.customer, ref_wrapper.owner)
-					frappe.db.commit()
-
-				exception_list.append(frappe.get_traceback())
-			finally:
-				if commit:
-					frappe.db.begin()
-
-	if exception_list:
-		exception_message = "\n\n".join([cstr(d) for d in exception_list])
-		raise Exception, exception_message
-
-def make_new_invoice(ref_wrapper, posting_date):
-	from erpnext.accounts.utils import get_fiscal_year
-	new_invoice = frappe.copy_doc(ref_wrapper)
-
-	mcount = month_map[ref_wrapper.recurring_type]
-
-	invoice_period_from_date = get_next_date(ref_wrapper.invoice_period_from_date, mcount)
-
-	# get last day of the month to maintain period if the from date is first day of its own month
-	# and to date is the last day of its own month
-	if (cstr(get_first_day(ref_wrapper.invoice_period_from_date)) == \
-			cstr(ref_wrapper.invoice_period_from_date)) and \
-		(cstr(get_last_day(ref_wrapper.invoice_period_to_date)) == \
-			cstr(ref_wrapper.invoice_period_to_date)):
-		invoice_period_to_date = get_last_day(get_next_date(ref_wrapper.invoice_period_to_date,
-			mcount))
-	else:
-		invoice_period_to_date = get_next_date(ref_wrapper.invoice_period_to_date, mcount)
-
-	new_invoice.update({
-		"posting_date": posting_date,
-		"aging_date": posting_date,
-		"due_date": add_days(posting_date, cint(date_diff(ref_wrapper.due_date,
-			ref_wrapper.posting_date))),
-		"invoice_period_from_date": invoice_period_from_date,
-		"invoice_period_to_date": invoice_period_to_date,
-		"fiscal_year": get_fiscal_year(posting_date)[0],
-		"owner": ref_wrapper.owner,
-	})
-
-	new_invoice.submit()
-
-	return new_invoice
-
-def send_notification(new_rv):
-	"""Notify concerned persons about recurring invoice generation"""
-
-	from frappe.core.doctype.print_format.print_format import get_html
-	frappe.sendmail(new_rv.notification_email_address,
-		subject="New Invoice : " + new_rv.name,
-		message = get_html(new_rv, new_rv, "SalesInvoice"))
-
-def notify_errors(inv, customer, owner):
-	from frappe.utils.user import get_system_managers
-	recipients=get_system_managers()
-
-	frappe.sendmail(recipients + [frappe.db.get_value("User", owner, "email")],
-		subject="[Urgent] Error while creating recurring invoice for %s" % inv,
-		message = frappe.get_template("template/emails/recurring_invoice_failed.html").render({
-			"name": inv,
-			"customer": customer
-		}))
-
-	assign_task_to_owner(inv, "Recurring Invoice Failed", recipients)
-
-def assign_task_to_owner(inv, msg, users):
-	for d in users:
-		from frappe.widgets.form import assign_to
-		args = {
-			'assign_to' 	:	d,
-			'doctype'		:	'Sales Invoice',
-			'name'			:	inv,
-			'description'	:	msg,
-			'priority'		:	'Urgent'
-		}
-		assign_to.add(args)
-
 @frappe.whitelist()
 def get_bank_cash_account(mode_of_payment):
 	val = frappe.db.get_value("Mode of Payment", mode_of_payment, "default_account")
@@ -783,6 +624,7 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
 	def set_missing_values(source, target):
+		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 

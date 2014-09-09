@@ -6,6 +6,11 @@ import frappe
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.buying_controller import BuyingController
+
+form_grid_templates = {
+	"quotation_items": "templates/form_grid/item_grid.html"
+}
+
 class SupplierQuotation(BuyingController):
 	tname = "Supplier Quotation Item"
 	fname = "quotation_items"
@@ -54,6 +59,7 @@ class SupplierQuotation(BuyingController):
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
 	def set_missing_values(source, target):
+		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("get_schedule_dates")
 		target.run_method("calculate_taxes_and_totals")

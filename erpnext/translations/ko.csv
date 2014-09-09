@@ -1,0 +1,3331 @@
+ (Half Day),
+ and year: ,
+""" does not exists","""존재하지 않습니다"
+%  Delivered,% 배달
+% Amount Billed,청구 % 금액
+% Billed,% 청구
+% Completed,% 완료
+% Delivered,% 배달
+% Installed,% 설치
+% Received,% 수신
+% of materials billed against this Purchase Order.,재료의 %이 구매 주문에 대해 청구.
+% of materials billed against this Sales Order,이 판매 주문에 대해 청구 자료 %
+% of materials delivered against this Delivery Note,이 납품서에 대해 전달 물질 %
+% of materials delivered against this Sales Order,이 판매 주문에 대해 전달 물질 %
+% of materials ordered against this Material Request,이 자료 요청에 대해 주문 물질 %
+% of materials received against this Purchase Order,재료의 %이 구매 주문에 대해 수신
+'Actual Start Date' can not be greater than 'Actual End Date','실제 시작 날짜는'실제 종료 날짜 '보다 클 수 없습니다
+'Based On' and 'Group By' can not be same,'을 바탕으로'와 '그룹으로는'동일 할 수 없습니다
+'Days Since Last Order' must be greater than or equal to zero,'마지막 주문 날짜 이후'는 0보다 크거나 같아야합니다
+'Entries' cannot be empty,'항목은'비워 둘 수 없습니다
+'Expected Start Date' can not be greater than 'Expected End Date','예상 시작 날짜는'예상 종료 날짜 '보다 클 수 없습니다
+'From Date' is required,'날짜'가 필요합니다
+'From Date' must be after 'To Date',"'날짜', '누계'이후 여야합니다"
+'Has Serial No' can not be 'Yes' for non-stock item,'시리얼 번호를 가지고'재고 항목에 대해 '예'일 수 없습니다
+'Notification Email Addresses' not specified for recurring invoice,송장을 반복 지정되지 '알림 이메일 주소'
+'Profit and Loss' type account {0} not allowed in Opening Entry,'손익'계정 유형 {0} 항목 열기에서 허용되지
+'To Case No.' cannot be less than 'From Case No.','사건 번호 사람' '사건 번호에서'보다 작을 수 없습니다
+'To Date' is required,'날짜를'필요
+'Update Stock' for Sales Invoice {0} must be set,견적서를위한 '업데이트 스톡'{0} 설정해야합니다
+* Will be calculated in the transaction.,* 트랜잭션에서 계산됩니다.
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,"1 통화 = [?]분수  예를 들어, 1 USD = 100 센트를 들어"
+1. To maintain the customer wise item code and to make them searchable based on their code use this option,1고객 현명한 항목 코드를 유지하고 자신의 코드 사용이 옵션에 따라이를 검색 할 수 있도록
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","만약 당신이 좋아 href=""#Sales Browser/Customer Group""> 추가 / 편집 </ A>"
+"<a href=""#Sales Browser/Item Group"">Add / Edit</a>","만약 당신이 좋아 href=""#Sales Browser/Item Group""> 추가 / 편집 </ A>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","만약 당신이 좋아 href=""#Sales Browser/Territory""> 추가 / 편집 </ A>"
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<H4> 기본 템플릿 </ H4>  <P>는 만약 당신이 좋아 href=""http://jinja.pocoo.org/docs/templates/""> 신사 템플릿 </ A> 및 주소의 모든 필드를 (사용 사용자 정의 필드있는 경우)을 포함하여 사용할 수 있습니다 </ P>  <PRE>의 <code> {{address_line1}} <BR>  {%이다 address_line2 %} {{address_line2}} {<BR> % ENDIF - %}  {{도시}} <BR>  {%의 경우 상태 %} {{상태}} <BR> {%의 ENDIF - %}  {%의 경우 PIN 코드의 %} PIN : {{}} 핀 코드 <BR> {%의 ENDIF - %}  {{국가}} <BR>  {% 경우 전화 %} 전화 : {{전화}} {<BR> % ENDIF - %}  {% 경우 팩스 %} 팩스 : {{팩스}} <BR> {%의 ENDIF - %}  {% email_id %} 이메일의 경우 {{email_id}} <BR> , {%의 ENDIF - %}  </ 코드> </ 사전>"
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,고객 그룹이 동일한 이름으로 존재하는 것은 고객의 이름을 변경하거나 고객 그룹의 이름을 바꾸십시오
+A Customer exists with same name,고객은 같은 이름을 가진
+A Lead with this email id should exist,이 이메일 ID와 리드가 존재한다
+A Product or Service,제품 또는 서비스
+A Supplier exists with same name,공급 업체가 같은 이름을 가진
+A symbol for this currency. For e.g. $,이 통화에 대한 기호.예를 들어 $
+AMC Expiry Date,AMC 유효 날짜
+Abbr,ABBR
+Abbreviation cannot have more than 5 characters,약어는 5 개 이상의 문자를 가질 수 없습니다
+Above Value,값 위
+Absent,없는
+Acceptance Criteria,허용 기준
+Accepted,허용
+Accepted + Rejected Qty must be equal to Received quantity for Item {0},수락 + 거부 수량이 항목에 대한 수신 수량이 동일해야합니다 {0}
+Accepted Quantity,허용 수량
+Accepted Warehouse,허용 창고
+Account,계정
+Account Balance,계정 잔액
+Account Created: {0},계정 작성일 : {0}
+Account Details,합계좌 세부사항
+Account Head,계정 헤드
+Account Name,계정 이름
+Account Type,계정 유형
+"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","계정 잔액이 이미 신용, 당신이 설정할 수 없습니다 '직불 카드'로 '밸런스 것은이어야'"
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","이미 직불의 계정 잔액, 당신은 같은 '신용', '균형이어야합니다'설정할 수 없습니다"
+Account for the warehouse (Perpetual Inventory) will be created under this Account.,웨어 하우스 (영구 재고)에 대한 계정은이 계정이 생성됩니다.
+Account head {0} created,계정 머리 {0} 생성
+Account must be a balance sheet account,계정 대차 대조표 계정이어야합니다
+Account with child nodes cannot be converted to ledger,자식 노드와 계정 원장으로 변환 할 수 없습니다
+Account with existing transaction can not be converted to group.,기존 거래와 계정 그룹으로 변환 할 수 없습니다.
+Account with existing transaction can not be deleted,기존 거래 계정은 삭제할 수 없습니다
+Account with existing transaction cannot be converted to ledger,기존 거래와 계정 원장으로 변환 할 수 없습니다
+Account {0} cannot be a Group,계정 {0} 그룹이 될 수 없습니다
+Account {0} does not belong to Company {1},계정 {0}이 회사에 속하지 않는 {1}
+Account {0} does not belong to company: {1},계정 {0} 회사에 속하지 않는 {1}
+Account {0} does not exist,계정 {0}이 (가) 없습니다
+Account {0} has been entered more than once for fiscal year {1},계정 {0} 더 많은 회계 연도 번 이상 입력 한 {1}
+Account {0} is frozen,계정 {0} 동결
+Account {0} is inactive,계정 {0} 비활성
+Account {0} is not valid,계정 {0} 유효하지 않습니다
+Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,품목은 {1} 자산 상품이기 때문에 계정 {0} 형식의 '고정 자산'이어야합니다
+Account {0}: Parent account {1} can not be a ledger,계정 {0} : 부모 계정은 {1} 원장이 될 수 없습니다
+Account {0}: Parent account {1} does not belong to company: {2},계정 {0} : 부모 계정 {1} 회사에 속하지 않는 {2}
+Account {0}: Parent account {1} does not exist,계정 {0} : 부모 계정 {1}이 (가) 없습니다
+Account {0}: You can not assign itself as parent account,계정 {0} : 당신은 부모 계정 자체를 할당 할 수 없습니다
+Account: {0} can only be updated via \					Stock Transactions,계정 : \ 주식 거래 {0}을 통해서만 업데이트 할 수 있습니다
+Accountant,회계사
+Accounting,회계
+"Accounting Entries can be made against leaf nodes, called","회계 항목은 전화, 리프 노드에 대해 수행 할 수 있습니다"
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","회계 항목이 날짜까지 냉동, 아무도 / 아래 지정된 역할을 제외하고 항목을 수정하지 않을 수 있습니다."
+Accounting journal entries.,회계 분개.
+Accounts,합계좌
+Accounts Browser,계정 브라우저
+Accounts Frozen Upto,냉동 개까지에게 계정
+Accounts Payable,채무
+Accounts Receivable,미수금
+Accounts Settings,계정 설정을
+Active,활성화
+Active: Will extract emails from ,
+Activity,활동 내역
+Activity Log,작업 로그
+Activity Log:,활동 로그 :
+Activity Type,활동 유형
+Actual,실제
+Actual Budget,실제 예산
+Actual Completion Date,실제 완료일
+Actual Date,실제 날짜
+Actual End Date,실제 종료 날짜
+Actual Invoice Date,실제 송장의 날짜
+Actual Posting Date,실제 등록 일자
+Actual Qty,실제 수량
+Actual Qty (at source/target),실제 수량 (소스 / 대상에서)
+Actual Qty After Transaction,거래 후 실제 수량
+Actual Qty: Quantity available in the warehouse.,실제 수량 :웨어 하우스에서 사용할 수있는 수량.
+Actual Quantity,실제 수량
+Actual Start Date,실제 시작 날짜
+Add,추가
+Add / Edit Taxes and Charges,추가 / 편집 세금과 요금
+Add Child,자식 추가
+Add Serial No,일련 번호 추가
+Add Taxes,세금 추가
+Add Taxes and Charges,세금과 요금 추가
+Add or Deduct,추가 공제
+Add rows to set annual budgets on Accounts.,계정에 연간 예산을 설정하는 행을 추가합니다.
+Add to Cart,쇼핑 카트에 담기
+Add to calendar on this date,이 날짜에 캘린더에 추가
+Add/Remove Recipients,추가 /받는 사람을 제거
+Address,주소
+Address & Contact,주소 및 연락처
+Address & Contacts,주소 및 연락처
+Address Desc,제품 설명에게 주소
+Address Details,주소 세부 사항
+Address HTML,주소 HTML
+Address Line 1,1 호선 주소
+Address Line 2,2 호선 주소
+Address Template,주소 템플릿
+Address Title,주소 제목
+Address Title is mandatory.,주소 제목은 필수입니다.
+Address Type,주소 유형
+Address master.,주소 마스터.
+Administrative Expenses,관리비
+Administrative Officer,관리 책임자
+Advance Amount,사전의 양
+Advance amount,사전 양
+Advances,진보
+Advertisement,광고
+Advertising,광고
+Aerospace,항공 우주
+After Sale Installations,판매 설치 후
+Against,에 대하여
+Against Account,계정에 대하여
+Against Bill {0} dated {1},빌은 {0} 년에 {1}
+Against Docname,docName 같은 반대
+Against Doctype,문서 종류에 대하여
+Against Document Detail No,문서의 세부 사항에 대한 없음
+Against Document No,문서 번호에 대하여
+Against Expense Account,비용 계정에 대한
+Against Income Account,손익 계정에 대한
+Against Journal Voucher,분개장에 대하여
+Against Journal Voucher {0} does not have any unmatched {1} entry,분개장에 대해 {0} 어떤 타의 추종을 불허 {1} 항목이없는
+Against Purchase Invoice,구매 인보이스에 대한
+Against Sales Invoice,견적서에 대하여
+Against Sales Order,판매 주문에 대해
+Against Voucher,바우처에 대한
+Against Voucher Type,바우처 형식에 대한
+Ageing Based On,을 바탕으로 고령화
+Ageing Date is mandatory for opening entry,날짜 고령화하는 항목을 열기위한 필수입니다
+Ageing date is mandatory for opening entry,날짜 고령화하는 항목을 열기위한 필수입니다
+Agent,Agent
+Aging Date,노화 날짜
+Aging Date is mandatory for opening entry,날짜 노화 항목을 열기위한 필수입니다
+Agriculture,농업
+Airline,항공 회사
+All Addresses.,모든 주소.
+All Contact,모든 연락처
+All Contacts.,모든 연락처.
+All Customer Contact,모든 고객에게 연락
+All Customer Groups,모든 고객 그룹
+All Day,하루 종일
+All Employee (Active),모든 직원 (활성)
+All Item Groups,모든 상품 그룹
+All Lead (Open),모든 납 (열기)
+All Products or Services.,모든 제품 또는 서비스.
+All Sales Partner Contact,모든 판매 파트너 문의
+All Sales Person,모든 판매 사람
+All Supplier Contact,모든 공급 업체에게 연락 해주기
+All Supplier Types,모든 공급 유형
+All Territories,모든 준주
+"All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","통화, 전환율, 수출 총 수출 총계 등과 같은 모든 수출 관련 분야가 배달 참고, POS, 견적, 판매 송장, 판매 주문 등을 사용할 수 있습니다"
+"All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","통화, 전환율, 수입 총 수입 총계 등과 같은 모든 수입 관련 분야는 구매 영수증, 공급 업체 견적, 구매 송장, 구매 주문 등을 사용할 수 있습니다"
+All items have already been invoiced,모든 상품은 이미 청구 된
+All these items have already been invoiced,이러한 모든 항목이 이미 청구 된
+Allocate,할당
+Allocate leaves for a period.,기간 동안 잎을 할당합니다.
+Allocate leaves for the year.,올해 잎을 할당합니다.
+Allocated Amount,할당 된 금액
+Allocated Budget,할당 된 예산
+Allocated amount,할당 된 양
+Allocated amount can not be negative,할당 된 금액은 음수 일 수 없습니다
+Allocated amount can not greater than unadusted amount,할당 된 금액은 unadusted 금액보다 큰 수 없습니다
+Allow Bill of Materials,재료의 허용 빌
+Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item,재료 명세서 (BOM)이 '예'해야 할 수 있습니다.하나 때문에 또는 항목에 대한 현재의 많은 활성화 된 BOM
+Allow Children,아이들 허용
+Allow Dropbox Access,보관 용 접근이 허용
+Allow Google Drive Access,구글 드라이브의 접근이 허용
+Allow Negative Balance,음의 균형이 허용
+Allow Negative Stock,음의 주식이 허용
+Allow Production Order,허용 생산 주문
+Allow User,사용자에게 허용
+Allow Users,사용자에게 허용
+Allow the following users to approve Leave Applications for block days.,다음 사용자가 블록 일에 대한 허가 신청을 승인 할 수 있습니다.
+Allow user to edit Price List Rate in transactions,사용자가 거래 가격리스트 평가를 편집 할 수
+Allowance Percent,대손 충당금 비율
+Allowance for over-{0} crossed for Item {1},수당에 {0} 항목에 대한 교차에 대한 {1}
+Allowance for over-{0} crossed for Item {1}.,수당에 {0} 항목에 대한 교차에 대한 {1}.
+Allowed Role to Edit Entries Before Frozen Date,냉동 날짜 이전에 편집 항목으로 허용 역할
+Amended From,개정
+Amount,양
+Amount (Company Currency),금액 (회사 통화)
+Amount Paid,지불 금액
+Amount to Bill,빌 금액
+An Customer exists with same name,고객은 같은 이름을 가진
+"An Item Group exists with same name, please change the item name or rename the item group",항목 그룹이 동일한 이름을 가진 항목의 이름을 변경하거나 항목 그룹의 이름을 바꾸십시오
+"An item exists with same name ({0}), please change the item group name or rename the item",항목 ({0}) 항목의 그룹 이름을 변경하거나 항목의 이름을 변경하시기 바랍니다 같은 이름을 가진
+Analyst,분석자
+Annual,연간
+Another Period Closing Entry {0} has been made after {1},또 다른 기간 결산 항목은 {0} 이후 한 {1}
+Another Salary Structure {0} is active for employee {0}. Please make its status 'Inactive' to proceed.,또 다른 급여 구조가 {0} 직원의 활성화는 {0}입니다.진행 상태 '비활성'을 확인하시기 바랍니다.
+"Any other comments, noteworthy effort that should go in the records.","다른 의견, 기록에 가야한다 주목할만한 노력."
+Apparel & Accessories,의류 및 액세서리
+Applicability,적용 대상
+Applicable For,에 적용
+Applicable Holiday List,해당 휴일 목록
+Applicable Territory,해당 지역
+Applicable To (Designation),에 적용 (지정)
+Applicable To (Employee),에 적용 (직원)
+Applicable To (Role),에 적용 (역할)
+Applicable To (User),에 적용 (사용자)
+Applicant Name,신청자 이름
+Applicant for a Job.,작업을 위해 신청자.
+Application of Funds (Assets),펀드의 응용 프로그램 (자산)
+Applications for leave.,휴가 신청.
+Applies to Company,회사에 적용
+Apply On,에 적용
+Appraisal,감정
+Appraisal Goal,감정의 골
+Appraisal Goals,감정의 골
+Appraisal Template,감정 템플릿
+Appraisal Template Goal,감정 템플릿 목표
+Appraisal Template Title,감정 템플릿 제목
+Appraisal {0} created for Employee {1} in the given date range,감정 {0} {1} 지정된 날짜 범위에서 직원에 대해 생성
+Apprentice,도제
+Approval Status,승인 상태
+Approval Status must be 'Approved' or 'Rejected',승인 상태가 '승인'또는 '거부'해야
+Approved,인가 된
+Approver,승인자
+Approving Role,승인 역할
+Approving Role cannot be same as role the rule is Applicable To,역할을 승인하면 규칙이 적용됩니다 역할로 동일 할 수 없습니다
+Approving User,승인 사용자
+Approving User cannot be same as user the rule is Applicable To,사용자가 승인하면 규칙에 적용 할 수있는 사용자로 동일 할 수 없습니다
+Are you sure you want to STOP ,
+Are you sure you want to UNSTOP ,
+Arrear Amount,연체 금액
+"As Production Order can be made for this item, it must be a stock item.","생산 주문이 항목에 대한 만들 수 있습니다, 그것은 재고 품목 수 있어야합니다."
+As per Stock UOM,주식 UOM 당
+"As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Is Stock Item' and 'Valuation Method'","이 항목에 대한 기존의 재고 트랜잭션이, 당신은 '일련 번호 있음'의 값을 변경할 수 있으며, '평가 방법', '재고 품목입니다'"
+Asset,자산
+Assistant,조수
+Associate,준
+Atleast one of the Selling or Buying must be selected,판매 또는 구매의이어야 하나를 선택해야합니다
+Atleast one warehouse is mandatory,이어야 한 창고는 필수입니다
+Attach Image,이미지 첨부
+Attach Letterhead,레터 첨부하기
+Attach Logo,로고를 부착
+Attach Your Picture,사진을 첨부
+Attendance,출석
+Attendance Date,출석 날짜
+Attendance Details,출석 세부 사항
+Attendance From Date,날짜부터 출석
+Attendance From Date and Attendance To Date is mandatory,날짜에 날짜 및 출석 출석은 필수입니다
+Attendance To Date,날짜 출석
+Attendance can not be marked for future dates,출석은 미래의 날짜에 표시 할 수 없습니다
+Attendance for employee {0} is already marked,직원의 출석 {0}이 (가) 이미 표시되어
+Attendance record.,출석 기록.
+Authorization Control,권한 제어
+Authorization Rule,권한 부여 규칙
+Auto Accounting For Stock Settings,재고 설정에 대한 자동 회계
+Auto Material Request,자동 자료 요청
+Auto-raise Material Request if quantity goes below re-order level in a warehouse,자동 인상 자료 요청 수량은 창고에 다시 주문 레벨 이하로되면
+Automatically compose message on submission of transactions.,자동 거래의 제출에 메시지를 작성합니다.
+Automatically extract Job Applicants from a mail box ,
+Automatically extract Leads from a mail box e.g.,자동으로 메일 박스의 예에서 리드를 추출
+Automatically updated via Stock Entry of type Manufacture/Repack,자동 형 제조 / 다시 채워 스톡 엔트리를 통해 업데이트
+Automotive,자동차
+Autoreply when a new mail is received,새로운 메일이 수신 될 때 자동 회신
+Available,사용 가능함
+Available Qty at Warehouse,창고에서 사용 가능한 수량
+Available Stock for Packing Items,항목 포장 재고품
+"Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","BOM, 배달 참고, 구매 송장, 생산 주문, 구매 주문, 구입 영수증, 견적서, 판매 주문, 재고 항목, 작업 표에서 사용 가능"
+Average Age,평균 연령
+Average Commission Rate,평균위원회 평가
+Average Discount,평균 할인
+Awesome Products,최고 제품
+Awesome Services,멋진 서비스
+BOM Detail No,BOM 세부 사항 없음
+BOM Explosion Item,BOM 폭발 상품
+BOM Item,BOM 상품
+BOM No,BOM 없음
+BOM No. for a Finished Good Item,완제품 항목에 대한 BOM 번호
+BOM Operation,BOM 운영
+BOM Operations,BOM 운영
+BOM Replace Tool,BOM은 도구를 교체
+BOM number is required for manufactured Item {0} in row {1},BOM 번호가 제조 품목에 필요한 {0} 행에서 {1}
+BOM number not allowed for non-manufactured Item {0} in row {1},비 제조 품목에 대해 허용되지 BOM 번호는 {0} 행에서 {1}
+BOM recursion: {0} cannot be parent or child of {2},BOM 재귀 : {0} 부모 또는 자녀가 될 수 없습니다 {2}
+BOM replaced,BOM 교체
+BOM {0} for Item {1} in row {2} is inactive or not submitted,BOM은 {0} 항목에 대한 {1} 행의 {2} 제출 비활성인지
+BOM {0} is not active or not submitted,BOM은 {0} 제출 활성 여부 아니다
+BOM {0} is not submitted or inactive BOM for Item {1},BOM {0} 제출되지 않았거나 비활성 BOM 항목에 대한 {1}
+Backup Manager,백업 관리자
+Backup Right Now,백업 지금
+Backups will be uploaded to,백업에 업로드됩니다
+Balance Qty,균형 수량
+Balance Sheet,대차 대조표
+Balance Value,밸런스 값
+Balance for Account {0} must always be {1},{0} 항상 있어야합니다 계정의 균형 {1}
+Balance must be,균형이 있어야합니다
+"Balances of Accounts of type ""Bank"" or ""Cash""","유형 ""은행""의 계정의 잔액 또는 ""현금"""
+Bank,은행
+Bank / Cash Account,은행 / 현금 계정
+Bank A/C No.,은행 A / C 번호
+Bank Account,은행 계좌
+Bank Account No.,은행 계좌 번호
+Bank Accounts,은행 계정
+Bank Clearance Summary,은행 정리 요약
+Bank Draft,은행 어음
+Bank Name,은행 이름
+Bank Overdraft Account,당좌 차월 계정
+Bank Reconciliation,은행 화해
+Bank Reconciliation Detail,은행 화해 세부 정보
+Bank Reconciliation Statement,은행 조정 계산서
+Bank Voucher,은행 바우처
+Bank/Cash Balance,은행 / 현금 잔액
+Banking,은행
+Barcode,바코드
+Barcode {0} already used in Item {1},바코드 {0}이 (가) 이미 상품에 사용되는 {1}
+Based On,에 근거
+Basic,기본
+Basic Info,기본 정보
+Basic Information,기본 정보
+Basic Rate,기본 요금
+Basic Rate (Company Currency),기본 요금 (회사 통화)
+Batch,일괄
+Batch (lot) of an Item.,항목의 배치 (제비).
+Batch Finished Date,배치 완료 날짜
+Batch ID,일괄 처리 ID
+Batch No,배치 없음
+Batch Started Date,일괄 날짜 시작
+Batch Time Logs for billing.,결제에 대한 일괄 처리 시간 로그.
+Batch-Wise Balance History,배치 식 밸런스 역사
+Batched for Billing,결제를위한 일괄 처리
+Better Prospects,더 나은 전망
+Bill Date,빌 날짜
+Bill No,빌 없음
+Bill No {0} already booked in Purchase Invoice {1},빌 없음 {0}이 (가) 이미 구매 송장에 예약 {1}
+Bill of Material,자재 명세서 (BOM)
+Bill of Material to be considered for manufacturing,제조를 위해 고려해야 할 소재의 빌
+Bill of Materials (BOM),재료 명세서 (BOM) (BOM)
+Billable,청구
+Billed,청구
+Billed Amount,청구 금액
+Billed Amt,청구 AMT 사의
+Billing,청구
+Billing Address,청구 주소
+Billing Address Name,청구 주소 이름
+Billing Status,결제 상태
+Bills raised by Suppliers.,공급 업체에 의해 제기 된 지폐입니다.
+Bills raised to Customers.,고객에게 제기 지폐입니다.
+Bin,큰 상자
+Bio,바이오
+Biotechnology,생명 공학
+Birthday,생년월일
+Block Date,블록 날짜
+Block Days,블록 일
+Block leave applications by department.,부서에서 허가 응용 프로그램을 차단합니다.
+Blog Post,블로그 포스트
+Blog Subscriber,블로그 구독자
+Blood Group,혈액 그룹
+Both Warehouse must belong to same Company,두 창고는 같은 회사에 속해 있어야합니다
+Box,상자
+Branch,Branch
+Brand,상표
+Brand Name,브랜드 ㅇ
+Brand master.,브랜드 마스터.
+Brands,상표
+Breakdown,고장
+Broadcasting,방송
+Brokerage,중개
+Budget,예산
+Budget Allocated,할당 된 예산
+Budget Detail,예산 세부 정보
+Budget Details,예산 세부 정보
+Budget Distribution,예산 분배
+Budget Distribution Detail,예산 분배의 세부 사항
+Budget Distribution Details,예산 분배의 자세한 사항
+Budget Variance Report,예산 차이 보고서
+Budget cannot be set for Group Cost Centers,예산은 그룹의 코스트 센터를 설정할 수 없습니다
+Build Report,보고서보기 빌드
+Bundle items at time of sale.,판매 상품을 동시에 번들.
+Business Development Manager,비즈니스 개발 매니저
+Buying,구매
+Buying & Selling,구매 및 판매
+Buying Amount,금액을 구매
+Buying Settings,설정을 구입
+"Buying must be checked, if Applicable For is selected as {0}",해당 법령에가로 선택된 경우 구매 확인해야합니다 {0}
+C-Form,C-양식
+C-Form Applicable,해당 C-양식
+C-Form Invoice Detail,C-양식 송장 세부 정보
+C-Form No,C-양식 없음
+C-Form records,C 형태의 기록
+CENVAT Capital Goods,CENVAT 자본재
+CENVAT Edu Cess,CENVAT 에듀 운
+CENVAT SHE Cess,CENVAT SHE 운
+CENVAT Service Tax,CENVAT 서비스 세금
+CENVAT Service Tax Cess 1,CENVAT 서비스 세금 CESS 1
+CENVAT Service Tax Cess 2,CENVAT 서비스 세금 CESS 2
+Calculate Based On,에 의거에게 계산
+Calculate Total Score,총 점수를 계산
+Calendar Events,캘린더 이벤트
+Call,전화
+Calls,통화
+Campaign,캠페인
+Campaign Name,캠페인 이름
+Campaign Name is required,캠페인 이름이 필요합니다
+Campaign Naming By,캠페인 이름 지정으로
+Campaign-.####,캠페인.# # # #
+Can be approved by {0},{0}에 의해 승인 될 수있다
+"Can not filter based on Account, if grouped by Account","계정별로 분류하면, 계정을 기준으로 필터링 할 수 없습니다"
+"Can not filter based on Voucher No, if grouped by Voucher","바우처를 기반으로 필터링 할 수 없음, 바우처로 그룹화하는 경우"
+Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total',"충전 타입 또는 '이전 행 전체', '이전 행의 양에'인 경우에만 행을 참조 할 수 있습니다"
+Cancel Material Visit {0} before cancelling this Customer Issue,"취소 재질 방문 {0}이 고객의 문제를 취소하기 전,"
+Cancel Material Visits {0} before cancelling this Maintenance Visit,"이 유지 보수 방문을 취소하기 전, 재질 방문 {0} 취소"
+Cancelled,취소
+Cancelling this Stock Reconciliation will nullify its effect.,이 재고 조정을 취소하면 그 효과를 무효로합니다.
+Cannot Cancel Opportunity as Quotation Exists,견적이 존재하는 기회를 취소 할 수
+Cannot approve leave as you are not authorized to approve leaves on Block Dates,당신이 블록 날짜에 잎을 승인 할 수있는 권한이 없습니다로 휴가를 승인 할 수 없습니다
+Cannot cancel because Employee {0} is already approved for {1},직원이 {0}이 (가) 이미 승인을하기 때문에 취소 할 수 없습니다 {1}
+Cannot cancel because submitted Stock Entry {0} exists,제출 된 재고 항목 {0}이 존재하기 때문에 취소 할 수 없습니다
+Cannot carry forward {0},앞으로 수행 할 수 없습니다 {0}
+Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved.,회계 연도 시작 날짜와 회계 연도가 저장되면 회계 연도 종료 날짜를 변경할 수 없습니다.
+"Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency.","기존의 트랜잭션이 있기 때문에, 회사의 기본 통화를 변경할 수 없습니다.거래 기본 통화를 변경하려면 취소해야합니다."
+Cannot convert Cost Center to ledger as it has child nodes,이 자식 노드를 가지고 원장 비용 센터로 변환 할 수 없습니다
+Cannot covert to Group because Master Type or Account Type is selected.,마스터 유형 또는 계정 유형을 선택하기 때문에 그룹 은밀한 할 수 없습니다.
+Cannot deactive or cancle BOM as it is linked with other BOMs,그것은 다른 BOM에와 연결되어으로 비활성화 또는 CANCLE의 BOM 수 없습니다
+"Cannot declare as lost, because Quotation has been made.","손실로 견적이되었습니다 때문에, 선언 할 수 없습니다."
+Cannot deduct when category is for 'Valuation' or 'Valuation and Total',카테고리는 '평가'또는 '평가 및 전체'에 대한 때 공제 할 수 없습니다
+"Cannot delete Serial No {0} in stock. First remove from stock, then delete.","재고 {0} 시리얼 번호를 삭제할 수 없습니다.먼저 삭제 한 후, 주식에서 제거합니다."
+"Cannot directly set amount. For 'Actual' charge type, use the rate field","직접 금액을 설정할 수 없습니다.'실제'충전식의 경우, 속도 필드를 사용하여"
+"Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in Stock Settings",{1} {0}보다 더 많은 행에서 {0} 항목에 대한 청구 되요 할 수 없습니다.과다 청구를 할 수 있도록 재고 설정에서 설정하시기 바랍니다
+Cannot produce more Item {0} than Sales Order quantity {1},더 많은 항목을 생성 할 수 없습니다 {0}보다 판매 주문 수량 {1}
+Cannot refer row number greater than or equal to current row number for this Charge type,이 충전 유형에 대한보다 크거나 현재의 행의 수와 동일한 행 번호를 참조 할 수 없습니다
+Cannot return more than {0} for Item {1},이상을 반환 할 수 없습니다 {0} 항목에 대한 {1}
+Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row,첫 번째 행에 대한 '이전 행 전체에'이전 행에 금액 '또는로 충전 타입을 선택할 수 없습니다
+Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for valuation. You can select only 'Total' option for previous row amount or previous row total,평가에 대한 '이전 행 전체에'이전 행에 금액 '또는로 충전 유형을 선택 할 수 없습니다.당신은 이전 행의 양 또는 이전 행 전체 만 '전체'옵션을 선택할 수 있습니다
+Cannot set as Lost as Sales Order is made.,판매 주문이 이루어질으로 분실로 설정할 수 없습니다.
+Cannot set authorization on basis of Discount for {0},에 대한 할인의 기준으로 권한을 설정할 수 없습니다 {0}
+Capacity,용량
+Capacity Units,용량 단위
+Capital Account,자본 계정
+Capital Equipments,자본 장비
+Carry Forward,이월하다
+Carry Forwarded Leaves,전달 잎을 운반
+Case No(s) already in use. Try from Case No {0},케이스 없음 (들)을 이미 사용.케이스 없음에서 시도 {0}
+Case No. cannot be 0,케이스 번호는 0이 될 수 없습니다
+Cash,자금
+Cash In Hand,손에 현금
+Cash Voucher,현금 바우처
+Cash or Bank Account is mandatory for making payment entry,현금 또는 은행 계좌 결제 항목을 만들기위한 필수입니다
+Cash/Bank Account,현금 / 은행 계좌
+Casual Leave,캐주얼 허가
+Cell Number,핸드폰 번호
+Change UOM for an Item.,항목 UOM을 변경합니다.
+Change the starting / current sequence number of an existing series.,기존 시리즈의 시작 / 현재의 순서 번호를 변경합니다.
+Channel Partner,채널 파트너
+Charge of type 'Actual' in row {0} cannot be included in Item Rate,유형 행 {0}에있는 '실제'의 책임은 상품 요금에 포함 할 수 없습니다
+Chargeable,청구
+Charity and Donations,자선과 기부
+Chart Name,차트 이름
+Chart of Accounts,계정의 차트
+Chart of Cost Centers,코스트 센터의 차트
+Check how the newsletter looks in an email by sending it to your email.,뉴스 레터를 이메일로 보내 이메일로 모양을 확인합니다.
+"Check if recurring invoice, uncheck to stop recurring or put proper End Date","송장을 반복 있는지 확인, 반복을 중지하거나 적절한 종료 날짜를 넣어 선택 취소"
+"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","당신이 자동 반복 송장을 필요로하는 경우에 선택합니다.모든 판매 청구서를 제출 한 후, 반복되는 부분은 볼 수 있습니다."
+Check if you want to send salary slip in mail to each employee while submitting salary slip,당신이 급여 명세서를 제출하는 동안 각 직원에게 우편으로 급여 명세서를 보내려면 확인
+Check this if you want to force the user to select a series before saving. There will be no default if you check this.,당신은 저장하기 전에 시리즈를 선택하도록 강제하려는 경우이 옵션을 선택합니다.당신이 선택하면 기본이되지 않습니다.
+Check this if you want to show in website,당신이 웹 사이트에 표시 할 경우이 옵션을 선택
+Check this to disallow fractions. (for Nos),분수를 허용하려면이 옵션을 선택합니다. (NOS의 경우)
+Check this to pull emails from your mailbox,사서함에서 이메일을 당겨하려면이 옵션을 선택합니다
+Check to activate,활성화 확인
+Check to make Shipping Address,배송 주소를 확인하십시오
+Check to make primary address,기본 주소를 확인하십시오
+Chemical,화학
+Cheque,수표
+Cheque Date,수표 날짜
+Cheque Number,수표 번호
+Child account exists for this account. You can not delete this account.,하위 계정은이 계정이 존재합니다.이 계정을 삭제할 수 없습니다.
+City,시
+City/Town,도시
+Claim Amount,청구 금액
+Claims for company expense.,회사 경비 주장한다.
+Class / Percentage,클래스 / 비율
+Classic,기본
+Clear Table,표 지우기
+Clearance Date,통관 날짜
+Clearance Date not mentioned,통관 날짜 언급되지
+Clearance date cannot be before check date in row {0},통관 날짜 행 체크인 날짜 이전 할 수 없습니다 {0}
+Click on 'Make Sales Invoice' button to create a new Sales Invoice.,새로운 판매 송장을 작성하는 '판매 송장 확인'버튼을 클릭합니다.
+Click on a link to get options to expand get options ,
+Client,클라이언트
+Close Balance Sheet and book Profit or Loss.,닫기 대차 대조표 및 책 이익 또는 손실.
+Closed,닫힘
+Closing (Cr),결산 (CR)
+Closing (Dr),결산 (박사)
+Closing Account Head,닫기 계정 헤드
+Closing Account {0} must be of type 'Liability',계정 {0} 닫는 형식 '책임'이어야합니다
+Closing Date,마감일
+Closing Fiscal Year,회계 연도 결산
+Closing Qty,닫기 수량
+Closing Value,닫기 값
+CoA Help,CoA를 도움말
+Code,코드
+Cold Calling,콜드 콜링
+Color,색상
+Column Break,단 나누기
+Comma separated list of email addresses,쉼표로 이메일 주소의 목록을 분리
+Comment,코멘트
+Comments,비고
+Commercial,광고 방송
+Commission,위원회
+Commission Rate,위원회 평가
+Commission Rate (%),위원회 비율 (%)
+Commission on Sales,판매에 대한 수수료
+Commission rate cannot be greater than 100,수수료율은 100보다 큰 수 없습니다
+Communication,통신 네트워크
+Communication HTML,통신 HTML
+Communication History,통신 역사
+Communication log.,통신 로그.
+Communications,통신
+Company,회사
+Company (not Customer or Supplier) master.,회사 (안 고객 또는 공급 업체) 마스터.
+Company Abbreviation,회사의 약어
+Company Details,회사 세부 사항
+Company Email,회사 이메일
+"Company Email ID not found, hence mail not sent","회사 이메일 ID를 찾을 수 없습니다, 따라서 전송되지 메일"
+Company Info,회사 소개
+Company Name,회사 명
+Company Settings,회사 설정
+Company is missing in warehouses {0},회사는 창고에없는 {0}
+Company is required,회사가 필요합니다
+Company registration numbers for your reference. Example: VAT Registration Numbers etc.,당신의 참고를위한 회사의 등록 번호.예 : VAT 등록 번호 등
+Company registration numbers for your reference. Tax numbers etc.,당신의 참고를위한 회사의 등록 번호.세금 번호 등
+"Company, Month and Fiscal Year is mandatory","회사, 월, 회계 연도는 필수입니다"
+Compensatory Off,보상 오프
+Complete,완성
+Complete Setup,설정 완료
+Completed,완료
+Completed Production Orders,완료 생산 주문
+Completed Qty,완료 수량
+Completion Date,완료일
+Completion Status,완료 상태
+Computer,컴퓨터
+Computers,컴퓨터
+Confirmation Date,확인 일자
+Confirmed orders from Customers.,고객의 확정 주문.
+Consider Tax or Charge for,세금이나 요금에 대한 고려
+Considered as Opening Balance,밸런스를 열기로 간주
+Considered as an Opening Balance,잔액으로 간주
+Consultant,컨설턴트
+Consulting,컨설팅
+Consumable,소모품
+Consumable Cost,소모품 비용
+Consumable cost per hour,시간 당 소모품 비용
+Consumed Qty,소비 수량
+Consumer Products,소비자 제품
+Contact,연락처
+Contact Control,연락처 관리
+Contact Desc,연락처 제품 설명
+Contact Details,연락처 세부 사항
+Contact Email,담당자 이메일
+Contact HTML,연락 HTML
+Contact Info,연락처 정보
+Contact Mobile No,연락처 모바일 없음
+Contact Name,담당자 이름
+Contact No.,연락 번호
+Contact Person,담당자
+Contact Type,접점 유형
+Contact master.,연락처 마스터.
+Contacts,주소록
+Content,목차
+Content Type,컨텐츠 유형
+Contra Voucher,콘트라 바우처
+Contract,계약직
+Contract End Date,계약 종료 날짜
+Contract End Date must be greater than Date of Joining,계약 종료 날짜는 가입 날짜보다 커야합니다
+Contribution (%),기여도 (%)
+Contribution to Net Total,인터넷 전체에 기여
+Conversion Factor,변환 계수
+Conversion Factor is required,변환 계수가 필요합니다
+Conversion factor cannot be in fractions,전환 요인은 분수에있을 수 없습니다
+Conversion factor for default Unit of Measure must be 1 in row {0},측정의 기본 단위에 대한 변환 계수는 행에 반드시 1이 {0}
+Conversion rate cannot be 0 or 1,변환 속도는 0 또는 1이 될 수 없습니다
+Convert into Recurring Invoice,경상 청구서로 변환
+Convert to Group,그룹으로 변환
+Convert to Ledger,원장으로 변환
+Converted,변환
+Copy From Item Group,상품 그룹에서 복사
+Cosmetics,화장품
+Cost Center,비용 센터
+Cost Center Details,센터 상세 비용
+Cost Center Name,코스트 센터의 이름
+Cost Center is required for 'Profit and Loss' account {0},비용 센터는 '손익'계정이 필요합니다 {0}
+Cost Center is required in row {0} in Taxes table for type {1},비용 센터가 행에 필요한 {0} 세금 테이블의 유형에 대한 {1}
+Cost Center with existing transactions can not be converted to group,기존의 트랜잭션 비용 센터는 그룹으로 변환 할 수 없습니다
+Cost Center with existing transactions can not be converted to ledger,기존의 트랜잭션 비용 센터 원장으로 변환 할 수 없습니다
+Cost Center {0} does not belong to Company {1},코스트 센터 {0}에 속하지 않는 회사 {1}
+Cost of Goods Sold,매출원가
+Costing,원가 계산
+Country,국가
+Country Name,국가 이름
+Country wise default Address Templates,국가 현명한 기본 주소 템플릿
+"Country, Timezone and Currency","국가, 시간대 통화"
+Create Bank Voucher for the total salary paid for the above selected criteria,위의 선택 기준에 대해 지불 한 총 연봉 은행 바우처를 만들기
+Create Customer,고객을 만들기
+Create Material Requests,자료 요청을 만듭니다
+Create New,새로 만들기
+Create Opportunity,기회를 만들기
+Create Production Orders,생산 오더를 생성
+Create Quotation,견적을 만들기
+Create Receiver List,수신기 목록 만들기
+Create Salary Slip,급여 슬립을 만듭니다
+Create Stock Ledger Entries when you submit a Sales Invoice,당신은 견적서를 제출할 때 주식 원장 항목을 작성
+"Create and manage daily, weekly and monthly email digests.","만들고, 매일, 매주 및 매월 이메일 다이제스트를 관리 할 수 있습니다."
+Create rules to restrict transactions based on values.,값을 기준으로 거래를 제한하는 규칙을 만듭니다.
+Created By,제작
+Creates salary slip for above mentioned criteria.,위에서 언급 한 기준에 대한 급여 명세서를 작성합니다.
+Creation Date,만든 날짜
+Creation Document No,작성 문서 없음
+Creation Document Type,작성 문서 형식
+Creation Time,작성 시간
+Credentials,신임장
+Credit,신용
+Credit Amt,신용 AMT 사의
+Credit Card,신용카드
+Credit Card Voucher,신용 카드 바우처
+Credit Controller,신용 컨트롤러
+Credit Days,신용 일
+Credit Limit,신용 한도
+Credit Note,신용 주
+Credit To,신용에
+Currency,통화
+Currency Exchange,환전
+Currency Name,통화 명
+Currency Settings,통화 설정
+Currency and Price List,통화 및 가격 목록
+Currency exchange rate master.,통화 환율 마스터.
+Current Address,현재 주소
+Current Address Is,현재 주소는
+Current Assets,유동 자산
+Current BOM,현재 BOM
+Current BOM and New BOM can not be same,현재 BOM 및 새로운 BOM은 동일 할 수 없습니다
+Current Fiscal Year,당해 사업 연도
+Current Liabilities,유동 부채
+Current Stock,현재 주식
+Current Stock UOM,현재 주식 UOM
+Current Value,현재 값
+Custom,사용자 지정
+Custom Autoreply Message,사용자 정의 자동 회신 메시지
+Custom Message,사용자 지정 메시지
+Customer,고객
+Customer (Receivable) Account,고객 (채권) 계정
+Customer / Item Name,고객 / 상품 이름
+Customer / Lead Address,고객 / 리드 주소
+Customer / Lead Name,고객 / 리드 명
+Customer > Customer Group > Territory,고객 지원> 고객 그룹> 지역
+Customer Account Head,고객 계정 헤드
+Customer Acquisition and Loyalty,고객 확보 및 충성도
+Customer Address,고객 주소
+Customer Addresses And Contacts,고객 주소 및 연락처
+Customer Addresses and Contacts,고객 주소 및 연락처
+Customer Code,고객 코드
+Customer Codes,고객 코드
+Customer Details,고객 상세 정보
+Customer Feedback,고객 의견
+Customer Group,고객 그룹
+Customer Group / Customer,고객 그룹 / 고객
+Customer Group Name,고객 그룹 이름
+Customer Intro,고객 소개
+Customer Issue,고객의 이슈
+Customer Issue against Serial No.,일련 번호에 대한 고객의 이슈
+Customer Name,고객 이름
+Customer Naming By,고객 이름 지정으로
+Customer Service,고객 서비스
+Customer database.,고객 데이터베이스입니다.
+Customer is required,고객이 필요합니다
+Customer master.,고객 마스터.
+Customer required for 'Customerwise Discount','Customerwise 할인'을 위해 필요한 고객
+Customer {0} does not belong to project {1},고객 {0} 프로젝트에 속하지 않는 {1}
+Customer {0} does not exist,고객 {0}이 (가) 없습니다
+Customer's Item Code,고객의 상품 코드
+Customer's Purchase Order Date,고객의 구매 주문 날짜
+Customer's Purchase Order No,고객의 구매 주문 번호
+Customer's Purchase Order Number,고객의 구매 주문 번호
+Customer's Vendor,고객의 공급 업체
+Customers Not Buying Since Long Time,고객은 긴 시간 때문에 구입하지 않음
+Customerwise Discount,Customerwise 할인
+Customize,사용자 지정
+Customize the Notification,알림 사용자 지정
+Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.,해당 이메일의 일부로가는 소개 텍스트를 사용자 정의 할 수 있습니다.각 트랜잭션은 별도의 소개 텍스트가 있습니다.
+DN Detail,DN 세부 정보
+Daily,매일
+Daily Time Log Summary,매일 시간 로그 요약
+Database Folder ID,데이터베이스 폴더 ID
+Database of potential customers.,잠재 고객의 데이터베이스.
+Date,날짜
+Date Format,날짜 Format
+Date Of Retirement,은퇴 날짜
+Date Of Retirement must be greater than Date of Joining,은퇴 날짜 가입 날짜보다 커야합니다
+Date is repeated,날짜는 반복된다
+Date of Birth,생일
+Date of Issue,발행일
+Date of Joining,가입 날짜
+Date of Joining must be greater than Date of Birth,가입 날짜는 출생의 날짜보다 커야합니다
+Date on which lorry started from supplier warehouse,화물 자동차 공급 업체의 창고에서 시작되는 날짜
+Date on which lorry started from your warehouse,트럭웨어 하우스에서 시작되는 날짜
+Dates,날짜
+Days Since Last Order,일 이후 마지막 주문
+Days for which Holidays are blocked for this department.,휴일이 부서 차단하는 일.
+Dealer,상인
+Debit,직불
+Debit Amt,직불 AMT 사의
+Debit Note,직불 주
+Debit To,To 직불
+Debit and Credit not equal for this voucher. Difference is {0}.,직불이 상품권 같지 않은 신용.차이는 {0}입니다.
+Deduct,공제
+Deduction,공제
+Deduction Type,공제 유형
+Deduction1,Deduction1
+Deductions,공제
+Default,기본값
+Default Account,기본 합계좌
+Default Address Template cannot be deleted,기본 주소 템플릿을 삭제할 수 없습니다
+Default Amount,기본 금액
+Default BOM,기본 BOM
+Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,이 모드를 선택하면 기본 은행 / 현금 계정은 자동으로 POS 송장에 업데이트됩니다.
+Default Bank Account,기본 은행 계좌
+Default Buying Cost Center,기본 구매 비용 센터
+Default Buying Price List,기본 구매 가격 목록
+Default Cash Account,기본 현금 계정
+Default Company,기본 회사
+Default Currency,기본 통화
+Default Customer Group,기본 고객 그룹
+Default Expense Account,기본 비용 계정
+Default Income Account,기본 소득 계정
+Default Item Group,기본 항목 그룹
+Default Price List,기본 가격리스트
+Default Purchase Account in which cost of the item will be debited.,항목의 비용이 청구됩니다되는 기본 구매 계정.
+Default Selling Cost Center,기본 판매 비용 센터
+Default Settings,기본 설정
+Default Source Warehouse,기본 소스 창고
+Default Stock UOM,기본 주식 UOM
+Default Supplier,기본 공급 업체
+Default Supplier Type,기본 공급자 유형
+Default Target Warehouse,기본 대상 창고
+Default Territory,기본 지역
+Default Unit of Measure,측정의 기본 단위
+"Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module.",이미 다른 UOM으로 일부 거래 (들)을 만들어 때문에 측정의 기본 단위는 직접 변경할 수 없습니다. 기본 UOM을 변경하려면 재고 모듈에서 'UOM 유틸리티 바꾸기 도구를 사용합니다.
+Default Valuation Method,기본 평가 방법
+Default Warehouse,기본 창고
+Default Warehouse is mandatory for stock Item.,기본 창고 재고 상품에 대한 필수입니다.
+Default settings for accounting transactions.,회계 거래의 기본 설정.
+Default settings for buying transactions.,트랜잭션을 구입을위한 기본 설정.
+Default settings for selling transactions.,트랜잭션을 판매의 기본 설정.
+Default settings for stock transactions.,주식 거래의 기본 설정.
+Defense,방어
+"Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","이 비용 센터에 예산을 정의합니다.예산 조치를 설정하려면 HREF <참조 = ""#!목록 / 회사 ""> 회사 마스터 </ A>"
+Del,델
+Delete,삭제
+Delete {0} {1}?,삭제 {0} {1}?
+Delivered,배달
+Delivered Items To Be Billed,청구에 전달 항목
+Delivered Qty,납품 수량
+Delivered Serial No {0} cannot be deleted,배달 시리얼 번호 {0} 삭제할 수 없습니다
+Delivery Date,* 인수일
+Delivery Details,납품 세부 사항
+Delivery Document No,납품 문서 없음
+Delivery Document Type,납품 문서 형식
+Delivery Note,상품 수령증
+Delivery Note Item,배송 참고 항목
+Delivery Note Items,배송 참고 항목
+Delivery Note Message,납품서 메시지
+Delivery Note No,납품서 없음
+Delivery Note Required,배송 참고 필요한
+Delivery Note Trends,배송 참고 동향
+Delivery Note {0} is not submitted,배송 참고 {0} 제출되지
+Delivery Note {0} must not be submitted,배송 참고 {0} 제출하지 않아야합니다
+Delivery Notes {0} must be cancelled before cancelling this Sales Order,배달 노트는 {0}이 판매 주문을 취소하기 전에 취소해야합니다
+Delivery Status,배달 상태
+Delivery Time,배달 시간
+Delivery To,에 배달
+Department,부서
+Department Stores,백화점
+Depends on LWP,LWP에 따라 달라집니다
+Depreciation,감가 상각
+Description,기술
+Description HTML,설명 HTML
+Designation,Designation
+Designer,디자이너
+Detailed Breakup of the totals,합계의 자세한 해체
+Details,세부 정보
+Difference (Dr - Cr),차이 (박사 - 크롬)
+Difference Account,차이 계정
+"Difference Account must be a 'Liability' type account, since this Stock Reconciliation is an Opening Entry",이 재고 조정이 오프닝 입장이기 때문에 차이 계정은 '책임'유형의 계정이어야합니다
+Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,항목에 대해 서로 다른 UOM가 잘못 (총) 순 중량 값으로 이어질 것입니다.각 항목의 순 중량이 동일한 UOM에 있는지 확인하십시오.
+Direct Expenses,직접 비용
+Direct Income,직접 수입
+Disable,사용 안함
+Disable Rounded Total,둥근 전체에게 사용 안 함
+Disabled,사용 안함
+Discount  %,할인 %
+Discount %,할인 %
+Discount (%),할인 (%)
+Discount Amount,할인 금액
+"Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice","할인 필드는 구매 주문, 구입 영수증, 구매 송장에 사용할 수"
+Discount Percentage,할인 비율
+Discount Percentage can be applied either against a Price List or for all Price List.,할인 비율은 가격 목록에 대해 또는 전체 가격 목록에 하나를 적용 할 수 있습니다.
+Discount must be less than 100,할인 100 미만이어야합니다
+Discount(%),할인 (%)
+Dispatch,파견
+Display all the individual items delivered with the main items,주요 항목과 함께 제공 모든 개별 항목을 표시
+Distribute transport overhead across items.,항목에 걸쳐 전송 오버 헤드를 배포합니다.
+Distribution,유통
+Distribution Id,배신 ID
+Distribution Name,배포 이름
+Distributor,분배 자
+Divorced,이혼
+Do Not Contact,연락하지 말라
+Do not show any symbol like $ etc next to currencies.,다음 통화 $ 등과 같은 모든 기호를 표시하지 마십시오.
+Do really want to unstop production order: ,
+Do you really want to STOP ,
+Do you really want to STOP this Material Request?,당신은 정말이 자료 요청을 중지 하시겠습니까?
+Do you really want to Submit all Salary Slip for month {0} and year {1},당신은 정말 {0}과 {1} 년 달에 대한 모든 급여 슬립 제출 하시겠습니까
+Do you really want to UNSTOP ,
+Do you really want to UNSTOP this Material Request?,당신은 정말이 자료 요청을 멈추지 하시겠습니까?
+Do you really want to stop production order: ,
+Doc Name,문서의 이름
+Doc Type,문서 유형
+Document Description,문서 설명
+Document Type,문서 형식
+Documents,서류
+Domain,도메인
+Don't send Employee Birthday Reminders,직원 생일 알림을 보내지 마십시오
+Download Materials Required,필요한 재료 다운로드하십시오
+Download Reconcilation Data,Reconcilation 데이터 다운로드하십시오
+Download Template,다운로드 템플릿
+Download a report containing all raw materials with their latest inventory status,그들의 최신의 재고 상황에 따라 모든 원료가 포함 된 보고서를 다운로드
+"Download the Template, fill appropriate data and attach the modified file.","템플릿을 다운로드, 적절한 데이터를 작성하고 수정 된 파일을 첨부합니다."
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records","템플릿을 다운로드, 적절한 데이터를 작성하고 수정 된 파일을 첨부합니다. 선택한 기간의 모든 날짜와 직원의 조합은 기존의 출석 기록과 함께, 템플릿에 올 것이다"
+Draft,초안
+Dropbox,드롭박스
+Dropbox Access Allowed,허용 보관 용 액세스
+Dropbox Access Key,보관 용 액세스 키
+Dropbox Access Secret,보관 용 액세스 비밀
+Due Date,마감일
+Due Date cannot be after {0},때문에 날짜가 없습니다 {0}
+Due Date cannot be before Posting Date,기한 날짜를 게시하기 전에 할 수 없습니다
+Duplicate Entry. Please check Authorization Rule {0},중복 입력입니다..권한 부여 규칙을 확인하시기 바랍니다 {0}
+Duplicate Serial No entered for Item {0},중복 된 일련 번호는 항목에 대해 입력 {0}
+Duplicate entry,항목을 중복
+Duplicate row {0} with same {1},중복 행 {0}과 같은 {1}
+Duties and Taxes,관세 및 세금
+ERPNext Setup,ERPNext 설치
+Earliest,처음
+Earnest Money,계약금
+Earning,적립
+Earning & Deduction,적립 및 공제
+Earning Type,유형 적립
+Earning1,Earning1
+Edit,편집
+Edu. Cess on Excise,에듀.소비세에 운
+Edu. Cess on Service Tax,에듀.서비스 세금에 운
+Edu. Cess on TDS,에듀.TDS에 운
+Education,교육
+Educational Qualification,교육 자격
+Educational Qualification Details,교육 자격 세부 사항
+Eg. smsgateway.com/api/send_sms.cgi,예. smsgateway.com / API / send_sms.cgi
+Either debit or credit amount is required for {0},직불 카드 또는 신용 금액 중 하나가 필요합니다 {0}
+Either target qty or target amount is mandatory,목표 수량 또는 목표량 하나는 필수입니다
+Either target qty or target amount is mandatory.,목표 수량 또는 목표량 하나는 필수입니다.
+Electrical,전기의
+Electricity Cost,전기 비용
+Electricity cost per hour,시간 당 전기 요금
+Electronics,전자 공학
+Email,이메일
+Email Digest,이메일 다이제스트
+Email Digest Settings,알림 이메일 설정
+Email Digest: ,
+Email Id,이메일 아이디
+"Email Id where a job applicant will email e.g. ""jobs@example.com""","작업 신청자가 보내드립니다 이메일 ID 예를 들면 ""jobs@example.com"""
+Email Notifications,전자 메일 알림
+Email Sent?,이메일 전송?
+"Email id must be unique, already exists for {0}","이메일 ID가 고유해야합니다, 이미 존재 {0}"
+Email ids separated by commas.,이메일 ID를 쉼표로 구분.
+"Email settings to extract Leads from sales email id e.g. ""sales@example.com""","판매 이메일 ID의 예를 들어 ""sales@example.com""에서 리드를 추출하는 전자 메일 설정"
+Emergency Contact,비상 연락처
+Emergency Contact Details,비상 연락처 세부 정보
+Emergency Phone,긴급 전화
+Employee,종업원
+Employee Birthday,직원 생일
+Employee Details,직원의 자세한 사항
+Employee Education,직원 교육
+Employee External Work History,직원 외부 일 역사
+Employee Information,직원 정보
+Employee Internal Work History,직원 내부 작업 기록
+Employee Internal Work Historys,직원 내부 작업 Historys
+Employee Leave Approver,직원 허가 승인자
+Employee Leave Balance,직원 허가 밸런스
+Employee Name,직원 이름
+Employee Number,직원 수
+Employee Records to be created by,직원 기록에 의해 생성되는
+Employee Settings,직원 설정
+Employee Type,직원 유형
+"Employee designation (e.g. CEO, Director etc.).","직원 지정 (예 : CEO, 이사 등)."
+Employee master.,직원 마스터.
+Employee record is created using selected field. ,
+Employee records.,직원 기록.
+Employee relieved on {0} must be set as 'Left',{0}에 안심 직원은 '왼쪽'으로 설정해야합니다
+Employee {0} has already applied for {1} between {2} and {3},직원 {0}이 (가) 이미 사이에 {1}를 신청했다 {2}와 {3}
+Employee {0} is not active or does not exist,직원 {0} 활성화되지 않거나 존재하지 않습니다
+Employee {0} was on leave on {1}. Cannot mark attendance.,직원은 {0} {1}에 휴가를했다.출석을 표시 할 수 없습니다.
+Employees Email Id,직원 이드 이메일
+Employment Details,고용 세부 사항
+Employment Type,고용 유형
+Enable / disable currencies.,/ 비활성화 통화를 사용합니다.
+Enabled,사용
+Encashment Date,현금화 날짜
+End Date,끝 날짜
+End Date can not be less than Start Date,종료 날짜는 시작 날짜보다 작을 수 없습니다
+End date of current invoice's period,현재 송장의 기간의 종료 날짜
+End of Life,수명 종료
+Energy,에너지
+Engineer,기사
+Enter Verification Code,인증 코드에게 입력
+Enter campaign name if the source of lead is campaign.,리드의 소스 캠페인 경우 캠페인 이름을 입력합니다.
+Enter department to which this Contact belongs,이 연락처가 속한 부서를 입력
+Enter designation of this Contact,이 연락처의 지정을 입력
+"Enter email id separated by commas, invoice will be mailed automatically on particular date","쉼표로 구분 된 전자 메일 ID를 입력, 송장은 특정 날짜에 자동으로 발송됩니다"
+Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.,당신이 생산 주문을 올리거나 분석을위한 원시 자료를 다운로드하고자하는 항목 및 계획 수량을 입력합니다.
+Enter name of campaign if source of enquiry is campaign,메시지의 소스 캠페인 경우 캠페인의 이름을 입력
+"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)","여기에 정적 URL 매개 변수를 입력합니다 (예 : 보낸 사람 = ERPNext, 사용자 이름 = ERPNext, 암호 = 1234 등)"
+Enter the company name under which Account Head will be created for this Supplier,머리를 어느 계정에서 회사 이름을 입력이 업체 생성됩니다
+Enter url parameter for message,메시지의 URL 매개 변수를 입력
+Enter url parameter for receiver nos,수신기 NOS에 대한 URL 매개 변수를 입력
+Entertainment & Leisure,엔터테인먼트 & 레저
+Entertainment Expenses,접대비
+Entries,항목
+Entries against ,
+Entries are not allowed against this Fiscal Year if the year is closed.,올해가 닫혀있는 경우 항목이 회계 연도에 허용되지 않습니다.
+Equity,공평
+Error: {0} > {1},오류 : {0}> {1}
+Estimated Material Cost,예상 재료비
+"Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","우선 순위가 가장 높은 가격에 여러 규칙이있는 경우에도, 그 다음 다음 내부의 우선 순위가 적용됩니다"
+Everyone can read,모든 사람이 읽을 수 있습니다
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". 예 ABCD # # # # #  일련 설정되고 시리얼 No가 트랜잭션에 언급되지 않은 경우, 자동으로 일련 번호가이 시리즈에 기초하여 생성 될 것이다.당신은 항상 명시 적으로이 항목에 대한 일련 NOS를 언급합니다. 이 비워 둡니다."
+Exchange Rate,환율
+Excise Duty 10,소비세 (10)
+Excise Duty 14,소비세 14
+Excise Duty 4,소비세 4
+Excise Duty 8,소비세 8
+Excise Duty @ 10,10 @ 소비세
+Excise Duty @ 14,14 @ 소비세
+Excise Duty @ 4,4 @ 소비세
+Excise Duty @ 8,8 @ 소비세
+Excise Duty Edu Cess 2,소비세 의무 에듀 CESS 2
+Excise Duty SHE Cess 1,소비세 의무 SHE CESS 1
+Excise Page Number,소비세의 페이지 번호
+Excise Voucher,소비세 바우처
+Execution,실행
+Executive Search,대표 조사
+Exemption Limit,면제 한도
+Exhibition,전시회
+Existing Customer,기존 고객
+Exit,닫기
+Exit Interview Details,출구 인터뷰의 자세한 사항
+Expected,예상
+Expected Completion Date can not be less than Project Start Date,예상 완료 날짜 프로젝트 시작 날짜보다 작을 수 없습니다
+Expected Date cannot be before Material Request Date,예상 날짜 자료 요청 날짜 이전 할 수 없습니다
+Expected Delivery Date,예상 배송 날짜
+Expected Delivery Date cannot be before Purchase Order Date,예상 배송 날짜는 구매 주문 날짜 전에 할 수 없습니다
+Expected Delivery Date cannot be before Sales Order Date,예상 배달 날짜 이전에 판매 주문 날짜가 될 수 없습니다
+Expected End Date,예상 종료 날짜
+Expected Start Date,예상 시작 날짜
+Expense,지출
+Expense / Difference account ({0}) must be a 'Profit or Loss' account,비용 / 차이 계정 ({0})의 이익 또는 손실 '계정이어야합니다
+Expense Account,비용 계정
+Expense Account is mandatory,비용 계정이 필수입니다
+Expense Claim,비용 청구
+Expense Claim Approved,비용 청구 승인
+Expense Claim Approved Message,경비 청구서 승인 메시지
+Expense Claim Detail,비용 청구 상세 정보
+Expense Claim Details,비용 청구 상세 정보
+Expense Claim Rejected,비용 청구는 거부
+Expense Claim Rejected Message,비용 청구 거부 메시지
+Expense Claim Type,비용 청구 유형
+Expense Claim has been approved.,경비 요청이 승인되었습니다.
+Expense Claim has been rejected.,경비 요청이 거부되었습니다.
+Expense Claim is pending approval. Only the Expense Approver can update status.,비용 청구가 승인 대기 중입니다.만 비용 승인자 상태를 업데이트 할 수 있습니다.
+Expense Date,비용 날짜
+Expense Details,비용 세부 정보
+Expense Head,비용 헤드
+Expense account is mandatory for item {0},비용 계정 항목에 대한 필수 {0}
+Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,비용이나 차이 계정은 필수 항목에 대한 {0}에 영향을 미치기 전체 주식 가치로
+Expenses,지출
+Expenses Booked,예약 비용
+Expenses Included In Valuation,비용은 평가에 포함
+Expenses booked for the digest period,다이제스트 기간 동안 예약 비용
+Expiry Date,유효 기간
+Exports,수출
+External,외부
+Extract Emails,이메일을 추출
+FCFS Rate,FCFS 평가
+Failed: ,
+Family Background,가족 배경
+Fax,팩스
+Features Setup,기능 설정
+Feed,사육하기
+Feed Type,공급 유형
+Feedback,피드백
+Female,여성
+Fetch exploded BOM (including sub-assemblies),(서브 어셈블리 포함) 폭발 BOM 가져 오기
+"Field available in Delivery Note, Quotation, Sales Invoice, Sales Order","배달 참고, 견적, 판매 송장, 판매 주문에서 사용할 수있는 필드"
+Files Folder ID,파일 폴더 ID
+Fill the form and save it,양식을 작성하고 그것을 저장
+Filter based on customer,필터 고객에 따라
+Filter based on item,항목을 기준으로 필터링
+Financial / accounting year.,금융 / 회계 연도.
+Financial Analytics,재무 분석
+Financial Services,금융 서비스
+Financial Year End Date,회계 연도 종료일
+Financial Year Start Date,회계 연도의 시작 날짜
+Finished Goods,완성품
+First Name,이름
+First Responded On,첫 번째에 반응했다
+Fiscal Year,회합계 연도
+Fiscal Year Start Date and Fiscal Year End Date are already set in Fiscal Year {0},회계 연도의 시작 날짜 및 회계 연도 종료 날짜가 이미 회계 연도에 설정되어 {0}
+Fiscal Year Start Date and Fiscal Year End Date cannot be more than a year apart.,회계 연도 시작 날짜 및 회계 연도 종료 날짜가 떨어져 년 이상 할 수 없습니다.
+Fiscal Year Start Date should not be greater than Fiscal Year End Date,회계 연도의 시작 날짜는 회계 연도 종료 날짜보다 크지 않아야한다
+Fixed Asset,고정 자산
+Fixed Assets,고정 자산
+Follow via Email,이메일을 통해 수행
+"Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.","항목 하위 경우 표를 수행하면 값을 표시합니다 - 계약.이 값은 하위의 ""재료 명세서 (BOM)""의 마스터에서 가져온 것입니다 - 상품 계약을 체결."
+Food,음식
+"Food, Beverage & Tobacco","음식, 음료 및 담배"
+"For 'Sales BOM' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Sales BOM' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.","'판매 BOM'항목, 창고, 일련 번호 및 배치에 대한이 '포장 목록'테이블에서 고려 될 것입니다.창고 및 배치 없음은 '판매 BOM'항목에 대한 모든 포장 항목에 대해 동일한 경우,이 값은 기본 항목 테이블에 입력 할 수있는 값은 '포장 목록'테이블에 복사됩니다."
+For Company,회사
+For Employee,직원에 대한
+For Employee Name,직원 이름에
+For Price List,가격 목록을 보려면
+For Production,생산
+For Reference Only.,참고 만하십시오.
+For Sales Invoice,판매 송장
+For Server Side Print Formats,서버 측 인쇄 형식의
+For Supplier,공급 업체
+For Warehouse,웨어 하우스
+For Warehouse is required before Submit,창고가 필요한 내용은 이전에 제출
+"For e.g. 2012, 2012-13","예를 들어, 2012 년, 2012-13"
+For reference,참고로
+For reference only.,참고하십시오.
+"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","고객의 편의를 위해, 이러한 코드는 인보이스 배송 메모와 같은 인쇄 포맷으로 사용될 수있다"
+Fraction,분수
+Fraction Units,분수 단위
+Freeze Stock Entries,동결 재고 항목
+Freeze Stocks Older Than [Days],고정 주식 이전보다 [일]
+Freight and Forwarding Charges,화물 운송 및 포워딩 요금
+Friday,금요일
+From,로부터
+From Bill of Materials,재료 명세서 (BOM)에서
+From Company,회사에서
+From Currency,통화와
+From Currency and To Currency cannot be same,통화와 통화하는 방법은 동일 할 수 없습니다
+From Customer,고객의
+From Customer Issue,고객의 문제에서
+From Date,날짜
+From Date cannot be greater than To Date,날짜에서 날짜보다 클 수 없습니다
+From Date must be before To Date,날짜 누계 이전이어야합니다
+From Date should be within the Fiscal Year. Assuming From Date = {0},날짜에서 회계 연도 내에 있어야합니다.날짜 가정 = {0}
+From Delivery Note,배달 주에서
+From Employee,직원에서
+From Lead,리드에서
+From Maintenance Schedule,유지 보수 일정에서
+From Material Request,자료 요청에서
+From Opportunity,기회에서
+From Package No.,패키지 번호에서
+From Purchase Order,구매 발주
+From Purchase Receipt,구매 영수증에서
+From Quotation,견적에서
+From Sales Order,판매 주문에서
+From Supplier Quotation,공급 업체의 견적에서
+From Time,시간에서
+From Value,값에서
+From and To dates required,일자 및 끝
+From value must be less than to value in row {0},값에서 행의 값보다 작아야합니다 {0}
+Frozen,언
+Frozen Accounts Modifier,냉동 계정 수정
+Fulfilled,적용
+Full Name,전체 이름
+Full-time,전 시간
+Fully Billed,완전 청구
+Fully Completed,완전히 완료
+Fully Delivered,완전 배달
+Furniture and Fixture,가구 및 비품
+Further accounts can be made under Groups but entries can be made against Ledger,또한 계정은 그룹에서 할 수 있지만 항목이 원장에 대해 할 수있다
+"Further accounts can be made under Groups, but entries can be made against Ledger","또한 계정 그룹하에 제조 될 수 있지만, 항목은 원장에 대해 수행 될 수있다"
+Further nodes can be only created under 'Group' type nodes,또한 노드는 '그룹'형태의 노드에서 생성 할 수 있습니다
+GL Entry,GL 등록
+Gantt Chart,Gantt 차트
+Gantt chart of all tasks.,모든 작업의 Gantt 차트.
+Gender,성별
+General,일반
+General Ledger,원장
+Generate Description HTML,설명 HTML을 생성
+Generate Material Requests (MRP) and Production Orders.,자료 요청 (MRP) 및 생산 오더를 생성합니다.
+Generate Salary Slips,급여 전표 생성
+Generate Schedule,일정을 생성
+Generates HTML to include selected image in the description,설명에 선택한 이미지를 포함하는 HTML을 생성합니다
+Get Advances Paid,진보는 돈을 받고
+Get Advances Received,진보는 수신 받기
+Get Current Stock,현재 주식을보세요
+Get Items,항목 가져 오기
+Get Items From Sales Orders,판매 주문에서 항목 가져 오기
+Get Items from BOM,BOM에서 항목 가져 오기
+Get Last Purchase Rate,마지막 구매께서는보세요
+Get Outstanding Invoices,미결제 인보이스를 얻을
+Get Relevant Entries,관련 항목을보세요
+Get Sales Orders,판매 주문을 받아보세요
+Get Specification Details,사양 세부 사항을 얻을
+Get Stock and Rate,주식 및 속도를 얻을 수
+Get Template,양식 구하기
+Get Terms and Conditions,약관을보세요
+Get Unreconciled Entries,비 조정 항목을보세요
+Get Weekly Off Dates,날짜 매주 하차
+"Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.","언급 게시 날짜 시간에 소스 / 목표웨어 하우스에서 평가의 속도와 재고를 바로 확인해보세요.항목을 직렬화하는 경우, 시리얼 NOS를 입력 한 후,이 버튼을 누르십시오."
+Global Defaults,글로벌 기본값
+Global POS Setting {0} already created for company {1},글로벌 POS 설정 {0}이 (가) 이미 위해 만든 회사 {1}
+Global Settings,전역 설정
+"Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts and create a new Account Ledger (by clicking on Add Child) of type ""Bank""","해당 그룹 (펀드 일반적으로 응용 프로그램> 유동 자산> 은행 계정으로 이동하여 ""은행에게""형식의 자식 추가를 클릭하여 새로운 계정 원장 ()를 작성"
+"Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties and create a new Account Ledger (by clicking on Add Child) of type ""Tax"" and do mention the Tax rate.","해당 그룹 (기금의 보통 소스> 부채> 세금과 의무로 이동 유형 ""세금""의 원장 (클릭하여 어린이 추가) 새 계정을 생성하고 세율을 언급 않습니다."
+Goal,골
+Goals,목표
+Goods received from Suppliers.,제품은 공급 업체에서 받았다.
+Google Drive,구글 드라이브
+Google Drive Access Allowed,구글 드라이브 액세스가 허용
+Government,통치 체제
+Graduate,졸업생
+Grand Total,총 합계
+Grand Total (Company Currency),총계 (회사 통화)
+"Grid ""","그리드 """
+Grocery,식료품 점
+Gross Margin %,매출 총 이익률의 %
+Gross Margin Value,매출 총 이익률 값
+Gross Pay,총 지불
+Gross Pay + Arrear Amount +Encashment Amount - Total Deduction,총 급여 + 연체 금액 + 현금화 금액 - 총 공제
+Gross Profit,매출 총 이익
+Gross Profit (%),매출 총 이익 (%)
+Gross Weight,총중량
+Gross Weight UOM,총중량 UOM
+Group,그릅
+Group by Account,계정이 그룹
+Group by Voucher,바우처 그룹
+Group or Ledger,그룹 또는 원장
+Groups,그룹
+HR Manager,HR 관리자
+HR Settings,HR 설정
+HTML / Banner that will show on the top of product list.,제품 목록의 상단에 표시됩니다 HTML / 배너입니다.
+Half Day,반나절
+Half Yearly,반년
+Half-yearly,반년마다
+Happy Birthday!,생일 축하해요!
+Hardware,하드웨어
+Has Batch No,일괄 없음에게 있습니다
+Has Child Node,아이 노드에게 있습니다
+Has Serial No,시리얼 No에게 있습니다
+Head of Marketing and Sales,마케팅 및 영업 책임자
+Header,머리글
+Health Care,건강 관리
+Health Concerns,건강 문제
+Health Details,건강의 자세한 사항
+Held On,개최
+Help HTML,도움말 HTML
+"Help: To link to another record in the system, use ""#Form/Note/[Note Name]"" as the Link URL. (don't use ""http://"")","도움말 : 시스템에서 다른 레코드에 링크는 ""# 양식 / 주 / [이름 참고]""링크 URL로 사용합니다. (에 ""http://""를 사용하지 않는다)"
+"Here you can maintain family details like name and occupation of parent, spouse and children","여기에서 당신은 부모, 배우자와 자녀의 이름과 직업 등 가족 세부 사항을 유지 관리 할 수 있습니다"
+"Here you can maintain height, weight, allergies, medical concerns etc","여기서 당신은 신장, 체중, 알레르기, 의료 문제 등 유지 관리 할 수 있습니다"
+Hide Currency Symbol,통화 기호에게 숨기기
+High,높음
+History In Company,회사의 역사
+Hold,길게 누르기
+Holiday,휴일
+Holiday List,휴일 목록
+Holiday List Name,휴일 목록 이름
+Holiday master.,휴일 마스터.
+Holidays,휴가
+Home,홈
+Host,호스트
+"Host, Email and Password required if emails are to be pulled","이메일을 당길 수있는 경우 호스트, 이메일과 비밀번호가 필요"
+Hour,시간
+Hour Rate,시간 비율
+Hour Rate Labour,시간 요금 노동
+Hours,시간
+How Pricing Rule is applied?,어떻게 가격의 규칙이 적용됩니다?
+How frequently?,얼마나 자주?
+"How should this currency be formatted? If not set, will use system defaults","어떻게 통화를 포맷해야 하는가?설정하지 않은 경우, 시스템 기본값을 사용합니다"
+Human Resources,인적 자원
+Identification of the package for the delivery (for print),(프린트) 전달을위한 패키지의 식별
+If Income or Expense,만약 소득 또는 비용
+If Monthly Budget Exceeded,월 예산을 초과하는 경우
+"If Sale BOM is defined, the actual BOM of the Pack is displayed as table. Available in Delivery Note and Sales Order","판매 BOM이 정의 된 경우, 팩의 실제 BOM은 테이블로 표시된다.배송 참고 및 판매 주문 가능"
+"If Supplier Part Number exists for given Item, it gets stored here","공급 업체의 부품 번호가 지정된 항목이있는 경우, 그것은 여기에 저장됩니다"
+If Yearly Budget Exceeded,연간 예산이 초과하는 경우
+"If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.","선택하면, 서브 어셈블리 항목에 대한 BOM은 원료를 얻기 위해 고려 될 것입니다.그렇지 않으면, 모든 서브 어셈블리 항목은 원료로 처리됩니다."
+"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day","이 옵션을 선택하면 총 없음. 작업 일의 휴일을 포함하며,이 급여 당 일의 가치를 감소시킬 것이다"
+"If checked, the tax amount will be considered as already included in the Print Rate / Print Amount",선택하면 이미 인쇄 속도 / 인쇄 금액에 포함되어있는 세액은 간주됩니다
+If different than customer address,만약 고객 주소와 다른
+"If disable, 'Rounded Total' field will not be visible in any transaction","사용하지 않으면, '둥근 총'이 필드는 모든 트랜잭션에서 볼 수 없습니다"
+"If enabled, the system will post accounting entries for inventory automatically.","활성화되면, 시스템이 자동으로 재고에 대한 회계 항목을 게시 할 예정입니다."
+If more than one package of the same type (for print),만약 (프린트) 동일한 유형의 하나 이상의 패키지
+"If multiple Pricing Rules continue to prevail, users are asked to set Priority manually to resolve conflict.","여러 가격의 규칙이 우선 계속되면, 사용자는 충돌을 해결하기 위해 수동으로 우선 순위를 설정하라는 메시지가 표시됩니다."
+"If no change in either Quantity or Valuation Rate, leave the cell blank.","수량이나 평가 평가 하나의 변화는, 세포를 비워없는 경우."
+If not applicable please enter: NA,적용 가능하지 않은 경우 입력 해주세요 NA
+"If not checked, the list will have to be added to each Department where it has to be applied.","선택되지 않으면, 목록은인가되는 각 부서가 여기에 첨가되어야 할 것이다."
+"If selected Pricing Rule is made for 'Price', it will overwrite Price List. Pricing Rule price is the final price, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.","선택한 가격의 규칙이 '가격'을 위해 만든 경우, 가격 목록을 덮어 씁니다.가격 규칙 가격이 최종 가격이기 때문에, 더 이상 할인이 적용 될 수 없습니다.따라서, 판매 주문, 구매 주문 등과 같은 거래에서, 오히려 '가격리스트 평가'필드보다, '평가'분야에서 가져온 것입니다."
+"If specified, send the newsletter using this email address","지정된 경우,이 이메일 주소를 사용하여 뉴스 레터를 보내"
+"If the account is frozen, entries are allowed to restricted users.","계정이 동결 된 경우, 항목은 제한된 사용자에게 허용됩니다."
+"If this Account represents a Customer, Supplier or Employee, set it here.","이 계정은 고객, 공급 업체 또는 직원을 나타내는 경우, 여기를 설정합니다."
+"If two or more Pricing Rules are found based on the above conditions, Priority is applied. Priority is a number between 0 to 20 while default value is zero (blank). Higher number means it will take precedence if there are multiple Pricing Rules with same conditions.","둘 이상의 가격 결정 규칙이 상기 조건에 기초하여 발견되는 경우, 우선 순위가 적용된다.기본 값이 0 (공백) 동안 우선 순위는 0-20 사이의 숫자입니다.숫자가 높을수록 동일한 조건으로 여러 가격의 규정이있는 경우는 우선 순위를 의미합니다."
+If you follow Quality Inspection. Enables Item QA Required and QA No in Purchase Receipt,당신이 품질 검사를 수행합니다.아니 구매 영수증에 상품 QA 필수 및 QA를 활성화하지
+If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,당신이 판매 팀 및 판매 파트너 (채널 파트너)가있는 경우 그들은 태그 및 영업 활동에 기여를 유지 할 수 있습니다
+"If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.","당신이 구매 세금과 요금 마스터에 표준 템플릿을 생성 한 경우, 하나를 선택하고 다음 버튼을 클릭합니다."
+"If you have created a standard template in Sales Taxes and Charges Master, select one and click on the button below.","당신이 판매 세금 및 요금 마스터에 표준 템플릿을 생성 한 경우, 하나를 선택하고 다음 버튼을 클릭합니다."
+"If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page","당신이 긴 프린트 형식이있는 경우,이 기능은 각 페이지의 모든 머리글과 바닥 글과 함께 여러 페이지에 인쇄 할 페이지를 분할 할 수 있습니다"
+If you involve in manufacturing activity. Enables Item 'Is Manufactured',당신이 생산 활동에 참여합니다.항목을 활성화는 '제조'
+Ignore,무시
+Ignore Pricing Rule,가격 규칙을 무시
+Ignored: ,
+Image,영상
+Image View,이미지보기
+Implementation Partner,구현 파트너
+Import Attendance,수입 출석
+Import Failed!,가져 오기 실패!
+Import Log,가져 오기 로그
+Import Successful!,성공적인 가져 오기!
+Imports,수입
+In Hours,시간
+In Process,처리 중
+In Qty,수량에
+In Value,가치있는
+In Words,즉
+In Words (Company Currency),단어 (회사 통화)에서
+In Words (Export) will be visible once you save the Delivery Note.,당신은 배달 주를 저장 한 단어에서 (수출) 표시됩니다.
+In Words will be visible once you save the Delivery Note.,당신은 배달 주를 저장 한 단어에서 볼 수 있습니다.
+In Words will be visible once you save the Purchase Invoice.,당신이 구입 송장을 저장 한 단어에서 볼 수 있습니다.
+In Words will be visible once you save the Purchase Order.,당신이 구매 주문을 저장 한 단어에서 볼 수 있습니다.
+In Words will be visible once you save the Purchase Receipt.,당신이 구입 영수증을 저장 한 단어에서 볼 수 있습니다.
+In Words will be visible once you save the Quotation.,당신은 견적을 저장 한 단어에서 볼 수 있습니다.
+In Words will be visible once you save the Sales Invoice.,당신이 판매 송장을 저장 한 단어에서 볼 수 있습니다.
+In Words will be visible once you save the Sales Order.,당신이 판매 주문을 저장하면 단어에서 볼 수 있습니다.
+Incentives,장려책
+Include Reconciled Entries,조정 됨 항목을 포함
+Include holidays in Total no. of Working Days,없이 총 휴일을 포함. 작업 일의
+Income,소득
+Income / Expense,수익 / 비용
+Income Account,소득 계정
+Income Booked,소득 예약
+Income Tax,소득세
+Income Year to Date,날짜 소득 연도
+Income booked for the digest period,다이제스트 기간 동안 예약 소득
+Incoming,수신
+Incoming Rate,수신 속도
+Incoming quality inspection.,수신 품질 검사.
+Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction.,원장 항목의 개수가 잘못되었습니다 발견.당신은 트랜잭션에 잘못된 계정을 선택했을 수 있습니다.
+Incorrect or Inactive BOM {0} for Item {1} at row {2},잘못된 또는 비활성 BOM {0} 항목에 대한 {1} 행에서 {2}
+Indicates that the package is a part of this delivery (Only Draft),패키지이 배달의 일부임을 나타냅니다 (만 안)
+Indirect Expenses,간접 비용
+Indirect Income,간접 소득
+Individual,개교회들과 사역들은 생겼다가 사라진다.
+Industry,산업
+Industry Type,산업 유형
+Inspected By,검사
+Inspection Criteria,검사 기준
+Inspection Required,검사 필수
+Inspection Type,검사 유형
+Installation Date,설치 날짜
+Installation Note,설치 참고
+Installation Note Item,설치 참고 항목
+Installation Note {0} has already been submitted,설치 참고 {0}이 (가) 이미 제출되었습니다
+Installation Status,설치 상태
+Installation Time,설치 시간
+Installation date cannot be before delivery date for Item {0},설치 날짜는 항목에 대한 배달 날짜 이전 할 수 없습니다 {0}
+Installation record for a Serial No.,일련 번호의 설치 기록
+Installed Qty,설치 수량
+Instructions,지침
+Integrate incoming support emails to Support Ticket,티켓 지원 들어오는 지원 이메일 통합
+Interested,관심
+Intern,인턴
+Internal,내부
+Internet Publishing,인터넷 게시
+Introduction,소개
+Invalid Barcode,잘못된 바코드
+Invalid Barcode or Serial No,잘못된 바코드 또는 일련 번호
+Invalid Mail Server. Please rectify and try again.,잘못된 메일 서버.조정하고 다시 시도하십시오.
+Invalid Master Name,잘못된 마스터 이름
+Invalid User Name or Support Password. Please rectify and try again.,잘못된 사용자 이름 또는 지원의 비밀.조정하고 다시 시도하십시오.
+Invalid quantity specified for item {0}. Quantity should be greater than 0.,항목에 대해 지정된 잘못된 수량 {0}.수량이 0보다 커야합니다.
+Inventory,재고
+Inventory & Support,재고 및 지원
+Investment Banking,투자 은행
+Investments,투자
+Invoice Date,송장의 날짜
+Invoice Details,인보이스 세부 사항
+Invoice No,아니 송장
+Invoice Number,송장 번호
+Invoice Period From,에서 송장 기간
+Invoice Period From and Invoice Period To dates mandatory for recurring invoice,송장을 반복 필수 날짜에와 송장 기간에서 송장 기간
+Invoice Period To,청구서 기간
+Invoice Type,송장 유형
+Invoice/Journal Voucher Details,송장 / 분개장 세부 정보
+Invoiced Amount (Exculsive Tax),인보이스에 청구 된 금액 (Exculsive 세금)
+Is Active,활성
+Is Advance,사전인가
+Is Cancelled,취소된다
+Is Carry Forward,이월된다
+Is Default,기본값
+Is Encash,현금화는
+Is Fixed Asset Item,고정 자산 상품에게 있습니다
+Is LWP,LWP는
+Is Opening,여는
+Is Opening Entry,항목을 여는
+Is POS,POS입니다
+Is Primary Contact,기본 연락처는
+Is Purchase Item,구매 상품입니다
+Is Sales Item,판매 상품입니다
+Is Service Item,서비스 항목은
+Is Stock Item,재고 품목입니다
+Is Sub Contracted Item,하위 계약 품목에게 있습니다
+Is Subcontracted,하청
+Is this Tax included in Basic Rate?,이 세금은 기본 요금에 포함되어 있습니까?
+Issue,이슈
+Issue Date,발행일
+Issue Details,문제의 세부 사항
+Issued Items Against Production Order,생산 오더에 대해 실행 항목
+It can also be used to create opening stock entries and to fix stock value.,또한 개봉 재고 항목을 작성하고 주식 가치를 해결하는 데 사용할 수 있습니다.
+Item,항목
+Item Advanced,상품 상세
+Item Barcode,상품의 바코드
+Item Batch Nos,상품 배치 NOS
+Item Code,상품 코드
+Item Code > Item Group > Brand,상품 코드> 상품 그룹> 브랜드
+Item Code and Warehouse should already exist.,상품 코드 및 창고는 이미 존재해야합니다.
+Item Code cannot be changed for Serial No.,상품 코드 일련 번호 변경할 수 없습니다
+Item Code is mandatory because Item is not automatically numbered,항목이 자동으로 번호가되어 있지 않기 때문에 상품 코드는 필수입니다
+Item Code required at Row No {0},행 번호에 필요한 상품 코드 {0}
+Item Customer Detail,항목을 고객의 세부 사항
+Item Description,항목 설명
+Item Desription,항목 DESRIPTION
+Item Details,상품 상세
+Item Group,항목 그룹
+Item Group Name,항목 그룹 이름
+Item Group Tree,항목 그룹 트리
+Item Group not mentioned in item master for item {0},항목에 대한 항목을 마스터에 언급되지 않은 항목 그룹 {0}
+Item Groups in Details,자세한 사항 상품 그룹
+Item Image (if not slideshow),상품의 이미지 (그렇지 않으면 슬라이드 쇼)
+Item Name,품명
+Item Naming By,상품 이름 지정으로
+Item Price,상품 가격
+Item Prices,상품 가격
+Item Quality Inspection Parameter,상품 품질 검사 매개 변수
+Item Reorder,항목 순서 바꾸기
+Item Serial No,상품 시리얼 번호
+Item Serial Nos,상품 직렬 NOS
+Item Shortage Report,매물 부족 보고서
+Item Supplier,부품 공급 업체
+Item Supplier Details,부품 공급 업체의 상세 정보
+Item Tax,상품의 세금
+Item Tax Amount,항목 세액
+Item Tax Rate,항목 세율
+Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,상품 세금 행 {0} 유형의 세금 또는 수입 비용 또는 청구의 계정이 있어야합니다
+Item Tax1,항목 Tax1
+Item To Manufacture,제조 품목에
+Item UOM,상품 UOM
+Item Website Specification,항목 웹 사이트 사양
+Item Website Specifications,항목 웹 사이트 사양
+Item Wise Tax Detail,항목 와이즈 세금 세부 정보
+Item Wise Tax Detail ,
+Item is required,항목이 필요합니다
+Item is updated,항목이 업데이트됩니다
+Item master.,품목 마스터.
+"Item must be a purchase item, as it is present in one or many Active BOMs",그것은 하나 또는 여러 활성 된 BOM에 존재하는 등의 품목은 구입 항목을해야합니다
+Item or Warehouse for row {0} does not match Material Request,행에 대한 항목이나 창고 {0} 물자의 요청과 일치하지 않습니다
+Item table can not be blank,항목 테이블은 비워 둘 수 없습니다
+Item to be manufactured or repacked,제조 또는 재 포장 할 항목
+Item valuation updated,상품 평가가 업데이트
+Item will be saved by this name in the data base.,품목은 데이터베이스에이 이름으로 저장됩니다.
+Item {0} appears multiple times in Price List {1},{0} 항목을 가격 목록에 여러 번 나타납니다 {1}
+Item {0} does not exist,{0} 항목이 존재하지 않습니다
+Item {0} does not exist in the system or has expired,{0} 항목을 시스템에 존재하지 않거나 만료
+Item {0} does not exist in {1} {2},{0} 항목에 존재하지 않는 {1} {2}
+Item {0} has already been returned,항목 {0}이 (가) 이미 반환 된
+Item {0} has been entered multiple times against same operation,{0} 항목을 동일한 작업에 대해 여러 번 입력 한
+Item {0} has been entered multiple times with same description or date,{0} 항목을 같은 설명 또는 날짜를 여러 번 입력 한
+Item {0} has been entered multiple times with same description or date or warehouse,{0} 항목을 같은 설명 또는 날짜 또는 창고로 여러 번 입력 한
+Item {0} has been entered twice,{0} 항목을 두 번 입력 한
+Item {0} has reached its end of life on {1},항목 {0}에 수명이 다한 {1}
+Item {0} ignored since it is not a stock item,그것은 재고 품목이 아니기 때문에 {0} 항목을 무시
+Item {0} is cancelled,{0} 항목 취소
+Item {0} is not Purchase Item,항목 {0} 항목을 구매하지 않습니다
+Item {0} is not a serialized Item,{0} 항목을 직렬화 된 상품이 없습니다
+Item {0} is not a stock Item,{0} 항목을 재고 항목이 없습니다
+Item {0} is not active or end of life has been reached,{0} 항목을 활성화하지 않거나 수명이 도달했습니다
+Item {0} is not setup for Serial Nos. Check Item master,{0} 항목을 직렬 제의 체크 항목 마스터에 대한 설정이 없습니다
+Item {0} is not setup for Serial Nos. Column must be blank,{0} 항목을 직렬 제 칼럼에 대한 설정이 비어 있어야하지
+Item {0} must be Sales Item,{0} 항목 판매 상품이어야합니다
+Item {0} must be Sales or Service Item in {1},{0} 항목을 판매하거나 서비스 상품이어야 {1}
+Item {0} must be Service Item,항목 {0} 서비스 상품이어야합니다
+Item {0} must be a Purchase Item,{0} 항목을 구매 상품이어야합니다
+Item {0} must be a Sales Item,항목 {0} 판매 품목이어야합니다
+Item {0} must be a Service Item.,항목 {0} 서비스 상품이어야합니다.
+Item {0} must be a Sub-contracted Item,{0} 항목 하위 계약 품목이어야합니다
+Item {0} must be a stock Item,{0} 항목을 재고 품목 수 있어야합니다
+Item {0} must be manufactured or sub-contracted,{0} 항목을 제조 할 수 있어야합니다 또는 하위 계약
+Item {0} not found,{0} 항목을 찾을 수 없습니다
+Item {0} with Serial No {1} is already installed,{0} 항목을 일련 번호로 {1}이 (가) 이미 설치되어 있습니다
+Item {0} with same description entered twice,{0} 항목을 같은 설명과 함께 두 번 입력
+"Item, Warranty, AMC (Annual Maintenance Contract) details will be automatically fetched when Serial Number is selected.","일련 번호를 선택하면 항목, 보증, AMC (연간 유지 보수 계약) 자세한 내용은 자동으로 인출 될 것입니다."
+Item-wise Price List Rate,상품이 많다는 가격리스트 평가
+Item-wise Purchase History,상품 현명한 구입 내역
+Item-wise Purchase Register,상품 현명한 구매 등록
+Item-wise Sales History,상품이 많다는 판매 기록
+Item-wise Sales Register,상품이 많다는 판매 등록
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry","품목 : {0} 배치 식 관리, 사용하여 조정할 수 없습니다 \ 재고 조정 대신 증권 엔트리에게 사용"
+Item: {0} not found in the system,품목 : {0} 시스템에서 찾을 수없는
+Items,아이템
+Items To Be Requested,요청 할 항목
+Items required,필요한 항목
+"Items to be requested which are ""Out of Stock"" considering all warehouses based on projected qty and minimum order qty","""재고 없음""이다 요구되는 항목은 예상 수량 및 최소 주문 수량에 따라 모든 창고를 고려"
+Items which do not exist in Item master can also be entered on customer's request,품목 마스터에 존재하지 않는 항목은 고객의 요청에 따라 입력 할 수 있습니다
+Itemwise Discount,Itemwise 할인
+Itemwise Recommended Reorder Level,Itemwise는 재주문 수준에게 추천
+Job Applicant,구직자
+Job Opening,구인
+Job Profile,작업 프로필
+Job Title,직책
+"Job profile, qualifications required etc.","필요한 작업 프로필, 자격 등"
+Jobs Email Settings,채용 정보 이메일 설정
+Journal Entries,저널 항목
+Journal Entry,분개
+Journal Voucher,분개장
+Journal Voucher Detail,분개장 세부 정보
+Journal Voucher Detail No,분개장 세부 사항 없음
+Journal Voucher {0} does not have account {1} or already matched,분개장 {0} 계정이없는 {1} 또는 이미 일치
+Journal Vouchers {0} are un-linked,분개장 {0} 않은 연결되어
+Keep a track of communication related to this enquiry which will help for future reference.,향후 참조를 위해 도움이 될 것입니다이 문의와 관련된 통신을 확인합니다.
+Keep it web friendly 900px (w) by 100px (h),100 픽셀로 웹 친화적 인 900px (W)를 유지 (H)
+Key Performance Area,핵심 성과 지역
+Key Responsibility Area,주요 책임 지역
+Kg,KG
+LR Date,LR 날짜
+LR No,아니 LR
+Label,라벨
+Landed Cost Item,착륙 비용 항목
+Landed Cost Items,비용 항목에 착륙
+Landed Cost Purchase Receipt,비용 구매 영수증 랜디
+Landed Cost Purchase Receipts,비용 구매 영수증 랜디
+Landed Cost Wizard,착륙 비용 마법사
+Landed Cost updated successfully,착륙 비용 성공적으로 업데이트
+Language,언어
+Last Name,성
+Last Purchase Rate,마지막 구매 비율
+Latest,최근
+Lead,납
+Lead Details,리드 세부 사항
+Lead Id,리드 아이디
+Lead Name,리드 명
+Lead Owner,리드 소유자
+Lead Source,리드 소스
+Lead Status,리드 상태
+Lead Time Date,리드 타임 날짜
+Lead Time Days,시간 일 리드
+Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,리드 타임의 일이 품목이 당신의 창고에 예상되는 일 수입니다.이 항목을 선택하면이 일 자료 요청에 반입됩니다.
+Lead Type,리드 타입
+Lead must be set if Opportunity is made from Lead,기회는 납으로 만든 경우 리드를 설정해야합니다
+Leave Allocation,할당을 남겨주세요
+Leave Allocation Tool,할당 도구를 남겨
+Leave Application,응용 프로그램을 남겨주
+Leave Approver,승인자를 남겨
+Leave Approvers,승인자를 남겨
+Leave Balance Before Application,응용 프로그램의 앞에 균형을 남겨주세요
+Leave Block List,차단 목록을 남겨주세요
+Leave Block List Allow,차단 목록은 허용 남겨
+Leave Block List Allowed,차단 목록은 허용 남겨
+Leave Block List Date,차단 목록 날짜를 남겨
+Leave Block List Dates,차단 목록 날짜를 남겨
+Leave Block List Name,차단 목록의 이름을 남겨주세요
+Leave Blocked,남겨 차단
+Leave Control Panel,제어판에게 남겨
+Leave Encashed?,Encashed 남겨?
+Leave Encashment Amount,현금화 금액을 남겨주
+Leave Type,유형을 남겨주세요
+Leave Type Name,유형 이름을 남겨주세요
+Leave Without Pay,지불하지 않고 종료
+Leave application has been approved.,허가 신청이 승인되었습니다.
+Leave application has been rejected.,허가 신청이 거부되었습니다.
+Leave approver must be one of {0},남겨 승인 중 하나 여야합니다 {0}
+Leave blank if considered for all branches,모든 지점을 고려하는 경우 비워 둡니다
+Leave blank if considered for all departments,모든 부서가 있다고 간주 될 경우 비워 둡니다
+Leave blank if considered for all designations,모든 지정을 고려하는 경우 비워 둡니다
+Leave blank if considered for all employee types,모든 직원의 유형을 고려하는 경우 비워 둡니다
+"Leave can be approved by users with Role, ""Leave Approver""","남겨 역할을 가진 사용자에 의해 승인 될 수있다 ""승인자를 남겨"""
+Leave of type {0} cannot be longer than {1},유형의 휴가는 {0}을 넘을 수 없습니다 {1}
+Leaves Allocated Successfully for {0},잎에 성공적으로 할당 된 {0}
+Leaves for type {0} already allocated for Employee {1} for Fiscal Year {0},잎 유형에 대한 {0}이 (가) 이미 직원에 할당 된 {1} 회계 연도에 대한 {0}
+Leaves must be allocated in multiples of 0.5,잎은 0.5의 배수로 할당해야합니다
+Ledger,원장
+Ledgers,합계정원장
+Left,왼쪽
+Legal,법률
+Legal Expenses,법률 비용
+Letter Head,레터 헤드
+Letter Heads for print templates.,인쇄 템플릿에 대한 편지 머리.
+Level,레벨
+Lft,좌
+Liability,책임
+List a few of your customers. They could be organizations or individuals.,고객의 몇 가지를 나열합니다.그들은 조직 또는 개인이 될 수 있습니다.
+List a few of your suppliers. They could be organizations or individuals.,공급 업체의 몇 가지를 나열합니다.그들은 조직 또는 개인이 될 수 있습니다.
+List items that form the package.,패키지를 형성하는 목록 항목.
+List this Item in multiple groups on the website.,웹 사이트에 여러 그룹에이 항목을 나열합니다.
+"List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start.","귀하의 제품이나 제품을 구매하거나 판매하는 서비스를 나열합니다.당신이 시작할 때 항목 그룹, 측정 및 기타 속성의 단위를 확인해야합니다."
+"List your tax heads (e.g. VAT, Excise; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later.","그들의 가격을, 당신의 세금 헤드 (그들은 고유 한 이름이 있어야합니다 예를 들어, VAT, 소비세)를 나열합니다.이것은 당신이 편집하고 나중에 더 추가 할 수있는 표준 템플릿을 생성합니다."
+Loading...,로딩 중...
+Loans (Liabilities),대출 (부채)
+Loans and Advances (Assets),대출 및 발전 (자산)
+Local,지역정보 검색
+Login,로그인
+Login with your new User ID,새 사용자 ID로 로그인
+Logo,로고
+Logo and Letter Heads,로고와 편지 머리
+Lost,상실
+Lost Reason,분실 된 이유
+Low,낮음
+Lower Income,낮은 소득
+MTN Details,MTN의 자세한 사항
+Main,주요 기능
+Main Reports,주 보고서
+Maintain Same Rate Throughout Sales Cycle,판매주기 전반에 걸쳐 동일한 비율을 유지
+Maintain same rate throughout purchase cycle,구매주기 동안 동일한 비율을 유지
+Maintenance,유지
+Maintenance Date,유지 보수 날짜
+Maintenance Details,유지 보수 세부 정보
+Maintenance Schedule,유지 보수 일정
+Maintenance Schedule Detail,유지 보수 일정의 세부 사항
+Maintenance Schedule Item,유지 보수 일정 상품
+Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule',유지 보수 일정은 모든 항목에 대해 생성되지 않습니다.'생성 일정'을 클릭 해주세요
+Maintenance Schedule {0} exists against {0},유지 보수 일정은 {0}에있는 {0}
+Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,유지 보수 일정은 {0}이 판매 주문을 취소하기 전에 취소해야합니다
+Maintenance Schedules,관리 스케줄
+Maintenance Status,유지 보수 상태
+Maintenance Time,유지 시간
+Maintenance Type,유지 보수 유형
+Maintenance Visit,유지 보수 방문
+Maintenance Visit Purpose,유지 보수 방문 목적
+Maintenance Visit {0} must be cancelled before cancelling this Sales Order,유지 보수 방문은 {0}이 판매 주문을 취소하기 전에 취소해야합니다
+Maintenance start date can not be before delivery date for Serial No {0},유지 보수 시작 날짜 일련 번호에 대한 배달 날짜 이전 할 수 없습니다 {0}
+Major/Optional Subjects,주요 / 선택 주제
+Make ,
+Make Accounting Entry For Every Stock Movement,모든 주식 이동을위한 회계 항목을 만듭니다
+Make Bank Voucher,은행 바우처에게 확인
+Make Credit Note,신용 참고하십시오
+Make Debit Note,직불 참고하십시오
+Make Delivery,배달을
+Make Difference Entry,차이의 항목을 만듭니다
+Make Excise Invoice,소비세 송장에게 확인
+Make Installation Note,설치 참고하십시오
+Make Invoice,인보이스를 확인
+Make Maint. Schedule,라쿠텐를 확인합니다.일정
+Make Maint. Visit,라쿠텐를 확인합니다.방문하기
+Make Maintenance Visit,유지 보수 방문을합니다
+Make Packing Slip,포장 명세서를 확인
+Make Payment,결제하기
+Make Payment Entry,지불 항목을 만듭니다
+Make Purchase Invoice,구매 인보이스에게 확인
+Make Purchase Order,확인 구매 주문
+Make Purchase Receipt,구매 영수증을
+Make Salary Slip,급여 슬립을
+Make Salary Structure,급여 구조를 확인
+Make Sales Invoice,견적서에게 확인
+Make Sales Order,확인 판매 주문
+Make Supplier Quotation,공급 업체의 견적을
+Make Time Log Batch,시간 로그 일괄 확인
+Male,남성
+Manage Customer Group Tree.,고객 그룹 트리를 관리 할 수 있습니다.
+Manage Sales Partners.,판매 파트너를 관리합니다.
+Manage Sales Person Tree.,판매 인 나무를 관리합니다.
+Manage Territory Tree.,지역의 나무를 관리합니다.
+Manage cost of operations,작업의 비용 관리
+Management,관리
+Manager,관리자
+"Mandatory if Stock Item is ""Yes"". Also the default warehouse where reserved quantity is set from Sales Order.","필수 경우 재고 품목은 ""예""입니다.또한 예약 된 수량이 판매 주문에서 설정된 기본 창고."
+Manufacture against Sales Order,판매 주문에 대해 제조
+Manufacture/Repack,제조 / 다시 채워
+Manufactured Qty,제조 수량
+Manufactured quantity will be updated in this warehouse,제조 수량이 창고에 업데이트됩니다
+Manufactured quantity {0} cannot be greater than planned quanitity {1} in Production Order {2},제조 수량 {0} 계획 quanitity를 초과 할 수 없습니다 {1} 생산 순서에 {2}
+Manufacturer,제조사:
+Manufacturer Part Number,제조업체 부품 번호
+Manufacturing,제조의
+Manufacturing Quantity,제조 수량
+Manufacturing Quantity is mandatory,제조 수량이 필수입니다
+Margin,마진
+Marital Status,결혼 여부
+Market Segment,시장 세분
+Marketing,마케팅
+Marketing Expenses,마케팅 비용
+Married,결혼 한
+Mass Mailing,대량 메일 링
+Master Name,마스터 이름
+Master Name is mandatory if account type is Warehouse,계정 유형이 창고 인 경우 마스터의 이름이 필수입니다
+Master Type,마스터 종류
+Masters,석사
+Match non-linked Invoices and Payments.,연결되지 않은 청구서 지불을 일치시킵니다.
+Material Issue,소재 호
+Material Receipt,소재 영수증
+Material Request,자료 요청
+Material Request Detail No,자료 요청의 세부 사항 없음
+Material Request For Warehouse,창고 재질 요청
+Material Request Item,자료 요청 항목
+Material Request Items,자료 요청 항목
+Material Request No,자료 요청 없음
+Material Request Type,자료 요청 유형
+Material Request of maximum {0} can be made for Item {1} against Sales Order {2},최대의 자료 요청은 {0} 항목에 대한 {1}에 대해 수행 할 수있는 판매 주문 {2}
+Material Request used to make this Stock Entry,자료 요청이 재고 항목을 확인하는 데 사용
+Material Request {0} is cancelled or stopped,자료 요청 {0} 취소 또는 정지
+Material Requests for which Supplier Quotations are not created,공급 업체의 견적이 생성되지 않는 재질 요청
+Material Requests {0} created,자료 요청 {0} 생성
+Material Requirement,자료 요구
+Material Transfer,재료 이송
+Materials,도구
+Materials Required (Exploded),필요한 재료 (분해)
+Max 5 characters,최대 5 자
+Max Days Leave Allowed,최대 일 허가 허용
+Max Discount (%),최대 할인 (%)
+Max Qty,최대 수량
+Max discount allowed for item: {0} is {1}%,최대 할인 품목을 허용 : {0} {1} %이
+Maximum Amount,최대 금액
+Maximum allowed credit is {0} days after posting date,허용되는 최대 신용 날짜를 게시 한 후 {0} 일
+Maximum {0} rows allowed,최대 {0} 행이 허용
+Maxiumm discount for Item {0} is {1}%,항목에 대한 Maxiumm 할인은 {0} {1} %에게 is
+Medical,의료
+Medium,중간
+"Merging is only possible if following properties are same in both records. Group or Ledger, Root Type, Company","다음과 같은 속성이 모두 기록에 같은 경우 병합에만 가능합니다.그룹 또는 레저, 루트 유형, 회사"
+Message,메시지
+Message Parameter,메시지 매개 변수
+Message Sent,보낸 메시지
+Message updated,메시지 업데이트
+Messages,쪽지
+Messages greater than 160 characters will be split into multiple messages,160 자보다 큰 메시지는 여러 개의 메시지로 분할됩니다
+Middle Income,중간 소득
+Milestone,마일스톤
+Milestone Date,마일스톤 날짜
+Milestones,연혁
+Milestones will be added as Events in the Calendar,이정표는 달력에 이벤트로 추가됩니다
+Min Order Qty,최소 주문 수량
+Min Qty,최소 수량
+Min Qty can not be greater than Max Qty,최소 수량이 최대 수량보다 클 수 없습니다
+Minimum Amount,최소 금액
+Minimum Order Qty,최소 주문 수량
+Minute,분
+Misc Details,기타 세부 사항
+Miscellaneous Expenses,기타 비용
+Miscelleneous,Miscelleneous
+Mobile No,모바일 없음
+Mobile No.,모바일 번호
+Mode of Payment,지불의 모드
+Modern,현대식
+Monday,월요일
+Month,월
+Monthly,월
+Monthly Attendance Sheet,월간 출석 시트
+Monthly Earning & Deduction,월간 적립 및 차감
+Monthly Salary Register,월급 등록
+Monthly salary statement.,월급의 문.
+More Details,세부정보 더보기
+More Info,추가 정보
+Motion Picture & Video,영화 및 비디오
+Moving Average,움직임 평균
+Moving Average Rate,이동 평균 속도
+Mr,씨
+Ms,MS
+Multiple Item prices.,여러 품목의 가격.
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}",여러 가격 규칙이 동일한 기준으로 존재 확인하시기 바랍니다 \ 우선 순위를 할당하여 충돌.가격 규칙 : {0}
+Music,음악
+Must be Whole Number,전체 숫자 여야합니다
+Name,이름
+Name and Description,이름 및 설명
+Name and Employee ID,이름 및 직원 ID
+"Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master","새로운 계정의 이름입니다.참고 : 고객 및 공급 업체를위한 계정을 생성하지 마십시오, 그들은 고객 및 공급 업체 마스터에서 자동으로 생성됩니다"
+Name of person or organization that this address belongs to.,이 주소가 속해있는 개인이나 조직의 이름입니다.
+Name of the Budget Distribution,예산 분배의 이름
+Naming Series,시리즈 이름 지정
+Negative Quantity is not allowed,음의 수량은 허용되지 않습니다
+Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},음의 주식 오류 ({6}) 항목에 대한 {0} 창고 {1}에 {2} {3}에서 {4} {5}
+Negative Valuation Rate is not allowed,부정 평가 비율은 허용되지 않습니다
+Negative balance in Batch {0} for Item {1} at Warehouse {2} on {3} {4},배치에 부정적인 균형 {0} 항목에 대한 {1}의 창고에서 {2}에서 {3} {4}
+Net Pay,실질 임금
+Net Pay (in words) will be visible once you save the Salary Slip.,당신이 급여 슬립을 저장하면 (즉) 순 유료가 표시됩니다.
+Net Profit / Loss,당기 순이익 / 손실
+Net Total,합계액
+Net Total (Company Currency),합계액 (회사 통화)
+Net Weight,순중량
+Net Weight UOM,순 중량 UOM
+Net Weight of each Item,각 항목의 순 중량
+Net pay cannot be negative,순 임금은 부정 할 수 없습니다
+Never,안함
+New ,
+New Account,새 계정
+New Account Name,새 계정 이름
+New BOM,새로운 BOM
+New Communications,새로운 통신
+New Company,새로운 회사
+New Cost Center,새로운 비용 센터
+New Cost Center Name,새로운 비용 센터의 이름
+New Delivery Notes,새로운 배달 노트
+New Enquiries,새로운 문의
+New Leads,새로운 리드
+New Leave Application,새로운 허가 신청
+New Leaves Allocated,할당 된 새로운 잎
+New Leaves Allocated (In Days),(일) 할당 된 새로운 잎
+New Material Requests,새로운 자료 요청
+New Projects,새로운 프로젝트
+New Purchase Orders,새로운 구매 주문
+New Purchase Receipts,새로운 구매 영수증
+New Quotations,새로운 인용
+New Sales Orders,새로운 판매 주문
+New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,새로운 시리얼 번호는 창고를 가질 수 없습니다.창고 재고 항목 또는 구입 영수증으로 설정해야합니다
+New Stock Entries,새로운 주식 항목
+New Stock UOM,새로운 주식 UOM
+New Stock UOM is required,새로운 주식 UOM가 필요합니다
+New Stock UOM must be different from current stock UOM,새로운 주식 UOM은 현재 주식 UOM 달라야합니다
+New Supplier Quotations,새로운 공급 업체 인용
+New Support Tickets,새로운 지원 티켓
+New UOM must NOT be of type Whole Number,새 UOM 형 정수 가져야 할 필요는 없다
+New Workplace,새로운 직장
+Newsletter,뉴스레터
+Newsletter Content,뉴스 레터 내용
+Newsletter Status,뉴스 레터 상태
+Newsletter has already been sent,뉴스 레터는 이미 전송 된
+"Newsletters to contacts, leads.","상대에게 뉴스 레터, 리드."
+Newspaper Publishers,신문 발행인
+Next,다음
+Next Contact By,다음 접촉
+Next Contact Date,다음 접촉 날짜
+Next Date,다음 날짜
+Next email will be sent on:,다음 이메일에 전송됩니다 :
+No,아니네요
+No Customer Accounts found.,고객의 계정을 찾을 수 없습니다.
+No Customer or Supplier Accounts found,고객의 또는 공급 업체 계정을 찾을 수 없습니다
+No Expense Approvers. Please assign 'Expense Approver' Role to atleast one user,더 비용 승인자 없습니다.이어야 한 사용자에게 '비용 승인자'역할을 할당하십시오
+No Item with Barcode {0},바코드 가진 항목이 없습니다 {0}
+No Item with Serial No {0},시리얼 번호와 어떤 항목이 없습니다 {0}
+No Items to pack,포장하는 항목이 없습니다
+No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user,는 허가 승인자 없습니다.이어야 한 사용자에게 '허가 승인자'역할을 할당하십시오
+No Permission,아무 권한이 없습니다
+No Production Orders created,생성 된 NO 생성 주문하지
+No Supplier Accounts found. Supplier Accounts are identified based on 'Master Type' value in account record.,어떤 공급 업체의 계정을 찾을 수 없습니다.공급 업체 계정은 계정 레코드의 '마스터 유형'값을 기준으로 식별됩니다.
+No accounting entries for the following warehouses,다음 창고에 대한 회계 항목이 없음
+No addresses created,이 생성되지 않음 주소 없음
+No contacts created,생성 된 주소록이 없습니다
+No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template.,기본 주소 템플릿을 찾을 수 없습니다.설정> 인쇄 및 브랜딩에서 새> 주소 템플릿을 생성 해주세요.
+No default BOM exists for Item {0},기본의 BOM은 존재하지 않습니다 항목에 대한 {0}
+No description given,주어진 설명이 없습니다
+No employee found,검색된 직원이 없습니다
+No employee found!,어떤 직원을 찾을 수 없습니다!
+No of Requested SMS,요청 SMS 없음
+No of Sent SMS,보낸 SMS 없음
+No of Visits,방문 없음
+No permission,아무 권한이 없습니다
+No record found,검색된 레코드가 없습니다
+No records found in the Invoice table,송장 테이블에있는 레코드 없음
+No records found in the Payment table,지불 테이블에있는 레코드 없음
+No salary slip found for month: ,
+Non Profit,비영리
+Nos,NOS
+Not Active,동작 없음
+Not Applicable,적용 할 수 없음
+Not Available,사용할 수 없음
+Not Billed,청구되지 않음
+Not Delivered,전달되지 않음
+Not Set,설정 아님
+Not allowed to update stock transactions older than {0},이상 주식 거래는 이전 업데이트 할 수 없습니다 {0}
+Not authorized to edit frozen Account {0},냉동 계정을 편집 할 수있는 권한이 없습니다 {0}
+Not authroized since {0} exceeds limits,{0} 한도를 초과 한 authroized Not
+Not permitted,허용하지 않음
+Note,정보
+Note User,주 사용자
+"Note: Backups and files are not deleted from Dropbox, you will have to delete them manually.","참고 : 백업 및 파일이 드롭 박스에서 삭제되지 않습니다, 당신은 수동으로 삭제해야합니다."
+"Note: Backups and files are not deleted from Google Drive, you will have to delete them manually.","참고 : 백업 및 파일을 구글 드라이브에서 삭제되지 않습니다, 당신은 수동으로 삭제해야합니다."
+Note: Due Date exceeds the allowed credit days by {0} day(s),참고 : 마감일은 {0} 일 (들)에 의해 허용 된 신용 일을 초과
+Note: Email will not be sent to disabled users,참고 : 전자 메일을 사용할 사용자에게 전송되지 않습니다
+Note: Item {0} entered multiple times,참고 : {0} 항목을 여러 번 입력
+Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified,참고 : 결제 항목이 '현금 또는 은행 계좌'이 지정되지 않았기 때문에 생성되지 않습니다
+Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0,주 : 시스템이 항목에 대한 납품에 이상 - 예약 확인하지 않습니다 {0} 수량 또는 금액으로 0이됩니다
+Note: There is not enough leave balance for Leave Type {0},참고 : 허가 유형에 대한 충분한 휴가 밸런스가 없습니다 {0}
+Note: This Cost Center is a Group. Cannot make accounting entries against groups.,참고 :이 비용 센터가 그룹입니다.그룹에 대한 회계 항목을 만들 수 없습니다.
+Note: {0},참고 : {0}
+Notes,참고
+Notes:,주석:
+Nothing to request,요청하지 마
+Notice (days),공지 사항 (일)
+Notification Control,알림 제어
+Notification Email Address,알림 전자 메일 주소
+Notify by Email on creation of automatic Material Request,자동 자료 요청의 생성에 이메일로 통보
+Number Format,번호 형식
+Offer Date,제공 날짜
+Office,사무실
+Office Equipments,사무용품
+Office Maintenance Expenses,사무실 유지 비용
+Office Rent,사무실 임대
+Old Parent,이전 부모
+On Net Total,인터넷 전체에
+On Previous Row Amount,이전 행의 양에
+On Previous Row Total,이전 행에 총
+Online Auctions,온라인 경매
+Only Leave Applications with status 'Approved' can be submitted,만 제출 될 수있다 '승인'상태로 응용 프로그램을 남겨주
+"Only Serial Nos with status ""Available"" can be delivered.","상태 만 직렬 NOS는 ""사용 가능한""전달 될 수있다."
+Only leaf nodes are allowed in transaction,만 잎 노드는 트랜잭션에 허용
+Only the selected Leave Approver can submit this Leave Application,만 선택 안함 승인자이 허가 신청을 제출할 수 있습니다
+Open,열기
+Open Production Orders,오픈 생산 주문
+Open Tickets,오픈 티켓
+Opening (Cr),오프닝 (CR)
+Opening (Dr),오프닝 (박사)
+Opening Date,Opening 날짜
+Opening Entry,항목 열기
+Opening Qty,열기 수량
+Opening Time,영업 시간
+Opening Value,영업 가치
+Opening for a Job.,작업에 대한 열기.
+Operating Cost,운영 비용
+Operation Description,작업 설명
+Operation No,동작 없음
+Operation Time (mins),동작 시간 (분)
+Operation {0} is repeated in Operations Table,동작은 {0} 작업 테이블에 반복된다
+Operation {0} not present in Operations Table,작업 테이블의 작업 {0} 존재하지
+Operations,운영
+Opportunity,기회
+Opportunity Date,기회 날짜
+Opportunity From,기회에서
+Opportunity Item,기회 상품
+Opportunity Items,기회 항목
+Opportunity Lost,잃어버린 기회
+Opportunity Type,기회의 유형
+Optional. This setting will be used to filter in various transactions.,선택.이 설정은 다양한 거래를 필터링하는 데 사용됩니다.
+Order Type,주문 유형
+Order Type must be one of {0},주문 유형 중 하나 여야합니다 {0}
+Ordered,주문
+Ordered Items To Be Billed,청구 항목을 주문한
+Ordered Items To Be Delivered,전달 될 품목을 주문
+Ordered Qty,수량 주문
+"Ordered Qty: Quantity ordered for purchase, but not received.",수량을 주문하는 : 수량 구입 주문 만 접수되지.
+Ordered Quantity,주문 수량
+Orders released for production.,생산 발표 순서.
+Organization Name,조직 이름
+Organization Profile,기업 프로필
+Organization branch master.,조직 분기의 마스터.
+Organization unit (department) master.,조직 단위 (현)의 마스터.
+Other,기타
+Other Details,기타 세부 사항
+Others,기타사항
+Out Qty,수량 아웃
+Out Value,분배 가치
+Out of AMC,AMC의 아웃
+Out of Warranty,보증 기간 만료
+Outgoing,발신
+Outstanding Amount,잔액
+Outstanding for {0} cannot be less than zero ({1}),뛰어난 {0}보다 작을 수 없습니다에 대한 ({1})
+Overhead,간접비
+Overheads,간접비
+Overlapping conditions found between:,사이에있는 중복 조건 :
+Overview,개요
+Owned,소유
+Owner,소유권자
+P L A - Cess Portion,PLA - 운 비중
+PL or BS,PL 또는 BS
+PO Date,PO 날짜
+PO No,PO 없음
+POP3 Mail Server,POP3 메일 서버
+POP3 Mail Settings,POP3 메일 설정
+POP3 mail server (e.g. pop.gmail.com),POP3 메일 서버 (예 pop.gmail.com)
+POP3 server e.g. (pop.gmail.com),POP3 서버 예 (pop.gmail.com)
+POS Setting,POS 설정
+POS Setting required to make POS Entry,POS 항목에게하기 위해 필요한 POS 설정
+POS Setting {0} already created for user: {1} and company {2},POS 설정 {0}이 (가) 이미 사용자에 대해 만들어 {1} 및 회사 {2}
+POS View,POS보기
+PR Detail,PR의 세부 사항
+Package Item Details,패키지 상품 상세
+Package Items,패키지 아이템
+Package Weight Details,포장 무게 세부 정보
+Packed Item,포장 된 상품
+Packed quantity must equal quantity for Item {0} in row {1},{0} 행에서 {1} 포장 수량의 수량을 동일해야합니다
+Packing Details,패킹 세부 사항
+Packing List,패킹리스트
+Packing Slip,포장 명세서
+Packing Slip Item,패킹 슬립 상품
+Packing Slip Items,슬립 항목을 포장
+Packing Slip(s) cancelled,포장 명세서 (들) 취소
+Page Break,페이지 나누기
+Page Name,페이지 이름
+Paid Amount,지불 금액
+Paid amount + Write Off Amount can not be greater than Grand Total,지불 금액 + 금액 오프 쓰기 총합보다 클 수 없습니다
+Pair,페어링
+Parameter,매개변수
+Parent Account,부모 합계좌
+Parent Cost Center,부모의 비용 센터
+Parent Customer Group,상위 고객 그룹
+Parent Detail docname,부모 상세 docName 같은
+Parent Item,상위 항목
+Parent Item Group,부모 항목 그룹
+Parent Item {0} must be not Stock Item and must be a Sales Item,"부모 항목 {0} 재고 품목이 아니해야하며, 판매 품목이어야합니다"
+Parent Party Type,부모 파티 유형
+Parent Sales Person,부모 판매 사람
+Parent Territory,상위 지역
+Parent Website Page,상위 웹 사이트의 페이지
+Parent Website Route,상위 웹 사이트 루트
+Parenttype,Parenttype
+Part-time,파트 타임으로
+Partially Completed,부분적으로 완료
+Partly Billed,일부 청구
+Partly Delivered,일부 배달
+Partner Target Detail,파트너 대상의 세부 사항
+Partner Type,파트너 유형
+Partner's Website,파트너의 웹 사이트
+Party,파티
+Party Account,당 계정
+Party Type,파티 형
+Party Type Name,당 유형 이름
+Passive,수동
+Passport Number,여권 번호
+Password,비밀번호
+Pay To / Recd From,에서 / Recd 지불
+Payable,지급
+Payables,채무
+Payables Group,매입 채무 그룹
+Payment Days,지불 일
+Payment Due Date,지불 기한
+Payment Period Based On Invoice Date,송장의 날짜를 기준으로 납부 기간
+Payment Reconciliation,결제 조정
+Payment Reconciliation Invoice,결제 조정 송장
+Payment Reconciliation Invoices,지불 화해 인보이스
+Payment Reconciliation Payment,지불 화해 지불
+Payment Reconciliation Payments,지불 화해 지불
+Payment Type,지불 유형
+Payment cannot be made for empty cart,결제는 빈 카트에 할 수 없다
+Payment of salary for the month {0} and year {1},달의 급여의 지급 {0}과 연도 {1}
+Payments,지불
+Payments Made,지불 한 금액
+Payments Received,지불금
+Payments made during the digest period,다이제스트 기간 중에 지불
+Payments received during the digest period,다이제스트 기간 동안받은 지불
+Payroll Settings,급여 설정
+Pending,대기 중
+Pending Amount,대기중인 금액
+Pending Items {0} updated,보류중인 항목 {0} 업데이트
+Pending Review,검토 중
+Pending SO Items For Purchase Request,구매 요청에 대한 SO 항목 보류
+Pension Funds,연금 펀드
+Percent Complete,완료율
+Percentage Allocation,비율 할당
+Percentage Allocation should be equal to 100%,백분율 할당은 100 % 같아야
+Percentage variation in quantity to be allowed while receiving or delivering this item.,이 항목을 수신하거나 제공하는 동시에 양의 백분율 변화는 허용된다.
+Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.,당신이 양에 대해 더 수신하거나 전달하도록 허용 비율 명령했다.예를 들면 : 당신이 100 대를 주문한 경우. 당신의 수당은 다음 110 단위를받을 10 % 허용된다.
+Performance appraisal.,성능 평가.
+Period,기간
+Period Closing Voucher,기간 결산 바우처
+Periodicity,주기성
+Permanent Address,영구 주소
+Permanent Address Is,영구 주소는
+Permission,허가
+Personal,개인의
+Personal Details,개인 정보
+Personal Email,개인 이메일
+Pharmaceutical,제약
+Pharmaceuticals,제약
+Phone,휴대폰
+Phone No,전화 번호
+Piecework,일한 분량에 따라 공임을 지급받는 일
+Pincode,PIN 코드
+Place of Issue,문제의 장소
+Plan for maintenance visits.,유지 보수 방문을 계획합니다.
+Planned Qty,계획 수량
+"Planned Qty: Quantity, for which, Production Order has been raised, but is pending to be manufactured.","계획 수량 : 수량,하는, 생산 오더가 발생했지만, 제조되는 대기 중입니다."
+Planned Quantity,계획 수량
+Planning,계획
+Plant,심기
+Plant and Machinery,플랜트 및 기계류
+Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,그것은 모든 계정 헤드와 접미사로 추가 될 것으로 제대로 약어 또는 짧은 이름을 입력하십시오.
+Please Update SMS Settings,SMS 설정을 업데이트하십시오
+Please add expense voucher details,비용 바우처 세부 정보를 추가하십시오
+Please add to Modes of Payment from Setup.,설정에서 지불의 모드에 추가하십시오.
+Please check 'Is Advance' against Account {0} if this is an advance entry.,계정에 대한 '사전인가'확인하시기 바랍니다 {0}이 미리 입력됩니다.
+Please click on 'Generate Schedule','생성 일정'을 클릭 해주세요
+Please click on 'Generate Schedule' to fetch Serial No added for Item {0},시리얼 번호는 항목에 대한 추가 가져 오기 위해 '생성 일정'을 클릭하십시오 {0}
+Please click on 'Generate Schedule' to get schedule,일정을 얻기 위해 '생성 일정'을 클릭 해주세요
+Please create Customer from Lead {0},리드에서 고객을 생성 해주세요 {0}
+Please create Salary Structure for employee {0},직원에 대한 급여 구조를 만드십시오 {0}
+Please create new account from Chart of Accounts.,계정의 차트에서 새로운 계정을 생성 해주세요.
+Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.,고객 및 공급 업체를위한 계정 (원장)을 생성하지 마십시오.그들은 고객 / 공급 업체 마스터에서 직접 만들어집니다.
+Please enter 'Expected Delivery Date','예상 배달 날짜'를 입력하십시오
+Please enter 'Is Subcontracted' as Yes or No,입력 해주십시오은 예 또는 아니오로 '하청'
+Please enter 'Repeat on Day of Month' field value,필드 값을 '이달의 날 반복'을 입력하십시오
+Please enter Account Receivable/Payable group in company master,회사 마스터에 매출 채권 / 채무 그룹을 입력하십시오
+Please enter Approving Role or Approving User,역할을 승인 또는 사용을 승인 입력하십시오
+Please enter BOM for Item {0} at row {1},항목에 대한 BOM을 입력하십시오 {0} 행에서 {1}
+Please enter Company,회사를 입력하십시오
+Please enter Cost Center,비용 센터를 입력 해주십시오
+Please enter Delivery Note No or Sales Invoice No to proceed,진행 납품서 없음 또는 판매 송장 번호를 입력하십시오
+Please enter Employee Id of this sales parson,이 판매 목사의 직원 ID를 입력하십시오
+Please enter Expense Account,비용 계정을 입력하십시오
+Please enter Item Code to get batch no,더 배치를 얻을 수 상품 코드를 입력하시기 바랍니다
+Please enter Item Code.,상품 코드를 입력 해 주시기 바랍니다.
+Please enter Item first,첫 번째 항목을 입력하십시오
+Please enter Maintaince Details first,Maintaince를 세부 사항을 먼저 입력하십시오
+Please enter Master Name once the account is created.,계정이 생성되면 마스터 이름을 입력하십시오.
+Please enter Planned Qty for Item {0} at row {1},항목에 대한 계획 수량을 입력하십시오 {0} 행에서 {1}
+Please enter Production Item first,첫 번째 생산 품목을 입력하십시오
+Please enter Purchase Receipt No to proceed,더 진행 구매 영수증을 입력하시기 바랍니다
+Please enter Reference date,참고 날짜를 입력 해주세요
+Please enter Warehouse for which Material Request will be raised,자료 요청이 발생합니다있는 창고를 입력 해주십시오
+Please enter Write Off Account,계정을 끄기 쓰기 입력하십시오
+Please enter atleast 1 invoice in the table,표에이어야 1 송장을 입력하십시오
+Please enter company first,첫 번째 회사를 입력하십시오
+Please enter company name first,첫 번째 회사 이름을 입력하십시오
+Please enter default Unit of Measure,측정의 기본 단위를 입력하십시오
+Please enter default currency in Company Master,회사 마스터에 기본 통화를 입력 해주십시오
+Please enter email address,이메일 주소를 입력하세요
+Please enter item details,항목의 세부 사항을 입력하십시오
+Please enter message before sending,전송하기 전에 메시지를 입력 해주세요
+Please enter parent account group for warehouse account,창고 계정의 부모 계정 그룹을 입력하십시오
+Please enter parent cost center,부모의 비용 센터를 입력 해주십시오
+Please enter quantity for Item {0},제품의 수량을 입력 해주십시오 {0}
+Please enter relieving date.,날짜를 덜어 입력 해 주시기 바랍니다.
+Please enter sales order in the above table,위의 표에 판매 주문을 입력하십시오
+Please enter valid Company Email,유효한 회사 이메일을 입력 해주세요
+Please enter valid Email Id,유효한 이메일에게 ID를 입력하십시오
+Please enter valid Personal Email,유효한 개인의 이메일을 입력 해주세요
+Please enter valid mobile nos,유효 모바일 NOS를 입력 해주십시오
+Please find attached Sales Invoice #{0},첨부하여주십시오 판매 송장 번호 {0}
+Please install dropbox python module,보관 용 파이썬 모듈을 설치하십시오
+Please mention no of visits required,언급 해주십시오 필요한 방문 없음
+Please pull items from Delivery Note,배달 주에서 항목을 뽑아주세요
+Please save the Newsletter before sending,전송하기 전에 뉴스를 저장하십시오
+Please save the document before generating maintenance schedule,유지 보수 일정을 생성하기 전에 문서를 저장하십시오
+Please see attachment,첨부 파일을 참조하시기 바랍니다
+Please select Bank Account,은행 계좌를 선택하세요
+Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,당신은 또한 이전 회계 연도의 균형이 회계 연도에 나뭇잎 포함 할 경우 이월를 선택하세요
+Please select Category first,첫 번째 범주를 선택하십시오
+Please select Charge Type first,충전 유형을 먼저 선택하세요
+Please select Fiscal Year,회계 연도를 선택하십시오
+Please select Group or Ledger value,그룹 또는 원장 값을 선택하세요
+Please select Incharge Person's name,INCHARGE 사람의 이름을 선택하세요
+Please select Invoice Type and Invoice Number in atleast one row,이어야 한 행에 송장 입력하고 송장 번호를 선택하세요
+"Please select Item where ""Is Stock Item"" is ""No"" and ""Is Sales Item"" is ""Yes"" and there is no other Sales BOM","""재고 상품입니다"" ""아니오""와 ""판매 상품입니다"" ""예""이고 다른 판매 BOM이없는 항목을 선택하십시오"
+Please select Price List,가격리스트를 선택하세요
+Please select Start Date and End Date for Item {0},시작 날짜와 항목에 대한 종료 날짜를 선택하세요 {0}
+Please select Time Logs.,시간 로그를 선택하십시오.
+Please select a csv file,CSV 파일을 선택하세요
+Please select a valid csv file with data,데이터가 유효한 CSV 파일을 선택하세요
+Please select a value for {0} quotation_to {1},값을 선택하세요 {0} quotation_to {1}
+"Please select an ""Image"" first","먼저 ""이미지""를 선택하세요"
+Please select charge type first,첫번째 책임 유형을 선택하세요
+Please select company first,첫 번째 회사를 선택하세요
+Please select company first.,첫 번째 회사를 선택하십시오.
+Please select item code,품목 코드를 선택하세요
+Please select month and year,월 및 연도를 선택하세요
+Please select prefix first,첫 번째 접두사를 선택하세요
+Please select the document type first,첫 번째 문서 유형을 선택하세요
+Please select weekly off day,매주 오프 날짜를 선택하세요
+Please select {0},선택하세요 {0}
+Please select {0} first,먼저 {0}를 선택하세요
+Please select {0} first.,먼저 {0}을 선택하십시오.
+Please set Dropbox access keys in your site config,사이트 구성에 보관 액세스 키를 설정하십시오
+Please set Google Drive access keys in {0},구글 드라이브 액세스 키를 설정하십시오 {0}
+Please set default Cash or Bank account in Mode of Payment {0},지불 모드로 기본 현금 또는 은행 계정을 설정하십시오 {0}
+Please set default value {0} in Company {0},기본값을 설정하십시오 {0} 회사에서 {0}
+Please set {0},설정하십시오 {0}
+Please setup Employee Naming System in Human Resource > HR Settings,인적 자원의하십시오 설치 직원의 이름 지정 시스템> HR 설정
+Please setup numbering series for Attendance via Setup > Numbering Series,설정> 번호 매기기 Series를 통해 출석 해주세요 설정 번호 지정 시리즈
+Please setup your chart of accounts before you start Accounting Entries,당신이 회계 항목을 시작하기 전에 설정에게 계정의 차트를주세요
+Please specify,지정하십시오
+Please specify Company,회사를 지정하십시오
+Please specify Company to proceed,진행하는 회사를 지정하십시오
+Please specify Default Currency in Company Master and Global Defaults,회사 마스터 및 글로벌 기본값에 기본 통화를 지정하십시오
+Please specify a,를 지정하십시오
+Please specify a valid 'From Case No.','사건 번호에서'유효 기간을 지정하십시오
+Please specify a valid Row ID for {0} in row {1},행 {0}에 대한 유효한 행의 ID를 지정하십시오 {1}
+Please specify either Quantity or Valuation Rate or both,수량이나 평가 비율 또는 둘 중 하나를 지정하십시오
+Please submit to update Leave Balance.,허가 밸런스를 업데이트 제출하시기 바랍니다.
+Plot,줄거리
+Plot By,으로 플롯
+Point of Sale,판매 시점
+Point-of-Sale Setting,판매 시점 설정
+Post Graduate,졸업 후
+Postal,우편의
+Postal Expenses,우편 비용
+Posting Date,날짜 게시
+Posting Time,시간을 게시
+Posting date and posting time is mandatory,게시 날짜 및 게시 시간이 필수입니다
+Posting timestamp must be after {0},게시 타임 스탬프 이후 여야 {0}
+Potential opportunities for selling.,판매를위한 잠재적 인 기회.
+Preferred Billing Address,선호하는 결제 주소
+Preferred Shipping Address,선호하는 배송 주소
+Prefix,접두사
+Present,선물
+Prevdoc DocType,Prevdoc의 문서 종류
+Prevdoc Doctype,Prevdoc의 문서 종류
+Preview,미리보기
+Previous,이전
+Previous Work Experience,이전 작업 경험
+Price,가격
+Price / Discount,가격 / 할인
+Price List,가격리스트
+Price List Currency,가격리스트 통화
+Price List Currency not selected,가격리스트 통화 선택하지
+Price List Exchange Rate,가격 기준 환율
+Price List Name,가격리스트 이름
+Price List Rate,가격리스트 평가
+Price List Rate (Company Currency),가격 목록 비율 (회사 통화)
+Price List master.,가격리스트 마스터.
+Price List must be applicable for Buying or Selling,가격리스트는 구매 또는 판매에 적용해야합니다
+Price List not selected,가격 목록을 선택하지
+Price List {0} is disabled,가격 목록 {0} 비활성화
+Price or Discount,가격 또는 할인
+Pricing Rule,가격 규칙
+Pricing Rule Help,가격 규칙 도움말
+"Pricing Rule is first selected based on 'Apply On' field, which can be Item, Item Group or Brand.","가격 규칙은 첫 번째 항목, 항목 그룹 또는 브랜드가 될 수있는 필드 '에 적용'에 따라 선택됩니다."
+"Pricing Rule is made to overwrite Price List / define discount percentage, based on some criteria.","가격 규칙은 몇 가지 기준에 따라, 가격 목록 / 할인 비율을 정의 덮어 쓰기를한다."
+Pricing Rules are further filtered based on quantity.,가격 규칙은 또한 수량에 따라 필터링됩니다.
+Print Format Style,인쇄 서식 스타일
+Print Heading,인쇄 제목
+Print Without Amount,금액없이 인쇄
+Print and Stationary,인쇄 및 정지
+Printing and Branding,인쇄 및 브랜딩
+Priority,우선순위
+Private Equity,사모
+Privilege Leave,권한 허가
+Probation,근신
+Process Payroll,프로세스 급여
+Produced,생산
+Produced Quantity,생산 수량
+Product Enquiry,제품 문의
+Production,생산
+Production Order,생산 주문
+Production Order status is {0},생산 오더의 상태는 {0}
+Production Order {0} must be cancelled before cancelling this Sales Order,생산 순서는 {0}이 판매 주문을 취소하기 전에 취소해야합니다
+Production Order {0} must be submitted,생산 오더 {0} 제출해야합니다
+Production Orders,생산 주문
+Production Orders in Progress,진행 중 생산 주문
+Production Plan Item,생산 계획 항목
+Production Plan Items,생산 계획 항목
+Production Plan Sales Order,생산 계획 판매 주문
+Production Plan Sales Orders,생산 계획의 판매 주문
+Production Planning Tool,생산 계획 도구
+Products,제품
+"Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.","제품은 기본 검색에 체중 연령에 의해 정렬됩니다.더 많은 체중 연령, 높은 제품이 목록에 나타납니다."
+Professional Tax,프로 세
+Profit and Loss,이익과 손실
+Profit and Loss Statement,손익 계산서
+Project,프로젝트
+Project Costing,프로젝트 원가 계산
+Project Details,프로젝트 세부 사항
+Project Manager,프로젝트 매니저
+Project Milestone,프로젝트 마일스톤
+Project Milestones,프로젝트 연혁
+Project Name,프로젝트 이름
+Project Start Date,프로젝트 시작 날짜
+Project Type,프로젝트 형식
+Project Value,프로젝트 값
+Project activity / task.,프로젝트 활동 / 작업.
+Project master.,프로젝트 마스터.
+Project will get saved and will be searchable with project name given,프로젝트가 저장 얻을 것이다 지정된 프로젝트 이름을 검색 할 것입니다
+Project wise Stock Tracking,프로젝트 현명한 재고 추적
+Project-wise data is not available for Quotation,프로젝트 와이즈 데이터는 견적을 사용할 수 없습니다
+Projected,예상
+Projected Qty,수량을 예상
+Projects,프로젝트
+Projects & System,프로젝트 및 시스템
+Prompt for Email on Submission of,제출의 전자 우편을위한 프롬프트
+Proposal Writing,제안서 작성
+Provide email id registered in company,이메일 ID는 회사에 등록 제공
+Provisional Profit / Loss (Credit),임시 이익 / 손실 (신용)
+Public,공공
+Published on website at: {0},에서 웹 사이트에 게시 된 {0}
+Publishing,출판
+Pull sales orders (pending to deliver) based on the above criteria,위의 기준에 따라 (전달하기 위해 출원 중) 판매 주문을 당겨
+Purchase,구입
+Purchase / Manufacture Details,구매 / 제조 세부 사항
+Purchase Analytics,구매 분석
+Purchase Common,공동 구매
+Purchase Details,구매 상세 정보
+Purchase Discounts,할인 구매
+Purchase Invoice,구매 인보이스
+Purchase Invoice Advance,송장 전진에게 구입
+Purchase Invoice Advances,구매 인보이스 발전
+Purchase Invoice Item,구매 인보이스 상품
+Purchase Invoice Trends,송장 동향을 구입
+Purchase Invoice {0} is already submitted,구매 인보이스 {0}이 (가) 이미 제출
+Purchase Order,구매 주문
+Purchase Order Item,구매 주문 상품
+Purchase Order Item No,구매 주문 품목 아니오
+Purchase Order Item Supplied,구매 주문 상품 공급
+Purchase Order Items,구매 주문 항목
+Purchase Order Items Supplied,공급 구매 주문 항목
+Purchase Order Items To Be Billed,청구 할 수 구매 주문 아이템
+Purchase Order Items To Be Received,수신 될 구매 주문 아이템
+Purchase Order Message,구매 주문 메시지
+Purchase Order Required,주문 필수에게 구입
+Purchase Order Trends,주문 동향을 구매
+Purchase Order number required for Item {0},구매 주문 번호 항목에 필요한 {0}
+Purchase Order {0} is 'Stopped',{0} '중지'를 주문 구매
+Purchase Order {0} is not submitted,구매 주문 {0} 제출되지
+Purchase Orders given to Suppliers.,공급 업체에 제공 구매 주문.
+Purchase Receipt,구입 영수증
+Purchase Receipt Item,구매 영수증 항목
+Purchase Receipt Item Supplied,구매 영수증 품목 공급
+Purchase Receipt Item Supplieds,구매 영수증 항목 Supplieds
+Purchase Receipt Items,구매 영수증 항목
+Purchase Receipt Message,구매 영수증 메시지
+Purchase Receipt No,구입 영수증 없음
+Purchase Receipt Required,필수 구입 영수증
+Purchase Receipt Trends,구매 영수증 동향
+Purchase Receipt number required for Item {0},상품에 필요한 구매 영수증 번호 {0}
+Purchase Receipt {0} is not submitted,구입 영수증 {0} 제출되지
+Purchase Register,회원에게 구매
+Purchase Return,구매 돌아 가기
+Purchase Returned,반품에게 구입
+Purchase Taxes and Charges,구매 세금과 요금
+Purchase Taxes and Charges Master,구매 세금과 요금 마스터
+Purchse Order number required for Item {0},purchse를 주문 번호는 상품에 필요한 {0}
+Purpose,용도
+Purpose must be one of {0},목적 중 하나 여야합니다 {0}
+QA Inspection,QA 검사
+Qty,수량
+Qty Consumed Per Unit,수량 단위 시간당 소비
+Qty To Manufacture,제조하는 수량
+Qty as per Stock UOM,수량 재고 UOM 당
+Qty to Deliver,제공하는 수량
+Qty to Order,수량은 주문
+Qty to Receive,받도록 수량
+Qty to Transfer,전송하는 수량
+Qualification,자격
+Quality,품질
+Quality Inspection,품질 검사
+Quality Inspection Parameters,품질 검사 매개 변수
+Quality Inspection Reading,품질 검사 읽기
+Quality Inspection Readings,품질 검사의 판독
+Quality Inspection required for Item {0},상품에 필요한 품질 검사 {0}
+Quality Management,품질 관리
+Quantity,수량
+Quantity Requested for Purchase,구매를 위해 요청한 수량
+Quantity and Rate,수량 및 평가
+Quantity and Warehouse,수량 및 창고
+Quantity cannot be a fraction in row {0},양 행의 일부가 될 수 없습니다 {0}
+Quantity for Item {0} must be less than {1},수량 항목에 대한 {0}보다 작아야합니다 {1}
+Quantity in row {0} ({1}) must be same as manufactured quantity {2},수량은 행에서 {0} ({1})와 동일해야합니다 제조 수량 {2}
+Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,원료의 부여 수량에서 재 포장 / 제조 후의 아이템의 수량
+Quantity required for Item {0} in row {1},상품에 필요한 수량 {0} 행에서 {1}
+Quarter,지구
+Quarterly,분기 별
+Quick Help,빠른 도움말
+Quotation,인용
+Quotation Item,견적 상품
+Quotation Items,견적 항목
+Quotation Lost Reason,견적 잃어버린 이유
+Quotation Message,견적 메시지
+Quotation To,에 견적
+Quotation Trends,견적 동향
+Quotation {0} is cancelled,견적 {0} 취소
+Quotation {0} not of type {1},견적 {0}은 유형 {1}
+Quotations received from Suppliers.,인용문은 공급 업체에서 받았다.
+Quotes to Leads or Customers.,리드 또는 고객에게 인용.
+Raise Material Request when stock reaches re-order level,주식이 다시 주문 수준에 도달 할 때 자료 요청을 올립니다
+Raised By,에 의해 제기
+Raised By (Email),(이메일)에 의해 제기
+Random,무작위
+Range,범위
+Rate,비율
+Rate ,
+Rate (%),비율 (%)
+Rate (Company Currency),속도 (회사 통화)
+Rate Of Materials Based On,자료에 의거 한 속도
+Rate and Amount,속도 및 양
+Rate at which Customer Currency is converted to customer's base currency,고객 통화는 고객의 기본 통화로 변환하는 속도에
+Rate at which Price list currency is converted to company's base currency,가격 목록 통화는 회사의 기본 통화로 변환하는 속도에
+Rate at which Price list currency is converted to customer's base currency,가격 목록의 통화는 고객의 기본 통화로 변환하는 속도에
+Rate at which customer's currency is converted to company's base currency,고객의 통화는 회사의 기본 통화로 변환하는 속도에
+Rate at which supplier's currency is converted to company's base currency,공급 업체의 통화는 회사의 기본 통화로 변환하는 속도에
+Rate at which this tax is applied,요금이 세금이 적용되는
+Raw Material,원료
+Raw Material Item Code,원료 상품 코드
+Raw Materials Supplied,공급 원료
+Raw Materials Supplied Cost,원료 공급 비용
+Raw material cannot be same as main Item,원료의 주요 항목과 동일 할 수 없습니다
+Re-Order Level,다시 주문 레벨
+Re-Order Qty,다시 주문 수량
+Re-order,추천 포인트
+Re-order Level,다시 주문 레벨
+Re-order Qty,다시 주문 수량
+Read,돇
+Reading 1,읽기 1
+Reading 10,10 읽기
+Reading 2,2 읽기
+Reading 3,3 읽기
+Reading 4,4 읽기
+Reading 5,5 읽기
+Reading 6,6 읽기
+Reading 7,7 읽기
+Reading 8,8 읽기
+Reading 9,9 읽기
+Real Estate,부동산
+Reason,이유
+Reason for Leaving,떠나는 이유
+Reason for Resignation,사임 이유
+Reason for losing,잃는 이유
+Recd Quantity,Recd 수량
+Receivable,받을 수있는
+Receivable / Payable account will be identified based on the field Master Type,채권 / 채무 계정 필드 마스터 유형에 따라 확인한다
+Receivables,채권
+Receivables / Payables,채권 / 채무
+Receivables Group,채권 그룹
+Received Date,받은 날짜
+Received Items To Be Billed,청구에 주어진 항목
+Received Qty,수량에게받은
+Received and Accepted,접수 및 승인
+Receiver List,수신기 목록
+Receiver List is empty. Please create Receiver List,수신기 목록이 비어 있습니다.수신기 목록을 만드십시오
+Receiver Parameter,수신기 매개 변수
+Recipients,받는 사람
+Reconcile,조정
+Reconciliation Data,화해 데이터
+Reconciliation HTML,화해 HTML
+Reconciliation JSON,화해 JSON
+Record item movement.,기록 항목의 움직임.
+Recurring Id,경상 아이디
+Recurring Invoice,경상 송장
+Recurring Type,경상 유형
+Reduce Deduction for Leave Without Pay (LWP),무급 휴직 공제를 줄 (LWP)
+Reduce Earning for Leave Without Pay (LWP),무급 휴직 적립 감소 (LWP)
+Ref,참조
+Ref Code,참조 코드
+Ref SQ,참조 SQ
+Reference,참고
+Reference #{0} dated {1},참고 # {0} 년 {1}
+Reference Date,참조 날짜
+Reference Name,참조명(Reference Name)
+Reference No & Reference Date is required for {0},참조 번호 및 참고 날짜가 필요합니다 {0}
+Reference No is mandatory if you entered Reference Date,당신이 참조 날짜를 입력 한 경우 참조 번호는 필수입니다
+Reference Number,참조 번호
+Reference Row #,참조 행 번호
+Refresh,새로 고침
+Registration Details,등록 세부 사항
+Registration Info,등록 정보
+Rejected,거부
+Rejected Quantity,거부 수량
+Rejected Serial No,시리얼 No 거부
+Rejected Warehouse,거부 창고
+Rejected Warehouse is mandatory against regected item,거부 창고 regected 항목에 대해 필수입니다
+Relation,관계
+Relieving Date,날짜를 덜어
+Relieving Date must be greater than Date of Joining,날짜를 완화하는 것은 가입 날짜보다 커야합니다
+Remark,비고
+Remarks,Remarks
+Remarks Custom,비고 지정
+Rename,이름
+Rename Log,로그인에게 이름 바꾸기
+Rename Tool,도구에게 이름 바꾸기
+Rent Cost,임대 비용
+Rent per hour,시간당 대여
+Rented,대여
+Repeat on Day of Month,이달의 날 반복
+Replace,교체
+Replace Item / BOM in all BOMs,모든 BOM에있는 부품 / BOM을 대체
+Replied,대답
+Report Date,보고서 날짜
+Report Type,보고서 유형
+Report Type is mandatory,보고서 유형이 필수입니다
+Reports to,에 대한 보고서
+Reqd By Date,Reqd 날짜
+Reqd by Date,Reqd 날짜로
+Request Type,요청 유형
+Request for Information,정보 요청
+Request for purchase.,구입 요청합니다.
+Requested,요청
+Requested For,에 대해 요청
+Requested Items To Be Ordered,주문 요청 항목
+Requested Items To Be Transferred,전송할 요청 항목
+Requested Qty,요청 수량
+"Requested Qty: Quantity requested for purchase, but not ordered.","요청 수량 : 수량 주문 구입 요청,하지만."
+Requests for items.,상품에 대한 요청.
+Required By,에 의해 필요한
+Required Date,필요한 날짜
+Required Qty,필요한 수량
+Required only for sample item.,단지 샘플 항목에 필요합니다.
+Required raw materials issued to the supplier for producing a sub - contracted item.,서브를 생산 공급 업체에 발급에 필요한 원료 - 계약 항목.
+Research,연구
+Research & Development,연구 개발 (R & D)
+Researcher,연구원
+Reseller,리셀러
+Reserved,예약
+Reserved Qty,예약 수량
+"Reserved Qty: Quantity ordered for sale, but not delivered.","예약 수량 : 수량 판매를 위해 주문,하지만 배달되지 않습니다."
+Reserved Quantity,예약 주문
+Reserved Warehouse,예약 창고
+Reserved Warehouse in Sales Order / Finished Goods Warehouse,판매 주문 / 완제품 창고에서 예약 창고
+Reserved Warehouse is missing in Sales Order,예약 창고는 판매 주문에 없습니다
+Reserved Warehouse required for stock Item {0} in row {1},재고 품목에 필요한 예약 창고 {0} 행에서 {1}
+Reserved warehouse required for stock item {0},재고 품목에 필요한 예약 창고 {0}
+Reserves and Surplus,적립금 및 잉여금
+Reset Filters,필터를 새로 고침
+Resignation Letter Date,사직서 날짜
+Resolution,해상도
+Resolution Date,결의일
+Resolution Details,해상도 세부 사항
+Resolved By,에 의해 해결
+Rest Of The World,세계의 나머지
+Retail,소매의
+Retail & Wholesale,소매 및 도매
+Retailer,소매상 인
+Review Date,검토 날짜
+Rgt,RGT
+Role Allowed to edit frozen stock,역할 냉동 주식을 편집 할 수
+Role that is allowed to submit transactions that exceed credit limits set.,설정 신용 한도를 초과하는 거래를 제출하도록 허용 역할.
+Root Type,루트 유형
+Root Type is mandatory,루트 유형이 필수입니다
+Root account can not be deleted,루트 계정은 삭제할 수 없습니다
+Root cannot be edited.,루트는 편집 할 수 없습니다.
+Root cannot have a parent cost center,루트는 부모의 비용 센터를 가질 수 없습니다
+Rounded Off,둥근 오프
+Rounded Total,둥근 총
+Rounded Total (Company Currency),둥근 합계 (회사 통화)
+Row # ,
+Row # {0}: ,
+Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,행 # {0} : 주문 된 수량 (품목 마스터에 정의 된) 항목의 최소 주문 수량보다 적은 수 없습니다.
+Row #{0}: Please specify Serial No for Item {1},행 번호는 {0} 항목에 대한 일련 번호를 지정하십시오 {1}
+Row {0}: Account does not match with \						Purchase Invoice Credit To account,행 {0} : \ 구매 송장 신용 계정에 대한 계정과 일치하지 않습니다
+Row {0}: Account does not match with \						Sales Invoice Debit To account,행 {0} : \ 견적서 직불 계정에 대한 계정과 일치하지 않습니다
+Row {0}: Conversion Factor is mandatory,행 {0} : 변환 계수는 필수입니다
+Row {0}: Credit entry can not be linked with a Purchase Invoice,행 {0} : 신용 항목은 구매 송장에 링크 할 수 없습니다
+Row {0}: Debit entry can not be linked with a Sales Invoice,행 {0} : 차변 항목은 판매 송장에 링크 할 수 없습니다
+Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,행 {0} : 지불 금액보다 작거나 잔액을 송장에 해당해야합니다.아래의 참고를 참조하십시오.
+Row {0}: Qty is mandatory,행 {0} : 수량은 필수입니다
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}","행 {0} : 수량은 창고에 avalable {1}에없는 {2} {3}. 가능 수량 : {4}, 수량 전송 {5}"
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}",행 {0} 설정하려면 {1}주기에서 현재까지의 차이 \보다 크거나 같아야합니다 {2}
+Row {0}:Start Date must be before End Date,행 {0} : 시작 날짜가 종료 날짜 이전이어야합니다
+Rules for adding shipping costs.,비용을 추가하는 규칙.
+Rules for applying pricing and discount.,가격 및 할인을 적용하기위한 규칙.
+Rules to calculate shipping amount for a sale,판매 배송 금액을 계산하는 규칙
+S.O. No.,SO 번호
+SHE Cess on Excise,그녀는 소비세에 운
+SHE Cess on Service Tax,SHE는 서비스 세금에 운
+SHE Cess on TDS,그녀는 TDS에 운
+SMS Center,SMS 센터
+SMS Gateway URL,SMS 게이트웨이 URL
+SMS Log,SMS 로그
+SMS Parameter,SMS 매개 변수
+SMS Sender Name,SMS 보낸 사람 이름
+SMS Settings,SMS 설정
+SO Date,SO 날짜
+SO Pending Qty,SO 보류 수량
+SO Qty,SO 수량
+Salary,봉급
+Salary Information,연봉 정보
+Salary Manager,급여 관리자
+Salary Mode,급여 모드
+Salary Slip,급여 슬립
+Salary Slip Deduction,급여 슬립 공제
+Salary Slip Earning,급여 슬립 적립
+Salary Slip of employee {0} already created for this month,직원의 급여 슬립 {0}이 (가) 이미 이번 달 생성
+Salary Structure,급여 구조
+Salary Structure Deduction,급여 구조 공제
+Salary Structure Earning,급여 구조 적립
+Salary Structure Earnings,급여 구조 실적
+Salary breakup based on Earning and Deduction.,급여 이별은 적립 및 차감에 따라.
+Salary components.,급여의 구성 요소.
+Salary template master.,급여 템플릿 마스터.
+Sales,매상
+Sales Analytics,판매 분석
+Sales BOM,판매 BOM
+Sales BOM Help,판매 BOM 도움말
+Sales BOM Item,판매 BOM 품목
+Sales BOM Items,판매 BOM 항목
+Sales Browser,판매 브라우저
+Sales Details,판매 세부 사항
+Sales Discounts,매출 할인
+Sales Email Settings,판매 이메일 설정
+Sales Expenses,영업 비용
+Sales Extras,판매 엑스트라
+Sales Funnel,판매 깔때기
+Sales Invoice,판매 송장
+Sales Invoice Advance,견적서 사전
+Sales Invoice Item,판매 송장 상품
+Sales Invoice Items,판매 송장 항목
+Sales Invoice Message,판매 송장 메시지
+Sales Invoice No,판매 송장 번호
+Sales Invoice Trends,견적서 동향
+Sales Invoice {0} has already been submitted,판매 송장 {0}이 (가) 이미 제출되었습니다
+Sales Invoice {0} must be cancelled before cancelling this Sales Order,판매 송장은 {0}이 판매 주문을 취소하기 전에 취소해야합니다
+Sales Order,판매 주문
+Sales Order Date,판매 주문 날짜
+Sales Order Item,판매 오더 품목
+Sales Order Items,판매 오더 품목
+Sales Order Message,판매 오더 메시지
+Sales Order No,판매 주문 번호
+Sales Order Required,판매 주문 필수
+Sales Order Trends,판매 주문 동향
+Sales Order required for Item {0},상품에 필요한 판매 주문 {0}
+Sales Order {0} is not submitted,판매 오더 {0} 제출되지
+Sales Order {0} is not valid,판매 오더 {0} 유효하지 않습니다
+Sales Order {0} is stopped,판매 주문은 {0} 정지
+Sales Partner,판매 파트너
+Sales Partner Name,판매 파트너 이름
+Sales Partner Target,판매 파트너 대상
+Sales Partners Commission,판매 파트너위원회
+Sales Person,판매 사람
+Sales Person Name,판매 사람 이름
+Sales Person Target Variance Item Group-Wise,영업 사원 대상 분산 상품 그룹 와이즈
+Sales Person Targets,영업 사원 대상
+Sales Person-wise Transaction Summary,판매 사람이 많다는 거래 요약
+Sales Register,판매 등록
+Sales Return,판매로 돌아 가기
+Sales Returned,판매는 반환
+Sales Taxes and Charges,판매 세금 및 요금
+Sales Taxes and Charges Master,판매 세금 및 요금 마스터
+Sales Team,판매 팀
+Sales Team Details,판매 팀의 자세한 사항
+Sales Team1,판매 Team1
+Sales and Purchase,판매 및 구매
+Sales campaigns.,판매 캠페인.
+Salutation,인사말
+Sample Size,표본 크기
+Sanctioned Amount,제재 금액
+Saturday,토요일
+Schedule,일정
+Schedule Date,일정 날짜
+Schedule Details,Schedule 세부사항
+Scheduled,예약된
+Scheduled Date,예약 된 날짜
+Scheduled to send to {0},에 보낼 예정 {0}
+Scheduled to send to {0} recipients,{0}받는 사람에게 보낼 예정
+Scheduler Failed Events,스케줄러 실패 이벤트
+School/University,학교 / 대학
+Score (0-5),점수 (0-5)
+Score Earned,점수 획득
+Score must be less than or equal to 5,점수보다 작거나 5 같아야
+Scrap %,스크랩 %
+Seasonality for setting budgets.,예산을 설정하는 계절.
+Secretary,비서
+Secured Loans,보안 대출
+Securities & Commodity Exchanges,증권 및 상품 교환
+Securities and Deposits,증권 및 예치금
+"See ""Rate Of Materials Based On"" in Costing Section","절 원가 계산의 ""에 근거를 자료의 평가""를 참조하십시오"
+"Select ""Yes"" for sub - contracting items","서브에 대해 ""예""를 선택합니다 - 상품을 계약"
+"Select ""Yes"" if this item is used for some internal purpose in your company.","이 항목을 귀하의 회사에 대한 내부 목적으로 사용하는 경우 ""예""를 선택합니다."
+"Select ""Yes"" if this item represents some work like training, designing, consulting etc.","이 항목 등 컨설팅 교육, 디자인, 같은 몇 가지 작업을 나타내는 경우 ""예""를 선택합니다"
+"Select ""Yes"" if you are maintaining stock of this item in your Inventory.","당신은 당신의 인벤토리에있는이 품목의 재고를 유지하는 경우 ""예""를 선택합니다."
+"Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.","당신이이 품목을 제조 공급 업체에 원료를 공급하는 경우 ""예""를 선택합니다."
+Select Brand...,브랜드를 선택합니다 ...
+Select Budget Distribution to unevenly distribute targets across months.,고르지 개월에 걸쳐 목표를 배포하는 예산 분배를 선택합니다.
+"Select Budget Distribution, if you want to track based on seasonality.","당신은 계절에 따라 추적 할 경우, 예산 분배를 선택합니다."
+Select Company...,회사를 선택 ...
+Select DocType,문서 종류 선택
+Select Fiscal Year...,회계 연도 선택 ...
+Select Items,항목 선택
+Select Project...,프로젝트를 선택합니다 ...
+Select Purchase Receipts,구매 영수증을 선택
+Select Sales Orders,선택 판매 주문
+Select Sales Orders from which you want to create Production Orders.,당신이 생산 오더를 생성하려는 선택 판매 주문.
+Select Time Logs and Submit to create a new Sales Invoice.,시간 로그를 선택하고 새로운 판매 송장을 만들 제출.
+Select Transaction,선택하기 이체
+Select Warehouse...,창고를 선택합니다 ...
+Select Your Language,언어를 선택하십시오
+Select account head of the bank where cheque was deposited.,검사가 입금 된 은행 계좌 머리를 선택합니다.
+Select company name first.,첫 번째 회사 이름을 선택합니다.
+Select template from which you want to get the Goals,당신이 목표를 취득하는 템플릿을 선택
+Select the Employee for whom you are creating the Appraisal.,당신은 감정을 만드는 누구를 위해 직원을 선택합니다.
+Select the period when the invoice will be generated automatically,송장이 자동으로 생성됩니다 기간을 선택
+Select the relevant company name if you have multiple companies,여러 회사가있는 경우 해당 회사의 이름을 선택
+Select the relevant company name if you have multiple companies.,여러 회사가있는 경우 해당 회사의 이름을 선택합니다.
+Select who you want to send this newsletter to,당신이 뉴스 레터를 보낼 사람 선택
+Select your home country and check the timezone and currency.,자신의 나라를 선택하고 시간대 및 통화를 확인합니다.
+"Selecting ""Yes"" will allow this item to appear in Purchase Order , Purchase Receipt.","""예""를 선택하면이 항목은 구매 주문, 구입 영수증에 표시 할 수 있습니다."
+"Selecting ""Yes"" will allow this item to figure in Sales Order, Delivery Note","""예""를 선택하면이 항목은 판매 주문, 배달 주에 파악 할 수 있도록"
+"Selecting ""Yes"" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.","""예""를 선택하면 원료 및이 항목의 제조에 따른 운영 비용을 보여주는 자료의 빌을 만들 수 있습니다."
+"Selecting ""Yes"" will allow you to make a Production Order for this item.","""예""를 선택하면이 항목에 대한 생산 주문을 할 수 있습니다."
+"Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.","""예""를 선택하면 일련 번호 마스터에서 볼 수있는 항목의 각 개체에 고유 한 ID를 제공합니다."
+Selling,판매
+Selling Settings,설정 판매
+"Selling must be checked, if Applicable For is selected as {0}","해당 법령에가로 선택된 경우 판매, 확인해야합니다 {0}"
+Send,보내기
+Send Autoreply,자동 회신을 보내
+Send Email,이메일 보내기
+Send From,에서 보내기
+Send Notifications To,알림을 보내기
+Send Now,지금 보내기
+Send SMS,SMS 보내기
+Send To,보내기
+Send To Type,입력 보내기
+Send mass SMS to your contacts,상대에게 대량 SMS를 보내기
+Send to this list,이 목록에 보내기
+Sender Name,보낸 사람 이름
+Sent On,에 전송
+Separate production order will be created for each finished good item.,별도의 생산 순서는 각 완제품 항목에 대해 작성됩니다.
+Serial No,일련 번호
+Serial No / Batch,일련 번호 / 배치
+Serial No Details,일련 번호 세부 사항
+Serial No Service Contract Expiry,일련 번호 서비스 계약 유효
+Serial No Status,일련 번호 상태 없습니다
+Serial No Warranty Expiry,일련 번호 보증 유효하지
+Serial No is mandatory for Item {0},일련 번호는 항목에 대해 필수입니다 {0}
+Serial No {0} created,일련 번호 {0} 생성
+Serial No {0} does not belong to Delivery Note {1},일련 번호 {0} 배달 주에 속하지 않는 {1}
+Serial No {0} does not belong to Item {1},일련 번호 {0} 항목에 속하지 않는 {1}
+Serial No {0} does not belong to Warehouse {1},일련 번호 {0} 창고에 속하지 않는 {1}
+Serial No {0} does not exist,일련 번호 {0}이 (가) 없습니다
+Serial No {0} has already been received,일련 번호 {0}이 (가) 이미 수신 된
+Serial No {0} is under maintenance contract upto {1},일련 번호는 {0}까지 유지 보수 계약에 따라 {1}
+Serial No {0} is under warranty upto {1},일련 번호는 {0}까지 보증 {1}
+Serial No {0} not in stock,일련 번호 {0} 재고가없는
+Serial No {0} quantity {1} cannot be a fraction,일련 번호 {0} 수량 {1} 일부가 될 수 없습니다
+Serial No {0} status must be 'Available' to Deliver,일련 번호 {0} 상태가 제공하는 '가능'해야
+Serial Nos Required for Serialized Item {0},직렬화 된 항목에 대한 일련 NOS 필수 {0}
+Serial Number Series,일련 번호 시리즈
+Serial number {0} entered more than once,일련 번호 {0} 번 이상 입력
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,직렬화 된 항목 {0} 업데이트 할 수 없습니다 \ 재고 조정을 사용하여
+Series,시리즈
+Series List for this Transaction,이 트랜잭션에 대한 시리즈 일람
+Series Updated,시리즈 업데이트
+Series Updated Successfully,시리즈가 업데이트
+Series is mandatory,시리즈는 필수입니다
+Series {0} already used in {1},계열 {0} 이미 사용될 {1}
+Service,서비스
+Service Address,서비스 주소
+Service Tax,서비스 세금
+Services,Services (서비스)
+Set,설정
+"Set Default Values like Company, Currency, Current Fiscal Year, etc.","기타 회사, 통화, 당해 사업 연도와 같은 기본값을 설정"
+Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,이 지역에 상품 그룹 현명한 예산을 설정합니다.또한 배포를 설정하여 계절성을 포함 할 수 있습니다.
+Set Status as Available,로 설정 가능 여부
+Set as Default,기본값으로 설정
+Set as Lost,분실로 설정
+Set prefix for numbering series on your transactions,트랜잭션에 일련 번호에 대한 설정 접두사
+Set targets Item Group-wise for this Sales Person.,목표를 설정 항목 그룹 방향이 판매 사람입니다.
+Setting Account Type helps in selecting this Account in transactions.,계정 유형을 설정하면 트랜잭션이 계정을 선택하는 데 도움이됩니다.
+Setting this Address Template as default as there is no other default,다른 기본이 없기 때문에 기본적으로이 주소 템플릿 설정
+Setting up...,설정 ...
+Settings,설정
+Settings for HR Module,HR 모듈에 대한 설정
+"Settings to extract Job Applicants from a mailbox e.g. ""jobs@example.com""","사서함 예를 들면 ""jobs@example.com""에서 입사 지원자를 추출하는 설정"
+Setup,설정
+Setup Already Complete!!,이미 설치 완료!
+Setup Complete,설치 완료
+Setup SMS gateway settings,설치 SMS 게이트웨이 설정
+Setup Series,설치 시리즈
+Setup Wizard,설치 마법사
+Setup incoming server for jobs email id. (e.g. jobs@example.com),작업 메일 ID의 설정받는 서버. (예를 들어 jobs@example.com)
+Setup incoming server for sales email id. (e.g. sales@example.com),판매 이메일 ID에 대한 설정받는 서버. (예를 들어 sales@example.com)
+Setup incoming server for support email id. (e.g. support@example.com),지원 전자 우편 ID의 설정받는 서버. (예를 들어 support@example.com)
+Share,공유
+Share With,함께 공유하기
+Shareholders Funds,주주의 자금
+Shipments to customers.,고객에게 선적.
+Shipping,배송
+Shipping Account,배송 계정
+Shipping Address,배송 주소
+Shipping Amount,배송 금액
+Shipping Rule,배송 규칙
+Shipping Rule Condition,배송 규칙 조건
+Shipping Rule Conditions,배송 규칙 조건
+Shipping Rule Label,배송 규칙 라벨
+Shop,상점
+Shopping Cart,쇼핑 카트
+Short biography for website and other publications.,웹 사이트 및 기타 간행물에 대한 짧은 전기.
+"Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.","""재고""표시 또는 ""재고 부족""이 창고에 재고를 기반으로."
+"Show / Hide features like Serial Nos, POS etc.","등 일련 NOS, POS 등의 표시 / 숨기기 기능"
+Show In Website,웹 사이트에 표시
+Show a slideshow at the top of the page,페이지의 상단에 슬라이드 쇼보기
+Show in Website,웹 사이트에 표시
+Show rows with zero values,0 값을 가진 행 표시
+Show this slideshow at the top of the page,페이지 상단에이 슬라이드 쇼보기
+Sick Leave,병가
+Signature,서명:
+Signature to be appended at the end of every email,모든 이메일의 끝에 추가되는 서명
+Single,미혼
+Single unit of an Item.,항목의 하나의 단위.
+Sit tight while your system is being setup. This may take a few moments.,시스템이 설치되는 동안 그대로 앉아있어.이 작업은 약간의 시간이 걸릴 수 있습니다.
+Slideshow,슬라이드쇼
+Soap & Detergent,비누 및 세제
+Software,소프트웨어
+Software Developer,소프트웨어 개발자
+"Sorry, Serial Nos cannot be merged","죄송합니다, 시리얼 NOS는 병합 할 수 없습니다"
+"Sorry, companies cannot be merged","죄송합니다, 회사는 병합 할 수 없습니다"
+Source,소스
+Source File,소스 파일
+Source Warehouse,자료 창고
+Source and target warehouse cannot be same for row {0},소스와 목표웨어 하우스는 행에 대해 동일 할 수 없습니다 {0}
+Source of Funds (Liabilities),자금의 출처 (부채)
+Source warehouse is mandatory for row {0},소스웨어 하우스는 행에 대해 필수입니다 {0}
+Spartan,스파르타의
+"Special Characters except ""-"" and ""/"" not allowed in naming series","를 제외한 특수 문자 ""-""및 ""/""시리즈 이름에 허용되지"
+Specification Details,사양 세부 정보
+Specifications,사양
+"Specify a list of Territories, for which, this Price List is valid","지역의 목록을 지정하는,이 가격 목록은 유효"
+"Specify a list of Territories, for which, this Shipping Rule is valid","지역의 목록을 지정하는,이 선박의 규칙이 유효합니다"
+"Specify a list of Territories, for which, this Taxes Master is valid","지역의 목록을 지정하는 경우,이 마스터가 유효 세금"
+"Specify the operations, operating cost and give a unique Operation no to your operations.","운영, 운영 비용을 지정하고 작업에 고유 한 작업에게 더를 제공합니다."
+Split Delivery Note into packages.,패키지로 배달 주를 분할합니다.
+Sports,스포츠
+Sr,SR
+Standard,표준
+Standard Buying,표준 구매
+Standard Reports,표준 보고서
+Standard Selling,표준 판매
+Standard contract terms for Sales or Purchase.,판매 또는 구매를위한 표준 계약 조건.
+Start,시작
+Start Date,시작 날짜
+Start date of current invoice's period,현재 송장의 기간의 시작 날짜
+Start date should be less than end date for Item {0},시작 날짜는 항목에 대한 종료 날짜보다 작아야합니다 {0}
+State,도
+Statement of Account,계정의 문
+Static Parameters,정적 매개 변수
+Status,상태
+Status must be one of {0},상태 중 하나 여야합니다 {0}
+Status of {0} {1} is now {2},{0} {1} 지금의 상태 {2}
+Status updated to {0},상태로 업데이트 {0}
+Statutory info and other general information about your Supplier,법정 정보 및 공급 업체에 대한 다른 일반적인 정보
+Stay Updated,숙박 업데이트
+Stock,재고
+Stock Adjustment,재고 조정
+Stock Adjustment Account,재고 조정 계정
+Stock Ageing,주식 고령화
+Stock Analytics,증권 분석
+Stock Assets,재고 자산
+Stock Balance,주식 대차
+Stock Entries already created for Production Order ,
+Stock Entry,재고 항목
+Stock Entry Detail,재고 항목의 세부 사항
+Stock Expenses,재고 비용
+Stock Frozen Upto,주식 냉동 개까지
+Stock Ledger,주식 원장
+Stock Ledger Entry,주식 원장 입장
+Stock Ledger entries balances updated,주식 원장 업데이트 균형 엔트리
+Stock Level,재고 수준
+Stock Liabilities,주식 부채
+Stock Projected Qty,재고 수량을 예상
+Stock Queue (FIFO),주식 큐 (FIFO)
+Stock Received But Not Billed,주식 받았지만 청구하지
+Stock Reconcilation Data,주식 Reconcilation 데이터
+Stock Reconcilation Template,주식 Reconcilation 템플릿
+Stock Reconciliation,재고 조정
+"Stock Reconciliation can be used to update the stock on a particular date, usually as per physical inventory.",재고 조정은 보통 물리적 명세 사항 따라 특정 날짜에 콘텐츠를 업데이트하기 위해 사용될 수있다.
+Stock Settings,스톡 설정
+Stock UOM,주식 UOM
+Stock UOM Replace Utility,주식 UOM 유틸리티를 교체
+Stock UOM updatd for Item {0},상품에 대한 주식 UOM의 updatd {0}
+Stock Uom,주식 UOM
+Stock Value,주식 가치
+Stock Value Difference,주식 가치의 차이
+Stock balances updated,주식 잔고가 업데이트
+Stock cannot be updated against Delivery Note {0},스톡 배달 주에 업데이트 할 수 없습니다 {0}
+Stock entries exist against warehouse {0} cannot re-assign or modify 'Master Name',재고 항목이 {0} '마스터 이름을'다시 지정하거나 수정할 수 없습니다 창고에 존재
+Stock transactions before {0} are frozen,{0} 전에 주식 거래는 냉동
+Stop,중지
+Stop Birthday Reminders,정지 생일 알림
+Stop Material Request,정지 자료 요청
+Stop users from making Leave Applications on following days.,다음과 같은 일에 허가 신청을하는 사용자가 중지합니다.
+Stop!,거기 서!
+Stopped,중지
+Stopped order cannot be cancelled. Unstop to cancel.,정지 순서는 취소 할 수 없습니다.취소 멈추지.
+Stores,상점
+Stub,그루터기
+Sub Assemblies,서브 어셈블리
+"Sub-currency. For e.g. ""Cent""","하위 통화.예를 들면 ""에 대한센트 """
+Subcontract,하청
+Subject,주제
+Submit Salary Slip,급여 슬립 제출
+Submit all salary slips for the above selected criteria,위의 선택 기준에 대한 모든 급여 전표 제출
+Submit this Production Order for further processing.,추가 처리를 위해이 생산 주문을 제출합니다.
+Submitted,제출
+Subsidiary,자회사
+Successful: ,
+Successfully Reconciled,성공적으로 조정 됨
+Suggestions,제안
+Sunday,일요일
+Supplier,공급 업체
+Supplier (Payable) Account,공급 업체 (직불) 계정
+Supplier (vendor) name as entered in supplier master,공급 업체 마스터에 입력 공급 업체 (공급 업체) 이름으로
+Supplier > Supplier Type,공급 업체> 공급 업체 유형
+Supplier Account Head,공급 업체 계정 헤드
+Supplier Address,공급 업체 주소
+Supplier Addresses and Contacts,공급 업체 주소 및 연락처
+Supplier Details,공급 업체의 상세 정보
+Supplier Intro,업체 소개
+Supplier Invoice Date,공급 업체 송장 날짜
+Supplier Invoice No,공급 업체 송장 번호
+Supplier Name,공급 업체 이름
+Supplier Naming By,공급 업체 이름 지정으로
+Supplier Part Number,공급 업체 부품 번호
+Supplier Quotation,공급 업체 견적
+Supplier Quotation Item,공급 업체의 견적 상품
+Supplier Reference,공급 업체 참조
+Supplier Type,공급 업체 유형
+Supplier Type / Supplier,공급 업체 유형 / 공급 업체
+Supplier Type master.,공급 유형 마스터.
+Supplier Warehouse,공급 업체 창고
+Supplier Warehouse mandatory for sub-contracted Purchase Receipt,하청 구입 영수증 필수 공급 업체 창고
+Supplier database.,공급 업체 데이터베이스.
+Supplier master.,공급 업체 마스터.
+Supplier warehouse where you have issued raw materials for sub - contracting,당신이 하위 원료를 발행 한 업체 창고 - 계약
+Supplier-Wise Sales Analytics,공급 업체 현명한 판매 분석
+Support,기술 지원
+Support Analtyics,지원 Analtyics
+Support Analytics,지원 분석
+Support Email,지원 이메일
+Support Email Settings,지원 이메일 설정
+Support Password,지원 암호
+Support Ticket,지원 티켓
+Support queries from customers.,고객 지원 쿼리.
+Symbol,상징
+Sync Support Mails,동기화 지원 메일
+Sync with Dropbox,드롭 박스와 동기화
+Sync with Google Drive,구글 드라이브와 동기화
+System,체계
+System Settings,시스템 설정
+"System User (login) ID. If set, it will become default for all HR forms.","시스템 사용자 (로그인) ID. 설정하면, 모든 HR 양식의 기본이 될 것입니다."
+TDS (Advertisement),TDS (광고)
+TDS (Commission),TDS (위원회)
+TDS (Contractor),TDS (시공)
+TDS (Interest),TDS (이자)
+TDS (Rent),TDS (임대)
+TDS (Salary),TDS (급여)
+Target  Amount,대상 금액
+Target Detail,세부 목표
+Target Details,대상 세부 정보
+Target Details1,대상 Details1
+Target Distribution,대상 배포
+Target On,대상에
+Target Qty,목표 수량
+Target Warehouse,목표웨어 하우스
+Target warehouse in row {0} must be same as Production Order,행의 목표웨어 하우스가 {0}과 동일해야합니다 생산 주문
+Target warehouse is mandatory for row {0},목표웨어 하우스는 행에 대해 필수입니다 {0}
+Task,태스크
+Task Details,작업 상세 정보
+Tasks,타스크
+Tax,세금
+Tax Amount After Discount Amount,할인 금액 후 세액
+Tax Assets,법인세 자산
+Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,세금의 종류는 '평가'또는 '평가 및 전체'모든 항목은 비 재고 품목이기 때문에 할 수 없습니다
+Tax Rate,세율
+Tax and other salary deductions.,세금 및 기타 급여 공제.
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,세금 세부 테이블은 문자열로 품목 마스터에서 가져온이 분야에 저장됩니다. 세금 및 요금에 사용
+Tax template for buying transactions.,트랜잭션을 구입을위한 세금 템플릿.
+Tax template for selling transactions.,거래를 판매에 대한 세금 템플릿.
+Taxable,과세 대상
+Taxes,세금
+Taxes and Charges,세금과 요금
+Taxes and Charges Added,추가 세금 및 수수료
+Taxes and Charges Added (Company Currency),추가 세금 및 수수료 (회사 통화)
+Taxes and Charges Calculation,세금과 요금 계산
+Taxes and Charges Deducted,차감 세금과 요금
+Taxes and Charges Deducted (Company Currency),차감 세금 및 수수료 (회사 통화)
+Taxes and Charges Total,세금과 요금 전체
+Taxes and Charges Total (Company Currency),세금과 요금 합계 (회사 통화)
+Technology,기술
+Telecommunications,통신
+Telephone Expenses,전화 비용
+Television,텔레비전
+Template,템플릿
+Template for performance appraisals.,성과 평가를위한 템플릿.
+Template of terms or contract.,조건 또는 계약의 템플릿.
+Temporary Accounts (Assets),임시 계정 (자산)
+Temporary Accounts (Liabilities),임시 계정 (부채)
+Temporary Assets,임시 자산
+Temporary Liabilities,임시 부채
+Term Details,용어의 자세한 사항
+Terms,약관
+Terms and Conditions,이용약관
+Terms and Conditions Content,약관 내용
+Terms and Conditions Details,약관의 자세한 사항
+Terms and Conditions Template,이용 약관 템플릿
+Terms and Conditions1,약관 및 상태 인 경우 1
+Terretory,Terretory
+Territory,준주
+Territory / Customer,지역 / 고객
+Territory Manager,지역 관리자
+Territory Name,지역 이름
+Territory Target Variance Item Group-Wise,지역 대상 분산 상품 그룹 와이즈
+Territory Targets,지역 대상
+Test,미리 보기
+Test Email Id,테스트 이메일 아이디
+Test the Newsletter,뉴스 레터를 테스트
+The BOM which will be replaced,대체됩니다 BOM
+The First User: You,첫 번째 사용자 : 당신
+"The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""","패키지를 나타내는 항목.""아니오""를 ""예""로 ""판매 아이템""으로이 항목은 ""재고 상품입니다""해야합니다"
+The Organization,조직
+"The account head under Liability, in which Profit/Loss will be booked","이익 / 손실은 예약 할 수있는 책임에서 계정 머리,"
+The date on which next invoice will be generated. It is generated on submit.,다음 송장이 생성되는 날짜입니다.그것은 제출에 생성됩니다.
+The date on which recurring invoice will be stop,반복 송장이 중단 될 일자
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",
+The day(s) on which you are applying for leave are holiday. You need not apply for leave.,당신이 허가를 신청하는 날 (들)은 휴일입니다.당신은 휴가를 신청할 필요가 없습니다.
+The first Leave Approver in the list will be set as the default Leave Approver,목록의 첫 번째 허가 승인자는 기본 남겨 승인자로 설정됩니다
+The first user will become the System Manager (you can change that later).,첫 번째 사용자 (당신은 나중에 변경할 수 있습니다) 시스템 관리자가 될 것입니다.
+The gross weight of the package. Usually net weight + packaging material weight. (for print),패키지의 총 무게.보통 그물 무게 + 포장 재료의 무게. (프린트)
+The name of your company for which you are setting up this system.,이 시스템을 설정하는하는 기업의 이름입니다.
+The net weight of this package. (calculated automatically as sum of net weight of items),이 패키지의 순 중량. (항목의 순 중량의 합으로 자동으로 계산)
+The new BOM after replacement,교체 후 새로운 BOM
+The rate at which Bill Currency is converted into company's base currency,빌 통화는 회사의 기본 통화로 변환되는 비율
+The unique id for tracking all recurring invoices. It is generated on submit.,모든 반복 송장을 추적하는 고유 ID.그것은 제출에 생성됩니다.
+"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.","그런 가격 설정 규칙은 고객에 따라 필터링됩니다, 고객 그룹, 지역, 공급 업체, 공급 업체 유형, 캠페인, 판매 파트너 등"
+There are more holidays than working days this month.,이번 달 작업 일 이상 휴일이 있습니다.
+"There can only be one Shipping Rule Condition with 0 or blank value for ""To Value""","전용 ""값을""0 또는 빈 값을 발송하는 규칙 조건이있을 수 있습니다"
+There is not enough leave balance for Leave Type {0},허가 유형에 대한 충분한 휴가 밸런스가 없습니다 {0}
+There is nothing to edit.,편집 할 수있는 것은 아무 것도 없습니다.
+There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,오류가 발생했습니다.한 가지 가능한 이유는 양식을 저장하지 않은 경우입니다.문제가 계속되면 support@erpnext.com에 문의하시기 바랍니다.
+There were errors.,오류가 발생했습니다.
+This Currency is disabled. Enable to use in transactions,이 통화는 사용할 수 없습니다.트랜잭션을에 사용하도록 설정
+This Leave Application is pending approval. Only the Leave Apporver can update status.,이 허가 신청이 승인 대기 중입니다.만 남겨 Apporver 상태를 업데이트 할 수 있습니다.
+This Time Log Batch has been billed.,이 시간 로그 일괄 청구하고있다.
+This Time Log Batch has been cancelled.,이 시간 로그 일괄 취소되었습니다.
+This Time Log conflicts with {0},이 시간 로그와 충돌 {0}
+This format is used if country specific format is not found,국가 별 형식을 찾을 수없는 경우이 형식이 사용됩니다
+This is a root account and cannot be edited.,이 루트 계정 및 편집 할 수 없습니다.
+This is a root customer group and cannot be edited.,이 루트 고객 그룹 및 편집 할 수 없습니다.
+This is a root item group and cannot be edited.,이 루트 항목 그룹 및 편집 할 수 없습니다.
+This is a root sales person and cannot be edited.,이 루트 판매 사람 및 편집 할 수 없습니다.
+This is a root territory and cannot be edited.,이 루트 영토 및 편집 할 수 없습니다.
+This is an example website auto-generated from ERPNext,이 ERPNext에서 자동으로 생성 예를 들어 웹 사이트입니다
+This is the number of the last created transaction with this prefix,이것은이 접두사를 마지막으로 생성 된 트랜잭션의 수입니다
+This will be used for setting rule in HR module,이것은 HR 모듈 규칙을 설정하는 데 사용할
+Thread HTML,스레드 HTML
+Thursday,목요일
+Time Log,시간 로그인
+Time Log Batch,시간 로그 배치
+Time Log Batch Detail,시간 로그 일괄 처리 정보
+Time Log Batch Details,시간 로그 일괄 세부 정보
+Time Log Batch {0} must be 'Submitted',시간 로그 일괄 {0} '제출'해야
+Time Log Status must be Submitted.,시간 로그인 상태 제출해야합니다.
+Time Log for tasks.,작업 시간에 로그인합니다.
+Time Log is not billable,시간 로그인이 청구되지 않습니다
+Time Log {0} must be 'Submitted',시간 로그는 {0} '제출'해야
+Time Zone,시간대
+Time Zones,시간대
+Time and Budget,시간과 예산
+Time at which items were delivered from warehouse,상품이 창고에서 전달 된 시간입니다
+Time at which materials were received,재료가 수신 된 시간입니다
+Title,제목
+Titles for print templates e.g. Proforma Invoice.,인쇄 템플릿의 제목은 형식 상 청구서를 예.
+To,선택된 연구에서 치료의 대조적인 차이의 영향을 조
+To Currency,통화로
+To Date,현재까지
+To Date should be same as From Date for Half Day leave,다른 날짜로 반나절 휴직 일로부터 동일해야합니다
+To Date should be within the Fiscal Year. Assuming To Date = {0},현재까지의 회계 연도 내에 있어야합니다.날짜에 가정 = {0}
+To Discuss,토론하기
+To Do List,명부를
+To Package No.,번호를 패키지에
+To Produce,생산
+To Time,시간
+To Value,값
+To Warehouse,창고
+"To add child nodes, explore tree and click on the node under which you want to add more nodes.","자식 노드를 추가하려면, 나무를 탐구하고 더 많은 노드를 추가 할 노드를 클릭합니다."
+"To assign this issue, use the ""Assign"" button in the sidebar.","이 문제를 할당 막대에서 ""할당""버튼을 사용하십시오."
+To create a Bank Account,은행 계좌를 만들려면
+To create a Tax Account,세금 계정을 만들려면
+"To create an Account Head under a different company, select the company and save customer.",다른 회사에서 계정 머리를 만들려면 회사를 선택하고 고객을 저장합니다.
+To date cannot be before from date,지금까지 날로부터 이전 할 수 없습니다
+To enable <b>Point of Sale</b> features,판매 </ B> 기능의 <b> 포인트를 사용하려면
+To enable <b>Point of Sale</b> view,판매 </ b>를보기의 <b> 포인트를 사용하려면
+To get Item Group in details table,자세한 내용은 테이블에 항목 그룹을 얻으려면
+"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","행에있는 세금을 포함하려면 {0} 항목의 요금에, 행의 세금은 {1}도 포함되어야한다"
+"To merge, following properties must be same for both items",병합하려면 다음과 같은 속성이 두 항목에 대해 동일해야합니다
+"To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled.",특정 트랜잭션에서 가격 규칙을 적용하지 않으려면 모두 적용 가격 규칙 비활성화해야합니다.
+"To set this Fiscal Year as Default, click on 'Set as Default'",기본값으로이 회계 연도 설정하려면 '기본값으로 설정'을 클릭
+To track any installation or commissioning related work after sales,판매 후 제품 설치 관련 작업을 시운전을 추적하려면
+"To track brand name in the following documents Delivery Note, Opportunity, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No","다음의 서류 배달 참고, 기회, 자료 요청, 항목, 구매 주문, 구매 바우처, 구매자 영수증, 견적, 판매 송장, 판매 BOM, 판매 주문, 일련 번호에 브랜드 이름을 추적하려면"
+To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,자신의 시리얼 NOS에 따라 판매 및 구매 문서의 항목을 추적 할 수 있습니다.또한이 제품의 보증 내용을 추적하는 데 사용 할 수 있습니다.
+To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,매출 항목을 추적 및 배치 NOS <BR>의 <b> 선호 산업 문서를 구매하려면 화학 물질 등 </ B>
+To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,바코드를 사용하여 항목을 추적 할 수 있습니다.당신은 상품의 바코드를 스캔하여 납품서 및 판매 송장에서 항목을 입력 할 수 있습니다.
+Too many columns. Export the report and print it using a spreadsheet application.,열이 너무 많습니다.보고서를 내 보낸 스프레드 시트 응용 프로그램을 사용하여 인쇄 할 수 있습니다.
+Tools,Tools (도구)
+Total,합계
+Total ({0}),전체 ({0})
+Total Advance,전체 사전
+Total Amount,총액
+Total Amount To Pay,지불하는 총 금액
+Total Amount in Words,단어의 합계 금액
+Total Billing This Year: ,
+Total Characters,전체 문자
+Total Claimed Amount,총 주장 금액
+Total Commission,전체위원회
+Total Cost,총 비용
+Total Credit,총 크레딧
+Total Debit,총 직불
+Total Debit must be equal to Total Credit. The difference is {0},총 직불 카드는 전체 신용 동일해야합니다.차이는 {0}
+Total Deduction,총 공제
+Total Earning,총 적립
+Total Experience,총 체험
+Total Hours,총 시간
+Total Hours (Expected),총 시간 (예정)
+Total Invoiced Amount,총 인보이스에 청구 된 금액
+Total Leave Days,총 허가 일
+Total Leaves Allocated,할당 된 전체 잎
+Total Message(s),전체 메시지 (들)
+Total Operating Cost,총 영업 비용
+Total Points,총 포인트
+Total Raw Material Cost,총 원재료비
+Total Sanctioned Amount,전체 금액의인가를
+Total Score (Out of 5),전체 점수 (5 점 만점)
+Total Tax (Company Currency),총 세금 (회사 통화)
+Total Taxes and Charges,총 세금 및 요금
+Total Taxes and Charges (Company Currency),총 세금 및 요금 (회사 통화)
+Total allocated percentage for sales team should be 100,영업 팀의 총 할당 비율은 100해야한다
+Total amount of invoices received from suppliers during the digest period,다이제스트 기간 동안 공급 업체로부터받은 송장의 총액
+Total amount of invoices sent to the customer during the digest period,다이제스트 기간 동안 고객에게 발송 송장의 총액
+Total cannot be zero,총은 제로가 될 수 없습니다
+Total in words,즉 전체
+Total points for all goals should be 100. It is {0},모든 목표에 총 포인트는 100이어야합니다.그것은 {0}
+Total valuation for manufactured or repacked item(s) can not be less than total valuation of raw materials,제조 또는 재 포장 항목 (들)에 대한 총 평가는 원료의 총 평가보다 작을 수 없습니다
+Total weightage assigned should be 100%. It is {0},할당 된 총 weightage 100 %이어야한다.그것은 {0}
+Totals,합계
+Track Leads by Industry Type.,트랙은 산업 유형에 의해 리드.
+Track this Delivery Note against any Project,모든 프로젝트에 대해이 배달 주를 추적
+Track this Sales Order against any Project,모든 프로젝트에 대해이 판매 주문을 추적
+Transaction,거래
+Transaction Date,거래 날짜
+Transaction not allowed against stopped Production Order {0},거래 정지 생산 오더에 대해 허용되지 {0}
+Transfer,이체
+Transfer Material,전송 자료
+Transfer Raw Materials,원료로 이동
+Transferred Qty,수량에게 전송
+Transportation,교통비
+Transporter Info,트랜스 정보
+Transporter Name,트랜스 포터의 이름
+Transporter lorry number,수송화물 자동차 번호
+Travel,여행
+Travel Expenses,여행 비용
+Tree Type,나무의 종류
+Tree of Item Groups.,항목 그룹의 나무.
+Tree of finanial Cost Centers.,finanial 코스트 센터의 나무.
+Tree of finanial accounts.,finanial 계정의 나무.
+Trial Balance,시산표
+Tuesday,화요일
+Type,종류
+Type of document to rename.,이름을 바꿀 문서의 종류.
+"Type of leaves like casual, sick etc.","캐주얼, 병 등과 같은 잎의 종류"
+Types of Expense Claim.,비용 청구의 유형.
+Types of activities for Time Sheets,시간 시트를위한 활동의 종류
+"Types of employment (permanent, contract, intern etc.).","고용 (영구, 계약, 인턴 등)의 종류."
+UOM Conversion Detail,UOM 변환 세부 사항
+UOM Conversion Details,UOM 변환 세부 사항
+UOM Conversion Factor,UOM 변환 계수
+UOM Conversion factor is required in row {0},UOM 변환 계수는 행에 필요한 {0}
+UOM Name,UOM 이름
+UOM coversion factor required for UOM: {0} in Item: {1},UOM에 필요한 UOM coversion 인자 : {0} 항목 {1}
+Under AMC,AMC에서
+Under Graduate,대학원에서
+Under Warranty,보증에 따른
+Unit,단위
+Unit of Measure,측정 단위
+Unit of Measure {0} has been entered more than once in Conversion Factor Table,측정 단위는 {0}보다 변환 계수 표에 두 번 이상 입력 한
+"Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","이 항목 (예 : kg, 단위, 없음, 쌍)의 측정 단위."
+Units/Hour,단위 / 시간
+Units/Shifts,단위 / 교대
+Unpaid,지불하지 않은
+Unreconciled Payment Details,비 조정 지불 세부 사항
+Unscheduled,예약되지 않은
+Unsecured Loans,무담보 대출
+Unstop,...의 마개를 뽑다
+Unstop Material Request,멈추지 자료 요청
+Unstop Purchase Order,멈추지 구매 주문
+Unsubscribed,가입되어 있지 않음
+Update,업데이트
+Update Clearance Date,업데이트 통관 날짜
+Update Cost,업데이트 비용
+Update Finished Goods,업데이트 완성품
+Update Landed Cost,업데이트 비용 랜디
+Update Series,업데이트 시리즈
+Update Series Number,업데이트 시리즈 번호
+Update Stock,주식 업데이트
+Update bank payment dates with journals.,저널과 은행의 지불 날짜를 업데이트합니다.
+Update clearance date of Journal Entries marked as 'Bank Vouchers',저널 항목의 업데이트 통관 날짜는 '은행 바우처'로 표시
+Updated,업데이트
+Updated Birthday Reminders,업데이트 생일 알림
+Upload Attendance,출석 업로드
+Upload Backups to Dropbox,보관 용 백업 업로드
+Upload Backups to Google Drive,구글 드라이브에 백업 업로드
+Upload HTML,업로드 HTML
+Upload a .csv file with two columns: the old name and the new name. Max 500 rows.,이전 이름과 새 이름 :. 두 개의 열이있는 CSV 파일을 업로드 할 수 있습니다.최대 500 행.
+Upload attendance from a .csv file,. csv 파일에서 출석을 업로드
+Upload stock balance via csv.,CSV를 통해 재고의 균형을 업로드 할 수 있습니다.
+Upload your letter head and logo - you can edit them later.,편지의 머리와 로고를 업로드 - 나중에 편집 할 수 있습니다.
+Upper Income,위 소득
+Urgent,긴급한
+Use Multi-Level BOM,사용 다중 레벨 BOM
+Use SSL,SSL을 사용하여
+Used for Production Plan,생산 계획에 사용
+User,사용자
+User ID,사용자 ID
+User ID not set for Employee {0},사용자 ID 직원에 대한 설정하지 {0}
+User Name,User 이름
+User Name or Support Password missing. Please enter and try again.,사용자 이름 또는 지원 암호 누락.입력하고 다시 시도하십시오.
+User Remark,사용자 비고
+User Remark will be added to Auto Remark,사용자 비고 자동 비고에 추가됩니다
+User Remarks is mandatory,사용자는 필수입니다 비고
+User Specific,사용자 별
+User must always select,사용자는 항상 선택해야합니다
+User {0} is already assigned to Employee {1},사용자 {0}이 (가) 이미 직원에 할당 된 {1}
+User {0} is disabled,{0} 사용자가 비활성화되어 있습니다
+Username,User이름
+Users with this role are allowed to create / modify accounting entry before frozen date,이 역할이있는 사용자는 고정 된 날짜 이전에 회계 항목을 수정 / 만들 수 있습니다
+Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,이 역할이있는 사용자는 고정 된 계정에 대한 계정 항목을 수정 / 냉동 계정을 설정하고 만들 수 있습니다
+Utilities,"공공요금(전기세, 상/하 수도세, 가스세, 쓰레기세 등)"
+Utility Expenses,광열비
+Valid For Territories,영토에 대한 유효
+Valid From,유효
+Valid Upto,유효한 개까지
+Valid for Territories,영토에 대한 유효
+Validate,유효성 검사
+Valuation,평가
+Valuation Method,평가 방법
+Valuation Rate,평가 평가
+Valuation Rate required for Item {0},상품에 필요한 평가 비율 {0}
+Valuation and Total,평가 및 총
+Value,가치
+Value or Qty,값 또는 수량
+Vehicle Dispatch Date,차량 파견 날짜
+Vehicle No,차량 없음
+Venture Capital,벤처 캐피탈
+Verified By,에 의해 확인
+View Ledger,보기 원장
+View Now,지금보기
+Visit report for maintenance call.,유지 보수 통화에 대해 보고서를 참조하십시오.
+Voucher #,상품권 #
+Voucher Detail No,바우처 세부 사항 없음
+Voucher Detail Number,바우처 세부 번호
+Voucher ID,바우처 ID
+Voucher No,바우처 없음
+Voucher Type,바우처 유형
+Voucher Type and Date,바우처 종류 및 날짜
+Walk In,걷다
+Warehouse,창고
+Warehouse Contact Info,창고 연락처 정보
+Warehouse Detail,창고 세부 정보
+Warehouse Name,창고의 이름
+Warehouse and Reference,창고 및 참조
+Warehouse can not be deleted as stock ledger entry exists for this warehouse.,주식 원장 항목이 창고에 존재하는웨어 하우스는 삭제할 수 없습니다.
+Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,창고 재고 만 입력 / 배달 주 / 구매 영수증을 통해 변경 될 수 있습니다
+Warehouse cannot be changed for Serial No.,웨어 하우스는 일련 번호 변경할 수 없습니다
+Warehouse is mandatory for stock Item {0} in row {1},창고 재고 상품의 경우 필수 {0} 행에서 {1}
+Warehouse is missing in Purchase Order,웨어 하우스는 구매 주문에 없습니다
+Warehouse not found in the system,시스템에서 찾을 수없는 창고
+Warehouse required for stock Item {0},재고 품목에 필요한 창고 {0}
+Warehouse where you are maintaining stock of rejected items,당신이 거부 된 품목의 재고를 유지하고 창고
+Warehouse {0} can not be deleted as quantity exists for Item {1},수량이 항목에 대한 존재하는 창고 {0} 삭제할 수 없습니다 {1}
+Warehouse {0} does not belong to company {1},웨어 하우스는 {0}에 속하지 않는 회사 {1}
+Warehouse {0} does not exist,창고 {0}이 (가) 없습니다
+Warehouse {0}: Company is mandatory,창고 {0} : 회사는 필수입니다
+Warehouse {0}: Parent account {1} does not bolong to the company {2},창고 {0} : 부모 계정이 {1} 회사에 BOLONG하지 않는 {2}
+Warehouse-Wise Stock Balance,창고 현명한 주식 밸런스
+Warehouse-wise Item Reorder,창고 현명한 항목 순서 바꾸기
+Warehouses,창고
+Warehouses.,창고.
+Warn,경고
+Warning: Leave application contains following block dates,경고 : 응용 프로그램이 다음 블록 날짜를 포함 남겨
+Warning: Material Requested Qty is less than Minimum Order Qty,경고 : 수량 요청 된 자료는 최소 주문 수량보다 적은
+Warning: Sales Order {0} already exists against same Purchase Order number,경고 : 판매 주문 {0}이 (가) 이미 같은 구매 주문 번호에 존재
+Warning: System will not check overbilling since amount for Item {0} in {1} is zero,경고 : 시스템이 {0} {1} 제로의 항목에 대한 금액 때문에 과다 청구를 확인하지 않습니다
+Warranty / AMC Details,보증 / AMC의 자세한 사항
+Warranty / AMC Status,보증 / AMC 상태
+Warranty Expiry Date,보증 유효 기간
+Warranty Period (Days),보증 기간 (일)
+Warranty Period (in days),(일) 보증 기간
+We buy this Item,우리는이 품목을 구매
+We sell this Item,우리는이 품목을
+Website,웹사이트
+Website Description,웹 사이트 설명
+Website Item Group,웹 사이트 상품 그룹
+Website Item Groups,웹 사이트 상품 그룹
+Website Settings,웹 사이트 설정
+Website Warehouse,웹 사이트 창고
+Wednesday,수요일
+Weekly,주l
+Weekly Off,주간 끄기
+Weight UOM,무게 UOM
+"Weight is mentioned,\nPlease mention ""Weight UOM"" too","무게는 언급, \n ""무게 UOM""를 언급 해주십시오도"
+Weightage,Weightage
+Weightage (%),Weightage (%)
+Welcome,반갑습니다
+Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!,ERPNext에 오신 것을 환영합니다.다음 몇 분 동안 우리는 당신을 설정하여 ERPNext 계정을 도움이 될 것입니다.시도하고 당신이 조금 더 걸리는 경우에도이만큼의 정보를 입력합니다.나중에 당신에게 많은 시간을 절약 할 수 있습니다.행운을 빕니다!
+Welcome to ERPNext. Please select your language to begin the Setup Wizard.,ERPNext에 오신 것을 환영합니다.설치 마법사를 시작하기 위해 언어를 선택하십시오.
+What does it do?,그것은 무엇을 하는가?
+"When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.","체크 거래의 하나가 ""제출""하면, 이메일 팝업이 자동으로 첨부 파일로 트랜잭션, 트랜잭션에 관련된 ""연락처""로 이메일을 보내 열었다.사용자는 나 이메일을 보낼 수도 있고 그렇지 않을 수도 있습니다."
+"When submitted, the system creates difference entries to set the given stock and valuation on this date.",제출하면 시스템이 날짜에 지정된 주식 가치 평가를 설정하는 차이 항목을 작성합니다.
+Where items are stored.,항목이 저장되는 위치.
+Where manufacturing operations are carried out.,제조 작업이 수행되는 경우.
+Widowed,과부
+Will be calculated automatically when you enter the details,당신이 세부 사항을 입력하면 자동으로 계산됩니다
+Will be updated after Sales Invoice is Submitted.,견적서를 제출 한 후 업데이트됩니다.
+Will be updated when batched.,일괄 처리 할 때 업데이트됩니다.
+Will be updated when billed.,청구 할 때 업데이트됩니다.
+Wire Transfer,송금
+With Operations,운영과
+With Period Closing Entry,기간 결산 항목과
+Work Details,작업 상세 정보
+Work Done,작업 완료
+Work In Progress,진행중인 작업
+Work-in-Progress Warehouse,작업중인 창고
+Work-in-Progress Warehouse is required before Submit,작업중인 창고는 제출하기 전에 필요
+Working,인식 중
+Working Days,작업 일
+Workstation,워크스테이션
+Workstation Name,워크 스테이션 이름
+Write Off Account,계정을 끄기 쓰기
+Write Off Amount,금액을 상각
+Write Off Amount <=,금액을 상각 <=
+Write Off Based On,에 의거 오프 쓰기
+Write Off Cost Center,비용 센터를 오프 쓰기
+Write Off Outstanding Amount,잔액을 떨어져 쓰기
+Write Off Voucher,바우처 오프 쓰기
+Wrong Template: Unable to find head row.,잘못된 템플릿 : 머리 행을 찾을 수 없습니다.
+Year,년
+Year Closed,연도 폐쇄
+Year End Date,연도 종료 날짜
+Year Name,올해의 이름
+Year Start Date,년 시작 날짜
+Year of Passing,전달의 해
+Yearly,매년
+Yes,예
+You are not authorized to add or update entries before {0},당신은 전에 항목을 추가하거나 업데이트 할 수있는 권한이 없습니다 {0}
+You are not authorized to set Frozen value,당신은 고정 된 값을 설정할 수있는 권한이 없습니다
+You are the Expense Approver for this record. Please Update the 'Status' and Save,이 기록에 대한 비용 승인자입니다.'상태'를 업데이트하고 저장하십시오
+You are the Leave Approver for this record. Please Update the 'Status' and Save,이 기록에 대한 허가 승인자입니다.'상태'를 업데이트하고 저장하십시오
+You can enter any date manually,당신은 수동으로 날짜를 입력 할 수 있습니다
+You can enter the minimum quantity of this item to be ordered.,당신은 주문이 항목의 최소 수량을 입력 할 수 있습니다.
+You can not change rate if BOM mentioned agianst any item,BOM 어떤 항목 agianst 언급 한 경우는 속도를 변경할 수 없습니다
+You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,당신은 아니오 모두 배달 주를 입력 할 수 없습니다 및 판매 송장 번호는 하나를 입력하십시오.
+You can not enter current voucher in 'Against Journal Voucher' column,당신은 열 '분개장에 대하여'에서 현재의 바우처를 입력 할 수 없습니다
+You can set Default Bank Account in Company master,당신은 회사 마스터의 기본 은행 계좌를 설정할 수 있습니다
+You can start by selecting backup frequency and granting access for sync,당신은 백업 빈도를 선택하고 동기화에 대한 액세스를 부여하여 시작할 수 있습니다
+You can submit this Stock Reconciliation.,당신이 재고 조정을 제출할 수 있습니다.
+You can update either Quantity or Valuation Rate or both.,당신은 수량이나 평가 비율 또는 둘 중 하나를 업데이트 할 수 있습니다.
+You cannot credit and debit same account at the same time,당신은 신용과 같은 시간에 같은 계좌에서 금액을 인출 할 수 없습니다
+You have entered duplicate items. Please rectify and try again.,중복 항목을 입력했습니다.조정하고 다시 시도하십시오.
+You may need to update: {0},당신은 업데이트 할 필요가있을 수 있습니다 : {0}
+You must Save the form before proceeding,당신은 진행하기 전에 양식을 저장해야합니다
+Your Customer's TAX registration numbers (if applicable) or any general information,고객의 세금 등록 번호 (해당하는 경우) 또는 일반적인 정보
+Your Customers,고객
+Your Login Id,귀하의 로그인 아이디
+Your Products or Services,귀하의 제품이나 서비스
+Your Suppliers,공급 업체
+Your email address,귀하의 이메일 주소
+Your financial year begins on,귀하의 회계 연도가 시작됩니다
+Your financial year ends on,재무 년에 종료
+Your sales person who will contact the customer in future,미래의 고객에게 연락 할 것이다 판매 사람
+Your sales person will get a reminder on this date to contact the customer,귀하의 영업 사원은 고객에게 연락이 날짜에 알림을 얻을 것이다
+Your setup is complete. Refreshing...,귀하의 설치가 완료됩니다.상쾌한 ...
+Your support email id - must be a valid email - this is where your emails will come!,귀하의 지원 전자 우편 ID는 - 유효한 이메일이어야합니다 - 귀하의 이메일이 올 것이다 곳이다!
+[Error],[오류]
+[Select],[선택]
+`Freeze Stocks Older Than` should be smaller than %d days.,`이상 경과 프리즈 주식은`% d의 일보다 작아야한다.
+and,손목
+are not allowed.,허용되지 않습니다.
+assigned by,할당
+cannot be greater than 100,100보다 큰 수 없습니다
+"e.g. ""Build tools for builders""","예를 들어 """"빌더 빌드 도구"
+"e.g. ""MC""","예를 들어 ""MC """
+"e.g. ""My Company LLC""","예를 들어 ""내 회사 LLC """
+e.g. 5,예를 들어 5
+"e.g. Bank, Cash, Credit Card","예를 들어, 은행, 현금, 신용 카드"
+"e.g. Kg, Unit, Nos, m","예를 들어 kg, 단위, NOS, M"
+e.g. VAT,예 VAT
+eg. Cheque Number,예를 들어.수표 번호
+example: Next Day Shipping,예 : 익일 배송
+lft,좌
+old_parent,old_parent
+rgt,RGT
+subject,~에 복종시키다
+to,구입
+website page link,웹 사이트 페이지 링크
+{0} '{1}' not in Fiscal Year {2},{0} '{1}'하지 회계 연도에 {2}
+{0} Credit limit {0} crossed,{0} 여신 한도 {0} 넘어
+{0} Serial Numbers required for Item {0}. Only {0} provided.,{0} 항목에 필요한 일련 번호 {0}.만 {0} 제공.
+{0} budget for Account {1} against Cost Center {2} will exceed by {3},{0} 계정에 대한 예산은 {1} 코스트 센터에 대해 {2} {3}에 의해 초과
+{0} can not be negative,{0} 음수가 될 수 없습니다
+{0} created,{0} 생성
+{0} does not belong to Company {1},{0} 회사에 속하지 않는 {1}
+{0} entered twice in Item Tax,{0} 항목의 세금에 두 번 입력
+{0} is an invalid email address in 'Notification Email Address',{0} '알림 전자 메일 주소'잘못된 이메일 주소입니다
+{0} is mandatory,{0} 필수입니다
+{0} is mandatory for Item {1},{0} 항목에 대한 필수입니다 {1}
+{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} 필수입니다.아마 통화 기록은 {2}로 {1}에 만들어지지 않습니다.
+{0} is not a stock Item,{0} 재고 상품이 아닌
+{0} is not a valid Batch Number for Item {1},{0} 항목에 대한 유효한 배치 수없는 {1}
+{0} is not a valid Leave Approver. Removing row #{1}.,{0}이 (가) 올바른 허가 승인자가 없습니다.제거 행 # {1}.
+{0} is not a valid email id,{0} 유효한 이메일 ID가 아닌
+{0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.,{0} 이제 기본 회계 연도이다.변경 내용을 적용하기 위해 브라우저를 새로 고침하십시오.
+{0} is required,{0}이 필요합니다
+{0} must be a Purchased or Sub-Contracted Item in row {1},{0} 행의 구입 또는 하위 계약 품목이어야 {1}
+{0} must be reduced by {1} or you should increase overflow tolerance,{0} {1} 감소해야하거나 오버 플로우 내성을 증가한다
+{0} must have role 'Leave Approver',{0}의 역할 '허가 승인자'을 가지고 있어야합니다
+{0} valid serial nos for Item {1},항목에 대한 {0} 유효한 일련 NOS {1}
+{0} {1} against Bill {2} dated {3},{0} {1} 계산서에 대하여 {2} 년 {3}
+{0} {1} against Invoice {2},{0} {1} 송장에 대한 {2}
+{0} {1} has already been submitted,{0} {1}이 (가) 이미 제출되었습니다
+{0} {1} has been modified. Please refresh.,{0} {1} 수정되었습니다.새로 고침하십시오.
+{0} {1} is not submitted,{0} {1} 제출되지
+{0} {1} must be submitted,{0} {1} 제출해야합니다
+{0} {1} not in any Fiscal Year,{0} {1}되지 않은 회계 연도에
+{0} {1} status is 'Stopped',{0} {1} 상태가 '중지'된다
+{0} {1} status is Stopped,{0} {1} 상태가 중지됨
+{0} {1} status is Unstopped,{0} {1} 상태 Unstopped입니다
+{0} {1}: Cost Center is mandatory for Item {2},{0} {1} : 코스트 센터는 항목에 대해 필수입니다 {2}
+{0}: {1} not found in Invoice Details table,{0} {1} 송장 정보 테이블에서 찾을 수 없습니다

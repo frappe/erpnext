@@ -22,7 +22,7 @@
    "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
    "fieldname": "parent_customer_group", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "in_list_view": 1, 
    "label": "Parent Customer Group", 
    "oldfieldname": "parent_customer_group", 
@@ -51,7 +51,7 @@
   {
    "fieldname": "default_price_list", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Default Price List", 
    "options": "Price List", 
    "permlevel": 0
@@ -87,7 +87,7 @@
    "fieldname": "old_parent", 
    "fieldtype": "Link", 
    "hidden": 1, 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "old_parent", 
    "no_copy": 1, 
    "oldfieldname": "old_parent", 
@@ -101,7 +101,7 @@
  "icon": "icon-sitemap", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-05-07 06:39:41.073285", 
+ "modified": "2014-05-27 03:49:09.397308", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Customer Group", 
@@ -109,7 +109,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -123,7 +122,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -137,7 +136,6 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 

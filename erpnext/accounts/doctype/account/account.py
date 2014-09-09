@@ -11,10 +11,10 @@ class Account(Document):
 	nsm_parent_field = 'parent_account'
 
 	def onload(self):
-		frozen_accounts_modifier = frappe.db.get_value("Accounts Settings", "Accounts Settings", "frozen_accounts_modifier")
-		if frozen_accounts_modifier in frappe.user.get_roles():
+		frozen_accounts_modifier = frappe.db.get_value("Accounts Settings", "Accounts Settings",
+			"frozen_accounts_modifier")
+		if not frozen_accounts_modifier or frozen_accounts_modifier in frappe.user.get_roles():
 			self.get("__onload").can_freeze_account = True
-
 
 	def autoname(self):
 		self.name = self.account_name.strip() + ' - ' + \
@@ -30,6 +30,7 @@ class Account(Document):
 		self.validate_mandatory()
 		self.validate_warehouse_account()
 		self.validate_frozen_accounts_modifier()
+		self.validate_balance_must_be_debit_or_credit()
 
 	def validate_master_name(self):
 		if self.master_type in ('Customer', 'Supplier') or self.account_type == "Warehouse":
@@ -39,19 +40,24 @@ class Account(Document):
 				throw(_("Invalid Master Name"))
 
 	def validate_parent(self):
-		"""Fetch Parent Details and validation for account not to be created under ledger"""
+		"""Fetch Parent Details and validate parent account"""
 		if self.parent_account:
 			par = frappe.db.get_value("Account", self.parent_account,
-				["name", "group_or_ledger", "report_type"], as_dict=1)
+				["name", "group_or_ledger", "report_type", "root_type", "company"], as_dict=1)
 			if not par:
-				throw(_("Parent account does not exist"))
-			elif par["name"] == self.name:
-				throw(_("You can not assign itself as parent account"))
-			elif par["group_or_ledger"] != 'Group':
-				throw(_("Parent account can not be a ledger"))
+				throw(_("Account {0}: Parent account {1} does not exist").format(self.name, self.parent_account))
+			elif par.name == self.name:
+				throw(_("Account {0}: You can not assign itself as parent account").format(self.name))
+			elif par.group_or_ledger != 'Group':
+				throw(_("Account {0}: Parent account {1} can not be a ledger").format(self.name, self.parent_account))
+			elif par.company != self.company:
+				throw(_("Account {0}: Parent account {1} does not belong to company: {2}")
+					.format(self.name, self.parent_account, self.company))
 
-			if par["report_type"]:
-				self.report_type = par["report_type"]
+			if par.report_type:
+				self.report_type = par.report_type
+			if par.root_type:
+				self.root_type = par.root_type
 
 	def validate_root_details(self):
 		#does not exists parent
@@ -66,6 +72,16 @@ class Account(Document):
 			if not frozen_accounts_modifier or \
 				frozen_accounts_modifier not in frappe.user.get_roles():
 					throw(_("You are not authorized to set Frozen value"))
+
+	def validate_balance_must_be_debit_or_credit(self):
+		from erpnext.accounts.utils import get_balance_on
+		if not self.get("__islocal") and self.balance_must_be:
+			account_balance = get_balance_on(self.name)
+
+			if account_balance > 0 and self.balance_must_be == "Credit":
+				frappe.throw(_("Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'"))
+			elif account_balance < 0 and self.balance_must_be == "Debit":
+				frappe.throw(_("Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"))
 
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
@@ -98,6 +114,9 @@ class Account(Document):
 	def validate_mandatory(self):
 		if not self.report_type:
 			throw(_("Report Type is mandatory"))
+
+		if not self.root_type:
+			throw(_("Root Type is mandatory"))
 
 	def validate_warehouse_account(self):
 		if not cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
@@ -146,7 +165,7 @@ class Account(Document):
 		# If outstanding greater than credit limit and not authorized person raise exception
 		if credit_limit > 0 and flt(total_outstanding) > credit_limit \
 				and not self.get_authorized_user():
-			throw(_("{0} Credit limit {0} crossed").format(_(credit_limit_from), credit_limit))
+			throw(_("{0} Credit limit {1} crossed").format(_(credit_limit_from), credit_limit))
 
 	def validate_due_date(self, posting_date, due_date):
 		credit_days = (self.credit_days or frappe.db.get_value("Company", self.company, "credit_days"))
@@ -194,10 +213,10 @@ class Account(Document):
 				throw(_("Account {0} does not exist").format(new))
 
 			val = list(frappe.db.get_value("Account", new_account,
-				["group_or_ledger", "report_type", "company"]))
+				["group_or_ledger", "root_type", "company"]))
 
-			if val != [self.group_or_ledger, self.report_type, self.company]:
-				throw(_("""Merging is only possible if following properties are same in both records. Group or Ledger, Report Type, Company"""))
+			if val != [self.group_or_ledger, self.root_type, self.company]:
+				throw(_("""Merging is only possible if following properties are same in both records. Group or Ledger, Root Type, Company"""))
 
 		return new_account
 

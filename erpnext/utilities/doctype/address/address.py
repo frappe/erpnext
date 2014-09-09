@@ -10,7 +10,6 @@ from frappe.utils import cstr
 from frappe.model.document import Document
 
 class Address(Document):
-
 	def autoname(self):
 		if not self.address_title:
 			self.address_title = self.customer \
@@ -56,22 +55,16 @@ def get_address_display(address_dict):
 	if not isinstance(address_dict, dict):
 		address_dict = frappe.db.get_value("Address", address_dict, "*", as_dict=True) or {}
 
-	meta = frappe.get_meta("Address")
-	sequence = (("", "address_line1"),
-		("\n", "address_line2"),
-		("\n", "city"),
-		("\n", "state"),
-		("\n" + meta.get_label("pincode") + ": ", "pincode"),
-		("\n", "country"),
-		("\n" + meta.get_label("phone") + ": ", "phone"),
-		("\n" + meta.get_label("fax") + ": ", "fax"))
+	template = frappe.db.get_value("Address Template", \
+		{"country": address_dict.get("country")}, "template")
+	if not template:
+		template = frappe.db.get_value("Address Template", \
+			{"is_default": 1}, "template")
 
-	display = ""
-	for separator, fieldname in sequence:
-		if address_dict.get(fieldname):
-			display += separator + address_dict.get(fieldname)
+	if not template:
+		frappe.throw(_("No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template."))
 
-	return display.strip()
+	return frappe.render_template(template, address_dict)
 
 def get_territory_from_address(address):
 	"""Tries to match city, state and country of address to existing territory"""
@@ -88,3 +81,6 @@ def get_territory_from_address(address):
 			break
 
 	return territory
+
+
+

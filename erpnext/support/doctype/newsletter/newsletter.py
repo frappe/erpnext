@@ -8,11 +8,12 @@ import frappe.utils
 from frappe.utils import cstr
 from frappe import throw, _
 from frappe.model.document import Document
+import erpnext.tasks
 
 class Newsletter(Document):
 	def onload(self):
 		if self.email_sent:
-			self.get("__onload").status_count = dict(frappe.db.sql("""select status, count(*)
+			self.get("__onload").status_count = dict(frappe.db.sql("""select status, count(name)
 				from `tabBulk Email` where ref_doctype=%s and ref_docname=%s
 				group by status""", (self.doctype, self.name))) or None
 
@@ -28,7 +29,15 @@ class Newsletter(Document):
 			throw(_("Newsletter has already been sent"))
 
 		self.recipients = self.get_recipients()
-		self.send_bulk()
+
+		if getattr(frappe.local, "is_ajax", False):
+			# to avoid request timed out!
+			self.validate_send()
+
+			# hack! event="bulk_long" to queue in longjob queue
+			erpnext.tasks.send_newsletter.delay(frappe.local.site, self.name, event="bulk_long")
+		else:
+			self.send_bulk()
 
 		frappe.msgprint(_("Scheduled to send to {0} recipients").format(len(self.recipients)))
 
@@ -77,6 +86,10 @@ class Newsletter(Document):
 			return email_list
 
 	def send_bulk(self):
+		if not self.get("recipients"):
+			# in case it is called via worker
+			self.recipients = self.get_recipients()
+
 		self.validate_send()
 
 		sender = self.send_from or frappe.utils.get_formatted_email(self.owner)
@@ -88,7 +101,7 @@ class Newsletter(Document):
 
 		send(recipients = self.recipients, sender = sender,
 			subject = self.subject, message = self.message,
-			doctype = self.send_to_doctype, email_field = self.email_field or "email_id",
+			doctype = self.send_to_doctype, email_field = self.get("email_field") or "email_id",
 			ref_doctype = self.doctype, ref_docname = self.name)
 
 		if not frappe.flags.in_test:
@@ -97,10 +110,6 @@ class Newsletter(Document):
 	def validate_send(self):
 		if self.get("__islocal"):
 			throw(_("Please save the Newsletter before sending"))
-
-		from frappe import conf
-		if (conf.get("status") or None) == "Trial":
-			throw(_("Newsletters is not allowed for Trial users"))
 
 @frappe.whitelist()
 def get_lead_options():
@@ -125,7 +134,7 @@ def create_lead(email_id):
 		"doctype": "Lead",
 		"email_id": email_id,
 		"lead_name": real_name or email_id,
-		"status": "Contacted",
+		"status": "Lead",
 		"naming_series": get_default_naming_series("Lead"),
 		"company": frappe.db.get_default("company"),
 		"source": "Email"

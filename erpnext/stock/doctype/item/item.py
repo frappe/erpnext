@@ -6,13 +6,20 @@ import frappe
 from frappe import msgprint, _
 from frappe.utils import cstr, flt, getdate, now_datetime, formatdate
 from frappe.website.website_generator import WebsiteGenerator
-from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for
+from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
+from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 
 class WarehouseNotSet(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
+	page_title_field = "item_name"
+	condition_field = "show_in_website"
+	template = "templates/generators/item.html"
+	parent_website_route_field = "item_group"
+
 	def onload(self):
+		super(Item, self).onload()
 		self.get("__onload").sle_exists = self.check_if_sle_exists()
 
 	def autoname(self):
@@ -25,6 +32,8 @@ class Item(WebsiteGenerator):
 		self.name = self.item_code
 
 	def validate(self):
+		super(Item, self).validate()
+
 		if not self.stock_uom:
 			msgprint(_("Please enter default Unit of Measure"), raise_exception=1)
 		if self.image and not self.website_image:
@@ -42,17 +51,24 @@ class Item(WebsiteGenerator):
 		self.cant_change()
 		self.validate_item_type_for_reorder()
 
-		if not self.parent_website_route:
-			self.parent_website_route = frappe.get_website_route("Item Group", self.item_group)
-
-		if self.name:
-			self.old_page_name = frappe.db.get_value('Item', self.name, 'page_name')
+		if not self.get("__islocal"):
+			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
+			self.old_website_item_groups = frappe.db.sql_list("""select item_group from `tabWebsite Item Group`
+				where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
 
 	def on_update(self):
 		super(Item, self).on_update()
 		invalidate_cache_for_item(self)
 		self.validate_name_with_item_group()
 		self.update_item_price()
+
+	def get_context(self, context):
+		context["parent_groups"] = get_parent_item_groups(self.item_group) + \
+			[{"name": self.name}]
+		if self.slideshow:
+			context.update(get_slideshow(self))
+
+		return context
 
 	def check_warehouse_is_set_for_stock_item(self):
 		if self.is_stock_item=="Yes" and not self.default_warehouse:
@@ -119,6 +135,10 @@ class Item(WebsiteGenerator):
 		if self.has_serial_no == 'Yes' and self.is_stock_item == 'No':
 			msgprint(_("'Has Serial No' can not be 'Yes' for non-stock item"), raise_exception=1)
 
+		if self.has_serial_no == "No" and self.serial_no_series:
+			self.serial_no_series = None
+
+
 	def check_for_active_boms(self):
 		if self.is_purchase_item != "Yes":
 			bom_mat = frappe.db.sql("""select distinct t1.parent
@@ -133,7 +153,6 @@ class Item(WebsiteGenerator):
 			bom = frappe.db.sql("""select name from `tabBOM` where item = %s
 				and is_active = 1""", (self.name,))
 			if bom and bom[0][0]:
-				print self.name
 				frappe.throw(_("""Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item"""))
 
 	def fill_customer_code(self):
@@ -196,14 +215,6 @@ class Item(WebsiteGenerator):
 			item_description=%s, modified=NOW() where item_code=%s""",
 			(self.item_name, self.description, self.name))
 
-	def get_page_title(self):
-		if self.name==self.item_name:
-			page_name_from = self.name
-		else:
-			page_name_from = self.name + " " + self.item_name
-
-		return page_name_from
-
 	def get_tax_rate(self, tax_type):
 		return { "tax_rate": frappe.db.get_value("Account", tax_type, "tax_rate") }
 
@@ -252,11 +263,20 @@ class Item(WebsiteGenerator):
 			frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
 		frappe.db.auto_commit_on_many_writes = 0
 
+	def copy_specification_from_item_group(self):
+		self.set("item_website_specifications", [])
+		if self.item_group:
+			for label, desc in frappe.db.get_values("Item Website Specification",
+				{"parent": self.item_group}, ["label", "description"]):
+					row = self.append("item_website_specifications")
+					row.label = label
+					row.description = desc
+
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
 		end_of_life = frappe.db.get_value("Item", item_code, "end_of_life")
 
-	if end_of_life and getdate(end_of_life) <= now_datetime().date():
+	if end_of_life and end_of_life!="0000-00-00" and getdate(end_of_life) <= now_datetime().date():
 		msg = _("Item {0} has reached its end of life on {1}").format(item_code, formatdate(end_of_life))
 		_msgprint(msg, verbose)
 
@@ -347,6 +367,12 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 
 def invalidate_cache_for_item(doc):
 	invalidate_cache_for(doc, doc.item_group)
-	for d in doc.get({"doctype":"Website Item Group"}):
-		if d.item_group:
-			invalidate_cache_for(doc, d.item_group)
+
+	website_item_groups = list(set((doc.get("old_website_item_groups") or [])
+		+ [d.item_group for d in doc.get({"doctype":"Website Item Group"}) if d.item_group]))
+
+	for item_group in website_item_groups:
+		invalidate_cache_for(doc, item_group)
+
+	if doc.get("old_item_group") and doc.get("old_item_group") != doc.item_group:
+		invalidate_cache_for(doc, doc.old_item_group)

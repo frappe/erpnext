@@ -61,7 +61,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				fields: [
 					{"fieldname": "language", "label": __("Language"), "fieldtype": "Select",
 						options: ["english", "العربية", "deutsch", "ελληνικά", "español", "français", "हिंदी", "hrvatski",
-						"italiano", "nederlands", "português brasileiro", "português", "српски", "தமிழ்",
+						"italiano", "nederlands", "polski", "português brasileiro", "português", "српски", "தமிழ்",
 						"ไทย", "中国（简体）", "中國（繁體）"], reqd:1},
 				],
 				help: __("Welcome to ERPNext. Please select your language to begin the Setup Wizard."),
@@ -192,7 +192,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 					{fieldname:'company_name', label: __('Company Name'), fieldtype:'Data', reqd:1,
 						placeholder: __('e.g. "My Company LLC"')},
 					{fieldname:'company_abbr', label: __('Company Abbreviation'), fieldtype:'Data',
-						placeholder: __('e.g. "MC"'),reqd:1},
+						description: __('Max 5 characters'), placeholder: __('e.g. "MC"'), reqd:1},
 					{fieldname:'fy_start_date', label:__('Financial Year Start Date'), fieldtype:'Date',
 						description: __('Your financial year begins on'), reqd:1},
 					{fieldname:'fy_end_date', label:__('Financial Year End Date'), fieldtype:'Date',
@@ -205,8 +205,15 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 					slide.get_input("company_name").on("change", function() {
 						var parts = slide.get_input("company_name").val().split(" ");
 						var abbr = $.map(parts, function(p) { return p ? p.substr(0,1) : null }).join("");
-						slide.get_input("company_abbr").val(abbr.toUpperCase());
+						slide.get_input("company_abbr").val(abbr.slice(0, 5).toUpperCase());
 					}).val(frappe.boot.sysdefaults.company_name || "").trigger("change");
+
+					slide.get_input("company_abbr").on("change", function() {
+						if(slide.get_input("company_abbr").val().length > 5) {
+							msgprint("Company Abbreviation cannot have more than 5 characters");
+							slide.get_input("company_abbr").val("");
+						}
+					});
 
 					slide.get_input("fy_start_date").on("change", function() {
 						var year_end_date =

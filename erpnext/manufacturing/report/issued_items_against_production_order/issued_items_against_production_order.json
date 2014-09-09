@@ -1,11 +1,12 @@
 {
  "add_total_row": 0, 
+ "apply_user_permissions": 1, 
  "creation": "2013-05-03 17:48:46", 
  "docstatus": 0, 
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-05-13 16:08:56.043867", 
+ "modified": "2014-06-03 07:18:17.082436", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Issued Items Against Production Order", 

@@ -11,20 +11,13 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 		cur_frm.cscript.calculate_total_days(doc, dt, dn);
 	}
 
-	var leave_approver = doc.leave_approver;
-	return cur_frm.call({
-		method: "erpnext.hr.utils.get_leave_approver_list",
-		callback: function(r) {
-			cur_frm.set_df_property("leave_approver", "options", $.map(r.message,
-				function(user) {
-					return {value: user, label: frappe.user_info(user).fullname};
-				}));
-
-			if(leave_approver) cur_frm.set_value("leave_approver", leave_approver);
-
-			cur_frm.cscript.get_leave_balance(cur_frm.doc);
-		}
+	cur_frm.set_query("leave_approver", function() {
+		return {
+			filters: [["UserRole", "role", "=", "Leave Approver"]]
+		};
 	});
+
+	cur_frm.cscript.get_leave_balance(cur_frm.doc);
 }
 
 cur_frm.cscript.refresh = function(doc, dt, dn) {

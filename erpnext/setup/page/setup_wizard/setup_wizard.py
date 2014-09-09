@@ -7,7 +7,7 @@ import frappe, json
 from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.utils.file_manager import save_file
-from frappe.translate import set_default_language, get_dict, get_lang_dict
+from frappe.translate import set_default_language, get_dict, get_lang_dict, send_translations
 from frappe.country_info import get_country_info
 from frappe.utils.nestedset import get_root_of
 from default_website import website_maker
@@ -76,12 +76,18 @@ def setup_account(args=None):
 
 		frappe.clear_cache()
 		frappe.db.commit()
+
 	except:
 		traceback = frappe.get_traceback()
 		for hook in frappe.get_hooks("setup_wizard_exception"):
 			frappe.get_attr(hook)(traceback, args)
 
 		raise
+
+	else:
+		for hook in frappe.get_hooks("setup_wizard_success"):
+			frappe.get_attr(hook)(args)
+
 
 def update_user_name(args):
 	if args.get("email"):
@@ -107,9 +113,11 @@ def update_user_name(args):
 			last_name=%(last_name)s WHERE name=%(name)s""", args)
 
 	if args.get("attach_user"):
-		filename, filetype, content = args.get("attach_user").split(",")
-		fileurl = save_file(filename, content, "User", args.get("name"), decode=True).file_url
-		frappe.db.set_value("User", args.get("name"), "user_image", fileurl)
+		attach_user = args.get("attach_user").split(",")
+		if len(attach_user)==3:
+			filename, filetype, content = attach_user
+			fileurl = save_file(filename, content, "User", args.get("name"), decode=True).file_url
+			frappe.db.set_value("User", args.get("name"), "user_image", fileurl)
 
 	add_all_roles_to(args.get("name"))
 
@@ -163,17 +171,25 @@ def set_defaults(args):
 
 	global_defaults.save()
 
+	number_format = get_country_info(args.get("country")).get("number_format", "#,###.##")
+
+	# replace these as float number formats, as they have 0 precision
+	# and are currency number formats and not for floats
+	if number_format=="#.###":
+		number_format = "#.###,##"
+	elif number_format=="#,###":
+		number_format = "#,###.##"
+
 	system_settings = frappe.get_doc("System Settings", "System Settings")
 	system_settings.update({
 		"language": args.get("language"),
 		"time_zone": args.get("timezone"),
 		"float_precision": 3,
 		'date_format': frappe.db.get_value("Country", args.get("country"), "date_format"),
-		'number_format': get_country_info(args.get("country")).get("number_format", "#,###.##"),
+		'number_format': number_format,
+		'enable_scheduler': 1
 	})
-
 	system_settings.save()
-
 
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.auto_accounting_for_stock = 1
@@ -208,10 +224,6 @@ def set_defaults(args):
 	hr_settings = frappe.get_doc("HR Settings")
 	hr_settings.emp_created_by = "Naming Series"
 	hr_settings.save()
-
-	email_settings = frappe.get_doc("Outgoing Email Settings")
-	email_settings.send_print_in_body_and_attachment = 1
-	email_settings.save()
 
 def create_feed_and_todo():
 	"""update activty feed and create todo for creation of item, customer, vendor"""
@@ -316,9 +328,11 @@ def create_items(args):
 			}).insert()
 
 			if args.get("item_img_" + str(i)):
-				filename, filetype, content = args.get("item_img_" + str(i)).split(",")
-				fileurl = save_file(filename, content, "Item", item, decode=True).file_url
-				frappe.db.set_value("Item", item, "image", fileurl)
+				item_image = args.get("item_img_" + str(i)).split(",")
+				if len(item_image)==3:
+					filename, filetype, content = item_image
+					fileurl = save_file(filename, content, "Item", item, decode=True).file_url
+					frappe.db.set_value("Item", item, "image", fileurl)
 
 def create_customers(args):
 	for i in xrange(1,6):
@@ -371,22 +385,26 @@ def create_letter_head(args):
 			"is_default": 1
 		}).insert()
 
-		filename, filetype, content = args.get("attach_letterhead").split(",")
-		fileurl = save_file(filename, content, "Letter Head", _("Standard"), decode=True).file_url
-		frappe.db.set_value("Letter Head", _("Standard"), "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
+		attach_letterhead = args.get("attach_letterhead").split(",")
+		if len(attach_letterhead)==3:
+			filename, filetype, content = attach_letterhead
+			fileurl = save_file(filename, content, "Letter Head", _("Standard"), decode=True).file_url
+			frappe.db.set_value("Letter Head", _("Standard"), "content", "<img src='%s' style='max-width: 100%%;'>" % fileurl)
 
 def create_logo(args):
 	if args.get("attach_logo"):
-		filename, filetype, content = args.get("attach_logo").split(",")
-		fileurl = save_file(filename, content, "Website Settings", "Website Settings",
-			decode=True).file_url
-		frappe.db.set_value("Website Settings", "Website Settings", "banner_html",
-			"<img src='%s' style='max-width: 100%%;'>" % fileurl)
+		attach_logo = args.get("attach_logo").split(",")
+		if len(attach_logo)==3:
+			filename, filetype, content = attach_logo
+			fileurl = save_file(filename, content, "Website Settings", "Website Settings",
+				decode=True).file_url
+			frappe.db.set_value("Website Settings", "Website Settings", "banner_html",
+				"<img src='%s' style='max-width: 100%%;'>" % fileurl)
 
 def add_all_roles_to(name):
 	user = frappe.get_doc("User", name)
 	for role in frappe.db.sql("""select name from tabRole"""):
-		if role[0] not in ["Administrator", "Guest", "All", "Customer", "Supplier", "Partner"]:
+		if role[0] not in ["Administrator", "Guest", "All", "Customer", "Supplier", "Partner", "Employee"]:
 			d = user.append("user_roles")
 			d.role = role[0]
 	user.save()
@@ -407,11 +425,12 @@ def create_territories():
 
 @frappe.whitelist()
 def load_messages(language):
+	frappe.clear_cache()
 	lang = get_lang_dict()[language]
 	frappe.local.lang = lang
 	m = get_dict("page", "setup-wizard")
 	m.update(get_dict("boot"))
-	frappe.local.response["__messages"] = m
+	send_translations(m)
 	return lang
 
 

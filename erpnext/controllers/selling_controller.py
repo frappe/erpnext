@@ -3,23 +3,38 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, flt, _round, cstr
+from frappe.utils import cint, flt, rounded, cstr, comma_or
 from erpnext.setup.utils import get_company_currency
 from frappe import _, throw
+from erpnext.stock.get_item_details import get_available_qty
 
 from erpnext.controllers.stock_controller import StockController
 
 class SellingController(StockController):
+	def __setup__(self):
+		if hasattr(self, "fname"):
+			self.table_print_templates = {
+				self.fname: "templates/print_formats/includes/item_grid.html",
+				"other_charges": "templates/print_formats/includes/taxes.html",
+			}
+
+	def onload(self):
+		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
+			for item in self.get(self.fname):
+				item.update(get_available_qty(item.item_code,
+					item.warehouse))
+
 	def validate(self):
 		super(SellingController, self).validate()
 		self.validate_max_discount()
 		check_active_sales_items(self)
 
 	def get_sender(self, comm):
-		if frappe.db.get_value('Sales Email Settings', None, 'extract_emails'):
-			return frappe.db.get_value('Sales Email Settings', None, 'email_id')
-		else:
-			return frappe.session.user
+		sender = None
+		if cint(frappe.db.get_value('Sales Email Settings', None, 'extract_emails')):
+			sender = frappe.db.get_value('Sales Email Settings', None, 'email_id')
+
+		return sender or comm.sender or frappe.session.user
 
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
@@ -136,11 +151,12 @@ class SellingController(StockController):
 
 				cumulated_tax_fraction += tax.tax_fraction_for_current_item
 
-			if cumulated_tax_fraction and not self.discount_amount_applied:
+			if cumulated_tax_fraction and not self.discount_amount_applied and item.qty:
 				item.base_amount = flt((item.amount * self.conversion_rate) /
 					(1 + cumulated_tax_fraction), self.precision("base_amount", item))
 
 				item.base_rate = flt(item.base_amount / item.qty, self.precision("base_rate", item))
+				item.discount_percentage = flt(item.discount_percentage, self.precision("discount_percentage", item))
 
 				if item.discount_percentage == 100:
 					item.base_price_list_rate = item.base_rate
@@ -212,8 +228,8 @@ class SellingController(StockController):
 			self.net_total_export + flt(self.discount_amount),
 			self.precision("other_charges_total_export"))
 
-		self.rounded_total = _round(self.grand_total)
-		self.rounded_total_export = _round(self.grand_total_export)
+		self.rounded_total = rounded(self.grand_total)
+		self.rounded_total_export = rounded(self.grand_total_export)
 
 	def apply_discount_amount(self):
 		if self.discount_amount:
@@ -286,20 +302,29 @@ class SellingController(StockController):
 		if not self.order_type:
 			self.order_type = "Sales"
 		elif self.order_type not in valid_types:
-			throw(_("Order Type must be one of {1}").comma_or(valid_types))
+			throw(_("Order Type must be one of {0}").format(comma_or(valid_types)))
 
 	def check_credit(self, grand_total):
 		customer_account = frappe.db.get_value("Account", {"company": self.company,
 			"master_name": self.customer}, "name")
 		if customer_account:
-			total_outstanding = frappe.db.sql("""select
+			invoice_outstanding = frappe.db.sql("""select
 				sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 				from `tabGL Entry` where account = %s""", customer_account)
-			total_outstanding = total_outstanding[0][0] if total_outstanding else 0
+			invoice_outstanding = flt(invoice_outstanding[0][0]) if invoice_outstanding else 0
 
-			outstanding_including_current = flt(total_outstanding) + flt(grand_total)
-			frappe.get_doc('Account', customer_account).run_method("check_credit_limit",
-				outstanding_including_current)
+			ordered_amount_to_be_billed = frappe.db.sql("""
+				select sum(grand_total*(100 - ifnull(per_billed, 0))/100)
+				from `tabSales Order`
+				where customer=%s and docstatus = 1
+				and ifnull(per_billed, 0) < 100 and status != 'Stopped'""", self.customer)
+
+			ordered_amount_to_be_billed = flt(ordered_amount_to_be_billed[0][0]) \
+				if ordered_amount_to_be_billed else 0.0
+
+			total_outstanding = invoice_outstanding + ordered_amount_to_be_billed
+
+			frappe.get_doc('Account', customer_account).check_credit_limit(total_outstanding)
 
 	def validate_max_discount(self):
 		for d in self.get(self.fname):
@@ -313,6 +338,9 @@ class SellingController(StockController):
 		for d in self.get(self.fname):
 			reserved_warehouse = ""
 			reserved_qty_for_main_item = 0
+
+			if d.qty is None:
+				frappe.throw(_("Row {0}: Qty is mandatory").format(d.idx))
 
 			if self.doctype == "Sales Order":
 				if (frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or

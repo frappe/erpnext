@@ -11,7 +11,7 @@
    "fieldname": "document_description", 
    "fieldtype": "HTML", 
    "label": "Document Description", 
-   "options": "<div class=\"field_description\">You can generate multiple salary slips based on the selected criteria, submit and mail those to the employee directly from here</div>", 
+   "options": "<div class=\"alert alert-info\">You can generate multiple salary slips based on the selected criteria, submit and mail those to the employee directly from here</div>", 
    "permlevel": 0
   }, 
   {
@@ -144,7 +144,7 @@
  "icon": "icon-cog", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2014-05-09 02:16:45.165977", 
+ "modified": "2014-06-04 06:46:39.437061", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Manager", 

@@ -7,6 +7,9 @@ import frappe
 
 from frappe import _
 
+default_mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via
+	<a style="color: #888" href="http://erpnext.org">ERPNext</a></div>"""
+
 def after_install():
 	frappe.get_doc({'doctype': "Role", "role_name": "Analytics"}).insert()
 	set_single_defaults()
@@ -25,28 +28,31 @@ def import_country_and_currency():
 
 	for name in data:
 		country = frappe._dict(data[name])
-		if not frappe.db.exists("Country", name):
-			frappe.get_doc({
-				"doctype": "Country",
-				"country_name": name,
-				"code": country.code,
-				"date_format": country.date_format or "dd-mm-yyyy",
-				"time_zones": "\n".join(country.timezones or [])
-			}).insert()
-
-		if country.currency and not frappe.db.exists("Currency", country.currency):
-			frappe.get_doc({
-				"doctype": "Currency",
-				"currency_name": country.currency,
-				"fraction": country.currency_fraction,
-				"symbol": country.currency_symbol,
-				"fraction_units": country.currency_fraction_units,
-				"number_format": country.number_format
-			}).insert()
+		add_country_and_currency(name, country)
 
 	# enable frequently used currencies
 	for currency in ("INR", "USD", "GBP", "EUR", "AED", "AUD", "JPY", "CNY", "CHF"):
 		frappe.db.set_value("Currency", currency, "enabled", 1)
+
+def add_country_and_currency(name, country):
+	if not frappe.db.exists("Country", name):
+		frappe.get_doc({
+			"doctype": "Country",
+			"country_name": name,
+			"code": country.code,
+			"date_format": country.date_format or "dd-mm-yyyy",
+			"time_zones": "\n".join(country.timezones or [])
+		}).insert()
+
+	if country.currency and not frappe.db.exists("Currency", country.currency):
+		frappe.get_doc({
+			"doctype": "Currency",
+			"currency_name": country.currency,
+			"fraction": country.currency_fraction,
+			"symbol": country.currency_symbol,
+			"fraction_units": country.currency_fraction_units,
+			"number_format": country.number_format
+		}).insert()
 
 def feature_setup():
 	"""save global defaults and features setup"""
@@ -79,3 +85,6 @@ def set_single_defaults():
 				pass
 
 	frappe.db.set_default("date_format", "dd-mm-yyyy")
+
+	frappe.db.set_value("Outgoing Email Settings", "Outgoing Email Settings", "footer",
+		default_mail_footer)

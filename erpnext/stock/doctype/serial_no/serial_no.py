@@ -248,7 +248,8 @@ def validate_serial_no(sle, item_det):
 				SerialNoRequiredError)
 
 def update_serial_nos(sle, item_det):
-	if sle.is_cancelled == "No" and not sle.serial_no and sle.actual_qty > 0 and item_det.serial_no_series:
+	if sle.is_cancelled == "No" and not sle.serial_no and sle.actual_qty > 0 \
+			and item_det.has_serial_no == "Yes" and item_det.serial_no_series:
 		from frappe.model.naming import make_autoname
 		serial_nos = []
 		for i in xrange(cint(sle.actual_qty)):
@@ -277,13 +278,16 @@ def get_serial_nos(serial_no):
 
 def make_serial_no(serial_no, sle):
 	sr = frappe.new_doc("Serial No")
+	sr.warehouse = None
+	sr.dont_update_if_missing.append("warehouse")
 	sr.ignore_permissions = True
+
 	sr.serial_no = serial_no
 	sr.item_code = sle.item_code
-	sr.warehouse = None
 	sr.company = sle.company
 	sr.via_stock_ledger = True
 	sr.insert()
+
 	sr.warehouse = sle.warehouse
 	sr.status = "Available"
 	sr.save()
@@ -291,19 +295,30 @@ def make_serial_no(serial_no, sle):
 	return sr.name
 
 def update_serial_nos_after_submit(controller, parentfield):
-	stock_ledger_entries = frappe.db.sql("""select voucher_detail_no, serial_no
+	stock_ledger_entries = frappe.db.sql("""select voucher_detail_no, serial_no, actual_qty, warehouse
 		from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""",
 		(controller.doctype, controller.name), as_dict=True)
 
 	if not stock_ledger_entries: return
 
 	for d in controller.get(parentfield):
-		serial_no = None
+		update_rejected_serial_nos = True if (controller.doctype=="Purchase Receipt" and d.rejected_qty) else False
+		accepted_serial_nos_updated = False
+		warehouse = d.t_warehouse if controller.doctype == "Stock Entry" else d.warehouse
+
 		for sle in stock_ledger_entries:
 			if sle.voucher_detail_no==d.name:
-				serial_no = sle.serial_no
-				break
-
-		if d.serial_no != serial_no:
-			d.serial_no = serial_no
-			frappe.db.set_value(d.doctype, d.name, "serial_no", serial_no)
+				if not accepted_serial_nos_updated and d.qty and abs(sle.actual_qty)==d.qty \
+					and sle.warehouse == warehouse and sle.serial_no != d.serial_no:
+						d.serial_no = sle.serial_no
+						frappe.db.set_value(d.doctype, d.name, "serial_no", sle.serial_no)
+						accepted_serial_nos_updated = True
+						if not update_rejected_serial_nos:
+							break
+				elif update_rejected_serial_nos and abs(sle.actual_qty)==d.rejected_qty \
+					and sle.warehouse == d.rejected_warehouse and sle.serial_no != d.rejected_serial_no:
+						d.rejected_serial_no = sle.serial_no
+						frappe.db.set_value(d.doctype, d.name, "rejected_serial_no", sle.serial_no)
+						update_rejected_serial_nos = False
+						if accepted_serial_nos_updated:
+							break

@@ -16,4 +16,5 @@ recursive-include erpnext *.md
 recursive-include erpnext *.png
 recursive-include erpnext *.py
 recursive-include erpnext *.svg
+recursive-include erpnext/public *
 recursive-exclude * *.pyc

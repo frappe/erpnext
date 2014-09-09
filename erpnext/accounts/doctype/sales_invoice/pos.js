@@ -21,9 +21,9 @@ erpnext.POS = Class.extend({
 									<tr>\
 										<th style="width: 40%">'+__("Item")+'</th>\
 										<th style="width: 9%"></th>\
-										<th style="width: 17%; text-align: right;">Qty</th>\
+										<th style="width: 22%; text-align: right;">Qty</th>\
 										<th style="width: 9%"></th>\
-										<th style="width: 25%; text-align: right;">Rate</th>\
+										<th style="width: 20%; text-align: right;">Rate</th>\
 									</tr>\
 								</thead>\
 								<tbody>\
@@ -367,10 +367,8 @@ erpnext.POS = Class.extend({
 		this.hide_payment_button();
 
 		// If quotation to is not Customer then remove party
-		if (this.frm.doctype == "Quotation") {
+		if (this.frm.doctype == "Quotation" && this.frm.doc.quotation_to!="Customer") {
 			this.party_field.$wrapper.remove();
-			if (this.frm.doc.quotation_to == "Customer")
-				this.make_party();
 		}
 	},
 	refresh_item_list: function() {
@@ -389,14 +387,19 @@ erpnext.POS = Class.extend({
 
 			$(repl('<tr id="%(item_code)s" data-selected="false">\
 					<td>%(item_code)s%(item_name)s</td>\
-					<td style="vertical-align:middle;" align="right">\
+					<td style="vertical-align:top; padding-top: 10px;" \
+						align="right">\
 						<div class="decrease-qty" style="cursor:pointer;">\
 							<i class="icon-minus-sign icon-large text-danger"></i>\
 						</div>\
 					</td>\
-					<td style="vertical-align:middle;"><input type="text" value="%(qty)s" \
-						class="form-control qty" style="text-align: right;"></td>\
-					<td style="vertical-align:middle;cursor:pointer;">\
+					<td style="vertical-align:middle;">\
+						<input type="text" value="%(qty)s" \
+						class="form-control qty" style="text-align: right;">\
+						<div class="actual-qty small text-muted">'
+							+__("Stock: ")+'<span class="text-success">%(actual_qty)s</span>%(projected_qty)s</div>\
+					</td>\
+					<td style="vertical-align:top; padding-top: 10px;">\
 						<div class="increase-qty" style="cursor:pointer;">\
 							<i class="icon-plus-sign icon-large text-success"></i>\
 						</div>\
@@ -407,6 +410,9 @@ erpnext.POS = Class.extend({
 					item_code: d.item_code,
 					item_name: d.item_name===d.item_code ? "" : ("<br>" + d.item_name),
 					qty: d.qty,
+					actual_qty: d.actual_qty,
+					projected_qty: d.projected_qty ? (" <span title='"+__("Projected Qty")
+						+"'>(" + d.projected_qty + ")<span>") : "",
 					rate: format_currency(d.rate, me.frm.doc.currency),
 					amount: format_currency(d.amount, me.frm.doc.currency)
 				}
@@ -481,7 +487,11 @@ erpnext.POS = Class.extend({
 		});
 
 		me.refresh_delete_btn();
-		this.barcode.$input.focus();
+		if(me.frm.doc[this.party]) {
+			this.barcode.$input.focus();
+		} else {
+			this.party_field.$input.focus();
+		}
 	},
 	increase_decrease_qty: function(tr, operation) {
 		var item_code = tr.attr("id");
@@ -489,7 +499,7 @@ erpnext.POS = Class.extend({
 
 		if (operation == "increase-qty")
 			this.update_qty(item_code, item_qty + 1);
-		else if (operation == "decrease-qty" && item_qty != 1)
+		else if (operation == "decrease-qty" && item_qty != 0)
 			this.update_qty(item_code, item_qty - 1);
 	},
 	disable_text_box_and_button: function() {

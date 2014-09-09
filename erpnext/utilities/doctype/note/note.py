@@ -9,20 +9,38 @@ from frappe import _
 from frappe.model.document import Document
 
 class Note(Document):
-
 	def autoname(self):
 		# replace forbidden characters
 		import re
 		self.name = re.sub("[%'\"#*?`]", "", self.title.strip())
 
-	def onload(self):
-		if not self.public and frappe.session.user != self.owner:
-			if frappe.session.user not in [d.user for d in self.get("share_with")]:
-				frappe.throw(_("Not permitted"), frappe.PermissionError)
+	def before_print(self):
+		self.print_heading = self.name
+		self.sub_heading = ""
 
-	def validate(self):
-		if not self.get("__islocal"):
-			if frappe.session.user != self.owner:
-				if frappe.session.user not in frappe.db.sql_list("""select user from `tabNote User`
-					where parent=%s and permission='Edit'""", self.name):
-					frappe.throw(_("Not permitted"), frappe.PermissionError)
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+
+	if user == "Administrator":
+		return ""
+
+	return """(`tabNote`.public=1 or `tabNote`.owner="{user}" or exists (
+		select name from `tabNote User`
+			where `tabNote User`.parent=`tabNote`.name
+			and `tabNote User`.user="{user}"))""".format(user=user)
+
+def has_permission(doc, ptype, user):
+	if doc.public == 1 or user == "Administrator":
+		return True
+
+	if user == doc.owner:
+		return True
+
+	note_user_map = dict((d.user, d) for d in doc.get("share_with"))
+	if user in note_user_map:
+		if ptype == "read":
+			return True
+		elif note_user_map.get(user).permission == "Edit":
+			return True
+
+	return False

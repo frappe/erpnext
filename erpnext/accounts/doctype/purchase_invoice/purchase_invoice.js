@@ -27,7 +27,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 		// Show / Hide button
 		if(doc.docstatus==1 && doc.outstanding_amount > 0)
-			this.frm.add_custom_button(__('Make Payment Entry'), this.make_bank_voucher);
+			this.frm.add_custom_button(__('Make Payment Entry'), this.make_bank_voucher,
+				frappe.boot.doctype_icons["Journal Voucher"]);
 
 		if(doc.docstatus==1) {
 			cur_frm.appframe.add_button(__('View Ledger'), function() {
@@ -56,7 +57,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, "icon-download", "btn-default");
 
 			cur_frm.add_custom_button(__('From Purchase Receipt'),
 				function() {
@@ -69,7 +70,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, "icon-download", "btn-default");
 
 		}
 
@@ -77,16 +78,19 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 
 	supplier: function() {
+		var me = this;
 		if(this.frm.updating_party_details)
 			return;
-		erpnext.utils.get_party_details(this.frm,
-			"erpnext.accounts.party.get_party_details", {
+		erpnext.utils.get_party_details(this.frm, "erpnext.accounts.party.get_party_details",
+			{
 				posting_date: this.frm.doc.posting_date,
 				party: this.frm.doc.supplier,
 				party_type: "Supplier",
 				account: this.frm.doc.debit_to,
 				price_list: this.frm.doc.buying_price_list,
-			})
+			}, function() {
+			me.apply_pricing_rule();
+		})
 	},
 
 	credit_to: function() {
@@ -109,7 +113,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 	entries_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("entries", row, ["expense_account", "cost_center"]);
+		this.frm.script_manager.copy_from_first_row("entries", row,
+			["expense_account", "cost_center", "project_name"]);
 	},
 
 	on_submit: function() {

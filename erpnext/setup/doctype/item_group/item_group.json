@@ -1,6 +1,5 @@
 {
- "allow_attach": 1, 
- "allow_import": 1, 
+  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:item_group_name", 
  "creation": "2013-03-28 10:35:29", 
@@ -22,24 +21,17 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "page_name", 
-   "fieldtype": "Data", 
-   "in_list_view": 1, 
-   "label": "Page Name", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "cb0", 
-   "fieldtype": "Column Break", 
+   "fieldname": "gs", 
+   "fieldtype": "Section Break", 
    "in_list_view": 0, 
+   "label": "General Settings", 
    "permlevel": 0
   }, 
   {
    "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
    "fieldname": "parent_item_group", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "in_list_view": 1, 
    "label": "Parent Item Group", 
    "no_copy": 0, 
@@ -65,6 +57,32 @@
    "search_index": 0
   }, 
   {
+   "fieldname": "column_break_5", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "default_income_account", 
+   "fieldtype": "Link", 
+   "label": "Default Income Account", 
+   "options": "Account", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "default_expense_account", 
+   "fieldtype": "Link", 
+   "label": "Default Expense Account", 
+   "options": "Account", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "default_cost_center", 
+   "fieldtype": "Link", 
+   "label": "Default Cost Center", 
+   "options": "Cost Center", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "sb9", 
    "fieldtype": "Section Break", 
    "label": "Website Settings", 
@@ -81,11 +99,21 @@
   }, 
   {
    "depends_on": "show_in_website", 
+   "fieldname": "page_name", 
+   "fieldtype": "Data", 
+   "in_list_view": 0, 
+   "label": "Page Name", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "depends_on": "show_in_website", 
    "fieldname": "parent_website_route", 
-   "fieldtype": "Link", 
-   "label": "Parent Website Page", 
-   "options": "Website Route", 
-   "permlevel": 0
+   "fieldtype": "Read Only", 
+   "label": "Parent Website Route", 
+   "options": "", 
+   "permlevel": 0, 
+   "read_only": 1
   }, 
   {
    "depends_on": "show_in_website", 
@@ -145,7 +173,7 @@
    "fieldname": "old_parent", 
    "fieldtype": "Link", 
    "hidden": 1, 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "old_parent", 
    "no_copy": 1, 
    "oldfieldname": "old_parent", 
@@ -162,7 +190,7 @@
  "in_create": 1, 
  "issingle": 0, 
  "max_attachments": 3, 
- "modified": "2014-05-16 15:26:47.322787", 
+ "modified": "2014-08-20 17:48:34.489750", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Item Group", 
@@ -170,7 +198,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -184,7 +211,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -197,7 +224,6 @@
    "write": 0
   }, 
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -210,7 +236,7 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 
@@ -220,7 +246,7 @@
    "role": "Sales User"
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 
@@ -230,7 +256,7 @@
    "role": "Purchase User"
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 

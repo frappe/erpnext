@@ -1,5 +1,4 @@
 {
- "allow_attach": 1, 
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "naming_series:", 
@@ -87,6 +86,7 @@
    "description": "System User (login) ID. If set, it will become default for all HR forms.", 
    "fieldname": "user_id", 
    "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
    "label": "User ID", 
    "options": "User", 
    "permlevel": 0
@@ -172,6 +172,7 @@
   {
    "fieldname": "employment_type", 
    "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
    "in_filter": 1, 
    "in_list_view": 1, 
    "label": "Employment Type", 
@@ -185,6 +186,7 @@
    "description": "Applicable Holiday List", 
    "fieldname": "holiday_list", 
    "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
    "label": "Holiday List", 
    "oldfieldname": "holiday_list", 
    "oldfieldtype": "Link", 
@@ -346,7 +348,7 @@
   {
    "fieldname": "reports_to", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Reports to", 
    "oldfieldname": "reports_to", 
    "oldfieldtype": "Link", 
@@ -672,7 +674,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2014-05-09 02:16:47.217445", 
+ "modified": "2014-08-27 05:55:00.514660", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee", 
@@ -680,7 +682,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -688,14 +690,13 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "restricted": 1, 
    "role": "Employee", 
    "submit": 0, 
    "write": 0
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -703,14 +704,13 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "restrict": 0, 
    "role": "HR User", 
    "submit": 0, 
+   "user_permission_doctypes": "[\"Branch\",\"Company\",\"Department\",\"Designation\"]", 
    "write": 1
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -718,19 +718,14 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "restrict": 1, 
    "role": "HR Manager", 
+   "set_user_permissions": 1, 
    "submit": 0, 
    "write": 1
-  }, 
-  {
-   "permlevel": 0, 
-   "read": 1, 
-   "restricted": 1, 
-   "role": "Leave Approver"
   }
  ], 
  "search_fields": "employee_name", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "employee_name"
 }

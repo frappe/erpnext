@@ -1,6 +1,6 @@
 {
  "allow_import": 1, 
- "creation": "2013-06-20 11:53:21.000000", 
+ "creation": "2013-06-20 11:53:21", 
  "description": "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. \n\nThe package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".\n\nFor Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.\n\nNote: BOM = Bill of Materials", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -16,6 +16,7 @@
    "description": "The Item that represents the Package. This Item must have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\"", 
    "fieldname": "new_item_code", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "Parent Item", 
    "no_copy": 1, 
    "oldfieldname": "new_item_code", 
@@ -45,7 +46,7 @@
  "icon": "icon-sitemap", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2014-01-20 17:49:19.000000", 
+ "modified": "2014-05-27 03:49:17.656569", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales BOM", 
@@ -53,7 +54,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -67,7 +67,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -81,7 +81,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 

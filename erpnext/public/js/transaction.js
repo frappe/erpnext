@@ -7,6 +7,8 @@ frappe.require("assets/erpnext/js/controllers/stock_controller.js");
 erpnext.TransactionController = erpnext.stock.StockController.extend({
 	onload: function() {
 		var me = this;
+		this._super();
+
 		if(this.frm.doc.__islocal) {
 			var today = get_today(),
 				currency = frappe.defaults.get_user_default("currency");
@@ -18,13 +20,15 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				currency: currency,
 				price_list_currency: currency,
 				status: "Draft",
-				company: frappe.defaults.get_user_default("company"),
-				fiscal_year: frappe.defaults.get_user_default("fiscal_year"),
 				is_subcontracted: "No",
 			}, function(fieldname, value) {
 				if(me.frm.fields_dict[fieldname] && !me.frm.doc[fieldname])
 					me.frm.set_value(fieldname, value);
 			});
+
+			if(this.frm.doc.company && !this.frm.doc.amended_from) {
+				cur_frm.script_manager.trigger("company");
+			}
 		}
 
 		if(this.other_fname) {
@@ -38,36 +42,51 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	onload_post_render: function() {
 		var me = this;
-		if(this.frm.doc.__islocal && this.frm.doc.company && !this.frm.doc.is_pos) {
+		if(this.frm.doc.__islocal && this.frm.doc.company && this.frm.doc[this.fname] && !this.frm.doc.is_pos) {
 			this.calculate_taxes_and_totals();
+		}
+		if(frappe.meta.get_docfield(this.tname, "item_code")) {
+			cur_frm.get_field(this.fname).grid.set_multiple_add("item_code", "qty");
 		}
 	},
 
 	refresh: function() {
-		this.frm.clear_custom_buttons();
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
 
 		// Show POS button only if it is enabled from features setup
-		if(cint(sys_defaults.fs_pos_view)===1 && this.frm.doctype!="Material Request")
+		if(cint(sys_defaults.fs_pos_view)===1 && this.frm.doctype!="Material Request") {
 			this.make_pos_btn();
+		}
 	},
 
 	make_pos_btn: function() {
-		if(!this.pos_active) {
-			var btn_label = __("POS View"),
-				icon = "icon-desktop";
-		} else {
-			var btn_label = __(this.frm.doctype) + __(" View"),
-				icon = "icon-file-text";
-		}
 		var me = this;
+		if(this.frm.doc.docstatus===0) {
+			if(!this.pos_active) {
+				var btn_label = __("POS View"),
+					icon = "icon-th";
+			} else {
+				var btn_label = __("Form View"),
+					icon = "icon-file-text";
+			}
 
-		this.$pos_btn = this.frm.appframe.add_button(btn_label, function() {
-			me.toggle_pos();
-		}, icon);
+			if(erpnext.open_as_pos) {
+				me.toggle_pos(true);
+				erpnext.open_as_pos = false;
+			}
+
+			this.$pos_btn && this.$pos_btn.remove();
+
+			this.$pos_btn = this.frm.appframe.add_primary_action(btn_label, function() {
+				me.toggle_pos();
+			}, icon, "btn-default");
+		} else {
+			// hack: will avoid calling refresh from refresh
+			setTimeout(function() { me.toggle_pos(false); }, 100);
+		}
 	},
 
 	toggle_pos: function(show) {
@@ -75,26 +94,27 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var price_list = frappe.meta.has_field(cur_frm.doc.doctype, "selling_price_list") ?
 			this.frm.doc.selling_price_list : this.frm.doc.buying_price_list;
 
-		if (!price_list)
-			msgprint(__("Please select Price List"))
-		else {
-			if((show===true && this.pos_active) || (show===false && !this.pos_active)) return;
+		if((show===true && this.pos_active) || (show===false && !this.pos_active))
+			return;
 
-			// make pos
-			if(!this.frm.pos) {
-				this.frm.layout.add_view("pos");
-				this.frm.pos = new erpnext.POS(this.frm.layout.views.pos, this.frm);
-			}
-
-			// toggle view
-			this.frm.layout.set_view(this.pos_active ? "" : "pos");
-			this.pos_active = !this.pos_active;
-
-			// refresh
-			if(this.pos_active)
-				this.frm.pos.refresh();
-			this.frm.refresh();
+		if(show && !price_list) {
+			frappe.throw(__("Please select Price List"));
 		}
+
+		// make pos
+		if(!this.frm.pos) {
+			this.frm.layout.add_view("pos");
+			this.frm.pos = new erpnext.POS(this.frm.layout.views.pos, this.frm);
+		}
+
+		// toggle view
+		this.frm.layout.set_view(this.pos_active ? "" : "pos");
+		this.pos_active = !this.pos_active;
+
+		// refresh
+		if(this.pos_active)
+			this.frm.pos.refresh();
+		this.frm.refresh();
 	},
 
 
@@ -114,8 +134,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 							barcode: item.barcode,
 							serial_no: item.serial_no,
 							warehouse: item.warehouse,
-							doctype: me.frm.doc.doctype,
-							docname: me.frm.doc.name,
+							parenttype: me.frm.doc.doctype,
+							parent: me.frm.doc.name,
 							customer: me.frm.doc.customer,
 							supplier: me.frm.doc.supplier,
 							currency: me.frm.doc.currency,
@@ -128,9 +148,14 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 							order_type: me.frm.doc.order_type,
 							is_pos: cint(me.frm.doc.is_pos),
 							is_subcontracted: me.frm.doc.is_subcontracted,
-							transaction_date: me.frm.doc.transaction_date
+							transaction_date: me.frm.doc.transaction_date,
+							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
+							doctype: item.doctype,
+							name: item.name,
+							project_name: item.project_name || me.frm.doc.project_name
 						}
 					},
+					
 					callback: function(r) {
 						if(!r.exc) {
 							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
@@ -194,6 +219,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			}
 
 			this.frm.script_manager.trigger("currency");
+			this.apply_pricing_rule();
 		}
 	},
 
@@ -225,24 +251,13 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 				this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
-		if(flt(this.frm.doc.conversion_rate)>0.0) this.calculate_taxes_and_totals();
-	},
+		if(flt(this.frm.doc.conversion_rate)>0.0) {
+			if(this.frm.doc.ignore_pricing_rule) {
+				this.calculate_taxes_and_totals();
+			} else if (!this.in_apply_price_list){
+				this.apply_price_list();
+			}
 
-	get_price_list_currency: function(buying_or_selling) {
-		var me = this;
-		var fieldname = buying_or_selling.toLowerCase() + "_price_list";
-		if(this.frm.doc[fieldname]) {
-			return this.frm.call({
-				method: "erpnext.setup.utils.get_price_list_currency",
-				args: {
-					price_list: this.frm.doc[fieldname],
-				},
-				callback: function(r) {
-					if(!r.exc) {
-						me.price_list_currency();
-					}
-				}
-			});
 		}
 	},
 
@@ -257,33 +272,27 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	price_list_currency: function() {
 		var me=this;
 		this.set_dynamic_labels();
-
-		var company_currency = this.get_company_currency();
-		if(this.frm.doc.price_list_currency !== company_currency) {
-			this.get_exchange_rate(this.frm.doc.price_list_currency, company_currency,
-				function(exchange_rate) {
-					if(exchange_rate) {
-						me.frm.set_value("plc_conversion_rate", exchange_rate);
-						me.plc_conversion_rate();
-					}
-				});
-		} else {
-			this.plc_conversion_rate();
-		}
+		this.set_plc_conversion_rate();
 	},
 
 	plc_conversion_rate: function() {
+		this.set_plc_conversion_rate();
+		if(!this.in_apply_price_list) {
+			this.apply_price_list();
+		}
+	},
+
+	set_plc_conversion_rate: function() {
 		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
 			this.frm.set_value("plc_conversion_rate", 1.0);
 		}
 		if(this.frm.doc.price_list_currency === this.frm.doc.currency) {
 			this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);
-			this.calculate_taxes_and_totals();
 		}
 	},
 
 	qty: function(doc, cdt, cdn) {
-		this.calculate_taxes_and_totals();
+		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
 	},
 
 	// tax rate
@@ -324,6 +333,99 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	calculate_charges: function() {
 		this.calculate_taxes_and_totals();
+	},
+
+	ignore_pricing_rule: function() {
+		this.apply_pricing_rule();
+	},
+
+	apply_pricing_rule: function(item, calculate_taxes_and_totals) {
+		var me = this;
+		return this.frm.call({
+			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
+			args: {	args: this._get_args(item) },
+			callback: function(r) {
+				if (!r.exc && r.message) {
+					me._set_values_for_item_list(r.message);
+					if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
+				}
+			}
+		});
+	},
+
+	_get_args: function(item) {
+		var me = this;
+		return {
+			"item_list": this._get_item_list(item),
+			"customer": me.frm.doc.customer,
+			"customer_group": me.frm.doc.customer_group,
+			"territory": me.frm.doc.territory,
+			"supplier": me.frm.doc.supplier,
+			"supplier_type": me.frm.doc.supplier_type,
+			"currency": me.frm.doc.currency,
+			"conversion_rate": me.frm.doc.conversion_rate,
+			"price_list": me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
+			"plc_conversion_rate": me.frm.doc.plc_conversion_rate,
+			"company": me.frm.doc.company,
+			"transaction_date": me.frm.doc.transaction_date || me.frm.doc.posting_date,
+			"campaign": me.frm.doc.campaign,
+			"sales_partner": me.frm.doc.sales_partner,
+			"ignore_pricing_rule": me.frm.doc.ignore_pricing_rule,
+			"parenttype": me.frm.doc.doctype,
+			"parent": me.frm.doc.name
+		};
+	},
+
+	_get_item_list: function(item) {
+		var item_list = [];
+		var append_item = function(d) {
+			if (d.item_code) {
+				item_list.push({
+					"doctype": d.doctype,
+					"name": d.name,
+					"item_code": d.item_code,
+					"item_group": d.item_group,
+					"brand": d.brand,
+					"qty": d.qty
+				});
+			}
+		};
+
+		if (item) {
+			append_item(item);
+		} else {
+			$.each(this.get_item_doclist(), function(i, d) {
+				append_item(d);
+			});
+		}
+		return item_list;
+	},
+
+	_set_values_for_item_list: function(children) {
+		$.each(children, function(i, d) {
+			$.each(d, function(k, v) {
+				if (["doctype", "name"].indexOf(k)===-1) {
+					frappe.model.set_value(d.doctype, d.name, k, v);
+				}
+			});
+		});
+	},
+
+	apply_price_list: function() {
+		var me = this;
+		return this.frm.call({
+			method: "erpnext.stock.get_item_details.apply_price_list",
+			args: {	args: this._get_args() },
+			callback: function(r) {
+				if (!r.exc) {
+					me.in_apply_price_list = true;
+					me.frm.set_value("price_list_currency", r.message.parent.price_list_currency);
+					me.frm.set_value("plc_conversion_rate", r.message.parent.plc_conversion_rate);
+					me.in_apply_price_list = false;
+					me._set_values_for_item_list(r.message.children);
+				}
+			}
+		});
 	},
 
 	included_in_print_rate: function(doc, cdt, cdn) {
@@ -547,7 +649,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		// maintain actual tax rate based on idx
 		$.each(this.frm.tax_doclist, function(i, tax) {
 			if (tax.charge_type == "Actual") {
-				actual_tax_dict[tax.idx] = flt(tax.rate);
+				actual_tax_dict[tax.idx] = flt(tax.rate, precision("tax_amount", tax));
 			}
 		});
 

@@ -33,14 +33,13 @@
  "icon": "icon-certificate", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2014-05-06 12:13:17.646235", 
+ "modified": "2014-05-27 03:49:08.217867", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Brand", 
  "owner": "Administrator", 
  "permissions": [
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -53,7 +52,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -66,6 +65,7 @@
    "write": 0
   }, 
   {
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 
@@ -75,6 +75,7 @@
    "role": "Sales User"
   }, 
   {
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 
@@ -84,6 +85,7 @@
    "role": "Purchase User"
   }, 
   {
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 

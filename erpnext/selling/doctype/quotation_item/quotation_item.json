@@ -1,6 +1,6 @@
 {
  "autoname": "QUOD/.#####", 
- "creation": "2013-03-07 11:42:57.000000", 
+ "creation": "2013-03-07 11:42:57", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -26,7 +26,6 @@
    "fieldname": "customer_item_code", 
    "fieldtype": "Data", 
    "hidden": 1, 
-   "in_list_view": 0, 
    "label": "Customer's Item Code", 
    "permlevel": 0, 
    "print_hide": 1, 
@@ -36,7 +35,7 @@
    "fieldname": "item_name", 
    "fieldtype": "Data", 
    "in_filter": 1, 
-   "in_list_view": 0, 
+   "in_list_view": 1, 
    "label": "Item Name", 
    "oldfieldname": "item_name", 
    "oldfieldtype": "Data", 
@@ -70,7 +69,6 @@
   {
    "fieldname": "quantity_and_rate", 
    "fieldtype": "Section Break", 
-   "in_list_view": 0, 
    "label": "Quantity and Rate", 
    "permlevel": 0
   }, 
@@ -93,7 +91,6 @@
   {
    "fieldname": "price_list_rate", 
    "fieldtype": "Currency", 
-   "in_list_view": 0, 
    "label": "Price List Rate", 
    "oldfieldname": "ref_rate", 
    "oldfieldtype": "Currency", 
@@ -107,8 +104,8 @@
   }, 
   {
    "fieldname": "discount_percentage", 
-   "fieldtype": "Float", 
-   "in_list_view": 0, 
+   "fieldtype": "Percent", 
+   "in_list_view": 1, 
    "label": "Discount (%)", 
    "oldfieldname": "adj_rate", 
    "oldfieldtype": "Float", 
@@ -126,7 +123,7 @@
   {
    "fieldname": "stock_uom", 
    "fieldtype": "Link", 
-   "in_list_view": 0, 
+   "in_list_view": 1, 
    "label": "UOM", 
    "oldfieldname": "stock_uom", 
    "oldfieldtype": "Data", 
@@ -141,7 +138,6 @@
   {
    "fieldname": "base_price_list_rate", 
    "fieldtype": "Currency", 
-   "in_list_view": 0, 
    "label": "Price List Rate (Company Currency)", 
    "oldfieldname": "base_ref_rate", 
    "oldfieldtype": "Currency", 
@@ -200,7 +196,6 @@
    "fieldname": "base_rate", 
    "fieldtype": "Currency", 
    "in_filter": 0, 
-   "in_list_view": 0, 
    "label": "Basic Rate (Company Currency)", 
    "oldfieldname": "basic_rate", 
    "oldfieldtype": "Currency", 
@@ -217,7 +212,6 @@
    "fieldname": "base_amount", 
    "fieldtype": "Currency", 
    "in_filter": 0, 
-   "in_list_view": 0, 
    "label": "Amount (Company Currency)", 
    "oldfieldname": "amount", 
    "oldfieldtype": "Currency", 
@@ -231,17 +225,9 @@
    "width": "100px"
   }, 
   {
-   "fieldname": "pricing_rule_for_price", 
+   "fieldname": "pricing_rule", 
    "fieldtype": "Link", 
-   "label": "Pricing Rule For Price", 
-   "options": "Pricing Rule", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "pricing_rule_for_discount", 
-   "fieldtype": "Link", 
-   "label": "Pricing Rule For Discount", 
+   "label": "Pricing Rule", 
    "options": "Pricing Rule", 
    "permlevel": 0, 
    "read_only": 1
@@ -249,7 +235,6 @@
   {
    "fieldname": "reference", 
    "fieldtype": "Section Break", 
-   "in_list_view": 0, 
    "label": "Reference", 
    "permlevel": 0
   }, 
@@ -257,7 +242,6 @@
    "fieldname": "prevdoc_doctype", 
    "fieldtype": "Data", 
    "hidden": 1, 
-   "in_list_view": 0, 
    "label": "Against Doctype", 
    "no_copy": 1, 
    "oldfieldname": "prevdoc_doctype", 
@@ -272,7 +256,6 @@
   {
    "fieldname": "prevdoc_docname", 
    "fieldtype": "Data", 
-   "in_list_view": 0, 
    "label": "Against Docname", 
    "no_copy": 1, 
    "oldfieldname": "prevdoc_docname", 
@@ -288,7 +271,6 @@
    "fieldname": "item_tax_rate", 
    "fieldtype": "Small Text", 
    "hidden": 1, 
-   "in_list_view": 0, 
    "label": "Item Tax Rate", 
    "oldfieldname": "item_tax_rate", 
    "oldfieldtype": "Small Text", 
@@ -307,7 +289,6 @@
    "fieldname": "page_break", 
    "fieldtype": "Check", 
    "hidden": 0, 
-   "in_list_view": 0, 
    "label": "Page Break", 
    "no_copy": 1, 
    "oldfieldname": "page_break", 
@@ -323,7 +304,6 @@
    "fieldtype": "Link", 
    "hidden": 1, 
    "in_filter": 1, 
-   "in_list_view": 0, 
    "label": "Item Group", 
    "oldfieldname": "item_group", 
    "oldfieldtype": "Link", 
@@ -338,7 +318,6 @@
    "fieldtype": "Link", 
    "hidden": 1, 
    "in_filter": 1, 
-   "in_list_view": 0, 
    "label": "Brand", 
    "oldfieldname": "brand", 
    "oldfieldtype": "Link", 
@@ -353,9 +332,12 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-28 11:20:34.000000", 
+ "modified": "2014-09-08 08:06:31.198440", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation Item", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": [], 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

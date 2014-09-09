@@ -18,7 +18,7 @@ frappe.query_reports["Accounts Receivable"] = {
 			"get_query": function() {
 				var company = frappe.query_report.filters_by_name.company.get_value();
 				return {
-					"query": "erpnext.accounts.utils.get_account_list", 
+					"query": "erpnext.controllers.queries.get_account_list", 
 					"filters": {
 						"report_type": "Balance Sheet",
 						"company": company,

@@ -74,8 +74,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Landed Cost Wizard",
-					"description": _("Distribute transport overhead across items."),
+					"name": "Landed Cost Voucher",
+					"description": _("Update additional costs to calculate landed cost of items"),
 				},
 				{
 					"type": "doctype",
@@ -161,7 +161,7 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"is_query_report": True,
+					"is_query_report": False,
 					"name": "Item-wise Price List Rate",
 					"doctype": "Item Price",
 				},
@@ -197,7 +197,6 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"is_query_report": True,
 					"name": "Serial No Service Contract Expiry",
 					"doctype": "Serial No"
 				},
@@ -210,12 +209,6 @@ def get_data():
 					"type": "report",
 					"name": "Serial No Warranty Expiry",
 					"doctype": "Serial No"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Purchase In Transit",
-					"doctype": "Purchase Order"
 				},
 				{
 					"type": "report",

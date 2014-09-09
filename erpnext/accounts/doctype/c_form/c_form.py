@@ -55,22 +55,12 @@ class CForm(Document):
 
 	def get_invoice_details(self, invoice_no):
 		"""	Pull details from invoices for referrence """
-
-		inv = frappe.db.get_value("Sales Invoice", invoice_no,
-			["posting_date", "territory", "net_total", "grand_total"], as_dict=True)
-		return {
-			'invoice_date' : inv.posting_date,
-			'territory'    : inv.territory,
-			'net_total'    : inv.net_total,
-			'grand_total'  : inv.grand_total
-		}
-
-def get_invoice_nos(doctype, txt, searchfield, start, page_len, filters):
-	from erpnext.utilities import build_filter_conditions
-	conditions, filter_values = build_filter_conditions(filters)
-
-	return frappe.db.sql("""select name from `tabSales Invoice` where docstatus = 1
-		and c_form_applicable = 'Yes' and ifnull(c_form_no, '') = '' %s
-		and %s like %s order by name limit %s, %s""" %
-		(conditions, searchfield, "%s", "%s", "%s"),
-		tuple(filter_values + ["%%%s%%" % txt, start, page_len]))
+		if invoice_no:
+			inv = frappe.db.get_value("Sales Invoice", invoice_no,
+				["posting_date", "territory", "net_total", "grand_total"], as_dict=True)
+			return {
+				'invoice_date' : inv.posting_date,
+				'territory'    : inv.territory,
+				'net_total'    : inv.net_total,
+				'grand_total'  : inv.grand_total
+			}

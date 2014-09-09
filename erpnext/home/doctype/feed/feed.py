@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import frappe.defaults
+import frappe.permissions
 from frappe.model.document import Document
 
 class Feed(Document):
@@ -16,21 +17,26 @@ def on_doctype_update():
 		frappe.db.sql("""alter table `tabFeed`
 			add index feed_doctype_docname_index(doc_type, doc_name)""")
 
-def get_permission_query_conditions():
-	restrictions = frappe.defaults.get_restrictions()
-	can_read = frappe.user.get_can_read()
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+
+	if not frappe.permissions.apply_user_permissions("Feed", "read", user):
+		return ""
+
+	user_permissions = frappe.defaults.get_user_permissions(user)
+	can_read = frappe.get_user(user).get_can_read()
 
 	can_read_doctypes = ['"{}"'.format(doctype) for doctype in
-		list(set(can_read) - set(restrictions.keys()))]
+		list(set(can_read) - set(user_permissions.keys()))]
 
 	if not can_read_doctypes:
 		return ""
 
 	conditions = ["tabFeed.doc_type in ({})".format(", ".join(can_read_doctypes))]
 
-	if restrictions:
+	if user_permissions:
 		can_read_docs = []
-		for doctype, names in restrictions.items():
+		for doctype, names in user_permissions.items():
 			for n in names:
 				can_read_docs.append('"{}|{}"'.format(doctype, n))
 
@@ -40,5 +46,5 @@ def get_permission_query_conditions():
 
 	return "(" + " or ".join(conditions) + ")"
 
-def has_permission(doc):
-	return frappe.has_permission(doc.doc_type, "read", doc.doc_name)
+def has_permission(doc, user):
+	return frappe.has_permission(doc.doc_type, "read", doc.doc_name, user=user)

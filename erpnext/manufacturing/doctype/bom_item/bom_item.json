@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:27:49.000000", 
+ "creation": "2013-02-22 01:27:49", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -79,7 +79,8 @@
    "fieldtype": "Float", 
    "in_list_view": 1, 
    "label": "Rate", 
-   "permlevel": 0
+   "permlevel": 0, 
+   "reqd": 1
   }, 
   {
    "fieldname": "col_break2", 
@@ -133,9 +134,12 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-03 12:47:39.000000", 
+ "modified": "2014-05-29 15:56:31.859868", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Item", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": [], 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
 }

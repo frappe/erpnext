@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.utils");
-erpnext.utils.get_party_details = function(frm, method, args) {
+erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	if(!method) {
 		method = "erpnext.accounts.party.get_party_details";
 	}
@@ -25,6 +25,7 @@ erpnext.utils.get_party_details = function(frm, method, args) {
 
 	args.currency = frm.doc.currency;
 	args.company = frm.doc.company;
+	args.doctype = frm.doc.doctype;
 	frappe.call({
 		method: method,
 		args: args,
@@ -33,6 +34,7 @@ erpnext.utils.get_party_details = function(frm, method, args) {
 				frm.updating_party_details = true;
 				frm.set_value(r.message);
 				frm.updating_party_details = false;
+				if(callback) callback();
 			}
 		}
 	});

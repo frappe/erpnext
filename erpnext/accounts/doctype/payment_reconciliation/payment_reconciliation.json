@@ -1,0 +1,163 @@
+{
+ "allow_copy": 1, 
+ "creation": "2014-07-09 12:04:51.681583", 
+ "custom": 0, 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "document_type": "", 
+ "fields": [
+  {
+   "fieldname": "company", 
+   "fieldtype": "Link", 
+   "label": "Company", 
+   "options": "Company", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "depends_on": "", 
+   "fieldname": "party_account", 
+   "fieldtype": "Link", 
+   "in_list_view": 0, 
+   "label": "Party Account", 
+   "options": "Account", 
+   "permlevel": 0, 
+   "reqd": 1, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "party_type", 
+   "fieldtype": "Select", 
+   "hidden": 1, 
+   "in_list_view": 1, 
+   "label": "Party Type", 
+   "options": "\nCustomer\nSupplier", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "bank_cash_account", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Bank / Cash Account", 
+   "options": "Account", 
+   "permlevel": 0, 
+   "reqd": 0, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "label": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "from_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 1, 
+   "label": "From Date", 
+   "permlevel": 0, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "to_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 1, 
+   "label": "To Date", 
+   "permlevel": 0, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "minimum_amount", 
+   "fieldtype": "Currency", 
+   "label": "Minimum Amount", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "maximum_amount", 
+   "fieldtype": "Currency", 
+   "label": "Maximum Amount", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "get_unreconciled_entries", 
+   "fieldtype": "Button", 
+   "label": "Get Unreconciled Entries", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "sec_break1", 
+   "fieldtype": "Section Break", 
+   "label": "Unreconciled Payment Details", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "payment_reconciliation_payments", 
+   "fieldtype": "Table", 
+   "label": "Payment Reconciliation Payments", 
+   "options": "Payment Reconciliation Payment", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "reconcile", 
+   "fieldtype": "Button", 
+   "label": "Reconcile", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "sec_break2", 
+   "fieldtype": "Section Break", 
+   "label": "Invoice/Journal Voucher Details", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "payment_reconciliation_invoices", 
+   "fieldtype": "Table", 
+   "label": "Payment Reconciliation Invoices", 
+   "options": "Payment Reconciliation Invoice", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "reconcile_help", 
+   "fieldtype": "Small Text", 
+   "label": "", 
+   "permlevel": 0, 
+   "read_only": 1
+  }
+ ], 
+ "hide_toolbar": 1, 
+ "icon": "icon-resize-horizontal", 
+ "issingle": 1, 
+ "modified": "2014-07-31 05:43:03.410832", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Payment Reconciliation", 
+ "name_case": "", 
+ "owner": "Administrator", 
+ "permissions": [
+  {
+   "cancel": 0, 
+   "create": 1, 
+   "delete": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "role": "Accounts Manager", 
+   "submit": 0, 
+   "write": 1
+  }, 
+  {
+   "cancel": 0, 
+   "create": 1, 
+   "delete": 1, 
+   "permlevel": 0, 
+   "read": 1, 
+   "role": "Accounts User", 
+   "submit": 0, 
+   "write": 1
+  }
+ ], 
+ "sort_field": "modified", 
+ "sort_order": "DESC"
+}

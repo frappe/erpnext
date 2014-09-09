@@ -57,6 +57,11 @@ def get_data():
 					"name": "SMS Center",
 					"description":_("Send mass SMS to your contacts"),
 				},
+				{
+					"type": "doctype",
+					"name": "Newsletter",
+					"description": _("Newsletters to contacts, leads."),
+				},
 			]
 		},
 		{
@@ -90,6 +95,11 @@ def get_data():
 					"link": "Sales Browser/Territory",
 					"description": _("Manage Territory Tree."),
 					"doctype": "Territory",
+				},
+				{
+					"type": "doctype",
+					"name": "Sales Partner",
+					"description": _("Manage Sales Partners."),
 				},
 				{
 					"type": "page",
@@ -156,6 +166,11 @@ def get_data():
 					"name": "Industry Type",
 					"description": _("Track Leads by Industry Type.")
 				},
+				{
+					"type": "doctype",
+					"name": "SMS Settings",
+					"description": _("Setup SMS gateway settings")
+				},
 			]
 		},
 		{
@@ -196,7 +211,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Customer Addresses And Contacts",
+					"name": "Customer Addresses and Contacts",
 					"doctype": "Contact"
 				},
 				{
@@ -240,7 +255,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Quotation Trend",
+					"name": "Quotation Trends",
 					"doctype": "Quotation"
 				},
 				{

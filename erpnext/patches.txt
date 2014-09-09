@@ -1,9 +1,11 @@
 execute:import unidecode # new requirement
 
 erpnext.patches.v4_0.validate_v3_patch
+erpnext.patches.v4_0.fix_employee_user_id
+erpnext.patches.v4_0.remove_employee_role_if_no_employee
 erpnext.patches.v4_0.update_user_properties
+erpnext.patches.v4_0.apply_user_permissions
 erpnext.patches.v4_0.move_warehouse_user_to_restrictions
-erpnext.patches.v4_0.new_permissions
 erpnext.patches.v4_0.global_defaults_to_system_settings
 erpnext.patches.v4_0.update_incharge_name_to_sales_person_in_maintenance_schedule
 execute:frappe.reload_doc('accounts', 'doctype', 'sales_invoice') # 2014-01-29
@@ -15,7 +17,6 @@ execute:frappe.reload_doc('accounts', 'doctype', 'purchase_invoice') # 2014-01-2
 execute:frappe.reload_doc('buying', 'doctype', 'purchase_order') # 2014-01-29
 execute:frappe.reload_doc('buying', 'doctype', 'supplier_quotation') # 2014-01-29
 execute:frappe.reload_doc('stock', 'doctype', 'purchase_receipt') # 2014-01-29
-erpnext.patches.v4_0.reload_purchase_print_format
 execute:frappe.reload_doc('accounts', 'doctype', 'pos_setting') # 2014-01-29
 execute:frappe.reload_doc('selling', 'doctype', 'customer') # 2014-01-29
 execute:frappe.reload_doc('buying', 'doctype', 'supplier') # 2014-01-29
@@ -30,7 +31,6 @@ erpnext.patches.v4_0.customer_discount_to_pricing_rule
 execute:frappe.db.sql("""delete from `tabWebsite Item Group` where ifnull(item_group, '')=''""")
 erpnext.patches.v4_0.remove_module_home_pages
 erpnext.patches.v4_0.split_email_settings
-erpnext.patches.v4_0.fix_employee_user_id
 erpnext.patches.v4_0.import_country_codes
 erpnext.patches.v4_0.countrywise_coa
 execute:frappe.delete_doc("DocType", "MIS Control")
@@ -38,9 +38,45 @@ execute:frappe.delete_doc("Page", "Financial Statements")
 execute:frappe.delete_doc("DocType", "Stock Ledger")
 execute:frappe.db.sql("update `tabJournal Voucher` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
 execute:frappe.delete_doc("DocType", "Grade")
-erpnext.patches.v4_0.remove_india_specific_fields
-execute:frappe.delete_doc_if_exists("DocType", "Warehouse User")
 execute:frappe.db.sql("delete from `tabWebsite Item Group` where ifnull(item_group, '')=''")
 execute:frappe.delete_doc("Print Format", "SalesInvoice")
 execute:import frappe.defaults;frappe.defaults.clear_default("price_list_currency")
+erpnext.patches.v4_0.update_account_root_type
+execute:frappe.delete_doc("Report", "Purchase In Transit")
+erpnext.patches.v4_0.new_address_template
+execute:frappe.delete_doc("DocType", "SMS Control")
+erpnext.patches.v4_0.fix_case_of_hr_module_def
+erpnext.patches.v4_0.fix_address_template
 
+# WATCHOUT: This patch reload's documents
+erpnext.patches.v4_0.reset_permissions_for_masters
+
+erpnext.patches.v4_0.update_tax_amount_after_discount
+execute:frappe.reset_perms("GL Entry") #2014-06-09
+execute:frappe.reset_perms("Stock Ledger Entry") #2014-06-09
+erpnext.patches.v4_0.create_custom_fields_for_india_specific_fields
+erpnext.patches.v4_0.save_default_letterhead
+erpnext.patches.v4_0.update_custom_print_formats_for_renamed_fields
+erpnext.patches.v4_0.update_other_charges_in_custom_purchase_print_formats
+erpnext.patches.v4_0.create_price_list_if_missing
+execute:frappe.db.sql("update `tabItem` set end_of_life=null where end_of_life='0000-00-00'") #2014-06-16
+erpnext.patches.v4_0.update_users_report_view_settings
+erpnext.patches.v4_0.set_pricing_rule_for_buying_or_selling
+erpnext.patches.v4_0.set_naming_series_property_setter
+erpnext.patches.v4_1.set_outgoing_email_footer
+erpnext.patches.v4_1.fix_jv_remarks
+erpnext.patches.v4_1.fix_sales_order_delivered_status
+erpnext.patches.v4_1.fix_delivery_and_billing_status
+execute:frappe.db.sql("update `tabAccount` set root_type='Liability' where root_type='Income' and report_type='Balance Sheet'")
+execute:frappe.delete_doc("DocType", "Payment to Invoice Matching Tool") # 29-07-2014
+execute:frappe.delete_doc("DocType", "Payment to Invoice Matching Tool Detail") # 29-07-2014
+execute:frappe.delete_doc("Page", "trial-balance") #2014-07-22
+erpnext.patches.v4_2.delete_old_print_formats #2014-07-29
+erpnext.patches.v4_2.toggle_rounded_total #2014-07-30
+erpnext.patches.v4_2.fix_account_master_type
+erpnext.patches.v4_2.update_project_milestones
+erpnext.patches.v4_2.add_currency_turkish_lira #2014-08-08
+execute:frappe.delete_doc("DocType", "Landed Cost Wizard")
+erpnext.patches.v4_2.default_website_style
+erpnext.patches.v4_2.set_company_country
+erpnext.patches.v4_2.update_sales_order_invoice_field_name

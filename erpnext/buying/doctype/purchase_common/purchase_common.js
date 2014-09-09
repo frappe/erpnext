@@ -62,7 +62,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 
 	supplier: function() {
-		erpnext.utils.get_party_details(this.frm);
+		var me = this;
+		erpnext.utils.get_party_details(this.frm, null, null, function(){me.apply_pricing_rule()});
 	},
 
 	supplier_address: function() {
@@ -74,7 +75,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 
 	buying_price_list: function() {
-		this.get_price_list_currency("Buying");
+		this.apply_price_list();
 	},
 
 	price_list_rate: function(doc, cdt, cdn) {
@@ -110,7 +111,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.uom) {
 			return this.frm.call({
-				method: "erpnext.buying.utils.get_conversion_factor",
+				method: "erpnext.stock.get_item_details.get_conversion_factor",
 				child: item,
 				args: {
 					item_code: item.item_code,
@@ -143,7 +144,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
-				method: "erpnext.buying.utils.get_projected_qty",
+				method: "erpnext.stock.get_item_details.get_projected_qty",
 				child: item,
 				args: {
 					item_code: item.item_code,
@@ -384,6 +385,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		});
 	}
 });
-
+cur_frm.add_fetch('project_name', 'cost_center', 'cost_center');
 var tname = cur_frm.cscript.tname;
 var fname = cur_frm.cscript.fname;

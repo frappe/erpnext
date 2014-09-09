@@ -1,0 +1,47 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-11">
+		<div class="text-ellipsis">
+			{% var per = 100 - cint((doc.qty - doc.produced_qty) * 100 / doc.qty); %}
+			{%= list.get_avatar_and_id(doc) %}
+			<span style="margin-right: 8px; display: inline-block">
+				<span class="filterable"
+					data-filter="customer,=,{%= doc.customer %}">
+					{%= doc.customer_name %}</span></span>
+			{% if(per < 100 && doc.status!=="Stopped") { %}
+				{% if(frappe.datetime.get_diff(doc.expected_delivery_date) < 0) { %}
+				<span class="label label-danger filterable"
+					title="{%= doc.get_formatted("expected_delivery_date")%}"
+					data-filter="status,=,Submitted|expected_delivery_date,<,Today"
+					>
+						{%= __("Overdue") %}
+				</span>
+				{% } else { %}
+				<span class="label label-warning filterable"
+					data-filter="produced_qty,<,{%= doc.qty %}|status,!=,Stopped"
+					title="{%= __("Pending") %}">
+					{%= doc.get_formatted("expected_delivery_date")%}</span>
+				{% } %}
+			{% } %}
+			{% if(per == 100 && doc.status!=="Stopped") { %}
+				<span class="filterable text-muted"
+					data-filter="produced_qty,=,{%= doc.qty %}|status,!=,Stopped">
+					<i class="icon-ok-sign"></i></span>
+			{% } %}
+			{% if(doc.status==="Stopped") { %}
+				<span class="label label-danger filterable"
+					data-filter="status,=,Stopped">{%= __("Stopped") %}</span>
+			{% } %}
+			<span class="label label-default filterable"
+				data-filter="sales_order,=,{%= doc.sales_order %}"
+				 title="{%= __("Sales Order") %}">
+					<i class="icon-file-text"></i> {%= doc.sales_order %}</span>
+			<span class="label label-default filterable"
+				data-filter="bom_no,=,{%= doc.bom_no %}" title="{%= __("BOM") %}">
+					<i class="icon-sitemap"></i> {%= doc.bom_no %}</span>
+		</div>
+	</div>
+	<div class="col-xs-1 text-right">
+		{% var completed = per, title = __("Completed") %}
+		{% include "templates/form_grid/includes/progress.html" %}
+	</div>
+</div>

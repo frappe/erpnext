@@ -60,7 +60,7 @@ erpnext.StockAgeing = erpnext.StockGridReport.extend({
 			options: ["Average Age", "Earliest", "Latest"]},
 		{fieldtype:"Date", label: __("To Date")},
 		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: __("Reset Filters")}
+		{fieldtype:"Button", label: __("Reset Filters"), icon: "icon-filter"}
 	],
 	setup_filters: function() {
 		var me = this;

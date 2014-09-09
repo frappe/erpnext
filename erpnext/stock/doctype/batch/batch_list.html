@@ -1,0 +1,21 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-12">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			<span class="filterable" style="margin-right: 8px;"
+				data-filter="item,=,{%= doc.item %}">
+				{%= doc.item %}</span>
+			{% if(doc.expiry_date && frappe.datetime.get_diff(doc.expiry_date) <= 0) { %}
+				<span class="label label-danger filterable"
+					data-filter="expiry_date,>=,Today">
+					{%= __("Expired") %}: {%= doc.get_formatted("expiry_date") %}
+				</span>
+			{% } else if(doc.expiry_date) { %}
+				<span class="label label-default filterable"
+					data-filter="expiry_date,=,{%= doc.expiry_date %}">
+					{%= __("Expiry") %}: {%= doc.get_formatted("expiry_date") %}
+				</span>
+			{% } %}
+		</div>
+	</div>
+</div>

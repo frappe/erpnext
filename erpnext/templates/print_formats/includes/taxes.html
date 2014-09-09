@@ -1,0 +1,17 @@
+<div class="row">
+	<div class="col-xs-6"></div>
+	<div class="col-xs-6">
+		{%- for charge in data -%}
+			{%- if not charge.included_in_print_rate -%}
+			<div class="row">
+				<div class="col-xs-5 text-right">
+					<label>{{ charge.get_formatted("description") }}</label></div>
+				<div class="col-xs-7 text-right">
+					{{ frappe.format_value(charge.tax_amount / doc.conversion_rate,
+						table_meta.get_field("tax_amount"), doc, currency=doc.currency) }}
+				</div>
+			</div>
+			{%- endif -%}
+		{%- endfor -%}
+	</div>
+</div>

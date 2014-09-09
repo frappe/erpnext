@@ -54,10 +54,12 @@ class PackingSlip(Document):
 
 		res = frappe.db.sql("""SELECT name FROM `tabPacking Slip`
 			WHERE delivery_note = %(delivery_note)s AND docstatus = 1 AND
-			(from_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s
-			OR to_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s
-			OR %(from_case_no)s BETWEEN from_case_no AND to_case_no)
-			""", self.as_dict())
+			((from_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s)
+			OR (to_case_no BETWEEN %(from_case_no)s AND %(to_case_no)s)
+			OR (%(from_case_no)s BETWEEN from_case_no AND to_case_no))
+			""", {"delivery_note":self.delivery_note,
+				"from_case_no":self.from_case_no,
+				"to_case_no":self.to_case_no})
 
 		if res:
 			frappe.throw(_("""Case No(s) already in use. Try from Case No {0}""").format(self.get_recommended_case_no()))
@@ -139,7 +141,7 @@ class PackingSlip(Document):
 			note
 		"""
 		recommended_case_no = frappe.db.sql("""SELECT MAX(to_case_no) FROM `tabPacking Slip`
-			WHERE delivery_note = %(delivery_note)s AND docstatus=1""", self.as_dict())
+			WHERE delivery_note = %s AND docstatus=1""", self.delivery_note)
 
 		return cint(recommended_case_no[0][0]) + 1
 

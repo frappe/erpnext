@@ -56,6 +56,7 @@ class Customer(TransactionBase):
 					(self.name, self.customer_name, self.lead_name))
 
 			lead = frappe.db.get_value("Lead", self.lead_name, ["lead_name", "email_id", "phone", "mobile_no"], as_dict=True)
+
 			c = frappe.new_doc('Contact')
 			c.first_name = lead.lead_name
 			c.email_id = lead.email_id
@@ -64,10 +65,10 @@ class Customer(TransactionBase):
 			c.customer = self.name
 			c.customer_name = self.customer_name
 			c.is_primary_contact = 1
-			try:
-				c.save()
-			except frappe.NameError:
-				pass
+			c.ignore_permissions = getattr(self, "ignore_permissions", None)
+			c.autoname()
+			if not frappe.db.exists("Contact", c.name):
+				c.insert()
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
@@ -120,7 +121,7 @@ class Customer(TransactionBase):
 
 	def before_rename(self, olddn, newdn, merge=False):
 		from erpnext.accounts.utils import rename_account_for
-		rename_account_for("Customer", olddn, newdn, merge, self.company)
+		rename_account_for("Customer", olddn, newdn, merge)
 
 	def after_rename(self, olddn, newdn, merge=False):
 		set_field = ''

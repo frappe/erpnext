@@ -51,11 +51,11 @@ def get_data():
 					"name": "Bank Reconciliation",
 					"description": _("Update bank payment dates with journals.")
 				},
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Payment to Invoice Matching Tool",
-				# 	"description": _("Match non-linked Invoices and Payments.")
-				# },
+				{
+					"type": "doctype",
+					"name": "Payment Reconciliation",
+					"description": _("Match non-linked Invoices and Payments.")
+				},
 				{
 					"type": "doctype",
 					"name": "Period Closing Voucher",
@@ -166,10 +166,10 @@ def get_data():
 					"is_query_report": True,
 				},
 				{
-					"type": "page",
-					"name": "trial-balance",
-					"label": _("Trial Balance"),
-					"icon": "icon-table"
+					"type": "report",
+					"name": "Trial Balance",
+					"doctype": "GL Entry",
+					"is_query_report": True,
 				},
 				{
 					"type": "report",
@@ -193,6 +193,18 @@ def get_data():
 					"type": "report",
 					"name": "Purchase Register",
 					"doctype": "Purchase Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Balance Sheet",
+					"doctype": "GL Entry",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Profit and Loss Statement",
+					"doctype": "GL Entry",
 					"is_query_report": True
 				},
 				{

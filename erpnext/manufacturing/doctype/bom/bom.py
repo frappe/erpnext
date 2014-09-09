@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, cstr, flt, now, nowdate
+from frappe.utils import cint, cstr, flt
 
 from frappe import _
 from frappe.model.document import Document
@@ -54,7 +54,7 @@ class BOM(Document):
 	def get_item_det(self, item_code):
 		item = frappe.db.sql("""select name, is_asset_item, is_purchase_item,
 			docstatus, description, is_sub_contracted_item, stock_uom, default_bom,
-			last_purchase_rate, standard_rate, is_manufactured_item
+			last_purchase_rate, is_manufactured_item
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
 
 		return item
@@ -111,8 +111,6 @@ class BOM(Document):
 					frappe.throw(_("Please select Price List"))
 				rate = frappe.db.get_value("Item Price", {"price_list": self.buying_price_list,
 					"item_code": arg["item_code"]}, "price_list_rate") or 0
-			elif self.rm_cost_as_per == 'Standard Rate':
-				rate = arg['standard_rate']
 
 		return rate
 
@@ -134,26 +132,15 @@ class BOM(Document):
 		return bom and bom[0]['unit_cost'] or 0
 
 	def get_valuation_rate(self, args):
-		""" Get average valuation rate of relevant warehouses
-			as per valuation method (MAR/FIFO)
-			as on costing date
-		"""
-		from erpnext.stock.utils import get_incoming_rate
-		posting_date, posting_time = nowdate(), now().split()[1]
-		warehouse = frappe.db.sql("select warehouse from `tabBin` where item_code = %s", args['item_code'])
-		rate = []
-		for wh in warehouse:
-			r = get_incoming_rate({
-				"item_code": args.get("item_code"),
-				"warehouse": wh[0],
-				"posting_date": posting_date,
-				"posting_time": posting_time,
-				"qty": args.get("qty") or 0
-			})
-			if r:
-				rate.append(r)
+		""" Get weighted average of valuation rate from all warehouses """
 
-		return rate and flt(sum(rate))/len(rate) or 0
+		total_qty, total_value = 0.0, 0.0
+		for d in frappe.db.sql("""select actual_qty, stock_value from `tabBin`
+			where item_code=%s and actual_qty > 0""", args['item_code'], as_dict=1):
+				total_qty += flt(d.actual_qty)
+				total_value += flt(d.stock_value)
+
+		return total_value / total_qty if total_qty else 0.0
 
 	def manage_default_bom(self):
 		""" Uncheck others if current one is selected as default,
@@ -301,8 +288,8 @@ class BOM(Document):
 		for d in self.get('bom_materials'):
 			if d.bom_no:
 				d.rate = self.get_bom_unitcost(d.bom_no)
-			d.amount = flt(d.rate) * flt(d.qty)
-			d.qty_consumed_per_unit = flt(d.qty) / flt(self.quantity)
+			d.amount = flt(d.rate, self.precision("rate", d)) * flt(d.qty, self.precision("qty", d))
+			d.qty_consumed_per_unit = flt(d.qty, self.precision("qty", d)) / flt(self.quantity, self.precision("quantity"))
 			total_rm_cost += d.amount
 
 		self.raw_material_cost = total_rm_cost
@@ -335,17 +322,19 @@ class BOM(Document):
 
 	def get_child_exploded_items(self, bom_no, qty):
 		""" Add all items from Flat BOM of child BOM"""
-
-		child_fb_items = frappe.db.sql("""select item_code, description, stock_uom, qty, rate,
-			qty_consumed_per_unit from `tabBOM Explosion Item`
-			where parent = %s and docstatus = 1""", bom_no, as_dict = 1)
+		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
+		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.description,
+			bom_item.stock_uom, bom_item.qty, bom_item.rate,
+			ifnull(bom_item.qty, 0 ) / ifnull(bom.quantity, 1) as qty_consumed_per_unit
+			from `tabBOM Explosion Item` bom_item, tabBOM bom
+			where bom_item.parent = bom.name and bom.name = %s and bom.docstatus = 1""", bom_no, as_dict = 1)
 
 		for d in child_fb_items:
 			self.add_to_cur_exploded_items(frappe._dict({
 				'item_code'				: d['item_code'],
 				'description'			: d['description'],
 				'stock_uom'				: d['stock_uom'],
-				'qty'					: flt(d['qty_consumed_per_unit'])*qty,
+				'qty'					: d['qty_consumed_per_unit']*qty,
 				'rate'					: flt(d['rate']),
 			}))
 
@@ -375,19 +364,21 @@ class BOM(Document):
 def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 	item_dict = {}
 
+	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 	query = """select
 				bom_item.item_code,
 				item.item_name,
-				ifnull(sum(bom_item.qty_consumed_per_unit),0) * %(qty)s as qty,
+				sum(ifnull(bom_item.qty, 0)/ifnull(bom.quantity, 1)) * %(qty)s as qty,
 				item.description,
 				item.stock_uom,
 				item.default_warehouse,
 				item.expense_account as expense_account,
 				item.buying_cost_center as cost_center
 			from
-				`tab%(table)s` bom_item, `tabItem` item
+				`tab%(table)s` bom_item, `tabBOM` bom, `tabItem` item
 			where
-				bom_item.docstatus < 2
+				bom_item.parent = bom.name
+				and bom_item.docstatus < 2
 				and bom_item.parent = "%(bom)s"
 				and item.name = bom_item.item_code
 				%(conditions)s

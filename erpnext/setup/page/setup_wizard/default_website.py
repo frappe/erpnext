@@ -6,6 +6,7 @@ import frappe
 
 from frappe import _
 from frappe.utils import nowdate
+from frappe.templates.pages.style_settings import default_properties
 
 class website_maker(object):
 	def __init__(self, company, tagline, user):
@@ -35,8 +36,8 @@ class website_maker(object):
 
 	def make_style_settings(self):
 		style_settings = frappe.get_doc("Style Settings", "Style Settings")
-		style_settings.top_bar_background = "F2F2F2"
-		style_settings.font_size = "15px"
+		style_settings.update(default_properties)
+		style_settings.apply_style = 1
 		style_settings.save()
 
 	def make_website_settings(self):
@@ -59,7 +60,7 @@ class website_maker(object):
 		website_settings.append("top_bar_items", {
 			"doctype": "Top Bar Item",
 			"label": _("Products"),
-			"url": frappe.db.get_value("Website Route", {"ref_doctype":"Item Group"})
+			"url": "products"
 		})
 		website_settings.save()
 

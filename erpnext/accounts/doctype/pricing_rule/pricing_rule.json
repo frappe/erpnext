@@ -52,6 +52,18 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "selling", 
+   "fieldtype": "Check", 
+   "label": "Selling", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "buying", 
+   "fieldtype": "Check", 
+   "label": "Buying", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "applicable_for", 
    "fieldtype": "Select", 
    "label": "Applicable For", 
@@ -132,6 +144,13 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "company", 
+   "fieldtype": "Link", 
+   "label": "Company", 
+   "options": "Company", 
+   "permlevel": 0
+  }, 
+  {
    "default": "Today", 
    "fieldname": "valid_from", 
    "fieldtype": "Date", 
@@ -198,12 +217,25 @@
    "label": "For Price List", 
    "options": "Price List", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "help_section", 
+   "fieldtype": "Section Break", 
+   "label": "", 
+   "options": "Simple", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "pricing_rule_help", 
+   "fieldtype": "HTML", 
+   "label": "Pricing Rule Help", 
+   "permlevel": 0
   }
  ], 
  "icon": "icon-gift", 
  "idx": 1, 
  "istable": 0, 
- "modified": "2014-05-12 16:24:52.005162", 
+ "modified": "2014-06-20 19:36:22.502381", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Pricing Rule", 
@@ -212,8 +244,8 @@
   {
    "create": 1, 
    "delete": 1, 
-   "export": 0, 
-   "import": 0, 
+   "export": 1, 
+   "import": 1, 
    "permlevel": 0, 
    "read": 1, 
    "report": 1, 
@@ -258,7 +290,6 @@
    "permlevel": 0, 
    "read": 1, 
    "report": 1, 
-   "restrict": 1, 
    "role": "System Manager", 
    "write": 1
   }

@@ -166,21 +166,19 @@ class StockController(AccountsController):
 
 
 	def get_future_stock_vouchers(self):
-		future_stock_vouchers = []
-
-		if hasattr(self, "fname"):
+		condition = ""
+		item_list = []
+		if getattr(self, "fname", None):
 			item_list = [d.item_code for d in self.get(self.fname)]
-			condition = ''.join(['and item_code in (\'', '\', \''.join(item_list) ,'\')'])
-		else:
-			condition = ""
+			if item_list:
+				condition = "and item_code in ({})".format(", ".join(["%s"] * len(item_list)))
 
-		for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
+		future_stock_vouchers = frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 			from `tabStock Ledger Entry` sle
-			where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) %s
-			order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""" %
-			('%s', '%s', condition), (self.posting_date, self.posting_time),
-			as_dict=True):
-				future_stock_vouchers.append([d.voucher_type, d.voucher_no])
+			where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
+			order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""".format(
+				condition=condition), tuple([self.posting_date, self.posting_date] + item_list),
+				as_list=True)
 
 		return future_stock_vouchers
 
@@ -237,8 +235,15 @@ class StockController(AccountsController):
 		if not item.get("expense_account"):
 			frappe.throw(_("Expense or Difference account is mandatory for Item {0} as it impacts overall stock value").format(item.item_code))
 
-		if item.get("expense_account") and not item.get("cost_center"):
-			frappe.throw(_("""Cost Center is mandatory for Item {0}""").format(item.get("item_code")))
+		else:
+			is_expense_account = frappe.db.get_value("Account",
+				item.get("expense_account"), "report_type")=="Profit and Loss"
+			if self.doctype not in ("Purchase Receipt", "Stock Reconciliation") and not is_expense_account:
+				frappe.throw(_("Expense / Difference account ({0}) must be a 'Profit or Loss' account")
+					.format(item.get("expense_account")))
+			if is_expense_account and not item.get("cost_center"):
+				frappe.throw(_("{0} {1}: Cost Center is mandatory for Item {2}").format(
+					_(self.doctype), self.name, item.get("item_code")))
 
 	def get_sl_entries(self, d, args):
 		sl_dict = {
@@ -267,10 +272,20 @@ class StockController(AccountsController):
 		from erpnext.stock.stock_ledger import make_sl_entries
 		make_sl_entries(sl_entries, is_amended)
 
-	def make_cancel_gl_entries(self):
+	def make_gl_entries_on_cancel(self):
 		if frappe.db.sql("""select name from `tabGL Entry` where voucher_type=%s
 			and voucher_no=%s""", (self.doctype, self.name)):
 				self.make_gl_entries()
+
+	def get_serialized_items(self):
+		serialized_items = []
+		item_codes = list(set([d.item_code for d in self.get(self.fname)]))
+		if item_codes:
+			serialized_items = frappe.db.sql_list("""select name from `tabItem`
+				where has_serial_no='Yes' and name in ({})""".format(", ".join(["%s"]*len(item_codes))),
+				tuple(item_codes))
+
+		return serialized_items
 
 def update_gl_entries_after(posting_date, posting_time, warehouse_account=None, for_items=None):
 	def _delete_gl_entries(voucher_type, voucher_no):
@@ -309,19 +324,21 @@ def compare_existing_and_expected_gle(existing_gle, expected_gle):
 def get_future_stock_vouchers(posting_date, posting_time, warehouse_account=None, for_items=None):
 	future_stock_vouchers = []
 
+	values = []
 	condition = ""
 	if for_items:
-		condition = ''.join([' and item_code in (\'', '\', \''.join(for_items) ,'\')'])
+		condition += " and item_code in ({})".format(", ".join(["%s"] * len(for_items)))
+		values += for_items
 
 	if warehouse_account:
-		condition += ''.join([' and warehouse in (\'', '\', \''.join(warehouse_account.keys()) ,'\')'])
+		condition += " and warehouse in ({})".format(", ".join(["%s"] * len(warehouse_account.keys())))
+		values += warehouse_account.keys()
 
 	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
-		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) %s
-		order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""" %
-		('%s', '%s', condition), (posting_date, posting_time),
-		as_dict=True):
+		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
+		order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""".format(condition=condition),
+		tuple([posting_date, posting_time] + values), as_dict=True):
 			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
 
 	return future_stock_vouchers

@@ -1,7 +1,5 @@
  (Half Day),(Μισή ημέρα)
  and year: ,και το έτος:
- by Role ,από το ρόλο
- is not set,Δεν έχει οριστεί
 """ does not exists",""" Δεν υπάρχει"
 %  Delivered,Δημοσιεύθηκε%
 % Amount Billed,Ποσό που χρεώνεται%
@@ -16,7 +14,6 @@
 % of materials delivered against this Sales Order,% Των υλικών που παραδίδονται κατά της εντολής αυτής Πωλήσεις
 % of materials ordered against this Material Request,% Των παραγγελθέντων υλικών κατά της αίτησης αυτής Υλικό
 % of materials received against this Purchase Order,% Της ύλης που έλαβε κατά της παραγγελίας
-%(conversion_rate_label)s is mandatory. Maybe Currency Exchange record is not created for %(from_currency)s to %(to_currency)s,% ( conversion_rate_label ) s είναι υποχρεωτική . Ίσως συναλλάγματος ρεκόρ δεν έχει δημιουργηθεί για % ( from_currency ) s σε% ( to_currency ) s
 'Actual Start Date' can not be greater than 'Actual End Date',"« Πραγματική Ημερομηνία Έναρξης δεν μπορεί να είναι μεγαλύτερη από ό, τι « Πραγματική ημερομηνία λήξης »"
 'Based On' and 'Group By' can not be same,« Με βάση την » και «Όμιλος Με τη φράση« δεν μπορεί να είναι ίδια
 'Days Since Last Order' must be greater than or equal to zero,« Ημέρες από την τελευταία Παραγγείλετε πρέπει να είναι μεγαλύτερη ή ίση με το μηδέν
@@ -26,19 +23,17 @@
 'From Date' must be after 'To Date',« Από την ημερομηνία » πρέπει να είναι μετά τη λέξη « μέχρι σήμερα»
 'Has Serial No' can not be 'Yes' for non-stock item,« Έχει Αύξων αριθμός » δεν μπορεί να είναι «ναι» για τη θέση μη - απόθεμα
 'Notification Email Addresses' not specified for recurring invoice,«Κοινοποίηση διευθύνσεις ηλεκτρονικού ταχυδρομείου δεν διευκρινίζεται για επαναλαμβανόμενες τιμολόγιο
-'Profit and Loss' type Account {0} used be set for Opening Entry,« Κέρδη και Ζημίες » Τύπος λογαριασμού {0} που χρησιμοποιούνται πρέπει να οριστεί για το άνοιγμα εισόδου
 'Profit and Loss' type account {0} not allowed in Opening Entry,« Κέρδη και Ζημίες » τον τύπο του λογαριασμού {0} δεν επιτρέπονται στο άνοιγμα εισόδου
 'To Case No.' cannot be less than 'From Case No.',«Για την υπόθεση αριθ.» δεν μπορεί να είναι μικρότερη »από το Νο. υπόθεση»
 'To Date' is required,« Έως » απαιτείται
 'Update Stock' for Sales Invoice {0} must be set,« Ενημέρωση Χρηματιστήριο » για τις πωλήσεις Τιμολόγιο πρέπει να ρυθμιστεί {0}
 * Will be calculated in the transaction.,* Θα πρέπει να υπολογίζεται στη συναλλαγή.
-"1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent",
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,1 Νόμισμα = [?] Κλάσμα  Για π.χ. 1 USD = 100 Cent
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,"1. Για να διατηρήσετε τον πελάτη σοφός κωδικό στοιχείο και να καταστούν προσβάσιμα με βάση τον κωδικό τους, χρησιμοποιήστε αυτή την επιλογή"
-2 days ago,2 μέρες πριν
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Προσθήκη / Επεξεργασία < / a>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Προσθήκη / Επεξεργασία < / a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Προσθήκη / Επεξεργασία < / a>"
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> Προεπιλογή Πρότυπο </ h4>  <p> Χρήσεις <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </ a> και όλα τα πεδία της Διεύθυνσης ( συμπεριλαμβανομένων των προσαρμοσμένων πεδίων, αν υπάρχουν) θα είναι διαθέσιμο </ p>  <pre> <code> {{}} address_line1 <br>  {% εάν address_line2%} {{}} address_line2 <br> { endif% -%}  {{}} πόλη <br>  {% αν το κράτος%} {{}} κατάσταση <br> {endif% -%}  {% εάν pincode%} PIN: {{}} pincode <br> {endif% -%}  {{}} χώρα <br>  {% αν το τηλέφωνο%} Τηλέφωνο: {{}} τηλέφωνο <br> { endif% -%}  {% εάν φαξ%} Fax: {{}} fax <br> {endif% -%}  {% εάν email_id%} Email: {{}} email_id <br> ? {endif% -%}  </ code> </ pre>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,Μια ομάδα πελατών υπάρχει με το ίδιο όνομα παρακαλούμε να αλλάξετε το όνομα του Πελάτη ή να μετονομάσετε την ομάδα πελατών
 A Customer exists with same name,Ένας πελάτης υπάρχει με το ίδιο όνομα
 A Lead with this email id should exist,Μια μολύβδου με αυτή την ταυτότητα ηλεκτρονικού ταχυδρομείου θα πρέπει να υπάρχει
@@ -48,7 +43,6 @@ A symbol for this currency. For e.g. $,Ένα σύμβολο για το νόμ�
 AMC Expiry Date,AMC Ημερομηνία Λήξης
 Abbr,Abbr
 Abbreviation cannot have more than 5 characters,Συντομογραφία δεν μπορεί να έχει περισσότερα από 5 χαρακτήρες
-About,Περίπου
 Above Value,Πάνω Value
 Absent,Απών
 Acceptance Criteria,Κριτήρια αποδοχής
@@ -63,6 +57,8 @@ Account Details,Στοιχεία Λογαριασμού
 Account Head,Επικεφαλής λογαριασμού
 Account Name,Όνομα λογαριασμού
 Account Type,Είδος Λογαριασμού
+"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Το υπόλοιπο του λογαριασμού ήδη Credit, δεν σας επιτρέπεται να θέσει «Υπόλοιπο Must Be» ως «χρεωστικές»"
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Το υπόλοιπο του λογαριασμού ήδη Debit, δεν μπορείτε να ρυθμίσετε το 'Υπόλοιπο Must Be »ως« Δάνειο »"
 Account for the warehouse (Perpetual Inventory) will be created under this Account.,Λογαριασμός για την αποθήκη ( Perpetual Απογραφή ) θα δημιουργηθεί στο πλαίσιο του παρόντος λογαριασμού.
 Account head {0} created,Κεφάλι Λογαριασμός {0} δημιουργήθηκε
 Account must be a balance sheet account,Ο λογαριασμός πρέπει να είναι λογαριασμός του ισολογισμού
@@ -70,17 +66,21 @@ Account with child nodes cannot be converted to ledger,Λογαριασμός μ
 Account with existing transaction can not be converted to group.,Ο λογαριασμός με τις υπάρχουσες συναλλαγή δεν μπορεί να μετατραπεί σε ομάδα .
 Account with existing transaction can not be deleted,Ο λογαριασμός με τις υπάρχουσες συναλλαγή δεν μπορεί να διαγραφεί
 Account with existing transaction cannot be converted to ledger,Ο λογαριασμός με τις υπάρχουσες συναλλαγή δεν μπορεί να μετατραπεί σε καθολικό
-Account {0} already exists,Ο λογαριασμός {0} υπάρχει ήδη
-Account {0} can only be updated via Stock Transactions,Ο λογαριασμός {0} μπορεί να ενημερώνεται μόνο μέσω Συναλλαγές Μετοχών
 Account {0} cannot be a Group,Ο λογαριασμός {0} δεν μπορεί να είναι μια ομάδα
 Account {0} does not belong to Company {1},Ο λογαριασμός {0} δεν ανήκει στη Εταιρεία {1}
+Account {0} does not belong to company: {1},Ο λογαριασμός {0} δεν ανήκει στην εταιρεία: {1}
 Account {0} does not exist,Ο λογαριασμός {0} δεν υπάρχει
 Account {0} has been entered more than once for fiscal year {1},Ο λογαριασμός {0} έχει εισαχθεί περισσότερες από μία φορά για το οικονομικό έτος {1}
 Account {0} is frozen,Ο λογαριασμός {0} έχει παγώσει
 Account {0} is inactive,Ο λογαριασμός {0} είναι ανενεργό
+Account {0} is not valid,Ο λογαριασμός {0} δεν είναι έγκυρη
 Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Ο λογαριασμός {0} πρέπει να είναι του τύπου « Παγίων » ως σημείο {1} είναι ένα περιουσιακό στοιχείο Στοιχείο
-Account {0} must be sames as Credit To Account in Purchase Invoice in row {0},Ο λογαριασμός {0} πρέπει να είναι Sames ως πίστωση στο λογαριασμό σε τιμολογίου αγοράς στη γραμμή {0}
-Account {0} must be sames as Debit To Account in Sales Invoice in row {0},Ο λογαριασμός {0} πρέπει να είναι Sames ως χρέωση στο λογαριασμό στο τιμολόγιο πώλησης στη γραμμή {0}
+Account {0}: Parent account {1} can not be a ledger,Ο λογαριασμός {0}: Μητρική λογαριασμό {1} δεν μπορεί να είναι ένα καθολικό
+Account {0}: Parent account {1} does not belong to company: {2},Ο λογαριασμός {0}: Μητρική λογαριασμό {1} δεν ανήκει στην εταιρεία: {2}
+Account {0}: Parent account {1} does not exist,Ο λογαριασμός {0}: Μητρική λογαριασμό {1} δεν υπάρχει
+Account {0}: You can not assign itself as parent account,Ο λογαριασμός {0}: Δεν μπορεί η ίδια να εκχωρήσει ως μητρική λογαριασμού
+Account: {0} can only be updated via \					Stock Transactions,Λογαριασμός: {0} μπορεί να ενημερώνεται μόνο μέσω \ Χρηματιστηριακές Συναλλαγές Μετοχών
+Accountant,λογιστής
 Accounting,Λογιστική
 "Accounting Entries can be made against leaf nodes, called","Λογιστικές εγγραφές μπορούν να γίνουν με κόμβους , που ονομάζεται"
 "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Λογιστική εγγραφή παγώσει μέχρι την ημερομηνία αυτή, κανείς δεν μπορεί να κάνει / τροποποιήσετε την είσοδο, εκτός από τον ρόλο που καθορίζεται παρακάτω."
@@ -91,7 +91,6 @@ Accounts Frozen Upto,Λογαριασμοί Κατεψυγμένα Μέχρι
 Accounts Payable,Λογαριασμοί πληρωτέοι
 Accounts Receivable,Απαιτήσεις από Πελάτες
 Accounts Settings,Λογαριασμοί Ρυθμίσεις
-Actions,δράσεις
 Active,Ενεργός
 Active: Will extract emails from ,Active: Θα εξαγάγετε μηνύματα ηλεκτρονικού ταχυδρομείου από
 Activity,Δραστηριότητα
@@ -113,23 +112,13 @@ Actual Quantity,Πραγματική ποσότητα
 Actual Start Date,Πραγματική ημερομηνία έναρξης
 Add,Προσθήκη
 Add / Edit Taxes and Charges,Προσθήκη / Επεξεργασία Φόροι και τέλη
-Add Attachments,Προσθήκη Συνημμένα
-Add Bookmark,Προσθήκη σελιδοδείκτη
 Add Child,Προσθήκη παιδιών
-Add Column,Προσθήκη στήλης
-Add Message,Προσθήκη μηνύματος
-Add Reply,Προσθέστε Απάντηση
 Add Serial No,Προσθήκη Αύξων αριθμός
 Add Taxes,Προσθήκη Φόροι
 Add Taxes and Charges,Προσθήκη Φόροι και τέλη
-Add This To User's Restrictions,Προσθέστε το σε Περιορισμοί χρήστη
-Add attachment,Προσθήκη συνημμένου
-Add new row,Προσθήκη νέας γραμμής
 Add or Deduct,Προσθήκη ή να αφαιρέσει
 Add rows to set annual budgets on Accounts.,Προσθέστε γραμμές να θέσουν ετήσιους προϋπολογισμούς σε λογαριασμούς.
 Add to Cart,Προσθήκη στο Καλάθι
-Add to To Do,Προσθήκη στο να κάνει
-Add to To Do List of,Προσθήκη στο να κάνει τον κατάλογο των
 Add to calendar on this date,Προσθήκη στο ημερολόγιο την ημερομηνία αυτή
 Add/Remove Recipients,Add / Remove παραληπτών
 Address,Διεύθυνση
@@ -140,15 +129,19 @@ Address Details,Λεπτομέρειες Διεύθυνση
 Address HTML,Διεύθυνση HTML
 Address Line 1,Διεύθυνση 1
 Address Line 2,Γραμμή διεύθυνσης 2
+Address Template,Διεύθυνση Πρότυπο
 Address Title,Τίτλος Διεύθυνση
 Address Title is mandatory.,Διεύθυνση τίτλου είναι υποχρεωτική .
 Address Type,Πληκτρολογήστε τη διεύθυνση
 Address master.,Διεύθυνση πλοιάρχου .
 Administrative Expenses,έξοδα διοικήσεως
+Administrative Officer,Διοικητικός Λειτουργός
 Advance Amount,Ποσό Advance
 Advance amount,Ποσό Advance
 Advances,Προκαταβολές
 Advertisement,Διαφήμιση
+Advertising,διαφήμιση
+Aerospace,Aerospace
 After Sale Installations,Μετά Εγκαταστάσεις Πώληση
 Against,Κατά
 Against Account,Έναντι του λογαριασμού
@@ -160,6 +153,7 @@ Against Document No,Ενάντια έγγραφο αριθ.
 Against Expense Account,Ενάντια Λογαριασμός Εξόδων
 Against Income Account,Έναντι του λογαριασμού εισοδήματος
 Against Journal Voucher,Ενάντια Voucher Εφημερίδα
+Against Journal Voucher {0} does not have any unmatched {1} entry,Ενάντια Εφημερίδα Voucher {0} δεν έχει ταίρι {1} εισόδου
 Against Purchase Invoice,Έναντι τιμολογίου αγοράς
 Against Sales Invoice,Ενάντια Πωλήσεις Τιμολόγιο
 Against Sales Order,Ενάντια Πωλήσεις Τάξης
@@ -171,6 +165,8 @@ Ageing date is mandatory for opening entry,Ημερομηνία Γήρανση �
 Agent,Πράκτορας
 Aging Date,Γήρανση Ημερομηνία
 Aging Date is mandatory for opening entry,Γήρανση Ημερομηνία είναι υποχρεωτική για το άνοιγμα εισόδου
+Agriculture,γεωργία
+Airline,αερογραμμή
 All Addresses.,Όλες τις διευθύνσεις.
 All Contact,Όλα Επικοινωνία
 All Contacts.,Όλες οι επαφές.
@@ -188,7 +184,7 @@ All Supplier Types,Όλοι οι τύποι Προμηθευτής
 All Territories,Όλα τα εδάφη
 "All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Όλα τα πεδία που συνδέονται με εξαγωγές , όπως το νόμισμα , συντελεστή μετατροπής , το σύνολο των εξαγωγών , των εξαγωγών γενικό σύνολο κλπ είναι διαθέσιμα στο Δελτίο Αποστολής , POS , Προσφορά , Τιμολόγιο Πώλησης , Πωλήσεις Τάξης, κ.λπ."
 "All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Όλες οι εισαγωγές που σχετίζονται με τομείς όπως το νόμισμα , συντελεστή μετατροπής , οι συνολικές εισαγωγές , εισαγωγής γενικό σύνολο κλπ είναι διαθέσιμα σε απόδειξης αγοράς , ο Προμηθευτής εισαγωγικά, Αγορά Τιμολόγιο , Παραγγελία κλπ."
-All items have already been transferred for this Production Order.,Όλα τα στοιχεία έχουν ήδη μεταφερθεί για αυτή την εντολή παραγωγής .
+All items have already been invoiced,Όλα τα στοιχεία έχουν ήδη τιμολογηθεί
 All these items have already been invoiced,Όλα αυτά τα στοιχεία έχουν ήδη τιμολογηθεί
 Allocate,Διαθέστε
 Allocate leaves for a period.,Διαθέστε τα φύλλα για ένα χρονικό διάστημα .
@@ -196,6 +192,8 @@ Allocate leaves for the year.,Διαθέστε τα φύλλα για το έτ�
 Allocated Amount,Χορηγούμενο ποσό
 Allocated Budget,Προϋπολογισμός που διατέθηκε
 Allocated amount,Χορηγούμενο ποσό
+Allocated amount can not be negative,Χορηγούμενο ποσό δεν μπορεί να είναι αρνητική
+Allocated amount can not greater than unadusted amount,Χορηγούμενο ποσό δεν μπορεί να είναι μεγαλύτερη από το ποσό unadusted
 Allow Bill of Materials,Αφήστε Bill of Materials
 Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item,Επιτρέψτε Bill of Materials θα πρέπει να είναι «Ναι» . Επειδή μία ή περισσότερες δραστικές BOMs παρόντες για το συγκεκριμένο προϊόν
 Allow Children,Αφήστε τα παιδιά
@@ -209,24 +207,23 @@ Allow Users,Αφήστε Χρήστες
 Allow the following users to approve Leave Applications for block days.,Αφήστε τα παρακάτω χρήστες να εγκρίνουν αιτήσεις Αφήστε για τις ημέρες μπλοκ.
 Allow user to edit Price List Rate in transactions,Επιτρέπει στο χρήστη να επεξεργαστείτε Τιμή Τιμή καταλόγου στις συναλλαγές
 Allowance Percent,Ποσοστό Επίδομα
-Allowance for over-delivery / over-billing crossed for Item {0},Επίδομα πάνω - παράδοση / υπερ- χρέωσης διέσχισε για τη θέση {0}
+Allowance for over-{0} crossed for Item {1},Επίδομα πάνω-{0} διέσχισε για τη θέση {1}
+Allowance for over-{0} crossed for Item {1}.,Επίδομα πάνω-{0} διέσχισε για τη θέση {1}.
 Allowed Role to Edit Entries Before Frozen Date,Κατοικίδια ρόλος στην επιλογή Επεξεργασία εγγραφών Πριν Κατεψυγμένα Ημερομηνία
-"Allowing DocType, DocType. Be careful!","Επιτρέποντας DocType , DocType . Να είστε προσεκτικοί !"
-Alternative download link,Εναλλακτική σύνδεση λήψης
-Amend,Τροποποιούνται
 Amended From,Τροποποίηση Από
 Amount,Ποσό
 Amount (Company Currency),Ποσό (νόμισμα της Εταιρείας)
-Amount <=,Ποσό &lt;=
-Amount >=,Ποσό&gt; =
+Amount Paid,Ποσό Αμειβόμενος
 Amount to Bill,Ανέρχονται σε Bill
 An Customer exists with same name,Υπάρχει ένα πελάτη με το ίδιο όνομα
 "An Item Group exists with same name, please change the item name or rename the item group","Ένα σημείο της ομάδας υπάρχει με το ίδιο όνομα , μπορείτε να αλλάξετε το όνομα του στοιχείου ή να μετονομάσετε την ομάδα στοιχείου"
 "An item exists with same name ({0}), please change the item group name or rename the item","Ένα στοιχείο υπάρχει με το ίδιο όνομα ( {0} ) , παρακαλούμε να αλλάξετε το όνομα της ομάδας στοιχείου ή να μετονομάσετε το στοιχείο"
+Analyst,αναλυτής
 Annual,ετήσιος
 Another Period Closing Entry {0} has been made after {1},Μια άλλη Έναρξη Περιόδου Κλείσιμο {0} έχει γίνει μετά από {1}
 Another Salary Structure {0} is active for employee {0}. Please make its status 'Inactive' to proceed.,Μια άλλη δομή Μισθός είναι {0} ενεργό για εργαζόμενο {0} . Παρακαλώ κάνετε το καθεστώς της « Ανενεργός » για να προχωρήσετε .
 "Any other comments, noteworthy effort that should go in the records.","Οποιαδήποτε άλλα σχόλια, αξιοσημείωτη προσπάθεια που θα πρέπει να πάει στα αρχεία."
+Apparel & Accessories,Ένδυση & Αξεσουάρ
 Applicability,Εφαρμογή
 Applicable For,εφαρμοστέο Για
 Applicable Holiday List,Εφαρμοστέος κατάλογος διακοπών
@@ -248,6 +245,7 @@ Appraisal Template,Πρότυπο Αξιολόγηση
 Appraisal Template Goal,Αξιολόγηση Goal Template
 Appraisal Template Title,Αξιολόγηση Τίτλος Template
 Appraisal {0} created for Employee {1} in the given date range,Αξιολόγηση {0} δημιουργήθηκε υπάλληλου {1} στο συγκεκριμένο εύρος ημερομηνιών
+Apprentice,τσιράκι
 Approval Status,Κατάσταση έγκρισης
 Approval Status must be 'Approved' or 'Rejected',Κατάσταση έγκρισης πρέπει να « Εγκρίθηκε » ή « Rejected »
 Approved,Εγκρίθηκε
@@ -258,23 +256,19 @@ Approving User,Έγκριση χρήστη
 Approving User cannot be same as user the rule is Applicable To,Την έγκριση του χρήστη δεν μπορεί να είναι ίδιο με το χρήστη ο κανόνας ισχύει για
 Are you sure you want to STOP ,
 Are you sure you want to UNSTOP ,
-Are you sure you want to delete the attachment?,Είστε σίγουροι ότι θέλετε να διαγράψετε το συνημμένο;
 Arrear Amount,Καθυστερήσεις Ποσό
 "As Production Order can be made for this item, it must be a stock item.","Όπως μπορεί να γίνει Παραγωγής παραγγελίας για το συγκεκριμένο προϊόν , θα πρέπει να είναι ένα στοιχείο υλικού."
 As per Stock UOM,Όπως ανά Διαθέσιμο UOM
 "As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Is Stock Item' and 'Valuation Method'","Δεδομένου ότι υπάρχουν χρηματιστηριακές συναλλαγές για αυτό το στοιχείο , δεν μπορείτε να αλλάξετε τις τιμές των « Έχει Αύξων αριθμός », « Είναι Stock σημείο » και « Μέθοδος αποτίμησης»"
-Ascending,Αύξουσα
-Assign To,Εκχώρηση σε
-Assigned To,Ανατέθηκε σε
-Assignments,αναθέσεις
+Asset,προσόν
+Assistant,βοηθός
+Associate,Συνεργάτης
+Atleast one of the Selling or Buying must be selected,Πρέπει να επιλεγεί τουλάχιστον μία από τις πωλήσεις ή την αγορά
 Atleast one warehouse is mandatory,"Τουλάχιστον, μια αποθήκη είναι υποχρεωτική"
-Attach Document Print,Συνδέστε Εκτύπωση εγγράφου
 Attach Image,Συνδέστε Image
 Attach Letterhead,Συνδέστε επιστολόχαρτο
 Attach Logo,Συνδέστε Logo
 Attach Your Picture,Προσαρμόστε την εικόνα σας
-Attach as web link,Να επισυναφθεί ως σύνδεσμο ιστού
-Attachments,Συνημμένα
 Attendance,Παρουσία
 Attendance Date,Ημερομηνία Συμμετοχή
 Attendance Details,Λεπτομέρειες Συμμετοχή
@@ -293,6 +287,7 @@ Automatically compose message on submission of transactions.,Αυτόματη σ
 Automatically extract Job Applicants from a mail box ,
 Automatically extract Leads from a mail box e.g.,"Αυτόματη εξαγωγή οδηγεί από ένα κουτί αλληλογραφίας , π.χ."
 Automatically updated via Stock Entry of type Manufacture/Repack,Αυτόματη ενημέρωση μέσω είσοδο στα αποθέματα Κατασκευή Τύπος / Repack
+Automotive,Αυτοκίνητο
 Autoreply when a new mail is received,Autoreply όταν λαμβάνονται νέα μηνύματα
 Available,Διαθέσιμος
 Available Qty at Warehouse,Διαθέσιμο Ποσότητα σε αποθήκη
@@ -328,11 +323,13 @@ Balance for Account {0} must always be {1},Υπόλοιπο Λογαριασμο
 Balance must be,Υπόλοιπο πρέπει να
 "Balances of Accounts of type ""Bank"" or ""Cash""","Υπόλοιπα Λογαριασμών του τύπου ""Τράπεζα"" ή "" Cash"""
 Bank,Τράπεζα
+Bank / Cash Account,Τράπεζα / Λογαριασμού Cash
 Bank A/C No.,Bank A / C Όχι
 Bank Account,Τραπεζικό Λογαριασμό
 Bank Account No.,Τράπεζα Αρ. Λογαριασμού
 Bank Accounts,Τραπεζικοί Λογαριασμοί
 Bank Clearance Summary,Τράπεζα Περίληψη Εκκαθάριση
+Bank Draft,Τραπεζική Επιταγή
 Bank Name,Όνομα Τράπεζας
 Bank Overdraft Account,Τραπεζικού λογαριασμού υπερανάληψης
 Bank Reconciliation,Τράπεζα Συμφιλίωση
@@ -340,6 +337,7 @@ Bank Reconciliation Detail,Τράπεζα Λεπτομέρεια Συμφιλί�
 Bank Reconciliation Statement,Τράπεζα Δήλωση Συμφιλίωση
 Bank Voucher,Voucher Bank
 Bank/Cash Balance,Τράπεζα / Cash Balance
+Banking,Banking
 Barcode,Barcode
 Barcode {0} already used in Item {1},Barcode {0} έχει ήδη χρησιμοποιηθεί στη θέση {1}
 Based On,Με βάση την
@@ -348,7 +346,6 @@ Basic Info,Βασικές Πληροφορίες
 Basic Information,Βασικές Πληροφορίες
 Basic Rate,Βασική Τιμή
 Basic Rate (Company Currency),Βασικό Επιτόκιο (νόμισμα της Εταιρείας)
-Basic Section,Βασικό τμήμα
 Batch,Παρτίδα
 Batch (lot) of an Item.,Παρτίδας (lot) ενός στοιχείου.
 Batch Finished Date,Batch Ημερομηνία Τελείωσε
@@ -377,6 +374,7 @@ Bills raised by Suppliers.,Γραμμάτια τέθηκαν από τους Π�
 Bills raised to Customers.,Γραμμάτια έθεσε σε πελάτες.
 Bin,Bin
 Bio,Bio
+Biotechnology,Βιοτεχνολογία
 Birthday,Γενέθλια
 Block Date,Αποκλεισμός Ημερομηνία
 Block Days,Ημέρες Block
@@ -384,7 +382,6 @@ Block leave applications by department.,Αποκλεισμός αφήνουν ε
 Blog Post,Δημοσίευση Blog
 Blog Subscriber,Συνδρομητής Blog
 Blood Group,Ομάδα Αίματος
-Bookmarks,Σελιδοδείκτες
 Both Warehouse must belong to same Company,Τόσο η αποθήκη πρέπει να ανήκουν στην ίδια εταιρεία
 Box,κουτί
 Branch,Υποκατάστημα
@@ -393,6 +390,8 @@ Brand Name,Μάρκα
 Brand master.,Πλοίαρχος Brand.
 Brands,Μάρκες
 Breakdown,Ανάλυση
+Broadcasting,Broadcasting
+Brokerage,μεσιτεία
 Budget,Προϋπολογισμός
 Budget Allocated,Προϋπολογισμός που διατέθηκε
 Budget Detail,Λεπτομέρεια του προϋπολογισμού
@@ -403,20 +402,26 @@ Budget Distribution Details,Λεπτομέρειες κατανομή του π�
 Budget Variance Report,Έκθεση του προϋπολογισμού Διακύμανση
 Budget cannot be set for Group Cost Centers,Ο προϋπολογισμός δεν μπορεί να ρυθμιστεί για Κέντρα Κόστους Ομίλου
 Build Report,Κατασκευάστηκε Έκθεση
-Built on,Χτισμένο σε
 Bundle items at time of sale.,Bundle στοιχεία κατά τη στιγμή της πώλησης.
+Business Development Manager,Business Development Manager
 Buying,Εξαγορά
 Buying & Selling,Αγορά & Πώληση
 Buying Amount,Αγοράζοντας Ποσό
 Buying Settings,Αγοράζοντας Ρυθμίσεις
+"Buying must be checked, if Applicable For is selected as {0}",Η αγορά πρέπει να ελεγχθεί αν υπάρχει Για επιλέγεται ως {0}
 C-Form,C-Form
 C-Form Applicable,C-αυτοί εφαρμόζονται
 C-Form Invoice Detail,C-Form Τιμολόγιο Λεπτομέρειες
 C-Form No,C-δεν αποτελούν
 C-Form records,C -Form εγγραφές
+CENVAT Capital Goods,CENVAT κεφαλαιουχικών αγαθών
+CENVAT Edu Cess,CENVAT Edu Cess
+CENVAT SHE Cess,CENVAT SHE Cess
+CENVAT Service Tax,CENVAT Φορολογική Υπηρεσία
+CENVAT Service Tax Cess 1,CENVAT Υπηρεσία Φόρου Cess 1
+CENVAT Service Tax Cess 2,CENVAT Υπηρεσία Φόρου Cess 2
 Calculate Based On,Υπολογιστεί με βάση:
 Calculate Total Score,Υπολογίστε Συνολική Βαθμολογία
-Calendar,Ημερολόγιο
 Calendar Events,Ημερολόγιο Εκδηλώσεων
 Call,Κλήση
 Calls,καλεί
@@ -429,7 +434,6 @@ Can be approved by {0},Μπορεί να εγκριθεί από {0}
 "Can not filter based on Account, if grouped by Account","Δεν μπορείτε να φιλτράρετε με βάση Λογαριασμό , εάν ομαδοποιούνται ανάλογα με το Λογαριασμό"
 "Can not filter based on Voucher No, if grouped by Voucher","Δεν μπορείτε να φιλτράρετε με βάση Voucher Όχι, αν είναι ομαδοποιημένες κατά Voucher"
 Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total',Μπορεί να παραπέμψει σειρά μόνο εφόσον ο τύπος φόρτισης είναι « On Προηγούμενη Row Ποσό » ή « Προηγούμενο Row Total »
-Cancel,Ακύρωση
 Cancel Material Visit {0} before cancelling this Customer Issue,Ακύρωση Υλικό Επίσκεψη {0} πριν από την ακύρωση αυτού του Πελάτη Τεύχος
 Cancel Material Visits {0} before cancelling this Maintenance Visit,Ακύρωση επισκέψεις Υλικό {0} πριν από την ακύρωση αυτής της συντήρησης Επίσκεψη
 Cancelled,Ακυρώθηκε
@@ -439,7 +443,7 @@ Cannot approve leave as you are not authorized to approve leaves on Block Dates,
 Cannot cancel because Employee {0} is already approved for {1},Δεν μπορείτε να ακυρώσετε επειδή Υπάλληλος {0} έχει ήδη εγκριθεί για {1}
 Cannot cancel because submitted Stock Entry {0} exists,"Δεν μπορείτε να ακυρώσετε , διότι υποβάλλονται Χρηματιστήριο Έναρξη {0} υπάρχει"
 Cannot carry forward {0},Δεν μπορούμε να συνεχίσουμε προς τα εμπρός {0}
-Cannot change Year Start Date and Year End Date once the Fiscal Year is saved.,Δεν μπορεί να αλλάξει Έτος Ημερομηνία Έναρξης και Λήξης Έτος φορά Χρήσεως αποθηκεύεται .
+Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved.,Δεν μπορεί να αλλάξει Χρήσεως Ημερομηνία έναρξης και Φορολογικό Έτος Ημερομηνία Λήξης φορά Χρήσεως αποθηκεύεται.
 "Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency.","Δεν μπορεί να αλλάξει προεπιλεγμένο νόμισμα της εταιρείας , επειδή υπάρχουν υφιστάμενες συναλλαγές . Οι συναλλαγές πρέπει να ακυρωθεί για να αλλάξετε το εξ 'ορισμού νόμισμα ."
 Cannot convert Cost Center to ledger as it has child nodes,"Δεν είναι δυνατή η μετατροπή Κέντρο Κόστους σε καθολικό , όπως έχει κόμβους του παιδιού"
 Cannot covert to Group because Master Type or Account Type is selected.,"Δεν μπορείτε να μετατρέψετε σε ομάδα , επειδή έχει επιλεγεί Μάστερ τύπου ή τύπου λογαριασμού ."
@@ -448,11 +452,7 @@ Cannot deactive or cancle BOM as it is linked with other BOMs,Δεν είναι 
 Cannot deduct when category is for 'Valuation' or 'Valuation and Total',Δεν μπορούν να εκπέσουν όταν η κατηγορία είναι για « Αποτίμηση » ή « Αποτίμηση και Total »
 "Cannot delete Serial No {0} in stock. First remove from stock, then delete.","Δεν είναι δυνατή η διαγραφή Αύξων αριθμός {0} σε απόθεμα . Πρώτα αφαιρέστε από το απόθεμα , στη συνέχεια, διαγράψτε ."
 "Cannot directly set amount. For 'Actual' charge type, use the rate field","Δεν μπορείτε να ορίσετε άμεσα το ποσό . Για « Πραγματική » τύπου φόρτισης , χρησιμοποιήστε το πεδίο ρυθμό"
-Cannot edit standard fields,Δεν μπορείτε να επεξεργαστείτε τα τυπικά πεδία
-Cannot open instance when its {0} is open,"Δεν μπορείτε να ανοίξετε παράδειγμα, όταν του {0} είναι ανοικτή"
-Cannot open {0} when its instance is open,Δεν είναι δυνατό το άνοιγμα {0} όταν παράδειγμα είναι ανοιχτό
-"Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in 'Setup' > 'Global Defaults'","Δεν είναι δυνατή η overbill για τη θέση {0} στη γραμμή {0} περισσότερο από {1} . Για να καταστεί δυνατή υπερτιμολογήσεων , ορίστε σε 'Setup' > ' Παγκόσμιο Προεπιλογές »"
-Cannot print cancelled documents,Δεν είναι δυνατή η εκτύπωση ακυρώνεται έγγραφα
+"Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in Stock Settings","Δεν είναι δυνατή η overbill για τη θέση {0} στη γραμμή {0} περισσότερο από {1}. Για να καταστεί δυνατή υπερτιμολογήσεων, ορίστε το Ρυθμίσεις Χρηματιστήριο"
 Cannot produce more Item {0} than Sales Order quantity {1},Δεν μπορεί να παράγει περισσότερο Θέση {0} από την ποσότητα Πωλήσεις Τάξης {1}
 Cannot refer row number greater than or equal to current row number for this Charge type,Δεν μπορεί να παραπέμψει τον αριθμό σειράς μεγαλύτερο ή ίσο με το σημερινό αριθμό γραμμής για αυτόν τον τύπο φόρτισης
 Cannot return more than {0} for Item {1},Δεν μπορεί να επιστρέψει πάνω από {0} για τη θέση {1}
@@ -484,7 +484,6 @@ Charity and Donations,Φιλανθρωπία και Δωρεές
 Chart Name,Διάγραμμα Όνομα
 Chart of Accounts,Λογιστικό Σχέδιο
 Chart of Cost Centers,Διάγραμμα των Κέντρων Κόστους
-Check for Duplicates,Ελέγξτε για Αντίγραφα
 Check how the newsletter looks in an email by sending it to your email.,Δείτε πώς το newsletter φαίνεται σε ένα μήνυμα ηλεκτρονικού ταχυδρομείου με την αποστολή στο email σας.
 "Check if recurring invoice, uncheck to stop recurring or put proper End Date","Ελέγξτε αν επαναλαμβανόμενες τιμολόγιο, καταργήστε την επιλογή για να σταματήσει επαναλαμβανόμενες ή να θέσει σωστή Ημερομηνία Λήξης"
 "Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Ελέγξτε εάν χρειάζεστε αυτόματες επαναλαμβανόμενες τιμολόγια. Μετά την υποβολή κάθε τιμολόγιο πώλησης, Επαναλαμβανόμενο τμήμα θα είναι ορατό."
@@ -496,6 +495,7 @@ Check this to pull emails from your mailbox,Επιλέξτε αυτό για ν�
 Check to activate,Ελέγξτε για να ενεργοποιήσετε
 Check to make Shipping Address,Ελέγξτε για να βεβαιωθείτε Διεύθυνση αποστολής
 Check to make primary address,Ελέγξτε για να βεβαιωθείτε κύρια διεύθυνση
+Chemical,χημικός
 Cheque,Επιταγή
 Cheque Date,Επιταγή Ημερομηνία
 Cheque Number,Επιταγή Αριθμός
@@ -506,20 +506,17 @@ Claim Amount,Ποσό απαίτησης
 Claims for company expense.,Απαιτήσεις για την εις βάρος της εταιρείας.
 Class / Percentage,Κλάση / Ποσοστό
 Classic,Classic
-Clear Cache,Clear Cache
 Clear Table,Clear Πίνακας
 Clearance Date,Ημερομηνία Εκκαθάριση
 Clearance Date not mentioned,Εκκαθάριση Ημερομηνία που δεν αναφέρονται
 Clearance date cannot be before check date in row {0},Ημερομηνία εκκαθάρισης δεν μπορεί να είναι πριν από την ημερομηνία άφιξης στη γραμμή {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Κάντε κλικ στο «Κάνε Πωλήσεις Τιμολόγιο» για να δημιουργηθεί μια νέα τιμολογίου πώλησης.
 Click on a link to get options to expand get options ,
-Click on row to view / edit.,Κάντε κλικ στην γραμμή για να δείτε / επεξεργαστείτε .
-Click to Expand / Collapse,Click to Expand / Collapse
 Client,Πελάτης
-Close,Κοντά
 Close Balance Sheet and book Profit or Loss.,Κλείσιμο Ισολογισμού και των Αποτελεσμάτων βιβλίο ή απώλεια .
-Close: {0},Κλείσιμο : {0}
 Closed,Κλειστό
+Closing (Cr),Κλείσιμο (Cr)
+Closing (Dr),Κλείσιμο (Dr)
 Closing Account Head,Κλείσιμο Head λογαριασμού
 Closing Account {0} must be of type 'Liability',Κλείσιμο του λογαριασμού {0} πρέπει να είναι τύπου «Ευθύνη »
 Closing Date,Καταληκτική ημερομηνία
@@ -529,12 +526,13 @@ Closing Value,Αξία Κλεισίματος
 CoA Help,CoA Βοήθεια
 Code,Κωδικός
 Cold Calling,Cold Calling
-Collapse,κατάρρευση
 Color,Χρώμα
+Column Break,Break Στήλη
 Comma separated list of email addresses,Διαχωρισμένες με κόμμα λίστα με τις διευθύνσεις ηλεκτρονικού ταχυδρομείου
 Comment,Σχόλιο
 Comments,Σχόλια
 Commercial,εμπορικός
+Commission,προμήθεια
 Commission Rate,Επιτροπή Τιμή
 Commission Rate (%),Επιτροπή Ποσοστό (%)
 Commission on Sales,Επιτροπή επί των πωλήσεων
@@ -542,7 +540,6 @@ Commission rate cannot be greater than 100,Ποσοστό της Επιτροπ�
 Communication,Επικοινωνία
 Communication HTML,Ανακοίνωση HTML
 Communication History,Ιστορία επικοινωνίας
-Communication Medium,Μέσο Επικοινωνίας
 Communication log.,Log ανακοίνωση.
 Communications,Επικοινωνίες
 Company,Εταιρεία
@@ -561,13 +558,13 @@ Company registration numbers for your reference. Tax numbers etc.,Αριθμοί
 "Company, Month and Fiscal Year is mandatory","Εταιρείας , Μήνας και Χρήσεως είναι υποχρεωτική"
 Compensatory Off,Αντισταθμιστικά Off
 Complete,Πλήρης
-Complete By,Συμπληρώστε Με
 Complete Setup,ολοκλήρωση της εγκατάστασης
 Completed,Ολοκληρώθηκε
 Completed Production Orders,Ολοκληρώθηκε Εντολών Παραγωγής
 Completed Qty,Ολοκληρώθηκε Ποσότητα
 Completion Date,Ημερομηνία Ολοκλήρωσης
 Completion Status,Κατάσταση Ολοκλήρωση
+Computer,ηλεκτρονικός υπολογιστής
 Computers,Υπολογιστές
 Confirmation Date,επιβεβαίωση Ημερομηνία
 Confirmed orders from Customers.,Επιβεβαιώθηκε παραγγελίες από πελάτες.
@@ -575,10 +572,12 @@ Consider Tax or Charge for,Σκεφτείτε φόρος ή τέλος για
 Considered as Opening Balance,Θεωρείται ως άνοιγμα Υπόλοιπο
 Considered as an Opening Balance,Θεωρείται ως ένα Υπόλοιπο έναρξης
 Consultant,Σύμβουλος
+Consulting,Consulting
 Consumable,Αναλώσιμα
 Consumable Cost,Αναλώσιμα Κόστος
 Consumable cost per hour,Αναλώσιμα κόστος ανά ώρα
 Consumed Qty,Καταναλώνεται Ποσότητα
+Consumer Products,Καταναλωτικά Προϊόντα
 Contact,Επαφή
 Contact Control,Στοιχεία ελέγχου
 Contact Desc,Επικοινωνία Desc
@@ -596,6 +595,7 @@ Contacts,Επαφές
 Content,Περιεχόμενο
 Content Type,Τύπος περιεχομένου
 Contra Voucher,Contra Voucher
+Contract,σύμβαση
 Contract End Date,Σύμβαση Ημερομηνία Λήξης
 Contract End Date must be greater than Date of Joining,"Ημερομηνία λήξης της σύμβασης πρέπει να είναι μεγαλύτερη από ό, τι Ημερομηνία Ενώνουμε"
 Contribution (%),Συμμετοχή (%)
@@ -609,13 +609,11 @@ Convert into Recurring Invoice,Μετατροπή σε Επαναλαμβανό�
 Convert to Group,Μετατροπή σε Ομάδα
 Convert to Ledger,Μετατροπή σε Ledger
 Converted,Αναπαλαιωμένο
-Copy,Αντιγραφή
 Copy From Item Group,Αντιγραφή από τη θέση Ομάδα
+Cosmetics,καλλυντικά
 Cost Center,Κέντρο Κόστους
 Cost Center Details,Κόστος Λεπτομέρειες Κέντρο
 Cost Center Name,Κόστος Όνομα Κέντρο
-Cost Center Name already exists,Κόστος Κέντρο όνομα υπάρχει ήδη
-Cost Center is mandatory for Item {0},Κέντρο Κόστους είναι υποχρεωτική για τη θέση {0}
 Cost Center is required for 'Profit and Loss' account {0},Κέντρο Κόστους απαιτείται για το λογαριασμό « Αποτελέσματα Χρήσεως » {0}
 Cost Center is required in row {0} in Taxes table for type {1},Κέντρο Κόστους απαιτείται στη γραμμή {0} σε φόρους πίνακα για τον τύπο {1}
 Cost Center with existing transactions can not be converted to group,Κέντρο Κόστους με τις υπάρχουσες συναλλαγές δεν μπορεί να μετατραπεί σε ομάδα
@@ -625,6 +623,7 @@ Cost of Goods Sold,Κόστος Πωληθέντων
 Costing,Κοστολόγηση
 Country,Χώρα
 Country Name,Όνομα Χώρα
+Country wise default Address Templates,Χώρα σοφός default Διεύθυνση Πρότυπα
 "Country, Timezone and Currency","Χώρα , Χρονική ζώνη και Συνάλλαγμα"
 Create Bank Voucher for the total salary paid for the above selected criteria,Δημιουργία Voucher Τράπεζας για το σύνολο του μισθού που καταβάλλεται για τις επιλεγμένες παραπάνω κριτήρια
 Create Customer,Δημιουργία Πελάτη
@@ -640,7 +639,6 @@ Create Stock Ledger Entries when you submit a Sales Invoice,Δημιουργία
 Create rules to restrict transactions based on values.,Δημιουργία κανόνων για τον περιορισμό των συναλλαγών που βασίζονται σε αξίες .
 Created By,Δημιουργήθηκε Από
 Creates salary slip for above mentioned criteria.,Δημιουργεί εκκαθαριστικό σημείωμα αποδοχών για τα προαναφερόμενα κριτήρια.
-Creation / Modified By,Δημιουργία / Τροποποιήθηκε από
 Creation Date,Ημερομηνία δημιουργίας
 Creation Document No,Έγγραφο Δημιουργία αριθ.
 Creation Document Type,Δημιουργία Τύπος εγγράφου
@@ -648,6 +646,7 @@ Creation Time,Χρόνος Δημιουργίας
 Credentials,Διαπιστευτήρια
 Credit,Πίστωση
 Credit Amt,Credit Amt
+Credit Card,Πιστωτική Κάρτα
 Credit Card Voucher,Πιστωτική Κάρτα Voucher
 Credit Controller,Credit Controller
 Credit Days,Ημέρες Credit
@@ -670,20 +669,20 @@ Current Liabilities,Βραχυπρόθεσμες Υποχρεώσεις
 Current Stock,Τρέχουσα Χρηματιστήριο
 Current Stock UOM,Τρέχουσα UOM Χρηματιστήριο
 Current Value,Τρέχουσα Αξία
-Current status,Τρέχουσα κατάσταση
 Custom,Έθιμο
 Custom Autoreply Message,Προσαρμοσμένο μήνυμα Autoreply
 Custom Message,Προσαρμοσμένο μήνυμα
-Custom Reports,Προσαρμοσμένες Αναφορές
 Customer,Πελάτης
 Customer (Receivable) Account,Πελατών (Απαιτήσεις) λογαριασμός
 Customer / Item Name,Πελάτης / Θέση Name
 Customer / Lead Address,Πελάτης / Επικεφαλής Διεύθυνση
 Customer / Lead Name,Πελάτης / Επικεφαλής Όνομα
+Customer > Customer Group > Territory,Πελάτης> Ομάδα Πελατών> Έδαφος
 Customer Account Head,Πελάτης Επικεφαλής λογαριασμού
 Customer Acquisition and Loyalty,Απόκτηση πελατών και Πιστότητας
 Customer Address,Διεύθυνση πελατών
 Customer Addresses And Contacts,Διευθύνσεις πελατών και των επαφών
+Customer Addresses and Contacts,Διευθύνσεις πελατών και επαφές
 Customer Code,Κωδικός Πελάτη
 Customer Codes,Κωδικοί πελατών
 Customer Details,Στοιχεία Πελάτη
@@ -696,6 +695,7 @@ Customer Issue,Τεύχος πελατών
 Customer Issue against Serial No.,Τεύχος πελατών κατά αύξοντα αριθμό
 Customer Name,Όνομα πελάτη
 Customer Naming By,Πελάτης ονομασία με
+Customer Service,Εξυπηρέτηση πελατών
 Customer database.,Βάση δεδομένων των πελατών.
 Customer is required,Πελάτης είναι υποχρεωμένος
 Customer master.,Πλοίαρχος του πελάτη .
@@ -722,7 +722,6 @@ Date Format,Μορφή ημερομηνίας
 Date Of Retirement,Ημερομηνία συνταξιοδότησης
 Date Of Retirement must be greater than Date of Joining,"Ημερομηνία συνταξιοδότησης πρέπει να είναι μεγαλύτερη από ό, τι Ημερομηνία Ενώνουμε"
 Date is repeated,Ημερομηνία επαναλαμβάνεται
-Date must be in format: {0},Η ημερομηνία πρέπει να είναι σε μορφή : {0}
 Date of Birth,Ημερομηνία Γέννησης
 Date of Issue,Ημερομηνία Έκδοσης
 Date of Joining,Ημερομηνία Ενώνουμε
@@ -733,13 +732,11 @@ Dates,Ημερομηνίες
 Days Since Last Order,Ημέρες από την τελευταία παραγγελία
 Days for which Holidays are blocked for this department.,Οι ημέρες για τις οποίες Διακοπές μπλοκαριστεί για αυτό το τμήμα.
 Dealer,Έμπορος
-Dear,Αγαπητός
 Debit,Χρέωση
 Debit Amt,Χρέωση Amt
 Debit Note,Χρεωστικό σημείωμα
 Debit To,Χρεωστική
 Debit and Credit not equal for this voucher. Difference is {0}.,Χρεωστικές και πιστωτικές δεν είναι ίση για αυτό το κουπόνι . Η διαφορά είναι {0} .
-Debit must equal Credit. The difference is {0},Χρεωστικές πρέπει να ισούται με πιστωτική . Η διαφορά είναι {0}
 Deduct,Μείον
 Deduction,Αφαίρεση
 Deduction Type,Τύπος Έκπτωση
@@ -747,6 +744,8 @@ Deduction1,Deduction1
 Deductions,Μειώσεις
 Default,Αθέτηση
 Default Account,Προεπιλεγμένο λογαριασμό
+Default Address Template cannot be deleted,Προεπιλογή Διεύθυνση πρότυπο δεν μπορεί να διαγραφεί
+Default Amount,Προεπιλογή Ποσό
 Default BOM,BOM Προεπιλογή
 Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,"Προεπιλογή Bank / Cash λογαριασμού θα ενημερώνεται αυτόματα σε Τιμολόγιο POS, όταν επιλέγεται αυτός ο τρόπος."
 Default Bank Account,Προεπιλογή Τραπεζικό Λογαριασμό
@@ -754,7 +753,6 @@ Default Buying Cost Center,Προεπιλογή Αγοράζοντας Κέντ�
 Default Buying Price List,Προεπιλογή Τιμοκατάλογος Αγορά
 Default Cash Account,Προεπιλεγμένο λογαριασμό Cash
 Default Company,Εταιρεία Προκαθορισμένο
-Default Cost Center for tracking expense for this item.,Προεπιλογή Κέντρο Κόστους για την παρακολούθηση των εξόδων για αυτό το στοιχείο.
 Default Currency,Προεπιλεγμένο νόμισμα
 Default Customer Group,Προεπιλογή Ομάδα πελατών
 Default Expense Account,Προεπιλογή Λογαριασμός Εξόδων
@@ -779,9 +777,10 @@ Default settings for accounting transactions.,Οι προεπιλεγμένες 
 Default settings for buying transactions.,Οι προεπιλεγμένες ρυθμίσεις για την αγορά των συναλλαγών .
 Default settings for selling transactions.,Οι προεπιλεγμένες ρυθμίσεις για την πώληση των συναλλαγών .
 Default settings for stock transactions.,Οι προεπιλεγμένες ρυθμίσεις για τις χρηματιστηριακές συναλλαγές .
+Defense,άμυνα
 "Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","Καθορισμός του προϋπολογισμού για το Κέντρο Κόστους. Για να ρυθμίσετε δράσης του προϋπολογισμού, βλ. <a href=""#!List/Company"">εταιρεία Master</a>"
+Del,Διαγ
 Delete,Διαγραφή
-Delete Row,Διαγραφή γραμμής
 Delete {0} {1}?,Διαγραφή {0} {1} ;
 Delivered,Δημοσιεύθηκε
 Delivered Items To Be Billed,Δημοσιεύθηκε αντικείμενα να χρεώνονται
@@ -805,16 +804,18 @@ Delivery Status,Κατάσταση παράδοσης
 Delivery Time,Χρόνος παράδοσης
 Delivery To,Παράδοση Προς
 Department,Τμήμα
+Department Stores,Πολυκαταστήματα
 Depends on LWP,Εξαρτάται από LWP
 Depreciation,απόσβεση
-Descending,Φθίνουσα
 Description,Περιγραφή
 Description HTML,Περιγραφή HTML
 Designation,Ονομασία
+Designer,σχεδιαστής
 Detailed Breakup of the totals,Λεπτομερής Χωρίστε των συνόλων
 Details,Λεπτομέρειες
-Difference,Διαφορά
+Difference (Dr - Cr),Διαφορά ( Dr - Cr )
 Difference Account,Ο λογαριασμός διαφορά
+"Difference Account must be a 'Liability' type account, since this Stock Reconciliation is an Opening Entry","Ο λογαριασμός διαφορά αυτή πρέπει να είναι ένας λογαριασμός τύπου «Ευθύνη » , δεδομένου ότι αυτό Stock συμφιλίωση είναι ένα άνοιγμα εισόδου"
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,Διαφορετικές UOM για τα στοιχεία θα οδηγήσουν σε λανθασμένη ( Σύνολο ) Καθαρή αξία βάρος . Βεβαιωθείτε ότι το Καθαρό βάρος κάθε στοιχείου είναι το ίδιο UOM .
 Direct Expenses,Άμεσες δαπάνες
 Direct Income,Άμεσα Έσοδα
@@ -827,8 +828,10 @@ Discount (%),Έκπτωση (%)
 Discount Amount,Ποσό έκπτωσης
 "Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice","Τα πεδία με έκπτωση θα είναι διαθέσιμο σε Εντολή Αγοράς, Αγορά Παραλαβή, Τιμολόγιο Αγορά"
 Discount Percentage,έκπτωση Ποσοστό
+Discount Percentage can be applied either against a Price List or for all Price List.,Έκπτωση Ποσοστό μπορεί να εφαρμοστεί είτε κατά Τιμοκατάλογος ή για όλα τα Τιμοκατάλογος.
 Discount must be less than 100,Έκπτωση πρέπει να είναι μικρότερη από 100
 Discount(%),Έκπτωση (%)
+Dispatch,αποστολή
 Display all the individual items delivered with the main items,Εμφανίζει όλα τα επιμέρους στοιχεία που παραδίδονται μαζί με τα κύρια θέματα
 Distribute transport overhead across items.,Μοιράστε εναέρια μεταφορά σε αντικείμενα.
 Distribution,Διανομή
@@ -848,25 +851,17 @@ Do you really want to stop production order: ,
 Doc Name,Doc Name
 Doc Type,Doc Τύπος
 Document Description,Περιγραφή εγγράφου
-Document Status transition from ,Έγγραφο μετάβασης κατάστασης από
-Document Status transition from {0} to {1} is not allowed,Μετάβασης Κατάσταση εγγράφου από {0} έως {1} δεν επιτρέπεται
 Document Type,Τύπος εγγράφου
-Document is only editable by users of role,Το έγγραφο είναι μόνο επεξεργάσιμη από τους χρήστες του ρόλου
-Documentation,Τεκμηρίωση
 Documents,Έγγραφα
 Domain,Τομέα
 Don't send Employee Birthday Reminders,Μην στέλνετε Υπάλληλος Υπενθυμίσεις γενεθλίων
-Download,Λήψη
 Download Materials Required,Κατεβάστε Απαιτούμενα Υλικά
 Download Reconcilation Data,Κατεβάστε συμφιλίωσης Δεδομένων
 Download Template,Κατεβάστε προτύπου
 Download a report containing all raw materials with their latest inventory status,Κατεβάστε μια έκθεση που περιέχει όλες τις πρώτες ύλες με πιο πρόσφατη κατάσταση των αποθεμάτων τους
 "Download the Template, fill appropriate data and attach the modified file.","Κατεβάστε το Πρότυπο , συμπληρώστε τα κατάλληλα δεδομένα και να επισυνάψετε το τροποποιημένο αρχείο ."
-"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records",
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records","Κατεβάστε το Πρότυπο, συμπληρώστε τα κατάλληλα δεδομένα και να επισυνάψετε το τροποποιημένο αρχείο. Όλες οι ημερομηνίες και ο συνδυασμός των εργαζομένων στην επιλεγμένη περίοδο θα έρθει στο πρότυπο, με τους υπάρχοντες καταλόγους παρουσίας"
 Draft,Προσχέδιο
-Drafts,Συντάκτης
-Drag to sort columns,Σύρετε για να ταξινομήσετε στήλες
 Dropbox,Dropbox
 Dropbox Access Allowed,Dropbox Access κατοικίδια
 Dropbox Access Key,Dropbox Access Key
@@ -876,11 +871,10 @@ Due Date cannot be after {0},Ημερομηνία λήξης δεν μπορεί
 Due Date cannot be before Posting Date,Ημερομηνία λήξης δεν μπορεί να είναι πριν από την απόσπαση Ημερομηνία
 Duplicate Entry. Please check Authorization Rule {0},Διπλότυπο εισόδου . Παρακαλώ ελέγξτε Εξουσιοδότηση άρθρο {0}
 Duplicate Serial No entered for Item {0},Διπλότυπο Αύξων αριθμός που εγγράφονται για τη θέση {0}
+Duplicate entry,Διπλότυπο είσοδο
 Duplicate row {0} with same {1},Διπλότυπο γραμμή {0} με το ίδιο {1}
 Duties and Taxes,Δασμοί και φόροι
 ERPNext Setup,Ρύθμιση ERPNext
-ESIC CARD No,ESIC ΚΑΡΤΑ αριθ.
-ESIC No.,ESIC Όχι
 Earliest,Η πιο παλιά
 Earnest Money,Earnest χρήματα
 Earning,Κερδίζουν
@@ -888,7 +882,10 @@ Earning & Deduction,Κερδίζουν &amp; Έκπτωση
 Earning Type,Κερδίζουν Τύπος
 Earning1,Earning1
 Edit,Επεξεργασία
-Editable,Επεξεργάσιμη
+Edu. Cess on Excise,Edu. Cess σε ειδικούς φόρους κατανάλωσης
+Edu. Cess on Service Tax,Edu. Cess στην Φορολογική Υπηρεσία
+Edu. Cess on TDS,Edu. Cess σε TDS
+Education,εκπαίδευση
 Educational Qualification,Εκπαιδευτικά προσόντα
 Educational Qualification Details,Εκπαιδευτικά Λεπτομέρειες Προκριματικά
 Eg. smsgateway.com/api/send_sms.cgi,Π.χ.. smsgateway.com / api / send_sms.cgi
@@ -898,6 +895,7 @@ Either target qty or target amount is mandatory.,Είτε ποσότητα -στ
 Electrical,ηλεκτρικός
 Electricity Cost,Κόστος ηλεκτρικής ενέργειας
 Electricity cost per hour,Κόστος της ηλεκτρικής ενέργειας ανά ώρα
+Electronics,ηλεκτρονική
 Email,Email
 Email Digest,Email Digest
 Email Digest Settings,Email Digest Ρυθμίσεις
@@ -906,12 +904,9 @@ Email Id,Id Email
 "Email Id where a job applicant will email e.g. ""jobs@example.com""","Email Id, όπου ένας υποψήφιος θα e-mail π.χ. &quot;jobs@example.com&quot;"
 Email Notifications,Ειδοποιήσεις μέσω ηλεκτρονικού ταχυδρομείου
 Email Sent?,Εστάλη μήνυμα ηλεκτρονικού ταχυδρομείου;
-"Email addresses, separted by commas","Οι διευθύνσεις ηλεκτρονικού ταχυδρομείου, separted με κόμματα"
 "Email id must be unique, already exists for {0}","Id ηλεκτρονικού ταχυδρομείου πρέπει να είναι μοναδικό , υπάρχει ήδη για {0}"
 Email ids separated by commas.,"Ταυτότητες ηλεκτρονικού ταχυδρομείου, διαχωρισμένες με κόμματα."
-Email sent to {0},Μηνύματος που αποστέλλεται σε {0}
 "Email settings to extract Leads from sales email id e.g. ""sales@example.com""",Ρυθμίσεις email για να εξαγάγετε οδηγεί από τις πωλήσεις e-mail id π.χ. &quot;sales@example.com&quot;
-Email...,Στείλτε e-mail ...
 Emergency Contact,Επείγουσα Επικοινωνία
 Emergency Contact Details,Στοιχεία επικοινωνίας έκτακτης ανάγκης
 Emergency Phone,Τηλέφωνο Έκτακτης Ανάγκης
@@ -931,7 +926,6 @@ Employee Records to be created by,Εγγραφές των εργαζομένων
 Employee Settings,Ρυθμίσεις των εργαζομένων
 Employee Type,Σχέση απασχόλησης
 "Employee designation (e.g. CEO, Director etc.).","Καθορισμό των εργαζομένων ( π.χ. Διευθύνων Σύμβουλος , Διευθυντής κ.λπ. ) ."
-Employee grade.,Βαθμού των εργαζομένων .
 Employee master.,Πλοίαρχος των εργαζομένων .
 Employee record is created using selected field. ,Εγγραφή υπαλλήλου δημιουργείται χρησιμοποιώντας επιλεγμένο πεδίο.
 Employee records.,Τα αρχεία των εργαζομένων.
@@ -949,7 +943,8 @@ End Date,Ημερομηνία Λήξης
 End Date can not be less than Start Date,"Ημερομηνία λήξης δεν μπορεί να είναι μικρότερη από ό, τι Ημερομηνία Έναρξης"
 End date of current invoice's period,Ημερομηνία λήξης της περιόδου τρέχουσας τιμολογίου
 End of Life,Τέλος της Ζωής
-Enter Value,Εισαγωγή τιμής
+Energy,ενέργεια
+Engineer,μηχανικός
 Enter Verification Code,Εισάγετε τον κωδικό επαλήθευσης
 Enter campaign name if the source of lead is campaign.,Πληκτρολογήστε το όνομα της καμπάνιας αν η πηγή του μολύβδου εκστρατείας.
 Enter department to which this Contact belongs,Εισάγετε υπηρεσία στην οποία ανήκει αυτή η επαφή
@@ -961,27 +956,37 @@ Enter name of campaign if source of enquiry is campaign,Πληκτρολογήσ
 Enter the company name under which Account Head will be created for this Supplier,Εισάγετε το όνομα της εταιρείας βάσει της οποίας επικεφαλής λογαριασμός θα δημιουργηθεί αυτής της επιχείρησης
 Enter url parameter for message,Εισάγετε παράμετρο url για το μήνυμα
 Enter url parameter for receiver nos,Εισάγετε παράμετρο url για nos δέκτη
+Entertainment & Leisure,Διασκέδαση & Leisure
 Entertainment Expenses,Έξοδα Ψυχαγωγία
 Entries,Καταχωρήσεις
-Entries against,Ενδείξεις κατά
+Entries against ,
 Entries are not allowed against this Fiscal Year if the year is closed.,"Οι συμμετοχές δεν επιτρέπεται κατά το τρέχον οικονομικό έτος, εάν το έτος είναι κλειστή."
-Entries before {0} are frozen,Οι καταχωρήσεις πριν από {0} κατεψυγμένα
-Equals,Ίσο
 Equity,δικαιοσύνη
 Error: {0} > {1},Σφάλμα : {0} > {1}
 Estimated Material Cost,Εκτιμώμενο κόστος υλικών
+"Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Ακόμα κι αν υπάρχουν πολλά Κανόνες τιμολόγησης με την υψηλότερη προτεραιότητα, στη συνέχεια μετά από εσωτερικές προτεραιότητες που εφαρμόζονται:"
 Everyone can read,Ο καθένας μπορεί να διαβάσει
-"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",". Παράδειγμα: ABCD # # # # #  Αν σειράς έχει οριστεί και Αύξων αριθμός δεν αναφέρεται στις συναλλαγές, τότε αυτόματα αύξων αριθμός θα δημιουργηθεί με βάση αυτή τη σειρά. Αν θέλετε πάντα να αναφέρεται ρητά Serial Nos για αυτό το προϊόν. αφήστε κενό αυτό."
 Exchange Rate,Ισοτιμία
+Excise Duty 10,Ειδικό φόρο κατανάλωσης 10
+Excise Duty 14,Ειδικό φόρο κατανάλωσης 14
+Excise Duty 4,Ειδικού φόρου κατανάλωσης 4
+Excise Duty 8,Ειδικού φόρου κατανάλωσης 8
+Excise Duty @ 10,Ειδικού φόρου κατανάλωσης @ 10
+Excise Duty @ 14,Ειδικού φόρου κατανάλωσης @ 14
+Excise Duty @ 4,Ειδικού φόρου κατανάλωσης @ 4
+Excise Duty @ 8,Ειδικού φόρου κατανάλωσης @ 8
+Excise Duty Edu Cess 2,Excise Duty Edu Cess 2
+Excise Duty SHE Cess 1,Excise Duty SHE Cess 1
 Excise Page Number,Excise Αριθμός σελίδας
 Excise Voucher,Excise Voucher
+Execution,εκτέλεση
+Executive Search,Executive Search
 Exemption Limit,Όριο απαλλαγής
 Exhibition,Έκθεση
 Existing Customer,Υφιστάμενες πελατών
 Exit,Έξοδος
 Exit Interview Details,Έξοδος Λεπτομέρειες Συνέντευξη
-Expand,Αναπτύξτε
 Expected,Αναμενόμενη
 Expected Completion Date can not be less than Project Start Date,"Αναμενόμενη ημερομηνία ολοκλήρωσης δεν μπορεί να είναι μικρότερη από ό, τι Ημερομηνία Έναρξης Έργου"
 Expected Date cannot be before Material Request Date,Αναμενόμενη ημερομηνία δεν μπορεί να είναι πριν Υλικό Ημερομηνία Αίτησης
@@ -990,6 +995,8 @@ Expected Delivery Date cannot be before Purchase Order Date,Αναμενόμεν
 Expected Delivery Date cannot be before Sales Order Date,Αναμενόμενη ημερομηνία παράδοσης δεν μπορεί να είναι πριν από την ημερομηνία Πωλήσεις Τάξης
 Expected End Date,Αναμενόμενη Ημερομηνία Λήξης
 Expected Start Date,Αναμενόμενη ημερομηνία έναρξης
+Expense,δαπάνη
+Expense / Difference account ({0}) must be a 'Profit or Loss' account,Έξοδα / λογαριασμού Διαφορά ({0}) πρέπει να είναι λογαριασμός «Κέρδη ή Ζημίες»
 Expense Account,Λογαριασμός Εξόδων
 Expense Account is mandatory,Λογαριασμός Εξόδων είναι υποχρεωτική
 Expense Claim,Αξίωση Εξόδων
@@ -1007,14 +1014,12 @@ Expense Date,Ημερομηνία Εξόδων
 Expense Details,Λεπτομέρειες Εξόδων
 Expense Head,Επικεφαλής Εξόδων
 Expense account is mandatory for item {0},Λογαριασμό εξόδων είναι υποχρεωτική για το στοιχείο {0}
-Expense or Difference account is mandatory for Item {0} as there is difference in value,"Δαπάνη ή διαφορά του λογαριασμού είναι υποχρεωτική για τη θέση {0} , καθώς υπάρχει διαφορά στην τιμή"
+Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,"Δαπάνη ή διαφορά του λογαριασμού είναι υποχρεωτική για τη θέση {0} , καθώς επηρεάζουν τη συνολική αξία των αποθεμάτων"
 Expenses,έξοδα
 Expenses Booked,Έξοδα κράτηση
 Expenses Included In Valuation,Έξοδα που περιλαμβάνονται στην αποτίμηση
 Expenses booked for the digest period,Έξοδα κράτηση για το χρονικό διάστημα πέψης
 Expiry Date,Ημερομηνία λήξης
-Export,Εξαγωγή
-Export not allowed. You need {0} role to export.,Η εξαγωγή δεν επιτρέπεται . Χρειάζεται {0} ρόλο για την εξαγωγή .
 Exports,Εξαγωγές
 External,Εξωτερικός
 Extract Emails,Απόσπασμα Emails
@@ -1029,29 +1034,29 @@ Feedback,Ανατροφοδότηση
 Female,Θηλυκός
 Fetch exploded BOM (including sub-assemblies),Φέρτε εξερράγη BOM ( συμπεριλαμβανομένων των υποσυνόλων )
 "Field available in Delivery Note, Quotation, Sales Invoice, Sales Order","Πεδίο διατίθεται σε δελτίο αποστολής, εισαγωγικά, Πωλήσεις Τιμολόγιο, Πωλήσεις Τάξης"
-Field {0} is not selectable.,Το πεδίο {0} δεν είναι επιλέξιμο .
-File,Αρχείο
 Files Folder ID,Αρχεία ID Folder
 Fill the form and save it,Συμπληρώστε τη φόρμα και να το αποθηκεύσετε
-Filter,Φιλτράρισμα
-Filter By Amount,Φιλτράρετε με βάση το ποσό
-Filter By Date,Με φίλτρο ανά ημερομηνία
 Filter based on customer,Φιλτράρισμα με βάση τον πελάτη
 Filter based on item,Φιλτράρισμα σύμφωνα με το σημείο
-Final Confirmation Date must be greater than Date of Joining,"Τελική ημερομηνία επιβεβαίωσης πρέπει να είναι μεγαλύτερη από ό, τι Ημερομηνία Ενώνουμε"
 Financial / accounting year.,Οικονομικών / λογιστικών έτος .
 Financial Analytics,Financial Analytics
+Financial Services,Χρηματοοικονομικές Υπηρεσίες
 Financial Year End Date,Οικονομικό έτος Ημερομηνία Λήξης
 Financial Year Start Date,Οικονομικό έτος Ημερομηνία Έναρξης
 Finished Goods,Έτοιμα προϊόντα
 First Name,Όνομα
 First Responded On,Πρώτη απάντησε στις
 Fiscal Year,Οικονομικό έτος
+Fiscal Year Start Date and Fiscal Year End Date are already set in Fiscal Year {0},Φορολογικό Έτος Ημερομηνία έναρξης και Φορολογικό Έτος Ημερομηνία λήξης έχουν ήδη τεθεί σε Χρήσεως {0}
+Fiscal Year Start Date and Fiscal Year End Date cannot be more than a year apart.,Φορολογικό Έτος Ημερομηνία έναρξης και Φορολογικό Έτος Ημερομηνία λήξης δεν μπορεί να είναι περισσότερο από ένα χρόνο χώρια.
+Fiscal Year Start Date should not be greater than Fiscal Year End Date,"Φορολογικό Έτος Ημερομηνία Έναρξης δεν πρέπει να είναι μεγαλύτερη από ό, τι Φορολογικό Έτος Ημερομηνία Λήξης"
 Fixed Asset,Πάγιο
 Fixed Assets,Πάγια
 Follow via Email,Ακολουθήστε μέσω e-mail
 "Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",Μετά τον πίνακα θα δείτε τις τιμές εάν τα στοιχεία είναι υπο - υπεργολάβο. Οι τιμές αυτές θα πρέπει να προσκομίζονται από τον πλοίαρχο του &quot;Bill of Materials&quot; των υπο - υπεργολάβο αντικείμενα.
 Food,τροφή
+"Food, Beverage & Tobacco","Τρόφιμα , Ποτά και Καπνός"
+"For 'Sales BOM' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Sales BOM' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.","Για «Πωλήσεις BOM» αντικείμενα, αποθήκη, Αύξων αριθμός παρτίδας και θα εξεταστεί από το τραπέζι των «Packing List». Αν και αποθήκη παρτίδας είναι ίδια για όλα τα είδη συσκευασίας για οποιοδήποτε στοιχείο «Πωλήσεις BOM», οι αξίες αυτές μπορούν να εγγραφούν στον κύριο πίνακα Στοιχείο, οι τιμές θα αντιγραφούν στο τραπέζι »Κατάλογος συσκευασίας»."
 For Company,Για την Εταιρεία
 For Employee,Για Υπάλληλος
 For Employee Name,Για Όνομα Υπάλληλος
@@ -1063,14 +1068,10 @@ For Server Side Print Formats,Για διακομιστή εκτύπωσης Μ�
 For Supplier,για Προμηθευτής
 For Warehouse,Για αποθήκη
 For Warehouse is required before Submit,Για απαιτείται αποθήκη πριν Υποβολή
-"For comparative filters, start with","Για τις συγκριτικές φίλτρα, ξεκινήστε με"
 "For e.g. 2012, 2012-13","Για παράδειγμα το 2012, 2012-13"
-For ranges,Για σειρές
 For reference,Για την αναφορά
 For reference only.,Για την αναφορά μόνο.
 "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","Για την εξυπηρέτηση των πελατών, οι κωδικοί αυτοί μπορούν να χρησιμοποιηθούν σε μορφές εκτύπωσης, όπως τιμολόγια και δελτία παράδοσης"
-Form,Μορφή
-Forums,φόρουμ
 Fraction,Κλάσμα
 Fraction Units,Μονάδες κλάσμα
 Freeze Stock Entries,Πάγωμα εγγραφών Χρηματιστήριο
@@ -1085,7 +1086,9 @@ From Currency and To Currency cannot be same,Από το νόμισμα και �
 From Customer,Από πελατών
 From Customer Issue,Από πελατών Τεύχος
 From Date,Από Ημερομηνία
+From Date cannot be greater than To Date,Από την ημερομηνία αυτή δεν μπορεί να είναι μεγαλύτερη από την Ημερομηνία
 From Date must be before To Date,Από την ημερομηνία πρέπει να είναι πριν από την ημερομηνία
+From Date should be within the Fiscal Year. Assuming From Date = {0},Από Ημερομηνία πρέπει να είναι εντός του οικονομικού έτους. Υποθέτοντας Από Ημερομηνία = {0}
 From Delivery Note,Από το Δελτίο Αποστολής
 From Employee,Από Υπάλληλος
 From Lead,Από μόλυβδο
@@ -1106,7 +1109,10 @@ Frozen,Κατεψυγμένα
 Frozen Accounts Modifier,Κατεψυγμένα Λογαριασμοί Τροποποίησης
 Fulfilled,Εκπληρωμένες
 Full Name,Ονοματεπώνυμο
+Full-time,Πλήρης απασχόληση
+Fully Billed,Πλήρως Billed
 Fully Completed,Πλήρως Ολοκληρώθηκε
+Fully Delivered,Πλήρως Δημοσιεύθηκε
 Furniture and Fixture,Έπιπλα και λοιπός εξοπλισμός
 Further accounts can be made under Groups but entries can be made against Ledger,Περαιτέρω λογαριασμοί μπορούν να γίνουν στις ομάδες αλλά και εγγραφές μπορούν να γίνουν με Ledger
 "Further accounts can be made under Groups, but entries can be made against Ledger","Περαιτέρω λογαριασμοί μπορούν να γίνουν στις ομάδες , αλλά και εγγραφές μπορούν να γίνουν με Ledger"
@@ -1122,22 +1128,21 @@ Generate Material Requests (MRP) and Production Orders.,Δημιουργία Α�
 Generate Salary Slips,Δημιουργία μισθολόγια
 Generate Schedule,Δημιουργήστε Πρόγραμμα
 Generates HTML to include selected image in the description,Δημιουργεί HTML για να συμπεριλάβει επιλεγμένη εικόνα στην περιγραφή
-Get,Λήψη
 Get Advances Paid,Πάρτε προκαταβολές που καταβλήθηκαν
 Get Advances Received,Πάρτε Προκαταβολές που εισπράχθηκαν
 Get Current Stock,Get Current Stock
-Get From ,Πάρτε Από
 Get Items,Πάρτε Είδη
 Get Items From Sales Orders,Πάρετε τα στοιχεία από τις πωλήσεις Παραγγελίες
 Get Items from BOM,Λήψη στοιχείων από BOM
 Get Last Purchase Rate,Πάρτε Τελευταία Τιμή Αγοράς
-Get Non Reconciled Entries,Πάρτε Μη Συμφιλιώνεται Καταχωρήσεις
 Get Outstanding Invoices,Αποκτήστε εξαιρετική τιμολόγια
+Get Relevant Entries,Πάρτε Σχετικές Καταχωρήσεις
 Get Sales Orders,Πάρτε Παραγγελίες
 Get Specification Details,Get Λεπτομέρειες Προδιαγραφές
 Get Stock and Rate,Πάρτε απόθεμα και ο ρυθμός
 Get Template,Πάρτε Πρότυπο
 Get Terms and Conditions,Πάρτε τους Όρους και Προϋποθέσεις
+Get Unreconciled Entries,Πάρτε unreconciled Καταχωρήσεις
 Get Weekly Off Dates,Πάρτε Weekly Off Ημερομηνίες
 "Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.","Πάρτε ποσοστό αποτίμησης και των διαθέσιμων αποθεμάτων στην αποθήκη πηγή / στόχο την απόσπαση αναφέρεται ημερομηνίας-ώρας. Αν συνέχειες στοιχείο, πατήστε αυτό το κουμπί μετά την είσοδό αύξοντες αριθμούς."
 Global Defaults,Παγκόσμια Προεπιλογές
@@ -1151,14 +1156,11 @@ Goods received from Suppliers.,Τα εμπορεύματα παραλαμβάν�
 Google Drive,Google Drive
 Google Drive Access Allowed,Google πρόσβαση στην μονάδα τα κατοικίδια
 Government,κυβέρνηση
-Grade,Βαθμός
 Graduate,Πτυχιούχος
 Grand Total,Γενικό Σύνολο
 Grand Total (Company Currency),Γενικό Σύνολο (νόμισμα της Εταιρείας)
-Gratuity LIC ID,Φιλοδώρημα ID LIC
-Greater or equals,Μεγαλύτερο ή ίσον
-Greater than,"μεγαλύτερη από ό, τι"
 "Grid ""","Πλέγμα """
+Grocery,παντοπωλείο
 Gross Margin %,Μικτό Περιθώριο%
 Gross Margin Value,Ακαθάριστη Αξία Περιθώριο
 Gross Pay,Ακαθάριστων αποδοχών
@@ -1168,11 +1170,11 @@ Gross Profit (%),Μικτό κέρδος (%)
 Gross Weight,Μικτό βάρος
 Gross Weight UOM,Μικτό βάρος UOM
 Group,Ομάδα
-"Group Added, refreshing...","Ομάδα Προστέθηκε , αναζωογονητικό ..."
 Group by Account,Ομάδα με Λογαριασμού
 Group by Voucher,Ομάδα του Voucher
 Group or Ledger,Ομάδα ή Ledger
 Groups,Ομάδες
+HR Manager,HR Manager
 HR Settings,HR Ρυθμίσεις
 HTML / Banner that will show on the top of product list.,HTML / Banner που θα εμφανιστούν στην κορυφή της λίστας των προϊόντων.
 Half Day,Half Day
@@ -1183,18 +1185,18 @@ Hardware,Hardware
 Has Batch No,Έχει παρτίδας
 Has Child Node,Έχει Κόμβος παιδιών
 Has Serial No,Έχει Αύξων αριθμός
+Head of Marketing and Sales,Επικεφαλής του Marketing και των Πωλήσεων
 Header,Header
+Health Care,Φροντίδα Υγείας
 Health Concerns,Ανησυχίες για την υγεία
 Health Details,Λεπτομέρειες Υγείας
 Held On,Πραγματοποιήθηκε την
-Help,Βοήθεια
 Help HTML,Βοήθεια HTML
 "Help: To link to another record in the system, use ""#Form/Note/[Note Name]"" as the Link URL. (don't use ""http://"")","Βοήθεια: Για να συνδέσετε με άλλη εγγραφή στο σύστημα, χρησιμοποιήστε &quot;# Μορφή / Note / [Name] Σημείωση&quot;, όπως τη διεύθυνση URL σύνδεσης. (Δεν χρησιμοποιούν &quot;http://&quot;)"
 "Here you can maintain family details like name and occupation of parent, spouse and children","Εδώ μπορείτε να διατηρήσετε τα στοιχεία της οικογένειας όπως το όνομα και η ιδιότητα του γονέα, σύζυγο και τα παιδιά"
 "Here you can maintain height, weight, allergies, medical concerns etc","Εδώ μπορείτε να διατηρήσετε το ύψος, το βάρος, τις αλλεργίες, ιατροφαρμακευτική περίθαλψη, κλπ. ανησυχίες"
 Hide Currency Symbol,Απόκρυψη Σύμβολο νομίσματος
 High,Υψηλός
-History,Ιστορία
 History In Company,Ιστορία Στην Εταιρεία
 Hold,Κρατήστε
 Holiday,Αργία
@@ -1209,6 +1211,7 @@ Hour,ώρα
 Hour Rate,Τιμή Hour
 Hour Rate Labour,Ώρα Εργασίας Τιμή
 Hours,Ώρες
+How Pricing Rule is applied?,Πώς εφαρμόζεται η τιμολόγηση κανόνα;
 How frequently?,Πόσο συχνά;
 "How should this currency be formatted? If not set, will use system defaults","Πώς θα πρέπει αυτό το νόμισμα να διαμορφωθεί; Αν δεν έχει οριστεί, θα χρησιμοποιήσει τις προεπιλογές του συστήματος"
 Human Resources,Ανθρώπινο Δυναμικό
@@ -1225,12 +1228,15 @@ If different than customer address,Αν είναι διαφορετική από
 "If disable, 'Rounded Total' field will not be visible in any transaction","Αν απενεργοποιήσετε, «στρογγυλεμένες Σύνολο του πεδίου δεν θα είναι ορατή σε κάθε συναλλαγή"
 "If enabled, the system will post accounting entries for inventory automatically.","Εάν είναι ενεργοποιημένο, το σύστημα θα δημοσιεύσει λογιστικές εγγραφές για την απογραφή αυτόματα."
 If more than one package of the same type (for print),Εάν περισσότερα από ένα πακέτο του ίδιου τύπου (για εκτύπωση)
+"If multiple Pricing Rules continue to prevail, users are asked to set Priority manually to resolve conflict.","Αν υπάρχουν πολλές Κανόνες τιμολόγησης συνεχίζουν να επικρατούν, οι χρήστες καλούνται να ορίσουν προτεραιότητα το χέρι για την επίλυση των συγκρούσεων."
 "If no change in either Quantity or Valuation Rate, leave the cell blank.","Εάν καμία αλλαγή είτε Ποσότητα ή αποτίμησης Rate , αφήστε το κενό κελί ."
 If not applicable please enter: NA,Αν δεν ισχύει παρακαλούμε εισάγετε: NA
 "If not checked, the list will have to be added to each Department where it has to be applied.","Αν δεν ελεγχθεί, η λίστα θα πρέπει να προστίθεται σε κάθε Τμήμα, όπου πρέπει να εφαρμοστεί."
+"If selected Pricing Rule is made for 'Price', it will overwrite Price List. Pricing Rule price is the final price, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.","Εάν έχει επιλεγεί η τιμολόγηση γίνεται κανόνας για «τιμή», θα αντικαταστήσει Τιμοκατάλογος. Τιμή τιμολόγηση Κανόνας είναι η τελική τιμή, οπότε θα πρέπει να εφαρμόζεται καμία επιπλέον έκπτωση. Ως εκ τούτου, στις συναλλαγές, όπως Πωλήσεις Τάξης, Παραγγελία κλπ, θα απέφερε στον τομέα «Ισοτιμία», παρά το πεδίο «Τιμοκατάλογος Rate»."
 "If specified, send the newsletter using this email address","Αν καθοριστεί, στείλτε το ενημερωτικό δελτίο χρησιμοποιώντας αυτή τη διεύθυνση ηλεκτρονικού ταχυδρομείου"
 "If the account is frozen, entries are allowed to restricted users.","Εάν ο λογαριασμός έχει παγώσει , οι καταχωρήσεις επιτρέπεται να περιορίζεται χρήστες ."
 "If this Account represents a Customer, Supplier or Employee, set it here.","Αν αυτός ο λογαριασμός αντιπροσωπεύει ένας πελάτης, προμηθευτής ή των εργαζομένων της, έθεσε εδώ."
+"If two or more Pricing Rules are found based on the above conditions, Priority is applied. Priority is a number between 0 to 20 while default value is zero (blank). Higher number means it will take precedence if there are multiple Pricing Rules with same conditions.","Αν δύο ή περισσότεροι κανόνες τιμολόγησης που βρέθηκαν με βάση τις παραπάνω προϋποθέσεις, προτεραιότητα εφαρμόζεται. Προτεραιότητα είναι ένας αριθμός μεταξύ 0 και 20, ενώ η προεπιλεγμένη τιμή είναι μηδέν (κενό). Μεγαλύτερος αριθμός σημαίνει ότι θα υπερισχύουν εάν υπάρχουν πολλαπλές Κανόνες τιμολόγησης με τους ίδιους όρους."
 If you follow Quality Inspection. Enables Item QA Required and QA No in Purchase Receipt,Αν ακολουθήσετε Ελέγχου Ποιότητας . Επιτρέπει σημείο QA Απαιτείται και QA Όχι στην Αγορά Παραλαβή
 If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,Αν έχετε Ομάδα Πωλήσεων και Συνεργάτες πώληση (Channel Partners) μπορούν να επισημανθούν και να διατηρήσει τη συμβολή τους στη δραστηριότητα των πωλήσεων
 "If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.","Αν έχετε δημιουργήσει ένα πρότυπο πρότυπο σε φόρους και τέλη Αγορά Δάσκαλος, επιλέξτε ένα και κάντε κλικ στο κουμπί παρακάτω."
@@ -1238,18 +1244,16 @@ If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged 
 "If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page","Αν έχετε εκτυπώσετε μεγάλες μορφές, αυτό το χαρακτηριστικό μπορεί να χρησιμοποιηθεί για να χωρίσει η σελίδα που θα εκτυπωθεί σε πολλές σελίδες με όλες τις κεφαλίδες και τα υποσέλιδα σε κάθε σελίδα"
 If you involve in manufacturing activity. Enables Item 'Is Manufactured',Αν συμμετοχή της μεταποιητικής δραστηριότητας . Επιτρέπει Θέση « Είναι Κατασκευάζεται '
 Ignore,Αγνοήστε
+Ignore Pricing Rule,Αγνοήστε Τιμολόγηση Κανόνας
 Ignored: ,Αγνοηθεί:
-"Ignoring Item {0}, because a group exists with the same name!","Αγνοώντας Θέση {0} , διότι υπάρχει μια ομάδα με το ίδιο όνομα !"
 Image,Εικόνα
 Image View,Προβολή εικόνας
 Implementation Partner,Εταίρος υλοποίησης
-Import,Εισαγωγή
 Import Attendance,Συμμετοχή Εισαγωγή
 Import Failed!,Εισαγωγή απέτυχε !
 Import Log,Εισαγωγή Log
 Import Successful!,Εισαγωγή επιτυχής !
 Imports,Εισαγωγές
-In,σε
 In Hours,Σε ώρες
 In Process,Σε διαδικασία
 In Qty,Στην Ποσότητα
@@ -1264,8 +1268,8 @@ In Words will be visible once you save the Purchase Receipt.,Με τα λόγι�
 In Words will be visible once you save the Quotation.,Με τα λόγια θα είναι ορατά αφού μπορείτε να αποθηκεύσετε το πρόσημο.
 In Words will be visible once you save the Sales Invoice.,Με τα λόγια θα είναι ορατά αφού μπορείτε να αποθηκεύσετε του τιμολογίου πώλησης.
 In Words will be visible once you save the Sales Order.,Με τα λόγια θα είναι ορατά αφού μπορείτε να αποθηκεύσετε την παραγγελία πωλήσεων.
-In response to,Σε απάντηση προς
 Incentives,Κίνητρα
+Include Reconciled Entries,Συμπεριλάβετε Συμφιλιώνεται Καταχωρήσεις
 Include holidays in Total no. of Working Days,Συμπεριλάβετε διακοπές στην Συνολικός αριθμός. των εργάσιμων ημερών
 Income,εισόδημα
 Income / Expense,Έσοδα / έξοδα
@@ -1277,15 +1281,14 @@ Income booked for the digest period,Έσοδα κράτηση για την πε
 Incoming,Εισερχόμενος
 Incoming Rate,Εισερχόμενο ρυθμό
 Incoming quality inspection.,Εισερχόμενη ελέγχου της ποιότητας.
+Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction.,Λάθος αριθμός των εγγραφών Γενικής Λογιστικής βρέθηκε. Μπορεί να έχετε επιλέξει λάθος Λογαριασμό στη συναλλαγή.
 Incorrect or Inactive BOM {0} for Item {1} at row {2},Εσφαλμένη ή Ανενεργό BOM {0} για τη θέση {1} στην γραμμή {2}
-Indicates that the package is a part of this delivery,Δηλώνει ότι το πακέτο είναι ένα μέρος αυτής της παράδοσης
+Indicates that the package is a part of this delivery (Only Draft),Δηλώνει ότι το πακέτο είναι ένα μέρος αυτής της παράδοσης (μόνο σχέδιο)
 Indirect Expenses,έμμεσες δαπάνες
 Indirect Income,έμμεση εισοδήματος
 Individual,Άτομο
 Industry,Βιομηχανία
 Industry Type,Τύπος Βιομηχανία
-Insert Below,Εισαγωγή κάτω
-Insert Row,Εισαγωγή γραμμής
 Inspected By,Επιθεωρείται από
 Inspection Criteria,Κριτήρια ελέγχου
 Inspection Required,Απαιτείται Επιθεώρηση
@@ -1302,24 +1305,29 @@ Installed Qty,Εγκατεστημένο Ποσότητα
 Instructions,Οδηγίες
 Integrate incoming support emails to Support Ticket,Ενσωμάτωση εισερχόμενων μηνυμάτων ηλεκτρονικού ταχυδρομείου υποστήριξης για την υποστήριξη εισιτηρίων
 Interested,Ενδιαφερόμενος
+Intern,κρατώ
 Internal,Εσωτερικός
+Internet Publishing,Εκδόσεις στο Διαδίκτυο
 Introduction,Εισαγωγή
+Invalid Barcode,Άκυρα Barcode
 Invalid Barcode or Serial No,Άκυρα Barcode ή Αύξων αριθμός
-Invalid Email: {0},Μη έγκυρο Email : {0}
-Invalid Filter: {0},Άκυρα Φίλτρο : {0}
 Invalid Mail Server. Please rectify and try again.,Άκυρα Mail Server . Παρακαλούμε διορθώσει και δοκιμάστε ξανά .
 Invalid Master Name,Άκυρα Μάστερ Όνομα
 Invalid User Name or Support Password. Please rectify and try again.,Μη έγκυρο όνομα χρήστη ή τον κωδικό υποστήριξης . Παρακαλούμε διορθώσει και δοκιμάστε ξανά .
 Invalid quantity specified for item {0}. Quantity should be greater than 0.,Άκυρα ποσότητα που καθορίζεται για το στοιχείο {0} . Ποσότητα αυτή θα πρέπει να είναι μεγαλύτερη από 0 .
 Inventory,Απογραφή
 Inventory & Support,Απογραφή & Υποστήριξη
+Investment Banking,Επενδυτική Τραπεζική
 Investments,επενδύσεις
 Invoice Date,Τιμολόγιο Ημερομηνία
 Invoice Details,Λεπτομέρειες Τιμολογίου
 Invoice No,Τιμολόγιο αριθ.
-Invoice Period From Date,Τιμολόγιο περιόδου από την
+Invoice Number,Αριθμός Τιμολογίου
+Invoice Period From,Τιμολόγιο Περίοδος Από
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Τιμολόγιο Περίοδος Από και Τιμολόγιο Περίοδος Προς ημερομηνίες υποχρεωτική για επαναλαμβανόμενες τιμολόγιο
-Invoice Period To Date,Τιμολόγιο Περίοδος Έως Ημερομηνία
+Invoice Period To,Τιμολόγιο Περίοδος να
+Invoice Type,Τιμολόγιο Τύπος
+Invoice/Journal Voucher Details,Τιμολόγιο / Εφημερίδα Voucher Λεπτομέρειες
 Invoiced Amount (Exculsive Tax),Ποσό τιμολόγησης ( exculsive ΦΠΑ)
 Is Active,Είναι ενεργός
 Is Advance,Είναι Advance
@@ -1350,6 +1358,7 @@ Item Advanced,Θέση για προχωρημένους
 Item Barcode,Barcode Θέση
 Item Batch Nos,Αριθ. παρτίδας Θέση
 Item Code,Κωδικός προϊόντος
+Item Code > Item Group > Brand,Κωδικός προϊόντος> Αντικείμενο Όμιλος> Brand
 Item Code and Warehouse should already exist.,Θέση κώδικα και αποθήκη πρέπει να υπάρχει ήδη .
 Item Code cannot be changed for Serial No.,Κωδικός προϊόντος δεν μπορεί να αλλάξει για την αύξων αριθμός
 Item Code is mandatory because Item is not automatically numbered,Κωδικός προϊόντος είναι υποχρεωτική λόγω σημείο δεν αριθμούνται αυτόματα
@@ -1361,6 +1370,7 @@ Item Details,Λεπτομέρειες αντικειμένου
 Item Group,Ομάδα Θέση
 Item Group Name,Θέση Όνομα ομάδας
 Item Group Tree,Θέση του Ομίλου Tree
+Item Group not mentioned in item master for item {0},Θέση του Ομίλου που δεν αναφέρονται στο σημείο πλοίαρχο για το στοιχείο {0}
 Item Groups in Details,Ομάδες Θέση στο Λεπτομέρειες
 Item Image (if not slideshow),Φωτογραφία προϊόντος (αν όχι slideshow)
 Item Name,Όνομα Θέση
@@ -1430,6 +1440,8 @@ Item-wise Purchase History,Στοιχείο-σοφός Ιστορικό αγορ
 Item-wise Purchase Register,Στοιχείο-σοφός Μητρώο Αγορά
 Item-wise Sales History,Στοιχείο-σοφός Ιστορία Πωλήσεις
 Item-wise Sales Register,Στοιχείο-σοφός Πωλήσεις Εγγραφή
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry","Θέση: {0} κατάφερε παρτίδες, δεν μπορεί να συμβιβαστεί με τη χρήση \ Τράπεζα Συμφιλίωση, αντί να χρησιμοποιήσετε το Χρηματιστήριο Έναρξη"
+Item: {0} not found in the system,Θέση : {0} δεν βρέθηκε στο σύστημα
 Items,Είδη
 Items To Be Requested,Στοιχεία που θα ζητηθούν
 Items required,στοιχεία που απαιτούνται
@@ -1448,9 +1460,10 @@ Journal Entry,Journal Entry
 Journal Voucher,Εφημερίδα Voucher
 Journal Voucher Detail,Εφημερίδα Λεπτομέρεια Voucher
 Journal Voucher Detail No,Εφημερίδα Λεπτομέρεια φύλλου αριθ.
-Journal Voucher {0} does not have account {1}.,Εφημερίδα Voucher {0} δεν έχει λογαριασμό {1} .
+Journal Voucher {0} does not have account {1} or already matched,Εφημερίδα Voucher {0} δεν έχει λογαριασμό {1} ή έχουν ήδη συμφωνημένα
 Journal Vouchers {0} are un-linked,Εφημερίδα Κουπόνια {0} είναι μη συνδεδεμένο
 Keep a track of communication related to this enquiry which will help for future reference.,Κρατήστε ένα κομμάτι της επικοινωνίας που σχετίζονται με την έρευνα αυτή που θα βοηθήσει για μελλοντική αναφορά.
+Keep it web friendly 900px (w) by 100px (h),Φροντίστε να είναι φιλικό web 900px ( w ) από 100px ( h )
 Key Performance Area,Βασικά Επιδόσεων
 Key Responsibility Area,Βασικά Περιοχή Ευθύνης
 Kg,kg
@@ -1466,7 +1479,6 @@ Landed Cost updated successfully,Προσγειώθηκε κόστος ενημ�
 Language,Γλώσσα
 Last Name,Επώνυμο
 Last Purchase Rate,Τελευταία Τιμή Αγοράς
-Last updated by,Τελευταία ενημέρωση από
 Latest,αργότερο
 Lead,Μόλυβδος
 Lead Details,Μόλυβδος Λεπτομέρειες
@@ -1506,7 +1518,6 @@ Leave blank if considered for all branches,Αφήστε το κενό αν θε�
 Leave blank if considered for all departments,Αφήστε το κενό αν θεωρηθεί για όλα τα τμήματα
 Leave blank if considered for all designations,Αφήστε το κενό αν θεωρηθεί για όλες τις ονομασίες
 Leave blank if considered for all employee types,Αφήστε το κενό αν θεωρηθεί για όλους τους τύπους των εργαζομένων
-Leave blank if considered for all grades,Αφήστε το κενό αν θεωρηθεί για όλους τους βαθμούς
 "Leave can be approved by users with Role, ""Leave Approver""","Αφήστε μπορεί να εγκριθεί από τους χρήστες με το ρόλο, &quot;Αφήστε Έγκρισης&quot;"
 Leave of type {0} cannot be longer than {1},Αφήστε του τύπου {0} δεν μπορεί να είναι μεγαλύτερη από {1}
 Leaves Allocated Successfully for {0},Φύλλα Κατανέμεται επιτυχία για {0}
@@ -1515,33 +1526,27 @@ Leaves must be allocated in multiples of 0.5,"Τα φύλλα πρέπει να 
 Ledger,Καθολικό
 Ledgers,καθολικά
 Left,Αριστερά
+Legal,νομικός
 Legal Expenses,Νομικά Έξοδα
-Less or equals,Λιγότερο ή ίσον
-Less than,λιγότερο από
 Letter Head,Επικεφαλής Επιστολή
 Letter Heads for print templates.,Επιστολή αρχηγών για πρότυπα εκτύπωσης .
 Level,Επίπεδο
 Lft,LFT
-Like,σαν
-Linked With,Συνδέεται με την
-List,Λίστα
+Liability,ευθύνη
 List a few of your customers. They could be organizations or individuals.,Απαριθμήσω μερικά από τους πελάτες σας . Θα μπορούσαν να είναι φορείς ή ιδιώτες .
 List a few of your suppliers. They could be organizations or individuals.,Απαριθμήσω μερικά από τους προμηθευτές σας . Θα μπορούσαν να είναι φορείς ή ιδιώτες .
-"List a few products or services you buy from your suppliers or vendors. If these are same as your products, then do not add them.","Απαριθμήσω μερικά προϊόντα ή τις υπηρεσίες που αγοράζουν από τους προμηθευτές ή τους προμηθευτές σας . Αν αυτά είναι ίδια με τα προϊόντα σας , τότε μην τα προσθέσετε ."
 List items that form the package.,Λίστα στοιχείων που αποτελούν το πακέτο.
 List this Item in multiple groups on the website.,Λίστα του αντικειμένου σε πολλαπλές ομάδες στην ιστοσελίδα.
-"List your products or services that you sell to your customers. Make sure to check the Item Group, Unit of Measure and other properties when you start.","Λίστα των προϊόντων ή των υπηρεσιών σας που πουλάτε στους πελάτες σας . Σιγουρευτείτε για να ελέγξετε τη Θέση του Ομίλου , Μονάδα Μέτρησης και άλλες ιδιότητες όταν ξεκινάτε ."
-"List your tax heads (e.g. VAT, Excise) (upto 3) and their standard rates. This will create a standard template, you can edit and add more later.","Λίστα φορολογική κεφάλια σας ( π.χ. ΦΠΑ , ειδικοί φόροι κατανάλωσης) ( μέχρι 3 ) και κατ 'αποκοπή συντελεστές τους . Αυτό θα δημιουργήσει ένα πρότυπο πρότυπο , μπορείτε να επεξεργαστείτε και να προσθέσετε περισσότερο αργότερα ."
-Loading,Φόρτωση
-Loading Report,Φόρτωση Έκθεση
+"List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start.",Κατάλογος προϊόντων ή υπηρεσιών που αγοράζουν ή να πωλούν σας.
+"List your tax heads (e.g. VAT, Excise; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later.","Λίστα φορολογική κεφάλια σας ( π.χ. ΦΠΑ , των ειδικών φόρων κατανάλωσης ? Θα πρέπει να έχουν μοναδικά ονόματα ) και κατ 'αποκοπή συντελεστές τους ."
 Loading...,Φόρτωση ...
 Loans (Liabilities),Δάνεια (Παθητικό )
 Loans and Advances (Assets),Δάνεια και Προκαταβολές ( Ενεργητικό )
 Local,τοπικός
+Login,σύνδεση
 Login with your new User ID,Σύνδεση με το νέο όνομα χρήστη σας
 Logo,Logo
 Logo and Letter Heads,Λογότυπο και Επιστολή αρχηγών
-Logout,Αποσύνδεση
 Lost,χαμένος
 Lost Reason,Ξεχάσατε Αιτιολογία
 Low,Χαμηλός
@@ -1583,6 +1588,7 @@ Make Maint. Schedule,Κάντε Συντήρηση . πρόγραμμα
 Make Maint. Visit,Κάντε Συντήρηση . επίσκεψη
 Make Maintenance Visit,Κάντε Συντήρηση Επίσκεψη
 Make Packing Slip,Κάντε Συσκευασία Slip
+Make Payment,Πληρωμή
 Make Payment Entry,Κάντε Έναρξη Πληρωμής
 Make Purchase Invoice,Κάντε τιμολογίου αγοράς
 Make Purchase Order,Κάντε παραγγελίας
@@ -1592,14 +1598,15 @@ Make Salary Structure,Κάντε Δομή Μισθός
 Make Sales Invoice,Κάντε Τιμολόγιο Πώλησης
 Make Sales Order,Κάντε Πωλήσεις Τάξης
 Make Supplier Quotation,Κάντε Προμηθευτής Προσφορά
-Make a new,Κάντε μια νέα
+Make Time Log Batch,Κάντε Χρόνος καταγραφής παρτίδας
 Male,Αρσενικός
 Manage Customer Group Tree.,Διαχειριστείτε την ομάδα πελατών Tree .
+Manage Sales Partners.,Διαχειριστείτε Sales Partners.
 Manage Sales Person Tree.,Διαχειριστείτε Sales Person Tree .
 Manage Territory Tree.,Διαχειριστείτε την Επικράτεια Tree .
 Manage cost of operations,Διαχειριστείτε το κόστος των εργασιών
-Mandatory fields required in {0},Υποχρεωτικά πεδία είναι υποχρεωτικά σε {0}
-Mandatory filters required:\n,Απαιτείται υποχρεωτική φίλτρα : \ n
+Management,διαχείριση
+Manager,Διευθυντής
 "Mandatory if Stock Item is ""Yes"". Also the default warehouse where reserved quantity is set from Sales Order.","Υποχρεωτική Θέση Χρηματιστήριο, αν είναι &quot;ναι&quot;. Επίσης, η αποθήκη προεπιλογή, όπου επιφυλάχθηκε ποσότητα που έχει οριστεί από Πωλήσεις Τάξης."
 Manufacture against Sales Order,Κατασκευή κατά Πωλήσεις Τάξης
 Manufacture/Repack,Κατασκευή / Repack
@@ -1614,6 +1621,7 @@ Manufacturing Quantity is mandatory,Βιομηχανία Ποσότητα είν
 Margin,Περιθώριο
 Marital Status,Οικογενειακή Κατάσταση
 Market Segment,Τομέα της αγοράς
+Marketing,εμπορία
 Marketing Expenses,Έξοδα Marketing
 Married,Παντρεμένος
 Mass Mailing,Ταχυδρομικές Μαζικής
@@ -1640,15 +1648,18 @@ Material Requirement,Απαίτηση Υλικού
 Material Transfer,Μεταφοράς υλικού
 Materials,Υλικά
 Materials Required (Exploded),Υλικά που απαιτούνται (Εξερράγη)
+Max 5 characters,Max 5 χαρακτήρες
 Max Days Leave Allowed,Max Μέρες Αφήστε τα κατοικίδια
 Max Discount (%),Μέγιστη έκπτωση (%)
 Max Qty,Μέγιστη Ποσότητα
+Max discount allowed for item: {0} is {1}%,Μέγιστη έκπτωση επιτρέπεται για το στοιχείο: {0} {1}%
+Maximum Amount,Μέγιστο ποσό
 Maximum allowed credit is {0} days after posting date,Μέγιστη επιτρεπόμενη πίστωση είναι {0} ημέρες από την ημερομηνία απόσπαση
 Maximum {0} rows allowed,Μέγιστη {0} σειρές επιτρέπονται
 Maxiumm discount for Item {0} is {1}%,Έκπτωση Maxiumm για τη θέση {0} {1} %
 Medical,ιατρικός
 Medium,Μέσον
-"Merging is only possible if following properties are same in both records. Group or Ledger, Report Type, Company","Η συγχώνευση είναι δυνατή μόνο εάν οι ακόλουθες ιδιότητες ίδια στα δύο αρχεία . Ομάδα ή Ledger , Τύπος αναφοράς , Company"
+"Merging is only possible if following properties are same in both records. Group or Ledger, Root Type, Company",Η συγχώνευση είναι δυνατή μόνο εάν οι ακόλουθες ιδιότητες ίδια στα δύο αρχεία .
 Message,Μήνυμα
 Message Parameter,Παράμετρος στο μήνυμα
 Message Sent,μήνυμα εστάλη
@@ -1662,18 +1673,17 @@ Milestones,Ορόσημα
 Milestones will be added as Events in the Calendar,Ορόσημα θα προστεθούν ως γεγονότα στο ημερολόγιο
 Min Order Qty,Ελάχιστη Ποσότητα
 Min Qty,Ελάχιστη ποσότητα
+Min Qty can not be greater than Max Qty,Ελάχιστη ποσότητα δεν μπορεί να είναι μεγαλύτερη από το μέγιστο Ποσότητα
+Minimum Amount,Ελάχιστο Ποσό
 Minimum Order Qty,Ελάχιστη Ποσότητα
 Minute,λεπτό
 Misc Details,Διάφορα Λεπτομέρειες
 Miscellaneous Expenses,διάφορα έξοδα
 Miscelleneous,Miscelleneous
-Missing Values Required,Λείπει τιμές Απαραίτητα
 Mobile No,Mobile Όχι
 Mobile No.,Mobile Όχι
 Mode of Payment,Τρόπος Πληρωμής
 Modern,Σύγχρονος
-Modified Amount,Τροποποιημένο ποσό
-Modified by,Τροποποιήθηκε από
 Monday,Δευτέρα
 Month,Μήνας
 Monthly,Μηνιαίος
@@ -1681,31 +1691,31 @@ Monthly Attendance Sheet,Μηνιαίο Δελτίο Συμμετοχής
 Monthly Earning & Deduction,Μηνιαία Κερδίζουν &amp; Έκπτωση
 Monthly Salary Register,Μηνιαία Εγγραφή Μισθός
 Monthly salary statement.,Μηνιαία κατάσταση μισθοδοσίας.
-More,Περισσότερο
 More Details,Περισσότερες λεπτομέρειες
 More Info,Περισσότερες πληροφορίες
-Move Down: {0},Μετακίνηση προς τα κάτω : {0}
-Move Up: {0},Μετακίνηση Up : {0}
+Motion Picture & Video,Motion Picture & Βίντεο
 Moving Average,Κινητός Μέσος Όρος
 Moving Average Rate,Κινητός μέσος όρος
 Mr,Ο κ.
 Ms,Κα
 Multiple Item prices.,Πολλαπλές τιμές Item .
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}","Πολλαπλές Τιμή Κανόνας υπάρχει με τα ίδια κριτήρια, παρακαλούμε να επιλύσει \ σύγκρουση με την απόδοση προτεραιότητας. Κανόνες Τιμή: {0}"
+Music,μουσική
 Must be Whole Number,Πρέπει να είναι Ακέραιος αριθμός
-My Settings,Οι ρυθμίσεις μου
 Name,Όνομα
 Name and Description,Όνομα και περιγραφή
 Name and Employee ID,Όνομα και Εργαζομένων ID
-Name is required,Όνομα απαιτείται
-Name not permitted,Όνομα δεν επιτρέπεται
 "Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master","Όνομα του νέου λογαριασμού. Σημείωση : Παρακαλώ μην δημιουργείτε λογαριασμούς για τους πελάτες και προμηθευτές , που δημιουργούνται αυτόματα από τον Πελάτη και Προμηθευτή πλοίαρχος"
 Name of person or organization that this address belongs to.,Όνομα προσώπου ή οργανισμού ότι αυτή η διεύθυνση ανήκει.
 Name of the Budget Distribution,Όνομα της διανομής του προϋπολογισμού
 Naming Series,Ονομασία σειράς
+Negative Quantity is not allowed,Αρνητική ποσότητα δεν επιτρέπεται
 Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},Αρνητική Σφάλμα Χρηματιστήριο ( {6} ) για τη θέση {0} στην αποθήκη {1} στο {2} {3} σε {4} {5}
+Negative Valuation Rate is not allowed,Αρνητική αποτίμηση Βαθμολογήστε δεν επιτρέπεται
 Negative balance in Batch {0} for Item {1} at Warehouse {2} on {3} {4},Αρνητικό ισοζύγιο στις Παρτίδα {0} για τη θέση {1} στην αποθήκη {2} στις {3} {4}
 Net Pay,Καθαρών αποδοχών
 Net Pay (in words) will be visible once you save the Salary Slip.,Καθαρών αποδοχών (ολογράφως) θα είναι ορατή τη στιγμή που θα αποθηκεύσετε το εκκαθαριστικό αποδοχών.
+Net Profit / Loss,Καθαρά Κέρδη / Ζημίες
 Net Total,Καθαρό Σύνολο
 Net Total (Company Currency),Καθαρό Σύνολο (νόμισμα της Εταιρείας)
 Net Weight,Καθαρό Βάρος
@@ -1713,7 +1723,6 @@ Net Weight UOM,Καθαρό Βάρος UOM
 Net Weight of each Item,Καθαρό βάρος κάθε είδους
 Net pay cannot be negative,Καθαρή αμοιβή δεν μπορεί να είναι αρνητική
 Never,Ποτέ
-New,νέος
 New ,
 New Account,Νέος λογαριασμός
 New Account Name,Νέο Όνομα λογαριασμού
@@ -1733,7 +1742,6 @@ New Projects,Νέα Έργα
 New Purchase Orders,Νέες Παραγγελίες Αγορά
 New Purchase Receipts,Νέες Παραλαβές Αγορά
 New Quotations,Νέα Παραθέσεις
-New Record,Νέα Εγγραφή
 New Sales Orders,Νέες Παραγγελίες
 New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,Νέα Αύξων αριθμός δεν μπορεί να έχει αποθήκη . Αποθήκη πρέπει να καθορίζεται από Stock Εισόδου ή απόδειξης αγοράς
 New Stock Entries,Νέες Καταχωρήσεις Χρηματιστήριο
@@ -1748,17 +1756,14 @@ Newsletter,Ενημερωτικό Δελτίο
 Newsletter Content,Newsletter Περιεχόμενο
 Newsletter Status,Κατάσταση Ενημερωτικό Δελτίο
 Newsletter has already been sent,Newsletter έχει ήδη αποσταλεί
-Newsletters is not allowed for Trial users,Ενημερωτικά δελτία δεν επιτρέπεται για τους χρήστες Δίκη
 "Newsletters to contacts, leads.","Ενημερωτικά δελτία για τις επαφές, οδηγεί."
+Newspaper Publishers,Εκδοτών Εφημερίδων
 Next,επόμενος
 Next Contact By,Επόμενη Επικοινωνία Με
 Next Contact Date,Επόμενη ημερομηνία Επικοινωνία
 Next Date,Επόμενη ημερομηνία
-Next Record,Επόμενη εγγραφή
-Next actions,Επόμενη δράσεις
 Next email will be sent on:,Επόμενο μήνυμα ηλεκτρονικού ταχυδρομείου θα αποσταλεί στις:
 No,Όχι
-No Communication tagged with this ,Δεν ανακοίνωση με ετικέτα αυτή
 No Customer Accounts found.,Δεν βρέθηκαν λογαριασμοί πελατών .
 No Customer or Supplier Accounts found,Δεν βρέθηκαν Πελάτης ή Προμηθευτής Λογαριασμοί
 No Expense Approvers. Please assign 'Expense Approver' Role to atleast one user,Δεν Υπεύθυνοι έγκρισης εξόδων . Παρακαλούμε εκχωρήσετε « Εξόδων εγκριτή » ρόλος για atleast ένα χρήστη
@@ -1768,47 +1773,34 @@ No Items to pack,Δεν υπάρχουν αντικείμενα για να συ
 No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user,Δεν Αφήστε Υπεύθυνοι έγκρισης . Παρακαλούμε αναθέσει ρόλο « Αφήστε εγκριτή να atleast ένα χρήστη
 No Permission,Δεν έχετε άδεια
 No Production Orders created,Δεν Εντολές Παραγωγής δημιουργήθηκε
-No Report Loaded. Please use query-report/[Report Name] to run a report.,Δεν Report Loaded. Παρακαλούμε χρησιμοποιήστε το ερώτημα-αναφορά / [Name] αναφορά στη εκτελέσετε μια έκθεση.
-No Results,Δεν υπάρχουν αποτελέσματα
 No Supplier Accounts found. Supplier Accounts are identified based on 'Master Type' value in account record.,Δεν βρέθηκαν λογαριασμοί Προμηθευτή. Οι λογαριασμοί της επιχείρησης προσδιορίζονται με βάση την αξία «Master Τύπος » στην εγγραφή λογαριασμού .
 No accounting entries for the following warehouses,Δεν λογιστικές καταχωρήσεις για τις ακόλουθες αποθήκες
 No addresses created,Δεν δημιουργούνται διευθύνσεις
-No amount allocated,Δεν ποσό που χορηγείται
 No contacts created,Δεν υπάρχουν επαφές που δημιουργήθηκαν
+No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template.,Δεν Πρότυπο προεπιλεγμένη Διεύθυνση βρέθηκε. Παρακαλούμε να δημιουργήσετε ένα νέο από το πρόγραμμα Εγκατάστασης> Εκτύπωση και Branding> Διεύθυνση Πρότυπο.
 No default BOM exists for Item {0},Δεν υπάρχει προεπιλεγμένη BOM για τη θέση {0}
 No description given,Δεν έχει περιγραφή
-No document selected,Δεν επιλεγμένο έγγραφο
 No employee found,Δεν βρέθηκε υπάλληλος
+No employee found!,Κανένας εργαζόμενος δεν βρέθηκε!
 No of Requested SMS,Δεν Αιτηθέντων SMS
 No of Sent SMS,Όχι από Sent SMS
 No of Visits,Δεν Επισκέψεων
-No one,Κανένας
 No permission,Δεν έχετε άδεια
-No permission to edit,Δεν έχετε άδεια για να επεξεργαστείτε
 No record found,Δεν υπάρχουν καταχωρημένα στοιχεία
-No records tagged.,Δεν υπάρχουν αρχεία ετικέτα.
+No records found in the Invoice table,Δεν βρέθηκαν στον πίνακα Τιμολόγιο εγγραφές
+No records found in the Payment table,Δεν βρέθηκαν στον πίνακα πληρωμής εγγραφές
 No salary slip found for month: ,Δεν βρέθηκαν εκκαθαριστικό σημείωμα αποδοχών για τον μηνα:
 Non Profit,μη Κερδοσκοπικοί
-None,Κανένας
-None: End of Workflow,Κανένας: Τέλος της ροής εργασίας
 Nos,nos
 Not Active,Δεν Active
 Not Applicable,Δεν εφαρμόζεται
 Not Available,Δεν Διατίθεται
 Not Billed,Δεν Τιμολογημένος
 Not Delivered,Δεν παραδόθηκαν
-Not Found,Δεν Βρέθηκε
-Not Linked to any record.,Δεν συνδέονται με καμία εγγραφή.
-Not Permitted,Δεν επιτρέπεται
 Not Set,Not Set
-Not Submitted,δεν Υποβλήθηκε
-Not allowed,δεν επιτρέπεται
-Not allowed to update entries older than {0},Δεν επιτρέπεται να ενημερώσετε τις καταχωρήσεις μεγαλύτερα από {0}
+Not allowed to update stock transactions older than {0},Δεν επιτρέπεται να ενημερώσετε χρηματιστηριακές συναλλαγές ηλικίας άνω των {0}
 Not authorized to edit frozen Account {0},Δεν επιτρέπεται να επεξεργαστείτε τα κατεψυγμένα Λογαριασμό {0}
 Not authroized since {0} exceeds limits,Δεν authroized δεδομένου {0} υπερβεί τα όρια
-Not enough permission to see links.,Δεν υπάρχουν αρκετά δικαιώματα για να δείτε συνδέσμους.
-Not equals,δεν ισούται
-Not found,δεν βρέθηκε
 Not permitted,δεν επιτρέπεται
 Note,Σημείωση
 Note User,Χρήστης Σημείωση
@@ -1817,7 +1809,6 @@ Note User,Χρήστης Σημείωση
 Note: Due Date exceeds the allowed credit days by {0} day(s),Σημείωση : Λόγω Ημερομηνία υπερβαίνει τις επιτρεπόμενες ημέρες πίστωσης από {0} ημέρα ( ες )
 Note: Email will not be sent to disabled users,Σημείωση: E-mail δε θα σταλεί σε χρήστες με ειδικές ανάγκες
 Note: Item {0} entered multiple times,Σημείωση : Το σημείο {0} τέθηκε πολλές φορές
-Note: Other permission rules may also apply,Σημείωση: Άλλοι κανόνες άδεια μπορεί επίσης να εφαρμοστεί
 Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified,Σημείωση : Έναρξη πληρωμών δεν θα πρέπει να δημιουργήσει από το « Cash ή τραπεζικού λογαριασμού ' δεν ορίστηκε
 Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0,Σημείωση : Το σύστημα δεν θα ελέγχει πάνω από την παράδοση και υπερ- κράτηση της θέσης {0} ως ποσότητα ή το ποσό είναι 0
 Note: There is not enough leave balance for Leave Type {0},Σημείωση : Δεν υπάρχει αρκετό υπόλοιπο άδειας για Αφήστε τύπου {0}
@@ -1826,12 +1817,9 @@ Note: {0},Σημείωση : {0}
 Notes,Σημειώσεις
 Notes:,Σημειώσεις :
 Nothing to request,Τίποτα να ζητήσει
-Nothing to show,Δεν έχει τίποτα να δείξει
-Nothing to show for this selection,Δεν έχει τίποτα να δείξει για αυτή την επιλογή
 Notice (days),Ανακοίνωση ( ημέρες )
 Notification Control,Έλεγχος Κοινοποίηση
 Notification Email Address,Γνωστοποίηση Διεύθυνση
-Notify By Email,Ειδοποιήσουμε με email
 Notify by Email on creation of automatic Material Request,Ειδοποίηση μέσω ηλεκτρονικού ταχυδρομείου σχετικά με τη δημιουργία των αυτόματων Αίτηση Υλικού
 Number Format,Μορφή αριθμών
 Offer Date,Πρόταση Ημερομηνία
@@ -1843,6 +1831,7 @@ Old Parent,Παλιά Μητρική
 On Net Total,Την Καθαρά Σύνολο
 On Previous Row Amount,Στο προηγούμενο ποσό Row
 On Previous Row Total,Στο προηγούμενο σύνολο Row
+Online Auctions,Online Δημοπρασίες
 Only Leave Applications with status 'Approved' can be submitted,Αφήστε μόνο Εφαρμογές με την ιδιότητα του « Εγκρίθηκε » μπορούν να υποβληθούν
 "Only Serial Nos with status ""Available"" can be delivered.",Μόνο αύξοντες αριθμούς με την ιδιότητα του &quot;Διαθέσιμο&quot; μπορεί να παραδοθεί.
 Only leaf nodes are allowed in transaction,Μόνο οι κόμβοι επιτρέπεται σε μία συναλλαγή
@@ -1850,7 +1839,6 @@ Only the selected Leave Approver can submit this Leave Application,Μόνο το
 Open,Ανοιχτό
 Open Production Orders,Ανοίξτε Εντολών Παραγωγής
 Open Tickets,Open εισιτήρια
-Open source ERP built for the web,Open source ERP χτίστηκε για το διαδίκτυο
 Opening (Cr),Άνοιγμα ( Cr )
 Opening (Dr),Άνοιγμα ( Dr )
 Opening Date,Άνοιγμα Ημερομηνία
@@ -1874,9 +1862,8 @@ Opportunity Items,Είδη Ευκαιρία
 Opportunity Lost,Ευκαιρία Lost
 Opportunity Type,Τύπος Ευκαιρία
 Optional. This setting will be used to filter in various transactions.,Προαιρετικό . Αυτή η ρύθμιση θα πρέπει να χρησιμοποιηθεί για το φιλτράρισμα σε διάφορες συναλλαγές.
-Or Created By,Ή δημιουργία
 Order Type,Τύπος Παραγγελία
-Order Type must be one of {1},Τύπος παραγγελία πρέπει να είναι ένα από {1}
+Order Type must be one of {0},Τύπος παραγγελία πρέπει να είναι ένα από τα {0}
 Ordered,διέταξε
 Ordered Items To Be Billed,Διέταξε τα στοιχεία να χρεώνονται
 Ordered Items To Be Delivered,Διέταξε πρέπει να παραδοθούν
@@ -1888,7 +1875,6 @@ Organization Name,Όνομα Οργανισμού
 Organization Profile,Οργανισμός Προφίλ
 Organization branch master.,Κύριο κλάδο Οργανισμού .
 Organization unit (department) master.,Μονάδα Οργάνωσης ( τμήμα ) πλοίαρχος .
-Original Message,Αρχικό μήνυμα
 Other,Άλλος
 Other Details,Άλλες λεπτομέρειες
 Others,Άλλα
@@ -1905,9 +1891,7 @@ Overlapping conditions found between:,Συρροή συνθήκες που επ�
 Overview,Επισκόπηση
 Owned,Ανήκουν
 Owner,ιδιοκτήτης
-PAN Number,Αριθμός PAN
-PF No.,PF Όχι
-PF Number,PF Αριθμός
+P L A - Cess Portion,PLA - Cess Μερίδα
 PL or BS,PL ή BS
 PO Date,PO Ημερομηνία
 PO No,PO Όχι
@@ -1919,9 +1903,7 @@ POS Setting,POS Περιβάλλον
 POS Setting required to make POS Entry,Ρύθμιση POS που απαιτείται για να κάνει έναρξη POS
 POS Setting {0} already created for user: {1} and company {2},POS Ρύθμιση {0} έχει ήδη δημιουργηθεί για το χρήστη : {1} και η εταιρεία {2}
 POS View,POS View
-POS-Setting-.#,POS - Περιβάλλον - . #
 PR Detail,PR Λεπτομέρειες
-PR Posting Date,PR Απόσπαση Ημερομηνία
 Package Item Details,Λεπτομέρειες αντικειμένου Πακέτο
 Package Items,Είδη συσκευασίας
 Package Weight Details,Λεπτομέρειες Βάρος συσκευασίας
@@ -1935,7 +1917,6 @@ Packing Slip Items,Συσκευασίας Είδη Slip
 Packing Slip(s) cancelled,Συσκευασία Slip ( ων) ακυρώθηκε
 Page Break,Αλλαγή σελίδας
 Page Name,Όνομα σελίδας
-Page not found,Η σελίδα δεν βρέθηκε
 Paid Amount,Καταβληθέν ποσό
 Paid amount + Write Off Amount can not be greater than Grand Total,"Καταβληθέν ποσό + Διαγραφών ποσό δεν μπορεί να είναι μεγαλύτερη από ό, τι Γενικό Σύνολο"
 Pair,ζεύγος
@@ -1952,15 +1933,16 @@ Parent Sales Person,Μητρική πρόσωπο πωλήσεων
 Parent Territory,Έδαφος Μητρική
 Parent Website Page,Μητρική Website σελίδας
 Parent Website Route,Μητρική Website Route
-Parent account can not be a ledger,Μητρική λογαριασμό δεν μπορεί να είναι ένα καθολικό
-Parent account does not exist,Μητρική λογαριασμό δεν υπάρχει
 Parenttype,Parenttype
+Part-time,Μερικής απασχόλησης
 Partially Completed,Ημιτελής
 Partly Billed,Μερικώς Τιμολογημένος
 Partly Delivered,Μερικώς Δημοσιεύθηκε
 Partner Target Detail,Partner Λεπτομέρεια Target
 Partner Type,Εταίρος Τύπος
 Partner's Website,Website εταίρου
+Party,Κόμμα
+Party Account,Ο λογαριασμός Κόμμα
 Party Type,Τύπος Πάρτυ
 Party Type Name,Κόμμα Τύπος Όνομα
 Passive,Παθητικός
@@ -1972,12 +1954,15 @@ Payables,Υποχρεώσεις
 Payables Group,Υποχρεώσεις Ομίλου
 Payment Days,Ημέρες Πληρωμής
 Payment Due Date,Πληρωμή Due Date
-Payment Entries,Ενδείξεις Πληρωμής
 Payment Period Based On Invoice Date,Περίοδος πληρωμής με βάση την Ημερομηνία Τιμολογίου
+Payment Reconciliation,Συμφιλίωση Πληρωμής
+Payment Reconciliation Invoice,Συμφιλίωση πληρωμής Τιμολόγιο
+Payment Reconciliation Invoices,Τιμολόγια Συμφιλίωση Πληρωμής
+Payment Reconciliation Payment,Συμφιλίωση Πληρωμή Πληρωμή
+Payment Reconciliation Payments,Συμφιλίωση Πληρωμής Πληρωμές
 Payment Type,Τρόπος Πληρωμής
+Payment cannot be made for empty cart,Η πληρωμή δεν μπορεί να γίνει για το άδειο καλάθι
 Payment of salary for the month {0} and year {1},Η πληρωμή της μισθοδοσίας για τον μήνα {0} και έτος {1}
-Payment to Invoice Matching Tool,Πληρωμή Τιμολόγιο Matching Tool
-Payment to Invoice Matching Tool Detail,Πληρωμή Τιμολόγιο Matching Tool Λεπτομέρειες
 Payments,Πληρωμές
 Payments Made,Πληρωμές Made
 Payments Received,Οι πληρωμές που εισπράττονται
@@ -1989,6 +1974,7 @@ Pending Amount,Εν αναμονή Ποσό
 Pending Items {0} updated,Στοιχεία σε εκκρεμότητα {0} ενημέρωση
 Pending Review,Εν αναμονή της αξιολόγησης
 Pending SO Items For Purchase Request,Εν αναμονή SO Αντικείμενα προς Αίτημα Αγοράς
+Pension Funds,συνταξιοδοτικά ταμεία
 Percent Complete,Ποσοστό Ολοκλήρωσης
 Percentage Allocation,Κατανομή Ποσοστό
 Percentage Allocation should be equal to 100%,Ποσοστό κατανομής θα πρέπει να είναι ίσο με το 100 %
@@ -1997,33 +1983,31 @@ Percentage you are allowed to receive or deliver more against the quantity order
 Performance appraisal.,Η αξιολόγηση της απόδοσης.
 Period,περίοδος
 Period Closing Voucher,Περίοδος Voucher Κλείσιμο
-Period is too short,Περίοδος αυτή είναι πολύ μικρή
 Periodicity,Περιοδικότητα
 Permanent Address,Μόνιμη Διεύθυνση
 Permanent Address Is,Μόνιμη Διεύθυνση είναι
-Permanently Cancel {0}?,Μόνιμα Ακύρωση {0} ;
-Permanently Submit {0}?,Μόνιμα Υποβολή {0} ;
-Permanently delete {0}?,Να διαγράψετε οριστικά {0} ;
 Permission,Άδεια
 Personal,Προσωπικός
 Personal Details,Προσωπικά Στοιχεία
 Personal Email,Προσωπικά Email
 Pharmaceutical,φαρμακευτικός
+Pharmaceuticals,Φαρμακευτική
 Phone,Τηλέφωνο
 Phone No,Τηλεφώνου
-Pick Columns,Διαλέξτε Στήλες
+Piecework,εργασία με το κομμάτι
 Pincode,PINCODE
 Place of Issue,Τόπος Έκδοσης
 Plan for maintenance visits.,Σχέδιο για επισκέψεις συντήρησης.
 Planned Qty,Προγραμματισμένη Ποσότητα
 "Planned Qty: Quantity, for which, Production Order has been raised, but is pending to be manufactured.","Προγραμματισμένες Ποσότητα : Ποσότητα , για την οποία , Παραγωγής Τάξης έχει αυξηθεί, αλλά εκκρεμεί να κατασκευαστεί."
 Planned Quantity,Προγραμματισμένη Ποσότητα
+Planning,σχεδίαση
 Plant,Φυτό
 Plant and Machinery,Εγκαταστάσεις και μηχανήματα
 Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,"Παρακαλώ εισάγετε Σύντμηση ή Short Name σωστά, όπως θα προστίθεται ως επίθημα σε όλους τους αρχηγούς λογαριασμό."
+Please Update SMS Settings,Ενημερώστε Ρυθμίσεις SMS
 Please add expense voucher details,Παρακαλώ προσθέστε βάρος λεπτομέρειες κουπόνι
-Please attach a file first.,Επισυνάψτε ένα αρχείο για πρώτη φορά.
-Please attach a file or set a URL,Παρακαλείστε να επισυνάψετε ένα αρχείο ή να ορίσετε μια διεύθυνση URL
+Please add to Modes of Payment from Setup.,Παρακαλούμε να προσθέσετε Τρόποι πληρωμής από το πρόγραμμα Εγκατάστασης.
 Please check 'Is Advance' against Account {0} if this is an advance entry.,Παρακαλώ ελέγξτε « Είναι Advance » κατά λογαριασμός {0} αν αυτό είναι μια εκ των προτέρων την είσοδο .
 Please click on 'Generate Schedule',"Παρακαλούμε κάντε κλικ στο ""Δημιουργία Χρονοδιάγραμμα»"
 Please click on 'Generate Schedule' to fetch Serial No added for Item {0},"Παρακαλούμε κάντε κλικ στο ""Δημιουργία Πρόγραμμα » για να φέρω Αύξων αριθμός προστίθεται για τη θέση {0}"
@@ -2032,7 +2016,6 @@ Please create Customer from Lead {0},Παρακαλώ δημιουργήστε �
 Please create Salary Structure for employee {0},Παρακαλώ δημιουργήστε Δομή Μισθός για εργαζόμενο {0}
 Please create new account from Chart of Accounts.,Παρακαλούμε να δημιουργήσετε νέο λογαριασμό από το Λογιστικό Σχέδιο .
 Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.,Παρακαλούμε ΜΗΝ δημιουργία του λογαριασμού ( Καθολικά ) για τους πελάτες και προμηθευτές . Έχουν δημιουργηθεί απευθείας από τους πλοιάρχους πελάτη / προμηθευτή .
-Please enable pop-ups,Παρακαλούμε ενεργοποιήστε τα pop-ups
 Please enter 'Expected Delivery Date',"Παρακαλούμε, εισάγετε « Αναμενόμενη ημερομηνία παράδοσης »"
 Please enter 'Is Subcontracted' as Yes or No,"Παρακαλούμε, εισάγετε « υπεργολαβία » Ναι ή Όχι"
 Please enter 'Repeat on Day of Month' field value,"Παρακαλούμε, εισάγετε « Επανάληψη για την Ημέρα του μήνα » τιμή του πεδίου"
@@ -2043,7 +2026,6 @@ Please enter Company,"Παρακαλούμε, εισάγετε Εταιρεία"
 Please enter Cost Center,"Παρακαλούμε, εισάγετε Κέντρο Κόστους"
 Please enter Delivery Note No or Sales Invoice No to proceed,"Παρακαλούμε, εισάγετε Δελτίο Αποστολής Όχι ή Τιμολόγιο Πώλησης Όχι για να προχωρήσετε"
 Please enter Employee Id of this sales parson,"Παρακαλούμε, εισάγετε Id Υπάλληλος του εφημερίου πωλήσεων"
-Please enter Event's Date and Time!,"Παρακαλούμε, εισάγετε Ημερομηνία Γεγονός και ώρα !"
 Please enter Expense Account,"Παρακαλούμε, εισάγετε Λογαριασμός Εξόδων"
 Please enter Item Code to get batch no,"Παρακαλούμε, εισάγετε Θέση κώδικα για να πάρει παρτίδα δεν"
 Please enter Item Code.,"Παρακαλούμε, εισάγετε Κωδικός προϊόντος ."
@@ -2054,7 +2036,6 @@ Please enter Planned Qty for Item {0} at row {1},"Παρακαλούμε, εισ
 Please enter Production Item first,"Παρακαλούμε, εισάγετε Παραγωγή Στοιχείο πρώτο"
 Please enter Purchase Receipt No to proceed,"Παρακαλούμε, εισάγετε Αγορά Παραλαβή Όχι για να προχωρήσετε"
 Please enter Reference date,Παρακαλώ εισάγετε την ημερομηνία αναφοράς
-Please enter Start Date and End Date,"Παρακαλούμε, εισάγετε Ημερομηνία έναρξης και Ημερομηνία λήξης"
 Please enter Warehouse for which Material Request will be raised,"Παρακαλούμε, εισάγετε αποθήκη για την οποία θα αυξηθεί Υλικό Αίτηση"
 Please enter Write Off Account,"Παρακαλούμε, εισάγετε Διαγραφών Λογαριασμού"
 Please enter atleast 1 invoice in the table,"Παρακαλούμε, εισάγετε atleast 1 τιμολόγιο στον πίνακα"
@@ -2070,19 +2051,17 @@ Please enter parent cost center,"Παρακαλούμε, εισάγετε κέν
 Please enter quantity for Item {0},"Παρακαλούμε, εισάγετε ποσότητα για τη θέση {0}"
 Please enter relieving date.,Παρακαλώ εισάγετε την ημερομηνία ανακούφιση .
 Please enter sales order in the above table,"Παρακαλούμε, εισάγετε παραγγελίας στον παραπάνω πίνακα"
-Please enter some text!,Παρακαλώ εισάγετε κάποιο κείμενο !
-Please enter title!,Παρακαλώ εισάγετε τον τίτλο !
 Please enter valid Company Email,Παρακαλώ εισάγετε μια έγκυρη Εταιρεία Email
 Please enter valid Email Id,Παρακαλώ εισάγετε ένα έγκυρο Email Id
 Please enter valid Personal Email,Παρακαλώ εισάγετε μια έγκυρη Προσωπικά Email
 Please enter valid mobile nos,Παρακαλώ εισάγετε μια έγκυρη κινητής nos
+Please find attached Sales Invoice #{0},Επισυνάπτεται Τιμολόγιο Πώλησης # {0}
 Please install dropbox python module,Παρακαλώ εγκαταστήστε dropbox python μονάδα
-Please login to Upvote!,Παρακαλούμε συνδεθείτε για να Upvote !
 Please mention no of visits required,Παρακαλείσθε να αναφέρετε καμία από τις επισκέψεις που απαιτούνται
 Please pull items from Delivery Note,Παρακαλώ τραβήξτε αντικείμενα από Δελτίο Αποστολής
 Please save the Newsletter before sending,Παρακαλώ αποθηκεύστε το ενημερωτικό δελτίο πριν από την αποστολή
 Please save the document before generating maintenance schedule,Παρακαλώ αποθηκεύστε το έγγραφο πριν από τη δημιουργία προγράμματος συντήρησης
-Please select Account first,Επιλέξτε Λογαριασμός πρώτη
+Please see attachment,Παρακαλώ δείτε συνημμένο
 Please select Bank Account,Παρακαλώ επιλέξτε τραπεζικού λογαριασμού
 Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Παρακαλώ επιλέξτε μεταφέρουν εάν θέλετε επίσης να περιλαμβάνεται η ισορροπία προηγούμενο οικονομικό έτος αφήνει σε αυτό το οικονομικό έτος
 Please select Category first,Παρακαλώ επιλέξτε την πρώτη κατηγορία
@@ -2090,22 +2069,26 @@ Please select Charge Type first,Παρακαλώ επιλέξτε Τύπος φ�
 Please select Fiscal Year,Παρακαλώ επιλέξτε Χρήσεως
 Please select Group or Ledger value,Επιλέξτε Κατηγορία ή Ledger αξία
 Please select Incharge Person's name,Παρακαλώ επιλέξτε το όνομα Incharge ατόμου
+Please select Invoice Type and Invoice Number in atleast one row,Παρακαλώ επιλέξτε Τιμολόγιο Τύπος και Αριθμός Τιμολογίου σε atleast μία σειρά
 "Please select Item where ""Is Stock Item"" is ""No"" and ""Is Sales Item"" is ""Yes"" and there is no other Sales BOM","Παρακαλώ επιλέξτε σημείο όπου ""Είναι Stock σημείο "" είναι ""Όχι"" και ""Είναι Πωλήσεις σημείο "" είναι ""Ναι"" και δεν υπάρχει άλλος Πωλήσεις BOM"
 Please select Price List,Παρακαλώ επιλέξτε Τιμοκατάλογος
 Please select Start Date and End Date for Item {0},Παρακαλώ επιλέξτε Ημερομηνία έναρξης και Ημερομηνία λήξης για τη θέση {0}
+Please select Time Logs.,Παρακαλώ επιλέξτε Ώρα Logs.
 Please select a csv file,Επιλέξτε ένα αρχείο CSV
 Please select a valid csv file with data,Παρακαλώ επιλέξτε ένα έγκυρο αρχείο csv με τα δεδομένα
 Please select a value for {0} quotation_to {1},Παρακαλώ επιλέξτε μια τιμή για {0} quotation_to {1}
 "Please select an ""Image"" first","Παρακαλώ επιλέξτε ένα "" Image "" πρώτη"
 Please select charge type first,Παρακαλούμε επιλέξτε τον τύπο φορτίου πρώτη
+Please select company first,Επιλέξτε την εταιρεία πρώτη
 Please select company first.,Παρακαλώ επιλέξτε την πρώτη εταιρεία .
 Please select item code,Παρακαλώ επιλέξτε κωδικό του στοιχείου
 Please select month and year,Παρακαλώ επιλέξτε μήνα και έτος
 Please select prefix first,Παρακαλώ επιλέξτε πρόθεμα πρώτη
 Please select the document type first,Παρακαλώ επιλέξτε τον τύπο του εγγράφου πρώτη
-Please select valid Voucher No to proceed,Παρακαλώ επιλέξτε ένα έγκυρο Voucher Όχι για να προχωρήσετε
 Please select weekly off day,Παρακαλώ επιλέξτε εβδομαδιαίο ρεπό
 Please select {0},Παρακαλώ επιλέξτε {0}
+Please select {0} first,Παρακαλώ επιλέξτε {0} Πρώτα
+Please select {0} first.,Παρακαλώ επιλέξτε {0} για πρώτη φορά.
 Please set Dropbox access keys in your site config,Παρακαλούμε να ορίσετε τα πλήκτρα πρόσβασης Dropbox στο config site σας
 Please set Google Drive access keys in {0},Παρακαλούμε να ορίσετε τα πλήκτρα πρόσβασης Google Drive στο {0}
 Please set default Cash or Bank account in Mode of Payment {0},Παρακαλούμε ορίσετε την προεπιλεγμένη μετρητά ή τραπεζικού λογαριασμού σε λειτουργία Πληρωμής {0}
@@ -2121,18 +2104,18 @@ Please specify Default Currency in Company Master and Global Defaults,Παρακ
 Please specify a,Παρακαλείστε να προσδιορίσετε μια
 Please specify a valid 'From Case No.',Καθορίστε μια έγκυρη »από το Νο. υπόθεση»
 Please specify a valid Row ID for {0} in row {1},Καθορίστε μια έγκυρη ταυτότητα Σειρά για {0} στη γραμμή {1}
+Please specify either Quantity or Valuation Rate or both,Παρακαλείστε να προσδιορίσετε είτε Ποσότητα ή αποτίμησης Rate ή και τα δύο
 Please submit to update Leave Balance.,Παρακαλώ να υποβάλετε ενημερώσετε Αφήστε Balance .
 Plot,οικόπεδο
 Plot By,οικόπεδο Με
 Point of Sale,Point of Sale
 Point-of-Sale Setting,Point-of-Sale Περιβάλλον
 Post Graduate,Μεταπτυχιακά
-Post already exists. Cannot add again!,Δημοσίευση υπάρχει ήδη . Δεν είναι δυνατή η προσθήκη και πάλι !
-Post does not exist. Please add post!,Δημοσίευση δεν υπάρχει . Παρακαλώ προσθέστε το post!
 Postal,Ταχυδρομικός
 Postal Expenses,Ταχυδρομική Έξοδα
 Posting Date,Απόσπαση Ημερομηνία
 Posting Time,Απόσπαση Ώρα
+Posting date and posting time is mandatory,Απόσπαση ημερομηνία και την απόσπαση του χρόνου είναι υποχρεωτική
 Posting timestamp must be after {0},Απόσπαση timestamp πρέπει να είναι μετά την {0}
 Potential opportunities for selling.,Πιθανές ευκαιρίες για την πώληση.
 Preferred Billing Address,Προτεινόμενα Διεύθυνση Χρέωσης
@@ -2143,7 +2126,6 @@ Prevdoc DocType,Prevdoc DocType
 Prevdoc Doctype,Prevdoc Doctype
 Preview,Προεπισκόπηση
 Previous,προηγούμενος
-Previous Record,Προηγούμενη Εγγραφή
 Previous Work Experience,Προηγούμενη εργασιακή εμπειρία
 Price,τιμή
 Price / Discount,Τιμή / Έκπτωση
@@ -2160,21 +2142,24 @@ Price List not selected,Τιμοκατάλογος δεν έχει επιλεγ�
 Price List {0} is disabled,Τιμοκατάλογος {0} είναι απενεργοποιημένη
 Price or Discount,Τιμή ή Έκπτωση
 Pricing Rule,τιμολόγηση Κανόνας
-Pricing Rule For Discount,Τιμολόγηση κανόνας για έκπτωση
-Pricing Rule For Price,Τιμολόγηση κανόνας για Τιμή
-Print,αποτύπωμα
+Pricing Rule Help,Τιμολόγηση Κανόνας Βοήθεια
+"Pricing Rule is first selected based on 'Apply On' field, which can be Item, Item Group or Brand.","Τιμολόγηση Κανόνας πρώτος επιλέγεται με βάση την «Εφαρμογή Στο« πεδίο, το οποίο μπορεί να είναι σημείο, σημείο Ομίλου ή Brand."
+"Pricing Rule is made to overwrite Price List / define discount percentage, based on some criteria.","Τιμολόγηση κανόνας γίνεται να αντικαταστήσετε Τιμοκατάλογος / καθορίζουν έκπτωση ποσοστού, με βάση ορισμένα κριτήρια."
+Pricing Rules are further filtered based on quantity.,Οι κανόνες τιμολόγησης φιλτράρεται περαιτέρω με βάση την ποσότητα.
 Print Format Style,Εκτύπωση Style Format
 Print Heading,Εκτύπωση Τομέας
 Print Without Amount,Εκτυπώστε χωρίς Ποσό
 Print and Stationary,Εκτύπωση και εν στάσει
-Print...,Εκτύπωση ...
 Printing and Branding,Εκτύπωσης και Branding
 Priority,Προτεραιότητα
+Private Equity,Private Equity
 Privilege Leave,Αφήστε Privilege
+Probation,δοκιμασία
 Process Payroll,Μισθοδοσίας Διαδικασία
 Produced,παράγεται
 Produced Quantity,Παραγόμενη ποσότητα
 Product Enquiry,Προϊόν Επικοινωνία
+Production,παραγωγή
 Production Order,Εντολής Παραγωγής
 Production Order status is {0},Κατάσταση παραγγελίας παραγωγής είναι {0}
 Production Order {0} must be cancelled before cancelling this Sales Order,Παραγγελία παραγωγής {0} πρέπει να ακυρωθεί πριν από την ακύρωση αυτής της παραγγελίας πώλησης
@@ -2187,12 +2172,14 @@ Production Plan Sales Order,Παραγωγή Plan Πωλήσεις Τάξης
 Production Plan Sales Orders,Πωλήσεις Σχέδιο Παραγωγής Παραγγελίες
 Production Planning Tool,Παραγωγή εργαλείο σχεδιασμού
 Products,προϊόντα
-Products or Services You Buy,Προϊόντα ή υπηρεσίες που αγοράζουν
 "Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.","Τα προϊόντα θα πρέπει να ταξινομούνται κατά βάρος-ηλικία στις αναζητήσεις προεπιλογή. Περισσότερο το βάρος-ηλικία, υψηλότερο το προϊόν θα εμφανίζονται στη λίστα."
+Professional Tax,Επαγγελματική Φόρος
 Profit and Loss,Κέρδη και ζημιές
+Profit and Loss Statement,Κατάσταση Αποτελεσμάτων
 Project,Σχέδιο
 Project Costing,Έργο Κοστολόγηση
 Project Details,Λεπτομέρειες Έργου
+Project Manager,Υπεύθυνος Έργου
 Project Milestone,Έργο Milestone
 Project Milestones,Ορόσημα του έργου
 Project Name,Όνομα Έργου
@@ -2209,9 +2196,12 @@ Projected Qty,Προβλεπόμενη Ποσότητα
 Projects,Έργα
 Projects & System,Έργα & Σύστημα
 Prompt for Email on Submission of,Ερώτηση για το e-mail για Υποβολή
+Proposal Writing,Γράφοντας Πρόταση
 Provide email id registered in company,Παροχή ταυτότητα ηλεκτρονικού ταχυδρομείου εγγραφεί στην εταιρεία
+Provisional Profit / Loss (Credit),Προσωρινή Κέρδη / Ζημιές (Credit)
 Public,Δημόσιο
-Pull Payment Entries,Τραβήξτε Καταχωρήσεις Πληρωμής
+Published on website at: {0},Δημοσιεύονται στο δικτυακό τόπο στη διεύθυνση: {0}
+Publishing,Εκδόσεις
 Pull sales orders (pending to deliver) based on the above criteria,Τραβήξτε παραγγελίες πωλήσεων (εκκρεμεί να παραδώσει) με βάση τα ανωτέρω κριτήρια
 Purchase,Αγορά
 Purchase / Manufacture Details,Αγορά / Κατασκευή Λεπτομέρειες
@@ -2219,7 +2209,6 @@ Purchase Analytics,Analytics Αγορά
 Purchase Common,Αγορά Κοινή
 Purchase Details,Λεπτομέρειες Αγορά
 Purchase Discounts,Εκπτώσεις Αγορά
-Purchase In Transit,Αγορά In Transit
 Purchase Invoice,Τιμολόγιο αγοράς
 Purchase Invoice Advance,Τιμολόγιο αγοράς Advance
 Purchase Invoice Advances,Τιμολόγιο αγοράς Προκαταβολές
@@ -2227,7 +2216,6 @@ Purchase Invoice Item,Τιμολόγιο αγοράς Θέση
 Purchase Invoice Trends,Τιμολόγιο αγοράς Τάσεις
 Purchase Invoice {0} is already submitted,Τιμολογίου αγοράς {0} έχει ήδη υποβληθεί
 Purchase Order,Εντολή Αγοράς
-Purchase Order Date,Αγορά Ημερομηνία παραγγελίας
 Purchase Order Item,Αγορά Θέση Παραγγελία
 Purchase Order Item No,Αγορά Στοιχείο Αύξων αριθμός
 Purchase Order Item Supplied,Θέση Αγορά Παραγγελία Εξοπλισμένο
@@ -2277,6 +2265,7 @@ Quality Inspection Parameters,Παράμετροι Ελέγχου Ποιότητ
 Quality Inspection Reading,Ποιότητα Reading Επιθεώρηση
 Quality Inspection Readings,Αναγνώσεις Ελέγχου Ποιότητας
 Quality Inspection required for Item {0},Έλεγχος της ποιότητας που απαιτείται για τη θέση {0}
+Quality Management,διαχείρισης Ποιότητας
 Quantity,Ποσότητα
 Quantity Requested for Purchase,Αιτούμενη ποσότητα για Αγορά
 Quantity and Rate,Ποσότητα και το ρυθμό
@@ -2288,10 +2277,8 @@ Quantity of item obtained after manufacturing / repacking from given quantities 
 Quantity required for Item {0} in row {1},Ποσότητα που απαιτείται για τη θέση {0} στη γραμμή {1}
 Quarter,Τέταρτο
 Quarterly,Τριμηνιαίος
-Query Report,Έκθεση ερωτήματος
 Quick Help,Γρήγορη Βοήθεια
 Quotation,Προσφορά
-Quotation Date,Ημερομηνία Προσφοράς
 Quotation Item,Θέση Προσφοράς
 Quotation Items,Στοιχεία Προσφοράς
 Quotation Lost Reason,Εισαγωγικά Lost Λόγος
@@ -2340,6 +2327,7 @@ Reading 6,Ανάγνωση 6
 Reading 7,Ανάγνωση 7
 Reading 8,Ανάγνωση 8
 Reading 9,Ανάγνωση 9
+Real Estate,ακίνητα
 Reason,Λόγος
 Reason for Leaving,Αιτία για την έξοδο
 Reason for Resignation,Λόγος Παραίτηση
@@ -2358,6 +2346,7 @@ Receiver List,Λίστα Δέκτης
 Receiver List is empty. Please create Receiver List,Δέκτης λίστας είναι άδειο . Παρακαλώ δημιουργήστε Receiver Λίστα
 Receiver Parameter,Παράμετρος Δέκτης
 Recipients,Παραλήπτες
+Reconcile,Συμφωνήστε
 Reconciliation Data,Συμφωνία δεδομένων
 Reconciliation HTML,Συμφιλίωση HTML
 Reconciliation JSON,Συμφιλίωση JSON
@@ -2367,6 +2356,7 @@ Recurring Invoice,Επαναλαμβανόμενο Τιμολόγιο
 Recurring Type,Επαναλαμβανόμενο Τύπος
 Reduce Deduction for Leave Without Pay (LWP),Μείωση Μείωση για άδεια χωρίς αποδοχές (LWP)
 Reduce Earning for Leave Without Pay (LWP),Μείωση κερδών για άδεια χωρίς αποδοχές (LWP)
+Ref,Ref
 Ref Code,Κωδ
 Ref SQ,Ref SQ
 Reference,Αναφορά
@@ -2388,14 +2378,12 @@ Rejected Warehouse is mandatory against regected item,Απορρίπτεται �
 Relation,Σχέση
 Relieving Date,Ανακούφιση Ημερομηνία
 Relieving Date must be greater than Date of Joining,"Ανακούφιση Ημερομηνία πρέπει να είναι μεγαλύτερη από ό, τι Ημερομηνία Ενώνουμε"
-Reload Page,Ανανέωση της σελίδας
 Remark,Παρατήρηση
 Remarks,Παρατηρήσεις
-Remove Bookmark,Κατάργηση Bookmark
+Remarks Custom,Παρατηρήσεις Προσαρμοσμένη
 Rename,μετονομάζω
 Rename Log,Μετονομασία Σύνδεση
 Rename Tool,Μετονομασία Tool
-Rename...,Μετονομασία ...
 Rent Cost,Ενοικίαση Κόστος
 Rent per hour,Ενοικίαση ανά ώρα
 Rented,Νοικιασμένο
@@ -2403,13 +2391,12 @@ Repeat on Day of Month,Επαναλάβετε την Ημέρα του μήνα
 Replace,Αντικατάσταση
 Replace Item / BOM in all BOMs,Αντικαταστήστε το σημείο / BOM σε όλες τις BOMs
 Replied,Απάντησε
-Report,Αναφορά
 Report Date,Έκθεση Ημερομηνία
 Report Type,Αναφορά Ειδών
 Report Type is mandatory,Τύπος έκθεσης είναι υποχρεωτική
-Report was not saved (there were errors),Έκθεση δεν αποθηκεύτηκε (υπήρχαν σφάλματα)
 Reports to,Εκθέσεις προς
 Reqd By Date,Reqd Με ημερομηνία
+Reqd by Date,Reqd κατά Ημερομηνία
 Request Type,Τύπος Αίτηση
 Request for Information,Αίτηση για πληροφορίες
 Request for purchase.,Αίτηση για την αγορά.
@@ -2425,6 +2412,9 @@ Required Date,Απαραίτητα Ημερομηνία
 Required Qty,Απαιτούμενη Ποσότητα
 Required only for sample item.,Απαιτείται μόνο για το στοιχείο του δείγματος.
 Required raw materials issued to the supplier for producing a sub - contracted item.,Απαιτείται πρώτων υλών που έχουν εκδοθεί στον προμηθευτή για την παραγωγή ενός υπο - υπεργολάβο στοιχείο.
+Research,έρευνα
+Research & Development,Έρευνα & Ανάπτυξη
+Researcher,ερευνητής
 Reseller,Reseller
 Reserved,reserved
 Reserved Qty,Ποσότητα Reserved
@@ -2444,11 +2434,14 @@ Resolution Details,Λεπτομέρειες Ανάλυση
 Resolved By,Αποφασισμένοι Με
 Rest Of The World,Rest Of The World
 Retail,Λιανική πώληση
+Retail & Wholesale,Λιανική & Χονδρική Πώληση
 Retailer,Έμπορος λιανικής
 Review Date,Ημερομηνία αξιολόγησης
 Rgt,Rgt
 Role Allowed to edit frozen stock,Ο ρόλος κατοικίδια να επεξεργαστείτε κατεψυγμένο απόθεμα
 Role that is allowed to submit transactions that exceed credit limits set.,Ο ρόλος που έχει τη δυνατότητα να υποβάλει τις συναλλαγές που υπερβαίνουν τα όρια που πίστωσης.
+Root Type,Τύπος root
+Root Type is mandatory,Τύπος Root είναι υποχρεωτική
 Root account can not be deleted,Λογαριασμού root δεν μπορεί να διαγραφεί
 Root cannot be edited.,Root δεν μπορεί να επεξεργαστεί .
 Root cannot have a parent cost center,Root δεν μπορεί να έχει ένα κέντρο κόστους μητρική
@@ -2456,12 +2449,27 @@ Rounded Off,στρογγυλοποιηθεί
 Rounded Total,Στρογγυλεμένες Σύνολο
 Rounded Total (Company Currency),Στρογγυλεμένες Σύνολο (νόμισμα της Εταιρείας)
 Row # ,Row #
+Row # {0}: ,
+Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Σειρά # {0}: Διέταξε ποσότητα δεν μπορεί να μικρότερη από την ελάχιστη ποσότητα σειρά στοιχείου (όπως ορίζεται στο σημείο master).
+Row #{0}: Please specify Serial No for Item {1},Σειρά # {0}: Παρακαλείστε να προσδιορίσετε Αύξων αριθμός για τη θέση {1}
+Row {0}: Account does not match with \						Purchase Invoice Credit To account,Σειρά {0}: Ο λογαριασμός δεν ταιριάζει με \ τιμολογίου αγοράς πίστωση του λογαριασμού
+Row {0}: Account does not match with \						Sales Invoice Debit To account,Σειρά {0}: Ο λογαριασμός δεν ταιριάζει με \ Τιμολόγιο Πώλησης χρέωση του λογαριασμού
+Row {0}: Conversion Factor is mandatory,Σειρά {0}: συντελεστής μετατροπής είναι υποχρεωτική
+Row {0}: Credit entry can not be linked with a Purchase Invoice,Σειρά {0} : Credit εισόδου δεν μπορεί να συνδεθεί με ένα τιμολογίου αγοράς
+Row {0}: Debit entry can not be linked with a Sales Invoice,Σειρά {0} : Χρεωστική εισόδου δεν μπορεί να συνδεθεί με ένα Τιμολόγιο Πώλησης
+Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,Σειρά {0}: Ποσό πληρωμής πρέπει να είναι μικρότερη ή ίση με τιμολόγιο οφειλόμενο ποσό. Παρακαλούμε ανατρέξτε Σημείωση παρακάτω.
+Row {0}: Qty is mandatory,Σειρά {0}: Ποσότητα είναι υποχρεωτική
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}","Σειρά {0}: Ποσότητα δεν avalable στην αποθήκη {1} στο {2} {3}. Διαθέσιμο Ποσότητα: {4}, Μεταφορά Ποσότητα: {5}"
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}","Σειρά {0}: Για να ρυθμίσετε {1} περιοδικότητα, η διαφορά μεταξύ της από και προς την ημερομηνία \ πρέπει να είναι μεγαλύτερη ή ίση με {2}"
+Row {0}:Start Date must be before End Date,Σειρά {0} : Ημερομηνία Έναρξης πρέπει να είναι πριν από την Ημερομηνία Λήξης
 Rules for adding shipping costs.,Κανόνες για την προσθήκη έξοδα αποστολής .
 Rules for applying pricing and discount.,Κανόνες για την εφαρμογή τιμών και εκπτώσεων .
 Rules to calculate shipping amount for a sale,Κανόνες για τον υπολογισμό του ποσού αποστολής για την πώληση
 S.O. No.,S.O. Όχι.
+SHE Cess on Excise,SHE διεργασίας για τους ειδικούς φόρους κατανάλωσης
+SHE Cess on Service Tax,SHE CeSS για Φορολογική Υπηρεσία
+SHE Cess on TDS,SHE διεργασίας για TDS
 SMS Center,SMS Κέντρο
-SMS Control,SMS Ελέγχου
 SMS Gateway URL,SMS URL Πύλη
 SMS Log,SMS Log
 SMS Parameter,SMS Παράμετρος
@@ -2542,12 +2550,10 @@ Salutation,Χαιρετισμός
 Sample Size,Μέγεθος δείγματος
 Sanctioned Amount,Κυρώσεις Ποσό
 Saturday,Σάββατο
-Save,εκτός
 Schedule,Πρόγραμμα
 Schedule Date,Πρόγραμμα Ημερομηνία
 Schedule Details,Λεπτομέρειες Πρόγραμμα
 Scheduled,Προγραμματισμένη
-Scheduled Confirmation Date must be greater than Date of Joining,"Προγραμματισμένη ημερομηνία επιβεβαίωσης πρέπει να είναι μεγαλύτερη από ό, τι Ημερομηνία Ενώνουμε"
 Scheduled Date,Προγραμματισμένη Ημερομηνία
 Scheduled to send to {0},Προγραμματισμένη για να στείλετε σε {0}
 Scheduled to send to {0} recipients,Προγραμματισμένη για να στείλετε σε {0} αποδέκτες
@@ -2557,9 +2563,10 @@ Score (0-5),Αποτέλεσμα (0-5)
 Score Earned,Αποτέλεσμα Δεδουλευμένα
 Score must be less than or equal to 5,Σκορ πρέπει να είναι μικρότερη από ή ίση με 5
 Scrap %,Άχρηστα%
-Search,Αναζήτηση
 Seasonality for setting budgets.,Εποχικότητα για τον καθορισμό των προϋπολογισμών.
+Secretary,γραμματέας
 Secured Loans,Δάνεια με εξασφαλίσεις
+Securities & Commodity Exchanges,Securities & χρηματιστήρια εμπορευμάτων
 Securities and Deposits,Κινητών Αξιών και καταθέσεις
 "See ""Rate Of Materials Based On"" in Costing Section",Ανατρέξτε στην ενότητα &quot;Rate υλικών με βάση&quot; στην κοστολόγηση ενότητα
 "Select ""Yes"" for sub - contracting items",Επιλέξτε &quot;Ναι&quot; για την υπο - αναθέτουσα στοιχεία
@@ -2567,29 +2574,25 @@ Securities and Deposits,Κινητών Αξιών και καταθέσεις
 "Select ""Yes"" if this item represents some work like training, designing, consulting etc.","Επιλέξτε &quot;Ναι&quot;, εάν το στοιχείο αυτό αντιπροσωπεύει κάποια εργασία όπως η κατάρτιση, το σχεδιασμό, διαβούλευση κλπ."
 "Select ""Yes"" if you are maintaining stock of this item in your Inventory.",Επιλέξτε &quot;Ναι&quot; αν είναι η διατήρηση αποθεμάτων του προϊόντος αυτού στη απογραφής σας.
 "Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.",Επιλέξτε &quot;Ναι&quot; αν προμηθεύουν πρώτες ύλες στον προμηθευτή σας για την κατασκευή αυτού του στοιχείου.
-Select All,Επιλέξτε All
-Select Attachments,Επιλέξτε Συνημμένα
+Select Brand...,Επιλέξτε Brand ...
 Select Budget Distribution to unevenly distribute targets across months.,Επιλέξτε κατανομή του προϋπολογισμού για τη διανομή άνισα στόχους σε μήνες.
 "Select Budget Distribution, if you want to track based on seasonality.","Επιλέξτε κατανομή του προϋπολογισμού, αν θέλετε να παρακολουθείτε με βάση την εποχικότητα."
+Select Company...,Επιλέξτε Εταιρία ...
 Select DocType,Επιλέξτε DocType
+Select Fiscal Year...,Επιλέξτε Χρήσεως ...
 Select Items,Επιλέξτε Προϊόντα
-Select Print Format,Επιλέξτε έντυπη μορφή
+Select Project...,Επιλέξτε το Project ...
 Select Purchase Receipts,Επιλέξτε Εισπράξεις Αγορά
-Select Report Name,Επιλογή Όνομα Έκθεση
 Select Sales Orders,Επιλέξτε Παραγγελίες
 Select Sales Orders from which you want to create Production Orders.,Επιλέξτε Παραγγελίες από το οποίο θέλετε να δημιουργήσετε Εντολές Παραγωγής.
 Select Time Logs and Submit to create a new Sales Invoice.,Επιλέξτε χρόνος Καταγράφει και Υποβολή για να δημιουργήσετε ένα νέο τιμολόγιο πωλήσεων.
-Select To Download:,Επιλέξτε για να κατεβάσετε :
 Select Transaction,Επιλέξτε Συναλλαγών
-Select Type,Επιλέξτε Τύπο
+Select Warehouse...,Επιλέξτε αποθήκη ...
 Select Your Language,Επιλέξτε τη γλώσσα σας
 Select account head of the bank where cheque was deposited.,"Επιλέξτε επικεφαλής λογαριασμό της τράπεζας, όπου επιταγή κατατέθηκε."
 Select company name first.,Επιλέξτε το όνομα της εταιρείας πρώτα.
-Select dates to create a new ,Επιλέξτε ημερομηνίες για να δημιουργήσετε ένα νέο
-Select or drag across time slots to create a new event.,Επιλέξτε ή σύρετε χρονοθυρίδες για να δημιουργήσετε ένα νέο συμβάν.
 Select template from which you want to get the Goals,Επιλέξτε το πρότυπο από το οποίο θέλετε να πάρετε τα Γκολ
 Select the Employee for whom you are creating the Appraisal.,Επιλέξτε τον υπάλληλο για τον οποίο δημιουργείτε η εκτίμηση.
-Select the Invoice against which you want to allocate payments.,Επιλέξτε το τιμολόγιο βάσει του οποίου θέλετε να κατανείμει τις καταβολές .
 Select the period when the invoice will be generated automatically,"Επιλογή της χρονικής περιόδου, όταν το τιμολόγιο θα δημιουργηθεί αυτόματα"
 Select the relevant company name if you have multiple companies,"Επιλέξτε το σχετικό όνομα της εταιρείας, αν έχετε πολλές εταιρείες"
 Select the relevant company name if you have multiple companies.,"Επιλέξτε το σχετικό όνομα της εταιρείας, αν έχετε πολλές εταιρείες."
@@ -2602,12 +2605,11 @@ Select your home country and check the timezone and currency.,Επιλέξτε �
 "Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.",Επιλέγοντας «Ναι» θα δώσει μια μοναδική ταυτότητα σε κάθε οντότητα αυτού του αντικειμένου που μπορεί να δει στο Αύξων αριθμός master.
 Selling,Πώληση
 Selling Settings,Η πώληση Ρυθμίσεις
+"Selling must be checked, if Applicable For is selected as {0}",Η πώληση πρέπει να ελεγχθεί αν υπάρχει Για επιλέγεται ως {0}
 Send,Αποστολή
-Send As Email,Αποστολή ως e-mail
 Send Autoreply,Αποστολή Autoreply
 Send Email,Αποστολή Email
 Send From,Αποστολή Από
-Send Me A Copy,Στείλτε μου ένα αντίγραφο
 Send Notifications To,Στείλτε κοινοποιήσεις
 Send Now,Αποστολή τώρα
 Send SMS,Αποστολή SMS
@@ -2617,7 +2619,6 @@ Send mass SMS to your contacts,Αποστολή μαζικών SMS στις επ
 Send to this list,Αποστολή σε αυτόν τον κατάλογο
 Sender Name,Όνομα αποστολέα
 Sent On,Εστάλη στις
-Sent or Received,Αποστέλλονται ή λαμβάνονται
 Separate production order will be created for each finished good item.,Ξεχωριστή σειρά παραγωγής θα δημιουργηθεί για κάθε τελικό καλό στοιχείο.
 Serial No,Αύξων αριθμός
 Serial No / Batch,Αύξων αριθμός / Batch
@@ -2640,7 +2641,7 @@ Serial No {0} status must be 'Available' to Deliver,Αύξων αριθμός {0
 Serial Nos Required for Serialized Item {0},Serial Απαιτείται αριθμοί των Serialized σημείο {0}
 Serial Number Series,Serial Number Series
 Serial number {0} entered more than once,Αύξων αριθμός {0} τέθηκε περισσότερο από μία φορά
-Serialized Item {0} cannot be updated using Stock Reconciliation,Serialized σημείο {0} δεν μπορεί να ενημερωθεί μέσω Stock Συμφιλίωση
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,Serialized σημείο {0} δεν μπορεί να ενημερωθεί \ χρησιμοποιώντας Χρηματιστήριο Συμφιλίωση
 Series,σειρά
 Series List for this Transaction,Λίστα Series για αυτή τη συναλλαγή
 Series Updated,σειρά ενημέρωση
@@ -2649,18 +2650,18 @@ Series is mandatory,Series είναι υποχρεωτική
 Series {0} already used in {1},Σειρά {0} έχει ήδη χρησιμοποιηθεί σε {1}
 Service,υπηρεσία
 Service Address,Service Διεύθυνση
+Service Tax,Φορολογική Υπηρεσία
 Services,Υπηρεσίες
-Session Expired. Logging you out,Συνεδρία Έληξε. Έξοδος από
 Set,σετ
 "Set Default Values like Company, Currency, Current Fiscal Year, etc.","Set Default Αξίες όπως η Εταιρεία , Συναλλάγματος , τρέχουσα χρήση , κλπ."
 Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,Ορισμός Θέση Ομάδα-σοφός προϋπολογισμούς σε αυτό το έδαφος. Μπορείτε επίσης να συμπεριλάβετε εποχικότητα με τη ρύθμιση της διανομής.
-Set Link,Ρύθμιση σύνδεσης
-Set allocated amount against each Payment Entry and click 'Allocate'.,Σετ ποσό που θα διατεθεί από κάθε έναρξη πληρωμής και κάντε κλικ στο κουμπί « Κατανομή » .
+Set Status as Available,Ορισμός κατάστασης όπως Διαθέσιμο
 Set as Default,Ορισμός ως Προεπιλογή
 Set as Lost,Ορισμός ως Lost
 Set prefix for numbering series on your transactions,Ορίστε πρόθεμα για σειρά αρίθμησης για τις συναλλαγές σας
 Set targets Item Group-wise for this Sales Person.,Τον καθορισμό στόχων Θέση Ομάδα-σοφός για αυτό το πρόσωπο πωλήσεων.
 Setting Account Type helps in selecting this Account in transactions.,Ρύθμιση Τύπος λογαριασμού βοηθά στην επιλογή αυτόν το λογαριασμό στις συναλλαγές.
+Setting this Address Template as default as there is no other default,"Η ρύθμιση αυτής της Διεύθυνση Πρότυπο ως προεπιλογή, καθώς δεν υπάρχει άλλη αθέτηση"
 Setting up...,Ρύθμιση ...
 Settings,Ρυθμίσεις
 Settings for HR Module,Ρυθμίσεις για HR Ενότητα
@@ -2668,6 +2669,7 @@ Settings for HR Module,Ρυθμίσεις για HR Ενότητα
 Setup,Εγκατάσταση
 Setup Already Complete!!,Ρύθμιση Ήδη Complete !
 Setup Complete,Η εγκατάσταση ολοκληρώθηκε
+Setup SMS gateway settings,Τις ρυθμίσεις του SMS gateway
 Setup Series,Σειρά εγκατάστασης
 Setup Wizard,Οδηγός εγκατάστασης
 Setup incoming server for jobs email id. (e.g. jobs@example.com),Ρύθμιση διακομιστή εισερχομένων για τις θέσεις εργασίας ταυτότητα ηλεκτρονικού ταχυδρομείου . ( π.χ. jobs@example.com )
@@ -2688,17 +2690,13 @@ Shipping Rule Label,Αποστολές Label Κανόνας
 Shop,Shop
 Shopping Cart,Καλάθι Αγορών
 Short biography for website and other publications.,Σύντομη βιογραφία για την ιστοσελίδα και άλλων εκδόσεων.
-Shortcut,Συντόμευση
 "Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.","Εμφάνιση &quot;Διαθέσιμο&quot; ή &quot;Μη διαθέσιμο&quot; με βάση αποθήκης, διαθέσιμη στην αποθήκη αυτή."
 "Show / Hide features like Serial Nos, POS etc.","Εμφάνιση / Απόκρυψη χαρακτηριστικά, όπως Serial Nos , POS κ.λπ."
-Show Details,Δείτε Λεπτομέρειες
 Show In Website,Εμφάνιση Στην Ιστοσελίδα
-Show Tags,Εμφάνιση Ετικέτες
 Show a slideshow at the top of the page,Δείτε ένα slideshow στην κορυφή της σελίδας
 Show in Website,Εμφάνιση στο Website
 Show rows with zero values,Εμφάνιση σειρές με μηδενικές τιμές
 Show this slideshow at the top of the page,Εμφάνιση αυτής της παρουσίασης στην κορυφή της σελίδας
-Showing only for (if not empty),Εμφάνιση μόνο ( αν δεν είναι άδειο)
 Sick Leave,αναρρωτική άδεια
 Signature,Υπογραφή
 Signature to be appended at the end of every email,Υπογραφή πρέπει να επισυνάπτεται στο τέλος του κάθε e-mail
@@ -2706,11 +2704,11 @@ Single,Μονόκλινο
 Single unit of an Item.,Ενιαία μονάδα ενός στοιχείου.
 Sit tight while your system is being setup. This may take a few moments.,"Καθίστε σφιχτά , ενώ το σύστημά σας είναι setup . Αυτό μπορεί να διαρκέσει μερικά λεπτά ."
 Slideshow,Παρουσίαση
-Sorry we were unable to find what you were looking for.,Δυστυχώς δεν μπορέσαμε να βρείτε αυτό που ψάχνατε.
-Sorry you are not permitted to view this page.,Δυστυχώς δεν σας επιτρέπεται να δείτε αυτή τη σελίδα.
+Soap & Detergent,Σαπούνι & απορρυπαντικών
+Software,λογισμικό
+Software Developer,Software Developer
 "Sorry, Serial Nos cannot be merged","Λυπούμαστε , Serial Nos δεν μπορούν να συγχωνευθούν"
 "Sorry, companies cannot be merged","Δυστυχώς , οι επιχειρήσεις δεν μπορούν να συγχωνευθούν"
-Sort By,Ταξινόμηση
 Source,Πηγή
 Source File,πηγή αρχείου
 Source Warehouse,Αποθήκη Πηγή
@@ -2719,8 +2717,6 @@ Source of Funds (Liabilities),Πηγή Χρηματοδότησης ( Παθητ
 Source warehouse is mandatory for row {0},Πηγή αποθήκη είναι υποχρεωτική για τη σειρά {0}
 Spartan,Σπαρτιάτης
 "Special Characters except ""-"" and ""/"" not allowed in naming series","Ειδικοί χαρακτήρες εκτός από "" - "" και "" / "" δεν επιτρέπονται στην ονομασία της σειράς"
-Special Characters not allowed in Abbreviation,Ειδικοί χαρακτήρες δεν επιτρέπονται σε Σύντμηση
-Special Characters not allowed in Company Name,Ειδικοί χαρακτήρες δεν επιτρέπονται στο όνομα της εταιρείας
 Specification Details,Λεπτομέρειες Προδιαγραφές
 Specifications,προδιαγραφές
 "Specify a list of Territories, for which, this Price List is valid","Ορίστε μια λίστα των εδαφών, για την οποία, παρών τιμοκατάλογος ισχύει"
@@ -2728,17 +2724,19 @@ Specifications,προδιαγραφές
 "Specify a list of Territories, for which, this Taxes Master is valid","Ορίστε μια λίστα των εδαφών, για την οποία, αυτός ο Δάσκαλος φόροι είναι έγκυρη"
 "Specify the operations, operating cost and give a unique Operation no to your operations.","Καθορίστε το πράξεις , το κόστος λειτουργίας και να δώσει μια μοναδική λειτουργία δεν τις εργασίες σας ."
 Split Delivery Note into packages.,Split Σημείωση Παράδοση σε πακέτα.
+Sports,αθλητισμός
+Sr,Sr
 Standard,Πρότυπο
-Standard Rate,Κανονικός συντελεστής
+Standard Buying,Πρότυπη Αγορά
 Standard Reports,πρότυπο Εκθέσεις
+Standard Selling,πρότυπο Selling
 Standard contract terms for Sales or Purchase.,Τυποποιημένων συμβατικών όρων για τις πωλήσεις ή Αγορά .
 Start,αρχή
 Start Date,Ημερομηνία έναρξης
-Start Report For,Ξεκινήστε την έκθεση για το
 Start date of current invoice's period,Ημερομηνία έναρξης της περιόδου τρέχουσας τιμολογίου
 Start date should be less than end date for Item {0},Η ημερομηνία έναρξης θα πρέπει να είναι μικρότερη από την ημερομηνία λήξης για τη θέση {0}
-Start date should be less than end date.,Η ημερομηνία έναρξης θα πρέπει να είναι μικρότερη από την ημερομηνία λήξης .
 State,Κατάσταση
+Statement of Account,Κατάσταση Λογαριασμού
 Static Parameters,Στατικές παραμέτρους
 Status,Κατάσταση
 Status must be one of {0},Κατάστασης πρέπει να είναι ένα από τα {0}
@@ -2780,6 +2778,7 @@ Stock Value Difference,Χρηματιστήριο Διαφορά Αξία
 Stock balances updated,Υπόλοιπα Χρηματιστήριο ενημέρωση
 Stock cannot be updated against Delivery Note {0},Χρηματιστήριο δεν μπορεί να ανανεωθεί κατά παράδοση Σημείωση {0}
 Stock entries exist against warehouse {0} cannot re-assign or modify 'Master Name',Υπάρχουν καταχωρήσεις Χρηματιστήριο κατά αποθήκη {0} δεν μπορεί εκ νέου να εκχωρήσει ή να τροποποιήσετε «Master Name '
+Stock transactions before {0} are frozen,Οι χρηματιστηριακές συναλλαγές πριν από {0} κατεψυγμένα
 Stop,Stop
 Stop Birthday Reminders,Διακοπή Υπενθυμίσεις γενεθλίων
 Stop Material Request,Διακοπή Υλικό Αίτηση
@@ -2793,20 +2792,19 @@ Sub Assemblies,υπο Συνελεύσεις
 "Sub-currency. For e.g. ""Cent""",Υπο-νόμισμα. Για παράδειγμα &quot;Cent&quot;
 Subcontract,Υπεργολαβία
 Subject,Θέμα
-Submit,Υποβολή
 Submit Salary Slip,Υποβολή Slip Μισθός
 Submit all salary slips for the above selected criteria,Υποβολή όλα τα εκκαθαριστικά σημειώματα αποδοχών για τα επιλεγμένα παραπάνω κριτήρια
 Submit this Production Order for further processing.,Υποβολή αυτό Παραγωγής Τάξης για περαιτέρω επεξεργασία .
 Submitted,Υποβλήθηκε
 Subsidiary,Θυγατρική
 Successful: ,Επιτυχείς:
-Successfully allocated,επιτυχία η διάθεση
+Successfully Reconciled,Επιτυχής Συμφιλιώνεται
 Suggestions,Προτάσεις
 Sunday,Κυριακή
 Supplier,Προμηθευτής
 Supplier (Payable) Account,Προμηθευτής (Υποχρεώσεις) λογαριασμός
 Supplier (vendor) name as entered in supplier master,Προμηθευτή (vendor) το όνομα που έχει καταχωρηθεί στο κύριο προμηθευτή
-Supplier Account,Ο λογαριασμός προμηθευτή
+Supplier > Supplier Type,Προμηθευτής> Προμηθευτής Τύπος
 Supplier Account Head,Προμηθευτής Head λογαριασμού
 Supplier Address,Διεύθυνση Προμηθευτή
 Supplier Addresses and Contacts,Διευθύνσεις προμηθευτή και Επαφές
@@ -2820,15 +2818,12 @@ Supplier Part Number,Προμηθευτής Αριθμός είδους
 Supplier Quotation,Προσφορά Προμηθευτής
 Supplier Quotation Item,Προμηθευτής Θέση Προσφοράς
 Supplier Reference,Αναφορά Προμηθευτής
-Supplier Shipment Date,Προμηθευτής ημερομηνία αποστολής
-Supplier Shipment No,Αποστολή Προμηθευτής αριθ.
 Supplier Type,Τύπος Προμηθευτής
 Supplier Type / Supplier,Προμηθευτής Τύπος / Προμηθευτής
 Supplier Type master.,Προμηθευτής Τύπος πλοίαρχος .
 Supplier Warehouse,Αποθήκη Προμηθευτής
 Supplier Warehouse mandatory for sub-contracted Purchase Receipt,Προμηθευτής αποθήκη υποχρεωτική για υπεργολαβικά Αγορά Παραλαβή
 Supplier database.,Βάση δεδομένων προμηθευτών.
-Supplier delivery number duplicate in {0},Προμηθευτής αριθμός παράδοσης διπλούν στο {0}
 Supplier master.,Προμηθευτής πλοίαρχος .
 Supplier warehouse where you have issued raw materials for sub - contracting,"Αποθήκη προμηθευτή, εάν έχετε εκδώσει τις πρώτες ύλες για την υπο - αναθέτουσα"
 Supplier-Wise Sales Analytics,Προμηθευτής - Wise Πωλήσεις Analytics
@@ -2840,7 +2835,6 @@ Support Email Settings,Υποστήριξη Ρυθμίσεις Email
 Support Password,Κωδικός Υποστήριξης
 Support Ticket,Ticket Support
 Support queries from customers.,Υποστήριξη ερωτήματα από πελάτες.
-Switch to Website,Αλλαγή σε ιστοσελίδα
 Symbol,Σύμβολο
 Sync Support Mails,Συγχρονισμός Mails Υποστήριξη
 Sync with Dropbox,Συγχρονισμός με το Dropbox
@@ -2848,7 +2842,12 @@ Sync with Google Drive,Συγχρονισμός με το Google Drive
 System,Σύστημα
 System Settings,Ρυθμίσεις συστήματος
 "System User (login) ID. If set, it will become default for all HR forms.","Σύστημα χρήστη (login) ID. Αν οριστεί, θα γίνει προεπιλογή για όλες τις μορφές HR."
-Tags,Tags
+TDS (Advertisement),TDS (Διαφήμιση)
+TDS (Commission),TDS (Επιτροπή)
+TDS (Contractor),TDS (Ανάδοχος)
+TDS (Interest),TDS (τόκοι)
+TDS (Rent),TDS (Ενοικίαση)
+TDS (Salary),TDS (Salary)
 Target  Amount,Ποσό-στόχος
 Target Detail,Λεπτομέρειες Target
 Target Details,Λεπτομέρειες Target
@@ -2868,11 +2867,11 @@ Tax Assets,Φορολογικές Απαιτήσεις
 Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,"Φορολογική κατηγορία δεν μπορεί να είναι « Αποτίμηση » ή « Αποτίμηση και Total », όπως όλα τα στοιχεία είναι στοιχεία μη - απόθεμα"
 Tax Rate,Φορολογικός Συντελεστής
 Tax and other salary deductions.,Φορολογικές και άλλες μειώσεις μισθών.
-"Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges",
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,"Τραπέζι λεπτομέρεια φόρου πωλούνταν από τη θέση πλοιάρχου, όπως μια σειρά και αποθηκεύονται σε αυτόν τον τομέα. Χρησιμοποιείται για φόρους και τέλη"
 Tax template for buying transactions.,Φορολογική πρότυπο για την αγορά των συναλλαγών .
 Tax template for selling transactions.,Φορολογική πρότυπο για την πώληση των συναλλαγών .
 Taxable,Φορολογητέο
+Taxes,Φόροι
 Taxes and Charges,Φόροι και τέλη
 Taxes and Charges Added,Οι φόροι και οι επιβαρύνσεις που προστίθενται
 Taxes and Charges Added (Company Currency),Οι φόροι και οι επιβαρύνσεις που προστίθενται (νόμισμα της Εταιρείας)
@@ -2881,13 +2880,17 @@ Taxes and Charges Deducted,Φόροι και τέλη παρακρατήθηκε
 Taxes and Charges Deducted (Company Currency),Οι φόροι και οι επιβαρύνσεις αφαιρούνται (νόμισμα της Εταιρείας)
 Taxes and Charges Total,Φόροι και τέλη Σύνολο
 Taxes and Charges Total (Company Currency),Φόροι και τέλη Σύνολο (νόμισμα της Εταιρείας)
+Technology,τεχνολογία
+Telecommunications,Τηλεπικοινωνίες
 Telephone Expenses,Τηλέφωνο Έξοδα
+Television,τηλεόραση
+Template,Πρότυπο
 Template for performance appraisals.,Πρότυπο για την αξιολόγηση της απόδοσης .
 Template of terms or contract.,Πρότυπο των όρων ή της σύμβασης.
-Temporary Account (Assets),Προσωρινή λογαριασμού ( Ενεργητικό )
-Temporary Account (Liabilities),Προσωρινή λογαριασμού ( Παθητικό )
 Temporary Accounts (Assets),Προσωρινή Λογαριασμοί (στοιχεία του ενεργητικού )
 Temporary Accounts (Liabilities),Προσωρινή Λογαριασμοί (Παθητικό )
+Temporary Assets,προσωρινή Ενεργητικού
+Temporary Liabilities,προσωρινή Υποχρεώσεις
 Term Details,Term Λεπτομέρειες
 Terms,όροι
 Terms and Conditions,Όροι και Προϋποθέσεις
@@ -2904,15 +2907,13 @@ Territory Target Variance Item Group-Wise,Έδαφος Target Variance Θέση 
 Territory Targets,Στόχοι Επικράτεια
 Test,Δοκιμή
 Test Email Id,Test Id Email
-Test Runner,Runner Test
 Test the Newsletter,Δοκιμάστε το Ενημερωτικό Δελτίο
 The BOM which will be replaced,Η ΒΟΜ η οποία θα αντικατασταθεί
 The First User: You,Η πρώτη Χρήστης : Μπορείτε
 "The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""","Το στοιχείο που αντιπροσωπεύει το πακέτο. Αυτό το στοιχείο πρέπει να έχει &quot;Είναι Stock Θέση&quot;, όπως &quot;Όχι&quot; και &quot;Είναι σημείο πώλησης&quot;, όπως &quot;Ναι&quot;"
 The Organization,ο Οργανισμός
 "The account head under Liability, in which Profit/Loss will be booked","Η κεφαλή του λογαριασμού βάσει της αστικής ευθύνης, στην οποία Κέρδη / Ζημίες θα κρατηθεί"
-"The date on which next invoice will be generated. It is generated on submit.
-",
+The date on which next invoice will be generated. It is generated on submit.,Η ημερομηνία κατά την οποία θα δημιουργηθεί το επόμενο τιμολόγιο. Παράγεται σε υποβάλει.
 The date on which recurring invoice will be stop,Η ημερομηνία κατά την οποία επαναλαμβανόμενες τιμολόγιο θα σταματήσει
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","Η ημέρα του μήνα κατά τον οποίο τιμολόγιο αυτοκινήτων θα παραχθούν, π.χ. 05, 28 κλπ"
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,Η μέρα ( ες) στην οποία υποβάλλετε αίτηση για άδεια είναι διακοπές . Δεν χρειάζεται να υποβάλουν αίτηση για άδεια .
@@ -2924,28 +2925,25 @@ The net weight of this package. (calculated automatically as sum of net weight o
 The new BOM after replacement,Η νέα BOM μετά την αντικατάστασή
 The rate at which Bill Currency is converted into company's base currency,Ο ρυθμός με τον οποίο Νόμισμα Bill μετατρέπεται σε νόμισμα βάσης της εταιρείας
 The unique id for tracking all recurring invoices. It is generated on submit.,Το μοναδικό αναγνωριστικό για την παρακολούθηση όλων των επαναλαμβανόμενες τιμολόγια. Παράγεται σε υποβάλει.
-Then By (optional),"Στη συνέχεια, με (προαιρετικό)"
+"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.","Στη συνέχεια, οι κανόνες τιμολόγησης φιλτράρονται με βάση πελατών, των πελατών του Ομίλου, Έδαφος, προμηθευτής, Προμηθευτής Τύπος, Εκστρατεία, Sales Partner κ.λπ."
 There are more holidays than working days this month.,Υπάρχουν περισσότερες διακοπές από εργάσιμων ημερών αυτό το μήνα .
 "There can only be one Shipping Rule Condition with 0 or blank value for ""To Value""","Μπορεί να υπάρχει μόνο μία αποστολή Κανόνας Κατάσταση με 0 ή κενή τιμή για το "" Να Value"""
 There is not enough leave balance for Leave Type {0},Δεν υπάρχει αρκετό υπόλοιπο άδειας για Αφήστε τύπου {0}
 There is nothing to edit.,Δεν υπάρχει τίποτα να επεξεργαστείτε .
 There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,Υπήρξε ένα σφάλμα . Ένας πιθανός λόγος θα μπορούσε να είναι ότι δεν έχετε αποθηκεύσει τη φόρμα . Παρακαλούμε επικοινωνήστε support@erpnext.com εάν το πρόβλημα παραμένει .
-There were errors,Υπήρξαν σφάλματα
-There were errors while sending email. Please try again.,Υπήρξαν σφάλματα κατά την αποστολή ηλεκτρονικού ταχυδρομείου . Παρακαλώ δοκιμάστε ξανά .
 There were errors.,Υπήρχαν λάθη .
 This Currency is disabled. Enable to use in transactions,Αυτό το νόμισμα είναι απενεργοποιημένη . Ενεργοποίηση για να χρησιμοποιήσετε στις συναλλαγές
 This Leave Application is pending approval. Only the Leave Apporver can update status.,Αυτό Αφήστε εφαρμογή εκκρεμεί η έγκριση . Μόνο ο Αφήστε Apporver να ενημερώσετε την κατάστασή .
 This Time Log Batch has been billed.,Αυτή η παρτίδα Log χρόνος έχει χρεωθεί.
 This Time Log Batch has been cancelled.,Αυτή η παρτίδα Log χρόνος έχει ακυρωθεί.
 This Time Log conflicts with {0},Αυτή τη φορά Σύνδεση συγκρούεται με {0}
-This is PERMANENT action and you cannot undo. Continue?,Αυτό είναι μόνιμη δράση και δεν μπορείτε να αναιρέσετε. Συνέχεια;
+This format is used if country specific format is not found,Αυτή η μορφή χρησιμοποιείται εάν η ειδική μορφή χώρα δεν έχει βρεθεί
 This is a root account and cannot be edited.,Αυτό είναι ένας λογαριασμός root και δεν μπορεί να επεξεργαστεί .
 This is a root customer group and cannot be edited.,Αυτό είναι μια ομάδα πελατών ρίζα και δεν μπορεί να επεξεργαστεί .
 This is a root item group and cannot be edited.,Πρόκειται για μια ομάδα ειδών ρίζα και δεν μπορεί να επεξεργαστεί .
 This is a root sales person and cannot be edited.,Αυτό είναι ένα πρόσωπο πωλήσεων ρίζα και δεν μπορεί να επεξεργαστεί .
 This is a root territory and cannot be edited.,Αυτό είναι μια περιοχή της ρίζας και δεν μπορεί να επεξεργαστεί .
 This is an example website auto-generated from ERPNext,Αυτό είναι ένα παράδειγμα ιστοσελίδα που δημιουργείται αυτόματα από ERPNext
-This is permanent action and you cannot undo. Continue?,Αυτό είναι μόνιμη δράση και δεν μπορείτε να αναιρέσετε. Συνέχεια;
 This is the number of the last created transaction with this prefix,Αυτός είναι ο αριθμός της τελευταίας συναλλαγής που δημιουργήθηκε με αυτό το πρόθεμα
 This will be used for setting rule in HR module,Αυτό θα χρησιμοποιηθεί για τον κανόνα ρύθμιση στην ενότητα HR
 Thread HTML,Θέμα HTML
@@ -2955,7 +2953,9 @@ Time Log Batch,Ώρα Batch Σύνδεση
 Time Log Batch Detail,Ώρα Λεπτομέρεια Batch Σύνδεση
 Time Log Batch Details,Λεπτομέρειες Batch Χρόνος καταγραφής
 Time Log Batch {0} must be 'Submitted',Χρόνος καταγραφής Παρτίδα {0} πρέπει να « Υποβλήθηκε »
+Time Log Status must be Submitted.,Ώρα Log Status πρέπει να υποβληθεί.
 Time Log for tasks.,Log Ώρα για εργασίες.
+Time Log is not billable,Χρόνος καταγραφής δεν είναι χρεώσιμο
 Time Log {0} must be 'Submitted',Χρόνος καταγραφής {0} πρέπει να « Υποβλήθηκε »
 Time Zone,Ζώνη ώρας
 Time Zones,Ζώνες ώρας
@@ -2968,6 +2968,7 @@ To,Να
 To Currency,Το νόμισμα
 To Date,Για την Ημερομηνία
 To Date should be same as From Date for Half Day leave,Για Ημερομηνία πρέπει να είναι ίδια με Από ημερομηνία για την άδεια Half Day
+To Date should be within the Fiscal Year. Assuming To Date = {0},Για Ημερομηνία πρέπει να είναι εντός του οικονομικού έτους. Υποθέτοντας να Ημερομηνία = {0}
 To Discuss,Για να συζητήσουν
 To Do List,To Do List
 To Package No.,Για τη συσκευασία Όχι
@@ -2977,8 +2978,8 @@ To Value,Για Value
 To Warehouse,Για Warehouse
 "To add child nodes, explore tree and click on the node under which you want to add more nodes.","Για να προσθέσετε κόμβους του παιδιού , να διερευνήσει το δέντρο και κάντε κλικ στο κόμβο κάτω από την οποία θέλετε να προσθέσετε περισσότερους κόμβους ."
 "To assign this issue, use the ""Assign"" button in the sidebar.","Για να εκχωρήσετε αυτό το ζήτημα, χρησιμοποιήστε το &quot;Assign&quot; κουμπί στο sidebar."
-To create a Bank Account:,Για να δημιουργήσετε ένα λογαριασμό της Τράπεζας :
-To create a Tax Account:,Για να δημιουργήσετε ένα λογαριασμό ΦΠΑ:
+To create a Bank Account,Για να δημιουργήσετε ένα Λογαριασμό Τράπεζας
+To create a Tax Account,Για να δημιουργήσετε ένα λογαριασμό Φόρος
 "To create an Account Head under a different company, select the company and save customer.","Για να δημιουργήσετε ένα κεφάλι λογαριασμό με διαφορετική εταιρεία, επιλέξτε την εταιρεία και να σώσει τους πελάτες."
 To date cannot be before from date,Μέχρι σήμερα δεν μπορεί να είναι πριν από την ημερομηνία
 To enable <b>Point of Sale</b> features,Για να ενεργοποιήσετε <b>Point of Sale</b> χαρακτηριστικά
@@ -2986,26 +2987,29 @@ To enable <b>Point of Sale</b> view,Για να ενεργοποιήσετε τ�
 To get Item Group in details table,Για να πάρετε την ομάδα Θέση σε λεπτομέρειες πίνακα
 "To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Να περιλαμβάνουν φόρους στη σειρά {0} στην τιμή Θέση , φόροι σε σειρές πρέπει επίσης να συμπεριληφθούν {1}"
 "To merge, following properties must be same for both items","Για να συγχωνεύσετε , ακόλουθες ιδιότητες πρέπει να είναι ίδιες για τα δύο είδη"
-"To report an issue, go to ",
-"To run a test add the module name in the route after '{0}'. For example, {1}","Για να εκτελέσετε μια δοκιμή προσθέστε το όνομα της ενότητας στη γραμμή μετά από '{0}' . Για παράδειγμα, το {1}"
+"To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled.","Για να μην εφαρμόσει τιμολόγηση κανόνα σε μια συγκεκριμένη συναλλαγή, όλους τους ισχύοντες κανόνες τιμολόγησης θα πρέπει να απενεργοποιηθεί."
 "To set this Fiscal Year as Default, click on 'Set as Default'","Για να ορίσετε το τρέχον οικονομικό έτος ως προεπιλογή , κάντε κλικ στο "" Ορισμός ως προεπιλογή """
 To track any installation or commissioning related work after sales,Για να παρακολουθήσετε οποιαδήποτε εγκατάσταση ή τις σχετικές εργασίες μετά την πώληση
 "To track brand name in the following documents Delivery Note, Opportunity, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No","Για να παρακολουθήσετε το εμπορικό σήμα στον παρακάτω έγγραφα Δελτίο Αποστολής , το Opportunity , Αίτηση Υλικού , σημείο , παραγγελίας , Αγορά Voucher , Αγοραστή Παραλαβή , Προσφορά , Τιμολόγιο Πώλησης , Πωλήσεις BOM , Πωλήσεις Τάξης , Αύξων αριθμός"
 To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,Για να ακολουθήσετε το στοιχείο στις πωλήσεις και παραστατικά αγοράς με βάση τους αύξοντες αριθμούς. Αυτό μπορεί επίσης να χρησιμοποιηθεί για να παρακολουθείτε τις λεπτομέρειες της εγγύησης του προϊόντος.
 To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,Για να παρακολουθείτε τα στοιχεία πωλήσεων και τα παραστατικά αγοράς με nos παρτίδα <br> <b>Προτεινόμενα Κλάδος: Χημικά κλπ</b>
 To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,Για να παρακολουθείτε τα στοιχεία με barcode. Θα είναι σε θέση να εισέλθουν αντικείμενα στο Δελτίο Αποστολής και Τιμολόγιο Πώλησης με σάρωση barcode του στοιχείου.
+Too many columns. Export the report and print it using a spreadsheet application.,Πάρα πολλές στήλες. Εξαγωγή την έκθεση και να το εκτυπώσετε χρησιμοποιώντας μια εφαρμογή λογιστικών φύλλων.
 Tools,Εργαλεία
 Total,Σύνολο
+Total ({0}),Σύνολο ({0})
 Total Advance,Σύνολο Advance
 Total Amount,Συνολικό Ποσό
 Total Amount To Pay,Συνολικό ποσό για να πληρώσει
 Total Amount in Words,Συνολικό ποσό ολογράφως
 Total Billing This Year: ,Σύνολο χρέωσης Αυτό το έτος:
+Total Characters,Σύνολο Χαρακτήρες
 Total Claimed Amount,Συνολικό αιτούμενο ποσό αποζημίωσης
 Total Commission,Σύνολο Επιτροπής
 Total Cost,Συνολικό Κόστος
 Total Credit,Συνολική πίστωση
 Total Debit,Σύνολο χρέωσης
+Total Debit must be equal to Total Credit. The difference is {0},Συνολική Χρέωση πρέπει να ισούται προς το σύνολο Credit .
 Total Deduction,Συνολική έκπτωση
 Total Earning,Σύνολο Κερδίζουν
 Total Experience,Συνολική εμπειρία
@@ -3023,16 +3027,16 @@ Total Score (Out of 5),Συνολική βαθμολογία (5)
 Total Tax (Company Currency),Σύνολο Φόρου (νόμισμα της Εταιρείας)
 Total Taxes and Charges,Σύνολο φόρους και τέλη
 Total Taxes and Charges (Company Currency),Σύνολο φόρους και τέλη (νόμισμα της Εταιρείας)
-Total Words,Σύνολο λόγια
-Total Working Days In The Month,Σύνολο εργάσιμες ημέρες του μήνα
 Total allocated percentage for sales team should be 100,Σύνολο των κατανεμημένων ποσοστό για την ομάδα πωλήσεων πρέπει να είναι 100
 Total amount of invoices received from suppliers during the digest period,Συνολικό ποσό των τιμολογίων που λαμβάνονται από τους προμηθευτές κατά την περίοδο της πέψης
 Total amount of invoices sent to the customer during the digest period,Συνολικό ποσό των τιμολογίων που αποστέλλονται στον πελάτη κατά τη διάρκεια της πέψης
 Total cannot be zero,Συνολικά δεν μπορεί να είναι μηδέν
 Total in words,Συνολικά στα λόγια
 Total points for all goals should be 100. It is {0},Σύνολο σημείων για όλους τους στόχους θα πρέπει να είναι 100 . Είναι {0}
+Total valuation for manufactured or repacked item(s) can not be less than total valuation of raw materials,"Συνολική αποτίμηση και για τα μεταποιημένα ή ανασυσκευασία, στοιχείο (α) δεν μπορεί να είναι μικρότερη από τη συνολική αποτίμηση των πρώτων υλών"
 Total weightage assigned should be 100%. It is {0},Σύνολο weightage ανατεθεί πρέπει να είναι 100 % . Είναι {0}
 Totals,Σύνολα
+Track Leads by Industry Type.,Track οδηγεί από τη βιομηχανία Τύπος .
 Track this Delivery Note against any Project,Παρακολουθήστε αυτό το Δελτίο Αποστολής εναντίον οποιουδήποτε έργου
 Track this Sales Order against any Project,Παρακολουθήστε αυτό το Πωλήσεις Τάξης εναντίον οποιουδήποτε έργου
 Transaction,Συναλλαγή
@@ -3042,10 +3046,10 @@ Transfer,Μεταφορά
 Transfer Material,μεταφορά Υλικού
 Transfer Raw Materials,Μεταφορά Πρώτες Ύλες
 Transferred Qty,Μεταφερόμενη ποσότητα
+Transportation,μεταφορά
 Transporter Info,Πληροφορίες Transporter
 Transporter Name,Όνομα Transporter
 Transporter lorry number,Transporter αριθμό φορτηγών
-Trash Reason,Λόγος Trash
 Travel,ταξίδι
 Travel Expenses,Έξοδα μετακίνησης
 Tree Type,δέντρο Τύπος
@@ -3065,8 +3069,7 @@ UOM Conversion Details,UOM Λεπτομέρειες μετατροπής
 UOM Conversion Factor,UOM Συντελεστής μετατροπής
 UOM Conversion factor is required in row {0},Συντελεστής μετατροπής UOM απαιτείται στη σειρά {0}
 UOM Name,UOM Name
-UOM coversion factor required for UOM {0} in Item {1},UOM παράγοντας coversion απαιτούνται για UOM {0} στη θέση {1}
-Unable to load: {0},Δεν είναι δυνατή η φόρτιση : {0}
+UOM coversion factor required for UOM: {0} in Item: {1},UOM παράγοντας coversion απαιτούνται για UOM: {0} στη θέση: {1}
 Under AMC,Σύμφωνα AMC
 Under Graduate,Σύμφωνα με Μεταπτυχιακό
 Under Warranty,Στα πλαίσια της εγγύησης
@@ -3076,11 +3079,8 @@ Unit of Measure {0} has been entered more than once in Conversion Factor Table,�
 "Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","Μονάδα μέτρησης του σημείου αυτού (π.χ. Kg, Μονάδα, Όχι, Pair)."
 Units/Hour,Μονάδες / ώρα
 Units/Shifts,Μονάδες / Βάρδιες
-Unknown Column: {0},Άγνωστος Στήλη : {0}
-Unknown Print Format: {0},Άγνωστη Τύπος εκτύπωσης: {0}
-Unmatched Amount,Απαράμιλλη Ποσό
 Unpaid,Απλήρωτα
-Unread Messages,Μη αναγνωσμένα μηνύματα
+Unreconciled Payment Details,Unreconciled Λεπτομέρειες πληρωμής
 Unscheduled,Έκτακτες
 Unsecured Loans,ακάλυπά δάνεια
 Unstop,ξεβουλώνω
@@ -3095,37 +3095,31 @@ Update Landed Cost,Ενημέρωση Landed Κόστος
 Update Series,Ενημέρωση Series
 Update Series Number,Ενημέρωση Αριθμός Σειράς
 Update Stock,Ενημέρωση Χρηματιστήριο
-"Update allocated amount in the above table and then click ""Allocate"" button",Ενημέρωση ποσό που διατίθεται στον παραπάνω πίνακα και στη συνέχεια κάντε κλικ στο κουμπί &quot;Εκχώρηση&quot; κουμπί
 Update bank payment dates with journals.,Ενημέρωση τράπεζα ημερομηνίες πληρωμής με περιοδικά.
 Update clearance date of Journal Entries marked as 'Bank Vouchers',Ενημέρωση ημερομηνία εκκαθάρισης της Εφημερίδας των εγγραφών που χαρακτηρίζονται ως « Τράπεζα Κουπόνια »
 Updated,Ενημέρωση
 Updated Birthday Reminders,Ενημερώθηκε Υπενθυμίσεις γενεθλίων
-Upload,Μεταφόρτωση
-Upload Attachment,Ανεβάστε Συνημμένο
 Upload Attendance,Ανεβάστε Συμμετοχή
 Upload Backups to Dropbox,Ανεβάστε αντίγραφα ασφαλείας στο Dropbox
 Upload Backups to Google Drive,Φορτώσουν τα αντίγραφα σε Google Drive
 Upload HTML,Ανεβάστε HTML
 Upload a .csv file with two columns: the old name and the new name. Max 500 rows.,Ανεβάστε ένα αρχείο CSV με δύο στήλες:. Το παλιό όνομα και το νέο όνομα. Max 500 σειρές.
-Upload a file,Μεταφόρτωση αρχείου
 Upload attendance from a .csv file,Ανεβάστε συμμετοχή από ένα αρχείο. Csv
 Upload stock balance via csv.,Ανεβάστε υπόλοιπο αποθεμάτων μέσω csv.
 Upload your letter head and logo - you can edit them later.,Ανεβάστε το κεφάλι γράμμα και το λογότυπό σας - μπορείτε να τα επεξεργαστείτε αργότερα .
-Uploading...,Μεταφόρτωση ...
 Upper Income,Άνω Εισοδήματος
 Urgent,Επείγων
 Use Multi-Level BOM,Χρησιμοποιήστε το Multi-Level BOM
 Use SSL,Χρήση SSL
+Used for Production Plan,Χρησιμοποιείται για το σχέδιο παραγωγής
 User,Χρήστης
 User ID,Όνομα Χρήστη
 User ID not set for Employee {0},ID χρήστη δεν έχει οριστεί υπάλληλου {0}
 User Name,Όνομα χρήστη
 User Name or Support Password missing. Please enter and try again.,"Όνομα Χρήστη ή Κωδικός Υποστήριξη λείπει . Παρακαλούμε, εισάγετε και δοκιμάστε ξανά ."
-User Permission Restrictions,Περιορισμοί άδεια χρήστη
 User Remark,Παρατήρηση χρήστη
 User Remark will be added to Auto Remark,Παρατήρηση Χρήστης θα πρέπει να προστεθεί στο Παρατήρηση Auto
 User Remarks is mandatory,Χρήστης Παρατηρήσεις είναι υποχρεωτική
-User Restrictions,Περιορισμοί χρήστη
 User Specific,Χρήστης Ειδικοί
 User must always select,Ο χρήστης πρέπει πάντα να επιλέγετε
 User {0} is already assigned to Employee {1},Χρήστης {0} έχει ήδη ανατεθεί σε εργαζομένους {1}
@@ -3149,12 +3143,14 @@ Value,Αξία
 Value or Qty,Αξία ή Τεμ
 Vehicle Dispatch Date,Όχημα ημερομηνία αποστολής
 Vehicle No,Όχημα αριθ.
+Venture Capital,Venture Capital
 Verified By,Verified by
 View Ledger,Προβολή Λέτζερ
 View Now,δείτε τώρα
 Visit report for maintenance call.,Επισκεφθείτε την έκθεση για την έκτακτη συντήρηση.
 Voucher #,Voucher #
 Voucher Detail No,Λεπτομέρεια φύλλου αριθ.
+Voucher Detail Number,Voucher Λεπτομέρεια Αριθμός
 Voucher ID,ID Voucher
 Voucher No,Δεν Voucher
 Voucher Type,Τύπος Voucher
@@ -3164,19 +3160,20 @@ Warehouse,αποθήκη
 Warehouse Contact Info,Αποθήκη Επικοινωνία
 Warehouse Detail,Λεπτομέρεια αποθήκη
 Warehouse Name,Όνομα αποθήκη
-Warehouse User,Χρήστης αποθήκη
 Warehouse and Reference,Αποθήκη και αναφορά
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,"Αποθήκης δεν μπορεί να διαγραφεί , όπως υφίσταται είσοδο στα αποθέματα καθολικό για την αποθήκη αυτή ."
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,Αποθήκη μπορεί να αλλάξει μόνο μέσω Stock εισόδου / Σημείωμα παράδοσης / απόδειξη αγοράς
 Warehouse cannot be changed for Serial No.,Αποθήκη δεν μπορεί να αλλάξει για την αύξων αριθμός
 Warehouse is mandatory for stock Item {0} in row {1},Αποθήκη είναι υποχρεωτική για απόθεμα Θέση {0} στη γραμμή {1}
 Warehouse is missing in Purchase Order,Αποθήκη λείπει σε Purchase Order
+Warehouse not found in the system,Αποθήκης δεν βρέθηκε στο σύστημα
 Warehouse required for stock Item {0},Αποθήκη απαιτούνται για απόθεμα Θέση {0}
-Warehouse required in POS Setting,Αποθήκη απαιτείται POS Περιβάλλον
 Warehouse where you are maintaining stock of rejected items,Αποθήκη όπου θα είναι η διατήρηση αποθέματος απορριφθέντα στοιχεία
 Warehouse {0} can not be deleted as quantity exists for Item {1},"Αποθήκη {0} δεν μπορεί να διαγραφεί , όπως υπάρχει ποσότητα για τη θέση {1}"
 Warehouse {0} does not belong to company {1},Αποθήκη {0} δεν ανήκει στην εταιρεία {1}
 Warehouse {0} does not exist,Αποθήκη {0} δεν υπάρχει
+Warehouse {0}: Company is mandatory,Αποθήκη {0}: Εταιρεία είναι υποχρεωτική
+Warehouse {0}: Parent account {1} does not bolong to the company {2},Αποθήκη {0}: Μητρική λογαριασμό {1} δεν BOLONG στην εταιρεία {2}
 Warehouse-Wise Stock Balance,Αποθήκη-Wise Balance Χρηματιστήριο
 Warehouse-wise Item Reorder,Αποθήκη-σοφός Θέση Αναδιάταξη
 Warehouses,Αποθήκες
@@ -3191,6 +3188,8 @@ Warranty / AMC Status,Εγγύηση / AMC Status
 Warranty Expiry Date,Εγγύηση Ημερομηνία Λήξης
 Warranty Period (Days),Περίοδος Εγγύησης (Ημέρες)
 Warranty Period (in days),Περίοδος Εγγύησης (σε ημέρες)
+We buy this Item,Αγοράζουμε αυτήν την θέση
+We sell this Item,Πουλάμε αυτήν την θέση
 Website,Δικτυακός τόπος
 Website Description,Περιγραφή Website
 Website Item Group,Website Ομάδα Θέση
@@ -3217,17 +3216,16 @@ Will be calculated automatically when you enter the details,Θα υπολογί�
 Will be updated after Sales Invoice is Submitted.,Θα πρέπει να ενημερώνεται μετά Sales τιμολογίου.
 Will be updated when batched.,Θα πρέπει να ενημερώνεται όταν ζυγισμένες.
 Will be updated when billed.,Θα πρέπει να ενημερώνεται όταν χρεώνονται.
-With Groups,με Ομάδες
-With Ledgers,με Καθολικά
+Wire Transfer,Wire Transfer
 With Operations,Με Λειτουργίες
-With period closing entry,Με την είσοδο κλεισίματος περιόδου
+With Period Closing Entry,Με την έναρξη Περίοδος Κλείσιμο
 Work Details,Λεπτομέρειες Εργασίας
 Work Done,Η εργασία που γίνεται
 Work In Progress,Εργασία In Progress
 Work-in-Progress Warehouse,Work-in-Progress αποθήκη
 Work-in-Progress Warehouse is required before Submit,Εργασία -in -Progress αποθήκη απαιτείται πριν Υποβολή
-Workflow will start after saving.,Workflow θα ξεκινήσει μετά την αποθήκευση.
 Working,Εργασία
+Working Days,Εργάσιμες ημέρες
 Workstation,Workstation
 Workstation Name,Όνομα σταθμού εργασίας
 Write Off Account,Γράψτε Off λογαριασμού
@@ -3243,25 +3241,15 @@ Year Closed,Έτους που έκλεισε
 Year End Date,Ημερομηνία Λήξης Έτος
 Year Name,Όνομα Έτος
 Year Start Date,Έτος Ημερομηνία Έναρξης
-Year Start Date and Year End Date are already set in Fiscal Year {0},Έτος Ημερομηνία έναρξης και Ημερομηνία λήξης έτους έχουν ήδη τεθεί σε Χρήσεως {0}
-Year Start Date and Year End Date are not within Fiscal Year.,Έτος Ημερομηνία έναρξης και Ημερομηνία λήξης έτους δεν εμπίπτουν Χρήσεως .
-Year Start Date should not be greater than Year End Date,Έτος Ημερομηνία Έναρξης δεν πρέπει να είναι μεγαλύτερη από το τέλος του έτους Ημερομηνία
 Year of Passing,Έτος Περνώντας
 Yearly,Ετήσια
 Yes,Ναί
-Yesterday,Χτες
-You are not allowed to create / edit reports,Δεν επιτρέπεται να δημιουργήσετε / επεξεργαστείτε εκθέσεις
-You are not allowed to create {0},Δεν επιτρέπεται να δημιουργήσετε {0}
-You are not allowed to export this report,Δεν επιτρέπεται να εξάγουν αυτή την έκθεση
-You are not allowed to print this document,Δεν επιτρέπεται να εκτυπώσετε το έγγραφο
-You are not allowed to send emails related to this document,Δεν επιτρέπεται να στείλετε μηνύματα ηλεκτρονικού ταχυδρομείου που σχετίζονται με αυτό το έγγραφο
 You are not authorized to add or update entries before {0},Δεν επιτρέπεται να προσθέσετε ή να ενημερώσετε τις καταχωρήσεις πριν από {0}
 You are not authorized to set Frozen value,Δεν επιτρέπεται να ορίσετε Κατεψυγμένα αξία
 You are the Expense Approver for this record. Please Update the 'Status' and Save,Είστε ο Υπεύθυνος έγκρισης Δαπάνη για αυτή την εγγραφή. Ενημερώστε το « Status » και Αποθήκευση
 You are the Leave Approver for this record. Please Update the 'Status' and Save,Είστε ο Αφήστε εγκριτή για αυτή την εγγραφή. Ενημερώστε το « Status » και Αποθήκευση
 You can enter any date manually,Μπορείτε να εισάγετε οποιαδήποτε ημερομηνία με το χέρι
 You can enter the minimum quantity of this item to be ordered.,Μπορείτε να εισάγετε την ελάχιστη ποσότητα αυτού του στοιχείου που πρέπει να καταδικαστεί.
-You can not assign itself as parent account,Μπορείτε δεν μπορεί να εκχωρήσει ως μητρική λογαριασμού
 You can not change rate if BOM mentioned agianst any item,"Δεν μπορείτε να αλλάξετε ρυθμό , αν BOM αναφέρεται agianst οποιοδήποτε στοιχείο"
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Δεν μπορείτε να εισάγετε δύο Παράδοση Σημείωση Όχι και Τιμολόγιο Πώλησης Νο Παρακαλώ εισάγετε κάθε μία .
 You can not enter current voucher in 'Against Journal Voucher' column,Δεν μπορείτε να εισάγετε την τρέχουσα κουπόνι σε « Ενάντια Εφημερίδα Voucher της στήλης
@@ -3269,15 +3257,15 @@ You can set Default Bank Account in Company master,Μπορείτε να ρυθ�
 You can start by selecting backup frequency and granting access for sync,Μπορείτε να ξεκινήσετε επιλέγοντας τη συχνότητα δημιουργίας αντιγράφων ασφαλείας και την παροχή πρόσβασης για συγχρονισμό
 You can submit this Stock Reconciliation.,Μπορείτε να υποβάλετε αυτό το Χρηματιστήριο Συμφιλίωση .
 You can update either Quantity or Valuation Rate or both.,Μπορείτε να ενημερώσετε είτε Ποσότητα ή αποτίμησης Rate ή και τα δύο .
-You cannot credit and debit same account at the same time.,Δεν μπορείτε πιστωτικές και χρεωστικές ίδιο λογαριασμό την ίδια στιγμή .
+You cannot credit and debit same account at the same time,Δεν μπορείτε πιστωτικές και χρεωστικές ίδιο λογαριασμό την ίδια στιγμή
 You have entered duplicate items. Please rectify and try again.,Έχετε εισάγει διπλότυπα στοιχεία . Παρακαλούμε διορθώσει και δοκιμάστε ξανά .
 You may need to update: {0},Μπορεί να χρειαστεί να ενημερώσετε : {0}
 You must Save the form before proceeding,Πρέπει Αποθηκεύστε τη φόρμα πριν προχωρήσετε
 Your Customer's TAX registration numbers (if applicable) or any general information,ΦΟΡΟΣ πελάτη σας αριθμούς κυκλοφορίας (κατά περίπτωση) ή γενικές πληροφορίες
 Your Customers,Οι πελάτες σας
+Your Login Id,Είσοδος Id σας
 Your Products or Services,Προϊόντα ή τις υπηρεσίες σας
 Your Suppliers,προμηθευτές σας
-"Your download is being built, this may take a few moments...","Η λήψη σας χτίζεται, αυτό μπορεί να διαρκέσει λίγα λεπτά ..."
 Your email address,Η διεύθυνση email σας
 Your financial year begins on,Οικονομικό έτος σας αρχίζει
 Your financial year ends on,Οικονομικό έτος σας τελειώνει στις
@@ -3285,12 +3273,13 @@ Your sales person who will contact the customer in future,Πωλήσεις πρ�
 Your sales person will get a reminder on this date to contact the customer,Πωλήσεις πρόσωπο σας θα πάρει μια υπενθύμιση για την ημερομηνία αυτή για να επικοινωνήσει με τον πελάτη
 Your setup is complete. Refreshing...,Setup σας είναι πλήρης. Αναζωογονητικό ...
 Your support email id - must be a valid email - this is where your emails will come!,Υποστήριξη id email σας - πρέπει να είναι μια έγκυρη διεύθυνση ηλεκτρονικού ταχυδρομείου - αυτό είναι όπου τα email σας θα έρθει!
+[Error],[Error]
+[Select],[ Επιλέξτε ]
 `Freeze Stocks Older Than` should be smaller than %d days.,` Τα αποθέματα Πάγωμα Παλαιότερο από ` θα πρέπει να είναι μικρότερη από % d ημέρες .
 and,και
 are not allowed.,δεν επιτρέπονται .
 assigned by,ανατεθεί από
-comment,σχόλιο
-comments,σχόλια
+cannot be greater than 100,δεν μπορεί να είναι μεγαλύτερη από 100
 "e.g. ""Build tools for builders""","π.χ. «Χτίστε εργαλεία για τους κατασκευαστές """
 "e.g. ""MC""","π.χ. "" MC """
 "e.g. ""My Company LLC""","π.χ. "" Η εταιρεία μου LLC """
@@ -3300,40 +3289,37 @@ e.g. 5,π.χ. 5
 e.g. VAT,π.χ. ΦΠΑ
 eg. Cheque Number,π.χ.. Επιταγή Αριθμός
 example: Next Day Shipping,παράδειγμα: Επόμενη Μέρα Ναυτιλίας
-found,βρέθηκαν
-is not allowed.,δεν επιτρέπεται.
 lft,LFT
 old_parent,old_parent
-or,ή
 rgt,RGT
+subject,θέμα
 to,να
-values and dates,τιμές και οι ημερομηνίες
 website page link,Ιστοσελίδα link της σελίδας
 {0} '{1}' not in Fiscal Year {2},{0} '{1}' δεν το Οικονομικό Έτος {2}
 {0} Credit limit {0} crossed,{0} πιστωτικό όριο {0} διέσχισε
 {0} Serial Numbers required for Item {0}. Only {0} provided.,{0} Serial Numbers που απαιτούνται για τη θέση {0} . Μόνο {0} που παρέχονται .
 {0} budget for Account {1} against Cost Center {2} will exceed by {3},{0} του προϋπολογισμού για τον Λογαριασμό {1} κατά Κέντρο Κόστους {2} θα υπερβαίνει {3}
+{0} can not be negative,{0} δεν μπορεί να είναι αρνητική
 {0} created,{0} δημιουργήθηκε
 {0} does not belong to Company {1},{0} δεν ανήκει στη Εταιρεία {1}
 {0} entered twice in Item Tax,{0} τέθηκε δύο φορές στη θέση Φόρος
 {0} is an invalid email address in 'Notification Email Address',{0} είναι μια έγκυρη διεύθυνση ηλεκτρονικού ταχυδρομείου στην « Ηλεκτρονική Διεύθυνση Κοινοποίηση»
 {0} is mandatory,{0} είναι υποχρεωτικά
 {0} is mandatory for Item {1},{0} είναι υποχρεωτική για τη θέση {1}
+{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} είναι υποχρεωτική. Ίσως συναλλάγματος ρεκόρ δεν έχει δημιουργηθεί για {1} έως {2}.
 {0} is not a stock Item,{0} δεν είναι ένα απόθεμα Θέση
 {0} is not a valid Batch Number for Item {1},{0} δεν είναι έγκυρη αριθμό παρτίδας για τη θέση {1}
-{0} is not a valid Leave Approver,{0} δεν είναι έγκυρη Αφήστε Έγκρισης
+{0} is not a valid Leave Approver. Removing row #{1}.,{0} δεν είναι έγκυρη Αφήστε εγκριτή. Αφαίρεση σειρά # {1}.
 {0} is not a valid email id,{0} δεν είναι έγκυρη ταυτότητα ηλεκτρονικού ταχυδρομείου
 {0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.,{0} είναι τώρα η προεπιλεγμένη Χρήσεως . Παρακαλούμε ανανεώστε το πρόγραμμα περιήγησής σας για την αλλαγή να τεθεί σε ισχύ .
 {0} is required,{0} απαιτείται
 {0} must be a Purchased or Sub-Contracted Item in row {1},{0} πρέπει να είναι αγοράστηκαν ή υπεργολαβίας Θέση στη γραμμή {1}
-{0} must be less than or equal to {1},{0} πρέπει να είναι μικρότερη από ή ίση με {1}
+{0} must be reduced by {1} or you should increase overflow tolerance,{0} πρέπει να μειωθεί κατά {1} ή θα πρέπει να αυξήσει την ανοχή υπερχείλισης
 {0} must have role 'Leave Approver',{0} πρέπει να έχει ρόλο « Αφήστε Έγκρισης »
 {0} valid serial nos for Item {1},{0} έγκυρο σειριακό nos για τη θέση {1}
 {0} {1} against Bill {2} dated {3},{0} {1} εναντίον Bill {2} { 3 με ημερομηνία }
-{0} {1} against Invoice {1},{0} {1} κατά Τιμολόγιο {1}
+{0} {1} against Invoice {2},{0} {1} κατά Τιμολόγιο {2}
 {0} {1} has already been submitted,{0} {1} έχει ήδη υποβληθεί
-{0} {1} has been modified. Please Refresh,{0} {1} έχει τροποποιηθεί . Παρακαλούμε Ανανέωση
-{0} {1} has been modified. Please refresh,{0} {1} έχει τροποποιηθεί . Παρακαλούμε ανανεώστε
 {0} {1} has been modified. Please refresh.,{0} {1} έχει τροποποιηθεί . Παρακαλώ ανανεώσετε .
 {0} {1} is not submitted,{0} {1} δεν έχει υποβληθεί
 {0} {1} must be submitted,{0} {1} πρέπει να υποβληθεί
@@ -3341,3 +3327,5 @@ website page link,Ιστοσελίδα link της σελίδας
 {0} {1} status is 'Stopped',{0} {1} καθεστώς «Σταματημένο»
 {0} {1} status is Stopped,{0} {1} καθεστώς έπαψε
 {0} {1} status is Unstopped,{0} {1} η κατάσταση είναι ανεμπόδιστη
+{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Κέντρο Κόστους είναι υποχρεωτική για τη θέση {2}
+{0}: {1} not found in Invoice Details table,{0}: {1} δεν βρέθηκε στον πίνακα Στοιχεία τιμολογίου

@@ -10,7 +10,6 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 
 {% include 'selling/sales_common.js' %}
 {% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
-{% include 'utilities/doctype/sms_control/sms_control.js' %}
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
@@ -26,30 +25,36 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
 					doc.per_billed);
 
-				cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 				// delivery note
 				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1)
-					cur_frm.add_custom_button(__('Make Delivery'), this.make_delivery_note);
-
-				// maintenance
-				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
-					cur_frm.add_custom_button(__('Make Maint. Visit'), this.make_maintenance_visit);
-					cur_frm.add_custom_button(__('Make Maint. Schedule'),
-						this.make_maintenance_schedule);
-				}
+					cur_frm.add_custom_button(__('Make Delivery'), this.make_delivery_note, "icon-truck");
 
 				// indent
 				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1)
 					cur_frm.add_custom_button(__('Make ') + __('Material Request'),
-						this.make_material_request);
+						this.make_material_request, "icon-ticket");
 
 				// sales invoice
-				if(flt(doc.per_billed, 2) < 100)
-					cur_frm.add_custom_button(__('Make Invoice'), this.make_sales_invoice);
+				if(flt(doc.per_billed, 2) < 100) {
+					cur_frm.add_custom_button(__('Make Invoice'), this.make_sales_invoice,
+						frappe.boot.doctype_icons["Sales Invoice"]);
+				}
 
 				// stop
 				if(flt(doc.per_delivered, 2) < 100 || doc.per_billed < 100)
-					cur_frm.add_custom_button(__('Stop!'), cur_frm.cscript['Stop Sales Order'],"icon-exclamation");
+					cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Sales Order'],
+						"icon-exclamation", "btn-default")
+
+						// maintenance
+						if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
+							cur_frm.add_custom_button(__('Make Maint. Visit'),
+								this.make_maintenance_visit, null, "btn-default");
+							cur_frm.add_custom_button(__('Make Maint. Schedule'),
+								this.make_maintenance_schedule, null, "btn-default");
+						}
+
+				cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone", true);
+
 			} else {
 				// un-stop
 				cur_frm.dashboard.set_headline_alert(__("Stopped"), "alert-danger", "icon-stop");
@@ -71,7 +76,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, "icon-download", "btn-default");
 		}
 
 		this.order_type(doc);
@@ -89,7 +94,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
-				method: "erpnext.selling.utils.get_available_qty",
+				method: "erpnext.stock.get_item_details.get_available_qty",
 				child: item,
 				args: {
 					item_code: item.item_code,
@@ -188,4 +193,40 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(frappe.boot.notification_settings.sales_order)) {
 		cur_frm.email_doc(frappe.boot.notification_settings.sales_order_message);
 	}
+};
+
+cur_frm.cscript.is_recurring = function(doc, dt, dn) {
+	// set default values for recurring orders
+	if(doc.is_recurring) {
+		var owner_email = doc.owner=="Administrator"
+			? frappe.user_info("Administrator").email
+			: doc.owner;
+
+		doc.notification_email_address = $.map([cstr(owner_email),
+			cstr(doc.contact_email)], function(v) { return v || null; }).join(", ");
+		doc.repeat_on_day_of_month = frappe.datetime.str_to_obj(doc.posting_date).getDate();
+	}
+
+	refresh_many(["notification_email_address", "repeat_on_day_of_month"]);
+}
+
+cur_frm.cscript.from_date = function(doc, dt, dn) {
+	// set to_date
+	if(doc.from_date) {
+		var recurring_type_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6,
+			'Yearly': 12};
+
+		var months = recurring_type_map[doc.recurring_type];
+		if(months) {
+			var to_date = frappe.datetime.add_months(doc.from_date,
+				months);
+			doc.to_date = frappe.datetime.add_days(to_date, -1);
+			refresh_field('to_date');
+		}
+	}
+}
+
+cur_frm.cscript.send_sms = function() {
+	frappe.require("assets/erpnext/js/sms_manager.js");
+	var sms_man = new SMSManager(cur_frm.doc);
 };

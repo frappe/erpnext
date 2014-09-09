@@ -9,6 +9,10 @@ from frappe import _
 
 from erpnext.controllers.selling_controller import SellingController
 
+form_grid_templates = {
+	"quotation_details": "templates/form_grid/item_grid.html"
+}
+
 class Quotation(SellingController):
 	tname = 'Quotation Item'
 	fname = 'quotation_details'
@@ -102,7 +106,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
-
+		target.ignore_pricing_rule = 1
 		target.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")

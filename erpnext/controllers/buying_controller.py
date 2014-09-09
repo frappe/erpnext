@@ -4,19 +4,27 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
-from frappe.utils import flt, _round
+from frappe.utils import flt, rounded
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_details
 
 from erpnext.controllers.stock_controller import StockController
 
 class BuyingController(StockController):
+	def __setup__(self):
+		if hasattr(self, "fname"):
+			self.table_print_templates = {
+				self.fname: "templates/print_formats/includes/item_grid.html",
+				"other_charges": "templates/print_formats/includes/taxes.html",
+			}
+
 	def validate(self):
 		super(BuyingController, self).validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:
 			self.supplier_name = frappe.db.get_value("Supplier",
 				self.supplier, "supplier_name")
 		self.is_item_table_empty()
+		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
 
@@ -52,9 +60,8 @@ class BuyingController(StockController):
 			validate_warehouse_company(w, self.company)
 
 	def validate_stock_or_nonstock_items(self):
-		if not self.get_stock_items():
-			tax_for_valuation = [d.account_head for d in
-				self.get("other_charges")
+		if self.meta.get_field("other_charges") and not self.get_stock_items():
+			tax_for_valuation = [d.account_head for d in self.get("other_charges")
 				if d.category in ["Valuation", "Valuation and Total"]]
 			if tax_for_valuation:
 				frappe.throw(_("Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items"))
@@ -111,10 +118,10 @@ class BuyingController(StockController):
 			self.precision("total_tax"))
 
 		if self.meta.get_field("rounded_total"):
-			self.rounded_total = _round(self.grand_total)
+			self.rounded_total = rounded(self.grand_total)
 
 		if self.meta.get_field("rounded_total_import"):
-			self.rounded_total_import = _round(self.grand_total_import)
+			self.rounded_total_import = rounded(self.grand_total_import)
 
 		if self.meta.get_field("other_charges_added"):
 			self.other_charges_added = flt(sum([flt(d.tax_amount) for d in self.tax_doclist
@@ -186,9 +193,13 @@ class BuyingController(StockController):
 					"UOM Conversion Detail", {"parent": item.item_code, "uom": item.uom},
 					"conversion_factor")) or 1
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
-				rm_supp_cost = item.rm_supp_cost if self.doctype=="Purchase Receipt" else 0.0
-				item.valuation_rate = ((item.base_amount + item.item_tax_amount + rm_supp_cost)
-					/ qty_in_stock_uom)
+				rm_supp_cost = flt(item.rm_supp_cost) if self.doctype=="Purchase Receipt" else 0.0
+
+				landed_cost_voucher_amount = flt(item.landed_cost_voucher_amount) \
+					if self.doctype == "Purchase Receipt" else 0.0
+
+				item.valuation_rate = ((item.base_amount + item.item_tax_amount + rm_supp_cost
+					 + landed_cost_voucher_amount) / qty_in_stock_uom)
 			else:
 				item.valuation_rate = 0.0
 
@@ -267,7 +278,7 @@ class BuyingController(StockController):
 		for d in self.get(raw_material_table):
 			if [d.main_item_code, d.reference_name] not in parent_items:
 				# mark for deletion from doclist
-				delete_list.append([d.main_item_code, d.reference_name])
+				delete_list.append(d)
 
 		# delete from doclist
 		if delete_list:
@@ -278,7 +289,8 @@ class BuyingController(StockController):
 					self.append(raw_material_table, d)
 
 	def get_items_from_default_bom(self, item_code):
-		bom_items = frappe.db.sql("""select t2.item_code, t2.qty_consumed_per_unit,
+		bom_items = frappe.db.sql("""select t2.item_code,
+			ifnull(t2.qty, 0) / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
 			t2.rate, t2.stock_uom, t2.name, t2.description
 			from `tabBOM` t1, `tabBOM Item` t2
 			where t2.parent = t1.name and t1.item = %s and t1.is_default = 1
@@ -318,3 +330,10 @@ class BuyingController(StockController):
 	def is_item_table_empty(self):
 		if not len(self.get(self.fname)):
 			frappe.throw(_("Item table can not be blank"))
+
+	def set_qty_as_per_stock_uom(self):
+		for d in self.get(self.fname):
+			if d.meta.get_field("stock_qty") and not d.stock_qty:
+				if not d.conversion_factor:
+					frappe.throw(_("Row {0}: Conversion Factor is mandatory"))
+				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)

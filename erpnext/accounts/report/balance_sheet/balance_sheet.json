@@ -1,0 +1,15 @@
+{
+ "apply_user_permissions": 1, 
+ "creation": "2014-07-14 05:24:20.385279", 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "is_standard": "Yes", 
+ "modified": "2014-07-14 05:24:20.385279", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Balance Sheet", 
+ "owner": "Administrator", 
+ "ref_doctype": "GL Entry", 
+ "report_name": "Balance Sheet", 
+ "report_type": "Script Report"
+}

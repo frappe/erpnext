@@ -12,6 +12,10 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.utils import update_bin
 from erpnext.controllers.selling_controller import SellingController
 
+form_grid_templates = {
+	"delivery_note_details": "templates/form_grid/item_grid.html"
+}
+
 class DeliveryNote(SellingController):
 	tname = 'Delivery Note Item'
 	fname = 'delivery_note_details'
@@ -29,7 +33,8 @@ class DeliveryNote(SellingController):
 			'source_field': 'qty',
 			'percent_join_field': 'against_sales_order',
 			'status_field': 'delivery_status',
-			'keyword': 'Delivered'
+			'keyword': 'Delivered',
+			'overflow_type': 'delivery'
 		}]
 
 	def onload(self):
@@ -38,6 +43,20 @@ class DeliveryNote(SellingController):
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.get("delivery_note_details")))
 			self.get("__onload").billing_complete = (billed_qty[0][0] == total_qty)
+
+	def before_print(self):
+		def toggle_print_hide(meta, fieldname):
+			df = meta.get_field(fieldname)
+			if self.get("print_without_amount"):
+				df.set("__print_hide", 1)
+			else:
+				df.delete_key("__print_hide")
+
+		toggle_print_hide(self.meta, "currency")
+
+		item_meta = frappe.get_meta("Delivery Note Item")
+		for fieldname in ("rate", "amount", "price_list_rate", "discount_percentage"):
+			toggle_print_hide(item_meta, fieldname)
 
 	def get_portal_page(self):
 		return "shipment" if self.docstatus==1 else None
@@ -68,13 +87,14 @@ class DeliveryNote(SellingController):
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "qty")
-		self.update_current_stock()
 		self.validate_with_previous_doc()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self, 'delivery_note_details')
 
-		self.status = 'Draft'
+		self.update_current_stock()
+
+		if not self.status: self.status = 'Draft'
 		if not self.installation_status: self.installation_status = 'Not Installed'
 
 	def validate_with_previous_doc(self):
@@ -133,14 +153,17 @@ class DeliveryNote(SellingController):
 
 
 	def update_current_stock(self):
-		for d in self.get('delivery_note_details'):
-			bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
-			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
+		if self.get("_action") and self._action != "update_after_submit":
+			for d in self.get('delivery_note_details'):
+				d.actual_qty = frappe.db.get_value("Bin", {"item_code": d.item_code,
+					"warehouse": d.warehouse}, "actual_qty")
 
-		for d in self.get('packing_details'):
-			bin = frappe.db.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
-			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
-			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
+			for d in self.get('packing_details'):
+				bin_qty = frappe.db.get_value("Bin", {"item_code": d.item_code,
+					"warehouse": d.warehouse}, ["actual_qty", "projected_qty"], as_dict=True)
+				if bin_qty:
+					d.actual_qty = flt(bin_qty.actual_qty)
+					d.projected_qty = flt(bin_qty.projected_qty)
 
 	def on_submit(self):
 		self.validate_packed_qty()
@@ -173,7 +196,7 @@ class DeliveryNote(SellingController):
 		frappe.db.set(self, 'status', 'Cancelled')
 		self.cancel_packing_slips()
 
-		self.make_cancel_gl_entries()
+		self.make_gl_entries_on_cancel()
 
 	def validate_packed_qty(self):
 		"""
@@ -276,6 +299,7 @@ def make_sales_invoice(source_name, target_doc=None):
 
 	def update_accounts(source, target):
 		target.is_pos = 0
+		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 
 		if len(target.get("entries")) == 0:
@@ -342,6 +366,22 @@ def make_installation_note(source_name, target_doc=None):
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.installed_qty < doc.qty
+		}
+	}, target_doc)
+
+	return doclist
+
+@frappe.whitelist()
+def make_packing_slip(source_name, target_doc=None):
+	doclist = get_mapped_doc("Delivery Note", source_name, 	{
+		"Delivery Note": {
+			"doctype": "Packing Slip",
+			"field_map": {
+				"name": "delivery_note"
+			},
+			"validation": {
+				"docstatus": ["=", 0]
+			}
 		}
 	}, target_doc)
 

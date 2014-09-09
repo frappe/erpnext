@@ -1,10 +1,11 @@
 {
+ "apply_user_permissions": 1, 
  "creation": "2013-10-09 10:38:40", 
  "docstatus": 0, 
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-05-13 16:08:56.218629", 
+ "modified": "2014-06-03 07:18:17.358554", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Addresses and Contacts", 

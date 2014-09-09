@@ -10,7 +10,13 @@ from frappe.utils import cstr, flt, getdate, comma_and
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 
+from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
+
 from erpnext.controllers.selling_controller import SellingController
+
+form_grid_templates = {
+	"sales_order_details": "templates/form_grid/item_grid.html"
+}
 
 class SalesOrder(SellingController):
 	tname = 'Sales Order Item'
@@ -102,7 +108,6 @@ class SalesOrder(SellingController):
 		self.validate_warehouse()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-
 		make_packing_list(self,'sales_order_details')
 
 		self.validate_with_previous_doc()
@@ -116,6 +121,8 @@ class SalesOrder(SellingController):
 
 		if not self.billing_status: self.billing_status = 'Not Billed'
 		if not self.delivery_status: self.delivery_status = 'Not Delivered'
+
+		validate_recurring_document(self)
 
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_warehouse_company
@@ -158,6 +165,8 @@ class SalesOrder(SellingController):
 
 		self.update_prevdoc_status('submit')
 		frappe.db.set(self, 'status', 'Submitted')
+		
+		convert_to_recurring(self, "SO/REC/.#####", self.transaction_date)
 
 	def on_cancel(self):
 		# Cannot cancel stopped SO
@@ -210,7 +219,7 @@ class SalesOrder(SellingController):
 		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" %
 			( mod_db, cstr(self.modified)))
 		if date_diff and date_diff[0][0]:
-			frappe.throw(_("{0} {1} has been modified. Please Refresh").format(self.doctype, self.name))
+			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name))
 
 	def stop_sales_order(self):
 		self.check_modified_date()
@@ -246,9 +255,10 @@ class SalesOrder(SellingController):
 	def get_portal_page(self):
 		return "order" if self.docstatus==1 else None
 
-def set_missing_values(source, target):
-	target.run_method("set_missing_values")
-	target.run_method("calculate_taxes_and_totals")
+	def on_update_after_submit(self):
+		validate_recurring_document(self)
+		convert_to_recurring(self, "SO/REC/.#####", self.transaction_date)
+
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
@@ -275,18 +285,19 @@ def make_material_request(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.ignore_pricing_rule = 1
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
 	def update_item(source, target, source_parent):
 		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
 		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
 		target.qty = flt(source.qty) - flt(source.delivered_qty)
 
-	doclist = get_mapped_doc("Sales Order", source_name, {
+	target_doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Delivery Note",
-			"field_map": {
-				"shipping_address": "address_display",
-				"shipping_address_name": "customer_address",
-			},
 			"validation": {
 				"docstatus": ["=", 1]
 			}
@@ -311,12 +322,13 @@ def make_delivery_note(source_name, target_doc=None):
 		}
 	}, target_doc, set_missing_values)
 
-	return doclist
+	return target_doc
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.is_pos = 0
+		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 

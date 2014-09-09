@@ -31,7 +31,7 @@
    "description": "Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.", 
    "fieldname": "default_account", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "in_list_view": 1, 
    "label": "Default Account", 
    "options": "Account", 
@@ -41,7 +41,7 @@
  ], 
  "icon": "icon-credit-card", 
  "idx": 1, 
- "modified": "2014-05-07 05:06:13.702313", 
+ "modified": "2014-05-27 03:49:13.846602", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Mode of Payment", 
@@ -59,6 +59,7 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
    "report": 1, 

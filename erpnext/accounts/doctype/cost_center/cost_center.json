@@ -31,7 +31,7 @@
   {
    "fieldname": "parent_cost_center", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "in_list_view": 1, 
    "label": "Parent Cost Center", 
    "oldfieldname": "parent_cost_center", 
@@ -131,7 +131,7 @@
    "fieldname": "old_parent", 
    "fieldtype": "Link", 
    "hidden": 1, 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "old_parent", 
    "no_copy": 1, 
    "oldfieldname": "old_parent", 
@@ -144,8 +144,8 @@
  ], 
  "icon": "icon-money", 
  "idx": 1, 
- "in_create": 1, 
- "modified": "2014-05-07 06:37:48.038993", 
+ "in_create": 0, 
+ "modified": "2014-08-26 12:16:11.163750", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Cost Center", 
@@ -153,7 +153,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -167,7 +166,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 0, 
    "delete": 0, 
    "email": 1, 
@@ -180,16 +179,19 @@
    "write": 0
   }, 
   {
+   "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
    "role": "Sales User"
   }, 
   {
+   "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
    "role": "Purchase User"
   }, 
   {
+   "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
    "role": "Material User"

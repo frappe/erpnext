@@ -20,6 +20,9 @@ def execute(filters=None):
 	return columns, res
 
 def validate_filters(filters, account_details):
+	if filters.get("account") and not account_details.get(filters.account):
+		frappe.throw(_("Account {0} does not exists").format(filters.account))
+
 	if filters.get("account") and filters.get("group_by_account") \
 			and account_details[filters.account].group_or_ledger == "Ledger":
 		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
@@ -63,6 +66,8 @@ def get_gl_entries(filters):
 def get_conditions(filters):
 	conditions = []
 	if filters.get("account"):
+		if not frappe.db.exists("Account", filters["account"]):
+			frappe.throw(_("Account {0} is not valid").format(filters["account"]))
 		lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
 		conditions.append("""account in (select name from tabAccount
 			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
@@ -131,17 +136,17 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 	opening, total_debit, total_credit = 0, 0, 0
 
 	for gle in gl_entries:
-		amount = flt(gle.debit) - flt(gle.credit)
+		amount = flt(gle.debit, 3) - flt(gle.credit, 3)
 		if filters.get("account") and (gle.posting_date<filters.from_date or cstr(gle.is_opening)=="Yes"):
 			gle_map[gle.account].opening += amount
 			opening += amount
 		elif gle.posting_date <= filters.to_date:
 			gle_map[gle.account].entries.append(gle)
-			gle_map[gle.account].total_debit += flt(gle.debit)
-			gle_map[gle.account].total_credit += flt(gle.credit)
+			gle_map[gle.account].total_debit += flt(gle.debit, 3)
+			gle_map[gle.account].total_credit += flt(gle.credit, 3)
 
-			total_debit += flt(gle.debit)
-			total_credit += flt(gle.credit)
+			total_debit += flt(gle.debit, 3)
+			total_credit += flt(gle.credit, 3)
 
 	return opening, total_debit, total_credit, gle_map
 

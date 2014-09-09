@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:kra_title", 
- "creation": "2012-07-03 13:30:39.000000", 
+ "creation": "2012-07-03 13:30:39", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -9,6 +9,7 @@
   {
    "fieldname": "kra_title", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Appraisal Template Title", 
    "oldfieldname": "kra_title", 
    "oldfieldtype": "Data", 
@@ -18,6 +19,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Small Text", 
+   "in_list_view": 1, 
    "label": "Description", 
    "oldfieldname": "description", 
    "oldfieldtype": "Small Text", 
@@ -37,19 +39,21 @@
   {
    "fieldname": "total_points", 
    "fieldtype": "Int", 
+   "in_list_view": 1, 
    "label": "Total Points", 
    "permlevel": 0
   }
  ], 
  "icon": "icon-file-text", 
  "idx": 1, 
- "modified": "2013-12-20 19:23:55.000000", 
+ "modified": "2014-05-27 03:49:07.533203", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Appraisal Template", 
  "owner": "ashwini@webnotestech.com", 
  "permissions": [
   {
+   "apply_user_permissions": 1, 
    "create": 1, 
    "email": 1, 
    "permlevel": 0, 

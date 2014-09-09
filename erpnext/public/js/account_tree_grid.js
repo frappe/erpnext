@@ -5,12 +5,12 @@
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.	If not, see <http://www.gnu.org/licenses/>.
 
@@ -23,8 +23,8 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 			appframe: wrapper.appframe,
 			doctypes: ["Company", "Fiscal Year", "Account", "GL Entry", "Cost Center"],
 			tree_grid: {
-				show: true, 
-				parent_field: "parent_account", 
+				show: true,
+				parent_field: "parent_account",
 				formatter: function(item) {
 					return repl("<a \
 						onclick='frappe.cur_grid_report.show_general_ledger(\"%(value)s\")'>\
@@ -37,7 +37,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 	},
 	setup_columns: function() {
 		this.columns = [
-			{id: "name", name: __("Account"), field: "name", width: 300, cssClass: "cell-title", 
+			{id: "name", name: __("Account"), field: "name", width: 300, cssClass: "cell-title",
 				formatter: this.tree_formatter},
 			{id: "opening_dr", name: __("Opening (Dr)"), field: "opening_dr", width: 100,
 				formatter: this.currency_formatter},
@@ -55,21 +55,22 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 
 	},
 	filters: [
-		{fieldtype: "Select", label: __("Company"), link:"Company", default_value: "Select Company...",
+		{fieldtype: "Select", label: __("Company"), link:"Company", fieldname: "company",
+			default_value: __("Select Company..."),
 			filter: function(val, item, opts, me) {
 				if (item.company == val || val == opts.default_value) {
 					return me.apply_zero_filter(val, item, opts, me);
 				}
 				return false;
 			}},
-		{fieldtype: "Select", label: __("Fiscal Year"), link:"Fiscal Year", 
-			default_value: "Select Fiscal Year..."},
-		{fieldtype: "Date", label: __("From Date")},
+		{fieldtype: "Select", label: "Fiscal Year", link:"Fiscal Year", fieldname: "fiscal_year",
+			default_value: __("Select Fiscal Year...")},
+		{fieldtype: "Date", label: __("From Date"), fieldname: "from_date"},
 		{fieldtype: "Label", label: __("To")},
-		{fieldtype: "Date", label: __("To Date")},
+		{fieldtype: "Date", label: __("To Date"), fieldname: "to_date"},
 		{fieldtype: "Button", label: __("Refresh"), icon:"icon-refresh icon-white",
 		 	cssClass:"btn-info"},
-		{fieldtype: "Button", label: __("Reset Filters")},
+		{fieldtype: "Button", label: __("Reset Filters"), icon: "icon-filter"},
 	],
 	setup_filters: function() {
 		this._super();
@@ -83,7 +84,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 					me.filter_inputs.to_date.val(dateutil.str_to_user(v.year_end_date));
 				}
 			});
-			me.set_route();
+			me.refresh();
 		});
 		me.show_zero_check()
 		if(me.ignore_closing_entry) me.ignore_closing_entry();
@@ -105,21 +106,21 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 					me.parent_map[d.name] = d.parent_account;
 				}
 			});
-			
+
 			me.primary_data = [].concat(me.data);
 		}
-		
+
 		me.data = [].concat(me.primary_data);
 		$.each(me.data, function(i, d) {
 			me.init_account(d);
 		});
-		
+
 		this.set_indent();
 		this.prepare_balances();
-		
+
 	},
 	init_account: function(d) {
-		this.reset_item_values(d);	
+		this.reset_item_values(d);
 	},
 
 	prepare_balances: function() {
@@ -132,7 +133,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 		if (!this.fiscal_year) return;
 
 		$.each(this.data, function(i, v) {
-			v.opening_dr = v.opening_cr = v.debit 
+			v.opening_dr = v.opening_cr = v.debit
 				= v.credit = v.closing_dr = v.closing_cr = 0;
 		});
 
@@ -145,15 +146,16 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 		this.update_groups();
 	},
 	update_balances: function(account, posting_date, v) {
-		var bal = flt(account.opening_dr) - flt(account.opening_cr) + flt(v.debit) - flt(v.credit);
 		// opening
 		if (posting_date < this.opening_date || v.is_opening === "Yes") {
-			if (account.report_type === "Profit and Loss" && 
+			if (account.report_type === "Profit and Loss" &&
 				posting_date <= dateutil.str_to_obj(this.fiscal_year[1])) {
-				// balance of previous fiscal_year should 
+				// balance of previous fiscal_year should
 				//	not be part of opening of pl account balance
 			} else {
-				this.set_debit_or_credit(account, "opening", bal);
+				var opening_bal = flt(account.opening_dr) - flt(account.opening_cr) +
+					flt(v.debit) - flt(v.credit);
+				this.set_debit_or_credit(account, "opening", opening_bal);
 			}
 		} else if (this.opening_date <= posting_date && posting_date <= this.closing_date) {
 			// in between
@@ -161,7 +163,9 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 			account.credit += flt(v.credit);
 		}
 		// closing
-		this.set_debit_or_credit(account, "closing", bal);
+		var closing_bal = flt(account.opening_dr) - flt(account.opening_cr) +
+			flt(account.debit) - flt(account.credit);
+		this.set_debit_or_credit(account, "closing", closing_bal);
 	},
 	set_debit_or_credit: function(account, field, balance) {
 		if(balance > 0) {
@@ -184,25 +188,25 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 					$.each(me.columns, function(c, col) {
 						if (col.formatter == me.currency_formatter) {
 							if(col.field=="opening_dr") {
-								var bal = flt(parent_account.opening_dr) - 
-									flt(parent_account.opening_cr) + 
+								var bal = flt(parent_account.opening_dr) -
+									flt(parent_account.opening_cr) +
 									flt(account.opening_dr) - flt(account.opening_cr);
 								me.set_debit_or_credit(parent_account, "opening", bal);
 							} else if(col.field=="closing_dr") {
-								var bal = flt(parent_account.closing_dr) - 
-									flt(parent_account.closing_cr) + 
+								var bal = flt(parent_account.closing_dr) -
+									flt(parent_account.closing_cr) +
 									flt(account.closing_dr) - flt(account.closing_cr);
 								me.set_debit_or_credit(parent_account, "closing", bal);
 							} else if(in_list(["debit", "credit"], col.field)) {
-								parent_account[col.field] = flt(parent_account[col.field]) + 
+								parent_account[col.field] = flt(parent_account[col.field]) +
 									flt(account[col.field]);
 							}
 						}
 					});
 					parent = me.parent_map[parent];
-				}				
+				}
 			}
-		});		
+		});
 	},
 
 	set_fiscal_year: function() {
@@ -214,7 +218,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 		this.fiscal_year = null;
 		var me = this;
 		$.each(frappe.report_dump.data["Fiscal Year"], function(i, v) {
-			if (me.opening_date >= dateutil.str_to_obj(v.year_start_date) && 
+			if (me.opening_date >= dateutil.str_to_obj(v.year_start_date) &&
 				me.closing_date <= dateutil.str_to_obj(v.year_end_date)) {
 					me.fiscal_year = v;
 				}
@@ -225,7 +229,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 			return;
 		}
 	},
-	
+
 	show_general_ledger: function(account) {
 		frappe.route_options = {
 			account: account,

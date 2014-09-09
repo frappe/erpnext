@@ -52,7 +52,7 @@ def get_events(start, end, filters=None):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
 	conditions = build_match_conditions("Task")
-	conditions and (" and " + conditions) or ""
+	conditions = conditions and (" and " + conditions) or ""
 
 	if filters:
 		filters = json.loads(filters)
@@ -62,12 +62,13 @@ def get_events(start, end, filters=None):
 
 	data = frappe.db.sql("""select name, exp_start_date, exp_end_date,
 		subject, status, project from `tabTask`
-		where ((exp_start_date between '%(start)s' and '%(end)s') \
-			or (exp_end_date between '%(start)s' and '%(end)s'))
-		%(conditions)s""" % {
+		where ((ifnull(exp_start_date, '0000-00-00')!= '0000-00-00') \
+				and (exp_start_date between %(start)s and %(end)s) \
+			or ((ifnull(exp_start_date, '0000-00-00')!= '0000-00-00') \
+				and exp_end_date between %(start)s and %(end)s))
+		{conditions}""".format(conditions=conditions), {
 			"start": start,
-			"end": end,
-			"conditions": conditions
+			"end": end
 		}, as_dict=True, update={"allDay": 0})
 
 	return data

@@ -128,11 +128,8 @@ class SalaryManager(Document):
 		for ss in ss_list:
 			ss_obj = frappe.get_doc("Salary Slip",ss[0])
 			try:
-				frappe.db.set(ss_obj, 'email_check', cint(self.send_mail))
-				if cint(self.send_email) == 1:
-					ss_obj.send_mail_funct()
-
-				frappe.db.set(ss_obj, 'docstatus', 1)
+				ss_obj.email_check = self.send_email
+				ss_obj.submit()
 			except Exception,e:
 				not_submitted_ss.append(ss[0])
 				frappe.msgprint(e)

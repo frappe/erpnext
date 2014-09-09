@@ -1,0 +1,15 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-12">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			{% if(doc.supplier_name != doc.name) { %}
+			<span style="margin-right: 8px; display: inline-block">
+				{%= doc.supplier_name %}</span>
+			{% } %}
+			<span class="label label-info filterable"
+				data-filter="supplier_type,=,{%= doc.supplier_type %}">
+					{%= doc.supplier_type %}
+			</span>
+		</div>
+	</div>
+</div>

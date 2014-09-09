@@ -38,6 +38,12 @@ def get_data():
 			"link": "List/Note",
 			"type": "list"
 		},
+		"POS": {
+			"color": "#589494",
+			"icon": "icon-th",
+			"type": "page",
+			"link": "pos"
+		},
 		"Projects": {
 			"color": "#8e44ad",
 			"icon": "icon-puzzle-piece",

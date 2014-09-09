@@ -20,7 +20,7 @@
    "read_only": 0
   },
   {
-   "description": "Indicates that the package is a part of this delivery",
+   "description": "Indicates that the package is a part of this delivery (Only Draft)",
    "fieldname": "delivery_note",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -63,8 +63,8 @@
    "description": "Identification of the package for the delivery (for print)",
    "fieldname": "from_case_no",
    "fieldtype": "Data",
-   "label": "From Package No.",
    "in_list_view": 1,
+   "label": "From Package No.",
    "no_copy": 1,
    "permlevel": 0,
    "read_only": 0,
@@ -81,8 +81,8 @@
    "description": "If more than one package of the same type (for print)",
    "fieldname": "to_case_no",
    "fieldtype": "Data",
-   "label": "To Package No.",
    "in_list_view": 1,
+   "label": "To Package No.",
    "no_copy": 1,
    "permlevel": 0,
    "read_only": 0,
@@ -168,7 +168,7 @@
   {
    "fieldname": "amended_from",
    "fieldtype": "Link",
-   "ignore_restrictions": 1,
+   "ignore_user_permissions": 1,
    "label": "Amended From",
    "no_copy": 1,
    "options": "Packing Slip",
@@ -180,7 +180,7 @@
  "icon": "icon-suitcase",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2014-05-06 08:20:35.134198",
+ "modified": "2014-05-27 03:49:14.251039",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",
@@ -188,6 +188,7 @@
  "permissions": [
   {
    "amend": 1,
+   "apply_user_permissions": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
@@ -202,6 +203,7 @@
   },
   {
    "amend": 1,
+   "apply_user_permissions": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,

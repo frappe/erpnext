@@ -13,8 +13,7 @@ from frappe.utils.email_lib import sendmail
 from frappe.core.doctype.user.user import STANDARD_USERS
 
 content_sequence = [
-	# ["Income / Expenses", ["income_year_to_date", "bank_balance",
-	# 	"income", "expenses_booked"]],
+	["Income / Expenses", ["income_year_to_date", "income", "expenses_booked"]],
 	["Receivables / Payables", ["collections", "payments",
 		"invoiced_amount", "payables"]],
 	["Bank Balance", ["bank_balance"]],
@@ -154,9 +153,9 @@ class EmailDigest(Document):
 
 		return msg
 
-	# def get_income_year_to_date(self):
-	# 	return self.get_income(frappe.db.get_defaults("year_start_date"),
-	# 		self.meta.get_label("income_year_to_date"))
+	def get_income_year_to_date(self):
+		return self.get_income(frappe.db.get_defaults("year_start_date"),
+			self.meta.get_label("income_year_to_date"))
 
 	def get_bank_balance(self):
 		# account is of type "Bank" or "Cash"
@@ -169,36 +168,34 @@ class EmailDigest(Document):
 				accounts[gle["account"]][1] += gle["debit"] - gle["credit"]
 
 		# build html
-		out = self.get_html("Bank/Cash Balance", "", "")
+		out = self.get_html("Bank/Cash Balance as on " + formatdate(self.to_date), "", "")
 		for ac in ackeys:
 			if accounts[ac][1]:
 				out += "\n" + self.get_html(accounts[ac][0], self.currency,
 					fmt_money(accounts[ac][1]), style="margin-left: 17px")
 		return sum((accounts[ac][1] for ac in ackeys)), out
 
-	# def get_income(self, from_date=None, label=None):
-	# 	# account is PL Account and Credit type account
-	# 	accounts = [a["name"] for a in self.get_accounts() if a["root_type"]=="Income"]
-	#
-	# 	income = 0
-	# 	for gle in self.get_gl_entries(from_date or self.from_date, self.to_date):
-	# 		if gle["account"] in accounts:
-	# 			income += gle["credit"] - gle["debit"]
-	#
-	# 	return income, self.get_html(label or self.meta.get_label("income"), self.currency,
-	# 		fmt_money(income))
-	#
-	# def get_expenses_booked(self):
-	# 	# account is PL Account and Debit type account
-	# 	accounts = [a["name"] for a in self.get_accounts() if a["root_type"]=="Expense"]
-	#
-	# 	expense = 0
-	# 	for gle in self.get_gl_entries(self.from_date, self.to_date):
-	# 		if gle["account"] in accounts:
-	# 			expense += gle["debit"] - gle["credit"]
-	#
-	# 	return expense, self.get_html(self.meta.get_label("expenses_booked"), self.currency,
-	# 		fmt_money(expense))
+	def get_income(self, from_date=None, label=None):
+		accounts = [a["name"] for a in self.get_accounts() if a["root_type"]=="Income"]
+
+		income = 0
+		for gle in self.get_gl_entries(from_date or self.from_date, self.to_date):
+			if gle["account"] in accounts:
+				income += gle["credit"] - gle["debit"]
+
+		return income, self.get_html(label or self.meta.get_label("income"), self.currency,
+			fmt_money(income))
+
+	def get_expenses_booked(self):
+		accounts = [a["name"] for a in self.get_accounts() if a["root_type"]=="Expense"]
+
+		expense = 0
+		for gle in self.get_gl_entries(self.from_date, self.to_date):
+			if gle["account"] in accounts:
+				expense += gle["debit"] - gle["credit"]
+
+		return expense, self.get_html(self.meta.get_label("expenses_booked"), self.currency,
+			fmt_money(expense))
 
 	def get_collections(self):
 		return self.get_party_total("Customer", "credit", self.meta.get_label("collections"))
@@ -250,35 +247,40 @@ class EmailDigest(Document):
 		return self.get_new_count("Lead", self.meta.get_label("new_leads"))
 
 	def get_new_enquiries(self):
-		return self.get_new_count("Opportunity", self.meta.get_label("new_enquiries"), docstatus=1)
+		return self.get_new_count("Opportunity", self.meta.get_label("new_enquiries"), docstatus=1,
+			date_field="transaction_date")
 
 	def get_new_quotations(self):
-		return self.get_new_sum("Quotation", self.meta.get_label("new_quotations"), "grand_total")
+		return self.get_new_sum("Quotation", self.meta.get_label("new_quotations"), "grand_total",
+			date_field="transaction_date")
 
 	def get_new_sales_orders(self):
-		return self.get_new_sum("Sales Order", self.meta.get_label("new_sales_orders"), "grand_total")
+		return self.get_new_sum("Sales Order", self.meta.get_label("new_sales_orders"), "grand_total",
+			date_field="transaction_date")
 
 	def get_new_delivery_notes(self):
-		return self.get_new_sum("Delivery Note", self.meta.get_label("new_delivery_notes"), "grand_total")
+		return self.get_new_sum("Delivery Note", self.meta.get_label("new_delivery_notes"), "grand_total",
+			date_field="posting_date")
 
 	def get_new_purchase_requests(self):
-		return self.get_new_count("Material Request",
-			 self.meta.get_label("new_purchase_requests"), docstatus=1)
+		return self.get_new_count("Material Request", self.meta.get_label("new_purchase_requests"), docstatus=1,
+			date_field="transaction_date")
 
 	def get_new_supplier_quotations(self):
 		return self.get_new_sum("Supplier Quotation", self.meta.get_label("new_supplier_quotations"),
-			"grand_total")
+			"grand_total", date_field="transaction_date")
 
 	def get_new_purchase_orders(self):
 		return self.get_new_sum("Purchase Order", self.meta.get_label("new_purchase_orders"),
-			"grand_total")
+			"grand_total", date_field="transaction_date")
 
 	def get_new_purchase_receipts(self):
 		return self.get_new_sum("Purchase Receipt", self.meta.get_label("new_purchase_receipts"),
-			"grand_total")
+			"grand_total", date_field="posting_date")
 
 	def get_new_stock_entries(self):
-		return self.get_new_sum("Stock Entry", self.meta.get_label("new_stock_entries"), "total_amount")
+		return self.get_new_sum("Stock Entry", self.meta.get_label("new_stock_entries"), "total_amount",
+			date_field="posting_date")
 
 	def get_new_support_tickets(self):
 		return self.get_new_count("Support Ticket", self.meta.get_label("new_support_tickets"),
@@ -315,7 +317,7 @@ class EmailDigest(Document):
 
 	def get_todo_list(self, user_id):
 		todo_list = frappe.db.sql("""select *
-			from `tabToDo` where (owner=%s or assigned_by=%s)
+			from `tabToDo` where (owner=%s or assigned_by=%s) and status="Open"
 			order by field(priority, 'High', 'Medium', 'Low') asc, date asc""",
 			(user_id, user_id), as_dict=True)
 
@@ -336,24 +338,28 @@ class EmailDigest(Document):
 		else:
 			return 0, "<p>To Do</p>"
 
-	def get_new_count(self, doctype, label, docstatus=0, filter_by_company=True):
+	def get_new_count(self, doctype, label, docstatus=0, filter_by_company=True, date_field="creation"):
 		if filter_by_company:
-			company = """and company="%s" """ % self.company.replace('"', '\"')
+			company_condition = """and company="%s" """ % self.company.replace('"', '\"')
 		else:
-			company = ""
-		count = frappe.db.sql("""select count(*) from `tab%s`
-			where docstatus=%s %s and
-			date(creation)>=%s and date(creation)<=%s""" %
-			(doctype, docstatus, company, "%s", "%s"), (self.from_date, self.to_date))
+			company_condition = ""
+
+		count = frappe.db.sql("""select count(*) from `tab{doctype}`
+			where ifnull(`docstatus`, 0)=%s {company_condition} and
+			date(`{date_field}`)>=%s and date({date_field})<=%s""".format(doctype=doctype,
+			company_condition=company_condition, date_field=date_field),
+			(docstatus, self.from_date, self.to_date))
+
 		count = count and count[0][0] or 0
 
 		return count, self.get_html(label, None, count)
 
-	def get_new_sum(self, doctype, label, sum_field):
-		count_sum = frappe.db.sql("""select count(*), sum(ifnull(`%s`, 0))
-			from `tab%s` where docstatus=1 and company = %s and
-			date(creation)>=%s and date(creation)<=%s""" % (sum_field, doctype, "%s",
-			"%s", "%s"), (self.company, self.from_date, self.to_date))
+	def get_new_sum(self, doctype, label, sum_field, date_field="creation"):
+		count_sum = frappe.db.sql("""select count(*), sum(ifnull(`{sum_field}`, 0))
+			from `tab{doctype}` where docstatus=1 and company = %s and
+			date(`{date_field}`)>=%s and date(`{date_field}`)<=%s""".format(sum_field=sum_field,
+			date_field=date_field, doctype=doctype), (self.company, self.from_date, self.to_date))
+
 		count, total = count_sum and count_sum[0] or (0, 0)
 
 		return count, self.get_html(label, self.currency,
@@ -390,7 +396,7 @@ class EmailDigest(Document):
 
 	def get_accounts(self):
 		if not hasattr(self, "accounts"):
-			self.accounts = frappe.db.sql("""select name, account_type, account_name, master_type
+			self.accounts = frappe.db.sql("""select name, account_type, account_name, master_type, root_type
 				from `tabAccount` where company=%s and docstatus < 2
 				and group_or_ledger = "Ledger" order by lft""",
 				(self.company,), as_dict=1)

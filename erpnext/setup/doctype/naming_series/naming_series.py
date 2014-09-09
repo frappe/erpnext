@@ -72,7 +72,7 @@ class NamingSeries(Document):
 					'field_name': 'naming_series',
 					'property': prop,
 					'value': prop_dict[prop],
-					'property_type': 'Select',
+					'property_type': 'Text',
 					'__islocal': 1
 				})
 				ps.save()

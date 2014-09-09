@@ -12,7 +12,7 @@ def execute(filters=None):
 	employee_filters = filters.get("company") and \
 		[["Employee", "company", "=", filters.get("company")]] or None
 	employees = runreport(doctype="Employee", fields=["name", "employee_name", "department"],
-		filters=employee_filters)
+		filters=employee_filters, limit_page_length=None)
 
 	if not employees:
 		frappe.throw(_("No employee found!"))
@@ -24,17 +24,19 @@ def execute(filters=None):
 	else:
 		fiscal_years = frappe.db.sql_list("select name from `tabFiscal Year` order by name desc")
 
+	employee_names = [d.name for d in employees]
+
 	allocations = frappe.db.sql("""select employee, fiscal_year, leave_type, total_leaves_allocated
 	 	from `tabLeave Allocation`
 		where docstatus=1 and employee in (%s)""" %
-		','.join(['%s']*len(employees)), employees, as_dict=True)
+		','.join(['%s']*len(employee_names)), employee_names, as_dict=True)
 
 	applications = frappe.db.sql("""select employee, fiscal_year, leave_type,
 			SUM(total_leave_days) as leaves
 		from `tabLeave Application`
 		where status="Approved" and docstatus = 1 and employee in (%s)
 		group by employee, fiscal_year, leave_type""" %
-			','.join(['%s']*len(employees)), employees, as_dict=True)
+			','.join(['%s']*len(employee_names)), employee_names, as_dict=True)
 
 	columns = [
 		"Fiscal Year", "Employee:Link/Employee:150", "Employee Name::200", "Department::150"

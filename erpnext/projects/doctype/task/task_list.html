@@ -1,0 +1,34 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-12">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+			{% if(doc.project) { %}
+			<span class="filterable" style="margin-right: 8px;"
+				data-filter="project,=,{%= doc.project %}">
+				{%= doc.project %}</span>
+			{% } %}
+			<span class="label label-{%= frappe.utils.guess_style(doc.status) %} filterable"
+				data-filter="status,=,{%= doc.status %}">
+				{%= doc.status %}
+			</span>
+			<span class="label label-{%= frappe.utils.guess_style(doc.priority) %} filterable"
+				data-filter="priority,=,{%= doc.priority %}">
+				{%= doc.priority %}
+			</span>
+			{% if(doc.status==="Open" && doc.exp_end_date
+				&& frappe.datetime.get_diff(doc.exp_end_date) <= 0) { %}
+				<span class="label label-danger filterable"
+					data-filter="exp_end_date,>=,Today"
+					title="{%= doc.get_formatted("exp_end_date") %}">
+					{%= __("Overdue") %}
+				</span>
+			{% } else if(doc.exp_end_date) { %}
+				<span class="label label-default filterable"
+					data-filter="exp_end_date,=,{%= doc.exp_end_date %}"
+					title="{%= __("Due Date") %}">
+					{%= doc.get_formatted("exp_end_date") %}
+				</span>
+			{% } %}
+		</div>
+	</div>
+</div>

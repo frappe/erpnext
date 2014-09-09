@@ -1,0 +1,24 @@
+<div class="row" style="max-height: 30px;">
+	<div class="col-xs-12">
+		<div class="text-ellipsis">
+			{%= list.get_avatar_and_id(doc) %}
+
+			<span style="margin-right: 8px;" class="filterable"
+					data-filter="customer,=,{%= doc.customer %}">
+					{%= doc.customer %}</span>
+
+			<span class="label
+				label-{%= frappe.utils.guess_style(doc.status) %} filterable"
+				data-filter="status,=,{%= doc.status %}">
+				{%= doc.status %}
+			</span>
+
+			{% if(doc.item_code) { %}
+			<span class="label label-default filterable"
+				data-filter="item_code,=,{%= doc.item_code %}">
+				{%= doc.item_code %}
+			</span>
+			{% } %}
+		</div>
+	</div>
+</div>

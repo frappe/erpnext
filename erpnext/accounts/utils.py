@@ -7,8 +7,7 @@ import frappe
 from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
 from frappe import throw, _
 from frappe.utils import formatdate
-from erpnext.utilities import build_filter_conditions
-
+import frappe.widgets.reportview
 
 class FiscalYearError(frappe.ValidationError): pass
 class BudgetError(frappe.ValidationError): pass
@@ -46,11 +45,8 @@ def get_balance_on(account=None, date=None):
 		account = frappe.form_dict.get("account")
 		date = frappe.form_dict.get("date")
 
-	acc = frappe.db.get_value('Account', account, \
-		['lft', 'rgt', 'report_type', 'group_or_ledger'], as_dict=1)
-
-	if not acc:
-		frappe.throw(_("Account {0} does not exist").format(account), frappe.DoesNotExistError)
+	acc = frappe.get_doc("Account", account)
+	acc.check_permission("read")
 
 	cond = []
 	if date:
@@ -83,7 +79,7 @@ def get_balance_on(account=None, date=None):
 			and ac.lft >= %s and ac.rgt <= %s
 		)""" % (acc.lft, acc.rgt))
 	else:
-		cond.append("""gle.account = "%s" """ % (account.replace('"', '\"'), ))
+		cond.append("""gle.account = "%s" """ % (account.replace('"', '\\"'), ))
 
 	bal = frappe.db.sql("""
 		SELECT sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
@@ -154,12 +150,12 @@ def check_if_jv_modified(args):
 		check if jv is submitted
 	"""
 	ret = frappe.db.sql("""
-		select t2.%(dr_or_cr)s from `tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
-		where t1.name = t2.parent and t2.account = '%(account)s'
+		select t2.{dr_or_cr} from `tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
+		where t1.name = t2.parent and t2.account = %(account)s
 		and ifnull(t2.against_voucher, '')=''
 		and ifnull(t2.against_invoice, '')='' and ifnull(t2.against_jv, '')=''
-		and t1.name = '%(voucher_no)s' and t2.name = '%(voucher_detail_no)s'
-		and t1.docstatus=1 """ % args)
+		and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
+		and t1.docstatus=1 """.format(dr_or_cr = args.get("dr_or_cr")), args)
 
 	if not ret:
 		throw(_("""Payment Entry has been modified after you pulled it. Please pull it again."""))
@@ -185,7 +181,7 @@ def update_against_doc(d, jv_obj):
 		ch = jv_obj.append("entries")
 		ch.account = d['account']
 		ch.cost_center = cstr(jvd[0][0])
-		ch.balance = cstr(jvd[0][1])
+		ch.balance = flt(jvd[0][1])
 		ch.set(d['dr_or_cr'], flt(d['unadjusted_amt']) - flt(d['allocated_amt']))
 		ch.set(d['dr_or_cr']== 'debit' and 'credit' or 'debit', 0)
 		ch.against_account = cstr(jvd[0][2])
@@ -195,28 +191,6 @@ def update_against_doc(d, jv_obj):
 	# will work as update after submit
 	jv_obj.ignore_validate_update_after_submit = True
 	jv_obj.save()
-
-def get_account_list(doctype, txt, searchfield, start, page_len, filters):
-	if not filters.get("group_or_ledger"):
-		filters["group_or_ledger"] = "Ledger"
-
-	conditions, filter_values = build_filter_conditions(filters)
-
-	return frappe.db.sql("""select name, parent_account from `tabAccount`
-		where docstatus < 2 %s and %s like %s order by name limit %s, %s""" %
-		(conditions, searchfield, "%s", "%s", "%s"),
-		tuple(filter_values + ["%%%s%%" % txt, start, page_len]))
-
-def get_cost_center_list(doctype, txt, searchfield, start, page_len, filters):
-	if not filters.get("group_or_ledger"):
-		filters["group_or_ledger"] = "Ledger"
-
-	conditions, filter_values = build_filter_conditions(filters)
-
-	return frappe.db.sql("""select name, parent_cost_center from `tabCost Center`
-		where docstatus < 2 %s and %s like %s order by name limit %s, %s""" %
-		(conditions, searchfield, "%s", "%s", "%s"),
-		tuple(filter_values + ["%%%s%%" % txt, start, page_len]))
 
 def remove_against_link_from_jv(ref_type, ref_no, against_field):
 	linked_jv = frappe.db.sql_list("""select parent from `tabJournal Voucher Detail`
@@ -348,32 +322,38 @@ def get_actual_expense(args):
 		and fiscal_year='%(fiscal_year)s' and company='%(company)s' %(condition)s
 	""" % (args))[0][0]
 
-def rename_account_for(dt, olddn, newdn, merge, company):
-	old_account = get_account_for(dt, olddn)
-	if old_account:
-		new_account = None
-		if not merge:
-			if old_account == add_abbr_if_missing(olddn, company):
-				new_account = frappe.rename_doc("Account", old_account, newdn)
-		else:
-			existing_new_account = get_account_for(dt, newdn)
-			new_account = frappe.rename_doc("Account", old_account,
-				existing_new_account or newdn, merge=True if existing_new_account else False)
+def rename_account_for(dt, olddn, newdn, merge, company=None):
+	if not company:
+		companies = [d[0] for d in frappe.db.sql("select name from tabCompany")]
+	else:
+		companies = [company]
 
-		frappe.db.set_value("Account", new_account or old_account, "master_name", newdn)
+	for company in companies:
+		old_account = get_account_for(dt, olddn, company)
+		if old_account:
+			new_account = None
+			if not merge:
+				if old_account == add_abbr_if_missing(olddn, company):
+					new_account = frappe.rename_doc("Account", old_account, newdn)
+			else:
+				existing_new_account = get_account_for(dt, newdn, company)
+				new_account = frappe.rename_doc("Account", old_account,
+					existing_new_account or newdn, merge=True if existing_new_account else False)
+
+			frappe.db.set_value("Account", new_account or old_account, "master_name", newdn)
 
 def add_abbr_if_missing(dn, company):
 	from erpnext.setup.doctype.company.company import get_name_with_abbr
 	return get_name_with_abbr(dn, company)
 
-def get_account_for(account_for_doctype, account_for):
+def get_account_for(account_for_doctype, account_for, company):
 	if account_for_doctype in ["Customer", "Supplier"]:
 		account_for_field = "master_type"
 	elif account_for_doctype == "Warehouse":
 		account_for_field = "account_type"
 
 	return frappe.db.get_value("Account", {account_for_field: account_for_doctype,
-		"master_name": account_for})
+		"master_name": account_for, "company": company})
 
 def get_currency_precision(currency=None):
 	if not currency:
@@ -383,3 +363,31 @@ def get_currency_precision(currency=None):
 
 	from frappe.utils import get_number_format_info
 	return get_number_format_info(currency_format)[2]
+
+def get_stock_rbnb_difference(posting_date, company):
+	stock_items = frappe.db.sql_list("""select distinct item_code
+		from `tabStock Ledger Entry` where company=%s""", company)
+
+	pr_valuation_amount = frappe.db.sql("""
+		select sum(ifnull(pr_item.valuation_rate, 0) * ifnull(pr_item.qty, 0) * ifnull(pr_item.conversion_factor, 0))
+		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
+	    where pr.name = pr_item.parent and pr.docstatus=1 and pr.company=%s
+		and pr.posting_date <= %s and pr_item.item_code in (%s)""" %
+	    ('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
+
+	pi_valuation_amount = frappe.db.sql("""
+		select sum(ifnull(pi_item.valuation_rate, 0) * ifnull(pi_item.qty, 0) * ifnull(pi_item.conversion_factor, 0))
+		from `tabPurchase Invoice Item` pi_item, `tabPurchase Invoice` pi
+	    where pi.name = pi_item.parent and pi.docstatus=1 and pi.company=%s
+		and pi.posting_date <= %s and pi_item.item_code in (%s)""" %
+	    ('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
+
+	# Balance should be
+	stock_rbnb = flt(pr_valuation_amount, 2) - flt(pi_valuation_amount, 2)
+
+	# Balance as per system
+	stock_rbnb_account = "Stock Received But Not Billed - " + frappe.db.get_value("Company", company, "abbr")
+	sys_bal = get_balance_on(stock_rbnb_account, posting_date)
+
+	# Amount should be credited
+	return flt(stock_rbnb) + flt(sys_bal)

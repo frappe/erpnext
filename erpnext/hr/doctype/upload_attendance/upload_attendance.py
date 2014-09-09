@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, add_days, date_diff
 from frappe import _
-from frappe.utils.datautils import UnicodeWriter
+from frappe.utils.csvutils import UnicodeWriter
 from frappe.model.document import Document
 
 class UploadAttendance(Document):
@@ -96,10 +96,11 @@ def upload():
 	if not frappe.has_permission("Attendance", "create"):
 		raise frappe.PermissionError
 
-	from frappe.utils.datautils import read_csv_content_from_uploaded_file
+	from frappe.utils.csvutils import read_csv_content_from_uploaded_file
 	from frappe.modules import scrub
 
 	rows = read_csv_content_from_uploaded_file()
+	rows = filter(lambda x: x and any(x), rows)
 	if not rows:
 		msg = [_("Please select a csv file")]
 		return {"messages": msg, "error": msg}
@@ -109,7 +110,7 @@ def upload():
 	ret = []
 	error = False
 
-	from frappe.utils.datautils import check_record, import_doc
+	from frappe.utils.csvutils import check_record, import_doc
 
 	for i, row in enumerate(rows[5:]):
 		if not row: continue

@@ -11,8 +11,12 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 	},
 
 	onload: function() {
-		this.setup_leave_approver_select();
 		if(this.frm.doc.__islocal) this.frm.set_value("employee_name", "");
+		this.frm.set_query("leave_approver", "employee_leave_approvers", function() {
+			return {
+				filters: [["UserRole", "role", "=", "Leave Approver"]]
+			}
+		});
 	},
 
 	refresh: function() {
@@ -21,23 +25,8 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 		if(!this.frm.doc.__islocal && this.frm.doc.__onload &&
 			!this.frm.doc.__onload.salary_structure_exists) {
 				cur_frm.add_custom_button(__('Make Salary Structure'), function() {
-					me.make_salary_structure(this); });
+					me.make_salary_structure(this); }, frappe.boot.doctype_icons["Salary Structure"]);
 		}
-	},
-
-	setup_leave_approver_select: function() {
-		var me = this;
-		return this.frm.call({
-			method: "erpnext.hr.utils.get_leave_approver_list",
-			callback: function(r) {
-				var df = frappe.meta.get_docfield("Employee Leave Approver", "leave_approver",
-					me.frm.doc.name);
-				df.options = $.map(r.message, function(user) {
-					return {value: user, label: frappe.user_info(user).fullname};
-				});
-				me.frm.fields_dict.employee_leave_approvers.refresh();
-			}
-		});
 	},
 
 	date_of_birth: function() {

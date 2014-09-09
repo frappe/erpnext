@@ -58,14 +58,20 @@ $.extend(cur_frm.cscript, {
 
 var cfn_set_fields = function(doc, dt, dn) {
 	if (doc.docstatus == 1) {
-		if (doc.status != 'Stopped' && doc.status != 'Completed')
-		cur_frm.add_custom_button(__('Stop!'), cur_frm.cscript['Stop Production Order'], "icon-exclamation");
-		else if (doc.status == 'Stopped')
-			cur_frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Production Order'], "icon-check");
 
 		if (doc.status == 'Submitted' || doc.status == 'Material Transferred' || doc.status == 'In Process'){
-			cur_frm.add_custom_button(__('Transfer Raw Materials'), cur_frm.cscript['Transfer Raw Materials']);
-			cur_frm.add_custom_button(__('Update Finished Goods'), cur_frm.cscript['Update Finished Goods']);
+			cur_frm.add_custom_button(__('Transfer Raw Materials'),
+				cur_frm.cscript['Transfer Raw Materials'], frappe.boot.doctype_icons["Stock Entry"]);
+			cur_frm.add_custom_button(__('Update Finished Goods'),
+				cur_frm.cscript['Update Finished Goods'], frappe.boot.doctype_icons["Stock Entry"]);
+		}
+
+		if (doc.status != 'Stopped' && doc.status != 'Completed') {
+			cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Production Order'],
+				"icon-exclamation", "btn-default");
+		} else if (doc.status == 'Stopped') {
+			cur_frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Production Order'],
+			"icon-check", "btn-default");
 		}
 	}
 }

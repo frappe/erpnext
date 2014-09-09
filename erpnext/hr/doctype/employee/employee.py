@@ -6,11 +6,12 @@ import frappe
 
 from frappe.utils import getdate, validate_email_add, cint
 from frappe.model.naming import make_autoname
-from frappe import throw, _
+from frappe import throw, _, msgprint
 import frappe.permissions
-from frappe.defaults import get_restrictions
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+
+class EmployeeUserDisabledError(frappe.ValidationError): pass
 
 class Employee(Document):
 	def onload(self):
@@ -45,36 +46,14 @@ class Employee(Document):
 
 	def on_update(self):
 		if self.user_id:
-			self.update_user_default()
 			self.update_user()
+			self.update_user_permissions()
 
 		self.update_dob_event()
-		self.restrict_leave_approver()
 
-	def restrict_user(self):
-		"""restrict to this employee for user"""
-		self.add_restriction_if_required("Employee", self.user_id)
-
-	def update_user_default(self):
-		self.restrict_user()
-		frappe.db.set_default("employee_name", self.employee_name, self.user_id)
-		frappe.db.set_default("company", self.company, self.user_id)
-
-	def restrict_leave_approver(self):
-		"""restrict to this employee for leave approver"""
-		employee_leave_approvers = [d.leave_approver for d in self.get("employee_leave_approvers")]
-		if self.reports_to and self.reports_to not in employee_leave_approvers:
-			employee_leave_approvers.append(frappe.db.get_value("Employee", self.reports_to, "user_id"))
-
-		for user in employee_leave_approvers:
-			self.add_restriction_if_required("Employee", user)
-			self.add_restriction_if_required("Leave Application", user)
-
-	def add_restriction_if_required(self, doctype, user):
-		if frappe.permissions.has_only_non_restrict_role(doctype, user) \
-			and self.name not in get_restrictions(user).get("Employee", []):
-
-			frappe.defaults.add_default("Employee", self.name, user, "Restriction")
+	def update_user_permissions(self):
+		frappe.permissions.add_user_permission("Employee", self.name, self.user_id)
+		frappe.permissions.set_user_permission_if_allowed("Company", self.company, self.user_id)
 
 	def update_user(self):
 		# add employee role if missing
@@ -85,7 +64,7 @@ class Employee(Document):
 			user.add_roles("Employee")
 
 		# copy details like Fullname, DOB and Image to User
-		if self.employee_name:
+		if self.employee_name and not (user.first_name and user.last_name):
 			employee_name = self.employee_name.split(" ")
 			if len(employee_name) >= 3:
 				user.last_name = " ".join(employee_name[2:])
@@ -111,7 +90,7 @@ class Employee(Document):
 						"attached_to_doctype": "User",
 						"attached_to_name": self.user_id
 					}).insert()
-				except frappe.DuplicateEntryError, e:
+				except frappe.DuplicateEntryError:
 					# already exists
 					pass
 
@@ -146,7 +125,7 @@ class Employee(Document):
 		enabled = frappe.db.sql("""select name from `tabUser` where
 			name=%s and enabled=1""", self.user_id)
 		if not enabled:
-			throw(_("User {0} is disabled").format(self.user_id))
+			throw(_("User {0} is disabled").format(self.user_id), EmployeeUserDisabledError)
 
 	def validate_duplicate_user_id(self):
 		employee = frappe.db.sql_list("""select name from `tabEmployee` where
@@ -155,12 +134,12 @@ class Employee(Document):
 			throw(_("User {0} is already assigned to Employee {1}").format(self.user_id, employee[0]))
 
 	def validate_employee_leave_approver(self):
-		from frappe.utils.user import User
 		from erpnext.hr.doctype.leave_application.leave_application import InvalidLeaveApproverError
 
-		for l in self.get("employee_leave_approvers"):
-			if "Leave Approver" not in User(l.leave_approver).get_roles():
-				throw(_("{0} is not a valid Leave Approver").format(l.leave_approver), InvalidLeaveApproverError)
+		for l in self.get("employee_leave_approvers")[:]:
+			if "Leave Approver" not in frappe.get_roles(l.leave_approver):
+				self.get("employee_leave_approvers").remove(l)
+				msgprint(_("{0} is not a valid Leave Approver. Removing row #{1}.").format(l.leave_approver, l.idx))
 
 	def update_dob_event(self):
 		if self.status == "Active" and self.date_of_birth \
@@ -217,10 +196,15 @@ def make_salary_structure(source_name, target=None):
 	target.make_earn_ded_table()
 	return target
 
-def update_user_default(doc, method):
+def validate_employee_role(doc, method):
 	# called via User hook
-	try:
+	if "Employee" in [d.role for d in doc.get("user_roles")]:
+		if not frappe.db.get_value("Employee", {"user_id": doc.name}):
+			frappe.msgprint("Please set User ID field in an Employee record to set Employee Role")
+			doc.get("user_roles").remove(doc.get("user_roles", {"role": "Employee"})[0])
+
+def update_user_permissions(doc, method):
+	# called via User hook
+	if "Employee" in [d.role for d in doc.get("user_roles")]:
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
-		employee.update_user_default()
-	except frappe.DoesNotExistError:
-		pass
+		employee.update_user_permissions()

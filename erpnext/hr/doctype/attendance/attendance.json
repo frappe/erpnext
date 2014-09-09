@@ -117,7 +117,7 @@
   {
    "fieldname": "amended_from", 
    "fieldtype": "Link", 
-   "ignore_restrictions": 1, 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "options": "Attendance", 
@@ -129,7 +129,7 @@
  "icon": "icon-ok", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-09 02:16:37.761770", 
+ "modified": "2014-08-05 06:52:02.226904", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Attendance", 
@@ -149,6 +149,7 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -177,5 +178,6 @@
  ], 
  "search_fields": "employee, employee_name, att_date, status", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "employee_name"
 }

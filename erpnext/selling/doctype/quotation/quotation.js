@@ -10,7 +10,6 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 
 {% include 'selling/sales_common.js' %}
 {% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
-{% include 'utilities/doctype/sms_control/sms_control.js' %}
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
@@ -21,16 +20,17 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			doc.quotation_to = "Customer";
 		else if(doc.lead && !doc.quotation_to)
 			doc.quotation_to = "Lead";
+
 	},
 	refresh: function(doc, dt, dn) {
 		this._super(doc, dt, dn);
 
 		if(doc.docstatus == 1 && doc.status!=='Lost') {
 			cur_frm.add_custom_button(__('Make Sales Order'),
-				cur_frm.cscript['Make Sales Order']);
+				cur_frm.cscript['Make Sales Order'], frappe.boot.doctype_icons["Sales Order"]);
 			if(doc.status!=="Ordered") {
 				cur_frm.add_custom_button(__('Set as Lost'),
-					cur_frm.cscript['Declare Order Lost'], "icon-exclamation");
+					cur_frm.cscript['Declare Order Lost'], "icon-exclamation", "btn-default");
 			}
 			cur_frm.appframe.add_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 		}
@@ -50,7 +50,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				});
+				}, "icon-download", "btn-default");
 		}
 
 		if (!doc.__islocal) {
@@ -174,3 +174,9 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(frappe.boot.notification_settings.quotation))
 		cur_frm.email_doc(frappe.boot.notification_settings.quotation_message);
 }
+
+cur_frm.cscript.send_sms = function() {
+	frappe.require("assets/erpnext/js/sms_manager.js");
+	var sms_man = new SMSManager(cur_frm.doc);
+}
+

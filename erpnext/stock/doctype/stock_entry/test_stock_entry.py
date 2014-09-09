@@ -21,7 +21,7 @@ class TestStockEntry(unittest.TestCase):
 		frappe.db.sql("""delete from `tabMaterial Request`""")
 		self._clear_stock_account_balance()
 
-		frappe.db.set_value("Stock Settings", None, "auto_indent", True)
+		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
 
 		st1 = frappe.copy_doc(test_records[0])
 		st1.insert()
@@ -664,15 +664,17 @@ class TestStockEntry(unittest.TestCase):
 	def test_serial_no_not_exists(self):
 		self._clear_stock_account_balance()
 		frappe.db.sql("delete from `tabSerial No` where name in ('ABCD', 'EFGH')")
+		make_serialized_item(target_warehouse="_Test Warehouse 1 - _TC")
 		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Material Issue"
-		se.get("mtn_details")[0].item_code = "_Test Serialized Item"
+		se.get("mtn_details")[0].item_code = "_Test Serialized Item With Series"
 		se.get("mtn_details")[0].qty = 2
 		se.get("mtn_details")[0].s_warehouse = "_Test Warehouse 1 - _TC"
 		se.get("mtn_details")[0].t_warehouse = None
 		se.get("mtn_details")[0].serial_no = "ABCD\nEFGH"
 		se.get("mtn_details")[0].transfer_qty = 2
 		se.insert()
+
 		self.assertRaises(SerialNoNotExistsError, se.submit)
 
 	def test_serial_duplicate(self):
@@ -699,8 +701,8 @@ class TestStockEntry(unittest.TestCase):
 		return se, serial_nos
 
 	def test_serial_item_error(self):
-		self._clear_stock_account_balance()
 		se, serial_nos = self.test_serial_by_series()
+		make_serialized_item("_Test Serialized Item", "ABCD\nEFGH")
 
 		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Material Transfer"
@@ -735,6 +737,8 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_serial_warehouse_error(self):
 		self._clear_stock_account_balance()
+		make_serialized_item(target_warehouse="_Test Warehouse 1 - _TC")
+
 		t = make_serialized_item()
 		serial_nos = get_serial_nos(t.get("mtn_details")[0].serial_no)
 
@@ -774,10 +778,12 @@ class TestStockEntry(unittest.TestCase):
 	def test_warehouse_user(self):
 		set_perpetual_inventory(0)
 
-		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com", "Restriction")
-		frappe.defaults.add_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", "Restriction")
-		frappe.get_doc("User", "test@example.com")\
-			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com", "User Permission")
+		frappe.defaults.add_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", "User Permission")
+		test_user = frappe.get_doc("User", "test@example.com")
+		test_user.add_roles("Sales User", "Sales Manager", "Material User")
+		test_user.remove_roles("Material Manager")
+
 		frappe.get_doc("User", "test2@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
 
@@ -795,11 +801,11 @@ class TestStockEntry(unittest.TestCase):
 		st1.submit()
 
 		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TC",
-			"test@example.com", parenttype="Restriction")
+			"test@example.com", parenttype="User Permission")
 		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 2 - _TC1",
-			"test2@example.com", parenttype="Restriction")
+			"test2@example.com", parenttype="User Permission")
 
-	def test_freeze_stocks (self):
+	def test_freeze_stocks(self):
 		self._clear_stock_account_balance()
 		frappe.db.set_value('Stock Settings', None,'stock_auth_role', '')
 
@@ -816,11 +822,16 @@ class TestStockEntry(unittest.TestCase):
 		self.assertRaises (StockFreezeError, se.submit)
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 0)
 
-def make_serialized_item():
+def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])
-	se.get("mtn_details")[0].item_code = "_Test Serialized Item With Series"
+	se.get("mtn_details")[0].item_code = item_code or "_Test Serialized Item With Series"
+	se.get("mtn_details")[0].serial_no = serial_no
 	se.get("mtn_details")[0].qty = 2
 	se.get("mtn_details")[0].transfer_qty = 2
+
+	if target_warehouse:
+		se.get("mtn_details")[0].t_warehouse = target_warehouse
+
 	se.insert()
 	se.submit()
 	return se

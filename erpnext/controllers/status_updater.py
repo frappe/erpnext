@@ -65,10 +65,11 @@ class StatusUpdater(Document):
 		self.validate_qty()
 
 	def set_status(self, update=False):
-		if self.get("__islocal"):
+		if self.is_new():
 			return
 
 		if self.doctype in status_map:
+			_status = self.status
 			sl = status_map[self.doctype][:]
 			sl.reverse()
 			for s in sl:
@@ -83,10 +84,14 @@ class StatusUpdater(Document):
 					self.status = s[0]
 					break
 
+			if self.status != _status:
+				self.add_comment("Label", self.status)
+
 			if update:
 				frappe.db.set_value(self.doctype, self.name, "status", self.status)
 
 	def on_communication(self):
+		if not self.get("communications"): return
 		self.communication_set = True
 		self.get("communications").sort(key=lambda d: d.creation)
 		self.set_status(update=True)
@@ -131,11 +136,12 @@ class StatusUpdater(Document):
 						if not item[args['target_ref_field']]:
 							msgprint(_("Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0").format(item.item_code))
 						elif args.get('no_tolerance'):
-							item['reduce_by'] = item[args['target_field']] - \
-								item[args['target_ref_field']]
+							item['reduce_by'] = item[args['target_field']] - item[args['target_ref_field']]
 							if item['reduce_by'] > .01:
-								msgprint(_("Allowance for over-delivery / over-billing crossed for Item {0}").format(item.item_code))
-								throw(_("{0} must be less than or equal to {1}").format(_(item.target_ref_field), item[args["target_ref_field"]]))
+								msgprint(_("Allowance for over-{0} crossed for Item {1}")
+									.format(args["overflow_type"], item.item_code))
+								throw(_("{0} must be reduced by {1} or you should increase overflow tolerance")
+									.format(_(item.target_ref_field.title()), item["reduce_by"]))
 
 						else:
 							self.check_overflow_with_tolerance(item, args)
@@ -155,8 +161,10 @@ class StatusUpdater(Document):
 			item['max_allowed'] = flt(item[args['target_ref_field']] * (100+tolerance)/100)
 			item['reduce_by'] = item[args['target_field']] - item['max_allowed']
 
-			msgprint(_("Allowance for over-delivery / over-billing crossed for Item {0}").format(item["item_code"]))
-			throw(_("{0} must be less than or equal to {1}").format(_(item["target_ref_field"]), item[args["max_allowed"]]))
+			msgprint(_("Allowance for over-{0} crossed for Item {1}.")
+				.format(args["overflow_type"], item["item_code"]))
+			throw(_("{0} must be reduced by {1} or you should increase overflow tolerance")
+				.format(_(item["target_ref_field"].title()), item["reduce_by"]))
 
 	def update_qty(self, change_modified=True):
 		"""
@@ -182,10 +190,10 @@ class StatusUpdater(Document):
 					args['second_source_condition'] = ""
 					if args.get('second_source_dt') and args.get('second_source_field') \
 							and args.get('second_join_field'):
-						args['second_source_condition'] = """ + (select sum(%(second_source_field)s)
+						args['second_source_condition'] = """ + ifnull((select sum(%(second_source_field)s)
 							from `tab%(second_source_dt)s`
 							where `%(second_join_field)s`="%(detail_id)s"
-							and (docstatus=1))""" % args
+							and (docstatus=1)), 0)""" % args
 
 					if args['detail_id']:
 						frappe.db.sql("""update `tab%(target_dt)s`
@@ -262,8 +270,7 @@ def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
 
 	if not tolerance:
 		if global_tolerance == None:
-			global_tolerance = flt(frappe.db.get_value('Global Defaults', None,
-				'tolerance'))
+			global_tolerance = flt(frappe.db.get_value('Stock Settings', None, 'tolerance'))
 		tolerance = global_tolerance
 
 	item_tolerance[item_code] = tolerance

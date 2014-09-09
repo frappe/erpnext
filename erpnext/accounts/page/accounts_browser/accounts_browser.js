@@ -25,16 +25,16 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 			'<li>'+__('To add child nodes, explore tree and click on the node under which you want to add more nodes.')+'</li>'+
 			'<li>'+
 			      __('Accounting Entries can be made against leaf nodes, called')+
-				 '<b>' +__('Ledgers')+'</b>.'+ __('Entries against') +
-				 '<b>' +__('Groups') + '</b>'+ __('are not allowed.')+
+				 ' <b>' +__('Ledgers')+'</b>. '+ __('Entries against ') +
+				 '<b>' +__('Groups') + '</b> '+ __('are not allowed.')+
 		    '</li>'+
 			'<li>'+__('Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.')+'</li>'+
 			'<li>'+
-			     '<b>'+__('To create a Bank Account:')+'</b>'+
+			     '<b>'+__('To create a Bank Account')+'</b>: '+
 			      __('Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts and create a new Account Ledger (by clicking on Add Child) of type "Bank"')+
 			'</li>'+
 			'<li>'+
-			      '<b>'+__('To create a Tax Account:')+'</b>'+
+			      '<b>'+__('To create a Tax Account') +'</b>: '+
 			      __('Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties and create a new Account Ledger (by clicking on Add Child) of type "Tax" and do mention the Tax rate.')+
 			'</li>'+
 		'</ol>'+
@@ -66,7 +66,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 			$.each(r.message, function(i, v) {
 				$('<option>').html(v).attr('value', v).appendTo(wrapper.$company_select);
 			});
-			wrapper.$company_select.val(frappe.defaults.get_user_default("company") || r[0]).change();
+			wrapper.$company_select.val(frappe.defaults.get_user_default("company") || r.message[0]).change();
 		}
 	});
 }
@@ -238,6 +238,9 @@ erpnext.AccountsChart = Class.extend({
 				method: 'erpnext.accounts.utils.add_ac',
 				callback: function(r) {
 					d.hide();
+					if(node.expanded) {
+						node.toggle_node();
+					}
 					node.reload();
 				}
 			});
@@ -281,6 +284,9 @@ erpnext.AccountsChart = Class.extend({
 				method: 'erpnext.accounts.utils.add_cc',
 				callback: function(r) {
 					d.hide();
+					if(node.expanded) {
+						node.toggle_node();
+					}
 					node.reload();
 				}
 			});

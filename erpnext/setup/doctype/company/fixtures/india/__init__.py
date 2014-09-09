@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
+from frappe import _
 
 def install(company):
 	docs = [
@@ -27,44 +28,45 @@ def install(company):
 		'group_or_ledger': 2,
 		'account_type': 3,
 		'report_type': 4,
-		'tax_rate': 5
+		'tax_rate': 5,
+		'root_type': 6
 	}
 
 	acc_list_india = [
-		['CENVAT Capital Goods','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['CENVAT','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['CENVAT Service Tax','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['CENVAT Service Tax Cess 1','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['CENVAT Service Tax Cess 2','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['CENVAT Edu Cess','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['CENVAT SHE Cess','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['Excise Duty 4','Tax Assets','Ledger','Tax','Balance Sheet','4.00'],
-		['Excise Duty 8','Tax Assets','Ledger','Tax','Balance Sheet','8.00'],
-		['Excise Duty 10','Tax Assets','Ledger','Tax','Balance Sheet','10.00'],
-		['Excise Duty 14','Tax Assets','Ledger','Tax','Balance Sheet','14.00'],
-		['Excise Duty Edu Cess 2','Tax Assets','Ledger','Tax','Balance Sheet','2.00'],
-		['Excise Duty SHE Cess 1','Tax Assets','Ledger','Tax','Balance Sheet','1.00'],
-		['P L A','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['P L A - Cess Portion','Tax Assets','Ledger','Chargeable','Balance Sheet',''],
-		['Edu. Cess on Excise','Duties and Taxes','Ledger','Tax','Balance Sheet','2.00'],
-		['Edu. Cess on Service Tax','Duties and Taxes','Ledger','Tax','Balance Sheet','2.00'],
-		['Edu. Cess on TDS','Duties and Taxes','Ledger','Tax','Balance Sheet','2.00'],
-		['Excise Duty @ 4','Duties and Taxes','Ledger','Tax','Balance Sheet','4.00'],
-		['Excise Duty @ 8','Duties and Taxes','Ledger','Tax','Balance Sheet','8.00'],
-		['Excise Duty @ 10','Duties and Taxes','Ledger','Tax','Balance Sheet','10.00'],
-		['Excise Duty @ 14','Duties and Taxes','Ledger','Tax','Balance Sheet','14.00'],
-		['Service Tax','Duties and Taxes','Ledger','Tax','Balance Sheet','10.3'],
-		['SHE Cess on Excise','Duties and Taxes','Ledger','Tax','Balance Sheet','1.00'],
-		['SHE Cess on Service Tax','Duties and Taxes','Ledger','Tax','Balance Sheet','1.00'],
-		['SHE Cess on TDS','Duties and Taxes','Ledger','Tax','Balance Sheet','1.00'],
-		['Professional Tax','Duties and Taxes','Ledger','Chargeable','Balance Sheet',''],
-		['VAT','Duties and Taxes','Ledger','Chargeable','Balance Sheet',''],
-		['TDS (Advertisement)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',''],
-		['TDS (Commission)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',''],
-		['TDS (Contractor)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',''],
-		['TDS (Interest)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',''],
-		['TDS (Rent)','Duties and Taxes','Ledger','Chargeable','Balance Sheet',''],
-		['TDS (Salary)','Duties and Taxes','Ledger','Chargeable','Balance Sheet','']
+		[_('CENVAT Capital Goods'),_(_('Tax Assets')),'Ledger','Chargeable','Balance Sheet', None, 'Asset'],
+		[_('CENVAT'),_('Tax Assets'),'Ledger','Chargeable','Balance Sheet', None, 'Asset'],
+		[_('CENVAT Service Tax'),_('Tax Assets'),'Ledger','Chargeable','Balance Sheet', None, 'Asset'],
+		[_('CENVAT Service Tax Cess 1'),_('Tax Assets'),'Ledger','Chargeable','Balance Sheet', None, 'Asset'],
+		[_('CENVAT Service Tax Cess 2'),_('Tax Assets'),'Ledger','Chargeable','Balance Sheet', None, 'Asset'],
+		[_('CENVAT Edu Cess'),_('Tax Assets'),'Ledger','Chargeable','Balance Sheet', None, 'Asset'],
+		[_('CENVAT SHE Cess'),_('Tax Assets'),'Ledger','Chargeable','Balance Sheet', None, 'Asset'],
+		[_('Excise Duty 4'),_('Tax Assets'),'Ledger','Tax','Balance Sheet','4.00', 'Asset'],
+		[_('Excise Duty 8'),_('Tax Assets'),'Ledger','Tax','Balance Sheet','8.00', 'Asset'],
+		[_('Excise Duty 10'),_('Tax Assets'),'Ledger','Tax','Balance Sheet','10.00', 'Asset'],
+		[_('Excise Duty 14'),_('Tax Assets'),'Ledger','Tax','Balance Sheet','14.00', 'Asset'],
+		[_('Excise Duty Edu Cess 2'),_('Tax Assets'),'Ledger','Tax','Balance Sheet','2.00', 'Asset'],
+		[_('Excise Duty SHE Cess 1'),_('Tax Assets'),'Ledger','Tax','Balance Sheet','1.00', 'Asset'],
+		[_('P L A'),_('Tax Assets'),'Ledger','Chargeable','Balance Sheet', None, 'Asset'],
+		[_('P L A - Cess Portion'),_('Tax Assets'),'Ledger','Chargeable','Balance Sheet', None, 'Asset'],
+		[_('Edu. Cess on Excise'),_('Duties and Taxes'),'Ledger','Tax','Balance Sheet','2.00', 'Liability'],
+		[_('Edu. Cess on Service Tax'),_('Duties and Taxes'),'Ledger','Tax','Balance Sheet','2.00', 'Liability'],
+		[_('Edu. Cess on TDS'),_('Duties and Taxes'),'Ledger','Tax','Balance Sheet','2.00', 'Liability'],
+		[_('Excise Duty @ 4'),_('Duties and Taxes'),'Ledger','Tax','Balance Sheet','4.00', 'Liability'],
+		[_('Excise Duty @ 8'),_('Duties and Taxes'),'Ledger','Tax','Balance Sheet','8.00', 'Liability'],
+		[_('Excise Duty @ 10'),_('Duties and Taxes'),'Ledger','Tax','Balance Sheet','10.00', 'Liability'],
+		[_('Excise Duty @ 14'),_('Duties and Taxes'),'Ledger','Tax','Balance Sheet','14.00', 'Liability'],
+		[_('Service Tax'),_('Duties and Taxes'),'Ledger','Tax','Balance Sheet','10.3', 'Liability'],
+		[_('SHE Cess on Excise'),_('Duties and Taxes'),'Ledger','Tax','Balance Sheet','1.00', 'Liability'],
+		[_('SHE Cess on Service Tax'),_('Duties and Taxes'),'Ledger','Tax','Balance Sheet','1.00', 'Liability'],
+		[_('SHE Cess on TDS'),_('Duties and Taxes'),'Ledger','Tax','Balance Sheet','1.00', 'Liability'],
+		[_('Professional Tax'),_('Duties and Taxes'),'Ledger','Chargeable','Balance Sheet', None, 'Liability'],
+		[_('VAT'),_('Duties and Taxes'),'Ledger','Chargeable','Balance Sheet', None, 'Liability'],
+		[_('TDS (Advertisement)'),_('Duties and Taxes'),'Ledger','Chargeable','Balance Sheet', None, 'Liability'],
+		[_('TDS (Commission)'),_('Duties and Taxes'),'Ledger','Chargeable','Balance Sheet', None, 'Liability'],
+		[_('TDS (Contractor)'),_('Duties and Taxes'),'Ledger','Chargeable','Balance Sheet', None, 'Liability'],
+		[_('TDS (Interest)'),_('Duties and Taxes'),'Ledger','Chargeable','Balance Sheet', None, 'Liability'],
+		[_('TDS (Rent)'),_('Duties and Taxes'),'Ledger','Chargeable','Balance Sheet', None, 'Liability'],
+		[_('TDS (Salary)'),_('Duties and Taxes'),'Ledger','Chargeable','Balance Sheet', None, 'Liability']
 	 ]
 
 	for lst in acc_list_india:

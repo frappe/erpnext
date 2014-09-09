@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "autoname": "field:country_name", 
- "creation": "2013-01-19 10:23:30.000000", 
+ "creation": "2013-01-19 10:23:30", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -9,6 +9,7 @@
   {
    "fieldname": "country_name", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Country Name", 
    "oldfieldname": "country_name", 
    "oldfieldtype": "Data", 
@@ -18,18 +19,21 @@
   {
    "fieldname": "date_format", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Date Format", 
    "permlevel": 0
   }, 
   {
    "fieldname": "time_zones", 
    "fieldtype": "Text", 
+   "in_list_view": 1, 
    "label": "Time Zones", 
    "permlevel": 0
   }, 
   {
    "fieldname": "code", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Code", 
    "permlevel": 0
   }
@@ -37,7 +41,7 @@
  "icon": "icon-globe", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-03-05 14:36:16.000000", 
+ "modified": "2014-05-27 03:49:08.984710", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Country", 
@@ -45,7 +49,6 @@
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "email": 1, 
    "permlevel": 0, 
@@ -68,6 +71,7 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "create": 1, 
    "email": 1, 
    "permlevel": 0, 
@@ -90,6 +94,7 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "email": 1, 
    "permlevel": 0, 
    "print": 1, 

@@ -7,8 +7,8 @@ cur_frm.cscript.onload = function(doc,dt,dn){
 
 }
 
-cur_frm.cscript.refresh = function(doc,dt,dn){  
-  
+cur_frm.cscript.refresh = function(doc,dt,dn){
+
 	if(doc.__islocal){
 		hide_field(['address_html', 'contact_html']);
 	}
@@ -17,6 +17,11 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 		// make lists
 		cur_frm.cscript.make_address(doc,dt,dn);
 		cur_frm.cscript.make_contact(doc,dt,dn);
+
+		if (doc.show_in_website) {
+			cur_frm.set_intro(__("Published on website at: {0}",
+				[repl('<a href="/%(website_route)s" target="_blank">/%(website_route)s</a>', doc.__onload)]));
+		}
 	}
 }
 
@@ -34,20 +39,14 @@ cur_frm.cscript.make_address = function() {
 				address.address_title = cur_frm.doc.name;
 				address.address_type = "Office";
 				frappe.set_route("Form", "Address", address.name);
-			},			
+			},
 			get_query: function() {
-				return "select name, address_type, address_line1, address_line2, city, state, country, pincode, fax, email_id, phone, is_primary_address, is_shipping_address from tabAddress where sales_partner='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_address desc"
+				return "select name, address_type, address_line1, address_line2, city, state, country, pincode, fax, email_id, phone, is_primary_address, is_shipping_address from tabAddress where sales_partner='" +
+					cur_frm.doc.name.replace(/'/g, "\\'") + "' and docstatus != 2 order by is_primary_address desc"
 			},
 			as_dict: 1,
 			no_results_message: __('No addresses created'),
-			render_row: function(wrapper, data) {
-				$(wrapper).css('padding','5px 0px');
-				var link = $ln(wrapper,cstr(data.name), function() { loaddoc("Address", this.dn); }, {fontWeight:'bold'});
-				link.dn = data.name
-				
-				$a(wrapper,'span','',{marginLeft:'5px', color: '#666'},(data.is_primary_address ? '[Primary]' : '') + (data.is_shipping_address ? '[Shipping]' : ''));				
-				$a(wrapper,'div','',{marginTop:'5px', color:'#555'}, data.address_line1 + '<br />' + (data.address_line2 ? data.address_line2 + '<br />' : '') + data.city + '<br />' + (data.state ? data.state + ', ' : '') + data.country + '<br />' + (data.pincode ? 'Pincode: ' + data.pincode + '<br />' : '') + (data.phone ? 'Tel: ' + data.phone + '<br />' : '') + (data.fax ? 'Fax: ' + data.fax + '<br />' : '') + (data.email_id ? 'Email: ' + data.email_id + '<br />' : ''));
-			}
+			render_row: cur_frm.cscript.render_address_row,
 		});
 	}
 	cur_frm.address_list.run();
@@ -66,18 +65,12 @@ cur_frm.cscript.make_contact = function() {
 				frappe.set_route("Form", "Contact", contact.name);
 			},
 			get_query: function() {
-				return "select name, first_name, last_name, email_id, phone, mobile_no, department, designation, is_primary_contact from tabContact where sales_partner='"+cur_frm.docname+"' and docstatus != 2 order by is_primary_contact desc"
+				return "select name, first_name, last_name, email_id, phone, mobile_no, department, designation, is_primary_contact from tabContact where sales_partner='" +
+					cur_frm.doc.name.replace(/'/g, "\\'") + "' and docstatus != 2 order by is_primary_contact desc"
 			},
 			as_dict: 1,
 			no_results_message: __('No contacts created'),
-			render_row: function(wrapper, data) {
-				$(wrapper).css('padding', '5px 0px');
-				var link = $ln(wrapper, cstr(data.name), function() { loaddoc("Contact", this.dn); }, {fontWeight:'bold'});
-				link.dn = data.name
-
-				$a(wrapper,'span','',{marginLeft:'5px', color: '#666'},(data.is_primary_contact ? '[Primary]' : ''));
-				$a(wrapper,'div', '',{marginTop:'5px', color:'#555'}, data.first_name + (data.last_name ? ' ' + data.last_name + '<br />' : '<br>') + (data.phone ? 'Tel: ' + data.phone + '<br />' : '') + (data.mobile_no ? 'Mobile: ' + data.mobile_no + '<br />' : '') + (data.email_id ? 'Email: ' + data.email_id + '<br />' : '') + (data.department ? 'Department: ' + data.department + '<br />' : '') + (data.designation ? 'Designation: ' + data.designation + '<br />' : ''));
-			}
+			render_row: cur_frm.cscript.render_contact_row,
 		});
 	}
 	cur_frm.contact_list.run();

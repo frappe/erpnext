@@ -56,6 +56,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	onload_post_render: function() {
+		cur_frm.get_field(this.fname).grid.set_multiple_add("item_code", "qty");
 		this.set_default_account();
 	},
 
@@ -70,10 +71,12 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(this.frm.doc.docstatus === 1 &&
 				frappe.boot.user.can_create.indexOf("Journal Voucher")!==-1) {
 			if(this.frm.doc.purpose === "Sales Return") {
-				this.frm.add_custom_button(__("Make Credit Note"), function() { me.make_return_jv(); });
+				this.frm.add_custom_button(__("Make Credit Note"),
+					function() { me.make_return_jv(); }, frappe.boot.doctype_icons["Journal Voucher"]);
 				this.add_excise_button();
 			} else if(this.frm.doc.purpose === "Purchase Return") {
-				this.frm.add_custom_button(__("Make Debit Note"), function() { me.make_return_jv(); });
+				this.frm.add_custom_button(__("Make Debit Note"),
+					function() { me.make_return_jv(); }, frappe.boot.doctype_icons["Journal Voucher"]);
 				this.add_excise_button();
 			}
 		}
@@ -91,7 +94,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	set_default_account: function() {
 		var me = this;
 
-		if(cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
+		if(cint(frappe.defaults.get_default("auto_accounting_for_stock")) && this.frm.doc.company) {
 			var account_for = "stock_adjustment_account";
 
 			if (this.frm.doc.purpose == "Purchase Return")
@@ -198,7 +201,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				excise = locals['Journal Voucher'][excise];
 				excise.voucher_type = 'Excise Voucher';
 				loaddoc('Journal Voucher', excise.name);
-			});
+			}, frappe.boot.doctype_icons["Journal Voucher"], "btn-default");
 	},
 
 	make_return_jv: function() {
@@ -210,14 +213,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				},
 				callback: function(r) {
 					if(!r.exc) {
-						var jv_name = frappe.model.make_new_doc_and_get_name('Journal Voucher');
-						var jv = locals["Journal Voucher"][jv_name];
-						$.extend(jv, r.message[0]);
-						$.each(r.message.slice(1), function(i, jvd) {
-							var child = frappe.model.add_child(jv, "Journal Voucher Detail", "entries");
-							$.extend(child, jvd);
-						});
-						loaddoc("Journal Voucher", jv_name);
+						var doclist = frappe.model.sync(r.message);
+						frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+
 					}
 				}
 			});
@@ -233,46 +231,94 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 	},
 
+	source_mandatory: ["Material Issue", "Material Transfer", "Purchase Return"],
+	target_mandatory: ["Material Receipt", "Material Transfer", "Sales Return"],
+
+	from_warehouse: function(doc) {
+		var me = this;
+		this.set_warehouse_if_missing("s_warehouse", doc.from_warehouse, function(row) {
+			return me.source_mandatory.indexOf(me.frm.doc.purpose)!==-1;
+		});
+	},
+
+	to_warehouse: function(doc) {
+		var me = this;
+		this.set_warehouse_if_missing("t_warehouse", doc.to_warehouse, function(row) {
+			return me.target_mandatory.indexOf(me.frm.doc.purpose)!==-1;
+		});
+	},
+
+	set_warehouse_if_missing: function(fieldname, value, condition) {
+		for (var i=0, l=(this.frm.doc.mtn_details || []).length; i<l; i++) {
+			var row = this.frm.doc.mtn_details[i];
+			if (!row[fieldname]) {
+				if (condition && !condition(row)) {
+					continue;
+				}
+
+				frappe.model.set_value(row.doctype, row.name, fieldname, value, "Link");
+			}
+		}
+	},
+
 	mtn_details_on_form_rendered: function(doc, grid_row) {
 		erpnext.setup_serial_no(grid_row)
 	},
 
 	customer: function() {
-		return this.frm.call({
-			method: "erpnext.accounts.party.get_party_details",
-			args: { party: this.frm.doc.customer, party_type:"Customer" }
+		this.get_party_details({
+			party: this.frm.doc.customer,
+			party_type:"Customer",
+			doctype: this.frm.doc.doctype
 		});
 	},
 
 	supplier: function() {
-		return this.frm.call({
+		this.get_party_details({
+			party: this.frm.doc.supplier,
+			party_type:"Supplier",
+			doctype: this.frm.doc.doctype
+		});
+	},
+
+	get_party_details: function(args) {
+		var me = this;
+		frappe.call({
 			method: "erpnext.accounts.party.get_party_details",
-			args: { party: this.frm.doc.supplier, party_type:"Supplier" }
+			args: args,
+			callback: function(r) {
+				if(r.message) {
+					me.frm.set_value({
+						"customer_name": r.message["customer_name"],
+						"customer_address": r.message["address_display"]
+					});
+				}
+			}
 		});
 	},
 
 	delivery_note_no: function() {
-		this.get_party_details({
+		this.get_party_details_from_against_voucher({
 			ref_dt: "Delivery Note",
 			ref_dn: this.frm.doc.delivery_note_no
 		})
 	},
 
 	sales_invoice_no: function() {
-		this.get_party_details({
+		this.get_party_details_from_against_voucher({
 			ref_dt: "Sales Invoice",
 			ref_dn: this.frm.doc.sales_invoice_no
 		})
 	},
 
 	purchase_receipt_no: function() {
-		this.get_party_details({
+		this.get_party_details_from_against_voucher({
 			ref_dt: "Purchase Receipt",
 			ref_dn: this.frm.doc.purchase_receipt_no
 		})
 	},
 
-	get_party_details: function(args) {
+	get_party_details_from_against_voucher: function(args) {
 		return this.frm.call({
 			method: "erpnext.stock.doctype.stock_entry.stock_entry.get_party_details",
 			args: args,
@@ -358,16 +404,17 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 
 cur_frm.cscript.s_warehouse = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	args = {
-		'item_code'		: d.item_code,
-		'warehouse'		: cstr(d.s_warehouse) || cstr(d.t_warehouse),
-		'transfer_qty'	: d.transfer_qty,
-		'serial_no'		: d.serial_no,
-		'bom_no'		: d.bom_no,
-		'qty'			: d.s_warehouse ? -1* d.qty : d.qty
+	if(!d.bom_no) {
+		args = {
+			'item_code'		: d.item_code,
+			'warehouse'		: cstr(d.s_warehouse) || cstr(d.t_warehouse),
+			'transfer_qty'	: d.transfer_qty,
+			'serial_no'		: d.serial_no,
+			'qty'			: d.s_warehouse ? -1* d.qty : d.qty
+		}
+		return get_server_fields('get_warehouse_details', JSON.stringify(args),
+			'mtn_details', doc, cdt, cdn, 1);
 	}
-	return get_server_fields('get_warehouse_details', JSON.stringify(args),
-		'mtn_details', doc, cdt, cdn, 1);
 }
 
 cur_frm.cscript.t_warehouse = cur_frm.cscript.s_warehouse;

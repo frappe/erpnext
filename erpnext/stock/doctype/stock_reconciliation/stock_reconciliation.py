@@ -11,8 +11,11 @@ from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import StockController
 
 class StockReconciliation(StockController):
-	def validate(self):
+	def __init__(self, arg1, arg2=None):
+		super(StockReconciliation, self).__init__(arg1, arg2)
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
+
+	def validate(self):
 		self.entries = []
 
 		self.validate_data()
@@ -24,7 +27,7 @@ class StockReconciliation(StockController):
 
 	def on_cancel(self):
 		self.delete_and_repost_sle()
-		self.make_cancel_gl_entries()
+		self.make_gl_entries_on_cancel()
 
 	def validate_data(self):
 		if not self.reconciliation_json:
@@ -71,7 +74,7 @@ class StockReconciliation(StockController):
 				self.validation_messages.append(_get_msg(row_num, _("Warehouse not found in the system")))
 
 			# if both not specified
-			if row[2] == "" and row[3] == "":
+			if row[2] in ["", None] and row[3] in ["", None]:
 				self.validation_messages.append(_get_msg(row_num,
 					_("Please specify either Quantity or Valuation Rate or both")))
 
@@ -146,14 +149,14 @@ class StockReconciliation(StockController):
 			})
 
 			# check valuation rate mandatory
-			if row.qty != "" and not row.valuation_rate and \
+			if row.qty not in ["", None] and not row.valuation_rate and \
 					flt(previous_sle.get("qty_after_transaction")) <= 0:
 				frappe.throw(_("Valuation Rate required for Item {0}").format(row.item_code))
 
-			change_in_qty = row.qty != "" and \
+			change_in_qty = row.qty not in ["", None] and \
 				(flt(row.qty) - flt(previous_sle.get("qty_after_transaction")))
 
-			change_in_rate = row.valuation_rate != "" and \
+			change_in_rate = row.valuation_rate not in ["", None] and \
 				(flt(row.valuation_rate) - flt(previous_sle.get("valuation_rate")))
 
 			if get_valuation_method(row.item_code) == "Moving Average":
@@ -168,7 +171,7 @@ class StockReconciliation(StockController):
 			if previous_valuation_rate == 0:
 				return flt(valuation_rate)
 			else:
-				if valuation_rate == "":
+				if valuation_rate in ["", None]:
 					valuation_rate = previous_valuation_rate
 				return (qty * valuation_rate - previous_qty * previous_valuation_rate) \
 					/ flt(qty - previous_qty)
@@ -176,8 +179,7 @@ class StockReconciliation(StockController):
 		if change_in_qty:
 			# if change in qty, irrespective of change in rate
 			incoming_rate = _get_incoming_rate(flt(row.qty), flt(row.valuation_rate),
-				flt(previous_sle.get("qty_after_transaction")),
-				flt(previous_sle.get("valuation_rate")))
+				flt(previous_sle.get("qty_after_transaction")), flt(previous_sle.get("valuation_rate")))
 
 			row["voucher_detail_no"] = "Row: " + cstr(row.row_num) + "/Actual Entry"
 			self.insert_entries({"actual_qty": change_in_qty, "incoming_rate": incoming_rate}, row)
@@ -208,7 +210,7 @@ class StockReconciliation(StockController):
 		def _insert_entries():
 			if previous_stock_queue != [[row.qty, row.valuation_rate]]:
 				# make entry as per attachment
-				if row.qty:
+				if flt(row.qty):
 					row["voucher_detail_no"] = "Row: " + cstr(row.row_num) + "/Actual Entry"
 					self.insert_entries({"actual_qty": row.qty,
 						"incoming_rate": flt(row.valuation_rate)}, row)
@@ -222,7 +224,7 @@ class StockReconciliation(StockController):
 
 
 		if change_in_qty:
-			if row.valuation_rate == "":
+			if row.valuation_rate in ["", None]:
 				# dont want change in valuation
 				if previous_stock_qty > 0:
 					# set valuation_rate as previous valuation_rate
@@ -299,5 +301,6 @@ class StockReconciliation(StockController):
 
 @frappe.whitelist()
 def upload():
-	from frappe.utils.datautils import read_csv_content_from_uploaded_file
-	return read_csv_content_from_uploaded_file()
+	from frappe.utils.csvutils import read_csv_content_from_uploaded_file
+	csv_content = read_csv_content_from_uploaded_file()
+	return filter(lambda x: x and any(x), csv_content)

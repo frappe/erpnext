@@ -32,6 +32,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Address Template",
+					"description": _("Country wise default Address Templates")
+				},
+				{
+					"type": "doctype",
 					"name": "Terms and Conditions",
 					"description": _("Standard contract terms for Sales or Purchase.")
 				},
@@ -82,6 +87,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Jobs Email Settings",
 					"description": _("Setup incoming server for jobs email id. (e.g. jobs@example.com)")
+				},
+				{
+					"type": "doctype",
+					"name": "SMS Settings",
+					"description": _("Setup SMS gateway settings")
 				},
 			]
 		},

@@ -40,9 +40,8 @@ class MaintenanceSchedule(TransactionBase):
 				child.idx = count
 				count = count + 1
 				child.sales_person = d.sales_person
-				child.save(1)
 
-		self.on_update()
+		self.save()
 
 	def on_submit(self):
 		if not self.get('maintenance_schedule_detail'):
@@ -135,7 +134,7 @@ class MaintenanceSchedule(TransactionBase):
 
 	def validate_dates_with_periodicity(self):
 		for d in self.get("item_maintenance_detail"):
-			if d.start_date and d.end_date and d.periodicity:
+			if d.start_date and d.end_date and d.periodicity and d.periodicity!="Random":
 				date_diff = (getdate(d.end_date) - getdate(d.start_date)).days + 1
 				days_in_period = {
 					"Weekly": 7,
@@ -194,6 +193,9 @@ class MaintenanceSchedule(TransactionBase):
 		for serial_no in serial_nos:
 			sr_details = frappe.db.get_value("Serial No", serial_no,
 				["warranty_expiry_date", "amc_expiry_date", "status", "delivery_date"], as_dict=1)
+
+			if not sr_details:
+				frappe.throw(_("Serial No {0} not found").format(serial_no))
 
 			if sr_details.warranty_expiry_date and sr_details.warranty_expiry_date>=amc_start_date:
 				throw(_("Serial No {0} is under warranty upto {1}").format(serial_no, sr_details.warranty_expiry_date))

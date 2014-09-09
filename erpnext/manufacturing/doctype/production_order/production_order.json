@@ -13,7 +13,7 @@
    "permlevel": 0
   }, 
   {
-   "default": "PRO", 
+   "default": "PRO-", 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "label": "Series", 
@@ -210,12 +210,13 @@
   }, 
   {
    "fieldname": "amended_from", 
-   "fieldtype": "Data", 
-   "ignore_restrictions": 1, 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
    "oldfieldtype": "Data", 
+   "options": "Production Order", 
    "permlevel": 0, 
    "read_only": 1
   }
@@ -224,7 +225,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2014-05-07 05:41:33.127710", 
+ "modified": "2014-06-23 07:55:50.092300", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 
@@ -232,6 +233,7 @@
  "permissions": [
   {
    "amend": 1, 
+   "apply_user_permissions": 1, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
@@ -245,6 +247,7 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
    "report": 1, 

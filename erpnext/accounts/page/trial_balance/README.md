@@ -1,1 +1,0 @@
-Period wise opening and closing balance of all transactions.

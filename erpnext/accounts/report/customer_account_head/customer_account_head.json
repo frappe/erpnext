@@ -1,10 +1,11 @@
 {
- "creation": "2013-06-03 16:17:34.000000", 
+ "apply_user_permissions": 1, 
+ "creation": "2013-06-03 16:17:34", 
  "docstatus": 0, 
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-03-07 15:30:27.000000", 
+ "modified": "2014-06-03 07:18:16.993419", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Customer Account Head", 

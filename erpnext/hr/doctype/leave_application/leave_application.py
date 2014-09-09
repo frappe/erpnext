@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_url_to_form, \
 	comma_or, get_fullname
 from frappe import msgprint
+from erpnext.hr.utils import set_employee_name
 
 class LeaveDayBlockedError(frappe.ValidationError): pass
 class OverlapError(frappe.ValidationError): pass
@@ -21,6 +22,8 @@ class LeaveApplication(Document):
 			self.previous_doc = frappe.db.get_value(self.doctype, self.name, "*", as_dict=True)
 		else:
 			self.previous_doc = None
+
+		set_employee_name(self)
 
 		self.validate_to_date()
 		self.validate_balance_leaves()
@@ -134,7 +137,12 @@ class LeaveApplication(Document):
 			and (from_date between %(from_date)s and %(to_date)s
 				or to_date between %(from_date)s and %(to_date)s
 				or %(from_date)s between from_date and to_date)
-			and name != %(name)s""", self.as_dict(), as_dict = 1):
+			and name != %(name)s""", {
+				"employee": self.employee,
+				"from_date": self.from_date,
+				"to_date": self.to_date,
+				"name": self.name
+			}, as_dict = 1):
 
 			frappe.msgprint(_("Employee {0} has already applied for {1} between {2} and {3}").format(self.employee,
 				cstr(d['leave_type']), formatdate(d['from_date']), formatdate(d['to_date'])))
@@ -147,16 +155,15 @@ class LeaveApplication(Document):
 
 	def validate_leave_approver(self):
 		employee = frappe.get_doc("Employee", self.employee)
-		leave_approvers = [l.leave_approver for l in
-			employee.get("employee_leave_approvers")]
+		leave_approvers = [l.leave_approver for l in employee.get("employee_leave_approvers")]
 
 		if len(leave_approvers) and self.leave_approver not in leave_approvers:
 			frappe.throw(_("Leave approver must be one of {0}").format(comma_or(leave_approvers)), InvalidLeaveApproverError)
 
 		elif self.leave_approver and not frappe.db.sql("""select name from `tabUserRole`
 			where parent=%s and role='Leave Approver'""", self.leave_approver):
-			frappe.throw(_("{0} must have role 'Leave Approver'").format(get_fullname(self.leave_approver)),
-				InvalidLeaveApproverError)
+			frappe.throw(_("{0} ({1}) must have role 'Leave Approver'")\
+				.format(get_fullname(self.leave_approver), self.leave_approver), InvalidLeaveApproverError)
 
 		elif self.docstatus==1 and len(leave_approvers) and self.leave_approver != frappe.session.user:
 			msgprint(_("Only the selected Leave Approver can submit this Leave Application"),
@@ -206,7 +213,7 @@ class LeaveApplication(Document):
 	def notify(self, args):
 		args = frappe._dict(args)
 		from frappe.core.page.messages.messages import post
-		post({"txt": args.message, "contact": args.message_to, "subject": args.subject,
+		post(**{"txt": args.message, "contact": args.message_to, "subject": args.subject,
 			"notify": cint(self.follow_via_email)})
 
 @frappe.whitelist()
@@ -234,8 +241,13 @@ def is_lwp(leave_type):
 @frappe.whitelist()
 def get_events(start, end):
 	events = []
-	employee = frappe.db.get_default("employee", frappe.session.user)
-	company = frappe.db.get_default("company", frappe.session.user)
+
+	employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, ["name", "company"],
+		as_dict=True)
+	if not employee:
+		return events
+
+	employee, company = employee.name, employee.company
 
 	from frappe.widgets.reportview import build_match_conditions
 	match_conditions = build_match_conditions("Leave Application")
@@ -244,7 +256,7 @@ def get_events(start, end):
 	if "Employee" in frappe.get_roles():
 		add_department_leaves(events, start, end, employee, company)
 
-	add_leaves(events, start, end, employee, company, match_conditions)
+	add_leaves(events, start, end, match_conditions)
 
 	add_block_dates(events, start, end, employee, company)
 	add_holidays(events, start, end, employee, company)
@@ -262,9 +274,9 @@ def add_department_leaves(events, start, end, employee, company):
 		and company=%s""", (department, company))
 
 	match_conditions = "employee in (\"%s\")" % '", "'.join(department_employees)
-	add_leaves(events, start, end, employee, company, match_conditions=match_conditions)
+	add_leaves(events, start, end, match_conditions=match_conditions)
 
-def add_leaves(events, start, end, employee, company, match_conditions=None):
+def add_leaves(events, start, end, match_conditions=None):
 	query = """select name, from_date, to_date, employee_name, half_day,
 		status, employee, docstatus
 		from `tabLeave Application` where

@@ -8,7 +8,7 @@ cur_frm.fields_dict['delivery_note'].get_query = function(doc, cdt, cdn) {
 }
 
 
-cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query = 
+cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query =
 		function(doc, cdt, cdn) {
 			return {
 				query: "erpnext.stock.doctype.packing_slip.packing_slip.item_details",
@@ -18,7 +18,7 @@ cur_frm.fields_dict['item_details'].grid.get_field('item_code').get_query =
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 	if(doc.delivery_note && doc.__islocal) {
-			cur_frm.cscript.get_items(doc, cdt, cdn);
+		cur_frm.cscript.get_items(doc, cdt, cdn);
 	}
 }
 
@@ -53,7 +53,7 @@ cur_frm.cscript.validate_case_nos = function(doc) {
 	} else if(cint(doc.to_case_no) < cint(doc.from_case_no)) {
 		msgprint(__("'To Case No.' cannot be less than 'From Case No.'"));
 		validated = false;
-	}	
+	}
 }
 
 
@@ -88,7 +88,7 @@ cur_frm.cscript.validate_duplicate_items = function(doc, ps_detail) {
 // Calculate Net Weight of Package
 cur_frm.cscript.calc_net_total_pkg = function(doc, ps_detail) {
 	var net_weight_pkg = 0;
-	doc.net_weight_uom = ps_detail?ps_detail[0].weight_uom:'';
+	doc.net_weight_uom = (ps_detail && ps_detail.length) ? ps_detail[0].weight_uom : '';
 	doc.gross_weight_uom = doc.net_weight_uom;
 
 	for(var i=0; i<ps_detail.length; i++) {

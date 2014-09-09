@@ -16,16 +16,16 @@ cur_frm.cscript.refresh = function(doc) {
 	}
 
 
-	if(!doc.__islocal && doc.show_in_website) {
-		cur_frm.appframe.add_button("View In Website", function() {
-			window.open(doc.page_name);
-		}, "icon-globe");
-	}
 	cur_frm.cscript.edit_prices_button();
 
 	if (!doc.__islocal && doc.is_stock_item == 'Yes') {
 		cur_frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method'],
 			(doc.__onload && doc.__onload.sle_exists=="exists") ? false : true);
+	}
+
+	if (!doc.__islocal && doc.show_in_website) {
+		cur_frm.set_intro(__("Published on website at: {0}",
+			[repl('<a href="/%(website_route)s" target="_blank">/%(website_route)s</a>', doc.__onload)]));
 	}
 
 	erpnext.item.toggle_reqd(cur_frm);
@@ -169,15 +169,9 @@ cur_frm.fields_dict.item_supplier_details.grid.get_field("supplier").get_query =
 }
 
 cur_frm.cscript.copy_from_item_group = function(doc) {
-	frappe.model.with_doc("Item Group", doc.item_group, function() {
-		$.each((doc.item_website_specifications || []), function(i, d) {
-				var n = frappe.model.add_child(doc, "Item Website Specification",
-					"item_website_specifications");
-				n.label = d.label;
-				n.description = d.description;
-			}
-		);
-		cur_frm.refresh();
+	return cur_frm.call({
+		doc: doc,
+		method: "copy_specification_from_item_group"
 	});
 }
 

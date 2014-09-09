@@ -30,14 +30,13 @@
  ], 
  "icon": "icon-font", 
  "idx": 1, 
- "modified": "2014-05-07 06:39:39.352519", 
+ "modified": "2014-05-27 03:49:14.944690", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Print Heading", 
  "owner": "Administrator", 
  "permissions": [
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -50,6 +49,7 @@
    "write": 1
   }, 
   {
+   "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
    "role": "All"

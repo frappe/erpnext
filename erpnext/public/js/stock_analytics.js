@@ -10,11 +10,11 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
-			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand", 
+			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand",
 				"Fiscal Year", "Serial No"],
 			tree_grid: {
-				show: true, 
-				parent_field: "parent_item_group", 
+				show: true,
+				parent_field: "parent_item_group",
 				formatter: function(item) {
 					if(!item.is_group) {
 						return repl("<a \
@@ -25,13 +25,13 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 					} else {
 						return item.name;
 					}
-					
+
 				}
 			},
 		}
-		
+
 		if(opts) $.extend(args, opts);
-		
+
 		this._super(args);
 	},
 	setup_columns: function() {
@@ -50,28 +50,29 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		this.columns = std_columns.concat(this.columns);
 	},
 	filters: [
-		{fieldtype:"Select", label: __("Value or Qty"), options:["Value", "Quantity"],
+		{fieldtype:"Select", label: __("Value or Qty"), fieldname: "value_or_qty",
+			options:["Value", "Quantity"],
 			filter: function(val, item, opts, me) {
 				return me.apply_zero_filter(val, item, opts, me);
 			}},
-		{fieldtype:"Select", label: __("Brand"), link:"Brand", 
-			default_value: "Select Brand...", filter: function(val, item, opts) {
+		{fieldtype:"Select", label: __("Brand"), link:"Brand", fieldname: "brand",
+			default_value: __("Select Brand..."), filter: function(val, item, opts) {
 				return val == opts.default_value || item.brand == val || item._show;
 			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", 
-			default_value: "Select Warehouse..."},
-		{fieldtype:"Date", label: __("From Date")},
+		{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", fieldname: "warehouse",
+			default_value: __("Select Warehouse...")},
+		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
 		{fieldtype:"Label", label: __("To")},
-		{fieldtype:"Date", label: __("To Date")},
-		{fieldtype:"Select", label: __("Range"), 
+		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
+		{fieldtype:"Select", label: __("Range"), fieldname: "range",
 			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
 		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: __("Reset Filters")}
+		{fieldtype:"Button", label: __("Reset Filters"), icon: "icon-filter"}
 	],
 	setup_filters: function() {
 		var me = this;
 		this._super();
-		
+
 		this.trigger_refresh_on_change(["value_or_qty", "brand", "warehouse", "range"]);
 
 		this.show_zero_check();
@@ -83,7 +84,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	},
 	prepare_data: function() {
 		var me = this;
-				
+
 		if(!this.data) {
 			var items = this.prepare_tree("Item", "Item Group");
 
@@ -109,10 +110,10 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 				me.reset_item_values(d);
 			});
 		}
-		
+
 		this.prepare_balances();
 		this.update_groups();
-		
+
 	},
 	prepare_balances: function() {
 		var me = this;
@@ -127,16 +128,16 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 			var sl = data[i];
 			sl.posting_datetime = sl.posting_date + " " + sl.posting_time;
 			var posting_datetime = dateutil.str_to_obj(sl.posting_datetime);
-			
+
 			if(me.is_default("warehouse") ? true : me.warehouse == sl.warehouse) {
 				var item = me.item_by_name[sl.item_code];
-				
+
 				if(me.value_or_qty!="Quantity") {
 					var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
-					var valuation_method = item.valuation_method ? 
+					var valuation_method = item.valuation_method ?
 						item.valuation_method : sys_defaults.valuation_method;
 					var is_fifo = valuation_method == "FIFO";
-					
+
 					var diff = me.get_value_diff(wh, sl, is_fifo);
 				} else {
 					var diff = sl.qty;
@@ -165,13 +166,13 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 						balance = item[col.field];
 					}
 				});
-				
+
 				var parent = me.parent_map[item.name];
 				while(parent) {
 					parent_group = me.item_by_name[parent];
 					$.each(me.columns, function(c, col) {
 						if (col.formatter == me.currency_formatter) {
-							parent_group[col.field] = 
+							parent_group[col.field] =
 								flt(parent_group[col.field])
 								+ flt(item[col.field]);
 						}

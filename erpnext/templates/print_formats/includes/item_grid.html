@@ -1,0 +1,47 @@
+{%- from "templates/print_formats/standard_macros.html" import print_value -%}
+{%- set std_fields = ("item_code", "item_name", "description", "qty", "rate", "amount", "stock_uom", "uom") -%}
+{%- set visible_columns = get_visible_columns(doc.get(df.fieldname), table_meta) -%}
+{%- set hide_rate = data[0].meta.is_print_hide("rate") if data|length else False-%}
+{%- set hide_amount = data[0].meta.is_print_hide("amount") if data|length else False-%}
+
+<table class="table table-bordered">
+	<tbody>
+		<tr>
+			<th style="width: 3%">{{ _("Sr") }}</th>
+			<th style="width: 57%">{{ _("Item") }}</th>
+			<th style="width: 10%;" class="text-right">{{ _("Qty") }}</th>
+			{% if not hide_rate -%}<th style="width: 15%;" class="text-right">{{ _("Rate") }}</th>{%- endif %}
+			{% if not hide_amount -%}<th style="width: 15%;" class="text-right">{{ _("Amount") }}</th>{%- endif %}
+		</tr>
+		{%- for row in data -%}
+		<tr>
+			<td>{{ row.idx }}</td>
+			<td>
+				{% if not row.meta.is_print_hide("item_code") -%}
+					<div class="primary">{{ row.item_code }}</div>
+				{%- endif %}
+				{% if (not row.meta.is_print_hide("item_name") and
+					(row.meta.is_print_hide("item_code") or row.item_code != row.item_name)) -%}
+					<div class="primary">{{ row.get_formatted("item_name") }}</div>
+				{%- endif %}
+				{% if (not row.meta.is_print_hide("description") and row.description and
+					((row.meta.is_print_hide("item_code") and row.meta.is_print_hide("item_name"))
+						or not (row.item_code == row.item_name == row.description))) -%}
+					<p>{{ row.get_formatted("description") }}</p>
+				{%- endif %}
+				{%- for field in visible_columns -%}
+					{%- if (field.fieldname not in std_fields) and
+							(row[field.fieldname] not in (None, "", 0)) -%}
+					<div><strong>{{ _(field.label) }}:</strong>
+						{{ row.get_formatted(field.fieldname, doc) }}</div>
+					{%- endif -%}
+				{%- endfor -%}
+			</td>
+			<td style="text-align: right;">{{ row.get_formatted("qty", doc) }}<br>
+				<small>{{ row.uom or row.stock_uom }}</small></td>
+			{% if not hide_rate -%}<td style="text-align: right;">{{ row.get_formatted("rate", doc) }}</td>{%- endif %}
+			{% if not hide_amount -%}<td style="text-align: right;">{{ row.get_formatted("amount", doc) }}</td>{%- endif %}
+		</tr>
+		{%- endfor -%}
+	</tbody>
+</table>

@@ -11,6 +11,11 @@ import frappe.defaults
 from erpnext.stock.utils import update_bin
 
 from erpnext.controllers.buying_controller import BuyingController
+
+form_grid_templates = {
+	"purchase_receipt_details": "templates/form_grid/item_grid.html"
+}
+
 class PurchaseReceipt(BuyingController):
 	tname = 'Purchase Receipt Item'
 	fname = 'purchase_receipt_details'
@@ -27,11 +32,12 @@ class PurchaseReceipt(BuyingController):
 			'target_ref_field': 'qty',
 			'source_field': 'qty',
 			'percent_join_field': 'prevdoc_docname',
+			'overflow_type': 'receipt'
 		}]
 
 	def onload(self):
 		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabPurchase Invoice Item`
-			where purchase_receipt=%s""", self.name)
+			where purchase_receipt=%s and docstatus=1""", self.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.get("purchase_receipt_details")))
 			self.get("__onload").billing_complete = (billed_qty[0][0] == total_qty)
@@ -61,8 +67,15 @@ class PurchaseReceipt(BuyingController):
 		# sub-contracting
 		self.validate_for_subcontracting()
 		self.create_raw_materials_supplied("pr_raw_material_details")
-
+		self.set_landed_cost_voucher_amount()
 		self.update_valuation_rate("purchase_receipt_details")
+
+	def set_landed_cost_voucher_amount(self):
+		for d in self.get("purchase_receipt_details"):
+			lc_voucher_amount = frappe.db.sql("""select sum(ifnull(applicable_charges, 0))
+				from `tabLanded Cost Item`
+				where docstatus = 1 and purchase_receipt_item = %s""", d.name)
+			d.landed_cost_voucher_amount = lc_voucher_amount[0][0] if lc_voucher_amount else 0.0
 
 	def validate_rejected_warehouse(self):
 		for d in self.get("purchase_receipt_details"):
@@ -137,7 +150,7 @@ class PurchaseReceipt(BuyingController):
 						"warehouse": d.rejected_warehouse,
 						"actual_qty": flt(d.rejected_qty) * flt(d.conversion_factor),
 						"serial_no": cstr(d.rejected_serial_no).strip(),
-						"incoming_rate": d.valuation_rate
+						"incoming_rate": 0.0
 					}))
 
 		self.bk_flush_supp_wh(sl_entries)
@@ -259,7 +272,7 @@ class PurchaseReceipt(BuyingController):
 		self.update_prevdoc_status()
 		pc_obj.update_last_purchase_rate(self, 0)
 
-		self.make_cancel_gl_entries()
+		self.make_gl_entries_on_cancel()
 
 	def get_current_stock(self):
 		for d in self.get('pr_raw_material_details'):
@@ -271,10 +284,116 @@ class PurchaseReceipt(BuyingController):
 		return frappe.get_doc('Purchase Common').get_rate(arg,self)
 
 	def get_gl_entries(self, warehouse_account=None):
-		against_stock_account = self.get_company_default("stock_received_but_not_billed")
+		from erpnext.accounts.general_ledger import process_gl_map
 
-		gl_entries = super(PurchaseReceipt, self).get_gl_entries(warehouse_account, against_stock_account)
-		return gl_entries
+		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+
+		gl_entries = []
+		warehouse_with_no_account = []
+		negative_expense_to_be_booked = 0.0
+		stock_items = self.get_stock_items()
+		for d in self.get("purchase_receipt_details"):
+			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
+				if warehouse_account.get(d.warehouse):
+
+					# warehouse account
+					gl_entries.append(self.get_gl_dict({
+						"account": warehouse_account[d.warehouse],
+						"against": stock_rbnb,
+						"cost_center": d.cost_center,
+						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+						"debit": flt(flt(d.valuation_rate) * flt(d.qty) * flt(d.conversion_factor),
+							self.precision("valuation_rate", d))
+					}))
+
+					# stock received but not billed
+					gl_entries.append(self.get_gl_dict({
+						"account": stock_rbnb,
+						"against": warehouse_account[d.warehouse],
+						"cost_center": d.cost_center,
+						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+						"credit": flt(d.base_amount, self.precision("base_amount", d))
+					}))
+
+					negative_expense_to_be_booked += flt(d.item_tax_amount)
+
+					# Amount added through landed-cost-voucher
+					if flt(d.landed_cost_voucher_amount):
+						gl_entries.append(self.get_gl_dict({
+							"account": expenses_included_in_valuation,
+							"against": warehouse_account[d.warehouse],
+							"cost_center": d.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"credit": flt(d.landed_cost_voucher_amount)
+						}))
+
+					# sub-contracting warehouse
+					if flt(d.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
+						gl_entries.append(self.get_gl_dict({
+							"account": warehouse_account[self.supplier_warehouse],
+							"against": warehouse_account[d.warehouse],
+							"cost_center": d.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"credit": flt(d.rm_supp_cost)
+						}))
+
+				elif d.warehouse not in warehouse_with_no_account or \
+					d.rejected_warehouse not in warehouse_with_no_account:
+						warehouse_with_no_account.append(d.warehouse)
+
+		# Cost center-wise amount breakup for other charges included for valuation
+		valuation_tax = {}
+		for tax in self.get("other_charges"):
+			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount):
+				if not tax.cost_center:
+					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
+				valuation_tax.setdefault(tax.cost_center, 0)
+				valuation_tax[tax.cost_center] += \
+					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
+
+		if negative_expense_to_be_booked and valuation_tax:
+			# Backward compatibility:
+			# If expenses_included_in_valuation account has been credited in against PI
+			# and charges added via Landed Cost Voucher,
+			# post valuation related charges on "Stock Received But Not Billed"
+
+			negative_expense_booked_in_pi = frappe.db.sql("""select name from `tabPurchase Invoice Item` pi
+				where docstatus = 1 and purchase_receipt=%s
+				and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice'
+					and voucher_no=pi.parent and account=%s)""", (self.name, expenses_included_in_valuation))
+
+			if negative_expense_booked_in_pi:
+				expenses_included_in_valuation = stock_rbnb
+
+			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
+			total_valuation_amount = sum(valuation_tax.values())
+			amount_including_divisional_loss = negative_expense_to_be_booked
+			i = 1
+			for cost_center, amount in valuation_tax.items():
+				if i == len(valuation_tax):
+					applicable_amount = amount_including_divisional_loss
+				else:
+					applicable_amount = negative_expense_to_be_booked * (amount / total_valuation_amount)
+					amount_including_divisional_loss -= applicable_amount
+
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": expenses_included_in_valuation,
+						"cost_center": cost_center,
+						"credit": applicable_amount,
+						"remarks": self.remarks or _("Accounting Entry for Stock"),
+						"against": against_account
+					})
+				)
+
+				i += 1
+
+		if warehouse_with_no_account:
+			frappe.msgprint(_("No accounting entries for the following warehouses") + ": \n" +
+				"\n".join(warehouse_with_no_account))
+
+		return process_gl_map(gl_entries)
 
 
 @frappe.whitelist()
@@ -287,6 +406,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 			frappe.throw(_("All items have already been invoiced"))
 
 		doc = frappe.get_doc(target)
+		doc.ignore_pricing_rule = 1
 		doc.run_method("set_missing_values")
 		doc.run_method("calculate_taxes_and_totals")
 

@@ -132,12 +132,6 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Purchase In Transit",
-					"doctype": "Purchase Order"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
 					"name": "Item-wise Purchase History",
 					"doctype": "Item"
 				},
@@ -156,7 +150,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Supplier Addresses And Contacts",
+					"name": "Supplier Addresses and Contacts",
 					"doctype": "Supplier"
 				},
 				{

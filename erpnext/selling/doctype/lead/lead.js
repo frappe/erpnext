@@ -2,7 +2,6 @@
 // License: GNU General Public License v3. See license.txt
 
 {% include 'setup/doctype/contact_control/contact_control.js' %};
-{% include 'utilities/doctype/sms_control/sms_control.js' %}
 
 frappe.provide("erpnext");
 erpnext.LeadController = frappe.ui.form.Controller.extend({
@@ -21,21 +20,17 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 			cur_frm.fields_dict.contact_by.get_query = function(doc, cdt, cdn) {
 				return { query:"frappe.core.doctype.user.user.user_query" } }
 		}
-
-		if(in_list(user_roles,'System Manager')) {
-			cur_frm.footer.help_area.innerHTML = '<p><a href="#Form/Sales Email Settings">'+__('Sales Email Settings')+'</a><br>\
-				<span class="help">'+__('Automatically extract Leads from a mail box e.g.')+' "sales@example.com"</span></p>';
-		}
 	},
 
 	refresh: function() {
 		var doc = this.frm.doc;
 		erpnext.toggle_naming_series();
-		this.frm.clear_custom_buttons();
 
 		if(!this.frm.doc.__islocal && this.frm.doc.__onload && !this.frm.doc.__onload.is_customer) {
-			this.frm.add_custom_button(__("Create Customer"), this.create_customer);
-			this.frm.add_custom_button(__("Create Opportunity"), this.create_opportunity);
+			this.frm.add_custom_button(__("Create Customer"), this.create_customer,
+				frappe.boot.doctype_icons["Customer"], "btn-default");
+			this.frm.add_custom_button(__("Create Opportunity"), this.create_opportunity,
+				frappe.boot.doctype_icons["Opportunity"], "btn-default");
 			this.frm.appframe.add_button(__("Send SMS"), this.frm.cscript.send_sms, "icon-mobile-phone");
 		}
 
@@ -90,3 +85,9 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 });
 
 $.extend(cur_frm.cscript, new erpnext.LeadController({frm: cur_frm}));
+
+cur_frm.cscript.send_sms = function() {
+	frappe.require("assets/erpnext/js/sms_manager.js");
+	var sms_man = new SMSManager(cur_frm.doc);
+}
+

@@ -1,6 +1,6 @@
 {
  "autoname": "naming_series:", 
- "creation": "2013-01-10 16:34:31.000000", 
+ "creation": "2013-01-10 16:34:31", 
  "description": "Create and Send Newsletters", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -132,7 +132,7 @@
  ], 
  "icon": "icon-envelope", 
  "idx": 1, 
- "modified": "2014-02-03 11:32:22.000000", 
+ "modified": "2014-08-04 07:22:06.445634", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Newsletter", 

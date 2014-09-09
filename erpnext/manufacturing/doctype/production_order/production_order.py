@@ -39,15 +39,15 @@ class ProductionOrder(Document):
 	def validate_sales_order(self):
 		if self.sales_order:
 			so = frappe.db.sql("""select name, delivery_date from `tabSales Order`
-				where name=%s and docstatus = 1""", self.sales_order, as_dict=1)[0]
+				where name=%s and docstatus = 1""", self.sales_order, as_dict=1)
 
-			if not so.name:
-				frappe.throw(_("Sales Order {0} is not valid") % self.sales_order)
+			if len(so):
+				if not self.expected_delivery_date:
+					self.expected_delivery_date = so[0].delivery_date
 
-			if not self.expected_delivery_date:
-				self.expected_delivery_date = so.delivery_date
-
-			self.validate_production_order_against_so()
+				self.validate_production_order_against_so()
+			else:
+				frappe.throw(_("Sales Order {0} is not valid").format(self.sales_order))
 
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_warehouse_company
@@ -149,7 +149,7 @@ class ProductionOrder(Document):
 @frappe.whitelist()
 def get_item_details(item):
 	res = frappe.db.sql("""select stock_uom, description
-		from `tabItem` where (ifnull(end_of_life, "")="" or end_of_life > now())
+		from `tabItem` where (ifnull(end_of_life, "0000-00-00")="0000-00-00" or end_of_life > now())
 		and name=%s""", item, as_dict=1)
 
 	if not res:

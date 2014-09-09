@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.utils import flt
+import frappe.permissions
 import unittest
 import copy
 
@@ -283,12 +284,17 @@ class TestSalesOrder(unittest.TestCase):
 			so.get("sales_order_details")[0].warehouse, 20.0)
 
 	def test_warehouse_user(self):
-		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", "Restriction")
-		frappe.get_doc("User", "test@example.com")\
-			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
+		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
+		frappe.permissions.add_user_permission("Company", "_Test Company 1", "test2@example.com")
 
-		frappe.get_doc("User", "test2@example.com")\
-			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+		test_user = frappe.get_doc("User", "test@example.com")
+		test_user.add_roles("Sales User", "Material User")
+		test_user.remove_roles("Sales Manager")
+
+		test_user_2 = frappe.get_doc("User", "test2@example.com")
+		test_user_2.add_roles("Sales User", "Material User")
+		test_user_2.remove_roles("Sales Manager")
 
 		frappe.set_user("test@example.com")
 
@@ -302,7 +308,33 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.set_user("test2@example.com")
 		so.insert()
 
-		frappe.defaults.clear_default("Warehouse", "_Test Warehouse 1 - _TC1", "test@example.com", parenttype="Restriction")
+		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
+		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
+		frappe.permissions.remove_user_permission("Company", "_Test Company 1", "test2@example.com")
+
+	def test_block_delivery_note_against_cancelled_sales_order(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import _insert_purchase_receipt
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+
+		sales_order = frappe.copy_doc(test_records[0])
+		sales_order.sales_order_details[0].qty = 5
+		sales_order.insert()
+		sales_order.submit()
+
+		_insert_purchase_receipt(sales_order.get("sales_order_details")[0].item_code)
+
+		delivery_note = make_delivery_note(sales_order.name)
+		delivery_note.posting_date = sales_order.transaction_date
+		delivery_note.insert()
+
+		sales_order.cancel()
+
+		self.assertRaises(frappe.CancelledLinkError, delivery_note.submit)
+
+	def test_recurring_order(self):
+		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
+
+		test_recurring_document(self, test_records)
 
 test_dependencies = ["Sales BOM", "Currency Exchange"]
 

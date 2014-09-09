@@ -62,7 +62,7 @@
    "options": "Price List", 
    "permlevel": 0, 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
    "fieldname": "company", 
@@ -147,7 +147,7 @@
    "options": "Warehouse", 
    "permlevel": 0, 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
    "fieldname": "cost_center", 
@@ -205,14 +205,13 @@
  ], 
  "icon": "icon-cog", 
  "idx": 1, 
- "modified": "2014-05-09 02:17:34.814856", 
+ "modified": "2014-06-23 16:40:59.510132", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "POS Setting", 
  "owner": "Administrator", 
  "permissions": [
   {
-   "cancel": 0, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -225,7 +224,7 @@
    "write": 1
   }, 
   {
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "delete": 0, 
    "email": 1, 
    "permlevel": 0, 
