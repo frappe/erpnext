@@ -54,5 +54,4 @@ class TestProductionOrder(unittest.TestCase):
 
 		self.assertRaises(StockOverProductionError, s.submit)
 
-
 test_records = frappe.get_test_records('Production Order')

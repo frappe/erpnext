@@ -10,6 +10,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 
 class TestStockEntry(unittest.TestCase):
+	
 	def tearDown(self):
 		frappe.set_user("Administrator")
 		set_perpetual_inventory(0)
@@ -26,7 +27,6 @@ class TestStockEntry(unittest.TestCase):
 		st1 = frappe.copy_doc(test_records[0])
 		st1.insert()
 		st1.submit()
-
 		st2 = frappe.copy_doc(test_records[1])
 		st2.insert()
 		st2.submit()
@@ -821,6 +821,37 @@ class TestStockEntry(unittest.TestCase):
 		se = frappe.copy_doc(test_records[0]).insert()
 		self.assertRaises (StockFreezeError, se.submit)
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 0)
+		
+	def test_production_order(self):
+		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item 2", 
+			"is_default": 1, "docstatus": 1})
+		
+		production_order = frappe.new_doc("Production Order")
+		production_order.update({
+			"company": "_Test Company",
+			"fg_warehouse": "_Test Warehouse 1 - _TC", 
+			"production_item": "_Test FG Item 2", 
+			"bom_no": bom_no,
+			"qty": 1.0,
+			"stock_uom": "Nos", 
+			"wip_warehouse": "_Test Warehouse - _TC"
+		})
+		production_order.insert()
+		production_order.submit()
+
+		self._insert_material_receipt()
+
+		stock_entry = frappe.new_doc("Stock Entry")
+		stock_entry.update({
+			"purpose": "Manufacture/Repack",
+			"production_order": production_order.name,
+			"bom_no": bom_no,
+			"fg_completed_qty": "1",
+			"total_fixed_cost": 1000
+		})
+		stock_entry.get_items()
+		fg_rate = [d.amount for d in stock_entry.get("mtn_details") if d.item_code=="_Test FG Item 2"][0]
+		self.assertEqual(fg_rate, 1200.00)
 
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])
