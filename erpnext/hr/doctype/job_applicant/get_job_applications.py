@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, cint
-from frappe.utils.email_lib.receive import POP3Mailbox
+from frappe.email.receive import POP3Mailbox
 from frappe.core.doctype.communication.communication import _make
 
 class JobsMailbox(POP3Mailbox):	

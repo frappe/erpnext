@@ -185,7 +185,7 @@ class SalarySlip(TransactionBase):
 
 
 	def send_mail_funct(self):
-		from frappe.utils.email_lib import sendmail
+		from frappe.email import sendmail
 
 		receiver = frappe.db.get_value("Employee", self.employee, "company_email")
 		if receiver:

@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.core.doctype.custom_field.custom_field import create_custom_field_if_values_exist
+from frappe.custom.doctype.custom_field.custom_field import create_custom_field_if_values_exist
 
 def execute():
 	frappe.reload_doc("stock", "doctype", "purchase_receipt")

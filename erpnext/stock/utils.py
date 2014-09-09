@@ -6,7 +6,7 @@ from frappe import _
 import json
 from frappe.utils import flt, cstr, nowdate, add_days, cint
 from frappe.defaults import get_global_default
-from frappe.utils.email_lib import sendmail
+from frappe.email import sendmail
 from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
