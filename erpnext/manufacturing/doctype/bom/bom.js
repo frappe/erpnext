@@ -150,12 +150,11 @@ erpnext.bom.calculate_op_cost = function(doc) {
 
 erpnext.bom.calculate_fixed_cost = function(doc) {
 	var op = doc.bom_operations || [];
-	total_fixed_cost = 0;
+	var total_fixed_cost = 0;
 	for(var i=0;i<op.length;i++) {
 		total_fixed_cost += flt(op[i].fixed_cycle_cost);
 	}
-	doc.total_fixed_cost = total_fixed_cost;
-	refresh_field('total_fixed_cost');
+	cur_frm.set_value("total_fixed_cost", total_fixed_cost);
 	doc.total_cost = flt(total_fixed_cost) + flt(doc.total_variable_cost);
 	refresh_field('total_cost');
 }
