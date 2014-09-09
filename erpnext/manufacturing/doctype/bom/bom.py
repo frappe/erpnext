@@ -288,7 +288,7 @@ class BOM(Document):
 		fixed_cost = 0
 		for d in self.get('bom_operations'):
 			if d.workstation:
-				fixed_cost += flt(frappe.db.get_value("Workstation",d.workstation,"fixed_cycle_cost"))
+				fixed_cost += flt(frappe.db.get_value("Workstation", d.workstation, "fixed_cycle_cost"))
 		self.total_fixed_cost = fixed_cost
 
 
