@@ -18,6 +18,9 @@ class JournalVoucher(AccountsController):
 		self.credit_days_global = -1
 		self.is_approving_authority = -1
 
+	def get_feed(self):
+		return self.voucher_type
+
 	def validate(self):
 		if not self.is_opening:
 			self.is_opening='No'

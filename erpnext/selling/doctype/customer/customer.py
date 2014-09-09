@@ -12,6 +12,8 @@ from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import create_party_account
 
 class Customer(TransactionBase):
+	def get_feed(self):
+		return self.customer_name
 
 	def autoname(self):
 		cust_master_name = frappe.defaults.get_global_default('cust_master_name')

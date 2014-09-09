@@ -20,7 +20,6 @@ notification_config = "erpnext.startup.notifications.get_notification_config"
 dump_report_map = "erpnext.startup.report_data_map.data_map"
 update_website_context = "erpnext.startup.webutils.update_website_context"
 
-on_session_creation = "erpnext.startup.event_handlers.on_session_creation"
 before_tests = "erpnext.setup.utils.before_tests"
 
 website_generators = ["Item Group", "Item", "Sales Partner"]
@@ -28,24 +27,15 @@ website_generators = ["Item Group", "Item", "Sales Partner"]
 standard_queries = "Customer:erpnext.selling.doctype.customer.customer.get_customer_list"
 
 permission_query_conditions = {
-		"Feed": "erpnext.home.doctype.feed.feed.get_permission_query_conditions",
 		"Note": "erpnext.utilities.doctype.note.note.get_permission_query_conditions"
 	}
 
 has_permission = {
-		"Feed": "erpnext.home.doctype.feed.feed.has_permission",
 		"Note": "erpnext.utilities.doctype.note.note.has_permission"
 	}
 
 
 doc_events = {
-	"*": {
-		"on_update": "erpnext.home.update_feed",
-		"on_submit": "erpnext.home.update_feed"
-	},
-	"Comment": {
-		"on_update": "erpnext.home.make_comment_feed"
-	},
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_qty",
 		"on_cancel": "erpnext.stock.doctype.material_request.material_request.update_completed_qty"

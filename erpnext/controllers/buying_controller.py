@@ -18,6 +18,10 @@ class BuyingController(StockController):
 				"other_charges": "templates/print_formats/includes/taxes.html",
 			}
 
+	def get_feed(self):
+		return _("From {0} | {1} {2}").format(self.supplier_name, self.currency,
+			self.grand_total_import)
+
 	def validate(self):
 		super(BuyingController, self).validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:

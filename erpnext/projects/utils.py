@@ -12,7 +12,7 @@ def get_time_log_list(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def query_task(doctype, txt, searchfield, start, page_len, filters):
-	from frappe.widgets.reportview import build_match_conditions
+	from frappe.desk.reportview import build_match_conditions
 	
 	search_string = "%%%s%%" % txt
 	order_by_string = "%s%%" % txt

@@ -7,13 +7,6 @@ def get_data():
 			"icon": "icon-money",
 			"type": "module"
 		},
-		"Activity": {
-			"color": "#e67e22",
-			"icon": "icon-play",
-			"label": _("Activity"),
-			"link": "activity",
-			"type": "page"
-		},
 		"Buying": {
 			"color": "#c0392b",
 			"icon": "icon-shopping-cart",
@@ -29,14 +22,6 @@ def get_data():
 			"color": "#7f8c8d",
 			"icon": "icon-cogs",
 			"type": "module"
-		},
-		"Notes": {
-			"color": "#95a5a6",
-			"doctype": "Note",
-			"icon": "icon-file-alt",
-			"label": _("Notes"),
-			"link": "List/Note",
-			"type": "list"
 		},
 		"POS": {
 			"color": "#589494",

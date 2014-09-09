@@ -12,6 +12,8 @@ from frappe.utils import today
 from erpnext.utilities.transaction_base import TransactionBase
 
 class CustomerIssue(TransactionBase):
+	def get_feed(self):
+		return _("{0}: From {1}").format(self.status, self.customer_name)
 
 	def validate(self):
 		if session['user'] != 'Guest' and not self.customer:

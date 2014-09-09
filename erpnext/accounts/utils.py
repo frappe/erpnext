@@ -7,7 +7,7 @@ import frappe
 from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
 from frappe import throw, _
 from frappe.utils import formatdate
-import frappe.widgets.reportview
+import frappe.desk.reportview
 
 class FiscalYearError(frappe.ValidationError): pass
 class BudgetError(frappe.ValidationError): pass

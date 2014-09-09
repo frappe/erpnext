@@ -1,1 +1,0 @@
-User who can access / edit the parent Note.

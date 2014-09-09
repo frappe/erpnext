@@ -26,6 +26,10 @@ form_grid_templates = {
 
 class StockEntry(StockController):
 	fname = 'mtn_details'
+
+	def get_feed(self):
+		return _("From {0} to {1}").format(self.from_warehouse, self.to_warehouse)
+
 	def onload(self):
 		if self.docstatus==1:
 			for item in self.get(self.fname):

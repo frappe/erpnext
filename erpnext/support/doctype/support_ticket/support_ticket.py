@@ -3,11 +3,14 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 
 from erpnext.utilities.transaction_base import TransactionBase
 from frappe.utils import now, extract_email_id
 
 class SupportTicket(TransactionBase):
+	def get_feed(self):
+		return "{0}: {1}".format(_(self.status, self.subject))
 
 	def get_sender(self, comm):
 		return frappe.db.get_value('Support Email Settings',None,'support_email')
@@ -30,7 +33,7 @@ class SupportTicket(TransactionBase):
 		self.set_lead_contact(self.raised_by)
 
 		if self.status == "Closed":
-			from frappe.widgets.form.assign_to import clear
+			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
 
 	def set_lead_contact(self, email_id):

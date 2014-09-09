@@ -18,6 +18,10 @@ class SellingController(StockController):
 				"other_charges": "templates/print_formats/includes/taxes.html",
 			}
 
+	def get_feed(self):
+		return _("To {0} | {1} {2}").format(self.customer_name, self.currency,
+			self.grand_total_export)
+
 	def onload(self):
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
 			for item in self.get(self.fname):

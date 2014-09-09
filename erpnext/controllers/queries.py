@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.widgets.reportview import get_match_cond
+from frappe.desk.reportview import get_match_cond
 from frappe.model.db_query import DatabaseQuery
 
 def get_filters_cond(doctype, filters, conditions):
@@ -276,7 +276,7 @@ def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 	if searchfield and txt:
 		filter_list.append([doctype, searchfield, "like", "%%%s%%" % txt])
 
-	return frappe.widgets.reportview.execute("Account", filters = filter_list,
+	return frappe.desk.reportview.execute("Account", filters = filter_list,
 		fields = ["name", "parent_account"],
 		limit_start=start, limit_page_length=page_len, as_list=True)
 
