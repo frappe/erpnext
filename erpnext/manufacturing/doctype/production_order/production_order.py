@@ -58,7 +58,7 @@ class ProductionOrder(Document):
 
 	def set_fixed_cost(self):
 		if self.total_fixed_cost==None:
-			self.total_fixed_cost = frappe.db.get_value("BOM",self.bom_no,"total_fixed_cost")
+			self.total_fixed_cost = frappe.db.get_value("BOM", self.bom_no, "total_fixed_cost")
 
 	def validate_production_order_against_so(self):
 		# already ordered qty
