@@ -135,7 +135,7 @@ class NamingSeries(Document):
 			msgprint(_("Please select prefix first"))
 
 def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True):
-	from frappe.core.doctype.property_setter.property_setter import make_property_setter
+	from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 	if naming_series:
 		make_property_setter(doctype, "naming_series", "hidden", 0, "Check")
 		make_property_setter(doctype, "naming_series", "reqd", 1, "Check")

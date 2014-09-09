@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint
 from frappe.model.document import Document
-from frappe.utils.email_lib.receive import POP3Mailbox
+from frappe.email.receive import POP3Mailbox
 import _socket, poplib
 
 class SupportEmailSettings(Document):

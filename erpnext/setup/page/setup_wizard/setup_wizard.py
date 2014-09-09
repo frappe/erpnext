@@ -8,7 +8,7 @@ from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.utils.file_manager import save_file
 from frappe.translate import set_default_language, get_dict, get_lang_dict, send_translations
-from frappe.country_info import get_country_info
+from frappe.geo.country_info import get_country_info
 from frappe.utils.nestedset import get_root_of
 from default_website import website_maker
 import install_fixtures

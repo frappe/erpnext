@@ -9,7 +9,7 @@ from frappe.utils import fmt_money, formatdate, now_datetime, cstr, esc, \
 from frappe.utils.dateutils import datetime_in_user_format
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
-from frappe.utils.email_lib import sendmail
+from frappe.email import sendmail
 from frappe.core.doctype.user.user import STANDARD_USERS
 
 content_sequence = [

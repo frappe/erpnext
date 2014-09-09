@@ -57,7 +57,7 @@ def take_backups_gdrive():
 		send_email(False, "Google Drive", error_message)
 
 def send_email(success, service_name, error_status=None):
-	from frappe.utils.email_lib import sendmail
+	from frappe.email import sendmail
 	if success:
 		subject = "Backup Upload Successful"
 		message ="""<h3>Backup Uploaded Successfully</h3><p>Hi there, this is just to inform you 
