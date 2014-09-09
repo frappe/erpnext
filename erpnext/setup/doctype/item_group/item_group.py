@@ -102,7 +102,8 @@ def invalidate_cache_for(doc, item_group=None):
 	if not item_group:
 		item_group = doc.name
 
-	for i in get_parent_item_groups(item_group):
-		route = doc.get_route()
+	for d in get_parent_item_groups(item_group):
+		d = frappe.get_doc("Item Group", d.name)
+		route = d.get_route()
 		if route:
 			clear_cache(route)

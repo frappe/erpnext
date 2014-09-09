@@ -374,5 +374,5 @@ def invalidate_cache_for_item(doc):
 	for item_group in website_item_groups:
 		invalidate_cache_for(doc, item_group)
 
-	if doc.get("old_item_group"):
+	if doc.get("old_item_group") and doc.get("old_item_group") != doc.item_group:
 		invalidate_cache_for(doc, doc.old_item_group)
