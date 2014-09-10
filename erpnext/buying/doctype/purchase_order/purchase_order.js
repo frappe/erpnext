@@ -205,7 +205,7 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 		cur_frm.email_doc(frappe.boot.notification_settings.purchase_order_message);
 	}
 }
-//added by sambhaji
+
 
 cur_frm.cscript.is_recurring = function(doc, dt, dn) {
 	// set default values for recurring orders
@@ -238,7 +238,7 @@ cur_frm.cscript.from_date = function(doc, dt, dn) {
 	}
 }
 
-//end of added by sambhaji
+
 cur_frm.cscript.send_sms = function() {
 	frappe.require("assets/erpnext/js/sms_manager.js");
 	var sms_man = new SMSManager(cur_frm.doc);

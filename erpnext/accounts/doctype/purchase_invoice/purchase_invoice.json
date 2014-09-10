@@ -800,6 +800,7 @@
   }, 
   {
    "allow_on_submit": 1, 
+   "depends_on": "eval:doc.is_recurring==1", 
    "description": "Select the period when the invoice will be generated automatically", 
    "fieldname": "recurring_type", 
    "fieldtype": "Select", 

@@ -232,7 +232,6 @@ cur_frm.fields_dict['entries'].grid.get_field('project_name').get_query = functi
 	}
 }
 
-//added by sambhaji
 
 
 cur_frm.cscript.is_recurring = function(doc, dt, dn) {
@@ -267,7 +266,7 @@ cur_frm.cscript.from_date = function(doc, dt, dn) {
 	}
 }
 
-//end of added by sambhajii
+
 
 cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 	if(doc.select_print_heading){
