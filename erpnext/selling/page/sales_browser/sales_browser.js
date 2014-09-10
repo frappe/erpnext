@@ -8,7 +8,7 @@ pscript['onload_Sales Browser'] = function(wrapper){
 
 	wrapper.appframe.add_module_icon("Selling")
 
-	wrapper.appframe.set_title_right('Refresh', function() {
+	wrapper.appframe.set_title_right(__('Refresh'), function() {
 			wrapper.make_tree();
 		});
 
@@ -44,7 +44,7 @@ pscript['onshow_Sales Browser'] = function(wrapper){
 	// set route
 	var ctype = frappe.get_route()[1] || 'Territory';
 
-	wrapper.appframe.set_title(ctype+' Tree')
+	wrapper.appframe.set_title(__('{0} Tree',[__(ctype)]));
 
 	if(erpnext.sales_chart && erpnext.sales_chart.ctype != ctype) {
 		wrapper.make_tree();
@@ -64,7 +64,7 @@ erpnext.SalesChart = Class.extend({
 
 		this.tree = new frappe.ui.Tree({
 			parent: $(parent),
-			label: root,
+			label: __(root),
 			args: {ctype: ctype},
 			method: 'erpnext.selling.page.sales_browser.sales_browser.get_children',
 			toolbar: [
@@ -112,20 +112,20 @@ erpnext.SalesChart = Class.extend({
 
 		var fields = [
 			{fieldtype:'Data', fieldname: 'name_field',
-				label:'New ' + me.ctype + ' Name', reqd:true},
-			{fieldtype:'Select', fieldname:'is_group', label:'Group Node', options:'No\nYes',
+				label:__('New {0} Name',[me.ctype]), reqd:true},
+			{fieldtype:'Select', fieldname:'is_group', label:__('Group Node'), options:'No\nYes',
 				description: __("Further nodes can be only created under 'Group' type nodes")},
-			{fieldtype:'Button', fieldname:'create_new', label:'Create New' }
+			{fieldtype:'Button', fieldname:'create_new', label:__('Create New') }
 		]
 
 		if(me.ctype == "Sales Person") {
-			fields.splice(-1, 0, {fieldtype:'Link', fieldname:'employee', label:'Employee',
+			fields.splice(-1, 0, {fieldtype:'Link', fieldname:'employee', label:__('Employee'),
 				options:'Employee', description: __("Please enter Employee Id of this sales parson")});
 		}
 
 		// the dialog
 		var d = new frappe.ui.Dialog({
-			title: __('New ') + __(me.ctype),
+			title: __('New {0}',[__(me.ctype)]),
 			fields: fields
 		})
 
