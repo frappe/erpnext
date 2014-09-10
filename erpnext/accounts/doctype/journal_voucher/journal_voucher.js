@@ -263,3 +263,22 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 		})
 	}
 }
+
+frappe.ui.form.on("Journal Voucher Detail", "party", function(frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	if(!d.account && d.party_type && d.party) {
+		return frappe.call({
+			method: "erpnext.accounts.party.get_party_account",
+			args: {
+				company: frm.doc.company,
+				party_type: d.party_type,
+				party: d.party
+			},
+			callback: function(r) {
+				if(!r.exc && r.message) {
+					frappe.model.set_value(cdt, cdn, "account", r.message);
+				}
+			}
+		});
+	}
+})

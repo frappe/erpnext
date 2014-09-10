@@ -172,10 +172,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		})
 	},
 
-	debit_to: function() {
-		this.customer();
-	},
-
 	allocated_amount: function() {
 		this.calculate_total_advance("Sales Invoice", "advance_adjustment_details");
 		this.frm.refresh_fields();
@@ -306,7 +302,8 @@ cur_frm.fields_dict.debit_to.get_query = function(doc) {
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 	return{
 		filters: {
-			'report_type': 'Balance Sheet',
+			'account_type': 'Receivable',
+			'root_type': 'Asset',
 			'group_or_ledger': 'Ledger',
 			'company': doc.company
 		}

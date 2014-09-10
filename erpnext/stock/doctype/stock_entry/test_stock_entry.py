@@ -332,7 +332,7 @@ class TestStockEntry(unittest.TestCase):
 
 		si = frappe.get_doc(si_doc)
 		si.posting_date = dn.posting_date
-		si.debit_to = "_Test Customer - _TC"
+		si.debit_to = "_Test Receivable - _TC"
 		for d in si.get("entries"):
 			d.income_account = "Sales - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
@@ -425,7 +425,7 @@ class TestStockEntry(unittest.TestCase):
 
 		si = make_sales_invoice(so.name)
 		si.posting_date = dn.posting_date
-		si.debit_to = "_Test Customer - _TC"
+		si.debit_to = "_Test Receivable - _TC"
 		for d in si.get("entries"):
 			d.income_account = "Sales - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
@@ -471,7 +471,7 @@ class TestStockEntry(unittest.TestCase):
 
 		pi = frappe.get_doc(pi_doc)
 		pi.posting_date = pr.posting_date
-		pi.credit_to = "_Test Supplier - _TC"
+		pi.credit_to = "_Test Payable - _TC"
 		for d in pi.get("entries"):
 			d.expense_account = "_Test Account Cost for Goods Sold - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
@@ -574,7 +574,7 @@ class TestStockEntry(unittest.TestCase):
 
 		pi = frappe.get_doc(pi_doc)
 		pi.posting_date = pr.posting_date
-		pi.credit_to = "_Test Supplier - _TC"
+		pi.credit_to = "_Test Payable - _TC"
 		for d in pi.get("entries"):
 			d.expense_account = "_Test Account Cost for Goods Sold - _TC"
 			d.cost_center = "_Test Cost Center - _TC"

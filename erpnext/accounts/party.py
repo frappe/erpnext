@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe import _, msgprint
+from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
 from frappe.utils import add_days, getdate, formatdate, flt
 from erpnext.utilities.doctype.address.address import get_address_display
@@ -116,8 +116,6 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 
 	if party:
 		account = get_party_account(company, party, party_type)
-	elif account:
-		party = frappe.db.get_value('Account', account, 'master_name')
 
 	account_fieldname = "debit_to" if party_type=="Customer" else "credit_to"
 
@@ -128,15 +126,26 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 	}
 	return out
 
+@frappe.whitelist()
 def get_party_account(company, party, party_type):
 	if not company:
 		frappe.throw(_("Please select company first."))
 
 	if party:
-		acc_head = frappe.db.get_value("Account", {"master_name":party,
-			"master_type": party_type, "company": company})
+		party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
+		party_details = frappe.db.sql("""select p.{0}, pa.account
+			from `tab{1}` p left join `tabParty Account` pa on pa.parent = p.name
+			where p.name = %s""".format(scrub(party_group_doctype), party_type), party)
+		if party_details:
+			party_group, account = party_details[0]
 
-		return acc_head
+		if not account:
+			account = frappe.db.get_value("Party Account",
+				{"parenttype": party_group_doctype, "parent": party_group, "company": company}, "account") or \
+				frappe.db.get_value("Company", company,
+					"default_receivable_account" if party_type=="Customer" else "default_payable_account")
+
+		return account
 
 def get_due_date(posting_date, party_type, party, company):
 	"""Set Due Date = Posting Date + Credit Days"""

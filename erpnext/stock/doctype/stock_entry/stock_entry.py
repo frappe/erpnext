@@ -813,6 +813,8 @@ def make_return_jv_from_sales_invoice(se, ref):
 	# customer account entry
 	parent = {
 		"account": ref.doc.debit_to,
+		"party_type": "Customer",
+		"party": ref.doc.customer,
 		"against_invoice": ref.doc.name,
 	}
 
@@ -879,7 +881,11 @@ def make_return_jv_from_delivery_note(se, ref):
 				children.append(account)
 
 			if not parent:
-				parent = {"account": si.debit_to}
+				parent = {
+					"account": si.debit_to,
+					"party_type": "Customer",
+					"party": si.customer
+				}
 
 			break
 
@@ -933,7 +939,11 @@ def make_return_jv_from_purchase_receipt(se, ref):
 				children.append(account)
 
 			if not parent:
-				parent = {"account": pi.credit_to}
+				parent = {
+					"account": pi.credit_to,
+					"party_type": "Supplier",
+					"party": pi.supplier
+				}
 
 			break
 

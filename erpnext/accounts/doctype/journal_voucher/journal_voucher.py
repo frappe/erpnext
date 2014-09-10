@@ -152,38 +152,36 @@ class JournalVoucher(AccountsController):
 
 	def validate_account_in_against_voucher(self, against_field, doctype):
 		payment_against_voucher = frappe._dict()
-		field_dict = {'Sales Invoice': "Debit To",
-			'Purchase Invoice': "Credit To",
-			'Sales Order': "Customer",
-			'Purchase Order': "Supplier"
+		field_dict = {'Sales Invoice': ["Customer", "Debit To"],
+			'Purchase Invoice': ["Supplier", "Credit To"],
+			'Sales Order': ["Customer"],
+			'Purchase Order': ["Supplier"]
 			}
 
 		for d in self.get("entries"):
 			if d.get(against_field):
 				dr_or_cr = "credit" if against_field in ["against_invoice", "against_sales_order"] \
 					else "debit"
-				if against_field in ["against_invoice", "against_sales_order"] \
-					and flt(d.debit) > 0:
+				if against_field in ["against_invoice", "against_sales_order"] and flt(d.debit) > 0:
 					frappe.throw(_("Row {0}: Debit entry can not be linked with a {1}").format(d.idx, doctype))
 
-				if against_field in ["against_voucher", "against_purchase_order"] \
-					and flt(d.credit) > 0:
+				if against_field in ["against_voucher", "against_purchase_order"] and flt(d.credit) > 0:
 					frappe.throw(_("Row {0}: Credit entry can not be linked with a {1}").format(d.idx, doctype))
 
-				voucher_account = frappe.db.get_value(doctype, d.get(against_field), \
-					scrub(field_dict.get(doctype)))
+				against_voucher = frappe.db.get_value(doctype, d.get(against_field),
+					[scrub(d) for d in field_dict.get(doctype)])
 
-				account_master_name = frappe.db.get_value("Account", d.account, "master_name")
-
-				if against_field in ["against_invoice", "against_voucher"] \
-					and voucher_account != d.account:
-					frappe.throw(_("Row {0}: Account {1} does not match with {2} {3} account") \
-						.format(d.idx, d.account, doctype, field_dict.get(doctype)))
+				if against_field in ["against_invoice", "against_voucher"]:
+					if (against_voucher[0] !=d.party or against_voucher[1] != d.account):
+						frappe.throw(_("Row {0}: Party / Account does not match with \
+							Customer / Debit To in {1}").format(d.idx, doctype))
+					else:
+						payment_against_voucher.setdefault(d.get(against_field), []).append(flt(d.get(dr_or_cr)))
 
 				if against_field in ["against_sales_order", "against_purchase_order"]:
-					if voucher_account != account_master_name:
-						frappe.throw(_("Row {0}: Account {1} does not match with {2} {3} Name") \
-							.format(d.idx, d.account, doctype, field_dict.get(doctype)))
+					if against_voucher != d.party:
+						frappe.throw(_("Row {0}: {1} {2} does not match with {3}") \
+							.format(d.idx, d.party_type, d.party, doctype))
 					elif d.is_advance == "Yes":
 						payment_against_voucher.setdefault(d.get(against_field), []).append(flt(d.get(dr_or_cr)))
 
@@ -420,6 +418,8 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 
 	# credit customer
 	jv.get("entries")[0].account = si.debit_to
+	jv.get("entries")[0].party_type = "Customer"
+	jv.get("entries")[0].party = si.customer
 	jv.get("entries")[0].balance = get_balance_on(si.debit_to)
 	jv.get("entries")[0].credit = si.outstanding_amount
 	jv.get("entries")[0].against_invoice = si.name
@@ -438,6 +438,8 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 
 	# credit supplier
 	jv.get("entries")[0].account = pi.credit_to
+	jv.get("entries")[0].party_type = "Supplier"
+	jv.get("entries")[0].party = pi.supplier
 	jv.get("entries")[0].balance = get_balance_on(pi.credit_to)
 	jv.get("entries")[0].debit = pi.outstanding_amount
 	jv.get("entries")[0].against_voucher = pi.name
@@ -452,7 +454,6 @@ def get_payment_entry(doc):
 
 	jv = frappe.new_doc('Journal Voucher')
 	jv.voucher_type = 'Bank Voucher'
-
 	jv.company = doc.company
 	jv.fiscal_year = doc.fiscal_year
 
