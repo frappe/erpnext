@@ -298,6 +298,14 @@
    "search_index": 0
   }, 
   {
+   "depends_on": "eval:doc.purpose==\"Manufacture/Repack\"", 
+   "fieldname": "total_fixed_cost", 
+   "fieldtype": "Float", 
+   "label": "Total Fixed Cost", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
    "fieldname": "cb1", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
