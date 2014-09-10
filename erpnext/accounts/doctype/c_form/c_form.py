@@ -17,14 +17,18 @@ class CForm(Document):
 				inv = frappe.db.sql("""select c_form_applicable, c_form_no from
 					`tabSales Invoice` where name = %s and docstatus = 1""", d.invoice_no)
 
-				if inv[0][0] != 'Yes':
+				if inv and inv[0][0] != 'Yes':
 					frappe.throw("C-form is not applicable for Invoice: %s" % d.invoice_no)
 
-				elif inv[0][1] and inv[0][1] != self.name:
+				elif inv and inv[0][1] and inv[0][1] != self.name:
 					frappe.throw("""Invoice %s is tagged in another C-form: %s.
 						If you want to change C-form no for this invoice,
 						please remove invoice no from the previous c-form and then try again""" %
 						(d.invoice_no, inv[0][1]))
+
+				elif not inv:
+					frappe.throw("Row %s: Invoice %s is invalid, it might be cancelled / does not exist. \
+						Please enter a valid Invoice" % d.idx, d.invoice_no)
 
 	def on_update(self):
 		"""	Update C-Form No on invoices"""
