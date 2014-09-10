@@ -155,8 +155,6 @@ erpnext.bom.calculate_fixed_cost = function(doc) {
 		total_fixed_cost += flt(op[i].fixed_cycle_cost);
 	}
 	cur_frm.set_value("total_fixed_cost", total_fixed_cost);
-	doc.total_cost = flt(total_fixed_cost) + flt(doc.total_variable_cost);
-	refresh_field('total_cost');
 }
 
 erpnext.bom.calculate_rm_cost = function(doc) {
@@ -169,8 +167,7 @@ erpnext.bom.calculate_rm_cost = function(doc) {
 			{'qty_consumed_per_unit': flt(rm[i].qty)/flt(doc.quantity)}, 'bom_materials');
 		total_rm_cost += amt;
 	}
-	doc.raw_material_cost = total_rm_cost;
-	refresh_field('raw_material_cost');
+	cur_frm.set_value("raw_material_cost", total_rm_cost);
 }
 
 
