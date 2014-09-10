@@ -531,7 +531,7 @@
    "search_index": 0
   }, 
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "fieldname": "select_print_heading", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -577,7 +577,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2014-09-03 11:01:23.159584", 
+ "modified": "2014-09-09 05:35:39.352951", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 

@@ -158,6 +158,7 @@
    "reqd": 1
   }, 
   {
+   "allow_on_submit": 1, 
    "fieldname": "letter_head", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
@@ -183,7 +184,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2014-08-28 03:32:38.865202", 
+ "modified": "2014-09-09 05:35:31.531651", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Application", 
