@@ -852,6 +852,8 @@ class TestStockEntry(unittest.TestCase):
 		stock_entry.get_items()
 		fg_rate = [d.amount for d in stock_entry.get("mtn_details") if d.item_code=="_Test FG Item 2"][0]
 		self.assertEqual(fg_rate, 1200.00)
+		fg_rate = [d.amount for d in stock_entry.get("mtn_details") if d.item_code=="_Test Item"][0]
+		self.assertEqual(fg_rate, 100.00)
 
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])
