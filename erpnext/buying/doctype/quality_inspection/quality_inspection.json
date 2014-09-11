@@ -36,7 +36,7 @@
    "label": "Inspection Type", 
    "oldfieldname": "inspection_type", 
    "oldfieldtype": "Select", 
-   "options": "\nIncoming\nOutgoing\nIn Process", 
+   "options": "\nIncoming\nOutgoing\nManufacture", 
    "permlevel": 0, 
    "reqd": 1
   }, 
@@ -141,6 +141,15 @@
    "search_index": 1
   }, 
   {
+   "depends_on": "eval:doc.inspection_type==\"Manufacture\"", 
+   "fieldname": "stock_entry_no", 
+   "fieldtype": "Link", 
+   "label": "Stock Entry No", 
+   "options": "Stock Entry", 
+   "permlevel": 0, 
+   "reqd": 0
+  }, 
+  {
    "fieldname": "inspected_by", 
    "fieldtype": "Data", 
    "label": "Inspected By", 
@@ -207,7 +216,7 @@
  "icon": "icon-search", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-06-23 07:55:51.183113", 
+ "modified": "2014-09-11 16:07:41.258060", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Quality Inspection", 

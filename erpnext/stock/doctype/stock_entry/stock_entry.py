@@ -7,7 +7,7 @@ import frappe.defaults
 
 from frappe.utils import cstr, cint, flt, comma_or, nowdate
 
-from frappe import _
+from frappe import _, msgprint
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.controllers.queries import get_match_cond
@@ -53,6 +53,7 @@ class StockEntry(StockController):
 		self.validate_fiscal_year()
 		self.validate_valuation_rate()
 		self.set_total_amount()
+		self.validate_quality_inspection()
 
 	def on_submit(self):
 		self.update_stock_ledger()
@@ -622,6 +623,12 @@ class StockEntry(StockController):
 				if mreq_item.item_code != item.item_code or mreq_item.warehouse != item.t_warehouse:
 					frappe.throw(_("Item or Warehouse for row {0} does not match Material Request").format(item.idx),
 						frappe.MappingMismatchError)
+	
+	def validate_quality_inspection(self):
+		if self.purpose == 'Manufacture/Repack':
+			for item in self.get("mtn_details"):
+				if frappe.db.get_value("Item",item.item_code,"inspection_required") =="Yes":
+					msgprint(_("Quality Inspection is required for Item: {0}").format(item.item_code))
 
 @frappe.whitelist()
 def get_party_details(ref_dt, ref_dn):
