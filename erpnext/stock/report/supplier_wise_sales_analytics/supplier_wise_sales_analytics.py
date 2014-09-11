@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.utils import flt
 
 def execute(filters=None):
@@ -40,12 +41,12 @@ def execute(filters=None):
 def get_columns(filters):
 	"""return columns based on filters"""
 	
-	columns = ["Item:Link/Item:100"] + ["Item Name::100"] + \
-	["Description::150"] + ["UOM:Link/UOM:90"] + \
-	["Consumed Qty:Float:110"] + ["Consumed Amount:Currency:130"] + \
-	["Delivered Qty:Float:110"] + ["Delivered Amount:Currency:130"] + \
-	["Total Qty:Float:110"] + ["Total Amount:Currency:130"] + \
-	["Supplier(s)::250"]
+	columns = [_("Item") + ":Link/Item:100"] + [_("Item Name") + "::100"] + \
+	[_("Description") + "::150"] + [_("UOM") + ":Link/UOM:90"] + \
+	[_("Consumed Qty") + ":Float:110"] + [_("Consumed Amount") + ":Currency:130"] + \
+	[_("Delivered Qty") + ":Float:110"] + [_("Delivered Amount") + ":Currency:130"] + \
+	[_("Total Qty") + ":Float:110"] + [_("Total Amount") + ":Currency:130"] + \
+	[_("Supplier(s)") + "::250"]
 
 	return columns
 
