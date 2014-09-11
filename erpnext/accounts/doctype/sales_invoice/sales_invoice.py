@@ -103,7 +103,7 @@ class SalesInvoice(SellingController):
 
 		self.update_c_form()
 		self.update_time_log_batch(self.name)
-		convert_to_recurring(self, "RECINV.#####", self.posting_date)
+		convert_to_recurring(self, self.posting_date)
 
 	def before_cancel(self):
 		self.update_time_log_batch(None)
@@ -145,7 +145,7 @@ class SalesInvoice(SellingController):
 
 	def on_update_after_submit(self):
 		validate_recurring_document(self)
-		convert_to_recurring(self, "RECINV.#####", self.posting_date)
+		convert_to_recurring(self, self.posting_date)
 
 	def get_portal_page(self):
 		return "invoice" if self.docstatus==1 else None

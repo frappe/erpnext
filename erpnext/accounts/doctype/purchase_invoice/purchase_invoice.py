@@ -265,11 +265,11 @@ class PurchaseInvoice(BuyingController):
 		self.update_against_document_in_jv()
 		self.update_prevdoc_status()
 		self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
-		convert_to_recurring(self, "RECPI.#####", self.posting_date)
+		convert_to_recurring(self, self.posting_date)
 
 	def on_update_after_submit(self):
 		validate_recurring_document(self)
-		convert_to_recurring(self, "RECPI.#####", self.posting_date)
+		convert_to_recurring(self, self.posting_date)
 
 	def make_gl_entries(self):
 		auto_accounting_for_stock = \

@@ -179,7 +179,7 @@ class PurchaseOrder(BuyingController):
 
 		frappe.db.set(self,'status','Submitted')
 		
-		convert_to_recurring(self, "SO/REP/.#####", self.transaction_date)
+		convert_to_recurring(self, self.transaction_date)
 
 	def on_cancel(self):
 		pc_obj = frappe.get_doc('Purchase Common')
@@ -206,7 +206,7 @@ class PurchaseOrder(BuyingController):
 
 	def on_update_after_submit(self):
 		validate_recurring_document(self)
-		convert_to_recurring(self, "SO/REP/.#####", self.transaction_date)
+		convert_to_recurring(self, self.transaction_date)
 
 def set_missing_values(source, target):
 	target.ignore_pricing_rule = 1

@@ -166,7 +166,7 @@ class SalesOrder(SellingController):
 		self.update_prevdoc_status('submit')
 		frappe.db.set(self, 'status', 'Submitted')
 		
-		convert_to_recurring(self, "SO/REC/.#####", self.transaction_date)
+		convert_to_recurring(self, self.transaction_date)
 
 	def on_cancel(self):
 		# Cannot cancel stopped SO
@@ -257,7 +257,7 @@ class SalesOrder(SellingController):
 
 	def on_update_after_submit(self):
 		validate_recurring_document(self)
-		convert_to_recurring(self, "SO/REC/.#####", self.transaction_date)
+		convert_to_recurring(self, self.transaction_date)
 
 
 @frappe.whitelist()

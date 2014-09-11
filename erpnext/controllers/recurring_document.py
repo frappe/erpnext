@@ -2,9 +2,14 @@ from __future__ import unicode_literals
 import frappe
 import frappe.utils
 import frappe.defaults
-from frappe.utils import cint, cstr, getdate, nowdate, get_first_day, get_last_day
+
+from frappe.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, \
+	get_first_day, get_last_day, comma_and
 from frappe.model.naming import make_autoname
+
 from frappe import _, msgprint, throw
+from erpnext.accounts.party import get_party_account, get_due_date, get_party_details
+from frappe.model.mapper import get_mapped_doc
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 
@@ -46,7 +51,7 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 
 					frappe.db.begin()
 					frappe.db.sql("update `tab%s` \
-						set is_recurring = 0 where name = %s" % (doctype, '%s'),
+						set is_recurring = 0 where name = %s" % (doctype, '%s'), 
 						(ref_document))
 					notify_errors(ref_document, doctype, ref_wrapper.customer, ref_wrapper.owner)
 					frappe.db.commit()
@@ -152,18 +157,18 @@ def validate_recurring_document(doc):
 		elif not (doc.from_date and doc.to_date):
 			throw(_("Period From and Period To dates mandatory for recurring %s") % doc.doctype)
 
-def convert_to_recurring(doc, autoname, posting_date):
-	if doc.is_recurring:
-		if not doc.recurring_id:
-			frappe.db.set(doc, "recurring_id",
-				make_autoname(autoname))
+#
+def convert_to_recurring(doc, posting_date):
+    if doc.is_recurring:
+        if not doc.recurring_id:
+            frappe.db.set(doc, "recurring_id", doc.name)
 
-		set_next_date(doc, posting_date)
+        set_next_date(doc, posting_date)
 
-	elif doc.recurring_id:
-		frappe.db.sql("""update `tab%s`
-			set is_recurring = 0
-			where recurring_id = %s""" % (doc.doctype, '%s'), (doc.recurring_id))
+    elif doc.recurring_id:
+        frappe.db.sql("""update `tab%s` set is_recurring = 0
+            where recurring_id = %s""" % (doc.doctype, '%s'), (doc.recurring_id))
+#
 
 def validate_notification_email_id(doc):
 	if doc.notification_email_address:
