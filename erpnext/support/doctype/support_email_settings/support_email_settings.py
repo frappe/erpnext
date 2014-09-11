@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint
 from frappe.model.document import Document
-from frappe.email.receive import POP3Mailbox
+from frappe.email.receive import POP3Server
 import _socket, poplib
 
 class SupportEmailSettings(Document):
@@ -32,7 +32,7 @@ class SupportEmailSettings(Document):
 				frappe.msgprint(err_msg)
 				raise
 
-			pop_mb = POP3Mailbox(inc_email)
+			pop_mb = POP3Server(inc_email)
 
 			try:
 				pop_mb.connect()

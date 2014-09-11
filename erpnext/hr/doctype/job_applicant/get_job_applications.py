@@ -4,10 +4,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, cint
-from frappe.email.receive import POP3Mailbox
+from frappe.email.receive import POP3Server
 from frappe.core.doctype.communication.communication import _make
 
-class JobsMailbox(POP3Mailbox):	
+class JobsMailbox(POP3Server):	
 	def setup(self, args=None):
 		self.settings = args or frappe.get_doc("Jobs Email Settings", "Jobs Email Settings")
 		

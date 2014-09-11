@@ -5,10 +5,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, cint, decode_dict, today
 from frappe.email import sendmail
-from frappe.email.receive import POP3Mailbox
+from frappe.email.receive import POP3Server
 from frappe.core.doctype.communication.communication import _make
 
-class SupportMailbox(POP3Mailbox):
+class SupportMailbox(POP3Server):
 	def setup(self, args=None):
 		self.email_settings = frappe.get_doc("Support Email Settings", "Support Email Settings")
 		self.settings = args or frappe._dict({
