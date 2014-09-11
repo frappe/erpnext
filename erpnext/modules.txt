@@ -1,6 +1,5 @@
 Accounts
 Buying
-Home
 HR
 Manufacturing
 Projects
