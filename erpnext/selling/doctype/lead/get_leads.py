@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, cint
-from frappe.email.receive import POP3Mailbox
+from frappe.email.receive import POP3Server
 from frappe.core.doctype.communication.communication import _make
 
 def add_sales_communication(subject, content, sender, real_name, mail=None, 
@@ -37,7 +37,7 @@ def add_sales_communication(subject, content, sender, real_name, mail=None,
 		doc = frappe.get_doc(parent_doctype, parent_name)
 		mail.save_attachments_in_doc(doc)
 
-class SalesMailbox(POP3Mailbox):	
+class SalesMailbox(POP3Server):	
 	def setup(self, args=None):
 		self.settings = args or frappe.get_doc("Sales Email Settings", "Sales Email Settings")
 		

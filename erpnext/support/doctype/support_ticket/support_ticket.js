@@ -11,7 +11,6 @@ cur_frm.add_fetch("customer", "customer_name", "customer_name")
 $.extend(cur_frm.cscript, {
 	refresh: function(doc) {
 		erpnext.toggle_naming_series();
-		cur_frm.cscript.make_listing(doc);
 		if(!doc.__islocal) {
 			if(cur_frm.fields_dict.status.get_status()=="Write") {
 				if(doc.status!='Closed') cur_frm.add_custom_button('Close',
@@ -24,28 +23,6 @@ $.extend(cur_frm.cscript, {
 			cur_frm.toggle_display("description", false);
 		}
 		refresh_field('status');
-	},
-
-	make_listing: function(doc) {
-		var wrapper = cur_frm.fields_dict['thread_html'].wrapper;
-
-		var comm_list = frappe.get_list("Communication", {"parent": doc.name, "parenttype":"Support Ticket"})
-
-		if(!comm_list.length) {
-			comm_list.push({
-				"sender": doc.raised_by,
-				"creation": doc.creation,
-				"subject": doc.subject,
-				"content": doc.description});
-		}
-
-		cur_frm.communication_view = new frappe.views.CommunicationList({
-			list: comm_list,
-			parent: wrapper,
-			doc: doc,
-			recipients: doc.raised_by
-		})
-
 	},
 
 	'Close Ticket': function() {
