@@ -43,16 +43,16 @@
   },
   {
    "fieldname": "party_type",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Party Type",
-   "options": "\nCustomer\nSupplier",
+   "options": "DocType",
    "permlevel": 0
   },
   {
    "fieldname": "party",
-   "fieldtype": "Link",
+   "fieldtype": "Dynamic Link",
    "label": "Party",
-   "options": "[Select]",
+   "options": "party_type",
    "permlevel": 0
   },
   {
@@ -188,7 +188,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2014-08-26 17:56:34.294770",
+ "modified": "2014-09-11 18:33:53.705093",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Voucher Detail",

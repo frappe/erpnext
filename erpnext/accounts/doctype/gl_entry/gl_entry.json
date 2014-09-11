@@ -49,16 +49,16 @@
   }, 
   {
    "fieldname": "party_type", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "label": "Party Type", 
-   "options": "\nCustomer\nSupplier", 
+   "options": "DocType", 
    "permlevel": 0
   }, 
   {
    "fieldname": "party", 
-   "fieldtype": "Link", 
+   "fieldtype": "Dynamic Link", 
    "label": "Party", 
-   "options": "[Select]", 
+   "options": "party_type", 
    "permlevel": 0
   }, 
   {
@@ -203,7 +203,7 @@
  "icon": "icon-list", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-08-26 17:56:49.147121", 
+ "modified": "2014-09-11 18:35:22.822064", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "GL Entry", 

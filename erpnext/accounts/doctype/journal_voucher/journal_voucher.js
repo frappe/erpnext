@@ -41,17 +41,11 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 			});
 		});
 
-		me.frm.set_query("party", "entries", function(doc, cdt, cdn) {
-			var jvd = frappe.get_doc(cdt, cdn);
-			if(!jvd.party_type) {
-				frappe.throw(__("Please enter Party Type first"));
-			} else {
-				return {
-					doctype: jvd.party_type
-				}
+		me.frm.set_query("party_type", "entries", function(doc, cdt, cdn) {
+			return {
+				filters: {"name": ["in", ["Customer", "Supplier"]]}
 			}
 		});
-
 
 		$.each([["against_voucher", "Purchase Invoice", "supplier"],
 			["against_invoice", "Sales Invoice", "customer"]], function(i, opts) {
