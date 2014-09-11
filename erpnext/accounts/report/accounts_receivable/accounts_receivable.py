@@ -20,13 +20,13 @@ class AccountsReceivableReport(object):
 		
 	def get_columns(self, customer_naming_by):
 		columns = [
-			"Posting Date:Date:80", "Account:Link/Account:150",
-			"Voucher Type::110", "Voucher No::120", "::30",
-			"Due Date:Date:80",  
-			"Invoiced Amount:Currency:100", "Payment Received:Currency:100", 
-			"Outstanding Amount:Currency:100", "Age:Int:50", "0-30:Currency:100",
-			"30-60:Currency:100", "60-90:Currency:100", "90-Above:Currency:100",
-			"Customer:Link/Customer:200"
+			_("Posting Date") + ":Date:80", _("Account") + ":Link/Account:150",
+			_("Voucher Type") + "::110", _("Voucher No") + "::120", "::30",
+			_("Due Date") + ":Date:80",  
+			_("Invoiced Amount") + ":Currency:100", _("Payment Received") + ":Currency:100", 
+			_("Outstanding Amount") + ":Currency:100", _("Age") + ":Int:50", "0-30:Currency:100",
+			"30-60:Currency:100", "60-90:Currency:100", _("90-Above") + ":Currency:100",
+			_("Customer") + ":Link/Customer:200"
 		]
 
 		if customer_naming_by == "Naming Series":

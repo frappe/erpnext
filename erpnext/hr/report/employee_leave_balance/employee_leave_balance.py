@@ -39,13 +39,13 @@ def execute(filters=None):
 			','.join(['%s']*len(employee_names)), employee_names, as_dict=True)
 
 	columns = [
-		"Fiscal Year", "Employee:Link/Employee:150", "Employee Name::200", "Department::150"
+		_("Fiscal Year"), _("Employee") + ":Link/Employee:150", _("Employee Name") + "::200", _("Department") +"::150"
 	]
 
 	for leave_type in leave_types:
-		columns.append(leave_type + " Allocated:Float")
-		columns.append(leave_type + " Taken:Float")
-		columns.append(leave_type + " Balance:Float")
+		columns.append(_(leave_type) + " " + _("Allocated") + ":Float")
+		columns.append(_(leave_type) + " " + _("Taken") + ":Float")
+		columns.append(_(leave_type) + " " + _("Balance") + ":Float")
 
 	data = {}
 	for d in allocations:

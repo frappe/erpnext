@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.utils import flt
 from erpnext.stock.utils import get_buying_amount, get_sales_bom_buying_amount
 
@@ -13,11 +14,11 @@ def execute(filters=None):
 	source = get_source_data(filters)
 	item_sales_bom = get_item_sales_bom()
 	
-	columns = ["Delivery Note/Sales Invoice::120", "Link::30", "Posting Date:Date", "Posting Time", 
-		"Item Code:Link/Item", "Item Name", "Description", "Warehouse:Link/Warehouse",
-		"Qty:Float", "Selling Rate:Currency", "Avg. Buying Rate:Currency", 
-		"Selling Amount:Currency", "Buying Amount:Currency",
-		"Gross Profit:Currency", "Gross Profit %:Percent", "Project:Link/Project"]
+	columns = [__("Delivery Note/Sales Invoice") + "::120", _("Link") + "::30", _("Posting Date") + ":Date", _("Posting Time"), 
+		_("Item Code") + ":Link/Item", _("Item Name"), _("Description"), _("Warehouse") + ":Link/Warehouse",
+		_("Qty") + ":Float", _("Selling Rate") + ":Currency", _("Avg. Buying Rate") + ":Currency", 
+		_("Selling Amount") + ":Currency", _("Buying Amount") + ":Currency",
+		_("Gross Profit") + ":Currency", _("Gross Profit %") + ":Percent", _("Project") + ":Link/Project"]
 	data = []
 	for row in source:
 		selling_amount = flt(row.base_amount)
