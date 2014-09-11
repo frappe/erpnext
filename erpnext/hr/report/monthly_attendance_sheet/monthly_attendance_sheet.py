@@ -45,15 +45,15 @@ def execute(filters=None):
 
 def get_columns(filters):
 	columns = [
-		"Employee:Link/Employee:120", "Employee Name::140", "Branch:Link/Branch:120",
-		"Department:Link/Department:120", "Designation:Link/Designation:120",
-		 "Company:Link/Company:120"
+		_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", _("Branch")+ ":Link/Branch:120",
+		_("Department") + ":Link/Department:120", _("Designation") + ":Link/Designation:120",
+		 _("Company") + ":Link/Company:120"
 	]
 
 	for day in range(filters["total_days_in_month"]):
 		columns.append(cstr(day+1) +"::20")
 
-	columns += ["Total Present:Float:80", "Total Absent:Float:80"]
+	columns += [_("Total Present") + ":Float:80", _("Total Absent") + ":Float:80"]
 	return columns
 
 def get_attendance_list(conditions, filters):
