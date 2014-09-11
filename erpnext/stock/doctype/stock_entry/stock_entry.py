@@ -217,6 +217,8 @@ class StockEntry(StockController):
 		allow_negative_stock = cint(frappe.db.get_default("allow_negative_stock"))
 
 		for d in self.get('mtn_details'):
+			d.transfer_qty = flt(d.transfer_qty)
+
 			args = frappe._dict({
 				"item_code": d.item_code,
 				"warehouse": d.s_warehouse or d.t_warehouse,
