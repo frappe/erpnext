@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import msgprint, _
 from frappe.utils import flt
 
 def execute(filters=None):
@@ -33,12 +34,12 @@ def execute(filters=None):
 	
 	
 def get_columns():
-	return ["Item Code:Link/Item:120", "Item Name::120", "Item Group:Link/Item Group:100", 
-		"Invoice:Link/Purchase Invoice:120", "Posting Date:Date:80", "Supplier:Link/Customer:120", 
-		"Supplier Account:Link/Account:120", "Project:Link/Project:80", "Company:Link/Company:100", 
-		"Purchase Order:Link/Purchase Order:100", "Purchase Receipt:Link/Purchase Receipt:100", 
-		"Expense Account:Link/Account:140", "Qty:Float:120", "Rate:Currency:120", 
-		"Amount:Currency:120"]
+	return [_("Item Code") + ":Link/Item:120", _("Item Name") + "::120", _("Item Group") + ":Link/Item Group:100", 
+		_("Invoice") + ":Link/Purchase Invoice:120", _("Posting Date") + ":Date:80", _("Supplier") + ":Link/Customer:120", 
+		_("Supplier Account") + ":Link/Account:120", _("Project") + ":Link/Project:80", _("Company") + ":Link/Company:100", 
+		_("Purchase Order") + ":Link/Purchase Order:100", _("Purchase Receipt") + ":Link/Purchase Receipt:100", 
+		_("Expense Account") + ":Link/Account:140", _("Qty") + ":Float:120", _("Rate") + ":Currency:120", 
+		_("Amount") + ":Currency:120"]
 	
 def get_conditions(filters):
 	conditions = ""

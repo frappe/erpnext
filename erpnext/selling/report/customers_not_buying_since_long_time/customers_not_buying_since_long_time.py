@@ -50,14 +50,14 @@ def get_last_so_amt(customer):
 
 def get_columns():
 	return [
-		"Customer:Link/Customer:120",
-		"Customer Name:Data:120",
-		"Territory::120",
-		"Customer Group::120",
-		"Number of Order::120",
-		"Total Order Value:Currency:120",
-		"Total Order Considered:Currency:160",
-		"Last Order Amount:Currency:160",
-		"Last Sales Order Date:Date:160",
-		"Days Since Last Order::160"
+		_("Customer") + ":Link/Customer:120",
+		_("Customer Name") + ":Data:120",
+		_("Territory") + "::120",
+		_("Customer Group") + "::120",
+		_("Number of Order") + "::120",
+		_("Total Order Value") + ":Currency:120",
+		_("Total Order Considered") + ":Currency:160",
+		_("Last Order Amount") + ":Currency:160",
+		_("Last Sales Order Date") + ":Date:160",
+		_("Days Since Last Order") + "::160"
 	]

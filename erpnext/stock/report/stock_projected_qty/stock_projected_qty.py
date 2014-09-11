@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 
 def execute(filters=None):
 	columns = get_columns()
@@ -26,12 +27,12 @@ def execute(filters=None):
 	return columns, data
 	
 def get_columns():
-	return ["Item Code:Link/Item:140", "Item Name::100", "Description::200", 
-		"Item Group:Link/Item Group:100", "Brand:Link/Brand:100", "Warehouse:Link/Warehouse:120", 
-		"UOM:Link/UOM:100", "Actual Qty:Float:100", "Planned Qty:Float:100", 
-		"Requested Qty:Float:110", "Ordered Qty:Float:100", "Reserved Qty:Float:100", 
-		"Projected Qty:Float:100", "Reorder Level:Float:100", "Reorder Qty:Float:100", 
-		"Shortage Qty:Float:100"]
+	return [_("Item Code") + ":Link/Item:140", _("Item Name") + "::100", _("Description") + "::200", 
+		_("Item Group") + ":Link/Item Group:100", _("Brand") + ":Link/Brand:100", _("Warehouse") + ":Link/Warehouse:120", 
+		_("UOM") + ":Link/UOM:100", _("Actual Qty") + ":Float:100", _("Planned Qty") + ":Float:100", 
+		_("Requested Qty") + ":Float:110", _("Ordered Qty") + ":Float:100", _("Reserved Qty") + ":Float:100", 
+		_("Projected Qty") + ":Float:100", _("Reorder Level") + ":Float:100", _("Reorder Qty") + ":Float:100", 
+		_("Shortage Qty") + ":Float:100"]
 	
 def get_item_conditions(filters):
 	conditions = []
