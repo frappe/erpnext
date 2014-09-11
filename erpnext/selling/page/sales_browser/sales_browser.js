@@ -112,7 +112,7 @@ erpnext.SalesChart = Class.extend({
 
 		var fields = [
 			{fieldtype:'Data', fieldname: 'name_field',
-				label:__('New {0} Name',[me.ctype]), reqd:true},
+				label:__('New {0} Name',[__(me.ctype)]), reqd:true},
 			{fieldtype:'Select', fieldname:'is_group', label:__('Group Node'), options:'No\nYes',
 				description: __("Further nodes can be only created under 'Group' type nodes")},
 			{fieldtype:'Button', fieldname:'create_new', label:__('Create New') }
