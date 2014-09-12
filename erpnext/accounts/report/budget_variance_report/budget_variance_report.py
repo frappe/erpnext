@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
 from frappe.utils import flt
+from frappe.utils import formatdate
 import time
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
@@ -51,9 +52,9 @@ def get_columns(filters):
 	for from_date, to_date in get_period_date_ranges(filters["period"], filters["fiscal_year"]):
 		for label in [_("Target") + " (%s)", _("Actual") + " (%s)", _("Variance") + " (%s)"]:
 			if group_months:
-				label = label % (_(from_date.strftime("%b")) + " - " + _(to_date.strftime("%b")))
+				label = label % (formatdate(from_date, format_string="MMM") + " - " + formatdate(from_date, format_string="MMM"))
 			else:
-				label = label % _(from_date.strftime("%b"))
+				label = label % formatdate(from_date, format_string="MMM")
 				
 			columns.append(label+":Float:120")
 
