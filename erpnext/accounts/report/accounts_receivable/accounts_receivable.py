@@ -24,7 +24,7 @@ class AccountsReceivableReport(object):
 		if customer_naming_by == "Naming Series":
 			columns += ["Customer Name::110"]
 
-		columns += [_("Voucher Type") + "::110", _("Voucher No") + ":Dynamic Link/Voucher Type:120", "::30",
+		columns += [_("Voucher Type") + "::110", _("Voucher No") + ":Dynamic Link/Voucher Type:120",
 			_("Due Date") + ":Date:80", _("Invoiced Amount") + ":Currency:100",
 			_("Payment Received") + ":Currency:100", _("Outstanding Amount") + ":Currency:100",
 			_("Age") + ":Int:50", "0-30:Currency:100", "30-60:Currency:100",

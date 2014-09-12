@@ -67,7 +67,7 @@ def get_columns(supplier_naming_by):
 	if supplier_naming_by == "Naming Series":
 		columns += ["Supplier Name::110"]
 
-	columns +=[_("Voucher Type") + "::110", _("Voucher No") + "::120", "::30",
+	columns +=[_("Voucher Type") + "::110", _("Voucher No") + ":Dynamic Link/Voucher Type:120",
 		_("Due Date") + ":Date:80", _("Bill No") + "::80", _("Bill Date") + ":Date:80",
 		_("Invoiced Amount") + ":Currency:100", _("Paid Amount") + ":Currency:100",
 		_("Outstanding Amount") + ":Currency:100", _("Age") + ":Int:50", "0-30:Currency:100",
