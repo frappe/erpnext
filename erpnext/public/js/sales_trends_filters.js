@@ -8,11 +8,11 @@ var get_filters = function(){
 			"label": __("Period"),
 			"fieldtype": "Select",
 			"options": [
-                { "value": "Monthly", "label": __("Monthly") },
-                { "value": "Quarterly", "label": __("Quarterly") },
-                { "value": "Half-Yearly", "label": __("Half-Yearly") },
-                { "value": "Yearly", "label": __("Yearly") }
-            ],
+				{ "value": "Monthly", "label": __("Monthly") },
+				{ "value": "Quarterly", "label": __("Quarterly") },
+				{ "value": "Half-Yearly", "label": __("Half-Yearly") },
+				{ "value": "Yearly", "label": __("Yearly") }
+			],
 			"default": "Monthly"
 		},
 		{
@@ -20,13 +20,13 @@ var get_filters = function(){
 			"label": __("Based On"),
 			"fieldtype": "Select",
 			"options": [
-                { "value": "Item", "label": __("Item") },
-                { "value": "Item Group", "label": __("Item Group") },
-                { "value": "Customer", "label": __("Customer") },
-                { "value": "Customer Group", "label": __("Customer Group") },
-                { "value": "Territory", "label": __("Territory") },
-                { "value": "Supplier Type", "label": __("Project") }
-            ],
+				{ "value": "Item", "label": __("Item") },
+				{ "value": "Item Group", "label": __("Item Group") },
+				{ "value": "Customer", "label": __("Customer") },
+				{ "value": "Customer Group", "label": __("Customer Group") },
+				{ "value": "Territory", "label": __("Territory") },
+				{ "value": "Supplier Type", "label": __("Project") }
+			],
 			"default": "Item"
 		},
 		{
@@ -34,10 +34,10 @@ var get_filters = function(){
 			"label": __("Group By"),
 			"fieldtype": "Select",
 			"options": [
-				{ "value": "", "label": "" },
-                { "value": "Item", "label": __("Item") },
-                { "value": "Customer", "label": __("Customer") }
-            ],
+				"",
+				{ "value": "Item", "label": __("Item") },
+				{ "value": "Customer", "label": __("Customer") }
+			],
 			"default": ""
 		},
 		{
