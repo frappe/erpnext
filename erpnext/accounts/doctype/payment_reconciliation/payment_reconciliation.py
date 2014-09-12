@@ -26,13 +26,14 @@ class PaymentReconciliation(Document):
 
 		jv_entries = frappe.db.sql("""
 			select
-				t1.name as voucher_no, t1.posting_date, t1.remark, t2.account,
+				t1.name as voucher_no, t1.posting_date, t1.remark,
 				t2.name as voucher_detail_no, {dr_or_cr} as payment_amount, t2.is_advance
 			from
 				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
 			where
 				t1.name = t2.parent and t1.docstatus = 1 and t2.docstatus = 1
-				and t2.account = %(party_account)s and {dr_or_cr} > 0
+				and t2.party_type = %(party_type)s and t2.party = %(party)s
+				and t2.account = %(account)s and {dr_or_cr} > 0
 				and ifnull(t2.against_voucher, '')='' and ifnull(t2.against_invoice, '')=''
 				and ifnull(t2.against_jv, '')='' {cond}
 				and (CASE
@@ -45,7 +46,9 @@ class PaymentReconciliation(Document):
 				"cond": cond,
 				"bank_account_condition": bank_account_condition,
 			}), {
-				"party_account": self.party_account,
+				"party_type": self.party_type,
+				"party": self.party,
+				"account": self.receivable_payable_account,
 				"bank_cash_account": "%%%s%%" % self.bank_cash_account
 			}, as_dict=1)
 
@@ -75,12 +78,17 @@ class PaymentReconciliation(Document):
 			from
 				`tabGL Entry`
 			where
-				account = %s and {dr_or_cr} > 0 {cond}
+				party_type = %(party_type)s and party = %(party)s
+				and account = %(account)s and {dr_or_cr} > 0 {cond}
 			group by voucher_type, voucher_no
 		""".format(**{
 			"cond": cond,
 			"dr_or_cr": dr_or_cr
-		}), (self.party_account), as_dict=True)
+		}), {
+			"party_type": self.party_type,
+			"party": self.party,
+			"account": self.receivable_payable_account,
+		}, as_dict=True)
 
 		for d in invoice_list:
 			payment_amount = frappe.db.sql("""
@@ -89,10 +97,17 @@ class PaymentReconciliation(Document):
 				from
 					`tabGL Entry`
 				where
-					account = %s and {0} > 0
-					and against_voucher_type = %s and ifnull(against_voucher, '') = %s
-			""".format("credit" if self.party_type == "Customer" else "debit"),
-			(self.party_account, d.voucher_type, d.voucher_no))
+					party_type = %(party_type)s and party = %(party)s
+					and account = %(account)s and {0} > 0
+					and against_voucher_type = %(against_voucher_type)s
+					and ifnull(against_voucher, '') = %(against_voucher)s
+			""".format("credit" if self.party_type == "Customer" else "debit"), {
+				"party_type": self.party_type,
+				"party": self.party,
+				"account": self.receivable_payable_account,
+				"against_voucher_type": d.voucher_type,
+				"against_voucher": d.voucher_no
+			})
 
 			payment_amount = payment_amount[0][0] if payment_amount else 0
 
@@ -130,7 +145,9 @@ class PaymentReconciliation(Document):
 					'voucher_detail_no' : e.voucher_detail_number,
 					'against_voucher_type' : e.invoice_type,
 					'against_voucher'  : e.invoice_number,
-					'account' : self.party_account,
+					'account' : self.receivable_payable_account,
+					'party_type': self.party_type,
+					'party': self.party,
 					'is_advance' : e.is_advance,
 					'dr_or_cr' : dr_or_cr,
 					'unadjusted_amt' : flt(e.amount),
@@ -144,7 +161,7 @@ class PaymentReconciliation(Document):
 			self.get_unreconciled_entries()
 
 	def check_mandatory_to_fetch(self):
-		for fieldname in ["company", "party_account"]:
+		for fieldname in ["company", "party_type", "party", "receivable_payable_account"]:
 			if not self.get(fieldname):
 				frappe.throw(_("Please select {0} first").format(self.meta.get_label(fieldname)))
 
