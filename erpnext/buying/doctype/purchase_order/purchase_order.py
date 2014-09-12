@@ -238,6 +238,11 @@ def make_purchase_receipt(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
+	def postprocess(source, target):
+		set_missing_values(source, target)
+		#Get the advance paid Journal Vouchers in Purchase Invoice Advance
+		target.get_advances()
+
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
@@ -263,6 +268,6 @@ def make_purchase_invoice(source_name, target_doc=None):
 			"doctype": "Purchase Taxes and Charges",
 			"add_if_empty": True
 		}
-	}, target_doc, set_missing_values)
+	}, target_doc, postprocess)
 
 	return doc
