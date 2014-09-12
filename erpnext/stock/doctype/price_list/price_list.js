@@ -7,7 +7,7 @@ $.extend(cur_frm.cscript, {
 	},
 
 	refresh: function() {
-		cur_frm.add_custom_button("Add / Edit Prices", function() {
+		cur_frm.add_custom_button(__("Add / Edit Prices"), function() {
 			frappe.route_options = {
 				"price_list": cur_frm.doc.name
 			};

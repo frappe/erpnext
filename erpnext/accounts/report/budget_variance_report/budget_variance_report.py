@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
 from frappe.utils import flt
+from frappe.utils import formatdate
 import time
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
@@ -44,21 +45,21 @@ def get_columns(filters):
 			msgprint(_("Please specify") + ": " + label,
 				raise_exception=True)
 
-	columns = ["Cost Center:Link/Cost Center:120", "Account:Link/Account:120"]
+	columns = [_("Cost Center") + ":Link/Cost Center:120", _("Account") + ":Link/Account:120"]
 
 	group_months = False if filters["period"] == "Monthly" else True
 
 	for from_date, to_date in get_period_date_ranges(filters["period"], filters["fiscal_year"]):
-		for label in ["Target (%s)", "Actual (%s)", "Variance (%s)"]:
+		for label in [_("Target") + " (%s)", _("Actual") + " (%s)", _("Variance") + " (%s)"]:
 			if group_months:
-				label = label % (from_date.strftime("%b") + " - " + to_date.strftime("%b"))
+				label = label % (formatdate(from_date, format_string="MMM") + " - " + formatdate(from_date, format_string="MMM"))
 			else:
-				label = label % from_date.strftime("%b")
+				label = label % formatdate(from_date, format_string="MMM")
 				
 			columns.append(label+":Float:120")
 
-	return columns + ["Total Target:Float:120", "Total Actual:Float:120", 
-		"Total Variance:Float:120"]
+	return columns + [_("Total Target") + ":Float:120", _("Total Actual") + ":Float:120", 
+		_("Total Variance") + ":Float:120"]
 
 #Get cost center & target details
 def get_costcenter_target_details(filters):

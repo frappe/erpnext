@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.utils import flt
 
 def execute(filters=None):
@@ -12,9 +13,9 @@ def execute(filters=None):
 		filters["from_time"] = "00:00:00"
 		filters["to_time"] = "24:00:00"
 
-	columns = ["Time Log:Link/Time Log:120", "Employee::150", "From Datetime::140",
-		"To Datetime::140", "Hours::70", "Activity Type::120", "Task:Link/Task:150",
-		"Task Subject::180", "Project:Link/Project:120", "Status::70"]
+	columns = [_("Time Log") + ":Link/Time Log:120", _("Employee") + "::150", _("From Datetime") + "::140",
+		_("To Datetime") + "::140", _("Hours") + "::70", _("Activity Type") + "::120", _("Task") + ":Link/Task:150",
+		_("Task Subject") + "::180", _("Project") + ":Link/Project:120", _("Status") + "::70"]
 
 	user_map = get_user_map()
 	task_map = get_task_map()

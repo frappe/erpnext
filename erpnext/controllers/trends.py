@@ -16,10 +16,10 @@ def get_columns(filters, trans):
 	# get conditions for grouping filter cond
 	group_by_cols = group_wise_column(filters.get("group_by"))
 
-	columns = based_on_details["based_on_cols"] + period_cols + ["Total(Qty):Float:120", "Total(Amt):Currency:120"]
+	columns = based_on_details["based_on_cols"] + period_cols + [_("Total(Qty)") + ":Float:120", _("Total(Amt)") + ":Currency:120"]
 	if group_by_cols:
 		columns = based_on_details["based_on_cols"] + group_by_cols + period_cols + \
-			["Total(Qty):Float:120", "Total(Amt):Currency:120"]
+			[_("Total(Qty)") + ":Float:120", _("Total(Amt)") + ":Currency:120"]
 
 	conditions = {"based_on_select": based_on_details["based_on_select"], "period_wise_select": period_select,
 		"columns": columns, "group_by": based_on_details["based_on_group_by"], "grbc": group_by_cols, "trans": trans,
@@ -130,8 +130,8 @@ def period_wise_columns_query(filters, trans):
 			get_period_wise_columns(dt, filters.get("period"), pwc)
 			query_details = get_period_wise_query(dt, trans_date, query_details)
 	else:
-		pwc = [filters.get("fiscal_year") + " (Qty):Float:120",
-			filters.get("fiscal_year") + " (Amt):Currency:120"]
+		pwc = [_(filters.get("fiscal_year")) + " ("+_("Qty") + "):Float:120",
+			_(filters.get("fiscal_year")) + " ("+ _("Amt") + "):Currency:120"]
 		query_details = " SUM(t2.qty), SUM(t2.base_amount),"
 
 	query_details += 'SUM(t2.qty), SUM(t2.base_amount)'
@@ -139,11 +139,11 @@ def period_wise_columns_query(filters, trans):
 
 def get_period_wise_columns(bet_dates, period, pwc):
 	if period == 'Monthly':
-		pwc += [get_mon(bet_dates[0]) + " (Qty):Float:120",
-			get_mon(bet_dates[0]) + " (Amt):Currency:120"]
+		pwc += [_(get_mon(bet_dates[0])) + " (" + _("Qty") + "):Float:120",
+			_(get_mon(bet_dates[0])) + " (" + _("Amt") + "):Currency:120"]
 	else:
-		pwc += [get_mon(bet_dates[0]) + "-" + get_mon(bet_dates[1]) + " (Qty):Float:120",
-			get_mon(bet_dates[0]) + "-" + get_mon(bet_dates[1]) + " (Amt):Currency:120"]
+		pwc += [_(get_mon(bet_dates[0])) + "-" + _(get_mon(bet_dates[1])) + " (" + _("Qty") + "):Float:120",
+			_(get_mon(bet_dates[0])) + "-" + _(get_mon(bet_dates[1])) + " (" + _("Amt") + "):Currency:120"]
 
 def get_period_wise_query(bet_dates, trans_date, query_details):
 	query_details += """SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.qty, NULL)),

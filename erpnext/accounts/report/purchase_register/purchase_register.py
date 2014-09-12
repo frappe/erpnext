@@ -63,11 +63,11 @@ def execute(filters=None):
 def get_columns(invoice_list):
 	"""return columns based on filters"""
 	columns = [
-		"Invoice:Link/Purchase Invoice:120", "Posting Date:Date:80", "Supplier Id::120", 
-		"Supplier Name::120", "Supplier Account:Link/Account:120", 
-		"Account Group:LInk/Account:120", "Project:Link/Project:80", "Bill No::120", 
-		"Bill Date:Date:80", "Remarks::150", 
-		"Purchase Order:Link/Purchase Order:100", "Purchase Receipt:Link/Purchase Receipt:100"
+		_("Invoice") + ":Link/Purchase Invoice:120", _("Posting Date") + ":Date:80", _("Supplier Id") + "::120", 
+		_("Supplier Name") + "::120", _("Supplier Account") + ":Link/Account:120", 
+		_("Account Group") + ":Link/Account:120", _("Project") + ":Link/Project:80", _("Bill No") + "::120", 
+		_("Bill Date") + ":Date:80", _("Remarks") + "::150", 
+		_("Purchase Order") + ":Link/Purchase Order:100", _("Purchase Receipt") + ":Link/Purchase Receipt:100"
 	]
 	expense_accounts = tax_accounts = expense_columns = tax_columns = []
 	

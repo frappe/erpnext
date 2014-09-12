@@ -1,7 +1,8 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import frappe 
+import frappe
+from frappe import _
 
 def execute(filters=None):
 	columns = get_columns()
@@ -21,11 +22,11 @@ def execute(filters=None):
 	return columns, data 
 
 def get_columns():
-	return ["Project Id:Link/Project:140", "Cost of Purchased Items:Currency:160",
-		"Cost of Issued Items:Currency:160", "Cost of Delivered Items:Currency:160", 
-		"Project Name::120", "Project Status::120", "Company:Link/Company:100", 
-		"Customer:Link/Customer:140", "Project Value:Currency:120", 
-		"Project Start Date:Date:120", "Completion Date:Date:120"]
+	return [_("Project Id") + ":Link/Project:140", _("Cost of Purchased Items") + ":Currency:160",
+		_("Cost of Issued Items") + ":Currency:160", _("Cost of Delivered Items") + ":Currency:160", 
+		_("Project Name") + "::120", _("Project Status") + "::120", _("Company") + ":Link/Company:100", 
+		_("Customer") + ":Link/Customer:140", _("Project Value") + ":Currency:120", 
+		_("Project Start Date") + ":Date:120", _("Completion Date") + ":Date:120"]+
 
 def get_project_details():
 	return frappe.db.sql(""" select name, project_name, status, company, customer, project_value,

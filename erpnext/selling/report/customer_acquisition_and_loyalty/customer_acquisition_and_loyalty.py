@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.utils import getdate, cint
 import calendar
 
@@ -52,13 +53,13 @@ def execute(filters=None):
 				new[1], repeat[1], new[1] + repeat[1]])
 					
 	return [
-		"Year", "Month", 
-		"New Customers:Int", 
-		"Repeat Customers:Int", 
-		"Total:Int",
-		"New Customer Revenue:Currency:150", 
-		"Repeat Customer Revenue:Currency:150", 
-		"Total Revenue:Currency:150"
+		_("Year"), _("Month"), 
+		_("New Customers") + ":Int", 
+		_("Repeat Customers") + ":Int", 
+		_("Total") + ":Int",
+		_("New Customer Revenue") + ":Currency:150", 
+		_("Repeat Customer Revenue") + ":Currency:150", 
+		_("Total Revenue") + ":Currency:150"
 	], out
 		
 		
