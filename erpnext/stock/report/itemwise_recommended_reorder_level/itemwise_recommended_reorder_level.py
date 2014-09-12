@@ -36,10 +36,10 @@ def execute(filters=None):
 
 def get_columns():
 	return[
-			"Item:Link/Item:120", "Item name:Data:120", "Description::160",
-			"Minimum Inventory Level:Float:160", "Lead Time Days:Float:120", "Consumed:Float:120",
-			"Delivered:Float:120", "Total Outgoing:Float:120", "Avg Daily Outgoing:Float:160",
-			"Reorder Level:Float:120"
+			_("Item") + ":Link/Item:120", _("Item Name") + ":Data:120", _("Description") + "::160",
+			_("Minimum Inventory Level") + ":Float:160", _("Lead Time Days") + ":Float:120", _("Consumed") + ":Float:120",
+			_("Delivered") + ":Float:120", _("Total Outgoing") + ":Float:120", _("Avg Daily Outgoing") + ":Float:160",
+			_("Reorder Level") + ":Float:120"
 	]
 
 def get_item_info():

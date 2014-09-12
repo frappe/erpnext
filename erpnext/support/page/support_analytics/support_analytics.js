@@ -28,7 +28,7 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 	
 	filters: [
 		{fieldtype:"Select", label: __("Fiscal Year"), link:"Fiscal Year", 
-			default_value: "Select Fiscal Year..."},
+			default_value: __("Select Fiscal Year") + "..."},
 		{fieldtype:"Date", label: __("From Date")},
 		{fieldtype:"Label", label: __("To")},
 		{fieldtype:"Date", label: __("To Date")},

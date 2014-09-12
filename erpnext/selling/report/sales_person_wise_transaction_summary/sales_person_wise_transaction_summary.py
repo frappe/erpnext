@@ -18,10 +18,10 @@ def get_columns(filters):
 		msgprint(_("Please select the document type first"), raise_exception=1)
 		
 	return [filters["doc_type"] + ":Link/" + filters["doc_type"] + ":140", 
-		"Customer:Link/Customer:140", "Territory:Link/Territory:100", "Posting Date:Date:100", 
-		"Item Code:Link/Item:120", "Qty:Float:100", "Amount:Currency:120", 
-		"Sales Person:Link/Sales Person:140", "Contribution %:Float:110", 
-		"Contribution Amount:Currency:140"]
+		_("Customer") + ":Link/Customer:140", _("Territory") + ":Link/Territory:100", _("Posting Date") + ":Date:100", 
+		_("Item Code") + ":Link/Item:120", _("Qty") + ":Float:100", _("Amount") + ":Currency:120", 
+		_("Sales Person") + ":Link/Sales Person:140", _("Contribution %") + ":Float:110", 
+		_("Contribution Amount") + ":Currency:140"]
 	
 def get_entries(filters):
 	date_field = filters["doc_type"] == "Sales Order" and "transaction_date" or "posting_date"

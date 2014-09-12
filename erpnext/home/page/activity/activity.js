@@ -20,7 +20,7 @@ frappe.pages['activity'].onload = function(wrapper) {
 	});
 	list.run();
 
-	wrapper.appframe.set_title_right("Refresh", function() { list.run(); });
+	wrapper.appframe.set_title_right(__("Refresh"), function() { list.run(); });
 
 	// Build Report Button
 	if(frappe.boot.user.can_get_report.indexOf("Feed")!=-1) {
