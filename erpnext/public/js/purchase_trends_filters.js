@@ -7,7 +7,12 @@ var get_filters = function(){
 			"fieldname":"period",
 			"label": __("Period"),
 			"fieldtype": "Select",
-			"options": ["Monthly", "Quarterly", "Half-Yearly", "Yearly"].join("\n"),
+			"options": [
+                { "value": "Monthly", "label": __("Monthly") },
+                { "value": "Quarterly", "label": __("Quarterly") },
+                { "value": "Half-Yearly", "label": __("Half-Yearly") },
+                { "value": "Yearly", "label": __("Yearly") }
+            ],
 			"default": "Monthly"
 		},
 		{
