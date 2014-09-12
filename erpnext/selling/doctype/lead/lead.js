@@ -4,6 +4,8 @@
 {% include 'setup/doctype/contact_control/contact_control.js' %};
 
 frappe.provide("erpnext");
+cur_frm.email_field = "email_id";
+
 erpnext.LeadController = frappe.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.fields_dict.customer.get_query = function(doc, cdt, cdn) {
