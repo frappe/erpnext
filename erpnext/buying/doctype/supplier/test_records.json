@@ -4,5 +4,11 @@
   "doctype": "Supplier", 
   "supplier_name": "_Test Supplier", 
   "supplier_type": "_Test Supplier Type"
+ },
+ {
+  "company": "_Test Company", 
+  "doctype": "Supplier", 
+  "supplier_name": "_Test Supplier 1", 
+  "supplier_type": "_Test Supplier Type"
  }
 ]
