@@ -59,6 +59,9 @@ def get_party_account(party_type, party_name):
 def get_outstanding_vouchers(args):
 	from erpnext.accounts.utils import get_outstanding_invoices
 
+	if not frappe.has_permission("Payment Tool"):
+		frappe.throw(_("No permission to use Payment Tool"), frappe.PermissionError)
+
 	args = json.loads(args)
 
 	if args.get("party_type") == "Customer" and args.get("received_or_paid") == "Received":

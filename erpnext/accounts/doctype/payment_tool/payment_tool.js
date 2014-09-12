@@ -4,12 +4,34 @@
 frappe.provide("erpnext.payment_tool");
 
 // Help content
-frappe.ui.form.on("Payment Tool", "onload", function(frm) {	
-	var help_content = '<i class="icon-hand-right"></i> Note:<br>'+
-		'<ul>If payment is not made against any reference, make Journal Voucher manually.</ul>';
-	frm.set_value("make_jv_help", help_content);
+frappe.ui.form.on("Payment Tool", "onload", function(frm) {
+	frm.set_value("make_jv_help", '<i class="icon-hand-right"></i> '
+		+ __("Note: If payment is not made against any reference, make Journal Voucher manually."));
 
-	frm.set_value("party_type", "Customer");
+	frm.set_query("payment_account", function() {
+		return {
+			filters: [
+				['Account', 'account_type', 'in', 'Bank, Cash'],
+				['Account', 'group_or_ledger', '=', 'Ledger'],
+				['Account', 'company', '=', frm.doc.company]
+			]
+		}
+	});
+
+	frm.set_query("against_voucher_type", "payment_tool_details", function() {
+		return {
+			filters: {"name": ["in", ["Sales Invoice", "Purchase Invoice", "Journal Voucher", "Sales Order", "Purchase Order"]]}
+		};
+	});
+});
+
+frappe.ui.form.on("Payment Tool", "refresh", function(frm) {
+	frappe.ui.form.trigger("Payment Tool", "party_type");
+});
+
+frappe.ui.form.on("Payment Tool", "party_type", function(frm) {
+	frm.toggle_reqd("customer", frm.doc.party_type == "Customer");
+	frm.toggle_reqd("supplier", frm.doc.party_type == "Supplier");
 });
 
 frappe.ui.form.on("Payment Tool", "company", function(frm) {
@@ -79,9 +101,11 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 			}
 		},
 		callback: function(r, rt) {
-			frm.fields_dict.get_outstanding_vouchers.$input.removeClass("btn-primary");
-			frm.fields_dict.make_journal_voucher.$input.addClass("btn-primary");
 			if(r.message) {
+				frm.fields_dict.get_outstanding_vouchers.$input.removeClass("btn-primary");
+				frm.fields_dict.make_journal_voucher.$input.addClass("btn-primary");
+
+				frappe.model.clear_table(frm.doc, "payment_tool_details");
 				$.each(r.message, function(i, d) {
 					var invoice_detail = frappe.model.add_child(frm.doc, "Payment Tool Detail", "payment_tool_details");
 					invoice_detail.against_voucher_type = d.voucher_type;
@@ -89,10 +113,9 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 					invoice_detail.total_amount = d.invoice_amount;
 					invoice_detail.outstanding_amount = d.outstanding_amount;
 				});
-				refresh_field("payment_tool_details");
-				frm.refresh_dependency();
 			}
-
+			refresh_field("payment_tool_details");
+			erpnext.payment_tool.set_total_payment_amount(frm);
 		}
 	});
 });
@@ -179,27 +202,6 @@ frappe.ui.form.on("Payment Tool", "make_journal_voucher", function(frm) {
 		}
 	});
 });
-
-cur_frm.fields_dict['payment_tool_details'].grid.get_field('against_voucher_no').get_query = function(doc, cdt, cdn) {
-	var c = locals[cdt][cdn];
-
-	erpnext.payment_tool.check_mandatory_to_fetch(doc);
-
-	args = { "docstatus": 1 };
-
-	if (c.against_voucher_type) {
-		if (in_list(["Sales Order", "Sales Invoice", "Purchase Order", "Purchase Invoice"], c.against_voucher_type)) {
-			var party_type = doc.party_type.toLowerCase();
-			args[party_type] = doc[party_type];
-		}
-		return {
-			doctype: c.against_voucher_type,
-			filters: args
-		}
-	} else {
-		frappe.throw(__("Row {0}: Please specify the Against Voucher Type", [c.idx]));
-	}
-}
 
 erpnext.payment_tool.check_mandatory_to_fetch = function(doc) {
 	var check_fields = [
