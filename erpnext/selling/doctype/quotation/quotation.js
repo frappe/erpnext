@@ -53,15 +53,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 				}, "icon-download", "btn-default");
 		}
 
-		if (!doc.__islocal) {
-			cur_frm.communication_view = new frappe.views.CommunicationList({
-				list: frappe.get_list("Communication", {"parent": doc.name, "parenttype": "Quotation"}),
-				parent: cur_frm.fields_dict.communication_html.wrapper,
-				doc: doc,
-				recipients: doc.contact_email
-			});
-		}
-
 		this.toggle_reqd_lead_customer();
 	},
 

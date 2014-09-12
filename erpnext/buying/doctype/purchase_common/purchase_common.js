@@ -10,6 +10,8 @@ frappe.provide("erpnext.buying");
 frappe.require("assets/erpnext/js/transaction.js");
 {% include "public/js/controllers/accounts.js" %}
 
+cur_frm.email_field = "contact_email";
+
 erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	onload: function() {
 		this.setup_queries();

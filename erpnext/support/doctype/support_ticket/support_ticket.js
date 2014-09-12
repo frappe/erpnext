@@ -7,6 +7,7 @@ cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
 frappe.provide("erpnext.support");
 
 cur_frm.add_fetch("customer", "customer_name", "customer_name")
+cur_frm.email_field = "raised_by";
 
 $.extend(cur_frm.cscript, {
 	refresh: function(doc) {

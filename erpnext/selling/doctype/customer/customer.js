@@ -34,11 +34,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 		// make lists
 		cur_frm.cscript.make_address(doc, dt, dn);
 		cur_frm.cscript.make_contact(doc, dt, dn);
-
-		cur_frm.communication_view = new frappe.views.CommunicationList({
-			parent: cur_frm.fields_dict.communication_html.wrapper,
-			doc: doc,
-		});
 	}
 }
 

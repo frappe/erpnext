@@ -3,16 +3,9 @@
 
 // For license information, please see license.txt
 
+// for communication
+cur_frm.email_field = "email_id";
 cur_frm.cscript = {
 	refresh: function(doc) {
-		cur_frm.cscript.make_listing(doc);
-	},
-	make_listing: function(doc) {
-		cur_frm.communication_view = new frappe.views.CommunicationList({
-			list: frappe.get_list("Communication", {"parent": doc.name, "parenttype": "Job Applicant"}),
-			parent: cur_frm.fields_dict['thread_html'].wrapper,
-			doc: doc,
-			recipients: doc.email_id
-		})
 	},
 }
