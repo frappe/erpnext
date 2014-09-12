@@ -10,6 +10,7 @@ def execute():
 		receivable_payable_accounts = create_receivable_payable_account()
 		set_party_in_jv_and_gl_entry(receivable_payable_accounts)
 		delete_individual_party_account(receivable_payable_accounts)
+		remove_customer_supplier_account_report()
 	except:
 		print frappe.get_traceback()
 		pass
@@ -87,3 +88,7 @@ def set_party_in_jv_and_gl_entry(receivable_payable_accounts):
 def delete_individual_party_account():
 	frappe.db.sql("""delete from `tabAccount` where ifnull(master_type, '') in ('Customer', 'Supplier')
 		and ifnull(master_name, '') != ''""")
+
+def remove_customer_supplier_account_report():
+	for d in ["Customer Account Head", "Supplier Account Head"]:
+		frappe.delete_doc("Report", d)
