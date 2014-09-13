@@ -370,9 +370,11 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(len(jv.get("entries")), 2)
 		self.assertEqual(jv.get("voucher_type"), "Credit Note")
 		self.assertEqual(jv.get("posting_date"), se.posting_date)
-		self.assertEqual(jv.get("entries")[0].get("account"), "_Test Customer - _TC")
-		self.assertEqual(jv.get("entries")[1].get("account"), "Sales - _TC")
+		self.assertEqual(jv.get("entries")[0].get("account"), "_Test Receivable - _TC")
+		self.assertEqual(jv.get("entries")[0].get("party_type"), "Customer")
+		self.assertEqual(jv.get("entries")[0].get("party"), "_Test Customer")
 		self.assertTrue(jv.get("entries")[0].get("against_invoice"))
+		self.assertEqual(jv.get("entries")[1].get("account"), "Sales - _TC")
 
 	def test_make_return_jv_for_sales_invoice_non_packing_item(self):
 		self._clear_stock_account_balance()

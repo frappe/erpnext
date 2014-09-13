@@ -802,6 +802,8 @@ def make_return_jv(stock_entry):
 	for r in result:
 		jv.append("entries", {
 			"account": r.get("account"),
+			"party_type": r.get("party_type"),
+			"party": r.get("party"),
 			"against_invoice": r.get("against_invoice"),
 			"against_voucher": r.get("against_voucher"),
 			"balance": get_balance_on(r.get("account"), se.posting_date) if r.get("account") else 0
