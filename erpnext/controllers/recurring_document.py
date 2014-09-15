@@ -16,6 +16,8 @@ month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
 def create_recurring_documents():
 	manage_recurring_documents("Sales Order")
 	manage_recurring_documents("Sales Invoice")
+	manage_recurring_documents("Purchase Order")
+	manage_recurring_documents("Purchase Invoice")
 
 def manage_recurring_documents(doctype, next_date=None, commit=True):
 	"""
@@ -27,6 +29,10 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 	if doctype == "Sales Order":
 		date_field = "transaction_date"
 	elif doctype == "Sales Invoice":
+		date_field = "posting_date"
+	elif doctype == "Purchase Order":
+		date_field = "transaction_date"
+	elif doctype == "Purchase Invoice":
 		date_field = "posting_date"
 
 	recurring_documents = frappe.db.sql("""select name, recurring_id
