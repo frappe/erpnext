@@ -71,7 +71,9 @@ class SalesInvoice(SellingController):
 			self.is_opening = 'No'
 
 		self.set_aging_date()
+
 		frappe.get_doc("Account", self.debit_to).validate_due_date(self.posting_date, self.due_date)
+
 		self.set_against_income_account()
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
@@ -146,6 +148,10 @@ class SalesInvoice(SellingController):
 	def on_update_after_submit(self):
 		validate_recurring_document(self)
 		convert_to_recurring(self, "RECINV.#####", self.posting_date)
+
+	def before_recurring(self):
+		self.aging_date = None
+		self.due_date = None
 
 	def get_portal_page(self):
 		return "invoice" if self.docstatus==1 else None

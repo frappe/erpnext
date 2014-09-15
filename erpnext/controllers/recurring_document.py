@@ -36,6 +36,9 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 				% (doctype, date_field, '%s', '%s'), (next_date, recurring_id)):
 			try:
 				ref_wrapper = frappe.get_doc(doctype, ref_document)
+				if hasattr(ref_wrapper, "before_recurring"):
+					ref_wrapper.before_recurring()
+
 				new_document_wrapper = make_new_document(ref_wrapper, date_field, next_date)
 				send_notification(new_document_wrapper)
 				if commit:
