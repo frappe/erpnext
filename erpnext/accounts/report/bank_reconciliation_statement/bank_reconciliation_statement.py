@@ -26,7 +26,7 @@ def execute(filters=None):
 	amounts_not_reflected_in_system = frappe.db.sql("""select sum(ifnull(jvd.debit, 0) - ifnull(jvd.credit, 0))
 		from `tabJournal Voucher Detail` jvd, `tabJournal Voucher` jv
 		where jvd.parent = jv.name and jv.docstatus=1 and jvd.account=%s
-		and jv.posting_date > %s and jv.clearance_date <= %s
+		and jv.posting_date > %s and jv.clearance_date <= %s and ifnull(jv.is_opening, 'No') = 'No'
 		""", (filters["account"], filters["report_date"], filters["report_date"]))
 
 	amounts_not_reflected_in_system = flt(amounts_not_reflected_in_system[0][0]) \
@@ -47,9 +47,9 @@ def execute(filters=None):
 	return columns, data
 
 def get_columns():
-	return ["Posting Date:Date:100", "Journal Voucher:Link/Journal Voucher:220",
-		"Debit:Currency:120", "Credit:Currency:120",
-		"Against Account:Link/Account:200", "Reference::100", "Ref Date:Date:110", "Clearance Date:Date:110"
+	return [_("Posting Date") + ":Date:100", _("Journal Voucher") + ":Link/Journal Voucher:220",
+		_("Debit") + ":Currency:120", _("Credit") + ":Currency:120",
+		_("Against Account") + ":Link/Account:200", _("Reference") + "::100", _("Ref Date") + ":Date:110", _("Clearance Date") + ":Date:110"
 	]
 
 def get_entries(filters):
@@ -61,6 +61,7 @@ def get_entries(filters):
 		where jvd.parent = jv.name and jv.docstatus=1
 			and jvd.account = %(account)s and jv.posting_date <= %(report_date)s
 			and ifnull(jv.clearance_date, '4000-01-01') > %(report_date)s
+			and ifnull(jv.is_opening, 'No') = 'No'
 		order by jv.name DESC""", filters, as_list=1)
 
 	return entries

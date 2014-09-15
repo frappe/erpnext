@@ -1,5 +1,5 @@
 {
-  "autoname": "naming_series:", 
+ "autoname": "naming_series:", 
  "creation": "2013-05-21 16:16:39", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -766,7 +766,7 @@
  "icon": "icon-truck", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-08-12 05:23:28.960161", 
+ "modified": "2014-09-09 05:35:32.971576", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt", 

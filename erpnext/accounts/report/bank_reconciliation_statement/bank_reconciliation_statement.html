@@ -16,31 +16,31 @@
 	</thead>
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
-			{% if (data[i].posting_date) { %}
+			{% if (data[i][__("Posting Date")]) { %}
 			<tr>
-				<td>{%= dateutil.str_to_user(data[i].posting_date) %}</td>
-				<td>{%= data[i].journal_voucher %}</td>
-				<td>{%= __("Against") %}: {%= data[i].against_account %}
-					{% if (data[i].reference) { %}
-						<br>{%= __("Reference") %}: {%= data[i].reference %}
-						{% if (data[i].ref_date) { %}
-							<br>{%= __("Reference Date") %}: {%= dateutil.str_to_user(data[i].ref_date) %}
+				<td>{%= dateutil.str_to_user(data[i][__("Posting Date")]) %}</td>
+				<td>{%= data[i][__("Journal Voucher")] %}</td>
+				<td>{%= __("Against") %}: {%= data[i][__("Against Account")] %}
+					{% if (data[i][__("Reference")]) { %}
+						<br>{%= __("Reference") %}: {%= data[i][__("Reference")] %}
+						{% if (data[i][__("Ref Date")]) { %}
+							<br>{%= __("Reference Date") %}: {%= dateutil.str_to_user(data[i][__("Ref Date")]) %}
 						{% } %}
 					{% } %}
-					{% if (data[i].clearance_date) { %}
-						<br>{%= __("Clearance Date") %}: {%= dateutil.str_to_user(data[i].clearance_date) %}
+					{% if (data[i][__("Clearance Date")]) { %}
+						<br>{%= __("Clearance Date") %}: {%= dateutil.str_to_user(data[i][__("Clearance Date")]) %}
 					{% } %}
 				</td>
-				<td style="text-align: right">{%= format_currency(data[i].debit) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i].credit) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i][__("Debit")]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i][__("Credit")]) %}</td>
 			</tr>
 			{% } else { %}
 			<tr>
 				<td></td>
 				<td></td>
-				<td>{%= data[i].journal_voucher %}</td>
-				<td style="text-align: right">{%= format_currency(data[i].debit) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i].credit) %}</td>
+				<td>{%= data[i][__("Journal Voucher")] %}</td>
+				<td style="text-align: right">{%= format_currency(data[i][__("Debit")]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i][__("Credit")]) %}</td>
 			</tr>
 			{% } %}
 		{% } %}

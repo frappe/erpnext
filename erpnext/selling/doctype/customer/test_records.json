@@ -22,5 +22,13 @@
   "customer_type": "Individual",
   "doctype": "Customer",
   "territory": "_Test Territory"
+ },
+ {
+  "company": "_Test Company",
+  "customer_group": "_Test Customer Group",
+  "customer_name": "_Test Customer 3",
+  "customer_type": "Individual",
+  "doctype": "Customer",
+  "territory": "_Test Territory"
  }
 ]

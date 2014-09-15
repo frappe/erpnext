@@ -1,41 +1,88 @@
 # Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
 from __future__ import unicode_literals
-import unittest
-import frappe
+import unittest, frappe
+from frappe.utils import flt
 
 class TestJournalVoucher(unittest.TestCase):
 	def test_journal_voucher_with_against_jv(self):
-		self.clear_account_balance()
+
 		jv_invoice = frappe.copy_doc(test_records[2])
-		jv_invoice.insert()
-		jv_invoice.submit()
+		base_jv = frappe.copy_doc(test_records[0])
+		self.jv_against_voucher_testcase(base_jv, jv_invoice)
 
-		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where account = %s and docstatus = 1 and parent = %s""",
-			("_Test Customer - _TC", jv_invoice.name)))
+	def test_jv_against_sales_order(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order \
+			import test_records as so_test_records
+
+		sales_order = frappe.copy_doc(so_test_records[0])
+		base_jv = frappe.copy_doc(test_records[0])
+		self.jv_against_voucher_testcase(base_jv, sales_order)
+
+	def test_jv_against_purchase_order(self):
+		from erpnext.buying.doctype.purchase_order.test_purchase_order \
+			import test_records as po_test_records
+
+		purchase_order = frappe.copy_doc(po_test_records[0])
+		base_jv = frappe.copy_doc(test_records[1])
+		self.jv_against_voucher_testcase(base_jv, purchase_order)
+
+	def jv_against_voucher_testcase(self, base_jv, test_voucher):
+		dr_or_cr = "credit" if test_voucher.doctype in ["Sales Order", "Journal Voucher"] else "debit"
+		field_dict = {'Journal Voucher': "against_jv",
+			'Sales Order': "against_sales_order",
+			'Purchase Order': "against_purchase_order"
+			}
+
+		self.clear_account_balance()
+		test_voucher.insert()
+		test_voucher.submit()
+
+		if test_voucher.doctype == "Journal Voucher":
+			self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
+				where account = %s and docstatus = 1 and parent = %s""",
+				("_Test Customer - _TC", test_voucher.name)))
 
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where against_jv=%s""", jv_invoice.name))
+			where %s=%s""" % (field_dict.get(test_voucher.doctype), '%s'), (test_voucher.name)))
 
-		jv_payment = frappe.copy_doc(test_records[0])
-		jv_payment.get("entries")[0].against_jv = jv_invoice.name
-		jv_payment.insert()
-		jv_payment.submit()
+		base_jv.get("entries")[0].is_advance = "Yes" if (test_voucher.doctype in ["Sales Order", "Purchase Order"]) else "No"
+		base_jv.get("entries")[0].set(field_dict.get(test_voucher.doctype), test_voucher.name)
+		base_jv.insert()
+		base_jv.submit()
+
+		submitted_voucher = frappe.get_doc(test_voucher.doctype, test_voucher.name)
 
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where against_jv=%s""", jv_invoice.name))
+			where %s=%s""" % (field_dict.get(test_voucher.doctype), '%s'), (submitted_voucher.name)))
 
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where against_jv=%s and credit=400""", jv_invoice.name))
+			where %s=%s and %s=400""" % (field_dict.get(submitted_voucher.doctype), '%s', dr_or_cr), (submitted_voucher.name)))
 
-		# cancel jv_invoice
-		jv_invoice.cancel()
+		if base_jv.get("entries")[0].is_advance == "Yes":
+			self.advance_paid_testcase(base_jv, submitted_voucher, dr_or_cr)
+		self.cancel_against_voucher_testcase(submitted_voucher)
 
-		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
-			where against_jv=%s""", jv_invoice.name))
+	def advance_paid_testcase(self, base_jv, test_voucher, dr_or_cr):
+		#Test advance paid field
+		advance_paid = frappe.db.sql("""select advance_paid from `tab%s`
+					where name=%s""" % (test_voucher.doctype, '%s'), (test_voucher.name))
+		payment_against_order = base_jv.get("entries")[0].get(dr_or_cr)
+		
+		self.assertTrue(flt(advance_paid[0][0]) == flt(payment_against_order))
+
+	def cancel_against_voucher_testcase(self, test_voucher):
+		if test_voucher.doctype == "Journal Voucher":
+			# if test_voucher is a Journal Voucher, test cancellation of test_voucher 
+			test_voucher.cancel()
+			self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
+				where against_jv=%s""", test_voucher.name))
+
+		elif test_voucher.doctype in ["Sales Order", "Purchase Order"]:
+			# if test_voucher is a Sales Order/Purchase Order, test error on cancellation of test_voucher 
+			submitted_voucher = frappe.get_doc(test_voucher.doctype, test_voucher.name)
+			self.assertRaises(frappe.LinkExistsError, submitted_voucher.cancel)
 
 	def test_jv_against_stock_account(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory

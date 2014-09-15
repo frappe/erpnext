@@ -326,6 +326,11 @@ def make_delivery_note(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
+	def postprocess(source, target):
+		set_missing_values(source, target)
+		#Get the advance paid Journal Vouchers in Sales Invoice Advance
+		target.get_advances()
+
 	def set_missing_values(source, target):
 		target.is_pos = 0
 		target.ignore_pricing_rule = 1
@@ -361,7 +366,18 @@ def make_sales_invoice(source_name, target_doc=None):
 			"doctype": "Sales Team",
 			"add_if_empty": True
 		}
-	}, target_doc, set_missing_values)
+	}, target_doc, postprocess)
+
+	def set_advance_vouchers(source, target):
+		advance_voucher_list = []
+
+		advance_voucher = frappe.db.sql("""
+			select
+				t1.name as voucher_no, t1.posting_date, t1.remark, t2.account,
+				t2.name as voucher_detail_no, {amount_query} as payment_amount, t2.is_advance
+			from
+				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
+			""")
 
 	return doclist
 

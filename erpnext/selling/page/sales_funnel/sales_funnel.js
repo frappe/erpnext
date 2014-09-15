@@ -4,7 +4,7 @@
 frappe.pages['sales-funnel'].onload = function(wrapper) { 
 	frappe.ui.make_app_page({
 		parent: wrapper,
-		title: 'Sales Funnel',
+		title: __('Sales Funnel'),
 		single_column: true
 	});
 	
@@ -30,13 +30,13 @@ erpnext.SalesFunnel = Class.extend({
 		
 		this.elements = { 
 			layout: $(wrapper).find(".layout-main"),
-			from_date: wrapper.appframe.add_date("From Date"),
-			to_date: wrapper.appframe.add_date("To Date"),
-			refresh_btn: wrapper.appframe.set_title_right("Refresh", 
+			from_date: wrapper.appframe.add_date(__("From Date")),
+			to_date: wrapper.appframe.add_date(__("To Date")),
+			refresh_btn: wrapper.appframe.set_title_right(__("Refresh"), 
 				function() { me.get_data(); }, "icon-refresh"),
 		};
 		
-		this.elements.no_data = $('<div class="alert alert-warning">No Data</div>')
+		this.elements.no_data = $('<div class="alert alert-warning">' + __("No Data") + '</div>')
 			.toggle(false)
 			.appendTo(this.elements.layout);
 		

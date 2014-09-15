@@ -153,7 +153,6 @@ class ProductionPlanningTool(Document):
 			pi.so_pending_qty			= flt(p['pending_qty'])
 			pi.planned_qty				= flt(p['pending_qty'])
 
-
 	def validate_data(self):
 		self.validate_company()
 		for d in self.get('pp_details'):

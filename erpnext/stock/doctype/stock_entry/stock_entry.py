@@ -217,6 +217,8 @@ class StockEntry(StockController):
 		allow_negative_stock = cint(frappe.db.get_default("allow_negative_stock"))
 
 		for d in self.get('mtn_details'):
+			d.transfer_qty = flt(d.transfer_qty)
+
 			args = frappe._dict({
 				"item_code": d.item_code,
 				"warehouse": d.s_warehouse or d.t_warehouse,
@@ -241,7 +243,6 @@ class StockEntry(StockController):
 					incoming_rate = flt(self.get_incoming_rate(args), self.precision("incoming_rate", d))
 					if incoming_rate > 0:
 						d.incoming_rate = incoming_rate
-
 				d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 				if not d.t_warehouse:
 					raw_material_cost += flt(d.amount)
@@ -256,7 +257,7 @@ class StockEntry(StockController):
 						if d.bom_no:
 							bom = frappe.db.get_value("BOM", d.bom_no, ["operating_cost", "quantity"], as_dict=1)
 							operation_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
-						d.incoming_rate = operation_cost_per_unit + (raw_material_cost / flt(d.transfer_qty))
+						d.incoming_rate = operation_cost_per_unit + (raw_material_cost + flt(self.total_fixed_cost)) / flt(d.transfer_qty)
 					d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 					break
 

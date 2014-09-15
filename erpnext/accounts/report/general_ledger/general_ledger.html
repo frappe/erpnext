@@ -22,23 +22,23 @@
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
 			<tr>
-			{% if(data[i].posting_date) { %}
-				<td>{%= dateutil.str_to_user(data[i].posting_date) %}</td>
-				<td>{%= data[i].voucher_type%}
-					<br>{%= data[i].voucher_no %}</td>
-				<td>{%= data[i].account %}
-					<br>{%= __("Against") %}: {%= data[i].against_account %}
-					<br>{%= __("Remarks") %}: {%= data[i].remarks %}</td>
-				<td style="text-align: right">{%= format_currency(data[i].debit) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i].credit) %}</td>
+			{% if(data[i][__("Posting Date")]) { %}
+				<td>{%= dateutil.str_to_user(data[i][__("Posting Date")]) %}</td>
+				<td>{%= data[i][__("Voucher Type")] %}
+					<br>{%= data[i][__("Voucher No")] %}</td>
+				<td>{%= data[i][__("Account")] %}
+					<br>{%= __("Against") %}: {%= data[i][__("Against Account")] %}
+					<br>{%= __("Remarks") %}: {%= data[i][__("Remarks")] %}</td>
+				<td style="text-align: right">{%= format_currency(data[i][__("Debit")]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i][__("Credit")]) %}</td>
 			{% } else { %}
 				<td></td>
 				<td></td>
-				<td><b>{%= data[i].account || "&nbsp;" %}</b></td>
+				<td><b>{%= data[i][__("Account")] || "&nbsp;" %}</b></td>
 				<td style="text-align: right">
-					{%= data[i].account && format_currency(data[i].debit) %}</td>
+					{%= data[i][__("Account")] && format_currency(data[i][__("Debit")]) %}</td>
 				<td style="text-align: right">
-					{%= data[i].account && format_currency(data[i].credit) %}</td>
+					{%= data[i][__("Account")] && format_currency(data[i][__("Credit")]) %}</td>
 			{% } %}
 			</tr>
 		{% } %}

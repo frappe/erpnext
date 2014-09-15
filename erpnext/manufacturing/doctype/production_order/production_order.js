@@ -123,3 +123,5 @@ cur_frm.set_query("bom_no", function(doc) {
 		}
 	} else msgprint(__("Please enter Production Item first"));
 });
+
+cur_frm.add_fetch('bom_no', 'total_fixed_cost', 'total_fixed_cost');
