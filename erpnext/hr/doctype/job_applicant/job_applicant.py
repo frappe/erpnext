@@ -5,13 +5,9 @@
 
 from __future__ import unicode_literals
 import frappe
-from erpnext.utilities.transaction_base import TransactionBase
+from frappe.model.document import Document
 from frappe.utils import extract_email_id
 
-class JobApplicant(TransactionBase):
-
-	def get_sender(self, comm):
-		return frappe.db.get_value('Jobs Email Settings',None,'email_id') or comm.sender or frappe.session.user
-
+class JobApplicant(Document):
 	def validate(self):
 		self.set_status()

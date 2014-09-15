@@ -1,1 +1,0 @@
-Settings to extract job applications via email (POP).
