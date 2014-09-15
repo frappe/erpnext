@@ -75,21 +75,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Support Email Settings",
-					"description": _("Setup incoming server for support email id. (e.g. support@example.com)")
-				},
-				{
-					"type": "doctype",
-					"name": "Sales Email Settings",
-					"description": _("Setup incoming server for sales email id. (e.g. sales@example.com)")
-				},
-				{
-					"type": "doctype",
-					"name": "Jobs Email Settings",
-					"description": _("Setup incoming server for jobs email id. (e.g. jobs@example.com)")
-				},
-				{
-					"type": "doctype",
 					"name": "SMS Settings",
 					"description": _("Setup SMS gateway settings")
 				},

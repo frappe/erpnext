@@ -38,11 +38,6 @@ doc_events = {
 }
 
 scheduler_events = {
-	"all": [
-		"erpnext.support.doctype.support_ticket.get_support_mails.get_support_mails",
-		"erpnext.hr.doctype.job_applicant.get_job_applications.get_job_applications",
-		"erpnext.selling.doctype.lead.get_leads.get_leads"
-	],
 	"daily": [
 		"erpnext.controllers.recurring_document.create_recurring_documents",
 		"erpnext.stock.utils.reorder_item",
@@ -56,4 +51,7 @@ scheduler_events = {
 		"erpnext.setup.doctype.backup_manager.backup_manager.take_backups_weekly"
 	]
 }
+
+default_mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>
+	<a style="color: #888" href="https://erpnext.com">Sent via ERPNext</a></div>"""
 

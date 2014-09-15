@@ -5,25 +5,12 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 
-from erpnext.utilities.transaction_base import TransactionBase
-from frappe.utils import now, extract_email_id
+from frappe.model.document import Document
+from frappe.utils import now
 
-class SupportTicket(TransactionBase):
+class SupportTicket(Document):
 	def get_feed(self):
 		return "{0}: {1}".format(_(self.status, self.subject))
-
-	def get_sender(self, comm):
-		return frappe.db.get_value('Support Email Settings',None,'support_email')
-
-	def get_subject(self, comm):
-		return '[' + self.name + '] ' + (comm.subject or 'No Subject Specified')
-
-	def get_content(self, comm):
-		signature = frappe.db.get_value('Support Email Settings',None,'support_signature')
-		content = comm.content
-		if signature:
-			content += '<p>' + signature + '</p>'
-		return content
 
 	def get_portal_page(self):
 		return "ticket"

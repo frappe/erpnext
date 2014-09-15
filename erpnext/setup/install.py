@@ -52,6 +52,3 @@ def set_single_defaults():
 				pass
 
 	frappe.db.set_default("date_format", "dd-mm-yyyy")
-
-	frappe.db.set_value("Outgoing Email Settings", "Outgoing Email Settings", "footer",
-		default_mail_footer)

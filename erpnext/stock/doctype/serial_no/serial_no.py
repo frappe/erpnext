@@ -192,9 +192,6 @@ class SerialNo(StockController):
 			self.set_sales_details(last_sle.get("delivery_sle"))
 			self.set_maintenance_status()
 
-	def on_communication(self):
-		return
-
 def process_serial_no(sle):
 	item_det = get_item_details(sle.item_code)
 	validate_serial_no(sle, item_det)
