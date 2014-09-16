@@ -163,7 +163,7 @@ def create_party_account(party, party_type, company):
 
 	company_details = frappe.db.get_value("Company", company,
 		["abbr", "receivables_group", "payables_group"], as_dict=True)
-	if not frappe.db.exists("Account", (party + " - " + company_details.abbr)):
+	if not frappe.db.exists("Account", (party.strip() + " - " + company_details.abbr)):
 		parent_account = company_details.receivables_group \
 			if party_type=="Customer" else company_details.payables_group
 		if not parent_account:
