@@ -1,19 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.get_states=function(doc, dt, dn) {
-	return $c('runserverobj', args={'method': 'check_state', 'docs':doc},
-		function(r, rt) {
-			if(r.message)
-				set_field_options('state', r.message);
-		}
-	);
-}
-
-cur_frm.cscript.country = function(doc, dt, dn) {
-	cur_frm.cscript.get_states(doc, dt, dn);
-}
-
 if(cur_frm.fields_dict['territory']) {
 	cur_frm.fields_dict['territory'].get_query = function(doc, dt, dn) {
 		return {
