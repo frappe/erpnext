@@ -10,7 +10,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 
 class TestStockEntry(unittest.TestCase):
-	
+
 	def tearDown(self):
 		frappe.set_user("Administrator")
 		set_perpetual_inventory(0)
@@ -530,7 +530,8 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(len(jv.get("entries")), 2)
 		self.assertEqual(jv.get("voucher_type"), "Debit Note")
 		self.assertEqual(jv.get("posting_date"), se.posting_date)
-		self.assertEqual(jv.get("entries")[0].get("account"), "_Test Supplier - _TC")
+		self.assertEqual(jv.get("entries")[0].get("account"), "_Test Payable - _TC")
+		self.assertEqual(jv.get("entries")[0].get("party"), "_Test Supplier")
 		self.assertEqual(jv.get("entries")[1].get("account"), "_Test Account Cost for Goods Sold - _TC")
 		self.assertTrue(jv.get("entries")[0].get("against_voucher"))
 
@@ -823,19 +824,19 @@ class TestStockEntry(unittest.TestCase):
 		se = frappe.copy_doc(test_records[0]).insert()
 		self.assertRaises (StockFreezeError, se.submit)
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 0)
-		
+
 	def test_production_order(self):
-		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item 2", 
+		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item 2",
 			"is_default": 1, "docstatus": 1})
-		
+
 		production_order = frappe.new_doc("Production Order")
 		production_order.update({
 			"company": "_Test Company",
-			"fg_warehouse": "_Test Warehouse 1 - _TC", 
-			"production_item": "_Test FG Item 2", 
+			"fg_warehouse": "_Test Warehouse 1 - _TC",
+			"production_item": "_Test FG Item 2",
 			"bom_no": bom_no,
 			"qty": 1.0,
-			"stock_uom": "Nos", 
+			"stock_uom": "Nos",
 			"wip_warehouse": "_Test Warehouse - _TC"
 		})
 		production_order.insert()

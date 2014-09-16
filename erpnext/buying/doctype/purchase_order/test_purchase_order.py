@@ -85,6 +85,8 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		self.assertEquals(pi.doctype, "Purchase Invoice")
 		self.assertEquals(len(pi.get("entries", [])), len(test_records[0]["po_details"]))
+
+		pi.credit_to = "_Test Payable - _TC"
 		pi.posting_date = "2013-05-12"
 		pi.bill_no = "NA"
 		frappe.get_doc(pi).insert()

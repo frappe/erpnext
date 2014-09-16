@@ -133,8 +133,8 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						options: "", fieldtype: 'Select'},
 					{fieldname:'timezone', label: __('Time Zone'), reqd:1,
 						options: "", fieldtype: 'Select'},
-					// {fieldname:'chart_of_accounts', label: __('Chart of Accounts'),
-					// 	options: "", fieldtype: 'Select'}
+					{fieldname:'chart_of_accounts', label: __('Chart of Accounts'),
+						options: "", fieldtype: 'Select'}
 				],
 				help: __('Select your home country and check the timezone and currency.'),
 				onload: function(slide, form) {

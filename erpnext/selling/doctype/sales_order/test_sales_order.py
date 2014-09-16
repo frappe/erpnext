@@ -57,6 +57,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(len(si.get("entries")), len(sales_order.get("sales_order_details")))
 		self.assertEquals(len(si.get("entries")), 1)
 
+		si.debit_to = "_Test Receivable - _TC"
 		si.posting_date = "2013-10-10"
 		si.insert()
 		si.submit()

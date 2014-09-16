@@ -401,6 +401,7 @@ class AccountsController(TransactionBase):
 			order by t1.posting_date""" %
 			(dr_or_cr, '%s', '%s', '%s', cond), tuple([account_head, party_type, party] + so_list), as_dict=1)
 
+
 		self.set(parentfield, [])
 		for d in res:
 			self.append(parentfield, {

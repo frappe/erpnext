@@ -169,7 +169,7 @@ class JournalVoucher(AccountsController):
 					frappe.throw(_("Row {0}: Credit entry can not be linked with a {1}").format(d.idx, doctype))
 
 				against_voucher = frappe.db.get_value(doctype, d.get(against_field),
-					[scrub(d) for d in field_dict.get(doctype)])
+					[scrub(dt) for dt in field_dict.get(doctype)])
 
 				if against_field in ["against_invoice", "against_voucher"]:
 					if (against_voucher[0] !=d.party or against_voucher[1] != d.account):

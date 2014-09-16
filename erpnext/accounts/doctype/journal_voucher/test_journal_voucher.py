@@ -42,7 +42,7 @@ class TestJournalVoucher(unittest.TestCase):
 		if test_voucher.doctype == "Journal Voucher":
 			self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
 				where account = %s and docstatus = 1 and parent = %s""",
-				("_Test Customer - _TC", test_voucher.name)))
+				("_Test Receivable - _TC", test_voucher.name)))
 
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
 			where %s=%s""" % (field_dict.get(test_voucher.doctype), '%s'), (test_voucher.name)))
