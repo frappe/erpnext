@@ -73,7 +73,7 @@ cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 				var fullname = frappe.user.full_name(v.name);
 				if(fullname !== v.name) v.name = fullname + " &lt;" + v.name + "&gt;";
 				if(v.enabled==0) {
-					v.name = repl("<span style='color: red'> %(name)s (disabled user)</span>", {name: v.name});
+					v.name = repl("<span style='color: red'> %(name)s (" + __("disabled user") + ")</span>", {name: v.name});
 				}
 				var user = $a($td(tab, i+1, 1), 'span', '', '', v.name);
 				//user.onclick = function() { check.checked = !check.checked; }
@@ -81,11 +81,11 @@ cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {
 
 			// Display add recipients button
 			if(r.user_list.length>15) {
-				$btn($td(tab, 0, 1), add_or_update + ' Recipients', function() {
+				$btn($td(tab, 0, 1), __('{0} Recipients',[__(add_or_update)]), function() {
 					cur_frm.cscript.add_to_rec_list(doc, tab, r.user_list.length);
 				});
 			}
-			$btn($td(tab, r.user_list.length+1, 1), add_or_update + ' Recipients', function() {
+			$btn($td(tab, r.user_list.length+1, 1),__('{0} Recipients',[__(add_or_update)]), function() {
 				cur_frm.cscript.add_to_rec_list(doc, tab, r.user_list.length);
 			});
 
