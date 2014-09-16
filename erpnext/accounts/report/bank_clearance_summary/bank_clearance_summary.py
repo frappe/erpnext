@@ -14,9 +14,9 @@ def execute(filters=None):
 	return columns, data
 	
 def get_columns():
-	return ["Journal Voucher:Link/Journal Voucher:140", "Account:Link/Account:140", 
-		"Posting Date:Date:100", "Clearance Date:Date:110", "Against Account:Link/Account:200", 
-		"Debit:Currency:120", "Credit:Currency:120"
+	return [_("Journal Voucher") + ":Link/Journal Voucher:140", _("Account") + ":Link/Account:140", 
+		_("Posting Date") + ":Date:100", _("Clearance Date") + ":Date:110", _("Against Account") + ":Link/Account:200", 
+		_("Debit") + ":Currency:120", _("Credit") + ":Currency:120"
 	]
 
 def get_conditions(filters):

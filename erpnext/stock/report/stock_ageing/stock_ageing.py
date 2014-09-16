@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.utils import date_diff
 
 def execute(filters=None):
@@ -35,9 +36,9 @@ def get_average_age(fifo_queue, to_date):
 	return (age_qty / total_qty) if total_qty else 0.0
 	
 def get_columns():
-	return ["Item Code:Link/Item:100", "Item Name::100", "Description::200", 
-		"Item Group:Link/Item Group:100", "Brand:Link/Brand:100", "Average Age:Float:100", 
-		"Earliest:Int:80", "Latest:Int:80", "UOM:Link/UOM:100"]
+	return [_("Item Code") + ":Link/Item:100", _("Item Name") + "::100", _("Description") + "::200", 
+		_("Item Group") + ":Link/Item Group:100", _("Brand") + ":Link/Brand:100", _("Average Age") + ":Float:100", 
+		_("Earliest") + ":Int:80", _("Latest") + ":Int:80", _("UOM") + ":Link/UOM:100"]
 		
 def get_fifo_queue(filters):
 	item_details = {}

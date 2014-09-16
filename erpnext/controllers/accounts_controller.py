@@ -363,9 +363,10 @@ class AccountsController(TransactionBase):
 			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
 	def get_advances(self, account_head, child_doctype, parentfield, dr_or_cr):
+		against_order_list = []
 		res = frappe.db.sql("""
 			select
-				t1.name as jv_no, t1.remark, t2.%s as amount, t2.name as jv_detail_no
+				t1.name as jv_no, t1.remark, t2.%s as amount, t2.name as jv_detail_no, t2.%s as order_no
 			from
 				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
 			where
@@ -374,18 +375,25 @@ class AccountsController(TransactionBase):
 				and ifnull(t2.against_invoice, '')  = ''
 				and ifnull(t2.against_jv, '')  = ''
 			order by t1.posting_date""" %
-			(dr_or_cr, '%s'), account_head, as_dict=1)
+			(dr_or_cr, "against_sales_order" if dr_or_cr == "credit" \
+			else "against_purchase_order", '%s'),
+			account_head, as_dict= True)
+
+		if self.get("entries"):
+			for i in self.get("entries"):
+				against_order_list.append(i.sales_order if dr_or_cr == "credit" else i.purchase_order)
 
 		self.set(parentfield, [])
 		for d in res:
-			self.append(parentfield, {
-				"doctype": child_doctype,
-				"journal_voucher": d.jv_no,
-				"jv_detail_no": d.jv_detail_no,
-				"remarks": d.remark,
-				"advance_amount": flt(d.amount),
-				"allocate_amount": 0
-			})
+			if not against_order_list or d.order_no in against_order_list:
+				self.append(parentfield, {
+					"doctype": child_doctype,
+					"journal_voucher": d.jv_no,
+					"jv_detail_no": d.jv_detail_no,
+					"remarks": d.remark,
+					"advance_amount": flt(d.amount),
+					"allocate_amount": 0
+				})
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		from erpnext.controllers.status_updater import get_tolerance_for
@@ -429,6 +437,32 @@ class AccountsController(TransactionBase):
 				(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return stock_items
+
+	def set_total_advance_paid(self):
+		if self.doctype == "Sales Order":
+			dr_or_cr = "credit"
+			against_field = "against_sales_order"
+		else:
+			dr_or_cr = "debit"
+			against_field = "against_purchase_order"
+
+		advance_paid = frappe.db.sql("""
+			select
+				sum(ifnull({dr_or_cr}, 0))
+			from
+				`tabJournal Voucher Detail`
+			where
+				{against_field} = %s and docstatus = 1 and is_advance = "Yes" """.format(dr_or_cr=dr_or_cr, \
+					against_field=against_field), self.name)
+
+		if advance_paid:
+			advance_paid = flt(advance_paid[0][0], self.precision("advance_paid"))
+		if flt(self.grand_total) >= advance_paid:
+			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
+		else:
+			frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater \
+				than the Grand Total ({2})")
+			.format(advance_paid, self.name, self.grand_total))
 
 	@property
 	def company_abbr(self):

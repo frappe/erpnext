@@ -171,6 +171,7 @@
    "read_only": 0
   }, 
   {
+   "allow_on_submit": 1, 
    "fieldname": "letter_head", 
    "fieldtype": "Link", 
    "label": "Letter Head", 
@@ -192,6 +193,7 @@
    "read_only": 0
   }, 
   {
+   "allow_on_submit": 1, 
    "fieldname": "select_print_heading", 
    "fieldtype": "Link", 
    "in_filter": 0, 
@@ -205,7 +207,7 @@
  ], 
  "icon": "icon-cog", 
  "idx": 1, 
- "modified": "2014-06-23 16:40:59.510132", 
+ "modified": "2014-09-09 05:35:31.969193", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "POS Setting", 

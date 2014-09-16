@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.utils import flt
 
 def execute(filters=None):
@@ -15,9 +16,9 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		"Employee:Link/Employee:120", "Name:Data:200", "Date of Birth:Date:100",
-		"Branch:Link/Branch:120", "Department:Link/Department:120",
-		"Designation:Link/Designation:120", "Gender::60", "Company:Link/Company:120"
+		_("Employee") + ":Link/Employee:120", _("Name") + ":Data:200", _("Date of Birth")+ ":Date:100",
+		_("Branch") + ":Link/Branch:120", _("Department") + ":Link/Department:120",
+		_("Designation") + ":Link/Designation:120", _("Gender") + "::60", _("Company") + ":Link/Company:120"
 	]
 
 def get_employees(filters):

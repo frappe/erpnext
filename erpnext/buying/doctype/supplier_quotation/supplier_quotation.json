@@ -1,5 +1,5 @@
 {
-  "allow_import": 1, 
+ "allow_import": 1, 
  "autoname": "naming_series:", 
  "creation": "2013-05-21 16:16:45", 
  "docstatus": 0, 
@@ -575,7 +575,7 @@
  "icon": "icon-shopping-cart", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-08-14 02:17:26.401532", 
+ "modified": "2014-09-09 05:35:35.369734", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation", 

@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import msgprint, _
 from frappe.utils import flt
 
 def execute(filters=None):
@@ -33,9 +34,9 @@ def execute(filters=None):
 def get_columns(filters):
 	"""return columns based on filters"""
 
-	columns = ["Item:Link/Item:100", "Item Name::150", "Description::150", "UOM:Link/UOM:80",
-		"Last Purchase Rate:Currency:90", "Valuation Rate:Currency:80",	"Sales Price List::80",
-		"Purchase Price List::80", "BOM Rate:Currency:90"]
+	columns = [_("Item") + ":Link/Item:100", _("Item Name") + "::150", _("Description") + "::150", _("UOM") + ":Link/UOM:80",
+		_("Last Purchase Rate") + ":Currency:90", _("Valuation Rate") + ":Currency:80",	_("Sales Price List") + "::80",
+		_("Purchase Price List") + "::80", _("BOM Rate") + ":Currency:90"]
 
 	return columns
 
@@ -114,7 +115,7 @@ def get_item_bom_rate():
 
 	item_bom_map = {}
 
-	for b in frappe.db.sql("""select item, (total_cost/quantity) as bom_rate
+	for b in frappe.db.sql("""select item, (total_variable_cost/quantity) as bom_rate
 		from `tabBOM` where is_active=1 and is_default=1""", as_dict=1):
 			item_bom_map.setdefault(b.item, flt(b.bom_rate))
 

@@ -169,15 +169,13 @@ class Account(Document):
 
 	def validate_due_date(self, posting_date, due_date):
 		credit_days = (self.credit_days or frappe.db.get_value("Company", self.company, "credit_days"))
-		if credit_days is None:
-			return
-
 		posting_date, due_date = getdate(posting_date), getdate(due_date)
 		diff = (due_date - posting_date).days
 
 		if diff < 0:
 			frappe.throw(_("Due Date cannot be before Posting Date"))
-		elif diff > credit_days:
+
+		elif credit_days is not None and diff > credit_days:
 			is_credit_controller = frappe.db.get_value("Accounts Settings", None,
 				"credit_controller") in frappe.user.get_roles()
 
