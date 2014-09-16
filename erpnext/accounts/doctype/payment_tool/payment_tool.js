@@ -8,13 +8,19 @@ frappe.ui.form.on("Payment Tool", "onload", function(frm) {
 	frm.set_value("make_jv_help", '<i class="icon-hand-right"></i> '
 		+ __("Note: If payment is not made against any reference, make Journal Voucher manually."));
 
+	frm.set_query("party_type", function() {
+		return {
+			filters: {"name": ["in", ["Customer", "Supplier"]]}
+		};
+	});
+
 	frm.set_query("payment_account", function() {
 		return {
-			filters: [
-				['Account', 'account_type', 'in', 'Bank, Cash'],
-				['Account', 'group_or_ledger', '=', 'Ledger'],
-				['Account', 'company', '=', frm.doc.company]
-			]
+			filters: {
+				"account_type": ["in", ["Receivable", "Payable"]],
+				"group_or_ledger": "Ledger",
+				"company": frm.doc.company
+			}
 		}
 	});
 
@@ -29,10 +35,24 @@ frappe.ui.form.on("Payment Tool", "refresh", function(frm) {
 	frappe.ui.form.trigger("Payment Tool", "party_type");
 });
 
-frappe.ui.form.on("Payment Tool", "party_type", function(frm) {
-	frm.toggle_reqd("customer", frm.doc.party_type == "Customer");
-	frm.toggle_reqd("supplier", frm.doc.party_type == "Supplier");
-});
+frappe.ui.form.on("Payment Tool", "party", function(frm) {
+	if(!frm.doc.party_account && frm.doc.party_type && frm.doc.party) {
+		return frappe.call({
+			method: "erpnext.accounts.party.get_party_account",
+			args: {
+				company: frm.doc.company,
+				party_type: frm.doc.party_type,
+				party: frm.doc.party
+			},
+			callback: function(r) {
+				if(!r.exc && r.message) {
+					frappe.model.set_value("party_account", r.message);
+					erpnext.payment_tool.check_mandatory_to_set_button(frm);
+				}
+			}
+		});
+	}
+})
 
 frappe.ui.form.on("Payment Tool", "company", function(frm) {
 	erpnext.payment_tool.check_mandatory_to_set_button(frm);
@@ -45,42 +65,10 @@ frappe.ui.form.on("Payment Tool", "received_or_paid", function(frm) {
 // Fetch bank/cash account based on payment mode
 cur_frm.add_fetch("payment_mode", "default_account", "payment_account");
 
-// Set party account name
-frappe.ui.form.on("Payment Tool", "customer", function(frm) {
-	erpnext.payment_tool.set_party_account(frm);
-	erpnext.payment_tool.check_mandatory_to_set_button(frm);
-});
-
-frappe.ui.form.on("Payment Tool", "supplier", function(frm) {
-	erpnext.payment_tool.set_party_account(frm);
-	erpnext.payment_tool.check_mandatory_to_set_button(frm);
-});
-
 erpnext.payment_tool.check_mandatory_to_set_button = function(frm) {
-	if (frm.doc.company && frm.doc.party_type && frm.doc.received_or_paid && (frm.doc.customer || frm.doc.supplier)) {
+	if (frm.doc.company && frm.doc.party_type && frm.doc.party && frm.doc.received_or_paid) {
 		frm.fields_dict.get_outstanding_vouchers.$input.addClass("btn-primary");
 	}
-}
-
-//Set Button color
-erpnext.payment_tool.set_party_account = function(frm) {
-	if(frm.doc.party_type == "Customer") {
-		var party_name = frm.doc.customer;
-	} else {
-		var party_name = frm.doc.supplier;
-	}
-	return  frappe.call({
-		method: 'erpnext.accounts.doctype.payment_tool.payment_tool.get_party_account',
-		args: {
-			party_type: frm.doc.party_type,
-			party_name: party_name
-		},
-		callback: function(r, rt) {
-			if(!r.exc) {
-				frm.set_value("party_account", r.message);
-			}
-		}
-	});
 }
 
 // Get outstanding vouchers
@@ -96,7 +84,7 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 				"company": frm.doc.company,
 				"party_type": frm.doc.party_type,
 				"received_or_paid": frm.doc.received_or_paid,
-				"party_name": frm.doc.party_type == "Customer" ? frm.doc.customer : frm.doc.supplier,
+				"party": frm.doc.party,
 				"party_account": frm.doc.party_account
 			}
 		},
@@ -204,14 +192,7 @@ frappe.ui.form.on("Payment Tool", "make_journal_voucher", function(frm) {
 });
 
 erpnext.payment_tool.check_mandatory_to_fetch = function(doc) {
-	var check_fields = [
-		['Company', doc.company],
-		['Party Type', doc.party_type],
-		['Received Or Paid', doc.received_or_paid],
-		['Customer / Supplier', doc.party_type == "Customer" ? doc.customer : doc.supplier]
-	];
-
-	$.each(check_fields, function(i, v) {
-		if(!v[1]) frappe.throw(__("Please select {0} first", [v[0]]));
+	$.each(["Company", "Party Type", "Party", "Received or Paid"], function(i, field) {
+		if(!doc[frappe.model.scrub(field)]]) frappe.throw(__("Please select {0} first", [field]));
 	});
 }

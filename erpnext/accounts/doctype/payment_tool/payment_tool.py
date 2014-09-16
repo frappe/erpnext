@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _, scrub
+from frappe import _
 from frappe.utils import flt
 from frappe.model.document import Document
 import json
@@ -37,6 +37,8 @@ class PaymentTool(Document):
 			if v.payment_amount:
 				d1 = jv.append("entries")
 				d1.account = self.party_account
+				d1.party_type = self.party_type
+				d1.party = self.party
 				d1.balance = get_balance_on(self.party_account)
 				d1.set("debit" if self.received_or_paid=="Paid" else "credit", flt(v.payment_amount))
 				d1.set(invoice_voucher_type.get(v.against_voucher_type), v.against_voucher_no)
@@ -50,10 +52,6 @@ class PaymentTool(Document):
 			d2.balance = get_balance_on(self.payment_account)
 
 		return jv.as_dict()
-
-@frappe.whitelist()
-def get_party_account(party_type, party_name):
-	return frappe.db.get_value("Account", {"master_type": party_type, "master_name": party_name})
 
 @frappe.whitelist()
 def get_outstanding_vouchers(args):
@@ -72,13 +70,14 @@ def get_outstanding_vouchers(args):
 		frappe.throw(_("Please enter the Against Vouchers manually"))
 
 	# Get all outstanding sales /purchase invoices
-	outstanding_invoices = get_outstanding_invoices(amount_query, args.get("party_account"))
+	outstanding_invoices = get_outstanding_invoices(amount_query, args.get("party_account"),
+		args.get("party_type"), args.get("party"))
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
-	orders_to_be_billed = get_orders_to_be_billed(args.get("party_type"), args.get("party_name"))
+	orders_to_be_billed = get_orders_to_be_billed(args.get("party_type"), args.get("party"))
 	return outstanding_invoices + orders_to_be_billed
 
-def get_orders_to_be_billed(party_type, party_name):
+def get_orders_to_be_billed(party_type, party):
 	voucher_type = 'Sales Order' if party_type == "Customer" else 'Purchase Order'
 	orders = frappe.db.sql("""
 		select
@@ -93,8 +92,7 @@ def get_orders_to_be_billed(party_type, party_name):
 			and docstatus = 1
 			and ifnull(grand_total, 0) > ifnull(advance_paid, 0)
 			and ifnull(per_billed, 0) < 100.0
-		""" % (voucher_type, 'customer' if party_type == "Customer" else 'supplier', '%s'),
-		party_name, as_dict = True)
+		""" % (voucher_type, 'customer' if party_type == "Customer" else 'supplier', '%s'), party, as_dict = True)
 
 	order_list = []
 	for d in orders:
