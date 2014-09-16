@@ -138,12 +138,6 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Item-wise Last Purchase Rate",
-					"doctype": "Item"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
 					"name": "Purchase Order Trends",
 					"doctype": "Purchase Order"
 				},
