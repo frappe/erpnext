@@ -26,6 +26,8 @@ website_generators = ["Item Group", "Item", "Sales Partner"]
 
 standard_queries = "Customer:erpnext.selling.doctype.customer.customer.get_customer_list"
 
+communication_covert_to = ["Lead", "Support Ticket", "Job Application"]
+
 doc_events = {
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_qty",
