@@ -243,8 +243,10 @@ def make_charts():
 				val["root_type"] = ""
 
 		with open(os.path.join("erpnext", "erpnext", "accounts", "doctype", "account", "chart_of_accounts",
-			filename + ".json"), "w") as chartfile:
-			chartfile.write(json.dumps(chart, indent=4, sort_keys=True))
+			filename + ".json"), "rw") as chartfile:
+			old_content = json.loads(chartfile.read())
+			if old_content.get("is_active", "No") == "No":
+				chartfile.write(json.dumps(chart, indent=4, sort_keys=True))
 
 		all_roots.setdefault(filename, chart["tree"].keys())
 

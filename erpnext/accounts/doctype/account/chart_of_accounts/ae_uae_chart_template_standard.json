@@ -1,6 +1,7 @@
 {
     "country_code": "ae",
-    "name": "U.A.E Chart of Accounts - Standard",
+    "name": "U.A.E Chart of Accounts",
+	"is_active": "Yes",
     "tree": {
         "Assets": {
             "Current Assets": {
@@ -87,7 +88,8 @@
                         "Shipment Insurance": {},
                         "Shipment Other Charges": {},
                         "Shipments Documentation Charges": {},
-                        "Supplier Cost": {}
+                        "Supplier Cost": {},
+						"account_type": "Stock"
                     }
                 },
                 "Perliminary and Preoperating Expenses": {
