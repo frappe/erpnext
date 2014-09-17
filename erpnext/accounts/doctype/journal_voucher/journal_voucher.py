@@ -7,6 +7,8 @@ from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, money_in_wor
 from frappe import msgprint, _, scrub
 from erpnext.setup.utils import get_company_currency
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.accounts.utils import get_balance_on
+
 
 class JournalVoucher(AccountsController):
 	def __init__(self, arg1, arg2=None):
@@ -400,7 +402,6 @@ class JournalVoucher(AccountsController):
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, voucher_type):
-	from erpnext.accounts.utils import get_balance_on
 	account = frappe.db.get_value("Company", company,
 		voucher_type=="Bank Voucher" and "default_bank_account" or "default_cash_account")
 	if account:
@@ -421,6 +422,7 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 	jv.get("entries")[0].party_type = "Customer"
 	jv.get("entries")[0].party = si.customer
 	jv.get("entries")[0].balance = get_balance_on(si.debit_to)
+	jv.get("entries")[0].party_balance = get_balance_on(si.customer, "Customer")
 	jv.get("entries")[0].credit = si.outstanding_amount
 	jv.get("entries")[0].against_invoice = si.name
 
@@ -431,7 +433,6 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 
 @frappe.whitelist()
 def get_payment_entry_from_purchase_invoice(purchase_invoice):
-	from erpnext.accounts.utils import get_balance_on
 	pi = frappe.get_doc("Purchase Invoice", purchase_invoice)
 	jv = get_payment_entry(pi)
 	jv.remark = 'Payment against Purchase Invoice {0}. {1}'.format(pi.name, pi.remarks)
@@ -441,6 +442,7 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	jv.get("entries")[0].party_type = "Supplier"
 	jv.get("entries")[0].party = pi.supplier
 	jv.get("entries")[0].balance = get_balance_on(pi.credit_to)
+	jv.get("entries")[0].party_balance = get_balance_on(pi.supplier, "Supplier")
 	jv.get("entries")[0].debit = pi.outstanding_amount
 	jv.get("entries")[0].against_voucher = pi.name
 
@@ -469,7 +471,6 @@ def get_payment_entry(doc):
 @frappe.whitelist()
 def get_opening_accounts(company):
 	"""get all balance sheet accounts for opening entry"""
-	from erpnext.accounts.utils import get_balance_on
 	accounts = frappe.db.sql_list("""select name from tabAccount
 		where group_or_ledger='Ledger' and report_type='Balance Sheet' and company=%s""", company)
 
@@ -508,3 +509,17 @@ def get_outstanding(args):
 		return {
 			"debit": flt(frappe.db.get_value("Purchase Invoice", args["docname"], "outstanding_amount"))
 		}
+
+@frappe.whitelist()
+def get_party_account_and_balance(company, party_type, party):
+	from erpnext.accounts.party import get_party_account
+	account = get_party_account(company, party, party_type)
+
+	account_balance = get_balance_on(account=account)
+	party_balance = get_balance_on(party_type=party_type, party=party)
+
+	return {
+		"account": account,
+		"balance": account_balance,
+		"party_balance": party_balance
+	}

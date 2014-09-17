@@ -40,13 +40,15 @@ def validate_fiscal_year(date, fiscal_year, label="Date"):
 		throw(_("{0} '{1}' not in Fiscal Year {2}").format(label, formatdate(date), fiscal_year))
 
 @frappe.whitelist()
-def get_balance_on(account=None, date=None):
+def get_balance_on(account=None, date=None, party_type=None, party=None):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
+	if not date and frappe.form_dict.get("date"):
 		date = frappe.form_dict.get("date")
-
-	acc = frappe.get_doc("Account", account)
-	acc.check_permission("read")
+	if not party_type and frappe.form_dict.get("party_type"):
+		party_type = frappe.form_dict.get("party_type")
+	if not party and frappe.form_dict.get("party"):
+		party = frappe.form_dict.get("party")
 
 	cond = []
 	if date:
@@ -67,19 +69,27 @@ def get_balance_on(account=None, date=None):
 			# hence, assuming balance as 0.0
 			return 0.0
 
-	# for pl accounts, get balance within a fiscal year
-	if acc.report_type == 'Profit and Loss':
-		cond.append("posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" \
-			% year_start_date)
+	if account:
+		acc = frappe.get_doc("Account", account)
+		acc.check_permission("read")
 
-	# different filter for group and ledger - improved performance
-	if acc.group_or_ledger=="Group":
-		cond.append("""exists (
-			select * from `tabAccount` ac where ac.name = gle.account
-			and ac.lft >= %s and ac.rgt <= %s
-		)""" % (acc.lft, acc.rgt))
-	else:
-		cond.append("""gle.account = "%s" """ % (account.replace('"', '\\"'), ))
+		# for pl accounts, get balance within a fiscal year
+		if acc.report_type == 'Profit and Loss':
+			cond.append("posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" \
+				% year_start_date)
+
+		# different filter for group and ledger - improved performance
+		if acc.group_or_ledger=="Group":
+			cond.append("""exists (
+				select * from `tabAccount` ac where ac.name = gle.account
+				and ac.lft >= %s and ac.rgt <= %s
+			)""" % (acc.lft, acc.rgt))
+		else:
+			cond.append("""gle.account = "%s" """ % (account.replace('"', '\\"'), ))
+
+	if party_type and party:
+		cond.append("""gle.party_type = "%s" and gle.party = "%s" """ %
+			(party_type.replace('"', '\\"'), party.replace('"', '\\"')))
 
 	bal = frappe.db.sql("""
 		SELECT sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))

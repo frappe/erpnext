@@ -77,15 +77,18 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 	},
 
 	setup_balance_formatter: function() {
-		var df = frappe.meta.get_docfield("Journal Voucher Detail", "balance", this.frm.doc.name);
-		df.formatter = function(value, df, options, doc) {
-			var currency = frappe.meta.get_field_currency(df, doc);
-			var dr_or_cr = value ? ('<label>' + (value > 0.0 ? __("Dr") : __("Cr")) + '</label>') : "";
-			return "<div style='text-align: right'>"
-				+ ((value==null || value==="") ? "" : format_currency(Math.abs(value), currency))
-				+ " " + dr_or_cr
-				+ "</div>";
-		}
+		var me = this;
+		$.each(["balance", "party_balance"], function(i, field) {
+			var df = frappe.meta.get_docfield("Journal Voucher Detail", field, me.frm.doc.name);
+			df.formatter = function(value, df, options, doc) {
+				var currency = frappe.meta.get_field_currency(df, doc);
+				var dr_or_cr = value ? ('<label>' + (value > 0.0 ? __("Dr") : __("Cr")) + '</label>') : "";
+				return "<div style='text-align: right'>"
+					+ ((value==null || value==="") ? "" : format_currency(Math.abs(value), currency))
+					+ " " + dr_or_cr
+					+ "</div>";
+			}
+		})
 	},
 
 	against_voucher: function(doc, cdt, cdn) {
@@ -259,19 +262,15 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 }
 
 frappe.ui.form.on("Journal Voucher Detail", "party", function(frm, cdt, cdn) {
-	var d = locals[cdt][cdn];
+	var d = frappe.get_doc(cdt, cdn);
 	if(!d.account && d.party_type && d.party) {
-		return frappe.call({
-			method: "erpnext.accounts.party.get_party_account",
+		return frm.call({
+			method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_party_account_and_balance",
+			child: d,
 			args: {
 				company: frm.doc.company,
 				party_type: d.party_type,
 				party: d.party
-			},
-			callback: function(r) {
-				if(!r.exc && r.message) {
-					frappe.model.set_value(cdt, cdn, "account", r.message);
-				}
 			}
 		});
 	}
