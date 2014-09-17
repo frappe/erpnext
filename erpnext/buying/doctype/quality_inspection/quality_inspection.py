@@ -9,6 +9,14 @@ from frappe.model.document import Document
 
 class QualityInspection(Document):
 
+	def validate(self):
+		self.validate_stock_entry_no()
+
+	def validate_stock_entry_no(self):
+		if self.inspection_type == 'Manufacture':
+			if not self.stock_entry_no:
+				frappe.throw(_("Stock Entry Number is mandatory for Inspection Type Manufacture."))
+
 	def get_item_specification_details(self):
 		self.set('qa_specification_details', [])
 		specification = frappe.db.sql("select specification, value from `tabItem Quality Inspection Parameter` \
