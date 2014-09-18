@@ -937,7 +937,5 @@ def make_return_jv_from_purchase_receipt(se, ref):
 
 	if len(invoice_against_receipt) == 1:
 		parent["against_voucher"] = invoice_against_receipt[0]
-
 	result = [parent] + [{"account": account} for account in children]
-
 	return result

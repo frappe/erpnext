@@ -31,13 +31,22 @@ def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 		error_msg = _("""{0} {1} not in any Fiscal Year""").format(label, formatdate(date))
 		if verbose: frappe.msgprint(error_msg)
 		raise FiscalYearError, error_msg
-
 	return fy
 
 def validate_fiscal_year(date, fiscal_year, label="Date"):
 	years = [f[0] for f in get_fiscal_years(date, label=label)]
 	if fiscal_year not in years:
 		throw(_("{0} '{1}' not in Fiscal Year {2}").format(label, formatdate(date), fiscal_year))
+
+@frappe.whitelist()
+def fetch_fiscal_year(company, posting_date):
+	fy= frappe.db.sql("""select name from `tabFiscal Year` where (company = %s or company ="") 
+		and %s >= year_start_date and %s <= year_end_date order by year_start_date desc""",
+		(company, posting_date, posting_date))
+	if not fy:
+		return None
+	else:
+		return fy[0]
 
 @frappe.whitelist()
 def get_balance_on(account=None, date=None):

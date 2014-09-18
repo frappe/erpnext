@@ -457,4 +457,34 @@ cur_frm.fields_dict.customer.get_query = function(doc, cdt, cdn) {
 cur_frm.fields_dict.supplier.get_query = function(doc, cdt, cdn) {
 	return { query: "erpnext.controllers.queries.supplier_query" }
 }
+
+cur_frm.cscript.company = function(doc, cdt, cdn) {
+	cur_frm.refresh_fields();
+	frappe.call({
+			type:"GET",
+			method: "erpnext.accounts.utils.fetch_fiscal_year",
+			args: {
+				"company": doc.company,
+				"posting_date": doc.posting_date
+			},
+			callback: function(r) {
+				if (r.message != null)	cur_frm.set_value("fiscal_year",r.message);
+			}
+	});
+}
+
+cur_frm.cscript.posting_date = function(doc) {
+	frappe.call({
+			type:"GET",
+			method: "erpnext.accounts.utils.fetch_fiscal_year",
+			args: {
+				"company": doc.company,
+				"posting_date": doc.posting_date
+			},
+			callback: function(r) {
+				if (r.message != null)	cur_frm.set_value("fiscal_year",r.message);
+			}
+	});
+}
+
 cur_frm.add_fetch('production_order', 'total_fixed_cost', 'total_fixed_cost');
