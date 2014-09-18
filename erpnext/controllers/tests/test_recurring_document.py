@@ -41,6 +41,20 @@ def test_recurring_document(obj, test_records):
 		date_field = "transaction_date"
 	elif base_doc.doctype == "Sales Invoice":
 		date_field = "posting_date"
+	#for Purchase order/purchase invoice
+	if base_doc.doctype == "Purchase Order":
+		base_doc.update({
+			"transaction_date": today
+		})
+	elif base_doc.doctype == "Purchase Invoice":
+		base_doc.update({
+			"posting_date": today
+		})
+
+	if base_doc.doctype == "Purchase Order":
+		date_field = "transaction_date"
+	elif base_doc.doctype == "Purchase Invoice":
+		date_field = "posting_date"
 
 	# monthly
 	doc1 = frappe.copy_doc(base_doc)

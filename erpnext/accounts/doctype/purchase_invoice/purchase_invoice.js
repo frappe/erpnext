@@ -233,6 +233,41 @@ cur_frm.fields_dict['entries'].grid.get_field('project_name').get_query = functi
 }
 
 
+
+cur_frm.cscript.is_recurring = function(doc, dt, dn) {
+	// set default values for recurring invoices
+	if(doc.is_recurring) {
+		var owner_email = doc.owner=="Administrator"
+			? frappe.user_info("Administrator").email
+			: doc.owner;
+
+		doc.notification_email_address = $.map([cstr(owner_email),
+			cstr(doc.contact_email)], function(v) { return v || null; }).join(", ");
+		doc.repeat_on_day_of_month = frappe.datetime.str_to_obj(doc.posting_date).getDate();
+	}
+
+	refresh_many(["notification_email_address", "repeat_on_day_of_month"]);
+}
+
+
+cur_frm.cscript.from_date = function(doc, dt, dn) {
+	// set to_date
+	if(doc.from_date) {
+		var recurring_type_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6,
+			'Yearly': 12};
+
+		var months = recurring_type_map[doc.recurring_type];
+		if(months) {
+			var to_date = frappe.datetime.add_months(doc.from_date,
+				months);
+			doc.to_date = frappe.datetime.add_days(to_date, -1);
+			refresh_field('to_date');
+		}
+	}
+}
+
+
+
 cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 	if(doc.select_print_heading){
 		// print heading
