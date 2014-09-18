@@ -49,6 +49,7 @@ class PurchaseInvoice(BuyingController):
 		self.check_conversion_rate()
 		self.validate_credit_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advance_allocation_details")
+		self.validate_advance_jv("advance_allocation_details", "purchase_order")
 		self.check_for_acc_head_of_supplier()
 		self.check_for_stopped_status()
 		self.validate_with_previous_doc()
@@ -80,7 +81,7 @@ class PurchaseInvoice(BuyingController):
 
 	def get_advances(self):
 		super(PurchaseInvoice, self).get_advances(self.credit_to,
-			"Purchase Invoice Advance", "advance_allocation_details", "debit")
+			"Purchase Invoice Advance", "advance_allocation_details", "debit", "purchase_order")
 
 	def check_active_purchase_items(self):
 		for d in self.get('entries'):
