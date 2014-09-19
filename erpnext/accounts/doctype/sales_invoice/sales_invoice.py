@@ -56,6 +56,7 @@ class SalesInvoice(SellingController):
 		self.validate_debit_acc()
 		self.validate_fixed_asset_account()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advance_adjustment_details")
+		self.validate_advance_jv("advance_adjustment_details", "sales_order")
 		self.add_remarks()
 
 		if cint(self.is_pos):
@@ -222,7 +223,7 @@ class SalesInvoice(SellingController):
 
 	def get_advances(self):
 		super(SalesInvoice, self).get_advances(self.debit_to,
-			"Sales Invoice Advance", "advance_adjustment_details", "credit")
+			"Sales Invoice Advance", "advance_adjustment_details", "credit", "sales_order")
 
 	def get_company_abbr(self):
 		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
