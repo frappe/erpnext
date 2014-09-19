@@ -362,6 +362,9 @@ class AccountsController(TransactionBase):
 
 	def get_advances(self, account_head, child_doctype, parentfield, dr_or_cr, against_order_field):
 		so_list = list(set([d.get(against_order_field) for d in self.get("entries") if d.get(against_order_field)]))
+		cond = ""
+		if so_list:
+			cond = "or (ifnull(t2.%s, '')  in (%s))" % ("against_" + against_order_field, ', '.join(['%s']*len(so_list)))
 
 		res = frappe.db.sql("""
 			select
@@ -376,12 +379,9 @@ class AccountsController(TransactionBase):
 						and ifnull(t2.against_jv, '')  = ''
 						and ifnull(t2.against_sales_order, '')  = ''
 						and ifnull(t2.against_purchase_order, '')  = ''
-					) or (
-						ifnull(t2.%s, '')  in (%s)
-					)
-				)
+					) %s)
 			order by t1.posting_date""" %
-			(dr_or_cr, '%s', "against_" + against_order_field, ', '.join(['%s']*len(so_list))),
+			(dr_or_cr, '%s', cond),
 			tuple([account_head] + so_list), as_dict= True)
 
 		self.set(parentfield, [])
