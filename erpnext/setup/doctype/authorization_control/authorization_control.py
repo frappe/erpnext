@@ -40,7 +40,7 @@ class AuthorizationControl(TransactionBase):
 		chk = 1
 		add_cond1,add_cond2	= '',''
 		if based_on == 'Itemwise Discount':
-			add_cond1 += " and master_name = '"+cstr(item).replace("'", "\'")+"'"
+			add_cond1 += " and master_name = '"+cstr(item).replace("'", "\\'")+"'"
 			itemwise_exists = frappe.db.sql("""select value from `tabAuthorization Rule`
 				where transaction = %s and value <= %s
 				and based_on = %s and company = %s and docstatus != 2 %s %s""" %
@@ -76,7 +76,7 @@ class AuthorizationControl(TransactionBase):
 		add_cond = ''
 		auth_value = av_dis
 
-		if val == 1: add_cond += " and system_user = '"+session['user'].replace("'", "\'")+"'"
+		if val == 1: add_cond += " and system_user = '"+session['user'].replace("'", "\\'")+"'"
 		elif val == 2: add_cond += " and system_role IN %s" % ("('"+"','".join(frappe.user.get_roles())+"')")
 		else: add_cond += " and ifnull(system_user,'') = '' and ifnull(system_role,'') = ''"
 
@@ -85,7 +85,7 @@ class AuthorizationControl(TransactionBase):
 			if doc_obj:
 				if doc_obj.doctype == 'Sales Invoice': customer = doc_obj.customer
 				else: customer = doc_obj.customer_name
-				add_cond = " and master_name = '"+cstr(customer).replace("'", "\'")+"'"
+				add_cond = " and master_name = '"+cstr(customer).replace("'", "\\'")+"'"
 		if based_on == 'Itemwise Discount':
 			if doc_obj:
 				for t in doc_obj.get(doc_obj.fname):
