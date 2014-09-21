@@ -155,7 +155,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 							project_name: item.project_name || me.frm.doc.project_name
 						}
 					},
-					
+
 					callback: function(r) {
 						if(!r.exc) {
 							me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
@@ -827,4 +827,35 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				.appendTo($(this.frm.fields_dict.other_charges_calculation.wrapper).empty());
 		}
 	},
+
+	is_recurring: function() {
+		// set default values for recurring documents
+		if(this.frm.doc.is_recurring) {
+			var owner_email = this.frm.doc.owner=="Administrator"
+				? frappe.user_info("Administrator").email
+				: this.frm.doc.owner;
+
+			this.frm.doc.notification_email_address = $.map([cstr(owner_email),
+				cstr(this.frm.doc.contact_email)], function(v) { return v || null; }).join(", ");
+			this.frm.doc.repeat_on_day_of_month = frappe.datetime.str_to_obj(this.frm.doc.posting_date).getDate();
+		}
+
+		refresh_many(["notification_email_address", "repeat_on_day_of_month"]);
+	},
+
+	from_date: function() {
+		// set to_date
+		if(this.frm.doc.from_date) {
+			var recurring_type_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6,
+				'Yearly': 12};
+
+			var months = recurring_type_map[this.frm.doc.recurring_type];
+			if(months) {
+				var to_date = frappe.datetime.add_months(this.frm.doc.from_date,
+					months);
+				this.frm.doc.to_date = frappe.datetime.add_days(to_date, -1);
+				refresh_field('to_date');
+			}
+		}
+	}
 });

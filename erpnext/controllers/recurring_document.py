@@ -12,6 +12,12 @@ from erpnext.accounts.party import get_party_account, get_due_date, get_party_de
 from frappe.model.mapper import get_mapped_doc
 
 month_map = {'Monthly': 1, 'Quarterly': 3, 'Half-yearly': 6, 'Yearly': 12}
+date_field_map = {
+	"Sales Order": "transaction_date",
+	"Sales Invoice": "posting_date",
+	"Purchase Order": "transaction_date",
+	"Purchase Invoice": "posting_date"
+}
 
 def create_recurring_documents():
 	manage_recurring_documents("Sales Order")
@@ -26,14 +32,7 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 	"""
 	next_date = next_date or nowdate()
 
-	if doctype == "Sales Order":
-		date_field = "transaction_date"
-	elif doctype == "Sales Invoice":
-		date_field = "posting_date"
-	elif doctype == "Purchase Order":
-		date_field = "transaction_date"
-	elif doctype == "Purchase Invoice":
-		date_field = "posting_date"
+	date_field = date_field_map[doctype]
 
 	recurring_documents = frappe.db.sql("""select name, recurring_id
 		from `tab{}` where ifnull(is_recurring, 0)=1
@@ -60,9 +59,10 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 
 					frappe.db.begin()
 					frappe.db.sql("update `tab%s` \
-						set is_recurring = 0 where name = %s" % (doctype, '%s'), 
+						set is_recurring = 0 where name = %s" % (doctype, '%s'),
 						(ref_document))
-					notify_errors(ref_document, doctype, ref_wrapper.customer, ref_wrapper.owner)
+					notify_errors(ref_document, doctype, ref_wrapper.get("customer") or ref_wrapper.get("supplier"),
+						ref_wrapper.owner)
 					frappe.db.commit()
 
 				exception_list.append(frappe.get_traceback())
@@ -129,7 +129,7 @@ def send_notification(new_rv):
 			"fcontent": frappe.get_print_format(new_rv.doctype, new_rv.name, as_pdf=True)
 		}])
 
-def notify_errors(doc, doctype, customer, owner):
+def notify_errors(doc, doctype, party, owner):
 	from frappe.utils.user import get_system_managers
 	recipients = get_system_managers(only_name=True)
 
@@ -138,7 +138,7 @@ def notify_errors(doc, doctype, customer, owner):
 		message = frappe.get_template("templates/emails/recurring_document_failed.html").render({
 			"type": doctype,
 			"name": doc,
-			"customer": customer
+			"party": party
 		}))
 
 	assign_task_to_owner(doc, doctype, "Recurring Invoice Failed", recipients)

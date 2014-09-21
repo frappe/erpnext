@@ -4,12 +4,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import add_days, cint, cstr, today, date_diff, flt, getdate, nowdate, \
-	get_first_day, get_last_day
-from frappe.model.naming import make_autoname
+from frappe.utils import cint, today, flt
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 import json
 
 class AccountsController(TransactionBase):
@@ -23,6 +22,24 @@ class AccountsController(TransactionBase):
 			self.set_total_in_words()
 
 		self.validate_for_freezed_account()
+
+		if self.meta.get_field("is_recurring"):
+			validate_recurring_document(self)
+
+	def on_submit(self):
+		if self.meta.get_field("is_recurring"):
+			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
+
+	def on_update_after_submit(self):
+		if self.meta.get_field("is_recurring"):
+			validate_recurring_document(self)
+			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
+
+	def before_recurring(self):
+		self.fiscal_year = None
+		for fieldname in ("due_date", "aging_date"):
+			if self.meta.get_field(fieldname):
+				self.set(fieldname, None)
 
 	def set_missing_values(self, for_validate=False):
 		for fieldname in ["posting_date", "transaction_date"]:
@@ -421,7 +438,6 @@ class AccountsController(TransactionBase):
 					max_allowed_amt = flt(ref_amt * (100 + tolerance) / 100)
 
 					if total_billed_amt - max_allowed_amt > 0.01:
-						reduce_by = total_billed_amt - max_allowed_amt
 						frappe.throw(_("Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in Stock Settings").format(item.item_code, item.idx, max_allowed_amt))
 
 	def get_company_default(self, fieldname):

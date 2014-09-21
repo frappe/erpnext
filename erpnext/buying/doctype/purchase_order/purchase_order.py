@@ -6,9 +6,6 @@ import frappe
 from frappe.utils import cstr, flt
 from frappe import msgprint, _, throw
 from frappe.model.mapper import get_mapped_doc
-
-from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
-
 from erpnext.controllers.buying_controller import BuyingController
 
 form_grid_templates = {
@@ -55,8 +52,6 @@ class PurchaseOrder(BuyingController):
 		self.validate_for_subcontracting()
 		self.validate_minimum_order_qty()
 		self.create_raw_materials_supplied("po_raw_material_details")
-		
-		validate_recurring_document(self)
 
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc(self.tname, {
@@ -167,6 +162,8 @@ class PurchaseOrder(BuyingController):
 		msgprint(_("Status of {0} {1} is now {2}").format(self.doctype, self.name, status))
 
 	def on_submit(self):
+		super(PurchaseOrder, self).on_submit()
+
 		purchase_controller = frappe.get_doc("Purchase Common")
 
 		self.update_prevdoc_status()
@@ -178,8 +175,6 @@ class PurchaseOrder(BuyingController):
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 
 		frappe.db.set(self,'status','Submitted')
-		
-		convert_to_recurring(self, self.transaction_date)
 
 	def on_cancel(self):
 		pc_obj = frappe.get_doc('Purchase Common')
@@ -203,10 +198,6 @@ class PurchaseOrder(BuyingController):
 
 	def on_update(self):
 		pass
-
-	def on_update_after_submit(self):
-		validate_recurring_document(self)
-		convert_to_recurring(self, self.transaction_date)
 
 def set_missing_values(source, target):
 	target.ignore_pricing_rule = 1

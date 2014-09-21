@@ -109,7 +109,6 @@ class TestPurchaseOrder(unittest.TestCase):
 
 	def test_recurring_order(self):
 		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
-
 		test_recurring_document(self, test_records)
 
 

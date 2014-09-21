@@ -5,19 +5,13 @@ from __future__ import unicode_literals
 import frappe
 
 
-from frappe.utils import add_days, cint, cstr, date_diff, formatdate, flt, getdate, nowdate, \
-	get_first_day, get_last_day
-from frappe.model.naming import make_autoname
-
+from frappe.utils import cint, cstr, formatdate, flt
 from frappe import msgprint, _, throw
 from erpnext.setup.utils import get_company_currency
-
 import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
-
-from erpnext.controllers.recurring_document import *
 
 form_grid_templates = {
 	"entries": "templates/form_grid/item_grid.html"
@@ -66,7 +60,6 @@ class PurchaseInvoice(BuyingController):
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount",
 			"purchase_receipt_details")
 		self.create_remarks()
-		validate_recurring_document(self)
 
 	def create_remarks(self):
 		if not self.remarks:
@@ -255,6 +248,8 @@ class PurchaseInvoice(BuyingController):
 			reconcile_against_document(lst)
 
 	def on_submit(self):
+		super(PurchaseInvoice, self).on_submit()
+
 		self.check_prev_docstatus()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
@@ -265,11 +260,6 @@ class PurchaseInvoice(BuyingController):
 		self.update_against_document_in_jv()
 		self.update_prevdoc_status()
 		self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
-		convert_to_recurring(self, self.posting_date)
-
-	def on_update_after_submit(self):
-		validate_recurring_document(self)
-		convert_to_recurring(self, self.posting_date)
 
 	def make_gl_entries(self):
 		auto_accounting_for_stock = \
