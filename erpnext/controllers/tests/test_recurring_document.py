@@ -2,12 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-import unittest, json, copy
-from frappe.utils import flt
 import frappe.permissions
-from erpnext.accounts.utils import get_stock_and_account_difference
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
-from erpnext.projects.doctype.time_log_batch.test_time_log_batch import *
+from erpnext.controllers.recurring_document import date_field_map
 
 def test_recurring_document(obj, test_records):
 	from frappe.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate, add_days
@@ -27,20 +23,11 @@ def test_recurring_document(obj, test_records):
 		"to_date": get_last_day(today)
 	})
 
-	if base_doc.doctype == "Sales Order":
-		base_doc.update({
-			"transaction_date": today,
-			"delivery_date": add_days(today, 15)
-		})
-	elif base_doc.doctype == "Sales Invoice":
-		base_doc.update({
-			"posting_date": today
-		})
+	date_field = date_field_map[base_doc.doctype]
+	base_doc.set(date_field, today)
 
 	if base_doc.doctype == "Sales Order":
-		date_field = "transaction_date"
-	elif base_doc.doctype == "Sales Invoice":
-		date_field = "posting_date"
+		base_doc.set("delivery_date", add_days(today, 15))
 
 	# monthly
 	doc1 = frappe.copy_doc(base_doc)
@@ -128,7 +115,7 @@ def _test_recurring_document(obj, base_doc, date_field, first_and_last_day):
 
 		next_date = get_next_date(base_doc.get(date_field), no_of_months,
 			base_doc.repeat_on_day_of_month)
-		
+
 		manage_recurring_documents(base_doc.doctype, next_date=next_date, commit=False)
 
 		recurred_documents = frappe.db.sql("""select name from `tab%s`
