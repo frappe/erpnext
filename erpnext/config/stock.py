@@ -28,6 +28,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Installation Note",
+					"description": _("Installation record for a Serial No.")
+				},
+				{
+					"type": "doctype",
 					"name": "Item",
 					"description": _("All Products or Services."),
 				},
@@ -56,11 +61,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Stock Reconciliation",
 					"description": _("Upload stock balance via csv.")
-				},
-				{
-					"type": "doctype",
-					"name": "Installation Note",
-					"description": _("Installation record for a Serial No.")
 				},
 				{
 					"type": "doctype",
