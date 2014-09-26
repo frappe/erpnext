@@ -6,10 +6,10 @@ import frappe
 import frappe.defaults
 from frappe.utils import cint, cstr, flt
 from frappe import _, msgprint, throw
-
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.controllers.stock_controller import update_gl_entries_after
 from frappe.model.mapper import get_mapped_doc
+
 from erpnext.controllers.selling_controller import SellingController
 
 form_grid_templates = {
@@ -473,9 +473,8 @@ class SalesInvoice(SellingController):
 
 			if repost_future_gle and cint(self.update_stock) \
 				and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-					items, warehouse_account = self.get_items_and_warehouse_accounts()
-					update_gl_entries_after(self.posting_date, self.posting_time,
-						warehouse_account, items)
+					items, warehouses = self.get_items_and_warehouses()
+					update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
 
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import merge_similar_entries
