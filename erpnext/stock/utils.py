@@ -159,18 +159,27 @@ def get_sales_bom_buying_amount(item_code, warehouse, voucher_type, voucher_no, 
 
 	return buying_amount
 
-def get_buying_amount(voucher_type, voucher_no, item_row, stock_ledger_entries):
+def get_buying_amount(item_code, item_qty, voucher_type, voucher_no, item_row, stock_ledger_entries):
 	# IMP NOTE
 	# stock_ledger_entries should already be filtered by item_code and warehouse and
 	# sorted by posting_date desc, posting_time desc
-	for i, sle in enumerate(stock_ledger_entries):
-		if sle.voucher_type == voucher_type and sle.voucher_no == voucher_no and \
-			sle.voucher_detail_no == item_row:
-				previous_stock_value = len(stock_ledger_entries) > i+1 and \
-					flt(stock_ledger_entries[i+1].stock_value) or 0.0
-				buying_amount =  previous_stock_value - flt(sle.stock_value)
+	if frappe.db.get_value("Item", item_code, "is_stock_item") == "Yes":
+		for i, sle in enumerate(stock_ledger_entries):
+			if sle.voucher_type == voucher_type and sle.voucher_no == voucher_no and \
+				sle.voucher_detail_no == item_row:
+					previous_stock_value = len(stock_ledger_entries) > i+1 and \
+						flt(stock_ledger_entries[i+1].stock_value) or 0.0
+					buying_amount =  previous_stock_value - flt(sle.stock_value)
 
-				return buying_amount
+					return buying_amount
+	else:
+		item_rate = frappe.db.sql("""select sum(base_amount) / sum(qty)
+			from `tabPurchase Invoice Item`
+			where item_code = %s and docstatus=1""" % ('%s'), item_code)
+		buying_amount = flt(item_qty) * flt(item_rate[0][0])
+
+		return buying_amount
+
 	return 0.0
 
 

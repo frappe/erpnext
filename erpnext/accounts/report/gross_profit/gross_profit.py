@@ -14,7 +14,7 @@ def execute(filters=None):
 	source = get_source_data(filters)
 	item_sales_bom = get_item_sales_bom()
 	
-	columns = [__("Delivery Note/Sales Invoice") + "::120", _("Link") + "::30", _("Posting Date") + ":Date", _("Posting Time"), 
+	columns = [_("Delivery Note/Sales Invoice") + "::120", _("Link") + "::30", _("Posting Date") + ":Date", _("Posting Time"), 
 		_("Item Code") + ":Link/Item", _("Item Name"), _("Description"), _("Warehouse") + ":Link/Warehouse",
 		_("Qty") + ":Float", _("Selling Rate") + ":Currency", _("Avg. Buying Rate") + ":Currency", 
 		_("Selling Amount") + ":Currency", _("Buying Amount") + ":Currency",
@@ -29,7 +29,7 @@ def execute(filters=None):
 			buying_amount = get_sales_bom_buying_amount(row.item_code, row.warehouse, 
 				row.parenttype, row.name, row.item_row, stock_ledger_entries, item_sales_bom_map)
 		else:
-			buying_amount = get_buying_amount(row.parenttype, row.name, row.item_row,
+			buying_amount = get_buying_amount(row.item_code, row.qty, row.parenttype, row.name, row.item_row,
 				stock_ledger_entries.get((row.item_code, row.warehouse), []))
 		
 		buying_amount = buying_amount > 0 and buying_amount or 0
@@ -107,7 +107,6 @@ def get_source_data(filters):
 		timestamp(si.posting_date, si.posting_time) as posting_datetime
 		from `tabSales Invoice` si, `tabSales Invoice Item` item
 		where item.parent = si.name and si.docstatus = 1 %s
-		and si.update_stock = 1
 		order by si.posting_date desc, si.posting_time desc""" % (conditions,), filters, as_dict=1)
 	
 	source = delivery_note_items + sales_invoice_items
