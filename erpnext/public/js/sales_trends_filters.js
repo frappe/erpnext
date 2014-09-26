@@ -25,7 +25,7 @@ var get_filters = function(){
 				{ "value": "Customer", "label": __("Customer") },
 				{ "value": "Customer Group", "label": __("Customer Group") },
 				{ "value": "Territory", "label": __("Territory") },
-				{ "value": "Supplier Type", "label": __("Project") }
+				{ "value": "Project", "label": __("Project") }
 			],
 			"default": "Item"
 		},

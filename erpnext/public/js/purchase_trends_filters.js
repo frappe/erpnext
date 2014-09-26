@@ -24,7 +24,7 @@ var get_filters = function(){
 				{ "value": "Item Group", "label": __("Item Group") },
 				{ "value": "Supplier", "label": __("Supplier") },
 				{ "value": "Supplier Type", "label": __("Supplier Type") },
-				{ "value": "Supplier Type", "label": __("Project") }
+				{ "value": "Project", "label": __("Project") }
 			],
 			"default": "Item"
 		},

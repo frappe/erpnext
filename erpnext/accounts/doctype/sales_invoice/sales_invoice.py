@@ -4,17 +4,11 @@
 from __future__ import unicode_literals
 import frappe
 import frappe.defaults
-
-from frappe.utils import add_days, cint, cstr, date_diff, flt, getdate, nowdate, \
-	get_first_day, get_last_day
-from frappe.model.naming import make_autoname
+from frappe.utils import cint, cstr, flt
 from frappe import _, msgprint, throw
-
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.controllers.stock_controller import update_gl_entries_after
 from frappe.model.mapper import get_mapped_doc
-
-from erpnext.controllers.recurring_document import *
 
 from erpnext.controllers.selling_controller import SellingController
 
@@ -78,11 +72,12 @@ class SalesInvoice(SellingController):
 		self.set_against_income_account()
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
-		validate_recurring_document(self)
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount",
 			"delivery_note_details")
 
 	def on_submit(self):
+		super(SalesInvoice, self).on_submit()
+
 		if cint(self.update_stock) == 1:
 			self.update_stock_ledger()
 		else:
@@ -105,7 +100,6 @@ class SalesInvoice(SellingController):
 			self.update_against_document_in_jv()
 
 		self.update_time_log_batch(self.name)
-		convert_to_recurring(self, "RECINV.#####", self.posting_date)
 
 	def before_cancel(self):
 		self.update_time_log_batch(None)
@@ -145,14 +139,6 @@ class SalesInvoice(SellingController):
 				'second_join_field': 'prevdoc_detail_docname',
 				'overflow_type': 'delivery'
 			})
-
-	def on_update_after_submit(self):
-		validate_recurring_document(self)
-		convert_to_recurring(self, "RECINV.#####", self.posting_date)
-
-	def before_recurring(self):
-		self.aging_date = None
-		self.due_date = None
 
 	def get_portal_page(self):
 		return "invoice" if self.docstatus==1 else None
@@ -487,9 +473,8 @@ class SalesInvoice(SellingController):
 
 			if repost_future_gle and cint(self.update_stock) \
 				and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-					items, warehouse_account = self.get_items_and_warehouse_accounts()
-					update_gl_entries_after(self.posting_date, self.posting_time,
-						warehouse_account, items)
+					items, warehouses = self.get_items_and_warehouses()
+					update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
 
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import merge_similar_entries

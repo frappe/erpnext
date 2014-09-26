@@ -162,6 +162,8 @@ class PurchaseOrder(BuyingController):
 		msgprint(_("Status of {0} {1} is now {2}").format(self.doctype, self.name, status))
 
 	def on_submit(self):
+		super(PurchaseOrder, self).on_submit()
+
 		purchase_controller = frappe.get_doc("Purchase Common")
 
 		self.update_prevdoc_status()

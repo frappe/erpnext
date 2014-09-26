@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
 from frappe.utils import flt, rounded
+
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_details
 
