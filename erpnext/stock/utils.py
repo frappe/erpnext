@@ -176,7 +176,7 @@ def get_buying_amount(item_code, item_qty, voucher_type, voucher_no, item_row, s
 		item_rate = frappe.db.sql("""select sum(base_amount) / sum(qty)
 			from `tabPurchase Invoice Item`
 			where item_code = %s and docstatus=1""" % ('%s'), item_code)
-		buying_amount = flt(item_qty) * flt(item_rate[0][0])
+		buying_amount = flt(item_qty) * flt(item_rate[0][0]) if item_rate else 0
 
 		return buying_amount
 
