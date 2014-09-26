@@ -6,13 +6,23 @@ import unittest
 import frappe
 
 from frappe.test_runner import make_test_records
+from erpnext.stock.doctype.item.item import WarehouseNotSet, DuplicateVariant
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
 
 class TestItem(unittest.TestCase):
+	def test_duplicate_variant(self):
+		item = frappe.copy_doc(test_records[11])
+		item.append("item_variants", {"item_attribute": "Test Size", "item_attribute_value": "Small"})
+		self.assertRaises(DuplicateVariant, item.insert)
+
+	def test_item_creation(self):
+		frappe.delete_doc("Item", test_records[11].get("item_code"))
+		item = frappe.copy_doc(test_records[11])
+		item.insert()
+
 	def test_default_warehouse(self):
-		from erpnext.stock.doctype.item.item import WarehouseNotSet
 		item = frappe.copy_doc(test_records[0])
 		item.is_stock_item = "Yes"
 		item.default_warehouse = None

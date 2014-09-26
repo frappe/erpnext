@@ -35,10 +35,31 @@ erpnext.item.toggle_reqd = function(frm) {
 	frm.toggle_reqd("default_warehouse", frm.doc.is_stock_item==="Yes");
 };
 
-frappe.ui.form.on("Item", "is_stock_item", function(frm) {
-	erpnext.item.toggle_reqd(frm);
+frappe.ui.form.on("Item", "onload", function(frm) {
+	var df = frappe.meta.get_docfield("Item Variant", "item_attribute_value");
+	df.on_make = function(field) {
+		field.$input.autocomplete({
+			minLength: 0,
+			minChars: 0,
+			source: function(request, response) {
+				frappe.call({
+					method:"frappe.client.get_list",
+					args:{
+						doctype:"Item Attribute Value",
+						filters: [
+							["parent","=", field.doc.item_attribute],
+							["attribute_value", "like", request.term + "%"]
+						],
+						fields: ["attribute_value"]
+					},
+					callback: function(r) {
+						response($.map(r.message, function(d) { return d.attribute_value; }));
+					}
+				});
+			}
+		})
+	}
 });
-
 
 cur_frm.cscript.make_dashboard = function() {
 	cur_frm.dashboard.reset();

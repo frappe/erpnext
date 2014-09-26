@@ -11,6 +11,7 @@ from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 
 class WarehouseNotSet(frappe.ValidationError): pass
+class DuplicateVariant(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
 	page_title_field = "item_name"
@@ -50,6 +51,7 @@ class Item(WebsiteGenerator):
 		self.validate_barcode()
 		self.cant_change()
 		self.validate_item_type_for_reorder()
+		self.validate_variants_are_unique()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -61,6 +63,7 @@ class Item(WebsiteGenerator):
 		invalidate_cache_for_item(self)
 		self.validate_name_with_item_group()
 		self.update_item_price()
+		self.make_variants()
 
 	def get_context(self, context):
 		context["parent_groups"] = get_parent_item_groups(self.item_group) + \
@@ -113,6 +116,45 @@ class Item(WebsiteGenerator):
 
 			if not matched:
 				frappe.throw(_("Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module."))
+
+	def validate_variants_are_unique(self):
+		variants = []
+		for d in self.item_variants:
+			key = (d.item_attribute, d.item_attribute_value)
+			if key in variants:
+				frappe.throw(_("{0} {1} is entered more than once in Item Variants table").format(d.item_attribute,
+					d.item_attribute_value), DuplicateVariant)
+			variants.append(key)
+
+	def make_variants(self):
+		variant_dict = {}
+		variant_item_codes = []
+
+		for d in self.item_variants:
+			variant_dict.setdefault(d.item_attribute, []).append(d.item_attribute_value)
+
+		attributes = variant_dict.keys()
+		for d in frappe.get_list("Item Attribute", order_by = "priority asc", ignore_permissions=True):
+			if d.name in attributes:
+				attr = frappe.get_doc("Item Attribute", d.name)
+				abbr = dict((d.attribute_value, d.abbr) for d in attr.item_attribute_values)
+				for value in variant_dict[d.name]:
+					variant_item_codes.append(self.name + "-" + abbr[value])
+
+		# delete missing variants
+		existing_variants = [d.name for d in frappe.get_list("Item",
+			filters={"variant_of":self.name}, ignore_permissions=True)]
+
+		for existing_variant in existing_variants:
+			if existing_variant.name not in variant_item_codes:
+				frappe.delete_doc("Item", existing_variant.name)
+			else:
+				# update mandatory fields
+				pass
+
+		# for item_code in variant_item_codes:
+		# 	for
+
 
 	def validate_conversion_factor(self):
 		check_list = []
