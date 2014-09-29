@@ -26,7 +26,6 @@ status_map = {
 		["Ordered", "has_sales_order"],
 		["Replied", "communication_sent"],
 		["Cancelled", "eval:self.docstatus==2"],
-		["Open", "communication_received"],
 	],
 	"Sales Order": [
 		["Draft", None],
