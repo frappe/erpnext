@@ -10,7 +10,7 @@ from frappe.utils import now
 
 class SupportTicket(Document):
 	def get_feed(self):
-		return "{0}: {1}".format(_(self.status, self.subject))
+		return "{0}: {1}".format(_(self.status), self.subject)
 
 	def get_portal_page(self):
 		return "ticket"
