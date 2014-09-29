@@ -16,7 +16,7 @@ install:
   - sudo apt-get install mariadb-server mariadb-common libmariadbclient-dev
   - wget http://downloads.sourceforge.net/project/wkhtmltopdf/0.12.1/wkhtmltox-0.12.1_linux-precise-amd64.deb
   - sudo dpkg -i wkhtmltox-0.12.1_linux-precise-amd64.deb
-  - CFLAGS=-O0 pip install git+https://github.com/frappe/frappe.git@develop
+  - CFLAGS=-O0 pip install git+https://github.com/frappe/frappe.git@v5.0
   - CFLAGS=-O0 pip install --editable .
 
 before_script:
