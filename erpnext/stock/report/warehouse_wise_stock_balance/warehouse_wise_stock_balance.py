@@ -71,10 +71,10 @@ def get_item_warehouse_map(filters):
 	for d in sle:
 		iwb_map.setdefault(d.company, {}).setdefault(d.item_code, {}).\
 		setdefault(d.warehouse, frappe._dict({\
-				"opening_qty": 0.0, "opening_val": 0.0, 
-				"in_qty": 0.0, "in_val": 0.0, 
-				"out_qty": 0.0, "out_val": 0.0, 
-				"bal_qty": 0.0, "bal_val": 0.0, 
+				"opening_qty": 0.0, "opening_val": 0.0,
+				"in_qty": 0.0, "in_val": 0.0,
+				"out_qty": 0.0, "out_val": 0.0,
+				"bal_qty": 0.0, "bal_val": 0.0,
 				"val_rate": 0.0, "uom": None
 			}))
 		qty_dict = iwb_map[d.company][d.item_code][d.warehouse]
@@ -82,19 +82,19 @@ def get_item_warehouse_map(filters):
 
 		if d.posting_date < filters["from_date"]:
 			qty_dict.opening_qty += flt(d.actual_qty)
-			qty_dict.opening_val += flt(d.actual_qty * d.valuation_rate)
+			qty_dict.opening_val += flt(d.actual_qty) * flt(d.valuation_rate)
 		elif d.posting_date >= filters["from_date"] and d.posting_date <= filters["to_date"]:
 			qty_dict.val_rate = d.valuation_rate
 
 			if flt(d.actual_qty) > 0:
 				qty_dict.in_qty += flt(d.actual_qty)
-				qty_dict.in_val += flt(d.actual_qty * d.valuation_rate)
+				qty_dict.in_val += flt(d.actual_qty) * flt(d.valuation_rate)
 			else:
 				qty_dict.out_qty += abs(flt(d.actual_qty))
-				qty_dict.out_val += flt(abs(flt(d.actual_qty)) * d.valuation_rate)
+				qty_dict.out_val += flt(abs(flt(d.actual_qty) * flt(d.valuation_rate)))
 
 		qty_dict.bal_qty += flt(d.actual_qty)
-		qty_dict.bal_val += flt(d.actual_qty * d.valuation_rate)
+		qty_dict.bal_val += flt(d.actual_qty) * flt(d.valuation_rate)
 
 	return iwb_map
 
