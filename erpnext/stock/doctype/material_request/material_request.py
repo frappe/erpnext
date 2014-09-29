@@ -22,7 +22,7 @@ class MaterialRequest(BuyingController):
 	fname = 'indent_details'
 
 	def get_feed(self):
-		return _("{1}: {2}").format(self.status, self.material_request_type)
+		return _("{0}: {1}").format(self.status, self.material_request_type)
 
 	def check_if_already_pulled(self):
 		pass#if self.[d.sales_order_no for d in self.get('indent_details')]
