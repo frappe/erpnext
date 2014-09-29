@@ -8,6 +8,7 @@ from frappe.utils import flt, cint, add_days
 import json
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 from erpnext.setup.utils import get_exchange_rate
+from frappe.model.meta import get_field_precision
 
 @frappe.whitelist()
 def get_item_details(args):
@@ -206,8 +207,7 @@ def validate_price_list(args):
 		throw(_("Price List not selected"))
 
 def validate_conversion_rate(args, meta):
-	from erpnext.setup.doctype.currency.currency import validate_conversion_rate
-	from frappe.model.meta import get_field_precision
+	from erpnext.controllers.accounts_controller import validate_conversion_rate
 
 	# validate currency conversion rate
 	validate_conversion_rate(args.currency, args.conversion_rate,
