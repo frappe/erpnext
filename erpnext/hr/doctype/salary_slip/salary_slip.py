@@ -185,12 +185,10 @@ class SalarySlip(TransactionBase):
 
 
 	def send_mail_funct(self):
-		from frappe.utils.email_lib import sendmail
-
 		receiver = frappe.db.get_value("Employee", self.employee, "company_email")
 		if receiver:
 			subj = 'Salary Slip - ' + cstr(self.month) +'/'+cstr(self.fiscal_year)
-			sendmail([receiver], subject=subj, msg = _("Please see attachment"),
+			frappe.sendmail([receiver], subject=subj, msg = _("Please see attachment"),
 				attachments=[{
 					"fname": self.name + ".pdf",
 					"fcontent": frappe.get_print_format(self.doctype, self.name, as_pdf = True)

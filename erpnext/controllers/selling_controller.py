@@ -18,6 +18,10 @@ class SellingController(StockController):
 				"other_charges": "templates/print_formats/includes/taxes.html",
 			}
 
+	def get_feed(self):
+		return _("To {0} | {1} {2}").format(self.customer_name, self.currency,
+			self.grand_total_export)
+
 	def onload(self):
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
 			for item in self.get(self.fname):
@@ -28,13 +32,6 @@ class SellingController(StockController):
 		super(SellingController, self).validate()
 		self.validate_max_discount()
 		check_active_sales_items(self)
-
-	def get_sender(self, comm):
-		sender = None
-		if cint(frappe.db.get_value('Sales Email Settings', None, 'extract_emails')):
-			sender = frappe.db.get_value('Sales Email Settings', None, 'email_id')
-
-		return sender or comm.sender or frappe.session.user
 
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)

@@ -78,7 +78,7 @@ def get_conditions(filters):
 		conditions.append("voucher_no=%(voucher_no)s")
 
 
-	from frappe.widgets.reportview import build_match_conditions
+	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
 	if match_conditions: conditions.append(match_conditions)
 

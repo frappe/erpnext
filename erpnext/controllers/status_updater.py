@@ -8,47 +8,29 @@ from frappe import msgprint, _, throw
 from frappe.model.document import Document
 
 status_map = {
-	"Contact": [
-		["Replied", "communication_sent"],
-		["Open", "communication_received"]
-	],
-	"Job Applicant": [
-		["Replied", "communication_sent"],
-		["Open", "communication_received"]
-	],
 	"Lead": [
-		["Replied", "communication_sent"],
 		["Converted", "has_customer"],
 		["Opportunity", "has_opportunity"],
-		["Open", "communication_received"],
 	],
 	"Opportunity": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
 		["Lost", "eval:self.status=='Lost'"],
 		["Quotation", "has_quotation"],
-		["Replied", "communication_sent"],
 		["Cancelled", "eval:self.docstatus==2"],
-		["Open", "communication_received"],
 	],
 	"Quotation": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
 		["Lost", "eval:self.status=='Lost'"],
 		["Ordered", "has_sales_order"],
-		["Replied", "communication_sent"],
 		["Cancelled", "eval:self.docstatus==2"],
-		["Open", "communication_received"],
 	],
 	"Sales Order": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
 		["Stopped", "eval:self.status=='Stopped'"],
 		["Cancelled", "eval:self.docstatus==2"],
-	],
-	"Support Ticket": [
-		["Replied", "communication_sent"],
-		["Open", "communication_received"]
 	],
 }
 
@@ -89,25 +71,6 @@ class StatusUpdater(Document):
 
 			if update:
 				frappe.db.set_value(self.doctype, self.name, "status", self.status)
-
-	def on_communication(self):
-		if not self.get("communications"): return
-		self.communication_set = True
-		self.get("communications").sort(key=lambda d: d.creation)
-		self.set_status(update=True)
-		del self.communication_set
-
-	def communication_received(self):
-		if getattr(self, "communication_set", False):
-			last_comm = self.get("communications")
-			if last_comm:
-				return last_comm[-1].sent_or_received == "Received"
-
-	def communication_sent(self):
-		if getattr(self, "communication_set", False):
-			last_comm = self.get("communications")
-			if last_comm:
-				return last_comm[-1].sent_or_received == "Sent"
 
 	def validate_qty(self):
 		"""

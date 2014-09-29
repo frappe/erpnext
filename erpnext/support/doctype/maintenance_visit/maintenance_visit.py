@@ -8,6 +8,8 @@ from frappe import _
 from erpnext.utilities.transaction_base import TransactionBase
 
 class MaintenanceVisit(TransactionBase):
+	def get_feed(self):
+		return _("To {0}").format(self.customer_name)
 
 	def get_item_details(self, item_code):
 		return frappe.db.get_value("Item", item_code, ["item_name", "description"], as_dict=1)

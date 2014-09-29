@@ -7,7 +7,7 @@ import json
 import re
 from frappe.model.naming import make_autoname
 from frappe.utils import cint
-from frappe.utils.email_lib import sendmail_to_system_managers
+from frappe.email import sendmail_to_system_managers
 
 doctype_series_map = {
 	'Attendance': 'ATT-',

@@ -38,7 +38,7 @@ class QualityInspection(Document):
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("from"):
-		from frappe.widgets.reportview import get_match_cond
+		from frappe.desk.reportview import get_match_cond
 		filters.update({
 			"txt": txt,
 			"mcond": get_match_cond(filters["from"]),

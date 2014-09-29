@@ -146,7 +146,6 @@ class AccountsController(TransactionBase):
 			self.currency = company_currency
 			self.conversion_rate = 1.0
 		else:
-			from erpnext.setup.doctype.currency.currency import validate_conversion_rate
 			validate_conversion_rate(self.currency, self.conversion_rate,
 				self.meta.get_label("conversion_rate"), self.company)
 
@@ -500,3 +499,12 @@ def get_taxes_and_charges(master_doctype, master_name, tax_parentfield):
 		taxes_and_charges.append(tax)
 
 	return taxes_and_charges
+
+def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, company):
+	"""common validation for currency and price list currency"""
+
+	company_currency = frappe.db.get_value("Company", company, "default_currency")
+
+	if not conversion_rate:
+		throw(_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.").format(
+			conversion_rate_label, currency, company_currency))

@@ -9,7 +9,6 @@ from frappe.utils import fmt_money, formatdate, now_datetime, cstr, esc, \
 from frappe.utils.dateutils import datetime_in_user_format
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
-from frappe.utils.email_lib import sendmail
 from frappe.core.doctype.user.user import STANDARD_USERS
 
 content_sequence = [
@@ -83,10 +82,10 @@ class EmailDigest(Document):
 				msg_for_this_receipient = self.get_msg_html(self.get_user_specific_content(user_id) + \
 					common_msg)
 				if msg_for_this_receipient:
-					sendmail(recipients=user_id,
+					frappe.sendmail(recipients=user_id,
 						subject="[ERPNext] [{frequency} Digest] {name}".format(
 							frequency=self.frequency, name=self.name),
-						msg=msg_for_this_receipient)
+						msg=msg_for_this_receipient, bulk=True)
 
 	def get_digest_msg(self):
 		return self.get_msg_html(self.get_user_specific_content(frappe.session.user) + \
@@ -295,7 +294,7 @@ class EmailDigest(Document):
 			filter_by_company=False)
 
 	def get_calendar_events(self, user_id):
-		from frappe.core.doctype.event.event import get_events
+		from frappe.desk.doctype.event.event import get_events
 		events = get_events(self.future_from_date.strftime("%Y-%m-%d"), self.future_to_date.strftime("%Y-%m-%d"))
 
 		html = ""

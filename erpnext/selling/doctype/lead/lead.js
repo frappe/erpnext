@@ -4,6 +4,8 @@
 {% include 'setup/doctype/contact_control/contact_control.js' %};
 
 frappe.provide("erpnext");
+cur_frm.email_field = "email_id";
+
 erpnext.LeadController = frappe.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.fields_dict.customer.get_query = function(doc, cdt, cdn) {
@@ -33,13 +35,6 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 				frappe.boot.doctype_icons["Opportunity"], "btn-default");
 			this.frm.appframe.add_button(__("Send SMS"), this.frm.cscript.send_sms, "icon-mobile-phone");
 		}
-
-		cur_frm.communication_view = new frappe.views.CommunicationList({
-			list: frappe.get_list("Communication", {"parenttype": "Lead", "parent":this.frm.doc.name}),
-			parent: this.frm.fields_dict.communication_html.wrapper,
-			doc: this.frm.doc,
-			recipients: this.frm.doc.email_id
-		});
 
 		if(!this.frm.doc.__islocal) {
 			this.make_address_list();

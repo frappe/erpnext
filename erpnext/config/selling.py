@@ -158,7 +158,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Sales Email Settings",
+					"name": "Email Account",
 					"description": _("Setup incoming server for sales email id. (e.g. sales@example.com)")
 				},
 				{

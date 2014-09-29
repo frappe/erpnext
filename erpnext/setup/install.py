@@ -13,7 +13,6 @@ default_mail_footer = """<div style="padding: 7px; text-align: right; color: #88
 def after_install():
 	frappe.get_doc({'doctype': "Role", "role_name": "Analytics"}).insert()
 	set_single_defaults()
-	import_country_and_currency()
 	from erpnext.accounts.doctype.chart_of_accounts.import_charts import import_charts
 	import_charts()
 	frappe.db.set_default('desktop:home_page', 'setup-wizard')
@@ -21,38 +20,6 @@ def after_install():
 	from erpnext.setup.page.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
 	frappe.db.commit()
-
-def import_country_and_currency():
-	from frappe.country_info import get_all
-	data = get_all()
-
-	for name in data:
-		country = frappe._dict(data[name])
-		add_country_and_currency(name, country)
-
-	# enable frequently used currencies
-	for currency in ("INR", "USD", "GBP", "EUR", "AED", "AUD", "JPY", "CNY", "CHF"):
-		frappe.db.set_value("Currency", currency, "enabled", 1)
-
-def add_country_and_currency(name, country):
-	if not frappe.db.exists("Country", name):
-		frappe.get_doc({
-			"doctype": "Country",
-			"country_name": name,
-			"code": country.code,
-			"date_format": country.date_format or "dd-mm-yyyy",
-			"time_zones": "\n".join(country.timezones or [])
-		}).insert()
-
-	if country.currency and not frappe.db.exists("Currency", country.currency):
-		frappe.get_doc({
-			"doctype": "Currency",
-			"currency_name": country.currency,
-			"fraction": country.currency_fraction,
-			"symbol": country.currency_symbol,
-			"fraction_units": country.currency_fraction_units,
-			"number_format": country.number_format
-		}).insert()
 
 def feature_setup():
 	"""save global defaults and features setup"""
@@ -85,6 +52,3 @@ def set_single_defaults():
 				pass
 
 	frappe.db.set_default("date_format", "dd-mm-yyyy")
-
-	frappe.db.set_value("Outgoing Email Settings", "Outgoing Email Settings", "footer",
-		default_mail_footer)

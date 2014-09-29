@@ -6,7 +6,6 @@ from frappe import _
 import json
 from frappe.utils import flt, cstr, nowdate, add_days, cint
 from frappe.defaults import get_global_default
-from frappe.utils.email_lib import sendmail
 from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
@@ -345,11 +344,11 @@ def send_email_notification(mr_list):
 			msg += "<tr><td>" + item.item_code + "</td><td>" + item.warehouse + "</td><td>" + \
 				cstr(item.qty) + "</td><td>" + cstr(item.uom) + "</td></tr>"
 		msg += "</table>"
-	sendmail(email_list, subject='Auto Material Request Generation Notification', msg = msg)
+	frappe.sendmail(recipients=email_list, subject='Auto Material Request Generation Notification', msg = msg)
 
 def notify_errors(exceptions_list):
 	subject = "[Important] [ERPNext] Error(s) while creating Material Requests based on Re-order Levels"
-	msg = """Dear System Manager,
+	content = """Dear System Manager,
 
 An error occured for certain Items while creating Material Requests based on Re-order level.
 
@@ -362,5 +361,5 @@ Please rectify these issues:
 Regards,
 Administrator""" % ("\n\n".join(exceptions_list),)
 
-	from frappe.utils.user import get_system_managers
-	sendmail(get_system_managers(), subject=subject, msg=msg)
+	from frappe.email import sendmail_to_system_managers
+	sendmail_to_system_managers(subject, content)

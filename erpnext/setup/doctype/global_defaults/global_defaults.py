@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.defaults
 from frappe.utils import cint
-from frappe.core.doctype.property_setter.property_setter import make_property_setter
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 keydict = {
 	# "key in defaults": "key in Global Defaults"

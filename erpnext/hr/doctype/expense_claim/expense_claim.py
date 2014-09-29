@@ -11,6 +11,10 @@ from erpnext.hr.utils import set_employee_name
 class InvalidExpenseApproverError(frappe.ValidationError): pass
 
 class ExpenseClaim(Document):
+	def get_feed(self):
+		return _("{0}: From {0} for {1}").format(self.approval_status,
+			self.employee_name, self.total_claimed_amount)
+
 	def validate(self):
 		self.validate_fiscal_year()
 		self.validate_exp_details()
