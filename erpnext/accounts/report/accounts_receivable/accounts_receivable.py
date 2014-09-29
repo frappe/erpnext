@@ -63,11 +63,6 @@ class AccountsReceivableReport(object):
 
 					row += [self.get_territory(gle.account), gle.remarks]
 					data.append(row)
-		
-		#for i in range(0, len(data)):
-		#	data[i].insert(4, """<a href="%s"><i class="icon icon-share" style="cursor: pointer;"></i></a>""" \
-		#		% ("/".join(["#Form", data[i][2], data[i][3]]),))
-		
 		return data
 
 	def get_entries_after(self, report_date):
