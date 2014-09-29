@@ -24,7 +24,6 @@ status_map = {
 		["Submitted", "eval:self.docstatus==1"],
 		["Lost", "eval:self.status=='Lost'"],
 		["Ordered", "has_sales_order"],
-		["Replied", "communication_sent"],
 		["Cancelled", "eval:self.docstatus==2"],
 	],
 	"Sales Order": [
