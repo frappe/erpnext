@@ -240,3 +240,32 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 	else
 		cur_frm.pformat.print_heading = __("Purchase Invoice");
 }
+
+cur_frm.cscript.company = function(doc, cdt, cdn) {
+	cur_frm.refresh_fields();
+	frappe.call({
+			type:"GET",
+			method: "erpnext.accounts.utils.fetch_fiscal_year",
+			args: {
+				"company": doc.company,
+				"posting_date": doc.posting_date
+			},
+			callback: function(r) {
+				if (r.message != null)	cur_frm.set_value("fiscal_year",r.message);
+			}
+	});
+}
+
+cur_frm.cscript.posting_date = function(doc) {
+	frappe.call({
+			type:"GET",
+			method: "erpnext.accounts.utils.fetch_fiscal_year",
+			args: {
+				"company": doc.company,
+				"posting_date": doc.posting_date
+			},
+			callback: function(r) {
+				if (r.message != null)	cur_frm.set_value("fiscal_year",r.message);
+			}
+	});
+}

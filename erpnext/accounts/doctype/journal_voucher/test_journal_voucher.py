@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import unittest, frappe
 from frappe.utils import flt
+from erpnext.accounts.utils import fetch_fiscal_year
 
 class TestJournalVoucher(unittest.TestCase):
 	def test_journal_voucher_with_against_jv(self):
@@ -178,5 +179,9 @@ class TestJournalVoucher(unittest.TestCase):
 	def clear_account_balance(self):
 		frappe.db.sql("""delete from `tabGL Entry`""")
 
+	def test_fiscal_year_autofetch(self):
+		jv = frappe.new_doc("Journal Voucher")
+		fiscal_year = fetch_fiscal_year("_Test Company","2012-10-31")
+		self.assertEqual(fiscal_year[0], "_Test Fiscal Year 2020")
 
 test_records = frappe.get_test_records('Journal Voucher')
