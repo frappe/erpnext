@@ -19,7 +19,7 @@ cur_frm.cscript.refresh = function(doc) {
 	cur_frm.cscript.edit_prices_button();
 
 	if (!doc.__islocal && doc.is_stock_item == 'Yes') {
-		cur_frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method'],
+		cur_frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method', 'has_batch_no'],
 			(doc.__onload && doc.__onload.sle_exists=="exists") ? false : true);
 	}
 
