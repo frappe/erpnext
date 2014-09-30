@@ -243,6 +243,7 @@
   "is_service_item": "No",
   "is_stock_item": "Yes",
   "is_sub_contracted_item": "Yes",
+  "is_manufactured_item": "Yes",
   "item_code": "_Test FG Item 2",
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test FG Item 2",
@@ -268,6 +269,7 @@
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Variant Item",
   "stock_uom": "_Test UOM",
+  "has_variants": 1,
   "item_variants": [
 	  {"item_attribute": "Test Size", "item_attribute_value": "Small"},
 	  {"item_attribute": "Test Size", "item_attribute_value": "Medium"},

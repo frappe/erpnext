@@ -80,16 +80,6 @@ cur_frm.cscript.item_code = function(doc) {
 		cur_frm.set_value("description", doc.item_code);
 }
 
-cur_frm.fields_dict['default_bom'].get_query = function(doc) {
-	return {
-		filters: {
-			'item': doc.item_code,
-			'is_active': 0
-		}
-	}
-}
-
-
 // Expense Account
 // ---------------------------------
 cur_frm.fields_dict['expense_account'].get_query = function(doc) {

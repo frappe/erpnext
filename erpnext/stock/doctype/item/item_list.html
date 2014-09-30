@@ -26,11 +26,11 @@
 				<i class="icon-shopping-cart text-muted"></i>
 			</span>
 			{% } %}
-			{% if(doc.is_manufactured_item==="Yes") { %}
+			{% if(doc.default_bom==="Yes") { %}
 			<span style="margin-right: 8px;"
 				title="{%= __("Manufactured Item") %}" class="filterable"
-				data-filter="is_manufactured_item,=,Yes">
-				<i class="icon-wrench text-muted"></i>
+				data-filter="default_bom,=,{%= doc.default_bom %}">
+				<i class="icon-site-map text-muted"></i>
 			</span>
 			{% } %}
 			{% if(doc.show_in_website) { %}

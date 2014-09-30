@@ -312,7 +312,7 @@
    "fieldname": "serial_no_series", 
    "fieldtype": "Data", 
    "label": "Serial Number Series", 
-   "no_copy": 1, 
+   "no_copy": 0, 
    "permlevel": 0
   }, 
   {
@@ -431,7 +431,7 @@
    "fieldname": "lead_time_days", 
    "fieldtype": "Int", 
    "label": "Lead Time Days", 
-   "no_copy": 1, 
+   "no_copy": 0, 
    "oldfieldname": "lead_time_days", 
    "oldfieldtype": "Int", 
    "permlevel": 0, 
@@ -860,7 +860,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2014-09-26 06:04:48.683214", 
+ "modified": "2014-09-30 14:34:50.101879", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 

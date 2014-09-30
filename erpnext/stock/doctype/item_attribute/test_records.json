@@ -4,9 +4,9 @@
 		"attribute_name": "Test Size",
 		"priority": 1,
 		"item_attribute_values": [
-			{"attribute_value": "Small", "abbr": "SM"},
-			{"attribute_value": "Medium", "abbr": "MD"},
-			{"attribute_value": "Large", "abbr": "LG"}
+			{"attribute_value": "Small", "abbr": "S"},
+			{"attribute_value": "Medium", "abbr": "M"},
+			{"attribute_value": "Large", "abbr": "L"}
 		]
 	},
 	{

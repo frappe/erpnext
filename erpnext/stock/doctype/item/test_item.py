@@ -17,6 +17,25 @@ class TestItem(unittest.TestCase):
 		item.append("item_variants", {"item_attribute": "Test Size", "item_attribute_value": "Small"})
 		self.assertRaises(DuplicateVariant, item.insert)
 
+	def test_variant_item_codes(self):
+		frappe.delete_doc("Item", test_records[11].get("item_code"))
+		item = frappe.copy_doc(test_records[11])
+		item.insert()
+		variants = ['_Test Variant Item-S', '_Test Variant Item-M', '_Test Variant Item-L']
+		self.assertEqual(item.get_variant_item_codes(), variants)
+		for v in variants:
+			self.assertTrue(frappe.db.get_value("Item", {"variant_of": item.name, "name": v}))
+
+		item.append("item_variants", {"item_attribute": "Test Colour", "item_attribute_value": "Red"})
+		item.append("item_variants", {"item_attribute": "Test Colour", "item_attribute_value": "Blue"})
+		item.append("item_variants", {"item_attribute": "Test Colour", "item_attribute_value": "Green"})
+
+		self.assertEqual(item.get_variant_item_codes(), ['_Test Variant Item-S-R',
+			'_Test Variant Item-S-G', '_Test Variant Item-S-B',
+			'_Test Variant Item-M-R', '_Test Variant Item-M-G',
+			'_Test Variant Item-M-B', '_Test Variant Item-L-R',
+			'_Test Variant Item-L-G', '_Test Variant Item-L-B'])
+
 	def test_item_creation(self):
 		frappe.delete_doc("Item", test_records[11].get("item_code"))
 		item = frappe.copy_doc(test_records[11])
@@ -33,7 +52,7 @@ class TestItem(unittest.TestCase):
 		to_check = {
 			"item_code": "_Test Item",
 			"item_name": "_Test Item",
-			"description": "_Test Item",
+			"description": "_Test Item 1",
 			"warehouse": "_Test Warehouse - _TC",
 			"income_account": "Sales - _TC",
 			"expense_account": "_Test Account Cost for Goods Sold - _TC",
