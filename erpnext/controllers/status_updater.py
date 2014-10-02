@@ -171,12 +171,13 @@ class StatusUpdater(Document):
 					args['name'] = name
 
 					# update percent complete in the parent table
-					frappe.db.sql("""update `tab%(target_parent_dt)s`
-						set %(target_parent_field)s = (select sum(if(%(target_ref_field)s >
-							ifnull(%(target_field)s, 0), %(target_field)s,
-							%(target_ref_field)s))/sum(%(target_ref_field)s)*100
-							from `tab%(target_dt)s` where parent="%(name)s") %(modified_cond)s
-						where name='%(name)s'""" % args)
+					if args.get('target_parent_field'):
+						frappe.db.sql("""update `tab%(target_parent_dt)s`
+							set %(target_parent_field)s = (select sum(if(%(target_ref_field)s >
+								ifnull(%(target_field)s, 0), %(target_field)s,
+								%(target_ref_field)s))/sum(%(target_ref_field)s)*100
+								from `tab%(target_dt)s` where parent="%(name)s") %(modified_cond)s
+							where name='%(name)s'""" % args)
 
 					# update field
 					if args.get('status_field'):
