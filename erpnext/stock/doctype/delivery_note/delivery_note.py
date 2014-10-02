@@ -24,18 +24,34 @@ class DeliveryNote(SellingController):
 		super(DeliveryNote, self).__init__(arg1, arg2)
 		self.status_updater = [{
 			'source_dt': 'Delivery Note Item',
-			'target_dt': 'Sales Order Item',
 			'join_field': 'prevdoc_detail_docname',
 			'target_field': 'delivered_qty',
-			'target_parent_dt': 'Sales Order',
-			'target_parent_field': 'per_delivered',
 			'target_ref_field': 'qty',
 			'source_field': 'qty',
-			'percent_join_field': 'against_sales_order',
-			'status_field': 'delivery_status',
-			'keyword': 'Delivered',
 			'overflow_type': 'delivery'
 		}]
+
+	def set_status_updater_dict(self, prev_doctype):
+		# for sales invoice
+		if prev_doctype == "Sales Invoice":
+			self.status_updater[0].update({
+				'target_dt': 'Sales Invoice Item',
+				'target_parent_dt': 'Sales Invoice',
+				'percent_join_field': 'against_sales_invoice',
+			})
+
+		# for sales order
+		elif prev_doctype == "Sales Order":
+			self.status_updater[0].update({
+				'target_dt': 'Sales Order Item',
+				'target_parent_dt': 'Sales Order',
+				'target_parent_field': 'per_delivered',
+				'percent_join_field': 'against_sales_order',
+				'status_field': 'delivery_status',
+				'keyword': 'Delivered'
+			})
+
+		return self.status_updater
 
 	def onload(self):
 		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabSales Invoice Item`
@@ -171,7 +187,12 @@ class DeliveryNote(SellingController):
 		# Check for Approving Authority
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total, self)
 
+		# update delivered qty in sales invoice
+		self.status_updater = self.set_status_updater_dict("Sales Invoice")
+		self.update_prevdoc_status()
+
 		# update delivered qty in sales order
+		self.status_updater = self.set_status_updater_dict("Sales Order")
 		self.update_prevdoc_status()
 
 		# create stock ledger entry
@@ -189,6 +210,10 @@ class DeliveryNote(SellingController):
 		self.check_stop_sales_order("against_sales_order")
 		self.check_next_docstatus()
 
+		self.status_updater = self.set_status_updater_dict("Sales Invoice")
+		self.update_prevdoc_status()
+
+		self.status_updater = self.set_status_updater_dict("Sales Order")
 		self.update_prevdoc_status()
 
 		self.update_stock_ledger()
