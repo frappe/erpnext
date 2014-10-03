@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import flt, getdate, add_days, formatdate
 from frappe.model.document import Document
 from datetime import date
+from erpnext.stock.doctype.item.item import ItemTemplateCannotHaveStock
 
 class StockFreezeError(frappe.ValidationError): pass
 
@@ -50,7 +51,8 @@ class StockLedgerEntry(Document):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))
 
 	def validate_item(self):
-		item_det = frappe.db.sql("""select name, has_batch_no, docstatus, is_stock_item
+		item_det = frappe.db.sql("""select name, has_batch_no, docstatus,
+			is_stock_item, has_variants
 			from tabItem where name=%s""", self.item_code, as_dict=True)[0]
 
 		if item_det.is_stock_item != 'Yes':
@@ -65,6 +67,10 @@ class StockLedgerEntry(Document):
 			if not frappe.db.get_value("Batch",
 					{"item": self.item_code, "name": self.batch_no}):
 				frappe.throw(_("{0} is not a valid Batch Number for Item {1}").format(self.batch_no, self.item_code))
+
+		if item_det.has_variants:
+			frappe.throw(_("Stock cannot exist for Item {0} since has variants").format(self.item_code),
+				ItemTemplateCannotHaveStock)
 
 		if not self.stock_uom:
 			self.stock_uom = item_det.stock_uom

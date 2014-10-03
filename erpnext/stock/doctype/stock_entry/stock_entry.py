@@ -11,7 +11,7 @@ from frappe import _
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.controllers.queries import get_match_cond
-from erpnext.stock.get_item_details import get_available_qty
+from erpnext.stock.get_item_details import get_available_qty, get_default_cost_center
 
 class NotUpdateStockError(frappe.ValidationError): pass
 class StockOverReturnError(frappe.ValidationError): pass
@@ -42,8 +42,8 @@ class StockEntry(StockController):
 		pro_obj = self.production_order and \
 			frappe.get_doc('Production Order', self.production_order) or None
 
-		self.set_transfer_qty()
 		self.validate_item()
+		self.set_transfer_qty()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse(pro_obj)
@@ -96,20 +96,22 @@ class StockEntry(StockController):
 		for item in self.get("mtn_details"):
 			if item.item_code not in stock_items:
 				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
-			if not item.stock_uom:
-				item.stock_uom = frappe.db.get_value("Item", item.item_code, "stock_uom")
-			if not item.uom:
-				item.uom = item.stock_uom
-			if not item.conversion_factor:
-				item.conversion_factor = 1
+
+			item_details = self.get_item_details(frappe._dict({"item_code": item.item_code,
+				"company": self.company, "project_name": self.project_name}))
+
+			for f in ("uom", "stock_uom", "description", "item_name", "expense_account",
+				"cost_center", "conversion_factor"):
+				item.set(f, item_details.get(f))
+
 			if not item.transfer_qty:
 				item.transfer_qty = item.qty * item.conversion_factor
+
 			if (self.purpose in ("Material Transfer", "Sales Return", "Purchase Return")
 				and not item.serial_no
 				and item.item_code in serialized_items):
 				frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}").format(item.idx, item.item_code),
 					frappe.MandatoryError)
-
 
 	def validate_warehouse(self, pro_obj):
 		"""perform various (sometimes conditional) validations on warehouse"""
@@ -408,20 +410,21 @@ class StockEntry(StockController):
 
 	def get_item_details(self, args):
 		item = frappe.db.sql("""select stock_uom, description, item_name,
-			expense_account, buying_cost_center from `tabItem`
+			expense_account, buying_cost_center, item_group from `tabItem`
 			where name = %s and (ifnull(end_of_life,'0000-00-00')='0000-00-00' or end_of_life > now())""",
 			(args.get('item_code')), as_dict = 1)
 		if not item:
 			frappe.throw(_("Item {0} is not active or end of life has been reached").format(args.get("item_code")))
+		item = item[0]
 
 		ret = {
-			'uom'			      	: item and item[0]['stock_uom'] or '',
-			'stock_uom'			  	: item and item[0]['stock_uom'] or '',
-			'description'		  	: item and item[0]['description'] or '',
-			'item_name' 		  	: item and item[0]['item_name'] or '',
+			'uom'			      	: item.stock_uom,
+			'stock_uom'			  	: item.stock_uom,
+			'description'		  	: item.description,
+			'item_name' 		  	: item.item_name,
 			'expense_account'		: args.get("expense_account") \
 				or frappe.db.get_value("Company", args.get("company"), "stock_adjustment_account"),
-			'cost_center'			: item and item[0]['buying_cost_center'] or args.get("cost_center"),
+			'cost_center'			: get_default_cost_center(args, item),
 			'qty'					: 0,
 			'transfer_qty'			: 0,
 			'conversion_factor'		: 1,

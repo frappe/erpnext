@@ -9,6 +9,14 @@ cur_frm.cscript.refresh = function(doc) {
 
 	cur_frm.cscript.make_dashboard();
 
+	cur_frm.set_intro();
+	if (cur_frm.doc.has_variants) {
+		cur_frm.set_intro(__("This Item is a Template and cannot be used in transactions. Item attributes will be copied over into the variants unless 'No Copy' is set"));
+	}
+	if (cur_frm.doc.variant_of) {
+		cur_frm.set_intro(__("This Item is a Variant of {0} (Template). Attributes will be copied over from the template unless 'No Copy' is set", [cur_frm.doc.variant_of]));
+	}
+
 	if (frappe.defaults.get_default("item_naming_by")!="Naming Series") {
 		cur_frm.toggle_display("naming_series", false);
 	} else {
@@ -154,7 +162,9 @@ cur_frm.cscript.add_image = function(doc, dt, dn) {
 	doc.description_html = repl('<table style="width: 100%; table-layout: fixed;">' +
 		'<tr><td style="width:110px"><img src="%(imgurl)s" width="100px"></td>' +
 		'<td>%(desc)s</td></tr>' +
-		'</table>', {imgurl: frappe.utils.get_file_link(doc.image), desc:doc.description});
+		'</table>', {
+			imgurl: frappe.utils.get_file_link(doc.image),
+			desc: doc.description.replace(/\n/g, "<br>")});
 
 	refresh_field('description_html');
 }

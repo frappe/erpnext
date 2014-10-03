@@ -42,13 +42,15 @@
    "search_index": 0
   }, 
   {
+   "depends_on": "variant_of", 
    "description": "If item is a variant of another item then description, image, pricing, taxes etc will be set from the template unless explicitly specified", 
    "fieldname": "variant_of", 
    "fieldtype": "Link", 
    "label": "Variant Of", 
    "options": "Item", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "read_only": 1
   }, 
   {
    "fieldname": "item_name", 
@@ -860,7 +862,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2014-09-30 14:34:50.101879", 
+ "modified": "2014-10-03 04:58:39.278047", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 

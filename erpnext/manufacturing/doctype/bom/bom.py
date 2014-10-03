@@ -207,6 +207,12 @@ class BOM(Document):
 
 	def validate_bom_no(self, item, bom_no, idx):
 		"""Validate BOM No of sub-contracted items"""
+		bom = frappe.get_doc("BOM", bom_no)
+		if not bom.is_active:
+			frappe.throw(_("BOM {0} must be active").format(bom_no))
+		if not bom.docstatus!=1:
+			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
+
 		bom = frappe.db.sql("""select name from `tabBOM` where name = %s and item = %s
 			and is_active=1 and docstatus=1""",
 			(bom_no, item), as_dict =1)

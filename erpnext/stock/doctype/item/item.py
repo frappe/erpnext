@@ -9,9 +9,11 @@ from frappe.website.website_generator import WebsiteGenerator
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
+import copy
 
 class WarehouseNotSet(frappe.ValidationError): pass
 class DuplicateVariant(frappe.ValidationError): pass
+class ItemTemplateCannotHaveStock(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
 	page_title_field = "item_name"
@@ -24,7 +26,7 @@ class Item(WebsiteGenerator):
 		self.get("__onload").sle_exists = self.check_if_sle_exists()
 
 	def autoname(self):
-		if frappe.db.get_default("item_naming_by")=="Naming Series":
+		if frappe.db.get_default("item_naming_by")=="Naming Series" and not self.variant_of:
 			from frappe.model.naming import make_autoname
 			self.item_code = make_autoname(self.naming_series+'.#####')
 		elif not self.item_code:
@@ -51,7 +53,7 @@ class Item(WebsiteGenerator):
 		self.validate_barcode()
 		self.cant_change()
 		self.validate_item_type_for_reorder()
-		self.validate_variants_are_unique()
+		self.validate_variants()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -117,6 +119,18 @@ class Item(WebsiteGenerator):
 			if not matched:
 				frappe.throw(_("Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module."))
 
+	def validate_variants(self):
+		self.validate_variants_are_unique()
+		self.validate_stock_for_template_must_be_zero()
+
+	def validate_stock_for_template_must_be_zero(self):
+		if self.has_variants:
+			stock_in = frappe.db.sql_list("""select warehouse from tabBin
+				where item_code=%s and ifnull(actual_qty, 0) > 0""", self.name)
+			if stock_in:
+				frappe.throw(_("Item Template cannot have stock and varaiants. Please remove stock from warehouses {0}").format(", ".join(stock_in)),
+					ItemTemplateCannotHaveStock)
+
 	def validate_variants_are_unique(self):
 		if not self.has_variants:
 			self.item_variants = []
@@ -167,6 +181,7 @@ class Item(WebsiteGenerator):
 		if not self.item_variants:
 			return []
 
+		self.variant_attributes = {}
 		variant_dict = {}
 		variant_item_codes = []
 
@@ -178,31 +193,34 @@ class Item(WebsiteGenerator):
 		# sort attributes by their priority
 		attributes = filter(None, map(lambda d: d if d in variant_dict else None, all_attributes))
 
-		def add_attribute_suffixes(item_code, attributes):
+		def add_attribute_suffixes(item_code, my_attributes, attributes):
 			attr = frappe.get_doc("Item Attribute", attributes[0])
 			for value in attr.item_attribute_values:
 				if value.attribute_value in variant_dict[attr.name]:
+					_my_attributes = copy.deepcopy(my_attributes)
+					_my_attributes.append([attr.name, value.attribute_value])
 					if len(attributes) > 1:
-						add_attribute_suffixes(item_code + "-" + value.abbr, attributes[1:])
+						add_attribute_suffixes(item_code + "-" + value.abbr, _my_attributes, attributes[1:])
 					else:
 						variant_item_codes.append(item_code + "-" + value.abbr)
+						self.variant_attributes[item_code + "-" + value.abbr] = _my_attributes
 
-		add_attribute_suffixes(self.name, attributes)
+		add_attribute_suffixes(self.name, [], attributes)
 
 		return variant_item_codes
 
 	def make_variant(self, item_code):
 		item = frappe.new_doc("Item")
-		self.copy_attributes_to_variant(item, insert=True)
+		self.copy_attributes_to_variant(item, item_code, insert=True)
 		item.item_code = item_code
 		item.insert()
 
 	def update_variant(self, item_code):
 		item = frappe.get_doc("Item", item_code)
-		self.copy_attributes_to_variant(item)
+		self.copy_attributes_to_variant(item, item_code)
 		item.save()
 
-	def copy_attributes_to_variant(self, variant, insert=False):
+	def copy_attributes_to_variant(self, variant, item_code, insert=False):
 		from frappe.model import no_value_fields
 		for field in self.meta.fields:
 			if field.fieldtype not in no_value_fields and (insert or not field.no_copy):
@@ -210,6 +228,11 @@ class Item(WebsiteGenerator):
 					variant.set(field.fieldname, self.get(field.fieldname))
 					variant.__dirty = True
 
+		variant.description += "\n"
+		for attr in self.variant_attributes[item_code]:
+			variant.description += "\n" + attr[0] + ": " + attr[1]
+			if variant.description_html:
+				variant.description_html += "<div style='margin-top: 4px; font-size: 80%'>" + attr[0] + ": " + attr[1] + "</div>"
 		variant.variant_of = self.name
 		variant.has_variants = 0
 		variant.show_in_website = 0
