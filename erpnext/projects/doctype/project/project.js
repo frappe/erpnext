@@ -5,7 +5,7 @@
 cur_frm.cscript.refresh = function(doc) {
 	if(!doc.__islocal) {
 		cur_frm.add_custom_button(__("Gantt Chart"), function() {
-			frappe.route_options = {"project": doc.name}
+			frappe.route_options = {"project": doc.name, "start": doc.project_start_date, "end": doc.completion_date};
 			frappe.set_route("Gantt", "Task");
 		}, "icon-tasks", true);
 		cur_frm.add_custom_button(__("Tasks"), function() {
