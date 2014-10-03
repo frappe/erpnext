@@ -12,6 +12,22 @@ $.extend(erpnext, {
 			return frappe.boot.sysdefaults.currency;
 	},
 
+	get_fiscal_year: function(doc) {
+		frappe.call({
+			type:"GET",
+			method: "erpnext.accounts.utils.get_fiscal_year",
+			args: {
+				"company": doc.company,
+				"date": doc.posting_date,
+				"verbose": '0'
+			},
+			callback: function(r) {
+				var arr = r.message
+				if (arr != null)	cur_frm.set_value("fiscal_year",arr[0]);
+			}
+		});
+	},
+
 	toggle_naming_series: function() {
 		if(cur_frm.fields_dict.naming_series) {
 			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);

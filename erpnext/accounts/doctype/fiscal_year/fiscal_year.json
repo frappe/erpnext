@@ -39,23 +39,17 @@
    "reqd": 1
   }, 
   {
-   "default": "No", 
-   "description": "Entries are not allowed against this Fiscal Year if the year is closed.", 
-   "fieldname": "is_fiscal_year_closed", 
-   "fieldtype": "Select", 
-   "in_list_view": 1, 
-   "label": "Year Closed", 
-   "no_copy": 1, 
-   "oldfieldname": "is_fiscal_year_closed", 
-   "oldfieldtype": "Select", 
-   "options": "\nNo\nYes", 
+   "fieldname": "company", 
+   "fieldtype": "Table", 
+   "label": "List of Companies", 
+   "options": "Fiscal Year Company", 
    "permlevel": 0, 
-   "reqd": 0
+   "precision": ""
   }
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
- "modified": "2014-07-14 05:30:56.843180", 
+ "modified": "2014-10-02 13:40:40.298965", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Fiscal Year", 

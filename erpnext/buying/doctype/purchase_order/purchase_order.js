@@ -211,3 +211,26 @@ cur_frm.cscript.send_sms = function() {
 	var sms_man = new SMSManager(cur_frm.doc);
 }
 
+cur_frm.cscript.company = function(doc, cdt, cdn) {
+	get_fiscal_year(doc);
+}
+
+cur_frm.cscript.transaction_date = function(doc, cdt, cdn){
+	get_fiscal_year(doc);
+}
+
+function get_fiscal_year(doc) {
+		frappe.call({
+			type:"GET",
+			method: "erpnext.accounts.utils.get_fiscal_year",
+			args: {
+				"company": doc.company,
+				"date": doc.transaction_date,
+				"verbose": '0'
+			},
+			callback: function(r) {
+				var arr = r.message
+				if (arr != null)	cur_frm.set_value("fiscal_year",arr[0]);
+			}
+		});
+}

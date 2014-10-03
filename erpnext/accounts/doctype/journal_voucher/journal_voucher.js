@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.accounts");
+frappe.require("assets/erpnext/js/utils.js");
 
 erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 	onload: function() {
@@ -153,6 +154,11 @@ cur_frm.cscript.refresh = function(doc) {
 
 cur_frm.cscript.company = function(doc, cdt, cdn) {
 	cur_frm.refresh_fields();
+	erpnext.get_fiscal_year(doc);
+}
+
+cur_frm.cscript.posting_date = function(doc, cdt, cdn){
+	erpnext.get_fiscal_year(doc);
 }
 
 cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
