@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, nowdate, flt
+from frappe.utils import getdate, nowdate, flt, cint
 
 class AccountsReceivableReport(object):
 	def __init__(self, filters=None):
@@ -27,8 +27,10 @@ class AccountsReceivableReport(object):
 		columns += [_("Voucher Type") + "::110", _("Voucher No") + ":Dynamic Link/Voucher Type:120",
 			_("Due Date") + ":Date:80", _("Invoiced Amount") + ":Currency:100",
 			_("Payment Received") + ":Currency:100", _("Outstanding Amount") + ":Currency:100",
-			_("Age") + ":Int:50", "0-30:Currency:100", "30-60:Currency:100",
-			"60-90:Currency:100", _("90-Above") + ":Currency:100",
+			_("Age") + ":Int:50", "0-" + self.filters.range1 + ":Currency:100",
+			self.filters.range1 + "-" + self.filters.range2 + ":Currency:100", 
+			self.filters.range2 + "-" + self.filters.range3 + ":Currency:100", 
+			self.filters.range3 + _("-Above") + ":Currency:100",
 			_("Territory") + ":Link/Territory:80", _("Remarks") + "::200"
 		]
 
@@ -56,7 +58,8 @@ class AccountsReceivableReport(object):
 						payment_received, outstanding_amount]
 
 					entry_date = due_date if self.filters.ageing_based_on == "Due Date" else gle.posting_date
-					row += get_ageing_data(self.age_as_on, entry_date, outstanding_amount) + \
+					row += get_ageing_data(cint(self.filters.range1), cint(self.filters.range2), \
+						cint(self.filters.range3), self.age_as_on, entry_date, outstanding_amount) + \
 						[self.get_territory(gle.account), gle.remarks]
 
 					data.append(row)
@@ -155,15 +158,16 @@ class AccountsReceivableReport(object):
 def execute(filters=None):
 	return AccountsReceivableReport(filters).run()
 
-def get_ageing_data(age_as_on, entry_date, outstanding_amount):
+def get_ageing_data(first_range, second_range, third_range, age_as_on, entry_date, outstanding_amount):
 	# [0-30, 30-60, 60-90, 90-above]
 	outstanding_range = [0.0, 0.0, 0.0, 0.0]
+
 	if not (age_as_on and entry_date):
 		return [0] + outstanding_range
 
 	age = (getdate(age_as_on) - getdate(entry_date)).days or 0
 	index = None
-	for i, days in enumerate([30, 60, 90]):
+	for i, days in enumerate([first_range, second_range, third_range]):
 		if age <= days:
 			index = i
 			break

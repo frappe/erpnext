@@ -3,14 +3,14 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
-from frappe.utils import getdate, nowdate, flt, cstr
+from frappe.utils import getdate, nowdate, flt, cstr, cint
+from frappe import msgprint, _
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import get_ageing_data
 
 def execute(filters=None):
 	if not filters: filters = {}
 	supplier_naming_by = frappe.db.get_value("Buying Settings", None, "supp_master_name")
-	columns = get_columns(supplier_naming_by)
+	columns = get_columns(filters, supplier_naming_by)
 	entries = get_gl_entries(filters)
 
 	entries_after_report_date = [[gle.voucher_type, gle.voucher_no]
@@ -50,7 +50,8 @@ def execute(filters=None):
 				else:
 					ageing_based_on_date = gle.posting_date
 
-				row += get_ageing_data(age_on, ageing_based_on_date, outstanding_amount) + \
+				row += get_ageing_data(cint(filters.get("range1")), cint(filters.get("range2")), \
+					cint(filters.get("range3")), age_on, ageing_based_on_date, outstanding_amount) + \
 					[supplier_details.get(gle.party).supplier_type, gle.remarks]
 
 				data.append(row)
@@ -70,8 +71,11 @@ def get_columns(supplier_naming_by):
 	columns +=[_("Voucher Type") + "::110", _("Voucher No") + ":Dynamic Link/Voucher Type:120",
 		_("Due Date") + ":Date:80", _("Bill No") + "::80", _("Bill Date") + ":Date:80",
 		_("Invoiced Amount") + ":Currency:100", _("Paid Amount") + ":Currency:100",
-		_("Outstanding Amount") + ":Currency:100", _("Age") + ":Int:50", "0-30:Currency:100",
-		"30-60:Currency:100", "60-90:Currency:100", _("90-Above") + ":Currency:100",
+		_("Outstanding Amount") + ":Currency:100", _("Age") + ":Int:50", 
+		"0-" + filters.get("range1") + ":Currency:100",
+		filters.get("range1") + "-" + filters.get("range2") + ":Currency:100", 
+		filters.get("range2") + "-" + filters.get("range3") + ":Currency:100", 
+		filters.get("range3") + _("-Above") + ":Currency:100",
 		_("Supplier Type") + ":Link/Supplier Type:150", _("Remarks") + "::150"
 	]
 
