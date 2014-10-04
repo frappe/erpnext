@@ -29,6 +29,7 @@
   {
    "fieldname": "enquiry_from", 
    "fieldtype": "Select", 
+   "in_list_view": 1, 
    "label": "Opportunity From", 
    "oldfieldname": "enquiry_from", 
    "oldfieldtype": "Select", 
