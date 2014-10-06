@@ -46,8 +46,7 @@ class SalesInvoice(SellingController):
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.check_stop_sales_order("sales_order")
-		self.validate_customer_account()
-		self.validate_debit_acc()
+		self.validate_debit_to_acc()
 		self.validate_fixed_asset_account()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advance_adjustment_details")
 		self.validate_advance_jv("advance_adjustment_details", "sales_order")
@@ -66,9 +65,6 @@ class SalesInvoice(SellingController):
 			self.is_opening = 'No'
 
 		self.set_aging_date()
-
-		frappe.get_doc("Account", self.debit_to).validate_due_date(self.posting_date, self.due_date)
-
 		self.set_against_income_account()
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
@@ -91,10 +87,9 @@ class SalesInvoice(SellingController):
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.update_billing_status_for_zero_amount_refdoc("Sales Order")
-
+		self.check_credit_limit()
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
-		self.check_credit_limit(self.debit_to)
 
 		if not cint(self.is_pos) == 1:
 			self.update_against_document_in_jv()
@@ -149,8 +144,7 @@ class SalesInvoice(SellingController):
 		if not self.debit_to:
 			self.debit_to = get_party_account(self.company, self.customer, "Customer")
 		if not self.due_date:
-			self.due_date = get_due_date(self.posting_date, self.customer, "Customer",
-				self.debit_to, self.company)
+			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
 
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
@@ -208,7 +202,7 @@ class SalesInvoice(SellingController):
 				self.set_taxes("other_charges", "taxes_and_charges")
 
 	def get_advances(self):
-		super(SalesInvoice, self).get_advances(self.debit_to,
+		super(SalesInvoice, self).get_advances(self.debit_to, "Customer", self.customer,
 			"Sales Invoice Advance", "advance_adjustment_details", "credit", "sales_order")
 
 	def get_company_abbr(self):
@@ -231,6 +225,8 @@ class SalesInvoice(SellingController):
 					'against_voucher_type' : 'Sales Invoice',
 					'against_voucher'  : self.name,
 					'account' : self.debit_to,
+					'party_type': 'Customer',
+					'party': self.customer,
 					'is_advance' : 'Yes',
 					'dr_or_cr' : 'credit',
 					'unadjusted_amt' : flt(d.advance_amount),
@@ -242,20 +238,12 @@ class SalesInvoice(SellingController):
 			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
 
-	def validate_customer_account(self):
-		"""Validates Debit To Account and Customer Matches"""
-		if self.customer and self.debit_to and not cint(self.is_pos):
-			acc_head = frappe.db.sql("select master_name from `tabAccount` where name = %s and docstatus != 2", self.debit_to)
-
-			if (acc_head and cstr(acc_head[0][0]) != cstr(self.customer)) or \
-				(not acc_head and (self.debit_to != cstr(self.customer) + " - " + self.get_company_abbr())):
-				msgprint("Debit To: %s do not match with Customer: %s for Company: %s.\n If both correctly entered, please select Master Type \
-					and Master Name in account master." %(self.debit_to, self.customer,self.company), raise_exception=1)
-
-
-	def validate_debit_acc(self):
-		if frappe.db.get_value("Account", self.debit_to, "report_type") != "Balance Sheet":
-			frappe.throw(_("Account must be a balance sheet account"))
+	def validate_debit_to_acc(self):
+		root_type, account_type = frappe.db.get_value("Account", self.debit_to, ["root_type", "account_type"])
+		if root_type != "Asset":
+			frappe.throw(_("Debit To account must be a liability account"))
+		if account_type != "Receivable":
+			frappe.throw(_("Debit To account must be a Receivable account"))
 
 	def validate_fixed_asset_account(self):
 		"""Validate Fixed Asset and whether Income Account Entered Exists"""
@@ -469,7 +457,7 @@ class SalesInvoice(SellingController):
 
 			if update_outstanding == "No":
 				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
-				update_outstanding_amt(self.debit_to, self.doctype, self.name)
+				update_outstanding_amt(self.debit_to, "Customer", self.customer, self.doctype, self.name)
 
 			if repost_future_gle and cint(self.update_stock) \
 				and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
@@ -499,6 +487,8 @@ class SalesInvoice(SellingController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
+					"party_type": "Customer",
+					"party": self.customer,
 					"against": self.against_income_account,
 					"debit": self.grand_total,
 					"remarks": self.remarks,
@@ -545,6 +535,8 @@ class SalesInvoice(SellingController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
+					"party_type": "Customer",
+					"party": self.customer,
 					"against": self.cash_bank_account,
 					"credit": self.paid_amount,
 					"remarks": self.remarks,
@@ -565,6 +557,8 @@ class SalesInvoice(SellingController):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": self.debit_to,
+						"party_type": "Customer",
+						"party": self.customer,
 						"against": self.write_off_account,
 						"credit": self.write_off_amount,
 						"remarks": self.remarks,
@@ -603,8 +597,6 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 					or tabAccount.account_type = "Income Account")
 				and tabAccount.group_or_ledger="Ledger"
 				and tabAccount.docstatus!=2
-				and ifnull(tabAccount.master_type, "")=""
-				and ifnull(tabAccount.master_name, "")=""
 				and tabAccount.company = '%(company)s'
 				and tabAccount.%(key)s LIKE '%(txt)s'
 				%(mcond)s""" % {'company': filters['company'], 'key': searchfield,

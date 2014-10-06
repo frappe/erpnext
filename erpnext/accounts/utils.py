@@ -40,13 +40,15 @@ def validate_fiscal_year(date, fiscal_year, label="Date"):
 		throw(_("{0} '{1}' not in Fiscal Year {2}").format(label, formatdate(date), fiscal_year))
 
 @frappe.whitelist()
-def get_balance_on(account=None, date=None):
+def get_balance_on(account=None, date=None, party_type=None, party=None):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
+	if not date and frappe.form_dict.get("date"):
 		date = frappe.form_dict.get("date")
-
-	acc = frappe.get_doc("Account", account)
-	acc.check_permission("read")
+	if not party_type and frappe.form_dict.get("party_type"):
+		party_type = frappe.form_dict.get("party_type")
+	if not party and frappe.form_dict.get("party"):
+		party = frappe.form_dict.get("party")
 
 	cond = []
 	if date:
@@ -67,19 +69,27 @@ def get_balance_on(account=None, date=None):
 			# hence, assuming balance as 0.0
 			return 0.0
 
-	# for pl accounts, get balance within a fiscal year
-	if acc.report_type == 'Profit and Loss':
-		cond.append("posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" \
-			% year_start_date)
+	if account:
+		acc = frappe.get_doc("Account", account)
+		acc.check_permission("read")
 
-	# different filter for group and ledger - improved performance
-	if acc.group_or_ledger=="Group":
-		cond.append("""exists (
-			select * from `tabAccount` ac where ac.name = gle.account
-			and ac.lft >= %s and ac.rgt <= %s
-		)""" % (acc.lft, acc.rgt))
-	else:
-		cond.append("""gle.account = "%s" """ % (account.replace('"', '\\"'), ))
+		# for pl accounts, get balance within a fiscal year
+		if acc.report_type == 'Profit and Loss':
+			cond.append("posting_date >= '%s' and voucher_type != 'Period Closing Voucher'" \
+				% year_start_date)
+
+		# different filter for group and ledger - improved performance
+		if acc.group_or_ledger=="Group":
+			cond.append("""exists (
+				select * from `tabAccount` ac where ac.name = gle.account
+				and ac.lft >= %s and ac.rgt <= %s
+			)""" % (acc.lft, acc.rgt))
+		else:
+			cond.append("""gle.account = "%s" """ % (account.replace('"', '\\"'), ))
+
+	if party_type and party:
+		cond.append("""gle.party_type = "%s" and gle.party = "%s" """ %
+			(party_type.replace('"', '\\"'), party.replace('"', '\\"')))
 
 	bal = frappe.db.sql("""
 		SELECT sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
@@ -152,6 +162,7 @@ def check_if_jv_modified(args):
 	ret = frappe.db.sql("""
 		select t2.{dr_or_cr} from `tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
 		where t1.name = t2.parent and t2.account = %(account)s
+		and t2.party_type = %(party_type)s and t2.party = %(party)s
 		and ifnull(t2.against_voucher, '')=''
 		and ifnull(t2.against_invoice, '')='' and ifnull(t2.against_jv, '')=''
 		and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
@@ -180,6 +191,8 @@ def update_against_doc(d, jv_obj):
 		# new entry with balance amount
 		ch = jv_obj.append("entries")
 		ch.account = d['account']
+		ch.party_type = d["party_type"]
+		ch.party = d["party"]
 		ch.cost_center = cstr(jvd[0][0])
 		ch.balance = flt(jvd[0][1])
 		ch.set(d['dr_or_cr'], flt(d['unadjusted_amt']) - flt(d['allocated_amt']))
@@ -244,8 +257,8 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 
 	difference = {}
 
-	account_warehouse = dict(frappe.db.sql("""select name, master_name from tabAccount
-		where account_type = 'Warehouse' and ifnull(master_name, '') != ''
+	account_warehouse = dict(frappe.db.sql("""select name, warehouse from tabAccount
+		where account_type = 'Warehouse' and ifnull(warehouse, '') != ''
 		and name in (%s)""" % ', '.join(['%s']*len(account_list)), account_list))
 
 	for account, warehouse in account_warehouse.items():
@@ -322,39 +335,6 @@ def get_actual_expense(args):
 		and fiscal_year='%(fiscal_year)s' and company='%(company)s' %(condition)s
 	""" % (args))[0][0]
 
-def rename_account_for(dt, olddn, newdn, merge, company=None):
-	if not company:
-		companies = [d[0] for d in frappe.db.sql("select name from tabCompany")]
-	else:
-		companies = [company]
-
-	for company in companies:
-		old_account = get_account_for(dt, olddn, company)
-		if old_account:
-			new_account = None
-			if not merge:
-				if old_account == add_abbr_if_missing(olddn, company):
-					new_account = frappe.rename_doc("Account", old_account, newdn)
-			else:
-				existing_new_account = get_account_for(dt, newdn, company)
-				new_account = frappe.rename_doc("Account", old_account,
-					existing_new_account or newdn, merge=True if existing_new_account else False)
-
-			frappe.db.set_value("Account", new_account or old_account, "master_name", newdn)
-
-def add_abbr_if_missing(dn, company):
-	from erpnext.setup.doctype.company.company import get_name_with_abbr
-	return get_name_with_abbr(dn, company)
-
-def get_account_for(account_for_doctype, account_for, company):
-	if account_for_doctype in ["Customer", "Supplier"]:
-		account_for_field = "master_type"
-	elif account_for_doctype == "Warehouse":
-		account_for_field = "account_type"
-
-	return frappe.db.get_value("Account", {account_for_field: account_for_doctype,
-		"master_name": account_for, "company": company})
-
 def get_currency_precision(currency=None):
 	if not currency:
 		currency = frappe.db.get_value("Company",
@@ -392,7 +372,7 @@ def get_stock_rbnb_difference(posting_date, company):
 	# Amount should be credited
 	return flt(stock_rbnb) + flt(sys_bal)
 
-def get_outstanding_invoices(amount_query, account):
+def get_outstanding_invoices(amount_query, account, party_type, party):
 	all_outstanding_vouchers = []
 	outstanding_voucher_list = frappe.db.sql("""
 		select
@@ -401,9 +381,9 @@ def get_outstanding_invoices(amount_query, account):
 		from
 			`tabGL Entry`
 		where
-			account = %s and {amount_query} > 0
+			account = %s and party_type=%s and party=%s and {amount_query} > 0
 		group by voucher_type, voucher_no
-		""".format(amount_query = amount_query), account, as_dict = True)
+		""".format(amount_query = amount_query), (account, party_type, party), as_dict = True)
 
 	for d in outstanding_voucher_list:
 		payment_amount = frappe.db.sql("""
@@ -411,11 +391,11 @@ def get_outstanding_invoices(amount_query, account):
 			from
 				`tabGL Entry`
 			where
-				account = %s and {amount_query} < 0
+				account = %s and party_type=%s and party=%s and {amount_query} < 0
 				and against_voucher_type = %s and ifnull(against_voucher, '') = %s
 			""".format(**{
 			"amount_query": amount_query
-			}), (account, d.voucher_type, d.voucher_no))
+			}), (account, party_type, party, d.voucher_type, d.voucher_no))
 
 		payment_amount = -1*payment_amount[0][0] if payment_amount else 0
 

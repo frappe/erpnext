@@ -27,7 +27,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		dl = wrapper
 
 		expected_gl_entries = {
-			"_Test Supplier - _TC": [0, 1512.30],
+			"_Test Payable - _TC": [0, 1512.30],
 			"_Test Account Cost for Goods Sold - _TC": [1250, 0],
 			"_Test Account Shipping Charges - _TC": [100, 0],
 			"_Test Account Excise Duty - _TC": [140, 0],
@@ -56,7 +56,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = sorted([
-			["_Test Supplier - _TC", 0, 720],
+			["_Test Payable - _TC", 0, 720],
 			["Stock Received But Not Billed - _TC", 750.0, 0],
 			["Expenses Included In Valuation - _TC", 0.0, 250.0],
 			["_Test Account Shipping Charges - _TC", 100.0, 0],
@@ -89,7 +89,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = sorted([
-			["_Test Supplier - _TC", 0, 720],
+			["_Test Payable - _TC", 0, 720],
 			["Stock Received But Not Billed - _TC", 500.0, 0],
 			["_Test Account Shipping Charges - _TC", 100.0, 0],
 			["_Test Account VAT - _TC", 120.0, 0],
@@ -120,7 +120,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = sorted([
-			["_Test Supplier - _TC", 0, 620],
+			["_Test Payable - _TC", 0, 620],
 			["_Test Account Cost for Goods Sold - _TC", 500.0, 0],
 			["_Test Account VAT - _TC", 120.0, 0],
 		])

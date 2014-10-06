@@ -230,7 +230,6 @@ erpnext.AccountsChart = Class.extend({
 
 			var node = me.tree.get_selected_node();
 			v.parent_account = node.label;
-			v.master_type = '';
 			v.company = me.company;
 
 			return frappe.call({

@@ -21,7 +21,7 @@ class AccountsController(TransactionBase):
 			self.validate_value("grand_total", ">=", 0)
 			self.set_total_in_words()
 
-		self.validate_for_freezed_account()
+		self.validate_due_date()
 
 		if self.meta.get_field("is_recurring"):
 			validate_recurring_document(self)
@@ -61,16 +61,12 @@ class AccountsController(TransactionBase):
 				validate_fiscal_year(self.get(date_field), self.fiscal_year,
 					label=self.meta.get_label(date_field))
 
-	def validate_for_freezed_account(self):
-		for fieldname in ["customer", "supplier"]:
-			if self.meta.get_field(fieldname) and self.get(fieldname):
-				accounts = frappe.db.get_values("Account",
-					{"master_type": fieldname.title(), "master_name": self.get(fieldname),
-					"company": self.company}, "name")
-				if accounts:
-					from erpnext.accounts.doctype.gl_entry.gl_entry import validate_frozen_account
-					for account in accounts:
-						validate_frozen_account(account[0])
+	def validate_due_date(self):
+		from erpnext.accounts.party import validate_due_date
+		if self.doctype == "Sales Invoice":
+			validate_due_date(self.posting_date, self.due_date, "Customer", self.customer, self.company)
+		elif self.doctype == "Purchase Invoice":
+			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.company)
 
 	def set_price_list_currency(self, buying_or_selling):
 		if self.meta.get_field("currency"):
@@ -368,6 +364,8 @@ class AccountsController(TransactionBase):
 			'debit': 0,
 			'credit': 0,
 			'is_opening': self.get("is_opening") or "No",
+			'party_type': None,
+			'party': None
 		})
 		gl_dict.update(args)
 		return gl_dict
@@ -378,7 +376,7 @@ class AccountsController(TransactionBase):
 		frappe.db.sql("""delete from `tab%s` where parentfield=%s and parent = %s
 			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
-	def get_advances(self, account_head, child_doctype, parentfield, dr_or_cr, against_order_field):
+	def get_advances(self, account_head, party_type, party, child_doctype, parentfield, dr_or_cr, against_order_field):
 		so_list = list(set([d.get(against_order_field) for d in self.get("entries") if d.get(against_order_field)]))
 		cond = ""
 		if so_list:
@@ -390,17 +388,19 @@ class AccountsController(TransactionBase):
 			from
 				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
 			where
-				t1.name = t2.parent and t2.account = %s and t2.is_advance = 'Yes' and t1.docstatus = 1
+				t1.name = t2.parent and t2.account = %s
+				and t2.party_type=%s and t2.party=%s
+				and t2.is_advance = 'Yes' and t1.docstatus = 1
 				and ((
 						ifnull(t2.against_voucher, '')  = ''
 						and ifnull(t2.against_invoice, '')  = ''
 						and ifnull(t2.against_jv, '')  = ''
 						and ifnull(t2.against_sales_order, '')  = ''
 						and ifnull(t2.against_purchase_order, '')  = ''
-					) %s)
+				) %s)
 			order by t1.posting_date""" %
-			(dr_or_cr, '%s', cond),
-			tuple([account_head] + so_list), as_dict= True)
+			(dr_or_cr, '%s', '%s', '%s', cond), tuple([account_head, party_type, party] + so_list), as_dict=1)
+
 
 		self.set(parentfield, [])
 		for d in res:
@@ -514,15 +514,6 @@ class AccountsController(TransactionBase):
 			self._abbr = frappe.db.get_value("Company", self.company, "abbr")
 
 		return self._abbr
-
-	def check_credit_limit(self, account):
-		total_outstanding = frappe.db.sql("""
-			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
-			from `tabGL Entry` where account = %s""", account)
-
-		total_outstanding = total_outstanding[0][0] if total_outstanding else 0
-		if total_outstanding:
-			frappe.get_doc('Account', account).check_credit_limit(total_outstanding)
 
 @frappe.whitelist()
 def get_tax_rate(account_head):

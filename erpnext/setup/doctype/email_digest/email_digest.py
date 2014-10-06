@@ -204,9 +204,7 @@ class EmailDigest(Document):
 
 	def get_party_total(self, party_type, gle_field, label):
 		import re
-		# account is of master_type Customer or Supplier
-		accounts = [a["name"] for a in self.get_accounts()
-			if a["master_type"]==party_type]
+		party_list = frappe.db.sql_list("select name from `tab{0}`".format(party_type))
 
 		# account is "Bank" or "Cash"
 		bc_accounts = [esc(a["name"], "()|") for a in self.get_accounts()
@@ -216,7 +214,7 @@ class EmailDigest(Document):
 		total = 0
 		for gle in self.get_gl_entries(self.from_date, self.to_date):
 			# check that its made against a bank or cash account
-			if gle["account"] in accounts and gle["against"] and \
+			if gle["party_type"]==party_type and gle["party"] in party_list and gle["against"] and \
 					bc_regex.findall(gle["against"]):
 				val = gle["debit"] - gle["credit"]
 				total += (gle_field=="debit" and 1 or -1) * val
@@ -231,13 +229,11 @@ class EmailDigest(Document):
 		return self.get_booked_total("Supplier", "credit", self.meta.get_label("payables"))
 
 	def get_booked_total(self, party_type, gle_field, label):
-		# account is of master_type Customer or Supplier
-		accounts = [a["name"] for a in self.get_accounts()
-			if a["master_type"]==party_type]
+		party_list = frappe.db.sql_list("select name from `tab{0}`".format(party_type))
 
 		total = 0
 		for gle in self.get_gl_entries(self.from_date, self.to_date):
-			if gle["account"] in accounts:
+			if gle["party_type"]==party_type and gle["party"] in party_list:
 				total += gle[gle_field]
 
 		return total, self.get_html(label, self.currency, fmt_money(total))
@@ -379,7 +375,7 @@ class EmailDigest(Document):
 				hasattr(self, "gl_entries"):
 			return self.gl_entries
 
-		gl_entries = frappe.db.sql("""select `account`,
+		gl_entries = frappe.db.sql("""select `account`, `party_type`, `party`,
 			ifnull(credit, 0) as credit, ifnull(debit, 0) as debit, `against`
 			from `tabGL Entry`
 			where company=%s
@@ -395,7 +391,7 @@ class EmailDigest(Document):
 
 	def get_accounts(self):
 		if not hasattr(self, "accounts"):
-			self.accounts = frappe.db.sql("""select name, account_type, account_name, master_type, root_type
+			self.accounts = frappe.db.sql("""select name, account_type, account_name, root_type
 				from `tabAccount` where company=%s and docstatus < 2
 				and group_or_ledger = "Ledger" order by lft""",
 				(self.company,), as_dict=1)

@@ -84,6 +84,19 @@
    "read_only": 1
   },
   {
+   "fieldname": "default_payable_accounts",
+   "fieldtype": "Section Break",
+   "label": "Default Payable Accounts",
+   "permlevel": 0
+  },
+  {
+   "fieldname": "party_accounts",
+   "fieldtype": "Table",
+   "label": "Party Accounts",
+   "options": "Party Account",
+   "permlevel": 0
+  },
+  {
    "fieldname": "more_info",
    "fieldtype": "Section Break",
    "label": "More Info",
@@ -170,7 +183,7 @@
  ],
  "icon": "icon-user",
  "idx": 1,
- "modified": "2014-09-12 12:26:37.606976",
+ "modified": "2014-09-10 17:53:09.286715",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

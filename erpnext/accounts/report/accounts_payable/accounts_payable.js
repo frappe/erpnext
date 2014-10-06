@@ -11,21 +11,10 @@ frappe.query_reports["Accounts Payable"] = {
 			"default": frappe.defaults.get_user_default("company")
 		},
 		{
-			"fieldname":"account",
-			"label": __("Account"),
+			"fieldname":"supplier",
+			"label": __("Supplier"),
 			"fieldtype": "Link",
-			"options": "Account",
-			"get_query": function() {
-				var company = frappe.query_report.filters_by_name.company.get_value();
-				return {
-					"query": "erpnext.controllers.queries.get_account_list",
-					"filters": {
-						"report_type": "Balance Sheet",
-						"company": company,
-						"master_type": "Supplier"
-					}
-				}
-			}
+			"options": "Supplier"
 		},
 		{
 			"fieldname":"report_date",

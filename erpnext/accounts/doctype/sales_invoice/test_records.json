@@ -5,7 +5,7 @@
   "currency": "INR",
   "customer": "_Test Customer",
   "customer_name": "_Test Customer",
-  "debit_to": "_Test Customer - _TC",
+  "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
   "due_date": "2013-01-23",
   "entries": [
@@ -74,7 +74,7 @@
   "currency": "INR",
   "customer": "_Test Customer",
   "customer_name": "_Test Customer",
-  "debit_to": "_Test Customer - _TC",
+  "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
   "due_date": "2013-03-07",
   "entries": [
@@ -130,7 +130,7 @@
   "currency": "INR",
   "customer": "_Test Customer",
   "customer_name": "_Test Customer",
-  "debit_to": "_Test Customer - _TC",
+  "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
   "due_date": "2013-01-23",
   "entries": [
@@ -256,7 +256,7 @@
   "currency": "INR",
   "customer": "_Test Customer",
   "customer_name": "_Test Customer",
-  "debit_to": "_Test Customer - _TC",
+  "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
   "due_date": "2013-01-23",
   "entries": [

@@ -33,6 +33,10 @@ class SellingController(StockController):
 		self.validate_max_discount()
 		check_active_sales_items(self)
 
+	def check_credit_limit(self):
+		from erpnext.selling.doctype.customer.customer import check_credit_limit
+		check_credit_limit(self.customer, self.company)
+
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
 
@@ -300,28 +304,6 @@ class SellingController(StockController):
 			self.order_type = "Sales"
 		elif self.order_type not in valid_types:
 			throw(_("Order Type must be one of {0}").format(comma_or(valid_types)))
-
-	def check_credit(self, grand_total):
-		customer_account = frappe.db.get_value("Account", {"company": self.company,
-			"master_name": self.customer}, "name")
-		if customer_account:
-			invoice_outstanding = frappe.db.sql("""select
-				sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
-				from `tabGL Entry` where account = %s""", customer_account)
-			invoice_outstanding = flt(invoice_outstanding[0][0]) if invoice_outstanding else 0
-
-			ordered_amount_to_be_billed = frappe.db.sql("""
-				select sum(grand_total*(100 - ifnull(per_billed, 0))/100)
-				from `tabSales Order`
-				where customer=%s and docstatus = 1
-				and ifnull(per_billed, 0) < 100 and status != 'Stopped'""", self.customer)
-
-			ordered_amount_to_be_billed = flt(ordered_amount_to_be_billed[0][0]) \
-				if ordered_amount_to_be_billed else 0.0
-
-			total_outstanding = invoice_outstanding + ordered_amount_to_be_billed
-
-			frappe.get_doc('Account', customer_account).check_credit_limit(total_outstanding)
 
 	def validate_max_discount(self):
 		for d in self.get(self.fname):

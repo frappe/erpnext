@@ -12,8 +12,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_display('account_name', doc.__islocal);
 
 	// hide fields if group
-	cur_frm.toggle_display(['account_type', 'master_type', 'master_name',
-		'credit_days', 'credit_limit', 'tax_rate'], doc.group_or_ledger=='Ledger')
+	cur_frm.toggle_display(['account_type', 'tax_rate'], doc.group_or_ledger=='Ledger')
 
 	// disable fields
 	cur_frm.toggle_enable(['account_name', 'group_or_ledger', 'company'], false);
@@ -29,23 +28,12 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	} else {
 		// credit days and type if customer or supplier
 		cur_frm.set_intro(null);
-		cur_frm.toggle_display(['credit_days', 'credit_limit'], in_list(['Customer', 'Supplier'],
-			doc.master_type));
 
-		cur_frm.cscript.master_type(doc, cdt, cdn);
 		cur_frm.cscript.account_type(doc, cdt, cdn);
 
 		// show / hide convert buttons
 		cur_frm.cscript.add_toolbar_buttons(doc);
 	}
-}
-
-cur_frm.cscript.master_type = function(doc, cdt, cdn) {
-	cur_frm.toggle_display(['credit_days', 'credit_limit'], in_list(['Customer', 'Supplier'],
-		doc.master_type));
-
-	cur_frm.toggle_display('master_name', doc.account_type=='Warehouse' ||
-		in_list(['Customer', 'Supplier'], doc.master_type));
 }
 
 cur_frm.add_fetch('parent_account', 'report_type', 'report_type');
@@ -54,8 +42,7 @@ cur_frm.add_fetch('parent_account', 'root_type', 'root_type');
 cur_frm.cscript.account_type = function(doc, cdt, cdn) {
 	if(doc.group_or_ledger=='Ledger') {
 		cur_frm.toggle_display(['tax_rate'], doc.account_type == 'Tax');
-		cur_frm.toggle_display('master_name', doc.account_type=='Warehouse' ||
-			in_list(['Customer', 'Supplier'], doc.master_type));
+		cur_frm.toggle_display('warehouse', doc.account_type=='Warehouse');
 	}
 }
 
@@ -96,20 +83,6 @@ cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
 	  cur_frm.refresh();
     }
   });
-}
-
-cur_frm.fields_dict['master_name'].get_query = function(doc) {
-	if (doc.master_type || doc.account_type=="Warehouse") {
-		var dt = doc.master_type || "Warehouse";
-		return {
-			doctype: dt,
-			query: "erpnext.accounts.doctype.account.account.get_master_name",
-			filters: {
-				"master_type": dt,
-				"company": doc.company
-			}
-		}
-	}
 }
 
 cur_frm.fields_dict['parent_account'].get_query = function(doc) {

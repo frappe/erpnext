@@ -86,15 +86,11 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				posting_date: this.frm.doc.posting_date,
 				party: this.frm.doc.supplier,
 				party_type: "Supplier",
-				account: this.frm.doc.debit_to,
+				account: this.frm.doc.credit_to,
 				price_list: this.frm.doc.buying_price_list,
 			}, function() {
 			me.apply_pricing_rule();
 		})
-	},
-
-	credit_to: function() {
-		this.supplier();
 	},
 
 	write_off_amount: function() {
@@ -169,7 +165,8 @@ cur_frm.fields_dict['entries'].grid.get_field("item_code").get_query = function(
 cur_frm.fields_dict['credit_to'].get_query = function(doc) {
 	return{
 		filters:{
-			'report_type': 'Balance Sheet',
+			'account_type': 'Payable',
+			'root_type': 'Liability',
 			'group_or_ledger': 'Ledger',
 			'company': doc.company
 		}

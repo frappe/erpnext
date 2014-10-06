@@ -34,9 +34,9 @@ def validate_filters(filters, account_details):
 		frappe.throw(_("From Date must be before To Date"))
 
 def get_columns():
-	return [_("Posting Date") + ":Date:100", _("Account") + ":Link/Account:200", _("Debit") + ":Float:100",
-		_("Credit") + ":Float:100", _("Voucher Type") + "::120", _("Voucher No") + "::160", _("Link") + "::20",
-		_("Against Account") + "::120", _("Cost Center") + ":Link/Cost Center:100", _("Remarks") + "::400"]
+	return ["Posting Date:Date:100", "Account:Link/Account:200", "Debit:Float:100",
+		"Credit:Float:100", "Voucher Type::120", "Voucher No:Dynamic Link/Voucher Type:160",
+		"Against Account::120", "Cost Center:Link/Cost Center:100", "Remarks::400"]
 
 def get_result(filters, account_details):
 	gl_entries = get_gl_entries(filters)
@@ -162,15 +162,6 @@ def get_result_as_list(data):
 	for d in data:
 		result.append([d.get("posting_date"), d.get("account"), d.get("debit"),
 			d.get("credit"), d.get("voucher_type"), d.get("voucher_no"),
-			get_voucher_link(d.get("voucher_type"), d.get("voucher_no")),
 			d.get("against"), d.get("cost_center"), d.get("remarks")])
 
 	return result
-
-def get_voucher_link(voucher_type, voucher_no):
-	icon = ""
-	if voucher_type and voucher_no:
-		icon = """<a href="%s"><i class="icon icon-share" style="cursor: pointer;">
-			</i></a>""" % ("/".join(["#Form", voucher_type, voucher_no]))
-
-	return icon

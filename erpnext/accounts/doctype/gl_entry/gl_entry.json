@@ -48,6 +48,20 @@
    "search_index": 1
   }, 
   {
+   "fieldname": "party_type", 
+   "fieldtype": "Link", 
+   "label": "Party Type", 
+   "options": "DocType", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "party", 
+   "fieldtype": "Dynamic Link", 
+   "label": "Party", 
+   "options": "party_type", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "cost_center", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -189,7 +203,7 @@
  "icon": "icon-list", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-06-23 08:07:30.678730", 
+ "modified": "2014-09-11 18:35:22.822064", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "GL Entry", 

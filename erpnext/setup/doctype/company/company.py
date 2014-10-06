@@ -39,7 +39,7 @@ class Company(Document):
 		self.validate_default_accounts()
 
 	def validate_default_accounts(self):
-		for field in ["default_bank_account", "default_cash_account", "receivables_group", "payables_group",
+		for field in ["default_bank_account", "default_cash_account", "default_receivable_account", "default_payable_account",
 			"default_expense_account", "default_income_account", "stock_received_but_not_billed",
 			"stock_adjustment_account", "expenses_included_in_valuation"]:
 				if self.get(field):
@@ -55,8 +55,7 @@ class Company(Document):
 			self.create_default_warehouses()
 			self.install_country_fixtures()
 
-		if not frappe.db.get_value("Cost Center", {"group_or_ledger": "Ledger",
-				"company": self.name}):
+		if not frappe.db.get_value("Cost Center", {"group_or_ledger": "Ledger", "company": self.name}):
 			self.create_default_cost_center()
 
 		self.set_default_accounts()
@@ -83,21 +82,20 @@ class Company(Document):
 
 	def create_default_accounts(self):
 		if self.chart_of_accounts:
-			self.import_chart_of_account()
+			from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
+			create_charts(self.chart_of_accounts, self.name)
 		else:
 			self.create_standard_accounts()
-			frappe.db.set(self, "receivables_group", _("Accounts Receivable") + " - " + self.abbr)
-			frappe.db.set(self, "payables_group", _("Accounts Payable") + " - " + self.abbr)
 
-	def import_chart_of_account(self):
-		chart = frappe.get_doc("Chart of Accounts", self.chart_of_accounts)
-		chart.create_accounts(self.name)
+		frappe.db.set(self, "default_receivable_account", frappe.db.get_value("Account",
+			{"company": self.name, "account_type": "Receivable"}))
+		frappe.db.set(self, "default_payable_account", frappe.db.get_value("Account",
+			{"company": self.name, "account_type": "Payable"}))
 
 	def add_acc(self, lst):
 		account = frappe.get_doc({
 			"doctype": "Account",
 			"freeze_account": "No",
-			"master_type": "",
 			"company": self.name
 		})
 

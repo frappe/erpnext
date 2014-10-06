@@ -130,6 +130,19 @@
    "read_only": 1
   },
   {
+   "fieldname": "default_receivable_accounts",
+   "fieldtype": "Section Break",
+   "label": "Default Receivable Accounts",
+   "permlevel": 0
+  },
+  {
+   "fieldname": "party_accounts",
+   "fieldtype": "Table",
+   "label": "Party Accounts",
+   "options": "Party Account",
+   "permlevel": 0
+  },
+  {
    "fieldname": "more_info",
    "fieldtype": "Section Break",
    "label": "More Info",
@@ -142,19 +155,6 @@
    "fieldtype": "Column Break",
    "permlevel": 0,
    "width": "50%"
-  },
-  {
-   "description": "To create an Account Head under a different company, select the company and save customer.",
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_filter": 1,
-   "label": "Company",
-   "oldfieldname": "company",
-   "oldfieldtype": "Link",
-   "options": "Company",
-   "permlevel": 0,
-   "reqd": 1,
-   "search_index": 1
   },
   {
    "description": "Your Customer's TAX registration numbers (if applicable) or any general information",

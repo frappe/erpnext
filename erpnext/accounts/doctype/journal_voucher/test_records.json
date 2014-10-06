@@ -6,7 +6,9 @@
   "doctype": "Journal Voucher",
   "entries": [
    {
-    "account": "_Test Customer - _TC",
+    "account": "_Test Receivable - _TC",
+	"party_type": "Customer",
+	"party": "_Test Customer",
     "credit": 400.0,
     "debit": 0.0,
     "doctype": "Journal Voucher Detail",
@@ -33,7 +35,9 @@
   "doctype": "Journal Voucher",
   "entries": [
    {
-    "account": "_Test Supplier - _TC",
+    "account": "_Test Payable - _TC",
+	"party_type": "Supplier",
+	"party": "_Test Supplier",
     "credit": 0.0,
     "debit": 400.0,
     "doctype": "Journal Voucher Detail",
@@ -60,7 +64,9 @@
   "doctype": "Journal Voucher",
   "entries": [
    {
-    "account": "_Test Customer - _TC",
+    "account": "_Test Receivable - _TC",
+	"party_type": "Customer",
+	"party": "_Test Customer",
     "credit": 0.0,
     "debit": 400.0,
     "doctype": "Journal Voucher Detail",

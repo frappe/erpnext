@@ -42,7 +42,7 @@ class TestJournalVoucher(unittest.TestCase):
 		if test_voucher.doctype == "Journal Voucher":
 			self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
 				where account = %s and docstatus = 1 and parent = %s""",
-				("_Test Customer - _TC", test_voucher.name)))
+				("_Test Receivable - _TC", test_voucher.name)))
 
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
 			where %s=%s""" % (field_dict.get(test_voucher.doctype), '%s'), (test_voucher.name)))
@@ -69,18 +69,18 @@ class TestJournalVoucher(unittest.TestCase):
 		advance_paid = frappe.db.sql("""select advance_paid from `tab%s`
 					where name=%s""" % (test_voucher.doctype, '%s'), (test_voucher.name))
 		payment_against_order = base_jv.get("entries")[0].get(dr_or_cr)
-		
+
 		self.assertTrue(flt(advance_paid[0][0]) == flt(payment_against_order))
 
 	def cancel_against_voucher_testcase(self, test_voucher):
 		if test_voucher.doctype == "Journal Voucher":
-			# if test_voucher is a Journal Voucher, test cancellation of test_voucher 
+			# if test_voucher is a Journal Voucher, test cancellation of test_voucher
 			test_voucher.cancel()
 			self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
 				where against_jv=%s""", test_voucher.name))
 
 		elif test_voucher.doctype in ["Sales Order", "Purchase Order"]:
-			# if test_voucher is a Sales Order/Purchase Order, test error on cancellation of test_voucher 
+			# if test_voucher is a Sales Order/Purchase Order, test error on cancellation of test_voucher
 			submitted_voucher = frappe.get_doc(test_voucher.doctype, test_voucher.name)
 			self.assertRaises(frappe.LinkExistsError, submitted_voucher.cancel)
 

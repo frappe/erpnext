@@ -3,9 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-
-
-from frappe.utils import cint, cstr, formatdate, flt
+from frappe.utils import cint, formatdate, flt
 from frappe import msgprint, _, throw
 from erpnext.setup.utils import get_company_currency
 import frappe.defaults
@@ -46,15 +44,13 @@ class PurchaseInvoice(BuyingController):
 		self.pr_required()
 		self.check_active_purchase_items()
 		self.check_conversion_rate()
-		self.validate_credit_acc()
+		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advance_allocation_details")
 		self.validate_advance_jv("advance_allocation_details", "purchase_order")
-		self.check_for_acc_head_of_supplier()
 		self.check_for_stopped_status()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
 		self.set_aging_date()
-		frappe.get_doc("Account", self.credit_to).validate_due_date(self.posting_date, self.due_date)
 		self.set_against_expense_account()
 		self.validate_write_off_account()
 		self.update_valuation_rate("entries")
@@ -73,13 +69,12 @@ class PurchaseInvoice(BuyingController):
 		if not self.credit_to:
 			self.credit_to = get_party_account(self.company, self.supplier, "Supplier")
 		if not self.due_date:
-			self.due_date = get_due_date(self.posting_date, self.supplier, "Supplier",
-				self.credit_to, self.company)
+			self.due_date = get_due_date(self.posting_date, "Supplier", self.supplier, self.company)
 
 		super(PurchaseInvoice, self).set_missing_values(for_validate)
 
 	def get_advances(self):
-		super(PurchaseInvoice, self).get_advances(self.credit_to,
+		super(PurchaseInvoice, self).get_advances(self.credit_to, "Supplier", self.supplier,
 			"Purchase Invoice Advance", "advance_allocation_details", "debit", "purchase_order")
 
 	def check_active_purchase_items(self):
@@ -95,21 +90,13 @@ class PurchaseInvoice(BuyingController):
 		if (self.currency == default_currency and flt(self.conversion_rate) != 1.00) or not self.conversion_rate or (self.currency != default_currency and flt(self.conversion_rate) == 1.00):
 			throw(_("Conversion rate cannot be 0 or 1"))
 
-	def validate_credit_acc(self):
-		if frappe.db.get_value("Account", self.credit_to, "report_type") != "Balance Sheet":
-			frappe.throw(_("Account must be a balance sheet account"))
+	def validate_credit_to_acc(self):
+		root_type, account_type = frappe.db.get_value("Account", self.credit_to, ["root_type", "account_type"])
+		if root_type != "Liability":
+			frappe.throw(_("Credit To account must be a liability account"))
+		if account_type != "Payable":
+			frappe.throw(_("Credit To account must be a Payable account"))
 
-	# Validate Acc Head of Supplier and Credit To Account entered
-	# ------------------------------------------------------------
-	def check_for_acc_head_of_supplier(self):
-		if self.supplier and self.credit_to:
-			acc_head = frappe.db.sql("select master_name from `tabAccount` where name = %s", self.credit_to)
-
-			if (acc_head and cstr(acc_head[0][0]) != cstr(self.supplier)) or (not acc_head and (self.credit_to != cstr(self.supplier) + " - " + self.company_abbr)):
-				msgprint("Credit To: %s do not match with Supplier: %s for Company: %s.\n If both correctly entered, please select Master Type and Master Name in account master." %(self.credit_to,self.supplier,self.company), raise_exception=1)
-
-	# Check for Stopped PO
-	# ---------------------
 	def check_for_stopped_status(self):
 		check_list = []
 		for d in self.get('entries'):
@@ -237,6 +224,8 @@ class PurchaseInvoice(BuyingController):
 					'against_voucher_type' : 'Purchase Invoice',
 					'against_voucher'  : self.name,
 					'account' : self.credit_to,
+					'party_type': 'Supplier',
+					'party': self.supplier,
 					'is_advance' : 'Yes',
 					'dr_or_cr' : 'debit',
 					'unadjusted_amt' : flt(d.advance_amount),
@@ -276,6 +265,8 @@ class PurchaseInvoice(BuyingController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.credit_to,
+					"party_type": "Supplier",
+					"party": self.supplier,
 					"against": self.against_expense_account,
 					"credit": self.total_amount_to_pay,
 					"remarks": self.remarks,
@@ -408,8 +399,6 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 					or tabAccount.account_type = "Expense Account")
 				and tabAccount.group_or_ledger="Ledger"
 				and tabAccount.docstatus!=2
-				and ifnull(tabAccount.master_type, "")=""
-				and ifnull(tabAccount.master_name, "")=""
 				and tabAccount.company = '%(company)s'
 				and tabAccount.%(key)s LIKE '%(txt)s'
 				%(mcond)s""" % {'company': filters['company'], 'key': searchfield,

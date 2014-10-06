@@ -93,7 +93,7 @@ def validate_total_debit_credit(total_debit, total_credit):
 def validate_account_for_auto_accounting_for_stock(gl_map):
 	if gl_map[0].voucher_type=="Journal Voucher":
 		aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
-			where account_type = 'Warehouse' and ifnull(master_name, '')!=''""")]
+			where account_type = 'Warehouse' and ifnull(warehouse, '')!=''""")]
 
 		for entry in gl_map:
 			if entry.account in aii_accounts:
@@ -122,5 +122,5 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		validate_expense_against_budget(entry)
 
 		if entry.get("against_voucher") and update_outstanding == 'Yes':
-			update_outstanding_amt(entry["account"], entry.get("against_voucher_type"),
+			update_outstanding_amt(entry["account"], entry.get("party_type"), entry.get("party"), entry.get("against_voucher_type"),
 				entry.get("against_voucher"), on_cancel=True)

@@ -174,10 +174,10 @@ class DeliveryNote(SellingController):
 		# update delivered qty in sales order
 		self.update_prevdoc_status()
 
+		self.check_credit_limit()
+
 		# create stock ledger entry
 		self.update_stock_ledger()
-
-		self.credit_limit()
 
 		self.make_gl_entries()
 
@@ -270,16 +270,6 @@ class DeliveryNote(SellingController):
 				"is_amended": self.amended_from and 'Yes' or 'No'
 			}
 			update_bin(args)
-
-	def credit_limit(self):
-		"""check credit limit of items in DN Detail which are not fetched from sales order"""
-		amount, total = 0, 0
-		for d in self.get('delivery_note_details'):
-			if not (d.against_sales_order or d.against_sales_invoice):
-				amount += d.base_amount
-		if amount != 0:
-			total = (amount/self.net_total)*self.grand_total
-			self.check_credit(total)
 
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""

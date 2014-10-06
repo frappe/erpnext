@@ -64,9 +64,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		stock_in_hand_account = frappe.db.get_value("Account",
-			{"master_name": pr.get("purchase_receipt_details")[0].warehouse})
+			{"warehouse": pr.get("purchase_receipt_details")[0].warehouse})
 		fixed_asset_account = frappe.db.get_value("Account",
-			{"master_name": pr.get("purchase_receipt_details")[1].warehouse})
+			{"warehouse": pr.get("purchase_receipt_details")[1].warehouse})
 
 		expected_values = {
 			stock_in_hand_account: [375.0, 0.0],

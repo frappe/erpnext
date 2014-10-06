@@ -4,7 +4,7 @@
   "buying_price_list": "_Test Price List",
   "company": "_Test Company",
   "conversion_rate": 1,
-  "credit_to": "_Test Supplier - _TC",
+  "credit_to": "_Test Payable - _TC",
   "currency": "INR",
   "doctype": "Purchase Invoice",
   "entries": [
@@ -146,7 +146,7 @@
   "buying_price_list": "_Test Price List",
   "company": "_Test Company",
   "conversion_rate": 1.0,
-  "credit_to": "_Test Supplier - _TC",
+  "credit_to": "_Test Payable - _TC",
   "currency": "INR",
   "doctype": "Purchase Invoice",
   "entries": [

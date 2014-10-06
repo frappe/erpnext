@@ -73,7 +73,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.get("delivery_note_details")[0].cost_center = "Main - _TC"
 
 		stock_in_hand_account = frappe.db.get_value("Account",
-			{"master_name": dn.get("delivery_note_details")[0].warehouse})
+			{"warehouse": dn.get("delivery_note_details")[0].warehouse})
 
 		from erpnext.accounts.utils import get_balance_on
 		prev_bal = get_balance_on(stock_in_hand_account, dn.posting_date)
@@ -128,7 +128,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.get("delivery_note_details")[0].qty = 1
 
 		stock_in_hand_account = frappe.db.get_value("Account",
-			{"master_name": dn.get("delivery_note_details")[0].warehouse})
+			{"warehouse": dn.get("delivery_note_details")[0].warehouse})
 
 		from erpnext.accounts.utils import get_balance_on
 		prev_bal = get_balance_on(stock_in_hand_account, dn.posting_date)
