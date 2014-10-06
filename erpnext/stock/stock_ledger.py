@@ -36,9 +36,9 @@ def make_sl_entries(sl_entries, is_amended=None):
 				"is_amended": is_amended
 			})
 			update_bin(args)
+
 		if cancel:
-			delete_cancelled_entry(sl_entries[0].get('voucher_type'),
-				sl_entries[0].get('voucher_no'))
+			delete_cancelled_entry(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
 
 def set_as_cancel(voucher_type, voucher_no):
 	frappe.db.sql("""update `tabStock Ledger Entry` set is_cancelled='Yes',

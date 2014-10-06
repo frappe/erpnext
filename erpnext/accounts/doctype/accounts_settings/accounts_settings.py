@@ -14,6 +14,9 @@ class AccountsSettings(Document):
 		frappe.db.set_default("auto_accounting_for_stock", self.auto_accounting_for_stock)
 
 		if cint(self.auto_accounting_for_stock):
+			if cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock")):
+				frappe.throw(_("Negative stock is not allowed in case of Perpetual Inventory, please disable it from Stock Settings"))
+
 			# set default perpetual account in company
 			for company in frappe.db.sql("select name from tabCompany"):
 				frappe.get_doc("Company", company[0]).save()
