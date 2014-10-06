@@ -26,6 +26,9 @@ class AccountsController(TransactionBase):
 		if self.meta.get_field("is_recurring"):
 			validate_recurring_document(self)
 
+		if self.meta.get_field("taxes_and_charges"):
+			self.validate_enabled_taxes_and_charges()
+
 	def on_submit(self):
 		if self.meta.get_field("is_recurring"):
 			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
@@ -341,6 +344,11 @@ class AccountsController(TransactionBase):
 			flt(item.get(print_field), self.precision(print_field, item)),
 			self.precision(base_field, item))
 		item.set(base_field, value_in_company_currency)
+
+	def validate_enabled_taxes_and_charges(self):
+		taxes_and_charges_doctype = self.meta.get_options("taxes_and_charges")
+		if frappe.db.get_value(taxes_and_charges_doctype, self.taxes_and_charges, "disabled"):
+			frappe.throw(_("{0} '{1}' is disabled").format(taxes_and_charges_doctype, self.taxes_and_charges))
 
 	def calculate_total_advance(self, parenttype, advance_parentfield):
 		if self.doctype == parenttype and self.docstatus < 2:
