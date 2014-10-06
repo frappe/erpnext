@@ -231,4 +231,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
 			where against_voucher=%s""", pi.name))
 
+	def test_recurring_invoice(self):
+		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
+		test_recurring_document(self, test_records)
+
 test_records = frappe.get_test_records('Purchase Invoice')

@@ -4,11 +4,10 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cint, cstr, flt, formatdate
 
+from frappe.utils import cint, cstr, formatdate, flt
 from frappe import msgprint, _, throw
 from erpnext.setup.utils import get_company_currency
-
 import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
@@ -49,6 +48,7 @@ class PurchaseInvoice(BuyingController):
 		self.check_conversion_rate()
 		self.validate_credit_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advance_allocation_details")
+		self.validate_advance_jv("advance_allocation_details", "purchase_order")
 		self.check_for_acc_head_of_supplier()
 		self.check_for_stopped_status()
 		self.validate_with_previous_doc()
@@ -80,7 +80,7 @@ class PurchaseInvoice(BuyingController):
 
 	def get_advances(self):
 		super(PurchaseInvoice, self).get_advances(self.credit_to,
-			"Purchase Invoice Advance", "advance_allocation_details", "debit")
+			"Purchase Invoice Advance", "advance_allocation_details", "debit", "purchase_order")
 
 	def check_active_purchase_items(self):
 		for d in self.get('entries'):
@@ -249,6 +249,8 @@ class PurchaseInvoice(BuyingController):
 			reconcile_against_document(lst)
 
 	def on_submit(self):
+		super(PurchaseInvoice, self).on_submit()
+
 		self.check_prev_docstatus()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,

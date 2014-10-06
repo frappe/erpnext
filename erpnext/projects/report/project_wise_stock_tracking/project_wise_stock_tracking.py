@@ -26,7 +26,7 @@ def get_columns():
 		_("Cost of Issued Items") + ":Currency:160", _("Cost of Delivered Items") + ":Currency:160", 
 		_("Project Name") + "::120", _("Project Status") + "::120", _("Company") + ":Link/Company:100", 
 		_("Customer") + ":Link/Customer:140", _("Project Value") + ":Currency:120", 
-		_("Project Start Date") + ":Date:120", _("Completion Date") + ":Date:120"]+
+		_("Project Start Date") + ":Date:120", _("Completion Date") + ":Date:120"]
 
 def get_project_details():
 	return frappe.db.sql(""" select name, project_name, status, company, customer, project_value,

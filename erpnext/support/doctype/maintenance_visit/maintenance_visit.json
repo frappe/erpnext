@@ -279,7 +279,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-06-23 07:55:49.200714", 
+ "modified": "2014-09-26 11:37:41.026433", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Maintenance Visit", 
@@ -301,7 +301,7 @@
    "write": 1
   }
  ], 
- "search_fields": "status,maintenance_type,customer,customer_name, address,mntc_date,company,fiscal_year", 
+ "search_fields": "status,maintenance_type,customer,customer_name,mntc_date,company,fiscal_year", 
  "sort_field": "modified", 
  "sort_order": "DESC"
 }

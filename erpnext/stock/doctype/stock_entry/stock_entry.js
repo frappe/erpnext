@@ -120,7 +120,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	clean_up: function() {
 		// Clear Production Order record from locals, because it is updated via Stock Entry
 		if(this.frm.doc.production_order &&
-				this.frm.doc.purpose == "Manufacture/Repack") {
+				this.frm.doc.purpose == "Manufacture") {
 			frappe.model.remove_from_locals("Production Order",
 				this.frm.doc.production_order);
 		}
@@ -162,7 +162,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	toggle_enable_bom: function() {
-		this.frm.toggle_enable("bom_no", !this.frm.doc.production_order);
+		this.frm.toggle_enable("bom_no", this.frm.doc.purpose!="Manufacture");
 	},
 
 	get_doctype_docname: function() {
@@ -339,6 +339,8 @@ cur_frm.cscript.toggle_related_fields = function(doc) {
 	cur_frm.fields_dict["mtn_details"].grid.set_column_disp("s_warehouse", !disable_from_warehouse);
 	cur_frm.fields_dict["mtn_details"].grid.set_column_disp("t_warehouse", !disable_to_warehouse);
 
+	cur_frm.cscript.toggle_enable_bom();
+
 	if(doc.purpose == 'Purchase Return') {
 		doc.customer = doc.customer_name = doc.customer_address =
 			doc.delivery_note_no = doc.sales_invoice_no = null;
@@ -351,6 +353,8 @@ cur_frm.cscript.toggle_related_fields = function(doc) {
 			doc.delivery_note_no = doc.sales_invoice_no = doc.supplier =
 			doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = null;
 	}
+
+
 }
 
 cur_frm.fields_dict['production_order'].get_query = function(doc) {
@@ -458,3 +462,4 @@ cur_frm.fields_dict.supplier.get_query = function(doc, cdt, cdn) {
 	return { query: "erpnext.controllers.queries.supplier_query" }
 }
 cur_frm.add_fetch('production_order', 'total_fixed_cost', 'total_fixed_cost');
+cur_frm.add_fetch('bom_no', 'total_fixed_cost', 'total_fixed_cost');

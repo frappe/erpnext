@@ -14,9 +14,9 @@ $.extend(cur_frm.cscript, {
 		erpnext.toggle_naming_series();
 		if(!doc.__islocal) {
 			if(cur_frm.fields_dict.status.get_status()=="Write") {
-				if(doc.status!='Closed') cur_frm.add_custom_button('Close',
+				if(doc.status!='Closed') cur_frm.add_custom_button(__('Close'),
 					cur_frm.cscript['Close Ticket'], "icon-ok", "btn-success");
-				if(doc.status=='Closed') cur_frm.add_custom_button('Re-Open Ticket',
+				if(doc.status=='Closed') cur_frm.add_custom_button(__('Re-Open Ticket'),
 					cur_frm.cscript['Re-Open Ticket'], null, "btn-default");
 			}
 

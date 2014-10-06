@@ -107,6 +107,10 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.get("po_details")[0].qty = 3.4
 		self.assertRaises(UOMMustBeIntegerError, po.insert)
 
+	def test_recurring_order(self):
+		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
+		test_recurring_document(self, test_records)
+
 
 test_dependencies = ["BOM"]
 

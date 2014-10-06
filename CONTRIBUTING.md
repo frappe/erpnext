@@ -1,5 +1,9 @@
 # Contributing to Frappe / ERPNext
 
+### Update 16-Sep-14
+
+Please send pull requests to branch v5.0
+
 ## Reporting issues
 
 We only accept issues that are bug reports or feature requests. Bugs must be isolated and reproducible problems. Please read the following guidelines before opening any issue.

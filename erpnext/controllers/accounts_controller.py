@@ -4,12 +4,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import add_days, cint, cstr, today, date_diff, flt, getdate, nowdate, \
-	get_first_day, get_last_day
-from frappe.model.naming import make_autoname
+from frappe.utils import cint, today, flt
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 import json
 
 class AccountsController(TransactionBase):
@@ -23,6 +22,24 @@ class AccountsController(TransactionBase):
 			self.set_total_in_words()
 
 		self.validate_for_freezed_account()
+
+		if self.meta.get_field("is_recurring"):
+			validate_recurring_document(self)
+
+	def on_submit(self):
+		if self.meta.get_field("is_recurring"):
+			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
+
+	def on_update_after_submit(self):
+		if self.meta.get_field("is_recurring"):
+			validate_recurring_document(self)
+			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
+
+	def before_recurring(self):
+		self.fiscal_year = None
+		for fieldname in ("due_date", "aging_date"):
+			if self.meta.get_field(fieldname):
+				self.set(fieldname, None)
 
 	def set_missing_values(self, for_validate=False):
 		for fieldname in ["posting_date", "transaction_date"]:
@@ -361,38 +378,67 @@ class AccountsController(TransactionBase):
 		frappe.db.sql("""delete from `tab%s` where parentfield=%s and parent = %s
 			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
-	def get_advances(self, account_head, child_doctype, parentfield, dr_or_cr):
-		against_order_list = []
+	def get_advances(self, account_head, child_doctype, parentfield, dr_or_cr, against_order_field):
+		so_list = list(set([d.get(against_order_field) for d in self.get("entries") if d.get(against_order_field)]))
+		cond = ""
+		if so_list:
+			cond = "or (ifnull(t2.%s, '')  in (%s))" % ("against_" + against_order_field, ', '.join(['%s']*len(so_list)))
+
 		res = frappe.db.sql("""
 			select
-				t1.name as jv_no, t1.remark, t2.%s as amount, t2.name as jv_detail_no, t2.%s as order_no
+				t1.name as jv_no, t1.remark, t2.%s as amount, t2.name as jv_detail_no
 			from
 				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
 			where
 				t1.name = t2.parent and t2.account = %s and t2.is_advance = 'Yes' and t1.docstatus = 1
-				and ifnull(t2.against_voucher, '')  = ''
-				and ifnull(t2.against_invoice, '')  = ''
-				and ifnull(t2.against_jv, '')  = ''
+				and ((
+						ifnull(t2.against_voucher, '')  = ''
+						and ifnull(t2.against_invoice, '')  = ''
+						and ifnull(t2.against_jv, '')  = ''
+						and ifnull(t2.against_sales_order, '')  = ''
+						and ifnull(t2.against_purchase_order, '')  = ''
+					) %s)
 			order by t1.posting_date""" %
-			(dr_or_cr, "against_sales_order" if dr_or_cr == "credit" \
-			else "against_purchase_order", '%s'),
-			account_head, as_dict= True)
-
-		if self.get("entries"):
-			for i in self.get("entries"):
-				against_order_list.append(i.sales_order if dr_or_cr == "credit" else i.purchase_order)
+			(dr_or_cr, '%s', cond),
+			tuple([account_head] + so_list), as_dict= True)
 
 		self.set(parentfield, [])
 		for d in res:
-			if not against_order_list or d.order_no in against_order_list:
-				self.append(parentfield, {
-					"doctype": child_doctype,
-					"journal_voucher": d.jv_no,
-					"jv_detail_no": d.jv_detail_no,
-					"remarks": d.remark,
-					"advance_amount": flt(d.amount),
-					"allocate_amount": 0
-				})
+			self.append(parentfield, {
+				"doctype": child_doctype,
+				"journal_voucher": d.jv_no,
+				"jv_detail_no": d.jv_detail_no,
+				"remarks": d.remark,
+				"advance_amount": flt(d.amount),
+				"allocate_amount": 0
+			})
+
+	def validate_advance_jv(self, advance_table_fieldname, against_order_field):
+		order_list = list(set([d.get(against_order_field) for d in self.get("entries") if d.get(against_order_field)]))
+		if order_list:
+			account = self.get("debit_to" if self.doctype=="Sales Invoice" else "credit_to")
+
+			jv_against_order = frappe.db.sql("""select parent, %s as against_order
+				from `tabJournal Voucher Detail`
+				where docstatus=1 and account=%s and ifnull(is_advance, 'No') = 'Yes'
+				and ifnull(against_sales_order, '') in (%s)
+				group by parent, against_sales_order""" %
+				("against_" + against_order_field, '%s', ', '.join(['%s']*len(order_list))),
+				tuple([account] + order_list), as_dict=1)
+
+			if jv_against_order:
+				order_jv_map = {}
+				for d in jv_against_order:
+					order_jv_map.setdefault(d.against_order, []).append(d.parent)
+
+				advance_jv_against_si = [d.journal_voucher for d in self.get(advance_table_fieldname)]
+
+				for order, jv_list in order_jv_map.items():
+					for jv in jv_list:
+						if not advance_jv_against_si or jv not in advance_jv_against_si:
+							frappe.throw(_("Journal Voucher {0} is linked against Order {1}, hence it must be fetched as advance in Invoice as well.")
+								.format(jv, order))
+
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		from erpnext.controllers.status_updater import get_tolerance_for
@@ -420,7 +466,6 @@ class AccountsController(TransactionBase):
 					max_allowed_amt = flt(ref_amt * (100 + tolerance) / 100)
 
 					if total_billed_amt - max_allowed_amt > 0.01:
-						reduce_by = total_billed_amt - max_allowed_amt
 						frappe.throw(_("Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in Stock Settings").format(item.item_code, item.idx, max_allowed_amt))
 
 	def get_company_default(self, fieldname):

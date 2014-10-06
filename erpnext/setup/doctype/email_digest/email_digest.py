@@ -128,7 +128,7 @@ class EmailDigest(Document):
 			with_value = "\n".join(with_value)
 		else:
 			has_updates = False
-			with_value = "<p>There were no updates in the items selected for this digest.</p><hr>"
+			with_value = "<p>" + _("There were no updates in the items selected for this digest.") + "</p><hr>"
 
 		if not has_updates and send_only_if_updates:
 			return
@@ -136,7 +136,7 @@ class EmailDigest(Document):
 		# seperate out no value items
 		no_value = [o[1] for o in out if not o[0]]
 		if no_value:
-			no_value = """<h4>No Updates For:</h4>""" + "\n".join(no_value)
+			no_value = """<h4>""" + _("No Updates For") + """:</h4>""" + "\n".join(no_value)
 
 		date = self.frequency == "Daily" and formatdate(self.from_date) or \
 			"%s to %s" % (formatdate(self.from_date), formatdate(self.to_date))
@@ -310,9 +310,9 @@ class EmailDigest(Document):
 						(e.subject, datetime_in_user_format(e.starts_on), datetime_in_user_format(e.ends_on))
 
 		if html:
-			return 1, "<h4>Upcoming Calendar Events (max 10):</h4><ul>" + html + "</ul><hr>"
+			return 1, "<h4>" + _("Upcoming Calendar Events (max 10)") + ":</h4><ul>" + html + "</ul><hr>"
 		else:
-			return 0, "<p>Calendar Events</p>"
+			return 0, "<p>" + _("Calendar Events") + "</p>"
 
 	def get_todo_list(self, user_id):
 		todo_list = frappe.db.sql("""select *

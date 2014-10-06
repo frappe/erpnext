@@ -103,7 +103,7 @@ class ProductionOrder(Document):
 			status = "Submitted"
 			if stock_entries:
 				status = "In Process"
-				produced_qty = stock_entries.get("Manufacture/Repack")
+				produced_qty = stock_entries.get("Manufacture")
 				if flt(produced_qty) == flt(self.qty):
 					status = "Completed"
 
@@ -113,7 +113,7 @@ class ProductionOrder(Document):
 	def update_produced_qty(self):
 		produced_qty = frappe.db.sql("""select sum(fg_completed_qty)
 			from `tabStock Entry` where production_order=%s and docstatus=1
-			and purpose='Manufacture/Repack'""", self.name)
+			and purpose='Manufacture'""", self.name)
 		produced_qty = flt(produced_qty[0][0]) if produced_qty else 0
 
 		if produced_qty > self.qty:
