@@ -28,3 +28,11 @@ def send_newsletter(site, newsletter, event):
 
 	finally:
 		frappe.destroy()
+
+@celery_task()
+def notify_fiscal_year_end():
+	for d in frappe.db.sql("select name,year,year_end_date from `tabFiscal Year` where year_end_date =(current_date + 7)"):
+		msg = "Your fiscal year named "+d.name+" is about to end on "+d.year_end_date+".Please create a new Fiscal Year."
+		from frappe.email import sendmail, get_system_managers
+		recipient_list = get_system_managers()
+		sendmail(recipients=recipient_list, msg=msg, subject="Your Fiscal Year is about to end.")
