@@ -465,9 +465,9 @@ cur_frm.add_fetch('production_order', 'total_fixed_cost', 'total_fixed_cost');
 cur_frm.add_fetch('bom_no', 'total_fixed_cost', 'total_fixed_cost');
 
 cur_frm.cscript.company = function(doc, cdt, cdn) {
-	erpnext.get_fiscal_year(doc);
+	erpnext.get_fiscal_year(doc.company, doc.posting_date);
 }
 
 cur_frm.cscript.posting_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc);
+	erpnext.get_fiscal_year(doc.company, doc.posting_date);
 }

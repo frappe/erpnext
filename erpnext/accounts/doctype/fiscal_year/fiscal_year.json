@@ -39,9 +39,9 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "company", 
+   "fieldname": "fiscal_year_companies", 
    "fieldtype": "Table", 
-   "label": "List of Companies", 
+   "label": "Fiscal Year Companies", 
    "options": "Fiscal Year Company", 
    "permlevel": 0, 
    "precision": ""
@@ -49,7 +49,7 @@
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
- "modified": "2014-10-02 13:40:40.298965", 
+ "modified": "2014-10-07 12:23:41.679419", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Fiscal Year", 

@@ -154,11 +154,11 @@ cur_frm.cscript.refresh = function(doc) {
 
 cur_frm.cscript.company = function(doc, cdt, cdn) {
 	cur_frm.refresh_fields();
-	erpnext.get_fiscal_year(doc);
+	erpnext.get_fiscal_year(doc.company, doc.posting_date);
 }
 
 cur_frm.cscript.posting_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc);
+	erpnext.get_fiscal_year(doc.company, doc.posting_date);
 }
 
 cur_frm.cscript.is_opening = function(doc, cdt, cdn) {

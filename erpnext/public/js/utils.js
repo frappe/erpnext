@@ -12,13 +12,13 @@ $.extend(erpnext, {
 			return frappe.boot.sysdefaults.currency;
 	},
 
-	get_fiscal_year: function(doc) {
+	get_fiscal_year: function(company, date) {
 		frappe.call({
 			type:"GET",
 			method: "erpnext.accounts.utils.get_fiscal_year",
 			args: {
-				"company": doc.company,
-				"date": doc.posting_date,
+				"company": company,
+				"date": date,
 				"verbose": '0'
 			},
 			callback: function(r) {

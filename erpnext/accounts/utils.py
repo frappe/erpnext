@@ -24,7 +24,7 @@ def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1, compa
 	elif company:
 		cond = """('%s' in (select company from `tabFiscal Year Company`
 			where `tabFiscal Year Company`.parent = `tabFiscal Year`.name)) 
-			and '%s' >= year_start_date and '%s' <= year_end_date """ %(company, date, date)
+			and '%s' >= year_start_date and '%s' <= year_end_date """ %(company.replace("'", "\'"), date, date)
 	else:
 		cond = "'%s' >= year_start_date and '%s' <= year_end_date" %(date, date)
 

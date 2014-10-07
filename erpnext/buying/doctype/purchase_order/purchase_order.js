@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.buying");
+frappe.require("assets/erpnext/js/utils.js");
 
 cur_frm.cscript.tname = "Purchase Order Item";
 cur_frm.cscript.fname = "po_details";
@@ -212,25 +213,9 @@ cur_frm.cscript.send_sms = function() {
 }
 
 cur_frm.cscript.company = function(doc, cdt, cdn) {
-	get_fiscal_year(doc);
+	erpnext.get_fiscal_year(doc.company, doc.transaction_date);
 }
 
 cur_frm.cscript.transaction_date = function(doc, cdt, cdn){
-	get_fiscal_year(doc);
-}
-
-function get_fiscal_year(doc) {
-		frappe.call({
-			type:"GET",
-			method: "erpnext.accounts.utils.get_fiscal_year",
-			args: {
-				"company": doc.company,
-				"date": doc.transaction_date,
-				"verbose": '0'
-			},
-			callback: function(r) {
-				var arr = r.message
-				if (arr != null)	cur_frm.set_value("fiscal_year",arr[0]);
-			}
-		});
+	erpnext.get_fiscal_year(doc.company, doc.transaction_date);
 }
