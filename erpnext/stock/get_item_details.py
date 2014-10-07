@@ -133,13 +133,15 @@ def get_basic_details(args, item):
 	if not item:
 		item = frappe.get_doc("Item", args.get("item_code"))
 
+	if item.variant_of:
+		item.update_template_tables()
+
 	from frappe.defaults import get_user_default_as_list
 	user_default_warehouse_list = get_user_default_as_list('warehouse')
 	user_default_warehouse = user_default_warehouse_list[0] \
 		if len(user_default_warehouse_list)==1 else ""
 
 	out = frappe._dict({
-
 		"item_code": item.name,
 		"item_name": item.item_name,
 		"description": item.description_html or item.description,
@@ -291,8 +293,13 @@ def get_serial_nos_by_fifo(args, item_doc):
 
 @frappe.whitelist()
 def get_conversion_factor(item_code, uom):
+	variant_of = frappe.db.get_value("Item", item_code, "variant_of")
+	filters = {"parent": item_code, "uom": uom}
+	if variant_of:
+		filters = {"parent": ("in", (item_code, variant_of))}
+
 	return {"conversion_factor": frappe.db.get_value("UOM Conversion Detail",
-		{"parent": item_code, "uom": uom}, "conversion_factor")}
+		filters, "conversion_factor")}
 
 @frappe.whitelist()
 def get_projected_qty(item_code, warehouse):

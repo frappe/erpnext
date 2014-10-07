@@ -34,7 +34,7 @@ class TestItem(unittest.TestCase):
 		se.purpose = "Material Receipt"
 		se.append("mtn_details", {
 			"item_code": item.name,
-			"t_warehouse": "Stores - WP",
+			"t_warehouse": "Stores - _TC",
 			"qty": 1,
 			"incoming_rate": 1
 		})

@@ -12,6 +12,9 @@ cur_frm.cscript.refresh = function(doc) {
 	cur_frm.set_intro();
 	if (cur_frm.doc.has_variants) {
 		cur_frm.set_intro(__("This Item is a Template and cannot be used in transactions. Item attributes will be copied over into the variants unless 'No Copy' is set"));
+		cur_frm.add_custom_button(__("Show Variants"), function() {
+			frappe.set_route("List", "Item", {"variant_of": cur_frm.doc.name});
+		}, "icon-list", "btn-default");
 	}
 	if (cur_frm.doc.variant_of) {
 		cur_frm.set_intro(__("This Item is a Variant of {0} (Template). Attributes will be copied over from the template unless 'No Copy' is set", [cur_frm.doc.variant_of]));
@@ -33,7 +36,7 @@ cur_frm.cscript.refresh = function(doc) {
 
 	if (!doc.__islocal && doc.show_in_website) {
 		cur_frm.set_intro(__("Published on website at: {0}",
-			[repl('<a href="/%(website_route)s" target="_blank">/%(website_route)s</a>', doc.__onload)]));
+			[repl('<a href="/%(website_route)s" target="_blank">/%(website_route)s</a>', doc.__onload)]), true);
 	}
 
 	erpnext.item.toggle_reqd(cur_frm);
@@ -78,7 +81,7 @@ cur_frm.cscript.make_dashboard = function() {
 cur_frm.cscript.edit_prices_button = function() {
 	cur_frm.add_custom_button(__("Add / Edit Prices"), function() {
 		frappe.set_route("Report", "Item Price", {"item_code": cur_frm.doc.name});
-	}, "icon-money");
+	}, "icon-money", "btn-default");
 }
 
 cur_frm.cscript.item_code = function(doc) {

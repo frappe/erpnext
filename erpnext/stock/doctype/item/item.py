@@ -42,6 +42,8 @@ class Item(WebsiteGenerator):
 		if self.image and not self.website_image:
 			self.website_image = self.image
 
+		if self.variant_of:
+			self.copy_attributes_to_variant(frappe.get_doc("Item", self.variant_of), self)
 		self.check_warehouse_is_set_for_stock_item()
 		self.check_stock_uom_with_bin()
 		self.add_default_uom_in_conversion_factor_table()
@@ -211,31 +213,53 @@ class Item(WebsiteGenerator):
 
 	def make_variant(self, item_code):
 		item = frappe.new_doc("Item")
-		self.copy_attributes_to_variant(item, item_code, insert=True)
 		item.item_code = item_code
+		self.copy_attributes_to_variant(self, item, insert=True)
 		item.insert()
 
 	def update_variant(self, item_code):
 		item = frappe.get_doc("Item", item_code)
-		self.copy_attributes_to_variant(item, item_code)
+		item.item_code = item_code
+		self.copy_attributes_to_variant(self, item)
 		item.save()
 
-	def copy_attributes_to_variant(self, variant, item_code, insert=False):
+	def copy_attributes_to_variant(self, template, variant, insert=False):
 		from frappe.model import no_value_fields
 		for field in self.meta.fields:
-			if field.fieldtype not in no_value_fields and (insert or not field.no_copy):
-				if variant.get(field.fieldname) != self.get(field.fieldname):
-					variant.set(field.fieldname, self.get(field.fieldname))
+			if field.fieldtype not in no_value_fields and (insert or not field.no_copy)\
+				and field.fieldname != "item_code":
+				if variant.get(field.fieldname) != template.get(field.fieldname):
+					variant.set(field.fieldname, template.get(field.fieldname))
 					variant.__dirty = True
 
 		variant.description += "\n"
-		for attr in self.variant_attributes[item_code]:
+
+		if not getattr(template, "variant_attributes", None):
+			template.get_variant_item_codes()
+
+		for attr in template.variant_attributes[variant.item_code]:
 			variant.description += "\n" + attr[0] + ": " + attr[1]
 			if variant.description_html:
 				variant.description_html += "<div style='margin-top: 4px; font-size: 80%'>" + attr[0] + ": " + attr[1] + "</div>"
-		variant.variant_of = self.name
+		variant.variant_of = template.name
 		variant.has_variants = 0
 		variant.show_in_website = 0
+
+	def update_template_tables(self):
+		template = frappe.get_doc("Item", self.variant_of)
+
+		# add item taxes from template
+		for d in template.get("item_tax"):
+			self.append("item_tax", {"tax_type": d.tax_type, "tax_rate": d.tax_rate})
+
+		# copy re-order table if empty
+		if not self.get("item_reorder"):
+			for d in template.get("item_reorder"):
+				n = {}
+				for k in ("warehouse", "warehouse_reorder_level",
+					"warehouse_reorder_qty", "material_request_type"):
+					n[k] = d.get(k)
+				self.append("item_reorder", n)
 
 	def validate_conversion_factor(self):
 		check_list = []

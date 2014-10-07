@@ -37,7 +37,51 @@ class TestStockEntry(unittest.TestCase):
 		mr_name = frappe.db.sql("""select parent from `tabMaterial Request Item`
 			where item_code='_Test Item'""")
 
+		frappe.db.set_value("Stock Settings", None, "auto_indent", 0)
+
 		self.assertTrue(mr_name)
+
+	def test_auto_material_request_for_variant(self):
+		item_code = "_Test Variant Item-S"
+		item = frappe.get_doc("Item", item_code)
+		template = frappe.get_doc("Item", item.variant_of)
+
+		warehouse = "_Test Warehouse - _TC"
+
+		# stock entry reqd for auto-reorder
+		se = frappe.new_doc("Stock Entry")
+		se.purpose = "Material Receipt"
+		se.company = "_Test Company"
+		se.append("mtn_details", {
+			"item_code": item_code,
+			"t_warehouse": "_Test Warehouse - _TC",
+			"qty": 1,
+			"incoming_rate": 1
+		})
+		se.insert()
+		se.submit()
+
+		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
+		projected_qty = frappe.db.get_value("Bin", {"item_code": item_code,
+			"warehouse": warehouse}, "projected_qty") or 0
+
+
+		# update re-level qty so that it is more than projected_qty
+		if projected_qty > template.item_reorder[0].warehouse_reorder_level:
+			template.item_reorder[0].warehouse_reorder_level += projected_qty
+			template.save()
+
+		from erpnext.stock.utils import reorder_item
+		mr_list = reorder_item()
+
+		frappe.db.set_value("Stock Settings", None, "auto_indent", 0)
+
+		items = []
+		for mr in mr_list:
+			for d in mr.indent_details:
+				items.append(d.item_code)
+
+		self.assertTrue(item_code in items)
 
 	def test_material_receipt_gl_entry(self):
 		self._clear_stock_account_balance()

@@ -390,6 +390,7 @@
    "read_only": 0
   }, 
   {
+   "description": "Will also apply for variants unless overrridden", 
    "fieldname": "item_reorder", 
    "fieldtype": "Table", 
    "label": "Warehouse-wise Item Reorder", 
@@ -487,6 +488,7 @@
   }, 
   {
    "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
+   "description": "Will also apply for variants", 
    "fieldname": "uom_conversion_details", 
    "fieldtype": "Table", 
    "label": "UOM Conversion Details", 
@@ -619,6 +621,7 @@
    "read_only": 0
   }, 
   {
+   "description": "Will also apply for variants", 
    "fieldname": "item_tax", 
    "fieldtype": "Table", 
    "label": "Item Tax1", 
@@ -652,7 +655,7 @@
   }, 
   {
    "depends_on": "eval:doc.inspection_required==\"Yes\"", 
-   "description": "Quality Inspection Parameters", 
+   "description": "Will also apply to variants", 
    "fieldname": "item_specification_details", 
    "fieldtype": "Table", 
    "label": "Item Quality Inspection Parameter", 
@@ -862,7 +865,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2014-10-03 04:58:39.278047", 
+ "modified": "2014-10-07 05:25:19.921651", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 

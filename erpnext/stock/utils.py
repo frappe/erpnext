@@ -192,14 +192,15 @@ def reorder_item():
 		frappe.local.auto_indent = cint(frappe.db.get_value('Stock Settings', None, 'auto_indent'))
 
 	if frappe.local.auto_indent:
-		_reorder_item()
+		return _reorder_item()
 
 def _reorder_item():
-	# {"Purchase": {"Company": [{"item_code": "", "warehouse": "", "reorder_qty": 0.0}]}, "Transfer": {...}}
 	material_requests = {"Purchase": {}, "Transfer": {}}
 
 	item_warehouse_projected_qty = get_item_warehouse_projected_qty()
-	warehouse_company = frappe._dict(frappe.db.sql("""select name, company from `tabWarehouse`"""))
+
+	warehouse_company = frappe._dict(frappe.db.sql("""select name, company
+		from `tabWarehouse`"""))
 	default_company = (frappe.defaults.get_defaults().get("company") or
 		frappe.db.sql("""select name from tabCompany limit 1""")[0][0])
 
@@ -227,6 +228,10 @@ def _reorder_item():
 
 	for item_code in item_warehouse_projected_qty:
 		item = frappe.get_doc("Item", item_code)
+
+		if item.variant_of and not item.get("item_reorder"):
+			item.update_template_tables()
+
 		if item.get("item_reorder"):
 			for d in item.get("item_reorder"):
 				add_to_material_request(item_code, d.warehouse, d.warehouse_reorder_level,
@@ -237,7 +242,7 @@ def _reorder_item():
 			add_to_material_request(item_code, item.default_warehouse, item.re_order_level, item.re_order_qty, "Purchase")
 
 	if material_requests:
-		create_material_request(material_requests)
+		return create_material_request(material_requests)
 
 def get_item_warehouse_projected_qty():
 	item_warehouse_projected_qty = {}
@@ -325,6 +330,8 @@ def create_material_request(material_requests):
 
 	if exceptions_list:
 		notify_errors(exceptions_list)
+
+	return mr_list
 
 def send_email_notification(mr_list):
 	""" Notify user about auto creation of indent"""

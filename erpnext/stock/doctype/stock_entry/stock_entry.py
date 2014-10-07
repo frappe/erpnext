@@ -11,7 +11,7 @@ from frappe import _
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.controllers.queries import get_match_cond
-from erpnext.stock.get_item_details import get_available_qty, get_default_cost_center
+from erpnext.stock.get_item_details import get_available_qty, get_default_cost_center, get_conversion_factor
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 
 class NotUpdateStockError(frappe.ValidationError): pass
@@ -436,8 +436,7 @@ class StockEntry(StockController):
 		return ret
 
 	def get_uom_details(self, args):
-		conversion_factor = frappe.db.get_value("UOM Conversion Detail", {"parent": args.get("item_code"),
-			"uom": args.get("uom")}, "conversion_factor")
+		conversion_factor = get_conversion_factor(args.get("item_code"), args.get("uom")).get("conversion_factor")
 
 		if not conversion_factor:
 			frappe.msgprint(_("UOM coversion factor required for UOM: {0} in Item: {1}")

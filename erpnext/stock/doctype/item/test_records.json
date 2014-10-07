@@ -275,6 +275,14 @@
 	  {"item_attribute": "Test Size", "item_attribute_value": "Small"},
 	  {"item_attribute": "Test Size", "item_attribute_value": "Medium"},
 	  {"item_attribute": "Test Size", "item_attribute_value": "Large"}
+  ],
+  "item_reorder": [
+      {
+       "material_request_type": "Purchase",
+       "warehouse": "_Test Warehouse - _TC",
+       "warehouse_reorder_level": 20,
+       "warehouse_reorder_qty": 20
+      }
   ]
  }
 
