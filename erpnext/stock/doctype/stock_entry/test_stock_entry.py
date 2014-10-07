@@ -858,6 +858,29 @@ class TestStockEntry(unittest.TestCase):
 		fg_rate = [d.amount for d in stock_entry.get("mtn_details") if d.item_code=="_Test Item"][0]
 		self.assertEqual(fg_rate, 100.00)
 
+	def test_variant_production_order(self):
+		bom_no = frappe.db.get_value("BOM", {"item": "_Test Variant Item",
+			"is_default": 1, "docstatus": 1})
+
+		production_order = frappe.new_doc("Production Order")
+		production_order.update({
+			"company": "_Test Company",
+			"fg_warehouse": "_Test Warehouse 1 - _TC",
+			"production_item": "_Test Variant Item-S",
+			"bom_no": bom_no,
+			"qty": 1.0,
+			"stock_uom": "Nos",
+			"wip_warehouse": "_Test Warehouse - _TC"
+		})
+		production_order.insert()
+		production_order.submit()
+
+		from erpnext.manufacturing.doctype.production_order.production_order import make_stock_entry
+
+		stock_entry = frappe.get_doc(make_stock_entry(production_order.name, "Manufacture", 1))
+		stock_entry.insert()
+		self.assertTrue("_Test Variant Item-S" in [d.item_code for d in stock_entry.mtn_details])
+
 def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se = frappe.copy_doc(test_records[0])
 	se.get("mtn_details")[0].item_code = item_code or "_Test Serialized Item With Series"

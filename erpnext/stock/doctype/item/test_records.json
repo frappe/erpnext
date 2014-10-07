@@ -264,6 +264,7 @@
   "is_sales_item": "Yes",
   "is_service_item": "No",
   "is_stock_item": "Yes",
+  "is_manufactured_item": "Yes",
   "is_sub_contracted_item": "Yes",
   "item_code": "_Test Variant Item",
   "item_group": "_Test Item Group Desktops",

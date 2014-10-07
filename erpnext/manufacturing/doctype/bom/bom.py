@@ -197,27 +197,14 @@ class BOM(Document):
 			if self.with_operations and cstr(m.operation_no) not in self.op:
 				frappe.throw(_("Operation {0} not present in Operations Table").format(m.operation_no))
 
-			if m.bom:
-				self.validate_bom_no(m.item_code, m.bom_no, m.idx)
+			if m.bom_no:
+				validate_bom_no(m.item_code, m.bom_no)
 
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 
 			self.check_if_item_repeated(m.item_code, m.operation_no, check_list)
 
-	def validate_bom_no(self, item, bom_no, idx):
-		"""Validate BOM No of sub-contracted items"""
-		bom = frappe.get_doc("BOM", bom_no)
-		if not bom.is_active:
-			frappe.throw(_("BOM {0} must be active").format(bom_no))
-		if not bom.docstatus!=1:
-			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
-
-		bom = frappe.db.sql("""select name from `tabBOM` where name = %s and item = %s
-			and is_active=1 and docstatus=1""",
-			(bom_no, item), as_dict =1)
-		if not bom:
-			frappe.throw(_("BOM {0} for Item {1} in row {2} is inactive or not submitted").format(bom_no, item, idx))
 
 	def check_if_item_repeated(self, item, op, check_list):
 		if [cstr(item), cstr(op)] in check_list:
@@ -425,3 +412,16 @@ def get_bom_items(bom, qty=1, fetch_exploded=1):
 	items = get_bom_items_as_dict(bom, qty, fetch_exploded).values()
 	items.sort(lambda a, b: a.item_code > b.item_code and 1 or -1)
 	return items
+
+def validate_bom_no(item, bom_no):
+	"""Validate BOM No of sub-contracted items"""
+	bom = frappe.get_doc("BOM", bom_no)
+	if not bom.is_active:
+		frappe.throw(_("BOM {0} must be active").format(bom_no))
+	if not bom.docstatus!=1:
+		if not getattr(frappe.flags, "in_test", False):
+			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
+	if item and not (bom.item == item or \
+		bom.item == frappe.db.get_value("Item", item, "variant_of")):
+		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+
