@@ -34,6 +34,22 @@ class DeliveryNote(SellingController):
 			'percent_join_field': 'against_sales_order',
 			'status_field': 'delivery_status',
 			'keyword': 'Delivered',
+			'second_source_dt': 'Sales Invoice Item',
+			'second_source_field': 'qty',
+			'second_join_field': 'so_detail',
+			'overflow_type': 'delivery',
+			'second_source_extra_cond': """ and exists(select name from `tabSales Invoice` 
+				where name=`tabSales Invoice Item`.parent and ifnull(update_stock, 0) = 1)"""
+		},
+		{
+			'source_dt': 'Delivery Note Item',
+			'target_dt': 'Sales Invoice Item',
+			'join_field': 'si_detail',
+			'target_field': 'delivered_qty',
+			'target_parent_dt': 'Sales Invoice',
+			'target_ref_field': 'qty',
+			'source_field': 'qty',
+			'percent_join_field': 'against_sales_invoice',
 			'overflow_type': 'delivery'
 		}]
 
