@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.hr");
+frappe.require("assets/erpnext/js/utils.js");
 
 erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 	make_bank_voucher: function() {
@@ -153,4 +154,12 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(frappe.boot.notification_settings && frappe.boot.notification_settings.expense_claim)) {
 		cur_frm.email_doc(frappe.boot.notification_settings.expense_claim_message);
 	}
+}
+
+cur_frm.cscript.company = function(doc, cdt, cdn) {
+	erpnext.get_fiscal_year(doc.company, doc.posting_date);
+}
+
+cur_frm.cscript.posting_date = function(doc, cdt, cdn){
+	erpnext.get_fiscal_year(doc.company, doc.posting_date);
 }

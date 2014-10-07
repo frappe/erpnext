@@ -22,8 +22,7 @@ $.extend(erpnext, {
 				"verbose": '0'
 			},
 			callback: function(r) {
-				var arr = r.message
-				if (arr != null)	cur_frm.set_value("fiscal_year",arr[0]);
+				if (r.message)	cur_frm.set_value("fiscal_year", r.message[0]);
 			}
 		});
 	},

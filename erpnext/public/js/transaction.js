@@ -223,11 +223,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			this.frm.script_manager.trigger("currency");
 			this.apply_pricing_rule();
 		}
-		erpnext.get_fiscal_year(this.frm.doc);
+		erpnext.get_fiscal_year(this.frm.doc.company, this.frm.doc.posting_date);
 	},
 
 	posting_date: function() {
-		erpnext.get_fiscal_year(this.frm.doc);
+		erpnext.get_fiscal_year(this.frm.doc.company, this.frm.doc.posting_date);
 	},
 
 	get_company_currency: function() {

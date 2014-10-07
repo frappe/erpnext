@@ -12,6 +12,8 @@ cur_frm.cscript.sales_team_fname = "sales_team";
 {% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
 
+frappe.require("assets/erpnext/js/utils.js");
+
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
 		var me = this;
@@ -171,3 +173,10 @@ cur_frm.cscript.send_sms = function() {
 	var sms_man = new SMSManager(cur_frm.doc);
 }
 
+cur_frm.cscript.company = function(doc, cdt, cdn) {
+	erpnext.get_fiscal_year(doc.company, doc.transaction_date);
+}
+
+cur_frm.cscript.transaction_date = function(doc, cdt, cdn){
+	erpnext.get_fiscal_year(doc.company, doc.transaction_date);
+}
