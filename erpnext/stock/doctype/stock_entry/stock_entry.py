@@ -479,23 +479,34 @@ class StockEntry(StockController):
 				self.production_order = None
 
 		if self.bom_no:
-			if self.purpose in ["Material Issue", "Material Transfer", "Manufacture", "Repack",
-					"Subcontract"]:
-				if self.production_order and self.purpose == "Material Transfer":
-					item_dict = self.get_pending_raw_materials(pro_obj)
+			if self.purpose in ("Material Issue", "Material Transfer", "Manufacture",
+				"Repack", "Subcontract"):
+
+				if self.production_order:
+					# production: stores -> wip
+					if self.purpose == "Material Transfer":
+						item_dict = self.get_pending_raw_materials(pro_obj)
+						for item in item_dict.values():
+							item["to_warehouse"] = pro_obj.wip_warehouse
+
+					# production: wip -> finished goods
+					elif self.purpose == "Manufacture":
+						item_dict = self.get_bom_raw_materials(self.fg_completed_qty)
+						for item in item_dict.values():
+								item["from_warehouse"] = pro_obj.wip_warehouse
+
+					else:
+						frappe.throw(_("Stock Entry against Production Order must be for 'Material Transfer' or 'Manufacture'"))
 				else:
 					if not self.fg_completed_qty:
 						frappe.throw(_("Manufacturing Quantity is mandatory"))
 					item_dict = self.get_bom_raw_materials(self.fg_completed_qty)
-					for item in item_dict.values():
-						if pro_obj:
-							item["from_warehouse"] = pro_obj.wip_warehouse
-						item["to_warehouse"] = ""
 
 				# add raw materials to Stock Entry Detail table
 				self.add_to_stock_entry_detail(item_dict)
 
-			if self.bom_no:
+			# add finished goods item
+			if self.purpose in ("Manufacture", "Repack"):
 				if self.production_order:
 					item_code = pro_obj.production_item
 					to_warehouse = pro_obj.fg_warehouse
@@ -529,6 +540,7 @@ class StockEntry(StockController):
 
 		for item in item_dict.values():
 			item.from_warehouse = item.default_warehouse
+			item.to_warehouse = ""
 
 		return item_dict
 
@@ -585,8 +597,8 @@ class StockEntry(StockController):
 
 		for d in item_dict:
 			se_child = self.append('mtn_details')
-			se_child.s_warehouse = item_dict[d].get("from_warehouse", self.from_warehouse)
-			se_child.t_warehouse = item_dict[d].get("to_warehouse", self.to_warehouse)
+			se_child.s_warehouse = item_dict[d].get("from_warehouse")
+			se_child.t_warehouse = item_dict[d].get("to_warehouse")
 			se_child.item_code = cstr(d)
 			se_child.item_name = item_dict[d]["item_name"]
 			se_child.description = item_dict[d]["description"]
@@ -595,6 +607,11 @@ class StockEntry(StockController):
 			se_child.qty = flt(item_dict[d]["qty"])
 			se_child.expense_account = item_dict[d]["expense_account"] or expense_account
 			se_child.cost_center = item_dict[d]["cost_center"] or cost_center
+
+			if se_child.s_warehouse==None:
+				se_child.s_warehouse = self.from_warehouse
+			if se_child.t_warehouse==None:
+				se_child.t_warehouse = self.to_warehouse
 
 			# in stock uom
 			se_child.transfer_qty = flt(item_dict[d]["qty"])
