@@ -169,30 +169,6 @@
    "search_index": 0
   }, 
   {
-   "allow_on_submit": 1, 
-   "depends_on": "", 
-   "description": "Start date of current invoice's period", 
-   "fieldname": "from_date", 
-   "fieldtype": "Date", 
-   "label": "From Date", 
-   "no_copy": 1, 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "read_only": 0
-  }, 
-  {
-   "allow_on_submit": 1, 
-   "depends_on": "", 
-   "description": "End date of current invoice's period", 
-   "fieldname": "to_date", 
-   "fieldtype": "Date", 
-   "label": "To Date", 
-   "no_copy": 1, 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "read_only": 0
-  }, 
-  {
    "fieldname": "currency_section", 
    "fieldtype": "Section Break", 
    "label": "Currency and Price List", 
@@ -1098,6 +1074,30 @@
   {
    "allow_on_submit": 1, 
    "depends_on": "eval:doc.is_recurring==1", 
+   "description": "End date of current invoice's period", 
+   "fieldname": "to_date", 
+   "fieldtype": "Date", 
+   "label": "To Date", 
+   "no_copy": 1, 
+   "permlevel": 0, 
+   "print_hide": 0, 
+   "read_only": 0
+  }, 
+  {
+   "allow_on_submit": 1, 
+   "depends_on": "eval:doc.is_recurring==1", 
+   "description": "Start date of current invoice's period", 
+   "fieldname": "from_date", 
+   "fieldtype": "Date", 
+   "label": "From Date", 
+   "no_copy": 1, 
+   "permlevel": 0, 
+   "print_hide": 0, 
+   "read_only": 0
+  }, 
+  {
+   "allow_on_submit": 1, 
+   "depends_on": "eval:doc.is_recurring==1", 
    "description": "Select the period when the invoice will be generated automatically", 
    "fieldname": "recurring_type", 
    "fieldtype": "Select", 
@@ -1121,17 +1121,6 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.is_recurring==1", 
-   "description": "The date on which next invoice will be generated. It is generated on submit.\n", 
-   "fieldname": "next_date", 
-   "fieldtype": "Date", 
-   "label": "Next Date", 
-   "no_copy": 1, 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1
-  }, 
-  {
    "allow_on_submit": 1, 
    "depends_on": "eval:doc.is_recurring==1", 
    "description": "The date on which recurring invoice will be stop", 
@@ -1151,6 +1140,17 @@
    "print_hide": 1, 
    "read_only": 0, 
    "width": "50%"
+  }, 
+  {
+   "depends_on": "eval:doc.is_recurring==1", 
+   "description": "The date on which next invoice will be generated. It is generated on submit.\n", 
+   "fieldname": "next_date", 
+   "fieldtype": "Date", 
+   "label": "Next Date", 
+   "no_copy": 1, 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
   }, 
   {
    "depends_on": "eval:doc.is_recurring==1", 
@@ -1192,7 +1192,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-09-18 03:17:54.976732", 
+ "modified": "2014-10-06 12:54:42.549361", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 

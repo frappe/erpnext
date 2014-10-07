@@ -21,7 +21,7 @@ class AccountsReceivableReport(object):
 	def get_columns(self, customer_naming_by):
 		columns = [
 			_("Posting Date") + ":Date:80", _("Account") + ":Link/Account:150",
-			_("Voucher Type") + "::110", _("Voucher No") + "::120", "::30",
+			_("Voucher Type") + "::110", _("Voucher No") + ":Dynamic Link/Voucher Type:120",
 			_("Due Date") + ":Date:80",  
 			_("Invoiced Amount") + ":Currency:100", _("Payment Received") + ":Currency:100", 
 			_("Outstanding Amount") + ":Currency:100", _("Age") + ":Int:50", "0-30:Currency:100",
@@ -63,11 +63,6 @@ class AccountsReceivableReport(object):
 
 					row += [self.get_territory(gle.account), gle.remarks]
 					data.append(row)
-		
-		for i in range(0, len(data)):
-			data[i].insert(4, """<a href="%s"><i class="icon icon-share" style="cursor: pointer;"></i></a>""" \
-				% ("/".join(["#Form", data[i][2], data[i][3]]),))
-		
 		return data
 
 	def get_entries_after(self, report_date):

@@ -843,7 +843,7 @@ class TestStockEntry(unittest.TestCase):
 
 		stock_entry = frappe.new_doc("Stock Entry")
 		stock_entry.update({
-			"purpose": "Manufacture/Repack",
+			"purpose": "Manufacture",
 			"production_order": production_order.name,
 			"bom_no": bom_no,
 			"fg_completed_qty": "1",
