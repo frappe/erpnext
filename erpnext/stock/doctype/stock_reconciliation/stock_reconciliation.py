@@ -129,7 +129,6 @@ class StockReconciliation(StockController):
 	def insert_stock_ledger_entries(self):
 		"""	find difference between current and expected entries
 			and create stock ledger entries based on the difference"""
-		from erpnext.stock.utils import get_valuation_method
 		from erpnext.stock.stock_ledger import get_previous_sle
 
 		row_template = ["item_code", "warehouse", "qty", "valuation_rate"]
@@ -141,105 +140,27 @@ class StockReconciliation(StockController):
 		for row_num, row in enumerate(data[data.index(self.head_row)+1:]):
 			row = frappe._dict(zip(row_template, row))
 			row["row_num"] = row_num
-			previous_sle = get_previous_sle({
-				"item_code": row.item_code,
-				"warehouse": row.warehouse,
-				"posting_date": self.posting_date,
-				"posting_time": self.posting_time
-			})
 
-			# check valuation rate mandatory
-			if row.qty not in ["", None] and not row.valuation_rate and \
-					flt(previous_sle.get("qty_after_transaction")) <= 0:
+			if row.qty in ("", None) or row.valuation_rate in ("", None):
+				previous_sle = get_previous_sle({
+					"item_code": row.item_code,
+					"warehouse": row.warehouse,
+					"posting_date": self.posting_date,
+					"posting_time": self.posting_time
+				})
+
+				if row.qty in ("", None):
+					row.qty = previous_sle.get("qty_after_transaction")
+
+				if row.valuation_rate in ("", None):
+					row.valuation_rate = previous_sle.get("valuation_rate")
+
+			if row.qty and not row.valuation_rate:
 				frappe.throw(_("Valuation Rate required for Item {0}").format(row.item_code))
 
-			change_in_qty = row.qty not in ["", None] and \
-				(flt(row.qty) - flt(previous_sle.get("qty_after_transaction")))
+			self.insert_entries(row)
 
-			change_in_rate = row.valuation_rate not in ["", None] and \
-				(flt(row.valuation_rate) - flt(previous_sle.get("valuation_rate")))
-
-			if get_valuation_method(row.item_code) == "Moving Average":
-				self.sle_for_moving_avg(row, previous_sle, change_in_qty, change_in_rate)
-
-			else:
-				self.sle_for_fifo(row, previous_sle, change_in_qty, change_in_rate)
-
-	def sle_for_moving_avg(self, row, previous_sle, change_in_qty, change_in_rate):
-		"""Insert Stock Ledger Entries for Moving Average valuation"""
-		def _get_incoming_rate(qty, valuation_rate, previous_qty, previous_valuation_rate):
-			if previous_valuation_rate == 0:
-				return flt(valuation_rate)
-			else:
-				if valuation_rate in ["", None]:
-					valuation_rate = previous_valuation_rate
-				return (qty * valuation_rate - previous_qty * previous_valuation_rate) \
-					/ flt(qty - previous_qty)
-
-		if change_in_qty:
-			# if change in qty, irrespective of change in rate
-			incoming_rate = _get_incoming_rate(flt(row.qty), flt(row.valuation_rate),
-				flt(previous_sle.get("qty_after_transaction")), flt(previous_sle.get("valuation_rate")))
-
-			row["voucher_detail_no"] = "Row: " + cstr(row.row_num) + "/Actual Entry"
-			self.insert_entries({"actual_qty": change_in_qty, "incoming_rate": incoming_rate}, row)
-
-		elif change_in_rate and flt(previous_sle.get("qty_after_transaction")) > 0:
-			# if no change in qty, but change in rate
-			# and positive actual stock before this reconciliation
-			incoming_rate = _get_incoming_rate(
-				flt(previous_sle.get("qty_after_transaction"))+1, flt(row.valuation_rate),
-				flt(previous_sle.get("qty_after_transaction")),
-				flt(previous_sle.get("valuation_rate")))
-
-			# +1 entry
-			row["voucher_detail_no"] = "Row: " + cstr(row.row_num) + "/Valuation Adjustment +1"
-			self.insert_entries({"actual_qty": 1, "incoming_rate": incoming_rate}, row)
-
-			# -1 entry
-			row["voucher_detail_no"] = "Row: " + cstr(row.row_num) + "/Valuation Adjustment -1"
-			self.insert_entries({"actual_qty": -1}, row)
-
-	def sle_for_fifo(self, row, previous_sle, change_in_qty, change_in_rate):
-		"""Insert Stock Ledger Entries for FIFO valuation"""
-		previous_stock_queue = json.loads(previous_sle.get("stock_queue") or "[]")
-		previous_stock_qty = sum((batch[0] for batch in previous_stock_queue))
-		previous_stock_value = sum((batch[0] * batch[1] for batch in \
-			previous_stock_queue))
-
-		def _insert_entries():
-			if previous_stock_queue != [[row.qty, row.valuation_rate]]:
-				# make entry as per attachment
-				if flt(row.qty):
-					row["voucher_detail_no"] = "Row: " + cstr(row.row_num) + "/Actual Entry"
-					self.insert_entries({"actual_qty": row.qty,
-						"incoming_rate": flt(row.valuation_rate)}, row)
-
-				# Make reverse entry
-				if previous_stock_qty:
-					row["voucher_detail_no"] = "Row: " + cstr(row.row_num) + "/Reverse Entry"
-					self.insert_entries({"actual_qty": -1 * previous_stock_qty,
-						"incoming_rate": previous_stock_qty < 0 and
-							flt(row.valuation_rate) or 0}, row)
-
-
-		if change_in_qty:
-			if row.valuation_rate in ["", None]:
-				# dont want change in valuation
-				if previous_stock_qty > 0:
-					# set valuation_rate as previous valuation_rate
-					row.valuation_rate = previous_stock_value / flt(previous_stock_qty)
-
-			_insert_entries()
-
-		elif change_in_rate and previous_stock_qty > 0:
-			# if no change in qty, but change in rate
-			# and positive actual stock before this reconciliation
-
-			row.qty = previous_stock_qty
-			_insert_entries()
-
-	def insert_entries(self, opts, row):
+	def insert_entries(self, row):
 		"""Insert Stock Ledger Entries"""
 		args = frappe._dict({
 			"doctype": "Stock Ledger Entry",
@@ -253,9 +174,10 @@ class StockReconciliation(StockController):
 			"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
 			"voucher_detail_no": row.voucher_detail_no,
 			"fiscal_year": self.fiscal_year,
-			"is_cancelled": "No"
+			"is_cancelled": "No",
+			"qty_after_transaction": row.qty,
+			"valuation_rate": row.valuation_rate
 		})
-		args.update(opts)
 		self.make_sl_entries([args])
 
 		# append to entries
@@ -295,7 +217,7 @@ class StockReconciliation(StockController):
 
 		if not self.expense_account:
 			msgprint(_("Please enter Expense Account"), raise_exception=1)
-		elif not frappe.db.sql("""select * from `tabStock Ledger Entry`"""):
+		elif not frappe.db.sql("""select name from `tabStock Ledger Entry` limit 1"""):
 			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(_("Difference Account must be a 'Liability' type account, since this Stock Reconciliation is an Opening Entry"))
 

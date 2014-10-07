@@ -78,7 +78,8 @@ data_map = {
 	"Stock Ledger Entry": {
 		"columns": ["name", "posting_date", "posting_time", "item_code", "warehouse",
 			"actual_qty as qty", "voucher_type", "voucher_no", "project",
-			"ifnull(incoming_rate,0) as incoming_rate", "stock_uom", "serial_no"],
+			"ifnull(incoming_rate,0) as incoming_rate", "stock_uom", "serial_no",
+			"qty_after_transaction", "valuation_rate"],
 		"order_by": "posting_date, posting_time, name",
 		"links": {
 			"item_code": ["Item", "name"],

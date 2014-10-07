@@ -44,7 +44,7 @@ class StockLedgerEntry(Document):
 						formatdate(self.posting_date), self.posting_time))
 
 	def validate_mandatory(self):
-		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','actual_qty','company']
+		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','company']
 		for k in mandatory:
 			if not self.get(k):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))

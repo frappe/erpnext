@@ -95,14 +95,23 @@ def update_entries_after(args, verbose=1):
 				qty_after_transaction += flt(sle.actual_qty)
 				continue
 
+
 		if sle.serial_no:
 			valuation_rate = get_serialized_values(qty_after_transaction, sle, valuation_rate)
-		elif valuation_method == "Moving Average":
-			valuation_rate = get_moving_average_values(qty_after_transaction, sle, valuation_rate)
-		else:
-			valuation_rate = get_fifo_values(qty_after_transaction, sle, stock_queue)
+			qty_after_transaction += flt(sle.actual_qty)
 
-		qty_after_transaction += flt(sle.actual_qty)
+		else:
+			if sle.voucher_type=="Stock Reconciliation":
+				valuation_rate = sle.valuation_rate
+				qty_after_transaction = sle.qty_after_transaction
+				stock_queue = [[qty_after_transaction, valuation_rate]]
+			else:
+				if valuation_method == "Moving Average":
+					valuation_rate = get_moving_average_values(qty_after_transaction, sle, valuation_rate)
+				else:
+					valuation_rate = get_fifo_values(qty_after_transaction, sle, stock_queue)
+
+				qty_after_transaction += flt(sle.actual_qty)
 
 		# get stock value
 		if sle.serial_no:
