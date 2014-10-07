@@ -49,6 +49,9 @@ class StockLedgerEntry(Document):
 			if not self.get(k):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))
 
+		if self.voucher_type != "Stock Reconciliation" and not self.actual_qty:
+			frappe.throw(_("Actual Qty is mandatory"))
+
 	def validate_item(self):
 		item_det = frappe.db.sql("""select name, has_batch_no, docstatus, is_stock_item
 			from tabItem where name=%s""", self.item_code, as_dict=True)[0]

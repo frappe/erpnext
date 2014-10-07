@@ -27,7 +27,7 @@ def make_sl_entries(sl_entries, is_amended=None):
 			if sle.get('is_cancelled') == 'Yes':
 				sle['actual_qty'] = -flt(sle['actual_qty'])
 
-			if sle.get("actual_qty"):
+			if sle.get("actual_qty") or sle.voucher_type=="Stock Reconciliation":
 				sle_id = make_entry(sle)
 
 			args = sle.copy()
