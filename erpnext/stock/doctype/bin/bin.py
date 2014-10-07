@@ -26,7 +26,7 @@ class Bin(Document):
 	def update_stock(self, args):
 		self.update_qty(args)
 
-		if args.get("actual_qty"):
+		if args.get("actual_qty") or args.get("voucher_type") == "Stock Reconciliation":
 			from erpnext.stock.stock_ledger import update_entries_after
 
 			if not args.get("posting_date"):

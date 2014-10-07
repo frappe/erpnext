@@ -83,7 +83,6 @@ def update_entries_after(args, verbose=1):
 
 	entries_to_fix = get_sle_after_datetime(previous_sle or \
 		{"item_code": args["item_code"], "warehouse": args["warehouse"]}, for_update=True)
-
 	valuation_method = get_valuation_method(args["item_code"])
 	stock_value_difference = 0.0
 
