@@ -334,8 +334,8 @@ class SellingController(StockController):
 				# But in this case reserved qty should only be reduced by 10 and not 12
 
 				already_delivered_qty = self.get_already_delivered_qty(self.name,
-					d.against_sales_order, d.prevdoc_detail_docname)
-				so_qty, reserved_warehouse = self.get_so_qty_and_warehouse(d.prevdoc_detail_docname)
+					d.against_sales_order, d.so_detail)
+				so_qty, reserved_warehouse = self.get_so_qty_and_warehouse(d.so_detail)
 
 				if already_delivered_qty + d.qty > so_qty:
 					reserved_qty_for_main_item = -(so_qty - already_delivered_qty)
@@ -377,7 +377,7 @@ class SellingController(StockController):
 
 	def get_already_delivered_qty(self, dn, so, so_detail):
 		qty = frappe.db.sql("""select sum(qty) from `tabDelivery Note Item`
-			where prevdoc_detail_docname = %s and docstatus = 1
+			where so_detail = %s and docstatus = 1
 			and against_sales_order = %s
 			and parent != %s""", (so_detail, so, dn))
 		return qty and flt(qty[0][0]) or 0.0

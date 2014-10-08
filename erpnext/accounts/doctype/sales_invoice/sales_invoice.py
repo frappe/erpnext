@@ -131,7 +131,7 @@ class SalesInvoice(SellingController):
 				'keyword':'Delivered',
 				'second_source_dt': 'Delivery Note Item',
 				'second_source_field': 'qty',
-				'second_join_field': 'prevdoc_detail_docname',
+				'second_join_field': 'so_detail',
 				'overflow_type': 'delivery',
 				'extra_cond': """ and exists(select name from `tabSales Invoice` 
 					where name=`tabSales Invoice Item`.parent and ifnull(update_stock, 0) = 1)"""
@@ -633,7 +633,7 @@ def make_delivery_note(source_name, target_doc=None):
 				"parent": "against_sales_invoice",
 				"serial_no": "serial_no",
 				"sales_order": "against_sales_order",
-				"so_detail": "prevdoc_detail_docname"
+				"so_detail": "so_detail"
 			},
 			"postprocess": update_item
 		},

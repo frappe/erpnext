@@ -85,7 +85,7 @@ class TestSalesOrder(unittest.TestCase):
 		dn = frappe.get_doc(frappe.copy_doc(dn_test_records[0]))
 		dn.get("delivery_note_details")[0].item_code = so.get("sales_order_details")[0].item_code
 		dn.get("delivery_note_details")[0].against_sales_order = so.name
-		dn.get("delivery_note_details")[0].prevdoc_detail_docname = so.get("sales_order_details")[0].name
+		dn.get("delivery_note_details")[0].so_detail = so.get("sales_order_details")[0].name
 		if delivered_qty:
 			dn.get("delivery_note_details")[0].qty = delivered_qty
 		dn.insert()
