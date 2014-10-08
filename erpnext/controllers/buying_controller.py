@@ -267,18 +267,20 @@ class BuyingController(StockController):
 			rm_supplied_idx += 1
 
 			# get raw materials rate
-			from erpnext.stock.utils import get_incoming_rate
-			item_rate = get_incoming_rate({
-				"item_code": bom_item.item_code,
-				"warehouse": self.supplier_warehouse,
-				"posting_date": self.posting_date,
-				"posting_time": self.posting_time,
-				"qty": -1 * required_qty,
-				"serial_no": rm.serial_no
-			})
-			rm.rate = item_rate
-			rm.amount = required_qty * flt(item_rate)
+			if self.doctype == "Purchase Receipt":
+				from erpnext.stock.utils import get_incoming_rate
+				rm.rate = get_incoming_rate({
+					"item_code": bom_item.item_code,
+					"warehouse": self.supplier_warehouse,
+					"posting_date": self.posting_date,
+					"posting_time": self.posting_time,
+					"qty": -1 * required_qty,
+					"serial_no": rm.serial_no
+				})
+			else:
+				rm.rate = bom_item.rate
 
+			rm.amount = required_qty * flt(rm.rate)
 			raw_materials_cost += flt(rm.amount)
 
 		if self.doctype == "Purchase Receipt":
