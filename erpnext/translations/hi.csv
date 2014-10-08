@@ -38,30 +38,30 @@ A Customer Group exists with same name please change the Customer name or rename
 A Customer exists with same name,यह नाम से दूसरा ग्राहक मौजूद हैं
 A Lead with this email id should exist,इस ईमेल आईडी के साथ एक लीड मौजूद होना चाहिए
 A Product or Service,उत्पाद या सेवा
-A Supplier exists with same name,सप्लायर एक ही नाम के साथ मौजूद है
-A symbol for this currency. For e.g. $,इस मुद्रा के लिए एक प्रतीक है. उदाहरण के लिए $
+A Supplier exists with same name,यह नाम से दूसरा आपूर्तिकर्ता मौजूद है 
+A symbol for this currency. For e.g. $,इस मुद्रा के लिए एक प्रतीक. उदाहरण के लिए $
 AMC Expiry Date,एएमसी समाप्ति तिथि
-Abbr,Abbr
-Abbreviation cannot have more than 5 characters,संक्षिप्त 5 से अधिक वर्ण नहीं हो सकता
-Above Value,मूल्य से ऊपर
+Abbr,संक्षिप्त
+Abbreviation cannot have more than 5 characters,संक्षिप्त 5 से अधिक वर्ण की नहीं हो सकती
+Above Value,ऊपर मूल्य
 Absent,अनुपस्थित
-Acceptance Criteria,स्वीकृति मानदंड
+Acceptance Criteria,स्वीकृति मापदंड
 Accepted,स्वीकार किया
 Accepted + Rejected Qty must be equal to Received quantity for Item {0},स्वीकृत + अस्वीकृत मात्रा मद के लिए प्राप्त मात्रा के बराबर होना चाहिए {0}
 Accepted Quantity,स्वीकार किए जाते हैं मात्रा
-Accepted Warehouse,स्वीकार किए जाते हैं वेअरहाउस
+Accepted Warehouse,स्वीकार किए जाते हैं गोदाम
 Account,खाता
-Account Balance,खाता शेष
-Account Created: {0},खाता बनाया : {0}
+Account Balance,खाते की शेष राशि
+Account Created: {0},खाता बन गया : {0}
 Account Details,खाता विवरण
 Account Head,लेखाशीर्ष
 Account Name,खाते का नाम
 Account Type,खाता प्रकार
-"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","खाता शेष राशि पहले से ही क्रेडिट में, आप सेट करने की अनुमति नहीं है 'डेबिट' के रूप में 'बैलेंस होना चाहिए'"
-"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","पहले से ही डेबिट में खाता शेष, आप के रूप में 'क्रेडिट' 'बैलेंस होना चाहिए' स्थापित करने के लिए अनुमति नहीं है"
+"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","खाते की शेष राशि पहले से ही क्रेडिट में है, कृपया आप शेष राशि को डेबिट के रूप में ही रखें "
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","खाते की शेष राशि पहले से ही डेबिट में है, कृपया आप शेष राशि को क्रेडिट के रूप में ही रखें"
 Account for the warehouse (Perpetual Inventory) will be created under this Account.,गोदाम ( सदा सूची ) के लिए खाते में इस खाते के तहत बनाया जाएगा .
-Account head {0} created,लेखा शीर्ष {0} बनाया
-Account must be a balance sheet account,खाता एक वित्तीय स्थिति विवरण खाता होना चाहिए
+Account head {0} created,लेखाशीर्ष {0} बनाया
+Account must be a balance sheet account,खाता एक वित्तीय स्थिति विवरण का खाता होना चाहिए
 Account with child nodes cannot be converted to ledger,बच्चे नोड्स के साथ खाता लेजर को परिवर्तित नहीं किया जा सकता है
 Account with existing transaction can not be converted to group.,मौजूदा लेन - देन के साथ खाता समूह को नहीं बदला जा सकता .
 Account with existing transaction can not be deleted,मौजूदा लेन - देन के साथ खाता हटाया नहीं जा सकता
