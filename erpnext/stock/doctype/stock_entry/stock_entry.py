@@ -527,7 +527,7 @@ class StockEntry(StockController):
 					}
 				}, bom_no=self.bom_no)
 
-		self.e()
+		self.get_stock_and_rate()
 
 	def get_bom_raw_materials(self, qty):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
