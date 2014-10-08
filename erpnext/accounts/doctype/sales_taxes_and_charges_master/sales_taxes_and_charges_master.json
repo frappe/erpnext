@@ -28,6 +28,14 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "disabled", 
+   "fieldtype": "Check", 
+   "in_list_view": 0, 
+   "label": "Disabled", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "column_break_3", 
    "fieldtype": "Column Break", 
    "permlevel": 0
@@ -72,7 +80,7 @@
  ], 
  "icon": "icon-money", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:19.023941", 
+ "modified": "2014-10-06 13:11:18.616789", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Taxes and Charges Master", 
