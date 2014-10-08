@@ -30,7 +30,7 @@ class StockController(AccountsController):
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None, allow_negative_stock=False):
 
-		# block_negative_stock(allow_negative_stock)
+		block_negative_stock(allow_negative_stock)
 
 		if not warehouse_account:
 			warehouse_account = get_warehouse_account()
@@ -51,7 +51,7 @@ class StockController(AccountsController):
 
 						stock_value_difference = flt(sle.stock_value_difference, 2)
 						if not stock_value_difference:
-							valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, sle.posting_date)
+							valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse)
 							stock_value_difference = flt(sle.actual_qty)*flt(valuation_rate)
 
 						gl_list.append(self.get_gl_dict({
@@ -301,12 +301,12 @@ def block_negative_stock(allow_negative_stock=False):
 		if cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock")):
 			frappe.throw(_("Negative stock is not allowed in case of Perpetual Inventory, please disable it from Stock Settings"))
 
-def get_valuation_rate(item_code, warehouse, posting_date):
+def get_valuation_rate(item_code, warehouse):
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
 		from `tabStock Ledger Entry`
 		where item_code = %s and warehouse = %s
-		and ifnull(qty_after_transaction, 0) > 0 and posting_date < %s
-		order by posting_date desc limit 1""", (item_code, warehouse, posting_date))
+		and ifnull(qty_after_transaction, 0) > 0
+		order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse))
 
 	valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
 

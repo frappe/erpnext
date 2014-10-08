@@ -214,9 +214,8 @@ def repost_all_stock_vouchers():
 		from `tabStock Ledger Entry` order by posting_date, posting_time, name""")
 
 	rejected = []
-	i = 0
+	# vouchers = [["Purchase Receipt", "GRN00062"]]
 	for voucher_type, voucher_no in vouchers:
-		i += 1
 		print voucher_type, voucher_no
 		try:
 			for dt in ["Stock Ledger Entry", "GL Entry"]:
@@ -226,13 +225,15 @@ def repost_all_stock_vouchers():
 			doc = frappe.get_doc(voucher_type, voucher_no)
 			if voucher_type=="Stock Entry" and doc.purpose in ["Manufacture", "Repack"]:
 				doc.get_stock_and_rate(force=1)
+			# elif voucher_type=="Purchase Receipt":
+			# 	doc.create_raw_materials_supplied("pr_raw_material_details")
+
 			doc.update_stock_ledger()
-			doc.make_gl_entries()
-			if i%100 == 0:
-				frappe.db.commit()
-		except:
+			doc.make_gl_entries(repost_future_gle=False, allow_negative_stock=True)
+			frappe.db.commit()
+		except Exception, e:
+			print frappe.get_traceback()
 			rejected.append([voucher_type, voucher_no])
-			pass
+			frappe.db.rollback()
 
 	print rejected
-

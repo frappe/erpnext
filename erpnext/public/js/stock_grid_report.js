@@ -9,8 +9,8 @@ erpnext.StockGridReport = frappe.views.TreeGridReport.extend({
 		};
 		return this.item_warehouse[item][warehouse];
 	},
-	
-	get_value_diff: function(wh, sl, is_fifo) {			
+
+	get_value_diff: function(wh, sl, is_fifo) {
 		// value
 		if(sl.qty > 0) {
 			// incoming - rate is given
@@ -30,9 +30,9 @@ erpnext.StockGridReport = frappe.views.TreeGridReport.extend({
 			} else {
 				var value_diff = (rate * add_qty);
 			}
-		
+
 			if(add_qty)
-				wh.fifo_stack.push([add_qty, sl.incoming_rate, sl.posting_date]);				
+				wh.fifo_stack.push([add_qty, sl.incoming_rate, sl.posting_date]);
 		} else {
 			// called everytime for maintaining fifo stack
 			var fifo_value_diff = this.get_fifo_value_diff(wh, sl);
@@ -44,13 +44,13 @@ erpnext.StockGridReport = frappe.views.TreeGridReport.extend({
 				var value_diff = fifo_value_diff;
 			} else {
 				// average rate for weighted average
-				var rate = (wh.balance_qty.toFixed(2) == 0.00 ? 0 : 
+				var rate = (wh.balance_qty.toFixed(2) == 0.00 ? 0 :
 					flt(wh.balance_value) / flt(wh.balance_qty));
-			
+
 				// no change in value if negative qty
 				if((wh.balance_qty + sl.qty).toFixed(2) >= 0.00)
 					var value_diff = (rate * sl.qty);
-				else 
+				else
 					var value_diff = -wh.balance_value;
 			}
 		}
@@ -58,7 +58,6 @@ erpnext.StockGridReport = frappe.views.TreeGridReport.extend({
 		// update balance (only needed in case of valuation)
 		wh.balance_qty += sl.qty;
 		wh.balance_value += value_diff;
-		
 		return value_diff;
 	},
 	get_fifo_value_diff: function(wh, sl) {
@@ -66,19 +65,19 @@ erpnext.StockGridReport = frappe.views.TreeGridReport.extend({
 		var fifo_stack = (wh.fifo_stack || []).reverse();
 		var fifo_value_diff = 0.0;
 		var qty = -sl.qty;
-	
+
 		for(var i=0, j=fifo_stack.length; i<j; i++) {
 			var batch = fifo_stack.pop();
 			if(batch[0] >= qty) {
 				batch[0] = batch[0] - qty;
 				fifo_value_diff += (qty * batch[1]);
-			
+
 				qty = 0.0;
 				if(batch[0]) {
 					// batch still has qty put it back
 					fifo_stack.push(batch);
 				}
-			
+
 				// all qty found
 				break;
 			} else {
@@ -87,35 +86,34 @@ erpnext.StockGridReport = frappe.views.TreeGridReport.extend({
 				qty = qty - batch[0];
 			}
 		}
-	
 		// reset the updated stack
 		wh.fifo_stack = fifo_stack.reverse();
 		return -fifo_value_diff;
 	},
-	
+
 	get_serialized_value_diff: function(sl) {
 		var me = this;
-		
+
 		var value_diff = 0.0;
-		
+
 		$.each(sl.serial_no.trim().split("\n"), function(i, sr) {
 			if(sr) {
 				value_diff += flt(me.serialized_buying_rates[sr.trim().toLowerCase()]);
 			}
 		});
-		
+
 		return value_diff;
 	},
-	
+
 	get_serialized_buying_rates: function() {
 		var serialized_buying_rates = {};
-		
+
 		if (frappe.report_dump.data["Serial No"]) {
 			$.each(frappe.report_dump.data["Serial No"], function(i, sn) {
 				serialized_buying_rates[sn.name.toLowerCase()] = flt(sn.incoming_rate);
 			});
 		}
-		
+
 		return serialized_buying_rates;
 	},
 });
