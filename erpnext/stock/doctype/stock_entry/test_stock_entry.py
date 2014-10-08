@@ -10,7 +10,6 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_per
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 
 class TestStockEntry(unittest.TestCase):
-
 	def tearDown(self):
 		frappe.set_user("Administrator")
 		set_perpetual_inventory(0)
@@ -18,60 +17,34 @@ class TestStockEntry(unittest.TestCase):
 			frappe.db.set_default("company", self.old_default_company)
 
 	def test_auto_material_request(self):
-		frappe.db.sql("""delete from `tabMaterial Request Item`""")
-		frappe.db.sql("""delete from `tabMaterial Request`""")
-		self._clear_stock_account_balance()
-
-		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
-
-		st1 = frappe.copy_doc(test_records[0])
-		st1.insert()
-		st1.submit()
-		st2 = frappe.copy_doc(test_records[1])
-		st2.insert()
-		st2.submit()
-
-		from erpnext.stock.utils import reorder_item
-		reorder_item()
-
-		mr_name = frappe.db.sql("""select parent from `tabMaterial Request Item`
-			where item_code='_Test Item'""")
-
-		frappe.db.set_value("Stock Settings", None, "auto_indent", 0)
-
-		self.assertTrue(mr_name)
+		self._test_auto_material_request("_Test Item")
 
 	def test_auto_material_request_for_variant(self):
-		item_code = "_Test Variant Item-S"
+		self._test_auto_material_request("_Test Variant Item-S")
+
+	def _test_auto_material_request(self, item_code):
 		item = frappe.get_doc("Item", item_code)
-		template = frappe.get_doc("Item", item.variant_of)
+
+		if item.variant_of:
+			template = frappe.get_doc("Item", item.variant_of)
+		else:
+			template = item
 
 		warehouse = "_Test Warehouse - _TC"
 
 		# stock entry reqd for auto-reorder
-		se = frappe.new_doc("Stock Entry")
-		se.purpose = "Material Receipt"
-		se.company = "_Test Company"
-		se.append("mtn_details", {
-			"item_code": item_code,
-			"t_warehouse": "_Test Warehouse - _TC",
-			"qty": 1,
-			"incoming_rate": 1
-		})
-		se.insert()
-		se.submit()
+		make_stock_entry(item_code=item_code, target="_Test Warehouse 1 - _TC", qty=1)
 
 		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
 		projected_qty = frappe.db.get_value("Bin", {"item_code": item_code,
 			"warehouse": warehouse}, "projected_qty") or 0
-
 
 		# update re-level qty so that it is more than projected_qty
 		if projected_qty > template.item_reorder[0].warehouse_reorder_level:
 			template.item_reorder[0].warehouse_reorder_level += projected_qty
 			template.save()
 
-		from erpnext.stock.utils import reorder_item
+		from erpnext.stock.reorder_item import reorder_item
 		mr_list = reorder_item()
 
 		frappe.db.set_value("Stock Settings", None, "auto_indent", 0)
@@ -897,6 +870,7 @@ class TestStockEntry(unittest.TestCase):
 			"total_fixed_cost": 1000
 		})
 		stock_entry.get_items()
+
 		fg_rate = [d.amount for d in stock_entry.get("mtn_details") if d.item_code=="_Test FG Item 2"][0]
 		self.assertEqual(fg_rate, 1200.00)
 		fg_rate = [d.amount for d in stock_entry.get("mtn_details") if d.item_code=="_Test Item"][0]
@@ -939,21 +913,27 @@ def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se.submit()
 	return se
 
-def make_stock_entry(item, source, target, qty, incoming_rate=None):
+def make_stock_entry(**args):
 	s = frappe.new_doc("Stock Entry")
-	if source and target:
-		s.purpose = "Material Transfer"
-	elif source:
-		s.purpose = "Material Issue"
-	else:
-		s.purpose = "Material Receipt"
-	s.company = "_Test Company"
+	args = frappe._dict(args)
+	if args.posting_date:
+		s.posting_date = args.posting_date
+	if args.posting_time:
+		s.posting_time = args.posting_time
+	if not args.purpose:
+		if args.source and args.target:
+			s.purpose = "Material Transfer"
+		elif args.source:
+			s.purpose = "Material Issue"
+		else:
+			s.purpose = "Material Receipt"
+	s.company = args.company or "_Test Company"
 	s.append("mtn_details", {
-		"item_code": item,
-		"s_warehouse": source,
-		"t_warehouse": target,
-		"qty": qty,
-		"incoming_rate": incoming_rate,
+		"item_code": args.item,
+		"s_warehouse": args.from_warehouse or args.source,
+		"t_warehouse": args.to_warehouse or args.target,
+		"qty": args.qty,
+		"incoming_rate": args.incoming_rate,
 		"conversion_factor": 1.0
 	})
 	s.insert()

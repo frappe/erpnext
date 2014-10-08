@@ -42,7 +42,7 @@ doc_events = {
 scheduler_events = {
 	"daily": [
 		"erpnext.controllers.recurring_document.create_recurring_documents",
-		"erpnext.stock.utils.reorder_item",
+		"erpnext.stock.reorder_item.reorder_item",
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.support.doctype.support_ticket.support_ticket.auto_close_tickets"
 	],
