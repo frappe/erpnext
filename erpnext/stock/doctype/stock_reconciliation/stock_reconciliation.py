@@ -16,8 +16,6 @@ class StockReconciliation(StockController):
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
 
 	def validate(self):
-		self.entries = []
-
 		self.validate_data()
 		self.validate_expense_account()
 
@@ -178,9 +176,6 @@ class StockReconciliation(StockController):
 			"valuation_rate": row.valuation_rate
 		})
 		self.make_sl_entries([args])
-
-		# append to entries
-		self.entries.append(args)
 
 	def delete_and_repost_sle(self):
 		"""	Delete Stock Ledger Entries related to this voucher

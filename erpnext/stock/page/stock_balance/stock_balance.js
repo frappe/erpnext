@@ -107,6 +107,9 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 				if(sl.voucher_type=="Stock Reconciliation") {
 					var qty_diff = sl.qty_after_transaction - (item.temp_closing_qty || 0.0);
 					var value_diff = (sl.valuation_rate * sl.qty_after_transaction) - (item.temp_closing_value || 0.0);
+					wh.fifo_stack.push([sl.qty_after_transaction, sl.valuation_rate, sl.posting_date]);
+					wh.balance_qty = sl.qty_after_transaction;
+					wh.balance_value = sl.valuation_rate * sl.qty_after_transaction;
 				} else {
 					var qty_diff = sl.qty;
 					var value_diff = me.get_value_diff(wh, sl, is_fifo);
