@@ -680,6 +680,16 @@
   {
    "allow_on_submit": 1, 
    "depends_on": "eval:doc.is_recurring==1", 
+   "fieldname": "recurring_type", 
+   "fieldtype": "Select", 
+   "label": "Recurring Type", 
+   "no_copy": 1, 
+   "options": "Monthly\nQuarterly\nHalf-yearly\nYearly", 
+   "permlevel": 0
+  }, 
+  {
+   "allow_on_submit": 1, 
+   "depends_on": "eval:doc.is_recurring==1", 
    "description": "Start date of current order's period", 
    "fieldname": "from_date", 
    "fieldtype": "Date", 
@@ -695,16 +705,6 @@
    "fieldtype": "Date", 
    "label": "To Date", 
    "no_copy": 1, 
-   "permlevel": 0
-  }, 
-  {
-   "allow_on_submit": 1, 
-   "depends_on": "eval:doc.is_recurring==1", 
-   "fieldname": "recurring_type", 
-   "fieldtype": "Select", 
-   "label": "Recurring Type", 
-   "no_copy": 1, 
-   "options": "Monthly\nQuarterly\nHalf-yearly\nYearly", 
    "permlevel": 0
   }, 
   {
@@ -772,7 +772,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-10-06 12:16:44.453946", 
+ "modified": "2014-10-08 14:23:29.718779", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 
