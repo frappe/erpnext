@@ -243,14 +243,13 @@ class StockEntry(StockController):
 					self.posting_date, self.posting_time, d.actual_qty, d.transfer_qty))
 
 			# get incoming rate
+			if not flt(d.incoming_rate) or d.s_warehouse or self.purpose == "Sales Return" or force:
+				incoming_rate = flt(self.get_incoming_rate(args), self.precision("incoming_rate", d))
+				if incoming_rate > 0:
+					d.incoming_rate = incoming_rate
+			d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 			if not d.t_warehouse:
-				if not flt(d.incoming_rate) or d.s_warehouse or self.purpose == "Sales Return" or force:
-					incoming_rate = flt(self.get_incoming_rate(args), self.precision("incoming_rate", d))
-					if incoming_rate > 0:
-						d.incoming_rate = incoming_rate
-				d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
-				if not d.t_warehouse:
-					raw_material_cost += flt(d.amount)
+				raw_material_cost += flt(d.amount)
 
 		# set incoming rate for fg item
 		if self.purpose in ("Manufacture", "Repack"):

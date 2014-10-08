@@ -179,5 +179,5 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 		stock_entry.from_warehouse = production_order.wip_warehouse
 		stock_entry.to_warehouse = production_order.fg_warehouse
 
-	stock_entry.run_method("get_items")
+	stock_entry.get_items()
 	return stock_entry.as_dict()
