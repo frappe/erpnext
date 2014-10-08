@@ -19,7 +19,7 @@ class StockController(AccountsController):
 			warehouse_account = get_warehouse_account()
 
 			if self.docstatus==1:
-				gl_entries = self.get_gl_entries(warehouse_account, allow_negative_stock)
+				gl_entries = self.get_gl_entries(warehouse_account, allow_negative_stock=allow_negative_stock)
 				make_gl_entries(gl_entries)
 
 			if repost_future_gle:
@@ -30,7 +30,7 @@ class StockController(AccountsController):
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None, allow_negative_stock=False):
 
-		block_negative_stock(allow_negative_stock)
+		# block_negative_stock(allow_negative_stock)
 
 		if not warehouse_account:
 			warehouse_account = get_warehouse_account()
@@ -52,7 +52,7 @@ class StockController(AccountsController):
 						stock_value_difference = flt(sle.stock_value_difference, 2)
 						if not stock_value_difference:
 							valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, sle.posting_date)
-							stock_value_difference = flt(sle.qty)*flt(valuation_rate)
+							stock_value_difference = flt(sle.actual_qty)*flt(valuation_rate)
 
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse],
@@ -126,7 +126,8 @@ class StockController(AccountsController):
 
 	def get_stock_ledger_details(self):
 		stock_ledger = {}
-		for sle in frappe.db.sql("""select warehouse, stock_value_difference, voucher_detail_no
+		for sle in frappe.db.sql("""select warehouse, stock_value_difference,
+			voucher_detail_no, item_code, posting_date, actual_qty
 			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""",
 			(self.doctype, self.name), as_dict=True):
 				stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
@@ -237,7 +238,7 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 	for voucher_type, voucher_no in future_stock_vouchers:
 		existing_gle = gle.get((voucher_type, voucher_no), [])
 		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
-		expected_gle = voucher_obj.get_gl_entries(warehouse_account, allow_negative_stock)
+		expected_gle = voucher_obj.get_gl_entries(warehouse_account, allow_negative_stock=allow_negative_stock)
 		if expected_gle:
 			if not existing_gle or not compare_existing_and_expected_gle(existing_gle,
 				expected_gle):
@@ -310,6 +311,6 @@ def get_valuation_rate(item_code, warehouse, posting_date):
 	valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
 
 	if not valuation_rate:
-		valuation_rate = frappe.db.get_value("Item Price", {"item_code": item_code, "buying": 1}, "price")
+		valuation_rate = frappe.db.get_value("Item Price", {"item_code": item_code, "buying": 1}, "price_list_rate")
 
 	return valuation_rate

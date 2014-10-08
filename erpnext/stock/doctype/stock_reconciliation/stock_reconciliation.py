@@ -22,7 +22,7 @@ class StockReconciliation(StockController):
 		self.validate_expense_account()
 
 	def on_submit(self):
-		self.insert_stock_ledger_entries()
+		self.update_stock_ledger()
 		self.make_gl_entries()
 
 	def on_cancel(self):
@@ -126,7 +126,7 @@ class StockReconciliation(StockController):
 		except Exception, e:
 			self.validation_messages.append(_("Row # ") + ("%d: " % (row_num)) + cstr(e))
 
-	def insert_stock_ledger_entries(self):
+	def update_stock_ledger(self):
 		"""	find difference between current and expected entries
 			and create stock ledger entries based on the difference"""
 		from erpnext.stock.stock_ledger import get_previous_sle
@@ -155,8 +155,8 @@ class StockReconciliation(StockController):
 				if row.valuation_rate in ("", None):
 					row.valuation_rate = previous_sle.get("valuation_rate")
 
-			if row.qty and not row.valuation_rate:
-				frappe.throw(_("Valuation Rate required for Item {0}").format(row.item_code))
+			# if row.qty and not row.valuation_rate:
+			# 	frappe.throw(_("Valuation Rate required for Item {0}").format(row.item_code))
 
 			self.insert_entries(row)
 
