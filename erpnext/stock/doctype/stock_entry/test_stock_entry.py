@@ -33,7 +33,7 @@ class TestStockEntry(unittest.TestCase):
 		warehouse = "_Test Warehouse - _TC"
 
 		# stock entry reqd for auto-reorder
-		make_stock_entry(item_code=item_code, target="_Test Warehouse 1 - _TC", qty=1)
+		make_stock_entry(item_code=item_code, target="_Test Warehouse 1 - _TC", qty=1, incoming_rate=1)
 
 		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
 		projected_qty = frappe.db.get_value("Bin", {"item_code": item_code,
@@ -929,7 +929,7 @@ def make_stock_entry(**args):
 			s.purpose = "Material Receipt"
 	s.company = args.company or "_Test Company"
 	s.append("mtn_details", {
-		"item_code": args.item,
+		"item_code": args.item or args.item_code,
 		"s_warehouse": args.from_warehouse or args.source,
 		"t_warehouse": args.to_warehouse or args.target,
 		"qty": args.qty,
