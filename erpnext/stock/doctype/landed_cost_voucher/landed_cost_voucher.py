@@ -97,10 +97,10 @@ class LandedCostVoucher(Document):
 
 			# update stock & gl entries for cancelled state of PR
 			pr.docstatus = 2
-			pr.update_stock()
+			pr.update_stock_ledger()
 			pr.make_gl_entries_on_cancel()
 
 			# update stock & gl entries for submit state of PR
 			pr.docstatus = 1
-			pr.update_stock()
+			pr.update_stock_ledger()
 			pr.make_gl_entries()

@@ -27,7 +27,7 @@ def make_sl_entries(sl_entries, is_amended=None):
 			if sle.get('is_cancelled') == 'Yes':
 				sle['actual_qty'] = -flt(sle['actual_qty'])
 
-			if sle.get("actual_qty"):
+			if sle.get("actual_qty") or sle.voucher_type=="Stock Reconciliation":
 				sle_id = make_entry(sle)
 
 			args = sle.copy()
@@ -36,9 +36,9 @@ def make_sl_entries(sl_entries, is_amended=None):
 				"is_amended": is_amended
 			})
 			update_bin(args)
+
 		if cancel:
-			delete_cancelled_entry(sl_entries[0].get('voucher_type'),
-				sl_entries[0].get('voucher_no'))
+			delete_cancelled_entry(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
 
 def set_as_cancel(voucher_type, voucher_no):
 	frappe.db.sql("""update `tabStock Ledger Entry` set is_cancelled='Yes',
@@ -83,7 +83,6 @@ def update_entries_after(args, verbose=1):
 
 	entries_to_fix = get_sle_after_datetime(previous_sle or \
 		{"item_code": args["item_code"], "warehouse": args["warehouse"]}, for_update=True)
-
 	valuation_method = get_valuation_method(args["item_code"])
 	stock_value_difference = 0.0
 
@@ -95,14 +94,23 @@ def update_entries_after(args, verbose=1):
 				qty_after_transaction += flt(sle.actual_qty)
 				continue
 
+
 		if sle.serial_no:
 			valuation_rate = get_serialized_values(qty_after_transaction, sle, valuation_rate)
-		elif valuation_method == "Moving Average":
-			valuation_rate = get_moving_average_values(qty_after_transaction, sle, valuation_rate)
-		else:
-			valuation_rate = get_fifo_values(qty_after_transaction, sle, stock_queue)
+			qty_after_transaction += flt(sle.actual_qty)
 
-		qty_after_transaction += flt(sle.actual_qty)
+		else:
+			if sle.voucher_type=="Stock Reconciliation":
+				valuation_rate = sle.valuation_rate
+				qty_after_transaction = sle.qty_after_transaction
+				stock_queue = [[qty_after_transaction, valuation_rate]]
+			else:
+				if valuation_method == "Moving Average":
+					valuation_rate = get_moving_average_values(qty_after_transaction, sle, valuation_rate)
+				else:
+					valuation_rate = get_fifo_values(qty_after_transaction, sle, stock_queue)
+
+				qty_after_transaction += flt(sle.actual_qty)
 
 		# get stock value
 		if sle.serial_no:

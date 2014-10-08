@@ -209,3 +209,30 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 
 		frappe.db.sql("""update `tabSerial No` set warehouse='' where status in ('Delivered', 'Purchase Returned')""")
 
+def repost_all_stock_vouchers():
+	vouchers = frappe.db.sql("""select distinct voucher_type, voucher_no
+		from `tabStock Ledger Entry` order by posting_date, posting_time, name""")
+
+	rejected = []
+	i = 0
+	for voucher_type, voucher_no in vouchers:
+		i += 1
+		print voucher_type, voucher_no
+		try:
+			for dt in ["Stock Ledger Entry", "GL Entry"]:
+				frappe.db.sql("""delete from `tab%s` where voucher_type=%s and voucher_no=%s"""%
+					(dt, '%s', '%s'), (voucher_type, voucher_no))
+
+			doc = frappe.get_doc(voucher_type, voucher_no)
+			if voucher_type=="Stock Entry" and doc.purpose in ["Manufacture", "Repack"]:
+				doc.get_stock_and_rate(force=1)
+			doc.update_stock_ledger()
+			doc.make_gl_entries()
+			if i%100 == 0:
+				frappe.db.commit()
+		except:
+			rejected.append([voucher_type, voucher_no])
+			pass
+
+	print rejected
+
