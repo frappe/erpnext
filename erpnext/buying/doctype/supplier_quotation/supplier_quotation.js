@@ -11,8 +11,6 @@ cur_frm.cscript.other_fname = "other_charges";
 {% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
 
-frappe.require("assets/erpnext/js/utils.js");
-
 erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
 		this._super();
@@ -73,12 +71,4 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 	return {
 		filters:{'supplier': doc.supplier}
 	}
-}
-
-cur_frm.cscript.company = function(doc, cdt, cdn) {
-	erpnext.get_fiscal_year(doc.company, doc.transaction_date);
-}
-
-cur_frm.cscript.transaction_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc.company, doc.transaction_date);
 }

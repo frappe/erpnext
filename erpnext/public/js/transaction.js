@@ -207,23 +207,33 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 
 	company: function() {
-		if(this.frm.doc.company && this.frm.fields_dict.currency) {
-			var company_currency = this.get_company_currency();
-			if (!this.frm.doc.currency) {
-				this.frm.set_value("currency", company_currency);
-			}
+		var me = this;
+		var fn = function() {
+			if(me.frm.doc.company && me.frm.fields_dict.currency) {
+				var company_currency = me.get_company_currency();
+				if (!me.frm.doc.currency) {
+					me.frm.set_value("currency", company_currency);
+				}
 
-			if (this.frm.doc.currency == company_currency) {
-				this.frm.set_value("conversion_rate", 1.0);
-			}
-			if (this.frm.doc.price_list_currency == company_currency) {
-				this.frm.set_value('plc_conversion_rate', 1.0);
-			}
+				if (me.frm.doc.currency == company_currency) {
+					me.frm.set_value("conversion_rate", 1.0);
+				}
+				if (me.frm.doc.price_list_currency == company_currency) {
+					me.frm.set_value('plc_conversion_rate', 1.0);
+				}
 
-			this.frm.script_manager.trigger("currency");
-			this.apply_pricing_rule();
+				me.frm.script_manager.trigger("currency");
+				me.apply_pricing_rule();
+			}	
 		}
-		erpnext.get_fiscal_year(this.frm.doc.company, this.frm.doc.posting_date);
+		
+		if (this.frm.doc.posting_date) var date = this.frm.doc.posting_date;
+		else var date = this.frm.doc.transaction_date;
+		erpnext.get_fiscal_year(this.frm.doc.company, date, fn);
+	},
+
+	transaction_date: function() {
+		erpnext.get_fiscal_year(this.frm.doc.company, this.frm.doc.transaction_date);
 	},
 
 	posting_date: function() {

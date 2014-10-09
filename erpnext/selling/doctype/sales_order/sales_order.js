@@ -199,11 +199,3 @@ cur_frm.cscript.send_sms = function() {
 	frappe.require("assets/erpnext/js/sms_manager.js");
 	var sms_man = new SMSManager(cur_frm.doc);
 };
-
-cur_frm.cscript.company = function(doc, cdt, cdn) {
-	erpnext.get_fiscal_year(doc.company, doc.transaction_date);
-}
-
-cur_frm.cscript.transaction_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc.company, doc.transaction_date);
-}
