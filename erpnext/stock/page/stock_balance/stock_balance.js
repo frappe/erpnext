@@ -126,6 +126,7 @@ erpnext.StockBalance = erpnext.StockAnalytics.extend({
 						&& this.stock_entry_map[sl.voucher_no].purpose=="Material Transfer";
 
 					if(!ignore_inflow_outflow) {
+
 						if(qty_diff < 0) {
 							item.outflow_qty += Math.abs(qty_diff);
 						} else {

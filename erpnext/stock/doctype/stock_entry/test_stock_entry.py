@@ -9,13 +9,63 @@ from erpnext.stock.doctype.serial_no.serial_no import *
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 
+def get_sle(**args):
+	condition, values = "", []
+	for key, value in args.iteritems():
+		condition += " and " if condition else " where "
+		condition += "`{0}`=%s".format(key)
+		values.append(value)
+
+	return frappe.db.sql("""select * from `tabStock Ledger Entry` %s
+		order by timestamp(posting_date, posting_time) desc, name desc limit 1"""% condition,
+		values, as_dict=1)
+
+def make_zero(item_code, warehouse):
+	sle = get_sle(item_code = item_code, warehouse = warehouse)
+	qty = sle[0].qty_after_transaction if sle else 0
+	if qty < 0:
+		make_stock_entry(item_code, None, warehouse, abs(qty), incoming_rate=10)
+	elif qty > 0:
+		make_stock_entry(item_code, warehouse, None, qty, incoming_rate=10)
+
 class TestStockEntry(unittest.TestCase):
-	
 	def tearDown(self):
 		frappe.set_user("Administrator")
 		set_perpetual_inventory(0)
 		if hasattr(self, "old_default_company"):
 			frappe.db.set_default("company", self.old_default_company)
+
+	def test_fifo(self):
+		frappe.db.set_default("allow_negative_stock", 1)
+		item_code = "_Test Item 2"
+		warehouse = "_Test Warehouse - _TC"
+		make_zero(item_code, warehouse)
+
+		make_stock_entry(item_code, None, warehouse, 1, incoming_rate=10)
+		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
+
+		self.assertEqual([[1, 10]], eval(sle.stock_queue))
+
+		# negative qty
+		make_zero(item_code, warehouse)
+		make_stock_entry(item_code, warehouse, None, 1, incoming_rate=10)
+		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
+
+		self.assertEqual([[-1, 10]], eval(sle.stock_queue))
+
+		# further negative
+		make_stock_entry(item_code, warehouse, None, 1)
+		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
+
+		self.assertEqual([[-2, 10]], eval(sle.stock_queue))
+
+		# move stock to positive
+		make_stock_entry(item_code, None, warehouse, 3, incoming_rate=10)
+		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
+
+		self.assertEqual([[1, 10]], eval(sle.stock_queue))
+
+		frappe.db.set_default("allow_negative_stock", 0)
 
 	def test_auto_material_request(self):
 		frappe.db.sql("""delete from `tabMaterial Request Item`""")
@@ -821,19 +871,19 @@ class TestStockEntry(unittest.TestCase):
 		se = frappe.copy_doc(test_records[0]).insert()
 		self.assertRaises (StockFreezeError, se.submit)
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 0)
-		
+
 	def test_production_order(self):
-		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item 2", 
+		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item 2",
 			"is_default": 1, "docstatus": 1})
-		
+
 		production_order = frappe.new_doc("Production Order")
 		production_order.update({
 			"company": "_Test Company",
-			"fg_warehouse": "_Test Warehouse 1 - _TC", 
-			"production_item": "_Test FG Item 2", 
+			"fg_warehouse": "_Test Warehouse 1 - _TC",
+			"production_item": "_Test FG Item 2",
 			"bom_no": bom_no,
 			"qty": 1.0,
-			"stock_uom": "Nos", 
+			"stock_uom": "Nos",
 			"wip_warehouse": "_Test Warehouse - _TC"
 		})
 		production_order.insert()
@@ -889,5 +939,3 @@ def make_stock_entry(item, source, target, qty, incoming_rate=None):
 	s.insert()
 	s.submit()
 	return s
-
-test_records = frappe.get_test_records('Stock Entry')

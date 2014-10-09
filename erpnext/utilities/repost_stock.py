@@ -213,10 +213,13 @@ def repost_all_stock_vouchers():
 	vouchers = frappe.db.sql("""select distinct voucher_type, voucher_no
 		from `tabStock Ledger Entry` order by posting_date, posting_time, name""")
 
+	print len(vouchers)
 	rejected = []
-	# vouchers = [["Purchase Receipt", "GRN00062"]]
+	# vouchers = [["Delivery Note", "DN00060"]]
+	i = 0
 	for voucher_type, voucher_no in vouchers:
-		print voucher_type, voucher_no
+		i+=1
+		print i
 		try:
 			for dt in ["Stock Ledger Entry", "GL Entry"]:
 				frappe.db.sql("""delete from `tab%s` where voucher_type=%s and voucher_no=%s"""%
