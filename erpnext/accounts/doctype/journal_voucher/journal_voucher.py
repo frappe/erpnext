@@ -76,14 +76,14 @@ class JournalVoucher(AccountsController):
 
 	def validate_entries_for_advance(self):
 		for d in self.get('entries'):
-			if not (d.against_voucher and d.against_invoice and d.against_jv) and d.is_advance in ["", "No"]:
+			if not (d.against_voucher and d.against_invoice and d.against_jv):
 				master_type = frappe.db.get_value("Account", d.account, "master_type")
 				if (master_type == 'Customer' and flt(d.credit) > 0) or \
 						(master_type == 'Supplier' and flt(d.debit) > 0):
-					msgprint(_("Row {0}: Please check 'Is Advance' against Account {1} if this \
-						is an advance entry.").format(d.idx, d.account))
-					if d.against_sales_order or d.against_purchase_order:
-						raise frappe.ValidationError
+					if not d.is_advance:
+						msgprint(_("Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.").format(d.idx, d.account))
+					elif (d.against_sales_order or d.against_purchase_order) and d.is_advance != "Yes":
+						frappe.throw(_("Row {0}: Payment against Sales/Purchase Order should always be marked as advance").format(d.idx))
 
 	def validate_against_jv(self):
 		for d in self.get('entries'):
