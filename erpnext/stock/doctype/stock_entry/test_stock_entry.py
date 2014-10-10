@@ -939,3 +939,5 @@ def make_stock_entry(item, source, target, qty, incoming_rate=None):
 	s.insert()
 	s.submit()
 	return s
+
+test_records = frappe.get_test_records('Stock Entry')
