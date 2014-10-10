@@ -79,6 +79,9 @@ class AccountsReceivableReport(object):
 		return (
 			# advance
 			(not gle.against_voucher) or 
+
+			# against sales order
+			(gle.against_voucher_type == "Sales Order") or
 			
 			# sales invoice
 			(gle.against_voucher==gle.voucher_no and gle.debit > 0) or 
