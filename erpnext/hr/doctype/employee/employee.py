@@ -39,6 +39,7 @@ class Employee(Document):
 		self.validate_email()
 		self.validate_status()
 		self.validate_employee_leave_approver()
+		self.validate_reports_to()
 
 		if self.user_id:
 			self.validate_for_enabled_user_id()
@@ -140,6 +141,10 @@ class Employee(Document):
 			if "Leave Approver" not in frappe.get_roles(l.leave_approver):
 				self.get("employee_leave_approvers").remove(l)
 				msgprint(_("{0} is not a valid Leave Approver. Removing row #{1}.").format(l.leave_approver, l.idx))
+
+	def validate_reports_to(self):
+		if self.reports_to == self.name:
+			throw(_("Employee cannot report to himself."))
 
 	def update_dob_event(self):
 		if self.status == "Active" and self.date_of_birth \
