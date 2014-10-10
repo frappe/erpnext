@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, cstr, now
 from erpnext.stock.utils import get_valuation_method
+from erpnext.controllers.stock_controller import get_valuation_rate
 import json
 
 # future reposting
@@ -106,8 +107,7 @@ def update_entries_after(args, verbose=1):
 				stock_queue = [[qty_after_transaction, valuation_rate]]
 			else:
 				if valuation_method == "Moving Average":
-					if flt(sle.actual_qty) > 0:
-						valuation_rate = get_moving_average_values(qty_after_transaction, sle, valuation_rate)
+					valuation_rate = get_moving_average_values(qty_after_transaction, sle, valuation_rate)
 				else:
 					valuation_rate = get_fifo_values(qty_after_transaction, sle, stock_queue)
 
@@ -256,19 +256,18 @@ def get_moving_average_values(qty_after_transaction, sle, valuation_rate):
 	incoming_rate = flt(sle.incoming_rate)
 	actual_qty = flt(sle.actual_qty)
 
-	if not incoming_rate:
-		# If wrong incoming rate
-		incoming_rate = valuation_rate
+	if flt(sle.actual_qty) > 0:
+		if qty_after_transaction < 0 and not valuation_rate:
+			# if negative stock, take current valuation rate as incoming rate
+			valuation_rate = incoming_rate
 
-	elif qty_after_transaction < 0 and not valuation_rate:
-		# if negative stock, take current valuation rate as incoming rate
-		valuation_rate = incoming_rate
+		new_stock_qty = abs(qty_after_transaction) + actual_qty
+		new_stock_value = (abs(qty_after_transaction) * valuation_rate) + (actual_qty * incoming_rate)
 
-	new_stock_qty = abs(qty_after_transaction) + actual_qty
-	new_stock_value = (abs(qty_after_transaction) * valuation_rate) + (actual_qty * incoming_rate)
-
-	if new_stock_qty:
-		valuation_rate = new_stock_value / flt(new_stock_qty)
+		if new_stock_qty:
+			valuation_rate = new_stock_value / flt(new_stock_qty)
+	elif not valuation_rate:
+		valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse)
 
 	return abs(valuation_rate)
 
@@ -321,7 +320,6 @@ def get_fifo_values(qty_after_transaction, sle, stock_queue):
 
 def intialize_stock_queue(stock_queue, item_code, warehouse):
 	if not stock_queue:
-		from erpnext.controllers.stock_controller import get_valuation_rate
 		estimated_val_rate = get_valuation_rate(item_code, warehouse)
 		stock_queue.append([0, estimated_val_rate])
 
