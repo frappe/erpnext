@@ -131,8 +131,10 @@ class SalesInvoice(SellingController):
 				'keyword':'Delivered',
 				'second_source_dt': 'Delivery Note Item',
 				'second_source_field': 'qty',
-				'second_join_field': 'prevdoc_detail_docname',
-				'overflow_type': 'delivery'
+				'second_join_field': 'so_detail',
+				'overflow_type': 'delivery',
+				'extra_cond': """ and exists(select name from `tabSales Invoice` 
+					where name=`tabSales Invoice Item`.parent and ifnull(update_stock, 0) = 1)"""
 			})
 
 	def get_portal_page(self):
@@ -627,9 +629,11 @@ def make_delivery_note(source_name, target_doc=None):
 		"Sales Invoice Item": {
 			"doctype": "Delivery Note Item",
 			"field_map": {
-				"name": "prevdoc_detail_docname",
+				"name": "si_detail",
 				"parent": "against_sales_invoice",
-				"serial_no": "serial_no"
+				"serial_no": "serial_no",
+				"sales_order": "against_sales_order",
+				"so_detail": "so_detail"
 			},
 			"postprocess": update_item
 		},

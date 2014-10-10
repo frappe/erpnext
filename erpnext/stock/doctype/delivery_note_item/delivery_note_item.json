@@ -373,11 +373,11 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "prevdoc_detail_docname", 
+   "fieldname": "so_detail", 
    "fieldtype": "Data", 
    "hidden": 1, 
    "in_filter": 1, 
-   "label": "Against Document Detail No", 
+   "label": "Against Sales Order Item", 
    "no_copy": 1, 
    "oldfieldname": "prevdoc_detail_docname", 
    "oldfieldtype": "Data", 
@@ -387,6 +387,18 @@
    "read_only": 1, 
    "search_index": 0, 
    "width": "150px"
+  }, 
+  {
+   "fieldname": "si_detail", 
+   "fieldtype": "Data", 
+   "hidden": 1, 
+   "in_filter": 1, 
+   "label": "Against Sales Invoice Item", 
+   "no_copy": 1, 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
   }, 
   {
    "fieldname": "installed_qty", 
@@ -426,7 +438,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-09-09 05:35:37.460939", 
+ "modified": "2014-10-08 11:11:59.411329", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note Item", 

@@ -25,7 +25,7 @@ class DeliveryNote(SellingController):
 		self.status_updater = [{
 			'source_dt': 'Delivery Note Item',
 			'target_dt': 'Sales Order Item',
-			'join_field': 'prevdoc_detail_docname',
+			'join_field': 'so_detail',
 			'target_field': 'delivered_qty',
 			'target_parent_dt': 'Sales Order',
 			'target_parent_field': 'per_delivered',
@@ -34,6 +34,22 @@ class DeliveryNote(SellingController):
 			'percent_join_field': 'against_sales_order',
 			'status_field': 'delivery_status',
 			'keyword': 'Delivered',
+			'second_source_dt': 'Sales Invoice Item',
+			'second_source_field': 'qty',
+			'second_join_field': 'so_detail',
+			'overflow_type': 'delivery',
+			'second_source_extra_cond': """ and exists(select name from `tabSales Invoice` 
+				where name=`tabSales Invoice Item`.parent and ifnull(update_stock, 0) = 1)"""
+		},
+		{
+			'source_dt': 'Delivery Note Item',
+			'target_dt': 'Sales Invoice Item',
+			'join_field': 'si_detail',
+			'target_field': 'delivered_qty',
+			'target_parent_dt': 'Sales Invoice',
+			'target_ref_field': 'qty',
+			'source_field': 'qty',
+			'percent_join_field': 'against_sales_invoice',
 			'overflow_type': 'delivery'
 		}]
 
@@ -113,7 +129,7 @@ class DeliveryNote(SellingController):
 				if cint(frappe.defaults.get_global_default('maintain_same_sales_rate')):
 					super(DeliveryNote, self).validate_with_previous_doc(self.tname, {
 						fn[0] + " Item": {
-							"ref_dn_field": "prevdoc_detail_docname",
+							"ref_dn_field": "so_detail",
 							"compare_fields": [["rate", "="]],
 							"is_child_table": True
 						}
@@ -312,7 +328,7 @@ def make_sales_invoice(source_name, target_doc=None):
 			"field_map": {
 				"name": "dn_detail",
 				"parent": "delivery_note",
-				"prevdoc_detail_docname": "so_detail",
+				"so_detail": "so_detail",
 				"against_sales_order": "sales_order",
 				"serial_no": "serial_no"
 			},

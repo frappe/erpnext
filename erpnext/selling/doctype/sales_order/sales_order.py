@@ -294,7 +294,7 @@ def make_delivery_note(source_name, target_doc=None):
 			"doctype": "Delivery Note Item",
 			"field_map": {
 				"rate": "rate",
-				"name": "prevdoc_detail_docname",
+				"name": "so_detail",
 				"parent": "against_sales_order",
 			},
 			"postprocess": update_item,

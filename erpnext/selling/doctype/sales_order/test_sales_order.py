@@ -34,12 +34,10 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, make_delivery_note,
 			so.name)
 
-		sales_order = frappe.get_doc("Sales Order", so.name)
-		sales_order.submit()
-		dn = make_delivery_note(so.name)
+		dn = self.make_next_doc_testcase(so, "Delivery Note")
 
 		self.assertEquals(dn.doctype, "Delivery Note")
-		self.assertEquals(len(dn.get("delivery_note_details")), len(sales_order.get("sales_order_details")))
+		self.assertEquals(len(dn.get("delivery_note_details")), len(so.get("sales_order_details")))
 
 	def test_make_sales_invoice(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
@@ -49,22 +47,77 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, make_sales_invoice,
 			so.name)
 
-		sales_order = frappe.get_doc("Sales Order", so.name)
-		sales_order.submit()
-		si = make_sales_invoice(so.name)
+		si = self.make_next_doc_testcase(so, "Sales Invoice")
 
 		self.assertEquals(si.doctype, "Sales Invoice")
-		self.assertEquals(len(si.get("entries")), len(sales_order.get("sales_order_details")))
+		self.assertEquals(len(si.get("entries")), len(so.get("sales_order_details")))
 		self.assertEquals(len(si.get("entries")), 1)
 
-		si.debit_to = "_Test Receivable - _TC"
-		si.posting_date = "2013-10-10"
+		si.set("debit_to", "_Test Receivable - _TC")
+		si.set("posting_date", "2013-10-10")
 		si.insert()
 		si.submit()
 
-		si1 = make_sales_invoice(so.name)
+		si1 = self.make_next_doc_testcase(so, "Sales Invoice")
 		self.assertEquals(len(si1.get("entries")), 0)
 
+	def test_update_qty(self):
+		so = frappe.copy_doc(test_records[0]).insert()
+
+		dn = self.make_next_doc_testcase(so, "Delivery Note")
+
+		dn.get("delivery_note_details")[0].qty = 6
+		dn.posting_date = "2013-10-10"
+		dn.insert()
+
+		delivery_note = frappe.get_doc("Delivery Note", dn.name)
+		delivery_note.submit()
+
+		sales_order = frappe.get_doc("Sales Order", so.name)
+
+		self.assertEquals(sales_order.get("sales_order_details")[0].delivered_qty, 6)
+
+		#Check delivered_qty after make_sales_invoice without update_stock checked
+		si1 = self.make_next_doc_testcase(sales_order, "Sales Invoice")
+
+		si1.set("debit_to", "_Test Receivable - _TC")
+		si1.set("posting_date", "2013-10-10")
+		si1.get("entries")[0].qty = 1
+		si1.insert()
+		si1.submit()
+
+		sales_order = frappe.get_doc("Sales Order", sales_order.name)
+
+		self.assertEquals(sales_order.get("sales_order_details")[0].delivered_qty, 6)
+
+		#Check delivered_qty after make_sales_invoice with update_stock checked
+		si2 = self.make_next_doc_testcase(sales_order, "Sales Invoice")
+
+		si2.set("debit_to", "_Test Receivable - _TC")
+		si2.set("posting_date", "2013-10-10")
+		si2.set("update_stock", 1)
+		si2.get("entries")[0].qty = 3
+		si2.insert()
+		si2.submit()
+
+		sales_order = frappe.get_doc("Sales Order", sales_order.name)
+
+		self.assertEquals(sales_order.get("sales_order_details")[0].delivered_qty, 9)
+
+	def make_next_doc_testcase(self, so, next_doc = None):
+
+		if so.docstatus < 1:
+			so.submit()
+
+		if next_doc == "Delivery Note":
+			from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+			next_doc = make_delivery_note(so.name)
+
+		if next_doc == "Sales Invoice":
+			from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+			next_doc = make_sales_invoice(so.name)
+		
+		return next_doc
 
 	def create_so(self, so_doc = None):
 		if not so_doc:
@@ -85,7 +138,7 @@ class TestSalesOrder(unittest.TestCase):
 		dn = frappe.get_doc(frappe.copy_doc(dn_test_records[0]))
 		dn.get("delivery_note_details")[0].item_code = so.get("sales_order_details")[0].item_code
 		dn.get("delivery_note_details")[0].against_sales_order = so.name
-		dn.get("delivery_note_details")[0].prevdoc_detail_docname = so.get("sales_order_details")[0].name
+		dn.get("delivery_note_details")[0].so_detail = so.get("sales_order_details")[0].name
 		if delivered_qty:
 			dn.get("delivery_note_details")[0].qty = delivered_qty
 		dn.insert()

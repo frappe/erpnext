@@ -153,16 +153,21 @@ class StatusUpdater(Document):
 					args['second_source_condition'] = ""
 					if args.get('second_source_dt') and args.get('second_source_field') \
 							and args.get('second_join_field'):
+						if not args.get("second_source_extra_cond"): 
+							args["second_source_extra_cond"] = ""
+
 						args['second_source_condition'] = """ + ifnull((select sum(%(second_source_field)s)
 							from `tab%(second_source_dt)s`
 							where `%(second_join_field)s`="%(detail_id)s"
-							and (docstatus=1)), 0)""" % args
+							and (`tab%(second_source_dt)s`.docstatus=1) %(second_source_extra_cond)s), 0) """ % args
 
 					if args['detail_id']:
+						if not args.get("extra_cond"): args["extra_cond"] = ""
+
 						frappe.db.sql("""update `tab%(target_dt)s`
 							set %(target_field)s = (select sum(%(source_field)s)
 								from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s"
-								and (docstatus=1 %(cond)s)) %(second_source_condition)s
+								and (docstatus=1 %(cond)s) %(extra_cond)s) %(second_source_condition)s
 							where name='%(detail_id)s'""" % args)
 
 			# get unique transactions to update
@@ -171,12 +176,13 @@ class StatusUpdater(Document):
 					args['name'] = name
 
 					# update percent complete in the parent table
-					frappe.db.sql("""update `tab%(target_parent_dt)s`
-						set %(target_parent_field)s = (select sum(if(%(target_ref_field)s >
-							ifnull(%(target_field)s, 0), %(target_field)s,
-							%(target_ref_field)s))/sum(%(target_ref_field)s)*100
-							from `tab%(target_dt)s` where parent="%(name)s") %(modified_cond)s
-						where name='%(name)s'""" % args)
+					if args.get('target_parent_field'):
+						frappe.db.sql("""update `tab%(target_parent_dt)s`
+							set %(target_parent_field)s = (select sum(if(%(target_ref_field)s >
+								ifnull(%(target_field)s, 0), %(target_field)s,
+								%(target_ref_field)s))/sum(%(target_ref_field)s)*100
+								from `tab%(target_dt)s` where parent="%(name)s") %(modified_cond)s
+							where name='%(name)s'""" % args)
 
 					# update field
 					if args.get('status_field'):
