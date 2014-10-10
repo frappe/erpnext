@@ -1,5 +1,5 @@
 {
-  "allow_copy": 1, 
+ "allow_copy": 1, 
  "autoname": "SR/.######", 
  "creation": "2013-03-28 10:35:31", 
  "description": "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.", 
@@ -42,20 +42,20 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "company", 
+   "fieldtype": "Link", 
+   "label": "Company", 
+   "options": "Company", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
    "fieldname": "fiscal_year", 
    "fieldtype": "Link", 
    "label": "Fiscal Year", 
    "options": "Fiscal Year", 
    "permlevel": 0, 
    "print_hide": 1, 
-   "reqd": 1
-  }, 
-  {
-   "fieldname": "company", 
-   "fieldtype": "Link", 
-   "label": "Company", 
-   "options": "Company", 
-   "permlevel": 0, 
    "reqd": 1
   }, 
   {
@@ -118,7 +118,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 1, 
- "modified": "2014-05-26 03:05:54.024413", 
+ "modified": "2014-10-08 12:47:52.102135", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Reconciliation", 

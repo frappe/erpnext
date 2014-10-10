@@ -12,26 +12,29 @@ import frappe.desk.reportview
 class FiscalYearError(frappe.ValidationError): pass
 class BudgetError(frappe.ValidationError): pass
 
+@frappe.whitelist()
+def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1, company=None):
+	return get_fiscal_years(date, fiscal_year, label, verbose, company)[0]
 
-def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1):
-	return get_fiscal_years(date, fiscal_year, label, verbose)[0]
-
-def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
+def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1, company=None):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
 	cond = ""
 	if fiscal_year:
 		cond = "name = '%s'" % fiscal_year.replace("'", "\'")
+	elif company:
+		cond = """('%s' in (select company from `tabFiscal Year Company`
+			where `tabFiscal Year Company`.parent = `tabFiscal Year`.name)) 
+			and '%s' >= year_start_date and '%s' <= year_end_date """ %(company.replace("'", "\'"), date, date)
 	else:
-		cond = "'%s' >= year_start_date and '%s' <= year_end_date" % \
-			(date, date)
+		cond = "'%s' >= year_start_date and '%s' <= year_end_date" %(date, date)
+
 	fy = frappe.db.sql("""select name, year_start_date, year_end_date
 		from `tabFiscal Year` where %s order by year_start_date desc""" % cond)
 
 	if not fy:
 		error_msg = _("""{0} {1} not in any Fiscal Year""").format(label, formatdate(date))
-		if verbose: frappe.msgprint(error_msg)
+		if verbose==1: frappe.msgprint(error_msg)
 		raise FiscalYearError, error_msg
-
 	return fy
 
 def validate_fiscal_year(date, fiscal_year, label="Date"):

@@ -1,10 +1,10 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
-// License: GNU General Public License v3. See license.txt
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.tname = "Stock Entry Detail";
 cur_frm.cscript.fname = "mtn_details";
 
 frappe.require("assets/erpnext/js/controllers/stock_controller.js");
+frappe.require("assets/erpnext/js/utils.js");
 frappe.provide("erpnext.stock");
 
 erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
@@ -463,3 +463,11 @@ cur_frm.fields_dict.supplier.get_query = function(doc, cdt, cdn) {
 }
 cur_frm.add_fetch('production_order', 'total_fixed_cost', 'total_fixed_cost');
 cur_frm.add_fetch('bom_no', 'total_fixed_cost', 'total_fixed_cost');
+
+cur_frm.cscript.company = function(doc, cdt, cdn) {
+	erpnext.get_fiscal_year(doc.company, doc.posting_date);
+}
+
+cur_frm.cscript.posting_date = function(doc, cdt, cdn){
+	erpnext.get_fiscal_year(doc.company, doc.posting_date);
+}

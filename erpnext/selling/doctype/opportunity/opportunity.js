@@ -8,6 +8,7 @@ frappe.ui.form.on_change("Opportunity", "contact_person", erpnext.utils.get_cont
 
 
 frappe.provide("erpnext.selling");
+frappe.require("assets/erpnext/js/utils.js");
 cur_frm.email_field = "contact_email";
 
 // TODO commonify this code
@@ -145,3 +146,10 @@ cur_frm.cscript.send_sms = function() {
 	var sms_man = new SMSManager(cur_frm.doc);
 }
 
+cur_frm.cscript.company = function(doc, cdt, cdn) {
+	erpnext.get_fiscal_year(doc.company, doc.transaction_date);
+}
+
+cur_frm.cscript.transaction_date = function(doc, cdt, cdn){
+	erpnext.get_fiscal_year(doc.company, doc.transaction_date);
+}

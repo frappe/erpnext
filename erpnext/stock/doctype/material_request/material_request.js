@@ -6,6 +6,8 @@ cur_frm.cscript.fname = "indent_details";
 
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 
+frappe.require("assets/erpnext/js/utils.js");
+
 erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({
 	onload: function(doc) {
 		this._super();

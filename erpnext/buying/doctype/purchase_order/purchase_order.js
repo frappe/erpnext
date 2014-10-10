@@ -210,4 +210,3 @@ cur_frm.cscript.send_sms = function() {
 	frappe.require("assets/erpnext/js/sms_manager.js");
 	var sms_man = new SMSManager(cur_frm.doc);
 }
-
