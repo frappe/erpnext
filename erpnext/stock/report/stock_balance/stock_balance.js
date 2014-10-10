@@ -1,7 +1,7 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
-// License: GNU General Public License v3. See license.txt
+// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors and contributors
+// For license information, please see license.txt
 
-frappe.query_reports["Warehouse-Wise Stock Balance"] = {
+frappe.query_reports["Stock Balance"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
