@@ -169,6 +169,27 @@
    "search_index": 0
   }, 
   {
+   "fieldname": "shipping_address_name", 
+   "fieldtype": "Link", 
+   "hidden": 1, 
+   "in_filter": 1, 
+   "label": "Shipping Address Name", 
+   "options": "Address", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "shipping_address", 
+   "fieldtype": "Small Text", 
+   "hidden": 1, 
+   "label": "Shipping Address", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "currency_section", 
    "fieldtype": "Section Break", 
    "label": "Currency and Price List", 
@@ -1192,7 +1213,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-10-08 14:23:05.034326", 
+ "modified": "2014-10-10 16:54:22.284284", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 
