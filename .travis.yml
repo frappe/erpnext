@@ -14,6 +14,8 @@ install:
   - sudo apt-get update
   - sudo apt-get purge -y mysql-common
   - sudo apt-get install mariadb-server mariadb-common libmariadbclient-dev
+  - ./ci/fix-mariadb.sh
+
   - wget http://downloads.sourceforge.net/project/wkhtmltopdf/0.12.1/wkhtmltox-0.12.1_linux-precise-amd64.deb
   - sudo dpkg -i wkhtmltox-0.12.1_linux-precise-amd64.deb
   - CFLAGS=-O0 pip install git+https://github.com/frappe/frappe.git@v5.0
