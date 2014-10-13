@@ -78,9 +78,10 @@ def setup_account(args=None):
 		frappe.db.commit()
 
 	except:
-		traceback = frappe.get_traceback()
-		for hook in frappe.get_hooks("setup_wizard_exception"):
-			frappe.get_attr(hook)(traceback, args)
+		if args:
+			traceback = frappe.get_traceback()
+			for hook in frappe.get_hooks("setup_wizard_exception"):
+				frappe.get_attr(hook)(traceback, args)
 
 		raise
 
