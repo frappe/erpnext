@@ -83,3 +83,5 @@ erpnext.patches.v4_2.update_sales_order_invoice_field_name
 erpnext.patches.v4_2.cost_of_production_cycle
 erpnext.patches.v4_2.seprate_manufacture_and_repack
 execute:frappe.delete_doc("Report", "Warehouse-Wise Stock Balance")
+execute:frappe.delete_doc("DocType", "Purchase Request")
+execute:frappe.delete_doc("DocType", "Purchase Request Item")
