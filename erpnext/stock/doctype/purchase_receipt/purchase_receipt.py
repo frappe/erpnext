@@ -287,7 +287,7 @@ class PurchaseReceipt(BuyingController):
 		from erpnext.accounts.general_ledger import process_gl_map
 		from erpnext.controllers.stock_controller import block_negative_stock
 
-		block_negative_stock(allow_negative_stock)
+		# block_negative_stock(allow_negative_stock)
 
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
