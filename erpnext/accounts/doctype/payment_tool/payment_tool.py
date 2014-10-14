@@ -91,6 +91,7 @@ def get_orders_to_be_billed(party_type, party_name):
 		where
 			%s = %s
 			and docstatus = 1
+			and ifnull(status, "") != "Stopped"
 			and ifnull(grand_total, 0) > ifnull(advance_paid, 0)
 			and ifnull(per_billed, 0) < 100.0
 		""" % (voucher_type, 'customer' if party_type == "Customer" else 'supplier', '%s'),

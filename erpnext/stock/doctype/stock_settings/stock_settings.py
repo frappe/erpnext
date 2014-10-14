@@ -6,18 +6,20 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-
+from frappe.utils import cint
 from frappe.model.document import Document
 
 class StockSettings(Document):
 
 	def validate(self):
-		for key in ["item_naming_by", "item_group", "stock_uom",
-			"allow_negative_stock"]:
+		if cint(self.allow_negative_stock) and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+			frappe.throw(_("Negative stock is not allowed in case of Perpetual Inventory"))
+
+		for key in ["item_naming_by", "item_group", "stock_uom", "allow_negative_stock"]:
 			frappe.db.set_default(key, self.get(key, ""))
-			
+
 		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
-		set_by_naming_series("Item", "item_code", 
+		set_by_naming_series("Item", "item_code",
 			self.get("item_naming_by")=="Naming Series", hide_name_field=True)
 
 		stock_frozen_limit = 356
@@ -25,3 +27,5 @@ class StockSettings(Document):
 		if submitted_stock_frozen > stock_frozen_limit:
 			self.stock_frozen_upto_days = stock_frozen_limit
 			frappe.msgprint (_("`Freeze Stocks Older Than` should be smaller than %d days.") %stock_frozen_limit)
+
+

@@ -44,7 +44,7 @@ AMC Expiry Date,AMCの有効期限日
 Abbr,略称
 Abbreviation cannot have more than 5 characters,略語は、5つ以上の文字を使用することはできません
 Above Value,値を上回る
-Absent,ない
+Absent,いんない
 Acceptance Criteria,合否基準
 Accepted,承認済
 Accepted + Rejected Qty must be equal to Received quantity for Item {0},一般に認められた+拒否数量、アイテムの受信量と等しくなければなりません{0}

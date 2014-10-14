@@ -142,10 +142,10 @@ def get_data():
 					"doctype": "Item",
 				},
 				{
-					"type": "page",
-					"name": "stock-balance",
-					"label": _("Stock Balance"),
-					"icon": "icon-table",
+					"type": "report",
+					"is_query_report": True,
+					"name": "Stock Balance",
+					"doctype": "Warehouse"
 				},
 				{
 					"type": "report",
@@ -170,13 +170,7 @@ def get_data():
 					"name": "stock-analytics",
 					"label": _("Stock Analytics"),
 					"icon": "icon-bar-chart"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Warehouse-Wise Stock Balance",
-					"doctype": "Warehouse"
-				},
+				}
 			]
 		},
 		{

@@ -97,8 +97,7 @@ def validate_account_for_auto_accounting_for_stock(gl_map):
 
 		for entry in gl_map:
 			if entry.account in aii_accounts:
-				frappe.throw(_("Account: {0} can only be updated via \
-					Stock Transactions").format(entry.account), StockAccountInvalidTransaction)
+				frappe.throw(_("Account: {0} can only be updated via Stock Transactions").format(entry.account), StockAccountInvalidTransaction)
 
 
 def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,

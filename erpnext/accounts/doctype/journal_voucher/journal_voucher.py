@@ -76,13 +76,14 @@ class JournalVoucher(AccountsController):
 
 	def validate_entries_for_advance(self):
 		for d in self.get('entries'):
-			if not d.is_advance and not d.against_voucher and \
-					not d.against_invoice and not d.against_jv:
+			if not (d.against_voucher and d.against_invoice and d.against_jv):
 				master_type = frappe.db.get_value("Account", d.account, "master_type")
 				if (master_type == 'Customer' and flt(d.credit) > 0) or \
 						(master_type == 'Supplier' and flt(d.debit) > 0):
-					msgprint(_("Row {0}: Please check 'Is Advance' against Account {1} if this \
-						is an advance entry.").format(d.idx, d.account))
+					if not d.is_advance:
+						msgprint(_("Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.").format(d.idx, d.account))
+					elif (d.against_sales_order or d.against_purchase_order) and d.is_advance != "Yes":
+						frappe.throw(_("Row {0}: Payment against Sales/Purchase Order should always be marked as advance").format(d.idx))
 
 	def validate_against_jv(self):
 		for d in self.get('entries'):
@@ -177,7 +178,7 @@ class JournalVoucher(AccountsController):
 	def validate_against_order_fields(self, doctype, payment_against_voucher):
 		for voucher_no, payment_list in payment_against_voucher.items():
 			voucher_properties = frappe.db.get_value(doctype, voucher_no, 
-				["docstatus", "per_billed", "advance_paid", "grand_total"])
+				["docstatus", "per_billed", "status", "advance_paid", "grand_total"])
 
 			if voucher_properties[0] != 1:
 				frappe.throw(_("{0} {1} is not submitted").format(doctype, voucher_no))
@@ -185,7 +186,10 @@ class JournalVoucher(AccountsController):
 			if flt(voucher_properties[1]) >= 100:
 				frappe.throw(_("{0} {1} is fully billed").format(doctype, voucher_no))
 
-			if flt(voucher_properties[3]) < flt(voucher_properties[2]) + flt(sum(payment_list)):
+			if cstr(voucher_properties[2]) == "Stopped":
+				frappe.throw(_("{0} {1} is stopped").format(doctype, voucher_no))
+
+			if flt(voucher_properties[4]) < flt(voucher_properties[3]) + flt(sum(payment_list)):
 				frappe.throw(_("Advance paid against {0} {1} cannot be greater \
 					than Grand Total {2}").format(doctype, voucher_no, voucher_properties[3]))
 

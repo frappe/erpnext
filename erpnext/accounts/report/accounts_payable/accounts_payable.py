@@ -30,7 +30,8 @@ def execute(filters=None):
 	data = []
 	for gle in entries:
 		if cstr(gle.against_voucher) == gle.voucher_no or not gle.against_voucher \
-				or [gle.against_voucher_type, gle.against_voucher] in entries_after_report_date:
+				or [gle.against_voucher_type, gle.against_voucher] in entries_after_report_date \
+				or (gle.against_voucher_type == "Purchase Order"):
 			voucher_details = voucher_detail_map.get(gle.voucher_type, {}).get(gle.voucher_no, {})
 			
 			invoiced_amount = gle.credit > 0 and gle.credit or 0

@@ -22,7 +22,11 @@ def repost(allow_negative_stock=False):
 		(select item_code, warehouse from tabBin
 		union
 		select item_code, warehouse from `tabStock Ledger Entry`) a"""):
-			repost_stock(d[0], d[1])
+			try:
+				repost_stock(d[0], d[1])
+				frappe.db.commit()
+			except:
+				frappe.db.rollback()
 
 	if allow_negative_stock:
 		frappe.db.set_default("allow_negative_stock",
@@ -209,3 +213,38 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 
 		frappe.db.sql("""update `tabSerial No` set warehouse='' where status in ('Delivered', 'Purchase Returned')""")
 
+def repost_all_stock_vouchers():
+	warehouses_with_account = frappe.db.sql_list("""select master_name from tabAccount
+		where ifnull(account_type, '') = 'Warehouse'""")
+
+	vouchers = frappe.db.sql("""select distinct voucher_type, voucher_no
+		from `tabStock Ledger Entry` sle
+		where voucher_type != "Serial No" and sle.warehouse in (%s)
+		order by posting_date, posting_time, name""" %
+		', '.join(['%s']*len(warehouses_with_account)), tuple(warehouses_with_account))
+
+	rejected = []
+	i = 0
+	for voucher_type, voucher_no in vouchers:
+		i+=1
+		print i, "/", len(vouchers)
+		try:
+			for dt in ["Stock Ledger Entry", "GL Entry"]:
+				frappe.db.sql("""delete from `tab%s` where voucher_type=%s and voucher_no=%s"""%
+					(dt, '%s', '%s'), (voucher_type, voucher_no))
+
+			doc = frappe.get_doc(voucher_type, voucher_no)
+			if voucher_type=="Stock Entry" and doc.purpose in ["Manufacture", "Repack"]:
+				doc.get_stock_and_rate(force=1)
+			elif voucher_type=="Purchase Receipt" and doc.is_subcontracted == "Yes":
+				doc.validate()
+
+			doc.update_stock_ledger()
+			doc.make_gl_entries(repost_future_gle=False, allow_negative_stock=True)
+			frappe.db.commit()
+		except Exception, e:
+			print frappe.get_traceback()
+			rejected.append([voucher_type, voucher_no])
+			frappe.db.rollback()
+
+	print rejected
