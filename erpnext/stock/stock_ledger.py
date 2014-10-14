@@ -275,7 +275,7 @@ def get_fifo_values(qty_after_transaction, sle, stock_queue):
 	incoming_rate = flt(sle.incoming_rate)
 	actual_qty = flt(sle.actual_qty)
 
-	intialize_stock_queue(stock_queue, sle.item_code, sle.warehouse)
+	intialize_stock_queue(stock_queue, sle.item_code, sle.warehouse, actual_qty)
 
 	if actual_qty > 0:
 		if stock_queue[-1][0] > 0:
@@ -289,7 +289,7 @@ def get_fifo_values(qty_after_transaction, sle, stock_queue):
 	else:
 		qty_to_pop = abs(actual_qty)
 		while qty_to_pop:
-			intialize_stock_queue(stock_queue, sle.item_code, sle.warehouse)
+			intialize_stock_queue(stock_queue, sle.item_code, sle.warehouse, actual_qty)
 
 			batch = stock_queue[0]
 
@@ -318,9 +318,9 @@ def get_fifo_values(qty_after_transaction, sle, stock_queue):
 
 	return abs(valuation_rate)
 
-def intialize_stock_queue(stock_queue, item_code, warehouse):
+def intialize_stock_queue(stock_queue, item_code, warehouse, actual_qty):
 	if not stock_queue:
-		estimated_val_rate = get_valuation_rate(item_code, warehouse)
+		estimated_val_rate = get_valuation_rate(item_code, warehouse) if actual_qty < 0 else 0
 		stock_queue.append([0, estimated_val_rate])
 
 def _raise_exceptions(args, verbose=1):
