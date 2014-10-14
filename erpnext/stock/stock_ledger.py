@@ -269,7 +269,7 @@ def get_moving_average_values(qty_after_transaction, sle, valuation_rate):
 	elif not valuation_rate:
 		valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse)
 
-	return abs(valuation_rate)
+	return abs(flt(valuation_rate))
 
 def get_fifo_values(qty_after_transaction, sle, stock_queue):
 	incoming_rate = flt(sle.incoming_rate)
