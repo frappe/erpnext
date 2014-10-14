@@ -5,12 +5,12 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	try:
-		for d in frappe.db.sql("select name from `tabBOM` where docstatus < 2"):
+	for d in frappe.db.sql("select name from `tabBOM` where docstatus < 2"):
+		try:	
 			document = frappe.get_doc('BOM', d[0])
 			if document.docstatus == 1:
 				document.ignore_validate_update_after_submit = True
 				document.calculate_cost()
 			document.save()
-	except:
-		pass
+		except:
+			pass
