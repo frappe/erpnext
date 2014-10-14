@@ -22,7 +22,11 @@ def repost(allow_negative_stock=False):
 		(select item_code, warehouse from tabBin
 		union
 		select item_code, warehouse from `tabStock Ledger Entry`) a"""):
-			repost_stock(d[0], d[1])
+			try:
+				repost_stock(d[0], d[1])
+				frappe.db.commit()
+			except:
+				frappe.db.rollback()
 
 	if allow_negative_stock:
 		frappe.db.set_default("allow_negative_stock",
@@ -210,9 +214,14 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 		frappe.db.sql("""update `tabSerial No` set warehouse='' where status in ('Delivered', 'Purchase Returned')""")
 
 def repost_all_stock_vouchers():
+	warehouses_with_account = frappe.db.sql_list("""select master_name from tabAccount
+		where ifnull(account_type, '') = 'Warehouse'""")
+
 	vouchers = frappe.db.sql("""select distinct voucher_type, voucher_no
-		from `tabStock Ledger Entry`
-		order by posting_date, posting_time, name""")
+		from `tabStock Ledger Entry` sle
+		where voucher_type != "Serial No" and sle.warehouse in (%s)
+		order by posting_date, posting_time, name""" %
+		', '.join(['%s']*len(warehouses_with_account)), tuple(warehouses_with_account))
 
 	rejected = []
 	i = 0

@@ -58,8 +58,8 @@ def get_conditions(filters):
 #get all details
 def get_stock_ledger_entries(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select item_code, warehouse, posting_date,
-		actual_qty, valuation_rate, stock_uom, company, voucher_type, qty_after_transaction
+	return frappe.db.sql("""select item_code, warehouse, posting_date, actual_qty, valuation_rate,
+	stock_uom, company, voucher_type, qty_after_transaction, stock_value_difference
 		from `tabStock Ledger Entry`
 		where docstatus < 2 %s order by posting_date, posting_time, name""" %
 		conditions, as_dict=1)
@@ -82,10 +82,10 @@ def get_item_warehouse_map(filters):
 
 		if d.voucher_type == "Stock Reconciliation":
 			qty_diff = flt(d.qty_after_transaction) - qty_dict.bal_qty
-			value_diff = flt(d.stock_value) - qty_dict.bal_val
 		else:
 			qty_diff = flt(d.actual_qty)
-			value_diff = flt(d.actual_qty) * flt(d.valuation_rate)
+
+		value_diff = flt(d.stock_value_difference)
 
 		if d.posting_date < filters["from_date"]:
 			qty_dict.opening_qty += qty_diff
