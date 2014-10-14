@@ -85,3 +85,4 @@ erpnext.patches.v4_2.seprate_manufacture_and_repack
 execute:frappe.delete_doc("Report", "Warehouse-Wise Stock Balance")
 execute:frappe.delete_doc("DocType", "Purchase Request")
 execute:frappe.delete_doc("DocType", "Purchase Request Item")
+erpnext.patches.v4_2.recalculate_bom_cost
