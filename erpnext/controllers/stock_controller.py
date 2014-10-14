@@ -30,7 +30,7 @@ class StockController(AccountsController):
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None, allow_negative_stock=False):
 
-		block_negative_stock(allow_negative_stock)
+		# block_negative_stock(allow_negative_stock)
 
 		if not warehouse_account:
 			warehouse_account = get_warehouse_account()
@@ -318,5 +318,8 @@ def get_valuation_rate(item_code, warehouse):
 
 	if not valuation_rate:
 		valuation_rate = frappe.db.get_value("Item Price", {"item_code": item_code, "buying": 1}, "price_list_rate")
+
+	if not valuation_rate:
+		frappe.throw(_("Purchase rate for item: {0} not found, which is required to book accounting entry. Please mention item price against a buying price list.").format(item_code))
 
 	return valuation_rate

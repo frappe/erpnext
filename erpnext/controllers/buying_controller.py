@@ -277,6 +277,9 @@ class BuyingController(StockController):
 					"qty": -1 * required_qty,
 					"serial_no": rm.serial_no
 				})
+				if not item_rate:
+					from erpnext.controllers.stock_controller import get_valuation_rate
+					item_rate = get_valuation_rate(bom_item.item_code, self.supplier_warehouse)
 				rm.rate = item_rate or bom_item.rate
 			else:
 				rm.rate = bom_item.rate
