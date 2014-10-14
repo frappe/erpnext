@@ -16,5 +16,11 @@
   "item_code": "_Test Item 2",
   "price_list": "_Test Price List Rest of the World",
   "price_list_rate": 20
+ },
+ {
+  "doctype": "Item Price",
+  "item_code": "_Test Item Home Desktop 100",
+  "price_list": "_Test Price List",
+  "price_list_rate": 1000
  }
 ]

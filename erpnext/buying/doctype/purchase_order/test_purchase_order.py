@@ -112,6 +112,6 @@ class TestPurchaseOrder(unittest.TestCase):
 		test_recurring_document(self, test_records)
 
 
-test_dependencies = ["BOM"]
+test_dependencies = ["BOM", "Item Price"]
 
 test_records = frappe.get_test_records('Purchase Order')

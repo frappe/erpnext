@@ -151,6 +151,6 @@ def set_perpetual_inventory(enable=1):
 	accounts_settings.save()
 
 
-test_dependencies = ["BOM"]
+test_dependencies = ["BOM", "Item Price"]
 
 test_records = frappe.get_test_records('Purchase Receipt')
