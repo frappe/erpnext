@@ -7,7 +7,7 @@ import frappe.defaults
 from frappe.utils import cint, cstr, flt
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
-from erpnext.controllers.stock_controller import update_gl_entries_after, block_negative_stock
+from erpnext.controllers.stock_controller import update_gl_entries_after
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
@@ -456,8 +456,8 @@ class SalesInvoice(SellingController):
 
 		self.make_sl_entries(sl_entries)
 
-	def make_gl_entries(self, repost_future_gle=True, allow_negative_stock=False):
-		gl_entries = self.get_gl_entries(allow_negative_stock=allow_negative_stock)
+	def make_gl_entries(self, repost_future_gle=True):
+		gl_entries = self.get_gl_entries()
 
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
@@ -476,7 +476,7 @@ class SalesInvoice(SellingController):
 					items, warehouses = self.get_items_and_warehouses()
 					update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
 
-	def get_gl_entries(self, warehouse_account=None, allow_negative_stock=False):
+	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import merge_similar_entries
 
 		gl_entries = []
@@ -485,7 +485,7 @@ class SalesInvoice(SellingController):
 
 		self.make_tax_gl_entries(gl_entries)
 
-		self.make_item_gl_entries(gl_entries, allow_negative_stock)
+		self.make_item_gl_entries(gl_entries)
 
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
@@ -520,7 +520,7 @@ class SalesInvoice(SellingController):
 					})
 				)
 
-	def make_item_gl_entries(self, gl_entries, allow_negative_stock=False):
+	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
 		for item in self.get("entries"):
 			if flt(item.base_amount):
@@ -537,7 +537,7 @@ class SalesInvoice(SellingController):
 		# expense account gl entries
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) \
 				and cint(self.update_stock):
-			gl_entries += super(SalesInvoice, self).get_gl_entries(allow_negative_stock=allow_negative_stock)
+			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos) and self.cash_bank_account and self.paid_amount:

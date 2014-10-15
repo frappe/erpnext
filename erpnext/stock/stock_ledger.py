@@ -58,7 +58,7 @@ def delete_cancelled_entry(voucher_type, voucher_no):
 	frappe.db.sql("""delete from `tabStock Ledger Entry`
 		where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
-def update_entries_after(args, verbose=1):
+def update_entries_after(args, allow_zero_rate=False, verbose=1):
 	"""
 		update valution rate and qty after transaction
 		from the current time-bucket onwards
@@ -106,9 +106,9 @@ def update_entries_after(args, verbose=1):
 				stock_queue = [[qty_after_transaction, valuation_rate]]
 			else:
 				if valuation_method == "Moving Average":
-					valuation_rate = get_moving_average_values(qty_after_transaction, sle, valuation_rate)
+					valuation_rate = get_moving_average_values(qty_after_transaction, sle, valuation_rate, allow_zero_rate)
 				else:
-					valuation_rate = get_fifo_values(qty_after_transaction, sle, stock_queue)
+					valuation_rate = get_fifo_values(qty_after_transaction, sle, stock_queue, allow_zero_rate)
 
 
 				qty_after_transaction += flt(sle.actual_qty)
@@ -251,7 +251,7 @@ def get_serialized_values(qty_after_transaction, sle, valuation_rate):
 
 	return valuation_rate
 
-def get_moving_average_values(qty_after_transaction, sle, valuation_rate):
+def get_moving_average_values(qty_after_transaction, sle, valuation_rate, allow_zero_rate):
 	incoming_rate = flt(sle.incoming_rate)
 	actual_qty = flt(sle.actual_qty)
 
@@ -266,11 +266,11 @@ def get_moving_average_values(qty_after_transaction, sle, valuation_rate):
 		if new_stock_qty:
 			valuation_rate = new_stock_value / flt(new_stock_qty)
 	elif not valuation_rate and qty_after_transaction <= 0:
-		valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse)
+		valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, allow_zero_rate)
 
 	return abs(flt(valuation_rate))
 
-def get_fifo_values(qty_after_transaction, sle, stock_queue):
+def get_fifo_values(qty_after_transaction, sle, stock_queue, allow_zero_rate):
 	incoming_rate = flt(sle.incoming_rate)
 	actual_qty = flt(sle.actual_qty)
 
@@ -290,7 +290,7 @@ def get_fifo_values(qty_after_transaction, sle, stock_queue):
 		qty_to_pop = abs(actual_qty)
 		while qty_to_pop:
 			if not stock_queue:
-				stock_queue.append([0, get_valuation_rate(sle.item_code, sle.warehouse)
+				stock_queue.append([0, get_valuation_rate(sle.item_code, sle.warehouse, allow_zero_rate)
 					if qty_after_transaction <= 0 else 0])
 
 			batch = stock_queue[0]
@@ -349,7 +349,7 @@ def get_previous_sle(args, for_update=False):
 		"desc", "limit 1", for_update=for_update)
 	return sle and sle[0] or {}
 
-def get_valuation_rate(item_code, warehouse):
+def get_valuation_rate(item_code, warehouse, allow_zero_rate=False):
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
 		from `tabStock Ledger Entry`
 		where item_code = %s and warehouse = %s
@@ -367,7 +367,7 @@ def get_valuation_rate(item_code, warehouse):
 	if not valuation_rate:
 		valuation_rate = frappe.db.get_value("Item Price", {"item_code": item_code, "buying": 1}, "price_list_rate")
 
-	if not valuation_rate and cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
+	if not allow_zero_rate and not valuation_rate and cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
 		frappe.throw(_("Purchase rate for item: {0} not found, which is required to book accounting entry (expense). Please mention item price against a buying price list.").format(item_code))
 
 	return valuation_rate

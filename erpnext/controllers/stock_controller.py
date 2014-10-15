@@ -11,7 +11,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
 
 class StockController(AccountsController):
-	def make_gl_entries(self, repost_future_gle=True, allow_negative_stock=False):
+	def make_gl_entries(self, repost_future_gle=True):
 		if self.docstatus == 2:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -19,18 +19,16 @@ class StockController(AccountsController):
 			warehouse_account = get_warehouse_account()
 
 			if self.docstatus==1:
-				gl_entries = self.get_gl_entries(warehouse_account, allow_negative_stock=allow_negative_stock)
+				gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries)
 
 			if repost_future_gle:
 				items, warehouses = self.get_items_and_warehouses()
 				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items,
-					warehouse_account, allow_negative_stock)
+					warehouse_account)
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
-			default_cost_center=None, allow_negative_stock=False):
-
-		# block_negative_stock(allow_negative_stock)
+			default_cost_center=None):
 
 		if not warehouse_account:
 			warehouse_account = get_warehouse_account()
@@ -219,7 +217,7 @@ class StockController(AccountsController):
 		return serialized_items
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
-		warehouse_account=None, allow_negative_stock=False):
+		warehouse_account=None):
 	def _delete_gl_entries(voucher_type, voucher_no):
 		frappe.db.sql("""delete from `tabGL Entry`
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
@@ -233,12 +231,12 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 	for voucher_type, voucher_no in future_stock_vouchers:
 		existing_gle = gle.get((voucher_type, voucher_no), [])
 		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
-		expected_gle = voucher_obj.get_gl_entries(warehouse_account, allow_negative_stock=allow_negative_stock)
+		expected_gle = voucher_obj.get_gl_entries(warehouse_account)
 		if expected_gle:
 			if not existing_gle or not compare_existing_and_expected_gle(existing_gle,
 				expected_gle):
 					_delete_gl_entries(voucher_type, voucher_no)
-					voucher_obj.make_gl_entries(repost_future_gle=False, allow_negative_stock=allow_negative_stock)
+					voucher_obj.make_gl_entries(repost_future_gle=False)
 		else:
 			_delete_gl_entries(voucher_type, voucher_no)
 
@@ -290,8 +288,3 @@ def get_warehouse_account():
 	warehouse_account = dict(frappe.db.sql("""select master_name, name from tabAccount
 		where account_type = 'Warehouse' and ifnull(master_name, '') != ''"""))
 	return warehouse_account
-
-def block_negative_stock(allow_negative_stock=False):
-	if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) and not allow_negative_stock:
-		if cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock")):
-			frappe.throw(_("Negative stock is not allowed in case of Perpetual Inventory, please disable it from Stock Settings"))
