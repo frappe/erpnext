@@ -283,11 +283,8 @@ class PurchaseReceipt(BuyingController):
 	def get_rate(self,arg):
 		return frappe.get_doc('Purchase Common').get_rate(arg,self)
 
-	def get_gl_entries(self, warehouse_account=None, allow_negative_stock=False):
+	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import process_gl_map
-		from erpnext.controllers.stock_controller import block_negative_stock
-
-		# block_negative_stock(allow_negative_stock)
 
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
