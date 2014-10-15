@@ -23,13 +23,30 @@ class Address(Document):
 	def validate(self):
 		self.validate_primary_address()
 		self.validate_shipping_address()
+		#self.validate_address()
+		
+	def validate_address(self):
+		for add_type in ["is_primary_address", "is_shipping_address"]:
+			if self.get(add_type) == 1:
+				self._unset_other(add_type)
+				#frappe.msgprint(add_type)
+			else:
+				for fieldname in ["customer", "supplier", "sales_partner", "lead"]:
+					if self.get(fieldname):
+						query = ("""select name from `tabAddress` where %s=1 and `%s`=%s and name!=%s""" % (add_type, fieldname, "%s", "%s"),
+							(self.get(fieldname), self.name))
+						frappe.msgprint(query)
+						#if not frappe.db.sql(query):
+						#	self.get(add_type)=1
+						break
 
 	def validate_primary_address(self):
 		"""Validate that there can only be one primary address for particular customer, supplier"""
 		if self.is_primary_address == 1:
 			self._unset_other("is_primary_address")
 
-		elif self.is_shipping_address != 1:
+		else:
+			#This would check if there is any Primary Address if not then would make current as Primary address
 			for fieldname in ["customer", "supplier", "sales_partner", "lead"]:
 				if self.get(fieldname):
 					if not frappe.db.sql("""select name from `tabAddress` where is_primary_address=1
@@ -42,6 +59,15 @@ class Address(Document):
 		"""Validate that there can only be one shipping address for particular customer, supplier"""
 		if self.is_shipping_address == 1:
 			self._unset_other("is_shipping_address")
+		else:
+			#This would check if there is any Shipping Address if not then would make current as Shipping address
+			for fieldname in ["customer", "supplier", "sales_partner", "lead"]:
+				if self.get(fieldname):
+					if not frappe.db.sql("""select name from `tabAddress` where is_shipping_address=1
+						and `%s`=%s and name!=%s""" % (fieldname, "%s", "%s"),
+						(self.get(fieldname), self.name)):
+							self.is_shipping_address = 1
+					break
 
 	def _unset_other(self, is_address_type):
 		for fieldname in ["customer", "supplier", "sales_partner", "lead"]:
@@ -81,6 +107,4 @@ def get_territory_from_address(address):
 			break
 
 	return territory
-
-
 
