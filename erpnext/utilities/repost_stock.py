@@ -9,7 +9,7 @@ from erpnext.stock.utils import update_bin
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.accounts.utils import get_fiscal_year
 
-def repost(allow_negative_stock=False):
+def repost(allow_negative_stock=False, allow_zero_rate=False):
 	"""
 	Repost everything!
 	"""
@@ -23,7 +23,7 @@ def repost(allow_negative_stock=False):
 		union
 		select item_code, warehouse from `tabStock Ledger Entry`) a"""):
 			try:
-				repost_stock(d[0], d[1])
+				repost_stock(d[0], d[1], allow_zero_rate)
 				frappe.db.commit()
 			except:
 				frappe.db.rollback()
@@ -33,8 +33,8 @@ def repost(allow_negative_stock=False):
 			frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
 	frappe.db.auto_commit_on_many_writes = 0
 
-def repost_stock(item_code, warehouse):
-	repost_actual_qty(item_code, warehouse)
+def repost_stock(item_code, warehouse, allow_zero_rate=False):
+	repost_actual_qty(item_code, warehouse, allow_zero_rate)
 
 	if item_code and warehouse:
 		update_bin_qty(item_code, warehouse, {
@@ -44,9 +44,9 @@ def repost_stock(item_code, warehouse):
 			"planned_qty": get_planned_qty(item_code, warehouse)
 		})
 
-def repost_actual_qty(item_code, warehouse):
+def repost_actual_qty(item_code, warehouse, allow_zero_rate=False):
 	try:
-		update_entries_after({ "item_code": item_code, "warehouse": warehouse })
+		update_entries_after({ "item_code": item_code, "warehouse": warehouse }, allow_zero_rate)
 	except:
 		pass
 
