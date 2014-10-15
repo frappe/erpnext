@@ -6,7 +6,6 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, cstr, now
 from erpnext.stock.utils import get_valuation_method
-from erpnext.controllers.stock_controller import get_valuation_rate
 import json
 
 # future reposting
@@ -266,7 +265,7 @@ def get_moving_average_values(qty_after_transaction, sle, valuation_rate):
 
 		if new_stock_qty:
 			valuation_rate = new_stock_value / flt(new_stock_qty)
-	elif not valuation_rate:
+	elif not valuation_rate and qty_after_transaction <= 0:
 		valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse)
 
 	return abs(flt(valuation_rate))
@@ -275,9 +274,10 @@ def get_fifo_values(qty_after_transaction, sle, stock_queue):
 	incoming_rate = flt(sle.incoming_rate)
 	actual_qty = flt(sle.actual_qty)
 
-	intialize_stock_queue(stock_queue, sle.item_code, sle.warehouse, actual_qty)
-
 	if actual_qty > 0:
+		if not stock_queue:
+			stock_queue.append([0, 0])
+
 		if stock_queue[-1][0] > 0:
 			stock_queue.append([actual_qty, incoming_rate])
 		else:
@@ -289,11 +289,11 @@ def get_fifo_values(qty_after_transaction, sle, stock_queue):
 	else:
 		qty_to_pop = abs(actual_qty)
 		while qty_to_pop:
-			intialize_stock_queue(stock_queue, sle.item_code, sle.warehouse, actual_qty)
+			if not stock_queue:
+				stock_queue.append([0, get_valuation_rate(sle.item_code, sle.warehouse)
+					if qty_after_transaction <= 0 else 0])
 
 			batch = stock_queue[0]
-
-			# print qty_to_pop, batch
 
 			if qty_to_pop >= batch[0]:
 				# consume current batch
@@ -317,11 +317,6 @@ def get_fifo_values(qty_after_transaction, sle, stock_queue):
 	valuation_rate = (stock_value / flt(stock_qty)) if stock_qty else 0
 
 	return abs(valuation_rate)
-
-def intialize_stock_queue(stock_queue, item_code, warehouse, actual_qty):
-	if not stock_queue:
-		estimated_val_rate = get_valuation_rate(item_code, warehouse) if actual_qty < 0 else 0
-		stock_queue.append([0, estimated_val_rate])
 
 def _raise_exceptions(args, verbose=1):
 	deficiency = min(e["diff"] for e in _exceptions)
@@ -353,3 +348,26 @@ def get_previous_sle(args, for_update=False):
 		"timestamp(posting_date, posting_time) <= timestamp(%(posting_date)s, %(posting_time)s)"],
 		"desc", "limit 1", for_update=for_update)
 	return sle and sle[0] or {}
+
+def get_valuation_rate(item_code, warehouse):
+	last_valuation_rate = frappe.db.sql("""select valuation_rate
+		from `tabStock Ledger Entry`
+		where item_code = %s and warehouse = %s
+		and ifnull(valuation_rate, 0) > 0
+		order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse))
+
+	if not last_valuation_rate:
+		last_valuation_rate = frappe.db.sql("""select valuation_rate
+			from `tabStock Ledger Entry`
+			where item_code = %s and ifnull(valuation_rate, 0) > 0
+			order by posting_date desc, posting_time desc, name desc limit 1""", item_code)
+
+	valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
+
+	if not valuation_rate:
+		valuation_rate = frappe.db.get_value("Item Price", {"item_code": item_code, "buying": 1}, "price_list_rate")
+
+	if not valuation_rate and cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
+		frappe.throw(_("Purchase rate for item: {0} not found, which is required to book accounting entry (expense). Please mention item price against a buying price list.").format(item_code))
+
+	return valuation_rate

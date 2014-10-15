@@ -49,17 +49,12 @@ class StockController(AccountsController):
 
 						self.check_expense_account(detail)
 
-						stock_value_difference = flt(sle.stock_value_difference, 2)
-						if not stock_value_difference:
-							valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse)
-							stock_value_difference = flt(sle.actual_qty)*flt(valuation_rate)
-
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse],
 							"against": detail.expense_account,
 							"cost_center": detail.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"debit": stock_value_difference
+							"debit": flt(sle.stock_value_difference, 2)
 						}))
 
 						# to target warehouse / expense account
@@ -68,7 +63,7 @@ class StockController(AccountsController):
 							"against": warehouse_account[sle.warehouse],
 							"cost_center": detail.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"credit": stock_value_difference
+							"credit": flt(sle.stock_value_difference, 2)
 						}))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
@@ -300,26 +295,3 @@ def block_negative_stock(allow_negative_stock=False):
 	if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) and not allow_negative_stock:
 		if cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock")):
 			frappe.throw(_("Negative stock is not allowed in case of Perpetual Inventory, please disable it from Stock Settings"))
-
-def get_valuation_rate(item_code, warehouse):
-	last_valuation_rate = frappe.db.sql("""select valuation_rate
-		from `tabStock Ledger Entry`
-		where item_code = %s and warehouse = %s
-		and ifnull(valuation_rate, 0) > 0
-		order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse))
-
-	if not last_valuation_rate:
-		last_valuation_rate = frappe.db.sql("""select valuation_rate
-			from `tabStock Ledger Entry`
-			where item_code = %s and ifnull(valuation_rate, 0) > 0
-			order by posting_date desc, posting_time desc, name desc limit 1""", item_code)
-
-	valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
-
-	if not valuation_rate:
-		valuation_rate = frappe.db.get_value("Item Price", {"item_code": item_code, "buying": 1}, "price_list_rate")
-
-	if not valuation_rate:
-		frappe.throw(_("Purchase rate for item: {0} not found, which is required to book accounting entry. Please mention item price against a buying price list.").format(item_code))
-
-	return valuation_rate
