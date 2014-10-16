@@ -53,7 +53,37 @@ $.extend(cur_frm.cscript, {
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
-	}
+	},
+
+	bom_no: function() {
+		return this.frm.call({
+			doc: this.frm.doc,
+			method: "get_production_order_operations",
+			callback: function(r) {
+				if(!r.exc) refresh_field("get_production_order_operations");
+			}
+		});
+	},
+
+	make_time_log: function(doc, cdt, cdn){
+		var child = locals[cdt][cdn]
+		frappe.call({
+			method:"erpnext.manufacturing.doctype.production_order.production_order.make_time_log",
+			args: {
+				"name": doc.name,
+				"operation": child.idx + ". " + child.operation,
+				"from_time": child.planned_start_time,
+				"to_time": child.planned_end_time,
+				"project": doc.project,
+				"qty": doc.qty - child.qty_completed,
+				"workstation": child.workstation
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
+	}	
 });
 
 var cfn_set_fields = function(doc, dt, dn) {

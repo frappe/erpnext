@@ -58,4 +58,59 @@ class TestProductionOrder(unittest.TestCase):
 
 		self.assertRaises(StockOverProductionError, s.submit)
 
+	def test_make_time_log(self):
+		prod_order = frappe.get_doc({
+			"doctype":"Production Order",
+			"production_item": "_Test FG Item 2",
+			"bom_no": "BOM/_Test FG Item 2/002",
+			"qty": 1
+		})
+
+
+		prod_order.get_production_order_operations()
+		prod_order.production_order_operations[0].update({
+			"planned_start_time": "2014-11-25 00:00:00",
+			"planned_end_time": "2014-11-25 10:00:00" 
+		})
+
+		prod_order.insert()
+		
+		d = prod_order.production_order_operations[0]
+
+		from erpnext.manufacturing.doctype.production_order.production_order import make_time_log
+		from frappe.utils import cstr
+		from frappe.utils import time_diff_in_hours
+		
+		time_log = make_time_log( prod_order.name, cstr(d.idx) + ". " + d.operation, \
+			d.planned_start_time, d.planned_end_time, prod_order.qty - d.qty_completed)
+
+		self.assertEqual(prod_order.name, time_log.production_order)
+		self.assertEqual((prod_order.qty - d.qty_completed), time_log.qty)
+		self.assertEqual(time_diff_in_hours(d.planned_end_time, d.planned_start_time),time_log.hours)
+
+		time_log.save()
+		time_log.submit()
+
+		prod_order.load_from_db()
+		self.assertEqual(prod_order.production_order_operations[0].status, "Completed")
+		self.assertEqual(prod_order.production_order_operations[0].qty_completed, prod_order.qty)
+
+		self.assertEqual(prod_order.production_order_operations[0].actual_start_time, time_log.from_time)
+		self.assertEqual(prod_order.production_order_operations[0].actual_end_time, time_log.to_time)
+
+		time_log.cancel()
+
+		prod_order.load_from_db()
+		self.assertEqual(prod_order.production_order_operations[0].status,"Pending")
+		self.assertEqual(prod_order.production_order_operations[0].qty_completed,0)
+
+		time_log2 = frappe.copy_doc(time_log)
+		time_log2.update({
+			"qty": 10,
+			"from_time": "2014-11-26 00:00:00",
+			"to_time": "2014-11-26 00:00:00",
+			"docstatus": 0
+		})
+		self.assertRaises(frappe.ValidationError, time_log2.save)
+		
 test_records = frappe.get_test_records('Production Order')

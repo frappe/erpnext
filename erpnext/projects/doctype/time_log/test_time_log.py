@@ -16,6 +16,6 @@ class TestTimeLog(unittest.TestCase):
 		self.assertRaises(OverlapError, ts.insert)
 
 		frappe.db.sql("delete from `tabTime Log`")
-
+		
 test_records = frappe.get_test_records('Time Log')
 test_ignore = ["Time Log Batch", "Sales Invoice"]

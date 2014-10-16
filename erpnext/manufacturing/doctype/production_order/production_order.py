@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+import frappe, json, time, datetime
 
 from frappe.utils import flt, nowdate
 from frappe import _
@@ -145,6 +145,19 @@ class ProductionOrder(Document):
 		from erpnext.stock.utils import update_bin
 		update_bin(args)
 
+	def get_production_order_operations(self):
+		self.set('production_order_operations', [])
+		operations = frappe.db.sql("""select operation, opn_description, workstation, hour_rate, time_in_mins, 
+			operating_cost, fixed_cycle_cost from `tabBOM Operation` where parent = %s""", self.bom_no, as_dict=1)
+		self.set('production_order_operations', operations)
+
+		for d in self.get('production_order_operations'):
+			d.status = "Pending"
+			d.qty_completed=0
+
+	def auto_caluclate_production_dates(self):
+		pass
+
 @frappe.whitelist()
 def get_item_details(item):
 	res = frappe.db.sql("""select stock_uom, description
@@ -205,3 +218,17 @@ def get_events(start, end, filters=None):
 			"end": end
 			}, as_dict=True, update={"allDay": 0})
 	return data
+
+@frappe.whitelist()
+def make_time_log(name, operation, from_time=None, to_time=None, qty=None, project=None, workstation=None):
+	time_log =  frappe.new_doc("Time Log")
+	time_log.time_log_for = 'Manufacturing'
+	time_log.from_time = from_time
+	time_log.to_time = to_time
+	time_log.production_order = name
+	time_log.project = project
+	time_log.operation= operation
+	time_log.qty= qty
+	time_log.workstation= workstation
+	time_log.calculate_total_hours()
+	return time_log

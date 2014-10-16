@@ -27,7 +27,6 @@ class BOM(Document):
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self, "stock_uom", "qty")
 
-		self.validate_operations()
 		self.validate_materials()
 		self.set_bom_material_details()
 		self.calculate_cost()
@@ -171,7 +170,7 @@ class BOM(Document):
 		if not self.with_operations:
 			self.set('bom_operations', [])
 			for d in self.get("bom_materials"):
-				d.operation_no = None
+				d.operation = None
 
 	def validate_main_item(self):
 		""" Validate main FG item"""
@@ -183,23 +182,10 @@ class BOM(Document):
 			self.description = ret[0]
 			self.uom = ret[1]
 
-	def validate_operations(self):
-		""" Check duplicate operation no"""
-		self.op = []
-		for d in self.get('bom_operations'):
-			if cstr(d.operation_no) in self.op:
-				frappe.throw(_("Operation {0} is repeated in Operations Table").format(d.operation_no))
-			else:
-				# add operation in op list
-				self.op.append(cstr(d.operation_no))
-
 	def validate_materials(self):
 		""" Validate raw material entries """
 		check_list = []
 		for m in self.get('bom_materials'):
-			# check if operation no not in op table
-			if self.with_operations and cstr(m.operation_no) not in self.op:
-				frappe.throw(_("Operation {0} not present in Operations Table").format(m.operation_no))
 
 			if m.bom_no:
 				validate_bom_no(m.item_code, m.bom_no)
@@ -207,7 +193,7 @@ class BOM(Document):
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 
-			self.check_if_item_repeated(m.item_code, m.operation_no, check_list)
+			self.check_if_item_repeated(m.item_code, m.operation, check_list)
 
 
 	def check_if_item_repeated(self, item, op, check_list):
@@ -426,4 +412,3 @@ def validate_bom_no(item, bom_no):
 	if item and not (bom.item == item or \
 		bom.item == frappe.db.get_value("Item", item, "variant_of")):
 		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
-
