@@ -53,7 +53,17 @@ $.extend(cur_frm.cscript, {
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
-	}
+	},
+
+	bom_no: function() {
+		return this.frm.call({
+			doc: this.frm.doc,
+			method: "get_production_order_operations",
+			callback: function(r) {
+				if(!r.exc) refresh_field("get_production_order_operations");
+			}
+		});
+	}	
 });
 
 var cfn_set_fields = function(doc, dt, dn) {

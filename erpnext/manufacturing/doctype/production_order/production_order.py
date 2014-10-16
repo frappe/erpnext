@@ -145,6 +145,12 @@ class ProductionOrder(Document):
 		from erpnext.stock.utils import update_bin
 		update_bin(args)
 
+	def get_production_order_operations(self):
+		self.set('production_order_operations', [])
+		operations = frappe.db.sql("""select operation_no, opn_description, workstation, hour_rate, time_in_mins, 
+			operating_cost, fixed_cycle_cost from `tabBOM Operation` where parent = %s""", self.bom_no, as_dict=1)
+		self.set('production_order_operations', operations)
+
 @frappe.whitelist()
 def get_item_details(item):
 	res = frappe.db.sql("""select stock_uom, description
