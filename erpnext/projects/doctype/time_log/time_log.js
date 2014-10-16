@@ -27,3 +27,36 @@ frappe.ui.form.on("Time Log", "to_time", function(frm) {
 });
 
 cur_frm.add_fetch('task','project','project');
+
+$.extend(cur_frm.cscript, {
+	production_order: function(doc) {	
+		if (doc.production_order){
+			var operations = [];
+			frappe.model.with_doc("Production Order", doc.production_order, function(pro) {
+				doc = frappe.get_doc("Production Order",pro);
+				$.each(doc.production_order_operations , function(i, row){
+					operations[i] = (i+1) +". "+ row.operation;
+				});
+			frappe.meta.get_docfield("Time Log", "operation", me.frm.doc.name).options = operations.join("\n");
+			refresh_field("operation");
+			})
+		}
+	},
+
+	operation: function(doc) {
+		return cur_frm.call({
+			method: "erpnext.projects.doctype.time_log.time_log.get_workstation",
+			args: { 
+				"production_order": doc.production_order,
+				"operation": doc.operation
+			},
+			callback: function(r) {
+				doc.workstation = r.workstation;
+			}
+		});
+	}
+});
+
+if (cur_frm.doc.time_log_for == "Manufacturing") {
+	cur_frm.cscript.onload = cur_frm.cscript.production_order;
+}
