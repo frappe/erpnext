@@ -175,8 +175,6 @@
    "reqd": 0
   }, 
   {
-<<<<<<< HEAD
-=======
    "depends_on": "bom_no", 
    "fieldname": "operations", 
    "fieldtype": "Section Break", 
@@ -191,10 +189,10 @@
    "label": "Production Order Operations", 
    "options": "Production Order Operation", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "read_only": 1
   }, 
   {
->>>>>>> Operations added in Production Order DocType
    "fieldname": "more_info", 
    "fieldtype": "Section Break", 
    "label": "More Info", 
@@ -266,11 +264,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
-<<<<<<< HEAD
  "modified": "2014-10-27 13:42:31.476892", 
-=======
- "modified": "2014-10-16 14:44:00.971022", 
->>>>>>> Operations added in Production Order DocType
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 
