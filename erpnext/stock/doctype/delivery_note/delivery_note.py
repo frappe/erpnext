@@ -245,7 +245,7 @@ class DeliveryNote(SellingController):
 		sl_entries = []
 		for d in self.get_item_list():
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
-					and d.warehouse:
+					and d.warehouse and flt(d['qty']):
 				self.update_reserved_qty(d)
 
 				sl_entries.append(self.get_sl_entries(d, {

@@ -88,15 +88,24 @@ class JournalVoucher(AccountsController):
 	def validate_against_jv(self):
 		for d in self.get('entries'):
 			if d.against_jv:
+				account_root_type = frappe.db.get_value("Account", d.account, "root_type")
+				if account_root_type == "Asset" and flt(d.debit) > 0:
+					frappe.throw(_("For {0}, only credit entries can be linked against another debit entry")
+						.format(d.account))
+				elif account_root_type == "Liability" and flt(d.credit) > 0:
+					frappe.throw(_("For {0}, only debit entries can be linked against another credit entry")
+						.format(d.account))
+
 				if d.against_jv == self.name:
 					frappe.throw(_("You can not enter current voucher in 'Against Journal Voucher' column"))
 
 				against_entries = frappe.db.sql("""select * from `tabJournal Voucher Detail`
 					where account = %s and docstatus = 1 and parent = %s
-					and ifnull(against_jv, '') = ''""", (d.account, d.against_jv), as_dict=True)
+					and ifnull(against_jv, '') = '' and ifnull(against_invoice, '') = ''
+					and ifnull(against_voucher, '') = ''""", (d.account, d.against_jv), as_dict=True)
 
 				if not against_entries:
-					frappe.throw(_("Journal Voucher {0} does not have account {1} or already matched")
+					frappe.throw(_("Journal Voucher {0} does not have account {1} or already matched against other voucher")
 						.format(d.against_jv, d.account))
 				else:
 					dr_or_cr = "debit" if d.credit > 0 else "credit"
@@ -153,7 +162,7 @@ class JournalVoucher(AccountsController):
 					and voucher_account != d.account:
 					frappe.throw(_("Row {0}: Account {1} does not match with {2} {3} account") \
 						.format(d.idx, d.account, doctype, field_dict.get(doctype)))
-					
+
 				if against_field in ["against_sales_order", "against_purchase_order"]:
 					if voucher_account != account_master_name:
 						frappe.throw(_("Row {0}: Account {1} does not match with {2} {3} Name") \
@@ -165,7 +174,7 @@ class JournalVoucher(AccountsController):
 
 	def validate_against_invoice_fields(self, doctype, payment_against_voucher):
 		for voucher_no, payment_list in payment_against_voucher.items():
-			voucher_properties = frappe.db.get_value(doctype, voucher_no, 
+			voucher_properties = frappe.db.get_value(doctype, voucher_no,
 				["docstatus", "outstanding_amount"])
 
 			if voucher_properties[0] != 1:
@@ -177,7 +186,7 @@ class JournalVoucher(AccountsController):
 
 	def validate_against_order_fields(self, doctype, payment_against_voucher):
 		for voucher_no, payment_list in payment_against_voucher.items():
-			voucher_properties = frappe.db.get_value(doctype, voucher_no, 
+			voucher_properties = frappe.db.get_value(doctype, voucher_no,
 				["docstatus", "per_billed", "status", "advance_paid", "grand_total"])
 
 			if voucher_properties[0] != 1:
@@ -532,9 +541,10 @@ def get_against_sales_invoice(doctype, txt, searchfield, start, page_len, filter
 		(filters["account"], "%%%s%%" % txt, start, page_len))
 
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql("""select jv.name, jv.posting_date, jv.user_remark
-		from `tabJournal Voucher` jv, `tabJournal Voucher Detail` jv_detail
-		where jv_detail.parent = jv.name and jv_detail.account = %s and jv.docstatus = 1
+	return frappe.db.sql("""select distinct jv.name, jv.posting_date, jv.user_remark
+		from `tabJournal Voucher` jv, `tabJournal Voucher Detail` jvd
+		where jvd.parent = jv.name and jvd.account = %s and jv.docstatus = 1
+		and (ifnull(jvd.against_invoice, '') = '' and ifnull(jvd.against_voucher, '') = '' and ifnull(jvd.against_jv, '') = '' )
 		and jv.%s like %s order by jv.name desc limit %s, %s""" %
 		("%s", searchfield, "%s", "%s", "%s"),
 		(filters["account"], "%%%s%%" % txt, start, page_len))
