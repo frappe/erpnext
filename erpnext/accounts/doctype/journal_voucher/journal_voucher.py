@@ -289,26 +289,25 @@ class JournalVoucher(AccountsController):
 
 	def set_print_format_fields(self):
 		for d in self.get('entries'):
-			result = frappe.db.get_value("Account", d.account,
-				["account_type", "master_type"])
+			acc = frappe.db.get_value("Account", d.account, ["account_type", "master_type"], as_dict=1)
 
-			if not result:
-				continue
+			if not acc: continue
 
-			account_type, master_type = result
-
-			if master_type in ['Supplier', 'Customer']:
+			if acc.master_type in ['Supplier', 'Customer']:
 				if not self.pay_to_recd_from:
-					self.pay_to_recd_from = frappe.db.get_value(master_type,
-						' - '.join(d.account.split(' - ')[:-1]),
-						master_type == 'Customer' and 'customer_name' or 'supplier_name')
+					self.pay_to_recd_from = frappe.db.get_value(acc.master_type, ' - '.join(d.account.split(' - ')[:-1]),
+						acc.master_type == 'Customer' and 'customer_name' or 'supplier_name')
+				if self.voucher_type in ["Credit Note", "Debit Note"]:
+					self.set_total_amount(d.debit or d.credit)
 
-			if account_type in ['Bank', 'Cash']:
-				company_currency = get_company_currency(self.company)
-				amt = flt(d.debit) and d.debit or d.credit
-				self.total_amount = fmt_money(amt, currency=company_currency)
-				from frappe.utils import money_in_words
-				self.total_amount_in_words = money_in_words(amt, company_currency)
+			if acc.account_type in ['Bank', 'Cash']:
+				self.set_total_amount(d.debit or d.credit)
+
+	def set_total_amount(self, amt):
+		company_currency = get_company_currency(self.company)
+		self.total_amount = fmt_money(amt, currency=company_currency)
+		from frappe.utils import money_in_words
+		self.total_amount_in_words = money_in_words(amt, company_currency)
 
 	def check_credit_days(self):
 		date_diff = 0
