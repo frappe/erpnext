@@ -23,7 +23,7 @@ class Quotation(SellingController):
 		self.validate_order_type()
 		self.validate_for_items()
 		self.validate_uom_is_integer("stock_uom", "qty")
-		self.quotation_to = "Customer" if self.customer else "Lead"
+		self.validate_quotation_to()
 
 	def has_sales_order(self):
 		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
@@ -53,6 +53,13 @@ class Quotation(SellingController):
 
 				if is_sales_item == 'No':
 					frappe.throw(_("Item {0} must be Sales Item").format(d.item_code))
+
+	def validate_quotation_to(self):
+		if self.customer:
+			self.quotation_to = "Customer"
+			self.lead = None
+		elif self.lead:
+			self.quotation_to = "Lead"
 
 	def update_opportunity(self):
 		for opportunity in list(set([d.prevdoc_docname for d in self.get("quotation_details")])):
@@ -139,8 +146,8 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 def _make_customer(source_name, ignore_permissions=False):
-	quotation = frappe.db.get_value("Quotation", source_name, ["lead", "order_type"])
-	if quotation and quotation[0]:
+	quotation = frappe.db.get_value("Quotation", source_name, ["lead", "order_type", "customer"])
+	if quotation and quotation[0] and not quotation[2]:
 		lead_name = quotation[0]
 		customer_name = frappe.db.get_value("Customer", {"lead_name": lead_name},
 			["name", "customer_name"], as_dict=True)
