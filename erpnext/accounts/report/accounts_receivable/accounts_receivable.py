@@ -50,14 +50,15 @@ class ReceivablePayableReport(object):
 		from erpnext.accounts.utils import get_currency_precision
 		currency_precision = get_currency_precision() or 2
 		data = []
-		dr_or_cr = args.get("dr_or_cr")
+		dr_or_cr = "debit" if args.get("party_type") == "Customer" else "credit"
+		voucher_details = self.get_voucher_details()
 		future_vouchers = self.get_entries_after(self.filters.report_date, args.get("party_type"))
 
 		for gle in self.get_entries_till(self.filters.report_date, args.get("party_type")):
-			if self.is_receivable_or_payable(gle, args.get("dr_or_cr"), future_vouchers):
-				outstanding_amount = self.get_outstanding_amount(gle, self.filters.report_date, args.get("dr_or_cr"))	
+			if self.is_receivable_or_payable(gle, dr_or_cr, future_vouchers):
+				outstanding_amount = self.get_outstanding_amount(gle, self.filters.report_date, dr_or_cr)
 				if abs(outstanding_amount) > 0.1/10**currency_precision:
-					due_date = self.get_due_date(args.get("party_type"), gle)
+					due_date = voucher_details.get("voucher_no", {}).get("due_date", "")
 					invoiced_amount = gle.get(dr_or_cr) if (gle.get(dr_or_cr) > 0) else 0
 					paid_amt = invoiced_amount - outstanding_amount
 					entry_date = due_date if self.filters.ageing_based_on == "Due Date" else gle.posting_date
@@ -69,7 +70,10 @@ class ReceivablePayableReport(object):
 					row += [gle.voucher_type, gle.voucher_no, due_date]
 
 					if args.get("party_type") == "Supplier":
-						row += self.get_supplier_bill_data(gle)
+						row += [
+							voucher_details.get("voucher_no", {}).get("bill_no", ""), 
+							voucher_details.get("voucher_no", {}).get("bill_date", "")
+						]
 
 					row += [invoiced_amount, paid_amt, outstanding_amount] + \
 						get_ageing_data(cint(self.filters.range1), cint(self.filters.range2), \
@@ -113,9 +117,9 @@ class ReceivablePayableReport(object):
 		payment_amount = 0.0
 		for e in self.get_gl_entries_for(gle.party, gle.party_type, gle.voucher_type, gle.voucher_no):
 			if getdate(e.posting_date) <= report_date and e.name!=gle.name:
-				payment_amount += (flt(e.credit if dr_or_cr == "debit" else e.debit) - flt(e.get(dr_or_cr)))
+				payment_amount += (flt(e.credit if gle.party_type == "Customer" else e.debit) - flt(e.get(dr_or_cr)))
 
-		return flt(gle.get(dr_or_cr)) - flt(gle.credit if dr_or_cr == "debit" else gle.debit) - payment_amount
+		return flt(gle.get(dr_or_cr)) - flt(gle.credit if gle.party_type == "Customer" else gle.debit) - payment_amount
 
 	def get_party_name(self, party_type, party_name):
 		return self.get_party_map(party_type).get(party_name, {}).get("customer_name" if party_type == "Customer" else "supplier_name") or ""
@@ -138,35 +142,18 @@ class ReceivablePayableReport(object):
 
 		return self.party_map
 
-	def get_due_date(self, party_type, gle):
-		self.get_voucher_details(gle)
-		if party_type == "Customer":
-			return self.voucher_detail_map.get(gle.voucher_no) if gle.voucher_type == "Sales Invoice" else ""
-		elif party_type == "Supplier":
-			return self.voucher_detail_map.get(gle.voucher_no).get("due_date") \
-				if gle.voucher_type in ["Purchase Invoice", "Journal Voucher"] else ""
+	def get_voucher_details(self):
+		voucher_details = frappe._dict()
 
-	def get_supplier_bill_data(self, gle):
-		self.get_voucher_details(gle)
-		return [self.voucher_detail_map.get(gle.voucher_no).get("bill_no"), \
-			self.voucher_detail_map.get(gle.voucher_no).get("bill_date")] \
-				if gle.voucher_type in ["Purchase Invoice", "Journal Voucher"] else ""
+		for si in frappe.db.sql("""select name, due_date
+			from `tabSales Invoice` where docstatus=1""", as_dict=1):
+				voucher_details.setdefault(si.name, si)
 
-	def get_voucher_details(self, gle):
-		# TODO can be restricted to posting date
-		if not hasattr(self, "voucher_detail_map"):
-			self.voucher_detail_map = dict(frappe.db.sql("""select name, due_date
-				from `tabSales Invoice` where docstatus=1"""))
+		for pi in frappe.db.sql("""select name, due_date, bill_no, bill_date
+			from `tabPurchase Invoice` where docstatus=1""", as_dict=1):
+				voucher_details.setdefault(pi.name, pi)
 
-			voucher_details = {}
-			get_voucher_details = frappe.db.sql("""select name, due_date, bill_no, bill_date
-				from `tabPurchase Invoice` where docstatus=1""")
-
-			for voucher_name, due_date, bill_no, bill_date in get_voucher_details:
-				voucher_details.setdefault(voucher_name, {}).update({"due_date": due_date, 
-					"bill_no": bill_no, "bill_date": bill_date})
-
-				self.voucher_detail_map.update(voucher_details)
+		return voucher_details
 
 	def get_gl_entries(self, party_type):
 		if not hasattr(self, "gl_entries"):
@@ -212,7 +199,7 @@ class ReceivablePayableReport(object):
 def execute(filters=None):
 	args = {
 		"party_type": "Customer",
-		"dr_or_cr": "debit",
+		# "dr_or_cr": "debit",
 		"naming_by": ["Selling Settings", "cust_master_name"],
 	}
 	return ReceivablePayableReport(filters).run(args)
