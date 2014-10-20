@@ -73,7 +73,7 @@ class MaterialRequest(BuyingController):
 		from erpnext.utilities import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
 
-		self.validate_value("material_request_type", "in", ["Purchase", "Transfer"])
+		self.validate_value("material_request_type", "in", ["Purchase", "Transfer", "Material Issue"])
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
@@ -112,7 +112,7 @@ class MaterialRequest(BuyingController):
 		frappe.db.set(self,'status','Cancelled')
 
 	def update_completed_qty(self, mr_items=None):
-		if self.material_request_type != "Transfer":
+		if self.material_request_type == "Purchase":
 			return
 
 		item_doclist = self.get("indent_details")
