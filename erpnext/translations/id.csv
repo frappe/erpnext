@@ -37,9 +37,9 @@
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Sebuah Kelompok Pelanggan ada dengan nama yang sama, silakan mengubah nama Nasabah atau mengubah nama Grup Pelanggan"
 A Customer exists with same name,Nasabah ada dengan nama yang sama
 A Lead with this email id should exist,Sebuah Lead dengan id email ini harus ada
-A Product or Service,Sebuah Produk atau Jasa
-A Supplier exists with same name,Sebuah Pemasok ada dengan nama yang sama
-A symbol for this currency. For e.g. $,Sebuah simbol untuk mata uang ini. Untuk misalnya $
+A Product or Service,Produk atau Jasa
+A Supplier exists with same name,Pemasok dengan nama yang sama sudah terdaftar
+A symbol for this currency. For e.g. $,Simbol untuk mata uang ini. Contoh $
 AMC Expiry Date,AMC Tanggal Berakhir
 Abbr,Abbr
 Abbreviation cannot have more than 5 characters,Singkatan tak bisa memiliki lebih dari 5 karakter
