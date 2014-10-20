@@ -45,6 +45,7 @@ scheduler_events = {
 		"erpnext.stock.utils.reorder_item",
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.support.doctype.support_ticket.support_ticket.auto_close_tickets"
+		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year"
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.backup_manager.backup_manager.take_backups_daily"
