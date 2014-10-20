@@ -17,7 +17,7 @@
    "fieldtype": "Select", 
    "in_list_view": 1, 
    "label": "Type", 
-   "options": "Purchase\nTransfer", 
+   "options": "Purchase\nTransfer\nMaterial Issue", 
    "permlevel": 0, 
    "reqd": 1
   }, 
@@ -235,7 +235,7 @@
  "icon": "icon-ticket", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-09-09 05:35:31.735821", 
+ "modified": "2014-10-20 14:13:11.043631", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request", 
