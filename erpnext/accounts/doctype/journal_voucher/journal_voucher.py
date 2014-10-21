@@ -422,7 +422,7 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 	jv.get("entries")[0].party_type = "Customer"
 	jv.get("entries")[0].party = si.customer
 	jv.get("entries")[0].balance = get_balance_on(si.debit_to)
-	jv.get("entries")[0].party_balance = get_balance_on(si.customer, "Customer")
+	jv.get("entries")[0].party_balance = get_balance_on(party=si.customer, party_type="Customer")
 	jv.get("entries")[0].credit = si.outstanding_amount
 	jv.get("entries")[0].against_invoice = si.name
 
@@ -442,7 +442,7 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	jv.get("entries")[0].party_type = "Supplier"
 	jv.get("entries")[0].party = pi.supplier
 	jv.get("entries")[0].balance = get_balance_on(pi.credit_to)
-	jv.get("entries")[0].party_balance = get_balance_on(pi.supplier, "Supplier")
+	jv.get("entries")[0].party_balance = get_balance_on(party=pi.supplier, party_type="Supplier")
 	jv.get("entries")[0].debit = pi.outstanding_amount
 	jv.get("entries")[0].against_voucher = pi.name
 
