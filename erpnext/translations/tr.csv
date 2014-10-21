@@ -34,65 +34,65 @@
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Ekle / Düzenle </ a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Ekle / Düzenle </ a>"
 "<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> Standart Şablon </ h4>  <p> <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Şablon Oluşturma </ a> ve Adres tüm alanları (kullanır Özel alanlar varsa) dahil olmak üzere mevcut olacaktır </ p>  <pre> <code> {{}} address_line1 <br>  {% if address_line2%} {{}} address_line2 <br> { % endif -%}  {{şehir}} <br>  {% eğer devlet%} {{}} devlet <br> {% endif -%}  {% if pinkodu%} PIN: {{}} pinkodu <br> {% endif -%}  {{ülke}} <br>  {% if telefon%} Telefon: {{}} telefon <br> { % endif -%}  {% if%} faks Faks: {{}} faks <br> {% endif -%}  {% email_id%} E-posta ise: {{}} email_id <br> ; {% endif -%}  </ code> </ pre>"
-A Customer Group exists with same name please change the Customer name or rename the Customer Group,Bir Müşteri Grubu aynı adla Müşteri adını değiştirebilir veya Müşteri Grubu yeniden adlandırma lütfen
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,Aynı adlı bir Müşteri Grubu bulunmaktadır. Lütfen Müşteri Grubu ismini değiştirin.
 A Customer exists with same name,Bir Müşteri aynı adla
 A Lead with this email id should exist,Bu e-posta kimliği ile bir Kurşun bulunmalıdır
 A Product or Service,Bir Ürün veya Hizmet
-A Supplier exists with same name,A Tedarikçi aynı adla
-A symbol for this currency. For e.g. $,Bu para için bir sembol. Örneğin $ için
+A Supplier exists with same name,Aynı isimli bir Tedarikçi mevcuttur.
+A symbol for this currency. For e.g. $,Para biriminiz için bir sembol girin. Örneğin $
 AMC Expiry Date,AMC Son Kullanma Tarihi
 Abbr,Kısaltma
-Abbreviation cannot have more than 5 characters,Kısaltma fazla 5 karakter olamaz
-Above Value,Değer üstünde
-Absent,Kimse yok
-Acceptance Criteria,Kabul Kriterleri
-Accepted,Kabul Edilen
-Accepted + Rejected Qty must be equal to Received quantity for Item {0},Kabul + Reddedilen Miktar Ürün Alınan miktara eşit olması gerekir {0}
+Abbreviation cannot have more than 5 characters,Kısaltma 5 karakterden fazla olamaz.
+Above Value,Değerinin üstünde
+Absent,Eksik
+Acceptance Criteria,Onaylanma Kriterleri
+Accepted,Onaylanmış
+Accepted + Rejected Qty must be equal to Received quantity for Item {0},Onaylanan ve reddedilen miktarların toplamı alınan ürün miktarına eşit olmak zorundadır. {0}
 Accepted Quantity,Kabul edilen Miktar
-Accepted Warehouse,Kabul Depo
+Accepted Warehouse,Kabul edilen depo
 Account,Hesap
 Account Balance,Hesap Bakiyesi
 Account Created: {0},Hesap Oluşturuldu: {0}
 Account Details,Hesap Detayları
-Account Head,Hesap Başkanı
+Account Head,Hesap Başlığı
 Account Name,Hesap adı
-Account Type,Hesap Türü
-"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Hesap bakiyesi zaten Kredi, sen ayarlamak için izin verilmez 'Debit' olarak 'Balance Olmalı'"
-"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Zaten Debit hesap bakiyesi, siz 'Kredi' Balance Olmalı 'ayarlamak için izin verilmez"
-Account for the warehouse (Perpetual Inventory) will be created under this Account.,Depo (Devamlı Envanter) Hesap bu hesap altında oluşturulacaktır.
-Account head {0} created,Hesap kafa {0} oluşturuldu
+Account Type,Hesap Tipi
+"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'",Bakiye alacaklı durumdaysa borçlu duruma çevrilemez.
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'",Bakiye borçlu durumdaysa alacaklı duruma çevrilemez.
+Account for the warehouse (Perpetual Inventory) will be created under this Account.,Depo hesabı (Devamlı Envanter) bu hesap altında oluşturulacaktır.
+Account head {0} created,Hesap başlığı {0} oluşturuldu
 Account must be a balance sheet account,Hesabınız bir bilanço hesabı olmalıdır
-Account with child nodes cannot be converted to ledger,Çocuk düğümleri ile hesap defterine dönüştürülebilir olamaz
-Account with existing transaction can not be converted to group.,Mevcut işlem ile hesap grubuna dönüştürülemez.
-Account with existing transaction can not be deleted,Mevcut işlem ile hesap silinemez
-Account with existing transaction cannot be converted to ledger,Mevcut işlem ile hesap defterine dönüştürülebilir olamaz
+Account with child nodes cannot be converted to ledger,Çocuk düğümlü hesaplar muhasebe defterine dönüştürülemez.
+Account with existing transaction can not be converted to group.,İşlem görmüş hesaplar gruba dönüştürülemez.
+Account with existing transaction can not be deleted,İşlem görmüş hesaplar silinemez.
+Account with existing transaction cannot be converted to ledger,İşlem görmüş hesaplar muhasebe defterine dönüştürülemez.
 Account {0} cannot be a Group,Hesap {0} Grup olamaz
-Account {0} does not belong to Company {1},Hesap {0} Şirket'e ait olmayan {1}
-Account {0} does not belong to company: {1},Hesap {0} şirkete ait değil: {1}
+Account {0} does not belong to Company {1},Hesap {0} Şirkete ait değil {1}
+Account {0} does not belong to company: {1},Hesap {0} Şirkete ait değil: {1}
 Account {0} does not exist,Hesap {0} yok
-Account {0} has been entered more than once for fiscal year {1},Hesap {0} daha fazla mali yıl için birden çok kez girildi {1}
-Account {0} is frozen,Hesap {0} dondu
+Account {0} has been entered more than once for fiscal year {1},Hesap {0} bir mali yıl içerisinde birden fazla girildi {1}
+Account {0} is frozen,Hesap {0} donduruldu
 Account {0} is inactive,Hesap {0} etkin değil
 Account {0} is not valid,Hesap {0} geçerli değil
 Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Öğe {1} bir Varlık Öğe olduğu gibi hesap {0} türündeki 'Demirbaş' olmalı
 Account {0}: Parent account {1} can not be a ledger,Hesap {0}: Ana hesap {1} bir defter olamaz
 Account {0}: Parent account {1} does not belong to company: {2},Hesap {0}: Ana hesap {1} şirkete ait değil: {2}
 Account {0}: Parent account {1} does not exist,Hesap {0}: Ana hesap {1} yok
-Account {0}: You can not assign itself as parent account,Hesap {0}: Siz ebeveyn hesabı olarak atanamıyor
-Account: {0} can only be updated via \					Stock Transactions,Hesap: \ Stok İşlemler {0} sadece aracılığıyla güncellenebilir
+Account {0}: You can not assign itself as parent account,Hesap {0}: Hesabınız ebeveyn hesabı olarak atanamıyor.
+Account: {0} can only be updated via \					Stock Transactions,Hesap: {0} sadece stok işlemler aracılığıyla güncellenebilir
 Accountant,Muhasebeci
 Accounting,Muhasebe
-"Accounting Entries can be made against leaf nodes, called","Muhasebe Yazılar denilen, yaprak düğümlere karşı yapılabilir"
-"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Muhasebe entry bu tarihe kadar dondurulmuş, kimse / aşağıda belirtilen rolü dışında girdisini değiştirin yapabilirsiniz."
+"Accounting Entries can be made against leaf nodes, called",Muhasebe girişleri yaprak düğümlere karşı yapılabilir.
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Muhasebe girişi bu tarihe kadar dondurulmuş, kimse / aşağıda belirtilen rolü dışında bir girdi değiştiremez."
 Accounting journal entries.,Muhasebe günlük girişleri.
 Accounts,Hesaplar
-Accounts Browser,Hesapları Tarayıcı
-Accounts Frozen Upto,Dondurulmuş kadar Hesapları
-Accounts Payable,Borç Hesapları
+Accounts Browser,Hesap Tarayıcı
+Accounts Frozen Upto,Dondurulmuş hesaplar
+Accounts Payable,Vadesi gelmiş hesaplar
 Accounts Receivable,Alacak hesapları
-Accounts Settings,Ayarları Hesapları
+Accounts Settings,Hesap ayarları
 Active,Etkin
-Active: Will extract emails from ,
+Active: Will extract emails from ,Etkin: E-maillerden ayrılacak
 Activity,Aktivite
 Activity Log,Etkinlik Günlüğü
 Activity Log:,Etkinlik Günlüğü:
@@ -107,7 +107,7 @@ Actual Posting Date,Gerçek Gönderme Tarihi
 Actual Qty,Gerçek Adet
 Actual Qty (at source/target),Fiili Miktar (kaynak / hedef)
 Actual Qty After Transaction,İşlem sonrası gerçek Adet
-Actual Qty: Quantity available in the warehouse.,Gerçek Adet: depoda mevcut miktarı.
+Actual Qty: Quantity available in the warehouse.,Gerçek Adet: depoda mevcut miktar.
 Actual Quantity,Gerçek Miktar
 Actual Start Date,Fiili Başlangıç ​​Tarihi
 Add,Ekle
@@ -299,32 +299,32 @@ Average Discount,Ortalama İndirim
 Awesome Products,Başar Ürünler
 Awesome Services,Başar Hizmetleri
 BOM Detail No,BOM Detay yok
-BOM Explosion Item,BOM Patlama Ürün
+BOM Explosion Item,BOM Ani artış yaşayan ürün
 BOM Item,BOM Ürün
-BOM No,BOM yok
-BOM No. for a Finished Good Item,Bir Biten İyi Ürün için BOM No
+BOM No,BOM numarası
+BOM No. for a Finished Good Item,Biten İyi Ürün için BOM numarası
 BOM Operation,BOM Operasyonu
 BOM Operations,BOM İşlemleri
 BOM Replace Tool,BOM Aracı değiştirin
 BOM number is required for manufactured Item {0} in row {1},BOM numara imal Öğe için gereklidir {0} üst üste {1}
-BOM number not allowed for non-manufactured Item {0} in row {1},Non-Üretilen Ürün için izin BOM sayı {0} üst üste {1}
+BOM number not allowed for non-manufactured Item {0} in row {1},Üretilmemiş ürün için BOM sayısı verilmez{0} 
 BOM recursion: {0} cannot be parent or child of {2},BOM özyineleme: {0} ebeveyn veya çocuk olamaz {2}
 BOM replaced,BOM yerine
 BOM {0} for Item {1} in row {2} is inactive or not submitted,BOM {0} öğesi için {1} üste {2} teslim inaktif ya da değildir
 BOM {0} is not active or not submitted,BOM {0} teslim aktif ya da değil değil
 BOM {0} is not submitted or inactive BOM for Item {1},BOM {0} teslim veya değildir inaktif BOM Ürün için {1}
-Backup Manager,Backup Manager
-Backup Right Now,Yedekleme Right Now
-Backups will be uploaded to,Yedekler yüklenir
+Backup Manager,Yedek Yöneticisi
+Backup Right Now,Yedek Kullanılabilir
+Backups will be uploaded to,Yedekler yüklenecek
 Balance Qty,Denge Adet
 Balance Sheet,Bilanço
 Balance Value,Denge Değeri
-Balance for Account {0} must always be {1},{0} her zaman olmalı Hesabı dengelemek {1}
-Balance must be,Denge olmalı
-"Balances of Accounts of type ""Bank"" or ""Cash""","Tip ""Banka"" Hesap bakiyeleri veya ""Nakit"""
+Balance for Account {0} must always be {1},Hesap {0} her zaman dengede olmalı {1}
+Balance must be,Hesap olmalı
+"Balances of Accounts of type ""Bank"" or ""Cash""",Banka ve Nakit denge hesapları
 Bank,Banka
 Bank / Cash Account,Banka / Kasa Hesabı
-Bank A/C No.,Bank A / C No
+Bank A/C No.,Banka A / C Numarası
 Bank Account,Banka Hesabı
 Bank Account No.,Banka Hesap No
 Bank Accounts,Banka Hesapları
@@ -339,47 +339,47 @@ Bank Voucher,Banka Çeki
 Bank/Cash Balance,Banka / Nakit Dengesi
 Banking,Bankacılık
 Barcode,Barkod
-Barcode {0} already used in Item {1},Barkod {0} zaten Öğe kullanılan {1}
+Barcode {0} already used in Item {1},Barkod {0} zaten öğede kullanılmakta{1}
 Based On,Göre
 Basic,Temel
 Basic Info,Temel Bilgiler
 Basic Information,Temel  Bilgi
-Basic Rate,Temel Oranı
-Basic Rate (Company Currency),Basic Rate (Şirket para birimi)
+Basic Rate,Temel Oran
+Basic Rate (Company Currency),Temel oran (Şirket para birimi)
 Batch,Yığın
 Batch (lot) of an Item.,Bir Öğe toplu (lot).
-Batch Finished Date,Toplu bitirdi Tarih
-Batch ID,Toplu Kimliği
+Batch Finished Date,Parti bitiş tarihi
+Batch ID,Parti Kimliği
 Batch No,Parti No
-Batch Started Date,Toplu Tarihi başladı
-Batch Time Logs for billing.,Fatura için Toplu Saat Kayıtlar.
+Batch Started Date,Parti başlangıç tarihi
+Batch Time Logs for billing.,Fatura için parti kayıt zamanı
 Batch-Wise Balance History,Toplu-Wise Dengesi Tarihi
-Batched for Billing,Fatura için batched
+Batched for Billing,Fatura için gruplanmış
 Better Prospects,Iyi Beklentiler
-Bill Date,Bill Tarih
-Bill No,Fatura yok
-Bill No {0} already booked in Purchase Invoice {1},Bill Hayır {0} zaten Satınalma Fatura rezervasyonu {1}
-Bill of Material,Malzeme Listesi
-Bill of Material to be considered for manufacturing,Üretim için dikkat edilmesi gereken Malzeme Bill
-Bill of Materials (BOM),Malzeme Listesi (BOM)
+Bill Date,Fatura tarihi
+Bill No,Fatura numarası
+Bill No {0} already booked in Purchase Invoice {1},Fatura numarası{0} Alım faturası zaten kayıtlı {1}
+Bill of Material,Materyal faturası
+Bill of Material to be considered for manufacturing,Üretim için incelenecek materyal faturası
+Bill of Materials (BOM),Ürün Ağacı (BOM)
 Billable,Faturalandırılabilir
-Billed,Gagalı
+Billed,Faturalanmış
 Billed Amount,Faturalı Tutar
 Billed Amt,Faturalı Tutarı
-Billing,Ödeme
-Billing Address,Fatura Adresi
+Billing,Faturalama
+Billing Address,Faturalama  Adresi
 Billing Address Name,Fatura Adresi Adı
 Billing Status,Fatura Durumu
-Bills raised by Suppliers.,Tedarikçiler tarafından dile Bono.
-Bills raised to Customers.,Müşteriler kaldırdı Bono.
+Bills raised by Suppliers.,Tedarikçiler tarafından yükseltilmiş faturalar.
+Bills raised to Customers.,Müşterilere yükseltilmiş faturalar.
 Bin,Kutu
-Bio,Bio
+Bio,Biyo
 Biotechnology,Biyoteknoloji
 Birthday,Doğum günü
 Block Date,Blok Tarih
 Block Days,Blok Gün
-Block leave applications by department.,Departmanı tarafından izin uygulamaları engellemek.
-Blog Post,Blog Post
+Block leave applications by department.,Departman tarafından engellenen uygulamalar.
+Blog Post,Blog postası
 Blog Subscriber,Blog Abone
 Blood Group,Kan grubu
 Both Warehouse must belong to same Company,Hem Depo Aynı Şirkete ait olmalıdır
@@ -406,13 +406,13 @@ Bundle items at time of sale.,Satış zamanında ürün Bundle.
 Business Development Manager,İş Geliştirme Müdürü
 Buying,Satın alma
 Buying & Selling,Alış ve Satış
-Buying Amount,Tutar Alış
+Buying Amount,Alış Tutarı
 Buying Settings,Ayarları Alma
 "Buying must be checked, if Applicable For is selected as {0}","Uygulanabilir için seçilmiş ise satın alma, kontrol edilmelidir {0}"
-C-Form,C-Form
+C-Form,C-Formu
 C-Form Applicable,Uygulanabilir C-Formu
 C-Form Invoice Detail,C-Form Fatura Ayrıntısı
-C-Form No,C-Form
+C-Form No,C-Form Numarası
 C-Form records,C-Form kayıtları
 CENVAT Capital Goods,CENVAT Sermaye Malı
 CENVAT Edu Cess,CENVAT Edu Cess
@@ -422,17 +422,17 @@ CENVAT Service Tax Cess 1,CENVAT Hizmet Vergisi Cess 1
 CENVAT Service Tax Cess 2,CENVAT Hizmet Vergisi Vergisi 2
 Calculate Based On,Tabanlı hesaplayın
 Calculate Total Score,Toplam Puan Hesapla
-Calendar Events,Takvim Olayları
+Calendar Events,Takvim etkinlikleri
 Call,Çağrı
 Calls,Aramalar
 Campaign,Kampanya
 Campaign Name,Kampanya Adı
 Campaign Name is required,Kampanya Adı gereklidir
-Campaign Naming By,Kampanya İsimlendirme tarafından
-Campaign-.####,Kampanya.# # # #
-Can be approved by {0},{0} tarafından onaylanmış olabilir
-"Can not filter based on Account, if grouped by Account","Hesap göre gruplandırılmış eğer, hesabına dayalı süzemezsiniz"
-"Can not filter based on Voucher No, if grouped by Voucher","Çeki dayalı süzemezsiniz Hayır, Fiş göre gruplandırılmış eğer"
+Campaign Naming By,Kampanya ... tarafından isimlendirilmiştir.
+Campaign-.####,Kampanya-.####
+Can be approved by {0},{0} tarafından onaylanmış
+"Can not filter based on Account, if grouped by Account","Hesap tarafından gruplandırma yapılmışsa, süzme hesap tabanlı yapılamaz."
+"Can not filter based on Voucher No, if grouped by Voucher","Gruplandırma çek tarafından yapılmışsa, çek numarası tabanlı süzme yapılamaz."
 Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total',Şarj tipi veya 'Sıra Önceki Toplamı' 'Sıra Önceki Tutar Açık' ise satır başvurabilirsiniz
 Cancel Material Visit {0} before cancelling this Customer Issue,İptal Malzeme ziyaret {0} Bu Müşteri Sayımız iptalinden önce
 Cancel Material Visits {0} before cancelling this Maintenance Visit,Bu Bakım Ziyaret iptalinden önce Malzeme Ziyaretler {0} İptal

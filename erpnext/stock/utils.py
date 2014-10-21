@@ -5,7 +5,6 @@ import frappe
 from frappe import _
 import json
 from frappe.utils import flt, cstr, nowdate, add_days, cint
-from frappe.defaults import get_global_default
 from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 
 class InvalidWarehouseCompany(frappe.ValidationError): pass
@@ -93,7 +92,7 @@ def get_valuation_method(item_code):
 	"""get valuation method from item or default"""
 	val_method = frappe.db.get_value('Item', item_code, 'valuation_method')
 	if not val_method:
-		val_method = get_global_default('valuation_method') or "FIFO"
+		val_method = frappe.db.get_value("Stock Settings", None, "valuation_method") or "FIFO"
 	return val_method
 
 def get_fifo_rate(previous_stock_queue, qty):

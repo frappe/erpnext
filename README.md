@@ -4,7 +4,7 @@
 
 Includes Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Built on Python / MariaDB.
 
-ERPNext is built on [frappe](https://github.com/frappe/frappe)
+ERPNext is built on [frappe](https://github.com/frappe/frappe) Python Framework.
 
 - [User Guide](http://erpnext.org/user-guide.html)
 - [Getting Help](http://erpnext.org/getting-help.html)
@@ -21,7 +21,7 @@ Use the bench, https://github.com/frappe/bench
 
 1. go to "/login"
 1. Administrator user name: "Administrator"
-1. Administrator passowrd "admin"
+1. Administrator password: "admin"
 
 ### Download and Install
 

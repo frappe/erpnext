@@ -9,7 +9,7 @@ from erpnext.stock.utils import update_bin
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.accounts.utils import get_fiscal_year
 
-def repost(allow_negative_stock=False):
+def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False):
 	"""
 	Repost everything!
 	"""
@@ -22,17 +22,21 @@ def repost(allow_negative_stock=False):
 		(select item_code, warehouse from tabBin
 		union
 		select item_code, warehouse from `tabStock Ledger Entry`) a"""):
-			repost_stock(d[0], d[1])
+			try:
+				repost_stock(d[0], d[1], allow_zero_rate, only_actual)
+				frappe.db.commit()
+			except:
+				frappe.db.rollback()
 
 	if allow_negative_stock:
 		frappe.db.set_default("allow_negative_stock",
 			frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
 	frappe.db.auto_commit_on_many_writes = 0
 
-def repost_stock(item_code, warehouse):
-	repost_actual_qty(item_code, warehouse)
+def repost_stock(item_code, warehouse, allow_zero_rate=False, only_actual=False):
+	repost_actual_qty(item_code, warehouse, allow_zero_rate)
 
-	if item_code and warehouse:
+	if item_code and warehouse and not only_actual:
 		update_bin_qty(item_code, warehouse, {
 			"reserved_qty": get_reserved_qty(item_code, warehouse),
 			"indented_qty": get_indented_qty(item_code, warehouse),
@@ -40,9 +44,9 @@ def repost_stock(item_code, warehouse):
 			"planned_qty": get_planned_qty(item_code, warehouse)
 		})
 
-def repost_actual_qty(item_code, warehouse):
+def repost_actual_qty(item_code, warehouse, allow_zero_rate=False):
 	try:
-		update_entries_after({ "item_code": item_code, "warehouse": warehouse })
+		update_entries_after({ "item_code": item_code, "warehouse": warehouse }, allow_zero_rate)
 	except:
 		pass
 
@@ -69,7 +73,7 @@ def get_reserved_qty(item_code, warehouse):
 					from `tabPacked Item` dnpi_in
 					where item_code = %s and warehouse = %s
 					and parenttype="Sales Order"
-				and item_code != parent_item
+					and item_code != parent_item
 					and exists (select * from `tabSales Order` so
 					where name = dnpi_in.parent and docstatus = 1 and status != 'Stopped')
 				) dnpi)
@@ -208,3 +212,39 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 				pass
 
 		frappe.db.sql("""update `tabSerial No` set warehouse='' where status in ('Delivered', 'Purchase Returned')""")
+
+def repost_all_stock_vouchers():
+	warehouses_with_account = frappe.db.sql_list("""select master_name from tabAccount
+		where ifnull(account_type, '') = 'Warehouse'""")
+
+	vouchers = frappe.db.sql("""select distinct voucher_type, voucher_no
+		from `tabStock Ledger Entry` sle
+		where voucher_type != "Serial No" and sle.warehouse in (%s)
+		order by posting_date, posting_time, name""" %
+		', '.join(['%s']*len(warehouses_with_account)), tuple(warehouses_with_account))
+
+	rejected = []
+	i = 0
+	for voucher_type, voucher_no in vouchers:
+		i+=1
+		print i, "/", len(vouchers)
+		try:
+			for dt in ["Stock Ledger Entry", "GL Entry"]:
+				frappe.db.sql("""delete from `tab%s` where voucher_type=%s and voucher_no=%s"""%
+					(dt, '%s', '%s'), (voucher_type, voucher_no))
+
+			doc = frappe.get_doc(voucher_type, voucher_no)
+			if voucher_type=="Stock Entry" and doc.purpose in ["Manufacture", "Repack"]:
+				doc.get_stock_and_rate(force=1)
+			elif voucher_type=="Purchase Receipt" and doc.is_subcontracted == "Yes":
+				doc.validate()
+
+			doc.update_stock_ledger()
+			doc.make_gl_entries(repost_future_gle=False, allow_negative_stock=True)
+			frappe.db.commit()
+		except Exception, e:
+			print frappe.get_traceback()
+			rejected.append([voucher_type, voucher_no])
+			frappe.db.rollback()
+
+	print rejected

@@ -95,7 +95,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.insert()
 
 		self.assertEquals(len(pr.get("pr_raw_material_details")), 2)
-		self.assertEquals(pr.get("purchase_receipt_details")[0].rm_supp_cost, 70000.0)
+		self.assertEquals(pr.get("purchase_receipt_details")[0].rm_supp_cost, 20750.0)
 
 
 	def test_serial_no_supplier(self):
@@ -151,6 +151,6 @@ def set_perpetual_inventory(enable=1):
 	accounts_settings.save()
 
 
-test_dependencies = ["BOM"]
+test_dependencies = ["BOM", "Item Price"]
 
 test_records = frappe.get_test_records('Purchase Receipt')

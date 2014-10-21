@@ -71,16 +71,17 @@ def setup_account(args=None):
 
 		frappe.db.set_default('desktop:home_page', 'desktop')
 
-		website_maker(args.company_name, args.company_tagline, args.name)
+		website_maker(args.company_name.strip(), args.company_tagline, args.name)
 		create_logo(args)
 
 		frappe.clear_cache()
 		frappe.db.commit()
 
 	except:
-		traceback = frappe.get_traceback()
-		for hook in frappe.get_hooks("setup_wizard_exception"):
-			frappe.get_attr(hook)(traceback, args)
+		if args:
+			traceback = frappe.get_traceback()
+			for hook in frappe.get_hooks("setup_wizard_exception"):
+				frappe.get_attr(hook)(traceback, args)
 
 		raise
 
@@ -134,7 +135,7 @@ def create_fiscal_year_and_company(args):
 	frappe.get_doc({
 		"doctype":"Company",
 		'domain': args.get("industry"),
-		'company_name':args.get('company_name'),
+		'company_name':args.get('company_name').strip(),
 		'abbr':args.get('company_abbr'),
 		'default_currency':args.get('currency'),
 		'country': args.get('country'),
@@ -165,7 +166,7 @@ def set_defaults(args):
 	global_defaults.update({
 		'current_fiscal_year': args.curr_fiscal_year,
 		'default_currency': args.get('currency'),
-		'default_company':args.get('company_name'),
+		'default_company':args.get('company_name').strip(),
 		"country": args.get("country"),
 	})
 
@@ -286,7 +287,7 @@ def create_taxes(args):
 			try:
 				frappe.get_doc({
 					"doctype":"Account",
-					"company": args.get("company_name"),
+					"company": args.get("company_name").strip(),
 					"parent_account": _("Duties and Taxes") + " - " + args.get("company_abbr"),
 					"account_name": args.get("tax_" + str(i)),
 					"group_or_ledger": "Ledger",
@@ -346,7 +347,7 @@ def create_customers(args):
 				"customer_type": "Company",
 				"customer_group": _("Commercial"),
 				"territory": args.get("country"),
-				"company": args.get("company_name")
+				"company": args.get("company_name").strip()
 			}).insert()
 
 			if args.get("customer_contact_" + str(i)):
@@ -366,7 +367,7 @@ def create_suppliers(args):
 				"doctype":"Supplier",
 				"supplier_name": supplier,
 				"supplier_type": _("Local"),
-				"company": args.get("company_name")
+				"company": args.get("company_name").strip()
 			}).insert()
 
 			if args.get("supplier_contact_" + str(i)):

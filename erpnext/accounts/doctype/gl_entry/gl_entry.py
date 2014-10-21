@@ -129,6 +129,11 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 			from `tabGL Entry` where voucher_type = 'Journal Voucher' and voucher_no = %s
 			and account = %s and party_type=%s and party=%s and ifnull(against_voucher, '') = ''""",
 			(against_voucher, account, party_type, party))[0][0])
+
+		if not against_voucher_amount:
+			frappe.throw(_("Against Journal Voucher {0} is already adjusted against some other voucher")
+				.format(against_voucher))
+
 		bal = against_voucher_amount + bal
 		if against_voucher_amount < 0:
 			bal = -bal

@@ -392,7 +392,7 @@ class AccountsController(TransactionBase):
 
 		res = frappe.db.sql("""
 			select
-				t1.name as jv_no, t1.remark, t2.%s as amount, t2.name as jv_detail_no
+				t1.name as jv_no, t1.remark, t2.{0} as amount, t2.name as jv_detail_no, `against_{1}` as against_order
 			from
 				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
 			where
@@ -405,10 +405,9 @@ class AccountsController(TransactionBase):
 						and ifnull(t2.against_jv, '')  = ''
 						and ifnull(t2.against_sales_order, '')  = ''
 						and ifnull(t2.against_purchase_order, '')  = ''
-				) %s)
-			order by t1.posting_date""" %
-			(dr_or_cr, '%s', '%s', '%s', cond), tuple([account_head, party_type, party] + so_list), as_dict=1)
-
+				) {2})
+			order by t1.posting_date""".format(dr_or_cr, against_order_field, cond),
+			[account_head, party_type, party] + so_list, as_dict=1)
 
 		self.set(parentfield, [])
 		for d in res:
@@ -418,7 +417,7 @@ class AccountsController(TransactionBase):
 				"jv_detail_no": d.jv_detail_no,
 				"remarks": d.remark,
 				"advance_amount": flt(d.amount),
-				"allocate_amount": 0
+				"allocated_amount": flt(d.amount) if d.against_order else 0
 			})
 
 	def validate_advance_jv(self, advance_table_fieldname, against_order_field):
