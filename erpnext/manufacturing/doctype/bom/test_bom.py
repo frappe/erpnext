@@ -28,3 +28,15 @@ class TestBOM(unittest.TestCase):
 	def test_get_items_list(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items
 		self.assertEquals(len(get_bom_items(bom="BOM/_Test FG Item 2/001", qty=1, fetch_exploded=1)), 3)
+
+	def test_default_bom(self):
+		bom = frappe.get_doc("BOM", "BOM/_Test FG Item 2/001")
+		bom.is_active = 0
+		bom.save()
+
+		self.assertEqual(frappe.db.get_value("Item", "_Test FG Item 2", "default_bom"), "")
+
+		bom.is_active = 1
+		bom.save()
+
+		self.assertTrue(frappe.db.get_value("Item", "_Test FG Item 2", "default_bom"), "BOM/_Test FG Item 2/001")

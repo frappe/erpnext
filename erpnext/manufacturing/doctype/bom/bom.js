@@ -182,10 +182,7 @@ erpnext.bom.calculate_total = function(doc) {
 
 cur_frm.fields_dict['item'].get_query = function(doc) {
  	return{
-		query: "erpnext.controllers.queries.item_query",
-		filters:{
-			'is_manufactured_item': 'Yes'
-		}
+		query: "erpnext.controllers.queries.item_query"
 	}
 }
 

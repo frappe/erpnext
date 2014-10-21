@@ -254,7 +254,7 @@ def fix_total_debit_credit():
 				(d.diff, d.voucher_type, d.voucher_no))
 
 def get_stock_and_account_difference(account_list=None, posting_date=None):
-	from erpnext.stock.utils import get_stock_balance_on
+	from erpnext.stock.utils import get_stock_value_on
 
 	if not posting_date: posting_date = nowdate()
 
@@ -266,7 +266,7 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 
 	for account, warehouse in account_warehouse.items():
 		account_balance = get_balance_on(account, posting_date)
-		stock_value = get_stock_balance_on(warehouse, posting_date)
+		stock_value = get_stock_value_on(warehouse, posting_date)
 		if abs(flt(stock_value) - flt(account_balance)) > 0.005:
 			difference.setdefault(account, flt(stock_value) - flt(account_balance))
 

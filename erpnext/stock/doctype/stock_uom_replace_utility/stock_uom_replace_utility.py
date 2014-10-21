@@ -33,7 +33,7 @@ class StockUOMReplaceUtility(Document):
 		item_doc.stock_uom = self.new_stock_uom
 		item_doc.save()
 
-		frappe.msgprint(_("Stock UOM updatd for Item {0}").format(self.item_code))
+		frappe.msgprint(_("Stock UOM updated for Item {0}").format(self.item_code))
 
 	def update_bin(self):
 		# update bin

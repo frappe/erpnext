@@ -9,6 +9,17 @@ cur_frm.cscript.refresh = function(doc) {
 
 	cur_frm.cscript.make_dashboard();
 
+	cur_frm.set_intro();
+	if (cur_frm.doc.has_variants) {
+		cur_frm.set_intro(__("This Item is a Template and cannot be used in transactions. Item attributes will be copied over into the variants unless 'No Copy' is set"));
+		cur_frm.add_custom_button(__("Show Variants"), function() {
+			frappe.set_route("List", "Item", {"variant_of": cur_frm.doc.name});
+		}, "icon-list", "btn-default");
+	}
+	if (cur_frm.doc.variant_of) {
+		cur_frm.set_intro(__("This Item is a Variant of {0} (Template). Attributes will be copied over from the template unless 'No Copy' is set", [cur_frm.doc.variant_of]));
+	}
+
 	if (frappe.defaults.get_default("item_naming_by")!="Naming Series") {
 		cur_frm.toggle_display("naming_series", false);
 	} else {
@@ -25,7 +36,7 @@ cur_frm.cscript.refresh = function(doc) {
 
 	if (!doc.__islocal && doc.show_in_website) {
 		cur_frm.set_intro(__("Published on website at: {0}",
-			[repl('<a href="/%(website_route)s" target="_blank">/%(website_route)s</a>', doc.__onload)]));
+			[repl('<a href="/%(website_route)s" target="_blank">/%(website_route)s</a>', doc.__onload)]), true);
 	}
 
 	erpnext.item.toggle_reqd(cur_frm);
@@ -35,10 +46,31 @@ erpnext.item.toggle_reqd = function(frm) {
 	frm.toggle_reqd("default_warehouse", frm.doc.is_stock_item==="Yes");
 };
 
-frappe.ui.form.on("Item", "is_stock_item", function(frm) {
-	erpnext.item.toggle_reqd(frm);
+frappe.ui.form.on("Item", "onload", function(frm) {
+	var df = frappe.meta.get_docfield("Item Variant", "item_attribute_value");
+	df.on_make = function(field) {
+		field.$input.autocomplete({
+			minLength: 0,
+			minChars: 0,
+			source: function(request, response) {
+				frappe.call({
+					method:"frappe.client.get_list",
+					args:{
+						doctype:"Item Attribute Value",
+						filters: [
+							["parent","=", field.doc.item_attribute],
+							["attribute_value", "like", request.term + "%"]
+						],
+						fields: ["attribute_value"]
+					},
+					callback: function(r) {
+						response($.map(r.message, function(d) { return d.attribute_value; }));
+					}
+				});
+			}
+		})
+	}
 });
-
 
 cur_frm.cscript.make_dashboard = function() {
 	cur_frm.dashboard.reset();
@@ -49,7 +81,7 @@ cur_frm.cscript.make_dashboard = function() {
 cur_frm.cscript.edit_prices_button = function() {
 	cur_frm.add_custom_button(__("Add / Edit Prices"), function() {
 		frappe.set_route("Report", "Item Price", {"item_code": cur_frm.doc.name});
-	}, "icon-money");
+	}, "icon-money", "btn-default");
 }
 
 cur_frm.cscript.item_code = function(doc) {
@@ -58,16 +90,6 @@ cur_frm.cscript.item_code = function(doc) {
 	if(!doc.description)
 		cur_frm.set_value("description", doc.item_code);
 }
-
-cur_frm.fields_dict['default_bom'].get_query = function(doc) {
-	return {
-		filters: {
-			'item': doc.item_code,
-			'is_active': 0
-		}
-	}
-}
-
 
 // Expense Account
 // ---------------------------------
@@ -143,7 +165,9 @@ cur_frm.cscript.add_image = function(doc, dt, dn) {
 	doc.description_html = repl('<table style="width: 100%; table-layout: fixed;">' +
 		'<tr><td style="width:110px"><img src="%(imgurl)s" width="100px"></td>' +
 		'<td>%(desc)s</td></tr>' +
-		'</table>', {imgurl: frappe.utils.get_file_link(doc.image), desc:doc.description});
+		'</table>', {
+			imgurl: frappe.utils.get_file_link(doc.image),
+			desc: doc.description.replace(/\n/g, "<br>")});
 
 	refresh_field('description_html');
 }

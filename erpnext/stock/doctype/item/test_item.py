@@ -6,13 +6,81 @@ import unittest
 import frappe
 
 from frappe.test_runner import make_test_records
+from erpnext.stock.doctype.item.item import WarehouseNotSet, DuplicateVariant, ItemTemplateCannotHaveStock
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
 
 class TestItem(unittest.TestCase):
+	def get_item(self, idx):
+		item_code = test_records[idx].get("item_code")
+		if not frappe.db.exists("Item", item_code):
+			item = frappe.copy_doc(test_records[idx])
+			item.insert()
+		else:
+			item = frappe.get_doc("Item", item_code)
+
+		return item
+
+	def test_duplicate_variant(self):
+		item = frappe.copy_doc(test_records[11])
+		item.append("item_variants", {"item_attribute": "Test Size", "item_attribute_value": "Small"})
+		self.assertRaises(DuplicateVariant, item.insert)
+
+	def test_template_cannot_have_stock(self):
+		item = self.get_item(10)
+
+		se = frappe.new_doc("Stock Entry")
+		se.purpose = "Material Receipt"
+		se.append("mtn_details", {
+			"item_code": item.name,
+			"t_warehouse": "Stores - _TC",
+			"qty": 1,
+			"incoming_rate": 1
+		})
+		se.insert()
+		se.submit()
+
+		item.has_variants = 1
+		self.assertRaises(ItemTemplateCannotHaveStock, item.save)
+
+	def test_variant_item_codes(self):
+		item = self.get_item(11)
+
+		variants = ['_Test Variant Item-S', '_Test Variant Item-M', '_Test Variant Item-L']
+		self.assertEqual(item.get_variant_item_codes(), variants)
+		for v in variants:
+			self.assertTrue(frappe.db.get_value("Item", {"variant_of": item.name, "name": v}))
+
+		item.append("item_variants", {"item_attribute": "Test Colour", "item_attribute_value": "Red"})
+		item.append("item_variants", {"item_attribute": "Test Colour", "item_attribute_value": "Blue"})
+		item.append("item_variants", {"item_attribute": "Test Colour", "item_attribute_value": "Green"})
+
+		self.assertEqual(item.get_variant_item_codes(), ['_Test Variant Item-S-R',
+			'_Test Variant Item-S-G', '_Test Variant Item-S-B',
+			'_Test Variant Item-M-R', '_Test Variant Item-M-G',
+			'_Test Variant Item-M-B', '_Test Variant Item-L-R',
+			'_Test Variant Item-L-G', '_Test Variant Item-L-B'])
+
+		self.assertEqual(item.variant_attributes['_Test Variant Item-L-R'], [['Test Size', 'Large'], ['Test Colour', 'Red']])
+		self.assertEqual(item.variant_attributes['_Test Variant Item-S-G'], [['Test Size', 'Small'], ['Test Colour', 'Green']])
+
+		# check stock entry cannot be made
+	def test_stock_entry_cannot_be_made_for_template(self):
+		item = self.get_item(11)
+
+		se = frappe.new_doc("Stock Entry")
+		se.purpose = "Material Receipt"
+		se.append("mtn_details", {
+			"item_code": item.name,
+			"t_warehouse": "Stores - WP",
+			"qty": 1,
+			"incoming_rate": 1
+		})
+		se.insert()
+		self.assertRaises(ItemTemplateCannotHaveStock, se.submit)
+
 	def test_default_warehouse(self):
-		from erpnext.stock.doctype.item.item import WarehouseNotSet
 		item = frappe.copy_doc(test_records[0])
 		item.is_stock_item = "Yes"
 		item.default_warehouse = None
@@ -23,12 +91,12 @@ class TestItem(unittest.TestCase):
 		to_check = {
 			"item_code": "_Test Item",
 			"item_name": "_Test Item",
-			"description": "_Test Item",
+			"description": "_Test Item 1",
 			"warehouse": "_Test Warehouse - _TC",
 			"income_account": "Sales - _TC",
 			"expense_account": "_Test Account Cost for Goods Sold - _TC",
 			"cost_center": "_Test Cost Center 2 - _TC",
-			"qty": 1.0,
+			"qty": 0.0,
 			"price_list_rate": 100.0,
 			"base_price_list_rate": 0.0,
 			"discount_percentage": 0.0,

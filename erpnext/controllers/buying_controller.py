@@ -8,6 +8,7 @@ from frappe.utils import flt, rounded
 
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_details
+from erpnext.stock.get_item_details import get_conversion_factor
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -194,9 +195,8 @@ class BuyingController(StockController):
 
 				self.round_floats_in(item)
 
-				item.conversion_factor = item.conversion_factor or flt(frappe.db.get_value(
-					"UOM Conversion Detail", {"parent": item.item_code, "uom": item.uom},
-					"conversion_factor")) or 1
+				item.conversion_factor = get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
+
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
 				rm_supp_cost = flt(item.rm_supp_cost) if self.doctype=="Purchase Receipt" else 0.0
 

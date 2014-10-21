@@ -164,6 +164,7 @@
    "permlevel": 0
   }, 
   {
+   "description": "Higher the number, higher the priority", 
    "fieldname": "priority", 
    "fieldtype": "Select", 
    "label": "Priority", 
@@ -235,7 +236,7 @@
  "icon": "icon-gift", 
  "idx": 1, 
  "istable": 0, 
- "modified": "2014-06-20 19:36:22.502381", 
+ "modified": "2014-09-26 09:09:38.418765", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Pricing Rule", 

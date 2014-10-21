@@ -7,12 +7,12 @@ import frappe
 from frappe.utils import flt, nowdate
 from frappe import _
 from frappe.model.document import Document
+from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
 
 class ProductionOrder(Document):
-
 	def validate(self):
 		if self.docstatus == 0:
 			self.status = "Draft"
@@ -21,21 +21,15 @@ class ProductionOrder(Document):
 		validate_status(self.status, ["Draft", "Submitted", "Stopped",
 			"In Process", "Completed", "Cancelled"])
 
-		self.validate_bom_no()
+		if self.bom_no:
+			validate_bom_no(self.production_item, self.bom_no)
+
 		self.validate_sales_order()
 		self.validate_warehouse()
 		self.set_fixed_cost()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self, "stock_uom", ["qty", "produced_qty"])
-
-	def validate_bom_no(self):
-		if self.bom_no:
-			bom = frappe.db.sql("""select name from `tabBOM` where name=%s and docstatus=1
-				and is_active=1 and item=%s"""
-				, (self.bom_no, self.production_item), as_dict =1)
-			if not bom:
-				frappe.throw(_("BOM {0} is not active or not submitted").format(self.bom_no))
 
 	def validate_sales_order(self):
 		if self.sales_order:
@@ -185,5 +179,5 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 		stock_entry.from_warehouse = production_order.wip_warehouse
 		stock_entry.to_warehouse = production_order.fg_warehouse
 
-	stock_entry.run_method("get_items")
+	stock_entry.get_items()
 	return stock_entry.as_dict()

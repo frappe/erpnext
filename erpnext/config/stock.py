@@ -129,6 +129,11 @@ def get_data():
 					"description": _("Multiple Item prices."),
 					"route": "Report/Item Price"
 				},
+				{
+					"type": "doctype",
+					"name": "Item Attribute",
+					"description": _("Attributes for Item Variants. e.g Size, Color etc."),
+				},
 			]
 		},
 		{

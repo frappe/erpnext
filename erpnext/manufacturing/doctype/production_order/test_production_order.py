@@ -20,8 +20,10 @@ class TestProductionOrder(unittest.TestCase):
 		pro_doc.submit()
 
 		# add raw materials to stores
-		test_stock_entry.make_stock_entry("_Test Item", None, "Stores - _TC", 100, 100)
-		test_stock_entry.make_stock_entry("_Test Item Home Desktop 100", None, "Stores - _TC", 100, 100)
+		test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target="Stores - _TC", qty=100, incoming_rate=100)
+		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target="Stores - _TC", qty=100, incoming_rate=100)
 
 		# from stores to wip
 		s = frappe.get_doc(make_stock_entry(pro_doc.name, "Material Transfer", 4))
@@ -46,8 +48,10 @@ class TestProductionOrder(unittest.TestCase):
 		from erpnext.manufacturing.doctype.production_order.production_order import StockOverProductionError
 		pro_doc = self.test_planned_qty()
 
-		test_stock_entry.make_stock_entry("_Test Item", None, "_Test Warehouse - _TC", 100, 100)
-		test_stock_entry.make_stock_entry("_Test Item Home Desktop 100", None, "_Test Warehouse - _TC", 100, 100)
+		test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target="_Test Warehouse - _TC", qty=100, incoming_rate=100)
+		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC", qty=100, incoming_rate=100)
 
 		s = frappe.get_doc(make_stock_entry(pro_doc.name, "Manufacture", 7))
 		s.insert()

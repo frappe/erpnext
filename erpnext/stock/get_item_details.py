@@ -40,7 +40,7 @@ def get_item_details(args):
 
 	validate_item_details(args, item)
 
-	out = get_basic_details(args, item_doc)
+	out = get_basic_details(args, item)
 
 	get_party_item_code(args, item_doc, out)
 
@@ -129,8 +129,12 @@ def validate_item_details(args, item):
 		if args.get("is_subcontracted") == "Yes" and item.is_sub_contracted_item != "Yes":
 			throw(_("Item {0} must be a Sub-contracted Item").format(item.name))
 
-def get_basic_details(args, item_doc):
-	item = item_doc
+def get_basic_details(args, item):
+	if not item:
+		item = frappe.get_doc("Item", args.get("item_code"))
+
+	if item.variant_of:
+		item.update_template_tables()
 
 	from frappe.defaults import get_user_default_as_list
 	user_default_warehouse_list = get_user_default_as_list('warehouse')
@@ -138,31 +142,21 @@ def get_basic_details(args, item_doc):
 		if len(user_default_warehouse_list)==1 else ""
 
 	out = frappe._dict({
-
 		"item_code": item.name,
 		"item_name": item.item_name,
 		"description": item.description_html or item.description,
 		"warehouse": user_default_warehouse or args.warehouse or item.default_warehouse,
-		"income_account": (item.income_account
-			or args.income_account
-			or frappe.db.get_value("Item Group", item.item_group, "default_income_account")
-			or frappe.db.get_value("Company", args.company, "default_income_account")),
-		"expense_account": (item.expense_account
-			or args.expense_account
-			or frappe.db.get_value("Item Group", item.item_group, "default_expense_account")
-			or frappe.db.get_value("Company", args.company, "default_expense_account")),
-		"cost_center": (frappe.db.get_value("Project", args.project_name, "cost_center")
-			or (item.selling_cost_center if args.transaction_type == "selling" else item.buying_cost_center)
-			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
-			or frappe.db.get_value("Company", args.company, "cost_center")),
+		"income_account": get_default_income_account(args, item),
+		"expense_account": get_default_expense_account(args, item),
+		"cost_center": get_default_cost_center(args, item),
 		"batch_no": None,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in
-			item_doc.get("item_tax")))),
+			item.get("item_tax")))),
 		"uom": item.stock_uom,
 		"min_order_qty": flt(item.min_order_qty) if args.parenttype == "Material Request" else "",
 		"conversion_factor": 1.0,
-		"qty": 1.0,
-		"stock_qty": 1.0,
+		"qty": 0.0,
+		"stock_qty": 0.0,
 		"price_list_rate": 0.0,
 		"base_price_list_rate": 0.0,
 		"rate": 0.0,
@@ -177,6 +171,24 @@ def get_basic_details(args, item_doc):
 
 	return out
 
+def get_default_income_account(args, item):
+	return (item.income_account
+		or args.income_account
+		or frappe.db.get_value("Item Group", item.item_group, "default_income_account")
+		or frappe.db.get_value("Company", args.company, "default_income_account"))
+
+def get_default_expense_account(args, item):
+	return (item.expense_account
+		or args.expense_account
+		or frappe.db.get_value("Item Group", item.item_group, "default_expense_account")
+		or frappe.db.get_value("Company", args.company, "default_expense_account"))
+
+def get_default_cost_center(args, item):
+	return (frappe.db.get_value("Project", args.project_name, "cost_center")
+		or (item.selling_cost_center if args.transaction_type == "selling" else item.buying_cost_center)
+		or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
+		or frappe.db.get_value("Company", args.company, "cost_center"))
+
 def get_price_list_rate(args, item_doc, out):
 	meta = frappe.get_meta(args.parenttype)
 
@@ -185,10 +197,12 @@ def get_price_list_rate(args, item_doc, out):
 		validate_conversion_rate(args, meta)
 
 
-		price_list_rate = frappe.db.get_value("Item Price",
-			{"price_list": args.price_list, "item_code": args.item_code}, "price_list_rate")
+		price_list_rate = get_price_list_rate_for(args, item_doc.name)
+		if not price_list_rate and item_doc.variant_of:
+			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
 
-		if not price_list_rate: return {}
+		if not price_list_rate:
+			return {}
 
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
 			/ flt(args.conversion_rate)
@@ -197,6 +211,10 @@ def get_price_list_rate(args, item_doc, out):
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 			out.update(get_last_purchase_details(item_doc.name,
 				args.parent, args.conversion_rate))
+
+def get_price_list_rate_for(args, item_code):
+	return frappe.db.get_value("Item Price",
+			{"price_list": args.price_list, "item_code": item_code}, "price_list_rate")
 
 def validate_price_list(args):
 	if args.get("price_list"):
@@ -235,7 +253,6 @@ def get_party_item_code(args, item_doc, out):
 	else:
 		item_supplier = item_doc.get("item_supplier_details", {"supplier": args.supplier})
 		out.supplier_part_no = item_supplier[0].supplier_part_no if item_supplier else None
-
 
 def get_pos_settings_item_details(company, args, pos_settings=None):
 	res = frappe._dict()
@@ -276,8 +293,13 @@ def get_serial_nos_by_fifo(args, item_doc):
 
 @frappe.whitelist()
 def get_conversion_factor(item_code, uom):
+	variant_of = frappe.db.get_value("Item", item_code, "variant_of")
+	filters = {"parent": item_code, "uom": uom}
+	if variant_of:
+		filters = {"parent": ("in", (item_code, variant_of))}
+
 	return {"conversion_factor": frappe.db.get_value("UOM Conversion Detail",
-		{"parent": item_code, "uom": uom}, "conversion_factor")}
+		filters, "conversion_factor")}
 
 @frappe.whitelist()
 def get_projected_qty(item_code, warehouse):

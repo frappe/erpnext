@@ -54,7 +54,7 @@ class BOM(Document):
 	def get_item_det(self, item_code):
 		item = frappe.db.sql("""select name, is_asset_item, is_purchase_item,
 			docstatus, description, is_sub_contracted_item, stock_uom, default_bom,
-			last_purchase_rate, is_manufactured_item
+			last_purchase_rate
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
 
 		return item
@@ -149,14 +149,19 @@ class BOM(Document):
 		if self.is_default and self.is_active:
 			from frappe.model.utils import set_default
 			set_default(self, "item")
-			frappe.db.set_value("Item", self.item, "default_bom", self.name)
+			item = frappe.get_doc("Item", self.item)
+			if item.default_bom != self.name:
+				item.default_bom = self.name
+				item.save()
 
 		else:
 			if not self.is_active:
 				frappe.db.set(self, "is_default", 0)
 
-			frappe.db.sql("update `tabItem` set default_bom = null where name = %s and default_bom = %s",
-				 (self.item, self.name))
+				item = frappe.get_doc("Item", self.item)
+				if item.default_bom == self.name:
+					item.default_bom = None
+					item.save()
 
 	def clear_operations(self):
 		if not self.with_operations:
@@ -169,9 +174,6 @@ class BOM(Document):
 		item = self.get_item_det(self.item)
 		if not item:
 			frappe.throw(_("Item {0} does not exist in the system or has expired").format(self.item))
-		elif item[0]['is_manufactured_item'] != 'Yes' \
-				and item[0]['is_sub_contracted_item'] != 'Yes':
-			frappe.throw(_("Item {0} must be manufactured or sub-contracted").format(self.item))
 		else:
 			ret = frappe.db.get_value("Item", self.item, ["description", "stock_uom"])
 			self.description = ret[0]
@@ -195,28 +197,14 @@ class BOM(Document):
 			if self.with_operations and cstr(m.operation_no) not in self.op:
 				frappe.throw(_("Operation {0} not present in Operations Table").format(m.operation_no))
 
-			item = self.get_item_det(m.item_code)
-			if item[0]['is_manufactured_item'] == 'Yes':
-				if not m.bom_no:
-					frappe.throw(_("BOM number is required for manufactured Item {0} in row {1}").format(m.item_code, m.idx))
-				else:
-					self.validate_bom_no(m.item_code, m.bom_no, m.idx)
-
-			elif m.bom_no:
-				frappe.throw(_("BOM number not allowed for non-manufactured Item {0} in row {1}").format(m.item_code, m.idx))
+			if m.bom_no:
+				validate_bom_no(m.item_code, m.bom_no)
 
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 
 			self.check_if_item_repeated(m.item_code, m.operation_no, check_list)
 
-	def validate_bom_no(self, item, bom_no, idx):
-		"""Validate BOM No of sub-contracted items"""
-		bom = frappe.db.sql("""select name from `tabBOM` where name = %s and item = %s
-			and is_active=1 and docstatus=1""",
-			(bom_no, item), as_dict =1)
-		if not bom:
-			frappe.throw(_("BOM {0} for Item {1} in row {2} is inactive or not submitted").format(bom_no, item, idx))
 
 	def check_if_item_repeated(self, item, op, check_list):
 		if [cstr(item), cstr(op)] in check_list:
@@ -424,3 +412,16 @@ def get_bom_items(bom, qty=1, fetch_exploded=1):
 	items = get_bom_items_as_dict(bom, qty, fetch_exploded).values()
 	items.sort(lambda a, b: a.item_code > b.item_code and 1 or -1)
 	return items
+
+def validate_bom_no(item, bom_no):
+	"""Validate BOM No of sub-contracted items"""
+	bom = frappe.get_doc("BOM", bom_no)
+	if not bom.is_active:
+		frappe.throw(_("BOM {0} must be active").format(bom_no))
+	if not bom.docstatus!=1:
+		if not getattr(frappe.flags, "in_test", False):
+			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
+	if item and not (bom.item == item or \
+		bom.item == frappe.db.get_value("Item", item, "variant_of")):
+		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))
+
