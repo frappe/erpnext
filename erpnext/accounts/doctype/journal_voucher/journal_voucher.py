@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, money_in_words
+from frappe.utils import cstr, flt, fmt_money, formatdate, getdate
 from frappe import msgprint, _, scrub
 from erpnext.setup.utils import get_company_currency
 from erpnext.controllers.accounts_controller import AccountsController
@@ -106,25 +106,35 @@ class JournalVoucher(AccountsController):
 
 	def validate_entries_for_advance(self):
 		for d in self.get('entries'):
-			if not d.is_advance and not d.against_voucher and \
-					not d.against_invoice and not d.against_jv:
-
+			if not (d.against_voucher and d.against_invoice and d.against_jv):
 				if (d.party_type == 'Customer' and flt(d.credit) > 0) or \
 						(d.party_type == 'Supplier' and flt(d.debit) > 0):
-					msgprint(_("Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.").format(d.row, d.account))
+					if not d.is_advance:
+						msgprint(_("Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.").format(d.idx, d.account))
+					elif (d.against_sales_order or d.against_purchase_order) and d.is_advance != "Yes":
+						frappe.throw(_("Row {0}: Payment against Sales/Purchase Order should always be marked as advance").format(d.idx))
 
 	def validate_against_jv(self):
 		for d in self.get('entries'):
 			if d.against_jv:
+				account_root_type = frappe.db.get_value("Account", d.account, "root_type")
+				if account_root_type == "Asset" and flt(d.debit) > 0:
+					frappe.throw(_("For {0}, only credit entries can be linked against another debit entry")
+						.format(d.account))
+				elif account_root_type == "Liability" and flt(d.credit) > 0:
+					frappe.throw(_("For {0}, only debit entries can be linked against another credit entry")
+						.format(d.account))
+
 				if d.against_jv == self.name:
 					frappe.throw(_("You can not enter current voucher in 'Against Journal Voucher' column"))
 
 				against_entries = frappe.db.sql("""select * from `tabJournal Voucher Detail`
 					where account = %s and docstatus = 1 and parent = %s
-					and ifnull(against_jv, '') = ''""", (d.account, d.against_jv), as_dict=True)
+					and ifnull(against_jv, '') = '' and ifnull(against_invoice, '') = ''
+					and ifnull(against_voucher, '') = ''""", (d.account, d.against_jv), as_dict=True)
 
 				if not against_entries:
-					frappe.throw(_("Journal Voucher {0} does not have account {1} or already matched")
+					frappe.throw(_("Journal Voucher {0} does not have account {1} or already matched against other voucher")
 						.format(d.against_jv, d.account))
 				else:
 					dr_or_cr = "debit" if d.credit > 0 else "credit"
@@ -204,7 +214,7 @@ class JournalVoucher(AccountsController):
 	def validate_against_order_fields(self, doctype, payment_against_voucher):
 		for voucher_no, payment_list in payment_against_voucher.items():
 			voucher_properties = frappe.db.get_value(doctype, voucher_no,
-				["docstatus", "per_billed", "advance_paid", "grand_total"])
+				["docstatus", "per_billed", "status", "advance_paid", "grand_total"])
 
 			if voucher_properties[0] != 1:
 				frappe.throw(_("{0} {1} is not submitted").format(doctype, voucher_no))
@@ -212,7 +222,10 @@ class JournalVoucher(AccountsController):
 			if flt(voucher_properties[1]) >= 100:
 				frappe.throw(_("{0} {1} is fully billed").format(doctype, voucher_no))
 
-			if flt(voucher_properties[3]) < flt(voucher_properties[2]) + flt(sum(payment_list)):
+			if cstr(voucher_properties[2]) == "Stopped":
+				frappe.throw(_("{0} {1} is stopped").format(doctype, voucher_no))
+
+			if flt(voucher_properties[4]) < flt(voucher_properties[3]) + flt(sum(payment_list)):
 				frappe.throw(_("Advance paid against {0} {1} cannot be greater \
 					than Grand Total {2}").format(doctype, voucher_no, voucher_properties[3]))
 
@@ -295,15 +308,21 @@ class JournalVoucher(AccountsController):
 				self.aging_date = self.posting_date
 
 	def set_print_format_fields(self):
-		currency = get_company_currency(self.company)
 		for d in self.get('entries'):
 			if d.party_type and d.party:
 				if not self.pay_to_recd_from:
 					self.pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
 						"customer_name" if d.party_type=="Customer" else "supplier_name")
+
+					self.set_total_amount(d.debit or d.credit)
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
-				self.total_amount = fmt_money(d.debit or d.credit, currency=currency)
-				self.total_amount_in_words = money_in_words(self.total_amount, currency)
+				self.set_total_amount(d.debit or d.credit)
+
+	def set_total_amount(self, amt):
+		company_currency = get_company_currency(self.company)
+		self.total_amount = fmt_money(amt, currency=company_currency)
+		from frappe.utils import money_in_words
+		self.total_amount_in_words = money_in_words(amt, company_currency)
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
@@ -481,9 +500,9 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select jv.name, jv.posting_date, jv.user_remark
 		from `tabJournal Voucher` jv, `tabJournal Voucher Detail` jv_detail
 		where jv_detail.parent = jv.name and jv_detail.account = %s and jv_detail.party = %s
-		and jv.docstatus = 1 and jv.%s like %s order by jv.name desc limit %s, %s""" %
-		("%s", searchfield, "%s", "%s", "%s"),
-		(filters["account"], filters["party"], "%%%s%%" % txt, start, page_len))
+		and (ifnull(jvd.against_invoice, '') = '' and ifnull(jvd.against_voucher, '') = '' and ifnull(jvd.against_jv, '') = '' )
+		and jv.docstatus = 1 and jv.{0} like %s order by jv.name desc limit %s, %s""".format(searchfield),
+		(filters["account"], filters["party"], "%{0}%".format(txt), start, page_len))
 
 @frappe.whitelist()
 def get_outstanding(args):

@@ -28,8 +28,8 @@ class AccountsReceivableReport(object):
 			_("Due Date") + ":Date:80", _("Invoiced Amount") + ":Currency:100",
 			_("Payment Received") + ":Currency:100", _("Outstanding Amount") + ":Currency:100",
 			_("Age") + ":Int:50", "0-" + self.filters.range1 + ":Currency:100",
-			self.filters.range1 + "-" + self.filters.range2 + ":Currency:100", 
-			self.filters.range2 + "-" + self.filters.range3 + ":Currency:100", 
+			self.filters.range1 + "-" + self.filters.range2 + ":Currency:100",
+			self.filters.range2 + "-" + self.filters.range3 + ":Currency:100",
 			self.filters.range3 + _("-Above") + ":Currency:100",
 			_("Territory") + ":Link/Territory:80", _("Remarks") + "::200"
 		]
@@ -80,6 +80,9 @@ class AccountsReceivableReport(object):
 		return (
 			# advance
 			(not gle.against_voucher) or
+
+			# against sales order
+			(gle.against_voucher_type == "Sales Order") or
 
 			# sales invoice
 			(gle.against_voucher==gle.voucher_no and gle.debit > 0) or

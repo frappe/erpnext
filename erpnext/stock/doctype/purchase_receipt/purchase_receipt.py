@@ -130,7 +130,7 @@ class PurchaseReceipt(BuyingController):
 				 if not d.prevdoc_docname:
 					 frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
 
-	def update_stock(self):
+	def update_stock_ledger(self):
 		sl_entries = []
 		stock_items = self.get_stock_items()
 
@@ -234,7 +234,7 @@ class PurchaseReceipt(BuyingController):
 
 		self.update_ordered_qty()
 
-		self.update_stock()
+		self.update_stock_ledger()
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "purchase_receipt_details")
@@ -267,7 +267,7 @@ class PurchaseReceipt(BuyingController):
 
 		self.update_ordered_qty()
 
-		self.update_stock()
+		self.update_stock_ledger()
 
 		self.update_prevdoc_status()
 		pc_obj.update_last_purchase_rate(self, 0)

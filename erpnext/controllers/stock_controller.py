@@ -8,7 +8,7 @@ from frappe import msgprint, _
 import frappe.defaults
 
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries
+from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
 
 class StockController(AccountsController):
 	def make_gl_entries(self, repost_future_gle=True):
@@ -24,11 +24,12 @@ class StockController(AccountsController):
 
 			if repost_future_gle:
 				items, warehouses = self.get_items_and_warehouses()
-				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items, warehouse_account)
+				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items,
+					warehouse_account)
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
-		from erpnext.accounts.general_ledger import process_gl_map
+
 		if not warehouse_account:
 			warehouse_account = get_warehouse_account()
 
@@ -118,7 +119,8 @@ class StockController(AccountsController):
 
 	def get_stock_ledger_details(self):
 		stock_ledger = {}
-		for sle in frappe.db.sql("""select warehouse, stock_value_difference, voucher_detail_no
+		for sle in frappe.db.sql("""select warehouse, stock_value_difference,
+			voucher_detail_no, item_code, posting_date, actual_qty
 			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""",
 			(self.doctype, self.name), as_dict=True):
 				stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
@@ -214,7 +216,8 @@ class StockController(AccountsController):
 
 		return serialized_items
 
-def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None, warehouse_account=None):
+def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
+		warehouse_account=None):
 	def _delete_gl_entries(voucher_type, voucher_no):
 		frappe.db.sql("""delete from `tabGL Entry`
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))

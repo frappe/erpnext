@@ -34,20 +34,20 @@
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> إضافة / تحرير < / A>"
 "<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> افتراضي قالب </ H4>  <p> ويستخدم <a href=""http://jinja.pocoo.org/docs/templates/""> جنجا القولبة </ a> و كافة الحقول من العنوان ( بما في ذلك الحقول المخصصة إن وجدت) وسوف تكون متاحة </ P>  <PRE> على <code> {{}} address_line1 <BR>  {٪ إذا address_line2٪} {{}} address_line2 <BR> { ENDIF٪ -٪}  {{المدينة}} <BR>  {٪ إذا الدولة٪} {{الدولة}} {<BR>٪ ENDIF -٪}  {٪ إذا كان الرقم السري٪} PIN: {{}} الرقم السري {<BR>٪ ENDIF -٪}  {{البلد}} <BR>  {٪ إذا كان الهاتف٪} الهاتف: {{هاتف}} {<BR> ENDIF٪ -٪}  {٪ إذا الفاكس٪} فاكس: {{}} الفاكس <BR> {٪ ENDIF -٪}  {٪٪ إذا email_id} البريد الإلكتروني: {{}} email_id <BR> ؛ {٪ ENDIF -٪}  </ رمز> </ قبل>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,يوجد مجموعة العملاء مع نفس الاسم الرجاء تغيير اسم العميل أو إعادة تسمية المجموعة العملاء
-A Customer exists with same name,العملاء من وجود نفس الاسم مع
+A Customer exists with same name,يوجد في قائمة العملاء عميل بنفس الاسم
 A Lead with this email id should exist,وينبغي أن يكون هذا المعرف الرصاص مع البريد الإلكتروني موجود
 A Product or Service,منتج أو خدمة
 A Supplier exists with same name,وهناك مورد موجود مع نفس الاسم
 A symbol for this currency. For e.g. $,رمزا لهذه العملة. على سبيل المثال ل$
 AMC Expiry Date,AMC تاريخ انتهاء الاشتراك
 Abbr,ابر
-Abbreviation cannot have more than 5 characters,اختصار لا يمكن أن يكون أكثر من 5 أحرف
+Abbreviation cannot have more than 5 characters,الاختصار لا يمكن أن يكون أكثر من 5 أحرف
 Above Value,فوق القيمة
 Absent,غائب
 Acceptance Criteria,معايير القبول
 Accepted,مقبول
 Accepted + Rejected Qty must be equal to Received quantity for Item {0},يجب أن يكون مقبول مرفوض + الكمية مساوية ل كمية تلقى القطعة ل {0}
-Accepted Quantity,قبلت الكمية
+Accepted Quantity,كمية مقبولة
 Accepted Warehouse,قبلت مستودع
 Account,حساب
 Account Balance,رصيد حسابك
@@ -65,12 +65,12 @@ Account with child nodes cannot be converted to ledger,حساب مع العقد 
 Account with existing transaction can not be converted to group.,حساب مع الصفقة الحالية لا يمكن تحويلها إلى المجموعة.
 Account with existing transaction can not be deleted,حساب مع الصفقة الحالية لا يمكن حذف
 Account with existing transaction cannot be converted to ledger,حساب مع الصفقة الحالية لا يمكن تحويلها إلى دفتر الأستاذ
-Account {0} cannot be a Group,حساب {0} لا يمكن أن تكون المجموعة
-Account {0} does not belong to Company {1},حساب {0} لا تنتمي إلى شركة {1}
+Account {0} cannot be a Group,حساب {0} لا يمكن أن يكون مجموعة
+Account {0} does not belong to Company {1},حساب {0} لا ينتمي إلى شركة {1}
 Account {0} does not belong to company: {1},حساب {0} لا تنتمي إلى الشركة: {1}
 Account {0} does not exist,حساب {0} غير موجود
-Account {0} has been entered more than once for fiscal year {1},حساب {0} تم إدخال أكثر من مرة للعام المالي {1}
-Account {0} is frozen,حساب {0} يتم تجميد
+Account {0} has been entered more than once for fiscal year {1},تم إدخال حساب {0} أكثر من مرة للعام المالي {1}
+Account {0} is frozen,حساب {0} مجمد
 Account {0} is inactive,حساب {0} غير نشط
 Account {0} is not valid,حساب {0} غير صالح
 Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"حساب {0} يجب أن تكون من النوع ' الأصول الثابتة ""كما البند {1} هو البند الأصول"
@@ -85,8 +85,8 @@ Accounting,المحاسبة
 "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.",قيد محاسبي المجمدة تصل إلى هذا التاريخ، لا أحد يمكن أن تفعل / تعديل إدخال باستثناء دور المحددة أدناه.
 Accounting journal entries.,المحاسبة إدخالات دفتر اليومية.
 Accounts,حسابات
-Accounts Browser,حسابات متصفح
-Accounts Frozen Upto,حسابات مجمدة لغاية
+Accounts Browser,متصفح الحسابات 
+Accounts Frozen Upto,حسابات مجمدة حتي
 Accounts Payable,ذمم دائنة
 Accounts Receivable,حسابات القبض
 Accounts Settings,إعدادات الحسابات
@@ -94,14 +94,14 @@ Active,نشط
 Active: Will extract emails from ,نشط: سيتم استخراج رسائل البريد الإلكتروني من
 Activity,نشاط
 Activity Log,سجل النشاط
-Activity Log:,النشاط المفتاح:
-Activity Type,النشاط نوع
+Activity Log:,:سجل النشاط
+Activity Type,نوع النشاط
 Actual,فعلي
 Actual Budget,الميزانية الفعلية
 Actual Completion Date,تاريخ الإنتهاء الفعلي
-Actual Date,تاريخ الفعلية
+Actual Date,التاريخ الفعلي
 Actual End Date,تاريخ الإنتهاء الفعلي
-Actual Invoice Date,الفعلي تاريخ الفاتورة
+Actual Invoice Date,التاريخ الفعلي للفاتورة
 Actual Posting Date,تاريخ النشر الفعلي
 Actual Qty,الكمية الفعلية
 Actual Qty (at source/target),الكمية الفعلية (في المصدر / الهدف)
@@ -112,7 +112,7 @@ Actual Start Date,تاريخ البدء الفعلي
 Add,إضافة
 Add / Edit Taxes and Charges,إضافة / تعديل الضرائب والرسوم
 Add Child,إضافة الطفل
-Add Serial No,إضافة رقم المسلسل
+Add Serial No,إضافة رقم تسلسلي
 Add Taxes,إضافة الضرائب
 Add Taxes and Charges,إضافة الضرائب والرسوم
 Add or Deduct,إضافة أو خصم
@@ -131,7 +131,7 @@ Address Line 2,العنوان سطر 2
 Address Template,قالب عنوان
 Address Title,عنوان عنوان
 Address Title is mandatory.,عنوان عنوانها إلزامية.
-Address Type,عنوان نوع
+Address Type,نوع العنوان
 Address master.,عنوان رئيسي.
 Administrative Expenses,المصاريف الإدارية
 Administrative Officer,موظف إداري
@@ -217,7 +217,7 @@ Amount to Bill,تصل إلى بيل
 An Customer exists with same name,موجود على العملاء مع نفس الاسم
 "An Item Group exists with same name, please change the item name or rename the item group",وجود فريق المدينة مع نفس الاسم، الرجاء تغيير اسم العنصر أو إعادة تسمية المجموعة البند
 "An item exists with same name ({0}), please change the item group name or rename the item",عنصر موجود مع نفس الاسم ( {0} ) ، الرجاء تغيير اسم المجموعة البند أو إعادة تسمية هذا البند
-Analyst,المحلل
+Analyst,محلل
 Annual,سنوي
 Another Period Closing Entry {0} has been made after {1},دخول أخرى الفترة الإنتهاء {0} أحرز بعد {1}
 Another Salary Structure {0} is active for employee {0}. Please make its status 'Inactive' to proceed.,"هيكل الرواتب أخرى {0} نشطة للموظف {0} . يرجى التأكد مكانتها ""غير نشطة "" والمضي قدما."
@@ -266,15 +266,15 @@ Atleast one of the Selling or Buying must be selected,يجب تحديد الاق
 Atleast one warehouse is mandatory,واحدة على الاقل مستودع إلزامي
 Attach Image,إرفاق صورة
 Attach Letterhead,نعلق رأسية
-Attach Logo,نعلق شعار
-Attach Your Picture,نعلق صورتك
+Attach Logo,إرفاق صورة الشعار/العلامة التجارية
+Attach Your Picture,إرفاق صورتك
 Attendance,الحضور
 Attendance Date,تاريخ الحضور
 Attendance Details,تفاصيل الحضور
 Attendance From Date,الحضور من تاريخ
 Attendance From Date and Attendance To Date is mandatory,الحضور من التسجيل والحضور إلى تاريخ إلزامي
 Attendance To Date,الحضور إلى تاريخ
-Attendance can not be marked for future dates,لا يمكن أن تكون علامة لحضور تواريخ مستقبلية
+Attendance can not be marked for future dates,لا يمكن أن ىكون تاريخ الحضور تاريخ مستقبلي
 Attendance for employee {0} is already marked,الحضور للموظف {0} تم وضع علامة بالفعل
 Attendance record.,سجل الحضور.
 Authorization Control,إذن التحكم
@@ -287,13 +287,13 @@ Automatically extract Job Applicants from a mail box ,
 Automatically extract Leads from a mail box e.g.,استخراج الشراء تلقائيا من صندوق البريد على سبيل المثال
 Automatically updated via Stock Entry of type Manufacture/Repack,تحديثها تلقائيا عن طريق إدخال الأسهم الصنع نوع / أعد حزم
 Automotive,السيارات
-Autoreply when a new mail is received,عندما رد تلقائي تلقي بريد جديد
+Autoreply when a new mail is received,رد تلقائي عند تلقي بريد جديد
 Available,متاح
 Available Qty at Warehouse,الكمية المتاحة في مستودع
 Available Stock for Packing Items,الأسهم المتاحة للتعبئة وحدات
 "Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet",المتاحة في BOM ، تسليم مذكرة ، شراء الفاتورة ، ترتيب الإنتاج، طلب شراء ، شراء استلام ، فاتورة المبيعات ، ترتيب المبيعات ، اسهم الدخول و الجدول الزمني
 Average Age,متوسط ​​العمر
-Average Commission Rate,متوسط ​​سعر جنة
+Average Commission Rate,متوسط ​​العمولة
 Average Discount,متوسط ​​الخصم
 Awesome Products,المنتجات رهيبة
 Awesome Services,خدمات رهيبة
@@ -331,9 +331,9 @@ Bank Clearance Summary,بنك ملخص التخليص
 Bank Draft,البنك مشروع
 Bank Name,اسم البنك
 Bank Overdraft Account,حساب السحب على المكشوف المصرفي
-Bank Reconciliation,البنك المصالحة
-Bank Reconciliation Detail,البنك المصالحة تفاصيل
-Bank Reconciliation Statement,بيان التسويات المصرفية
+Bank Reconciliation,تسوية البنك
+Bank Reconciliation Detail,تفاصيل تسوية البنك
+Bank Reconciliation Statement,بيان تسوية البنك
 Bank Voucher,البنك قسيمة
 Bank/Cash Balance,بنك / النقد وما في حكمه
 Banking,مصرفي
@@ -405,21 +405,21 @@ Bundle items at time of sale.,حزمة البنود في وقت البيع.
 Business Development Manager,مدير تطوير الأعمال
 Buying,شراء
 Buying & Selling,شراء وبيع
-Buying Amount,شراء المبلغ
-Buying Settings,شراء إعدادات
+Buying Amount,مبلغ الشراء
+Buying Settings,إعدادات الشراء
 "Buying must be checked, if Applicable For is selected as {0}",يجب أن يتم التحقق الشراء، إذا تم تحديد مطبق للك {0}
 C-Form,نموذج C-
 C-Form Applicable,C-نموذج قابل للتطبيق
-C-Form Invoice Detail,C-نموذج تفاصيل الفاتورة
-C-Form No,C-الاستمارة رقم
-C-Form records,سجلات نموذج C-
+C-Form Invoice Detail, تفاصيل الفاتورة نموذج - س 
+C-Form No,رقم النموذج - س 
+C-Form records,سجلات النموذج - س
 CENVAT Capital Goods,CENVAT السلع الرأسمالية
 CENVAT Edu Cess,CENVAT ايدو سيس
 CENVAT SHE Cess,CENVAT SHE سيس
 CENVAT Service Tax,CENVAT ضريبة الخدمة
 CENVAT Service Tax Cess 1,خدمة CENVAT ضريبة سيس 1
 CENVAT Service Tax Cess 2,خدمة CENVAT ضريبة سيس 2
-Calculate Based On,حساب الربح بناء على
+Calculate Based On,إحسب الربح بناء على
 Calculate Total Score,حساب النتيجة الإجمالية
 Calendar Events,الأحداث
 Call,دعوة
@@ -538,7 +538,7 @@ Commission on Sales,عمولة على المبيعات
 Commission rate cannot be greater than 100,معدل العمولة لا يمكن أن يكون أكبر من 100
 Communication,اتصالات
 Communication HTML,الاتصالات HTML
-Communication History,الاتصال التاريخ
+Communication History,تاريخ الاتصال
 Communication log.,سجل الاتصالات.
 Communications,الاتصالات
 Company,شركة
@@ -1025,7 +1025,7 @@ Extract Emails,استخراج رسائل البريد الإلكتروني
 FCFS Rate,FCFS قيم
 Failed: ,فشل:
 Family Background,الخلفية العائلية
-Fax,بالفاكس
+Fax,فاكس
 Features Setup,ميزات الإعداد
 Feed,أطعم
 Feed Type,إطعام نوع
@@ -1041,7 +1041,7 @@ Financial / accounting year.,المالية / المحاسبة العام.
 Financial Analytics,تحليلات مالية
 Financial Services,الخدمات المالية
 Financial Year End Date,تاريخ نهاية السنة المالية
-Financial Year Start Date,السنة المالية تاريخ بدء
+Financial Year Start Date,تاريخ بدء السنة المالية
 Finished Goods,السلع تامة الصنع
 First Name,الاسم الأول
 First Responded On,أجاب أولا على
@@ -1059,7 +1059,7 @@ Food,غذاء
 For Company,لشركة
 For Employee,لموظف
 For Employee Name,لاسم الموظف
-For Price List,ل ائحة الأسعار
+For Price List,لائحة الأسعار
 For Production,للإنتاج
 For Reference Only.,للإشارة فقط.
 For Sales Invoice,لفاتورة المبيعات
@@ -1823,7 +1823,7 @@ Notify by Email on creation of automatic Material Request,إبلاغ عن طري
 Number Format,عدد تنسيق
 Offer Date,عرض التسجيل
 Office,مكتب
-Office Equipments,معدات المكاتب
+Office Equipments,أدوات المكتب
 Office Maintenance Expenses,مصاريف صيانة المكاتب
 Office Rent,مكتب للإيجار
 Old Parent,العمر الرئيسي
@@ -1840,7 +1840,7 @@ Open Production Orders,أوامر مفتوحة الانتاج
 Open Tickets,تذاكر مفتوحة
 Opening (Cr),افتتاح (الكروم )
 Opening (Dr),افتتاح ( الدكتور )
-Opening Date,فتح تاريخ
+Opening Date,تاريخ الفتح
 Opening Entry,فتح دخول
 Opening Qty,فتح الكمية
 Opening Time,يفتح من الساعة
@@ -1854,7 +1854,7 @@ Operation {0} is repeated in Operations Table,عملية {0} يتكرر في ج�
 Operation {0} not present in Operations Table,عملية {0} غير موجودة في جدول العمليات
 Operations,عمليات
 Opportunity,فرصة
-Opportunity Date,الفرصة تاريخ
+Opportunity Date,تاريخ الفرصة
 Opportunity From,فرصة من
 Opportunity Item,فرصة السلعة
 Opportunity Items,فرصة الأصناف
@@ -1914,9 +1914,9 @@ Packing Slip,زلة التعبئة
 Packing Slip Item,التعبئة الإغلاق زلة
 Packing Slip Items,التعبئة عناصر زلة
 Packing Slip(s) cancelled,زلة التعبئة (ق ) إلغاء
-Page Break,الصفحة استراحة
-Page Name,الصفحة اسم
-Paid Amount,دفع المبلغ
+Page Break,فاصل الصفحة
+Page Name,اسم الصفحة
+Paid Amount,المبلغ المدفوع
 Paid amount + Write Off Amount can not be greater than Grand Total,المبلغ المدفوع + شطب المبلغ لا يمكن أن يكون أكبر من المجموع الكلي
 Pair,زوج
 Parameter,المعلمة
@@ -3128,7 +3128,7 @@ Users with this role are allowed to create / modify accounting entry before froz
 Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,يسمح للمستخدمين مع هذا الدور لضبط الحسابات المجمدة و إنشاء / تعديل القيود المحاسبية على حسابات مجمدة
 Utilities,خدمات
 Utility Expenses,مصاريف فائدة
-Valid For Territories,صالحة للالأقاليم
+Valid For Territories,صالحة للأقاليم
 Valid From,صالحة من
 Valid Upto,صالحة لغاية
 Valid for Territories,صالحة للالأقاليم
@@ -3237,7 +3237,7 @@ Write Off Voucher,شطب قسيمة
 Wrong Template: Unable to find head row.,قالب الخطأ: تعذر العثور على صف الرأس.
 Year,عام
 Year Closed,مغلق العام
-Year End Date,نهاية التاريخ العام
+Year End Date,تاريخ نهاية العام
 Year Name,اسم العام
 Year Start Date,تاريخ بدء العام
 Year of Passing,اجتياز سنة
@@ -3261,8 +3261,8 @@ You have entered duplicate items. Please rectify and try again.,لقد دخلت 
 You may need to update: {0},قد تحتاج إلى تحديث : {0}
 You must Save the form before proceeding,يجب حفظ النموذج قبل الشروع
 Your Customer's TAX registration numbers (if applicable) or any general information,عميلك أرقام التسجيل الضريبي (إن وجدت) أو أي معلومات عامة
-Your Customers,الزبائن
-Your Login Id,تسجيل الدخول اسم المستخدم الخاص بك
+Your Customers,العملاء
+Your Login Id,تسجيل الدخول - اسم المستخدم الخاص بك
 Your Products or Services,المنتجات أو الخدمات الخاصة بك
 Your Suppliers,لديك موردون
 Your email address,عنوان البريد الإلكتروني الخاص بك
