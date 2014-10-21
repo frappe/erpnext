@@ -7,7 +7,7 @@ $(document).ready(function() {
 	
 	frappe.call({
 		type: "POST",
-		method: "shopping_cart.shopping_cart.product.get_product_info",
+		method: "erpnext.shopping_cart.product.get_product_info",
 		args: {
 			item_code: "{{ name }}"
 		},

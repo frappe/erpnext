@@ -3332,3 +3332,49 @@ website page link,сайт ссылку
 {0} {1} status is Unstopped,{0} {1} статус отверзутся
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: МВЗ является обязательным для п. {2}
 {0}: {1} not found in Invoice Details table,{0} {1} не найден в счете-фактуре таблице
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Добавить / Изменить </>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Добавить / Изменить </>"
+Billed,Объявленный
+Company,Организация
+Currency is required for Price List {0},Валюта необходима для Прейскурантом {0}
+Default Customer Group,По умолчанию Группа клиентов
+Default Territory,По умолчанию Территория
+Delivered,Доставлено
+Enable Shopping Cart,Включить Корзина
+Go ahead and add something to your cart.,Идем дальше и добавить что-то в корзину.
+Hey! Go ahead and add an address,16.35 Эй! Идем дальше и добавить адрес
+Invalid Billing Address,Неверный Адрес для выставления счета
+Invalid Shipping Address,Неверный адрес пересылки
+Missing Currency Exchange Rates for {0},Отсутствует валютный курс для {0}
+Name is required,Имя обязательно
+Not Allowed,Не разрешены
+Paid,Оплачено
+Partially Billed,Частично Объявленный
+Partially Delivered,Частично Поставляются
+Please specify a Price List which is valid for Territory,"Пожалуйста, сформулируйте прайс-лист, который действителен для территории"
+Please specify currency in Company,"Пожалуйста, сформулируйте валюту в компании"
+Please write something,"Пожалуйста, напишите что-нибудь"
+Please write something in subject and message!,"Пожалуйста, напишите что-нибудь в тему и текст сообщения!"
+Price List,Прайс-лист
+Price List not configured.,Прайс-лист не настроен.
+Quotation Series,Цитата серии
+Shipping Rule,Правило Доставка
+Shopping Cart,Корзина
+Shopping Cart Price List,Корзина Прайс-лист
+Shopping Cart Price Lists,Корзина Прайс-листы
+Shopping Cart Settings,Корзина Настройки
+Shopping Cart Shipping Rule,Корзина Правило Доставка
+Shopping Cart Shipping Rules,Корзина Правила Доставка
+Shopping Cart Taxes and Charges Master,Корзина Налоги и сборы Мастер
+Shopping Cart Taxes and Charges Masters,Налоги Корзина Торговые и сборы Мастера
+Something went wrong!,Что-то пошло не так!
+Something went wrong.,Что-то пошло не так.
+Tax Master,Налоговый Мастер
+To Pay,Платить
+Updated,Обновлено
+You are not allowed to reply to this ticket.,Вы не можете отвечать на этот билет.
+You need to be logged in to view your cart.,"Вы должны войти в систему, чтобы просмотреть свою корзину."
+You need to enable Shopping Cart,Вам необходимо включить Корзина
+{0} cannot be purchased using Shopping Cart,{0} не может быть приобретен с помощью Корзина
+{0} is required,{0} требуется
+{0} {1} has a common territory {2},{0} {1} имеет общую территорию {2}

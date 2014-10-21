@@ -3329,3 +3329,49 @@ website page link,sito web link alla pagina
 {0} {1} status is Unstopped,{0} {1} stato è unstopped
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: centro di costo è obbligatoria per la voce {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} non trovato in fattura tabella Dettagli
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Aggiungi / Modifica < / a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Aggiungi / Modifica < / a>"
+Billed,Addebbitato
+Company,Azienda
+Currency is required for Price List {0},È richiesto di valuta per il listino prezzi {0}
+Default Customer Group,Gruppo Clienti Predefinito
+Default Territory,Territorio Predefinito
+Delivered,Consegnato
+Enable Shopping Cart,Abilita Carello Acquisti
+Go ahead and add something to your cart.,Vai avanti e aggiungere qualcosa al tuo carrello.
+Hey! Go ahead and add an address,Ehi! Vai avanti e aggiungere un indirizzo
+Invalid Billing Address,Valido indirizzo di fatturazione
+Invalid Shipping Address,Valido Indirizzo di spedizione
+Missing Currency Exchange Rates for {0},Manca valuta Tassi di cambio {0}
+Name is required,Il nome è obbligatorio
+Not Allowed,non sono ammessi
+Paid,pagato
+Partially Billed,parzialmente Fatturato
+Partially Delivered,parzialmente Consegnato
+Please specify a Price List which is valid for Territory,Si prega di specificare una lista di prezzi è valido per il Territorio
+Please specify currency in Company,Si prega di specificare la valuta in Azienda
+Please write something,Si prega di scrivere qualcosa
+Please write something in subject and message!,Si prega di scrivere qualcosa in oggetto e il messaggio !
+Price List,Listino Prezzi
+Price List not configured.,Prezzo di listino non è configurato.
+Quotation Series,Serie Quotazione
+Shipping Rule,Spedizione Rule
+Shopping Cart,Carrello spesa
+Shopping Cart Price List,Carrello Prezzo di listino
+Shopping Cart Price Lists,Carrello Listini
+Shopping Cart Settings,Carrello Impostazioni
+Shopping Cart Shipping Rule,Carrello Spedizioni Rule
+Shopping Cart Shipping Rules,Carrello Regole di Spedizione
+Shopping Cart Taxes and Charges Master,Carrello Tasse e Spese master
+Shopping Cart Taxes and Charges Masters,Carrello Tasse e Costi Masters
+Something went wrong!,Qualcosa è andato storto!
+Something went wrong.,Qualcosa è andato storto.
+Tax Master,Tax Maestro
+To Pay,To Pay
+Updated,Aggiornato
+You are not allowed to reply to this ticket.,Non sei autorizzato a rispondere a questo biglietto .
+You need to be logged in to view your cart.,Devi essere loggato per vedere il tuo carrello.
+You need to enable Shopping Cart,È necessario abilitare Carrello
+{0} cannot be purchased using Shopping Cart,{0} non può essere acquistato tramite Carrello
+{0} is required,{0} è richiesto
+{0} {1} has a common territory {2},{0} {1} ha un territorio comune {2}

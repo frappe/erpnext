@@ -3377,3 +3377,49 @@ website page link,link da página do site
 {0} {1} status is Unstopped,{0} {1} status é abrirão
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Centro de Custo é obrigatória para item {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} não foi encontrado na fatura Detalhes Mesa
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer grupo""> Adicionar / Editar </ a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Adicionar / Editar </ a>"
+Billed,Faturado
+Company,Empresa
+Currency is required for Price List {0},Moeda é necessário para Preço de {0}
+Default Customer Group,Grupo de Clientes padrão
+Default Territory,Território padrão
+Delivered,Entregue
+Enable Shopping Cart,Ativar Carrinho de Compras
+Go ahead and add something to your cart.,Vá em frente e acrescentar algo ao seu carrinho.
+Hey! Go ahead and add an address,Ei! Vá em frente e adicionar um endereço
+Invalid Billing Address,Inválido Endereço de Cobrança
+Invalid Shipping Address,Inválido envio Endereço
+Missing Currency Exchange Rates for {0},Falta de câmbio de moeda para {0}
+Name is required,Nome é obrigatório
+Not Allowed,não Permitido
+Paid,pago
+Partially Billed,parcialmente faturado
+Partially Delivered,parcialmente entregues
+Please specify a Price List which is valid for Territory,"Por favor, especifique uma lista de preços que é válido para o território"
+Please specify currency in Company,"Por favor, especificar a moeda em Empresa"
+Please write something,"Por favor, escreva algo"
+Please write something in subject and message!,"Por favor, escreva algo no assunto e uma mensagem !"
+Price List,Lista de Preços
+Price List not configured.,Lista de Preço não configurado.
+Quotation Series,Série citação
+Shipping Rule,Regra de envio
+Shopping Cart,Carrinho de Compras
+Shopping Cart Price List,Carrinho de Compras Lista de Preços
+Shopping Cart Price Lists,Carrinho listas de preços
+Shopping Cart Settings,Carrinho Configurações
+Shopping Cart Shipping Rule,Carrinho de Compras Rule envio
+Shopping Cart Shipping Rules,Carrinho Regras frete
+Shopping Cart Taxes and Charges Master,Carrinho impostos e taxas Mestre
+Shopping Cart Taxes and Charges Masters,Carrinho Impostos e Taxas de mestrado
+Something went wrong!,Algo deu errado!
+Something went wrong.,Algo deu errado.
+Tax Master,Imposto de Mestre
+To Pay,pagar
+Updated,Atualizado
+You are not allowed to reply to this ticket.,Você não tem permissão para responder a este bilhete .
+You need to be logged in to view your cart.,Você precisa estar logado para ver seu carrinho.
+You need to enable Shopping Cart,Você precisa habilitar o Carrinho de Compras
+{0} cannot be purchased using Shopping Cart,{0} não pode ser comprado usando Carrinho de Compras
+{0} is required,{0} é necessária
+{0} {1} has a common territory {2},{0} {1} tem um território comum {2}

@@ -3329,3 +3329,49 @@ website page link,웹 사이트 페이지 링크
 {0} {1} status is Unstopped,{0} {1} 상태 Unstopped입니다
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1} : 코스트 센터는 항목에 대해 필수입니다 {2}
 {0}: {1} not found in Invoice Details table,{0} {1} 송장 정보 테이블에서 찾을 수 없습니다
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","만약 당신이 좋아 href=""#Sales Browser/Customer Group""> 추가 / 편집 </ A>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","만약 당신이 좋아 href=""#Sales Browser/Territory""> 추가 / 편집 </ A>"
+Billed,청구
+Company,회사
+Currency is required for Price List {0},환율은 가격 목록에 필요한 {0}
+Default Customer Group,기본 고객 그룹
+Default Territory,기본 지역
+Delivered,배달
+Enable Shopping Cart,쇼핑 카트를 사용
+Go ahead and add something to your cart.,가서 당신의 손수레로 뭔가를 추가 할 수 있습니다.
+Hey! Go ahead and add an address,야!가서 주소를 추가
+Invalid Billing Address,잘못된 청구 주소
+Invalid Shipping Address,잘못된 배송 주소
+Missing Currency Exchange Rates for {0},를 위해 환율 누락 {0}
+Name is required,이름이 필요합니다
+Not Allowed,허용하지 않음
+Paid,유료
+Partially Billed,일부 청구
+Partially Delivered,부분적으로 배달
+Please specify a Price List which is valid for Territory,지역에 유효한 가격 목록을 지정하십시오
+Please specify currency in Company,회사에 통화를 지정하십시오
+Please write something,뭔가를 작성 해주세요
+Please write something in subject and message!,제목과 메시지에 무언가를 써주세요!
+Price List,가격리스트
+Price List not configured.,가격 목록이 구성되어 있지.
+Quotation Series,견적 시리즈
+Shipping Rule,배송 규칙
+Shopping Cart,쇼핑 카트
+Shopping Cart Price List,쇼핑 카트의 가격 목록
+Shopping Cart Price Lists,쇼핑 카트의 가격 목록
+Shopping Cart Settings,쇼핑 카트 설정
+Shopping Cart Shipping Rule,장바구니 배송 규칙
+Shopping Cart Shipping Rules,장바구니 배송 규칙
+Shopping Cart Taxes and Charges Master,쇼핑 카트 세금과 요금 마스터
+Shopping Cart Taxes and Charges Masters,쇼핑 카트 세금과 요금의 석사
+Something went wrong!,문제가 발생했습니다!
+Something went wrong.,문제가 발생했습니다.
+Tax Master,세금 마스터
+To Pay,지불하는
+Updated,업데이트
+You are not allowed to reply to this ticket.,당신이 티켓에 회신 할 수 없습니다.
+You need to be logged in to view your cart.,당신은 당신의 카트를 보려면 로그인해야합니다.
+You need to enable Shopping Cart,당신은 쇼핑 카트를 활성화해야
+{0} cannot be purchased using Shopping Cart,{0} 쇼핑 카트를 사용하여 구입 할 수 없습니다
+{0} is required,{0}이 필요합니다
+{0} {1} has a common territory {2},{0} {1} 공통의 영토가 {2}

@@ -3329,3 +3329,49 @@ website page link,web sayfa linki
 {0} {1} status is Unstopped,{0} {1} durumu Unstopped olduğunu
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Maliyet Merkezi Ürün için zorunludur {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} Fatura Ayrıntıları tablosunda bulunamadı
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Ekle / Düzenle </ a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Ekle / Düzenle </ a>"
+Billed,Faturalanmış
+Company,Şirket
+Currency is required for Price List {0},Döviz Fiyat Listesi için gereklidir {0}
+Default Customer Group,Varsayılan Müşteri Grubu
+Default Territory,Standart Bölge
+Delivered,Teslim Edildi
+Enable Shopping Cart,Alışveriş sepeti etkinleştirin
+Go ahead and add something to your cart.,Devam edin ve sepetinize şey eklemek.
+Hey! Go ahead and add an address,Hey! Devam edin ve bir adres eklemek
+Invalid Billing Address,Geçersiz Fatura Adresi
+Invalid Shipping Address,Geçersiz Teslimat Adresi
+Missing Currency Exchange Rates for {0},Döviz Kurların eksik {0}
+Name is required,Adı gerekli
+Not Allowed,İzin Verilmedi
+Paid,Ödendi
+Partially Billed,Kısmen Faturalı
+Partially Delivered,Kısmen Teslim
+Please specify a Price List which is valid for Territory,Territory için geçerli olan bir Fiyat Listesi belirtin
+Please specify currency in Company,Şirket para birimi belirtiniz
+Please write something,Bir şeyler yazınız
+Please write something in subject and message!,Konu ve mesaj bir şeyler yazınız!
+Price List,Fiyat listesi
+Price List not configured.,Fiyat Listesi yapılandırılmamış.
+Quotation Series,Teklif Serisi
+Shipping Rule,Kargo Kural
+Shopping Cart,Alışveriş Sepeti
+Shopping Cart Price List,Alışveriş Sepeti Fiyat Listesi
+Shopping Cart Price Lists,Alışveriş Sepeti Fiyat Listeleri
+Shopping Cart Settings,Alışveriş sepeti Ayarları
+Shopping Cart Shipping Rule,Alışveriş Sepeti Kargo Kural
+Shopping Cart Shipping Rules,Alışveriş Sepeti Nakliye Kuralları
+Shopping Cart Taxes and Charges Master,Alışveriş Sepeti Vergi ve Harçlar Usta
+Shopping Cart Taxes and Charges Masters,Alışveriş Sepeti Vergi ve Harçlar Masters
+Something went wrong!,Bir şeyler yanlış gitti!
+Something went wrong.,Bir şeyler yanlış gitti.
+Tax Master,Vergi Usta
+To Pay,Ödeme
+Updated,Güncellenmiş
+You are not allowed to reply to this ticket.,Bu bilet için cevap izin verilmez.
+You need to be logged in to view your cart.,Eğer sepeti görmek için oturum açmanız gerekir.
+You need to enable Shopping Cart,Sen Alışveriş Sepeti etkinleştirmeniz gerekir
+{0} cannot be purchased using Shopping Cart,{0} sepeti kullanarak satın alınamaz
+{0} is required,{0} gereklidir
+{0} {1} has a common territory {2},"{0} {1}, ortak bir bölge var {2}"

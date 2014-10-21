@@ -3329,3 +3329,49 @@ website page link,Ιστοσελίδα link της σελίδας
 {0} {1} status is Unstopped,{0} {1} η κατάσταση είναι ανεμπόδιστη
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Κέντρο Κόστους είναι υποχρεωτική για τη θέση {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} δεν βρέθηκε στον πίνακα Στοιχεία τιμολογίου
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Προσθήκη / Επεξεργασία < / a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Προσθήκη / Επεξεργασία < / a>"
+Billed,Χρεώνεται
+Company,Εταιρεία
+Currency is required for Price List {0},Νόμισμα απαιτείται για Τιμοκατάλογος {0}
+Default Customer Group,Προεπιλογή Ομάδα πελατών
+Default Territory,Έδαφος Προεπιλογή
+Delivered,Δημοσιεύθηκε
+Enable Shopping Cart,Ενεργοποίηση Καλάθι Αγορών
+Go ahead and add something to your cart.,Προχωρήστε και να προσθέσω κάτι στο καλάθι σας.
+Hey! Go ahead and add an address,Γειά! Προχωρήστε και να προσθέσετε μια διεύθυνση
+Invalid Billing Address,Μη έγκυρη διεύθυνση χρέωσης
+Invalid Shipping Address,Μη έγκυρη διεύθυνση αποστολής
+Missing Currency Exchange Rates for {0},Λείπει Τιμές συναλλάγματος για {0}
+Name is required,Όνομα απαιτείται
+Not Allowed,δεν επιτρέπονται κατοικίδια
+Paid,Αμειβόμενος
+Partially Billed,μερικώς Billed
+Partially Delivered,μερικώς Δημοσιεύθηκε
+Please specify a Price List which is valid for Territory,Παρακαλείστε να προσδιορίσετε μια λίστα τιμών που ισχύει για Επικράτεια
+Please specify currency in Company,Παρακαλείστε να προσδιορίσετε το νόμισμα στην εταιρεία
+Please write something,Παρακαλώ γράψτε κάτι
+Please write something in subject and message!,Παρακαλώ γράψτε κάτι στο θέμα και το μήνυμα !
+Price List,Τιμοκατάλογος
+Price List not configured.,Τιμοκατάλογος δεν έχει ρυθμιστεί.
+Quotation Series,Σειρά Προσφοράς
+Shipping Rule,Αποστολές Κανόνας
+Shopping Cart,Καλάθι Αγορών
+Shopping Cart Price List,Shopping Τιμοκατάλογος Καλάθι
+Shopping Cart Price Lists,Τιμοκατάλογοι Καλάθι Αγορών
+Shopping Cart Settings,Ρυθμίσεις Καλάθι Αγορών
+Shopping Cart Shipping Rule,Καλάθι Αγορών αποστολή Κανόνας
+Shopping Cart Shipping Rules,Κανόνες Shipping Καλάθι Αγορών
+Shopping Cart Taxes and Charges Master,Φόροι Καλάθι και Χρεώσεις Δάσκαλος
+Shopping Cart Taxes and Charges Masters,Φόροι Καλάθι και Χρεώσεις Masters
+Something went wrong!,Κάτι πήγε στραβά!
+Something went wrong.,Κάτι πήγε στραβά.
+Tax Master,Δάσκαλος φόρου
+To Pay,να πληρώσει
+Updated,Ενημέρωση
+You are not allowed to reply to this ticket.,Δεν επιτρέπεται να απαντήσετε σε αυτό το εισιτήριο .
+You need to be logged in to view your cart.,Θα πρέπει να είστε συνδεδεμένοι για να δείτε το καλάθι σας.
+You need to enable Shopping Cart,Χρειάζεται να ενεργοποιήσετε Καλάθι Αγορών
+{0} cannot be purchased using Shopping Cart,{0} δεν μπορούν να αγοραστούν χρησιμοποιώντας Καλάθι Αγορών
+{0} is required,{0} απαιτείται
+{0} {1} has a common territory {2},{0} {1} έχει ένα κοινό έδαφος {2}

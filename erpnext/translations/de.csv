@@ -3460,3 +3460,51 @@ website page link,Website-Link
 {0} {1} status is Unstopped,{0} {1} Status unstopped
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Kostenstelle ist obligatorisch für Artikel {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} nicht in der Rechnungs Details-Tabelle gefunden
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Hinzufügen / Bearbeiten </ a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Hinzufügen / Bearbeiten </ a>"
+Billed,Abgerechnet
+Company,Unternehmen
+Currency is required for Price List {0},Die Währung ist für Preisliste erforderlich {0}
+Default Customer Group,Standardkundengruppe
+Default Territory,Standardregion
+Default settings for Shopping Cart,Standardeinstellungen für Einkaufswagen
+Delivered,Geliefert
+Enable Shopping Cart,Einkaufswagen aktivieren
+Go ahead and add something to your cart.,Gehen Sie voran und fügen Sie etwas in Ihren Warenkorb.
+Hey! Go ahead and add an address,Hallo! Gehen Sie voran und fügen Sie eine Adresse
+Invalid Billing Address,Ungültige Rechnungsadresse
+Invalid Shipping Address,Falsche Lieferadresse
+Missing Currency Exchange Rates for {0},Fehlende Wechselkurse für {0}
+Name is required,Name ist erforderlich
+Not Allowed,Nicht erlaubt
+Paid,bezahlt
+Partially Billed,teilweise Angekündigt
+Partially Delivered,teilweise Lieferung
+Please specify a Price List which is valid for Territory,"Legen Sie eine Preisliste fest, die für die Region gültig ist"
+Please specify currency in Company,Geben Sie die Währung im Unternehmen an
+Please write something,Bitte schreiben Sie etwas
+Please write something in subject and message!,Bitte schreiben Sie etwas in Betreff und die Nachricht !
+Price List,Preisliste
+Price List not configured.,Preisliste nicht konfiguriert.
+Quotation Series,Angebotsserie
+Shipping Rule,Versandregel
+Shopping Cart,Einkaufswagen
+Shopping Cart Price List,Einkaufswagen Preisliste
+Shopping Cart Price Lists,Einkaufswagen Preislisten
+Shopping Cart Settings,Einkaufswageneinstellungen
+Shopping Cart Shipping Rule,Einkaufswagen-Versandregel
+Shopping Cart Shipping Rules,Einkaufswagen-Versandregeln
+Shopping Cart Taxes and Charges Master,Einkaufswagen-Steuern und Abgabenstamm
+Shopping Cart Taxes and Charges Masters,Einkaufswagen-Steuern und Abgabenstämme
+Something went wrong!,Etwas ist schiefgelaufen!
+Something went wrong.,Es gab ein Problem.
+Tax Master,Steuerstamm
+To Pay,To Pay
+Updated,Aktualisiert
+Website Manager,
+You are not allowed to reply to this ticket.,"Sie sind nicht berechtigt, auf diesem Ticket antworten ."
+You need to be logged in to view your cart.,"Sie müssen angemeldet sein, um Ihren Warenkorb zu sehen."
+You need to enable Shopping Cart,Sie benötigen den Einkaufswagen zu ermöglichen
+{0} cannot be purchased using Shopping Cart,{0} kann nicht mit Einkaufswagen erworben werden
+{0} is required,{0} ist erforderlich
+{0} {1} has a common territory {2},{0} {1} hat einen gemeinsamen Territorium {2}

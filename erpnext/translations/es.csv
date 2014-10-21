@@ -3335,3 +3335,49 @@ website page link,el vínculo web
 {0} {1} status is Unstopped,{0} {1} Estado es destapados
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Centro de Costo es obligatorio para el punto {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} no se encuentra en la factura Detalles mesa
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer grupo""> Añadir / Editar < / a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Añadir / Editar < / a>"
+Billed,Anunciado
+Company,Empresa
+Currency is required for Price List {0},Se requiere de divisas para el precio de lista {0}
+Default Customer Group,Grupo predeterminado Cliente
+Default Territory,Territorio predeterminado
+Delivered,liberado
+Enable Shopping Cart,Habilitar Compras
+Go ahead and add something to your cart.,Seguir adelante y añadir algo a su carrito.
+Hey! Go ahead and add an address,¡Hey! Seguir adelante y añadir una dirección
+Invalid Billing Address,No válida dirección de facturación
+Invalid Shipping Address,Dirección no válida de envío
+Missing Currency Exchange Rates for {0},Missing Tipo de Cambio para {0}
+Name is required,El nombre es necesario
+Not Allowed,No se permite
+Paid,pagado
+Partially Billed,Parcialmente Anunciado
+Partially Delivered,Parcialmente Entregado
+Please specify a Price List which is valid for Territory,"Por favor, especifique una lista de precios que es válido para el territorio"
+Please specify currency in Company,"Por favor, especifique la moneda en la empresa"
+Please write something,"Por favor, escribir algo"
+Please write something in subject and message!,"Por favor, escriba algo en asunto y el mensaje !"
+Price List,Lista de Precios
+Price List not configured.,Lista de precios no está configurado.
+Quotation Series,Serie Cotización
+Shipping Rule,Regla de envío
+Shopping Cart,Cesta de la compra
+Shopping Cart Price List,Cesta de la compra Precio de lista
+Shopping Cart Price Lists,Compras Listas de precios
+Shopping Cart Settings,Compras Ajustes
+Shopping Cart Shipping Rule,Compras Regla de envío
+Shopping Cart Shipping Rules,Compras Reglas de Envío
+Shopping Cart Taxes and Charges Master,Compras Impuestos y Cargos Maestro
+Shopping Cart Taxes and Charges Masters,Carrito impuestos y las cargas Masters
+Something went wrong!,¡Algo salió mal!
+Something went wrong.,Algo salió mal.
+Tax Master,Maestro de Impuestos
+To Pay,Pagar
+Updated,actualizado
+You are not allowed to reply to this ticket.,No se le permite responder a este boleto.
+You need to be logged in to view your cart.,Tienes que estar registrado para ver su carrito.
+You need to enable Shopping Cart,Necesita habilitar Compras
+{0} cannot be purchased using Shopping Cart,{0} no puede ser comprado usando Compras
+{0} is required,{0} es necesario
+{0} {1} has a common territory {2},{0} {1} tiene un territorio común {2}

@@ -3329,3 +3329,49 @@ website page link,website Paginalink
 {0} {1} status is Unstopped,{0} {1} status ontsloten
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: kostenplaats is verplicht voor Item {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} niet gevonden in Factuur Details tabel
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> toevoegen / bewerken < / a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> toevoegen / bewerken < / a>"
+Billed,Gefactureerd
+Company,Vennootschap
+Currency is required for Price List {0},Valuta is vereist voor prijslijst {0}
+Default Customer Group,Standaard Klant Groep
+Default Territory,Standaard Territory
+Delivered,Geleverd
+Enable Shopping Cart,Enable Winkelwagen
+Go ahead and add something to your cart.,Ga je gang en iets toe te voegen aan uw winkelwagen.
+Hey! Go ahead and add an address,Hé! Ga je gang en voeg een adres
+Invalid Billing Address,Ongeldig Factuuradres
+Invalid Shipping Address,Ongeldig verzendadres
+Missing Currency Exchange Rates for {0},Ontbrekende wisselkoersen gedurende {0}
+Name is required,Naam is vereist
+Not Allowed,niet toegestaan
+Paid,betaald
+Partially Billed,gedeeltelijk gefactureerde
+Partially Delivered,gedeeltelijk Geleverd
+Please specify a Price List which is valid for Territory,Geef een prijslijst die geldig is voor het grondgebied
+Please specify currency in Company,Specificeer munt in Bedrijf
+Please write something,Iets schrijven aub
+Please write something in subject and message!,Schrijf iets in het onderwerp en een bericht !
+Price List,Prijslijst
+Price List not configured.,Prijslijst niet geconfigureerd.
+Quotation Series,Offerte Series
+Shipping Rule,Verzending Rule
+Shopping Cart,Winkelwagen
+Shopping Cart Price List,Winkelwagen Prijslijst
+Shopping Cart Price Lists,Winkelwagen Prijslijsten
+Shopping Cart Settings,Winkelwagen Instellingen
+Shopping Cart Shipping Rule,Winkelwagen Scheepvaart Rule
+Shopping Cart Shipping Rules,Winkelwagen Scheepvaart Regels
+Shopping Cart Taxes and Charges Master,Winkelwagen en-heffingen Master
+Shopping Cart Taxes and Charges Masters,Winkelwagen en-heffingen Masters
+Something went wrong!,Er ging iets mis!
+Something went wrong.,Er is iets fout gegaan
+Tax Master,Fiscale Master
+To Pay,te betalen
+Updated,Bijgewerkt
+You are not allowed to reply to this ticket.,Het is niet toegestaan ​​om te reageren op dit kaartje .
+You need to be logged in to view your cart.,Je moet ingelogd zijn om uw winkelwagentje te bekijken.
+You need to enable Shopping Cart,U moet Winkelwagen stellen
+{0} cannot be purchased using Shopping Cart,{0} kan niet worden aangeschaft met Winkelwagen
+{0} is required,{0} is verplicht
+{0} {1} has a common territory {2},{0} {1} heeft een gemeenschappelijk grondgebied {2}

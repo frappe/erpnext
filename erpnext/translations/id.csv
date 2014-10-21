@@ -3329,3 +3329,49 @@ website page link,tautan halaman situs web
 {0} {1} status is Unstopped,{0} {1} status unstopped
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Biaya Pusat adalah wajib untuk Item {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} tidak ditemukan dalam Faktur Rincian table
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Add / Edit </ a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Tambah / Edit </ a>"
+Billed,Ditagih
+Company,Perusahaan
+Currency is required for Price List {0},Mata Uang diperlukan untuk Daftar Harga {0}
+Default Customer Group,Bawaan Pelanggan Grup
+Default Territory,Wilayah standar
+Delivered,Disampaikan
+Enable Shopping Cart,Aktifkan Keranjang Belanja
+Go ahead and add something to your cart.,Pergi ke depan dan menambahkan sesuatu ke keranjang Anda.
+Hey! Go ahead and add an address,Hei! Pergi ke depan dan menambahkan alamat
+Invalid Billing Address,Alamat Penagihan valid
+Invalid Shipping Address,Alamat Pengiriman valid
+Missing Currency Exchange Rates for {0},Hilang Kurs mata uang Tarif untuk {0}
+Name is required,Nama dibutuhkan
+Not Allowed,Tidak Diizinkan
+Paid,Terbayar
+Partially Billed,Sebagian Ditagih
+Partially Delivered,Sebagian Disampaikan
+Please specify a Price List which is valid for Territory,Tentukan Daftar Harga yang berlaku untuk Wilayah
+Please specify currency in Company,Silakan tentukan mata uang di Perusahaan
+Please write something,Silahkan menulis sesuatu
+Please write something in subject and message!,Silahkan menulis sesuatu dalam subjek dan pesan!
+Price List,Daftar Harga
+Price List not configured.,Daftar Harga belum dikonfigurasi.
+Quotation Series,Quotation Series
+Shipping Rule,Aturan Pengiriman
+Shopping Cart,Daftar Belanja
+Shopping Cart Price List,Daftar Belanja Daftar Harga
+Shopping Cart Price Lists,Daftar Harga Daftar Belanja
+Shopping Cart Settings,Pengaturan Keranjang Belanja
+Shopping Cart Shipping Rule,Belanja Pengiriman Rule
+Shopping Cart Shipping Rules,Daftar Belanja Pengiriman Aturan
+Shopping Cart Taxes and Charges Master,Pajak Keranjang Belanja dan Biaya Guru
+Shopping Cart Taxes and Charges Masters,Daftar Belanja Pajak dan Biaya Masters
+Something went wrong!,Ada yang tidak beres!
+Something went wrong.,Ada Sesuatu yang tidak beres.
+Tax Master,Guru Pajak
+To Pay,Untuk Bayar
+Updated,Diperbarui
+You are not allowed to reply to this ticket.,Anda tidak diizinkan untuk membalas tiket ini.
+You need to be logged in to view your cart.,Anda harus login untuk melihat keranjang Anda.
+You need to enable Shopping Cart,Anda harus mengaktifkan Keranjang Belanja
+{0} cannot be purchased using Shopping Cart,{0} tidak dapat dibeli dengan menggunakan Keranjang Belanja
+{0} is required,{0} diperlukan
+{0} {1} has a common territory {2},{0} {1} memiliki wilayah umum {2}

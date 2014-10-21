@@ -3329,3 +3329,49 @@ website page link,веб страница веза
 {0} {1} status is Unstopped,{0} {1} статус отверзутся
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Трошкови Центар је обавезан за пункт {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} није пронађен у табели Фактура Детаљи
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<а хреф=""#Салес Бровсер/Цустомер Гроуп""> Додај / Уреди < />"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<а хреф=""#Салес Бровсер/Территори""> Додај / Уреди < />"
+Billed,Изграђена
+Company,Компанија
+Currency is required for Price List {0},Валюта необходима для Прейскурантом {0}
+Default Customer Group,Уобичајено групу потрошача
+Default Territory,Уобичајено Територија
+Delivered,Испоручено
+Enable Shopping Cart,Омогући Корпа
+Go ahead and add something to your cart.,Само напред и додати нешто у вашој корпи.
+Hey! Go ahead and add an address,Хеј! Само напред и додај адресу
+Invalid Billing Address,Неверный Адрес для выставления счета
+Invalid Shipping Address,Неверный адрес пересылки
+Missing Currency Exchange Rates for {0},Отсутствует валютный курс для {0}
+Name is required,Име је обавезно
+Not Allowed,Не разрешены
+Paid,плаћен
+Partially Billed,Делимично Изграђена
+Partially Delivered,Делимично Испоручено
+Please specify a Price List which is valid for Territory,Наведите ценовник који важи за територију
+Please specify currency in Company,Наведите валуту у компанији
+Please write something,Молимо вас да напишете нешто
+Please write something in subject and message!,Молимо вас да напишете нешто у теми и поруци !
+Price List,Ценовник
+Price List not configured.,Ценовник није подесио.
+Quotation Series,Цитат серија
+Shipping Rule,Достава Правило
+Shopping Cart,Корпа
+Shopping Cart Price List,Корпа Ценовник
+Shopping Cart Price Lists,Корпа Ценовници
+Shopping Cart Settings,Корпа Подешавања
+Shopping Cart Shipping Rule,Корпа Достава Правило
+Shopping Cart Shipping Rules,Корпа испоруке Правила
+Shopping Cart Taxes and Charges Master,Корпа такси и накнада Мастер
+Shopping Cart Taxes and Charges Masters,Корпа такси и накнада Мастерс
+Something went wrong!,Нешто је пошло наопако!
+Something went wrong.,Нешто је пошло наопако.
+Tax Master,Пореска Мастер
+To Pay,То Паи
+Updated,Ажурирано
+You are not allowed to reply to this ticket.,Нисте дозвољено да одговори на ову карту .
+You need to be logged in to view your cart.,Морате бити пријављени да бисте видели вашу корпу.
+You need to enable Shopping Cart,Вам необходимо включить Корзина
+{0} cannot be purchased using Shopping Cart,{0} не может быть приобретен с помощью Корзина
+{0} is required,{0} требуется
+{0} {1} has a common territory {2},{0} {1} имеет общую территорию {2}

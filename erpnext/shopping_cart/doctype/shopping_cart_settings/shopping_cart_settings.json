@@ -1,0 +1,115 @@
+{
+ "creation": "2013-06-19 15:57:32", 
+ "description": "Default settings for Shopping Cart", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "enabled", 
+   "fieldtype": "Check", 
+   "in_list_view": 1, 
+   "label": "Enable Shopping Cart", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "section_break_2", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "company", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Company", 
+   "options": "Company", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "fieldname": "default_territory", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
+   "in_list_view": 1, 
+   "label": "Default Territory", 
+   "options": "Territory", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "column_break_4", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
+   "fieldname": "default_customer_group", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
+   "label": "Default Customer Group", 
+   "options": "Customer Group", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "quotation_series", 
+   "fieldtype": "Select", 
+   "label": "Quotation Series", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "section_break_6", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "price_lists", 
+   "fieldtype": "Table", 
+   "label": "Shopping Cart Price Lists", 
+   "options": "Shopping Cart Price List", 
+   "permlevel": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "shipping_rules", 
+   "fieldtype": "Table", 
+   "label": "Shopping Cart Shipping Rules", 
+   "options": "Shopping Cart Shipping Rule", 
+   "permlevel": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "column_break_10", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "sales_taxes_and_charges_masters", 
+   "fieldtype": "Table", 
+   "label": "Shopping Cart Taxes and Charges Masters", 
+   "options": "Shopping Cart Taxes and Charges Master", 
+   "permlevel": 0, 
+   "reqd": 0
+  }
+ ], 
+ "icon": "icon-shopping-cart", 
+ "idx": 1, 
+ "issingle": 1, 
+ "modified": "2014-05-26 03:05:53.747800", 
+ "modified_by": "Administrator", 
+ "module": "Shopping Cart", 
+ "name": "Shopping Cart Settings", 
+ "owner": "Administrator", 
+ "permissions": [
+  {
+   "create": 1, 
+   "email": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "role": "Website Manager", 
+   "write": 1
+  }
+ ]
+}

@@ -3329,3 +3329,49 @@ website page link,वेबसाइट के पेज लिंक
 {0} {1} status is Unstopped,{0} {1} स्थिति unstopped है
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: लागत केंद्र मद के लिए अनिवार्य है {2}
 {0}: {1} not found in Invoice Details table,{0} {1} चालान विवरण तालिका में नहीं मिला
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> जोड़ें / संपादित करें </ a >"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> जोड़ें / संपादित करें </ a >"
+Billed,का बिल
+Company,कंपनी
+Currency is required for Price List {0},मुद्रा मूल्य सूची के लिए आवश्यक है {0}
+Default Customer Group,डिफ़ॉल्ट ग्राहक समूह
+Default Territory,Default टेरिटरी
+Delivered,दिया गया
+Enable Shopping Cart,शॉपिंग कार्ट सक्षम करें
+Go ahead and add something to your cart.,आगे बढ़ो और अपनी गाड़ी को कुछ जोड़ सकते.
+Hey! Go ahead and add an address,अरे! आगे बढ़ो और एक पते जोड़
+Invalid Billing Address,अवैध बिलिंग पता
+Invalid Shipping Address,अवैध शिपिंग पता
+Missing Currency Exchange Rates for {0},के लिए मुद्रा विनिमय दरें गुम {0}
+Name is required,नाम आवश्यक है
+Not Allowed,अनुमति नहीं
+Paid,प्रदत्त
+Partially Billed,आंशिक रूप से बिल
+Partially Delivered,आंशिक रूप से वितरित
+Please specify a Price List which is valid for Territory,राज्य क्षेत्र के लिए मान्य है जो एक मूल्य सूची निर्दिष्ट करें
+Please specify currency in Company,कंपनी में मुद्रा निर्दिष्ट करें
+Please write something,कुछ लिखें
+Please write something in subject and message!,विषय और संदेश में कुछ लिखने के लिए धन्यवाद !
+Price List,कीमत सूची
+Price List not configured.,मूल्य सूची कॉन्फ़िगर नहीं.
+Quotation Series,कोटेशन सीरीज
+Shipping Rule,नौवहन नियम
+Shopping Cart,खरीदारी की टोकरी
+Shopping Cart Price List,शॉपिंग कार्ट में मूल्य सूची
+Shopping Cart Price Lists,शॉपिंग कार्ट में मूल्य सूची
+Shopping Cart Settings,शॉपिंग कार्ट सेटिंग्स
+Shopping Cart Shipping Rule,शॉपिंग कार्ट शिपिंग नियम
+Shopping Cart Shipping Rules,शॉपिंग कार्ट शिपिंग नियम
+Shopping Cart Taxes and Charges Master,शॉपिंग कार्ट में करों और शुल्कों मास्टर
+Shopping Cart Taxes and Charges Masters,शॉपिंग कार्ट में करों और शुल्कों मास्टर्स
+Something went wrong!,कुछ गलत हो गया!
+Something went wrong.,कुछ गलत हो गया.
+Tax Master,टैक्स मास्टर
+To Pay,भुगतान करने के लिए
+Updated,अद्यतित
+You are not allowed to reply to this ticket.,आप इस टिकट का उत्तर देने की अनुमति नहीं है .
+You need to be logged in to view your cart.,आप अपनी गाड़ी को देखने के लिए लॉग इन करना होगा.
+You need to enable Shopping Cart,आप शॉपिंग कार्ट में सक्रिय करने की जरूरत
+{0} cannot be purchased using Shopping Cart,{0} शॉपिंग कार्ट का उपयोग कर खरीदा नहीं जा सकता
+{0} is required,{0} के लिए आवश्यक है
+{0} {1} has a common territory {2},{0} {1} एक सामान्य क्षेत्र है {2}

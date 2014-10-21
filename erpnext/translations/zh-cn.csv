@@ -3377,3 +3377,49 @@ website page link,网站页面的链接
 {0} {1} status is Unstopped,{0} {1}状态为开通
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}：成本中心是强制性的项目{2}
 {0}: {1} not found in Invoice Details table,{0}：{1}不是在发票明细表中找到
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group"">添加/编辑</a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory"">添加/编辑</a>"
+Billed,计费
+Company,公司
+Currency is required for Price List {0},货币需要价格表{0}
+Default Customer Group,默认用户组
+Default Territory,默认领地
+Delivered,交付
+Enable Shopping Cart,启用的购物车
+Go ahead and add something to your cart.,来吧，讲一下你的车。
+Hey! Go ahead and add an address,嘿！来吧，添加一个地址
+Invalid Billing Address,无效的帐单地址
+Invalid Shipping Address,无效的送货地址
+Missing Currency Exchange Rates for {0},缺少货币汇率的{0}
+Name is required,名称是必需的
+Not Allowed,不允许
+Paid,支付
+Partially Billed,部分帐单
+Partially Delivered,部分交付
+Please specify a Price List which is valid for Territory,请指定一个价格表，有效期为领地
+Please specify currency in Company,请公司指定的货币
+Please write something,请写东西
+Please write something in subject and message!,请写东西的主题和消息！
+Price List,价格表
+Price List not configured.,未配置价格表。
+Quotation Series,系列报价
+Shipping Rule,送货规则
+Shopping Cart,购物车
+Shopping Cart Price List,购物车价格表
+Shopping Cart Price Lists,购物车价目表
+Shopping Cart Settings,购物车设置
+Shopping Cart Shipping Rule,购物车运费规则
+Shopping Cart Shipping Rules,购物车运费规则
+Shopping Cart Taxes and Charges Master,购物车税收和收费硕士
+Shopping Cart Taxes and Charges Masters,购物车税收和收费硕士
+Something went wrong!,出事了！
+Something went wrong.,出事了。
+Tax Master,税务硕士
+To Pay,支付方式
+Updated,更新
+You are not allowed to reply to this ticket.,你不允许回复此票。
+You need to be logged in to view your cart.,您需要登录才能查看您的购物车。
+You need to enable Shopping Cart,您需要启用的购物车
+{0} cannot be purchased using Shopping Cart,{0}不能使用购物车购买
+{0} is required,{0}是必需的
+{0} {1} has a common territory {2},{0} {1}有一个共同的领土{2}

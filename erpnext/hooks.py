@@ -11,14 +11,18 @@ error_report_email = "support@erpnext.com"
 app_include_js = "assets/js/erpnext.min.js"
 app_include_css = "assets/css/erpnext.css"
 web_include_js = "assets/js/erpnext-web.min.js"
+web_include_css = "assets/css/shopping-cart-web.css"
 
 after_install = "erpnext.setup.install.after_install"
 
 boot_session = "erpnext.startup.boot.boot_session"
 notification_config = "erpnext.startup.notifications.get_notification_config"
 
+on_session_creation = "erpnext.shopping_cart.utils.set_cart_count"
+on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
+update_website_context = ["erpnext.shopping_cart.utils.update_website_context", "erpnext.startup.webutils.update_website_context"]
+
 dump_report_map = "erpnext.startup.report_data_map.data_map"
-update_website_context = "erpnext.startup.webutils.update_website_context"
 
 before_tests = "erpnext.setup.utils.before_tests"
 
@@ -36,7 +40,13 @@ doc_events = {
 	"User": {
 		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
 		"on_update": "erpnext.hr.doctype.employee.employee.update_user_permissions"
-	}
+	},
+	"Sales Taxes and Charges Master": {
+		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
+	},
+	"Price List": {
+		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
+	},
 }
 
 scheduler_events = {
@@ -55,6 +65,5 @@ scheduler_events = {
 	]
 }
 
-default_mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>
-	<a style="color: #888" href="https://erpnext.com">Sent via ERPNext</a></div>"""
-
+default_mail_footer = """<div style="padding: 7px; text-align: right;">
+	<a style="color: #888; font-size: 80%;" href="https://erpnext.com">Sent via ERPNext</a></div>"""

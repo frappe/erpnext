@@ -3329,3 +3329,49 @@ website page link,pagina site-ului link-ul
 {0} {1} status is Unstopped,{0} {1} statut este destupate
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Cost Center este obligatorie pentru postul {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} nu a fost găsit în factură Detalii masă
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Add / Edit </ a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Add / Edit </ a>"
+Billed,Facturat
+Company,Firma
+Currency is required for Price List {0},Monedă este necesară pentru lista de prețuri {0}
+Default Customer Group,Implicit Client Group
+Default Territory,Implicit Teritoriul
+Delivered,Livrat
+Enable Shopping Cart,Activați Cosul de cumparaturi
+Go ahead and add something to your cart.,Du-te și adaugă ceva la coș.
+Hey! Go ahead and add an address,Hei! Du-te și adăugați o adresă
+Invalid Billing Address,Adresa de facturare invalid
+Invalid Shipping Address,Adresa Transport invalid
+Missing Currency Exchange Rates for {0},Lipsește valutar Curs valutar pentru {0}
+Name is required,Este necesar numele
+Not Allowed,Nu este permis
+Paid,Platit
+Partially Billed,Parțial Taxat
+Partially Delivered,Parțial livrate
+Please specify a Price List which is valid for Territory,"Vă rugăm să specificați o listă de prețuri, care este valabil pentru teritoriul"
+Please specify currency in Company,Vă rugăm să specificați în valută de companie
+Please write something,Vă rugăm să scrieți ceva
+Please write something in subject and message!,Vă rugăm să scrieți ceva în subiect și un mesaj!
+Price List,Lista de prețuri
+Price List not configured.,Lista de prețuri nu a fost configurat.
+Quotation Series,Citat Series
+Shipping Rule,Regula de transport maritim
+Shopping Cart,Cosul de cumparaturi
+Shopping Cart Price List,Cosul de cumparaturi Lista de prețuri
+Shopping Cart Price Lists,Cosul de cumparaturi Liste de prețuri
+Shopping Cart Settings,Setări Cosul de cumparaturi
+Shopping Cart Shipping Rule,Cosul de cumparaturi Regula Transport
+Shopping Cart Shipping Rules,Cosul de cumparaturi Reguli de expediere
+Shopping Cart Taxes and Charges Master,Taxele coș de cumpărături și taxe de Master
+Shopping Cart Taxes and Charges Masters,Cumpărături Impozite și taxe cos Masters
+Something went wrong!,Ceva a mers prost!
+Something went wrong.,Ceva nu a funcționat.
+Tax Master,Taxa de Master
+To Pay,Pentru a Pay
+Updated,Actualizat
+You are not allowed to reply to this ticket.,Nu vi se permite să răspundeți la acest bilet.
+You need to be logged in to view your cart.,Ai nevoie să fii logat pentru a vedea cosul de cumparaturi.
+You need to enable Shopping Cart,Ai nevoie pentru a permite Cosul de cumparaturi
+{0} cannot be purchased using Shopping Cart,{0} nu pot fi achiziționate cu ajutorul Cosul de cumparaturi
+{0} is required,{0} este necesară
+{0} {1} has a common territory {2},{0} {1} are un teritoriu comun {2}

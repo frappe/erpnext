@@ -3329,3 +3329,49 @@ website page link,liên kết trang web
 {0} {1} status is Unstopped,{0} {1} tình trạng là Unstopped
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Trung tâm chi phí là bắt buộc đối với hàng {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} không tìm thấy trong hóa đơn chi tiết bảng
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>",{0} là cần thiết
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>",Tiền tệ là cần thiết cho Giá liệt kê {0}
+Billed,Một cái gì đó đã đi sai!
+Company,Giỏ hàng Giá liệt kê
+Currency is required for Price List {0},Danh sách giá
+Default Customer Group,Xin vui lòng viết một cái gì đó trong chủ đề và thông điệp!
+Default Territory,Vui lòng ghi rõ tiền tệ tại Công ty
+Delivered,"Nếu được chỉ định, gửi các bản tin sử dụng địa chỉ email này"
+Enable Shopping Cart,Dòng báo giá
+Go ahead and add something to your cart.,Được quảng cáo một phần
+Hey! Go ahead and add an address,Một cái gì đó đã đi sai.
+Invalid Billing Address,Thuế Thạc sĩ
+Invalid Shipping Address,Để trả tiền
+Missing Currency Exchange Rates for {0},Quy tắc vận chuyển
+Name is required,{0} không thể mua được bằng Giỏ hàng
+Not Allowed,Giỏ hàng Thuế và phí Thạc sĩ
+Paid,Quy định vận chuyển Giỏ hàng
+Partially Billed,Bạn cần phải kích hoạt Giỏ hàng
+Partially Delivered,Địa chỉ thanh toán không hợp lệ
+Please specify a Price List which is valid for Territory,Mặc định Territory
+Please specify currency in Company,Giỏ hàng Vận chuyển Rule
+Please write something,Giỏ hàng Chức năng Giá
+Please write something in subject and message!,{0} {1} có một lãnh thổ chung {2}
+Price List,"<a href=""#Sales Browser/Customer Group""> Add / Edit </ a>"
+Price List not configured.,Một phần Giao
+Quotation Series,Giỏ hàng Thuế và phí Masters
+Shipping Rule,Này ! Đi trước và thêm một địa chỉ
+Shopping Cart,"<a href=""#Sales Browser/Territory""> Add / Edit </ a>"
+Shopping Cart Price List,Đã cập nhật
+Shopping Cart Price Lists,Danh sách giá không được cấu hình.
+Shopping Cart Settings,Mặc định khách hàng Nhóm
+Shopping Cart Shipping Rule,Bạn cần phải đăng nhập để xem giỏ hàng của bạn.
+Shopping Cart Shipping Rules,Không phép
+Shopping Cart Taxes and Charges Master,Công ty
+Shopping Cart Taxes and Charges Masters,Địa chỉ Vận chuyển không hợp lệ
+Something went wrong!,Bạn không được phép trả lời vé này.
+Something went wrong.,Đi trước và thêm một cái gì đó vào giỏ hàng của bạn.
+Tax Master,Giao
+To Pay,Thanh toán
+Updated,Xin vui lòng viết một cái gì đó
+You are not allowed to reply to this ticket.,Vui lòng xác định Bảng giá có giá trị trong lãnh thổ
+You need to be logged in to view your cart.,Giỏ hàng
+You need to enable Shopping Cart,Giỏ hàng mua sắm thiết lập
+{0} cannot be purchased using Shopping Cart,Lập hóa đơn
+{0} is required,Cho phép Giỏ hàng
+{0} {1} has a common territory {2},Yêu cầu nhập tên

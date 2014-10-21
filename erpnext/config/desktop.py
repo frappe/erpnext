@@ -48,5 +48,12 @@ def get_data():
 			"color": "#2c3e50",
 			"icon": "icon-phone",
 			"type": "module"
+		},
+		"Shopping Cart": {
+			"color": "#B7E090",
+			"icon": "icon-shopping-cart",
+			"label": _("Shopping Cart"),
+			"link": "Form/Shopping Cart Settings",
+			"type": "module"
 		}
 	}

@@ -1,0 +1,85 @@
+<div class="sale-content">
+    <ul class="breadcrumb">
+    	<li><a href="index">Home</a></li>
+    	<li><a href="{{ parent_link }}">{{ parent_title }}</a></li>
+    	<li class="active"><i class="icon-file icon-fixed-width"></i> {{ doc.name }}</li>
+    </ul>
+	<h3><i class="icon-file icon-fixed-width"></i> {{ doc.name }}</h3>
+	{% if doc.name == _("Not Allowed") -%}
+		<script>ask_to_login();</script>
+	{% else %}
+	<hr>
+	<div>
+	<div class="row">
+		<div class="col-xs-6">
+			{% if doc.status -%}{{ doc.status }}{%- endif %}
+		</div>
+		<div class="col-xs-6">
+			<span class="pull-right">{{ frappe.utils.formatdate(doc.posting_date or doc.transaction_date) }}</span>
+		</div>
+	</div>
+	<br>
+	<div class="row">
+		<div class="col-md-12">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<th>Sr</th>
+					<th>Item Name</th>
+					<th>Description</th>
+					<th>Qty</th>
+					<th>UoM</th>
+					<th>Basic Rate</th>
+					<th>Amount</th>
+				</tr>
+				{%- for row in doc.get({"doctype": doc.doctype + " Item"}) %}
+				<tr>
+					<td style="width: 3%;">{{ row.idx }}</td>
+					<td style="width: 20%;">{{ row.item_name }}</td>
+					<td style="width: 37%;">{{ row.description }}</td>
+					<td style="width: 5%; text-align: right;">{{ row.qty }}</td>
+					<td style="width: 5%;">{{ row.stock_uom }}</td>
+					<td style="width: 15%; text-align: right;">{{ frappe.utils.fmt_money(row.rate, currency=doc.currency) }}</td>
+					<td style="width: 15%; text-align: right;">{{ frappe.utils.fmt_money(row.amount, currency=doc.currency) }}</td>
+				</tr>
+				{% endfor -%}
+			</tbody>
+		</table>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6"></div>
+		<div class="col-md-6">
+		<table cellspacing=0 width=100%>
+		<tbody>
+			<tr>
+				<td>Net Total</td>
+				<td width=40% style="text-align: right;">{{
+					frappe.utils.fmt_money(doc.net_total/doc.conversion_rate, currency=doc.currency)
+				}}</td>
+			</tr>
+			{%- for charge in doc.get({"doctype":"Sales Taxes and Charges"}) -%}
+			{%- if not charge.included_in_print_rate -%}
+			<tr>
+				<td>{{ charge.description }}</td>
+				<td style="text-align: right;">{{ frappe.utils.fmt_money(charge.tax_amount / doc.conversion_rate, currency=doc.currency) }}</td>
+			</tr>
+			{%- endif -%}
+			{%- endfor -%}
+			<tr>
+				<td>Grand Total</td>
+				<td style="text-align: right;">{{ frappe.utils.fmt_money(doc.grand_total_export, currency=doc.currency) }}</td>
+			</tr>
+			<tr style='font-weight: bold'>
+				<td>Rounded Total</td>
+				<td style="text-align: right;">{{ frappe.utils.fmt_money(doc.rounded_total_export, currency=doc.currency) }}</td>
+			</tr>
+		</tbody>
+		</table>
+		</div>
+	</div>
+	</div>
+	{%- endif %}
+</div>
+
+<!-- no-sidebar -->

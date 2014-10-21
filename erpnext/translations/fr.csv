@@ -3330,3 +3330,49 @@ website page link,Lien vers page web
 {0} {1} status is Unstopped,Vous ne pouvez pas reporter le numéro de rangée supérieure ou égale à numéro de la ligne actuelle pour ce type de charge
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Centre de coûts est obligatoire pour objet {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} ne trouve pas dans la table Détails de la facture
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Ajouter / Modifier < / a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Ajouter / Modifier < / a>"
+Billed,Facturé
+Company,Entreprise
+Currency is required for Price List {0},{0} est obligatoire
+Default Customer Group,Groupe de clients par défaut
+Default Territory,Territoire défaut
+Delivered,Livré
+Enable Shopping Cart,Activer Panier
+Go ahead and add something to your cart.,Allez-y et ajouter quelque chose à votre panier.
+Hey! Go ahead and add an address,Hé ! Allez-y et ajoutez une adresse
+Invalid Billing Address,"Pour exécuter un test ajouter le nom du module dans la route après '{0}' . Par exemple, {1}"
+Invalid Shipping Address,effondrement
+Missing Currency Exchange Rates for {0},Vider le cache
+Name is required,Le nom est obligatoire
+Not Allowed,"Groupe ajoutée, rafraîchissant ..."
+Paid,payé
+Partially Billed,partiellement Facturé
+Partially Delivered,Livré partiellement
+Please specify a Price List which is valid for Territory,S&#39;il vous plaît spécifier une liste de prix qui est valable pour le territoire
+Please specify currency in Company,S&#39;il vous plaît préciser la devise dans la société
+Please write something,S'il vous plaît écrire quelque chose
+Please write something in subject and message!,S'il vous plaît écrire quelque chose dans le thème et le message !
+Price List,Liste des Prix
+Price List not configured.,Liste des prix non configuré.
+Quotation Series,Série de devis
+Shipping Rule,Livraison règle
+Shopping Cart,Panier
+Shopping Cart Price List,Panier Liste des prix
+Shopping Cart Price Lists,Panier Liste des prix
+Shopping Cart Settings,Panier Paramètres
+Shopping Cart Shipping Rule,Panier Livraison règle
+Shopping Cart Shipping Rules,Panier Règles d&#39;expédition
+Shopping Cart Taxes and Charges Master,Panier taxes et redevances Maître
+Shopping Cart Taxes and Charges Masters,Panier Taxes et frais de maîtrise
+Something went wrong!,Quelque chose s'est mal passé!
+Something went wrong.,Une erreur est survenue.
+Tax Master,Maître d&#39;impôt
+To Pay,à payer
+Updated,Mise à jour
+You are not allowed to reply to this ticket.,Vous n'êtes pas autorisé à répondre à ce billet .
+You need to be logged in to view your cart.,Vous devez être connecté pour voir votre panier.
+You need to enable Shopping Cart,Poster n'existe pas . S'il vous plaît ajoutez poste !
+{0} cannot be purchased using Shopping Cart,Envoyer permanence {0} ?
+{0} is required,{0} ne peut pas être acheté en utilisant Panier
+{0} {1} has a common territory {2},Alternative lien de téléchargement

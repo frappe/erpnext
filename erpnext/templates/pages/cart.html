@@ -1,0 +1,57 @@
+{% block title %} {{ "Shopping Cart" }} {% endblock %}
+
+{% block header %}<h2><i class="icon-shopping-cart"></i> Shopping Cart</h2>{% endblock %}
+
+{% block script %}{% include "templates/includes/cart.js" %}{% endblock %}
+
+{% block content %}
+<div class="cart-content">
+	<div class="progress progress-striped active">
+		<div class="progress-bar progress-bar-info" style="width: 100%;"></div>
+	</div>
+	<div id="cart-container" class="hide">
+		<p class="pull-right"><button class="btn btn-success btn-place-order" type="button">Place Order</button></p>
+		<div class="clearfix"></div>
+		<div id="cart-error" class="alert alert-danger" style="display: none;"></div>
+		<hr>
+		<div class="row">
+			<div class="col-md-9 col-sm-9">
+				<div class="row">
+					<div class="col-md-9 col-md-offset-3"><h4>Item Details</h4></div>
+				</div>
+			</div>
+			<div class="col-md-3 col-sm-3 text-right"><h4>Qty, Amount</h4></div>
+		</div><hr>
+		<div id="cart-items">
+		</div>
+		<div id="cart-taxes">
+		</div>
+		<div id="cart-totals">
+		</div>
+		<hr>
+		<div id="cart-addresses">
+			<div class="row">
+				<div class="col-md-6">
+					<h4>Shipping Address</h4>
+					<div id="cart-shipping-address" class="panel-group"
+						data-fieldname="shipping_address_name"></div>
+					<button class="btn btn-default" type="button" id="cart-add-shipping-address">
+						<span class="icon icon-plus"></span> New Shipping Address</button>
+				</div>
+				<div class="col-md-6">
+					<h4>Billing Address</h4>
+					<div id="cart-billing-address" class="panel-group"
+						data-fieldname="customer_address"></div>
+					<button class="btn btn-default" type="button" id="cart-add-billing-address">
+						<span class="icon icon-plus"></span> New Billing Address</button>
+				</div>
+			</div>
+			<hr>
+		</div>
+		<p class="pull-right"><button class="btn btn-success btn-place-order" type="button">Place Order</button></p>
+	</div>
+</div>
+
+<!-- no-sidebar -->
+{% endblock %}
+

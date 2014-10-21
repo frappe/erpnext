@@ -74,6 +74,9 @@ def set_party_in_jv_and_gl_entry(receivable_payable_accounts):
 	for d in accounts:
 		account_map.setdefault(d.name, d)
 
+	if not account_map:
+		return
+
 	for dt in ["Journal Voucher Detail", "GL Entry"]:
 		records = frappe.db.sql("""select name, account from `tab%s` where account in (%s)""" %
 			(dt, ", ".join(['%s']*len(account_map))), tuple(account_map.keys()))

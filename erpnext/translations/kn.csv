@@ -3329,3 +3329,49 @@ website page link,ವೆಬ್ಸೈಟ್ ಪುಟ ಲಿಂಕ್
 {0} {1} status is Unstopped,{0} {1} ಸ್ಥಿತಿಯನ್ನು unstopped ಆಗಿದೆ
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: ವೆಚ್ಚ ಸೆಂಟರ್ ಐಟಂ ಕಡ್ಡಾಯ {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} ಸರಕುಪಟ್ಟಿ ವಿವರಗಳು ಟೇಬಲ್ ಕಂಡುಬಂದಿಲ್ಲ
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","ಕವಿದ href=""#Sales Browser/Customer Group""> ಸೇರಿಸಿ / ಸಂಪಾದಿಸಿ </ ಒಂದು >"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","ಕವಿದ href=""#Sales Browser/Territory""> ಸೇರಿಸಿ / ಸಂಪಾದಿಸಿ </ ಒಂದು >"
+Billed,ಖ್ಯಾತವಾದ
+Company,ಕಂಪನಿ
+Currency is required for Price List {0},ಕರೆನ್ಸಿ ಬೆಲೆ ಪಟ್ಟಿ ಅಗತ್ಯವಿದೆ {0}
+Default Customer Group,ಡೀಫಾಲ್ಟ್ ಗ್ರಾಹಕ ಗುಂಪಿನ
+Default Territory,ಡೀಫಾಲ್ಟ್ ಪ್ರದೇಶ
+Delivered,ತಲುಪಿಸಲಾಗಿದೆ
+Enable Shopping Cart,ಶಾಪಿಂಗ್ ಕಾರ್ಟ್ ಸಕ್ರಿಯಗೊಳಿಸಿ
+Go ahead and add something to your cart.,ಮುಂದೆ ಹೋಗಿ ಮತ್ತು ನಿಮ್ಮ ಕಾರ್ಟ್ ಏನಾದರೂ ಸೇರಿಸಿ.
+Hey! Go ahead and add an address,ಹೇ! ಮುಂದೆ ಹೋಗಿ ಒಂದು ಸೇರಿಸಿ
+Invalid Billing Address,ಅಮಾನ್ಯವಾದ ಬಿಲ್ಲಿಂಗ್ ವಿಳಾಸ
+Invalid Shipping Address,ಅಮಾನ್ಯವಾದ ಶಿಪ್ಪಿಂಗ್ ವಿಳಾಸ
+Missing Currency Exchange Rates for {0},ಕರೆನ್ಸಿ ವಿನಿಮಯ ದರಗಳು ಮಿಸ್ಸಿಂಗ್ {0}
+Name is required,ಹೆಸರು ಅಗತ್ಯವಿದೆ
+Not Allowed,ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ
+Paid,ಪಾವತಿಸಿದ
+Partially Billed,ಭಾಗಶಃ ಖ್ಯಾತವಾದ
+Partially Delivered,ಭಾಗಶಃ ತಲುಪಿಸಲಾಗಿದೆ
+Please specify a Price List which is valid for Territory,ಪ್ರದೇಶ ಮಾನ್ಯ ಬೆಲೆ ಪಟ್ಟಿ ಸೂಚಿಸಲು ದಯವಿಟ್ಟು
+Please specify currency in Company,ಕಂಪನಿ ಕರೆನ್ಸಿ ಸೂಚಿಸಲು ದಯವಿಟ್ಟು
+Please write something,ಏನೋ ಬರೆಯಲು ಮಾಡಿ
+Please write something in subject and message!,ವಿಷಯ ಮತ್ತು ಸಂದೇಶದ ಏನೋ ಬರೆಯಲು ಮಾಡಿ !
+Price List,ಬೆಲೆ ಪಟ್ಟಿ
+Price List not configured.,ಬೆಲೆ ಪಟ್ಟಿ ಕಾನ್ಫಿಗರ್.
+Quotation Series,ನುಡಿಮುತ್ತುಗಳು ಸರಣಿ
+Shipping Rule,ಶಿಪ್ಪಿಂಗ್ ರೂಲ್
+Shopping Cart,ಶಾಪಿಂಗ್ ಕಾರ್ಟ್
+Shopping Cart Price List,ಶಾಪಿಂಗ್ ಕಾರ್ಟ್ ಬೆಲೆ ಪಟ್ಟಿ
+Shopping Cart Price Lists,ಶಾಪಿಂಗ್ ಕಾರ್ಟ್ ಬೆಲೆ ಪಟ್ಟಿ
+Shopping Cart Settings,ಶಾಪಿಂಗ್ ಕಾರ್ಟ್ ಸೆಟ್ಟಿಂಗ್ಗಳು
+Shopping Cart Shipping Rule,ಶಾಪಿಂಗ್ ಕಾರ್ಟ್ ಶಿಪ್ಪಿಂಗ್ ರೂಲ್
+Shopping Cart Shipping Rules,ಶಾಪಿಂಗ್ ಕಾರ್ಟ್ ಶಿಪ್ಪಿಂಗ್ ನಿಯಮಗಳು
+Shopping Cart Taxes and Charges Master,ಶಾಪಿಂಗ್ ಕಾರ್ಟ್ ತೆರಿಗೆಗಳು ಮತ್ತು ಶುಲ್ಕಗಳು ಮಾಸ್ಟರ್
+Shopping Cart Taxes and Charges Masters,ಶಾಪಿಂಗ್ ಕಾರ್ಟ್ ತೆರಿಗೆಗಳು ಮತ್ತು ಶುಲ್ಕಗಳು ಮಾಸ್ಟರ್ಸ್
+Something went wrong!,ಏನೋ ತಪ್ಪಾಗಿದೆ!
+Something went wrong.,ಯಾವುದೋ ತಪ್ಪು ಸಂಭವಿಸಿದೆ.
+Tax Master,ತೆರಿಗೆ ಮಾಸ್ಟರ್
+To Pay,ಪಾವತಿಸಲು
+Updated,ನವೀಕರಿಸಲಾಗಿದೆ
+You are not allowed to reply to this ticket.,ಈ ಟಿಕೆಟ್ ಪ್ರತ್ಯುತ್ತರ ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ.
+You need to be logged in to view your cart.,ನಿಮ್ಮ ಕಾರ್ಟ್ ಲಾಗಿನ್ ಅಗತ್ಯವಿದೆ.
+You need to enable Shopping Cart,ನೀವು ಶಾಪಿಂಗ್ ಕಾರ್ಟ್ ಸಕ್ರಿಯಗೊಳಿಸಬೇಕು
+{0} cannot be purchased using Shopping Cart,{0} ಶಾಪಿಂಗ್ ಕಾರ್ಟ್ ಬಳಸಿ ಕೊಳ್ಳಬಹುದು ಸಾಧ್ಯವಿಲ್ಲ
+{0} is required,{0} ಅಗತ್ಯವಿದೆ
+{0} {1} has a common territory {2},{0} {1} ಸಾಮಾನ್ಯ ಪ್ರದೇಶವನ್ನು ಹೊಂದಿದೆ {2}

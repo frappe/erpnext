@@ -3329,3 +3329,49 @@ website page link,web stranica vode
 {0} {1} status is Unstopped,{0} {1} status Unstopped
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: troška je obvezno za točku {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} nije pronađen u Pojedinosti dostavnice stolu
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Dodaj / Uredi < />"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Dodaj / Uredi < />"
+Billed,Naplaćeno
+Company,Društvo
+Currency is required for Price List {0},Valuta je potrebno za Cjenika {0}
+Default Customer Group,Zadani Korisnik Grupa
+Default Territory,Zadani Regija
+Delivered,Isporučena
+Enable Shopping Cart,Omogućite Košarica
+Go ahead and add something to your cart.,Ići naprijed i dodati nešto u košaricu.
+Hey! Go ahead and add an address,Hej! Ići naprijed i dodati adresu
+Invalid Billing Address,Pogrešna adresa naplate
+Invalid Shipping Address,Invalid Dostava Adresa
+Missing Currency Exchange Rates for {0},Nedostaje Tečajne stope za {0}
+Name is required,Ime je potrebno
+Not Allowed,Not Allowed
+Paid,plaćen
+Partially Billed,djelomično Naplaćeno
+Partially Delivered,djelomično Isporučeno
+Please specify a Price List which is valid for Territory,Navedite cjenik koji vrijedi za teritoriju
+Please specify currency in Company,Navedite valutu u Društvu
+Please write something,Molimo napisati nešto
+Please write something in subject and message!,Molimo napisati nešto u temi i poruke !
+Price List,Cjenik
+Price List not configured.,Popis Cijena nije konfiguriran.
+Quotation Series,Ponuda Serija
+Shipping Rule,Dostava Pravilo
+Shopping Cart,Košarica
+Shopping Cart Price List,Košarica Cjenik
+Shopping Cart Price Lists,Košarica cjenike
+Shopping Cart Settings,Košarica Postavke
+Shopping Cart Shipping Rule,Košarica Dostava Pravilo
+Shopping Cart Shipping Rules,Košarica Dostava Pravila
+Shopping Cart Taxes and Charges Master,Košarica poreze i troškove Master
+Shopping Cart Taxes and Charges Masters,Košarica Porezi i naknade Masters
+Something went wrong!,Nešto je pošlo po krivu!
+Something went wrong.,Nešto je pošlo po zlu.
+Tax Master,Porezna Master
+To Pay,platiti
+Updated,Obnovljeno
+You are not allowed to reply to this ticket.,Vi ne smijete odgovoriti na ovu kartu.
+You need to be logged in to view your cart.,Morate biti prijavljeni da biste vidjeli svoju košaricu.
+You need to enable Shopping Cart,Morate omogućiti Košarica
+{0} cannot be purchased using Shopping Cart,{0} ne može se kupiti pomoću Košarica
+{0} is required,{0} je potrebno
+{0} {1} has a common territory {2},{0} {1} ima zajednički teritorij {2}

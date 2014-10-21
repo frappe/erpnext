@@ -3329,3 +3329,49 @@ website page link,இணைய பக்கம் இணைப்பு
 {0} {1} status is Unstopped,{0} {1} நிலையை ஐபோனில் இருக்கிறது
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: செலவு மையம் பொருள் கட்டாய {2}
 {0}: {1} not found in Invoice Details table,{0} {1} விலைப்பட்டியல் விவரம் அட்டவணையில் இல்லை
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","மிக href=""#Sales Browser/Customer Group""> சேர் / திருத்து </ a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","மிக href=""#Sales Browser/Territory""> சேர் / திருத்து </ a>"
+Billed,கட்டணம்
+Company,நிறுவனம்
+Currency is required for Price List {0},நாணய விலை பட்டியல் தேவை {0}
+Default Customer Group,முன்னிருப்பு வாடிக்கையாளர் பிரிவு
+Default Territory,முன்னிருப்பு மண்டலம்
+Delivered,வழங்கினார்
+Enable Shopping Cart,வணிக வண்டியில் செயல்படுத்த
+Go ahead and add something to your cart.,முன்னோக்கி சென்று உங்கள் வண்டி ஒன்று சேர்க்க.
+Hey! Go ahead and add an address,ஏய்! போய் ஒரு முகவரியை சேர்க்க
+Invalid Billing Address,தவறான பில்லிங் முகவரி
+Invalid Shipping Address,செல்லாத கப்பல் முகவரி
+Missing Currency Exchange Rates for {0},ஐந்து நாணய மாற்று விகிதங்கள் காணவில்லை {0}
+Name is required,பெயர் தேவை
+Not Allowed,அனுமதி இல்லை
+Paid,பணம்
+Partially Billed,பகுதி கூறப்படுவது
+Partially Delivered,பகுதியளவு வழங்கப்படுகிறது
+Please specify a Price List which is valid for Territory,மண்டலம் செல்லுபடியாகும் ஒரு விலை பட்டியல் குறிப்பிடவும்
+Please specify currency in Company,நிறுவனத்தின் நாணய குறிப்பிடவும்
+Please write something,ஏதாவது எழுத கொள்ளவும்
+Please write something in subject and message!,பொருள் மற்றும் செய்தி ஏதாவது எழுத கொள்ளவும் !
+Price List,விலை பட்டியல்
+Price List not configured.,விலை பட்டியல் கட்டமைக்கப்பட்ட.
+Quotation Series,மேற்கோள் தொடர்
+Shipping Rule,கப்பல் விதி
+Shopping Cart,வணிக வண்டி
+Shopping Cart Price List,வணிக வண்டியில் விலை பட்டியல்
+Shopping Cart Price Lists,வணிக வண்டியில் விலை பட்டியல்கள்
+Shopping Cart Settings,வணிக வண்டியில் அமைப்புகள்
+Shopping Cart Shipping Rule,வணிக வண்டியில் கப்பல் போக்குவரத்து விதி
+Shopping Cart Shipping Rules,வணிக வண்டியில் கப்பல் போக்குவரத்து விதிகள்
+Shopping Cart Taxes and Charges Master,வணிக வண்டியில் வரிகள் மற்றும் கட்டணங்கள் மாஸ்டர்
+Shopping Cart Taxes and Charges Masters,வணிக வண்டியில் வரிகள் மற்றும் கட்டணங்கள் முதுநிலை
+Something went wrong!,ஏதோ தவறு!
+Something went wrong.,ஏதோ தவறு நடந்துவிட்டது.
+Tax Master,வரி மாஸ்டர்
+To Pay,பணம்
+Updated,புதுப்பிக்கப்பட்ட
+You are not allowed to reply to this ticket.,இந்த டிக்கெட் பதில் அனுமதி இல்லை .
+You need to be logged in to view your cart.,உங்கள் வண்டி பார்வையிட உள்நுழைந்திருக்க வேண்டும்.
+You need to enable Shopping Cart,வணிக வண்டியில் செயல்படுத்த வேண்டும்
+{0} cannot be purchased using Shopping Cart,{0} வணிக வண்டியில் பயன்படுத்தி வாங்க முடியாது
+{0} is required,{0} தேவைப்படுகிறது
+{0} {1} has a common territory {2},{0} {1} ஒரு பொதுவான பகுதியில் உள்ளது {2}

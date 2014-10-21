@@ -1,0 +1,23 @@
+{
+ "creation": "2013-07-03 13:15:34.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "shipping_rule", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Shipping Rule", 
+   "options": "Shipping Rule", 
+   "permlevel": 0, 
+   "reqd": 1
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:30:47.000000", 
+ "modified_by": "Administrator", 
+ "module": "Shopping Cart", 
+ "name": "Shopping Cart Shipping Rule", 
+ "owner": "Administrator"
+}
