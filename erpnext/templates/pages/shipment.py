@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from shopping_cart.templates.utils import get_transaction_context
+from erpnext.templates.utils import get_transaction_context
 
 no_cache = 1
 no_sitemap = 1

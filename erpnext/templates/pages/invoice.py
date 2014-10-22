@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, fmt_money
-from shopping_cart.templates.utils import get_transaction_context
+from erpnext.templates.utils import get_transaction_context
 
 no_cache = 1
 no_sitemap = 1

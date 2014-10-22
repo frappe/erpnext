@@ -11,7 +11,7 @@ no_sitemap = 1
 def get_context(context):
 	return {
 		"title": "My Tickets",
-		"method": "shopping_cart.templates.pages.tickets.get_tickets",
+		"method": "erpnext.templates.pages.tickets.get_tickets",
 		"icon": "icon-ticket",
 		"empty_list_message": "No Tickets Raised",
 		"page": "ticket"
