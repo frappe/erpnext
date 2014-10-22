@@ -41,7 +41,7 @@ A Supplier exists with same name,وهناك مورد موجود مع نفس ال
 A symbol for this currency. For e.g. $,رمزا لهذه العملة. على سبيل المثال ل$
 AMC Expiry Date,AMC تاريخ انتهاء الاشتراك
 Abbr,ابر
-Abbreviation cannot have more than 5 characters,اختصار لا يمكن أن يكون أكثر من 5 أحرف
+Abbreviation cannot have more than 5 characters,الاختصار لا يمكن أن يكون أكثر من 5 أحرف
 Above Value,فوق القيمة
 Absent,غائب
 Acceptance Criteria,معايير القبول
@@ -69,7 +69,7 @@ Account {0} cannot be a Group,حساب {0} لا يمكن أن يكون مجمو�
 Account {0} does not belong to Company {1},حساب {0} لا ينتمي إلى شركة {1}
 Account {0} does not belong to company: {1},حساب {0} لا تنتمي إلى الشركة: {1}
 Account {0} does not exist,حساب {0} غير موجود
-Account {0} has been entered more than once for fiscal year {1},حساب {0} تم إدخال أكثر من مرة للعام المالي {1}
+Account {0} has been entered more than once for fiscal year {1},تم إدخال حساب {0} أكثر من مرة للعام المالي {1}
 Account {0} is frozen,حساب {0} مجمد
 Account {0} is inactive,حساب {0} غير نشط
 Account {0} is not valid,حساب {0} غير صالح
@@ -86,7 +86,7 @@ Accounting,المحاسبة
 Accounting journal entries.,المحاسبة إدخالات دفتر اليومية.
 Accounts,حسابات
 Accounts Browser,متصفح الحسابات 
-Accounts Frozen Upto,حسابات مجمدة لغاية
+Accounts Frozen Upto,حسابات مجمدة حتي
 Accounts Payable,ذمم دائنة
 Accounts Receivable,حسابات القبض
 Accounts Settings,إعدادات الحسابات
@@ -94,7 +94,7 @@ Active,نشط
 Active: Will extract emails from ,نشط: سيتم استخراج رسائل البريد الإلكتروني من
 Activity,نشاط
 Activity Log,سجل النشاط
-Activity Log:,النشاط المفتاح:
+Activity Log:,:سجل النشاط
 Activity Type,نوع النشاط
 Actual,فعلي
 Actual Budget,الميزانية الفعلية
@@ -410,16 +410,16 @@ Buying Settings,إعدادات الشراء
 "Buying must be checked, if Applicable For is selected as {0}",يجب أن يتم التحقق الشراء، إذا تم تحديد مطبق للك {0}
 C-Form,نموذج C-
 C-Form Applicable,C-نموذج قابل للتطبيق
-C-Form Invoice Detail,C-نموذج تفاصيل الفاتورة
-C-Form No,C-الاستمارة رقم
-C-Form records,سجلات نموذج C-
+C-Form Invoice Detail, تفاصيل الفاتورة نموذج - س 
+C-Form No,رقم النموذج - س 
+C-Form records,سجلات النموذج - س
 CENVAT Capital Goods,CENVAT السلع الرأسمالية
 CENVAT Edu Cess,CENVAT ايدو سيس
 CENVAT SHE Cess,CENVAT SHE سيس
 CENVAT Service Tax,CENVAT ضريبة الخدمة
 CENVAT Service Tax Cess 1,خدمة CENVAT ضريبة سيس 1
 CENVAT Service Tax Cess 2,خدمة CENVAT ضريبة سيس 2
-Calculate Based On,حساب الربح بناء على
+Calculate Based On,إحسب الربح بناء على
 Calculate Total Score,حساب النتيجة الإجمالية
 Calendar Events,الأحداث
 Call,دعوة
@@ -538,7 +538,7 @@ Commission on Sales,عمولة على المبيعات
 Commission rate cannot be greater than 100,معدل العمولة لا يمكن أن يكون أكبر من 100
 Communication,اتصالات
 Communication HTML,الاتصالات HTML
-Communication History,الاتصال التاريخ
+Communication History,تاريخ الاتصال
 Communication log.,سجل الاتصالات.
 Communications,الاتصالات
 Company,شركة

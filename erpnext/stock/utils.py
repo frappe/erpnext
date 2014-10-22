@@ -100,7 +100,7 @@ def get_fifo_rate(previous_stock_queue, qty):
 	"""get FIFO (average) Rate from Queue"""
 	if qty >= 0:
 		total = sum(f[0] for f in previous_stock_queue)
-		return total and sum(f[0] * f[1] for f in previous_stock_queue) / flt(total) or 0.0
+		return sum(flt(f[0]) * flt(f[1]) for f in previous_stock_queue) / flt(total) if total else 0.0
 	else:
 		available_qty_for_outgoing, outgoing_cost = 0, 0
 		qty_to_pop = abs(qty)
