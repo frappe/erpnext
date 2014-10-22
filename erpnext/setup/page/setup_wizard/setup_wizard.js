@@ -139,7 +139,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				help: __('Select your home country and check the timezone and currency.'),
 				onload: function(slide, form) {
 					frappe.call({
-						method:"frappe.country_info.get_country_timezone_info",
+						method:"frappe.geo.country_info.get_country_timezone_info",
 						callback: function(data) {
 							frappe.country_info = data.message.country_info;
 							frappe.all_timezones = data.message.all_timezones;
