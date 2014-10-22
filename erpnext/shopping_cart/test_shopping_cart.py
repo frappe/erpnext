@@ -217,7 +217,7 @@ class TestShoppingCart(unittest.TestCase):
 			"doctype": "Address",
 			"address_line1": "_Test Address Line 1",
 			"address_title": "_Test Cart Lead Address",
-			"address_type": "Home",
+			"address_type": "Personal",
 			"city": "_Test City",
 			"country": "India",
 			"lead": lead.name,
