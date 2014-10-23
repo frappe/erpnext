@@ -52,6 +52,8 @@ class Address(Document):
 
 @frappe.whitelist()
 def get_address_display(address_dict):
+	if not address_dict:
+		return
 	if not isinstance(address_dict, dict):
 		address_dict = frappe.db.get_value("Address", address_dict, "*", as_dict=True) or {}
 
