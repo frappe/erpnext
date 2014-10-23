@@ -5,15 +5,13 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	try:
-		frappe.reload_doc("accounts", "doctype", "account")
-		receivable_payable_accounts = create_receivable_payable_account()
+	frappe.reload_doc("accounts", "doctype", "account")
+	receivable_payable_accounts = create_receivable_payable_account()
+	if receivable_payable_accounts:
 		set_party_in_jv_and_gl_entry(receivable_payable_accounts)
-		delete_individual_party_account(receivable_payable_accounts)
+		delete_individual_party_account()
 		remove_customer_supplier_account_report()
-	except:
-		print frappe.get_traceback()
-		pass
+		add_default_accounts_in_party(receivable_payable_accounts)
 
 
 def link_warehouse_account():
@@ -95,3 +93,17 @@ def delete_individual_party_account():
 def remove_customer_supplier_account_report():
 	for d in ["Customer Account Head", "Supplier Account Head"]:
 		frappe.delete_doc("Report", d)
+
+def add_default_accounts_in_party(receivable_payable_accounts):
+	for dt in ["Customer", "Supplier"]:
+		for p in frappe.db.sql("""select name from `tab{0}` where docstatus < 2""".format(dt)):
+			try:
+				party = frappe.get_doc(dt, p[0])
+				for company, accounts in receivable_payable_accounts.items():
+					party.append("party_accounts", {
+						"company": company,
+						"account": accounts["Receivable" if dt == "Customer" else "Payable"]
+					})
+				party.save()
+			except:
+				pass
