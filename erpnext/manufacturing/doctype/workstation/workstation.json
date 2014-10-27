@@ -39,29 +39,6 @@
    "width": "300px"
   }, 
   {
-   "fieldname": "capacity", 
-   "fieldtype": "Data", 
-   "hidden": 1, 
-   "in_list_view": 1, 
-   "label": "Capacity", 
-   "oldfieldname": "capacity", 
-   "oldfieldtype": "Data", 
-   "permlevel": 0, 
-   "reqd": 0
-  }, 
-  {
-   "fieldname": "capacity_units", 
-   "fieldtype": "Select", 
-   "hidden": 1, 
-   "in_list_view": 1, 
-   "label": "Capacity Units", 
-   "oldfieldname": "capacity_units", 
-   "oldfieldtype": "Select", 
-   "options": "\nUnits/Shifts\nUnits/Hour", 
-   "permlevel": 0, 
-   "reqd": 0
-  }, 
-  {
    "fieldname": "fixed_cycle_cost", 
    "fieldtype": "Float", 
    "label": "Fixed Cycle Cost", 
@@ -126,33 +103,6 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "section_break", 
-   "fieldtype": "Section Break", 
-   "label": "Capacity", 
-   "permlevel": 0, 
-   "precision": ""
-  }, 
-  {
-   "fieldname": "capacity_per_cycle", 
-   "fieldtype": "Int", 
-   "label": "Capacity Per Cycle", 
-   "permlevel": 0, 
-   "precision": ""
-  }, 
-  {
-   "fieldname": "column_break_18", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0, 
-   "precision": ""
-  }, 
-  {
-   "fieldname": "duration_of_cycle", 
-   "fieldtype": "Float", 
-   "label": "Duration of Cycle", 
-   "permlevel": 0, 
-   "precision": "2"
-  }, 
-  {
    "fieldname": "operation_timings", 
    "fieldtype": "Section Break", 
    "label": "Operation Timings", 
@@ -161,8 +111,16 @@
   }, 
   {
    "fieldname": "start_time", 
-   "fieldtype": "Datetime", 
+   "fieldtype": "Time", 
    "label": "Start Time", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "holiday_list", 
+   "fieldtype": "Link", 
+   "label": "Holiday List", 
+   "options": "Holiday List", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -174,8 +132,22 @@
   }, 
   {
    "fieldname": "closing_time", 
-   "fieldtype": "Datetime", 
+   "fieldtype": "Time", 
    "label": "Closing Time", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "section_break", 
+   "fieldtype": "Section Break", 
+   "label": "Capacity", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "capacity", 
+   "fieldtype": "Int", 
+   "label": "Capacity", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -198,7 +170,7 @@
  ], 
  "icon": "icon-wrench", 
  "idx": 1, 
- "modified": "2014-10-24 13:19:06.091414", 
+ "modified": "2014-10-27 16:59:12.420621", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Workstation", 
