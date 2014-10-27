@@ -42,8 +42,12 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 					this.make_supplier_quotation,
 						frappe.boot.doctype_icons["Supplier Quotation"]);
 
-			if(doc.material_request_type === "Transfer" && doc.status === "Submitted")
+			if(doc.material_request_type === "Material Transfer" && doc.status === "Submitted")
 				cur_frm.add_custom_button(__("Transfer Material"), this.make_stock_entry,
+					frappe.boot.doctype_icons["Stock Entry"]);
+		
+			if(doc.material_request_type === "Material Issue" && doc.status === "Submitted")
+				cur_frm.add_custom_button(__("Issue Material"), this.make_stock_entry,
 					frappe.boot.doctype_icons["Stock Entry"]);
 
 			if(flt(doc.per_ordered, 2) < 100) {
@@ -165,7 +169,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur_frm}));
 
-cur_frm.cscript.qty = function(doc, cdt, cdn) {
+cur_frm.cscript.qty = function(cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (flt(d.qty) < flt(d.min_order_qty))
 		alert(__("Warning: Material Requested Qty is less than Minimum Order Qty"));

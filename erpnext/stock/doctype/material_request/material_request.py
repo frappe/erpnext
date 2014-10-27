@@ -73,7 +73,7 @@ class MaterialRequest(BuyingController):
 		from erpnext.utilities import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
 
-		self.validate_value("material_request_type", "in", ["Purchase", "Transfer", "Material Issue"])
+		self.validate_value("material_request_type", "in", ["Purchase", "Material Transfer", "Material Issue"])
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
@@ -293,13 +293,16 @@ def make_supplier_quotation(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
+
+	obj = frappe.get_doc("Material Request", source_name)
+
 	def update_item(obj, target, source_parent):
 		target.conversion_factor = 1
 		target.qty = flt(obj.qty) - flt(obj.ordered_qty)
 		target.transfer_qty = flt(obj.qty) - flt(obj.ordered_qty)
 
 	def set_missing_values(source, target):
-		target.purpose = "Material Transfer"
+		target.purpose = obj.material_request_type
 		target.run_method("get_stock_and_rate")
 
 	doclist = get_mapped_doc("Material Request", source_name, {
@@ -307,7 +310,7 @@ def make_stock_entry(source_name, target_doc=None):
 			"doctype": "Stock Entry",
 			"validation": {
 				"docstatus": ["=", 1],
-				"material_request_type": ["=", "Transfer"]
+				"material_request_type": ["=", obj.material_request_type]
 			}
 		},
 		"Material Request Item": {
