@@ -34,7 +34,7 @@ $(document).ready(function() {
 	$("#fullname").val(getCookie("full_name") || "");
 	$("#update_user").click(function() {
 		frappe.call({
-			method: "shopping_cart.templates.pages.user.update_user",
+			method: "erpnext.templates.pages.user.update_user",
 			type: "POST",
 			args: {
 				fullname: $("#fullname").val(),

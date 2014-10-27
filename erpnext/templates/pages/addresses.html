@@ -19,7 +19,7 @@
 ;(function() {
 	var fetch_addresses = function() {
 		frappe.call({
-			method: "shopping_cart.templates.pages.addresses.get_addresses",
+			method: "erpnext.templates.pages.addresses.get_addresses",
 			callback: function(r) {
 				$("#address-list .progress").remove();
 				var $list = $("#address-list");

@@ -92,7 +92,7 @@
 			frappe.call({
 				btn: $(this),
 				type: "POST",
-				method: "shopping_cart.templates.pages.address.save_address",
+				method: "erpnext.templates.pages.address.save_address",
 				args: { fields: fields, address_fieldname: get_url_arg("address_fieldname") },
 				error_msg: "#address-error",
 				callback: function(r) {

@@ -65,7 +65,7 @@
 			} else {
 				frappe.call({
 					type: "POST",
-					method: "shopping_cart.templates.pages.tickets.make_new_ticket",
+					method: "erpnext.templates.pages.tickets.make_new_ticket",
 					btn: this,
 					args: { subject: subject, message: message },
 					callback: function(r) {

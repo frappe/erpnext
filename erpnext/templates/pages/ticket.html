@@ -90,7 +90,7 @@ $(document).ready(function() {
 		} else {
 			frappe.call({
 				type: "POST",
-				method: "shopping_cart.templates.pages.ticket.add_reply",
+				method: "erpnext.templates.pages.ticket.add_reply",
 				btn: this,
 				args: { ticket: "{{ doc.name }}", message: reply },
 				callback: function(r) {
