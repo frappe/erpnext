@@ -153,6 +153,33 @@
    "precision": "2"
   }, 
   {
+   "fieldname": "operation_timings", 
+   "fieldtype": "Section Break", 
+   "label": "Operation Timings", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "start_time", 
+   "fieldtype": "Datetime", 
+   "label": "Start Time", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "column_break_20", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "closing_time", 
+   "fieldtype": "Datetime", 
+   "label": "Closing Time", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "hour_rate_section_break", 
    "fieldtype": "Section Break", 
    "label": "Hour Rate", 
@@ -171,7 +198,7 @@
  ], 
  "icon": "icon-wrench", 
  "idx": 1, 
- "modified": "2014-10-22 11:54:23.772290", 
+ "modified": "2014-10-24 13:19:06.091414", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Workstation", 
