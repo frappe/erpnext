@@ -184,10 +184,10 @@ def get_default_expense_account(args, item):
 		or frappe.db.get_value("Company", args.company, "default_expense_account"))
 
 def get_default_cost_center(args, item):
-	return (frappe.db.get_value("Project", args.project_name, "cost_center")
-		or (item.selling_cost_center if args.transaction_type == "selling" else item.buying_cost_center)
+	return (frappe.db.get_value("Project", args.get("project_name"), "cost_center")
+		or (item.selling_cost_center if args.get("transaction_type") == "selling" else item.buying_cost_center)
 		or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
-		or frappe.db.get_value("Company", args.company, "cost_center"))
+		or frappe.db.get_value("Company", args.get("company"), "cost_center"))
 
 def get_price_list_rate(args, item_doc, out):
 	meta = frappe.get_meta(args.parenttype)
