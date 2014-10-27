@@ -130,14 +130,14 @@
   }, 
   {
    "fieldname": "start_date", 
-   "fieldtype": "Date", 
+   "fieldtype": "Datetime", 
    "label": "Start Date", 
    "permlevel": 0, 
    "precision": ""
   }, 
   {
    "fieldname": "end_date", 
-   "fieldtype": "Date", 
+   "fieldtype": "Datetime", 
    "label": "End Date", 
    "permlevel": 0, 
    "precision": ""
@@ -246,7 +246,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2014-10-14 13:09:37.463454", 
+ "modified": "2014-10-27 13:42:31.476892", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 
