@@ -50,7 +50,7 @@ class Company(Document):
 
 	def on_update(self):
 		if not frappe.db.sql("""select name from tabAccount
-			where company=%s and docstatus<2 limit 1""", self.name):
+				where company=%s and docstatus<2 limit 1""", self.name):
 			self.create_default_accounts()
 			self.create_default_warehouses()
 			self.install_country_fixtures()

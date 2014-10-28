@@ -56,9 +56,9 @@ def get_chart(chart_name):
 	for fname in os.listdir(os.path.dirname(__file__)):
 		if fname.endswith(".json"):
 			with open(os.path.join(os.path.dirname(__file__), fname), "r") as f:
-				chart = json.loads(f.read())
-				if chart.get("name") == chart_name:
-					return chart
+				chart = f.read()
+				if chart and json.loads(chart).get("name") == chart_name:
+					return json.loads(chart)
 
 @frappe.whitelist()
 def get_charts_for_country(country):

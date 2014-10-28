@@ -241,14 +241,18 @@ def make_charts():
 				chart["tree"].pop(key)
 			if type(val) == dict:
 				val["root_type"] = ""
+		if chart:
+			fpath = os.path.join("erpnext", "erpnext", "accounts", "doctype", "account",
+				"chart_of_accounts", filename + ".json")
 
-		with open(os.path.join("erpnext", "erpnext", "accounts", "doctype", "account", "chart_of_accounts",
-			filename + ".json"), "rw") as chartfile:
-			old_content = json.loads(chartfile.read())
-			if old_content.get("is_active", "No") == "No":
-				chartfile.write(json.dumps(chart, indent=4, sort_keys=True))
+			with open(fpath, "r") as chartfile:
+				old_content = chartfile.read()
+				if old_content and json.loads(old_content).get("is_active", "No") == "No" \
+						and json.loads(old_content).get("disabled", "No") == "No":
+					with open(fpath, "w") as chartfile:
+						chartfile.write(json.dumps(chart, indent=4, sort_keys=True))
 
-		all_roots.setdefault(filename, chart["tree"].keys())
+					all_roots.setdefault(filename, chart["tree"].keys())
 
 def create_all_roots_file():
 	with open('all_roots.txt', 'w') as f:

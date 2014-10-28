@@ -1,6 +1,7 @@
 {
     "country_code": "ar",
     "name": "Argentina - Plan de Cuentas",
+	"disabled": "Yes",
     "tree": {
         "Cuentas Patrimoniales": {
             "ACTIVO": {

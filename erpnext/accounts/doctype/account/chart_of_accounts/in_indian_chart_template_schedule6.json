@@ -1,356 +1,355 @@
 {
-    "country_code": "in", 
-    "name": "Indian Chart of Accounts - Schedule VI", 
+    "country_code": "in",
+    "name": "Indian Chart of Accounts - Schedule VI",
+	"is_active": "Yes",
     "tree": {
-        "Balance Sheet": {
-            "Assets": {
-                "Current Assets": {
-                    "Cash And Cash Equivalent": {
-                        "Bank Balance": {
-                            "Balance Account": {}, 
-                            "Balance Account 9876543211": {}
-                        }, 
-                        "Cash-In-Hand": {
-                            "Cash Balance": {
-                                "account_type": "Cash"
-                            }, 
-                            "Petty Cash Balance": {
-                                "account_type": "Cash"
-                            }, 
+        "Assets": {
+            "Current Assets": {
+                "Cash And Cash Equivalent": {
+                    "Bank Balance": {
+                        "Balance Account": {},
+                        "Balance Account 9876543211": {}
+                    },
+                    "Cash-In-Hand": {
+                        "Cash Balance": {
                             "account_type": "Cash"
-                        }, 
-                        "Cheques On Hand": {
-                            "Cheque With Account": {}
-                        }
-                    }, 
-                    "Current Investment": {
-                        "In Short Term Fixed Deposits": {}, 
-                        "Investment In Debentures And Bonds": {}, 
-                        "Investment In Equity": {}, 
-                        "Investment In Government Securities": {}, 
-                        "Investment In Mutual Fund": {}, 
-                        "Investment In Partnership Firm": {}, 
-                        "Investment In Preference Shares": {}
-                    }, 
-                    "Inventories": {
-                        "Finished Goods": {}, 
-                        "Goods-In-Transit": {}, 
-                        "Loose Tools": {}, 
-                        "Other With Job Worker": {}, 
-                        "Raw Material": {}, 
-                        "Stock-In-Trade": {}, 
-                        "Stores And Spares": {}, 
-                        "Work-In-Progress": {}
-                    }, 
-                    "Other Current Assets": {
-                        "Duties and Taxes": {
-                            "Excise Duty Receivable": {
-                                "Education Cess Receivable On Excise Duty": {}, 
-                                "Excise Duty Receivable": {}, 
-                                "Higher Education Cess Receivable On Excise Duty": {}
-                            }, 
-                            "Sales Tax Receivable": {}, 
-                            "Service Tax Receivable": {
-                                "Education Cess Receivable On Service Tax": {}, 
-                                "Higher Education Cess Receivable On Service Tax": {}, 
-                                "Service Tax Receivable": {}
-                            }, 
-                            "TDS Receivable": {}, 
-                            "VAT Receivable": {}
-                        }, 
-                        "Miscellaneous Expense to the Extent Not Written Off": {
-                            "Preliminary Expense": {}
-                        }
-                    }, 
-                    "Short Terms Loans And Advances": {
-                        "Advances with Revenue Authority": {
-                            "Advance Income Tax/Refund Due": {}, 
-                            "Advance To Suppliers": {}, 
-                            "Balance With Revenue Authorities (Indirect Taxes)": {}, 
-                            "Prepaid Expenses": {}
-                        }, 
-                        "Loans And Advances From Related Parties": {
-                            "Doubtful": {}, 
-                            "Other Advances Unsecured and Considered as Good": {
-                                "Unsecured Recoverable in Cash or in Kind or for Value to be Received": {}
-                            }, 
-                            "Secured, Considered Good": {
-                                "Advance To Associate Concerns": {}
-                            }
-                        }
-                    }, 
-                    "Trade Recievables": {
-                        "Others": {
-                            "Doubtful": {}, 
-                            "Secured, Considered Good": {}, 
-                            "Unsecured, Considered Good": {}
-                        }, 
-                        "Outstanding For More Than Six Months": {
-                            "Doubtful": {}, 
-                            "Secured, Considered Good": {}, 
-                            "Unsecured, Considered Good": {}
-                        }, 
-                        "Sundry Debtors": {
-                            "account_type": "Receivable"
+                        },
+                        "Petty Cash Balance": {
+                            "account_type": "Cash"
+                        },
+                        "account_type": "Cash"
+                    },
+                    "Cheques On Hand": {
+                        "Cheque With Account": {}
+                    }
+                },
+                "Current Investment": {
+                    "In Short Term Fixed Deposits": {},
+                    "Investment In Debentures And Bonds": {},
+                    "Investment In Equity": {},
+                    "Investment In Government Securities": {},
+                    "Investment In Mutual Fund": {},
+                    "Investment In Partnership Firm": {},
+                    "Investment In Preference Shares": {}
+                },
+                "Inventories": {
+                    "Finished Goods": {},
+                    "Goods-In-Transit": {},
+                    "Loose Tools": {},
+                    "Other With Job Worker": {},
+                    "Raw Material": {},
+                    "Stock-In-Trade": {},
+                    "Stores And Spares": {},
+                    "Work-In-Progress": {}
+                },
+                "Other Current Assets": {
+                    "Duties and Taxes": {
+                        "Excise Duty Receivable": {
+                            "Education Cess Receivable On Excise Duty": {},
+                            "Excise Duty Receivable": {},
+                            "Higher Education Cess Receivable On Excise Duty": {}
+                        },
+                        "Sales Tax Receivable": {},
+                        "Service Tax Receivable": {
+                            "Education Cess Receivable On Service Tax": {},
+                            "Higher Education Cess Receivable On Service Tax": {},
+                            "Service Tax Receivable": {}
+                        },
+                        "TDS Receivable": {},
+                        "VAT Receivable": {}
+                    },
+                    "Miscellaneous Expense to the Extent Not Written Off": {
+                        "Preliminary Expense": {}
+                    }
+                },
+                "Short Terms Loans And Advances": {
+                    "Advances with Revenue Authority": {
+                        "Advance Income Tax/Refund Due": {},
+                        "Advance To Suppliers": {},
+                        "Balance With Revenue Authorities (Indirect Taxes)": {},
+                        "Prepaid Expenses": {}
+                    },
+                    "Loans And Advances From Related Parties": {
+                        "Doubtful": {},
+                        "Other Advances Unsecured and Considered as Good": {
+                            "Unsecured Recoverable in Cash or in Kind or for Value to be Received": {}
+                        },
+                        "Secured, Considered Good": {
+                            "Advance To Associate Concerns": {}
                         }
                     }
-                }, 
-                "Non-Current Assets": {
-                    "Deferred Tax Assets (Net)": {}, 
-                    "Fixed Assets": {
-                        "Capital Work-In-Progress": {
-                            "Building Under Construction": {}
-                        }, 
-                        "Intangible Assets": {
-                            "Goodwill": {}
-                        }, 
-                        "Intangible Assets Under Development": {}, 
-                        "Tangible Assets": {
-                            "Buildings": {}, 
-                            "Computer/Laptops": {}, 
-                            "Furnitures And Fixtures": {}, 
-                            "Land": {}, 
-                            "Office Equipments": {}, 
-                            "Plant And Equipments": {}, 
-                            "Vehicles": {}
-                        }
-                    }, 
-                    "Long Term Loans And Advances": {
-                        "Capital Assets": {
-                            "Doubtful": {}, 
-                            "Secured, Considered Good": {}, 
-                            "Unsecured, Considered Good": {}
-                        }, 
-                        "Loans And Advances To Related Parties": {}, 
-                        "Other Loans And Advances": {}, 
-                        "Security Deposit": {
-                            "Doubtful": {}, 
-                            "Secured, Considered Good": {
-                                "Earnest Money Deposit": {}, 
-                                "Other Deposit": {}
-                            }, 
-                            "Unsecured, Considered Good": {}
-                        }
-                    }, 
-                    "Non-Current Investments": {
-                        "Investment In Debentures And Bonds": {}, 
-                        "Investment In Equity Instrument": {}, 
-                        "Investment In Government Or Trust Securities": {}, 
-                        "Investment In Mutual Fund": {}, 
-                        "Investment In Partnership Firm": {}, 
-                        "Investment In Preference Shares": {}, 
-                        "Investment In Property": {}, 
-                        "Other": {
-                            "Fixed Deposit With Banks-Earmarked": {}, 
-                            "Gold": {}
-                        }
-                    }, 
-                    "Other Non Current Assets": {
-                        "Long Term Trade Recievables": {
-                            "Doubtful": {}, 
-                            "Secured, Considered Good": {}, 
-                            "Unsecured, Considered Good": {}
-                        }, 
-                        "Miscellaneous Exps to the Extent Not Written Off": {
-                            "Preliminery Expense": {}, 
-                            "Software": {}
-                        }, 
-                        "Others": {}
+                },
+                "Trade Recievables": {
+                    "Others": {
+                        "Doubtful": {},
+                        "Secured, Considered Good": {},
+                        "Unsecured, Considered Good": {}
+                    },
+                    "Outstanding For More Than Six Months": {
+                        "Doubtful": {},
+                        "Secured, Considered Good": {},
+                        "Unsecured, Considered Good": {}
+                    },
+                    "Sundry Debtors": {
+                        "account_type": "Receivable"
                     }
                 }
-            }, 
-            "Equity And Liabilities": {
-                "Current Liabilities": {
-                    "Other Current Liabilities": {
-                        "Advance From Customers": {}, 
-                        "Duties and Taxes": {
-                            "Central Sales Tax Payable": {}, 
-                            "Excise Duty Payable": {
-                                "Education Cess Payable On Excise Duty": {}, 
-                                "Excise Duty Payable": {}, 
-                                "Higher Education Cess Payable On Excise Duty": {}
-                            }, 
-                            "Service Tax Payable": {
-                                "Education Cess Payable On Service Tax": {}, 
-                                "Higher Education Cess Payable On Service Tax": {}, 
-                                "Service Tax Payable": {}
-                            }, 
-                            "TDS Paybale": {}, 
-                            "VAT Payable": {}
-                        }, 
-                        "Out Standing Cheques for Clearance": {}
-                    }, 
-                    "Short Term Borrowings": {
-                        "Depsoits": {}, 
-                        "Loans And Advances From Related Parties": {}, 
-                        "Others": {}, 
-                        "Secured Loans From Bank": {
-                            "Bank Loan (Short Term)": {}
-                        }
-                    }, 
-                    "Short Term Provisions": {
-                        "Other Provisions": {
-                            "Electricity And Power Charges Payable": {}, 
-                            "Employee Providend Fund Payable": {}, 
-                            "Internet Expenses Payable": {}, 
-                            "Mobile Expenses Payable": {}, 
-                            "Provision For Expenses": {}, 
-                            "Provision For Taxation": {}, 
-                            "Secueity Expenses Payable": {}, 
-                            "Telephone Expenses Payable": {}, 
-                            "Wages Payable": {}
-                        }, 
-                        "Provision For Employees Benefit": {
-                            "EPF Payable": {}, 
-                            "Unpaid Remuneration": {}
-                        }
-                    }, 
-                    "Trade Payables": {
-                        "Sundry Creditors For Material/Supplies": {
-                            "account_type": "Payable"
-                        }, 
-                        "Sundry Creditors For Services": {
-                            "account_type": "Payable"
-                        }
+            },
+            "Non-Current Assets": {
+                "Deferred Tax Assets (Net)": {},
+                "Fixed Assets": {
+                    "Capital Work-In-Progress": {
+                        "Building Under Construction": {}
+                    },
+                    "Intangible Assets": {
+                        "Goodwill": {}
+                    },
+                    "Intangible Assets Under Development": {},
+                    "Tangible Assets": {
+                        "Buildings": {},
+                        "Computer/Laptops": {},
+                        "Furnitures And Fixtures": {},
+                        "Land": {},
+                        "Office Equipments": {},
+                        "Plant And Equipments": {},
+                        "Vehicles": {}
                     }
-                }, 
-                "Non-Current Liabilities": {
-                    "Deferred Tax Liabilities (Net)": {}, 
-                    "Long Term Borrowings": {
-                        "Secured Loans From Bank": {
-                            "Bank Loan (Long Term)": {}
-                        }, 
-                        "Unsecured Loans": {
-                            "From Others": {}
-                        }
-                    }, 
-                    "Long Term Provisions": {}, 
-                    "Other Long Term Liabilities": {}
-                }, 
-                "Share Application Money Pending Allotment": {
-                    "Share Application Money Pending Allotment": {}
-                }, 
-                "Shareholder's Funds": {
-                    "Money Received Against Share Warrants": {}, 
-                    "Reserve And Surplus": {
-                        "Capital Redemption Reserve": {}, 
-                        "Capital Reserve": {}, 
-                        "Debenture Redeemption Reserve": {}, 
-                        "Other Reserve": {}, 
-                        "Revaluation Reserve": {}, 
-                        "Securities Premium Reserve": {}, 
-                        "Shares Option Outstanding Account": {}, 
-                        "Surplus (Profit and Loss Account)": {}
-                    }, 
-                    "Share Capital": {
-                        "Authorised Share Capital": {}, 
-                        "Issued, Subscribed And Paid Up Capital": {}
+                },
+                "Long Term Loans And Advances": {
+                    "Capital Assets": {
+                        "Doubtful": {},
+                        "Secured, Considered Good": {},
+                        "Unsecured, Considered Good": {}
+                    },
+                    "Loans And Advances To Related Parties": {},
+                    "Other Loans And Advances": {},
+                    "Security Deposit": {
+                        "Doubtful": {},
+                        "Secured, Considered Good": {
+                            "Earnest Money Deposit": {},
+                            "Other Deposit": {}
+                        },
+                        "Unsecured, Considered Good": {}
+                    }
+                },
+                "Non-Current Investments": {
+                    "Investment In Debentures And Bonds": {},
+                    "Investment In Equity Instrument": {},
+                    "Investment In Government Or Trust Securities": {},
+                    "Investment In Mutual Fund": {},
+                    "Investment In Partnership Firm": {},
+                    "Investment In Preference Shares": {},
+                    "Investment In Property": {},
+                    "Other": {
+                        "Fixed Deposit With Banks-Earmarked": {},
+                        "Gold": {}
+                    }
+                },
+                "Other Non Current Assets": {
+                    "Long Term Trade Recievables": {
+                        "Doubtful": {},
+                        "Secured, Considered Good": {},
+                        "Unsecured, Considered Good": {}
+                    },
+                    "Miscellaneous Exps to the Extent Not Written Off": {
+                        "Preliminery Expense": {},
+                        "Software": {}
+                    },
+                    "Others": {}
+                }
+            },
+			"root_type": "Asset"
+        },
+        "Equity And Liabilities": {
+            "Current Liabilities": {
+                "Other Current Liabilities": {
+                    "Advance From Customers": {},
+                    "Duties and Taxes": {
+                        "Central Sales Tax Payable": {},
+                        "Excise Duty Payable": {
+                            "Education Cess Payable On Excise Duty": {},
+                            "Excise Duty Payable": {},
+                            "Higher Education Cess Payable On Excise Duty": {}
+                        },
+                        "Service Tax Payable": {
+                            "Education Cess Payable On Service Tax": {},
+                            "Higher Education Cess Payable On Service Tax": {},
+                            "Service Tax Payable": {}
+                        },
+                        "TDS Paybale": {},
+                        "VAT Payable": {}
+                    },
+                    "Out Standing Cheques for Clearance": {}
+                },
+                "Short Term Borrowings": {
+                    "Depsoits": {},
+                    "Loans And Advances From Related Parties": {},
+                    "Others": {},
+                    "Secured Loans From Bank": {
+                        "Bank Loan (Short Term)": {}
+                    }
+                },
+                "Short Term Provisions": {
+                    "Other Provisions": {
+                        "Electricity And Power Charges Payable": {},
+                        "Employee Providend Fund Payable": {},
+                        "Internet Expenses Payable": {},
+                        "Mobile Expenses Payable": {},
+                        "Provision For Expenses": {},
+                        "Provision For Taxation": {},
+                        "Secueity Expenses Payable": {},
+                        "Telephone Expenses Payable": {},
+                        "Wages Payable": {}
+                    },
+                    "Provision For Employees Benefit": {
+                        "EPF Payable": {},
+                        "Unpaid Remuneration": {}
+                    }
+                },
+                "Trade Payables": {
+                    "Sundry Creditors For Material/Supplies": {
+                        "account_type": "Payable"
+                    },
+                    "Sundry Creditors For Services": {
+                        "account_type": "Payable"
                     }
                 }
-            }, 
-            "root_type": ""
-        }, 
-        "Profit And Loss": {
-            "Total Expenses": {
-                "Changes In Inventories of Finished Goods, Work-In-Progress And Stock-In-Trade": {}, 
-                "Cost of Materials Consumed": {
-                    "Closing Stock": {}, 
-                    "Opening Stock": {}, 
-                    "Purchases of Raw Materials And Stores": {
-                        "Raw Material": {}, 
-                        "Stores And Consumables": {}
+            },
+            "Non-Current Liabilities": {
+                "Deferred Tax Liabilities (Net)": {},
+                "Long Term Borrowings": {
+                    "Secured Loans From Bank": {
+                        "Bank Loan (Long Term)": {}
+                    },
+                    "Unsecured Loans": {
+                        "From Others": {}
                     }
-                }, 
-                "Depreciation And Amortization Expense": {
-                    "Depreciation": {}, 
-                    "Preliminary Expenses": {}
-                }, 
-                "Employement Benefit Expenses": {
-                    "Commision To Joint M.D": {}, 
-                    "Commision To M.D": {}, 
-                    "Directors Remuneration": {}, 
-                    "Directors Setting Fees": {}, 
-                    "Salaries, Bonus, PF And ESIC": {}, 
-                    "Staff Welfare Expense": {}
-                }, 
-                "Financial Cost": {
-                    "Bank Charges": {}, 
-                    "Bank Gurantee Charges": {}, 
-                    "Interest On Car Loan": {}, 
-                    "Interest On Cash Credit Facality": {}, 
-                    "Interest On Other Loans": {}
-                }, 
-                "Other Expenses": {
-                    "Administrative and Selling Expenses": {
-                        "Advertisement And Publicity": {}, 
-                        "Annual Service Fees": {}, 
-                        "Auditors Remuneration": {}, 
-                        "Car Expenses (Including Insurance)": {}, 
-                        "Computer Maintenace": {}, 
-                        "Conveyance Expense": {}, 
-                        "Custom Duty": {}, 
-                        "Donation": {}, 
-                        "Excise/ Service Tax Expenses": {}, 
-                        "Export Expenses": {}, 
-                        "General Expenses": {}, 
-                        "Insurance Expenses": {}, 
-                        "Interest On Delayed Payment of Taxes": {}, 
-                        "Internal Audit Fee": {}, 
-                        "Internet And Website Expenses": {}, 
-                        "Labour Welfare Expenses": {}, 
-                        "Legal Expenses": {}, 
-                        "Loan Processing Fees": {}, 
-                        "Office Cleaning Expense": {}, 
-                        "Packing and Forwarding Expense": {}, 
-                        "Post and Courrier Charges": {}, 
-                        "Postage And Telegram": {}, 
-                        "Prelimenary Expense W/Off": {}, 
-                        "Professional Charges": {}, 
-                        "Rent Rates And Taxes": {}, 
-                        "Repair And Maintenance Building": {}, 
-                        "Security Expesnes": {}, 
-                        "Software Expense W/Off": {}, 
-                        "Stamping Charge": {}, 
-                        "Stationery Expenses": {}, 
-                        "Telephone Expense": {}, 
-                        "Tender Fee And Testing Charges": {}, 
-                        "Travelling Expenses (Including Foreign Travelling)": {}
-                    }, 
-                    "Direct Expenses": {
-                        "Centeral Sales Tax": {}, 
-                        "Electrical Repairing Expense": {}, 
-                        "Freight Forwarding and Octroi Expenses (Local)": {}, 
-                        "Jobwork Charges": {}, 
-                        "Machinery Repair and Maintenance": {}, 
-                        "Material Testing Expense": {}, 
-                        "Measuring Expense": {}, 
-                        "Packing Material Expense": {}, 
-                        "Power and Fuel Charges": {}, 
-                        "Processing Labour Charges": {}, 
-                        "Stores and Spares": {}, 
-                        "Workshop Expense": {}
-                    }
-                }, 
-                "Purchase of Stock-In-Trade": {
-                    "Purchase of Stock-In-Trade": {}
+                },
+                "Long Term Provisions": {},
+                "Other Long Term Liabilities": {}
+            },
+            "Share Application Money Pending Allotment": {
+                "Share Application Money Pending Allotment": {}
+            },
+            "Shareholder's Funds": {
+                "Money Received Against Share Warrants": {},
+                "Reserve And Surplus": {
+                    "Capital Redemption Reserve": {},
+                    "Capital Reserve": {},
+                    "Debenture Redeemption Reserve": {},
+                    "Other Reserve": {},
+                    "Revaluation Reserve": {},
+                    "Securities Premium Reserve": {},
+                    "Shares Option Outstanding Account": {},
+                    "Surplus (Profit and Loss Account)": {}
+                },
+                "Share Capital": {
+                    "Authorised Share Capital": {},
+                    "Issued, Subscribed And Paid Up Capital": {}
                 }
-            }, 
-            "Total Revenue": {
-                "Other Income": {
-                    "Interest": {}, 
-                    "Other Financial Services": {}, 
-                    "Other Non Operating Income": {}
-                }, 
-                "Revenue From Operations": {
-                    "Central Sales(Exclusive of Excise Duty)": {}, 
-                    "Export Sales": {}, 
-                    "Job Work Receipts": {}, 
-                    "Other Operating Income": {}, 
-                    "Product Sales": {}, 
-                    "Sales of Services": {}
+            },
+			"root_type": "Liability"
+        },
+        "Total Expenses": {
+            "Changes In Inventories of Finished Goods, Work-In-Progress And Stock-In-Trade": {},
+            "Cost of Materials Consumed": {
+                "Closing Stock": {},
+                "Opening Stock": {},
+                "Purchases of Raw Materials And Stores": {
+                    "Raw Material": {},
+                    "Stores And Consumables": {}
                 }
-            }, 
-            "root_type": ""
+            },
+            "Depreciation And Amortization Expense": {
+                "Depreciation": {},
+                "Preliminary Expenses": {}
+            },
+            "Employement Benefit Expenses": {
+                "Commision To Joint M.D": {},
+                "Commision To M.D": {},
+                "Directors Remuneration": {},
+                "Directors Setting Fees": {},
+                "Salaries, Bonus, PF And ESIC": {},
+                "Staff Welfare Expense": {}
+            },
+            "Financial Cost": {
+                "Bank Charges": {},
+                "Bank Gurantee Charges": {},
+                "Interest On Car Loan": {},
+                "Interest On Cash Credit Facality": {},
+                "Interest On Other Loans": {}
+            },
+            "Other Expenses": {
+                "Administrative and Selling Expenses": {
+                    "Advertisement And Publicity": {},
+                    "Annual Service Fees": {},
+                    "Auditors Remuneration": {},
+                    "Car Expenses (Including Insurance)": {},
+                    "Computer Maintenace": {},
+                    "Conveyance Expense": {},
+                    "Custom Duty": {},
+                    "Donation": {},
+                    "Excise/ Service Tax Expenses": {},
+                    "Export Expenses": {},
+                    "General Expenses": {},
+                    "Insurance Expenses": {},
+                    "Interest On Delayed Payment of Taxes": {},
+                    "Internal Audit Fee": {},
+                    "Internet And Website Expenses": {},
+                    "Labour Welfare Expenses": {},
+                    "Legal Expenses": {},
+                    "Loan Processing Fees": {},
+                    "Office Cleaning Expense": {},
+                    "Packing and Forwarding Expense": {},
+                    "Post and Courrier Charges": {},
+                    "Postage And Telegram": {},
+                    "Prelimenary Expense W/Off": {},
+                    "Professional Charges": {},
+                    "Rent Rates And Taxes": {},
+                    "Repair And Maintenance Building": {},
+                    "Security Expesnes": {},
+                    "Software Expense W/Off": {},
+                    "Stamping Charge": {},
+                    "Stationery Expenses": {},
+                    "Telephone Expense": {},
+                    "Tender Fee And Testing Charges": {},
+                    "Travelling Expenses (Including Foreign Travelling)": {}
+                },
+                "Direct Expenses": {
+                    "Centeral Sales Tax": {},
+                    "Electrical Repairing Expense": {},
+                    "Freight Forwarding and Octroi Expenses (Local)": {},
+                    "Jobwork Charges": {},
+                    "Machinery Repair and Maintenance": {},
+                    "Material Testing Expense": {},
+                    "Measuring Expense": {},
+                    "Packing Material Expense": {},
+                    "Power and Fuel Charges": {},
+                    "Processing Labour Charges": {},
+                    "Stores and Spares": {},
+                    "Workshop Expense": {}
+                }
+            },
+            "Purchase of Stock-In-Trade": {
+                "Purchase of Stock-In-Trade": {}
+            },
+			"root_type": "Expense"
+        },
+        "Total Revenue": {
+            "Other Income": {
+                "Interest": {},
+                "Other Financial Services": {},
+                "Other Non Operating Income": {}
+            },
+            "Revenue From Operations": {
+                "Central Sales(Exclusive of Excise Duty)": {},
+                "Export Sales": {},
+                "Job Work Receipts": {},
+                "Other Operating Income": {},
+                "Product Sales": {},
+                "Sales of Services": {}
+            },
+			"root_type": "Income"
         }
     }
 }
