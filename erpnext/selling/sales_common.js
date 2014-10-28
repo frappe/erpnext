@@ -593,10 +593,12 @@ frappe.ui.form.on(cur_frm.doctype,"project_name", function(frm) {
 		method:'erpnext.projects.doctype.project.project.get_cost_center_name' ,
 		args: {	project_name: frm.doc.project_name	},
 		callback: function(r, rt) {
-			if(!r.exc) {
+			if(!r.exc && r.message) {
 				$.each(frm.doc[cur_frm.cscript.fname] || [], function(i, row) {
-					frappe.model.set_value(row.doctype, row.name, "cost_center", r.message);
-					msgprint(__("Cost Center For Item with Item Code '"+row.item_name+"' has been Changed to "+ r.message));
+					if(frappe.meta.has_field(cur_frm.cscript.tname , "cost_center")) {
+						frappe.model.set_value(row.doctype, row.name, "cost_center", r.message);
+						msgprint(__("Cost Center For Item with Item Code '"+row.item_name+"' has been Changed to "+ r.message));
+					}
 				})
 			}
 		}
