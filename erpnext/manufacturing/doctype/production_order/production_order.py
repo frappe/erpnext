@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, json
 
 from frappe.utils import flt, nowdate
 from frappe import _
@@ -181,3 +181,27 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 
 	stock_entry.get_items()
 	return stock_entry.as_dict()
+
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	from frappe.desk.reportview import build_match_conditions
+	if not frappe.has_permission("Production Order"):
+		frappe.msgprint(_("No Permission"), raise_exception=1)
+
+	conditions = build_match_conditions("Production Order")
+	conditions = conditions and (" and " + conditions) or ""
+	if filters:
+		filters = json.loads(filters)
+		for key in filters:
+			if filters[key]:
+				conditions += " and " + key + ' = "' + filters[key].replace('"', '\"') + '"'
+
+	data = frappe.db.sql("""select name,production_item, start_date,end_date from `tabProduction Order`
+		where ((ifnull(start_date, '0000-00-00')!= '0000-00-00') \
+				and (start_date between %(start)s and %(end)s) \
+			or ((ifnull(start_date, '0000-00-00')!= '0000-00-00') \
+				and end_date between %(start)s and %(end)s)){conditions}""".format(conditions=conditions), {
+			"start": start,
+			"end": end
+			}, as_dict=True, update={"allDay": 0})
+	return data
