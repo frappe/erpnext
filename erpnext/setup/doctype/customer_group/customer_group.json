@@ -126,7 +126,7 @@
  "icon": "icon-sitemap", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-08-29 16:37:35.877256", 
+ "modified": "2014-10-29 19:10:29.957410", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Customer Group", 
@@ -160,6 +160,14 @@
    "write": 0
   }, 
   {
+   "email": 1, 
+   "permlevel": 1, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Sales User"
+  }, 
+  {
    "amend": 0, 
    "create": 1, 
    "delete": 1, 
@@ -173,23 +181,15 @@
    "write": 1
   }, 
   {
+   "email": 1, 
    "permlevel": 1, 
+   "print": 1, 
    "read": 1, 
+   "report": 1, 
    "role": "Sales Master Manager", 
    "write": 1
-  }, 
-  {
-   "permlevel": 1, 
-   "read": 1, 
-   "role": "Sales User"
-  }, 
-  {
-   "permlevel": 1, 
-   "read": 1, 
-   "role": "Sales Manager", 
-   "write": 0
   }
  ], 
  "read_only": 1, 
- "search_fields": "name,parent_customer_group"
+ "search_fields": "customer_group_name, parent_customer_group"
 }
