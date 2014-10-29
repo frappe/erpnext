@@ -51,9 +51,14 @@ cur_frm.fields_dict['serial_no'].get_query = function(doc, cdt, cdn) {
 		['Serial No', 'docstatus', '!=', 2],
 		['Serial No', 'status', '=', "Delivered"]
 	];
-	if(doc.item_code) cond = ['Serial No', 'item_code', '=', doc.item_code];
-	if(doc.customer) cond = ['Serial No', 'customer', '=', doc.customer];
-	filter.push(cond);
+	if(doc.item_code) {
+		cond = ['Serial No', 'item_code', '=', doc.item_code];
+		filter.push(cond);
+	}
+	if(doc.customer) {
+		cond = ['Serial No', 'customer', '=', doc.customer];
+		filter.push(cond);
+	}
 	return{
 		filters:filter
 	}

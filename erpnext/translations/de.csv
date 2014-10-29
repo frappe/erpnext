@@ -40,14 +40,14 @@
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Hinzufügen / Bearbeiten </ a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Hinzufügen / Bearbeiten </ a>"
 "<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>",
-A Customer Group exists with same name please change the Customer name or rename the Customer Group,Eine Kundengruppe mit dem gleichen Namen existiert bereits. Ändern Sie den Kundennamen oder nennen Sie die Kundengruppe um
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,Eine Kundengruppe mit dem gleichen Namen existiert bereits. Ändern Sie den Kundennamen oder benennen Sie die Kundengruppe um
 A Customer exists with same name,Ein Kunde mit dem gleichen Namen existiert bereits
-A Lead with this email id should exist,Ein Lead mit dieser E-Mail Adresse sollte vorhanden sein
-A Product or Service,Ein Produkt oder Dienstleistung
-"A Product or a Service that is bought, sold or kept in stock.","Ein Produkt oder eine Dienstleistung, die gekauft, verkauft oder auf Lager gehalten wird."
+A Lead with this email id should exist,Ein Leiter mit dieser E-Mail-Adresse sollte vorhanden sein
+A Product or Service,Produkt oder Dienstleistung
+"A Product or a Service that is bought, sold or kept in stock.","Produkt oder Dienstleistung, die gekauft, verkauft oder auf Lager gehalten wird."
 A Supplier exists with same name,Ein Lieferant mit dem gleichen Namen existiert bereits
-A condition for a Shipping Rule,Eine Bedingung für eine Versandregel
-A logical Warehouse against which stock entries are made.,"Eine logisches Warenlager, für das Bestandseinträge gemacht werden."
+A condition for a Shipping Rule,Bedingung für eine Versandregel
+A logical Warehouse against which stock entries are made.,Eine logisches Warenlager für das Bestandseinträge gemacht werden.
 A symbol for this currency. For e.g. $,"Ein Symbol für diese Währung, z.B. €"
 A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,"Ein dritter Vertriebspartner/Händler/Kommissionär/Tochterunternehmer/ Fachhändler, der die Produkte es Unternehmens auf Provision vertreibt."
 "A user with ""Expense Approver"" role",
@@ -65,13 +65,13 @@ Account,Konto
 Account Balance,Kontostand
 Account Created: {0},Konto {0} erstellt
 Account Details,Kontendaten
-Account Head,Konto Kopf
-Account Name,Konto Name
-Account Type,Konto Typ
+Account Head,Kontoführer
+Account Name,Kontoname
+Account Type,Kontotyp
 "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Kontostand bereits im Kredit, Sie dürfen nicht eingestellt ""Balance Must Be"" als ""Debit"""
 "Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Kontostand bereits in Lastschrift, sind Sie nicht berechtigt, festgelegt als ""Kredit"" ""Balance Must Be '"
 Account for the warehouse (Perpetual Inventory) will be created under this Account.,Konto für das Lager (Laufende Inventur) wird unter diesem Konto erstellt.
-Account head {0} created,Konto Kopf {0} erstellt
+Account head {0} created,Kontoführer {0} erstellt
 Account must be a balance sheet account,Konto muss ein Bilanzkonto sein
 Account with child nodes cannot be converted to ledger,Ein Konto mit Kind-Knoten kann nicht in ein Kontoblatt umgewandelt werden
 Account with existing transaction can not be converted to group.,Ein Konto mit bestehenden Transaktion kann nicht in eine Gruppe umgewandelt werden
@@ -79,11 +79,11 @@ Account with existing transaction can not be deleted,Ein Konto mit bestehenden T
 Account with existing transaction cannot be converted to ledger,Ein Konto mit bestehenden Transaktion kann nicht in ein Kontoblatt umgewandelt werden
 Account {0} cannot be a Group,Konto {0} kann keine Gruppe sein
 Account {0} does not belong to Company {1},Konto {0} gehört nicht zum Unternehmen {1}
-Account {0} does not belong to company: {1},Konto {0} gehört nicht zum Unternehmen {1}
+Account {0} does not belong to company: {1},Konto {0} gehört nicht zum Unternehmen: {1}
 Account {0} does not exist,Konto {0} existiert nicht
 Account {0} does not exists,
 Account {0} has been entered more than once for fiscal year {1},Konto {0} wurde mehr als einmal für das Geschäftsjahr {1} eingegeben 
-Account {0} is frozen,Konto {0} ist eingefroren
+Account {0} is frozen,Konto {0} ist gesperrt
 Account {0} is inactive,Konto {0} ist inaktiv
 Account {0} is not valid,Konto {0} ist nicht gültig
 Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Konto {0} muss vom Typ ""Aktivposten"" sein, weil der Artikel {1} ein Aktivposten ist"
@@ -99,18 +99,18 @@ Accounting Entry for Stock,
 "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Bis zu diesem Zeitpunkt eingefrorener Buchhaltungseintrag, niemand außer der unten genannten Position kann den Eintrag bearbeiten/ändern."
 Accounting journal entries.,Buchhaltungsjournaleinträge
 Accounts,Konten
-Accounts Browser,Konten Browser
-Accounts Frozen Upto,Eingefrorene Konten bis
-Accounts Manager,
+Accounts Browser,Kontenbrowser
+Accounts Frozen Upto,Konten gesperrt bis
+Accounts Manager,Kontenmanager
 Accounts Payable,Kreditoren
 Accounts Receivable,Forderungen
-Accounts Settings,Kontoeinstellungen
-Accounts User,
+Accounts Settings,Konteneinstellungen
+Accounts User,Kontenbenutzer
 Active,Aktiv
 Active: Will extract emails from ,Aktiv: Werden E-Mails extrahieren
 Activity,Aktivität
 Activity Log,Aktivitätsprotokoll
-Activity Log:,Activity Log:
+Activity Log:,Aktivitätsprotokoll:
 Activity Type,Aktivitätstyp
 Actual,Tatsächlich
 Actual Budget,Tatsächliches Budget
@@ -127,7 +127,7 @@ Actual Quantity,Istmenge
 Actual Start Date,Tatsächliches Startdatum
 Add,Hinzufügen
 Add / Edit Taxes and Charges,Hinzufügen/Bearbeiten von Steuern und Abgaben
-Add Child,Kind hinzufügen
+Add Child,Untergeordnetes Element hinzufügen
 Add Serial No,In Seriennummer
 Add Taxes,Steuern hinzufügen
 Add or Deduct,Hinzuaddieren oder abziehen
@@ -338,12 +338,12 @@ BOM {0} is not submitted or inactive BOM for Item {1},Stückliste {0} nicht vorg
 Backup Manager,Datensicherungsverwaltung
 Backup Right Now,Jetzt eine Datensicherung durchführen
 Backups will be uploaded to,Datensicherungen werden hochgeladen nach
-Balance Qty,Bilanz Menge
+Balance Qty,Bilanzmenge
 Balance Sheet,Bilanz
 Balance Value,Bilanzwert
 Balance for Account {0} must always be {1},Saldo für Konto {0} muss immer {1} sein
 Balance must be,Saldo muss sein
-"Balances of Accounts of type ""Bank"" or ""Cash""","Guthaben von Konten vom Typ "" Bank"" oder "" Cash"""
+"Balances of Accounts of type ""Bank"" or ""Cash""","Guthaben von Konten vom Typ ""Bank"" oder ""Cash"""
 Bank,Bank
 Bank / Cash Account,Bank / Geldkonto
 Bank A/C No.,Bankkonto-Nr.
@@ -351,25 +351,25 @@ Bank Account,Bankkonto
 Bank Account No.,Bankkonto-Nr.
 Bank Accounts,Bankkonten
 Bank Clearance Summary,Zusammenfassung Bankgenehmigung
-Bank Draft,Bank Draft
+Bank Draft,Banktratte
 Bank Name,Name der Bank
 Bank Overdraft Account,Kontokorrentkredit Konto
 Bank Reconciliation,Kontenabstimmung
 Bank Reconciliation Detail,Kontenabstimmungsdetail
 Bank Reconciliation Statement,Kontenabstimmungsauszug
-Bank Voucher,Bankgutschein
+Bank Voucher,Bankbeleg
 Bank/Cash Balance,Bank-/Bargeldsaldo
 Banking,Bankwesen
 Barcode,Strichcode
-Barcode {0} already used in Item {1},Barcode {0} bereits im Artikel verwendet {1}
+Barcode {0} already used in Item {1},Barcode {0} bereits in Artikel {1} verwendet 
 Based On,Beruht auf
 Basic,Grundlagen
-Basic Info,Basis Informationen
-Basic Information,Basis Informationen
-Basic Rate,Basisrate
-Basic Rate (Company Currency),Basisrate (Unternehmenswährung)
+Basic Info,Grundinfo
+Basic Information,Grundinformationen
+Basic Rate,Grundrate
+Basic Rate (Company Currency),Grundrate (Unternehmenswährung)
 Batch,Stapel
-Batch (lot) of an Item.,Stapel (Charge) eines Artikels.
+Batch (lot) of an Item.,Stapel (Partie) eines Artikels.
 Batch Finished Date,Enddatum des Stapels
 Batch ID,Stapel-ID
 Batch No,Stapelnr.
@@ -381,7 +381,7 @@ Batched for Billing,Für Abrechnung gebündelt
 Better Prospects,Bessere zukünftige Kunden
 Bill Date,Rechnungsdatum
 Bill No,Rechnungsnr.
-Bill of Material,Bill of Material
+Bill of Material,Stückliste
 Bill of Material to be considered for manufacturing,"Stückliste, die für die Herstellung berücksichtigt werden soll"
 Bill of Materials (BOM),Stückliste (SL)
 Billable,Abrechenbar
@@ -389,7 +389,7 @@ Billed,Abgerechnet
 Billed Amount,Rechnungsbetrag
 Billed Amt,Rechnungsbetrag
 Billing,Abrechnung
-Billing (Sales Invoice),
+Billing (Sales Invoice),Abrechung (Handelsrechnung)
 Billing Address,Rechnungsadresse
 Billing Address Name,Name der Rechnungsadresse
 Billing Status,Abrechnungsstatus

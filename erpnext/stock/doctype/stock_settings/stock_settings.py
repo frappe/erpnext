@@ -12,9 +12,6 @@ from frappe.model.document import Document
 class StockSettings(Document):
 
 	def validate(self):
-		if cint(self.allow_negative_stock) and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-			frappe.throw(_("Negative stock is not allowed in case of Perpetual Inventory"))
-
 		for key in ["item_naming_by", "item_group", "stock_uom", "allow_negative_stock"]:
 			frappe.db.set_default(key, self.get(key, ""))
 

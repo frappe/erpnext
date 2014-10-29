@@ -11,7 +11,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
 
 class StockController(AccountsController):
-	def make_gl_entries(self, repost_future_gle=True, allow_negative_stock=False):
+	def make_gl_entries(self, repost_future_gle=True):
 		if self.docstatus == 2:
 			delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -19,18 +19,16 @@ class StockController(AccountsController):
 			warehouse_account = get_warehouse_account()
 
 			if self.docstatus==1:
-				gl_entries = self.get_gl_entries(warehouse_account, allow_negative_stock=allow_negative_stock)
+				gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries)
 
 			if repost_future_gle:
 				items, warehouses = self.get_items_and_warehouses()
 				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items,
-					warehouse_account, allow_negative_stock)
+					warehouse_account)
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
-			default_cost_center=None, allow_negative_stock=False):
-
-		# block_negative_stock(allow_negative_stock)
+			default_cost_center=None):
 
 		if not warehouse_account:
 			warehouse_account = get_warehouse_account()
@@ -49,17 +47,12 @@ class StockController(AccountsController):
 
 						self.check_expense_account(detail)
 
-						stock_value_difference = flt(sle.stock_value_difference, 2)
-						if not stock_value_difference:
-							valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse)
-							stock_value_difference = flt(sle.actual_qty)*flt(valuation_rate)
-
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse],
 							"against": detail.expense_account,
 							"cost_center": detail.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"debit": stock_value_difference
+							"debit": flt(sle.stock_value_difference, 2)
 						}))
 
 						# to target warehouse / expense account
@@ -68,7 +61,7 @@ class StockController(AccountsController):
 							"against": warehouse_account[sle.warehouse],
 							"cost_center": detail.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"credit": stock_value_difference
+							"credit": flt(sle.stock_value_difference, 2)
 						}))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
@@ -224,7 +217,7 @@ class StockController(AccountsController):
 		return serialized_items
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
-		warehouse_account=None, allow_negative_stock=False):
+		warehouse_account=None):
 	def _delete_gl_entries(voucher_type, voucher_no):
 		frappe.db.sql("""delete from `tabGL Entry`
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
@@ -238,12 +231,12 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 	for voucher_type, voucher_no in future_stock_vouchers:
 		existing_gle = gle.get((voucher_type, voucher_no), [])
 		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
-		expected_gle = voucher_obj.get_gl_entries(warehouse_account, allow_negative_stock=allow_negative_stock)
+		expected_gle = voucher_obj.get_gl_entries(warehouse_account)
 		if expected_gle:
 			if not existing_gle or not compare_existing_and_expected_gle(existing_gle,
 				expected_gle):
 					_delete_gl_entries(voucher_type, voucher_no)
-					voucher_obj.make_gl_entries(repost_future_gle=False, allow_negative_stock=allow_negative_stock)
+					voucher_obj.make_gl_entries(repost_future_gle=False)
 		else:
 			_delete_gl_entries(voucher_type, voucher_no)
 
@@ -295,31 +288,3 @@ def get_warehouse_account():
 	warehouse_account = dict(frappe.db.sql("""select master_name, name from tabAccount
 		where account_type = 'Warehouse' and ifnull(master_name, '') != ''"""))
 	return warehouse_account
-
-def block_negative_stock(allow_negative_stock=False):
-	if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) and not allow_negative_stock:
-		if cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock")):
-			frappe.throw(_("Negative stock is not allowed in case of Perpetual Inventory, please disable it from Stock Settings"))
-
-def get_valuation_rate(item_code, warehouse):
-	last_valuation_rate = frappe.db.sql("""select valuation_rate
-		from `tabStock Ledger Entry`
-		where item_code = %s and warehouse = %s
-		and ifnull(valuation_rate, 0) > 0
-		order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse))
-
-	if not last_valuation_rate:
-		last_valuation_rate = frappe.db.sql("""select valuation_rate
-			from `tabStock Ledger Entry`
-			where item_code = %s and ifnull(valuation_rate, 0) > 0
-			order by posting_date desc, posting_time desc, name desc limit 1""", item_code)
-
-	valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
-
-	if not valuation_rate:
-		valuation_rate = frappe.db.get_value("Item Price", {"item_code": item_code, "buying": 1}, "price_list_rate")
-
-	if not valuation_rate:
-		frappe.throw(_("Purchase rate for item: {0} not found, which is required to book accounting entry. Please mention item price against a buying price list.").format(item_code))
-
-	return valuation_rate

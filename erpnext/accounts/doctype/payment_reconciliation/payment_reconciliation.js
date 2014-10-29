@@ -19,9 +19,9 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 					]
 				};
 			}
-			
+
 		});
-		
+
 		this.frm.set_query('bank_cash_account', function() {
 			if(!me.frm.doc.company) {
 				msgprint(__("Please select company first"));
@@ -35,12 +35,8 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 				};
 			}
 		});
-
-		var help_content = '<i class="icon-hand-right"></i> ' + __("Note") + ':<br>'+
-			'<ul>' + __("If you are unable to match the exact amount, then amend your Journal Voucher and split rows such that payment amount match the invoice amount.") + '</ul>';
-		this.frm.set_value("reconcile_help", help_content);
 	},
-	
+
 	get_unreconciled_entries: function() {
 		var me = this;
 		return this.frm.call({
@@ -48,12 +44,12 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 			method: 'get_unreconciled_entries',
 			callback: function(r, rt) {
 				var invoices = [];
-				
+
 				$.each(me.frm.doc.payment_reconciliation_invoices || [], function(i, row) {
-						if (row.invoice_number && !inList(invoices, row.invoice_number)) 
+						if (row.invoice_number && !inList(invoices, row.invoice_number))
 							invoices.push(row.invoice_number);
 				});
-								
+
 				frappe.meta.get_docfield("Payment Reconciliation Payment", "invoice_number",
 					me.frm.doc.name).options = invoices.join("\n");
 
