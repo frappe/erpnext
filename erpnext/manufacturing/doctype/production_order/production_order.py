@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+import frappe, json, time, datetime
 
 from frappe.utils import flt, nowdate
 from frappe import _
@@ -150,6 +150,24 @@ class ProductionOrder(Document):
 		operations = frappe.db.sql("""select operation_no, opn_description, workstation, hour_rate, time_in_mins, 
 			operating_cost, fixed_cycle_cost from `tabBOM Operation` where parent = %s""", self.bom_no, as_dict=1)
 		self.set('production_order_operations', operations)
+
+		gross_production_duration = 0
+		for d in self.get('production_order_operations'):
+			production_duration = d.time_in_mins
+			workstation_start_time = frappe.db.get_value("Workstation", d.workstation, "start_time")
+			workstation_close_time = frappe.db.get_value("Workstation", d.workstation, "closing_time")
+			workstation_duration = workstation_close_time - workstation_start_time
+			workstation_duration_min =  int(workstation_duration.total_seconds() / 60)
+			if (production_duration > workstation_duration_min):
+				production_duration = (production_duration / workstation_duration_min) * 24 * 60
+			gross_production_duration += production_duration
+
+		production_start_time = time.mktime(time.strptime(self.start_date,"%Y-%m-%d %H:%M:%S"))
+		production_end_time =  production_start_time + ( gross_production_duration * 60 )
+		self.end_date = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(production_end_time))
+
+	def auto_caluclate_production_dates(self):
+		pass
 
 @frappe.whitelist()
 def get_item_details(item):
