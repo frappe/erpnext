@@ -66,9 +66,11 @@ class JournalVoucher(AccountsController):
 	def validate_party(self):
 		for d in self.get("entries"):
 			account_type = frappe.db.get_value("Account", d.account, "account_type")
-			if account_type in ["Receivable", "Payable"] and not (d.party_type and d.party):
-				frappe.throw(_("Row{0}: Party Type and Party is required for Receivable / Payable account {1}").format(d.idx, d.account))
-
+			if account_type in ["Receivable", "Payable"]:
+				if not (d.party_type and d.party):
+					frappe.throw(_("Row{0}: Party Type and Party is required for Receivable / Payable account {1}").format(d.idx, d.account))
+			elif d.party_type and d.party:
+				frappe.throw(_("Row{0}: Party Type and Party is only applicable against Receivable / Payable account {1}").format(d.idx, d.account))
 
 	def check_credit_limit(self):
 		customers = list(set([d.party for d in self.get("entries") if d.party_type=="Customer"]))
