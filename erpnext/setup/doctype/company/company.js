@@ -78,14 +78,22 @@ cur_frm.cscript.change_abbr = function() {
 cur_frm.fields_dict.default_bank_account.get_query = function(doc) {
 	return{
 		filters: [
-			['Account', 'account_type', 'in', 'Bank, Cash'],
+			['Account', 'account_type', '=', 'Bank'],
 			['Account', 'group_or_ledger', '=', 'Ledger'],
 			['Account', 'company', '=', doc.name]
 		]
 	}
 }
 
-cur_frm.fields_dict.default_cash_account.get_query = cur_frm.fields_dict.default_bank_account.get_query;
+cur_frm.fields_dict.default_cash_account.get_query = function(doc) {
+	return{
+		filters: [
+			['Account', 'account_type', '=', 'Cash'],
+			['Account', 'group_or_ledger', '=', 'Ledger'],
+			['Account', 'company', '=', doc.name]
+		]
+	}
+}
 
 cur_frm.fields_dict.default_receivable_account.get_query = function(doc) {
 	return{
