@@ -33,8 +33,8 @@ class ReceivablePayableReport(object):
 		columns += [_("Invoiced Amount") + ":Currency:100", _("Paid Amount") + ":Currency:100",
 			_("Outstanding Amount") + ":Currency:100", _("Age") + ":Int:50",
 			"0-" + self.filters.range1 + ":Currency:100",
-			self.filters.range1 + "-" + self.filters.range2 + ":Currency:100", 
-			self.filters.range2 + "-" + self.filters.range3 + ":Currency:100", 
+			self.filters.range1 + "-" + self.filters.range2 + ":Currency:100",
+			self.filters.range2 + "-" + self.filters.range3 + ":Currency:100",
 			self.filters.range3 + _("-Above") + ":Currency:100"
 		]
 
@@ -49,36 +49,47 @@ class ReceivablePayableReport(object):
 	def get_data(self, party_naming_by, args):
 		from erpnext.accounts.utils import get_currency_precision
 		currency_precision = get_currency_precision() or 2
-		data = []
 		dr_or_cr = "debit" if args.get("party_type") == "Customer" else "credit"
+
 		voucher_details = self.get_voucher_details()
+
 		future_vouchers = self.get_entries_after(self.filters.report_date, args.get("party_type"))
 
+		data = []
 		for gle in self.get_entries_till(self.filters.report_date, args.get("party_type")):
 			if self.is_receivable_or_payable(gle, dr_or_cr, future_vouchers):
 				outstanding_amount = self.get_outstanding_amount(gle, self.filters.report_date, dr_or_cr)
 				if abs(outstanding_amount) > 0.1/10**currency_precision:
-					due_date = voucher_details.get("voucher_no", {}).get("due_date", "")
-					invoiced_amount = gle.get(dr_or_cr) if (gle.get(dr_or_cr) > 0) else 0
-					paid_amt = invoiced_amount - outstanding_amount
-					entry_date = due_date if self.filters.ageing_based_on == "Due Date" else gle.posting_date
+
 					row = [gle.posting_date, gle.party]
 
+					# customer / supplier name
 					if party_naming_by == "Naming Series":
 						row += [self.get_party_name(gle.party_type, gle.party)]
 
+					# get due date
+					due_date = voucher_details.get(gle.voucher_no, {}).get("due_date", "")
+
 					row += [gle.voucher_type, gle.voucher_no, due_date]
 
+					# get supplier bill details
 					if args.get("party_type") == "Supplier":
 						row += [
-							voucher_details.get("voucher_no", {}).get("bill_no", ""), 
-							voucher_details.get("voucher_no", {}).get("bill_date", "")
+							voucher_details.get(gle.voucher_no, {}).get("bill_no", ""),
+							voucher_details.get(gle.voucher_no, {}).get("bill_date", "")
 						]
 
-					row += [invoiced_amount, paid_amt, outstanding_amount] + \
-						get_ageing_data(cint(self.filters.range1), cint(self.filters.range2), \
+					# invoiced and paid amounts
+					invoiced_amount = gle.get(dr_or_cr) if (gle.get(dr_or_cr) > 0) else 0
+					paid_amt = invoiced_amount - outstanding_amount
+					row += [invoiced_amount, paid_amt, outstanding_amount]
+
+					# ageing data
+					entry_date = due_date if self.filters.ageing_based_on == "Due Date" else gle.posting_date
+					row += get_ageing_data(cint(self.filters.range1), cint(self.filters.range2),
 						cint(self.filters.range3), self.age_as_on, entry_date, outstanding_amount)
 
+					# customer territory / supplier type
 					if args.get("party_type") == "Customer":
 						row += [self.get_territory(gle.party), gle.remarks]
 					if args.get("party_type") == "Supplier":
@@ -199,7 +210,6 @@ class ReceivablePayableReport(object):
 def execute(filters=None):
 	args = {
 		"party_type": "Customer",
-		# "dr_or_cr": "debit",
 		"naming_by": ["Selling Settings", "cust_master_name"],
 	}
 	return ReceivablePayableReport(filters).run(args)

@@ -276,6 +276,12 @@ def get_data():
 					"name": "Pending SO Items For Purchase Request",
 					"doctype": "Sales Order"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Customer Credit Balance",
+					"doctype": "Customer"
+				},
 			]
 		},
 	]
