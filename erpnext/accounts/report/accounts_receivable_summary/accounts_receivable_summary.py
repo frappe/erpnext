@@ -15,13 +15,15 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		columns = [_("Customer") + ":Link/Customer:200"]
 
 		if party_naming_by == "Naming Series":
-			columns += ["Customer Name::110"]
+			columns += ["Customer Name::140"]
 
-		columns += [_("Total Invoiced Amount") + ":Currency:100",
-			_("Total Paid Amount") + ":Currency:100", _("Total Outstanding Amount") + ":Currency:100",
+		columns += [
+			_("Total Invoiced Amt") + ":Currency:140",
+			_("Total Paid Amt") + ":Currency:140",
+			_("Total Outstanding Amt") + ":Currency:160",
 			"0-" + self.filters.range1 + ":Currency:100",
-			self.filters.range1 + "-" + self.filters.range2 + ":Currency:100", 
-			self.filters.range2 + "-" + self.filters.range3 + ":Currency:100", 
+			self.filters.range1 + "-" + self.filters.range2 + ":Currency:100",
+			self.filters.range2 + "-" + self.filters.range3 + ":Currency:100",
 			self.filters.range3 + _("-Above") + ":Currency:100",
 			_("Territory") + ":Link/Territory:80"
 		]
@@ -30,66 +32,66 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 	def get_data(self, party_naming_by, args):
 		data = []
-		prev_columns, prev_data = ReceivablePayableReport(self.filters).run(args)
-		total_amount_dict = frappe._dict()
 
-		key_list = ["posting_date", "customer"]
+		customerwise_total = self.get_customerwise_total(party_naming_by, args)
 
-		if party_naming_by == "Naming Series":
-			key_list += ["customer_name"]
-
-		key_list += ["voucher_type", "voucher_no", "due_date", "invoiced_amt", "paid_amt", 
-		"outstanding_amt", "age", "range1", "range2", "range3", "range4", "territory", "remarks"]
-
-		data_dict = self.make_data_dict(key_list, prev_data)
-
-		for d in data_dict:
-			if d["customer"] in total_amount_dict:
-				customer_key = total_amount_dict[d.customer]
-				customer_key["total_invoiced_amt"] += d.get("invoiced_amt")
-				customer_key["total_paid_amt"] += d.get("paid_amt")
-				customer_key["total_outstanding_amt"]+= d.get("outstanding_amt")
-				customer_key["total_range1"] += d.get("range1")
-				customer_key["total_range2"] += d.get("range2")
-				customer_key["total_range3"] += d.get("range3")
-				customer_key["total_range4"] += d.get("range4")
-			else:
-				total_amount_dict.setdefault(d.get("customer"), {}).update({
-					"total_invoiced_amt": d.get("invoiced_amt"),
-					"total_paid_amt": d.get("paid_amt"),
-					"total_outstanding_amt": d.get("outstanding_amt"),
-					"total_range1": d.get("range1"),
-					"total_range2": d.get("range2"),
-					"total_range3": d.get("range3"),
-					"total_range4": d.get("range4")
-					})
-
-		for i in total_amount_dict:
-			row = [i]
+		for customer, customer_dict in customerwise_total.items():
+			row = [customer]
 
 			if party_naming_by == "Naming Series":
-				row += [self.get_party_name("Customer", i)]
+				row += [self.get_party_name("Customer", customer)]
 
-			row += [total_amount_dict[i]["total_invoiced_amt"], total_amount_dict[i]["total_paid_amt"], 
-				total_amount_dict[i]["total_outstanding_amt"], total_amount_dict[i]["total_range1"],
-				total_amount_dict[i]["total_range2"], total_amount_dict[i]["total_range3"], 
-				total_amount_dict[i]["total_range4"], self.get_territory(i)]
-
+			row += [
+				customer_dict.invoiced_amt, customer_dict.paid_amt, customer_dict.outstanding_amt,
+				customer_dict.range1, customer_dict.range2, customer_dict.range3, customer_dict.range4,
+				self.get_territory(customer)
+			]
 			data.append(row)
 
 		return data
 
-	def make_data_dict(self, key_list, data):
-		make_data_dict = []
-		for d in data:
-			make_data_dict.append(frappe._dict(zip(key_list, d)))
+	def get_customerwise_total(self, party_naming_by, args):
+		customer_total = frappe._dict()
+		for d in self.get_voucherwise_data(party_naming_by, args):
+			customer_total.setdefault(d.customer,
+				frappe._dict({
+					"invoiced_amt": 0,
+					"paid_amt": 0,
+					"outstanding_amt": 0,
+					"range1": 0,
+					"range2": 0,
+					"range3": 0,
+					"range4": 0
+				})
+			)
+			for k in customer_total[d.customer].keys():
+				customer_total[d.customer][k] += d.get(k, 0)
 
-		return make_data_dict
+		return customer_total
+
+	def get_voucherwise_data(self, party_naming_by, args):
+		voucherwise_data = ReceivablePayableReport(self.filters).run(args)[1]
+
+		cols = ["posting_date", "customer"]
+
+		if party_naming_by == "Naming Series":
+			cols += ["customer_name"]
+
+		cols += ["voucher_type", "voucher_no", "due_date", "invoiced_amt", "paid_amt",
+		"outstanding_amt", "age", "range1", "range2", "range3", "range4", "territory", "remarks"]
+
+		return self.make_data_dict(cols, voucherwise_data)
+
+	def make_data_dict(self, cols, data):
+		data_dict = []
+		for d in data:
+			data_dict.append(frappe._dict(zip(cols, d)))
+
+		return data_dict
 
 def execute(filters=None):
 	args = {
 		"party_type": "Customer",
-		"dr_or_cr": "debit",
 		"naming_by": ["Selling Settings", "cust_master_name"],
 	}
 

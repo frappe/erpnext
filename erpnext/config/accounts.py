@@ -320,6 +320,18 @@ def get_data():
 					"is_query_report": True,
 					"doctype": "Sales Invoice"
 				},
+				{
+					"type": "report",
+					"name": "Accounts Receivable Summary",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Customer Credit Balance",
+					"doctype": "Customer"
+				},
 			]
 		},
 	]
