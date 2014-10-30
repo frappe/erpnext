@@ -96,13 +96,14 @@ class PaymentReconciliation(Document):
 
 			payment_amount = payment_amount[0][0] if payment_amount else 0
 
-			if d.invoice_amount > payment_amount:
+			if d.invoice_amount - payment_amount > 0.005:
 				non_reconciled_invoices.append({
 					'voucher_no': d.voucher_no,
 					'voucher_type': d.voucher_type,
 					'posting_date': d.posting_date,
 					'invoice_amount': flt(d.invoice_amount),
-					'outstanding_amount': d.invoice_amount - payment_amount})
+					'outstanding_amount': flt(d.invoice_amount - payment_amount, 2)
+				})
 
 		self.add_invoice_entries(non_reconciled_invoices)
 
