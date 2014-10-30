@@ -293,7 +293,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
-
+	
 	obj = frappe.get_doc("Material Request", source_name)
 
 	def update_item(obj, target, source_parent):
@@ -302,15 +302,19 @@ def make_stock_entry(source_name, target_doc=None):
 		target.transfer_qty = flt(obj.qty) - flt(obj.ordered_qty)
 
 	def set_missing_values(source, target):
-		target.purpose = obj.material_request_type
+		target.purpose = source.material_request_type
 		target.run_method("get_stock_and_rate")
 
+	if obj.material_request_type=="Material Issue":
+		warehouse = "s_warehouse"
+	else:
+		warehouse = "t_warehouse"
 	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {
 			"doctype": "Stock Entry",
 			"validation": {
 				"docstatus": ["=", 1],
-				"material_request_type": ["=", obj.material_request_type]
+				"material_request_type": ["in", ["Material Transfer", "Material Issue"]]
 			}
 		},
 		"Material Request Item": {
@@ -319,7 +323,7 @@ def make_stock_entry(source_name, target_doc=None):
 				"name": "material_request_item",
 				"parent": "material_request",
 				"uom": "stock_uom",
-				"warehouse": "t_warehouse"
+				"warehouse": warehouse
 			},
 			"postprocess": update_item
 		}
