@@ -11,7 +11,6 @@ def execute():
 		set_party_in_jv_and_gl_entry(receivable_payable_accounts)
 		delete_individual_party_account()
 		remove_customer_supplier_account_report()
-		add_default_accounts_in_party(receivable_payable_accounts)
 
 
 def link_warehouse_account():
@@ -27,8 +26,8 @@ def create_receivable_payable_account():
 		account.update(args)
 		account.insert()
 
-		frappe.db.set_value("Company", args["company"],
-			("receivables_group" if args["account_type"]=="Receivable" else "payables_group"), account.name)
+		frappe.db.set_value("Company", args["company"], ("default_receivable_account"
+			if args["account_type"]=="Receivable" else "default_payable_account"), account.name)
 
 		receivable_payable_accounts.setdefault(args["company"], {}).setdefault(args["account_type"], account.name)
 
@@ -93,17 +92,3 @@ def delete_individual_party_account():
 def remove_customer_supplier_account_report():
 	for d in ["Customer Account Head", "Supplier Account Head"]:
 		frappe.delete_doc("Report", d)
-
-def add_default_accounts_in_party(receivable_payable_accounts):
-	for dt in ["Customer", "Supplier"]:
-		for p in frappe.db.sql("""select name from `tab{0}` where docstatus < 2""".format(dt)):
-			try:
-				party = frappe.get_doc(dt, p[0])
-				for company, accounts in receivable_payable_accounts.items():
-					party.append("party_accounts", {
-						"company": company,
-						"account": accounts["Receivable" if dt == "Customer" else "Payable"]
-					})
-				party.save()
-			except:
-				pass
