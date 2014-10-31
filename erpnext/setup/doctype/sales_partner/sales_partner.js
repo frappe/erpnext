@@ -17,11 +17,6 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 		// make lists
 		cur_frm.cscript.make_address(doc,dt,dn);
 		cur_frm.cscript.make_contact(doc,dt,dn);
-
-		if (doc.show_in_website) {
-			cur_frm.set_intro(__("Published on website at: {0}",
-				[repl('<a href="/%(website_route)s" target="_blank">/%(website_route)s</a>', doc.__onload)]));
-		}
 	}
 }
 

@@ -8,20 +8,13 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.appframe.add_button(__("Item Group Tree"), function() {
 		frappe.set_route("Sales Browser", "Item Group");
 	}, "icon-sitemap")
-
-	if (!doc.__islocal && doc.show_in_website) {
-		cur_frm.set_intro(__("Published on website at: {0}",
-			[repl('<a href="/%(website_route)s" target="_blank">/%(website_route)s</a>', doc.__onload)]));
-	}
 }
 
 cur_frm.cscript.set_root_readonly = function(doc) {
 	// read-only for root item group
 	if(!doc.parent_item_group) {
 		cur_frm.set_read_only();
-		cur_frm.set_intro(__("This is a root item group and cannot be edited."));
-	} else {
-		cur_frm.set_intro(null);
+		cur_frm.set_intro(__("This is a root item group and cannot be edited."), true);
 	}
 }
 
