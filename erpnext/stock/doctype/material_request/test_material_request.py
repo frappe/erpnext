@@ -51,7 +51,7 @@ class TestMaterialRequest(unittest.TestCase):
 			mr.name)
 
 		mr = frappe.get_doc("Material Request", mr.name)
-		mr.material_request_type = "Transfer"
+		mr.material_request_type = "Material Transfer"
 		mr.submit()
 		se = make_stock_entry(mr.name)
 
@@ -168,7 +168,7 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# submit material request of type Purchase
 		mr = frappe.copy_doc(test_records[0])
-		mr.material_request_type = "Transfer"
+		mr.material_request_type = "Material Transfer"
 		mr.insert()
 		mr.submit()
 
@@ -257,7 +257,7 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# submit material request of type Purchase
 		mr = frappe.copy_doc(test_records[0])
-		mr.material_request_type = "Transfer"
+		mr.material_request_type = "Material Transfer"
 		mr.insert()
 		mr.submit()
 
@@ -330,9 +330,9 @@ class TestMaterialRequest(unittest.TestCase):
 		self.assertEquals(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
 
 	def test_incorrect_mapping_of_stock_entry(self):
-		# submit material request of type Purchase
+		# submit material request of type Transfer
 		mr = frappe.copy_doc(test_records[0])
-		mr.material_request_type = "Transfer"
+		mr.material_request_type = "Material Transfer"
 		mr.insert()
 		mr.submit()
 
@@ -362,6 +362,17 @@ class TestMaterialRequest(unittest.TestCase):
 		# check for stopped status of Material Request
 		se = frappe.copy_doc(se_doc)
 		self.assertRaises(frappe.MappingMismatchError, se.insert)
+
+		# submit material request of type Transfer
+		mr = frappe.copy_doc(test_records[0])
+		mr.material_request_type = "Material Issue"
+		mr.insert()
+		mr.submit()
+
+		# map a stock entry
+		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
+		se_doc = make_stock_entry(mr.name)
+		self.assertEquals(se_doc.get("mtn_details")[0].s_warehouse, "_Test Warehouse - _TC")
 
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany

@@ -625,7 +625,8 @@ class StockEntry(StockController):
 				mreq_item = frappe.db.get_value("Material Request Item",
 					{"name": item.material_request_item, "parent": item.material_request},
 					["item_code", "warehouse", "idx"], as_dict=True)
-				if mreq_item.item_code != item.item_code or mreq_item.warehouse != item.t_warehouse:
+				if mreq_item.item_code != item.item_code or \
+				mreq_item.warehouse != (item.s_warehouse if self.purpose== "Material Issue" else item.t_warehouse):
 					frappe.throw(_("Item or Warehouse for row {0} does not match Material Request").format(item.idx),
 						frappe.MappingMismatchError)
 
