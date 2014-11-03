@@ -73,7 +73,7 @@ class JournalVoucher(AccountsController):
 				frappe.throw(_("Row{0}: Party Type and Party is only applicable against Receivable / Payable account {1}").format(d.idx, d.account))
 
 	def check_credit_limit(self):
-		customers = list(set([d.party for d in self.get("entries") if d.party_type=="Customer"]))
+		customers = list(set([d.party for d in self.get("entries") if d.party_type=="Customer" and flt(d.debit) > 0]))
 		if customers:
 			from erpnext.selling.doctype.customer.customer import check_credit_limit
 			for customer in customers:
