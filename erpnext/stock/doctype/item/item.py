@@ -365,6 +365,7 @@ class Item(WebsiteGenerator):
 	def on_trash(self):
 		super(Item, self).on_trash()
 		frappe.db.sql("""delete from tabBin where item_code=%s""", self.item_code)
+		frappe.db.sql("delete from `tabItem Price` where item_code=%s", self.name)
 		for variant_of in frappe.get_all("Item", {"variant_of": self.name}):
 			frappe.delete_doc("Item", variant_of.name)
 
