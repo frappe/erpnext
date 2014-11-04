@@ -87,7 +87,7 @@ def update_entries_after(args, allow_zero_rate=False, verbose=1):
 	stock_value_difference = 0.0
 
 	for sle in entries_to_fix:
-		if sle.serial_no or not cint(frappe.db.get_default("allow_negative_stock")):
+		if sle.serial_no or not cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock")):
 			# validate negative stock for serialized items, fifo valuation
 			# or when negative stock is not allowed for moving average
 			if not validate_negative_stock(qty_after_transaction, sle):

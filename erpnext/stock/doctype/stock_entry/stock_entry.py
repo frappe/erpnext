@@ -219,7 +219,7 @@ class StockEntry(StockController):
 		if not self.posting_date or not self.posting_time:
 			frappe.throw(_("Posting date and posting time is mandatory"))
 
-		allow_negative_stock = cint(frappe.db.get_default("allow_negative_stock"))
+		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
 
 		for d in self.get('mtn_details'):
 			d.transfer_qty = flt(d.transfer_qty)
