@@ -3,15 +3,13 @@
 
 from __future__ import unicode_literals
 import frappe
-
-from frappe.utils import cstr, flt
+from frappe.utils import flt
 from frappe import _
 
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.controllers.buying_controller import BuyingController
 
 class PurchaseCommon(BuyingController):
-
 	def update_last_purchase_rate(self, obj, is_submit):
 		"""updates last_purchase_rate in item table for each item"""
 
@@ -122,27 +120,6 @@ class PurchaseCommon(BuyingController):
 					frappe.throw(_("Item {0} has been entered multiple times with same description or date").format(d.item_code))
 				else:
 					chk_dupl_itm.append(f)
-
-	def get_qty(self, curr_doctype, ref_tab_fname, ref_tab_dn, ref_doc_tname, transaction, curr_parent_name):
-		# Get total Quantities of current doctype (eg. PR) except for qty of this transaction
-		#------------------------------
-		# please check as UOM changes from Material Request - Purchase Order ,so doing following else uom should be same .
-		# i.e. in PO uom is NOS then in PR uom should be NOS
-		# but if in Material Request uom KG it can change in PO
-
-		get_qty = (transaction == 'Material Request - Purchase Order') and 'qty * conversion_factor' or 'qty'
-		qty = frappe.db.sql("""select sum(%s) from `tab%s` where %s = %s and
-			docstatus = 1 and parent != %s""" % (get_qty, curr_doctype, ref_tab_fname, '%s', '%s'),
-			(ref_tab_dn, curr_parent_name))
-		qty = qty and flt(qty[0][0]) or 0
-
-		# get total qty of ref doctype
-		#--------------------
-		max_qty = frappe.db.sql("""select qty from `tab%s` where name = %s
-			and docstatus = 1""" % (ref_doc_tname, '%s'), ref_tab_dn)
-		max_qty = max_qty and flt(max_qty[0][0]) or 0
-
-		return cstr(qty)+'~~~'+cstr(max_qty)
 
 	def check_for_stopped_status(self, doctype, docname):
 		stopped = frappe.db.sql("""select name from `tab%s` where name = %s and

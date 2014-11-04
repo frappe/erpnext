@@ -79,30 +79,9 @@ class MaterialRequest(BuyingController):
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
 
-	def update_bin(self, is_submit, is_stopped):
-		""" Update Quantity Requested for Purchase in Bin for Material Request of type 'Purchase'"""
-
-		from erpnext.stock.utils import update_bin
-		for d in self.get('indent_details'):
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes":
-				if not d.warehouse:
-					frappe.throw(_("Warehouse required for stock Item {0}").format(d.item_code))
-
-				qty =flt(d.qty)
-				if is_stopped:
-					qty = (d.qty > d.ordered_qty) and flt(flt(d.qty) - flt(d.ordered_qty)) or 0
-
-				args = {
-					"item_code": d.item_code,
-					"warehouse": d.warehouse,
-					"indented_qty": (is_submit and 1 or -1) * flt(qty),
-					"posting_date": self.transaction_date
-				}
-				update_bin(args)
-
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')
-		self.update_bin(is_submit = 1, is_stopped = 0)
+		self.update_requested_qty()
 
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("""select modified from `tabMaterial Request` where name = %s""",
@@ -115,23 +94,18 @@ class MaterialRequest(BuyingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
-		self.update_bin(is_submit = (status == 'Submitted') and 1 or 0, is_stopped = 1)
+		self.update_requested_qty()
 		frappe.db.set(self, 'status', cstr(status))
 		frappe.msgprint(_("Status updated to {0}").format(_(status)))
 
 	def on_cancel(self):
-		# Step 1:=> Get Purchase Common Obj
 		pc_obj = frappe.get_doc('Purchase Common')
 
-		# Step 2:=> Check for stopped status
 		pc_obj.check_for_stopped_status(self.doctype, self.name)
-
-		# Step 3:=> Check if Purchase Order has been submitted against current Material Request
 		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Order', docname = self.name, detail_doctype = 'Purchase Order Item')
-		# Step 4:=> Update Bin
-		self.update_bin(is_submit = 0, is_stopped = (cstr(self.status) == 'Stopped') and 1 or 0)
 
-		# Step 5:=> Set Status
+		self.update_requested_qty()
+
 		frappe.db.set(self,'status','Cancelled')
 
 	def update_completed_qty(self, mr_items=None):
@@ -162,56 +136,47 @@ class MaterialRequest(BuyingController):
 		self.per_ordered = flt((per_ordered / flt(len(item_doclist))) * 100.0, 2)
 		frappe.db.set_value(self.doctype, self.name, "per_ordered", self.per_ordered)
 
-def update_completed_qty(doc, method):
-	if doc.doctype == "Stock Entry":
+	def update_requested_qty(self, mr_item_rows=None):
+		"""update requested qty (before ordered_qty is updated)"""
+		from erpnext.stock.utils import get_bin
+
+		def _update_requested_qty(item_code, warehouse):
+			requested_qty = frappe.db.sql("""select sum(mr_item.qty - ifnull(mr_item.ordered_qty, 0))
+				from `tabMaterial Request Item` mr_item, `tabMaterial Request` mr
+				where mr_item.item_code=%s and mr_item.warehouse=%s
+				and mr_item.qty > ifnull(mr_item.ordered_qty, 0) and mr_item.parent=mr.name
+				and mr.status!='Stopped' and mr.docstatus=1""", (item_code, warehouse))
+
+			bin_doc = get_bin(item_code, warehouse)
+			bin_doc.indented_qty = flt(requested_qty[0][0]) if requested_qty else 0
+			bin_doc.save()
+
+		item_wh_list = []
+		for d in self.get("indent_details"):
+			if (not mr_item_rows or d.name in mr_item_rows) and [d.item_code, d.warehouse] not in item_wh_list \
+					and frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" and d.warehouse:
+				item_wh_list.append([d.item_code, d.warehouse])
+
+		for item_code, warehouse in item_wh_list:
+			_update_requested_qty(item_code, warehouse)
+
+def update_completed_and_requested_qty(stock_entry, method):
+	if stock_entry.doctype == "Stock Entry":
 		material_request_map = {}
 
-		for d in doc.get("mtn_details"):
+		for d in stock_entry.get("mtn_details"):
 			if d.material_request:
 				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
 
-		for mr_name, mr_items in material_request_map.items():
-			mr_obj = frappe.get_doc("Material Request", mr_name)
+		for mr, mr_item_rows in material_request_map.items():
+			if mr and mr_item_rows:
+				mr_obj = frappe.get_doc("Material Request", mr)
 
-			if mr_obj.status in ["Stopped", "Cancelled"]:
-				frappe.throw(_("Material Request {0} is cancelled or stopped").format(mr_obj.name),
-					frappe.InvalidStatusError)
+				if mr_obj.status in ["Stopped", "Cancelled"]:
+					frappe.throw(_("Material Request {0} is cancelled or stopped").format(mr), frappe.InvalidStatusError)
 
-			_update_requested_qty(doc, mr_obj, mr_items)
-
-			# update ordered percentage and qty
-			mr_obj.update_completed_qty(mr_items)
-
-def _update_requested_qty(doc, mr_obj, mr_items):
-	"""update requested qty (before ordered_qty is updated)"""
-	from erpnext.stock.utils import update_bin
-	for mr_item_name in mr_items:
-		mr_item = mr_obj.get("indent_details", {"name": mr_item_name})
-		se_detail = doc.get("mtn_details", {"material_request": mr_obj.name,
-			"material_request_item": mr_item_name})
-
-		if mr_item and se_detail:
-			mr_item = mr_item[0]
-			se_detail = se_detail[0]
-			mr_item.ordered_qty = flt(mr_item.ordered_qty)
-			mr_item.qty = flt(mr_item.qty)
-			se_detail.transfer_qty = flt(se_detail.transfer_qty)
-
-			if se_detail.docstatus == 2 and mr_item.ordered_qty > mr_item.qty \
-					and se_detail.transfer_qty == mr_item.ordered_qty:
-				add_indented_qty = mr_item.qty
-			elif se_detail.docstatus == 1 and \
-					mr_item.ordered_qty + se_detail.transfer_qty > mr_item.qty:
-				add_indented_qty = mr_item.qty - mr_item.ordered_qty
-			else:
-				add_indented_qty = se_detail.transfer_qty
-
-			update_bin({
-				"item_code": se_detail.item_code,
-				"warehouse": se_detail.t_warehouse,
-				"indented_qty": (se_detail.docstatus==2 and 1 or -1) * add_indented_qty,
-				"posting_date": doc.posting_date,
-			})
+				mr_obj.update_completed_qty(mr_item_rows)
+				mr_obj.update_requested_qty(mr_item_rows)
 
 def set_missing_values(source, target_doc):
 	target_doc.run_method("set_missing_values")
