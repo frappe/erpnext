@@ -47,8 +47,8 @@ doc_events = {
 		"on_update": "erpnext.home.make_comment_feed"
 	},
 	"Stock Entry": {
-		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_qty",
-		"on_cancel": "erpnext.stock.doctype.material_request.material_request.update_completed_qty"
+		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
+		"on_cancel": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty"
 	},
 	"User": {
 		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
