@@ -58,7 +58,7 @@ class TestMaterialRequest(unittest.TestCase):
 		self.assertEquals(se.doctype, "Stock Entry")
 		self.assertEquals(len(se.get("mtn_details")), len(mr.get("indent_details")))
 
-	def _insert_stock_entry(self, qty1, qty2):
+	def _insert_stock_entry(self, qty1, qty2, warehouse = None ):
 		se = frappe.get_doc({
 				"company": "_Test Company",
 				"doctype": "Stock Entry",
