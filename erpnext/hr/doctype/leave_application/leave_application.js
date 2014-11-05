@@ -104,7 +104,15 @@ cur_frm.cscript.calculate_total_days = function(doc, dt, dn) {
 		if(cint(doc.half_day) == 1) set_multiple(dt,dn,{total_leave_days:0.5});
 		else{
 			// server call is done to include holidays in leave days calculations
-			return get_server_fields('get_total_leave_days', '', '', doc, dt, dn, 1);
+			return frappe.call({
+				method: 'erpnext.hr.doctype.leave_application.leave_application.get_total_leave_days',
+				args: {leave_app: doc},
+				callback: function(response) {
+					if (response && response.message) {
+						cur_frm.set_value('total_leave_days', response.message.total_leave_days);
+					}
+				}
+			});
 		}
 	}
 }
