@@ -29,8 +29,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		frappe.get_doc(pr).insert()
 
 	def test_ordered_qty(self):
-		frappe.db.sql("delete from tabBin")
-
+		existing_ordered_qty = self._get_ordered_qty("_Test Item", "_Test Warehouse - _TC")
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 
 		po = frappe.copy_doc(test_records[0]).insert()
@@ -43,8 +42,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.get("po_details")[0].item_code = "_Test Item"
 		po.submit()
 
-		self.assertEquals(frappe.db.get_value("Bin", {"item_code": "_Test Item",
-			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty"), 10)
+		self.assertEquals(self._get_ordered_qty("_Test Item", "_Test Warehouse - _TC"), existing_ordered_qty + 10)
 
 		pr = make_purchase_receipt(po.name)
 
@@ -56,8 +54,9 @@ class TestPurchaseOrder(unittest.TestCase):
 		pr.insert()
 		pr.submit()
 
-		self.assertEquals(flt(frappe.db.get_value("Bin", {"item_code": "_Test Item",
-			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty")), 6.0)
+		po.load_from_db()
+		self.assertEquals(po.get("po_details")[0].received_qty, 4)
+		self.assertEquals(self._get_ordered_qty("_Test Item", "_Test Warehouse - _TC"), existing_ordered_qty + 6)
 
 		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
 
@@ -68,8 +67,16 @@ class TestPurchaseOrder(unittest.TestCase):
 		pr1.insert()
 		pr1.submit()
 
-		self.assertEquals(flt(frappe.db.get_value("Bin", {"item_code": "_Test Item",
-			"warehouse": "_Test Warehouse - _TC"}, "ordered_qty")), 0.0)
+		po.load_from_db()
+		self.assertEquals(po.get("po_details")[0].received_qty, 12)
+		self.assertEquals(self._get_ordered_qty("_Test Item", "_Test Warehouse - _TC"), existing_ordered_qty)
+
+		pr1.load_from_db()
+		pr1.cancel()
+
+		po.load_from_db()
+		self.assertEquals(po.get("po_details")[0].received_qty, 4)
+		self.assertEquals(self._get_ordered_qty("_Test Item", "_Test Warehouse - _TC"), existing_ordered_qty + 6)
 
 	def test_make_purchase_invoice(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
@@ -112,6 +119,9 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_recurring_order(self):
 		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
 		test_recurring_document(self, test_records)
+
+	def _get_ordered_qty(self, item_code, warehouse):
+		return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "ordered_qty"))
 
 
 test_dependencies = ["BOM", "Item Price"]

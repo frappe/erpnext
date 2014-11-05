@@ -2,5 +2,6 @@
  "db_name": "test_frappe",
  "db_password": "test_frappe",
  "admin_password": "admin",
+ "host_name": "http://localhost:8888",
  "mute_emails": 1
 }

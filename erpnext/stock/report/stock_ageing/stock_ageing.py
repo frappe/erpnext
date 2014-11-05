@@ -42,13 +42,12 @@ def get_columns():
 
 def get_fifo_queue(filters):
 	item_details = {}
-	prev_qty = 0.0
 	for d in get_stock_ledger_entries(filters):
 		item_details.setdefault(d.name, {"details": d, "fifo_queue": []})
 		fifo_queue = item_details[d.name]["fifo_queue"]
 
 		if d.voucher_type == "Stock Reconciliation":
-			d.actual_qty = flt(d.qty_after_transaction) - flt(prev_qty)
+			d.actual_qty = flt(d.qty_after_transaction) - flt(item_details[d.name].get("qty_after_transaction", 0))
 
 		if d.actual_qty > 0:
 			fifo_queue.append([d.actual_qty, d.posting_date])
@@ -66,7 +65,7 @@ def get_fifo_queue(filters):
 					batch[0] -= qty_to_pop
 					qty_to_pop = 0
 
-		prev_qty = d.qty_after_transaction
+		item_details[d.name]["qty_after_transaction"] = d.qty_after_transaction
 
 	return item_details
 

@@ -131,6 +131,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 
 			if(me.is_default("warehouse") ? true : me.warehouse == sl.warehouse) {
 				var item = me.item_by_name[sl.item_code];
+				if(item.closing_qty_value==undefined) item.closing_qty_value = 0;
 
 				if(me.value_or_qty!="Quantity") {
 					var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
