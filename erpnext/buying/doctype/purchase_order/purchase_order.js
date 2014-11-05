@@ -109,7 +109,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("po_details", row, ["schedule_date"]);
 	}
-
 });
 
 // for backward compatibility: combine new and previous states
@@ -131,6 +130,17 @@ cur_frm.fields_dict['po_details'].grid.get_field('project_name').get_query = fun
 	return {
 		filters:[
 			['Project', 'status', 'not in', 'Completed, Cancelled']
+		]
+	}
+}
+
+cur_frm.fields_dict['po_details'].grid.get_field('bom').get_query = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn]
+	return {
+		filters: [
+			['BOM', 'item', '=', d.item_code],
+			['BOM', 'is_active', '=', '1'],
+			['BOM', 'docstatus', '=', '1']
 		]
 	}
 }
@@ -219,3 +229,11 @@ cur_frm.cscript.send_sms = function() {
 cur_frm.cscript.schedule_date = function(doc, cdt, cdn) {
 	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "schedule_date");
 }
+
+frappe.provide("erpnext.buying");
+
+frappe.ui.form.on("Purchase Order", "is_subcontracted", function(frm) {
+	if (frm.doc.is_subcontracted === "Yes") {
+		erpnext.buying.get_default_bom(frm);
+	}
+});

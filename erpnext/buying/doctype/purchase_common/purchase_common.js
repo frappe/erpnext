@@ -389,5 +389,22 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	}
 });
 cur_frm.add_fetch('project_name', 'cost_center', 'cost_center');
-var tname = cur_frm.cscript.tname;
-var fname = cur_frm.cscript.fname;
+
+erpnext.buying.get_default_bom = function(frm) {
+	$.each(frm.doc[frm.cscript.fname] || [], function(i, d) {
+		if (d.item_code && d.bom === "") {
+			return frappe.call({
+				type: "GET",
+				method: "erpnext.stock.get_item_details.get_default_bom",
+				args: {
+					"item_code": d.item_code,
+				},
+				callback: function(r) {
+					if(r) {
+						frappe.model.set_value(d.doctype, d.name, "bom", r.message);
+					}
+				}
+			})
+		}
+	});
+}

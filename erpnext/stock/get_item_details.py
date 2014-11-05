@@ -68,6 +68,9 @@ def get_item_details(args):
 		out.schedule_date = out.lead_time_date = add_days(args.transaction_date,
 			item.lead_time_days)
 
+	if args.get("is_subcontracted") == "Yes":
+		out.bom = get_default_bom(args.item_code)
+
 	return out
 
 def process_args(args):
@@ -381,3 +384,12 @@ def get_price_list_currency_and_exchange_rate(args):
 		"price_list_currency": price_list_currency,
 		"plc_conversion_rate": plc_conversion_rate
 	}
+
+@frappe.whitelist()
+def get_default_bom(item_code=None):
+	if item_code:
+		bom = frappe.db.get_value("BOM", {"docstatus": 1, "is_default": 1, "is_active": 1, "item": item_code})
+		if bom:
+			return bom
+		else:
+			frappe.throw(_("No default BOM exists for Item {0}").format(item_code))
