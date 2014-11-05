@@ -328,6 +328,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Accounts Payable Summary",
+					"doctype": "Purchase Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"is_query_report": True,
 					"name": "Customer Credit Balance",
 					"doctype": "Customer"

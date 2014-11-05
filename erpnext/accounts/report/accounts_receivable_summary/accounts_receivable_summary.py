@@ -9,13 +9,13 @@ from erpnext.accounts.report.accounts_receivable.accounts_receivable import Rece
 class AccountsReceivableSummary(ReceivablePayableReport):
 	def run(self, args):
 		party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
-		return self.get_columns(party_naming_by), self.get_data(party_naming_by, args)
+		return self.get_columns(party_naming_by, args), self.get_data(party_naming_by, args)
 
-	def get_columns(self, party_naming_by):
-		columns = [_("Customer") + ":Link/Customer:200"]
+	def get_columns(self, party_naming_by, args):
+		columns = [_(args.get("party_type")) + ":Link/" + args.get("party_type") + ":200"]
 
 		if party_naming_by == "Naming Series":
-			columns += ["Customer Name::140"]
+			columns += [ args.get("party_type") + " Name::140"]
 
 		columns += [
 			_("Total Invoiced Amt") + ":Currency:140",
@@ -24,36 +24,43 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			"0-" + self.filters.range1 + ":Currency:100",
 			self.filters.range1 + "-" + self.filters.range2 + ":Currency:100",
 			self.filters.range2 + "-" + self.filters.range3 + ":Currency:100",
-			self.filters.range3 + _("-Above") + ":Currency:100",
-			_("Territory") + ":Link/Territory:80"
-		]
+			self.filters.range3 + _("-Above") + ":Currency:100"]
+
+		if args.get("party_type") == "Customer":
+			columns += [_("Territory") + ":Link/Territory:80"]
+		if args.get("party_type") == "Supplier":
+			columns += [_("Supplier Type") + ":Link/Supplier Type:80"]
 
 		return columns
 
 	def get_data(self, party_naming_by, args):
 		data = []
 
-		customerwise_total = self.get_customerwise_total(party_naming_by, args)
+		partywise_total = self.get_partywise_total(party_naming_by, args)
 
-		for customer, customer_dict in customerwise_total.items():
-			row = [customer]
+		for party, party_dict in partywise_total.items():
+			row = [party]
 
 			if party_naming_by == "Naming Series":
-				row += [self.get_party_name("Customer", customer)]
+				row += [self.get_party_name(args.get("party_type"), party)]
 
 			row += [
-				customer_dict.invoiced_amt, customer_dict.paid_amt, customer_dict.outstanding_amt,
-				customer_dict.range1, customer_dict.range2, customer_dict.range3, customer_dict.range4,
-				self.get_territory(customer)
+				party_dict.invoiced_amt, party_dict.paid_amt, party_dict.outstanding_amt,
+				party_dict.range1, party_dict.range2, party_dict.range3, party_dict.range4,
 			]
+
+			if args.get("party_type") == "Customer":
+				row += [self.get_territory(party)]
+			if args.get("party_type") == "Supplier":
+				row += [self.get_supplier_type(party)]
 			data.append(row)
 
 		return data
 
-	def get_customerwise_total(self, party_naming_by, args):
-		customer_total = frappe._dict()
+	def get_partywise_total(self, party_naming_by, args):
+		party_total = frappe._dict()
 		for d in self.get_voucherwise_data(party_naming_by, args):
-			customer_total.setdefault(d.customer,
+			party_total.setdefault(d.party,
 				frappe._dict({
 					"invoiced_amt": 0,
 					"paid_amt": 0,
@@ -64,21 +71,31 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 					"range4": 0
 				})
 			)
-			for k in customer_total[d.customer].keys():
-				customer_total[d.customer][k] += d.get(k, 0)
+			for k in party_total[d.party].keys():
+				party_total[d.party][k] += d.get(k, 0)
 
-		return customer_total
+		return party_total
 
 	def get_voucherwise_data(self, party_naming_by, args):
 		voucherwise_data = ReceivablePayableReport(self.filters).run(args)[1]
 
-		cols = ["posting_date", "customer"]
+		cols = ["posting_date", "party"]
 
 		if party_naming_by == "Naming Series":
-			cols += ["customer_name"]
+			cols += ["party_name"]
 
-		cols += ["voucher_type", "voucher_no", "due_date", "invoiced_amt", "paid_amt",
-		"outstanding_amt", "age", "range1", "range2", "range3", "range4", "territory", "remarks"]
+		cols += ["voucher_type", "voucher_no", "due_date"]
+
+		if args.get("party_type") == "Supplier":
+			cols += ["bill_no", "bill_date"]
+
+		cols += ["invoiced_amt", "paid_amt",
+		"outstanding_amt", "age", "range1", "range2", "range3", "range4"]
+
+		if args.get("party_type") == "Supplier":
+			cols += ["supplier_type", "remarks"]
+		if args.get("party_type") == "Customer":
+			cols += ["territory", "remarks"]
 
 		return self.make_data_dict(cols, voucherwise_data)
 
