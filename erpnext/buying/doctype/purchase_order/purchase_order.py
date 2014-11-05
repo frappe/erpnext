@@ -96,50 +96,45 @@ class PurchaseOrder(BuyingController):
 				check_list.append(d.prevdoc_docname)
 				pc_obj.check_for_stopped_status( d.prevdoc_doctype, d.prevdoc_docname)
 
+	def update_requested_qty(self):
+		material_request_map = {}
+		for d in self.get("po_details"):
+			if d.prevdoc_doctype and d.prevdoc_doctype == "Material Request" and d.prevdoc_detail_docname:
+				material_request_map.setdefault(d.prevdoc_docname, []).append(d.prevdoc_detail_docname)
 
-	def update_bin(self, is_submit, is_stopped = 0):
-		from erpnext.stock.utils import update_bin
-		pc_obj = frappe.get_doc('Purchase Common')
-		for d in self.get('po_details'):
-			#1. Check if is_stock_item == 'Yes'
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes":
-				# this happens when item is changed from non-stock to stock item
-				if not d.warehouse:
-					continue
+		for mr, mr_item_rows in material_request_map.items():
+			if mr and mr_item_rows:
+				mr_obj = frappe.get_doc("Material Request", mr)
 
-				ind_qty, po_qty = 0, flt(d.qty) * flt(d.conversion_factor)
-				if is_stopped:
-					po_qty = flt(d.qty) > flt(d.received_qty) and \
-						flt( flt(flt(d.qty) - flt(d.received_qty))*flt(d.conversion_factor)) or 0
+				if mr_obj.status in ["Stopped", "Cancelled"]:
+					frappe.throw(_("Material Request {0} is cancelled or stopped").format(mr), frappe.InvalidStatusError)
 
-				# No updates in Material Request on Stop / Unstop
-				if cstr(d.prevdoc_doctype) == 'Material Request' and not is_stopped:
-					# get qty and pending_qty of prevdoc
-					curr_ref_qty = pc_obj.get_qty(d.doctype, 'prevdoc_detail_docname',
-					 	d.prevdoc_detail_docname, 'Material Request Item',
-						'Material Request - Purchase Order', self.name)
-					max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), \
-					 	flt(curr_ref_qty.split('~~~')[0]), 0
+				mr_obj.update_requested_qty(mr_item_rows)
 
-					if flt(qty) + flt(po_qty) > flt(max_qty):
-						curr_qty = flt(max_qty) - flt(qty)
-						# special case as there is no restriction
-						# for Material Request - Purchase Order
-						curr_qty = curr_qty > 0 and curr_qty or 0
-					else:
-						curr_qty = flt(po_qty)
+	def update_ordered_qty(self, po_item_rows=None):
+		"""update requested qty (before ordered_qty is updated)"""
+		from erpnext.stock.utils import get_bin
 
-					ind_qty = -flt(curr_qty)
+		def _update_ordered_qty(item_code, warehouse):
+			ordered_qty = frappe.db.sql("""
+				select sum((po_item.qty - ifnull(po_item.received_qty, 0))*po_item.conversion_factor)
+				from `tabPurchase Order Item` po_item, `tabPurchase Order` po
+				where po_item.item_code=%s and po_item.warehouse=%s
+				and po_item.qty > ifnull(po_item.received_qty, 0) and po_item.parent=po.name
+				and po.status!='Stopped' and po.docstatus=1""", (item_code, warehouse))
 
-				# Update ordered_qty and indented_qty in bin
-				args = {
-					"item_code": d.item_code,
-					"warehouse": d.warehouse,
-					"ordered_qty": (is_submit and 1 or -1) * flt(po_qty),
-					"indented_qty": (is_submit and 1 or -1) * flt(ind_qty),
-					"posting_date": self.transaction_date
-				}
-				update_bin(args)
+			bin_doc = get_bin(item_code, warehouse)
+			bin_doc.ordered_qty = flt(ordered_qty[0][0]) if ordered_qty else 0
+			bin_doc.save()
+
+		item_wh_list = []
+		for d in self.get("po_details"):
+			if (not po_item_rows or d.name in po_item_rows) and [d.item_code, d.warehouse] not in item_wh_list \
+					and frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" and d.warehouse:
+				item_wh_list.append([d.item_code, d.warehouse])
+
+		for item_code, warehouse in item_wh_list:
+			_update_ordered_qty(item_code, warehouse)
 
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("select modified from `tabPurchase Order` where name = %s",
@@ -152,13 +147,11 @@ class PurchaseOrder(BuyingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
-		# step 1:=> Set Status
 		frappe.db.set(self,'status',cstr(status))
 
-		# step 2:=> Update Bin
-		self.update_bin(is_submit = (status == 'Submitted') and 1 or 0, is_stopped = 1)
+		self.update_requested_qty()
+		self.update_ordered_qty()
 
-		# step 3:=> Acknowledge user
 		msgprint(_("Status of {0} {1} is now {2}").format(self.doctype, self.name, status))
 
 	def on_submit(self):
@@ -167,7 +160,8 @@ class PurchaseOrder(BuyingController):
 		purchase_controller = frappe.get_doc("Purchase Common")
 
 		self.update_prevdoc_status()
-		self.update_bin(is_submit = 1, is_stopped = 0)
+		self.update_requested_qty()
+		self.update_ordered_qty()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.grand_total)
@@ -192,8 +186,13 @@ class PurchaseOrder(BuyingController):
 			throw(_("Purchase Invoice {0} is already submitted").format(", ".join(submitted)))
 
 		frappe.db.set(self,'status','Cancelled')
+
 		self.update_prevdoc_status()
-		self.update_bin( is_submit = 0, is_stopped = 0)
+
+		# Must be called after updating ordered qty in Material Request
+		self.update_requested_qty()
+		self.update_ordered_qty()
+
 		pc_obj.update_last_purchase_rate(self, is_submit = 0)
 
 	def on_update(self):

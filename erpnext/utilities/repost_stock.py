@@ -93,11 +93,11 @@ def get_reserved_qty(item_code, warehouse):
 	return flt(reserved_qty[0][0]) if reserved_qty else 0
 
 def get_indented_qty(item_code, warehouse):
-	indented_qty = frappe.db.sql("""select sum(pr_item.qty - ifnull(pr_item.ordered_qty, 0))
-		from `tabMaterial Request Item` pr_item, `tabMaterial Request` pr
-		where pr_item.item_code=%s and pr_item.warehouse=%s
-		and pr_item.qty > ifnull(pr_item.ordered_qty, 0) and pr_item.parent=pr.name
-		and pr.status!='Stopped' and pr.docstatus=1""", (item_code, warehouse))
+	indented_qty = frappe.db.sql("""select sum(mr_item.qty - ifnull(mr_item.ordered_qty, 0))
+		from `tabMaterial Request Item` mr_item, `tabMaterial Request` mr
+		where mr_item.item_code=%s and mr_item.warehouse=%s
+		and mr_item.qty > ifnull(mr_item.ordered_qty, 0) and mr_item.parent=mr.name
+		and mr.status!='Stopped' and mr.docstatus=1""", (item_code, warehouse))
 
 	return flt(indented_qty[0][0]) if indented_qty else 0
 
