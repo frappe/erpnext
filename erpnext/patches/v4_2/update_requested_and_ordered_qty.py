@@ -18,7 +18,7 @@ def execute():
 					"indented_qty": get_indented_qty(item_code, warehouse),
 					"ordered_qty": get_ordered_qty(item_code, warehouse)
 				})
-				if count / 200 == 0:
+				if count % 200 == 0:
 					frappe.db.commit()
 			except:
 				frappe.db.rollback()
