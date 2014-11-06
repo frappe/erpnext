@@ -385,7 +385,7 @@ class JournalVoucher(AccountsController):
 		for d in self.get("entries"):
 			master_type, master_name = frappe.db.get_value("Account", d.account,
 				["master_type", "master_name"])
-			if master_type == "Customer" and master_name:
+			if master_type == "Customer" and master_name and flt(d.debit) > 0:
 				super(JournalVoucher, self).check_credit_limit(d.account)
 
 	def get_balance(self):

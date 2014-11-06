@@ -8,7 +8,6 @@ from frappe.utils import cstr, flt, cint
 
 from frappe import _
 import frappe.defaults
-from erpnext.stock.utils import update_bin
 
 from erpnext.controllers.buying_controller import BuyingController
 
@@ -157,29 +156,19 @@ class PurchaseReceipt(BuyingController):
 		self.make_sl_entries(sl_entries)
 
 	def update_ordered_qty(self):
-		stock_items = self.get_stock_items()
+		po_map = {}
 		for d in self.get("purchase_receipt_details"):
-			if d.item_code in stock_items and d.warehouse \
-					and cstr(d.prevdoc_doctype) == 'Purchase Order':
+			if d.prevdoc_doctype and d.prevdoc_doctype == "Purchase Order" and d.prevdoc_detail_docname:
+				po_map.setdefault(d.prevdoc_docname, []).append(d.prevdoc_detail_docname)
 
-				already_received_qty = self.get_already_received_qty(d.prevdoc_docname,
-					d.prevdoc_detail_docname)
-				po_qty, ordered_warehouse = self.get_po_qty_and_warehouse(d.prevdoc_detail_docname)
+		for po, po_item_rows in po_map.items():
+			if po and po_item_rows:
+				po_obj = frappe.get_doc("Purchase Order", po)
 
-				if not ordered_warehouse:
-					frappe.throw(_("Warehouse is missing in Purchase Order"))
+				if po_obj.status in ["Stopped", "Cancelled"]:
+					frappe.throw(_("Material Request {0} is cancelled or stopped").format(po), frappe.InvalidStatusError)
 
-				if already_received_qty + d.qty > po_qty:
-					ordered_qty = - (po_qty - already_received_qty) * flt(d.conversion_factor)
-				else:
-					ordered_qty = - flt(d.qty) * flt(d.conversion_factor)
-
-				update_bin({
-					"item_code": d.item_code,
-					"warehouse": ordered_warehouse,
-					"posting_date": self.posting_date,
-					"ordered_qty": flt(ordered_qty) if self.docstatus==1 else -flt(ordered_qty)
-				})
+				po_obj.update_ordered_qty(po_item_rows)
 
 	def get_already_received_qty(self, po, po_detail):
 		qty = frappe.db.sql("""select sum(qty) from `tabPurchase Receipt Item`
@@ -265,11 +254,13 @@ class PurchaseReceipt(BuyingController):
 
 		frappe.db.set(self,'status','Cancelled')
 
-		self.update_ordered_qty()
-
 		self.update_stock_ledger()
 
 		self.update_prevdoc_status()
+
+		# Must be called after updating received qty in PO
+		self.update_ordered_qty()
+
 		pc_obj.update_last_purchase_rate(self, 0)
 
 		self.make_gl_entries_on_cancel()

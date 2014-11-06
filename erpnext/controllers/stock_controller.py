@@ -175,7 +175,7 @@ class StockController(AccountsController):
 					_(self.doctype), self.name, item.get("item_code")))
 
 	def get_sl_entries(self, d, args):
-		sl_dict = {
+		sl_dict = frappe._dict({
 			"item_code": d.get("item_code", None),
 			"warehouse": d.get("warehouse", None),
 			"posting_date": self.posting_date,
@@ -192,7 +192,7 @@ class StockController(AccountsController):
 			"serial_no": d.get("serial_no"),
 			"project": d.get("project_name"),
 			"is_cancelled": self.docstatus==2 and "Yes" or "No"
-		}
+		})
 
 		sl_dict.update(args)
 		return sl_dict
