@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+import frappe, json, time, datetime
 
 from frappe.utils import flt, nowdate
 from frappe import _
@@ -144,6 +144,21 @@ class ProductionOrder(Document):
 		}
 		from erpnext.stock.utils import update_bin
 		update_bin(args)
+
+	def get_production_order_operations(self):
+		self.set('production_order_operations', [])
+		operations = frappe.db.sql("""select operation_no, opn_description, workstation, hour_rate, time_in_mins, 
+			operating_cost, fixed_cycle_cost from `tabBOM Operation` where parent = %s""", self.bom_no, as_dict=1)
+		self.set('production_order_operations', operations)
+
+		for d in self.get('production_order_operations'):
+			d.status = "Pending"
+			d.planned_start_time = self.start_date
+			end_time = time.mktime(time.strptime(d.planned_start_time,"%Y-%m-%d %H:%M:%S")) + (d.time_in_mins * 60)
+			d.planned_end_time = time.strftime("%Y-%m-%d %H:%M:%S",time.localtime(end_time))
+
+	def auto_caluclate_production_dates(self):
+		pass
 
 @frappe.whitelist()
 def get_item_details(item):
