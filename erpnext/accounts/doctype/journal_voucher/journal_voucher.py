@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cint, cstr, flt, fmt_money, formatdate, getdate
+from frappe.utils import cstr, flt, fmt_money, formatdate, getdate
 from frappe import msgprint, _, scrub
 from erpnext.setup.utils import get_company_currency
 
@@ -13,10 +13,6 @@ from erpnext.controllers.accounts_controller import AccountsController
 class JournalVoucher(AccountsController):
 	def __init__(self, arg1, arg2=None):
 		super(JournalVoucher, self).__init__(arg1, arg2)
-		self.master_type = {}
-		self.credit_days_for = {}
-		self.credit_days_global = -1
-		self.is_approving_authority = -1
 
 	def validate(self):
 		if not self.is_opening:
@@ -40,7 +36,7 @@ class JournalVoucher(AccountsController):
 
 	def on_submit(self):
 		if self.voucher_type in ['Bank Voucher', 'Contra Voucher', 'Journal Entry']:
-			self.check_credit_days()
+			self.check_reference_date()
 		self.make_gl_entries()
 		self.check_credit_limit()
 		self.update_advance_paid()
@@ -309,43 +305,18 @@ class JournalVoucher(AccountsController):
 		from frappe.utils import money_in_words
 		self.total_amount_in_words = money_in_words(amt, company_currency)
 
-	def check_credit_days(self):
+	def check_reference_date(self):
 		if self.cheque_date:
 			for d in self.get("entries"):
-				if flt(d.credit) > 0 and d.against_invoice \
-					and frappe.db.get_value("Account", d.account, "master_type")=='Customer':
-						posting_date = frappe.db.get_value("Sales Invoice", d.against_invoice, "posting_date")
-						credit_days = self.get_credit_days_for(d.account)
-						if credit_days:
-							date_diff = (getdate(self.cheque_date) - getdate(posting_date)).days
-							if date_diff > flt(credit_days):
-								msgprint(_("Note: Reference Date exceeds allowed credit days by {0} days for {1}")
-									.format(date_diff - flt(credit_days), d.account))
-								if not self.get_authorized_user():
-									raise frappe.ValidationError
+				due_date = None
+				if d.against_invoice and flt(d.credit) > 0:
+					due_date = frappe.db.get_value("Sales Invoice", d.against_invoice, "due_date")
+				elif d.against_voucher and flt(d.debit) > 0:
+					due_date = frappe.db.get_value("Purchase Invoice", d.against_voucher, "due_date")
 
-	def get_credit_days_for(self, ac):
-		if not self.credit_days_for.has_key(ac):
-			self.credit_days_for[ac] = cint(frappe.db.get_value("Account", ac, "credit_days"))
-
-		if not self.credit_days_for[ac]:
-			if self.credit_days_global==-1:
-				self.credit_days_global = cint(frappe.db.get_value("Company", self.company, "credit_days"))
-
-			return self.credit_days_global
-		else:
-			return self.credit_days_for[ac]
-
-	def get_authorized_user(self):
-		if self.is_approving_authority==-1:
-			self.is_approving_authority = 0
-			approving_authority = frappe.db.get_value("Accounts Settings", None, "credit_controller")
-
-			# Check logged-in user is authorized
-			if approving_authority in frappe.user.get_roles():
-				self.is_approving_authority = 1
-
-		return self.is_approving_authority
+				if due_date and getdate(self.cheque_date) > getdate(due_date):
+					msgprint(_("Note: Reference Date {0} is after invoice due date {1}")
+						.format(formatdate(self.cheque_date), formatdate(due_date)))
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
