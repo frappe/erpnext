@@ -81,7 +81,7 @@ class JournalVoucher(AccountsController):
 
 	def check_credit_days(self):
 		from erpnext.accounts.party import get_credit_days
-		posting_date = self.posting_date
+		posting_date = None
 		if self.cheque_date:
 			for d in self.get("entries"):
 				if d.party_type and d.party and d.get("credit" if d.party_type=="Customer" else "debit") > 0:
@@ -91,11 +91,11 @@ class JournalVoucher(AccountsController):
 						posting_date = frappe.db.get_value("Purchase Invoice", d.against_voucher, "posting_date")
 
 					credit_days = get_credit_days(d.party_type, d.party, self.company)
-					if credit_days:
+					if posting_date and credit_days:
 						date_diff = (getdate(self.cheque_date) - getdate(posting_date)).days
 						if  date_diff > flt(credit_days):
 							msgprint(_("Note: Reference Date exceeds allowed credit days by {0} days for {1} {2}")
-								.format(date_diff, d.party_type, d.party))
+								.format(date_diff - flt(credit_days), d.party_type, d.party))
 
 	def validate_cheque_info(self):
 		if self.voucher_type in ['Bank Voucher']:
