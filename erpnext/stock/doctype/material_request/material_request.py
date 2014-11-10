@@ -73,7 +73,7 @@ class MaterialRequest(BuyingController):
 		from erpnext.utilities import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
 
-		self.validate_value("material_request_type", "in", ["Purchase", "Transfer"])
+		self.validate_value("material_request_type", "in", ["Purchase", "Material Transfer", "Material Issue"])
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
@@ -112,7 +112,7 @@ class MaterialRequest(BuyingController):
 		frappe.db.set(self,'status','Cancelled')
 
 	def update_completed_qty(self, mr_items=None):
-		if self.material_request_type != "Transfer":
+		if self.material_request_type == "Purchase":
 			return
 
 		item_doclist = self.get("indent_details")
@@ -294,12 +294,19 @@ def make_supplier_quotation(source_name, target_doc=None):
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
+		qty = flt(obj.qty) - flt(obj.ordered_qty) \
+			if flt(obj.qty) > flt(obj.ordered_qty) else 0
+		target.qty = qty
+		target.transfer_qty = qty
 		target.conversion_factor = 1
-		target.qty = flt(obj.qty) - flt(obj.ordered_qty)
-		target.transfer_qty = flt(obj.qty) - flt(obj.ordered_qty)
+		
+		if source_parent.material_request_type == "Material Transfer":
+			target.t_warehouse = obj.warehouse
+		else:
+			target.s_warehouse = obj.warehouse
 
 	def set_missing_values(source, target):
-		target.purpose = "Material Transfer"
+		target.purpose = source.material_request_type
 		target.run_method("get_stock_and_rate")
 
 	doclist = get_mapped_doc("Material Request", source_name, {
@@ -307,7 +314,7 @@ def make_stock_entry(source_name, target_doc=None):
 			"doctype": "Stock Entry",
 			"validation": {
 				"docstatus": ["=", 1],
-				"material_request_type": ["=", "Transfer"]
+				"material_request_type": ["in", ["Material Transfer", "Material Issue"]]
 			}
 		},
 		"Material Request Item": {
@@ -316,7 +323,6 @@ def make_stock_entry(source_name, target_doc=None):
 				"name": "material_request_item",
 				"parent": "material_request",
 				"uom": "stock_uom",
-				"warehouse": "t_warehouse"
 			},
 			"postprocess": update_item
 		}

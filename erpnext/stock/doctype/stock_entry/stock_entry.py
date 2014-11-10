@@ -219,7 +219,7 @@ class StockEntry(StockController):
 		if not self.posting_date or not self.posting_time:
 			frappe.throw(_("Posting date and posting time is mandatory"))
 
-		allow_negative_stock = cint(frappe.db.get_default("allow_negative_stock"))
+		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
 
 		for d in self.get('mtn_details'):
 			d.transfer_qty = flt(d.transfer_qty)
@@ -625,7 +625,8 @@ class StockEntry(StockController):
 				mreq_item = frappe.db.get_value("Material Request Item",
 					{"name": item.material_request_item, "parent": item.material_request},
 					["item_code", "warehouse", "idx"], as_dict=True)
-				if mreq_item.item_code != item.item_code or mreq_item.warehouse != item.t_warehouse:
+				if mreq_item.item_code != item.item_code or \
+				mreq_item.warehouse != (item.s_warehouse if self.purpose== "Material Issue" else item.t_warehouse):
 					frappe.throw(_("Item or Warehouse for row {0} does not match Material Request").format(item.idx),
 						frappe.MappingMismatchError)
 
