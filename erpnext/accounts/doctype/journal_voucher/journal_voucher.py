@@ -310,22 +310,19 @@ class JournalVoucher(AccountsController):
 		self.total_amount_in_words = money_in_words(amt, company_currency)
 
 	def check_credit_days(self):
-		date_diff = 0
 		if self.cheque_date:
-			date_diff = (getdate(self.cheque_date)-getdate(self.posting_date)).days
-
-		if date_diff <= 0: return
-
-		# Get List of Customer Account
-		acc_list = filter(lambda d: frappe.db.get_value("Account", d.account,
-		 	"master_type")=='Customer', self.get('entries'))
-
-		for d in acc_list:
-			credit_days = self.get_credit_days_for(d.account)
-			# Check credit days
-			if credit_days > 0 and not self.get_authorized_user() and cint(date_diff) > credit_days:
-				msgprint(_("Maximum allowed credit is {0} days after posting date").format(credit_days),
-					raise_exception=1)
+			for d in self.get("entries"):
+				if flt(d.credit) > 0 and d.against_invoice \
+					and frappe.db.get_value("Account", d.account, "master_type")=='Customer':
+						posting_date = frappe.db.get_value("Sales Invoice", d.against_invoice, "posting_date")
+						credit_days = self.get_credit_days_for(d.account)
+						if credit_days:
+							date_diff = (getdate(self.cheque_date) - getdate(posting_date)).days
+							if date_diff > flt(credit_days):
+								msgprint(_("Note: Reference Date exceeds allowed credit days by {0} days for {1}")
+									.format(date_diff - flt(credit_days), d.account))
+								if not self.get_authorized_user():
+									raise frappe.ValidationError
 
 	def get_credit_days_for(self, ac):
 		if not self.credit_days_for.has_key(ac):
@@ -333,8 +330,7 @@ class JournalVoucher(AccountsController):
 
 		if not self.credit_days_for[ac]:
 			if self.credit_days_global==-1:
-				self.credit_days_global = cint(frappe.db.get_value("Company",
-					self.company, "credit_days"))
+				self.credit_days_global = cint(frappe.db.get_value("Company", self.company, "credit_days"))
 
 			return self.credit_days_global
 		else:
@@ -343,10 +339,7 @@ class JournalVoucher(AccountsController):
 	def get_authorized_user(self):
 		if self.is_approving_authority==-1:
 			self.is_approving_authority = 0
-
-			# Fetch credit controller role
-			approving_authority = frappe.db.get_value("Accounts Settings", None,
-				"credit_controller")
+			approving_authority = frappe.db.get_value("Accounts Settings", None, "credit_controller")
 
 			# Check logged-in user is authorized
 			if approving_authority in frappe.user.get_roles():
