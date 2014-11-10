@@ -10,6 +10,7 @@ from frappe import throw, _, msgprint
 import frappe.permissions
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from erpnext.utilities.transaction_base import delete_events
 
 class EmployeeUserDisabledError(frappe.ValidationError): pass
 
@@ -178,6 +179,9 @@ class Employee(Document):
 		else:
 			frappe.db.sql("""delete from `tabEvent` where repeat_on='Every Year' and
 				ref_type='Employee' and ref_name=%s""", self.name)
+
+	def on_trash(self):
+		delete_events(self.doctype, self.name)
 
 @frappe.whitelist()
 def get_retirement_date(date_of_birth=None):
