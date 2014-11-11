@@ -1,6 +1,6 @@
 {
     "country_code": "sg",
-    "name": "Singapore Chart of Accounts - Standard",
+    "name": "Singapore Chart of Accounts",
 	"is_active": "Yes",
     "tree": {
         "Assets": {
