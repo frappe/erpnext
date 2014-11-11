@@ -55,6 +55,7 @@ class Item(WebsiteGenerator):
 		self.validate_barcode()
 		self.cant_change()
 		self.validate_item_type_for_reorder()
+		self.validate_warehouse_for_reorder()
 		self.validate_variants()
 
 		if not self.get("__islocal"):
@@ -343,6 +344,15 @@ class Item(WebsiteGenerator):
 		if self.re_order_level or len(self.get("item_reorder", {"material_request_type": "Purchase"})):
 			if not self.is_purchase_item:
 				frappe.throw(_("""To set reorder level, item must be Purchase Item"""))
+
+	def validate_warehouse_for_reorder(self):
+		warehouse = []
+		for i in self.get("item_reorder"):
+			if i.get("warehouse") and i.get("warehouse") not in warehouse:
+				warehouse += [i.get("warehouse")]
+			else:
+				frappe.throw(_("Row {0}: An Reorder entry already exists for this warehouse {1}")
+					.format(i.idx, i.warehouse))
 
 	def check_if_sle_exists(self):
 		sle = frappe.db.sql("""select name from `tabStock Ledger Entry`
