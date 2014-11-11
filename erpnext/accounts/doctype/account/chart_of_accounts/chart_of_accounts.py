@@ -7,10 +7,6 @@ from frappe.utils import cstr
 from unidecode import unidecode
 
 def create_charts(chart_name, company):
-	# ***************
-	frappe.db.sql("delete from tabAccount where company=%s", company)
-	# ***************
-
 	chart = get_chart(chart_name)
 
 	if chart:
@@ -63,12 +59,18 @@ def get_chart(chart_name):
 @frappe.whitelist()
 def get_charts_for_country(country):
 	charts = []
-	country_code = frappe.db.get_value("Country", country, "code")
 
+	def _get_chart_name(content):
+		if content:
+			content = json.loads(content)
+			if content and content.get("is_active", "No") == "Yes" and content.get("disabled", "No") == "No":
+				charts.append(content["name"])
+
+	country_code = frappe.db.get_value("Country", country, "code")
 	for fname in os.listdir(os.path.dirname(__file__)):
 		if fname.startswith(country_code) and fname.endswith(".json"):
 			with open(os.path.join(os.path.dirname(__file__), fname), "r") as f:
-				charts.append(json.loads(f.read())["name"])
+				_get_chart_name(f.read())
 
 	countries_use_OHADA_system = ["Benin", "Burkina Faso", "Cameroon", "Central African Republic", "Comoros",
 		"Congo", "Ivory Coast", "Gabon", "Guinea", "Guinea Bissau", "Equatorial Guinea", "Mali", "Niger",
@@ -76,6 +78,6 @@ def get_charts_for_country(country):
 
 	if country in countries_use_OHADA_system:
 		with open(os.path.join(os.path.dirname(__file__), "syscohada_syscohada_chart_template.json"), "r") as f:
-			charts.append(json.loads(f.read())["name"])
+			_get_chart_name(f.read())
 
 	return charts
