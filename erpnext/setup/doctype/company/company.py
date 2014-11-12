@@ -49,11 +49,11 @@ class Company(Document):
 							.format(self.get(field), self.name))
 
 	def on_update(self):
-		if not frappe.db.sql("""select name from tabAccount
-				where company=%s and docstatus<2 limit 1""", self.name):
-			self.create_default_accounts()
-			self.create_default_warehouses()
-			self.install_country_fixtures()
+		# if not frappe.db.sql("""select name from tabAccount
+		# 		where company=%s and docstatus<2 limit 1""", self.name):
+		self.create_default_accounts()
+		self.create_default_warehouses()
+		self.install_country_fixtures()
 
 		if not frappe.db.get_value("Cost Center", {"group_or_ledger": "Ledger", "company": self.name}):
 			self.create_default_cost_center()
@@ -81,11 +81,13 @@ class Company(Document):
 					}).insert()
 
 	def create_default_accounts(self):
-		if self.chart_of_accounts:
+		if not self.chart_of_accounts:
+			frappe.throw(_("Please select Chart of Accounts"))
+		else:
 			from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
 			create_charts(self.chart_of_accounts, self.name)
-		else:
-			self.create_standard_accounts()
+		# else:
+		# 	self.create_standard_accounts()
 
 		frappe.db.set(self, "default_receivable_account", frappe.db.get_value("Account",
 			{"company": self.name, "account_type": "Receivable"}))

@@ -9,6 +9,8 @@ from unidecode import unidecode
 def create_charts(chart_name, company):
 	chart = get_chart(chart_name)
 
+	frappe.db.sql("delete from `tabAccount` where company=%s", company)
+
 	if chart:
 		accounts = []
 
@@ -45,16 +47,20 @@ def create_charts(chart_name, company):
 
 					_import_accounts(children, account.name, root_type)
 
-		_import_accounts(chart.get("tree"), None, None, root_account=True)
+		_import_accounts(chart, None, None, root_account=True)
 
 def get_chart(chart_name):
 	chart = {}
-	for fname in os.listdir(os.path.dirname(__file__)):
-		if fname.endswith(".json"):
-			with open(os.path.join(os.path.dirname(__file__), fname), "r") as f:
-				chart = f.read()
-				if chart and json.loads(chart).get("name") == chart_name:
-					return json.loads(chart)
+	if chart_name == "Standard":
+		from erpnext.accounts.doctype.account.chart_of_accounts import standard_chart_of_accounts
+		return standard_chart_of_accounts.coa
+	else:
+		for fname in os.listdir(os.path.dirname(__file__)):
+			if fname.endswith(".json"):
+				with open(os.path.join(os.path.dirname(__file__), fname), "r") as f:
+					chart = f.read()
+					if chart and json.loads(chart).get("name") == chart_name:
+						return json.loads(chart).get("tree")
 
 @frappe.whitelist()
 def get_charts_for_country(country):
@@ -80,4 +86,5 @@ def get_charts_for_country(country):
 		with open(os.path.join(os.path.dirname(__file__), "syscohada_syscohada_chart_template.json"), "r") as f:
 			_get_chart_name(f.read())
 
+	charts.append("Standard")
 	return charts
