@@ -89,6 +89,7 @@ erpnext.patches.v4_2.recalculate_bom_cost
 erpnext.patches.v4_2.fix_gl_entries_for_stock_transactions
 erpnext.patches.v4_2.update_requested_and_ordered_qty
 erpnext.patches.v4_2.party_model
+erpnext.patches.v4_4.make_email_accounts
 erpnext.patches.v5_0.update_frozen_accounts_permission_role
 erpnext.patches.v5_0.update_dn_against_doc_fields
 execute:frappe.db.sql("update `tabMaterial Request` set material_request_type = 'Material Transfer' where material_request_type = 'Transfer'")
