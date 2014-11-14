@@ -9,8 +9,6 @@ from unidecode import unidecode
 def create_charts(chart_name, company):
 	chart = get_chart(chart_name)
 
-	frappe.db.sql("delete from `tabAccount` where company=%s", company)
-
 	if chart:
 		accounts = []
 

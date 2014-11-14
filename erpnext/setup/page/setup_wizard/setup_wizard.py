@@ -285,16 +285,19 @@ def create_taxes(args):
 			tax_rate = (args.get("tax_rate_" + str(i)) or "").replace("%", "")
 
 			try:
-				frappe.get_doc({
-					"doctype":"Account",
-					"company": args.get("company_name").strip(),
-					"parent_account": _("Duties and Taxes") + " - " + args.get("company_abbr"),
-					"account_name": args.get("tax_" + str(i)),
-					"group_or_ledger": "Ledger",
-					"report_type": "Balance Sheet",
-					"account_type": "Tax",
-					"tax_rate": flt(tax_rate) if tax_rate else None
-				}).insert()
+				tax_group = frappe.db.get_value("Account", {"company": args.get("company_name"),
+					"group_or_ledger": "Group", "account_type": "Tax", "root_type": "Liability"})
+				if tax_group:
+					frappe.get_doc({
+						"doctype":"Account",
+						"company": args.get("company_name").strip(),
+						"parent_account": tax_group,
+						"account_name": args.get("tax_" + str(i)),
+						"group_or_ledger": "Ledger",
+						"report_type": "Balance Sheet",
+						"account_type": "Tax",
+						"tax_rate": flt(tax_rate) if tax_rate else None
+					}).insert()
 			except frappe.NameError, e:
 				if e.args[2][0]==1062:
 					pass

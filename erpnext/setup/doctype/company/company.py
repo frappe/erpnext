@@ -49,11 +49,11 @@ class Company(Document):
 							.format(self.get(field), self.name))
 
 	def on_update(self):
-		# if not frappe.db.sql("""select name from tabAccount
-		# 		where company=%s and docstatus<2 limit 1""", self.name):
-		self.create_default_accounts()
-		self.create_default_warehouses()
-		self.install_country_fixtures()
+		if not frappe.db.sql("""select name from tabAccount
+				where company=%s and docstatus<2 limit 1""", self.name):
+			self.create_default_accounts()
+			self.create_default_warehouses()
+			self.install_country_fixtures()
 
 		if not frappe.db.get_value("Cost Center", {"group_or_ledger": "Ledger", "company": self.name}):
 			self.create_default_cost_center()
@@ -86,8 +86,6 @@ class Company(Document):
 		else:
 			from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
 			create_charts(self.chart_of_accounts, self.name)
-		# else:
-		# 	self.create_standard_accounts()
 
 		frappe.db.set(self, "default_receivable_account", frappe.db.get_value("Account",
 			{"company": self.name, "account_type": "Receivable"}))
@@ -190,92 +188,6 @@ class Company(Document):
 			where defkey='Company' and defvalue=%s""", (newdn, olddn))
 
 		frappe.defaults.clear_cache()
-
-	def create_standard_accounts(self):
-		self.fld_dict = {
-			'account_name': 0,
-			'parent_account': 1,
-			'group_or_ledger': 2,
-			'account_type': 3,
-			'report_type': 4,
-			'tax_rate': 5,
-			'root_type': 6
-		}
-
-		acc_list_common = [
-			[_('Application of Funds (Assets)'), None,'Group', None,'Balance Sheet', None, 'Asset'],
-				[_('Current Assets'),_('Application of Funds (Assets)'),'Group', None,'Balance Sheet', None, 'Asset'],
-					[_('Accounts Receivable'),_('Current Assets'),'Group', None,'Balance Sheet', None, 'Asset'],
-						[_('Debtors'), _('Accounts Receivable'),'Ledger', 'Receivable','Balance Sheet', None, 'Asset'],
-					[_('Bank Accounts'),_('Current Assets'),'Group','Bank','Balance Sheet', None, 'Asset'],
-					[_('Cash In Hand'),_('Current Assets'),'Group','Cash','Balance Sheet', None, 'Asset'],
-						[_('Cash'),_('Cash In Hand'),'Ledger','Cash','Balance Sheet', None, 'Asset'],
-					[_('Loans and Advances (Assets)'),_('Current Assets'),'Group', None,'Balance Sheet', None, 'Asset'],
-					[_('Securities and Deposits'),_('Current Assets'),'Group', None,'Balance Sheet', None, 'Asset'],
-						[_('Earnest Money'),_('Securities and Deposits'),'Ledger', None,'Balance Sheet', None, 'Asset'],
-					[_('Stock Assets'),_('Current Assets'),'Group','Stock','Balance Sheet', None, 'Asset'],
-					[_('Tax Assets'),_('Current Assets'),'Group', None,'Balance Sheet', None, 'Asset'],
-				[_('Fixed Assets'),_('Application of Funds (Assets)'),'Group', None,'Balance Sheet', None, 'Asset'],
-					[_('Capital Equipments'),_('Fixed Assets'),'Ledger','Fixed Asset','Balance Sheet', None, 'Asset'],
-					[_('Computers'),_('Fixed Assets'),'Ledger','Fixed Asset','Balance Sheet', None, 'Asset'],
-					[_('Furniture and Fixture'),_('Fixed Assets'),'Ledger','Fixed Asset','Balance Sheet', None, 'Asset'],
-					[_('Office Equipments'),_('Fixed Assets'),'Ledger','Fixed Asset','Balance Sheet', None, 'Asset'],
-					[_('Plant and Machinery'),_('Fixed Assets'),'Ledger','Fixed Asset','Balance Sheet', None, 'Asset'],
-				[_('Investments'),_('Application of Funds (Assets)'),'Group', None,'Balance Sheet', None, 'Asset'],
-				[_('Temporary Accounts (Assets)'),_('Application of Funds (Assets)'),'Group', None,'Balance Sheet', None, 'Asset'],
-					[_('Temporary Assets'),_('Temporary Accounts (Assets)'),'Ledger', None,'Balance Sheet', None, 'Asset'],
-			[_('Expenses'), None,'Group','Expense Account','Profit and Loss', None, 'Expense'],
-				[_('Direct Expenses'),_('Expenses'),'Group','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Stock Expenses'),_('Direct Expenses'),'Group','Expense Account','Profit and Loss', None, 'Expense'],
-						[_('Cost of Goods Sold'),_('Stock Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-						[_('Stock Adjustment'),_('Stock Expenses'),'Ledger','Stock Adjustment','Profit and Loss', None, 'Expense'],
-						[_('Expenses Included In Valuation'), _("Stock Expenses"), 'Ledger', 'Expenses Included In Valuation', 'Profit and Loss',  None, 'Expense'],
-				[_('Indirect Expenses'), _('Expenses'),'Group','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Marketing Expenses'), _('Indirect Expenses'),'Ledger','Chargeable','Profit and Loss', None, 'Expense'],
-					[_('Sales Expenses'), _('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Administrative Expenses'), _('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Charity and Donations'), _('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Commission on Sales'), _('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Travel Expenses'), _('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Entertainment Expenses'), _('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Depreciation'), _('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Freight and Forwarding Charges'), _('Indirect Expenses'),'Ledger','Chargeable','Profit and Loss', None, 'Expense'],
-					[_('Legal Expenses'), _('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Miscellaneous Expenses'), _('Indirect Expenses'),'Ledger','Chargeable','Profit and Loss', None, 'Expense'],
-					[_('Office Maintenance Expenses'), _('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Office Rent'), _('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Postal Expenses'), _('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Print and Stationary'), _('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Rounded Off'), _('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Salary') ,_('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Telephone Expenses') ,_('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-					[_('Utility Expenses') ,_('Indirect Expenses'),'Ledger','Expense Account','Profit and Loss', None, 'Expense'],
-			[_('Income'), None,'Group', None,'Profit and Loss', None, 'Income'],
-				[_('Direct Income'),_('Income'),'Group','Income Account','Profit and Loss', None, 'Income'],
-					[_('Sales'),_('Direct Income'),'Ledger','Income Account','Profit and Loss', None, 'Income'],
-					[_('Service'),_('Direct Income'),'Ledger','Income Account','Profit and Loss', None, 'Income'],
-				[_('Indirect Income'),_('Income'),'Group','Income Account','Profit and Loss', None, 'Income'],
-			[_('Source of Funds (Liabilities)'), None,'Group', None,'Balance Sheet', None, 'Liability'],
-				[_('Capital Account'),_('Source of Funds (Liabilities)'),'Group', None,'Balance Sheet', None, 'Liability'],
-					[_('Reserves and Surplus'),_('Capital Account'),'Ledger', None,'Balance Sheet', None, 'Liability'],
-					[_('Shareholders Funds'),_('Capital Account'),'Ledger', None,'Balance Sheet', None, 'Liability'],
-				[_('Current Liabilities'),_('Source of Funds (Liabilities)'),'Group', None,'Balance Sheet', None, 'Liability'],
-					[_('Accounts Payable'),_('Current Liabilities'),'Group', None,'Balance Sheet', None, 'Liability'],
-						[_('Creditors'), _('Accounts Payable'),'Ledger', 'Payable','Balance Sheet', None, 'Liability'],
-					[_('Stock Liabilities'),_('Current Liabilities'),'Group', None,'Balance Sheet', None, 'Liability'],
-						[_('Stock Received But Not Billed'), _('Stock Liabilities'), 'Ledger', 'Stock Received But Not Billed', 'Balance Sheet',  None, 'Liability'],
-					[_('Duties and Taxes'),_('Current Liabilities'),'Group', None,'Balance Sheet', None, 'Liability'],
-					[_('Loans (Liabilities)'),_('Current Liabilities'),'Group', None,'Balance Sheet', None, 'Liability'],
-						[_('Secured Loans'),_('Loans (Liabilities)'),'Group', None,'Balance Sheet', None, 'Liability'],
-						[_('Unsecured Loans'),_('Loans (Liabilities)'),'Group', None,'Balance Sheet', None, 'Liability'],
-						[_('Bank Overdraft Account'),_('Loans (Liabilities)'),'Group', None,'Balance Sheet', None, 'Liability'],
-				[_('Temporary Accounts (Liabilities)'),_('Source of Funds (Liabilities)'),'Group', None,'Balance Sheet', None, 'Liability'],
-					[_('Temporary Liabilities'),_('Temporary Accounts (Liabilities)'),'Ledger', None,'Balance Sheet', None, 'Liability']
-		]
-
-		# load common account heads
-		for d in acc_list_common:
-			self.add_acc(d)
 
 @frappe.whitelist()
 def replace_abbr(company, old, new):
