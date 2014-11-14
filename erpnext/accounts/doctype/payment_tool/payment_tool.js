@@ -42,9 +42,6 @@ frappe.ui.form.on("Payment Tool", "received_or_paid", function(frm) {
 	erpnext.payment_tool.check_mandatory_to_set_button(frm);
 });
 
-// Fetch bank/cash account based on payment mode
-cur_frm.add_fetch("payment_mode", "default_account", "payment_account");
-
 // Set party account name
 frappe.ui.form.on("Payment Tool", "customer", function(frm) {
 	erpnext.payment_tool.set_party_account(frm);

@@ -205,7 +205,8 @@ def make_purchase_order(source_name, target_doc=None):
 				["uom", "stock_uom"],
 				["uom", "uom"]
 			],
-			"postprocess": update_item
+			"postprocess": update_item,
+			"condition": lambda doc: doc.ordered_qty < doc.qty
 		}
 	}, target_doc, set_missing_values)
 
@@ -243,7 +244,8 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 					["uom", "stock_uom"],
 					["uom", "uom"]
 				],
-				"postprocess": update_item
+				"postprocess": update_item,
+				"condition": lambda doc: doc.ordered_qty < doc.qty
 			}
 		}, target_doc, postprocess)
 
@@ -315,7 +317,8 @@ def make_stock_entry(source_name, target_doc=None):
 				"uom": "stock_uom",
 				"warehouse": "t_warehouse"
 			},
-			"postprocess": update_item
+			"postprocess": update_item,
+			"condition": lambda doc: doc.ordered_qty < doc.qty
 		}
 	}, target_doc, set_missing_values)
 
