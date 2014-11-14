@@ -66,7 +66,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	make_pos_btn: function() {
 		var me = this;
-		if(this.frm.doc.docstatus===0) {
+		if(this.frm.doc.docstatus <= 1) {
 			if(!this.pos_active) {
 				var btn_label = __("POS View"),
 					icon = "icon-th";

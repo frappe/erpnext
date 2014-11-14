@@ -387,13 +387,15 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	if(cint(frappe.boot.notification_settings.sales_invoice)) {
-		cur_frm.email_doc(frappe.boot.notification_settings.sales_invoice_message);
-	}
-
 	$.each(doc["entries"], function(i, row) {
 		if(row.delivery_note) frappe.model.clear_doc("Delivery Note", row.delivery_note)
 	})
+
+	if(cint(frappe.boot.notification_settings.sales_invoice)) {
+		cur_frm.email_doc(frappe.boot.notification_settings.sales_invoice_message);
+	} else if(cur_frm.doc.is_pos) {
+		new_doc("Sales Invoice");
+	}
 }
 
 cur_frm.cscript.send_sms = function() {
