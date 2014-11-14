@@ -29,7 +29,8 @@
                     "Deposit Account": {}
                 },
                 "Inventories": {
-                    "Inventories": {}
+                    "Inventories": {},
+                    "account_type": "Warehouse"
                 },
                 "Other Current Assets": {
                     "Prepaid Insurance": {}
