@@ -359,7 +359,7 @@ class BOM(Document):
 					and docstatus = 1 and is_active = 1)""", self.name)
 
 			if act_pbom and act_pbom[0][0]:
-				frappe.throw(_("Cannot deactive or cancle BOM as it is linked with other BOMs"))
+				frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
 
 def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 	item_dict = {}
