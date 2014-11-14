@@ -14,6 +14,10 @@ def execute(filters=None):
 	source = get_source_data(filters)
 	item_sales_bom = get_item_sales_bom()
 
+	total_gross_profit = 0.0
+	total_selling_amount = 0.0
+	total_buying_amount = 0.0
+
 	columns = [_("Delivery Note/Sales Invoice") + "::120", _("Link") + "::30", _("Posting Date") + ":Date", _("Posting Time"),
 		_("Item Code") + ":Link/Item", _("Item Name"), _("Description"), _("Warehouse") + ":Link/Warehouse",
 		_("Qty") + ":Float", _("Selling Rate") + ":Currency", _("Avg. Buying Rate") + ":Currency",
@@ -22,6 +26,7 @@ def execute(filters=None):
 	data = []
 	for row in source:
 		selling_amount = flt(row.base_amount)
+		total_selling_amount += flt(row.base_amount)
 
 		item_sales_bom_map = item_sales_bom.get(row.parenttype, {}).get(row.name, frappe._dict())
 
@@ -33,8 +38,11 @@ def execute(filters=None):
 				stock_ledger_entries.get((row.item_code, row.warehouse), []))
 
 		buying_amount = buying_amount > 0 and buying_amount or 0
+		total_buying_amount += buying_amount
 
 		gross_profit = selling_amount - buying_amount
+		total_gross_profit += gross_profit
+
 		if selling_amount:
 			gross_profit_percent = (gross_profit / selling_amount) * 100.0
 		else:
@@ -46,6 +54,14 @@ def execute(filters=None):
 			row.description, row.warehouse, row.qty, row.base_rate,
 			row.qty and (buying_amount / row.qty) or 0, row.base_amount, buying_amount,
 			gross_profit, gross_profit_percent, row.project])
+
+	if total_selling_amount:
+		total_gross_profit_percent = (total_gross_profit / total_selling_amount) * 100.0
+	else:
+		total_gross_profit_percent = 0.0
+
+	data.append(["Total", None, None, None, None, None, None, None, None, None, None, total_selling_amount,
+		total_buying_amount, total_gross_profit, total_gross_profit_percent, None])
 
 	return columns, data
 
