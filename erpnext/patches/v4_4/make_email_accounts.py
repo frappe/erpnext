@@ -4,8 +4,8 @@ def execute():
 	frappe.reload_doc("email", "doctype", "email_account")
 
 	# outgoing
-	if frappe.db.exists("DocType", "Outgoing Email Settings"):
-		outgoing = dict(frappe.db.sql("select field, value from tabSingles where doctype='Outgoing Email Settings'"))
+	outgoing = dict(frappe.db.sql("select field, value from tabSingles where doctype='Outgoing Email Settings'"))
+	if outgoing and outgoing['mail_server']:
 		account = frappe.new_doc("Email Account")
 		mapping = {
 			"email_id": "mail_login",
@@ -26,8 +26,8 @@ def execute():
 		account.insert()
 
 	# support
-	if frappe.db.exists("DocType", "Support Email Settings"):
-		support = dict(frappe.db.sql("select field, value from tabSingles where doctype='Support Email Settings'"))
+	support = dict(frappe.db.sql("select field, value from tabSingles where doctype='Support Email Settings'"))
+	if support and support['mail_server']:
 		account = frappe.new_doc("Email Account")
 		mapping = {
 			"enable_incoming": "sync_support_mails",
@@ -50,8 +50,9 @@ def execute():
 
 	# sales, jobs
 	for doctype in ("Sales Email Settings", "Jobs Email Settings"):
-		if frappe.db.exists("DocType", doctype):
-			source = dict(frappe.db.sql("select field, value from tabSingles where doctype=%s", doctype))
+		source = dict(frappe.db.sql("select field, value from tabSingles where doctype=%s", doctype))
+		print source
+		if source and  source.get('host'):
 			account = frappe.new_doc("Email Account")
 			mapping = {
 				"enable_incoming": "extract_emails",
