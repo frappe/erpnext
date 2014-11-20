@@ -19,29 +19,18 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "company", 
-   "fieldtype": "Link", 
-   "in_list_view": 1, 
-   "label": "Company", 
-   "options": "Company", 
+   "allow_on_submit": 1, 
+   "fieldname": "mode_of_payment_details", 
+   "fieldtype": "Table", 
+   "label": "Mode of Payment Details", 
+   "options": "Mode of Payment Detail", 
    "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "description": "Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.", 
-   "fieldname": "default_account", 
-   "fieldtype": "Link", 
-   "ignore_user_permissions": 1, 
-   "in_list_view": 1, 
-   "label": "Default Account", 
-   "options": "Account", 
-   "permlevel": 0, 
-   "read_only": 0
+   "precision": ""
   }
  ], 
  "icon": "icon-credit-card", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:13.846602", 
+ "modified": "2014-11-25 11:37:39.329513", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Mode of Payment", 
