@@ -4,8 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt
-from erpnext.stock.utils import get_buying_amount, get_sales_bom_buying_amount
+from erpnext.accounts.reports.gross_profit import gross_profit_generator
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -14,11 +13,7 @@ def execute(filters=None):
 	source = get_source_data(filters)
 	item_sales_bom = get_item_sales_bom()
 
-	total_gross_profit = 0.0
-	total_selling_amount = 0.0
-	total_buying_amount = 0.0
-
-	columns = [_("Delivery Note/Sales Invoice") + "::120", _("Link") + "::30", _("Posting Date") + ":Date", _("Posting Time"),
+	columns = [_("Sales Invoice") + "::120", _("Link") + "::30", _("Posting Date") + ":Date", _("Posting Time"),
 		_("Item Code") + ":Link/Item", _("Item Name"), _("Description"), _("Warehouse") + ":Link/Warehouse",
 		_("Qty") + ":Float", _("Selling Rate") + ":Currency", _("Avg. Buying Rate") + ":Currency",
 		_("Selling Amount") + ":Currency", _("Buying Amount") + ":Currency",
@@ -65,68 +60,6 @@ def execute(filters=None):
 
 	return columns, data
 
-def get_stock_ledger_entries(filters):
-	query = """select item_code, voucher_type, voucher_no,
-		voucher_detail_no, posting_date, posting_time, stock_value,
-		warehouse, actual_qty as qty
-		from `tabStock Ledger Entry`"""
 
-	if filters.get("company"):
-		query += """ where company=%(company)s"""
 
-	query += " order by item_code desc, warehouse desc, posting_date desc, posting_time desc, name desc"
 
-	res = frappe.db.sql(query, filters, as_dict=True)
-
-	out = {}
-	for r in res:
-		if (r.item_code, r.warehouse) not in out:
-			out[(r.item_code, r.warehouse)] = []
-
-		out[(r.item_code, r.warehouse)].append(r)
-
-	return out
-
-def get_item_sales_bom():
-	item_sales_bom = {}
-
-	for d in frappe.db.sql("""select parenttype, parent, parent_item,
-		item_code, warehouse, -1*qty as total_qty, parent_detail_docname
-		from `tabPacked Item` where docstatus=1""", as_dict=True):
-		item_sales_bom.setdefault(d.parenttype, frappe._dict()).setdefault(d.parent,
-			frappe._dict()).setdefault(d.parent_item, []).append(d)
-
-	return item_sales_bom
-
-def get_source_data(filters):
-	conditions = ""
-	if filters.get("company"):
-		conditions += " and company=%(company)s"
-	if filters.get("from_date"):
-		conditions += " and posting_date>=%(from_date)s"
-	if filters.get("to_date"):
-		conditions += " and posting_date<=%(to_date)s"
-
-	delivery_note_items = frappe.db.sql("""select item.parenttype, dn.name,
-		dn.posting_date, dn.posting_time, dn.project_name,
-		item.item_code, item.item_name, item.description, item.warehouse,
-		item.qty, item.base_rate, item.base_amount, item.name as "item_row",
-		timestamp(dn.posting_date, dn.posting_time) as posting_datetime
-		from `tabDelivery Note` dn, `tabDelivery Note Item` item
-		where item.parent = dn.name and dn.docstatus = 1 %s
-		order by dn.posting_date desc, dn.posting_time desc""" % (conditions,), filters, as_dict=1)
-
-	sales_invoice_items = frappe.db.sql("""select item.parenttype, si.name,
-		si.posting_date, si.posting_time, si.project_name,
-		item.item_code, item.item_name, item.description, item.warehouse,
-		item.qty, item.base_rate, item.base_amount, item.name as "item_row",
-		timestamp(si.posting_date, si.posting_time) as posting_datetime
-		from `tabSales Invoice` si, `tabSales Invoice Item` item
-		where item.parent = si.name and si.docstatus = 1 %s
-		order by si.posting_date desc, si.posting_time desc""" % (conditions,), filters, as_dict=1)
-
-	source = delivery_note_items + sales_invoice_items
-	if len(source) > len(delivery_note_items):
-		source.sort(key=lambda d: d.posting_datetime, reverse=True)
-
-	return source
