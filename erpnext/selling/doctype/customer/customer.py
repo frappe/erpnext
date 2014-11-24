@@ -7,11 +7,14 @@ from frappe.model.naming import make_autoname
 from frappe import msgprint, _
 import frappe.defaults
 
-
 from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.utilities.address_and_contact import load_address_and_contact
 from erpnext.accounts.party import create_party_account
 
 class Customer(TransactionBase):
+	def onload(self):
+		"""Load address and contacts in `__onload`"""
+		load_address_and_contact(self, "customer")
 
 	def autoname(self):
 		cust_master_name = frappe.defaults.get_global_default('cust_master_name')

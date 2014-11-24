@@ -1,8 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'setup/doctype/contact_control/contact_control.js' %};
-
 frappe.provide("erpnext");
 erpnext.LeadController = frappe.ui.form.Controller.extend({
 	setup: function() {
@@ -42,7 +40,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		});
 
 		if(!this.frm.doc.__islocal) {
-			this.make_address_list();
+			erpnext.utils.render_address_and_contact(cur_frm);
 		}
 	},
 
