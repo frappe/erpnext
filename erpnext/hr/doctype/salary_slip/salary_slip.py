@@ -156,7 +156,7 @@ class SalarySlip(TransactionBase):
 					/ cint(self.total_days_in_month), 2)
 			elif not self.payment_days:
 				d.e_modified_amount = 0
-			else:
+			elif not d.e_modified_amount:
 				d.e_modified_amount = d.e_amount
 			self.gross_pay += flt(d.e_modified_amount)
 
@@ -168,7 +168,7 @@ class SalarySlip(TransactionBase):
 					/ cint(self.total_days_in_month), 2)
 			elif not self.payment_days:
 				d.d_modified_amount = 0
-			else:
+			elif not d.d_modified_amount:
 				d.d_modified_amount = d.d_amount
 
 			self.total_deduction += flt(d.d_modified_amount)
