@@ -1,5 +1,5 @@
- (Half Day),
- and year: ,
+ (Half Day), (Half Day)
+ and year: , and year: 
 """ does not exists","""Không tồn tại"
 %  Delivered,Giao%
 % Amount Billed,% Số tiền Được quảng cáo
@@ -92,7 +92,7 @@ Accounts Payable,Tài khoản Phải trả
 Accounts Receivable,Tài khoản Phải thu
 Accounts Settings,Chiếm chỉnh
 Active,Chủ động
-Active: Will extract emails from ,
+Active: Will extract emails from ,Active: Will extract emails from 
 Activity,Hoạt động
 Activity Log,Đăng nhập hoạt động
 Activity Log:,Lần đăng nhập:
@@ -254,8 +254,8 @@ Approving Role,Phê duyệt Vai trò
 Approving Role cannot be same as role the rule is Applicable To,Phê duyệt Vai trò không thể giống như vai trò của quy tắc là áp dụng để
 Approving User,Phê duyệt danh
 Approving User cannot be same as user the rule is Applicable To,Phê duyệt Người dùng không thể được giống như sử dụng các quy tắc là áp dụng để
-Are you sure you want to STOP ,
-Are you sure you want to UNSTOP ,
+Are you sure you want to STOP ,Are you sure you want to STOP 
+Are you sure you want to UNSTOP ,Are you sure you want to UNSTOP 
 Arrear Amount,Tiền còn thiếu Số tiền
 "As Production Order can be made for this item, it must be a stock item.","Như sản xuất hàng có thể được thực hiện cho mặt hàng này, nó phải là một mục chứng khoán."
 As per Stock UOM,Theo Cổ UOM
@@ -284,7 +284,7 @@ Auto Accounting For Stock Settings,Tự động chỉnh Kế toán Đối với 
 Auto Material Request,Vật liệu tự động Yêu cầu
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,Tự động nâng cao Vật liệu Yêu cầu nếu số lượng đi dưới mức lại trật tự trong một nhà kho
 Automatically compose message on submission of transactions.,Tự động soạn tin nhắn trên trình giao dịch.
-Automatically extract Job Applicants from a mail box ,
+Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,Tự động trích xuất chào từ một hộp thư ví dụ như
 Automatically updated via Stock Entry of type Manufacture/Repack,Tự động cập nhật thông qua hàng nhập loại Sản xuất / Repack
 Automotive,Ô tô
@@ -511,7 +511,7 @@ Clearance Date,Giải phóng mặt bằng ngày
 Clearance Date not mentioned,Giải phóng mặt bằng ngày không được đề cập
 Clearance date cannot be before check date in row {0},Ngày giải phóng mặt bằng không có thể trước ngày kiểm tra trong hàng {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Bấm vào nút ""Thực hiện kinh doanh Hoá đơn 'để tạo ra một hóa đơn bán hàng mới."
-Click on a link to get options to expand get options ,
+Click on a link to get options to expand get options ,Click on a link to get options to expand get options 
 Client,Khách hàng
 Close Balance Sheet and book Profit or Loss.,Gần Cân đối kế toán và lợi nhuận cuốn sách hay mất.
 Closed,Đã đóng
@@ -841,13 +841,13 @@ Distributor,Nhà phân phối
 Divorced,Đa ly dị
 Do Not Contact,Không Liên
 Do not show any symbol like $ etc next to currencies.,Không hiển thị bất kỳ biểu tượng như $ vv bên cạnh tiền tệ.
-Do really want to unstop production order: ,
-Do you really want to STOP ,
+Do really want to unstop production order: ,Do really want to unstop production order: 
+Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,Bạn có thực sự muốn để STOP Yêu cầu vật liệu này?
 Do you really want to Submit all Salary Slip for month {0} and year {1},Bạn có thực sự muốn để gửi tất cả các Phiếu lương cho tháng {0} và năm {1}
-Do you really want to UNSTOP ,
+Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,Bạn có thực sự muốn tháo nút Yêu cầu vật liệu này?
-Do you really want to stop production order: ,
+Do you really want to stop production order: ,Do you really want to stop production order: 
 Doc Name,Doc Tên
 Doc Type,Loại doc
 Document Description,Mô tả tài liệu
@@ -899,7 +899,7 @@ Electronics,Thiết bị điện tử
 Email,Email
 Email Digest,Email thông báo
 Email Digest Settings,Email chỉnh Digest
-Email Digest: ,
+Email Digest: ,Email Digest: 
 Email Id,Email Id
 "Email Id where a job applicant will email e.g. ""jobs@example.com""","Email Id nơi người xin việc sẽ gửi email cho ví dụ: ""jobs@example.com"""
 Email Notifications,Thông báo email
@@ -927,7 +927,7 @@ Employee Settings,Thiết lập nhân viên
 Employee Type,Loại nhân viên
 "Employee designation (e.g. CEO, Director etc.).","Chỉ định nhân viên (ví dụ: Giám đốc điều hành, Giám đốc vv.)"
 Employee master.,Chủ lao động.
-Employee record is created using selected field. ,
+Employee record is created using selected field. ,Employee record is created using selected field. 
 Employee records.,Hồ sơ nhân viên.
 Employee relieved on {0} must be set as 'Left',Nhân viên bớt căng thẳng trên {0} phải được thiết lập như là 'trái'
 Employee {0} has already applied for {1} between {2} and {3},Nhân viên {0} đã áp dụng cho {1} {2} giữa và {3}
@@ -959,7 +959,7 @@ Enter url parameter for receiver nos,Nhập tham số url cho người nhận no
 Entertainment & Leisure,Giải trí & Giải trí
 Entertainment Expenses,Chi phí Giải trí
 Entries,Số lượng vị trí
-Entries against ,
+Entries against ,Entries against 
 Entries are not allowed against this Fiscal Year if the year is closed.,Mục không được phép đối với năm tài chính này nếu năm được đóng lại.
 Equity,Vốn chủ sở hữu
 Error: {0} > {1},Lỗi: {0}> {1}
@@ -1024,7 +1024,7 @@ Exports,Xuất khẩu
 External,Bên ngoài
 Extract Emails,Trích xuất email
 FCFS Rate,FCFS Tỷ giá
-Failed: ,
+Failed: ,Failed: 
 Family Background,Gia đình nền
 Fax,Fax
 Features Setup,Tính năng cài đặt
@@ -1245,7 +1245,7 @@ If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged 
 If you involve in manufacturing activity. Enables Item 'Is Manufactured',Nếu bạn tham gia vào hoạt động sản xuất. Cho phép Item là Sản xuất '
 Ignore,Bỏ qua
 Ignore Pricing Rule,Bỏ qua giá Rule
-Ignored: ,
+Ignored: ,Ignored: 
 Image,Hình
 Image View,Xem hình ảnh
 Implementation Partner,Đối tác thực hiện
@@ -1574,7 +1574,7 @@ Maintenance Visit Purpose,Bảo trì đăng nhập Mục đích
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Bảo trì đăng nhập {0} phải được hủy bỏ trước khi hủy bỏ đơn đặt hàng này
 Maintenance start date can not be before delivery date for Serial No {0},Bảo trì ngày bắt đầu không thể trước ngày giao hàng cho Serial No {0}
 Major/Optional Subjects,Chính / Đối tượng bắt buộc
-Make ,
+Make ,Make 
 Make Accounting Entry For Every Stock Movement,Làm kế toán nhập Đối với tất cả phong trào Cổ
 Make Bank Voucher,Làm cho Ngân hàng Phiếu
 Make Credit Note,Làm cho tín dụng Ghi chú
@@ -1723,7 +1723,7 @@ Net Weight UOM,Trọng lượng UOM
 Net Weight of each Item,Trọng lượng của mỗi Item
 Net pay cannot be negative,Trả tiền net không thể phủ định
 Never,Không bao giờ
-New ,
+New ,New 
 New Account,Tài khoản mới
 New Account Name,Tài khoản mới Tên
 New BOM,Mới BOM
@@ -1789,7 +1789,7 @@ No permission,Không có sự cho phép
 No record found,Rohit ERPNext Phần mở rộng (thường)
 No records found in the Invoice table,Không có hồ sơ được tìm thấy trong bảng hóa đơn
 No records found in the Payment table,Không có hồ sơ được tìm thấy trong bảng thanh toán
-No salary slip found for month: ,
+No salary slip found for month: ,No salary slip found for month: 
 Non Profit,Không lợi nhuận
 Nos,lớp
 Not Active,Không đăng nhập
@@ -2448,8 +2448,8 @@ Root cannot have a parent cost center,Gốc không thể có một trung tâm ch
 Rounded Off,Tròn Tắt
 Rounded Total,Tổng số tròn
 Rounded Total (Company Currency),Tổng số tròn (Công ty tiền tệ)
-Row # ,
-Row # {0}: ,
+Row # ,Row # 
+Row # {0}: ,Row # {0}: 
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Hàng # {0}: SL thứ tự có thể không ít hơn SL đặt hàng tối thiểu hàng của (quy định tại mục chủ).
 Row #{0}: Please specify Serial No for Item {1},Hàng # {0}: Hãy xác định Serial No cho mục {1}
 Row {0}: Account does not match with \						Purchase Invoice Credit To account,Hàng {0}: Tài khoản không phù hợp với \ mua hóa đơn tín dụng Để giải
@@ -2751,7 +2751,7 @@ Stock Ageing,Cổ người cao tuổi
 Stock Analytics,Chứng khoán Analytics
 Stock Assets,Tài sản chứng khoán
 Stock Balance,Số dư chứng khoán
-Stock Entries already created for Production Order ,
+Stock Entries already created for Production Order ,Stock Entries already created for Production Order 
 Stock Entry,Chứng khoán nhập
 Stock Entry Detail,Cổ phiếu nhập chi tiết
 Stock Expenses,Chi phí chứng khoán
@@ -2797,7 +2797,7 @@ Submit all salary slips for the above selected criteria,Gửi tất cả các ph
 Submit this Production Order for further processing.,Trình tự sản xuất này để chế biến tiếp.
 Submitted,Đã lần gửi
 Subsidiary,Công ty con
-Successful: ,
+Successful: ,Successful: 
 Successfully Reconciled,Hòa giải thành công
 Suggestions,Đề xuất
 Sunday,Chủ Nhật
@@ -2915,7 +2915,7 @@ The Organization,Tổ chức
 "The account head under Liability, in which Profit/Loss will be booked","Người đứng đầu tài khoản dưới trách nhiệm pháp lý, trong đó lợi nhuận / lỗ sẽ được ghi nhận"
 The date on which next invoice will be generated. It is generated on submit.,Ngày mà hóa đơn tiếp theo sẽ được tạo ra. Nó được tạo ra trên trình.
 The date on which recurring invoice will be stop,Ngày mà hóa đơn định kỳ sẽ được dừng lại
-"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","The day of the month on which auto invoice will be generated e.g. 05, 28 etc "
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,Ngày (s) mà bạn đang nộp đơn xin nghỉ là nghỉ. Bạn không cần phải nộp đơn xin nghỉ phép.
 The first Leave Approver in the list will be set as the default Leave Approver,Người phê duyệt Để lại đầu tiên trong danh sách sẽ được thiết lập mặc định Để lại phê duyệt
 The first user will become the System Manager (you can change that later).,Người sử dụng đầu tiên sẽ trở thành hệ thống quản lý (bạn có thể thay đổi điều này sau).
@@ -3002,7 +3002,7 @@ Total Advance,Tổng số trước
 Total Amount,Tổng tiền
 Total Amount To Pay,Tổng số tiền phải trả tiền
 Total Amount in Words,Tổng số tiền trong từ
-Total Billing This Year: ,
+Total Billing This Year: ,Total Billing This Year: 
 Total Characters,Tổng số nhân vật
 Total Claimed Amount,Tổng số tiền tuyên bố chủ quyền
 Total Commission,Tổng số Ủy ban

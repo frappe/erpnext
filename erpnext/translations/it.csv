@@ -254,8 +254,8 @@ Approving Role,Regola Approvazione
 Approving Role cannot be same as role the rule is Applicable To,Approvazione ruolo non può essere lo stesso ruolo la regola è applicabile ad
 Approving User,Utente Certificatore
 Approving User cannot be same as user the rule is Applicable To,Approvazione utente non può essere uguale all'utente la regola è applicabile ad
-Are you sure you want to STOP ,
-Are you sure you want to UNSTOP ,
+Are you sure you want to STOP ,Are you sure you want to STOP 
+Are you sure you want to UNSTOP ,Are you sure you want to UNSTOP 
 Arrear Amount,Importo posticipata
 "As Production Order can be made for this item, it must be a stock item.","Come ordine di produzione può essere fatta per questo articolo , deve essere un elemento di magazzino ."
 As per Stock UOM,Per Stock UOM
@@ -284,7 +284,7 @@ Auto Accounting For Stock Settings,Contabilità Auto Per Impostazioni Immagini
 Auto Material Request,Richiesta Materiale Auto
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,Auto aumenta Materiale Richiesta se la quantità scende sotto il livello di riordino in un magazzino
 Automatically compose message on submission of transactions.,Comporre automaticamente il messaggio di presentazione delle transazioni .
-Automatically extract Job Applicants from a mail box ,
+Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,Estrarre automaticamente Leads da una casella di posta elettronica ad esempio
 Automatically updated via Stock Entry of type Manufacture/Repack,Aggiornato automaticamente via Archivio Entrata di tipo Produzione / Repack
 Automotive,Automotive
@@ -511,7 +511,7 @@ Clearance Date,Data Liquidazione
 Clearance Date not mentioned,Liquidazione data non menzionato
 Clearance date cannot be before check date in row {0},Data di Liquidazione non può essere prima della data di arrivo in riga {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Clicca sul pulsante 'Crea Fattura Vendita' per creare una nuova Fattura di Vendita
-Click on a link to get options to expand get options ,
+Click on a link to get options to expand get options ,Click on a link to get options to expand get options 
 Client,Intestatario
 Close Balance Sheet and book Profit or Loss.,Chiudere Stato Patrimoniale e il libro utile o perdita .
 Closed,Chiuso
@@ -841,13 +841,13 @@ Distributor,Distributore
 Divorced,Divorced
 Do Not Contact,Non Contattaci
 Do not show any symbol like $ etc next to currencies.,Non visualizzare nessun simbolo tipo € dopo le Valute.
-Do really want to unstop production order: ,
-Do you really want to STOP ,
+Do really want to unstop production order: ,Do really want to unstop production order: 
+Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,Vuoi davvero fermare questo materiale Request ?
 Do you really want to Submit all Salary Slip for month {0} and year {1},Vuoi davvero a presentare tutti foglio paga per il mese {0} e l'anno {1}
-Do you really want to UNSTOP ,
+Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,Vuoi davvero a stappare questa Materiale Richiedi ?
-Do you really want to stop production order: ,
+Do you really want to stop production order: ,Do you really want to stop production order: 
 Doc Name,Nome Doc
 Doc Type,Tipo Doc
 Document Description,Descrizione del documento
@@ -899,7 +899,7 @@ Electronics,elettronica
 Email,Email
 Email Digest,Email di massa
 Email Digest Settings,Impostazioni Email di Massa
-Email Digest: ,
+Email Digest: ,Email Digest: 
 Email Id,ID Email
 "Email Id where a job applicant will email e.g. ""jobs@example.com""","Email del candidato deve essere del tipo ""jobs@example.com"""
 Email Notifications,Notifiche e-mail
@@ -959,7 +959,7 @@ Enter url parameter for receiver nos,Inserisci parametri url per NOS ricevuti
 Entertainment & Leisure,Intrattenimento e tempo libero
 Entertainment Expenses,Spese di rappresentanza
 Entries,Voci
-Entries against ,
+Entries against ,Entries against 
 Entries are not allowed against this Fiscal Year if the year is closed.,Voci non permesse in confronto ad un Anno Fiscale già chiuso.
 Equity,equità
 Error: {0} > {1},Errore: {0} > {1}
@@ -1574,7 +1574,7 @@ Maintenance Visit Purpose,Visita di manutenzione Scopo
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Manutenzione Visita {0} deve essere cancellato prima di annullare questo ordine di vendita
 Maintenance start date can not be before delivery date for Serial No {0},Manutenzione data di inizio non può essere prima della data di consegna per Serial No {0}
 Major/Optional Subjects,Principali / Opzionale Soggetti
-Make ,
+Make ,Make 
 Make Accounting Entry For Every Stock Movement,Fai Entry Accounting per ogni Archivio Movimento
 Make Bank Voucher,Fai Voucher Banca
 Make Credit Note,Fai la nota di credito
@@ -1723,7 +1723,7 @@ Net Weight UOM,UOM Peso netto
 Net Weight of each Item,Peso netto di ogni articolo
 Net pay cannot be negative,Retribuzione netta non può essere negativo
 Never,Mai
-New ,
+New ,New 
 New Account,nuovo account
 New Account Name,Nuovo nome account
 New BOM,Nuovo BOM
@@ -2449,7 +2449,7 @@ Rounded Off,arrotondato
 Rounded Total,Totale arrotondato
 Rounded Total (Company Currency),Totale arrotondato (Azienda valuta)
 Row # ,Row #
-Row # {0}: ,
+Row # {0}: ,Row # {0}: 
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Row # {0}: quantità ordinata non può a meno di quantità di ordine minimo dell'elemento (definito al punto master).
 Row #{0}: Please specify Serial No for Item {1},Row # {0}: Si prega di specificare Numero d'ordine per la voce {1}
 Row {0}: Account does not match with \						Purchase Invoice Credit To account,Riga {0}: Account non corrisponde con \ Acquisto fattura accreditare sul suo conto
@@ -2751,7 +2751,7 @@ Stock Ageing,Invecchiamento Archivio
 Stock Analytics,Analytics Archivio
 Stock Assets,Attivo Immagini
 Stock Balance,Archivio Balance
-Stock Entries already created for Production Order ,
+Stock Entries already created for Production Order ,Stock Entries already created for Production Order 
 Stock Entry,Archivio Entry
 Stock Entry Detail,Dell&#39;entrata Stock Detail
 Stock Expenses,Spese Immagini
