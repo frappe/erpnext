@@ -44,29 +44,6 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	make_address_list: function() {
-		var me = this;
-		if(!this.frm.address_list) {
-			this.frm.address_list = new frappe.ui.Listing({
-				parent: this.frm.fields_dict['address_html'].wrapper,
-				page_length: 5,
-				new_doctype: "Address",
-				get_query: function() {
-					return 'select name, address_type, address_line1, address_line2, \
-					city, state, country, pincode, fax, email_id, phone, \
-					is_primary_address, is_shipping_address from tabAddress \
-					where lead="'+me.frm.doc.name+'" and docstatus != 2 \
-					order by is_primary_address, is_shipping_address desc'
-				},
-				as_dict: 1,
-				no_results_message: __('No addresses created'),
-				render_row: this.render_address_row,
-			});
-			// note: render_address_row is defined in contact_control.js
-		}
-		this.frm.address_list.run();
-	},
-
 	create_customer: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.lead.lead.make_customer",
