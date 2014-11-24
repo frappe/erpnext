@@ -10,7 +10,14 @@
             {% if(contact_list[i].is_primary_contact) { %}<span class="label label-info">
                 {%= __("Primary") %}</span>{% } %}
         </div>
-        <p style="padding-top: 5px;">{%= __("Phone") %}: {%= contact_list[i].phone %}</p>
+        <p style="padding-top: 5px;">
+            {% if(contact_list[i].phone) { %}
+                {%= __("Phone") %}: {%= contact_list[i].phone %}<br>
+            {% } %}
+            {% if(contact_list[i].email_id) { %}
+                {%= __("Email Id") %}: {%= contact_list[i].email_id %}
+            {% } %}
+        </p>
     </div>
 {% } %}
 {% if(!contact_list.length) { %}
