@@ -51,7 +51,7 @@ Accepted + Rejected Qty must be equal to Received quantity for Item {0},"La quan
 Compte {0} doit être SAMES comme débit pour tenir compte de la facture de vente en ligne {0}"
 Accepted Quantity,Quantité acceptés
 Accepted Warehouse,Entrepôt acceptable
-Account,compte
+Account,Compte
 Account Balance,Solde du compte
 Account Created: {0},Compte créé : {0}
 Account Details,Détails du compte
@@ -63,18 +63,18 @@ Account Type,Type de compte
 Account for the warehouse (Perpetual Inventory) will be created under this Account.,Compte de l'entrepôt ( de l'inventaire permanent ) sera créé sous ce compte .
 Account head {0} created,Responsable du compte {0} a été crée
 Account must be a balance sheet account,Le compte doit être un bilan
-Account with child nodes cannot be converted to ledger,Liste des prix non sélectionné
-Account with existing transaction can not be converted to group.,{0} n'est pas un congé approbateur valide
-Account with existing transaction can not be deleted,Compte avec la transaction existante ne peut pas être supprimé
-Account with existing transaction cannot be converted to ledger,Compte avec la transaction existante ne peut pas être converti en livre
+Account with child nodes cannot be converted to ledger,Un compte avec des enfants ne peut pas être converti en grand livre
+Account with existing transaction can not be converted to group.,Un compte contenant une transaction ne peut pas être converti en groupe
+Account with existing transaction can not be deleted,Un compte contenant une transaction ne peut pas être supprimé
+Account with existing transaction cannot be converted to ledger,Un compte contenant une transaction ne peut pas être converti en grand livre
 Account {0} cannot be a Group,Compte {0} ne peut pas être un groupe
 Account {0} does not belong to Company {1},Compte {0} n'appartient pas à la société {1}
-Account {0} does not belong to company: {1},Compte {0} n'appartient pas à l'entreprise: {1}
+Account {0} does not belong to company: {1},Compte {0} n'appartient pas à la société : {1}
 Account {0} does not exist,Compte {0} n'existe pas
-Account {0} has been entered more than once for fiscal year {1},S'il vous plaît entrer « Répétez le jour du Mois de la« valeur de champ
-Account {0} is frozen,Attention: Commande {0} existe déjà contre le même numéro de bon de commande
-Account {0} is inactive,dépenses directes
-Account {0} is not valid,Compte {0} n'est pas valide
+Account {0} has been entered more than once for fiscal year {1},Le compte {0} a été renseigné plus d'une fois pour l'année fiscale {1}
+Account {0} is frozen,Le compte {0} est gelé
+Account {0} is inactive,Le compte {0} est inactif
+Account {0} is not valid,Le compte {0} n'est pas valide
 Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Compte {0} doit être de type ' actif fixe ' comme objet {1} est un atout article
 Account {0}: Parent account {1} can not be a ledger,Compte {0}: compte de Parent {1} ne peut pas être un grand livre
 Account {0}: Parent account {1} does not belong to company: {2},Compte {0}: compte de Parent {1} n'appartient pas à l'entreprise: {2}
@@ -88,12 +88,12 @@ Accounting,Comptabilité
 Accounting journal entries.,Les écritures comptables.
 Accounts,Comptes
 Accounts Browser,Navigateur des comptes
-Accounts Frozen Upto,Jusqu&#39;à comptes gelés
+Accounts Frozen Upto,Comptes gelés jusqu'au
 Accounts Payable,Comptes à payer
 Accounts Receivable,Débiteurs
 Accounts Settings,Paramètres des comptes
 Active,Actif
-Active: Will extract emails from ,Actif: va extraire des emails à partir de
+Active: Will extract emails from ,Actif : extraira les emails depuis
 Activity,Activité
 Activity Log,Journal d&#39;activité
 Activity Log:,Journal d'activité:
@@ -104,7 +104,7 @@ Actual Completion Date,Date d&#39;achèvement réelle
 Actual Date,Date Réelle
 Actual End Date,Date de fin réelle
 Actual Invoice Date,Date de la facture réelle
-Actual Posting Date,Date réelle d&#39;affichage
+Actual Posting Date,Date réelle d'envoie
 Actual Qty,Quantité réelle
 Actual Qty (at source/target),Quantité réelle (à la source / cible)
 Actual Qty After Transaction,Qté réel Après Transaction
@@ -112,11 +112,11 @@ Actual Qty: Quantity available in the warehouse.,Quantité réelle : Quantité d
 Actual Quantity,Quantité réelle
 Actual Start Date,Date de début réelle
 Add,Ajouter
-Add / Edit Taxes and Charges,Ajouter / Modifier Taxes et frais
+Add / Edit Taxes and Charges,Ajouter / Modifier Taxes et Charges
 Add Child,Ajouter un enfant
 Add Serial No,Ajouter Numéro de série
 Add Taxes,Ajouter impôts
-Add Taxes and Charges,Ajouter Taxes et frais
+Add Taxes and Charges,Ajouter impôts et charges
 Add or Deduct,Ajouter ou déduire
 Add rows to set annual budgets on Accounts.,Ajoutez des lignes pour établir des budgets annuels sur des comptes.
 Add to Cart,Ajouter au panier
@@ -130,9 +130,9 @@ Address Details,Détails de l&#39;adresse
 Address HTML,Adresse HTML
 Address Line 1,Adresse ligne 1
 Address Line 2,Adresse ligne 2
-Address Template,Adresse modèle
+Address Template,Modèle d'adresse
 Address Title,Titre de l'adresse
-Address Title is mandatory.,Vous n'êtes pas autorisé à imprimer ce document
+Address Title is mandatory.,Le titre de l'adresse est obligatoire
 Address Type,Type d&#39;adresse
 Address master.,Adresse principale
 Administrative Expenses,Dépenses administratives
@@ -171,22 +171,22 @@ Airline,compagnie aérienne
 All Addresses.,Toutes les adresses.
 All Contact,Tout contact
 All Contacts.,Tous les contacts.
-All Customer Contact,Tout contact avec la clientèle
-All Customer Groups,N ° de série {0} est sous contrat de maintenance jusqu'à {1}
+All Customer Contact,Tous les contacts clients
+All Customer Groups,Tous les groupes client
 All Day,Toute la journée
 All Employee (Active),Tous les employés (Actif)
-All Item Groups,Tous les groupes des ouvrages
-All Lead (Open),Tous plomb (Ouvert)
+All Item Groups,Tous les groupes d'article
+All Lead (Open),Toutes les pistes (Ouvertes)
 All Products or Services.,Tous les produits ou services.
-All Sales Partner Contact,Tout contact Sales Partner
-All Sales Person,Tout Sales Person
-All Supplier Contact,Toutes Contacter le fournisseur
+All Sales Partner Contact,Tous les contacts des partenaires commerciaux
+All Sales Person,Tous les commerciaux
+All Supplier Contact,Tous les contacts fournisseur
 All Supplier Types,Tous les types de fournisseurs
-All Territories,Compte racine ne peut pas être supprimé
+All Territories,Tous les secteurs
 "All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Tous les champs liés à l'exportation comme monnaie , taux de conversion , l'exportation totale , l'exportation totale grandiose etc sont disponibles dans la note de livraison , POS , offre , facture de vente , Sales Order etc"
 "All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Tous les champs importation connexes comme monnaie , taux de conversion , totale d'importation , importation grande etc totale sont disponibles en Achat réception , Fournisseur d'offre , facture d'achat , bon de commande , etc"
 All items have already been invoiced,Tous les articles ont déjà été facturés
-All these items have already been invoiced,Existe compte de l'enfant pour ce compte . Vous ne pouvez pas supprimer ce compte .
+All these items have already been invoiced,Tous les articles ont déjà été facturés
 Allocate,Allouer
 Allocate leaves for a period.,Compte temporaire ( actif)
 Allocate leaves for the year.,Allouer des feuilles de l&#39;année.
@@ -199,10 +199,10 @@ Allow Bill of Materials,Laissez Bill of Materials
 Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item,Commande {0} n'est pas valide
 Allow Children,permettre aux enfants
 Allow Dropbox Access,Autoriser l'accès au Dropbox
-Allow Google Drive Access,Autoriser Google Drive accès
-Allow Negative Balance,Laissez solde négatif
-Allow Negative Stock,Laissez Stock Négatif
-Allow Production Order,Laissez un ordre de fabrication
+Allow Google Drive Access,Autoriser l'accès à Google Drive
+Allow Negative Balance,Autoriser un solde négatif
+Allow Negative Stock,Autoriser un stock négatif
+Allow Production Order,Permettre les ordres de fabrication
 Allow User,Permettre à l&#39;utilisateur
 Allow Users,Autoriser les utilisateurs
 Allow the following users to approve Leave Applications for block days.,Autoriser les utilisateurs suivants d&#39;approuver demandes d&#39;autorisation pour les jours de bloc.
@@ -211,14 +211,14 @@ Allowance Percent,Pourcentage allocation
 Allowance for over-{0} crossed for Item {1},Allocation pour les plus de {0} croisés pour objet {1}
 Allowance for over-{0} crossed for Item {1}.,Allocation pour les plus de {0} franchi pour objet {1}.
 Allowed Role to Edit Entries Before Frozen Date,Autorisé rôle à modifier les entrées Avant Frozen date
-Amended From,De modifiée
+Amended From,Modifié depuis
 Amount,Montant
 Amount (Company Currency),Montant (Société Monnaie)
 Amount Paid,Montant payé
 Amount to Bill,Montant du projet de loi
 An Customer exists with same name,Il existe un client avec le même nom
-"An Item Group exists with same name, please change the item name or rename the item group","Un groupe d'objet existe avec le même nom , s'il vous plaît changer le nom de l'élément ou de renommer le groupe de l'article"
-"An item exists with same name ({0}), please change the item group name or rename the item",Le compte doit être un compte de bilan
+"An Item Group exists with same name, please change the item name or rename the item group","Un groupe d'article existe avec le même nom, changez le nom de l'article ou renommez le groupe d'article SVP"
+"An item exists with same name ({0}), please change the item group name or rename the item","Un article existe avec le même nom ({0}), changez le groupe de l'article ou renommez l'article SVP"
 Analyst,analyste
 Annual,Annuel
 Another Period Closing Entry {0} has been made after {1},Point Wise impôt Détail
@@ -246,17 +246,17 @@ Appraisal Template,Modèle d&#39;évaluation
 Appraisal Template Goal,Objectif modèle d&#39;évaluation
 Appraisal Template Title,Titre modèle d&#39;évaluation
 Appraisal {0} created for Employee {1} in the given date range,Soulager date doit être supérieure à date d'adhésion
-Apprentice,apprenti
+Apprentice,Apprenti
 Approval Status,Statut d&#39;approbation
-Approval Status must be 'Approved' or 'Rejected',non autorisé
+Approval Status must be 'Approved' or 'Rejected',Le statut d'approbation doit être 'Approuvé' ou 'Rejeté'
 Approved,Approuvé
 Approver,Approbateur
 Approving Role,Approuver rôle
 Approving Role cannot be same as role the rule is Applicable To,Vous ne pouvez pas sélectionner le type de charge comme « Sur la ligne précédente Montant » ou « Le précédent Row totale » pour la première rangée
 Approving User,Approuver l&#39;utilisateur
 Approving User cannot be same as user the rule is Applicable To,Approuver l'utilisateur ne peut pas être identique à l'utilisateur la règle est applicable aux
-Are you sure you want to STOP ,
-Are you sure you want to UNSTOP ,
+Are you sure you want to STOP ,Are you sure you want to STOP 
+Are you sure you want to UNSTOP ,Are you sure you want to UNSTOP 
 Arrear Amount,Montant échu
 "As Production Order can be made for this item, it must be a stock item.","Comme ordre de fabrication peut être faite de cet élément, il doit être un article en stock ."
 As per Stock UOM,Selon Stock UDM
@@ -265,11 +265,11 @@ Asset,atout
 Assistant,assistant
 Associate,associé
 Atleast one of the Selling or Buying must be selected,Au moins un de la vente ou l'achat doit être sélectionné
-Atleast one warehouse is mandatory,Atleast un entrepôt est obligatoire
-Attach Image,suivant
-Attach Letterhead,Fixez -tête
-Attach Logo,S'il vous plaît sélectionner un fichier csv valide avec les données
-Attach Your Picture,Liquidation Date non mentionné
+Atleast one warehouse is mandatory,Au moins un entrepôt est obligatoire
+Attach Image,Joindre l'image
+Attach Letterhead,Joindre l'entête
+Attach Logo,Joindre le logo
+Attach Your Picture,Joindre votre photo
 Attendance,Présence
 Attendance Date,Date de Participation
 Attendance Details,Détails de présence
@@ -285,7 +285,7 @@ Auto Accounting For Stock Settings,Auto Comptabilité Pour les paramètres de dr
 Auto Material Request,Auto Demande de Matériel
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,Auto-raise Demande de Matériel si la quantité va en dessous du niveau de re-commande dans un entrepôt
 Automatically compose message on submission of transactions.,Composer automatiquement un message sur la soumission de transactions .
-Automatically extract Job Applicants from a mail box ,
+Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,Extraire automatiquement des prospects à partir d'une boîte aux lettres par exemple
 Automatically updated via Stock Entry of type Manufacture/Repack,Automatiquement mis à jour via l&#39;entrée de fabrication de type Stock / Repack
 Automotive,automobile
@@ -369,7 +369,7 @@ Billed Amount,Montant facturé
 Billed Amt,Bec Amt
 Billing,Facturation
 Billing Address,Adresse de facturation
-Billing Address Name,Facturation Nom Adresse
+Billing Address Name,Nom de l'adresse de facturation
 Billing Status,Statut de la facturation
 Bills raised by Suppliers.,Factures soulevé par les fournisseurs.
 Bills raised to Customers.,Factures aux clients soulevé.
@@ -380,10 +380,10 @@ Birthday,anniversaire
 Block Date,Date de bloquer
 Block Days,Bloquer les jours
 Block leave applications by department.,Bloquer les demandes d&#39;autorisation par le ministère.
-Blog Post,Blog
+Blog Post,Article de blog
 Blog Subscriber,Abonné Blog
 Blood Group,Groupe sanguin
-Both Warehouse must belong to same Company,Les deux Entrepôt doit appartenir à une même entreprise
+Both Warehouse must belong to same Company,Les deux Entrepôt doivent appartenir à la même entreprise
 Box,boîte
 Branch,Branche
 Brand,Marque
@@ -406,7 +406,7 @@ Build Report,Créer un rapport
 Bundle items at time of sale.,Regrouper des envois au moment de la vente.
 Business Development Manager,Directeur du développement des affaires
 Buying,Achat
-Buying & Selling,Fin d'année financière Date
+Buying & Selling,Achats et ventes
 Buying Amount,Montant d&#39;achat
 Buying Settings,Réglages d&#39;achat
 "Buying must be checked, if Applicable For is selected as {0}","Achat doit être vérifiée, si pour Applicable est sélectionné comme {0}"
@@ -428,11 +428,11 @@ Call,Appeler
 Calls,appels
 Campaign,Campagne
 Campaign Name,Nom de la campagne
-Campaign Name is required,Maître à la clientèle .
+Campaign Name is required,Le nom de la campagne est requis
 Campaign Naming By,Campagne Naming par
-Campaign-.####,Centre de coûts de transactions existants ne peut pas être converti en groupe
+Campaign-.####,Campagne-.####
 Can be approved by {0},Peut être approuvé par {0}
-"Can not filter based on Account, if grouped by Account","Impossible de filtrer sur la base de compte , si regroupées par compte"
+"Can not filter based on Account, if grouped by Account","Impossible de filtrer sur les compte , si regroupées par compte"
 "Can not filter based on Voucher No, if grouped by Voucher","Impossible de filtrer sur la base Bon Non, si regroupés par Chèque"
 Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total',Remarque : {0}
 Cancel Material Visit {0} before cancelling this Customer Issue,Invalid serveur de messagerie . S'il vous plaît corriger et essayer à nouveau.
@@ -441,10 +441,10 @@ Cancelled,Annulé
 Cancelling this Stock Reconciliation will nullify its effect.,Annulation de ce stock de réconciliation annuler son effet .
 Cannot Cancel Opportunity as Quotation Exists,Vous ne pouvez pas annuler Possibilité de devis Existe
 Cannot approve leave as you are not authorized to approve leaves on Block Dates,Vous ne pouvez pas approuver les congés que vous n'êtes pas autorisé à approuver les congés sur les dates de bloc
-Cannot cancel because Employee {0} is already approved for {1},Vous ne pouvez pas annuler parce employés {0} est déjà approuvé pour {1}
+Cannot cancel because Employee {0} is already approved for {1},Impossible d'annuler car l'employé {0} est déjà approuvé pour {1}
 Cannot cancel because submitted Stock Entry {0} exists,Vous ne pouvez pas annuler car soumis Stock entrée {0} existe
 Cannot carry forward {0},Point {0} doit être un achat article
-Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved.,Vous ne pouvez pas modifier Exercice Date de départ et de l'exercice Date de fin une fois l'exercice est enregistré.
+Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved.,Impossible de modifier les dates de début et de fin d'exercice une fois que l'exercice est enregistré.
 "Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency.",Voyage
 Cannot convert Cost Center to ledger as it has child nodes,Vous ne pouvez pas convertir le centre de coûts à livre car il possède des nœuds enfant
 Cannot covert to Group because Master Type or Account Type is selected.,Il y avait des erreurs lors de l'envoi de courriel . S'il vous plaît essayez de nouveau .
@@ -842,13 +842,13 @@ Distributor,Distributeur
 Divorced,Divorcé
 Do Not Contact,Ne communiquez pas avec
 Do not show any symbol like $ etc next to currencies.,Ne plus afficher n&#39;importe quel symbole comme $ etc à côté de devises.
-Do really want to unstop production order: ,
-Do you really want to STOP ,
+Do really want to unstop production order: ,Do really want to unstop production order: 
+Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,Voulez-vous vraiment arrêter cette Demande de Matériel ?
 Do you really want to Submit all Salary Slip for month {0} and year {1},"Statut du document de transition {0} {1}, n'est pas autorisé"
-Do you really want to UNSTOP ,
+Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,Voulez-vous vraiment à ce unstop Demande de Matériel ?
-Do you really want to stop production order: ,
+Do you really want to stop production order: ,Do you really want to stop production order: 
 Doc Name,Nom de Doc
 Doc Type,Doc Type d&#39;
 Document Description,Description du document
@@ -900,7 +900,7 @@ Electronics,électronique
 Email,Email
 Email Digest,Email Digest
 Email Digest Settings,Paramètres de messagerie Digest
-Email Digest: ,
+Email Digest: ,Email Digest: 
 Email Id,Identification d&#39;email
 "Email Id where a job applicant will email e.g. ""jobs@example.com""",Identification d&#39;email où un demandeur d&#39;emploi enverra par courriel par exemple &quot;jobs@example.com&quot;
 Email Notifications,Notifications par courriel
@@ -960,7 +960,7 @@ Enter url parameter for receiver nos,Entrez le paramètre url pour nos récepteu
 Entertainment & Leisure,Entertainment & Leisure
 Entertainment Expenses,Frais de représentation
 Entries,Entrées
-Entries against ,
+Entries against ,Entries against 
 Entries are not allowed against this Fiscal Year if the year is closed.,Les inscriptions ne sont pas autorisés contre cette exercice si l&#39;année est fermé.
 Equity,Opération {0} est répété dans le tableau des opérations
 Error: {0} > {1},Erreur: {0} > {1}
@@ -1575,7 +1575,7 @@ Maintenance Visit Purpose,But Visite d&#39;entretien
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Doublons {0} avec la même {1}
 Maintenance start date can not be before delivery date for Serial No {0},Entretien date de début ne peut pas être avant la date de livraison pour série n ° {0}
 Major/Optional Subjects,Sujets principaux / en option
-Make ,
+Make ,Make 
 Make Accounting Entry For Every Stock Movement,Faites Entrée Comptabilité Pour chaque mouvement Stock
 Make Bank Voucher,Assurez-Bon Banque
 Make Credit Note,Assurez Note de crédit
@@ -2450,7 +2450,7 @@ Rounded Off,Période est trop courte
 Rounded Total,Totale arrondie
 Rounded Total (Company Currency),Totale arrondie (Société Monnaie)
 Row # ,Row #
-Row # {0}: ,
+Row # {0}: ,Row # {0}: 
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Ligne # {0}: quantité Commandé ne peut pas moins que l'ordre minimum quantité de produit (défini dans le maître de l'article).
 Row #{0}: Please specify Serial No for Item {1},Ligne # {0}: S'il vous plaît spécifier Pas de série pour objet {1}
 Row {0}: Account does not match with \						Purchase Invoice Credit To account,Ligne {0}: compte ne correspond pas à \ Facture d'achat crédit du compte
@@ -2752,7 +2752,7 @@ Stock Ageing,Stock vieillissement
 Stock Analytics,Analytics stock
 Stock Assets,payable
 Stock Balance,Solde Stock
-Stock Entries already created for Production Order ,
+Stock Entries already created for Production Order ,Stock Entries already created for Production Order 
 Stock Entry,Entrée Stock
 Stock Entry Detail,Détail d&#39;entrée Stock
 Stock Expenses,Facteur de conversion de l'unité de mesure par défaut doit être de 1 à la ligne {0}

@@ -1,1 +1,0 @@
-[To deprecate] Common scripts for Contacts.

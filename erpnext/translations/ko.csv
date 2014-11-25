@@ -1,5 +1,5 @@
- (Half Day),
- and year: ,
+ (Half Day), (Half Day)
+ and year: , and year: 
 """ does not exists","""존재하지 않습니다"
 %  Delivered,% 배달
 % Amount Billed,청구 % 금액
@@ -92,7 +92,7 @@ Accounts Payable,채무
 Accounts Receivable,미수금
 Accounts Settings,계정 설정을
 Active,활성화
-Active: Will extract emails from ,
+Active: Will extract emails from ,Active: Will extract emails from 
 Activity,활동 내역
 Activity Log,작업 로그
 Activity Log:,활동 로그 :
@@ -254,8 +254,8 @@ Approving Role,승인 역할
 Approving Role cannot be same as role the rule is Applicable To,역할을 승인하면 규칙이 적용됩니다 역할로 동일 할 수 없습니다
 Approving User,승인 사용자
 Approving User cannot be same as user the rule is Applicable To,사용자가 승인하면 규칙에 적용 할 수있는 사용자로 동일 할 수 없습니다
-Are you sure you want to STOP ,
-Are you sure you want to UNSTOP ,
+Are you sure you want to STOP ,Are you sure you want to STOP 
+Are you sure you want to UNSTOP ,Are you sure you want to UNSTOP 
 Arrear Amount,연체 금액
 "As Production Order can be made for this item, it must be a stock item.","생산 주문이 항목에 대한 만들 수 있습니다, 그것은 재고 품목 수 있어야합니다."
 As per Stock UOM,주식 UOM 당
@@ -284,7 +284,7 @@ Auto Accounting For Stock Settings,재고 설정에 대한 자동 회계
 Auto Material Request,자동 자료 요청
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,자동 인상 자료 요청 수량은 창고에 다시 주문 레벨 이하로되면
 Automatically compose message on submission of transactions.,자동 거래의 제출에 메시지를 작성합니다.
-Automatically extract Job Applicants from a mail box ,
+Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,자동으로 메일 박스의 예에서 리드를 추출
 Automatically updated via Stock Entry of type Manufacture/Repack,자동 형 제조 / 다시 채워 스톡 엔트리를 통해 업데이트
 Automotive,자동차
@@ -511,7 +511,7 @@ Clearance Date,통관 날짜
 Clearance Date not mentioned,통관 날짜 언급되지
 Clearance date cannot be before check date in row {0},통관 날짜 행 체크인 날짜 이전 할 수 없습니다 {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,새로운 판매 송장을 작성하는 '판매 송장 확인'버튼을 클릭합니다.
-Click on a link to get options to expand get options ,
+Click on a link to get options to expand get options ,Click on a link to get options to expand get options 
 Client,클라이언트
 Close Balance Sheet and book Profit or Loss.,닫기 대차 대조표 및 책 이익 또는 손실.
 Closed,닫힘
@@ -841,13 +841,13 @@ Distributor,분배 자
 Divorced,이혼
 Do Not Contact,연락하지 말라
 Do not show any symbol like $ etc next to currencies.,다음 통화 $ 등과 같은 모든 기호를 표시하지 마십시오.
-Do really want to unstop production order: ,
-Do you really want to STOP ,
+Do really want to unstop production order: ,Do really want to unstop production order: 
+Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,당신은 정말이 자료 요청을 중지 하시겠습니까?
 Do you really want to Submit all Salary Slip for month {0} and year {1},당신은 정말 {0}과 {1} 년 달에 대한 모든 급여 슬립 제출 하시겠습니까
-Do you really want to UNSTOP ,
+Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,당신은 정말이 자료 요청을 멈추지 하시겠습니까?
-Do you really want to stop production order: ,
+Do you really want to stop production order: ,Do you really want to stop production order: 
 Doc Name,문서의 이름
 Doc Type,문서 유형
 Document Description,문서 설명
@@ -899,7 +899,7 @@ Electronics,전자 공학
 Email,이메일
 Email Digest,이메일 다이제스트
 Email Digest Settings,알림 이메일 설정
-Email Digest: ,
+Email Digest: ,Email Digest: 
 Email Id,이메일 아이디
 "Email Id where a job applicant will email e.g. ""jobs@example.com""","작업 신청자가 보내드립니다 이메일 ID 예를 들면 ""jobs@example.com"""
 Email Notifications,전자 메일 알림
@@ -927,7 +927,7 @@ Employee Settings,직원 설정
 Employee Type,직원 유형
 "Employee designation (e.g. CEO, Director etc.).","직원 지정 (예 : CEO, 이사 등)."
 Employee master.,직원 마스터.
-Employee record is created using selected field. ,
+Employee record is created using selected field. ,Employee record is created using selected field. 
 Employee records.,직원 기록.
 Employee relieved on {0} must be set as 'Left',{0}에 안심 직원은 '왼쪽'으로 설정해야합니다
 Employee {0} has already applied for {1} between {2} and {3},직원 {0}이 (가) 이미 사이에 {1}를 신청했다 {2}와 {3}
@@ -959,7 +959,7 @@ Enter url parameter for receiver nos,수신기 NOS에 대한 URL 매개 변수�
 Entertainment & Leisure,엔터테인먼트 & 레저
 Entertainment Expenses,접대비
 Entries,항목
-Entries against ,
+Entries against ,Entries against 
 Entries are not allowed against this Fiscal Year if the year is closed.,올해가 닫혀있는 경우 항목이 회계 연도에 허용되지 않습니다.
 Equity,공평
 Error: {0} > {1},오류 : {0}> {1}
@@ -1024,7 +1024,7 @@ Exports,수출
 External,외부
 Extract Emails,이메일을 추출
 FCFS Rate,FCFS 평가
-Failed: ,
+Failed: ,Failed: 
 Family Background,가족 배경
 Fax,팩스
 Features Setup,기능 설정
@@ -1245,7 +1245,7 @@ If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged 
 If you involve in manufacturing activity. Enables Item 'Is Manufactured',당신이 생산 활동에 참여합니다.항목을 활성화는 '제조'
 Ignore,무시
 Ignore Pricing Rule,가격 규칙을 무시
-Ignored: ,
+Ignored: ,Ignored: 
 Image,영상
 Image View,이미지보기
 Implementation Partner,구현 파트너
@@ -1574,7 +1574,7 @@ Maintenance Visit Purpose,유지 보수 방문 목적
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,유지 보수 방문은 {0}이 판매 주문을 취소하기 전에 취소해야합니다
 Maintenance start date can not be before delivery date for Serial No {0},유지 보수 시작 날짜 일련 번호에 대한 배달 날짜 이전 할 수 없습니다 {0}
 Major/Optional Subjects,주요 / 선택 주제
-Make ,
+Make ,Make 
 Make Accounting Entry For Every Stock Movement,모든 주식 이동을위한 회계 항목을 만듭니다
 Make Bank Voucher,은행 바우처에게 확인
 Make Credit Note,신용 참고하십시오
@@ -1723,7 +1723,7 @@ Net Weight UOM,순 중량 UOM
 Net Weight of each Item,각 항목의 순 중량
 Net pay cannot be negative,순 임금은 부정 할 수 없습니다
 Never,안함
-New ,
+New ,New 
 New Account,새 계정
 New Account Name,새 계정 이름
 New BOM,새로운 BOM
@@ -1789,7 +1789,7 @@ No permission,아무 권한이 없습니다
 No record found,검색된 레코드가 없습니다
 No records found in the Invoice table,송장 테이블에있는 레코드 없음
 No records found in the Payment table,지불 테이블에있는 레코드 없음
-No salary slip found for month: ,
+No salary slip found for month: ,No salary slip found for month: 
 Non Profit,비영리
 Nos,NOS
 Not Active,동작 없음
@@ -2448,8 +2448,8 @@ Root cannot have a parent cost center,루트는 부모의 비용 센터를 가�
 Rounded Off,둥근 오프
 Rounded Total,둥근 총
 Rounded Total (Company Currency),둥근 합계 (회사 통화)
-Row # ,
-Row # {0}: ,
+Row # ,Row # 
+Row # {0}: ,Row # {0}: 
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,행 # {0} : 주문 된 수량 (품목 마스터에 정의 된) 항목의 최소 주문 수량보다 적은 수 없습니다.
 Row #{0}: Please specify Serial No for Item {1},행 번호는 {0} 항목에 대한 일련 번호를 지정하십시오 {1}
 Row {0}: Account does not match with \						Purchase Invoice Credit To account,행 {0} : \ 구매 송장 신용 계정에 대한 계정과 일치하지 않습니다
@@ -2751,7 +2751,7 @@ Stock Ageing,주식 고령화
 Stock Analytics,증권 분석
 Stock Assets,재고 자산
 Stock Balance,주식 대차
-Stock Entries already created for Production Order ,
+Stock Entries already created for Production Order ,Stock Entries already created for Production Order 
 Stock Entry,재고 항목
 Stock Entry Detail,재고 항목의 세부 사항
 Stock Expenses,재고 비용
@@ -2797,7 +2797,7 @@ Submit all salary slips for the above selected criteria,위의 선택 기준에 
 Submit this Production Order for further processing.,추가 처리를 위해이 생산 주문을 제출합니다.
 Submitted,제출
 Subsidiary,자회사
-Successful: ,
+Successful: ,Successful: 
 Successfully Reconciled,성공적으로 조정 됨
 Suggestions,제안
 Sunday,일요일
@@ -2915,7 +2915,7 @@ The Organization,조직
 "The account head under Liability, in which Profit/Loss will be booked","이익 / 손실은 예약 할 수있는 책임에서 계정 머리,"
 The date on which next invoice will be generated. It is generated on submit.,다음 송장이 생성되는 날짜입니다.그것은 제출에 생성됩니다.
 The date on which recurring invoice will be stop,반복 송장이 중단 될 일자
-"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","The day of the month on which auto invoice will be generated e.g. 05, 28 etc "
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,당신이 허가를 신청하는 날 (들)은 휴일입니다.당신은 휴가를 신청할 필요가 없습니다.
 The first Leave Approver in the list will be set as the default Leave Approver,목록의 첫 번째 허가 승인자는 기본 남겨 승인자로 설정됩니다
 The first user will become the System Manager (you can change that later).,첫 번째 사용자 (당신은 나중에 변경할 수 있습니다) 시스템 관리자가 될 것입니다.
@@ -3002,7 +3002,7 @@ Total Advance,전체 사전
 Total Amount,총액
 Total Amount To Pay,지불하는 총 금액
 Total Amount in Words,단어의 합계 금액
-Total Billing This Year: ,
+Total Billing This Year: ,Total Billing This Year: 
 Total Characters,전체 문자
 Total Claimed Amount,총 주장 금액
 Total Commission,전체위원회

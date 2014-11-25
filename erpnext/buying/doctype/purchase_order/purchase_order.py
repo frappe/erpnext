@@ -247,7 +247,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
-		target.qty = target.amount / flt(obj.rate) if flt(obj.rate) else flt(obj.qty)
+		target.qty = target.amount / flt(obj.rate) if (flt(obj.rate) and flt(obj.billed_amt)) else flt(obj.qty)
 
 	doc = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {

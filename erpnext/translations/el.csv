@@ -36,20 +36,20 @@
 "<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> Προεπιλογή Πρότυπο </ h4>  <p> Χρήσεις <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </ a> και όλα τα πεδία της Διεύθυνσης ( συμπεριλαμβανομένων των προσαρμοσμένων πεδίων, αν υπάρχουν) θα είναι διαθέσιμο </ p>  <pre> <code> {{}} address_line1 <br>  {% εάν address_line2%} {{}} address_line2 <br> { endif% -%}  {{}} πόλη <br>  {% αν το κράτος%} {{}} κατάσταση <br> {endif% -%}  {% εάν pincode%} PIN: {{}} pincode <br> {endif% -%}  {{}} χώρα <br>  {% αν το τηλέφωνο%} Τηλέφωνο: {{}} τηλέφωνο <br> { endif% -%}  {% εάν φαξ%} Fax: {{}} fax <br> {endif% -%}  {% εάν email_id%} Email: {{}} email_id <br> ? {endif% -%}  </ code> </ pre>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,Μια ομάδα πελατών υπάρχει με το ίδιο όνομα παρακαλούμε να αλλάξετε το όνομα του Πελάτη ή να μετονομάσετε την ομάδα πελατών
 A Customer exists with same name,Ένας πελάτης υπάρχει με το ίδιο όνομα
-A Lead with this email id should exist,Μια μολύβδου με αυτή την ταυτότητα ηλεκτρονικού ταχυδρομείου θα πρέπει να υπάρχει
+A Lead with this email id should exist,Μια επαφή με αυτή τη διεύθυνση ηλεκτρονικού ταχυδρομείου θα πρέπει να υπάρχει
 A Product or Service,Ένα Προϊόν ή Υπηρεσία
 A Supplier exists with same name,Ένας προμηθευτής υπάρχει με το ίδιο όνομα
 A symbol for this currency. For e.g. $,Ένα σύμβολο για το νόμισμα αυτό. Για παράδειγμα $
 AMC Expiry Date,AMC Ημερομηνία Λήξης
 Abbr,Συντ.
-Abbreviation cannot have more than 5 characters,Μια συντομογραφία δεν μπορεί να έχει περισσότερα από 5 χαρακτήρες
+Abbreviation cannot have more than 5 characters,Μια συντομογραφία δεν μπορεί να έχει περισσότερους από 5 χαρακτήρες
 Above Value,Πάνω Value
 Absent,Απών
-Acceptance Criteria,Κριτήρια αποδοχής
+Acceptance Criteria,Αποδοχή κριτήρίων
 Accepted,Δεκτός
-Accepted + Rejected Qty must be equal to Received quantity for Item {0},Αποδεκτές + Απορρίπτεται Ποσότητα πρέπει να είναι ίση με Ελήφθη ποσότητα για τη θέση {0}
-Accepted Quantity,ΠΟΣΟΤΗΤΑ
-Accepted Warehouse,Αποδεκτές αποθήκη
+Accepted + Rejected Qty must be equal to Received quantity for Item {0},Η Αποδεκτή + η Απορριπτέα ποσότητα πρέπει να είναι ίση με ληφθήσα ποσότητα για τη θέση {0}
+Accepted Quantity,Αποδεκτή ποσότητα
+Accepted Warehouse,Αποδεκτή Aποθήκη
 Account,Λογαριασμός
 Account Balance,Υπόλοιπο Λογαριασμού
 Account Created: {0},Ο λογαριασμός δημιουργήθηκε : {0}
@@ -57,8 +57,8 @@ Account Details,Στοιχεία Λογαριασμού
 Account Head,Επικεφαλής λογαριασμού
 Account Name,Όνομα λογαριασμού
 Account Type,Είδος Λογαριασμού
-"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Το υπόλοιπο του λογαριασμού ήδη Credit, δεν σας επιτρέπεται να θέσει «Υπόλοιπο Must Be» ως «χρεωστικές»"
-"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Το υπόλοιπο του λογαριασμού ήδη Debit, δεν μπορείτε να ρυθμίσετε το 'Υπόλοιπο Must Be »ως« Δάνειο »"
+"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Το υπόλοιπο του λογαριασμού είναι ήδη πιστωτικό, δεν επιτρέπεται να ρυθμίσετε το «Υπόλοιπο πρέπει να είναι χρεωστικό»"
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Το υπόλοιπο του λογαριασμού ήδη χρεωστικό, δεν μπορείτε να ρυθμίσετε το 'Υπόλοιπο πρέπει να είναι ως Δάνειο »"
 Account for the warehouse (Perpetual Inventory) will be created under this Account.,Λογαριασμός για την αποθήκη ( Perpetual Απογραφή ) θα δημιουργηθεί στο πλαίσιο του παρόντος λογαριασμού.
 Account head {0} created,Κεφάλι Λογαριασμός {0} δημιουργήθηκε
 Account must be a balance sheet account,Ο λογαριασμός πρέπει να είναι λογαριασμός του ισολογισμού
@@ -214,8 +214,8 @@ Amended From,Τροποποίηση Από
 Amount,Ποσό
 Amount (Company Currency),Ποσό (νόμισμα της Εταιρείας)
 Amount Paid,Ποσό Αμειβόμενος
-Amount to Bill,Ανέρχονται σε Bill
-An Customer exists with same name,Υπάρχει ένα πελάτη με το ίδιο όνομα
+Amount to Bill,Χρεώσιμο Ποσό
+An Customer exists with same name,Υπάρχει  πελάτης με το ίδιο όνομα
 "An Item Group exists with same name, please change the item name or rename the item group","Ένα σημείο της ομάδας υπάρχει με το ίδιο όνομα , μπορείτε να αλλάξετε το όνομα του στοιχείου ή να μετονομάσετε την ομάδα στοιχείου"
 "An item exists with same name ({0}), please change the item group name or rename the item","Ένα στοιχείο υπάρχει με το ίδιο όνομα ( {0} ) , παρακαλούμε να αλλάξετε το όνομα της ομάδας στοιχείου ή να μετονομάσετε το στοιχείο"
 Analyst,αναλυτής
@@ -254,14 +254,14 @@ Approving Role,Έγκριση Ρόλος
 Approving Role cannot be same as role the rule is Applicable To,"Έγκριση ρόλος δεν μπορεί να είναι ίδιο με το ρόλο , ο κανόνας είναι να εφαρμόζεται"
 Approving User,Έγκριση χρήστη
 Approving User cannot be same as user the rule is Applicable To,Την έγκριση του χρήστη δεν μπορεί να είναι ίδιο με το χρήστη ο κανόνας ισχύει για
-Are you sure you want to STOP ,
-Are you sure you want to UNSTOP ,
+Are you sure you want to STOP ,Είσαστε σίγουροι πως θέλετε να σταματήσετε
+Are you sure you want to UNSTOP ,Are you sure you want to UNSTOP 
 Arrear Amount,Καθυστερήσεις Ποσό
 "As Production Order can be made for this item, it must be a stock item.","Όπως μπορεί να γίνει Παραγωγής παραγγελίας για το συγκεκριμένο προϊόν , θα πρέπει να είναι ένα στοιχείο υλικού."
 As per Stock UOM,Όπως ανά Διαθέσιμο UOM
 "As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Is Stock Item' and 'Valuation Method'","Δεδομένου ότι υπάρχουν χρηματιστηριακές συναλλαγές για αυτό το στοιχείο , δεν μπορείτε να αλλάξετε τις τιμές των « Έχει Αύξων αριθμός », « Είναι Stock σημείο » και « Μέθοδος αποτίμησης»"
 Asset,προσόν
-Assistant,βοηθός
+Assistant,Βοηθός
 Associate,Συνεργάτης
 Atleast one of the Selling or Buying must be selected,Πρέπει να επιλεγεί τουλάχιστον μία από τις πωλήσεις ή την αγορά
 Atleast one warehouse is mandatory,"Τουλάχιστον, μια αποθήκη είναι υποχρεωτική"
@@ -270,27 +270,27 @@ Attach Letterhead,Συνδέστε επιστολόχαρτο
 Attach Logo,Συνδέστε Logo
 Attach Your Picture,Προσαρμόστε την εικόνα σας
 Attendance,Παρουσία
-Attendance Date,Ημερομηνία Συμμετοχή
-Attendance Details,Λεπτομέρειες Συμμετοχή
+Attendance Date,Ημερομηνία Συμμετοχής
+Attendance Details,Λεπτομέρειες Συμμετοχής
 Attendance From Date,Συμμετοχή Από Ημερομηνία
-Attendance From Date and Attendance To Date is mandatory,Συμμετοχή Από Ημερομηνία και φοίτηση μέχρι σήμερα είναι υποχρεωτική
-Attendance To Date,Συμμετοχή σε Ημερομηνία
+Attendance From Date and Attendance To Date is mandatory,Η συμμετοχή Από και Μέχρι είναι υποχρεωτική
+Attendance To Date,Προσέλευση μέχρι Ημερομηνία
 Attendance can not be marked for future dates,Συμμετοχή δεν μπορεί να επιλεγεί για τις μελλοντικές ημερομηνίες
-Attendance for employee {0} is already marked,Συμμετοχή των εργαζομένων για {0} έχει ήδη σημειώνονται
-Attendance record.,Ρεκόρ προσέλευσης.
-Authorization Control,Έλεγχος της χορήγησης αδειών
-Authorization Rule,Κανόνας Εξουσιοδότηση
+Attendance for employee {0} is already marked,Συμμετοχή για εργαζομένο {0} έχει ήδη σημειώθει
+Attendance record.,Καταχωρήσεις Προσέλευσης.
+Authorization Control,Έλεγχος Εξουσιοδότησης
+Authorization Rule,Κανόνας Εξουσιοδότησης
 Auto Accounting For Stock Settings,Auto Λογιστικά Για Ρυθμίσεις Χρηματιστήριο
 Auto Material Request,Αυτόματη Αίτηση Υλικό
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,Auto-raise Αίτηση Υλικό εάν η ποσότητα πέσει κάτω εκ νέου για το επίπεδο σε μια αποθήκη
 Automatically compose message on submission of transactions.,Αυτόματη συνθέτουν το μήνυμα για την υποβολή των συναλλαγών .
-Automatically extract Job Applicants from a mail box ,
+Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,"Αυτόματη εξαγωγή οδηγεί από ένα κουτί αλληλογραφίας , π.χ."
 Automatically updated via Stock Entry of type Manufacture/Repack,Αυτόματη ενημέρωση μέσω είσοδο στα αποθέματα Κατασκευή Τύπος / Repack
 Automotive,Αυτοκίνητο
 Autoreply when a new mail is received,Autoreply όταν λαμβάνονται νέα μηνύματα
 Available,Διαθέσιμος
-Available Qty at Warehouse,Διαθέσιμο Ποσότητα σε αποθήκη
+Available Qty at Warehouse,Διαθέσιμο Ποσότητα στην Αποθήκη
 Available Stock for Packing Items,Διαθέσιμο Διαθέσιμο για είδη συσκευασίας
 "Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","Διατίθεται σε BOM , Δελτίο Αποστολής , Τιμολόγιο Αγοράς , Παραγωγής Τάξης, Παραγγελία Αγοράς, Αγορά Παραλαβή , Πωλήσεις Τιμολόγιο , Πωλήσεις Τάξης , Stock Έναρξη , φύλλο κατανομής χρόνου"
 Average Age,Μέσος όρος ηλικίας
@@ -511,7 +511,7 @@ Clearance Date,Ημερομηνία Εκκαθάριση
 Clearance Date not mentioned,Εκκαθάριση Ημερομηνία που δεν αναφέρονται
 Clearance date cannot be before check date in row {0},Ημερομηνία εκκαθάρισης δεν μπορεί να είναι πριν από την ημερομηνία άφιξης στη γραμμή {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Κάντε κλικ στο «Κάνε Πωλήσεις Τιμολόγιο» για να δημιουργηθεί μια νέα τιμολογίου πώλησης.
-Click on a link to get options to expand get options ,
+Click on a link to get options to expand get options ,Click on a link to get options to expand get options 
 Client,Πελάτης
 Close Balance Sheet and book Profit or Loss.,Κλείσιμο Ισολογισμού και των Αποτελεσμάτων βιβλίο ή απώλεια .
 Closed,Κλειστό
@@ -841,13 +841,13 @@ Distributor,Διανομέας
 Divorced,Διαζευγμένος
 Do Not Contact,Μην Επικοινωνία
 Do not show any symbol like $ etc next to currencies.,Να μην εμφανίζεται κανένα σύμβολο όπως $ κλπ δίπλα σε νομίσματα.
-Do really want to unstop production order: ,
-Do you really want to STOP ,
+Do really want to unstop production order: ,Do really want to unstop production order: 
+Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,Θέλετε πραγματικά να σταματήσει αυτό το υλικό την Αίτηση Συμμετοχής;
 Do you really want to Submit all Salary Slip for month {0} and year {1},Θέλετε πραγματικά να υποβληθούν όλα τα Slip Μισθός για το μήνα {0} και {1 χρόνο }
-Do you really want to UNSTOP ,
+Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,Θέλετε πραγματικά να ξεβουλώνω αυτό Υλικό Αίτηση Συμμετοχής;
-Do you really want to stop production order: ,
+Do you really want to stop production order: ,Do you really want to stop production order: 
 Doc Name,Doc Name
 Doc Type,Doc Τύπος
 Document Description,Περιγραφή εγγράφου
@@ -899,7 +899,7 @@ Electronics,ηλεκτρονική
 Email,Email
 Email Digest,Email Digest
 Email Digest Settings,Email Digest Ρυθμίσεις
-Email Digest: ,
+Email Digest: ,Email Digest: 
 Email Id,Id Email
 "Email Id where a job applicant will email e.g. ""jobs@example.com""","Email Id, όπου ένας υποψήφιος θα e-mail π.χ. &quot;jobs@example.com&quot;"
 Email Notifications,Ειδοποιήσεις μέσω ηλεκτρονικού ταχυδρομείου
@@ -959,7 +959,7 @@ Enter url parameter for receiver nos,Εισάγετε παράμετρο url γ�
 Entertainment & Leisure,Διασκέδαση & Leisure
 Entertainment Expenses,Έξοδα Ψυχαγωγία
 Entries,Καταχωρήσεις
-Entries against ,
+Entries against ,Entries against 
 Entries are not allowed against this Fiscal Year if the year is closed.,"Οι συμμετοχές δεν επιτρέπεται κατά το τρέχον οικονομικό έτος, εάν το έτος είναι κλειστή."
 Equity,δικαιοσύνη
 Error: {0} > {1},Σφάλμα : {0} > {1}
@@ -1480,18 +1480,18 @@ Language,Γλώσσα
 Last Name,Επώνυμο
 Last Purchase Rate,Τελευταία Τιμή Αγοράς
 Latest,αργότερο
-Lead,Μόλυβδος
-Lead Details,Μόλυβδος Λεπτομέρειες
-Lead Id,Μόλυβδος Id
-Lead Name,Μόλυβδος Name
-Lead Owner,Μόλυβδος Ιδιοκτήτης
-Lead Source,Μόλυβδος Πηγή
-Lead Status,Lead Κατάσταση
-Lead Time Date,Μόλυβδος Ημερομηνία Ώρα
-Lead Time Days,Μόλυβδος Ημέρες Ώρα
-Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,"Μόλυβδος μέρες είναι ο αριθμός των ημερών κατά τον οποίο το στοιχείο αυτό αναμένεται στην αποθήκη σας. Αυτό μέρες είναι παρατραβηγμένο σε αίτημα αφορά υλικό, όταν επιλέξετε αυτό το στοιχείο."
-Lead Type,Μόλυβδος Τύπος
-Lead must be set if Opportunity is made from Lead,Ο μόλυβδος πρέπει να οριστεί αν Ευκαιρία είναι κατασκευασμένο από μόλυβδο
+Lead,Επαφή
+Lead Details,Λεπτομέρειες Επαφής
+Lead Id,Id Επαφής
+Lead Name,Όνομα Επαφής
+Lead Owner,Ιδιοκτήτης Επαφής
+Lead Source,Από που προήρθε η Επαφή
+Lead Status,Κατάσταση Επαφής
+Lead Time Date,Ημερομηνία Ώρα Επαφής
+Lead Time Days,Ημέρα Ώρα Επαφής
+Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,"Ο χρόνος παράδοσης σε ημέρες είναι ο αριθμός των ημερών κατά τον οποίο το στοιχείο αυτό αναμένεται στην αποθήκη σας. Αυτές οι μέρες αναφέρεται σε αίτημα που αφορά υλικό, όταν επιλέξετε αυτό το στοιχείο."
+Lead Type,Τύπος Επαφής
+Lead must be set if Opportunity is made from Lead,Η Επαφή πρέπει να οριστεί αν η Ευκαιρία προέρχεται από επαφή
 Leave Allocation,Αφήστε Κατανομή
 Leave Allocation Tool,Αφήστε το εργαλείο Κατανομή
 Leave Application,Αφήστε Εφαρμογή
@@ -1574,7 +1574,7 @@ Maintenance Visit Purpose,Σκοπός Συντήρηση Επίσκεψη
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Συντήρηση Επίσκεψη {0} πρέπει να ακυρωθεί πριν από την ακύρωση αυτής της παραγγελίας πώλησης
 Maintenance start date can not be before delivery date for Serial No {0},Ημερομηνία έναρξης συντήρησης δεν μπορεί να είναι πριν από την ημερομηνία παράδοσης Αύξων αριθμός {0}
 Major/Optional Subjects,Σημαντικές / προαιρετικά μαθήματα
-Make ,
+Make ,Make 
 Make Accounting Entry For Every Stock Movement,Κάντε Λογιστική καταχώρηση για κάθε Κίνημα Χρηματιστήριο
 Make Bank Voucher,Κάντε Voucher Bank
 Make Credit Note,Κάντε Πιστωτικό Σημείωμα
@@ -1723,7 +1723,7 @@ Net Weight UOM,Καθαρό Βάρος UOM
 Net Weight of each Item,Καθαρό βάρος κάθε είδους
 Net pay cannot be negative,Καθαρή αμοιβή δεν μπορεί να είναι αρνητική
 Never,Ποτέ
-New ,
+New ,New 
 New Account,Νέος λογαριασμός
 New Account Name,Νέο Όνομα λογαριασμού
 New BOM,Νέα BOM
@@ -2449,7 +2449,7 @@ Rounded Off,στρογγυλοποιηθεί
 Rounded Total,Στρογγυλεμένες Σύνολο
 Rounded Total (Company Currency),Στρογγυλεμένες Σύνολο (νόμισμα της Εταιρείας)
 Row # ,Row #
-Row # {0}: ,
+Row # {0}: ,Row # {0}: 
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Σειρά # {0}: Διέταξε ποσότητα δεν μπορεί να μικρότερη από την ελάχιστη ποσότητα σειρά στοιχείου (όπως ορίζεται στο σημείο master).
 Row #{0}: Please specify Serial No for Item {1},Σειρά # {0}: Παρακαλείστε να προσδιορίσετε Αύξων αριθμός για τη θέση {1}
 Row {0}: Account does not match with \						Purchase Invoice Credit To account,Σειρά {0}: Ο λογαριασμός δεν ταιριάζει με \ τιμολογίου αγοράς πίστωση του λογαριασμού
@@ -3277,8 +3277,8 @@ Your support email id - must be a valid email - this is where your emails will c
 [Select],[ Επιλέξτε ]
 `Freeze Stocks Older Than` should be smaller than %d days.,` Τα αποθέματα Πάγωμα Παλαιότερο από ` θα πρέπει να είναι μικρότερη από % d ημέρες .
 and,και
-are not allowed.,δεν επιτρέπονται .
-assigned by,ανατεθεί από
+are not allowed.,δεν επιτρέπονται.
+assigned by,Ανατέθηκε από
 cannot be greater than 100,δεν μπορεί να είναι μεγαλύτερη από 100
 "e.g. ""Build tools for builders""","π.χ. «Χτίστε εργαλεία για τους κατασκευαστές """
 "e.g. ""MC""","π.χ. "" MC """

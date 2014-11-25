@@ -204,6 +204,8 @@ def get_holidays(leave_app):
 	tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1
 		where e1.name = %s and h1.parent = h2.name and e1.holiday_list = h2.name
 		and h1.holiday_date between %s and %s""", (leave_app.employee, leave_app.from_date, leave_app.to_date))
+	# below line is needed. If an employee hasn't been assigned with any holiday list then above will return 0 rows.
+	tot_hol=tot_hol and flt(tot_hol[0][0]) or 0	
 	if not tot_hol:
 		tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2
 			where h1.parent = h2.name and h1.holiday_date between %s and %s

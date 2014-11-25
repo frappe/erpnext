@@ -5,11 +5,16 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, filter_strip_join
 from frappe.website.website_generator import WebsiteGenerator
+from erpnext.utilities.address_and_contact import load_address_and_contact
 
 class SalesPartner(WebsiteGenerator):
 	page_title_field = "partner_name"
 	condition_field = "show_in_website"
 	template = "templates/generators/sales_partner.html"
+	def onload(self):
+		"""Load address and contacts in `__onload`"""
+		load_address_and_contact(self, "sales_partner")
+
 	def autoname(self):
 		self.name = self.partner_name
 

@@ -1,0 +1,25 @@
+<p><button class="btn btn-sm btn-default btn-contact">
+    <i class="icon-plus"></i> New Contact</button></p>
+{% for(var i=0, l=contact_list.length; i<l; i++) { %}
+    <hr>
+    <a href="#Form/Contact/{%= contact_list[i].name %}" class="btn btn-sm btn-default pull-right">
+        {%= __("Edit") %}</a>
+    <p><b>{%= i+1 %}. {%= contact_list[i].first_name %} {%= contact_list[i].last_name %}</b></p>
+    <div style="padding-left: 15px;">
+        <div>
+            {% if(contact_list[i].is_primary_contact) { %}<span class="label label-info">
+                {%= __("Primary") %}</span>{% } %}
+        </div>
+        <p style="padding-top: 5px;">
+            {% if(contact_list[i].phone) { %}
+                {%= __("Phone") %}: {%= contact_list[i].phone %}<br>
+            {% } %}
+            {% if(contact_list[i].email_id) { %}
+                {%= __("Email Id") %}: {%= contact_list[i].email_id %}
+            {% } %}
+        </p>
+    </div>
+{% } %}
+{% if(!contact_list.length) { %}
+<p class="text-muted">{%= __("No contacts added yet.") %}</p>
+{% } %}
