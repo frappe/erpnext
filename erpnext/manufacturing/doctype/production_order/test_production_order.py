@@ -67,7 +67,7 @@ class TestProductionOrder(unittest.TestCase):
 		})
 
 
-		prod_order.get_production_order_operations()
+		prod_order.set_production_order_operations()
 		prod_order.production_order_operations[0].update({
 			"planned_start_time": "2014-11-25 00:00:00",
 			"planned_end_time": "2014-11-25 10:00:00" 
