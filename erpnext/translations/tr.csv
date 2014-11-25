@@ -1,27 +1,27 @@
- (Half Day),
- and year: ,
+ (Half Day),(Yarım Gün)
+ and year: ,ve yıl:
 """ does not exists","""Mevcut değildir"
 %  Delivered,% Teslim Edildi
-% Amount Billed,Faturalı% Tutar
-% Billed,% Faturalı
+% Amount Billed,% Tutar Faturalandı
+% Billed,% Faturalandı
 % Completed,% Tamamlandı
 % Delivered,% Teslim Edildi
-% Installed,% Yüklü
-% Received,% Alınan
-% of materials billed against this Purchase Order.,"Malzemelerin%, bu Satınalma Siparişi karşı fatura."
-% of materials billed against this Sales Order,Bu Satış Siparişi karşı hesap malzemelerin%
-% of materials delivered against this Delivery Note,Bu İrsaliye karşı teslim malzemelerin%
-% of materials delivered against this Sales Order,Bu Satış Siparişi teslim karşı malzemelerin%
-% of materials ordered against this Material Request,Bu Malzeme Request karşı emretti malzemelerin%
-% of materials received against this Purchase Order,Malzemelerin% bu Satınalma Siparişi karşı alınan
-'Actual Start Date' can not be greater than 'Actual End Date',"'Fiili Başlangıç ​​Tarihi', 'Gerçek Bitiş Tarihi' den büyük olamaz"
-'Based On' and 'Group By' can not be same,'Dayalı' ve 'Grup tarafından' aynı olamaz
-'Days Since Last Order' must be greater than or equal to zero,'Son Sipariş yana Gün' den büyük veya sıfıra eşit olmalıdır
-'Entries' cannot be empty,'Yazılar' boş olamaz
-'Expected Start Date' can not be greater than 'Expected End Date',"'Beklenen Başlangıç ​​Tarihi', 'Beklenen Bitiş Tarihi' den büyük olamaz"
-'From Date' is required,'Date' gereklidir
-'From Date' must be after 'To Date','Tarihten itibaren' Tarihi 'sonra olmalıdır
-'Has Serial No' can not be 'Yes' for non-stock item,'Seri No Has' non-stok kalemi için 'Evet' olamaz
+% Installed,% Yüklendi
+% Received,% Alındı
+% of materials billed against this Purchase Order.,% Malzeme bu Satınalma Siparişi karşı faturalandı.
+% of materials billed against this Sales Order,% Malzeme bu Satış Siparişi karşı faturalandı
+% of materials delivered against this Delivery Note,% Malzeme Bu İrsaliye karşı teslim edildi
+% of materials delivered against this Sales Order,% Malzeme Bu Satış Siparişine istinaden teslim edildi. 
+% of materials ordered against this Material Request,% malzeme bu Malzeme İsteğine istinaden sipariş verildi  
+% of materials received against this Purchase Order,% Malzeme bu Satınalma Siparişine istinaden ulaştı
+'Actual Start Date' can not be greater than 'Actual End Date',"'Fiili Başlangıç Tarihi', 'Fiili Bitiş Tarihi' den büyük olamaz"
+'Based On' and 'Group By' can not be same,'Temel' ve 'Grup tarafından' aynı olamaz
+'Days Since Last Order' must be greater than or equal to zero,'Son Siparişten bu yana Gün' sıfırdan den büyük veya eşit olmalıdır
+'Entries' cannot be empty,'Girişler' boş olamaz
+'Expected Start Date' can not be greater than 'Expected End Date',"'Beklenen Başlangıç Tarihi', 'Beklenen Bitiş Tarihi' den büyük olamaz"
+'From Date' is required,'Başlangıç tarihi' gereklidir
+'From Date' must be after 'To Date',"'Başlangıç tarihi','Bitiş Tarihi'nden sonra olmalıdır"
+'Has Serial No' can not be 'Yes' for non-stock item,'Seri No' stoklanmayan ürünler için 'Evet' olamaz
 'Notification Email Addresses' not specified for recurring invoice,Faturayı yinelenen için belirlenen 'Bildirim E-posta Adresleri'
 'Profit and Loss' type account {0} not allowed in Opening Entry,'Kar ve Zarar' tipi hesap {0} kaydı Açılış izin yok
 'To Case No.' cannot be less than 'From Case No.','Dava No To' 'Dava No Kimden' den az olamaz
