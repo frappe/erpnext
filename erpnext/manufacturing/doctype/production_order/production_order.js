@@ -58,9 +58,9 @@ $.extend(cur_frm.cscript, {
 	bom_no: function() {
 		return this.frm.call({
 			doc: this.frm.doc,
-			method: "get_production_order_operations",
+			method: "set_production_order_operations",
 			callback: function(r) {
-				if(!r.exc) refresh_field("get_production_order_operations");
+				if(!r.exc) refresh_field("production_order_operations");
 			}
 		});
 	},

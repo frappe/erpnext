@@ -262,6 +262,7 @@
    "precision": ""
   }, 
   {
+   "allow_on_submit": 1, 
    "fieldname": "make_time_log", 
    "fieldtype": "Button", 
    "label": "Make Time Log", 
@@ -276,7 +277,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2014-11-13 16:47:31.015973", 
+ "modified": "2014-11-25 13:34:10.697445", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order Operation", 

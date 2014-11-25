@@ -4,7 +4,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, json
 from frappe import _
 from frappe.utils import cstr, cint, comma_and
 
@@ -135,23 +135,31 @@ def get_workstation(production_order, operation):
 			parent=%s and operation = %s""", (idx, production_order, operation), as_dict=1)[0]
 
 @frappe.whitelist()
-def get_events(start, end):
+def get_events(start, end, filters=None):
 	from frappe.desk.reportview import build_match_conditions
 	if not frappe.has_permission("Time Log"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
 	match = build_match_conditions("Time Log")
-	data = frappe.db.sql("""select name, from_time, to_time,
-		activity_type, task, project from `tabTime Log`
-		where from_time between '%(start)s' and '%(end)s' or to_time between '%(start)s' and '%(end)s'
-		%(match)s""" % {
-			"start": start,
-			"end": end,
-			"match": match and (" and " + match) or ""
-		}, as_dict=True, update={"allDay": 0})
+	
+	conditions = build_match_conditions("Time Log")
+	conditions = conditions and (" and " + conditions) or ""
+	if filters:
+		filters = json.loads(filters)
+		for key in filters:
+			if filters[key]:
+				conditions += " and " + key + ' = "' + filters[key].replace('"', '\"') + '"'
 
+	data = frappe.db.sql("""select name, from_time, to_time,
+		activity_type, task, project, production_order, workstation from `tabTime Log`
+		where ( from_time between %(start)s and %(end)s or to_time between %(start)s and %(end)s )
+		{conditions}""".format(conditions=conditions), {
+			"start": start,
+			"end": end
+			}, as_dict=True, update={"allDay": 0})
+	
 	for d in data:
-		d.title = d.name + ": " + (d.activity_type or "[Activity Type not set]")
+		d.title = d.name + ": " + (d.activity_type or d.production_order or "")
 		if d.task:
 			d.title += " for Task: " + d.task
 		if d.project:

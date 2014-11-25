@@ -145,7 +145,7 @@ class ProductionOrder(Document):
 		from erpnext.stock.utils import update_bin
 		update_bin(args)
 
-	def get_production_order_operations(self):
+	def set_production_order_operations(self):
 		self.set('production_order_operations', [])
 		operations = frappe.db.sql("""select operation, opn_description, workstation, hour_rate, time_in_mins, 
 			operating_cost, fixed_cycle_cost from `tabBOM Operation` where parent = %s""", self.bom_no, as_dict=1)
@@ -230,5 +230,6 @@ def make_time_log(name, operation, from_time=None, to_time=None, qty=None, proje
 	time_log.operation= operation
 	time_log.qty= qty
 	time_log.workstation= workstation
-	time_log.calculate_total_hours()
+	if from_time and to_time :
+		time_log.calculate_total_hours()
 	return time_log
