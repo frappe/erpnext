@@ -105,6 +105,11 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		this.get_terms();
 	},
 
+	po_details_add: function(doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		this.frm.script_manager.copy_from_first_row("po_details", row, ["schedule_date"]);
+	}
+
 });
 
 // for backward compatibility: combine new and previous states
@@ -209,4 +214,8 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 cur_frm.cscript.send_sms = function() {
 	frappe.require("assets/erpnext/js/sms_manager.js");
 	var sms_man = new SMSManager(cur_frm.doc);
+}
+
+cur_frm.cscript.schedule_date = function(doc, cdt, cdn) {
+	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "schedule_date");
 }
