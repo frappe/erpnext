@@ -35,8 +35,8 @@
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> toevoegen / bewerken < / a>"
 "<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> modelo padrão </ h4>  <p> Usa <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </ a> e todos os campos de Endereço ( incluindo campos personalizados se houver) estará disponível </ p>  <pre> <code> {{}} address_line1 <br>  {% if address_line2%} {{}} address_line2 <br> { endif% -%}  {{cidade}} <br>  {% if%} Estado {{estado}} {% endif <br> -%}  {% if pincode%} PIN: {{}} pincode <br> {% endif -%}  {{país}} <br>  {% if%} telefone Telefone: {{telefone}} {<br> endif% -%}  {% if%} fax Fax: {{fax}} {% endif <br> -%}  {% if% email_id} E-mail: {{}} email_id <br> , {% endif -%}  </ code> </ pre>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Um grupo de clientes existente com o mesmo nome, por favor altere o nome do cliente ou renomear o grupo de clientes"
-A Customer exists with same name,Um cliente existe com mesmo nome
-A Lead with this email id should exist,Um chumbo com esse ID de e-mail deve existir
+A Customer exists with same name,Um cliente existe com o mesmo nome
+A Lead with this email id should exist,Um Lead com esse ID de e-mail deve existir
 A Product or Service,Um produto ou serviço
 A Supplier exists with same name,Um Fornecedor existe com mesmo nome
 A symbol for this currency. For e.g. $,Um símbolo para esta moeda. Por exemplo: $
@@ -47,20 +47,20 @@ Above Value,Acima de Valor
 Absent,Ausente
 Acceptance Criteria,Critérios de Aceitação
 Accepted,Aceito
-Accepted + Rejected Qty must be equal to Received quantity for Item {0},Aceito Rejeitado + Qt deve ser igual a quantidade recebida por item {0}
-Accepted Quantity,Quantidade Aceito
-Accepted Warehouse,Armazém Aceito
+Accepted + Rejected Qty must be equal to Received quantity for Item {0},Aceite + Qty Rejeitada deve ser igual a quantidade recebida por item {0}
+Accepted Quantity,Quantidade Aceite
+Accepted Warehouse,Armazém Aceite
 Account,conta
 Account Balance,Saldo em Conta
 Account Created: {0},Conta Criada : {0}
 Account Details,Detalhes da conta
-Account Head,Chefe conta
+Account Head,Conta principal
 Account Name,Nome da conta
 Account Type,Tipo de conta
 "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Saldo já em crédito, você não tem permissão para definir 'saldo deve ser' como 'débito'"
 "Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Saldo já em débito, você não tem permissão para definir 'saldo deve ser' como 'crédito'"
-Account for the warehouse (Perpetual Inventory) will be created under this Account.,Rekening voor het magazijn ( Perpetual Inventory ) wordt aangemaakt onder deze account .
-Account head {0} created,Cabeça Conta {0} criado
+Account for the warehouse (Perpetual Inventory) will be created under this Account.,Uma conta para o armazém ( Perpetual Inventory ) será criada tendo como base esta conta.
+Account head {0} created,Conta principal {0} criada
 Account must be a balance sheet account,Conta deve ser uma conta de balanço
 Account with child nodes cannot be converted to ledger,Conta com nós filhos não pode ser convertido em livro
 Account with existing transaction can not be converted to group.,Conta com a transação existente não pode ser convertido em grupo.
@@ -75,15 +75,15 @@ Account {0} is frozen,Conta {0} está congelado
 Account {0} is inactive,Conta {0} está inativo
 Account {0} is not valid,Conta {0} não é válido
 Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Conta {0} deve ser do tipo "" Ativo Fixo "" como item {1} é um item de ativos"
-Account {0}: Parent account {1} can not be a ledger,Conta {0}: conta Parent {1} não pode ser um livro
-Account {0}: Parent account {1} does not belong to company: {2},Conta {0}: conta Parent {1} não pertence à empresa: {2}
-Account {0}: Parent account {1} does not exist,Conta {0}: conta Parent {1} não existe
+Account {0}: Parent account {1} can not be a ledger,Conta {0}: conta principal {1} não pode ser um livro
+Account {0}: Parent account {1} does not belong to company: {2},Conta {0}: conta principal {1} não pertence à empresa: {2}
+Account {0}: Parent account {1} does not exist,Conta {0}: conta principal {1} não existe
 Account {0}: You can not assign itself as parent account,Conta {0}: Você não pode atribuir-se como conta principal
-Account: {0} can only be updated via \					Stock Transactions,Conta: {0} só pode ser atualizado através de \ operações com ações
-Accountant,contador
+Account: {0} can only be updated via \					Stock Transactions,Conta: {0} só pode ser atualizado através de \ operações de stock
+Accountant,Contabilista
 Accounting,Contabilidade
-"Accounting Entries can be made against leaf nodes, called","Boekingen kunnen worden gemaakt tegen leaf nodes , genaamd"
-"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Registro contábil congelado até a presente data, ninguém pode fazer / modificar entrada exceto papel especificado abaixo."
+"Accounting Entries can be made against leaf nodes, called",Registos contábeis podem ser realizadas através de chamadas a nós filhos
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Registo contábil congelado até à presente data, ninguém pode fazer / modificar entrada exceto para as regras especificadas abaixo."
 Accounting journal entries.,Lançamentos contábeis jornal.
 Accounts,Contas
 Accounts Browser,Contas Navegador
@@ -92,51 +92,51 @@ Accounts Payable,Contas a Pagar
 Accounts Receivable,Contas a receber
 Accounts Settings,Configurações de contas
 Active,Ativo
-Active: Will extract emails from ,Ativo: Será que extrair e-mails a partir de
+Active: Will extract emails from ,Ativo: Irá extrair e-mails a partir de
 Activity,Atividade
 Activity Log,Registro de Atividade
-Activity Log:,Activity Log :
+Activity Log:,Registro de Atividade:
 Activity Type,Tipo de Atividade
-Actual,Real
-Actual Budget,Orçamento real
-Actual Completion Date,Data de conclusão real
-Actual Date,Data Real
-Actual End Date,Data final real
-Actual Invoice Date,Actual Data da Fatura
+Actual,Atual
+Actual Budget,Orçamento Atual
+Actual Completion Date,Atual Data de Conclusão
+Actual Date,Data atual
+Actual End Date,Atual Data final
+Actual Invoice Date,Atual Data da Fatura
 Actual Posting Date,Actual Data lançamento
-Actual Qty,Qtde real
-Actual Qty (at source/target),Qtde real (a origem / destino)
-Actual Qty After Transaction,Qtde real após a transação
-Actual Qty: Quantity available in the warehouse.,Werkelijke Aantal : Aantal beschikbaar in het magazijn.
-Actual Quantity,Quantidade real
-Actual Start Date,Data de início real
+Actual Qty,Qtde Atual
+Actual Qty (at source/target),Qtde Atual (na origem / destino)
+Actual Qty After Transaction,Qtde atual após a transação
+Actual Qty: Quantity available in the warehouse.,Atual Qtde: Quantidade existente no armazém.
+Actual Quantity,Quantidade Atual
+Actual Start Date,Atual Data de início
 Add,Adicionar
 Add / Edit Taxes and Charges,Adicionar / Editar Impostos e Taxas
-Add Child,Child
-Add Serial No,Voeg Serienummer
-Add Taxes,Belastingen toevoegen
-Add Taxes and Charges,Belastingen en heffingen toe te voegen
+Add Child,Adicionar Descendente
+Add Serial No,Adicionar número de série
+Add Taxes,Adicionar impostos
+Add Taxes and Charges,Adicionar impostos e taxas
 Add or Deduct,Adicionar ou Deduzir
 Add rows to set annual budgets on Accounts.,Adicionar linhas para definir orçamentos anuais nas contas.
-Add to Cart,Adicionar ao carrinho
-Add to calendar on this date,Toevoegen aan agenda op deze datum
+Add to Cart,Adicionar ao carrinho de compras
+Add to calendar on this date,Adicionar ao calendário nesta data
 Add/Remove Recipients,Adicionar / Remover Destinatários
 Address,Endereço
-Address & Contact,Address &amp; Contact
+Address & Contact,Endereço e contato
 Address & Contacts,Endereço e contatos
 Address Desc,Endereço Descr
 Address Details,Detalhes de endereço
-Address HTML,Abordar HTML
+Address HTML,Endereço HTML
 Address Line 1,Endereço Linha 1
 Address Line 2,Endereço Linha 2
 Address Template,Modelo de endereço
-Address Title,Título endereço
-Address Title is mandatory.,Endereço de título é obrigatório.
+Address Title,Título do endereço
+Address Title is mandatory.,O título do Endereço é obrigatório.
 Address Type,Tipo de endereço
-Address master.,Mestre de endereços.
-Administrative Expenses,despesas administrativas
+Address master.,Endereço principal.
+Administrative Expenses,Despesas Administrativas
 Administrative Officer,Diretor Administrativo
-Advance Amount,Quantidade antecedência
+Advance Amount,Quantidade Adiantada
 Advance amount,Valor do adiantamento
 Advances,Avanços
 Advertisement,Anúncio
@@ -145,71 +145,71 @@ Aerospace,aeroespaço
 After Sale Installations,Após instalações Venda
 Against,Contra
 Against Account,Contra Conta
-Against Bill {0} dated {1},Contra Bill {0} {1} datado
-Against Docname,Contra docName
+Against Bill {0} dated {1},Contra Bill {0} datado {1}
+Against Docname,Contra Docname
 Against Doctype,Contra Doctype
-Against Document Detail No,Contra Detalhe documento n
-Against Document No,Contra documento n
+Against Document Detail No,Contra Detalhe documento No
+Against Document No,Contra documento No
 Against Expense Account,Contra a conta de despesas
-Against Income Account,Contra Conta Renda
+Against Income Account,Contra Conta a Receber
 Against Journal Voucher,Contra Vale Jornal
 Against Journal Voucher {0} does not have any unmatched {1} entry,Contra Jornal Vale {0} não tem {1} entrada incomparável
 Against Purchase Invoice,Contra a Nota Fiscal de Compra
 Against Sales Invoice,Contra a nota fiscal de venda
-Against Sales Order,Tegen klantorder
+Against Sales Order,Contra Ordem de Venda
 Against Voucher,Contra Vale
 Against Voucher Type,Tipo contra Vale
-Ageing Based On,Vergrijzing Based On
+Ageing Based On,Contra Baseado em
 Ageing Date is mandatory for opening entry,Envelhecimento Data é obrigatória para a abertura de entrada
 Ageing date is mandatory for opening entry,Data Envelhecer é obrigatória para a abertura de entrada
 Agent,Agente
 Aging Date,Envelhecimento Data
 Aging Date is mandatory for opening entry,Envelhecimento Data é obrigatória para a abertura de entrada
-Agriculture,agricultura
-Airline,companhia aérea
+Agriculture,Agricultura
+Airline,Companhia aérea
 All Addresses.,Todos os endereços.
-All Contact,Todos Contato
+All Contact,Todos os Contatos
 All Contacts.,Todos os contatos.
-All Customer Contact,Todos contato do cliente
+All Customer Contact,Todos os contatos de clientes
 All Customer Groups,Todos os grupos de clientes
-All Day,Dia de Todos os
-All Employee (Active),Todos Empregado (Ativo)
+All Day,Todo o Dia
+All Employee (Active),Todos os Empregados (Ativo)
 All Item Groups,Todos os grupos de itens
 All Lead (Open),Todos chumbo (Aberto)
 All Products or Services.,Todos os produtos ou serviços.
 All Sales Partner Contact,Todos Contato parceiro de vendas
-All Sales Person,Todos Vendas Pessoa
-All Supplier Contact,Todos contato fornecedor
-All Supplier Types,Alle Leverancier Types
+All Sales Person,Todos as Pessoas de Vendas
+All Supplier Contact,Todos os contatos de fornecedores
+All Supplier Types,Todos os tipos de fornecedores
 All Territories,Todos os Territórios
-"All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Todas as exportações campos relacionados, como moeda, taxa de conversão , a exportação total, a exportação total etc estão disponíveis na nota de entrega , POS, Cotação , Vendas fatura , Ordem de vendas etc"
-"All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Todos os campos de importação relacionados, como moeda , taxa de conversão total de importação , importação total etc estão disponíveis no Recibo de compra , fornecedor de cotação , factura de compra , ordem de compra , etc"
+"All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Todos os campos exportados tais como, moeda, taxa de conversão, total de exportação, total de exportação final, etc estão disponíveis na nota de entrega , POS, Cotação , Fatura de Vendas, Ordem de vendas, etc."
+"All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Todos os campos exportados tais como, moeda, taxa de conversão, total de exportação, total de exportação final e etc, estão disponíveis no Recibo de compra, fornecedor de cotação, factura de compra, ordem de compra e etc."
 All items have already been invoiced,Todos os itens já foram faturados
 All these items have already been invoiced,Todos esses itens já foram faturados
-Allocate,Distribuir
-Allocate leaves for a period.,Alocar folhas por um período .
-Allocate leaves for the year.,Alocar folhas para o ano.
-Allocated Amount,Montante afectado
+Allocate,Atribuír
+Allocate leaves for a period.,Atribuír folhas por um período .
+Allocate leaves for the year.,Atribuír folhas para o ano.
+Allocated Amount,Montante atribuído
 Allocated Budget,Orçamento atribuído
 Allocated amount,Montante atribuído
 Allocated amount can not be negative,Montante atribuído não pode ser negativo
-Allocated amount can not greater than unadusted amount,Montante atribuído não pode superior à quantia unadusted
+Allocated amount can not greater than unadusted amount,Montante atribuído não pode ser superior à quantia desasjustada
 Allow Bill of Materials,Permitir Lista de Materiais
-Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item,"Permitir Lista de Materiais deve ser ""sim"" . Porque uma ou várias listas de materiais ativos presentes para este item"
-Allow Children,permitir que as crianças
+Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item,"Permitir Lista de Materiais deve ser ""sim"". Porque uma ou várias listas de materiais encontram-se ativas para este item"
+Allow Children,Permitir descendentes
 Allow Dropbox Access,Permitir Dropbox Acesso
 Allow Google Drive Access,Permitir acesso Google Drive
 Allow Negative Balance,Permitir saldo negativo
-Allow Negative Stock,Permitir estoque negativo
+Allow Negative Stock,Permitir stock negativo
 Allow Production Order,Permitir Ordem de Produção
-Allow User,Permitir que o usuário
-Allow Users,Permitir que os usuários
-Allow the following users to approve Leave Applications for block days.,Permitir que os seguintes usuários para aprovar Deixe Applications para os dias de bloco.
-Allow user to edit Price List Rate in transactions,Permitir ao usuário editar Lista de Preços Taxa em transações
-Allowance Percent,Percentual subsídio
+Allow User,Permitir utilizador
+Allow Users,Permitir utilizadores
+Allow the following users to approve Leave Applications for block days.,"Permitir que os seguintes utilizadores aprovem ""Deixar Aplicações"" para os dias de bloco."
+Allow user to edit Price List Rate in transactions,Permitir ao utilizador editar Taxa de Lista de Preços em transações
+Allowance Percent,Subsídio Percentual
 Allowance for over-{0} crossed for Item {1},Provisão para over-{0} cruzou para item {1}
 Allowance for over-{0} crossed for Item {1}.,Provisão para over-{0} cruzou para item {1}.
-Allowed Role to Edit Entries Before Frozen Date,Toegestaan ​​Rol te bewerken items voor Frozen Datum
+Allowed Role to Edit Entries Before Frozen Date,Regras de permissão para edição de entradas antes da data ser congelada.
 Amended From,Alterado De
 Amount,Quantidade
 Amount (Company Currency),Amount (Moeda Company)
@@ -254,8 +254,8 @@ Approving Role,Aprovar Papel
 Approving Role cannot be same as role the rule is Applicable To,Aprovando Papel não pode ser o mesmo que papel a regra é aplicável a
 Approving User,Aprovar Usuário
 Approving User cannot be same as user the rule is Applicable To,Aprovando usuário não pode ser o mesmo que usuário a regra é aplicável a
-Are you sure you want to STOP ,
-Are you sure you want to UNSTOP ,
+Are you sure you want to STOP ,Are you sure you want to STOP 
+Are you sure you want to UNSTOP ,Are you sure you want to UNSTOP 
 Arrear Amount,Quantidade atraso
 "As Production Order can be made for this item, it must be a stock item.","Como ordem de produção pode ser feita para este item , deve ser um item de estoque."
 As per Stock UOM,Como por Banco UOM
@@ -284,7 +284,7 @@ Auto Accounting For Stock Settings,Auto Accounting Voor Stock Instellingen
 Auto Material Request,Pedido de material Auto
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,Auto-raise pedido se se a quantidade for inferior a nível re-order em um armazém
 Automatically compose message on submission of transactions.,Compor automaticamente mensagem na apresentação de transações.
-Automatically extract Job Applicants from a mail box ,
+Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,Leads automatisch extraheren uit een brievenbus bijv.
 Automatically updated via Stock Entry of type Manufacture/Repack,Atualizado automaticamente através da entrada de Fabricação tipo / Repack
 Automotive,automotivo
@@ -511,7 +511,7 @@ Clearance Date,Data de Liquidação
 Clearance Date not mentioned,Apuramento data não mencionada
 Clearance date cannot be before check date in row {0},Apuramento data não pode ser anterior à data de verificação na linha {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Clique em &#39;Criar Fatura de vendas&#39; botão para criar uma nova factura de venda.
-Click on a link to get options to expand get options ,
+Click on a link to get options to expand get options ,Click on a link to get options to expand get options 
 Client,Cliente
 Close Balance Sheet and book Profit or Loss.,Sluiten Balans en boek Winst of verlies .
 Closed,Fechado
@@ -841,13 +841,13 @@ Distributor,Distribuidor
 Divorced,Divorciado
 Do Not Contact,Neem geen contact op
 Do not show any symbol like $ etc next to currencies.,Não mostrar qualquer símbolo como US $ etc ao lado de moedas.
-Do really want to unstop production order: ,
-Do you really want to STOP ,
+Do really want to unstop production order: ,Do really want to unstop production order: 
+Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,Wil je echt wilt dit materiaal afbreken ?
 Do you really want to Submit all Salary Slip for month {0} and year {1},Você realmente quer submeter todos os folha de salário do mês {0} e {1} ano
-Do you really want to UNSTOP ,
+Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,Wil je echt wilt dit materiaal aanvragen opendraaien ?
-Do you really want to stop production order: ,
+Do you really want to stop production order: ,Do you really want to stop production order: 
 Doc Name,Nome Doc
 Doc Type,Tipo Doc
 Document Description,Descrição documento
@@ -899,7 +899,7 @@ Electronics,eletrônica
 Email,E-mail
 Email Digest,E-mail Digest
 Email Digest Settings,E-mail Digest Configurações
-Email Digest: ,
+Email Digest: ,Email Digest: 
 Email Id,Id e-mail
 "Email Id where a job applicant will email e.g. ""jobs@example.com""",Id e-mail onde um candidato a emprego vai enviar e-mail &quot;jobs@example.com&quot; por exemplo
 Email Notifications,Notificações de e-mail
@@ -959,7 +959,7 @@ Enter url parameter for receiver nos,Digite o parâmetro url para nn receptor
 Entertainment & Leisure,Entretenimento & Lazer
 Entertainment Expenses,despesas de representação
 Entries,Entradas
-Entries against ,
+Entries against ,Entries against 
 Entries are not allowed against this Fiscal Year if the year is closed.,Entradas não são permitidos contra este Ano Fiscal se o ano está fechada.
 Equity,equidade
 Error: {0} > {1},Erro: {0} > {1}
@@ -1574,7 +1574,7 @@ Maintenance Visit Purpose,Finalidade visita de manutenção
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Manutenção Visita {0} deve ser cancelado antes de cancelar esta ordem de venda
 Maintenance start date can not be before delivery date for Serial No {0},Manutenção data de início não pode ser anterior à data de entrega para Serial Não {0}
 Major/Optional Subjects,Assuntos Principais / Opcional
-Make ,
+Make ,Make 
 Make Accounting Entry For Every Stock Movement,Maak boekhoudkundige afschrijving voor elke Stock Movement
 Make Bank Voucher,Faça Vale Banco
 Make Credit Note,Maak Credit Note
@@ -1723,7 +1723,7 @@ Net Weight UOM,UOM Peso Líquido
 Net Weight of each Item,Peso líquido de cada item
 Net pay cannot be negative,Salário líquido não pode ser negativo
 Never,Nunca
-New ,
+New ,New 
 New Account,nieuw account
 New Account Name,Nieuw account Naam
 New BOM,Novo BOM
@@ -2449,7 +2449,7 @@ Rounded Off,arredondado
 Rounded Total,Total arredondado
 Rounded Total (Company Currency),Total arredondado (Moeda Company)
 Row # ,Linha #
-Row # {0}: ,
+Row # {0}: ,Row # {0}: 
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Row # {0}: qty ordenado pode não inferior a qty pedido mínimo do item (definido no mestre de item).
 Row #{0}: Please specify Serial No for Item {1},Row # {0}: Favor especificar Sem Serial para item {1}
 Row {0}: Account does not match with \						Purchase Invoice Credit To account,Row {0}: Conta não corresponde com \ Compra fatura de crédito para conta
@@ -2751,7 +2751,7 @@ Stock Ageing,Envelhecimento estoque
 Stock Analytics,Analytics ações
 Stock Assets,Ativos estoque
 Stock Balance,Balanço de estoque
-Stock Entries already created for Production Order ,
+Stock Entries already created for Production Order ,Stock Entries already created for Production Order 
 Stock Entry,Entrada estoque
 Stock Entry Detail,Detalhe Entrada estoque
 Stock Expenses,despesas Stock

@@ -253,8 +253,8 @@ Approving Role,الموافقة على دور
 Approving Role cannot be same as role the rule is Applicable To,الموافقة دور لا يمكن أن يكون نفس دور القاعدة تنطبق على
 Approving User,الموافقة العضو
 Approving User cannot be same as user the rule is Applicable To,الموافقة العضو لا يمكن أن يكون نفس المستخدم القاعدة تنطبق على
-Are you sure you want to STOP ,
-Are you sure you want to UNSTOP ,
+Are you sure you want to STOP ,Are you sure you want to STOP 
+Are you sure you want to UNSTOP ,Are you sure you want to UNSTOP 
 Arrear Amount,متأخرات المبلغ
 "As Production Order can be made for this item, it must be a stock item.",كما يمكن أن يتم ترتيب الإنتاج لهذا البند، يجب أن يكون بند الأوراق المالية .
 As per Stock UOM,وفقا للأوراق UOM
@@ -283,7 +283,7 @@ Auto Accounting For Stock Settings,السيارات المحاسبة المال�
 Auto Material Request,السيارات مادة طلب
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,لصناعة السيارات في رفع طلب المواد إذا كمية يذهب دون مستوى إعادة الطلب في مستودع
 Automatically compose message on submission of transactions.,يؤلف تلقائيا رسالة على تقديم المعاملات.
-Automatically extract Job Applicants from a mail box ,
+Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,استخراج الشراء تلقائيا من صندوق البريد على سبيل المثال
 Automatically updated via Stock Entry of type Manufacture/Repack,تحديثها تلقائيا عن طريق إدخال الأسهم الصنع نوع / أعد حزم
 Automotive,السيارات
@@ -510,7 +510,7 @@ Clearance Date,إزالة التاريخ
 Clearance Date not mentioned,إزالة التاريخ لم يرد ذكرها
 Clearance date cannot be before check date in row {0},تاريخ التخليص لا يمكن أن يكون قبل تاريخ الاختيار في الصف {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,انقر على &#39;جعل مبيعات الفاتورة &quot;الزر لإنشاء فاتورة مبيعات جديدة.
-Click on a link to get options to expand get options ,
+Click on a link to get options to expand get options ,Click on a link to get options to expand get options 
 Client,عميل	
 Close Balance Sheet and book Profit or Loss.,وثيقة الميزانية العمومية و كتاب الربح أو الخسارة .
 Closed,مغلق
@@ -840,13 +840,13 @@ Distributor,موزع
 Divorced,المطلقات
 Do Not Contact,عدم الاتصال
 Do not show any symbol like $ etc next to currencies.,لا تظهر أي رمز مثل $ الخ بجانب العملات.
-Do really want to unstop production order: ,
-Do you really want to STOP ,
+Do really want to unstop production order: ,Do really want to unstop production order: 
+Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,هل تريد حقا لوقف هذا طلب المواد ؟
 Do you really want to Submit all Salary Slip for month {0} and year {1},هل تريد حقا لتقديم كل زلة الرواتب ل شهر {0} و السنة {1}
-Do you really want to UNSTOP ,
+Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,هل تريد حقا أن نزع السدادة هذا طلب المواد ؟
-Do you really want to stop production order: ,
+Do you really want to stop production order: ,Do you really want to stop production order: 
 Doc Name,اسم الوثيقة
 Doc Type,نوع الوثيقة
 Document Description,وصف الوثيقة
@@ -898,7 +898,7 @@ Electronics,إلكترونيات
 Email,البريد الإلكتروني
 Email Digest,البريد الإلكتروني دايجست
 Email Digest Settings,البريد الإلكتروني إعدادات دايجست
-Email Digest: ,
+Email Digest: ,Email Digest: 
 Email Id,البريد الإلكتروني معرف
 "Email Id where a job applicant will email e.g. ""jobs@example.com""",معرف البريد الإلكتروني حيث طالب العمل سوف البريد الإلكتروني على سبيل المثال &quot;jobs@example.com&quot;
 Email Notifications,إشعارات البريد الإلكتروني
@@ -958,7 +958,7 @@ Enter url parameter for receiver nos,أدخل عنوان URL لمعلمة NOS ا
 Entertainment & Leisure,الترفيه وترفيهية
 Entertainment Expenses,مصاريف الترفيه
 Entries,مقالات
-Entries against ,
+Entries against ,Entries against 
 Entries are not allowed against this Fiscal Year if the year is closed.,لا يسمح مقالات ضد السنة المالية الحالية إذا تم إغلاق السنة.
 Equity,إنصاف
 Error: {0} > {1},الخطأ: {0} > {1}
@@ -1573,7 +1573,7 @@ Maintenance Visit Purpose,صيانة زيارة الغرض
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,صيانة زيارة {0} يجب أن يتم إلغاء هذا الأمر قبل إلغاء المبيعات
 Maintenance start date can not be before delivery date for Serial No {0},صيانة تاريخ بداية لا يمكن أن يكون قبل تاريخ التسليم لل رقم المسلسل {0}
 Major/Optional Subjects,الرئيسية / اختياري الموضوعات
-Make ,
+Make ,Make 
 Make Accounting Entry For Every Stock Movement,جعل الدخول المحاسبة للحصول على كل حركة الأسهم
 Make Bank Voucher,جعل قسيمة البنك
 Make Credit Note,جعل الائتمان ملاحظة
@@ -1722,7 +1722,7 @@ Net Weight UOM,الوزن الصافي UOM
 Net Weight of each Item,الوزن الصافي لكل بند
 Net pay cannot be negative,صافي الأجور لا يمكن أن تكون سلبية
 Never,أبدا
-New ,
+New ,New 
 New Account,حساب جديد
 New Account Name,اسم الحساب الجديد
 New BOM,BOM جديدة
@@ -2448,7 +2448,7 @@ Rounded Off,تقريبها
 Rounded Total,تقريب إجمالي
 Rounded Total (Company Currency),المشاركات تقريب (العملة الشركة)
 Row # ,الصف #
-Row # {0}: ,
+Row # {0}: ,Row # {0}: 
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,الصف # {0}: الكمية المطلوبة لا يمكن أن أقل من الحد الأدنى الكمية النظام القطعة (المحددة في البند الرئيسي).
 Row #{0}: Please specify Serial No for Item {1},الصف # {0}: يرجى تحديد رقم التسلسلي للتاريخ {1}
 Row {0}: Account does not match with \						Purchase Invoice Credit To account,الصف {0}: الحساب لا يتطابق مع \ شراء فاتورة الائتمان لحساب
@@ -2750,7 +2750,7 @@ Stock Ageing,الأسهم شيخوخة
 Stock Analytics,الأسهم تحليلات
 Stock Assets,الموجودات الأسهم
 Stock Balance,الأسهم الرصيد
-Stock Entries already created for Production Order ,
+Stock Entries already created for Production Order ,Stock Entries already created for Production Order 
 Stock Entry,الأسهم الدخول
 Stock Entry Detail,الأسهم إدخال التفاصيل
 Stock Expenses,مصاريف الأسهم

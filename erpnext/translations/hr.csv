@@ -254,8 +254,8 @@ Approving Role,Odobravanje ulogu
 Approving Role cannot be same as role the rule is Applicable To,Odobravanje ulogu ne mogu biti isti kao i ulogepravilo odnosi se na
 Approving User,Odobravanje korisnika
 Approving User cannot be same as user the rule is Applicable To,Odobravanje korisnik ne može biti isto kao korisnikapravilo odnosi se na
-Are you sure you want to STOP ,
-Are you sure you want to UNSTOP ,
+Are you sure you want to STOP ,Are you sure you want to STOP 
+Are you sure you want to UNSTOP ,Are you sure you want to UNSTOP 
 Arrear Amount,Iznos unatrag
 "As Production Order can be made for this item, it must be a stock item.","Kao Production Order može biti za tu stavku , to mora bitipredmet dionica ."
 As per Stock UOM,Kao po burzi UOM
@@ -284,7 +284,7 @@ Auto Accounting For Stock Settings,Auto Računovodstvo za dionice Settings
 Auto Material Request,Auto Materijal Zahtjev
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,Auto-podizanje Materijal zahtjev ako se količina ide ispod ponovno bi razinu u skladištu
 Automatically compose message on submission of transactions.,Automatski nova poruka na podnošenje transakcija .
-Automatically extract Job Applicants from a mail box ,
+Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,Automatski ekstrakt vodi iz mail box pr
 Automatically updated via Stock Entry of type Manufacture/Repack,Automatski ažurira putem burze Unos tipa Proizvodnja / prepakirati
 Automotive,automobilski
@@ -511,7 +511,7 @@ Clearance Date,Razmak Datum
 Clearance Date not mentioned,Razmak Datum nije spomenuo
 Clearance date cannot be before check date in row {0},Datum rasprodaja ne može biti prije datuma check u redu {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Kliknite na &quot;Make prodaje Račun &#39;gumb za stvaranje nove prodaje fakture.
-Click on a link to get options to expand get options ,
+Click on a link to get options to expand get options ,Click on a link to get options to expand get options 
 Client,Klijent
 Close Balance Sheet and book Profit or Loss.,Zatvori bilanca i knjiga dobit ili gubitak .
 Closed,Zatvoreno
@@ -661,7 +661,7 @@ Currency and Price List,Valuta i cjenik
 Currency exchange rate master.,Majstor valute .
 Current Address,Trenutna adresa
 Current Address Is,Trenutni Adresa je
-Current Assets,Trenutna imovina
+Current Assets,Dugotrajna imovina
 Current BOM,Trenutni BOM
 Current BOM and New BOM can not be same,Trenutni troškovnik i novi troškovnik ne mogu biti isti
 Current Fiscal Year,Tekuće fiskalne godine
@@ -841,13 +841,13 @@ Distributor,Distributer
 Divorced,Rastavljen
 Do Not Contact,Ne Kontaktiraj
 Do not show any symbol like $ etc next to currencies.,Ne pokazuju nikakav simbol kao $ itd uz valutama.
-Do really want to unstop production order: ,
-Do you really want to STOP ,
+Do really want to unstop production order: ,Do really want to unstop production order: 
+Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,Da li stvarno želite prestati s ovom materijalnom zahtjev ?
 Do you really want to Submit all Salary Slip for month {0} and year {1},Želite li zaista da podnesu sve plaće slip za mjesec {0} i godina {1}
-Do you really want to UNSTOP ,
+Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,Da li stvarno želite otpušiti ovaj materijal zahtjev ?
-Do you really want to stop production order: ,
+Do you really want to stop production order: ,Do you really want to stop production order: 
 Doc Name,Doc Ime
 Doc Type,Doc Tip
 Document Description,Dokument Opis
@@ -899,7 +899,7 @@ Electronics,elektronika
 Email,E-mail
 Email Digest,E-pošta
 Email Digest Settings,E-pošta Postavke
-Email Digest: ,
+Email Digest: ,Email Digest: 
 Email Id,E-mail ID
 "Email Id where a job applicant will email e.g. ""jobs@example.com""",E-mail Id gdje posao zahtjeva će e-mail npr. &quot;jobs@example.com&quot;
 Email Notifications,E-mail obavijesti
@@ -959,7 +959,7 @@ Enter url parameter for receiver nos,Unesite URL parametar za prijemnike br
 Entertainment & Leisure,Zabava i slobodno vrijeme
 Entertainment Expenses,Zabava Troškovi
 Entries,Prijave
-Entries against ,
+Entries against ,Entries against 
 Entries are not allowed against this Fiscal Year if the year is closed.,"Prijave nisu dozvoljeni protiv ove fiskalne godine, ako se godina zatvoren."
 Equity,pravičnost
 Error: {0} > {1},Pogreška : {0} > {1}
@@ -1574,7 +1574,7 @@ Maintenance Visit Purpose,Održavanje Posjetite Namjena
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Održavanje Posjetite {0} mora biti otkazana prije poništenja ovu prodajnog naloga
 Maintenance start date can not be before delivery date for Serial No {0},Održavanje datum početka ne može biti prije datuma isporuke za rednim brojem {0}
 Major/Optional Subjects,Glavni / Izborni predmeti
-Make ,
+Make ,Make 
 Make Accounting Entry For Every Stock Movement,Provjerite knjiženje za svaki burzi pokreta
 Make Bank Voucher,Napravite Bank bon
 Make Credit Note,Provjerite Credit Note
@@ -1723,7 +1723,7 @@ Net Weight UOM,Težina UOM
 Net Weight of each Item,Težina svake stavke
 Net pay cannot be negative,Neto plaća ne može biti negativna
 Never,Nikad
-New ,
+New ,New 
 New Account,Novi račun
 New Account Name,Novi naziv računa
 New BOM,Novi BOM
@@ -2449,7 +2449,7 @@ Rounded Off,zaokružen
 Rounded Total,Zaobljeni Ukupno
 Rounded Total (Company Currency),Zaobljeni Ukupno (Društvo valuta)
 Row # ,Redak #
-Row # {0}: ,
+Row # {0}: ,Row # {0}: 
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Row # {0}: Ž Količina ne može manje od stavke minimalne narudžbe kom (definiranom u točki gospodara).
 Row #{0}: Please specify Serial No for Item {1},Row # {0}: Navedite rednim brojem predmeta za {1}
 Row {0}: Account does not match with \						Purchase Invoice Credit To account,Red {0}: račun ne odgovara \ Kupnja Račun kredit za račun
@@ -2751,7 +2751,7 @@ Stock Ageing,Kataloški Starenje
 Stock Analytics,Stock Analytics
 Stock Assets,dionicama u vrijednosti
 Stock Balance,Kataloški bilanca
-Stock Entries already created for Production Order ,
+Stock Entries already created for Production Order ,Stock Entries already created for Production Order 
 Stock Entry,Kataloški Stupanje
 Stock Entry Detail,Kataloški Stupanje Detalj
 Stock Expenses,Stock Troškovi
