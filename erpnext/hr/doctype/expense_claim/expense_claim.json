@@ -1,9 +1,21 @@
 {
- "autoname": "EXP.######", 
+ "autoname": "naming_series:", 
  "creation": "2013-01-10 16:34:14", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
+  {
+   "default": "EXP", 
+   "fieldname": "naming_series", 
+   "fieldtype": "Select", 
+   "label": "Series", 
+   "no_copy": 1, 
+   "options": "EXP", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "reqd": 1
+  }, 
   {
    "default": "Draft", 
    "depends_on": "eval:!doc.__islocal", 
@@ -190,7 +202,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-08-27 07:08:48.454580", 
+ "modified": "2014-11-24 18:25:53.038826", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Expense Claim", 
