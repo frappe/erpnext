@@ -116,7 +116,7 @@ class TestSalesOrder(unittest.TestCase):
 		if next_doc == "Sales Invoice":
 			from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 			next_doc = make_sales_invoice(so.name)
-		
+
 		return next_doc
 
 	def create_so(self, so_doc = None):
@@ -182,7 +182,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = self.create_so()
 
 		# allow negative stock
-		frappe.db.set_default("allow_negative_stock", 1)
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		# submit dn
 		dn = self.create_dn_against_so(so)
@@ -212,7 +212,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = self.create_so()
 
 		# allow negative stock
-		frappe.db.set_default("allow_negative_stock", 1)
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		# set over-delivery tolerance
 		frappe.db.set_value('Item', so.get("sales_order_details")[0].item_code, 'tolerance', 50)
@@ -268,7 +268,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = self.create_so(test_record)
 
 		# allow negative stock
-		frappe.db.set_default("allow_negative_stock", 1)
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		# submit dn
 		dn = self.create_dn_against_so(so)
@@ -317,7 +317,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = self.create_so(test_record)
 
 		# allow negative stock
-		frappe.db.set_default("allow_negative_stock", 1)
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		# set over-delivery tolerance
 		frappe.db.set_value('Item', so.get("sales_order_details")[0].item_code, 'tolerance', 50)

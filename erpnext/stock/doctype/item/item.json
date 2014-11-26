@@ -357,7 +357,8 @@
    "read_only": 0
   }, 
   {
-   "description": "Auto-raise Material Request if quantity goes below re-order level in a warehouse", 
+   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
+   "description": "Auto-raise Material Request if quantity goes below re-order level in default warehouse", 
    "fieldname": "reorder_section", 
    "fieldtype": "Section Break", 
    "label": "Re-order", 
@@ -366,7 +367,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
+   "depends_on": "eval:(doc.is_stock_item==\"Yes\" && !doc.apply_warehouse_wise_reorder_level)", 
    "fieldname": "re_order_level", 
    "fieldtype": "Float", 
    "label": "Re-Order Level", 
@@ -376,7 +377,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
+   "depends_on": "eval:(doc.is_stock_item==\"Yes\" && !doc.apply_warehouse_wise_reorder_level)", 
    "fieldname": "re_order_qty", 
    "fieldtype": "Float", 
    "label": "Re-Order Qty", 
@@ -384,12 +385,22 @@
    "read_only": 0
   }, 
   {
+   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
+   "fieldname": "apply_warehouse_wise_reorder_level", 
+   "fieldtype": "Check", 
+   "label": "Apply Warehouse-wise Reorder Level", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:(doc.is_stock_item==\"Yes\" && doc.apply_warehouse_wise_reorder_level)", 
    "fieldname": "section_break_31", 
    "fieldtype": "Section Break", 
    "permlevel": 0, 
    "read_only": 0
   }, 
   {
+   "depends_on": "eval:(doc.is_stock_item==\"Yes\" && doc.apply_warehouse_wise_reorder_level)", 
    "description": "Will also apply for variants unless overrridden", 
    "fieldname": "item_reorder", 
    "fieldtype": "Table", 
@@ -865,7 +876,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2014-11-25 18:39:56.226084", 
+ "modified": "2014-11-26 15:05:38.116026", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 

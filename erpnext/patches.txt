@@ -93,3 +93,5 @@ erpnext.patches.v4_4.make_email_accounts
 erpnext.patches.v5_0.update_frozen_accounts_permission_role
 erpnext.patches.v5_0.update_dn_against_doc_fields
 execute:frappe.db.sql("update `tabMaterial Request` set material_request_type = 'Material Transfer' where material_request_type = 'Transfer'")
+execute:frappe.reload_doc('stock', 'doctype', 'item')
+execute:frappe.db.sql("update `tabItem` i set apply_warehouse_wise_reorder_level=1, re_order_level=0, re_order_qty=0 where exists(select name from `tabItem Reorder` where parent=i.name)")

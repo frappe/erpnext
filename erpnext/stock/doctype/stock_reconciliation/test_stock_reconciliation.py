@@ -195,7 +195,7 @@ class TestStockReconciliation(unittest.TestCase):
 
 	def insert_existing_sle(self, valuation_method):
 		frappe.db.set_value("Item", "_Test Item", "valuation_method", valuation_method)
-		frappe.db.set_default("allow_negative_stock", 1)
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		stock_entry = {
 			"company": "_Test Company",

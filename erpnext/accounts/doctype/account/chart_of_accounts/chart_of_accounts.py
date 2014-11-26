@@ -17,22 +17,25 @@ def create_charts(chart_name, company):
 				if root_account:
 					root_type = children.get("root_type")
 
-				if account_name not in ["account_type", "root_type"]:
+				if account_name not in ["account_type", "root_type", "group_or_ledger"]:
 
 					account_name_in_db = unidecode(account_name.strip().lower())
 					if account_name_in_db in accounts:
 						count = accounts.count(account_name_in_db)
 						account_name = account_name + " " + cstr(count)
 
+					group_or_ledger = identify_group_or_ledger(children)
+					report_type = "Balance Sheet" if root_type in ["Asset", "Liability", "Equity"] \
+						else "Profit and Loss"
+
 					account = frappe.get_doc({
 						"doctype": "Account",
 						"account_name": account_name,
 						"company": company,
 						"parent_account": parent,
-						"group_or_ledger": "Group" if len(children) else "Ledger",
+						"group_or_ledger": group_or_ledger,
 						"root_type": root_type,
-						"report_type": "Balance Sheet" \
-							if root_type in ["Asset", "Liability", "Equity"] else "Profit and Loss",
+						"report_type": report_type,
 						"account_type": children.get("account_type")
 					})
 
@@ -46,6 +49,16 @@ def create_charts(chart_name, company):
 					_import_accounts(children, account.name, root_type)
 
 		_import_accounts(chart, None, None, root_account=True)
+
+def identify_group_or_ledger(children):
+	if children.get("group_or_ledger"):
+		group_or_ledger = children.get("group_or_ledger")
+	elif len(set(children.keys()) - set(["account_type", "root_type", "group_or_ledger"])):
+		group_or_ledger = "Group"
+	else:
+		group_or_ledger = "Ledger"
+
+	return group_or_ledger
 
 def get_chart(chart_name):
 	chart = {}

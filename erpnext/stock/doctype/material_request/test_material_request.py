@@ -399,7 +399,7 @@ class TestMaterialRequest(unittest.TestCase):
 		self.assertEquals(se.doctype, "Stock Entry")
 		self.assertEquals(len(se.get("mtn_details")), len(mr.get("indent_details")))
 
-	def test_compleated_qty_for_issue(self):
+	def test_completed_qty_for_issue(self):
 		def _get_requested_qty():
 			return flt(frappe.db.get_value("Bin", {"item_code": "_Test Item Home Desktop 100",
 				"warehouse": "_Test Warehouse - _TC"}, "indented_qty"))
@@ -412,7 +412,7 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.material_request_type = "Material Issue"
 		mr.submit()
 
-		#testing bin value after material request is submitted 
+		#testing bin value after material request is submitted
 		self.assertEquals(_get_requested_qty(), existing_requested_qty + 54.0)
 
 		# receive items to allow issue
@@ -431,7 +431,7 @@ class TestMaterialRequest(unittest.TestCase):
 		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 60.0)
 		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 3.0)
 
-		#testing bin requested qty after issuing stock against material request 
+		#testing bin requested qty after issuing stock against material request
 		self.assertEquals(_get_requested_qty(), existing_requested_qty)
 
 test_dependencies = ["Currency Exchange"]

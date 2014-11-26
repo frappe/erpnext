@@ -34,8 +34,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po = frappe.copy_doc(test_records[0]).insert()
 
-		self.assertRaises(frappe.ValidationError, make_purchase_receipt,
-			po.name)
+		self.assertRaises(frappe.ValidationError, make_purchase_receipt, po.name)
 
 		po = frappe.get_doc("Purchase Order", po.name)
 		po.is_subcontracted = "No"

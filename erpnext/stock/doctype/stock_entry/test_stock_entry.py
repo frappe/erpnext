@@ -24,9 +24,9 @@ def make_zero(item_code, warehouse):
 	sle = get_sle(item_code = item_code, warehouse = warehouse)
 	qty = sle[0].qty_after_transaction if sle else 0
 	if qty < 0:
-		make_stock_entry(item_code, None, warehouse, abs(qty), incoming_rate=10)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=abs(qty), incoming_rate=10)
 	elif qty > 0:
-		make_stock_entry(item_code, warehouse, None, qty, incoming_rate=10)
+		make_stock_entry(item_code=item_code, source=warehouse, qty=qty, incoming_rate=10)
 
 class TestStockEntry(unittest.TestCase):
 	def tearDown(self):
@@ -36,31 +36,31 @@ class TestStockEntry(unittest.TestCase):
 			frappe.db.set_default("company", self.old_default_company)
 
 	def test_fifo(self):
-		frappe.db.set_default("allow_negative_stock", 1)
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 		item_code = "_Test Item 2"
 		warehouse = "_Test Warehouse - _TC"
 		make_zero(item_code, warehouse)
 
-		make_stock_entry(item_code, None, warehouse, 1, incoming_rate=10)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=1, incoming_rate=10)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 
 		self.assertEqual([[1, 10]], eval(sle.stock_queue))
 
 		# negative qty
 		make_zero(item_code, warehouse)
-		make_stock_entry(item_code, warehouse, None, 1, incoming_rate=10)
+		make_stock_entry(item_code=item_code, source=warehouse, qty=1, incoming_rate=10)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 
 		self.assertEqual([[-1, 10]], eval(sle.stock_queue))
 
 		# further negative
-		make_stock_entry(item_code, warehouse, None, 1)
+		make_stock_entry(item_code=item_code, source=warehouse, qty=1)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 
 		self.assertEqual([[-2, 10]], eval(sle.stock_queue))
 
 		# move stock to positive
-		make_stock_entry(item_code, None, warehouse, 3, incoming_rate=10)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=3, incoming_rate=10)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 
 		self.assertEqual([[1, 10]], eval(sle.stock_queue))
@@ -84,7 +84,7 @@ class TestStockEntry(unittest.TestCase):
 		warehouse = "_Test Warehouse - _TC"
 
 		# stock entry reqd for auto-reorder
-		make_stock_entry(item_code=item_code, target="_Test Warehouse 1 - _TC", qty=1, incoming_rate=1)
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, incoming_rate=1)
 
 		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
 		projected_qty = frappe.db.get_value("Bin", {"item_code": item_code,

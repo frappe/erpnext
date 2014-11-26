@@ -89,7 +89,12 @@ class TestJournalVoucher(unittest.TestCase):
 		set_perpetual_inventory()
 
 		jv = frappe.copy_doc(test_records[0])
-		jv.get("entries")[0].account = "_Test Warehouse - _TC"
+		jv.get("entries")[0].update({
+			"account": "_Test Warehouse - _TC",
+			"party_type": None,
+			"party": None
+		})
+
 		jv.insert()
 
 		from erpnext.accounts.general_ledger import StockAccountInvalidTransaction
@@ -152,9 +157,13 @@ class TestJournalVoucher(unittest.TestCase):
 		self.clear_account_balance()
 
 		jv = frappe.copy_doc(test_records[0])
-		jv.get("entries")[0].account = "_Test Account Cost for Goods Sold - _TC"
-		jv.get("entries")[0].cost_center = "_Test Cost Center - _TC"
-		jv.get("entries")[0].credit = 30000.0
+		jv.get("entries")[0].update({
+			"account": "_Test Account Cost for Goods Sold - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"party_type": None,
+			"party": None,
+			"credit": 30000.0
+		})
 		jv.get("entries")[1].debit = 30000.0
 		jv.submit()
 

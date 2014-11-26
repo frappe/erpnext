@@ -23,7 +23,7 @@ def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1, compa
 		cond = "name = '%s'" % fiscal_year.replace("'", "\'")
 	elif company:
 		cond = """('%s' in (select company from `tabFiscal Year Company`
-			where `tabFiscal Year Company`.parent = `tabFiscal Year`.name)) 
+			where `tabFiscal Year Company`.parent = `tabFiscal Year`.name))
 			and '%s' >= year_start_date and '%s' <= year_end_date """ %(company.replace("'", "\'"), date, date)
 	else:
 		cond = "'%s' >= year_start_date and '%s' <= year_end_date" %(date, date)
@@ -233,7 +233,7 @@ def get_company_default(company, fieldname):
 	value = frappe.db.get_value("Company", company, fieldname)
 
 	if not value:
-		throw(_("Please set default value {0} in Company {0}").format(frappe.get_meta("Company").get_label(fieldname), company))
+		throw(_("Please set default value {0} in Company {1}").format(frappe.get_meta("Company").get_label(fieldname), company))
 
 	return value
 

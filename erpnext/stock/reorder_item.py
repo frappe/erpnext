@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe import _
 from frappe.utils import flt, cstr, nowdate, add_days, cint
 from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 
@@ -23,8 +22,7 @@ def _reorder_item():
 
 	item_warehouse_projected_qty = get_item_warehouse_projected_qty()
 
-	warehouse_company = frappe._dict(frappe.db.sql("""select name, company
-		from `tabWarehouse`"""))
+	warehouse_company = frappe._dict(frappe.db.sql("""select name, company from `tabWarehouse`"""))
 	default_company = (frappe.defaults.get_defaults().get("company") or
 		frappe.db.sql("""select name from tabCompany limit 1""")[0][0])
 

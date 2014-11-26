@@ -13,7 +13,8 @@ coa = {
                 }
             },
             _("Bank Accounts"): {
-                "account_type": "Bank"
+                "account_type": "Bank",
+				"group_or_ledger": "Group"
             },
             _("Cash In Hand"): {
                 _("Cash"): {
@@ -26,7 +27,8 @@ coa = {
                 _("Earnest Money"): {}
             },
             _("Stock Assets"): {
-                "account_type": "Stock"
+                "account_type": "Stock",
+				"group_or_ledger": "Group"
             },
             _("Tax Assets"): {}
         },
@@ -47,7 +49,9 @@ coa = {
                 "account_type": "Fixed Asset"
             }
         },
-        _("Investments"): {},
+        _("Investments"): {
+        	"group_or_ledger": "Group"
+        },
         _("Temporary Accounts (Assets)"): {
             _("Temporary Assets"): {}
         },
@@ -139,7 +143,8 @@ coa = {
             "account_type": "Income Account"
         },
         _("Indirect Income"): {
-            "account_type": "Income Account"
+            "account_type": "Income Account",
+			"group_or_ledger": "Group"
         },
 		"root_type": "Income"
     },
@@ -160,7 +165,8 @@ coa = {
 			    },
 		    },
 			_("Duties and Taxes"): {
-				"account_type": "Tax"
+				"account_type": "Tax",
+				"group_or_ledger": "Group"
 			},
 			_("Loans (Liabilities)"): {
 				_("Secured Loans"): {},

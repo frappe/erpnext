@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
-from frappe.utils import cstr, flt, getdate, now_datetime, formatdate
+from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
@@ -54,7 +54,7 @@ class Item(WebsiteGenerator):
 		self.check_item_tax()
 		self.validate_barcode()
 		self.cant_change()
-		self.validate_item_type_for_reorder()
+		self.validate_reorder_level()
 		self.validate_warehouse_for_reorder()
 		self.validate_variants()
 
@@ -340,10 +340,15 @@ class Item(WebsiteGenerator):
 					if self.check_if_sle_exists() == "exists":
 						frappe.throw(_("As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'"))
 
-	def validate_item_type_for_reorder(self):
+	def validate_reorder_level(self):
+		if cint(self.apply_warehouse_wise_reorder_level):
+			self.re_order_level, self.re_order_qty = 0, 0
+		else:
+			self.set("item_reorder", [])
+
 		if self.re_order_level or len(self.get("item_reorder", {"material_request_type": "Purchase"})):
 			if not self.is_purchase_item:
-				frappe.throw(_("""To set reorder level, item must be Purchase Item"""))
+				frappe.throw(_("""To set reorder level, item must be a Purchase Item"""))
 
 	def validate_warehouse_for_reorder(self):
 		warehouse = []
@@ -411,13 +416,13 @@ class Item(WebsiteGenerator):
 	def recalculate_bin_qty(self, newdn):
 		from erpnext.utilities.repost_stock import repost_stock
 		frappe.db.auto_commit_on_many_writes = 1
-		frappe.db.set_default("allow_negative_stock", 1)
+		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		for warehouse in frappe.db.sql("select name from `tabWarehouse`"):
 			repost_stock(newdn, warehouse[0])
 
-		frappe.db.set_default("allow_negative_stock",
-			frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 		frappe.db.auto_commit_on_many_writes = 0
 
 	def copy_specification_from_item_group(self):
