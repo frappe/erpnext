@@ -103,7 +103,7 @@ class StockEntry(StockController):
 
 			for f in ("uom", "stock_uom", "description", "item_name", "expense_account",
 				"cost_center", "conversion_factor"):
-					if not item.get(f):
+					if f not in ["expense_account", "cost_center"] or not item.get(f):
 						item.set(f, item_details.get(f))
 
 			if not item.transfer_qty:
