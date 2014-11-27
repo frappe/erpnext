@@ -14,8 +14,11 @@
             {% if(contact_list[i].phone) { %}
                 {%= __("Phone") %}: {%= contact_list[i].phone %}<br>
             {% } %}
+            {% if(contact_list[i].mobile_no) { %}
+                {%= __("Mobile No.") %}: {%= contact_list[i].mobile_no %}<br>
+            {% } %}
             {% if(contact_list[i].email_id) { %}
-                {%= __("Email Id") %}: {%= contact_list[i].email_id %}
+                {%= __("Email ID") %}: {%= contact_list[i].email_id %}
             {% } %}
         </p>
     </div>
