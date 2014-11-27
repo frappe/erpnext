@@ -18,6 +18,7 @@
   "item_code": "_Test Item",
   "item_group": "_Test Item Group",
   "item_name": "_Test Item",
+  "apply_warehouse_wise_reorder_level": 1,
   "item_reorder": [
    {
     "material_request_type": "Purchase",
@@ -40,7 +41,7 @@
   "income_account": "Sales - _TC",
   "inspection_required": "No",
   "is_asset_item": "No",
-  "is_pro_applicable": "Yes",
+  "is_pro_applicable": "No",
   "is_purchase_item": "Yes",
   "is_sales_item": "Yes",
   "is_service_item": "No",
@@ -191,7 +192,7 @@
   "has_serial_no": "Yes",
   "inspection_required": "No",
   "is_asset_item": "No",
-  "is_pro_applicable": "Yes",
+  "is_pro_applicable": "No",
   "is_purchase_item": "Yes",
   "is_sales_item": "Yes",
   "is_service_item": "No",
@@ -274,6 +275,7 @@
 	  {"item_attribute": "Test Size", "item_attribute_value": "Medium"},
 	  {"item_attribute": "Test Size", "item_attribute_value": "Large"}
   ],
+  "apply_warehouse_wise_reorder_level": 1,
   "item_reorder": [
       {
        "material_request_type": "Purchase",
