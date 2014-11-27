@@ -150,6 +150,7 @@
    "precision": ""
   }, 
   {
+   "default": "", 
    "fieldname": "holiday_list", 
    "fieldtype": "Link", 
    "label": "Holiday List", 
@@ -160,7 +161,7 @@
  ], 
  "icon": "icon-wrench", 
  "idx": 1, 
- "modified": "2014-11-07 11:39:37.720913", 
+ "modified": "2014-11-27 19:04:58.125107", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Workstation", 

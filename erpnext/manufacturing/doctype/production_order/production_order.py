@@ -4,13 +4,17 @@
 from __future__ import unicode_literals
 import frappe, json, time, datetime
 
-from frappe.utils import flt, nowdate
+from frappe.utils import flt, nowdate, now, cint, cstr
 from frappe import _
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
+
+form_grid_templates = {
+	"production_order_operations": "templates/form_grid/production_order_grid.html"
+}
 
 class ProductionOrder(Document):
 	def validate(self):
@@ -146,6 +150,7 @@ class ProductionOrder(Document):
 		update_bin(args)
 
 	def set_production_order_operations(self):
+		"""Sets operations table in 'Production Order'. """
 		self.set('production_order_operations', [])
 		operations = frappe.db.sql("""select operation, opn_description, workstation, hour_rate, time_in_mins, 
 			operating_cost, fixed_cycle_cost from `tabBOM Operation` where parent = %s""", self.bom_no, as_dict=1)
@@ -154,9 +159,24 @@ class ProductionOrder(Document):
 		for d in self.get('production_order_operations'):
 			d.status = "Pending"
 			d.qty_completed=0
+			
+		self.auto_caluclate_production_dates()
 
 	def auto_caluclate_production_dates(self):
-		pass
+		start_delay = cint(frappe.db.get_value("Manufacturing Settings", "None", "operations_start_delay")) * 60
+		time = datetime.datetime.now() + datetime.timedelta(seconds= start_delay)
+		for d in self.get('production_order_operations'):
+			holiday_list = frappe.db.get_value("Workstation", d.workstation, "holiday_list")
+			for d in frappe.db.sql("""select holiday_date from `tabHoliday` where parent = %s 
+				order by holiday_date""", holiday_list, as_dict=1):
+				print "time date", time.date()
+				print "holiday ", d.holiday_date
+				if d.holiday_date == time.date():
+					print "time IN ", time
+					time = time + datetime.timedelta(seconds= 24*60*60)
+			d.planned_start_time = time.strftime('%Y-%m-%d %H:%M:%S')
+			time = time + datetime.timedelta(seconds= (cint(d.time_in_mins) * 60))
+			d.planned_end_time = time.strftime('%Y-%m-%d %H:%M:%S')
 
 @frappe.whitelist()
 def get_item_details(item):
@@ -220,7 +240,7 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_time_log(name, operation, from_time=None, to_time=None, qty=None, project=None, workstation=None):
+def make_time_log(name, operation, from_time, to_time, qty=None, project=None, workstation=None):
 	time_log =  frappe.new_doc("Time Log")
 	time_log.time_log_for = 'Manufacturing'
 	time_log.from_time = from_time
@@ -233,3 +253,13 @@ def make_time_log(name, operation, from_time=None, to_time=None, qty=None, proje
 	if from_time and to_time :
 		time_log.calculate_total_hours()
 	return time_log
+		
+@frappe.whitelist()
+def auto_make_time_log(production_order_id):
+	prod_order = frappe.get_doc("Production Order", production_order_id)
+	for d in prod_order.production_order_operations:
+		operation = cstr(d.idx) + ". " + d.operation
+		time_log = make_time_log(prod_order.name, operation, d.planned_start_time, d.planned_end_time, 
+			prod_order.qty, prod_order.project_name, d.workstation)
+		time_log.save()
+	frappe.msgprint(_("Time Logs created."))

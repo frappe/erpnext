@@ -3,7 +3,7 @@
 
 // render
 frappe.listview_settings['Time Log'] = {
-	add_fields: ["status", "billable", "activity_type", "task", "project", "hours"],
+	add_fields: ["status", "billable", "activity_type", "task", "project", "hours", "time_log_for"],
 	selectable: true,
 	onload: function(me) {
 		me.appframe.add_primary_action(__("Make Time Log Batch"), function() {

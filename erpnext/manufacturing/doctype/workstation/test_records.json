@@ -6,6 +6,7 @@
 		"warehouse": "_Test warehouse - _TC",
 		"fixed_cycle_cost": 1000,
 		"hour_rate":100,
+		"holiday_list": "_Test Holiday List",
 		"workstation_operation_hours": [
 			{
 				"start_time": "10:00:00",

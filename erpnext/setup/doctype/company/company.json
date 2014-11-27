@@ -161,6 +161,14 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "default_holiday_list", 
+   "fieldtype": "Link", 
+   "label": "Default Holiday List", 
+   "options": "Holiday List", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "column_break0", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 
@@ -356,7 +364,7 @@
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2014-08-29 15:50:18.539228", 
+ "modified": "2014-11-27 18:15:48.909416", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 
