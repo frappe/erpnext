@@ -83,6 +83,15 @@ $.extend(cur_frm.cscript, {
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
+	},
+	
+	auto_time_log: function(doc){
+		frappe.call({
+			method:"erpnext.manufacturing.doctype.production_order.production_order.auto_make_time_log",
+			args: {
+				"production_order_id": doc.name
+			}
+		});
 	}	
 });
 
