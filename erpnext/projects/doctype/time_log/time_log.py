@@ -43,12 +43,11 @@ class TimeLog(Document):
 				(from_time between %s and %s) or
 				(to_time between %s and %s) or
 				(%s between from_time and to_time))
-			and name!=%s
-			and ifnull(task, "")=%s
+			and name !=%s
+			and to_time > %s
 			and docstatus < 2""",
 			(self.employee, self.from_time, self.to_time, self.from_time,
-				self.to_time, self.from_time, self.name or "No Name",
-				cstr(self.task)))
+				self.to_time, self.from_time, self.name or "No Name", self.from_time))
 
 		if existing:
 			frappe.throw(_("This Time Log conflicts with {0}").format(comma_and(existing)), OverlapError)
