@@ -38,7 +38,7 @@ class TimeLog(Document):
 			self.status="Billed"
 
 	def validate_overlap(self):
-		existing = frappe.db.sql_list("""select name from `tabTime Log` where owner=%s and
+		existing = frappe.db.sql_list("""select name from `tabTime Log` where employee=%s and
 			(
 				(from_time between %s and %s) or
 				(to_time between %s and %s) or
@@ -46,7 +46,7 @@ class TimeLog(Document):
 			and name!=%s
 			and ifnull(task, "")=%s
 			and docstatus < 2""",
-			(self.owner, self.from_time, self.to_time, self.from_time,
+			(self.employee, self.from_time, self.to_time, self.from_time,
 				self.to_time, self.from_time, self.name or "No Name",
 				cstr(self.task)))
 
