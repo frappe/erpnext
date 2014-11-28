@@ -31,7 +31,7 @@
 1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,"1 moneda = [?] Fracción  Por ejemplo, 1 USD = 100 Cent"
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1 . Para mantener el código del artículo sabia cliente y para efectuar búsquedas en ellos en función de su uso de código de esta opción
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer grupo""> Añadir / Editar < / a>"
-"<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item grupo""> Añadir / Editar < / a>"
+"<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Añadir / Editar < / a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Añadir / Editar < / a>"
 "<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> defecto plantilla </ h4>  <p> Usos <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja plantillas </ a> y todos los campos de la Dirección ( incluyendo campos personalizados en su caso) estará disponible </ p>  <pre> <code> {{}} address_line1 <br>  {% if address_line2%} {{}} address_line2 <br> { endif% -%}  {{city}} <br>  {% if estado%} {{Estado}} {% endif <br> -%}  {% if%} pincode PIN: {{pincode}} {% endif <br> -%}  {{país}} <br>  {% if%} de teléfono Teléfono: {{phone}} {<br> endif% -%}  {% if%} fax Fax: {{fax}} {% endif <br> -%}  {% if%} email_ID Email: {{}} email_ID <br> ; {% endif -%}  </ code> </ pre>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Existe un Grupo de Clientes con el mismo nombre, por favor cambie el nombre del Cliente o cambie el nombre del Grupo de Clientes"
@@ -2745,7 +2745,7 @@ Statement of Account,Estado de cuenta
 Static Parameters,Parámetros estáticos
 Status,estado
 Status must be one of {0},Estado debe ser uno de {0}
-Status of {0} {1} is now {2},Situación de {0} {1} { 2 es ahora }
+Status of {0} {1} is now {2},Situación de {0} {1} {2} es ahora
 Status updated to {0},Estado actualizado a {0}
 Statutory info and other general information about your Supplier,Información legal y otra información general acerca de su proveedor
 Stay Updated,Manténgase actualizado

@@ -233,6 +233,11 @@ erpnext.POS = Class.extend({
 	},
 	make_item_list: function() {
 		var me = this;
+		if(!this.price_list) {
+			msgprint(__("Price List not found or disabled"));
+			return;
+		}
+
 		me.item_timeout = null;
 		frappe.call({
 			method: 'erpnext.accounts.doctype.sales_invoice.pos.get_items',
