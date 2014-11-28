@@ -1,5 +1,5 @@
- (Half Day),
- and year: ,
+ (Half Day), (Half Day)
+ and year: , and year: 
 """ does not exists",""" ಅಸ್ತಿತ್ವದಲ್ಲಿಲ್ಲ"
 %  Delivered,ತಲುಪಿಸಲಾಗಿದೆ %
 % Amount Billed,ಖ್ಯಾತವಾದ % ಪ್ರಮಾಣ
@@ -92,7 +92,7 @@ Accounts Payable,ಖಾತೆಗಳನ್ನು ಕೊಡಬೇಕಾದ
 Accounts Receivable,ಸ್ವೀಕರಿಸುವಂತಹ ಖಾತೆಗಳು
 Accounts Settings,ಸೆಟ್ಟಿಂಗ್ಗಳು ಖಾತೆಗಳು
 Active,ಕ್ರಿಯಾಶೀಲ
-Active: Will extract emails from ,
+Active: Will extract emails from ,Active: Will extract emails from 
 Activity,ಚಟುವಟಿಕೆ
 Activity Log,ಚಟುವಟಿಕೆ ಲಾಗ್
 Activity Log:,ಚಟುವಟಿಕೆ ಲಾಗ್ :
@@ -254,8 +254,8 @@ Approving Role,ಅಂಗೀಕಾರಕ್ಕಾಗಿ ಪಾತ್ರ
 Approving Role cannot be same as role the rule is Applicable To,ಪಾತ್ರ ನಿಯಮ ಅನ್ವಯವಾಗುತ್ತದೆ ಪಾತ್ರ ಅನುಮೋದನೆ ಇರಲಾಗುವುದಿಲ್ಲ
 Approving User,ಅಂಗೀಕಾರಕ್ಕಾಗಿ ಬಳಕೆದಾರ
 Approving User cannot be same as user the rule is Applicable To,ಬಳಕೆದಾರ ನಿಯಮ ಅನ್ವಯವಾಗುತ್ತದೆ ಎಂದು ಬಳಕೆದಾರ ಅನುಮೋದನೆ ಇರಲಾಗುವುದಿಲ್ಲ
-Are you sure you want to STOP ,
-Are you sure you want to UNSTOP ,
+Are you sure you want to STOP ,Are you sure you want to STOP 
+Are you sure you want to UNSTOP ,Are you sure you want to UNSTOP 
 Arrear Amount,ಬಾಕಿ ಪ್ರಮಾಣ
 "As Production Order can be made for this item, it must be a stock item.","ಪ್ರೊಡಕ್ಷನ್ ಆರ್ಡರ್ ಈ ಐಟಂ ಮಾಡಬಹುದು ಎಂದು, ಇದು ಒಂದು ಸ್ಟಾಕ್ ಐಟಂ ಇರಬೇಕು ."
 As per Stock UOM,ಸ್ಟಾಕ್ UOM ಪ್ರಕಾರ
@@ -284,7 +284,7 @@ Auto Accounting For Stock Settings,ಸ್ಟಾಕ್ ಸೆಟ್ಟಿಂಗ�
 Auto Material Request,ಆಟೋ ಉತ್ಪನ್ನ ವಿನಂತಿ
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,ಆಟೋ ಐಟಿ ವಸ್ತು ವಿನಂತಿಯನ್ನು ಪ್ರಮಾಣ ಉಗ್ರಾಣದಲ್ಲಿ ಮತ್ತೆ ಸಲುವಾಗಿ ಮಟ್ಟಕ್ಕಿಂತ ಹೋದಲ್ಲಿ
 Automatically compose message on submission of transactions.,ಸ್ವಯಂಚಾಲಿತವಾಗಿ ವ್ಯವಹಾರಗಳ ಸಲ್ಲಿಕೆಯಲ್ಲಿ ಸಂದೇಶವನ್ನು ರಚಿಸಿದರು .
-Automatically extract Job Applicants from a mail box ,
+Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮೇಲ್ ಬಾಕ್ಸ್ ಇ ಜಿ ಕಾರಣವಾಗುತ್ತದೆ ಹೊರತೆಗೆಯಲು
 Automatically updated via Stock Entry of type Manufacture/Repack,ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಮಾದರಿ ತಯಾರಿಕೆ / ಮತ್ತೆ ಮೂಟೆಕಟ್ಟು ನೆಲದ ಪ್ರವೇಶ ಮೂಲಕ ಅಪ್ಡೇಟ್ಗೊಳಿಸಲಾಗಿದೆ
 Automotive,ಆಟೋಮೋಟಿವ್
@@ -511,7 +511,7 @@ Clearance Date,ಕ್ಲಿಯರೆನ್ಸ್ ದಿನಾಂಕ
 Clearance Date not mentioned,ಕ್ಲಿಯರೆನ್ಸ್ ದಿನಾಂಕ ಪ್ರಸ್ತಾಪಿಸಿದ್ದಾರೆ
 Clearance date cannot be before check date in row {0},ಕ್ಲಿಯರೆನ್ಸ್ ದಿನಾಂಕ ದಿನಾಂಕ ಸತತವಾಗಿ ಚೆಕ್ ಮೊದಲು ಸಾಧ್ಯವಿಲ್ಲ {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,ಹೊಸ ಮಾರಾಟದ ಸರಕುಪಟ್ಟಿ ರಚಿಸಲು ' ಮಾರಾಟದ ಸರಕುಪಟ್ಟಿ ಮಾಡಿ ' ಗುಂಡಿಯನ್ನು ಕ್ಲಿಕ್ ಮಾಡಿ .
-Click on a link to get options to expand get options ,
+Click on a link to get options to expand get options ,Click on a link to get options to expand get options 
 Client,ಕಕ್ಷಿಗಾರ
 Close Balance Sheet and book Profit or Loss.,ಮುಚ್ಚಿ ಬ್ಯಾಲೆನ್ಸ್ ಶೀಟ್ ಮತ್ತು ಪುಸ್ತಕ ಲಾಭ ಅಥವಾ ನಷ್ಟ .
 Closed,ಮುಚ್ಚಲಾಗಿದೆ
@@ -841,13 +841,13 @@ Distributor,ವಿತರಕ
 Divorced,ವಿವಾಹವಿಚ್ಛೇದಿತ
 Do Not Contact,ಸಂಪರ್ಕಿಸಿ ಇಲ್ಲ
 Do not show any symbol like $ etc next to currencies.,ಮುಂದಿನ ಕರೆನ್ಸಿಗಳ $ ಇತ್ಯಾದಿ ಯಾವುದೇ ಸಂಕೇತ ತೋರಿಸುವುದಿಲ್ಲ.
-Do really want to unstop production order: ,
-Do you really want to STOP ,
+Do really want to unstop production order: ,Do really want to unstop production order: 
+Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,ನೀವು ನಿಜವಾಗಿಯೂ ಈ ವಸ್ತು ವಿನಂತಿಯನ್ನು ನಿಲ್ಲಿಸಲು ಬಯಸುತ್ತೀರಾ ?
 Do you really want to Submit all Salary Slip for month {0} and year {1},ನೀವು ನಿಜವಾಗಿಯೂ {0} {1} ತಿಂಗಳು ಮತ್ತು ವರ್ಷದ ಸಂಬಳ ಸ್ಲಿಪ್ ಎಲ್ಲಾ ಸಲ್ಲಿಸಲು ಬಯಸುತ್ತೀರಾ
-Do you really want to UNSTOP ,
+Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,ನೀವು ನಿಜವಾಗಿಯೂ ಈ ವಸ್ತು ವಿನಂತಿಯನ್ನು ಅಡ್ಡಿಯಾಗಿರುವುದನ್ನು ಬಿಡಿಸು ಬಯಸುವಿರಾ?
-Do you really want to stop production order: ,
+Do you really want to stop production order: ,Do you really want to stop production order: 
 Doc Name,ಡಾಕ್ ಹೆಸರು
 Doc Type,ಡಾಕ್ ಪ್ರಕಾರ
 Document Description,ಡಾಕ್ಯುಮೆಂಟ್ ವಿವರಣೆ
@@ -899,7 +899,7 @@ Electronics,ಇಲೆಕ್ಟ್ರಾನಿಕ್ ಶಾಸ್ತ್ರ
 Email,ಗಾಜುಲೇಪ
 Email Digest,ಡೈಜೆಸ್ಟ್ ಇಮೇಲ್
 Email Digest Settings,ಡೈಜೆಸ್ಟ್ ಇಮೇಲ್ ಸೆಟ್ಟಿಂಗ್ಗಳು
-Email Digest: ,
+Email Digest: ,Email Digest: 
 Email Id,ಮಿಂಚಂಚೆ
 "Email Id where a job applicant will email e.g. ""jobs@example.com""","ಕೆಲಸ ಅರ್ಜಿದಾರರ ಇಮೇಲ್ ಅಲ್ಲಿ ಮಿಂಚಂಚೆ ಇ ಜಿ "" Jobs@example.com """
 Email Notifications,ಇಮೇಲ್ ಅಧಿಸೂಚನೆಗಳನ್ನು
@@ -927,7 +927,7 @@ Employee Settings,ನೌಕರರ ಸೆಟ್ಟಿಂಗ್ಗಳು
 Employee Type,ನೌಕರರ ಪ್ರಕಾರ
 "Employee designation (e.g. CEO, Director etc.).","ನೌಕರರ ಹುದ್ದೆ ( ಇ ಜಿ ಸಿಇಒ , ನಿರ್ದೇಶಕ , ಇತ್ಯಾದಿ ) ."
 Employee master.,ನೌಕರರ ಮಾಸ್ಟರ್ .
-Employee record is created using selected field. ,
+Employee record is created using selected field. ,Employee record is created using selected field. 
 Employee records.,ನೌಕರರ ದಾಖಲೆಗಳು .
 Employee relieved on {0} must be set as 'Left',{0} ಮೇಲೆ ಬಿಡುಗಡೆ ನೌಕರರ ' ಎಡ ' ಹೊಂದಿಸಿ
 Employee {0} has already applied for {1} between {2} and {3},ನೌಕರರ {0} ಈಗಾಗಲೇ {1} {2} ಮತ್ತು ನಡುವೆ ಅನ್ವಯಿಸಿದ್ದಾರೆ {3}
@@ -959,7 +959,7 @@ Enter url parameter for receiver nos,ರಿಸೀವರ್ ಸೂಲ URL ಅ�
 Entertainment & Leisure,ಮನರಂಜನೆ ಮತ್ತು ವಿರಾಮ
 Entertainment Expenses,ಮನೋರಂಜನೆ ವೆಚ್ಚಗಳು
 Entries,ನಮೂದುಗಳು
-Entries against ,
+Entries against ,Entries against 
 Entries are not allowed against this Fiscal Year if the year is closed.,ವರ್ಷ ಮುಚ್ಚಲಾಗಿದೆ ವೇಳೆ ನಮೂದುಗಳು ಈ ಆರ್ಥಿಕ ವರ್ಷ ವಿರುದ್ಧ ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ.
 Equity,ಇಕ್ವಿಟಿ
 Error: {0} > {1},ದೋಷ : {0} > {1}
@@ -1024,7 +1024,7 @@ Exports,ರಫ್ತು
 External,ಬಾಹ್ಯ
 Extract Emails,ಇಮೇಲ್ಗಳನ್ನು ಹೊರತೆಗೆಯಲು
 FCFS Rate,FCFS ದರ
-Failed: ,
+Failed: ,Failed: 
 Family Background,ಕೌಟುಂಬಿಕ ಹಿನ್ನೆಲೆ
 Fax,ಫ್ಯಾಕ್ಸ್
 Features Setup,ವೈಶಿಷ್ಟ್ಯಗಳು ಸೆಟಪ್
@@ -1245,7 +1245,7 @@ If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged 
 If you involve in manufacturing activity. Enables Item 'Is Manufactured',ನೀವು ಉತ್ಪಾದನಾ ಚಟುವಟಿಕೆ ಒಳಗೊಂಡಿರುತ್ತವೆ ವೇಳೆ . ಐಟಂ ಸಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ ' ತಯಾರಿಸುತ್ತದೆ '
 Ignore,ಕಡೆಗಣಿಸು
 Ignore Pricing Rule,ಬೆಲೆ ರೂಲ್ ನಿರ್ಲಕ್ಷಿಸು
-Ignored: ,
+Ignored: ,Ignored: 
 Image,ಚಿತ್ರ
 Image View,ImageView
 Implementation Partner,ಅನುಷ್ಠಾನ ಸಂಗಾತಿ
@@ -1574,7 +1574,7 @@ Maintenance Visit Purpose,ನಿರ್ವಹಣೆ ಭೇಟಿ ಉದ್ದ�
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,ನಿರ್ವಹಣೆ ಭೇಟಿ {0} ಈ ಮಾರಾಟದ ಆದೇಶವನ್ನು ರದ್ದುಗೊಳಿಸುವ ಮೊದಲು ರದ್ದು ಮಾಡಬೇಕು
 Maintenance start date can not be before delivery date for Serial No {0},ನಿರ್ವಹಣೆ ಆರಂಭ ದಿನಾಂಕ ಯಾವುದೇ ಸೀರಿಯಲ್ ವಿತರಣಾ ದಿನಾಂಕದ ಮೊದಲು ಸಾಧ್ಯವಿಲ್ಲ {0}
 Major/Optional Subjects,ಮೇಜರ್ / ಐಚ್ಛಿಕ ವಿಷಯಗಳ
-Make ,
+Make ,Make 
 Make Accounting Entry For Every Stock Movement,ಪ್ರತಿ ಸ್ಟಾಕ್ ಚಳುವಳಿ ಲೆಕ್ಕಪರಿಶೋಧಕ ಎಂಟ್ರಿ ಮಾಡಿ
 Make Bank Voucher,ಬ್ಯಾಂಕ್ ಚೀಟಿ ಮಾಡಿ
 Make Credit Note,ಕ್ರೆಡಿಟ್ ಸ್ಕೋರ್ ಮಾಡಿ
@@ -1723,7 +1723,7 @@ Net Weight UOM,ನೆಟ್ ತೂಕ UOM
 Net Weight of each Item,ಪ್ರತಿ ಐಟಂ ನೆಟ್ ತೂಕ
 Net pay cannot be negative,ನಿವ್ವಳ ವೇತನ ಋಣಾತ್ಮಕ ಇರುವಂತಿಲ್ಲ
 Never,ನೆವರ್
-New ,
+New ,New 
 New Account,ಹೊಸ ಖಾತೆ
 New Account Name,ಹೊಸ ಖಾತೆ ಹೆಸರು
 New BOM,ಹೊಸ BOM
@@ -1789,7 +1789,7 @@ No permission,ಯಾವುದೇ ಅನುಮತಿ
 No record found,ಯಾವುದೇ ದಾಖಲೆ
 No records found in the Invoice table,ಸರಕುಪಟ್ಟಿ ಕೋಷ್ಟಕದಲ್ಲಿ ಯಾವುದೇ ದಾಖಲೆಗಳು
 No records found in the Payment table,ಪಾವತಿ ಕೋಷ್ಟಕದಲ್ಲಿ ಯಾವುದೇ ದಾಖಲೆಗಳು
-No salary slip found for month: ,
+No salary slip found for month: ,No salary slip found for month: 
 Non Profit,ಲಾಭಾಪೇಕ್ಷೆಯಿಲ್ಲದ
 Nos,ಸೂಲ
 Not Active,ಸಕ್ರಿಯವಾಗಿರದ
@@ -2448,8 +2448,8 @@ Root cannot have a parent cost center,ರೂಟ್ ಪೋಷಕರು ವ�
 Rounded Off,ಆಫ್ ದುಂಡಾದ
 Rounded Total,ದುಂಡಾದ ಒಟ್ಟು
 Rounded Total (Company Currency),ದುಂಡಾದ ಒಟ್ಟು ( ಕಂಪನಿ ಕರೆನ್ಸಿ )
-Row # ,
-Row # {0}: ,
+Row # ,Row # 
+Row # {0}: ,Row # {0}: 
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,ರೋ # {0}: ಆದೇಶಿಸಿತು ಪ್ರಮಾಣ (ಐಟಂ ಮಾಸ್ಟರ್ ವ್ಯಾಖ್ಯಾನಿಸಲಾಗಿದೆ) ಐಟಂನ ಕನಿಷ್ಠ ಪ್ರಮಾಣ ಆದೇಶ ಕಡಿಮೆ ಸಾಧ್ಯವಿಲ್ಲ.
 Row #{0}: Please specify Serial No for Item {1},ರೋ # {0}: ಐಟಂ ಯಾವುದೇ ಸೀರಿಯಲ್ ಸೂಚಿಸಲು ದಯವಿಟ್ಟು {1}
 Row {0}: Account does not match with \						Purchase Invoice Credit To account,ರೋ {0}: \ ಖರೀದಿಸಿ ಸರಕುಪಟ್ಟಿ ಕ್ರೆಡಿಟ್ ಖಾತೆಗೆ ಜೊತೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ
@@ -2751,7 +2751,7 @@ Stock Ageing,ಸ್ಟಾಕ್ ಏಜಿಂಗ್
 Stock Analytics,ಸ್ಟಾಕ್ ಅನಾಲಿಟಿಕ್ಸ್
 Stock Assets,ಸ್ಟಾಕ್ ಸ್ವತ್ತುಗಳು
 Stock Balance,ಸ್ಟಾಕ್ ಬ್ಯಾಲೆನ್ಸ್
-Stock Entries already created for Production Order ,
+Stock Entries already created for Production Order ,Stock Entries already created for Production Order 
 Stock Entry,ಸ್ಟಾಕ್ ಎಂಟ್ರಿ
 Stock Entry Detail,ಸ್ಟಾಕ್ ಎಂಟ್ರಿ ವಿವರಗಳು
 Stock Expenses,ಸ್ಟಾಕ್ ವೆಚ್ಚಗಳು
@@ -2797,7 +2797,7 @@ Submit all salary slips for the above selected criteria,ಮೇಲೆ ಆಯ�
 Submit this Production Order for further processing.,ಮತ್ತಷ್ಟು ಪ್ರಕ್ರಿಯೆಗೆ ಈ ಪ್ರೊಡಕ್ಷನ್ ಆರ್ಡರ್ ಸಲ್ಲಿಸಿ .
 Submitted,ಒಪ್ಪಿಸಿದ
 Subsidiary,ಸಹಕಾರಿ
-Successful: ,
+Successful: ,Successful: 
 Successfully Reconciled,ಯಶಸ್ವಿಯಾಗಿ ಮರುಕೌನ್ಸಿಲ್
 Suggestions,ಸಲಹೆಗಳು
 Sunday,ಭಾನುವಾರ
@@ -2915,7 +2915,7 @@ The Organization,ಸಂಸ್ಥೆ
 "The account head under Liability, in which Profit/Loss will be booked","ಲಾಭ / ನಷ್ಟ ಗೊತ್ತು ಯಾವ ಹೊಣೆಗಾರಿಕೆ ಅಡಿಯಲ್ಲಿ ಖಾತೆ ತಲೆ ,"
 The date on which next invoice will be generated. It is generated on submit.,ಮುಂದಿನ ಸರಕುಪಟ್ಟಿ ಸೃಷ್ಟಿಸಲಾಗುತ್ತಿಲ್ಲ ಯಾವ ದಿನಾಂಕ. ಇದು ಸಲ್ಲಿಸಲು ಮೇಲೆ ಉತ್ಪಾದಿಸಲಾಗುತ್ತದೆ.
 The date on which recurring invoice will be stop,ಮರುಕಳಿಸುವ ಸರಕುಪಟ್ಟಿ ಸ್ಟಾಪ್ ಯಾವ ದಿನಾಂಕ
-"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","The day of the month on which auto invoice will be generated e.g. 05, 28 etc "
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,ನೀವು ರಜೆ ಹಾಕುತ್ತಿವೆ ಮೇಲೆ ದಿನ (ಗಳು) ರಜಾ ಇವೆ . ನೀವು ಬಿಟ್ಟು ಅರ್ಜಿ ಅಗತ್ಯವಿದೆ .
 The first Leave Approver in the list will be set as the default Leave Approver,ಪಟ್ಟಿಯಲ್ಲಿ ಮೊದಲ ಲೀವ್ ಅನುಮೋದಕ ಡೀಫಾಲ್ಟ್ ಲೀವ್ ಅನುಮೋದಕ ಎಂದು ಸೆಟ್ ಮಾಡಲಾಗುತ್ತದೆ
 The first user will become the System Manager (you can change that later).,ಮೊದಲ ಬಳಕೆದಾರ ( ನೀವು ನಂತರ ಬದಲಾಯಿಸಬಹುದು ) ವ್ಯವಸ್ಥೆ ನಿರ್ವಾಹಕರಾಗುತ್ತೀರಿ.
@@ -3002,7 +3002,7 @@ Total Advance,ಒಟ್ಟು ಅಡ್ವಾನ್ಸ್
 Total Amount,ಒಟ್ಟು ಪ್ರಮಾಣ
 Total Amount To Pay,ಪಾವತಿಸಲು ಒಟ್ಟು ಪ್ರಮಾಣ
 Total Amount in Words,ವರ್ಡ್ಸ್ ಒಟ್ಟು ಪ್ರಮಾಣ
-Total Billing This Year: ,
+Total Billing This Year: ,Total Billing This Year: 
 Total Characters,ಒಟ್ಟು ಪಾತ್ರಗಳು
 Total Claimed Amount,ಹಕ್ಕು ಪಡೆದ ಒಟ್ಟು ಪ್ರಮಾಣ
 Total Commission,ಒಟ್ಟು ಆಯೋಗ

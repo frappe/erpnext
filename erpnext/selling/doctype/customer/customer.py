@@ -8,12 +8,16 @@ from frappe import _, msgprint, throw
 import frappe.defaults
 from frappe.utils import flt
 
-
 from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.utilities.address_and_contact import load_address_and_contact
 
 class Customer(TransactionBase):
 	def get_feed(self):
 		return self.customer_name
+
+	def onload(self):
+		"""Load address and contacts in `__onload`"""
+		load_address_and_contact(self, "customer")
 
 	def autoname(self):
 		cust_master_name = frappe.defaults.get_global_default('cust_master_name')

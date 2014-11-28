@@ -254,8 +254,8 @@ Approving Role,Одобравање улоге
 Approving Role cannot be same as role the rule is Applicable To,"Утверждении роль не может быть такой же, как роль правило применимо к"
 Approving User,Одобравање корисника
 Approving User cannot be same as user the rule is Applicable To,"Утверждении покупатель не может быть такой же, как пользователь правило применимо к"
-Are you sure you want to STOP ,
-Are you sure you want to UNSTOP ,
+Are you sure you want to STOP ,Are you sure you want to STOP 
+Are you sure you want to UNSTOP ,Are you sure you want to UNSTOP 
 Arrear Amount,Заостатак Износ
 "As Production Order can be made for this item, it must be a stock item.","Как Производственный заказ можно сделать по этой статье, он должен быть запас пункт ."
 As per Stock UOM,По берза ЗОЦГ
@@ -284,7 +284,7 @@ Auto Accounting For Stock Settings,Аутоматско Рачуноводств
 Auto Material Request,Ауто Материјал Захтев
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,Аутоматско подизање Захтева материјал уколико количина падне испод нивоа поново би у складишту
 Automatically compose message on submission of transactions.,Автоматически создавать сообщение о подаче сделок .
-Automatically extract Job Applicants from a mail box ,
+Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,Аутоматски екстракт води од кутије маил нпр
 Automatically updated via Stock Entry of type Manufacture/Repack,Аутоматски ажурира путем берзе Унос типа Производња / препаковати
 Automotive,аутомобилски
@@ -511,7 +511,7 @@ Clearance Date,Чишћење Датум
 Clearance Date not mentioned,Клиренс Дата не упоминается
 Clearance date cannot be before check date in row {0},Дата просвет не может быть до даты регистрации в строке {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Кликните на &#39;да продаје Фактура&#39; дугме да бисте креирали нову продајну фактуру.
-Click on a link to get options to expand get options ,
+Click on a link to get options to expand get options ,Click on a link to get options to expand get options 
 Client,Клијент
 Close Balance Sheet and book Profit or Loss.,Затвори Биланс стања и књига добитак или губитак .
 Closed,Затворено
@@ -841,13 +841,13 @@ Distributor,Дистрибутер
 Divorced,Разведен
 Do Not Contact,Немојте Контакт
 Do not show any symbol like $ etc next to currencies.,Не показују као симбол $ итд поред валутама.
-Do really want to unstop production order: ,
-Do you really want to STOP ,
+Do really want to unstop production order: ,Do really want to unstop production order: 
+Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,Да ли заиста желите да зауставите овај материјал захтев ?
 Do you really want to Submit all Salary Slip for month {0} and year {1},"Вы действительно хотите , чтобы представить все Зарплата Слип для месяца {0} и год {1}"
-Do you really want to UNSTOP ,
+Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,Да ли стварно желите да Отпушити овај материјал захтев ?
-Do you really want to stop production order: ,
+Do you really want to stop production order: ,Do you really want to stop production order: 
 Doc Name,Док Име
 Doc Type,Док Тип
 Document Description,Опис документа
@@ -899,7 +899,7 @@ Electronics,електроника
 Email,Е-маил
 Email Digest,Е-маил Дигест
 Email Digest Settings,Е-маил подешавања Дигест
-Email Digest: ,
+Email Digest: ,Email Digest: 
 Email Id,Емаил ИД
 "Email Id where a job applicant will email e.g. ""jobs@example.com""",Емаил ИД гдје посао подносилац ће пошаљи нпр &quot;јобс@екампле.цом&quot;
 Email Notifications,Уведомления по электронной почте
@@ -959,7 +959,7 @@ Enter url parameter for receiver nos,Унесите УРЛ параметар з
 Entertainment & Leisure,Забава и слободно време
 Entertainment Expenses,представительские расходы
 Entries,Уноси
-Entries against ,
+Entries against ,Entries against 
 Entries are not allowed against this Fiscal Year if the year is closed.,Уноси нису дозвољени против фискалне године ако је затворен.
 Equity,капитал
 Error: {0} > {1},Ошибка: {0} > {1}
@@ -1574,7 +1574,7 @@ Maintenance Visit Purpose,Одржавање посета Сврха
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Техническое обслуживание Посетить {0} должно быть отменено до отмены этого заказ клиента
 Maintenance start date can not be before delivery date for Serial No {0},Техническое обслуживание дата не может быть до даты доставки для Serial No {0}
 Major/Optional Subjects,Мајор / Опциони предмети
-Make ,
+Make ,Make 
 Make Accounting Entry For Every Stock Movement,Направите Рачуноводство унос за сваки Стоцк Покрета
 Make Bank Voucher,Направите ваучер Банк
 Make Credit Note,Маке Цредит Ноте
@@ -1723,7 +1723,7 @@ Net Weight UOM,Тежина УОМ
 Net Weight of each Item,Тежина сваког артикла
 Net pay cannot be negative,Чистая зарплата не может быть отрицательным
 Never,Никад
-New ,
+New ,New 
 New Account,Нови налог
 New Account Name,Нови налог Име
 New BOM,Нови БОМ
@@ -2449,7 +2449,7 @@ Rounded Off,округляется
 Rounded Total,Роундед Укупно
 Rounded Total (Company Currency),Заобљени Укупно (Друштво валута)
 Row # ,Ред #
-Row # {0}: ,
+Row # {0}: ,Row # {0}: 
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Ред # {0}: Ж количина не може мање од ставке Минимална количина за поручивање (дефинисано у тачки мастер).
 Row #{0}: Please specify Serial No for Item {1},Ред # {0}: Наведите Сериал но за пункт {1}
 Row {0}: Account does not match with \						Purchase Invoice Credit To account,Ред {0}: Рачун не одговара \ фактури Кредит на рачун
@@ -2751,7 +2751,7 @@ Stock Ageing,Берза Старење
 Stock Analytics,Стоцк Аналитика
 Stock Assets,фондовые активы
 Stock Balance,Берза Биланс
-Stock Entries already created for Production Order ,
+Stock Entries already created for Production Order ,Stock Entries already created for Production Order 
 Stock Entry,Берза Ступање
 Stock Entry Detail,Берза Унос Детаљ
 Stock Expenses,Акции Расходы

@@ -6,12 +6,16 @@ import frappe
 import frappe.defaults
 from frappe import msgprint, _
 from frappe.model.naming import make_autoname
-
+from erpnext.utilities.address_and_contact import load_address_and_contact
 from erpnext.utilities.transaction_base import TransactionBase
 
 class Supplier(TransactionBase):
 	def get_feed(self):
 		return self.supplier_name
+
+	def onload(self):
+		"""Load address and contacts in `__onload`"""
+		load_address_and_contact(self, "supplier")
 
 	def autoname(self):
 		supp_master_name = frappe.defaults.get_global_default('supp_master_name')

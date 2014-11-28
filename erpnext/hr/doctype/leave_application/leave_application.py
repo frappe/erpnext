@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, json
 from frappe import _
 
 from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_url_to_form, \
@@ -81,26 +81,10 @@ class LeaveApplication(Document):
 					LeaveDayBlockedError)
 
 	def get_holidays(self):
-		tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1
-			where e1.name = %s and h1.parent = h2.name and e1.holiday_list = h2.name
-			and h1.holiday_date between %s and %s""", (self.employee, self.from_date, self.to_date))
-		if not tot_hol:
-			tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2
-				where h1.parent = h2.name and h1.holiday_date between %s and %s
-				and ifnull(h2.is_default,0) = 1 and h2.fiscal_year = %s""",
-				(self.from_date, self.to_date, self.fiscal_year))
-		return tot_hol and flt(tot_hol[0][0]) or 0
+		return get_holidays(self)
 
 	def get_total_leave_days(self):
-		"""Calculates total leave days based on input and holidays"""
-		ret = {'total_leave_days' : 0.5}
-		if not self.half_day:
-			tot_days = date_diff(self.to_date, self.from_date) + 1
-			holidays = self.get_holidays()
-			ret = {
-				'total_leave_days' : flt(tot_days)-flt(holidays)
-			}
-		return ret
+		return get_total_leave_days(self)
 
 	def validate_to_date(self):
 		if self.from_date and self.to_date and \
@@ -219,6 +203,35 @@ class LeaveApplication(Document):
 		from frappe.desk.page.messages.messages import post
 		post(**{"txt": args.message, "contact": args.message_to, "subject": args.subject,
 			"notify": cint(self.follow_via_email)})
+
+def get_holidays(leave_app):
+	tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1
+		where e1.name = %s and h1.parent = h2.name and e1.holiday_list = h2.name
+		and h1.holiday_date between %s and %s""", (leave_app.employee, leave_app.from_date, leave_app.to_date))
+	# below line is needed. If an employee hasn't been assigned with any holiday list then above will return 0 rows.
+	tot_hol=tot_hol and flt(tot_hol[0][0]) or 0	
+	if not tot_hol:
+		tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2
+			where h1.parent = h2.name and h1.holiday_date between %s and %s
+			and ifnull(h2.is_default,0) = 1 and h2.fiscal_year = %s""",
+			(leave_app.from_date, leave_app.to_date, leave_app.fiscal_year))
+	return tot_hol and flt(tot_hol[0][0]) or 0
+
+@frappe.whitelist()
+def get_total_leave_days(leave_app):
+	# Parse Leave Application if neccessary
+	if isinstance(leave_app, str) or isinstance(leave_app, unicode):
+		leave_app = frappe.get_doc(json.loads(leave_app))
+
+	"""Calculates total leave days based on input and holidays"""
+	ret = {'total_leave_days' : 0.5}
+	if not leave_app.half_day:
+		tot_days = date_diff(leave_app.to_date, leave_app.from_date) + 1
+		holidays = leave_app.get_holidays()
+		ret = {
+			'total_leave_days' : flt(tot_days)-flt(holidays)
+		}
+	return ret
 
 @frappe.whitelist()
 def get_leave_balance(employee, leave_type, fiscal_year):

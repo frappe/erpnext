@@ -343,17 +343,17 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var me = this;
 		var tax_count = this.frm.tax_doclist.length;
 
-		this.frm.doc.grand_total = flt(
-			tax_count ? this.frm.tax_doclist[tax_count - 1].total : this.frm.doc.net_total,
-			precision("grand_total"));
-		this.frm.doc.grand_total_export = flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate,
-			precision("grand_total_export"));
+		this.frm.doc.grand_total = flt(tax_count ? this.frm.tax_doclist[tax_count - 1].total : this.frm.doc.net_total);
+		this.frm.doc.grand_total_export = flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate);
 
 		this.frm.doc.other_charges_total = flt(this.frm.doc.grand_total - this.frm.doc.net_total,
 			precision("other_charges_total"));
 		this.frm.doc.other_charges_total_export = flt(this.frm.doc.grand_total_export -
 			this.frm.doc.net_total_export + flt(this.frm.doc.discount_amount),
 			precision("other_charges_total_export"));
+
+		this.frm.doc.grand_total = flt(this.frm.doc.grand_total, precision("grand_total"));
+		this.frm.doc.grand_total_export = flt(this.frm.doc.grand_total_export, precision("grand_total_export"));
 
 		this.frm.doc.rounded_total = Math.round(this.frm.doc.grand_total);
 		this.frm.doc.rounded_total_export = Math.round(this.frm.doc.grand_total_export);

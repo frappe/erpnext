@@ -115,13 +115,13 @@ class BuyingController(StockController):
 		self.round_floats_in(self, ["net_total", "net_total_import"])
 
 	def calculate_totals(self):
-		self.grand_total = flt(self.tax_doclist[-1].total if self.tax_doclist
-			else self.net_total, self.precision("grand_total"))
-		self.grand_total_import = flt(self.grand_total / self.conversion_rate,
-			self.precision("grand_total_import"))
+		self.grand_total = flt(self.tax_doclist[-1].total if self.tax_doclist else self.net_total)
+		self.grand_total_import = flt(self.grand_total / self.conversion_rate)
 
-		self.total_tax = flt(self.grand_total - self.net_total,
-			self.precision("total_tax"))
+		self.total_tax = flt(self.grand_total - self.net_total, self.precision("total_tax"))
+
+		self.grand_total = flt(self.grand_total, self.precision("grand_total"))
+		self.grand_total_import = flt(self.grand_total_import, self.precision("grand_total_import"))
 
 		if self.meta.get_field("rounded_total"):
 			self.rounded_total = rounded(self.grand_total)

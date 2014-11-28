@@ -1,5 +1,5 @@
- (Half Day),
- and year: ,
+ (Half Day), (Half Day)
+ and year: , and year: 
 """ does not exists","""Nu există"
 %  Delivered,Livrat%
 % Amount Billed,% Suma facturată
@@ -34,7 +34,7 @@
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Add / Edit </ a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Add / Edit </ a>"
 "<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> implicit Format </ h4>  <p> Utilizeaza <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja templating </ a> și toate domeniile de Adresa ( inclusiv Câmpuri personalizate dacă este cazul) va fi disponibil </ p>  <pre> <code> {{}} address_line1 <br>  {% dacă address_line2%} {{}} address_line2 cui { % endif -%}  {{oras}} <br>  {%, în cazul în care de stat%} {{}} stat {cui% endif -%}  {%, în cazul în care parola așa%} PIN: {{}} parola așa cui {% endif -%}  {{țară}} <br>  {%, în cazul în care telefonul%} Telefon: {{telefon}} cui { % endif -%}  {% dacă fax%} Fax: {{fax}} cui {% endif -%}  {% dacă email_id%} Email: {{}} email_id <br> ; {% endif -%}  </ code> </ pre>"
-A Customer Group exists with same name please change the Customer name or rename the Customer Group,Există un grup de clienți cu același nume vă rugăm să schimbați numele clientului sau redenumi Grupul Customer
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,Există un grup de clienți cu același nume vă rugăm să schimbați numele clientului sau redenumiti Grupul Clienti
 A Customer exists with same name,Există un client cu același nume
 A Lead with this email id should exist,Un plumb cu acest id-ul de e-mail ar trebui să existe
 A Product or Service,Un produs sau serviciu
@@ -42,13 +42,13 @@ A Supplier exists with same name,Un furnizor există cu același nume
 A symbol for this currency. For e.g. $,"Un simbol pentru această monedă. De exemplu, $"
 AMC Expiry Date,AMC Data expirării
 Abbr,Abbr
-Abbreviation cannot have more than 5 characters,Abreviere nu poate avea mai mult de 5 caractere
+Abbreviation cannot have more than 5 characters,Abrevierea nu poate avea mai mult de 5 caractere
 Above Value,Valoarea de mai sus
 Absent,Absent
 Acceptance Criteria,Criteriile de acceptare
 Accepted,Acceptat
-Accepted + Rejected Qty must be equal to Received quantity for Item {0},Acceptat Respins + Cantitate trebuie să fie egală cu cantitatea primite pentru postul {0}
-Accepted Quantity,Acceptat Cantitate
+Accepted + Rejected Qty must be equal to Received quantity for Item {0},Cantitatea Acceptata + Respinsa trebuie să fie egală cu cantitatea primita pentru articolul {0}
+Accepted Quantity,Cantitatea acceptată
 Accepted Warehouse,Depozit acceptate
 Account,Cont
 Account Balance,Soldul contului
@@ -57,33 +57,33 @@ Account Details,Detalii cont
 Account Head,Cont Șeful
 Account Name,Nume cont
 Account Type,Tip de cont
-"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Soldul contului deja în credit, tu nu sunt permise pentru a seta ""Balanța trebuie să fie"" la fel de ""debit"""
-"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Soldul contului deja în debit, nu vi se permite să stabilească ""Balanța trebuie să fie"" drept ""credit"""
+"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Soldul contului este deja în Credit, nu poţi seta ""Balanța trebuie să fie"" drept ""Debit""."
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Soldul contului este deja în Debit, nu poţi seta ""Balanța trebuie să fie"" drept ""Credit""."
 Account for the warehouse (Perpetual Inventory) will be created under this Account.,Cont de depozit (Inventar Perpetual) va fi creat sub acest cont.
 Account head {0} created,Cap cont {0} a creat
-Account must be a balance sheet account,Contul trebuie să fie un cont de bilanț
-Account with child nodes cannot be converted to ledger,Cont cu noduri copil nu pot fi convertite în registrul
-Account with existing transaction can not be converted to group.,Cont cu tranzacții existente nu pot fi convertite în grup.
-Account with existing transaction can not be deleted,Cont cu tranzacții existente nu pot fi șterse
-Account with existing transaction cannot be converted to ledger,Cont cu tranzacții existente nu pot fi convertite în registrul
-Account {0} cannot be a Group,Contul {0} nu poate fi un grup
-Account {0} does not belong to Company {1},Contul {0} nu aparține companiei {1}
+Account must be a balance sheet account,Contul trebuie să fie un cont de bilanț contabil
+Account with child nodes cannot be converted to ledger,Cont cu noduri copil nu pot fi convertite în registru
+Account with existing transaction can not be converted to group.,Cont cu tranzacții existente nu poate fi convertit în grup.
+Account with existing transaction can not be deleted,Cont cu tranzacții existente nu poate fi șters
+Account with existing transaction cannot be converted to ledger,Cont cu tranzacții existente nu poate fi convertit în registru
+Account {0} cannot be a Group,Contul {0} nu poate fi un Grup
+Account {0} does not belong to Company {1},Contul {0} nu aparține Companiei {1}
 Account {0} does not belong to company: {1},Contul {0} nu apartine companiei: {1}
 Account {0} does not exist,Contul {0} nu există
 Account {0} has been entered more than once for fiscal year {1},Contul {0} a fost introdus mai mult de o dată pentru anul fiscal {1}
 Account {0} is frozen,Contul {0} este înghețat
 Account {0} is inactive,Contul {0} este inactiv
 Account {0} is not valid,Contul {0} nu este valid
-Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Contul {0} trebuie să fie de tip ""active fixe"", ca Item {1} este un element activ"
+Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Contul {0} trebuie să fie de tip ""active fixe"", ca Articol {1} este un Articol de active"
 Account {0}: Parent account {1} can not be a ledger,Contul {0}: cont Părinte {1} nu poate fi un registru
 Account {0}: Parent account {1} does not belong to company: {2},Contul {0}: cont Părinte {1} nu apartine companiei: {2}
-Account {0}: Parent account {1} does not exist,Contul {0}: cont Părinte {1} nu exista
-Account {0}: You can not assign itself as parent account,Contul {0}: Nu se poate atribui ca cont părinte
+Account {0}: Parent account {1} does not exist,Contul {0}: cont Părinte {1} nu există
+Account {0}: You can not assign itself as parent account,Contul {0}: Nu se poate atribui drept cont părinte
 Account: {0} can only be updated via \					Stock Transactions,Cont: {0} poate fi actualizat doar prin \ Tranzacții stoc
 Accountant,Contabil
 Accounting,Contabilitate
 "Accounting Entries can be made against leaf nodes, called","Înregistrări contabile pot fi făcute împotriva nodurile frunză, numit"
-"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Intrare contabilitate congelate până la această dată, nimeni nu poate face / modifica intrare cu excepția rol specificate mai jos."
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Intrare contabilitate îngheţată până la această dată, nimeni nu poate face / modifica intrarea cu excepția rolului specificat mai jos."
 Accounting journal entries.,Intrări de jurnal de contabilitate.
 Accounts,Conturi
 Accounts Browser,Conturi Browser
@@ -92,26 +92,26 @@ Accounts Payable,Conturi de plată
 Accounts Receivable,Conturi de încasat
 Accounts Settings,Conturi Setări
 Active,Activ
-Active: Will extract emails from ,
+Active: Will extract emails from ,Active: Will extract emails from 
 Activity,Activități
-Activity Log,Activitate Log
+Activity Log,Activitate Jurnal
 Activity Log:,Activitate Log:
 Activity Type,Activitatea de Tip
-Actual,Real
+Actual,Actual
 Actual Budget,Bugetul actual
-Actual Completion Date,Real Finalizarea Data
+Actual Completion Date,Data Efectivă de Completare
 Actual Date,Data efectivă
-Actual End Date,Real Data de încheiere
-Actual Invoice Date,Real Data facturii
-Actual Posting Date,Real Dată postare
-Actual Qty,Real Cantitate
-Actual Qty (at source/target),Real Cantitate (la sursă / țintă)
-Actual Qty After Transaction,Real Cantitate După tranzacție
-Actual Qty: Quantity available in the warehouse.,Cantitate real: Cantitate disponibil în depozit.
-Actual Quantity,Real Cantitate
-Actual Start Date,Data efectivă Start
+Actual End Date,Data Efectivă de încheiere
+Actual Invoice Date,Data Efectivă a facturii
+Actual Posting Date,Dată de Postare Efectivă
+Actual Qty,Cant. Actuală
+Actual Qty (at source/target),Cantitate Actuală (la sursă / țintă)
+Actual Qty After Transaction,Cantitate Actuală După tranzacție
+Actual Qty: Quantity available in the warehouse.,Cantitate Actuală: Cantitate disponibilă în depozit.
+Actual Quantity,Cantitate Actuală
+Actual Start Date,Data efectivă de Pornire
 Add,Adaugă
-Add / Edit Taxes and Charges,Adauga / Editare Impozite și Taxe
+Add / Edit Taxes and Charges,Adaugă / Editare Impozite și Taxe
 Add Child,Adăuga copii
 Add Serial No,Adauga ordine
 Add Taxes,Adauga Impozite
@@ -254,8 +254,8 @@ Approving Role,Aprobarea Rolul
 Approving Role cannot be same as role the rule is Applicable To,Aprobarea rol nu poate fi la fel ca rolul statului este aplicabilă
 Approving User,Aprobarea utilizator
 Approving User cannot be same as user the rule is Applicable To,Aprobarea Utilizatorul nu poate fi aceeași ca și utilizator regula este aplicabilă
-Are you sure you want to STOP ,
-Are you sure you want to UNSTOP ,
+Are you sure you want to STOP ,Are you sure you want to STOP 
+Are you sure you want to UNSTOP ,Are you sure you want to UNSTOP 
 Arrear Amount,Restanță Suma
 "As Production Order can be made for this item, it must be a stock item.","Ca producție Ordine pot fi făcute pentru acest articol, trebuie să fie un element de stoc."
 As per Stock UOM,Ca pe Stock UOM
@@ -284,7 +284,7 @@ Auto Accounting For Stock Settings,Contabilitate Auto Pentru Stock Setări
 Auto Material Request,Material Auto Cerere
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,Auto-raise Material cerere în cazul în care cantitatea scade sub nivelul de re-comandă într-un depozit
 Automatically compose message on submission of transactions.,Compune în mod automat un mesaj pe prezentarea de tranzacții.
-Automatically extract Job Applicants from a mail box ,
+Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,"Extrage automat Oportunitati de la o cutie de e-mail de exemplu,"
 Automatically updated via Stock Entry of type Manufacture/Repack,Actualizat automat prin Bursa de intrare de tip Fabricarea / Repack
 Automotive,Automotive
@@ -511,7 +511,7 @@ Clearance Date,Clearance Data
 Clearance Date not mentioned,Clearance Data nu sunt menționate
 Clearance date cannot be before check date in row {0},Data de clearance-ul nu poate fi înainte de data de check-in rândul {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,"Faceți clic pe butonul ""face Factura Vanzare"" pentru a crea o nouă factură de vânzare."
-Click on a link to get options to expand get options ,
+Click on a link to get options to expand get options ,Click on a link to get options to expand get options 
 Client,Client
 Close Balance Sheet and book Profit or Loss.,Aproape Bilanțul și carte profit sau pierdere.
 Closed,Inchisa
@@ -841,13 +841,13 @@ Distributor,Distribuitor
 Divorced,Divorțat
 Do Not Contact,Nu de contact
 Do not show any symbol like $ etc next to currencies.,Nu prezintă nici un simbol de genul $ etc alături de valute.
-Do really want to unstop production order: ,
-Do you really want to STOP ,
+Do really want to unstop production order: ,Do really want to unstop production order: 
+Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,Chiar vrei pentru a opri această cerere Material?
 Do you really want to Submit all Salary Slip for month {0} and year {1},Chiar vrei să prezinte toate Slip Salariul pentru luna {0} și {1 an}
-Do you really want to UNSTOP ,
+Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,Chiar vrei să unstop această cerere Material?
-Do you really want to stop production order: ,
+Do you really want to stop production order: ,Do you really want to stop production order: 
 Doc Name,Doc Nume
 Doc Type,Doc Tip
 Document Description,Document Descriere
@@ -899,7 +899,7 @@ Electronics,Electronică
 Email,E-mail
 Email Digest,Email Digest
 Email Digest Settings,E-mail Settings Digest
-Email Digest: ,
+Email Digest: ,Email Digest: 
 Email Id,E-mail Id-ul
 "Email Id where a job applicant will email e.g. ""jobs@example.com""","E-mail Id-ul în cazul în care un solicitant de loc de muncă va trimite un email de exemplu ""jobs@example.com"""
 Email Notifications,Notificări e-mail
@@ -927,7 +927,7 @@ Employee Settings,Setări angajaților
 Employee Type,Tipul angajatului
 "Employee designation (e.g. CEO, Director etc.).","Desemnarea angajat (de exemplu, CEO, director, etc)."
 Employee master.,Maestru angajat.
-Employee record is created using selected field. ,
+Employee record is created using selected field. ,Employee record is created using selected field. 
 Employee records.,Înregistrările angajaților.
 Employee relieved on {0} must be set as 'Left',"Angajat eliberat pe {0} trebuie să fie setat ca ""stânga"""
 Employee {0} has already applied for {1} between {2} and {3},Angajat {0} a aplicat deja pentru {1} între {2} și {3}
@@ -959,7 +959,7 @@ Enter url parameter for receiver nos,Introduceți parametru url pentru receptor 
 Entertainment & Leisure,Entertainment & Leisure
 Entertainment Expenses,Cheltuieli de divertisment
 Entries,Intrări
-Entries against ,
+Entries against ,Entries against 
 Entries are not allowed against this Fiscal Year if the year is closed.,"Lucrările nu sunt permise în acest an fiscal, dacă anul este închis."
 Equity,Echitate
 Error: {0} > {1},Eroare: {0}> {1}
@@ -1024,7 +1024,7 @@ Exports,Exporturile
 External,Extern
 Extract Emails,Extrage poștă electronică
 FCFS Rate,FCFS Rate
-Failed: ,
+Failed: ,Failed: 
 Family Background,Context familie
 Fax,Fax
 Features Setup,Caracteristici de configurare
@@ -1245,7 +1245,7 @@ If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged 
 If you involve in manufacturing activity. Enables Item 'Is Manufactured',"Dacă vă implica în activitatea de producție. Permite Articol ""este fabricat"""
 Ignore,Ignora
 Ignore Pricing Rule,Ignora Regula Preturi
-Ignored: ,
+Ignored: ,Ignored: 
 Image,Imagine
 Image View,Imagine Vizualizare
 Implementation Partner,Partener de punere în aplicare
@@ -1574,7 +1574,7 @@ Maintenance Visit Purpose,Vizitează întreținere Scop
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Vizitează întreținere {0} trebuie anulată înainte de a anula această comandă de vânzări
 Maintenance start date can not be before delivery date for Serial No {0},Întreținere data de începere nu poate fi înainte de data de livrare pentru de serie nr {0}
 Major/Optional Subjects,Subiectele majore / opționale
-Make ,
+Make ,Make 
 Make Accounting Entry For Every Stock Movement,Asigurați-vă de contabilitate de intrare pentru fiecare Stock Mișcarea
 Make Bank Voucher,Banca face Voucher
 Make Credit Note,Face Credit Nota
@@ -1723,7 +1723,7 @@ Net Weight UOM,Greutate neta UOM
 Net Weight of each Item,Greutatea netă a fiecărui produs
 Net pay cannot be negative,Salariul net nu poate fi negativ
 Never,Niciodată
-New ,
+New ,New 
 New Account,Cont nou
 New Account Name,Nume nou cont
 New BOM,Nou BOM
@@ -1789,7 +1789,7 @@ No permission,Nici o permisiune
 No record found,Nu au găsit înregistrări
 No records found in the Invoice table,Nu sunt găsite în tabelul de factură înregistrări
 No records found in the Payment table,Nu sunt găsite în tabelul de plăți înregistrări
-No salary slip found for month: ,
+No salary slip found for month: ,No salary slip found for month: 
 Non Profit,Non-Profit
 Nos,Nos
 Not Active,Nu este activ
@@ -2448,8 +2448,8 @@ Root cannot have a parent cost center,Rădăcină nu poate avea un centru de cos
 Rounded Off,Rotunjite
 Rounded Total,Rotunjite total
 Rounded Total (Company Currency),Rotunjite total (Compania de valuta)
-Row # ,
-Row # {0}: ,
+Row # ,Row # 
+Row # {0}: ,Row # {0}: 
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Rând # {0}: Cantitate Comandat poate nu mai puțin de cantitate minimă de comandă item (definit la punctul de master).
 Row #{0}: Please specify Serial No for Item {1},Rând # {0}: Vă rugăm să specificați Nu serial pentru postul {1}
 Row {0}: Account does not match with \						Purchase Invoice Credit To account,Rând {0}: Contul nu se potrivește cu \ cumparare Facturi de credit a contului
@@ -2751,7 +2751,7 @@ Stock Ageing,Stoc Îmbătrânirea
 Stock Analytics,Analytics stoc
 Stock Assets,Active stoc
 Stock Balance,Stoc Sold
-Stock Entries already created for Production Order ,
+Stock Entries already created for Production Order ,Stock Entries already created for Production Order 
 Stock Entry,Stoc de intrare
 Stock Entry Detail,Stoc de intrare Detaliu
 Stock Expenses,Cheltuieli stoc
@@ -2797,7 +2797,7 @@ Submit all salary slips for the above selected criteria,Să prezinte toate fișe
 Submit this Production Order for further processing.,Trimiteți acest comandă de producție pentru prelucrarea ulterioară.
 Submitted,Inscrisa
 Subsidiary,Filială
-Successful: ,
+Successful: ,Successful: 
 Successfully Reconciled,Împăcați cu succes
 Suggestions,Sugestii
 Sunday,Duminică
@@ -2915,7 +2915,7 @@ The Organization,Organizația
 "The account head under Liability, in which Profit/Loss will be booked","Contul capul sub răspunderii, în care Profit / pierdere va fi rezervat"
 The date on which next invoice will be generated. It is generated on submit.,Data la care va fi generat următoarea factură. Acesta este generat pe prezinte.
 The date on which recurring invoice will be stop,La data la care factura recurente vor fi opri
-"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","The day of the month on which auto invoice will be generated e.g. 05, 28 etc "
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,A doua zi (e) pe care aplici pentru concediu sunt vacanță. Tu nu trebuie să se aplice pentru concediu.
 The first Leave Approver in the list will be set as the default Leave Approver,Primul Aprobatorul Lăsați în lista va fi setat ca implicit concediu aprobator
 The first user will become the System Manager (you can change that later).,Primul utilizator va deveni System Manager (puteți schimba asta mai târziu).
@@ -3002,7 +3002,7 @@ Total Advance,Total de Advance
 Total Amount,Suma totală
 Total Amount To Pay,Suma totală să plătească
 Total Amount in Words,Suma totală în cuvinte
-Total Billing This Year: ,
+Total Billing This Year: ,Total Billing This Year: 
 Total Characters,Total de caractere
 Total Claimed Amount,Total suma pretinsă
 Total Commission,Total de Comisie

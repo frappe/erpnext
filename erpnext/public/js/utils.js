@@ -97,5 +97,28 @@ $.extend(erpnext, {
 
 			d.show();
 		});
-	}
+	},
 });
+
+erpnext.utils = {
+	render_address_and_contact: function(frm) {
+		// render address
+		$(frm.fields_dict['address_html'].wrapper)
+			.html(frappe.render(frappe.templates.address_list,
+				cur_frm.doc.__onload))
+			.find(".btn-address").on("click", function() {
+				new_doc("Address");
+			});
+
+		// render contact
+		if(frm.fields_dict['contact_html']) {
+			$(frm.fields_dict['contact_html'].wrapper)
+				.html(frappe.render(frappe.templates.contact_list,
+					cur_frm.doc.__onload))
+				.find(".btn-contact").on("click", function() {
+					new_doc("Contact");
+				}
+			);
+		}
+	}
+}

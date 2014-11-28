@@ -254,8 +254,8 @@ Approving Role,रोल की स्वीकृति
 Approving Role cannot be same as role the rule is Applicable To,रोल का अनुमोदन करने के लिए नियम लागू है भूमिका के रूप में ही नहीं हो सकता
 Approving User,उपयोगकर्ता के स्वीकृति
 Approving User cannot be same as user the rule is Applicable To,उपयोगकर्ता का अनुमोदन करने के लिए नियम लागू है उपयोगकर्ता के रूप में ही नहीं हो सकता
-Are you sure you want to STOP ,
-Are you sure you want to UNSTOP ,
+Are you sure you want to STOP ,Are you sure you want to STOP 
+Are you sure you want to UNSTOP ,Are you sure you want to UNSTOP 
 Arrear Amount,बकाया राशि
 "As Production Order can be made for this item, it must be a stock item.","उत्पादन का आदेश इस मद के लिए बनाया जा सकता है, यह एक शेयर मद होना चाहिए ."
 As per Stock UOM,स्टॉक UOM के अनुसार
@@ -284,7 +284,7 @@ Auto Accounting For Stock Settings,शेयर सेटिंग्स के 
 Auto Material Request,ऑटो सामग्री अनुरोध
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,मात्रा एक गोदाम में फिर से आदेश के स्तर से नीचे चला जाता है तो सामग्री अनुरोध ऑटो बढ़ा
 Automatically compose message on submission of transactions.,स्वचालित रूप से लेनदेन के प्रस्तुत करने पर संदेश लिखें .
-Automatically extract Job Applicants from a mail box ,
+Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,स्वचालित रूप से एक मेल बॉक्स से सुराग निकालने उदा
 Automatically updated via Stock Entry of type Manufacture/Repack,स्वतः प्रकार निर्माण / Repack स्टॉक प्रविष्टि के माध्यम से अद्यतन
 Automotive,मोटर वाहन
@@ -511,7 +511,7 @@ Clearance Date,क्लीयरेंस तिथि
 Clearance Date not mentioned,क्लीयरेंस तिथि का उल्लेख नहीं
 Clearance date cannot be before check date in row {0},क्लीयरेंस तारीख पंक्ति में चेक की तारीख से पहले नहीं किया जा सकता {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,एक नया बिक्री चालान बनाने के लिए बटन &#39;बिक्री चालान करें&#39; पर क्लिक करें.
-Click on a link to get options to expand get options ,
+Click on a link to get options to expand get options ,Click on a link to get options to expand get options 
 Client,ग्राहक
 Close Balance Sheet and book Profit or Loss.,बंद बैलेंस शीट और पुस्तक लाभ या हानि .
 Closed,बंद
@@ -841,13 +841,13 @@ Distributor,वितरक
 Divorced,तलाकशुदा
 Do Not Contact,संपर्क नहीं है
 Do not show any symbol like $ etc next to currencies.,$ मुद्राओं की बगल आदि की तरह किसी भी प्रतीक नहीं दिखा.
-Do really want to unstop production order: ,
-Do you really want to STOP ,
+Do really want to unstop production order: ,Do really want to unstop production order: 
+Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,आप वास्तव में इस सामग्री अनुरोध बंद करना चाहते हैं ?
 Do you really want to Submit all Salary Slip for month {0} and year {1},आप वास्तव में {0} और वर्ष {1} माह के लिए सभी वेतन पर्ची प्रस्तुत करना चाहते हैं
-Do you really want to UNSTOP ,
+Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,आप वास्तव में इस सामग्री अनुरोध आगे बढ़ाना चाहते हैं?
-Do you really want to stop production order: ,
+Do you really want to stop production order: ,Do you really want to stop production order: 
 Doc Name,डॉक्टर का नाम
 Doc Type,डॉक्टर के प्रकार
 Document Description,दस्तावेज का विवरण
@@ -899,7 +899,7 @@ Electronics,इलेक्ट्रानिक्स
 Email,ईमेल
 Email Digest,ईमेल डाइजेस्ट
 Email Digest Settings,ईमेल डाइजेस्ट सेटिंग
-Email Digest: ,
+Email Digest: ,Email Digest: 
 Email Id,ईमेल आईडी
 "Email Id where a job applicant will email e.g. ""jobs@example.com""",ईमेल आईडी जहां एक नौकरी आवेदक जैसे &quot;jobs@example.com&quot; ईमेल करेंगे
 Email Notifications,ईमेल सूचनाएं
@@ -959,7 +959,7 @@ Enter url parameter for receiver nos,रिसीवर ओपन स्कू�
 Entertainment & Leisure,मनोरंजन और आराम
 Entertainment Expenses,मनोरंजन खर्च
 Entries,प्रविष्टियां
-Entries against ,
+Entries against ,Entries against 
 Entries are not allowed against this Fiscal Year if the year is closed.,"प्रविष्टियों इस वित्त वर्ष के खिलाफ की अनुमति नहीं है, अगर साल बंद कर दिया जाता है."
 Equity,इक्विटी
 Error: {0} > {1},त्रुटि: {0} > {1}
@@ -1574,7 +1574,7 @@ Maintenance Visit Purpose,रखरखाव भेंट प्रयोजन
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,रखरखाव भेंट {0} इस बिक्री आदेश रद्द करने से पहले रद्द कर दिया जाना चाहिए
 Maintenance start date can not be before delivery date for Serial No {0},रखरखाव शुरू करने की तारीख धारावाहिक नहीं के लिए डिलीवरी की तारीख से पहले नहीं किया जा सकता {0}
 Major/Optional Subjects,मेजर / वैकल्पिक विषय
-Make ,
+Make ,Make 
 Make Accounting Entry For Every Stock Movement,हर शेयर आंदोलन के लिए लेखा प्रविष्टि बनाओ
 Make Bank Voucher,बैंक वाउचर
 Make Credit Note,क्रेडिट नोट बनाने
@@ -1723,7 +1723,7 @@ Net Weight UOM,नेट वजन UOM
 Net Weight of each Item,प्रत्येक आइटम के नेट वजन
 Net pay cannot be negative,शुद्ध भुगतान नकारात्मक नहीं हो सकता
 Never,कभी नहीं
-New ,
+New ,New 
 New Account,नया खाता
 New Account Name,नया खाता नाम
 New BOM,नई बीओएम
@@ -2449,7 +2449,7 @@ Rounded Off,गोल बंद
 Rounded Total,गोल कुल
 Rounded Total (Company Currency),गोल कुल (कंपनी मुद्रा)
 Row # ,# पंक्ति
-Row # {0}: ,
+Row # {0}: ,Row # {0}: 
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Row # {0}: आदेश दिया मात्रा (आइटम मास्टर में परिभाषित) मद की न्यूनतम आदेश मात्रा से कम नहीं कर सकते हैं.
 Row #{0}: Please specify Serial No for Item {1},Row # {0}: आइटम के लिए धारावाहिक नहीं निर्दिष्ट करें {1}
 Row {0}: Account does not match with \						Purchase Invoice Credit To account,पंक्ति {0}: \ खरीद चालान क्रेडिट खाते के साथ मेल नहीं खाता
@@ -2751,7 +2751,7 @@ Stock Ageing,स्टॉक बूढ़े
 Stock Analytics,स्टॉक विश्लेषिकी
 Stock Assets,शेयर एसेट्स
 Stock Balance,बाकी स्टाक
-Stock Entries already created for Production Order ,
+Stock Entries already created for Production Order ,Stock Entries already created for Production Order 
 Stock Entry,स्टॉक एंट्री
 Stock Entry Detail,शेयर एंट्री विस्तार
 Stock Expenses,शेयर व्यय
