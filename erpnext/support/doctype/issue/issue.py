@@ -8,7 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import now
 
-class SupportTicket(Document):
+class Issue(Document):
 	def get_feed(self):
 		return "{0}: {1}".format(_(self.status), self.subject)
 
@@ -37,7 +37,7 @@ class SupportTicket(Document):
 					frappe.db.get_default("company")
 
 	def update_status(self):
-		status = frappe.db.get_value("Support Ticket", self.name, "status")
+		status = frappe.db.get_value("Issue", self.name, "status")
 		if self.status!="Open" and status =="Open" and not self.first_responded_on:
 			self.first_responded_on = now()
 		if self.status=="Closed" and status !="Closed":
@@ -48,11 +48,11 @@ class SupportTicket(Document):
 
 @frappe.whitelist()
 def set_status(name, status):
-	st = frappe.get_doc("Support Ticket", name)
+	st = frappe.get_doc("Issue", name)
 	st.status = status
 	st.save()
 
 def auto_close_tickets():
-	frappe.db.sql("""update `tabSupport Ticket` set status = 'Closed'
+	frappe.db.sql("""update `tabIssue` set status = 'Closed'
 		where status = 'Replied'
 		and date_sub(curdate(),interval 15 Day) > modified""")

@@ -278,7 +278,7 @@ class EmailDigest(Document):
 			date_field="posting_date")
 
 	def get_new_support_tickets(self):
-		return self.get_new_count("Support Ticket", self.meta.get_label("new_support_tickets"),
+		return self.get_new_count("Issue", self.meta.get_label("new_support_tickets"),
 			filter_by_company=False)
 
 	def get_new_communications(self):
@@ -454,7 +454,7 @@ class EmailDigest(Document):
 
 	def get_open_tickets(self):
 		open_tickets = frappe.db.sql("""select name, subject, modified, raised_by
-			from `tabSupport Ticket` where status='Open'
+			from `tabIssue` where status='Open'
 			order by modified desc limit 10""", as_dict=True)
 
 		if open_tickets:

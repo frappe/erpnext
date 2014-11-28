@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+from frappe.permissions import reset_perms
 
 def execute():
 	for doctype in ("About Us Settings", "Accounts Settings", "Activity Type",
@@ -14,7 +14,7 @@ def execute():
 		"Mode of Payment", "Module Def", "Naming Series", "POS Setting", "Print Heading",
 		"Report", "Role", "Selling Settings", "Stock Settings", "Supplier Type", "UOM"):
 		try:
-			frappe.reset_perms(doctype)
+			reset_perms(doctype)
 		except:
 			print "Error resetting perms for", doctype
 			raise

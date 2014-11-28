@@ -4,7 +4,7 @@
 import frappe
 import unittest
 
-test_records = frappe.get_test_records('Support Ticket')
+test_records = frappe.get_test_records('Issue')
 
-class TestSupportTicket(unittest.TestCase):
+class TestIssue(unittest.TestCase):
 	pass

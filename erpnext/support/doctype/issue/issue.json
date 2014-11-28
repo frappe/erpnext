@@ -1,5 +1,4 @@
 {
- "allow_attach": 1, 
  "autoname": "naming_series:", 
  "creation": "2013-02-01 10:36:25", 
  "docstatus": 0, 
@@ -218,15 +217,14 @@
  ], 
  "icon": "icon-ticket", 
  "idx": 1, 
- "modified": "2014-09-11 18:53:21.140997", 
+ "modified": "2014-11-28 11:38:35.978149", 
  "modified_by": "Administrator", 
  "module": "Support", 
- "name": "Support Ticket", 
+ "name": "Issue", 
  "owner": "Administrator", 
  "permissions": [
   {
    "amend": 0, 
-   "cancel": 0, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -240,7 +238,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 0, 
    "email": 1, 
@@ -254,7 +252,7 @@
   }, 
   {
    "amend": 0, 
-   "cancel": 0, 
+   "apply_user_permissions": 1, 
    "create": 1, 
    "delete": 1, 
    "email": 1, 
@@ -265,30 +263,6 @@
    "role": "Support Team", 
    "submit": 0, 
    "write": 1
-  }, 
-  {
-   "amend": 0, 
-   "cancel": 0, 
-   "create": 0, 
-   "delete": 0, 
-   "permlevel": 1, 
-   "read": 1, 
-   "report": 1, 
-   "role": "Support Team", 
-   "submit": 0, 
-   "write": 1
-  }, 
-  {
-   "amend": 0, 
-   "cancel": 0, 
-   "create": 0, 
-   "delete": 0, 
-   "permlevel": 2, 
-   "read": 1, 
-   "report": 1, 
-   "role": "Support Team", 
-   "submit": 0, 
-   "write": 0
   }
  ], 
  "search_fields": "status,customer,subject,raised_by", 

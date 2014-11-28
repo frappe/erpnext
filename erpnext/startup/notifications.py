@@ -7,7 +7,7 @@ import frappe
 def get_notification_config():
 	return { "for_doctype": 
 		{
-			"Support Ticket": {"status":"Open"},
+			"Issue": {"status":"Open"},
 			"Customer Issue": {"status":"Open"},
 			"Task": {"status":"Open"},
 			"Lead": {"status":"Open"},

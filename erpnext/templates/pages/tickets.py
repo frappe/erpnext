@@ -20,7 +20,7 @@ def get_context(context):
 @frappe.whitelist()
 def get_tickets(start=0):
 	tickets = frappe.db.sql("""select name, subject, status, creation
-		from `tabSupport Ticket` where raised_by=%s
+		from `tabIssue` where raised_by=%s
 		order by modified desc
 		limit %s, 20""", (frappe.session.user, cint(start)), as_dict=True)
 	for t in tickets:
@@ -34,7 +34,7 @@ def make_new_ticket(subject, message):
 		raise frappe.throw(_("Please write something in subject and message!"))
 
 	ticket = frappe.get_doc({
-		"doctype":"Support Ticket",
+		"doctype":"Issue",
 		"subject": subject,
 		"raised_by": frappe.session.user,
 	})
@@ -46,7 +46,7 @@ def make_new_ticket(subject, message):
 		"content": message,
 		"sender": frappe.session.user,
 		"sent_or_received": "Received",
-		"reference_doctype": "Support Ticket",
+		"reference_doctype": "Issue",
 		"reference_name": ticket.name
 	})
 	comm.insert(ignore_permissions=True)

@@ -61,7 +61,7 @@ class Lead(SellingController):
 				frappe.throw(_("Email id must be unique, already exists for {0}").format(comma_and(items)))
 
 	def on_trash(self):
-		frappe.db.sql("""update `tabSupport Ticket` set lead='' where lead=%s""",
+		frappe.db.sql("""update `tabIssue` set lead='' where lead=%s""",
 			self.name)
 
 		self.delete_events()

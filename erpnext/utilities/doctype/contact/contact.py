@@ -51,7 +51,7 @@ class Contact(StatusUpdater):
 					self.is_primary_contact = 1
 
 	def on_trash(self):
-		frappe.db.sql("""update `tabSupport Ticket` set contact='' where contact=%s""",
+		frappe.db.sql("""update `tabIssue` set contact='' where contact=%s""",
 			self.name)
 
 @frappe.whitelist()

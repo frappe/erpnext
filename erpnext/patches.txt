@@ -52,8 +52,8 @@ erpnext.patches.v4_0.fix_address_template
 erpnext.patches.v4_0.reset_permissions_for_masters
 
 erpnext.patches.v4_0.update_tax_amount_after_discount
-execute:frappe.reset_perms("GL Entry") #2014-06-09
-execute:frappe.reset_perms("Stock Ledger Entry") #2014-06-09
+execute:frappe.permissions.reset_perms("GL Entry") #2014-06-09
+execute:frappe.permissions.reset_perms("Stock Ledger Entry") #2014-06-09
 erpnext.patches.v4_0.create_custom_fields_for_india_specific_fields
 erpnext.patches.v4_0.save_default_letterhead
 erpnext.patches.v4_0.update_custom_print_formats_for_renamed_fields
@@ -95,3 +95,4 @@ erpnext.patches.v5_0.update_dn_against_doc_fields
 execute:frappe.db.sql("update `tabMaterial Request` set material_request_type = 'Material Transfer' where material_request_type = 'Transfer'")
 execute:frappe.reload_doc('stock', 'doctype', 'item')
 execute:frappe.db.sql("update `tabItem` i set apply_warehouse_wise_reorder_level=1, re_order_level=0, re_order_qty=0 where exists(select name from `tabItem Reorder` where parent=i.name)")
+execute:frappe.rename_doc("DocType", "Support Ticket", "Issue", force=True)

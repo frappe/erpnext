@@ -1,7 +1,7 @@
 [
 	{
-		"doctype": "Support Ticket",
-		"name": "_Test Support Ticket 1",
+		"doctype": "Issue",
+		"name": "_Test Issue 1",
 		"subject": "Test Support",
 		"raised_by": "test@example.com"
 	}

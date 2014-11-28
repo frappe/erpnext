@@ -29,7 +29,7 @@ doctype_series_map = {
 	'Stock Entry': 'STE-',
 	'Supplier': 'SUPP-',
 	'Supplier Quotation': 'SQTN-',
-	'Support Ticket': 'SUP-'
+	'Issue': 'SUP-'
 }
 
 def execute():

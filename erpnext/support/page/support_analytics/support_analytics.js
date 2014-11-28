@@ -22,7 +22,7 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			appframe: wrapper.appframe,
-			doctypes: ["Support Ticket", "Fiscal Year"],
+			doctypes: ["Issue", "Fiscal Year"],
 		});
 	},
 	
@@ -64,7 +64,7 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 		var total_responded = {};
 
 		
-		$.each(frappe.report_dump.data["Support Ticket"], function(i, d) {
+		$.each(frappe.report_dump.data["Issue"], function(i, d) {
 			var dateobj = dateutil.str_to_obj(d.creation);
 			var date = d.creation.split(" ")[0];
 			var col = me.column_map[date];

@@ -8,7 +8,7 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Support Ticket",
+					"name": "Issue",
 					"description": _("Support queries from customers."),
 				},
 				{

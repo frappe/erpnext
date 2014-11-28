@@ -287,7 +287,7 @@ data_map = {
 		}
 	},
 	# Support
-	"Support Ticket": {
+	"Issue": {
 		"columns": ["name","status","creation","resolution_date","first_responded_on"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "creation"
