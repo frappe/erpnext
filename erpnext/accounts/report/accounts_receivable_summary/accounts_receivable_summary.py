@@ -21,10 +21,10 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			_("Total Invoiced Amt") + ":Currency:140",
 			_("Total Paid Amt") + ":Currency:140",
 			_("Total Outstanding Amt") + ":Currency:160",
-			"0-" + self.filters.range1 + ":Currency:100",
-			self.filters.range1 + "-" + self.filters.range2 + ":Currency:100",
-			self.filters.range2 + "-" + self.filters.range3 + ":Currency:100",
-			self.filters.range3 + _("-Above") + ":Currency:100"]
+			"0-" + str(self.filters.range1) + ":Currency:100",
+			str(self.filters.range1) + "-" + str(self.filters.range2) + ":Currency:100",
+			str(self.filters.range2) + "-" + str(self.filters.range3) + ":Currency:100",
+			str(self.filters.range3) + _("-Above") + ":Currency:100"]
 
 		if args.get("party_type") == "Customer":
 			columns += [_("Territory") + ":Link/Territory:80"]
