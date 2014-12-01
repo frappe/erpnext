@@ -372,7 +372,7 @@
   {
    "description": "Your sales person will get a reminder on this date to contact the customer", 
    "fieldname": "contact_date", 
-   "fieldtype": "Date", 
+   "fieldtype": "Datetime", 
    "label": "Next Contact Date", 
    "oldfieldname": "contact_date", 
    "oldfieldtype": "Date", 
@@ -416,7 +416,7 @@
  "icon": "icon-info-sign", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-08-12 05:21:51.282397", 
+ "modified": "2014-12-01 08:46:35.331148", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Opportunity", 
