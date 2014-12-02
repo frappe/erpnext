@@ -9,6 +9,7 @@ from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings
 
 # TODO
 # validate stock of each item in Website Warehouse or have a list of possible warehouses in Shopping Cart Settings
+# Below functions are used for test cases
 
 def get_quotation(user=None):
 	if not user:
@@ -22,7 +23,8 @@ def get_quotation(user=None):
 		"order_type": "Shopping Cart",
 		party.doctype.lower(): party.name,
 		"docstatus": 0,
-		"contact_email": user
+		"contact_email": user,
+		"selling_price_list": "_Test Price List Rest of the World"
 	}
 
 	try:
@@ -60,34 +62,10 @@ def set_item_in_cart(item_code, qty, user=None):
 	quotation.save(ignore_permissions=True)
 	return quotation
 
-def set_address_in_cart(address_fieldname, address, user=None):
-	quotation = get_quotation(user=user)
-	validate_address(quotation, address_fieldname, address)
-
-	if quotation.get(address_fieldname) != address:
-		quotation.set(address_fieldname, address)
-		if address_fieldname=="customer_address":
-			quotation.set("address_display", None)
-		else:
-			quotation.set("shipping_address", None)
-
-		quotation.save(ignore_permissions=True)
-
-	return quotation
-
 def validate_item(item_code):
 	item = frappe.db.get_value("Item", item_code, ["item_name", "show_in_website"], as_dict=True)
 	if not item.show_in_website:
 		frappe.throw(_("{0} cannot be purchased using Shopping Cart").format(item.item_name))
-
-def validate_address(quotation, address_fieldname, address):
-	party = get_party(quotation.contact_email)
-	address_doc = frappe.get_doc(address)
-	if address_doc.get(party.doctype.lower()) != party.name:
-		if address_fieldname=="customer_address":
-			frappe.throw(_("Invalid Billing Address"))
-		else:
-			frappe.throw(_("Invalid Shipping Address"))
 
 def get_party(user):
 	def _get_party(user):
@@ -122,5 +100,4 @@ def guess_territory():
 	territory = None
 	if frappe.session.get("session_country"):
 		territory = frappe.db.get_value("Territory", frappe.session.get("session_country"))
-
 	return territory or get_default_territory()

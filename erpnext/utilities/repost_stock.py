@@ -179,6 +179,8 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 		}
 
 		sle_doc = frappe.get_doc(sle_dict)
+		sle_doc.ignore_validate = True
+		sle_doc.ignore_links = True
 		sle_doc.insert()
 
 		args = sle_dict.copy()

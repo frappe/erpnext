@@ -222,7 +222,6 @@ def apply_cart_settings(party=None, quotation=None):
 		quotation = _get_cart_quotation(party)
 
 	cart_settings = frappe.get_doc("Shopping Cart Settings")
-
 	billing_territory = get_address_territory(quotation.customer_address) or \
 		party.territory or get_root_of("Territory")
 
@@ -237,7 +236,6 @@ def apply_cart_settings(party=None, quotation=None):
 def set_price_list_and_rate(quotation, cart_settings, billing_territory):
 	"""set price list based on billing territory"""
 	quotation.selling_price_list = cart_settings.get_price_list(billing_territory)
-
 	# reset values
 	quotation.price_list_currency = quotation.currency = \
 		quotation.plc_conversion_rate = quotation.conversion_rate = None
@@ -359,76 +357,3 @@ def get_address_territory(address_name):
 				break
 
 	return territory
-
-import unittest
-test_dependencies = ["Item", "Price List", "Contact", "Shopping Cart Settings"]
-
-class TestCart(unittest.TestCase):
-	def tearDown(self):
-		return
-
-		cart_settings = frappe.get_doc("Shopping Cart Settings")
-		cart_settings.ignore_permissions = True
-		cart_settings.enabled = 0
-		cart_settings.save()
-
-	def enable_shopping_cart(self):
-		return
-		if not frappe.db.get_value("Shopping Cart Settings", None, "enabled"):
-			cart_settings = frappe.get_doc("Shopping Cart Settings")
-			cart_settings.ignore_permissions = True
-			cart_settings.enabled = 1
-			cart_settings.save()
-
-	def test_get_lead_or_customer(self):
-		frappe.session.user = "test@example.com"
-		party1 = get_lead_or_customer()
-		party2 = get_lead_or_customer()
-		self.assertEquals(party1.name, party2.name)
-		self.assertEquals(party1.doctype, "Lead")
-
-		frappe.session.user = "test_contact_customer@example.com"
-		party = get_lead_or_customer()
-		self.assertEquals(party.name, "_Test Customer")
-
-	def test_add_to_cart(self):
-		self.enable_shopping_cart()
-		frappe.session.user = "test@example.com"
-
-		update_cart("_Test Item", 1)
-
-		quotation = _get_cart_quotation()
-		quotation_items = quotation.get("quotation_details", {"item_code": "_Test Item"})
-		self.assertTrue(quotation_items)
-		self.assertEquals(quotation_items[0].qty, 1)
-
-		return quotation
-
-	def test_update_cart(self):
-		self.test_add_to_cart()
-
-		update_cart("_Test Item", 5)
-
-		quotation = _get_cart_quotation()
-		quotation_items = quotation.get("quotation_details", {"item_code": "_Test Item"})
-		self.assertTrue(quotation_items)
-		self.assertEquals(quotation_items[0].qty, 5)
-
-		return quotation
-
-	def test_remove_from_cart(self):
-		quotation0 = self.test_add_to_cart()
-
-		update_cart("_Test Item", 0)
-
-		quotation = _get_cart_quotation()
-		self.assertEquals(quotation0.name, quotation.name)
-
-		quotation_items = quotation.get("quotation_details", {"item_code": "_Test Item"})
-		self.assertEquals(quotation_items, [])
-
-	def test_place_order(self):
-		quotation = self.test_update_cart()
-		sales_order_name = place_order()
-		sales_order = frappe.get_doc("Sales Order", sales_order_name)
-		self.assertEquals(sales_order.getone({"item_code": "_Test Item"}).prevdoc_docname, quotation.name)
