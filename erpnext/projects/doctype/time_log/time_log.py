@@ -23,6 +23,8 @@ class TimeLog(Document):
 	def calculate_total_hours(self):
 		from frappe.utils import time_diff_in_hours
 		self.hours = time_diff_in_hours(self.to_time, self.from_time)
+		if self.hours < 0:
+			frappe.throw(_("'From Time' cannot be later than 'To Time'"))
 
 	def set_status(self):
 		self.status = {
@@ -40,8 +42,8 @@ class TimeLog(Document):
 	def validate_overlap(self):
 		existing = frappe.db.sql_list("""select name from `tabTime Log` where employee=%s and
 			(
-				(from_time between %s and %s) or
-				(to_time between %s and %s) or
+				(from_time < %s and from_time > %s) or
+				(to_time < %s and to_time < %s) or
 				(%s between from_time and to_time))
 			and name !=%s
 			and to_time > %s
