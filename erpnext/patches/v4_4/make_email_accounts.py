@@ -51,7 +51,6 @@ def execute():
 	# sales, jobs
 	for doctype in ("Sales Email Settings", "Jobs Email Settings"):
 		source = dict(frappe.db.sql("select field, value from tabSingles where doctype=%s", doctype))
-		print source
 		if source and  source.get('host'):
 			account = frappe.new_doc("Email Account")
 			mapping = {
