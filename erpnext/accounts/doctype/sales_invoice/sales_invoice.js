@@ -256,7 +256,10 @@ cur_frm.cscript.hide_fields = function(doc) {
 cur_frm.cscript.mode_of_payment = function(doc) {
 	return cur_frm.call({
 		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
-		args: { mode_of_payment: doc.mode_of_payment },
+		args: {
+			"mode_of_payment": doc.mode_of_payment,
+			"company": doc.company
+			 },
 	});
 }
 

@@ -1,6 +1,7 @@
 [
 	{
 		"doctype": "Mode of Payment",
-		"name": "_Test Mode of Payment 1"
+		"name": "_Test Mode of Payment 1",
+		"mode_of_payment": "_Test Mode of Payment 1"
 	}
 ]
