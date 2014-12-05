@@ -4,7 +4,6 @@
 frappe.provide("erpnext.projects");
 
 frappe.ui.form.on("Time Log", "onload", function(frm) {
-	frm.set_query("task", erpnext.queries.task);
 });
 
 // set to time if hours is updated
