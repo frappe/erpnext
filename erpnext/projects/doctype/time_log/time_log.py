@@ -19,7 +19,7 @@ class TimeLog(Document):
 		self.set_status()
 		self.validate_overlap()
 		self.calculate_total_hours()
-		
+
 	def calculate_total_hours(self):
 		from frappe.utils import time_diff_in_hours
 		self.hours = time_diff_in_hours(self.to_time, self.from_time)
@@ -40,17 +40,16 @@ class TimeLog(Document):
 			self.status="Billed"
 
 	def validate_overlap(self):
-		existing = frappe.db.sql_list("""select name from `tabTime Log` where owner=%s and
+		existing = frappe.db.sql_list("""select name from `tabTime Log` where employee=%s and
 			(
-				(from_time between %s and %s) or
-				(to_time between %s and %s) or
+				(from_time < %s and from_time > %s) or
+				(to_time < %s and to_time < %s) or
 				(%s between from_time and to_time))
-			and name!=%s
-			and ifnull(task, "")=%s
+			and name !=%s
+			and to_time > %s
 			and docstatus < 2""",
-			(self.owner, self.from_time, self.to_time, self.from_time,
-				self.to_time, self.from_time, self.name or "No Name",
-				cstr(self.task)))
+			(self.employee, self.from_time, self.to_time, self.from_time,
+				self.to_time, self.from_time, self.name or "No Name", self.from_time))
 
 		if existing:
 			frappe.throw(_("This Time Log conflicts with {0}").format(comma_and(existing)), OverlapError)
