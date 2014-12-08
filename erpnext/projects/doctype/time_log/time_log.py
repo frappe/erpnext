@@ -19,7 +19,7 @@ class TimeLog(Document):
 		self.set_status()
 		self.validate_overlap()
 		self.calculate_total_hours()
-		
+
 	def calculate_total_hours(self):
 		from frappe.utils import time_diff_in_hours
 		self.hours = time_diff_in_hours(self.to_time, self.from_time)
