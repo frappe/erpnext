@@ -434,11 +434,12 @@ class JournalVoucher(AccountsController):
 	def validate_expense_claim(self):
 		for d in self.entries:
 			if d.against_expense_claim:
-				sanctioned_amount = cint(frappe.db.get_value("Expense Claim", d.against_expense_claim, "total_sanctioned_amount"))
-				reimbursed_amount = cint(frappe.db.get_value("Expense Claim", d.against_expense_claim, "total_amount_reimbursed"))
-				pending_amount = sanctioned_amount - reimbursed_amount
+				sanctioned_amount, reimbursed_amount = frappe.db.get_value("Expense Claim", d.against_expense_claim, 
+					("total_sanctioned_amount", "total_amount_reimbursed"))
+				pending_amount = cint(sanctioned_amount) - cint(reimbursed_amount)
 				if d.debit > pending_amount:
-					frappe.throw("Amount cannot be greater than Expense Claim")
+					frappe.throw(_("Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. \
+						Pending Amount is {2}".format(d.idx, d.against_expense_claim, pending_amount)))
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, voucher_type):
