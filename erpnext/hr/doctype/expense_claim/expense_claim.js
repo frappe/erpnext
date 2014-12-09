@@ -89,7 +89,7 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 		if(doc.docstatus==0 && doc.exp_approver==user && doc.approval_status=="Approved")
 			 cur_frm.savesubmit();
 
-		if(doc.docstatus==1 && frappe.model.can_create("Journal Voucher"))
+		if(doc.docstatus==1 && frappe.model.can_create("Journal Voucher") && doc.total_amount_reimbursed < doc.total_sanctioned_amount)
 			 cur_frm.add_custom_button(__("Make Bank Voucher"),
 			 	cur_frm.cscript.make_bank_voucher, frappe.boot.doctype_icons["Journal Voucher"]);
 	}
@@ -109,6 +109,9 @@ cur_frm.cscript.set_help = function(doc) {
 		} else {
 			if(doc.approval_status=="Approved") {
 				cur_frm.set_intro(__("Expense Claim has been approved."));
+				if(doc.total_amount_reimbursed== doc.total_sanctioned_amount){
+					cur_frm.set_intro(__("Expense Claim has been reimbursed."));
+				}
 			} else if(doc.approval_status=="Rejected") {
 				cur_frm.set_intro(__("Expense Claim has been rejected."));
 			}
