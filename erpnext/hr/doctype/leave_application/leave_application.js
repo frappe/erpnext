@@ -118,3 +118,18 @@ cur_frm.cscript.calculate_total_days = function(doc, dt, dn) {
 }
 
 cur_frm.fields_dict.employee.get_query = erpnext.queries.employee;
+
+frappe.ui.form.on("Leave Application", "leave_approver", function(frm) {
+	frappe.call({
+		"method": "frappe.client.get",
+		args: {
+			doctype: "User",
+			name: frm.doc.leave_approver
+		},
+		callback: function (data) {
+			frappe.model.set_value(frm.doctype, frm.docname, "leave_approver_name",
+				data.message.first_name
+				+ (data.message.last_name ? (" " + data.message.last_name) : ""))
+		}
+	})
+})
