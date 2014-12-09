@@ -45,6 +45,7 @@ class Lead(SellingController):
 	def add_calendar_event(self, opts=None, force=False):
 		super(Lead, self).add_calendar_event({
 			"owner": self.lead_owner,
+			"starts_on": self.contact_date,
 			"subject": ('Contact ' + cstr(self.lead_name)),
 			"description": ('Contact ' + cstr(self.lead_name)) + \
 				(self.contact_by and ('. By : ' + cstr(self.contact_by)) or '')
