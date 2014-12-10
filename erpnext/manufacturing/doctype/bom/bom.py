@@ -182,6 +182,9 @@ class BOM(Document):
 			ret = frappe.db.get_value("Item", self.item, ["description", "stock_uom"])
 			self.description = ret[0]
 			self.uom = ret[1]
+			
+		if frappe.db.get_value('Item', self.item, 'is_manufactured_item')== 'No':
+			frappe.throw(_("You cannot make a BOM against this Item."))
 
 	def validate_operations(self):
 		""" Check duplicate operation no"""

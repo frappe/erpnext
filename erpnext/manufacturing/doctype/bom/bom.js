@@ -218,3 +218,11 @@ cur_frm.cscript.validate = function(doc, dt, dn) {
 	erpnext.bom.calculate_total(doc);
 }
 
+cur_frm.set_query("item", function(doc) {
+	return{
+		filters: [ 
+			['Item', 'is_manufactured_item', '=', 'Yes' ]
+		]
+	}
+});
+
