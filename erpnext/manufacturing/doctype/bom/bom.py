@@ -285,7 +285,10 @@ class BOM(Document):
 				if not d.hour_rate:
 					d.hour_rate = flt(w[0])
 
-				fixed_cost += flt(w[1])
+				if d.fixed_cycle_cost == None:
+					d.fixed_cycle_cost= flt(w[1])
+
+				fixed_cost += d.fixed_cycle_cost
 
 			if d.hour_rate and d.time_in_mins:
 				d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
