@@ -403,3 +403,12 @@ cur_frm.cscript.send_sms = function() {
 	var sms_man = new SMSManager(cur_frm.doc);
 }
 
+cur_frm.set_query("debit_to", function(doc) {
+	return{
+		filters: [
+			['Account', 'root_type', '=', 'Asset'],
+			['Account', 'account_type', '=', 'Receivable']
+		]
+	}
+});
+
