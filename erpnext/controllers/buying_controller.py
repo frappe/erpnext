@@ -212,9 +212,18 @@ class BuyingController(StockController):
 		if not self.is_subcontracted and self.sub_contracted_items:
 			frappe.throw(_("Please enter 'Is Subcontracted' as Yes or No"))
 
-		if self.doctype == "Purchase Receipt" and self.is_subcontracted=="Yes" \
-			and not self.supplier_warehouse:
+		if self.is_subcontracted == "Yes":
+			if self.doctype == "Purchase Receipt" and not self.supplier_warehouse:
 				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted Purchase Receipt"))
+
+			for item in self.get(self.fname):
+				if item in self.sub_contracted_items and not item.bom:
+					frappe.throw(_("Please select BOM in BOM field for Item {0}").format(item.item_code))
+
+		else:
+			for item in self.get(self.fname):
+				if item.bom:
+					item.bom = None
 
 	def create_raw_materials_supplied(self, raw_material_table):
 		if self.is_subcontracted=="Yes":
@@ -236,7 +245,7 @@ class BuyingController(StockController):
 				item.rm_supp_cost = 0.0
 
 	def update_raw_materials_supplied(self, item, raw_material_table, rm_supplied_idx):
-		bom_items = self.get_items_from_default_bom(item.item_code)
+		bom_items = self.get_items_from_bom(item.item_code, item.bom)
 		raw_materials_cost = 0
 
 		for bom_item in bom_items:
@@ -309,15 +318,16 @@ class BuyingController(StockController):
 				if d not in delete_list:
 					self.append(raw_material_table, d)
 
-	def get_items_from_default_bom(self, item_code):
+	def get_items_from_bom(self, item_code, bom):
 		bom_items = frappe.db.sql("""select t2.item_code,
 			ifnull(t2.qty, 0) / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
 			t2.rate, t2.stock_uom, t2.name, t2.description
 			from `tabBOM` t1, `tabBOM Item` t2
-			where t2.parent = t1.name and t1.item = %s and t1.is_default = 1
-			and t1.docstatus = 1 and t1.is_active = 1""", item_code, as_dict=1)
+			where t2.parent = t1.name and t1.item = %s
+			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s""", (item_code, bom), as_dict=1)
+
 		if not bom_items:
-			msgprint(_("No default BOM exists for Item {0}").format(item_code), raise_exception=1)
+			msgprint(_("Specified BOM {0} does not exist for Item {1}").format(bom, item_code), raise_exception=1)
 
 		return bom_items
 
@@ -358,3 +368,4 @@ class BuyingController(StockController):
 				if not d.conversion_factor:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory"))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
+

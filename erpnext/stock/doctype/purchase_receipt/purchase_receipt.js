@@ -161,6 +161,17 @@ cur_frm.fields_dict.purchase_receipt_details.grid.get_field("qa_no").get_query =
 	}
 }
 
+cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('bom').get_query = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn]
+	return {
+		filters: [
+			['BOM', 'item', '=', d.item_code],
+			['BOM', 'is_active', '=', '1'],
+			['BOM', 'docstatus', '=', '1']
+		]
+	}
+}
+
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(frappe.boot.notification_settings.purchase_receipt))
 		cur_frm.email_doc(frappe.boot.notification_settings.purchase_receipt_message);
@@ -171,3 +182,10 @@ cur_frm.cscript.send_sms = function() {
 	var sms_man = new SMSManager(cur_frm.doc);
 }
 
+frappe.provide("erpnext.buying");
+
+frappe.ui.form.on("Purchase Receipt", "is_subcontracted", function(frm) {
+	if (frm.doc.is_subcontracted === "Yes") {
+		erpnext.buying.get_default_bom(frm);
+	}
+});
