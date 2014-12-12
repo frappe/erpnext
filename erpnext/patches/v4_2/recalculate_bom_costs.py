@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	for d in frappe.db.sql("""select bom.name from `tabBOM` bom where bom.docstatus < 2 and 
-		exists(select bom_item.name from `tabBOM Operation` bom_op where 
+	for d in frappe.db.sql("""select bom.name from `tabBOM` bom where bom.docstatus < 2 and
+		exists(select bom_op.name from `tabBOM Operation` bom_op where
 		bom.name = bom_op.parent and bom_op.fixed_cycle_cost IS NOT NULL)""", as_dict=1):
 		try:
 			bom = frappe.get_doc('BOM', d.name)
@@ -16,4 +16,3 @@ def execute():
 			frappe.db.commit()
 		except:
 			frappe.db.rollback()
-		
