@@ -22,10 +22,12 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 
 				var d1 = frappe.model.add_child(jv, 'Journal Voucher Detail', 'entries');
 				d1.debit = cur_frm.doc.total_sanctioned_amount;
+				d1.against_expense_claim = cur_frm.doc.name;
 
 				// credit to bank
 				var d1 = frappe.model.add_child(jv, 'Journal Voucher Detail', 'entries');
 				d1.credit = cur_frm.doc.total_sanctioned_amount;
+				d1.against_expense_claim = cur_frm.doc.name;
 				if(r.message) {
 					d1.account = r.message.account;
 					d1.balance = r.message.balance;
@@ -89,7 +91,8 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 		if(doc.docstatus==0 && doc.exp_approver==user && doc.approval_status=="Approved")
 			 cur_frm.savesubmit();
 
-		if(doc.docstatus==1 && frappe.model.can_create("Journal Voucher") && doc.total_amount_reimbursed < doc.total_sanctioned_amount)
+		if(doc.docstatus==1 && frappe.model.can_create("Journal Voucher") && 
+			cint(doc.total_amount_reimbursed) < cint(doc.total_sanctioned_amount))
 			 cur_frm.add_custom_button(__("Make Bank Voucher"),
 			 	cur_frm.cscript.make_bank_voucher, frappe.boot.doctype_icons["Journal Voucher"]);
 	}
@@ -109,7 +112,7 @@ cur_frm.cscript.set_help = function(doc) {
 		} else {
 			if(doc.approval_status=="Approved") {
 				cur_frm.set_intro(__("Expense Claim has been approved."));
-				if(doc.total_amount_reimbursed== doc.total_sanctioned_amount){
+				if(Math.abs(cint(doc.total_amount_reimbursed) - cint(doc.total_sanctioned_amount)) < .001){
 					cur_frm.set_intro(__("Expense Claim has been reimbursed."));
 				}
 			} else if(doc.approval_status=="Rejected") {

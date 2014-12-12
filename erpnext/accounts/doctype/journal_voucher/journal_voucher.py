@@ -429,7 +429,7 @@ class JournalVoucher(AccountsController):
 			if d.against_expense_claim:
 				amt = frappe.db.sql("""select sum(debit) as amt from `tabJournal Voucher Detail` 
 					where against_expense_claim = %s and docstatus = 1""", d.against_expense_claim ,as_dict=1)[0].amt
-				frappe.db.sql("update `tabExpense Claim` set total_amount_reimbursed = %s where name = %s",(amt, d.against_expense_claim))
+				frappe.db.set_value("Expense Claim", d.against_expense_claim , "total_amount_reimbursed", amt)
 				
 	def validate_expense_claim(self):
 		for d in self.entries:
