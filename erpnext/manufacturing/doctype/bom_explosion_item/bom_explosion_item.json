@@ -1,6 +1,6 @@
 {
  "autoname": "FBD/.######", 
- "creation": "2013-03-07 11:42:57.000000", 
+ "creation": "2013-03-07 11:42:57", 
  "default_print_format": "Standard", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -40,21 +40,23 @@
   }, 
   {
    "fieldname": "rate", 
-   "fieldtype": "Float", 
+   "fieldtype": "Currency", 
    "in_list_view": 1, 
    "label": "Rate", 
    "oldfieldname": "standard_rate", 
    "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "read_only": 1
   }, 
   {
    "fieldname": "amount", 
-   "fieldtype": "Float", 
+   "fieldtype": "Currency", 
    "in_list_view": 1, 
    "label": "Amount", 
    "oldfieldname": "amount_as_per_sr", 
    "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -82,10 +84,11 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:22:57.000000", 
+ "modified": "2014-12-12 11:18:01.745641", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Explosion Item", 
  "owner": "Administrator", 
+ "permissions": [], 
  "read_only": 0
 }

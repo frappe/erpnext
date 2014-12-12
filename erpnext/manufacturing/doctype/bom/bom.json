@@ -129,15 +129,17 @@
   }, 
   {
    "fieldname": "raw_material_cost", 
-   "fieldtype": "Float", 
+   "fieldtype": "Currency", 
    "label": "Total Raw Material Cost", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "read_only": 1
   }, 
   {
    "fieldname": "operating_cost", 
-   "fieldtype": "Float", 
+   "fieldtype": "Currency", 
    "label": "Total Operating Cost", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -148,23 +150,26 @@
   }, 
   {
    "fieldname": "total_variable_cost", 
-   "fieldtype": "Float", 
+   "fieldtype": "Currency", 
    "in_list_view": 1, 
    "label": "Total Variable Cost", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "read_only": 1
   }, 
   {
    "fieldname": "total_fixed_cost", 
-   "fieldtype": "Float", 
+   "fieldtype": "Currency", 
    "label": "Total Fixed Cost", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "read_only": 1
   }, 
   {
    "fieldname": "total_cost", 
-   "fieldtype": "Float", 
+   "fieldtype": "Currency", 
    "label": "Total Cost", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -183,6 +188,14 @@
    "oldfieldtype": "Link", 
    "options": "Project", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "company", 
+   "fieldtype": "Link", 
+   "label": "Company", 
+   "options": "company", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "amended_from", 
@@ -247,7 +260,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2014-12-04 12:37:39.710211", 
+ "modified": "2014-12-12 11:13:12.146205", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM", 
