@@ -1,0 +1,20 @@
+<p><button class="btn btn-sm btn-default btn-address">
+    <i class="icon-plus"></i> New Address</button></p>
+{% for(var i=0, l=addr_list.length; i<l; i++) { %}
+    <hr>
+    <a href="#Form/Address/{%= addr_list[i].name %}" class="btn btn-sm btn-default pull-right">
+        {%= __("Edit") %}</a>
+    <p><b>{%= i+1 %}. {%= addr_list[i].address_type %}</b></p>
+    <div style="padding-left: 15px;">
+        <div>
+            {% if(addr_list[i].is_primary_address) { %}<span class="label label-info">
+                {%= __("Primary") %}</span>{% } %}
+            {% if(addr_list[i].is_shipping_address) { %}<span class="label label-default">
+                {%= __("Shipping") %}</span>{% } %}
+        </div>
+        <p style="margin-top: 5px;">{%= addr_list[i].display %}</p>
+    </div>
+{% } %}
+{% if(!addr_list.length) { %}
+<p class="text-muted">{%= __("No address added yet.") %}</p>
+{% } %}

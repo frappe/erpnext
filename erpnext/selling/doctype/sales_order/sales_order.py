@@ -157,7 +157,7 @@ class SalesOrder(SellingController):
 
 		self.check_credit(self.grand_total)
 
-		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.grand_total, self)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total, self)
 
 		self.update_prevdoc_status('submit')
 		frappe.db.set(self, 'status', 'Submitted')
@@ -329,7 +329,7 @@ def make_sales_invoice(source_name, target_doc=None):
 	def update_item(source, target, source_parent):
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
-		target.qty = source.rate and target.amount / flt(source.rate) or source.qty
+		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -356,17 +356,6 @@ def make_sales_invoice(source_name, target_doc=None):
 			"add_if_empty": True
 		}
 	}, target_doc, postprocess)
-
-	def set_advance_vouchers(source, target):
-		advance_voucher_list = []
-
-		advance_voucher = frappe.db.sql("""
-			select
-				t1.name as voucher_no, t1.posting_date, t1.remark, t2.account,
-				t2.name as voucher_detail_no, {amount_query} as payment_amount, t2.is_advance
-			from
-				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
-			""")
 
 	return doclist
 

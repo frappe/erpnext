@@ -1,5 +1,5 @@
- (Half Day),
- and year: ,
+ (Half Day), (Half Day)
+ and year: , and year: 
 """ does not exists","""Tidak ada"
 %  Delivered,Disampaikan%
 % Amount Billed,% Jumlah Ditagih
@@ -41,14 +41,14 @@ A Product or Service,Produk atau Jasa
 A Supplier exists with same name,Pemasok dengan nama yang sama sudah terdaftar
 A symbol for this currency. For e.g. $,Simbol untuk mata uang ini. Contoh $
 AMC Expiry Date,AMC Tanggal Berakhir
-Abbr,Abbr
+Abbr,Singkatan
 Abbreviation cannot have more than 5 characters,Singkatan tak bisa memiliki lebih dari 5 karakter
 Above Value,Nilai di atas
 Absent,Absen
 Acceptance Criteria,Kriteria Penerimaan
 Accepted,Diterima
 Accepted + Rejected Qty must be equal to Received quantity for Item {0},Diterima Ditolak + Qty harus sama dengan jumlah yang diterima untuk Item {0}
-Accepted Quantity,Diterima Kuantitas
+Accepted Quantity,Kuantitas Diterima
 Accepted Warehouse,Gudang Diterima
 Account,Akun
 Account Balance,Saldo Rekening
@@ -57,25 +57,25 @@ Account Details,Rincian Account
 Account Head,Akun Kepala
 Account Name,Nama Akun
 Account Type,Jenis Account
-"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Saldo rekening sudah Kredit, Anda tidak diizinkan untuk mengatur 'Balance Harus' sebagai 'Debit'"
+"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Saldo rekening telah ada di Kredit, Anda tidak diizinkan untuk mengatur 'Balance Harus' sebagai 'Debit'"
 "Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Saldo rekening sudah di Debit, Anda tidak diizinkan untuk mengatur 'Balance Harus' sebagai 'Kredit'"
 Account for the warehouse (Perpetual Inventory) will be created under this Account.,Rekening untuk gudang (Inventaris Perpetual) akan dibuat di bawah Rekening ini.
-Account head {0} created,Kepala akun {0} dibuat
+Account head {0} created,Kepala akun {0} telah dibuat
 Account must be a balance sheet account,Rekening harus menjadi akun neraca
 Account with child nodes cannot be converted to ledger,Akun dengan node anak tidak dapat dikonversi ke buku
 Account with existing transaction can not be converted to group.,Akun dengan transaksi yang ada tidak dapat dikonversi ke grup.
 Account with existing transaction can not be deleted,Akun dengan transaksi yang ada tidak dapat dihapus
 Account with existing transaction cannot be converted to ledger,Akun dengan transaksi yang ada tidak dapat dikonversi ke buku
-Account {0} cannot be a Group,Akun {0} tidak dapat Kelompok a
+Account {0} cannot be a Group,Akun {0} tidak dapat berupa Kelompok
 Account {0} does not belong to Company {1},Akun {0} bukan milik Perusahaan {1}
 Account {0} does not belong to company: {1},Akun {0} bukan milik perusahaan: {1}
 Account {0} does not exist,Akun {0} tidak ada
 Account {0} has been entered more than once for fiscal year {1},Akun {0} telah dimasukkan lebih dari sekali untuk tahun fiskal {1}
-Account {0} is frozen,Akun {0} beku
+Account {0} is frozen,Akun {0} dibekukan
 Account {0} is inactive,Akun {0} tidak aktif
 Account {0} is not valid,Akun {0} tidak valid
 Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Akun {0} harus bertipe 'Aset Tetap' sebagai Barang {1} adalah sebuah Aset Barang
-Account {0}: Parent account {1} can not be a ledger,Akun {0}: akun Parent {1} tidak dapat buku besar
+Account {0}: Parent account {1} can not be a ledger,Akun {0}: akun Parent {1} tidak dapat berupa buku besar
 Account {0}: Parent account {1} does not belong to company: {2},Akun {0}: akun Parent {1} bukan milik perusahaan: {2}
 Account {0}: Parent account {1} does not exist,Akun {0}: akun Parent {1} tidak ada
 Account {0}: You can not assign itself as parent account,Akun {0}: Anda tidak dapat menetapkan dirinya sebagai rekening induk
@@ -92,24 +92,24 @@ Accounts Payable,Hutang
 Accounts Receivable,Piutang
 Accounts Settings,Account Settings
 Active,Aktif
-Active: Will extract emails from ,
+Active: Will extract emails from ,Active: Will extract emails from 
 Activity,Aktivitas
 Activity Log,Log Aktivitas
 Activity Log:,Log Aktivitas:
 Activity Type,Jenis Kegiatan
 Actual,Aktual
-Actual Budget,Realisasi Anggaran
-Actual Completion Date,Realisasi Tanggal Penyelesaian
-Actual Date,Realisasi Tanggal
-Actual End Date,Realisasi Tanggal Akhir
-Actual Invoice Date,Sebenarnya Faktur Tanggal
+Actual Budget,Anggaran Aktual
+Actual Completion Date,Tanggal Penyelesaian Aktual
+Actual Date,Tanggal Aktual
+Actual End Date,Tanggal Akhir Realisasi
+Actual Invoice Date,Tanggal Faktur Aktual
 Actual Posting Date,Sebenarnya Posting Tanggal
-Actual Qty,Realisasi Qty
-Actual Qty (at source/target),Aktual Qty (di sumber / target)
-Actual Qty After Transaction,Realisasi Qty Setelah Transaksi
+Actual Qty,Qty Aktual
+Actual Qty (at source/target),Qty Aktual (di sumber/target)
+Actual Qty After Transaction,Qty Aktual Setelah Transaksi
 Actual Qty: Quantity available in the warehouse.,Jumlah yang sebenarnya: Kuantitas yang tersedia di gudang.
-Actual Quantity,Realisasi Kuantitas
-Actual Start Date,Aktual Tanggal Mulai
+Actual Quantity,Kuantitas Aktual
+Actual Start Date,Tanggal Mulai Aktual
 Add,Tambahkan
 Add / Edit Taxes and Charges,Tambah / Edit Pajak dan Biaya
 Add Child,Tambah Anak
@@ -254,8 +254,8 @@ Approving Role,Menyetujui Peran
 Approving Role cannot be same as role the rule is Applicable To,Menyetujui Peran tidak bisa sama dengan peran aturan yang Berlaku Untuk
 Approving User,Menyetujui Pengguna
 Approving User cannot be same as user the rule is Applicable To,Menyetujui Pengguna tidak bisa sama dengan pengguna aturan yang Berlaku Untuk
-Are you sure you want to STOP ,
-Are you sure you want to UNSTOP ,
+Are you sure you want to STOP ,Are you sure you want to STOP 
+Are you sure you want to UNSTOP ,Are you sure you want to UNSTOP 
 Arrear Amount,Jumlah tunggakan
 "As Production Order can be made for this item, it must be a stock item.","Seperti Orde Produksi dapat dibuat untuk item ini, itu harus menjadi barang saham."
 As per Stock UOM,Per Saham UOM
@@ -284,7 +284,7 @@ Auto Accounting For Stock Settings,Auto Akuntansi Untuk Stock Pengaturan
 Auto Material Request,Auto Material Permintaan
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,Auto-meningkatkan Permintaan Material jika kuantitas berjalan di bawah tingkat re-order di gudang
 Automatically compose message on submission of transactions.,Secara otomatis menulis pesan pada pengajuan transaksi.
-Automatically extract Job Applicants from a mail box ,
+Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,Secara otomatis mengekstrak Memimpin dari kotak surat misalnya
 Automatically updated via Stock Entry of type Manufacture/Repack,Secara otomatis diperbarui melalui Bursa Masuknya jenis Industri / Repack
 Automotive,Ot
@@ -511,7 +511,7 @@ Clearance Date,Izin Tanggal
 Clearance Date not mentioned,Izin Tanggal tidak disebutkan
 Clearance date cannot be before check date in row {0},Tanggal clearance tidak bisa sebelum tanggal check-in baris {0}
 Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Klik 'Buat Sales Invoice' tombol untuk membuat Faktur Penjualan baru.
-Click on a link to get options to expand get options ,
+Click on a link to get options to expand get options ,Click on a link to get options to expand get options 
 Client,Client (Nasabah)
 Close Balance Sheet and book Profit or Loss.,Tutup Neraca dan Perhitungan Laba Rugi atau buku.
 Closed,Tertutup
@@ -841,13 +841,13 @@ Distributor,Distributor
 Divorced,Bercerai
 Do Not Contact,Jangan Hubungi
 Do not show any symbol like $ etc next to currencies.,Jangan menunjukkan simbol seperti $ etc sebelah mata uang.
-Do really want to unstop production order: ,
-Do you really want to STOP ,
+Do really want to unstop production order: ,Do really want to unstop production order: 
+Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,Apakah Anda benar-benar ingin BERHENTI Permintaan Bahan ini?
 Do you really want to Submit all Salary Slip for month {0} and year {1},Apakah Anda benar-benar ingin Menyerahkan semua Slip Gaji untuk bulan {0} dan tahun {1}
-Do you really want to UNSTOP ,
+Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,Apakah Anda benar-benar ingin unstop Permintaan Bahan ini?
-Do you really want to stop production order: ,
+Do you really want to stop production order: ,Do you really want to stop production order: 
 Doc Name,Doc Nama
 Doc Type,Doc Type
 Document Description,Dokumen Deskripsi
@@ -899,7 +899,7 @@ Electronics,Elektronik
 Email,siska_chute34@yahoo.com
 Email Digest,Email Digest
 Email Digest Settings,Email Digest Pengaturan
-Email Digest: ,
+Email Digest: ,Email Digest: 
 Email Id,Email Id
 "Email Id where a job applicant will email e.g. ""jobs@example.com""","Email Id di mana pelamar pekerjaan akan mengirimkan email misalnya ""jobs@example.com"""
 Email Notifications,Notifikasi Email
@@ -927,7 +927,7 @@ Employee Settings,Pengaturan Karyawan
 Employee Type,Tipe Karyawan
 "Employee designation (e.g. CEO, Director etc.).","Penunjukan Karyawan (misalnya CEO, Direktur dll)."
 Employee master.,Master Karyawan.
-Employee record is created using selected field. ,
+Employee record is created using selected field. ,Employee record is created using selected field. 
 Employee records.,Catatan karyawan.
 Employee relieved on {0} must be set as 'Left',Karyawan lega pada {0} harus ditetapkan sebagai 'Kiri'
 Employee {0} has already applied for {1} between {2} and {3},Karyawan {0} telah diterapkan untuk {1} antara {2} dan {3}
@@ -959,7 +959,7 @@ Enter url parameter for receiver nos,Masukkan parameter url untuk penerima nos
 Entertainment & Leisure,Hiburan & Kenyamanan
 Entertainment Expenses,Beban Hiburan
 Entries,Entri
-Entries against ,
+Entries against ,Entries against 
 Entries are not allowed against this Fiscal Year if the year is closed.,Entri tidak diperbolehkan melawan Tahun Anggaran ini jika tahun ditutup.
 Equity,Modal
 Error: {0} > {1},Kesalahan: {0}> {1}
@@ -1024,7 +1024,7 @@ Exports,Ekspor
 External,Eksternal
 Extract Emails,Ekstrak Email
 FCFS Rate,FCFS Tingkat
-Failed: ,
+Failed: ,Failed: 
 Family Background,Latar Belakang Keluarga
 Fax,Fax
 Features Setup,Fitur Pengaturan
@@ -1245,7 +1245,7 @@ If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged 
 If you involve in manufacturing activity. Enables Item 'Is Manufactured',Jika Anda terlibat dalam aktivitas manufaktur. Memungkinkan Barang 'Apakah Diproduksi'
 Ignore,Mengabaikan
 Ignore Pricing Rule,Abaikan Aturan Harga
-Ignored: ,
+Ignored: ,Ignored: 
 Image,Gambar
 Image View,Citra Tampilan
 Implementation Partner,Implementasi Mitra
@@ -1574,7 +1574,7 @@ Maintenance Visit Purpose,Pemeliharaan Visit Tujuan
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Pemeliharaan Kunjungan {0} harus dibatalkan sebelum membatalkan Sales Order ini
 Maintenance start date can not be before delivery date for Serial No {0},Tanggal mulai pemeliharaan tidak bisa sebelum tanggal pengiriman untuk Serial No {0}
 Major/Optional Subjects,Mayor / Opsional Subjek
-Make ,
+Make ,Make 
 Make Accounting Entry For Every Stock Movement,Membuat Entri Akuntansi Untuk Setiap Gerakan Stock
 Make Bank Voucher,Membuat Bank Voucher
 Make Credit Note,Membuat Nota Kredit
@@ -1723,7 +1723,7 @@ Net Weight UOM,Berat Bersih UOM
 Net Weight of each Item,Berat Bersih dari setiap Item
 Net pay cannot be negative,Gaji bersih yang belum dapat negatif
 Never,Tidak Pernah
-New ,
+New ,New 
 New Account,Akun baru
 New Account Name,New Account Name
 New BOM,New BOM
@@ -1789,7 +1789,7 @@ No permission,Tidak ada izin
 No record found,Tidak ada catatan ditemukan
 No records found in the Invoice table,Tidak ada catatan yang ditemukan dalam tabel Faktur
 No records found in the Payment table,Tidak ada catatan yang ditemukan dalam tabel Pembayaran
-No salary slip found for month: ,
+No salary slip found for month: ,No salary slip found for month: 
 Non Profit,Non Profit
 Nos,Nos
 Not Active,Tidak Aktif
@@ -2448,8 +2448,8 @@ Root cannot have a parent cost center,Root tidak dapat memiliki pusat biaya oran
 Rounded Off,Rounded Off
 Rounded Total,Rounded Jumlah
 Rounded Total (Company Currency),Rounded Jumlah (Perusahaan Mata Uang)
-Row # ,
-Row # {0}: ,
+Row # ,Row # 
+Row # {0}: ,Row # {0}: 
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Row # {0}: qty Memerintahkan tidak bisa kurang dari minimum qty pesanan item (didefinisikan dalam master barang).
 Row #{0}: Please specify Serial No for Item {1},Row # {0}: Silakan tentukan Serial ada untuk Item {1}
 Row {0}: Account does not match with \						Purchase Invoice Credit To account,Row {0}: Akun tidak cocok dengan \ Purchase Invoice Kredit Untuk account
@@ -2751,7 +2751,7 @@ Stock Ageing,Stock Penuaan
 Stock Analytics,Stock Analytics
 Stock Assets,Aset saham
 Stock Balance,Stock Balance
-Stock Entries already created for Production Order ,
+Stock Entries already created for Production Order ,Stock Entries already created for Production Order 
 Stock Entry,Stock Entri
 Stock Entry Detail,Stock Masuk Detil
 Stock Expenses,Beban saham
@@ -2797,7 +2797,7 @@ Submit all salary slips for the above selected criteria,Menyerahkan semua slip g
 Submit this Production Order for further processing.,Kirim Produksi ini Order untuk diproses lebih lanjut.
 Submitted,Dikirim
 Subsidiary,Anak Perusahaan
-Successful: ,
+Successful: ,Successful: 
 Successfully Reconciled,Berhasil Berdamai
 Suggestions,Saran
 Sunday,Minggu
@@ -2915,7 +2915,7 @@ The Organization,Organisasi
 "The account head under Liability, in which Profit/Loss will be booked","Account kepala di bawah Kewajiban, di mana Laba / Rugi akan dipesan"
 The date on which next invoice will be generated. It is generated on submit.,Tanggal dimana faktur berikutnya akan dihasilkan. Hal ini dihasilkan di submit.
 The date on which recurring invoice will be stop,Tanggal dimana berulang faktur akan berhenti
-"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","The day of the month on which auto invoice will be generated e.g. 05, 28 etc "
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,Hari (s) yang Anda lamar untuk cuti adalah liburan. Anda tidak perlu mengajukan cuti.
 The first Leave Approver in the list will be set as the default Leave Approver,The Approver Cuti pertama dalam daftar akan ditetapkan sebagai default Tinggalkan Approver
 The first user will become the System Manager (you can change that later).,Pengguna pertama akan menjadi System Manager (Anda dapat mengubah nanti).
@@ -3002,7 +3002,7 @@ Total Advance,Jumlah Uang Muka
 Total Amount,Jumlah Total
 Total Amount To Pay,Jumlah Total Untuk Bayar
 Total Amount in Words,Jumlah Total Kata
-Total Billing This Year: ,
+Total Billing This Year: ,Total Billing This Year: 
 Total Characters,Jumlah Karakter
 Total Claimed Amount,Jumlah Total Diklaim
 Total Commission,Jumlah Komisi

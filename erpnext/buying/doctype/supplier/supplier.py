@@ -9,10 +9,14 @@ from frappe.utils import cint
 from frappe import msgprint, _
 from frappe.model.naming import make_autoname
 from erpnext.accounts.party import create_party_account
+from erpnext.utilities.address_and_contact import load_address_and_contact
 
 from erpnext.utilities.transaction_base import TransactionBase
 
 class Supplier(TransactionBase):
+	def onload(self):
+		"""Load address and contacts in `__onload`"""
+		load_address_and_contact(self, "supplier")
 
 	def autoname(self):
 		supp_master_name = frappe.defaults.get_global_default('supp_master_name')

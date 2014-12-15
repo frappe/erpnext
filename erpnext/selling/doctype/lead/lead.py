@@ -9,11 +9,13 @@ from frappe import session
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.utilities.address_and_contact import load_address_and_contact
 
 class Lead(SellingController):
 	def onload(self):
 		customer = frappe.db.get_value("Customer", {"lead_name": self.name})
 		self.get("__onload").is_customer = customer
+		load_address_and_contact(self, "lead")
 
 	def validate(self):
 		self._prev = frappe._dict({
@@ -43,6 +45,7 @@ class Lead(SellingController):
 	def add_calendar_event(self, opts=None, force=False):
 		super(Lead, self).add_calendar_event({
 			"owner": self.lead_owner,
+			"starts_on": self.contact_date,
 			"subject": ('Contact ' + cstr(self.lead_name)),
 			"description": ('Contact ' + cstr(self.lead_name)) + \
 				(self.contact_by and ('. By : ' + cstr(self.contact_by)) or '')
