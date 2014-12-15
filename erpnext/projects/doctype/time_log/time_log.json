@@ -146,12 +146,43 @@
    "permlevel": 1, 
    "print_hide": 1, 
    "read_only": 0
+  }, 
+  {
+   "fieldname": "btn", 
+   "fieldtype": "Button", 
+   "in_list_view": 0, 
+   "label": "btn", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "code", 
+   "fieldtype": "Code", 
+   "in_list_view": 1, 
+   "label": "code", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "time", 
+   "fieldtype": "Time", 
+   "label": "time", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "percent", 
+   "fieldtype": "Percent", 
+   "in_list_view": 1, 
+   "label": "percent", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-10-22 16:53:26.993828", 
+ "modified": "2014-11-18 08:18:32.929127", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 
@@ -168,6 +199,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
+   "restricted": 1, 
    "role": "Projects User", 
    "submit": 1, 
    "write": 1
