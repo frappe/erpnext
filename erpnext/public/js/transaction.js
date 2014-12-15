@@ -230,6 +230,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		if (this.frm.doc.posting_date) var date = this.frm.doc.posting_date;
 		else var date = this.frm.doc.transaction_date;
 		erpnext.get_fiscal_year(this.frm.doc.company, date, fn);
+		
+		erpnext.get_letter_head(this.frm.doc.company);
 	},
 
 	transaction_date: function() {
