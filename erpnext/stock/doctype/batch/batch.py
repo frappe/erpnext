@@ -12,6 +12,5 @@ class Batch(Document):
 		self.item_has_batch_enabled()
 
 	def item_has_batch_enabled(self):
-		has_batch_no = frappe.db.get_value("Item",self.item,"has_batch_no")
-		if has_batch_no =='No':
+		if frappe.db.get_value("Item",self.item,"has_batch_no") =='No':
 			frappe.throw(_("The selected item cannot have Batch"))

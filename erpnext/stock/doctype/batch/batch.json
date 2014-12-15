@@ -1,7 +1,7 @@
 {
-  "allow_import": 1, 
+ "allow_import": 1, 
  "autoname": "field:batch_id", 
- "creation": "2013-03-05 14:50:38.000000", 
+ "creation": "2013-03-05 14:50:38", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -28,23 +28,10 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "description", 
-   "fieldtype": "Small Text", 
-   "in_list_view": 1, 
-   "label": "Description", 
-   "oldfieldname": "description", 
-   "oldfieldtype": "Small Text", 
+   "fieldname": "column_break_3", 
+   "fieldtype": "Column Break", 
    "permlevel": 0, 
-   "width": "300px"
-  }, 
-  {
-   "fieldname": "expiry_date", 
-   "fieldtype": "Date", 
-   "in_list_view": 1, 
-   "label": "Expiry Date", 
-   "oldfieldname": "expiry_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0
+   "precision": ""
   }, 
   {
    "fieldname": "start_date", 
@@ -61,12 +48,37 @@
    "oldfieldname": "finished_date", 
    "oldfieldtype": "Date", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "expiry_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 1, 
+   "label": "Expiry Date", 
+   "oldfieldname": "expiry_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "section_break_7", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "description", 
+   "fieldtype": "Small Text", 
+   "in_list_view": 1, 
+   "label": "Batch Description", 
+   "oldfieldname": "description", 
+   "oldfieldtype": "Small Text", 
+   "permlevel": 0, 
+   "width": "300px"
   }
  ], 
  "icon": "icon-archive", 
  "idx": 1, 
  "max_attachments": 5, 
- "modified": "2014-01-20 17:48:24.000000", 
+ "modified": "2014-12-15 17:37:01.781726", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Batch", 
