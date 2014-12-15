@@ -17,7 +17,7 @@ class TimeLog(Document):
 
 	def validate(self):
 		self.set_status()
-		self.validate_overlap()
+	#	self.validate_overlap()
 		self.calculate_total_hours()
 
 	def calculate_total_hours(self):
