@@ -4,6 +4,12 @@
 frappe.provide("erpnext.projects");
 
 frappe.ui.form.on("Time Log", "onload", function(frm) {
+//blue = cur_frm.add_fetch('employee', 'employee_name', 'employee_name')
+});
+
+frappe.ui.form.on("Employee", "employee_name", function(frm) {
+
+cur_frm.set_value('employee_name', frm.doc.employee_name);
 });
 
 // set to time if hours is updated
