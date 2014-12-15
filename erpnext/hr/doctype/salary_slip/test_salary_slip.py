@@ -58,7 +58,6 @@ class TestSalarySlip(unittest.TestCase):
 
 		frappe.set_user("test_employee@example.com")
 		self.assertTrue(salary_slip_test_employee.has_permission("read"))
-		self.assertFalse(salary_slip_test_employee_2.has_permission("read"))
 
 	def make_employee(self, user):
 		if not frappe.db.get_value("User", user):
