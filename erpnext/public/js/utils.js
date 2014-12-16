@@ -1,6 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 frappe.provide("erpnext");
+frappe.provide("erpnext.utils");
 
 $.extend(erpnext, {
 	get_currency: function(company) {
@@ -100,7 +101,8 @@ $.extend(erpnext, {
 	},
 });
 
-erpnext.utils = {
+
+$.extend(erpnext.utils, {
 	render_address_and_contact: function(frm) {
 		// render address
 		$(frm.fields_dict['address_html'].wrapper)
@@ -121,4 +123,4 @@ erpnext.utils = {
 			);
 		}
 	}
-}
+})
