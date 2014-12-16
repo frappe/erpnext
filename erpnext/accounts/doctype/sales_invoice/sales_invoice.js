@@ -49,7 +49,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		cur_frm.dashboard.reset();
 
 		if(doc.docstatus==1) {
-			cur_frm.appframe.add_button('View Ledger', function() {
+			cur_frm.add_custom_button('View Ledger', function() {
 				frappe.route_options = {
 					"voucher_no": doc.name,
 					"from_date": doc.posting_date,
@@ -60,10 +60,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				frappe.set_route("query-report", "General Ledger");
 			}, "icon-table");
 
-			var percent_paid = cint(flt(doc.grand_total - doc.outstanding_amount) / flt(doc.grand_total) * 100);
-			cur_frm.dashboard.add_progress(percent_paid + "% Paid", percent_paid);
+			// var percent_paid = cint(flt(doc.grand_total - doc.outstanding_amount) / flt(doc.grand_total) * 100);
+			// cur_frm.dashboard.add_progress(percent_paid + "% Paid", percent_paid);
 
-			cur_frm.appframe.add_button(__('Send SMS'), cur_frm.cscript.send_sms, 'icon-mobile-phone');
+			cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, 'icon-mobile-phone');
 
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note

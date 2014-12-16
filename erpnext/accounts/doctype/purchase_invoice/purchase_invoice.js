@@ -31,7 +31,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				frappe.boot.doctype_icons["Journal Voucher"]);
 
 		if(doc.docstatus==1) {
-			cur_frm.appframe.add_button(__('View Ledger'), function() {
+			cur_frm.add_custom_button(__('View Ledger'), function() {
 				frappe.route_options = {
 					"voucher_no": doc.name,
 					"from_date": doc.posting_date,

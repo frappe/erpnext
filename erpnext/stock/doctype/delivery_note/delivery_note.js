@@ -32,7 +32,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			cur_frm.add_custom_button(__('Make Installation Note'), this.make_installation_note);
 
 		if (doc.docstatus==1) {
-			cur_frm.appframe.add_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
+			cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 			this.show_stock_ledger();
 			this.show_general_ledger();
 		}

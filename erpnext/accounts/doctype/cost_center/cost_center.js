@@ -51,7 +51,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_display('sb1', doc.group_or_ledger=='Ledger')
 	cur_frm.set_intro(intro_txt);
 
-	cur_frm.appframe.add_button(__('Chart of Cost Centers'),
+	cur_frm.add_custom_button(__('Chart of Cost Centers'),
 		function() { frappe.set_route("Accounts Browser", "Cost Center"); }, 'icon-sitemap')
 }
 

@@ -32,7 +32,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 				cur_frm.add_custom_button(__('Set as Lost'),
 					cur_frm.cscript['Declare Order Lost'], "icon-exclamation", "btn-default");
 			}
-			cur_frm.appframe.add_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
+			cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 		}
 
 		if (this.frm.doc.docstatus===0) {

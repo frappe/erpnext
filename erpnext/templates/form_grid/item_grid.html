@@ -2,7 +2,7 @@
 
 {% if(!doc) { %}
 	<div class="row">
-		<div class="col-sm-6">{%= __("Item") %}</div>
+		<div class="col-sm-6">{%= __("Items") %}</div>
 		<div class="col-sm-2 text-right">{%= __("Qty") %}</div>
 		<div class="col-sm-2 text-right">{%= __("Rate") %}</div>
 		<div class="col-sm-2 text-right">{%= __("Amount") %}</div>
@@ -14,13 +14,36 @@
 				<br>{%= doc.item_name %}{% } %}
 			{% if(doc.item_name != doc.description) { %}
 				<p>{%= doc.description %}</p>{% } %}
-			{% if(doc.sales_order || doc.against_sales_order) { %}
-				<p><span class="label label-default"
-					title="{%= __("Sales Order") %}">
-					<i class="icon-file"></i>
-					{%= doc.sales_order || doc.against_sales_order %}
-				</span></p>
-			{% } %}
+            <div>
+    			{% if(doc.sales_order || doc.against_sales_order) { %}
+    				<span class="label label-default"
+    					title="{%= __("Sales Order") %}">
+    					<i class="icon-file"></i>
+    					{%= doc.sales_order || doc.against_sales_order %}
+    				</span>
+    			{% } %}
+    			{% if(doc.warehouse) {
+    				var label_class = "label-default",
+    					title = "Warehouse",
+    					actual_qty = (doc.doctype==="Sales Order"
+    						? doc.projected_qty : doc.actual_qty);
+    				if(actual_qty != undefined) {
+    					if(actual_qty > doc.qty) {
+    						var label_class = "label-success";
+    						var title = "In Stock"
+    					} else {
+    						var title = "Not In Stock"
+    					}
+    				}
+    				%}
+    				<span style="margin-left: 10px;"
+    					title="{%= title %}">
+    					<span class="label {%= label_class %}">
+    						{%= doc.warehouse %}
+    					</span>
+    				</span>
+    			{% } %}
+            </div>
 			{% include "templates/form_grid/includes/visible_cols.html" %}
 			{% if(doc.schedule_date) { %}
 			<div><span title="{%= __("Reqd By Date") %}" class="label {%=
@@ -45,28 +68,6 @@
 					title = __("Delivered");
 				%}
 				{% include "templates/form_grid/includes/progress.html" %}
-			{% } %}
-			{% if(doc.warehouse) {
-				var label_class = "label-default",
-					title = "Warehouse",
-					actual_qty = (doc.doctype==="Sales Order"
-						? doc.projected_qty : doc.actual_qty);
-				if(actual_qty != undefined) {
-					if(actual_qty > doc.qty) {
-						var label_class = "label-success";
-						var title = "In Stock"
-					} else {
-						var title = "Not In Stock"
-					}
-				}
-				%}
-				<div style="overflow:hidden; min-height: 25px;
-					white-space:nowrap; text-overflow: ellipsis;"
-					title="{%= title %}">
-					<span class="label {%= label_class %}">
-						{%= doc.warehouse %}
-					</span>
-				</div>
 			{% } %}
 		</div>
 
