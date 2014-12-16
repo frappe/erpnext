@@ -4,10 +4,10 @@
  "doctype": "DocType", 
  "fields": [
   {
-   "fieldname": "operation_no", 
+   "fieldname": "operation", 
    "fieldtype": "Select", 
    "in_list_view": 1, 
-   "label": "Operation No", 
+   "label": "Operation", 
    "oldfieldname": "operation_no", 
    "oldfieldtype": "Data", 
    "permlevel": 0, 
@@ -134,7 +134,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-05-29 15:56:31.859868", 
+ "modified": "2014-11-12 14:48:30.931123", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Item", 

@@ -25,7 +25,17 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Workstation",
-					"description": _("Where manufacturing operations are carried out."),
+					"description": _("Where manufacturing operations are carried."),
+				},
+				{
+					"type": "doctype",
+					"name": "Operation",
+					"description": _("Details of the operations carried out."),
+				},
+				{
+					"type": "doctype",
+					"name": "Manufacturing Settings",
+					"description": _("Global settings for all manufacturing processes."),
 				},
 
 			]

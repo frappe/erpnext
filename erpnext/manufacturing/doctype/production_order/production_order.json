@@ -102,13 +102,7 @@
    "reqd": 1
   }, 
   {
-   "depends_on": "production_item", 
-   "fieldname": "total_fixed_cost", 
-   "fieldtype": "Float", 
-   "label": "Total Fixed Cost", 
-   "permlevel": 0
-  }, 
-  {
+   "default": "0", 
    "depends_on": "eval:doc.docstatus==1", 
    "description": "Automatically updated via Stock Entry of type Manufacture or Repack", 
    "fieldname": "produced_qty", 
@@ -121,24 +115,38 @@
    "read_only": 1
   }, 
   {
-   "depends_on": "sales_order", 
+   "fieldname": "time", 
+   "fieldtype": "Section Break", 
+   "label": "Time", 
+   "options": "icon-time", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "", 
    "fieldname": "expected_delivery_date", 
    "fieldtype": "Date", 
    "label": "Expected Delivery Date", 
    "permlevel": 0, 
-   "read_only": 1
+   "read_only": 0
+  }, 
+  {
+   "fieldname": "column_break_13", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "start_date", 
    "fieldtype": "Datetime", 
-   "label": "Start Date", 
+   "label": "Production Start Date", 
    "permlevel": 0, 
    "precision": ""
   }, 
   {
    "fieldname": "end_date", 
    "fieldtype": "Datetime", 
-   "label": "End Date", 
+   "label": "Production End Date", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -173,6 +181,40 @@
    "options": "Warehouse", 
    "permlevel": 0, 
    "reqd": 0
+  }, 
+  {
+   "depends_on": "bom_no", 
+   "fieldname": "operations", 
+   "fieldtype": "Section Break", 
+   "label": "Operations", 
+   "options": "icon-wrench", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "production_item", 
+   "fieldname": "total_fixed_cost", 
+   "fieldtype": "Float", 
+   "label": "Total Fixed Cost", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "production_order_operations", 
+   "fieldtype": "Table", 
+   "label": "Production Order Operations", 
+   "options": "Production Order Operation", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "allow_on_submit": 1, 
+   "depends_on": "eval:doc.docstatus==1", 
+   "fieldname": "auto_time_log", 
+   "fieldtype": "Button", 
+   "label": "Automatically Make Time logs", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "more_info", 
@@ -246,7 +288,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2014-10-27 13:42:31.476892", 
+ "modified": "2014-12-01 11:36:56.832268", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 
