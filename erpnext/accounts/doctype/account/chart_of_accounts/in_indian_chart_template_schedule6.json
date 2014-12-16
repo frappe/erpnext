@@ -33,14 +33,8 @@
                     "Investment In Preference Shares": {}
                 },
                 "Inventories": {
-                    "Finished Goods": {},
-                    "Goods-In-Transit": {},
-                    "Loose Tools": {},
-                    "Other With Job Worker": {},
-                    "Raw Material": {},
-                    "Stock-In-Trade": {},
-                    "Stores And Spares": {},
-                    "Work-In-Progress": {}
+	                "account_type": "Stock",
+					"group_or_ledger": "Group"
                 },
                 "Other Current Assets": {
                     "Duties and Taxes": {

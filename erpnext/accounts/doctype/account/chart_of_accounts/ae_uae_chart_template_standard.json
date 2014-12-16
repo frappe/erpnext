@@ -83,13 +83,8 @@
                         "Items Delivered to Customs on temprary Base": {}
                     },
                     "Stock in Hand": {
-                        "Customs Duty": {},
-                        "Freight and Transport": {},
-                        "Shipment Insurance": {},
-                        "Shipment Other Charges": {},
-                        "Shipments Documentation Charges": {},
-                        "Supplier Cost": {},
-						"account_type": "Stock"
+		                "account_type": "Stock",
+						"group_or_ledger": "Group"
                     }
                 },
                 "Perliminary and Preoperating Expenses": {
