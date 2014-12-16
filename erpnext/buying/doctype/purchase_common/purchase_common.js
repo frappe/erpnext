@@ -71,7 +71,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 
 	contact_person: function() {
-		this.supplier_address();
+		erpnext.utils.get_contact_details(this.frm);
 	},
 
 	buying_price_list: function() {
