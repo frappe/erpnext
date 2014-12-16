@@ -1,7 +1,6 @@
 [
  {
   "doctype": "Holiday List",
-  "name": "_Test Holiday List 1",
   "fiscal_year": "_Test Fiscal Year 2013", 
   "holiday_list_details": [
    {
