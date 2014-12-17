@@ -422,14 +422,24 @@ class JournalVoucher(AccountsController):
 				and outstanding_amount > 0 %s""" % ('%s', cond), self.company, as_dict=True)
 
 @frappe.whitelist()
-def get_default_bank_cash_account(company, voucher_type):
-	account = frappe.db.get_value("Company", company,
+def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+	if mode_of_payment:
+		account = get_bank_cash_account(mode_of_payment, company)
+		if account.get("bank_cash_account"):
+			account.update({"balance": get_balance_on(account.get("cash_bank_account"))})
+			return account
+
+	account = frappe.db.get_value("Company", company, \
 		voucher_type=="Bank Voucher" and "default_bank_account" or "default_cash_account")
+
 	if account:
 		return {
-			"account": account,
+			"cash_bank_account": account,
 			"balance": get_balance_on(account)
 		}
+
+
 
 @frappe.whitelist()
 def get_payment_entry_from_sales_invoice(sales_invoice):
@@ -473,7 +483,7 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	return jv.as_dict()
 
 def get_payment_entry(doc):
-	bank_account = get_default_bank_cash_account(doc.company, "Bank Voucher")
+	bank_account = get_default_bank_cash_account(doc.company, "Bank Voucher", doc.mode_of_payment)
 
 	jv = frappe.new_doc('Journal Voucher')
 	jv.voucher_type = 'Bank Voucher'
@@ -484,7 +494,7 @@ def get_payment_entry(doc):
 	d2 = jv.append("entries")
 
 	if bank_account:
-		d2.account = bank_account["account"]
+		d2.account = bank_account["cash_bank_account"]
 		d2.balance = bank_account["balance"]
 
 	return jv
