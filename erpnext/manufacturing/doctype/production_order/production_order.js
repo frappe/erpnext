@@ -3,7 +3,6 @@
 
 $.extend(cur_frm.cscript, {
 	onload: function (doc, dt, dn) {
-
 		if (!doc.status) doc.status = 'Draft';
 		cfn_set_fields(doc, dt, dn);
 
@@ -75,7 +74,6 @@ $.extend(cur_frm.cscript, {
 				"from_time": child.planned_start_time,
 				"to_time": child.planned_end_time,
 				"project": doc.project,
-				"qty": doc.qty - child.qty_completed,
 				"workstation": child.workstation
 			},
 			callback: function(r) {
@@ -84,7 +82,7 @@ $.extend(cur_frm.cscript, {
 			}
 		});
 	},
-	
+
 	auto_time_log: function(doc){
 		frappe.call({
 			method:"erpnext.manufacturing.doctype.production_order.production_order.auto_make_time_log",
@@ -92,7 +90,7 @@ $.extend(cur_frm.cscript, {
 				"production_order_id": doc.name
 			}
 		});
-	}	
+	}
 });
 
 var cfn_set_fields = function(doc, dt, dn) {
@@ -164,3 +162,5 @@ cur_frm.set_query("bom_no", function(doc) {
 });
 
 cur_frm.add_fetch('bom_no', 'total_fixed_cost', 'total_fixed_cost');
+cur_frm.add_fetch('bom_no', 'total_variable_cost', 'planned_variable_cost');
+cur_frm.add_fetch('bom_no', 'total_operating_cost', 'total_operating_cost');

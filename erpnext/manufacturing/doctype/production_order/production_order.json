@@ -192,17 +192,59 @@
    "precision": ""
   }, 
   {
-   "depends_on": "production_item", 
-   "fieldname": "total_fixed_cost", 
-   "fieldtype": "Float", 
-   "label": "Total Fixed Cost", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "production_order_operations", 
    "fieldtype": "Table", 
    "label": "Production Order Operations", 
    "options": "Production Order Operation", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "section_break_22", 
+   "fieldtype": "Section Break", 
+   "label": "Operation Cost", 
+   "options": "", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "production_item", 
+   "fieldname": "total_fixed_cost", 
+   "fieldtype": "Currency", 
+   "label": "Total Fixed Cost", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "planned_variable_cost", 
+   "fieldtype": "Currency", 
+   "label": "Planned Variable Cost", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "actual_variable_cost", 
+   "fieldtype": "Currency", 
+   "label": "Actual Variable Cost", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_24", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "total_operating_cost", 
+   "fieldtype": "Currency", 
+   "label": "Total Operating Cost", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "precision": "", 
    "read_only": 1
@@ -288,7 +330,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2014-12-01 11:36:56.832268", 
+ "modified": "2014-12-17 15:16:28.054620", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 
