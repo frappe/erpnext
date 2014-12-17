@@ -5,10 +5,14 @@
 
 from __future__ import unicode_literals
 import frappe
-
+from frappe import _
 @frappe.whitelist()
 def get_time_log_list(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.get_values("Time Log", filters, ["name", "activity_type", "owner"])
+
+def set_employee_name(doc):
+	if doc.employee and not doc.employee_name:
+		doc.employee_name = frappe.db.get_value("Employee", doc.employee, "employee_name")
 
 @frappe.whitelist()
 def query_task(doctype, txt, searchfield, start, page_len, filters):
