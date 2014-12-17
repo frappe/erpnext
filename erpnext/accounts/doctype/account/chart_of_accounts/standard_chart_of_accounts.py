@@ -30,7 +30,9 @@ coa = {
                 "account_type": "Stock",
 				"group_or_ledger": "Group"
             },
-            _("Tax Assets"): {}
+            _("Tax Assets"): {
+				"group_or_ledger": "Group"
+			}
         },
         _("Fixed Assets"): {
             _("Capital Equipments"): {
