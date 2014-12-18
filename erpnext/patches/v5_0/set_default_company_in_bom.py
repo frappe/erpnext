@@ -4,5 +4,6 @@
 import frappe
 
 def execute():
+	frappe.reload_doc("manufacturing", "doctype", "bom")
 	company = frappe.db.get_value("Global Defaults", None, "default_company")
 	frappe.db.sql("""update  `tabBOM` set company = %s""",company)
