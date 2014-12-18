@@ -99,6 +99,20 @@ $.extend(erpnext, {
 			d.show();
 		});
 	},
+	
+	get_letter_head: function(company) {
+		frappe.call({
+			type:"GET",
+			method: "erpnext.accounts.utils.get_letter_head",
+			args: {
+				"company": company
+			},
+			callback: function(r) {
+				if (!r.exe)	cur_frm.set_value("letter_head", r.message);
+			}
+		});
+	},
+	
 });
 
 

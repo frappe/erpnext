@@ -179,6 +179,14 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "default_letter_head", 
+   "fieldtype": "Link", 
+   "label": "Default Letter Head", 
+   "options": "Letter Head", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "cost_center", 
    "fieldtype": "Link", 
@@ -356,7 +364,7 @@
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2014-08-29 15:50:18.539228", 
+ "modified": "2014-12-15 11:14:12.090020", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 
