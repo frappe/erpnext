@@ -114,23 +114,16 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 
 erpnext.bom.calculate_op_cost = function(doc) {
 	var op = doc.bom_operations || [];
-	total_op_cost = 0;
+	doc.total_variable_cost, doc.total_fixed_cost = 0.0, 0.0;
 	for(var i=0;i<op.length;i++) {
-		op_cost =	flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
-		set_multiple('BOM Operation',op[i].name, {'operating_cost': op_cost}, 'bom_operations');
-		total_op_cost += op_cost;
-	}
-	doc.operating_cost = total_op_cost;
-	refresh_field('operating_cost');
-}
+		variable_cost =	flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
+		frappe.model.set_value('BOM Operation',op[i].name, "variable_cost", variable_cost);
 
-erpnext.bom.calculate_fixed_cost = function(doc) {
-	var op = doc.bom_operations || [];
-	var total_fixed_cost = 0;
-	for(var i=0;i<op.length;i++) {
-		total_fixed_cost += flt(op[i].fixed_cycle_cost);
+		doc.total_variable_cost += variable_cost;
+		doc.total_fixed_cost += flt(op[i].fixed_cost);
 	}
-	cur_frm.set_value("total_fixed_cost", total_fixed_cost);
+	refresh_field(['total_fixed_cost', 'total_variable_cost']);
+	frappe.model.set_value("total_operating_cost", (doc.total_variable_cost + doc.total_fixed_cost))
 }
 
 erpnext.bom.calculate_rm_cost = function(doc) {
@@ -149,9 +142,8 @@ erpnext.bom.calculate_rm_cost = function(doc) {
 
 // Calculate Total Cost
 erpnext.bom.calculate_total = function(doc) {
-	doc.total_variable_cost = flt(doc.raw_material_cost) + flt(doc.operating_cost) ;
-	doc.total_cost = flt(doc.total_fixed_cost) + flt(doc.total_variable_cost);
-	refresh_field(['total_variable_cost', 'total_cost']);
+	total_cost = flt(doc.total_operating_cost) + flt(doc.raw_material_cost);
+	frappe.model.set_value("total_cost", total_cost);
 }
 
 
@@ -224,7 +216,7 @@ frappe.ui.form.on("BOM Operation", "workstation", function(frm, cdt, cdn) {
         },
         callback: function (data) {
 			frappe.model.set_value(d.doctype, d.name, "hour_rate", data.message.hour_rate);
-			frappe.model.set_value(d.doctype, d.name, "fixed_cycle_cost", data.message.fixed_cycle_cost);
+			frappe.model.set_value(d.doctype, d.name, "fixed_cost", data.message.fixed_cost);
 			erpnext.bom.calculate_op_cost(frm.doc);
 			erpnext.bom.calculate_fixed_cost(frm.doc);
 			erpnext.bom.calculate_total(frm.doc);

@@ -20,10 +20,10 @@
    "fieldname": "time_log_for", 
    "fieldtype": "Select", 
    "label": "Time Log For", 
-   "options": "Project\nManufacturing", 
+   "options": "\nProject\nManufacturing", 
    "permlevel": 0, 
    "precision": "", 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
    "fieldname": "from_time", 
@@ -68,7 +68,7 @@
    "reqd": 0
   }, 
   {
-   "depends_on": "eval:doc.time_log_for == 'Project'", 
+   "depends_on": "eval:doc.time_log_for != 'Manufacturing'", 
    "fieldname": "activity_type", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
@@ -79,7 +79,7 @@
    "reqd": 0
   }, 
   {
-   "depends_on": "eval:doc.time_log_for == 'Project'", 
+   "depends_on": "eval:doc.time_log_for != 'Manufacturing'", 
    "fieldname": "task", 
    "fieldtype": "Link", 
    "label": "Task", 
@@ -112,13 +112,15 @@
    "label": "Workstation", 
    "options": "Workstation", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "read_only": 1
   }, 
   {
-   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
-   "fieldname": "qty", 
-   "fieldtype": "Float", 
-   "label": "Quantity", 
+   "default": "Work in Progress", 
+   "fieldname": "operation_status", 
+   "fieldtype": "Select", 
+   "label": "Operation Status", 
+   "options": "\nWork in Progress\nCompleted", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -150,6 +152,7 @@
    "read_only": 0
   }, 
   {
+   "depends_on": "eval:doc.time_log_for == 'Project'", 
    "fieldname": "project", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
@@ -197,7 +200,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-11-19 11:39:02.633802", 
+ "modified": "2014-12-18 17:21:01.520646", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 

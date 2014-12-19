@@ -22,6 +22,7 @@
    "reqd": 1
   }, 
   {
+   "default": "Draft", 
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "status", 
    "fieldtype": "Select", 
@@ -51,7 +52,7 @@
    "reqd": 1
   }, 
   {
-   "depends_on": "production_item", 
+   "depends_on": "", 
    "description": "Bill of Material to be considered for manufacturing", 
    "fieldname": "bom_no", 
    "fieldtype": "Link", 
@@ -65,14 +66,6 @@
    "reqd": 1
   }, 
   {
-   "default": "1", 
-   "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
-   "fieldname": "use_multi_level_bom", 
-   "fieldtype": "Check", 
-   "label": "Use Multi-Level BOM", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "column_break1", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 
@@ -81,16 +74,7 @@
    "width": "50%"
   }, 
   {
-   "description": "Manufacture against Sales Order", 
-   "fieldname": "sales_order", 
-   "fieldtype": "Link", 
-   "label": "Sales Order", 
-   "options": "Sales Order", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "production_item", 
+   "depends_on": "", 
    "fieldname": "qty", 
    "fieldtype": "Float", 
    "in_list_view": 1, 
@@ -115,6 +99,14 @@
    "read_only": 1
   }, 
   {
+   "default": "1", 
+   "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
+   "fieldname": "use_multi_level_bom", 
+   "fieldtype": "Check", 
+   "label": "Use Multi-Level BOM", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "time", 
    "fieldtype": "Section Break", 
    "label": "Time", 
@@ -137,14 +129,14 @@
    "precision": ""
   }, 
   {
-   "fieldname": "start_date", 
+   "fieldname": "production_start_date", 
    "fieldtype": "Datetime", 
    "label": "Production Start Date", 
    "permlevel": 0, 
    "precision": ""
   }, 
   {
-   "fieldname": "end_date", 
+   "fieldname": "production_end_date", 
    "fieldtype": "Datetime", 
    "label": "Production End Date", 
    "permlevel": 0, 
@@ -158,7 +150,7 @@
    "permlevel": 0
   }, 
   {
-   "depends_on": "production_item", 
+   "depends_on": "", 
    "description": "Manufactured quantity will be updated in this warehouse", 
    "fieldname": "fg_warehouse", 
    "fieldtype": "Link", 
@@ -183,7 +175,7 @@
    "reqd": 0
   }, 
   {
-   "depends_on": "bom_no", 
+   "depends_on": "", 
    "fieldname": "operations", 
    "fieldtype": "Section Break", 
    "label": "Operations", 
@@ -209,7 +201,7 @@
    "precision": ""
   }, 
   {
-   "depends_on": "production_item", 
+   "depends_on": "", 
    "fieldname": "total_fixed_cost", 
    "fieldtype": "Currency", 
    "label": "Total Fixed Cost", 
@@ -274,6 +266,24 @@
    "read_only": 1
   }, 
   {
+   "depends_on": "", 
+   "fieldname": "stock_uom", 
+   "fieldtype": "Link", 
+   "label": "Stock UOM", 
+   "oldfieldname": "stock_uom", 
+   "oldfieldtype": "Data", 
+   "options": "UOM", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "width": "50%"
+  }, 
+  {
    "fieldname": "project_name", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -285,22 +295,13 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "column_break2", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "width": "50%"
-  }, 
-  {
-   "depends_on": "production_item", 
-   "fieldname": "stock_uom", 
+   "description": "Manufacture against Sales Order", 
+   "fieldname": "sales_order", 
    "fieldtype": "Link", 
-   "label": "Stock UOM", 
-   "oldfieldname": "stock_uom", 
-   "oldfieldtype": "Data", 
-   "options": "UOM", 
+   "label": "Sales Order", 
+   "options": "Sales Order", 
    "permlevel": 0, 
-   "read_only": 1
+   "read_only": 0
   }, 
   {
    "fieldname": "company", 
@@ -330,7 +331,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2014-12-17 15:16:28.054620", 
+ "modified": "2014-12-18 15:06:41.802390", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 

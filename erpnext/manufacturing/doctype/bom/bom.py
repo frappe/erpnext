@@ -247,26 +247,28 @@ class BOM(Document):
 		"""Calculate bom totals"""
 		self.calculate_op_cost()
 		self.calculate_rm_cost()
-		self.total_variable_cost = self.raw_material_cost + self.operating_cost
-		self.total_cost = self.total_variable_cost + self.total_fixed_cost
+		self.total_cost = self.total_operating_cost + self.raw_material_cost
 
 	def calculate_op_cost(self):
 		"""Update workstation rate and calculates totals"""
-		total_op_cost, fixed_cost = 0, 0
+		total_variable_cost, total_fixed_cost = 0, 0
 		for d in self.get('bom_operations'):
 			if d.workstation:
-				w = frappe.db.get_value("Workstation", d.workstation, ["hour_rate", "fixed_cycle_cost"])
+				w = frappe.db.get_value("Workstation", d.workstation, ["hour_rate", "fixed_cost"])
 				if not d.hour_rate:
 					d.hour_rate = flt(w[0])
 
-				fixed_cost += flt(w[1])
+				total_fixed_cost += flt(w[1])
 
 			if d.hour_rate and d.time_in_mins:
-				d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
-			total_op_cost += flt(d.operating_cost)
+				d.variable_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
 
-		self.operating_cost = total_op_cost
-		self.total_fixed_cost = fixed_cost
+			d.operating_cost = flt(d.fixed_cost) + flt(d.variable_cost)
+			total_variable_cost += flt(d.variable_cost)
+
+		self.total_variable_cost = total_variable_cost
+		self.total_fixed_cost = total_fixed_cost
+		self.total_operating_cost = self.total_variable_cost + self.total_fixed_cost
 
 	def calculate_rm_cost(self):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""

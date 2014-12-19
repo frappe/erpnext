@@ -26,10 +26,18 @@ frappe.ui.form.on("Time Log", "to_time", function(frm) {
 		"hours"));
 });
 
+cur_frm.set_query("production_order", function(doc) {
+	return {
+		"filters": {
+			"docstatus": 1
+		}
+	};
+});
+
 cur_frm.add_fetch('task','project','project');
 
 $.extend(cur_frm.cscript, {
-	production_order: function(doc) {	
+	production_order: function(doc) {
 		if (doc.production_order){
 			var operations = [];
 			frappe.model.with_doc("Production Order", doc.production_order, function(pro) {
@@ -44,13 +52,16 @@ $.extend(cur_frm.cscript, {
 	},
 
 	operation: function(doc) {
-		return cur_frm.call({
+		return frappe.call({
 			method: "erpnext.projects.doctype.time_log.time_log.get_workstation",
-			args: { 
+			args: {
 				"production_order": doc.production_order,
 				"operation": doc.operation
 			},
 			callback: function(r) {
+				if(!r.exc) {
+					cur_frm.set_value("workstation", r.message)
+				}
 				doc.workstation = r.workstation;
 			}
 		});

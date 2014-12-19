@@ -98,3 +98,4 @@ execute:frappe.reload_doc('stock', 'doctype', 'item')
 execute:frappe.db.sql("update `tabItem` i set apply_warehouse_wise_reorder_level=1, re_order_level=0, re_order_qty=0 where exists(select name from `tabItem Reorder` where parent=i.name)")
 execute:frappe.rename_doc("DocType", "Support Ticket", "Issue", force=True)
 erpnext.patches.v5_0.set_default_company_in_bom
+erpnext.patches.v5_0.capacity_planning

@@ -32,9 +32,12 @@ $.extend(cur_frm.cscript, {
 	},
 
 	production_item: function(doc) {
-		return this.frm.call({
-			method: "get_item_details",
-			args: { item: doc.production_item }
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.production_order.production_order.get_item_details",
+			args: { item: doc.production_item },
+			callback: function(r) {
+				cur_frm.set_value(r.message);
+			}
 		});
 	},
 
@@ -164,3 +167,8 @@ cur_frm.set_query("bom_no", function(doc) {
 cur_frm.add_fetch('bom_no', 'total_fixed_cost', 'total_fixed_cost');
 cur_frm.add_fetch('bom_no', 'total_variable_cost', 'planned_variable_cost');
 cur_frm.add_fetch('bom_no', 'total_operating_cost', 'total_operating_cost');
+
+frappe.ui.form.on("Production Order", "total_fixed_cost", function(frm) {
+	var variable_cost = frm.doc.actual_variable_cost ? flt(frm.doc.actual_variable_cost) : flt(frm.doc.planned_variable_cost)
+	frm.set_value("total_operating_cost", (flt(frm.doc.total_fixed_cost) + variable_cost))
+})

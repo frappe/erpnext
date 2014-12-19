@@ -52,6 +52,15 @@
    "reqd": 1
   }, 
   {
+   "default": "", 
+   "fieldname": "holiday_list", 
+   "fieldtype": "Link", 
+   "label": "Holiday List", 
+   "options": "Holiday List", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "fixed_costs", 
    "fieldtype": "Section Break", 
    "label": "Fixed Costs", 
@@ -59,9 +68,9 @@
    "precision": ""
   }, 
   {
-   "fieldname": "fixed_cycle_cost", 
+   "fieldname": "fixed_cost", 
    "fieldtype": "Float", 
-   "label": "Fixed Cycle Cost", 
+   "label": "Fixed Cost", 
    "permlevel": 0
   }, 
   {
@@ -106,9 +115,9 @@
   }, 
   {
    "description": "per hour", 
-   "fieldname": "overhead", 
+   "fieldname": "total_variable_cost", 
    "fieldtype": "Float", 
-   "label": "Total Operating Cost", 
+   "label": "Total Variable Cost", 
    "oldfieldname": "overhead", 
    "oldfieldtype": "Currency", 
    "permlevel": 0, 
@@ -148,20 +157,11 @@
    "options": "Workstation Operation Hours", 
    "permlevel": 0, 
    "precision": ""
-  }, 
-  {
-   "default": "", 
-   "fieldname": "holiday_list", 
-   "fieldtype": "Link", 
-   "label": "Holiday List", 
-   "options": "Holiday List", 
-   "permlevel": 0, 
-   "precision": ""
   }
  ], 
  "icon": "icon-wrench", 
  "idx": 1, 
- "modified": "2014-11-27 19:04:58.125107", 
+ "modified": "2014-12-18 13:01:47.143326", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Workstation", 
