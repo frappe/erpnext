@@ -11,7 +11,7 @@ frappe.pages['purchase-analytics'].onload = function(wrapper) {
 	new erpnext.PurchaseAnalytics(wrapper);
 
 
-	wrapper.appframe.add_module_icon("Buying")
+	frappe.add_breadcrumbs("Buying")
 
 }
 

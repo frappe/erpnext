@@ -20,6 +20,9 @@
 }
 
 /* pos */
+.pos {
+}
+
 .pos-item {
 	height: 200px;
 	overflow: hidden;
@@ -28,10 +31,62 @@
 	padding-right: 5px !important;
 }
 
+.pos-item-area {
+	border: 1px solid #d1d8dd;
+	border-top: none;
+}
+
+.pos-item-toolbar {
+	padding: 10px 0px;
+	border-bottom: 1px solid #d1d8dd;
+}
+
+.item-list-area {
+	padding: 15px;
+}
+
+.pos-toolbar, .pos-bill-toolbar {
+	padding: 10px 0px;
+	border-bottom: 1px solid #d1d8dd;
+	height: 55px;
+}
+
+.pos-item-toolbar .form-group {
+	margin-bottom: 0px;
+}
+
+.pos-bill-wrapper {
+	border: 1px solid #d1d8dd;
+	border-top: none;
+	border-right: none;
+}
+
 .pos-bill {
-	margin-left: -30px;
-	margin-top: -10px;
-	padding: 20px 10px;
-	border-right: 1px solid #c7c7c7;
-	border-bottom: 1px solid #c7c7c7;
+	margin-left: -15px;
+	margin-right: -15px;
+}
+
+.pos-bill-row {
+	margin: 0px;
+	padding: 7px 0px;
+	border-top: 1px solid #d1d8dd;
+}
+
+.pos-bill-header {
+	border: none !important;
+	background-color: #f5f7fa;
+}
+
+.pos-item-qty {
+	display: inline-block;
+}
+
+.pos-qty-row > div {
+	padding: 5px 0px;
+}
+
+.pos-qty-btn {
+	margin-top: 5px;
+	cursor: pointer;
+	font-size: 120%;
 }

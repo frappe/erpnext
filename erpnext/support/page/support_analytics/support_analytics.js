@@ -11,7 +11,7 @@ frappe.pages['support-analytics'].onload = function(wrapper) {
 	new erpnext.SupportAnalytics(wrapper);
 	
 
-	wrapper.appframe.add_module_icon("Support")
+	frappe.add_breadcrumbs("Support")
 	
 }
 

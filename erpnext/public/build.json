@@ -13,7 +13,10 @@
 		"public/js/queries.js",
 		"public/js/utils/party.js",
 		"public/js/templates/address_list.html",
-		"public/js/templates/contact_list.html"
+		"public/js/templates/contact_list.html",
+		"public/js/pos/pos.html",
+		"public/js/pos/pos_bill_item.html",
+		"public/js/pos/pos.js"
 	],
 	"css/shopping-cart-web.css":  [
 		"public/css/shopping_cart.css"

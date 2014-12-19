@@ -10,7 +10,7 @@ frappe.pages['sales-analytics'].onload = function(wrapper) {
 	new erpnext.SalesAnalytics(wrapper);
 
 
-	wrapper.appframe.add_module_icon("Selling")
+	frappe.add_breadcrumbs("Selling")
 
 }
 

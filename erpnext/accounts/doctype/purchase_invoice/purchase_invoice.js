@@ -8,7 +8,6 @@ cur_frm.cscript.other_fname = "other_charges";
 frappe.provide("erpnext.accounts");
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 {% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
-{% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	onload: function() {

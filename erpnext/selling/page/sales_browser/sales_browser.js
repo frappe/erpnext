@@ -6,7 +6,7 @@ pscript['onload_Sales Browser'] = function(wrapper){
 		parent: wrapper,
 	})
 
-	wrapper.appframe.add_module_icon("Selling")
+	frappe.add_breadcrumbs("Selling")
 
 	wrapper.appframe.set_title_right(__('Refresh'), function() {
 			wrapper.make_tree();

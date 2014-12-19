@@ -13,7 +13,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		single_column: true
 	})
 
-	wrapper.appframe.add_module_icon("Accounts");
+	frappe.add_breadcrumbs("Accounts");
 
 	var main = $(wrapper).find(".layout-main"),
 		chart_area = $("<div>")

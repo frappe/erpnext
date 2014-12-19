@@ -105,12 +105,12 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 		// make pos
 		if(!this.frm.pos) {
-			this.frm.layout.add_view("pos");
-			this.frm.pos = new erpnext.POS(this.frm.layout.views.pos, this.frm);
+			var wrapper = this.frm.appframe.add_view("pos", "<div>");
+			this.frm.pos = new erpnext.POS(wrapper, this.frm);
 		}
 
 		// toggle view
-		this.frm.layout.set_view(this.pos_active ? "" : "pos");
+		this.frm.appframe.set_view(this.pos_active ? "main" : "pos");
 		this.pos_active = !this.pos_active;
 
 		// refresh
@@ -224,9 +224,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 				me.frm.script_manager.trigger("currency");
 				me.apply_pricing_rule();
-			}	
+			}
 		}
-		
+
 		if (this.frm.doc.posting_date) var date = this.frm.doc.posting_date;
 		else var date = this.frm.doc.transaction_date;
 		erpnext.get_fiscal_year(this.frm.doc.company, date, fn);
