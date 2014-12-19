@@ -402,20 +402,26 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 
 	_set_values_for_item_list: function(children) {
+		var me = this;
 		$.each(children, function(i, d) {
+			var existing_pricing_rule = frappe.model.get_value(d.doctype, d.name, "pricing_rule");
 			$.each(d, function(k, v) {
 				if (["doctype", "name"].indexOf(k)===-1) {
 					frappe.model.set_value(d.doctype, d.name, k, v);
 				}
 			});
+			// if pricing rule set as blank from an existing value, apply price_list
+			if(existing_pricing_rule && !d.pricing_rule) {
+				me.apply_price_list(frappe.get_doc(d.doctype, d.name));
+			}
 		});
 	},
 
-	apply_price_list: function() {
+	apply_price_list: function(item) {
 		var me = this;
 		return this.frm.call({
 			method: "erpnext.stock.get_item_details.apply_price_list",
-			args: {	args: this._get_args() },
+			args: {	args: this._get_args(item) },
 			callback: function(r) {
 				if (!r.exc) {
 					me.in_apply_price_list = true;
