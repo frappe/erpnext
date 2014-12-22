@@ -154,14 +154,14 @@
    "fieldname": "workstation_operation_hours", 
    "fieldtype": "Table", 
    "label": "Workstation Operation Hours", 
-   "options": "Workstation Operation Hours", 
+   "options": "Workstation Operation Hour", 
    "permlevel": 0, 
    "precision": ""
   }
  ], 
  "icon": "icon-wrench", 
  "idx": 1, 
- "modified": "2014-12-18 13:01:47.143326", 
+ "modified": "2014-12-22 14:18:40.253034", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Workstation", 

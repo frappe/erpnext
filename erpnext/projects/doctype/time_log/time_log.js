@@ -5,6 +5,16 @@ frappe.provide("erpnext.projects");
 
 frappe.ui.form.on("Time Log", "onload", function(frm) {
 	frm.set_query("task", erpnext.queries.task);
+	if (frm.doc.time_log_for == "Manufacturing") {
+		frappe.ui.form.trigger("Time Log", "production_order");
+	}
+});
+
+frappe.ui.form.on("Time Log", "refresh", function(frm) {
+	var is_manufacturing = frm.doc.time_log_for=="Manufacturing" ? true : false;
+	frm.toggle_reqd("production_order", is_manufacturing);
+	frm.toggle_reqd("operation", is_manufacturing);
+	frm.toggle_reqd("operation_status", is_manufacturing);
 });
 
 // set to time if hours is updated
@@ -45,7 +55,7 @@ $.extend(cur_frm.cscript, {
 				$.each(doc.production_order_operations , function(i, row){
 					operations[i] = (i+1) +". "+ row.operation;
 				});
-			frappe.meta.get_docfield("Time Log", "operation", me.frm.doc.name).options = operations.join("\n");
+			frappe.meta.get_docfield("Time Log", "operation", me.frm.doc.name).options = "\n" + operations.join("\n");
 			refresh_field("operation");
 			})
 		}
@@ -60,14 +70,10 @@ $.extend(cur_frm.cscript, {
 			},
 			callback: function(r) {
 				if(!r.exc) {
+					console.log(r.message)
 					cur_frm.set_value("workstation", r.message)
 				}
-				doc.workstation = r.workstation;
 			}
 		});
 	}
 });
-
-if (cur_frm.doc.time_log_for == "Manufacturing") {
-	cur_frm.cscript.onload = cur_frm.cscript.production_order;
-}

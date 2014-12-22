@@ -152,7 +152,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.time_log_for == 'Project'", 
+   "depends_on": "eval:doc.time_log_for", 
    "fieldname": "project", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
@@ -200,7 +200,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-12-18 17:21:01.520646", 
+ "modified": "2014-12-19 14:20:41.381152", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 

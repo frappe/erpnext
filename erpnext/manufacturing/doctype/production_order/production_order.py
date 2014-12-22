@@ -64,8 +64,8 @@ class ProductionOrder(Document):
 
 		self.planned_variable_cost, self.actual_variable_cost = 0.0, 0.0
 		for d in self.get("production_order_operations"):
-			d.actual_variable_cost = flt(d.hour_rate) * flt(d.actual_operation_time) / 60 \
-				if d.actual_operation_time else d.time_in_mins
+
+			d.actual_variable_cost = flt(d.hour_rate) * flt(d.actual_operation_time) / 60
 
 			self.planned_variable_cost += flt(d.variable_cost)
 			self.actual_variable_cost += flt(d.actual_variable_cost)
@@ -254,14 +254,16 @@ def get_events(start, end, filters=None):
 			if filters[key]:
 				conditions += " and " + key + ' = "' + filters[key].replace('"', '\"') + '"'
 
-	data = frappe.db.sql("""select name,production_item, production_start_date, production_end_date from `tabProduction Order`
+	data = frappe.db.sql("""select name,production_item, production_start_date, production_end_date
+		from `tabProduction Order`
 		where ((ifnull(production_start_date, '0000-00-00')!= '0000-00-00') \
 				and (production_start_date between %(start)s and %(end)s) \
 			or ((ifnull(production_start_date, '0000-00-00')!= '0000-00-00') \
-				and production_end_date between %(start)s and %(end)s)){conditions}""".format(conditions=conditions), {
+				and production_end_date between %(start)s and %(end)s)) {conditions}
+		""".format(conditions=conditions), {
 			"start": start,
 			"end": end
-			}, as_dict=True, update={"allDay": 0})
+		}, as_dict=True, update={"allDay": 0})
 	return data
 
 @frappe.whitelist()

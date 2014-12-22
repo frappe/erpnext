@@ -277,7 +277,7 @@
   }, 
   {
    "allow_on_submit": 1, 
-   "depends_on": "eval:doc.docstatus==1", 
+   "depends_on": "eval:(doc.docstatus==1 && doc.status!=\"Completed\")", 
    "fieldname": "make_time_log", 
    "fieldtype": "Button", 
    "label": "Make Time Log", 
@@ -292,7 +292,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2014-12-18 12:18:51.655535", 
+ "modified": "2014-12-19 12:49:49.918120", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order Operation", 

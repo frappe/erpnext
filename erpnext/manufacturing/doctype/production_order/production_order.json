@@ -123,24 +123,40 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "planned_start_date", 
+   "fieldtype": "Datetime", 
+   "label": "Planned Start Date", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "planned_end_date", 
+   "fieldtype": "Datetime", 
+   "label": "Planned End Date", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "column_break_13", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
    "precision": ""
   }, 
   {
-   "fieldname": "production_start_date", 
+   "fieldname": "actual_start_date", 
    "fieldtype": "Datetime", 
-   "label": "Production Start Date", 
+   "label": "Actual Start Date", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "read_only": 1
   }, 
   {
-   "fieldname": "production_end_date", 
+   "fieldname": "actual_end_date", 
    "fieldtype": "Datetime", 
-   "label": "Production End Date", 
+   "label": "Actual End Date", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "read_only": 1
   }, 
   {
    "fieldname": "warehouses", 
@@ -331,7 +347,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2014-12-18 15:06:41.802390", 
+ "modified": "2014-12-19 14:23:50.701164", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 
