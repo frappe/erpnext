@@ -322,7 +322,7 @@ class JournalVoucher(AccountsController):
 
 	def set_total_amount(self, amt):
 		company_currency = get_company_currency(self.company)
-		self.total_amount = fmt_money(amt, currency=company_currency)
+		self.total_amount = amt
 		from frappe.utils import money_in_words
 		self.total_amount_in_words = money_in_words(amt, company_currency)
 
