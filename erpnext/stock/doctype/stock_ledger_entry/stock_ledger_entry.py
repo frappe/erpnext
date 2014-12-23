@@ -39,8 +39,8 @@ class StockLedgerEntry(Document):
 				(self.warehouse, self.item_code, self.batch_no))[0][0])
 
 			if batch_bal_after_transaction < 0:
-				frappe.throw(_("Negative balance in Batch {0} for Item {1} at Warehouse {2} on {3} {4}").format(\
-					batch_bal_after_transaction - self.actual_qty, self.item_code, self.warehouse,
+				frappe.throw(_("Negative balance {0} in Batch {1} for Item {2} at Warehouse {3} on {4} {5}")
+					.format(batch_bal_after_transaction - self.actual_qty, self.batch_no, self.item_code, self.warehouse,
 						formatdate(self.posting_date), self.posting_time))
 
 	def validate_mandatory(self):
