@@ -82,10 +82,10 @@ class Company(Document):
 
 	def create_default_accounts(self):
 		if not self.chart_of_accounts:
-			frappe.throw(_("Please select Chart of Accounts"))
-		else:
-			from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
-			create_charts(self.chart_of_accounts, self.name)
+			self.chart_of_accounts = "Standard"
+
+		from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
+		create_charts(self.chart_of_accounts, self.name)
 
 		frappe.db.set(self, "default_receivable_account", frappe.db.get_value("Account",
 			{"company": self.name, "account_type": "Receivable"}))

@@ -1,5 +1,6 @@
 {
  "allow_import": 1, 
+ "autoname": "field:holiday_list_name", 
  "creation": "2013-01-10 16:34:14", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -13,7 +14,8 @@
    "oldfieldname": "holiday_list_name", 
    "oldfieldtype": "Data", 
    "permlevel": 0, 
-   "reqd": 1
+   "reqd": 1, 
+   "unique": 1
   }, 
   {
    "fieldname": "is_default", 
@@ -72,7 +74,7 @@
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
- "modified": "2014-05-09 02:16:38.887266", 
+ "modified": "2014-11-25 15:42:22.419054", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Holiday List", 

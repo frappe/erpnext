@@ -115,7 +115,7 @@ def get_item_bom_rate():
 
 	item_bom_map = {}
 
-	for b in frappe.db.sql("""select item, (total_variable_cost/quantity) as bom_rate
+	for b in frappe.db.sql("""select item, (total_cost/quantity) as bom_rate
 		from `tabBOM` where is_active=1 and is_default=1""", as_dict=1):
 			item_bom_map.setdefault(b.item, flt(b.bom_rate))
 

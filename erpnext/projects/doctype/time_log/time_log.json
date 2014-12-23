@@ -17,6 +17,15 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "time_log_for", 
+   "fieldtype": "Select", 
+   "label": "Time Log For", 
+   "options": "\nProject\nManufacturing", 
+   "permlevel": 0, 
+   "precision": "", 
+   "reqd": 0
+  }, 
+  {
    "fieldname": "from_time", 
    "fieldtype": "Datetime", 
    "in_list_view": 1, 
@@ -59,6 +68,7 @@
    "reqd": 0
   }, 
   {
+   "depends_on": "eval:doc.time_log_for != 'Manufacturing'", 
    "fieldname": "activity_type", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
@@ -66,15 +76,52 @@
    "options": "Activity Type", 
    "permlevel": 0, 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
+   "depends_on": "eval:doc.time_log_for != 'Manufacturing'", 
    "fieldname": "task", 
    "fieldtype": "Link", 
    "label": "Task", 
    "options": "Task", 
    "permlevel": 0, 
    "read_only": 0
+  }, 
+  {
+   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
+   "fieldname": "production_order", 
+   "fieldtype": "Link", 
+   "label": "Production Order", 
+   "options": "Production Order", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
+   "fieldname": "operation", 
+   "fieldtype": "Select", 
+   "label": "Operation", 
+   "options": "", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
+   "fieldname": "workstation", 
+   "fieldtype": "Link", 
+   "label": "Workstation", 
+   "options": "Workstation", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "description": "Operation completed for how many finished goods?", 
+   "fieldname": "completed_qty", 
+   "fieldtype": "Float", 
+   "label": "Completed Qty", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "billable", 
@@ -104,6 +151,7 @@
    "read_only": 0
   }, 
   {
+   "depends_on": "eval:doc.time_log_for", 
    "fieldname": "project", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
@@ -151,7 +199,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-10-22 16:53:26.993828", 
+ "modified": "2014-12-22 15:22:00.664972", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 

@@ -11,9 +11,6 @@ from frappe import throw, _
 from frappe.model.document import Document
 
 class HolidayList(Document):
-	def autoname(self):
-		self.name = make_autoname(self.fiscal_year + "/" + self.holiday_list_name + "/.###")
-
 	def validate(self):
 		self.update_default_holiday_list()
 

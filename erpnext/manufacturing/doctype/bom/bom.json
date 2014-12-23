@@ -128,17 +128,18 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "raw_material_cost", 
+   "fieldname": "operating_cost", 
    "fieldtype": "Currency", 
-   "label": "Total Raw Material Cost", 
+   "in_list_view": 1, 
+   "label": "Operating Cost", 
    "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "read_only": 1
   }, 
   {
-   "fieldname": "operating_cost", 
+   "fieldname": "raw_material_cost", 
    "fieldtype": "Currency", 
-   "label": "Total Operating Cost", 
+   "label": "Raw Material Cost", 
    "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "read_only": 1
@@ -147,23 +148,6 @@
    "fieldname": "cb1", 
    "fieldtype": "Column Break", 
    "permlevel": 0
-  }, 
-  {
-   "fieldname": "total_variable_cost", 
-   "fieldtype": "Currency", 
-   "in_list_view": 1, 
-   "label": "Total Variable Cost", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "total_fixed_cost", 
-   "fieldtype": "Currency", 
-   "label": "Total Fixed Cost", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "read_only": 1
   }, 
   {
    "fieldname": "total_cost", 
@@ -260,7 +244,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2014-12-12 11:13:12.146205", 
+ "modified": "2014-12-23 16:39:14.197038", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM", 

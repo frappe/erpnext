@@ -3,7 +3,6 @@
 
 $.extend(cur_frm.cscript, {
 	onload: function (doc, dt, dn) {
-
 		if (!doc.status) doc.status = 'Draft';
 		cfn_set_fields(doc, dt, dn);
 
@@ -33,9 +32,12 @@ $.extend(cur_frm.cscript, {
 	},
 
 	production_item: function(doc) {
-		return this.frm.call({
-			method: "get_item_details",
-			args: { item: doc.production_item }
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.production_order.production_order.get_item_details",
+			args: { item: doc.production_item },
+			callback: function(r) {
+				cur_frm.set_value(r.message);
+			}
 		});
 	},
 
@@ -51,6 +53,45 @@ $.extend(cur_frm.cscript, {
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
+	},
+
+	bom_no: function() {
+		return this.frm.call({
+			doc: this.frm.doc,
+			method: "set_production_order_operations",
+			callback: function(r) {
+				if(!r.exc) refresh_field("production_order_operations");
+			}
+		});
+	},
+
+	make_time_log: function(doc, cdt, cdn){
+		var child = locals[cdt][cdn]
+		frappe.call({
+			method:"erpnext.manufacturing.doctype.production_order.production_order.make_time_log",
+			args: {
+				"name": doc.name,
+				"operation": child.idx + ". " + child.operation,
+				"from_time": child.planned_start_time,
+				"to_time": child.planned_end_time,
+				"project": doc.project,
+				"workstation": child.workstation,
+				"qty": flt(doc.qty) - flt(child.completed_qty)
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
+	},
+
+	auto_time_log: function(doc){
+		frappe.call({
+			method:"erpnext.manufacturing.doctype.production_order.production_order.auto_make_time_log",
+			args: {
+				"production_order_id": doc.name
 			}
 		});
 	}
@@ -124,4 +165,7 @@ cur_frm.set_query("bom_no", function(doc) {
 	} else msgprint(__("Please enter Production Item first"));
 });
 
-cur_frm.add_fetch('bom_no', 'total_fixed_cost', 'total_fixed_cost');
+frappe.ui.form.on("Production Order", "additional_operating_cost", function(frm) {
+	var variable_cost = frm.doc.actual_operating_cost ? flt(frm.doc.actual_operating_cost) : flt(frm.doc.planned_operating_cost)
+	frm.set_value("total_operating_cost", (flt(frm.doc.additional_operating_cost) + variable_cost))
+})

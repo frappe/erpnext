@@ -299,9 +299,11 @@
   }, 
   {
    "depends_on": "eval:inList([\"Manufacture\", \"Repack\"], doc.purpose)", 
-   "fieldname": "total_fixed_cost", 
-   "fieldtype": "Float", 
-   "label": "Total Fixed Cost", 
+   "fieldname": "additional_operating_cost", 
+   "fieldtype": "Currency", 
+   "label": "Additional Operating Cost", 
+   "no_copy": 1, 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "read_only": 0
   }, 
@@ -585,7 +587,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2014-10-03 14:55:44.916658", 
+ "modified": "2014-12-23 15:03:42.963697", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 

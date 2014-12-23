@@ -4,14 +4,26 @@
  "doctype": "DocType", 
  "fields": [
   {
-   "fieldname": "operation_no", 
-   "fieldtype": "Data", 
+   "fieldname": "operation", 
+   "fieldtype": "Link", 
    "in_list_view": 1, 
-   "label": "Operation No", 
+   "label": "Operation", 
    "oldfieldname": "operation_no", 
    "oldfieldtype": "Data", 
+   "options": "Operation", 
    "permlevel": 0, 
    "reqd": 1
+  }, 
+  {
+   "fieldname": "workstation", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Workstation", 
+   "oldfieldname": "workstation", 
+   "oldfieldtype": "Link", 
+   "options": "Workstation", 
+   "permlevel": 0, 
+   "reqd": 0
   }, 
   {
    "fieldname": "opn_description", 
@@ -29,34 +41,24 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "workstation", 
-   "fieldtype": "Link", 
-   "in_list_view": 1, 
-   "label": "Workstation", 
-   "oldfieldname": "workstation", 
-   "oldfieldtype": "Link", 
-   "options": "Workstation", 
-   "permlevel": 0, 
-   "reqd": 0
-  }, 
-  {
    "fieldname": "hour_rate", 
-   "fieldtype": "Currency", 
+   "fieldtype": "Float", 
    "in_list_view": 0, 
    "label": "Hour Rate", 
    "oldfieldname": "hour_rate", 
    "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "reqd": 0
   }, 
   {
+   "description": "In minutes", 
    "fieldname": "time_in_mins", 
    "fieldtype": "Float", 
    "in_list_view": 0, 
-   "label": "Operation Time (mins)", 
+   "label": "Operation Time ", 
    "oldfieldname": "time_in_mins", 
    "oldfieldtype": "Currency", 
+   "options": "", 
    "permlevel": 0, 
    "reqd": 0
   }, 
@@ -68,22 +70,14 @@
    "label": "Operating Cost", 
    "oldfieldname": "operating_cost", 
    "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
    "permlevel": 0, 
+   "read_only": 1, 
    "reqd": 0
-  }, 
-  {
-   "fieldname": "fixed_cycle_cost", 
-   "fieldtype": "Currency", 
-   "in_list_view": 0, 
-   "label": "Fixed Cycle Cost", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0
   }
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-12-12 11:16:49.031521", 
+ "modified": "2014-12-23 15:01:54.340605", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Operation", 

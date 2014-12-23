@@ -3,8 +3,8 @@
 
 frappe.views.calendar["Production Order"] = {
 	field_map: {
-		"start": "start_date",
-		"end": "end_date",
+		"start": "production_start_date",
+		"end": "production_end_date",
 		"id": "name",
 		"title": "production_item",
 		"allDay": "allDay"
@@ -21,7 +21,7 @@ frappe.views.calendar["Production Order"] = {
 			"fieldtype": "Link",
 			"fieldname": "production_item",
 			"options": "Item",
-			"label": __("Production Item")	
+			"label": __("Production Item")
 		},
 		{
 			"fieldtype": "Link",
