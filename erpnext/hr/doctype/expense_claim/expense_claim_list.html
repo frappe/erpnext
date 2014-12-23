@@ -13,7 +13,12 @@
 				data-filter="status,=,{%= doc.approval_status %}">
 				{%= doc.approval_status %}
 			</span>
-
+			
+			{% if(doc.total_amount_reimbursed== doc.total_sanctioned_amount && doc.docstatus== 1) { %}
+			<span class="label label-success">
+				"Reimbursed"
+			</span>
+			{% } %}
 		</div>
 	</div>
 	<!-- sample graph -->

@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, flt, fmt_money, formatdate, getdate
+from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, cint
 from frappe import msgprint, _, scrub
 from erpnext.setup.utils import get_company_currency
 from erpnext.controllers.accounts_controller import AccountsController
@@ -37,11 +37,13 @@ class JournalVoucher(AccountsController):
 		self.validate_against_sales_order()
 		self.validate_against_purchase_order()
 		self.check_credit_days()
+		self.validate_expense_claim()
 
 	def on_submit(self):
 		self.check_credit_limit()
 		self.make_gl_entries()
 		self.update_advance_paid()
+		self.update_expense_claim()
 
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
@@ -62,6 +64,7 @@ class JournalVoucher(AccountsController):
 
 		self.make_gl_entries(1)
 		self.update_advance_paid()
+		self.update_expense_claim()
 
 	def validate_party(self):
 		for d in self.get("entries"):
@@ -420,6 +423,23 @@ class JournalVoucher(AccountsController):
 			return frappe.db.sql("""select name, credit_to as account, supplier as party, outstanding_amount
 				from `tabPurchase Invoice` where docstatus = 1 and company = %s
 				and outstanding_amount > 0 %s""" % ('%s', cond), self.company, as_dict=True)
+				
+	def update_expense_claim(self):
+		for d in self.entries:
+			if d.against_expense_claim:
+				amt = frappe.db.sql("""select sum(debit) as amt from `tabJournal Voucher Detail` 
+					where against_expense_claim = %s and docstatus = 1""", d.against_expense_claim ,as_dict=1)[0].amt
+				frappe.db.set_value("Expense Claim", d.against_expense_claim , "total_amount_reimbursed", amt)
+				
+	def validate_expense_claim(self):
+		for d in self.entries:
+			if d.against_expense_claim:
+				sanctioned_amount, reimbursed_amount = frappe.db.get_value("Expense Claim", d.against_expense_claim, 
+					("total_sanctioned_amount", "total_amount_reimbursed"))
+				pending_amount = cint(sanctioned_amount) - cint(reimbursed_amount)
+				if d.debit > pending_amount:
+					frappe.throw(_("Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. \
+						Pending Amount is {2}".format(d.idx, d.against_expense_claim, pending_amount)))
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, voucher_type):
