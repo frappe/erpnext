@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	frappe.reload_doc('manufacturing', 'doctype', 'bom_operation')
 	for d in frappe.db.sql("""select bom.name from `tabBOM` bom where bom.docstatus < 2 and
 		exists(select bom_op.name from `tabBOM Operation` bom_op where
 		bom.name = bom_op.parent and bom_op.fixed_cycle_cost IS NOT NULL)""", as_dict=1):
