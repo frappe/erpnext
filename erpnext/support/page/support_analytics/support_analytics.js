@@ -21,7 +21,7 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 			title: __("Support Analtyics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
-			appframe: wrapper.appframe,
+			page: wrapper.page,
 			doctypes: ["Issue", "Fiscal Year"],
 		});
 	},

@@ -20,7 +20,7 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 			title: __("Stock Ledger"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
-			appframe: wrapper.appframe,
+			page: wrapper.page,
 			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand", "Serial No"],
 		})
 	},

@@ -8,7 +8,7 @@ pscript['onload_Sales Browser'] = function(wrapper){
 
 	frappe.add_breadcrumbs("Selling")
 
-	wrapper.appframe.set_title_right(__('Refresh'), function() {
+	wrapper.page.set_primary_action(__('Refresh'), function() {
 			wrapper.make_tree();
 		});
 
@@ -44,7 +44,7 @@ pscript['onshow_Sales Browser'] = function(wrapper){
 	// set route
 	var ctype = frappe.get_route()[1] || 'Territory';
 
-	wrapper.appframe.set_title(__('{0} Tree',[__(ctype)]));
+	wrapper.page.set_title(__('{0} Tree',[__(ctype)]));
 
 	if(erpnext.sales_chart && erpnext.sales_chart.ctype != ctype) {
 		wrapper.make_tree();

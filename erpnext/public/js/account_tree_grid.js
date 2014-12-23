@@ -20,7 +20,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 			title: title,
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
-			appframe: wrapper.appframe,
+			page: wrapper.page,
 			doctypes: ["Company", "Fiscal Year", "Account", "GL Entry", "Cost Center"],
 			tree_grid: {
 				show: true,
