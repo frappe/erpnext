@@ -116,11 +116,10 @@
    "read_only": 1
   }, 
   {
-   "default": "Work in Progress", 
-   "fieldname": "operation_status", 
-   "fieldtype": "Select", 
-   "label": "Operation Status", 
-   "options": "\nWork in Progress\nCompleted", 
+   "description": "Operation completed for how many finished goods?", 
+   "fieldname": "completed_qty", 
+   "fieldtype": "Float", 
+   "label": "Completed Qty", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -200,7 +199,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-12-19 14:20:41.381152", 
+ "modified": "2014-12-22 15:22:00.664972", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 

@@ -41,13 +41,6 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "fixed_cost", 
-   "fieldtype": "Currency", 
-   "in_list_view": 0, 
-   "label": "Fixed Cost", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "hour_rate", 
    "fieldtype": "Float", 
    "in_list_view": 0, 
@@ -70,14 +63,6 @@
    "reqd": 0
   }, 
   {
-   "fieldname": "variable_cost", 
-   "fieldtype": "Currency", 
-   "label": "Variable Cost", 
-   "permlevel": 0, 
-   "precision": "", 
-   "read_only": 1
-  }, 
-  {
    "allow_on_submit": 0, 
    "fieldname": "operating_cost", 
    "fieldtype": "Currency", 
@@ -92,7 +77,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-12-17 17:54:34.313130", 
+ "modified": "2014-12-23 15:01:54.340605", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Operation", 

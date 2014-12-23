@@ -25,7 +25,7 @@ class BOMReplaceTool(Document):
 			frappe.throw(_("Current BOM and New BOM can not be same"))
 
 	def update_new_bom(self):
-		current_bom_unitcost = frappe.db.sql("""select total_variable_cost/quantity
+		current_bom_unitcost = frappe.db.sql("""select total_cost/quantity
 			from `tabBOM` where name = %s""", self.current_bom)
 		current_bom_unitcost = current_bom_unitcost and flt(current_bom_unitcost[0][0]) or 0
 		frappe.db.sql("""update `tabBOM Item` set bom_no=%s,

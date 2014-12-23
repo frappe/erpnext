@@ -38,8 +38,7 @@ erpnext.bom.set_operation = function(doc) {
 		operations[i] = (i+1);
 	}
 
-	frappe.meta.get_docfield("BOM Item", "operation",
-		cur_frm.docname).options = operations.join("\n");
+	frappe.meta.get_docfield("BOM Item", "operation", cur_frm.docname).options = operations.join("\n");
 
 	refresh_field("bom_materials");
 }
@@ -54,7 +53,6 @@ cur_frm.add_fetch("item", "stock_uom", "uom");
 
 cur_frm.cscript.hour_rate = function(doc, dt, dn) {
 	erpnext.bom.calculate_op_cost(doc);
-	erpnext.bom.calculate_fixed_cost(doc);
 	erpnext.bom.calculate_total(doc);
 }
 
@@ -114,16 +112,14 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 
 erpnext.bom.calculate_op_cost = function(doc) {
 	var op = doc.bom_operations || [];
-	doc.total_variable_cost, doc.total_fixed_cost = 0.0, 0.0;
+	doc.operating_cost = 0.0;
 	for(var i=0;i<op.length;i++) {
-		variable_cost =	flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
-		frappe.model.set_value('BOM Operation',op[i].name, "variable_cost", variable_cost);
+		operating_cost = flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
+		frappe.model.set_value('BOM Operation',op[i].name, "operating_cost", operating_cost);
 
-		doc.total_variable_cost += variable_cost;
-		doc.total_fixed_cost += flt(op[i].fixed_cost);
+		doc.operating_cost += operating_cost;
 	}
-	refresh_field(['total_fixed_cost', 'total_variable_cost']);
-	frappe.model.set_value("total_operating_cost", (doc.total_variable_cost + doc.total_fixed_cost))
+	refresh_field('operating_cost');
 }
 
 erpnext.bom.calculate_rm_cost = function(doc) {
@@ -142,8 +138,8 @@ erpnext.bom.calculate_rm_cost = function(doc) {
 
 // Calculate Total Cost
 erpnext.bom.calculate_total = function(doc) {
-	total_cost = flt(doc.total_operating_cost) + flt(doc.raw_material_cost);
-	frappe.model.set_value("total_cost", total_cost);
+	total_cost = flt(doc.operating_cost) + flt(doc.raw_material_cost);
+	frappe.model.set_value(doc.doctype, doc.name, "total_cost", total_cost);
 }
 
 
@@ -184,7 +180,6 @@ cur_frm.fields_dict['bom_materials'].grid.get_field('bom_no').get_query = functi
 cur_frm.cscript.validate = function(doc, dt, dn) {
 	erpnext.bom.calculate_op_cost(doc);
 	erpnext.bom.calculate_rm_cost(doc);
-	erpnext.bom.calculate_fixed_cost(doc);
 	erpnext.bom.calculate_total(doc);
 }
 
@@ -216,9 +211,7 @@ frappe.ui.form.on("BOM Operation", "workstation", function(frm, cdt, cdn) {
         },
         callback: function (data) {
 			frappe.model.set_value(d.doctype, d.name, "hour_rate", data.message.hour_rate);
-			frappe.model.set_value(d.doctype, d.name, "fixed_cost", data.message.fixed_cost);
 			erpnext.bom.calculate_op_cost(frm.doc);
-			erpnext.bom.calculate_fixed_cost(frm.doc);
 			erpnext.bom.calculate_total(frm.doc);
         }
     })

@@ -171,9 +171,19 @@ class StockEntry(StockController):
 			if not self.production_order:
 				frappe.throw(_("Production order number is mandatory for stock entry purpose manufacture"))
 			# check for double entry
+			self.check_if_operations_completed()
 			self.check_duplicate_entry_for_production_order()
 		elif self.purpose != "Material Transfer":
 			self.production_order = None
+
+	def check_if_operations_completed(self):
+		prod_order = frappe.get_doc("Production Order", self.production_order)
+		if prod_order.actual_operating_cost:
+			for d in prod_order.get("production_order_operations"):
+				total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
+				if total_completed_qty > flt(d.completed_qty):
+					frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Production Order # {3}. Please update operation status via Time Logs")
+						.format(d.idx, d.operation, total_completed_qty, self.production_order))
 
 	def check_duplicate_entry_for_production_order(self):
 		other_ste = [t[0] for t in frappe.db.get_values("Stock Entry",  {
@@ -258,13 +268,27 @@ class StockEntry(StockController):
 			for d in self.get("mtn_details"):
 				if d.bom_no or (d.t_warehouse and number_of_fg_items == 1):
 					if not flt(d.incoming_rate) or force:
-						operation_cost_per_unit = 0
-						if d.bom_no:
-							bom = frappe.db.get_value("BOM", d.bom_no, ["operating_cost", "quantity"], as_dict=1)
-							operation_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
-						d.incoming_rate = operation_cost_per_unit + (raw_material_cost + flt(self.total_fixed_cost)) / flt(d.transfer_qty)
+						operation_cost_per_unit = self.get_operation_cost_per_unit(d.bom_no, d.qty)
+						d.incoming_rate = operation_cost_per_unit + (raw_material_cost / flt(d.transfer_qty))
 					d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 					break
+
+	def get_operation_cost_per_unit(self, bom_no, qty):
+		operation_cost_per_unit = 0
+
+		if self.production_order:
+			pro_order = frappe.get_doc("Production Order", self.production_order)
+			for d in pro_order.get("production_order_operations"):
+				if flt(d.completed_qty):
+					operation_cost_per_unit += flt(d.actual_operating_cost) / flt(d.completed_qty)
+				else:
+					operation_cost_per_unit += flt(d.planned_operating_cost) / flt(self.qty)
+
+		if not operation_cost_per_unit and bom_no:
+			bom = frappe.db.get_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=1)
+			operation_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
+
+		return operation_cost_per_unit + flt(self.additional_operating_cost) / flt(qty)
 
 	def get_incoming_rate(self, args):
 		incoming_rate = 0
@@ -643,10 +667,12 @@ def get_party_details(ref_dt, ref_dn):
 
 @frappe.whitelist()
 def get_production_order_details(production_order):
-	result = frappe.db.sql("""select bom_no,
-		ifnull(qty, 0) - ifnull(produced_qty, 0) as fg_completed_qty, use_multi_level_bom,
-		wip_warehouse from `tabProduction Order` where name = %s""", production_order, as_dict=1)
-	return result and result[0] or {}
+	res = frappe.db.sql("""select bom_no, use_multi_level_bom, wip_warehouse,
+		ifnull(qty, 0) - ifnull(produced_qty, 0) as fg_completed_qty,
+		(infull(additional_operating_cost, 0) / qty)*(ifnull(qty, 0) - ifnull(produced_qty, 0)) as additional_operating_cost
+		from `tabProduction Order` where name = %s""", production_order, as_dict=1)
+
+	return res and res[0] or {}
 
 def query_sales_return_doc(doctype, txt, searchfield, start, page_len, filters):
 	conditions = ""

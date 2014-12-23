@@ -77,7 +77,8 @@ $.extend(cur_frm.cscript, {
 				"from_time": child.planned_start_time,
 				"to_time": child.planned_end_time,
 				"project": doc.project,
-				"workstation": child.workstation
+				"workstation": child.workstation,
+				"qty": flt(doc.qty) - flt(child.completed_qty)
 			},
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);
@@ -164,11 +165,7 @@ cur_frm.set_query("bom_no", function(doc) {
 	} else msgprint(__("Please enter Production Item first"));
 });
 
-cur_frm.add_fetch('bom_no', 'total_fixed_cost', 'total_fixed_cost');
-cur_frm.add_fetch('bom_no', 'total_variable_cost', 'planned_variable_cost');
-cur_frm.add_fetch('bom_no', 'total_operating_cost', 'total_operating_cost');
-
-frappe.ui.form.on("Production Order", "total_fixed_cost", function(frm) {
-	var variable_cost = frm.doc.actual_variable_cost ? flt(frm.doc.actual_variable_cost) : flt(frm.doc.planned_variable_cost)
-	frm.set_value("total_operating_cost", (flt(frm.doc.total_fixed_cost) + variable_cost))
+frappe.ui.form.on("Production Order", "additional_operating_cost", function(frm) {
+	var variable_cost = frm.doc.actual_operating_cost ? flt(frm.doc.actual_operating_cost) : flt(frm.doc.planned_operating_cost)
+	frm.set_value("total_operating_cost", (flt(frm.doc.additional_operating_cost) + variable_cost))
 })

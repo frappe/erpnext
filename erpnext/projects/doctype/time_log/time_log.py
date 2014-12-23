@@ -23,7 +23,6 @@ class TimeLog(Document):
 		self.validate_time_log_for()
 		self.check_workstation_timings()
 		self.validate_production_order()
-		self.validate_operation_status()
 
 	def on_submit(self):
 		self.update_production_order()
@@ -77,7 +76,7 @@ class TimeLog(Document):
 
 	def validate_time_log_for(self):
 		if self.time_log_for == "Project":
-			for fld in ["production_order", "operation", "workstation", "operation_status"]:
+			for fld in ["production_order", "operation", "workstation", "completed_qty"]:
 				self.set(fld, None)
 
 	def check_workstation_timings(self):
@@ -92,33 +91,25 @@ class TimeLog(Document):
 			if frappe.db.get_value("Production Order", self.production_order, "docstatus") != 1 :
 				frappe.throw(_("You can make a time log only against a submitted production order"), NotSubmittedError)
 
-	def validate_operation_status(self):
-		if self.time_log_for=="Manufacturing" and self.production_order and self.operation:
-			if self.operation_status == "Work in Progress":
-				latest_time_log = self.get_latest_time_log()
-				if latest_time_log and latest_time_log[0].operation_status == "Completed":
-					frappe.throw("Operation is already completed via Time Log {}".format(latest_time_log[0].name))
-
 	def update_production_order(self):
 		"""Updates `start_date`, `end_date`, `status` for operation in Production Order."""
 
 		if self.time_log_for=="Manufacturing" and self.operation:
+			operation = self.operation.split('. ',1)
+
 			dates = self.get_operation_start_end_time()
+			tl = self.get_all_time_logs()
 
-			latest_time_log = self.get_latest_time_log()
-			op_status = latest_time_log[0].operation_status if latest_time_log else "Pending"
-
-			actual_op_time = self.get_actual_op_time()
-			d = self.operation.split('. ',1)
 
 			frappe.db.sql("""update `tabProduction Order Operation`
-				set actual_start_time = %s, actual_end_time = %s, status = %s, actual_operation_time = %s
+				set actual_start_time = %s, actual_end_time = %s, completed_qty = %s, actual_operation_time = %s
 				where parent=%s and idx=%s and operation = %s""",
-				(dates.start_date, dates.end_date, op_status,
-					actual_op_time, self.production_order, d[0], d[1]))
+				(dates.start_date, dates.end_date, tl.completed_qty,
+					tl.hours, self.production_order, operation[0], operation[1]))
 
 			pro_order = frappe.get_doc("Production Order", self.production_order)
 			pro_order.ignore_validate_update_after_submit = True
+			pro_order.update_operation_status()
 			pro_order.calculate_operating_cost()
 			pro_order.save()
 
@@ -128,17 +119,13 @@ class TimeLog(Document):
 				where production_order = %s and operation = %s and docstatus=1""",
 				(self.production_order, self.operation), as_dict=1)[0]
 
-	def get_actual_op_time(self):
+	def get_all_time_logs(self):
 		"""Returns 'Actual Operating Time'. """
-		actual_time = frappe.db.sql("""select sum(hours*60) as time_diff from
-			`tabTime Log` where production_order = %s and operation = %s and docstatus=1""",
-			(self.production_order, self.operation))
-		return actual_time[0][0] if actual_time else 0
-
-	def get_latest_time_log(self):
-		return frappe.db.sql("""select name, operation_status from `tabTime Log`
-			where production_order=%s and operation=%s and docstatus=1
-			order by to_time desc limit 1""", (self.production_order, self.operation), as_dict=1)
+		return frappe.db.sql("""select
+			sum(hours*60) as hours, sum(ifnull(completed_qty, 0)) as completed_qty
+			from `tabTime Log`
+			where production_order = %s and operation = %s and docstatus=1""",
+			(self.production_order, self.operation), as_dict=1)[0]
 
 @frappe.whitelist()
 def get_workstation(production_order, operation):

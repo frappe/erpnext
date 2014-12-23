@@ -918,7 +918,7 @@ class TestStockEntry(unittest.TestCase):
 			"production_order": production_order.name,
 			"bom_no": bom_no,
 			"fg_completed_qty": "1",
-			"total_fixed_cost": 1000
+			"additional_operating_cost": 1000
 		})
 		stock_entry.get_items()
 

@@ -61,19 +61,6 @@
    "precision": ""
   }, 
   {
-   "fieldname": "fixed_costs", 
-   "fieldtype": "Section Break", 
-   "label": "Fixed Costs", 
-   "permlevel": 0, 
-   "precision": ""
-  }, 
-  {
-   "fieldname": "fixed_cost", 
-   "fieldtype": "Float", 
-   "label": "Fixed Cost", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "over_heads", 
    "fieldtype": "Section Break", 
    "label": "Operating Costs", 
@@ -99,15 +86,6 @@
    "permlevel": 0
   }, 
   {
-   "description": "per hour", 
-   "fieldname": "hour_rate_rent", 
-   "fieldtype": "Float", 
-   "label": "Rent Cost", 
-   "oldfieldname": "hour_rate_rent", 
-   "oldfieldtype": "Currency", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "column_break_11", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -115,13 +93,12 @@
   }, 
   {
    "description": "per hour", 
-   "fieldname": "total_variable_cost", 
+   "fieldname": "hour_rate_rent", 
    "fieldtype": "Float", 
-   "label": "Total Variable Cost", 
-   "oldfieldname": "overhead", 
+   "label": "Rent Cost", 
+   "oldfieldname": "hour_rate_rent", 
    "oldfieldtype": "Currency", 
-   "permlevel": 0, 
-   "read_only": 1
+   "permlevel": 0
   }, 
   {
    "description": "Wages per hour", 
@@ -161,7 +138,7 @@
  ], 
  "icon": "icon-wrench", 
  "idx": 1, 
- "modified": "2014-12-22 14:18:40.253034", 
+ "modified": "2014-12-23 15:27:58.477925", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Workstation", 

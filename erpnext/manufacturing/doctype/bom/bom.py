@@ -118,11 +118,10 @@ class BOM(Document):
 			return
 
 		for d in self.get("bom_materials"):
-			d.rate = self.get_bom_material_detail({
-				'item_code': d.item_code,
-				'bom_no': d.bom_no,
-				'qty': d.qty
-			})["rate"]
+			rate = self.get_bom_material_detail({'item_code': d.item_code, 'bom_no': d.bom_no,
+				'qty': d.qty})["rate"]
+			if rate:
+				d.rate = rate
 
 		if self.docstatus == 1:
 			self.ignore_validate_update_after_submit = True
@@ -130,20 +129,31 @@ class BOM(Document):
 		self.save()
 
 	def get_bom_unitcost(self, bom_no):
-		bom = frappe.db.sql("""select name, total_variable_cost/quantity as unit_cost from `tabBOM`
+		bom = frappe.db.sql("""select name, total_cost/quantity as unit_cost from `tabBOM`
 			where is_active = 1 and name = %s""", bom_no, as_dict=1)
 		return bom and bom[0]['unit_cost'] or 0
 
 	def get_valuation_rate(self, args):
 		""" Get weighted average of valuation rate from all warehouses """
 
-		total_qty, total_value = 0.0, 0.0
+		total_qty, total_value, valuation_rate = 0.0, 0.0, 0.0
 		for d in frappe.db.sql("""select actual_qty, stock_value from `tabBin`
-			where item_code=%s and actual_qty > 0""", args['item_code'], as_dict=1):
+			where item_code=%s""", args['item_code'], as_dict=1):
 				total_qty += flt(d.actual_qty)
 				total_value += flt(d.stock_value)
 
-		return total_value / total_qty if total_qty else 0.0
+		if total_qty:
+			valuation_rate =  total_value / total_qty
+
+		if valuation_rate <= 0:
+			last_valuation_rate = frappe.db.sql("""select valuation_rate
+				from `tabStock Ledger Entry`
+				where item_code = %s and ifnull(valuation_rate, 0) > 0
+				order by posting_date desc, posting_time desc, name desc limit 1""", args['item_code'])
+
+			valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
+
+		return valuation_rate
 
 	def manage_default_bom(self):
 		""" Uncheck others if current one is selected as default,
@@ -247,28 +257,20 @@ class BOM(Document):
 		"""Calculate bom totals"""
 		self.calculate_op_cost()
 		self.calculate_rm_cost()
-		self.total_cost = self.total_operating_cost + self.raw_material_cost
+		self.total_cost = self.operating_cost + self.raw_material_cost
 
 	def calculate_op_cost(self):
 		"""Update workstation rate and calculates totals"""
-		total_variable_cost, total_fixed_cost = 0, 0
+		self.operating_cost = 0
 		for d in self.get('bom_operations'):
 			if d.workstation:
-				w = frappe.db.get_value("Workstation", d.workstation, ["hour_rate", "fixed_cost"])
 				if not d.hour_rate:
-					d.hour_rate = flt(w[0])
-
-				total_fixed_cost += flt(w[1])
+					d.hour_rate = flt(frappe.db.get_value("Workstation", d.workstation, "hour_rate"))
 
 			if d.hour_rate and d.time_in_mins:
-				d.variable_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
+				d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0
 
-			d.operating_cost = flt(d.fixed_cost) + flt(d.variable_cost)
-			total_variable_cost += flt(d.variable_cost)
-
-		self.total_variable_cost = total_variable_cost
-		self.total_fixed_cost = total_fixed_cost
-		self.total_operating_cost = self.total_variable_cost + self.total_fixed_cost
+			self.operating_cost += flt(d.operating_cost)
 
 	def calculate_rm_cost(self):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""

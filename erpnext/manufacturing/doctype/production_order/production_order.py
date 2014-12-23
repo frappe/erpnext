@@ -59,20 +59,15 @@ class ProductionOrder(Document):
 			validate_warehouse_company(w, self.company)
 
 	def calculate_operating_cost(self):
-		if self.total_fixed_cost==None:
-			self.total_fixed_cost = frappe.db.get_value("BOM", self.bom_no, "total_fixed_cost")
-
-		self.planned_variable_cost, self.actual_variable_cost = 0.0, 0.0
+		self.planned_operating_cost, self.actual_operating_cost = 0.0, 0.0
 		for d in self.get("production_order_operations"):
+			d.actual_operating_cost = flt(d.hour_rate) * flt(d.actual_operation_time) / 60
 
-			d.actual_variable_cost = flt(d.hour_rate) * flt(d.actual_operation_time) / 60
+			self.planned_operating_cost += flt(d.planned_operating_cost)
+			self.actual_operating_cost += flt(d.actual_operating_cost)
 
-			self.planned_variable_cost += flt(d.variable_cost)
-			self.actual_variable_cost += flt(d.actual_variable_cost)
-
-		variable_cost = self.actual_variable_cost if self.actual_variable_cost else self.planned_variable_cost
-		self.total_operating_cost = flt(self.total_fixed_cost) + flt(variable_cost)
-
+		variable_cost = self.actual_operating_cost if self.actual_operating_cost else self.planned_operating_cost
+		self.total_operating_cost = flt(self.additional_operating_cost) + flt(variable_cost)
 
 	def validate_production_order_against_so(self):
 		# already ordered qty
@@ -171,15 +166,16 @@ class ProductionOrder(Document):
 		self.set('production_order_operations', [])
 
 		operations = frappe.db.sql("""select operation, opn_description, workstation,
-			hour_rate, time_in_mins, fixed_cost, variable_cost, "Pending" as status
+			hour_rate, time_in_mins, operating_cost as "planned_operating_cost", "Pending" as status
 			from `tabBOM Operation` where parent = %s""", self.bom_no, as_dict=1)
 
 		self.set('production_order_operations', operations)
 
 		self.plan_operations()
+		self.calculate_operating_cost()
 
 	def plan_operations(self):
-		scheduled_datetime = self.production_start_date
+		scheduled_datetime = self.planned_start_date
 		for d in self.get('production_order_operations'):
 			while getdate(scheduled_datetime) in self.get_holidays(d.workstation):
 				scheduled_datetime = get_datetime(scheduled_datetime) + relativedelta(days=1)
@@ -188,7 +184,7 @@ class ProductionOrder(Document):
 			scheduled_datetime = get_datetime(scheduled_datetime) + relativedelta(minutes=d.time_in_mins)
 			d.planned_end_time = scheduled_datetime
 
-		self.production_end_date = scheduled_datetime
+		self.planned_end_date = scheduled_datetime
 
 
 	def get_holidays(self, workstation):
@@ -202,6 +198,17 @@ class ProductionOrder(Document):
 
 		return self.holidays[holiday_list]
 
+	def update_operation_status(self):
+		for d in self.get("production_order_operations"):
+			if not d.completed_qty:
+				d.status = "Pending"
+			elif flt(d.completed_qty) < flt(self.qty):
+				d.status = "Work in Progress"
+			elif flt(d.completed_qty) == flt(self.qty):
+				d.status = "Completed"
+			else:
+				frappe.throw(_("Completed Qty can not be greater than 'Qty to Manufacture'"))
+
 
 @frappe.whitelist()
 def get_item_details(item):
@@ -213,10 +220,7 @@ def get_item_details(item):
 		return {}
 
 	res = res[0]
-	bom = frappe.db.sql("""select name as bom_no,total_fixed_cost  from `tabBOM` where item=%s
-		and ifnull(is_default, 0)=1""", item, as_dict=1)
-	if bom:
-		res.update(bom[0])
+	res["bom_no"] = frappe.db.get_value("BOM", filters={"item": item, "is_default": 1})
 	return res
 
 @frappe.whitelist()
@@ -228,6 +232,7 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 	stock_entry.production_order = production_order_id
 	stock_entry.company = production_order.company
 	stock_entry.bom_no = production_order.bom_no
+	stock_entry.additional_operating_cost = production_order.additional_operating_cost
 	stock_entry.use_multi_level_bom = production_order.use_multi_level_bom
 	stock_entry.fg_completed_qty = qty or (flt(production_order.qty) - flt(production_order.produced_qty))
 
@@ -267,7 +272,7 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_time_log(name, operation, from_time, to_time, qty=None, project=None, workstation=None):
+def make_time_log(name, operation, from_time, to_time, qty=None,  project=None, workstation=None):
 	time_log =  frappe.new_doc("Time Log")
 	time_log.time_log_for = 'Manufacturing'
 	time_log.from_time = from_time
@@ -276,16 +281,24 @@ def make_time_log(name, operation, from_time, to_time, qty=None, project=None, w
 	time_log.project = project
 	time_log.operation= operation
 	time_log.workstation= workstation
+	time_log.completed_qty = flt(qty)
 	if from_time and to_time :
 		time_log.calculate_total_hours()
 	return time_log
 
 @frappe.whitelist()
 def auto_make_time_log(production_order_id):
+	if frappe.db.get_value("Time Log", filters={"production_order": production_order_id}):
+		frappe.throw(_("Time logs already exists against this Production Order"))
+
+	time_logs = []
 	prod_order = frappe.get_doc("Production Order", production_order_id)
+
 	for d in prod_order.production_order_operations:
 		operation = cstr(d.idx) + ". " + d.operation
 		time_log = make_time_log(prod_order.name, operation, d.planned_start_time, d.planned_end_time,
-			prod_order.qty, prod_order.project_name, d.workstation)
+			flt(prod_order.qty) - flt(d.completed_qty), prod_order.project_name, d.workstation)
 		time_log.save()
-	frappe.msgprint(_("Time Logs created."))
+		time_logs.append(time_log.name)
+	if time_logs:
+		frappe.msgprint(_("Time Logs created:") + "\n" + "\n".join(time_logs))

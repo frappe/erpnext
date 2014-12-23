@@ -14,7 +14,7 @@ frappe.ui.form.on("Time Log", "refresh", function(frm) {
 	var is_manufacturing = frm.doc.time_log_for=="Manufacturing" ? true : false;
 	frm.toggle_reqd("production_order", is_manufacturing);
 	frm.toggle_reqd("operation", is_manufacturing);
-	frm.toggle_reqd("operation_status", is_manufacturing);
+	frm.toggle_reqd("completed_qty", is_manufacturing);
 });
 
 // set to time if hours is updated

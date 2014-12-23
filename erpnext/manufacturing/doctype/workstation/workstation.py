@@ -25,9 +25,8 @@ class Workstation(Document):
 	def on_update(self):
 		self.validate_overlap_for_operation_timings()
 
-		frappe.db.set(self, 'total_variable_cost', flt(self.hour_rate_electricity) +
+		frappe.db.set(self, 'hour_rate', flt(self.hour_rate_labour) + flt(self.hour_rate_electricity) +
 			flt(self.hour_rate_consumable) + flt(self.hour_rate_rent))
-		frappe.db.set(self, 'hour_rate', flt(self.hour_rate_labour) + flt(self.total_variable_cost))
 
 		self.update_bom_operation()
 
@@ -41,8 +40,8 @@ class Workstation(Document):
 						(%s between start_time and end_time))
 				""", (self.name, d.name, d.start_time, d.end_time, d.start_time, d.end_time, d.start_time))
 
-		if existing:
-			frappe.throw(_("Row #{0}: Timings conflicts with row {1}").format(d.idx, comma_and(existing)), OverlapError)
+			if existing:
+				frappe.throw(_("Row #{0}: Timings conflicts with row {1}").format(d.idx, comma_and(existing)), OverlapError)
 
 @frappe.whitelist()
 def get_default_holiday_list():
