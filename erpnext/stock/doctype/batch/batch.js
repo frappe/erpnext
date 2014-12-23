@@ -5,7 +5,8 @@ cur_frm.fields_dict['item'].get_query = function(doc, cdt, cdn) {
 	return {
 		query: "erpnext.controllers.queries.item_query",
 		filters:{
-			'is_stock_item': 'Yes'	
+			'is_stock_item': 'Yes',
+			'has_batch_no': 'Yes'	
 		}
 	}	
 }
