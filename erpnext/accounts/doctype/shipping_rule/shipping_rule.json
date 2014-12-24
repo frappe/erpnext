@@ -38,7 +38,7 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "shipping_rule_conditions", 
+   "fieldname": "conditions", 
    "fieldtype": "Table", 
    "label": "Shipping Rule Conditions", 
    "options": "Shipping Rule Condition", 
@@ -52,7 +52,7 @@
   }, 
   {
    "description": "Specify a list of Territories, for which, this Shipping Rule is valid", 
-   "fieldname": "valid_for_territories", 
+   "fieldname": "territories", 
    "fieldtype": "Table", 
    "label": "Valid For Territories", 
    "options": "Applicable Territory", 
@@ -102,7 +102,7 @@
  ], 
  "icon": "icon-truck", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:19.387875", 
+ "modified": "2014-12-24 14:59:04.430010", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Shipping Rule", 

@@ -28,9 +28,9 @@
    "width": "300px"
   }, 
   {
-   "fieldname": "kra_sheet", 
+   "fieldname": "goals", 
    "fieldtype": "Table", 
-   "label": "Appraisal Template Goal", 
+   "label": "Goals", 
    "oldfieldname": "kra_sheet", 
    "oldfieldtype": "Table", 
    "options": "Appraisal Template Goal", 
@@ -46,7 +46,7 @@
  ], 
  "icon": "icon-file-text", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:07.533203", 
+ "modified": "2014-12-24 15:01:34.621450", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Appraisal Template", 

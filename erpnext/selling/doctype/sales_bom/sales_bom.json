@@ -33,9 +33,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "sales_bom_items", 
+   "fieldname": "items", 
    "fieldtype": "Table", 
-   "label": "Sales BOM Items", 
+   "label": "Items", 
    "oldfieldname": "sales_bom_items", 
    "oldfieldtype": "Table", 
    "options": "Sales BOM Item", 
@@ -46,7 +46,7 @@
  "icon": "icon-sitemap", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2014-05-27 03:49:17.656569", 
+ "modified": "2014-12-24 16:40:11.941046", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales BOM", 

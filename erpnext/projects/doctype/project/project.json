@@ -1,5 +1,4 @@
 {
- "allow_attach": 1, 
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:project_name", 
@@ -126,9 +125,9 @@
   }, 
   {
    "description": "Milestones will be added as Events in the Calendar", 
-   "fieldname": "project_milestones", 
+   "fieldname": "milestones", 
    "fieldtype": "Table", 
-   "label": "Project Milestones", 
+   "label": "Milestones", 
    "no_copy": 0, 
    "oldfieldname": "project_milestones", 
    "oldfieldtype": "Table", 
@@ -273,7 +272,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2014-08-26 14:59:27.052172", 
+ "modified": "2014-12-24 16:36:50.539666", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 

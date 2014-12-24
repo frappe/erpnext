@@ -195,9 +195,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "qa_specification_details", 
+   "fieldname": "readings", 
    "fieldtype": "Table", 
-   "label": "Quality Inspection Readings", 
+   "label": "Readings", 
    "oldfieldname": "qa_specification_details", 
    "oldfieldtype": "Table", 
    "options": "Quality Inspection Reading", 
@@ -207,7 +207,7 @@
  "icon": "icon-search", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-06-23 07:55:51.183113", 
+ "modified": "2014-12-24 16:37:43.755107", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Quality Inspection", 

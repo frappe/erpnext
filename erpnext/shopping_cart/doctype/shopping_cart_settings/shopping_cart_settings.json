@@ -66,7 +66,7 @@
   {
    "fieldname": "price_lists", 
    "fieldtype": "Table", 
-   "label": "Shopping Cart Price Lists", 
+   "label": "Price Lists", 
    "options": "Shopping Cart Price List", 
    "permlevel": 0, 
    "reqd": 0
@@ -74,7 +74,7 @@
   {
    "fieldname": "shipping_rules", 
    "fieldtype": "Table", 
-   "label": "Shopping Cart Shipping Rules", 
+   "label": "Shipping Rules", 
    "options": "Shopping Cart Shipping Rule", 
    "permlevel": 0, 
    "reqd": 0
@@ -87,7 +87,7 @@
   {
    "fieldname": "sales_taxes_and_charges_masters", 
    "fieldtype": "Table", 
-   "label": "Shopping Cart Taxes and Charges Masters", 
+   "label": "Taxes and Charges", 
    "options": "Shopping Cart Taxes and Charges Master", 
    "permlevel": 0, 
    "reqd": 0
@@ -96,7 +96,7 @@
  "icon": "icon-shopping-cart", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2014-05-26 03:05:53.747800", 
+ "modified": "2014-12-24 16:42:14.262882", 
  "modified_by": "Administrator", 
  "module": "Shopping Cart", 
  "name": "Shopping Cart Settings", 

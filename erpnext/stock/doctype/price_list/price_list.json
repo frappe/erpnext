@@ -1,5 +1,5 @@
 {
-  "allow_copy": 0, 
+ "allow_copy": 0, 
  "allow_email": 1, 
  "allow_import": 1, 
  "allow_print": 1, 
@@ -63,7 +63,7 @@
   }, 
   {
    "description": "Specify a list of Territories, for which, this Price List is valid", 
-   "fieldname": "valid_for_territories", 
+   "fieldname": "territories", 
    "fieldtype": "Table", 
    "label": "Valid for Territories", 
    "options": "Applicable Territory", 
@@ -74,7 +74,7 @@
  "icon": "icon-tags", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2014-05-27 03:49:14.866933", 
+ "modified": "2014-12-24 14:59:23.413738", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Price List", 

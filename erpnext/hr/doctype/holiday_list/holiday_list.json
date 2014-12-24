@@ -55,7 +55,7 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "holiday_list_details", 
+   "fieldname": "holidays", 
    "fieldtype": "Table", 
    "label": "Holidays", 
    "oldfieldname": "holiday_list_details", 
@@ -74,7 +74,7 @@
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
- "modified": "2014-11-25 15:42:22.419054", 
+ "modified": "2014-12-24 15:32:58.469070", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Holiday List", 

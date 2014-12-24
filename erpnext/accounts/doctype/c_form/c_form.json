@@ -107,9 +107,9 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "invoice_details", 
+   "fieldname": "invoices", 
    "fieldtype": "Table", 
-   "label": "Invoice Details", 
+   "label": "Invoices", 
    "options": "C-Form Invoice Detail", 
    "permlevel": 0, 
    "read_only": 0
@@ -139,7 +139,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2014-09-05 12:58:43.333698", 
+ "modified": "2014-12-24 15:20:08.627169", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "C-Form", 

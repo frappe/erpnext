@@ -116,7 +116,7 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "items", 
+   "fieldname": "items_section", 
    "fieldtype": "Section Break", 
    "label": "Items", 
    "oldfieldtype": "Section Break", 
@@ -126,9 +126,9 @@
   }, 
   {
    "description": "Items which do not exist in Item master can also be entered on customer's request", 
-   "fieldname": "enquiry_details", 
+   "fieldname": "items", 
    "fieldtype": "Table", 
-   "label": "Opportunity Items", 
+   "label": "Items", 
    "oldfieldname": "enquiry_details", 
    "oldfieldtype": "Table", 
    "options": "Opportunity Item", 
@@ -388,7 +388,7 @@
  "icon": "icon-info-sign", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-10-07 18:12:19.104820", 
+ "modified": "2014-12-24 14:22:53.858170", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Opportunity", 

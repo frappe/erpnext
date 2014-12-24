@@ -121,24 +121,24 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "operation_timings", 
+   "fieldname": "working_hours_section", 
    "fieldtype": "Section Break", 
-   "label": "Operation Timings", 
+   "label": "Wroking Hours", 
    "permlevel": 0, 
    "precision": ""
   }, 
   {
-   "fieldname": "workstation_operation_hours", 
+   "fieldname": "working_hours", 
    "fieldtype": "Table", 
-   "label": "Workstation Operation Hours", 
-   "options": "Workstation Operation Hour", 
+   "label": "Working Hours", 
+   "options": "Workstation Working Hour", 
    "permlevel": 0, 
    "precision": ""
   }
  ], 
  "icon": "icon-wrench", 
  "idx": 1, 
- "modified": "2014-12-23 15:27:58.477925", 
+ "modified": "2014-12-24 14:47:06.676335", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Workstation", 

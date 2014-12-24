@@ -90,9 +90,9 @@
   }, 
   {
    "description": "Add rows to set annual budgets on Accounts.", 
-   "fieldname": "budget_details", 
+   "fieldname": "budgets", 
    "fieldtype": "Table", 
-   "label": "Budget Details", 
+   "label": "Budgets", 
    "oldfieldname": "budget_details", 
    "oldfieldtype": "Table", 
    "options": "Budget Detail", 
@@ -145,7 +145,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-08-26 12:16:11.163750", 
+ "modified": "2014-12-24 15:18:16.937207", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Cost Center", 
@@ -197,5 +197,5 @@
    "role": "Material User"
   }
  ], 
- "search_fields": "name,parent_cost_center"
+ "search_fields": "parent_cost_center"
 }

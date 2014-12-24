@@ -52,9 +52,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "time_log_batch_details", 
+   "fieldname": "time_logs", 
    "fieldtype": "Table", 
-   "label": "Time Log Batch Details", 
+   "label": "Time Logs", 
    "options": "Time Log Batch Detail", 
    "permlevel": 0, 
    "reqd": 1
@@ -83,7 +83,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-27 03:49:21.339026", 
+ "modified": "2014-12-24 16:48:03.419707", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log Batch", 

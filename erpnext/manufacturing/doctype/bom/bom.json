@@ -77,33 +77,33 @@
   {
    "depends_on": "with_operations", 
    "description": "Specify the operations, operating cost and give a unique Operation no to your operations.", 
-   "fieldname": "operations", 
+   "fieldname": "operations_section", 
    "fieldtype": "Section Break", 
    "label": "Operations", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0
   }, 
   {
-   "fieldname": "bom_operations", 
+   "fieldname": "operations", 
    "fieldtype": "Table", 
    "in_list_view": 0, 
-   "label": "BOM Operations", 
+   "label": "Operations", 
    "oldfieldname": "bom_operations", 
    "oldfieldtype": "Table", 
    "options": "BOM Operation", 
    "permlevel": 0
   }, 
   {
-   "fieldname": "materials", 
+   "fieldname": "materials_section", 
    "fieldtype": "Section Break", 
    "label": "Materials", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0
   }, 
   {
-   "fieldname": "bom_materials", 
+   "fieldname": "items", 
    "fieldtype": "Table", 
-   "label": "BOM Item", 
+   "label": "Items", 
    "oldfieldname": "bom_materials", 
    "oldfieldtype": "Table", 
    "options": "BOM Item", 
@@ -223,10 +223,10 @@
    "print_hide": 0
   }, 
   {
-   "fieldname": "flat_bom_details", 
+   "fieldname": "exploded_items", 
    "fieldtype": "Table", 
    "hidden": 0, 
-   "label": "Materials Required (Exploded)", 
+   "label": "Exploded_items", 
    "no_copy": 1, 
    "oldfieldname": "flat_bom_details", 
    "oldfieldtype": "Table", 
@@ -244,7 +244,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2014-12-23 16:39:14.197038", 
+ "modified": "2014-12-24 14:38:43.906947", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM", 

@@ -224,9 +224,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "installed_item_details", 
+   "fieldname": "items", 
    "fieldtype": "Table", 
-   "label": "Installation Note Item", 
+   "label": "Items", 
    "oldfieldname": "installed_item_details", 
    "oldfieldtype": "Table", 
    "options": "Installation Note Item", 
@@ -236,7 +236,7 @@
  "icon": "icon-wrench", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-07-30 03:37:31.118791", 
+ "modified": "2014-12-24 15:33:52.513813", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Installation Note", 

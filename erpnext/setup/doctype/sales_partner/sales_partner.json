@@ -108,9 +108,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "partner_target_details", 
+   "fieldname": "targets", 
    "fieldtype": "Table", 
-   "label": "Partner Target Detail", 
+   "label": "Targets", 
    "oldfieldname": "partner_target_details", 
    "oldfieldtype": "Table", 
    "options": "Target Detail", 
@@ -200,7 +200,7 @@
  "icon": "icon-user", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-09-05 14:54:57.014940", 
+ "modified": "2014-12-24 16:45:13.652374", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Partner", 

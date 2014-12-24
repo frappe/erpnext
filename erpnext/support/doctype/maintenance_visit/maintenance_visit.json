@@ -145,9 +145,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "maintenance_visit_details", 
+   "fieldname": "purposes", 
    "fieldtype": "Table", 
-   "label": "Maintenance Visit Purpose", 
+   "label": "Purposes", 
    "oldfieldname": "maintenance_visit_details", 
    "oldfieldtype": "Table", 
    "options": "Maintenance Visit Purpose", 
@@ -279,7 +279,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-09-26 11:37:41.026433", 
+ "modified": "2014-12-24 16:20:49.640483", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Maintenance Visit", 

@@ -17,7 +17,7 @@ frappe.ui.form.on("Payment Tool", "onload", function(frm) {
 	frm.set_query("payment_account", function() {
 		return {
 			filters: {
-				"account_type": ["in", ["Receivable", "Payable"]],
+				"account_type": ["in", ["Bank", "Cash"]],
 				"group_or_ledger": "Ledger",
 				"company": frm.doc.company
 			}
@@ -193,6 +193,6 @@ frappe.ui.form.on("Payment Tool", "make_journal_voucher", function(frm) {
 
 erpnext.payment_tool.check_mandatory_to_fetch = function(doc) {
 	$.each(["Company", "Party Type", "Party", "Received or Paid"], function(i, field) {
-		if(!doc[frappe.model.scrub(field)]]) frappe.throw(__("Please select {0} first", [field]));
+		if(!doc[frappe.model.scrub(field)]) frappe.throw(__("Please select {0} first", [field]));
 	});
 }

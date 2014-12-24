@@ -205,7 +205,7 @@
    "print_hide": 1
   }, 
   {
-   "fieldname": "items", 
+   "fieldname": "items_section", 
    "fieldtype": "Section Break", 
    "label": "Items", 
    "oldfieldtype": "Section Break", 
@@ -214,9 +214,9 @@
   }, 
   {
    "allow_on_submit": 1, 
-   "fieldname": "quotation_items", 
+   "fieldname": "items", 
    "fieldtype": "Table", 
-   "label": "Quotation Items", 
+   "label": "Items", 
    "no_copy": 0, 
    "oldfieldname": "po_details", 
    "oldfieldtype": "Table", 
@@ -259,7 +259,7 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "taxes", 
+   "fieldname": "taxes_section", 
    "fieldtype": "Section Break", 
    "label": "Taxes and Charges", 
    "oldfieldtype": "Section Break", 
@@ -279,7 +279,7 @@
    "print_hide": 1
   }, 
   {
-   "fieldname": "other_charges", 
+   "fieldname": "taxes", 
    "fieldtype": "Table", 
    "label": "Purchase Taxes and Charges", 
    "no_copy": 0, 
@@ -575,7 +575,7 @@
  "icon": "icon-shopping-cart", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-09-09 05:35:35.369734", 
+ "modified": "2014-12-24 14:28:56.009809", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation", 

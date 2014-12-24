@@ -284,7 +284,7 @@
    "print_hide": 1
   }, 
   {
-   "fieldname": "items", 
+   "fieldname": "items_section", 
    "fieldtype": "Section Break", 
    "label": "Items", 
    "oldfieldtype": "Section Break", 
@@ -294,9 +294,9 @@
   }, 
   {
    "allow_on_submit": 1, 
-   "fieldname": "delivery_note_details", 
+   "fieldname": "items", 
    "fieldtype": "Table", 
-   "label": "Delivery Note Items", 
+   "label": "Items", 
    "no_copy": 0, 
    "oldfieldname": "delivery_note_details", 
    "oldfieldtype": "Table", 
@@ -317,9 +317,9 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "packing_details", 
+   "fieldname": "packed_items", 
    "fieldtype": "Table", 
-   "label": "Packing Details", 
+   "label": "Packed Items", 
    "oldfieldname": "packing_details", 
    "oldfieldtype": "Table", 
    "options": "Packed Item", 
@@ -369,7 +369,7 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "taxes", 
+   "fieldname": "taxes_section", 
    "fieldtype": "Section Break", 
    "label": "Taxes and Charges", 
    "oldfieldtype": "Section Break", 
@@ -410,7 +410,7 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "other_charges", 
+   "fieldname": "taxes", 
    "fieldtype": "Table", 
    "label": "Sales Taxes and Charges", 
    "no_copy": 0, 
@@ -1013,7 +1013,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2014-09-09 05:35:30.700911", 
+ "modified": "2014-12-24 14:26:18.627591", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note", 

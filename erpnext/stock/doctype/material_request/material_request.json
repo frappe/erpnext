@@ -70,7 +70,7 @@
    "width": "150px"
   }, 
   {
-   "fieldname": "items", 
+   "fieldname": "items_section", 
    "fieldtype": "Section Break", 
    "label": "Items", 
    "oldfieldtype": "Section Break", 
@@ -79,9 +79,9 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "fieldname": "indent_details", 
+   "fieldname": "items", 
    "fieldtype": "Table", 
-   "label": "Material Request Items", 
+   "label": "Items", 
    "no_copy": 0, 
    "oldfieldname": "indent_details", 
    "oldfieldtype": "Table", 
@@ -235,7 +235,7 @@
  "icon": "icon-ticket", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-10-27 12:16:38.833386", 
+ "modified": "2014-12-24 14:28:14.548275", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request", 

@@ -111,9 +111,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "target_details", 
+   "fieldname": "targets", 
    "fieldtype": "Table", 
-   "label": "Target Details1", 
+   "label": "Targets", 
    "oldfieldname": "target_details", 
    "oldfieldtype": "Table", 
    "options": "Target Detail", 
@@ -143,7 +143,7 @@
  "icon": "icon-user", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-05-27 03:49:18.900175", 
+ "modified": "2014-12-24 16:46:02.819886", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Person", 
@@ -190,5 +190,5 @@
    "write": 1
   }
  ], 
- "search_fields": "name,parent_sales_person"
+ "search_fields": "parent_sales_person"
 }

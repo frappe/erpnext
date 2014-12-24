@@ -206,7 +206,7 @@
    "print_hide": 1
   }, 
   {
-   "fieldname": "items", 
+   "fieldname": "items_section", 
    "fieldtype": "Section Break", 
    "label": "Items", 
    "oldfieldtype": "Section Break", 
@@ -215,9 +215,9 @@
   }, 
   {
    "allow_on_submit": 1, 
-   "fieldname": "po_details", 
+   "fieldname": "items", 
    "fieldtype": "Table", 
-   "label": "Purchase Order Items", 
+   "label": "Items", 
    "no_copy": 0, 
    "oldfieldname": "po_details", 
    "oldfieldtype": "Table", 
@@ -268,7 +268,7 @@
    "print_hide": 0
   }, 
   {
-   "fieldname": "taxes", 
+   "fieldname": "taxes_section", 
    "fieldtype": "Section Break", 
    "label": "Taxes and Charges", 
    "oldfieldtype": "Section Break", 
@@ -289,7 +289,7 @@
    "print_hide": 1
   }, 
   {
-   "fieldname": "other_charges", 
+   "fieldname": "taxes", 
    "fieldtype": "Table", 
    "label": "Purchase Taxes and Charges", 
    "no_copy": 0, 
@@ -642,9 +642,9 @@
   }, 
   {
    "allow_on_submit": 1, 
-   "fieldname": "po_raw_material_details", 
+   "fieldname": "supplied_items", 
    "fieldtype": "Table", 
-   "label": "Purchase Order Items Supplied", 
+   "label": "Supplied Items", 
    "no_copy": 0, 
    "oldfieldname": "po_raw_material_details", 
    "oldfieldtype": "Table", 
@@ -772,7 +772,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-10-08 14:23:29.718779", 
+ "modified": "2014-12-24 14:30:24.868635", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 

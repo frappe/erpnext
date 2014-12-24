@@ -87,9 +87,9 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "fieldname": "expense_voucher_details", 
+   "fieldname": "expenses", 
    "fieldtype": "Table", 
-   "label": "Expense Claim Details", 
+   "label": "Expenses", 
    "oldfieldname": "expense_voucher_details", 
    "oldfieldtype": "Table", 
    "options": "Expense Claim Detail", 
@@ -164,16 +164,6 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "total_amount_reimbursed", 
-   "fieldtype": "Currency", 
-   "label": "Total Amount Reimbursed", 
-   "no_copy": 1, 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "precision": "", 
-   "read_only": 1
-  }, 
-  {
    "allow_on_submit": 0, 
    "fieldname": "remark", 
    "fieldtype": "Small Text", 
@@ -212,7 +202,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-12-09 11:52:32.196383", 
+ "modified": "2014-12-24 15:31:39.611197", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Expense Claim", 

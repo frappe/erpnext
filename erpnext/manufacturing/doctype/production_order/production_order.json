@@ -192,7 +192,7 @@
   }, 
   {
    "depends_on": "", 
-   "fieldname": "operations", 
+   "fieldname": "operations_section", 
    "fieldtype": "Section Break", 
    "label": "Operations", 
    "options": "icon-wrench", 
@@ -200,9 +200,9 @@
    "precision": ""
   }, 
   {
-   "fieldname": "production_order_operations", 
+   "fieldname": "operations", 
    "fieldtype": "Table", 
-   "label": "Production Order Operations", 
+   "label": "Operations", 
    "options": "Production Order Operation", 
    "permlevel": 0, 
    "precision": "", 
@@ -351,7 +351,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2014-12-23 15:07:26.516227", 
+ "modified": "2014-12-24 14:36:25.662920", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 
