@@ -5,4 +5,4 @@ import frappe
 
 def execute():
 	frappe.reload_doc("stock", "doctype", "stock_entry")
-	frappe.db.sql("update tabBOM set additional_operating_cost = total_fixed_cost")
+	frappe.db.sql("update `tabStock Entry` set additional_operating_cost = total_fixed_cost")
