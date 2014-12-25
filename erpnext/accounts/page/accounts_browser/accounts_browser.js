@@ -19,7 +19,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		chart_area = $("<div>")
 			.css({"margin-bottom": "15px", "min-height": "200px"})
 			.appendTo(main),
-		help_area = $('<div class="well">'+
+		help_area = $('<div class="msg-box">'+
 		'<h4>'+__('Quick Help')+'</h4>'+
 		'<ol>'+
 			'<li>'+__('To add child nodes, explore tree and click on the node under which you want to add more nodes.')+'</li>'+

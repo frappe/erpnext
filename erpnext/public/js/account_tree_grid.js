@@ -69,7 +69,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 		{fieldtype: "Label", label: __("To")},
 		{fieldtype: "Date", label: __("To Date"), fieldname: "to_date"},
 		{fieldtype: "Button", label: __("Refresh"), icon:"icon-refresh icon-white",
-		 	cssClass:"btn-info"},
+		 	cssClass:"btn-primary"},
 		{fieldtype: "Button", label: __("Reset Filters"), icon: "icon-filter"},
 	],
 	setup_filters: function() {

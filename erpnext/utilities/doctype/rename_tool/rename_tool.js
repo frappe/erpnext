@@ -44,7 +44,7 @@ cur_frm.cscript.setup_upload = function() {
 		.click(function() {
 			$log.html("Working...");
 		})
-		.addClass("btn-info")
+		.addClass("btn-primary")
 		.attr('value', 'Upload and Rename')
 
 }
