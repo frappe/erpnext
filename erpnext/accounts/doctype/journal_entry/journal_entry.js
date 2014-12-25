@@ -12,13 +12,13 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 	},
 
 	onload_post_render: function() {
-		cur_frm.get_field("entries").grid.set_multiple_add("account");
+		cur_frm.get_field("accounts").grid.set_multiple_add("account");
 	},
 
 	load_defaults: function() {
 		if(this.frm.doc.__islocal && this.frm.doc.company) {
 			frappe.model.set_default_values(this.frm.doc);
-			$.each(this.frm.doc.entries || [], function(i, jvd) {
+			$.each(this.frm.doc.accounts || [], function(i, jvd) {
 					frappe.model.set_default_values(jvd);
 				}
 			);
@@ -31,7 +31,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 		var me = this;
 
 		$.each(["account", "cost_center"], function(i, fieldname) {
-			me.frm.set_query(fieldname, "entries", function() {
+			me.frm.set_query(fieldname, "accounts", function() {
 				frappe.model.validate_missing(me.frm.doc, "company");
 				return {
 					filters: {
@@ -42,7 +42,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 			});
 		});
 
-		me.frm.set_query("party_type", "entries", function(doc, cdt, cdn) {
+		me.frm.set_query("party_type", "accounts", function(doc, cdt, cdn) {
 			return {
 				filters: {"name": ["in", ["Customer", "Supplier"]]}
 			}
@@ -50,7 +50,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 
 		$.each([["against_voucher", "Purchase Invoice", "supplier"],
 			["against_invoice", "Sales Invoice", "customer"]], function(i, opts) {
-				me.frm.set_query(opts[0], "entries", function(doc, cdt, cdn) {
+				me.frm.set_query(opts[0], "accounts", function(doc, cdt, cdn) {
 					var jvd = frappe.get_doc(cdt, cdn);
 					frappe.model.validate_missing(jvd, ["party_type", "party"]);
 					return {
@@ -63,7 +63,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 				});
 		});
 
-		this.frm.set_query("against_jv", "entries", function(doc, cdt, cdn) {
+		this.frm.set_query("against_jv", "accounts", function(doc, cdt, cdn) {
 			var jvd = frappe.get_doc(cdt, cdn);
 			frappe.model.validate_missing(jvd, "account");
 
@@ -168,7 +168,7 @@ cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
 
 cur_frm.cscript.update_totals = function(doc) {
 	var td=0.0; var tc =0.0;
-	var el = doc.entries || [];
+	var el = doc.accounts || [];
 	for(var i in el) {
 		td += flt(el[i].debit, precision("debit", el[i]));
 		tc += flt(el[i].credit, precision("credit", el[i]));
@@ -200,7 +200,7 @@ cur_frm.cscript.account = function(doc,dt,dn) {
 			args: {account: d.account, date: doc.posting_date},
 			callback: function(r) {
 				d.balance = r.message;
-				refresh_field('balance', d.name, 'entries');
+				refresh_field('balance', d.name, 'accounts');
 			}
 		});
 	}
@@ -223,17 +223,17 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	cur_frm.set_df_property("cheque_no", "reqd", doc.voucher_type=="Bank Entry");
 	cur_frm.set_df_property("cheque_date", "reqd", doc.voucher_type=="Bank Entry");
 
-	if((doc.entries || []).length!==0 || !doc.company) // too early
+	if((doc.accounts || []).length!==0 || !doc.company) // too early
 		return;
 
 	var update_jv_details = function(doc, r) {
-		var jvdetail = frappe.model.add_child(doc, "Journal Entry Account", "entries");
+		var jvdetail = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
 		$.each(r, function(i, d) {
-			var row = frappe.model.add_child(doc, "Journal Entry Account", "entries");
+			var row = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
 			row.account = d.account;
 			row.balance = d.balance;
 		});
-		refresh_field("entries");
+		refresh_field("accounts");
 	}
 
 	if(in_list(["Bank Entry", "Cash Entry"], doc.voucher_type)) {
@@ -258,7 +258,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 				"company": doc.company
 			},
 			callback: function(r) {
-				frappe.model.clear_table(doc, "entries");
+				frappe.model.clear_table(doc, "accounts");
 				if(r.message) {
 					update_jv_details(doc, r.message);
 				}

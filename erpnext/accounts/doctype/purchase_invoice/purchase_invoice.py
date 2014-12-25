@@ -12,12 +12,12 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
 
 form_grid_templates = {
-	"entries": "templates/form_grid/item_grid.html"
+	"items": "templates/form_grid/item_grid.html"
 }
 
 class PurchaseInvoice(BuyingController):
 	tname = 'Purchase Invoice Item'
-	fname = 'entries'
+	fname = 'items'
 
 	def __init__(self, arg1, arg2=None):
 		super(PurchaseInvoice, self).__init__(arg1, arg2)
@@ -53,7 +53,7 @@ class PurchaseInvoice(BuyingController):
 		self.set_aging_date()
 		self.set_against_expense_account()
 		self.validate_write_off_account()
-		self.update_valuation_rate("entries")
+		self.update_valuation_rate("items")
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount",
 			"items")
 		self.create_remarks()
@@ -78,7 +78,7 @@ class PurchaseInvoice(BuyingController):
 			"Purchase Invoice Advance", "advances", "debit", "purchase_order")
 
 	def check_active_purchase_items(self):
-		for d in self.get('entries'):
+		for d in self.get('items'):
 			if d.item_code:		# extra condn coz item_code is not mandatory in PV
 				if frappe.db.get_value("Item", d.item_code, "is_purchase_item") != 'Yes':
 					msgprint(_("Item {0} is not Purchase Item").format(d.item_code), raise_exception=True)
@@ -99,7 +99,7 @@ class PurchaseInvoice(BuyingController):
 
 	def check_for_stopped_status(self):
 		check_list = []
-		for d in self.get('entries'):
+		for d in self.get('items'):
 			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
 				check_list.append(d.purchase_order)
 				stopped = frappe.db.sql("select name from `tabPurchase Order` where status = 'Stopped' and name = %s", d.purchase_order)
@@ -159,7 +159,7 @@ class PurchaseInvoice(BuyingController):
 
 		against_accounts = []
 		stock_items = self.get_stock_items()
-		for item in self.get("entries"):
+		for item in self.get("items"):
 			if auto_accounting_for_stock and item.item_code in stock_items \
 					and self.is_opening == 'No':
 				# in case of auto inventory accounting, against expense account is always
@@ -181,13 +181,13 @@ class PurchaseInvoice(BuyingController):
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
-			 for d in self.get('entries'):
+			 for d in self.get('items'):
 				 if not d.purchase_order:
 					 throw(_("Purchse Order number required for Item {0}").format(d.item_code))
 
 	def pr_required(self):
 		if frappe.db.get_value("Buying Settings", None, "pr_required") == 'Yes':
-			 for d in self.get('entries'):
+			 for d in self.get('items'):
 				 if not d.purchase_receipt:
 					 throw(_("Purchase Receipt number required for Item {0}").format(d.item_code))
 
@@ -196,7 +196,7 @@ class PurchaseInvoice(BuyingController):
 			throw(_("Please enter Write Off Account"))
 
 	def check_prev_docstatus(self):
-		for d in self.get('entries'):
+		for d in self.get('items'):
 			if d.purchase_order:
 				submitted = frappe.db.sql("select name from `tabPurchase Order` where docstatus = 1 and name = %s", d.purchase_order)
 				if not submitted:
@@ -301,7 +301,7 @@ class PurchaseInvoice(BuyingController):
 		# item gl entries
 		negative_expense_to_be_booked = 0.0
 		stock_items = self.get_stock_items()
-		for item in self.get("entries"):
+		for item in self.get("items"):
 			if flt(item.base_amount):
 				gl_entries.append(
 					self.get_gl_dict({

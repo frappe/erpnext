@@ -799,7 +799,7 @@ return_map = {
 	"Sales Return": {
 		# [Ref DocType, [Item tables' parentfields]]
 		"delivery_note_no": ["Delivery Note", ["items", "packed_items"]],
-		"sales_invoice_no": ["Sales Invoice", ["entries", "packed_items"]]
+		"sales_invoice_no": ["Sales Invoice", ["items", "packed_items"]]
 	},
 	"Purchase Return": {
 		"purchase_receipt_no": ["Purchase Receipt", ["items"]]
@@ -832,7 +832,7 @@ def make_return_jv(stock_entry):
 
 	from erpnext.accounts.utils import get_balance_on
 	for r in result:
-		jv.append("entries", {
+		jv.append("accounts", {
 			"account": r.get("account"),
 			"party_type": r.get("party_type"),
 			"party": r.get("party"),

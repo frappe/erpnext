@@ -28,11 +28,11 @@ class BankReconciliation(Document):
 				and ifnull(t1.is_opening, 'No') = 'No' %s""" %
 				('%s', '%s', '%s', condition), (self.bank_account, self.from_date, self.to_date), as_dict=1)
 
-		self.set('entries', [])
+		self.set('journal_entries', [])
 		self.total_amount = 0.0
 
 		for d in dl:
-			nl = self.append('entries', {})
+			nl = self.append('journal_entries', {})
 			nl.posting_date = d.posting_date
 			nl.voucher_id = d.name
 			nl.cheque_number = d.cheque_no
@@ -45,7 +45,7 @@ class BankReconciliation(Document):
 
 	def update_details(self):
 		vouchers = []
-		for d in self.get('entries'):
+		for d in self.get('journal_entries'):
 			if d.clearance_date:
 				if d.cheque_date and getdate(d.clearance_date) < getdate(d.cheque_date):
 					frappe.throw(_("Clearance date cannot be before check date in row {0}").format(d.idx))

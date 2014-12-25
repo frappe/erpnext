@@ -385,7 +385,7 @@ class AccountsController(TransactionBase):
 			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
 	def get_advances(self, account_head, party_type, party, child_doctype, parentfield, dr_or_cr, against_order_field):
-		so_list = list(set([d.get(against_order_field) for d in self.get("entries") if d.get(against_order_field)]))
+		so_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
 		cond = ""
 		if so_list:
 			cond = "or (ifnull(t2.%s, '')  in (%s))" % ("against_" + against_order_field, ', '.join(['%s']*len(so_list)))
@@ -421,7 +421,7 @@ class AccountsController(TransactionBase):
 			})
 
 	def validate_advance_jv(self, advance_table_fieldname, against_order_field):
-		order_list = list(set([d.get(against_order_field) for d in self.get("entries") if d.get(against_order_field)]))
+		order_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
 		if order_list:
 			account = self.get("debit_to" if self.doctype=="Sales Invoice" else "credit_to")
 
@@ -452,7 +452,7 @@ class AccountsController(TransactionBase):
 		item_tolerance = {}
 		global_tolerance = None
 
-		for item in self.get("entries"):
+		for item in self.get("items"):
 			if item.get(item_ref_dn):
 				ref_amt = flt(frappe.db.get_value(ref_dt + " Item",
 					item.get(item_ref_dn), based_on), self.precision(based_on, item))

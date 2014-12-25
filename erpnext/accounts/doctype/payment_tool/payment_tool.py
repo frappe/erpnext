@@ -35,7 +35,7 @@ class PaymentTool(Document):
 					v.against_voucher_type))
 
 			if v.payment_amount:
-				d1 = jv.append("entries")
+				d1 = jv.append("accounts")
 				d1.account = self.party_account
 				d1.party_type = self.party_type
 				d1.party = self.party
@@ -45,7 +45,7 @@ class PaymentTool(Document):
 				d1.set('is_advance', 'Yes' if v.against_voucher_type in ['Sales Order', 'Purchase Order'] else 'No')
 				total_payment_amount = flt(total_payment_amount) + flt(d1.debit) - flt(d1.credit)
 
-		d2 = jv.append("entries")
+		d2 = jv.append("accounts")
 		d2.account = self.payment_account
 		d2.set('debit' if total_payment_amount < 0 else 'credit', abs(total_payment_amount))
 		if self.payment_account:

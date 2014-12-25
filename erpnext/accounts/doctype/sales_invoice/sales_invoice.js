@@ -199,7 +199,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.write_off_outstanding_amount_automatically();
 	},
 
-	entries_add: function(doc, cdt, cdn) {
+	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("items", row, ["income_account", "cost_center"]);
 	},
@@ -209,7 +209,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.hide_fields(this.frm.doc);
 	},
 
-	entries_on_form_rendered: function(doc, grid_row) {
+	items_on_form_rendered: function(doc, grid_row) {
 		erpnext.setup_serial_no(grid_row)
 	}
 

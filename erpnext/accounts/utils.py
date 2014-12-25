@@ -184,7 +184,7 @@ def update_against_doc(d, jv_obj):
 	"""
 		Updates against document, if partial amount splits into rows
 	"""
-	jv_detail = jv_obj.get("entries", {"name": d["voucher_detail_no"]})[0]
+	jv_detail = jv_obj.get("accounts", {"name": d["voucher_detail_no"]})[0]
 	jv_detail.set(d["dr_or_cr"], d["allocated_amt"])
 	jv_detail.set(d["against_fld"], d["against_voucher"])
 
@@ -192,7 +192,7 @@ def update_against_doc(d, jv_obj):
 		jvd = frappe.db.sql("""select cost_center, balance, against_account, is_advance
 			from `tabJournal Entry Account` where name = %s""", d['voucher_detail_no'])
 		# new entry with balance amount
-		ch = jv_obj.append("entries")
+		ch = jv_obj.append("accounts")
 		ch.account = d['account']
 		ch.party_type = d["party_type"]
 		ch.party = d["party"]

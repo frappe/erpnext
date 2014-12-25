@@ -48,12 +48,12 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
 		jv.posting_date = dateutil.obj_to_str(new Date());
 
 		// credit to bank
-		var d1 = frappe.model.add_child(jv, 'Journal Entry Account', 'entries');
+		var d1 = frappe.model.add_child(jv, 'Journal Entry Account', 'accounts');
 		d1.account = r.message['default_bank_account'];
 		d1.credit = r.message['amount']
 
 		// debit to salary account
-		var d2 = frappe.model.add_child(jv, 'Journal Entry Account', 'entries');
+		var d2 = frappe.model.add_child(jv, 'Journal Entry Account', 'accounts');
 		d2.debit = r.message['amount']
 
 		loaddoc('Journal Entry', jv.name);

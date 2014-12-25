@@ -199,7 +199,7 @@ class StatusUpdater(Document):
 		all_zero_amount_refdoc = frappe.db.sql_list("""select name from `tab%s`
 			where docstatus=1 and net_total = 0""" % ref_dt)
 
-		for item in self.get("entries"):
+		for item in self.get("items"):
 			if item.get(ref_fieldname) \
 				and item.get(ref_fieldname) in all_zero_amount_refdoc \
 				and item.get(ref_fieldname) not in zero_amount_refdoc:

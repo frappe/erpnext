@@ -312,7 +312,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 
-		if len(target.get("entries")) == 0:
+		if len(target.get("items")) == 0:
 			frappe.throw(_("All these items have already been invoiced"))
 
 		target.run_method("calculate_taxes_and_totals")

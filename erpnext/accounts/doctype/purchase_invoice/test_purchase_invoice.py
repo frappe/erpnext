@@ -78,7 +78,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pr.submit()
 
 		pi = frappe.copy_doc(test_records[1])
-		for d in pi.get("entries"):
+		for d in pi.get("items"):
 			d.purchase_receipt = pr.name
 		pi.insert()
 		pi.submit()
@@ -107,8 +107,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 
 		pi = frappe.copy_doc(test_records[1])
-		pi.get("entries")[0].item_code = "_Test Non Stock Item"
-		pi.get("entries")[0].expense_account = "_Test Account Cost for Goods Sold - _TC"
+		pi.get("items")[0].item_code = "_Test Non Stock Item"
+		pi.get("items")[0].expense_account = "_Test Account Cost for Goods Sold - _TC"
 		pi.get("taxes").pop(0)
 		pi.get("taxes").pop(1)
 		pi.insert()
@@ -140,7 +140,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			["_Test Item Home Desktop 100", 90, 59],
 			["_Test Item Home Desktop 200", 135, 177]
 		]
-		for i, item in enumerate(wrapper.get("entries")):
+		for i, item in enumerate(wrapper.get("items")):
 			self.assertEqual(item.item_code, expected_values[i][0])
 			self.assertEqual(item.item_tax_amount, expected_values[i][1])
 			self.assertEqual(item.valuation_rate, expected_values[i][2])
@@ -166,7 +166,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 	def test_purchase_invoice_with_subcontracted_item(self):
 		wrapper = frappe.copy_doc(test_records[0])
-		wrapper.get("entries")[0].item_code = "_Test FG Item"
+		wrapper.get("items")[0].item_code = "_Test FG Item"
 		wrapper.insert()
 		wrapper.load_from_db()
 
@@ -174,7 +174,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			["_Test FG Item", 90, 59],
 			["_Test Item Home Desktop 200", 135, 177]
 		]
-		for i, item in enumerate(wrapper.get("entries")):
+		for i, item in enumerate(wrapper.get("items")):
 			self.assertEqual(item.item_code, expected_values[i][0])
 			self.assertEqual(item.item_tax_amount, expected_values[i][1])
 			self.assertEqual(item.valuation_rate, expected_values[i][2])
@@ -209,7 +209,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi = frappe.copy_doc(test_records[0])
 		pi.append("advances", {
 			"journal_entry": jv.name,
-			"jv_detail_no": jv.get("entries")[0].name,
+			"jv_detail_no": jv.get("accounts")[0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
 			"remarks": jv.remark

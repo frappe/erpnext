@@ -13,12 +13,12 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
 
 form_grid_templates = {
-	"entries": "templates/form_grid/item_grid.html"
+	"items": "templates/form_grid/item_grid.html"
 }
 
 class SalesInvoice(SellingController):
 	tname = 'Sales Invoice Item'
-	fname = 'entries'
+	fname = 'items'
 
 	def __init__(self, arg1, arg2=None):
 		super(SalesInvoice, self).__init__(arg1, arg2)
@@ -133,7 +133,7 @@ class SalesInvoice(SellingController):
 				'second_source_field': 'qty',
 				'second_join_field': 'so_detail',
 				'overflow_type': 'delivery',
-				'extra_cond': """ and exists(select name from `tabSales Invoice` 
+				'extra_cond': """ and exists(select name from `tabSales Invoice`
 					where name=`tabSales Invoice Item`.parent and ifnull(update_stock, 0) = 1)"""
 			})
 
@@ -187,7 +187,7 @@ class SalesInvoice(SellingController):
 				self.update_stock = cint(pos.get("update_stock"))
 
 			# set pos values in items
-			for item in self.get("entries"):
+			for item in self.get("items"):
 				if item.get('item_code'):
 					for fname, val in get_pos_settings_item_details(pos,
 						frappe._dict(item.as_dict()), pos).items():
@@ -249,7 +249,7 @@ class SalesInvoice(SellingController):
 
 	def validate_fixed_asset_account(self):
 		"""Validate Fixed Asset and whether Income Account Entered Exists"""
-		for d in self.get('entries'):
+		for d in self.get('items'):
 			item = frappe.db.sql("""select name,is_asset_item,is_sales_item from `tabItem`
 				where name = %s""", d.item_code)
 			acc = frappe.db.sql("""select account_type from `tabAccount`
@@ -296,7 +296,7 @@ class SalesInvoice(SellingController):
 	def set_against_income_account(self):
 		"""Set against account for debit to account"""
 		against_acc = []
-		for d in self.get('entries'):
+		for d in self.get('items'):
 			if d.income_account not in against_acc:
 				against_acc.append(d.income_account)
 		self.against_income_account = ','.join(against_acc)
@@ -311,7 +311,7 @@ class SalesInvoice(SellingController):
 		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
 		for i in dic:
 			if frappe.db.get_value('Selling Settings', None, dic[i]) == 'Yes':
-				for d in self.get('entries'):
+				for d in self.get('items'):
 					if frappe.db.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
 						and not d.get(i.lower().replace(' ','_')):
 						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
@@ -336,12 +336,12 @@ class SalesInvoice(SellingController):
 
 
 	def validate_item_code(self):
-		for d in self.get('entries'):
+		for d in self.get('items'):
 			if not d.item_code:
 				msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
 
 	def validate_delivery_note(self):
-		for d in self.get("entries"):
+		for d in self.get("items"):
 			if d.delivery_note:
 				msgprint(_("Stock cannot be updated against Delivery Note {0}").format(d.delivery_note), raise_exception=1)
 
@@ -366,7 +366,7 @@ class SalesInvoice(SellingController):
 				.format(self.name, self.c_form_no), raise_exception = 1)
 
 	def update_current_stock(self):
-		for d in self.get('entries'):
+		for d in self.get('items'):
 			if d.item_code and d.warehouse:
 				bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 				d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
@@ -399,12 +399,12 @@ class SalesInvoice(SellingController):
 			if cint(self.is_pos) == 1:
 				w = self.get_warehouse()
 				if w:
-					for d in self.get('entries'):
+					for d in self.get('items'):
 						if not d.warehouse:
 							d.warehouse = cstr(w)
 
 			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-			make_packing_list(self, 'entries')
+			make_packing_list(self, 'items')
 		else:
 			self.set('packed_items', [])
 
@@ -421,7 +421,7 @@ class SalesInvoice(SellingController):
 			frappe.db.set(self,'paid_amount',0)
 
 	def check_prev_docstatus(self):
-		for d in self.get('entries'):
+		for d in self.get('items'):
 			if d.sales_order:
 				submitted = frappe.db.sql("""select name from `tabSales Order`
 					where docstatus = 1 and name = %s""", d.sales_order)
@@ -514,7 +514,7 @@ class SalesInvoice(SellingController):
 
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
-		for item in self.get("entries"):
+		for item in self.get("items"):
 			if flt(item.base_amount):
 				gl_entries.append(
 					self.get_gl_dict({

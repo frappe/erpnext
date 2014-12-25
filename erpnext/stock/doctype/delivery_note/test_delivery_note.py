@@ -34,10 +34,10 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.submit()
 		si = make_sales_invoice(dn.name)
 
-		self.assertEquals(len(si.get("entries")), len(dn.get("items")))
+		self.assertEquals(len(si.get("items")), len(dn.get("items")))
 
 		# modify amount
-		si.get("entries")[0].rate = 200
+		si.get("items")[0].rate = 200
 		self.assertRaises(frappe.ValidationError, frappe.get_doc(si).insert)
 
 

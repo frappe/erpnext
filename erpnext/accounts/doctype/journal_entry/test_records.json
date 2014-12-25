@@ -4,7 +4,7 @@
   "cheque_no": "33",
   "company": "_Test Company",
   "doctype": "Journal Entry",
-  "entries": [
+  "accounts": [
    {
     "account": "_Test Receivable - _TC",
 	"party_type": "Customer",
@@ -12,14 +12,14 @@
     "credit": 400.0,
     "debit": 0.0,
     "doctype": "Journal Entry Account",
-    "parentfield": "entries"
+    "parentfield": "accounts"
    },
    {
     "account": "_Test Account Bank Account - _TC",
     "credit": 0.0,
     "debit": 400.0,
     "doctype": "Journal Entry Account",
-    "parentfield": "entries"
+    "parentfield": "accounts"
    }
   ],
   "fiscal_year": "_Test Fiscal Year 2013",
@@ -33,7 +33,7 @@
   "cheque_no": "33",
   "company": "_Test Company",
   "doctype": "Journal Entry",
-  "entries": [
+  "accounts": [
    {
     "account": "_Test Payable - _TC",
 	"party_type": "Supplier",
@@ -41,14 +41,14 @@
     "credit": 0.0,
     "debit": 400.0,
     "doctype": "Journal Entry Account",
-    "parentfield": "entries"
+    "parentfield": "accounts"
    },
    {
     "account": "_Test Account Bank Account - _TC",
     "credit": 400.0,
     "debit": 0.0,
     "doctype": "Journal Entry Account",
-    "parentfield": "entries"
+    "parentfield": "accounts"
    }
   ],
   "fiscal_year": "_Test Fiscal Year 2013",
@@ -62,7 +62,7 @@
   "cheque_no": "33",
   "company": "_Test Company",
   "doctype": "Journal Entry",
-  "entries": [
+  "accounts": [
    {
     "account": "_Test Receivable - _TC",
 	"party_type": "Customer",
@@ -70,7 +70,7 @@
     "credit": 0.0,
     "debit": 400.0,
     "doctype": "Journal Entry Account",
-    "parentfield": "entries"
+    "parentfield": "accounts"
    },
    {
     "account": "Sales - _TC",
@@ -78,7 +78,7 @@
     "credit": 400.0,
     "debit": 0.0,
     "doctype": "Journal Entry Account",
-    "parentfield": "entries"
+    "parentfield": "accounts"
    }
   ],
   "fiscal_year": "_Test Fiscal Year 2013",

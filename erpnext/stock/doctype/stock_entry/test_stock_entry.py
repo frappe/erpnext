@@ -325,9 +325,9 @@ class TestStockEntry(unittest.TestCase):
 		# insert a pos invoice with update stock
 		si = frappe.copy_doc(sales_invoice_test_records[1])
 		si.update_stock = 1
-		si.get("entries")[0].warehouse = "_Test Warehouse - _TC"
-		si.get("entries")[0].item_code = item_code
-		si.get("entries")[0].qty = 5.0
+		si.get("items")[0].warehouse = "_Test Warehouse - _TC"
+		si.get("items")[0].item_code = item_code
+		si.get("items")[0].qty = 5.0
 		si.insert()
 		si.submit()
 
@@ -401,7 +401,7 @@ class TestStockEntry(unittest.TestCase):
 		si = frappe.get_doc(si_doc)
 		si.posting_date = dn.posting_date
 		si.debit_to = "_Test Receivable - _TC"
-		for d in si.get("entries"):
+		for d in si.get("items"):
 			d.income_account = "Sales - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
 		si.insert()
@@ -435,14 +435,14 @@ class TestStockEntry(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.stock_entry import make_return_jv
 		jv = make_return_jv(se.name)
 
-		self.assertEqual(len(jv.get("entries")), 2)
+		self.assertEqual(len(jv.get("accounts")), 2)
 		self.assertEqual(jv.get("voucher_type"), "Credit Note")
 		self.assertEqual(jv.get("posting_date"), se.posting_date)
-		self.assertEqual(jv.get("entries")[0].get("account"), "_Test Receivable - _TC")
-		self.assertEqual(jv.get("entries")[0].get("party_type"), "Customer")
-		self.assertEqual(jv.get("entries")[0].get("party"), "_Test Customer")
-		self.assertTrue(jv.get("entries")[0].get("against_invoice"))
-		self.assertEqual(jv.get("entries")[1].get("account"), "Sales - _TC")
+		self.assertEqual(jv.get("accounts")[0].get("account"), "_Test Receivable - _TC")
+		self.assertEqual(jv.get("accounts")[0].get("party_type"), "Customer")
+		self.assertEqual(jv.get("accounts")[0].get("party"), "_Test Customer")
+		self.assertTrue(jv.get("accounts")[0].get("against_invoice"))
+		self.assertEqual(jv.get("accounts")[1].get("account"), "Sales - _TC")
 
 	def test_make_return_jv_for_sales_invoice_non_packing_item(self):
 		self._clear_stock_account_balance()
@@ -496,7 +496,7 @@ class TestStockEntry(unittest.TestCase):
 		si = make_sales_invoice(so.name)
 		si.posting_date = dn.posting_date
 		si.debit_to = "_Test Receivable - _TC"
-		for d in si.get("entries"):
+		for d in si.get("items"):
 			d.income_account = "Sales - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
 		si.insert()
@@ -542,7 +542,7 @@ class TestStockEntry(unittest.TestCase):
 		pi = frappe.get_doc(pi_doc)
 		pi.posting_date = pr.posting_date
 		pi.credit_to = "_Test Payable - _TC"
-		for d in pi.get("entries"):
+		for d in pi.get("items"):
 			d.expense_account = "_Test Account Cost for Goods Sold - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
 
@@ -595,13 +595,13 @@ class TestStockEntry(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.stock_entry import make_return_jv
 		jv = make_return_jv(se.name)
 
-		self.assertEqual(len(jv.get("entries")), 2)
+		self.assertEqual(len(jv.get("accounts")), 2)
 		self.assertEqual(jv.get("voucher_type"), "Debit Note")
 		self.assertEqual(jv.get("posting_date"), se.posting_date)
-		self.assertEqual(jv.get("entries")[0].get("account"), "_Test Payable - _TC")
-		self.assertEqual(jv.get("entries")[0].get("party"), "_Test Supplier")
-		self.assertEqual(jv.get("entries")[1].get("account"), "_Test Account Cost for Goods Sold - _TC")
-		self.assertTrue(jv.get("entries")[0].get("against_voucher"))
+		self.assertEqual(jv.get("accounts")[0].get("account"), "_Test Payable - _TC")
+		self.assertEqual(jv.get("accounts")[0].get("party"), "_Test Supplier")
+		self.assertEqual(jv.get("accounts")[1].get("account"), "_Test Account Cost for Goods Sold - _TC")
+		self.assertTrue(jv.get("accounts")[0].get("against_voucher"))
 
 	def test_make_return_jv_for_purchase_receipt(self):
 		self._clear_stock_account_balance()
@@ -646,7 +646,7 @@ class TestStockEntry(unittest.TestCase):
 		pi = frappe.get_doc(pi_doc)
 		pi.posting_date = pr.posting_date
 		pi.credit_to = "_Test Payable - _TC"
-		for d in pi.get("entries"):
+		for d in pi.get("items"):
 			d.expense_account = "_Test Account Cost for Goods Sold - _TC"
 			d.cost_center = "_Test Cost Center - _TC"
 		for d in pi.get("taxes"):

@@ -47,8 +47,8 @@ class TestJournalEntry(unittest.TestCase):
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
 			where %s=%s""" % (field_dict.get(test_voucher.doctype), '%s'), (test_voucher.name)))
 
-		base_jv.get("entries")[0].is_advance = "Yes" if (test_voucher.doctype in ["Sales Order", "Purchase Order"]) else "No"
-		base_jv.get("entries")[0].set(field_dict.get(test_voucher.doctype), test_voucher.name)
+		base_jv.get("accounts")[0].is_advance = "Yes" if (test_voucher.doctype in ["Sales Order", "Purchase Order"]) else "No"
+		base_jv.get("accounts")[0].set(field_dict.get(test_voucher.doctype), test_voucher.name)
 		base_jv.insert()
 		base_jv.submit()
 
@@ -60,7 +60,7 @@ class TestJournalEntry(unittest.TestCase):
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where %s=%s and %s=400""" % (field_dict.get(submitted_voucher.doctype), '%s', dr_or_cr), (submitted_voucher.name)))
 
-		if base_jv.get("entries")[0].is_advance == "Yes":
+		if base_jv.get("accounts")[0].is_advance == "Yes":
 			self.advance_paid_testcase(base_jv, submitted_voucher, dr_or_cr)
 		self.cancel_against_voucher_testcase(submitted_voucher)
 
@@ -68,7 +68,7 @@ class TestJournalEntry(unittest.TestCase):
 		#Test advance paid field
 		advance_paid = frappe.db.sql("""select advance_paid from `tab%s`
 					where name=%s""" % (test_voucher.doctype, '%s'), (test_voucher.name))
-		payment_against_order = base_jv.get("entries")[0].get(dr_or_cr)
+		payment_against_order = base_jv.get("accounts")[0].get(dr_or_cr)
 
 		self.assertTrue(flt(advance_paid[0][0]) == flt(payment_against_order))
 
@@ -89,7 +89,7 @@ class TestJournalEntry(unittest.TestCase):
 		set_perpetual_inventory()
 
 		jv = frappe.copy_doc(test_records[0])
-		jv.get("entries")[0].update({
+		jv.get("accounts")[0].update({
 			"account": "_Test Warehouse - _TC",
 			"party_type": None,
 			"party": None
@@ -107,10 +107,10 @@ class TestJournalEntry(unittest.TestCase):
 		self.clear_account_balance()
 
 		jv = frappe.copy_doc(test_records[0])
-		jv.get("entries")[1].account = "_Test Account Cost for Goods Sold - _TC"
-		jv.get("entries")[1].cost_center = "_Test Cost Center - _TC"
-		jv.get("entries")[1].debit = 20000.0
-		jv.get("entries")[0].credit = 20000.0
+		jv.get("accounts")[1].account = "_Test Account Cost for Goods Sold - _TC"
+		jv.get("accounts")[1].cost_center = "_Test Cost Center - _TC"
+		jv.get("accounts")[1].debit = 20000.0
+		jv.get("accounts")[0].credit = 20000.0
 		jv.insert()
 		jv.submit()
 		self.assertTrue(frappe.db.get_value("GL Entry",
@@ -122,10 +122,10 @@ class TestJournalEntry(unittest.TestCase):
 		self.clear_account_balance()
 
 		jv = frappe.copy_doc(test_records[0])
-		jv.get("entries")[1].account = "_Test Account Cost for Goods Sold - _TC"
-		jv.get("entries")[1].cost_center = "_Test Cost Center - _TC"
-		jv.get("entries")[1].debit = 20000.0
-		jv.get("entries")[0].credit = 20000.0
+		jv.get("accounts")[1].account = "_Test Account Cost for Goods Sold - _TC"
+		jv.get("accounts")[1].cost_center = "_Test Cost Center - _TC"
+		jv.get("accounts")[1].debit = 20000.0
+		jv.get("accounts")[0].credit = 20000.0
 		jv.insert()
 
 		self.assertRaises(BudgetError, jv.submit)
@@ -141,10 +141,10 @@ class TestJournalEntry(unittest.TestCase):
 
 		jv = frappe.copy_doc(test_records[0])
 		jv.posting_date = "2013-08-12"
-		jv.get("entries")[1].account = "_Test Account Cost for Goods Sold - _TC"
-		jv.get("entries")[1].cost_center = "_Test Cost Center - _TC"
-		jv.get("entries")[1].debit = 150000.0
-		jv.get("entries")[0].credit = 150000.0
+		jv.get("accounts")[1].account = "_Test Account Cost for Goods Sold - _TC"
+		jv.get("accounts")[1].cost_center = "_Test Cost Center - _TC"
+		jv.get("accounts")[1].debit = 150000.0
+		jv.get("accounts")[0].credit = 150000.0
 		jv.insert()
 
 		self.assertRaises(BudgetError, jv.submit)
@@ -157,24 +157,24 @@ class TestJournalEntry(unittest.TestCase):
 		self.clear_account_balance()
 
 		jv = frappe.copy_doc(test_records[0])
-		jv.get("entries")[0].update({
+		jv.get("accounts")[0].update({
 			"account": "_Test Account Cost for Goods Sold - _TC",
 			"cost_center": "_Test Cost Center - _TC",
 			"party_type": None,
 			"party": None,
 			"credit": 30000.0
 		})
-		jv.get("entries")[1].debit = 30000.0
+		jv.get("accounts")[1].debit = 30000.0
 		jv.submit()
 
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv.name}))
 
 		jv1 = frappe.copy_doc(test_records[0])
-		jv1.get("entries")[1].account = "_Test Account Cost for Goods Sold - _TC"
-		jv1.get("entries")[1].cost_center = "_Test Cost Center - _TC"
-		jv1.get("entries")[1].debit = 40000.0
-		jv1.get("entries")[0].credit = 40000.0
+		jv1.get("accounts")[1].account = "_Test Account Cost for Goods Sold - _TC"
+		jv1.get("accounts")[1].cost_center = "_Test Cost Center - _TC"
+		jv1.get("accounts")[1].debit = 40000.0
+		jv1.get("accounts")[0].credit = 40000.0
 		jv1.submit()
 
 		self.assertTrue(frappe.db.get_value("GL Entry",

@@ -20,12 +20,12 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 				jv.remark = 'Payment against Expense Claim: ' + cur_frm.doc.name;
 				jv.fiscal_year = cur_frm.doc.fiscal_year;
 
-				var d1 = frappe.model.add_child(jv, 'Journal Entry Account', 'entries');
+				var d1 = frappe.model.add_child(jv, 'Journal Entry Account', 'accounts');
 				d1.debit = cur_frm.doc.total_sanctioned_amount;
 				d1.against_expense_claim = cur_frm.doc.name;
 
 				// credit to bank
-				var d1 = frappe.model.add_child(jv, 'Journal Entry Account', 'entries');
+				var d1 = frappe.model.add_child(jv, 'Journal Entry Account', 'accounts');
 				d1.credit = cur_frm.doc.total_sanctioned_amount;
 				d1.against_expense_claim = cur_frm.doc.name;
 				if(r.message) {

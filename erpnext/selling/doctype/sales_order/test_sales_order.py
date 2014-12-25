@@ -50,8 +50,8 @@ class TestSalesOrder(unittest.TestCase):
 		si = self.make_next_doc_testcase(so, "Sales Invoice")
 
 		self.assertEquals(si.doctype, "Sales Invoice")
-		self.assertEquals(len(si.get("entries")), len(so.get("items")))
-		self.assertEquals(len(si.get("entries")), 1)
+		self.assertEquals(len(si.get("items")), len(so.get("items")))
+		self.assertEquals(len(si.get("items")), 1)
 
 		si.set("debit_to", "_Test Receivable - _TC")
 		si.set("posting_date", "2013-10-10")
@@ -59,7 +59,7 @@ class TestSalesOrder(unittest.TestCase):
 		si.submit()
 
 		si1 = self.make_next_doc_testcase(so, "Sales Invoice")
-		self.assertEquals(len(si1.get("entries")), 0)
+		self.assertEquals(len(si1.get("items")), 0)
 
 	def test_update_qty(self):
 		so = frappe.copy_doc(test_records[0]).insert()
@@ -82,7 +82,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		si1.set("debit_to", "_Test Receivable - _TC")
 		si1.set("posting_date", "2013-10-10")
-		si1.get("entries")[0].qty = 1
+		si1.get("items")[0].qty = 1
 		si1.insert()
 		si1.submit()
 
@@ -96,7 +96,7 @@ class TestSalesOrder(unittest.TestCase):
 		si2.set("debit_to", "_Test Receivable - _TC")
 		si2.set("posting_date", "2013-10-10")
 		si2.set("update_stock", 1)
-		si2.get("entries")[0].qty = 3
+		si2.get("items")[0].qty = 3
 		si2.insert()
 		si2.submit()
 

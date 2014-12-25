@@ -123,11 +123,11 @@ class TestPaymentTool(unittest.TestCase):
 
 	def create_against_jv(self, test_record, args):
 		jv = frappe.copy_doc(test_record)
-		jv.get("entries")[0].update(args)
+		jv.get("accounts")[0].update(args)
 		if args.get("debit"):
-			jv.get("entries")[1].credit = args["debit"]
+			jv.get("accounts")[1].credit = args["debit"]
 		elif args.get("credit"):
-			jv.get("entries")[1].debit = args["credit"]
+			jv.get("accounts")[1].debit = args["credit"]
 
 		jv.insert()
 		jv.submit()
@@ -174,7 +174,7 @@ class TestPaymentTool(unittest.TestCase):
 			[paytool.party_account, paytool.party, 100.00, None, None, None, None, expected_outstanding.get("Purchase Order")[0]]
 		]
 
-		for jv_entry in new_jv.get("entries"):
+		for jv_entry in new_jv.get("accounts"):
 			if paytool.party_account == jv_entry.get("account") and paytool.party == jv_entry.get("party"):
 				row = [
 					jv_entry.get("account"),

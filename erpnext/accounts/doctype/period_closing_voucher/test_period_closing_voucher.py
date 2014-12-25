@@ -16,10 +16,10 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		jv.submit()
 
 		jv1 = frappe.copy_doc(jv_records[0])
-		jv1.get("entries")[1].account = "_Test Account Cost for Goods Sold - _TC"
-		jv1.get("entries")[1].cost_center = "_Test Cost Center - _TC"
-		jv1.get("entries")[1].debit = 600.0
-		jv1.get("entries")[0].credit = 600.0
+		jv1.get("accounts")[1].account = "_Test Account Cost for Goods Sold - _TC"
+		jv1.get("accounts")[1].cost_center = "_Test Cost Center - _TC"
+		jv1.get("accounts")[1].debit = 600.0
+		jv1.get("accounts")[0].credit = 600.0
 		jv1.insert()
 		jv1.submit()
 

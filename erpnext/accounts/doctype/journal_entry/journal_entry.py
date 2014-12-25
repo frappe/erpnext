@@ -47,7 +47,7 @@ class JournalEntry(AccountsController):
 
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
-		for d in self.get("entries"):
+		for d in self.get("accounts"):
 			if d.is_advance:
 				if d.against_sales_order:
 					advance_paid.setdefault("Sales Order", []).append(d.against_sales_order)
@@ -67,7 +67,7 @@ class JournalEntry(AccountsController):
 		self.update_expense_claim()
 
 	def validate_party(self):
-		for d in self.get("entries"):
+		for d in self.get("accounts"):
 			account_type = frappe.db.get_value("Account", d.account, "account_type")
 			if account_type in ["Receivable", "Payable"]:
 				if not (d.party_type and d.party):
@@ -76,7 +76,7 @@ class JournalEntry(AccountsController):
 				frappe.throw(_("Row{0}: Party Type and Party is only applicable against Receivable / Payable account").format(d.idx))
 
 	def check_credit_limit(self):
-		customers = list(set([d.party for d in self.get("entries") if d.party_type=="Customer" and flt(d.debit) > 0]))
+		customers = list(set([d.party for d in self.get("accounts") if d.party_type=="Customer" and flt(d.debit) > 0]))
 		if customers:
 			from erpnext.selling.doctype.customer.customer import check_credit_limit
 			for customer in customers:
@@ -86,7 +86,7 @@ class JournalEntry(AccountsController):
 		from erpnext.accounts.party import get_credit_days
 		posting_date = None
 		if self.cheque_date:
-			for d in self.get("entries"):
+			for d in self.get("accounts"):
 				if d.party_type and d.party and d.get("credit" if d.party_type=="Customer" else "debit") > 0:
 					if d.against_invoice:
 						posting_date = frappe.db.get_value("Sales Invoice", d.against_invoice, "posting_date")
@@ -110,7 +110,7 @@ class JournalEntry(AccountsController):
 			msgprint(_("Reference No is mandatory if you entered Reference Date"), raise_exception=1)
 
 	def validate_entries_for_advance(self):
-		for d in self.get('entries'):
+		for d in self.get('accounts'):
 			if not (d.against_voucher and d.against_invoice and d.against_jv):
 				if (d.party_type == 'Customer' and flt(d.credit) > 0) or \
 						(d.party_type == 'Supplier' and flt(d.debit) > 0):
@@ -120,14 +120,14 @@ class JournalEntry(AccountsController):
 						frappe.throw(_("Row {0}: Payment against Sales/Purchase Order should always be marked as advance").format(d.idx))
 
 	def validate_against_jv(self):
-		for d in self.get('entries'):
+		for d in self.get('accounts'):
 			if d.against_jv:
 				account_root_type = frappe.db.get_value("Account", d.account, "root_type")
 				if account_root_type == "Asset" and flt(d.debit) > 0:
-					frappe.throw(_("For {0}, only credit entries can be linked against another debit entry")
+					frappe.throw(_("For {0}, only credit accounts can be linked against another debit entry")
 						.format(d.account))
 				elif account_root_type == "Liability" and flt(d.credit) > 0:
-					frappe.throw(_("For {0}, only debit entries can be linked against another credit entry")
+					frappe.throw(_("For {0}, only debit accounts can be linked against another credit entry")
 						.format(d.account))
 
 				if d.against_jv == self.name:
@@ -175,7 +175,7 @@ class JournalEntry(AccountsController):
 			'Purchase Order': ["Supplier"]
 			}
 
-		for d in self.get("entries"):
+		for d in self.get("accounts"):
 			if d.get(against_field):
 				dr_or_cr = "credit" if against_field in ["against_invoice", "against_sales_order"] \
 					else "debit"
@@ -236,23 +236,23 @@ class JournalEntry(AccountsController):
 
 	def set_against_account(self):
 		accounts_debited, accounts_credited = [], []
-		for d in self.get("entries"):
+		for d in self.get("accounts"):
 			if flt(d.debit > 0): accounts_debited.append(d.account)
 			if flt(d.credit) > 0: accounts_credited.append(d.account)
 
-		for d in self.get("entries"):
+		for d in self.get("accounts"):
 			if flt(d.debit > 0): d.against_account = ", ".join(list(set(accounts_credited)))
 			if flt(d.credit > 0): d.against_account = ", ".join(list(set(accounts_debited)))
 
 	def validate_debit_and_credit(self):
 		self.total_debit, self.total_credit, self.difference = 0, 0, 0
 
-		for d in self.get("entries"):
+		for d in self.get("accounts"):
 			if d.debit and d.credit:
 				frappe.throw(_("You cannot credit and debit same account at the same time"))
 
-			self.total_debit = flt(self.total_debit) + flt(d.debit, self.precision("debit", "entries"))
-			self.total_credit = flt(self.total_credit) + flt(d.credit, self.precision("credit", "entries"))
+			self.total_debit = flt(self.total_debit) + flt(d.debit, self.precision("debit", "accounts"))
+			self.total_credit = flt(self.total_credit) + flt(d.credit, self.precision("credit", "accounts"))
 
 		self.difference = flt(self.total_debit, self.precision("total_debit")) - \
 			flt(self.total_credit, self.precision("total_credit"))
@@ -269,7 +269,7 @@ class JournalEntry(AccountsController):
 			else:
 				msgprint(_("Please enter Reference date"), raise_exception=frappe.MandatoryError)
 
-		for d in self.get('entries'):
+		for d in self.get('accounts'):
 			if d.against_invoice and d.credit:
 				currency = frappe.db.get_value("Sales Invoice", d.against_invoice, "currency")
 
@@ -305,7 +305,7 @@ class JournalEntry(AccountsController):
 		if self.is_opening != 'Yes':
 			self.aging_date = self.posting_date
 		else:
-			party_list = [d.party for d in self.get("entries") if d.party_type and d.party]
+			party_list = [d.party for d in self.get("accounts") if d.party_type and d.party]
 
 			if len(party_list) and not self.aging_date:
 				frappe.throw(_("Aging Date is mandatory for opening entry"))
@@ -313,7 +313,7 @@ class JournalEntry(AccountsController):
 				self.aging_date = self.posting_date
 
 	def set_print_format_fields(self):
-		for d in self.get('entries'):
+		for d in self.get('accounts'):
 			if d.party_type and d.party:
 				if not self.pay_to_recd_from:
 					self.pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
@@ -333,7 +333,7 @@ class JournalEntry(AccountsController):
 		from erpnext.accounts.general_ledger import make_gl_entries
 
 		gl_map = []
-		for d in self.get("entries"):
+		for d in self.get("accounts"):
 			if d.debit or d.credit:
 				gl_map.append(
 					self.get_gl_dict({
@@ -341,8 +341,8 @@ class JournalEntry(AccountsController):
 						"party_type": d.party_type,
 						"party": d.party,
 						"against": d.against_account,
-						"debit": flt(d.debit, self.precision("debit", "entries")),
-						"credit": flt(d.credit, self.precision("credit", "entries")),
+						"debit": flt(d.debit, self.precision("debit", "accounts")),
+						"credit": flt(d.credit, self.precision("credit", "accounts")),
 						"against_voucher_type": (("Purchase Invoice" if d.against_voucher else None)
 							or ("Sales Invoice" if d.against_invoice else None)
 							or ("Journal Entry" if d.against_jv else None)
@@ -359,14 +359,14 @@ class JournalEntry(AccountsController):
 			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj)
 
 	def get_balance(self):
-		if not self.get('entries'):
+		if not self.get('accounts'):
 			msgprint(_("'Entries' cannot be empty"), raise_exception=True)
 		else:
 			flag, self.total_debit, self.total_credit = 0, 0, 0
 			diff = flt(self.difference, self.precision("difference"))
 
 			# If any row without amount, set the diff on that row
-			for d in self.get('entries'):
+			for d in self.get('accounts'):
 				if not d.credit and not d.debit and diff != 0:
 					if diff>0:
 						d.credit = diff
@@ -376,7 +376,7 @@ class JournalEntry(AccountsController):
 
 			# Set the diff in a new row
 			if flag == 0 and diff != 0:
-				jd = self.append('entries', {})
+				jd = self.append('accounts', {})
 				if diff>0:
 					jd.credit = abs(diff)
 				elif diff<0:
@@ -385,24 +385,24 @@ class JournalEntry(AccountsController):
 			self.validate_debit_and_credit()
 
 	def get_outstanding_invoices(self):
-		self.set('entries', [])
+		self.set('accounts', [])
 		total = 0
 		for d in self.get_values():
-			total += flt(d.outstanding_amount, self.precision("credit", "entries"))
-			jd1 = self.append('entries', {})
+			total += flt(d.outstanding_amount, self.precision("credit", "accounts"))
+			jd1 = self.append('accounts', {})
 			jd1.account = d.account
 			jd1.party = d.party
 
 			if self.write_off_based_on == 'Accounts Receivable':
 				jd1.party_type = "Customer"
-				jd1.credit = flt(d.outstanding_amount, self.precision("credit", "entries"))
+				jd1.credit = flt(d.outstanding_amount, self.precision("credit", "accounts"))
 				jd1.against_invoice = cstr(d.name)
 			elif self.write_off_based_on == 'Accounts Payable':
 				jd1.party_type = "Supplier"
-				jd1.debit = flt(d.outstanding_amount, self.precision("debit", "entries"))
+				jd1.debit = flt(d.outstanding_amount, self.precision("debit", "accounts"))
 				jd1.against_voucher = cstr(d.name)
 
-		jd2 = self.append('entries', {})
+		jd2 = self.append('accounts', {})
 		if self.write_off_based_on == 'Accounts Receivable':
 			jd2.debit = total
 		elif self.write_off_based_on == 'Accounts Payable':
@@ -425,14 +425,14 @@ class JournalEntry(AccountsController):
 				and outstanding_amount > 0 %s""" % ('%s', cond), self.company, as_dict=True)
 
 	def update_expense_claim(self):
-		for d in self.entries:
+		for d in self.accounts:
 			if d.against_expense_claim:
 				amt = frappe.db.sql("""select sum(debit) as amt from `tabJournal Entry Account`
 					where against_expense_claim = %s and docstatus = 1""", d.against_expense_claim ,as_dict=1)[0].amt
 				frappe.db.set_value("Expense Claim", d.against_expense_claim , "total_amount_reimbursed", amt)
 
 	def validate_expense_claim(self):
-		for d in self.entries:
+		for d in self.accounts:
 			if d.against_expense_claim:
 				sanctioned_amount, reimbursed_amount = frappe.db.get_value("Expense Claim", d.against_expense_claim,
 					("total_sanctioned_amount", "total_amount_reimbursed"))
@@ -459,16 +459,16 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 	jv.remark = 'Payment received against Sales Invoice {0}. {1}'.format(si.name, si.remarks)
 
 	# credit customer
-	jv.get("entries")[0].account = si.debit_to
-	jv.get("entries")[0].party_type = "Customer"
-	jv.get("entries")[0].party = si.customer
-	jv.get("entries")[0].balance = get_balance_on(si.debit_to)
-	jv.get("entries")[0].party_balance = get_balance_on(party=si.customer, party_type="Customer")
-	jv.get("entries")[0].credit = si.outstanding_amount
-	jv.get("entries")[0].against_invoice = si.name
+	jv.get("accounts")[0].account = si.debit_to
+	jv.get("accounts")[0].party_type = "Customer"
+	jv.get("accounts")[0].party = si.customer
+	jv.get("accounts")[0].balance = get_balance_on(si.debit_to)
+	jv.get("accounts")[0].party_balance = get_balance_on(party=si.customer, party_type="Customer")
+	jv.get("accounts")[0].credit = si.outstanding_amount
+	jv.get("accounts")[0].against_invoice = si.name
 
 	# debit bank
-	jv.get("entries")[1].debit = si.outstanding_amount
+	jv.get("accounts")[1].debit = si.outstanding_amount
 
 	return jv.as_dict()
 
@@ -479,16 +479,16 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	jv.remark = 'Payment against Purchase Invoice {0}. {1}'.format(pi.name, pi.remarks)
 
 	# credit supplier
-	jv.get("entries")[0].account = pi.credit_to
-	jv.get("entries")[0].party_type = "Supplier"
-	jv.get("entries")[0].party = pi.supplier
-	jv.get("entries")[0].balance = get_balance_on(pi.credit_to)
-	jv.get("entries")[0].party_balance = get_balance_on(party=pi.supplier, party_type="Supplier")
-	jv.get("entries")[0].debit = pi.outstanding_amount
-	jv.get("entries")[0].against_voucher = pi.name
+	jv.get("accounts")[0].account = pi.credit_to
+	jv.get("accounts")[0].party_type = "Supplier"
+	jv.get("accounts")[0].party = pi.supplier
+	jv.get("accounts")[0].balance = get_balance_on(pi.credit_to)
+	jv.get("accounts")[0].party_balance = get_balance_on(party=pi.supplier, party_type="Supplier")
+	jv.get("accounts")[0].debit = pi.outstanding_amount
+	jv.get("accounts")[0].against_voucher = pi.name
 
 	# credit bank
-	jv.get("entries")[1].credit = pi.outstanding_amount
+	jv.get("accounts")[1].credit = pi.outstanding_amount
 
 	return jv.as_dict()
 
@@ -500,8 +500,8 @@ def get_payment_entry(doc):
 	jv.company = doc.company
 	jv.fiscal_year = doc.fiscal_year
 
-	jv.append("entries")
-	d2 = jv.append("entries")
+	jv.append("accounts")
+	d2 = jv.append("accounts")
 
 	if bank_account:
 		d2.account = bank_account["account"]

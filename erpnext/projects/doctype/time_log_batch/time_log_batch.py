@@ -67,7 +67,7 @@ def make_sales_invoice(source_name, target=None):
 		target_doc.description = "via Time Logs"
 
 	target = frappe.new_doc("Sales Invoice")
-	target.append("entries", get_mapped_doc("Time Log Batch", source_name, {
+	target.append("items", get_mapped_doc("Time Log Batch", source_name, {
 		"Time Log Batch": {
 			"doctype": "Sales Invoice Item",
 			"field_map": {

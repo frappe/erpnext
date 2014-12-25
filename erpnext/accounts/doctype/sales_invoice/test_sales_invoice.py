@@ -44,11 +44,11 @@ class TestSalesInvoice(unittest.TestCase):
 		}
 
 		# check if children are saved
-		self.assertEquals(len(si.get("entries")),
+		self.assertEquals(len(si.get("items")),
 			len(expected_values)-1)
 
 		# check if item values are calculated
-		for d in si.get("entries"):
+		for d in si.get("items"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
@@ -80,10 +80,10 @@ class TestSalesInvoice(unittest.TestCase):
 		si = frappe.copy_doc(test_records[2])
 		si.currency = "USD"
 		si.conversion_rate = 50
-		si.get("entries")[0].rate = 1
-		si.get("entries")[0].price_list_rate = 1
-		si.get("entries")[1].rate = 3
-		si.get("entries")[1].price_list_rate = 3
+		si.get("items")[0].rate = 1
+		si.get("items")[0].price_list_rate = 1
+		si.get("items")[1].rate = 3
+		si.get("items")[1].price_list_rate = 3
 		si.insert()
 
 		expected_values = {
@@ -94,11 +94,11 @@ class TestSalesInvoice(unittest.TestCase):
 		}
 
 		# check if children are saved
-		self.assertEquals(len(si.get("entries")),
+		self.assertEquals(len(si.get("items")),
 			len(expected_values)-1)
 
 		# check if item values are calculated
-		for d in si.get("entries"):
+		for d in si.get("items"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
@@ -148,11 +148,11 @@ class TestSalesInvoice(unittest.TestCase):
 		}
 
 		# check if children are saved
-		self.assertEquals(len(si.get("entries")),
+		self.assertEquals(len(si.get("items")),
 			len(expected_values)-1)
 
 		# check if item values are calculated
-		for d in si.get("entries"):
+		for d in si.get("items"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
@@ -204,7 +204,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		expected_values = sorted([
 			[si.debit_to, 1500, 0.0],
-			[test_records[3]["entries"][0]["income_account"], 0.0, 1163.45],
+			[test_records[3]["items"][0]["income_account"], 0.0, 1163.45],
 			[test_records[3]["taxes"][0]["account_head"], 0.0, 130.31],
 			[test_records[3]["taxes"][1]["account_head"], 0.0, 2.61],
 			[test_records[3]["taxes"][2]["account_head"], 0.0, 1.31],
@@ -234,8 +234,8 @@ class TestSalesInvoice(unittest.TestCase):
 		for i, tax in enumerate(si.get("taxes")):
 			tax.idx = i+1
 
-		si.get("entries")[0].price_list_rate = 62.5
-		si.get("entries")[0].price_list_rate = 191
+		si.get("items")[0].price_list_rate = 62.5
+		si.get("items")[0].price_list_rate = 191
 		for i in xrange(6):
 			si.get("taxes")[i].included_in_print_rate = 1
 
@@ -259,11 +259,11 @@ class TestSalesInvoice(unittest.TestCase):
 		}
 
 		# check if children are saved
-		self.assertEquals(len(si.get("entries")),
+		self.assertEquals(len(si.get("items")),
 			len(expected_values)-1)
 
 		# check if item values are calculated
-		for d in si.get("entries"):
+		for d in si.get("items"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
@@ -296,10 +296,10 @@ class TestSalesInvoice(unittest.TestCase):
 		si = frappe.copy_doc(test_records[3])
 		si.currency = "USD"
 		si.conversion_rate = 50
-		si.get("entries")[0].price_list_rate = 55.56
-		si.get("entries")[0].discount_percentage = 10
-		si.get("entries")[1].price_list_rate = 187.5
-		si.get("entries")[1].discount_percentage = 20
+		si.get("items")[0].price_list_rate = 55.56
+		si.get("items")[0].discount_percentage = 10
+		si.get("items")[1].price_list_rate = 187.5
+		si.get("items")[1].discount_percentage = 20
 		si.get("taxes")[6].rate = 5000
 
 		si.insert()
@@ -312,10 +312,10 @@ class TestSalesInvoice(unittest.TestCase):
 		}
 
 		# check if children are saved
-		self.assertEquals(len(si.get("entries")), len(expected_values)-1)
+		self.assertEquals(len(si.get("items")), len(expected_values)-1)
 
 		# check if item values are calculated
-		for d in si.get("entries"):
+		for d in si.get("items"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
@@ -355,7 +355,7 @@ class TestSalesInvoice(unittest.TestCase):
 			import test_records as jv_test_records
 
 		jv = frappe.get_doc(frappe.copy_doc(jv_test_records[0]))
-		jv.get("entries")[0].against_invoice = w.name
+		jv.get("accounts")[0].against_invoice = w.name
 		jv.insert()
 		jv.submit()
 
@@ -375,7 +375,7 @@ class TestSalesInvoice(unittest.TestCase):
 		tlb.submit()
 
 		si = frappe.get_doc(frappe.copy_doc(test_records[0]))
-		si.get("entries")[0].time_log_batch = tlb.name
+		si.get("items")[0].time_log_batch = tlb.name
 		si.insert()
 		si.submit()
 
@@ -407,7 +407,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		expected_values = sorted([
 			[si.debit_to, 630.0, 0.0],
-			[test_records[1]["entries"][0]["income_account"], 0.0, 500.0],
+			[test_records[1]["items"][0]["income_account"], 0.0, 500.0],
 			[test_records[1]["taxes"][0]["account_head"], 0.0, 80.0],
 			[test_records[1]["taxes"][1]["account_head"], 0.0, 50.0],
 		])
@@ -461,11 +461,11 @@ class TestSalesInvoice(unittest.TestCase):
 
 		expected_gl_entries = sorted([
 			[si.debit_to, 630.0, 0.0],
-			[pos["entries"][0]["income_account"], 0.0, 500.0],
+			[pos["items"][0]["income_account"], 0.0, 500.0],
 			[pos["taxes"][0]["account_head"], 0.0, 80.0],
 			[pos["taxes"][1]["account_head"], 0.0, 50.0],
 			[stock_in_hand, 0.0, 75.0],
-			[pos["entries"][0]["expense_account"], 75.0, 0.0],
+			[pos["items"][0]["expense_account"], 75.0, 0.0],
 			[si.debit_to, 0.0, 600.0],
 			["_Test Account Bank Account - _TC", 600.0, 0.0]
 		])
@@ -522,7 +522,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si_doc = copy.deepcopy(test_records[1])
 		si_doc["update_stock"] = 1
 		si_doc["posting_time"] = "12:05"
-		si_doc.get("entries")[0]["warehouse"] = "_Test Warehouse No Account - _TC"
+		si_doc.get("items")[0]["warehouse"] = "_Test Warehouse No Account - _TC"
 
 		si = frappe.copy_doc(si_doc)
 		si.insert()
@@ -544,7 +544,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		expected_gl_entries = sorted([
 			[si.debit_to, 630.0, 0.0],
-			[si_doc.get("entries")[0]["income_account"], 0.0, 500.0],
+			[si_doc.get("items")[0]["income_account"], 0.0, 500.0],
 			[si_doc.get("taxes")[0]["account_head"], 0.0, 80.0],
 			[si_doc.get("taxes")[1]["account_head"], 0.0, 50.0],
 		])
@@ -565,7 +565,7 @@ class TestSalesInvoice(unittest.TestCase):
 		set_perpetual_inventory()
 
 		si = frappe.get_doc(test_records[1])
-		si.get("entries")[0].item_code = None
+		si.get("items")[0].item_code = None
 		si.insert()
 		si.submit()
 
@@ -576,7 +576,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		expected_values = sorted([
 			[si.debit_to, 630.0, 0.0],
-			[test_records[1]["entries"][0]["income_account"], 0.0, 500.0],
+			[test_records[1]["items"][0]["income_account"], 0.0, 500.0],
 			[test_records[1]["taxes"][0]["account_head"], 0.0, 80.0],
 			[test_records[1]["taxes"][1]["account_head"], 0.0, 50.0],
 		])
@@ -591,7 +591,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.clear_stock_account_balance()
 		set_perpetual_inventory()
 		si = frappe.get_doc(test_records[1])
-		si.get("entries")[0].item_code = "_Test Non Stock Item"
+		si.get("items")[0].item_code = "_Test Non Stock Item"
 		si.insert()
 		si.submit()
 
@@ -602,7 +602,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		expected_values = sorted([
 			[si.debit_to, 630.0, 0.0],
-			[test_records[1]["entries"][0]["income_account"], 0.0, 500.0],
+			[test_records[1]["items"][0]["income_account"], 0.0, 500.0],
 			[test_records[1]["taxes"][0]["account_head"], 0.0, 80.0],
 			[test_records[1]["taxes"][1]["account_head"], 0.0, 50.0],
 		])
@@ -642,7 +642,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.append("advances", {
 			"doctype": "Sales Invoice Advance",
 			"journal_entry": jv.name,
-			"jv_detail_no": jv.get("entries")[0].name,
+			"jv_detail_no": jv.get("accounts")[0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
 			"remarks": jv.remark
@@ -683,9 +683,9 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si = frappe.copy_doc(test_records[0])
 		si.update_stock = 1
-		si.get("entries")[0].item_code = "_Test Serialized Item With Series"
-		si.get("entries")[0].qty = 1
-		si.get("entries")[0].serial_no = serial_nos[0]
+		si.get("items")[0].item_code = "_Test Serialized Item With Series"
+		si.get("items")[0].qty = 1
+		si.get("items")[0].serial_no = serial_nos[0]
 		si.insert()
 		si.submit()
 
@@ -701,7 +701,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si = self.test_serialized()
 		si.cancel()
 
-		serial_nos = get_serial_nos(si.get("entries")[0].serial_no)
+		serial_nos = get_serial_nos(si.get("items")[0].serial_no)
 
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Available")
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
@@ -721,9 +721,9 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si = frappe.copy_doc(test_records[0])
 		si.update_stock = 1
-		si.get("entries")[0].item_code = "_Test Serialized Item With Series"
-		si.get("entries")[0].qty = 1
-		si.get("entries")[0].serial_no = serial_nos[0]
+		si.get("items")[0].item_code = "_Test Serialized Item With Series"
+		si.get("items")[0].qty = 1
+		si.get("items")[0].serial_no = serial_nos[0]
 		si.insert()
 
 		self.assertRaises(SerialNoStatusError, si.submit)

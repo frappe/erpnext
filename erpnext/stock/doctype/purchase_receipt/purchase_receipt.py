@@ -393,7 +393,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
-		if len(target.get("entries")) == 0:
+		if len(target.get("items")) == 0:
 			frappe.throw(_("All items have already been invoiced"))
 
 		doc = frappe.get_doc(target)

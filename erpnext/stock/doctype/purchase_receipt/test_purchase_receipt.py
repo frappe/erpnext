@@ -24,10 +24,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pi = make_purchase_invoice(pr.name)
 
 		self.assertEquals(pi.doctype, "Purchase Invoice")
-		self.assertEquals(len(pi.get("entries")), len(pr.get("items")))
+		self.assertEquals(len(pi.get("items")), len(pr.get("items")))
 
 		# modify rate
-		pi.get("entries")[0].rate = 200
+		pi.get("items")[0].rate = 200
 		self.assertRaises(frappe.ValidationError, frappe.get_doc(pi).submit)
 
 	def test_purchase_receipt_no_gl_entry(self):

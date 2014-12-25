@@ -90,7 +90,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		pi = make_purchase_invoice(po.name)
 
 		self.assertEquals(pi.doctype, "Purchase Invoice")
-		self.assertEquals(len(pi.get("entries", [])), len(test_records[0]["items"]))
+		self.assertEquals(len(pi.get("items", [])), len(test_records[0]["items"]))
 
 		pi.credit_to = "_Test Payable - _TC"
 		pi.posting_date = "2013-05-12"
