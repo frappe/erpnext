@@ -8,8 +8,8 @@ from frappe.utils import flt
 test_dependencies = ["Item"]
 
 class TestPaymentTool(unittest.TestCase):
-	def test_make_journal_voucher(self):
-		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
+	def test_make_journal_entry(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
 			import test_records as jv_test_records
 		from erpnext.selling.doctype.sales_order.test_sales_order \
 			import test_records as so_test_records
@@ -84,7 +84,7 @@ class TestPaymentTool(unittest.TestCase):
 
 		#Create a dict containing properties and expected values
 		expected_outstanding = {
-			"Journal Voucher"	: [base_customer_jv.name, 400.00],
+			"Journal Entry"	: [base_customer_jv.name, 400.00],
 			"Sales Invoice"		: [si1.name, 161.80],
 			"Purchase Invoice"	: [pi.name, 1512.30],
 			"Sales Order"		: [so1.name, 600.00],
@@ -111,7 +111,7 @@ class TestPaymentTool(unittest.TestCase):
 			"party": "_Test Supplier 1",
 			"party_account": "_Test Payable - _TC"
 		})
-		expected_outstanding["Journal Voucher"] = [base_supplier_jv.name, 400.00]
+		expected_outstanding["Journal Entry"] = [base_supplier_jv.name, 400.00]
 		self.make_voucher_for_party(args, expected_outstanding)
 
 	def create_voucher(self, test_record, args):
@@ -134,7 +134,7 @@ class TestPaymentTool(unittest.TestCase):
 		return jv
 
 	def make_voucher_for_party(self, args, expected_outstanding):
-		#Make Journal Voucher for Party
+		#Make Journal Entry for Party
 		payment_tool_doc = frappe.new_doc("Payment Tool")
 
 		for k, v in args.items():
@@ -162,12 +162,12 @@ class TestPaymentTool(unittest.TestCase):
 			d1.payment_amount = 100.00
 		paytool.total_payment_amount = 300
 
-		new_jv = paytool.make_journal_voucher()
+		new_jv = paytool.make_journal_entry()
 
 		#Create a list of expected values as [party account, payment against, against_jv, against_invoice,
 		#against_voucher, against_sales_order, against_purchase_order]
 		expected_values = [
-			[paytool.party_account, paytool.party, 100.00, expected_outstanding.get("Journal Voucher")[0], None, None, None, None],
+			[paytool.party_account, paytool.party, 100.00, expected_outstanding.get("Journal Entry")[0], None, None, None, None],
 			[paytool.party_account, paytool.party, 100.00, None, expected_outstanding.get("Sales Invoice")[0], None, None, None],
 			[paytool.party_account, paytool.party, 100.00, None, None, expected_outstanding.get("Purchase Invoice")[0], None, None],
 			[paytool.party_account, paytool.party, 100.00, None, None, None, expected_outstanding.get("Sales Order")[0], None],

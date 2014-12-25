@@ -152,8 +152,8 @@ Against Document Detail No,Đối với tài liệu chi tiết Không
 Against Document No,Đối với văn bản số
 Against Expense Account,Đối với tài khoản chi phí
 Against Income Account,Đối với tài khoản thu nhập
-Against Journal Voucher,Tạp chí chống lại Voucher
-Against Journal Voucher {0} does not have any unmatched {1} entry,Đối với Tạp chí Chứng từ {0} không có bất kỳ chưa từng có {1} nhập
+Against Journal Entry,Tạp chí chống lại Voucher
+Against Journal Entry {0} does not have any unmatched {1} entry,Đối với Tạp chí Chứng từ {0} không có bất kỳ chưa từng có {1} nhập
 Against Purchase Invoice,Đối với hóa đơn mua hàng
 Against Sales Invoice,Chống bán hóa đơn
 Against Sales Order,So với bán hàng đặt hàng
@@ -335,7 +335,7 @@ Bank Overdraft Account,Tài khoản thấu chi ngân hàng
 Bank Reconciliation,Ngân hàng hòa giải
 Bank Reconciliation Detail,Ngân hàng hòa giải chi tiết
 Bank Reconciliation Statement,Trữ ngân hàng hòa giải
-Bank Voucher,Ngân hàng Phiếu
+Bank Entry,Ngân hàng Phiếu
 Bank/Cash Balance,Ngân hàng / Cash Balance
 Banking,Ngân hàng
 Barcode,Mã vạch
@@ -470,7 +470,7 @@ Case No(s) already in use. Try from Case No {0},Không trường hợp (s) đã 
 Case No. cannot be 0,Trường hợp số không thể là 0
 Cash,Tiền mặt
 Cash In Hand,Tiền mặt trong tay
-Cash Voucher,Phiếu tiền mặt
+Cash Entry,Phiếu tiền mặt
 Cash or Bank Account is mandatory for making payment entry,Tiền mặt hoặc tài khoản ngân hàng là bắt buộc đối với việc nhập cảnh thanh toán
 Cash/Bank Account,Tài khoản tiền mặt / Ngân hàng
 Casual Leave,Để lại bình thường
@@ -594,7 +594,7 @@ Contact master.,Liên hệ với chủ.
 Contacts,Danh bạ
 Content,Lọc nội dung
 Content Type,Loại nội dung
-Contra Voucher,Contra Voucher
+Contra Entry,Contra Entry
 Contract,hợp đồng
 Contract End Date,Ngày kết thúc hợp đồng
 Contract End Date must be greater than Date of Joining,Ngày kết thúc hợp đồng phải lớn hơn ngày của Tham gia
@@ -625,7 +625,7 @@ Country,Tại
 Country Name,Tên nước
 Country wise default Address Templates,Nước khôn ngoan Địa chỉ mặc định Templates
 "Country, Timezone and Currency","Quốc gia, múi giờ và tiền tệ"
-Create Bank Voucher for the total salary paid for the above selected criteria,Tạo Ngân hàng Chứng từ tổng tiền lương cho các tiêu chí lựa chọn ở trên
+Create Bank Entry for the total salary paid for the above selected criteria,Tạo Ngân hàng Chứng từ tổng tiền lương cho các tiêu chí lựa chọn ở trên
 Create Customer,Tạo ra khách hàng
 Create Material Requests,Các yêu cầu tạo ra vật liệu
 Create New,Tạo mới
@@ -647,7 +647,7 @@ Credentials,Thông tin
 Credit,Tín dụng
 Credit Amt,Tín dụng Amt
 Credit Card,Thẻ tín dụng
-Credit Card Voucher,Phiếu thẻ tín dụng
+Credit Card Entry,Phiếu thẻ tín dụng
 Credit Controller,Bộ điều khiển tín dụng
 Credit Days,Ngày tín dụng
 Credit Limit,Hạn chế tín dụng
@@ -979,7 +979,7 @@ Excise Duty @ 8,Tiêu thụ đặc biệt Duty @ 8
 Excise Duty Edu Cess 2,Tiêu thụ đặc biệt Duty Edu Cess 2
 Excise Duty SHE Cess 1,Tiêu thụ đặc biệt Duty SHE Cess 1
 Excise Page Number,Tiêu thụ đặc biệt số trang
-Excise Voucher,Phiếu tiêu thụ đặc biệt
+Excise Entry,Phiếu tiêu thụ đặc biệt
 Execution,Thực hiện
 Executive Search,Điều hành Tìm kiếm
 Exemption Limit,Giới hạn miễn
@@ -1327,7 +1327,7 @@ Invoice Period From,Hóa đơn Thời gian Từ
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Thời gian hóa đơn từ và hóa đơn Thời gian Để ngày bắt buộc đối với hóa đơn định kỳ
 Invoice Period To,Hóa đơn Thời gian để
 Invoice Type,Loại hóa đơn
-Invoice/Journal Voucher Details,Hóa đơn / Tạp chí Chứng từ chi tiết
+Invoice/Journal Entry Details,Hóa đơn / Tạp chí Chứng từ chi tiết
 Invoiced Amount (Exculsive Tax),Số tiền ghi trên hóa đơn (thuế Exculsive)
 Is Active,Là hoạt động
 Is Advance,Là Trước
@@ -1457,11 +1457,11 @@ Job Title,Chức vụ
 Jobs Email Settings,Thiết lập việc làm Email
 Journal Entries,Tạp chí Entries
 Journal Entry,Tạp chí nhập
-Journal Voucher,Tạp chí Voucher
+Journal Entry,Tạp chí Voucher
 Journal Entry Account,Tạp chí Chứng từ chi tiết
 Journal Entry Account No,Tạp chí Chứng từ chi tiết Không
-Journal Voucher {0} does not have account {1} or already matched,Tạp chí Chứng từ {0} không có tài khoản {1} hoặc đã khớp
-Journal Vouchers {0} are un-linked,Tạp chí Chứng từ {0} được bỏ liên kết
+Journal Entry {0} does not have account {1} or already matched,Tạp chí Chứng từ {0} không có tài khoản {1} hoặc đã khớp
+Journal Entries {0} are un-linked,Tạp chí Chứng từ {0} được bỏ liên kết
 Keep a track of communication related to this enquiry which will help for future reference.,Giữ một ca khúc của truyền thông liên quan đến cuộc điều tra này sẽ giúp cho tài liệu tham khảo trong tương lai.
 Keep it web friendly 900px (w) by 100px (h),Giữ cho nó thân thiện với web 900px (w) bởi 100px (h)
 Key Performance Area,Hiệu suất chủ chốt trong khu vực
@@ -1576,7 +1576,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Bảo t
 Major/Optional Subjects,Chính / Đối tượng bắt buộc
 Make ,Make 
 Make Accounting Entry For Every Stock Movement,Làm kế toán nhập Đối với tất cả phong trào Cổ
-Make Bank Voucher,Làm cho Ngân hàng Phiếu
+Make Bank Entry,Làm cho Ngân hàng Phiếu
 Make Credit Note,Làm cho tín dụng Ghi chú
 Make Debit Note,Làm báo nợ
 Make Delivery,Làm cho giao hàng
@@ -3096,7 +3096,7 @@ Update Series,Cập nhật dòng
 Update Series Number,Cập nhật Dòng Số
 Update Stock,Cập nhật chứng khoán
 Update bank payment dates with journals.,Cập nhật ngày thanh toán ngân hàng với các tạp chí.
-Update clearance date of Journal Entries marked as 'Bank Vouchers',Ngày giải phóng mặt bằng bản cập nhật của Tạp chí Entries đánh dấu là 'Ngân hàng Chứng từ'
+Update clearance date of Journal Entries marked as 'Bank Entry',Ngày giải phóng mặt bằng bản cập nhật của Tạp chí Entries đánh dấu là 'Ngân hàng Chứng từ'
 Updated,Xin vui lòng viết một cái gì đó
 Updated Birthday Reminders,Cập nhật mừng sinh nhật Nhắc nhở
 Upload Attendance,Tải lên tham dự
@@ -3234,7 +3234,7 @@ Write Off Amount <=,Viết Tắt Số tiền <=
 Write Off Based On,Viết Tắt Dựa trên
 Write Off Cost Center,Viết Tắt Trung tâm Chi phí
 Write Off Outstanding Amount,Viết Tắt Số tiền nổi bật
-Write Off Voucher,Viết Tắt Voucher
+Write Off Entry,Viết Tắt Voucher
 Wrong Template: Unable to find head row.,Sai mẫu: Không thể tìm thấy hàng đầu.
 Year,Năm
 Year Closed,Đóng cửa năm
@@ -3252,7 +3252,7 @@ You can enter any date manually,Bạn có thể nhập bất kỳ ngày nào tay
 You can enter the minimum quantity of this item to be ordered.,Bạn có thể nhập số lượng tối thiểu của mặt hàng này được đặt hàng.
 You can not change rate if BOM mentioned agianst any item,Bạn không thể thay đổi tỷ lệ nếu HĐQT đã đề cập agianst bất kỳ mục nào
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Bạn không thể gõ cả hai Giao hàng tận nơi Lưu ý Không có hóa đơn bán hàng và số Vui lòng nhập bất kỳ một.
-You can not enter current voucher in 'Against Journal Voucher' column,Bạn không thể nhập chứng từ hiện tại 'chống Tạp chí Voucher' cột
+You can not enter current voucher in 'Against Journal Entry' column,Bạn không thể nhập chứng từ hiện tại 'chống Tạp chí Voucher' cột
 You can set Default Bank Account in Company master,Bạn có thể thiết lập Mặc định tài khoản ngân hàng của Công ty chủ
 You can start by selecting backup frequency and granting access for sync,Bạn có thể bắt đầu bằng cách chọn tần số sao lưu và cấp quyền truy cập cho đồng bộ
 You can submit this Stock Reconciliation.,Bạn có thể gửi hòa giải chứng khoán này.

@@ -152,8 +152,8 @@ Against Document Detail No,Против докумената детаља Нем
 Against Document No,Против документу Нема
 Against Expense Account,Против трошковником налог
 Against Income Account,Против приход
-Against Journal Voucher,Против Јоурнал ваучер
-Against Journal Voucher {0} does not have any unmatched {1} entry,Против Јоурнал ваучер {0} нема премца {1} унос
+Against Journal Entry,Против Јоурнал ваучер
+Against Journal Entry {0} does not have any unmatched {1} entry,Против Јоурнал ваучер {0} нема премца {1} унос
 Against Purchase Invoice,Против фактури
 Against Sales Invoice,Против продаје фактура
 Against Sales Order,Против продаје налога
@@ -335,7 +335,7 @@ Bank Overdraft Account,Банк Овердрафт счета
 Bank Reconciliation,Банка помирење
 Bank Reconciliation Detail,Банка помирење Детаљ
 Bank Reconciliation Statement,Банка помирење Изјава
-Bank Voucher,Банка ваучера
+Bank Entry,Банка ваучера
 Bank/Cash Balance,Банка / стање готовине
 Banking,банкарство
 Barcode,Баркод
@@ -470,7 +470,7 @@ Case No(s) already in use. Try from Case No {0},Случай Нет (ы) уже 
 Case No. cannot be 0,Предмет бр не може бити 0
 Cash,Готовина
 Cash In Hand,Наличность кассовая
-Cash Voucher,Готовина ваучера
+Cash Entry,Готовина ваучера
 Cash or Bank Account is mandatory for making payment entry,Наличными или банковский счет является обязательным для внесения записи платежей
 Cash/Bank Account,Готовина / банковног рачуна
 Casual Leave,Повседневная Оставить
@@ -594,7 +594,7 @@ Contact master.,Связаться с мастером.
 Contacts,связи
 Content,Садржина
 Content Type,Тип садржаја
-Contra Voucher,Цонтра ваучера
+Contra Entry,Цонтра ваучера
 Contract,уговор
 Contract End Date,Уговор Датум завршетка
 Contract End Date must be greater than Date of Joining,"Конец контракта Дата должна быть больше, чем дата вступления"
@@ -625,7 +625,7 @@ Country,Земља
 Country Name,Земља Име
 Country wise default Address Templates,Земља мудар подразумевана адреса шаблон
 "Country, Timezone and Currency","Земља , временску зону и валута"
-Create Bank Voucher for the total salary paid for the above selected criteria,Креирање ваучера банка за укупне плате исплаћене за горе изабраним критеријумима
+Create Bank Entry for the total salary paid for the above selected criteria,Креирање ваучера банка за укупне плате исплаћене за горе изабраним критеријумима
 Create Customer,Креирање корисника
 Create Material Requests,Креирате захтеве Материјал
 Create New,Цреате Нев
@@ -647,7 +647,7 @@ Credentials,Акредитив
 Credit,Кредит
 Credit Amt,Кредитни Амт
 Credit Card,кредитна картица
-Credit Card Voucher,Кредитна картица ваучера
+Credit Card Entry,Кредитна картица ваучера
 Credit Controller,Кредитни контролер
 Credit Days,Кредитни Дана
 Credit Limit,Кредитни лимит
@@ -979,7 +979,7 @@ Excise Duty @ 8,Акцизе @ 8
 Excise Duty Edu Cess 2,Акцизе Еду Цесс 2
 Excise Duty SHE Cess 1,Акцизе ОНА Цесс 1
 Excise Page Number,Акцизе Број странице
-Excise Voucher,Акцизе ваучера
+Excise Entry,Акцизе ваучера
 Execution,извршење
 Executive Search,Екецутиве Сеарцх
 Exemption Limit,Изузеће Лимит
@@ -1327,7 +1327,7 @@ Invoice Period From,Фактура периоду од
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Счет Период С и счет-фактура Период до даты обязательных для повторяющихся счет
 Invoice Period To,Фактура период до
 Invoice Type,Фактура Тип
-Invoice/Journal Voucher Details,Рачун / Часопис ваучера Детаљи
+Invoice/Journal Entry Details,Рачун / Часопис ваучера Детаљи
 Invoiced Amount (Exculsive Tax),Износ фактуре ( Екцулсиве Пореска )
 Is Active,Је активан
 Is Advance,Да ли Адванце
@@ -1457,11 +1457,11 @@ Job Title,Звање
 Jobs Email Settings,Послови Емаил подешавања
 Journal Entries,Часопис Ентриес
 Journal Entry,Јоурнал Ентри
-Journal Voucher,Часопис ваучера
+Journal Entry,Часопис ваучера
 Journal Entry Account,Часопис Ваучер Детаљ
 Journal Entry Account No,Часопис Ваучер Детаљ Нема
-Journal Voucher {0} does not have account {1} or already matched,Часопис Ваучер {0} нема рачун {1} или већ упарен
-Journal Vouchers {0} are un-linked,Журнал Ваучеры {0} являются не- связаны
+Journal Entry {0} does not have account {1} or already matched,Часопис Ваучер {0} нема рачун {1} или већ упарен
+Journal Entries {0} are un-linked,Журнал Ваучеры {0} являются не- связаны
 Keep a track of communication related to this enquiry which will help for future reference.,Водите евиденцију о комуникацији у вези са овом истрагу која ће помоћи за будућу референцу.
 Keep it web friendly 900px (w) by 100px (h),Држите га веб пријатељски 900пк ( В ) од 100пк ( х )
 Key Performance Area,Кључна Перформансе Област
@@ -1576,7 +1576,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Тех�
 Major/Optional Subjects,Мајор / Опциони предмети
 Make ,Make 
 Make Accounting Entry For Every Stock Movement,Направите Рачуноводство унос за сваки Стоцк Покрета
-Make Bank Voucher,Направите ваучер Банк
+Make Bank Entry,Направите ваучер Банк
 Make Credit Note,Маке Цредит Ноте
 Make Debit Note,Маке задужењу
 Make Delivery,Маке Деливери
@@ -3096,7 +3096,7 @@ Update Series,Упдате
 Update Series Number,Упдате Број
 Update Stock,Упдате Стоцк
 Update bank payment dates with journals.,Ажурирање банка плаћање датира са часописима.
-Update clearance date of Journal Entries marked as 'Bank Vouchers',"Клиренс Ажурирање датум уноса у дневник означена као "" банка "" Ваучери"
+Update clearance date of Journal Entries marked as 'Bank Entry',"Клиренс Ажурирање датум уноса у дневник означена као "" банка "" Ваучери"
 Updated,Ажурирано
 Updated Birthday Reminders,Ажурирано Рођендан Подсетници
 Upload Attendance,Уплоад присуствовање
@@ -3234,7 +3234,7 @@ Write Off Amount <=,Отпис Износ &lt;=
 Write Off Based On,Отпис Басед Он
 Write Off Cost Center,Отпис Центар трошкова
 Write Off Outstanding Amount,Отпис неизмирени износ
-Write Off Voucher,Отпис ваучер
+Write Off Entry,Отпис ваучер
 Wrong Template: Unable to find head row.,Погрешно Шаблон: Није могуће пронаћи ред главу.
 Year,Година
 Year Closed,Година Цлосед
@@ -3252,7 +3252,7 @@ You can enter any date manually,Можете да ручно унесете би
 You can enter the minimum quantity of this item to be ordered.,Можете да унесете минималну количину ове ставке се могу наручити.
 You can not change rate if BOM mentioned agianst any item,Не можете променити стопу ако бом помиње агианст било које ставке
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Не можете да унесете како доставници Не и продаје Фактура бр Унесите било коју .
-You can not enter current voucher in 'Against Journal Voucher' column,"Вы не можете ввести текущий ваучер в ""Против Journal ваучер ' колонке"
+You can not enter current voucher in 'Against Journal Entry' column,"Вы не можете ввести текущий ваучер в ""Против Journal ваучер ' колонке"
 You can set Default Bank Account in Company master,Вы можете установить по умолчанию банковский счет в мастер компании
 You can start by selecting backup frequency and granting access for sync,Вы можете начать с выбора частоты резервного копирования и предоставления доступа для синхронизации
 You can submit this Stock Reconciliation.,Можете да пошаљете ову Стоцк помирење .

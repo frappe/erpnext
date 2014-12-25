@@ -316,7 +316,7 @@ def make_delivery_note(source_name, target_doc=None):
 def make_sales_invoice(source_name, target_doc=None):
 	def postprocess(source, target):
 		set_missing_values(source, target)
-		#Get the advance paid Journal Vouchers in Sales Invoice Advance
+		#Get the advance paid Journal Entries in Sales Invoice Advance
 		target.get_advances()
 
 	def set_missing_values(source, target):

@@ -29,7 +29,7 @@ class PaymentReconciliation(Document):
 				t1.name as voucher_no, t1.posting_date, t1.remark,
 				t2.name as voucher_detail_no, {dr_or_cr} as payment_amount, t2.is_advance
 			from
-				`tabJournal Voucher` t1, `tabJournal Entry Account` t2
+				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
 				t1.name = t2.parent and t1.docstatus = 1 and t2.docstatus = 1
 				and t2.party_type = %(party_type)s and t2.party = %(party)s
@@ -58,7 +58,7 @@ class PaymentReconciliation(Document):
 		self.set('payments', [])
 		for e in jv_entries:
 			ent = self.append('payments', {})
-			ent.journal_voucher = e.get('voucher_no')
+			ent.journal_entry = e.get('voucher_no')
 			ent.posting_date = e.get('posting_date')
 			ent.amount = flt(e.get('payment_amount'))
 			ent.remark = e.get('remark')
@@ -142,7 +142,7 @@ class PaymentReconciliation(Document):
 		for e in self.get('payments'):
 			if e.invoice_type and e.invoice_number and e.allocated_amount:
 				lst.append({
-					'voucher_no' : e.journal_voucher,
+					'voucher_no' : e.journal_entry,
 					'voucher_detail_no' : e.voucher_detail_number,
 					'against_voucher_type' : e.invoice_type,
 					'against_voucher'  : e.invoice_number,

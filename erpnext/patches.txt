@@ -36,7 +36,7 @@ erpnext.patches.v4_0.countrywise_coa
 execute:frappe.delete_doc("DocType", "MIS Control")
 execute:frappe.delete_doc("Page", "Financial Statements")
 execute:frappe.delete_doc("DocType", "Stock Ledger")
-execute:frappe.db.sql("update `tabJournal Voucher` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
+execute:frappe.db.sql("update `tabJournal Entry` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
 execute:frappe.delete_doc("DocType", "Grade")
 execute:frappe.db.sql("delete from `tabWebsite Item Group` where ifnull(item_group, '')=''")
 execute:frappe.delete_doc("Print Format", "SalesInvoice")

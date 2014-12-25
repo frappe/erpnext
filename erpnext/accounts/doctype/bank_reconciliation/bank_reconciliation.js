@@ -3,7 +3,7 @@
 
 cur_frm.cscript.onload = function(doc, cdt, cdn){
 	cur_frm.set_intro('<i class="icon-question" /> ' +
-		__("Update clearance date of Journal Entries marked as 'Bank Vouchers'"));
+		__("Update clearance date of Journal Entries marked as 'Bank Entry'"));
 
 	cur_frm.add_fetch("bank_account", "company", "company");
 

@@ -178,8 +178,8 @@ Against Document Detail No,對文件詳細說明暫無
 Against Document No,對文件無
 Against Expense Account,對費用帳戶
 Against Income Account,對收入賬戶
-Against Journal Voucher,對日記帳憑證
-Against Journal Voucher {0} does not have any unmatched {1} entry,對日記帳憑證{0}沒有任何無可比擬{1}項目
+Against Journal Entry,對日記帳憑證
+Against Journal Entry {0} does not have any unmatched {1} entry,對日記帳憑證{0}沒有任何無可比擬{1}項目
 Against Purchase Invoice,對採購發票
 Against Sales Invoice,對銷售發票
 Against Sales Order,對銷售訂單
@@ -361,7 +361,7 @@ Bank Overdraft Account,銀行透支戶口
 Bank Reconciliation,銀行對帳
 Bank Reconciliation Detail,銀行對帳詳細
 Bank Reconciliation Statement,銀行對帳表
-Bank Voucher,銀行券
+Bank Entry,銀行券
 Bank/Cash Balance,銀行/現金結餘
 Banking,銀行業
 Barcode,條碼
@@ -496,7 +496,7 @@ Case No(s) already in use. Try from Case No {0},案例編號已在使用中（ S
 Case No. cannot be 0,案號不能為0
 Cash,現金
 Cash In Hand,手頭現金
-Cash Voucher,現金券
+Cash Entry,現金券
 Cash or Bank Account is mandatory for making payment entry,現金或銀行帳戶是強制性的付款項
 Cash/Bank Account,現金/銀行賬戶
 Casual Leave,事假
@@ -620,7 +620,7 @@ Contact master.,聯繫站長。
 Contacts,往來
 Content,內容
 Content Type,內容類型
-Contra Voucher,魂斗羅券
+Contra Entry,魂斗羅券
 Contract,合同
 Contract End Date,合同結束日期
 Contract End Date must be greater than Date of Joining,合同結束日期必須大於加入的日期
@@ -651,7 +651,7 @@ Country,國家
 Country Name,國家名稱
 Country wise default Address Templates,國家明智的默認地址模板
 "Country, Timezone and Currency",國家，時區和貨幣
-Create Bank Voucher for the total salary paid for the above selected criteria,創建銀行券為支付上述選擇的標準工資總額
+Create Bank Entry for the total salary paid for the above selected criteria,創建銀行券為支付上述選擇的標準工資總額
 Create Customer,創建客戶
 Create Material Requests,創建材料要求
 Create New,創建新
@@ -673,7 +673,7 @@ Credentials,證書
 Credit,信用
 Credit Amt,信用額
 Credit Card,信用卡
-Credit Card Voucher,信用卡券
+Credit Card Entry,信用卡券
 Credit Controller,信用控制器
 Credit Days,信貸天
 Credit Limit,信用額度
@@ -1009,7 +1009,7 @@ Excise Duty @ 8,消費稅@ 8
 Excise Duty Edu Cess 2,消費稅埃杜塞斯2
 Excise Duty SHE Cess 1,消費稅佘塞斯1
 Excise Page Number,消費頁碼
-Excise Voucher,消費券
+Excise Entry,消費券
 Execution,執行
 Executive Search,獵頭
 Exemption Limit,免稅限額
@@ -1357,7 +1357,7 @@ Invoice Period From,發票的日期從
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,發票期間由發票日期為日期必須在經常性發票
 Invoice Period To,發票的日期要
 Invoice Type,發票類型
-Invoice/Journal Voucher Details,發票/日記帳憑證詳細信息
+Invoice/Journal Entry Details,發票/日記帳憑證詳細信息
 Invoiced Amount (Exculsive Tax),發票金額（Exculsive稅）
 Is Active,為活躍
 Is Advance,為進
@@ -1489,11 +1489,11 @@ Job Title,職位
 Jobs Email Settings,喬布斯郵件設置
 Journal Entries,日記帳分錄
 Journal Entry,日記帳分錄
-Journal Voucher,期刊券
+Journal Entry,期刊券
 Journal Entry Account,日記帳憑證詳細信息
 Journal Entry Account No,日記帳憑證詳細說明暫無
-Journal Voucher {0} does not have account {1} or already matched,記賬憑單{0}沒有帳號{1}或已經匹配
-Journal Vouchers {0} are un-linked,日記帳憑單{0}被取消鏈接
+Journal Entry {0} does not have account {1} or already matched,記賬憑單{0}沒有帳號{1}或已經匹配
+Journal Entries {0} are un-linked,日記帳憑單{0}被取消鏈接
 Keep a track of communication related to this enquiry which will help for future reference.,保持跟踪的溝通與此相關的調查，這將有助於以供將來參考。
 Keep it web friendly 900px (w) by 100px (h),保持它的Web友好900px （寬）x 100像素（高）
 Key Performance Area,關鍵績效區
@@ -1608,7 +1608,7 @@ Maintenance start date can not be before delivery date for Serial No {0},維護�
 Major/Optional Subjects,大/選修課
 Make ,使
 Make Accounting Entry For Every Stock Movement,做會計分錄為每股份轉移
-Make Bank Voucher,使銀行券
+Make Bank Entry,使銀行券
 Make Credit Note,使信貸注
 Make Debit Note,讓繳費單
 Make Delivery,使交貨
@@ -3144,7 +3144,7 @@ Update Series,更新系列
 Update Series Number,更新序列號
 Update Stock,庫存更新
 Update bank payment dates with journals.,更新與期刊銀行付款日期。
-Update clearance date of Journal Entries marked as 'Bank Vouchers',你不能同時輸入送貨單號及銷售發票編號請輸入任何一個。
+Update clearance date of Journal Entries marked as 'Bank Entry',你不能同時輸入送貨單號及銷售發票編號請輸入任何一個。
 Updated,更新
 Updated Birthday Reminders,更新生日提醒
 Upload Attendance,上傳出席
@@ -3282,7 +3282,7 @@ Write Off Amount <=,核銷金額&lt;=
 Write Off Based On,核銷的基礎上
 Write Off Cost Center,沖銷成本中心
 Write Off Outstanding Amount,核銷額（億元）
-Write Off Voucher,核銷券
+Write Off Entry,核銷券
 Wrong Template: Unable to find head row.,錯誤的模板：找不到頭排。
 Year,年
 Year Closed,年度關閉
@@ -3300,7 +3300,7 @@ You can enter any date manually,您可以手動輸入任何日期
 You can enter the minimum quantity of this item to be ordered.,您可以輸入資料到訂購的最小數量。
 You can not change rate if BOM mentioned agianst any item,你不能改變速度，如果BOM中提到反對的任何項目
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,請輸入倉庫的材料要求將提高
-You can not enter current voucher in 'Against Journal Voucher' column,“反對日記帳憑證”列中您不能輸入電流券
+You can not enter current voucher in 'Against Journal Entry' column,“反對日記帳憑證”列中您不能輸入電流券
 You can set Default Bank Account in Company master,您可以在公司主設置默認銀行賬戶
 You can start by selecting backup frequency and granting access for sync,您可以通過選擇備份的頻率和授權訪問的同步啟動
 You can submit this Stock Reconciliation.,您可以提交該股票對賬。

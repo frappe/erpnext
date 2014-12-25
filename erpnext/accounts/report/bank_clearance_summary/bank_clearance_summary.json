@@ -10,7 +10,7 @@
  "module": "Accounts", 
  "name": "Bank Clearance Summary", 
  "owner": "Administrator", 
- "ref_doctype": "Journal Voucher", 
+ "ref_doctype": "Journal Entry", 
  "report_name": "Bank Clearance Summary", 
  "report_type": "Script Report"
 }

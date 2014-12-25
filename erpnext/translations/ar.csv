@@ -151,8 +151,8 @@ Against Document Detail No,تفاصيل الوثيقة رقم ضد
 Against Document No,ضد الوثيقة رقم
 Against Expense Account,ضد حساب المصاريف
 Against Income Account,ضد حساب الدخل
-Against Journal Voucher,ضد مجلة قسيمة
-Against Journal Voucher {0} does not have any unmatched {1} entry,ضد مجلة قسيمة {0} لا يملك أي لا مثيل له {1} دخول
+Against Journal Entry,ضد مجلة قسيمة
+Against Journal Entry {0} does not have any unmatched {1} entry,ضد مجلة قسيمة {0} لا يملك أي لا مثيل له {1} دخول
 Against Purchase Invoice,ضد فاتورة الشراء
 Against Sales Invoice,ضد فاتورة المبيعات
 Against Sales Order,ضد ترتيب المبيعات
@@ -334,7 +334,7 @@ Bank Overdraft Account,حساب السحب على المكشوف المصرفي
 Bank Reconciliation,تسوية البنك
 Bank Reconciliation Detail,تفاصيل تسوية البنك
 Bank Reconciliation Statement,بيان تسوية البنك
-Bank Voucher,البنك قسيمة
+Bank Entry,البنك قسيمة
 Bank/Cash Balance,بنك / النقد وما في حكمه
 Banking,مصرفي
 Barcode,الباركود
@@ -469,7 +469,7 @@ Case No(s) already in use. Try from Case No {0},الحالة رقم ( ق ) قي�
 Case No. cannot be 0,القضية رقم لا يمكن أن يكون 0
 Cash,نقد
 Cash In Hand,نقد في الصندوق
-Cash Voucher,قسيمة نقدية
+Cash Entry,قسيمة نقدية
 Cash or Bank Account is mandatory for making payment entry,نقدا أو الحساب المصرفي إلزامي لجعل الدخول الدفع
 Cash/Bank Account,النقد / البنك حساب
 Casual Leave,عارضة اترك
@@ -593,7 +593,7 @@ Contact master.,الاتصال الرئيسي.
 Contacts,اتصالات
 Content,محتوى
 Content Type,نوع المحتوى
-Contra Voucher,كونترا قسيمة
+Contra Entry,كونترا قسيمة
 Contract,عقد
 Contract End Date,تاريخ نهاية العقد
 Contract End Date must be greater than Date of Joining,يجب أن يكون تاريخ الانتهاء العقد أكبر من تاريخ الالتحاق بالعمل
@@ -624,7 +624,7 @@ Country,بلد
 Country Name,الاسم الدولة
 Country wise default Address Templates,قوالب بلد الحكمة العنوان الافتراضي
 "Country, Timezone and Currency",البلد، المنطقة الزمنية و العملة
-Create Bank Voucher for the total salary paid for the above selected criteria,إنشاء بنك للقسيمة الراتب الإجمالي المدفوع للاختيار المعايير المذكورة أعلاه
+Create Bank Entry for the total salary paid for the above selected criteria,إنشاء بنك للقسيمة الراتب الإجمالي المدفوع للاختيار المعايير المذكورة أعلاه
 Create Customer,خلق العملاء
 Create Material Requests,إنشاء طلبات المواد
 Create New,خلق جديد
@@ -646,7 +646,7 @@ Credentials,أوراق اعتماد
 Credit,ائتمان
 Credit Amt,الائتمان AMT
 Credit Card,بطاقة إئتمان
-Credit Card Voucher,بطاقة الائتمان قسيمة
+Credit Card Entry,بطاقة الائتمان قسيمة
 Credit Controller,المراقب الائتمان
 Credit Days,الائتمان أيام
 Credit Limit,الحد الائتماني
@@ -978,7 +978,7 @@ Excise Duty @ 8,واجب المكوس @ 8
 Excise Duty Edu Cess 2,المكوس واجب ايدو سيس 2
 Excise Duty SHE Cess 1,المكوس واجب SHE سيس 1
 Excise Page Number,المكوس رقم الصفحة
-Excise Voucher,المكوس قسيمة
+Excise Entry,المكوس قسيمة
 Execution,إعدام
 Executive Search,البحث التنفيذي
 Exemption Limit,إعفاء الحد
@@ -1326,7 +1326,7 @@ Invoice Period From,الفترة من الفاتورة
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,الفترة من الفاتورة و الفاتورة ل فترة مواعيد إلزامية ل فاتورة المتكررة
 Invoice Period To,فترة الفاتورة ل
 Invoice Type,نوع الفاتورة
-Invoice/Journal Voucher Details,فاتورة / مجلة قسيمة تفاصيل
+Invoice/Journal Entry Details,فاتورة / مجلة قسيمة تفاصيل
 Invoiced Amount (Exculsive Tax),المبلغ فواتير ( Exculsive الضرائب )
 Is Active,نشط
 Is Advance,هو المقدمة
@@ -1456,11 +1456,11 @@ Job Title,المسمى الوظيفي
 Jobs Email Settings,إعدادات البريد الإلكتروني وظائف
 Journal Entries,مجلة مقالات
 Journal Entry,إدخال دفتر اليومية
-Journal Voucher,مجلة قسيمة
+Journal Entry,مجلة قسيمة
 Journal Entry Account,مجلة قسيمة التفاصيل
 Journal Entry Account No,مجلة التفاصيل قسيمة لا
-Journal Voucher {0} does not have account {1} or already matched,مجلة قسيمة {0} لا يملك حساب {1} أو بالفعل المتطابقة
-Journal Vouchers {0} are un-linked,مجلة قسائم {0} ترتبط الامم المتحدة و
+Journal Entry {0} does not have account {1} or already matched,مجلة قسيمة {0} لا يملك حساب {1} أو بالفعل المتطابقة
+Journal Entries {0} are un-linked,مجلة قسائم {0} ترتبط الامم المتحدة و
 Keep a track of communication related to this enquiry which will help for future reference.,الحفاظ على مسار الاتصالات المتعلقة بهذا التحقيق والتي سوف تساعد للرجوع إليها مستقبلا.
 Keep it web friendly 900px (w) by 100px (h),يبقيه على شبكة الإنترنت 900px دية ( ث ) من قبل 100px (ح )
 Key Performance Area,مفتاح الأداء المنطقة
@@ -1575,7 +1575,7 @@ Maintenance start date can not be before delivery date for Serial No {0},صيا�
 Major/Optional Subjects,الرئيسية / اختياري الموضوعات
 Make ,Make 
 Make Accounting Entry For Every Stock Movement,جعل الدخول المحاسبة للحصول على كل حركة الأسهم
-Make Bank Voucher,جعل قسيمة البنك
+Make Bank Entry,جعل قسيمة البنك
 Make Credit Note,جعل الائتمان ملاحظة
 Make Debit Note,ملاحظة جعل الخصم
 Make Delivery,جعل التسليم
@@ -3095,7 +3095,7 @@ Update Series,تحديث سلسلة
 Update Series Number,تحديث سلسلة رقم
 Update Stock,تحديث الأسهم
 Update bank payment dates with journals.,تحديث البنك دفع التواريخ مع المجلات.
-Update clearance date of Journal Entries marked as 'Bank Vouchers',تاريخ التخليص تحديث إدخالات دفتر اليومية وضعت ' قسائم البنك
+Update clearance date of Journal Entries marked as 'Bank Entry',تاريخ التخليص تحديث إدخالات دفتر اليومية وضعت ' قسائم البنك
 Updated,تحديث
 Updated Birthday Reminders,تحديث ميلاد تذكير
 Upload Attendance,تحميل الحضور
@@ -3233,7 +3233,7 @@ Write Off Amount <=,شطب المبلغ &lt;=
 Write Off Based On,شطب بناء على
 Write Off Cost Center,شطب مركز التكلفة
 Write Off Outstanding Amount,شطب المبلغ المستحق
-Write Off Voucher,شطب قسيمة
+Write Off Entry,شطب قسيمة
 Wrong Template: Unable to find head row.,قالب الخطأ: تعذر العثور على صف الرأس.
 Year,عام
 Year Closed,مغلق العام
@@ -3251,7 +3251,7 @@ You can enter any date manually,يمكنك إدخال أي تاريخ يدويا
 You can enter the minimum quantity of this item to be ordered.,يمكنك إدخال كمية الحد الأدنى في هذا البند إلى أن يؤمر.
 You can not change rate if BOM mentioned agianst any item,لا يمكنك تغيير معدل إذا ذكر BOM agianst أي بند
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,لا يمكنك إدخال كل من التسليم ملاحظة لا و الفاتورة رقم المبيع الرجاء إدخال أي واحد .
-You can not enter current voucher in 'Against Journal Voucher' column,لا يمكنك إدخال قسيمة الحالي في ' ضد مجلة قسيمة ' العمود
+You can not enter current voucher in 'Against Journal Entry' column,لا يمكنك إدخال قسيمة الحالي في ' ضد مجلة قسيمة ' العمود
 You can set Default Bank Account in Company master,يمكنك تعيين الافتراضي الحساب المصرفي الرئيسي في الشركة
 You can start by selecting backup frequency and granting access for sync,يمكنك أن تبدأ من خلال تحديد تردد النسخ الاحتياطي و منح الوصول لمزامنة
 You can submit this Stock Reconciliation.,يمكنك تقديم هذه الأسهم المصالحة .

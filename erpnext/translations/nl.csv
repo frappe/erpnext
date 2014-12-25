@@ -152,8 +152,8 @@ Against Document Detail No,Tegen Document Detail Geen
 Against Document No,Tegen document nr.
 Against Expense Account,Tegen Expense Account
 Against Income Account,Tegen Inkomen account
-Against Journal Voucher,Tegen Journal Voucher
-Against Journal Voucher {0} does not have any unmatched {1} entry,Tegen Journal Voucher {0} heeft geen ongeëvenaarde {1} toegang hebben
+Against Journal Entry,Tegen Journal Entry
+Against Journal Entry {0} does not have any unmatched {1} entry,Tegen Journal Entry {0} heeft geen ongeëvenaarde {1} toegang hebben
 Against Purchase Invoice,Tegen Aankoop Factuur
 Against Sales Invoice,Tegen Sales Invoice
 Against Sales Order,Tegen klantorder
@@ -335,7 +335,7 @@ Bank Overdraft Account,Bank Overdraft Account
 Bank Reconciliation,Bank Verzoening
 Bank Reconciliation Detail,Bank Verzoening Detail
 Bank Reconciliation Statement,Bank Verzoening Statement
-Bank Voucher,Bank Voucher
+Bank Entry,Bank Entry
 Bank/Cash Balance,Bank / Geldsaldo
 Banking,bank
 Barcode,Barcode
@@ -470,7 +470,7 @@ Case No(s) already in use. Try from Case No {0},Zaak nr. ( s ) al in gebruik. Pr
 Case No. cannot be 0,Zaak nr. mag geen 0
 Cash,Geld
 Cash In Hand,Cash In Hand
-Cash Voucher,Cash Voucher
+Cash Entry,Cash Entry
 Cash or Bank Account is mandatory for making payment entry,Cash of bankrekening is verplicht voor de betaling toegang
 Cash/Bank Account,Cash / bankrekening
 Casual Leave,Casual Leave
@@ -594,7 +594,7 @@ Contact master.,Contact meester .
 Contacts,contacten
 Content,Inhoud
 Content Type,Content Type
-Contra Voucher,Contra Voucher
+Contra Entry,Contra Entry
 Contract,contract
 Contract End Date,Contract Einddatum
 Contract End Date must be greater than Date of Joining,Contract Einddatum moet groter zijn dan Datum van Deelnemen zijn
@@ -625,7 +625,7 @@ Country,Land
 Country Name,Naam van het land
 Country wise default Address Templates,Land verstandig default Adres Templates
 "Country, Timezone and Currency","Country , Tijdzone en Valuta"
-Create Bank Voucher for the total salary paid for the above selected criteria,Maak Bank Voucher voor het totale loon voor de bovenstaande geselecteerde criteria
+Create Bank Entry for the total salary paid for the above selected criteria,Maak Bank Entry voor het totale loon voor de bovenstaande geselecteerde criteria
 Create Customer,Maak de klant
 Create Material Requests,Maak Materiaal Aanvragen
 Create New,Create New
@@ -647,7 +647,7 @@ Credentials,Geloofsbrieven
 Credit,Krediet
 Credit Amt,Credit Amt
 Credit Card,creditkaart
-Credit Card Voucher,Credit Card Voucher
+Credit Card Entry,Credit Card Entry
 Credit Controller,Credit Controller
 Credit Days,Credit Dagen
 Credit Limit,Kredietlimiet
@@ -979,7 +979,7 @@ Excise Duty @ 8,Accijns @ 8
 Excise Duty Edu Cess 2,Accijns Edu Cess 2
 Excise Duty SHE Cess 1,Accijns SHE Cess 1
 Excise Page Number,Accijnzen Paginanummer
-Excise Voucher,Accijnzen Voucher
+Excise Entry,Accijnzen Voucher
 Execution,uitvoering
 Executive Search,Executive Search
 Exemption Limit,Vrijstelling Limit
@@ -1327,7 +1327,7 @@ Invoice Period From,Factuur Periode Van
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Factuur Periode Van en Factuur periode data verplicht voor terugkerende factuur
 Invoice Period To,Factuur periode
 Invoice Type,Factuur Type
-Invoice/Journal Voucher Details,Factuur / Journal Voucher Details
+Invoice/Journal Entry Details,Factuur / Journal Entry Details
 Invoiced Amount (Exculsive Tax),Factuurbedrag ( Exculsive BTW )
 Is Active,Is actief
 Is Advance,Is Advance
@@ -1457,11 +1457,11 @@ Job Title,Functie
 Jobs Email Settings,Vacatures E-mailinstellingen
 Journal Entries,Journaalposten
 Journal Entry,Journal Entry
-Journal Voucher,Journal Voucher
+Journal Entry,Journal Entry
 Journal Entry Account,Journal Entry Account
 Journal Entry Account No,Journal Entry Account Geen
-Journal Voucher {0} does not have account {1} or already matched,Journal Voucher {0} heeft geen rekening {1} of al geëvenaard
-Journal Vouchers {0} are un-linked,Dagboek Vouchers {0} zijn niet- verbonden
+Journal Entry {0} does not have account {1} or already matched,Journal Entry {0} heeft geen rekening {1} of al geëvenaard
+Journal Entries {0} are un-linked,Dagboek Vouchers {0} zijn niet- verbonden
 Keep a track of communication related to this enquiry which will help for future reference.,Houd een spoor van communicatie met betrekking tot dit onderzoek dat zal helpen voor toekomstig gebruik.
 Keep it web friendly 900px (w) by 100px (h),Houd het web vriendelijk 900px ( w ) door 100px ( h )
 Key Performance Area,Key Performance Area
@@ -1576,7 +1576,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Onderho
 Major/Optional Subjects,Major / keuzevakken
 Make ,Make 
 Make Accounting Entry For Every Stock Movement,Maak boekhoudkundige afschrijving voor elke Stock Movement
-Make Bank Voucher,Maak Bank Voucher
+Make Bank Entry,Maak Bank Entry
 Make Credit Note,Maak Credit Note
 Make Debit Note,Maak debetnota
 Make Delivery,Maak Levering
@@ -3096,7 +3096,7 @@ Update Series,Update Series
 Update Series Number,Update Serie Nummer
 Update Stock,Werk Stock
 Update bank payment dates with journals.,Update bank betaaldata met tijdschriften.
-Update clearance date of Journal Entries marked as 'Bank Vouchers',Goedkeuring datum actualisering van Journaalposten gemarkeerd als ' Bank Vouchers '
+Update clearance date of Journal Entries marked as 'Bank Entry',Goedkeuring datum actualisering van Journaalposten gemarkeerd als ' Bank Entry '
 Updated,Bijgewerkt
 Updated Birthday Reminders,Bijgewerkt verjaardagsherinneringen
 Upload Attendance,Upload Toeschouwers
@@ -3234,7 +3234,7 @@ Write Off Amount <=,Schrijf Uit Bedrag &lt;=
 Write Off Based On,Schrijf Uit Based On
 Write Off Cost Center,Schrijf Uit kostenplaats
 Write Off Outstanding Amount,Schrijf uitstaande bedrag
-Write Off Voucher,Schrijf Uit Voucher
+Write Off Entry,Schrijf Uit Voucher
 Wrong Template: Unable to find head row.,Verkeerde Template: Kan hoofd rij vinden.
 Year,Jaar
 Year Closed,Jaar Gesloten
@@ -3252,7 +3252,7 @@ You can enter any date manually,U kunt elke datum handmatig
 You can enter the minimum quantity of this item to be ordered.,U kunt de minimale hoeveelheid van dit product te bestellen.
 You can not change rate if BOM mentioned agianst any item,U kunt geen koers veranderen als BOM agianst een item genoemd
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Je kunt niet Geen Voer beide Delivery Note en verkoopfactuur Nee Geef iemand.
-You can not enter current voucher in 'Against Journal Voucher' column,Je kan niet in de huidige voucher in ' Against Journal Voucher ' kolom
+You can not enter current voucher in 'Against Journal Entry' column,Je kan niet in de huidige voucher in ' Against Journal Entry ' kolom
 You can set Default Bank Account in Company master,U kunt Default Bank Account ingesteld in Bedrijf meester
 You can start by selecting backup frequency and granting access for sync,U kunt beginnen met back- frequentie te selecteren en het verlenen van toegang voor synchronisatie
 You can submit this Stock Reconciliation.,U kunt indienen dit Stock Verzoening .

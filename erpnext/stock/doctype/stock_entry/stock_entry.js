@@ -69,14 +69,14 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		this.show_general_ledger();
 
 		if(this.frm.doc.docstatus === 1 &&
-				frappe.boot.user.can_create.indexOf("Journal Voucher")!==-1) {
+				frappe.boot.user.can_create.indexOf("Journal Entry")!==-1) {
 			if(this.frm.doc.purpose === "Sales Return") {
 				this.frm.add_custom_button(__("Make Credit Note"),
-					function() { me.make_return_jv(); }, frappe.boot.doctype_icons["Journal Voucher"]);
+					function() { me.make_return_jv(); }, frappe.boot.doctype_icons["Journal Entry"]);
 				this.add_excise_button();
 			} else if(this.frm.doc.purpose === "Purchase Return") {
 				this.frm.add_custom_button(__("Make Debit Note"),
-					function() { me.make_return_jv(); }, frappe.boot.doctype_icons["Journal Voucher"]);
+					function() { me.make_return_jv(); }, frappe.boot.doctype_icons["Journal Entry"]);
 				this.add_excise_button();
 			}
 		}
@@ -197,11 +197,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	add_excise_button: function() {
 		if(frappe.boot.sysdefaults.country === "India")
 			this.frm.add_custom_button(__("Make Excise Invoice"), function() {
-				var excise = frappe.model.make_new_doc_and_get_name('Journal Voucher');
-				excise = locals['Journal Voucher'][excise];
-				excise.voucher_type = 'Excise Voucher';
-				loaddoc('Journal Voucher', excise.name);
-			}, frappe.boot.doctype_icons["Journal Voucher"], "btn-default");
+				var excise = frappe.model.make_new_doc_and_get_name('Journal Entry');
+				excise = locals['Journal Entry'][excise];
+				excise.voucher_type = 'Excise Entry';
+				loaddoc('Journal Entry', excise.name);
+			}, frappe.boot.doctype_icons["Journal Entry"], "btn-default");
 	},
 
 	make_return_jv: function() {

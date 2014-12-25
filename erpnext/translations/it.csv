@@ -152,8 +152,8 @@ Against Document Detail No,Per Dettagli Documento N
 Against Document No,Per Documento N
 Against Expense Account,Per Spesa Conto
 Against Income Account,Per Reddito Conto
-Against Journal Voucher,Per Buono Acquisto
-Against Journal Voucher {0} does not have any unmatched {1} entry,Contro ufficiale Voucher {0} non ha alcun ineguagliata {1} entry
+Against Journal Entry,Per Buono Acquisto
+Against Journal Entry {0} does not have any unmatched {1} entry,Contro ufficiale Voucher {0} non ha alcun ineguagliata {1} entry
 Against Purchase Invoice,Per Fattura Acquisto
 Against Sales Invoice,Per Fattura Vendita
 Against Sales Order,Contro Sales Order
@@ -335,7 +335,7 @@ Bank Overdraft Account,Scoperto di conto bancario
 Bank Reconciliation,Conciliazione Banca
 Bank Reconciliation Detail,Dettaglio Riconciliazione Banca
 Bank Reconciliation Statement,Prospetto di Riconciliazione Banca
-Bank Voucher,Buono Banca
+Bank Entry,Buono Banca
 Bank/Cash Balance,Banca/Contanti Saldo
 Banking,bancario
 Barcode,Codice a barre
@@ -470,7 +470,7 @@ Case No(s) already in use. Try from Case No {0},Caso n ( s) già in uso . Prova 
 Case No. cannot be 0,Caso No. Non può essere 0
 Cash,Contante
 Cash In Hand,Cash In Hand
-Cash Voucher,Buono Contanti
+Cash Entry,Buono Contanti
 Cash or Bank Account is mandatory for making payment entry,Contanti o conto bancario è obbligatoria per effettuare il pagamento voce
 Cash/Bank Account,Conto Contanti/Banca
 Casual Leave,Casual Leave
@@ -594,7 +594,7 @@ Contact master.,Contatto master.
 Contacts,Contatti
 Content,Contenuto
 Content Type,Tipo Contenuto
-Contra Voucher,Contra Voucher
+Contra Entry,Contra Entry
 Contract,contratto
 Contract End Date,Data fine Contratto
 Contract End Date must be greater than Date of Joining,Data fine contratto deve essere maggiore di Data di giunzione
@@ -625,7 +625,7 @@ Country,Nazione
 Country Name,Nome Nazione
 Country wise default Address Templates,Modelli Country saggio di default Indirizzo
 "Country, Timezone and Currency","Paese , Fuso orario e valuta"
-Create Bank Voucher for the total salary paid for the above selected criteria,Crea Buono Bancario per il totale dello stipendio da pagare per i seguenti criteri
+Create Bank Entry for the total salary paid for the above selected criteria,Crea Buono Bancario per il totale dello stipendio da pagare per i seguenti criteri
 Create Customer,Crea clienti
 Create Material Requests,Creare Richieste Materiale
 Create New,Crea nuovo
@@ -647,7 +647,7 @@ Credentials,Credenziali
 Credit,Credit
 Credit Amt,Credit Amt
 Credit Card,carta di credito
-Credit Card Voucher,Carta Buono di credito
+Credit Card Entry,Carta Buono di credito
 Credit Controller,Controllare Credito
 Credit Days,Giorni Credito
 Credit Limit,Limite Credito
@@ -979,7 +979,7 @@ Excise Duty @ 8,Excise Duty @ 8
 Excise Duty Edu Cess 2,Excise Duty Edu Cess 2
 Excise Duty SHE Cess 1,Excise Duty SHE Cess 1
 Excise Page Number,Accise Numero Pagina
-Excise Voucher,Buono Accise
+Excise Entry,Buono Accise
 Execution,esecuzione
 Executive Search,executive Search
 Exemption Limit,Limite Esenzione
@@ -1327,7 +1327,7 @@ Invoice Period From,Fattura Periodo Da
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Fattura Periodo Da e fattura Periodo Per le date obbligatorie per la fattura ricorrenti
 Invoice Period To,Periodo fattura per
 Invoice Type,Tipo Fattura
-Invoice/Journal Voucher Details,Fattura / Journal Voucher Dettagli
+Invoice/Journal Entry Details,Fattura / Journal Entry Dettagli
 Invoiced Amount (Exculsive Tax),Importo fatturato ( Exculsive Tax)
 Is Active,È attivo
 Is Advance,È Advance
@@ -1457,11 +1457,11 @@ Job Title,Professione
 Jobs Email Settings,Impostazioni email Lavoro
 Journal Entries,Prime note
 Journal Entry,Journal Entry
-Journal Voucher,Journal Voucher
+Journal Entry,Journal Entry
 Journal Entry Account,Journal Entry Account
 Journal Entry Account No,Journal Entry Account No
-Journal Voucher {0} does not have account {1} or already matched,Journal Voucher {0} non ha conto {1} o già abbinate
-Journal Vouchers {0} are un-linked,Diario Buoni {0} sono non- linked
+Journal Entry {0} does not have account {1} or already matched,Journal Entry {0} non ha conto {1} o già abbinate
+Journal Entries {0} are un-linked,Diario Buoni {0} sono non- linked
 Keep a track of communication related to this enquiry which will help for future reference.,Tenere una traccia delle comunicazioni relative a questa indagine che contribuirà per riferimento futuro.
 Keep it web friendly 900px (w) by 100px (h),Keep it web amichevole 900px ( w ) di 100px ( h )
 Key Performance Area,Area Key Performance
@@ -1576,7 +1576,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Manuten
 Major/Optional Subjects,Principali / Opzionale Soggetti
 Make ,Make 
 Make Accounting Entry For Every Stock Movement,Fai Entry Accounting per ogni Archivio Movimento
-Make Bank Voucher,Fai Voucher Banca
+Make Bank Entry,Fai Voucher Banca
 Make Credit Note,Fai la nota di credito
 Make Debit Note,Fai la nota di addebito
 Make Delivery,effettuare la consegna
@@ -3096,7 +3096,7 @@ Update Series,Update
 Update Series Number,Aggiornamento Numero di Serie
 Update Stock,Aggiornare Archivio
 Update bank payment dates with journals.,Risale aggiornamento versamento bancario con riviste.
-Update clearance date of Journal Entries marked as 'Bank Vouchers',"Data di aggiornamento della respinta corta di voci di diario contrassegnato come "" Buoni Banca '"
+Update clearance date of Journal Entries marked as 'Bank Entry',"Data di aggiornamento della respinta corta di voci di diario contrassegnato come "" Buoni Banca '"
 Updated,Aggiornato
 Updated Birthday Reminders,Aggiornato Compleanno Promemoria
 Upload Attendance,Carica presenze
@@ -3234,7 +3234,7 @@ Write Off Amount <=,Scrivi Off Importo &lt;=
 Write Off Based On,Scrivi Off Basato Su
 Write Off Cost Center,Scrivi Off Centro di costo
 Write Off Outstanding Amount,Scrivi Off eccezionale Importo
-Write Off Voucher,Scrivi Off Voucher
+Write Off Entry,Scrivi Off Voucher
 Wrong Template: Unable to find head row.,Template Sbagliato: Impossibile trovare la linea di testa.
 Year,Anno
 Year Closed,Anno Chiuso
@@ -3252,7 +3252,7 @@ You can enter any date manually,È possibile immettere qualsiasi data manualment
 You can enter the minimum quantity of this item to be ordered.,È possibile inserire la quantità minima di questo oggetto da ordinare.
 You can not change rate if BOM mentioned agianst any item,Non è possibile modificare tariffa se BOM menzionato agianst tutto l'articolo
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Non è possibile inserire sia Consegna Nota n e Fattura n Inserisci nessuno.
-You can not enter current voucher in 'Against Journal Voucher' column,Non è possibile immettere voucher di corrente in ' Contro ufficiale Voucher ' colonna
+You can not enter current voucher in 'Against Journal Entry' column,Non è possibile immettere voucher di corrente in ' Contro ufficiale Voucher ' colonna
 You can set Default Bank Account in Company master,È possibile impostare di default conto bancario in master Società
 You can start by selecting backup frequency and granting access for sync,È possibile avviare selezionando la frequenza di backup e di concedere l'accesso per la sincronizzazione
 You can submit this Stock Reconciliation.,Puoi inviare questo Archivio Riconciliazione.

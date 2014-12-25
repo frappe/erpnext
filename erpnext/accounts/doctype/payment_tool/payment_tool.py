@@ -9,18 +9,18 @@ from frappe.model.document import Document
 import json
 
 class PaymentTool(Document):
-	def make_journal_voucher(self):
+	def make_journal_entry(self):
 		from erpnext.accounts.utils import get_balance_on
 		total_payment_amount = 0.00
 		invoice_voucher_type = {
 			'Sales Invoice': 'against_invoice',
 			'Purchase Invoice': 'against_voucher',
-			'Journal Voucher': 'against_jv',
+			'Journal Entry': 'against_jv',
 			'Sales Order': 'against_sales_order',
 			'Purchase Order': 'against_purchase_order',
 		}
 
-		jv = frappe.new_doc('Journal Voucher')
+		jv = frappe.new_doc('Journal Entry')
 		jv.voucher_type = 'Journal Entry'
 		jv.company = self.company
 		jv.cheque_no = self.reference_no
@@ -109,7 +109,7 @@ def get_against_voucher_amount(against_voucher_type, against_voucher_no):
 		select_cond = "grand_total as total_amount, ifnull(grand_total, 0) - ifnull(advance_paid, 0) as outstanding_amount"
 	elif against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
 		select_cond = "grand_total as total_amount, outstanding_amount"
-	elif against_voucher_type == "Journal Voucher":
+	elif against_voucher_type == "Journal Entry":
 		select_cond = "total_debit as total_amount"
 
 	details = frappe.db.sql("""select {0} from `tab{1}` where name = %s"""

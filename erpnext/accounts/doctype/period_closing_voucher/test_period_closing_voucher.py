@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from erpnext.accounts.doctype.journal_voucher.test_journal_voucher import test_records as jv_records
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import test_records as jv_records
 
 class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):

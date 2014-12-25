@@ -152,8 +152,8 @@ Against Document Detail No,Ενάντια Λεπτομέρεια έγγραφο 
 Against Document No,Ενάντια έγγραφο αριθ.
 Against Expense Account,Ενάντια Λογαριασμός Εξόδων
 Against Income Account,Έναντι του λογαριασμού εισοδήματος
-Against Journal Voucher,Ενάντια Voucher Εφημερίδα
-Against Journal Voucher {0} does not have any unmatched {1} entry,Ενάντια Εφημερίδα Voucher {0} δεν έχει ταίρι {1} εισόδου
+Against Journal Entry,Ενάντια Voucher Εφημερίδα
+Against Journal Entry {0} does not have any unmatched {1} entry,Ενάντια Εφημερίδα Voucher {0} δεν έχει ταίρι {1} εισόδου
 Against Purchase Invoice,Έναντι τιμολογίου αγοράς
 Against Sales Invoice,Ενάντια Πωλήσεις Τιμολόγιο
 Against Sales Order,Ενάντια Πωλήσεις Τάξης
@@ -335,7 +335,7 @@ Bank Overdraft Account,Τραπεζικού λογαριασμού υπεραν�
 Bank Reconciliation,Τράπεζα Συμφιλίωση
 Bank Reconciliation Detail,Τράπεζα Λεπτομέρεια Συμφιλίωση
 Bank Reconciliation Statement,Τράπεζα Δήλωση Συμφιλίωση
-Bank Voucher,Voucher Bank
+Bank Entry,Voucher Bank
 Bank/Cash Balance,Τράπεζα / Cash Balance
 Banking,Banking
 Barcode,Barcode
@@ -470,7 +470,7 @@ Case No(s) already in use. Try from Case No {0},Υπόθεση ( ες ) που �
 Case No. cannot be 0,Υπόθεση αριθ. δεν μπορεί να είναι 0
 Cash,Μετρητά
 Cash In Hand,Μετρητά στο χέρι
-Cash Voucher,Ταμειακό παραστατικό
+Cash Entry,Ταμειακό παραστατικό
 Cash or Bank Account is mandatory for making payment entry,Μετρητά ή τραπεζικός λογαριασμός είναι υποχρεωτική για την κατασκευή εισόδου πληρωμής
 Cash/Bank Account,Μετρητά / Τραπεζικό Λογαριασμό
 Casual Leave,Casual Αφήστε
@@ -594,7 +594,7 @@ Contact master.,Πλοίαρχος επικοινωνίας.
 Contacts,Επαφές
 Content,Περιεχόμενο
 Content Type,Τύπος περιεχομένου
-Contra Voucher,Contra Voucher
+Contra Entry,Contra Entry
 Contract,σύμβαση
 Contract End Date,Σύμβαση Ημερομηνία Λήξης
 Contract End Date must be greater than Date of Joining,"Ημερομηνία λήξης της σύμβασης πρέπει να είναι μεγαλύτερη από ό, τι Ημερομηνία Ενώνουμε"
@@ -625,7 +625,7 @@ Country,Χώρα
 Country Name,Όνομα Χώρα
 Country wise default Address Templates,Χώρα σοφός default Διεύθυνση Πρότυπα
 "Country, Timezone and Currency","Χώρα , Χρονική ζώνη και Συνάλλαγμα"
-Create Bank Voucher for the total salary paid for the above selected criteria,Δημιουργία Voucher Τράπεζας για το σύνολο του μισθού που καταβάλλεται για τις επιλεγμένες παραπάνω κριτήρια
+Create Bank Entry for the total salary paid for the above selected criteria,Δημιουργία Voucher Τράπεζας για το σύνολο του μισθού που καταβάλλεται για τις επιλεγμένες παραπάνω κριτήρια
 Create Customer,Δημιουργία Πελάτη
 Create Material Requests,Δημιουργία Αιτήσεις Υλικό
 Create New,Δημιουργία νέου
@@ -647,7 +647,7 @@ Credentials,Διαπιστευτήρια
 Credit,Πίστωση
 Credit Amt,Credit Amt
 Credit Card,Πιστωτική Κάρτα
-Credit Card Voucher,Πιστωτική Κάρτα Voucher
+Credit Card Entry,Πιστωτική Κάρτα Voucher
 Credit Controller,Credit Controller
 Credit Days,Ημέρες Credit
 Credit Limit,Όριο Πίστωσης
@@ -979,7 +979,7 @@ Excise Duty @ 8,Ειδικού φόρου κατανάλωσης @ 8
 Excise Duty Edu Cess 2,Excise Duty Edu Cess 2
 Excise Duty SHE Cess 1,Excise Duty SHE Cess 1
 Excise Page Number,Excise Αριθμός σελίδας
-Excise Voucher,Excise Voucher
+Excise Entry,Excise Entry
 Execution,εκτέλεση
 Executive Search,Executive Search
 Exemption Limit,Όριο απαλλαγής
@@ -1327,7 +1327,7 @@ Invoice Period From,Τιμολόγιο Περίοδος Από
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Τιμολόγιο Περίοδος Από και Τιμολόγιο Περίοδος Προς ημερομηνίες υποχρεωτική για επαναλαμβανόμενες τιμολόγιο
 Invoice Period To,Τιμολόγιο Περίοδος να
 Invoice Type,Τιμολόγιο Τύπος
-Invoice/Journal Voucher Details,Τιμολόγιο / Εφημερίδα Voucher Λεπτομέρειες
+Invoice/Journal Entry Details,Τιμολόγιο / Εφημερίδα Voucher Λεπτομέρειες
 Invoiced Amount (Exculsive Tax),Ποσό τιμολόγησης ( exculsive ΦΠΑ)
 Is Active,Είναι ενεργός
 Is Advance,Είναι Advance
@@ -1457,11 +1457,11 @@ Job Title,Τίτλος εργασίας
 Jobs Email Settings,Εργασία Ρυθμίσεις Email
 Journal Entries,Εφημερίδα Καταχωρήσεις
 Journal Entry,Journal Entry
-Journal Voucher,Εφημερίδα Voucher
+Journal Entry,Εφημερίδα Voucher
 Journal Entry Account,Εφημερίδα Λεπτομέρεια Voucher
 Journal Entry Account No,Εφημερίδα Λεπτομέρεια φύλλου αριθ.
-Journal Voucher {0} does not have account {1} or already matched,Εφημερίδα Voucher {0} δεν έχει λογαριασμό {1} ή έχουν ήδη συμφωνημένα
-Journal Vouchers {0} are un-linked,Εφημερίδα Κουπόνια {0} είναι μη συνδεδεμένο
+Journal Entry {0} does not have account {1} or already matched,Εφημερίδα Voucher {0} δεν έχει λογαριασμό {1} ή έχουν ήδη συμφωνημένα
+Journal Entries {0} are un-linked,Εφημερίδα Κουπόνια {0} είναι μη συνδεδεμένο
 Keep a track of communication related to this enquiry which will help for future reference.,Κρατήστε ένα κομμάτι της επικοινωνίας που σχετίζονται με την έρευνα αυτή που θα βοηθήσει για μελλοντική αναφορά.
 Keep it web friendly 900px (w) by 100px (h),Φροντίστε να είναι φιλικό web 900px ( w ) από 100px ( h )
 Key Performance Area,Βασικά Επιδόσεων
@@ -1576,7 +1576,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Ημε�
 Major/Optional Subjects,Σημαντικές / προαιρετικά μαθήματα
 Make ,Make 
 Make Accounting Entry For Every Stock Movement,Κάντε Λογιστική καταχώρηση για κάθε Κίνημα Χρηματιστήριο
-Make Bank Voucher,Κάντε Voucher Bank
+Make Bank Entry,Κάντε Voucher Bank
 Make Credit Note,Κάντε Πιστωτικό Σημείωμα
 Make Debit Note,Κάντε χρεωστικό σημείωμα
 Make Delivery,Κάντε Παράδοση
@@ -3096,7 +3096,7 @@ Update Series,Ενημέρωση Series
 Update Series Number,Ενημέρωση Αριθμός Σειράς
 Update Stock,Ενημέρωση Χρηματιστήριο
 Update bank payment dates with journals.,Ενημέρωση τράπεζα ημερομηνίες πληρωμής με περιοδικά.
-Update clearance date of Journal Entries marked as 'Bank Vouchers',Ενημέρωση ημερομηνία εκκαθάρισης της Εφημερίδας των εγγραφών που χαρακτηρίζονται ως « Τράπεζα Κουπόνια »
+Update clearance date of Journal Entries marked as 'Bank Entry',Ενημέρωση ημερομηνία εκκαθάρισης της Εφημερίδας των εγγραφών που χαρακτηρίζονται ως « Τράπεζα Κουπόνια »
 Updated,Ενημέρωση
 Updated Birthday Reminders,Ενημερώθηκε Υπενθυμίσεις γενεθλίων
 Upload Attendance,Ανεβάστε Συμμετοχή
@@ -3234,7 +3234,7 @@ Write Off Amount <=,Γράψτε Εφάπαξ Ποσό &lt;=
 Write Off Based On,Γράψτε Off βάση την
 Write Off Cost Center,Γράψτε Off Κέντρο Κόστους
 Write Off Outstanding Amount,Γράψτε Off οφειλόμενο ποσό
-Write Off Voucher,Γράψτε Off Voucher
+Write Off Entry,Γράψτε Off Voucher
 Wrong Template: Unable to find head row.,Λάθος Πρότυπο: Ανίκανος να βρει γραμμή κεφάλι.
 Year,Έτος
 Year Closed,Έτους που έκλεισε
@@ -3252,7 +3252,7 @@ You can enter any date manually,Μπορείτε να εισάγετε οποι�
 You can enter the minimum quantity of this item to be ordered.,Μπορείτε να εισάγετε την ελάχιστη ποσότητα αυτού του στοιχείου που πρέπει να καταδικαστεί.
 You can not change rate if BOM mentioned agianst any item,"Δεν μπορείτε να αλλάξετε ρυθμό , αν BOM αναφέρεται agianst οποιοδήποτε στοιχείο"
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Δεν μπορείτε να εισάγετε δύο Παράδοση Σημείωση Όχι και Τιμολόγιο Πώλησης Νο Παρακαλώ εισάγετε κάθε μία .
-You can not enter current voucher in 'Against Journal Voucher' column,Δεν μπορείτε να εισάγετε την τρέχουσα κουπόνι σε « Ενάντια Εφημερίδα Voucher της στήλης
+You can not enter current voucher in 'Against Journal Entry' column,Δεν μπορείτε να εισάγετε την τρέχουσα κουπόνι σε « Ενάντια Εφημερίδα Voucher της στήλης
 You can set Default Bank Account in Company master,Μπορείτε να ρυθμίσετε Προεπιλογή Τραπεζικού Λογαριασμού στην Εταιρεία πλοίαρχος
 You can start by selecting backup frequency and granting access for sync,Μπορείτε να ξεκινήσετε επιλέγοντας τη συχνότητα δημιουργίας αντιγράφων ασφαλείας και την παροχή πρόσβασης για συγχρονισμό
 You can submit this Stock Reconciliation.,Μπορείτε να υποβάλετε αυτό το Χρηματιστήριο Συμφιλίωση .

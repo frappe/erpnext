@@ -29,7 +29,7 @@ cur_frm.cscript.submit_salary_slip = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.cscript.make_bank_voucher = function(doc,cdt,cdn){
+cur_frm.cscript.make_bank_entry = function(doc,cdt,cdn){
     if(doc.company && doc.month && doc.fiscal_year){
     	cur_frm.cscript.make_jv(doc, cdt, cdn);
     } else {
@@ -39,9 +39,9 @@ cur_frm.cscript.make_bank_voucher = function(doc,cdt,cdn){
 
 cur_frm.cscript.make_jv = function(doc, dt, dn) {
 	var call_back = function(r, rt){
-		var jv = frappe.model.make_new_doc_and_get_name('Journal Voucher');
-		jv = locals['Journal Voucher'][jv];
-		jv.voucher_type = 'Bank Voucher';
+		var jv = frappe.model.make_new_doc_and_get_name('Journal Entry');
+		jv = locals['Journal Entry'][jv];
+		jv.voucher_type = 'Bank Entry';
 		jv.user_remark = __('Payment of salary for the month {0} and year {1}', [doc.month, doc.fiscal_year]);
 		jv.fiscal_year = doc.fiscal_year;
 		jv.company = doc.company;
@@ -56,7 +56,7 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
 		var d2 = frappe.model.add_child(jv, 'Journal Entry Account', 'entries');
 		d2.debit = r.message['amount']
 
-		loaddoc('Journal Voucher', jv.name);
+		loaddoc('Journal Entry', jv.name);
 	}
 	return $c_obj(doc, 'get_acc_details', '', call_back);
 }

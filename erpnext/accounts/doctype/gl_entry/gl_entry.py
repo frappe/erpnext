@@ -25,7 +25,7 @@ class GLEntry(Document):
 		validate_balance_type(self.account, adv_adj)
 
 		# Update outstanding amt on against voucher
-		if self.against_voucher_type in ['Journal Voucher', 'Sales Invoice', 'Purchase Invoice'] \
+		if self.against_voucher_type in ['Journal Entry', 'Sales Invoice', 'Purchase Invoice'] \
 			and self.against_voucher and update_outstanding == 'Yes':
 				update_outstanding_amt(self.account, self.party_type, self.party, self.against_voucher_type,
 					self.against_voucher)
@@ -123,15 +123,15 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 
 	if against_voucher_type == 'Purchase Invoice':
 		bal = -bal
-	elif against_voucher_type == "Journal Voucher":
+	elif against_voucher_type == "Journal Entry":
 		against_voucher_amount = flt(frappe.db.sql("""
 			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
-			from `tabGL Entry` where voucher_type = 'Journal Voucher' and voucher_no = %s
+			from `tabGL Entry` where voucher_type = 'Journal Entry' and voucher_no = %s
 			and account = %s and party_type=%s and party=%s and ifnull(against_voucher, '') = ''""",
 			(against_voucher, account, party_type, party))[0][0])
 
 		if not against_voucher_amount:
-			frappe.throw(_("Against Journal Voucher {0} is already adjusted against some other voucher")
+			frappe.throw(_("Against Journal Entry {0} is already adjusted against some other voucher")
 				.format(against_voucher))
 
 		bal = against_voucher_amount + bal

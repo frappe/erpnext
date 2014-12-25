@@ -152,8 +152,8 @@ Against Document Detail No,Against Document Detail No
 Against Document No,Against Document No
 Against Expense Account,Against Expense Account
 Against Income Account,Against Income Account
-Against Journal Voucher,Against Journal Voucher
-Against Journal Voucher {0} does not have any unmatched {1} entry,Dergi Çeki karşı {0} herhangi bir eşsiz {1} girdi yok
+Against Journal Entry,Against Journal Entry
+Against Journal Entry {0} does not have any unmatched {1} entry,Dergi Çeki karşı {0} herhangi bir eşsiz {1} girdi yok
 Against Purchase Invoice,Against Purchase Invoice
 Against Sales Invoice,Against Sales Invoice
 Against Sales Order,Satış Siparişi karşı
@@ -335,7 +335,7 @@ Bank Overdraft Account,Banka Kredili Mevduat Hesabı
 Bank Reconciliation,Banka Uzlaşma
 Bank Reconciliation Detail,Banka Uzlaşma Detay
 Bank Reconciliation Statement,Banka Uzlaşma Bildirimi
-Bank Voucher,Banka Çeki
+Bank Entry,Banka Çeki
 Bank/Cash Balance,Banka / Nakit Dengesi
 Banking,Bankacılık
 Barcode,Barkod
@@ -470,7 +470,7 @@ Case No(s) already in use. Try from Case No {0},Örnek numaraları zaten kullan�
 Case No. cannot be 0,Örnek Numarası  0 olamaz
 Cash,Nakit
 Cash In Hand,Kasa mevcudu
-Cash Voucher,Para yerine geçen belge
+Cash Entry,Para yerine geçen belge
 Cash or Bank Account is mandatory for making payment entry,Kasa veya Banka Hesabı ödeme girişi yapmak için zorunludur
 Cash/Bank Account,Kasa / Banka Hesabı
 Casual Leave,Casual bırak
@@ -594,7 +594,7 @@ Contact master.,İletişim ustası.
 Contacts,İletişimler
 Content,İçerik
 Content Type,İçerik Türü
-Contra Voucher,Contra Çeki
+Contra Entry,Contra Çeki
 Contract,Sözleşme
 Contract End Date,Sözleşme Bitiş Tarihi
 Contract End Date must be greater than Date of Joining,Sözleşme Bitiş Tarihi Katılma tarihinden daha büyük olmalıdır
@@ -625,7 +625,7 @@ Country,Ülke
 Country Name,Ülke Adı
 Country wise default Address Templates,Ülke bilge varsayılan Adres Şablonları
 "Country, Timezone and Currency","Ülke, Saat Dilimi ve Döviz"
-Create Bank Voucher for the total salary paid for the above selected criteria,Yukarıda seçilen ölçütler için ödenen toplam maaş için Banka Çeki oluştur
+Create Bank Entry for the total salary paid for the above selected criteria,Yukarıda seçilen ölçütler için ödenen toplam maaş için Banka Çeki oluştur
 Create Customer,Müşteri Oluştur
 Create Material Requests,Malzeme İstekleri Oluştur
 Create New,Yeni Oluştur
@@ -647,7 +647,7 @@ Credentials,Kimlik Bilgileri
 Credit,Kredi
 Credit Amt,Kredi Tutarı
 Credit Card,Kredi kartı
-Credit Card Voucher,Kredi Kartı Çeki
+Credit Card Entry,Kredi Kartı Çeki
 Credit Controller,Kredi Kontrolör
 Credit Days,Kredi Gün
 Credit Limit,Kredi Limiti
@@ -979,7 +979,7 @@ Excise Duty @ 8,@ 8 Özel Tüketim Vergisi
 Excise Duty Edu Cess 2,ÖTV Edu Cess 2
 Excise Duty SHE Cess 1,ÖTV SHE Cess 1
 Excise Page Number,Tüketim Sayfa Numarası
-Excise Voucher,Tüketim Çeki
+Excise Entry,Tüketim Çeki
 Execution,Yerine Getirme
 Executive Search,Executive Search
 Exemption Limit,Muafiyet Sınırı
@@ -1327,7 +1327,7 @@ Invoice Period From,Gönderen Fatura Dönemi
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Faturayı yinelenen zorunlu tarihler için ve Fatura Dönemi itibaren Fatura Dönemi
 Invoice Period To,Için Fatura Dönemi
 Invoice Type,Fatura Türü
-Invoice/Journal Voucher Details,Fatura / Dergi Çeki Detayları
+Invoice/Journal Entry Details,Fatura / Dergi Çeki Detayları
 Invoiced Amount (Exculsive Tax),Faturalanan Tutar (Exculsive Vergisi)
 Is Active,Aktif mi
 Is Advance,Peşin mi
@@ -1457,11 +1457,11 @@ Job Title,Meslek
 Jobs Email Settings,İş E-posta Ayarları
 Journal Entries,Alacak/Borç Girişleri
 Journal Entry,Alacak/Borç Girişleri
-Journal Voucher,Alacak/Borç Çeki
+Journal Entry,Alacak/Borç Çeki
 Journal Entry Account,Alacak/Borç Fiş Detay
 Journal Entry Account No,Alacak/Borç Fiş Detay No
-Journal Voucher {0} does not have account {1} or already matched,Dergi Çeki {0} hesabı yok {1} ya da zaten eşleşti
-Journal Vouchers {0} are un-linked,Dergi Fişler {0} un-bağlantılı
+Journal Entry {0} does not have account {1} or already matched,Dergi Çeki {0} hesabı yok {1} ya da zaten eşleşti
+Journal Entries {0} are un-linked,Dergi Fişler {0} un-bağlantılı
 Keep a track of communication related to this enquiry which will help for future reference.,Gelecekte başvurulara yardımcı olmak için bu soruşturma ile ilgili bir iletişim takip edin.
 Keep it web friendly 900px (w) by 100px (h),100px tarafından web dostu 900px (w) it Keep (h)
 Key Performance Area,Anahtar Performans Alan
@@ -1576,7 +1576,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Bakım 
 Major/Optional Subjects,Zorunlu / Opsiyonel Konular
 Make ,Make 
 Make Accounting Entry For Every Stock Movement,Her Stok Hareketi İçin Muhasebe kaydı yapmak
-Make Bank Voucher,Banka Çeki Yap
+Make Bank Entry,Banka Çeki Yap
 Make Credit Note,Kredi Not Yap
 Make Debit Note,Banka Not Yap
 Make Delivery,Teslim olun
@@ -3096,7 +3096,7 @@ Update Series,Update Serisi
 Update Series Number,Update Serisi sayısı
 Update Stock,Stok Güncelleme
 Update bank payment dates with journals.,Update bank payment dates with journals.
-Update clearance date of Journal Entries marked as 'Bank Vouchers',Journal Entries Update temizlenme tarihi 'Banka Fişler' olarak işaretlenmiş
+Update clearance date of Journal Entries marked as 'Bank Entry',Journal Entries Update temizlenme tarihi 'Banka Fişler' olarak işaretlenmiş
 Updated,Güncellenmiş
 Updated Birthday Reminders,Güncelleme Birthday Reminders
 Upload Attendance,Katılımcı ekle
@@ -3234,7 +3234,7 @@ Write Off Amount <=,Write Off Amount <=
 Write Off Based On,Write Off Based On
 Write Off Cost Center,Write Off Cost Center
 Write Off Outstanding Amount,Write Off Outstanding Amount
-Write Off Voucher,Write Off Voucher
+Write Off Entry,Write Off Entry
 Wrong Template: Unable to find head row.,Yanlış Şablon: kafa satır bulmak için açılamıyor.
 Year,Yıl
 Year Closed,Yıl Kapalı
@@ -3252,7 +3252,7 @@ You can enter any date manually,Elle herhangi bir tarih girebilirsiniz
 You can enter the minimum quantity of this item to be ordered.,Sen sipariş için bu maddenin minimum miktar girebilirsiniz.
 You can not change rate if BOM mentioned agianst any item,BOM herhangi bir öğenin agianst söz eğer hızını değiştiremezsiniz
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Hayır hem Teslim Not giremezsiniz ve Satış Fatura No birini girin.
-You can not enter current voucher in 'Against Journal Voucher' column,Sen sütununda 'Journal Fiş Karşı' cari fiş giremezsiniz
+You can not enter current voucher in 'Against Journal Entry' column,Sen sütununda 'Journal Fiş Karşı' cari fiş giremezsiniz
 You can set Default Bank Account in Company master,Siz Firma master Varsayılan Banka Hesap ayarlayabilirsiniz
 You can start by selecting backup frequency and granting access for sync,Yedekleme sıklığını seçme ve senkronizasyon için erişim sağlayarak başlayabilirsiniz
 You can submit this Stock Reconciliation.,Bu Stok Uzlaşma gönderebilirsiniz.

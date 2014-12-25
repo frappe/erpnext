@@ -152,8 +152,8 @@ Against Document Detail No,Protiv dokumenta Detalj No
 Against Document No,Protiv dokumentu nema
 Against Expense Account,Protiv Rashodi račun
 Against Income Account,Protiv računu dohotka
-Against Journal Voucher,Protiv Journal Voucheru
-Against Journal Voucher {0} does not have any unmatched {1} entry,Protiv Journal vaučer {0} nema premca {1} unos
+Against Journal Entry,Protiv Journal Entryu
+Against Journal Entry {0} does not have any unmatched {1} entry,Protiv Journal vaučer {0} nema premca {1} unos
 Against Purchase Invoice,Protiv Kupnja fakture
 Against Sales Invoice,Protiv prodaje fakture
 Against Sales Order,Protiv prodajnog naloga
@@ -335,7 +335,7 @@ Bank Overdraft Account,Bank Prekoračenje računa
 Bank Reconciliation,Banka pomirenje
 Bank Reconciliation Detail,Banka Pomirenje Detalj
 Bank Reconciliation Statement,Izjava banka pomirenja
-Bank Voucher,Banka bon
+Bank Entry,Banka bon
 Bank/Cash Balance,Banka / saldo
 Banking,bankarstvo
 Barcode,Barkod
@@ -470,7 +470,7 @@ Case No(s) already in use. Try from Case No {0},Slučaj Ne ( i) je već u uporab
 Case No. cannot be 0,Slučaj broj ne može biti 0
 Cash,Gotovina
 Cash In Hand,Novac u blagajni
-Cash Voucher,Novac bon
+Cash Entry,Novac bon
 Cash or Bank Account is mandatory for making payment entry,Novac ili bankovni račun je obvezna za izradu ulazak plaćanje
 Cash/Bank Account,Novac / bankovni račun
 Casual Leave,Casual dopust
@@ -594,7 +594,7 @@ Contact master.,Kontakt majstor .
 Contacts,Kontakti
 Content,Sadržaj
 Content Type,Vrsta sadržaja
-Contra Voucher,Contra bon
+Contra Entry,Contra bon
 Contract,ugovor
 Contract End Date,Ugovor Datum završetka
 Contract End Date must be greater than Date of Joining,Ugovor Datum završetka mora biti veći od dana ulaska u
@@ -625,7 +625,7 @@ Country,Zemlja
 Country Name,Država Ime
 Country wise default Address Templates,Država mudar zadana adresa predlošci
 "Country, Timezone and Currency","Država , vremenske zone i valute"
-Create Bank Voucher for the total salary paid for the above selected criteria,Stvaranje Bank bon za ukupne plaće isplaćene za gore odabranih kriterija
+Create Bank Entry for the total salary paid for the above selected criteria,Stvaranje Bank bon za ukupne plaće isplaćene za gore odabranih kriterija
 Create Customer,izraditi korisnika
 Create Material Requests,Stvaranje materijalni zahtijevi
 Create New,Stvori novo
@@ -647,7 +647,7 @@ Credentials,Svjedodžba
 Credit,Kredit
 Credit Amt,Kreditne Amt
 Credit Card,kreditna kartica
-Credit Card Voucher,Kreditne kartice bon
+Credit Card Entry,Kreditne kartice bon
 Credit Controller,Kreditne kontroler
 Credit Days,Kreditne Dani
 Credit Limit,Kreditni limit
@@ -979,7 +979,7 @@ Excise Duty @ 8,Trošarina @ 8.
 Excise Duty Edu Cess 2,Trošarina Edu Posebni porez 2
 Excise Duty SHE Cess 1,Trošarina ONA Posebni porez na 1
 Excise Page Number,Trošarina Broj stranice
-Excise Voucher,Trošarina bon
+Excise Entry,Trošarina bon
 Execution,izvršenje
 Executive Search,Executive Search
 Exemption Limit,Izuzeće granica
@@ -1327,7 +1327,7 @@ Invoice Period From,Račun razdoblju od
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Račun razdoblju od računa i period za datume obveznih za ponavljajuće fakture
 Invoice Period To,Račun Razdoblje Da
 Invoice Type,Tip fakture
-Invoice/Journal Voucher Details,Račun / Časopis bon Detalji
+Invoice/Journal Entry Details,Račun / Časopis bon Detalji
 Invoiced Amount (Exculsive Tax),Dostavljeni iznos ( Exculsive poreza )
 Is Active,Je aktivna
 Is Advance,Je Predujam
@@ -1457,11 +1457,11 @@ Job Title,Titula
 Jobs Email Settings,Poslovi Postavke e-pošte
 Journal Entries,Časopis upisi
 Journal Entry,Časopis Stupanje
-Journal Voucher,Časopis bon
+Journal Entry,Časopis bon
 Journal Entry Account,Časopis bon Detalj
 Journal Entry Account No,Časopis bon Detalj Ne
-Journal Voucher {0} does not have account {1} or already matched,Časopis bon {0} nema račun {1} ili već usklađeni
-Journal Vouchers {0} are un-linked,Časopis bon {0} su UN -linked
+Journal Entry {0} does not have account {1} or already matched,Časopis bon {0} nema račun {1} ili već usklađeni
+Journal Entries {0} are un-linked,Časopis bon {0} su UN -linked
 Keep a track of communication related to this enquiry which will help for future reference.,Držite pratiti komunikacije vezane uz ovaj upit koji će vam pomoći za buduću referencu.
 Keep it web friendly 900px (w) by 100px (h),Držite ga prijateljski web 900px ( w ) by 100px ( h )
 Key Performance Area,Key Performance Area
@@ -1576,7 +1576,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Održav
 Major/Optional Subjects,Glavni / Izborni predmeti
 Make ,Make 
 Make Accounting Entry For Every Stock Movement,Provjerite knjiženje za svaki burzi pokreta
-Make Bank Voucher,Napravite Bank bon
+Make Bank Entry,Napravite Bank bon
 Make Credit Note,Provjerite Credit Note
 Make Debit Note,Provjerite terećenju
 Make Delivery,bi isporuka
@@ -3096,7 +3096,7 @@ Update Series,Update serija
 Update Series Number,Update serije Broj
 Update Stock,Ažurirajte Stock
 Update bank payment dates with journals.,Update banka datum plaćanja s časopisima.
-Update clearance date of Journal Entries marked as 'Bank Vouchers',"Datum Update klirens navoda označene kao ""Banka bon '"
+Update clearance date of Journal Entries marked as 'Bank Entry',"Datum Update klirens navoda označene kao ""Banka bon '"
 Updated,Obnovljeno
 Updated Birthday Reminders,Obnovljeno Rođendan Podsjetnici
 Upload Attendance,Upload Attendance
@@ -3234,7 +3234,7 @@ Write Off Amount <=,Otpis Iznos &lt;=
 Write Off Based On,Otpis na temelju
 Write Off Cost Center,Otpis troška
 Write Off Outstanding Amount,Otpisati preostali iznos
-Write Off Voucher,Napišite Off bon
+Write Off Entry,Napišite Off bon
 Wrong Template: Unable to find head row.,Pogrešna Predložak: Nije moguće pronaći glave red.
 Year,Godina
 Year Closed,Godina Zatvoreno
@@ -3252,7 +3252,7 @@ You can enter any date manually,Možete unijeti bilo koji datum ručno
 You can enter the minimum quantity of this item to be ordered.,Možete unijeti minimalnu količinu ove točke biti naređeno.
 You can not change rate if BOM mentioned agianst any item,Ne možete promijeniti brzinu ako BOM spomenuo agianst bilo predmet
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Vi ne možete unositi oba isporuke Napomena Ne i prodaje Račun br Unesite bilo jedno .
-You can not enter current voucher in 'Against Journal Voucher' column,Ne možete unijeti trenutni voucher u ' Protiv Journal vaučer ' kolonu
+You can not enter current voucher in 'Against Journal Entry' column,Ne možete unijeti trenutni voucher u ' Protiv Journal vaučer ' kolonu
 You can set Default Bank Account in Company master,Možete postaviti Default bankovni račun u gospodara tvrtke
 You can start by selecting backup frequency and granting access for sync,Možete početi odabirom sigurnosnu frekvenciju i davanje pristupa za sinkronizaciju
 You can submit this Stock Reconciliation.,Možete poslati ovu zaliha pomirenja .

@@ -222,7 +222,7 @@ class SalesInvoice(SellingController):
 		for d in self.get('advances'):
 			if flt(d.allocated_amount) > 0:
 				args = {
-					'voucher_no' : d.journal_voucher,
+					'voucher_no' : d.journal_entry,
 					'voucher_detail_no' : d.jv_detail_no,
 					'against_voucher_type' : 'Sales Invoice',
 					'against_voucher'  : self.name,

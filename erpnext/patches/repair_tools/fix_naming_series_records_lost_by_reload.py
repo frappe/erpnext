@@ -17,7 +17,7 @@ doctype_series_map = {
 	'Delivery Note': 'DN-',
 	'Installation Note': 'IN-',
 	'Item': 'ITEM-',
-	'Journal Voucher': 'JV-',
+	'Journal Entry': 'JV-',
 	'Lead': 'LEAD-',
 	'Opportunity': 'OPTY-',
 	'Packing Slip': 'PS-',

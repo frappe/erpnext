@@ -152,8 +152,8 @@ Against Document Detail No,문서의 세부 사항에 대한 없음
 Against Document No,문서 번호에 대하여
 Against Expense Account,비용 계정에 대한
 Against Income Account,손익 계정에 대한
-Against Journal Voucher,분개장에 대하여
-Against Journal Voucher {0} does not have any unmatched {1} entry,분개장에 대해 {0} 어떤 타의 추종을 불허 {1} 항목이없는
+Against Journal Entry,분개장에 대하여
+Against Journal Entry {0} does not have any unmatched {1} entry,분개장에 대해 {0} 어떤 타의 추종을 불허 {1} 항목이없는
 Against Purchase Invoice,구매 인보이스에 대한
 Against Sales Invoice,견적서에 대하여
 Against Sales Order,판매 주문에 대해
@@ -335,7 +335,7 @@ Bank Overdraft Account,당좌 차월 계정
 Bank Reconciliation,은행 화해
 Bank Reconciliation Detail,은행 화해 세부 정보
 Bank Reconciliation Statement,은행 조정 계산서
-Bank Voucher,은행 바우처
+Bank Entry,은행 바우처
 Bank/Cash Balance,은행 / 현금 잔액
 Banking,은행
 Barcode,바코드
@@ -470,7 +470,7 @@ Case No(s) already in use. Try from Case No {0},케이스 없음 (들)을 이미
 Case No. cannot be 0,케이스 번호는 0이 될 수 없습니다
 Cash,자금
 Cash In Hand,손에 현금
-Cash Voucher,현금 바우처
+Cash Entry,현금 바우처
 Cash or Bank Account is mandatory for making payment entry,현금 또는 은행 계좌 결제 항목을 만들기위한 필수입니다
 Cash/Bank Account,현금 / 은행 계좌
 Casual Leave,캐주얼 허가
@@ -594,7 +594,7 @@ Contact master.,연락처 마스터.
 Contacts,주소록
 Content,목차
 Content Type,컨텐츠 유형
-Contra Voucher,콘트라 바우처
+Contra Entry,콘트라 바우처
 Contract,계약직
 Contract End Date,계약 종료 날짜
 Contract End Date must be greater than Date of Joining,계약 종료 날짜는 가입 날짜보다 커야합니다
@@ -625,7 +625,7 @@ Country,국가
 Country Name,국가 이름
 Country wise default Address Templates,국가 현명한 기본 주소 템플릿
 "Country, Timezone and Currency","국가, 시간대 통화"
-Create Bank Voucher for the total salary paid for the above selected criteria,위의 선택 기준에 대해 지불 한 총 연봉 은행 바우처를 만들기
+Create Bank Entry for the total salary paid for the above selected criteria,위의 선택 기준에 대해 지불 한 총 연봉 은행 바우처를 만들기
 Create Customer,고객을 만들기
 Create Material Requests,자료 요청을 만듭니다
 Create New,새로 만들기
@@ -647,7 +647,7 @@ Credentials,신임장
 Credit,신용
 Credit Amt,신용 AMT 사의
 Credit Card,신용카드
-Credit Card Voucher,신용 카드 바우처
+Credit Card Entry,신용 카드 바우처
 Credit Controller,신용 컨트롤러
 Credit Days,신용 일
 Credit Limit,신용 한도
@@ -979,7 +979,7 @@ Excise Duty @ 8,8 @ 소비세
 Excise Duty Edu Cess 2,소비세 의무 에듀 CESS 2
 Excise Duty SHE Cess 1,소비세 의무 SHE CESS 1
 Excise Page Number,소비세의 페이지 번호
-Excise Voucher,소비세 바우처
+Excise Entry,소비세 바우처
 Execution,실행
 Executive Search,대표 조사
 Exemption Limit,면제 한도
@@ -1327,7 +1327,7 @@ Invoice Period From,에서 송장 기간
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,송장을 반복 필수 날짜에와 송장 기간에서 송장 기간
 Invoice Period To,청구서 기간
 Invoice Type,송장 유형
-Invoice/Journal Voucher Details,송장 / 분개장 세부 정보
+Invoice/Journal Entry Details,송장 / 분개장 세부 정보
 Invoiced Amount (Exculsive Tax),인보이스에 청구 된 금액 (Exculsive 세금)
 Is Active,활성
 Is Advance,사전인가
@@ -1457,11 +1457,11 @@ Job Title,직책
 Jobs Email Settings,채용 정보 이메일 설정
 Journal Entries,저널 항목
 Journal Entry,분개
-Journal Voucher,분개장
+Journal Entry,분개장
 Journal Entry Account,분개장 세부 정보
 Journal Entry Account No,분개장 세부 사항 없음
-Journal Voucher {0} does not have account {1} or already matched,분개장 {0} 계정이없는 {1} 또는 이미 일치
-Journal Vouchers {0} are un-linked,분개장 {0} 않은 연결되어
+Journal Entry {0} does not have account {1} or already matched,분개장 {0} 계정이없는 {1} 또는 이미 일치
+Journal Entries {0} are un-linked,분개장 {0} 않은 연결되어
 Keep a track of communication related to this enquiry which will help for future reference.,향후 참조를 위해 도움이 될 것입니다이 문의와 관련된 통신을 확인합니다.
 Keep it web friendly 900px (w) by 100px (h),100 픽셀로 웹 친화적 인 900px (W)를 유지 (H)
 Key Performance Area,핵심 성과 지역
@@ -1576,7 +1576,7 @@ Maintenance start date can not be before delivery date for Serial No {0},유지 
 Major/Optional Subjects,주요 / 선택 주제
 Make ,Make 
 Make Accounting Entry For Every Stock Movement,모든 주식 이동을위한 회계 항목을 만듭니다
-Make Bank Voucher,은행 바우처에게 확인
+Make Bank Entry,은행 바우처에게 확인
 Make Credit Note,신용 참고하십시오
 Make Debit Note,직불 참고하십시오
 Make Delivery,배달을
@@ -3096,7 +3096,7 @@ Update Series,업데이트 시리즈
 Update Series Number,업데이트 시리즈 번호
 Update Stock,주식 업데이트
 Update bank payment dates with journals.,저널과 은행의 지불 날짜를 업데이트합니다.
-Update clearance date of Journal Entries marked as 'Bank Vouchers',저널 항목의 업데이트 통관 날짜는 '은행 바우처'로 표시
+Update clearance date of Journal Entries marked as 'Bank Entry',저널 항목의 업데이트 통관 날짜는 '은행 바우처'로 표시
 Updated,업데이트
 Updated Birthday Reminders,업데이트 생일 알림
 Upload Attendance,출석 업로드
@@ -3234,7 +3234,7 @@ Write Off Amount <=,금액을 상각 <=
 Write Off Based On,에 의거 오프 쓰기
 Write Off Cost Center,비용 센터를 오프 쓰기
 Write Off Outstanding Amount,잔액을 떨어져 쓰기
-Write Off Voucher,바우처 오프 쓰기
+Write Off Entry,바우처 오프 쓰기
 Wrong Template: Unable to find head row.,잘못된 템플릿 : 머리 행을 찾을 수 없습니다.
 Year,년
 Year Closed,연도 폐쇄
@@ -3252,7 +3252,7 @@ You can enter any date manually,당신은 수동으로 날짜를 입력 할 수 
 You can enter the minimum quantity of this item to be ordered.,당신은 주문이 항목의 최소 수량을 입력 할 수 있습니다.
 You can not change rate if BOM mentioned agianst any item,BOM 어떤 항목 agianst 언급 한 경우는 속도를 변경할 수 없습니다
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,당신은 아니오 모두 배달 주를 입력 할 수 없습니다 및 판매 송장 번호는 하나를 입력하십시오.
-You can not enter current voucher in 'Against Journal Voucher' column,당신은 열 '분개장에 대하여'에서 현재의 바우처를 입력 할 수 없습니다
+You can not enter current voucher in 'Against Journal Entry' column,당신은 열 '분개장에 대하여'에서 현재의 바우처를 입력 할 수 없습니다
 You can set Default Bank Account in Company master,당신은 회사 마스터의 기본 은행 계좌를 설정할 수 있습니다
 You can start by selecting backup frequency and granting access for sync,당신은 백업 빈도를 선택하고 동기화에 대한 액세스를 부여하여 시작할 수 있습니다
 You can submit this Stock Reconciliation.,당신이 재고 조정을 제출할 수 있습니다.

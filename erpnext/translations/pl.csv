@@ -145,8 +145,8 @@ Against Document No,Against Document No
 Against Entries,Against Entries
 Against Expense Account,Against Expense Account
 Against Income Account,Against Income Account
-Against Journal Voucher,Against Journal Voucher
-Against Journal Voucher {0} does not have any unmatched {1} entry,Against Journal Voucher {0} does not have any unmatched {1} entry
+Against Journal Entry,Against Journal Entry
+Against Journal Entry {0} does not have any unmatched {1} entry,Against Journal Entry {0} does not have any unmatched {1} entry
 Against Purchase Invoice,Against Purchase Invoice
 Against Sales Invoice,Against Sales Invoice
 Against Sales Order,Against Sales Order
@@ -328,7 +328,7 @@ Bank Overdraft Account,Bank Overdraft Account
 Bank Reconciliation,Bank Reconciliation
 Bank Reconciliation Detail,Bank Reconciliation Detail
 Bank Reconciliation Statement,Bank Reconciliation Statement
-Bank Voucher,Bank Voucher
+Bank Entry,Bank Entry
 Bank/Cash Balance,Bank/Cash Balance
 Banking,Banking
 Barcode,Kod kreskowy
@@ -457,7 +457,7 @@ Case No(s) already in use. Try from Case No {0},Case No(s) already in use. Try f
 Case No. cannot be 0,Case No. cannot be 0
 Cash,Gotówka
 Cash In Hand,Cash In Hand
-Cash Voucher,Cash Voucher
+Cash Entry,Cash Entry
 Cash or Bank Account is mandatory for making payment entry,Cash or Bank Account is mandatory for making payment entry
 Cash/Bank Account,Cash/Bank Account
 Casual Leave,Casual Leave
@@ -577,7 +577,7 @@ Contact master.,Contact master.
 Contacts,Kontakty
 Content,Zawartość
 Content Type,Content Type
-Contra Voucher,Contra Voucher
+Contra Entry,Contra Entry
 Contract,Kontrakt
 Contract End Date,Contract End Date
 Contract End Date must be greater than Date of Joining,Contract End Date must be greater than Date of Joining
@@ -608,7 +608,7 @@ Costing,Zestawienie kosztów
 Country,Kraj
 Country Name,Nazwa kraju
 "Country, Timezone and Currency","Country, Timezone and Currency"
-Create Bank Voucher for the total salary paid for the above selected criteria,Create Bank Voucher for the total salary paid for the above selected criteria
+Create Bank Entry for the total salary paid for the above selected criteria,Create Bank Entry for the total salary paid for the above selected criteria
 Create Customer,Create Customer
 Create Material Requests,Create Material Requests
 Create New,Create New
@@ -630,7 +630,7 @@ Credentials,Credentials
 Credit,Credit
 Credit Amt,Credit Amt
 Credit Card,Credit Card
-Credit Card Voucher,Credit Card Voucher
+Credit Card Entry,Credit Card Entry
 Credit Controller,Credit Controller
 Credit Days,Credit Days
 Credit Limit,Credit Limit
@@ -944,7 +944,7 @@ Everyone can read,Everyone can read
 "Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank."
 Exchange Rate,Exchange Rate
 Excise Page Number,Excise Page Number
-Excise Voucher,Excise Voucher
+Excise Entry,Excise Entry
 Execution,Execution
 Executive Search,Executive Search
 Exemption Limit,Exemption Limit
@@ -1401,11 +1401,11 @@ Job Title,Job Title
 Jobs Email Settings,Jobs Email Settings
 Journal Entries,Journal Entries
 Journal Entry,Journal Entry
-Journal Voucher,Journal Voucher
+Journal Entry,Journal Entry
 Journal Entry Account,Journal Entry Account
 Journal Entry Account No,Journal Entry Account No
-Journal Voucher {0} does not have account {1} or already matched,Journal Voucher {0} does not have account {1} or already matched
-Journal Vouchers {0} are un-linked,Journal Vouchers {0} are un-linked
+Journal Entry {0} does not have account {1} or already matched,Journal Entry {0} does not have account {1} or already matched
+Journal Entries {0} are un-linked,Journal Entries {0} are un-linked
 Keep a track of communication related to this enquiry which will help for future reference.,Keep a track of communication related to this enquiry which will help for future reference.
 Keep it web friendly 900px (w) by 100px (h),Keep it web friendly 900px (w) by 100px (h)
 Key Performance Area,Key Performance Area
@@ -1519,7 +1519,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Mainten
 Major/Optional Subjects,Major/Optional Subjects
 Make ,Stwórz
 Make Accounting Entry For Every Stock Movement,Make Accounting Entry For Every Stock Movement
-Make Bank Voucher,Make Bank Voucher
+Make Bank Entry,Make Bank Entry
 Make Credit Note,Make Credit Note
 Make Debit Note,Make Debit Note
 Make Delivery,Make Delivery
@@ -2982,7 +2982,7 @@ Update Series Number,Update Series Number
 Update Stock,Update Stock
 "Update allocated amount in the above table and then click ""Allocate"" button","Update allocated amount in the above table and then click ""Allocate"" button"
 Update bank payment dates with journals.,Update bank payment dates with journals.
-Update clearance date of Journal Entries marked as 'Bank Vouchers',Update clearance date of Journal Entries marked as 'Bank Vouchers'
+Update clearance date of Journal Entries marked as 'Bank Entry',Update clearance date of Journal Entries marked as 'Bank Entry'
 Updated,Updated
 Updated Birthday Reminders,Updated Birthday Reminders
 Upload Attendance,Upload Attendance
@@ -3117,7 +3117,7 @@ Write Off Amount <=,Write Off Amount <=
 Write Off Based On,Write Off Based On
 Write Off Cost Center,Write Off Cost Center
 Write Off Outstanding Amount,Write Off Outstanding Amount
-Write Off Voucher,Write Off Voucher
+Write Off Entry,Write Off Entry
 Wrong Template: Unable to find head row.,Wrong Template: Unable to find head row.
 Year,Rok
 Year Closed,Year Closed
@@ -3139,7 +3139,7 @@ You can enter the minimum quantity of this item to be ordered.,"Można wpisać m
 You can not assign itself as parent account,You can not assign itself as parent account
 You can not change rate if BOM mentioned agianst any item,You can not change rate if BOM mentioned agianst any item
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.
-You can not enter current voucher in 'Against Journal Voucher' column,You can not enter current voucher in 'Against Journal Voucher' column
+You can not enter current voucher in 'Against Journal Entry' column,You can not enter current voucher in 'Against Journal Entry' column
 You can set Default Bank Account in Company master,You can set Default Bank Account in Company master
 You can start by selecting backup frequency and granting access for sync,You can start by selecting backup frequency and granting access for sync
 You can submit this Stock Reconciliation.,You can submit this Stock Reconciliation.

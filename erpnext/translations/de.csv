@@ -166,8 +166,8 @@ Against Document Detail No,Gegen Dokumentendetail Nr.
 Against Document No,Gegen Dokument Nr.
 Against Expense Account,Gegen Aufwandskonto
 Against Income Account,Gegen Einkommenskonto
-Against Journal Voucher,Gegen Journalgutschein
-Against Journal Voucher {0} does not have any unmatched {1} entry,Vor Blatt Gutschein {0} keine unerreichte {1} Eintrag haben
+Against Journal Entry,Gegen Journalgutschein
+Against Journal Entry {0} does not have any unmatched {1} entry,Vor Blatt Gutschein {0} keine unerreichte {1} Eintrag haben
 Against Purchase Invoice,Gegen Einkaufsrechnung
 Against Sales Invoice,Gegen Verkaufsrechnung
 Against Sales Order,Vor Sales Order
@@ -357,7 +357,7 @@ Bank Overdraft Account,Kontokorrentkredit Konto
 Bank Reconciliation,Kontenabstimmung
 Bank Reconciliation Detail,Kontenabstimmungsdetail
 Bank Reconciliation Statement,Kontenabstimmungsauszug
-Bank Voucher,Bankbeleg
+Bank Entry,Bankbeleg
 Bank/Cash Balance,Bank-/Bargeldsaldo
 Banking,Bankwesen
 Barcode,Barcode
@@ -495,7 +495,7 @@ Case No(s) already in use. Try from Case No {0},"Fall Nr. (n) bereits im Einsatz
 Case No. cannot be 0,Fall Nr. kann nicht 0 sein
 Cash,Bargeld
 Cash In Hand,Bargeld in der Hand
-Cash Voucher,Kassenbeleg
+Cash Entry,Kassenbeleg
 Cash or Bank Account is mandatory for making payment entry,Barzahlung oder Bankkonto ist für die Zahlung Eintrag
 Cash/Bank Account,Kassen-/Bankkonto
 Casual Leave,Lässige Leave
@@ -624,7 +624,7 @@ Contact master.,Kontakt Master.
 Contacts,Impressum
 Content,Inhalt
 Content Type,Inhaltstyp
-Contra Voucher,Gegen Gutschein
+Contra Entry,Gegen Gutschein
 Contract,Vertrag
 Contract End Date,Vertragsende
 Contract End Date must be greater than Date of Joining,Vertragsende muss größer sein als Datum für Füge sein
@@ -656,7 +656,7 @@ Country Name,Ländername
 Country wise default Address Templates,Land weise Standardadressvorlagen
 "Country, Timezone and Currency","Land , Zeitzone und Währung"
 Cr,Cr
-Create Bank Voucher for the total salary paid for the above selected criteria,Bankgutschein für das Gesamtgehalt nach den oben ausgewählten Kriterien erstellen
+Create Bank Entry for the total salary paid for the above selected criteria,Bankgutschein für das Gesamtgehalt nach den oben ausgewählten Kriterien erstellen
 Create Customer,Neues Kunden
 Create Material Requests,Materialanfragen erstellen
 Create New,Neu erstellen
@@ -679,7 +679,7 @@ Credentials,Anmeldeinformationen
 Credit,Guthaben
 Credit Amt,Guthabenbetrag
 Credit Card,Kreditkarte
-Credit Card Voucher,Kreditkarten-Gutschein
+Credit Card Entry,Kreditkarten-Gutschein
 Credit Controller,Kredit-Controller
 Credit Days,Kredittage
 Credit Limit,Kreditlimit
@@ -1021,7 +1021,7 @@ Excise Duty @ 8,Verbrauchsteuer @ 8
 Excise Duty Edu Cess 2,Verbrauchsteuer Edu Cess 2
 Excise Duty SHE Cess 1,Verbrauchsteuer SHE Cess 1
 Excise Page Number,Seitenzahl ausschneiden
-Excise Voucher,Gutschein ausschneiden
+Excise Entry,Gutschein ausschneiden
 Execution,Ausführung
 Executive Search,Executive Search
 Exhibition,Ausstellung
@@ -1376,7 +1376,7 @@ Invoice Details,Rechnungsdetails
 Invoice No,Rechnungs-Nr.
 Invoice Number,Rechnungsnummer
 Invoice Type,Rechnungstyp
-Invoice/Journal Voucher Details,Rechnung / Journal Gutschein-Details
+Invoice/Journal Entry Details,Rechnung / Journal Gutschein-Details
 Invoiced Amount (Exculsive Tax),Rechnungsbetrag ( Exculsive MwSt.)
 Is Active,Ist aktiv
 Is Advance,Ist Voraus
@@ -1512,11 +1512,11 @@ Job Title,Stellenbezeichnung
 Jobs Email Settings,Stellen-E-Mail-Einstellungen
 Journal Entries,Journaleinträge
 Journal Entry,Journaleintrag
-Journal Voucher,Journal
+Journal Entry,Journal
 Journal Entry Account,Detailansicht Beleg
 Journal Entry Account No,Journalnummer
-Journal Voucher {0} does not have account {1} or already matched,Blatt Gutschein {0} ist nicht Konto haben {1} oder bereits abgestimmt
-Journal Vouchers {0} are un-linked,Blatt Gutscheine {0} sind un -linked
+Journal Entry {0} does not have account {1} or already matched,Blatt Gutschein {0} ist nicht Konto haben {1} oder bereits abgestimmt
+Journal Entries {0} are un-linked,Blatt Gutscheine {0} sind un -linked
 "Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ","Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. "
 Keep a track of communication related to this enquiry which will help for future reference.,Kommunikation bezüglich dieser Anfrage für zukünftige Zwecke aufbewahren.
 Keep it web friendly 900px (w) by 100px (h),"Bitte passende Größe für Webdarstellung wählen:
@@ -1638,7 +1638,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Wartung
 Major/Optional Subjects,Wichtiger/optionaler Betreff
 Make ,Make 
 Make Accounting Entry For Every Stock Movement,Machen Accounting Eintrag für jede Lagerbewegung
-Make Bank Voucher,Bankbeleg erstellen
+Make Bank Entry,Bankbeleg erstellen
 Make Credit Note,Gutschrift erstellen
 Make Debit Note,Lastschrift erstellen
 Make Delivery,Lieferung erstellen
@@ -3222,7 +3222,7 @@ Update Series Number,Seriennummer aktualisieren
 Update Stock,Lagerbestand aktualisieren
 Update additional costs to calculate landed cost of items,Aktualisieren Sie Zusatzkosten um die Einstandskosten des Artikels zu kalkulieren
 Update bank payment dates with journals.,Aktualisierung der Konten mit Hilfe der Journaleinträge
-Update clearance date of Journal Entries marked as 'Bank Vouchers',"Update- Clearance Datum der Journaleinträge als ""Bank Gutscheine 'gekennzeichnet"
+Update clearance date of Journal Entries marked as 'Bank Entry',"Update- Clearance Datum der Journaleinträge als ""Bank Gutscheine 'gekennzeichnet"
 Updated,Aktualisiert
 Updated Birthday Reminders,Geburtstagserinnerungen aktualisiert
 Upload Attendance,Teilnahme hochladen
@@ -3362,7 +3362,7 @@ Write Off Amount <=,"Abschreiben, Betrag <="
 Write Off Based On,Abschreiben basiert auf
 Write Off Cost Center,"Abschreiben, Kostenstelle"
 Write Off Outstanding Amount,"Abschreiben, ausstehender Betrag"
-Write Off Voucher,"Abschreiben, Gutschein"
+Write Off Entry,"Abschreiben, Gutschein"
 Wrong Template: Unable to find head row.,Falsche Vorlage: Kopfzeile nicht gefunden
 Year,Jahr
 Year Closed,Jahr geschlossen
@@ -3380,7 +3380,7 @@ You can enter any date manually,Sie können jedes Datum manuell eingeben
 You can enter the minimum quantity of this item to be ordered.,"Sie können die Mindestmenge des Artikels eingeben, der bestellt werden soll."
 You can not change rate if BOM mentioned agianst any item,"Sie können Rate nicht ändern, wenn BOM agianst jeden Artikel erwähnt"
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Sie können nicht sowohl Lieferschein Nein und Sales Invoice Nr. Bitte geben Sie eine beliebige .
-You can not enter current voucher in 'Against Journal Voucher' column,"Sie können keine aktuellen Gutschein in ""Gegen Blatt Gutschein -Spalte"
+You can not enter current voucher in 'Against Journal Entry' column,"Sie können keine aktuellen Gutschein in ""Gegen Blatt Gutschein -Spalte"
 You can set Default Bank Account in Company master,Sie können Standard- Bank-Konto in Firmen Master eingestellt
 You can start by selecting backup frequency and granting access for sync,Sie können durch Auswahl Backup- Frequenz und den Zugang für die Gewährung Sync starten
 You can submit this Stock Reconciliation.,Sie können diese Vektor Versöhnung vorzulegen.

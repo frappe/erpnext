@@ -178,8 +178,8 @@ Against Document Detail No,Contra Detalhe do Documento nº
 Against Document No,Contra Documento nº
 Against Expense Account,Contra a Conta de Despesas
 Against Income Account,Contra a Conta de Rendimentos
-Against Journal Voucher,Contra Comprovante do livro Diário
-Against Journal Voucher {0} does not have any unmatched {1} entry,Contra Jornal Vale {0} não tem {1} entrada incomparável
+Against Journal Entry,Contra Comprovante do livro Diário
+Against Journal Entry {0} does not have any unmatched {1} entry,Contra Jornal Vale {0} não tem {1} entrada incomparável
 Against Purchase Invoice,Contra a Nota Fiscal de Compra
 Against Sales Invoice,Contra a Nota Fiscal de Venda
 Against Sales Order,Contra Ordem de Vendas
@@ -361,7 +361,7 @@ Bank Overdraft Account,Conta Garantida Banco
 Bank Reconciliation,Reconciliação Bancária
 Bank Reconciliation Detail,Detalhe da Reconciliação Bancária
 Bank Reconciliation Statement,Declaração de reconciliação bancária
-Bank Voucher,Comprovante Bancário
+Bank Entry,Comprovante Bancário
 Bank/Cash Balance,Banco / Saldo de Caixa
 Banking,bancário
 Barcode,Código de barras
@@ -496,7 +496,7 @@ Case No(s) already in use. Try from Case No {0},Processo n º (s) já está em u
 Case No. cannot be 0,Caso n não pode ser 0
 Cash,Numerário
 Cash In Hand,Dinheiro na mão
-Cash Voucher,Comprovante de Caixa
+Cash Entry,Comprovante de Caixa
 Cash or Bank Account is mandatory for making payment entry,Dinheiro ou conta bancária é obrigatória para a tomada de entrada de pagamento
 Cash/Bank Account,Conta do Caixa/Banco
 Casual Leave,Casual Deixar
@@ -620,7 +620,7 @@ Contact master.,Contato mestre.
 Contacts,Contactos
 Content,Conteúdo
 Content Type,Tipo de Conteúdo
-Contra Voucher,Comprovante de Caixa
+Contra Entry,Comprovante de Caixa
 Contract,contrato
 Contract End Date,Data Final do contrato
 Contract End Date must be greater than Date of Joining,Data Contrato Final deve ser maior que Data de Participar
@@ -651,7 +651,7 @@ Country,País
 Country Name,Nome do País
 Country wise default Address Templates,Modelos País default sábio endereço
 "Country, Timezone and Currency","País , o fuso horário e moeda"
-Create Bank Voucher for the total salary paid for the above selected criteria,Criar Comprovante Bancário para o salário total pago para os critérios acima selecionados
+Create Bank Entry for the total salary paid for the above selected criteria,Criar Comprovante Bancário para o salário total pago para os critérios acima selecionados
 Create Customer,criar Cliente
 Create Material Requests,Criar Pedidos de Materiais
 Create New,criar Novo
@@ -673,7 +673,7 @@ Credentials,Credenciais
 Credit,Crédito
 Credit Amt,Montante de Crédito
 Credit Card,cartão de crédito
-Credit Card Voucher,Comprovante do cartão de crédito
+Credit Card Entry,Comprovante do cartão de crédito
 Credit Controller,Controlador de crédito
 Credit Days,Dias de Crédito
 Credit Limit,Limite de Crédito
@@ -1009,7 +1009,7 @@ Excise Duty @ 8,Impostos Especiais de Consumo @ 8
 Excise Duty Edu Cess 2,Impostos Especiais de Consumo Edu Cess 2
 Excise Duty SHE Cess 1,Impostos Especiais de Consumo SHE Cess 1
 Excise Page Number,Número de página do imposto
-Excise Voucher,Comprovante do imposto
+Excise Entry,Comprovante do imposto
 Execution,execução
 Executive Search,Executive Search
 Exemption Limit,Limite de isenção
@@ -1357,7 +1357,7 @@ Invoice Period From,Fatura Período De
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Fatura Período De e Período fatura para datas obrigatórias para fatura recorrentes
 Invoice Period To,Período fatura para
 Invoice Type,Tipo de Fatura
-Invoice/Journal Voucher Details,Factura / Jornal Vale detalhes
+Invoice/Journal Entry Details,Factura / Jornal Vale detalhes
 Invoiced Amount (Exculsive Tax),Valor faturado ( Exculsive Tributário)
 Is Active,É Ativo
 Is Advance,É antecipado
@@ -1489,11 +1489,11 @@ Job Title,Cargo
 Jobs Email Settings,Configurações do e-mail de empregos
 Journal Entries,Lançamentos do livro Diário
 Journal Entry,Lançamento do livro Diário
-Journal Voucher,Comprovante do livro Diário
+Journal Entry,Comprovante do livro Diário
 Journal Entry Account,Detalhe do Comprovante do livro Diário
 Journal Entry Account No,Nº do Detalhe do Comprovante do livro Diário
-Journal Voucher {0} does not have account {1} or already matched,Jornal Vale {0} não tem conta {1} ou já combinava
-Journal Vouchers {0} are un-linked,Jornal Vouchers {0} são não- ligado
+Journal Entry {0} does not have account {1} or already matched,Jornal Vale {0} não tem conta {1} ou já combinava
+Journal Entries {0} are un-linked,Jornal Vouchers {0} são não- ligado
 Keep a track of communication related to this enquiry which will help for future reference.,"Mantenha o controle de comunicações relacionadas a esta consulta, o que irá ajudar para futuras referências."
 Keep it web friendly 900px (w) by 100px (h),Mantenha- web 900px amigável (w) por 100px ( h )
 Key Performance Area,Área Chave de Performance
@@ -1608,7 +1608,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Manuten
 Major/Optional Subjects,Assuntos Principais / Opcionais
 Make ,
 Make Accounting Entry For Every Stock Movement,Faça Contabilidade entrada para cada Banco de Movimento
-Make Bank Voucher,Fazer Comprovante Bancário
+Make Bank Entry,Fazer Comprovante Bancário
 Make Credit Note,Faça Nota de Crédito
 Make Debit Note,Faça Nota de Débito
 Make Delivery,Faça Entrega
@@ -3144,7 +3144,7 @@ Update Series,Atualizar Séries
 Update Series Number,Atualizar Números de Séries
 Update Stock,Atualizar Estoque
 Update bank payment dates with journals.,Atualizar datas de pagamento bancário com livro Diário.
-Update clearance date of Journal Entries marked as 'Bank Vouchers',Data de apuramento Atualização de entradas de diário marcado como ' Banco ' Vouchers
+Update clearance date of Journal Entries marked as 'Bank Entry',Data de apuramento Atualização de entradas de diário marcado como ' Banco ' Vouchers
 Updated,Atualizado
 Updated Birthday Reminders,Atualizado Aniversário Lembretes
 Upload Attendance,Envie Atendimento
@@ -3282,7 +3282,7 @@ Write Off Amount <=,Eliminar Valor &lt;=
 Write Off Based On,Eliminar Baseado em
 Write Off Cost Center,Eliminar Centro de Custos
 Write Off Outstanding Amount,Eliminar saldo devedor
-Write Off Voucher,Eliminar comprovante
+Write Off Entry,Eliminar comprovante
 Wrong Template: Unable to find head row.,Template errado: Não é possível encontrar linha cabeça.
 Year,Ano
 Year Closed,Ano Encerrado
@@ -3300,7 +3300,7 @@ You can enter any date manually,Você pode entrar qualquer data manualmente
 You can enter the minimum quantity of this item to be ordered.,Você pode inserir a quantidade mínima deste item a ser encomendada.
 You can not change rate if BOM mentioned agianst any item,Você não pode alterar a taxa de se BOM mencionado agianst qualquer item
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Você não pode entrar tanto de entrega Nota Não e Vendas fatura Não. Por favor entrar em qualquer um.
-You can not enter current voucher in 'Against Journal Voucher' column,Você não pode entrar comprovante atual em ' Contra Jornal Vale ' coluna
+You can not enter current voucher in 'Against Journal Entry' column,Você não pode entrar comprovante atual em ' Contra Jornal Vale ' coluna
 You can set Default Bank Account in Company master,Você pode definir padrão Conta Bancária no mestre Empresa
 You can start by selecting backup frequency and granting access for sync,Você pode começar por selecionar a freqüência de backup e concessão de acesso para sincronização
 You can submit this Stock Reconciliation.,Você pode enviar este Stock Reconciliação.

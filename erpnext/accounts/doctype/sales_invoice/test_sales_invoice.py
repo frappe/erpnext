@@ -351,7 +351,7 @@ class TestSalesInvoice(unittest.TestCase):
 		frappe.db.sql("""delete from `tabGL Entry`""")
 		w = self.make()
 
-		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
 			import test_records as jv_test_records
 
 		jv = frappe.get_doc(frappe.copy_doc(jv_test_records[0]))
@@ -631,7 +631,7 @@ class TestSalesInvoice(unittest.TestCase):
 		return dn
 
 	def test_sales_invoice_with_advance(self):
-		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
 			import test_records as jv_test_records
 
 		jv = frappe.copy_doc(jv_test_records[0])
@@ -641,7 +641,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si = frappe.copy_doc(test_records[0])
 		si.append("advances", {
 			"doctype": "Sales Invoice Advance",
-			"journal_voucher": jv.name,
+			"journal_entry": jv.name,
 			"jv_detail_no": jv.get("entries")[0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,
@@ -728,5 +728,5 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertRaises(SerialNoStatusError, si.submit)
 
-test_dependencies = ["Journal Voucher", "Contact", "Address"]
+test_dependencies = ["Journal Entry", "Contact", "Address"]
 test_records = frappe.get_test_records('Sales Invoice')

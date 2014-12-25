@@ -68,7 +68,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 			frappe.model.validate_missing(jvd, "account");
 
 			return {
-				query: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_against_jv",
+				query: "erpnext.accounts.doctype.journal_entry.journal_entry.get_against_jv",
 				filters: {
 					account: jvd.account,
 					party: jvd.party
@@ -109,7 +109,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 	against_jv: function(doc, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
 		if (d.against_jv && d.party && !flt(d.credit) && !flt(d.debit)) {
-			this.get_outstanding('Journal Voucher', d.against_jv, d);
+			this.get_outstanding('Journal Entry', d.against_jv, d);
 		}
 	},
 
@@ -216,12 +216,12 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 		cur_frm.pformat.print_heading = doc.select_print_heading;
 	}
 	else
-		cur_frm.pformat.print_heading = __("Journal Voucher");
+		cur_frm.pformat.print_heading = __("Journal Entry");
 }
 
 cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
-	cur_frm.set_df_property("cheque_no", "reqd", doc.voucher_type=="Bank Voucher");
-	cur_frm.set_df_property("cheque_date", "reqd", doc.voucher_type=="Bank Voucher");
+	cur_frm.set_df_property("cheque_no", "reqd", doc.voucher_type=="Bank Entry");
+	cur_frm.set_df_property("cheque_date", "reqd", doc.voucher_type=="Bank Entry");
 
 	if((doc.entries || []).length!==0 || !doc.company) // too early
 		return;
@@ -236,10 +236,10 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 		refresh_field("entries");
 	}
 
-	if(in_list(["Bank Voucher", "Cash Voucher"], doc.voucher_type)) {
+	if(in_list(["Bank Entry", "Cash Entry"], doc.voucher_type)) {
 		return frappe.call({
 			type: "GET",
-			method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
+			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
 			args: {
 				"voucher_type": doc.voucher_type,
 				"company": doc.company
@@ -253,7 +253,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	} else if(doc.voucher_type=="Opening Entry") {
 		return frappe.call({
 			type:"GET",
-			method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_opening_accounts",
+			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_opening_accounts",
 			args: {
 				"company": doc.company
 			},
@@ -272,7 +272,7 @@ frappe.ui.form.on("Journal Entry Account", "party", function(frm, cdt, cdn) {
 	var d = frappe.get_doc(cdt, cdn);
 	if(!d.account && d.party_type && d.party) {
 		return frm.call({
-			method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_party_account_and_balance",
+			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_party_account_and_balance",
 			child: d,
 			args: {
 				company: frm.doc.company,

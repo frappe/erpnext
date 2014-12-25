@@ -152,8 +152,8 @@ Against Document Detail No,ドキュメントの詳細に対して何
 Against Document No,ドキュメントNoに対する
 Against Expense Account,費用勘定に対する
 Against Income Account,所得収支に対する
-Against Journal Voucher,ジャーナルバウチャーに対する
-Against Journal Voucher {0} does not have any unmatched {1} entry,ジャーナルバウチャーに対して{0}は、比類のない{1}のエントリがありません
+Against Journal Entry,ジャーナルバウチャーに対する
+Against Journal Entry {0} does not have any unmatched {1} entry,ジャーナルバウチャーに対して{0}は、比類のない{1}のエントリがありません
 Against Purchase Invoice,購入の請求書に対する
 Against Sales Invoice,納品書に対する
 Against Sales Order,受注に対する
@@ -335,7 +335,7 @@ Bank Overdraft Account,銀行当座貸越口座
 Bank Reconciliation,銀行和解
 Bank Reconciliation Detail,銀行和解の詳細
 Bank Reconciliation Statement,銀行和解声明
-Bank Voucher,銀行の領収書
+Bank Entry,銀行の領収書
 Bank/Cash Balance,銀行/現金残高
 Banking,銀行業務
 Barcode,バーコード
@@ -470,7 +470,7 @@ Case No(s) already in use. Try from Case No {0},ケースなし（S ）は既に
 Case No. cannot be 0,ケース番号は0にすることはできません
 Cash,現金
 Cash In Hand,手持ちの現金
-Cash Voucher,金券
+Cash Entry,金券
 Cash or Bank Account is mandatory for making payment entry,現金または銀行口座は、支払いのエントリを作成するための必須です
 Cash/Bank Account,現金/銀行口座
 Casual Leave,臨時休暇
@@ -594,7 +594,7 @@ Contact master.,連絡先マスター。
 Contacts,連絡先
 Content,内容
 Content Type,コンテンツの種類
-Contra Voucher,コントラバウチャー
+Contra Entry,コントラバウチャー
 Contract,契約書
 Contract End Date,契約終了日
 Contract End Date must be greater than Date of Joining,契約終了日は、参加の日よりも大きくなければならない
@@ -625,7 +625,7 @@ Country,国
 Country Name,国名
 Country wise default Address Templates,国ごとのデフォルトのアドレス·テンプレート
 "Country, Timezone and Currency",国、タイムゾーンと通貨
-Create Bank Voucher for the total salary paid for the above selected criteria,上で選択した基準に支払わ総給与のために銀行券を作成
+Create Bank Entry for the total salary paid for the above selected criteria,上で選択した基準に支払わ総給与のために銀行券を作成
 Create Customer,顧客を作成
 Create Material Requests,素材の要求を作成
 Create New,新規作成
@@ -647,7 +647,7 @@ Credentials,Credentials
 Credit,クレジット
 Credit Amt,クレジットアマウント
 Credit Card,クレジットカード
-Credit Card Voucher,クレジットカードのバウチャー
+Credit Card Entry,クレジットカードのバウチャー
 Credit Controller,クレジットコントローラ
 Credit Days,クレジット日数
 Credit Limit,支払いの上限
@@ -981,7 +981,7 @@ Excise Duty @ 8,8 @物品税
 Excise Duty Edu Cess 2,物品税エドゥ目的税2
 Excise Duty SHE Cess 1,物品税SHE目的税1
 Excise Page Number,物品税ページ番号
-Excise Voucher,物品税バウチャー
+Excise Entry,物品税バウチャー
 Execution,実行
 Executive Search,エグゼクティブサーチ
 Exemption Limit,免除の制限
@@ -1329,7 +1329,7 @@ Invoice Period From,より請求書期間
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,請求書を定期的に必須の日付へと請求期間からの請求書の期間
 Invoice Period To,請求書の期間
 Invoice Type,請求書の種類
-Invoice/Journal Voucher Details,請求書/ジャーナルクーポン詳細
+Invoice/Journal Entry Details,請求書/ジャーナルクーポン詳細
 Invoiced Amount (Exculsive Tax),請求された金額（Exculsive税）
 Is Active,アクティブである
 Is Advance,進歩である
@@ -1459,11 +1459,11 @@ Job Title,職業名
 Jobs Email Settings,仕事のメール設定
 Journal Entries,仕訳
 Journal Entry,仕訳
-Journal Voucher,伝票
+Journal Entry,伝票
 Journal Entry Account,伝票の詳細
 Journal Entry Account No,伝票の詳細番号
-Journal Voucher {0} does not have account {1} or already matched,伝票は{0}アカウントを持っていない{1}、またはすでに一致
-Journal Vouchers {0} are un-linked,ジャーナルバウチャー{0}アンリンクされている
+Journal Entry {0} does not have account {1} or already matched,伝票は{0}アカウントを持っていない{1}、またはすでに一致
+Journal Entries {0} are un-linked,ジャーナルバウチャー{0}アンリンクされている
 Keep a track of communication related to this enquiry which will help for future reference.,今後の参考のために役立ちます。この照会に関連した通信を追跡する。
 Keep it web friendly 900px (w) by 100px (h),900px(w)100px(h)にすることで適用それを維持する。
 Key Performance Area,重要実行分野
@@ -1578,7 +1578,7 @@ Maintenance start date can not be before delivery date for Serial No {0},メン�
 Major/Optional Subjects,大手/オプション科目
 Make ,作成する
 Make Accounting Entry For Every Stock Movement,すべての株式の動きの会計処理のエントリを作成
-Make Bank Voucher,銀行バウチャーを作る
+Make Bank Entry,銀行バウチャーを作る
 Make Credit Note,クレジットメモしておきます
 Make Debit Note,デビットメモしておきます
 Make Delivery,配達をする
@@ -3103,7 +3103,7 @@ Update Series,シリーズの更新
 Update Series Number,シリーズ番号の更新
 Update Stock,在庫の更新
 Update bank payment dates with journals.,銀行支払日と履歴を更新して下さい。
-Update clearance date of Journal Entries marked as 'Bank Vouchers',履歴欄を「銀行決済」と明記してクリアランス日（清算日）を更新して下さい。
+Update clearance date of Journal Entries marked as 'Bank Entry',履歴欄を「銀行決済」と明記してクリアランス日（清算日）を更新して下さい。
 Updated,更新済み
 Updated Birthday Reminders,誕生日の事前通知の更新完了
 Upload Attendance,参加者をアップロードする。（参加者をメインのコンピューターに送る。）
@@ -3243,7 +3243,7 @@ Write Off Amount <=,金額を償却<=
 Write Off Based On,ベースオンを償却
 Write Off Cost Center,原価の事業経費
 Write Off Outstanding Amount,事業経費未払金額
-Write Off Voucher,事業経費領収書
+Write Off Entry,事業経費領収書
 Wrong Template: Unable to find head row.,間違ったテンプレートです。：見出し／最初の行が見つかりません。
 Year,年
 Year Closed,年間休館
@@ -3262,7 +3262,7 @@ You can enter any date manually,手動で日付を入力することができま
 You can enter the minimum quantity of this item to be ordered.,最小限の数量からこの商品を注文することができます
 You can not change rate if BOM mentioned agianst any item,部品表が否認した商品は、料金を変更することができません
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,納品書と売上請求書の両方を入力することはできません。どちらら一つを記入して下さい
-You can not enter current voucher in 'Against Journal Voucher' column,''アゲンストジャーナルバウチャー’’の欄に、最新の領収証を入力することはできません。
+You can not enter current voucher in 'Against Journal Entry' column,''アゲンストジャーナルバウチャー’’の欄に、最新の領収証を入力することはできません。
 You can set Default Bank Account in Company master,あなたは、会社のマスターにメイン銀行口座を設定することができます
 You can start by selecting backup frequency and granting access for sync,バックアップの頻度を選択し、同期するためのアクセスに承諾することで始めることができます
 You can submit this Stock Reconciliation.,あなたは、この株式調整を提出することができます。

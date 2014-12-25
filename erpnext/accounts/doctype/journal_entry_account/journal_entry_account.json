@@ -145,7 +145,7 @@
    "fieldname": "against_jv", 
    "fieldtype": "Link", 
    "in_filter": 1, 
-   "label": "Against Journal Voucher", 
+   "label": "Against Journal Entry", 
    "no_copy": 1, 
    "oldfieldname": "against_jv", 
    "oldfieldtype": "Link", 

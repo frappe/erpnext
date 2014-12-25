@@ -117,7 +117,7 @@
   {
    "fieldname": "sec_break2", 
    "fieldtype": "Section Break", 
-   "label": "Invoice/Journal Voucher Details", 
+   "label": "Invoice/Journal Entry Details", 
    "permlevel": 0
   }, 
   {

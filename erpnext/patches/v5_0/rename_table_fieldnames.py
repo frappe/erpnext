@@ -209,6 +209,15 @@ rename_map = {
 	# "Workstation": [
 	# 	["workstation_operation_hours", "working_hours"]
 	# ],
+	"Payment Reconciliation Payment": [
+		["journal_voucher", "journal_entry"],
+	],
+	"Purchase Invoice Advance": [
+		["journal_voucher", "journal_entry"],
+	],
+	"Sales Invoice Advance": [
+		["journal_voucher", "journal_entry"],
+	]
 }
 
 def execute():
@@ -228,3 +237,9 @@ def execute():
 		["Budget Distribution", "Monthly Distribution"]]:
 			if "tab"+old_dt not in tables:
 				frappe.rename_doc("DocType", old_dt, new_dt, force=True)
+
+	# update voucher type
+	for old, new in [["Bank Voucher", "Bank Entry"], ["Cash Voucher", "Cash Entry"],
+		["Credit Card Voucher", "Credit Card Entry"], ["Contra Voucher", "Contra Entry"],
+		["Write Off Voucher", "Write Off Entry"], ["Excise Voucher", "Excise Entry"]]:
+			frappe.db.sql("update `tabJournal Entry` set voucher_type=%s where voucher_type=%s", (new, old))

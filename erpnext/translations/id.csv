@@ -152,8 +152,8 @@ Against Document Detail No,Terhadap Dokumen Detil ada
 Against Document No,Melawan Dokumen Tidak
 Against Expense Account,Terhadap Beban Akun
 Against Income Account,Terhadap Akun Penghasilan
-Against Journal Voucher,Melawan Journal Voucher
-Against Journal Voucher {0} does not have any unmatched {1} entry,Terhadap Journal Voucher {0} tidak memiliki tertandingi {1} entri
+Against Journal Entry,Melawan Journal Entry
+Against Journal Entry {0} does not have any unmatched {1} entry,Terhadap Journal Entry {0} tidak memiliki tertandingi {1} entri
 Against Purchase Invoice,Terhadap Purchase Invoice
 Against Sales Invoice,Terhadap Faktur Penjualan
 Against Sales Order,Terhadap Sales Order
@@ -335,7 +335,7 @@ Bank Overdraft Account,Cerukan Bank Akun
 Bank Reconciliation,5. Bank Reconciliation (Rekonsiliasi Bank)
 Bank Reconciliation Detail,Rekonsiliasi Bank Detil
 Bank Reconciliation Statement,Pernyataan Bank Rekonsiliasi
-Bank Voucher,Bank Voucher
+Bank Entry,Bank Entry
 Bank/Cash Balance,Bank / Cash Balance
 Banking,Perbankan
 Barcode,barcode
@@ -470,7 +470,7 @@ Case No(s) already in use. Try from Case No {0},Kasus ada (s) sudah digunakan. C
 Case No. cannot be 0,Kasus No tidak bisa 0
 Cash,kas
 Cash In Hand,Cash In Hand
-Cash Voucher,Voucher Cash
+Cash Entry,Voucher Cash
 Cash or Bank Account is mandatory for making payment entry,Kas atau Rekening Bank wajib untuk membuat entri pembayaran
 Cash/Bank Account,Rekening Kas / Bank
 Casual Leave,Santai Cuti
@@ -594,7 +594,7 @@ Contact master.,Kontak utama.
 Contacts,Kontak
 Content,Isi Halaman
 Content Type,Content Type
-Contra Voucher,Contra Voucher
+Contra Entry,Contra Entry
 Contract,Kontrak
 Contract End Date,Tanggal Kontrak End
 Contract End Date must be greater than Date of Joining,Kontrak Tanggal Akhir harus lebih besar dari Tanggal Bergabung
@@ -625,7 +625,7 @@ Country,Negara
 Country Name,Nama Negara
 Country wise default Address Templates,Negara bijaksana Alamat bawaan Template
 "Country, Timezone and Currency","Country, Timezone dan Mata Uang"
-Create Bank Voucher for the total salary paid for the above selected criteria,Buat Bank Voucher untuk gaji total yang dibayarkan untuk kriteria pilihan di atas
+Create Bank Entry for the total salary paid for the above selected criteria,Buat Bank Entry untuk gaji total yang dibayarkan untuk kriteria pilihan di atas
 Create Customer,Buat Pelanggan
 Create Material Requests,Buat Permintaan Material
 Create New,Buat New
@@ -647,7 +647,7 @@ Credentials,Surat kepercayaan
 Credit,Piutang
 Credit Amt,Kredit Jumlah Yang
 Credit Card,Kartu Kredit
-Credit Card Voucher,Voucher Kartu Kredit
+Credit Card Entry,Voucher Kartu Kredit
 Credit Controller,Kontroler Kredit
 Credit Days,Hari Kredit
 Credit Limit,Batas Kredit
@@ -979,7 +979,7 @@ Excise Duty @ 8,Cukai Duty @ 8
 Excise Duty Edu Cess 2,Cukai Edu Cess 2
 Excise Duty SHE Cess 1,Cukai SHE Cess 1
 Excise Page Number,Jumlah Cukai Halaman
-Excise Voucher,Voucher Cukai
+Excise Entry,Voucher Cukai
 Execution,Eksekusi
 Executive Search,Pencarian eksekutif
 Exemption Limit,Batas Pembebasan
@@ -1327,7 +1327,7 @@ Invoice Period From,Faktur Periode Dari
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Faktur Periode Dari dan Faktur Period Untuk tanggal wajib untuk berulang faktur
 Invoice Period To,Periode Faktur Untuk
 Invoice Type,Invoice Type
-Invoice/Journal Voucher Details,Invoice / Journal Entry Account
+Invoice/Journal Entry Details,Invoice / Journal Entry Account
 Invoiced Amount (Exculsive Tax),Faktur Jumlah (Pajak exculsive)
 Is Active,Aktif
 Is Advance,Apakah Muka
@@ -1457,11 +1457,11 @@ Job Title,Jabatan
 Jobs Email Settings,Pengaturan Jobs Email
 Journal Entries,Entries Journal
 Journal Entry,Jurnal Entri
-Journal Voucher,Journal Voucher
-Journal Entry Account,Journal Voucher Detil
-Journal Entry Account No,Journal Voucher Detil ada
-Journal Voucher {0} does not have account {1} or already matched,Journal Voucher {0} tidak memiliki akun {1} atau sudah cocok
-Journal Vouchers {0} are un-linked,Journal Voucher {0} yang un-linked
+Journal Entry,Journal Entry
+Journal Entry Account,Journal Entry Detil
+Journal Entry Account No,Journal Entry Detil ada
+Journal Entry {0} does not have account {1} or already matched,Journal Entry {0} tidak memiliki akun {1} atau sudah cocok
+Journal Entries {0} are un-linked,Journal Entry {0} yang un-linked
 Keep a track of communication related to this enquiry which will help for future reference.,Menyimpan melacak komunikasi yang berkaitan dengan penyelidikan ini yang akan membantu untuk referensi di masa mendatang.
 Keep it web friendly 900px (w) by 100px (h),Simpan web 900px ramah (w) oleh 100px (h)
 Key Performance Area,Key Bidang Kinerja
@@ -1576,7 +1576,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Tanggal
 Major/Optional Subjects,Mayor / Opsional Subjek
 Make ,Make 
 Make Accounting Entry For Every Stock Movement,Membuat Entri Akuntansi Untuk Setiap Gerakan Stock
-Make Bank Voucher,Membuat Bank Voucher
+Make Bank Entry,Membuat Bank Entry
 Make Credit Note,Membuat Nota Kredit
 Make Debit Note,Membuat Debit Note
 Make Delivery,Membuat Pengiriman
@@ -3096,7 +3096,7 @@ Update Series,Pembaruan Series
 Update Series Number,Pembaruan Series Number
 Update Stock,Perbarui Stock
 Update bank payment dates with journals.,Perbarui tanggal pembayaran bank dengan jurnal.
-Update clearance date of Journal Entries marked as 'Bank Vouchers',Tanggal pembaruan clearance Entries Journal ditandai sebagai 'Bank Voucher'
+Update clearance date of Journal Entries marked as 'Bank Entry',Tanggal pembaruan clearance Entries Journal ditandai sebagai 'Bank Entry'
 Updated,Diperbarui
 Updated Birthday Reminders,Diperbarui Ulang Tahun Pengingat
 Upload Attendance,Upload Kehadiran
@@ -3234,7 +3234,7 @@ Write Off Amount <=,Menulis Off Jumlah <=
 Write Off Based On,Menulis Off Berbasis On
 Write Off Cost Center,Menulis Off Biaya Pusat
 Write Off Outstanding Amount,Menulis Off Jumlah Outstanding
-Write Off Voucher,Menulis Off Voucher
+Write Off Entry,Menulis Off Voucher
 Wrong Template: Unable to find head row.,Template yang salah: Tidak dapat menemukan baris kepala.
 Year,Tahun
 Year Closed,Tahun Ditutup
@@ -3252,7 +3252,7 @@ You can enter any date manually,Anda dapat memasukkan setiap tanggal secara manu
 You can enter the minimum quantity of this item to be ordered.,Anda dapat memasukkan jumlah minimum dari item ini yang akan dipesan.
 You can not change rate if BOM mentioned agianst any item,Anda tidak dapat mengubah tingkat jika BOM disebutkan agianst item
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Anda tidak dapat memasukkan kedua Delivery Note ada dan Faktur Penjualan No Masukkan salah satu.
-You can not enter current voucher in 'Against Journal Voucher' column,Anda tidak bisa masuk voucher saat ini di 'Melawan Journal Voucher' kolom
+You can not enter current voucher in 'Against Journal Entry' column,Anda tidak bisa masuk voucher saat ini di 'Melawan Journal Entry' kolom
 You can set Default Bank Account in Company master,Anda dapat mengatur default Bank Account menguasai Perusahaan
 You can start by selecting backup frequency and granting access for sync,Anda dapat memulai dengan memilih frekuensi backup dan memberikan akses untuk sinkronisasi
 You can submit this Stock Reconciliation.,Anda bisa mengirimkan ini Stock Rekonsiliasi.

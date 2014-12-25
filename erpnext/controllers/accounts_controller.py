@@ -394,7 +394,7 @@ class AccountsController(TransactionBase):
 			select
 				t1.name as jv_no, t1.remark, t2.{0} as amount, t2.name as jv_detail_no, `against_{1}` as against_order
 			from
-				`tabJournal Voucher` t1, `tabJournal Entry Account` t2
+				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
 				t1.name = t2.parent and t2.account = %s
 				and t2.party_type=%s and t2.party=%s
@@ -413,7 +413,7 @@ class AccountsController(TransactionBase):
 		for d in res:
 			self.append(parentfield, {
 				"doctype": child_doctype,
-				"journal_voucher": d.jv_no,
+				"journal_entry": d.jv_no,
 				"jv_detail_no": d.jv_detail_no,
 				"remarks": d.remark,
 				"advance_amount": flt(d.amount),
@@ -438,12 +438,12 @@ class AccountsController(TransactionBase):
 				for d in jv_against_order:
 					order_jv_map.setdefault(d.against_order, []).append(d.parent)
 
-				advance_jv_against_si = [d.journal_voucher for d in self.get(advance_table_fieldname)]
+				advance_jv_against_si = [d.journal_entry for d in self.get(advance_table_fieldname)]
 
 				for order, jv_list in order_jv_map.items():
 					for jv in jv_list:
 						if not advance_jv_against_si or jv not in advance_jv_against_si:
-							frappe.throw(_("Journal Voucher {0} is linked against Order {1}, hence it must be fetched as advance in Invoice as well.")
+							frappe.throw(_("Journal Entry {0} is linked against Order {1}, hence it must be fetched as advance in Invoice as well.")
 								.format(jv, order))
 
 

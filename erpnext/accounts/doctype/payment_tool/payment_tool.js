@@ -6,7 +6,7 @@ frappe.provide("erpnext.payment_tool");
 // Help content
 frappe.ui.form.on("Payment Tool", "onload", function(frm) {
 	frm.set_value("make_jv_help", '<i class="icon-hand-right"></i> '
-		+ __("Note: If payment is not made against any reference, make Journal Voucher manually."));
+		+ __("Note: If payment is not made against any reference, make Journal Entry manually."));
 
 	frm.set_query("party_type", function() {
 		return {
@@ -26,7 +26,7 @@ frappe.ui.form.on("Payment Tool", "onload", function(frm) {
 
 	frm.set_query("against_voucher_type", "against_vouchers", function() {
 		return {
-			filters: {"name": ["in", ["Sales Invoice", "Purchase Invoice", "Journal Voucher", "Sales Order", "Purchase Order"]]}
+			filters: {"name": ["in", ["Sales Invoice", "Purchase Invoice", "Journal Entry", "Sales Order", "Purchase Order"]]}
 		};
 	});
 });
@@ -91,7 +91,7 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 		callback: function(r, rt) {
 			if(r.message) {
 				frm.fields_dict.get_outstanding_vouchers.$input.removeClass("btn-primary");
-				frm.fields_dict.make_journal_voucher.$input.addClass("btn-primary");
+				frm.fields_dict.make_journal_entry.$input.addClass("btn-primary");
 
 				frappe.model.clear_table(frm.doc, "against_vouchers");
 				$.each(r.message, function(i, d) {
@@ -116,15 +116,15 @@ frappe.ui.form.on("Payment Tool Detail", "against_voucher_type", function(frm) {
 erpnext.payment_tool.validate_against_voucher = function(frm) {
 	$.each(frm.doc.against_vouchers || [], function(i, row) {
 		if(frm.doc.party_type=="Customer"
-			&& !in_list(["Sales Order", "Sales Invoice", "Journal Voucher"], row.against_voucher_type)) {
+			&& !in_list(["Sales Order", "Sales Invoice", "Journal Entry"], row.against_voucher_type)) {
 				frappe.model.set_value(row.doctype, row.name, "against_voucher_type", "");
-				frappe.throw(__("Against Voucher Type must be one of Sales Order, Sales Invoice or Journal Voucher"))
+				frappe.throw(__("Against Voucher Type must be one of Sales Order, Sales Invoice or Journal Entry"))
 			}
 
 		if(frm.doc.party_type=="Supplier"
-			&& !in_list(["Purchase Order", "Purchase Invoice", "Journal Voucher"], row.against_voucher_type)) {
+			&& !in_list(["Purchase Order", "Purchase Invoice", "Journal Entry"], row.against_voucher_type)) {
 				frappe.model.set_value(row.doctype, row.name, "against_voucher_type", "");
-				frappe.throw(__("Against Voucher Type must be one of Purchase Order, Purchase Invoice or Journal Voucher"))
+				frappe.throw(__("Against Voucher Type must be one of Purchase Order, Purchase Invoice or Journal Entry"))
 			}
 
 	});
@@ -176,15 +176,15 @@ erpnext.payment_tool.set_total_payment_amount = function(frm) {
 }
 
 
-// Make Journal voucher
-frappe.ui.form.on("Payment Tool", "make_journal_voucher", function(frm) {
+// Make Journal Entry
+frappe.ui.form.on("Payment Tool", "make_journal_entry", function(frm) {
 	erpnext.payment_tool.check_mandatory_to_fetch(frm.doc);
 
 	return  frappe.call({
-		method: 'make_journal_voucher',
+		method: 'make_journal_entry',
 		doc: frm.doc,
 		callback: function(r) {
-			frm.fields_dict.make_journal_voucher.$input.addClass("btn-primary");
+			frm.fields_dict.make_journal_entry.$input.addClass("btn-primary");
 			var doclist = frappe.model.sync(r.message);
 			frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 		}

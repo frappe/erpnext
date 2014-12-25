@@ -136,7 +136,7 @@ def reconcile_against_document(args):
 		check_if_jv_modified(d)
 		validate_allocated_amount(d)
 		against_fld = {
-			'Journal Voucher' : 'against_jv',
+			'Journal Entry' : 'against_jv',
 			'Sales Invoice' : 'against_invoice',
 			'Purchase Invoice' : 'against_voucher'
 		}
@@ -144,7 +144,7 @@ def reconcile_against_document(args):
 		d['against_fld'] = against_fld[d['against_voucher_type']]
 
 		# cancel JV
-		jv_obj = frappe.get_doc('Journal Voucher', d['voucher_no'])
+		jv_obj = frappe.get_doc('Journal Entry', d['voucher_no'])
 
 		jv_obj.make_gl_entries(cancel=1, adv_adj=1)
 
@@ -152,7 +152,7 @@ def reconcile_against_document(args):
 		update_against_doc(d, jv_obj)
 
 		# re-submit JV
-		jv_obj = frappe.get_doc('Journal Voucher', d['voucher_no'])
+		jv_obj = frappe.get_doc('Journal Entry', d['voucher_no'])
 		jv_obj.make_gl_entries(cancel = 0, adv_adj =1)
 
 
@@ -163,7 +163,7 @@ def check_if_jv_modified(args):
 		check if jv is submitted
 	"""
 	ret = frappe.db.sql("""
-		select t2.{dr_or_cr} from `tabJournal Voucher` t1, `tabJournal Entry Account` t2
+		select t2.{dr_or_cr} from `tabJournal Entry` t1, `tabJournal Entry Account` t2
 		where t1.name = t2.parent and t2.account = %(account)s
 		and t2.party_type = %(party_type)s and t2.party = %(party)s
 		and ifnull(t2.against_voucher, '')=''
@@ -225,7 +225,7 @@ def remove_against_link_from_jv(ref_type, ref_no, against_field):
 			and voucher_no != ifnull(against_voucher, '')""",
 			(now(), frappe.session.user, ref_type, ref_no))
 
-		frappe.msgprint(_("Journal Vouchers {0} are un-linked".format("\n".join(linked_jv))))
+		frappe.msgprint(_("Journal Entries {0} are un-linked".format("\n".join(linked_jv))))
 
 
 @frappe.whitelist()

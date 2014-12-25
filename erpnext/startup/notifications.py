@@ -15,7 +15,7 @@ def get_notification_config():
 			"Opportunity": {"docstatus":0},
 			"Quotation": {"docstatus":0},
 			"Sales Order": {"docstatus":0},
-			"Journal Voucher": {"docstatus":0},
+			"Journal Entry": {"docstatus":0},
 			"Sales Invoice": {"docstatus":0},
 			"Purchase Invoice": {"docstatus":0},
 			"Leave Application": {"status":"Open"},

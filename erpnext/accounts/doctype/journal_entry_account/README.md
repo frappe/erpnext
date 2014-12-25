@@ -1,1 +1,1 @@
-Individual entry for parent Journal Voucher.
+Individual entry for parent Journal Entry.

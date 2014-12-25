@@ -37,7 +37,7 @@ def execute(filters=None):
 	return columns, data
 
 def get_columns():
-	return [_("Journal Voucher") + ":Link/Journal Voucher:140", _("Account") + ":Link/Account:140",
+	return [_("Journal Entry") + ":Link/Journal Entry:140", _("Account") + ":Link/Account:140",
 		_("Posting Date") + ":Date:100", _("Against Invoice") + ":Link/Purchase Invoice:130",
 		_("Against Invoice Posting Date") + ":Date:130", _("Debit") + ":Currency:120", _("Credit") + ":Currency:120",
 		_("Reference No") + "::100", _("Reference Date") + ":Date:100", _("Remarks") + "::150", _("Age") +":Int:40",
@@ -77,7 +77,7 @@ def get_entries(filters):
 	entries =  frappe.db.sql("""select jv.name, jvd.account, jv.posting_date,
 		jvd.against_voucher, jvd.against_invoice, jvd.debit, jvd.credit,
 		jv.cheque_no, jv.cheque_date, jv.remark
-		from `tabJournal Entry Account` jvd, `tabJournal Voucher` jv
+		from `tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		where jvd.parent = jv.name and jv.docstatus=1 %s order by jv.name DESC""" %
 		(conditions), tuple(party_accounts), as_dict=1)
 

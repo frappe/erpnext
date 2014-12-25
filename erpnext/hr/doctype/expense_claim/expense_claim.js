@@ -4,18 +4,18 @@
 frappe.provide("erpnext.hr");
 
 erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
-	make_bank_voucher: function() {
+	make_bank_entry: function() {
 		var me = this;
 		return frappe.call({
-			method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_default_bank_cash_account",
+			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
 			args: {
 				"company": cur_frm.doc.company,
-				"voucher_type": "Bank Voucher"
+				"voucher_type": "Bank Entry"
 			},
 			callback: function(r) {
-				var jv = frappe.model.make_new_doc_and_get_name('Journal Voucher');
-				jv = locals['Journal Voucher'][jv];
-				jv.voucher_type = 'Bank Voucher';
+				var jv = frappe.model.make_new_doc_and_get_name('Journal Entry');
+				jv = locals['Journal Entry'][jv];
+				jv.voucher_type = 'Bank Entry';
 				jv.company = cur_frm.doc.company;
 				jv.remark = 'Payment against Expense Claim: ' + cur_frm.doc.name;
 				jv.fiscal_year = cur_frm.doc.fiscal_year;
@@ -33,7 +33,7 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 					d1.balance = r.message.balance;
 				}
 
-				loaddoc('Journal Voucher', jv.name);
+				loaddoc('Journal Entry', jv.name);
 			}
 		});
 	}
@@ -91,10 +91,10 @@ cur_frm.cscript.refresh = function(doc,cdt,cdn){
 		if(doc.docstatus==0 && doc.exp_approver==user && doc.approval_status=="Approved")
 			 cur_frm.savesubmit();
 
-		if(doc.docstatus==1 && frappe.model.can_create("Journal Voucher") && 
+		if(doc.docstatus==1 && frappe.model.can_create("Journal Entry") && 
 			cint(doc.total_amount_reimbursed) < cint(doc.total_sanctioned_amount))
-			 cur_frm.add_custom_button(__("Make Bank Voucher"),
-			 	cur_frm.cscript.make_bank_voucher, frappe.boot.doctype_icons["Journal Voucher"]);
+			 cur_frm.add_custom_button(__("Make Bank Entry"),
+			 	cur_frm.cscript.make_bank_entry, frappe.boot.doctype_icons["Journal Entry"]);
 	}
 }
 

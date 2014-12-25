@@ -3,7 +3,7 @@
   "cheque_date": "2013-02-14",
   "cheque_no": "33",
   "company": "_Test Company",
-  "doctype": "Journal Voucher",
+  "doctype": "Journal Entry",
   "entries": [
    {
     "account": "_Test Receivable - _TC",
@@ -23,16 +23,16 @@
    }
   ],
   "fiscal_year": "_Test Fiscal Year 2013",
-  "naming_series": "_T-Journal Voucher-",
+  "naming_series": "_T-Journal Entry-",
   "posting_date": "2013-02-14",
   "user_remark": "test",
-  "voucher_type": "Bank Voucher"
+  "voucher_type": "Bank Entry"
  },
  {
   "cheque_date": "2013-02-14",
   "cheque_no": "33",
   "company": "_Test Company",
-  "doctype": "Journal Voucher",
+  "doctype": "Journal Entry",
   "entries": [
    {
     "account": "_Test Payable - _TC",
@@ -52,16 +52,16 @@
    }
   ],
   "fiscal_year": "_Test Fiscal Year 2013",
-  "naming_series": "_T-Journal Voucher-",
+  "naming_series": "_T-Journal Entry-",
   "posting_date": "2013-02-14",
   "user_remark": "test",
-  "voucher_type": "Bank Voucher"
+  "voucher_type": "Bank Entry"
  },
  {
   "cheque_date": "2013-02-14",
   "cheque_no": "33",
   "company": "_Test Company",
-  "doctype": "Journal Voucher",
+  "doctype": "Journal Entry",
   "entries": [
    {
     "account": "_Test Receivable - _TC",
@@ -82,9 +82,9 @@
    }
   ],
   "fiscal_year": "_Test Fiscal Year 2013",
-  "naming_series": "_T-Journal Voucher-",
+  "naming_series": "_T-Journal Entry-",
   "posting_date": "2013-02-14",
   "user_remark": "test",
-  "voucher_type": "Bank Voucher"
+  "voucher_type": "Bank Entry"
  }
 ]

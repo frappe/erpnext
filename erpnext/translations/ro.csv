@@ -152,8 +152,8 @@ Against Document Detail No,Împotriva Document Detaliu Nu
 Against Document No,Împotriva Documentul nr
 Against Expense Account,Împotriva cont de cheltuieli
 Against Income Account,Împotriva contul de venit
-Against Journal Voucher,Împotriva Jurnalul Voucher
-Against Journal Voucher {0} does not have any unmatched {1} entry,Împotriva Jurnalul Voucher {0} nu are nici neegalat {1} intrare
+Against Journal Entry,Împotriva Jurnalul Voucher
+Against Journal Entry {0} does not have any unmatched {1} entry,Împotriva Jurnalul Voucher {0} nu are nici neegalat {1} intrare
 Against Purchase Invoice,Împotriva cumparare factură
 Against Sales Invoice,Împotriva Factura Vanzare
 Against Sales Order,Împotriva comandă de vânzări
@@ -335,7 +335,7 @@ Bank Overdraft Account,Descoperitul de cont bancar
 Bank Reconciliation,Banca Reconciliere
 Bank Reconciliation Detail,Banca Reconcilierea Detaliu
 Bank Reconciliation Statement,Extras de cont de reconciliere
-Bank Voucher,Bancă Voucher
+Bank Entry,Bancă Voucher
 Bank/Cash Balance,Bank / Cash Balance
 Banking,Bancar
 Barcode,Cod de bare
@@ -470,7 +470,7 @@ Case No(s) already in use. Try from Case No {0},Cazul (e) deja în uz. Încerca�
 Case No. cannot be 0,"Caz Nu, nu poate fi 0"
 Cash,Numerar
 Cash In Hand,Bani în mână
-Cash Voucher,Cash Voucher
+Cash Entry,Cash Entry
 Cash or Bank Account is mandatory for making payment entry,Numerar sau cont bancar este obligatorie pentru a face intrarea plată
 Cash/Bank Account,Contul Cash / Banca
 Casual Leave,Casual concediu
@@ -594,7 +594,7 @@ Contact master.,Contact maestru.
 Contacts,Contacte
 Content,Continut
 Content Type,Tip de conținut
-Contra Voucher,Contra Voucher
+Contra Entry,Contra Entry
 Contract,Contractarea
 Contract End Date,Contract Data de încheiere
 Contract End Date must be greater than Date of Joining,Contract Data de sfârșit trebuie să fie mai mare decât Data aderării
@@ -625,7 +625,7 @@ Country,Ţară
 Country Name,Nume țară
 Country wise default Address Templates,Șabloanele țară înțelept adresa implicită
 "Country, Timezone and Currency","Țară, Timezone și valutar"
-Create Bank Voucher for the total salary paid for the above selected criteria,Crea Bank Voucher pentru salariul totală plătită pentru criteriile selectate de mai sus
+Create Bank Entry for the total salary paid for the above selected criteria,Crea Bank Entry pentru salariul totală plătită pentru criteriile selectate de mai sus
 Create Customer,Creare client
 Create Material Requests,Cererile crea materiale
 Create New,Crearea de noi
@@ -647,7 +647,7 @@ Credentials,Scrisori de acreditare
 Credit,credit
 Credit Amt,Credit Amt
 Credit Card,Card de credit
-Credit Card Voucher,Card de credit Voucher
+Credit Card Entry,Card de credit Voucher
 Credit Controller,Controler de credit
 Credit Days,Zile de credit
 Credit Limit,Limita de credit
@@ -979,7 +979,7 @@ Excise Duty @ 8,Accize @ 8
 Excise Duty Edu Cess 2,Accizele Edu Cess 2
 Excise Duty SHE Cess 1,Accizele SHE Cess 1
 Excise Page Number,Numărul de accize Page
-Excise Voucher,Accize Voucher
+Excise Entry,Accize Voucher
 Execution,Detalii de fabricaţie
 Executive Search,Executive Search
 Exemption Limit,Limita de scutire
@@ -1327,7 +1327,7 @@ Invoice Period From,Perioada factura la
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Perioada factura la și facturilor perioadă la date obligatorii pentru facturi recurente
 Invoice Period To,Perioada de facturare a
 Invoice Type,Factura Tip
-Invoice/Journal Voucher Details,Factura / Jurnalul Voucher Detalii
+Invoice/Journal Entry Details,Factura / Jurnalul Voucher Detalii
 Invoiced Amount (Exculsive Tax),Facturate Suma (Exculsive Tax)
 Is Active,Este activ
 Is Advance,Este Advance
@@ -1457,11 +1457,11 @@ Job Title,Denumirea postului
 Jobs Email Settings,Setări de locuri de muncă de e-mail
 Journal Entries,Intrari in jurnal
 Journal Entry,Jurnal de intrare
-Journal Voucher,Jurnalul Voucher
+Journal Entry,Jurnalul Voucher
 Journal Entry Account,Jurnalul Voucher Detaliu
 Journal Entry Account No,Jurnalul Voucher Detaliu Nu
-Journal Voucher {0} does not have account {1} or already matched,Jurnalul Voucher {0} nu are cont {1} sau deja potrivire
-Journal Vouchers {0} are un-linked,Jurnalul Tichete {0} sunt ne-legate de
+Journal Entry {0} does not have account {1} or already matched,Jurnalul Voucher {0} nu are cont {1} sau deja potrivire
+Journal Entries {0} are un-linked,Jurnalul Tichete {0} sunt ne-legate de
 Keep a track of communication related to this enquiry which will help for future reference.,"Păstra o pistă de comunicare legate de această anchetă, care va ajuta de referință pentru viitor."
 Keep it web friendly 900px (w) by 100px (h),Păstrați-l web 900px prietenos (w) de 100px (h)
 Key Performance Area,Domeniul Major de performanță
@@ -1576,7 +1576,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Între�
 Major/Optional Subjects,Subiectele majore / opționale
 Make ,Make 
 Make Accounting Entry For Every Stock Movement,Asigurați-vă de contabilitate de intrare pentru fiecare Stock Mișcarea
-Make Bank Voucher,Banca face Voucher
+Make Bank Entry,Banca face Voucher
 Make Credit Note,Face Credit Nota
 Make Debit Note,Face notă de debit
 Make Delivery,Face de livrare
@@ -3096,7 +3096,7 @@ Update Series,Actualizare Series
 Update Series Number,Actualizare Serii Număr
 Update Stock,Actualizați Stock
 Update bank payment dates with journals.,Actualizați datele de plată bancar cu reviste.
-Update clearance date of Journal Entries marked as 'Bank Vouchers',"Data de clearance-ul de actualizare de jurnal intrările marcate ca ""Tichete Bank"""
+Update clearance date of Journal Entries marked as 'Bank Entry',"Data de clearance-ul de actualizare de jurnal intrările marcate ca ""Tichete Bank"""
 Updated,Actualizat
 Updated Birthday Reminders,Actualizat Data nasterii Memento
 Upload Attendance,Încărcați Spectatori
@@ -3234,7 +3234,7 @@ Write Off Amount <=,Scrie Off Suma <=
 Write Off Based On,Scrie Off bazat pe
 Write Off Cost Center,Scrie Off cost Center
 Write Off Outstanding Amount,Scrie Off remarcabile Suma
-Write Off Voucher,Scrie Off Voucher
+Write Off Entry,Scrie Off Voucher
 Wrong Template: Unable to find head row.,Format greșit: Imposibil de găsit rând cap.
 Year,An
 Year Closed,An Închis
@@ -3252,7 +3252,7 @@ You can enter any date manually,Puteți introduce manual orice dată
 You can enter the minimum quantity of this item to be ordered.,Puteți introduce cantitatea minimă de acest element pentru a fi comandat.
 You can not change rate if BOM mentioned agianst any item,Nu puteți schimba rata dacă BOM menționat agianst orice element
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Nu puteți introduce atât de livrare Notă Nu și Factura Vanzare Nr Vă rugăm să introduceți nici una.
-You can not enter current voucher in 'Against Journal Voucher' column,"Nu puteți introduce voucher curent în ""Împotriva Jurnalul Voucher"" coloana"
+You can not enter current voucher in 'Against Journal Entry' column,"Nu puteți introduce voucher curent în ""Împotriva Jurnalul Voucher"" coloana"
 You can set Default Bank Account in Company master,Puteți seta implicit cont bancar în maestru de companie
 You can start by selecting backup frequency and granting access for sync,Puteți începe prin selectarea frecvenței de backup și acordarea de acces pentru sincronizare
 You can submit this Stock Reconciliation.,Puteți trimite această Bursa de reconciliere.

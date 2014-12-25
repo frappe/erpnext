@@ -199,7 +199,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(tax.total, expected_values[i][2])
 
 	def test_purchase_invoice_with_advance(self):
-		from erpnext.accounts.doctype.journal_voucher.test_journal_voucher \
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
 			import test_records as jv_test_records
 
 		jv = frappe.copy_doc(jv_test_records[1])
@@ -208,7 +208,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi = frappe.copy_doc(test_records[0])
 		pi.append("advances", {
-			"journal_voucher": jv.name,
+			"journal_entry": jv.name,
 			"jv_detail_no": jv.get("entries")[0].name,
 			"advance_amount": 400,
 			"allocated_amount": 300,

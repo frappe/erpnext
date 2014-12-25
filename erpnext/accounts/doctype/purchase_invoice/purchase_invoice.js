@@ -27,8 +27,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 		// Show / Hide button
 		if(doc.docstatus==1 && doc.outstanding_amount > 0)
-			this.frm.add_custom_button(__('Make Payment Entry'), this.make_bank_voucher,
-				frappe.boot.doctype_icons["Journal Voucher"]);
+			this.frm.add_custom_button(__('Make Payment Entry'), this.make_bank_entry,
+				frappe.boot.doctype_icons["Journal Entry"]);
 
 		if(doc.docstatus==1) {
 			cur_frm.appframe.add_button(__('View Ledger'), function() {
@@ -127,9 +127,9 @@ cur_frm.cscript.is_opening = function(doc, dt, dn) {
 	if (doc.is_opening == 'Yes') unhide_field('aging_date');
 }
 
-cur_frm.cscript.make_bank_voucher = function() {
+cur_frm.cscript.make_bank_entry = function() {
 	return frappe.call({
-		method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_payment_entry_from_purchase_invoice",
+		method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_from_purchase_invoice",
 		args: {
 			"purchase_invoice": cur_frm.doc.name,
 		},

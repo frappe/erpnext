@@ -6,7 +6,7 @@ import unittest, frappe
 from frappe.utils import flt
 
 class TestJournalEntry(unittest.TestCase):
-	def test_journal_voucher_with_against_jv(self):
+	def test_journal_entry_with_against_jv(self):
 
 		jv_invoice = frappe.copy_doc(test_records[2])
 		base_jv = frappe.copy_doc(test_records[0])
@@ -29,8 +29,8 @@ class TestJournalEntry(unittest.TestCase):
 		self.jv_against_voucher_testcase(base_jv, purchase_order)
 
 	def jv_against_voucher_testcase(self, base_jv, test_voucher):
-		dr_or_cr = "credit" if test_voucher.doctype in ["Sales Order", "Journal Voucher"] else "debit"
-		field_dict = {'Journal Voucher': "against_jv",
+		dr_or_cr = "credit" if test_voucher.doctype in ["Sales Order", "Journal Entry"] else "debit"
+		field_dict = {'Journal Entry': "against_jv",
 			'Sales Order': "against_sales_order",
 			'Purchase Order': "against_purchase_order"
 			}
@@ -39,7 +39,7 @@ class TestJournalEntry(unittest.TestCase):
 		test_voucher.insert()
 		test_voucher.submit()
 
-		if test_voucher.doctype == "Journal Voucher":
+		if test_voucher.doctype == "Journal Entry":
 			self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
 				where account = %s and docstatus = 1 and parent = %s""",
 				("_Test Receivable - _TC", test_voucher.name)))
@@ -73,8 +73,8 @@ class TestJournalEntry(unittest.TestCase):
 		self.assertTrue(flt(advance_paid[0][0]) == flt(payment_against_order))
 
 	def cancel_against_voucher_testcase(self, test_voucher):
-		if test_voucher.doctype == "Journal Voucher":
-			# if test_voucher is a Journal Voucher, test cancellation of test_voucher
+		if test_voucher.doctype == "Journal Entry":
+			# if test_voucher is a Journal Entry, test cancellation of test_voucher
 			test_voucher.cancel()
 			self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
 				where against_jv=%s""", test_voucher.name))
@@ -114,7 +114,7 @@ class TestJournalEntry(unittest.TestCase):
 		jv.insert()
 		jv.submit()
 		self.assertTrue(frappe.db.get_value("GL Entry",
-			{"voucher_type": "Journal Voucher", "voucher_no": jv.name}))
+			{"voucher_type": "Journal Entry", "voucher_no": jv.name}))
 
 	def test_monthly_budget_crossed_stop(self):
 		from erpnext.accounts.utils import BudgetError
@@ -168,7 +168,7 @@ class TestJournalEntry(unittest.TestCase):
 		jv.submit()
 
 		self.assertTrue(frappe.db.get_value("GL Entry",
-			{"voucher_type": "Journal Voucher", "voucher_no": jv.name}))
+			{"voucher_type": "Journal Entry", "voucher_no": jv.name}))
 
 		jv1 = frappe.copy_doc(test_records[0])
 		jv1.get("entries")[1].account = "_Test Account Cost for Goods Sold - _TC"
@@ -178,7 +178,7 @@ class TestJournalEntry(unittest.TestCase):
 		jv1.submit()
 
 		self.assertTrue(frappe.db.get_value("GL Entry",
-			{"voucher_type": "Journal Voucher", "voucher_no": jv1.name}))
+			{"voucher_type": "Journal Entry", "voucher_no": jv1.name}))
 
 		self.assertRaises(BudgetError, jv.cancel)
 
@@ -188,4 +188,4 @@ class TestJournalEntry(unittest.TestCase):
 		frappe.db.sql("""delete from `tabGL Entry`""")
 
 
-test_records = frappe.get_test_records('Journal Voucher')
+test_records = frappe.get_test_records('Journal Entry')

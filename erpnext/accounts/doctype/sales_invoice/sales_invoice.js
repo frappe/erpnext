@@ -79,7 +79,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}
 
 			if(doc.outstanding_amount!=0) {
-				cur_frm.appframe.add_primary_action(__('Make Payment Entry'), cur_frm.cscript.make_bank_voucher, "icon-money");
+				cur_frm.appframe.add_primary_action(__('Make Payment Entry'), cur_frm.cscript.make_bank_entry, "icon-money");
 			}
 		}
 
@@ -276,9 +276,9 @@ cur_frm.cscript['Make Delivery Note'] = function() {
 	})
 }
 
-cur_frm.cscript.make_bank_voucher = function() {
+cur_frm.cscript.make_bank_entry = function() {
 	return frappe.call({
-		method: "erpnext.accounts.doctype.journal_voucher.journal_voucher.get_payment_entry_from_sales_invoice",
+		method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_from_sales_invoice",
 		args: {
 			"sales_invoice": cur_frm.doc.name
 		},

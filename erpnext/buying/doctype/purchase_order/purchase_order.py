@@ -241,7 +241,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 def make_purchase_invoice(source_name, target_doc=None):
 	def postprocess(source, target):
 		set_missing_values(source, target)
-		#Get the advance paid Journal Vouchers in Purchase Invoice Advance
+		#Get the advance paid Journal Entries in Purchase Invoice Advance
 		target.get_advances()
 
 	def update_item(obj, target, source_parent):

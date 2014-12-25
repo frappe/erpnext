@@ -11,7 +11,7 @@
  "module": "Accounts", 
  "name": "Payment Period Based On Invoice Date", 
  "owner": "Administrator", 
- "ref_doctype": "Journal Voucher", 
+ "ref_doctype": "Journal Entry", 
  "report_name": "Payment Period Based On Invoice Date", 
  "report_type": "Script Report"
 }

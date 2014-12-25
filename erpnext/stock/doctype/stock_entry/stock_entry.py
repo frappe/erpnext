@@ -822,7 +822,7 @@ def make_return_jv(stock_entry):
 		result = make_return_jv_from_purchase_receipt(se, ref)
 
 	# create jv doc and fetch balance for each unique row item
-	jv = frappe.new_doc("Journal Voucher")
+	jv = frappe.new_doc("Journal Entry")
 	jv.update({
 		"posting_date": se.posting_date,
 		"voucher_type": se.purpose == "Sales Return" and "Credit Note" or "Debit Note",

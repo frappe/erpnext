@@ -8,7 +8,7 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Journal Voucher",
+					"name": "Journal Entry",
 					"description": _("Accounting journal entries.")
 				},
 				{
@@ -234,7 +234,7 @@ def get_data():
 					"type": "report",
 					"name": "Bank Reconciliation Statement",
 					"is_query_report": True,
-					"doctype": "Journal Voucher"
+					"doctype": "Journal Entry"
 				},
 				{
 					"type": "report",
@@ -264,13 +264,13 @@ def get_data():
 					"type": "report",
 					"name": "Bank Clearance Summary",
 					"is_query_report": True,
-					"doctype": "Journal Voucher"
+					"doctype": "Journal Entry"
 				},
 				{
 					"type": "report",
 					"name": "Payment Period Based On Invoice Date",
 					"is_query_report": True,
-					"doctype": "Journal Voucher"
+					"doctype": "Journal Entry"
 				},
 				{
 					"type": "report",

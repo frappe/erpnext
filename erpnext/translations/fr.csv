@@ -153,8 +153,8 @@ Against Document Detail No,Contre Détail document n
 Against Document No,Contre le document n °
 Against Expense Account,Contre compte de dépenses
 Against Income Account,Contre compte le revenu
-Against Journal Voucher,Contre Bon Journal
-Against Journal Voucher {0} does not have any unmatched {1} entry,Contre Journal Bon {0} n'a pas encore inégalée {1} entrée
+Against Journal Entry,Contre Bon Journal
+Against Journal Entry {0} does not have any unmatched {1} entry,Contre Journal Bon {0} n'a pas encore inégalée {1} entrée
 Against Purchase Invoice,Contre facture d&#39;achat
 Against Sales Invoice,Contre facture de vente
 Against Sales Order,Contre Commande
@@ -336,7 +336,7 @@ Bank Overdraft Account,Compte du découvert bancaire
 Bank Reconciliation,Rapprochement bancaire
 Bank Reconciliation Detail,Détail du rapprochement bancaire
 Bank Reconciliation Statement,Énoncé de rapprochement bancaire
-Bank Voucher,Coupon de la banque
+Bank Entry,Coupon de la banque
 Bank/Cash Balance,Solde de la banque / trésorerie
 Banking,Bancaire
 Barcode,Barcode
@@ -471,7 +471,7 @@ Case No(s) already in use. Try from Case No {0},Entrées avant {0} sont gelés
 Case No. cannot be 0,Cas n ° ne peut pas être 0
 Cash,Espèces
 Cash In Hand,Votre exercice social commence le
-Cash Voucher,Bon trésorerie
+Cash Entry,Bon trésorerie
 Cash or Bank Account is mandatory for making payment entry,N ° de série {0} a déjà été reçu
 Cash/Bank Account,Trésorerie / Compte bancaire
 Casual Leave,Règles d'application des prix et de ristournes .
@@ -595,7 +595,7 @@ Contact master.,'N'a pas de série »ne peut pas être « Oui »pour non - artic
 Contacts,S'il vous plaît entrer la quantité pour l'article {0}
 Content,Teneur
 Content Type,Type de contenu
-Contra Voucher,Bon Contra
+Contra Entry,Bon Contra
 Contract,contrat
 Contract End Date,Date de fin du contrat
 Contract End Date must be greater than Date of Joining,Fin du contrat La date doit être supérieure à date d'adhésion
@@ -626,7 +626,7 @@ Country,Pays
 Country Name,Nom Pays
 Country wise default Address Templates,Modèles pays sage d'adresses par défaut
 "Country, Timezone and Currency","Pays , Fuseau horaire et devise"
-Create Bank Voucher for the total salary paid for the above selected criteria,Créer Chèques de la Banque pour le salaire total payé pour les critères ci-dessus sélectionnées
+Create Bank Entry for the total salary paid for the above selected criteria,Créer Chèques de la Banque pour le salaire total payé pour les critères ci-dessus sélectionnées
 Create Customer,créer clientèle
 Create Material Requests,Créer des demandes de matériel
 Create New,créer un nouveau
@@ -648,7 +648,7 @@ Credentials,Lettres de créance
 Credit,Crédit
 Credit Amt,Crédit Amt
 Credit Card,Carte de crédit
-Credit Card Voucher,Bon de carte de crédit
+Credit Card Entry,Bon de carte de crédit
 Credit Controller,Credit Controller
 Credit Days,Jours de crédit
 Credit Limit,Limite de crédit
@@ -980,7 +980,7 @@ Excise Duty @ 8,Droits d'accise @ 8
 Excise Duty Edu Cess 2,Droits d'accise Edu Cess 2
 Excise Duty SHE Cess 1,Droits d'accise ELLE Cess 1
 Excise Page Number,Numéro de page d&#39;accise
-Excise Voucher,Bon d&#39;accise
+Excise Entry,Bon d&#39;accise
 Execution,exécution
 Executive Search,Executive Search
 Exemption Limit,Limite d&#39;exemption
@@ -1076,7 +1076,7 @@ For reference only.,À titre de référence seulement.
 Fraction,Fraction
 Fraction Units,Unités fraction
 Freeze Stock Entries,Congeler entrées en stocks
-Freeze Stocks Older Than [Days],Vous ne pouvez pas entrer bon actuelle dans «Contre Journal Voucher ' colonne
+Freeze Stocks Older Than [Days],Vous ne pouvez pas entrer bon actuelle dans «Contre Journal Entry ' colonne
 Freight and Forwarding Charges,Fret et d'envoi en sus
 Friday,Vendredi
 From,À partir de
@@ -1328,7 +1328,7 @@ Invoice Period From,Période facture de
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Période facture et la période de facturation Pour les dates obligatoires pour la facture récurrente
 Invoice Period To,Période facture Pour
 Invoice Type,Type de facture
-Invoice/Journal Voucher Details,Facture / Journal Chèques Détails
+Invoice/Journal Entry Details,Facture / Journal Chèques Détails
 Invoiced Amount (Exculsive Tax),Montant facturé ( impôt Exculsive )
 Is Active,Est active
 Is Advance,Est-Advance
@@ -1458,11 +1458,11 @@ Job Title,Titre d&#39;emploi
 Jobs Email Settings,Paramètres de messagerie Emploi
 Journal Entries,Journal Entries
 Journal Entry,Journal Entry
-Journal Voucher,Bon Journal
+Journal Entry,Bon Journal
 Journal Entry Account,Détail pièce de journal
 Journal Entry Account No,Détail Bon Journal No
-Journal Voucher {0} does not have account {1} or already matched,Journal Bon {0} n'a pas encore compte {1} ou déjà identifié
-Journal Vouchers {0} are un-linked,Date de livraison prévue ne peut pas être avant ventes Date de commande
+Journal Entry {0} does not have account {1} or already matched,Journal Bon {0} n'a pas encore compte {1} ou déjà identifié
+Journal Entries {0} are un-linked,Date de livraison prévue ne peut pas être avant ventes Date de commande
 Keep a track of communication related to this enquiry which will help for future reference.,Gardez une trace de la communication liée à cette enquête qui aidera pour référence future.
 Keep it web friendly 900px (w) by 100px (h),Gardez web 900px amical ( w) par 100px ( h )
 Key Performance Area,Section de performance clé
@@ -1577,7 +1577,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Entreti
 Major/Optional Subjects,Sujets principaux / en option
 Make ,Make 
 Make Accounting Entry For Every Stock Movement,Faites Entrée Comptabilité Pour chaque mouvement Stock
-Make Bank Voucher,Assurez-Bon Banque
+Make Bank Entry,Assurez-Bon Banque
 Make Credit Note,Assurez Note de crédit
 Make Debit Note,Assurez- notes de débit
 Make Delivery,Assurez- livraison
@@ -3097,7 +3097,7 @@ Update Series,Update Series
 Update Series Number,Numéro de série mise à jour
 Update Stock,Mise à jour Stock
 Update bank payment dates with journals.,Mise à jour bancaire dates de paiement des revues.
-Update clearance date of Journal Entries marked as 'Bank Vouchers',Date d'autorisation de mise à jour des entrées de journal marqué comme « Banque Bons »
+Update clearance date of Journal Entries marked as 'Bank Entry',Date d'autorisation de mise à jour des entrées de journal marqué comme « Banque Bons »
 Updated,Mise à jour
 Updated Birthday Reminders,Mise à jour anniversaire rappels
 Upload Attendance,Téléchargez Participation
@@ -3235,7 +3235,7 @@ Write Off Amount <=,Ecrire Off Montant &lt;=
 Write Off Based On,Ecrire Off Basé sur
 Write Off Cost Center,Ecrire Off Centre de coûts
 Write Off Outstanding Amount,Ecrire Off Encours
-Write Off Voucher,Ecrire Off Bon
+Write Off Entry,Ecrire Off Bon
 Wrong Template: Unable to find head row.,Modèle tort: ​​Impossible de trouver la ligne de tête.
 Year,Année
 Year Closed,L'année est fermée
@@ -3253,7 +3253,7 @@ You can enter any date manually,Vous pouvez entrer une date manuellement
 You can enter the minimum quantity of this item to be ordered.,Vous pouvez entrer la quantité minimale de cet élément à commander.
 You can not change rate if BOM mentioned agianst any item,Vous ne pouvez pas modifier le taux si BOM mentionné agianst un article
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Vous ne pouvez pas entrer à la fois bon de livraison et la facture de vente n ° n ° S'il vous plaît entrer personne.
-You can not enter current voucher in 'Against Journal Voucher' column,"D'autres comptes peuvent être faites dans les groupes , mais les entrées peuvent être faites contre Ledger"
+You can not enter current voucher in 'Against Journal Entry' column,"D'autres comptes peuvent être faites dans les groupes , mais les entrées peuvent être faites contre Ledger"
 You can set Default Bank Account in Company master,Articles en attente {0} mise à jour
 You can start by selecting backup frequency and granting access for sync,Vous pouvez commencer par sélectionner la fréquence de sauvegarde et d'accorder l'accès pour la synchronisation
 You can submit this Stock Reconciliation.,Vous pouvez soumettre cette Stock réconciliation .

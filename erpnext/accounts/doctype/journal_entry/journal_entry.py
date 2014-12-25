@@ -101,7 +101,7 @@ class JournalEntry(AccountsController):
 								.format(date_diff - flt(credit_days), d.party_type, d.party))
 
 	def validate_cheque_info(self):
-		if self.voucher_type in ['Bank Voucher']:
+		if self.voucher_type in ['Bank Entry']:
 			if not self.cheque_no or not self.cheque_date:
 				msgprint(_("Reference No & Reference Date is required for {0}").format(self.voucher_type),
 					raise_exception=1)
@@ -131,7 +131,7 @@ class JournalEntry(AccountsController):
 						.format(d.account))
 
 				if d.against_jv == self.name:
-					frappe.throw(_("You can not enter current voucher in 'Against Journal Voucher' column"))
+					frappe.throw(_("You can not enter current voucher in 'Against Journal Entry' column"))
 
 				against_entries = frappe.db.sql("""select * from `tabJournal Entry Account`
 					where account = %s and docstatus = 1 and parent = %s
@@ -139,7 +139,7 @@ class JournalEntry(AccountsController):
 					and ifnull(against_voucher, '') = ''""", (d.account, d.against_jv), as_dict=True)
 
 				if not against_entries:
-					frappe.throw(_("Journal Voucher {0} does not have account {1} or already matched against other voucher")
+					frappe.throw(_("Journal Entry {0} does not have account {1} or already matched against other voucher")
 						.format(d.against_jv, d.account))
 				else:
 					dr_or_cr = "debit" if d.credit > 0 else "credit"
@@ -148,7 +148,7 @@ class JournalEntry(AccountsController):
 						if flt(jvd[dr_or_cr]) > 0:
 							valid = True
 					if not valid:
-						frappe.throw(_("Against Journal Voucher {0} does not have any unmatched {1} entry")
+						frappe.throw(_("Against Journal Entry {0} does not have any unmatched {1} entry")
 							.format(d.against_jv, dr_or_cr))
 
 	def validate_against_sales_invoice(self):
@@ -345,7 +345,7 @@ class JournalEntry(AccountsController):
 						"credit": flt(d.credit, self.precision("credit", "entries")),
 						"against_voucher_type": (("Purchase Invoice" if d.against_voucher else None)
 							or ("Sales Invoice" if d.against_invoice else None)
-							or ("Journal Voucher" if d.against_jv else None)
+							or ("Journal Entry" if d.against_jv else None)
 							or ("Sales Order" if d.against_sales_order else None)
 							or ("Purchase Order" if d.against_purchase_order else None)),
 						"against_voucher": d.against_voucher or d.against_invoice or d.against_jv
@@ -444,7 +444,7 @@ class JournalEntry(AccountsController):
 @frappe.whitelist()
 def get_default_bank_cash_account(company, voucher_type):
 	account = frappe.db.get_value("Company", company,
-		voucher_type=="Bank Voucher" and "default_bank_account" or "default_cash_account")
+		voucher_type=="Bank Entry" and "default_bank_account" or "default_cash_account")
 	if account:
 		return {
 			"account": account,
@@ -493,10 +493,10 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	return jv.as_dict()
 
 def get_payment_entry(doc):
-	bank_account = get_default_bank_cash_account(doc.company, "Bank Voucher")
+	bank_account = get_default_bank_cash_account(doc.company, "Bank Entry")
 
-	jv = frappe.new_doc('Journal Voucher')
-	jv.voucher_type = 'Bank Voucher'
+	jv = frappe.new_doc('Journal Entry')
+	jv.voucher_type = 'Bank Entry'
 	jv.company = doc.company
 	jv.fiscal_year = doc.fiscal_year
 
@@ -520,7 +520,7 @@ def get_opening_accounts(company):
 
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select jv.name, jv.posting_date, jv.user_remark
-		from `tabJournal Voucher` jv, `tabJournal Entry Account` jv_detail
+		from `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
 		where jv_detail.parent = jv.name and jv_detail.account = %s and jv_detail.party = %s
 		and (ifnull(jvd.against_invoice, '') = '' and ifnull(jvd.against_voucher, '') = '' and ifnull(jvd.against_jv, '') = '' )
 		and jv.docstatus = 1 and jv.{0} like %s order by jv.name desc limit %s, %s""".format(searchfield),
@@ -529,7 +529,7 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def get_outstanding(args):
 	args = eval(args)
-	if args.get("doctype") == "Journal Voucher" and args.get("party"):
+	if args.get("doctype") == "Journal Entry" and args.get("party"):
 		against_jv_amount = frappe.db.sql("""
 			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 			from `tabJournal Entry Account` where parent=%s and party=%s

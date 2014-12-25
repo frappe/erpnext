@@ -7,7 +7,7 @@ import frappe
 def execute():
 	frappe.reload_doc("accounts", "doctype", "account")
 	frappe.reload_doc("setup", "doctype", "company")
-	frappe.reload_doc("accounts", "doctype", "journal_voucher_detail")
+	frappe.reload_doc("accounts", "doctype", "journal_entry_account")
 	frappe.reload_doc("accounts", "doctype", "gl_entry")
 	receivable_payable_accounts = create_receivable_payable_account()
 	if receivable_payable_accounts:
