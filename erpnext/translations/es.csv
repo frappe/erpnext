@@ -1461,8 +1461,8 @@ Jobs Email Settings,Trabajos Email
 Journal Entries,entradas de diario
 Journal Entry,Entrada de diario
 Journal Voucher,Comprobante de Diario
-Journal Voucher Detail,Detalle del Asiento de Diario
-Journal Voucher Detail No,Detalle del Asiento de Diario No
+Journal Entry Account,Detalle del Asiento de Diario
+Journal Entry Account No,Detalle del Asiento de Diario No
 Journal Voucher {0} does not have account {1} or already matched,Comprobante de Diario {0} no tiene cuenta {1} o ya emparejado
 Journal Vouchers {0} are un-linked,Asientos de Diario {0} no están vinculados.
 Keep a track of communication related to this enquiry which will help for future reference.,Mantenga un registro de la comunicación en relación con esta consulta que ayudará para futuras consultas.

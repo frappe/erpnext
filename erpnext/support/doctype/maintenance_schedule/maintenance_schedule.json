@@ -94,7 +94,7 @@
    "fieldname": "schedules", 
    "fieldtype": "Table", 
    "label": "Schedules", 
-   "oldfieldname": "maintenance_schedule_detail", 
+   "oldfieldname": "schedules", 
    "oldfieldtype": "Table", 
    "options": "Maintenance Schedule Detail", 
    "permlevel": 0, 

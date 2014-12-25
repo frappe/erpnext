@@ -15,7 +15,7 @@ class TimeLogBatch(Document):
 	def validate(self):
 		self.set_status()
 		self.total_hours = 0.0
-		for d in self.get("time_log_batch_details"):
+		for d in self.get("time_logs"):
 			tl = frappe.get_doc("Time Log", d.time_log)
 			self.update_time_log_values(d, tl)
 			self.validate_time_log_is_submitted(tl)
@@ -53,7 +53,7 @@ class TimeLogBatch(Document):
 
 	def update_status(self, time_log_batch):
 		self.set_status()
-		for d in self.get("time_log_batch_details"):
+		for d in self.get("time_logs"):
 			tl = frappe.get_doc("Time Log", d.time_log)
 			tl.time_log_batch = time_log_batch
 			tl.sales_invoice = self.sales_invoice

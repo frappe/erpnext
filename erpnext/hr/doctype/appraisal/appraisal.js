@@ -33,7 +33,7 @@ cur_frm.cscript.kra_template = function(doc, dt, dn) {
 
 cur_frm.cscript.calculate_total_score = function(doc,cdt,cdn){
 	//return get_server_fields('calculate_total','','',doc,cdt,cdn,1);
-	var val = doc.appraisal_details || [];
+	var val = doc.goals || [];
 	var total =0;
 	for(var i = 0; i<val.length; i++){
 		total = flt(total)+flt(val[i].score_earned)
@@ -48,21 +48,21 @@ cur_frm.cscript.score = function(doc,cdt,cdn){
 		if (flt(d.score) > 5) {
 			msgprint(__("Score must be less than or equal to 5"));
 			d.score = 0;
-			refresh_field('score', d.name, 'appraisal_details');
+			refresh_field('score', d.name, 'goals');
 		}
 		total = flt(d.per_weightage*d.score)/100;
 		d.score_earned = total.toPrecision(2);
-		refresh_field('score_earned', d.name, 'appraisal_details');
+		refresh_field('score_earned', d.name, 'goals');
 	}
 	else{
 		d.score_earned = 0;
-		refresh_field('score_earned', d.name, 'appraisal_details');
+		refresh_field('score_earned', d.name, 'goals');
 	}
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
 }
 
 cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
-	var val = doc.appraisal_details || [];
+	var val = doc.goals || [];
 	var total =0;
 	for(var i = 0; i<val.length; i++){
 		total = flt(total)+flt(val[i].score_earned);

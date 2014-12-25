@@ -1458,8 +1458,8 @@ Jobs Email Settings,채용 정보 이메일 설정
 Journal Entries,저널 항목
 Journal Entry,분개
 Journal Voucher,분개장
-Journal Voucher Detail,분개장 세부 정보
-Journal Voucher Detail No,분개장 세부 사항 없음
+Journal Entry Account,분개장 세부 정보
+Journal Entry Account No,분개장 세부 사항 없음
 Journal Voucher {0} does not have account {1} or already matched,분개장 {0} 계정이없는 {1} 또는 이미 일치
 Journal Vouchers {0} are un-linked,분개장 {0} 않은 연결되어
 Keep a track of communication related to this enquiry which will help for future reference.,향후 참조를 위해 도움이 될 것입니다이 문의와 관련된 통신을 확인합니다.

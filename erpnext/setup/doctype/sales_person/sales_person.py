@@ -11,7 +11,7 @@ class SalesPerson(NestedSet):
 	nsm_parent_field = 'parent_sales_person';
 
 	def validate(self):
-		for d in self.get('target_details'):
+		for d in self.get('targets'):
 			if not flt(d.target_qty) and not flt(d.target_amount):
 				frappe.throw(_("Either target qty or target amount is mandatory."))
 

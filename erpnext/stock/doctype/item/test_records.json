@@ -19,7 +19,7 @@
   "item_group": "_Test Item Group",
   "item_name": "_Test Item",
   "apply_warehouse_wise_reorder_level": 1,
-  "item_reorder": [
+  "reorder_levels": [
    {
     "material_request_type": "Purchase",
     "warehouse": "_Test Warehouse - _TC",
@@ -74,10 +74,10 @@
   "item_code": "_Test Item Home Desktop 100",
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Item Home Desktop 100",
-  "item_tax": [
+  "taxes": [
    {
     "doctype": "Item Tax",
-    "parentfield": "item_tax",
+    "parentfield": "taxes",
     "tax_rate": 10,
     "tax_type": "_Test Account Excise Duty - _TC"
    }
@@ -270,13 +270,13 @@
   "item_name": "_Test Variant Item",
   "stock_uom": "_Test UOM",
   "has_variants": 1,
-  "item_variants": [
+  "variants": [
 	  {"item_attribute": "Test Size", "item_attribute_value": "Small"},
 	  {"item_attribute": "Test Size", "item_attribute_value": "Medium"},
 	  {"item_attribute": "Test Size", "item_attribute_value": "Large"}
   ],
   "apply_warehouse_wise_reorder_level": 1,
-  "item_reorder": [
+  "reorder_levels": [
       {
        "material_request_type": "Purchase",
        "warehouse": "_Test Warehouse - _TC",

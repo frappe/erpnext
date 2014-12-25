@@ -29,7 +29,7 @@ cur_frm.fields_dict['parent_territory'].get_query = function(doc,cdt,cdn) {
 
 
 // ******************** ITEM Group ********************************
-cur_frm.fields_dict['target_details'].grid.get_field("item_group").get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['targets'].grid.get_field("item_group").get_query = function(doc, cdt, cdn) {
 	return{
 		filters:{ 'is_group': "No"}
 	}

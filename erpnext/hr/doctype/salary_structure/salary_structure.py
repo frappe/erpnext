@@ -40,16 +40,16 @@ class SalaryStructure(Document):
 		list1 = frappe.db.sql("select name from `tab%s` where docstatus != 2" % doct_name)
 		for li in list1:
 			child = self.append(tab_fname, {})
-			if(tab_fname == 'earning_details'):
+			if(tab_fname == 'earnings'):
 				child.e_type = cstr(li[0])
 				child.modified_value = 0
-			elif(tab_fname == 'deduction_details'):
+			elif(tab_fname == 'deductions'):
 				child.d_type = cstr(li[0])
 				child.d_modified_amt = 0
 
 	def make_earn_ded_table(self):
-		self.make_table('Earning Type','earning_details','Salary Structure Earning')
-		self.make_table('Deduction Type','deduction_details', 'Salary Structure Deduction')
+		self.make_table('Earning Type','earnings','Salary Structure Earning')
+		self.make_table('Deduction Type','deductions', 'Salary Structure Deduction')
 
 	def check_existing(self):
 		ret = frappe.db.sql("""select name from `tabSalary Structure` where is_active = 'Yes'

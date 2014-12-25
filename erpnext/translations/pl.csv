@@ -1402,8 +1402,8 @@ Jobs Email Settings,Jobs Email Settings
 Journal Entries,Journal Entries
 Journal Entry,Journal Entry
 Journal Voucher,Journal Voucher
-Journal Voucher Detail,Journal Voucher Detail
-Journal Voucher Detail No,Journal Voucher Detail No
+Journal Entry Account,Journal Entry Account
+Journal Entry Account No,Journal Entry Account No
 Journal Voucher {0} does not have account {1} or already matched,Journal Voucher {0} does not have account {1} or already matched
 Journal Vouchers {0} are un-linked,Journal Vouchers {0} are un-linked
 Keep a track of communication related to this enquiry which will help for future reference.,Keep a track of communication related to this enquiry which will help for future reference.

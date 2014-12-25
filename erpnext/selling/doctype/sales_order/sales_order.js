@@ -4,8 +4,8 @@
 // Module CRM
 
 cur_frm.cscript.tname = "Sales Order Item";
-cur_frm.cscript.fname = "sales_order_details";
-cur_frm.cscript.other_fname = "other_charges";
+cur_frm.cscript.fname = "items";
+cur_frm.cscript.other_fname = "taxes";
 cur_frm.cscript.sales_team_fname = "sales_team";
 
 {% include 'selling/sales_common.js' %}

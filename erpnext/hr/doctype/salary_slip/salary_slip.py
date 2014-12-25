@@ -134,8 +134,8 @@ class SalarySlip(TransactionBase):
 		from frappe.utils import money_in_words
 		self.check_existing()
 
-		if not (len(self.get("earning_details")) or
-			len(self.get("deduction_details"))):
+		if not (len(self.get("earnings")) or
+			len(self.get("deductions"))):
 				self.get_emp_and_leave_details()
 		else:
 			self.get_leave_details(self.leave_without_pay)
@@ -150,7 +150,7 @@ class SalarySlip(TransactionBase):
 
 	def calculate_earning_total(self):
 		self.gross_pay = flt(self.arrear_amount) + flt(self.leave_encashment_amount)
-		for d in self.get("earning_details"):
+		for d in self.get("earnings"):
 			if cint(d.e_depends_on_lwp) == 1:
 				d.e_modified_amount = rounded(flt(d.e_amount) * flt(self.payment_days)
 					/ cint(self.total_days_in_month), 2)
@@ -162,7 +162,7 @@ class SalarySlip(TransactionBase):
 
 	def calculate_ded_total(self):
 		self.total_deduction = 0
-		for d in self.get('deduction_details'):
+		for d in self.get('deductions'):
 			if cint(d.d_depends_on_lwp) == 1:
 				d.d_modified_amount = rounded(flt(d.d_amount) * flt(self.payment_days)
 					/ cint(self.total_days_in_month), 2)

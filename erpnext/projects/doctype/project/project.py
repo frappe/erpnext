@@ -31,9 +31,9 @@ class Project(Document):
 		self.update_milestones_completed()
 
 	def update_milestones_completed(self):
-		if self.project_milestones:
-			completed = filter(lambda x: x.status=="Completed", self.project_milestones)
-			self.percent_milestones_completed =  len(completed) * 100 / len(self.project_milestones)
+		if self.milestones:
+			completed = filter(lambda x: x.status=="Completed", self.milestones)
+			self.percent_milestones_completed =  len(completed) * 100 / len(self.milestones)
 
 	def on_update(self):
 		self.add_calendar_event()
@@ -53,7 +53,7 @@ class Project(Document):
 		delete_events(self.doctype, self.name)
 
 		# add events
-		for milestone in self.get("project_milestones"):
+		for milestone in self.get("milestones"):
 			if milestone.milestone_date:
 				description = (milestone.milestone or "Milestone") + " for " + self.name
 				frappe.get_doc({

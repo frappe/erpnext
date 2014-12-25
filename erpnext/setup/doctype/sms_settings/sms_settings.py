@@ -71,7 +71,7 @@ def send_sms(receiver_list, msg, sender_name = ''):
 def send_via_gateway(arg):
 	ss = frappe.get_doc('SMS Settings', 'SMS Settings')
 	args = {ss.message_parameter : arg.get('message')}
-	for d in ss.get("static_parameter_details"):
+	for d in ss.get("static_parameters"):
 		args[d.parameter] = d.value
 
 	resp = []

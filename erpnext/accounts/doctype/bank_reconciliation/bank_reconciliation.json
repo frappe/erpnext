@@ -58,9 +58,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "entries", 
+   "fieldname": "journal_entries", 
    "fieldtype": "Table", 
-   "label": "Entries", 
+   "label": "Journal Entries", 
    "options": "Bank Reconciliation Detail", 
    "permlevel": 0
   }, 
@@ -85,7 +85,7 @@
  "icon": "icon-check", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2014-05-27 03:37:21.783216", 
+ "modified": "2014-12-25 13:16:16.711609", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Bank Reconciliation", 

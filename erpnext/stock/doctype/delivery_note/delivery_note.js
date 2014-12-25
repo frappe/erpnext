@@ -3,8 +3,8 @@
 
 // Module Material Management
 cur_frm.cscript.tname = "Delivery Note Item";
-cur_frm.cscript.fname = "delivery_note_details";
-cur_frm.cscript.other_fname = "other_charges";
+cur_frm.cscript.fname = "items";
+cur_frm.cscript.other_fname = "taxes";
 cur_frm.cscript.sales_team_fname = "sales_team";
 
 {% include 'selling/sales_common.js' %};
@@ -20,7 +20,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		if(doc.__onload && !doc.__onload.billing_complete && doc.docstatus==1) {
 			// show Make Invoice button only if Delivery Note is not created from Sales Invoice
 			var from_sales_invoice = false;
-			from_sales_invoice = cur_frm.doc.delivery_note_details.some(function(item) {
+			from_sales_invoice = cur_frm.doc.items.some(function(item) {
 					return item.against_sales_invoice ? true : false;
 				});
 
@@ -86,7 +86,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		this.get_terms();
 	},
 
-	delivery_note_details_on_form_rendered: function(doc, grid_row) {
+	items_on_form_rendered: function(doc, grid_row) {
 		erpnext.setup_serial_no(grid_row)
 	}
 
@@ -167,7 +167,7 @@ cur_frm.pformat.sales_order_no= function(doc, cdt, cdn){
 
 	out ='';
 
-	var cl = doc.delivery_note_details || [];
+	var cl = doc.items || [];
 
 	// outer table
 	var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 50%"></td><td>';
@@ -214,7 +214,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 	}
 
 	// expense account
-	cur_frm.fields_dict['delivery_note_details'].grid.get_field('expense_account').get_query = function(doc) {
+	cur_frm.fields_dict['items'].grid.get_field('expense_account').get_query = function(doc) {
 		return {
 			filters: {
 				"report_type": "Profit and Loss",
@@ -236,7 +236,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 		refresh_field(cur_frm.cscript.fname);
 	}
 
-	cur_frm.fields_dict.delivery_note_details.grid.get_field("cost_center").get_query = function(doc) {
+	cur_frm.fields_dict.items.grid.get_field("cost_center").get_query = function(doc) {
 		return {
 
 			filters: {

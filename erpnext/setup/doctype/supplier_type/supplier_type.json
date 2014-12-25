@@ -30,16 +30,16 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "party_accounts", 
+   "fieldname": "accounts", 
    "fieldtype": "Table", 
-   "label": "Party Accounts", 
+   "label": "Accounts", 
    "options": "Party Account", 
    "permlevel": 0
   }
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2014-08-29 16:38:22.219286", 
+ "modified": "2014-12-25 12:48:28.195655", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Supplier Type", 

@@ -12,7 +12,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 	}
 }
 
-cur_frm.fields_dict['partner_target_details'].grid.get_field("item_group").get_query = function(doc, dt, dn) {
+cur_frm.fields_dict['targets'].grid.get_field("item_group").get_query = function(doc, dt, dn) {
   return{
   	filters:{ 'is_group': "No" }
   }

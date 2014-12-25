@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import unittest, frappe
 from frappe.utils import flt
 
-class TestJournalVoucher(unittest.TestCase):
+class TestJournalEntry(unittest.TestCase):
 	def test_journal_voucher_with_against_jv(self):
 
 		jv_invoice = frappe.copy_doc(test_records[2])
@@ -40,11 +40,11 @@ class TestJournalVoucher(unittest.TestCase):
 		test_voucher.submit()
 
 		if test_voucher.doctype == "Journal Voucher":
-			self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
+			self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
 				where account = %s and docstatus = 1 and parent = %s""",
 				("_Test Receivable - _TC", test_voucher.name)))
 
-		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
 			where %s=%s""" % (field_dict.get(test_voucher.doctype), '%s'), (test_voucher.name)))
 
 		base_jv.get("entries")[0].is_advance = "Yes" if (test_voucher.doctype in ["Sales Order", "Purchase Order"]) else "No"
@@ -54,10 +54,10 @@ class TestJournalVoucher(unittest.TestCase):
 
 		submitted_voucher = frappe.get_doc(test_voucher.doctype, test_voucher.name)
 
-		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where %s=%s""" % (field_dict.get(test_voucher.doctype), '%s'), (submitted_voucher.name)))
 
-		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where %s=%s and %s=400""" % (field_dict.get(submitted_voucher.doctype), '%s', dr_or_cr), (submitted_voucher.name)))
 
 		if base_jv.get("entries")[0].is_advance == "Yes":
@@ -76,7 +76,7 @@ class TestJournalVoucher(unittest.TestCase):
 		if test_voucher.doctype == "Journal Voucher":
 			# if test_voucher is a Journal Voucher, test cancellation of test_voucher
 			test_voucher.cancel()
-			self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
+			self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
 				where against_jv=%s""", test_voucher.name))
 
 		elif test_voucher.doctype in ["Sales Order", "Purchase Order"]:

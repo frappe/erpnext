@@ -1,6 +1,6 @@
 {
  "autoname": "BDD/.#####", 
- "creation": "2013-02-22 01:27:38.000000", 
+ "creation": "2013-02-22 01:27:38", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -27,9 +27,10 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:22:59.000000", 
+ "modified": "2014-12-25 15:45:11.173204", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
- "name": "Budget Distribution Detail", 
- "owner": "Administrator"
+ "name": "Monthly Distribution Percentage", 
+ "owner": "Administrator", 
+ "permissions": []
 }

@@ -33,13 +33,13 @@ def update_packing_list_item(obj, packing_item_code, qty, warehouse, line, packi
 
 	# check if exists
 	exists = 0
-	for d in obj.get("packing_details"):
+	for d in obj.get("packed_items"):
 		if d.parent_item == line.item_code and d.item_code == packing_item_code and d.parent_detail_docname == line.name:
 			pi, exists = d, 1
 			break
 
 	if not exists:
-		pi = obj.append('packing_details', {})
+		pi = obj.append('packed_items', {})
 
 	pi.parent_item = line.item_code
 	pi.item_code = packing_item_code
@@ -80,7 +80,7 @@ def make_packing_list(obj, item_table_fieldname):
 def cleanup_packing_list(obj, parent_items):
 	"""Remove all those child items which are no longer present in main item table"""
 	delete_list = []
-	for d in obj.get("packing_details"):
+	for d in obj.get("packed_items"):
 		if [d.parent_item, d.parent_detail_docname] not in parent_items:
 			# mark for deletion from doclist
 			delete_list.append(d)
@@ -88,8 +88,8 @@ def cleanup_packing_list(obj, parent_items):
 	if not delete_list:
 		return obj
 
-	packing_details = obj.get("packing_details")
-	obj.set("packing_details", [])
-	for d in packing_details:
+	packed_items = obj.get("packed_items")
+	obj.set("packed_items", [])
+	for d in packed_items:
 		if d not in delete_list:
-			obj.append("packing_details", d)
+			obj.append("packed_items", d)

@@ -20,12 +20,12 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 				jv.remark = 'Payment against Expense Claim: ' + cur_frm.doc.name;
 				jv.fiscal_year = cur_frm.doc.fiscal_year;
 
-				var d1 = frappe.model.add_child(jv, 'Journal Voucher Detail', 'entries');
+				var d1 = frappe.model.add_child(jv, 'Journal Entry Account', 'entries');
 				d1.debit = cur_frm.doc.total_sanctioned_amount;
 				d1.against_expense_claim = cur_frm.doc.name;
 
 				// credit to bank
-				var d1 = frappe.model.add_child(jv, 'Journal Voucher Detail', 'entries');
+				var d1 = frappe.model.add_child(jv, 'Journal Entry Account', 'entries');
 				d1.credit = cur_frm.doc.total_sanctioned_amount;
 				d1.against_expense_claim = cur_frm.doc.name;
 				if(r.message) {
@@ -69,7 +69,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn) {
 }
 
 cur_frm.cscript.clear_sanctioned = function(doc) {
-	var val = doc.expense_voucher_details || [];
+	var val = doc.expenses || [];
 	for(var i = 0; i<val.length; i++){
 		val[i].sanctioned_amount ='';
 	}
@@ -129,7 +129,7 @@ cur_frm.cscript.validate = function(doc) {
 cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 	doc.total_claimed_amount = 0;
 	doc.total_sanctioned_amount = 0;
-	$.each((doc.expense_voucher_details || []), function(i, d) {
+	$.each((doc.expenses || []), function(i, d) {
 		doc.total_claimed_amount += d.claim_amount;
 		if(d.sanctioned_amount==null) {
 			d.sanctioned_amount = d.claim_amount;

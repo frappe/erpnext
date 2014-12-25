@@ -1458,8 +1458,8 @@ Jobs Email Settings,Vacatures E-mailinstellingen
 Journal Entries,Journaalposten
 Journal Entry,Journal Entry
 Journal Voucher,Journal Voucher
-Journal Voucher Detail,Journal Voucher Detail
-Journal Voucher Detail No,Journal Voucher Detail Geen
+Journal Entry Account,Journal Entry Account
+Journal Entry Account No,Journal Entry Account Geen
 Journal Voucher {0} does not have account {1} or already matched,Journal Voucher {0} heeft geen rekening {1} of al geëvenaard
 Journal Vouchers {0} are un-linked,Dagboek Vouchers {0} zijn niet- verbonden
 Keep a track of communication related to this enquiry which will help for future reference.,Houd een spoor van communicatie met betrekking tot dit onderzoek dat zal helpen voor toekomstig gebruik.

@@ -13,7 +13,7 @@
   "order_type": "Sales", 
   "plc_conversion_rate": 1.0, 
   "price_list_currency": "INR", 
-  "quotation_details": [
+  "items": [
    {
     "base_amount": 1000.0, 
     "base_rate": 100.0, 
@@ -21,7 +21,7 @@
     "doctype": "Quotation Item", 
     "item_code": "_Test Item Home Desktop 100", 
     "item_name": "CPU", 
-    "parentfield": "quotation_details", 
+    "parentfield": "items", 
     "qty": 10.0, 
     "rate": 100.0
    }

@@ -1458,8 +1458,8 @@ Jobs Email Settings,Setări de locuri de muncă de e-mail
 Journal Entries,Intrari in jurnal
 Journal Entry,Jurnal de intrare
 Journal Voucher,Jurnalul Voucher
-Journal Voucher Detail,Jurnalul Voucher Detaliu
-Journal Voucher Detail No,Jurnalul Voucher Detaliu Nu
+Journal Entry Account,Jurnalul Voucher Detaliu
+Journal Entry Account No,Jurnalul Voucher Detaliu Nu
 Journal Voucher {0} does not have account {1} or already matched,Jurnalul Voucher {0} nu are cont {1} sau deja potrivire
 Journal Vouchers {0} are un-linked,Jurnalul Tichete {0} sunt ne-legate de
 Keep a track of communication related to this enquiry which will help for future reference.,"Păstra o pistă de comunicare legate de această anchetă, care va ajuta de referință pentru viitor."

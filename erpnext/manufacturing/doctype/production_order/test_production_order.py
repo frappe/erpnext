@@ -28,7 +28,7 @@ class TestProductionOrder(unittest.TestCase):
 
 		# from stores to wip
 		s = frappe.get_doc(make_stock_entry(pro_doc.name, "Material Transfer", 4))
-		for d in s.get("mtn_details"):
+		for d in s.get("items"):
 			d.s_warehouse = "Stores - _TC"
 		s.insert()
 		s.submit()
@@ -71,7 +71,7 @@ class TestProductionOrder(unittest.TestCase):
 
 
 		prod_order.set_production_order_operations()
-		prod_order.production_order_operations[0].update({
+		prod_order.operations[0].update({
 			"planned_start_time": "2014-11-25 00:00:00",
 			"planned_end_time": "2014-11-25 10:00:00",
 			"hour_rate": 10
@@ -79,7 +79,7 @@ class TestProductionOrder(unittest.TestCase):
 
 		prod_order.insert()
 
-		d = prod_order.production_order_operations[0]
+		d = prod_order.operations[0]
 
 		from erpnext.manufacturing.doctype.production_order.production_order import make_time_log
 		from frappe.utils import cstr
@@ -106,23 +106,23 @@ class TestProductionOrder(unittest.TestCase):
 		manufacturing_settings.save()
 
 		prod_order.load_from_db()
-		self.assertEqual(prod_order.production_order_operations[0].status, "Completed")
-		self.assertEqual(prod_order.production_order_operations[0].qty_completed, prod_order.qty)
+		self.assertEqual(prod_order.operations[0].status, "Completed")
+		self.assertEqual(prod_order.operations[0].qty_completed, prod_order.qty)
 
-		self.assertEqual(prod_order.production_order_operations[0].actual_start_time, time_log.from_time)
-		self.assertEqual(prod_order.production_order_operations[0].actual_end_time, time_log.to_time)
+		self.assertEqual(prod_order.operations[0].actual_start_time, time_log.from_time)
+		self.assertEqual(prod_order.operations[0].actual_end_time, time_log.to_time)
 
-		self.assertEqual(prod_order.production_order_operations[0].actual_operation_time, 600)
-		self.assertEqual(prod_order.production_order_operations[0].actual_operating_cost, 6000)
+		self.assertEqual(prod_order.operations[0].actual_operation_time, 600)
+		self.assertEqual(prod_order.operations[0].actual_operating_cost, 6000)
 
 		time_log.cancel()
 
 		prod_order.load_from_db()
-		self.assertEqual(prod_order.production_order_operations[0].status, "Pending")
-		self.assertEqual(prod_order.production_order_operations[0].qty_completed, 0)
+		self.assertEqual(prod_order.operations[0].status, "Pending")
+		self.assertEqual(prod_order.operations[0].qty_completed, 0)
 
-		self.assertEqual(prod_order.production_order_operations[0].actual_operation_time, 0)
-		self.assertEqual(prod_order.production_order_operations[0].actual_operating_cost, 0)
+		self.assertEqual(prod_order.operations[0].actual_operation_time, 0)
+		self.assertEqual(prod_order.operations[0].actual_operating_cost, 0)
 
 		time_log2 = frappe.copy_doc(time_log)
 		time_log2.update({

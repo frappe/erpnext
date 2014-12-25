@@ -17,7 +17,7 @@ class BuyingController(StockController):
 		if hasattr(self, "fname"):
 			self.table_print_templates = {
 				self.fname: "templates/print_formats/includes/item_grid.html",
-				"other_charges": "templates/print_formats/includes/taxes.html",
+				"taxes": "templates/print_formats/includes/taxes.html",
 			}
 
 	def get_feed(self):
@@ -46,7 +46,7 @@ class BuyingController(StockController):
 
 		self.set_missing_item_details()
 		if self.get("__islocal"):
-			self.set_taxes("other_charges", "taxes_and_charges")
+			self.set_taxes("taxes", "taxes_and_charges")
 
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.supplier:
@@ -66,8 +66,8 @@ class BuyingController(StockController):
 			validate_warehouse_company(w, self.company)
 
 	def validate_stock_or_nonstock_items(self):
-		if self.meta.get_field("other_charges") and not self.get_stock_items():
-			tax_for_valuation = [d.account_head for d in self.get("other_charges")
+		if self.meta.get_field("taxes") and not self.get_stock_items():
+			tax_for_valuation = [d.account_head for d in self.get("taxes")
 				if d.category in ["Valuation", "Valuation and Total"]]
 			if tax_for_valuation:
 				frappe.throw(_("Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items"))
@@ -82,9 +82,9 @@ class BuyingController(StockController):
 		 		self.currency)
 
 	def calculate_taxes_and_totals(self):
-		self.other_fname = "other_charges"
+		self.other_fname = "taxes"
 		super(BuyingController, self).calculate_taxes_and_totals()
-		self.calculate_total_advance("Purchase Invoice", "advance_allocation_details")
+		self.calculate_total_advance("Purchase Invoice", "advances")
 
 	def calculate_item_values(self):
 		for item in self.item_doclist:
@@ -175,7 +175,7 @@ class BuyingController(StockController):
 				last_stock_item_idx = d.idx
 
 		total_valuation_amount = sum([flt(d.tax_amount) for d in
-			self.get("other_charges")
+			self.get("taxes")
 			if d.category in ["Valuation", "Valuation and Total"]])
 
 

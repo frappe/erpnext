@@ -61,18 +61,18 @@ class TestShoppingCart(unittest.TestCase):
 		# add first item
 		set_item_in_cart("_Test Item", 1)
 		quotation = self.test_get_cart_lead()
-		self.assertEquals(quotation.get("quotation_details")[0].item_code, "_Test Item")
-		self.assertEquals(quotation.get("quotation_details")[0].qty, 1)
-		self.assertEquals(quotation.get("quotation_details")[0].amount, 10)
+		self.assertEquals(quotation.get("items")[0].item_code, "_Test Item")
+		self.assertEquals(quotation.get("items")[0].qty, 1)
+		self.assertEquals(quotation.get("items")[0].amount, 10)
 
 		# add second item
 		set_item_in_cart("_Test Item 2", 1)
 		quotation = self.test_get_cart_lead()
-		self.assertEquals(quotation.get("quotation_details")[1].item_code, "_Test Item 2")
-		self.assertEquals(quotation.get("quotation_details")[1].qty, 1)
-		self.assertEquals(quotation.get("quotation_details")[1].amount, 20)
+		self.assertEquals(quotation.get("items")[1].item_code, "_Test Item 2")
+		self.assertEquals(quotation.get("items")[1].qty, 1)
+		self.assertEquals(quotation.get("items")[1].amount, 20)
 
-		self.assertEquals(len(quotation.get("quotation_details")), 2)
+		self.assertEquals(len(quotation.get("items")), 2)
 
 	def test_update_cart(self):
 		# first, add to cart
@@ -81,11 +81,11 @@ class TestShoppingCart(unittest.TestCase):
 		# update first item
 		set_item_in_cart("_Test Item", 5)
 		quotation = self.test_get_cart_lead()
-		self.assertEquals(quotation.get("quotation_details")[0].item_code, "_Test Item")
-		self.assertEquals(quotation.get("quotation_details")[0].qty, 5)
-		self.assertEquals(quotation.get("quotation_details")[0].amount, 50)
+		self.assertEquals(quotation.get("items")[0].item_code, "_Test Item")
+		self.assertEquals(quotation.get("items")[0].qty, 5)
+		self.assertEquals(quotation.get("items")[0].amount, 50)
 		self.assertEquals(quotation.net_total, 70)
-		self.assertEquals(len(quotation.get("quotation_details")), 2)
+		self.assertEquals(len(quotation.get("items")), 2)
 
 	def test_remove_from_cart(self):
 		# first, add to cart
@@ -94,17 +94,17 @@ class TestShoppingCart(unittest.TestCase):
 		# remove first item
 		set_item_in_cart("_Test Item", 0)
 		quotation = self.test_get_cart_lead()
-		self.assertEquals(quotation.get("quotation_details")[0].item_code, "_Test Item 2")
-		self.assertEquals(quotation.get("quotation_details")[0].qty, 1)
-		self.assertEquals(quotation.get("quotation_details")[0].amount, 20)
+		self.assertEquals(quotation.get("items")[0].item_code, "_Test Item 2")
+		self.assertEquals(quotation.get("items")[0].qty, 1)
+		self.assertEquals(quotation.get("items")[0].amount, 20)
 		self.assertEquals(quotation.net_total, 20)
-		self.assertEquals(len(quotation.get("quotation_details")), 1)
+		self.assertEquals(len(quotation.get("items")), 1)
 
 		# remove second item
 		set_item_in_cart("_Test Item 2", 0)
 		quotation = self.test_get_cart_lead()
 		self.assertEquals(quotation.net_total, 0)
-		self.assertEquals(len(quotation.get("quotation_details")), 0)
+		self.assertEquals(len(quotation.get("items")), 0)
 
 	def test_set_billing_address(self):
 		return

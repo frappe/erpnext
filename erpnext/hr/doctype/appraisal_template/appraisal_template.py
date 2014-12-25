@@ -10,7 +10,7 @@ from frappe.model.document import Document
 class AppraisalTemplate(Document):
 	def validate(self):
 		self.total_points = 0
-		for d in self.get("kra_sheet"):
+		for d in self.get("goals"):
 			self.total_points += int(d.per_weightage or 0)
 
 		if int(self.total_points) != 100:

@@ -30,7 +30,7 @@ class ExpenseClaim(Document):
 		validate_fiscal_year(self.posting_date, self.fiscal_year, "Posting Date")
 
 	def validate_exp_details(self):
-		if not self.get('expense_voucher_details'):
+		if not self.get('expenses'):
 			frappe.throw(_("Please add expense voucher details"))
 
 	def validate_expense_approver(self):

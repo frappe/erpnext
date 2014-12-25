@@ -31,7 +31,7 @@ class Workstation(Document):
 		self.update_bom_operation()
 
 	def validate_overlap_for_operation_timings(self):
-		for d in self.get("workstation_operation_hours"):
+		for d in self.get("working_hours"):
 			existing = frappe.db.sql_list("""select idx from `tabWorkstation Operation Hours`
 				where parent = %s and name != %s
 					and (

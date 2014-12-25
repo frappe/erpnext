@@ -2,7 +2,7 @@
  {
   "doctype": "Holiday List",
   "fiscal_year": "_Test Fiscal Year 2013", 
-  "holiday_list_details": [
+  "holidays": [
    {
     "description": "New Year", 
     "holiday_date": "2013-01-01"

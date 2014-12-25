@@ -32,7 +32,7 @@ frappe.listview_settings['Time Log'] = {
 				var tlb = frappe.model.get_new_doc("Time Log Batch");
 				$.each(selected, function(i, d) {
 					var detail = frappe.model.get_new_doc("Time Log Batch Detail", tlb,
-						"time_log_batch_details");
+						"time_logs");
 
 					$.extend(detail, {
 						"time_log": d.name,

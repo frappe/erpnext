@@ -45,8 +45,8 @@ class PurchaseInvoice(BuyingController):
 		self.check_active_purchase_items()
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
-		self.clear_unallocated_advances("Purchase Invoice Advance", "advance_allocation_details")
-		self.validate_advance_jv("advance_allocation_details", "purchase_order")
+		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
+		self.validate_advance_jv("advances", "purchase_order")
 		self.check_for_stopped_status()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
@@ -55,7 +55,7 @@ class PurchaseInvoice(BuyingController):
 		self.validate_write_off_account()
 		self.update_valuation_rate("entries")
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount",
-			"purchase_receipt_details")
+			"items")
 		self.create_remarks()
 
 	def create_remarks(self):
@@ -75,7 +75,7 @@ class PurchaseInvoice(BuyingController):
 
 	def get_advances(self):
 		super(PurchaseInvoice, self).get_advances(self.credit_to, "Supplier", self.supplier,
-			"Purchase Invoice Advance", "advance_allocation_details", "debit", "purchase_order")
+			"Purchase Invoice Advance", "advances", "debit", "purchase_order")
 
 	def check_active_purchase_items(self):
 		for d in self.get('entries'):
@@ -216,7 +216,7 @@ class PurchaseInvoice(BuyingController):
 		"""
 
 		lst = []
-		for d in self.get('advance_allocation_details'):
+		for d in self.get('advances'):
 			if flt(d.allocated_amount) > 0:
 				args = {
 					'voucher_no' : d.journal_voucher,
@@ -277,7 +277,7 @@ class PurchaseInvoice(BuyingController):
 
 		# tax table gl entries
 		valuation_tax = {}
-		for tax in self.get("other_charges"):
+		for tax in self.get("taxes"):
 			if tax.category in ("Total", "Valuation and Total") and flt(tax.tax_amount):
 				gl_entries.append(
 					self.get_gl_dict({

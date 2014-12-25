@@ -60,7 +60,7 @@
    "precision": ""
   }, 
   {
-   "fieldname": "other_charges", 
+   "fieldname": "taxes", 
    "fieldtype": "Table", 
    "label": "Purchase Taxes and Charges", 
    "oldfieldname": "purchase_tax_details", 
@@ -71,7 +71,7 @@
  ], 
  "icon": "icon-money", 
  "idx": 1, 
- "modified": "2014-10-07 12:40:17.165882", 
+ "modified": "2014-12-24 17:19:29.921875", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Taxes and Charges Master", 

@@ -48,8 +48,8 @@ class SalesInvoice(SellingController):
 		self.check_stop_sales_order("sales_order")
 		self.validate_debit_to_acc()
 		self.validate_fixed_asset_account()
-		self.clear_unallocated_advances("Sales Invoice Advance", "advance_adjustment_details")
-		self.validate_advance_jv("advance_adjustment_details", "sales_order")
+		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
+		self.validate_advance_jv("advances", "sales_order")
 		self.add_remarks()
 
 		if cint(self.is_pos):
@@ -69,7 +69,7 @@ class SalesInvoice(SellingController):
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount",
-			"delivery_note_details")
+			"items")
 
 	def on_submit(self):
 		super(SalesInvoice, self).on_submit()
@@ -200,12 +200,12 @@ class SalesInvoice(SellingController):
 				self.terms = frappe.db.get_value("Terms and Conditions", self.tc_name, "terms")
 
 			# fetch charges
-			if self.taxes_and_charges and not len(self.get("other_charges")):
-				self.set_taxes("other_charges", "taxes_and_charges")
+			if self.taxes_and_charges and not len(self.get("taxes")):
+				self.set_taxes("taxes", "taxes_and_charges")
 
 	def get_advances(self):
 		super(SalesInvoice, self).get_advances(self.debit_to, "Customer", self.customer,
-			"Sales Invoice Advance", "advance_adjustment_details", "credit", "sales_order")
+			"Sales Invoice Advance", "advances", "credit", "sales_order")
 
 	def get_company_abbr(self):
 		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
@@ -219,7 +219,7 @@ class SalesInvoice(SellingController):
 		"""
 
 		lst = []
-		for d in self.get('advance_adjustment_details'):
+		for d in self.get('advances'):
 			if flt(d.allocated_amount) > 0:
 				args = {
 					'voucher_no' : d.journal_voucher,
@@ -371,7 +371,7 @@ class SalesInvoice(SellingController):
 				bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 				d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 
-		for d in self.get('packing_details'):
+		for d in self.get('packed_items'):
 			bin = frappe.db.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
@@ -406,7 +406,7 @@ class SalesInvoice(SellingController):
 			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 			make_packing_list(self, 'entries')
 		else:
-			self.set('packing_details', [])
+			self.set('packed_items', [])
 
 		if cint(self.is_pos) == 1:
 			if flt(self.paid_amount) == 0:
@@ -500,7 +500,7 @@ class SalesInvoice(SellingController):
 			)
 
 	def make_tax_gl_entries(self, gl_entries):
-		for tax in self.get("other_charges"):
+		for tax in self.get("taxes"):
 			if flt(tax.tax_amount_after_discount_amount):
 				gl_entries.append(
 					self.get_gl_dict({

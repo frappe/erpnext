@@ -11,12 +11,12 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
 
 form_grid_templates = {
-	"sales_order_details": "templates/form_grid/item_grid.html"
+	"items": "templates/form_grid/item_grid.html"
 }
 
 class SalesOrder(SellingController):
 	tname = 'Sales Order Item'
-	fname = 'sales_order_details'
+	fname = 'items'
 	person_tname = 'Target Detail'
 	partner_tname = 'Partner Target Detail'
 	territory_tname = 'Territory Target Detail'
@@ -42,7 +42,7 @@ class SalesOrder(SellingController):
 	def validate_for_items(self):
 		check_list, flag = [], 0
 		chk_dupl_itm = []
-		for d in self.get('sales_order_details'):
+		for d in self.get('items'):
 			e = [d.item_code, d.description, d.warehouse, d.prevdoc_docname or '']
 			f = [d.item_code, d.description]
 
@@ -68,7 +68,7 @@ class SalesOrder(SellingController):
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
 
 	def validate_sales_mntc_quotation(self):
-		for d in self.get('sales_order_details'):
+		for d in self.get('items'):
 			if d.prevdoc_docname:
 				res = frappe.db.sql("select name from `tabQuotation` where name=%s and order_type = %s", (d.prevdoc_docname, self.order_type))
 				if not res:
@@ -104,7 +104,7 @@ class SalesOrder(SellingController):
 		self.validate_warehouse()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		make_packing_list(self,'sales_order_details')
+		make_packing_list(self,'items')
 
 		self.validate_with_previous_doc()
 

@@ -4,8 +4,8 @@
 frappe.provide("erpnext.buying");
 
 cur_frm.cscript.tname = "Purchase Order Item";
-cur_frm.cscript.fname = "po_details";
-cur_frm.cscript.other_fname = "other_charges";
+cur_frm.cscript.fname = "items";
+cur_frm.cscript.other_fname = "taxes";
 
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 {% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
@@ -105,9 +105,9 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		this.get_terms();
 	},
 
-	po_details_add: function(doc, cdt, cdn) {
+	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("po_details", row, ["schedule_date"]);
+		this.frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
 	}
 });
 
@@ -126,7 +126,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.fields_dict['po_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
 	return {
 		filters:[
 			['Project', 'status', 'not in', 'Completed, Cancelled']
@@ -134,7 +134,7 @@ cur_frm.fields_dict['po_details'].grid.get_field('project_name').get_query = fun
 	}
 }
 
-cur_frm.fields_dict['po_details'].grid.get_field('bom').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn]
 	return {
 		filters: [
@@ -188,7 +188,7 @@ cur_frm.pformat.indent_no = function(doc, cdt, cdn){
 
 	out ='';
 
-	var cl = doc.po_details || [];
+	var cl = doc.items || [];
 
 	// outer table
 	var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 50%"></td><td>';

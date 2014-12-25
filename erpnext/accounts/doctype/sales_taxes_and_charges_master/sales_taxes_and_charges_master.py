@@ -14,4 +14,4 @@ class SalesTaxesandChargesMaster(Document):
 				(self.name, self.company))
 
 		# at least one territory
-		self.validate_table_has_rows("valid_for_territories")
+		self.validate_table_has_rows("territories")

@@ -15,11 +15,11 @@ class PriceList(Document):
 
 		try:
 			# at least one territory
-			self.validate_table_has_rows("valid_for_territories")
+			self.validate_table_has_rows("territories")
 		except frappe.EmptyTableError:
 			# if no territory, set default territory
 			if frappe.defaults.get_user_default("territory"):
-				self.append("valid_for_territories", {
+				self.append("territories", {
 					"doctype": "Applicable Territory",
 					"territory": frappe.defaults.get_user_default("territory")
 				})

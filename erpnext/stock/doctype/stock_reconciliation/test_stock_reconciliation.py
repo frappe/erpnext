@@ -204,12 +204,12 @@ class TestStockReconciliation(unittest.TestCase):
 			"posting_time": "01:00",
 			"purpose": "Material Receipt",
 			"fiscal_year": "_Test Fiscal Year 2012",
-			"mtn_details": [
+			"items": [
 				{
 					"conversion_factor": 1.0,
 					"doctype": "Stock Entry Detail",
 					"item_code": "_Test Item",
-					"parentfield": "mtn_details",
+					"parentfield": "items",
 					"incoming_rate": 1000,
 					"qty": 20.0,
 					"stock_uom": "_Test UOM",
@@ -229,9 +229,9 @@ class TestStockReconciliation(unittest.TestCase):
 		pr1 = frappe.copy_doc(stock_entry)
 		pr1.posting_date = "2012-12-15"
 		pr1.posting_time = "02:00"
-		pr1.get("mtn_details")[0].qty = 10
-		pr1.get("mtn_details")[0].transfer_qty = 10
-		pr1.get("mtn_details")[0].incoming_rate = 700
+		pr1.get("items")[0].qty = 10
+		pr1.get("items")[0].transfer_qty = 10
+		pr1.get("items")[0].incoming_rate = 700
 		pr1.insert()
 		pr1.submit()
 
@@ -239,11 +239,11 @@ class TestStockReconciliation(unittest.TestCase):
 		pr2.posting_date = "2012-12-25"
 		pr2.posting_time = "03:00"
 		pr2.purpose = "Material Issue"
-		pr2.get("mtn_details")[0].s_warehouse = "_Test Warehouse - _TC"
-		pr2.get("mtn_details")[0].t_warehouse = None
-		pr2.get("mtn_details")[0].qty = 15
-		pr2.get("mtn_details")[0].transfer_qty = 15
-		pr2.get("mtn_details")[0].incoming_rate = 0
+		pr2.get("items")[0].s_warehouse = "_Test Warehouse - _TC"
+		pr2.get("items")[0].t_warehouse = None
+		pr2.get("items")[0].qty = 15
+		pr2.get("items")[0].transfer_qty = 15
+		pr2.get("items")[0].incoming_rate = 0
 		pr2.insert()
 		pr2.submit()
 
@@ -251,11 +251,11 @@ class TestStockReconciliation(unittest.TestCase):
 		pr3.posting_date = "2012-12-31"
 		pr3.posting_time = "08:00"
 		pr3.purpose = "Material Issue"
-		pr3.get("mtn_details")[0].s_warehouse = "_Test Warehouse - _TC"
-		pr3.get("mtn_details")[0].t_warehouse = None
-		pr3.get("mtn_details")[0].qty = 20
-		pr3.get("mtn_details")[0].transfer_qty = 20
-		pr3.get("mtn_details")[0].incoming_rate = 0
+		pr3.get("items")[0].s_warehouse = "_Test Warehouse - _TC"
+		pr3.get("items")[0].t_warehouse = None
+		pr3.get("items")[0].qty = 20
+		pr3.get("items")[0].transfer_qty = 20
+		pr3.get("items")[0].incoming_rate = 0
 		pr3.insert()
 		pr3.submit()
 
@@ -264,9 +264,9 @@ class TestStockReconciliation(unittest.TestCase):
 		pr4.posting_date = "2013-01-05"
 		pr4.fiscal_year = "_Test Fiscal Year 2013"
 		pr4.posting_time = "07:00"
-		pr4.get("mtn_details")[0].qty = 15
-		pr4.get("mtn_details")[0].transfer_qty = 15
-		pr4.get("mtn_details")[0].incoming_rate = 1200
+		pr4.get("items")[0].qty = 15
+		pr4.get("items")[0].transfer_qty = 15
+		pr4.get("items")[0].incoming_rate = 1200
 		pr4.insert()
 		pr4.submit()
 

@@ -8,7 +8,7 @@ frappe.require("assets/erpnext/js/controllers/stock_controller.js");
 erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({		
 	setup: function() {
 		var me = this;
-		this.frm.fields_dict.landed_cost_purchase_receipts.grid.get_field('purchase_receipt').get_query = 
+		this.frm.fields_dict.purchase_receipts.grid.get_field('purchase_receipt').get_query = 
 			function() {
 				if(!me.frm.doc.company) msgprint(__("Please enter company first"));
 				return {
@@ -19,7 +19,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 				}
 		};
 	
-		this.frm.fields_dict.landed_cost_taxes_and_charges.grid.get_field('account').get_query = function() {
+		this.frm.fields_dict.taxes.grid.get_field('account').get_query = function() {
 				if(!me.frm.doc.company) msgprint(__("Please enter company first"));
 				return {
 					filters:[
@@ -67,7 +67,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	
 	get_items_from_purchase_receipts: function() {
 		var me = this;
-		if(!this.frm.doc.landed_cost_purchase_receipts.length) {
+		if(!this.frm.doc.purchase_receipts.length) {
 			msgprint(__("Please enter Purchase Receipt first"));
 		} else {
 			return this.frm.call({
@@ -84,7 +84,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	
 	set_total_taxes_and_charges: function() {
 		total_taxes_and_charges = 0.0;
-		$.each(this.frm.doc.landed_cost_taxes_and_charges, function(i, d) {
+		$.each(this.frm.doc.taxes, function(i, d) {
 			total_taxes_and_charges += flt(d.amount)
 		});
 		cur_frm.set_value("total_taxes_and_charges", total_taxes_and_charges);
@@ -92,16 +92,16 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	
 	set_applicable_charges_for_item: function() {
 		var me = this;
-		if(this.frm.doc.landed_cost_taxes_and_charges.length) {
+		if(this.frm.doc.taxes.length) {
 			var total_item_cost = 0.0;
-			$.each(this.frm.doc.landed_cost_items, function(i, d) {
+			$.each(this.frm.doc.items, function(i, d) {
 				total_item_cost += flt(d.amount)
 			});
 			
-			$.each(this.frm.doc.landed_cost_items, function(i, item) {
+			$.each(this.frm.doc.items, function(i, item) {
 				item.applicable_charges = flt(item.amount) *  flt(me.frm.doc.total_taxes_and_charges) / flt(total_item_cost)
 			});
-			refresh_field("landed_cost_items");
+			refresh_field("items");
 		}
 	}
 	

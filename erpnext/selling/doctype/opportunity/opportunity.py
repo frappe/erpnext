@@ -78,7 +78,7 @@ class Opportunity(TransactionBase):
 		super(Opportunity, self).add_calendar_event(opts, force)
 
 	def validate_item_details(self):
-		if not self.get('enquiry_details'):
+		if not self.get('items'):
 			frappe.throw(_("Items required"))
 
 	def validate_lead_cust(self):

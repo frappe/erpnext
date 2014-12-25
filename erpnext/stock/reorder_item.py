@@ -51,11 +51,11 @@ def _reorder_item():
 	for item_code in item_warehouse_projected_qty:
 		item = frappe.get_doc("Item", item_code)
 
-		if item.variant_of and not item.get("item_reorder"):
+		if item.variant_of and not item.get("reorder_levels"):
 			item.update_template_tables()
 
-		if item.get("item_reorder"):
-			for d in item.get("item_reorder"):
+		if item.get("reorder_levels"):
+			for d in item.get("reorder_levels"):
 				add_to_material_request(item_code, d.warehouse, d.warehouse_reorder_level,
 					d.warehouse_reorder_qty, d.material_request_type)
 
@@ -122,7 +122,7 @@ def create_material_request(material_requests):
 				for d in items:
 					d = frappe._dict(d)
 					item = frappe.get_doc("Item", d.item_code)
-					mr.append("indent_details", {
+					mr.append("items", {
 						"doctype": "Material Request Item",
 						"item_code": d.item_code,
 						"schedule_date": add_days(nowdate(),cint(item.lead_time_days)),
@@ -169,7 +169,7 @@ def send_email_notification(mr_list):
 	for mr in mr_list:
 		msg += "<p><b><u>" + mr.name + """</u></b></p><table class='table table-bordered'><tr>
 			<th>Item Code</th><th>Warehouse</th><th>Qty</th><th>UOM</th></tr>"""
-		for item in mr.get("indent_details"):
+		for item in mr.get("items"):
 			msg += "<tr><td>" + item.item_code + "</td><td>" + item.warehouse + "</td><td>" + \
 				cstr(item.qty) + "</td><td>" + cstr(item.uom) + "</td></tr>"
 		msg += "</table>"

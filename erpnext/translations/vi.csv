@@ -1458,8 +1458,8 @@ Jobs Email Settings,Thiết lập việc làm Email
 Journal Entries,Tạp chí Entries
 Journal Entry,Tạp chí nhập
 Journal Voucher,Tạp chí Voucher
-Journal Voucher Detail,Tạp chí Chứng từ chi tiết
-Journal Voucher Detail No,Tạp chí Chứng từ chi tiết Không
+Journal Entry Account,Tạp chí Chứng từ chi tiết
+Journal Entry Account No,Tạp chí Chứng từ chi tiết Không
 Journal Voucher {0} does not have account {1} or already matched,Tạp chí Chứng từ {0} không có tài khoản {1} hoặc đã khớp
 Journal Vouchers {0} are un-linked,Tạp chí Chứng từ {0} được bỏ liên kết
 Keep a track of communication related to this enquiry which will help for future reference.,Giữ một ca khúc của truyền thông liên quan đến cuộc điều tra này sẽ giúp cho tài liệu tham khảo trong tương lai.

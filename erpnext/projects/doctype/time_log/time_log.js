@@ -52,7 +52,7 @@ $.extend(cur_frm.cscript, {
 			var operations = [];
 			frappe.model.with_doc("Production Order", doc.production_order, function(pro) {
 				doc = frappe.get_doc("Production Order",pro);
-				$.each(doc.production_order_operations , function(i, row){
+				$.each(doc.operations , function(i, row){
 					operations[i] = (i+1) +". "+ row.operation;
 				});
 			frappe.meta.get_docfield("Time Log", "operation", me.frm.doc.name).options = "\n" + operations.join("\n");

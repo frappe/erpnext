@@ -1459,8 +1459,8 @@ Jobs Email Settings,Настройки Вакансии Email
 Journal Entries,Записи в журнале
 Journal Entry,Запись в дневнике
 Journal Voucher,Журнал Ваучер
-Journal Voucher Detail,Журнал Ваучер Подробно
-Journal Voucher Detail No,Журнал Ваучер Подробно Нет
+Journal Entry Account,Журнал Ваучер Подробно
+Journal Entry Account No,Журнал Ваучер Подробно Нет
 Journal Voucher {0} does not have account {1} or already matched,Журнал Ваучер {0} не имеет учетной записи {1} или уже согласованы
 Journal Vouchers {0} are un-linked,Журнал Ваучеры {0} являются не-связаны
 Keep a track of communication related to this enquiry which will help for future reference.,"Постоянно отслеживать коммуникации, связанные на этот запрос, который поможет в будущем."

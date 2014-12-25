@@ -1458,8 +1458,8 @@ Jobs Email Settings,नौकरियां ईमेल सेटिंग
 Journal Entries,जर्नल प्रविष्टियां
 Journal Entry,जर्नल प्रविष्टि
 Journal Voucher,जर्नल वाउचर
-Journal Voucher Detail,जर्नल वाउचर विस्तार
-Journal Voucher Detail No,जर्नल वाउचर विस्तार नहीं
+Journal Entry Account,जर्नल वाउचर विस्तार
+Journal Entry Account No,जर्नल वाउचर विस्तार नहीं
 Journal Voucher {0} does not have account {1} or already matched,जर्नल वाउचर {0} खाता नहीं है {1} या पहले से ही मेल नहीं खाते
 Journal Vouchers {0} are un-linked,जर्नल वाउचर {0} संयुक्त राष्ट्र से जुड़े हुए हैं
 Keep a track of communication related to this enquiry which will help for future reference.,जांच है जो भविष्य में संदर्भ के लिए मदद करने के लिए संबंधित संचार का ट्रैक रखें.

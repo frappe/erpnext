@@ -2,13 +2,13 @@
  {
   "company": "_Test Company", 
   "doctype": "Sales Taxes and Charges Master", 
-  "other_charges": [
+  "taxes": [
    {
     "account_head": "_Test Account VAT - _TC", 
     "charge_type": "On Net Total", 
     "description": "VAT", 
     "doctype": "Sales Taxes and Charges", 
-    "parentfield": "other_charges", 
+    "parentfield": "taxes", 
     "rate": 6
    }, 
    {
@@ -16,20 +16,20 @@
     "charge_type": "On Net Total", 
     "description": "Service Tax", 
     "doctype": "Sales Taxes and Charges", 
-    "parentfield": "other_charges", 
+    "parentfield": "taxes", 
     "rate": 6.36
    }
   ], 
   "title": "_Test Sales Taxes and Charges Master", 
-  "valid_for_territories": [
+  "territories": [
    {
     "doctype": "Applicable Territory", 
-    "parentfield": "valid_for_territories", 
+    "parentfield": "territories", 
     "territory": "All Territories"
    }, 
    {
     "doctype": "Applicable Territory", 
-    "parentfield": "valid_for_territories", 
+    "parentfield": "territories", 
     "territory": "_Test Territory Rest Of The World"
    }
   ]
@@ -37,14 +37,14 @@
  {
   "company": "_Test Company", 
   "doctype": "Sales Taxes and Charges Master", 
-  "other_charges": [
+  "taxes": [
    {
     "account_head": "_Test Account Shipping Charges - _TC", 
     "charge_type": "Actual", 
     "cost_center": "_Test Cost Center - _TC", 
     "description": "Shipping Charges", 
     "doctype": "Sales Taxes and Charges", 
-    "parentfield": "other_charges", 
+    "parentfield": "taxes", 
     "rate": 100
    }, 
    {
@@ -53,7 +53,7 @@
     "cost_center": "_Test Cost Center - _TC", 
     "description": "Customs Duty", 
     "doctype": "Sales Taxes and Charges", 
-    "parentfield": "other_charges", 
+    "parentfield": "taxes", 
     "rate": 10
    }, 
    {
@@ -62,7 +62,7 @@
     "cost_center": "_Test Cost Center - _TC", 
     "description": "Excise Duty", 
     "doctype": "Sales Taxes and Charges", 
-    "parentfield": "other_charges", 
+    "parentfield": "taxes", 
     "rate": 12
    }, 
    {
@@ -71,7 +71,7 @@
     "cost_center": "_Test Cost Center - _TC", 
     "description": "Education Cess", 
     "doctype": "Sales Taxes and Charges", 
-    "parentfield": "other_charges", 
+    "parentfield": "taxes", 
     "rate": 2, 
     "row_id": 3
    }, 
@@ -81,7 +81,7 @@
     "cost_center": "_Test Cost Center - _TC", 
     "description": "S&H Education Cess", 
     "doctype": "Sales Taxes and Charges", 
-    "parentfield": "other_charges", 
+    "parentfield": "taxes", 
     "rate": 1, 
     "row_id": 3
    }, 
@@ -91,7 +91,7 @@
     "cost_center": "_Test Cost Center - _TC", 
     "description": "CST", 
     "doctype": "Sales Taxes and Charges", 
-    "parentfield": "other_charges", 
+    "parentfield": "taxes", 
     "rate": 2, 
     "row_id": 5
    }, 
@@ -101,7 +101,7 @@
     "cost_center": "_Test Cost Center - _TC", 
     "description": "VAT", 
     "doctype": "Sales Taxes and Charges", 
-    "parentfield": "other_charges", 
+    "parentfield": "taxes", 
     "rate": 12.5
    }, 
    {
@@ -110,16 +110,16 @@
     "cost_center": "_Test Cost Center - _TC", 
     "description": "Discount", 
     "doctype": "Sales Taxes and Charges", 
-    "parentfield": "other_charges", 
+    "parentfield": "taxes", 
     "rate": -10, 
     "row_id": 7
    }
   ], 
   "title": "_Test India Tax Master", 
-  "valid_for_territories": [
+  "territories": [
    {
     "doctype": "Applicable Territory", 
-    "parentfield": "valid_for_territories", 
+    "parentfield": "territories", 
     "territory": "_Test Territory India"
    }
   ]
@@ -127,13 +127,13 @@
  {
   "company": "_Test Company", 
   "doctype": "Sales Taxes and Charges Master", 
-  "other_charges": [
+  "taxes": [
    {
     "account_head": "_Test Account VAT - _TC", 
     "charge_type": "On Net Total", 
     "description": "VAT", 
     "doctype": "Sales Taxes and Charges", 
-    "parentfield": "other_charges", 
+    "parentfield": "taxes", 
     "rate": 12
    }, 
    {
@@ -141,15 +141,15 @@
     "charge_type": "On Net Total", 
     "description": "Service Tax", 
     "doctype": "Sales Taxes and Charges", 
-    "parentfield": "other_charges", 
+    "parentfield": "taxes", 
     "rate": 4
    }
   ], 
   "title": "_Test Sales Taxes and Charges Master - Rest of the World", 
-  "valid_for_territories": [
+  "territories": [
    {
     "doctype": "Applicable Territory", 
-    "parentfield": "valid_for_territories", 
+    "parentfield": "territories", 
     "territory": "_Test Territory Rest Of The World"
    }
   ]

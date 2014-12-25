@@ -153,7 +153,7 @@ def create_price_lists(args):
 			"buying": 1 if pl_type == "Buying" else 0,
 			"selling": 1 if pl_type == "Selling" else 0,
 			"currency": args["currency"],
-			"valid_for_territories": [{
+			"territories": [{
 				"territory": get_root_of("Territory")
 			}]
 		}).insert()

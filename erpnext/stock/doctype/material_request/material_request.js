@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.tname = "Material Request Item";
-cur_frm.cscript.fname = "indent_details";
+cur_frm.cscript.fname = "items";
 
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 
@@ -88,12 +88,12 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 	schedule_date: function(doc, cdt, cdn) {
 		var val = locals[cdt][cdn].schedule_date;
 		if(val) {
-			$.each((doc.indent_details || []), function(i, d) {
+			$.each((doc.items || []), function(i, d) {
 				if(!d.schedule_date) {
 					d.schedule_date = val;
 				}
 			});
-			refresh_field("indent_details");
+			refresh_field("items");
 		}
 	},
 
@@ -117,7 +117,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				args: values,
 				callback: function(r) {
 					$.each(r.message, function(i, item) {
-						var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "indent_details");
+						var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
 						d.item_code = item.item_code;
 						d.description = item.description;
 						d.warehouse = item.default_warehouse;
@@ -125,7 +125,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 						d.qty = item.qty;
 					});
 					d.hide();
-					refresh_field("indent_details");
+					refresh_field("items");
 				}
 			});
 		});

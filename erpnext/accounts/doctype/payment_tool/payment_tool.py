@@ -29,7 +29,7 @@ class PaymentTool(Document):
 		if not self.total_payment_amount:
 			frappe.throw(_("Please enter Payment Amount in atleast one row"))
 
-		for v in self.get("payment_tool_details"):
+		for v in self.get("against_vouchers"):
 			if not frappe.db.get_value(v.against_voucher_type, {"name": v.against_voucher_no}):
 				frappe.throw(_("Row {0}: {1} is not a valid {2}").format(v.idx, v.against_voucher_no,
 					v.against_voucher_type))

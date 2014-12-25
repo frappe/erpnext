@@ -28,7 +28,7 @@ def create_price_list(pl_name, buying=0, selling=0):
 		"buying": buying,
 		"selling": selling,
 		"currency": frappe.db.get_default("currency"),
-		"valid_for_territories": [{
+		"territories": [{
 			"territory": get_root_of("Territory")
 		}]
 	})

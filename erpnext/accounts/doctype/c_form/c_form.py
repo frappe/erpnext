@@ -12,7 +12,7 @@ class CForm(Document):
 		"""Validate invoice that c-form is applicable
 			and no other c-form is received for that"""
 
-		for d in self.get('invoice_details'):
+		for d in self.get('invoices'):
 			if d.invoice_no:
 				inv = frappe.db.sql("""select c_form_applicable, c_form_no from
 					`tabSales Invoice` where name = %s and docstatus = 1""", d.invoice_no)
@@ -42,7 +42,7 @@ class CForm(Document):
 		frappe.db.sql("""update `tabSales Invoice` set c_form_no=null where c_form_no=%s""", self.name)
 
 	def set_cform_in_sales_invoices(self):
-		inv = [d.invoice_no for d in self.get('invoice_details')]
+		inv = [d.invoice_no for d in self.get('invoices')]
 		if inv:
 			frappe.db.sql("""update `tabSales Invoice` set c_form_no=%s, modified=%s where name in (%s)""" %
 				('%s', '%s', ', '.join(['%s'] * len(inv))), tuple([self.name, self.modified] + inv))
@@ -54,7 +54,7 @@ class CForm(Document):
 			frappe.throw(_("Please enter atleast 1 invoice in the table"))
 
 	def set_total_invoiced_amount(self):
-		total = sum([flt(d.grand_total) for d in self.get('invoice_details')])
+		total = sum([flt(d.grand_total) for d in self.get('invoices')])
 		frappe.db.set(self, 'total_invoiced_amount', total)
 
 	def get_invoice_details(self, invoice_no):

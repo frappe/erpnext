@@ -15,7 +15,7 @@ class MaintenanceVisit(TransactionBase):
 		return frappe.db.get_value("Item", item_code, ["item_name", "description"], as_dict=1)
 
 	def validate_serial_no(self):
-		for d in self.get('maintenance_visit_details'):
+		for d in self.get('purposes'):
 			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):
 				frappe.throw(_("Serial No {0} does not exist").format(d.serial_no))
 
@@ -23,7 +23,7 @@ class MaintenanceVisit(TransactionBase):
 		self.validate_serial_no()
 
 	def update_customer_issue(self, flag):
-		for d in self.get('maintenance_visit_details'):
+		for d in self.get('purposes'):
 			if d.prevdoc_docname and d.prevdoc_doctype == 'Customer Issue' :
 				if flag==1:
 					mntc_date = self.mntc_date
@@ -53,7 +53,7 @@ class MaintenanceVisit(TransactionBase):
 	def check_if_last_visit(self):
 		"""check if last maintenance visit against same sales order/ customer issue"""
 		check_for_docname = None
-		for d in self.get('maintenance_visit_details'):
+		for d in self.get('purposes'):
 			if d.prevdoc_docname:
 				check_for_docname = d.prevdoc_docname
 				#check_for_doctype = d.prevdoc_doctype

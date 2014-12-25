@@ -1458,8 +1458,8 @@ Jobs Email Settings,Impostazioni email Lavoro
 Journal Entries,Prime note
 Journal Entry,Journal Entry
 Journal Voucher,Journal Voucher
-Journal Voucher Detail,Journal Voucher Detail
-Journal Voucher Detail No,Journal Voucher Detail No
+Journal Entry Account,Journal Entry Account
+Journal Entry Account No,Journal Entry Account No
 Journal Voucher {0} does not have account {1} or already matched,Journal Voucher {0} non ha conto {1} o già abbinate
 Journal Vouchers {0} are un-linked,Diario Buoni {0} sono non- linked
 Keep a track of communication related to this enquiry which will help for future reference.,Tenere una traccia delle comunicazioni relative a questa indagine che contribuirà per riferimento futuro.

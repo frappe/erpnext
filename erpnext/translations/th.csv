@@ -1458,8 +1458,8 @@ Jobs Email Settings,งานการตั้งค่าอีเมล
 Journal Entries,บันทึกรายการแบบรวม
 Journal Entry,บันทึกรายการค้า
 Journal Voucher,บัตรกำนัลวารสาร
-Journal Voucher Detail,รายละเอียดใบสำคัญรายวันทั่วไป
-Journal Voucher Detail No,รายละเอียดใบสำคัญรายวันทั่วไปไม่มี
+Journal Entry Account,รายละเอียดใบสำคัญรายวันทั่วไป
+Journal Entry Account No,รายละเอียดใบสำคัญรายวันทั่วไปไม่มี
 Journal Voucher {0} does not have account {1} or already matched,ใบสำคัญรายวันทั่วไป {0} ไม่ได้มี บัญชี {1} หรือ การจับคู่ แล้ว
 Journal Vouchers {0} are un-linked,ใบสำคัญรายวันทั่วไป {0} จะ ยกเลิกการ เชื่อมโยง
 Keep a track of communication related to this enquiry which will help for future reference.,ติดตามของการสื่อสารที่เกี่ยวข้องกับการสืบสวนเรื่องนี้ซึ่งจะช่วยให้สำหรับการอ้างอิงในอนาคต

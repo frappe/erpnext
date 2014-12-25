@@ -1458,8 +1458,8 @@ Jobs Email Settings,Εργασία Ρυθμίσεις Email
 Journal Entries,Εφημερίδα Καταχωρήσεις
 Journal Entry,Journal Entry
 Journal Voucher,Εφημερίδα Voucher
-Journal Voucher Detail,Εφημερίδα Λεπτομέρεια Voucher
-Journal Voucher Detail No,Εφημερίδα Λεπτομέρεια φύλλου αριθ.
+Journal Entry Account,Εφημερίδα Λεπτομέρεια Voucher
+Journal Entry Account No,Εφημερίδα Λεπτομέρεια φύλλου αριθ.
 Journal Voucher {0} does not have account {1} or already matched,Εφημερίδα Voucher {0} δεν έχει λογαριασμό {1} ή έχουν ήδη συμφωνημένα
 Journal Vouchers {0} are un-linked,Εφημερίδα Κουπόνια {0} είναι μη συνδεδεμένο
 Keep a track of communication related to this enquiry which will help for future reference.,Κρατήστε ένα κομμάτι της επικοινωνίας που σχετίζονται με την έρευνα αυτή που θα βοηθήσει για μελλοντική αναφορά.

@@ -4,10 +4,10 @@
 cur_frm.add_fetch('employee', 'company', 'company');
 
 cur_frm.cscript.onload = function(doc, dt, dn){
-	e_tbl = doc.earning_details || [];
-	d_tbl = doc.deduction_details || [];
+	e_tbl = doc.earnings || [];
+	d_tbl = doc.deductions || [];
 	if (e_tbl.length == 0 && d_tbl.length == 0)
-		return $c_obj(doc,'make_earn_ded_table','', function(r, rt) { refresh_many(['earning_details', 'deduction_details']);});
+		return $c_obj(doc,'make_earn_ded_table','', function(r, rt) { refresh_many(['earnings', 'deductions']);});
 }
 
 cur_frm.cscript.refresh = function(doc, dt, dn){
@@ -38,8 +38,8 @@ cur_frm.cscript.d_modified_amt = function(doc, cdt, cdn){
 }
 
 var calculate_totals = function(doc, cdt, cdn) {
-	var tbl1 = doc.earning_details || [];
-	var tbl2 = doc.deduction_details || [];
+	var tbl1 = doc.earnings || [];
+	var tbl2 = doc.deductions || [];
 
 	var total_earn = 0; var total_ded = 0;
 	for(var i = 0; i < tbl1.length; i++){

@@ -102,8 +102,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this._super();
 		this.frm.toggle_display("customer_name",
 			(this.frm.doc.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
-		if(this.frm.fields_dict.packing_details) {
-			var packing_list_exists = (this.frm.doc.packing_details || []).length;
+		if(this.frm.fields_dict.packed_items) {
+			var packing_list_exists = (this.frm.doc.packed_items || []).length;
 			this.frm.toggle_display("packing_list", packing_list_exists ? true : false);
 		}
 	},
@@ -241,7 +241,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	calculate_taxes_and_totals: function(update_paid_amount) {
 		this._super();
-		this.calculate_total_advance("Sales Invoice", "advance_adjustment_details", update_paid_amount);
+		this.calculate_total_advance("Sales Invoice", "advances", update_paid_amount);
 		this.calculate_commission();
 		this.calculate_contribution();
 
@@ -477,7 +477,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	set_sales_bom_help: function(doc) {
 		if(!cur_frm.fields_dict.packing_list) return;
-		if ((doc.packing_details || []).length) {
+		if ((doc.packed_items || []).length) {
 			$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
 
 			if (inList(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
@@ -560,17 +560,17 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		setup_field_label_map(["rate", "price_list_rate", "amount"],
 			this.frm.doc.currency, this.fname);
 
-		setup_field_label_map(["tax_amount", "total"], company_currency, "other_charges");
+		setup_field_label_map(["tax_amount", "total"], company_currency, "taxes");
 
-		if(this.frm.fields_dict["advance_allocation_details"]) {
+		if(this.frm.fields_dict["advances"]) {
 			setup_field_label_map(["advance_amount", "allocated_amount"], company_currency,
-				"advance_allocation_details");
+				"advances");
 		}
 
 		// toggle columns
 		var item_grid = this.frm.fields_dict[this.fname].grid;
 		var show = (this.frm.doc.currency != company_currency) ||
-			((cur_frm.doc.other_charges || []).filter(
+			((cur_frm.doc.taxes || []).filter(
 					function(d) { return d.included_in_print_rate===1}).length);
 
 		$.each(["base_rate", "base_price_list_rate", "base_amount"], function(i, fname) {

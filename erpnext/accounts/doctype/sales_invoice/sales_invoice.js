@@ -2,8 +2,8 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.tname = "Sales Invoice Item";
-cur_frm.cscript.fname = "entries";
-cur_frm.cscript.other_fname = "other_charges";
+cur_frm.cscript.fname = "items";
+cur_frm.cscript.other_fname = "taxes";
 cur_frm.cscript.sales_team_fname = "sales_team";
 
 // print heading
@@ -68,7 +68,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
 				var from_delivery_note = false;
-				from_delivery_note = cur_frm.doc.entries
+				from_delivery_note = cur_frm.doc.items
 					.some(function(item) {
 						return item.delivery_note ? true : false;
 					});
@@ -173,7 +173,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	allocated_amount: function() {
-		this.calculate_total_advance("Sales Invoice", "advance_adjustment_details");
+		this.calculate_total_advance("Sales Invoice", "advances");
 		this.frm.refresh_fields();
 	},
 
@@ -201,7 +201,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 	entries_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("entries", row, ["income_account", "cost_center"]);
+		this.frm.script_manager.copy_from_first_row("items", row, ["income_account", "cost_center"]);
 	},
 
 	set_dynamic_labels: function() {
@@ -223,7 +223,7 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 cur_frm.cscript.hide_fields = function(doc) {
 	par_flds = ['project_name', 'due_date', 'is_opening', 'source', 'total_advance', 'gross_profit',
 	'gross_profit_percent', 'get_advances_received',
-	'advance_adjustment_details', 'sales_partner', 'commission_rate',
+	'advances', 'sales_partner', 'commission_rate',
 	'total_commission', 'advances', 'from_date', 'to_date'];
 
 	item_flds_normal = ['sales_order', 'delivery_note']
@@ -231,18 +231,18 @@ cur_frm.cscript.hide_fields = function(doc) {
 	if(cint(doc.is_pos) == 1) {
 		hide_field(par_flds);
 		unhide_field('payments_section');
-		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, false);
+		cur_frm.fields_dict['items'].grid.set_column_disp(item_flds_normal, false);
 	} else {
 		hide_field('payments_section');
 		for (i in par_flds) {
 			var docfield = frappe.meta.docfield_map[doc.doctype][par_flds[i]];
 			if(!docfield.hidden) unhide_field(par_flds[i]);
 		}
-		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, true);
+		cur_frm.fields_dict['items'].grid.set_column_disp(item_flds_normal, true);
 	}
 
 	item_flds_stock = ['serial_no', 'batch_no', 'actual_qty', 'expense_account', 'warehouse']
-	cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_stock,
+	cur_frm.fields_dict['items'].grid.set_column_disp(item_flds_stock,
 		(cint(doc.update_stock)==1 ? true : false));
 
 	// India related fields
@@ -342,7 +342,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 
 // Income Account in Details Table
 // --------------------------------
-cur_frm.set_query("income_account", "entries", function(doc) {
+cur_frm.set_query("income_account", "items", function(doc) {
 	return{
 		query: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_income_account",
 		filters: {'company': doc.company}
@@ -351,7 +351,7 @@ cur_frm.set_query("income_account", "entries", function(doc) {
 
 // expense account
 if (sys_defaults.auto_accounting_for_stock) {
-	cur_frm.fields_dict['entries'].grid.get_field('expense_account').get_query = function(doc) {
+	cur_frm.fields_dict['items'].grid.get_field('expense_account').get_query = function(doc) {
 		return {
 			filters: {
 				'report_type': 'Profit and Loss',
@@ -365,7 +365,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 
 // Cost Center in Details Table
 // -----------------------------
-cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
+cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(doc) {
 	return {
 		filters: {
 			'company': doc.company,
@@ -387,7 +387,7 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
-	$.each(doc["entries"], function(i, row) {
+	$.each(doc["items"], function(i, row) {
 		if(row.delivery_note) frappe.model.clear_doc("Delivery Note", row.delivery_note)
 	})
 

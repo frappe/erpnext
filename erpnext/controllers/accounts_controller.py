@@ -145,8 +145,8 @@ class AccountsController(TransactionBase):
 				get_taxes_and_charges(tax_master_doctype, self.get(tax_master_field), tax_parentfield))
 
 	def set_other_charges(self):
-		self.set("other_charges", [])
-		self.set_taxes("other_charges", "taxes_and_charges")
+		self.set("taxes", [])
+		self.set_taxes("taxes", "taxes_and_charges")
 
 	def calculate_taxes_and_totals(self):
 		self.discount_amount_applied = False
@@ -394,7 +394,7 @@ class AccountsController(TransactionBase):
 			select
 				t1.name as jv_no, t1.remark, t2.{0} as amount, t2.name as jv_detail_no, `against_{1}` as against_order
 			from
-				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
+				`tabJournal Voucher` t1, `tabJournal Entry Account` t2
 			where
 				t1.name = t2.parent and t2.account = %s
 				and t2.party_type=%s and t2.party=%s
@@ -426,7 +426,7 @@ class AccountsController(TransactionBase):
 			account = self.get("debit_to" if self.doctype=="Sales Invoice" else "credit_to")
 
 			jv_against_order = frappe.db.sql("""select parent, %s as against_order
-				from `tabJournal Voucher Detail`
+				from `tabJournal Entry Account`
 				where docstatus=1 and account=%s and ifnull(is_advance, 'No') = 'Yes'
 				and ifnull(against_sales_order, '') in (%s)
 				group by parent, against_sales_order""" %
@@ -501,7 +501,7 @@ class AccountsController(TransactionBase):
 			select
 				sum(ifnull({dr_or_cr}, 0))
 			from
-				`tabJournal Voucher Detail`
+				`tabJournal Entry Account`
 			where
 				{against_field} = %s and docstatus = 1 and is_advance = "Yes" """.format(dr_or_cr=dr_or_cr, \
 					against_field=against_field), self.name)

@@ -2,8 +2,8 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.tname = "Purchase Receipt Item";
-cur_frm.cscript.fname = "purchase_receipt_details";
-cur_frm.cscript.other_fname = "other_charges";
+cur_frm.cscript.fname = "items";
+cur_frm.cscript.other_fname = "taxes";
 
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 {% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
@@ -119,7 +119,7 @@ cur_frm.cscript.new_contact = function() {
 	loaddoc('Contact', tn);
 }
 
-cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
 	return {
 		filters: [
 			['Project', 'status', 'not in', 'Completed, Cancelled']
@@ -127,7 +127,7 @@ cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('project_name').g
 	}
 }
 
-cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('batch_no').get_query= function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field('batch_no').get_query= function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(d.item_code) {
 		return {
@@ -153,7 +153,7 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 	}
 }
 
-cur_frm.fields_dict.purchase_receipt_details.grid.get_field("qa_no").get_query = function(doc) {
+cur_frm.fields_dict.items.grid.get_field("qa_no").get_query = function(doc) {
 	return {
 		filters: {
 			'docstatus': 1
@@ -161,7 +161,7 @@ cur_frm.fields_dict.purchase_receipt_details.grid.get_field("qa_no").get_query =
 	}
 }
 
-cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('bom').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn]
 	return {
 		filters: [

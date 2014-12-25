@@ -21,9 +21,9 @@ class TestQuotation(unittest.TestCase):
 		sales_order = make_sales_order(quotation.name)
 
 		self.assertEquals(sales_order.doctype, "Sales Order")
-		self.assertEquals(len(sales_order.get("sales_order_details")), 1)
-		self.assertEquals(sales_order.get("sales_order_details")[0].doctype, "Sales Order Item")
-		self.assertEquals(sales_order.get("sales_order_details")[0].prevdoc_docname, quotation.name)
+		self.assertEquals(len(sales_order.get("items")), 1)
+		self.assertEquals(sales_order.get("items")[0].doctype, "Sales Order Item")
+		self.assertEquals(sales_order.get("items")[0].prevdoc_docname, quotation.name)
 		self.assertEquals(sales_order.customer, "_Test Customer")
 
 		sales_order.delivery_date = "2014-01-01"

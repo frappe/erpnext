@@ -17,7 +17,7 @@ class ManyBlankToValuesError(frappe.ValidationError): pass
 class ShippingRule(Document):
 	def validate(self):
 		self.validate_value("calculate_based_on", "in", ["Net Total", "Net Weight"])
-		self.shipping_rule_conditions = self.get("shipping_rule_conditions")
+		self.conditions = self.get("conditions")
 		self.validate_from_to_values()
 		self.sort_shipping_rule_conditions()
 		self.validate_overlapping_shipping_rule_conditions()
@@ -25,7 +25,7 @@ class ShippingRule(Document):
 	def validate_from_to_values(self):
 		zero_to_values = []
 
-		for d in self.get("shipping_rule_conditions"):
+		for d in self.get("conditions"):
 			self.round_floats_in(d)
 
 			# values cannot be negative
@@ -44,8 +44,8 @@ class ShippingRule(Document):
 
 	def sort_shipping_rule_conditions(self):
 		"""Sort Shipping Rule Conditions based on increasing From Value"""
-		self.shipping_rules_conditions = sorted(self.shipping_rule_conditions, key=lambda d: flt(d.from_value))
-		for i, d in enumerate(self.shipping_rule_conditions):
+		self.shipping_rules_conditions = sorted(self.conditions, key=lambda d: flt(d.from_value))
+		for i, d in enumerate(self.conditions):
 			d.idx = i + 1
 
 	def validate_overlapping_shipping_rule_conditions(self):
@@ -60,9 +60,9 @@ class ShippingRule(Document):
 			return (not separate)
 
 		overlaps = []
-		for i in xrange(0, len(self.shipping_rule_conditions)):
-			for j in xrange(i+1, len(self.shipping_rule_conditions)):
-				d1, d2 = self.shipping_rule_conditions[i], self.shipping_rule_conditions[j]
+		for i in xrange(0, len(self.conditions)):
+			for j in xrange(i+1, len(self.conditions)):
+				d1, d2 = self.conditions[i], self.conditions[j]
 				if d1.as_dict() != d2.as_dict():
 					# in our case, to_value can be zero, hence pass the from_value if so
 					range_a = (d1.from_value, d1.to_value or d1.from_value)

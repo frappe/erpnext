@@ -38,10 +38,10 @@ class ProductionPlanningTool(Document):
 		return ret
 
 	def clear_so_table(self):
-		self.set('pp_so_details', [])
+		self.set('sales_orders', [])
 
 	def clear_item_table(self):
-		self.set('pp_details', [])
+		self.set('items', [])
 
 	def validate_company(self):
 		if not self.company:
@@ -83,10 +83,10 @@ class ProductionPlanningTool(Document):
 		""" Add sales orders in the table"""
 		self.clear_so_table()
 
-		so_list = [d.sales_order for d in self.get('pp_so_details')]
+		so_list = [d.sales_order for d in self.get('sales_orders')]
 		for r in open_so:
 			if cstr(r['name']) not in so_list:
-				pp_so = self.append('pp_so_details', {})
+				pp_so = self.append('sales_orders', {})
 				pp_so.sales_order = r['name']
 				pp_so.sales_order_date = cstr(r['transaction_date'])
 				pp_so.customer = cstr(r['customer'])
@@ -101,7 +101,7 @@ class ProductionPlanningTool(Document):
 		self.add_items(items)
 
 	def get_items(self):
-		so_list = filter(None, [d.sales_order for d in self.get('pp_so_details')])
+		so_list = filter(None, [d.sales_order for d in self.get('sales_orders')])
 		if not so_list:
 			msgprint(_("Please enter sales order in the above table"))
 			return []
@@ -143,7 +143,7 @@ class ProductionPlanningTool(Document):
 		for p in items:
 			item_details = frappe.db.sql("""select description, stock_uom, default_bom
 				from tabItem where name=%s""", p['item_code'])
-			pi = self.append('pp_details', {})
+			pi = self.append('items', {})
 			pi.sales_order				= p['parent']
 			pi.warehouse				= p['warehouse']
 			pi.item_code				= p['item_code']
@@ -155,7 +155,7 @@ class ProductionPlanningTool(Document):
 
 	def validate_data(self):
 		self.validate_company()
-		for d in self.get('pp_details'):
+		for d in self.get('items'):
 			self.validate_bom_no(d)
 			if not flt(d.planned_qty):
 				frappe.throw(_("Please enter Planned Qty for Item {0} at row {1}").format(d.item_code, d.idx))
@@ -193,7 +193,7 @@ class ProductionPlanningTool(Document):
 			}
 		"""
 		item_dict, bom_dict = {}, {}
-		for d in self.get("pp_details"):
+		for d in self.get("items"):
 			bom_dict.setdefault(d.bom_no, []).append([d.sales_order, flt(d.planned_qty)])
 			item_dict[(d.item_code, d.sales_order, d.warehouse)] = {
 				"production_item"	: d.item_code,
@@ -379,7 +379,7 @@ class ProductionPlanningTool(Document):
 					"material_request_type": "Purchase"
 				})
 				for sales_order, requested_qty in items_to_be_requested[item].items():
-					pr_doc.append("indent_details", {
+					pr_doc.append("items", {
 						"doctype": "Material Request Item",
 						"__islocal": 1,
 						"item_code": item,

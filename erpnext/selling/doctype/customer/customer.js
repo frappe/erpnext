@@ -91,7 +91,7 @@ cur_frm.fields_dict['default_price_list'].get_query = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.fields_dict['party_accounts'].grid.get_field('account').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['accounts'].grid.get_field('account').get_query = function(doc, cdt, cdn) {
 	var d  = locals[cdt][cdn];
 	return {
 		filters: {

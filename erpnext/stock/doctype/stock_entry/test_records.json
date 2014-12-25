@@ -3,7 +3,7 @@
   "company": "_Test Company", 
   "doctype": "Stock Entry", 
   "fiscal_year": "_Test Fiscal Year 2013", 
-  "mtn_details": [
+  "items": [
    {
     "conversion_factor": 1.0, 
     "cost_center": "_Test Cost Center - _TC", 
@@ -11,7 +11,7 @@
     "expense_account": "Stock Adjustment - _TC", 
     "incoming_rate": 100,
     "item_code": "_Test Item", 
-    "parentfield": "mtn_details", 
+    "parentfield": "items", 
     "qty": 50.0, 
     "stock_uom": "_Test UOM", 
     "t_warehouse": "_Test Warehouse - _TC", 
@@ -27,7 +27,7 @@
   "company": "_Test Company", 
   "doctype": "Stock Entry", 
   "fiscal_year": "_Test Fiscal Year 2013", 
-  "mtn_details": [
+  "items": [
    {
     "conversion_factor": 1.0, 
     "cost_center": "_Test Cost Center - _TC", 
@@ -35,7 +35,7 @@
     "expense_account": "Stock Adjustment - _TC", 
     "incoming_rate": 100, 
     "item_code": "_Test Item", 
-    "parentfield": "mtn_details", 
+    "parentfield": "items", 
     "qty": 40.0, 
     "s_warehouse": "_Test Warehouse - _TC", 
     "stock_uom": "_Test UOM", 
@@ -51,7 +51,7 @@
   "company": "_Test Company", 
   "doctype": "Stock Entry", 
   "fiscal_year": "_Test Fiscal Year 2013", 
-  "mtn_details": [
+  "items": [
    {
     "conversion_factor": 1.0, 
     "cost_center": "_Test Cost Center - _TC", 
@@ -59,7 +59,7 @@
     "expense_account": "Stock Adjustment - _TC", 
     "incoming_rate": 100, 
     "item_code": "_Test Item", 
-    "parentfield": "mtn_details", 
+    "parentfield": "items", 
     "qty": 45.0, 
     "s_warehouse": "_Test Warehouse - _TC", 
     "stock_uom": "_Test UOM", 
@@ -76,7 +76,7 @@
   "company": "_Test Company", 
   "doctype": "Stock Entry", 
   "fiscal_year": "_Test Fiscal Year 2013", 
-  "mtn_details": [
+  "items": [
    {
     "conversion_factor": 1.0, 
     "cost_center": "_Test Cost Center - _TC", 
@@ -84,7 +84,7 @@
     "expense_account": "Stock Adjustment - _TC", 
     "incoming_rate": 100, 
     "item_code": "_Test Item", 
-    "parentfield": "mtn_details", 
+    "parentfield": "items", 
     "qty": 50.0, 
     "s_warehouse": "_Test Warehouse - _TC", 
     "stock_uom": "_Test UOM", 
@@ -98,7 +98,7 @@
     "expense_account": "Stock Adjustment - _TC", 
     "incoming_rate": 5000, 
     "item_code": "_Test Item Home Desktop 100", 
-    "parentfield": "mtn_details", 
+    "parentfield": "items", 
     "qty": 1, 
     "stock_uom": "_Test UOM", 
     "t_warehouse": "_Test Warehouse - _TC", 

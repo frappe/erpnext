@@ -5,7 +5,7 @@
   "currency": "INR", 
   "customer": "_Test Customer", 
   "customer_name": "_Test Customer", 
-  "delivery_note_details": [
+  "items": [
    {
     "base_amount": 500.0, 
     "base_rate": 100.0, 
@@ -15,7 +15,7 @@
     "expense_account": "Cost of Goods Sold - _TC", 
     "item_code": "_Test Item", 
     "item_name": "_Test Item", 
-    "parentfield": "delivery_note_details", 
+    "parentfield": "items", 
     "qty": 5.0, 
     "rate": 100.0, 
     "stock_uom": "_Test UOM", 

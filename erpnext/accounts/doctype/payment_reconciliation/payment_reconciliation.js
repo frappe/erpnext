@@ -72,7 +72,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 			callback: function(r, rt) {
 				var invoices = [];
 
-				$.each(me.frm.doc.payment_reconciliation_invoices || [], function(i, row) {
+				$.each(me.frm.doc.invoices || [], function(i, row) {
 						if (row.invoice_number && !inList(invoices, row.invoice_number))
 							invoices.push(row.invoice_number);
 				});
@@ -80,11 +80,11 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 				frappe.meta.get_docfield("Payment Reconciliation Payment", "invoice_number",
 					me.frm.doc.name).options = invoices.join("\n");
 
-				$.each(me.frm.doc.payment_reconciliation_payments || [], function(i, p) {
+				$.each(me.frm.doc.payments || [], function(i, p) {
 					if(!inList(invoices, cstr(p.invoice_number))) p.invoice_number = null;
 				});
 
-				refresh_field("payment_reconciliation_payments");
+				refresh_field("payments");
 			}
 		});
 

@@ -138,9 +138,9 @@ class Employee(Document):
 	def validate_employee_leave_approver(self):
 		from erpnext.hr.doctype.leave_application.leave_application import InvalidLeaveApproverError
 
-		for l in self.get("employee_leave_approvers")[:]:
+		for l in self.get("leave_approvers")[:]:
 			if "Leave Approver" not in frappe.get_roles(l.leave_approver):
-				self.get("employee_leave_approvers").remove(l)
+				self.get("leave_approvers").remove(l)
 				msgprint(_("{0} is not a valid Leave Approver. Removing row #{1}.").format(l.leave_approver, l.idx))
 
 	def validate_reports_to(self):

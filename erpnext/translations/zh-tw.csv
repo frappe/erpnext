@@ -1490,8 +1490,8 @@ Jobs Email Settings,喬布斯郵件設置
 Journal Entries,日記帳分錄
 Journal Entry,日記帳分錄
 Journal Voucher,期刊券
-Journal Voucher Detail,日記帳憑證詳細信息
-Journal Voucher Detail No,日記帳憑證詳細說明暫無
+Journal Entry Account,日記帳憑證詳細信息
+Journal Entry Account No,日記帳憑證詳細說明暫無
 Journal Voucher {0} does not have account {1} or already matched,記賬憑單{0}沒有帳號{1}或已經匹配
 Journal Vouchers {0} are un-linked,日記帳憑單{0}被取消鏈接
 Keep a track of communication related to this enquiry which will help for future reference.,保持跟踪的溝通與此相關的調查，這將有助於以供將來參考。

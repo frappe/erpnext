@@ -29,21 +29,21 @@
    "search_index": 1
   }, 
   {
-   "fieldname": "budget_distribution_details", 
+   "fieldname": "percentages", 
    "fieldtype": "Table", 
-   "label": "Budget Distribution Details", 
+   "label": "Monthly Distribution Percentages", 
    "oldfieldname": "budget_distribution_details", 
    "oldfieldtype": "Table", 
-   "options": "Budget Distribution Detail", 
+   "options": "Monthly Distribution Percentage", 
    "permlevel": 0
   }
  ], 
  "icon": "icon-bar-chart", 
  "idx": 1, 
- "modified": "2014-05-09 02:16:47.567367", 
+ "modified": "2014-12-25 15:45:04.729489", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
- "name": "Budget Distribution", 
+ "name": "Monthly Distribution", 
  "name_case": "Title Case", 
  "owner": "Administrator", 
  "permissions": [

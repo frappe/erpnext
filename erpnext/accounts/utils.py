@@ -163,7 +163,7 @@ def check_if_jv_modified(args):
 		check if jv is submitted
 	"""
 	ret = frappe.db.sql("""
-		select t2.{dr_or_cr} from `tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
+		select t2.{dr_or_cr} from `tabJournal Voucher` t1, `tabJournal Entry Account` t2
 		where t1.name = t2.parent and t2.account = %(account)s
 		and t2.party_type = %(party_type)s and t2.party = %(party)s
 		and ifnull(t2.against_voucher, '')=''
@@ -190,7 +190,7 @@ def update_against_doc(d, jv_obj):
 
 	if d['allocated_amt'] < d['unadjusted_amt']:
 		jvd = frappe.db.sql("""select cost_center, balance, against_account, is_advance
-			from `tabJournal Voucher Detail` where name = %s""", d['voucher_detail_no'])
+			from `tabJournal Entry Account` where name = %s""", d['voucher_detail_no'])
 		# new entry with balance amount
 		ch = jv_obj.append("entries")
 		ch.account = d['account']
@@ -209,11 +209,11 @@ def update_against_doc(d, jv_obj):
 	jv_obj.save()
 
 def remove_against_link_from_jv(ref_type, ref_no, against_field):
-	linked_jv = frappe.db.sql_list("""select parent from `tabJournal Voucher Detail`
+	linked_jv = frappe.db.sql_list("""select parent from `tabJournal Entry Account`
 		where `%s`=%s and docstatus < 2""" % (against_field, "%s"), (ref_no))
 
 	if linked_jv:
-		frappe.db.sql("""update `tabJournal Voucher Detail` set `%s`=null,
+		frappe.db.sql("""update `tabJournal Entry Account` set `%s`=null,
 			modified=%s, modified_by=%s
 			where `%s`=%s and docstatus < 2""" % (against_field, "%s", "%s", against_field, "%s"),
 			(now(), frappe.session.user, ref_no))

@@ -1457,8 +1457,8 @@ Jobs Email Settings,إعدادات البريد الإلكتروني وظائف
 Journal Entries,مجلة مقالات
 Journal Entry,إدخال دفتر اليومية
 Journal Voucher,مجلة قسيمة
-Journal Voucher Detail,مجلة قسيمة التفاصيل
-Journal Voucher Detail No,مجلة التفاصيل قسيمة لا
+Journal Entry Account,مجلة قسيمة التفاصيل
+Journal Entry Account No,مجلة التفاصيل قسيمة لا
 Journal Voucher {0} does not have account {1} or already matched,مجلة قسيمة {0} لا يملك حساب {1} أو بالفعل المتطابقة
 Journal Vouchers {0} are un-linked,مجلة قسائم {0} ترتبط الامم المتحدة و
 Keep a track of communication related to this enquiry which will help for future reference.,الحفاظ على مسار الاتصالات المتعلقة بهذا التحقيق والتي سوف تساعد للرجوع إليها مستقبلا.

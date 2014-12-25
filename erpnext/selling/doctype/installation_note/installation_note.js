@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.tname = "Installation Note Item";
-cur_frm.cscript.fname = "installed_item_details";
+cur_frm.cscript.fname = "items";
 
 frappe.require("assets/erpnext/js/utils.js");
 

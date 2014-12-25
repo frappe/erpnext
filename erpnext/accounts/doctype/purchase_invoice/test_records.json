@@ -7,7 +7,7 @@
   "credit_to": "_Test Payable - _TC",
   "currency": "INR",
   "doctype": "Purchase Invoice",
-  "entries": [
+  "items": [
    {
     "amount": 500,
     "base_amount": 500,
@@ -19,7 +19,7 @@
     "item_code": "_Test Item Home Desktop 100",
     "item_name": "_Test Item Home Desktop 100",
     "item_tax_rate": "{\"_Test Account Excise Duty - _TC\": 10}",
-    "parentfield": "entries",
+    "parentfield": "items",
     "qty": 10,
     "rate": 50,
     "uom": "_Test UOM"
@@ -34,7 +34,7 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "item_code": "_Test Item Home Desktop 200",
     "item_name": "_Test Item Home Desktop 200",
-    "parentfield": "entries",
+    "parentfield": "items",
     "qty": 5,
     "rate": 150,
     "uom": "_Test UOM"
@@ -43,7 +43,7 @@
   "fiscal_year": "_Test Fiscal Year 2013",
   "grand_total_import": 0,
   "naming_series": "_T-BILL",
-  "other_charges": [
+  "taxes": [
    {
     "account_head": "_Test Account Shipping Charges - _TC",
     "add_deduct_tax": "Add",
@@ -52,7 +52,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "Shipping Charges",
     "doctype": "Purchase Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 100
    },
    {
@@ -63,7 +63,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "Customs Duty",
     "doctype": "Purchase Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 10
    },
    {
@@ -74,7 +74,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "Excise Duty",
     "doctype": "Purchase Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 12
    },
    {
@@ -85,7 +85,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "Education Cess",
     "doctype": "Purchase Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 2,
     "row_id": 3
    },
@@ -97,7 +97,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "S&H Education Cess",
     "doctype": "Purchase Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 1,
     "row_id": 3
    },
@@ -109,7 +109,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "CST",
     "doctype": "Purchase Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 2,
     "row_id": 5
    },
@@ -121,7 +121,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "VAT",
     "doctype": "Purchase Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 12.5
    },
    {
@@ -132,7 +132,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "Discount",
     "doctype": "Purchase Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 10,
     "row_id": 7
    }
@@ -149,7 +149,7 @@
   "credit_to": "_Test Payable - _TC",
   "currency": "INR",
   "doctype": "Purchase Invoice",
-  "entries": [
+  "items": [
    {
     "conversion_factor": 1.0,
     "cost_center": "_Test Cost Center - _TC",
@@ -157,7 +157,7 @@
     "expense_account": "_Test Account Cost for Goods Sold - _TC",
     "item_code": "_Test Item",
     "item_name": "_Test Item",
-    "parentfield": "entries",
+    "parentfield": "items",
     "qty": 10.0,
     "rate": 50.0,
     "uom": "_Test UOM"
@@ -166,7 +166,7 @@
   "fiscal_year": "_Test Fiscal Year 2013",
   "grand_total_import": 0,
   "naming_series": "_T-Purchase Invoice-",
-  "other_charges": [
+  "taxes": [
    {
     "account_head": "_Test Account Shipping Charges - _TC",
     "add_deduct_tax": "Add",
@@ -175,7 +175,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "Shipping Charges",
     "doctype": "Purchase Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 100.0
    },
    {
@@ -186,7 +186,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "VAT",
     "doctype": "Purchase Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 120.0
    },
    {
@@ -197,7 +197,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "Customs Duty",
     "doctype": "Purchase Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 150.0
    }
   ],

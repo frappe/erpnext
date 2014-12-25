@@ -5,7 +5,7 @@ cur_frm.add_fetch("time_log", "activity_type", "activity_type");
 cur_frm.add_fetch("time_log", "owner", "created_by");
 cur_frm.add_fetch("time_log", "hours", "hours");
 
-cur_frm.set_query("time_log", "time_log_batch_details", function(doc) {
+cur_frm.set_query("time_log", "time_logs", function(doc) {
 	return {
 		query: "erpnext.projects.utils.get_time_log_list",
 		filters: {

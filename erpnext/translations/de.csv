@@ -1513,8 +1513,8 @@ Jobs Email Settings,Stellen-E-Mail-Einstellungen
 Journal Entries,Journaleinträge
 Journal Entry,Journaleintrag
 Journal Voucher,Journal
-Journal Voucher Detail,Detailansicht Beleg
-Journal Voucher Detail No,Journalnummer
+Journal Entry Account,Detailansicht Beleg
+Journal Entry Account No,Journalnummer
 Journal Voucher {0} does not have account {1} or already matched,Blatt Gutschein {0} ist nicht Konto haben {1} oder bereits abgestimmt
 Journal Vouchers {0} are un-linked,Blatt Gutscheine {0} sind un -linked
 "Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ","Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. "

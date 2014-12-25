@@ -1458,8 +1458,8 @@ Jobs Email Settings,İş E-posta Ayarları
 Journal Entries,Alacak/Borç Girişleri
 Journal Entry,Alacak/Borç Girişleri
 Journal Voucher,Alacak/Borç Çeki
-Journal Voucher Detail,Alacak/Borç Fiş Detay
-Journal Voucher Detail No,Alacak/Borç Fiş Detay No
+Journal Entry Account,Alacak/Borç Fiş Detay
+Journal Entry Account No,Alacak/Borç Fiş Detay No
 Journal Voucher {0} does not have account {1} or already matched,Dergi Çeki {0} hesabı yok {1} ya da zaten eşleşti
 Journal Vouchers {0} are un-linked,Dergi Fişler {0} un-bağlantılı
 Keep a track of communication related to this enquiry which will help for future reference.,Gelecekte başvurulara yardımcı olmak için bu soruşturma ile ilgili bir iletişim takip edin.

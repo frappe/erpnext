@@ -124,7 +124,7 @@
    "label": "Target Distribution", 
    "oldfieldname": "distribution_id", 
    "oldfieldtype": "Link", 
-   "options": "Budget Distribution", 
+   "options": "Monthly Distribution", 
    "permlevel": 0
   }, 
   {
@@ -200,7 +200,7 @@
  "icon": "icon-user", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-12-24 16:45:13.652374", 
+ "modified": "2014-12-25 15:37:44.884917", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Partner", 

@@ -154,7 +154,7 @@ def get_basic_details(args, item):
 		"cost_center": get_default_cost_center(args, item),
 		"batch_no": None,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in
-			item.get("item_tax")))),
+			item.get("taxes")))),
 		"uom": item.stock_uom,
 		"min_order_qty": flt(item.min_order_qty) if args.parenttype == "Material Request" else "",
 		"conversion_factor": 1.0,
@@ -251,10 +251,10 @@ def validate_conversion_rate(args, meta):
 
 def get_party_item_code(args, item_doc, out):
 	if args.transaction_type == "selling":
-		customer_item_code = item_doc.get("item_customer_details", {"customer_name": args.customer})
+		customer_item_code = item_doc.get("customer_item_codes", {"customer_name": args.customer})
 		out.customer_item_code = customer_item_code[0].ref_code if customer_item_code else None
 	else:
-		item_supplier = item_doc.get("item_supplier_details", {"supplier": args.supplier})
+		item_supplier = item_doc.get("supplier_item_codes", {"supplier": args.supplier})
 		out.supplier_part_no = item_supplier[0].supplier_part_no if item_supplier else None
 
 def get_pos_settings_item_details(company, args, pos_settings=None):

@@ -8,7 +8,7 @@
   "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
   "due_date": "2013-01-23",
-  "entries": [
+  "items": [
    {
     "amount": 500.0,
     "base_amount": 500.0,
@@ -19,7 +19,7 @@
     "income_account": "Sales - _TC",
 	"expense_account": "_Test Account Cost for Goods Sold - _TC",
     "item_name": "138-CMS Shoe",
-    "parentfield": "entries",
+    "parentfield": "items",
     "qty": 1.0,
     "rate": 500.0
    }
@@ -30,13 +30,13 @@
   "is_pos": 0,
   "naming_series": "_T-Sales Invoice-",
   "net_total": 500.0,
-  "other_charges": [
+  "taxes": [
    {
     "account_head": "_Test Account VAT - _TC",
     "charge_type": "On Net Total",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 6
    },
    {
@@ -44,7 +44,7 @@
     "charge_type": "On Net Total",
     "description": "Service Tax",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 6.36
    }
   ],
@@ -77,7 +77,7 @@
   "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
   "due_date": "2013-03-07",
-  "entries": [
+  "items": [
    {
     "amount": 500.0,
     "base_amount": 500.0,
@@ -89,7 +89,7 @@
     "income_account": "Sales - _TC",
     "item_code": "_Test Item",
     "item_name": "_Test Item",
-    "parentfield": "entries",
+    "parentfield": "items",
     "price_list_rate": 500.0,
     "qty": 1.0
    }
@@ -100,13 +100,13 @@
   "is_pos": 0,
   "naming_series": "_T-Sales Invoice-",
   "net_total": 500.0,
-  "other_charges": [
+  "taxes": [
    {
     "account_head": "_Test Account VAT - _TC",
     "charge_type": "On Net Total",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 16
    },
    {
@@ -114,7 +114,7 @@
     "charge_type": "On Net Total",
     "description": "Service Tax",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 10
    }
   ],
@@ -133,7 +133,7 @@
   "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
   "due_date": "2013-01-23",
-  "entries": [
+  "items": [
    {
     "cost_center": "_Test Cost Center - _TC",
     "doctype": "Sales Invoice Item",
@@ -142,7 +142,7 @@
     "item_code": "_Test Item Home Desktop 100",
     "item_name": "_Test Item Home Desktop 100",
     "item_tax_rate": "{\"_Test Account Excise Duty - _TC\": 10}",
-    "parentfield": "entries",
+    "parentfield": "items",
     "price_list_rate": 50,
     "qty": 10,
     "rate": 50,
@@ -155,7 +155,7 @@
 	"expense_account": "_Test Account Cost for Goods Sold - _TC",
     "item_code": "_Test Item Home Desktop 200",
     "item_name": "_Test Item Home Desktop 200",
-    "parentfield": "entries",
+    "parentfield": "items",
     "price_list_rate": 150,
     "qty": 5,
     "rate": 150,
@@ -166,14 +166,14 @@
   "grand_total_export": 0,
   "is_pos": 0,
   "naming_series": "_T-Sales Invoice-",
-  "other_charges": [
+  "taxes": [
    {
     "account_head": "_Test Account Shipping Charges - _TC",
     "charge_type": "Actual",
     "cost_center": "_Test Cost Center - _TC",
     "description": "Shipping Charges",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 100
    },
    {
@@ -182,7 +182,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "Customs Duty",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 10
    },
    {
@@ -191,7 +191,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "Excise Duty",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 12
    },
    {
@@ -200,7 +200,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "Education Cess",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 2,
     "row_id": 3
    },
@@ -210,7 +210,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "S&H Education Cess",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 1,
     "row_id": 3
    },
@@ -220,7 +220,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "CST",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 2,
     "row_id": 5
    },
@@ -230,7 +230,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 12.5
    },
    {
@@ -239,7 +239,7 @@
     "cost_center": "_Test Cost Center - _TC",
     "description": "Discount",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": -10,
     "row_id": 7
    }
@@ -259,7 +259,7 @@
   "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
   "due_date": "2013-01-23",
-  "entries": [
+  "items": [
    {
     "cost_center": "_Test Cost Center - _TC",
     "doctype": "Sales Invoice Item",
@@ -268,7 +268,7 @@
     "item_code": "_Test Item Home Desktop 100",
     "item_name": "_Test Item Home Desktop 100",
     "item_tax_rate": "{\"_Test Account Excise Duty - _TC\": 10}",
-    "parentfield": "entries",
+    "parentfield": "items",
     "price_list_rate": 62.5,
     "qty": 10,
     "stock_uom": "_Test UOM"
@@ -280,7 +280,7 @@
 	"expense_account": "_Test Account Cost for Goods Sold - _TC",
     "item_code": "_Test Item Home Desktop 200",
     "item_name": "_Test Item Home Desktop 200",
-    "parentfield": "entries",
+    "parentfield": "items",
     "price_list_rate": 190.66,
     "qty": 5,
     "stock_uom": "_Test UOM"
@@ -290,7 +290,7 @@
   "grand_total_export": 0,
   "is_pos": 0,
   "naming_series": "_T-Sales Invoice-",
-  "other_charges": [
+  "taxes": [
    {
     "account_head": "_Test Account Excise Duty - _TC",
     "charge_type": "On Net Total",
@@ -299,7 +299,7 @@
     "doctype": "Sales Taxes and Charges",
     "idx": 1,
     "included_in_print_rate": 1,
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 12
    },
    {
@@ -310,7 +310,7 @@
     "doctype": "Sales Taxes and Charges",
     "idx": 2,
     "included_in_print_rate": 1,
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 2,
     "row_id": 1
    },
@@ -322,7 +322,7 @@
     "doctype": "Sales Taxes and Charges",
     "idx": 3,
     "included_in_print_rate": 1,
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 1,
     "row_id": 1
    },
@@ -334,7 +334,7 @@
     "doctype": "Sales Taxes and Charges",
     "idx": 4,
     "included_in_print_rate": 1,
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 2,
     "row_id": 3
    },
@@ -346,7 +346,7 @@
     "doctype": "Sales Taxes and Charges",
     "idx": 5,
     "included_in_print_rate": 1,
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 12.5
    },
    {
@@ -356,7 +356,7 @@
     "description": "Customs Duty",
     "doctype": "Sales Taxes and Charges",
     "idx": 6,
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 10
    },
    {
@@ -366,7 +366,7 @@
     "description": "Shipping Charges",
     "doctype": "Sales Taxes and Charges",
     "idx": 7,
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": 100
    },
    {
@@ -376,7 +376,7 @@
     "description": "Discount",
     "doctype": "Sales Taxes and Charges",
     "idx": 8,
-    "parentfield": "other_charges",
+    "parentfield": "taxes",
     "rate": -10,
     "row_id": 7
    }

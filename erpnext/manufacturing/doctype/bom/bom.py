@@ -63,7 +63,7 @@ class BOM(Document):
 			frappe.throw(_("Raw material cannot be same as main Item"))
 
 	def set_bom_material_details(self):
-		for item in self.get("bom_materials"):
+		for item in self.get("items"):
 			ret = self.get_bom_material_detail({"item_code": item.item_code, "bom_no": item.bom_no,
 				"qty": item.qty})
 
@@ -117,7 +117,7 @@ class BOM(Document):
 		if self.docstatus == 2:
 			return
 
-		for d in self.get("bom_materials"):
+		for d in self.get("items"):
 			rate = self.get_bom_material_detail({'item_code': d.item_code, 'bom_no': d.bom_no,
 				'qty': d.qty})["rate"]
 			if rate:
@@ -178,8 +178,8 @@ class BOM(Document):
 
 	def clear_operations(self):
 		if not self.with_operations:
-			self.set('bom_operations', [])
-			for d in self.get("bom_materials"):
+			self.set('operations', [])
+			for d in self.get("items"):
 				d.operation = None
 
 	def validate_main_item(self):
@@ -195,7 +195,7 @@ class BOM(Document):
 	def validate_materials(self):
 		""" Validate raw material entries """
 		check_list = []
-		for m in self.get('bom_materials'):
+		for m in self.get('items'):
 
 			if m.bom_no:
 				validate_bom_no(m.item_code, m.bom_no)
@@ -262,7 +262,7 @@ class BOM(Document):
 	def calculate_op_cost(self):
 		"""Update workstation rate and calculates totals"""
 		self.operating_cost = 0
-		for d in self.get('bom_operations'):
+		for d in self.get('operations'):
 			if d.workstation:
 				if not d.hour_rate:
 					d.hour_rate = flt(frappe.db.get_value("Workstation", d.workstation, "hour_rate"))
@@ -275,7 +275,7 @@ class BOM(Document):
 	def calculate_rm_cost(self):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
 		total_rm_cost = 0
-		for d in self.get('bom_materials'):
+		for d in self.get('items'):
 			if d.bom_no:
 				d.rate = self.get_bom_unitcost(d.bom_no)
 			d.amount = flt(d.rate, self.precision("rate", d)) * flt(d.qty, self.precision("qty", d))
@@ -292,7 +292,7 @@ class BOM(Document):
 	def get_exploded_items(self):
 		""" Get all raw materials including items from child bom"""
 		self.cur_exploded_items = {}
-		for d in self.get('bom_materials'):
+		for d in self.get('items'):
 			if d.bom_no:
 				self.get_child_exploded_items(d.bom_no, d.qty)
 			else:
@@ -331,9 +331,9 @@ class BOM(Document):
 	def add_exploded_items(self):
 		"Add items to Flat BOM table"
 		frappe.db.sql("""delete from `tabBOM Explosion Item` where parent=%s""", self.name)
-		self.set('flat_bom_details', [])
+		self.set('exploded_items', [])
 		for d in self.cur_exploded_items:
-			ch = self.append('flat_bom_details', {})
+			ch = self.append('exploded_items', {})
 			for i in self.cur_exploded_items[d].keys():
 				ch.set(i, self.cur_exploded_items[d][i])
 			ch.amount = flt(ch.qty) * flt(ch.rate)

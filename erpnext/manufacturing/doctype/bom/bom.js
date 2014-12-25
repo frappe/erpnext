@@ -26,12 +26,12 @@ cur_frm.cscript.update_cost = function() {
 }
 
 cur_frm.cscript.with_operations = function(doc) {
-	cur_frm.fields_dict["bom_materials"].grid.set_column_disp("operation", doc.with_operations);
-	cur_frm.fields_dict["bom_materials"].grid.toggle_reqd("operation", doc.with_operations);
+	cur_frm.fields_dict["items"].grid.set_column_disp("operation", doc.with_operations);
+	cur_frm.fields_dict["items"].grid.toggle_reqd("operation", doc.with_operations);
 }
 
 erpnext.bom.set_operation = function(doc) {
-	var op_table = doc["bom_operations"] || [];
+	var op_table = doc["operations"] || [];
 	var operations = [];
 
 	for (var i=0, j=op_table.length; i<j; i++) {
@@ -40,10 +40,10 @@ erpnext.bom.set_operation = function(doc) {
 
 	frappe.meta.get_docfield("BOM Item", "operation", cur_frm.docname).options = operations.join("\n");
 
-	refresh_field("bom_materials");
+	refresh_field("items");
 }
 
-cur_frm.cscript.bom_operations_remove = function(){
+cur_frm.cscript.operations_remove = function(){
 	erpnext.bom.set_operation(doc);
 }
 
@@ -84,7 +84,7 @@ var get_bom_material_detail= function(doc, cdt, cdn) {
 			callback: function(r) {
 				d = locals[cdt][cdn];
 				$.extend(d, r.message);
-				refresh_field("bom_materials");
+				refresh_field("items");
 				doc = locals[doc.doctype][doc.name];
 				erpnext.bom.calculate_rm_cost(doc);
 				erpnext.bom.calculate_total(doc);
@@ -111,7 +111,7 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 }
 
 erpnext.bom.calculate_op_cost = function(doc) {
-	var op = doc.bom_operations || [];
+	var op = doc.operations || [];
 	doc.operating_cost = 0.0;
 	for(var i=0;i<op.length;i++) {
 		operating_cost = flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
@@ -123,13 +123,13 @@ erpnext.bom.calculate_op_cost = function(doc) {
 }
 
 erpnext.bom.calculate_rm_cost = function(doc) {
-	var rm = doc.bom_materials || [];
+	var rm = doc.items || [];
 	total_rm_cost = 0;
 	for(var i=0;i<rm.length;i++) {
 		amt =	flt(rm[i].rate) * flt(rm[i].qty);
-		set_multiple('BOM Item',rm[i].name, {'amount': amt}, 'bom_materials');
+		set_multiple('BOM Item',rm[i].name, {'amount': amt}, 'items');
 		set_multiple('BOM Item',rm[i].name,
-			{'qty_consumed_per_unit': flt(rm[i].qty)/flt(doc.quantity)}, 'bom_materials');
+			{'qty_consumed_per_unit': flt(rm[i].qty)/flt(doc.quantity)}, 'items');
 		total_rm_cost += amt;
 	}
 	cur_frm.set_value("raw_material_cost", total_rm_cost);
@@ -157,7 +157,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
 	}
 }
 
-cur_frm.fields_dict['bom_materials'].grid.get_field('item_code').get_query = function(doc) {
+cur_frm.fields_dict['items'].grid.get_field('item_code').get_query = function(doc) {
 	return{
 		query: "erpnext.controllers.queries.item_query",
 		filters: {
@@ -166,7 +166,7 @@ cur_frm.fields_dict['bom_materials'].grid.get_field('item_code').get_query = fun
 	}
 }
 
-cur_frm.fields_dict['bom_materials'].grid.get_field('bom_no').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field('bom_no').get_query = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	return{
 		filters:{

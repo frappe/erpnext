@@ -1490,8 +1490,8 @@ Jobs Email Settings,Configurações do e-mail de empregos
 Journal Entries,Lançamentos do livro Diário
 Journal Entry,Lançamento do livro Diário
 Journal Voucher,Comprovante do livro Diário
-Journal Voucher Detail,Detalhe do Comprovante do livro Diário
-Journal Voucher Detail No,Nº do Detalhe do Comprovante do livro Diário
+Journal Entry Account,Detalhe do Comprovante do livro Diário
+Journal Entry Account No,Nº do Detalhe do Comprovante do livro Diário
 Journal Voucher {0} does not have account {1} or already matched,Jornal Vale {0} não tem conta {1} ou já combinava
 Journal Vouchers {0} are un-linked,Jornal Vouchers {0} são não- ligado
 Keep a track of communication related to this enquiry which will help for future reference.,"Mantenha o controle de comunicações relacionadas a esta consulta, o que irá ajudar para futuras referências."

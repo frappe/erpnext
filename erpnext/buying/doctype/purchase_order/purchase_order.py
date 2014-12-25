@@ -9,12 +9,12 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
 
 form_grid_templates = {
-	"po_details": "templates/form_grid/item_grid.html"
+	"items": "templates/form_grid/item_grid.html"
 }
 
 class PurchaseOrder(BuyingController):
 	tname = 'Purchase Order Item'
-	fname = 'po_details'
+	fname = 'items'
 
 	def __init__(self, arg1, arg2=None):
 		super(PurchaseOrder, self).__init__(arg1, arg2)
@@ -51,7 +51,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
 		self.validate_minimum_order_qty()
-		self.create_raw_materials_supplied("po_raw_material_details")
+		self.create_raw_materials_supplied("supplied_items")
 
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc(self.tname, {
@@ -71,7 +71,7 @@ class PurchaseOrder(BuyingController):
 		itemwise_min_order_qty = frappe._dict(frappe.db.sql("select name, min_order_qty from tabItem"))
 
 		itemwise_qty = frappe._dict()
-		for d in self.get("po_details"):
+		for d in self.get("items"):
 			itemwise_qty.setdefault(d.item_code, 0)
 			itemwise_qty[d.item_code] += flt(d.stock_qty)
 
@@ -80,7 +80,7 @@ class PurchaseOrder(BuyingController):
 				frappe.throw(_("Item #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).").format(item_code))
 
 	def get_schedule_dates(self):
-		for d in self.get('po_details'):
+		for d in self.get('items'):
 			if d.prevdoc_detail_docname and not d.schedule_date:
 				d.schedule_date = frappe.db.get_value("Material Request Item",
 						d.prevdoc_detail_docname, "schedule_date")
@@ -91,14 +91,14 @@ class PurchaseOrder(BuyingController):
 	# Check for Stopped status
 	def check_for_stopped_status(self, pc_obj):
 		check_list =[]
-		for d in self.get('po_details'):
+		for d in self.get('items'):
 			if d.meta.get_field('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
 				check_list.append(d.prevdoc_docname)
 				pc_obj.check_for_stopped_status( d.prevdoc_doctype, d.prevdoc_docname)
 
 	def update_requested_qty(self):
 		material_request_map = {}
-		for d in self.get("po_details"):
+		for d in self.get("items"):
 			if d.prevdoc_doctype and d.prevdoc_doctype == "Material Request" and d.prevdoc_detail_docname:
 				material_request_map.setdefault(d.prevdoc_docname, []).append(d.prevdoc_detail_docname)
 
@@ -128,7 +128,7 @@ class PurchaseOrder(BuyingController):
 			bin_doc.save()
 
 		item_wh_list = []
-		for d in self.get("po_details"):
+		for d in self.get("items"):
 			if (not po_item_rows or d.name in po_item_rows) and [d.item_code, d.warehouse] not in item_wh_list \
 					and frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" and d.warehouse:
 				item_wh_list.append([d.item_code, d.warehouse])

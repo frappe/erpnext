@@ -2,8 +2,8 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.tname = "Purchase Invoice Item";
-cur_frm.cscript.fname = "entries";
-cur_frm.cscript.other_fname = "other_charges";
+cur_frm.cscript.fname = "items";
+cur_frm.cscript.other_fname = "taxes";
 
 frappe.provide("erpnext.accounts");
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
@@ -99,7 +99,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 
 	allocated_amount: function() {
-		this.calculate_total_advance("Purchase Invoice", "advance_allocation_details");
+		this.calculate_total_advance("Purchase Invoice", "advances");
 		this.frm.refresh_fields();
 	},
 
@@ -109,12 +109,12 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 	entries_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("entries", row,
+		this.frm.script_manager.copy_from_first_row("items", row,
 			["expense_account", "cost_center", "project_name"]);
 	},
 
 	on_submit: function() {
-		$.each(this.frm.doc["entries"], function(i, row) {
+		$.each(this.frm.doc["items"], function(i, row) {
 			if(row.purchase_receipt) frappe.model.clear_doc("Purchase Receipt", row.purchase_receipt)
 		})
 	}
@@ -153,7 +153,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.fields_dict['entries'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
 	return {
 		query: "erpnext.controllers.queries.item_query",
 		filters:{
@@ -182,7 +182,7 @@ return{
 	}
 }
 
-cur_frm.set_query("expense_account", "entries", function(doc) {
+cur_frm.set_query("expense_account", "items", function(doc) {
 	return{
 		query: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.get_expense_account",
 		filters: {'company': doc.company}
@@ -192,15 +192,15 @@ cur_frm.set_query("expense_account", "entries", function(doc) {
 cur_frm.cscript.expense_account = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
 	if(d.idx == 1 && d.expense_account){
-		var cl = doc.entries || [];
+		var cl = doc.items || [];
 		for(var i = 0; i < cl.length; i++){
 			if(!cl[i].expense_account) cl[i].expense_account = d.expense_account;
 		}
 	}
-	refresh_field('entries');
+	refresh_field('items');
 }
 
-cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = function(doc) {
+cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(doc) {
 	return {
 		filters: {
 			'company': doc.company,
@@ -213,15 +213,15 @@ cur_frm.fields_dict["entries"].grid.get_field("cost_center").get_query = functio
 cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
 	if(d.idx == 1 && d.cost_center){
-		var cl = doc.entries || [];
+		var cl = doc.items || [];
 		for(var i = 0; i < cl.length; i++){
 			if(!cl[i].cost_center) cl[i].cost_center = d.cost_center;
 		}
 	}
-	refresh_field('entries');
+	refresh_field('items');
 }
 
-cur_frm.fields_dict['entries'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
 	return{
 		filters:[
 			['Project', 'status', 'not in', 'Completed, Cancelled']

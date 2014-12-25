@@ -1459,8 +1459,8 @@ Jobs Email Settings,Paramètres de messagerie Emploi
 Journal Entries,Journal Entries
 Journal Entry,Journal Entry
 Journal Voucher,Bon Journal
-Journal Voucher Detail,Détail pièce de journal
-Journal Voucher Detail No,Détail Bon Journal No
+Journal Entry Account,Détail pièce de journal
+Journal Entry Account No,Détail Bon Journal No
 Journal Voucher {0} does not have account {1} or already matched,Journal Bon {0} n'a pas encore compte {1} ou déjà identifié
 Journal Vouchers {0} are un-linked,Date de livraison prévue ne peut pas être avant ventes Date de commande
 Keep a track of communication related to this enquiry which will help for future reference.,Gardez une trace de la communication liée à cette enquête qui aidera pour référence future.

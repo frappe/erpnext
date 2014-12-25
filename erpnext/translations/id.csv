@@ -1327,7 +1327,7 @@ Invoice Period From,Faktur Periode Dari
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Faktur Periode Dari dan Faktur Period Untuk tanggal wajib untuk berulang faktur
 Invoice Period To,Periode Faktur Untuk
 Invoice Type,Invoice Type
-Invoice/Journal Voucher Details,Invoice / Journal Voucher Detail
+Invoice/Journal Voucher Details,Invoice / Journal Entry Account
 Invoiced Amount (Exculsive Tax),Faktur Jumlah (Pajak exculsive)
 Is Active,Aktif
 Is Advance,Apakah Muka
@@ -1458,8 +1458,8 @@ Jobs Email Settings,Pengaturan Jobs Email
 Journal Entries,Entries Journal
 Journal Entry,Jurnal Entri
 Journal Voucher,Journal Voucher
-Journal Voucher Detail,Journal Voucher Detil
-Journal Voucher Detail No,Journal Voucher Detil ada
+Journal Entry Account,Journal Voucher Detil
+Journal Entry Account No,Journal Voucher Detil ada
 Journal Voucher {0} does not have account {1} or already matched,Journal Voucher {0} tidak memiliki akun {1} atau sudah cocok
 Journal Vouchers {0} are un-linked,Journal Voucher {0} yang un-linked
 Keep a track of communication related to this enquiry which will help for future reference.,Menyimpan melacak komunikasi yang berkaitan dengan penyelidikan ini yang akan membantu untuk referensi di masa mendatang.

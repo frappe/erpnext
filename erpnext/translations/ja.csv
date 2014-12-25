@@ -1460,8 +1460,8 @@ Jobs Email Settings,仕事のメール設定
 Journal Entries,仕訳
 Journal Entry,仕訳
 Journal Voucher,伝票
-Journal Voucher Detail,伝票の詳細
-Journal Voucher Detail No,伝票の詳細番号
+Journal Entry Account,伝票の詳細
+Journal Entry Account No,伝票の詳細番号
 Journal Voucher {0} does not have account {1} or already matched,伝票は{0}アカウントを持っていない{1}、またはすでに一致
 Journal Vouchers {0} are un-linked,ジャーナルバウチャー{0}アンリンクされている
 Keep a track of communication related to this enquiry which will help for future reference.,今後の参考のために役立ちます。この照会に関連した通信を追跡する。

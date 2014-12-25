@@ -77,7 +77,7 @@ def get_entries(filters):
 	entries =  frappe.db.sql("""select jv.name, jvd.account, jv.posting_date,
 		jvd.against_voucher, jvd.against_invoice, jvd.debit, jvd.credit,
 		jv.cheque_no, jv.cheque_date, jv.remark
-		from `tabJournal Voucher Detail` jvd, `tabJournal Voucher` jv
+		from `tabJournal Entry Account` jvd, `tabJournal Voucher` jv
 		where jvd.parent = jv.name and jv.docstatus=1 %s order by jv.name DESC""" %
 		(conditions), tuple(party_accounts), as_dict=1)
 

@@ -29,7 +29,7 @@ class PaymentReconciliation(Document):
 				t1.name as voucher_no, t1.posting_date, t1.remark,
 				t2.name as voucher_detail_no, {dr_or_cr} as payment_amount, t2.is_advance
 			from
-				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
+				`tabJournal Voucher` t1, `tabJournal Entry Account` t2
 			where
 				t1.name = t2.parent and t1.docstatus = 1 and t2.docstatus = 1
 				and t2.party_type = %(party_type)s and t2.party = %(party)s
@@ -55,9 +55,9 @@ class PaymentReconciliation(Document):
 		self.add_payment_entries(jv_entries)
 
 	def add_payment_entries(self, jv_entries):
-		self.set('payment_reconciliation_payments', [])
+		self.set('payments', [])
 		for e in jv_entries:
-			ent = self.append('payment_reconciliation_payments', {})
+			ent = self.append('payments', {})
 			ent.journal_voucher = e.get('voucher_no')
 			ent.posting_date = e.get('posting_date')
 			ent.amount = flt(e.get('payment_amount'))
@@ -66,7 +66,7 @@ class PaymentReconciliation(Document):
 			ent.is_advance = e.get('is_advance')
 
 	def get_invoice_entries(self):
-		#Fetch JVs, Sales and Purchase Invoices for 'payment_reconciliation_invoices' to reconcile against
+		#Fetch JVs, Sales and Purchase Invoices for 'invoices' to reconcile against
 		non_reconciled_invoices = []
 		dr_or_cr = "debit" if self.party_type == "Customer" else "credit"
 		cond = self.check_condition(dr_or_cr)
@@ -123,11 +123,11 @@ class PaymentReconciliation(Document):
 		self.add_invoice_entries(non_reconciled_invoices)
 
 	def add_invoice_entries(self, non_reconciled_invoices):
-		#Populate 'payment_reconciliation_invoices' with JVs and Invoices to reconcile against
-		self.set('payment_reconciliation_invoices', [])
+		#Populate 'invoices' with JVs and Invoices to reconcile against
+		self.set('invoices', [])
 
 		for e in non_reconciled_invoices:
-			ent = self.append('payment_reconciliation_invoices', {})
+			ent = self.append('invoices', {})
 			ent.invoice_type = e.get('voucher_type')
 			ent.invoice_number = e.get('voucher_no')
 			ent.invoice_date = e.get('posting_date')
@@ -139,7 +139,7 @@ class PaymentReconciliation(Document):
 		self.validate_invoice()
 		dr_or_cr = "credit" if self.party_type == "Customer" else "debit"
 		lst = []
-		for e in self.get('payment_reconciliation_payments'):
+		for e in self.get('payments'):
 			if e.invoice_type and e.invoice_number and e.allocated_amount:
 				lst.append({
 					'voucher_no' : e.journal_voucher,
@@ -168,18 +168,18 @@ class PaymentReconciliation(Document):
 
 
 	def validate_invoice(self):
-		if not self.get("payment_reconciliation_invoices"):
+		if not self.get("invoices"):
 			frappe.throw(_("No records found in the Invoice table"))
 
-		if not self.get("payment_reconciliation_payments"):
+		if not self.get("payments"):
 			frappe.throw(_("No records found in the Payment table"))
 
 		unreconciled_invoices = frappe._dict()
-		for d in self.get("payment_reconciliation_invoices"):
+		for d in self.get("invoices"):
 			unreconciled_invoices.setdefault(d.invoice_type, {}).setdefault(d.invoice_number, d.outstanding_amount)
 
 		invoices_to_reconcile = []
-		for p in self.get("payment_reconciliation_payments"):
+		for p in self.get("payments"):
 			if p.invoice_type and p.invoice_number and p.allocated_amount:
 				invoices_to_reconcile.append(p.invoice_number)
 

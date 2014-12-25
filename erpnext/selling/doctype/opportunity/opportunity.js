@@ -46,7 +46,7 @@ erpnext.selling.Opportunity = frappe.ui.form.Controller.extend({
 			else if(me.frm.doc.customer) return {filters: { customer: me.frm.doc.customer } };
 		});
 
-		this.frm.set_query("item_code", "enquiry_details", function() {
+		this.frm.set_query("item_code", "items", function() {
 			return {
 				query: "erpnext.controllers.queries.item_query",
 				filters: me.frm.doc.enquiry_type === "Maintenance" ?
@@ -97,7 +97,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
 		return get_server_fields('get_item_details', d.item_code,
-			'enquiry_details', doc, cdt, cdn, 1);
+			'items', doc, cdt, cdn, 1);
 	}
 }
 

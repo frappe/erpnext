@@ -62,7 +62,7 @@ $.extend(cur_frm.cscript, {
 			doc: this.frm.doc,
 			method: "set_production_order_operations",
 			callback: function(r) {
-				if(!r.exc) refresh_field("production_order_operations");
+				if(!r.exc) refresh_field("operations");
 			}
 		});
 	},

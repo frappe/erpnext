@@ -14,7 +14,7 @@ class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
 
 form_grid_templates = {
-	"production_order_operations": "templates/form_grid/production_order_grid.html"
+	"operations": "templates/form_grid/production_order_grid.html"
 }
 
 class ProductionOrder(Document):
@@ -60,7 +60,7 @@ class ProductionOrder(Document):
 
 	def calculate_operating_cost(self):
 		self.planned_operating_cost, self.actual_operating_cost = 0.0, 0.0
-		for d in self.get("production_order_operations"):
+		for d in self.get("operations"):
 			d.actual_operating_cost = flt(d.hour_rate) * flt(d.actual_operation_time) / 60
 
 			self.planned_operating_cost += flt(d.planned_operating_cost)
@@ -163,20 +163,20 @@ class ProductionOrder(Document):
 	def set_production_order_operations(self):
 		"""Fetch operations from BOM and set in 'Production Order'"""
 
-		self.set('production_order_operations', [])
+		self.set('operations', [])
 
 		operations = frappe.db.sql("""select operation, opn_description, workstation,
 			hour_rate, time_in_mins, operating_cost as "planned_operating_cost", "Pending" as status
 			from `tabBOM Operation` where parent = %s""", self.bom_no, as_dict=1)
 
-		self.set('production_order_operations', operations)
+		self.set('operations', operations)
 
 		self.plan_operations()
 		self.calculate_operating_cost()
 
 	def plan_operations(self):
 		scheduled_datetime = self.planned_start_date
-		for d in self.get('production_order_operations'):
+		for d in self.get('operations'):
 			while getdate(scheduled_datetime) in self.get_holidays(d.workstation):
 				scheduled_datetime = get_datetime(scheduled_datetime) + relativedelta(days=1)
 
@@ -199,7 +199,7 @@ class ProductionOrder(Document):
 		return self.holidays[holiday_list]
 
 	def update_operation_status(self):
-		for d in self.get("production_order_operations"):
+		for d in self.get("operations"):
 			if not d.completed_qty:
 				d.status = "Pending"
 			elif flt(d.completed_qty) < flt(self.qty):
@@ -294,7 +294,7 @@ def auto_make_time_log(production_order_id):
 	time_logs = []
 	prod_order = frappe.get_doc("Production Order", production_order_id)
 
-	for d in prod_order.production_order_operations:
+	for d in prod_order.operations:
 		operation = cstr(d.idx) + ". " + d.operation
 		time_log = make_time_log(prod_order.name, operation, d.planned_start_time, d.planned_end_time,
 			flt(prod_order.qty) - flt(d.completed_qty), prod_order.project_name, d.workstation)

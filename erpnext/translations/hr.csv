@@ -1458,8 +1458,8 @@ Jobs Email Settings,Poslovi Postavke e-pošte
 Journal Entries,Časopis upisi
 Journal Entry,Časopis Stupanje
 Journal Voucher,Časopis bon
-Journal Voucher Detail,Časopis bon Detalj
-Journal Voucher Detail No,Časopis bon Detalj Ne
+Journal Entry Account,Časopis bon Detalj
+Journal Entry Account No,Časopis bon Detalj Ne
 Journal Voucher {0} does not have account {1} or already matched,Časopis bon {0} nema račun {1} ili već usklađeni
 Journal Vouchers {0} are un-linked,Časopis bon {0} su UN -linked
 Keep a track of communication related to this enquiry which will help for future reference.,Držite pratiti komunikacije vezane uz ovaj upit koji će vam pomoći za buduću referencu.

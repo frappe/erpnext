@@ -10,9 +10,9 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on
 
 
-class JournalVoucher(AccountsController):
+class JournalEntry(AccountsController):
 	def __init__(self, arg1, arg2=None):
-		super(JournalVoucher, self).__init__(arg1, arg2)
+		super(JournalEntry, self).__init__(arg1, arg2)
 
 	def get_feed(self):
 		return self.voucher_type
@@ -22,7 +22,7 @@ class JournalVoucher(AccountsController):
 			self.is_opening='No'
 		self.clearance_date = None
 
-		super(JournalVoucher, self).validate_date_with_fiscal_year()
+		super(JournalEntry, self).validate_date_with_fiscal_year()
 		self.validate_party()
 		self.validate_cheque_info()
 		self.validate_entries_for_advance()
@@ -133,7 +133,7 @@ class JournalVoucher(AccountsController):
 				if d.against_jv == self.name:
 					frappe.throw(_("You can not enter current voucher in 'Against Journal Voucher' column"))
 
-				against_entries = frappe.db.sql("""select * from `tabJournal Voucher Detail`
+				against_entries = frappe.db.sql("""select * from `tabJournal Entry Account`
 					where account = %s and docstatus = 1 and parent = %s
 					and ifnull(against_jv, '') = '' and ifnull(against_invoice, '') = ''
 					and ifnull(against_voucher, '') = ''""", (d.account, d.against_jv), as_dict=True)
@@ -423,18 +423,18 @@ class JournalVoucher(AccountsController):
 			return frappe.db.sql("""select name, credit_to as account, supplier as party, outstanding_amount
 				from `tabPurchase Invoice` where docstatus = 1 and company = %s
 				and outstanding_amount > 0 %s""" % ('%s', cond), self.company, as_dict=True)
-				
+
 	def update_expense_claim(self):
 		for d in self.entries:
 			if d.against_expense_claim:
-				amt = frappe.db.sql("""select sum(debit) as amt from `tabJournal Voucher Detail` 
+				amt = frappe.db.sql("""select sum(debit) as amt from `tabJournal Entry Account`
 					where against_expense_claim = %s and docstatus = 1""", d.against_expense_claim ,as_dict=1)[0].amt
 				frappe.db.set_value("Expense Claim", d.against_expense_claim , "total_amount_reimbursed", amt)
-				
+
 	def validate_expense_claim(self):
 		for d in self.entries:
 			if d.against_expense_claim:
-				sanctioned_amount, reimbursed_amount = frappe.db.get_value("Expense Claim", d.against_expense_claim, 
+				sanctioned_amount, reimbursed_amount = frappe.db.get_value("Expense Claim", d.against_expense_claim,
 					("total_sanctioned_amount", "total_amount_reimbursed"))
 				pending_amount = cint(sanctioned_amount) - cint(reimbursed_amount)
 				if d.debit > pending_amount:
@@ -520,7 +520,7 @@ def get_opening_accounts(company):
 
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select jv.name, jv.posting_date, jv.user_remark
-		from `tabJournal Voucher` jv, `tabJournal Voucher Detail` jv_detail
+		from `tabJournal Voucher` jv, `tabJournal Entry Account` jv_detail
 		where jv_detail.parent = jv.name and jv_detail.account = %s and jv_detail.party = %s
 		and (ifnull(jvd.against_invoice, '') = '' and ifnull(jvd.against_voucher, '') = '' and ifnull(jvd.against_jv, '') = '' )
 		and jv.docstatus = 1 and jv.{0} like %s order by jv.name desc limit %s, %s""".format(searchfield),
@@ -532,7 +532,7 @@ def get_outstanding(args):
 	if args.get("doctype") == "Journal Voucher" and args.get("party"):
 		against_jv_amount = frappe.db.sql("""
 			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
-			from `tabJournal Voucher Detail` where parent=%s and party=%s
+			from `tabJournal Entry Account` where parent=%s and party=%s
 			and ifnull(against_invoice, '')='' and ifnull(against_voucher, '')=''
 			and ifnull(against_jv, '')=''""", (args['docname'], args['party']))
 

@@ -84,14 +84,14 @@ class Item(WebsiteGenerator):
 				raise_exception=WarehouseNotSet)
 
 	def add_default_uom_in_conversion_factor_table(self):
-		uom_conv_list = [d.uom for d in self.get("uom_conversion_details")]
+		uom_conv_list = [d.uom for d in self.get("uoms")]
 		if self.stock_uom not in uom_conv_list:
-			ch = self.append('uom_conversion_details', {})
+			ch = self.append('uoms', {})
 			ch.uom = self.stock_uom
 			ch.conversion_factor = 1
 
 		to_remove = []
-		for d in self.get("uom_conversion_details"):
+		for d in self.get("uoms"):
 			if d.conversion_factor == 1 and d.uom != self.stock_uom:
 				to_remove.append(d)
 
@@ -136,13 +136,13 @@ class Item(WebsiteGenerator):
 
 	def validate_variants_are_unique(self):
 		if not self.has_variants:
-			self.item_variants = []
+			self.variants = []
 
-		if self.item_variants and self.variant_of:
+		if self.variants and self.variant_of:
 			frappe.throw(_("Item cannot be a variant of a variant"))
 
 		variants = []
-		for d in self.item_variants:
+		for d in self.variants:
 			key = (d.item_attribute, d.item_attribute_value)
 			if key in variants:
 				frappe.throw(_("{0} {1} is entered more than once in Item Variants table").format(d.item_attribute,
@@ -181,14 +181,14 @@ class Item(WebsiteGenerator):
 			frappe.msgprint(_("Item Variants {0} deleted").format(", ".join(deleted)))
 
 	def get_variant_item_codes(self):
-		if not self.item_variants:
+		if not self.variants:
 			return []
 
 		self.variant_attributes = {}
 		variant_dict = {}
 		variant_item_codes = []
 
-		for d in self.item_variants:
+		for d in self.variants:
 			variant_dict.setdefault(d.item_attribute, []).append(d.item_attribute_value)
 
 		all_attributes = [d.name for d in frappe.get_all("Item Attribute", order_by = "priority asc")]
@@ -250,21 +250,21 @@ class Item(WebsiteGenerator):
 		template = frappe.get_doc("Item", self.variant_of)
 
 		# add item taxes from template
-		for d in template.get("item_tax"):
-			self.append("item_tax", {"tax_type": d.tax_type, "tax_rate": d.tax_rate})
+		for d in template.get("taxes"):
+			self.append("taxes", {"tax_type": d.tax_type, "tax_rate": d.tax_rate})
 
 		# copy re-order table if empty
-		if not self.get("item_reorder"):
-			for d in template.get("item_reorder"):
+		if not self.get("reorder_levels"):
+			for d in template.get("reorder_levels"):
 				n = {}
 				for k in ("warehouse", "warehouse_reorder_level",
 					"warehouse_reorder_qty", "material_request_type"):
 					n[k] = d.get(k)
-				self.append("item_reorder", n)
+				self.append("reorder_levels", n)
 
 	def validate_conversion_factor(self):
 		check_list = []
-		for d in self.get('uom_conversion_details'):
+		for d in self.get('uoms'):
 			if cstr(d.uom) in check_list:
 				frappe.throw(_("Unit of Measure {0} has been entered more than once in Conversion Factor Table").format(d.uom))
 			else:
@@ -302,14 +302,14 @@ class Item(WebsiteGenerator):
 	def fill_customer_code(self):
 		""" Append all the customer codes and insert into "customer_code" field of item table """
 		cust_code=[]
-		for d in self.get('item_customer_details'):
+		for d in self.get('customer_item_codes'):
 			cust_code.append(d.ref_code)
 		self.customer_code=','.join(cust_code)
 
 	def check_item_tax(self):
 		"""Check whether Tax Rate is not entered twice for same Tax Type"""
 		check_list=[]
-		for d in self.get('item_tax'):
+		for d in self.get('taxes'):
 			if d.tax_type:
 				account_type = frappe.db.get_value("Account", d.tax_type, "account_type")
 
@@ -344,15 +344,15 @@ class Item(WebsiteGenerator):
 		if cint(self.apply_warehouse_wise_reorder_level):
 			self.re_order_level, self.re_order_qty = 0, 0
 		else:
-			self.set("item_reorder", [])
+			self.set("reorder_levels", [])
 
-		if self.re_order_level or len(self.get("item_reorder", {"material_request_type": "Purchase"})):
+		if self.re_order_level or len(self.get("reorder_levels", {"material_request_type": "Purchase"})):
 			if not self.is_purchase_item:
 				frappe.throw(_("""To set reorder level, item must be a Purchase Item"""))
 
 	def validate_warehouse_for_reorder(self):
 		warehouse = []
-		for i in self.get("item_reorder"):
+		for i in self.get("reorder_levels"):
 			if i.get("warehouse") and i.get("warehouse") not in warehouse:
 				warehouse += [i.get("warehouse")]
 			else:
@@ -426,11 +426,11 @@ class Item(WebsiteGenerator):
 		frappe.db.auto_commit_on_many_writes = 0
 
 	def copy_specification_from_item_group(self):
-		self.set("item_website_specifications", [])
+		self.set("website_specifications", [])
 		if self.item_group:
 			for label, desc in frappe.db.get_values("Item Website Specification",
 				{"parent": self.item_group}, ["label", "description"]):
-					row = self.append("item_website_specifications")
+					row = self.append("website_specifications")
 					row.label = label
 					row.description = desc
 

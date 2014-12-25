@@ -24,7 +24,7 @@ class TestItem(unittest.TestCase):
 
 	def test_duplicate_variant(self):
 		item = frappe.copy_doc(test_records[11])
-		item.append("item_variants", {"item_attribute": "Test Size", "item_attribute_value": "Small"})
+		item.append("variants", {"item_attribute": "Test Size", "item_attribute_value": "Small"})
 		self.assertRaises(DuplicateVariant, item.insert)
 
 	def test_template_cannot_have_stock(self):
@@ -32,7 +32,7 @@ class TestItem(unittest.TestCase):
 
 		se = frappe.new_doc("Stock Entry")
 		se.purpose = "Material Receipt"
-		se.append("mtn_details", {
+		se.append("items", {
 			"item_code": item.name,
 			"t_warehouse": "Stores - _TC",
 			"qty": 1,
@@ -52,9 +52,9 @@ class TestItem(unittest.TestCase):
 		for v in variants:
 			self.assertTrue(frappe.db.get_value("Item", {"variant_of": item.name, "name": v}))
 
-		item.append("item_variants", {"item_attribute": "Test Colour", "item_attribute_value": "Red"})
-		item.append("item_variants", {"item_attribute": "Test Colour", "item_attribute_value": "Blue"})
-		item.append("item_variants", {"item_attribute": "Test Colour", "item_attribute_value": "Green"})
+		item.append("variants", {"item_attribute": "Test Colour", "item_attribute_value": "Red"})
+		item.append("variants", {"item_attribute": "Test Colour", "item_attribute_value": "Blue"})
+		item.append("variants", {"item_attribute": "Test Colour", "item_attribute_value": "Green"})
 
 		self.assertEqual(item.get_variant_item_codes(), ['_Test Variant Item-S-R',
 			'_Test Variant Item-S-G', '_Test Variant Item-S-B',
@@ -71,7 +71,7 @@ class TestItem(unittest.TestCase):
 
 		se = frappe.new_doc("Stock Entry")
 		se.purpose = "Material Receipt"
-		se.append("mtn_details", {
+		se.append("items", {
 			"item_code": item.name,
 			"t_warehouse": "Stores - _TC",
 			"qty": 1,

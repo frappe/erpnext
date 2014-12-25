@@ -127,7 +127,7 @@ cur_frm.fields_dict['selling_cost_center'].get_query = function(doc) {
 }
 
 
-cur_frm.fields_dict['item_tax'].grid.get_field("tax_type").get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['taxes'].grid.get_field("tax_type").get_query = function(doc, cdt, cdn) {
 	return {
 		filters: [
 			['Account', 'account_type', 'in',
@@ -139,7 +139,7 @@ cur_frm.fields_dict['item_tax'].grid.get_field("tax_type").get_query = function(
 
 cur_frm.cscript.tax_type = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
-	return get_server_fields('get_tax_rate', d.tax_type, 'item_tax', doc, cdt, cdn, 1);
+	return get_server_fields('get_tax_rate', d.tax_type, 'taxes', doc, cdt, cdn, 1);
 }
 
 cur_frm.fields_dict['item_group'].get_query = function(doc,cdt,cdn) {
@@ -178,11 +178,11 @@ cur_frm.cscript.validate = function(doc, cdt, cdn){
 	cur_frm.cscript.weight_to_validate(doc, cdt, cdn);
 }
 
-cur_frm.fields_dict.item_customer_details.grid.get_field("customer_name").get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict.customer_item_codes.grid.get_field("customer_name").get_query = function(doc, cdt, cdn) {
 	return { query: "erpnext.controllers.queries.customer_query" }
 }
 
-cur_frm.fields_dict.item_supplier_details.grid.get_field("supplier").get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict.supplier_item_codes.grid.get_field("supplier").get_query = function(doc, cdt, cdn) {
 	return { query: "erpnext.controllers.queries.supplier_query" }
 }
 

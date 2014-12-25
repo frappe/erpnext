@@ -14,22 +14,22 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
 
 form_grid_templates = {
-	"indent_details": "templates/form_grid/material_request_grid.html"
+	"items": "templates/form_grid/material_request_grid.html"
 }
 
 class MaterialRequest(BuyingController):
 	tname = 'Material Request Item'
-	fname = 'indent_details'
+	fname = 'items'
 
 	def get_feed(self):
 		return _("{0}: {1}").format(self.status, self.material_request_type)
 
 	def check_if_already_pulled(self):
-		pass#if self.[d.sales_order_no for d in self.get('indent_details')]
+		pass#if self.[d.sales_order_no for d in self.get('items')]
 
 	def validate_qty_against_so(self):
 		so_items = {} # Format --> {'SO/00001': {'Item/001': 120, 'Item/002': 24}}
-		for d in self.get('indent_details'):
+		for d in self.get('items'):
 			if d.sales_order_no:
 				if not so_items.has_key(d.sales_order_no):
 					so_items[d.sales_order_no] = {d.item_code: flt(d.qty)}
@@ -55,7 +55,7 @@ class MaterialRequest(BuyingController):
 					frappe.throw(_("Material Request of maximum {0} can be made for Item {1} against Sales Order {2}").format(actual_so_qty - already_indented, item, so_no))
 
 	def validate_schedule_date(self):
-		for d in self.get('indent_details'):
+		for d in self.get('items'):
 			if d.schedule_date and d.schedule_date < self.transaction_date:
 				frappe.throw(_("Expected Date cannot be before Material Request Date"))
 
@@ -115,7 +115,7 @@ class MaterialRequest(BuyingController):
 		if self.material_request_type == "Purchase":
 			return
 
-		item_doclist = self.get("indent_details")
+		item_doclist = self.get("items")
 
 		if not mr_items:
 			mr_items = [d.name for d in item_doclist]
@@ -155,7 +155,7 @@ class MaterialRequest(BuyingController):
 			bin_doc.save()
 
 		item_wh_list = []
-		for d in self.get("indent_details"):
+		for d in self.get("items"):
 			if (not mr_item_rows or d.name in mr_item_rows) and [d.item_code, d.warehouse] not in item_wh_list \
 					and frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" and d.warehouse:
 				item_wh_list.append([d.item_code, d.warehouse])
@@ -167,7 +167,7 @@ def update_completed_and_requested_qty(stock_entry, method):
 	if stock_entry.doctype == "Stock Entry":
 		material_request_map = {}
 
-		for d in stock_entry.get("mtn_details"):
+		for d in stock_entry.get("items"):
 			if d.material_request:
 				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
 
@@ -221,14 +221,14 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 		if isinstance(target_doc, basestring):
 			import json
 			target_doc = frappe.get_doc(json.loads(target_doc))
-		target_doc.set("po_details", [])
+		target_doc.set("items", [])
 
 	material_requests, supplier_items = get_material_requests_based_on_supplier(source_name)
 
 	def postprocess(source, target_doc):
 		target_doc.supplier = source_name
 		set_missing_values(source, target_doc)
-		target_doc.set("po_details", [d for d in target_doc.get("po_details")
+		target_doc.set("items", [d for d in target_doc.get("items")
 			if d.get("item_code") in supplier_items and d.get("qty") > 0])
 
 		return target_doc

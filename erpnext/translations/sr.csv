@@ -1458,8 +1458,8 @@ Jobs Email Settings,Послови Емаил подешавања
 Journal Entries,Часопис Ентриес
 Journal Entry,Јоурнал Ентри
 Journal Voucher,Часопис ваучера
-Journal Voucher Detail,Часопис Ваучер Детаљ
-Journal Voucher Detail No,Часопис Ваучер Детаљ Нема
+Journal Entry Account,Часопис Ваучер Детаљ
+Journal Entry Account No,Часопис Ваучер Детаљ Нема
 Journal Voucher {0} does not have account {1} or already matched,Часопис Ваучер {0} нема рачун {1} или већ упарен
 Journal Vouchers {0} are un-linked,Журнал Ваучеры {0} являются не- связаны
 Keep a track of communication related to this enquiry which will help for future reference.,Водите евиденцију о комуникацији у вези са овом истрагу која ће помоћи за будућу референцу.

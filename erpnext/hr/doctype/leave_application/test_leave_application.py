@@ -61,7 +61,7 @@ class TestLeaveApplication(unittest.TestCase):
 		temp_session_user = frappe.session.user
 		frappe.set_user("Administrator")
 		employee = frappe.get_doc("Employee", employee)
-		employee.append("employee_leave_approvers", {
+		employee.append("leave_approvers", {
 			"doctype": "Employee Leave Approver",
 			"leave_approver": leave_approver
 		})
@@ -72,11 +72,11 @@ class TestLeaveApplication(unittest.TestCase):
 		temp_session_user = frappe.session.user
 		frappe.set_user("Administrator")
 		employee = frappe.get_doc("Employee", employee)
-		d = employee.get("employee_leave_approvers", {
+		d = employee.get("leave_approvers", {
 			"leave_approver": leave_approver
 		})
 		if d:
-			employee.get("employee_leave_approvers").remove(d[0])
+			employee.get("leave_approvers").remove(d[0])
 			employee.save()
 		frappe.set_user(temp_session_user)
 

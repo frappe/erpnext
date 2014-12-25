@@ -43,10 +43,10 @@ def create_time_log_batch(time_log):
 	tlb = frappe.get_doc({
 		"doctype": "Time Log Batch",
 		"rate": "500",
-		"time_log_batch_details": [
+		"time_logs": [
 			{
 			"doctype": "Time Log Batch Detail",
-			"parentfield": "time_log_batch_details",
+			"parentfield": "time_logs",
 			"parenttype": "Time Log Batch",
 			"time_log": time_log
 			}

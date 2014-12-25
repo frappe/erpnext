@@ -7,7 +7,7 @@ from frappe.utils import flt
 from frappe import _
 from frappe.model.document import Document
 
-class BudgetDistribution(Document):
+class MonthlyDistribution(Document):
 	def get_months(self):
 		month_list = ['January','February','March','April','May','June','July','August','September',
 		'October','November','December']

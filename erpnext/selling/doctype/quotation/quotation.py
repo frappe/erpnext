@@ -10,12 +10,12 @@ from frappe import _
 from erpnext.controllers.selling_controller import SellingController
 
 form_grid_templates = {
-	"quotation_details": "templates/form_grid/item_grid.html"
+	"items": "templates/form_grid/item_grid.html"
 }
 
 class Quotation(SellingController):
 	tname = 'Quotation Item'
-	fname = 'quotation_details'
+	fname = 'items'
 
 	def validate(self):
 		super(Quotation, self).validate()
@@ -30,7 +30,7 @@ class Quotation(SellingController):
 
 	def validate_for_items(self):
 		chk_dupl_itm = []
-		for d in self.get('quotation_details'):
+		for d in self.get('items'):
 			if [cstr(d.item_code),cstr(d.description)] in chk_dupl_itm:
 				frappe.throw(_("Item {0} with same description entered twice").format(d.item_code))
 			else:
@@ -40,14 +40,14 @@ class Quotation(SellingController):
 		super(Quotation, self).validate_order_type()
 
 		if self.order_type in ['Maintenance', 'Service']:
-			for d in self.get('quotation_details'):
+			for d in self.get('items'):
 				is_service_item = frappe.db.sql("select is_service_item from `tabItem` where name=%s", d.item_code)
 				is_service_item = is_service_item and is_service_item[0][0] or 'No'
 
 				if is_service_item == 'No':
 					frappe.throw(_("Item {0} must be Service Item").format(d.item_code))
 		else:
-			for d in self.get('quotation_details'):
+			for d in self.get('items'):
 				is_sales_item = frappe.db.sql("select is_sales_item from `tabItem` where name=%s", d.item_code)
 				is_sales_item = is_sales_item and is_sales_item[0][0] or 'No'
 
@@ -62,7 +62,7 @@ class Quotation(SellingController):
 			self.quotation_to = "Lead"
 
 	def update_opportunity(self):
-		for opportunity in list(set([d.prevdoc_docname for d in self.get("quotation_details")])):
+		for opportunity in list(set([d.prevdoc_docname for d in self.get("items")])):
 			if opportunity:
 				frappe.get_doc("Opportunity", opportunity).set_status(update=True)
 
@@ -75,7 +75,7 @@ class Quotation(SellingController):
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
 
 	def check_item_table(self):
-		if not self.get('quotation_details'):
+		if not self.get('items'):
 			frappe.throw(_("Please enter item details"))
 
 	def on_submit(self):
@@ -94,7 +94,7 @@ class Quotation(SellingController):
 
 	def print_other_charges(self,docname):
 		print_lst = []
-		for d in self.get('other_charges'):
+		for d in self.get('taxes'):
 			lst1 = []
 			lst1.append(d.description)
 			lst1.append(d.total)

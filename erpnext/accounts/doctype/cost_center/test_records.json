@@ -1,12 +1,12 @@
 [
  {
-  "budget_details": [
+  "budgets": [
    {
     "account": "_Test Account Cost for Goods Sold - _TC", 
     "budget_allocated": 100000, 
     "doctype": "Budget Detail", 
     "fiscal_year": "_Test Fiscal Year 2013", 
-    "parentfield": "budget_details"
+    "parentfield": "budgets"
    }
   ], 
   "company": "_Test Company", 

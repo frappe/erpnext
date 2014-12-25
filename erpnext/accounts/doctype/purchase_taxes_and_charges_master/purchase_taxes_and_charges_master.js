@@ -20,7 +20,7 @@ cur_frm.pformat.in_words_import = function(doc) {
 	return '';
 }
 
-cur_frm.pformat.other_charges= function(doc) {
+cur_frm.pformat.taxes= function(doc) {
 
 	//function to make row of table
 	var make_row = function(title, val, bold) {
@@ -41,7 +41,7 @@ cur_frm.pformat.other_charges= function(doc) {
 		return doc_field.print_hide;
 	}
 
-	var cl = doc.other_charges || [];
+	var cl = doc.taxes || [];
 
 	// outer table
 	var out='<div><table class="noborder" style="width:100%">\
@@ -104,7 +104,7 @@ cur_frm.cscript.charge_type = function(doc, cdt, cdn) {
 	}
 
 	validated = false;
-	refresh_field('charge_type', d.name, 'other_charges');
+	refresh_field('charge_type', d.name, 'taxes');
 
 	cur_frm.cscript.row_id(doc, cdt, cdn);
 	cur_frm.cscript.rate(doc, cdt, cdn);
@@ -130,10 +130,10 @@ cur_frm.cscript.row_id = function(doc, cdt, cdn) {
 		}
 	}
 	validated = false;
-	refresh_field('row_id', d.name, 'other_charges');
+	refresh_field('row_id', d.name, 'taxes');
 }
 
-cur_frm.set_query("account_head", "other_charges", function(doc) {
+cur_frm.set_query("account_head", "taxes", function(doc) {
 	return {
 		query: "erpnext.controllers.queries.tax_account_query",
 		filters: {
@@ -143,7 +143,7 @@ cur_frm.set_query("account_head", "other_charges", function(doc) {
 	}
 });
 
-cur_frm.fields_dict['other_charges'].grid.get_field("cost_center").get_query = function(doc) {
+cur_frm.fields_dict['taxes'].grid.get_field("cost_center").get_query = function(doc) {
 	return {
 		filters: {
 			'company': doc.company,
@@ -160,7 +160,7 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 		d.rate = '';
 	}
 	validated = false;
-	refresh_field('rate', d.name, 'other_charges');
+	refresh_field('rate', d.name, 'taxes');
 }
 
 cur_frm.cscript.tax_amount = function(doc, cdt, cdn) {
@@ -176,5 +176,5 @@ cur_frm.cscript.tax_amount = function(doc, cdt, cdn) {
 	}
 
 	validated = false;
-	refresh_field('tax_amount', d.name, 'other_charges');
+	refresh_field('tax_amount', d.name, 'taxes');
 }

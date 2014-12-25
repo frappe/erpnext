@@ -22,11 +22,11 @@ class DuplicateEntryForProductionOrderError(frappe.ValidationError): pass
 from erpnext.controllers.stock_controller import StockController
 
 form_grid_templates = {
-	"mtn_details": "templates/form_grid/stock_entry_grid.html"
+	"items": "templates/form_grid/stock_entry_grid.html"
 }
 
 class StockEntry(StockController):
-	fname = 'mtn_details'
+	fname = 'items'
 
 	def get_feed(self):
 		return _("From {0} to {1}").format(self.from_warehouse, self.to_warehouse)
@@ -64,7 +64,7 @@ class StockEntry(StockController):
 		self.update_stock_ledger()
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
-		update_serial_nos_after_submit(self, "mtn_details")
+		update_serial_nos_after_submit(self, "items")
 		self.update_production_order()
 		self.make_gl_entries()
 
@@ -85,7 +85,7 @@ class StockEntry(StockController):
 			frappe.throw(_("Purpose must be one of {0}").format(comma_or(valid_purposes)))
 
 	def set_transfer_qty(self):
-		for item in self.get("mtn_details"):
+		for item in self.get("items"):
 			if not flt(item.qty):
 				frappe.throw(_("Row {0}: Qty is mandatory").format(item.idx))
 
@@ -94,7 +94,7 @@ class StockEntry(StockController):
 	def validate_item(self):
 		stock_items = self.get_stock_items()
 		serialized_items = self.get_serialized_items()
-		for item in self.get("mtn_details"):
+		for item in self.get("items"):
 			if item.item_code not in stock_items:
 				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
 
@@ -121,18 +121,18 @@ class StockEntry(StockController):
 		source_mandatory = ["Material Issue", "Material Transfer", "Purchase Return"]
 		target_mandatory = ["Material Receipt", "Material Transfer", "Sales Return"]
 
-		validate_for_manufacture_repack = any([d.bom_no for d in self.get("mtn_details")])
+		validate_for_manufacture_repack = any([d.bom_no for d in self.get("items")])
 
 		if self.purpose in source_mandatory and self.purpose not in target_mandatory:
 			self.to_warehouse = None
-			for d in self.get('mtn_details'):
+			for d in self.get('items'):
 				d.t_warehouse = None
 		elif self.purpose in target_mandatory and self.purpose not in source_mandatory:
 			self.from_warehouse = None
-			for d in self.get('mtn_details'):
+			for d in self.get('items'):
 				d.s_warehouse = None
 
-		for d in self.get('mtn_details'):
+		for d in self.get('items'):
 			if not d.s_warehouse and not d.t_warehouse:
 				d.s_warehouse = self.from_warehouse
 				d.t_warehouse = self.to_warehouse
@@ -179,7 +179,7 @@ class StockEntry(StockController):
 	def check_if_operations_completed(self):
 		prod_order = frappe.get_doc("Production Order", self.production_order)
 		if prod_order.actual_operating_cost:
-			for d in prod_order.get("production_order_operations"):
+			for d in prod_order.get("operations"):
 				total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
 				if total_completed_qty > flt(d.completed_qty):
 					frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Production Order # {3}. Please update operation status via Time Logs")
@@ -210,7 +210,7 @@ class StockEntry(StockController):
 	def validate_valuation_rate(self):
 		if self.purpose in ["Manufacture", "Repack"]:
 			valuation_at_source, valuation_at_target = 0, 0
-			for d in self.get("mtn_details"):
+			for d in self.get("items"):
 				if d.s_warehouse and not d.t_warehouse:
 					valuation_at_source += flt(d.amount)
 				if d.t_warehouse and not d.s_warehouse:
@@ -220,7 +220,7 @@ class StockEntry(StockController):
 				frappe.throw(_("Total valuation for manufactured or repacked item(s) can not be less than total valuation of raw materials"))
 
 	def set_total_amount(self):
-		self.total_amount = sum([flt(item.amount) for item in self.get("mtn_details")])
+		self.total_amount = sum([flt(item.amount) for item in self.get("items")])
 
 	def get_stock_and_rate(self, force=False):
 		"""get stock and incoming rate on posting date"""
@@ -232,7 +232,7 @@ class StockEntry(StockController):
 
 		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
 
-		for d in self.get('mtn_details'):
+		for d in self.get('items'):
 			d.transfer_qty = flt(d.transfer_qty)
 
 			args = frappe._dict({
@@ -264,8 +264,8 @@ class StockEntry(StockController):
 
 		# set incoming rate for fg item
 		if self.purpose in ("Manufacture", "Repack"):
-			number_of_fg_items = len([t.t_warehouse for t in self.get("mtn_details") if t.t_warehouse])
-			for d in self.get("mtn_details"):
+			number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
+			for d in self.get("items"):
 				if d.bom_no or (d.t_warehouse and number_of_fg_items == 1):
 					if not flt(d.incoming_rate) or force:
 						operation_cost_per_unit = self.get_operation_cost_per_unit(d.bom_no, d.qty)
@@ -278,7 +278,7 @@ class StockEntry(StockController):
 
 		if self.production_order:
 			pro_order = frappe.get_doc("Production Order", self.production_order)
-			for d in pro_order.get("production_order_operations"):
+			for d in pro_order.get("operations"):
 				if flt(d.completed_qty):
 					operation_cost_per_unit += flt(d.actual_operating_cost) / flt(d.completed_qty)
 				else:
@@ -312,18 +312,18 @@ class StockEntry(StockController):
 		return incoming_rate
 
 	def validate_incoming_rate(self):
-		for d in self.get('mtn_details'):
+		for d in self.get('items'):
 			if d.t_warehouse:
 				self.validate_value("incoming_rate", ">", 0, d, raise_exception=IncorrectValuationRateError)
 
 	def validate_bom(self):
-		for d in self.get('mtn_details'):
+		for d in self.get('items'):
 			if d.bom_no:
 				validate_bom_no(d.item_code, d.bom_no)
 
 	def validate_finished_goods(self):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
-		for d in self.get('mtn_details'):
+		for d in self.get('items'):
 			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty):
 				frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}").format(d.idx, d.transfer_qty, self.fg_completed_qty))
 
@@ -353,7 +353,7 @@ class StockEntry(StockController):
 			stock_items = get_stock_items_for_return(ref.doc, ref.parentfields)
 			already_returned_item_qty = self.get_already_returned_item_qty(ref.fieldname)
 
-			for item in self.get("mtn_details"):
+			for item in self.get("items"):
 				# validate if item exists in the ref doc and that it is a stock item
 				if item.item_code not in stock_items:
 					frappe.throw(_("Item {0} does not exist in {1} {2}").format(item.item_code, ref.doc.doctype, ref.doc.name),
@@ -379,7 +379,7 @@ class StockEntry(StockController):
 
 	def update_stock_ledger(self):
 		sl_entries = []
-		for d in self.get('mtn_details'):
+		for d in self.get('items'):
 			if cstr(d.s_warehouse) and self.docstatus == 1:
 				sl_entries.append(self.get_sl_entries(d, {
 					"warehouse": cstr(d.s_warehouse),
@@ -489,7 +489,7 @@ class StockEntry(StockController):
 		return ret
 
 	def get_items(self):
-		self.set('mtn_details', [])
+		self.set('items', [])
 		self.validate_production_order()
 
 		pro_obj = None
@@ -620,7 +620,7 @@ class StockEntry(StockController):
 			["default_expense_account", "cost_center"])[0]
 
 		for d in item_dict:
-			se_child = self.append('mtn_details')
+			se_child = self.append('items')
 			se_child.s_warehouse = item_dict[d].get("from_warehouse")
 			se_child.t_warehouse = item_dict[d].get("to_warehouse")
 			se_child.item_code = cstr(d)
@@ -645,7 +645,7 @@ class StockEntry(StockController):
 			se_child.bom_no = bom_no
 
 	def validate_with_material_request(self):
-		for item in self.get("mtn_details"):
+		for item in self.get("items"):
 			if item.material_request:
 				mreq_item = frappe.db.get_value("Material Request Item",
 					{"name": item.material_request_item, "parent": item.material_request},
@@ -798,11 +798,11 @@ def get_return_doc_and_details(args):
 return_map = {
 	"Sales Return": {
 		# [Ref DocType, [Item tables' parentfields]]
-		"delivery_note_no": ["Delivery Note", ["delivery_note_details", "packing_details"]],
-		"sales_invoice_no": ["Sales Invoice", ["entries", "packing_details"]]
+		"delivery_note_no": ["Delivery Note", ["items", "packed_items"]],
+		"sales_invoice_no": ["Sales Invoice", ["entries", "packed_items"]]
 	},
 	"Purchase Return": {
-		"purchase_receipt_no": ["Purchase Receipt", ["purchase_receipt_details"]]
+		"purchase_receipt_no": ["Purchase Receipt", ["items"]]
 	}
 }
 
@@ -854,7 +854,7 @@ def make_return_jv_from_sales_invoice(se, ref):
 
 	# income account entries
 	children = []
-	for se_item in se.get("mtn_details"):
+	for se_item in se.get("items"):
 		# find item in ref.doc
 		ref_item = ref.doc.get({"item_code": se_item.item_code})[0]
 
@@ -895,7 +895,7 @@ def make_return_jv_from_delivery_note(se, ref):
 	parent = {}
 	children = []
 
-	for se_item in se.get("mtn_details"):
+	for se_item in se.get("items"):
 		for sales_invoice in invoices_against_delivery:
 			si = frappe.get_doc("Sales Invoice", sales_invoice)
 
@@ -957,7 +957,7 @@ def make_return_jv_from_purchase_receipt(se, ref):
 	parent = {}
 	children = []
 
-	for se_item in se.get("mtn_details"):
+	for se_item in se.get("items"):
 		for purchase_invoice in invoice_against_receipt:
 			pi = frappe.get_doc("Purchase Invoice", purchase_invoice)
 			ref_item = pi.get({"item_code": se_item.item_code})

@@ -178,7 +178,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	calculate_taxes_and_totals: function() {
 		this._super();
-		this.calculate_total_advance("Purchase Invoice", "advance_allocation_details");
+		this.calculate_total_advance("Purchase Invoice", "advances");
 		this.frm.refresh_fields();
 	},
 
@@ -368,9 +368,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			setup_field_label_map(["tax_amount", "total"], company_currency, this.other_fname);
 		}
 
-		if(this.frm.fields_dict["advance_allocation_details"]) {
+		if(this.frm.fields_dict["advances"]) {
 			setup_field_label_map(["advance_amount", "allocated_amount"], company_currency,
-				"advance_allocation_details");
+				"advances");
 		}
 
 		// toggle columns

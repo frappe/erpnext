@@ -1458,8 +1458,8 @@ Jobs Email Settings,E-mail Configurações de empregos
 Journal Entries,Jornal entradas
 Journal Entry,Journal Entry
 Journal Voucher,Vale Jornal
-Journal Voucher Detail,Jornal Detalhe Vale
-Journal Voucher Detail No,Jornal Detalhe folha no
+Journal Entry Account,Jornal Detalhe Vale
+Journal Entry Account No,Jornal Detalhe folha no
 Journal Voucher {0} does not have account {1} or already matched,Jornal Vale {0} não tem conta {1} ou já combinava
 Journal Vouchers {0} are un-linked,Jornal Vouchers {0} são não- ligado
 Keep a track of communication related to this enquiry which will help for future reference.,Mantenha uma faixa de comunicação relacionada a este inquérito que irá ajudar para referência futura.

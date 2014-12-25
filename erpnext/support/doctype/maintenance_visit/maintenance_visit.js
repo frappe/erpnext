@@ -75,7 +75,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
   	}
 }
 
-cur_frm.fields_dict['maintenance_visit_details'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['purposes'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
 	return{
     	filters:{ 'is_service_item': "Yes"}
   	}
@@ -85,7 +85,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	var fname = cur_frm.cscript.fname;
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
-		return get_server_fields('get_item_details',d.item_code, 'maintenance_visit_details',doc,cdt,cdn,1);
+		return get_server_fields('get_item_details',d.item_code, 'purposes',doc,cdt,cdn,1);
 	}
 }
 

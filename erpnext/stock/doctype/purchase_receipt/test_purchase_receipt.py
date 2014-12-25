@@ -24,7 +24,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pi = make_purchase_invoice(pr.name)
 
 		self.assertEquals(pi.doctype, "Purchase Invoice")
-		self.assertEquals(len(pi.get("entries")), len(pr.get("purchase_receipt_details")))
+		self.assertEquals(len(pi.get("entries")), len(pr.get("items")))
 
 		# modify rate
 		pi.get("entries")[0].rate = 200
@@ -64,9 +64,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		stock_in_hand_account = frappe.db.get_value("Account",
-			{"warehouse": pr.get("purchase_receipt_details")[0].warehouse})
+			{"warehouse": pr.get("items")[0].warehouse})
 		fixed_asset_account = frappe.db.get_value("Account",
-			{"warehouse": pr.get("purchase_receipt_details")[1].warehouse})
+			{"warehouse": pr.get("items")[1].warehouse})
 
 		expected_values = {
 			stock_in_hand_account: [375.0, 0.0],
@@ -94,19 +94,19 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.run_method("calculate_taxes_and_totals")
 		pr.insert()
 
-		self.assertEquals(len(pr.get("pr_raw_material_details")), 2)
-		self.assertEquals(pr.get("purchase_receipt_details")[0].rm_supp_cost, 20750.0)
+		self.assertEquals(len(pr.get("supplied_items")), 2)
+		self.assertEquals(pr.get("items")[0].rm_supp_cost, 20750.0)
 
 
 	def test_serial_no_supplier(self):
 		pr = frappe.copy_doc(test_records[0])
-		pr.get("purchase_receipt_details")[0].item_code = "_Test Serialized Item With Series"
-		pr.get("purchase_receipt_details")[0].qty = 1
-		pr.get("purchase_receipt_details")[0].received_qty = 1
+		pr.get("items")[0].item_code = "_Test Serialized Item With Series"
+		pr.get("items")[0].qty = 1
+		pr.get("items")[0].received_qty = 1
 		pr.insert()
 		pr.submit()
 
-		self.assertEquals(frappe.db.get_value("Serial No", pr.get("purchase_receipt_details")[0].serial_no,
+		self.assertEquals(frappe.db.get_value("Serial No", pr.get("items")[0].serial_no,
 			"supplier"), pr.supplier)
 
 		return pr
@@ -115,30 +115,30 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr = self.test_serial_no_supplier()
 		pr.cancel()
 
-		self.assertFalse(frappe.db.get_value("Serial No", pr.get("purchase_receipt_details")[0].serial_no,
+		self.assertFalse(frappe.db.get_value("Serial No", pr.get("items")[0].serial_no,
 			"warehouse"))
 
 	def test_rejected_serial_no(self):
 		pr = frappe.copy_doc(test_records[0])
-		pr.get("purchase_receipt_details")[0].item_code = "_Test Serialized Item With Series"
-		pr.get("purchase_receipt_details")[0].qty = 3
-		pr.get("purchase_receipt_details")[0].rejected_qty = 2
-		pr.get("purchase_receipt_details")[0].received_qty = 5
-		pr.get("purchase_receipt_details")[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
+		pr.get("items")[0].item_code = "_Test Serialized Item With Series"
+		pr.get("items")[0].qty = 3
+		pr.get("items")[0].rejected_qty = 2
+		pr.get("items")[0].received_qty = 5
+		pr.get("items")[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
 		pr.insert()
 		pr.submit()
 
-		accepted_serial_nos = pr.get("purchase_receipt_details")[0].serial_no.split("\n")
+		accepted_serial_nos = pr.get("items")[0].serial_no.split("\n")
 		self.assertEquals(len(accepted_serial_nos), 3)
 		for serial_no in accepted_serial_nos:
 			self.assertEquals(frappe.db.get_value("Serial No", serial_no, "warehouse"),
-				pr.get("purchase_receipt_details")[0].warehouse)
+				pr.get("items")[0].warehouse)
 
-		rejected_serial_nos = pr.get("purchase_receipt_details")[0].rejected_serial_no.split("\n")
+		rejected_serial_nos = pr.get("items")[0].rejected_serial_no.split("\n")
 		self.assertEquals(len(rejected_serial_nos), 2)
 		for serial_no in rejected_serial_nos:
 			self.assertEquals(frappe.db.get_value("Serial No", serial_no, "warehouse"),
-				pr.get("purchase_receipt_details")[0].rejected_warehouse)
+				pr.get("items")[0].rejected_warehouse)
 
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit

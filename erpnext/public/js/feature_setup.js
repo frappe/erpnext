@@ -6,7 +6,7 @@ Dictionary Format
 	'projects': {
 		'Sales Order': {
 			'fields':['project_name'],
-			'sales_order_details':['projected_qty']
+			'items':['projected_qty']
 		},
 		'Purchase Order': {
 			'fields':['project_name']
@@ -17,105 +17,105 @@ pscript.feature_dict = {
 	'fs_projects': {
 		'BOM': {'fields':['project_name']},
 		'Delivery Note': {'fields':['project_name']},
-		'Purchase Invoice': {'entries':['project_name']},
+		'Purchase Invoice': {'items':['project_name']},
 		'Production Order': {'fields':['project_name']},
-		'Purchase Order': {'po_details':['project_name']},
-		'Purchase Receipt': {'purchase_receipt_details':['project_name']},
+		'Purchase Order': {'items':['project_name']},
+		'Purchase Receipt': {'items':['project_name']},
 		'Sales Invoice': {'fields':['project_name']},
 		'Sales Order': {'fields':['project_name']},
 		'Stock Entry': {'fields':['project_name']},
 		'Timesheet': {'timesheet_details':['project_name']}
 	},
 	'fs_discounts': {
-		'Delivery Note': {'delivery_note_details':['discount_percentage']},
-		'Quotation': {'quotation_details':['discount_percentage']},
-		'Sales Invoice': {'entries':['discount_percentage']},
-		'Sales Order': {'sales_order_details':['discount_percentage','price_list_rate']}
+		'Delivery Note': {'items':['discount_percentage']},
+		'Quotation': {'items':['discount_percentage']},
+		'Sales Invoice': {'items':['discount_percentage']},
+		'Sales Order': {'items':['discount_percentage','price_list_rate']}
 	},
 	'fs_purchase_discounts': {
-		'Purchase Order': {'po_details':['base_price_list_rate', 'discount_percentage', 'price_list_rate']},
-		'Purchase Receipt': {'purchase_receipt_details':['base_price_list_rate', 'discount_percentage', 'price_list_rate']},
-		'Purchase Invoice': {'entries':['base_price_list_rate', 'discount_percentage', 'price_list_rate']}
+		'Purchase Order': {'items':['base_price_list_rate', 'discount_percentage', 'price_list_rate']},
+		'Purchase Receipt': {'items':['base_price_list_rate', 'discount_percentage', 'price_list_rate']},
+		'Purchase Invoice': {'items':['base_price_list_rate', 'discount_percentage', 'price_list_rate']}
 	},
 	'fs_brands': {
-		'Delivery Note': {'delivery_note_details':['brand']},
-		'Material Request': {'indent_details':['brand']},
+		'Delivery Note': {'items':['brand']},
+		'Material Request': {'items':['brand']},
 		'Item': {'fields':['brand']},
-		'Purchase Order': {'po_details':['brand']},
-		'Purchase Invoice': {'entries':['brand']},
-		'Quotation': {'quotation_details':['brand']},
-		'Sales Invoice': {'entries':['brand']},
+		'Purchase Order': {'items':['brand']},
+		'Purchase Invoice': {'items':['brand']},
+		'Quotation': {'items':['brand']},
+		'Sales Invoice': {'items':['brand']},
 		'Sales BOM': {'fields':['new_item_brand']},
-		'Sales Order': {'sales_order_details':['brand']},
+		'Sales Order': {'items':['brand']},
 		'Serial No': {'fields':['brand']}
 	},
 	'fs_after_sales_installations': {
-		'Delivery Note': {'fields':['installation_status','per_installed'],'delivery_note_details':['installed_qty']}
+		'Delivery Note': {'fields':['installation_status','per_installed'],'items':['installed_qty']}
 	},
 	'fs_item_batch_nos': {
-		'Delivery Note': {'delivery_note_details':['batch_no']},
+		'Delivery Note': {'items':['batch_no']},
 		'Item': {'fields':['has_batch_no']},
-		'Purchase Receipt': {'purchase_receipt_details':['batch_no']},
+		'Purchase Receipt': {'items':['batch_no']},
 		'Quality Inspection': {'fields':['batch_no']},
 		'Sales and Pruchase Return Wizard': {'return_details':['batch_no']},
-		'Sales Invoice': {'entries':['batch_no']},
-		'Stock Entry': {'mtn_details':['batch_no']},
+		'Sales Invoice': {'items':['batch_no']},
+		'Stock Entry': {'items':['batch_no']},
 		'Stock Ledger Entry': {'fields':['batch_no']}
 	},
 	'fs_item_serial_nos': {
 		'Customer Issue': {'fields':['serial_no']},
-		'Delivery Note': {'delivery_note_details':['serial_no'],'packing_details':['serial_no']},
-		'Installation Note': {'installed_item_details':['serial_no']},
+		'Delivery Note': {'items':['serial_no'],'packed_items':['serial_no']},
+		'Installation Note': {'items':['serial_no']},
 		'Item': {'fields':['has_serial_no']},
-		'Maintenance Schedule': {'item_maintenance_detail':['serial_no'],'maintenance_schedule_detail':['serial_no']},
-		'Maintenance Visit': {'maintenance_visit_details':['serial_no']},
-		'Purchase Receipt': {'purchase_receipt_details':['serial_no']},
+		'Maintenance Schedule': {'items':['serial_no'],'schedules':['serial_no']},
+		'Maintenance Visit': {'purposes':['serial_no']},
+		'Purchase Receipt': {'items':['serial_no']},
 		'Quality Inspection': {'fields':['item_serial_no']},
 		'Sales and Pruchase Return Wizard': {'return_details':['serial_no']},
-		'Sales Invoice': {'entries':['serial_no']},
-		'Stock Entry': {'mtn_details':['serial_no']},
+		'Sales Invoice': {'items':['serial_no']},
+		'Stock Entry': {'items':['serial_no']},
 		'Stock Ledger Entry': {'fields':['serial_no']}
 	},
 	'fs_item_barcode': {
 		'Item': {'fields': ['barcode']},
-		'Delivery Note': {'delivery_note_details': ['barcode']},
-		'Sales Invoice': {'entries': ['barcode']}
+		'Delivery Note': {'items': ['barcode']},
+		'Sales Invoice': {'items': ['barcode']}
 	},
 	'fs_item_group_in_details': {
-		'Delivery Note': {'delivery_note_details':['item_group']},
-		'Opportunity': {'enquiry_details':['item_group']},
-		'Material Request': {'indent_details':['item_group']},
+		'Delivery Note': {'items':['item_group']},
+		'Opportunity': {'items':['item_group']},
+		'Material Request': {'items':['item_group']},
 		'Item': {'fields':['item_group']},
 		'Global Defaults': {'fields':['default_item_group']},
-		'Purchase Order': {'po_details':['item_group']},
-		'Purchase Receipt': {'purchase_receipt_details':['item_group']},
-		'Purchase Voucher': {'entries':['item_group']},
-		'Quotation': {'quotation_details':['item_group']},
-		'Sales Invoice': {'entries':['item_group']},
+		'Purchase Order': {'items':['item_group']},
+		'Purchase Receipt': {'items':['item_group']},
+		'Purchase Voucher': {'items':['item_group']},
+		'Quotation': {'items':['item_group']},
+		'Sales Invoice': {'items':['item_group']},
 		'Sales BOM': {'fields':['serial_no']},
-		'Sales Order': {'sales_order_details':['item_group']},
+		'Sales Order': {'items':['item_group']},
 		'Serial No': {'fields':['item_group']},
-		'Sales Partner': {'partner_target_details':['item_group']},
-		'Sales Person': {'target_details':['item_group']},
-		'Territory': {'target_details':['item_group']}
+		'Sales Partner': {'targets':['item_group']},
+		'Sales Person': {'targets':['item_group']},
+		'Territory': {'targets':['item_group']}
 	},
 	'fs_page_break': {
-		'Delivery Note': {'delivery_note_details':['page_break'],'packing_details':['page_break']},
-		'Material Request': {'indent_details':['page_break']},
-		'Purchase Order': {'po_details':['page_break']},
-		'Purchase Receipt': {'purchase_receipt_details':['page_break']},
-		'Purchase Voucher': {'entries':['page_break']},
-		'Quotation': {'quotation_details':['page_break']},
-		'Sales Invoice': {'entries':['page_break']},
-		'Sales Order': {'sales_order_details':['page_break']}
+		'Delivery Note': {'items':['page_break'],'packed_items':['page_break']},
+		'Material Request': {'items':['page_break']},
+		'Purchase Order': {'items':['page_break']},
+		'Purchase Receipt': {'items':['page_break']},
+		'Purchase Voucher': {'items':['page_break']},
+		'Quotation': {'items':['page_break']},
+		'Sales Invoice': {'items':['page_break']},
+		'Sales Order': {'items':['page_break']}
 	},
 	'fs_exports': {
-		'Delivery Note': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'delivery_note_details':['base_price_list_rate','base_amount','base_rate']},
+		'Delivery Note': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'items':['base_price_list_rate','base_amount','base_rate']},
 		'POS Setting': {'fields':['conversion_rate','currency']},
-		'Quotation': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'quotation_details':['base_price_list_rate','base_amount','base_rate']},
-		'Sales Invoice': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'entries':['base_price_list_rate','base_amount','base_rate']},
+		'Quotation': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'items':['base_price_list_rate','base_amount','base_rate']},
+		'Sales Invoice': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'items':['base_price_list_rate','base_amount','base_rate']},
 		'Sales BOM': {'fields':['currency']},
-		'Sales Order': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'sales_order_details':['base_price_list_rate','base_amount','base_rate']}
+		'Sales Order': {'fields':['conversion_rate','currency','grand_total','in_words','rounded_total'],'items':['base_price_list_rate','base_amount','base_rate']}
 	},
 
 	'fs_imports': {
@@ -123,18 +123,18 @@ pscript.feature_dict = {
 			'fields': ['conversion_rate', 'currency', 'grand_total',
 		 		'in_words', 'net_total', 'other_charges_added',
 		 		'other_charges_deducted'],
-			'entries': ['base_price_list_rate', 'base_amount','base_rate']
+			'items': ['base_price_list_rate', 'base_amount','base_rate']
 		},
 		'Purchase Order': {
 			'fields': ['conversion_rate','currency', 'grand_total',
 			'in_words', 'net_total', 'other_charges_added',
 			 'other_charges_deducted'],
-			'po_details': ['base_price_list_rate', 'base_amount','base_rate']
+			'items': ['base_price_list_rate', 'base_amount','base_rate']
 		},
 		'Purchase Receipt': {
 			'fields': ['conversion_rate', 'currency','grand_total', 'in_words',
 			 	'net_total', 'other_charges_added', 'other_charges_deducted'],
-			'purchase_receipt_details': ['base_price_list_rate','base_amount','base_rate']
+			'items': ['base_price_list_rate','base_amount','base_rate']
 		},
 		'Supplier Quotation': {
 			'fields':['conversion_rate','currency']
@@ -142,14 +142,14 @@ pscript.feature_dict = {
 	},
 
 	'fs_item_advanced': {
-		'Item': {'fields':['item_customer_details']}
+		'Item': {'fields':['customer_item_codes']}
 	},
 	'fs_sales_extras': {
 		'Address': {'fields':['sales_partner']},
 		'Contact': {'fields':['sales_partner']},
 		'Customer': {'fields':['sales_team']},
 		'Delivery Note': {'fields':['sales_team']},
-		'Item': {'fields':['item_customer_details']},
+		'Item': {'fields':['customer_item_codes']},
 		'Sales Invoice': {'fields':['sales_team']},
 		'Sales Order': {'fields':['sales_team']}
 	},
@@ -169,7 +169,7 @@ pscript.feature_dict = {
 	},
 	'fs_quality': {
 		'Item': {'fields':['inspection_criteria','inspection_required']},
-		'Purchase Receipt': {'purchase_receipt_details':['qa_no']}
+		'Purchase Receipt': {'items':['qa_no']}
 	},
 	'fs_manufacturing': {
 		'Item': {'fields':['manufacturing']}

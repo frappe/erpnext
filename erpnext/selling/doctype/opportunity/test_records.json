@@ -5,7 +5,7 @@
 		"enquiry_from": "Lead",
 		"enquiry_type": "Sales",
 		"lead": "_T-Lead-00001",
-		"enquiry_details": [{
+		"items": [{
 			"item_name": "Test Item",
 			"description": "Some description"
 		}]

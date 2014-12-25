@@ -1,5 +1,5 @@
 {
-  "allow_import": 1, 
+ "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:item_group_name", 
  "creation": "2013-03-28 10:35:29", 
@@ -134,9 +134,9 @@
   }, 
   {
    "depends_on": "show_in_website", 
-   "fieldname": "item_website_specifications", 
+   "fieldname": "website_specifications", 
    "fieldtype": "Table", 
-   "label": "Item Website Specifications", 
+   "label": "Website Specifications", 
    "options": "Item Website Specification", 
    "permlevel": 0
   }, 
@@ -190,7 +190,7 @@
  "in_create": 1, 
  "issingle": 0, 
  "max_attachments": 3, 
- "modified": "2014-08-20 17:48:34.489750", 
+ "modified": "2014-12-25 12:33:43.359081", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Item Group", 

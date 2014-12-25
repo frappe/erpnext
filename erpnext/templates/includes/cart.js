@@ -53,7 +53,7 @@ $.extend(shopping_cart, {
 		var $cart_billing_address = $("#cart-billing-address").empty();
 		var $cart_shipping_address = $("#cart-shipping-address").empty();
 
-		var no_items = $.map(doc.quotation_details || [],
+		var no_items = $.map(doc.items || [],
 			function(d) { return d.item_code || null;}).length===0;
 		if(no_items) {
 			shopping_cart.show_error("Empty :-(", frappe._("Go ahead and add something to your cart."));
@@ -65,11 +65,11 @@ $.extend(shopping_cart, {
 		var taxes_exist = false;
 		var shipping_rule_labels = $.map(out.shipping_rules || [], function(rule) { return rule[1]; });
 
-		$.each(doc.quotation_details || [], function(i, d) {
+		$.each(doc.items || [], function(i, d) {
 			shopping_cart.render_item_row($cart_items, d);
 		});
 
-		$.each(doc.other_charges || [], function(i, d) {
+		$.each(doc.taxes || [], function(i, d) {
 			if(out.shipping_rules && out.shipping_rules.length &&
 				shipping_rule_labels.indexOf(d.description)!==-1) {
 					shipping_rule_added = true;

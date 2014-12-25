@@ -116,9 +116,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "party_accounts", 
+   "fieldname": "accounts", 
    "fieldtype": "Table", 
-   "label": "Party Accounts", 
+   "label": "Accounts", 
    "options": "Party Account", 
    "permlevel": 0
   }
@@ -126,7 +126,7 @@
  "icon": "icon-sitemap", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-08-29 16:37:35.877256", 
+ "modified": "2014-12-25 12:48:13.727656", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Customer Group", 
@@ -191,5 +191,5 @@
   }
  ], 
  "read_only": 1, 
- "search_fields": "name,parent_customer_group"
+ "search_fields": "parent_customer_group"
 }

@@ -14,7 +14,7 @@ class WebsitePriceListMissingError(frappe.ValidationError): pass
 def set_cart_count(quotation=None):
 	if not quotation:
 		quotation = _get_cart_quotation()
-	cart_count = cstr(len(quotation.get("quotation_details")))
+	cart_count = cstr(len(quotation.get("items")))
 	frappe.local.cookie_manager.set_cookie("cart_count", cart_count)
 
 @frappe.whitelist()
@@ -50,7 +50,7 @@ def place_order():
 
 	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
-	for item in sales_order.get("sales_order_details"):
+	for item in sales_order.get("items"):
 		item.reserved_warehouse = frappe.db.get_value("Item", item.item_code, "website_warehouse") or None
 
 	sales_order.ignore_permissions = True
@@ -66,15 +66,15 @@ def update_cart(item_code, qty, with_doc):
 
 	qty = flt(qty)
 	if qty == 0:
-		quotation.set("quotation_details", quotation.get("quotation_details", {"item_code": ["!=", item_code]}))
-		if not quotation.get("quotation_details") and \
+		quotation.set("items", quotation.get("items", {"item_code": ["!=", item_code]}))
+		if not quotation.get("items") and \
 			not quotation.get("__islocal"):
 				quotation.__delete = True
 
 	else:
-		quotation_items = quotation.get("quotation_details", {"item_code": item_code})
+		quotation_items = quotation.get("items", {"item_code": item_code})
 		if not quotation_items:
-			quotation.append("quotation_details", {
+			quotation.append("items", {
 				"doctype": "Quotation Item",
 				"item_code": item_code,
 				"qty": qty
@@ -134,13 +134,13 @@ def guess_territory():
 
 def decorate_quotation_doc(quotation_doc):
 	doc = frappe._dict(quotation_doc.as_dict())
-	for d in doc.get("quotation_details", []):
+	for d in doc.get("items", []):
 		d.update(frappe.db.get_value("Item", d["item_code"],
 			["website_image", "description", "page_name"], as_dict=True))
 		d["formatted_rate"] = fmt_money(d.get("rate"), currency=doc.currency)
 		d["formatted_amount"] = fmt_money(d.get("amount"), currency=doc.currency)
 
-	for d in doc.get("other_charges", []):
+	for d in doc.get("taxes", []):
 		d["formatted_tax_amount"] = fmt_money(flt(d.get("tax_amount")) / doc.conversion_rate,
 			currency=doc.currency)
 
@@ -239,7 +239,7 @@ def set_price_list_and_rate(quotation, cart_settings, billing_territory):
 	# reset values
 	quotation.price_list_currency = quotation.currency = \
 		quotation.plc_conversion_rate = quotation.conversion_rate = None
-	for item in quotation.get("quotation_details"):
+	for item in quotation.get("items"):
 		item.price_list_rate = item.discount_percentage = item.rate = item.amount = None
 
 	# refetch values
@@ -253,10 +253,10 @@ def set_taxes(quotation, cart_settings, billing_territory):
 	quotation.taxes_and_charges = cart_settings.get_tax_master(billing_territory)
 
 	# clear table
-	quotation.set("other_charges", [])
+	quotation.set("taxes", [])
 
 	# append taxes
-	quotation.append_taxes_from_master("other_charges", "taxes_and_charges")
+	quotation.append_taxes_from_master("taxes", "taxes_and_charges")
 
 def get_lead_or_customer():
 	customer = frappe.db.get_value("Contact", {"email_id": frappe.session.user}, "customer")

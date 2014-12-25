@@ -109,8 +109,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi = frappe.copy_doc(test_records[1])
 		pi.get("entries")[0].item_code = "_Test Non Stock Item"
 		pi.get("entries")[0].expense_account = "_Test Account Cost for Goods Sold - _TC"
-		pi.get("other_charges").pop(0)
-		pi.get("other_charges").pop(1)
+		pi.get("taxes").pop(0)
+		pi.get("taxes").pop(1)
 		pi.insert()
 		pi.submit()
 
@@ -159,7 +159,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			["_Test Account Discount - _TC", 168.03, 1512.30],
 		]
 
-		for i, tax in enumerate(wrapper.get("other_charges")):
+		for i, tax in enumerate(wrapper.get("taxes")):
 			self.assertEqual(tax.account_head, expected_values[i][0])
 			self.assertEqual(tax.tax_amount, expected_values[i][1])
 			self.assertEqual(tax.total, expected_values[i][2])
@@ -193,7 +193,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			["_Test Account Discount - _TC", 168.03, 1512.30],
 		]
 
-		for i, tax in enumerate(wrapper.get("other_charges")):
+		for i, tax in enumerate(wrapper.get("taxes")):
 			self.assertEqual(tax.account_head, expected_values[i][0])
 			self.assertEqual(tax.tax_amount, expected_values[i][1])
 			self.assertEqual(tax.total, expected_values[i][2])
@@ -207,7 +207,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		jv.submit()
 
 		pi = frappe.copy_doc(test_records[0])
-		pi.append("advance_allocation_details", {
+		pi.append("advances", {
 			"journal_voucher": jv.name,
 			"jv_detail_no": jv.get("entries")[0].name,
 			"advance_amount": 400,
@@ -218,17 +218,17 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.submit()
 		pi.load_from_db()
 
-		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where against_voucher=%s""", pi.name))
 
-		self.assertTrue(frappe.db.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
 			where against_voucher=%s and debit=300""", pi.name))
 
 		self.assertEqual(pi.outstanding_amount, 1212.30)
 
 		pi.cancel()
 
-		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Voucher Detail`
+		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
 			where against_voucher=%s""", pi.name))
 
 	def test_recurring_invoice(self):

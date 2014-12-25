@@ -18,9 +18,9 @@ class HolidayList(Document):
 		self.validate_values()
 		yr_start_date, yr_end_date = self.get_fy_start_end_dates()
 		date_list = self.get_weekly_off_date_list(yr_start_date, yr_end_date)
-		last_idx = max([cint(d.idx) for d in self.get("holiday_list_details")] or [0,])
+		last_idx = max([cint(d.idx) for d in self.get("holidays")] or [0,])
 		for i, d in enumerate(date_list):
-			ch = self.append('holiday_list_details', {})
+			ch = self.append('holidays', {})
 			ch.description = self.weekly_off
 			ch.holiday_date = d
 			ch.idx = last_idx + i + 1
@@ -54,7 +54,7 @@ class HolidayList(Document):
 		return date_list
 
 	def clear_table(self):
-		self.set('holiday_list_details', [])
+		self.set('holidays', [])
 
 	def update_default_holiday_list(self):
 		frappe.db.sql("""update `tabHoliday List` set is_default = 0

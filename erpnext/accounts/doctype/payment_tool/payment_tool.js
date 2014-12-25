@@ -24,7 +24,7 @@ frappe.ui.form.on("Payment Tool", "onload", function(frm) {
 		}
 	});
 
-	frm.set_query("against_voucher_type", "payment_tool_details", function() {
+	frm.set_query("against_voucher_type", "against_vouchers", function() {
 		return {
 			filters: {"name": ["in", ["Sales Invoice", "Purchase Invoice", "Journal Voucher", "Sales Order", "Purchase Order"]]}
 		};
@@ -75,7 +75,7 @@ erpnext.payment_tool.check_mandatory_to_set_button = function(frm) {
 frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 	erpnext.payment_tool.check_mandatory_to_fetch(frm.doc);
 
-	frm.set_value("payment_tool_details", []);
+	frm.set_value("against_vouchers", []);
 
 	return  frappe.call({
 		method: 'erpnext.accounts.doctype.payment_tool.payment_tool.get_outstanding_vouchers',
@@ -93,16 +93,16 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 				frm.fields_dict.get_outstanding_vouchers.$input.removeClass("btn-primary");
 				frm.fields_dict.make_journal_voucher.$input.addClass("btn-primary");
 
-				frappe.model.clear_table(frm.doc, "payment_tool_details");
+				frappe.model.clear_table(frm.doc, "against_vouchers");
 				$.each(r.message, function(i, d) {
-					var invoice_detail = frappe.model.add_child(frm.doc, "Payment Tool Detail", "payment_tool_details");
+					var invoice_detail = frappe.model.add_child(frm.doc, "Payment Tool Detail", "against_vouchers");
 					invoice_detail.against_voucher_type = d.voucher_type;
 					invoice_detail.against_voucher_no = d.voucher_no;
 					invoice_detail.total_amount = d.invoice_amount;
 					invoice_detail.outstanding_amount = d.outstanding_amount;
 				});
 			}
-			refresh_field("payment_tool_details");
+			refresh_field("against_vouchers");
 			erpnext.payment_tool.set_total_payment_amount(frm);
 		}
 	});
@@ -114,7 +114,7 @@ frappe.ui.form.on("Payment Tool Detail", "against_voucher_type", function(frm) {
 });
 
 erpnext.payment_tool.validate_against_voucher = function(frm) {
-	$.each(frm.doc.payment_tool_details || [], function(i, row) {
+	$.each(frm.doc.against_vouchers || [], function(i, row) {
 		if(frm.doc.party_type=="Customer"
 			&& !in_list(["Sales Order", "Sales Invoice", "Journal Voucher"], row.against_voucher_type)) {
 				frappe.model.set_value(row.doctype, row.name, "against_voucher_type", "");
@@ -154,13 +154,13 @@ frappe.ui.form.on("Payment Tool Detail", "payment_amount", function(frm) {
 	erpnext.payment_tool.set_total_payment_amount(frm);
 });
 
-frappe.ui.form.on("Payment Tool Detail", "payment_tool_details_remove", function(frm) {
+frappe.ui.form.on("Payment Tool Detail", "against_vouchers_remove", function(frm) {
 	erpnext.payment_tool.set_total_payment_amount(frm);
 });
 
 erpnext.payment_tool.set_total_payment_amount = function(frm) {
 	var total_amount = 0.00;
-	$.each(frm.doc.payment_tool_details || [], function(i, row) {
+	$.each(frm.doc.against_vouchers || [], function(i, row) {
 		if (row.payment_amount && (row.payment_amount <= row.outstanding_amount)) {
 			total_amount = total_amount + row.payment_amount;
 		} else {

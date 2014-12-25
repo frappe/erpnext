@@ -190,7 +190,7 @@ def set_price_list(quotation):
 
 	if previous_selling_price_list != quotation.selling_price_list:
 		quotation.price_list_currency = quotation.currency = quotation.plc_conversion_rate = quotation.conversion_rate = None
-		for d in quotation.get("quotation_details"):
+		for d in quotation.get("items"):
 			d.price_list_rate = d.discount_percentage = d.rate = d.amount = None
 
 	quotation.set_price_list_and_item_details()

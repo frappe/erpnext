@@ -42,18 +42,18 @@ def set_item_in_cart(item_code, qty, user=None):
 	validate_item(item_code)
 	quotation = get_quotation(user=user)
 	qty = flt(qty)
-	quotation_item = quotation.get("quotation_details", {"item_code": item_code})
+	quotation_item = quotation.get("items", {"item_code": item_code})
 
 	if qty==0:
 		if quotation_item:
 			# remove
-			quotation.get("quotation_details").remove(quotation_item[0])
+			quotation.get("items").remove(quotation_item[0])
 	else:
 		# add or update
 		if quotation_item:
 			quotation_item[0].qty = qty
 		else:
-			quotation.append("quotation_details", {
+			quotation.append("items", {
 				"doctype": "Quotation Item",
 				"item_code": item_code,
 				"qty": qty

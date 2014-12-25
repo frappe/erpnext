@@ -13,12 +13,12 @@ from erpnext.stock.utils import update_bin
 from erpnext.controllers.selling_controller import SellingController
 
 form_grid_templates = {
-	"delivery_note_details": "templates/form_grid/item_grid.html"
+	"items": "templates/form_grid/item_grid.html"
 }
 
 class DeliveryNote(SellingController):
 	tname = 'Delivery Note Item'
-	fname = 'delivery_note_details'
+	fname = 'items'
 
 	def __init__(self, arg1, arg2=None):
 		super(DeliveryNote, self).__init__(arg1, arg2)
@@ -57,7 +57,7 @@ class DeliveryNote(SellingController):
 		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabSales Invoice Item`
 			where docstatus=1 and delivery_note=%s""", self.name)
 		if billed_qty:
-			total_qty = sum((item.qty for item in self.get("delivery_note_details")))
+			total_qty = sum((item.qty for item in self.get("items")))
 			self.get("__onload").billing_complete = (billed_qty[0][0] == total_qty)
 
 	def before_print(self):
@@ -82,7 +82,7 @@ class DeliveryNote(SellingController):
 		return "shipment" if self.docstatus==1 else None
 
 	def set_actual_qty(self):
-		for d in self.get('delivery_note_details'):
+		for d in self.get('items'):
 			if d.item_code and d.warehouse:
 				actual_qty = frappe.db.sql("""select actual_qty from `tabBin`
 					where item_code = %s and warehouse = %s""", (d.item_code, d.warehouse))
@@ -91,7 +91,7 @@ class DeliveryNote(SellingController):
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
 		if frappe.db.get_value("Selling Settings", None, 'so_required') == 'Yes':
-			 for d in self.get('delivery_note_details'):
+			 for d in self.get('items'):
 				 if not d.against_sales_order:
 					 frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
@@ -110,7 +110,7 @@ class DeliveryNote(SellingController):
 		self.validate_with_previous_doc()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		make_packing_list(self, 'delivery_note_details')
+		make_packing_list(self, 'items')
 
 		self.update_current_stock()
 
@@ -118,7 +118,7 @@ class DeliveryNote(SellingController):
 		if not self.installation_status: self.installation_status = 'Not Installed'
 
 	def validate_with_previous_doc(self):
-		items = self.get("delivery_note_details")
+		items = self.get("items")
 
 		for fn in (("Sales Order", "against_sales_order"), ("Sales Invoice", "against_sales_invoice")):
 			if filter(None, [getattr(d, fn[1], None) for d in items]):
@@ -150,7 +150,7 @@ class DeliveryNote(SellingController):
 
 	def validate_for_items(self):
 		check_list, chk_dupl_itm = [], []
-		for d in self.get('delivery_note_details'):
+		for d in self.get('items'):
 			e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
 			f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
 
@@ -174,11 +174,11 @@ class DeliveryNote(SellingController):
 
 	def update_current_stock(self):
 		if self.get("_action") and self._action != "update_after_submit":
-			for d in self.get('delivery_note_details'):
+			for d in self.get('items'):
 				d.actual_qty = frappe.db.get_value("Bin", {"item_code": d.item_code,
 					"warehouse": d.warehouse}, "actual_qty")
 
-			for d in self.get('packing_details'):
+			for d in self.get('packed_items'):
 				bin_qty = frappe.db.get_value("Bin", {"item_code": d.item_code,
 					"warehouse": d.warehouse}, ["actual_qty", "projected_qty"], as_dict=True)
 				if bin_qty:

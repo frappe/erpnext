@@ -13,7 +13,7 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 class InstallationNote(TransactionBase):
 	tname = 'Installation Note Item'
-	fname = 'installed_item_details'
+	fname = 'items'
 
 	def __init__(self, arg1, arg2=None):
 		super(InstallationNote, self).__init__(arg1, arg2)
@@ -76,7 +76,7 @@ class InstallationNote(TransactionBase):
 
 	def validate_serial_no(self):
 		cur_s_no, prevdoc_s_no, sr_list = [], [], []
-		for d in self.get('installed_item_details'):
+		for d in self.get('items'):
 			self.is_serial_no_added(d.item_code, d.serial_no)
 			if d.serial_no:
 				sr_list = get_valid_serial_nos(d.serial_no, d.qty, d.item_code)
@@ -89,14 +89,14 @@ class InstallationNote(TransactionBase):
 				self.is_serial_no_installed(sr_list, d.item_code)
 
 	def validate_installation_date(self):
-		for d in self.get('installed_item_details'):
+		for d in self.get('items'):
 			if d.prevdoc_docname:
 				d_date = frappe.db.get_value("Delivery Note", d.prevdoc_docname, "posting_date")
 				if d_date > getdate(self.inst_date):
 					frappe.throw(_("Installation date cannot be before delivery date for Item {0}").format(d.item_code))
 
 	def check_item_table(self):
-		if not(self.get('installed_item_details')):
+		if not(self.get('items')):
 			frappe.throw(_("Please pull items from Delivery Note"))
 
 	def on_update(self):
@@ -108,7 +108,7 @@ class InstallationNote(TransactionBase):
 		frappe.db.set(self, 'status', 'Submitted')
 
 	def on_cancel(self):
-		for d in self.get('installed_item_details'):
+		for d in self.get('items'):
 			if d.serial_no:
 				d.serial_no = d.serial_no.replace(",", "\n")
 				for sr_no in d.serial_no.split("\n"):

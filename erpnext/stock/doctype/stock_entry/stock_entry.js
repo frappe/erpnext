@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.tname = "Stock Entry Detail";
-cur_frm.cscript.fname = "mtn_details";
+cur_frm.cscript.fname = "items";
 
 frappe.require("assets/erpnext/js/controllers/stock_controller.js");
 frappe.require("assets/erpnext/js/utils.js");
@@ -24,7 +24,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			};
 		};
 
-		this.frm.fields_dict.mtn_details.grid.get_field('item_code').get_query = function() {
+		this.frm.fields_dict.items.grid.get_field('item_code').get_query = function() {
 			if(in_list(["Sales Return", "Purchase Return"], me.frm.doc.purpose) &&
 				me.get_doctype_docname()) {
 					return {
@@ -43,7 +43,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 		if(cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
-			this.frm.fields_dict.mtn_details.grid.get_field('expense_account').get_query =
+			this.frm.fields_dict.items.grid.get_field('expense_account').get_query =
 					function() {
 				return {
 					filters: {
@@ -108,7 +108,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				},
 				callback: function(r) {
 					if (!r.exc) {
-						$.each(me.frm.doc.mtn_details || [], function(i, d) {
+						$.each(me.frm.doc.items || [], function(i, d) {
 							if(!d.expense_account) d.expense_account = r.message;
 						});
 					}
@@ -133,7 +133,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				doc: this.frm.doc,
 				method: "get_items",
 				callback: function(r) {
-					if(!r.exc) refresh_field("mtn_details");
+					if(!r.exc) refresh_field("items");
 				}
 			});
 		}
@@ -142,7 +142,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	qty: function(doc, cdt, cdn) {
 		var d = locals[cdt][cdn];
 		d.transfer_qty = flt(d.qty) * flt(d.conversion_factor);
-		refresh_field('mtn_details');
+		refresh_field('items');
 	},
 
 	production_order: function() {
@@ -222,9 +222,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 	},
 
-	mtn_details_add: function(doc, cdt, cdn) {
+	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
-		this.frm.script_manager.copy_from_first_row("mtn_details", row,
+		this.frm.script_manager.copy_from_first_row("items", row,
 			["expense_account", "cost_center"]);
 
 		if(!row.s_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
@@ -249,8 +249,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	set_warehouse_if_missing: function(fieldname, value, condition) {
-		for (var i=0, l=(this.frm.doc.mtn_details || []).length; i<l; i++) {
-			var row = this.frm.doc.mtn_details[i];
+		for (var i=0, l=(this.frm.doc.items || []).length; i<l; i++) {
+			var row = this.frm.doc.items[i];
 			if (!row[fieldname]) {
 				if (condition && !condition(row)) {
 					continue;
@@ -261,7 +261,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 	},
 
-	mtn_details_on_form_rendered: function(doc, grid_row) {
+	items_on_form_rendered: function(doc, grid_row) {
 		erpnext.setup_serial_no(grid_row)
 	},
 
@@ -336,8 +336,8 @@ cur_frm.cscript.toggle_related_fields = function(doc) {
 	cur_frm.toggle_enable("from_warehouse", !disable_from_warehouse);
 	cur_frm.toggle_enable("to_warehouse", !disable_to_warehouse);
 
-	cur_frm.fields_dict["mtn_details"].grid.set_column_disp("s_warehouse", !disable_from_warehouse);
-	cur_frm.fields_dict["mtn_details"].grid.set_column_disp("t_warehouse", !disable_to_warehouse);
+	cur_frm.fields_dict["items"].grid.set_column_disp("s_warehouse", !disable_from_warehouse);
+	cur_frm.fields_dict["items"].grid.set_column_disp("t_warehouse", !disable_to_warehouse);
 
 	cur_frm.cscript.toggle_enable_bom();
 
@@ -371,7 +371,7 @@ cur_frm.cscript.purpose = function(doc, cdt, cdn) {
 }
 
 // Overloaded query for link batch_no
-cur_frm.fields_dict['mtn_details'].grid.get_field('batch_no').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field('batch_no').get_query = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(d.item_code) {
 		return{
@@ -401,7 +401,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 			'company'		: cur_frm.doc.company
 		};
 		return get_server_fields('get_item_details', JSON.stringify(args),
-			'mtn_details', doc, cdt, cdn, 1);
+			'items', doc, cdt, cdn, 1);
 	}
 
 }
@@ -417,7 +417,7 @@ cur_frm.cscript.s_warehouse = function(doc, cdt, cdn) {
 			'qty'			: d.s_warehouse ? -1* d.qty : d.qty
 		}
 		return get_server_fields('get_warehouse_details', JSON.stringify(args),
-			'mtn_details', doc, cdt, cdn, 1);
+			'items', doc, cdt, cdn, 1);
 	}
 }
 
@@ -428,7 +428,7 @@ cur_frm.cscript.uom = function(doc, cdt, cdn) {
 	if(d.uom && d.item_code){
 		var arg = {'item_code':d.item_code, 'uom':d.uom, 'qty':d.qty}
 		return get_server_fields('get_uom_details', JSON.stringify(arg),
-			'mtn_details', doc, cdt, cdn, 1);
+			'items', doc, cdt, cdn, 1);
 	}
 }
 
@@ -439,7 +439,7 @@ cur_frm.cscript.validate = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.validate_items = function(doc) {
-	cl = doc.mtn_details || [];
+	cl = doc.items || [];
 	if (!cl.length) {
 		msgprint(__("Item table can not be blank"));
 		validated = false;

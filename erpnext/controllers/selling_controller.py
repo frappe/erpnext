@@ -15,7 +15,7 @@ class SellingController(StockController):
 		if hasattr(self, "fname"):
 			self.table_print_templates = {
 				self.fname: "templates/print_formats/includes/item_grid.html",
-				"other_charges": "templates/print_formats/includes/taxes.html",
+				"taxes": "templates/print_formats/includes/taxes.html",
 			}
 
 	def get_feed(self):
@@ -44,7 +44,7 @@ class SellingController(StockController):
 		self.set_missing_lead_customer_details()
 		self.set_price_list_and_item_details()
 		if self.get("__islocal"):
-			self.set_taxes("other_charges", "taxes_and_charges")
+			self.set_taxes("taxes", "taxes_and_charges")
 
 	def set_missing_lead_customer_details(self):
 		if getattr(self, "customer", None):
@@ -73,7 +73,7 @@ class SellingController(StockController):
 			# shipping rule calculation based on item's net weight
 
 			shipping_amount = 0.0
-			for condition in shipping_rule.get("shipping_rule_conditions"):
+			for condition in shipping_rule.get("conditions"):
 				if not condition.to_value or (flt(condition.from_value) <= value <= flt(condition.to_value)):
 					shipping_amount = condition.shipping_amount
 					break
@@ -85,28 +85,28 @@ class SellingController(StockController):
 				"cost_center": shipping_rule.cost_center
 			}
 
-			existing_shipping_charge = self.get("other_charges", filters=shipping_charge)
+			existing_shipping_charge = self.get("taxes", filters=shipping_charge)
 			if existing_shipping_charge:
 				# take the last record found
 				existing_shipping_charge[-1].rate = shipping_amount
 			else:
 				shipping_charge["rate"] = shipping_amount
 				shipping_charge["description"] = shipping_rule.label
-				self.append("other_charges", shipping_charge)
+				self.append("taxes", shipping_charge)
 
 			self.calculate_taxes_and_totals()
 
 	def remove_shipping_charge(self):
 		if self.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
-			existing_shipping_charge = self.get("other_charges", {
+			existing_shipping_charge = self.get("taxes", {
 				"doctype": "Sales Taxes and Charges",
 				"charge_type": "Actual",
 				"account_head": shipping_rule.account,
 				"cost_center": shipping_rule.cost_center
 			})
 			if existing_shipping_charge:
-				self.get("other_charges").remove(existing_shipping_charge[-1])
+				self.get("taxes").remove(existing_shipping_charge[-1])
 				self.calculate_taxes_and_totals()
 
 	def set_total_in_words(self):
@@ -124,11 +124,11 @@ class SellingController(StockController):
 				self.grand_total_export or self.rounded_total_export, self.currency)
 
 	def calculate_taxes_and_totals(self):
-		self.other_fname = "other_charges"
+		self.other_fname = "taxes"
 
 		super(SellingController, self).calculate_taxes_and_totals()
 
-		self.calculate_total_advance("Sales Invoice", "advance_adjustment_details")
+		self.calculate_total_advance("Sales Invoice", "advances")
 		self.calculate_commission()
 		self.calculate_contribution()
 
@@ -343,7 +343,7 @@ class SellingController(StockController):
 					reserved_qty_for_main_item = -flt(d.qty)
 
 			if self.has_sales_bom(d.item_code):
-				for p in self.get("packing_details"):
+				for p in self.get("packed_items"):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 						# the packing details table's qty is already multiplied with parent's qty
 						il.append(frappe._dict({

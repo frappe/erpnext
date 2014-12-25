@@ -25,7 +25,7 @@ class TestMaterialRequest(unittest.TestCase):
 		po = make_purchase_order(mr.name)
 
 		self.assertEquals(po.doctype, "Purchase Order")
-		self.assertEquals(len(po.get("po_details")), len(mr.get("indent_details")))
+		self.assertEquals(len(po.get("items")), len(mr.get("items")))
 
 	def test_make_supplier_quotation(self):
 		from erpnext.stock.doctype.material_request.material_request import make_supplier_quotation
@@ -39,7 +39,7 @@ class TestMaterialRequest(unittest.TestCase):
 		sq = make_supplier_quotation(mr.name)
 
 		self.assertEquals(sq.doctype, "Supplier Quotation")
-		self.assertEquals(len(sq.get("quotation_items")), len(mr.get("indent_details")))
+		self.assertEquals(len(sq.get("items")), len(mr.get("items")))
 
 
 	def test_make_stock_entry(self):
@@ -56,7 +56,7 @@ class TestMaterialRequest(unittest.TestCase):
 		se = make_stock_entry(mr.name)
 
 		self.assertEquals(se.doctype, "Stock Entry")
-		self.assertEquals(len(se.get("mtn_details")), len(mr.get("indent_details")))
+		self.assertEquals(len(se.get("items")), len(mr.get("items")))
 
 	def _insert_stock_entry(self, qty1, qty2, warehouse = None ):
 		se = frappe.get_doc({
@@ -66,12 +66,12 @@ class TestMaterialRequest(unittest.TestCase):
 				"posting_time": "00:00:00",
 				"purpose": "Material Receipt",
 				"fiscal_year": "_Test Fiscal Year 2013",
-				"mtn_details": [
+				"items": [
 					{
 						"conversion_factor": 1.0,
 						"doctype": "Stock Entry Detail",
 						"item_code": "_Test Item Home Desktop 100",
-						"parentfield": "mtn_details",
+						"parentfield": "items",
 						"incoming_rate": 100,
 						"qty": qty1,
 						"stock_uom": "_Test UOM 1",
@@ -83,7 +83,7 @@ class TestMaterialRequest(unittest.TestCase):
 						"conversion_factor": 1.0,
 						"doctype": "Stock Entry Detail",
 						"item_code": "_Test Item Home Desktop 200",
-						"parentfield": "mtn_details",
+						"parentfield": "items",
 						"incoming_rate": 100,
 						"qty": qty2,
 						"stock_uom": "_Test UOM 1",
@@ -107,18 +107,18 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# check if per complete is None
 		self.assertEquals(mr.per_ordered, None)
-		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
-		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
+		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
 
 		# map a purchase order
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 		po_doc = make_purchase_order(mr.name)
 		po_doc.supplier = "_Test Supplier"
 		po_doc.transaction_date = "2013-07-07"
-		po_doc.get("po_details")[0].qty = 27.0
-		po_doc.get("po_details")[1].qty = 1.5
-		po_doc.get("po_details")[0].schedule_date = "2013-07-09"
-		po_doc.get("po_details")[1].schedule_date = "2013-07-09"
+		po_doc.get("items")[0].qty = 27.0
+		po_doc.get("items")[1].qty = 1.5
+		po_doc.get("items")[0].schedule_date = "2013-07-09"
+		po_doc.get("items")[1].schedule_date = "2013-07-09"
 
 
 		# check for stopped status of Material Request
@@ -140,8 +140,8 @@ class TestMaterialRequest(unittest.TestCase):
 		# check if per complete is as expected
 		mr.load_from_db()
 		self.assertEquals(mr.per_ordered, 50)
-		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 27.0)
-		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 1.5)
+		self.assertEquals(mr.get("items")[0].ordered_qty, 27.0)
+		self.assertEquals(mr.get("items")[1].ordered_qty, 1.5)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
@@ -153,8 +153,8 @@ class TestMaterialRequest(unittest.TestCase):
 		# check if per complete is as expected
 		mr.load_from_db()
 		self.assertEquals(mr.per_ordered, None)
-		self.assertEquals(mr.get("indent_details")[0].ordered_qty, None)
-		self.assertEquals(mr.get("indent_details")[1].ordered_qty, None)
+		self.assertEquals(mr.get("items")[0].ordered_qty, None)
+		self.assertEquals(mr.get("items")[1].ordered_qty, None)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
@@ -174,8 +174,8 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# check if per complete is None
 		self.assertEquals(mr.per_ordered, None)
-		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
-		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
+		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
@@ -192,13 +192,13 @@ class TestMaterialRequest(unittest.TestCase):
 			"posting_time": "01:00",
 			"fiscal_year": "_Test Fiscal Year 2013",
 		})
-		se_doc.get("mtn_details")[0].update({
+		se_doc.get("items")[0].update({
 			"qty": 27.0,
 			"transfer_qty": 27.0,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
 			"incoming_rate": 1.0
 		})
-		se_doc.get("mtn_details")[1].update({
+		se_doc.get("items")[1].update({
 			"qty": 1.5,
 			"transfer_qty": 1.5,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
@@ -229,8 +229,8 @@ class TestMaterialRequest(unittest.TestCase):
 		# check if per complete is as expected
 		mr.load_from_db()
 		self.assertEquals(mr.per_ordered, 50)
-		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 27.0)
-		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 1.5)
+		self.assertEquals(mr.get("items")[0].ordered_qty, 27.0)
+		self.assertEquals(mr.get("items")[1].ordered_qty, 1.5)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
@@ -242,8 +242,8 @@ class TestMaterialRequest(unittest.TestCase):
 		se.cancel()
 		mr.load_from_db()
 		self.assertEquals(mr.per_ordered, 0)
-		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
-		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
+		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
@@ -263,8 +263,8 @@ class TestMaterialRequest(unittest.TestCase):
 
 		# check if per complete is None
 		self.assertEquals(mr.per_ordered, None)
-		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
-		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
+		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
 
 		# map a stock entry
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
@@ -275,13 +275,13 @@ class TestMaterialRequest(unittest.TestCase):
 			"posting_time": "00:00",
 			"fiscal_year": "_Test Fiscal Year 2013",
 		})
-		se_doc.get("mtn_details")[0].update({
+		se_doc.get("items")[0].update({
 			"qty": 60.0,
 			"transfer_qty": 60.0,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
 			"incoming_rate": 1.0
 		})
-		se_doc.get("mtn_details")[1].update({
+		se_doc.get("items")[1].update({
 			"qty": 3.0,
 			"transfer_qty": 3.0,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
@@ -307,8 +307,8 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.load_from_db()
 
 		self.assertEquals(mr.per_ordered, 100)
-		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 60.0)
-		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 3.0)
+		self.assertEquals(mr.get("items")[0].ordered_qty, 60.0)
+		self.assertEquals(mr.get("items")[1].ordered_qty, 3.0)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
@@ -320,8 +320,8 @@ class TestMaterialRequest(unittest.TestCase):
 		se.cancel()
 		mr.load_from_db()
 		self.assertEquals(mr.per_ordered, 0)
-		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 0)
-		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 0)
+		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
@@ -345,14 +345,14 @@ class TestMaterialRequest(unittest.TestCase):
 			"posting_time": "00:00",
 			"fiscal_year": "_Test Fiscal Year 2013",
 		})
-		se_doc.get("mtn_details")[0].update({
+		se_doc.get("items")[0].update({
 			"qty": 60.0,
 			"transfer_qty": 60.0,
 			"s_warehouse": "_Test Warehouse - _TC",
 			"t_warehouse": "_Test Warehouse 1 - _TC",
 			"incoming_rate": 1.0
 		})
-		se_doc.get("mtn_details")[1].update({
+		se_doc.get("items")[1].update({
 			"qty": 3.0,
 			"transfer_qty": 3.0,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
@@ -372,7 +372,7 @@ class TestMaterialRequest(unittest.TestCase):
 		# map a stock entry
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 		se_doc = make_stock_entry(mr.name)
-		self.assertEquals(se_doc.get("mtn_details")[0].s_warehouse, "_Test Warehouse - _TC")
+		self.assertEquals(se_doc.get("items")[0].s_warehouse, "_Test Warehouse - _TC")
 
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
@@ -397,7 +397,7 @@ class TestMaterialRequest(unittest.TestCase):
 		se = make_stock_entry(mr.name)
 
 		self.assertEquals(se.doctype, "Stock Entry")
-		self.assertEquals(len(se.get("mtn_details")), len(mr.get("indent_details")))
+		self.assertEquals(len(se.get("items")), len(mr.get("items")))
 
 	def test_completed_qty_for_issue(self):
 		def _get_requested_qty():
@@ -422,14 +422,14 @@ class TestMaterialRequest(unittest.TestCase):
 
 		se_doc = make_stock_entry(mr.name)
 		se_doc.fiscal_year = "_Test Fiscal Year 2014"
-		se_doc.get("mtn_details")[0].qty = 60.0
+		se_doc.get("items")[0].qty = 60.0
 		se_doc.insert()
 		se_doc.submit()
 
 		# check if per complete is as expected
 		mr.load_from_db()
-		self.assertEquals(mr.get("indent_details")[0].ordered_qty, 60.0)
-		self.assertEquals(mr.get("indent_details")[1].ordered_qty, 3.0)
+		self.assertEquals(mr.get("items")[0].ordered_qty, 60.0)
+		self.assertEquals(mr.get("items")[1].ordered_qty, 3.0)
 
 		#testing bin requested qty after issuing stock against material request
 		self.assertEquals(_get_requested_qty(), existing_requested_qty)

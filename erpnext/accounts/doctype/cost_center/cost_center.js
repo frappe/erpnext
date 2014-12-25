@@ -12,8 +12,8 @@ erpnext.accounts.CostCenterController = frappe.ui.form.Controller.extend({
 
 	setup_queries: function() {
 		var me = this;
-		if(this.frm.fields_dict["budget_details"].grid.get_field("account")) {
-			this.frm.set_query("account", "budget_details", function() {
+		if(this.frm.fields_dict["budgets"].grid.get_field("account")) {
+			this.frm.set_query("account", "budgets", function() {
 				return {
 					filters:[
 						['Account', 'company', '=', me.frm.doc.company],

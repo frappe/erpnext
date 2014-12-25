@@ -21,7 +21,7 @@ class BankReconciliation(Document):
 		dl = frappe.db.sql("""select t1.name, t1.cheque_no, t1.cheque_date, t2.debit,
 				t2.credit, t1.posting_date, t2.against_account, t1.clearance_date
 			from
-				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
+				`tabJournal Voucher` t1, `tabJournal Entry Account` t2
 			where
 				t2.parent = t1.name and t2.account = %s
 				and t1.posting_date >= %s and t1.posting_date <= %s and t1.docstatus=1
