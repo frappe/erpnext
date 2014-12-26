@@ -100,9 +100,9 @@ rename_map = {
 	],
 	"Employee": [
 		["employee_leave_approvers", "leave_approvers"],
-		# ["educational_qualification_details", "educational_qualifications"],
-		# ["previous_experience_details", "external_work_experiences"], work_history
-		# ["experience_in_company_details", "internal_work_experiences"], internal_work_history
+		["educational_qualification_details", "education"],
+		["previous_experience_details", "external_work_history"],
+		["experience_in_company_details", "internal_work_history"]
 	],
 	"Event": [
 		["event_individuals", "users"],
@@ -124,8 +124,8 @@ rename_map = {
 		["item_variants", "variants"],
 		["item_reorder", "reorder_levels"],
 		["uom_conversion_details", "uoms"],
-		# ["item_supplier_details", "supplier_item_codes"],
-		# ["item_customer_details", "customer_item_codes"],
+		["item_supplier_details", "supplier_items"],
+		["item_customer_details", "customer_items"],
 		["item_tax", "taxes"],
 		["item_specification_details", "quality_parameters"],
 		["item_website_specifications", "website_specifications"]
@@ -161,7 +161,7 @@ rename_map = {
 		["party_accounts", "accounts"]
 	],
 	"Payment Tool": [
-		# ["payment_tool_details", "against_vouchers"]
+		["payment_tool_details", "vouchers"]
 	],
 	"Production Planning Tool": [
 		["pp_so_details", "sales_orders"],
@@ -185,7 +185,7 @@ rename_map = {
 		["sales_bom_items", "items"]
 	],
 	"SMS Settings": [
-		# ["static_parameter_details", "static_parameters"]
+		["static_parameter_details", "parameters"]
 	],
 	"Stock Entry": [
 		["mtn_details", "items"]
@@ -203,7 +203,7 @@ rename_map = {
 		["time_log_batch_details", "time_logs"]
 	],
 	"Workflow": [
-		# ["workflow_document_states", "document_states"],
+		["workflow_document_states", "states"],
 		["workflow_transitions", "transitions"]
 	],
 	"Workstation": [

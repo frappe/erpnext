@@ -302,7 +302,7 @@ class Item(WebsiteGenerator):
 	def fill_customer_code(self):
 		""" Append all the customer codes and insert into "customer_code" field of item table """
 		cust_code=[]
-		for d in self.get('customer_item_codes'):
+		for d in self.get('customer_items'):
 			cust_code.append(d.ref_code)
 		self.customer_code=','.join(cust_code)
 

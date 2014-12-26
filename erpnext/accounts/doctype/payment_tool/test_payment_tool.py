@@ -154,7 +154,7 @@ class TestPaymentTool(unittest.TestCase):
 
 	def check_jv_entries(self, paytool, outstanding_entries, expected_outstanding):
 		for e in outstanding_entries:
-			d1 = paytool.append("against_vouchers")
+			d1 = paytool.append("vouchers")
 			d1.against_voucher_type = e.get("voucher_type")
 			d1.against_voucher_no = e.get("voucher_no")
 			d1.total_amount = e.get("invoice_amount")

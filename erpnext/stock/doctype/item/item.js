@@ -178,11 +178,11 @@ cur_frm.cscript.validate = function(doc, cdt, cdn){
 	cur_frm.cscript.weight_to_validate(doc, cdt, cdn);
 }
 
-cur_frm.fields_dict.customer_item_codes.grid.get_field("customer_name").get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict.customer_items.grid.get_field("customer_name").get_query = function(doc, cdt, cdn) {
 	return { query: "erpnext.controllers.queries.customer_query" }
 }
 
-cur_frm.fields_dict.supplier_item_codes.grid.get_field("supplier").get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict.supplier_items.grid.get_field("supplier").get_query = function(doc, cdt, cdn) {
 	return { query: "erpnext.controllers.queries.supplier_query" }
 }
 

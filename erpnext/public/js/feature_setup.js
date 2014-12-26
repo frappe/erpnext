@@ -142,14 +142,14 @@ pscript.feature_dict = {
 	},
 
 	'fs_item_advanced': {
-		'Item': {'fields':['customer_item_codes']}
+		'Item': {'fields':['customer_items']}
 	},
 	'fs_sales_extras': {
 		'Address': {'fields':['sales_partner']},
 		'Contact': {'fields':['sales_partner']},
 		'Customer': {'fields':['sales_team']},
 		'Delivery Note': {'fields':['sales_team']},
-		'Item': {'fields':['customer_item_codes']},
+		'Item': {'fields':['customer_items']},
 		'Sales Invoice': {'fields':['sales_team']},
 		'Sales Order': {'fields':['sales_team']}
 	},

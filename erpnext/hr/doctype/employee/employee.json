@@ -539,9 +539,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "educational_qualifications", 
+   "fieldname": "education", 
    "fieldtype": "Table", 
-   "label": "Educational Qualifications", 
+   "label": "Education", 
    "options": "Employee Education", 
    "permlevel": 0
   }, 
@@ -553,9 +553,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "external_work_experiences", 
+   "fieldname": "external_work_history", 
    "fieldtype": "Table", 
-   "label": "External Work Experiences", 
+   "label": "External Work History", 
    "options": "Employee External Work History", 
    "permlevel": 0
   }, 
@@ -567,9 +567,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "internal_work_experiences", 
+   "fieldname": "internal_work_history", 
    "fieldtype": "Table", 
-   "label": "Internal Work Experiences", 
+   "label": "Internal Work History", 
    "options": "Employee Internal Work History", 
    "permlevel": 0
   }, 
@@ -673,7 +673,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2014-12-24 15:28:06.576523", 
+ "modified": "2014-12-26 11:12:57.631617", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee", 

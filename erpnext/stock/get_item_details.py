@@ -251,10 +251,10 @@ def validate_conversion_rate(args, meta):
 
 def get_party_item_code(args, item_doc, out):
 	if args.transaction_type == "selling":
-		customer_item_code = item_doc.get("customer_item_codes", {"customer_name": args.customer})
+		customer_item_code = item_doc.get("customer_items", {"customer_name": args.customer})
 		out.customer_item_code = customer_item_code[0].ref_code if customer_item_code else None
 	else:
-		item_supplier = item_doc.get("supplier_item_codes", {"supplier": args.supplier})
+		item_supplier = item_doc.get("supplier_items", {"supplier": args.supplier})
 		out.supplier_part_no = item_supplier[0].supplier_part_no if item_supplier else None
 
 def get_pos_settings_item_details(company, args, pos_settings=None):
