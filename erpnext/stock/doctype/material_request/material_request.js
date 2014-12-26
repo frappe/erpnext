@@ -1,9 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.tname = "Material Request Item";
-cur_frm.cscript.fname = "items";
-
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 
 frappe.require("assets/erpnext/js/utils.js");
@@ -11,7 +8,7 @@ frappe.require("assets/erpnext/js/utils.js");
 erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.extend({
 	onload: function(doc) {
 		this._super();
-		this.frm.set_query("item_code", this.frm.cscript.fname, function() {
+		this.frm.set_query("item_code", "items", function() {
 			return {
 				query: "erpnext.controllers.queries.item_query"
 			}
@@ -45,7 +42,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 			if(doc.material_request_type === "Material Transfer" && doc.status === "Submitted")
 				cur_frm.add_custom_button(__("Transfer Material"), this.make_stock_entry,
 					frappe.boot.doctype_icons["Stock Entry"]);
-		
+
 			if(doc.material_request_type === "Material Issue" && doc.status === "Submitted")
 				cur_frm.add_custom_button(__("Issue Material"), this.make_stock_entry,
 					frappe.boot.doctype_icons["Stock Entry"]);

@@ -14,9 +14,6 @@ form_grid_templates = {
 }
 
 class Quotation(SellingController):
-	tname = 'Quotation Item'
-	fname = 'items'
-
 	def validate(self):
 		super(Quotation, self).validate()
 		self.set_status()

@@ -16,9 +16,6 @@ form_grid_templates = {
 }
 
 class PurchaseInvoice(BuyingController):
-	tname = 'Purchase Invoice Item'
-	fname = 'items'
-
 	def __init__(self, arg1, arg2=None):
 		super(PurchaseInvoice, self).__init__(arg1, arg2)
 		self.status_updater = [{
@@ -107,7 +104,7 @@ class PurchaseInvoice(BuyingController):
 					throw(_("Purchase Order {0} is 'Stopped'").format(d.purchase_order))
 
 	def validate_with_previous_doc(self):
-		super(PurchaseInvoice, self).validate_with_previous_doc(self.tname, {
+		super(PurchaseInvoice, self).validate_with_previous_doc({
 			"Purchase Order": {
 				"ref_dn_field": "purchase_order",
 				"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
@@ -130,7 +127,7 @@ class PurchaseInvoice(BuyingController):
 		})
 
 		if cint(frappe.defaults.get_global_default('maintain_same_rate')):
-			super(PurchaseInvoice, self).validate_with_previous_doc(self.tname, {
+			super(PurchaseInvoice, self).validate_with_previous_doc({
 				"Purchase Order Item": {
 					"ref_dn_field": "po_detail",
 					"compare_fields": [["rate", "="]],

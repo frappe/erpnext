@@ -1,12 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// Module CRM
-// =====================================================================================
-cur_frm.cscript.tname = "Quotation Item";
-cur_frm.cscript.fname = "items";
-cur_frm.cscript.other_fname = "taxes";
-cur_frm.cscript.sales_team_fname = "sales_team";
 
 {% include 'selling/sales_common.js' %}
 {% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}

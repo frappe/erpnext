@@ -1,9 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.tname = "Installation Note Item";
-cur_frm.cscript.fname = "items";
-
 frappe.require("assets/erpnext/js/utils.js");
 
 frappe.ui.form.on_change("Installation Note", "customer",

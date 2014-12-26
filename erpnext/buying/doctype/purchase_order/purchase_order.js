@@ -3,10 +3,6 @@
 
 frappe.provide("erpnext.buying");
 
-cur_frm.cscript.tname = "Purchase Order Item";
-cur_frm.cscript.fname = "items";
-cur_frm.cscript.other_fname = "taxes";
-
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 {% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
@@ -147,7 +143,7 @@ cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt
 
 cur_frm.cscript.get_last_purchase_rate = function(doc, cdt, cdn){
 	return $c_obj(doc, 'get_last_purchase_rate', '', function(r, rt) {
-		refresh_field(cur_frm.cscript.fname);
+		refresh_field("items");
 		var doc = locals[cdt][cdn];
 		cur_frm.cscript.calc_amount( doc, 2);
 	});

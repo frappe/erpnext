@@ -17,9 +17,6 @@ form_grid_templates = {
 }
 
 class DeliveryNote(SellingController):
-	tname = 'Delivery Note Item'
-	fname = 'items'
-
 	def __init__(self, arg1, arg2=None):
 		super(DeliveryNote, self).__init__(arg1, arg2)
 		self.status_updater = [{
@@ -38,7 +35,7 @@ class DeliveryNote(SellingController):
 			'second_source_field': 'qty',
 			'second_join_field': 'so_detail',
 			'overflow_type': 'delivery',
-			'second_source_extra_cond': """ and exists(select name from `tabSales Invoice` 
+			'second_source_extra_cond': """ and exists(select name from `tabSales Invoice`
 				where name=`tabSales Invoice Item`.parent and ifnull(update_stock, 0) = 1)"""
 		},
 		{
@@ -122,7 +119,7 @@ class DeliveryNote(SellingController):
 
 		for fn in (("Sales Order", "against_sales_order"), ("Sales Invoice", "against_sales_invoice")):
 			if filter(None, [getattr(d, fn[1], None) for d in items]):
-				super(DeliveryNote, self).validate_with_previous_doc(self.tname, {
+				super(DeliveryNote, self).validate_with_previous_doc({
 					fn[0]: {
 						"ref_dn_field": fn[1],
 						"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
@@ -131,7 +128,7 @@ class DeliveryNote(SellingController):
 				})
 
 				if cint(frappe.defaults.get_global_default('maintain_same_sales_rate')):
-					super(DeliveryNote, self).validate_with_previous_doc(self.tname, {
+					super(DeliveryNote, self).validate_with_previous_doc({
 						fn[0] + " Item": {
 							"ref_dn_field": "so_detail",
 							"compare_fields": [["rate", "="]],
@@ -222,10 +219,10 @@ class DeliveryNote(SellingController):
 		"""
 			Validate that if packed qty exists, it should be equal to qty
 		"""
-		if not any([flt(d.get('packed_qty')) for d in self.get(self.fname)]):
+		if not any([flt(d.get('packed_qty')) for d in self.get("items")]):
 			return
 		has_error = False
-		for d in self.get(self.fname):
+		for d in self.get("items"):
 			if flt(d.get('qty')) != flt(d.get('packed_qty')):
 				frappe.msgprint(_("Packed quantity must equal quantity for Item {0} in row {1}").format(d.item_code, d.idx))
 				has_error = True

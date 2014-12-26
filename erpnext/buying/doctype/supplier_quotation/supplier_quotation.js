@@ -1,11 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// define defaults for purchase common
-cur_frm.cscript.tname = "Supplier Quotation Item";
-cur_frm.cscript.fname = "items";
-cur_frm.cscript.other_fname = "taxes";
-
 // attach required files
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 {% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}

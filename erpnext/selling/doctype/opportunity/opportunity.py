@@ -10,9 +10,6 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.utilities.transaction_base import TransactionBase
 
 class Opportunity(TransactionBase):
-	fname = 'enq_details'
-	tname = 'Opportunity Item'
-
 	def get_item_details(self, item_code):
 		item = frappe.db.sql("""select item_name, stock_uom, description_html, description, item_group, brand
 			from `tabItem` where name = %s""", item_code, as_dict=1)

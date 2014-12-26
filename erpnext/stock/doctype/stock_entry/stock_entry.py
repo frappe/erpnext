@@ -26,14 +26,12 @@ form_grid_templates = {
 }
 
 class StockEntry(StockController):
-	fname = 'items'
-
 	def get_feed(self):
 		return _("From {0} to {1}").format(self.from_warehouse, self.to_warehouse)
 
 	def onload(self):
 		if self.docstatus==1:
-			for item in self.get(self.fname):
+			for item in self.get("items"):
 				item.update(get_available_qty(item.item_code,
 					item.s_warehouse))
 
@@ -869,7 +867,7 @@ def get_sales_account_from_item(doc, ref_item):
 	account = None
 	if not getattr(ref_item, "income_account", None):
 		if ref_item.parent_item:
-			parent_item = doc.get(doc.fname, {"item_code": ref_item.parent_item})[0]
+			parent_item = doc.get("items", {"item_code": ref_item.parent_item})[0]
 			account = parent_item.income_account
 	else:
 		account = ref_item.income_account
@@ -944,7 +942,7 @@ def make_return_jv_from_purchase_receipt(se, ref):
 
 	if not invoice_against_receipt:
 		purchase_orders_against_receipt = [d.prevdoc_docname for d in
-			ref.doc.get(ref.doc.fname, {"prevdoc_doctype": "Purchase Order"})
+			ref.doc.get("items", {"prevdoc_doctype": "Purchase Order"})
 			if getattr(d, "prevdoc_docname", None)]
 
 		if purchase_orders_against_receipt:

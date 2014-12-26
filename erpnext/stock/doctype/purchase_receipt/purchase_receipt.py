@@ -16,9 +16,6 @@ form_grid_templates = {
 }
 
 class PurchaseReceipt(BuyingController):
-	tname = 'Purchase Receipt Item'
-	fname = 'items'
-
 	def __init__(self, arg1, arg2=None):
 		super(PurchaseReceipt, self).__init__(arg1, arg2)
 		self.status_updater = [{
@@ -101,7 +98,7 @@ class PurchaseReceipt(BuyingController):
 
 
 	def validate_with_previous_doc(self):
-		super(PurchaseReceipt, self).validate_with_previous_doc(self.tname, {
+		super(PurchaseReceipt, self).validate_with_previous_doc({
 			"Purchase Order": {
 				"ref_dn_field": "prevdoc_docname",
 				"compare_fields": [["supplier", "="], ["company", "="],	["currency", "="]],
@@ -114,7 +111,7 @@ class PurchaseReceipt(BuyingController):
 		})
 
 		if cint(frappe.defaults.get_global_default('maintain_same_rate')):
-			super(PurchaseReceipt, self).validate_with_previous_doc(self.tname, {
+			super(PurchaseReceipt, self).validate_with_previous_doc({
 				"Purchase Order Item": {
 					"ref_dn_field": "prevdoc_detail_docname",
 					"compare_fields": [["rate", "="]],

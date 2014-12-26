@@ -102,12 +102,12 @@ class AccountsController(TransactionBase):
 	def set_missing_item_details(self):
 		"""set missing item values"""
 		from erpnext.stock.get_item_details import get_item_details
-		if hasattr(self, "fname"):
+		if hasattr(self, "items"):
 			parent_dict = {}
 			for fieldname in self.meta.get_valid_columns():
 				parent_dict[fieldname] = self.get(fieldname)
 
-			for item in self.get(self.fname):
+			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
 					args.update(item.as_dict())
@@ -166,8 +166,6 @@ class AccountsController(TransactionBase):
 				self.meta.get_label("conversion_rate"), self.company)
 
 		self.conversion_rate = flt(self.conversion_rate)
-		self.item_doclist = self.get(self.fname)
-		self.tax_doclist = self.get(self.other_fname)
 
 		self.calculate_item_values()
 		self.initialize_taxes()
@@ -181,7 +179,7 @@ class AccountsController(TransactionBase):
 		self._cleanup()
 
 	def initialize_taxes(self):
-		for tax in self.tax_doclist:
+		for tax in self.get("taxes"):
 			tax.item_wise_tax_detail = {}
 			tax_fields = ["total", "tax_amount_after_discount_amount",
 				"tax_amount_for_current_item", "grand_total_for_current_item",
@@ -216,30 +214,30 @@ class AccountsController(TransactionBase):
 				# inclusive tax cannot be of type Actual
 				throw(_("Charge of type 'Actual' in row {0} cannot be included in Item Rate").format(tax.idx))
 			elif tax.charge_type == "On Previous Row Amount" and \
-					not cint(self.tax_doclist[cint(tax.row_id) - 1].included_in_print_rate):
+					not cint(self.get("taxes")[cint(tax.row_id) - 1].included_in_print_rate):
 				# referred row should also be inclusive
 				_on_previous_row_error(tax.row_id)
 			elif tax.charge_type == "On Previous Row Total" and \
-					not all([cint(t.included_in_print_rate) for t in self.tax_doclist[:cint(tax.row_id) - 1]]):
+					not all([cint(t.included_in_print_rate) for t in self.get("taxes")[:cint(tax.row_id) - 1]]):
 				# all rows about the reffered tax should be inclusive
 				_on_previous_row_error("1 - %d" % (tax.row_id,))
 
 	def calculate_taxes(self):
 		# maintain actual tax rate based on idx
-		actual_tax_dict = dict([[tax.idx, flt(tax.rate, self.precision("tax_amount", tax))] for tax in self.tax_doclist
+		actual_tax_dict = dict([[tax.idx, flt(tax.rate, self.precision("tax_amount", tax))] for tax in self.get("taxes")
 			if tax.charge_type == "Actual"])
 
-		for n, item in enumerate(self.item_doclist):
+		for n, item in enumerate(self.get("items")):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
 
-			for i, tax in enumerate(self.tax_doclist):
+			for i, tax in enumerate(self.get("taxes")):
 				# tax_amount represents the amount of tax for the current step
 				current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map)
 
 				# Adjust divisional loss to the last item
 				if tax.charge_type == "Actual":
 					actual_tax_dict[tax.idx] -= current_tax_amount
-					if n == len(self.item_doclist) - 1:
+					if n == len(self.get("items")) - 1:
 						current_tax_amount += actual_tax_dict[tax.idx]
 
 				# store tax_amount for current item as it will be used for
@@ -268,18 +266,18 @@ class AccountsController(TransactionBase):
 						self.precision("total", tax))
 				else:
 					tax.grand_total_for_current_item = \
-						flt(self.tax_doclist[i-1].grand_total_for_current_item +
+						flt(self.get("taxes")[i-1].grand_total_for_current_item +
 							current_tax_amount, self.precision("total", tax))
 
 				# in tax.total, accumulate grand total of each item
 				tax.total += tax.grand_total_for_current_item
 
 				# set precision in the last item iteration
-				if n == len(self.item_doclist) - 1:
+				if n == len(self.get("items")) - 1:
 					self.round_off_totals(tax)
 
 					# adjust Discount Amount loss in last tax iteration
-					if i == (len(self.tax_doclist) - 1) and self.discount_amount_applied:
+					if i == (len(self.get("taxes")) - 1) and self.discount_amount_applied:
 						self.adjust_discount_amount_loss(tax)
 
 	def round_off_totals(self, tax):
@@ -308,10 +306,10 @@ class AccountsController(TransactionBase):
 			current_tax_amount = (tax_rate / 100.0) * item.base_amount
 		elif tax.charge_type == "On Previous Row Amount":
 			current_tax_amount = (tax_rate / 100.0) * \
-				self.tax_doclist[cint(tax.row_id) - 1].tax_amount_for_current_item
+				self.get("taxes")[cint(tax.row_id) - 1].tax_amount_for_current_item
 		elif tax.charge_type == "On Previous Row Total":
 			current_tax_amount = (tax_rate / 100.0) * \
-				self.tax_doclist[cint(tax.row_id) - 1].grand_total_for_current_item
+				self.get("taxes")[cint(tax.row_id) - 1].grand_total_for_current_item
 
 		current_tax_amount = flt(current_tax_amount, self.precision("tax_amount", tax))
 
@@ -335,7 +333,7 @@ class AccountsController(TransactionBase):
 			return tax.rate
 
 	def _cleanup(self):
-		for tax in self.tax_doclist:
+		for tax in self.get("taxes"):
 			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
 
 	def _set_in_company_currency(self, item, print_field, base_field):
@@ -461,7 +459,7 @@ class AccountsController(TransactionBase):
 				else:
 					already_billed = frappe.db.sql("""select sum(%s) from `tab%s`
 						where %s=%s and docstatus=1 and parent != %s""" %
-						(based_on, self.tname, item_ref_dn, '%s', '%s'),
+						(based_on, self.doctype + " Item", item_ref_dn, '%s', '%s'),
 						(item.get(item_ref_dn), self.name))[0][0]
 
 					total_billed_amt = flt(flt(already_billed) + flt(item.get(based_on)),
@@ -481,7 +479,7 @@ class AccountsController(TransactionBase):
 
 	def get_stock_items(self):
 		stock_items = []
-		item_codes = list(set(item.item_code for item in self.get(self.fname)))
+		item_codes = list(set(item.item_code for item in self.get("items")))
 		if item_codes:
 			stock_items = [r[0] for r in frappe.db.sql("""select name
 				from `tabItem` where name in (%s) and is_stock_item='Yes'""" % \

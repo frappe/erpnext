@@ -1,12 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// Preset
-// ------
-// cur_frm.cscript.tname - Details table name
-// cur_frm.cscript.fname - Details fieldname
-// cur_frm.cscript.other_fname - fieldname
-// cur_frm.cscript.sales_team_fname - Sales Team fieldname
 
 frappe.provide("erpnext.selling");
 frappe.require("assets/erpnext/js/transaction.js");
@@ -23,7 +17,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	onload_post_render: function() {
-		cur_frm.get_field(this.fname).grid.set_multiple_add("item_code", "qty");
+		cur_frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
 
 	setup_queries: function() {
@@ -58,12 +52,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
-		if(!this.fname) {
+		if(!this.frm.fields_dict["items"]) {
 			return;
 		}
 
-		if(this.frm.fields_dict[this.fname].grid.get_field('item_code')) {
-			this.frm.set_query("item_code", this.fname, function() {
+		if(this.frm.fields_dict["items"].grid.get_field('item_code')) {
+			this.frm.set_query("item_code", "items", function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
 					filters: (me.frm.doc.order_type === "Maintenance" ?
@@ -73,8 +67,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
-		if(this.frm.fields_dict[this.fname].grid.get_field('batch_no')) {
-			this.frm.set_query("batch_no", this.fname, function(doc, cdt, cdn) {
+		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
+			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {
 				var item = frappe.get_doc(cdt, cdn);
 				if(!item.item_code) {
 					frappe.throw(__("Please enter Item Code to get batch no"));
@@ -231,7 +225,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	toggle_editable_price_list_rate: function() {
-		var df = frappe.meta.get_docfield(this.tname, "price_list_rate", this.frm.doc.name);
+		var df = frappe.meta.get_docfield(this.frm.doc.doctype + " Item", "price_list_rate", this.frm.doc.name);
 		var editable_price_list_rate = cint(frappe.defaults.get_default("editable_price_list_rate"));
 
 		if(df && editable_price_list_rate) {
@@ -555,10 +549,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 
 		setup_field_label_map(["base_rate", "base_price_list_rate", "base_amount"],
-			company_currency, this.fname);
+			company_currency, "items");
 
 		setup_field_label_map(["rate", "price_list_rate", "amount"],
-			this.frm.doc.currency, this.fname);
+			this.frm.doc.currency, "items");
 
 		setup_field_label_map(["tax_amount", "total"], company_currency, "taxes");
 
@@ -568,7 +562,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 
 		// toggle columns
-		var item_grid = this.frm.fields_dict[this.fname].grid;
+		var item_grid = this.frm.fields_dict["items"].grid;
 		var show = (this.frm.doc.currency != company_currency) ||
 			((cur_frm.doc.taxes || []).filter(
 					function(d) { return d.included_in_print_rate===1}).length);
@@ -595,7 +589,7 @@ frappe.ui.form.on(cur_frm.doctype,"project_name", function(frm) {
 			args: {	project_name: frm.doc.project_name	},
 			callback: function(r, rt) {
 				if(!r.exc) {
-					$.each(frm.doc[cur_frm.cscript.fname] || [], function(i, row) {
+					$.each(frm.doc["items"] || [], function(i, row) {
 						frappe.model.set_value(row.doctype, row.name, "cost_center", r.message);
 						msgprint(__("Cost Center For Item with Item Code '"+row.item_name+"' has been Changed to "+ r.message));
 					})

@@ -107,7 +107,6 @@ cur_frm.fields_dict['items'].grid.get_field('item_code').get_query = function(do
 }
 
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
-	var fname = cur_frm.cscript.fname;
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
 		return get_server_fields('get_item_details', d.item_code, 'items',

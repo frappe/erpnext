@@ -1,12 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// Module Material Management
-cur_frm.cscript.tname = "Delivery Note Item";
-cur_frm.cscript.fname = "items";
-cur_frm.cscript.other_fname = "taxes";
-cur_frm.cscript.sales_team_fname = "sales_team";
-
 {% include 'selling/sales_common.js' %};
 {% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
 {% include 'accounts/doctype/sales_invoice/pos.js' %}
@@ -46,7 +40,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 
 		// unhide expense_account and cost_center is auto_accounting_for_stock enabled
 		var aii_enabled = cint(sys_defaults.auto_accounting_for_stock)
-		cur_frm.fields_dict[cur_frm.cscript.fname].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
+		cur_frm.fields_dict["items"].grid.set_column_disp(["expense_account", "cost_center"], aii_enabled);
 
 		if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('From Sales Order'),
@@ -205,12 +199,12 @@ if (sys_defaults.auto_accounting_for_stock) {
 	cur_frm.cscript.expense_account = function(doc, cdt, cdn){
 		var d = locals[cdt][cdn];
 		if(d.expense_account) {
-			var cl = doc[cur_frm.cscript.fname] || [];
+			var cl = doc["items"] || [];
 			for(var i = 0; i < cl.length; i++){
 				if(!cl[i].expense_account) cl[i].expense_account = d.expense_account;
 			}
 		}
-		refresh_field(cur_frm.cscript.fname);
+		refresh_field("items");
 	}
 
 	// expense account
@@ -228,12 +222,12 @@ if (sys_defaults.auto_accounting_for_stock) {
 	cur_frm.cscript.cost_center = function(doc, cdt, cdn){
 		var d = locals[cdt][cdn];
 		if(d.cost_center) {
-			var cl = doc[cur_frm.cscript.fname] || [];
+			var cl = doc["items"] || [];
 			for(var i = 0; i < cl.length; i++){
 				if(!cl[i].cost_center) cl[i].cost_center = d.cost_center;
 			}
 		}
-		refresh_field(cur_frm.cscript.fname);
+		refresh_field("items");
 	}
 
 	cur_frm.fields_dict.items.grid.get_field("cost_center").get_query = function(doc) {

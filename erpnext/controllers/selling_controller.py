@@ -12,9 +12,9 @@ from erpnext.controllers.stock_controller import StockController
 
 class SellingController(StockController):
 	def __setup__(self):
-		if hasattr(self, "fname"):
+		if hasattr(self, "items"):
 			self.table_print_templates = {
-				self.fname: "templates/print_formats/includes/item_grid.html",
+				"items": "templates/print_formats/includes/item_grid.html",
 				"taxes": "templates/print_formats/includes/taxes.html",
 			}
 
@@ -24,7 +24,7 @@ class SellingController(StockController):
 
 	def onload(self):
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
-			for item in self.get(self.fname):
+			for item in self.get("items"):
 				item.update(get_available_qty(item.item_code,
 					item.warehouse))
 
@@ -124,8 +124,6 @@ class SellingController(StockController):
 				self.grand_total_export or self.rounded_total_export, self.currency)
 
 	def calculate_taxes_and_totals(self):
-		self.other_fname = "taxes"
-
 		super(SellingController, self).calculate_taxes_and_totals()
 
 		self.calculate_total_advance("Sales Invoice", "advances")
@@ -133,21 +131,21 @@ class SellingController(StockController):
 		self.calculate_contribution()
 
 	def determine_exclusive_rate(self):
-		if not any((cint(tax.included_in_print_rate) for tax in self.tax_doclist)):
+		if not any((cint(tax.included_in_print_rate) for tax in self.get("taxes"))):
 			# no inclusive tax
 			return
 
-		for item in self.item_doclist:
+		for item in self.get("items"):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
 			cumulated_tax_fraction = 0
-			for i, tax in enumerate(self.tax_doclist):
+			for i, tax in enumerate(self.get("taxes")):
 				tax.tax_fraction_for_current_item = self.get_current_tax_fraction(tax, item_tax_map)
 
 				if i==0:
 					tax.grand_total_fraction_for_current_item = 1 + tax.tax_fraction_for_current_item
 				else:
 					tax.grand_total_fraction_for_current_item = \
-						self.tax_doclist[i-1].grand_total_fraction_for_current_item \
+						self.get("taxes")[i-1].grand_total_fraction_for_current_item \
 						+ tax.tax_fraction_for_current_item
 
 				cumulated_tax_fraction += tax.tax_fraction_for_current_item
@@ -181,17 +179,17 @@ class SellingController(StockController):
 
 			elif tax.charge_type == "On Previous Row Amount":
 				current_tax_fraction = (tax_rate / 100.0) * \
-					self.tax_doclist[cint(tax.row_id) - 1].tax_fraction_for_current_item
+					self.get("taxes")[cint(tax.row_id) - 1].tax_fraction_for_current_item
 
 			elif tax.charge_type == "On Previous Row Total":
 				current_tax_fraction = (tax_rate / 100.0) * \
-					self.tax_doclist[cint(tax.row_id) - 1].grand_total_fraction_for_current_item
+					self.get("taxes")[cint(tax.row_id) - 1].grand_total_fraction_for_current_item
 
 		return current_tax_fraction
 
 	def calculate_item_values(self):
 		if not self.discount_amount_applied:
-			for item in self.item_doclist:
+			for item in self.get("items"):
 				self.round_floats_in(item)
 
 				if item.discount_percentage == 100:
@@ -210,14 +208,14 @@ class SellingController(StockController):
 	def calculate_net_total(self):
 		self.net_total = self.net_total_export = 0.0
 
-		for item in self.item_doclist:
+		for item in self.get("items"):
 			self.net_total += item.base_amount
 			self.net_total_export += item.amount
 
 		self.round_floats_in(self, ["net_total", "net_total_export"])
 
 	def calculate_totals(self):
-		self.grand_total = flt(self.tax_doclist[-1].total if self.tax_doclist else self.net_total)
+		self.grand_total = flt(self.get("taxes")[-1].total if self.get("taxes") else self.net_total)
 
 		self.grand_total_export = flt(self.grand_total / self.conversion_rate)
 
@@ -238,7 +236,7 @@ class SellingController(StockController):
 
 			if grand_total_for_discount_amount:
 				# calculate item amount after Discount Amount
-				for item in self.item_doclist:
+				for item in self.get("items"):
 					distributed_amount = flt(self.discount_amount) * item.base_amount / grand_total_for_discount_amount
 					item.base_amount = flt(item.base_amount - distributed_amount, self.precision("base_amount", item))
 
@@ -248,7 +246,7 @@ class SellingController(StockController):
 	def get_grand_total_for_discount_amount(self):
 		actual_taxes_dict = {}
 
-		for tax in self.tax_doclist:
+		for tax in self.get("taxes"):
 			if tax.charge_type == "Actual":
 				actual_taxes_dict.setdefault(tax.idx, tax.tax_amount)
 			elif tax.row_id in actual_taxes_dict:
@@ -306,7 +304,7 @@ class SellingController(StockController):
 			throw(_("Order Type must be one of {0}").format(comma_or(valid_types)))
 
 	def validate_max_discount(self):
-		for d in self.get(self.fname):
+		for d in self.get("items"):
 			discount = flt(frappe.db.get_value("Item", d.item_code, "max_discount"))
 
 			if discount and flt(d.discount_percentage) > discount:
@@ -314,7 +312,7 @@ class SellingController(StockController):
 
 	def get_item_list(self):
 		il = []
-		for d in self.get(self.fname):
+		for d in self.get("items"):
 			reserved_warehouse = ""
 			reserved_qty_for_main_item = 0
 
@@ -390,14 +388,14 @@ class SellingController(StockController):
 		return so_qty, so_warehouse
 
 	def check_stop_sales_order(self, ref_fieldname):
-		for d in self.get(self.fname):
+		for d in self.get("items"):
 			if d.get(ref_fieldname):
 				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status")
 				if status == "Stopped":
 					frappe.throw(_("Sales Order {0} is stopped").format(d.get(ref_fieldname)))
 
 def check_active_sales_items(obj):
-	for d in obj.get(obj.fname):
+	for d in obj.get("items"):
 		if d.item_code:
 			item = frappe.db.sql("""select docstatus, is_sales_item,
 				is_service_item, income_account from tabItem where name = %s""",

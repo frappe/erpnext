@@ -58,12 +58,12 @@ class TransactionBase(StatusUpdater):
 	def validate_uom_is_integer(self, uom_field, qty_fields):
 		validate_uom_is_integer(self, uom_field, qty_fields)
 
-	def validate_with_previous_doc(self, source_dt, ref):
+	def validate_with_previous_doc(self, ref):
 		for key, val in ref.items():
 			is_child = val.get("is_child_table")
 			ref_doc = {}
 			item_ref_dn = []
-			for d in self.get_all_children(source_dt):
+			for d in self.get_all_children(self.doctype + " Item"):
 				ref_dn = d.get(val["ref_dn_field"])
 				if ref_dn:
 					if is_child:

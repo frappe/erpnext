@@ -12,9 +12,6 @@ form_grid_templates = {
 }
 
 class SupplierQuotation(BuyingController):
-	tname = "Supplier Quotation Item"
-	fname = "items"
-
 	def validate(self):
 		super(SupplierQuotation, self).validate()
 
@@ -39,7 +36,7 @@ class SupplierQuotation(BuyingController):
 		pass
 
 	def validate_with_previous_doc(self):
-		super(SupplierQuotation, self).validate_with_previous_doc(self.tname, {
+		super(SupplierQuotation, self).validate_with_previous_doc({
 			"Material Request": {
 				"ref_dn_field": "prevdoc_docname",
 				"compare_fields": [["company", "="]],

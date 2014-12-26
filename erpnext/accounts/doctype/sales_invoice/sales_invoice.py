@@ -17,9 +17,6 @@ form_grid_templates = {
 }
 
 class SalesInvoice(SellingController):
-	tname = 'Sales Invoice Item'
-	fname = 'items'
-
 	def __init__(self, arg1, arg2=None):
 		super(SalesInvoice, self).__init__(arg1, arg2)
 		self.status_updater = [{
@@ -151,7 +148,7 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
 	def update_time_log_batch(self, sales_invoice):
-		for d in self.get(self.fname):
+		for d in self.get("items"):
 			if d.time_log_batch:
 				tlb = frappe.get_doc("Time Log Batch", d.time_log_batch)
 				tlb.sales_invoice = sales_invoice
@@ -159,7 +156,7 @@ class SalesInvoice(SellingController):
 				tlb.save()
 
 	def validate_time_logs_are_submitted(self):
-		for d in self.get(self.fname):
+		for d in self.get("items"):
 			if d.time_log_batch:
 				status = frappe.db.get_value("Time Log Batch", d.time_log_batch, "status")
 				if status!="Submitted":
@@ -258,7 +255,7 @@ class SalesInvoice(SellingController):
 				msgprint(_("Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item").format(acc[0][0], d.item_code), raise_exception=True)
 
 	def validate_with_previous_doc(self):
-		super(SalesInvoice, self).validate_with_previous_doc(self.tname, {
+		super(SalesInvoice, self).validate_with_previous_doc({
 			"Sales Order": {
 				"ref_dn_field": "sales_order",
 				"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
@@ -272,7 +269,7 @@ class SalesInvoice(SellingController):
 		})
 
 		if cint(frappe.defaults.get_global_default('maintain_same_sales_rate')):
-			super(SalesInvoice, self).validate_with_previous_doc(self.tname, {
+			super(SalesInvoice, self).validate_with_previous_doc({
 				"Sales Order Item": {
 					"ref_dn_field": "so_detail",
 					"compare_fields": [["rate", "="]],

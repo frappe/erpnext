@@ -1,8 +1,5 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.tname = "Stock Entry Detail";
-cur_frm.cscript.fname = "items";
-
 frappe.require("assets/erpnext/js/controllers/stock_controller.js");
 frappe.require("assets/erpnext/js/utils.js");
 frappe.provide("erpnext.stock");
@@ -56,7 +53,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	onload_post_render: function() {
-		cur_frm.get_field(this.fname).grid.set_multiple_add("item_code", "qty");
+		cur_frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 		this.set_default_account();
 	},
 

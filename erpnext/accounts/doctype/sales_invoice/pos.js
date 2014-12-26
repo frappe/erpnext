@@ -293,7 +293,7 @@ erpnext.POS = Class.extend({
 
 		// check whether the item is already added
 		if (no_of_items != 0) {
-			$.each(this.frm.doc[this.frm.cscript.fname] || [], function(i, d) {
+			$.each(this.frm.doc["items"] || [], function(i, d) {
 				if (d.item_code == item_code) {
 					caught = true;
 					if (serial_no)
@@ -314,8 +314,7 @@ erpnext.POS = Class.extend({
 	add_new_item_to_grid: function(item_code, serial_no) {
 		var me = this;
 
-		var child = frappe.model.add_child(me.frm.doc, this.frm.doctype + " Item",
-			this.frm.cscript.fname);
+		var child = frappe.model.add_child(me.frm.doc, this.frm.doctype + " Item", "items");
 		child.item_code = item_code;
 
 		if (serial_no)
@@ -334,7 +333,7 @@ erpnext.POS = Class.extend({
 	},
 	update_qty: function(item_code, qty) {
 		var me = this;
-		$.each(this.frm.doc[this.frm.cscript.fname] || [], function(i, d) {
+		$.each(this.frm.doc["items"] || [], function(i, d) {
 			if (d.item_code == item_code) {
 				if (qty == 0) {
 					frappe.model.clear_doc(d.doctype, d.name);
@@ -383,7 +382,7 @@ erpnext.POS = Class.extend({
 		var me = this;
 		var $items = this.wrapper.find("#cart tbody").empty();
 
-		$.each(this.frm.doc[this.frm.cscript.fname] || [], function(i, d) {
+		$.each(this.frm.doc["items"] || [], function(i, d) {
 
 			$(repl('<tr id="%(item_code)s" data-selected="false">\
 					<td>%(item_code)s%(item_name)s</td>\
@@ -425,7 +424,7 @@ erpnext.POS = Class.extend({
 	},
 	show_taxes: function() {
 		var me = this;
-		var taxes = this.frm.doc[this.frm.cscript.other_fname] || [];
+		var taxes = this.frm.doc["taxes"] || [];
 		$(this.wrapper).find(".tax-table")
 			.toggle((taxes && taxes.length) ? true : false)
 			.find("tbody").empty();
@@ -550,7 +549,7 @@ erpnext.POS = Class.extend({
 			}
 		}
 
-		var child = this.frm.doc[this.frm.cscript.fname] || [];
+		var child = this.frm.doc["items"] || [];
 
 		$.each(child, function(i, d) {
 			for (var i in selected_items) {
@@ -564,7 +563,7 @@ erpnext.POS = Class.extend({
 	},
 	refresh_grid: function() {
 		this.frm.dirty();
-		this.frm.fields_dict[this.frm.cscript.fname].grid.refresh();
+		this.frm.fields_dict["items"].grid.refresh();
 		this.frm.script_manager.trigger("calculate_taxes_and_totals");
 		this.refresh();
 	},

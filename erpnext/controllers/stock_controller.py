@@ -77,7 +77,7 @@ class StockController(AccountsController):
 			return [frappe._dict({ "name": voucher_detail_no, "expense_account": default_expense_account,
 				"cost_center": default_cost_center }) for voucher_detail_no, sle in sle_map.items()]
 		else:
-			details = self.get(self.fname)
+			details = self.get("items")
 
 			if default_expense_account or default_cost_center:
 				for d in details:
@@ -91,8 +91,8 @@ class StockController(AccountsController):
 	def get_items_and_warehouses(self):
 		items, warehouses = [], []
 
-		if hasattr(self, "fname"):
-			item_doclist = self.get(self.fname)
+		if hasattr(self, "items"):
+			item_doclist = self.get("items")
 		elif self.doctype == "Stock Reconciliation":
 			import json
 			item_doclist = []
@@ -208,7 +208,7 @@ class StockController(AccountsController):
 
 	def get_serialized_items(self):
 		serialized_items = []
-		item_codes = list(set([d.item_code for d in self.get(self.fname)]))
+		item_codes = list(set([d.item_code for d in self.get("items")]))
 		if item_codes:
 			serialized_items = frappe.db.sql_list("""select name from `tabItem`
 				where has_serial_no='Yes' and name in ({})""".format(", ".join(["%s"]*len(item_codes))),

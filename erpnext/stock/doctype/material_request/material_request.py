@@ -18,9 +18,6 @@ form_grid_templates = {
 }
 
 class MaterialRequest(BuyingController):
-	tname = 'Material Request Item'
-	fname = 'items'
-
 	def get_feed(self):
 		return _("{0}: {1}").format(self.status, self.material_request_type)
 
@@ -115,13 +112,13 @@ class MaterialRequest(BuyingController):
 		if self.material_request_type == "Purchase":
 			return
 
-		item_doclist = self.get("items")
+		self.get("items") = self.get("items")
 
 		if not mr_items:
-			mr_items = [d.name for d in item_doclist]
+			mr_items = [d.name for d in self.get("items")]
 
 		per_ordered = 0.0
-		for d in item_doclist:
+		for d in self.get("items"):
 			if d.name in mr_items:
 				d.ordered_qty =  flt(frappe.db.sql("""select sum(transfer_qty)
 					from `tabStock Entry Detail` where material_request = %s
@@ -129,14 +126,14 @@ class MaterialRequest(BuyingController):
 					(self.name, d.name))[0][0])
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
-			# note: if qty is 0, its row is still counted in len(item_doclist)
+			# note: if qty is 0, its row is still counted in len(self.get("items"))
 			# hence adding 1 to per_ordered
 			if (d.ordered_qty > d.qty) or not d.qty:
 				per_ordered += 1.0
 			elif d.qty > 0:
 				per_ordered += flt(d.ordered_qty / flt(d.qty))
 
-		self.per_ordered = flt((per_ordered / flt(len(item_doclist))) * 100.0, 2)
+		self.per_ordered = flt((per_ordered / flt(len(self.get("items")))) * 100.0, 2)
 		frappe.db.set_value(self.doctype, self.name, "per_ordered", self.per_ordered)
 
 	def update_requested_qty(self, mr_item_rows=None):
@@ -301,7 +298,7 @@ def make_stock_entry(source_name, target_doc=None):
 		target.qty = qty
 		target.transfer_qty = qty
 		target.conversion_factor = 1
-		
+
 		if source_parent.material_request_type == "Material Transfer":
 			target.t_warehouse = obj.warehouse
 		else:

@@ -1,11 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// Preset
-// ------
-// cur_frm.cscript.tname - Details table name
-// cur_frm.cscript.fname - Details fieldname
-
 frappe.provide("erpnext.buying");
 frappe.require("assets/erpnext/js/transaction.js");
 {% include "public/js/controllers/accounts.js" %}
@@ -42,7 +37,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				return{	query: "erpnext.controllers.queries.supplier_query" }});
 		}
 
-		this.frm.set_query("item_code", this.frm.cscript.fname, function() {
+		this.frm.set_query("item_code", "items", function() {
 			if(me.frm.doc.is_subcontracted == "Yes") {
 				 return{
 					query: "erpnext.controllers.queries.item_query",
@@ -159,7 +154,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	project_name: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.project_name) {
-			$.each(this.frm.doc[this.fname],
+			$.each(this.frm.doc["items"],
 				function(i, other_item) {
 					if(!other_item.project_name) {
 						other_item.project_name = item.project_name;
@@ -359,13 +354,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		};
 
 		setup_field_label_map(["base_rate", "base_price_list_rate", "base_amount", "base_rate"],
-			company_currency, this.fname);
+			company_currency, "items");
 
-		setup_field_label_map(["rate", "price_list_rate", "amount"],
-			this.frm.doc.currency, this.fname);
+			setup_field_label_map(["rate", "price_list_rate", "amount"], this.frm.doc.currency, "items");
 
-		if(this.frm.fields_dict[this.other_fname]) {
-			setup_field_label_map(["tax_amount", "total"], company_currency, this.other_fname);
+		if(this.frm.fields_dict["taxes"]) {
+			setup_field_label_map(["tax_amount", "total"], company_currency, "taxes");
 		}
 
 		if(this.frm.fields_dict["advances"]) {
@@ -374,7 +368,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 
 		// toggle columns
-		var item_grid = this.frm.fields_dict[this.fname].grid;
+		var item_grid = this.frm.fields_dict["items"].grid;
 		var fieldnames = $.map(["base_rate", "base_price_list_rate", "base_amount", "base_rate"], function(fname) {
 			return frappe.meta.get_docfield(item_grid.doctype, fname, me.frm.docname) ? fname : null;
 		});
@@ -391,7 +385,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 cur_frm.add_fetch('project_name', 'cost_center', 'cost_center');
 
 erpnext.buying.get_default_bom = function(frm) {
-	$.each(frm.doc[frm.cscript.fname] || [], function(i, d) {
+	$.each(frm.doc["items"] || [], function(i, d) {
 		if (d.item_code && d.bom === "") {
 			return frappe.call({
 				type: "GET",

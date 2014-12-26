@@ -15,12 +15,6 @@ form_grid_templates = {
 }
 
 class SalesOrder(SellingController):
-	tname = 'Sales Order Item'
-	fname = 'items'
-	person_tname = 'Target Detail'
-	partner_tname = 'Partner Target Detail'
-	territory_tname = 'Territory Target Detail'
-
 	def validate_mandatory(self):
 		# validate transaction date v/s delivery date
 		if self.delivery_date:
@@ -122,13 +116,13 @@ class SalesOrder(SellingController):
 		from erpnext.stock.utils import validate_warehouse_company
 
 		warehouses = list(set([d.warehouse for d in
-			self.get(self.fname) if d.warehouse]))
+			self.get("items") if d.warehouse]))
 
 		for w in warehouses:
 			validate_warehouse_company(w, self.company)
 
 	def validate_with_previous_doc(self):
-		super(SalesOrder, self).validate_with_previous_doc(self.tname, {
+		super(SalesOrder, self).validate_with_previous_doc({
 			"Quotation": {
 				"ref_dn_field": "prevdoc_docname",
 				"compare_fields": [["company", "="], ["currency", "="]]
@@ -142,7 +136,7 @@ class SalesOrder(SellingController):
 			frappe.db.sql("update `tabOpportunity` set status = %s where name=%s",(flag,enq[0][0]))
 
 	def update_prevdoc_status(self, flag):
-		for quotation in list(set([d.prevdoc_docname for d in self.get(self.fname)])):
+		for quotation in list(set([d.prevdoc_docname for d in self.get("items")])):
 			if quotation:
 				doc = frappe.get_doc("Quotation", quotation)
 				if doc.docstatus==2:
