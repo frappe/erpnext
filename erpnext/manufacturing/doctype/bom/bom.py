@@ -180,7 +180,7 @@ class BOM(Document):
 		if not self.with_operations:
 			self.set('bom_operations', [])
 			for d in self.get("bom_materials"):
-				d.operation = None
+				d.operation_no = None
 
 	def validate_main_item(self):
 		""" Validate main FG item"""
@@ -203,7 +203,7 @@ class BOM(Document):
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
 
-			self.check_if_item_repeated(m.item_code, m.operation, check_list)
+			self.check_if_item_repeated(m.item_code, m.operation_no, check_list)
 
 
 	def check_if_item_repeated(self, item, op, check_list):
