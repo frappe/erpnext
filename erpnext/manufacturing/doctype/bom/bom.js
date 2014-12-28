@@ -26,8 +26,8 @@ cur_frm.cscript.update_cost = function() {
 }
 
 cur_frm.cscript.with_operations = function(doc) {
-	cur_frm.fields_dict["bom_materials"].grid.set_column_disp("operation", doc.with_operations);
-	cur_frm.fields_dict["bom_materials"].grid.toggle_reqd("operation", doc.with_operations);
+	cur_frm.fields_dict["bom_materials"].grid.set_column_disp("operation_no", doc.with_operations);
+	cur_frm.fields_dict["bom_materials"].grid.toggle_reqd("operation_no", doc.with_operations);
 }
 
 erpnext.bom.set_operation = function(doc) {
@@ -38,7 +38,7 @@ erpnext.bom.set_operation = function(doc) {
 		operations[i] = (i+1);
 	}
 
-	frappe.meta.get_docfield("BOM Item", "operation", cur_frm.docname).options = operations.join("\n");
+	frappe.meta.get_docfield("BOM Item", "operation_no", cur_frm.docname).options = operations.join("\n");
 
 	refresh_field("bom_materials");
 }
