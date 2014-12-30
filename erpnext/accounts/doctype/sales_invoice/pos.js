@@ -492,7 +492,7 @@ erpnext.POS = Class.extend({
 		});
 
 		me.refresh_delete_btn();
-		if(me.frm.doc[this.party]) {
+		if(me.frm.doc[this.party.toLowerCase()]) {
 			this.barcode.$input.focus();
 		} else {
 			this.party_field.$input.focus();
