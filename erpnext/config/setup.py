@@ -17,7 +17,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Printing and Branding"),
+			"label": _("Printing"),
 			"icon": "icon-print",
 			"items": [
 				{
