@@ -403,10 +403,14 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	_set_values_for_item_list: function(children) {
 		var me = this;
+		var price_list_rate_changed = false;
 		$.each(children, function(i, d) {
 			var existing_pricing_rule = frappe.model.get_value(d.doctype, d.name, "pricing_rule");
 			$.each(d, function(k, v) {
 				if (["doctype", "name"].indexOf(k)===-1) {
+					if(k=="price_list_rate") {
+						if(flt(v) != flt(d.price_list_rate)) price_list_rate_changed = true;
+					}
 					frappe.model.set_value(d.doctype, d.name, k, v);
 				}
 			});
@@ -414,6 +418,8 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			if(!me.frm.doc.ignore_pricing_rule && existing_pricing_rule && !d.pricing_rule) {
 				me.apply_price_list(frappe.get_doc(d.doctype, d.name));
 			}
+
+			if(!price_list_rate_changed) me.calculate_taxes_and_totals();
 		});
 	},
 
