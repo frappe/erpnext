@@ -112,8 +112,6 @@ class MaterialRequest(BuyingController):
 		if self.material_request_type == "Purchase":
 			return
 
-		self.get("items") = self.get("items")
-
 		if not mr_items:
 			mr_items = [d.name for d in self.get("items")]
 
