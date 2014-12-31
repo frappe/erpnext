@@ -3318,7 +3318,7 @@ website page link,Lien vers page web
 {0} must be reduced by {1} or you should increase overflow tolerance,{0} doit être réduite par {1} ou vous devez augmenter la tolérance de dépassement
 {0} must have role 'Leave Approver',Nouveau Stock UDM est nécessaire
 {0} valid serial nos for Item {1},BOM {0} pour objet {1} à la ligne {2} est inactif ou non soumis
-{0} {1} against Bill {2} dated {3},S'il vous plaît entrer le titre !
+{0} {1} against Bill {2} dated {3},{0} {1} contre le projet de loi en date du {2} {3}
 {0} {1} against Invoice {2},investissements
 {0} {1} has already been submitted,"S'il vous plaît entrer » est sous-traitée "" comme Oui ou Non"
 {0} {1} has been modified. Please refresh.,Point ou Entrepôt à la ligne {0} ne correspond pas à la Demande de Matériel

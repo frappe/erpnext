@@ -118,6 +118,10 @@ class AccountsController(TransactionBase):
 							item.get(fieldname) is None and value is not None:
 								item.set(fieldname, value)
 
+						if fieldname == "cost_center" and item.meta.get_field("cost_center") \
+							and not item.get("cost_center") and value is not None:
+								item.set(fieldname, value)
+
 					if ret.get("pricing_rule"):
 						for field in ["base_price_list_rate", "price_list_rate",
 							"discount_percentage", "base_rate", "rate"]:
@@ -441,7 +445,7 @@ class AccountsController(TransactionBase):
 				for order, jv_list in order_jv_map.items():
 					for jv in jv_list:
 						if not advance_jv_against_si or jv not in advance_jv_against_si:
-							frappe.throw(_("Journal Entry {0} is linked against Order {1}, hence it must be fetched as advance in Invoice as well.")
+							frappe.msgprint(_("Journal Entry {0} is linked against Order {1}, check if it should be pulled as advance in this invoice.")
 								.format(jv, order))
 
 

@@ -233,6 +233,11 @@ erpnext.POS = Class.extend({
 	},
 	make_item_list: function() {
 		var me = this;
+		if(!this.price_list) {
+			msgprint(__("Price List not found or disabled"));
+			return;
+		}
+
 		me.item_timeout = null;
 		frappe.call({
 			method: 'erpnext.accounts.doctype.sales_invoice.pos.get_items',
@@ -486,7 +491,7 @@ erpnext.POS = Class.extend({
 		});
 
 		me.refresh_delete_btn();
-		if(me.frm.doc[this.party]) {
+		if(me.frm.doc[this.party.toLowerCase()]) {
 			this.barcode.$input.focus();
 		} else {
 			this.party_field.$input.focus();

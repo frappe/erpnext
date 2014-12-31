@@ -98,9 +98,12 @@ class AuthorizationControl(TransactionBase):
 		if doc_obj:
 			price_list_rate, base_rate = 0, 0
 			for d in doc_obj.get("items"):
-				if d.base_price_list_rate and d.base_rate:
-					price_list_rate += flt(d.base_price_list_rate)
+				if d.base_rate:
+					price_list_rate += flt(d.base_price_list_rate) or flt(d.base_rate)
 					base_rate += flt(d.base_rate)
+			if doc_obj.get("discount_amount"):
+				base_rate -= flt(doc_obj.discount_amount)
+
 			if price_list_rate: av_dis = 100 - flt(base_rate * 100 / price_list_rate)
 
 		final_based_on = ['Grand Total','Average Discount','Customerwise Discount','Itemwise Discount']

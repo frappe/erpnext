@@ -61,14 +61,27 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 				fields: [
 					{
 						"fieldname": "language", "label": __("Language"), "fieldtype": "Select",
-						options: ["english", "العربية", "deutsch", "ελληνικά", "español", "français", "हिंदी", "hrvatski",
-							"italiano", "nederlands", "polski", "português brasileiro", "português", "српски", "தமிழ்",
-							"ไทย", "中国（简体）", "中國（繁體）"],
-						reqd:1, "default": "english"
+						reqd:1
 					},
 				],
 				help: __("Welcome to ERPNext. Please select your language to begin the Setup Wizard."),
 				onload: function(slide) {
+					var me = this;
+
+					if (!this.language_list) {
+						frappe.call({
+							method: "erpnext.setup.page.setup_wizard.setup_wizard.load_languages",
+							callback: function(r) {
+								me.language_list = r.message;
+								slide.get_input("language")
+									.add_options(r.message)
+									.val("english");
+							}
+						})
+					} else {
+						slide.get_input("language").add_options(this.language_list);
+					}
+
 					slide.get_input("language").on("change", function() {
 						var lang = $(this).val() || "english";
 						frappe._messages = {};

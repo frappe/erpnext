@@ -439,4 +439,6 @@ def load_messages(language):
 	send_translations(m)
 	return lang
 
-
+@frappe.whitelist()
+def load_languages():
+	return sorted(get_lang_dict().keys())

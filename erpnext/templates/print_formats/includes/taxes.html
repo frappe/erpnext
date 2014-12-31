@@ -7,7 +7,7 @@
 				<div class="col-xs-5 text-right">
 					<label>{{ charge.get_formatted("description") }}</label></div>
 				<div class="col-xs-7 text-right">
-					{{ frappe.format_value(charge.tax_amount / doc.conversion_rate,
+					{{ frappe.format_value(frappe.utils.flt(charge.tax_amount) / doc.conversion_rate,
 						table_meta.get_field("tax_amount"), doc, currency=doc.currency) }}
 				</div>
 			</div>

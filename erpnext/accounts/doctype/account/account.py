@@ -3,8 +3,8 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, cstr, cint, getdate, add_days, formatdate
-from frappe import msgprint, throw, _
+from frappe.utils import cstr, cint
+from frappe import throw, _
 from frappe.model.document import Document
 
 class Account(Document):

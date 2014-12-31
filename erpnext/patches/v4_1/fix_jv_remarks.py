@@ -6,8 +6,9 @@ import frappe
 
 def execute():
 	reference_date = guess_reference_date()
+	frappe.reload_doc('accounts', 'doctype', 'journal_voucher_detail')
 	for name in frappe.db.sql_list("""select name from `tabJournal Entry`
-		where date(creation)>=%s""", reference_date):
+			where date(creation)>=%s""", reference_date):
 		jv = frappe.get_doc("Journal Entry", name)
 		try:
 			jv.create_remarks()

@@ -189,9 +189,6 @@ class SalarySlip(TransactionBase):
 		if receiver:
 			subj = 'Salary Slip - ' + cstr(self.month) +'/'+cstr(self.fiscal_year)
 			frappe.sendmail([receiver], subject=subj, msg = _("Please see attachment"),
-				attachments=[{
-					"fname": self.name + ".pdf",
-					"fcontent": frappe.get_print_format(self.doctype, self.name, as_pdf = True)
-				}])
+				attachments=[frappe.attach_print(self.doctype, self.name, file_name=self.name)])
 		else:
 			msgprint(_("Company Email ID not found, hence mail not sent"))
