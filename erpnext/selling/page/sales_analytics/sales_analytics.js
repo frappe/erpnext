@@ -10,7 +10,7 @@ frappe.pages['sales-analytics'].onload = function(wrapper) {
 	new erpnext.SalesAnalytics(wrapper);
 
 
-	wrapper.appframe.add_module_icon("Selling")
+	frappe.add_breadcrumbs("Selling")
 
 }
 
@@ -20,7 +20,7 @@ erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 			title: __("Sales Analytics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
-			appframe: wrapper.appframe,
+			page: wrapper.page,
 			doctypes: ["Item", "Item Group", "Customer", "Customer Group", "Company", "Territory",
 				"Fiscal Year", "Sales Invoice", "Sales Invoice Item",
 				"Sales Order", "Sales Order Item[Sales Analytics]",

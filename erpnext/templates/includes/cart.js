@@ -8,7 +8,7 @@ frappe.provide("shopping_cart");
 
 $.extend(shopping_cart, {
 	show_error: function(title, text) {
-		$("#cart-container").html('<div class="well"><h4>' + title + '</h4> ' + text + '</div>');
+		$("#cart-container").html('<div class="msg-box"><h4>' + title + '</h4> ' + text + '</div>');
 	},
 
 	bind_events: function() {
@@ -96,7 +96,7 @@ $.extend(shopping_cart, {
 		});
 
 		if(!(addresses && addresses.length)) {
-			$cart_shipping_address.html('<div class="well">'+frappe._("Hey! Go ahead and add an address")+'</div>');
+			$cart_shipping_address.html('<div class="msg-box">'+frappe._("Hey! Go ahead and add an address")+'</div>');
 		} else {
 			shopping_cart.render_address($cart_shipping_address, addresses, doc.shipping_address_name);
 			shopping_cart.render_address($cart_billing_address, addresses, doc.customer_address);

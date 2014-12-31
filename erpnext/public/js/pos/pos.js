@@ -5,105 +5,7 @@ erpnext.POS = Class.extend({
 	init: function(wrapper, frm) {
 		this.wrapper = wrapper;
 		this.frm = frm;
-		this.wrapper.html('<div class="container">\
-			<div class="row" style="margin: -9px 0px 10px -30px; border-bottom: 1px solid #c7c7c7;">\
-				<div class="party-area col-sm-3 col-xs-6"></div>\
-				<div class="barcode-area col-sm-3 col-xs-6"></div>\
-				<div class="search-area col-sm-3 col-xs-6"></div>\
-				<div class="item-group-area col-sm-3 col-xs-6"></div>\
-			</div>\
-			<div class="row">\
-				<div class="col-sm-6">\
-					<div class="pos-bill">\
-						<div class="item-cart">\
-							<table class="table table-condensed table-hover" id="cart" style="table-layout: fixed;">\
-								<thead>\
-									<tr>\
-										<th style="width: 40%">'+__("Item")+'</th>\
-										<th style="width: 9%"></th>\
-										<th style="width: 22%; text-align: right;">Qty</th>\
-										<th style="width: 9%"></th>\
-										<th style="width: 20%; text-align: right;">Rate</th>\
-									</tr>\
-								</thead>\
-								<tbody>\
-								</tbody>\
-							</table>\
-						</div>\
-						<br>\
-						<div class="totals-area" style="margin-left: 40%;">\
-							<div class="net-total-area">\
-								<table class="table table-condensed">\
-									<tr>\
-										<td><b>'+__("Net Total")+'</b></td>\
-										<td style="text-align: right;" class="net-total"></td>\
-									</tr>\
-								</table>\
-							</div>\
-							<div class="tax-table" style="display: none;">\
-								<table class="table table-condensed">\
-									<thead>\
-										<tr>\
-											<th style="width: 60%">'+__("Taxes")+'</th>\
-											<th style="width: 40%; text-align: right;"></th>\
-										</tr>\
-									</thead>\
-									<tbody>\
-									</tbody>\
-								</table>\
-							</div>\
-							<div class="discount-amount-area">\
-								<table class="table table-condensed">\
-									<tr>\
-										<td style="vertical-align: middle;" width="50%"><b>'+__("Discount Amount")+'</b></td>\
-										<td width="20%"></td>\
-										<td style="text-align: right;">\
-											<input type="text" class="form-control discount-amount" \
-												style="text-align: right;">\
-										</td>\
-									</tr>\
-								</table>\
-							</div>\
-							<div class="grand-total-area">\
-								<table class="table table-condensed">\
-									<tr>\
-										<td style="vertical-align: middle;"><b>'+__("Grand Total")+'</b></td>\
-										<td style="text-align: right; font-size: 200%; \
-											font-size: bold;" class="grand-total"></td>\
-									</tr>\
-								</table>\
-							</div>\
-							<div class="paid-amount-area">\
-								<table class="table table-condensed">\
-								<tr>\
-									<td style="vertical-align: middle;">'+__("Amount Paid")+'</td>\
-									<td style="text-align: right; \
-										font-size: bold;" class="paid-amount"></td>\
-								</tr>\
-								</table>\
-							</div>\
-						</div>\
-					</div>\
-					<br><br>\
-					<div class="row">\
-						<div class="col-sm-9">\
-							<button class="btn btn-success btn-lg make-payment">\
-								<i class="icon-money"></i> '+__("Make Payment")+'</button>\
-						</div>\
-						<div class="col-sm-3">\
-							<button class="btn btn-default btn-lg remove-items" style="display: none;">\
-								<i class="icon-trash"></i> '+__("Del")+'</button>\
-						</div>\
-					</div>\
-					<br><br>\
-				</div>\
-				<div class="col-sm-6">\
-					<div class="item-list-area">\
-						<div class="col-sm-12">\
-							<div class="row item-list"></div></div>\
-					</div>\
-				</div>\
-			</div></div>');
+		this.wrapper.html(frappe.render_template("pos", {}));
 
 		this.check_transaction_type();
 		this.make();
@@ -276,14 +178,8 @@ erpnext.POS = Class.extend({
 				// if form is local then allow this function
 				$(me.wrapper).find("div.pos-item").on("click", function() {
 					if(me.frm.doc.docstatus==0) {
-						if(!me.frm.doc[me.party.toLowerCase()] && ((me.frm.doctype == "Quotation" &&
-								me.frm.doc.quotation_to == "Customer")
-								|| me.frm.doctype != "Quotation")) {
-							msgprint(__("Please select {0} first.", [me.party]));
-							return;
-						}
-						else
-							me.add_to_cart($(this).attr("data-item_code"));
+						console.log($(this).attr("data-item_code"));
+						me.add_to_cart($(this).attr("data-item_code"));
 					}
 				});
 			}
@@ -293,8 +189,15 @@ erpnext.POS = Class.extend({
 		var me = this;
 		var caught = false;
 
+		if(!me.frm.doc[me.party.toLowerCase()] && ((me.frm.doctype == "Quotation" &&
+				me.frm.doc.quotation_to == "Customer")
+				|| me.frm.doctype != "Quotation")) {
+			msgprint(__("Please select {0} first.", [me.party]));
+			return;
+		}
+
 		// get no_of_items
-		var no_of_items = me.wrapper.find("#cart tbody tr").length;
+		var no_of_items = me.wrapper.find(".pos-bill-item").length;
 
 		// check whether the item is already added
 		if (no_of_items != 0) {
@@ -337,6 +240,7 @@ erpnext.POS = Class.extend({
 		}
 	},
 	update_qty: function(item_code, qty) {
+		console.log([item_code, qty]);
 		var me = this;
 		$.each(this.frm.doc["items"] || [], function(i, d) {
 			if (d.item_code == item_code) {
@@ -372,7 +276,7 @@ erpnext.POS = Class.extend({
 
 		// If quotation to is not Customer then remove party
 		if (this.frm.doctype == "Quotation" && this.frm.doc.quotation_to!="Customer") {
-			this.party_field.$wrapper.remove();
+			this.party_field.$input.prop("disabled", true);
 		}
 	},
 	refresh_item_list: function() {
@@ -385,45 +289,20 @@ erpnext.POS = Class.extend({
 	},
 	show_items_in_item_cart: function() {
 		var me = this;
-		var $items = this.wrapper.find("#cart tbody").empty();
+		var $items = this.wrapper.find(".items").empty();
 
-		$.each(this.frm.doc["items"] || [], function(i, d) {
-
-			$(repl('<tr id="%(item_code)s" data-selected="false">\
-					<td>%(item_code)s%(item_name)s</td>\
-					<td style="vertical-align:top; padding-top: 10px;" \
-						align="right">\
-						<div class="decrease-qty" style="cursor:pointer;">\
-							<i class="icon-minus-sign icon-large text-danger"></i>\
-						</div>\
-					</td>\
-					<td style="vertical-align:middle;">\
-						<input type="text" value="%(qty)s" \
-						class="form-control qty" style="text-align: right;">\
-						<div class="actual-qty small text-muted">'
-							+__("Stock: ")+'<span class="text-success">%(actual_qty)s</span>%(projected_qty)s</div>\
-					</td>\
-					<td style="vertical-align:top; padding-top: 10px;">\
-						<div class="increase-qty" style="cursor:pointer;">\
-							<i class="icon-plus-sign icon-large text-success"></i>\
-						</div>\
-					</td>\
-					<td style="text-align: right;"><b>%(amount)s</b><br>%(rate)s</td>\
-				</tr>',
-				{
-					item_code: d.item_code,
-					item_name: d.item_name===d.item_code ? "" : ("<br>" + d.item_name),
-					qty: d.qty,
-					actual_qty: d.actual_qty,
-					projected_qty: d.projected_qty ? (" <span title='"+__("Projected Qty")
-						+"'>(" + d.projected_qty + ")<span>") : "",
-					rate: format_currency(d.rate, me.frm.doc.currency),
-					amount: format_currency(d.amount, me.frm.doc.currency)
-				}
-			)).appendTo($items);
+		$.each(this.frm.doc.items|| [], function(i, d) {
+			$(frappe.render_template("pos_bill_item", {
+				item_code: d.item_code,
+				item_name: d.item_name===d.item_code ? "" : ("<br>" + d.item_name),
+				qty: d.qty,
+				actual_qty: d.actual_qty,
+				rate: format_currency(d.rate, me.frm.doc.currency),
+				amount: format_currency(d.amount, me.frm.doc.currency)
+			})).appendTo($items);
 		});
 
-		this.wrapper.find("input.qty").on("focus", function() {
+		this.wrapper.find("input.pos-item-qty").on("focus", function() {
 			$(this).select();
 		});
 	},
@@ -465,15 +344,15 @@ erpnext.POS = Class.extend({
 		var me = this;
 
 		// append quantity to the respective item after change from input box
-		$(this.wrapper).find("input.qty").on("change", function() {
+		$(this.wrapper).find("input.pos-item-qty").on("change", function() {
 			var item_code = $(this).closest("tr").attr("id");
 			me.update_qty(item_code, $(this).val());
 		});
 
 		// increase/decrease qty on plus/minus button
-		$(this.wrapper).find(".increase-qty, .decrease-qty").on("click", function() {
-			var tr = $(this).closest("tr");
-			me.increase_decrease_qty(tr, $(this).attr("class"));
+		$(this.wrapper).find(".pos-qty-btn").on("click", function() {
+			var $item = $(this).parents(".pos-bill-item:first");
+			me.increase_decrease_qty($item, $(this).attr("data-action"));
 		});
 
 		// on td click toggle the highlighting of row
@@ -491,15 +370,23 @@ erpnext.POS = Class.extend({
 		});
 
 		me.refresh_delete_btn();
+<<<<<<< HEAD:erpnext/accounts/doctype/sales_invoice/pos.js
 		if(me.frm.doc[this.party.toLowerCase()]) {
+=======
+		//me.focus();
+	},
+	focus: function() {
+		if(me.frm.doc[this.party]) {
+>>>>>>> v5-design:erpnext/public/js/pos/pos.js
 			this.barcode.$input.focus();
 		} else {
-			this.party_field.$input.focus();
+			if(!(this.frm.doctype == "Quotation" && this.frm.doc.quotation_to!="Customer"))
+				this.party_field.$input.focus();
 		}
 	},
-	increase_decrease_qty: function(tr, operation) {
-		var item_code = tr.attr("id");
-		var item_qty = cint(tr.find("input.qty").val());
+	increase_decrease_qty: function($item, operation) {
+		var item_code = $item.attr("data-item-code");
+		var item_qty = cint($item.find("input.pos-item-qty").val());
 
 		if (operation == "increase-qty")
 			this.update_qty(item_code, item_qty + 1);
@@ -510,7 +397,7 @@ erpnext.POS = Class.extend({
 		var me = this;
 		// if form is submitted & cancelled then disable all input box & buttons
 		$(this.wrapper)
-			.find(".remove-items, .make-payment, .increase-qty, .decrease-qty")
+			.find(".remove-items, .make-payment, .pos-qty-btn")
 			.toggle(this.frm.doc.docstatus===0);
 
 		$(this.wrapper).find('input, button').prop("disabled", !(this.frm.doc.docstatus===0));

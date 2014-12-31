@@ -82,9 +82,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 			this.$pos_btn && this.$pos_btn.remove();
 
-			this.$pos_btn = this.frm.appframe.add_primary_action(btn_label, function() {
+			this.$pos_btn = this.frm.page.add_menu_item(btn_label, function() {
 				me.toggle_pos();
-			}, icon, "btn-default");
+			});
 		} else {
 			// hack: will avoid calling refresh from refresh
 			setTimeout(function() { me.toggle_pos(false); }, 100);
@@ -105,12 +105,12 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 		// make pos
 		if(!this.frm.pos) {
-			this.frm.layout.add_view("pos");
-			this.frm.pos = new erpnext.POS(this.frm.layout.views.pos, this.frm);
+			var wrapper = this.frm.page.add_view("pos", "<div>");
+			this.frm.pos = new erpnext.POS(wrapper, this.frm);
 		}
 
 		// toggle view
-		this.frm.layout.set_view(this.pos_active ? "" : "pos");
+		this.frm.page.set_view(this.pos_active ? "main" : "pos");
 		this.pos_active = !this.pos_active;
 
 		// refresh

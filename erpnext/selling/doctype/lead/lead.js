@@ -31,7 +31,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 				frappe.boot.doctype_icons["Customer"], "btn-default");
 			this.frm.add_custom_button(__("Create Opportunity"), this.create_opportunity,
 				frappe.boot.doctype_icons["Opportunity"], "btn-default");
-			this.frm.appframe.add_button(__("Send SMS"), this.frm.cscript.send_sms, "icon-mobile-phone");
+			cur_frm.add_custom_button(__("Send SMS"), this.frm.cscript.send_sms, "icon-mobile-phone");
 		}
 
 		if(!this.frm.doc.__islocal) {

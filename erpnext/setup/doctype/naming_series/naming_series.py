@@ -19,7 +19,6 @@ class NamingSeries(Document):
 
 		prefixes = ""
 		for d in doctypes:
-			print d
 			try:
 				options = self.get_options(d)
 			except frappe.DoesNotExistError:

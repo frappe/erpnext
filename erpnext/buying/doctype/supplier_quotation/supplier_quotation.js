@@ -4,7 +4,6 @@
 // attach required files
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 {% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
-{% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.extend({
 	refresh: function() {

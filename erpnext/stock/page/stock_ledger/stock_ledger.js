@@ -9,7 +9,7 @@ frappe.pages['stock-ledger'].onload = function(wrapper) {
 	});
 
 	new erpnext.StockLedger(wrapper);
-	wrapper.appframe.add_module_icon("Stock")
+	frappe.add_breadcrumbs("Stock")
 }
 
 frappe.require("assets/erpnext/js/stock_grid_report.js");
@@ -20,7 +20,7 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 			title: __("Stock Ledger"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
-			appframe: wrapper.appframe,
+			page: wrapper.page,
 			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand", "Serial No"],
 		})
 	},

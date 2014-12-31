@@ -6,7 +6,6 @@ cur_frm.pformat.print_heading = 'Invoice';
 
 {% include 'selling/sales_common.js' %};
 {% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
-{% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 frappe.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
@@ -44,7 +43,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		cur_frm.dashboard.reset();
 
 		if(doc.docstatus==1) {
-			cur_frm.appframe.add_button('View Ledger', function() {
+			cur_frm.add_custom_button('View Ledger', function() {
 				frappe.route_options = {
 					"voucher_no": doc.name,
 					"from_date": doc.posting_date,
@@ -55,10 +54,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				frappe.set_route("query-report", "General Ledger");
 			}, "icon-table");
 
-			var percent_paid = cint(flt(doc.grand_total - doc.outstanding_amount) / flt(doc.grand_total) * 100);
-			cur_frm.dashboard.add_progress(percent_paid + "% Paid", percent_paid);
+			// var percent_paid = cint(flt(doc.grand_total - doc.outstanding_amount) / flt(doc.grand_total) * 100);
+			// cur_frm.dashboard.add_progress(percent_paid + "% Paid", percent_paid);
 
-			cur_frm.appframe.add_button(__('Send SMS'), cur_frm.cscript.send_sms, 'icon-mobile-phone');
+			cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, 'icon-mobile-phone');
 
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
@@ -69,12 +68,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					});
 
 				if(!from_delivery_note) {
-					cur_frm.appframe.add_primary_action(__('Make Delivery'), cur_frm.cscript['Make Delivery Note'], "icon-truck")
+					cur_frm.page.add_menu_item(__('Make Delivery'), cur_frm.cscript['Make Delivery Note'], "icon-truck")
 				}
 			}
 
 			if(doc.outstanding_amount!=0) {
-				cur_frm.appframe.add_primary_action(__('Make Payment Entry'), cur_frm.cscript.make_bank_entry, "icon-money");
+				cur_frm.page.add_menu_item(__('Make Payment Entry'), cur_frm.cscript.make_bank_entry, "icon-money");
 			}
 		}
 
@@ -86,7 +85,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	sales_order_btn: function() {
-		this.$sales_order_btn = cur_frm.appframe.add_primary_action(__('From Sales Order'),
+		this.$sales_order_btn = cur_frm.page.add_menu_item(__('From Sales Order'),
 			function() {
 				frappe.model.map_current_doc({
 					method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
@@ -103,7 +102,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	delivery_note_btn: function() {
-		this.$delivery_note_btn = cur_frm.appframe.add_primary_action(__('From Delivery Note'),
+		this.$delivery_note_btn = cur_frm.page.add_menu_item(__('From Delivery Note'),
 			function() {
 				frappe.model.map_current_doc({
 					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",

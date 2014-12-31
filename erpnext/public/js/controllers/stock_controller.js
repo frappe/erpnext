@@ -43,7 +43,7 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 	show_stock_ledger: function() {
 		var me = this;
 		if(this.frm.doc.docstatus===1) {
-			this.frm.appframe.add_button(__("Stock Ledger"), function() {
+			cur_frm.add_custom_button(__("Stock Ledger"), function() {
 				frappe.route_options = {
 					voucher_no: me.frm.doc.name,
 					from_date: me.frm.doc.posting_date,
@@ -59,7 +59,7 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 	show_general_ledger: function() {
 		var me = this;
 		if(this.frm.doc.docstatus===1 && cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
-			cur_frm.appframe.add_button(__('Accounting Ledger'), function() {
+			cur_frm.add_custom_button(__('Accounting Ledger'), function() {
 				frappe.route_options = {
 					voucher_no: me.frm.doc.name,
 					from_date: me.frm.doc.posting_date,

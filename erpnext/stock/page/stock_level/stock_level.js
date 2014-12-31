@@ -11,7 +11,7 @@ frappe.pages['stock-level'].onload = function(wrapper) {
 	new erpnext.StockLevel(wrapper);
 
 
-	wrapper.appframe.add_module_icon("Stock")
+	frappe.add_breadcrumbs("Stock")
 	;
 }
 
@@ -25,7 +25,7 @@ erpnext.StockLevel = erpnext.StockGridReport.extend({
 			title: __("Stock Level"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
-			appframe: wrapper.appframe,
+			page: wrapper.page,
 			doctypes: ["Item", "Warehouse", "Stock Ledger Entry", "Production Order", 
 				"Material Request Item", "Purchase Order Item", "Sales Order Item", "Brand", "Serial No"],
 		});

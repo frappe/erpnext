@@ -139,7 +139,7 @@ cur_frm.cscript.refresh = function(doc) {
 	erpnext.toggle_naming_series();
 	cur_frm.cscript.voucher_type(doc);
 	if(doc.docstatus==1) {
-		cur_frm.appframe.add_button(__('View Ledger'), function() {
+		cur_frm.add_custom_button(__('View Ledger'), function() {
 			frappe.route_options = {
 				"voucher_no": doc.name,
 				"from_date": doc.posting_date,

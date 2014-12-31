@@ -73,9 +73,7 @@ class StatusUpdater(Document):
 				frappe.db.set_value(self.doctype, self.name, "status", self.status)
 
 	def validate_qty(self):
-		"""
-			Validates qty at row level
-		"""
+		"""Validates qty at row level"""
 		self.tolerance = {}
 		self.global_tolerance = None
 
@@ -153,7 +151,7 @@ class StatusUpdater(Document):
 					args['second_source_condition'] = ""
 					if args.get('second_source_dt') and args.get('second_source_field') \
 							and args.get('second_join_field'):
-						if not args.get("second_source_extra_cond"): 
+						if not args.get("second_source_extra_cond"):
 							args["second_source_extra_cond"] = ""
 
 						args['second_source_condition'] = """ + ifnull((select sum(%(second_source_field)s)

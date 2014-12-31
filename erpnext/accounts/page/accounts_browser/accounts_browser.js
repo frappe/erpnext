@@ -13,13 +13,13 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		single_column: true
 	})
 
-	wrapper.appframe.add_module_icon("Accounts");
+	frappe.add_breadcrumbs("Accounts");
 
 	var main = $(wrapper).find(".layout-main"),
 		chart_area = $("<div>")
 			.css({"margin-bottom": "15px", "min-height": "200px"})
 			.appendTo(main),
-		help_area = $('<div class="well">'+
+		help_area = $('<div class="msg-box">'+
 		'<h4>'+__('Quick Help')+'</h4>'+
 		'<ol>'+
 			'<li>'+__('To add child nodes, explore tree and click on the node under which you want to add more nodes.')+'</li>'+
@@ -41,16 +41,16 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		'<p>'+__('Please setup your chart of accounts before you start Accounting Entries')+'</p></div>').appendTo(main);
 
 	if (frappe.boot.user.can_create.indexOf("Company") !== -1) {
-		wrapper.appframe.add_button(__('New Company'), function() { newdoc('Company'); },
+		wrapper.page.add_button(__('New Company'), function() { newdoc('Company'); },
 			'icon-plus');
 	}
 
-	wrapper.appframe.set_title_right(__('Refresh'), function() {
+	wrapper.page.set_primary_action(__('Refresh'), function() {
 			wrapper.$company_select.change();
 		});
 
 	// company-select
-	wrapper.$company_select = wrapper.appframe.add_select("Company", [])
+	wrapper.$company_select = wrapper.page.add_select("Company", [])
 		.change(function() {
 			var ctype = frappe.get_route()[1] || 'Account';
 			erpnext.account_chart = new erpnext.AccountsChart(ctype, $(this).val(),
@@ -73,9 +73,9 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 
 pscript.set_title = function(wrapper, ctype, val) {
 	if(val) {
-		wrapper.appframe.set_title('Chart of '+ctype+'s' + " - " + cstr(val));
+		wrapper.page.set_title('Chart of '+ctype+'s' + " - " + cstr(val));
 	} else {
-		wrapper.appframe.set_title('Chart of '+ctype+'s');
+		wrapper.page.set_title('Chart of '+ctype+'s');
 	}
 }
 

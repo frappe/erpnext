@@ -11,7 +11,7 @@ frappe.pages['support-analytics'].onload = function(wrapper) {
 	new erpnext.SupportAnalytics(wrapper);
 	
 
-	wrapper.appframe.add_module_icon("Support")
+	frappe.add_breadcrumbs("Support")
 	
 }
 
@@ -21,7 +21,7 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 			title: __("Support Analtyics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
-			appframe: wrapper.appframe,
+			page: wrapper.page,
 			doctypes: ["Issue", "Fiscal Year"],
 		});
 	},

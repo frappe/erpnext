@@ -120,7 +120,7 @@ $.extend(erpnext.utils, {
 	render_address_and_contact: function(frm) {
 		// render address
 		$(frm.fields_dict['address_html'].wrapper)
-			.html(frappe.render(frappe.templates.address_list,
+			.html(frappe.render_template("address_list",
 				cur_frm.doc.__onload))
 			.find(".btn-address").on("click", function() {
 				new_doc("Address");
@@ -129,7 +129,7 @@ $.extend(erpnext.utils, {
 		// render contact
 		if(frm.fields_dict['contact_html']) {
 			$(frm.fields_dict['contact_html'].wrapper)
-				.html(frappe.render(frappe.templates.contact_list,
+				.html(frappe.render_template("contact_list",
 					cur_frm.doc.__onload))
 				.find(".btn-contact").on("click", function() {
 					new_doc("Contact");

@@ -4,7 +4,6 @@
 
 {% include 'selling/sales_common.js' %}
 {% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
-{% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
@@ -26,7 +25,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 				cur_frm.add_custom_button(__('Set as Lost'),
 					cur_frm.cscript['Declare Order Lost'], "icon-exclamation", "btn-default");
 			}
-			cur_frm.appframe.add_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
+			cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
 		}
 
 		if (this.frm.doc.docstatus===0) {

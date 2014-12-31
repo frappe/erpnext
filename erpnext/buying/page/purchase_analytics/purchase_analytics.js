@@ -11,7 +11,7 @@ frappe.pages['purchase-analytics'].onload = function(wrapper) {
 	new erpnext.PurchaseAnalytics(wrapper);
 
 
-	wrapper.appframe.add_module_icon("Buying")
+	frappe.add_breadcrumbs("Buying")
 
 }
 
@@ -21,7 +21,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 			title: __("Purchase Analytics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
-			appframe: wrapper.appframe,
+			page: wrapper.page,
 			doctypes: ["Item", "Item Group", "Supplier", "Supplier Type", "Company", "Fiscal Year",
 				"Purchase Invoice", "Purchase Invoice Item",
 				"Purchase Order", "Purchase Order Item[Purchase Analytics]",
