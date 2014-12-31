@@ -57,6 +57,9 @@ class BOM(Document):
 			last_purchase_rate, is_manufactured_item
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
 
+		if not item:
+			frappe.throw(_("Item: {0} does not exist in the system").format(item_code))
+
 		return item
 
 	def validate_rm_item(self, item):
