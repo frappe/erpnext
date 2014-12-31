@@ -370,14 +370,10 @@ erpnext.POS = Class.extend({
 		});
 
 		me.refresh_delete_btn();
-<<<<<<< HEAD:erpnext/accounts/doctype/sales_invoice/pos.js
-		if(me.frm.doc[this.party.toLowerCase()]) {
-=======
 		//me.focus();
 	},
 	focus: function() {
-		if(me.frm.doc[this.party]) {
->>>>>>> v5-design:erpnext/public/js/pos/pos.js
+		if(me.frm.doc[this.party].toLowerCase()) {
 			this.barcode.$input.focus();
 		} else {
 			if(!(this.frm.doctype == "Quotation" && this.frm.doc.quotation_to!="Customer"))
