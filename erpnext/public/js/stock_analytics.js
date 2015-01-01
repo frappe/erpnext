@@ -62,12 +62,9 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", fieldname: "warehouse",
 			default_value: __("Select Warehouse...")},
 		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
-		{fieldtype:"Label", label: __("To")},
 		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
 		{fieldtype:"Select", label: __("Range"), fieldname: "range",
-			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: __("Reset Filters"), icon: "icon-filter"}
+			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]}
 	],
 	setup_filters: function() {
 		var me = this;

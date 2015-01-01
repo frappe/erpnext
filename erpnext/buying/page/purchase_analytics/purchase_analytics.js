@@ -98,14 +98,11 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		{fieldtype:"Select", label: __("Company"), link:"Company", fieldname: "company",
 			default_value: __("Select Company...")},
 		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
-		{fieldtype:"Label", label: __("To")},
 		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
 		{fieldtype:"Select", label: __("Range"), fieldname: "range",
 			options:[{label: __("Daily"), value: "Daily"}, {label: __("Weekly"), value: "Weekly"},
 				{label: __("Monthly"), value: "Monthly"}, {label: __("Quarterly"), value: "Quarterly"},
-				{label: __("Yearly"), value: "Yearly"}]},
-		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: __("Reset Filters"), icon: "icon-filter"}
+				{label: __("Yearly"), value: "Yearly"}]}
 	],
 	setup_filters: function() {
 		var me = this;

@@ -67,10 +67,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 			default_value: __("Select Fiscal Year...")},
 		{fieldtype: "Date", label: __("From Date"), fieldname: "from_date"},
 		{fieldtype: "Label", label: __("To")},
-		{fieldtype: "Date", label: __("To Date"), fieldname: "to_date"},
-		{fieldtype: "Button", label: __("Refresh"), icon:"icon-refresh icon-white",
-		 	cssClass:"btn-primary"},
-		{fieldtype: "Button", label: __("Reset Filters"), icon: "icon-filter"},
+		{fieldtype: "Date", label: __("To Date"), fieldname: "to_date"}
 	],
 	setup_filters: function() {
 		this._super();

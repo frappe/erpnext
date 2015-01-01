@@ -9,7 +9,7 @@ frappe.pages['financial-analytics'].onload = function(wrapper) {
 		title: __('Financial Analytics'),
 		single_column: true
 	});
-	erpnext.trial_balance = new erpnext.FinancialAnalytics(wrapper, 'Financial Analytics');
+	erpnext.financial_analytics = new erpnext.FinancialAnalytics(wrapper, 'Financial Analytics');
 	frappe.add_breadcrumbs("Accounts")
 
 }
@@ -41,14 +41,11 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		{fieldtype:"Select", label: __("Fiscal Year"), link:"Fiscal Year", fieldname: "fiscal_year",
 			default_value: __("Select Fiscal Year...")},
 		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
-		{fieldtype:"Label", label: __("To")},
 		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
 		{fieldtype:"Select", label: __("Range"), fieldname: "range",
 			options:[{label: __("Daily"), value: "Daily"}, {label: __("Weekly"), value: "Weekly"},
 				{label: __("Monthly"), value: "Monthly"}, {label: __("Quarterly"), value: "Quarterly"},
-				{label: __("Yearly"), value: "Yearly"}]},
-		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: __("Reset Filters"), icon: "icon-filter"}
+		{label: __("Yearly"), value: "Yearly"}]}
 	],
 	setup_columns: function() {
 		var std_columns = [

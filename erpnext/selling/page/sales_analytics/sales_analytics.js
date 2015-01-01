@@ -105,9 +105,7 @@ erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 		{fieldtype:"Select", label: __("Range"), fieldname: "range",
 			options:[{label: __("Daily"), value: "Daily"}, {label: __("Weekly"), value: "Weekly"},
 				{label: __("Monthly"), value: "Monthly"}, {label: __("Quarterly"), value: "Quarterly"},
-				{label: __("Yearly"), value: "Yearly"}]},
-		{fieldtype:"Button", fieldname: "refresh", label: __("Refresh"), icon:"icon-refresh"},
-		{fieldtype:"Button", fieldname: "reset_filters", label: __("Reset Filters"), icon:"icon-filter"}
+				{label: __("Yearly"), value: "Yearly"}]}
 	],
 	setup_filters: function() {
 		var me = this;
