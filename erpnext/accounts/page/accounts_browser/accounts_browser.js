@@ -19,7 +19,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		chart_area = $("<div>")
 			.css({"margin-bottom": "15px", "min-height": "200px"})
 			.appendTo(main),
-		help_area = $('<div class="msg-box">'+
+		help_area = $('<hr><div style="padding: 0px 15px;">'+
 		'<h4>'+__('Quick Help')+'</h4>'+
 		'<ol>'+
 			'<li>'+__('To add child nodes, explore tree and click on the node under which you want to add more nodes.')+'</li>'+
@@ -41,8 +41,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		'<p>'+__('Please setup your chart of accounts before you start Accounting Entries')+'</p></div>').appendTo(main);
 
 	if (frappe.boot.user.can_create.indexOf("Company") !== -1) {
-		wrapper.page.add_button(__('New Company'), function() { newdoc('Company'); },
-			'icon-plus');
+		wrapper.page.add_menu_item(__('New Company'), function() { newdoc('Company'); }, true);
 	}
 
 	wrapper.page.set_primary_action(__('Refresh'), function() {
@@ -169,9 +168,11 @@ erpnext.AccountsChart = Class.extend({
 				}
 			],
 			onrender: function(node) {
+				var dr_or_cr = node.data.balance < 0 ? "Cr" : "Dr";
 				if (me.ctype == 'Account' && node.data && node.data.balance!==undefined) {
-					$('<span class="balance-area pull-right text-muted">'
-						+ format_currency(node.data.balance, node.data.currency)
+					$('<span class="balance-area pull-right text-muted small">'
+						+ format_currency(Math.abs(node.data.balance), node.data.currency)
+						+ " " + dr_or_cr
 						+ '</span>').insertBefore(node.$ul);
 				}
 			}

@@ -4,6 +4,7 @@
 pscript['onload_Sales Browser'] = function(wrapper){
 	frappe.ui.make_app_page({
 		parent: wrapper,
+		single_column: true,
 	})
 
 	frappe.add_breadcrumbs("Selling")
@@ -11,13 +12,6 @@ pscript['onload_Sales Browser'] = function(wrapper){
 	wrapper.page.set_primary_action(__('Refresh'), function() {
 			wrapper.make_tree();
 		});
-
-
-	$(wrapper)
-		.find(".layout-side-section")
-		.html('<div class="text-muted">'+
-			__('Click on a link to get options to expand get options ') +
-			__('Add') + ' / ' + __('Edit') + ' / '+ __('Delete') + '.</div>')
 
 	wrapper.make_tree = function() {
 		var ctype = frappe.get_route()[1] || 'Territory';
@@ -114,8 +108,7 @@ erpnext.SalesChart = Class.extend({
 			{fieldtype:'Data', fieldname: 'name_field',
 				label:__('New {0} Name',[__(me.ctype)]), reqd:true},
 			{fieldtype:'Select', fieldname:'is_group', label:__('Group Node'), options:'No\nYes',
-				description: __("Further nodes can be only created under 'Group' type nodes")},
-			{fieldtype:'Button', fieldname:'create_new', label:__('Create New') }
+				description: __("Further nodes can be only created under 'Group' type nodes")}
 		]
 
 		if(me.ctype == "Sales Person") {
@@ -131,7 +124,7 @@ erpnext.SalesChart = Class.extend({
 
 		d.set_value("is_group", "No");
 		// create
-		$(d.fields_dict.create_new.input).click(function() {
+		d.set_primary_action(__("Create New"), function() {
 			var btn = this;
 			var v = d.get_values();
 			if(!v) return;
@@ -155,6 +148,7 @@ erpnext.SalesChart = Class.extend({
 				}
 			});
 		});
+
 		d.show();
 	},
 });

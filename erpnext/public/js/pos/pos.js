@@ -158,7 +158,7 @@ erpnext.POS = Class.extend({
 							image = '<img src="' + obj.image + '" class="img-responsive" \
 									style="border:1px solid #eee; max-height: 140px;">';
 						else
-							image = '<div class="missing-image"><i class="icon-camera"></i></div>';
+							image = '<div class="missing-image"><i class="octicon octicon-circle-slash"></i></div>';
 
 						$(repl('<div class="col-xs-3 pos-item" data-item_code="%(item_code)s">\
 									<div style="height: 140px; overflow: hidden;">%(item_image)s</div>\
