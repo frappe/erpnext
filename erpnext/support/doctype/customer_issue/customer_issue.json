@@ -244,7 +244,7 @@
   }, 
   {
    "depends_on": "customer", 
-   "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "customer_group", 
    "fieldtype": "Link", 
    "label": "Customer Group", 
@@ -255,7 +255,7 @@
   }, 
   {
    "depends_on": "customer", 
-   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "territory", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -396,7 +396,7 @@
  "icon": "icon-bug", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2014-07-07 02:47:56.491906", 
+ "modified": "2015-01-01 14:30:00.857711", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Customer Issue", 

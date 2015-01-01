@@ -258,7 +258,7 @@
    "permlevel": 0
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "territory", 
    "fieldtype": "Link", 
    "label": "Territory", 
@@ -267,7 +267,7 @@
    "print_hide": 1
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "customer_group", 
    "fieldtype": "Link", 
    "label": "Customer Group", 
@@ -279,7 +279,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-12-24 16:20:49.640483", 
+ "modified": "2015-01-01 14:30:02.998219", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Maintenance Visit", 

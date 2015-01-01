@@ -2,14 +2,14 @@
 // License: GNU General Public License v3. See license.txt
 
 pscript['onload_Sales Browser'] = function(wrapper){
-	frappe.ui.make_app_page({
+	var page = frappe.ui.make_app_page({
 		parent: wrapper,
 		single_column: true,
-	})
+	});
 
 	frappe.add_breadcrumbs("Selling")
 
-	wrapper.page.set_primary_action(__('Refresh'), function() {
+	wrapper.page.set_secondary_action(__('Refresh'), function() {
 			wrapper.make_tree();
 		});
 
@@ -20,7 +20,7 @@ pscript['onload_Sales Browser'] = function(wrapper){
 			args: {ctype: ctype},
 			callback: function(r) {
 				var root = r.message[0]["value"];
-				erpnext.sales_chart = new erpnext.SalesChart(ctype, root,
+				erpnext.sales_chart = new erpnext.SalesChart(ctype, root, page,
 					$(wrapper)
 						.find(".layout-main-section")
 						.css({
@@ -46,15 +46,20 @@ pscript['onshow_Sales Browser'] = function(wrapper){
 };
 
 erpnext.SalesChart = Class.extend({
-	init: function(ctype, root, parent) {
+	init: function(ctype, root, page, parent) {
 		$(parent).empty();
 		var me = this;
 		me.ctype = ctype;
+		me.page = page;
 		me.can_read = frappe.model.can_read(this.ctype);
 		me.can_create = frappe.boot.user.can_create.indexOf(this.ctype) !== -1 ||
 					frappe.boot.user.in_create.indexOf(this.ctype) !== -1;
 		me.can_write = frappe.model.can_write(this.ctype);
 		me.can_delete = frappe.model.can_delete(this.ctype);
+
+		me.page.set_primary_action(__("New"), function() {
+			me.new_node();
+		});
 
 		this.tree = new frappe.ui.Tree({
 			parent: $(parent),
@@ -103,6 +108,12 @@ erpnext.SalesChart = Class.extend({
 	},
 	new_node: function() {
 		var me = this;
+		var node = me.tree.get_selected_node();
+
+		if(!(node && node.expandable)) {
+			frappe.msgprint(__("Select a group node first."));
+			return;
+		}
 
 		var fields = [
 			{fieldtype:'Data', fieldname: 'name_field',

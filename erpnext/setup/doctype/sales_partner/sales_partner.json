@@ -33,7 +33,7 @@
    "search_index": 0
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "territory", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
@@ -200,7 +200,7 @@
  "icon": "icon-user", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-12-25 15:37:44.884917", 
+ "modified": "2015-01-01 14:30:05.641746", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Partner", 

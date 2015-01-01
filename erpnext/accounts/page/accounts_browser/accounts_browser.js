@@ -44,8 +44,12 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 		wrapper.page.add_menu_item(__('New Company'), function() { newdoc('Company'); }, true);
 	}
 
-	wrapper.page.set_primary_action(__('Refresh'), function() {
+	wrapper.page.set_secondary_action(__('Refresh'), function() {
 			wrapper.$company_select.change();
+		});
+
+	wrapper.page.set_primary_action(__('New'), function() {
+			erpnext.account_chart && erpnext.account_chart.new_account();
 		});
 
 	// company-select
@@ -181,6 +185,13 @@ erpnext.AccountsChart = Class.extend({
 	new_account: function() {
 		var me = this;
 
+		var node = me.tree.get_selected_node();
+
+		if(!(node && node.expandable)) {
+			frappe.msgprint(__("Select a group node first."));
+			return;
+		}
+
 		// the dialog
 		var d = new frappe.ui.Dialog({
 			title:__('New Account'),
@@ -194,8 +205,7 @@ erpnext.AccountsChart = Class.extend({
 						'Equity', 'Cost of Goods Sold', 'Fixed Asset', 'Expense Account',
 						'Income Account', 'Tax', 'Chargeable'].join('\n'),
 					description: __("Optional. This setting will be used to filter in various transactions.") },
-				{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate')},
-				{fieldtype:'Button', fieldname:'create_new', label:__('Create New') }
+				{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate')}
 			]
 		})
 
@@ -224,7 +234,7 @@ erpnext.AccountsChart = Class.extend({
 		})
 
 		// create
-		$(fd.create_new.input).click(function() {
+		d.set_primary_action(__("Create New"), function() {
 			var btn = this;
 			var v = d.get_values();
 			if(!v) return;

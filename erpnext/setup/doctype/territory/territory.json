@@ -20,7 +20,7 @@
    "reqd": 1
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "parent_territory", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
@@ -91,7 +91,7 @@
    "search_index": 1
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "old_parent", 
    "fieldtype": "Link", 
    "hidden": 1, 
@@ -135,8 +135,8 @@
  ], 
  "icon": "icon-map-marker", 
  "idx": 1, 
- "in_create": 1, 
- "modified": "2014-12-25 15:37:31.563276", 
+ "in_create": 0, 
+ "modified": "2015-01-01 15:36:03.787473", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Territory", 
@@ -196,6 +196,6 @@
    "role": "Maintenance User"
   }
  ], 
- "read_only": 1, 
+ "read_only": 0, 
  "search_fields": "parent_territory,territory_manager"
 }

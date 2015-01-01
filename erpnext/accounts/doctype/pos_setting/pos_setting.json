@@ -16,7 +16,7 @@
    "read_only": 0
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "territory", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
@@ -207,7 +207,7 @@
  ], 
  "icon": "icon-cog", 
  "idx": 1, 
- "modified": "2014-09-09 05:35:31.969193", 
+ "modified": "2015-01-01 14:30:03.415900", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "POS Setting", 

@@ -299,7 +299,7 @@
    "report_hide": 1
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
    "hidden": 1, 
@@ -332,7 +332,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-09-09 05:35:36.871532", 
+ "modified": "2015-01-01 14:29:59.329982", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation Item", 

@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:27:51.000000", 
+ "creation": "2013-02-22 01:27:51", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -25,7 +25,7 @@
    "reqd": 1
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
    "hidden": 1, 
@@ -115,9 +115,10 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-02-03 12:40:44.000000", 
+ "modified": "2015-01-01 14:29:58.657537", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Opportunity Item", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }

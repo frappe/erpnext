@@ -1,22 +1,21 @@
 frappe.pages['pos'].onload = function(wrapper) {
-	frappe.ui.make_app_page({
+	var page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: __('Start POS'),
 		single_column: true
 	});
 
-	wrapper.body.html('<div class="text-center" style="margin: 40px">\
+	page.main.html('<div class="text-center" style="padding: 40px">\
 		<p>' + __("Select type of transaction") + '</p>\
 		<p class="select-type" style="margin: auto; max-width: 300px; margin-bottom: 15px;"></p>\
-		<p class="alert alert-warning pos-setting-message hide">'
-			+ __("Please setup your POS Preferences")
-			+ ': <a class="btn btn-default" onclick="newdoc(\'POS Setting\')">'
-			+ __("Make new POS Setting") + '</a></p>\
-		<p><button class="btn btn-primary">' + __("Start") + '</button></p>\
+		<p class="pos-setting-message hide">'
+			+ '<br><a class="btn btn-default btn-sm" onclick="newdoc(\'POS Setting\')">'
+			+ __("Make new POS Setting") + '</a><br><br></p>\
+		<p><button class="btn btn-primary btn-sm">' + __("Start") + '</button></p>\
 	</div>');
 
 	var pos_type = frappe.ui.form.make_control({
-		parent: wrapper.body.find(".select-type"),
+		parent: page.main.find(".select-type"),
 		df: {
 			fieldtype: "Select",
 			options: [
@@ -35,7 +34,7 @@ frappe.pages['pos'].onload = function(wrapper) {
 
 	pos_type.refresh();
 
-	wrapper.body.find(".btn-primary").on("click", function() {
+	page.main.find(".btn-primary").on("click", function() {
 		erpnext.open_as_pos = true;
 		new_doc(pos_type.get_value());
 	});
@@ -44,7 +43,7 @@ frappe.pages['pos'].onload = function(wrapper) {
 		url: "/api/resource/POS Setting",
 		success: function(data) {
 			if(!data.data.length) {
-				wrapper.body.find(".pos-setting-message").removeClass('hide');
+				page.main.find(".pos-setting-message").removeClass('hide');
 			}
 		}
 	})

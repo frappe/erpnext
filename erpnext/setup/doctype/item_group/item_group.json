@@ -28,7 +28,7 @@
    "permlevel": 0
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "parent_item_group", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
@@ -169,7 +169,7 @@
    "search_index": 1
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "old_parent", 
    "fieldtype": "Link", 
    "hidden": 1, 
@@ -190,7 +190,7 @@
  "in_create": 1, 
  "issingle": 0, 
  "max_attachments": 3, 
- "modified": "2014-12-25 12:33:43.359081", 
+ "modified": "2015-01-01 14:30:02.349930", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Item Group", 

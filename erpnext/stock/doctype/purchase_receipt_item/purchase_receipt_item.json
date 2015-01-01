@@ -457,7 +457,7 @@
    "read_only": 1
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
    "hidden": 1, 
@@ -559,7 +559,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-11-07 15:54:08.266918", 
+ "modified": "2015-01-01 14:30:00.032715", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt Item", 

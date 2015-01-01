@@ -272,7 +272,7 @@
    "read_only": 0
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
    "hidden": 1, 
@@ -438,7 +438,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-10-08 11:11:59.411329", 
+ "modified": "2015-01-01 14:29:59.711539", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note Item", 

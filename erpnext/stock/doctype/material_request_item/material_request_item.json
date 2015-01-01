@@ -127,7 +127,7 @@
    "permlevel": 0
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -235,7 +235,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-09-09 05:35:37.746067", 
+ "modified": "2015-01-01 14:29:59.597199", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request Item", 
