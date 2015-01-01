@@ -230,8 +230,10 @@ def execute():
 		["Journal Voucher", "Journal Entry"],
 		["Budget Distribution Detail", "Monthly Distribution Percentage"],
 		["Budget Distribution", "Monthly Distribution"]]:
-			if "tab"+old_dt not in tables:
+			if "tab"+new_dt not in tables:
 				frappe.rename_doc("DocType", old_dt, new_dt, force=True)
+
+	frappe.reload_doc("manufacturing", "doctype", "production_order_operation")
 
 	#rename table fieldnames
 	for dn in rename_map:

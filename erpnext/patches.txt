@@ -36,8 +36,6 @@ erpnext.patches.v4_0.countrywise_coa
 execute:frappe.delete_doc("DocType", "MIS Control")
 execute:frappe.delete_doc("Page", "Financial Statements")
 execute:frappe.delete_doc("DocType", "Stock Ledger")
-execute:frappe.reload_doc("accounts", "doctype", "journal_entry") # 2014-12-31
-execute:frappe.db.sql("update `tabJournal Entry` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
 execute:frappe.delete_doc("DocType", "Grade")
 execute:frappe.db.sql("delete from `tabWebsite Item Group` where ifnull(item_group, '')=''")
 execute:frappe.delete_doc("Print Format", "SalesInvoice")
@@ -65,7 +63,6 @@ erpnext.patches.v4_0.update_users_report_view_settings
 erpnext.patches.v4_0.set_pricing_rule_for_buying_or_selling
 erpnext.patches.v4_0.set_naming_series_property_setter
 erpnext.patches.v4_1.set_outgoing_email_footer
-erpnext.patches.v4_1.fix_jv_remarks
 erpnext.patches.v4_1.fix_sales_order_delivered_status
 erpnext.patches.v4_1.fix_delivery_and_billing_status
 execute:frappe.db.sql("update `tabAccount` set root_type='Liability' where root_type='Income' and report_type='Balance Sheet'")
@@ -98,6 +95,9 @@ execute:frappe.db.sql("update `tabMaterial Request` set material_request_type = 
 execute:frappe.reload_doc('stock', 'doctype', 'item')
 execute:frappe.db.sql("update `tabItem` i set apply_warehouse_wise_reorder_level=1, re_order_level=0, re_order_qty=0 where exists(select name from `tabItem Reorder` where parent=i.name)")
 execute:frappe.rename_doc("DocType", "Support Ticket", "Issue", force=True)
-erpnext.patches.v5_0.recalculate_total_amount_in_jv
 erpnext.patches.v5_0.set_default_company_in_bom
 erpnext.patches.v5_0.capacity_planning
+erpnext.patches.v5_0.rename_table_fieldnames
+erpnext.patches.v5_0.recalculate_total_amount_in_jv
+execute:frappe.db.sql("update `tabJournal Entry` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
+erpnext.patches.v4_1.fix_jv_remarks
