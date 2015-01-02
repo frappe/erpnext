@@ -44,7 +44,7 @@ class SalesInvoice(SellingController):
 		self.so_dn_required()
 		self.validate_proj_cust()
 		self.validate_with_previous_doc()
-		self.validate_uom_is_integer("stock_uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.check_stop_sales_order("sales_order")
 		self.validate_customer_account()
 		self.validate_debit_acc()
@@ -450,7 +450,7 @@ class SalesInvoice(SellingController):
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
 					and d.warehouse:
 				sl_entries.append(self.get_sl_entries(d, {
-					"actual_qty": -1*flt(d.qty),
+					"actual_qty": -1*flt(d.stock_qty),
 					"stock_uom": frappe.db.get_value("Item", d.item_code, "stock_uom")
 				}))
 

@@ -372,6 +372,7 @@ class SellingController(StockController):
 							'reserved_warehouse': reserved_warehouse,
 							'item_code': p.item_code,
 							'qty': flt(p.qty),
+							'stock_qty': flt(p.stock_qty),
 							'reserved_qty': (flt(p.qty)/flt(d.qty)) * reserved_qty_for_main_item,
 							'uom': p.uom,
 							'batch_no': cstr(p.batch_no).strip(),
@@ -384,6 +385,7 @@ class SellingController(StockController):
 					'reserved_warehouse': reserved_warehouse,
 					'item_code': d.item_code,
 					'qty': d.qty,
+					'stock_qty': d.stock_qty,
 					'reserved_qty': reserved_qty_for_main_item,
 					'uom': d.stock_uom,
 					'batch_no': cstr(d.get("batch_no")).strip(),
@@ -428,3 +430,11 @@ def check_active_sales_items(obj):
 			if getattr(d, "income_account", None) and not item.income_account:
 				frappe.db.set_value("Item", d.item_code, "income_account",
 					d.income_account)
+
+def set_qty_as_per_stock_uom(self):
+		for d in self.get(self.fname):
+			if d.meta.get_field("stock_qty") and not d.stock_qty:
+				if not d.conversion_factor:
+					frappe.throw(_("Row {0}: Conversion Factor is mandatory"))
+				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
+    
