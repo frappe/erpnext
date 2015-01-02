@@ -23,7 +23,7 @@ def get_data():
 		"Manufacturing": {
 			"color": "#7f8c8d",
 			"icon": "icon-cogs",
-			"icon": "octicon octicon-gear",
+			"icon": "octicon octicon-tools",
 			"type": "module"
 		},
 		"POS": {
@@ -60,7 +60,7 @@ def get_data():
 		"Shopping Cart": {
 			"color": "#B7E090",
 			"icon": "icon-shopping-cart",
-			"icon": "octicon octicon-gear",
+			"icon": "octicon octicon-gift",
 			"label": _("Shopping Cart"),
 			"link": "Form/Shopping Cart Settings",
 			"type": "module"
