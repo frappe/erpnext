@@ -85,7 +85,6 @@ execute:frappe.delete_doc("DocType", "Purchase Request Item")
 erpnext.patches.v4_2.recalculate_bom_cost
 erpnext.patches.v4_2.fix_gl_entries_for_stock_transactions
 erpnext.patches.v4_2.update_requested_and_ordered_qty
-erpnext.patches.v4_2.party_model
 erpnext.patches.v4_4.make_email_accounts
 execute:frappe.delete_doc("DocType", "Contact Control")
 erpnext.patches.v4_2.reset_bom_costs
@@ -98,6 +97,8 @@ execute:frappe.rename_doc("DocType", "Support Ticket", "Issue", force=True)
 erpnext.patches.v5_0.set_default_company_in_bom
 erpnext.patches.v5_0.capacity_planning
 erpnext.patches.v5_0.rename_table_fieldnames
-erpnext.patches.v5_0.recalculate_total_amount_in_jv
 execute:frappe.db.sql("update `tabJournal Entry` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
+erpnext.patches.v4_2.party_model
 erpnext.patches.v4_1.fix_jv_remarks
+erpnext.patches.v5_0.recalculate_total_amount_in_jv
+erpnext.patches.v5_0.remove_shopping_cart_app

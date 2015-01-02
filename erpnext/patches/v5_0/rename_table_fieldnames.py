@@ -233,7 +233,13 @@ def execute():
 			if "tab"+new_dt not in tables:
 				frappe.rename_doc("DocType", old_dt, new_dt, force=True)
 
+	# reload new child doctypes
 	frappe.reload_doc("manufacturing", "doctype", "production_order_operation")
+	frappe.reload_doc("manufacturing", "doctype", "workstation_working_hour")
+	frappe.reload_doc("stock", "doctype", "item_variant")
+	frappe.reload_doc("accounts", "doctype", "party_account")
+	frappe.reload_doc("accounts", "doctype", "fiscal_year_company")
+	frappe.reload_doc("workflow", "doctype", "workflow")
 
 	#rename table fieldnames
 	for dn in rename_map:

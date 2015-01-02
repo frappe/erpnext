@@ -7,8 +7,8 @@ import frappe
 def execute():
 	frappe.reload_doc("accounts", "doctype", "account")
 	frappe.reload_doc("setup", "doctype", "company")
-	frappe.reload_doc("accounts", "doctype", "journal_entry_account")
 	frappe.reload_doc("accounts", "doctype", "gl_entry")
+	frappe.reload_doc("accounts", "doctype", "journal_entry_account")
 	receivable_payable_accounts = create_receivable_payable_account()
 	if receivable_payable_accounts:
 		set_party_in_jv_and_gl_entry(receivable_payable_accounts)
