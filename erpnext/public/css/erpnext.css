@@ -20,11 +20,32 @@
 }
 
 .pos-item {
-	height: 200px;
+	display: inline-block;
 	overflow: hidden;
+	text-overflow: ellipsis;
 	cursor: pointer;
-	padding-left: 5px !important;
-	padding-right: 5px !important;
+	padding: 10px;
+	height: 0px;
+	padding-bottom: 35%;
+	width: 30%;
+	margin: 1.6%;
+	border: 1px solid #d1d8dd;
+}
+
+.pos-item .item-code {
+	margin-bottom: 0px;
+}
+
+.pos-item .no-image {
+	background-color: #fafbfc;
+	border: 1px dashed #d1d8dd;
+}
+
+.pos-item-image {
+	padding-bottom: 100%;
+	background-size: cover;
+	background-position: center;
+	border: 1px solid transparent;
 }
 
 .pos-item-area {
@@ -38,7 +59,7 @@
 }
 
 .item-list-area {
-	padding: 15px;
+	padding: 15px 0px;
 }
 
 .pos-toolbar, .pos-bill-toolbar {
@@ -54,7 +75,7 @@
 .pos-bill-wrapper {
 	border: 1px solid #d1d8dd;
 	border-top: none;
-	border-right: none;
+	margin-right: -1px;
 }
 
 .pos-bill {
@@ -82,7 +103,15 @@
 }
 
 .pos-qty-btn {
-	margin-top: 5px;
+	margin-top: 3px;
 	cursor: pointer;
 	font-size: 120%;
+}
+
+.pos .search-area .form-group {
+	max-width: 100% !important;
+}
+
+.pos .tax-table {
+	margin-bottom: 10px;
 }

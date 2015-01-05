@@ -19,8 +19,9 @@ erpnext.POS = Class.extend({
 			frappe.model.set_value(me.frm.doctype, me.frm.docname, "discount_amount", this.value);
 		});
 
-		this.call_function("remove-items", function() {me.remove_selected_items();});
-		this.call_function("make-payment", function() {me.make_payment();});
+		this.wrapper.find(".make-payment").on("click", function() {
+			me.make_payment();
+		})
 	},
 	check_transaction_type: function() {
 		var me = this;
@@ -45,14 +46,9 @@ erpnext.POS = Class.extend({
 		// this.amount = export_or_import + "_amount";
 		// this.rate = export_or_import + "_rate";
 	},
-	call_function: function(class_name, fn, event_name) {
-		this.wrapper.find("." + class_name).on(event_name || "click", fn);
-	},
 	make: function() {
 		this.make_party();
-		this.make_barcode();
 		this.make_search();
-		this.make_item_group();
 		this.make_item_list();
 	},
 	make_party: function() {
@@ -75,25 +71,6 @@ erpnext.POS = Class.extend({
 					me.party.toLowerCase(), this.value);
 		});
 	},
-	make_barcode: function() {
-		var me = this;
-		this.barcode = frappe.ui.form.make_control({
-			df: {
-				"fieldtype": "Data",
-				"label": "Barcode",
-				"fieldname": "pos_barcode",
-				"placeholder": "Barcode / Serial No"
-			},
-			parent: this.wrapper.find(".barcode-area"),
-			only_input: true,
-		});
-		this.barcode.make_input();
-		this.barcode.$input.on("keypress", function() {
-			if(me.barcode_timeout)
-				clearTimeout(me.barcode_timeout);
-			me.barcode_timeout = setTimeout(function() { me.add_item_thru_barcode(); }, 1000);
-		});
-	},
 	make_search: function() {
 		var me = this;
 		this.search = frappe.ui.form.make_control({
@@ -114,25 +91,6 @@ erpnext.POS = Class.extend({
 				me.item_timeout = setTimeout(function() { me.make_item_list(); }, 1000);
 		});
 	},
-	make_item_group: function() {
-		var me = this;
-		this.item_group = frappe.ui.form.make_control({
-			df: {
-				"fieldtype": "Link",
-				"options": "Item Group",
-				"label": "Item Group",
-				"fieldname": "pos_item_group",
-				"placeholder": "Item Group"
-			},
-			parent: this.wrapper.find(".item-group-area"),
-			only_input: true,
-		});
-		this.item_group.make_input();
-		this.item_group.$input.on("change", function() {
-			if(!me.item_group.autocomplete_open)
-				me.make_item_list();
-		});
-	},
 	make_item_list: function() {
 		var me = this;
 		if(!this.price_list) {
@@ -146,40 +104,40 @@ erpnext.POS = Class.extend({
 			args: {
 				sales_or_purchase: this.sales_or_purchase,
 				price_list: this.price_list,
-				item_group: this.item_group.$input.val(),
 				item: this.search.$input.val()
 			},
 			callback: function(r) {
 				var $wrap = me.wrapper.find(".item-list");
 				me.wrapper.find(".item-list").empty();
 				if (r.message) {
-					$.each(r.message, function(index, obj) {
-						if (obj.image)
-							image = '<img src="' + obj.image + '" class="img-responsive" \
-									style="border:1px solid #eee; max-height: 140px;">';
-						else
-							image = '<div class="missing-image"><i class="octicon octicon-circle-slash"></i></div>';
+					if (r.message.length === 1) {
+						var item = r.message[0];
+						if (item.serial_no) {
+							me.add_to_cart(item.item_code, item.serial_no);
+							this.search.$input.val("");
+							return;
 
-						$(repl('<div class="col-xs-3 pos-item" data-item_code="%(item_code)s">\
-									<div style="height: 140px; overflow: hidden;">%(item_image)s</div>\
-									<div class="small">%(item_code)s</div>\
-									<div class="small">%(item_name)s</div>\
-									<div class="small">%(item_price)s</div>\
-								</div>',
-							{
-								item_code: obj.name,
-								item_price: format_currency(obj.price_list_rate, obj.currency),
-								item_name: obj.name===obj.item_name ? "" : obj.item_name,
-								item_image: image
-							})).appendTo($wrap);
+						} else if (item.barcode) {
+							me.add_to_cart(item.item_code);
+							this.search.$input.val("");
+							return;
+						}
+					}
+
+					$.each(r.message, function(index, obj) {
+						$(frappe.render_template("pos_item", {
+							item_code: obj.name,
+							item_price: format_currency(obj.price_list_rate, obj.currency),
+							item_name: obj.name===obj.item_name ? "" : obj.item_name,
+							item_image: obj.image
+						})).appendTo($wrap);
 					});
 				}
 
 				// if form is local then allow this function
 				$(me.wrapper).find("div.pos-item").on("click", function() {
 					if(me.frm.doc.docstatus==0) {
-						console.log($(this).attr("data-item_code"));
-						me.add_to_cart($(this).attr("data-item_code"));
+						me.add_to_cart($(this).attr("data-item-code"));
 					}
 				});
 			}
@@ -224,6 +182,7 @@ erpnext.POS = Class.extend({
 
 		var child = frappe.model.add_child(me.frm.doc, this.frm.doctype + " Item", "items");
 		child.item_code = item_code;
+		child.qty = 1;
 
 		if (serial_no)
 			child.serial_no = serial_no;
@@ -240,7 +199,6 @@ erpnext.POS = Class.extend({
 		}
 	},
 	update_qty: function(item_code, qty) {
-		console.log([item_code, qty]);
 		var me = this;
 		$.each(this.frm.doc["items"] || [], function(i, d) {
 			if (d.item_code == item_code) {
@@ -260,7 +218,6 @@ erpnext.POS = Class.extend({
 		this.refresh_item_list();
 		this.party_field.set_input(this.frm.doc[this.party.toLowerCase()]);
 		this.wrapper.find('input.discount-amount').val(this.frm.doc.discount_amount);
-		this.barcode.set_input("");
 
 		this.show_items_in_item_cart();
 		this.show_taxes();
@@ -294,9 +251,8 @@ erpnext.POS = Class.extend({
 		$.each(this.frm.doc.items|| [], function(i, d) {
 			$(frappe.render_template("pos_bill_item", {
 				item_code: d.item_code,
-				item_name: d.item_name===d.item_code ? "" : ("<br>" + d.item_name),
+				item_name: (d.item_name===d.item_code || !d.item_name) ? "" : ("<br>" + d.item_name),
 				qty: d.qty,
-				actual_qty: d.actual_qty,
 				rate: format_currency(d.rate, me.frm.doc.currency),
 				amount: format_currency(d.amount, me.frm.doc.currency)
 			})).appendTo($items);
@@ -309,21 +265,17 @@ erpnext.POS = Class.extend({
 	show_taxes: function() {
 		var me = this;
 		var taxes = this.frm.doc["taxes"] || [];
-		$(this.wrapper).find(".tax-table")
-			.toggle((taxes && taxes.length) ? true : false)
-			.find("tbody").empty();
+		$(this.wrapper)
+			.find(".tax-area").toggleClass("hide", (taxes && taxes.length) ? false : true)
+			.find(".tax-table").empty();
 
 		$.each(taxes, function(i, d) {
 			if (d.tax_amount) {
-				$(repl('<tr>\
-					<td>%(description)s %(rate)s</td>\
-					<td style="text-align: right;">%(tax_amount)s</td>\
-				<tr>', {
+				$(frappe.render_template("pos_tax_row", {
 					description: d.description,
-					rate: ((d.charge_type == "Actual") ? '' : ("(" + d.rate + "%)")),
 					tax_amount: format_currency(flt(d.tax_amount)/flt(me.frm.doc.conversion_rate),
 						me.frm.doc.currency)
-				})).appendTo(".tax-table tbody");
+				})).appendTo(me.wrapper.find(".tax-table"));
 			}
 		});
 	},
@@ -345,7 +297,7 @@ erpnext.POS = Class.extend({
 
 		// append quantity to the respective item after change from input box
 		$(this.wrapper).find("input.pos-item-qty").on("change", function() {
-			var item_code = $(this).closest("tr").attr("id");
+			var item_code = $(this).parents(".pos-bill-item").attr("data-item-code");
 			me.update_qty(item_code, $(this).val());
 		});
 
@@ -374,7 +326,7 @@ erpnext.POS = Class.extend({
 	},
 	focus: function() {
 		if(me.frm.doc[this.party].toLowerCase()) {
-			this.barcode.$input.focus();
+			this.search.$input.focus();
 		} else {
 			if(!(this.frm.doctype == "Quotation" && this.frm.doc.quotation_to!="Customer"))
 				this.party_field.$input.focus();
@@ -393,38 +345,23 @@ erpnext.POS = Class.extend({
 		var me = this;
 		// if form is submitted & cancelled then disable all input box & buttons
 		$(this.wrapper)
-			.find(".remove-items, .make-payment, .pos-qty-btn")
+			.find(".pos-qty-btn")
 			.toggle(this.frm.doc.docstatus===0);
 
 		$(this.wrapper).find('input, button').prop("disabled", !(this.frm.doc.docstatus===0));
+
+		this.wrapper.find(".pos-item-area").toggleClass("hide", me.frm.doc.docstatus!==0);
+
 	},
 	hide_payment_button: function() {
+		var toggle = !(this.frm.doctype == "Sales Invoice" && this.frm.doc.is_pos && this.frm.doc.docstatus===1);
 		$(this.wrapper)
 			.find(".make-payment")
-			.toggle(this.frm.doctype == "Sales Invoice" && this.frm.doc.is_pos);
+			.toggleClass("hide", toggle)
+			.prop("disabled", toggle);
 	},
 	refresh_delete_btn: function() {
 		$(this.wrapper).find(".remove-items").toggle($(".item-cart .warning").length ? true : false);
-	},
-	add_item_thru_barcode: function() {
-		var me = this;
-		me.barcode_timeout = null;
-		frappe.call({
-			method: 'erpnext.accounts.doctype.sales_invoice.pos.get_item_code',
-			args: {barcode_serial_no: this.barcode.$input.val()},
-			callback: function(r) {
-				if (r.message) {
-					if (r.message[1] == "serial_no")
-						me.add_to_cart(r.message[0][0].item_code, r.message[0][0].name);
-					else
-						me.add_to_cart(r.message[0][0].name);
-				}
-				else
-					msgprint(__("Invalid Barcode"));
-
-				me.refresh();
-			}
-		});
 	},
 	remove_selected_items: function() {
 		var me = this;
@@ -457,7 +394,7 @@ erpnext.POS = Class.extend({
 	},
 	make_payment: function() {
 		var me = this;
-		var no_of_items = $(this.wrapper).find("#cart tbody tr").length;
+		var no_of_items = this.frm.doc.items.length;
 		var mode_of_payment = [];
 
 		if (no_of_items == 0)

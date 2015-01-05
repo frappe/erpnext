@@ -12,7 +12,7 @@ from frappe.model.document import Document
 
 class Project(Document):
 	def get_feed(self):
-		return self.status
+		return '{0}: {1}'.format(_(self.status), self.project_name)
 
 	def get_gross_profit(self):
 		pft, per_pft =0, 0

@@ -292,13 +292,13 @@ cur_frm.fields_dict.debit_to.get_query = function(doc) {
 }
 
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
-	return{
-		filters: {
-			'account_type': 'Receivable',
-			'root_type': 'Asset',
-			'group_or_ledger': 'Ledger',
-			'company': doc.company
-		}
+	return {
+		filters: [
+			["Account", "account_type", "in", ["Cash", "Bank"]],
+			["Account", "root_type", "=", "Asset"],
+			["Account", "group_or_ledger", "=", "Ledger"],
+			["Account", "company", "=", doc.company]
+		]
 	}
 }
 

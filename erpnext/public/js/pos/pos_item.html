@@ -1,0 +1,10 @@
+<div class="pos-item" data-item-code="{%= item_code %}">
+	<div class="pos-item-image {% if (!item_image) { %} no-image {% } %}"
+		 style="{% if (item_image) { %} background-image: url({%= item_image %}) {% } %}">
+	</div>
+	<h6 class="item-code text-ellipsis">{%= item_code %}</h6>
+	<div class="small text-ellipsis">
+		{% if (item_name) { %}{%= item_name %}<br>{% } %}
+		{%= item_price %}
+	</div>
+</div>
