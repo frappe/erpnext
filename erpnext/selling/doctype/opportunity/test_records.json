@@ -2,6 +2,8 @@
 	{
 		"doctype": "Opportunity",
 		"name": "_Test Opportunity 1",
+		"transaction_date": "2013-06-06", 
+		"fiscal_year": "_Test Fiscal Year 2013", 
 		"enquiry_from": "Lead",
 		"enquiry_type": "Sales",
 		"lead": "_T-Lead-00001",
