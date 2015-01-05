@@ -1,28 +1,20 @@
 <div class="row" style="max-height: 30px;">
-	<div class="col-xs-10">
-		<div class="text-ellipsis">
-			{%= list.get_avatar_and_id(doc) %}
-			<span style="margin-right: 8px; display: inline-block"
-				title="{%= doc.material_request_type %}" class="filterable"
-				data-filter="material_request_type,=,{%= doc.material_request_type %}">
-			{% if(doc.material_request_type==="Purchase") { %}
-				<i class="icon-shopping-cart"></i>
-			{% } else { %}
-				<i class="icon-truck"></i>
-			{% } %}
-			</span>
-			{% if(doc.status=="Draft") { %}
-			<span class="label label-danger"
-				data-filter="status,=,{%= doc.status %}">{%= doc.status %}</span>
-			{% } %}
-			{% if(doc.status=="Submitted" && doc.per_ordered < 100) { %}
-			<span class="label label-warning filterable"
-				data-filter="per_ordered,<,100">{%= __("Pending") %}</span>
-			{% } %}
-		</div>
+	<div class="col-sm-10 col-xs-12 text-ellipsis">
+		{%= list.get_avatar_and_id(doc) %}
 	</div>
-	<div class="col-xs-2">
-		{% var completed = doc.per_ordered, title = __("Ordered") %}
-		{% include "templates/form_grid/includes/progress.html" %}
+	<div class="col-sm-2 hidden-xs">
+		{% if(doc.status=="Draft") { %}
+		<span class="indicator red filterable"
+			data-filter="status,=,{%= doc.status %}">{%= doc.status %}</span>
+		{% } else if(doc.status=="Submitted" && doc.per_ordered < 100) { %}
+		<span class="indicator orange filterable"
+			data-filter="per_ordered,<,100">{%= __("Pending") %}</span>
+		{% } else if(doc.status=="Submitted" && doc.per_ordered == 100) { %}
+		<span class="indicator blue filterable"
+			data-filter="per_ordered,=,100">{%= __("Completed") %}</span>
+		{% } else if(doc.status=="Stopped") { %}
+		<span class="indicator red filterable"
+			data-filter="status,=,Stopped">{%= __("Stopped") %}</span>
+        {% } %}
 	</div>
 </div>

@@ -23,23 +23,6 @@
    "read_only": 0
   }, 
   {
-   "default": "Not Available", 
-   "description": "Only Serial Nos with status \"Available\" can be delivered.", 
-   "fieldname": "status", 
-   "fieldtype": "Select", 
-   "in_filter": 1, 
-   "in_list_view": 1, 
-   "label": "Status", 
-   "no_copy": 1, 
-   "oldfieldname": "status", 
-   "oldfieldtype": "Select", 
-   "options": "Not Available\nAvailable\nDelivered\nPurchase Returned\nSales Returned", 
-   "permlevel": 0, 
-   "read_only": 1, 
-   "reqd": 1, 
-   "search_index": 1
-  }, 
-  {
    "fieldname": "serial_no", 
    "fieldtype": "Data", 
    "in_filter": 0, 
@@ -67,6 +50,23 @@
    "search_index": 0
   }, 
   {
+   "default": "Not Available", 
+   "description": "Only Serial Nos with status \"Available\" can be delivered.", 
+   "fieldname": "status", 
+   "fieldtype": "Select", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Status", 
+   "no_copy": 1, 
+   "oldfieldname": "status", 
+   "oldfieldtype": "Select", 
+   "options": "Not Available\nAvailable\nDelivered\nPurchase Returned\nSales Returned", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "reqd": 1, 
+   "search_index": 1
+  }, 
+  {
    "description": "Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt", 
    "fieldname": "warehouse", 
    "fieldtype": "Link", 
@@ -91,7 +91,7 @@
   {
    "fieldname": "item_name", 
    "fieldtype": "Data", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Item Name", 
    "permlevel": 0, 
    "read_only": 1
@@ -417,7 +417,7 @@
  "icon": "icon-barcode", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-01-01 14:30:05.865206", 
+ "modified": "2015-01-05 16:03:49.825174", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Serial No", 

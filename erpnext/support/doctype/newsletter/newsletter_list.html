@@ -1,16 +1,15 @@
 <div class="row" style="max-height: 30px;">
-	<div class="col-xs-10">
+	<div class="col-xs-12 col-sm-9">
 		<div class="text-ellipsis">
 			{%= list.get_avatar_and_id(doc) %}
-			<span class="label
-				label-{%= cint(doc.email_sent) ? "success" : "warning" %} filterable"
-				data-filter="email_sent,=,{%= cint(doc.email_sent) ? __("Yes") : __("No") %}">
-				{%= cint(doc.email_sent) ? __("Sent") : __("Not Sent") %}
-			</span>
-			<span class="label label-info filterable"
-				data-filter="send_to_type,=,{%= doc.send_to_type %}">
-				{%= doc.send_to_type %}
-			</span>
 		</div>
 	</div>
+    <div class="col-sm-3 hidden-xs">
+        {% if (!doc.email_sent) { %}
+		<span class="indicator orange filterable"
+			data-filter="email_sent,=,No">
+			{%= __("Not Sent") %}
+		</span>
+        {% } %}
+    </div>
 </div>

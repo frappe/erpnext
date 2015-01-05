@@ -138,7 +138,7 @@ def get_data():
 				},
 				{
 					"type":"doctype",
-					"name": "Budget Distribution",
+					"name": "Monthly Distribution",
 					"description": _("Seasonality for setting budgets.")
 				},
 				{

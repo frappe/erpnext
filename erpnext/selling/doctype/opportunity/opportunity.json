@@ -389,7 +389,7 @@
  "icon": "icon-info-sign", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-01 14:30:03.287608", 
+ "modified": "2015-01-05 12:14:59.101693", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Opportunity", 
@@ -427,5 +427,6 @@
  ], 
  "search_fields": "status,transaction_date,customer,lead,enquiry_type,territory,company", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "customer_name"
 }

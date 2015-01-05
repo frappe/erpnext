@@ -448,7 +448,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-12-25 17:21:56.824371", 
+ "modified": "2015-01-05 10:54:54.294810", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Entry", 
@@ -502,5 +502,6 @@
  "read_only_onload": 1, 
  "search_fields": "voucher_type,posting_date, due_date, cheque_no", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "voucher_type"
 }

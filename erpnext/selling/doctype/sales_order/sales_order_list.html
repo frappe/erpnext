@@ -1,47 +1,34 @@
 <div class="row" style="max-height: 30px;">
-	<div class="col-xs-8">
+	<div class="col-xs-12 col-sm-8">
 		<div class="text-ellipsis">
 			{%= list.get_avatar_and_id(doc) %}
-			<span style="margin-right: 8px; display: inline-block">
-				<span class="filterable"
-					data-filter="customer,=,{%= doc.customer %}">
-					{%= doc.customer_name %}</span></span>
-			{% if(doc.per_delivered < 100 && doc.status!=="Stopped") { %}
-				{% if(frappe.datetime.get_diff(doc.delivery_date) < 0) { %}
-				<span class="label label-danger filterable"
-					title="{%= doc.get_formatted("delivery_date")%}"
-					data-filter="per_delivered,<,100|delivery_date,<,Today|status,!=,Stopped"
-					>
-						{%= __("Overdue") %}
-				</span>
-				{% } else { %}
-				<span class="label label-warning filterable"
-					data-filter="per_delivered,<,100|status,!=,Stopped"
-					title="{%= __("Pending") %}">
-					{%= doc.get_formatted("delivery_date") || "Pending" %}</span>
-				{% } %}
-			{% } %}
-			{% if(doc.per_delivered == 100 && doc.status!=="Stopped") { %}
-				<span class="filterable text-muted"
-					data-filter="per_delivered,=,100|status,!=,Stopped">
-					<i class="icon-ok-sign"></i></span>
-			{% } %}
-			{% if(doc.status==="Stopped") { %}
-				<span class="label label-danger filterable"
-					data-filter="status,=,Stopped">{%= __("Stopped") %}</span>
-			{% } %}
 		</div>
 	</div>
-	<div class="col-xs-1 text-right">
-		{% var completed = doc.per_delivered, title = __("Delivered") %}
-		{% include "templates/form_grid/includes/progress.html" %}
-	</div>
-	<div class="col-xs-1 text-right">
-		{% var completed = doc.per_billed, title = __("Billed") %}
-		{% include "templates/form_grid/includes/progress.html" %}
-	</div>
-	<div class="col-xs-2 text-right">
-		<div class="text-ellipsis" title="{%= doc.get_formatted('grand_total_export') %}">
+    <div class="col-sm-2 hidden-xs text-ellipsis">
+		{% if(doc.per_delivered < 100 && doc.status!=="Stopped" &&
+            frappe.datetime.get_diff(doc.delivery_date) < 0) { %}
+			<span class="indicator red filterable"
+				title="{%= doc.get_formatted("delivery_date")%}"
+				data-filter="per_delivered,<,100|delivery_date,<,Today|status,!=,Stopped">
+					{%= __("Overdue") %}
+			</span>
+		{% } else if(doc.per_delivered < 100 && doc.status!=="Stopped") { %}
+			<span class="indicator orange filterable"
+				data-filter="per_delivered,<,100|status,!=,Stopped"
+				title="{%= __("Pending") %}">
+				{%= doc.get_formatted("delivery_date") || "Pending" %}</span>
+		{% } else if(doc.per_delivered == 100 && doc.status!=="Stopped") { %}
+			<span class="filterable indicator green"
+				data-filter="per_delivered,=,100|status,!=,Stopped">
+                {%= __("Delivered") %}
+            </span>
+		{% } else if(doc.status==="Stopped") { %}
+			<span class="indicator red filterable"
+				data-filter="status,=,Stopped">{%= __("Stopped") %}</span>
+		{% } %}
+    </div>
+	<div class="col-sm-2 hidden-xs text-ellipsis text-right">
+		<div title="{%= doc.get_formatted('grand_total_export') %}">
 			{%= doc.get_formatted("grand_total_export") %}
 		</div>
 	</div>

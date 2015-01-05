@@ -22,10 +22,8 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		cur_frm.dashboard.reset();
 		if(doc.docstatus===1) {
 			if(doc.status==="Stopped") {
-				cur_frm.dashboard.set_headline_alert(__("Stopped"), "alert-danger", "icon-stop")
+				cur_frm.dashboard.set_headline_alert(__("Stopped"), "alert-danger", "octicon octicon-circle-slash")
 			}
-			cur_frm.dashboard.add_progress(cint(doc.per_ordered) + "% "
-				+ __("Fulfilled"), cint(doc.per_ordered));
 		}
 
 		if(doc.docstatus==0) {

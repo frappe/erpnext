@@ -63,7 +63,7 @@
    "fieldname": "customer", 
    "fieldtype": "Link", 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Customer", 
    "oldfieldname": "customer", 
    "oldfieldtype": "Link", 
@@ -162,7 +162,7 @@
    "fieldtype": "Select", 
    "hidden": 0, 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Warranty / AMC Status", 
    "options": "\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC", 
    "permlevel": 0
@@ -396,7 +396,7 @@
  "icon": "icon-bug", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2015-01-01 14:30:00.857711", 
+ "modified": "2015-01-05 16:21:50.525893", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Customer Issue", 
@@ -419,5 +419,6 @@
  ], 
  "search_fields": "status,customer,customer_name,territory", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "customer_name"
 }

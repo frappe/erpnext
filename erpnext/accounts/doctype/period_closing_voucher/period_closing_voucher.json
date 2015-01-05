@@ -14,7 +14,7 @@
   {
    "fieldname": "transaction_date", 
    "fieldtype": "Date", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Transaction Date", 
    "oldfieldname": "transaction_date", 
    "oldfieldtype": "Date", 
@@ -23,7 +23,7 @@
   {
    "fieldname": "posting_date", 
    "fieldtype": "Date", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Posting Date", 
    "oldfieldname": "posting_date", 
    "oldfieldtype": "Date", 
@@ -45,7 +45,7 @@
    "fieldname": "amended_from", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Amended From", 
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
@@ -57,6 +57,7 @@
   {
    "fieldname": "company", 
    "fieldtype": "Link", 
+   "in_list_view": 0, 
    "label": "Company", 
    "oldfieldname": "company", 
    "oldfieldtype": "Select", 
@@ -102,7 +103,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-06-23 07:55:49.946225", 
+ "modified": "2015-01-05 11:27:11.937653", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Period Closing Voucher", 
@@ -139,5 +140,6 @@
  ], 
  "search_fields": "posting_date, fiscal_year", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "closing_account_head"
 }

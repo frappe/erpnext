@@ -14,6 +14,14 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "title", 
+   "fieldtype": "Data", 
+   "label": "Title", 
+   "permlevel": 0, 
+   "precision": "", 
+   "reqd": 1
+  }, 
+  {
    "default": "Item Code", 
    "fieldname": "apply_on", 
    "fieldtype": "Select", 
@@ -236,7 +244,7 @@
  "icon": "icon-gift", 
  "idx": 1, 
  "istable": 0, 
- "modified": "2014-09-26 09:09:38.418765", 
+ "modified": "2015-01-05 10:58:42.550092", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Pricing Rule", 
@@ -296,5 +304,6 @@
   }
  ], 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "title"
 }

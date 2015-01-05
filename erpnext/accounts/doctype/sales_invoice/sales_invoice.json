@@ -1192,7 +1192,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-01 14:30:04.525035", 
+ "modified": "2015-01-05 10:57:31.054236", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 
@@ -1248,5 +1248,6 @@
  "read_only_onload": 1, 
  "search_fields": "posting_date, due_date, customer, fiscal_year, grand_total, outstanding_amount", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "customer_name"
 }

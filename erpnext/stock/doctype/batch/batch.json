@@ -78,7 +78,7 @@
  "icon": "icon-archive", 
  "idx": 1, 
  "max_attachments": 5, 
- "modified": "2014-12-15 17:37:01.781726", 
+ "modified": "2015-01-05 16:11:40.125703", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Batch", 
@@ -97,5 +97,6 @@
    "submit": 0, 
    "write": 1
   }
- ]
+ ], 
+ "title_field": "item"
 }

@@ -587,7 +587,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2014-12-24 16:43:51.886121", 
+ "modified": "2015-01-05 15:28:49.649079", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 
@@ -656,5 +656,6 @@
  "read_only_onload": 0, 
  "search_fields": "posting_date, from_warehouse, to_warehouse, purpose, remarks", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "purpose"
 }

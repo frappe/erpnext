@@ -1021,7 +1021,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "issingle": 0, 
- "modified": "2015-01-01 14:30:05.304190", 
+ "modified": "2015-01-05 12:25:02.687860", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 
@@ -1111,5 +1111,6 @@
  "read_only_onload": 1, 
  "search_fields": "status,transaction_date,customer,customer_name, territory,order_type,company", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "customer_name"
 }

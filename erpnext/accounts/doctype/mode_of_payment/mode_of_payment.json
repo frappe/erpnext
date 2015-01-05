@@ -10,7 +10,7 @@
   {
    "fieldname": "mode_of_payment", 
    "fieldtype": "Data", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Mode of Payment", 
    "oldfieldname": "mode_of_payment", 
    "oldfieldtype": "Data", 
@@ -41,7 +41,7 @@
  ], 
  "icon": "icon-credit-card", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:13.846602", 
+ "modified": "2015-01-05 11:13:54.446006", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Mode of Payment", 

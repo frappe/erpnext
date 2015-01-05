@@ -10,7 +10,7 @@
   {
    "fieldname": "brand", 
    "fieldtype": "Data", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Brand Name", 
    "oldfieldname": "brand", 
    "oldfieldtype": "Data", 
@@ -33,7 +33,7 @@
  "icon": "icon-certificate", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2014-05-27 03:49:08.217867", 
+ "modified": "2015-01-05 16:15:25.811253", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Brand", 

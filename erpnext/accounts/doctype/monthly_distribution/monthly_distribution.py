@@ -13,13 +13,15 @@ class MonthlyDistribution(Document):
 		'October','November','December']
 		idx =1
 		for m in month_list:
-			mnth = self.append('budget_distribution_details')
+			mnth = self.append('percentages')
 			mnth.month = m
+			mnth.percentage_allocation = 100.0/12
 			mnth.idx = idx
 			idx += 1
 
 	def validate(self):
-		total = sum([flt(d.percentage_allocation) for d in self.get("budget_distribution_details")])
+		total = sum([flt(d.percentage_allocation) for d in self.get("percentages")])
 
-		if total != 100.0:
-			frappe.throw(_("Percentage Allocation should be equal to 100%"))
+		if flt(total, 2) != 100.0:
+			frappe.throw(_("Percentage Allocation should be equal to 100%") + \
+				" ({0}%)".format(str(flt(total, 2))))

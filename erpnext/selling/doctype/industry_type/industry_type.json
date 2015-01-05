@@ -1,5 +1,6 @@
 {
  "allow_import": 1, 
+ "allow_rename": 1, 
  "autoname": "field:industry", 
  "creation": "2012-03-27 14:36:09", 
  "docstatus": 0, 
@@ -9,7 +10,7 @@
   {
    "fieldname": "industry", 
    "fieldtype": "Data", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Industry", 
    "oldfieldname": "industry", 
    "oldfieldtype": "Data", 
@@ -19,7 +20,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:11.146729", 
+ "modified": "2015-01-05 15:02:09.356985", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Industry Type", 

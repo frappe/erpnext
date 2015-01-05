@@ -12,13 +12,13 @@
    "fieldname": "partner_name", 
    "fieldtype": "Data", 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Sales Partner Name", 
    "oldfieldname": "partner_name", 
    "oldfieldtype": "Data", 
    "permlevel": 0, 
    "reqd": 1, 
-   "search_index": 1
+   "search_index": 0
   }, 
   {
    "fieldname": "partner_type", 
@@ -52,7 +52,7 @@
   {
    "fieldname": "commission_rate", 
    "fieldtype": "Float", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Commission Rate", 
    "oldfieldname": "commission_rate", 
    "oldfieldtype": "Currency", 
@@ -200,7 +200,7 @@
  "icon": "icon-user", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-01-01 14:30:05.641746", 
+ "modified": "2015-01-05 14:52:04.562481", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Partner", 

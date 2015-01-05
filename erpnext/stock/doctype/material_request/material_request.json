@@ -235,7 +235,7 @@
  "icon": "icon-ticket", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-12-24 14:28:14.548275", 
+ "modified": "2015-01-05 15:17:13.466750", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request", 
@@ -303,5 +303,6 @@
  "read_only_onload": 1, 
  "search_fields": "status,transaction_date", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "material_request_type"
 }

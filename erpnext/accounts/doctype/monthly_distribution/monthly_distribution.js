@@ -4,9 +4,9 @@
 cur_frm.cscript.onload = function(doc,cdt,cdn){
   if(doc.__islocal){
     var callback1 = function(r,rt){
-      refresh_field('budget_distribution_details');
+      refresh_field('percentages');
     }
-    
+
     return $c('runserverobj',args={'method':'get_months', 'docs':doc}, callback1);
   }
 }
