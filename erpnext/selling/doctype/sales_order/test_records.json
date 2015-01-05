@@ -19,6 +19,7 @@
   "sales_order_details": [
    {
     "base_amount": 1000.0, 
+    "conversion_factor": 1.0, 
     "base_rate": 100.0, 
     "description": "CPU", 
     "doctype": "Sales Order Item", 

@@ -9,6 +9,7 @@
    {
     "base_amount": 500.0, 
     "base_rate": 100.0, 
+    "conversion_factor": 1.0, 
     "cost_center": "Main - _TC", 
     "description": "CPU", 
     "doctype": "Delivery Note Item", 
