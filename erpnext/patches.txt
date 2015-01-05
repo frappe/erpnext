@@ -102,3 +102,4 @@ erpnext.patches.v4_2.party_model
 erpnext.patches.v4_1.fix_jv_remarks
 erpnext.patches.v5_0.recalculate_total_amount_in_jv
 erpnext.patches.v5_0.remove_shopping_cart_app
+erpnext.patches.v5_0.update_companywise_payment_account

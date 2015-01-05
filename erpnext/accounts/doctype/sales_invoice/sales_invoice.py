@@ -577,13 +577,15 @@ class SalesInvoice(SellingController):
 				)
 
 @frappe.whitelist()
-def get_bank_cash_account(mode_of_payment):
-	val = frappe.db.get_value("Mode of Payment", mode_of_payment, "default_account")
-	if not val:
+def get_bank_cash_account(mode_of_payment, company):
+	account = frappe.db.get_value("Mode of Payment Account", {"parent": mode_of_payment, "company": company}, \
+		"default_account")
+	if not account:
 		frappe.msgprint(_("Please set default Cash or Bank account in Mode of Payment {0}").format(mode_of_payment))
 	return {
-		"cash_bank_account": val
+		"cash_bank_account": account
 	}
+
 
 @frappe.whitelist()
 def get_income_account(doctype, txt, searchfield, start, page_len, filters):

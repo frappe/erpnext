@@ -230,7 +230,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 		var jvdetail = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
 		$.each(r, function(i, d) {
 			var row = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
-			row.account = d.account;
+			row.account = d.cash_bank_account;
 			row.balance = d.balance;
 		});
 		refresh_field("accounts");
