@@ -81,7 +81,7 @@
    "fieldname": "customer_name", 
    "fieldtype": "Data", 
    "hidden": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Customer / Lead Name", 
    "permlevel": 0, 
    "read_only": 1
@@ -800,7 +800,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 1, 
- "modified": "2015-01-05 12:33:02.162194", 
+ "modified": "2015-01-06 17:17:04.598365", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation", 
