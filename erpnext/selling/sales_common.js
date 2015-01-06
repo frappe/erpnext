@@ -408,9 +408,11 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			if(this.frm.doc.is_pos) {
 				if(!this.frm.doc.paid_amount || update_paid_amount===undefined || update_paid_amount) {
 					this.frm.doc.paid_amount = flt(total_amount_to_pay);
+					this.frm.refresh_field("paid_amount");
 				}
 			} else {
 				this.frm.doc.paid_amount = 0
+				this.frm.refresh_field("paid_amount");
 			}
 
 			this.frm.set_value("outstanding_amount", flt(total_amount_to_pay

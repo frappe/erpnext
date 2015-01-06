@@ -58,67 +58,9 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
 
-		// Show POS button only if it is enabled from features setup
-		if(cint(sys_defaults.fs_pos_view)===1 && this.frm.doctype!="Material Request") {
-			this.make_pos_btn();
-		}
+		erpnext.pos.make_pos_btn(this.frm);
+
 	},
-
-	make_pos_btn: function() {
-		var me = this;
-		if(this.frm.doc.docstatus <= 1) {
-			if(!this.pos_active) {
-				var btn_label = __("POS View"),
-					icon = "icon-th";
-			} else {
-				var btn_label = __("Form View"),
-					icon = "icon-file-text";
-			}
-
-			if(erpnext.open_as_pos) {
-				me.toggle_pos(true);
-				erpnext.open_as_pos = false;
-			}
-
-			this.$pos_btn && this.$pos_btn.remove();
-
-			this.$pos_btn = this.frm.page.add_menu_item(btn_label, function() {
-				me.toggle_pos();
-			});
-		} else {
-			// hack: will avoid calling refresh from refresh
-			setTimeout(function() { me.toggle_pos(false); }, 100);
-		}
-	},
-
-	toggle_pos: function(show) {
-		// Check whether it is Selling or Buying cycle
-		var price_list = frappe.meta.has_field(cur_frm.doc.doctype, "selling_price_list") ?
-			this.frm.doc.selling_price_list : this.frm.doc.buying_price_list;
-
-		if((show===true && this.pos_active) || (show===false && !this.pos_active))
-			return;
-
-		if(show && !price_list) {
-			frappe.throw(__("Please select Price List"));
-		}
-
-		// make pos
-		if(!this.frm.pos) {
-			var wrapper = this.frm.page.add_view("pos", "<div>");
-			this.frm.pos = new erpnext.POS(wrapper, this.frm);
-		}
-
-		// toggle view
-		this.frm.page.set_view(this.pos_active ? "main" : "pos");
-		this.pos_active = !this.pos_active;
-
-		// refresh
-		if(this.pos_active)
-			this.frm.pos.refresh();
-		this.frm.refresh();
-	},
-
 
 	item_code: function(doc, cdt, cdn) {
 		var me = this;

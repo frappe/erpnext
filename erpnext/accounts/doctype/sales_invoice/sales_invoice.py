@@ -176,7 +176,8 @@ class SalesInvoice(SellingController):
 				# self.set_customer_defaults()
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
-				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account'):
+				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account',
+				'write_off_account', 'write_off_cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
 

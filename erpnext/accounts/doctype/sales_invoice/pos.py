@@ -42,22 +42,6 @@ def get_items(price_list, sales_or_purchase, item=None):
 		where
 			%s""" % ('%(price_list)s', condition), args, as_dict=1)
 
-# @frappe.whitelist()
-# def get_item_code(barcode_serial_no):
-# 	input_via = "serial_no"
-# 	item_code = frappe.db.sql("""select name, item_code from `tabSerial No` where
-# 		name=%s""", (barcode_serial_no), as_dict=1)
-#
-# 	if not item_code:
-# 		input_via = "barcode"
-# 		item_code = frappe.db.sql("""select name from `tabItem` where barcode=%s""",
-# 			(barcode_serial_no), as_dict=1)
-#
-# 	if item_code:
-# 		return item_code, input_via
-# 	else:
-# 		frappe.throw(frappe._("Invalid Barcode or Serial No"))
-
 @frappe.whitelist()
 def get_mode_of_payment():
-	return frappe.get_list("Mode of Payment")
+	return sorted([d.name for d in frappe.get_list("Mode of Payment")])

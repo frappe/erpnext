@@ -24,12 +24,16 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 	cursor: pointer;
-	padding: 10px;
+	padding: 5px;
 	height: 0px;
-	padding-bottom: 35%;
+	padding-bottom: 38%;
 	width: 30%;
 	margin: 1.6%;
 	border: 1px solid #d1d8dd;
+}
+
+.pos-item-text {
+	padding: 0px 5px;
 }
 
 .pos-item .item-code {
