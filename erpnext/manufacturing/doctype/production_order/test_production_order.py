@@ -27,11 +27,15 @@ class TestProductionOrder(unittest.TestCase):
 		s = frappe.get_doc(make_stock_entry(pro_doc.name, "Material Transfer", 4))
 		for d in s.get("mtn_details"):
 			d.s_warehouse = "Stores - _TC"
+		s.fiscal_year = "_Test Fiscal Year 2013"
+		s.posting_date = "2013-01-01"
 		s.insert()
 		s.submit()
 
 		# from wip to fg
 		s = frappe.get_doc(make_stock_entry(pro_doc.name, "Manufacture", 4))
+		s.fiscal_year = "_Test Fiscal Year 2013"
+		s.posting_date = "2013-01-01"
 		s.insert()
 		s.submit()
 
@@ -50,6 +54,8 @@ class TestProductionOrder(unittest.TestCase):
 		test_stock_entry.make_stock_entry("_Test Item Home Desktop 100", None, "_Test Warehouse - _TC", 100, 100)
 
 		s = frappe.get_doc(make_stock_entry(pro_doc.name, "Manufacture", 7))
+		s.fiscal_year = "_Test Fiscal Year 2013"
+		s.posting_date = "2013-01-01"
 		s.insert()
 
 		self.assertRaises(StockOverProductionError, s.submit)
