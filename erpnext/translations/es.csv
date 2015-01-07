@@ -3322,7 +3322,7 @@ website page link,el vínculo web
 {0} must be reduced by {1} or you should increase overflow tolerance,{0} debe reducirse en {1} o se debe aumentar la tolerancia de desbordamiento
 {0} must have role 'Leave Approver',{0} debe tener rol ' Dejar aprobador '
 {0} valid serial nos for Item {1},{0} nn serie válidos para el elemento {1}
-{0} {1} against Bill {2} dated {3},{0} {1} { 2 contra Bill } {3} de fecha
+{0} {1} against Bill {2} dated {3},{0} {1} {2} contra Bill {3} de fecha
 {0} {1} against Invoice {2},{0} {1} contra Factura {2}
 {0} {1} has already been submitted,{0} {1} ya ha sido presentado
 {0} {1} has been modified. Please refresh.,{0} {1} ha sido modificado. Por favor regenere .

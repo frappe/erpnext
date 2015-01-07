@@ -111,7 +111,8 @@ class BuyingController(StockController):
 
 	def calculate_totals(self):
 		self.grand_total = flt(self.tax_doclist[-1].total if self.tax_doclist else self.net_total)
-		self.grand_total_import = flt(self.grand_total / self.conversion_rate)
+		self.grand_total_import = flt(self.grand_total / self.conversion_rate) \
+			if self.tax_doclist else self.net_total_import
 
 		self.total_tax = flt(self.grand_total - self.net_total, self.precision("total_tax"))
 

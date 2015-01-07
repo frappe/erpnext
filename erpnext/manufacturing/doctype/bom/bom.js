@@ -83,6 +83,7 @@ cur_frm.cscript.hour_rate = function(doc, dt, dn) {
 
 
 cur_frm.cscript.time_in_mins = cur_frm.cscript.hour_rate;
+cur_frm.cscript.fixed_cycle_cost = cur_frm.cscript.hour_rate;
 
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	get_bom_material_detail(doc, cdt, cdn);

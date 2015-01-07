@@ -119,6 +119,10 @@ class AccountsController(TransactionBase):
 							item.get(fieldname) is None and value is not None:
 								item.set(fieldname, value)
 
+						if fieldname == "cost_center" and item.meta.get_field("cost_center") \
+							and not item.get("cost_center") and value is not None:
+								item.set(fieldname, value)
+
 					if ret.get("pricing_rule"):
 						for field in ["base_price_list_rate", "price_list_rate",
 							"discount_percentage", "base_rate", "rate"]:

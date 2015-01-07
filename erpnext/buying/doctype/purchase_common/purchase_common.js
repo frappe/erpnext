@@ -71,7 +71,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 
 	contact_person: function() {
-		this.supplier_address();
+		erpnext.utils.get_contact_details(this.frm);
 	},
 
 	buying_price_list: function() {
@@ -211,7 +211,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var tax_count = this.frm.tax_doclist.length;
 		this.frm.doc.grand_total = flt(tax_count ?
 			this.frm.tax_doclist[tax_count - 1].total : this.frm.doc.net_total);
-		this.frm.doc.grand_total_import = flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate);
+		this.frm.doc.grand_total_import = flt(tax_count ?
+			flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate) : this.frm.doc.net_total_import);
 
 		this.frm.doc.total_tax = flt(this.frm.doc.grand_total - this.frm.doc.net_total,
 			precision("total_tax"));
