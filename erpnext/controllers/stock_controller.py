@@ -245,7 +245,7 @@ def compare_existing_and_expected_gle(existing_gle, expected_gle):
 	for entry in expected_gle:
 		for e in existing_gle:
 			if entry.account==e.account and entry.against_account==e.against_account \
-				and entry.cost_center==e.cost_center \
+				and (not entry.cost_center or not e.cost_center or entry.cost_center==e.cost_center) \
 				and (entry.debit != e.debit or entry.credit != e.credit):
 					matched = False
 					break
