@@ -67,7 +67,7 @@ class StatusUpdater(Document):
 					break
 
 			if self.status != _status:
-				self.add_comment("Label", self.status)
+				self.add_comment("Label", _(self.status))
 
 			if update:
 				frappe.db.set_value(self.doctype, self.name, "status", self.status)
