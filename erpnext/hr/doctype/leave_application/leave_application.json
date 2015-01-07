@@ -10,7 +10,7 @@
    "default": "Open", 
    "fieldname": "status", 
    "fieldtype": "Select", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Status", 
    "no_copy": 1, 
    "options": "Open\nApproved\nRejected", 
@@ -36,7 +36,7 @@
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Leave Type", 
    "options": "Leave Type", 
    "permlevel": 0, 
@@ -94,7 +94,7 @@
    "fieldname": "employee_name", 
    "fieldtype": "Data", 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Employee Name", 
    "permlevel": 0, 
    "read_only": 1, 
@@ -111,6 +111,7 @@
   {
    "fieldname": "total_leave_days", 
    "fieldtype": "Float", 
+   "in_list_view": 1, 
    "label": "Total Leave Days", 
    "no_copy": 1, 
    "permlevel": 0, 
@@ -191,7 +192,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2014-12-09 16:33:29.626849", 
+ "modified": "2015-01-07 14:40:16.244403", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Application", 
@@ -298,5 +299,6 @@
  ], 
  "search_fields": "employee,employee_name,leave_type,from_date,to_date,total_leave_days,fiscal_year", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "employee_name"
 }

@@ -41,7 +41,7 @@
    "fieldname": "employee_name", 
    "fieldtype": "Data", 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "For Employee Name", 
    "oldfieldname": "employee_name", 
    "oldfieldtype": "Data", 
@@ -62,7 +62,7 @@
    "fieldname": "status", 
    "fieldtype": "Select", 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Status", 
    "no_copy": 1, 
    "oldfieldname": "status", 
@@ -197,7 +197,7 @@
  "icon": "icon-thumbs-up", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-12-24 15:00:49.133185", 
+ "modified": "2015-01-07 14:51:15.943276", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Appraisal", 
@@ -249,5 +249,6 @@
  ], 
  "search_fields": "status, employee, employee_name", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "employee_name"
 }

@@ -75,11 +75,6 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 }
 
 pscript.set_title = function(wrapper, ctype, val) {
-	if(val) {
-		wrapper.page.set_title('Chart of '+ctype+'s' + " - " + cstr(val));
-	} else {
-		wrapper.page.set_title('Chart of '+ctype+'s');
-	}
 }
 
 pscript['onshow_Accounts Browser'] = function(wrapper){
@@ -106,7 +101,7 @@ erpnext.AccountsChart = Class.extend({
 		me.company = company;
 		this.tree = new frappe.ui.Tree({
 			parent: $(wrapper),
-			label: ctype==="Account" ? "Accounts" : "Cost Centers",
+			label: ctype==="Account" ? __("Accounts") : __("Cost Centers"),
 			args: {ctype: ctype, comp: company},
 			method: 'erpnext.accounts.page.accounts_browser.accounts_browser.get_children',
 			click: function(link) {
@@ -181,6 +176,14 @@ erpnext.AccountsChart = Class.extend({
 				}
 			}
 		});
+	},
+	set_title: function(val) {
+		var chart_str = this.ctype=="Account" ? __("Chart of Accounts") : __("Chart of Cost Centers");
+		if(val) {
+			wrapper.page.set_title(chart_str + " - " + cstr(val));
+		} else {
+			wrapper.page.set_title(chart_str);
+		}
 	},
 	new_account: function() {
 		var me = this;

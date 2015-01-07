@@ -28,7 +28,7 @@
   {
    "fieldname": "from_time", 
    "fieldtype": "Datetime", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "From Time", 
    "permlevel": 0, 
    "read_only": 0, 
@@ -37,7 +37,7 @@
   {
    "fieldname": "to_time", 
    "fieldtype": "Datetime", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "To Time", 
    "permlevel": 0, 
    "read_only": 0, 
@@ -60,7 +60,7 @@
   {
    "fieldname": "status", 
    "fieldtype": "Select", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Status", 
    "options": "Draft\nSubmitted\nBatched for Billing\nBilled\nCancelled", 
    "permlevel": 0, 
@@ -71,7 +71,7 @@
    "depends_on": "eval:doc.time_log_for != 'Manufacturing'", 
    "fieldname": "activity_type", 
    "fieldtype": "Link", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Activity Type", 
    "options": "Activity Type", 
    "permlevel": 0, 
@@ -126,7 +126,7 @@
   {
    "fieldname": "billable", 
    "fieldtype": "Check", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Billable", 
    "permlevel": 0, 
    "read_only": 0
@@ -199,7 +199,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-12-22 15:22:00.664972", 
+ "modified": "2015-01-07 15:11:45.194002", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 
@@ -233,5 +233,6 @@
    "submit": 1, 
    "write": 1
   }
- ]
+ ], 
+ "title_field": "activity_type"
 }

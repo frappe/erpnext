@@ -32,7 +32,7 @@
   {
    "fieldname": "customer", 
    "fieldtype": "Link", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Customer", 
    "oldfieldname": "customer", 
    "oldfieldtype": "Link", 
@@ -46,7 +46,7 @@
    "depends_on": "customer", 
    "fieldname": "customer_address", 
    "fieldtype": "Link", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Customer Address", 
    "options": "Address", 
    "permlevel": 0, 
@@ -209,6 +209,7 @@
   {
    "fieldname": "remarks", 
    "fieldtype": "Small Text", 
+   "in_list_view": 1, 
    "label": "Remarks", 
    "oldfieldname": "remarks", 
    "oldfieldtype": "Small Text", 
@@ -236,7 +237,7 @@
  "icon": "icon-wrench", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-01 14:30:01.822455", 
+ "modified": "2015-01-07 10:50:31.542246", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Installation Note", 
@@ -270,5 +271,6 @@
   }
  ], 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "customer_name"
 }

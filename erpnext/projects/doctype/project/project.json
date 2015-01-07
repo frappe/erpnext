@@ -59,6 +59,7 @@
   {
    "fieldname": "priority", 
    "fieldtype": "Select", 
+   "in_list_view": 0, 
    "label": "Priority", 
    "no_copy": 0, 
    "oldfieldname": "priority", 
@@ -163,7 +164,7 @@
   {
    "fieldname": "percent_complete", 
    "fieldtype": "Percent", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "% Tasks Completed", 
    "permlevel": 0, 
    "read_only": 1
@@ -272,7 +273,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2014-12-24 16:36:50.539666", 
+ "modified": "2015-01-07 15:03:59.981848", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 

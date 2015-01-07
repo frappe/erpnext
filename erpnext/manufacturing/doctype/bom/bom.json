@@ -27,7 +27,7 @@
    "fieldname": "is_active", 
    "fieldtype": "Check", 
    "hidden": 0, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Is Active", 
    "no_copy": 1, 
    "oldfieldname": "is_active", 
@@ -40,7 +40,7 @@
    "default": "1", 
    "fieldname": "is_default", 
    "fieldtype": "Check", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Is Default", 
    "no_copy": 1, 
    "oldfieldname": "is_default", 
@@ -130,7 +130,7 @@
   {
    "fieldname": "operating_cost", 
    "fieldtype": "Currency", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Operating Cost", 
    "options": "Company:company:default_currency", 
    "permlevel": 0, 
@@ -152,6 +152,7 @@
   {
    "fieldname": "total_cost", 
    "fieldtype": "Currency", 
+   "in_list_view": 1, 
    "label": "Total Cost", 
    "options": "Company:company:default_currency", 
    "permlevel": 0, 
@@ -208,7 +209,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Small Text", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Item Desription", 
    "permlevel": 0, 
    "read_only": 1
@@ -244,7 +245,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2014-12-24 14:38:43.906947", 
+ "modified": "2015-01-07 11:11:07.047695", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM", 

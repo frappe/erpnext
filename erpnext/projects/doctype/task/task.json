@@ -1,5 +1,5 @@
 {
-  "allow_import": 1, 
+ "allow_import": 1, 
  "autoname": "TASK.#####", 
  "creation": "2013-01-29 19:25:50", 
  "docstatus": 0, 
@@ -20,7 +20,7 @@
    "fieldname": "subject", 
    "fieldtype": "Data", 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Subject", 
    "oldfieldname": "subject", 
    "oldfieldtype": "Data", 
@@ -56,16 +56,6 @@
    "width": "50%"
   }, 
   {
-   "fieldname": "project", 
-   "fieldtype": "Link", 
-   "in_list_view": 1, 
-   "label": "Project", 
-   "oldfieldname": "project", 
-   "oldfieldtype": "Link", 
-   "options": "Project", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "status", 
    "fieldtype": "Select", 
    "in_list_view": 1, 
@@ -74,6 +64,16 @@
    "oldfieldname": "status", 
    "oldfieldtype": "Select", 
    "options": "Open\nWorking\nPending Review\nClosed\nCancelled", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "project", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Project", 
+   "oldfieldname": "project", 
+   "oldfieldtype": "Link", 
+   "options": "Project", 
    "permlevel": 0
   }, 
   {
@@ -217,7 +217,7 @@
  "icon": "icon-check", 
  "idx": 1, 
  "max_attachments": 5, 
- "modified": "2014-05-27 03:49:20.708319", 
+ "modified": "2015-01-07 14:57:22.370410", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Task", 

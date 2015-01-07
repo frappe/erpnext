@@ -9,7 +9,7 @@
   {
    "fieldname": "activity_type", 
    "fieldtype": "Data", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Activity Type", 
    "permlevel": 0, 
    "reqd": 1
@@ -18,7 +18,7 @@
  "icon": "icon-flag", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2014-05-27 03:49:07.219341", 
+ "modified": "2015-01-07 15:12:20.500625", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Activity Type", 

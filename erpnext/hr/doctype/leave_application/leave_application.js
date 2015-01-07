@@ -36,15 +36,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 				cur_frm.set_intro(__("This Leave Application is pending approval. Only the Leave Apporver can update status."))
 				cur_frm.toggle_enable("status", false);
 			}
-		} else {
- 			if(doc.status=="Approved") {
-				cur_frm.set_intro(__("Leave application has been approved."));
-				if(cur_frm.doc.docstatus==0) {
-					cur_frm.set_intro(__("Please submit to update Leave Balance."));
-				}
-			} else if(doc.status=="Rejected") {
-				cur_frm.set_intro(__("Leave application has been rejected."));
-			}
 		}
 	}
 }

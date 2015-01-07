@@ -19,7 +19,7 @@
   {
    "fieldname": "item", 
    "fieldtype": "Link", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Item", 
    "oldfieldname": "item", 
    "oldfieldtype": "Link", 
@@ -34,25 +34,9 @@
    "precision": ""
   }, 
   {
-   "fieldname": "start_date", 
-   "fieldtype": "Date", 
-   "label": "Batch Started Date", 
-   "oldfieldname": "start_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "finished_date", 
-   "fieldtype": "Date", 
-   "label": "Batch Finished Date", 
-   "oldfieldname": "finished_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "expiry_date", 
    "fieldtype": "Date", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Expiry Date", 
    "oldfieldname": "expiry_date", 
    "oldfieldtype": "Date", 
@@ -67,7 +51,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Small Text", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Batch Description", 
    "oldfieldname": "description", 
    "oldfieldtype": "Small Text", 
@@ -78,7 +62,7 @@
  "icon": "icon-archive", 
  "idx": 1, 
  "max_attachments": 5, 
- "modified": "2015-01-05 16:11:40.125703", 
+ "modified": "2015-01-07 16:24:13.422480", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Batch", 
