@@ -28,7 +28,7 @@ def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1):
 		from `tabFiscal Year` where %s order by year_start_date desc""" % cond)
 
 	if not fy:
-		error_msg = _("""{0} {1} not in any Fiscal Year""").format(label, formatdate(date))
+		error_msg = _("""{0} {1} not in any Fiscal Year. For more details check {2}.""").format(label, formatdate(date), "https://erpnext.com/kb/accounts/fiscal-year-error")
 		if verbose: frappe.msgprint(error_msg)
 		raise FiscalYearError, error_msg
 
