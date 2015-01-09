@@ -8,7 +8,7 @@ from frappe.utils import cint, cstr, flt
 from frappe import _
 from frappe.model.document import Document
 
-from operator import itemgetter, attrgetter
+from operator import itemgetter
 
 class BOM(Document):
 
