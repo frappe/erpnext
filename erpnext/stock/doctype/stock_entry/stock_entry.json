@@ -576,6 +576,15 @@
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0
+  }, 
+  {
+   "fieldname": "credit_note", 
+   "fieldtype": "Link", 
+   "hidden": 1, 
+   "label": "Credit Note", 
+   "options": "Journal Entry", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "hide_heading": 0, 
@@ -587,7 +596,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2015-01-05 15:28:49.649079", 
+ "modified": "2015-01-07 17:38:40.170567", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 
