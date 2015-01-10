@@ -153,8 +153,8 @@ class StockReconciliation(StockController):
 				if row.valuation_rate in ("", None):
 					row.valuation_rate = previous_sle.get("valuation_rate")
 
-			# if row.qty and not row.valuation_rate:
-			# 	frappe.throw(_("Valuation Rate required for Item {0}").format(row.item_code))
+			if row.qty and not row.valuation_rate:
+				frappe.throw(_("Valuation Rate required for Item {0}").format(row.item_code))
 
 			self.insert_entries(row)
 
