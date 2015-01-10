@@ -314,10 +314,10 @@ def create_items(args):
 			is_stock_item = item_group!=_("Services")
 			default_warehouse = ""
 			if is_stock_item:
-				if is_sales_item:
-					default_warehouse = _("Finished Goods") + " - " + args.get("company_abbr")
-				else:
-					default_warehouse = _("Stores") + " - " + args.get("company_abbr")
+				default_warehouse = frappe.db.get_value("Warehouse", filters={
+					"warehouse_name": _("Finished Goods") if is_sales_item else _("Stores"),
+					"company": args.get("company_name").strip()
+				})
 
 			frappe.get_doc({
 				"doctype":"Item",

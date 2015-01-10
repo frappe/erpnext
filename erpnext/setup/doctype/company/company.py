@@ -168,6 +168,12 @@ class Company(Document):
 			#delete cost center
 			frappe.db.sql("delete from `tabCost Center` WHERE company = %s order by lft desc, rgt desc", self.name)
 
+			# delete account from customer and supplier
+			frappe.db.sql("delete from `tabParty Account` where company=%s", self.name)
+
+			# delete email digest
+			frappe.db.sql("delete from `tabEmail Digest` where company=%s", self.name)
+
 		if not frappe.db.get_value("Stock Ledger Entry", {"company": self.name}):
 			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)
 

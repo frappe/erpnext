@@ -71,9 +71,9 @@ def get_salesperson_details(filters):
 def get_target_distribution_details(filters):
 	target_details = {}
 
-	for d in frappe.db.sql("""select bd.name, bdd.month, bdd.percentage_allocation
-		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
-		where bdd.parent=bd.name and bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
+	for d in frappe.db.sql("""select md.name, mdp.month, mdp.percentage_allocation
+		from `tabMonthly Distribution Percentage` mdp, `tabMonthly Distribution` mdp
+		where mdp.parent=md.name and md.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
 			target_details.setdefault(d.name, {}).setdefault(d.month, flt(d.percentage_allocation))
 
 	return target_details

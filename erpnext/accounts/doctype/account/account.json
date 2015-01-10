@@ -66,6 +66,22 @@
    "search_index": 1
   }, 
   {
+   "fieldname": "root_type", 
+   "fieldtype": "Select", 
+   "label": "Root Type", 
+   "options": "\nAsset\nLiability\nIncome\nExpense\nEquity", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "report_type", 
+   "fieldtype": "Select", 
+   "label": "Report Type", 
+   "options": "\nBalance Sheet\nProfit and Loss", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "column_break1", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -131,22 +147,6 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "root_type", 
-   "fieldtype": "Select", 
-   "label": "Root Type", 
-   "options": "\nAsset\nLiability\nIncome\nExpense\nEquity", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "report_type", 
-   "fieldtype": "Select", 
-   "label": "Report Type", 
-   "options": "\nBalance Sheet\nProfit and Loss", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
    "fieldname": "lft", 
    "fieldtype": "Int", 
    "hidden": 1, 
@@ -177,7 +177,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-01-01 15:36:43.219662", 
+ "modified": "2015-01-05 11:03:07.861934", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Account", 

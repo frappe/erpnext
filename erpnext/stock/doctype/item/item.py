@@ -79,7 +79,7 @@ class Item(WebsiteGenerator):
 		return context
 
 	def check_warehouse_is_set_for_stock_item(self):
-		if self.is_stock_item=="Yes" and not self.default_warehouse:
+		if self.is_stock_item=="Yes" and not self.default_warehouse and frappe.get_all("Warehouse"):
 			frappe.msgprint(_("Default Warehouse is mandatory for stock Item."),
 				raise_exception=WarehouseNotSet)
 

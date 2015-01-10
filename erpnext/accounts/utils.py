@@ -309,9 +309,9 @@ def validate_expense_against_budget(args):
 def get_allocated_budget(distribution_id, posting_date, fiscal_year, yearly_budget):
 	if distribution_id:
 		distribution = {}
-		for d in frappe.db.sql("""select bdd.month, bdd.percentage_allocation
-			from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
-			where bdd.parent=bd.name and bd.fiscal_year=%s""", fiscal_year, as_dict=1):
+		for d in frappe.db.sql("""select mdp.month, mdp.percentage_allocation
+			from `tabMonthly Distribution Percentage` mdp, `tabMonthly Distribution` md
+			where mdp.parent=md.name and md.fiscal_year=%s""", fiscal_year, as_dict=1):
 				distribution.setdefault(d.month, d.percentage_allocation)
 
 	dt = frappe.db.get_value("Fiscal Year", fiscal_year, "year_start_date")
@@ -413,8 +413,8 @@ def get_outstanding_invoices(amount_query, account, party_type, party):
 				})
 
 	return all_outstanding_vouchers
-	
+
 @frappe.whitelist()
 def get_letter_head(company):
 	return frappe.db.get_value("Company",company,"default_letter_head")
-	
+

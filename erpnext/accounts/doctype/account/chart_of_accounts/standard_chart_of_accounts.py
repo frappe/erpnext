@@ -22,7 +22,9 @@ coa = {
                 },
                 "account_type": "Cash"
             },
-            _("Loans and Advances (Assets)"): {},
+            _("Loans and Advances (Assets)"): {
+            	"group_or_ledger": "Group"
+            },
             _("Securities and Deposits"): {
                 _("Earnest Money"): {}
             },

@@ -220,6 +220,9 @@ rename_map = {
 	],
 	"Journal Entry": [
 		["entries", "accounts"]
+	],
+	"Monthly Distribution": [
+		["budget_distribution_details", "percentages"]
 	]
 }
 
