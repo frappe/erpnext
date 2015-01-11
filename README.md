@@ -1,8 +1,8 @@
-# ERPNext - Open Source ERP for small, medium sized businesses [![Build Status](https://travis-ci.org/frappe/erpnext.png)](https://travis-ci.org/frappe/erpnext)
+# ERPNext - Open source ERP for small and medium-size business [![Build Status](https://travis-ci.org/frappe/erpnext.png)](https://travis-ci.org/frappe/erpnext)
 
-[https://erpnext.com](https://erpnext.com)
+Website: [https://erpnext.com](https://erpnext.com)
 
-Includes Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Python back-end with Javascript client in browser. Requires MariaDB.
+Includes: Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Python back-end with Javascript client in browser. Requires MariaDB.
 
 ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web framework in python & js.
 
