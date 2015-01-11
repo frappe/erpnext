@@ -1,10 +1,10 @@
 # ERPNext - Open source ERP for small and medium-size business [![Build Status](https://travis-ci.org/frappe/erpnext.png)](https://travis-ci.org/frappe/erpnext)
 
-Website: [https://erpnext.com](https://erpnext.com)
+[https://erpnext.com](https://erpnext.com)
 
-Includes: Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Python back-end with Javascript client in browser. Requires MariaDB.
+Includes: Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Requires MariaDB.
 
-ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web framework in python & js.
+ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web app framework in Python & Javascript.
 
 - [User Guide](https://erpnext.com/user-guide)
 - [Getting Help](http://erpnext.org/getting-help.html)
@@ -14,9 +14,9 @@ ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a 
 
 ### Full Install
 
-Follow the Easy Way install script for bench, see https://github.com/frappe/bench
+The Easy Way install script for bench will install all dependencies (e.g. MariaDB). See https://github.com/frappe/bench
 
-The install script will create new passwords for the ERPNext "Administrator user, MariaDB root user, and frappe user (passwords are both displayed and saved to file ~/frappe_passwords.txt).
+New passwords will be created for the ERPNext "Administrator" user, the MariaDB root user, and the frappe user (the script displays the passwords and saves them to ~/frappe_passwords.txt).
 
 ### Virtual Image
 
