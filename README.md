@@ -2,32 +2,29 @@
 
 [https://erpnext.com](https://erpnext.com)
 
-Includes Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Built on Python / MariaDB.
+Includes Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Python back-end with Javascript client in browser. Requires MariaDB.
 
-ERPNext is built on [frappe](https://github.com/frappe/frappe) Python Framework.
+ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web framework in python & js.
 
-- [User Guide](http://erpnext.org/user-guide.html)
+- [User Guide](https://erpnext.com/user-guide)
 - [Getting Help](http://erpnext.org/getting-help.html)
-- [Developer Forum](http://groups.google.com/group/erpnext-developer-forum)
-- [User Forum](http://groups.google.com/group/erpnext-user-forum)
+- [Discussion Forum](https://discuss.frappe.io/)
 
 ---
 
-### Install
+### Full Install
 
-Use the bench, https://github.com/frappe/bench
+Follow the Easy Way install script for bench, see https://github.com/frappe/bench
 
-### Admin Login
+The install script will create new passwords for the ERPNext "Administrator user, MariaDB root user, and frappe user (passwords are both displayed and saved to file ~/frappe_passwords.txt).
 
-1. go to "/login"
-1. Administrator user name: "Administrator"
-1. Administrator password: "admin"
+### Virtual Image
 
-### Download and Install
-
-##### Virtual Image:
+You can download a virtual image to run ERPNext in a virtual machine on your local system.
 
 - [ERPNext Download](http://erpnext.com/download)
+
+System and user credentials are listed on the download page.
 
 ---
 
