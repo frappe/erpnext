@@ -16,23 +16,27 @@ class BudgetError(frappe.ValidationError): pass
 def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1, company=None):
 	return get_fiscal_years(date, fiscal_year, label, verbose, company)[0]
 
-def get_fiscal_years(date=None, fiscal_year=None, label="Date", verbose=1, company=None):
+def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verbose=1, company=None):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
 	cond = ""
 	if fiscal_year:
-		cond = "name = '%s'" % fiscal_year.replace("'", "\'")
-	elif company:
-		cond = """('%s' in (select company from `tabFiscal Year Company`
-			where `tabFiscal Year Company`.parent = `tabFiscal Year`.name))
-			and '%s' >= year_start_date and '%s' <= year_end_date """ %(company.replace("'", "\'"), date, date)
+		cond = "fy.name = %(fiscal_year)s"
 	else:
-		cond = "'%s' >= year_start_date and '%s' <= year_end_date" %(date, date)
-
-	fy = frappe.db.sql("""select name, year_start_date, year_end_date
-		from `tabFiscal Year` where %s order by year_start_date desc""" % cond)
+		cond = "%(transaction_date)s >= fy.year_start_date and %(transaction_date)s <= fy.year_end_date"
+		
+	if company:
+		cond += """ and (not exists(select name from `tabFiscal Year Company` fyc where fyc.parent = fy.name)
+			or exists(select company from `tabFiscal Year Company` fyc where fyc.parent = fy.name and fyc.company=%(company)s ))"""
+		
+	fy = frappe.db.sql("""select fy.name, fy.year_start_date, fy.year_end_date from `tabFiscal Year` fy 
+		where %s order by fy.year_start_date desc""" % cond, {
+			"fiscal_year": fiscal_year,
+			"transaction_date": transaction_date,
+			"company": company
+		})
 
 	if not fy:
-		error_msg = _("""{0} {1} not in any Fiscal Year""").format(label, formatdate(date))
+		error_msg = _("""{0} {1} not in any Fiscal Year""").format(label, formatdate(transaction_date))
 		if verbose==1: frappe.msgprint(error_msg)
 		raise FiscalYearError, error_msg
 	return fy

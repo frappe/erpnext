@@ -20,7 +20,7 @@ $.extend(erpnext, {
 			args: {
 				"company": company,
 				"date": date,
-				"verbose": '0'
+				"verbose": 0
 			},
 			callback: function(r) {
 				if (r.message)	cur_frm.set_value("fiscal_year", r.message[0]);
