@@ -35,9 +35,15 @@ class StockEntry(StockController):
 				item.update(get_available_qty(item.item_code,
 					item.s_warehouse))
 	
-		count = frappe.db.sql("select count(stock_entry) as c from `tabJournal Entry` \
-			where stock_entry = %s and docstatus = 1",self.name, as_dict=1)[0].c
-		self.get("__onload").credit_debit_note_exists = count 
+		count = frappe.db.exists({
+			"doctype": "Journal Entry",
+			"stock_entry":self.stock_entry,
+			"docstatus":1	
+		})
+		if count:
+			self.get("__onload").credit_debit_note_exists = 1
+		else:
+			self.get("__onload").credit_debit_note_exists = 0
 
 	def validate(self):
 		self.validate_posting_time()
