@@ -40,6 +40,11 @@ def get_data():
 					"description": _("Tree of finanial accounts."),
 					"doctype": "Account",
 				},
+				{
+					"type": "doctype",
+					"name": "Fixed Asset Account",
+					"description": _("Fixed Assets")
+				},
 			]
 		},
 		{
@@ -65,6 +70,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Payment Tool",
 					"description": _("Create Payment Entries against Orders or Invoices.")
+				},
+				{
+					"type": "doctype",
+					"name": "Fixed Asset Sale",
+					"description": _("Sell a Fixed Asset")
 				},
 			]
 		},
@@ -338,6 +348,17 @@ def get_data():
 					"name": "Customer Credit Balance",
 					"doctype": "Customer"
 				},
+				{
+					"type": "report",
+					"name": "Written Down",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Straight Line",
+					"is_query_report": True,
+				},
+
 			]
 		},
 	]
