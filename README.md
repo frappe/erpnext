@@ -1,33 +1,30 @@
-# ERPNext - Open Source ERP for small, medium sized businesses [![Build Status](https://travis-ci.org/frappe/erpnext.png)](https://travis-ci.org/frappe/erpnext)
+# ERPNext - Open source ERP for small and medium-size business [![Build Status](https://travis-ci.org/frappe/erpnext.png)](https://travis-ci.org/frappe/erpnext)
 
 [https://erpnext.com](https://erpnext.com)
 
-Includes Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Built on Python / MariaDB.
+Includes: Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Requires MariaDB.
 
-ERPNext is built on [frappe](https://github.com/frappe/frappe) Python Framework.
+ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web app framework in Python & Javascript.
 
-- [User Guide](http://erpnext.org/user-guide.html)
+- [User Guide](https://erpnext.com/user-guide)
 - [Getting Help](http://erpnext.org/getting-help.html)
-- [Developer Forum](http://groups.google.com/group/erpnext-developer-forum)
-- [User Forum](http://groups.google.com/group/erpnext-user-forum)
+- [Discussion Forum](https://discuss.frappe.io/)
 
 ---
 
-### Install
+### Full Install
 
-Use the bench, https://github.com/frappe/bench
+The Easy Way install script for bench will install all dependencies (e.g. MariaDB). See https://github.com/frappe/bench
 
-### Admin Login
+New passwords will be created for the ERPNext "Administrator" user, the MariaDB root user, and the frappe user (the script displays the passwords and saves them to ~/frappe_passwords.txt).
 
-1. go to "/login"
-1. Administrator user name: "Administrator"
-1. Administrator password: "admin"
+### Virtual Image
 
-### Download and Install
-
-##### Virtual Image:
+You can download a virtual image to run ERPNext in a virtual machine on your local system.
 
 - [ERPNext Download](http://erpnext.com/download)
+
+System and user credentials are listed on the download page.
 
 ---
 

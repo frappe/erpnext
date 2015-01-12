@@ -936,6 +936,8 @@ def make_stock_entry(item, source, target, qty, incoming_rate=None):
 		"incoming_rate": incoming_rate,
 		"conversion_factor": 1.0
 	})
+	s.posting_date= "2013-01-01"
+	s.fiscal_year= "_Test Fiscal Year 2013"
 	s.insert()
 	s.submit()
 	return s
