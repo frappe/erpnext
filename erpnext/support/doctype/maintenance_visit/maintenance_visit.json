@@ -35,7 +35,7 @@
    "fieldname": "customer_name", 
    "fieldtype": "Data", 
    "hidden": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Customer Name", 
    "permlevel": 0, 
    "read_only": 1
@@ -279,7 +279,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-01 14:30:02.998219", 
+ "modified": "2015-01-08 14:02:17.403671", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Maintenance Visit", 
@@ -303,5 +303,6 @@
  ], 
  "search_fields": "status,maintenance_type,customer,customer_name,mntc_date,company,fiscal_year", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "customer_name"
 }
