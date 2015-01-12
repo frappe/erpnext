@@ -63,14 +63,17 @@ def execute(filters=None):
                 days = getDateDiffDays(finyrfrom, saledate)
                 depronopening = depronopening + (((saleamount - (saleamount * factor)) * rateofdepr / 100) * (days / TOTAL_DAYS_IN_YEAR))
 
-        # Depreciation provided on Purchase in the Current FY
+        global depronpurchases # Depreciation provided on Purchase in the Current FY
         depronpurchases = float(0)
-        purdate = datetime.strptime(assets.purchase_date, "%Y-%m-%d").date()
-        days = getDateDiffDays(purdate, finyrto)
-        depronpurchases = depronpurchases + ((assets.gross_purchase_value * rateofdepr / 100) * (days / TOTAL_DAYS_IN_YEAR))
+        if assets.purchase_date>=finyrfrom and assets.purchase_date<=finyrto
+            purdate = datetime.strptime(assets.purchase_date, "%Y-%m-%d").date()
+            days = getDateDiffDays(purdate, finyrto)
+            depronpurchases = depronpurchases + ((assets.gross_purchase_value * rateofdepr / 100) * (days / TOTAL_DAYS_IN_YEAR))
 
+        global deprwrittenback
         deprwrittenback = 0
-        deprwrittenback = depronopening + deprtilllastyr
+        if totalsales > 0
+            deprwrittenback = depronopening + deprtilllastyr
 
         row = [fixed_asset_name,
                fixed_asset_account,
