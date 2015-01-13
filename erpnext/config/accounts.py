@@ -76,6 +76,11 @@ def get_data():
 					"name": "Fixed Asset Sale",
 					"description": _("Sell a Fixed Asset")
 				},
+				{
+					"type": "doctype",
+					"name": "Fixed Asset Year Close",
+					"description": _("Year Closing Entry for Fixed Asset")
+				},
 			]
 		},
 		{
@@ -353,12 +358,6 @@ def get_data():
 					"name": "Written Down",
 					"is_query_report": True,
 				},
-				{
-					"type": "report",
-					"name": "Straight Line",
-					"is_query_report": True,
-				},
-
 			]
 		},
 	]
