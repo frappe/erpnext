@@ -44,30 +44,30 @@ def get_total_depr_for(fiscal_year,fa_name):
 			if purchase_date>=finyrfrom and purchase_date<=finyrto:
 				totalpurchase = assets.gross_purchase_value
 
-				totalsales = assets.total_sale_value
+			totalsales = assets.total_sale_value
 
-				depronopening = float(0)
+			depronopening = float(0)
 
-				if totalsales == 0:
-					depronopening = float(depronopening + (((opening_balance - deprtilllastyr) * rateofdepr / 100)))
-				elif totalsales >= opening_balance:
-					sales_sql = frappe.db.sql("""select * from `tabFixed Asset Sale` where docstatus=1 and fixed_asset_account=%s and posting_date>=%s and posting_date<=%s""", (fixed_asset_name, finyrfrom, finyrto), as_dict=True)
-					factor = 1
-					if opening_balance > 0:
-						factor = float(deprtilllastyr / opening_balance)
+			if totalsales == 0:
+				depronopening = float(depronopening + (((opening_balance - deprtilllastyr) * rateofdepr / 100)))
+			elif totalsales >= opening_balance:
+				sales_sql = frappe.db.sql("""select * from `tabFixed Asset Sale` where docstatus=1 and fixed_asset_account=%s and posting_date>=%s and posting_date<=%s""", (fixed_asset_name, finyrfrom, finyrto), as_dict=True)
+				factor = 1
+				if opening_balance > 0:
+					factor = float(deprtilllastyr / opening_balance)
 
-					for sales in sales_sql:
-						saleamount = float(sales.asset_purchase_cost)
-						saledate = datetime.strptime(sales.posting_date, "%Y-%m-%d").date()
-						days = getDateDiffDays(finyrfrom, saledate)
-						depronopening = depronopening + (((saleamount - (saleamount * factor)) * rateofdepr / 100) * (days / TOTAL_DAYS_IN_YEAR))
+				for sales in sales_sql:
+					saleamount = float(sales.asset_purchase_cost)
+					saledate = datetime.strptime(sales.posting_date, "%Y-%m-%d").date()
+					days = getDateDiffDays(finyrfrom, saledate)
+					depronopening = depronopening + (((saleamount - (saleamount * factor)) * rateofdepr / 100) * (days / TOTAL_DAYS_IN_YEAR))
 
-				depronpurchases = float(0)
-				if purchase_date>=finyrfrom and purchase_date<=finyrto:
-					days = getDateDiffDays(purchase_date, finyrto)
-					depronpurchases = depronpurchases + ((assets.gross_purchase_value * rateofdepr / 100) * (days / TOTAL_DAYS_IN_YEAR))
+			depronpurchases = float(0)
+			if purchase_date>=finyrfrom and purchase_date<=finyrto:
+				days = getDateDiffDays(purchase_date, finyrto)
+				depronpurchases = depronpurchases + ((assets.gross_purchase_value * rateofdepr / 100) * (days / TOTAL_DAYS_IN_YEAR))
 
-				print depronopening, depronpurchases, deprtilllastyr
+			print depronopening, depronpurchases, deprtilllastyr
 
 	return flt(depronopening+depronpurchases,2)
 
