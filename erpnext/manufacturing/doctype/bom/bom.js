@@ -187,33 +187,33 @@ cur_frm.cscript.validate = function(doc, dt, dn) {
 frappe.ui.form.on("BOM Operation", "operation", function(frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 
-    frappe.call({
-        "method": "frappe.client.get",
-        args: {
-            doctype: "Operation",
-            name: d.operation
-        },
-        callback: function (data) {
+	frappe.call({
+		"method": "frappe.client.get",
+		args: {
+			doctype: "Operation",
+			name: d.operation
+		},
+		callback: function (data) {
 			frappe.model.set_value(d.doctype, d.name, "opn_description", data.message.opn_description);
 			frappe.model.set_value(d.doctype, d.name, "workstation", data.message.workstation);
 			erpnext.bom.set_operation(frm.doc);
-        }
-    })
+		}
+	})
 });
 
 frappe.ui.form.on("BOM Operation", "workstation", function(frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 
-    frappe.call({
-        "method": "frappe.client.get",
-        args: {
-            doctype: "Workstation",
-            name: d.workstation
-        },
-        callback: function (data) {
+	frappe.call({
+		"method": "frappe.client.get",
+		args: {
+			doctype: "Workstation",
+			name: d.workstation
+		},
+		callback: function (data) {
 			frappe.model.set_value(d.doctype, d.name, "hour_rate", data.message.hour_rate);
 			erpnext.bom.calculate_op_cost(frm.doc);
 			erpnext.bom.calculate_total(frm.doc);
-        }
-    })
+		}
+	})
 });
