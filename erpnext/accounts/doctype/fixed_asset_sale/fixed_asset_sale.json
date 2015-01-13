@@ -167,6 +167,7 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "description": "The Difference of Amount.\n(Purchase Cost + Accumulated Depreciation) - Sale Amount\nUseful to know whether there has been a Loss or Profit on the Sale of Asset.", 
    "fieldname": "difference", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -207,6 +208,7 @@
   {
    "allow_on_submit": 0, 
    "depends_on": "eval:doc.profit_or_loss!=\"\"", 
+   "description": "Specify account to book Profit or Loss", 
    "fieldname": "booking_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -263,7 +265,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-01-13 13:05:11.656949", 
+ "modified": "2015-01-13 16:27:10.027681", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Fixed Asset Sale", 

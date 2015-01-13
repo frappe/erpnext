@@ -39,6 +39,7 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "description": "The Account in the \"Chart of Accounts\" where this Fixed Asset is Linked To", 
    "fieldname": "fixed_asset_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -59,6 +60,7 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "description": "Rate of Depreciation per Year in %. If you use \"Useful Life in Years\" then this can be calculated as (100/N)% (N is the Useful Life in Years. ", 
    "fieldname": "depreciation_rate", 
    "fieldtype": "Percent", 
    "hidden": 0, 
@@ -97,6 +99,7 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "description": "The Purchase Value of the Asset", 
    "fieldname": "gross_purchase_value", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -115,6 +118,7 @@
    "set_only_once": 0
   }, 
   {
+   "description": "The Supplier from which the Asset is Purchased", 
    "fieldname": "purchased_from", 
    "fieldtype": "Link", 
    "label": "Purchased From", 
@@ -124,6 +128,7 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "description": "If the Asset is being carried forward from the last fiscal year, this table should contain Total Accumulated Depreciation Value till the Last Fiscal Year.\\neg. Current FY: 2002-2003. Depr. till Last Year 2000. Then the entry must be FY: 2001-2002 Val: 2000.", 
    "fieldname": "depreciation", 
    "fieldtype": "Table", 
    "hidden": 0, 
@@ -167,7 +172,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-01-12 19:38:49.597143", 
+ "modified": "2015-01-13 16:25:32.636681", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Fixed Asset Account", 
