@@ -6,6 +6,15 @@ import frappe
 from frappe.model.document import Document
 
 class FixedAssetAccount(Document):
+	def validate(self):
+		for totaldepr in self.depreciation:
+			count = 0
+			for totaldepr_entries in self.depreciation:
+				if totaldepr.fiscal_year == totaldepr_entries.fiscal_year:
+					count = count + 1;
+					if count >= 2:
+						frappe.throw("Fiscal Yr Duplicated in Accumulated Depreciation. Pls Check")
+
 	def post_journal_entry(self):
 		jv = frappe.new_doc('Journal Entry')
 		jv.voucher_type = 'Journal Entry'
