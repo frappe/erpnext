@@ -21,12 +21,14 @@ def execute(filters=None):
     TOTAL_DAYS_IN_YEAR = 365
 
     ps = frappe.db.sql("""select led.*,ifnull((select sum(sale.asset_purchase_cost) from `tabFixed Asset Sale` sale where sale.fixed_asset_account=led.fixed_asset_name and sale.docstatus=1  and sale.posting_date>=%s and sale.posting_date<=%s),0) as total_sale_value
-           from `tabFixed Asset Account` led where is_sold=false or (is_sold=true and (select count(*) from `tabFixed Asset Sale` sale where sale.fixed_asset_account=led.fixed_asset_name and docstatus=1 and sale.posting_date>=%s and sale.posting_date<=%s)>0)""", (finyrfrom,finyrto,finyrfrom,finyrto,finyrfrom,finyrto), as_dict=True)
+           from `tabFixed Asset Account` led where is_sold=false or (is_sold=true and (select count(*) from `tabFixed Asset Sale` sale where sale.fixed_asset_account=led.fixed_asset_name and docstatus=1 and sale.posting_date>=%s and sale.posting_date<=%s)>0)""", (finyrfrom,finyrto,finyrfrom,finyrto), as_dict=True)
 
     for assets in ps:
         fixed_asset_name = assets.fixed_asset_name
         fixed_asset_account = assets.fixed_asset_account
         rateofdepr = abs(assets.depreciation_rate)
+        purchase_date = datetime.strptime(assets.purchase_date, "%Y-%m-%d").date()
+
 
         global deprtilllastyr # Depreciation provided till close of last fiscal Yr.
         deprtilllastyr = 0
@@ -41,7 +43,7 @@ def execute(filters=None):
 
         global totalpurchase # Purchases in this Fiscal Yr
         totalpurchase = 0
-        if assets.purchase_date>=finyrfrom and assets.purchase_date<=finyrto
+        if purchase_date>=finyrfrom and purchase_date<=finyrto:
             totalpurchase = assets.gross_purchase_value
 
         totalsales = assets.total_sale_value
@@ -65,14 +67,13 @@ def execute(filters=None):
 
         global depronpurchases # Depreciation provided on Purchase in the Current FY
         depronpurchases = float(0)
-        if assets.purchase_date>=finyrfrom and assets.purchase_date<=finyrto
-        	purdate = datetime.strptime(assets.purchase_date, "%Y-%m-%d").date()
-        	days = getDateDiffDays(purdate, finyrto)
+        if purchase_date>=finyrfrom and purchase_date<=finyrto:
+        	days = getDateDiffDays(purchase_date, finyrto)
         	depronpurchases = depronpurchases + ((assets.gross_purchase_value * rateofdepr / 100) * (days / TOTAL_DAYS_IN_YEAR))
 
 	global deprwrittenback
         deprwrittenback = 0
-	if totalsales > 0        
+	if totalsales > 0:
         	deprwrittenback = depronopening + deprtilllastyr
 
 	if depronopening <= (assets.gross_purchase_value - deprtilllastyr):
