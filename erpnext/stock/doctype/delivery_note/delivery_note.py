@@ -210,7 +210,7 @@ class DeliveryNote(SellingController):
 			return
 		has_error = False
 		for d in self.get(self.fname):
-			if flt(d.get('stock_qty')) != flt(d.get('packed_qty')):
+			if flt(d.get('qty')) != flt(d.get('packed_qty')):
 				frappe.msgprint(_("Packed quantity must equal quantity for Item {0} in row {1}").format(d.item_code, d.idx))
 				has_error = True
 		if has_error:
