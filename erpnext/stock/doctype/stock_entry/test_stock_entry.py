@@ -921,7 +921,7 @@ def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se.submit()
 	return se
 
-def make_stock_entry(item, source, target, stock_qty, incoming_rate=None):
+def make_stock_entry(item, source, target, qty, incoming_rate=None):
 	s = frappe.new_doc("Stock Entry")
 	if source and target:
 		s.purpose = "Material Transfer"
@@ -934,7 +934,7 @@ def make_stock_entry(item, source, target, stock_qty, incoming_rate=None):
 		"item_code": item,
 		"s_warehouse": source,
 		"t_warehouse": target,
-		"stock_qty": stock_qty,
+		"qty": qty,
 		"incoming_rate": incoming_rate,
 		"conversion_factor": 1.0
 	})
