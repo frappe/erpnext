@@ -1,7 +1,7 @@
 cur_frm.cscript.fixed_asset_account = function (doc,dt,dn) {
 	if (doc.fixed_asset_account) {
 		return frappe.call({
-			method: "erpnext.fixed_asset.doctype.fixed_asset_account.fixed_asset_account.get_purchase_cost",
+			method: "erpnext.accounts.doctype.fixed_asset_account.fixed_asset_account.get_purchase_cost",
 			args: {account: doc.fixed_asset_account},
 			callback: function(r) {
 				doc.asset_purchase_cost = Math.abs(r.message);
@@ -14,7 +14,7 @@ cur_frm.cscript.fixed_asset_account = function (doc,dt,dn) {
 cur_frm.cscript.sales_amount = function (doc,dt,dn) {
 	if (doc.sales_amount) {
 		return frappe.call({
-			method: "erpnext.fixed_asset.doctype.fixed_asset_sale.written_down.calculateWrittenDownOn",
+			method: "erpnext.accounts.doctype.fixed_asset_sale.written_down.calculateWrittenDownOn",
 			args: {fa_account: doc.fixed_asset_account, saledate: doc.posting_date, saleamount: doc.asset_purchase_cost},
 			callback: function(r) {
 				doc.accumulated_depreciation = Math.abs(r.message);
