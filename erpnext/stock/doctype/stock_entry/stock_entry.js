@@ -426,7 +426,7 @@ cur_frm.cscript.t_warehouse = cur_frm.cscript.s_warehouse;
 cur_frm.cscript.uom = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(d.uom && d.item_code){
-		var arg = {'item_code':d.item_code, 'uom':d.uom, 'qty':d.qty}
+		var arg = {'item_code':d.item_code, 'uom':d.uom, 'qty':d.stock_qty}
 		return get_server_fields('get_uom_details', JSON.stringify(arg),
 			'mtn_details', doc, cdt, cdn, 1);
 	}

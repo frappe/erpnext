@@ -204,13 +204,13 @@ class DeliveryNote(SellingController):
 
 	def validate_packed_qty(self):
 		"""
-			Validate that if packed qty exists, it should be equal to qty
+			Validate that if packed qty exists, it should be equal to stock_qty
 		"""
 		if not any([flt(d.get('packed_qty')) for d in self.get(self.fname)]):
 			return
 		has_error = False
 		for d in self.get(self.fname):
-			if flt(d.get('qty')) != flt(d.get('packed_qty')):
+			if flt(d.get('stock_qty')) != flt(d.get('packed_qty')):
 				frappe.msgprint(_("Packed quantity must equal quantity for Item {0} in row {1}").format(d.item_code, d.idx))
 				has_error = True
 		if has_error:

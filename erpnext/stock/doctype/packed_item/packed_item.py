@@ -14,7 +14,7 @@ class PackedItem(Document):
 	pass
 
 def get_sales_bom_items(item_code):
-	return frappe.db.sql("""select t1.item_code, t1.qty, t1.uom
+	return frappe.db.sql("""select t1.item_code, t1.stock_qty, t1.uom
 		from `tabSales BOM Item` t1, `tabSales BOM` t2
 		where t2.new_item_code=%s and t1.parent = t2.name""", item_code, as_dict=1)
 
@@ -22,13 +22,13 @@ def get_packing_item_details(item):
 	return frappe.db.sql("""select item_name, description, stock_uom from `tabItem`
 		where name = %s""", item, as_dict = 1)[0]
 
-def get_bin_qty(item, warehouse):
+def get_bin_stock_qty(item, warehouse):
 	det = frappe.db.sql("""select actual_qty, projected_qty from `tabBin`
 		where item_code = %s and warehouse = %s""", (item, warehouse), as_dict = 1)
 	return det and det[0] or ''
 
-def update_packing_list_item(obj, packing_item_code, qty, warehouse, line):
-	bin = get_bin_qty(packing_item_code, warehouse)
+def update_packing_list_item(obj, packing_item_code, stock_qty, warehouse, line):
+	bin = get_bin_stock_qty(packing_item_code, warehouse)
 	item = get_packing_item_details(packing_item_code)
 
 	# check if exists
@@ -47,7 +47,7 @@ def update_packing_list_item(obj, packing_item_code, qty, warehouse, line):
 	pi.parent_detail_docname = line.name
 	pi.description = item['description']
 	pi.uom = item['stock_uom']
-	pi.qty = flt(qty)
+	pi.stock_qty = flt(stock_qty)
 	pi.actual_qty = bin and flt(bin['actual_qty']) or 0
 	pi.projected_qty = bin and flt(bin['projected_qty']) or 0
 	if not pi.warehouse:
@@ -66,7 +66,7 @@ def make_packing_list(obj, item_table_fieldname):
 	for d in obj.get(item_table_fieldname):
 		if frappe.db.get_value("Sales BOM", {"new_item_code": d.item_code}):
 			for i in get_sales_bom_items(d.item_code):
-				update_packing_list_item(obj, i['item_code'], flt(i['qty'])*flt(d.qty), d.warehouse, d)
+				update_packing_list_item(obj, i['item_code'], flt(i['stock_qty'])*flt(d.stock_qty), d.warehouse, d)
 
 			if [d.item_code, d.name] not in parent_items:
 				parent_items.append([d.item_code, d.name])

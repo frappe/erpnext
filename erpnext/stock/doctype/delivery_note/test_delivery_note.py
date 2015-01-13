@@ -126,6 +126,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn = frappe.copy_doc(test_records[0])
 		dn.get("delivery_note_details")[0].item_code = "_Test Sales BOM Item"
 		dn.get("delivery_note_details")[0].qty = 1
+		dn.get("delivery_note_details")[0].stock_qty = 1
 
 		stock_in_hand_account = frappe.db.get_value("Account",
 			{"master_name": dn.get("delivery_note_details")[0].warehouse})
@@ -165,6 +166,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn = frappe.copy_doc(test_records[0])
 		dn.get("delivery_note_details")[0].item_code = "_Test Serialized Item With Series"
 		dn.get("delivery_note_details")[0].qty = 1
+		dn.get("delivery_note_details")[0].stock_qty = 1
 		dn.get("delivery_note_details")[0].serial_no = serial_nos[0]
 		dn.insert()
 		dn.submit()
@@ -202,6 +204,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn = frappe.copy_doc(test_records[0])
 		dn.get("delivery_note_details")[0].item_code = "_Test Serialized Item With Series"
 		dn.get("delivery_note_details")[0].qty = 1
+		dn.get("delivery_note_details")[0].stock_qty = 1
 		dn.get("delivery_note_details")[0].serial_no = serial_nos[0]
 		dn.insert()
 

@@ -348,7 +348,7 @@ class SellingController(StockController):
 					self.has_sales_bom(d.item_code)) and not d.warehouse:
 						frappe.throw(_("Reserved Warehouse required for stock Item {0} in row {1}").format(d.item_code, d.idx))
 				reserved_warehouse = d.warehouse
-				if flt(d.qty) > flt(d.delivered_qty):
+				if flt(d.stock_qty) > flt(d.delivered_qty):
 					reserved_qty_for_main_item = flt(d.stock_qty) - flt(d.delivered_qty)
 
 			elif self.doctype == "Delivery Note" and d.against_sales_order:
@@ -372,7 +372,7 @@ class SellingController(StockController):
 							'warehouse': p.warehouse,
 							'reserved_warehouse': reserved_warehouse,
 							'item_code': p.item_code,
-							'qty': flt(p.stck_qty),
+							'qty': flt(p.qty),
 							'stock_qty': flt(p.stock_qty),
 							'reserved_qty': (flt(p.stock_qty)/flt(d.stock_qty)) * reserved_qty_for_main_item,
 							'uom': p.uom,
@@ -385,7 +385,7 @@ class SellingController(StockController):
 					'warehouse': d.warehouse,
 					'reserved_warehouse': reserved_warehouse,
 					'item_code': d.item_code,
-					'qty': d.stock_qty,
+					'qty': d.qty,
 					'stock_qty': d.stock_qty,
 					'reserved_qty': reserved_qty_for_main_item,
 					'uom': d.stock_uom,

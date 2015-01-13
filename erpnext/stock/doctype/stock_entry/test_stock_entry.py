@@ -22,11 +22,11 @@ def get_sle(**args):
 
 def make_zero(item_code, warehouse):
 	sle = get_sle(item_code = item_code, warehouse = warehouse)
-	qty = sle[0].qty_after_transaction if sle else 0
-	if qty < 0:
-		make_stock_entry(item_code, None, warehouse, abs(qty), incoming_rate=10)
-	elif qty > 0:
-		make_stock_entry(item_code, warehouse, None, qty, incoming_rate=10)
+	stock_qty = sle[0].qty_after_transaction if sle else 0
+	if stock_qty < 0:
+		make_stock_entry(item_code, None, warehouse, abs(stock_qty), incoming_rate=10)
+	elif stock_qty > 0:
+		make_stock_entry(item_code, warehouse, None, stock_qty, incoming_rate=10)
 
 class TestStockEntry(unittest.TestCase):
 	def tearDown(self):
@@ -310,6 +310,7 @@ class TestStockEntry(unittest.TestCase):
 		si.get("entries")[0].warehouse = "_Test Warehouse - _TC"
 		si.get("entries")[0].item_code = item_code
 		si.get("entries")[0].qty = 5.0
+		si.get("entries")[0].stock_qty = 5.0
 		si.insert()
 		si.submit()
 
@@ -461,6 +462,7 @@ class TestStockEntry(unittest.TestCase):
 		so = frappe.copy_doc(sales_order_test_records[0])
 		so.get("sales_order_details")[0].item_code = item_code
 		so.get("sales_order_details")[0].qty = 5.0
+		so.get("sales_order_details")[0].stock_qty = 5.0
 		so.insert()
 		so.submit()
 
@@ -919,7 +921,7 @@ def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
 	se.submit()
 	return se
 
-def make_stock_entry(item, source, target, qty, incoming_rate=None):
+def make_stock_entry(item, source, target, stock_qty, incoming_rate=None):
 	s = frappe.new_doc("Stock Entry")
 	if source and target:
 		s.purpose = "Material Transfer"
@@ -932,7 +934,7 @@ def make_stock_entry(item, source, target, qty, incoming_rate=None):
 		"item_code": item,
 		"s_warehouse": source,
 		"t_warehouse": target,
-		"qty": qty,
+		"stock_qty": stock_qty,
 		"incoming_rate": incoming_rate,
 		"conversion_factor": 1.0
 	})

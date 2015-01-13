@@ -18,6 +18,7 @@
     "item_name": "_Test Item", 
     "parentfield": "delivery_note_details", 
     "qty": 5.0, 
+    "stock_qty": 5.0, 
     "rate": 100.0, 
     "stock_uom": "_Test UOM", 
     "warehouse": "_Test Warehouse - _TC"
