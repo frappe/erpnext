@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from __future__ import division
 import frappe
 from frappe.model.document import Document
 from frappe.utils import flt
@@ -61,11 +62,13 @@ def get_total_depr_for(fiscal_year,fa_name):
 				saledate = datetime.strptime(sales.posting_date, "%Y-%m-%d").date()
 				days = getDateDiffDays(finyrfrom, saledate)
 				depronopening = depronopening + (((saleamount - (saleamount * factor)) * rateofdepr / 100) * (days / TOTAL_DAYS_IN_YEAR))
+				print "IN DEPR OPEN", depronopening
 
 		depronpurchases = float(0)
 		if purchase_date>=finyrfrom and purchase_date<=finyrto:
 			days = getDateDiffDays(purchase_date, finyrto)
 			depronpurchases = depronpurchases + ((assets.gross_purchase_value * rateofdepr / 100) * (days / TOTAL_DAYS_IN_YEAR))
+			print "IN DEPR PUR", depronpurchases
 
 		print depronopening, depronpurchases, deprtilllastyr
 
