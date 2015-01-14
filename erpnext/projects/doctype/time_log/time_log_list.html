@@ -2,6 +2,11 @@
 	<div class="col-xs-12">
 		<div class="text-ellipsis">
 			{%= list.get_avatar_and_id(doc) %}
+
+				<span style="margin-right: 8px;" class="text-muted">
+				({%= doc.fname + " " + doc.lname %})
+			
+
 			{% if(doc.billable) { %}
 			<span style="margin-right: 8px;"
 				title="{%= __("Billable") %}" class="filterable"

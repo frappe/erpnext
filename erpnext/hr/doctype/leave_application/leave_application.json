@@ -191,7 +191,11 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
+<<<<<<< HEAD
  "modified": "2014-12-09 16:33:29.626849", 
+=======
+ "modified": "2014-12-10 14:38:38.359114", 
+>>>>>>> 4c1073ac10973d8202fdd5dd12eacc274788d475
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Application", 
@@ -207,24 +211,6 @@
    "read": 1, 
    "report": 1, 
    "role": "Employee", 
-   "user_permission_doctypes": "[\"Company\",\"Employee\",\"Fiscal Year\",\"Leave Application\"]", 
-   "write": 1
-  }, 
-  {
-   "amend": 1, 
-   "cancel": 1, 
-   "create": 1, 
-   "delete": 1, 
-   "email": 1, 
-   "export": 1, 
-   "import": 0, 
-   "permlevel": 0, 
-   "print": 1, 
-   "read": 1, 
-   "report": 1, 
-   "role": "HR Manager", 
-   "set_user_permissions": 1, 
-   "submit": 1, 
    "write": 1
   }, 
   {
@@ -245,14 +231,15 @@
    "delete": 1, 
    "email": 1, 
    "export": 0, 
+   "import": 0, 
    "permlevel": 0, 
    "print": 1, 
    "read": 1, 
    "report": 1, 
+   "restrict": 1, 
    "role": "HR User", 
    "set_user_permissions": 1, 
    "submit": 1, 
-   "user_permission_doctypes": "[\"Company\"]", 
    "write": 1
   }, 
   {
@@ -268,7 +255,6 @@
    "report": 1, 
    "role": "Leave Approver", 
    "submit": 1, 
-   "user_permission_doctypes": "[\"Company\",\"User\"]", 
    "write": 1
   }, 
   {

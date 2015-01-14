@@ -1,0 +1,17 @@
+{
+ "add_total_row": 1, 
+ "apply_user_permissions": 1, 
+ "creation": "2015-01-14 12:00:15.218878", 
+ "docstatus": 0, 
+ "doctype": "Report", 
+ "idx": 1, 
+ "is_standard": "Yes", 
+ "modified": "2015-01-14 12:52:34.201970", 
+ "modified_by": "Administrator", 
+ "module": "Projects", 
+ "name": "Test Time Report", 
+ "owner": "Administrator", 
+ "ref_doctype": "Time Log", 
+ "report_name": "Test Time Report", 
+ "report_type": "Script Report"
+}
