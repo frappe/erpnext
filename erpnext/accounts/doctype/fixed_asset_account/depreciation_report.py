@@ -19,13 +19,13 @@ def getDeprTillLastYear(day_before_start, fixed_asset_name):
         return 0
         
 def getDeprProvidedThisYear(method, depronopening, purchase_value, deprtilllastyr, rateofdepr):
-	if method == "Written Down" or (depronopening <= (assets.gross_purchase_value - deprtilllastyr)):
+	if method == "Written Down" or (depronopening <= (purchase_value - deprtilllastyr)):
 		return flt(depronopening,2)
 	elif depronopening > (purchase_value - deprtilllastyr) and \
-	(assets.gross_purchase_value - deprtilllastyr) < (assets.gross_purchase_value * rateofdepr / 100) and \
+	(purchase_value - deprtilllastyr) < (purchase_value * rateofdepr / 100) and \
 	method=="Straight Line":
 		return flt(purchase_value - deprtilllastyr,2)
-	else method=="Straight Line":
+	elif method=="Straight Line":
 		return 0
 
 def get_report_data(finyrfrom, finyrto, company, fa_name=None):
@@ -128,8 +128,6 @@ def calculateWrittenDownOn(fa_account, saledate, company, saleamount):
 	
 	ps = frappe.db.sql("""select led.* from `tabFixed Asset Account` led where is_sold=false and led.fixed_asset_name=%s limit 1""", (fa_account), as_dict=True)
 
-        global deprwrittenback
-
 	for assets in ps:
 	        fixed_asset_account = assets.fixed_asset_account
 	        purchase_date = datetime.strptime(assets.purchase_date, "%Y-%m-%d").date()
@@ -153,4 +151,4 @@ def calculateWrittenDownOn(fa_account, saledate, company, saleamount):
 		
                 return flt((depronopening + deprtilllastyr),2)
 
-	frappe.throw("Either Asset is Sold, Or no Record Found")
+	frappe.throw("Either Asset is Sold Or no Record Found")

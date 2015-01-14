@@ -15,7 +15,7 @@ cur_frm.cscript.company = function (doc,dt,dn) {
 	if (doc.company) {
 		return frappe.call({
 			method: "erpnext.accounts.doctype.fixed_asset_account.fixed_asset_account.validate_default_accounts",
-			args: {account: doc.company},
+			args: {company: doc.company},
 			callback: function(r) {
 			}			
 		});
