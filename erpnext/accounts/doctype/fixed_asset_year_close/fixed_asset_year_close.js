@@ -11,3 +11,13 @@ frappe.ui.form.on("Fixed Asset Year Close", "post_journal_entry", function(frm) 
 		}
 	});
 });
+cur_frm.cscript.company = function (doc,dt,dn) {
+	if (doc.company) {
+		return frappe.call({
+			method: "erpnext.accounts.doctype.fixed_asset_account.fixed_asset_account.validate_default_accounts",
+			args: {company: doc.company},
+			callback: function(r) {
+			}			
+		});
+	}
+}

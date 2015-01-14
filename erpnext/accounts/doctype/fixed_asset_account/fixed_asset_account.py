@@ -41,3 +41,12 @@ def get_purchase_cost(account):
    val = frappe.get_doc("Fixed Asset Account", account).gross_purchase_value
    return val
 
+@frappe.whitelist()
+def validate_default_accounts(company):
+	comp = frappe.get_doc("Company", company)
+	if not comp.default_depreciation_expense_account:
+		frappe.throw("Pls Set Company Default Depreciation Expense Account")
+	if not comp.default_accumulated_depreciation_account:
+		frappe.throw("Pls Set Company Default Accumulated Depreciation Account")
+
+

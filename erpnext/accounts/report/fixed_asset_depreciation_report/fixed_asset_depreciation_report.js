@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors and contributors
 // For license information, please see license.txt
 
-frappe.query_reports["Diminishing Value Depreciation"] = {
+frappe.query_reports["Fixed Asset Depreciation Report"] = {
 	"filters": [
 		{
 			"fieldname":"fiscal_year",

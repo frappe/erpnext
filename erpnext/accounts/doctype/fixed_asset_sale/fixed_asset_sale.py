@@ -7,9 +7,8 @@ from frappe.model.document import Document
 
 class FixedAssetSale(Document):
 	def post_journal_entry(self):
-		validate_account = frappe.db.get_value("Account", {"account_name": "Accumulated Depreciation"})
-		if not validate_account:
-			frappe.throw("""Account 'Accumulated Depreciation' Not Found""")
+		from erpnext.accounts.doctype.fixed_asset_account.fixed_asset_account import validate_default_accounts
+		validate_default_accounts(self.company)
 		jv = frappe.new_doc('Journal Entry')
 		jv.voucher_type = 'Journal Entry'
 		jv.company = self.company
@@ -31,7 +30,7 @@ class FixedAssetSale(Document):
 
 		td5 = jv.append("accounts")
 		# td5.account = frappe.db.get_value("Fixed Asset Account", self.fixed_asset_account,"fixed_asset_account")
-		td5.account = frappe.db.get_value("Account", {"account_name": "Accumulated Depreciation"})
+		td5.account = frappe.get_doc("Company", self.company).default_accumulated_depreciation_account
 		td5.set('debit', float(self.accumulated_depreciation))
 
 		if self.profit_or_loss == "Loss":

@@ -172,6 +172,22 @@
    "precision": ""
   }, 
   {
+   "fieldname": "default_depreciation_expense_account", 
+   "fieldtype": "Link", 
+   "label": "Default Depreciation Expense Account", 
+   "options": "Account", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "default_accumulated_depreciation_account", 
+   "fieldtype": "Link", 
+   "label": "Default Accumulated Depreciation Account", 
+   "options": "Account", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "column_break0", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 
@@ -375,7 +391,7 @@
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2015-01-05 11:30:45.716971", 
+ "modified": "2015-01-14 12:18:31.949045", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 

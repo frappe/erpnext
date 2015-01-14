@@ -1,17 +1,17 @@
 {
  "add_total_row": 0, 
  "apply_user_permissions": 1, 
- "creation": "2015-01-12 19:22:21.392874", 
+ "creation": "2015-01-14 12:39:58.987567", 
  "disabled": 0, 
  "docstatus": 0, 
  "doctype": "Report", 
  "is_standard": "Yes", 
- "modified": "2015-01-12 19:22:21.392874", 
+ "modified": "2015-01-14 12:39:58.987567", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
- "name": "Written Down", 
+ "name": "Fixed Asset Depreciation Report", 
  "owner": "Administrator", 
  "ref_doctype": "Fixed Asset Account", 
- "report_name": "Written Down", 
+ "report_name": "Fixed Asset Depreciation Report", 
  "report_type": "Script Report"
 }
