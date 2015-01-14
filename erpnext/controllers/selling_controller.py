@@ -426,10 +426,10 @@ class SellingController(StockController):
 					
 	def set_qty_as_per_stock_uom(self):
 		for d in self.get(self.fname):
-			if d.meta.get_field("stock_qty") and not d.stock_qty:
+			if d.meta.get_field("stock_qty"):
 				if not d.conversion_factor:
 					frappe.throw(_("Item {0}: Conversion Factor is mandatory").format(d.item_code))
-				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
+				d.stock_qty = flt(flt(d.qty) * flt(d.conversion_factor), self.precision("stock_qty"))
 
 def check_active_sales_items(obj):
 	for d in obj.get(obj.fname):

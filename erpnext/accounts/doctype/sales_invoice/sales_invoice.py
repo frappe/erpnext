@@ -44,6 +44,7 @@ class SalesInvoice(SellingController):
 		self.so_dn_required()
 		self.validate_proj_cust()
 		self.validate_with_previous_doc()
+		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.check_stop_sales_order("sales_order")
 		self.validate_customer_account()
