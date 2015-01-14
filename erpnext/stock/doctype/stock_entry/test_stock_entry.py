@@ -987,6 +987,8 @@ def make_stock_entry(**args):
 		"incoming_rate": args.incoming_rate,
 		"conversion_factor": 1.0
 	})
+	s.posting_date= "2013-01-01"
+	s.fiscal_year= "_Test Fiscal Year 2013"
 	s.insert()
 	s.submit()
 	return s

@@ -11,7 +11,7 @@ from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.projects.doctype.time_log.time_log import OverProductionError
 
 class TestProductionOrder(unittest.TestCase):
-	def test_planned_qty(self):
+	def check_planned_qty(self):
 		set_perpetual_inventory(0)
 
 		planned0 = frappe.db.get_value("Bin", {"item_code": "_Test FG Item", "warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty") or 0
@@ -30,11 +30,15 @@ class TestProductionOrder(unittest.TestCase):
 		s = frappe.get_doc(make_stock_entry(pro_doc.name, "Material Transfer", 4))
 		for d in s.get("items"):
 			d.s_warehouse = "Stores - _TC"
+		s.fiscal_year = "_Test Fiscal Year 2013"
+		s.posting_date = "2013-01-02"
 		s.insert()
 		s.submit()
 
 		# from wip to fg
 		s = frappe.get_doc(make_stock_entry(pro_doc.name, "Manufacture", 4))
+		s.fiscal_year = "_Test Fiscal Year 2013"
+		s.posting_date = "2013-01-03"
 		s.insert()
 		s.submit()
 
@@ -47,7 +51,7 @@ class TestProductionOrder(unittest.TestCase):
 
 	def test_over_production(self):
 		from erpnext.manufacturing.doctype.production_order.production_order import StockOverProductionError
-		pro_doc = self.test_planned_qty()
+		pro_doc = self.check_planned_qty()
 
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
 			target="_Test Warehouse - _TC", qty=100, incoming_rate=100)
@@ -55,6 +59,8 @@ class TestProductionOrder(unittest.TestCase):
 			target="_Test Warehouse - _TC", qty=100, incoming_rate=100)
 
 		s = frappe.get_doc(make_stock_entry(pro_doc.name, "Manufacture", 7))
+		s.fiscal_year = "_Test Fiscal Year 2013"
+		s.posting_date = "2013-01-04"
 		s.insert()
 
 		self.assertRaises(StockOverProductionError, s.submit)

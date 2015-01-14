@@ -8,6 +8,8 @@ from frappe.utils import cint, cstr, flt
 from frappe import _
 from frappe.model.document import Document
 
+from operator import itemgetter
+
 class BOM(Document):
 
 	def autoname(self):
@@ -335,7 +337,7 @@ class BOM(Document):
 		"Add items to Flat BOM table"
 		frappe.db.sql("""delete from `tabBOM Explosion Item` where parent=%s""", self.name)
 		self.set('exploded_items', [])
-		for d in self.cur_exploded_items:
+		for d in sorted(self.cur_exploded_items, key=itemgetter(0)):
 			ch = self.append('exploded_items', {})
 			for i in self.cur_exploded_items[d].keys():
 				ch.set(i, self.cur_exploded_items[d][i])

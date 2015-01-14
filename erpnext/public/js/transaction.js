@@ -696,7 +696,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 
 	adjust_discount_amount_loss: function(tax) {
-		var discount_amount_loss = this.frm.doc.grand_total - flt(this.frm.doc.discount_amount) - tax.total;
+		var discount_amount_loss = this.frm.doc.grand_total - flt(this.frm.doc.base_discount_amount) - tax.total;
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount +
 			discount_amount_loss, precision("tax_amount", tax));
 		tax.total = flt(tax.total + discount_amount_loss, precision("total", tax));
@@ -710,8 +710,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			// distribute the tax amount proportionally to each item row
 			var actual = flt(tax.rate, precision("tax_amount", tax));
 			current_tax_amount = this.frm.doc.net_total ?
-				((item.base_amount / this.frm.doc.net_total) * actual) :
-				0.0;
+			((item.base_amount / this.frm.doc.net_total) * actual) : 0.0;
 
 		} else if(tax.charge_type == "On Net Total") {
 			current_tax_amount = (tax_rate / 100.0) * item.base_amount;

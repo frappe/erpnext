@@ -242,7 +242,7 @@ def repost_all_stock_vouchers():
 				doc.validate()
 
 			doc.update_stock_ledger()
-			doc.make_gl_entries(repost_future_gle=False, allow_negative_stock=True)
+			doc.make_gl_entries(repost_future_gle=False)
 			frappe.db.commit()
 		except Exception, e:
 			print frappe.get_traceback()

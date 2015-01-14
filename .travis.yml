@@ -15,6 +15,7 @@ install:
   - cd ~/ && bench init frappe-bench --frappe-path https://github.com/frappe/frappe.git
   - cp -r $TRAVIS_BUILD_DIR/test_sites/test_site ~/frappe-bench/sites/
 
+<<<<<<< HEAD
 script:
   - cd ~/frappe-bench
   - bench get-app erpnext $TRAVIS_BUILD_DIR
@@ -23,6 +24,13 @@ script:
   - bench frappe --build_website
   - bench frappe --serve_test &
   - bench frappe --verbose --run_tests
+=======
+  - sudo apt-get install xfonts-75dpi xfonts-base -y
+  - wget http://downloads.sourceforge.net/project/wkhtmltopdf/0.12.2/wkhtmltox-0.12.2_linux-precise-amd64.deb
+  - sudo dpkg -i wkhtmltox-0.12.2_linux-precise-amd64.deb
+  - CFLAGS=-O0 pip install git+https://github.com/frappe/frappe.git@develop
+  - CFLAGS=-O0 pip install --editable .
+>>>>>>> da975f5a76aacc24abb71c4a26cb204f9ec72610
 
 before_script:
   - mysql -e 'create database test_frappe'

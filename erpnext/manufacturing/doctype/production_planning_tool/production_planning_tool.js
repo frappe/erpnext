@@ -24,6 +24,13 @@ cur_frm.cscript.item_code = function(doc,cdt,cdn) {
 	}
 }
 
+cur_frm.cscript.raise_purchase_request = function(doc, cdt, cdn) {
+	return frappe.call({
+		method: "raise_purchase_request",
+		doc:doc
+	})
+}
+
 cur_frm.cscript.download_materials_required = function(doc, cdt, cdn) {
 	return $c_obj(doc, 'validate_data', '', function(r, rt) {
 		if (!r['exc'])

@@ -291,7 +291,7 @@ class AccountsController(TransactionBase):
 			self.precision("tax_amount", tax))
 
 	def adjust_discount_amount_loss(self, tax):
-		discount_amount_loss = self.grand_total - flt(self.discount_amount) - tax.total
+		discount_amount_loss = self.grand_total - flt(self.base_discount_amount) - tax.total
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount +
 			discount_amount_loss, self.precision("tax_amount", tax))
 		tax.total = flt(tax.total + discount_amount_loss, self.precision("total", tax))
@@ -475,7 +475,7 @@ class AccountsController(TransactionBase):
 					max_allowed_amt = flt(ref_amt * (100 + tolerance) / 100)
 
 					if total_billed_amt - max_allowed_amt > 0.01:
-						frappe.throw(_("Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in Stock Settings").format(item.item_code, item.idx, max_allowed_amt))
+						frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow overbilling, please set in Stock Settings").format(item.item_code, item.idx, max_allowed_amt))
 
 	def get_company_default(self, fieldname):
 		from erpnext.accounts.utils import get_company_default

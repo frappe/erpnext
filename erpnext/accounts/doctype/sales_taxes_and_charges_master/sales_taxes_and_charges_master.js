@@ -46,17 +46,17 @@ cur_frm.pformat.taxes= function(doc){
 		var new_val = flt(val)/flt(doc.conversion_rate);
 		return new_val;
 	}
-	
+
 	function print_hide(fieldname) {
 		var doc_field = frappe.meta.get_docfield(doc.doctype, fieldname, doc.name);
 		return doc_field.print_hide;
 	}
-	
+
 	out ='';
 	if (!doc.print_without_amount) {
 		var cl = doc.taxes || [];
 
-		// outer table	
+		// outer table
 		var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 60%"></td><td>';
 
 		// main table
@@ -77,12 +77,12 @@ cur_frm.pformat.taxes= function(doc){
 
 		// Discount Amount
 		if(!print_hide('discount_amount') && doc.discount_amount)
-			out += make_row('Discount Amount', convert_rate(doc.discount_amount), 0);
+			out += make_row('Discount Amount', doc.discount_amount, 0);
 
 		// grand total
 		if(!print_hide('grand_total_export'))
 			out += make_row('Grand Total', doc.grand_total_export, 1);
-		
+
 		if(!print_hide('rounded_total_export'))
 			out += make_row('Rounded Total', doc.rounded_total_export, 1);
 
@@ -92,7 +92,7 @@ cur_frm.pformat.taxes= function(doc){
 			out += '<table><tr><td style="width:25%;"><b>In Words</b></td>';
 			out += '<td style="width:50%;">' + doc.in_words_export + '</td></tr>';
 		}
-		out += '</table></td></tr></table></div>';	 
+		out += '</table></td></tr></table></div>';
 	}
 	return out;
 }
@@ -139,14 +139,14 @@ cur_frm.fields_dict['taxes'].grid.get_field("account_head").get_query = function
 			"account_type": ["Tax", "Chargeable", "Income Account"],
 			"company": doc.company
 		}
-	}	
+	}
 }
 
 cur_frm.fields_dict['taxes'].grid.get_field("cost_center").get_query = function(doc) {
 	return{
 		'company': doc.company,
 		'group_or_ledger': "Ledger"
-	}	
+	}
 }
 
 cur_frm.cscript.rate = function(doc, cdt, cdn) {
