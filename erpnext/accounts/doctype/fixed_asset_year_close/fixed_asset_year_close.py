@@ -13,6 +13,8 @@ from erpnext.accounts.doctype.fixed_asset_account.written_down_report import get
 
 class FixedAssetYearClose(Document):
 	def post_journal_entry(self):
+		from erpnext.accounts.doctype.fixed_asset_account.fixed_asset_account import validate_default_accounts
+		validate_default_accounts(self.company)
 		finyrfrom, finyrto = get_fiscal_year(fiscal_year = self.fiscal_year)[1:]
 		day_before_start = finyrfrom - timedelta (days=1)
 		ps = frappe.db.sql("""select * from `tabFixed Asset Account` led where is_sold=false or (is_sold=true and (select count(*) from `tabFixed Asset Sale` sale where sale.fixed_asset_account=led.fixed_asset_name and docstatus=1 and sale.posting_date>=%s and sale.posting_date<=%s)>0)""", (finyrfrom, finyrto), as_dict=True)
@@ -40,12 +42,12 @@ class FixedAssetYearClose(Document):
 			account.save()
 
 			td1 = jv.append("accounts")
-			td1.account = assets.fixed_asset_account
+			td1.account = frappe.get_doc("Company", self.company).default_depreciation_expense_account
 			td1.set('debit', total_depreciation_for_year)
 			td1.against_fixed_asset = fixed_asset_name
 	
 		td2 = jv.append("accounts")
-		td2.account = frappe.db.get_value("Account", {"account_name": "Accumulated Depreciation"})
+		td2.account = frappe.get_doc("Company", self.company).default_accumulated_depreciation_account
 		td2.set('credit', float(total_depr))
 
 		return jv.insert()

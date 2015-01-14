@@ -355,7 +355,7 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Written Down",
+					"name": "Fixed Asset Depreciation Report",
 					"is_query_report": True,
 				},
 			]

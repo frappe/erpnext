@@ -14,7 +14,7 @@ cur_frm.cscript.fixed_asset_account = function (doc,dt,dn) {
 cur_frm.cscript.sales_amount = function (doc,dt,dn) {
 	if (doc.sales_amount) {
 		return frappe.call({
-			method: "erpnext.accounts.doctype.fixed_asset_sale.written_down.calculateWrittenDownOn",
+			method: "erpnext.accounts.doctype.fixed_asset_account.written_down_report.calculateWrittenDownOn",
 			args: {fa_account: doc.fixed_asset_account, saledate: doc.posting_date, saleamount: doc.asset_purchase_cost},
 			callback: function(r) {
 				doc.accumulated_depreciation = Math.abs(r.message);
