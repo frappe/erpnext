@@ -86,7 +86,7 @@ class TestSalesOrder(unittest.TestCase):
 		dn.get("delivery_note_details")[0].against_sales_order = so.name
 		dn.get("delivery_note_details")[0].prevdoc_detail_docname = so.get("sales_order_details")[0].name
 		if delivered_qty:
-			dn.get("delivery_note_details")[0].stock_qty = delivered_qty
+			dn.get("delivery_note_details")[0].qty = delivered_qty	
 		dn.insert()
 		dn.submit()
 		return dn
@@ -319,7 +319,7 @@ class TestSalesOrder(unittest.TestCase):
 		sales_order = frappe.copy_doc(test_records[0])
 		sales_order.sales_order_details[0].qty = 5
 		sales_order.sales_order_details[0].stock_qty = 5
-		sales_order.insert()
+		sales_order.sales_order_details[0].conversion_factor = 5
 		sales_order.submit()
 
 		_insert_purchase_receipt(sales_order.get("sales_order_details")[0].item_code)
