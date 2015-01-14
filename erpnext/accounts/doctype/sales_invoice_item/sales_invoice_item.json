@@ -86,6 +86,15 @@
    "reqd": 0
   }, 
   {
+   "fieldname": "uom", 
+   "fieldtype": "Link", 
+   "label": "UOM", 
+   "options": "UOM", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "price_list_rate", 
    "fieldtype": "Currency", 
    "label": "Price List Rate", 
@@ -120,15 +129,6 @@
    "label": "Stock UOM", 
    "options": "UOM", 
    "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "uom", 
-   "fieldtype": "Link", 
-   "label": "UOM", 
-   "options": "UOM", 
-   "permlevel": 0, 
-   "precision": "", 
    "read_only": 1
   }, 
   {
@@ -467,7 +467,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-01-14 08:20:44.421847", 
+ "modified": "2015-01-14 10:16:17.143080", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Item", 
