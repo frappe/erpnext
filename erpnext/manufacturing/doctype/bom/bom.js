@@ -100,6 +100,7 @@ cur_frm.cscript.is_default = function(doc) {
 var get_bom_material_detail= function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
+		frappe.mgsprint("test");
 		return frappe.call({
 			doc: cur_frm.doc,
 			method: "get_bom_material_detail",
