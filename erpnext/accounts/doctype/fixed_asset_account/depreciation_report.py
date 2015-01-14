@@ -11,15 +11,28 @@ from frappe.utils import flt
 
 def getDateDiffDays(d1, d2):
     return abs((d2 - d1).days)
-
+    
+def getDeprTillLastYear(day_before_start, fixed_asset_name):
+        for accdepr in frappe.get_doc("Fixed Asset Account", fixed_asset_name).depreciation:
+           if get_fiscal_year(fiscal_year = accdepr.fiscal_year) == get_fiscal_year(date = day_before_start):
+               return accdepr.total_accumulated_depreciation
+        return 0
+        
+def getDeprProvidedThisYear(method, depronopening, purchase_value, deprtilllastyr, rateofdepr):
+	if method == "Written Down" or (depronopening <= (assets.gross_purchase_value - deprtilllastyr)):
+		return flt(depronopening,2)
+	elif depronopening > (purchase_value - deprtilllastyr) and \
+	(assets.gross_purchase_value - deprtilllastyr) < (assets.gross_purchase_value * rateofdepr / 100) and \
+	method=="Straight Line":
+		return flt(purchase_value - deprtilllastyr,2)
+	else method=="Straight Line":
+		return 0
 
 def get_report_data(finyrfrom, finyrto, company, fa_name=None):
     data = []
-    # global finyrfrom, finyrto
-    # finyrfrom, finyrto = fiscal_year[1:]
     finyrfrom = datetime.strptime(finyrfrom, "%Y-%m-%d").date()
     finyrto = datetime.strptime(finyrto, "%Y-%m-%d").date()
-    day_before_start = finyrfrom - timedelta (days=1)
+    day_before_start = finyrfrom - timedelta (days=1)    
     TOTAL_DAYS_IN_YEAR = 365
     method = frappe.get_doc("Company", company).default_depreciation_method
     global ps
@@ -38,10 +51,7 @@ def get_report_data(finyrfrom, finyrto, company, fa_name=None):
         purchase_date = datetime.strptime(assets.purchase_date, "%Y-%m-%d").date()
 
         global deprtilllastyr # Depreciation provided till close of last fiscal Yr.
-        deprtilllastyr = 0
-        for accdepr in frappe.get_doc("Fixed Asset Account", fixed_asset_name).depreciation:
-           if get_fiscal_year(fiscal_year = accdepr.fiscal_year) == get_fiscal_year(date = day_before_start):
-               deprtilllastyr = accdepr.total_accumulated_depreciation
+        deprtilllastyr = getDeprTillLastYear(day_before_start, fixed_asset_name)
 
         global opening_balance # Opening Cost of Asset for the Year
         opening_balance = 0
@@ -56,7 +66,7 @@ def get_report_data(finyrfrom, finyrto, company, fa_name=None):
         totalsales = assets.total_sale_value
 
         global depronopening # Depreciation to be Provided in on the Opening Cost for this Fiscal Yr.
-        depronopening = float(0)
+        depronopening = 0
 
         if totalsales == 0:
 		if method!="Straight Line":
@@ -71,8 +81,6 @@ def get_report_data(finyrfrom, finyrto, company, fa_name=None):
 		if method=="Straight Line":
 			factor = 0
 
-	    print "Factor:", factor
-
             for sales in sales_sql:
                 saleamount = float(sales.asset_purchase_cost)
                 saledate = datetime.strptime(sales.posting_date, "%Y-%m-%d").date()
@@ -80,7 +88,7 @@ def get_report_data(finyrfrom, finyrto, company, fa_name=None):
                 depronopening = depronopening + (((saleamount - (saleamount * factor)) * rateofdepr / 100) * (days / TOTAL_DAYS_IN_YEAR))
 
         global depronpurchases # Depreciation provided on Purchase in the Current FY
-        depronpurchases = float(0)
+        depronpurchases = 0
         if purchase_date>=finyrfrom and purchase_date<=finyrto:
             days = getDateDiffDays(purchase_date, finyrto)
             depronpurchases = depronpurchases + ((assets.gross_purchase_value * rateofdepr / 100) * (days / TOTAL_DAYS_IN_YEAR))
@@ -90,50 +98,19 @@ def get_report_data(finyrfrom, finyrto, company, fa_name=None):
         if totalsales > 0:
             deprwrittenback = depronopening + deprtilllastyr
 
-	if method == "Written Down" or (depronopening <= (assets.gross_purchase_value - deprtilllastyr)):
-	        row = [fixed_asset_name,
-               fixed_asset_account,
-               rateofdepr,
-               flt(opening_balance,2),
-               flt(totalpurchase,2),
-               flt(totalsales,2),
-               flt(((opening_balance + totalpurchase) - totalsales),2),
-               flt(deprtilllastyr,2),
-               flt(depronopening,2),
-               flt(depronpurchases,2),
-               flt(depronopening+depronpurchases,2),
-               flt(deprwrittenback,2),
-               flt(((deprtilllastyr + depronopening + depronpurchases) - deprwrittenback),2)]
-	elif depronopening > (assets.gross_purchase_value - deprtilllastyr) and \
-	(assets.gross_purchase_value - deprtilllastyr) < (assets.gross_purchase_value * rateofdepr / 100) and \
-	method=="Straight Line":
-	        row = [fixed_asset_name,
-               fixed_asset_account,
-               rateofdepr,
-               flt(opening_balance,2),
-               flt(totalpurchase,2),
-               flt(totalsales,2),
-               flt(((opening_balance + totalpurchase) - totalsales),2),
-               flt(deprtilllastyr,2),
-               flt(assets.gross_purchase_value - deprtilllastyr,2),
-               flt(depronopening+depronpurchases,2),
-               flt(depronpurchases,2),
-               flt(deprwrittenback,2),
-               flt(((deprtilllastyr + (assets.gross_purchase_value - deprtilllastyr) + depronpurchases) - deprwrittenback),2)]
-	elif method=="Straight Line":
-	        row = [fixed_asset_name,
-               fixed_asset_account,
-               rateofdepr,
-               flt(opening_balance,2),
-               flt(totalpurchase,2),
-               flt(totalsales,2),
-               flt(((opening_balance + totalpurchase) - totalsales),2),
-               flt(deprtilllastyr,2),
-               flt(assets.gross_purchase_value - deprtilllastyr,2),
-               flt(0,2),
-               flt(depronpurchases,2),
-               flt(deprwrittenback,2),
-               flt(((deprtilllastyr - deprwrittenback)),2)]
+        row = [fixed_asset_name,
+       		fixed_asset_account,
+        	rateofdepr,
+               	flt(opening_balance,2),
+               	flt(totalpurchase,2),
+               	flt(totalsales,2),
+               	flt(((opening_balance + totalpurchase) - totalsales),2),
+               	flt(deprtilllastyr,2),
+               	getDeprProvidedThisYear(method, depronopening, assets.gross_purchase_value, deprtilllastyr, rateofdepr),
+               	flt(depronpurchases,2),
+               	flt(depronopening+depronpurchases,2),
+               	flt(deprwrittenback,2),
+               	flt(((deprtilllastyr + getDeprProvidedThisYear(method, depronopening, assets.gross_purchase_value, deprtilllastyr, rateofdepr) + depronpurchases) - deprwrittenback),2)]
 
         data.append(row)
 
@@ -149,30 +126,21 @@ def calculateWrittenDownOn(fa_account, saledate, company, saleamount):
 	day_before_start = finyrfrom - timedelta (days=1)
 	TOTAL_DAYS_IN_YEAR = 365
 	
-	ps = frappe.db.sql("""select led.* from `tabFixed Asset Account` led where is_sold=false and led.fixed_asset_name=%s""", (fa_account), as_dict=True)
+	ps = frappe.db.sql("""select led.* from `tabFixed Asset Account` led where is_sold=false and led.fixed_asset_name=%s limit 1""", (fa_account), as_dict=True)
 
         global deprwrittenback
 
 	for assets in ps:
-        	fixed_asset_name = assets.fixed_asset_name
 	        fixed_asset_account = assets.fixed_asset_account
-	        rateofdepr = abs(assets.depreciation_rate)
 	        purchase_date = datetime.strptime(assets.purchase_date, "%Y-%m-%d").date()
 
-	        global deprtilllastyr # Depreciation provided till close of last fiscal Yr.
-	        deprtilllastyr = 0
-	        for accdepr in frappe.get_doc("Fixed Asset Account", fixed_asset_name).depreciation:
-	           if get_fiscal_year(fiscal_year = accdepr.fiscal_year) == get_fiscal_year(date = day_before_start):
-	               deprtilllastyr = accdepr.total_accumulated_depreciation
+	        deprtilllastyr = getDeprTillLastYear(day_before_start, assets.fixed_asset_name)
 
-	        global opening_balance # Opening Cost of Asset for the Year
 	        opening_balance = 0
 	        if deprtilllastyr > 0:
 	        	opening_balance = abs(assets.gross_purchase_value)
 
-
-	        global depronopening # Depreciation to be Provided in on the Opening Cost for this Fiscal Yr.
-	        depronopening = float(0)
+	        depronopening = 0
 
 	        factor = 1
 		if opening_balance > 0:
@@ -181,9 +149,8 @@ def calculateWrittenDownOn(fa_account, saledate, company, saleamount):
 			factor = 0
 
                 days = getDateDiffDays(finyrfrom, saledate)
-                depronopening = depronopening + (((saleamount - (saleamount * factor)) * rateofdepr / 100) * (days / TOTAL_DAYS_IN_YEAR))
+                depronopening = depronopening + (((saleamount - (saleamount * factor)) * assets.depreciation_rate / 100) * (days / TOTAL_DAYS_IN_YEAR))
 		
                 return flt((depronopening + deprtilllastyr),2)
 
 	frappe.throw("Either Asset is Sold, Or no Record Found")
-
