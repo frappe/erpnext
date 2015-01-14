@@ -282,3 +282,8 @@ frappe.ui.form.on("Journal Entry Account", "party", function(frm, cdt, cdn) {
 		});
 	}
 })
+
+frappe.ui.form.on("Journal Entry Account", "accounts_remove", function(frm) {
+	cur_frm.cscript.update_totals(frm.doc);
+});
+
