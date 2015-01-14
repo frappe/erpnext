@@ -149,7 +149,7 @@ class AccountsReceivableReport(object):
 			if not account_map:
 				frappe.throw(_("No Customer Accounts found."))
 			else:
-				accounts_list = ['"{0}"'.format(ac.replace('"', '\"')) for ac in account_map]
+				accounts_list = ["'{0}'".format(frappe.db.escape(ac)) for ac in account_map]
 				conditions.append("account in ({0})".format(", ".join(accounts_list)))
 
 		return " and ".join(conditions), values
