@@ -59,7 +59,10 @@ def get_report_data(finyrfrom, finyrto, company, fa_name=None):
         depronopening = float(0)
 
         if totalsales == 0:
-            depronopening = float(depronopening + (((opening_balance - deprtilllastyr) * rateofdepr / 100)))
+		if method!="Straight Line":
+	            depronopening = float(depronopening + (((opening_balance - deprtilllastyr) * rateofdepr / 100)))
+		else:
+	            depronopening = float(depronopening + ((opening_balance * rateofdepr / 100)))		
         elif totalsales == opening_balance:
             sales_sql = frappe.db.sql("""select * from `tabFixed Asset Sale` where docstatus=1 and fixed_asset_account=%s and posting_date>=%s and posting_date<=%s""", (fixed_asset_name, finyrfrom, finyrto), as_dict=True)
             factor = 1
@@ -67,6 +70,8 @@ def get_report_data(finyrfrom, finyrto, company, fa_name=None):
                 factor = float(deprtilllastyr / opening_balance)
 		if method=="Straight Line":
 			factor = 0
+
+	    print "Factor:", factor
 
             for sales in sales_sql:
                 saleamount = float(sales.asset_purchase_cost)
@@ -85,7 +90,7 @@ def get_report_data(finyrfrom, finyrto, company, fa_name=None):
         if totalsales > 0:
             deprwrittenback = depronopening + deprtilllastyr
 
-	if depronopening <= (assets.gross_purchase_value - deprtilllastyr) or method=="Written Down":
+	if method == "Written Down" or (depronopening <= (assets.gross_purchase_value - deprtilllastyr)):
 	        row = [fixed_asset_name,
                fixed_asset_account,
                rateofdepr,
