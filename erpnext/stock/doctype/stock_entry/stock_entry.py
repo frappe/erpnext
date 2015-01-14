@@ -517,7 +517,7 @@ class StockEntry(StockController):
 					self.bom_no, as_dict=1)
 				self.add_to_stock_entry_detail({
 					item[0]["name"] : {
-						"qty": self.fg_completed_qty,
+						"stock_qty": self.fg_completed_qty,
 						"item_name": item[0].item_name,
 						"description": item[0]["description"],
 						"stock_uom": item[0]["stock_uom"],
