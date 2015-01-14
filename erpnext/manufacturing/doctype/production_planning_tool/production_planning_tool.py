@@ -113,7 +113,7 @@ class ProductionPlanningTool(Document):
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
 			(qty - ifnull(delivered_qty, 0)) as pending_qty
 			from `tabSales Order Item` so_item
-			where parent in (%s) and docstatus = 1 and ifnull(stock_qty, 0) > ifnull(delivered_qty, 0)
+			where parent in (%s) and docstatus = 1 and ifnull(qty, 0) > ifnull(delivered_qty, 0)
 			and exists (select * from `tabItem` item where item.name=so_item.item_code
 				and (ifnull(item.is_pro_applicable, 'No') = 'Yes'
 					or ifnull(item.is_sub_contracted_item, 'No') = 'Yes')) %s""" % \
@@ -123,7 +123,7 @@ class ProductionPlanningTool(Document):
 			item_condition = ' and pi.item_code = "' + self.fg_item + '"'
 
 		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
-			(((so_item.qty - ifnull(so_item.delivered_qty, 0)) * pi.qty) / so_item.stock_qty)
+			(((so_item.qty - ifnull(so_item.delivered_qty, 0)) * pi.qty) / so_item.qty)
 				as pending_qty
 			from `tabSales Order Item` so_item, `tabPacked Item` pi
 			where so_item.parent = pi.parent and so_item.docstatus = 1
