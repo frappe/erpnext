@@ -37,14 +37,11 @@ class StockEntry(StockController):
 	
 		count = frappe.db.exists({
 			"doctype": "Journal Entry",
-			"stock_entry":self.stock_entry,
+			"stock_entry":self.name,
 			"docstatus":1	
 		})
-		if count:
-			self.get("__onload").credit_debit_note_exists = 1
-		else:
-			self.get("__onload").credit_debit_note_exists = 0
-
+		self.get("__onload").credit_debit_note_exists = 1 if count else 0
+	
 	def validate(self):
 		self.validate_posting_time()
 		self.validate_purpose()
