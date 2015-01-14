@@ -267,6 +267,15 @@
    "read_only": 0
   }, 
   {
+   "default": "Written Down", 
+   "fieldname": "default_depreciation_method", 
+   "fieldtype": "Select", 
+   "label": "Default Depreciation Method", 
+   "options": "Straight Line\nWritten Down", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "auto_accounting_for_stock_settings", 
    "fieldtype": "Section Break", 
@@ -391,7 +400,7 @@
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2015-01-14 12:18:31.949045", 
+ "modified": "2015-01-14 13:24:08.746460", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 

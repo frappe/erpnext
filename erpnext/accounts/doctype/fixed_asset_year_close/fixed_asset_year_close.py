@@ -9,7 +9,7 @@ from frappe.utils import flt
 from datetime import date, timedelta
 from datetime import datetime
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.accounts.doctype.fixed_asset_account.written_down_report import get_report_data
+from erpnext.accounts.doctype.fixed_asset_account.depreciation_report import get_report_data
 
 class FixedAssetYearClose(Document):
 	def post_journal_entry(self):
@@ -30,7 +30,7 @@ class FixedAssetYearClose(Document):
 		for assets in ps:
 			fixed_asset_name = assets.fixed_asset_name
 			fiscal_doc = frappe.get_doc("Fiscal Year", self.fiscal_year)
-			data = get_report_data(fiscal_doc.year_start_date, fiscal_doc.year_end_date, fixed_asset_name)
+			data = get_report_data(fiscal_doc.year_start_date, fiscal_doc.year_end_date, self.company, fixed_asset_name)
 			total_depreciation_for_year = data[0][10]
 			total_depr = total_depr + total_depreciation_for_year
 			deprtilllastyr = data[0][7]
