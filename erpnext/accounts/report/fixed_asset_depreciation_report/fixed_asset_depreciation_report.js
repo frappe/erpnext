@@ -9,6 +9,13 @@ frappe.query_reports["Fixed Asset Depreciation Report"] = {
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
 			"default": frappe.defaults.get_user_default("fiscal_year")
+		},
+		{
+			"fieldname":"company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+			"default": frappe.defaults.get_user_default("company")
 		}
 	]
 }

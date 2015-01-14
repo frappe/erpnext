@@ -13,7 +13,7 @@ def getDateDiffDays(d1, d2):
     return abs((d2 - d1).days)
 
 
-def get_report_data(finyrfrom, finyrto, fa_name=None):
+def get_report_data(finyrfrom, finyrto, company, fa_name=None):
     data = []
     # global finyrfrom, finyrto
     # finyrfrom, finyrto = fiscal_year[1:]
@@ -21,7 +21,7 @@ def get_report_data(finyrfrom, finyrto, fa_name=None):
     finyrto = datetime.strptime(finyrto, "%Y-%m-%d").date()
     day_before_start = finyrfrom - timedelta (days=1)
     TOTAL_DAYS_IN_YEAR = 365
-
+    method = frappe.get_doc("Company", company).default_depreciation_method
     global ps
     if fa_name==None:
 	    ps = frappe.db.sql("""select led.*,ifnull((select sum(sale.asset_purchase_cost) from `tabFixed Asset Sale` sale where sale.fixed_asset_account=led.fixed_asset_name and sale.docstatus=1  and sale.posting_date>=%s and sale.posting_date<=%s),0) as total_sale_value
@@ -65,6 +65,8 @@ def get_report_data(finyrfrom, finyrto, fa_name=None):
             factor = 1
             if opening_balance > 0:
                 factor = float(deprtilllastyr / opening_balance)
+		if method=="Straight Line":
+			factor = 0
 
             for sales in sales_sql:
                 saleamount = float(sales.asset_purchase_cost)
@@ -83,7 +85,8 @@ def get_report_data(finyrfrom, finyrto, fa_name=None):
         if totalsales > 0:
             deprwrittenback = depronopening + deprtilllastyr
 
-        row = [fixed_asset_name,
+	if depronopening <= (assets.gross_purchase_value - deprtilllastyr) or method=="Written Down":
+	        row = [fixed_asset_name,
                fixed_asset_account,
                rateofdepr,
                flt(opening_balance,2),
@@ -96,22 +99,54 @@ def get_report_data(finyrfrom, finyrto, fa_name=None):
                flt(depronopening+depronpurchases,2),
                flt(deprwrittenback,2),
                flt(((deprtilllastyr + depronopening + depronpurchases) - deprwrittenback),2)]
+	elif depronopening > (assets.gross_purchase_value - deprtilllastyr) and \
+	(assets.gross_purchase_value - deprtilllastyr) < (assets.gross_purchase_value * rateofdepr / 100) and \
+	method=="Straight Line":
+	        row = [fixed_asset_name,
+               fixed_asset_account,
+               rateofdepr,
+               flt(opening_balance,2),
+               flt(totalpurchase,2),
+               flt(totalsales,2),
+               flt(((opening_balance + totalpurchase) - totalsales),2),
+               flt(deprtilllastyr,2),
+               flt(assets.gross_purchase_value - deprtilllastyr,2),
+               flt(depronopening+depronpurchases,2),
+               flt(depronpurchases,2),
+               flt(deprwrittenback,2),
+               flt(((deprtilllastyr + (assets.gross_purchase_value - deprtilllastyr) + depronpurchases) - deprwrittenback),2)]
+	elif method=="Straight Line":
+	        row = [fixed_asset_name,
+               fixed_asset_account,
+               rateofdepr,
+               flt(opening_balance,2),
+               flt(totalpurchase,2),
+               flt(totalsales,2),
+               flt(((opening_balance + totalpurchase) - totalsales),2),
+               flt(deprtilllastyr,2),
+               flt(assets.gross_purchase_value - deprtilllastyr,2),
+               flt(0,2),
+               flt(depronpurchases,2),
+               flt(deprwrittenback,2),
+               flt(((deprtilllastyr - deprwrittenback)),2)]
 
         data.append(row)
 
     return data
 
 @frappe.whitelist()
-def calculateWrittenDownOn(fa_account, saledate, saleamount):
+def calculateWrittenDownOn(fa_account, saledate, company, saleamount):
 	
 	saleamount = float(saleamount)
 	saledate=datetime.strptime(saledate, "%Y-%m-%d").date()
 	from erpnext.accounts.utils import get_fiscal_year	
 	finyrfrom, finyrto =get_fiscal_year(saledate)[1:]
 	day_before_start = finyrfrom - timedelta (days=1)
-	TOTAL_DAYS_IN_YEAR = 365;
+	TOTAL_DAYS_IN_YEAR = 365
 	
 	ps = frappe.db.sql("""select led.* from `tabFixed Asset Account` led where is_sold=false and led.fixed_asset_name=%s""", (fa_account), as_dict=True)
+
+        global deprwrittenback
 
 	for assets in ps:
         	fixed_asset_name = assets.fixed_asset_name
@@ -137,12 +172,13 @@ def calculateWrittenDownOn(fa_account, saledate, saleamount):
 	        factor = 1
 		if opening_balance > 0:
 	             factor = float(deprtilllastyr / opening_balance)
+		     if frappe.get_doc("Company", company).default_depreciation_method=="Straight Line":
+			factor = 0
 
                 days = getDateDiffDays(finyrfrom, saledate)
                 depronopening = depronopening + (((saleamount - (saleamount * factor)) * rateofdepr / 100) * (days / TOTAL_DAYS_IN_YEAR))
+		
+                return flt((depronopening + deprtilllastyr),2)
 
-	        global deprwrittenback
-                deprwrittenback = depronopening + deprtilllastyr
-
-	return flt(deprwrittenback,2)
+	frappe.throw("Either Asset is Sold, Or no Record Found")
 

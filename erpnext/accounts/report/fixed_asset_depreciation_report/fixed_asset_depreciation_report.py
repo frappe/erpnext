@@ -4,13 +4,13 @@
 from __future__ import unicode_literals
 import frappe
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.accounts.doctype.fixed_asset_account.written_down_report import get_report_data
+from erpnext.accounts.doctype.fixed_asset_account.depreciation_report import get_report_data
 
 def execute(filters=None):
     data = []
     columns = []
     finyrfrom, finyrto = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
-    data = get_report_data(finyrfrom = str(finyrfrom), finyrto = str(finyrto))
+    data = get_report_data(finyrfrom = str(finyrfrom), finyrto = str(finyrto), company = filters["company"])
 
 
     columns = ["FIXED ASSET NAME",
