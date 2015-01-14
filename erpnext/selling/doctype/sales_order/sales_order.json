@@ -421,11 +421,6 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "column_break_46", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "other_charges_total", 
    "fieldtype": "Currency", 
    "label": "Taxes and Charges Total (Company Currency)", 
@@ -438,11 +433,27 @@
    "width": "150px"
   }, 
   {
+   "fieldname": "column_break_46", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "discount_amount", 
    "fieldtype": "Currency", 
    "label": "Discount Amount", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "print_hide": 0
+  }, 
+  {
+   "fieldname": "base_discount_amount", 
+   "fieldtype": "Currency", 
+   "label": "Discount Amount (Company Currency)", 
    "options": "Company:company:default_currency", 
-   "permlevel": 0
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
   }, 
   {
    "fieldname": "totals", 
@@ -491,14 +502,6 @@
    "width": "200px"
   }, 
   {
-   "fieldname": "advance_paid", 
-   "fieldtype": "Currency", 
-   "label": "Advance Paid", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1
-  }, 
-  {
    "fieldname": "column_break3", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 
@@ -541,6 +544,15 @@
    "print_hide": 0, 
    "read_only": 1, 
    "width": "200px"
+  }, 
+  {
+   "fieldname": "advance_paid", 
+   "fieldtype": "Currency", 
+   "label": "Advance Paid", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
   }, 
   {
    "fieldname": "view_details", 
@@ -1021,7 +1033,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "issingle": 0, 
- "modified": "2014-12-16 10:36:47.295144", 
+ "modified": "2015-01-12 15:16:51.611467", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 

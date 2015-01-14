@@ -342,8 +342,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var tax_count = this.frm.tax_doclist.length;
 
 		this.frm.doc.grand_total = flt(tax_count ? this.frm.tax_doclist[tax_count - 1].total : this.frm.doc.net_total);
-		this.frm.doc.grand_total_export = flt(tax_count ?
-			flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate) : this.frm.doc.net_total_export);
+		this.frm.doc.grand_total_export = flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate);
 
 		this.frm.doc.other_charges_total = flt(this.frm.doc.grand_total - this.frm.doc.net_total,
 			precision("other_charges_total"));
@@ -363,17 +362,22 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var distributed_amount = 0.0;
 
 		if (this.frm.doc.discount_amount) {
+			this.frm.set_value("base_discount_amount",
+				flt(this.frm.doc.discount_amount * this.frm.doc.conversion_rate, precision("base_discount_amount")))
+
 			var grand_total_for_discount_amount = this.get_grand_total_for_discount_amount();
 			// calculate item amount after Discount Amount
 			if (grand_total_for_discount_amount) {
 				$.each(this.frm.item_doclist, function(i, item) {
-					distributed_amount = flt(me.frm.doc.discount_amount) * item.base_amount / grand_total_for_discount_amount;
+					distributed_amount = flt(me.frm.doc.base_discount_amount) * item.base_amount / grand_total_for_discount_amount;
 					item.base_amount = flt(item.base_amount - distributed_amount, precision("base_amount", item));
 				});
 
 				this.discount_amount_applied = true;
 				this._calculate_taxes_and_totals();
 			}
+		} else {
+			this.frm.set_value("base_discount_amount", 0);
 		}
 	},
 
@@ -507,12 +511,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			});
 		};
-		setup_field_label_map(["net_total", "other_charges_total", "grand_total",
+		setup_field_label_map(["net_total", "other_charges_total", "base_discount_amount", "grand_total",
 			"rounded_total", "in_words",
 			"outstanding_amount", "total_advance", "paid_amount", "write_off_amount"],
 			company_currency);
 
-		setup_field_label_map(["net_total_export", "other_charges_total_export", "grand_total_export",
+		setup_field_label_map(["net_total_export", "other_charges_total_export", "discount_amount", "grand_total_export",
 			"rounded_total_export", "in_words_export"], this.frm.doc.currency);
 
 		cur_frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency
@@ -525,7 +529,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		// toggle fields
 		this.frm.toggle_display(["conversion_rate", "net_total", "other_charges_total",
-			"grand_total", "rounded_total", "in_words"],
+			"grand_total", "rounded_total", "in_words", "base_discount_amount"],
 			this.frm.doc.currency != company_currency);
 
 		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"],
