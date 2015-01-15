@@ -1,5 +1,6 @@
 {
  "allow_import": 1, 
+ "allow_rename": 1, 
  "autoname": "field:kra_title", 
  "creation": "2012-07-03 13:30:39", 
  "docstatus": 0, 
@@ -46,7 +47,7 @@
  ], 
  "icon": "icon-file-text", 
  "idx": 1, 
- "modified": "2014-12-24 15:01:34.621450", 
+ "modified": "2015-01-15 15:26:55.553233", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Appraisal Template", 

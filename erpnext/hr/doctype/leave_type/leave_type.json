@@ -1,5 +1,6 @@
 {
  "allow_import": 1, 
+ "allow_rename": 1, 
  "autoname": "field:leave_type_name", 
  "creation": "2013-02-21 09:55:58", 
  "docstatus": 0, 
@@ -62,7 +63,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:13.297832", 
+ "modified": "2015-01-15 12:37:30.557739", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Type", 

@@ -1,5 +1,6 @@
 {
- "autoname": "POS/.####", 
+ "allow_rename": 0, 
+ "autoname": "hash", 
  "creation": "2013-05-24 12:15:51", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -225,7 +226,7 @@
  ], 
  "icon": "icon-cog", 
  "idx": 1, 
- "modified": "2015-01-06 02:20:25.431768", 
+ "modified": "2015-01-15 15:27:41.530538", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "POS Setting", 
@@ -256,5 +257,6 @@
   }
  ], 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "user"
 }

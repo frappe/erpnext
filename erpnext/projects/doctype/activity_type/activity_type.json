@@ -1,5 +1,6 @@
 {
  "allow_import": 1, 
+ "allow_rename": 1, 
  "autoname": "field:activity_type", 
  "creation": "2013-03-05 10:14:59", 
  "docstatus": 0, 
@@ -18,7 +19,7 @@
  "icon": "icon-flag", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2015-01-07 15:12:20.500625", 
+ "modified": "2015-01-15 15:22:10.640553", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Activity Type", 

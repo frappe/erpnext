@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_import": 1, 
- "allow_rename": 0, 
+ "allow_rename": 1, 
  "autoname": "field:attribute_name", 
  "creation": "2014-09-26 03:49:54.899170", 
  "custom": 0, 
@@ -54,7 +54,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2014-09-26 06:08:28.729519", 
+ "modified": "2015-01-15 15:25:52.728797", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Attribute", 
