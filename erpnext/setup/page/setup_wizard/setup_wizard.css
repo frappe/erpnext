@@ -3,7 +3,7 @@
 	top: 0px; bottom: 0px;
 	left: 0px; right: 0px;
 	overflow: auto;
-	padding-top: 60px;
+	padding-top: 30px;
 }
 .setup-wizard-wrapper {
 	margin: 0px auto;
@@ -15,13 +15,12 @@
 	}
 }
 
-#page-setup-wizard .panel {
-	background-color: #fff;
-}
-
-#page-setup-wizard .panel-body {
-}
-
 #page-setup-wizard .col-md-6 .control-input .btn {
 	width: 100%;
+}
+
+#page-setup-wizard .form-section {
+	margin: 0px -15px;
+	padding: 0px;
+	max-width: 400px;
 }

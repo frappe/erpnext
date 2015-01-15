@@ -28,8 +28,8 @@ class website_maker(object):
 				'<p>'+_("This is an example website auto-generated from ERPNext")+"</p>"+\
 				'<p><a class="btn btn-primary" href="/login">Login</a></p>',
 			"description": self.company + ":" + (self.tagline or ""),
-			"css": frappe.get_template("setup/page/setup_wizard/sample_home_page.css").render(),
-			"main_section": frappe.get_template("setup/page/setup_wizard/sample_home_page.html").render({
+			"css": frappe.get_template("setup/page/setup_wizard/data/sample_home_page.css").render(),
+			"main_section": frappe.get_template("setup/page/setup_wizard/data/sample_home_page.html").render({
 				"company": self.company, "tagline": (self.tagline or "")
 			})
 		}).insert()
@@ -88,7 +88,7 @@ class website_maker(object):
 			"blogger": blogger.name,
 			"blog_category": blog_category.name,
 			"blog_intro": "My First Blog",
-			"content": frappe.get_template("setup/page/setup_wizard/sample_blog_post.html").render(),
+			"content": frappe.get_template("setup/page/setup_wizard/data/sample_blog_post.html").render(),
 		}).insert()
 
 def test():

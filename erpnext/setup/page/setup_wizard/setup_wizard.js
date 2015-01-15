@@ -38,11 +38,6 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 			})
 		},
 		title: __("Welcome"),
-		welcome_html: '<h1 class="text-muted text-center"><i class="icon-magic"></i></h1>\
-			<h2 class="text-center">'+__('ERPNext Setup')+'</h2>\
-			<p class="text-center" style="margin: 0px 100px">' +
-			__('Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!') +
-			'</p>',
 		working_html: function() { return '<h3 class="text-muted text-center"><i class="icon-refresh icon-spin"></i></h3>\
 			<h2 class="text-center">'+__('Setting up...')+'</h2>\
 			<p class="text-center">' +
@@ -64,22 +59,23 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						reqd:1
 					},
 				],
-				help: __("Welcome to ERPNext. Please select your language to begin the Setup Wizard."),
+				help: "",
 				onload: function(slide) {
 					var me = this;
+					var select = slide.get_field("language");
 
 					if (!this.language_list) {
 						frappe.call({
 							method: "erpnext.setup.page.setup_wizard.setup_wizard.load_languages",
 							callback: function(r) {
 								me.language_list = r.message;
-								slide.get_input("language")
-									.add_options(r.message)
-									.val("english");
+								select.df.options = me.language_list;
+								select.set_input("english");
 							}
 						})
 					} else {
-						slide.get_input("language").add_options(this.language_list);
+						select.df.options = this.language_list;
+						select.refresh();
 					}
 
 					slide.get_input("language").on("change", function() {
@@ -95,7 +91,10 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 								$.each(slide.wiz.slide_dict, function(key, s) {
 									s.make();
 								});
-								slide.get_input("language").val(lang);
+
+								// select is re-made after language change
+								var select = slide.get_field("language");
+								select.set_input(lang);
 							}
 						})
 					});
@@ -177,10 +176,12 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						if(country){
 							var timezone_list = frappe.country_info[country].timezones || [];
 							$timezone.add_options(timezone_list.sort());
-							slide.get_input("currency").val(frappe.country_info[country].currency);
+							slide.get_field("currency").set_input(frappe.country_info[country].currency);
 						}
 						// add all timezones at the end, so that user has the option to change it to any timezone
 						$timezone.add_options([""].concat(frappe.all_timezones));
+
+						slide.get_field("timezone").set_input($timezone.val());
 
 						// temporarily set date format
 						frappe.boot.sysdefaults.date_format = (frappe.country_info[country].date_format
@@ -221,13 +222,13 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 					slide.get_input("company_name").on("change", function() {
 						var parts = slide.get_input("company_name").val().split(" ");
 						var abbr = $.map(parts, function(p) { return p ? p.substr(0,1) : null }).join("");
-						slide.get_input("company_abbr").val(abbr.slice(0, 5).toUpperCase());
+						slide.get_field("company_abbr").set_input(abbr.slice(0, 5).toUpperCase());
 					}).val(frappe.boot.sysdefaults.company_name || "").trigger("change");
 
 					slide.get_input("company_abbr").on("change", function() {
 						if(slide.get_input("company_abbr").val().length > 5) {
 							msgprint("Company Abbreviation cannot have more than 5 characters");
-							slide.get_input("company_abbr").val("");
+							slide.get_field("company_abbr").set_input("");
 						}
 					});
 
@@ -235,7 +236,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						var year_end_date =
 							frappe.datetime.add_days(frappe.datetime.add_months(
 								frappe.datetime.user_to_obj(slide.get_input("fy_start_date").val()), 12), -1);
-						slide.get_input("fy_end_date").val(frappe.datetime.obj_to_user(year_end_date));
+						slide.get_field("fy_end_date").set_input(frappe.datetime.obj_to_user(year_end_date));
 
 					});
 				}
@@ -366,7 +367,6 @@ frappe.wiz.Wizard = Class.extend({
 		this.make();
 		this.slides = this.slides;
 		this.slide_dict = {};
-		//this.show_welcome();
 		this.welcomed = true;
 		frappe.set_route(this.page_name, "0");
 	},
@@ -378,22 +378,6 @@ frappe.wiz.Wizard = Class.extend({
 		return $(repl('<div class="panel panel-default" data-state="setup-complete">\
 			<div class="panel-body" style="padding: 40px;">%(html)s</div>\
 		</div>', {html:html}))
-	},
-	show_welcome: function() {
-		if(this.$welcome)
-			return;
-		var me = this;
-		this.$welcome = this.get_message(this.welcome_html +
-			'<br><p class="text-center"><button class="btn btn-primary">'+__("Start")+'</button></p>')
-			.appendTo(this.parent);
-
-		this.$welcome.find(".btn").click(function() {
-			me.$welcome.toggle(false);
-			me.welcomed = true;
-			frappe.set_route(me.page_name, "0");
-		})
-
-		this.current_slide = {"$wrapper": this.$welcome};
 	},
 	show_working: function() {
 		this.hide_current_slide();
@@ -452,33 +436,8 @@ frappe.wiz.WizardSlide = Class.extend({
 			this.before_load(this);
 		}
 
-		this.$body = $(repl('<div class="panel panel-default">\
-			<div class="panel-heading">\
-				<div class="panel-title row">\
-					<div class="col-sm-12"><h3 style="margin: 0px;">\
-						<i class="%(icon)s text-muted"></i> %(title)s</h3></div>\
-				</div>\
-			</div>\
-			<div class="panel-body">\
-				<div class="progress">\
-					<div class="progress-bar" style="width: %(width)s%"></div>\
-				</div>\
-				<div class="row">\
-					<div class="col-sm-12">\
-						<p>%(help)s</p><br>\
-						<div class="form"></div>\
-					</div>\
-				</div>\
-				<hr>\
-				<div class="footer">\
-					<div class="text-right"><a class="prev-btn hide btn btn-default">'+__('Previous')+'</a> \
-						<a class="next-btn hide btn btn-primary">'+__("Next")+'</a> \
-						<a class="complete-btn hide btn btn-primary"><b>'+__("Complete Setup")+'</b></a>\
-					</div>\
-				</div>\
-			</div>\
-		</div>', {help: __(this.help), title:__(this.title), main_title:__(this.wiz.title), step: this.id + 1,
-				width: (flt(this.id + 1) / (this.wiz.slides.length+1)) * 100, icon:this.icon}))
+		this.$body = $(frappe.render_template("setup_wizard_page",
+			{help: __(this.help), title:__(this.title), main_title:__(this.wiz.title), step: this.id + 1 }))
 			.appendTo(this.$wrapper);
 
 		this.body = this.$body.find(".form")[0];
@@ -530,5 +489,8 @@ frappe.wiz.WizardSlide = Class.extend({
 	},
 	get_input: function(fn) {
 		return this.form.get_input(fn);
+	},
+	get_field: function(fn) {
+		return this.form.get_field(fn);
 	}
 })
