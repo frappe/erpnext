@@ -248,7 +248,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var me = this;
 
 		if (!this.discount_amount_applied) {
-			$.each(this.frm.item_doclist, function(i, item) {
+			$.each(this.frm.doc["items"], function(i, item) {
 				frappe.model.round_floats_in(item);
 				item.amount = flt(item.rate * item.qty, precision("amount", item));
 
@@ -261,18 +261,18 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	determine_exclusive_rate: function() {
 		var me = this;
-		$.each(me.frm.item_doclist, function(n, item) {
+		$.each(me.frm.doc["items"], function(n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 			var cumulated_tax_fraction = 0.0;
 
-			$.each(me.frm.tax_doclist, function(i, tax) {
+			$.each(me.frm.doc["taxes"], function(i, tax) {
 				tax.tax_fraction_for_current_item = me.get_current_tax_fraction(tax, item_tax_map);
 
 				if(i==0) {
 					tax.grand_total_fraction_for_current_item = 1 + tax.tax_fraction_for_current_item;
 				} else {
 					tax.grand_total_fraction_for_current_item =
-						me.frm.tax_doclist[i-1].grand_total_fraction_for_current_item +
+						me.frm.doc["taxes"][i-1].grand_total_fraction_for_current_item +
 						tax.tax_fraction_for_current_item;
 				}
 
@@ -310,11 +310,11 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 			} else if(tax.charge_type == "On Previous Row Amount") {
 				current_tax_fraction = (tax_rate / 100.0) *
-					this.frm.tax_doclist[cint(tax.row_id) - 1].tax_fraction_for_current_item;
+					this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_fraction_for_current_item;
 
 			} else if(tax.charge_type == "On Previous Row Total") {
 				current_tax_fraction = (tax_rate / 100.0) *
-					this.frm.tax_doclist[cint(tax.row_id) - 1].grand_total_fraction_for_current_item;
+					this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_fraction_for_current_item;
 			}
 		}
 
@@ -325,7 +325,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var me = this;
 		this.frm.doc.net_total = this.frm.doc.net_total_export = 0.0;
 
-		$.each(this.frm.item_doclist, function(i, item) {
+		$.each(this.frm.doc["items"], function(i, item) {
 			me.frm.doc.net_total += item.base_amount;
 			me.frm.doc.net_total_export += item.amount;
 		});
@@ -335,9 +335,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	calculate_totals: function() {
 		var me = this;
-		var tax_count = this.frm.tax_doclist.length;
+		var tax_count = this.frm.doc["taxes"].length;
 
-		this.frm.doc.grand_total = flt(tax_count ? this.frm.tax_doclist[tax_count - 1].total : this.frm.doc.net_total);
+		this.frm.doc.grand_total = flt(tax_count ? this.frm.doc["taxes"][tax_count - 1].total : this.frm.doc.net_total);
 		this.frm.doc.grand_total_export = flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate);
 
 		this.frm.doc.other_charges_total = flt(this.frm.doc.grand_total - this.frm.doc.net_total,
@@ -364,7 +364,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			var grand_total_for_discount_amount = this.get_grand_total_for_discount_amount();
 			// calculate item amount after Discount Amount
 			if (grand_total_for_discount_amount) {
-				$.each(this.frm.item_doclist, function(i, item) {
+				$.each(this.frm.doc["items"], function(i, item) {
 					distributed_amount = flt(me.frm.doc.base_discount_amount) * item.base_amount / grand_total_for_discount_amount;
 					item.base_amount = flt(item.base_amount - distributed_amount, precision("base_amount", item));
 				});
@@ -382,7 +382,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var total_actual_tax = 0.0;
 		var actual_taxes_dict = {};
 
-		$.each(this.frm.tax_doclist, function(i, tax) {
+		$.each(this.frm.doc["taxes"], function(i, tax) {
 			if (tax.charge_type == "Actual")
 				actual_taxes_dict[tax.idx] = tax.tax_amount;
 			else if (actual_taxes_dict[tax.row_id] !== null) {

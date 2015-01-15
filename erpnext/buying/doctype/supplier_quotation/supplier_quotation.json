@@ -132,7 +132,7 @@
    "search_index": 1
   }, 
   {
-   "fieldname": "currency_price_list", 
+   "fieldname": "currency_and_price_list", 
    "fieldtype": "Section Break", 
    "label": "Currency and Price List", 
    "options": "icon-tag", 
@@ -575,7 +575,7 @@
  "icon": "icon-shopping-cart", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-07 10:34:25.299110", 
+ "modified": "2015-01-15 07:34:12.734538", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation", 

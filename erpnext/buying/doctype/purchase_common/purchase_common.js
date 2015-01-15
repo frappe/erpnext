@@ -180,7 +180,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	calculate_item_values: function() {
 		var me = this;
 
-		$.each(this.frm.item_doclist, function(i, item) {
+		$.each(this.frm.doc["items"], function(i, item) {
 			frappe.model.round_floats_in(item);
 			item.amount = flt(item.rate * item.qty, precision("amount", item));
 			item.item_tax_amount = 0.0;
@@ -196,7 +196,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var me = this;
 
 		this.frm.doc.net_total = this.frm.doc.net_total_import = 0.0;
-		$.each(this.frm.item_doclist, function(i, item) {
+		$.each(this.frm.doc["items"], function(i, item) {
 			me.frm.doc.net_total += item.base_amount;
 			me.frm.doc.net_total_import += item.amount;
 		});
@@ -205,9 +205,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 
 	calculate_totals: function() {
-		var tax_count = this.frm.tax_doclist.length;
+		var tax_count = this.frm.doc["taxes"].length;
 		this.frm.doc.grand_total = flt(tax_count ?
-			this.frm.tax_doclist[tax_count - 1].total : this.frm.doc.net_total);
+			this.frm.doc["taxes"][tax_count - 1].total : this.frm.doc.net_total);
 		this.frm.doc.grand_total_import = flt(tax_count ?
 			flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate) : this.frm.doc.net_total_import);
 
@@ -230,12 +230,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.frm.doc.other_charges_added = 0.0
 		this.frm.doc.other_charges_deducted = 0.0
 		if(tax_count) {
-			this.frm.doc.other_charges_added = frappe.utils.sum($.map(this.frm.tax_doclist,
+			this.frm.doc.other_charges_added = frappe.utils.sum($.map(this.frm.doc["taxes"],
 				function(tax) { return (tax.add_deduct_tax == "Add"
 					&& in_list(["Valuation and Total", "Total"], tax.category)) ?
 					tax.tax_amount : 0.0; }));
 
-			this.frm.doc.other_charges_deducted = frappe.utils.sum($.map(this.frm.tax_doclist,
+			this.frm.doc.other_charges_deducted = frappe.utils.sum($.map(this.frm.doc["taxes"],
 				function(tax) { return (tax.add_deduct_tax == "Deduct"
 					&& in_list(["Valuation and Total", "Total"], tax.category)) ?
 					tax.tax_amount : 0.0; }));
@@ -253,17 +253,17 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this._super();
 		this.frm.doc.in_words = this.frm.doc.in_words_import = "";
 
-		if(this.frm.item_doclist.length) {
-			if(!frappe.meta.get_docfield(this.frm.item_doclist[0].doctype, "item_tax_amount", this.frm.doctype)) {
-				$.each(this.frm.item_doclist, function(i, item) {
+		if(this.frm.doc["items"].length) {
+			if(!frappe.meta.get_docfield(this.frm.doc["items"][0].doctype, "item_tax_amount", this.frm.doctype)) {
+				$.each(this.frm.doc["items"], function(i, item) {
 					delete item["item_tax_amount"];
 				});
 			}
 		}
 
-		if(this.frm.tax_doclist.length) {
-			if(!frappe.meta.get_docfield(this.frm.tax_doclist[0].doctype, "tax_amount_after_discount_amount", this.frm.doctype)) {
-				$.each(this.frm.tax_doclist, function(i, tax) {
+		if(this.frm.doc["taxes"].length) {
+			if(!frappe.meta.get_docfield(this.frm.doc["taxes"][0].doctype, "tax_amount_after_discount_amount", this.frm.doctype)) {
+				$.each(this.frm.doc["taxes"], function(i, tax) {
 					delete tax["tax_amount_after_discount_amount"];
 				});
 			}

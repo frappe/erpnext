@@ -55,11 +55,18 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	refresh: function() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
+		this.hide_currency_and_price_list()
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
-
 		erpnext.pos.make_pos_btn(this.frm);
+	},
 
+	hide_currency_and_price_list: function() {
+		if(this.frm.doc.docstatus > 0) {
+			hide_field("currency_and_price_list");
+		} else {
+			unhide_field("currency_and_price_list");
+		}
 	},
 
 	item_code: function(doc, cdt, cdn) {
@@ -356,7 +363,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		if (item) {
 			append_item(item);
 		} else {
-			$.each(this.get_item_doclist(), function(i, d) {
+			$.each(this.frm.doc["items"], function(i, d) {
 				append_item(d);
 			});
 		}
@@ -426,8 +433,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 
 	validate_inclusive_tax: function(tax) {
-		if(!this.frm.tax_doclist) this.frm.tax_doclist = this.get_tax_doclist();
-
 		var actual_type_error = function() {
 			var msg = __("Actual type tax cannot be included in Item rate in row {0}", [tax.idx])
 			frappe.throw(msg);
@@ -444,11 +449,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				// inclusive tax cannot be of type Actual
 				actual_type_error();
 			} else if(tax.charge_type == "On Previous Row Amount" &&
-				!cint(this.frm.tax_doclist[tax.row_id - 1].included_in_print_rate)) {
+				!cint(this.frm.doc["taxes"][tax.row_id - 1].included_in_print_rate)) {
 					// referred row should also be an inclusive tax
 					on_previous_row_error(tax.row_id);
 			} else if(tax.charge_type == "On Previous Row Total") {
-				var taxes_not_included = $.map(this.frm.tax_doclist.slice(0, tax.row_id),
+				var taxes_not_included = $.map(this.frm.doc["taxes"].slice(0, tax.row_id),
 					function(t) { return cint(t.included_in_print_rate) ? null : t; });
 				if(taxes_not_included.length > 0) {
 					// all rows above this tax should be inclusive
@@ -473,7 +478,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var tax_accounts = [];
 		var company_currency = this.get_company_currency();
 
-		$.each(this.get_tax_doclist(), function(i, tax) {
+		$.each(this.frm.doc["taxes"], function(i, tax) {
 			var tax_amount_precision = precision("tax_amount", tax);
 			var tax_rate_precision = precision("rate", tax);
 			$.each(JSON.parse(tax.item_wise_tax_detail || '{}'),
@@ -502,7 +507,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 		var distinct_item_names = [];
 		var distinct_items = [];
-		$.each(this.get_item_doclist(), function(i, item) {
+		$.each(this.frm.doc["items"], function(i, item) {
 			if(distinct_item_names.indexOf(item.item_code || item.item_name)===-1) {
 				distinct_item_names.push(item.item_code || item.item_name);
 				distinct_items.push(item);
@@ -547,14 +552,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		return valid;
 	},
 
-	get_item_doclist: function() {
-		return this.frm.doc["items"] || [];
-	},
-
-	get_tax_doclist: function() {
-		return this.frm.doc["taxes"] || [];
-	},
-
 	validate_conversion_rate: function() {
 		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, precision("conversion_rate"));
 		var conversion_rate_label = frappe.meta.get_label(this.frm.doc.doctype, "conversion_rate",
@@ -582,9 +579,6 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	_calculate_taxes_and_totals: function() {
 		this.validate_conversion_rate();
-		this.frm.item_doclist = this.get_item_doclist();
-		this.frm.tax_doclist = this.get_tax_doclist();
-
 		this.calculate_item_values();
 		this.initialize_taxes();
 		this.determine_exclusive_rate && this.determine_exclusive_rate();
@@ -592,14 +586,13 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		this.calculate_taxes();
 		this.calculate_totals();
 		this._cleanup();
-
 		this.show_item_wise_taxes();
 	},
 
 	initialize_taxes: function() {
 		var me = this;
 
-		$.each(this.frm.tax_doclist, function(i, tax) {
+		$.each(this.frm.doc["taxes"], function(i, tax) {
 			tax.item_wise_tax_detail = {};
 			tax_fields = ["total", "tax_amount_after_discount_amount",
 				"tax_amount_for_current_item", "grand_total_for_current_item",
@@ -621,23 +614,23 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var actual_tax_dict = {};
 
 		// maintain actual tax rate based on idx
-		$.each(this.frm.tax_doclist, function(i, tax) {
+		$.each(this.frm.doc["taxes"], function(i, tax) {
 			if (tax.charge_type == "Actual") {
 				actual_tax_dict[tax.idx] = flt(tax.rate, precision("tax_amount", tax));
 			}
 		});
 
-		$.each(this.frm.item_doclist, function(n, item) {
+		$.each(this.frm.doc["items"], function(n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 
-			$.each(me.frm.tax_doclist, function(i, tax) {
+			$.each(me.frm.doc["taxes"], function(i, tax) {
 				// tax_amount represents the amount of tax for the current step
 				var current_tax_amount = me.get_current_tax_amount(item, tax, item_tax_map);
 
 				// Adjust divisional loss to the last item
 				if (tax.charge_type == "Actual") {
 					actual_tax_dict[tax.idx] -= current_tax_amount;
-					if (n == me.frm.item_doclist.length - 1) {
+					if (n == me.frm.doc["items"].length - 1) {
 						current_tax_amount += actual_tax_dict[tax.idx]
 					}
 				}
@@ -669,7 +662,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 						precision("total", tax));
 				} else {
 					tax.grand_total_for_current_item =
-						flt(me.frm.tax_doclist[i-1].grand_total_for_current_item + current_tax_amount,
+						flt(me.frm.doc["taxes"][i-1].grand_total_for_current_item + current_tax_amount,
 							precision("total", tax));
 				}
 
@@ -677,11 +670,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 				tax.total += tax.grand_total_for_current_item;
 
 				// set precision in the last item iteration
-				if (n == me.frm.item_doclist.length - 1) {
+				if (n == me.frm.doc["items"].length - 1) {
 					me.round_off_totals(tax);
 
 					// adjust Discount Amount loss in last tax iteration
-					if ((i == me.frm.tax_doclist.length - 1) && me.discount_amount_applied)
+					if ((i == me.frm.doc["taxes"].length - 1) && me.discount_amount_applied)
 						me.adjust_discount_amount_loss(tax);
 				}
 			});
@@ -717,11 +710,11 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 		} else if(tax.charge_type == "On Previous Row Amount") {
 			current_tax_amount = (tax_rate / 100.0) *
-				this.frm.tax_doclist[cint(tax.row_id) - 1].tax_amount_for_current_item;
+				this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_amount_for_current_item;
 
 		} else if(tax.charge_type == "On Previous Row Total") {
 			current_tax_amount = (tax_rate / 100.0) *
-				this.frm.tax_doclist[cint(tax.row_id) - 1].grand_total_for_current_item;
+				this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_for_current_item;
 		}
 
 		current_tax_amount = flt(current_tax_amount, precision("tax_amount", tax));
@@ -733,7 +726,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 
 	_cleanup: function() {
-		$.each(this.frm.tax_doclist, function(i, tax) {
+		$.each(this.frm.doc["taxes"], function(i, tax) {
 			$.each(["tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"],
 				function(i, fieldname) { delete tax[fieldname]; });
