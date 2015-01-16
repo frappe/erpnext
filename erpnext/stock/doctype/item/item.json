@@ -687,19 +687,6 @@
    "read_only": 0
   }, 
   {
-   "default": "No", 
-   "description": "Selecting \"Yes\" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.", 
-   "fieldname": "is_manufactured_item", 
-   "fieldtype": "Select", 
-   "label": "Allow Bill of Materials", 
-   "oldfieldname": "is_manufactured_item", 
-   "oldfieldtype": "Select", 
-   "options": "Yes\nNo", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 1
-  }, 
-  {
    "depends_on": "eval:doc.is_manufactured_item==\"Yes\"", 
    "fieldname": "default_bom", 
    "fieldtype": "Link", 
@@ -877,7 +864,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2015-01-08 14:59:49.747106", 
+ "modified": "2015-01-16 14:48:36.423571", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
