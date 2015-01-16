@@ -93,6 +93,9 @@ class Opportunity(TransactionBase):
 				(not cint(self.get("__islocal"))) else None,
 		})
 
+		if not self.enquiry_from:
+			frappe.throw(_("Opportunity From field is mandatory"))
+
 		self.set_status()
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
