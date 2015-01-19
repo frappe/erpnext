@@ -16,3 +16,20 @@ cur_frm.cscript.onload = function(doc, cdt, cdn){
 		};
 	});
 }
+
+frappe.ui.form.on("Bank Reconciliation", "update_clearance_date", function(frm) {
+	return frappe.call({
+		method: "update_details",
+		doc: frm.doc
+	})
+})
+
+frappe.ui.form.on("Bank Reconciliation", "get_relevant_entries", function(frm) {
+	return frappe.call({
+		method: "get_details",
+		doc: frm.doc,
+		callback: function(r, rt) {
+			frm.refresh()
+		}
+	})
+})
