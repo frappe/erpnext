@@ -134,7 +134,7 @@ class BOM(Document):
 		self.save()
 		
 	def update_item_desc(self):
-		if self.docstatus == 1:
+		if self.docstatus < 2:
 			self.ignore_validate_update_after_submit = True
 			self.description = frappe.db.get_value("Item", self.item, "description")
 			for d in self.get("items"):

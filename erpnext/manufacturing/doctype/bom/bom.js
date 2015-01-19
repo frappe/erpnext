@@ -10,7 +10,7 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 		cur_frm.add_custom_button(__("Update Cost"), cur_frm.cscript.update_cost,
 			"icon-money", "btn-default");
 		
-		cur_frm.add_custom_button(__("Update Item"), cur_frm.cscript.update_item_desc,
+		cur_frm.add_custom_button(__("Update Item Description"), cur_frm.cscript.update_item_desc,
 			"icon-tag", "btn-default");
 	}
 
