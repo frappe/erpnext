@@ -21,12 +21,10 @@ pscript['onload_Sales Browser'] = function(wrapper){
 			callback: function(r) {
 				var root = r.message[0]["value"];
 				erpnext.sales_chart = new erpnext.SalesChart(ctype, root, page,
-					$(wrapper)
-						.find(".layout-main-section")
-						.css({
-							"min-height": "300px",
-							"padding-bottom": "25px"
-						}));
+					page.main.css({
+						"min-height": "300px",
+						"padding-bottom": "25px"
+					}));
 			}
 		});
 	}

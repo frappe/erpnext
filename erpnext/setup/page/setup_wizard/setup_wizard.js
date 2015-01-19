@@ -43,7 +43,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 			<p class="text-center">' +
 			__('Sit tight while your system is being setup. This may take a few moments.') +
 			'</p>' },
-		complete_html: function() { return '<h1 class="text-muted text-center"><i class="icon-thumbs-up"></i></h1>\
+		complete_html: function() { return '<h1 class="text-muted text-center"></h1>\
 			<h2 class="text-center">'+__('Setup Complete')+'</h2>\
 			<p class="text-center">' +
 			__('Your setup is complete. Refreshing...') +
@@ -210,6 +210,8 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						placeholder: __('e.g. "My Company LLC"')},
 					{fieldname:'company_abbr', label: __('Company Abbreviation'), fieldtype:'Data',
 						description: __('Max 5 characters'), placeholder: __('e.g. "MC"'), reqd:1},
+					{fieldname:'bank_account', label: __('Bank Account'), fieldtype:'Data',
+						placeholder: __('e.g. "XYZ National Bank"'), reqd:1 },
 					{fieldname:'fy_start_date', label:__('Financial Year Start Date'), fieldtype:'Date',
 						description: __('Your financial year begins on'), reqd:1},
 					{fieldname:'fy_end_date', label:__('Financial Year End Date'), fieldtype:'Date',
@@ -236,7 +238,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 						var year_end_date =
 							frappe.datetime.add_days(frappe.datetime.add_months(
 								frappe.datetime.user_to_obj(slide.get_input("fy_start_date").val()), 12), -1);
-						slide.get_field("fy_end_date").set_input(frappe.datetime.obj_to_user(year_end_date));
+						slide.get_field("fy_end_date").set_input(year_end_date);
 
 					});
 				}
@@ -371,12 +373,11 @@ frappe.wiz.Wizard = Class.extend({
 		frappe.set_route(this.page_name, "0");
 	},
 	make: function() {
-		frappe.ui.set_user_background(null, "#page-setup-wizard");
 		this.parent = $('<div class="setup-wizard-wrapper">').appendTo(this.parent);
 	},
 	get_message: function(html) {
-		return $(repl('<div class="panel panel-default" data-state="setup-complete">\
-			<div class="panel-body" style="padding: 40px;">%(html)s</div>\
+		return $(repl('<div data-state="setup-complete">\
+			<div style="padding: 40px;" class="text-center">%(html)s</div>\
 		</div>', {html:html}))
 	},
 	show_working: function() {

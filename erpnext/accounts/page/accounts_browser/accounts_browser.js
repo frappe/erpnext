@@ -15,7 +15,7 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 
 	frappe.add_breadcrumbs("Accounts");
 
-	var main = $(wrapper).find(".layout-main"),
+	var main = wrapper.page.main,
 		chart_area = $("<div>")
 			.css({"margin-bottom": "15px", "min-height": "200px"})
 			.appendTo(main),

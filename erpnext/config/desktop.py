@@ -56,13 +56,5 @@ def get_data():
 			"icon": "icon-phone",
 			"icon": "octicon octicon-issue-opened",
 			"type": "module"
-		},
-		"Shopping Cart": {
-			"color": "#B7E090",
-			"icon": "icon-shopping-cart",
-			"icon": "octicon octicon-gift",
-			"label": _("Shopping Cart"),
-			"link": "Form/Shopping Cart Settings",
-			"type": "module"
 		}
 	}
