@@ -10,7 +10,7 @@ def execute(filters=None):
     data = []
     columns = []
     finyrfrom, finyrto = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
-    data = get_report_data(finyrfrom = str(finyrfrom), finyrto = str(finyrto), company = filters["company"])
+    data = get_report_data(financial_year_from = str(finyrfrom), financial_year_to = str(finyrto), company = filters["company"])
 
 
     columns = ["FIXED ASSET NAME",
