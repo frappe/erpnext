@@ -214,22 +214,14 @@ class BOM(Document):
 			frappe.throw(_("Raw Materials cannot be blank."))
 		check_list = []
 		for m in self.get('items'):
-
 			if m.bom_no:
 				validate_bom_no(m.item_code, m.bom_no)
-
 			if flt(m.qty) <= 0:
 				frappe.throw(_("Quantity required for Item {0} in row {1}").format(m.item_code, m.idx))
-
-			self.check_if_item_repeated(m.item_code, check_list)
-
-
-	def check_if_item_repeated(self, item, check_list):
-		
-		if [cstr(item)] in check_list:
-			frappe.throw(_("Item {0} has been entered multiple times.").format(item))
-		else:
-			check_list.append([cstr(item)])
+			check_list.append(cstr(m.item_code))
+		unique_chk_list = set(check_list)
+		if len(unique_chk_list)	!= len(check_list):
+			frappe.throw(_("Same item has been entered multiple times."))
 
 	def check_recursion(self):
 		""" Check whether recursion occurs in any bom"""
