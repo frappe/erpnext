@@ -687,7 +687,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.is_manufactured_item==\"Yes\"", 
+   "depends_on": "", 
    "fieldname": "default_bom", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
@@ -701,7 +701,7 @@
   }, 
   {
    "default": "No", 
-   "depends_on": "eval:doc.is_manufactured_item==\"Yes\"", 
+   "depends_on": "", 
    "description": "Selecting \"Yes\" will allow you to make a Production Order for this item.", 
    "fieldname": "is_pro_applicable", 
    "fieldtype": "Select", 
@@ -864,7 +864,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2015-01-16 14:48:36.423571", 
+ "modified": "2015-01-19 16:17:59.756852", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
