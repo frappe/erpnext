@@ -65,8 +65,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		this.show_stock_ledger();
 		this.show_general_ledger();
 
-		if(this.frm.doc.docstatus === 1 &&
-				frappe.boot.user.can_create.indexOf("Journal Entry")!==-1) {
+		if(this.frm.doc.docstatus === 1 && frappe.boot.user.can_create.indexOf("Journal Entry")!==-1 
+			&& this.frm.doc.__onload.credit_debit_note_exists == 0 ) {
 			if(this.frm.doc.purpose === "Sales Return") {
 				this.frm.add_custom_button(__("Make Credit Note"),
 					function() { me.make_return_jv(); }, frappe.boot.doctype_icons["Journal Entry"]);
@@ -77,7 +77,6 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				this.add_excise_button();
 			}
 		}
-
 	},
 
 	on_submit: function() {

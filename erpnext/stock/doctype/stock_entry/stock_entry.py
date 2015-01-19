@@ -34,7 +34,14 @@ class StockEntry(StockController):
 			for item in self.get("items"):
 				item.update(get_available_qty(item.item_code,
 					item.s_warehouse))
-
+	
+		count = frappe.db.exists({
+			"doctype": "Journal Entry",
+			"stock_entry":self.name,
+			"docstatus":1	
+		})
+		self.get("__onload").credit_debit_note_exists = 1 if count else 0
+	
 	def validate(self):
 		self.validate_posting_time()
 		self.validate_purpose()
@@ -825,7 +832,8 @@ def make_return_jv(stock_entry):
 		"posting_date": se.posting_date,
 		"voucher_type": se.purpose == "Sales Return" and "Credit Note" or "Debit Note",
 		"fiscal_year": se.fiscal_year,
-		"company": se.company
+		"company": se.company,
+		"stock_entry": se.name
 	})
 
 	from erpnext.accounts.utils import get_balance_on

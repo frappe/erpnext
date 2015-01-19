@@ -38,6 +38,7 @@ class JournalEntry(AccountsController):
 		self.validate_against_purchase_order()
 		self.check_credit_days()
 		self.validate_expense_claim()
+		self.validate_credit_debit_note()
 
 	def on_submit(self):
 		self.check_credit_limit()
@@ -440,6 +441,15 @@ class JournalEntry(AccountsController):
 				if d.debit > pending_amount:
 					frappe.throw(_("Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. \
 						Pending Amount is {2}".format(d.idx, d.against_expense_claim, pending_amount)))
+						
+	def validate_credit_debit_note(self):
+		count = frappe.db.exists({
+			"doctype": "Journal Entry",
+			"stock_entry":self.stock_entry,
+			"docstatus":1	
+		})
+		if count:
+			frappe.throw(_("{0} already made against stock entry {1}".format(self.voucher_type, self.stock_entry)))
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
