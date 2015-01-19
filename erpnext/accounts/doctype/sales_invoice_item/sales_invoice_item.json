@@ -86,6 +86,15 @@
    "reqd": 0
   }, 
   {
+   "fieldname": "uom", 
+   "fieldtype": "Link", 
+   "label": "UOM", 
+   "options": "UOM", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "price_list_rate", 
    "fieldtype": "Currency", 
    "label": "Price List Rate", 
@@ -117,10 +126,18 @@
    "fieldname": "stock_uom", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
-   "label": "UOM", 
+   "label": "Stock UOM", 
    "options": "UOM", 
    "permlevel": 0, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "conversion_factor", 
+   "fieldtype": "Float", 
+   "label": "Conversion Factor", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
   }, 
   {
    "fieldname": "base_price_list_rate", 
@@ -200,6 +217,17 @@
    "options": "Pricing Rule", 
    "permlevel": 0, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "stock_qty", 
+   "fieldtype": "Float", 
+   "label": "Qty as per Stock UOM", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "print_width": "100px", 
+   "read_only": 1, 
+   "width": "100px"
   }, 
   {
    "fieldname": "accounting", 
@@ -439,7 +467,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-09-09 05:35:36.019576", 
+ "modified": "2015-01-14 10:16:17.143080", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Item", 

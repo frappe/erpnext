@@ -13,6 +13,7 @@
     "amount": 500.0,
     "base_amount": 500.0,
     "base_rate": 500.0,
+    "conversion_factor": 1.0,
     "cost_center": "_Test Cost Center - _TC",
     "description": "138-CMS Shoe",
     "doctype": "Sales Invoice Item",
@@ -82,6 +83,7 @@
     "amount": 500.0,
     "base_amount": 500.0,
     "base_rate": 500.0,
+    "conversion_factor": 1.0, 
     "cost_center": "_Test Cost Center - _TC",
     "description": "_Test Item",
     "doctype": "Sales Invoice Item",
@@ -146,6 +148,7 @@
     "price_list_rate": 50,
     "qty": 10,
     "rate": 50,
+    "conversion_factor": 1.0, 
     "stock_uom": "_Test UOM"
    },
    {

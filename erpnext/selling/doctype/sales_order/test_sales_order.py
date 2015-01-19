@@ -86,7 +86,7 @@ class TestSalesOrder(unittest.TestCase):
 		dn.get("delivery_note_details")[0].against_sales_order = so.name
 		dn.get("delivery_note_details")[0].prevdoc_detail_docname = so.get("sales_order_details")[0].name
 		if delivered_qty:
-			dn.get("delivery_note_details")[0].qty = delivered_qty
+			dn.get("delivery_note_details")[0].qty = delivered_qty	
 		dn.insert()
 		dn.submit()
 		return dn
@@ -101,9 +101,9 @@ class TestSalesOrder(unittest.TestCase):
 		if bin:
 			frappe.delete_doc("Bin", bin[0][0])
 
-	def check_reserved_qty(self, item_code, warehouse, qty):
+	def check_reserved_qty(self, item_code, warehouse, stock_qty):
 		bin_reserved_qty = self.get_bin_reserved_qty(item_code, warehouse)
-		self.assertEqual(bin_reserved_qty, qty)
+		self.assertEqual(bin_reserved_qty, stock_qty)
 
 	def test_reserved_qty_for_so(self):
 		# reset bin
@@ -318,7 +318,8 @@ class TestSalesOrder(unittest.TestCase):
 
 		sales_order = frappe.copy_doc(test_records[0])
 		sales_order.sales_order_details[0].qty = 5
-		sales_order.insert()
+		sales_order.sales_order_details[0].stock_qty = 5
+		sales_order.sales_order_details[0].conversion_factor = 5
 		sales_order.submit()
 
 		_insert_purchase_receipt(sales_order.get("sales_order_details")[0].item_code)

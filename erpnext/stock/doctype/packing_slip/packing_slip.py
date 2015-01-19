@@ -24,7 +24,7 @@ class PackingSlip(Document):
 		self.validate_qty()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
-		validate_uom_is_integer(self, "stock_uom", "qty")
+		validate_uom_is_integer(self, "stock_uom", "stock_qty")
 		validate_uom_is_integer(self, "weight_uom", "net_weight")
 
 	def validate_delivery_note(self):
@@ -150,7 +150,7 @@ class PackingSlip(Document):
 
 		dn_details = self.get_details_for_packing()[0]
 		for item in dn_details:
-			if flt(item.qty) > flt(item.packed_qty):
+			if flt(item.stock_qty) > flt(item.packed_qty):
 				ch = self.append('item_details', {})
 				ch.item_code = item.item_code
 				ch.item_name = item.item_name

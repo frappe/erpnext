@@ -9,6 +9,7 @@
    {
     "base_amount": 500.0, 
     "base_rate": 100.0, 
+    "conversion_factor": 1.0, 
     "cost_center": "Main - _TC", 
     "description": "CPU", 
     "doctype": "Delivery Note Item", 
@@ -17,6 +18,7 @@
     "item_name": "_Test Item", 
     "parentfield": "delivery_note_details", 
     "qty": 5.0, 
+    "stock_qty": 5.0, 
     "rate": 100.0, 
     "stock_uom": "_Test UOM", 
     "warehouse": "_Test Warehouse - _TC"

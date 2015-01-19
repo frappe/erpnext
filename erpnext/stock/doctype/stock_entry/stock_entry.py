@@ -40,7 +40,7 @@ class StockEntry(StockController):
 
 		self.set_transfer_qty()
 		self.validate_item()
-		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("uom", "stock_qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse(pro_obj)
 		self.validate_production_order()
@@ -323,7 +323,7 @@ class StockEntry(StockController):
 				if self.purpose == "Purchase Return":
 					ref_item_qty = sum([flt(d.qty)*flt(d.conversion_factor) for d in ref.doc.get({"item_code": item.item_code})])
 				elif self.purpose == "Sales Return":
-					ref_item_qty = sum([flt(d.qty) for d in ref.doc.get({"item_code": item.item_code})])
+					ref_item_qty = sum([flt(d.stock_qty) for d in ref.doc.get({"item_code": item.item_code})])
 				returnable_qty = ref_item_qty - flt(already_returned_item_qty.get(item.item_code))
 				if not returnable_qty:
 					frappe.throw(_("Item {0} has already been returned").format(item.item_code), StockOverReturnError)
@@ -506,7 +506,7 @@ class StockEntry(StockController):
 					self.bom_no, as_dict=1)
 				self.add_to_stock_entry_detail({
 					item[0]["name"] : {
-						"qty": self.fg_completed_qty,
+						"stock_qty": self.fg_completed_qty,
 						"item_name": item[0].item_name,
 						"description": item[0]["description"],
 						"stock_uom": item[0]["stock_uom"],

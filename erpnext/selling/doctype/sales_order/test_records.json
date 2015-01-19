@@ -19,6 +19,7 @@
   "sales_order_details": [
    {
     "base_amount": 1000.0, 
+    "conversion_factor": 1.0, 
     "base_rate": 100.0, 
     "description": "CPU", 
     "doctype": "Sales Order Item", 
@@ -26,6 +27,7 @@
     "item_name": "CPU", 
     "parentfield": "sales_order_details", 
     "qty": 10.0, 
+    "stock_qty": 10.0, 
     "rate": 100.0, 
     "warehouse": "_Test Warehouse - _TC"
    }
