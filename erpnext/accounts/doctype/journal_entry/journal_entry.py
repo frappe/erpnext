@@ -442,12 +442,20 @@ class JournalEntry(AccountsController):
 						Pending Amount is {2}".format(d.idx, d.against_expense_claim, pending_amount)))
 
 @frappe.whitelist()
-def get_default_bank_cash_account(company, voucher_type):
-	account = frappe.db.get_value("Company", company,
-		voucher_type=="Bank Entry" and "default_bank_account" or "default_cash_account")
+def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
+	if mode_of_payment:
+		account = get_bank_cash_account(mode_of_payment, company)
+		if account.get("bank_cash_account"):
+			account.update({"balance": get_balance_on(account.get("cash_bank_account"))})
+			return account
+
+	account = frappe.db.get_value("Company", company, \
+		voucher_type=="Bank Voucher" and "default_bank_account" or "default_cash_account")
+
 	if account:
 		return {
-			"account": account,
+			"cash_bank_account": account,
 			"balance": get_balance_on(account)
 		}
 
@@ -504,7 +512,7 @@ def get_payment_entry(doc):
 	d2 = jv.append("accounts")
 
 	if bank_account:
-		d2.account = bank_account["account"]
+		d2.account = bank_account["cash_bank_account"]
 		d2.balance = bank_account["balance"]
 
 	return jv

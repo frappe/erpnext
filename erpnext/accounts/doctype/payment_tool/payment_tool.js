@@ -63,7 +63,22 @@ frappe.ui.form.on("Payment Tool", "received_or_paid", function(frm) {
 });
 
 // Fetch bank/cash account based on payment mode
-cur_frm.add_fetch("payment_mode", "default_account", "payment_account");
+frappe.ui.form.on("Payment Tool", "payment_mode", function(frm) {
+	return  frappe.call({
+		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
+		args: {
+				"mode_of_payment": frm.doc.mode_of_payment,
+				"company": frm.doc.company
+		},
+		callback: function(r, rt) {
+			if(r.message) {
+				frm.doc.set_value("payment_account", r.message['bank_cash_account']
+);
+			}
+		}
+	});
+});
+
 
 erpnext.payment_tool.check_mandatory_to_set_button = function(frm) {
 	if (frm.doc.company && frm.doc.party_type && frm.doc.party && frm.doc.received_or_paid) {
