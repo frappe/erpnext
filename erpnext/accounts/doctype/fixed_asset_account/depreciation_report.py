@@ -9,190 +9,259 @@ from datetime import datetime
 from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils import flt
 
-
 def get_date_difference_in_days(d1, d2):
     return abs((d2 - d1).days)
 
-    
-def get_depreciation_provided_till_last_year(day_before_start, fixed_asset_name):
-        for accdepr in frappe.get_doc("Fixed Asset Account", fixed_asset_name).depreciation:
-           if get_fiscal_year(fiscal_year = accdepr.fiscal_year) == get_fiscal_year(date = day_before_start):
-               return accdepr.total_accumulated_depreciation
-        return 0
-
-        
-def get_depr_provided_this_year(depreciation_method, depreciation_provided_on_opening_purchase_cost, \
-	purchase_value, depreciation_provided_till_last_year, rate_of_depreciation):
-
-	if depreciation_method == "Written Down" or \
-	    (depreciation_provided_on_opening_purchase_cost <= (purchase_value - depreciation_provided_till_last_year)):
-		return flt(depreciation_provided_on_opening_purchase_cost,2)
-
-	elif depreciation_provided_on_opening_purchase_cost > (purchase_value - depreciation_provided_till_last_year) and \
-	    (purchase_value - depreciation_provided_till_last_year) < (purchase_value * rate_of_depreciation / 100) and \
-	    depreciation_method=="Straight Line":
-		return flt(purchase_value - depreciation_provided_till_last_year,2)
-
-	elif depreciation_method=="Straight Line":
-		return 0
+class Depreciation:
+	def __init__(self,financial_year_from, financial_year_to, company, fixed_asset=None):
+	    self.financial_year_from = datetime.strptime(financial_year_from, "%Y-%m-%d").date()
+	    self.financial_year_to = datetime.strptime(financial_year_to, "%Y-%m-%d").date()
+	    self.day_before_start = self.financial_year_from - timedelta (days=1)    
+	    self.TOTAL_DAYS_IN_YEAR = 365
+	    self.depreciation_method = frappe.get_doc("Company", company).default_depreciation_method
+	    self.fixed_asset = fixed_asset
 
 
-def get_report_data(financial_year_from, financial_year_to, company, fixed_asset=None):
-    data = []
-    financial_year_from = datetime.strptime(financial_year_from, "%Y-%m-%d").date()
-    financial_year_to = datetime.strptime(financial_year_to, "%Y-%m-%d").date()
-    day_before_start = financial_year_from - timedelta (days=1)    
-    TOTAL_DAYS_IN_YEAR = 365
-    depreciation_method = frappe.get_doc("Company", company).default_depreciation_method
-
-    asset_query = """select fa.*,
-		  ifnull((select sum(sale.asset_purchase_cost) from `tabFixed Asset Sale` sale 
-			where sale.fixed_asset_account=fa.fixed_asset_name and sale.docstatus=1
-			and sale.posting_date>=%s and sale.posting_date<=%s),0) as total_sale_value
-		  from `tabFixed Asset Account` fa where (is_sold=false or 
-		  (is_sold=true and (select count(*) from `tabFixed Asset Sale` sale where 
-			sale.fixed_asset_account=fa.fixed_asset_name and docstatus=1 and 
+	def get_assets(self):
+	    asset_query = """select fa.* from `tabFixed Asset Account` fa 
+		  where (is_sold=false or (is_sold=true and (select count(*) from `tabFixed Asset Sale` sale 
+		     where sale.fixed_asset_account=fa.fixed_asset_name and docstatus=1 and 
 			sale.posting_date>=%s and sale.posting_date<=%s)>0))"""
 
-    if fixed_asset==None:
-	    asset_query_result = frappe.db.sql(asset_query, \
-	     (financial_year_from,financial_year_to,financial_year_from,financial_year_to), as_dict=True)
-    else:
-	    asset_query = asset_query + """and fa.fixed_asset_name=%s"""
-	    asset_query_result = frappe.db.sql(asset_query, \
-	     (financial_year_from,financial_year_to,financial_year_from,financial_year_to,fixed_asset), as_dict=True)
+	    if self.fixed_asset==None:
+		    return frappe.db.sql(asset_query, (self.financial_year_from,self.financial_year_to), as_dict=True)
+	    else:
+		    asset_query = asset_query + """and fa.fixed_asset_name=%s"""
+		    return frappe.db.sql(asset_query, (self.financial_year_from,self.financial_year_to, \
+				self.fixed_asset), as_dict=True)
+
+	def get_asset_sales_in_the_year(self,asset):
+	    sale_query = """select ifnull(sum(sale.asset_purchase_cost),0) as total_sales 
+			from `tabFixed Asset Sale` sale where sale.fixed_asset_account=%s and sale.docstatus=1
+			and sale.posting_date>=%s and sale.posting_date<=%s limit 1"""
+
+	    sales_query_result = frappe.db.sql(sale_query, \
+			(asset.fixed_asset_name, self.financial_year_from, self.financial_year_to), \
+			as_dict=True)
+
+	    for results in sales_query_result:
+		return results.total_sales
 
 
-    for assets in asset_query_result:
-        fixed_asset_name = assets.fixed_asset_name
-        fixed_asset_account = assets.fixed_asset_account
-        rate_of_depreciation = assets.depreciation_rate
-        purchase_date = datetime.strptime(assets.purchase_date, "%Y-%m-%d").date()
+	def get_asset_purchases_in_the_year(self,asset):
+	        purchase_date = datetime.strptime(asset.purchase_date, "%Y-%m-%d").date()	    
+	        if purchase_date>=self.financial_year_from and purchase_date<=self.financial_year_to:
+	            return asset.gross_purchase_value
+	        return 0	        
 
-        depreciation_provided_till_last_year = get_depreciation_provided_till_last_year(day_before_start, fixed_asset_name)
 
-        purchase_cost_at_year_start = 0
-        if depreciation_provided_till_last_year > 0:
-        	purchase_cost_at_year_start = abs(assets.gross_purchase_value)
+	def get_depreciation_provided_till_last_year(self,asset):
+	        for accdepr in frappe.get_doc("Fixed Asset Account", asset.fixed_asset_name).depreciation:
+	           if get_fiscal_year(fiscal_year = accdepr.fiscal_year) == \
+				get_fiscal_year(date = self.day_before_start):
+	               return accdepr.total_accumulated_depreciation
+	        return 0
 
-        total_purchases_during_the_year = 0
-        if purchase_date>=financial_year_from and purchase_date<=financial_year_to:
-            total_purchases_during_the_year = assets.gross_purchase_value
 
-        total_sales_during_the_year = assets.total_sale_value
+	def get_purchase_cost_at_year_start(self,asset,dict_value):
+	        if dict_value['depreciation_provided_till_last_year'] > 0:
+	        	return abs(asset.gross_purchase_value)
+		return 0
+	    
 
-        depreciation_provided_on_opening_purchase_cost = 0
+	def run(self):
+	    asset_query_result = self.get_assets()
+	    data = []
+	    for assets in asset_query_result:
+		asset_value_dict = {}
 
-        if total_sales_during_the_year == 0:
-		if depreciation_method!="Straight Line":
-	            depreciation_provided_on_opening_purchase_cost = float(depreciation_provided_on_opening_purchase_cost + \
-			(((purchase_cost_at_year_start - depreciation_provided_till_last_year) * rate_of_depreciation / 100)))
-		else:
-	            depreciation_provided_on_opening_purchase_cost = float(depreciation_provided_on_opening_purchase_cost + \
-			((purchase_cost_at_year_start * rate_of_depreciation / 100)))		
-        elif total_sales_during_the_year == purchase_cost_at_year_start:
+	        asset_value_dict['depreciation_provided_till_last_year'] = self.get_depreciation_provided_till_last_year(assets)
+
+	        asset_value_dict['purchase_cost_at_year_start']  = self.get_purchase_cost_at_year_start(assets,asset_value_dict)
+
+	        asset_value_dict['total_purchases_during_the_year'] = self.get_asset_purchases_in_the_year(assets)
+
+		print "Asset:", assets.fixed_asset_name, "Purchases:", asset_value_dict['total_purchases_during_the_year'], \
+				"Opening:", asset_value_dict['purchase_cost_at_year_start'] 
+	        asset_value_dict['total_sales_during_the_year'] = self.get_asset_sales_in_the_year(assets)
+
+	        asset_value_dict['depreciation_provided_on_opening_purchase_cost'] = \
+			 self.get_depreciation_provided_on_opening_purchase_cost(assets,asset_value_dict)
+
+	        asset_value_dict['depreciation_provided_on_purchases'] = \
+			self.get_depreciation_provided_on_purchases(assets)
+
+	        asset_value_dict['depreciation_written_back'] = self.get_depreciation_written_back(asset_value_dict)
+
+		asset_value_dict['depreciation_provided_this_year'] = self.get_depr_provided_this_year(asset_value_dict, assets)
+
+		if asset_value_dict['total_purchases_during_the_year'] + \
+			asset_value_dict['purchase_cost_at_year_start'] > 0:
+			data.append(self.build_row(assets, asset_value_dict))
+
+	    return data
+
+		
+
+	def get_depreciation_written_back(self,dict_value):
+            if dict_value['total_sales_during_the_year'] > 0:
+	        return dict_value['depreciation_provided_on_opening_purchase_cost'] +\
+			dict_value['depreciation_provided_till_last_year']
+	    return 0
+
+
+	def get_depreciation_provided_on_purchases(self,asset):
+	    purchase_date = datetime.strptime(asset.purchase_date, "%Y-%m-%d").date()	    
+            if purchase_date>=self.financial_year_from and \
+	    	    purchase_date<=self.financial_year_to:
+	        days = get_date_difference_in_days(purchase_date, self.financial_year_to)
+	        return (asset.gross_purchase_value * asset.depreciation_rate / 100) * \
+				  (days / self.TOTAL_DAYS_IN_YEAR)
+	    return 0
+
+
+	def get_sales_data(self,asset):
             sales_sql = frappe.db.sql("""select * from `tabFixed Asset Sale` where docstatus=1 and 
-		fixed_asset_account=%s and posting_date>=%s and posting_date<=%s""", \
-		(fixed_asset_name, financial_year_from, financial_year_to), as_dict=True)
+		fixed_asset_account=%s and posting_date>=%s and posting_date<=%s limit 1""", \
+		(asset.fixed_asset_name, self.financial_year_from, self.financial_year_to), as_dict=True)
 
-            factor = 1
-            if purchase_cost_at_year_start > 0:
-                factor = float(depreciation_provided_till_last_year / purchase_cost_at_year_start)
-		if depreciation_method=="Straight Line":
-			factor = 0
-
-            for sales in sales_sql:
-                saleamount = float(sales.asset_purchase_cost)
-                saledate = datetime.strptime(sales.posting_date, "%Y-%m-%d").date()
-                days = get_date_difference_in_days(financial_year_from, saledate)
-                depreciation_provided_on_opening_purchase_cost = depreciation_provided_on_opening_purchase_cost + \
-		     (((saleamount - (saleamount * factor)) * rate_of_depreciation / 100) * \
-		     (days / TOTAL_DAYS_IN_YEAR))
-
-        depreciation_provided_on_purchases = 0
-        if purchase_date>=financial_year_from and purchase_date<=financial_year_to:
-            days = get_date_difference_in_days(purchase_date, financial_year_to)
-            depreciation_provided_on_purchases = depreciation_provided_on_purchases + \
-	         ((assets.gross_purchase_value * rate_of_depreciation / 100) * \
-		  (days / TOTAL_DAYS_IN_YEAR))
-
-        depreciation_written_back = 0
-        if total_sales_during_the_year > 0:
-            depreciation_written_back = depreciation_provided_on_opening_purchase_cost + depreciation_provided_till_last_year
-
-	depreciation_provided_this_year = get_depr_provided_this_year(depreciation_method, \
-			depreciation_provided_on_opening_purchase_cost, \
-			assets.gross_purchase_value, \
-			depreciation_provided_till_last_year, \
-			rate_of_depreciation)
+	    for sales in sales_sql:
+		return sales
+	   
 
 
-        row = [fixed_asset_name,
+	def depreciation_provided_on_opening_purchase_cost_no_sale(self,asset, dict_value):
+		if self.depreciation_method!="Straight Line":
+	            return ((dict_value['purchase_cost_at_year_start'] - \
+			       dict_value['depreciation_provided_till_last_year']) *\
+				 asset.depreciation_rate / 100)
+		else:
+	            return (dict_value['purchase_cost_at_year_start'] *\
+			       asset.depreciation_rate / 100)
 
-       		fixed_asset_account,
+	def depreciation_provided_on_opening_purchase_cost_with_sale(self,asset, dict_value):
+	            factor = self.get_factor(dict_value)
 
-        	rate_of_depreciation,
+	            sales = self.get_sales_data(asset)
+	            asset_purchase_cost = float(sales.asset_purchase_cost)
+	            saledate = datetime.strptime(sales.posting_date, "%Y-%m-%d").date()
+	            days = get_date_difference_in_days(self.financial_year_from, saledate)
+	            return ((asset_purchase_cost - (asset_purchase_cost * factor)) \
+			* asset.depreciation_rate / 100) * (days / self.TOTAL_DAYS_IN_YEAR)
+		
 
-               	flt(purchase_cost_at_year_start,2),
+	def get_factor(self, dict_value):
+	            factor = 1
+	            if dict_value['purchase_cost_at_year_start'] > 0:
+	                factor = dict_value['depreciation_provided_till_last_year'] /\
+				 dict_value['purchase_cost_at_year_start']
+			if self.depreciation_method=="Straight Line":
+	 			factor = 0
+		    return factor
+	
 
-               	flt(total_purchases_during_the_year,2),
+	def get_depreciation_provided_on_opening_purchase_cost(self,asset,dict_value):
+	   if dict_value['total_sales_during_the_year'] == 0:
+		return self.depreciation_provided_on_opening_purchase_cost_no_sale(asset, dict_value)
+           elif dict_value['total_sales_during_the_year'] > 0:
+		return self.depreciation_provided_on_opening_purchase_cost_with_sale(asset, dict_value)
+	   return 0
 
-               	flt(total_sales_during_the_year,2),
 
-               	flt(((purchase_cost_at_year_start + total_purchases_during_the_year) - total_sales_during_the_year),2),
+	def get_depr_provided_this_year(self,dict_value, asset):
+		purchase_less_depreciation = asset.gross_purchase_value -\
+			 dict_value['depreciation_provided_till_last_year']
+		if self.depreciation_method == "Written Down" or \
+		    	(dict_value['depreciation_provided_on_opening_purchase_cost'] <= \
+			(purchase_less_depreciation)):
+			return flt(dict_value['depreciation_provided_on_opening_purchase_cost'],2)
 
-               	flt(depreciation_provided_till_last_year,2),
+		elif dict_value['depreciation_provided_on_opening_purchase_cost'] > \
+			(purchase_less_depreciation) and (purchase_less_depreciation) < \
+			  (asset.gross_purchase_value * asset.depreciation_rate / 100) and \
+			    self.depreciation_method=="Straight Line":
+			return flt(purchase_less_depreciation,2)
 
-               	depreciation_provided_this_year,
+		elif self.depreciation_method=="Straight Line":
+			return 0
 
-               	flt(depreciation_provided_on_purchases,2),
 
-               	flt(depreciation_provided_on_opening_purchase_cost+depreciation_provided_on_purchases,2),
+	def build_row(self,asset, dict_value):
+		return [asset.fixed_asset_name,
+       		asset.fixed_asset_account,
+        	asset.depreciation_rate,
+               	flt(dict_value['purchase_cost_at_year_start'],2),
 
-               	flt(depreciation_written_back,2),
+               	flt(dict_value['total_purchases_during_the_year'],2),
 
-               	flt(((depreciation_provided_till_last_year + \
-			depreciation_provided_this_year + \
-			depreciation_provided_on_purchases) - depreciation_written_back),2)]
+               	flt(dict_value['total_sales_during_the_year'],2),
 
-        data.append(row)
+               	flt(((dict_value['purchase_cost_at_year_start'] + \
+			dict_value['total_purchases_during_the_year']) - \
+			dict_value['total_sales_during_the_year']),2),
 
-    return data
+               	flt(dict_value['depreciation_provided_till_last_year'],2),
+
+               	dict_value['depreciation_provided_this_year'],
+
+               	flt(dict_value['depreciation_provided_on_purchases'],2),
+
+               	flt(dict_value['depreciation_provided_on_opening_purchase_cost']+\
+			dict_value['depreciation_provided_on_purchases'],2),
+
+               	flt(dict_value['depreciation_written_back'],2),
+
+               	flt(((dict_value['depreciation_provided_till_last_year'] + \
+			dict_value['depreciation_provided_this_year'] + \
+			dict_value['depreciation_provided_on_purchases']) - \
+			dict_value['depreciation_written_back']),2)]
+
+
+	def calculate_written_down_on(self, saledate, saleamount):
+		assets = self.get_unsold_asset()
+		if assets:
+			asset_value_dict = {}
+		        purchase_date = datetime.strptime(assets.purchase_date, "%Y-%m-%d").date()
+
+		        asset_value_dict['depreciation_provided_till_last_year'] =\
+			   self.get_depreciation_provided_till_last_year(assets)
+
+		        asset_value_dict['purchase_cost_at_year_start']  =\
+			   self.get_purchase_cost_at_year_start(assets,asset_value_dict)
+
+		        factor = self.get_factor(asset_value_dict)
+
+	                days = get_date_difference_in_days(self.financial_year_from, saledate)
+	                asset_value_dict['depreciation_provided_on_opening_purchase_cost'] = \
+				((saleamount - (saleamount * factor)) *\
+				 assets.depreciation_rate / 100) * (days / self.TOTAL_DAYS_IN_YEAR)
+		
+	                return flt((asset_value_dict['depreciation_provided_on_opening_purchase_cost'] +\
+				 asset_value_dict['depreciation_provided_till_last_year']),2)					
+
+
+
+	def get_unsold_asset(self):
+		unsold_query = frappe.db.sql("""select * from `tabFixed Asset Account` where is_sold=false 
+			and fixed_asset_name=%s limit 1""", (self.fixed_asset), as_dict=True)
+		for result in unsold_query:
+			return result
+
+
+    
+
+def get_report_data(financial_year_from, financial_year_to, company, fixed_asset=None):
+    depreciation = Depreciation(financial_year_from, financial_year_to, company, fixed_asset)
+    return depreciation.run()
+
 
 @frappe.whitelist()
-def calculateWrittenDownOn(fixed_asset, saledate, company, saleamount):
+def get_written_down_when_selling_fixed_asset(fixed_asset, saledate, company, saleamount):
 	
 	saleamount = float(saleamount)
 	saledate=datetime.strptime(saledate, "%Y-%m-%d").date()
 	from erpnext.accounts.utils import get_fiscal_year	
 	financial_year_from, financial_year_to = get_fiscal_year(saledate)[1:]
-	day_before_start = financial_year_from - timedelta (days=1)
-	TOTAL_DAYS_IN_YEAR = 365
 	
-	ps = frappe.db.sql("""select * from `tabFixed Asset Account` where is_sold=false 
-		and fixed_asset_name=%s limit 1""", (fixed_asset), as_dict=True)
-
-	for assets in ps:
-	        fixed_asset_account = assets.fixed_asset_account
-	        purchase_date = datetime.strptime(assets.purchase_date, "%Y-%m-%d").date()
-
-	        depreciation_provided_till_last_year = get_depreciation_provided_till_last_year(day_before_start, assets.fixed_asset_name)
-
-	        purchase_cost_at_year_start = 0
-	        if depreciation_provided_till_last_year > 0:
-	        	purchase_cost_at_year_start = abs(assets.gross_purchase_value)
-
-	        factor = 1
-		if purchase_cost_at_year_start > 0:
-	             factor = depreciation_provided_till_last_year / purchase_cost_at_year_start
-		     if frappe.get_doc("Company", company).default_depreciation_method=="Straight Line":
-			factor = 0
-
-                days = get_date_difference_in_days(financial_year_from, saledate)
-                depreciation_provided_on_opening_purchase_cost = depreciation_provided_on_opening_purchase_cost + \
-			(((saleamount - (saleamount * factor)) * assets.depreciation_rate / 100) \
-			 * (days / TOTAL_DAYS_IN_YEAR))
-		
-                return flt((depreciation_provided_on_opening_purchase_cost + depreciation_provided_till_last_year),2)
-
-	frappe.throw("Either Asset is Sold Or no Record Found")
+	depreciation = Depreciation(str(financial_year_from), str(financial_year_to), company, fixed_asset)
+	return depreciation.calculate_written_down_on(saledate, saleamount)
