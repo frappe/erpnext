@@ -53,7 +53,7 @@ class BOM(Document):
 		self.manage_default_bom()
 
 	def get_item_det(self, item_code):
-		item = frappe.db.sql("""select name, is_asset_item, is_purchase_item,
+		item = frappe.db.sql("""select name, item_name, is_asset_item, is_purchase_item,
 			docstatus, description, is_sub_contracted_item, stock_uom, default_bom,
 			last_purchase_rate
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
@@ -69,7 +69,7 @@ class BOM(Document):
 
 	def set_bom_material_details(self):
 		for item in self.get("items"):
-			ret = self.get_bom_material_detail({"item_code": item.item_code, "bom_no": item.bom_no,
+			ret = self.get_bom_material_detail({"item_code": item.item_code, "item_name": item.item_name, "bom_no": item.bom_no,
 				"qty": item.qty})
 
 			for r in ret:
@@ -93,6 +93,7 @@ class BOM(Document):
 
 		rate = self.get_rm_rate(args)
 		ret_item = {
+			 'item_name'	: item and args['item_name'] or '',
 			 'description'  : item and args['description'] or '',
 			 'stock_uom'	: item and args['stock_uom'] or '',
 			 'bom_no'		: args['bom_no'],
@@ -203,9 +204,10 @@ class BOM(Document):
 		if not item:
 			frappe.throw(_("Item {0} does not exist in the system or has expired").format(self.item))
 		else:
-			ret = frappe.db.get_value("Item", self.item, ["description", "stock_uom"])
+			ret = frappe.db.get_value("Item", self.item, ["description", "stock_uom", "item_name"])
 			self.description = ret[0]
 			self.uom = ret[1]
+			self.item_name= ret[2]
 
 	def validate_materials(self):
 		""" Validate raw material entries """
@@ -313,6 +315,7 @@ class BOM(Document):
 			else:
 				self.add_to_cur_exploded_items(frappe._dict({
 					'item_code'				: d.item_code,
+					'item_name'				: d.item_name,
 					'description'			: d.description,
 					'stock_uom'				: d.stock_uom,
 					'qty'					: flt(d.qty),
@@ -328,7 +331,7 @@ class BOM(Document):
 	def get_child_exploded_items(self, bom_no, qty):
 		""" Add all items from Flat BOM of child BOM"""
 		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
-		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.description,
+		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.item_name, bom_item.description,
 			bom_item.stock_uom, bom_item.qty, bom_item.rate,
 			ifnull(bom_item.qty, 0 ) / ifnull(bom.quantity, 1) as qty_consumed_per_unit
 			from `tabBOM Explosion Item` bom_item, tabBOM bom
@@ -337,6 +340,7 @@ class BOM(Document):
 		for d in child_fb_items:
 			self.add_to_cur_exploded_items(frappe._dict({
 				'item_code'				: d['item_code'],
+				'item_name'				: d['item_name'],
 				'description'			: d['description'],
 				'stock_uom'				: d['stock_uom'],
 				'qty'					: d['qty_consumed_per_unit']*qty,

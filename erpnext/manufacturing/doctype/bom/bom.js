@@ -61,6 +61,7 @@ cur_frm.cscript.operations_remove = function(){
 }
 
 cur_frm.add_fetch("item", "description", "description");
+cur_frm.add_fetch("item", "item_name", "item_name");
 cur_frm.add_fetch("item", "stock_uom", "uom");
 
 
