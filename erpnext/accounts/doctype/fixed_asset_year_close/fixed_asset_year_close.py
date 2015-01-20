@@ -12,31 +12,38 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.accounts.doctype.fixed_asset_account.depreciation_report import get_report_data
 
 class FixedAssetYearClose(Document):
-	def post_journal_entry(self):
-		from erpnext.accounts.doctype.fixed_asset_account.fixed_asset_account import validate_default_accounts
-		validate_default_accounts(self.company)
 
-		financial_year_from, financial_year_to = get_fiscal_year(fiscal_year = self.fiscal_year)[1:]
-		day_before_start = financial_year_from - timedelta (days=1)
-
+	def get_assets(self):
 		asset_query = """select * from `tabFixed Asset Account` led where is_sold=false or 
 			(is_sold=true and (select count(*) from `tabFixed Asset Sale` sale where
 			   sale.fixed_asset_account=led.fixed_asset_name and docstatus=1 and 
 			   sale.posting_date>=%s and sale.posting_date<=%s)>0)"""
 
-		ps = frappe.db.sql(asset_query, (financial_year_from, financial_year_to), as_dict=True)
+		return frappe.db.sql(asset_query, (self.financial_year_from, \
+				self.financial_year_to), as_dict=True)
+
+
+	def post_journal_entry(self):
+		from erpnext.accounts.doctype.fixed_asset_account.fixed_asset_account import validate_default_accounts
+		validate_default_accounts(self.company)
+
+		self.financial_year_from, self.financial_year_to =\
+			 get_fiscal_year(fiscal_year = self.fiscal_year)[1:]
+		day_before_start = self.financial_year_from - timedelta (days=1)
 
 		jv = frappe.new_doc('Journal Entry')
 		jv.voucher_type = 'Journal Entry'
 		jv.company = self.company
-		jv.posting_date = financial_year_to
+		jv.posting_date = self.financial_year_to
 		jv.user_remark = 'Fixed Asset Closing Entry'
+		default_depreciation_account = frappe.get_doc("Company", self.company).\
+				default_depreciation_expense_account
 
 		total_depreciation = 0
-		for assets in ps:
+		for assets in self.get_assets():
 			fixed_asset_name = assets.fixed_asset_name
 
-			data = get_report_data(str(financial_year_from), str(financial_year_to), \
+			data = get_report_data(str(self.financial_year_from), str(self.financial_year_to), \
 				self.company, fixed_asset_name)
 
 			total_depreciation_for_year = data[0][10]
@@ -51,7 +58,7 @@ class FixedAssetYearClose(Document):
 			account.save()
 
 			td1 = jv.append("accounts")
-			td1.account = frappe.get_doc("Company", self.company).default_depreciation_expense_account
+			td1.account = default_depreciation_account
 			td1.set('debit', total_depreciation_for_year)
 			td1.against_fixed_asset = fixed_asset_name
 	

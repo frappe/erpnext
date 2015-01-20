@@ -39,6 +39,7 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "description": "Caution: This process is Irreversible", 
    "fieldname": "post_journal_entry", 
    "fieldtype": "Button", 
    "hidden": 0, 
@@ -64,7 +65,7 @@
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
- "modified": "2015-01-13 14:31:09.572934", 
+ "modified": "2015-01-20 16:51:05.027530", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Fixed Asset Year Close", 
