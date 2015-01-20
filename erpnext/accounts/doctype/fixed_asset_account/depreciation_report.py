@@ -81,8 +81,6 @@ class Depreciation:
 
 	        asset_value_dict['total_purchases_during_the_year'] = self.get_asset_purchases_in_the_year(assets)
 
-		print "Asset:", assets.fixed_asset_name, "Purchases:", asset_value_dict['total_purchases_during_the_year'], \
-				"Opening:", asset_value_dict['purchase_cost_at_year_start'] 
 	        asset_value_dict['total_sales_during_the_year'] = self.get_asset_sales_in_the_year(assets)
 
 	        asset_value_dict['depreciation_provided_on_opening_purchase_cost'] = \
@@ -248,6 +246,21 @@ class Depreciation:
 			return result
 
 
+def get_report_columns(financial_year_from, financial_year_to):
+    columns = ["FIXED ASSET NAME",
+               "FIXED ASSET ACCOUNT",
+               "RATE OF DEPRECIATION",
+               "COST AS ON "+financial_year_from,
+               "PURCHASES",
+               "SALES",
+               "CLOSING COST "+financial_year_to,
+               "DEPRECIATION AS ON "+financial_year_from,
+               "DEPRECIATION PROVIDED ON OPENING FOR CUR YR",
+               "DEPRECIATION PROVIDED ON PURCHASE FOR CUR YR",
+               "TOTAL DEPRECIATION FOR CUR YR",
+               "WRITTEN_BACK",
+               "TOTAL ACCUMULATED DEPRECIATION AS ON "+financial_year_to]
+    return columns
     
 
 def get_report_data(financial_year_from, financial_year_to, company, fixed_asset=None):
