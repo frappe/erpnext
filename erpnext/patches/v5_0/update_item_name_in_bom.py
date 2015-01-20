@@ -4,9 +4,9 @@
 import frappe
 
 def execute():
-	frappe.db.sql("""update `tabBOM` set `tabBOM`.item_name = ( select `tabItem`.item_name \
-		from `tabItem` where `tabItem`.name = `tabBOM`.item)""")
-	frappe.db.sql("""update `tabBOM Item` set item_name = ( select item_name  \
-		from tabItem where `tabItem`.name = `tabBOM Item`.item_code)""")
-	frappe.db.sql("""update `tabBOM Explosion Item` set `tabBOM Explosion Item`.item_name = \
-		( select `tabItem`.item_name from `tabItem` where `tabItem`.name = `tabBOM Explosion Item`.item_code)""")
+	frappe.db.sql("""update `tabBOM` as bom  set bom.item_name = \
+		( select item.item_name from `tabItem` as item  where item.name = bom.item)""")
+	frappe.db.sql("""update `tabBOM Item` as bomItem set bomItem.item_name = ( select item.item_name  \
+		from `tabItem` as item where item.name = bomItem.item_code)""")
+	frappe.db.sql("""update `tabBOM Explosion Item` as explosionItem set explosionItem.item_name = \
+		( select item.item_name from `tabItem` as item where item.name = explosionItem.item_code)""")
