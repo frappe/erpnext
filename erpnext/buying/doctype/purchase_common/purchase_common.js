@@ -154,7 +154,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	project_name: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.project_name) {
-			$.each(this.frm.doc["items"],
+			$.each(this.frm.doc["items"] || [],
 				function(i, other_item) {
 					if(!other_item.project_name) {
 						other_item.project_name = item.project_name;
@@ -180,7 +180,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	calculate_item_values: function() {
 		var me = this;
 
-		$.each(this.frm.doc["items"], function(i, item) {
+		$.each(this.frm.doc["items"] || [], function(i, item) {
 			frappe.model.round_floats_in(item);
 			item.amount = flt(item.rate * item.qty, precision("amount", item));
 			item.item_tax_amount = 0.0;
@@ -196,7 +196,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var me = this;
 
 		this.frm.doc.net_total = this.frm.doc.net_total_import = 0.0;
-		$.each(this.frm.doc["items"], function(i, item) {
+		$.each(this.frm.doc["items"] || [], function(i, item) {
 			me.frm.doc.net_total += item.base_amount;
 			me.frm.doc.net_total_import += item.amount;
 		});
@@ -205,7 +205,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 
 	calculate_totals: function() {
-		var tax_count = this.frm.doc["taxes"].length;
+		var tax_count = this.frm.doc["taxes"] ? this.frm.doc["taxes"].length : 0;
 		this.frm.doc.grand_total = flt(tax_count ?
 			this.frm.doc["taxes"][tax_count - 1].total : this.frm.doc.net_total);
 		this.frm.doc.grand_total_import = flt(tax_count ?
@@ -255,7 +255,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 		if(this.frm.doc["items"].length) {
 			if(!frappe.meta.get_docfield(this.frm.doc["items"][0].doctype, "item_tax_amount", this.frm.doctype)) {
-				$.each(this.frm.doc["items"], function(i, item) {
+				$.each(this.frm.doc["items"] || [], function(i, item) {
 					delete item["item_tax_amount"];
 				});
 			}
@@ -263,7 +263,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 		if(this.frm.doc["taxes"].length) {
 			if(!frappe.meta.get_docfield(this.frm.doc["taxes"][0].doctype, "tax_amount_after_discount_amount", this.frm.doctype)) {
-				$.each(this.frm.doc["taxes"], function(i, tax) {
+				$.each(this.frm.doc["taxes"] || [], function(i, tax) {
 					delete tax["tax_amount_after_discount_amount"];
 				});
 			}

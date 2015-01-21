@@ -109,7 +109,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 
 	on_submit: function() {
-		$.each(this.frm.doc["items"], function(i, row) {
+		$.each(this.frm.doc["items"] || [], function(i, row) {
 			if(row.purchase_receipt) frappe.model.clear_doc("Purchase Receipt", row.purchase_receipt)
 		})
 	}
