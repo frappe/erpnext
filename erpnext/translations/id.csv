@@ -34,11 +34,11 @@
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Add / Edit </ a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Tambah / Edit </ a>"
 "<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> default Template </ h4>  <p> Menggunakan <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja template </ a> dan semua bidang Address ( termasuk Custom Fields jika ada) akan tersedia </ p>  <pre> <code> {{}} address_line1 <br>  {% jika% address_line2} {{}} address_line2 <br> { endif% -%}  {{kota}} <br>  {% jika negara%} {{negara}} <br> {% endif -%}  {% jika pincode%} PIN: {{}} pincode <br> {% endif -%}  {{negara}} <br>  {% jika telepon%} Telepon: {{ponsel}} {<br> endif% -%}  {% jika faks%} Fax: {{}} fax <br> {% endif -%}  {% jika email_id%} Email: {{}} email_id <br> ; {% endif -%}  </ code> </ pre>"
-A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Sebuah Kelompok Pelanggan ada dengan nama yang sama, silakan mengubah nama Nasabah atau mengubah nama Grup Pelanggan"
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Kelompok Pelanggan sudah ada dengan nama yang sama, silakan mengubah nama Pelanggan atau mengubah nama Grup Pelanggan"
 A Customer exists with same name,Nasabah ada dengan nama yang sama
 A Lead with this email id should exist,Sebuah Lead dengan id email ini harus ada
 A Product or Service,Produk atau Jasa
-A Supplier exists with same name,Pemasok dengan nama yang sama sudah terdaftar
+A Supplier exists with same name,Pemasok dengan nama yang sama sudah ada
 A symbol for this currency. For e.g. $,Simbol untuk mata uang ini. Contoh $
 AMC Expiry Date,AMC Tanggal Berakhir
 Abbr,Singkatan
@@ -47,7 +47,7 @@ Above Value,Nilai di atas
 Absent,Absen
 Acceptance Criteria,Kriteria Penerimaan
 Accepted,Diterima
-Accepted + Rejected Qty must be equal to Received quantity for Item {0},Diterima Ditolak + Qty harus sama dengan jumlah yang diterima untuk Item {0}
+Accepted + Rejected Qty must be equal to Received quantity for Item {0},Jumlah Diterima + Ditolak harus sama dengan jumlah yang diterima untuk Item {0}
 Accepted Quantity,Kuantitas Diterima
 Accepted Warehouse,Gudang Diterima
 Account,Akun
@@ -57,16 +57,16 @@ Account Details,Rincian Account
 Account Head,Akun Kepala
 Account Name,Nama Akun
 Account Type,Jenis Account
-"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Saldo rekening telah ada di Kredit, Anda tidak diizinkan untuk mengatur 'Balance Harus' sebagai 'Debit'"
-"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Saldo rekening sudah di Debit, Anda tidak diizinkan untuk mengatur 'Balance Harus' sebagai 'Kredit'"
-Account for the warehouse (Perpetual Inventory) will be created under this Account.,Rekening untuk gudang (Inventaris Perpetual) akan dibuat di bawah Rekening ini.
+"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Saldo rekening telah berada di Kredit, Anda tidak diizinkan untuk mengatur 'Balance Harus' sebagai 'Debit'"
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Saldo rekening sudah berada di Debit, Anda tidak diizinkan untuk mengatur 'Balance Harus' sebagai 'Kredit'"
+Account for the warehouse (Perpetual Inventory) will be created under this Account.,Akun untuk gudang (Inventaris Perpetual) akan dibuat di bawah Rekening ini.
 Account head {0} created,Kepala akun {0} telah dibuat
-Account must be a balance sheet account,Rekening harus menjadi akun neraca
-Account with child nodes cannot be converted to ledger,Akun dengan node anak tidak dapat dikonversi ke buku
+Account must be a balance sheet account,Akun harus menjadi akun neraca
+Account with child nodes cannot be converted to ledger,Akun dengan node anak tidak dapat dikonversi ke buku besar
 Account with existing transaction can not be converted to group.,Akun dengan transaksi yang ada tidak dapat dikonversi ke grup.
 Account with existing transaction can not be deleted,Akun dengan transaksi yang ada tidak dapat dihapus
-Account with existing transaction cannot be converted to ledger,Akun dengan transaksi yang ada tidak dapat dikonversi ke buku
-Account {0} cannot be a Group,Akun {0} tidak dapat berupa Kelompok
+Account with existing transaction cannot be converted to ledger,Akun dengan transaksi yang ada tidak dapat dikonversi ke buku besar
+Account {0} cannot be a Group,Akun {0} tidak dapat menjadi akun Grup
 Account {0} does not belong to Company {1},Akun {0} bukan milik Perusahaan {1}
 Account {0} does not belong to company: {1},Akun {0} bukan milik perusahaan: {1}
 Account {0} does not exist,Akun {0} tidak ada
@@ -74,25 +74,25 @@ Account {0} has been entered more than once for fiscal year {1},Akun {0} telah d
 Account {0} is frozen,Akun {0} dibekukan
 Account {0} is inactive,Akun {0} tidak aktif
 Account {0} is not valid,Akun {0} tidak valid
-Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Akun {0} harus bertipe 'Aset Tetap' sebagai Barang {1} adalah sebuah Aset Barang
-Account {0}: Parent account {1} can not be a ledger,Akun {0}: akun Parent {1} tidak dapat berupa buku besar
-Account {0}: Parent account {1} does not belong to company: {2},Akun {0}: akun Parent {1} bukan milik perusahaan: {2}
-Account {0}: Parent account {1} does not exist,Akun {0}: akun Parent {1} tidak ada
-Account {0}: You can not assign itself as parent account,Akun {0}: Anda tidak dapat menetapkan dirinya sebagai rekening induk
-Account: {0} can only be updated via \					Stock Transactions,Account: {0} hanya dapat diperbarui melalui \ Transaksi Bursa
+Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Akun {0} harus bertipe 'Aset Tetap' dikarenakan Barang {1} adalah merupakan sebuah Aset Tetap
+Account {0}: Parent account {1} can not be a ledger,Akun {0}: akun Induk {1} tidak dapat berupa buku besar
+Account {0}: Parent account {1} does not belong to company: {2},Akun {0}: akun Induk {1} bukan milik perusahaan: {2}
+Account {0}: Parent account {1} does not exist,Akun {0}: akun Induk {1} tidak ada
+Account {0}: You can not assign itself as parent account,Akun {0}: Anda tidak dapat menetapkanya sebagai Akun Induk
+Account: {0} can only be updated via \					Stock Transactions,Account: {0} hanya dapat diperbarui melalui \ Transaksi Stok
 Accountant,Akuntan
 Accounting,Akuntansi
 "Accounting Entries can be made against leaf nodes, called","Entri Akuntansi dapat dilakukan terhadap node daun, yang disebut"
-"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Entri Akuntansi beku up to date ini, tak seorang pun bisa melakukan / memodifikasi entri kecuali peran ditentukan di bawah ini."
-Accounting journal entries.,Jurnal akuntansi.
-Accounts,Rekening
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Pencatatan Akuntansi telah dibekukan sampai tanggal ini, tidak seorang pun yang bisa melakukan / memodifikasi pencatatan kecuali peran yang telah ditentukan di bawah ini."
+Accounting journal entries.,Pencatatan Jurnal akuntansi.
+Accounts,Akun / Rekening
 Accounts Browser,Account Browser
-Accounts Frozen Upto,Account Frozen Upto
+Accounts Frozen Upto,Akun dibekukan sampai dengan
 Accounts Payable,Hutang
 Accounts Receivable,Piutang
-Accounts Settings,Account Settings
+Accounts Settings,Pengaturan Akun
 Active,Aktif
-Active: Will extract emails from ,Active: Will extract emails from 
+Active: Will extract emails from ,Aktif: Akan mengambil email dari
 Activity,Aktivitas
 Activity Log,Log Aktivitas
 Activity Log:,Log Aktivitas:
@@ -101,111 +101,113 @@ Actual,Aktual
 Actual Budget,Anggaran Aktual
 Actual Completion Date,Tanggal Penyelesaian Aktual
 Actual Date,Tanggal Aktual
-Actual End Date,Tanggal Akhir Realisasi
+Actual End Date,Tanggal Akhir Aktual
 Actual Invoice Date,Tanggal Faktur Aktual
-Actual Posting Date,Sebenarnya Posting Tanggal
-Actual Qty,Qty Aktual
-Actual Qty (at source/target),Qty Aktual (di sumber/target)
-Actual Qty After Transaction,Qty Aktual Setelah Transaksi
-Actual Qty: Quantity available in the warehouse.,Jumlah yang sebenarnya: Kuantitas yang tersedia di gudang.
+Actual Posting Date,Tanggal Posting Aktual
+Actual Qty,Jumlah Aktual
+Actual Qty (at source/target),Jumlah Aktual (di sumber/target)
+Actual Qty After Transaction,Jumlah Aktual Setelah Transaksi
+Actual Qty: Quantity available in the warehouse.,Jumlah Aktual: Kuantitas yang tersedia di gudang.
 Actual Quantity,Kuantitas Aktual
 Actual Start Date,Tanggal Mulai Aktual
 Add,Tambahkan
 Add / Edit Taxes and Charges,Tambah / Edit Pajak dan Biaya
 Add Child,Tambah Anak
-Add Serial No,Tambahkan Serial No
+Add Serial No,Tambahkan Nomor Serial
 Add Taxes,Tambahkan Pajak
 Add Taxes and Charges,Tambahkan Pajak dan Biaya
-Add or Deduct,Tambah atau Dikurangi
-Add rows to set annual budgets on Accounts.,Tambahkan baris untuk mengatur anggaran tahunan Accounts.
-Add to Cart,Add to Cart
+Add or Deduct,Penambahan atau Pengurangan
+Add rows to set annual budgets on Accounts.,Tambahkan baris untuk mengatur akun anggaran tahunan.
+Add to Cart,Tambahkan ke Keranjang Belanja
 Add to calendar on this date,Tambahkan ke kalender pada tanggal ini
 Add/Remove Recipients,Tambah / Hapus Penerima
 Address,Alamat
-Address & Contact,Alamat Kontak
+Address & Contact,Alamat & Kontak
 Address & Contacts,Alamat & Kontak
-Address Desc,Alamat Penj
+Address Desc,Deskripsi Alamat 
 Address Details,Alamat Detail
 Address HTML,Alamat HTML
 Address Line 1,Alamat Baris 1
 Address Line 2,Alamat Baris 2
 Address Template,Template Alamat
 Address Title,Alamat Judul
-Address Title is mandatory.,Alamat Judul adalah wajib.
-Address Type,Alamat Type
+Address Title is mandatory.,"Wajib masukan Judul Alamat.
+"
+Address Type,Tipe Alamat
 Address master.,Alamat utama.
 Administrative Expenses,Beban Administrasi
 Administrative Officer,Petugas Administrasi
-Advance Amount,Jumlah muka
+Advance Amount,Jumlah Uang Muka
 Advance amount,Jumlah muka
 Advances,Uang Muka
 Advertisement,iklan
 Advertising,Pengiklanan
 Aerospace,Aerospace
-After Sale Installations,Setelah Sale Instalasi
+After Sale Installations,Pemasangan setelah Penjualan
 Against,Terhadap
-Against Account,Terhadap Rekening
-Against Bill {0} dated {1},Melawan Bill {0} tanggal {1}
-Against Docname,Melawan Docname
+Against Account,Terhadap Akun
+Against Bill {0} dated {1},Terhadap Bill {0} tanggal {1}
+Against Docname,Terhadap Docname
 Against Doctype,Terhadap Doctype
-Against Document Detail No,Terhadap Dokumen Detil ada
-Against Document No,Melawan Dokumen Tidak
-Against Expense Account,Terhadap Beban Akun
-Against Income Account,Terhadap Akun Penghasilan
-Against Journal Voucher,Melawan Journal Voucher
-Against Journal Voucher {0} does not have any unmatched {1} entry,Terhadap Journal Voucher {0} tidak memiliki tertandingi {1} entri
-Against Purchase Invoice,Terhadap Purchase Invoice
+Against Document Detail No,Terhadap Detail Dokumen No.
+Against Document No,"Melawan Dokumen No.
+"
+Against Expense Account,Terhadap Akun Biaya
+Against Income Account,Terhadap Akun Pendapatan
+Against Journal Voucher,Terhadap Voucher Journal
+Against Journal Voucher {0} does not have any unmatched {1} entry,Terhadap Journal Voucher {0} tidak memiliki {1} perbedaan pencatatan
+Against Purchase Invoice,Terhadap Faktur Pembelian
 Against Sales Invoice,Terhadap Faktur Penjualan
-Against Sales Order,Terhadap Sales Order
-Against Voucher,Melawan Voucher
-Against Voucher Type,Terhadap Voucher Type
-Ageing Based On,Penuaan Berdasarkan
-Ageing Date is mandatory for opening entry,Penuaan Tanggal adalah wajib untuk membuka entri
+Against Sales Order,Terhadap Order Penjualan
+Against Voucher,Terhadap Voucher
+Against Voucher Type,Terhadap Tipe Voucher
+Ageing Based On,Umur Berdasarkan
+Ageing Date is mandatory for opening entry,Periodisasi Tanggal adalah wajib untuk membuka entri
 Ageing date is mandatory for opening entry,Penuaan saat ini adalah wajib untuk membuka entri
 Agent,Agen
 Aging Date,Penuaan Tanggal
 Aging Date is mandatory for opening entry,Penuaan Tanggal adalah wajib untuk membuka entri
-Agriculture,Agriculture
-Airline,Perusahaan penerbangan
-All Addresses.,Semua Addresses.
+Agriculture,Pertanian
+Airline,Maskapai Penerbangan
+All Addresses.,Semua Alamat
 All Contact,Semua Kontak
-All Contacts.,All Contacts.
+All Contacts.,Semua Kontak.
 All Customer Contact,Semua Kontak Pelanggan
 All Customer Groups,Semua Grup Pelanggan
 All Day,Semua Hari
 All Employee (Active),Semua Karyawan (Active)
-All Item Groups,Semua Barang Grup
-All Lead (Open),Semua Timbal (Open)
+All Item Groups,Semua Grup Barang/Item
+All Lead (Open),Semua Prospektus (Open)
 All Products or Services.,Semua Produk atau Jasa.
-All Sales Partner Contact,Semua Penjualan Partner Kontak
-All Sales Person,Semua Penjualan Orang
-All Supplier Contact,Semua Pemasok Kontak
-All Supplier Types,Semua Jenis Pemasok
-All Territories,Semua Territories
-"All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Semua bidang ekspor terkait seperti mata uang, tingkat konversi, jumlah ekspor, total ekspor dll besar tersedia dalam Pengiriman Catatan, POS, Quotation, Faktur Penjualan, Sales Order dll"
-"All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Semua bidang impor terkait seperti mata uang, tingkat konversi, jumlah impor, impor besar jumlah dll tersedia dalam Penerimaan Pembelian, Supplier Quotation, Purchase Invoice, Purchase Order dll"
-All items have already been invoiced,Semua item telah ditagih
+All Sales Partner Contact,Kontak Semua Partner Penjualan
+All Sales Person,Semua Salesperson
+All Supplier Contact,Kontak semua pemasok
+All Supplier Types,Semua Jenis pemasok
+All Territories,Semua Wilayah
+"All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Semua data berkaitan dengan ekspor seperti mata uang, nilai tukar, total ekspor, nilai total ekspor dll. terdapat di Nota Pengiriman, POS, Penawaran Quotation, Fatkur Penjualan, Order Penjualan, dll."
+"All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Semua data berkaitan dengan impor seperti mata uang, nilai tukar, total ekspor, nilai total ekspor dll. terdapat di Nota Pengiriman, POS, Penawaran Quotation, Fatkur Penjualan, Order Penjualan, dll."
+All items have already been invoiced,Semua Barang telah tertagih
 All these items have already been invoiced,Semua barang-barang tersebut telah ditagih
-Allocate,Menyediakan
-Allocate leaves for a period.,Mengalokasikan daun untuk suatu periode.
-Allocate leaves for the year.,Mengalokasikan daun untuk tahun ini.
-Allocated Amount,Dialokasikan Jumlah
-Allocated Budget,Anggaran Dialokasikan
+Allocate,Alokasi
+Allocate leaves for a period.,Alokasi cuti untuk periode tertentu
+Allocate leaves for the year.,Alokasi cuti untuk tahun ini.
+Allocated Amount,Jumlah alokasi
+Allocated Budget,Alokasi Anggaran
 Allocated amount,Jumlah yang dialokasikan
-Allocated amount can not be negative,Jumlah yang dialokasikan tidak dapat negatif
-Allocated amount can not greater than unadusted amount,Jumlah yang dialokasikan tidak bisa lebih besar dari jumlah unadusted
-Allow Bill of Materials,Biarkan Bill of Material
-Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item,Biarkan Bill of Material harus 'Ya'. Karena satu atau banyak BOMs aktif hadir untuk item ini
-Allow Children,Biarkan Anak-anak
+Allocated amount can not be negative,Jumlah yang dialokasikan tidak dijinkan negatif
+Allocated amount can not greater than unadusted amount,Jumlah yang dialokasikan tidak boleh lebih besar dari sisa jumlah 
+Allow Bill of Materials,Izinkan untuk Bill of Material
+Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item,Izinkan untuk Bill of Material harus 'Ya'. karena ada satu atau lebih BOM aktif untuk item barang ini.
+Allow Children,Izinkan Anak Akun
 Allow Dropbox Access,Izinkan Dropbox Access
 Allow Google Drive Access,Izinkan Google Drive Access
-Allow Negative Balance,Biarkan Saldo Negatif
+Allow Negative Balance,Izinkan Saldo Negatif
 Allow Negative Stock,Izinkan Bursa Negatif
 Allow Production Order,Izinkan Pesanan Produksi
 Allow User,Izinkan Pengguna
 Allow Users,Izinkan Pengguna
-Allow the following users to approve Leave Applications for block days.,Memungkinkan pengguna berikut untuk menyetujui Leave Aplikasi untuk blok hari.
-Allow user to edit Price List Rate in transactions,Memungkinkan pengguna untuk mengedit Daftar Harga Tingkat dalam transaksi
+Allow the following users to approve Leave Applications for block days.,Izinkan pengguna ini untuk menyetujui aplikasi izin cuti untuk hari yang terpilih(blocked).
+Allow user to edit Price List Rate in transactions,Izinkan user/pengguna untuk mengubah rate daftar harga di dalam transaksi
 Allowance Percent,Penyisihan Persen
 Allowance for over-{0} crossed for Item {1},Penyisihan over-{0} menyeberang untuk Item {1}
 Allowance for over-{0} crossed for Item {1}.,Penyisihan over-{0} menyeberang untuk Item {1}.
@@ -298,33 +300,33 @@ Average Commission Rate,Rata-rata Komisi Tingkat
 Average Discount,Rata-rata Diskon
 Awesome Products,Mengagumkan Produk
 Awesome Services,Layanan yang mengagumkan
-BOM Detail No,BOM Detil ada
+BOM Detail No,No. Rincian BOM
 BOM Explosion Item,BOM Ledakan Barang
-BOM Item,BOM Barang
-BOM No,BOM ada
-BOM No. for a Finished Good Item,BOM No untuk jadi baik Barang
-BOM Operation,BOM Operasi
-BOM Operations,BOM Operasi
-BOM Replace Tool,BOM Ganti Alat
-BOM number is required for manufactured Item {0} in row {1},Nomor BOM diperlukan untuk diproduksi Barang {0} berturut-turut {1}
-BOM number not allowed for non-manufactured Item {0} in row {1},Nomor BOM tidak diperbolehkan untuk non-manufaktur Barang {0} berturut-turut {1}
-BOM recursion: {0} cannot be parent or child of {2},BOM rekursi: {0} tidak dapat orang tua atau anak dari {2}
+BOM Item,Komponen BOM
+BOM No,No. BOM
+BOM No. for a Finished Good Item,No. BOM untuk Barang Jadi
+BOM Operation,BOM Operation
+BOM Operations,BOM Operations
+BOM Replace Tool,BOM Replace Tool
+BOM number is required for manufactured Item {0} in row {1},Nomor BOM diperlukan untuk Barang Produksi {0} berturut-turut {1}
+BOM number not allowed for non-manufactured Item {0} in row {1},Nomor BOM tidak diperbolehkan untuk Barang non-manufaktur {0} berturut-turut {1}
+BOM recursion: {0} cannot be parent or child of {2},BOM recursion: {0} tidak bisa menjadi induk atau cabang dari {2}
 BOM replaced,BOM diganti
-BOM {0} for Item {1} in row {2} is inactive or not submitted,BOM {0} untuk Item {1} berturut-turut {2} tidak aktif atau tidak disampaikan
-BOM {0} is not active or not submitted,BOM {0} tidak aktif atau tidak disampaikan
-BOM {0} is not submitted or inactive BOM for Item {1},BOM {0} bukan disampaikan atau tidak aktif BOM untuk Item {1}
+BOM {0} for Item {1} in row {2} is inactive or not submitted,BOM {0} untuk Item {1} berturut-turut {2} tidak aktif atau tidak tersubmit
+BOM {0} is not active or not submitted,BOM {0} tidak aktif atau tidak tersubmit
+BOM {0} is not submitted or inactive BOM for Item {1},BOM {0} tidak tersubmit atau BOM tidak aktif untuk Item {1}
 Backup Manager,Backup Manager
 Backup Right Now,Backup Right Now
 Backups will be uploaded to,Backup akan di-upload ke
 Balance Qty,Balance Qty
 Balance Sheet,Neraca
-Balance Value,Saldo Nilai
+Balance Value,Nilai Saldo
 Balance for Account {0} must always be {1},Saldo Rekening {0} harus selalu {1}
 Balance must be,Balance harus
 "Balances of Accounts of type ""Bank"" or ""Cash""","Saldo Rekening jenis ""Bank"" atau ""Cash"""
 Bank,Bank
-Bank / Cash Account,Bank / Kas Rekening
-Bank A/C No.,Bank A / C No
+Bank / Cash Account,Bank / Rekening Kas
+Bank A/C No.,Rekening Bank No.
 Bank Account,Bank Account/Rekening Bank
 Bank Account No.,Rekening Bank No
 Bank Accounts,Rekening Bank
@@ -332,9 +334,9 @@ Bank Clearance Summary,Izin Bank Summary
 Bank Draft,Bank Draft
 Bank Name,Nama Bank
 Bank Overdraft Account,Cerukan Bank Akun
-Bank Reconciliation,5. Bank Reconciliation (Rekonsiliasi Bank)
-Bank Reconciliation Detail,Rekonsiliasi Bank Detil
-Bank Reconciliation Statement,Pernyataan Bank Rekonsiliasi
+Bank Reconciliation,Rekonsiliasi Bank
+Bank Reconciliation Detail,Rincian Rekonsiliasi Bank
+Bank Reconciliation Statement,Pernyataan Rekonsiliasi Bank
 Bank Voucher,Bank Voucher
 Bank/Cash Balance,Bank / Cash Balance
 Banking,Perbankan
@@ -344,13 +346,13 @@ Based On,Berdasarkan
 Basic,Dasar
 Basic Info,Info Dasar
 Basic Information,Informasi Dasar
-Basic Rate,Tingkat Dasar
-Basic Rate (Company Currency),Tingkat Dasar (Perusahaan Mata Uang)
-Batch,Sejumlah
+Basic Rate,Harga Dasar
+Basic Rate (Company Currency),Harga Dasar (Dalam Mata Uang Lokal)
+Batch,Batch
 Batch (lot) of an Item.,Batch (banyak) dari Item.
 Batch Finished Date,Batch Selesai Tanggal
 Batch ID,Batch ID
-Batch No,Ada Batch
+Batch No,No. Batch
 Batch Started Date,Batch Dimulai Tanggal
 Batch Time Logs for billing.,Batch Sisa log untuk penagihan.
 Batch-Wise Balance History,Batch-Wise Balance Sejarah
@@ -362,53 +364,53 @@ Bill No {0} already booked in Purchase Invoice {1},Bill ada {0} sudah memesan di
 Bill of Material,Bill of Material
 Bill of Material to be considered for manufacturing,Bill of Material untuk dipertimbangkan untuk manufaktur
 Bill of Materials (BOM),Bill of Material (BOM)
-Billable,Ditagih
+Billable,Dapat ditagih
 Billed,Ditagih
-Billed Amount,Ditagih Jumlah
-Billed Amt,Ditagih Amt
+Billed Amount,Jumlah Tagihan
+Billed Amt,Jumlah tagihan
 Billing,Penagihan
 Billing Address,Alamat Penagihan
-Billing Address Name,Alamat Penagihan Nama
+Billing Address Name,Nama Alamat Penagihan
 Billing Status,Status Penagihan
 Bills raised by Suppliers.,Bills diajukan oleh Pemasok.
-Bills raised to Customers.,Bills diangkat ke Pelanggan.
-Bin,Bin
+Bills raised to Customers.,Bills diajukan ke Pelanggan.
+Bin,Tong Sampah
 Bio,Bio
 Biotechnology,Bioteknologi
 Birthday,Ulang tahun
-Block Date,Blok Tanggal
-Block Days,Block Hari
-Block leave applications by department.,Memblokir aplikasi cuti oleh departemen.
+Block Date,Blokir Tanggal
+Block Days,Blokir Hari
+Block leave applications by department.,Memblokir aplikasi cuti berdasarkan departemen.
 Blog Post,Posting Blog
 Blog Subscriber,Blog Subscriber
-Blood Group,Kelompok darah
-Both Warehouse must belong to same Company,Kedua Gudang harus milik Perusahaan yang sama
+Blood Group,Golongan darah
+Both Warehouse must belong to same Company,Kedua Gudang harus merupakan gudang dari Perusahaan yang sama
 Box,Kotak
 Branch,Cabang
 Brand,Merek
 Brand Name,Merek Nama
 Brand master.,Master merek.
 Brands,Merek
-Breakdown,Kerusakan
+Breakdown,Rincian
 Broadcasting,Penyiaran
-Brokerage,Perdagangan perantara
+Brokerage,Memperantarai
 Budget,Anggaran belanja
 Budget Allocated,Anggaran Dialokasikan
-Budget Detail,Anggaran Detil
-Budget Details,Rincian Anggaran
+Budget Detail,Rincian Anggaran
+Budget Details,Rincian-rincian Anggaran
 Budget Distribution,Distribusi anggaran
-Budget Distribution Detail,Detil Distribusi Anggaran
-Budget Distribution Details,Rincian Distribusi Anggaran
-Budget Variance Report,Varians Anggaran Laporan
-Budget cannot be set for Group Cost Centers,Anggaran tidak dapat ditetapkan untuk Biaya Pusat Grup
+Budget Distribution Detail,Rincian Distribusi Anggaran
+Budget Distribution Details,Rincian-rincian Distribusi Anggaran
+Budget Variance Report,Laporan Perbedaan Anggaran
+Budget cannot be set for Group Cost Centers,Anggaran tidak dapat ditetapkan untuk Cost Centernya Grup
 Build Report,Buat Laporan
 Bundle items at time of sale.,Bundel item pada saat penjualan.
 Business Development Manager,Business Development Manager
 Buying,Pembelian
-Buying & Selling,Jual Beli &
-Buying Amount,Membeli Jumlah
-Buying Settings,Membeli Pengaturan
-"Buying must be checked, if Applicable For is selected as {0}","Membeli harus diperiksa, jika Berlaku Untuk dipilih sebagai {0}"
+Buying & Selling,Pembelian & Penjualan
+Buying Amount,Jumlah Pembelian
+Buying Settings,Setting Pembelian
+"Buying must be checked, if Applicable For is selected as {0}","Membeli harus dicentang, jika ""Berlaku Untuk"" dipilih sebagai {0}"
 C-Form,C-Form
 C-Form Applicable,C-Form Berlaku
 C-Form Invoice Detail,C-Form Faktur Detil
@@ -422,21 +424,21 @@ CENVAT Service Tax Cess 1,Cenvat Pelayanan Pajak Cess 1
 CENVAT Service Tax Cess 2,Cenvat Pelayanan Pajak Cess 2
 Calculate Based On,Hitung Berbasis On
 Calculate Total Score,Hitung Total Skor
-Calendar Events,Kalender Acara
+Calendar Events,Acara
 Call,Panggilan
 Calls,Panggilan
-Campaign,Kampanye
-Campaign Name,Nama Kampanye
-Campaign Name is required,Nama Kampanye diperlukan
-Campaign Naming By,Kampanye Penamaan Dengan
-Campaign-.####,Kampanye-.# # # #
+Campaign,Promosi
+Campaign Name,Nama Promosi
+Campaign Name is required,Nama Promosi diperlukan
+Campaign Naming By,Penamaan Promosi dengan
+Campaign-.####,Promosi-.# # # #
 Can be approved by {0},Dapat disetujui oleh {0}
-"Can not filter based on Account, if grouped by Account","Tidak dapat menyaring berdasarkan Account, jika dikelompokkan berdasarkan Rekening"
-"Can not filter based on Voucher No, if grouped by Voucher","Tidak dapat menyaring berdasarkan Voucher Tidak, jika dikelompokkan berdasarkan Voucher"
+"Can not filter based on Account, if grouped by Account","Tidak dapat memfilter berdasarkan Account, jika dikelompokkan berdasarkan Account"
+"Can not filter based on Voucher No, if grouped by Voucher","Tidak dapat memfilter berdasarkan No. Voucher, jika dikelompokkan berdasarkan Voucher"
 Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total',Dapat merujuk baris hanya jika jenis biaya adalah 'On Sebelumnya Row Jumlah' atau 'Sebelumnya Row Jumlah'
-Cancel Material Visit {0} before cancelling this Customer Issue,Batal Bahan Visit {0} sebelum membatalkan ini Issue Pelanggan
+Cancel Material Visit {0} before cancelling this Customer Issue,Batalkan Kunjungan {0} sebelum membatalkan Keluhan Pelanggan
 Cancel Material Visits {0} before cancelling this Maintenance Visit,Batal Kunjungan Material {0} sebelum membatalkan ini Maintenance Visit
-Cancelled,Cancelled
+Cancelled,Dibatalkan
 Cancelling this Stock Reconciliation will nullify its effect.,Membatalkan ini Stock Rekonsiliasi akan meniadakan efeknya.
 Cannot Cancel Opportunity as Quotation Exists,Tidak bisa Batal Peluang sebagai Quotation Exists
 Cannot approve leave as you are not authorized to approve leaves on Block Dates,Tidak dapat menyetujui cuti karena Anda tidak berwenang untuk menyetujui daun di Blok Dates
@@ -3239,16 +3241,16 @@ Wrong Template: Unable to find head row.,Template yang salah: Tidak dapat menemu
 Year,Tahun
 Year Closed,Tahun Ditutup
 Year End Date,Tanggal Akhir Tahun
-Year Name,Tahun Nama
-Year Start Date,Tahun Tanggal Mulai
+Year Name,Nama Tahun
+Year Start Date,Tanggal Mulai Tahun
 Year of Passing,Tahun Passing
 Yearly,Tahunan
 Yes,Ya
 You are not authorized to add or update entries before {0},Anda tidak diizinkan untuk menambah atau memperbarui entri sebelum {0}
-You are not authorized to set Frozen value,Anda tidak diizinkan untuk menetapkan nilai Beku
-You are the Expense Approver for this record. Please Update the 'Status' and Save,Anda adalah Approver Beban untuk catatan ini. Silakan Update 'Status' dan Simpan
-You are the Leave Approver for this record. Please Update the 'Status' and Save,Anda adalah Leave Approver untuk catatan ini. Silakan Update 'Status' dan Simpan
-You can enter any date manually,Anda dapat memasukkan setiap tanggal secara manual
+You are not authorized to set Frozen value,Anda tidak diizinkan untuk menetapkan nilai yg sedang dibekukan
+You are the Expense Approver for this record. Please Update the 'Status' and Save,Anda adalah Approver Beban untuk record ini. Silakan Update 'Status' dan Simpan
+You are the Leave Approver for this record. Please Update the 'Status' and Save,Anda adalah Leave Approver untuk record ini. Silakan Update 'Status' dan Simpan
+You can enter any date manually,Anda dapat memasukkan tanggal apapun secara manual
 You can enter the minimum quantity of this item to be ordered.,Anda dapat memasukkan jumlah minimum dari item ini yang akan dipesan.
 You can not change rate if BOM mentioned agianst any item,Anda tidak dapat mengubah tingkat jika BOM disebutkan agianst item
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Anda tidak dapat memasukkan kedua Delivery Note ada dan Faktur Penjualan No Masukkan salah satu.

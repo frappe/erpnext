@@ -56,49 +56,49 @@ Account Created: {0},Ο λογαριασμός δημιουργήθηκε : {0}
 Account Details,Στοιχεία Λογαριασμού
 Account Head,Επικεφαλής λογαριασμού
 Account Name,Όνομα λογαριασμού
-Account Type,Είδος Λογαριασμού
+Account Type,Τύπος Λογαριασμού
 "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Το υπόλοιπο του λογαριασμού είναι ήδη πιστωτικό, δεν επιτρέπεται να ρυθμίσετε το «Υπόλοιπο πρέπει να είναι χρεωστικό»"
-"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Το υπόλοιπο του λογαριασμού ήδη χρεωστικό, δεν μπορείτε να ρυθμίσετε το 'Υπόλοιπο πρέπει να είναι ως Δάνειο »"
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Το υπόλοιπο του λογαριασμού είναι ήδη χρεωστικό, δεν μπορείτε να ρυθμίσετε το 'Υπόλοιπο πρέπει να είναι' ως 'Πιστωτικό' "
 Account for the warehouse (Perpetual Inventory) will be created under this Account.,Λογαριασμός για την αποθήκη ( Perpetual Απογραφή ) θα δημιουργηθεί στο πλαίσιο του παρόντος λογαριασμού.
 Account head {0} created,Κεφάλι Λογαριασμός {0} δημιουργήθηκε
 Account must be a balance sheet account,Ο λογαριασμός πρέπει να είναι λογαριασμός του ισολογισμού
 Account with child nodes cannot be converted to ledger,Λογαριασμός με κόμβους παιδί δεν μπορεί να μετατραπεί σε καθολικό
-Account with existing transaction can not be converted to group.,Ο λογαριασμός με τις υπάρχουσες συναλλαγή δεν μπορεί να μετατραπεί σε ομάδα .
-Account with existing transaction can not be deleted,Ο λογαριασμός με τις υπάρχουσες συναλλαγή δεν μπορεί να διαγραφεί
-Account with existing transaction cannot be converted to ledger,Ο λογαριασμός με τις υπάρχουσες συναλλαγή δεν μπορεί να μετατραπεί σε καθολικό
-Account {0} cannot be a Group,Ο λογαριασμός {0} δεν μπορεί να είναι μια ομάδα
+Account with existing transaction can not be converted to group.,Ο λογαριασμός με υπάρχουσα συναλλαγή δεν μπορεί να μετατραπεί σε ομάδα .
+Account with existing transaction can not be deleted,Ο λογαριασμός με υπάρχουσα συναλλαγή δεν μπορεί να διαγραφεί
+Account with existing transaction cannot be converted to ledger,Ο λογαριασμός με υπάρχουσα συναλλαγή δεν μπορεί να μετατραπεί σε καθολικό
+Account {0} cannot be a Group,Ο λογαριασμός {0} δεν μπορεί να είναι ομάδα
 Account {0} does not belong to Company {1},Ο λογαριασμός {0} δεν ανήκει στη Εταιρεία {1}
 Account {0} does not belong to company: {1},Ο λογαριασμός {0} δεν ανήκει στην εταιρεία: {1}
 Account {0} does not exist,Ο λογαριασμός {0} δεν υπάρχει
 Account {0} has been entered more than once for fiscal year {1},Ο λογαριασμός {0} έχει εισαχθεί περισσότερες από μία φορά για το οικονομικό έτος {1}
 Account {0} is frozen,Ο λογαριασμός {0} έχει παγώσει
-Account {0} is inactive,Ο λογαριασμός {0} είναι ανενεργό
-Account {0} is not valid,Ο λογαριασμός {0} δεν είναι έγκυρη
+Account {0} is inactive,Ο λογαριασμός {0} είναι ανενεργός
+Account {0} is not valid,Ο λογαριασμός {0} δεν είναι έγκυρος
 Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Ο λογαριασμός {0} πρέπει να είναι του τύπου « Παγίων » ως σημείο {1} είναι ένα περιουσιακό στοιχείο Στοιχείο
 Account {0}: Parent account {1} can not be a ledger,Ο λογαριασμός {0}: Μητρική λογαριασμό {1} δεν μπορεί να είναι ένα καθολικό
 Account {0}: Parent account {1} does not belong to company: {2},Ο λογαριασμός {0}: Μητρική λογαριασμό {1} δεν ανήκει στην εταιρεία: {2}
 Account {0}: Parent account {1} does not exist,Ο λογαριασμός {0}: Μητρική λογαριασμό {1} δεν υπάρχει
 Account {0}: You can not assign itself as parent account,Ο λογαριασμός {0}: Δεν μπορεί η ίδια να εκχωρήσει ως μητρική λογαριασμού
 Account: {0} can only be updated via \					Stock Transactions,Λογαριασμός: {0} μπορεί να ενημερώνεται μόνο μέσω \ Χρηματιστηριακές Συναλλαγές Μετοχών
-Accountant,λογιστής
+Accountant,Λογιστής
 Accounting,Λογιστική
 "Accounting Entries can be made against leaf nodes, called","Λογιστικές εγγραφές μπορούν να γίνουν με κόμβους , που ονομάζεται"
 "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Λογιστική εγγραφή παγώσει μέχρι την ημερομηνία αυτή, κανείς δεν μπορεί να κάνει / τροποποιήσετε την είσοδο, εκτός από τον ρόλο που καθορίζεται παρακάτω."
 Accounting journal entries.,Λογιστικές εγγραφές περιοδικό.
 Accounts,Λογαριασμοί
-Accounts Browser,λογαριασμοί Browser
-Accounts Frozen Upto,Λογαριασμοί Κατεψυγμένα Μέχρι
-Accounts Payable,Λογαριασμοί πληρωτέοι
+Accounts Browser,Περιηγητής Λογαριασμων
+Accounts Frozen Upto,Παγωμένοι Λογαριασμοί Μέχρι
+Accounts Payable,Λογαριασμοί Πληρωτέοι
 Accounts Receivable,Απαιτήσεις από Πελάτες
 Accounts Settings,Λογαριασμοί Ρυθμίσεις
 Active,Ενεργός
 Active: Will extract emails from ,Active: Θα εξαγάγετε μηνύματα ηλεκτρονικού ταχυδρομείου από
 Activity,Δραστηριότητα
-Activity Log,Σύνδεση Δραστηριότητα
+Activity Log,Αρχείο-Καταγραφή Δραστηριότητας
 Activity Log:,Είσοδος Δραστηριότητα :
 Activity Type,Τύπος δραστηριότητας
 Actual,Πραγματικός
-Actual Budget,Πραγματικό προϋπολογισμό
+Actual Budget,Πραγματικός προϋπολογισμό
 Actual Completion Date,Πραγματική Ημερομηνία Ολοκλήρωσης
 Actual Date,Πραγματική Ημερομηνία
 Actual End Date,Πραγματική Ημερομηνία Λήξης
@@ -111,11 +111,11 @@ Actual Qty: Quantity available in the warehouse.,Πραγματική Ποσότ
 Actual Quantity,Πραγματική ποσότητα
 Actual Start Date,Πραγματική ημερομηνία έναρξης
 Add,Προσθήκη
-Add / Edit Taxes and Charges,Προσθήκη / Επεξεργασία Φόροι και τέλη
+Add / Edit Taxes and Charges,Προσθήκη / Επεξεργασία Φόρων και τέλών
 Add Child,Προσθήκη παιδιών
 Add Serial No,Προσθήκη Αύξων αριθμός
-Add Taxes,Προσθήκη Φόροι
-Add Taxes and Charges,Προσθήκη Φόροι και τέλη
+Add Taxes,Προσθήκη Φόρων
+Add Taxes and Charges,Προσθήκη Φόρων και Τελών
 Add or Deduct,Προσθήκη ή να αφαιρέσει
 Add rows to set annual budgets on Accounts.,Προσθέστε γραμμές να θέσουν ετήσιους προϋπολογισμούς σε λογαριασμούς.
 Add to Cart,Προσθήκη στο Καλάθι
@@ -125,22 +125,22 @@ Address,Διεύθυνση
 Address & Contact,Διεύθυνση &amp; Επικοινωνία
 Address & Contacts,Διεύθυνση &amp; Επικοινωνία
 Address Desc,Διεύθυνση ΦΘΕ
-Address Details,Λεπτομέρειες Διεύθυνση
+Address Details,Λεπτομέρειες Διεύθυνσης
 Address HTML,Διεύθυνση HTML
 Address Line 1,Διεύθυνση 1
-Address Line 2,Γραμμή διεύθυνσης 2
+Address Line 2,Γραμμή Διεύθυνσης 2
 Address Template,Διεύθυνση Πρότυπο
 Address Title,Τίτλος Διεύθυνση
-Address Title is mandatory.,Διεύθυνση τίτλου είναι υποχρεωτική .
-Address Type,Πληκτρολογήστε τη διεύθυνση
+Address Title is mandatory.,Ο τίτλος της Διεύθυνσης είναι υποχρεωτικός.
+Address Type,Τύπος Διεύθυνσης
 Address master.,Διεύθυνση πλοιάρχου .
-Administrative Expenses,έξοδα διοικήσεως
+Administrative Expenses,Έξοδα Διοικήσεως
 Administrative Officer,Διοικητικός Λειτουργός
-Advance Amount,Ποσό Advance
+Advance Amount,Ποσό Προκαταβολής
 Advance amount,Ποσό Advance
 Advances,Προκαταβολές
 Advertisement,Διαφήμιση
-Advertising,διαφήμιση
+Advertising,Διαφήμιση
 Aerospace,Aerospace
 After Sale Installations,Μετά Εγκαταστάσεις Πώληση
 Against,Κατά
@@ -214,13 +214,13 @@ Amended From,Τροποποίηση Από
 Amount,Ποσό
 Amount (Company Currency),Ποσό (νόμισμα της Εταιρείας)
 Amount Paid,Ποσό Αμειβόμενος
-Amount to Bill,Χρεώσιμο Ποσό
+Amount to Bill,Ποσό Χρέωσης
 An Customer exists with same name,Υπάρχει  πελάτης με το ίδιο όνομα
 "An Item Group exists with same name, please change the item name or rename the item group","Ένα σημείο της ομάδας υπάρχει με το ίδιο όνομα , μπορείτε να αλλάξετε το όνομα του στοιχείου ή να μετονομάσετε την ομάδα στοιχείου"
 "An item exists with same name ({0}), please change the item group name or rename the item","Ένα στοιχείο υπάρχει με το ίδιο όνομα ( {0} ) , παρακαλούμε να αλλάξετε το όνομα της ομάδας στοιχείου ή να μετονομάσετε το στοιχείο"
-Analyst,αναλυτής
-Annual,ετήσιος
-Another Period Closing Entry {0} has been made after {1},Μια άλλη Έναρξη Περιόδου Κλείσιμο {0} έχει γίνει μετά από {1}
+Analyst,Αναλυτής
+Annual,Ετήσιος
+Another Period Closing Entry {0} has been made after {1},Μια ακόμη εισαγωγή Κλεισίματος Περιόδου {0} έχει γίνει μετά από {1}
 Another Salary Structure {0} is active for employee {0}. Please make its status 'Inactive' to proceed.,Μια άλλη δομή Μισθός είναι {0} ενεργό για εργαζόμενο {0} . Παρακαλώ κάνετε το καθεστώς της « Ανενεργός » για να προχωρήσετε .
 "Any other comments, noteworthy effort that should go in the records.","Οποιαδήποτε άλλα σχόλια, αξιοσημείωτη προσπάθεια που θα πρέπει να πάει στα αρχεία."
 Apparel & Accessories,Ένδυση & Αξεσουάρ
@@ -232,20 +232,20 @@ Applicable To (Designation),Που ισχύουν για (Ονομασία)
 Applicable To (Employee),Που ισχύουν για (Υπάλληλος)
 Applicable To (Role),Που ισχύουν για (Ρόλος)
 Applicable To (User),Που ισχύουν για (User)
-Applicant Name,Όνομα Αιτών
-Applicant for a Job.,Αίτηση εργασίας.
+Applicant Name,Όνομα Αιτούντα
+Applicant for a Job.,Αίτηση για εργασία
 Application of Funds (Assets),Εφαρμογή των Ταμείων ( Ενεργητικό )
-Applications for leave.,Οι αιτήσεις για τη χορήγηση άδειας.
+Applications for leave.,Αιτήσεις για χορήγηση άδειας.
 Applies to Company,Ισχύει για την Εταιρεία
 Apply On,Εφαρμόστε την
 Appraisal,Εκτίμηση
 Appraisal Goal,Goal Αξιολόγηση
-Appraisal Goals,Στόχοι Αξιολόγηση
-Appraisal Template,Πρότυπο Αξιολόγηση
-Appraisal Template Goal,Αξιολόγηση Goal Template
-Appraisal Template Title,Αξιολόγηση Τίτλος Template
+Appraisal Goals,Στόχοι Αξιολόγησης
+Appraisal Template,Πρότυπο Αξιολόγησης
+Appraisal Template Goal,Στόχος Προτύπου Αξιολόγησης
+Appraisal Template Title,Τίτλος Προτύπου Αξιολόγησης
 Appraisal {0} created for Employee {1} in the given date range,Αξιολόγηση {0} δημιουργήθηκε υπάλληλου {1} στο συγκεκριμένο εύρος ημερομηνιών
-Apprentice,τσιράκι
+Apprentice,Μαθητευόμενος
 Approval Status,Κατάσταση έγκρισης
 Approval Status must be 'Approved' or 'Rejected',Κατάσταση έγκρισης πρέπει να « Εγκρίθηκε » ή « Rejected »
 Approved,Εγκρίθηκε
@@ -265,10 +265,10 @@ Assistant,Βοηθός
 Associate,Συνεργάτης
 Atleast one of the Selling or Buying must be selected,Πρέπει να επιλεγεί τουλάχιστον μία από τις πωλήσεις ή την αγορά
 Atleast one warehouse is mandatory,"Τουλάχιστον, μια αποθήκη είναι υποχρεωτική"
-Attach Image,Συνδέστε Image
-Attach Letterhead,Συνδέστε επιστολόχαρτο
-Attach Logo,Συνδέστε Logo
-Attach Your Picture,Προσαρμόστε την εικόνα σας
+Attach Image,Επισύναψη Εικόνας
+Attach Letterhead,Επισύναψη επιστολόχαρτου
+Attach Logo,Επισύναψη Logo
+Attach Your Picture,Επισύναψη της εικόνα σας
 Attendance,Παρουσία
 Attendance Date,Ημερομηνία Συμμετοχής
 Attendance Details,Λεπτομέρειες Συμμετοχής
@@ -281,20 +281,20 @@ Attendance record.,Καταχωρήσεις Προσέλευσης.
 Authorization Control,Έλεγχος Εξουσιοδότησης
 Authorization Rule,Κανόνας Εξουσιοδότησης
 Auto Accounting For Stock Settings,Auto Λογιστικά Για Ρυθμίσεις Χρηματιστήριο
-Auto Material Request,Αυτόματη Αίτηση Υλικό
+Auto Material Request,Αυτόματη Αίτηση Υλικού
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,Auto-raise Αίτηση Υλικό εάν η ποσότητα πέσει κάτω εκ νέου για το επίπεδο σε μια αποθήκη
-Automatically compose message on submission of transactions.,Αυτόματη συνθέτουν το μήνυμα για την υποβολή των συναλλαγών .
+Automatically compose message on submission of transactions.,Αυτόματη σύνθεση μηνύματος για την υποβολή συναλλαγών .
 Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box
 Automatically extract Leads from a mail box e.g.,"Αυτόματη εξαγωγή οδηγεί από ένα κουτί αλληλογραφίας , π.χ."
-Automatically updated via Stock Entry of type Manufacture/Repack,Αυτόματη ενημέρωση μέσω είσοδο στα αποθέματα Κατασκευή Τύπος / Repack
+Automatically updated via Stock Entry of type Manufacture/Repack,Αυτόματη ενημέρωση με την είσοδο αποθεμάτων Κατασκευή Τύπος / Repack
 Automotive,Αυτοκίνητο
-Autoreply when a new mail is received,Autoreply όταν λαμβάνονται νέα μηνύματα
+Autoreply when a new mail is received,Αυτόματη απάντηση όταν λαμβάνονται νέα μηνύματα
 Available,Διαθέσιμος
-Available Qty at Warehouse,Διαθέσιμο Ποσότητα στην Αποθήκη
-Available Stock for Packing Items,Διαθέσιμο Διαθέσιμο για είδη συσκευασίας
+Available Qty at Warehouse,Διαθέσιμη Ποσότητα στην Αποθήκη
+Available Stock for Packing Items,Διαθέσιμο απόθεμα για είδη συσκευασίας
 "Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","Διατίθεται σε BOM , Δελτίο Αποστολής , Τιμολόγιο Αγοράς , Παραγωγής Τάξης, Παραγγελία Αγοράς, Αγορά Παραλαβή , Πωλήσεις Τιμολόγιο , Πωλήσεις Τάξης , Stock Έναρξη , φύλλο κατανομής χρόνου"
 Average Age,Μέσος όρος ηλικίας
-Average Commission Rate,Μέση Τιμή Επιτροπής
+Average Commission Rate,Μέσος συντελεστής προμήθειας
 Average Discount,Μέση έκπτωση
 Awesome Products,Awesome Προϊόντα
 Awesome Services,Awesome Υπηρεσίες

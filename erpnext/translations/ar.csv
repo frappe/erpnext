@@ -1477,20 +1477,20 @@ Landed Cost Wizard,هبطت تكلفة معالج
 Landed Cost updated successfully,تحديث تكلفة هبطت بنجاح
 Language,لغة
 Last Name,اسم العائلة
-Last Purchase Rate,مشاركة الشراء قيم
+Last Purchase Rate,أخر سعر توريد
 Latest,آخر
-Lead,قيادة
-Lead Details,تفاصيل اعلان
-Lead Id,رقم الرصاص
-Lead Name,يؤدي اسم
-Lead Owner,يؤدي المالك
-Lead Source,تؤدي المصدر
-Lead Status,تؤدي الحالة
-Lead Time Date,تؤدي تاريخ الوقت
-Lead Time Days,يؤدي يوما مرة
+Lead,مبادرة بيع
+Lead Details,تفاصيل مبادرة بيع
+Lead Id,معرف مبادرة البيع
+Lead Name,اسم مبادرة البيع
+Lead Owner,مسئول مبادرة البيع
+Lead Source,مصدر مبادرة البيع
+Lead Status,حالة مبادرة البيع
+Lead Time Date,تاريخ و وقت مبادرة البيع
+Lead Time Days,يوم ووقت مبادرة البيع
 Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,يؤدي الوقت هو أيام عدد الأيام التي من المتوقع هذا البند في المستودع الخاص بك. يتم إحضار هذه الأيام في طلب المواد عند اختيار هذا البند.
-Lead Type,يؤدي النوع
-Lead must be set if Opportunity is made from Lead,يجب تعيين الرصاص إذا تم الفرص من الرصاص
+Lead Type,نوع مبادرة البيع
+Lead must be set if Opportunity is made from Lead,يجب تحديد مبادرة البيع اذ كانة فرصة البيع من مبادرة بيع 
 Leave Allocation,ترك توزيع
 Leave Allocation Tool,ترك أداة تخصيص
 Leave Application,ترك التطبيق
