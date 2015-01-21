@@ -46,15 +46,16 @@ class FixedAssetYearClose(Document):
 			data = get_report_data(str(self.financial_year_from), str(self.financial_year_to), \
 				self.company, fixed_asset_name)
 
-			total_depreciation_for_year = data[0][10]
+			total_depreciation_for_year = data[0]["total_depreciation_for_current_year"]
 
 			total_depreciation = total_depreciation + total_depreciation_for_year
-			depr_provided_till_last_year = data[0][7]
+			depr_provided_till_last_year = data[0]["opening_depreciation"]
 
 			account = frappe.get_doc("Fixed Asset Account", fixed_asset_name)
 			dep = account.append("depreciation")
 			dep.fiscal_year = self.fiscal_year
-			dep.total_accumulated_depreciation = total_depreciation_for_year+depr_provided_till_last_year
+			dep.total_accumulated_depreciation = total_depreciation_for_year +\
+				depr_provided_till_last_year
 			account.save()
 
 			td1 = jv.append("accounts")

@@ -16,6 +16,12 @@ frappe.query_reports["Fixed Asset Depreciation Report"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("company")
+		},
+		{
+			"fieldname":"expand_levels",
+			"label": __("Expand All Levels"),
+			"fieldtype": "Check",
+			"default": 0
 		}
 	]
 }

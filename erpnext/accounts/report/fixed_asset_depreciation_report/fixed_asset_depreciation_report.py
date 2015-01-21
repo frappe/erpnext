@@ -10,7 +10,8 @@ from erpnext.accounts.doctype.fixed_asset_account.depreciation_report \
 
 def execute(filters=None):
     finyrfrom, finyrto = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
-    data = get_report_data(financial_year_from = str(finyrfrom), financial_year_to = str(finyrto), company = filters["company"])
+    data = get_report_data(financial_year_from = str(finyrfrom), \
+		financial_year_to = str(finyrto), company = filters["company"], expand_levels=filters.expand_levels)
     columns = get_report_columns(financial_year_from = str(finyrfrom), financial_year_to = str(finyrto))
 
     return columns, data
