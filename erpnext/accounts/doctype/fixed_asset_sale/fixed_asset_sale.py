@@ -29,7 +29,6 @@ class FixedAssetSale(Document):
 		td2.set('debit', float(self.sales_amount))
 
 		td5 = jv.append("accounts")
-		# td5.account = frappe.db.get_value("Fixed Asset Account", self.fixed_asset_account,"fixed_asset_account")
 		td5.account = frappe.get_doc("Company", self.company).default_accumulated_depreciation_account
 		td5.set('debit', float(self.accumulated_depreciation))
 

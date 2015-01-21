@@ -14,7 +14,7 @@ def get_date_difference_in_days(d1, d2):
     return abs((d2 - d1).days)
 
 class Depreciation:
-	def __init__(self,financial_year_from, financial_year_to, company, fixed_asset=None):
+	def __init__(self,financial_year_from, financial_year_to, company, fixed_asset=None, expand_levels=False):
 		self.financial_year_from = datetime.strptime(financial_year_from, "%Y-%m-%d").date()
 		self.financial_year_to = datetime.strptime(financial_year_to, "%Y-%m-%d").date()
 		self.day_before_start = self.financial_year_from - timedelta (days=1)    
@@ -22,6 +22,9 @@ class Depreciation:
 		self.depreciation_method = frappe.get_doc("Company", company).default_depreciation_method
 		self.fixed_asset = fixed_asset
 		self.set_totals_to_zero()
+		self.expand_levels = expand_levels
+		if fixed_asset:
+			self.expand_levels = True
 
 	
 	def set_totals_to_zero(self):
@@ -110,12 +113,16 @@ class Depreciation:
 
 	        asset_value_dict['depreciation_written_back'] = self.get_depreciation_written_back(asset_value_dict)
 
-		asset_value_dict['depreciation_provided_this_year'] = self.get_depr_provided_this_year(asset_value_dict, assets)
+		asset_value_dict['depreciation_provided_this_year'] = \
+			self.get_depreciation_provided_this_year(assets, asset_value_dict)
+
+		self.do_depreciation_total(asset_value_dict)
 
 		if asset_value_dict['total_purchases_during_the_year'] + \
 			asset_value_dict['purchase_cost_at_year_start'] > 0:			
-				data.append(self.build_row(assets, asset_value_dict))
-				self.calculate_total(asset_value_dict, assets.fixed_asset_account, data)	
+				if self.expand_levels==True:
+					data.append(self.build_row(assets, asset_value_dict))
+		self.calculate_total(asset_value_dict, assets.fixed_asset_account, data)	
 
   	    self.calculate_total(asset_value_dict, assets.fixed_asset_account, data, True)	
 
@@ -187,7 +194,7 @@ class Depreciation:
 	   return 0
 
 
-	def get_depr_provided_this_year(self, dict_value, asset):
+	def get_depreciation_provided_this_year(self, asset, dict_value):
 		purchase_less_depreciation = asset.gross_purchase_value -\
 			 dict_value['depreciation_provided_till_last_year']
 		if self.depreciation_method == "Written Down" or \
@@ -204,56 +211,61 @@ class Depreciation:
 		elif self.depreciation_method=="Straight Line":
 			return 0
 
+	def do_depreciation_total(self, dict_value):
+		dict_value['total_accumulated_depreciation_till_year_end'] = \
+				((dict_value['depreciation_provided_till_last_year'] + \
+				dict_value['depreciation_provided_this_year'] + \
+				dict_value['depreciation_provided_on_purchases']) - \
+				dict_value['depreciation_written_back'])
+
+		dict_value['total_asset_value_at_year_end'] = \
+				((dict_value['purchase_cost_at_year_start'] + \
+				dict_value['total_purchases_during_the_year']) - \
+				dict_value['total_sales_during_the_year'])
+
 
 	def build_row(self, asset, dict_value):
 
-		total_accumulated_depreciation_till_year_end = flt(((dict_value['depreciation_provided_till_last_year'] + \
-			dict_value['depreciation_provided_this_year'] + \
-			dict_value['depreciation_provided_on_purchases']) - \
-			dict_value['depreciation_written_back']),2)
+		return {
+			"fixed_asset_name": asset.fixed_asset_name,
+			"fixed_asset_account": asset.fixed_asset_account,
+			"rate_of_depreciation": asset.depreciation_rate,
+			"cost_as_on": dict_value['purchase_cost_at_year_start'],
 
-		total_asset_value_at_year_end = flt(((dict_value['purchase_cost_at_year_start'] + \
-			dict_value['total_purchases_during_the_year']) - \
-			dict_value['total_sales_during_the_year']),2)
+			"purchases": dict_value['total_purchases_during_the_year'],
 
-		return [asset.fixed_asset_name,
-			asset.fixed_asset_account,
-			asset.depreciation_rate,
-			flt(dict_value['purchase_cost_at_year_start'],2),
+			"sales": dict_value['total_sales_during_the_year'],
 
-			flt(dict_value['total_purchases_during_the_year'],2),
+			"closing_cost": dict_value['total_asset_value_at_year_end'],
 
-			flt(dict_value['total_sales_during_the_year'],2),
+			"opening_depreciation": dict_value['depreciation_provided_till_last_year'],
 
-			total_asset_value_at_year_end,
+			"depreciation_provided_on_opening_current_year": \
+					dict_value['depreciation_provided_this_year'],
 
-			flt(dict_value['depreciation_provided_till_last_year'],2),
+			"depreciation_provided_on_purchase_current_year": \
+					dict_value['depreciation_provided_on_purchases'],
 
-			dict_value['depreciation_provided_this_year'],
+			"total_depreciation_for_current_year": \
+				dict_value['depreciation_provided_on_opening_purchase_cost']+\
+				dict_value['depreciation_provided_on_purchases'],
 
-			flt(dict_value['depreciation_provided_on_purchases'],2),
+			"depreciation_written_back": \
+				dict_value['depreciation_written_back'],
 
-			flt(dict_value['depreciation_provided_on_opening_purchase_cost']+\
-				dict_value['depreciation_provided_on_purchases'],2),
+			"total_accumulated_depreciation": \
+				dict_value['total_accumulated_depreciation_till_year_end'],
 
-			flt(dict_value['depreciation_written_back'],2),
+			"net_closing_value": \
+				dict_value['total_asset_value_at_year_end'] - \
+				dict_value['total_accumulated_depreciation_till_year_end'],
 
-			total_accumulated_depreciation_till_year_end,
-
-			total_asset_value_at_year_end - total_accumulated_depreciation_till_year_end,
-
-			flt(dict_value['purchase_cost_at_year_start'] - \
-				dict_value['depreciation_provided_till_last_year'],2)]
+			"net_opening_value": \
+				dict_value['purchase_cost_at_year_start'] - \
+				dict_value['depreciation_provided_till_last_year']
+		       }
 
 	def calculate_total(self, dict_value, group_name, data, end=False):
-		total_accumulated_depreciation_till_year_end = flt(((dict_value['depreciation_provided_till_last_year'] + \
-			dict_value['depreciation_provided_this_year'] + \
-			dict_value['depreciation_provided_on_purchases']) - \
-			dict_value['depreciation_written_back']),2)
-
-		total_asset_value_at_year_end = flt(((dict_value['purchase_cost_at_year_start'] + \
-			dict_value['total_purchases_during_the_year']) - \
-			dict_value['total_sales_during_the_year']),2)
 
 		if (self.old_group_name != group_name or end==True) and self.fixed_asset==None:
 			data.append(self.get_total_row(self.old_group_name))
@@ -261,38 +273,52 @@ class Depreciation:
 			self.set_totals_to_zero()
 
 		self.group_total_year_start_purchase_cost += dict_value['purchase_cost_at_year_start']
+
 		self.group_total_purchases_in_the_year += dict_value['total_purchases_during_the_year']
+
 		self.group_total_sales_in_the_year += dict_value['total_sales_during_the_year']
-		self.group_total_asset_value_at_year_end += total_asset_value_at_year_end
+
+		self.group_total_asset_value_at_year_end += dict_value['total_asset_value_at_year_end']
+
 		self.group_total_depreciation_till_last_year += dict_value['depreciation_provided_till_last_year']
+
 		self.group_total_depreciation_in_the_year += dict_value['depreciation_provided_this_year']
+
 		self.group_total_depreciation_on_purchase_in_year += dict_value['depreciation_provided_on_purchases']
+
 		self.group_total_deprecitaion_this_year += dict_value['depreciation_provided_on_opening_purchase_cost']+\
 				dict_value['depreciation_provided_on_purchases']
+
 		self.group_total_depreciation_written_back += dict_value['depreciation_written_back']
-		self.group_total_accumulated_depreciation_at_year_end += total_accumulated_depreciation_till_year_end
-		self.group_total_net_closing += total_asset_value_at_year_end - \
-				total_accumulated_depreciation_till_year_end
+
+		self.group_total_accumulated_depreciation_at_year_end += \
+				dict_value['total_accumulated_depreciation_till_year_end']
+
+		self.group_total_net_closing += dict_value['total_asset_value_at_year_end'] - \
+				dict_value['total_accumulated_depreciation_till_year_end']
+
 		self.group_total_net_opening += dict_value['purchase_cost_at_year_start'] - \
 				dict_value['depreciation_provided_till_last_year']
 
 
 	def get_total_row(self, group_name):
-			return [group_name,
+			return [
 				'',
+				group_name,
 				'',
-				flt(self.group_total_year_start_purchase_cost,2),
-				flt(self.group_total_purchases_in_the_year,2),
-				flt(self.group_total_sales_in_the_year,2),
-				flt(self.group_total_asset_value_at_year_end,2),
-				flt(self.group_total_depreciation_till_last_year,2),
-				flt(self.group_total_depreciation_in_the_year,2),
-				flt(self.group_total_depreciation_on_purchase_in_year,2),
-				flt(self.group_total_deprecitaion_this_year,2),
-				flt(self.group_total_depreciation_written_back,2),
-				flt(self.group_total_accumulated_depreciation_at_year_end,2),
-				flt(self.group_total_net_closing,2),
-				flt(self.group_total_net_opening,2)]
+				self.group_total_year_start_purchase_cost,
+				self.group_total_purchases_in_the_year,
+				self.group_total_sales_in_the_year,
+				self.group_total_asset_value_at_year_end,
+				self.group_total_depreciation_till_last_year,
+				self.group_total_depreciation_in_the_year,
+				self.group_total_depreciation_on_purchase_in_year,
+				self.group_total_deprecitaion_this_year,
+				self.group_total_depreciation_written_back,
+				self.group_total_accumulated_depreciation_at_year_end,
+				self.group_total_net_closing,
+				self.group_total_net_opening
+			      ]
 
 
 	def get_start_group_name(self):
@@ -432,8 +458,8 @@ def get_report_columns(financial_year_from, financial_year_to):
     return columns
     
 
-def get_report_data(financial_year_from, financial_year_to, company, fixed_asset=None):
-    depreciation = Depreciation(financial_year_from, financial_year_to, company, fixed_asset)
+def get_report_data(financial_year_from, financial_year_to, company, fixed_asset=None, expand_levels=False):
+    depreciation = Depreciation(financial_year_from, financial_year_to, company, fixed_asset, expand_levels)
     return depreciation.run()
 
 
