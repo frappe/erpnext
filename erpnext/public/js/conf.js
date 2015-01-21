@@ -7,7 +7,7 @@ frappe.provide('erpnext');
 $(document).bind('toolbar_setup', function() {
 	frappe.app.name = "ERPNext";
 
-	$('.navbar-brand').html('<i class="octicon octicon-home visible-xs"></i><span class="hidden-xs">ERPNext</span>');
+	$('.navbar-home').html('ERPNext');
 
 	$('[data-link="docs"]').attr("href", "https://erpnext.com/user-guide")
 });
