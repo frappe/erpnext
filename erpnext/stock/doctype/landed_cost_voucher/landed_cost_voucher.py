@@ -7,9 +7,6 @@ from frappe import _
 from frappe.utils import flt
 from frappe.model.document import Document
 
-from erpnext.stock.utils import get_valuation_method
-from erpnext.stock.stock_ledger import get_previous_sle
-
 class LandedCostVoucher(Document):
 	def get_items_from_purchase_receipts(self):
 		self.set("landed_cost_items", [])
@@ -69,10 +66,11 @@ class LandedCostVoucher(Document):
 		self.total_taxes_and_charges = sum([flt(d.amount) for d in self.get("landed_cost_taxes_and_charges")])
 
 	def set_applicable_charges_for_item(self):
-		total_item_cost = sum([flt(d.amount) for d in self.get("landed_cost_items")])
+		based_on = self.distribute_charges_based_on.lower()
+		total = sum([flt(d.get(based_on)) for d in self.get("landed_cost_items")])
 
 		for item in self.get("landed_cost_items"):
-			item.applicable_charges = flt(item.amount) *  flt(self.total_taxes_and_charges) / flt(total_item_cost)
+			item.applicable_charges = flt(item.get(based_on)) *  flt(self.total_taxes_and_charges) / flt(total)
 
 	def on_submit(self):
 		self.update_landed_cost()
@@ -92,13 +90,16 @@ class LandedCostVoucher(Document):
 			pr.update_valuation_rate("purchase_receipt_details")
 
 			# save will update landed_cost_voucher_amount and voucher_amount in PR,
-			# as those fields are ellowed to edit after submit
+			# as those fields are allowed to edit after submit
 			pr.save()
 
-			# update stock & gl entries for cancelled state of PR
-			pr.docstatus = 2
-			pr.update_stock_ledger()
-			pr.make_gl_entries_on_cancel()
+			# delete stock ledger entries & gl entries for cancelled state of PR
+
+			frappe.db.sql("""delete from `tabStock Ledger Entry`
+				where voucher_type='Purchase Receipt' and voucher_no=%s""", pr.name)
+
+			frappe.db.sql("""delete from `tabGL Entry`
+				where voucher_type='Purchase Receipt' and voucher_no=%s""", pr.name)
 
 			# update stock & gl entries for submit state of PR
 			pr.docstatus = 1
