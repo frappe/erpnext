@@ -14,7 +14,7 @@ class NegativeStockError(frappe.ValidationError): pass
 _exceptions = frappe.local('stockledger_exceptions')
 # _exceptions = []
 
-def make_sl_entries(sl_entries, is_amended=None):
+def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False):
 	if sl_entries:
 		from erpnext.stock.utils import update_bin
 
@@ -35,7 +35,7 @@ def make_sl_entries(sl_entries, is_amended=None):
 				"sle_id": sle_id,
 				"is_amended": is_amended
 			})
-			update_bin(args)
+			update_bin(args, allow_negative_stock)
 
 		if cancel:
 			delete_cancelled_entry(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
@@ -58,7 +58,7 @@ def delete_cancelled_entry(voucher_type, voucher_no):
 	frappe.db.sql("""delete from `tabStock Ledger Entry`
 		where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
-def update_entries_after(args, allow_zero_rate=False, verbose=1):
+def update_entries_after(args, allow_zero_rate=False, allow_negative_stock=False, verbose=1):
 	"""
 		update valution rate and qty after transaction
 		from the current time-bucket onwards
@@ -72,6 +72,9 @@ def update_entries_after(args, allow_zero_rate=False, verbose=1):
 	"""
 	if not _exceptions:
 		frappe.local.stockledger_exceptions = []
+
+	if not allow_negative_stock:
+		allow_negative_stock = cint(frappe.db.get_default("allow_negative_stock"))
 
 	previous_sle = get_sle_before_datetime(args)
 
@@ -87,7 +90,7 @@ def update_entries_after(args, allow_zero_rate=False, verbose=1):
 	stock_value_difference = 0.0
 
 	for sle in entries_to_fix:
-		if sle.serial_no or not cint(frappe.db.get_default("allow_negative_stock")):
+		if sle.serial_no or not allow_negative_stock:
 			# validate negative stock for serialized items, fifo valuation
 			# or when negative stock is not allowed for moving average
 			if not validate_negative_stock(qty_after_transaction, sle):

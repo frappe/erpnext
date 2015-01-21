@@ -23,7 +23,7 @@ class Bin(Document):
 			if (not getattr(self, f, None)) or (not self.get(f)):
 				self.set(f, 0.0)
 
-	def update_stock(self, args):
+	def update_stock(self, args, allow_negative_stock=False):
 		self.update_qty(args)
 
 		if args.get("actual_qty") or args.get("voucher_type") == "Stock Reconciliation":
@@ -38,7 +38,7 @@ class Bin(Document):
 				"warehouse": self.warehouse,
 				"posting_date": args.get("posting_date"),
 				"posting_time": args.get("posting_time")
-			})
+			}, allow_negative_stock=allow_negative_stock)
 
 	def update_qty(self, args):
 		# update the stock values (for current quantities)

@@ -93,13 +93,10 @@ class LandedCostVoucher(Document):
 			# as those fields are allowed to edit after submit
 			pr.save()
 
-			# delete stock ledger entries & gl entries for cancelled state of PR
-
-			frappe.db.sql("""delete from `tabStock Ledger Entry`
-				where voucher_type='Purchase Receipt' and voucher_no=%s""", pr.name)
-
-			frappe.db.sql("""delete from `tabGL Entry`
-				where voucher_type='Purchase Receipt' and voucher_no=%s""", pr.name)
+			# update stock & gl entries for cancelled state of PR
+			pr.docstatus = 2
+			pr.update_stock_ledger(allow_negative_stock=True)
+			pr.make_gl_entries_on_cancel()
 
 			# update stock & gl entries for submit state of PR
 			pr.docstatus = 1
