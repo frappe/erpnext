@@ -91,3 +91,4 @@ erpnext.patches.v4_2.update_requested_and_ordered_qty
 execute:frappe.delete_doc("DocType", "Contact Control")
 erpnext.patches.v4_2.recalculate_bom_costs
 erpnext.patches.v4_2.discount_amount
+erpnext.patches.v4_2.update_landed_cost_voucher

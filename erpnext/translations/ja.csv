@@ -299,7 +299,7 @@ Average Discount,平均割引
 Awesome Products,素晴らしい製品
 Awesome Services,素晴らしいサービス
 BOM Detail No,部品表の詳細はありません
-BOM Explosion Item,BOM爆発アイテム
+BOM Explosion Item,部品表展開アイテム
 BOM Item,部品表の項目
 BOM No,部品表はありません
 BOM No. for a Finished Good Item,完成品アイテムの部品表番号
@@ -310,15 +310,15 @@ BOM number is required for manufactured Item {0} in row {1},部品表番号は{1
 BOM number not allowed for non-manufactured Item {0} in row {1},非製造されたアイテムのために許可されていない部品表番号は{0}行{1}
 BOM recursion: {0} cannot be parent or child of {2},部品表再帰：{0} {2}の親または子にすることはできません
 BOM replaced,部品表置き換え
-BOM {0} for Item {1} in row {2} is inactive or not submitted,BOMは{0}商品{1}の行に{2}が提出され、非アクティブであるかどう
-BOM {0} is not active or not submitted,BOMは{0}アクティブか提出していないではありません
-BOM {0} is not submitted or inactive BOM for Item {1},BOMは{0}商品{1}のために提出または非アクティブのBOMされていません
+BOM {0} for Item {1} in row {2} is inactive or not submitted,部品表は{0}項目ごとに{1}の行に{2}非アクティブか、提出されていない
+BOM {0} is not active or not submitted,BOMは{0}非アクティブか提出されていません。
+BOM {0} is not submitted or inactive BOM for Item {1},部品表は{0}{1}項目の部品表は提出されていないか非アクティブ
 Backup Manager,バックアップマネージャ
 Backup Right Now,今すぐバックアップ
 Backups will be uploaded to,バックアップをするとアップロードされます。
-Balance Qty,バランス数量
-Balance Sheet,バランスシート
-Balance Value,バランス値
+Balance Qty,残高数量
+Balance Sheet,貸借対照表
+Balance Value,価格のバランス
 Balance for Account {0} must always be {1},アカウントの残高は{0}は常に{1}でなければなりません
 Balance must be,残高がある必要があります
 "Balances of Accounts of type ""Bank"" or ""Cash""",タイプ「銀行」の口座の残高または「現金」
@@ -355,7 +355,7 @@ Batch Started Date,束の日付を開始
 Batch Time Logs for billing.,請求のための束のタイムログ。
 Batch-Wise Balance History,バッチ式残高記録
 Batched for Billing,請求の一括処理
-Better Prospects,より良い展望
+Better Prospects,いい見通し
 Bill Date,ビル日
 Bill No,請求はありません
 Bill No {0} already booked in Purchase Invoice {1},請求·いいえ{0}はすでに購入の請求書に計上{1}
@@ -371,8 +371,8 @@ Billing Address,請求先住所
 Billing Address Name,請求先住所の名前
 Billing Status,課金状況
 Bills raised by Suppliers.,サプライヤーが提起した請求書。
-Bills raised to Customers.,お客様に上げ法案。
-Bin,ビン
+Bills raised to Customers.,顧客に上がる請求
+Bin,Binary 
 Bio,自己紹介
 Biotechnology,バイオテクノロジー
 Birthday,誕生日
@@ -384,12 +384,12 @@ Blog Subscriber,ブログ購読者
 Blood Group,血液型
 Both Warehouse must belong to same Company,両方の倉庫は同じ会社に属している必要があります
 Box,ボックス
-Branch,ブランチ (branch)
+Branch,支店
 Brand,ブランド
 Brand Name,ブランド名
 Brand master.,ブランドのマスター。
 Brands,ブランド
-Breakdown,内訳
+Breakdown,故障
 Broadcasting,放送
 Brokerage,証券仲介
 Budget,予算
@@ -400,13 +400,13 @@ Budget Distribution,予算配分
 Budget Distribution Detail,予算配分の詳細
 Budget Distribution Details,予算配分の詳細
 Budget Variance Report,予算差異レポート
-Budget cannot be set for Group Cost Centers,予算はグループ原価センタの設定はできません
+Budget cannot be set for Group Cost Centers,予算は、グループの原価センターに設定することはできません。
 Build Report,レポートを作成
-Bundle items at time of sale.,販売時にアイテムをバンドル。
+Bundle items at time of sale.,販売時に商品をまとめる。
 Business Development Manager,ビジネス開発マネージャー
 Buying,買収
 Buying & Selling,購買＆販売
-Buying Amount,金額を購入
+Buying Amount,購入金額
 Buying Settings,[設定]を購入
 "Buying must be checked, if Applicable For is selected as {0}",適用のためには次のように選択されている場合の購入は、チェックする必要があります{0}
 C-Form,C-フォーム
@@ -435,7 +435,7 @@ Can be approved by {0},{0}によって承認することができます
 "Can not filter based on Voucher No, if grouped by Voucher",バウチャーに基づいてフィルタリングすることはできませんいいえ、クーポンごとにグループ化された場合
 Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total',または '前の行の合計' '前の行の量に「充電式である場合にのみ、行を参照することができます
 Cancel Material Visit {0} before cancelling this Customer Issue,この顧客の問題をキャンセルする前の材料の訪問{0}をキャンセル
-Cancel Material Visits {0} before cancelling this Maintenance Visit,このメンテナンス訪問をキャンセルする前の材料の訪問{0}をキャンセル
+Cancel Material Visits {0} before cancelling this Maintenance Visit,このメンテナンス訪問をキャンセル{0}する前に材料の訪問をキャンセル
 Cancelled,キャンセル済み
 Cancelling this Stock Reconciliation will nullify its effect.,このストック調整をキャンセルすると、その効果を無効にします。
 Cannot Cancel Opportunity as Quotation Exists,引用が存在する限り機会をキャンセルすることはできません
@@ -489,7 +489,7 @@ Check how the newsletter looks in an email by sending it to your email.,ニュ�
 "Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.",自動定期的な請求書を必要とするかどうかを確認します。いずれの売上請求書を提出した後、定期的なセクションは表示されます。
 Check if you want to send salary slip in mail to each employee while submitting salary slip,あなたが給料スリップを提出しながら、各従業員へのメール給与伝票を送信するかどうかを確認してください
 Check this if you want to force the user to select a series before saving. There will be no default if you check this.,あなたが保存する前に、一連の選択をユーザに強制したい場合は、これを確認してください。これをチェックするとデフォルトはありません。
-Check this if you want to show in website,あなたのウェブサイトに表示する場合は、これをチェックする
+Check this if you want to show in website,もしあなたのウェブサイトに表示する場合は、これをチェックしてください。
 Check this to disallow fractions. (for Nos),画分を許可しないように、これをチェックしてください。 （NOS用）
 Check this to pull emails from your mailbox,あなたのメールボックスからメールをプルするために、これをチェックする
 Check to activate,アクティブにするためにチェックする
@@ -515,7 +515,7 @@ Click on a link to get options to expand get options ,Click on a link to get opt
 Client,顧客
 Close Balance Sheet and book Profit or Loss.,貸借対照表と帳簿上の利益または損失を閉じる。
 Closed,閉じました。
-Closing (Cr),クロム（Cr）を閉じる
+Closing (Cr),（Cr）を閉じる
 Closing (Dr),（DR）を閉じる
 Closing Account Head,決算ヘッド
 Closing Account {0} must be of type 'Liability',アカウント{0}を閉じると、タイプ '責任'でなければなりません
@@ -531,30 +531,30 @@ Column Break,列の区切り
 Comma separated list of email addresses,コンマは、電子メールアドレスのリストを区切り
 Comment,コメント
 Comments,コメント
-Commercial,商用版
+Commercial,コマーシャル
 Commission,委員会
 Commission Rate,手数料率
 Commission Rate (%),手数料率（％）
 Commission on Sales,販売委員会
-Commission rate cannot be greater than 100,手数料率は、100を超えることはできません
+Commission rate cannot be greater than 100,手数料率は、100を超えることはできません。
 Communication,コミュニケーション
 Communication HTML,通信のHTML
 Communication History,通信履歴
 Communication log.,通信ログ。
 Communications,コミュニケーション
 Company,会社
-Company (not Customer or Supplier) master.,会社（ないお客様、またはサプライヤ）のマスター。
-Company Abbreviation,会社の略
+Company (not Customer or Supplier) master.,会社（顧客、又はサプライヤーではない）のマスター。
+Company Abbreviation,会社の省略
 Company Details,会社の詳細情報
 Company Email,会社の電子メール
 "Company Email ID not found, hence mail not sent",会社の電子メールIDが見つかりません、したがって送信されませんでした。
 Company Info,会社情報
 Company Name,（会社名）
 Company Settings,会社の設定
-Company is missing in warehouses {0},当社は、倉庫にありません{0}
-Company is required,当社は必要とされている
-Company registration numbers for your reference. Example: VAT Registration Numbers etc.,あなたの参照のための会社の登録番号。例：付加価値税登録番号など
-Company registration numbers for your reference. Tax numbers etc.,あなたの参照のための会社の登録番号。税番号など
+Company is missing in warehouses {0},会社は、倉庫にありません{0}
+Company is required,会社は必要です
+Company registration numbers for your reference. Example: VAT Registration Numbers etc.,あなたの参考のための会社の登録番号。例：付加価値税登録番号など…
+Company registration numbers for your reference. Tax numbers etc.,あなたの参考のための会社の登録番号。税番号など
 "Company, Month and Fiscal Year is mandatory",会社、月と年度は必須です
 Compensatory Off,代償オフ
 Complete,完了
@@ -1026,7 +1026,7 @@ Exports,輸出
 External,外部
 Extract Emails,電子メールを抽出します
 FCFS Rate,FCFSレート
-Failed: ,Failed: 
+Failed: ,失敗しました：
 Family Background,家族の背景
 Fax,ファックス
 Features Setup,特長のセットアップ
@@ -1048,7 +1048,7 @@ Financial Year Start Date,会計年度の開始日
 Finished Goods,完成品
 First Name,お名前（名）
 First Responded On,最初に奏効
-Fiscal Year,年度
+Fiscal Year,会計年度
 Fiscal Year Start Date and Fiscal Year End Date are already set in Fiscal Year {0},当連結会計年度の開始日と会計年度終了日は、すでに会計年度に設定されている{0}
 Fiscal Year Start Date and Fiscal Year End Date cannot be more than a year apart.,当連結会計年度の開始日と会計年度終了日は離れて年を超えることはできません。
 Fiscal Year Start Date should not be greater than Fiscal Year End Date,当連結会計年度の開始日が会計年度終了日を超えてはならない
@@ -1061,7 +1061,7 @@ Food,食べ物
 "For 'Sales BOM' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Sales BOM' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.",「販売のBOM」のアイテム、倉庫、シリアル番号およびバッチには 'をパッキングリスト」テーブルから考慮されます。倉庫とバッチいいえ任意の「販売のBOM」の項目のすべての梱包項目について同じである場合、これらの値は、メインアイテムテーブルに入力することができ、値が「パッキングリスト」テーブルにコピーされます。
 For Company,会社のために
 For Employee,従業員の
-For Employee Name,従業員名用
+For Employee Name,従業員名の
 For Price List,価格表のための
 For Production,生産のための
 For Reference Only.,参考値。
@@ -1080,30 +1080,30 @@ Freeze Stock Entries,フリーズ証券のエントリー
 Freeze Stocks Older Than [Days],[日]より古い株式を凍結する
 Freight and Forwarding Charges,貨物および転送料金
 Friday,金曜日
-From,はじまり
+From,から
 From Bill of Materials,部品表から
 From Company,会社から
 From Currency,通貨から
 From Currency and To Currency cannot be same,通貨から通貨へ同じにすることはできません
 From Customer,顧客から
 From Customer Issue,お客様の問題から
-From Date,日
+From Date,日から
 From Date cannot be greater than To Date,日から日へより大きくすることはできません
 From Date must be before To Date,日付から日付の前でなければなりません
 From Date should be within the Fiscal Year. Assuming From Date = {0},日から年度内にする必要があります。日から仮定する= {0}
 From Delivery Note,納品書から
 From Employee,社員から
-From Lead,鉛を
+From Lead,鉛から
 From Maintenance Schedule,メンテナンススケジュールから
-From Material Request,素材要求から
-From Opportunity,オポチュニティから
+From Material Request,素材リクエストから
+From Opportunity,機会から
 From Package No.,パッケージ番号から
 From Purchase Order,発注から
 From Purchase Receipt,購入時の領収書から
 From Quotation,見積りから
 From Sales Order,受注から
 From Supplier Quotation,サプライヤー見積から
-From Time,時から
+From Time,時間から
 From Value,値から
 From and To dates required,から、必要な日数に
 From value must be less than to value in row {0},値から行の値以下でなければなりません{0}
@@ -1183,10 +1183,10 @@ Half Day,半日
 Half Yearly,半年ごとの
 Half-yearly,半年ごとの
 Happy Birthday!,お誕生日おめでとう！
-Hardware,size
-Has Batch No,バッチ番号があります
-Has Child Node,子ノードを持って
-Has Serial No,シリアル番号を持っている
+Hardware,ハードウェア
+Has Batch No,束の番号があります
+Has Child Node,子ノードがあります
+Has Serial No,シリアル番号があります
 Head of Marketing and Sales,マーケティングおよび販売部長
 Header,ヘッダー
 Health Care,健康管理
@@ -1208,7 +1208,7 @@ Holiday master.,休日のマスター。
 Holidays,休日
 Home,ホーム
 Host,ホスト
-"Host, Email and Password required if emails are to be pulled",メールが引っ張られるのであれば必要なホスト、メールとパスワード
+"Host, Email and Password required if emails are to be pulled",メールが引っ張られるのであれば、ホスト、メールとパスワードが必要です。
 Hour,時
 Hour Rate,時間率
 Hour Rate Labour,時間レート労働
@@ -1463,7 +1463,7 @@ Journal Voucher,伝票
 Journal Voucher Detail,伝票の詳細
 Journal Voucher Detail No,伝票の詳細番号
 Journal Voucher {0} does not have account {1} or already matched,伝票は{0}アカウントを持っていない{1}、またはすでに一致
-Journal Vouchers {0} are un-linked,ジャーナルバウチャー{0}アンリンクされている
+Journal Vouchers {0} are un-linked,ジャーナルバウチャーは{0}連結されていません。
 Keep a track of communication related to this enquiry which will help for future reference.,今後の参考のために役立ちます。この照会に関連した通信を追跡する。
 Keep it web friendly 900px (w) by 100px (h),900px(w)100px(h)にすることで適用それを維持する。
 Key Performance Area,重要実行分野
@@ -1707,11 +1707,11 @@ Must be Whole Number,整数でなければなりません
 Name,名前
 Name and Description,名前と説明
 Name and Employee ID,名前と従業員ID
-"Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master",新しいアカウントの名前。注：お客様のアカウントを作成しないでください、それらは顧客とサプライヤマスタから自動的に作成され
+"Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master",新しいアカウントの名前。注：お客様のアカウントを作成しないでください、それらは顧客とサプライヤーマスターから自動的に作成されます。
 Name of person or organization that this address belongs to.,このアドレスが所属する個人または組織の名前。
 Name of the Budget Distribution,予算配分の名前
-Naming Series,シリーズの命名
-Negative Quantity is not allowed,負の量は許可されていません
+Naming Series,シリーズを名付ける
+Negative Quantity is not allowed,負の数量は許可されていません
 Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},{4} {5} {2} {3}上の倉庫{1}の項目{0}のための負のストックError（{6}）
 Negative Valuation Rate is not allowed,負の評価レートは、許可されていません
 Negative balance in Batch {0} for Item {1} at Warehouse {2} on {3} {4},倉庫にある項目{1}のためのバッチでマイナス残高{0} {2} {3} {4}に
@@ -1724,8 +1724,8 @@ Net Weight,正味重量
 Net Weight UOM,純重量UOM
 Net Weight of each Item,各項目の正味重量
 Net pay cannot be negative,正味賃金は負にすることはできません
-Never,使用しない
-New ,New 
+Never,決して
+New ,新しい
 New Account,新しいアカウント
 New Account Name,新しいアカウント名
 New BOM,新しい部品表
@@ -1733,17 +1733,17 @@ New Communications,新しい通信
 New Company,新会社
 New Cost Center,新しいコストセンター
 New Cost Center Name,新しいコストセンター名
-New Delivery Notes,新しい納品書
+New Delivery Notes,新しい発送伝票
 New Enquiries,新しいお問い合わせ
 New Leads,新規リード
-New Leave Application,新しい休業申出
+New Leave Application,新しい休暇届け
 New Leaves Allocated,割り当てられた新しい葉
 New Leaves Allocated (In Days),（日数）が割り当て新しい葉
 New Material Requests,新素材のリクエスト
 New Projects,新しいプロジェクト
 New Purchase Orders,新しい発注書
 New Purchase Receipts,新規購入の領収書
-New Quotations,新しい名言
+New Quotations,新しい引用
 New Sales Orders,新しい販売注文
 New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,新しいシリアル番号は、倉庫を持つことができません。倉庫在庫入力や購入時の領収書で設定する必要があります
 New Stock Entries,新入荷のエントリー
@@ -1766,8 +1766,8 @@ Next Contact Date,次連絡日
 Next Date,次の日
 Next email will be sent on:,次の電子メールは上に送信されます。
 No,いいえ
-No Customer Accounts found.,現在、アカウントはありませんでした。
-No Customer or Supplier Accounts found,顧客やサプライヤアカウント見つからないん
+No Customer Accounts found.,顧客アカウントが見つかりませんでした。
+No Customer or Supplier Accounts found,顧客やサプライヤーアカウントが見つかりません。
 No Expense Approvers. Please assign 'Expense Approver' Role to atleast one user,出費を承認しない。少なくとも1ユーザーに「経費承認者の役割を割り当ててください
 No Item with Barcode {0},バーコード{0}に項目なし
 No Item with Serial No {0},シリアル番号{0}に項目なし
@@ -1777,7 +1777,7 @@ No Permission,権限がありませんん
 No Production Orders created,作成しない製造指図しない
 No Supplier Accounts found. Supplier Accounts are identified based on 'Master Type' value in account record.,いいえサプライヤーアカウント見つかりませんでした。サプライヤーアカウントはアカウント·レコードに「マスタータイプ」の値に基づいて識別されます。
 No accounting entries for the following warehouses,次の倉庫にはアカウンティングエントリません
-No addresses created,作成されないアドレスません
+No addresses created,アドレスが作れません。
 No contacts created,NO接点は作成されません
 No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template.,デフォルトのアドレステンプレートが見つかりませんでした。[設定]> [印刷とブランディング>アドレステンプレートから新しいものを作成してください。
 No default BOM exists for Item {0},デフォルトのBOMが存在しないアイテムのため{0}
@@ -1817,7 +1817,7 @@ Note: There is not enough leave balance for Leave Type {0},注：休暇タイプ
 Note: This Cost Center is a Group. Cannot make accounting entries against groups.,注：この原価センタグループです。グループに対する会計上のエントリを作成することはできません。
 Note: {0},注：{0}
 Notes,注釈
-Notes:,注:
+Notes:,注意事項:
 Nothing to request,要求するものがありません
 Notice (days),お知らせ（日）
 Notification Control,通知制御
@@ -1998,7 +1998,7 @@ Pharmaceuticals,医薬品
 Phone,電話
 Phone No,電話番号
 Piecework,出来高仕事
-Pincode,PINコード
+Pincode,郵便番号
 Place of Issue,発行場所
 Plan for maintenance visits.,メンテナンスの訪問を計画します。
 Planned Qty,計画数量
@@ -2369,11 +2369,11 @@ Reference Name,参照名
 Reference No & Reference Date is required for {0},リファレンスノー·基準日は、{0}に必要です
 Reference No is mandatory if you entered Reference Date,あなたは基準日を入力した場合の基準はありませんが必須です
 Reference Number,参照番号
-Reference Row #,参照行番号
+Reference Row #,参照行＃
 Refresh,リフレッシュ
 Registration Details,登録の詳細
 Registration Info,登録情報
-Rejected,拒否
+Rejected,拒否された
 Rejected Quantity,拒否された数量
 Rejected Serial No,拒否されたシリアル番号
 Rejected Warehouse,拒否された倉庫

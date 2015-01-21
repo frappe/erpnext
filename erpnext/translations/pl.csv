@@ -34,53 +34,53 @@
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group"">Add / Edit</a>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group"">Add / Edit</a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory"">Add / Edit</a>"
-A Customer Group exists with same name please change the Customer name or rename the Customer Group,A Customer Group exists with same name please change the Customer name or rename the Customer Group
-A Customer exists with same name,A Customer exists with same name
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,Grupa Odbiorców posiada taką nazwę - wprowadź inną nazwę Odbiorcy lub zmień nazwę Grupy  
+A Customer exists with same name,Odbiorca o tej nazwie już istnieje
 A Lead with this email id should exist,A Lead with this email id should exist
 A Product or Service,Produkt lub usługa
-A Supplier exists with same name,A Supplier exists with same name
-A symbol for this currency. For e.g. $,A symbol for this currency. For e.g. $
+A Supplier exists with same name,Dostawca o tej nazwie już istnieje
+A symbol for this currency. For e.g. $,Symbol waluty. Np. $
 AMC Expiry Date,AMC Expiry Date
-Abbr,Abbr
-Abbreviation cannot have more than 5 characters,Abbreviation cannot have more than 5 characters
-About,About
+Abbr,Skrót
+Abbreviation cannot have more than 5 characters,Skrót nie może posiadać więcej niż 5 znaków
+About,Informacje
 Above Value,Above Value
 Absent,Nieobecny
 Acceptance Criteria,Kryteria akceptacji
-Accepted,Accepted
-Accepted + Rejected Qty must be equal to Received quantity for Item {0},Accepted + Rejected Qty must be equal to Received quantity for Item {0}
-Accepted Quantity,Accepted Quantity
+Accepted,Przyjęte
+Accepted + Rejected Qty must be equal to Received quantity for Item {0},Ilość Przyjętych + Odrzuconych musi odpowiadać ilości Odebranych (Element {0})
+Accepted Quantity,Przyjęta Ilość
 Accepted Warehouse,Accepted Warehouse
 Account,Konto
 Account Balance,Bilans konta
-Account Created: {0},Account Created: {0}
+Account Created: {0},Utworzono Konto: {0}
 Account Details,Szczegóły konta
 Account Head,Account Head
 Account Name,Nazwa konta
-Account Type,Account Type
+Account Type,Typ konta
 Account for the warehouse (Perpetual Inventory) will be created under this Account.,Account for the warehouse (Perpetual Inventory) will be created under this Account.
 Account head {0} created,Account head {0} created
-Account must be a balance sheet account,Account must be a balance sheet account
-Account with child nodes cannot be converted to ledger,Account with child nodes cannot be converted to ledger
-Account with existing transaction can not be converted to group.,Account with existing transaction can not be converted to group.
-Account with existing transaction can not be deleted,Account with existing transaction can not be deleted
-Account with existing transaction cannot be converted to ledger,Account with existing transaction cannot be converted to ledger
-Account {0} cannot be a Group,Account {0} cannot be a Group
-Account {0} does not belong to Company {1},Account {0} does not belong to Company {1}
-Account {0} does not exist,Account {0} does not exist
+Account must be a balance sheet account,Konto musi być bilansowe
+Account with child nodes cannot be converted to ledger,Konto grupujące inne konta nie może być konwertowane
+Account with existing transaction can not be converted to group.,Konto z istniejącymi zapisami nie może być konwertowane na Grupę (konto dzielone).
+Account with existing transaction can not be deleted,Konto z istniejącymi zapisami nie może być usunięte
+Account with existing transaction cannot be converted to ledger,Konto z istniejącymi zapisami nie może być konwertowane
+Account {0} cannot be a Group,Konto {0} nie może być Grupą (kontem dzielonym)
+Account {0} does not belong to Company {1},Konto {0} nie jest przypisane do Firmy {1}
+Account {0} does not exist,Konto {0} nie istnieje
 Account {0} has been entered more than once for fiscal year {1},Account {0} has been entered more than once for fiscal year {1}
-Account {0} is frozen,Account {0} is frozen
-Account {0} is inactive,Account {0} is inactive
+Account {0} is frozen,Konto {0} jest zamrożone
+Account {0} is inactive,Konto {0} jest nieaktywne
 Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item
-Account: {0} can only be updated via \					Stock Transactions,Account: {0} can only be updated via \					Stock Transactions
+Account: {0} can only be updated via \					Stock Transactions,Konto: {0} może być aktualizowane tylko przez \ Operacje Magazynowe
 Accountant,Księgowy
 Accounting,Księgowość
 "Accounting Entries can be made against leaf nodes, called","Accounting Entries can be made against leaf nodes, called"
-"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Accounting entry frozen up to this date, nobody can do / modify entry except role specified below."
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Zapisywanie kont zostało zamrożone do tej daty, nikt  nie może / modyfikować zapisów poza uprawnionymi użytkownikami wymienionymi poniżej."
 Accounting journal entries.,Accounting journal entries.
 Accounts,Księgowość
 Accounts Browser,Accounts Browser
-Accounts Frozen Upto,Accounts Frozen Upto
+Accounts Frozen Upto,Konta zamrożone do 
 Accounts Payable,Accounts Payable
 Accounts Receivable,Accounts Receivable
 Accounts Settings,Accounts Settings
@@ -106,13 +106,13 @@ Actual Start Date,Actual Start Date
 Add,Dodaj
 Add / Edit Taxes and Charges,Add / Edit Taxes and Charges
 Add Child,Add Child
-Add Serial No,Add Serial No
-Add Taxes,Add Taxes
+Add Serial No,Dodaj nr seryjny
+Add Taxes,Dodaj Podatki
 Add Taxes and Charges,Dodaj podatki i opłaty
-Add or Deduct,Add or Deduct
+Add or Deduct,Dodatki lub Potrącenia
 Add rows to set annual budgets on Accounts.,Add rows to set annual budgets on Accounts.
 Add to Cart,Add to Cart
-Add to calendar on this date,Add to calendar on this date
+Add to calendar on this date,Dodaj do kalendarza pod tą datą
 Add/Remove Recipients,Add/Remove Recipients
 Address,Adres
 Address & Contact,Adres i kontakt
@@ -194,8 +194,8 @@ Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present
 Allow Children,Allow Children
 Allow Dropbox Access,Allow Dropbox Access
 Allow Google Drive Access,Allow Google Drive Access
-Allow Negative Balance,Allow Negative Balance
-Allow Negative Stock,Allow Negative Stock
+Allow Negative Balance,Dozwolony ujemny bilans
+Allow Negative Stock,Dozwolony ujemny stan
 Allow Production Order,Allow Production Order
 Allow User,Allow User
 Allow Users,Allow Users
@@ -208,11 +208,11 @@ Amended From,Amended From
 Amount,Wartość
 Amount (Company Currency),Amount (Company Currency)
 Amount <=,Amount <=
-Amount >=,Amount >=
+Amount >=,Wartość >=
 Amount to Bill,Amount to Bill
 An Customer exists with same name,An Customer exists with same name
-"An Item Group exists with same name, please change the item name or rename the item group","An Item Group exists with same name, please change the item name or rename the item group"
-"An item exists with same name ({0}), please change the item group name or rename the item","An item exists with same name ({0}), please change the item group name or rename the item"
+"An Item Group exists with same name, please change the item name or rename the item group",Istnieje element Grupy o takiej nazwie. Zmień nazwę elementu lub tamtej Grupy.
+"An item exists with same name ({0}), please change the item group name or rename the item",Istnieje element  o takiej nazwie. Zmień nazwę Grupy lub tego elementu.
 Analyst,Analyst
 Annual,Roczny
 Another Period Closing Entry {0} has been made after {1},Another Period Closing Entry {0} has been made after {1}
@@ -261,7 +261,7 @@ Associate,Associate
 Atleast one warehouse is mandatory,Atleast one warehouse is mandatory
 Attach Image,Dołącz obrazek
 Attach Letterhead,Attach Letterhead
-Attach Logo,Attach Logo
+Attach Logo,Załącz Logo
 Attach Your Picture,Attach Your Picture
 Attendance,Attendance
 Attendance Date,Attendance Date
@@ -313,8 +313,8 @@ Backups will be uploaded to,Backups will be uploaded to
 Balance Qty,Balance Qty
 Balance Sheet,Balance Sheet
 Balance Value,Balance Value
-Balance for Account {0} must always be {1},Balance for Account {0} must always be {1}
-Balance must be,Balance must be
+Balance for Account {0} must always be {1},Bilans dla Konta {0} zawsze powinien wynosić {1}
+Balance must be,Bilans powinien wynosić 
 "Balances of Accounts of type ""Bank"" or ""Cash""","Balances of Accounts of type ""Bank"" or ""Cash"""
 Bank,Bank
 Bank A/C No.,Bank A/C No.
@@ -339,12 +339,12 @@ Basic Info,Informacje podstawowe
 Basic Information,Basic Information
 Basic Rate,Basic Rate
 Basic Rate (Company Currency),Basic Rate (Company Currency)
-Batch,Batch
-Batch (lot) of an Item.,Batch (lot) produktu.
-Batch Finished Date,Data zakończenia lotu
-Batch ID,Identyfikator lotu
-Batch No,Nr lotu
-Batch Started Date,Data rozpoczęcia lotu
+Batch,Partia
+Batch (lot) of an Item.,Partia (pakiet) produktu.
+Batch Finished Date,Data ukończenia Partii
+Batch ID,Identyfikator Partii
+Batch No,Nr Partii
+Batch Started Date,Data rozpoczęcia Partii
 Batch Time Logs for billing.,Batch Time Logs for billing.
 Batch-Wise Balance History,Batch-Wise Balance History
 Batched for Billing,Batched for Billing
@@ -408,7 +408,7 @@ C-Form Invoice Detail,C-Form Invoice Detail
 C-Form No,C-Form No
 C-Form records,C-Form records
 Calculate Based On,Calculate Based On
-Calculate Total Score,Calculate Total Score
+Calculate Total Score,Oblicz całkowity wynik
 Calendar Events,Calendar Events
 Call,Call
 Calls,Calls
@@ -423,14 +423,14 @@ Can be approved by {0},Can be approved by {0}
 Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total',Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'
 Cancel Material Visit {0} before cancelling this Customer Issue,Cancel Material Visit {0} before cancelling this Customer Issue
 Cancel Material Visits {0} before cancelling this Maintenance Visit,Cancel Material Visits {0} before cancelling this Maintenance Visit
-Cancelled,Cancelled
+Cancelled,Anulowano
 Cancelling this Stock Reconciliation will nullify its effect.,Cancelling this Stock Reconciliation will nullify its effect.
 Cannot Cancel Opportunity as Quotation Exists,Cannot Cancel Opportunity as Quotation Exists
 Cannot approve leave as you are not authorized to approve leaves on Block Dates,Cannot approve leave as you are not authorized to approve leaves on Block Dates
 Cannot cancel because Employee {0} is already approved for {1},Cannot cancel because Employee {0} is already approved for {1}
 Cannot cancel because submitted Stock Entry {0} exists,Cannot cancel because submitted Stock Entry {0} exists
 Cannot carry forward {0},Cannot carry forward {0}
-Cannot change Year Start Date and Year End Date once the Fiscal Year is saved.,Cannot change Year Start Date and Year End Date once the Fiscal Year is saved.
+Cannot change Year Start Date and Year End Date once the Fiscal Year is saved.,Nie można zmieniać daty początkowej i końcowej uworzonego już Roku Podatkowego.
 "Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency.","Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."
 Cannot convert Cost Center to ledger as it has child nodes,Cannot convert Cost Center to ledger as it has child nodes
 Cannot covert to Group because Master Type or Account Type is selected.,Cannot covert to Group because Master Type or Account Type is selected.
@@ -458,10 +458,10 @@ Case No. cannot be 0,Case No. cannot be 0
 Cash,Gotówka
 Cash In Hand,Cash In Hand
 Cash Voucher,Cash Voucher
-Cash or Bank Account is mandatory for making payment entry,Cash or Bank Account is mandatory for making payment entry
-Cash/Bank Account,Cash/Bank Account
+Cash or Bank Account is mandatory for making payment entry,Konto Kasa lub Bank jest wymagane dla tworzenia zapisów Płatności
+Cash/Bank Account,Konto Kasa/Bank
 Casual Leave,Casual Leave
-Cell Number,Cell Number
+Cell Number,Telefon komórkowy
 Change UOM for an Item.,Change UOM for an Item.
 Change the starting / current sequence number of an existing series.,Change the starting / current sequence number of an existing series.
 Channel Partner,Channel Partner
@@ -469,8 +469,8 @@ Charge of type 'Actual' in row {0} cannot be included in Item Rate,Charge of typ
 Chargeable,Chargeable
 Charity and Donations,Charity and Donations
 Chart Name,Chart Name
-Chart of Accounts,Chart of Accounts
-Chart of Cost Centers,Chart of Cost Centers
+Chart of Accounts,Plan Kont
+Chart of Cost Centers,Struktura kosztów (MPK)
 Check how the newsletter looks in an email by sending it to your email.,Check how the newsletter looks in an email by sending it to your email.
 "Check if recurring invoice, uncheck to stop recurring or put proper End Date","Check if recurring invoice, uncheck to stop recurring or put proper End Date"
 "Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible."
@@ -486,7 +486,7 @@ Chemical,Chemical
 Cheque,Cheque
 Cheque Date,Cheque Date
 Cheque Number,Cheque Number
-Child account exists for this account. You can not delete this account.,Child account exists for this account. You can not delete this account.
+Child account exists for this account. You can not delete this account.,To konto zawiera konta potomne. Nie można usunąć takiego konta.
 City,Miasto
 City/Town,Miasto/Miejscowość
 Claim Amount,Claim Amount
@@ -571,7 +571,7 @@ Contact Info,Dane kontaktowe
 Contact Mobile No,Contact Mobile No
 Contact Name,Nazwa kontaktu
 Contact No.,Contact No.
-Contact Person,Contact Person
+Contact Person,Osoba kontaktowa
 Contact Type,Contact Type
 Contact master.,Contact master.
 Contacts,Kontakty
@@ -594,7 +594,7 @@ Convert to Ledger,Convert to Ledger
 Converted,Converted
 Copy From Item Group,Copy From Item Group
 Cosmetics,Cosmetics
-Cost Center,Cost Center
+Cost Center,MPK
 Cost Center Details,Cost Center Details
 Cost Center Name,Cost Center Name
 Cost Center is mandatory for Item {0},Cost Center is mandatory for Item {0}
@@ -607,7 +607,7 @@ Cost of Goods Sold,Cost of Goods Sold
 Costing,Zestawienie kosztów
 Country,Kraj
 Country Name,Nazwa kraju
-"Country, Timezone and Currency","Country, Timezone and Currency"
+"Country, Timezone and Currency","Kraj, Strefa czasowa i Waluta"
 Create Bank Voucher for the total salary paid for the above selected criteria,Create Bank Voucher for the total salary paid for the above selected criteria
 Create Customer,Create Customer
 Create Material Requests,Create Material Requests
@@ -694,7 +694,7 @@ Customize,Customize
 Customize the Notification,Customize the Notification
 Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.,Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.
 DN Detail,DN Detail
-Daily,Daily
+Daily,Codziennie
 Daily Time Log Summary,Daily Time Log Summary
 Database Folder ID,Database Folder ID
 Database of potential customers.,Baza danych potencjalnych klientów.
@@ -703,14 +703,14 @@ Date Format,Format daty
 Date Of Retirement,Date Of Retirement
 Date Of Retirement must be greater than Date of Joining,Date Of Retirement must be greater than Date of Joining
 Date is repeated,Date is repeated
-Date of Birth,Date of Birth
+Date of Birth,Data urodzenia
 Date of Issue,Date of Issue
 Date of Joining,Date of Joining
 Date of Joining must be greater than Date of Birth,Date of Joining must be greater than Date of Birth
 Date on which lorry started from supplier warehouse,Date on which lorry started from supplier warehouse
 Date on which lorry started from your warehouse,Date on which lorry started from your warehouse
-Dates,Dates
-Days Since Last Order,Days Since Last Order
+Dates,Daty
+Days Since Last Order,Dni od ostatniego zamówienia
 Days for which Holidays are blocked for this department.,Days for which Holidays are blocked for this department.
 Dealer,Dealer
 Debit,Debit
@@ -727,23 +727,23 @@ Default,Default
 Default Account,Default Account
 Default BOM,Default BOM
 Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.
-Default Bank Account,Default Bank Account
+Default Bank Account,Domyślne konto bankowe
 Default Buying Cost Center,Default Buying Cost Center
 Default Buying Price List,Default Buying Price List
 Default Cash Account,Default Cash Account
 Default Company,Default Company
 Default Cost Center for tracking expense for this item.,Default Cost Center for tracking expense for this item.
 Default Currency,Domyślna waluta
-Default Customer Group,Default Customer Group
-Default Expense Account,Default Expense Account
-Default Income Account,Default Income Account
+Default Customer Group,Domyślna grupa klientów
+Default Expense Account,Domyślne konto rozchodów
+Default Income Account,Domyślne konto przychodów
 Default Item Group,Default Item Group
 Default Price List,Default Price List
 Default Purchase Account in which cost of the item will be debited.,Default Purchase Account in which cost of the item will be debited.
 Default Selling Cost Center,Default Selling Cost Center
 Default Settings,Default Settings
 Default Source Warehouse,Domyślny źródłowy magazyn
-Default Stock UOM,Default Stock UOM
+Default Stock UOM,Domyślna jednostka
 Default Supplier,Domyślny dostawca
 Default Supplier Type,Default Supplier Type
 Default Target Warehouse,Domyślny magazyn docelowy
@@ -877,7 +877,7 @@ Email Digest Settings,Email Digest Settings
 Email Digest: ,Email Digest: 
 Email Id,Email Id
 "Email Id where a job applicant will email e.g. ""jobs@example.com""","Email Id where a job applicant will email e.g. ""jobs@example.com"""
-Email Notifications,Email Notifications
+Email Notifications,Powiadomienia na e-mail
 Email Sent?,Email Sent?
 "Email id must be unique, already exists for {0}","Email id must be unique, already exists for {0}"
 Email ids separated by commas.,Email ids separated by commas.
@@ -935,7 +935,7 @@ Entertainment & Leisure,Entertainment & Leisure
 Entertainment Expenses,Entertainment Expenses
 Entries,Entries
 Entries against,Entries against
-Entries are not allowed against this Fiscal Year if the year is closed.,Entries are not allowed against this Fiscal Year if the year is closed.
+Entries are not allowed against this Fiscal Year if the year is closed.,Nie jest możliwe wykonywanie zapisów na zamkniętym Roku Podatkowym.
 Entries before {0} are frozen,Entries before {0} are frozen
 Equity,Equity
 Error: {0} > {1},Error: {0} > {1}
@@ -960,8 +960,8 @@ Expected Delivery Date cannot be before Purchase Order Date,Expected Delivery Da
 Expected Delivery Date cannot be before Sales Order Date,Expected Delivery Date cannot be before Sales Order Date
 Expected End Date,Expected End Date
 Expected Start Date,Expected Start Date
-Expense,Expense
-Expense Account,Expense Account
+Expense,Koszt
+Expense Account,Konto Wydatków
 Expense Account is mandatory,Expense Account is mandatory
 Expense Claim,Expense Claim
 Expense Claim Approved,Expense Claim Approved
@@ -1010,7 +1010,7 @@ Financial Year Start Date,Financial Year Start Date
 Finished Goods,Finished Goods
 First Name,First Name
 First Responded On,First Responded On
-Fiscal Year,Rok obrotowy
+Fiscal Year,Rok Podatkowy
 Fixed Asset,Fixed Asset
 Fixed Assets,Fixed Assets
 Follow via Email,Follow via Email
@@ -1128,7 +1128,7 @@ Gross Weight UOM,Gross Weight UOM
 Group,Grupa
 Group by Account,Group by Account
 Group by Voucher,Group by Voucher
-Group or Ledger,Group or Ledger
+Group or Ledger,Grupa lub Konto
 Groups,Grupy
 HR Manager,HR Manager
 HR Settings,HR Settings
@@ -1399,9 +1399,9 @@ Job Profile,Job Profile
 Job Title,Job Title
 "Job profile, qualifications required etc.","Job profile, qualifications required etc."
 Jobs Email Settings,Jobs Email Settings
-Journal Entries,Journal Entries
+Journal Entries,Zapisy księgowe
 Journal Entry,Journal Entry
-Journal Voucher,Journal Voucher
+Journal Voucher,Polecenia Księgowania
 Journal Voucher Detail,Journal Voucher Detail
 Journal Voucher Detail No,Journal Voucher Detail No
 Journal Voucher {0} does not have account {1} or already matched,Journal Voucher {0} does not have account {1} or already matched
@@ -1410,7 +1410,7 @@ Keep a track of communication related to this enquiry which will help for future
 Keep it web friendly 900px (w) by 100px (h),Keep it web friendly 900px (w) by 100px (h)
 Key Performance Area,Key Performance Area
 Key Responsibility Area,Key Responsibility Area
-Kg,Kg
+Kg,kg
 LR Date,LR Date
 LR No,Nr ciężarówki
 Label,Label
@@ -1420,8 +1420,8 @@ Landed Cost Purchase Receipt,Landed Cost Purchase Receipt
 Landed Cost Purchase Receipts,Landed Cost Purchase Receipts
 Landed Cost Wizard,Landed Cost Wizard
 Landed Cost updated successfully,Landed Cost updated successfully
-Language,Language
-Last Name,Last Name
+Language,Język
+Last Name,Nazwisko
 Last Purchase Rate,Last Purchase Rate
 Latest,Latest
 Lead,Lead
@@ -1518,7 +1518,7 @@ Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Maint
 Maintenance start date can not be before delivery date for Serial No {0},Maintenance start date can not be before delivery date for Serial No {0}
 Major/Optional Subjects,Major/Optional Subjects
 Make ,Stwórz
-Make Accounting Entry For Every Stock Movement,Make Accounting Entry For Every Stock Movement
+Make Accounting Entry For Every Stock Movement,Tworzenie Zapisów Księgowych dla każdej zmiany stanu Magazynu
 Make Bank Voucher,Make Bank Voucher
 Make Credit Note,Make Credit Note
 Make Debit Note,Make Debit Note
@@ -1858,20 +1858,20 @@ Paid Amount,Paid Amount
 Paid amount + Write Off Amount can not be greater than Grand Total,Paid amount + Write Off Amount can not be greater than Grand Total
 Pair,Para
 Parameter,Parametr
-Parent Account,Parent Account
+Parent Account,Nadrzędne konto
 Parent Cost Center,Parent Cost Center
 Parent Customer Group,Parent Customer Group
 Parent Detail docname,Parent Detail docname
-Parent Item,Parent Item
-Parent Item Group,Parent Item Group
+Parent Item,Element nadrzędny
+Parent Item Group,Grupa Elementu nadrzędnego
 Parent Item {0} must be not Stock Item and must be a Sales Item,Parent Item {0} must be not Stock Item and must be a Sales Item
 Parent Party Type,Parent Party Type
 Parent Sales Person,Parent Sales Person
 Parent Territory,Parent Territory
 Parent Website Page,Parent Website Page
 Parent Website Route,Parent Website Route
-Parent account can not be a ledger,Parent account can not be a ledger
-Parent account does not exist,Parent account does not exist
+Parent account can not be a ledger,Nadrzędne konto (Grupa) nie może być zwykłym kontem
+Parent account does not exist,Nadrzędne konto nie istnieje
 Parenttype,Parenttype
 Part-time,Part-time
 Partially Completed,Partially Completed
@@ -1957,7 +1957,7 @@ Please enter Company,Please enter Company
 Please enter Cost Center,Please enter Cost Center
 Please enter Delivery Note No or Sales Invoice No to proceed,Please enter Delivery Note No or Sales Invoice No to proceed
 Please enter Employee Id of this sales parson,Please enter Employee Id of this sales parson
-Please enter Expense Account,Please enter Expense Account
+Please enter Expense Account,Wprowadź konto Wydatków
 Please enter Item Code to get batch no,Please enter Item Code to get batch no
 Please enter Item Code.,Please enter Item Code.
 Please enter Item first,Please enter Item first
@@ -1992,11 +1992,11 @@ Please pull items from Delivery Note,Please pull items from Delivery Note
 Please save the Newsletter before sending,Please save the Newsletter before sending
 Please save the document before generating maintenance schedule,Please save the document before generating maintenance schedule
 Please select Account first,Please select Account first
-Please select Bank Account,Please select Bank Account
+Please select Bank Account,Wybierz konto Bank
 Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year
 Please select Category first,Please select Category first
 Please select Charge Type first,Please select Charge Type first
-Please select Fiscal Year,Please select Fiscal Year
+Please select Fiscal Year,Wybierz Rok Podatkowy
 Please select Group or Ledger value,Please select Group or Ledger value
 Please select Incharge Person's name,Please select Incharge Person's name
 "Please select Item where ""Is Stock Item"" is ""No"" and ""Is Sales Item"" is ""Yes"" and there is no other Sales BOM","Please select Item where ""Is Stock Item"" is ""No"" and ""Is Sales Item"" is ""Yes"" and there is no other Sales BOM"
@@ -2022,7 +2022,7 @@ Please set default value {0} in Company {0},Please set default value {0} in Comp
 Please set {0},Please set {0}
 Please setup Employee Naming System in Human Resource > HR Settings,Please setup Employee Naming System in Human Resource > HR Settings
 Please setup numbering series for Attendance via Setup > Numbering Series,Please setup numbering series for Attendance via Setup > Numbering Series
-Please setup your chart of accounts before you start Accounting Entries,Please setup your chart of accounts before you start Accounting Entries
+Please setup your chart of accounts before you start Accounting Entries,Należy stworzyć własny Plan Kont zanim rozpocznie się księgowanie
 Please specify,Please specify
 Please specify Company,Please specify Company
 Please specify Company to proceed,Please specify Company to proceed
@@ -2034,8 +2034,8 @@ Please specify either Quantity or Valuation Rate or both,Please specify either Q
 Please submit to update Leave Balance.,Please submit to update Leave Balance.
 Plot,Plot
 Plot By,Plot By
-Point of Sale,Point of Sale
-Point-of-Sale Setting,Point-of-Sale Setting
+Point of Sale,Punkt Sprzedaży
+Point-of-Sale Setting,Konfiguracja Punktu Sprzedaży
 Post Graduate,Post Graduate
 Postal,Postal
 Postal Expenses,Postal Expenses
@@ -2414,7 +2414,7 @@ Sales Browser,Sales Browser
 Sales Details,Szczegóły sprzedaży
 Sales Discounts,Sales Discounts
 Sales Email Settings,Sales Email Settings
-Sales Expenses,Sales Expenses
+Sales Expenses,Koszty Sprzedaży
 Sales Extras,Sales Extras
 Sales Funnel,Sales Funnel
 Sales Invoice,Sales Invoice
@@ -2424,20 +2424,20 @@ Sales Invoice Items,Sales Invoice Items
 Sales Invoice Message,Sales Invoice Message
 Sales Invoice No,Nr faktury sprzedażowej
 Sales Invoice Trends,Sales Invoice Trends
-Sales Invoice {0} has already been submitted,Sales Invoice {0} has already been submitted
-Sales Invoice {0} must be cancelled before cancelling this Sales Order,Sales Invoice {0} must be cancelled before cancelling this Sales Order
+Sales Invoice {0} has already been submitted,Faktura Sprzedaży {0} została już wprowadzona
+Sales Invoice {0} must be cancelled before cancelling this Sales Order,Faktura Sprzedaży {0} powinna być anulowana przed anulowaniem samego Zlecenia Sprzedaży
 Sales Order,Zlecenie sprzedaży
-Sales Order Date,Sales Order Date
-Sales Order Item,Sales Order Item
-Sales Order Items,Sales Order Items
-Sales Order Message,Sales Order Message
-Sales Order No,Sales Order No
+Sales Order Date,Data Zlecenia
+Sales Order Item,Pozycja Zlecenia Sprzedaży
+Sales Order Items,Pozycje Zlecenia Sprzedaży
+Sales Order Message,Informacje Zlecenia Sprzedaży
+Sales Order No,Nr Zlecenia Sprzedaży
 Sales Order Required,Sales Order Required
 Sales Order Trends,Sales Order Trends
-Sales Order required for Item {0},Sales Order required for Item {0}
-Sales Order {0} is not submitted,Sales Order {0} is not submitted
-Sales Order {0} is not valid,Sales Order {0} is not valid
-Sales Order {0} is stopped,Sales Order {0} is stopped
+Sales Order required for Item {0},Zlecenie Sprzedaży jest wymagane dla Elementu {0}
+Sales Order {0} is not submitted,Zlecenie Sprzedaży {0} nie jest jeszcze złożone
+Sales Order {0} is not valid,Zlecenie Sprzedaży {0} jest niepoprawne
+Sales Order {0} is stopped,Zlecenie Sprzedaży {0} jest wstrzymane
 Sales Partner,Sales Partner
 Sales Partner Name,Sales Partner Name
 Sales Partner Target,Sales Partner Target
@@ -2449,7 +2449,7 @@ Sales Person Targets,Sales Person Targets
 Sales Person-wise Transaction Summary,Sales Person-wise Transaction Summary
 Sales Register,Sales Register
 Sales Return,Zwrot sprzedaży
-Sales Returned,Sales Returned
+Sales Returned,Sprzedaże zwrócone
 Sales Taxes and Charges,Sales Taxes and Charges
 Sales Taxes and Charges Master,Sales Taxes and Charges Master
 Sales Team,Sales Team
@@ -2460,11 +2460,11 @@ Sales campaigns.,Sales campaigns.
 Salutation,Salutation
 Sample Size,Wielkość próby
 Sanctioned Amount,Sanctioned Amount
-Saturday,Saturday
-Schedule,Schedule
+Saturday,Sobota
+Schedule,Harmonogram
 Schedule Date,Schedule Date
 Schedule Details,Schedule Details
-Scheduled,Scheduled
+Scheduled,Zaplanowane
 Scheduled Date,Scheduled Date
 Scheduled to send to {0},Scheduled to send to {0}
 Scheduled to send to {0} recipients,Scheduled to send to {0} recipients
@@ -2488,13 +2488,13 @@ Securities and Deposits,Securities and Deposits
 Select Budget Distribution to unevenly distribute targets across months.,Select Budget Distribution to unevenly distribute targets across months.
 "Select Budget Distribution, if you want to track based on seasonality.","Select Budget Distribution, if you want to track based on seasonality."
 Select DocType,Select DocType
-Select Items,Select Items
+Select Items,Wybierz Elementy
 Select Purchase Receipts,Select Purchase Receipts
 Select Sales Orders,Select Sales Orders
 Select Sales Orders from which you want to create Production Orders.,Select Sales Orders from which you want to create Production Orders.
 Select Time Logs and Submit to create a new Sales Invoice.,Select Time Logs and Submit to create a new Sales Invoice.
 Select Transaction,Select Transaction
-Select Your Language,Select Your Language
+Select Your Language,Wybierz Swój Język
 Select account head of the bank where cheque was deposited.,Select account head of the bank where cheque was deposited.
 Select company name first.,Select company name first.
 Select template from which you want to get the Goals,Select template from which you want to get the Goals
@@ -2503,7 +2503,7 @@ Select the period when the invoice will be generated automatically,Select the pe
 Select the relevant company name if you have multiple companies,Select the relevant company name if you have multiple companies
 Select the relevant company name if you have multiple companies.,Select the relevant company name if you have multiple companies.
 Select who you want to send this newsletter to,Select who you want to send this newsletter to
-Select your home country and check the timezone and currency.,Select your home country and check the timezone and currency.
+Select your home country and check the timezone and currency.,Wybierz kraj oraz sprawdź strefę czasową i walutę
 "Selecting ""Yes"" will allow this item to appear in Purchase Order , Purchase Receipt.",Wybranie “Tak” pozwoli na dostępność tego produktu w Zamówieniach i Potwierdzeniach Odbioru
 "Selecting ""Yes"" will allow this item to figure in Sales Order, Delivery Note","Selecting ""Yes"" will allow this item to figure in Sales Order, Delivery Note"
 "Selecting ""Yes"" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.","Selecting ""Yes"" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item."
@@ -2738,7 +2738,7 @@ Sync Support Mails,Sync Support Mails
 Sync with Dropbox,Sync with Dropbox
 Sync with Google Drive,Sync with Google Drive
 System,System
-System Settings,System Settings
+System Settings,Ustawienia Systemowe
 "System User (login) ID. If set, it will become default for all HR forms.","System User (login) ID. If set, it will become default for all HR forms."
 Target  Amount,Target  Amount
 Target Detail,Target Detail
@@ -2939,8 +2939,8 @@ Travel,Podróż
 Travel Expenses,Travel Expenses
 Tree Type,Tree Type
 Tree of Item Groups.,Tree of Item Groups.
-Tree of finanial Cost Centers.,Tree of finanial Cost Centers.
-Tree of finanial accounts.,Tree of finanial accounts.
+Tree of finanial Cost Centers.,Miejsca Powstawania Kosztów.
+Tree of finanial accounts.,Rejestr operacji gospodarczych.
 Trial Balance,Trial Balance
 Tuesday,Wtorek
 Type,Typ
@@ -3000,7 +3000,7 @@ Use SSL,Use SSL
 User,Użytkownik
 User ID,User ID
 User ID not set for Employee {0},User ID not set for Employee {0}
-User Name,User Name
+User Name,Nazwa Użytkownika
 User Name or Support Password missing. Please enter and try again.,User Name or Support Password missing. Please enter and try again.
 User Remark,User Remark
 User Remark will be added to Auto Remark,User Remark will be added to Auto Remark
@@ -3053,7 +3053,7 @@ Warehouse is mandatory for stock Item {0} in row {1},Warehouse is mandatory for 
 Warehouse is missing in Purchase Order,Warehouse is missing in Purchase Order
 Warehouse not found in the system,Warehouse not found in the system
 Warehouse required for stock Item {0},Warehouse required for stock Item {0}
-Warehouse required in POS Setting,Warehouse required in POS Setting
+Warehouse required in POS Setting,Magazyn wymagany w ustawieniach Punktu Sprzedaży (POS)
 Warehouse where you are maintaining stock of rejected items,Warehouse where you are maintaining stock of rejected items
 Warehouse {0} can not be deleted as quantity exists for Item {1},Warehouse {0} can not be deleted as quantity exists for Item {1}
 Warehouse {0} does not belong to company {1},Warehouse {0} does not belong to company {1}
@@ -3124,8 +3124,8 @@ Year Closed,Year Closed
 Year End Date,Year End Date
 Year Name,Year Name
 Year Start Date,Year Start Date
-Year Start Date and Year End Date are already set in Fiscal Year {0},Year Start Date and Year End Date are already set in Fiscal Year {0}
-Year Start Date and Year End Date are not within Fiscal Year.,Year Start Date and Year End Date are not within Fiscal Year.
+Year Start Date and Year End Date are already set in Fiscal Year {0},Data Początkowa i Data Końcowa są już zdefiniowane dla Roku Podatkowego {0}
+Year Start Date and Year End Date are not within Fiscal Year.,Data Początkowa i Data Końcowa nie zawierają się w Roku Podatkowym.
 Year Start Date should not be greater than Year End Date,Year Start Date should not be greater than Year End Date
 Year of Passing,Year of Passing
 Yearly,Rocznie
@@ -3136,7 +3136,7 @@ You are the Expense Approver for this record. Please Update the 'Status' and Sav
 You are the Leave Approver for this record. Please Update the 'Status' and Save,You are the Leave Approver for this record. Please Update the 'Status' and Save
 You can enter any date manually,You can enter any date manually
 You can enter the minimum quantity of this item to be ordered.,"Można wpisać minimalna ilość tego produktu, którą zamierza się zamawiać."
-You can not assign itself as parent account,You can not assign itself as parent account
+You can not assign itself as parent account,Nie można przypisać jako nadrzędne konto tego samego konta
 You can not change rate if BOM mentioned agianst any item,You can not change rate if BOM mentioned agianst any item
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.
 You can not enter current voucher in 'Against Journal Voucher' column,You can not enter current voucher in 'Against Journal Voucher' column
@@ -3144,10 +3144,10 @@ You can set Default Bank Account in Company master,You can set Default Bank Acco
 You can start by selecting backup frequency and granting access for sync,You can start by selecting backup frequency and granting access for sync
 You can submit this Stock Reconciliation.,You can submit this Stock Reconciliation.
 You can update either Quantity or Valuation Rate or both.,You can update either Quantity or Valuation Rate or both.
-You cannot credit and debit same account at the same time,You cannot credit and debit same account at the same time
+You cannot credit and debit same account at the same time,Nie można wykonywać zapisów po stronie debetowej oraz kredytowej tego samego konta w jednym czasie
 You have entered duplicate items. Please rectify and try again.,You have entered duplicate items. Please rectify and try again.
 You may need to update: {0},You may need to update: {0}
-You must Save the form before proceeding,You must Save the form before proceeding
+You must Save the form before proceeding,Zapisz formularz aby kontynuować
 You must allocate amount before reconcile,You must allocate amount before reconcile
 Your Customer's TAX registration numbers (if applicable) or any general information,Your Customer's TAX registration numbers (if applicable) or any general information
 Your Customers,Your Customers
@@ -3155,8 +3155,8 @@ Your Login Id,Your Login Id
 Your Products or Services,Your Products or Services
 Your Suppliers,Your Suppliers
 Your email address,Your email address
-Your financial year begins on,Your financial year begins on
-Your financial year ends on,Your financial year ends on
+Your financial year begins on,Rok Podatkowy rozpoczyna się 
+Your financial year ends on,Rok Podatkowy kończy się 
 Your sales person who will contact the customer in future,Your sales person who will contact the customer in future
 Your sales person will get a reminder on this date to contact the customer,Your sales person will get a reminder on this date to contact the customer
 Your setup is complete. Refreshing...,Your setup is complete. Refreshing...

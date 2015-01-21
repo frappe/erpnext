@@ -34,11 +34,11 @@
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Aggiungi / Modifica < / a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Aggiungi / Modifica < / a>"
 "<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> modello predefinito </ h4>  <p> Utilizza <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </ a> e tutti i campi di indirizzo ( compresi i campi personalizzati se presenti) sarà disponibile </ p>  <pre> <code> {{address_line1}} <br>  {% se address_line2%} {{address_line2}} {<br> % endif -%}  {{city}} <br>  {% se lo stato%} {{stato}} <br> {% endif -%}  {% se pincode%} PIN: {{}} pincode <br> {% endif -%}  {{country}} <br>  {% se il telefono%} Telefono: {{phone}} {<br> % endif -}%  {% se il fax%} Fax: {{fax}} <br> {% endif -%}  {% se email_id%} Email: {{email_id}} <br> {% endif -%}  </ code> </ pre>"
-A Customer Group exists with same name please change the Customer name or rename the Customer Group,Un gruppo cliente con lo stesso nome già esiste. Si prega di modificare il nome del cliente o rinominare il gruppo clienti.
-A Customer exists with same name,Un cliente con lo stesso nome esiste già.
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Esiste un Gruppo Clienti con lo stesso nome, per favore cambiare il nome del Cliente o rinominare il Gruppo Clienti"
+A Customer exists with same name,Esiste un Cliente con lo stesso nome
 A Lead with this email id should exist,Un potenziale cliente (lead) con questa e-mail dovrebbe esistere
 A Product or Service,Un prodotto o servizio
-A Supplier exists with same name,Un fornitore con lo stesso nome già esiste
+A Supplier exists with same name,Esiste un Fornitore con lo stesso nome
 A symbol for this currency. For e.g. $,Un simbolo per questa valuta. Per esempio $
 AMC Expiry Date,AMC Data Scadenza
 Abbr,Abbr
@@ -50,10 +50,10 @@ Accepted,Accettato
 Accepted + Rejected Qty must be equal to Received quantity for Item {0},Accettato + Respinto quantità deve essere uguale al quantitativo ricevuto per la voce {0}
 Accepted Quantity,Quantità accettata
 Accepted Warehouse,Magazzino Accettato
-Account,conto
-Account Balance,Bilancio Conto
+Account,Account
+Account Balance,Bilancio Account
 Account Created: {0},Account Creato : {0}
-Account Details,Dettagli conto
+Account Details,Dettagli Account
 Account Head,Conto Capo
 Account Name,Nome Conto
 Account Type,Tipo Conto
@@ -80,7 +80,7 @@ Account {0}: Parent account {1} does not belong to company: {2},Account {0}: con
 Account {0}: Parent account {1} does not exist,Account {0}: conto Parent {1} non esiste
 Account {0}: You can not assign itself as parent account,Account {0}: Non è possibile assegnare stesso come conto principale
 Account: {0} can only be updated via \					Stock Transactions,Account: {0} può essere aggiornato solo tramite \ transazioni di magazzino
-Accountant,ragioniere
+Accountant,Ragioniere
 Accounting,Contabilità
 "Accounting Entries can be made against leaf nodes, called","Scritture contabili può essere fatta contro nodi foglia , chiamato"
 "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Registrazione contabile congelato fino a questa data, nessuno può / Modifica voce eccetto ruolo specificato di seguito."
@@ -281,7 +281,7 @@ Attendance record.,Archivio Presenze
 Authorization Control,Controllo Autorizzazioni
 Authorization Rule,Ruolo Autorizzazione
 Auto Accounting For Stock Settings,Contabilità Auto Per Impostazioni Immagini
-Auto Material Request,Richiesta Materiale Auto
+Auto Material Request,Richiesta Automatica Materiale 
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,Auto aumenta Materiale Richiesta se la quantità scende sotto il livello di riordino in un magazzino
 Automatically compose message on submission of transactions.,Comporre automaticamente il messaggio di presentazione delle transazioni .
 Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
@@ -294,10 +294,10 @@ Available Qty at Warehouse,Quantità Disponibile a magazzino
 Available Stock for Packing Items,Disponibile Magazzino per imballaggio elementi
 "Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","Disponibile in distinta , bolla di consegna , fattura di acquisto , ordine di produzione , ordine di acquisto , ricevuta d'acquisto , fattura di vendita , ordini di vendita , dell'entrata Stock , Timesheet"
 Average Age,Età media
-Average Commission Rate,Media della Commissione Tasso
+Average Commission Rate,Tasso medio di commissione
 Average Discount,Sconto Medio
-Awesome Products,Prodotti impressionante
-Awesome Services,impressionante Servizi
+Awesome Products,Prodotti di punta
+Awesome Services,Servizi di punta
 BOM Detail No,DIBA Dettagli N.
 BOM Explosion Item,DIBA Articolo Esploso
 BOM Item,DIBA Articolo
@@ -339,7 +339,7 @@ Bank Voucher,Buono Banca
 Bank/Cash Balance,Banca/Contanti Saldo
 Banking,bancario
 Barcode,Codice a barre
-Barcode {0} already used in Item {1},Barcode {0} già utilizzato alla voce {1}
+Barcode {0} already used in Item {1},Codice a barre {0} già utilizzato nel Prodotto {1}
 Based On,Basato su
 Basic,di base
 Basic Info,Info Base
@@ -374,7 +374,7 @@ Bills raised by Suppliers.,Fatture sollevate dai fornitori.
 Bills raised to Customers.,Fatture sollevate dai Clienti.
 Bin,Bin
 Bio,Bio
-Biotechnology,biotecnologia
+Biotechnology,Biotecnologia
 Birthday,Compleanno
 Block Date,Data Blocco
 Block Days,Giorno Blocco
@@ -383,7 +383,7 @@ Blog Post,Articolo Blog
 Blog Subscriber,Abbonati Blog
 Blood Group,Gruppo Discendenza
 Both Warehouse must belong to same Company,Entrambi Warehouse deve appartenere alla stessa Società
-Box,scatola
+Box,Scatola
 Branch,Ramo
 Brand,Marca
 Brand Name,Nome Marca
@@ -427,7 +427,7 @@ Call,Chiama
 Calls,chiamate
 Campaign,Campagna
 Campaign Name,Nome Campagna
-Campaign Name is required,È obbligatorio Nome campagna
+Campaign Name is required,Nome Campagna obbligatorio
 Campaign Naming By,Campagna di denominazione
 Campaign-.####,Campagna . # # # #
 Can be approved by {0},Può essere approvato da {0}
@@ -498,7 +498,7 @@ Check to make primary address,Seleziona per impostare indirizzo principale
 Chemical,chimico
 Cheque,Assegno
 Cheque Date,Data Assegno
-Cheque Number,Controllo Numero
+Cheque Number,Numero Assegno
 Child account exists for this account. You can not delete this account.,Conto Child esiste per questo account . Non è possibile eliminare questo account .
 City,Città
 City/Town,Città/Paese
@@ -532,7 +532,7 @@ Comma separated list of email addresses,Lista separata da virgola degli indirizz
 Comment,Commento
 Comments,Commenti
 Commercial,commerciale
-Commission,commissione
+Commission,Commissione
 Commission Rate,Tasso Commissione
 Commission Rate (%),Tasso Commissione (%)
 Commission on Sales,Commissione sulle vendite
@@ -573,7 +573,7 @@ Considered as Opening Balance,Considerato come Apertura Saldo
 Considered as an Opening Balance,Considerato come Apertura Saldo
 Consultant,Consulente
 Consulting,Consulting
-Consumable,consumabili
+Consumable,Consumabile
 Consumable Cost,Costo consumabili
 Consumable cost per hour,Costo consumabili per ora
 Consumed Qty,Q.tà Consumata
@@ -612,7 +612,7 @@ Converted,Convertito
 Copy From Item Group,Copiare da elemento Gruppo
 Cosmetics,cosmetici
 Cost Center,Centro di Costo
-Cost Center Details,Dettaglio Centro di Costo
+Cost Center Details,Dettagli Centro di Costo
 Cost Center Name,Nome Centro di Costo
 Cost Center is required for 'Profit and Loss' account {0},È necessaria Centro di costo per ' economico ' conto {0}
 Cost Center is required in row {0} in Taxes table for type {1},Centro di costo è richiesto in riga {0} nella tabella Tasse per il tipo {1}
@@ -639,7 +639,7 @@ Create Stock Ledger Entries when you submit a Sales Invoice,Creare scorta voci r
 Create rules to restrict transactions based on values.,Creare regole per limitare le transazioni in base ai valori .
 Created By,Creato da
 Creates salary slip for above mentioned criteria.,Crea busta paga per i criteri sopra menzionati.
-Creation Date,Data di creazione
+Creation Date,Data di Creazione
 Creation Document No,Creazione di documenti No
 Creation Document Type,Creazione tipo di documento
 Creation Time,Tempo di creazione
@@ -910,7 +910,7 @@ Email ids separated by commas.,ID Email separati da virgole.
 Emergency Contact,Contatto di emergenza
 Emergency Contact Details,Dettagli Contatto Emergenza
 Emergency Phone,Telefono di emergenza
-Employee,Dipendenti
+Employee,Dipendente
 Employee Birthday,Compleanno Dipendente
 Employee Details,Dettagli Dipendente
 Employee Education,Istruzione Dipendente
@@ -920,11 +920,11 @@ Employee Internal Work History,Cronologia Lavoro Interno Dipendente
 Employee Internal Work Historys,Cronologia Lavoro Interno Dipendente
 Employee Leave Approver,Dipendente Lascia Approvatore
 Employee Leave Balance,Approvazione Bilancio Dipendete
-Employee Name,Nome Dipendete
-Employee Number,Numero Dipendenti
+Employee Name,Nome Dipendente
+Employee Number,Numero Dipendente
 Employee Records to be created by,Record dei dipendenti di essere creati da
 Employee Settings,Impostazioni per i dipendenti
-Employee Type,Tipo Dipendenti
+Employee Type,Tipo Dipendente
 "Employee designation (e.g. CEO, Director etc.).","Designazione dei dipendenti (ad esempio amministratore delegato , direttore , ecc.)"
 Employee master.,Maestro dei dipendenti .
 Employee record is created using selected field. ,Record dipendente viene creato utilizzando campo selezionato.
@@ -937,7 +937,7 @@ Employees Email Id,Email Dipendente
 Employment Details,Dettagli Dipendente
 Employment Type,Tipo Dipendente
 Enable / disable currencies.,Abilitare / disabilitare valute .
-Enabled,Attivo
+Enabled,Attivato
 Encashment Date,Data Incasso
 End Date,Data di Fine
 End Date can not be less than Start Date,Data finale non può essere inferiore a Data di inizio
@@ -995,7 +995,7 @@ Expected Delivery Date cannot be before Purchase Order Date,Data prevista di con
 Expected Delivery Date cannot be before Sales Order Date,Data prevista di consegna non può essere precedente Sales Order Data
 Expected End Date,Data prevista di fine
 Expected Start Date,Data prevista di inizio
-Expense,spese
+Expense,Spesa
 Expense / Difference account ({0}) must be a 'Profit or Loss' account,Expense / account Differenza ({0}) deve essere un 'utile o perdita' conto
 Expense Account,Conto uscite
 Expense Account is mandatory,Conto spese è obbligatorio
@@ -1703,8 +1703,8 @@ Multiple Item prices.,Molteplici i prezzi articolo.
 Music,musica
 Must be Whole Number,Devono essere intere Numero
 Name,Nome
-Name and Description,Nome e descrizione
-Name and Employee ID,Nome e ID dipendente
+Name and Description,Nome e Descrizione
+Name and Employee ID,Nome e ID Dipendente
 "Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master","Nome del nuovo account . Nota : Si prega di non creare account per i Clienti e Fornitori , vengono creati automaticamente dal cliente e maestro fornitore"
 Name of person or organization that this address belongs to.,Nome della persona o organizzazione che questo indirizzo appartiene.
 Name of the Budget Distribution,Nome della distribuzione del bilancio
@@ -1723,12 +1723,12 @@ Net Weight UOM,UOM Peso netto
 Net Weight of each Item,Peso netto di ogni articolo
 Net pay cannot be negative,Retribuzione netta non può essere negativo
 Never,Mai
-New ,New 
-New Account,nuovo account
-New Account Name,Nuovo nome account
+New ,Nuovo
+New Account,Nuovo Account
+New Account Name,Nuovo Nome Account
 New BOM,Nuovo BOM
 New Communications,New Communications
-New Company,New Company
+New Company,Nuova Azienda
 New Cost Center,Nuovo Centro di costo
 New Cost Center Name,Nuovo Centro di costo Nome
 New Delivery Notes,Nuovi Consegna Note
@@ -1737,7 +1737,7 @@ New Leads,New Leads
 New Leave Application,Nuovo Lascia Application
 New Leaves Allocated,Nuove foglie allocato
 New Leaves Allocated (In Days),Nuove foglie attribuiti (in giorni)
-New Material Requests,Nuovo materiale Richieste
+New Material Requests,Nuove Richieste di Materiale
 New Projects,Nuovi Progetti
 New Purchase Orders,Nuovi Ordini di acquisto
 New Purchase Receipts,Nuovo acquisto Ricevute
@@ -1758,7 +1758,7 @@ Newsletter Status,Newsletter di stato
 Newsletter has already been sent,Newsletter è già stato inviato
 "Newsletters to contacts, leads.","Newsletter ai contatti, lead."
 Newspaper Publishers,Editori Giornali
-Next,prossimo
+Next,Successivo
 Next Contact By,Avanti Contatto Con
 Next Contact Date,Avanti Contact Data
 Next Date,Avanti Data
@@ -1768,7 +1768,7 @@ No Customer Accounts found.,Nessun account dei clienti trovata .
 No Customer or Supplier Accounts found,Nessun cliente o fornitore Conti trovati
 No Expense Approvers. Please assign 'Expense Approver' Role to atleast one user,Nessun approvazioni di spesa . Assegnare ruoli ' Expense Approvatore ' per atleast un utente
 No Item with Barcode {0},Nessun articolo con codice a barre {0}
-No Item with Serial No {0},Nessun articolo con Serial No {0}
+No Item with Serial No {0},Nessun Articolo con Numero di Serie {0}
 No Items to pack,Non ci sono elementi per il confezionamento
 No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user,Nessun Lascia le approvazioni . Assegnare ruoli ' Lascia Approvatore ' per atleast un utente
 No Permission,Nessuna autorizzazione
@@ -1781,18 +1781,18 @@ No default Address Template found. Please create a new one from Setup > Printing
 No default BOM exists for Item {0},Non esiste BOM predefinito per la voce {0}
 No description given,Nessuna descrizione fornita
 No employee found,Nessun dipendente trovato
-No employee found!,Nessun dipendente trovata!
+No employee found!,Nessun dipendente trovato!
 No of Requested SMS,No di SMS richiesto
 No of Sent SMS,No di SMS inviati
 No of Visits,No di visite
 No permission,Nessuna autorizzazione
 No record found,Nessun record trovato
-No records found in the Invoice table,Nessun record trovati nella tabella Fattura
-No records found in the Payment table,Nessun record trovati nella tabella di pagamento
+No records found in the Invoice table,Nessun record trovato nella tabella Fattura
+No records found in the Payment table,Nessun record trovato nella tabella di Pagamento
 No salary slip found for month: ,Nessun foglio paga trovato per mese:
 Non Profit,non Profit
 Nos,nos
-Not Active,Non attivo
+Not Active,Non Attivo
 Not Applicable,Non Applicabile
 Not Available,Non disponibile
 Not Billed,Non fatturata
@@ -1824,8 +1824,8 @@ Notify by Email on creation of automatic Material Request,Notifica tramite e-mai
 Number Format,Formato numero
 Offer Date,offerta Data
 Office,Ufficio
-Office Equipments,ufficio Equipments
-Office Maintenance Expenses,Spese di manutenzione degli uffici
+Office Equipments,Attrezzature Ufficio
+Office Maintenance Expenses,Spese Manutenzione Ufficio
 Office Rent,Affitto Ufficio
 Old Parent,Vecchio genitore
 On Net Total,Sul totale netto
@@ -1836,9 +1836,9 @@ Only Leave Applications with status 'Approved' can be submitted,Lasciare solo ap
 "Only Serial Nos with status ""Available"" can be delivered.",Possono essere consegnati solo i numeri seriali con stato &quot;Disponibile&quot;.
 Only leaf nodes are allowed in transaction,Solo i nodi foglia sono ammessi nelle transazioni
 Only the selected Leave Approver can submit this Leave Application,Solo il selezionato Lascia Approver può presentare questo Leave applicazione
-Open,Aprire
+Open,Aperto
 Open Production Orders,Aprire ordini di produzione
-Open Tickets,Biglietti Open
+Open Tickets,Tickets Aperti
 Opening (Cr),Opening ( Cr )
 Opening (Dr),Opening ( Dr)
 Opening Date,Data di apertura
@@ -1855,16 +1855,16 @@ Operation {0} is repeated in Operations Table,Operazione {0} è ripetuto in Oper
 Operation {0} not present in Operations Table,Operazione {0} non presente in Operations tabella
 Operations,Operazioni
 Opportunity,Opportunità
-Opportunity Date,Opportunity Data
+Opportunity Date,Data Opportunità
 Opportunity From,Opportunità da
 Opportunity Item,Opportunità articolo
-Opportunity Items,Articoli Opportunità
+Opportunity Items,Opportunità Articoli
 Opportunity Lost,Occasione persa
 Opportunity Type,Tipo di Opportunità
 Optional. This setting will be used to filter in various transactions.,Facoltativo. Questa impostazione verrà utilizzato per filtrare in diverse operazioni .
 Order Type,Tipo di ordine
 Order Type must be one of {0},Tipo ordine deve essere uno dei {0}
-Ordered,ordinato
+Ordered,Ordinato
 Ordered Items To Be Billed,Articoli ordinati da fatturare
 Ordered Items To Be Delivered,Articoli ordinati da consegnare
 Ordered Qty,Quantità ordinato
@@ -1877,11 +1877,11 @@ Organization branch master.,Ramo Organizzazione master.
 Organization unit (department) master.,Unità organizzativa ( dipartimento) master.
 Other,Altro
 Other Details,Altri dettagli
-Others,altrui
+Others,Altri
 Out Qty,out Quantità
 Out Value,out Valore
 Out of AMC,Fuori di AMC
-Out of Warranty,Fuori garanzia
+Out of Warranty,Fuori Garanzia
 Outgoing,In partenza
 Outstanding Amount,Eccezionale Importo
 Outstanding for {0} cannot be less than zero ({1}),Eccezionale per {0} non può essere inferiore a zero ( {1} )
@@ -1890,7 +1890,7 @@ Overheads,Spese generali
 Overlapping conditions found between:,Condizioni sovrapposti trovati tra :
 Overview,Panoramica
 Owned,Di proprietà
-Owner,proprietario
+Owner,Proprietario
 P L A - Cess Portion,PLA - Cess Porzione
 PL or BS,PL o BS
 PO Date,PO Data
@@ -2275,8 +2275,8 @@ Quantity for Item {0} must be less than {1},Quantità per la voce {0} deve esser
 Quantity in row {0} ({1}) must be same as manufactured quantity {2},Quantità in riga {0} ( {1} ) deve essere uguale quantità prodotta {2}
 Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,Quantità di prodotto ottenuto dopo la produzione / reimballaggio da determinati quantitativi di materie prime
 Quantity required for Item {0} in row {1},Quantità necessaria per la voce {0} in riga {1}
-Quarter,Quartiere
-Quarterly,Trimestrale
+Quarter,Trimestrale
+Quarterly,Trimestralmente
 Quick Help,Guida rapida
 Quotation,Quotazione
 Quotation Item,Quotazione articolo
@@ -2858,20 +2858,20 @@ Target Qty,Obiettivo Qtà
 Target Warehouse,Obiettivo Warehouse
 Target warehouse in row {0} must be same as Production Order,Magazzino Target in riga {0} deve essere uguale ordine di produzione
 Target warehouse is mandatory for row {0},Magazzino di destinazione è obbligatoria per riga {0}
-Task,Task
-Task Details,Attività Dettagli
-Tasks,compiti
-Tax,Tax
+Task,Attività
+Task Details,Dettagli Attività
+Tasks,Attività
+Tax,Tassa
 Tax Amount After Discount Amount,Fiscale Ammontare Dopo Sconto Importo
 Tax Assets,Attività fiscali
 Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,"Tasse categoria non può essere ' valutazione ' o ' di valutazione e Total ', come tutti gli articoli sono elementi non-azione"
-Tax Rate,Aliquota fiscale
+Tax Rate,Aliquota Fiscale
 Tax and other salary deductions.,Fiscale e di altre deduzioni salariali.
 Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,Tabella di dettaglio fiscale prelevato dalla voce principale come una stringa e memorizzato in questo campo. Usato per imposte e oneri
 Tax template for buying transactions.,Modello fiscale per l'acquisto di transazioni.
 Tax template for selling transactions.,Modello fiscale per la vendita di transazioni.
 Taxable,Imponibile
-Taxes,Tassazione.
+Taxes,Tasse
 Taxes and Charges,Tasse e Costi
 Taxes and Charges Added,Tasse e spese aggiuntive
 Taxes and Charges Added (Company Currency),Tasse e spese aggiuntive (Azienda valuta)
@@ -2892,7 +2892,7 @@ Temporary Accounts (Liabilities),Conti temporanee ( Passivo )
 Temporary Assets,Le attività temporanee
 Temporary Liabilities,Passivo temporanee
 Term Details,Dettagli termine
-Terms,condizioni
+Terms,Termini
 Terms and Conditions,Termini e Condizioni
 Terms and Conditions Content,Termini e condizioni contenuti
 Terms and Conditions Details,Termini e condizioni dettagli
@@ -2900,7 +2900,7 @@ Terms and Conditions Template,Termini e condizioni Template
 Terms and Conditions1,Termini e Condizioni 1
 Terretory,Terretory
 Territory,Territorio
-Territory / Customer,Territorio / clienti
+Territory / Customer,Territorio / Cliente
 Territory Manager,Territory Manager
 Territory Name,Territorio Nome
 Territory Target Variance Item Group-Wise,Territorio di destinazione Varianza articolo Group- Wise
@@ -2909,9 +2909,9 @@ Test,Prova
 Test Email Id,Prova Email Id
 Test the Newsletter,Provare la Newsletter
 The BOM which will be replaced,La distinta base che sarà sostituito
-The First User: You,Il primo utente : è
+The First User: You,Il Primo Utente : Tu
 "The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""",L&#39;articolo che rappresenta il pacchetto. Questo elemento deve avere &quot;è Stock Item&quot; come &quot;No&quot; e &quot;Is Voce di vendita&quot; come &quot;Yes&quot;
-The Organization,l'Organizzazione
+The Organization,L'Organizzazione
 "The account head under Liability, in which Profit/Loss will be booked","La testa account con responsabilità, in cui sarà prenotato Utile / Perdita"
 The date on which next invoice will be generated. It is generated on submit.,La data in cui verrà generato prossima fattura. Viene generato su Invia.
 The date on which recurring invoice will be stop,La data in cui fattura ricorrente sarà ferma
@@ -2943,11 +2943,11 @@ This is a root customer group and cannot be edited.,Si tratta di un gruppo di cl
 This is a root item group and cannot be edited.,Questo è un gruppo elemento principale e non può essere modificato .
 This is a root sales person and cannot be edited.,Si tratta di una persona di vendita di root e non può essere modificato .
 This is a root territory and cannot be edited.,Questo è un territorio root e non può essere modificato .
-This is an example website auto-generated from ERPNext,Questo è un sito esempio generata automaticamente da ERPNext
+This is an example website auto-generated from ERPNext,Questo è un sito di esempio generato automaticamente da ERPNext
 This is the number of the last created transaction with this prefix,Questo è il numero dell&#39;ultimo transazione creata con questo prefisso
 This will be used for setting rule in HR module,Questo verrà utilizzato per regola impostazione nel modulo HR
 Thread HTML,HTML Discussione
-Thursday,Giovedi
+Thursday,Giovedì
 Time Log,Tempo di Log
 Time Log Batch,Tempo Log Batch
 Time Log Batch Detail,Ora Dettaglio Batch Log
@@ -2957,8 +2957,8 @@ Time Log Status must be Submitted.,Tempo Log Stato deve essere presentata.
 Time Log for tasks.,Tempo di log per le attività.
 Time Log is not billable,Il tempo log non è fatturabile
 Time Log {0} must be 'Submitted',Tempo di log {0} deve essere ' inoltrata '
-Time Zone,Time Zone
-Time Zones,Time Zones
+Time Zone,Fuso Orario
+Time Zones,Fusi Orari
 Time and Budget,Tempo e budget
 Time at which items were delivered from warehouse,Ora in cui gli elementi sono stati consegnati dal magazzino
 Time at which materials were received,Ora in cui sono stati ricevuti i materiali
@@ -2969,7 +2969,7 @@ To Currency,Per valuta
 To Date,Di sesso
 To Date should be same as From Date for Half Day leave,Per data deve essere lo stesso Dalla Data per il congedo mezza giornata
 To Date should be within the Fiscal Year. Assuming To Date = {0},Per data deve essere entro l'anno fiscale. Assumendo A Data = {0}
-To Discuss,Per Discutere
+To Discuss,Da Discutere
 To Do List,To Do List
 To Package No.,A Pacchetto no
 To Produce,per produrre
@@ -3046,7 +3046,7 @@ Transfer,Trasferimento
 Transfer Material,Material Transfer
 Transfer Raw Materials,Trasferimento materie prime
 Transferred Qty,Quantità trasferito
-Transportation,Trasporti
+Transportation,Trasporto
 Transporter Info,Info Transporter
 Transporter Name,Trasportatore Nome
 Transporter lorry number,Numero di camion Transporter
@@ -3073,11 +3073,11 @@ UOM coversion factor required for UOM: {0} in Item: {1},Fattore coversion UOM ri
 Under AMC,Sotto AMC
 Under Graduate,Sotto Laurea
 Under Warranty,Sotto Garanzia
-Unit,unità
-Unit of Measure,Unità di misura
+Unit,Unità
+Unit of Measure,Unità di Misura
 Unit of Measure {0} has been entered more than once in Conversion Factor Table,Unità di misura {0} è stato inserito più di una volta Factor Tabella di conversione
 "Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","Unità di misura di questo oggetto (es. Kg, Unità, No, coppia)."
-Units/Hour,Unità / Hour
+Units/Hour,Unità / Ora
 Units/Shifts,Unità / turni
 Unpaid,Non pagata
 Unreconciled Payment Details,Non riconciliate Particolari di pagamento
