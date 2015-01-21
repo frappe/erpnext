@@ -118,13 +118,15 @@ class Depreciation:
 
 		self.do_depreciation_total(asset_value_dict)
 
+		self.calculate_sub_total(asset_value_dict, assets.fixed_asset_account, data)
+
 		if asset_value_dict['total_purchases_during_the_year'] + \
 			asset_value_dict['purchase_cost_at_year_start'] > 0:			
 				if self.expand_levels==True:
 					data.append(self.build_row(assets, asset_value_dict))
-		self.calculate_total(asset_value_dict, assets.fixed_asset_account, data)	
+			
 
-  	    self.calculate_total(asset_value_dict, assets.fixed_asset_account, data, True)	
+  	    self.calculate_sub_total(asset_value_dict, assets.fixed_asset_account, data, True)	
 
 	    return data
 
@@ -265,7 +267,7 @@ class Depreciation:
 				dict_value['depreciation_provided_till_last_year']
 		       }
 
-	def calculate_total(self, dict_value, group_name, data, end=False):
+	def calculate_sub_total(self, dict_value, group_name, data, end=False):
 
 		if (self.old_group_name != group_name or end==True) and self.fixed_asset==None:
 			data.append(self.get_total_row(self.old_group_name))
@@ -302,23 +304,28 @@ class Depreciation:
 
 
 	def get_total_row(self, group_name):
-			return [
-				'',
-				group_name,
-				'',
-				self.group_total_year_start_purchase_cost,
-				self.group_total_purchases_in_the_year,
-				self.group_total_sales_in_the_year,
-				self.group_total_asset_value_at_year_end,
-				self.group_total_depreciation_till_last_year,
-				self.group_total_depreciation_in_the_year,
-				self.group_total_depreciation_on_purchase_in_year,
-				self.group_total_deprecitaion_this_year,
-				self.group_total_depreciation_written_back,
-				self.group_total_accumulated_depreciation_at_year_end,
-				self.group_total_net_closing,
-				self.group_total_net_opening
-			      ]
+			return {
+				"fixed_asset_name": 'Sub Total',
+				"fixed_asset_account": group_name,
+				"rate_of_depreciation": '',
+				"cost_as_on": self.group_total_year_start_purchase_cost,
+				"purchases": self.group_total_purchases_in_the_year,
+				"sales": self.group_total_sales_in_the_year,
+				"closing_cost": self.group_total_asset_value_at_year_end,
+				"opening_depreciation": self.group_total_depreciation_till_last_year,
+				"depreciation_provided_on_opening_current_year": \
+					self.group_total_depreciation_in_the_year,
+				"depreciation_provided_on_purchase_current_year": \
+					self.group_total_depreciation_on_purchase_in_year,
+				"total_depreciation_for_current_year": \
+					self.group_total_deprecitaion_this_year,
+				"depreciation_written_back": \
+					self.group_total_depreciation_written_back,
+				"total_accumulated_depreciation": \
+					self.group_total_accumulated_depreciation_at_year_end,
+				"net_closing_value": self.group_total_net_closing,
+				"net_opening_value": self.group_total_net_opening
+			      }
 
 
 	def get_start_group_name(self):
