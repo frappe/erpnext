@@ -142,6 +142,8 @@ def create_fiscal_year_and_company(args):
 		'chart_of_accounts': args.get(('chart_of_accounts')),
 	}).insert()
 
+	# Bank Account
+
 	args["curr_fiscal_year"] = curr_fiscal_year
 
 def create_price_lists(args):

@@ -73,7 +73,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 	set_total_taxes_and_charges: function() {
 		total_taxes_and_charges = 0.0;
-		$.each(this.frm.doc.taxes, function(i, d) {
+		$.each(this.frm.doc.taxes || [], function(i, d) {
 			total_taxes_and_charges += flt(d.amount)
 		});
 		cur_frm.set_value("total_taxes_and_charges", total_taxes_and_charges);
@@ -83,11 +83,11 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		var me = this;
 		if(this.frm.doc.taxes.length) {
 			var total_item_cost = 0.0;
-			$.each(this.frm.doc.items, function(i, d) {
+			$.each(this.frm.doc.items || [], function(i, d) {
 				total_item_cost += flt(d.amount)
 			});
 
-			$.each(this.frm.doc.items, function(i, item) {
+			$.each(this.frm.doc.items || [], function(i, item) {
 				item.applicable_charges = flt(item.amount) *  flt(me.frm.doc.total_taxes_and_charges) / flt(total_item_cost)
 			});
 			refresh_field("items");

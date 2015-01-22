@@ -35,7 +35,7 @@ class FiscalYear(Document):
 
 		if (getdate(self.year_end_date) - getdate(self.year_start_date)).days > 366:
 			frappe.throw(_("Fiscal Year Start Date and Fiscal Year End Date cannot be more than a year apart."))
-	
+
 		check_duplicate_fiscal_year(self)
 
 @frappe.whitelist()
@@ -60,7 +60,7 @@ def auto_create_fiscal_year():
 			start_year = new_fy.year_start_date[:4]
 			end_year = new_fy.year_end_date[:4]
 			new_fy.year = start_year if start_year==end_year else (start_year + "-" + end_year)
-			
+
 			new_fy.insert()
-		except:
+		except frappe.NameError:
 			pass

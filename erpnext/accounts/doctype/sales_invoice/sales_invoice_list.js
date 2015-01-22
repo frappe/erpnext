@@ -14,5 +14,6 @@ frappe.listview_settings['Sales Invoice'] = {
 		} else if (doc.outstanding_amount > 0 && doc.due_date <= frappe.datetime.get_today()) {
 			return [__("Overdue"), "red", "oustanding_amount,>,0|due_date,<=,Today"]
 		}
-	}
+	},
+	right_column: "grand_total_export"
 };

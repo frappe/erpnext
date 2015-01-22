@@ -2,14 +2,14 @@
 
 {% if(!doc) { %}
 	<div class="row">
-		<div class="col-sm-6">{%= __("Items") %}</div>
-		<div class="col-sm-2 text-right">{%= __("Qty") %}</div>
-		<div class="col-sm-2 text-right">{%= __("Rate") %}</div>
-		<div class="col-sm-2 text-right">{%= __("Amount") %}</div>
+		<div class="col-sm-6 col-xs-8">{%= __("Items") %}</div>
+		<div class="col-sm-2 hidden-xs text-right">{%= __("Qty") %}</div>
+		<div class="col-sm-2 hidden-xs text-right">{%= __("Rate") %}</div>
+		<div class="col-sm-2 col-xs-4 text-right">{%= __("Amount") %}</div>
 	</div>
 {% } else { %}
 	<div class="row">
-		<div class="col-sm-6"><strong>{%= doc.item_code %}</strong>
+		<div class="col-sm-6 col-xs-8"><strong>{%= doc.item_code %}</strong>
 			{% if(doc.item_name != doc.item_code) { %}
 				<br>{%= doc.item_name %}{% } %}
 			{% if(doc.item_name != doc.description) { %}
@@ -56,7 +56,7 @@
 		</div>
 
 		<!-- qty -->
-		<div class="col-sm-2 text-right">
+		<div class="col-sm-2 hidden-xs text-right">
 			{%= doc.get_formatted("qty") %}
 			<br><small>{%= doc.uom || doc.stock_uom %}</small>
 			{% if(in_list(["Sales Order Item", "Purchase Order Item"],
@@ -72,7 +72,7 @@
 		</div>
 
 		<!-- rate -->
-		<div class="col-sm-2 text-right">
+		<div class="col-sm-2 hidden-xs text-right">
 			{% if (!frappe.perm.is_visible("rate", doc, frm.perm)) { %}
 				<span class="text-muted">{%= __("hidden") %}</span>
 			{% } else { %}
@@ -86,7 +86,7 @@
 		</div>
 
 		<!-- amount -->
-		<div class="col-sm-2 text-right">
+		<div class="col-sm-2 col-xs-4 text-right">
 			{% if (!frappe.perm.is_visible("amount", doc, frm.perm)) { %}
 				<span class="text-muted">{%= __("hidden") %}</span>
 			{% } else { %}
@@ -101,6 +101,13 @@
 				%}
 				<br><small>&nbsp;</small>
 				{% include "templates/form_grid/includes/progress.html" %}
+			{% } %}
+
+			{% if (frappe.perm.is_visible("rate", doc, frm.perm)) { %}
+			<div class="visible-xs text-muted">
+				{%= doc.get_formatted("qty") %} <small>{%= doc.uom || doc.stock_uom %}</small>
+				x {%= doc.get_formatted("rate") %}
+			</div>
 			{% } %}
 		</div>
 	</div>

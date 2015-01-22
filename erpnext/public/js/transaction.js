@@ -363,7 +363,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		if (item) {
 			append_item(item);
 		} else {
-			$.each(this.frm.doc["items"], function(i, d) {
+			$.each(this.frm.doc["items"] || [], function(i, d) {
 				append_item(d);
 			});
 		}
@@ -478,7 +478,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var tax_accounts = [];
 		var company_currency = this.get_company_currency();
 
-		$.each(this.frm.doc["taxes"], function(i, tax) {
+		$.each(this.frm.doc["taxes"] || [], function(i, tax) {
 			var tax_amount_precision = precision("tax_amount", tax);
 			var tax_rate_precision = precision("rate", tax);
 			$.each(JSON.parse(tax.item_wise_tax_detail || '{}'),
@@ -507,7 +507,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 		var distinct_item_names = [];
 		var distinct_items = [];
-		$.each(this.frm.doc["items"], function(i, item) {
+		$.each(this.frm.doc["items"] || [], function(i, item) {
 			if(distinct_item_names.indexOf(item.item_code || item.item_name)===-1) {
 				distinct_item_names.push(item.item_code || item.item_name);
 				distinct_items.push(item);
@@ -592,7 +592,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	initialize_taxes: function() {
 		var me = this;
 
-		$.each(this.frm.doc["taxes"], function(i, tax) {
+		$.each(this.frm.doc["taxes"] || [], function(i, tax) {
 			tax.item_wise_tax_detail = {};
 			tax_fields = ["total", "tax_amount_after_discount_amount",
 				"tax_amount_for_current_item", "grand_total_for_current_item",
@@ -614,16 +614,16 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 		var actual_tax_dict = {};
 
 		// maintain actual tax rate based on idx
-		$.each(this.frm.doc["taxes"], function(i, tax) {
+		$.each(this.frm.doc["taxes"] || [], function(i, tax) {
 			if (tax.charge_type == "Actual") {
 				actual_tax_dict[tax.idx] = flt(tax.rate, precision("tax_amount", tax));
 			}
 		});
 
-		$.each(this.frm.doc["items"], function(n, item) {
+		$.each(this.frm.doc["items"] || [], function(n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 
-			$.each(me.frm.doc["taxes"], function(i, tax) {
+			$.each(me.frm.doc["taxes"] || [], function(i, tax) {
 				// tax_amount represents the amount of tax for the current step
 				var current_tax_amount = me.get_current_tax_amount(item, tax, item_tax_map);
 
@@ -726,7 +726,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 
 	_cleanup: function() {
-		$.each(this.frm.doc["taxes"], function(i, tax) {
+		$.each(this.frm.doc["taxes"] || [], function(i, tax) {
 			$.each(["tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"],
 				function(i, fieldname) { delete tax[fieldname]; });
