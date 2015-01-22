@@ -1,0 +1,355 @@
+{
+	"country_code": "is",
+	"name": "Íslenskur bókhaldslykill fyrir ERPNext - útgáfa 1",
+	"is_active": "Yes",
+	"tree": {
+		"1000 - Eignir": {
+			"1005 - Veltufjármunir": {
+				"1010 - Viðskiptakröfur": {
+					"1011 - Viðskiptamenn": {
+						"account_type": "Receivable"
+					},
+					"1012 - Greiðslukort": {
+						"account_type": "Receivable"
+					},
+					"1013 - Kröfur í innheimtu": {
+						"account_type": "Receivable"
+					}
+				},
+				"1030 - Bankareikningar og handbært fé": {
+					"1031 - Debitreikningur Landsbankinn": {
+						"account_type": "Bank"
+					},
+					"1032 - EUR Landsbankinn": {
+						"account_type": "Bank"
+					},
+					"1033 - USD Landsbankinn": {
+						"account_type": "Bank"
+					},
+					"1034 - Sjóður": {
+						"account_type": "Cash"
+					}
+				},
+				"1050 - Skuldabréf og skuldabréfasjóðir": {
+					"1051 - Skuldabréf": {
+						"group_or_ledger": "Group"
+					},
+					"1052 - Sjóðir": {
+						"group_or_ledger": "Group"
+					}
+				},
+				"1070 - Fyrirframgreiðslur": {
+					"1071 - Fyrirframgreidd laun": {},
+					"1072 - Fyrirframgreiddur kostnaður": {}
+				},
+				"1090 - Vörubirgðir": {
+					"1091 - Birgðageymsla": {
+						"account_type": "Stock"
+					}
+				}
+			},
+			"1115 - Fastafjármunir": {
+				"1120 - Áhættufjármunir": {
+					"1121 - Hlutafjáreign": {
+					  "account_type": "Fixed Asset"
+					}
+				},
+				"1140 - Varanlegir rekstrarfjármunir": {
+					"1141 - Skrifstofuáhöld": {
+					  "account_type": "Fixed Asset"
+					},
+					"1142 - Tölvubúnaður": {
+					  "account_type": "Fixed Asset"
+					},
+					"1143 - Hugbúnaður": {
+					  "account_type": "Fixed Asset"
+					},
+					"1144 - Bifreiðar": {
+					  "account_type": "Fixed Asset"
+					},
+					"1145 - Vélar og tæki": {
+					  "account_type": "Fixed Asset"
+					},
+					"1146 - Fasteignir": {
+					  "account_type": "Fixed Asset"
+					},
+					"1147 - Land": {
+					  "account_type": "Fixed Asset"
+					}
+				}
+			},
+			"root_type": "Asset"
+		},
+		"2000 - Skuldir og eigið fé": {
+			"2005 - Skammtímaskuldir": {
+				"2010 - Viðskiptaskuldir": {
+					"2011 - Lánadrottnar": {
+						"account_type": "Payable"
+					},
+					"2012 - Mótteknar birgðir en ekki greiddar": {
+						"account_type": "Stock Received But Not Billed"
+					},
+					"2013 - Ógreiddir reikningar": {},
+					"2014 - Ógreiddur tollur": {}
+				},
+				"2030 - Virðisaukaskattur": {
+					"2031 - Innskattur 11%": {
+						"account_type": "Tax"
+					},
+					"2032 - Innskattur 24%": {
+						"account_type": "Tax"
+					},
+					"2033 - Útskattur 11%": {
+						"account_type": "Tax"
+					},
+					"2034 - Útskattur 24%": {
+						"account_type": "Tax"
+					},
+					"2035 - Uppgjörsreikningur virðisauka": {},
+					"2036 - Handfærður innskattur": {},
+					"2037 - Virðisaukaskattur í tolli": {}
+				},
+				"2050 - Ógreidd opinber gjöld": {
+					"2051 - Áætlaður tekjuskattur": {},
+					"2052 - Fjármagnstekjuskattur": {}
+				},
+				"2070 - Ógreitt vegna launa starfsmanna": {
+					"2071 - Ógreidd staðgreiðsla": {},
+					"2072 - Ógreiddur lífeyrissjóður": {},
+					"2073 - Ógreiddur viðbótarlífeyrissparnaður": {},
+					"2074 - Ógreidd félagsgjöld": {},
+					"2075 - Ógreitt orlof": {},
+					"2076 - Ógreitt tryggingagjald": {},
+					"2077 - Ógreidd opinber gjöld starfsmanna": {}
+				}
+			},
+			"2125 - Langtímaskuldir": {
+				"2130 - Verðtryggð lán": {
+					"group_or_ledger": "Group"
+				},
+				"2230 - Óverðtryggð lán": {
+					"group_or_ledger": "Group"
+				}
+			},
+			"2305 - Egið fé": {
+				"2310 - Hagnaður ársins": {
+					"account_type": "Equity"
+				},
+				"2311 - Óráðstafað eigið fé": {
+					"account_type": "Equity"
+				},
+				"2312 - Hlutafé": {
+					"account_type": "Equity"
+				},
+				"2313 - Lögbundinn varasjóður": {
+					"account_type": "Equity"
+				},
+				"account_type": "Equity"
+			},
+			"root_type": "Liability"
+		},
+		"3000 - Rekstrartekjur": {
+			"3005 - Tekjur af sölu vöru og þjónustu": {
+				"3010 - Sala vöru": {
+					"account_type": "Income Account"
+				},
+				"3011 - Sala þjónustu": {
+					"account_type": "Income Account"
+				}
+			},
+			"3045 - Aðrar tekjur": {
+				"3050 - Ýmsar tekjur án vsk": {
+					"account_type": "Income Account"
+				}
+			},
+			"root_type": "Income"
+		},
+		"4000 - Rekstrargjöld": {
+			"4005 - Kostnaðarverð seldrar vöru": {
+				"4010 - Vörunotkun": {
+					"account_type": "Expense Account"
+				},
+				"4011 - Kostnaður við birgðamat": {
+					"account_type": "Expenses Included In Valuation"
+				},
+				"4012 - Birgðaleiðrétting": {
+					"account_type": "Stock Adjustment"
+				},
+				"4013 - Flutningsgjöld án vsk": {
+					"account_type": "Expense Account"
+				},
+				"4014 - Bankakostnaður vegna vörukaupa": {
+					"account_type": "Expense Account"
+				},
+				"4015 - Tollar og önnur gjöld": {
+					"account_type": "Expense Account"
+				},
+				"account_type": "Expense Account"
+			},
+			"4035 - Laun og launatengd gjöld": {
+				"4040 - Laun starfsmanna": {
+					"account_type": "Expense Account"
+				},
+				"4041 - Lífeyrissjóðsframlag": {
+					"account_type": "Expense Account"
+				},
+				"4042 - Viðbótar lífeyrissjóðsframlag": {
+					"account_type": "Expense Account"
+				},
+				"4043 - Bifreiðastyrkir": {
+					"account_type": "Expense Account"
+				},
+				"4044 - Dagpeningar": {
+					"account_type": "Expense Account"
+				},
+				"4045 - Starfsendurhæfingarsjóður": {
+					"account_type": "Expense Account"
+				},
+				"4046 - Tryggingargjald": {
+					"account_type": "Expense Account"
+				}
+			},
+			"4075 - Skrifstofukostnaður": {
+				"4080 - Fjarskiptaþjónusta með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4081 - Ritföng og pappír með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4082 - Burðargjöld án vsk": {
+					"account_type": "Expense Account"
+				},
+				"4083 - Blöð og tímarit með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4084 - Húsgögn með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4085 - Hugbúnaður með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4086 - Aðkeyptur akstur með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4087 - Stöðumælagjöld og sektir": {
+					"account_type": "Expense Account"
+				},
+				"4088 - Verkfæri og áhöld með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4089 - Viðhald verkfæra og áhalda með vsk": {
+					"account_type": "Expense Account"
+				}
+			},
+			"4105 - Aðkeypt þjónusta": {
+				"4110 - Endurskoðun með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4111 - Lögfræðiþjónusta með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4112 - Öryggisþjónusta með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4113 - Auglýsingar með vsk": {
+					"account_type": "Expense Account"
+				}
+			},
+			"4135 - Rekstur bifreiða": {
+				"4140 - Eldsneyti með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4141 - Viðgerðir með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4142 - Varahlutir með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4143 - Tryggingar og skattar án vsk": {
+					"account_type": "Expense Account"
+				}
+			},
+			"4175 - Rekstur húsnæðis": {
+				"4180 - Hiti með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4181 - Rafmagn með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4182 - Húsaleiga án vsk vsk": {
+					"account_type": "Expense Account"
+				},
+				"4183 - Viðgerðir og viðhald með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4184 - Ræstingarvörur með vsk": {
+					"account_type": "Expense Account"
+				},
+				"4185 - Tryggingar án vsk": {
+					"account_type": "Expense Account"
+				},
+				"4186 - Fasteignagjöld án vsk": {
+					"account_type": "Expense Account"
+				},
+				"4187 - Vatns- og fráveitugjöld án vsk": {
+					"account_type": "Expense Account"
+				},
+				"4188 - Sameiginlegur rekstrarkostnaður húsnæðis án vsk": {
+					"account_type": "Expense Account"
+				}
+			},
+			"4205 - Ferðakostnaður": {
+				"4210 - Flugfargjöld": {
+					"account_type": "Expense Account"
+				},
+				"4211 - Hótelkostnaður": {
+					"account_type": "Expense Account"
+				},
+				"4212 - Bílaleigukostnaður": {
+					"account_type": "Expense Account"
+				}
+			},
+			"4235 - Bankakostnaður": {
+				"4240 - Færslugjöld án vsk": {
+					"account_type": "Expense Account"
+				},
+				"4241 - Greiðslukortakostnaður án vsk": {
+					"account_type": "Expense Account"
+				},
+				"4242 - Innheimtukostnaður": {
+					"account_type": "Expense Account"
+				}
+			},
+			"4265 - Ýmiss kostnaður": {
+				"4270 - Kaffistofukostnaður án vsk": {
+					"account_type": "Expense Account"
+				},
+				"4271 - Styrkir og gjafir án vsk": {
+					"account_type": "Expense Account"
+				},
+				"4272 - Móttaka gesta án vsk": {
+					"account_type": "Expense Account"
+				}
+			},
+			"4295 - Afskriftir": {
+				"4300 - Skrifstofuáhalda": {},
+				"4301 - Tölvubúnaðar": {},
+				"4302 - Hugbúnaðar": {},
+				"4303 - Bifreiða": {},
+				"4304 - Véla og tækja": {},
+				"4305 - Fasteigna": {}
+			},
+			"4325 - Fjármagnsliðir": {
+				"4330 - Vaxtatekjur": {},
+				"4331 - Vaxtagjöld skammtímalána": {},
+				"4332 - Vaxtagjöld langtímalána": {},
+				"4333 - Gengishagnaður/tap": {}
+			},
+			"4355 - Rekstrartengdir skattar og opinber gjöld": {
+				"4360 - Tekjuskattur": {},
+				"4361 - Útvarpsgjald": {}
+			},
+			"root_type": "Expense"
+		}
+	}
+}
