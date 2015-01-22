@@ -3,9 +3,9 @@
 
 
 frappe.provide("erpnext.selling");
-frappe.require("assets/erpnext/js/transaction.js");
+frappe.require("assets/erpnext/js/controllers/transaction.js");
 
-{% include "public/js/controllers/accounts.js" %}
+{% include "public/js/controllers/accounts.js" %};
 
 cur_frm.email_field = "contact_email";
 
@@ -233,94 +233,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 
-	calculate_taxes_and_totals: function(update_paid_amount) {
-		this._super();
-		this.calculate_total_advance("Sales Invoice", "advances", update_paid_amount);
-		this.calculate_commission();
-		this.calculate_contribution();
-
-		// TODO check for custom_recalc in custom scripts of server
-
-		this.frm.refresh_fields();
-	},
-
-	calculate_item_values: function() {
-		var me = this;
-
-		if (!this.discount_amount_applied) {
-			$.each(this.frm.doc["items"] || [], function(i, item) {
-				frappe.model.round_floats_in(item);
-				item.amount = flt(item.rate * item.qty, precision("amount", item));
-
-				me._set_in_company_currency(item, "price_list_rate", "base_price_list_rate");
-				me._set_in_company_currency(item, "rate", "base_rate");
-				me._set_in_company_currency(item, "amount", "base_amount");
-			});
-		}
-	},
-
-	determine_exclusive_rate: function() {
-		var me = this;
-		$.each(me.frm.doc["items"] || [], function(n, item) {
-			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
-			var cumulated_tax_fraction = 0.0;
-
-			$.each(me.frm.doc["taxes"] || [], function(i, tax) {
-				tax.tax_fraction_for_current_item = me.get_current_tax_fraction(tax, item_tax_map);
-
-				if(i==0) {
-					tax.grand_total_fraction_for_current_item = 1 + tax.tax_fraction_for_current_item;
-				} else {
-					tax.grand_total_fraction_for_current_item =
-						me.frm.doc["taxes"][i-1].grand_total_fraction_for_current_item +
-						tax.tax_fraction_for_current_item;
-				}
-
-				cumulated_tax_fraction += tax.tax_fraction_for_current_item;
-			});
-
-			if(cumulated_tax_fraction && !me.discount_amount_applied) {
-				item.base_amount = flt(
-					(item.amount * me.frm.doc.conversion_rate) / (1 + cumulated_tax_fraction),
-					precision("base_amount", item));
-
-				item.base_rate = flt(item.base_amount / item.qty, precision("base_rate", item));
-
-				if(item.discount_percentage == 100) {
-					item.base_price_list_rate = item.base_rate;
-					item.base_rate = 0.0;
-				} else {
-					item.base_price_list_rate = flt(item.base_rate / (1 - item.discount_percentage / 100.0),
-						precision("base_price_list_rate", item));
-				}
-			}
-		});
-	},
-
-	get_current_tax_fraction: function(tax, item_tax_map) {
-		// Get tax fraction for calculating tax exclusive amount
-		// from tax inclusive amount
-		var current_tax_fraction = 0.0;
-
-		if(cint(tax.included_in_print_rate)) {
-			var tax_rate = this._get_tax_rate(tax, item_tax_map);
-
-			if(tax.charge_type == "On Net Total") {
-				current_tax_fraction = (tax_rate / 100.0);
-
-			} else if(tax.charge_type == "On Previous Row Amount") {
-				current_tax_fraction = (tax_rate / 100.0) *
-					this.frm.doc["taxes"][cint(tax.row_id) - 1].tax_fraction_for_current_item;
-
-			} else if(tax.charge_type == "On Previous Row Total") {
-				current_tax_fraction = (tax_rate / 100.0) *
-					this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_fraction_for_current_item;
-			}
-		}
-
-		return current_tax_fraction;
-	},
-
 	calculate_net_total: function() {
 		var me = this;
 		this.frm.doc.net_total = this.frm.doc.net_total_export = 0.0;
@@ -351,54 +263,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		this.frm.doc.rounded_total = Math.round(this.frm.doc.grand_total);
 		this.frm.doc.rounded_total_export = Math.round(this.frm.doc.grand_total_export);
-	},
-
-	apply_discount_amount: function() {
-		var me = this;
-		var distributed_amount = 0.0;
-
-		if (this.frm.doc.discount_amount) {
-			this.frm.set_value("base_discount_amount",
-				flt(this.frm.doc.discount_amount * this.frm.doc.conversion_rate, precision("base_discount_amount")))
-
-			var grand_total_for_discount_amount = this.get_grand_total_for_discount_amount();
-			// calculate item amount after Discount Amount
-			if (grand_total_for_discount_amount) {
-				$.each(this.frm.doc["items"] || [], function(i, item) {
-					distributed_amount = flt(me.frm.doc.base_discount_amount) * item.base_amount / grand_total_for_discount_amount;
-					item.base_amount = flt(item.base_amount - distributed_amount, precision("base_amount", item));
-				});
-
-				this.discount_amount_applied = true;
-				this._calculate_taxes_and_totals();
-			}
-		} else {
-			this.frm.set_value("base_discount_amount", 0);
-		}
-	},
-
-	get_grand_total_for_discount_amount: function() {
-		var me = this;
-		var total_actual_tax = 0.0;
-		var actual_taxes_dict = {};
-
-		$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-			if (tax.charge_type == "Actual")
-				actual_taxes_dict[tax.idx] = tax.tax_amount;
-			else if (actual_taxes_dict[tax.row_id] !== null) {
-				actual_tax_amount = flt(actual_taxes_dict[tax.row_id]) * flt(tax.rate) / 100;
-				actual_taxes_dict[tax.idx] = actual_tax_amount;
-			}
-		});
-
-		$.each(actual_taxes_dict, function(key, value) {
-			if (value)
-				total_actual_tax += value;
-		});
-
-		grand_total_for_discount_amount = flt(this.frm.doc.grand_total - total_actual_tax,
-			precision("grand_total"));
-		return grand_total_for_discount_amount;
 	},
 
 	calculate_outstanding_amount: function(update_paid_amount) {
@@ -449,11 +313,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 						precision("allocated_amount", sales_person));
 				}
 			});
-	},
-
-	_cleanup: function() {
-		this._super();
-		this.frm.doc.in_words = this.frm.doc.in_words_export = "";
 	},
 
 	shipping_rule: function() {

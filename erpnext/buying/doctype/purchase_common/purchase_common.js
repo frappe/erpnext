@@ -2,8 +2,9 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.buying");
-frappe.require("assets/erpnext/js/transaction.js");
-{% include "public/js/controllers/accounts.js" %}
+frappe.require("assets/erpnext/js/controllers/transaction.js");
+
+{% include "public/js/controllers/accounts.js" %};
 
 cur_frm.email_field = "contact_email";
 
@@ -171,27 +172,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 	},
 
-	calculate_taxes_and_totals: function() {
-		this._super();
-		this.calculate_total_advance("Purchase Invoice", "advances");
-		this.frm.refresh_fields();
-	},
-
-	calculate_item_values: function() {
-		var me = this;
-
-		$.each(this.frm.doc["items"] || [], function(i, item) {
-			frappe.model.round_floats_in(item);
-			item.amount = flt(item.rate * item.qty, precision("amount", item));
-			item.item_tax_amount = 0.0;
-
-			me._set_in_company_currency(item, "price_list_rate", "base_price_list_rate");
-			me._set_in_company_currency(item, "rate", "base_rate");
-			me._set_in_company_currency(item, "amount", "base_amount");
-		});
-
-	},
-
 	calculate_net_total: function() {
 		var me = this;
 
@@ -247,27 +227,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			this.frm.doc.conversion_rate, precision("other_charges_added_import"));
 		this.frm.doc.other_charges_deducted_import = flt(this.frm.doc.other_charges_deducted /
 			this.frm.doc.conversion_rate, precision("other_charges_deducted_import"));
-	},
-
-	_cleanup: function() {
-		this._super();
-		this.frm.doc.in_words = this.frm.doc.in_words_import = "";
-
-		if(this.frm.doc["items"].length) {
-			if(!frappe.meta.get_docfield(this.frm.doc["items"][0].doctype, "item_tax_amount", this.frm.doctype)) {
-				$.each(this.frm.doc["items"] || [], function(i, item) {
-					delete item["item_tax_amount"];
-				});
-			}
-		}
-
-		if(this.frm.doc["taxes"].length) {
-			if(!frappe.meta.get_docfield(this.frm.doc["taxes"][0].doctype, "tax_amount_after_discount_amount", this.frm.doctype)) {
-				$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-					delete tax["tax_amount_after_discount_amount"];
-				});
-			}
-		}
 	},
 
 	calculate_outstanding_amount: function() {

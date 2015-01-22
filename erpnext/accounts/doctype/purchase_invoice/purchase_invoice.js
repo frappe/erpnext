@@ -94,7 +94,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 
 	allocated_amount: function() {
-		this.calculate_total_advance("Purchase Invoice", "advances");
+		this.calculate_total_advance();
 		this.frm.refresh_fields();
 	},
 

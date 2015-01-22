@@ -167,7 +167,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	allocated_amount: function() {
-		this.calculate_total_advance("Sales Invoice", "advances");
+		this.calculate_total_advance();
 		this.frm.refresh_fields();
 	},
 
@@ -176,8 +176,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
 			// this will make outstanding amount 0
 			this.frm.set_value("write_off_amount",
-				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount,
-					precision("write_off_amount"))
+				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount, precision("write_off_amount"))
 			);
 		}
 
@@ -249,7 +248,7 @@ cur_frm.cscript.mode_of_payment = function(doc) {
 	if(doc.is_pos) {
 		return cur_frm.call({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
-			args: { 
+			args: {
 				"mode_of_payment": doc.mode_of_payment,
 				"company": doc.company
 			 },
