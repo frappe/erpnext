@@ -27,13 +27,13 @@ def execute(filters=None):
 		where docstatus < 2 %s order by employee_name asc""" % (conditions, ), filters, as_dict=1)
 
 	if time_logs:
-		users = [time_logs[0].owner]
+		users = [time_logs[0].employee]
 
 	data = []
 	total_hours = total_employee_hours = count = 0
 	for tl in time_logs:
-		if tl.owner not in users:
-			users.append(tl.owner)
+		if tl.employee not in users:
+			users.append(tl.employee)
 			data.append(["", "", "Total", total_employee_hours, "", "", "", "", "", "", ""])
 			total_employee_hours = 0
 
