@@ -28,7 +28,7 @@ def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False):
 				sle['actual_qty'] = -flt(sle['actual_qty'])
 
 			if sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
-				sle_id = make_entry(sle)
+				sle_id = make_entry(sle, allow_negative_stock)
 
 			args = sle.copy()
 			args.update({
@@ -46,10 +46,11 @@ def set_as_cancel(voucher_type, voucher_no):
 		where voucher_no=%s and voucher_type=%s""",
 		(now(), frappe.session.user, voucher_type, voucher_no))
 
-def make_entry(args):
+def make_entry(args, allow_negative_stock=False):
 	args.update({"doctype": "Stock Ledger Entry"})
 	sle = frappe.get_doc(args)
 	sle.ignore_permissions = 1
+	sle.allow_negative_stock=allow_negative_stock
 	sle.insert()
 	sle.submit()
 	return sle.name
