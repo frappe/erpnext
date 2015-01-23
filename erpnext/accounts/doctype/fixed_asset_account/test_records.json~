@@ -3,7 +3,7 @@
 		"doctype": "Fixed Asset Account",
 <<<<<<< HEAD
 		"fixed_asset_name": "_Test Fixed Asset Name 1",
-		"fixed_asset_account": "_Test Account Fixed Assets",
+		"fixed_asset_account": "_Test Account Fixed Assets - _TC",
 		"company": "_Test Company",
 		"depreciation_rate": 5,
 		"gross_purchase_value": 25000,
@@ -18,13 +18,23 @@
 	{
 		"doctype": "Fixed Asset Account",
 		"fixed_asset_name": "_Test Fixed Asset Name 2",
-		"fixed_asset_account": "_Test Account Fixed Assets",
+		"fixed_asset_account": "_Test Account Fixed Assets - _TC",
 		"company": "_Test Company",
 		"depreciation_rate": 5,
 		"gross_purchase_value": 25000,
 		"purchase_date": "2013-10-01"
 =======
-		"name": "_Test Fixed Asset Account 1"
+		"name": "_Test Fixed Asset Account 1",
+		"fixed_asset_account": "_Test Assets - _TC",
+		"depreciation_rate": 5,
+		"gross_purchase_value": 25000,
+		"purchase_date": "2013-10-01",
+		"depreciation": [
+				  {
+		  		    "fiscal_year": "_Test Fiscal Year 2013",
+				    "total_accumulated_depreciation": 623.28
+				  }
+				]			
 >>>>>>> 4cedaef192f522086bcf5f3fc18455d7c0d50e77
 	}
 ]

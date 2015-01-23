@@ -3,16 +3,12 @@
 
 import frappe
 import unittest
-<<<<<<< HEAD
 from frappe.exceptions import ValidationError
-=======
->>>>>>> 4cedaef192f522086bcf5f3fc18455d7c0d50e77
 
 test_records = frappe.get_test_records('Fixed Asset Account')
 
 class TestFixedAssetAccount(unittest.TestCase):
 	
-<<<<<<< HEAD
 	def test_fixed_asset_account_carried_forward(self):	
 		frappe.db.sql("""delete from `tabFixed Asset Account` where 
 			fixed_asset_name='_Test Fixed Asset Name 1'""")
@@ -28,11 +24,4 @@ class TestFixedAssetAccount(unittest.TestCase):
 		je_name = account.post_journal_entry()
 		je = frappe.get_doc("Journal Entry", je_name)
 		self.assertTrue("_Test Fixed Asset Account" in [d.account for d in je.accounts])
-=======
-	def test_fixed_asset_account(self):
-		account = frappe.copy_doc(test_records[0])
-		account.insert()
-		je_name = account.post_journal_entry()
-		je = frappe.get_doc("Journal Entry", je_name)
-		self.assertTrue("Fixed Assets" in [d.account for d in je.accounts])
->>>>>>> 4cedaef192f522086bcf5f3fc18455d7c0d50e77
+

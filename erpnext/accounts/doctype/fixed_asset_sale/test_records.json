@@ -1,7 +1,6 @@
 [
 	{
 		"doctype": "Fixed Asset Sale",
-<<<<<<< HEAD
 		"fixed_asset_account": "_Test Fixed Asset Name 1",
 		"company": "_Test Company",
 		"sales_amount": 25000,
@@ -23,8 +22,5 @@
 		"company": "_Test Company",
 		"account_name": "_Test Accumulated Depreciation Account",
 		"group_or_ledger": "Ledger"
-=======
-		"name": "_Test Fixed Asset Sale 1"
->>>>>>> 4cedaef192f522086bcf5f3fc18455d7c0d50e77
 	}
 ]
