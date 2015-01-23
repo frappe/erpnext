@@ -16,7 +16,7 @@
    "reqd": 1
   }, 
   {
-   "default": "Edit", 
+   "default": "Read", 
    "fieldname": "permission", 
    "fieldtype": "Select", 
    "in_list_view": 1, 
@@ -27,7 +27,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-06-04 02:33:27.466061", 
+ "modified": "2014-12-12 09:46:34.110870", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Note User", 

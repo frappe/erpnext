@@ -322,17 +322,25 @@ class BOM(Document):
 	def get_exploded_items(self):
 		""" Get all raw materials including items from child bom"""
 		self.cur_exploded_items = {}
-		for d in self.get('bom_materials'):
+		
+			
+
+		for d in self.get('bom_materials'):	
+			#order_by = d.item_code
+			#order_by.sort(lambda a, b: a.item_code < b.item_code and 1 or -1)
+			#frappe.msgprint(order_by)
 			if d.bom_no:
 				self.get_child_exploded_items(d.bom_no, d.qty)
 			else:
 				self.add_to_cur_exploded_items(frappe._dict({
 					'item_code'				: d.item_code,
-					'description'			: d.description,
+					'description'				: d.description,
 					'stock_uom'				: d.stock_uom,
 					'qty'					: flt(d.qty),
 					'rate'					: flt(d.rate),
 				}))
+			
+			
 
 	def add_to_cur_exploded_items(self, args):
 		if self.cur_exploded_items.get(args.item_code):
@@ -347,26 +355,28 @@ class BOM(Document):
 			bom_item.stock_uom, bom_item.qty, bom_item.rate,
 			ifnull(bom_item.qty, 0 ) / ifnull(bom.quantity, 1) as qty_consumed_per_unit
 			from `tabBOM Explosion Item` bom_item, tabBOM bom
-			where bom_item.parent = bom.name and bom.name = %s and bom.docstatus = 1""", bom_no, as_dict = 1)
+			where bom_item.parent = bom.name and bom.name = %s and bom.docstatus = 1 """, bom_no, as_dict = 1)
 
 		for d in child_fb_items:
 			self.add_to_cur_exploded_items(frappe._dict({
 				'item_code'				: d['item_code'],
-				'description'			: d['description'],
+				'description'				: d['description'],
 				'stock_uom'				: d['stock_uom'],
 				'qty'					: d['qty_consumed_per_unit']*qty,
 				'rate'					: flt(d['rate']),
 			}))
 
+
 	def add_exploded_items(self):
 		"Add items to Flat BOM table"
 		frappe.db.sql("""delete from `tabBOM Explosion Item` where parent=%s""", self.name)
-		self.set('flat_bom_details', [])
-		for d in sorted(self.cur_exploded_items, key=itemgetter(0)):
-			ch = self.append('flat_bom_details', {})
+
+		self.set('flat_bom_details', [])		
+		for d in sorted(self.cur_exploded_items, key=itemgetter(0)):			
+			ch = self.append('flat_bom_details', {})			
 			for i in self.cur_exploded_items[d].keys():
 				ch.set(i, self.cur_exploded_items[d][i])
-			ch.amount = flt(ch.qty) * flt(ch.rate)
+			ch.amount = flt(ch.qty) * flt(ch.rate)			
 			ch.qty_consumed_per_unit = flt(ch.qty) / flt(self.quantity)
 			ch.docstatus = self.docstatus
 			ch.db_insert()
@@ -432,5 +442,5 @@ def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 @frappe.whitelist()
 def get_bom_items(bom, qty=1, fetch_exploded=1):
 	items = get_bom_items_as_dict(bom, qty, fetch_exploded).values()
-	items.sort(lambda a, b: a.item_code > b.item_code and 1 or -1)
+	items.sort(lambda a, b: a.item_code < b.item_code and 1 or -1)
 	return items

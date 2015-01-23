@@ -11,9 +11,9 @@ def execute(filters=None):
 		filters = {}
 	elif filters.get("from_date") or filters.get("to_date"):
 		filters["from_time"] = "00:00:00"
-		filters["to_time"] = "23:59:59"
+		filters["to_time"] = "24:00:00"
 
-	columns = [_("Time Log") + ":Link/Time Log:120", _("Employee") + "::150",_("Date") + "::140",
+	columns = [_("Time Log") + ":Link/Time Log:120", _("Employee") + "::150", _("Date") + "::140",
 		_("Hours") + "::70", _("Activity Type") + "::120", _("Task") + ":Link/Task:150",
 		_("Task Subject") + "::180", _("Project") + ":Link/Project:120", _("Status") + "::70"]
 
@@ -32,10 +32,10 @@ def execute(filters=None):
 	for tl in time_logs:
 		if tl.owner not in users:
 			users.append(tl.owner)
-			data.append(["", "", "Total", total_employee_hours, "", "", "", "", ""])
+			data.append(["", "", "", "Total", total_employee_hours, "", "", "", "", ""])
 			total_employee_hours = 0
 
-		data.append([tl.name, user_map[tl.owner], tl.date_worked, tl.hours,
+		data.append([tl.name, user_map[tl.owner], tl.from_time, tl.to_time, tl.hours,
 				tl.activity_type, tl.task, task_map.get(tl.task), tl.project, tl.status])
 
 		count += 1
@@ -43,10 +43,10 @@ def execute(filters=None):
 		total_employee_hours += flt(tl.hours)
 
 		if count == len(time_logs):
-			data.append(["", "", "Total Hours", total_employee_hours, "", "", "", "", ""])
+			data.append(["", "", "", "Total Hours", total_employee_hours, "", "", "", "", ""])
 
 	if total_hours:
-		data.append(["", "", "Grand Total", total_hours, "", "", "", "", ""])
+		data.append(["", "", "", "Grand Total", total_hours, "", "", "", "", ""])
 
 	return columns, data
 

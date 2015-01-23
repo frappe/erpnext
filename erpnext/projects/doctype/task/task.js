@@ -9,7 +9,7 @@ erpnext.projects.Task = frappe.ui.form.Controller.extend({
 	setup: function() {
 		this.frm.fields_dict.project.get_query = function() {
 			return {
-				query: "erpnext.projects.doctype.task.task.get_project"
+				
 			}
 		};
 	},
