@@ -1,7 +1,10 @@
 *.pyc
 *.py~
 *.js~
+<<<<<<< HEAD
 *.json~
+=======
+>>>>>>> 4cedaef192f522086bcf5f3fc18455d7c0d50e77
 .DS_Store
 conf.py
 locale

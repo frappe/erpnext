@@ -7,6 +7,7 @@ import unittest
 test_records = frappe.get_test_records('Fixed Asset Sale')
 
 class TestFixedAssetSale(unittest.TestCase):
+<<<<<<< HEAD
 	def setup_defaults_in_company(self):
 		self.setup_depreciation_expense_account()
 		self.setup_accumulated_depreciation_account()
@@ -41,3 +42,6 @@ class TestFixedAssetSale(unittest.TestCase):
 		je = frappe.get_doc("Journal Entry", je_name)
 		self.assertTrue("_Test Fixed Asset Account" in [d.account for d in je.accounts])		
 		
+=======
+	pass
+>>>>>>> 4cedaef192f522086bcf5f3fc18455d7c0d50e77

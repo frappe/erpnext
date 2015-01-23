@@ -1,6 +1,7 @@
 [
 	{
 		"doctype": "Fixed Asset Account",
+<<<<<<< HEAD
 		"fixed_asset_name": "_Test Fixed Asset Name 1",
 		"fixed_asset_account": "_Test Account Fixed Assets",
 		"company": "_Test Company",
@@ -22,5 +23,8 @@
 		"depreciation_rate": 5,
 		"gross_purchase_value": 25000,
 		"purchase_date": "2013-10-01"
+=======
+		"name": "_Test Fixed Asset Account 1"
+>>>>>>> 4cedaef192f522086bcf5f3fc18455d7c0d50e77
 	}
 ]
