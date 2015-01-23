@@ -15,6 +15,10 @@ class Lead(SellingController):
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.lead_name)
 
+	def set_sender(self, sender):
+		"""Will be called by **Communication** when a Lead is created from an incoming email."""
+		self.email_id = sender
+
 	def onload(self):
 		customer = frappe.db.get_value("Customer", {"lead_name": self.name})
 		self.get("__onload").is_customer = customer

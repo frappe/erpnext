@@ -51,8 +51,6 @@ class Employee(Document):
 			self.update_user()
 			self.update_user_permissions()
 
-		self.update_dob_event()
-
 	def update_user_permissions(self):
 		frappe.permissions.add_user_permission("Employee", self.name, self.user_id)
 		frappe.permissions.set_user_permission_if_allowed("Company", self.company, self.user_id)
@@ -136,8 +134,6 @@ class Employee(Document):
 			throw(_("User {0} is already assigned to Employee {1}").format(self.user_id, employee[0]))
 
 	def validate_employee_leave_approver(self):
-		from erpnext.hr.doctype.leave_application.leave_application import InvalidLeaveApproverError
-
 		for l in self.get("leave_approvers")[:]:
 			if "Leave Approver" not in frappe.get_roles(l.leave_approver):
 				self.get("leave_approvers").remove(l)
@@ -146,39 +142,6 @@ class Employee(Document):
 	def validate_reports_to(self):
 		if self.reports_to == self.name:
 			throw(_("Employee cannot report to himself."))
-
-	def update_dob_event(self):
-		if self.status == "Active" and self.date_of_birth \
-			and not cint(frappe.db.get_value("HR Settings", None, "stop_birthday_reminders")):
-			birthday_event = frappe.db.sql("""select name from `tabEvent` where repeat_on='Every Year'
-				and ref_type='Employee' and ref_name=%s""", self.name)
-
-			starts_on = self.date_of_birth + " 00:00:00"
-			ends_on = self.date_of_birth + " 00:15:00"
-
-			if birthday_event:
-				event = frappe.get_doc("Event", birthday_event[0][0])
-				event.starts_on = starts_on
-				event.ends_on = ends_on
-				event.save()
-			else:
-				frappe.get_doc({
-					"doctype": "Event",
-					"subject": _("Birthday") + ": " + self.employee_name,
-					"description": _("Happy Birthday!") + " " + self.employee_name,
-					"starts_on": starts_on,
-					"ends_on": ends_on,
-					"event_type": "Public",
-					"all_day": 1,
-					"send_reminder": 1,
-					"repeat_this_event": 1,
-					"repeat_on": "Every Year",
-					"ref_type": "Employee",
-					"ref_name": self.name
-				}).insert()
-		else:
-			frappe.db.sql("""delete from `tabEvent` where repeat_on='Every Year' and
-				ref_type='Employee' and ref_name=%s""", self.name)
 
 	def on_trash(self):
 		delete_events(self.doctype, self.name)
@@ -217,3 +180,31 @@ def update_user_permissions(doc, method):
 	if "Employee" in [d.role for d in doc.get("user_roles")]:
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
 		employee.update_user_permissions()
+
+def send_birthday_reminders():
+	"""Send Employee birthday reminders if no 'Stop Birthday Reminders' is not set."""
+	if int(frappe.db.get_single_value("HR Settings", "stop_birthday_reminders") or 0):
+		return
+
+	from frappe.utils.user import get_enabled_system_users
+	users = None
+
+	birthdays = get_employees_who_are_born_today()
+
+	if birthdays:
+		if not users:
+			users = [u.email_id or u.name for u in get_enabled_system_users()]
+
+		for e in birthdays:
+			frappe.sendmail(recipients=filter(lambda u: u not in (e.company_email, e.personal_email), users),
+				subject=_("Birthday Reminder for {0}").format(e.employee_name),
+				message=_("""Today is {0}'s birthday!""").format(e.employee_name),
+				reply_to=e.company_email or e.personal_email,
+				bulk=True)
+
+def get_employees_who_are_born_today():
+	"""Get Employee properties whose birthday is today."""
+	return frappe.db.sql("""select name, personal_email, company_email, employee_name
+		from tabEmployee where day(date_of_birth) = day(curdate())
+		and month(date_of_birth) = month(curdate())
+		and status = 'Active'""", as_dict=True)

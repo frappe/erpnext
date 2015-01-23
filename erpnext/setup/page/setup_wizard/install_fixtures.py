@@ -187,7 +187,11 @@ def install(country=None):
 		{'doctype': 'Industry Type', 'industry': _('Telecommunications')},
 		{'doctype': 'Industry Type', 'industry': _('Television')},
 		{'doctype': 'Industry Type', 'industry': _('Transportation')},
-		{'doctype': 'Industry Type', 'industry': _('Venture Capital')}
+		{'doctype': 'Industry Type', 'industry': _('Venture Capital')},
+
+		{'doctype': "Email Account", "email_id": "sales@example.com", "append_to": "Lead"},
+		{'doctype': "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
+		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"}
 	]
 
 	from frappe.modules import scrub
