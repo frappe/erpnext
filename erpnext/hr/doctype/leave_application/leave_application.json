@@ -191,11 +191,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
-<<<<<<< HEAD
- "modified": "2014-12-09 16:33:29.626849", 
-=======
  "modified": "2014-12-10 14:38:38.359114", 
->>>>>>> 4c1073ac10973d8202fdd5dd12eacc274788d475
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Application", 

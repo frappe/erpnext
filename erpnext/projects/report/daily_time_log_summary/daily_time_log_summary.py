@@ -11,7 +11,7 @@ def execute(filters=None):
 		filters = {}
 	elif filters.get("from_date") or filters.get("to_date"):
 		filters["from_time"] = "00:00:00"
-		filters["to_time"] = "24:00:00"
+		filters["to_time"] = "23:59:59"
 
 	columns = [_("Time Log") + ":Link/Time Log:120", _("Employee") + "::150",_("Date") + "::140",
 		_("Hours") + "::70", _("Activity Type") + "::120", _("Task") + ":Link/Task:150",

@@ -189,11 +189,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
-<<<<<<< HEAD
- "modified": "2015-01-14 12:08:24.758273", 
-=======
  "modified": "2014-11-18 08:18:32.929127", 
->>>>>>> 4c1073ac10973d8202fdd5dd12eacc274788d475
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 
@@ -212,15 +208,9 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-<<<<<<< HEAD
    "role": "All", 
    "set_user_permissions": 0, 
    "submit": 0, 
-=======
-   "restricted": 1, 
-   "role": "Projects User", 
-   "submit": 1, 
->>>>>>> 4c1073ac10973d8202fdd5dd12eacc274788d475
    "write": 1
   }, 
   {

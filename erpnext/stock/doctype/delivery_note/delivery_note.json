@@ -435,6 +435,15 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "other_charges_total_export", 
+   "fieldtype": "Currency", 
+   "label": "Taxes and Charges Total", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "other_charges_total", 
    "fieldtype": "Currency", 
    "label": "Taxes and Charges Total (Company Currency)", 
@@ -453,20 +462,21 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "other_charges_total_export", 
-   "fieldtype": "Currency", 
-   "label": "Taxes and Charges Total", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1
-  }, 
-  {
    "fieldname": "discount_amount", 
    "fieldtype": "Currency", 
    "label": "Discount Amount", 
-   "options": "Company:company:default_currency", 
+   "options": "currency", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "base_discount_amount", 
+   "fieldtype": "Currency", 
+   "label": "Discount Amount (Company Currency)", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
   }, 
   {
    "fieldname": "totals", 
@@ -1013,7 +1023,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2014-12-22 14:58:19.575566", 
+ "modified": "2015-01-12 16:56:39.975961", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note", 

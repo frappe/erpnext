@@ -370,7 +370,7 @@ class BOM(Document):
 	def add_exploded_items(self):
 		"Add items to Flat BOM table"
 		frappe.db.sql("""delete from `tabBOM Explosion Item` where parent=%s""", self.name)
-		
+
 		self.set('flat_bom_details', [])		
 		for d in sorted(self.cur_exploded_items, key=itemgetter(0)):			
 			ch = self.append('flat_bom_details', {})			

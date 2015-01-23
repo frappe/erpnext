@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import flt, cint, add_days
+from frappe.utils import flt, cint, add_days, cstr
 import json
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 from erpnext.setup.utils import get_exchange_rate
@@ -140,7 +140,7 @@ def get_basic_details(args, item_doc):
 
 		"item_code": item.name,
 		"item_name": item.item_name,
-		"description": item.description_html or item.description,
+		"description": cstr(item.description_html).strip() or cstr(item.description).strip(),
 		"warehouse": user_default_warehouse or args.warehouse or item.default_warehouse,
 		"income_account": (item.income_account
 			or args.income_account
