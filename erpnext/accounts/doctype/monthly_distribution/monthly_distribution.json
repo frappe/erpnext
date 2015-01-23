@@ -1,12 +1,12 @@
 {
  "autoname": "field:distribution_id", 
  "creation": "2013-01-10 16:34:05", 
- "description": "**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.\n\nTo distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**", 
+ "description": "**Monthly Distribution** helps you distribute your budget across months if you have seasonality in your business.\n\nTo distribute a budget using this distribution, set this **Monthly Distribution** in the **Cost Center**", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
   {
-   "description": "Name of the Budget Distribution", 
+   "description": "Name of the Monthly Distribution", 
    "fieldname": "distribution_id", 
    "fieldtype": "Data", 
    "in_list_view": 1, 

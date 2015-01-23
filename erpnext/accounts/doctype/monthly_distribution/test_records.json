@@ -1,8 +1,8 @@
 [{
-	"doctype": "Budget Distribution",
+	"doctype": "Monthly Distribution",
 	"distribution_id": "_Test Distribution",
 	"fiscal_year": "_Test Fiscal Year 2013",
-	"budget_distribution_details": [
+	"percentages": [
 		{
 			"month": "January",
 			"percentage_allocation": "8"

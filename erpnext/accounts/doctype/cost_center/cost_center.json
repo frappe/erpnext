@@ -79,7 +79,7 @@
    "permlevel": 0
   }, 
   {
-   "description": "Select Budget Distribution, if you want to track based on seasonality.", 
+   "description": "Select Monthly Distribution, if you want to track based on seasonality.", 
    "fieldname": "distribution_id", 
    "fieldtype": "Link", 
    "label": "Distribution Id", 

@@ -123,7 +123,7 @@
    "permlevel": 0
   }, 
   {
-   "description": "Select Budget Distribution to unevenly distribute targets across months.", 
+   "description": "Select Monthly Distribution to unevenly distribute targets across months.", 
    "fieldname": "distribution_id", 
    "fieldtype": "Link", 
    "label": "Target Distribution", 
