@@ -114,7 +114,7 @@ erpnext.POS = Class.extend({
 		});
 
 		this.wrapper.find('input.discount-amount').on("change", function() {
-			frappe.model.set_value(me.frm.doctype, me.frm.docname, "discount_amount", this.value);
+			frappe.model.set_value(me.frm.doctype, me.frm.docname, "discount_amount", flt(this.value));
 		});
 
 		this.call_function("remove-items", function() {me.remove_selected_items();});
