@@ -63,7 +63,7 @@ class StockEntry(StockController):
 		self.validate_fiscal_year()
 		self.validate_valuation_rate()
 		self.set_total_amount()
-
+		self.validate_batch_item()
 
 	def on_submit(self):
 		self.update_stock_ledger()
@@ -330,7 +330,8 @@ class StockEntry(StockController):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
 		for d in self.get('items'):
 			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty):
-				frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}").format(d.idx, d.transfer_qty, self.fg_completed_qty))
+				frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}"). \
+					format(d.idx, d.transfer_qty, self.fg_completed_qty))
 
 	def validate_return_reference_doc(self):
 		"""validate item with reference doc"""
@@ -659,6 +660,10 @@ class StockEntry(StockController):
 				mreq_item.warehouse != (item.s_warehouse if self.purpose== "Material Issue" else item.t_warehouse):
 					frappe.throw(_("Item or Warehouse for row {0} does not match Material Request").format(item.idx),
 						frappe.MappingMismatchError)
+						
+	def validate_batch_item(self):
+		if frappe.db.get_value("Item",self.item,"has_batch_no") =='No':
+			frappe.throw(_("The selected item cannot have Batch"))
 
 @frappe.whitelist()
 def get_party_details(ref_dt, ref_dn):
