@@ -1,6 +1,16 @@
 [
 	{
 		"doctype": "Fixed Asset Account",
-		"name": "_Test Fixed Asset Account 1"
+		"name": "_Test Fixed Asset Account 1",
+		"fixed_asset_account": "_Test Assets - _TC",
+		"depreciation_rate": 5,
+		"gross_purchase_value": 25000,
+		"purchase_date": "2013-10-01",
+		"depreciation": [
+				  {
+		  		    "fiscal_year": "_Test Fiscal Year 2013",
+				    "total_accumulated_depreciation": 623.28
+				  }
+				]			
 	}
 ]
