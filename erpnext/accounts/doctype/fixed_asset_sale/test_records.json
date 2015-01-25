@@ -1,0 +1,40 @@
+[
+	{
+		"doctype": "Fixed Asset Sale",
+		"fixed_asset_account": "_Test Fixed Asset Name 1",
+		"company": "_Test Company",
+		"sales_amount": 5000,
+		"sold_to": "_Test Customer",
+		"posting_date": "2014-01-01",
+		"asset_purchase_cost": 25000,
+		"profit_or_loss": "Loss",
+		"booking_account": "_Test Account Discount - _TC"
+	},
+	{	
+		"doctype": "Account",
+		"parent_account": "_Test Account Stock Expenses - _TC",
+		"account_type": "Expense Account",
+		"company": "_Test Company",
+		"account_name": "_Test Depreciation Expense Account",
+		"group_or_ledger": "Ledger"
+	},
+	{	
+		"doctype": "Account",
+		"parent_account": "Current Assets - _TC",
+		"account_type": "Fixed Asset",
+		"company": "_Test Company",
+		"account_name": "_Test Accumulated Depreciation Account",
+		"group_or_ledger": "Ledger"
+	},
+	{
+		"doctype": "Fixed Asset Sale",
+		"fixed_asset_account": "_Test Fixed Asset Name 3",
+		"company": "_Test Company",
+		"sales_amount": 5000,
+		"sold_to": "_Test Customer",
+		"posting_date": "2014-01-01",
+		"asset_purchase_cost": 25000,
+		"profit_or_loss": "Loss",
+		"booking_account": "_Test Account Discount - _TC"
+	}
+]

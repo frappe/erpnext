@@ -1,5 +1,7 @@
 *.pyc
 *.py~
+*.js~
+*.json~
 .DS_Store
 conf.py
 locale

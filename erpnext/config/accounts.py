@@ -40,6 +40,11 @@ def get_data():
 					"description": _("Tree of finanial accounts."),
 					"doctype": "Account",
 				},
+				{
+					"type": "doctype",
+					"name": "Fixed Asset Account",
+					"description": _("Fixed Assets")
+				},
 			]
 		},
 		{
@@ -65,6 +70,16 @@ def get_data():
 					"type": "doctype",
 					"name": "Payment Tool",
 					"description": _("Create Payment Entries against Orders or Invoices.")
+				},
+				{
+					"type": "doctype",
+					"name": "Fixed Asset Sale",
+					"description": _("Sell a Fixed Asset")
+				},
+				{
+					"type": "doctype",
+					"name": "Fixed Asset Year Close",
+					"description": _("Year Closing Entry for Fixed Asset")
 				},
 			]
 		},
@@ -337,6 +352,11 @@ def get_data():
 					"is_query_report": True,
 					"name": "Customer Credit Balance",
 					"doctype": "Customer"
+				},
+				{
+					"type": "report",
+					"name": "Fixed Asset Depreciation Report",
+					"is_query_report": True,
 				},
 			]
 		},

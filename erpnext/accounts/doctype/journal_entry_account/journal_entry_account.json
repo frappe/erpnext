@@ -155,6 +155,14 @@
    "search_index": 1
   }, 
   {
+   "fieldname": "against_fixed_asset", 
+   "fieldtype": "Link", 
+   "label": "Against Fixed Asset", 
+   "options": "Fixed Asset Account", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "col_break3", 
    "fieldtype": "Column Break", 
    "permlevel": 0
@@ -206,7 +214,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-12-25 15:44:03.077639", 
+ "modified": "2015-01-13 13:51:45.477858", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Entry Account", 
