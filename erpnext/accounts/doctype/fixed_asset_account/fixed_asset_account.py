@@ -13,7 +13,8 @@ class FixedAssetAccount(Document):
 				if totaldepr.fiscal_year == totaldepr_entries.fiscal_year:
 					count = count + 1;
 					if count >= 2:
-						frappe.throw("Fiscal Yr Duplicated in Accumulated Depreciation. Pls Check")
+						raise frappe.ValidationError, \
+					"Looks like Fiscal Year for Fixed Assets is Already Closed"
 
 	def post_journal_entry(self):
 		jv = frappe.new_doc('Journal Entry')
