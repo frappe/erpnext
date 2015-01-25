@@ -56,10 +56,10 @@ class TestFixedAssetSale(unittest.TestCase):
 		sale = frappe.copy_doc(test_records[3])
 		from erpnext.accounts.doctype.fixed_asset_account.depreciation_report \
 			import get_written_down_when_selling_fixed_asset
-		self.assertRaises(ValidationError, get_written_down_when_selling_fixed_asset(\
+		self.assertRaises(ValidationError, get_written_down_when_selling_fixed_asset, \
 				sale.fixed_asset_account,\
 				sale.posting_date,\
 				sale.company,\
-				sale.sales_amount))
+				sale.sales_amount)
 			
 		

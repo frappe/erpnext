@@ -37,8 +37,7 @@ class TestFixedAssetAccount(unittest.TestCase):
 
 	def test_fixed_asset_account_purchased(self):
 		account = frappe.copy_doc(test_records[1])
-		account.insert()
+		account.insert()		
 		je_name = account.post_journal_entry()
-		je = frappe.get_doc("Journal Entry", je_name)
-		self.assertTrue("_Test Fixed Asset Account" in [d.account for d in je.accounts])
+		self.assertTrue("_Test Account Fixed Assets - _TC" in [d.account for d in je_name.accounts])
 

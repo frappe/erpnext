@@ -7,6 +7,7 @@
 		"depreciation_rate": 5,
 		"gross_purchase_value": 25000,
 		"purchase_date": "2012-10-01",
+		"fiscal_year": "_Test Fiscal Year 2012",
 		"depreciation": [
 			{
 			"fiscal_year": "_Test Fiscal Year 2012",
@@ -25,7 +26,8 @@
 		"company": "_Test Company",
 		"depreciation_rate": 5,
 		"gross_purchase_value": 25000,
-		"purchase_date": "2013-10-01"	
+		"purchase_date": "2014-10-01",
+		"purchased_from": "_Test Supplier"
 	},
 	{
 		"doctype": "Fixed Asset Account",
@@ -35,6 +37,7 @@
 		"depreciation_rate": 5,
 		"gross_purchase_value": 25000,
 		"purchase_date": "2012-10-01",
+		"fiscal_year": "_Test Fiscal Year 2012",
 		"is_sold": 1,
 		"depreciation": [
 			{
