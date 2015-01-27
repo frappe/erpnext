@@ -44,7 +44,7 @@ def get_sle_count():
 def get_sle_with_batch():
 	sle_with_batch = {}
 	for d in frappe.db.sql("""select item_code, count(name) as cnt from `tabStock Ledger Entry` 
-		where batch_no != '' group by item_code""", as_dict=1):
+		where ifnull(batch_no, '') != '' group by item_code""", as_dict=1):
 			sle_with_batch.setdefault(d.item_code, d.cnt)
 		
 	return sle_with_batch
@@ -53,7 +53,7 @@ def get_sle_with_batch():
 def get_sle_with_serial():
 	sle_with_serial = {}
 	for d in frappe.db.sql("""select item_code, count(name) as cnt from `tabStock Ledger Entry` 
-		where serial_no != '' group by item_code""", as_dict=1):
+		where ifnull(serial_no, '') != '' group by item_code""", as_dict=1):
 			sle_with_serial.setdefault(d.item_code, d.cnt)
 	
 	return sle_with_serial
