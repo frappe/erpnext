@@ -9,9 +9,13 @@
 		<tr>
 			<th style="width: 3%">{{ _("Sr") }}</th>
 			<th style="width: 57%">{{ _("Item") }}</th>
-			<th style="width: 10%;" class="text-right">{{ _("Qty") }}</th>
-			{% if not hide_rate -%}<th style="width: 15%;" class="text-right">{{ _("Rate") }}</th>{%- endif %}
-			{% if not hide_amount -%}<th style="width: 15%;" class="text-right">{{ _("Amount") }}</th>{%- endif %}
+			<th style="width: 10%;" class="text-right">{{ _(data[0].meta.get_label("qty")) }}</th>
+			{% if not hide_rate -%}
+				<th style="width: 15%;" class="text-right">{{ _(data[0].meta.get_label("rate")) }}</th>
+			{%- endif %}
+			{% if not hide_amount -%}
+				<th style="width: 15%;" class="text-right">{{ _(data[0].meta.get_label("amount")) }}</th>
+			{%- endif %}
 		</tr>
 		{%- for row in data -%}
 		<tr>
