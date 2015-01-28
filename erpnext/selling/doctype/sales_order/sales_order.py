@@ -51,12 +51,12 @@ class SalesOrder(SellingController):
 					frappe.throw(_("Reserved warehouse required for stock item {0}").format(d.item_code))
 
 				if e in check_list:
-					frappe.throw(_("Item {0} has been entered twice").format(d.item_code))
+					frappe.msgprint(_("Item {0} has been entered twice").format(d.item_code))
 				else:
 					check_list.append(e)
 			else:
 				if f in chk_dupl_itm:
-					frappe.throw(_("Item {0} has been entered twice").format(d.item_code))
+					frappe.msgprint(_("Item {0} has been entered twice").format(d.item_code))
 				else:
 					chk_dupl_itm.append(f)
 
