@@ -231,8 +231,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 	},
 
-	source_mandatory: ["Material Issue", "Material Transfer", "Purchase Return"],
-	target_mandatory: ["Material Receipt", "Material Transfer", "Sales Return"],
+	source_mandatory: ["Material Issue", "Material Transfer", "Purchase Return", "Subcontract"],
+	target_mandatory: ["Material Receipt", "Material Transfer", "Sales Return", "Subcontract"],
 
 	from_warehouse: function(doc) {
 		var me = this;
