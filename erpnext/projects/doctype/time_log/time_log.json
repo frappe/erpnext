@@ -76,7 +76,7 @@
    "options": "Activity Type", 
    "permlevel": 0, 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 1
   }, 
   {
    "depends_on": "eval:doc.time_log_for != 'Manufacturing'", 
@@ -199,7 +199,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-07 15:11:45.194002", 
+ "modified": "2015-01-29 07:36:29.343589", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 

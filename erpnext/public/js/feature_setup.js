@@ -13,7 +13,8 @@ Dictionary Format
 		}
 	}
 // ====================================================================*/
-pscript.feature_dict = {
+frappe.provide("erpnext.feature_setup");
+erpnext.feature_setup.feature_dict = {
 	'fs_projects': {
 		'BOM': {'fields':['project_name']},
 		'Delivery Note': {'fields':['project_name']},
@@ -183,15 +184,16 @@ pscript.feature_dict = {
 }
 
 $(document).bind('form_refresh', function() {
+	var feature_dict = erpnext.feature_setup.feature_dict;
 	for(var sys_feat in sys_defaults) {
 		if(sys_defaults[sys_feat]=='0'
-			&& (sys_feat in pscript.feature_dict)) { //"Features to hide" exists
-			if(cur_frm.doc.doctype in pscript.feature_dict[sys_feat]) {
-				for(var fort in pscript.feature_dict[sys_feat][cur_frm.doc.doctype]) {
+			&& (sys_feat in feature_dict)) { //"Features to hide" exists
+			if(cur_frm.doc.doctype in feature_dict[sys_feat]) {
+				for(var fort in feature_dict[sys_feat][cur_frm.doc.doctype]) {
 					if(fort=='fields') {
-						hide_field(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort]);
+						hide_field(feature_dict[sys_feat][cur_frm.doc.doctype][fort]);
 					} else if(cur_frm.fields_dict[fort]) {
-						cur_frm.fields_dict[fort].grid.set_column_disp(pscript.feature_dict[sys_feat][cur_frm.doc.doctype][fort], false);
+						cur_frm.fields_dict[fort].grid.set_column_disp(feature_dict[sys_feat][cur_frm.doc.doctype][fort], false);
 					} else {
 						msgprint(__('Grid "')+fort+__('" does not exists'));
 					}
