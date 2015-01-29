@@ -7,6 +7,11 @@ $.extend(cur_frm.cscript, {
 		cfn_set_fields(doc, dt, dn);
 
 		this.frm.add_fetch("sales_order", "delivery_date", "expected_delivery_date");
+		
+		return this.frm.call({
+			doc: this.frm.doc,
+			method: "set_actual_dates"
+		});
 	},
 
 	before_submit: function() {
@@ -60,10 +65,14 @@ $.extend(cur_frm.cscript, {
 	bom_no: function() {
 		return this.frm.call({
 			doc: this.frm.doc,
-			method: "set_production_order_operations",
-			callback: function(r) {
-				if(!r.exc) refresh_field("operations");
-			}
+			method: "set_production_order_operations"
+		});
+	},
+	
+	planned_start_date: function() {
+		return this.frm.call({
+			doc: this.frm.doc,
+			method: "plan_operations"
 		});
 	},
 
