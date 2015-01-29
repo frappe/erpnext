@@ -109,8 +109,8 @@ class StockEntry(StockController):
 	def validate_warehouse(self, pro_obj):
 		"""perform various (sometimes conditional) validations on warehouse"""
 
-		source_mandatory = ["Material Issue", "Material Transfer", "Purchase Return"]
-		target_mandatory = ["Material Receipt", "Material Transfer", "Sales Return"]
+		source_mandatory = ["Material Issue", "Material Transfer", "Purchase Return", "Subcontract"]
+		target_mandatory = ["Material Receipt", "Material Transfer", "Sales Return", "Subcontract"]
 
 		validate_for_manufacture_repack = any([d.bom_no for d in self.get("mtn_details")])
 
@@ -467,6 +467,9 @@ class StockEntry(StockController):
 					"Subcontract"]:
 				if self.production_order and self.purpose == "Material Transfer":
 					item_dict = self.get_pending_raw_materials(pro_obj)
+					if self.to_warehouse and pro_obj:
+						for item in item_dict.values():
+							item["to_warehouse"] = pro_obj.wip_warehouse
 				else:
 					if not self.fg_completed_qty:
 						frappe.throw(_("Manufacturing Quantity is mandatory"))
@@ -474,7 +477,8 @@ class StockEntry(StockController):
 					for item in item_dict.values():
 						if pro_obj:
 							item["from_warehouse"] = pro_obj.wip_warehouse
-						item["to_warehouse"] = ""
+
+						item["to_warehouse"] = self.to_warehouse if self.purpose=="Subcontract" else ""
 
 				# add raw materials to Stock Entry Detail table
 				self.add_to_stock_entry_detail(item_dict)
@@ -525,7 +529,7 @@ class StockEntry(StockController):
 		item_dict = get_bom_items_as_dict(self.bom_no, qty=qty, fetch_exploded = self.use_multi_level_bom)
 
 		for item in item_dict.values():
-			item.from_warehouse = item.default_warehouse
+			item.from_warehouse = self.from_warehouse or item.default_warehouse
 
 		return item_dict
 
