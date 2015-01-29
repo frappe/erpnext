@@ -2,9 +2,9 @@
 // License: GNU General Public License v3. See license.txt
 
 var display_activity_log = function(msg) {
-	if(!pscript.ss_html)
-		pscript.ss_html = $a(cur_frm.fields_dict['activity_log'].wrapper,'div');
-	pscript.ss_html.innerHTML =
+	if(!cur_frm.ss_html)
+		cur_frm.ss_html = $a(cur_frm.fields_dict['activity_log'].wrapper,'div');
+	cur_frm.ss_html.innerHTML =
 		'<div class="panel"><div class="panel-heading">'+__("Activity Log:")+'</div>'+msg+'</div>';
 }
 

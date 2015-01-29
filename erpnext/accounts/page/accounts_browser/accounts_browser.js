@@ -7,7 +7,7 @@
 // edit node
 // see ledger
 
-pscript['onload_Accounts Browser'] = function(wrapper){
+frappe.pages["Accounts Browser"].on_page_load  = function(wrapper){
 	frappe.ui.make_app_page({
 		parent: wrapper,
 		single_column: true
@@ -58,7 +58,6 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 			var ctype = frappe.get_route()[1] || 'Account';
 			erpnext.account_chart = new erpnext.AccountsChart(ctype, $(this).val(),
 				chart_area.get(0));
-			pscript.set_title(wrapper, ctype, $(this).val());
 		})
 
 	// load up companies
@@ -74,18 +73,13 @@ pscript['onload_Accounts Browser'] = function(wrapper){
 	});
 }
 
-pscript.set_title = function(wrapper, ctype, val) {
-}
-
-pscript['onshow_Accounts Browser'] = function(wrapper){
+frappe.pages["Accounts Browser"].on_page_show = function(wrapper){
 	// set route
 	var ctype = frappe.get_route()[1] || 'Account';
 
 	if(erpnext.account_chart && erpnext.account_chart.ctype != ctype) {
 		wrapper.$company_select.change();
 	}
-
-	pscript.set_title(wrapper, ctype);
 }
 
 erpnext.AccountsChart = Class.extend({
@@ -260,7 +254,7 @@ erpnext.AccountsChart = Class.extend({
 		});
 
 		// show
-		d.onshow = function() {
+		d.on_page_show = function() {
 			$(fd.group_or_ledger.input).change();
 			$(fd.account_type.input).change();
 		}

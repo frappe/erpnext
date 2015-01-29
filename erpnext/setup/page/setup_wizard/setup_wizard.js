@@ -1,4 +1,4 @@
-frappe.pages['setup-wizard'].onload = function(wrapper) {
+frappe.pages['setup-wizard'].on_page_load = function(wrapper) {
 	if(sys_defaults.company) {
 		frappe.set_route("desktop");
 		return;
@@ -356,7 +356,7 @@ frappe.pages['setup-wizard'].onload = function(wrapper) {
 	erpnext.wiz = new frappe.wiz.Wizard(wizard_settings)
 }
 
-frappe.pages['setup-wizard'].onshow = function(wrapper) {
+frappe.pages['setup-wizard'].on_page_show = function(wrapper) {
 	if(frappe.get_route()[1])
 		erpnext.wiz.show(frappe.get_route()[1]);
 }

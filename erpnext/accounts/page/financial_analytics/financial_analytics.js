@@ -3,7 +3,7 @@
 
 frappe.require("assets/erpnext/js/account_tree_grid.js");
 
-frappe.pages['financial-analytics'].onload = function(wrapper) {
+frappe.pages['financial-analytics'].on_page_load = function(wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
 		title: __('Financial Analytics'),

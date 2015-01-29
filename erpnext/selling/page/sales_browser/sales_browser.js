@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-pscript['onload_Sales Browser'] = function(wrapper){
+frappe.pages["Sales Browser"].on_page_load = function(wrapper){
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
 		single_column: true,
@@ -32,7 +32,7 @@ pscript['onload_Sales Browser'] = function(wrapper){
 	wrapper.make_tree();
 }
 
-pscript['onshow_Sales Browser'] = function(wrapper){
+frappe.pages['Sales Browser'].on_page_show = function(wrapper){
 	// set route
 	var ctype = frappe.get_route()[1] || 'Territory';
 
