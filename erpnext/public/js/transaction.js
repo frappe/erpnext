@@ -394,9 +394,13 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	apply_price_list: function(item) {
 		var me = this;
+		var args = this._get_args(item);
+		if(!args.item_list.length) {
+			return;
+		}
 		return this.frm.call({
 			method: "erpnext.stock.get_item_details.apply_price_list",
-			args: {	args: this._get_args(item) },
+			args: {	args: args },
 			callback: function(r) {
 				if (!r.exc) {
 					me.in_apply_price_list = true;

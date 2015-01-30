@@ -54,7 +54,7 @@
    "width": "150px"
   }, 
   {
-   "description": "Select the relevant company name if you have multiple companies", 
+   "description": "", 
    "fieldname": "company", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -236,7 +236,7 @@
  "icon": "icon-ticket", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-06 17:38:12.250644", 
+ "modified": "2015-01-30 04:21:23.753767", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request", 

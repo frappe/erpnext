@@ -151,7 +151,7 @@
    "width": "150px"
   }, 
   {
-   "description": "Select the relevant company name if you have multiple companies.", 
+   "description": "", 
    "fieldname": "company", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -810,7 +810,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 1, 
- "modified": "2015-01-15 07:33:06.919752", 
+ "modified": "2015-01-30 04:19:47.045878", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation", 

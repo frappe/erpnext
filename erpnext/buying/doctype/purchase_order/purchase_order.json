@@ -117,7 +117,7 @@
    "report_hide": 0
   }, 
   {
-   "description": "Select the relevant company name if you have multiple companies", 
+   "description": "", 
    "fieldname": "company", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -775,7 +775,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-15 07:34:27.901777", 
+ "modified": "2015-01-30 04:20:42.103367", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 

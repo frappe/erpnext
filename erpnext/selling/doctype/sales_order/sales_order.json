@@ -125,7 +125,7 @@
    "width": "150px"
   }, 
   {
-   "description": "Select the relevant company name if you have multiple companies.", 
+   "description": "", 
    "fieldname": "company", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -1034,7 +1034,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "issingle": 0, 
- "modified": "2015-01-15 07:51:42.642249", 
+ "modified": "2015-01-30 04:20:02.166745", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 
