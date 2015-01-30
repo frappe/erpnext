@@ -76,7 +76,7 @@
    "options": "Activity Type", 
    "permlevel": 0, 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
    "depends_on": "eval:doc.time_log_for != 'Manufacturing'", 
@@ -116,6 +116,7 @@
    "read_only": 1
   }, 
   {
+   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
    "description": "Operation completed for how many finished goods?", 
    "fieldname": "completed_qty", 
    "fieldtype": "Float", 

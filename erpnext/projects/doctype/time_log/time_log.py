@@ -23,6 +23,7 @@ class TimeLog(Document):
 		self.validate_time_log_for()
 		self.check_workstation_timings()
 		self.validate_production_order()
+		self.validate_project()
 
 	def on_submit(self):
 		self.update_production_order()
@@ -127,6 +128,11 @@ class TimeLog(Document):
 			from `tabTime Log`
 			where production_order = %s and operation = %s and docstatus=1""",
 			(self.production_order, self.operation), as_dict=1)[0]
+			
+	def validate_project(self):
+		if self.time_log_for == 'Project':
+			if not self.project:
+				frappe.throw(_("Project is Mandatory."))
 
 @frappe.whitelist()
 def get_workstation(production_order, operation):
