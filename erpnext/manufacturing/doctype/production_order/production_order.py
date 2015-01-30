@@ -298,7 +298,7 @@ def make_time_log(name, operation, from_time, to_time, qty=None,  project=None, 
 
 @frappe.whitelist()
 def auto_make_time_log(production_order_id):
-	if frappe.db.get_value("Time Log", filters={"production_order": production_order_id}):
+	if frappe.db.get_value("Time Log", filters={"production_order": production_order_id, "docstatus":1}):
 		frappe.throw(_("Time logs already exists against this Production Order"))
 
 	time_logs = []
