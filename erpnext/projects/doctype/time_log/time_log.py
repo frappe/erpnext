@@ -24,6 +24,7 @@ class TimeLog(Document):
 		self.check_workstation_timings()
 		self.validate_production_order()
 		self.validate_project()
+		self.validate_activity()
 
 	def on_submit(self):
 		self.update_production_order()
@@ -133,6 +134,11 @@ class TimeLog(Document):
 		if self.time_log_for == 'Project':
 			if not self.project:
 				frappe.throw(_("Project is Mandatory."))
+
+	def validate_activity(self):
+		if self.time_log_for == 'Project':
+			if not self.activity:
+				frappe.throw(_("Activity is Mandatory."))
 
 @frappe.whitelist()
 def get_workstation(production_order, operation):
