@@ -25,6 +25,7 @@ class TimeLog(Document):
 		self.validate_production_order()
 		self.validate_project()
 		self.validate_activity()
+		self.validate_manufacturing()
 
 	def on_submit(self):
 		self.update_production_order()
@@ -134,11 +135,26 @@ class TimeLog(Document):
 		if self.time_log_for == 'Project':
 			if not self.project:
 				frappe.throw(_("Project is Mandatory."))
-
+		if self.time_log_for == "":
+			self.project = None
+			
 	def validate_activity(self):
-		if self.time_log_for == 'Project':
-			if not self.activity:
+		if self.time_log_for != 'Manufacturing':
+			if not self.activity_type:
 				frappe.throw(_("Activity is Mandatory."))
+			self.production_order = None
+			self.operation = None
+			self.quantity = None
+		
+	def validate_manufacturing(self):
+		if self.time_log_for == 'Manufacturing':
+			if not self.production_order:
+				frappe.throw(_("Production Order is Mandatory"))
+			if not self.operation:
+				frappe.throw(_("Operation is Mandatory"))
+			if not self.completed_qty:
+				self.completed_qty=0
+			self.activity_type = None
 
 @frappe.whitelist()
 def get_workstation(production_order, operation):
@@ -176,7 +192,7 @@ def get_events(start, end, filters=None):
 
 	data = frappe.db.sql("""select name, from_time, to_time,
 		activity_type, task, project, production_order, workstation from `tabTime Log`
-		where ( from_time between %(start)s and %(end)s or to_time between %(start)s and %(end)s )
+		where docstatus < 2 and ( from_time between %(start)s and %(end)s or to_time between %(start)s and %(end)s )
 		{conditions}""".format(conditions=conditions), {
 			"start": start,
 			"end": end
