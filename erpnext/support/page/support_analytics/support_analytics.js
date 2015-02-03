@@ -37,7 +37,7 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: __("Plot"), field: "check", width: 30,
+			{id: "_check", name: __("Plot"), field: "_check", width: 30,
 				formatter: this.check_formatter},
 			{id: "status", name: __("Status"), field: "status", width: 100},
 		];

@@ -36,7 +36,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	},
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: __("Plot"), field: "check", width: 30,
+			{id: "_check", name: __("Plot"), field: "_check", width: 30,
 				formatter: this.check_formatter},
 			{id: "name", name: __("Item"), field: "name", width: 300,
 				formatter: this.tree_formatter},

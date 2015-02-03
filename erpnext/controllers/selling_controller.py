@@ -13,9 +13,8 @@ from erpnext.controllers.stock_controller import StockController
 class SellingController(StockController):
 	def __setup__(self):
 		if hasattr(self, "items"):
-			self.table_print_templates = {
-				"items": "templates/print_formats/includes/item_grid.html",
-				"taxes": "templates/print_formats/includes/taxes.html",
+			self.print_templates = {
+				"taxes": "templates/print_formats/includes/taxes.html"
 			}
 
 	def get_feed(self):
