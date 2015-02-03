@@ -63,7 +63,6 @@ class StockEntry(StockController):
 		self.validate_fiscal_year()
 		self.validate_valuation_rate()
 		self.set_total_amount()
-		self.validate_batch_item()
 
 	def on_submit(self):
 		self.update_stock_ledger()
@@ -660,10 +659,6 @@ class StockEntry(StockController):
 				mreq_item.warehouse != (item.s_warehouse if self.purpose== "Material Issue" else item.t_warehouse):
 					frappe.throw(_("Item or Warehouse for row {0} does not match Material Request").format(item.idx),
 						frappe.MappingMismatchError)
-						
-	def validate_batch_item(self):
-		if frappe.db.get_value("Item",self.item,"has_batch_no") =='No':
-			frappe.throw(_("The selected item cannot have Batch"))
 
 @frappe.whitelist()
 def get_party_details(ref_dt, ref_dn):
