@@ -32,6 +32,7 @@ class BOM(Document):
 		self.validate_materials()
 		self.set_bom_material_details()
 		self.calculate_cost()
+		self.validate_operations()
 
 	def on_update(self):
 		self.check_recursion()
@@ -211,6 +212,8 @@ class BOM(Document):
 
 	def validate_materials(self):
 		""" Validate raw material entries """
+		if not self.get('items'):
+			frappe.throw(_("Raw Materials cannot be blank."))
 		check_list = []
 		for m in self.get('items'):
 
@@ -369,6 +372,10 @@ class BOM(Document):
 
 			if act_pbom and act_pbom[0][0]:
 				frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
+				
+	def validate_operations(self):
+		if self.with_operations and not self.get('operations'):
+			frappe.throw(_("Operations cannot be left blank."))
 
 def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 	item_dict = {}
