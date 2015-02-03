@@ -64,7 +64,6 @@ class StockEntry(StockController):
 		self.validate_valuation_rate()
 		self.set_total_amount()
 
-
 	def on_submit(self):
 		self.update_stock_ledger()
 
@@ -330,7 +329,8 @@ class StockEntry(StockController):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
 		for d in self.get('items'):
 			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty):
-				frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}").format(d.idx, d.transfer_qty, self.fg_completed_qty))
+				frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}"). \
+					format(d.idx, d.transfer_qty, self.fg_completed_qty))
 
 	def validate_return_reference_doc(self):
 		"""validate item with reference doc"""
