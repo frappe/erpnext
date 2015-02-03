@@ -210,7 +210,7 @@ class BOM(Document):
 
 	def validate_materials(self):
 		""" Validate raw material entries """
-		if self.get('items') == []:
+		if not self.get('items'):
 			frappe.throw(_("Raw Materials cannot be blank."))
 		check_list = []
 		for m in self.get('items'):
@@ -370,7 +370,7 @@ class BOM(Document):
 				frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
 				
 	def validate_operations(self):
-		if self.with_operations and self.get('operations') == []:
+		if self.with_operations and not self.get('operations'):
 			frappe.throw(_("Operations cannot be left blank."))
 
 def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
