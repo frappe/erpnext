@@ -67,7 +67,6 @@
    ],
   "items": [
    {
-    "operation": 1,
     "amount": 5000.0,
     "doctype": "BOM Item",
     "item_code": "_Test Item",
@@ -77,7 +76,6 @@
     "stock_uom": "_Test UOM"
    },
    {
-    "operation": 1,
     "amount": 2000.0,
     "bom_no": "BOM/_Test Item Home Desktop Manufactured/001",
     "doctype": "BOM Item",
@@ -108,7 +106,6 @@
    ],
   "items": [
    {
-    "operation": 1,
     "amount": 5000.0,
     "doctype": "BOM Item",
     "item_code": "_Test Item",

@@ -13,9 +13,6 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 		cur_frm.add_custom_button(__("Update Item Description"), cur_frm.cscript.update_item_desc,
 			"icon-tag", "btn-default");
 	}
-
-	cur_frm.cscript.with_operations(doc);
-	erpnext.bom.set_operation(doc);
 }
 
 cur_frm.cscript.update_cost = function() {
@@ -37,29 +34,6 @@ cur_frm.cscript.update_item_desc = function() {
 		}
 	})
 }
-
-cur_frm.cscript.with_operations = function(doc) {
-	cur_frm.fields_dict["items"].grid.set_column_disp("operation", doc.with_operations);
-	cur_frm.fields_dict["items"].grid.toggle_reqd("operation", doc.with_operations);
-}
-
-erpnext.bom.set_operation = function(doc) {
-	var op_table = doc["operations"] || [];
-	var operations = [];
-
-	for (var i=0, j=op_table.length; i<j; i++) {
-		operations[i] = (i+1);
-	}
-
-	frappe.meta.get_docfield("BOM Item", "operation", cur_frm.docname).options = operations.join("\n");
-
-	refresh_field("items");
-}
-
-cur_frm.cscript.operations_remove = function(){
-	erpnext.bom.set_operation(doc);
-}
-
 cur_frm.add_fetch("item", "description", "description");
 cur_frm.add_fetch("item", "item_name", "item_name");
 cur_frm.add_fetch("item", "stock_uom", "uom");
@@ -210,7 +184,6 @@ frappe.ui.form.on("BOM Operation", "operation", function(frm, cdt, cdn) {
 		callback: function (data) {
 			frappe.model.set_value(d.doctype, d.name, "opn_description", data.message.opn_description);
 			frappe.model.set_value(d.doctype, d.name, "workstation", data.message.workstation);
-			erpnext.bom.set_operation(frm.doc);
 		}
 	})
 });
@@ -230,4 +203,14 @@ frappe.ui.form.on("BOM Operation", "workstation", function(frm, cdt, cdn) {
 			erpnext.bom.calculate_total(frm.doc);
 		}
 	})
+});
+
+frappe.ui.form.on("BOM Operation", "operations_remove", function(frm) {
+	erpnext.bom.calculate_op_cost(frm.doc);
+	erpnext.bom.calculate_total(frm.doc);
+});
+
+frappe.ui.form.on("BOM Item", "items_remove", function(frm) {
+	erpnext.bom.calculate_rm_cost(frm.doc);
+	erpnext.bom.calculate_total(frm.doc);
 });
