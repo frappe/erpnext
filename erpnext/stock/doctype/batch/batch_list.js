@@ -4,7 +4,9 @@ frappe.listview_settings['Batch'] = {
 		if(doc.expiry_date && frappe.datetime.get_diff(doc.expiry_date) <= 0) {
 			return [__("Expired"), "red", "expiry_date,>=,Today"]
 		} else if(doc.expiry_date) {
-			return [__("Not Expired"), "darkgrey", "expiry_date,<,Today"]
+			return [__("Not Expired"), "green", "expiry_date,<,Today"]
+		} else {
+			return ["Not Set", "darkgrey", ""];
 		}
 	}
 };
