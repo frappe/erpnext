@@ -68,5 +68,11 @@ $.extend(cur_frm.cscript, {
 				}
 			}
 		});
+	},
+	
+	time_log_for: function(doc) {
+		if (doc.time_log_for == 'Manufacturing') {
+			cur_frm.set_value("activity_type", "Manufacturing")
+		}
 	}
 });

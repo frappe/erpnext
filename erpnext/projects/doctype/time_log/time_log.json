@@ -68,7 +68,7 @@
    "reqd": 0
   }, 
   {
-   "depends_on": "eval:doc.time_log_for != 'Manufacturing'", 
+   "depends_on": "", 
    "fieldname": "activity_type", 
    "fieldtype": "Link", 
    "in_list_view": 0, 
@@ -76,7 +76,7 @@
    "options": "Activity Type", 
    "permlevel": 0, 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 1
   }, 
   {
    "depends_on": "eval:doc.time_log_for != 'Manufacturing'", 
@@ -116,7 +116,6 @@
    "read_only": 1
   }, 
   {
-   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
    "description": "Operation completed for how many finished goods?", 
    "fieldname": "completed_qty", 
    "fieldtype": "Float", 
@@ -237,5 +236,5 @@
    "write": 1
   }
  ], 
- "title_field": ""
+ "title_field": "activity_type"
 }
