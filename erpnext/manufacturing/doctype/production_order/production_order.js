@@ -7,6 +7,13 @@ $.extend(cur_frm.cscript, {
 		cfn_set_fields(doc, dt, dn);
 
 		this.frm.add_fetch("sales_order", "delivery_date", "expected_delivery_date");
+		
+		if(doc.__islocal) {
+			cur_frm.set_value({
+			"actual_start_date": "",
+			"actual_end_date": ""
+			});
+		}
 	},
 
 	before_submit: function() {
