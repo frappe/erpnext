@@ -7,6 +7,7 @@ def execute():
 	frappe.reload_doc("manufacturing", "doctype", "bom")
 	frappe.reload_doc("manufacturing", "doctype", "bom_item")
 	frappe.reload_doc("manufacturing", "doctype", "bom_explosion_item")
+	frappe.reload_doc("manufacturing", "doctype", "bom_operation")
 
 	frappe.db.sql("""update `tabBOM` as bom  set bom.item_name = \
 		( select item.item_name from `tabItem` as item  where item.name = bom.item)""")

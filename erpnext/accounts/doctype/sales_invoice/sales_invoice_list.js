@@ -5,14 +5,13 @@
 frappe.listview_settings['Sales Invoice'] = {
 	add_fields: ["customer", "customer_name", "grand_total", "outstanding_amount", "due_date", "company",
 		"currency"],
-	filters: [["outstanding_amount", ">", "0"]],
 	get_indicator: function(doc) {
 		if(doc.outstanding_amount==0) {
-			return [__("Paid"), "green", "oustanding_amount,=,0"]
+			return [__("Paid"), "green", "outstanding_amount,=,0"]
 		} else if (doc.outstanding_amount > 0 && doc.due_date > frappe.datetime.get_today()) {
-			return [__("Unpaid"), "orange", "oustanding_amount,>,0|due_date,>,Today"]
+			return [__("Unpaid"), "orange", "outstanding_amount,>,0|due_date,>,Today"]
 		} else if (doc.outstanding_amount > 0 && doc.due_date <= frappe.datetime.get_today()) {
-			return [__("Overdue"), "red", "oustanding_amount,>,0|due_date,<=,Today"]
+			return [__("Overdue"), "red", "outstanding_amount,>,0|due_date,<=,Today"]
 		}
 	},
 	right_column: "grand_total_export"

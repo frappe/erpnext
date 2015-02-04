@@ -793,8 +793,13 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 
 	show_item_wise_taxes: function() {
 		if(this.frm.fields_dict.other_charges_calculation) {
-			$(this.get_item_wise_taxes_html())
-				.appendTo($(this.frm.fields_dict.other_charges_calculation.wrapper).empty());
+			var html = this.get_item_wise_taxes_html();
+			if (html) {
+				this.frm.toggle_display("other_charges_calculation", true);
+				$(this.frm.fields_dict.other_charges_calculation.wrapper).html(html);
+			} else {
+				this.frm.toggle_display("other_charges_calculation", false);
+			}
 		}
 	},
 
