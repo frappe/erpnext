@@ -51,10 +51,6 @@ class GLEntry(Document):
 		elif self.cost_center:
 			self.cost_center = None
 
-	def validate_posting_date(self):
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.posting_date, self.fiscal_year, "Posting Date")
-
 	def check_pl_account(self):
 		if self.is_opening=='Yes' and \
 				frappe.db.get_value("Account", self.account, "report_type")=="Profit and Loss":

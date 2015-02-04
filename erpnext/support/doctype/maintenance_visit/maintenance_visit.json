@@ -216,19 +216,6 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "fiscal_year", 
-   "fieldtype": "Link", 
-   "in_filter": 1, 
-   "label": "Fiscal Year", 
-   "oldfieldname": "fiscal_year", 
-   "oldfieldtype": "Select", 
-   "options": "Fiscal Year", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "reqd": 1, 
-   "search_index": 0
-  }, 
-  {
    "depends_on": "customer", 
    "fieldname": "contact_info_section", 
    "fieldtype": "Section Break", 
@@ -302,7 +289,7 @@
    "write": 1
   }
  ], 
- "search_fields": "status,maintenance_type,customer,customer_name,mntc_date,company,fiscal_year", 
+ "search_fields": "status,maintenance_type,customer,customer_name,mntc_date,company", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "customer_name"

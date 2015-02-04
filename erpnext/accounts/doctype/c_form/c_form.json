@@ -67,15 +67,6 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "fiscal_year", 
-   "fieldtype": "Link", 
-   "label": "Fiscal Year", 
-   "options": "Fiscal Year", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 1
-  }, 
-  {
    "fieldname": "quarter", 
    "fieldtype": "Select", 
    "label": "Quarter", 
@@ -139,7 +130,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2015-02-05 05:11:35.427357", 
+ "modified": "2015-02-09 12:27:49.408097", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "C-Form", 

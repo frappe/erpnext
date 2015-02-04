@@ -2,7 +2,6 @@
  {
   "company": "_Test Company", 
   "doctype": "Material Request", 
-  "fiscal_year": "_Test Fiscal Year 2013", 
   "items": [
    {
     "description": "_Test Item Home Desktop 100", 

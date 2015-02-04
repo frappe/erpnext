@@ -160,11 +160,3 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 });
 
 cur_frm.cscript = new erpnext.stock.StockReconciliation({frm: cur_frm});
-
-cur_frm.cscript.company = function(doc, cdt, cdn) {
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
-}
-
-cur_frm.cscript.posting_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
-}

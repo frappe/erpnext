@@ -22,7 +22,6 @@ class JournalEntry(AccountsController):
 			self.is_opening='No'
 		self.clearance_date = None
 
-		super(JournalEntry, self).validate_date_with_fiscal_year()
 		self.validate_party()
 		self.validate_cheque_info()
 		self.validate_entries_for_advance()
@@ -516,7 +515,6 @@ def get_payment_entry(doc):
 	jv = frappe.new_doc('Journal Entry')
 	jv.voucher_type = 'Bank Entry'
 	jv.company = doc.company
-	jv.fiscal_year = doc.fiscal_year
 
 	jv.append("accounts")
 	d2 = jv.append("accounts")

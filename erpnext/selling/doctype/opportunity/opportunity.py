@@ -28,9 +28,6 @@ class Opportunity(TransactionBase):
 		self.validate_lead_cust()
 		self.validate_cust_name()
 
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.transaction_date, self.fiscal_year, "Opportunity Date")
-
 	def on_submit(self):
 		if self.lead:
 			frappe.get_doc("Lead", self.lead).set_status(update=True)
@@ -130,17 +127,49 @@ class Opportunity(TransactionBase):
 			frappe.throw(_("Items required"))
 
 	def validate_lead_cust(self):
-		if self.enquiry_from == 'Lead':
-			if not self.lead:
-				frappe.throw(_("Lead must be set if Opportunity is made from Lead"))
-			else:
-				self.customer = None
-		elif self.enquiry_from == 'Customer':
-			if not self.customer:
-				msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
-			else:
-				self.lead = None
-		
+		if self.enquiry_from == 'Lead' and not self.lead:
+			frappe.throw(_("Lead must be set if Opportunity is made from Lead"))
+		elif self.enquiry_from == 'Customer' and not self.customer:
+			msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
+
+	def validate(self):
+		self._prev = frappe._dict({
+			"contact_date": frappe.db.get_value("Opportunity", self.name, "contact_date") if \
+				(not cint(self.get("__islocal"))) else None,
+			"contact_by": frappe.db.get_value("Opportunity", self.name, "contact_by") if \
+				(not cint(self.get("__islocal"))) else None,
+		})
+
+		if not self.enquiry_from:
+			frappe.throw(_("Opportunity From field is mandatory"))
+
+		self.set_status()
+		self.validate_item_details()
+		self.validate_uom_is_integer("uom", "qty")
+		self.validate_lead_cust()
+
+	def on_submit(self):
+		if self.lead:
+			frappe.get_doc("Lead", self.lead).set_status(update=True)
+
+	def on_cancel(self):
+		if self.has_quotation():
+			frappe.throw(_("Cannot Cancel Opportunity as Quotation Exists"))
+		self.set_status(update=True)
+
+	def declare_enquiry_lost(self,arg):
+		if not self.has_quotation():
+			frappe.db.set(self, 'status', 'Lost')
+			frappe.db.set(self, 'order_lost_reason', arg)
+		else:
+			frappe.throw(_("Cannot declare as lost, because Quotation has been made."))
+
+	def on_trash(self):
+		self.delete_events()
+
+	def has_quotation(self):
+		return frappe.db.get_value("Quotation Item", {"prevdoc_docname": self.name, "docstatus": 1})
+
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):

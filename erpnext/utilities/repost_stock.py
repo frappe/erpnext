@@ -7,7 +7,6 @@ import frappe
 from frappe.utils import flt, cstr, nowdate, nowtime
 from erpnext.stock.utils import update_bin
 from erpnext.stock.stock_ledger import update_entries_after
-from erpnext.accounts.utils import get_fiscal_year
 
 def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False):
 	"""
@@ -135,11 +134,9 @@ def update_bin_qty(item_code, warehouse, qty_dict=None):
 
 		bin.save()
 
-def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, posting_time=None,
-	 	fiscal_year=None):
+def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, posting_time=None):
 	if not posting_date: posting_date = nowdate()
 	if not posting_time: posting_time = nowtime()
-	if not fiscal_year: fiscal_year = get_fiscal_year(posting_date)[0]
 
 	condition = " and item.name='%s'" % item_code.replace("'", "\'") if item_code else ""
 
@@ -172,7 +169,6 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 			'stock_uom'					: d[3],
 			'incoming_rate'				: sle and flt(serial_nos[0][0]) > flt(d[2]) and flt(sle[0][0]) or 0,
 			'company'					: sle and cstr(sle[0][1]) or 0,
-			'fiscal_year'				: fiscal_year,
 			'is_cancelled'			 	: 'No',
 			'batch_no'					: '',
 			'serial_no'					: ''

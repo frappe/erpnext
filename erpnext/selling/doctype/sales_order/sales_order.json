@@ -750,20 +750,6 @@
    "report_hide": 1
   }, 
   {
-   "fieldname": "fiscal_year", 
-   "fieldtype": "Link", 
-   "in_filter": 1, 
-   "label": "Fiscal Year", 
-   "oldfieldname": "fiscal_year", 
-   "oldfieldtype": "Select", 
-   "options": "Fiscal Year", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "reqd": 1, 
-   "search_index": 1, 
-   "width": "150px"
-  }, 
-  {
    "fieldname": "section_break_78", 
    "fieldtype": "Section Break", 
    "oldfieldtype": "Column Break", 

@@ -289,17 +289,6 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "fiscal_year", 
-   "fieldtype": "Link", 
-   "hidden": 1, 
-   "in_filter": 1, 
-   "label": "Fiscal Year", 
-   "oldfieldname": "fiscal_year", 
-   "oldfieldtype": "Select", 
-   "options": "Fiscal Year", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "column_break3", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 

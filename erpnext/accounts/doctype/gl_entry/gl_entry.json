@@ -178,17 +178,6 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "fiscal_year", 
-   "fieldtype": "Link", 
-   "in_filter": 1, 
-   "label": "Fiscal Year", 
-   "oldfieldname": "fiscal_year", 
-   "oldfieldtype": "Select", 
-   "options": "Fiscal Year", 
-   "permlevel": 0, 
-   "search_index": 0
-  }, 
-  {
    "fieldname": "company", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -203,7 +192,7 @@
  "icon": "icon-list", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-09-11 18:35:22.822064", 
+ "modified": "2015-02-05 11:30:12.544961", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "GL Entry", 

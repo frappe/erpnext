@@ -362,9 +362,6 @@ class ProductionPlanningTool(Document):
 	def insert_purchase_request(self):
 		items_to_be_requested = self.get_requested_items()
 
-		from erpnext.accounts.utils import get_fiscal_year
-		fiscal_year = get_fiscal_year(nowdate())[0]
-
 		purchase_request_list = []
 		if items_to_be_requested:
 			for item in items_to_be_requested:
@@ -374,7 +371,6 @@ class ProductionPlanningTool(Document):
 					"transaction_date": nowdate(),
 					"status": "Draft",
 					"company": self.company,
-					"fiscal_year": fiscal_year,
 					"requested_by": frappe.session.user,
 					"material_request_type": "Purchase"
 				})

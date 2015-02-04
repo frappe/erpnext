@@ -5,7 +5,6 @@
     "account": "_Test Account Cost for Goods Sold - _TC", 
     "budget_allocated": 100000, 
     "doctype": "Budget Detail", 
-    "fiscal_year": "_Test Fiscal Year 2013", 
     "parentfield": "budgets"
    }
   ], 

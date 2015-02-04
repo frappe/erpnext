@@ -614,21 +614,6 @@
    "width": "150px"
   }, 
   {
-   "fieldname": "fiscal_year", 
-   "fieldtype": "Link", 
-   "in_filter": 1, 
-   "label": "Fiscal Year", 
-   "oldfieldname": "fiscal_year", 
-   "oldfieldtype": "Select", 
-   "options": "Fiscal Year", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "print_width": "150px", 
-   "reqd": 1, 
-   "search_index": 1, 
-   "width": "150px"
-  }, 
-  {
    "fieldname": "column_break4", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 

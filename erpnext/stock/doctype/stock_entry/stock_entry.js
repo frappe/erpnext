@@ -457,11 +457,3 @@ cur_frm.fields_dict.customer.get_query = function(doc, cdt, cdn) {
 cur_frm.fields_dict.supplier.get_query = function(doc, cdt, cdn) {
 	return { query: "erpnext.controllers.queries.supplier_query" }
 }
-
-cur_frm.cscript.company = function(doc, cdt, cdn) {
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
-}
-
-cur_frm.cscript.posting_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
-}
