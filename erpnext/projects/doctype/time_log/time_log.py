@@ -111,6 +111,7 @@ class TimeLog(Document):
 			pro_order.ignore_validate_update_after_submit = True
 			pro_order.update_operation_status()
 			pro_order.calculate_operating_cost()
+			pro_order.set_actual_dates()
 			pro_order.save()
 
 	def get_operation_start_end_time(self):

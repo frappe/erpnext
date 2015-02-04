@@ -7,11 +7,6 @@ $.extend(cur_frm.cscript, {
 		cfn_set_fields(doc, dt, dn);
 
 		this.frm.add_fetch("sales_order", "delivery_date", "expected_delivery_date");
-		
-		return this.frm.call({
-			doc: this.frm.doc,
-			method: "set_actual_dates"
-		});
 	},
 
 	before_submit: function() {
