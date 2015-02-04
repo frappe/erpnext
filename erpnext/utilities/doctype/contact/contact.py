@@ -11,15 +11,15 @@ class Contact(StatusUpdater):
 
 	def autoname(self):
 		# concat first and last name
-		self.name = " ".join(filter(None, 
+		self.name = " ".join(filter(None,
 			[cstr(self.get(f)).strip() for f in ["first_name", "last_name"]]))
-		
+
 		# concat party name if reqd
 		for fieldname in ("customer", "supplier", "sales_partner"):
 			if self.get(fieldname):
 				self.name = self.name + "-" + cstr(self.get(fieldname)).strip()
 				break
-		
+
 	def validate(self):
 		self.set_status()
 		self.validate_primary_contact()
@@ -27,13 +27,13 @@ class Contact(StatusUpdater):
 	def validate_primary_contact(self):
 		if self.is_primary_contact == 1:
 			if self.customer:
-				frappe.db.sql("update tabContact set is_primary_contact=0 where customer = %s", 
+				frappe.db.sql("update tabContact set is_primary_contact=0 where customer = %s",
 					(self.customer))
 			elif self.supplier:
-				frappe.db.sql("update tabContact set is_primary_contact=0 where supplier = %s", 
-					 (self.supplier))	
+				frappe.db.sql("update tabContact set is_primary_contact=0 where supplier = %s",
+					 (self.supplier))
 			elif self.sales_partner:
-				frappe.db.sql("""update tabContact set is_primary_contact=0 
+				frappe.db.sql("""update tabContact set is_primary_contact=0
 					where sales_partner = %s""", (self.sales_partner))
 		else:
 			if self.customer:
@@ -46,7 +46,7 @@ class Contact(StatusUpdater):
 					self.is_primary_contact = 1
 			elif self.sales_partner:
 				if not frappe.db.sql("select name from tabContact \
-						where is_primary_contact=1 and sales_partner = %s", 
+						where is_primary_contact=1 and sales_partner = %s",
 						self.sales_partner):
 					self.is_primary_contact = 1
 
@@ -59,7 +59,7 @@ def get_contact_details(contact):
 	contact = frappe.get_doc("Contact", contact)
 	out = {
 		"contact_person": contact.get("name"),
-		"contact_display": " ".join(filter(None, 
+		"contact_display": " ".join(filter(None,
 			[contact.get("first_name"), contact.get("last_name")])),
 		"contact_email": contact.get("email_id"),
 		"contact_mobile": contact.get("mobile_no"),
@@ -67,5 +67,5 @@ def get_contact_details(contact):
 		"contact_designation": contact.get("designation"),
 		"contact_department": contact.get("department")
 	}
-	
+
 	return out
