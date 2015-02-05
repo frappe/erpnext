@@ -45,7 +45,7 @@ class SalarySlip(TransactionBase):
 
 	def get_leave_details(self, lwp=None):
 		if not self.fiscal_year:
-			self.fiscal_year = frappe.get_default("fiscal_year")
+			self.fiscal_year = frappe.db.get_default("fiscal_year")
 		if not self.month:
 			self.month = "%02d" % getdate(nowdate()).month
 
