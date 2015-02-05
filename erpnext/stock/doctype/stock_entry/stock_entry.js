@@ -24,6 +24,12 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			};
 		};
 
+		this.frm.fields_dict.bom_no.get_query = function() {
+			return {
+				filters:{ 'docstatus': 1 }
+			};
+		};
+
 		this.frm.fields_dict.mtn_details.grid.get_field('item_code').get_query = function() {
 			if(in_list(["Sales Return", "Purchase Return"], me.frm.doc.purpose) &&
 				me.get_doctype_docname()) {
