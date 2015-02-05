@@ -218,9 +218,10 @@ class SellingController(StockController):
 	def calculate_totals(self):
 		self.grand_total = flt(self.tax_doclist[-1].total if self.tax_doclist else self.net_total)
 
-		self.grand_total_export = flt(self.grand_total / self.conversion_rate)
-
 		self.other_charges_total = flt(self.grand_total - self.net_total, self.precision("other_charges_total"))
+
+		self.grand_total_export = flt(self.grand_total / self.conversion_rate) \
+			if (self.other_charges_total or self.discount_amount) else self.net_total_export
 
 		self.other_charges_total_export = flt(self.grand_total_export - self.net_total_export +
 			flt(self.discount_amount), self.precision("other_charges_total_export"))
