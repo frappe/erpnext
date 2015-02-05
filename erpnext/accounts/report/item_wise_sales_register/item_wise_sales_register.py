@@ -14,36 +14,36 @@ def execute(filters=None):
 	item_list = get_items(filters)
 	if item_list:
 		item_tax, tax_accounts = get_tax_accounts(item_list, columns)
-	
+
 	data = []
 	for d in item_list:
-		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, 
-			d.customer_name, d.debit_to, d.territory, d.project_name, d.company, d.sales_order, 
+		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date,
+			d.customer_name, d.debit_to, d.territory, d.project_name, d.company, d.sales_order,
 			d.delivery_note, d.income_account, d.qty, d.base_rate, d.base_amount]
-			
+
 		for tax in tax_accounts:
 			row.append(item_tax.get(d.parent, {}).get(d.item_code, {}).get(tax, 0))
 
 		total_tax = sum(row[last_col:])
 		row += [total_tax, d.base_amount + total_tax]
-		
+
 		data.append(row)
-	
+
 	return columns, data
-	
+
 def get_columns():
 	return [
-		_("Item Code") + ":Link/Item:120", _("Item Name") + "::120", _("Item Group") + ":Link/Item Group:100", 
-		_("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80", _("Customer") + ":Link/Customer:120", 
+		_("Item Code") + ":Link/Item:120", _("Item Name") + "::120", _("Item Group") + ":Link/Item Group:100",
+		_("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80", _("Customer") + ":Link/Customer:120",
 		_("Customer Account") + ":Link/Account:120", _("Territory") + ":Link/Territory:80",
-		_("Project") + ":Link/Project:80", _("Company") + ":Link/Company:100", _("Sales Order") + ":Link/Sales Order:100", 
-		_("Delivery Note") + ":Link/Delivery Note:100", _("Income Account") + ":Link/Account:140", 
+		_("Project") + ":Link/Project:80", _("Company") + ":Link/Company:100", _("Sales Order") + ":Link/Sales Order:100",
+		_("Delivery Note") + ":Link/Delivery Note:100", _("Income Account") + ":Link/Account:140",
 		_("Qty") + ":Float:120", _("Rate") + ":Currency:120", _("Amount") + ":Currency:120"
 	]
-	
+
 def get_conditions(filters):
 	conditions = ""
-	
+
 	for opts in (("company", " and company=%(company)s"),
 		("account", " and si.debit_to = %(account)s"),
 		("item_code", " and si_item.item_code = %(item_code)s"),
@@ -53,32 +53,36 @@ def get_conditions(filters):
 				conditions += opts[1]
 
 	return conditions
-		
+
 def get_items(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select si_item.parent, si.posting_date, si.debit_to, si.project_name, 
-		si.customer, si.remarks, si.territory, si.company, si_item.item_code, si_item.item_name, 
-		si_item.item_group, si_item.sales_order, si_item.delivery_note, si_item.income_account, 
+	return frappe.db.sql("""select si_item.parent, si.posting_date, si.debit_to, si.project_name,
+		si.customer, si.remarks, si.territory, si.company, si.net_total, si_item.item_code, si_item.item_name,
+		si_item.item_group, si_item.sales_order, si_item.delivery_note, si_item.income_account,
 		si_item.qty, si_item.base_rate, si_item.base_amount, si.customer_name
-		from `tabSales Invoice` si, `tabSales Invoice Item` si_item 
-		where si.name = si_item.parent and si.docstatus = 1 %s 
+		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
+		where si.name = si_item.parent and si.docstatus = 1 %s
 		order by si.posting_date desc, si_item.item_code desc""" % conditions, filters, as_dict=1)
-		
+
 def get_tax_accounts(item_list, columns):
 	import json
 	item_tax = {}
 	tax_accounts = []
-	
-	tax_details = frappe.db.sql("""select parent, account_head, item_wise_tax_detail
-		from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice' 
+
+	invoice_wise_items = {}
+	for d in item_list:
+		invoice_wise_items.setdefault(d.parent, []).append(d)
+
+	tax_details = frappe.db.sql("""select parent, account_head, item_wise_tax_detail, charge_type, tax_amount
+		from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice'
 		and docstatus = 1 and ifnull(account_head, '') != ''
-		and parent in (%s)""" % ', '.join(['%s']*len(item_list)), 
-		tuple([item.parent for item in item_list]))
-		
-	for parent, account_head, item_wise_tax_detail in tax_details:
+		and parent in (%s)""" % ', '.join(['%s']*len(invoice_wise_items)),
+		tuple(invoice_wise_items.keys()))
+
+	for parent, account_head, item_wise_tax_detail, charge_type, tax_amount in tax_details:
 		if account_head not in tax_accounts:
 			tax_accounts.append(account_head)
-				
+
 		if item_wise_tax_detail:
 			try:
 				item_wise_tax_detail = json.loads(item_wise_tax_detail)
@@ -87,7 +91,11 @@ def get_tax_accounts(item_list, columns):
 						 flt(tax_amount[1]) if isinstance(tax_amount, list) else flt(tax_amount)
 			except ValueError:
 				continue
-	
+		elif charge_type == "Actual" and tax_amount:
+			for d in invoice_wise_items.get(parent, []):
+				item_tax.setdefault(parent, {}).setdefault(d.item_code, {})[account_head] = \
+					flt((tax_amount * d.base_amount) / d.net_total)
+
 	tax_accounts.sort()
 	columns += [account_head + ":Currency:80" for account_head in tax_accounts]
 	columns += ["Total Tax:Currency:80", "Total:Currency:80"]
