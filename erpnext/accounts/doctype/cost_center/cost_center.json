@@ -145,7 +145,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-12-25 15:35:09.968578", 
+ "modified": "2015-02-05 05:11:36.155435", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Cost Center", 
@@ -161,6 +161,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

@@ -32,7 +32,7 @@
  ], 
  "icon": "icon-font", 
  "idx": 1, 
- "modified": "2015-01-15 15:25:32.907590", 
+ "modified": "2015-02-05 05:11:42.732646", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Print Heading", 
@@ -47,6 +47,7 @@
    "read": 1, 
    "report": 1, 
    "role": "System Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

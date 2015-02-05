@@ -139,7 +139,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2014-12-24 15:20:08.627169", 
+ "modified": "2015-02-05 05:11:35.427357", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "C-Form", 
@@ -154,6 +154,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -165,6 +166,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

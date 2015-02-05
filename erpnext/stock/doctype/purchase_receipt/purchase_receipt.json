@@ -767,7 +767,7 @@
  "icon": "icon-truck", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-30 04:22:04.356498", 
+ "modified": "2015-02-05 05:11:43.969108", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt", 
@@ -784,6 +784,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -799,6 +800,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -814,6 +816,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Purchase User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 

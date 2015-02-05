@@ -202,7 +202,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-07 11:31:12.783147", 
+ "modified": "2015-02-05 05:11:38.702422", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Expense Claim", 
@@ -218,6 +218,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Employee", 
+   "share": 1, 
    "write": 1
   }, 
   {
@@ -235,6 +236,7 @@
    "report": 1, 
    "role": "HR Manager", 
    "set_user_permissions": 0, 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -250,6 +252,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Expense Approver", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -265,6 +268,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }

@@ -237,7 +237,7 @@
  "icon": "icon-wrench", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-30 04:22:34.375717", 
+ "modified": "2015-02-05 05:11:39.246897", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Installation Note", 
@@ -255,6 +255,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 

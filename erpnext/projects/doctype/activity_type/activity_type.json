@@ -19,7 +19,7 @@
  "icon": "icon-flag", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2015-01-15 15:22:10.640553", 
+ "modified": "2015-02-05 05:11:34.201187", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Activity Type", 
@@ -33,6 +33,7 @@
    "read": 1, 
    "report": 1, 
    "role": "System Manager", 
+   "share": 1, 
    "write": 1
   }, 
   {
@@ -44,6 +45,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Projects User", 
+   "share": 1, 
    "write": 1
   }
  ]

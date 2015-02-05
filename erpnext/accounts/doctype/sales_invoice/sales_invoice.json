@@ -1202,7 +1202,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-15 07:33:52.971354", 
+ "modified": "2015-02-05 05:11:45.330358", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 
@@ -1219,6 +1219,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -1234,6 +1235,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 

@@ -273,7 +273,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2015-01-07 15:03:59.981848", 
+ "modified": "2015-02-05 05:11:43.094638", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 
@@ -290,6 +290,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Projects User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

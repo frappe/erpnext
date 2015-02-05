@@ -190,7 +190,7 @@
  "in_create": 1, 
  "issingle": 0, 
  "max_attachments": 3, 
- "modified": "2015-01-01 14:30:02.349930", 
+ "modified": "2015-02-05 05:11:39.844136", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Item Group", 
@@ -232,6 +232,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

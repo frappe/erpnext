@@ -199,7 +199,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-29 07:36:29.343589", 
+ "modified": "2015-02-05 05:11:48.252723", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 
@@ -217,6 +217,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Projects User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -230,6 +231,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Projects Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }

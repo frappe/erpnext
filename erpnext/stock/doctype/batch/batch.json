@@ -62,7 +62,7 @@
  "icon": "icon-archive", 
  "idx": 1, 
  "max_attachments": 5, 
- "modified": "2015-01-07 16:24:13.422480", 
+ "modified": "2015-02-05 05:11:34.824412", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Batch", 
@@ -78,6 +78,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

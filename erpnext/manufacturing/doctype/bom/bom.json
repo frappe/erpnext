@@ -252,7 +252,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-01-20 11:54:43.042697", 
+ "modified": "2015-02-05 05:11:35.113320", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM", 
@@ -268,6 +268,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Manufacturing Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -282,6 +283,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Manufacturing User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }

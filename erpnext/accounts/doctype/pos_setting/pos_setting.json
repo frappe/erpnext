@@ -226,7 +226,7 @@
  ], 
  "icon": "icon-cog", 
  "idx": 1, 
- "modified": "2015-01-15 15:27:41.530538", 
+ "modified": "2015-02-05 05:11:42.344180", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "POS Setting", 
@@ -241,6 +241,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

@@ -105,7 +105,7 @@
  "idx": 1, 
  "in_create": 1, 
  "issingle": 1, 
- "modified": "2014-05-26 03:05:48.838329", 
+ "modified": "2015-02-05 05:11:39.042446", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Global Defaults", 
@@ -119,6 +119,7 @@
    "read": 1, 
    "report": 0, 
    "role": "System Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

@@ -1,7 +1,7 @@
 {
-  "allow_email": 1, 
+ "allow_email": 1, 
  "allow_print": 1, 
- "creation": "2012-12-03 10:25:59.000000", 
+ "creation": "2012-12-03 10:25:59", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -31,7 +31,7 @@
  "idx": 1, 
  "issingle": 1, 
  "max_attachments": 1, 
- "modified": "2013-07-05 14:52:51.000000", 
+ "modified": "2015-02-05 05:11:44.714515", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Rename Tool", 
@@ -43,6 +43,7 @@
    "read": 1, 
    "report": 0, 
    "role": "System Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

@@ -864,7 +864,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2015-01-19 16:17:59.756852", 
+ "modified": "2015-02-05 05:11:39.507487", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
@@ -880,6 +880,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

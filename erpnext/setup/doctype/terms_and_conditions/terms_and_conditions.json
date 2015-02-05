@@ -32,7 +32,7 @@
  ], 
  "icon": "icon-legal", 
  "idx": 1, 
- "modified": "2015-01-05 14:58:21.277113", 
+ "modified": "2015-02-05 05:11:48.092112", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Terms and Conditions", 
@@ -48,6 +48,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -80,6 +81,7 @@
    "read": 1, 
    "report": 1, 
    "role": "System Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -93,6 +95,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

@@ -596,7 +596,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2015-01-07 17:38:40.170567", 
+ "modified": "2015-02-05 05:11:46.986620", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 
@@ -614,6 +614,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -629,6 +630,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Manufacturing User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -643,6 +645,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Manufacturing Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -657,6 +660,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }

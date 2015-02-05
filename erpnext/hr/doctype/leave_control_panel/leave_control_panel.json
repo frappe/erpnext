@@ -98,7 +98,7 @@
  "icon": "icon-cog", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2014-05-09 02:16:44.996178", 
+ "modified": "2015-02-05 05:11:40.791976", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Control Panel", 
@@ -110,6 +110,7 @@
    "read": 1, 
    "report": 0, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

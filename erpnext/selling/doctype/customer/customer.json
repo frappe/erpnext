@@ -267,7 +267,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2015-01-06 17:08:55.045595", 
+ "modified": "2015-02-05 05:11:36.603762", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Customer", 
@@ -284,6 +284,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -313,6 +314,7 @@
    "report": 1, 
    "role": "Sales Master Manager", 
    "set_user_permissions": 1, 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

@@ -40,7 +40,7 @@
  ], 
  "icon": "icon-bar-chart", 
  "idx": 1, 
- "modified": "2014-12-25 15:45:04.729489", 
+ "modified": "2015-02-05 05:11:41.429491", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Monthly Distribution", 
@@ -58,6 +58,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

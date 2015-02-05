@@ -390,7 +390,7 @@
  "icon": "icon-info-sign", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-07 11:00:31.557646", 
+ "modified": "2015-02-05 05:11:41.732687", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Opportunity", 
@@ -408,6 +408,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -422,6 +423,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }

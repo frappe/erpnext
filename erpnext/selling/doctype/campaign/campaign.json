@@ -48,7 +48,7 @@
  ], 
  "icon": "icon-bullhorn", 
  "idx": 1, 
- "modified": "2015-01-05 14:46:52.204964", 
+ "modified": "2015-02-05 05:11:35.510179", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Campaign", 
@@ -92,6 +92,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

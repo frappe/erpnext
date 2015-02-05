@@ -375,7 +375,7 @@
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2015-01-05 11:30:45.716971", 
+ "modified": "2015-02-05 05:11:35.790597", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 
@@ -391,6 +391,7 @@
    "read": 1, 
    "report": 1, 
    "role": "System Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

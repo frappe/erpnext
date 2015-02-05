@@ -810,7 +810,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 1, 
- "modified": "2015-01-30 04:19:47.045878", 
+ "modified": "2015-02-05 05:11:44.426544", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation", 
@@ -827,6 +827,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -878,6 +879,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -892,6 +894,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Maintenance Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -918,6 +921,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Maintenance User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 

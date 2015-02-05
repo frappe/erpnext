@@ -575,7 +575,7 @@
  "icon": "icon-shopping-cart", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-30 04:20:19.719720", 
+ "modified": "2015-02-05 05:11:47.602292", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation", 
@@ -592,6 +592,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Manufacturing Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -606,6 +607,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Purchase Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -621,6 +623,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Purchase User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

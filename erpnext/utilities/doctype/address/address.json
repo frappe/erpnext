@@ -199,7 +199,7 @@
  "icon": "icon-map-marker", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2015-01-05 12:10:31.519685", 
+ "modified": "2015-02-05 05:11:34.249167", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Address", 
@@ -215,6 +215,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -228,6 +229,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Purchase User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -241,6 +243,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Maintenance User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -254,6 +257,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

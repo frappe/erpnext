@@ -170,7 +170,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2015-01-20 17:35:41.423211", 
+ "modified": "2015-02-05 05:11:47.468728", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier", 
@@ -207,6 +207,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Purchase Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

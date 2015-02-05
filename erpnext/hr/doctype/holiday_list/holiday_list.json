@@ -74,7 +74,7 @@
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
- "modified": "2015-01-15 15:26:20.031592", 
+ "modified": "2015-02-05 05:11:39.099428", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Holiday List", 
@@ -90,6 +90,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

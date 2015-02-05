@@ -200,7 +200,7 @@
  "icon": "icon-user", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-01-05 14:52:04.562481", 
+ "modified": "2015-02-05 05:11:46.087123", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Partner", 
@@ -243,6 +243,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

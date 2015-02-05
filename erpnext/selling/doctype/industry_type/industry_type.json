@@ -20,7 +20,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2015-01-05 15:02:09.356985", 
+ "modified": "2015-02-05 05:11:39.190793", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Industry Type", 
@@ -34,6 +34,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Manager", 
+   "share": 1, 
    "write": 1
   }, 
   {
@@ -53,6 +54,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Master Manager", 
+   "share": 1, 
    "write": 1
   }
  ]

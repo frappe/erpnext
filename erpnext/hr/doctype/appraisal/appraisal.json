@@ -197,7 +197,7 @@
  "icon": "icon-thumbs-up", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-07 14:51:15.943276", 
+ "modified": "2015-02-05 05:11:34.405796", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Appraisal", 
@@ -214,6 +214,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Employee", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -228,6 +229,7 @@
    "read": 1, 
    "report": 1, 
    "role": "System Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -243,6 +245,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }
