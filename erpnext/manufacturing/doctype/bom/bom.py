@@ -134,16 +134,6 @@ class BOM(Document):
 			self.ignore_validate_update_after_submit = True
 			self.calculate_cost()
 		self.save()
-		
-	def update_item_desc(self):
-		if self.docstatus < 2:
-			self.ignore_validate_update_after_submit = True
-			self.description = frappe.db.get_value("Item", self.item, "description")
-			for d in self.get("items"):
-				d.description = frappe.db.get_value("Item", d.item_code, "description")
-			for d in self.get("exploded_items"):
-				d.description = frappe.db.get_value("Item", d.item_code, "description")
-			self.save()
 
 	def get_bom_unitcost(self, bom_no):
 		bom = frappe.db.sql("""select name, total_cost/quantity as unit_cost from `tabBOM`

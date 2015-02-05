@@ -9,9 +9,6 @@ cur_frm.cscript.refresh = function(doc,dt,dn){
 	if (!doc.__islocal && doc.docstatus<2) {
 		cur_frm.add_custom_button(__("Update Cost"), cur_frm.cscript.update_cost,
 			"icon-money", "btn-default");
-		
-		cur_frm.add_custom_button(__("Update Item Description"), cur_frm.cscript.update_item_desc,
-			"icon-tag", "btn-default");
 	}
 }
 
@@ -25,15 +22,6 @@ cur_frm.cscript.update_cost = function() {
 	})
 }
 
-cur_frm.cscript.update_item_desc = function() {
-	return frappe.call({
-		doc: cur_frm.doc,
-		method: "update_item_desc",
-		callback: function(r) {
-			if(!r.exc) cur_frm.refresh_fields();
-		}
-	})
-}
 cur_frm.add_fetch("item", "description", "description");
 cur_frm.add_fetch("item", "item_name", "item_name");
 cur_frm.add_fetch("item", "stock_uom", "uom");

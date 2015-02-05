@@ -69,6 +69,7 @@ class Item(WebsiteGenerator):
 		self.validate_name_with_item_group()
 		self.update_item_price()
 		self.sync_variants()
+		self.update_item_desc()
 
 	def get_context(self, context):
 		context["parent_groups"] = get_parent_item_groups(self.item_group) + \
@@ -433,7 +434,12 @@ class Item(WebsiteGenerator):
 					row = self.append("website_specifications")
 					row.label = label
 					row.description = desc
-
+					
+	def update_item_desc(self):
+		frappe.db.sql("""update `tabBOM` set description = %s where item = %s and docstatus < 2""",(self.description, self.name))
+		frappe.db.sql("""update `tabBOM Item` set description = %s where item_code = %s and docstatus < 2""",(self.description, self.name))
+		frappe.db.sql("""update `tabBOM Explosion Item` set description = %s where item_code = %s and docstatus < 2""",(self.description, self.name))		
+		
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
 		end_of_life = frappe.db.get_value("Item", item_code, "end_of_life")
