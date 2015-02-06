@@ -68,7 +68,7 @@
    "reqd": 0
   }, 
   {
-   "depends_on": "eval:doc.time_log_for != 'Manufacturing'", 
+   "depends_on": "", 
    "fieldname": "activity_type", 
    "fieldtype": "Link", 
    "in_list_view": 0, 

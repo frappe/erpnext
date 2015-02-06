@@ -135,7 +135,8 @@ def install(country=None):
 		{'doctype': 'Activity Type', 'activity_type': _('Proposal Writing')},
 		{'doctype': 'Activity Type', 'activity_type': _('Execution')},
 		{'doctype': 'Activity Type', 'activity_type': _('Communication')},
-
+		{'doctype': 'Activity Type', 'activity_type': _('Manufacturing')},
+		
 		# Industry Type
 		{'doctype': 'Industry Type', 'industry': _('Accounting')},
 		{'doctype': 'Industry Type', 'industry': _('Advertising')},

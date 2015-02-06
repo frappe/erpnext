@@ -291,6 +291,7 @@ def make_time_log(name, operation, from_time, to_time, qty=None,  project=None, 
 	time_log.project = project
 	time_log.operation= operation
 	time_log.workstation= workstation
+	time_log.activity_type= "Manufacturing"
 	time_log.completed_qty = flt(qty)
 	if from_time and to_time :
 		time_log.calculate_total_hours()
