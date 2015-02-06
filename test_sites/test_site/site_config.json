@@ -3,5 +3,6 @@
  "db_password": "test_frappe",
  "admin_password": "admin",
  "host_name": "http://localhost:8888",
+ "auto_email_id": "admin@example.com",
  "mute_emails": 1
 }
