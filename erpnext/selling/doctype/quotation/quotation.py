@@ -24,7 +24,7 @@ class Quotation(SellingController):
 
 	def has_sales_order(self):
 		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
-
+		
 	def validate_for_items(self):
 		chk_dupl_itm = []
 		for d in self.get('items'):

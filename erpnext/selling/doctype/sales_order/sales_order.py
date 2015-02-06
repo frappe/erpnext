@@ -134,6 +134,7 @@ class SalesOrder(SellingController):
 					frappe.throw(_("Quotation {0} is cancelled").format(quotation))
 
 				doc.set_status(update=True)
+				doc.update_opportunity()
 
 	def on_submit(self):
 		super(SalesOrder, self).on_submit()
