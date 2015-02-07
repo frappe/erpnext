@@ -3,7 +3,7 @@ ERPNext License Info
 
 (c) 2013 Web Notes Technologies Pvt Ltd. Mumbai
 ERPNext is a trademark of Web Notes Technologies
-
+Auraca JSC
 The ERPNext code is licensed under the GNU General Public License (v3) as mentioned below and the Documentation is licensed under Creative Commons (CC-BY-SA-3.0)
 
 GNU GENERAL PUBLIC LICENSE
