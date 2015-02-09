@@ -182,18 +182,6 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "fiscal_year", 
-   "fieldtype": "Link", 
-   "in_filter": 1, 
-   "label": "Fiscal Year", 
-   "oldfieldname": "fiscal_year", 
-   "oldfieldtype": "Select", 
-   "options": "Fiscal Year", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "reqd": 1
-  }, 
-  {
    "fieldname": "amended_from", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 

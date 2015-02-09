@@ -60,7 +60,6 @@ class StockEntry(StockController):
 		self.validate_finished_goods()
 		self.validate_return_reference_doc()
 		self.validate_with_material_request()
-		self.validate_fiscal_year()
 		self.validate_valuation_rate()
 		self.set_total_amount()
 
@@ -76,11 +75,6 @@ class StockEntry(StockController):
 		self.update_stock_ledger()
 		self.update_production_order()
 		self.make_gl_entries_on_cancel()
-
-	def validate_fiscal_year(self):
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.posting_date, self.fiscal_year,
-			self.meta.get_label("posting_date"))
 
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer",

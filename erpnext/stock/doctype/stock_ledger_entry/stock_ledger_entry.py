@@ -20,10 +20,6 @@ class StockLedgerEntry(Document):
 		validate_warehouse_company(self.warehouse, self.company)
 		self.scrub_posting_time()
 
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.posting_date, self.fiscal_year,
-			self.meta.get_label("posting_date"))
-
 	def on_submit(self):
 		self.check_stock_frozen_date()
 		self.actual_amt_check()

@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import frappe, unittest
 from frappe.utils import flt
 import json
-from erpnext.accounts.utils import get_fiscal_year, get_stock_and_account_difference
+from erpnext.accounts.utils import get_stock_and_account_difference
 
 
 class TestStockReconciliation(unittest.TestCase):
@@ -179,7 +179,6 @@ class TestStockReconciliation(unittest.TestCase):
 			"doctype": "Stock Reconciliation",
 			"posting_date": posting_date,
 			"posting_time": posting_time,
-			"fiscal_year": get_fiscal_year(posting_date)[0],
 			"company": "_Test Company",
 			"expense_account": "Stock Adjustment - _TC",
 			"cost_center": "_Test Cost Center - _TC",

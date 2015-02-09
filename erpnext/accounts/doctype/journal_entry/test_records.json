@@ -22,7 +22,6 @@
     "parentfield": "accounts"
    }
   ],
-  "fiscal_year": "_Test Fiscal Year 2013",
   "naming_series": "_T-Journal Entry-",
   "posting_date": "2013-02-14",
   "user_remark": "test",
@@ -51,7 +50,6 @@
     "parentfield": "accounts"
    }
   ],
-  "fiscal_year": "_Test Fiscal Year 2013",
   "naming_series": "_T-Journal Entry-",
   "posting_date": "2013-02-14",
   "user_remark": "test",
@@ -81,7 +79,6 @@
     "parentfield": "accounts"
    }
   ],
-  "fiscal_year": "_Test Fiscal Year 2013",
   "naming_series": "_T-Journal Entry-",
   "posting_date": "2013-02-14",
   "user_remark": "test",

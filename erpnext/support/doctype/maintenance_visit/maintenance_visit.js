@@ -92,11 +92,3 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
 	return {query: "erpnext.controllers.queries.customer_query" }
 }
-
-cur_frm.cscript.company = function(doc, cdt, cdn) {
-	erpnext.get_fiscal_year(doc.company, doc.mntc_date);
-}
-
-cur_frm.cscript.mntc_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc.company, doc.mntc_date);
-}

@@ -6,7 +6,6 @@ import frappe
 from frappe import _, throw
 from frappe.utils import cint, today, flt
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
-from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 import json
@@ -15,7 +14,6 @@ class AccountsController(TransactionBase):
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
-		self.validate_date_with_fiscal_year()
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
 			self.validate_value("grand_total", ">=", 0)
@@ -39,7 +37,6 @@ class AccountsController(TransactionBase):
 			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
 
 	def before_recurring(self):
-		self.fiscal_year = None
 		for fieldname in ("due_date", "aging_date"):
 			if self.meta.get_field(fieldname):
 				self.set(fieldname, None)
@@ -48,23 +45,9 @@ class AccountsController(TransactionBase):
 		for fieldname in ["posting_date", "transaction_date"]:
 			if not self.get(fieldname) and self.meta.get_field(fieldname):
 				self.set(fieldname, today())
-				if not self.fiscal_year:
-					self.fiscal_year = get_fiscal_year(self.get(fieldname))[0]
 				break
 
-	def validate_date_with_fiscal_year(self):
-		if self.meta.get_field("fiscal_year") :
-			date_field = ""
-			if self.meta.get_field("posting_date"):
-				date_field = "posting_date"
-			elif self.meta.get_field("transaction_date"):
-				date_field = "transaction_date"
-
-			if date_field and self.get(date_field):
-				validate_fiscal_year(self.get(date_field), self.fiscal_year,
-					label=self.meta.get_label(date_field))
-
-	def validate_due_date(self):
+def validate_due_date(self):
 		from erpnext.accounts.party import validate_due_date
 		if self.doctype == "Sales Invoice":
 			validate_due_date(self.posting_date, self.due_date, "Customer", self.customer, self.company)
@@ -370,7 +353,6 @@ class AccountsController(TransactionBase):
 			'voucher_no': self.name,
 			'aging_date': self.get("aging_date") or self.posting_date,
 			'remarks': self.get("remarks"),
-			'fiscal_year': self.fiscal_year,
 			'debit': 0,
 			'credit': 0,
 			'is_opening': self.get("is_opening") or "No",
