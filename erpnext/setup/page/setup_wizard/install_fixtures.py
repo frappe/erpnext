@@ -136,7 +136,7 @@ def install(country=None):
 		{'doctype': 'Activity Type', 'activity_type': _('Execution')},
 		{'doctype': 'Activity Type', 'activity_type': _('Communication')},
 		{'doctype': 'Activity Type', 'activity_type': _('Manufacturing')},
-		
+
 		# Industry Type
 		{'doctype': 'Industry Type', 'industry': _('Accounting')},
 		{'doctype': 'Industry Type', 'industry': _('Advertising')},
@@ -203,6 +203,6 @@ def install(country=None):
 		# ignore mandatory for root
 		parent_link_field = ("parent_" + scrub(doc.doctype))
 		if doc.meta.get_field(parent_link_field) and not doc.get(parent_link_field):
-			doc.ignore_mandatory = True
+			doc.flags.ignore_mandatory = True
 
 		doc.insert()

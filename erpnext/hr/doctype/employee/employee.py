@@ -58,7 +58,7 @@ class Employee(Document):
 	def update_user(self):
 		# add employee role if missing
 		user = frappe.get_doc("User", self.user_id)
-		user.ignore_permissions = True
+		user.flags.ignore_permissions = True
 
 		if "Employee" not in user.get("user_roles"):
 			user.add_roles("Employee")

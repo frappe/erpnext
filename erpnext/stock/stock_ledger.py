@@ -49,7 +49,7 @@ def set_as_cancel(voucher_type, voucher_no):
 def make_entry(args, allow_negative_stock=False):
 	args.update({"doctype": "Stock Ledger Entry"})
 	sle = frappe.get_doc(args)
-	sle.ignore_permissions = 1
+	sle.flags.ignore_permissions = 1
 	sle.allow_negative_stock=allow_negative_stock
 	sle.insert()
 	sle.submit()
@@ -153,7 +153,7 @@ def update_entries_after(args, allow_zero_rate=False, allow_negative_stock=False
 			"item_code": args["item_code"],
 			"warehouse": args["warehouse"],
 		})
-		bin_wrapper.ignore_permissions = 1
+		bin_wrapper.flags.ignore_permissions = 1
 		bin_wrapper.insert()
 
 	frappe.db.sql("""update `tabBin` set valuation_rate=%s, actual_qty=%s,
