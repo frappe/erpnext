@@ -27,7 +27,7 @@ class BOM(Document):
 		self.validate_main_item()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
-		validate_uom_is_integer(self, "stock_uom", "qty")
+		validate_uom_is_integer(self, "stock_uom", "qty", "BOM Item")
 
 		self.validate_materials()
 		self.set_bom_material_details()

@@ -95,7 +95,7 @@ def delete_events(ref_type, ref_name):
 
 class UOMMustBeIntegerError(frappe.ValidationError): pass
 
-def validate_uom_is_integer(doc, uom_field, qty_fields):
+def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	if isinstance(qty_fields, basestring):
 		qty_fields = [qty_fields]
 
@@ -106,7 +106,7 @@ def validate_uom_is_integer(doc, uom_field, qty_fields):
 	if not integer_uoms:
 		return
 
-	for d in doc.get_all_children():
+	for d in doc.get_all_children(parenttype=child_dt):
 		if d.get(uom_field) in integer_uoms:
 			for f in qty_fields:
 				if d.get(f):

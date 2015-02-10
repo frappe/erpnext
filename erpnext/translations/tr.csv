@@ -39,7 +39,7 @@ A Customer exists with same name,Bir Müşteri aynı adla
 A Lead with this email id should exist,Bu e-posta sistemde zaten kayıtlı
 A Product or Service,Ürün veya Hizmet
 A Supplier exists with same name,Aynı isimli bir Tedarikçi mevcuttur.
-A symbol for this currency. For e.g. $,Bu para birimi için bir sembol. örneğin $
+A symbol for this currency. For e.g. $,Bu para birimi için bir sembol. örn. $
 AMC Expiry Date,AMC Expiry Date
 Abbr,Kısaltma
 Abbreviation cannot have more than 5 characters,Kısaltma 5 karakterden fazla olamaz.
@@ -152,8 +152,8 @@ Against Document Detail No,Against Document Detail No
 Against Document No,Against Document No
 Against Expense Account,Against Expense Account
 Against Income Account,Against Income Account
-Against Journal Entry,Against Journal Entry
-Against Journal Entry {0} does not have any unmatched {1} entry,Dergi Çeki karşı {0} herhangi bir eşsiz {1} girdi yok
+Against Journal Voucher,Against Journal Voucher
+Against Journal Voucher {0} does not have any unmatched {1} entry,Dergi Çeki karşı {0} herhangi bir eşsiz {1} girdi yok
 Against Purchase Invoice,Against Purchase Invoice
 Against Sales Invoice,Against Sales Invoice
 Against Sales Order,Satış Siparişi karşı
@@ -335,7 +335,7 @@ Bank Overdraft Account,Banka Kredili Mevduat Hesabı
 Bank Reconciliation,Banka Uzlaşma
 Bank Reconciliation Detail,Banka Uzlaşma Detay
 Bank Reconciliation Statement,Banka Uzlaşma Bildirimi
-Bank Entry,Banka Çeki
+Bank Voucher,Banka Çeki
 Bank/Cash Balance,Banka / Nakit Dengesi
 Banking,Bankacılık
 Barcode,Barkod
@@ -470,7 +470,7 @@ Case No(s) already in use. Try from Case No {0},Örnek numaraları zaten kullan�
 Case No. cannot be 0,Örnek Numarası  0 olamaz
 Cash,Nakit
 Cash In Hand,Kasa mevcudu
-Cash Entry,Para yerine geçen belge
+Cash Voucher,Para yerine geçen belge
 Cash or Bank Account is mandatory for making payment entry,Kasa veya Banka Hesabı ödeme girişi yapmak için zorunludur
 Cash/Bank Account,Kasa / Banka Hesabı
 Casual Leave,Casual bırak
@@ -594,7 +594,7 @@ Contact master.,İletişim ustası.
 Contacts,İletişimler
 Content,İçerik
 Content Type,İçerik Türü
-Contra Entry,Contra Çeki
+Contra Voucher,Contra Çeki
 Contract,Sözleşme
 Contract End Date,Sözleşme Bitiş Tarihi
 Contract End Date must be greater than Date of Joining,Sözleşme Bitiş Tarihi Katılma tarihinden daha büyük olmalıdır
@@ -625,7 +625,7 @@ Country,Ülke
 Country Name,Ülke Adı
 Country wise default Address Templates,Ülke bilge varsayılan Adres Şablonları
 "Country, Timezone and Currency","Ülke, Saat Dilimi ve Döviz"
-Create Bank Entry for the total salary paid for the above selected criteria,Yukarıda seçilen ölçütler için ödenen toplam maaş için Banka Çeki oluştur
+Create Bank Voucher for the total salary paid for the above selected criteria,Yukarıda seçilen ölçütler için ödenen toplam maaş için Banka Çeki oluştur
 Create Customer,Müşteri Oluştur
 Create Material Requests,Malzeme İstekleri Oluştur
 Create New,Yeni Oluştur
@@ -647,7 +647,7 @@ Credentials,Kimlik Bilgileri
 Credit,Kredi
 Credit Amt,Kredi Tutarı
 Credit Card,Kredi kartı
-Credit Card Entry,Kredi Kartı Çeki
+Credit Card Voucher,Kredi Kartı Çeki
 Credit Controller,Kredi Kontrolör
 Credit Days,Kredi Gün
 Credit Limit,Kredi Limiti
@@ -979,7 +979,7 @@ Excise Duty @ 8,@ 8 Özel Tüketim Vergisi
 Excise Duty Edu Cess 2,ÖTV Edu Cess 2
 Excise Duty SHE Cess 1,ÖTV SHE Cess 1
 Excise Page Number,Tüketim Sayfa Numarası
-Excise Entry,Tüketim Çeki
+Excise Voucher,Tüketim Çeki
 Execution,Yerine Getirme
 Executive Search,Executive Search
 Exemption Limit,Muafiyet Sınırı
@@ -1327,7 +1327,7 @@ Invoice Period From,Gönderen Fatura Dönemi
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Faturayı yinelenen zorunlu tarihler için ve Fatura Dönemi itibaren Fatura Dönemi
 Invoice Period To,Için Fatura Dönemi
 Invoice Type,Fatura Türü
-Invoice/Journal Entry Details,Fatura / Dergi Çeki Detayları
+Invoice/Journal Voucher Details,Fatura / Dergi Çeki Detayları
 Invoiced Amount (Exculsive Tax),Faturalanan Tutar (Exculsive Vergisi)
 Is Active,Aktif mi
 Is Advance,Peşin mi
@@ -1455,13 +1455,13 @@ Job Profile,İş Profili
 Job Title,Meslek
 "Job profile, qualifications required etc.","Gerekli iş profili, nitelikleri vb"
 Jobs Email Settings,İş E-posta Ayarları
-Journal Entries,Alacak/Borç Girişleri
-Journal Entry,Alacak/Borç Girişleri
-Journal Entry,Alacak/Borç Çeki
-Journal Entry Account,Alacak/Borç Fiş Detay
-Journal Entry Account No,Alacak/Borç Fiş Detay No
-Journal Entry {0} does not have account {1} or already matched,Dergi Çeki {0} hesabı yok {1} ya da zaten eşleşti
-Journal Entries {0} are un-linked,Dergi Fişler {0} un-bağlantılı
+Journal Entries,Yevmiye Girişleri
+Journal Entry,Yevmiye Girişi
+Journal Voucher,Yevmiye Fişi
+Journal Voucher Detail,Alacak/Borç Fiş Detay
+Journal Voucher Detail No,Alacak/Borç Fiş Detay No
+Journal Voucher {0} does not have account {1} or already matched,Dergi Çeki {0} hesabı yok {1} ya da zaten eşleşti
+Journal Vouchers {0} are un-linked,Dergi Fişler {0} un-bağlantılı
 Keep a track of communication related to this enquiry which will help for future reference.,Gelecekte başvurulara yardımcı olmak için bu soruşturma ile ilgili bir iletişim takip edin.
 Keep it web friendly 900px (w) by 100px (h),100px tarafından web dostu 900px (w) it Keep (h)
 Key Performance Area,Anahtar Performans Alan
@@ -1480,13 +1480,13 @@ Language,Dil
 Last Name,Soyadı
 Last Purchase Rate,Son Satış Fiyatı
 Latest,Son
-Lead,Lead
+Lead,Aday
 Lead Details,Lead Details
 Lead Id,Kurşun Kimliği
 Lead Name,Lead Name
 Lead Owner,Lead Owner
-Lead Source,Kurşun Kaynak
-Lead Status,Kurşun Durum
+Lead Source,Aday Kaynak
+Lead Status,Aday Durumu
 Lead Time Date,Lead Time Date
 Lead Time Days,Lead Time Days
 Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,"Lead Time gün bu öğe depoda beklenen hangi gün sayısıdır. Bu öğeyi seçtiğinizde, bu gün Malzeme İsteği getirildi."
@@ -1576,7 +1576,7 @@ Maintenance start date can not be before delivery date for Serial No {0},Bakım 
 Major/Optional Subjects,Zorunlu / Opsiyonel Konular
 Make ,Make 
 Make Accounting Entry For Every Stock Movement,Her Stok Hareketi İçin Muhasebe kaydı yapmak
-Make Bank Entry,Banka Çeki Yap
+Make Bank Voucher,Banka Çeki Yap
 Make Credit Note,Kredi Not Yap
 Make Debit Note,Banka Not Yap
 Make Delivery,Teslim olun
@@ -3096,7 +3096,7 @@ Update Series,Update Serisi
 Update Series Number,Update Serisi sayısı
 Update Stock,Stok Güncelleme
 Update bank payment dates with journals.,Update bank payment dates with journals.
-Update clearance date of Journal Entries marked as 'Bank Entry',Journal Entries Update temizlenme tarihi 'Banka Fişler' olarak işaretlenmiş
+Update clearance date of Journal Entries marked as 'Bank Vouchers',Journal Entries Update temizlenme tarihi 'Banka Fişler' olarak işaretlenmiş
 Updated,Güncellenmiş
 Updated Birthday Reminders,Güncelleme Birthday Reminders
 Upload Attendance,Katılımcı ekle
@@ -3234,7 +3234,7 @@ Write Off Amount <=,Write Off Amount <=
 Write Off Based On,Write Off Based On
 Write Off Cost Center,Write Off Cost Center
 Write Off Outstanding Amount,Write Off Outstanding Amount
-Write Off Entry,Write Off Entry
+Write Off Voucher,Write Off Voucher
 Wrong Template: Unable to find head row.,Yanlış Şablon: kafa satır bulmak için açılamıyor.
 Year,Yıl
 Year Closed,Yıl Kapalı
@@ -3252,7 +3252,7 @@ You can enter any date manually,Elle herhangi bir tarih girebilirsiniz
 You can enter the minimum quantity of this item to be ordered.,Sen sipariş için bu maddenin minimum miktar girebilirsiniz.
 You can not change rate if BOM mentioned agianst any item,BOM herhangi bir öğenin agianst söz eğer hızını değiştiremezsiniz
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Hayır hem Teslim Not giremezsiniz ve Satış Fatura No birini girin.
-You can not enter current voucher in 'Against Journal Entry' column,Sen sütununda 'Journal Fiş Karşı' cari fiş giremezsiniz
+You can not enter current voucher in 'Against Journal Voucher' column,Sen sütununda 'Journal Fiş Karşı' cari fiş giremezsiniz
 You can set Default Bank Account in Company master,Siz Firma master Varsayılan Banka Hesap ayarlayabilirsiniz
 You can start by selecting backup frequency and granting access for sync,Yedekleme sıklığını seçme ve senkronizasyon için erişim sağlayarak başlayabilirsiniz
 You can submit this Stock Reconciliation.,Bu Stok Uzlaşma gönderebilirsiniz.
@@ -3329,49 +3329,3 @@ website page link,website page link
 {0} {1} status is Unstopped,{0} {1} durumu Unstopped olduğunu
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Maliyet Merkezi Ürün için zorunludur {2}
 {0}: {1} not found in Invoice Details table,{0}: {1} Fatura Ayrıntıları tablosunda bulunamadı
-"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Ekle / Düzenle </ a>"
-"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Ekle / Düzenle </ a>"
-Billed,Faturalanmış
-Company,Şirket
-Currency is required for Price List {0},Döviz Fiyat Listesi için gereklidir {0}
-Default Customer Group,Varsayılan Müşteri Grubu
-Default Territory,Standart Bölge
-Delivered,Teslim Edildi
-Enable Shopping Cart,Alışveriş sepeti etkinleştirin
-Go ahead and add something to your cart.,Devam edin ve sepetinize şey eklemek.
-Hey! Go ahead and add an address,Hey! Devam edin ve bir adres eklemek
-Invalid Billing Address,Geçersiz Fatura Adresi
-Invalid Shipping Address,Geçersiz Teslimat Adresi
-Missing Currency Exchange Rates for {0},Döviz Kurların eksik {0}
-Name is required,Adı gerekli
-Not Allowed,İzin Verilmedi
-Paid,Ödendi
-Partially Billed,Kısmen Faturalı
-Partially Delivered,Kısmen Teslim
-Please specify a Price List which is valid for Territory,Territory için geçerli olan bir Fiyat Listesi belirtin
-Please specify currency in Company,Şirket para birimi belirtiniz
-Please write something,Bir şeyler yazınız
-Please write something in subject and message!,Konu ve mesaj bir şeyler yazınız!
-Price List,Fiyat listesi
-Price List not configured.,Fiyat Listesi yapılandırılmamış.
-Quotation Series,Teklif Serisi
-Shipping Rule,Kargo Kural
-Shopping Cart,Alışveriş Sepeti
-Shopping Cart Price List,Alışveriş Sepeti Fiyat Listesi
-Shopping Cart Price Lists,Alışveriş Sepeti Fiyat Listeleri
-Shopping Cart Settings,Alışveriş sepeti Ayarları
-Shopping Cart Shipping Rule,Alışveriş Sepeti Kargo Kural
-Shopping Cart Shipping Rules,Alışveriş Sepeti Nakliye Kuralları
-Shopping Cart Taxes and Charges Master,Alışveriş Sepeti Vergi ve Harçlar Usta
-Shopping Cart Taxes and Charges Masters,Alışveriş Sepeti Vergi ve Harçlar Masters
-Something went wrong!,Bir şeyler yanlış gitti!
-Something went wrong.,Bir şeyler yanlış gitti.
-Tax Master,Vergi Usta
-To Pay,Ödeme
-Updated,Güncellenmiş
-You are not allowed to reply to this ticket.,Bu bilet için cevap izin verilmez.
-You need to be logged in to view your cart.,Eğer sepeti görmek için oturum açmanız gerekir.
-You need to enable Shopping Cart,Sen Alışveriş Sepeti etkinleştirmeniz gerekir
-{0} cannot be purchased using Shopping Cart,{0} sepeti kullanarak satın alınamaz
-{0} is required,{0} gereklidir
-{0} {1} has a common territory {2},"{0} {1}, ortak bir bölge var {2}"

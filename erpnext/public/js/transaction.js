@@ -373,23 +373,27 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	_set_values_for_item_list: function(children) {
 		var me = this;
 		var price_list_rate_changed = false;
-		$.each(children, function(i, d) {
+		for(var i=0, l=children.length; i<l; i++) {
+			var d = children[i];
 			var existing_pricing_rule = frappe.model.get_value(d.doctype, d.name, "pricing_rule");
-			$.each(d, function(k, v) {
+
+			for(var k in d) {
+				var v = d[k];
 				if (["doctype", "name"].indexOf(k)===-1) {
 					if(k=="price_list_rate") {
 						if(flt(v) != flt(d.price_list_rate)) price_list_rate_changed = true;
 					}
 					frappe.model.set_value(d.doctype, d.name, k, v);
 				}
-			});
+			}
+
 			// if pricing rule set as blank from an existing value, apply price_list
 			if(!me.frm.doc.ignore_pricing_rule && existing_pricing_rule && !d.pricing_rule) {
 				me.apply_price_list(frappe.get_doc(d.doctype, d.name));
 			}
+		}
 
-			if(!price_list_rate_changed) me.calculate_taxes_and_totals();
-		});
+		if(!price_list_rate_changed) me.calculate_taxes_and_totals();
 	},
 
 	apply_price_list: function(item) {

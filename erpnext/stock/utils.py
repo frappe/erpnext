@@ -71,11 +71,11 @@ def get_bin(item_code, warehouse):
 	bin_obj.ignore_permissions = True
 	return bin_obj
 
-def update_bin(args):
+def update_bin(args, allow_negative_stock=False):
 	is_stock_item = frappe.db.get_value('Item', args.get("item_code"), 'is_stock_item')
 	if is_stock_item == 'Yes':
 		bin = get_bin(args.get("item_code"), args.get("warehouse"))
-		bin.update_stock(args)
+		bin.update_stock(args, allow_negative_stock)
 		return bin
 	else:
 		frappe.msgprint(_("Item {0} ignored since it is not a stock item").format(args.get("item_code")))

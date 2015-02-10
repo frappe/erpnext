@@ -94,8 +94,7 @@ class BuyingController(StockController):
 				item.rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
 					self.precision("rate", item))
 
-			item.amount = flt(item.rate * item.qty,
-				self.precision("amount", item))
+			item.amount = flt(item.rate * item.qty, self.precision("amount", item))
 			item.item_tax_amount = 0.0;
 
 			self._set_in_company_currency(item, "amount", "base_amount")
@@ -114,19 +113,13 @@ class BuyingController(StockController):
 
 	def calculate_totals(self):
 		self.grand_total = flt(self.get("taxes")[-1].total if self.get("taxes") else self.net_total)
-		self.grand_total_import = flt(self.grand_total / self.conversion_rate) \
-			if self.get("taxes") else self.net_total_import
 
 		self.total_tax = flt(self.grand_total - self.net_total, self.precision("total_tax"))
 
 		self.grand_total = flt(self.grand_total, self.precision("grand_total"))
-		self.grand_total_import = flt(self.grand_total_import, self.precision("grand_total_import"))
 
 		if self.meta.get_field("rounded_total"):
 			self.rounded_total = rounded(self.grand_total)
-
-		if self.meta.get_field("rounded_total_import"):
-			self.rounded_total_import = rounded(self.grand_total_import)
 
 		if self.meta.get_field("other_charges_added"):
 			self.other_charges_added = flt(sum([flt(d.tax_amount) for d in self.get("taxes")
@@ -137,6 +130,14 @@ class BuyingController(StockController):
 			self.other_charges_deducted = flt(sum([flt(d.tax_amount) for d in self.get("taxes")
 				if d.add_deduct_tax=="Deduct" and d.category in ["Valuation and Total", "Total"]]),
 				self.precision("other_charges_deducted"))
+
+		self.grand_total_import = flt(self.grand_total / self.conversion_rate) \
+			if (self.other_charges_added or self.other_charges_deducted) else self.net_total_import
+
+		self.grand_total_import = flt(self.grand_total_import, self.precision("grand_total_import"))
+
+		if self.meta.get_field("rounded_total_import"):
+			self.rounded_total_import = rounded(self.grand_total_import)
 
 		if self.meta.get_field("other_charges_added_import"):
 			self.other_charges_added_import = flt(self.other_charges_added /

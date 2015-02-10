@@ -206,24 +206,15 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	calculate_totals: function() {
 		var tax_count = this.frm.doc["taxes"] ? this.frm.doc["taxes"].length : 0;
-		this.frm.doc.grand_total = flt(tax_count ?
-			this.frm.doc["taxes"][tax_count - 1].total : this.frm.doc.net_total);
-		this.frm.doc.grand_total_import = flt(tax_count ?
-			flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate) : this.frm.doc.net_total_import);
+		this.frm.doc.grand_total = flt(tax_count ? this.frm.doc["taxes"][tax_count - 1].total : this.frm.doc.net_total);
 
-		this.frm.doc.total_tax = flt(this.frm.doc.grand_total - this.frm.doc.net_total,
-			precision("total_tax"));
+		this.frm.doc.total_tax = flt(this.frm.doc.grand_total - this.frm.doc.net_total, precision("total_tax"));
 
 		this.frm.doc.grand_total = flt(this.frm.doc.grand_total, precision("grand_total"));
-		this.frm.doc.grand_total_import = flt(this.frm.doc.grand_total_import, precision("grand_total_import"));
 
 		// rounded totals
 		if(frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total", this.frm.doc.name)) {
 			this.frm.doc.rounded_total = Math.round(this.frm.doc.grand_total);
-		}
-
-		if(frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total_import", this.frm.doc.name)) {
-			this.frm.doc.rounded_total_import = Math.round(this.frm.doc.grand_total_import);
 		}
 
 		// other charges added/deducted
@@ -243,6 +234,16 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			frappe.model.round_floats_in(this.frm.doc,
 				["other_charges_added", "other_charges_deducted"]);
 		}
+
+		this.frm.doc.grand_total_import = flt((this.frm.doc.other_charges_added || this.frm.doc.other_charges_deducted) ?
+			flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate) : this.frm.doc.net_total_import);
+
+		this.frm.doc.grand_total_import = flt(this.frm.doc.grand_total_import, precision("grand_total_import"));
+
+		if(frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total_import", this.frm.doc.name)) {
+			this.frm.doc.rounded_total_import = Math.round(this.frm.doc.grand_total_import);
+		}
+
 		this.frm.doc.other_charges_added_import = flt(this.frm.doc.other_charges_added /
 			this.frm.doc.conversion_rate, precision("other_charges_added_import"));
 		this.frm.doc.other_charges_deducted_import = flt(this.frm.doc.other_charges_deducted /

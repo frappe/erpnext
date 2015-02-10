@@ -5,7 +5,7 @@
  "doctype": "Print Format",
  "html": "{%- from \"templates/print_formats/standard_macros.html\" import add_header -%}\n<div class=\"page-break\">\n    {%- if not doc.get(\"print_heading\") and not doc.get(\"select_print_heading\") \n        and doc.set(\"select_print_heading\", _(\"Payment Receipt Note\")) -%}{%- endif -%}\n    {{ add_header(0, 1, doc, letter_head, no_letterhead) }}\n\n    {%- for label, value in (\n        (_(\"Received On\"), frappe.utils.formatdate(doc.voucher_date)),\n        (_(\"Received From\"), doc.pay_to_recd_from),\n        (_(\"Amount\"), \"<strong>\" + doc.get_formatted(\"total_amount\") + \"</strong><br>\" + (doc.total_amount_in_words or \"\") + \"<br>\"),\n        (_(\"Remarks\"), doc.remark)\n    ) -%}\n    <div class=\"row\">\n        <div class=\"col-xs-3\"><label class=\"text-right\">{{ label }}</label></div>\n        <div class=\"col-xs-9\">{{ value }}</div>\n    </div>\n\n    {%- endfor -%}\n\n    <hr>\n    <br>\n    <p class=\"strong\">\n        {{ _(\"For\") }} {{ doc.company }},<br>\n        <br>\n        <br>\n        <br>\n        {{ _(\"Authorized Signatory\") }}\n    </p>\n</div>\n\n",
  "idx": 1,
- "modified": "2015-01-12 11:03:22.893209",
+ "modified": "2015-01-16 11:03:22.893209",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Receipt Voucher",

@@ -29,6 +29,7 @@ class MaintenanceVisit(TransactionBase):
 					mntc_date = self.mntc_date
 					service_person = d.service_person
 					work_done = d.work_done
+					status = "Open"
 					if self.completion_status == 'Fully Completed':
 						status = 'Closed'
 					elif self.completion_status == 'Partially Completed':

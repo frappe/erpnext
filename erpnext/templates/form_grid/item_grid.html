@@ -64,7 +64,7 @@
 				var delivered = doc.doctype==="Sales Order Item" ?
 						doc.delivered_qty : doc.received_qty,
 					completed =
-						100 - cint((doc.qty - delivered) * 100 / doc.qty),
+						100 - cint((flt(doc.qty) - flt(delivered)) * 100 / flt(doc.qty)),
 					title = __("Delivered");
 				%}
 				{% include "templates/form_grid/includes/progress.html" %}
@@ -96,7 +96,7 @@
 			{% if(in_list(["Sales Order Item", "Purchase Order Item"],
 				doc.doctype) && frm.doc.docstatus===1 && doc.amount) {
 				var completed =
-					100 - cint((doc.amount - doc.billed_amt) * 100 / doc.amount),
+					100 - cint((flt(doc.amount) - flt(doc.billed_amt)) * 100 / flt(doc.amount)),
 					title = __("Billed");
 				%}
 				<br><small>&nbsp;</small>

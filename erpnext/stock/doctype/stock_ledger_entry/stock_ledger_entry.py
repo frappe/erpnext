@@ -33,16 +33,15 @@ class StockLedgerEntry(Document):
 
 	#check for item quantity available in stock
 	def actual_amt_check(self):
-		if self.batch_no:
+		if self.batch_no and not self.get("allow_negative_stock"):
 			batch_bal_after_transaction = flt(frappe.db.sql("""select sum(actual_qty)
 				from `tabStock Ledger Entry`
 				where warehouse=%s and item_code=%s and batch_no=%s""",
 				(self.warehouse, self.item_code, self.batch_no))[0][0])
 
 			if batch_bal_after_transaction < 0:
-				frappe.throw(_("Negative balance {0} in Batch {1} for Item {2} at Warehouse {3} on {4} {5}")
-					.format(batch_bal_after_transaction - self.actual_qty, self.batch_no, self.item_code, self.warehouse,
-						formatdate(self.posting_date), self.posting_time))
+				frappe.throw(_("Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3}")
+					.format(self.batch_no, batch_bal_after_transaction, self.item_code, self.warehouse))
 
 	def validate_mandatory(self):
 		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','company']
