@@ -102,7 +102,7 @@ class Company(Document):
 		for d in self.fld_dict.keys():
 			account.set(d, (d == 'parent_account' and lst[self.fld_dict[d]]) and lst[self.fld_dict[d]] +' - '+ self.abbr or lst[self.fld_dict[d]])
 		if not account.parent_account:
-			account.ignore_mandatory = True
+			account.flags.ignore_mandatory = True
 		account.insert()
 
 	def set_default_accounts(self):
@@ -146,10 +146,10 @@ class Company(Document):
 		for cc in cc_list:
 			cc.update({"doctype": "Cost Center"})
 			cc_doc = frappe.get_doc(cc)
-			cc_doc.ignore_permissions = True
+			cc_doc.flags.ignore_permissions = True
 
 			if cc.get("cost_center_name") == self.name:
-				cc_doc.ignore_mandatory = True
+				cc_doc.flags.ignore_mandatory = True
 			cc_doc.insert()
 
 		frappe.db.set(self, "cost_center", _("Main") + " - " + self.abbr)

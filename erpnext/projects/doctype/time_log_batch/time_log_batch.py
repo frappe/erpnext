@@ -57,7 +57,7 @@ class TimeLogBatch(Document):
 			tl = frappe.get_doc("Time Log", d.time_log)
 			tl.time_log_batch = time_log_batch
 			tl.sales_invoice = self.sales_invoice
-			tl.ignore_validate_update_after_submit = True
+			tl.flags.ignore_validate_update_after_submit = True
 			tl.save()
 
 @frappe.whitelist()

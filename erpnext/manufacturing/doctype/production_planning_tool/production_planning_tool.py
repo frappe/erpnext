@@ -394,7 +394,7 @@ class ProductionPlanningTool(Document):
 						"sales_order_no": sales_order if sales_order!="No Sales Order" else None
 					})
 
-				pr_doc.ignore_permissions = 1
+				pr_doc.flags.ignore_permissions = 1
 				pr_doc.submit()
 				purchase_request_list.append(pr_doc.name)
 

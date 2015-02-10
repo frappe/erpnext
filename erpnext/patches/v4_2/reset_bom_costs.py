@@ -9,7 +9,7 @@ def execute():
 	for d in frappe.db.sql("""select name from `tabBOM` where docstatus < 2""", as_dict=1):
 		try:
 			bom = frappe.get_doc('BOM', d.name)
-			bom.ignore_validate_update_after_submit = True
+			bom.flags.ignore_validate_update_after_submit = True
 			bom.calculate_cost()
 			bom.save()
 			frappe.db.commit()

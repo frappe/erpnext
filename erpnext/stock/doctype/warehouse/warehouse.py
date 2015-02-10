@@ -54,7 +54,7 @@ class Warehouse(Document):
 						"warehouse": self.name,
 						"freeze_account": "No"
 					})
-					ac_doc.ignore_permissions = True
+					ac_doc.flags.ignore_permissions = True
 					ac_doc.insert()
 					msgprint(_("Account head {0} created").format(ac_doc.name))
 

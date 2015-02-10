@@ -9,6 +9,8 @@ def boot_session(bootinfo):
 	"""boot session - send website info if guest"""
 	import frappe
 
+	print "erpnext boot session"
+
 	bootinfo.custom_css = frappe.db.get_value('Style Settings', None, 'custom_css') or ''
 	bootinfo.website_settings = frappe.get_doc('Website Settings')
 

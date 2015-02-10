@@ -131,7 +131,7 @@ class BOM(Document):
 				d.rate = rate
 
 		if self.docstatus == 1:
-			self.ignore_validate_update_after_submit = True
+			self.flags.ignore_validate_update_after_submit = True
 			self.calculate_cost()
 		self.save()
 
@@ -353,7 +353,7 @@ class BOM(Document):
 
 			if act_pbom and act_pbom[0][0]:
 				frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
-				
+
 	def validate_operations(self):
 		if self.with_operations and not self.get('operations'):
 			frappe.throw(_("Operations cannot be left blank."))

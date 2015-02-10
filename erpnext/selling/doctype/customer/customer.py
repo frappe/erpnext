@@ -61,7 +61,7 @@ class Customer(TransactionBase):
 			c.customer = self.name
 			c.customer_name = self.customer_name
 			c.is_primary_contact = 1
-			c.ignore_permissions = getattr(self, "ignore_permissions", None)
+			c.flags.ignore_permissions = self.flags.ignore_permissions
 			c.autoname()
 			if not frappe.db.exists("Contact", c.name):
 				c.insert()

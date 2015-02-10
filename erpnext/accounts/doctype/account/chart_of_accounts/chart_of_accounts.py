@@ -40,7 +40,7 @@ def create_charts(chart_name, company):
 					})
 
 					if root_account:
-						account.ignore_mandatory = True
+						account.flags.ignore_mandatory = True
 
 					account.insert()
 

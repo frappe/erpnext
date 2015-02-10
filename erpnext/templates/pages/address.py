@@ -53,7 +53,7 @@ def save_address(fields, address_fieldname=None):
 		party_fieldname: party.name,
 		(party_fieldname + "_name"): party.get(party_fieldname + "_name")
 	})
-	doc.ignore_permissions = True
+	doc.flags.ignore_permissions = True
 	doc.save()
 
 	if address_fieldname:

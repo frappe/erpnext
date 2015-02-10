@@ -64,11 +64,11 @@ def get_bin(item_code, warehouse):
 			"item_code": item_code,
 			"warehouse": warehouse,
 		})
-		bin_obj.ignore_permissions = 1
+		bin_obj.flags.ignore_permissions = 1
 		bin_obj.insert()
 	else:
 		bin_obj = frappe.get_doc('Bin', bin)
-	bin_obj.ignore_permissions = True
+	bin_obj.flags.ignore_permissions = True
 	return bin_obj
 
 def update_bin(args):

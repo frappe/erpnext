@@ -110,7 +110,7 @@ class TimeLog(Document):
 					tl.hours, self.production_order, operation[0], operation[1]))
 
 			pro_order = frappe.get_doc("Production Order", self.production_order)
-			pro_order.ignore_validate_update_after_submit = True
+			pro_order.flags.ignore_validate_update_after_submit = True
 			pro_order.update_operation_status()
 			pro_order.calculate_operating_cost()
 			pro_order.set_actual_dates()
@@ -129,14 +129,14 @@ class TimeLog(Document):
 			from `tabTime Log`
 			where production_order = %s and operation = %s and docstatus=1""",
 			(self.production_order, self.operation), as_dict=1)[0]
-			
+
 	def validate_project(self):
 		if self.time_log_for == 'Project':
 			if not self.project:
 				frappe.throw(_("Project is Mandatory."))
 		if self.time_log_for == "":
-			self.project = None			
-		
+			self.project = None
+
 	def validate_manufacturing(self):
 		if self.time_log_for == 'Manufacturing':
 			if not self.production_order:
