@@ -99,13 +99,10 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 			args: {"item_code":d.item_code},
 			callback: function(r, rt) {
 				if(r.message) {
-					frappe.model.set_value(d.doctype, d.name, "description", r.message.description);
-					frappe.model.set_value(d.doctype, d.name, "item_name", r.message.item_name);
-					frappe.model.set_value(d.doctype, d.name, "brand", r.message.brand);
-					frappe.model.set_value(d.doctype, d.name, "uom", r.message.uom);
-					frappe.model.set_value(d.doctype, d.name, "item_group", r.message.item_group);
-					frappe.model.set_value(d.doctype, d.name, "image", r.message.image);
-					refresh_field('image_view', d.name, 'items');
+					$.each(r.message, function(k, v) {
+						frappe.model.set_value(cdt, cdn, k, v);
+					});
+				refresh_field('image_view', d.name, 'items');
 				}
 			}
 		})

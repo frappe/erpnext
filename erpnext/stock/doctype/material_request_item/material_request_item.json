@@ -20,6 +20,11 @@
    "width": "100px"
   }, 
   {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "item_name", 
    "fieldtype": "Data", 
    "in_filter": 1, 
@@ -35,9 +40,10 @@
    "width": "100px"
   }, 
   {
-   "fieldname": "col_break1", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
+   "fieldname": "section_break_4", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "description", 
@@ -50,6 +56,27 @@
    "print_width": "250px", 
    "reqd": 1, 
    "width": "250px"
+  }, 
+  {
+   "fieldname": "column_break_6", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "label": "Image", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "quantity_and_warehouse", 
@@ -235,7 +262,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-01-01 14:29:59.597199", 
+ "modified": "2015-02-10 16:14:59.940476", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request Item", 

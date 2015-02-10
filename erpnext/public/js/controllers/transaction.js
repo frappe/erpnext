@@ -68,6 +68,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	item_code: function(doc, cdt, cdn) {
 		var me = this;
+		var d = locals[cdt][cdn];
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code || item.barcode || item.serial_no) {
 			if(!this.validate_company_and_party()) {

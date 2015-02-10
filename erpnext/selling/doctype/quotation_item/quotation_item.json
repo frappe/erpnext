@@ -67,6 +67,21 @@
    "width": "300px"
   }, 
   {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "label": "Image", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "quantity_and_rate", 
    "fieldtype": "Section Break", 
    "label": "Quantity and Rate", 
@@ -332,7 +347,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-01-01 14:29:59.329982", 
+ "modified": "2015-02-10 15:21:17.447331", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation Item", 
