@@ -15,6 +15,11 @@
    "reqd": 0
   }, 
   {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "item_name", 
    "fieldtype": "Data", 
    "in_list_view": 1, 
@@ -52,9 +57,10 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "col_break1", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
+   "fieldname": "section_break_6", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "description", 
@@ -67,6 +73,29 @@
    "print_width": "300px", 
    "reqd": 1, 
    "width": "300px"
+  }, 
+  {
+   "fieldname": "column_break_8", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "hidden": 0, 
+   "label": "Image", 
+   "options": "", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "quantity_and_rate", 
@@ -115,7 +144,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-01-01 14:29:58.657537", 
+ "modified": "2015-02-10 13:03:39.188558", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Opportunity Item", 

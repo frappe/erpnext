@@ -94,8 +94,21 @@ cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
 cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
-		return get_server_fields('get_item_details', d.item_code,
-			'items', doc, cdt, cdn, 1);
+		return frappe.call({
+			method: "erpnext.selling.doctype.opportunity.opportunity.get_item_details",
+			args: {"item_code":d.item_code},
+			callback: function(r, rt) {
+				if(r.message) {
+					frappe.model.set_value(d.doctype, d.name, "description", r.message.description);
+					frappe.model.set_value(d.doctype, d.name, "item_name", r.message.item_name);
+					frappe.model.set_value(d.doctype, d.name, "brand", r.message.brand);
+					frappe.model.set_value(d.doctype, d.name, "uom", r.message.uom);
+					frappe.model.set_value(d.doctype, d.name, "item_group", r.message.item_group);
+					frappe.model.set_value(d.doctype, d.name, "image", r.message.image);
+					refresh_field('image_view', d.name, 'items');
+				}
+			}
+		})
 	}
 }
 
