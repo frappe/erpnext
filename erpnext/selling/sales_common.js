@@ -342,10 +342,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var tax_count = this.frm.tax_doclist.length;
 
 		this.frm.doc.grand_total = flt(tax_count ? this.frm.tax_doclist[tax_count - 1].total : this.frm.doc.net_total);
-		this.frm.doc.grand_total_export = flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate);
 
 		this.frm.doc.other_charges_total = flt(this.frm.doc.grand_total - this.frm.doc.net_total,
 			precision("other_charges_total"));
+
+		this.frm.doc.grand_total_export = (this.frm.doc.other_charges_total || this.frm.doc.discount_amount) ?
+			flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate) : this.frm.doc.net_total_export;
+
 		this.frm.doc.other_charges_total_export = flt(this.frm.doc.grand_total_export -
 			this.frm.doc.net_total_export + flt(this.frm.doc.discount_amount),
 			precision("other_charges_total_export"));
