@@ -55,7 +55,7 @@
                     "Anticipos de IR o Pago Minimo Definitivo": {},
                     "Retenciones a Cuenta de IR Acreditables": {
                         "Retencion por V/Bienes o P/Servicios 2%":{},
-                        "Retencion Operaciones Targeta Debito/Credito 1.5%":{},
+                        "Retencion Operaciones Targeta Debito/Credito 1.5%":{}
                     },
                     "Retenciones a Cuenta de IMI Acreditables": {},
                     "Retenciones Definitivas Sobre Rentas o Ganancias de Capital": {}
@@ -188,7 +188,7 @@
                 "Retenciones por Pagar": {
                     "Rentas del Trabajo": {
                         "Retencion Rentas del Trabajo Tarifa Progresiva":{},
-                        "Retencion Definitiva por Renta del Trabajo":{},
+                        "Retencion Definitiva por Renta del Trabajo":{}
                     },
                     "Rentas de Actividades Economicas": {
                         "Retencion 2% por C/Bienes o P/Servicios":{},
