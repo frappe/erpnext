@@ -5,14 +5,13 @@
     "tree": {
         "Activo": {
             "Activo Corriente": {
-                "Inventarios": {
-                    "Productos Disponibles para la Venta": {},
-                    "Materia Prima": {},
-                    "Produccion en Proceso": {},
-                    "Producto Terminado": {},
-                    "Mercaderia en Transito": {},
-                    "Mercaderia de Reventa": {},
-                    "Productos en Proceso": {}
+                "Efectivo en Caja y Bancos": {
+                    "Caja Moneda Nacional": {},
+                    "Caja Moneda Extrangera": {},
+                    "Caja Chica Moneda Extranjera": {},
+                    "Caja Chica Moneda Nacional": {},
+                    "Cuentas Bancarias Moneda Nacional": {},
+                    "Cuentas Bancarias Moneda Extrangera": {}
                 },
                 "Activos Financieros": {
                     "Inversiones a Corto Plazo": {},
@@ -27,6 +26,15 @@
                     "Cuentas por Cobrar por Exportaciones": {},
                     "Estimacion para Cuentas Incobrables": {}
                 },
+                "Inventarios": {
+                    "Productos Disponibles para la Venta": {},
+                    "Materia Prima": {},
+                    "Produccion en Proceso": {},
+                    "Producto Terminado": {},
+                    "Mercaderia en Transito": {},
+                    "Mercaderia de Reventa": {},
+                    "Productos en Proceso": {}
+                },
                 "Impuestos Acreditables": {
                     "Impuesto a Valor Agregado Acreditable": {},
                     "Anticipos de IR o Pago Minimo Definitivo": {},
@@ -34,19 +42,6 @@
                     "Retenciones a Cuenta de IR Acreditables": {},
                     "Retenciones a Cuenta de IMI Acreditables": {},
                     "Retenciones Definitivas Sobre Rentas o Ganancias de Capital": {}
-                },
-                "Efectivo en Caja y Bancos": {
-                    "Caja Moneda Nacional": {},
-                    "Caja Moneda Extrangera": {},
-                    "Caja Chica Moneda Extranjera": {},
-                    "Caja Chica Moneda Nacional": {},
-                    "Cuentas Bancarias Moneda Nacional": {},
-                    "Cuentas Bancarias Moneda Extrangera": {}
-                },
-                "Inversiones Temporales": {
-                    "Bonos": {},
-                    "Acciones": {},
-                    "Valores Publicos": {}
                 },
                 "Otras Cuentas por Cobrar": {
                     "Anticipos a Proveedores": {},
