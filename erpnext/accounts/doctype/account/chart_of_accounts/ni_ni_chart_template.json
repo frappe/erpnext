@@ -132,8 +132,16 @@
                 "Venta por Exportaciones": {},
                 "root_type": "Income"
             },
-            "Otros Ingresos Grabables": {},
-            "Ingresos no Grabables": {},
+            "Otros Ingresos Grabables": {
+                "Ganacia Cambiaria":{},
+                "Sobrante en Arqueo de Caja":{},
+                "Otros Ingresos Grabables":{}
+            },
+            "Ingresos no Grabables": {
+                "Ingreso por Rentas y Ganacias de Capital sujetas a Retencion Definitiva":{},
+                "Interes Bancarios":{},
+                "Otros Ingresos no Grabables":{}
+            },
             "root_type": "Income"
         },
         "Pasivo": {
@@ -262,7 +270,9 @@
                 "Cuentas Incobrables": {},
                 "Capacitacion al Personal": {},
                 "Uniformes": {},
-                "Seguros": {}
+                "Seguros": {},
+                "Donaciones"{},
+                "Ayuda a Empleados":{}
             },
             "Gastos por Servicios Profesionales y Tecnicos": {
                 "Servicios Profesionales": {},
