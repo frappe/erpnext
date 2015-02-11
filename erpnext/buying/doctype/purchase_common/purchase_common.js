@@ -55,11 +55,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		});
 	},
 
-	refresh: function(doc) {
-		this.frm.toggle_display("supplier_name",
-			(this.supplier_name && this.frm.doc.supplier_name!==this.frm.doc.supplier));
-		this._super();
-	},
+	//refresh: function(doc) {
+	//	this.frm.toggle_display("supplier_name",
+	//		(this.supplier_name && this.frm.doc.supplier_name!==this.frm.doc.supplier));
+	//	this._super();
+	//},
 
 	supplier: function() {
 		var me = this;

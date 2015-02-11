@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.utils import cstr, comma_and
 
+from erpnext.projects.utils import set_employee_name
 
 class OverlapError(frappe.ValidationError): pass
 
@@ -17,8 +18,9 @@ class TimeLog(Document):
 
 	def validate(self):
 		self.set_status()
-		self.validate_overlap()
+	#	self.validate_overlap()
 		self.calculate_total_hours()
+		set_employee_name(self)
 		
 	def calculate_total_hours(self):
 		from frappe.utils import time_diff_in_hours
