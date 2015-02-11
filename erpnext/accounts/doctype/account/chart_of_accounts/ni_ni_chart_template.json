@@ -340,7 +340,7 @@
                     }
                 }
             },
-            "root_type": "Asset"
+            "root_type": "Equity"
         },
         "CostosyGastos": {
             "CostodeVenta": {
