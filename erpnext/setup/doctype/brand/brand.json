@@ -33,7 +33,7 @@
  "icon": "icon-certificate", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2015-01-05 16:15:25.811253", 
+ "modified": "2015-02-05 05:11:35.319683", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Brand", 
@@ -48,6 +48,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Master Manager", 
+   "share": 1, 
    "write": 1
   }, 
   {

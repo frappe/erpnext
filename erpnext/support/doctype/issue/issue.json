@@ -217,7 +217,7 @@
  ], 
  "icon": "icon-ticket", 
  "idx": 1, 
- "modified": "2015-01-05 16:16:58.927957", 
+ "modified": "2015-02-05 05:11:39.362659", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Issue", 
@@ -233,6 +233,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Guest", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -247,6 +248,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Customer", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -261,6 +263,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Support Team", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

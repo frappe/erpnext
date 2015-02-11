@@ -1,5 +1,5 @@
 {
-  "creation": "2013-01-25 11:34:53.000000", 
+ "creation": "2013-01-25 11:34:53", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -57,7 +57,7 @@
  "idx": 1, 
  "issingle": 1, 
  "max_attachments": 1, 
- "modified": "2013-12-20 19:21:54.000000", 
+ "modified": "2015-02-05 05:11:48.540845", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Upload Attendance", 
@@ -71,6 +71,7 @@
    "read": 1, 
    "report": 0, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -82,6 +83,7 @@
    "read": 1, 
    "report": 0, 
    "role": "HR Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

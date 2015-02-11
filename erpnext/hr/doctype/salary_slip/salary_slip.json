@@ -337,7 +337,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-07 14:49:28.835615", 
+ "modified": "2015-02-05 05:11:44.967827", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip", 
@@ -354,6 +354,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 1, 
    "user_permission_doctypes": "[\"Branch\",\"Company\",\"Department\",\"Designation\",\"Fiscal Year\",\"Salary Slip\"]", 
    "write": 1
@@ -369,6 +370,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 

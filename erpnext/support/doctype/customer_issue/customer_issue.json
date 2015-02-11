@@ -396,7 +396,7 @@
  "icon": "icon-bug", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2015-01-05 16:21:50.525893", 
+ "modified": "2015-02-05 05:11:36.857779", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Customer Issue", 
@@ -413,6 +413,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Maintenance User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

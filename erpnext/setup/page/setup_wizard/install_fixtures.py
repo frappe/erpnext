@@ -135,6 +135,7 @@ def install(country=None):
 		{'doctype': 'Activity Type', 'activity_type': _('Proposal Writing')},
 		{'doctype': 'Activity Type', 'activity_type': _('Execution')},
 		{'doctype': 'Activity Type', 'activity_type': _('Communication')},
+		{'doctype': 'Activity Type', 'activity_type': _('Manufacturing')},
 
 		# Industry Type
 		{'doctype': 'Industry Type', 'industry': _('Accounting')},
@@ -187,7 +188,11 @@ def install(country=None):
 		{'doctype': 'Industry Type', 'industry': _('Telecommunications')},
 		{'doctype': 'Industry Type', 'industry': _('Television')},
 		{'doctype': 'Industry Type', 'industry': _('Transportation')},
-		{'doctype': 'Industry Type', 'industry': _('Venture Capital')}
+		{'doctype': 'Industry Type', 'industry': _('Venture Capital')},
+
+		{'doctype': "Email Account", "email_id": "sales@example.com", "append_to": "Lead"},
+		{'doctype': "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
+		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"}
 	]
 
 	from frappe.modules import scrub
@@ -198,6 +203,6 @@ def install(country=None):
 		# ignore mandatory for root
 		parent_link_field = ("parent_" + scrub(doc.doctype))
 		if doc.meta.get_field(parent_link_field) and not doc.get(parent_link_field):
-			doc.ignore_mandatory = True
+			doc.flags.ignore_mandatory = True
 
 		doc.insert()

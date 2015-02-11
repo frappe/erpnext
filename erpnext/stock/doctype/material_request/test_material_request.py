@@ -216,7 +216,7 @@ class TestMaterialRequest(unittest.TestCase):
 
 		mr.update_status('Submitted')
 
-		se.ignore_validate_update_after_submit = True
+		se.flags.ignore_validate_update_after_submit = True
 		se.submit()
 		mr.update_status('Stopped')
 		self.assertRaises(frappe.InvalidStatusError, se.cancel)

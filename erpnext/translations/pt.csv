@@ -35,13 +35,13 @@
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> toevoegen / bewerken < / a>"
 "<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> modelo padrão </ h4>  <p> Usa <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </ a> e todos os campos de Endereço ( incluindo campos personalizados se houver) estará disponível </ p>  <pre> <code> {{}} address_line1 <br>  {% if address_line2%} {{}} address_line2 <br> { endif% -%}  {{cidade}} <br>  {% if%} Estado {{estado}} {% endif <br> -%}  {% if pincode%} PIN: {{}} pincode <br> {% endif -%}  {{país}} <br>  {% if%} telefone Telefone: {{telefone}} {<br> endif% -%}  {% if%} fax Fax: {{fax}} {% endif <br> -%}  {% if% email_id} E-mail: {{}} email_id <br> , {% endif -%}  </ code> </ pre>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Um grupo de clientes existente com o mesmo nome, por favor altere o nome do cliente ou renomear o grupo de clientes"
-A Customer exists with same name,Um cliente existe com o mesmo nome
+A Customer exists with same name,Existe um cliente com o mesmo nome
 A Lead with this email id should exist,Um Lead com esse ID de e-mail deve existir
 A Product or Service,Um produto ou serviço
 A Supplier exists with same name,Um Fornecedor existe com mesmo nome
 A symbol for this currency. For e.g. $,Um símbolo para esta moeda. Por exemplo: $
 AMC Expiry Date,AMC Data de Validade
-Abbr,Abbr
+Abbr,Abrv
 Abbreviation cannot have more than 5 characters,Abreviatura não pode ter mais de 5 caracteres
 Above Value,Acima de Valor
 Absent,Ausente
@@ -71,9 +71,9 @@ Account {0} does not belong to Company {1},Conta {0} não pertence à empresa {1
 Account {0} does not belong to company: {1},Conta {0} não pertence à empresa: {1}
 Account {0} does not exist,Conta {0} não existe
 Account {0} has been entered more than once for fiscal year {1},Conta {0} foi inserido mais de uma vez para o ano fiscal {1}
-Account {0} is frozen,Conta {0} está congelado
-Account {0} is inactive,Conta {0} está inativo
-Account {0} is not valid,Conta {0} não é válido
+Account {0} is frozen,Conta {0} está congelada
+Account {0} is inactive,Conta {0} está inativa
+Account {0} is not valid,Conta {0} inválida
 Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Conta {0} deve ser do tipo "" Ativo Fixo "" como item {1} é um item de ativos"
 Account {0}: Parent account {1} can not be a ledger,Conta {0}: conta principal {1} não pode ser um livro
 Account {0}: Parent account {1} does not belong to company: {2},Conta {0}: conta principal {1} não pertence à empresa: {2}
@@ -1046,16 +1046,16 @@ Financial Year Start Date,Exercício Data de Início
 Finished Goods,afgewerkte producten
 First Name,Nome
 First Responded On,Primeiro respondeu em
-Fiscal Year,Exercício fiscal
+Fiscal Year,Ano Fiscal
 Fiscal Year Start Date and Fiscal Year End Date are already set in Fiscal Year {0},Ano Fiscal Data de Início e Término do Exercício Social Data já estão definidos no ano fiscal de {0}
 Fiscal Year Start Date and Fiscal Year End Date cannot be more than a year apart.,Ano Fiscal Data de Início e Término do Exercício Social Data não pode ter mais do que um ano de intervalo.
 Fiscal Year Start Date should not be greater than Fiscal Year End Date,Ano Fiscal Data de início não deve ser maior do que o Fiscal Year End Date
-Fixed Asset,ativos Fixos
+Fixed Asset,Activos Fixos
 Fixed Assets,Imobilizado
-Follow via Email,Siga por e-mail
+Follow via Email,Seguir por e-mail
 "Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",Após tabela mostrará valores se os itens são sub - contratada. Estes valores serão obtidos a partir do mestre de &quot;Bill of Materials&quot; de sub - itens contratados.
-Food,comida
-"Food, Beverage & Tobacco","Alimentos, Bebidas e Fumo"
+Food,Comida
+"Food, Beverage & Tobacco","Alimentos, Bebidas e Tabaco"
 "For 'Sales BOM' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Sales BOM' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.","Para os itens de vendas 'BOM', Armazém, N º de Série e Batch Não será considerada a partir da tabela ""Packing List"". Se Warehouse e Batch Não são as mesmas para todos os itens de embalagem para qualquer item 'Vendas BOM', esses valores podem ser inseridos na tabela do item principal, os valores serão copiados para a tabela ""Packing List""."
 For Company,Para a Empresa
 For Employee,Para Empregado
@@ -1118,14 +1118,14 @@ Further accounts can be made under Groups but entries can be made against Ledger
 "Further accounts can be made under Groups, but entries can be made against Ledger","Outras contas podem ser feitas em grupos , mas as entradas podem ser feitas contra Ledger"
 Further nodes can be only created under 'Group' type nodes,Verder nodes kunnen alleen worden gemaakt op grond van het type nodes 'Groep'
 GL Entry,Entrada GL
-Gantt Chart,Gantt
+Gantt Chart,Gráfico Gantt
 Gantt chart of all tasks.,Gantt de todas as tarefas.
 Gender,Sexo
 General,Geral
 General Ledger,General Ledger
 Generate Description HTML,Gerar Descrição HTML
-Generate Material Requests (MRP) and Production Orders.,Gerar Pedidos de Materiais (MRP) e ordens de produção.
-Generate Salary Slips,Gerar folhas de salários
+Generate Material Requests (MRP) and Production Orders.,Gerar Pedidos de Materiais (MRP) e Ordens de Produção.
+Generate Salary Slips,Gerar Folhas de Vencimento
 Generate Schedule,Gerar Agende
 Generates HTML to include selected image in the description,Gera HTML para incluir imagem selecionada na descrição
 Get Advances Paid,Obter adiantamentos pagos
@@ -1133,9 +1133,9 @@ Get Advances Received,Obter adiantamentos recebidos
 Get Current Stock,Obter Estoque atual
 Get Items,Obter itens
 Get Items From Sales Orders,Obter itens de Pedidos de Vendas
-Get Items from BOM,Items ophalen van BOM
+Get Items from BOM,Obter itens da Lista de Material
 Get Last Purchase Rate,Obter Tarifa de Compra Última
-Get Outstanding Invoices,Obter faturas pendentes
+Get Outstanding Invoices,Obter Facturas Pendentes
 Get Relevant Entries,Obter entradas relevantes
 Get Sales Orders,Obter Pedidos de Vendas
 Get Specification Details,Obtenha detalhes Especificação
@@ -1174,13 +1174,13 @@ Group by Account,Grupo por Conta
 Group by Voucher,Grupo pela Vale
 Group or Ledger,Grupo ou Ledger
 Groups,Grupos
-HR Manager,Gerente de RH
-HR Settings,Configurações HR
+HR Manager,Gestor de RH
+HR Settings,Configurações RH
 HTML / Banner that will show on the top of product list.,HTML bandeira / que vai mostrar no topo da lista de produtos.
 Half Day,Meio Dia
 Half Yearly,Semestrais
 Half-yearly,Semestral
-Happy Birthday!,Happy Birthday!
+Happy Birthday!,Feliz Aniversário!
 Hardware,ferragens
 Has Batch No,Não tem Batch
 Has Child Node,Tem nó filho
@@ -1197,17 +1197,17 @@ Help HTML,Ajuda HTML
 "Here you can maintain height, weight, allergies, medical concerns etc","Aqui você pode manter a altura, peso, alergias, etc preocupações médica"
 Hide Currency Symbol,Ocultar Símbolo de Moeda
 High,Alto
-History In Company,História In Company
+History In Company,Historial na Empresa
 Hold,Segurar
 Holiday,Férias
-Holiday List,Lista de feriado
-Holiday List Name,Nome da lista férias
+Holiday List,Lista de Feriados
+Holiday List Name,Lista de Nomes de Feriados
 Holiday master.,Mestre férias .
 Holidays,Férias
 Home,Casa
 Host,Anfitrião
 "Host, Email and Password required if emails are to be pulled",E-mail host e senha necessária se e-mails devem ser puxado
-Hour,hora
+Hour,Hora
 Hour Rate,Taxa de hora
 Hour Rate Labour,A taxa de hora
 Hours,Horas
@@ -1713,7 +1713,7 @@ Negative Quantity is not allowed,Negativo Quantidade não é permitido
 Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},Negativo Banco de Erro ( {6} ) para item {0} no Armazém {1} em {2} {3} em {4} {5}
 Negative Valuation Rate is not allowed,Negativa Avaliação Taxa não é permitido
 Negative balance in Batch {0} for Item {1} at Warehouse {2} on {3} {4},Saldo negativo em lote {0} para {1} item no Armazém {2} em {3} {4}
-Net Pay,Pagamento Net
+Net Pay,Pagamento Líquido
 Net Pay (in words) will be visible once you save the Salary Slip.,Pagamento líquido (em palavras) será visível quando você salvar a folha de salário.
 Net Profit / Loss,Lucro / Prejuízo Líquido
 Net Total,Líquida Total
@@ -1723,16 +1723,16 @@ Net Weight UOM,UOM Peso Líquido
 Net Weight of each Item,Peso líquido de cada item
 Net pay cannot be negative,Salário líquido não pode ser negativo
 Never,Nunca
-New ,New 
-New Account,nieuw account
+New ,Novo
+New Account,Nova Conta
 New Account Name,Nieuw account Naam
 New BOM,Novo BOM
-New Communications,New Communications
-New Company,nieuw bedrijf
-New Cost Center,Nieuwe kostenplaats
-New Cost Center Name,Nieuwe kostenplaats Naam
+New Communications,Comunicações Novas
+New Company,Nova empresa
+New Cost Center,Novo Centro de Custo
+New Cost Center Name,Nome de NOvo Centro de Custo
 New Delivery Notes,Novas notas de entrega
-New Enquiries,Consultas novo
+New Enquiries,Novas Consultas
 New Leads,Nova leva
 New Leave Application,Aplicação deixar Nova
 New Leaves Allocated,Nova Folhas alocado
@@ -1746,7 +1746,7 @@ New Sales Orders,Novos Pedidos de Vendas
 New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,"New Serial Não, não pode ter Warehouse. Warehouse deve ser definida pelo Banco de entrada ou Recibo de compra"
 New Stock Entries,Novas entradas em existências
 New Stock UOM,Nova da UOM
-New Stock UOM is required,Novo Estoque UOM é necessária
+New Stock UOM is required,Novo stock UOM é necessária
 New Stock UOM must be different from current stock UOM,Novo Estoque UOM deve ser diferente do atual UOM estoque
 New Supplier Quotations,Novas citações Fornecedor
 New Support Tickets,Novos pedidos de ajuda
@@ -2408,7 +2408,7 @@ Requested Qty,verzocht Aantal
 "Requested Qty: Quantity requested for purchase, but not ordered.","Aangevraagd Aantal : Aantal op aankoop, maar niet besteld."
 Requests for items.,Os pedidos de itens.
 Required By,Exigido por
-Required Date,Data Obrigatório
+Required Date,Data Obrigatória
 Required Qty,Quantidade requerida
 Required only for sample item.,Necessário apenas para o item amostra.
 Required raw materials issued to the supplier for producing a sub - contracted item.,Matérias-primas necessárias emitidos para o fornecedor para a produção de um sub - item contratado.
@@ -2493,7 +2493,7 @@ Salary Structure Earnings,Estrutura Lucros Salário
 Salary breakup based on Earning and Deduction.,Separação Salário com base em salário e dedução.
 Salary components.,Componentes salariais.
 Salary template master.,Mestre modelo Salário .
-Sales,De vendas
+Sales,Vendas
 Sales Analytics,Sales Analytics
 Sales BOM,BOM vendas
 Sales BOM Help,Vendas Ajuda BOM
@@ -2603,7 +2603,7 @@ Select your home country and check the timezone and currency.,Selecteer uw land 
 "Selecting ""Yes"" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.",Selecionando &quot;Sim&quot; permitirá a você criar Bill of Material mostrando matérias-primas e os custos operacionais incorridos para fabricar este item.
 "Selecting ""Yes"" will allow you to make a Production Order for this item.",Selecionando &quot;Sim&quot; vai permitir que você faça uma ordem de produção para este item.
 "Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.",Selecionando &quot;Sim&quot; vai dar uma identidade única para cada entidade deste item que pode ser visto no mestre Número de ordem.
-Selling,Vendendo
+Selling,Vendas
 Selling Settings,Vendendo Configurações
 "Selling must be checked, if Applicable For is selected as {0}","Venda deve ser verificada, se for caso disso for selecionado como {0}"
 Send,Enviar
@@ -3140,23 +3140,24 @@ Valuation Rate,Taxa de valorização
 Valuation Rate required for Item {0},Valorização Taxa exigida para item {0}
 Valuation and Total,Avaliação e Total
 Value,Valor
-Value or Qty,Waarde of Aantal
+Value or Qty,Valor ou Quantidade
 Vehicle Dispatch Date,Veículo Despacho Data
 Vehicle No,No veículo
-Venture Capital,venture Capital
-Verified By,Verified By
-View Ledger,Bekijk Ledger
-View Now,Bekijk nu
+Venture Capital,Capital de Risco
+Verified By,Verificado Por
+View Ledger,Ver Diário
+View Now,Ver Já
 Visit report for maintenance call.,Relatório de visita para a chamada manutenção.
 Voucher #,voucher #
 Voucher Detail No,Detalhe folha no
 Voucher Detail Number,Número Detalhe voucher
-Voucher ID,ID comprovante
-Voucher No,Não vale
-Voucher Type,Tipo comprovante
-Voucher Type and Date,Tipo Vale e Data
+Voucher ID,"ID de Vale
+"
+Voucher No,Vale No.
+Voucher Type,Tipo de Vale
+Voucher Type and Date,Tipo de Vale e Data
 Walk In,Walk In
-Warehouse,armazém
+Warehouse,Armazém
 Warehouse Contact Info,Armazém Informações de Contato
 Warehouse Detail,Detalhe Armazém
 Warehouse Name,Nome Armazém
@@ -3238,8 +3239,8 @@ Write Off Entry,Escreva voucher
 Wrong Template: Unable to find head row.,Template errado: Não é possível encontrar linha cabeça.
 Year,Ano
 Year Closed,Ano Encerrado
-Year End Date,Eind van het jaar Datum
-Year Name,Nome Ano
+Year End Date,Data de Fim de Ano
+Year Name,Nome do Ano
 Year Start Date,Data de início do ano
 Year of Passing,Ano de Passagem
 Yearly,Anual

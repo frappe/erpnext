@@ -417,7 +417,7 @@
  "icon": "icon-barcode", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-01-05 16:03:49.825174", 
+ "modified": "2015-02-05 05:11:46.454105", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Serial No", 
@@ -432,6 +432,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

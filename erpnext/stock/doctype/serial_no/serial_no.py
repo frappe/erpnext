@@ -278,7 +278,7 @@ def make_serial_no(serial_no, sle):
 	sr = frappe.new_doc("Serial No")
 	sr.warehouse = None
 	sr.dont_update_if_missing.append("warehouse")
-	sr.ignore_permissions = True
+	sr.flags.ignore_permissions = True
 
 	sr.serial_no = serial_no
 	sr.item_code = sle.item_code

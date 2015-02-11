@@ -152,7 +152,7 @@ class SalesInvoice(SellingController):
 			if d.time_log_batch:
 				tlb = frappe.get_doc("Time Log Batch", d.time_log_batch)
 				tlb.sales_invoice = sales_invoice
-				tlb.ignore_validate_update_after_submit = True
+				tlb.flags.ignore_validate_update_after_submit = True
 				tlb.save()
 
 	def validate_time_logs_are_submitted(self):

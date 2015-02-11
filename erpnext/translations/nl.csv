@@ -34,9 +34,9 @@
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> toevoegen / bewerken < / a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> toevoegen / bewerken < / a>"
 "<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> Standaardsjabloon </ h4>  <p> Gebruikt <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </ a> en alle velden van Address ( inclusief aangepaste velden indien aanwezig) zal beschikbaar zijn </ p>  <pre> <code> {{address_line1}} <br>  {% if address_line2%} {{address_line2}} {<br> % endif -%}  {{city}} <br>  {% if staat%} {{staat}} {% endif <br> -%}  {% if pincode%} PIN: {{pincode}} {% endif <br> -%}  {{land}} <br>  {% if telefoon%} Telefoon: {{telefoon}} {<br> % endif -%}  {% if fax%} Fax: {{fax}} {% endif <br> -%}  {% if email_id%} E-mail: {{email_id}} <br> ; {% endif -%}  </ code> </ pre>"
-A Customer Group exists with same name please change the Customer name or rename the Customer Group,Een Klantgroep met dezelfde naam bestaat.Gelieve de naam van de Klant of de Klantgroep te wijzigen
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,Een Klantgroep met dezelfde naam bestaat. Gelieve de naam van de Klant of de Klantgroep  wijzigen
 A Customer exists with same name,Een Klant bestaat met dezelfde naam
-A Lead with this email id should exist,Een Lead met deze e-mail-ID moet bestaan
+A Lead with this email id should exist,Een Lead met dit email-ID moet bestaan
 A Product or Service,Een product of dienst
 A Supplier exists with same name,Een leverancier bestaat met dezelfde naam
 A symbol for this currency. For e.g. $,Een symbool voor deze valuta. Voor bijvoorbeeld $
@@ -55,15 +55,15 @@ Account Balance,Rekeningbalans
 Account Created: {0},Account Gemaakt : {0}
 Account Details,Account Details
 Account Head,Account Hoofding
-Account Name,Rekeningnaam
+Account Name,Rekening Naam
 Account Type,Rekening Type
 "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Saldo reeds in Credit, is het niet toegestaan om 'evenwicht moet worden' als 'Debet'"
 "Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Saldo reeds in Debit, is het niet toegestaan om 'evenwicht moet worden' als 'Credit'"
-Account for the warehouse (Perpetual Inventory) will be created under this Account.,Rekening voor het magazijn ( Perpetual Inventory ) wordt aangemaakt onder deze account .
+Account for the warehouse (Perpetual Inventory) will be created under this Account.,Rekening voor het magazijn wordt aangemaakt onder dit account .
 Account head {0} created,Account hoofding {0} aangemaakt
 Account must be a balance sheet account,Rekening moet een balansrekening zijn
-Account with child nodes cannot be converted to ledger,Rekening met kind nodes kunnen niet worden geconverteerd naar ledger
-Account with existing transaction can not be converted to group.,Rekening met bestaande transactie kan niet worden omgezet in groep .
+Account with child nodes cannot be converted to ledger,Rekening met onderliggende regels kunnen niet worden geconverteerd naar grootboek
+Account with existing transaction can not be converted to group.,Rekening met bestaande transactie kan niet worden omgezet naar een groep .
 Account with existing transaction can not be deleted,Rekening met bestaande transactie kan niet worden verwijderd
 Account with existing transaction cannot be converted to ledger,Rekening met bestaande transactie kan niet worden geconverteerd naar grootboek
 Account {0} cannot be a Group,Rekening {0} kan geen groep zijn
@@ -86,9 +86,9 @@ Accounting,Boekhouding
 "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Boekhoudkundige afschrijving bevroren tot deze datum, kan niemand / te wijzigen toegang behalve rol hieronder aangegeven."
 Accounting journal entries.,Accounting journaalposten.
 Accounts,Rekeningen
-Accounts Browser,Rekeningen Browser
-Accounts Frozen Upto,Rekeningen bevroren Tot
-Accounts Payable,Accounts Payable
+Accounts Browser,Rekeningen Verkenner
+Accounts Frozen Upto,Rekeningen bevroren tot
+Accounts Payable,Crediteuren
 Accounts Receivable,Debiteuren
 Accounts Settings,Accounts Settings
 Active,Actief
@@ -298,23 +298,23 @@ Average Commission Rate,Gemiddelde Commissie Rate
 Average Discount,Gemiddelde korting
 Awesome Products,Awesome producten
 Awesome Services,Awesome Services
-BOM Detail No,BOM Detail Geen
+BOM Detail No,BOM Detail nr.
 BOM Explosion Item,BOM Explosie Item
 BOM Item,BOM Item
-BOM No,BOM Geen
-BOM No. for a Finished Good Item,BOM Nee voor een afgewerkte goed item
+BOM No,BOM nr.
+BOM No. for a Finished Good Item,BOM nr. voor een afgewerkt goederen item
 BOM Operation,BOM Operatie
 BOM Operations,BOM Operations
 BOM Replace Tool,BOM Replace Tool
-BOM number is required for manufactured Item {0} in row {1},BOM nummer is vereist voor gefabriceerde Item {0} in rij {1}
-BOM number not allowed for non-manufactured Item {0} in row {1},BOM nummer niet toegestaan ​​voor niet - gefabriceerde Item {0} in rij {1}
+BOM number is required for manufactured Item {0} in row {1},BOM nr. is vereist voor gefabriceerde Item {0} in rij {1}
+BOM number not allowed for non-manufactured Item {0} in row {1},BOM nr. niet toegestaan ​​voor niet - gefabriceerde Item {0} in rij {1}
 BOM recursion: {0} cannot be parent or child of {2},BOM recursie : {0} mag niet ouder of kind zijn van {2}
 BOM replaced,BOM vervangen
 BOM {0} for Item {1} in row {2} is inactive or not submitted,BOM {0} voor post {1} in rij {2} is niet actief of niet ingediend
 BOM {0} is not active or not submitted,BOM {0} is niet actief of niet ingediend
 BOM {0} is not submitted or inactive BOM for Item {1},BOM {0} is niet voorgelegd of inactief BOM voor post {1}
 Backup Manager,Backup Manager
-Backup Right Now,Back-up Right Now
+Backup Right Now,Back-up direct
 Backups will be uploaded to,Back-ups worden geüpload naar
 Balance Qty,Balance Aantal
 Balance Sheet,balans
@@ -323,36 +323,36 @@ Balance for Account {0} must always be {1},Saldo van account {0} moet altijd {1}
 Balance must be,Evenwicht moet worden
 "Balances of Accounts of type ""Bank"" or ""Cash""","Saldi van de rekeningen van het type "" Bank "" of "" Cash """
 Bank,Bank
-Bank / Cash Account,Bank / Cash Account
-Bank A/C No.,Bank A / C Nee
+Bank / Cash Account,Bank / Kassa rekening
+Bank A/C No.,Bank A / C nr.
 Bank Account,Bankrekening
-Bank Account No.,Bank Account Nr
-Bank Accounts,bankrekeningen
+Bank Account No.,Bank rekening nr.
+Bank Accounts,Bankrekeningen
 Bank Clearance Summary,Bank Ontruiming Samenvatting
 Bank Draft,Bank Draft
-Bank Name,Naam van de bank
+Bank Name,Bank naam
 Bank Overdraft Account,Bank Overdraft Account
 Bank Reconciliation,Bank Verzoening
 Bank Reconciliation Detail,Bank Verzoening Detail
 Bank Reconciliation Statement,Bank Verzoening Statement
 Bank Entry,Bank Entry
 Bank/Cash Balance,Bank / Geldsaldo
-Banking,bank
+Banking,Bankieren
 Barcode,Barcode
-Barcode {0} already used in Item {1},Barcode {0} al gebruikt in post {1}
+Barcode {0} already used in Item {1},Barcode {0} is al in gebruik in post {1}
 Based On,Gebaseerd op
-Basic,basisch
-Basic Info,Basic Info
-Basic Information,Basisinformatie
-Basic Rate,Basic Rate
-Basic Rate (Company Currency),Basic Rate (Company Munt)
+Basic,Basis
+Basic Info,Basis Info
+Basic Information,Basis Informatie
+Basic Rate,Basis Tarief
+Basic Rate (Company Currency),Basis Tarief (Bedrijfs Valuta)
 Batch,Partij
-Batch (lot) of an Item.,Batch (lot) van een item.
-Batch Finished Date,Batch Afgewerkt Datum
-Batch ID,Batch ID
-Batch No,Batch nr.
-Batch Started Date,Batch Gestart Datum
-Batch Time Logs for billing.,Batch Time Logs voor de facturering.
+Batch (lot) of an Item.,Partij (veel) van een item.
+Batch Finished Date,Einddatum partij
+Batch ID,Partij ID
+Batch No,Partij nr.
+Batch Started Date,Aanvangdatum partij
+Batch Time Logs for billing.,Partij logbestanden voor facturering.
 Batch-Wise Balance History,Batch-Wise Balance Geschiedenis
 Batched for Billing,Gebundeld voor facturering
 Better Prospects,Betere vooruitzichten
@@ -369,28 +369,28 @@ Billed Amt,Billed Amt
 Billing,Billing
 Billing Address,Factuuradres
 Billing Address Name,Factuuradres Naam
-Billing Status,Billing Status
-Bills raised by Suppliers.,Rekeningen die door leveranciers.
+Billing Status,Factuur Status
+Bills raised by Suppliers.,Facturen van leveranciers.
 Bills raised to Customers.,Bills verhoogd tot klanten.
 Bin,Bak
 Bio,Bio
-Biotechnology,biotechnologie
-Birthday,verjaardag
-Block Date,Blokkeren Datum
-Block Days,Blokkeren Dagen
+Biotechnology,Biotechnologie
+Birthday,Verjaardag
+Block Date,Blokeer Datum
+Block Days,Blokeer Dagen
 Block leave applications by department.,Blok verlaten toepassingen per afdeling.
 Blog Post,Blog Post
 Blog Subscriber,Blog Abonnee
 Blood Group,Bloedgroep
-Both Warehouse must belong to same Company,Beide Warehouse moeten behoren tot dezelfde Company
-Box,doos
+Both Warehouse must belong to same Company,Beide magazijnen moeten tot hetzelfde bedrijf behoren
+Box,Doos
 Branch,Tak
 Brand,Merk
 Brand Name,Merknaam
-Brand master.,Brand meester.
+Brand master.,Merk meester.
 Brands,Merken
 Breakdown,Storing
-Broadcasting,omroep
+Broadcasting,Uitzenden
 Brokerage,makelarij
 Budget,Begroting
 Budget Allocated,Budget
@@ -404,10 +404,10 @@ Budget cannot be set for Group Cost Centers,Begroting kan niet worden ingesteld 
 Build Report,Build Report
 Bundle items at time of sale.,Bundel artikelen op moment van verkoop.
 Business Development Manager,Business Development Manager
-Buying,Het kopen
-Buying & Selling,Kopen en verkopen
-Buying Amount,Kopen Bedrag
-Buying Settings,Kopen Instellingen
+Buying,Inkoop
+Buying & Selling,Inkopen en verkopen
+Buying Amount,Inkoop aantal
+Buying Settings,Inkoop Instellingen
 "Buying must be checked, if Applicable For is selected as {0}","Kopen moet worden gecontroleerd, indien van toepassing voor is geselecteerd als {0}"
 C-Form,C-Form
 C-Form Applicable,C-Form Toepasselijk
@@ -422,9 +422,9 @@ CENVAT Service Tax Cess 1,CENVAT Dienst Belastingen Cess 1
 CENVAT Service Tax Cess 2,CENVAT Dienst Belastingen Cess 2
 Calculate Based On,Bereken Based On
 Calculate Total Score,Bereken Totaal Score
-Calendar Events,Kalender Evenementen
-Call,Noemen
-Calls,oproepen
+Calendar Events,Agenda Evenementen
+Call,Bellen
+Calls,Oproepen
 Campaign,Campagne
 Campaign Name,Campagnenaam
 Campaign Name is required,Campagne Naam is vereist
@@ -1478,26 +1478,26 @@ Landed Cost Wizard,Landed Cost Wizard
 Landed Cost updated successfully,Landed Cost succesvol bijgewerkt
 Language,Taal
 Last Name,Achternaam
-Last Purchase Rate,Laatste Purchase Rate
+Last Purchase Rate,Laatste inkoop aantal
 Latest,laatst
-Lead,Leiden
-Lead Details,Lood Details
-Lead Id,lead Id
+Lead,Lead
+Lead Details,Lead Details
+Lead Id,Lead Id
 Lead Name,Lead Naam
-Lead Owner,Lood Owner
-Lead Source,Lood Bron
+Lead Owner,Lead Eigenaar
+Lead Source,Lead Bron
 Lead Status,Lead Status
 Lead Time Date,Lead Tijd Datum
 Lead Time Days,Lead Time Dagen
 Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,Levertijd dagen is het aantal dagen waarmee dit artikel wordt verwacht in uw magazijn. Deze dag wordt opgehaald in Laden en aanvragen als u dit item.
 Lead Type,Lood Type
 Lead must be set if Opportunity is made from Lead,Lood moet worden ingesteld als Opportunity is gemaakt van lood
-Leave Allocation,Laat Toewijzing
-Leave Allocation Tool,Laat Toewijzing Tool
+Leave Allocation,Verlof Toewijzing
+Leave Allocation Tool,Verlof Toewijzing Tool
 Leave Application,Verlofaanvraag
-Leave Approver,Laat Fiatteur
-Leave Approvers,Verlaat Goedkeurders
-Leave Balance Before Application,Laat Balance Voor het aanbrengen
+Leave Approver,Verlof goedkeurder
+Leave Approvers,Verlof goedkeurders
+Leave Balance Before Application,Verlofsaldo voor aanvraag
 Leave Block List,Laat Block List
 Leave Block List Allow,Laat Block List Laat
 Leave Block List Allowed,Laat toegestaan ​​Block List
@@ -1505,31 +1505,31 @@ Leave Block List Date,Laat Block List Datum
 Leave Block List Dates,Laat Block List Data
 Leave Block List Name,Laat Block List Name
 Leave Blocked,Laat Geblokkeerde
-Leave Control Panel,Laat het Configuratiescherm
-Leave Encashed?,Laat verzilverd?
+Leave Control Panel,Verlof Configuratiescherm
+Leave Encashed?,Verlof verzilverd?
 Leave Encashment Amount,Laat inning Bedrag
-Leave Type,Laat Type
-Leave Type Name,Laat Type Naam
-Leave Without Pay,Verlof zonder wedde
+Leave Type,Verlof Type
+Leave Type Name,Verlof Type Naam
+Leave Without Pay,Onbetaald verlof
 Leave application has been approved.,Verlof aanvraag is goedgekeurd .
 Leave application has been rejected.,Verlofaanvraag is afgewezen .
-Leave approver must be one of {0},Verlaat approver moet een van zijn {0}
-Leave blank if considered for all branches,Laat leeg indien dit voor alle vestigingen
-Leave blank if considered for all departments,Laat leeg indien dit voor alle afdelingen
+Leave approver must be one of {0},Verlof goedkeurder moet een van zijn {0}
+Leave blank if considered for all branches,Laat leeg indien dit voor alle vestigingen is
+Leave blank if considered for all departments,Laat leeg indien dit voor alle afdelingen is
 Leave blank if considered for all designations,Laat leeg indien overwogen voor alle aanduidingen
 Leave blank if considered for all employee types,Laat leeg indien overwogen voor alle werknemer soorten
 "Leave can be approved by users with Role, ""Leave Approver""",Laat kan worden goedgekeurd door gebruikers met Role: &quot;Laat Fiatteur&quot;
 Leave of type {0} cannot be longer than {1},Verlof van type {0} kan niet langer zijn dan {1}
-Leaves Allocated Successfully for {0},Bladeren succesvol Toegewezen voor {0}
-Leaves for type {0} already allocated for Employee {1} for Fiscal Year {0},Bladeren voor type {0} reeds voor Employee {1} voor het fiscale jaar {0}
+Leaves Allocated Successfully for {0},Verlof succesvol toegewezen aan {0}
+Leaves for type {0} already allocated for Employee {1} for Fiscal Year {0},Verlof van type {0} reeds voor medewerker {1} voor het fiscale jaar {0}
 Leaves must be allocated in multiples of 0.5,"Bladeren moeten in veelvouden van 0,5 worden toegewezen"
 Ledger,Grootboek
-Ledgers,grootboeken
+Ledgers,Grootboeken
 Left,Links
-Legal,wettelijk
+Legal,Wettelijk
 Legal Expenses,Juridische uitgaven
 Letter Head,Brief Hoofd
-Letter Heads for print templates.,Letter Heads voor print templates .
+Letter Heads for print templates.,Letter Heads voor print sjablonen.
 Level,Niveau
 Lft,Lft
 Liability,aansprakelijkheid
@@ -1539,21 +1539,21 @@ List items that form the package.,Lijst items die het pakket vormen.
 List this Item in multiple groups on the website.,Lijst deze post in meerdere groepen op de website.
 "List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start.",Een lijst van uw producten of diensten die u koopt of verkoopt .
 "List your tax heads (e.g. VAT, Excise; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later.","Een lijst van uw fiscale koppen ( zoals btw , accijnzen , ze moeten unieke namen hebben ) en hun standaard tarieven."
-Loading...,Loading ...
+Loading...,Laden ...
 Loans (Liabilities),Leningen (passiva )
 Loans and Advances (Assets),Leningen en voorschotten ( Assets )
-Local,lokaal
-Login,login
+Local,Lokaal
+Login,Login
 Login with your new User ID,Log in met je nieuwe gebruikersnaam
 Logo,Logo
-Logo and Letter Heads,Logo en Letter Heads
-Lost,verloren
-Lost Reason,Verloren Reden
+Logo and Letter Heads,Logo en Briefhoofden
+Lost,Verloren
+Lost Reason,Reden van verlies
 Low,Laag
 Lower Income,Lager inkomen
 MTN Details,MTN Details
-Main,hoofd-
-Main Reports,Belangrijkste Rapporten
+Main,Hoofd
+Main Reports,Hoofd Rapporten
 Maintain Same Rate Throughout Sales Cycle,Onderhouden Zelfde Rate Gedurende Salescyclus
 Maintain same rate throughout purchase cycle,Handhaaf dezelfde snelheid gedurende aankoop cyclus
 Maintenance,Onderhoud
@@ -1570,7 +1570,7 @@ Maintenance Status,Onderhoud Status
 Maintenance Time,Onderhoud Tijd
 Maintenance Type,Onderhoud Type
 Maintenance Visit,Onderhoud Bezoek
-Maintenance Visit Purpose,Onderhoud Bezoek Doel
+Maintenance Visit Purpose,Doel van onderhouds bezoek
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Onderhoud Bezoek {0} moet worden geannuleerd voordat het annuleren van deze verkooporder
 Maintenance start date can not be before delivery date for Serial No {0},Onderhoud startdatum kan niet voor de leveringsdatum voor Serienummer {0}
 Major/Optional Subjects,Major / keuzevakken
@@ -1591,21 +1591,21 @@ Make Packing Slip,Maak pakbon
 Make Payment,Betalen
 Make Payment Entry,Betalen Entry
 Make Purchase Invoice,Maak inkoopfactuur
-Make Purchase Order,Maak Bestelling
+Make Purchase Order,Maak inkooporder
 Make Purchase Receipt,Maak Kwitantie
-Make Salary Slip,Maak loonstrook
+Make Salary Slip,Maak Salarisstrook
 Make Salary Structure,Maak salarisstructuur
 Make Sales Invoice,Maak verkoopfactuur
-Make Sales Order,Maak klantorder
+Make Sales Order,Maak verkooporder
 Make Supplier Quotation,Maak Leverancier Offerte
 Make Time Log Batch,Maak tijd Inloggen Batch
 Male,Mannelijk
 Manage Customer Group Tree.,Beheer Customer Group Boom .
-Manage Sales Partners.,Beheer Sales Partners.
+Manage Sales Partners.,Beheer Verkoop Partners.
 Manage Sales Person Tree.,Beheer Sales Person Boom .
 Manage Territory Tree.,Beheer Grondgebied Boom.
 Manage cost of operations,Beheer kosten van de operaties
-Management,beheer
+Management,Beheer
 Manager,Manager
 "Mandatory if Stock Item is ""Yes"". Also the default warehouse where reserved quantity is set from Sales Order.",Verplicht als Stock Item is &quot;ja&quot;. Ook de standaard opslagplaats waar de gereserveerde hoeveelheid is ingesteld van Sales Order.
 Manufacture against Sales Order,Vervaardiging tegen Verkooporder
@@ -1632,14 +1632,15 @@ Masters,Masters
 Match non-linked Invoices and Payments.,Match niet-gekoppelde facturen en betalingen.
 Material Issue,Materiaal Probleem
 Material Receipt,Materiaal Ontvangst
-Material Request,Materiaal aanvragen
-Material Request Detail No,Materiaal Aanvraag Detail Geen
-Material Request For Warehouse,Materiaal Request For Warehouse
-Material Request Item,Materiaal aanvragen Item
-Material Request Items,Materiaal aanvragen Items
-Material Request No,Materiaal aanvragen Geen
+Material Request,"Materiaal Aanvraag
+"
+Material Request Detail No,Materiaal Aanvraag Detail nr.
+Material Request For Warehouse,Materiaal Aanvraag voor magazijn
+Material Request Item,Materiaal Aanvraag Item
+Material Request Items,Materiaal Aanvraag Items
+Material Request No,Materiaal Aanvraag nr.
 Material Request Type,Materiaal Soort aanvraag
-Material Request of maximum {0} can be made for Item {1} against Sales Order {2},Materiaal aanvragen van maximaal {0} kan worden gemaakt voor post {1} tegen Sales Order {2}
+Material Request of maximum {0} can be made for Item {1} against Sales Order {2},Materiaal Aanvraag van maximaal {0} kan worden gemaakt voor item {1} tegen Verkooporder {2}
 Material Request used to make this Stock Entry,Materiaal Request gebruikt om dit Stock Entry maken
 Material Request {0} is cancelled or stopped,Materiaal aanvragen {0} wordt geannuleerd of gestopt
 Material Requests for which Supplier Quotations are not created,Materiaal Verzoeken waarvoor Leverancier Offertes worden niet gemaakt
@@ -1649,7 +1650,7 @@ Material Transfer,Materiaaloverdracht
 Materials,Materieel
 Materials Required (Exploded),Benodigde materialen (Exploded)
 Max 5 characters,Max. 5 tekens
-Max Days Leave Allowed,Max Dagen Laat toegestaan
+Max Days Leave Allowed,Max Dagen Verlof toegestaan
 Max Discount (%),Max Korting (%)
 Max Qty,Max Aantal
 Max discount allowed for item: {0} is {1}%,Maximale korting toegestaan voor artikel: {0} is {1}%
@@ -1666,20 +1667,20 @@ Message Sent,bericht verzonden
 Message updated,bericht geactualiseerd
 Messages,Berichten
 Messages greater than 160 characters will be split into multiple messages,Bericht van meer dan 160 tekens worden opgesplitst in meerdere mesage
-Middle Income,Midden Inkomen
+Middle Income,Modaal Inkomen
 Milestone,Mijlpaal
 Milestone Date,Mijlpaal Datum
 Milestones,Mijlpalen
-Milestones will be added as Events in the Calendar,Mijlpalen worden toegevoegd als evenementen in deze kalender
+Milestones will be added as Events in the Calendar,Mijlpalen als evenementen aan deze agenda worden toegevoegd.
 Min Order Qty,Minimum Aantal
 Min Qty,min Aantal
 Min Qty can not be greater than Max Qty,Min Aantal kan niet groter zijn dan Max Aantal zijn
 Minimum Amount,Minimumbedrag
-Minimum Order Qty,Minimum Aantal
+Minimum Order Qty,Minimum bestel aantal
 Minute,minuut
 Misc Details,Misc Details
 Miscellaneous Expenses,diverse kosten
-Miscelleneous,Miscelleneous
+Miscelleneous,Divers
 Mobile No,Mobiel Nog geen
 Mobile No.,Mobile No
 Mode of Payment,Wijze van betaling
@@ -1822,15 +1823,15 @@ Notification Control,Kennisgeving Controle
 Notification Email Address,Melding e-mail adres
 Notify by Email on creation of automatic Material Request,Informeer per e-mail op de creatie van automatische Materiaal Request
 Number Format,Getalnotatie
-Offer Date,aanbieding Datum
+Offer Date,Aanbieding datum
 Office,Kantoor
 Office Equipments,Office Uitrustingen
 Office Maintenance Expenses,Office onderhoudskosten
-Office Rent,Office Rent
+Office Rent,Kantoorhuur
 Old Parent,Oude Parent
 On Net Total,On Net Totaal
-On Previous Row Amount,Op de vorige toer Bedrag
-On Previous Row Total,Op de vorige toer Totaal
+On Previous Row Amount,Aantal van vorige rij
+On Previous Row Total,Aantal van volgende rij
 Online Auctions,online Veilingen
 Only Leave Applications with status 'Approved' can be submitted,Alleen Laat Toepassingen met de status ' Goedgekeurd ' kunnen worden ingediend
 "Only Serial Nos with status ""Available"" can be delivered.","Alleen serienummers met de status ""Beschikbaar"" kan worden geleverd."
@@ -1841,7 +1842,7 @@ Open Production Orders,Open productieorders
 Open Tickets,Open Kaarten
 Opening (Cr),Opening ( Cr )
 Opening (Dr),Opening ( Dr )
-Opening Date,Opening Datum
+Opening Date,Openingsdatum
 Opening Entry,Opening Entry
 Opening Qty,Opening Aantal
 Opening Time,Opening Time
@@ -2264,31 +2265,31 @@ Quality Inspection,Kwaliteitscontrole
 Quality Inspection Parameters,Quality Inspection Parameters
 Quality Inspection Reading,Kwaliteitscontrole Reading
 Quality Inspection Readings,Kwaliteitscontrole Lezingen
-Quality Inspection required for Item {0},Kwaliteitscontrole vereist voor post {0}
+Quality Inspection required for Item {0},Kwaliteitscontrole vereist voor item {0}
 Quality Management,Quality Management
 Quantity,Hoeveelheid
-Quantity Requested for Purchase,Aantal op aankoop
+Quantity Requested for Purchase,Aantal aangevraagd voor inkoop
 Quantity and Rate,Hoeveelheid en Prijs
-Quantity and Warehouse,Hoeveelheid en Warehouse
-Quantity cannot be a fraction in row {0},Hoeveelheid kan een fractie in rij niet {0}
-Quantity for Item {0} must be less than {1},Hoeveelheid voor post {0} moet kleiner zijn dan {1}
+Quantity and Warehouse,Hoeveelheid en magazijn
+Quantity cannot be a fraction in row {0},Hoeveelheid kan geen onderdeel zijn in rij {0}
+Quantity for Item {0} must be less than {1},Hoeveelheid voor item {0} moet kleiner zijn dan {1}
 Quantity in row {0} ({1}) must be same as manufactured quantity {2},Hoeveelheid in rij {0} ( {1} ) moet hetzelfde zijn als geproduceerde hoeveelheid {2}
 Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,Hoeveelheid product verkregen na de productie / ompakken van de gegeven hoeveelheden grondstoffen
-Quantity required for Item {0} in row {1},Benodigde hoeveelheid voor post {0} in rij {1}
+Quantity required for Item {0} in row {1},Benodigde hoeveelheid voor item {0} in rij {1}
 Quarter,Kwartaal
 Quarterly,Driemaandelijks
 Quick Help,Quick Help
-Quotation,Citaat
+Quotation,Offerte Aanvraag
 Quotation Item,Offerte Item
 Quotation Items,Offerte Items
-Quotation Lost Reason,Offerte Verloren Reden
+Quotation Lost Reason,Reden verlies van Offerte
 Quotation Message,Offerte Bericht
 Quotation To,Offerte Voor
-Quotation Trends,offerte Trends
-Quotation {0} is cancelled,Offerte {0} wordt geannuleerd
+Quotation Trends,Offerte Trends
+Quotation {0} is cancelled,Offerte {0} is geannuleerd
 Quotation {0} not of type {1},Offerte {0} niet van het type {1}
 Quotations received from Suppliers.,Offertes ontvangen van leveranciers.
-Quotes to Leads or Customers.,Quotes om leads of klanten.
+Quotes to Leads or Customers.,Offertes naar leads of klanten.
 Raise Material Request when stock reaches re-order level,Raise Materiaal aanvragen bij voorraad strekt re-order niveau
 Raised By,Opgevoed door
 Raised By (Email),Verhoogde Door (E-mail)
@@ -2480,72 +2481,72 @@ SO Pending Qty,SO afwachting Aantal
 SO Qty,SO Aantal
 Salary,Salaris
 Salary Information,Salaris Informatie
-Salary Manager,Salaris Manager
-Salary Mode,Salaris Mode
-Salary Slip,Loonstrook
-Salary Slip Deduction,Loonstrook Aftrek
-Salary Slip Earning,Loonstrook verdienen
-Salary Slip of employee {0} already created for this month,Loonstrook van de werknemer {0} al gemaakt voor deze maand
+Salary Manager,Salaris beheerder
+Salary Mode,Salaris Modus
+Salary Slip,Salarisstrook
+Salary Slip Deduction,Salarisstrook Aftrek
+Salary Slip Earning,Salarisstrook Inkomen
+Salary Slip of employee {0} already created for this month,Salarisstrook van de werknemer {0} al gemaakt voor deze maand
 Salary Structure,Salarisstructuur
 Salary Structure Deduction,Salaris Structuur Aftrek
-Salary Structure Earning,Salaris Structuur verdienen
+Salary Structure Earning,Salaris Structuur Inkomen
 Salary Structure Earnings,Salaris Structuur winst
 Salary breakup based on Earning and Deduction.,Salaris verbreken op basis Verdienen en Aftrek.
 Salary components.,Salaris componenten.
 Salary template master.,Salaris sjabloon meester .
-Sales,Sales
-Sales Analytics,Sales Analytics
+Sales,Verkoop
+Sales Analytics,Verkoop analyse
 Sales BOM,Verkoop BOM
 Sales BOM Help,Verkoop BOM Help
 Sales BOM Item,Verkoop BOM Item
 Sales BOM Items,Verkoop BOM Items
-Sales Browser,Sales Browser
+Sales Browser,Verkoop verkenner
 Sales Details,Verkoop Details
-Sales Discounts,Sales kortingen
-Sales Email Settings,Sales E-mailinstellingen
-Sales Expenses,verkoopkosten
+Sales Discounts,Verkoop kortingen
+Sales Email Settings,Verkoop emailinstellingen
+Sales Expenses,Verkoopkosten
 Sales Extras,Sales Extra&#39;s
 Sales Funnel,Sales Funnel
-Sales Invoice,Sales Invoice
+Sales Invoice,Verkoopfactuur
 Sales Invoice Advance,Sales Invoice Advance
-Sales Invoice Item,Sales Invoice Item
+Sales Invoice Item,Verkoopfactuur Item
 Sales Invoice Items,Verkoopfactuur Items
-Sales Invoice Message,Sales Invoice Message
-Sales Invoice No,Verkoop Factuur nr.
+Sales Invoice Message,Verkoopfactuur bericht
+Sales Invoice No,Verkoopfactuur nr.
 Sales Invoice Trends,Verkoopfactuur Trends
-Sales Invoice {0} has already been submitted,Verkoopfactuur {0} al is ingediend
-Sales Invoice {0} must be cancelled before cancelling this Sales Order,Verkoopfactuur {0} moet worden geannuleerd voordat het annuleren van deze verkooporder
+Sales Invoice {0} has already been submitted,Verkoopfactuur {0} ia al ingediend
+Sales Invoice {0} must be cancelled before cancelling this Sales Order,Verkoopfactuur {0} moet worden geannuleerd voordat deze verkooporder kan worden geannuleerd.
 Sales Order,Verkooporder
 Sales Order Date,Verkooporder Datum
-Sales Order Item,Sales Order Item
-Sales Order Items,Sales Order Items
+Sales Order Item,Verkooporder Item
+Sales Order Items,Verkooporder Items
 Sales Order Message,Verkooporder Bericht
-Sales Order No,Sales Order No
-Sales Order Required,Verkooporder Vereiste
-Sales Order Trends,Sales Order Trends
-Sales Order required for Item {0},Klantorder nodig is voor post {0}
-Sales Order {0} is not submitted,Sales Order {0} is niet ingediend
-Sales Order {0} is not valid,Sales Order {0} is niet geldig
-Sales Order {0} is stopped,Sales Order {0} is gestopt
-Sales Partner,Sales Partner
-Sales Partner Name,Sales Partner Naam
+Sales Order No,Verkooporder nr.
+Sales Order Required,Verkooporder Vereist
+Sales Order Trends,Verkooporder Trends
+Sales Order required for Item {0},Verkooporder nodig voor item {0}
+Sales Order {0} is not submitted,Verkooporder {0} is niet ingediend
+Sales Order {0} is not valid,Verkooporder {0} is niet geldig
+Sales Order {0} is stopped,Verkooporder {0} is gestopt
+Sales Partner,Verkoop Partner
+Sales Partner Name,Verkoop Partner Naam
 Sales Partner Target,Sales Partner Target
 Sales Partners Commission,Sales Partners Commissie
-Sales Person,Sales Person
+Sales Person,Verkoper
 Sales Person Name,Sales Person Name
 Sales Person Target Variance Item Group-Wise,Sales Person Doel Variance Post Group - Wise
 Sales Person Targets,Sales Person Doelen
 Sales Person-wise Transaction Summary,Sales Person-wise Overzicht opdrachten
 Sales Register,Sales Registreer
 Sales Return,Verkoop Terug
-Sales Returned,Sales Terugkerende
+Sales Returned,Terugkerende verkoop
 Sales Taxes and Charges,Verkoop en-heffingen
 Sales Taxes and Charges Master,Verkoop en-heffingen Master
-Sales Team,Sales Team
-Sales Team Details,Sales Team Details
+Sales Team,Verkoop Team
+Sales Team Details,Verkoops Team Details
 Sales Team1,Verkoop Team1
 Sales and Purchase,Verkoop en Inkoop
-Sales campaigns.,Verkoopacties .
+Sales campaigns.,Verkoop campagnes
 Salutation,Aanhef
 Sample Size,Steekproefomvang
 Sanctioned Amount,Gesanctioneerde Bedrag
@@ -2577,7 +2578,7 @@ Securities and Deposits,Effecten en deposito's
 Select Brand...,Selecteer Merk ...
 Select Budget Distribution to unevenly distribute targets across months.,Selecteer Budget Uitkering aan ongelijk verdelen doelen uit maanden.
 "Select Budget Distribution, if you want to track based on seasonality.","Selecteer Budget Distributie, als je wilt volgen op basis van seizoensinvloeden."
-Select Company...,Selecteer Company ...
+Select Company...,Selecteer Bedrijf ...
 Select DocType,Selecteer DocType
 Select Fiscal Year...,Selecteer boekjaar ...
 Select Items,Selecteer Items
@@ -2603,10 +2604,10 @@ Select your home country and check the timezone and currency.,Selecteer uw land 
 "Selecting ""Yes"" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.",&quot;Ja&quot; zal u toelaten om Bill of Material tonen grondstof-en operationele kosten om dit item te produceren maken.
 "Selecting ""Yes"" will allow you to make a Production Order for this item.",&quot;Ja&quot; zal u toelaten om een ​​productieorder voor dit item te maken.
 "Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.",&quot;Ja&quot; geeft een unieke identiteit voor elke entiteit van dit artikel die kunnen worden bekeken in de Serial No meester.
-Selling,Selling
-Selling Settings,Selling Instellingen
+Selling,Verkoop
+Selling Settings,Verkoop Instellingen
 "Selling must be checked, if Applicable For is selected as {0}","Selling moet worden gecontroleerd, indien van toepassing voor is geselecteerd als {0}"
-Send,Sturen
+Send,Verstuur
 Send Autoreply,Stuur Autoreply
 Send Email,E-mail verzenden
 Send From,Stuur Van
@@ -3138,29 +3139,29 @@ Valuation,Taxatie
 Valuation Method,Waardering Methode
 Valuation Rate,Waardering Prijs
 Valuation Rate required for Item {0},Taxatie Rate vereist voor post {0}
-Valuation and Total,Taxatie en Total
+Valuation and Total,Taxatie en Totaal
 Value,Waarde
 Value or Qty,Waarde of Aantal
 Vehicle Dispatch Date,Vehicle Dispatch Datum
-Vehicle No,Voertuig Geen
+Vehicle No,Voertuig nr.
 Venture Capital,Venture Capital
-Verified By,Verified By
-View Ledger,Bekijk Ledger
+Verified By,Geverifieerd door
+View Ledger,Bekijk Grootboek
 View Now,Bekijk nu
 Visit report for maintenance call.,Bezoek rapport voor onderhoud gesprek.
 Voucher #,voucher #
 Voucher Detail No,Voucher Detail Geen
 Voucher Detail Number,Voucher Detail Nummer
 Voucher ID,Voucher ID
-Voucher No,Blad nr.
+Voucher No,Voucher nr.
 Voucher Type,Voucher Type
-Voucher Type and Date,Voucher Type en Date
+Voucher Type and Date,Voucher Type en Datum
 Walk In,Walk In
-Warehouse,magazijn
+Warehouse,Magazijn
 Warehouse Contact Info,Warehouse Contact Info
 Warehouse Detail,Magazijn Detail
-Warehouse Name,Warehouse Naam
-Warehouse and Reference,Magazijn en Reference
+Warehouse Name,Magazijn Naam
+Warehouse and Reference,Magazijn en Referentie
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,Magazijn kan niet worden verwijderd als voorraad grootboek toegang bestaat voor dit magazijn .
 Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,Magazijn kan alleen via Stock Entry / Delivery Note / Kwitantie worden veranderd
 Warehouse cannot be changed for Serial No.,Magazijn kan niet worden gewijzigd voor Serienummer
@@ -3192,9 +3193,9 @@ We buy this Item,We kopen dit item
 We sell this Item,Wij verkopen dit item
 Website,Website
 Website Description,Website Beschrijving
-Website Item Group,Website Item Group
+Website Item Group,Website Item Groep
 Website Item Groups,Website Artikelgroepen
-Website Settings,Website-instellingen
+Website Settings,Website instellingen
 Website Warehouse,Website Warehouse
 Wednesday,Woensdag
 Weekly,Wekelijks
@@ -3203,7 +3204,7 @@ Weight UOM,Gewicht Verpakking
 "Weight is mentioned,\nPlease mention ""Weight UOM"" too","Gewicht wordt vermeld , \ nGelieve noemen "" Gewicht Verpakking "" te"
 Weightage,Weightage
 Weightage (%),Weightage (%)
-Welcome,welkom
+Welcome,Welkom
 Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!,"Welkom bij ERPNext . In de komende paar minuten zullen we u helpen opzetten van je ERPNext account. Probeer en vul zo veel mogelijk informatie je hebt , zelfs als het duurt een beetje langer . Het zal u een hoop tijd later besparen . Good Luck !"
 Welcome to ERPNext. Please select your language to begin the Setup Wizard.,Welkom bij ERPNext . Selecteer uw taal om de installatiewizard te starten.
 What does it do?,Wat doet het?
@@ -3212,8 +3213,8 @@ What does it do?,Wat doet het?
 Where items are stored.,Waar items worden opgeslagen.
 Where manufacturing operations are carried out.,Wanneer de productie operaties worden uitgevoerd.
 Widowed,Weduwe
-Will be calculated automatically when you enter the details,Wordt automatisch berekend wanneer u de details
-Will be updated after Sales Invoice is Submitted.,Zal worden bijgewerkt na verkoopfactuur wordt ingediend.
+Will be calculated automatically when you enter the details,Wordt automatisch berekend wanneer u de details invult
+Will be updated after Sales Invoice is Submitted.,Zal worden bijgewerkt zodra verkoopfactuur is ingediend.
 Will be updated when batched.,Zal worden bijgewerkt wanneer gedoseerd.
 Will be updated when billed.,Zal worden bijgewerkt wanneer gefactureerd.
 Wire Transfer,overboeking
@@ -3226,7 +3227,7 @@ Work-in-Progress Warehouse,Work-in-Progress Warehouse
 Work-in-Progress Warehouse is required before Submit,Work -in- Progress Warehouse wordt vóór vereist Verzenden
 Working,Werkzaam
 Working Days,Werkdagen
-Workstation,Workstation
+Workstation,Werkstation
 Workstation Name,Naam van werkstation
 Write Off Account,Schrijf Uit account
 Write Off Amount,Schrijf Uit Bedrag
@@ -3242,9 +3243,9 @@ Year End Date,Eind van het jaar Datum
 Year Name,Jaar Naam
 Year Start Date,Jaar Startdatum
 Year of Passing,Jaar van de Passing
-Yearly,Jaar-
+Yearly,Jaarlijks
 Yes,Ja
-You are not authorized to add or update entries before {0},U bent niet bevoegd om items toe te voegen of bij te werken voordat {0}
+You are not authorized to add or update entries before {0},U bent niet bevoegd om items toe te voegen of bij te werken voor {0}
 You are not authorized to set Frozen value,U bent niet bevoegd om Frozen waarde in te stellen
 You are the Expense Approver for this record. Please Update the 'Status' and Save,U bent de Expense Approver voor dit record . Werk van de 'Status' en opslaan
 You are the Leave Approver for this record. Please Update the 'Status' and Save,U bent de Leave Approver voor dit record . Werk van de 'Status' en opslaan
@@ -3262,16 +3263,16 @@ You have entered duplicate items. Please rectify and try again.,U heeft dubbele 
 You may need to update: {0},U kan nodig zijn om te werken: {0}
 You must Save the form before proceeding,U moet het formulier opslaan voordat u verder gaat
 Your Customer's TAX registration numbers (if applicable) or any general information,Uw klant fiscale nummers (indien van toepassing) of een algemene informatie
-Your Customers,uw klanten
-Your Login Id,Uw login-ID
+Your Customers,Uw Klanten
+Your Login Id,Uw loginnaam
 Your Products or Services,Uw producten of diensten
-Your Suppliers,uw Leveranciers
+Your Suppliers,Uw Leveranciers
 Your email address,Uw e-mailadres
 Your financial year begins on,Uw financiële jaar begint op
 Your financial year ends on,Uw financiële jaar eindigt op
 Your sales person who will contact the customer in future,Uw verkoop persoon die de klant in de toekomst contact op te nemen
 Your sales person will get a reminder on this date to contact the customer,Uw verkoop persoon krijgt een herinnering op deze datum aan de klant contact op te nemen
-Your setup is complete. Refreshing...,Uw installatie is voltooid . Verfrissend ...
+Your setup is complete. Refreshing...,Uw installatie is voltooid. Aan het vernieuwen ...
 Your support email id - must be a valid email - this is where your emails will come!,Uw steun e-id - moet een geldig e zijn - dit is waar je e-mails zal komen!
 [Error],[Error]
 [Select],[Selecteer ]

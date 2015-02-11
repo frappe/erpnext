@@ -123,7 +123,7 @@
    "permlevel": 0
   }, 
   {
-   "description": "Select Budget Distribution to unevenly distribute targets across months.", 
+   "description": "Select Monthly Distribution to unevenly distribute targets across months.", 
    "fieldname": "distribution_id", 
    "fieldtype": "Link", 
    "label": "Target Distribution", 
@@ -136,7 +136,7 @@
  "icon": "icon-map-marker", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-01-01 15:36:03.787473", 
+ "modified": "2015-02-05 05:11:48.158225", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Territory", 
@@ -153,6 +153,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

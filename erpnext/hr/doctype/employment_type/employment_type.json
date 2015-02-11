@@ -20,7 +20,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2015-01-15 15:24:46.680451", 
+ "modified": "2015-02-05 05:11:38.516592", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employment Type", 
@@ -36,6 +36,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -48,6 +49,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

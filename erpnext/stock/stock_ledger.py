@@ -14,7 +14,7 @@ class NegativeStockError(frappe.ValidationError): pass
 _exceptions = frappe.local('stockledger_exceptions')
 # _exceptions = []
 
-def make_sl_entries(sl_entries, is_amended=None):
+def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False):
 	if sl_entries:
 		from erpnext.stock.utils import update_bin
 
@@ -28,14 +28,14 @@ def make_sl_entries(sl_entries, is_amended=None):
 				sle['actual_qty'] = -flt(sle['actual_qty'])
 
 			if sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
-				sle_id = make_entry(sle)
+				sle_id = make_entry(sle, allow_negative_stock)
 
 			args = sle.copy()
 			args.update({
 				"sle_id": sle_id,
 				"is_amended": is_amended
 			})
-			update_bin(args)
+			update_bin(args, allow_negative_stock)
 
 		if cancel:
 			delete_cancelled_entry(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
@@ -46,10 +46,11 @@ def set_as_cancel(voucher_type, voucher_no):
 		where voucher_no=%s and voucher_type=%s""",
 		(now(), frappe.session.user, voucher_type, voucher_no))
 
-def make_entry(args):
+def make_entry(args, allow_negative_stock=False):
 	args.update({"doctype": "Stock Ledger Entry"})
 	sle = frappe.get_doc(args)
-	sle.ignore_permissions = 1
+	sle.flags.ignore_permissions = 1
+	sle.allow_negative_stock=allow_negative_stock
 	sle.insert()
 	sle.submit()
 	return sle.name
@@ -58,7 +59,7 @@ def delete_cancelled_entry(voucher_type, voucher_no):
 	frappe.db.sql("""delete from `tabStock Ledger Entry`
 		where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
-def update_entries_after(args, allow_zero_rate=False, verbose=1):
+def update_entries_after(args, allow_zero_rate=False, allow_negative_stock=False, verbose=1):
 	"""
 		update valution rate and qty after transaction
 		from the current time-bucket onwards
@@ -72,6 +73,9 @@ def update_entries_after(args, allow_zero_rate=False, verbose=1):
 	"""
 	if not _exceptions:
 		frappe.local.stockledger_exceptions = []
+
+	if not allow_negative_stock:
+		allow_negative_stock = cint(frappe.db.get_default("allow_negative_stock"))
 
 	previous_sle = get_sle_before_datetime(args)
 
@@ -149,7 +153,7 @@ def update_entries_after(args, allow_zero_rate=False, verbose=1):
 			"item_code": args["item_code"],
 			"warehouse": args["warehouse"],
 		})
-		bin_wrapper.ignore_permissions = 1
+		bin_wrapper.flags.ignore_permissions = 1
 		bin_wrapper.insert()
 
 	frappe.db.sql("""update `tabBin` set valuation_rate=%s, actual_qty=%s,

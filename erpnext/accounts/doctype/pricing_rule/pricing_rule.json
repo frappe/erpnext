@@ -244,7 +244,7 @@
  "icon": "icon-gift", 
  "idx": 1, 
  "istable": 0, 
- "modified": "2015-01-05 10:58:42.550092", 
+ "modified": "2015-02-05 05:11:42.530822", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Pricing Rule", 
@@ -259,6 +259,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts Manager", 
+   "share": 1, 
    "write": 1
   }, 
   {
@@ -271,6 +272,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Manager", 
+   "share": 1, 
    "write": 1
   }, 
   {
@@ -280,6 +282,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Purchase Manager", 
+   "share": 1, 
    "write": 1
   }, 
   {
@@ -289,6 +292,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Website Manager", 
+   "share": 1, 
    "write": 1
   }, 
   {
@@ -300,6 +304,7 @@
    "read": 1, 
    "report": 1, 
    "role": "System Manager", 
+   "share": 1, 
    "write": 1
   }
  ], 

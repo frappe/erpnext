@@ -57,6 +57,7 @@ class Item(WebsiteGenerator):
 		self.validate_reorder_level()
 		self.validate_warehouse_for_reorder()
 		self.validate_variants()
+		self.update_item_desc()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -390,7 +391,7 @@ class Item(WebsiteGenerator):
 			if not frappe.db.exists("Item", newdn):
 				frappe.throw(_("Item {0} does not exist").format(newdn))
 
-			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no", "is_manufactured_item"]
+			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
 			new_properties = [cstr(d) for d in frappe.db.get_value("Item", newdn, field_list)]
 			if new_properties != [cstr(self.get(fld)) for fld in field_list]:
 				frappe.throw(_("To merge, following properties must be same for both items")
@@ -433,7 +434,13 @@ class Item(WebsiteGenerator):
 					row = self.append("website_specifications")
 					row.label = label
 					row.description = desc
-
+					
+	def update_item_desc(self):
+		if frappe.db.get_value('BOM',self.name, 'description') != self.description:
+			frappe.db.sql("""update `tabBOM` set description = %s where item = %s and docstatus < 2""",(self.description, self.name))
+			frappe.db.sql("""update `tabBOM Item` set description = %s where item_code = %s and docstatus < 2""",(self.description, self.name))
+			frappe.db.sql("""update `tabBOM Explosion Item` set description = %s where item_code = %s and docstatus < 2""",(self.description, self.name))		
+		
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
 		end_of_life = frappe.db.get_value("Item", item_code, "end_of_life")

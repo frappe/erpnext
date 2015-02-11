@@ -31,7 +31,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2014-07-31 07:25:26.606030", 
+ "modified": "2015-02-05 05:11:37.761378", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Earning Type", 
@@ -47,6 +47,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

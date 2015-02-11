@@ -22,6 +22,33 @@
    "search_index": 1
   }, 
   {
+   "fieldname": "item_name", 
+   "fieldtype": "Data", 
+   "label": "Item Name", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "rm_cost_as_per", 
+   "fieldtype": "Select", 
+   "label": "Rate Of Materials Based On", 
+   "options": "Valuation Rate\nLast Purchase Rate\nPrice List", 
+   "permlevel": 0
+  }, 
+  {
+   "depends_on": "eval:doc.rm_cost_as_per===\"Price List\"", 
+   "fieldname": "buying_price_list", 
+   "fieldtype": "Link", 
+   "label": "Price List", 
+   "options": "Price List", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "cb0", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
    "allow_on_submit": 1, 
    "default": "1", 
    "fieldname": "is_active", 
@@ -48,30 +75,10 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "cb0", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
-  }, 
-  {
    "description": "Manage cost of operations", 
    "fieldname": "with_operations", 
    "fieldtype": "Check", 
    "label": "With Operations", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "rm_cost_as_per", 
-   "fieldtype": "Select", 
-   "label": "Rate Of Materials Based On", 
-   "options": "Valuation Rate\nLast Purchase Rate\nPrice List", 
-   "permlevel": 0
-  }, 
-  {
-   "depends_on": "eval:doc.rm_cost_as_per===\"Price List\"", 
-   "fieldname": "buying_price_list", 
-   "fieldtype": "Link", 
-   "label": "Price List", 
-   "options": "Price List", 
    "permlevel": 0
   }, 
   {
@@ -245,7 +252,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-01-07 11:11:07.047695", 
+ "modified": "2015-02-05 05:11:35.113320", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM", 
@@ -261,6 +268,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Manufacturing Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -275,6 +283,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Manufacturing User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }

@@ -126,7 +126,7 @@ class PurchaseReceipt(BuyingController):
 				 if not d.prevdoc_docname:
 					 frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
 
-	def update_stock_ledger(self):
+	def update_stock_ledger(self, allow_negative_stock=False):
 		sl_entries = []
 		stock_items = self.get_stock_items()
 
@@ -135,10 +135,11 @@ class PurchaseReceipt(BuyingController):
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 
 				if pr_qty:
+					val_rate_db_precision = 6 if cint(self.precision("valuation_rate")) <= 6 else 9
 					sl_entries.append(self.get_sl_entries(d, {
 						"actual_qty": flt(pr_qty),
 						"serial_no": cstr(d.serial_no).strip(),
-						"incoming_rate": d.valuation_rate
+						"incoming_rate": flt(d.valuation_rate, val_rate_db_precision)
 					}))
 
 				if flt(d.rejected_qty) > 0:
@@ -150,7 +151,7 @@ class PurchaseReceipt(BuyingController):
 					}))
 
 		self.bk_flush_supp_wh(sl_entries)
-		self.make_sl_entries(sl_entries)
+		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
 	def update_ordered_qty(self):
 		po_map = {}
@@ -285,14 +286,16 @@ class PurchaseReceipt(BuyingController):
 			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
 				if warehouse_account.get(d.warehouse):
 
+					val_rate_db_precision = 6 if cint(self.precision("valuation_rate")) <= 6 else 9
+
 					# warehouse account
 					gl_entries.append(self.get_gl_dict({
 						"account": warehouse_account[d.warehouse],
 						"against": stock_rbnb,
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-						"debit": flt(flt(d.valuation_rate) * flt(d.qty) * flt(d.conversion_factor),
-							self.precision("valuation_rate", d))
+						"debit": flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty) * flt(d.conversion_factor),
+							self.precision("base_amount", d))
 					}))
 
 					# stock received but not billed
@@ -325,6 +328,24 @@ class PurchaseReceipt(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.rm_supp_cost)
 						}))
+
+					# divisional loss adjustment
+					if not self.get("other_charges"):
+						sle_valuation_amount = flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty) * flt(d.conversion_factor),
+								self.precision("base_amount", d))
+
+						distributed_amount = flt(flt(d.base_amount, self.precision("base_amount", d))) + \
+							flt(d.landed_cost_voucher_amount) + flt(d.rm_supp_cost)
+
+						divisional_loss = flt(distributed_amount - sle_valuation_amount, self.precision("base_amount", d))
+						if divisional_loss:
+							gl_entries.append(self.get_gl_dict({
+								"account": stock_rbnb,
+								"against": warehouse_account[d.warehouse],
+								"cost_center": d.cost_center,
+								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+								"debit": divisional_loss
+							}))
 
 				elif d.warehouse not in warehouse_with_no_account or \
 					d.rejected_warehouse not in warehouse_with_no_account:

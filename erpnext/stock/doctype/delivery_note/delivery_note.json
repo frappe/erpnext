@@ -142,7 +142,7 @@
    "width": "150px"
   }, 
   {
-   "description": "Select the relevant company name if you have multiple companies", 
+   "description": "", 
    "fieldname": "company", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -1024,7 +1024,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2015-01-15 07:33:24.245923", 
+ "modified": "2015-02-05 05:11:37.151596", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note", 
@@ -1042,6 +1042,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -1056,6 +1057,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -1071,6 +1073,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 

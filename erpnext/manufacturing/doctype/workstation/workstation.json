@@ -138,7 +138,7 @@
  ], 
  "icon": "icon-wrench", 
  "idx": 1, 
- "modified": "2014-12-24 14:47:06.676335", 
+ "modified": "2015-02-05 05:13:38.580439", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Workstation", 
@@ -154,6 +154,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Manufacturing User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

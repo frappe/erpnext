@@ -33,16 +33,15 @@ class StockLedgerEntry(Document):
 
 	#check for item quantity available in stock
 	def actual_amt_check(self):
-		if self.batch_no:
+		if self.batch_no and not self.get("allow_negative_stock"):
 			batch_bal_after_transaction = flt(frappe.db.sql("""select sum(actual_qty)
 				from `tabStock Ledger Entry`
 				where warehouse=%s and item_code=%s and batch_no=%s""",
 				(self.warehouse, self.item_code, self.batch_no))[0][0])
 
 			if batch_bal_after_transaction < 0:
-				frappe.throw(_("Negative balance {0} in Batch {1} for Item {2} at Warehouse {3} on {4} {5}")
-					.format(batch_bal_after_transaction - self.actual_qty, self.batch_no, self.item_code, self.warehouse,
-						formatdate(self.posting_date), self.posting_time))
+				frappe.throw(_("Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3}")
+					.format(self.batch_no, batch_bal_after_transaction, self.item_code, self.warehouse))
 
 	def validate_mandatory(self):
 		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','company']
@@ -62,15 +61,16 @@ class StockLedgerEntry(Document):
 			frappe.throw(_("Item {0} must be a stock Item").format(self.item_code))
 
 		# check if batch number is required
-		if item_det.has_batch_no =='Yes' and self.voucher_type != 'Stock Reconciliation':
-			if not self.batch_no:
-				frappe.throw("Batch number is mandatory for Item {0}".format(self.item_code))
-
-			# check if batch belongs to item
-			if not frappe.db.get_value("Batch",
-					{"item": self.item_code, "name": self.batch_no}):
-				frappe.throw(_("{0} is not a valid Batch Number for Item {1}").format(self.batch_no, self.item_code))
-
+		if self.voucher_type != 'Stock Reconciliation':
+			if item_det.has_batch_no =='Yes':
+				if not self.batch_no:
+					frappe.throw(_("Batch number is mandatory for Item {0}").format(self.item_code))
+				elif not frappe.db.get_value("Batch",{"item": self.item_code, "name": self.batch_no}):
+						frappe.throw(_("{0} is not a valid Batch Number for Item {1}").format(self.batch_no, self.item_code))
+			
+			elif item_det.has_batch_no =='No' and self.batch_no:
+					frappe.throw(_("The Item {0} cannot have Batch").format(self.item_code))
+			
 		if item_det.has_variants:
 			frappe.throw(_("Stock cannot exist for Item {0} since has variants").format(self.item_code),
 				ItemTemplateCannotHaveStock)

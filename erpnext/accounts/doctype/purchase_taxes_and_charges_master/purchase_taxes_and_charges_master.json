@@ -71,7 +71,7 @@
  ], 
  "icon": "icon-money", 
  "idx": 1, 
- "modified": "2015-01-05 11:12:27.944849", 
+ "modified": "2015-02-05 05:11:44.223684", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Taxes and Charges Master", 
@@ -101,6 +101,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Purchase Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

@@ -227,7 +227,7 @@
  ], 
  "icon": "icon-file-text", 
  "idx": 1, 
- "modified": "2014-12-24 16:39:45.518474", 
+ "modified": "2015-02-05 05:11:45.120566", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Structure", 
@@ -243,6 +243,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -255,6 +256,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

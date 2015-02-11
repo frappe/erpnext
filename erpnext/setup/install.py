@@ -20,7 +20,7 @@ def after_install():
 def feature_setup():
 	"""save global defaults and features setup"""
 	doc = frappe.get_doc("Features Setup", "Features Setup")
-	doc.ignore_permissions = True
+	doc.flags.ignore_permissions = True
 
 	# store value as 1 for all these fields
 	flds = ['fs_item_serial_nos', 'fs_item_batch_nos', 'fs_brands', 'fs_item_barcode',

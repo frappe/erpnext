@@ -54,7 +54,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-01-15 15:25:52.728797", 
+ "modified": "2015-02-05 05:11:39.794192", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Attribute", 
@@ -76,6 +76,7 @@
    "report": 1, 
    "role": "Material Master Manager", 
    "set_user_permissions": 0, 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

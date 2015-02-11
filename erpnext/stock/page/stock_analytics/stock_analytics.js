@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 
-frappe.pages['stock-analytics'].onload = function(wrapper) { 
+frappe.pages['stock-analytics'].on_page_load = function(wrapper) { 
 	frappe.ui.make_app_page({
 		parent: wrapper,
 		title: __('Stock Analytics'),

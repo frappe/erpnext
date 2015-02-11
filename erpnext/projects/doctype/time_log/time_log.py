@@ -23,6 +23,8 @@ class TimeLog(Document):
 		self.validate_time_log_for()
 		self.check_workstation_timings()
 		self.validate_production_order()
+		self.validate_project()
+		self.validate_manufacturing()
 
 	def on_submit(self):
 		self.update_production_order()
@@ -108,9 +110,10 @@ class TimeLog(Document):
 					tl.hours, self.production_order, operation[0], operation[1]))
 
 			pro_order = frappe.get_doc("Production Order", self.production_order)
-			pro_order.ignore_validate_update_after_submit = True
+			pro_order.flags.ignore_validate_update_after_submit = True
 			pro_order.update_operation_status()
 			pro_order.calculate_operating_cost()
+			pro_order.set_actual_dates()
 			pro_order.save()
 
 	def get_operation_start_end_time(self):
@@ -126,6 +129,26 @@ class TimeLog(Document):
 			from `tabTime Log`
 			where production_order = %s and operation = %s and docstatus=1""",
 			(self.production_order, self.operation), as_dict=1)[0]
+
+	def validate_project(self):
+		if self.time_log_for == 'Project':
+			if not self.project:
+				frappe.throw(_("Project is Mandatory."))
+		if self.time_log_for == "":
+			self.project = None
+
+	def validate_manufacturing(self):
+		if self.time_log_for == 'Manufacturing':
+			if not self.production_order:
+				frappe.throw(_("Production Order is Mandatory"))
+			if not self.operation:
+				frappe.throw(_("Operation is Mandatory"))
+			if not self.completed_qty:
+				self.completed_qty=0
+		else:
+			self.production_order = None
+			self.operation = None
+			self.quantity = None
 
 @frappe.whitelist()
 def get_workstation(production_order, operation):
@@ -163,7 +186,7 @@ def get_events(start, end, filters=None):
 
 	data = frappe.db.sql("""select name, from_time, to_time,
 		activity_type, task, project, production_order, workstation from `tabTime Log`
-		where ( from_time between %(start)s and %(end)s or to_time between %(start)s and %(end)s )
+		where docstatus < 2 and ( from_time between %(start)s and %(end)s or to_time between %(start)s and %(end)s )
 		{conditions}""".format(conditions=conditions), {
 			"start": start,
 			"end": end

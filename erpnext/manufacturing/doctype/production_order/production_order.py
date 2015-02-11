@@ -175,16 +175,17 @@ class ProductionOrder(Document):
 		self.calculate_operating_cost()
 
 	def plan_operations(self):
-		scheduled_datetime = self.planned_start_date
-		for d in self.get('operations'):
-			while getdate(scheduled_datetime) in self.get_holidays(d.workstation):
-				scheduled_datetime = get_datetime(scheduled_datetime) + relativedelta(days=1)
+		if self.planned_start_date:
+			scheduled_datetime = self.planned_start_date
+			for d in self.get('operations'):
+				while getdate(scheduled_datetime) in self.get_holidays(d.workstation):
+					scheduled_datetime = get_datetime(scheduled_datetime) + relativedelta(days=1)
 
-			d.planned_start_time = scheduled_datetime
-			scheduled_datetime = get_datetime(scheduled_datetime) + relativedelta(minutes=d.time_in_mins)
-			d.planned_end_time = scheduled_datetime
+				d.planned_start_time = scheduled_datetime
+				scheduled_datetime = get_datetime(scheduled_datetime) + relativedelta(minutes=d.time_in_mins)
+				d.planned_end_time = scheduled_datetime
 
-		self.planned_end_date = scheduled_datetime
+			self.planned_end_date = scheduled_datetime
 
 
 	def get_holidays(self, workstation):
@@ -208,7 +209,16 @@ class ProductionOrder(Document):
 				d.status = "Completed"
 			else:
 				frappe.throw(_("Completed Qty can not be greater than 'Qty to Manufacture'"))
-
+		
+	def set_actual_dates(self):
+		if self.get("operations"):
+			actual_date = frappe.db.sql("""select min(actual_start_time) as start_date, max(actual_end_time) as end_date from `tabProduction Order Operation`
+				where parent = %s and docstatus=1""", self.name, as_dict=1)[0]
+			self.actual_start_date = actual_date.start_date
+			self.actual_end_date = actual_date.end_date
+		else:
+			self.actual_start_date = None
+			self.actual_end_date = None
 
 @frappe.whitelist()
 def get_item_details(item):
@@ -281,6 +291,7 @@ def make_time_log(name, operation, from_time, to_time, qty=None,  project=None, 
 	time_log.project = project
 	time_log.operation= operation
 	time_log.workstation= workstation
+	time_log.activity_type= "Manufacturing"
 	time_log.completed_qty = flt(qty)
 	if from_time and to_time :
 		time_log.calculate_total_hours()
@@ -288,7 +299,7 @@ def make_time_log(name, operation, from_time, to_time, qty=None,  project=None, 
 
 @frappe.whitelist()
 def auto_make_time_log(production_order_id):
-	if frappe.db.get_value("Time Log", filters={"production_order": production_order_id}):
+	if frappe.db.get_value("Time Log", filters={"production_order": production_order_id, "docstatus":1}):
 		frappe.throw(_("Time logs already exists against this Production Order"))
 
 	time_logs = []

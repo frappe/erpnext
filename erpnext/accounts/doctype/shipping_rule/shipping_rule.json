@@ -102,7 +102,7 @@
  ], 
  "icon": "icon-truck", 
  "idx": 1, 
- "modified": "2015-01-05 14:59:25.045126", 
+ "modified": "2015-02-05 05:11:46.634371", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Shipping Rule", 
@@ -137,6 +137,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts Manager", 
+   "share": 1, 
    "write": 1
   }, 
   {
@@ -148,6 +149,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Master Manager", 
+   "share": 1, 
    "write": 1
   }
  ]

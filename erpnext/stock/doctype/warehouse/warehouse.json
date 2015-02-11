@@ -151,7 +151,7 @@
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2015-01-05 15:58:43.046509", 
+ "modified": "2015-02-05 05:11:48.803063", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Warehouse", 
@@ -167,6 +167,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

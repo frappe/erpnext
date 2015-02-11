@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.utils
 from frappe.utils import cstr, flt, getdate, comma_and
-from frappe import _
+from frappe import _ , msgprint
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
@@ -34,25 +34,13 @@ class SalesOrder(SellingController):
 				frappe.msgprint(_("Warning: Sales Order {0} already exists against same Purchase Order number").format(so[0][0]))
 
 	def validate_for_items(self):
-		check_list, flag = [], 0
-		chk_dupl_itm = []
+		check_list = []
 		for d in self.get('items'):
-			e = [d.item_code, d.description, d.warehouse, d.prevdoc_docname or '']
-			f = [d.item_code, d.description]
+			check_list.append(cstr(d.item_code))
 
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes':
 				if not d.warehouse:
 					frappe.throw(_("Reserved warehouse required for stock item {0}").format(d.item_code))
-
-				if e in check_list:
-					frappe.throw(_("Item {0} has been entered twice").format(d.item_code))
-				else:
-					check_list.append(e)
-			else:
-				if f in chk_dupl_itm:
-					frappe.throw(_("Item {0} has been entered twice").format(d.item_code))
-				else:
-					chk_dupl_itm.append(f)
 
 			# used for production plan
 			d.transaction_date = self.transaction_date
@@ -60,6 +48,9 @@ class SalesOrder(SellingController):
 			tot_avail_qty = frappe.db.sql("select projected_qty from `tabBin` \
 				where item_code = %s and warehouse = %s", (d.item_code,d.warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
+		unique_chk_list = set(check_list)
+		if len(unique_chk_list) != len(check_list):
+			frappe.msgprint(_("Warning:Same item has been entered multiple times."))
 
 	def validate_sales_mntc_quotation(self):
 		for d in self.get('items'):
@@ -143,6 +134,7 @@ class SalesOrder(SellingController):
 					frappe.throw(_("Quotation {0} is cancelled").format(quotation))
 
 				doc.set_status(update=True)
+				doc.update_opportunity()
 
 	def on_submit(self):
 		super(SalesOrder, self).on_submit()

@@ -217,7 +217,7 @@
  "icon": "icon-check", 
  "idx": 1, 
  "max_attachments": 5, 
- "modified": "2015-01-07 14:57:22.370410", 
+ "modified": "2015-02-05 05:11:47.984820", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Task", 
@@ -233,6 +233,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Projects User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

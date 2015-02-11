@@ -41,7 +41,7 @@ def place_order():
 		if not quotation.get(fieldname):
 			throw(_("{0} is required").format(quotation.meta.get_label(fieldname)))
 
-	quotation.ignore_permissions = True
+	quotation.flags.ignore_permissions = True
 	quotation.submit()
 
 	if quotation.lead:
@@ -53,7 +53,7 @@ def place_order():
 	for item in sales_order.get("items"):
 		item.reserved_warehouse = frappe.db.get_value("Item", item.item_code, "website_warehouse") or None
 
-	sales_order.ignore_permissions = True
+	sales_order.flags.ignore_permissions = True
 	sales_order.insert()
 	sales_order.submit()
 	frappe.local.cookie_manager.delete_cookie("cart_count")
@@ -88,7 +88,7 @@ def update_cart(item_code, qty, with_doc):
 		frappe.delete_doc("Quotation", quotation.name, ignore_permissions=True)
 		quotation = _get_cart_quotation()
 	else:
-		quotation.ignore_permissions = True
+		quotation.flags.ignore_permissions = True
 		quotation.save()
 
 	set_cart_count(quotation)
@@ -117,7 +117,7 @@ def update_cart_address(address_fieldname, address_name):
 
 	apply_cart_settings(quotation=quotation)
 
-	quotation.ignore_permissions = True
+	quotation.flags.ignore_permissions = True
 	quotation.save()
 
 	return get_cart_quotation(quotation)
@@ -175,7 +175,7 @@ def _get_cart_quotation(party=None):
 			qdoc.contact_person = frappe.db.get_value("Contact", {"email_id": frappe.session.user,
 				"customer": party.name})
 
-		qdoc.ignore_permissions = True
+		qdoc.flags.ignore_permissions = True
 		qdoc.run_method("set_missing_values")
 		apply_cart_settings(party, qdoc)
 
@@ -201,18 +201,18 @@ def update_party(fullname, company_name=None, mobile_no=None, phone=None):
 		contact.customer_name = party.customer_name
 		contact.mobile_no = mobile_no
 		contact.phone = phone
-		contact.ignore_permissions = True
+		contact.flags.ignore_permissions = True
 		contact.save()
 
 	party_doc = frappe.get_doc(party.as_dict())
-	party_doc.ignore_permissions = True
+	party_doc.flags.ignore_permissions = True
 	party_doc.save()
 
 	qdoc = _get_cart_quotation(party)
 	if not qdoc.get("__islocal"):
 		qdoc.customer_name = company_name or fullname
 		qdoc.run_method("set_missing_lead_customer_details")
-		qdoc.ignore_permissions = True
+		qdoc.flags.ignore_permissions = True
 		qdoc.save()
 
 def apply_cart_settings(party=None, quotation=None):
@@ -276,7 +276,7 @@ def get_lead_or_customer():
 		})
 
 		if frappe.session.user not in ("Guest", "Administrator"):
-			lead_doc.ignore_permissions = True
+			lead_doc.flags.ignore_permissions = True
 			lead_doc.insert()
 
 		return lead_doc
@@ -303,7 +303,7 @@ def apply_shipping_rule(shipping_rule):
 
 	apply_cart_settings(quotation=quotation)
 
-	quotation.ignore_permissions = True
+	quotation.flags.ignore_permissions = True
 	quotation.save()
 
 	return get_cart_quotation(quotation)

@@ -13,9 +13,8 @@ from erpnext.controllers.stock_controller import StockController
 class SellingController(StockController):
 	def __setup__(self):
 		if hasattr(self, "items"):
-			self.table_print_templates = {
-				"items": "templates/print_formats/includes/item_grid.html",
-				"taxes": "templates/print_formats/includes/taxes.html",
+			self.print_templates = {
+				"taxes": "templates/print_formats/includes/taxes.html"
 			}
 
 	def get_feed(self):
@@ -49,8 +48,7 @@ class SellingController(StockController):
 	def set_missing_lead_customer_details(self):
 		if getattr(self, "customer", None):
 			from erpnext.accounts.party import _get_party_details
-			party_details = _get_party_details(self.customer,
-				ignore_permissions=getattr(self, "ignore_permissions", None))
+			party_details = _get_party_details(self.customer, ignore_permissions=self.flags.ignore_permissions)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
 
@@ -217,9 +215,10 @@ class SellingController(StockController):
 	def calculate_totals(self):
 		self.grand_total = flt(self.get("taxes")[-1].total if self.get("taxes") else self.net_total)
 
-		self.grand_total_export = flt(self.grand_total / self.conversion_rate)
-
 		self.other_charges_total = flt(self.grand_total - self.net_total, self.precision("other_charges_total"))
+
+		self.grand_total_export = flt(self.grand_total / self.conversion_rate) \
+			if (self.other_charges_total or self.discount_amount) else self.net_total_export
 
 		self.other_charges_total_export = flt(self.grand_total_export - self.net_total_export +
 			flt(self.discount_amount), self.precision("other_charges_total_export"))

@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.pages['purchase-analytics'].onload = function(wrapper) {
+frappe.pages['purchase-analytics'].on_page_load = function(wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
 		title: __('Purchase Analytics'),
@@ -74,7 +74,7 @@ erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 		this.tree_grid = this.tree_grids[this.tree_type];
 
 		var std_columns = [
-			{id: "check", name: __("Plot"), field: "check", width: 30,
+			{id: "_check", name: __("Plot"), field: "_check", width: 30,
 				formatter: this.check_formatter},
 			{id: "name", name: this.tree_grid.label, field: "name", width: 300,
 				formatter: this.tree_formatter},

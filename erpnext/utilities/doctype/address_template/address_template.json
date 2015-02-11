@@ -34,7 +34,7 @@
   }
  ], 
  "icon": "icon-map-marker", 
- "modified": "2015-01-15 15:25:18.709952", 
+ "modified": "2015-02-05 05:11:34.356413", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Address Template", 
@@ -50,6 +50,7 @@
    "report": 1, 
    "role": "System Manager", 
    "set_user_permissions": 1, 
+   "share": 1, 
    "write": 1
   }
  ], 

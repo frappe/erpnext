@@ -72,7 +72,7 @@
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:13.198735", 
+ "modified": "2015-02-05 05:11:40.729590", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Block List", 
@@ -86,6 +86,7 @@
    "print": 1, 
    "read": 1, 
    "role": "HR User", 
+   "share": 1, 
    "write": 1
   }
  ]

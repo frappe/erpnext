@@ -371,30 +371,38 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	_set_values_for_item_list: function(children) {
 		var me = this;
 		var price_list_rate_changed = false;
-		$.each(children, function(i, d) {
+		for(var i=0, l=children.length; i<l; i++) {
+			var d = children[i];
 			var existing_pricing_rule = frappe.model.get_value(d.doctype, d.name, "pricing_rule");
-			$.each(d, function(k, v) {
+
+			for(var k in d) {
+				var v = d[k];
 				if (["doctype", "name"].indexOf(k)===-1) {
 					if(k=="price_list_rate") {
 						if(flt(v) != flt(d.price_list_rate)) price_list_rate_changed = true;
 					}
 					frappe.model.set_value(d.doctype, d.name, k, v);
 				}
-			});
+			}
+
 			// if pricing rule set as blank from an existing value, apply price_list
 			if(!me.frm.doc.ignore_pricing_rule && existing_pricing_rule && !d.pricing_rule) {
 				me.apply_price_list(frappe.get_doc(d.doctype, d.name));
 			}
+		}
 
-			if(!price_list_rate_changed) me.calculate_taxes_and_totals();
-		});
+		if(!price_list_rate_changed) me.calculate_taxes_and_totals();
 	},
 
 	apply_price_list: function(item) {
 		var me = this;
+		var args = this._get_args(item);
+		if(!args.item_list.length) {
+			return;
+		}
 		return this.frm.call({
 			method: "erpnext.stock.get_item_details.apply_price_list",
-			args: {	args: this._get_args(item) },
+			args: {	args: args },
 			callback: function(r) {
 				if (!r.exc) {
 					me.in_apply_price_list = true;
@@ -595,8 +603,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	show_item_wise_taxes: function() {
 		if(this.frm.fields_dict.other_charges_calculation) {
-			$(this.get_item_wise_taxes_html())
-				.appendTo($(this.frm.fields_dict.other_charges_calculation.wrapper).empty());
+			var html = this.get_item_wise_taxes_html();
+			if (html) {
+				this.frm.toggle_display("other_charges_calculation", true);
+				$(this.frm.fields_dict.other_charges_calculation.wrapper).html(html);
+			} else {
+				this.frm.toggle_display("other_charges_calculation", false);
+			}
 		}
 	},
 

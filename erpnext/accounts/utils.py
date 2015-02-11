@@ -209,7 +209,7 @@ def update_against_doc(d, jv_obj):
 		ch.docstatus = 1
 
 	# will work as update after submit
-	jv_obj.ignore_validate_update_after_submit = True
+	jv_obj.flags.ignore_validate_update_after_submit = True
 	jv_obj.save()
 
 def remove_against_link_from_jv(ref_type, ref_no, against_field):

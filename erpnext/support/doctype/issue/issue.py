@@ -15,6 +15,10 @@ class Issue(Document):
 	def get_portal_page(self):
 		return "ticket"
 
+	def set_sender(self, sender):
+		"""Will be called by **Communication** when the Issue is created from an incoming email."""
+		self.raised_by = sender
+
 	def validate(self):
 		self.update_status()
 		self.set_lead_contact(self.raised_by)

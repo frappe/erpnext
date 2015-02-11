@@ -34,66 +34,66 @@
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group""> Добавить / Изменить </>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Добавить / Изменить </>"
 "<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> умолчанию шаблона </ h4>  <p> Использует <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja шаблонов </ A> и все поля Адрес ( в том числе пользовательских полей если таковые имеются) будут доступны </ P>  <pre> <code> {{address_line1}} инструменты  {%, если address_line2%} {{address_line2}} инструменты { % ENDIF -%}  {{город}} инструменты  {%, если состояние%} {{состояние}} инструменты {% ENDIF -%}  {%, если пин-код%} PIN-код: {{пин-код}} инструменты {% ENDIF -%}  {{страна}} инструменты  {%, если телефон%} Телефон: {{телефон}} инструменты { % ENDIF -%}  {%, если факс%} Факс: {{факс}} инструменты {% ENDIF -%}  {%, если email_id%} Email: {{email_id}} инструменты ; {% ENDIF -%}  </ код> </ предварительно>"
-A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Группа клиентов существует с тем же именем, пожалуйста изменить имя клиентов или переименовать группу клиентов"
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Группа клиентов с таким именем уже существует. Пожалуйста, измените имя клиента или имя группы клиентов"
 A Customer exists with same name,"Клиент с таким именем уже существует
 "
-A Lead with this email id should exist,Ведущий с этим электронный идентификатор должен существовать
+A Lead with this email id should exist,Руководитеть с таким email должен существовать
 A Product or Service,Продукт или сервис
-A Supplier exists with same name,Поставщик существует с одноименным названием
-A symbol for this currency. For e.g. $,"Символ для этой валюты. Для например, $"
+A Supplier exists with same name,Поставщик с таким именем уже существует
+A symbol for this currency. For e.g. $,"Символ для этой валюты. Например, $"
 AMC Expiry Date,КУА срок действия
 Abbr,Аббревиатура
 Abbreviation cannot have more than 5 characters,Аббревиатура не может иметь более 5 символов
 Above Value,Выше стоимости
-Absent,Рассеянность
-Acceptance Criteria,Критерии приемлемости
+Absent,Отсутствует
+Acceptance Criteria,Критерий приемлемости
 Accepted,Принято
 Accepted + Rejected Qty must be equal to Received quantity for Item {0},Принято + Отклоненные Кол-во должно быть равно полученного количества по пункту {0}
 Accepted Quantity,Принято Количество
-Accepted Warehouse,Принято Склад
+Accepted Warehouse,Принимающий склад
 Account,Аккаунт
 Account Balance,Остаток на счете
-Account Created: {0},Учетная запись создана: {0}
+Account Created: {0},Аккаунт создан: {0}
 Account Details,Подробности аккаунта
-Account Head,Счет руководитель
+Account Head,Основной счет
 Account Name,Имя Учетной Записи
 Account Type,Тип учетной записи
-"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Баланс счета уже в кредит, вы не можете установить ""баланс должен быть 'как' Debit '"
-"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Баланс счета уже в дебет, вы не можете установить ""баланс должен быть 'как' Кредит»"
-Account for the warehouse (Perpetual Inventory) will be created under this Account.,Счет для склада (непрерывной инвентаризации) будут созданы под этой учетной записью.
-Account head {0} created,Глава счета {0} создан
-Account must be a balance sheet account,Счет должен быть балансовый счет
-Account with child nodes cannot be converted to ledger,Счет с дочерних узлов не могут быть преобразованы в книге
-Account with existing transaction can not be converted to group.,Счет с существующей сделки не могут быть преобразованы в группы.
-Account with existing transaction can not be deleted,Счет с существующей сделки не могут быть удалены
-Account with existing transaction cannot be converted to ledger,Счет с существующей сделки не могут быть преобразованы в книге
-Account {0} cannot be a Group,Аккаунт {0} не может быть в группе
+"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","Баланс счета в Кредите, запрещена установка 'Баланс должен быть' как 'Дебет'"
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","Баланс счета в Дебете, запрещена установка 'Баланс должен быть' как 'Кредит'"
+Account for the warehouse (Perpetual Inventory) will be created under this Account.,Счет для склада (непрерывной инвентаризации) будет создан для этого счета.
+Account head {0} created,Основной счет {0} создан
+Account must be a balance sheet account,Счет должен быть балансовый
+Account with child nodes cannot be converted to ledger,Счет с дочерних узлов не может быть преобразован в регистр
+Account with existing transaction can not be converted to group.,Счет существующей проводки не может быть преобразован в группу.
+Account with existing transaction can not be deleted,Счет существующей проводки не может быть удален
+Account with existing transaction cannot be converted to ledger,Счет существующей проводки не может быть преобразован в регистр
+Account {0} cannot be a Group,Счет {0} не может быть группой
 Account {0} does not belong to Company {1},Аккаунт {0} не принадлежит компании {1}
 Account {0} does not belong to company: {1},Аккаунт {0} не принадлежит компании: {1}
 Account {0} does not exist,Аккаунт {0} не существует
 Account {0} has been entered more than once for fiscal year {1},Счет {0} был введен более чем один раз в течение финансового года {1}
-Account {0} is frozen,Аккаунт {0} заморожен
-Account {0} is inactive,Аккаунт {0} неактивен
+Account {0} is frozen,Счет {0} заморожен
+Account {0} is inactive,Счет {0} неактивен
 Account {0} is not valid,Счет {0} не является допустимым
-Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Счет {0} должен быть типа ""Fixed Asset"", как товара {1} является активом Пункт"
-Account {0}: Parent account {1} can not be a ledger,Счет {0}: Родитель счета {1} не может быть книга
+Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Счет {0} должен быть типа 'Основные средства', товар {1} является активом"
+Account {0}: Parent account {1} can not be a ledger,Счет {0}: Родительский счет {1} не может быть регистром
 Account {0}: Parent account {1} does not belong to company: {2},Счет {0}: Родитель счета {1} не принадлежит компании: {2}
 Account {0}: Parent account {1} does not exist,Счет {0}: Родитель счета {1} не существует
 Account {0}: You can not assign itself as parent account,Счет {0}: Вы не можете назначить себя как родительским счетом
-Account: {0} can only be updated via \					Stock Transactions,Счета: {0} может быть обновлен только через \ Биржевые операции
+Account: {0} can only be updated via \					Stock Transactions,Счет: {0} может быть обновлен только через \ Биржевые операции
 Accountant,Бухгалтер
-Accounting,Пользователи
+Accounting,Бухгалтерия
 "Accounting Entries can be made against leaf nodes, called","Бухгалтерские записи могут быть сделаны против конечных узлов, называется"
-"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Бухгалтерская запись заморожены до этой даты, никто не может сделать / изменить запись, кроме роли, указанной ниже."
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Бухгалтерская запись заморожена до этой даты, никто не может сделать / изменить запись, кроме роли, указанной ниже."
 Accounting journal entries.,Журнал бухгалтерских записей.
 Accounts,Учётные записи
-Accounts Browser,Дебиторская Браузер
+Accounts Browser,Обзор счетов
 Accounts Frozen Upto,Счета заморожены До
-Accounts Payable,Ежемесячные счета по кредиторской задолженности
+Accounts Payable,Счета к оплате
 Accounts Receivable,Дебиторская задолженность
 Accounts Settings, Настройки аккаунта
 Active,Активен
-Active: Will extract emails from ,Active: Will extract emails from 
+Active: Will extract emails from ,Получать сообщения e-mail от
 Activity,Активность
 Activity Log,Журнал активности
 Activity Log:,Журнал активности:
@@ -109,8 +109,8 @@ Actual Qty,Фактический Кол-во
 Actual Qty (at source/target),Фактический Кол-во (в источнике / цели)
 Actual Qty After Transaction,Остаток после проведения
 Actual Qty: Quantity available in the warehouse.,Фактический Кол-во: Есть в наличии на складе.
-Actual Quantity,Фактический Количество
-Actual Start Date,Фактическое начало Дата
+Actual Quantity,Фактическое Количество
+Actual Start Date,Фактическое Дата начала
 Add,Добавить
 Add / Edit Taxes and Charges,Добавить / Изменить Налоги и сборы
 Add Child,Добавить дочерний
@@ -153,8 +153,8 @@ Against Document Detail No,Против деталях документа Нет
 Against Document No,Против Документ №
 Against Expense Account,Против Expense Счет
 Against Income Account,Против ДОХОДОВ
-Against Journal Entry,Против Journal ваучером
-Against Journal Entry {0} does not have any unmatched {1} entry,Против Journal ваучером {0} не имеет непревзойденную {1} запись
+Against Journal Voucher,Против Journal ваучером
+Against Journal Voucher {0} does not have any unmatched {1} entry,Против Journal ваучером {0} не имеет непревзойденную {1} запись
 Against Purchase Invoice,Против счете-фактуре
 Against Sales Invoice,Против продаж счета-фактуры
 Against Sales Order,Против заказ клиента
@@ -265,10 +265,10 @@ Asset,Актив
 Assistant,Помощник
 Associate,Помощник
 Atleast one of the Selling or Buying must be selected,По крайней мере один из продажи или покупки должен быть выбран
-Atleast one warehouse is mandatory,По крайней мере один склад является обязательным
-Attach Image,Прикрепите изображение
-Attach Letterhead,Прикрепите бланке
-Attach Logo,Прикрепите логотип
+Atleast one warehouse is mandatory,"По крайней мере, один склад является обязательным"
+Attach Image,Прикрепить изображение
+Attach Letterhead,Прикрепить бланк
+Attach Logo,Прикрепить логотип
 Attach Your Picture,Прикрепите свою фотографию
 Attendance,Посещаемость
 Attendance Date,Посещаемость Дата
@@ -296,18 +296,18 @@ Available Stock for Packing Items,Доступные Stock для упаковк
 "Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","Доступный в спецификации, накладной, счете-фактуре, производственного заказа, заказа на поставку, покупка получение, счет-фактура, заказ клиента, фондовой въезда, расписания"
 Average Age,Средний возраст
 Average Commission Rate,Средний Комиссия курс
-Average Discount,Средний Скидка
-Awesome Products,Потрясающие Продукты
+Average Discount,Средняя скидка
+Awesome Products,Потрясающие продукты
 Awesome Services,Потрясающие услуги
-BOM Detail No,BOM Подробно Нет
+BOM Detail No,BOM детали №
 BOM Explosion Item,BOM Взрыв Пункт
-BOM Item,Позиции спецификации
-BOM No,BOM Нет
-BOM No. for a Finished Good Item,BOM номер для готового изделия Пункт
+BOM Item,Позиция BOM
+BOM No,BOM №
+BOM No. for a Finished Good Item,BOM номер для позиции готового изделия
 BOM Operation,BOM Операция
 BOM Operations,BOM Операции
 BOM Replace Tool,BOM Заменить Tool
-BOM number is required for manufactured Item {0} in row {1},BOM номер необходим для выпускаемой Пункт {0} в строке {1}
+BOM number is required for manufactured Item {0} in row {1},BOM номер необходим для выпускаемой позиции {0} в строке {1}
 BOM number not allowed for non-manufactured Item {0} in row {1},Число спецификации не допускается для не-выпускаемой Пункт {0} в строке {1}
 BOM recursion: {0} cannot be parent or child of {2},BOM рекурсия: {0} не может быть родитель или ребенок {2}
 BOM replaced,BOM заменить
@@ -315,7 +315,7 @@ BOM {0} for Item {1} in row {2} is inactive or not submitted,BOM {0} для Пу
 BOM {0} is not active or not submitted,BOM {0} не является активным или не представили
 BOM {0} is not submitted or inactive BOM for Item {1},BOM {0} не представлено или неактивным спецификации по пункту {1}
 Backup Manager,Менеджер резервных копий
-Backup Right Now,Сделать резервную копию
+Backup Right Now,Сделать резервную копию сейчас
 Backups will be uploaded to,Резервные копии будут размещены на
 Balance Qty,Баланс Кол-во
 Balance Sheet,Балансовый отчет
@@ -325,48 +325,48 @@ Balance must be,Баланс должен быть
 "Balances of Accounts of type ""Bank"" or ""Cash""",Остатки на счетах типа «Банк» или «Денежные средства»
 Bank,Банк:
 Bank / Cash Account,Банк / Расчетный счет
-Bank A/C No.,Bank A / С №
+Bank A/C No.,Банк Сч/Тек №
 Bank Account,Банковский счет
 Bank Account No.,Счет №
 Bank Accounts,Банковские счета
-Bank Clearance Summary,Банк просвет Основная
-Bank Draft,"Тратта, выставленная банком на другой банк"
+Bank Clearance Summary,Банк уплата по счетам итого
+Bank Draft,Банковский счет
 Bank Name,Название банка
-Bank Overdraft Account,Банк Овердрафт счета
-Bank Reconciliation,Банк примирения
-Bank Reconciliation Detail,Банк примирения Подробно
-Bank Reconciliation Statement,Заявление Банк примирения
-Bank Entry,Банк Ваучер
-Bank/Cash Balance,Банк / Баланс счета
-Banking,Банковское дело
+Bank Overdraft Account,Банк овердрафтовый счет
+Bank Reconciliation,Банковская сверка
+Bank Reconciliation Detail,Банковская сверка подробно
+Bank Reconciliation Statement,Банковская сверка состояние
+Bank Voucher,Банк Ваучер
+Bank/Cash Balance,Банк /Баланс счета
+Banking,Банковские операции
 Barcode,Штрихкод
 Barcode {0} already used in Item {1},Штрихкод {0} уже используется в позиции {1}
-Based On,На основе
-Basic,Базовый
-Basic Info,Введение
+Based On,На основании
+Basic,Основной
+Basic Info,Основная информация
 Basic Information,Основная информация
-Basic Rate,Базовая ставка
-Basic Rate (Company Currency),Basic Rate (Компания Валюта)
-Batch,Парти
-Batch (lot) of an Item.,Пакетная (много) элемента.
-Batch Finished Date,Пакетная Готовые Дата
-Batch ID,ID Пакета
+Basic Rate,Основная ставка
+Basic Rate (Company Currency),Основная ставка (валюта компании)
+Batch,Партия
+Batch (lot) of an Item.,Партия элементов.
+Batch Finished Date,Дата окончания партии
+Batch ID,ID партии
 Batch No,№ партии
-Batch Started Date,Пакетная работы Дата
-Batch Time Logs for billing.,Пакетные Журналы Время для выставления счетов.
-Batch-Wise Balance History,Порционно Баланс История
-Batched for Billing,Batched для биллинга
-Better Prospects,Лучшие перспективы
+Batch Started Date,Дата начала партии
+Batch Time Logs for billing.,Журналы партий для выставления счета.
+Batch-Wise Balance History,Партиями Баланс История
+Batched for Billing,Укомплектовать для выставления счета
+Better Prospects,Потенциальные покупатели
 Bill Date,Дата оплаты
 Bill No,Номер накладной
-Bill No {0} already booked in Purchase Invoice {1},Билл Нет {0} уже заказали в счете-фактуре {1}
-Bill of Material,Накладная материалов
-Bill of Material to be considered for manufacturing,"Билл материала, который будет рассматриваться на производстве"
+Bill No {0} already booked in Purchase Invoice {1},Накладная № {0} уже заказан в счете-фактуре {1}
+Bill of Material,Накладная на материалы
+Bill of Material to be considered for manufacturing,Счёт на материалы для производства
 Bill of Materials (BOM),Ведомость материалов (BOM)
-Billable,Платежные
-Billed,Объявленный
-Billed Amount,Объявленный Количество
-Billed Amt,Объявленный Amt
+Billable,Оплачиваемый
+Billed,Выдавать счета
+Billed Amount,Счетов выдано количество
+Billed Amt,Счетов выдано кол-во
 Billing,Выставление счетов
 Billing Address,Адрес для выставления счетов
 Billing Address Name,Адрес для выставления счета Имя
@@ -381,13 +381,13 @@ Block Date,Блок Дата
 Block Days,Блок дня
 Block leave applications by department.,Блок отпуска приложений отделом.
 Blog Post,Пост блога
-Blog Subscriber,Блог абонента
+Blog Subscriber,Блог подписчика
 Blood Group,Группа крови
-Both Warehouse must belong to same Company,Оба Склад должены принадлежать той же компании
+Both Warehouse must belong to same Company,Оба Склад должены принадлежать одной Компании
 Box,Рамка
-Branch,Ветвь:
+Branch,Ветвь
 Brand,Бренд
-Brand Name,Бренд
+Brand Name,Имя Бренда
 Brand master.,Бренд мастер.
 Brands,Бренды
 Breakdown,Разбивка
@@ -471,7 +471,7 @@ Case No(s) already in use. Try from Case No {0},Случай Нет (ы) уже 
 Case No. cannot be 0,Дело № не может быть 0
 Cash,Наличные
 Cash In Hand,Наличность кассы
-Cash Entry,Кассовый чек
+Cash Voucher,Кассовый чек
 Cash or Bank Account is mandatory for making payment entry,Наличными или банковский счет является обязательным для внесения записи платежей
 Cash/Bank Account, Наличные / Банковский счет
 Casual Leave,Повседневная Оставить
@@ -595,7 +595,7 @@ Contact master.,Связаться с мастером.
 Contacts,Контакты
 Content,Содержимое
 Content Type,Тип контента
-Contra Entry,Contra Ваучер
+Contra Voucher,Contra Ваучер
 Contract,Контракт
 Contract End Date,Конец контракта Дата
 Contract End Date must be greater than Date of Joining,"Конец контракта Дата должна быть больше, чем дата вступления"
@@ -626,7 +626,7 @@ Country,Страна
 Country Name,Название страны
 Country wise default Address Templates,Шаблоны Страна мудрый адрес по умолчанию
 "Country, Timezone and Currency","Страна, Временной пояс и валют"
-Create Bank Entry for the total salary paid for the above selected criteria,Создание банка Ваучер на общую зарплату заплатили за вышеуказанных выбранным критериям
+Create Bank Voucher for the total salary paid for the above selected criteria,Создание банка Ваучер на общую зарплату заплатили за вышеуказанных выбранным критериям
 Create Customer,Создание клиентов
 Create Material Requests,Создать запросы Материал
 Create New,Создать новый
@@ -648,7 +648,7 @@ Credentials,Сведения о профессиональной квалифи�
 Credit,Кредит
 Credit Amt,Кредитная Amt
 Credit Card,Кредитная карта
-Credit Card Entry,Ваучер Кредитная карта
+Credit Card Voucher,Ваучер Кредитная карта
 Credit Controller,Кредитная контроллер
 Credit Days,Кредитные дней
 Credit Limit,{0}{/0} {1}Кредитный лимит {/1}
@@ -853,7 +853,7 @@ Doc Name,Имя документа
 Doc Type,Тип документа
 Document Description,Документ Описание
 Document Type,Тип документа
-Documents,Документация
+Documents,Документы
 Domain,Домен
 Don't send Employee Birthday Reminders,Не отправляйте Employee рождения Напоминания
 Download Materials Required,Скачать Необходимые материалы
@@ -900,12 +900,12 @@ Electronics,Электроника
 Email,E-mail
 Email Digest,E-mail Дайджест
 Email Digest Settings,Email Дайджест Настройки
-Email Digest: ,Email Digest: 
-Email Id,E-mail Id
+Email Digest: ,Email Дайджест:
+Email Id,Email Id
 "Email Id where a job applicant will email e.g. ""jobs@example.com""","E-mail Id, где соискатель вышлем например ""jobs@example.com"""
 Email Notifications,Уведомления электронной почты
 Email Sent?,Отправки сообщения?
-"Email id must be unique, already exists for {0}","Удостоверение личности электронной почты должен быть уникальным, уже существует для {0}"
+"Email id must be unique, already exists for {0}","ID электронной почты должен быть уникальным, уже существует для {0}"
 Email ids separated by commas.,Email идентификаторы через запятую.
 "Email settings to extract Leads from sales email id e.g. ""sales@example.com""","Настройки электронной почты для извлечения ведет от продаж электронный идентификатор, например, ""sales@example.com"""
 Emergency Contact,Экстренная связь
@@ -924,7 +924,7 @@ Employee Leave Balance,Сотрудник Оставить Баланс
 Employee Name,Имя Сотрудника
 Employee Number,Общее число сотрудников
 Employee Records to be created by,Сотрудник отчеты должны быть созданные
-Employee Settings,Настройки работникам
+Employee Settings,Работники Настройки
 Employee Type,Сотрудник Тип
 "Employee designation (e.g. CEO, Director etc.).","Сотрудник обозначение (например, генеральный директор, директор и т.д.)."
 Employee master.,Мастер сотрудников.
@@ -980,7 +980,7 @@ Excise Duty @ 8,Акцизе @ 8
 Excise Duty Edu Cess 2,Акцизе Эду Цесс 2
 Excise Duty SHE Cess 1,Акцизе ОНА Цесс 1
 Excise Page Number,Количество Акцизный Страница
-Excise Entry,Акцизный Ваучер
+Excise Voucher,Акцизный Ваучер
 Execution,Реализация
 Executive Search,Executive Search
 Exemption Limit,Освобождение Предел
@@ -1196,7 +1196,7 @@ Help HTML,Помощь HTML
 "Help: To link to another record in the system, use ""#Form/Note/[Note Name]"" as the Link URL. (don't use ""http://"")","Помощь: Чтобы связать с другой записью в системе, используйте ""# формуляр / Примечание / [Примечание Имя]"", как ссылка URL. (Не используйте ""http://"")"
 "Here you can maintain family details like name and occupation of parent, spouse and children","Здесь Вы можете сохранить семейные подробности, как имя и оккупации родитель, супруг и детей"
 "Here you can maintain height, weight, allergies, medical concerns etc","Здесь вы можете поддерживать рост, вес, аллергии, медицинские проблемы и т.д."
-Hide Currency Symbol,Скрыть Символа Валюты
+Hide Currency Symbol,Скрыть Символ Валюты
 High,Высокий
 History In Company,История В компании
 Hold,Удержание
@@ -1215,7 +1215,7 @@ Hours,Часов
 How Pricing Rule is applied?,Как Ценообразование Правило применяется?
 How frequently?,Как часто?
 "How should this currency be formatted? If not set, will use system defaults","Как это должно валюта быть отформатирован? Если не установлен, будет использовать системные значения по умолчанию"
-Human Resources,Человеческие ресурсы
+Human Resources,Кадры
 Identification of the package for the delivery (for print),Идентификация пакета на поставку (для печати)
 If Income or Expense,Если доходов или расходов
 If Monthly Budget Exceeded,Если Месячный бюджет Превышен
@@ -1328,7 +1328,7 @@ Invoice Period From,Счет Период С
 Invoice Period From and Invoice Period To dates mandatory for recurring invoice,Счет Период С и счет-фактура Период до даты обязательных для повторяющихся счет
 Invoice Period To,Счет Период до
 Invoice Type,Тип счета
-Invoice/Journal Entry Details,Счет / Журнал Подробности Ваучер
+Invoice/Journal Voucher Details,Счет / Журнал Подробности Ваучер
 Invoiced Amount (Exculsive Tax),Сумма по счетам (Exculsive стоимость)
 Is Active,Активен
 Is Advance,Является Advance
@@ -1458,11 +1458,11 @@ Job Title,Должность
 Jobs Email Settings,Настройки Вакансии Email
 Journal Entries,Записи в журнале
 Journal Entry,Запись в дневнике
-Journal Entry,Журнал Ваучер
-Journal Entry Account,Журнал Ваучер Подробно
-Journal Entry Account No,Журнал Ваучер Подробно Нет
-Journal Entry {0} does not have account {1} or already matched,Журнал Ваучер {0} не имеет учетной записи {1} или уже согласованы
-Journal Entries {0} are un-linked,Журнал Ваучеры {0} являются не-связаны
+Journal Voucher,Журнал Ваучер
+Journal Voucher Detail,Журнал Ваучер Подробно
+Journal Voucher Detail No,Журнал Ваучер Подробно Нет
+Journal Voucher {0} does not have account {1} or already matched,Журнал Ваучер {0} не имеет учетной записи {1} или уже согласованы
+Journal Vouchers {0} are un-linked,Журнал Ваучеры {0} являются не-связаны
 Keep a track of communication related to this enquiry which will help for future reference.,"Постоянно отслеживать коммуникации, связанные на этот запрос, который поможет в будущем."
 Keep it web friendly 900px (w) by 100px (h),Держите его веб дружелюбны 900px (ш) на 100px (ч)
 Key Performance Area,Ключ Площадь Производительность
@@ -1481,9 +1481,9 @@ Language,Язык
 Last Name,Фамилия
 Last Purchase Rate,Последний Покупка Оценить
 Latest,Последние
-Lead,Ответст
-Lead Details,Содержание
-Lead Id,Ведущий Id
+Lead,Лид
+Lead Details,Лид Подробности
+Lead Id,ID лида
 Lead Name,Ведущий Имя
 Lead Owner,Ведущий Владелец
 Lead Source,Ведущий Источник
@@ -1529,7 +1529,7 @@ Ledgers,Регистры
 Left,Слева
 Legal,Легальный
 Legal Expenses,Судебные издержки
-Letter Head,Бланк
+Letter Head,Заголовок письма
 Letter Heads for print templates.,Письмо главы для шаблонов печати.
 Level,Уровень
 Lft,Lft
@@ -1554,22 +1554,22 @@ Low,Низкий
 Lower Income,Нижняя Доход
 MTN Details,MTN Подробнее
 Main,Основные
-Main Reports,Основные доклады
+Main Reports,Основные отчеты
 Maintain Same Rate Throughout Sales Cycle,Поддержание же скоростью протяжении цикла продаж
 Maintain same rate throughout purchase cycle,Поддержание же скоростью в течение покупке цикла
 Maintenance,Обслуживание
 Maintenance Date,Техническое обслуживание Дата
 Maintenance Details,Техническое обслуживание Детали
-Maintenance Schedule,График регламентных работ
-Maintenance Schedule Detail,График обслуживания Подробно
-Maintenance Schedule Item,График обслуживания товара
+Maintenance Schedule,График технического обслуживания
+Maintenance Schedule Detail,График технического обслуживания Подробно
+Maintenance Schedule Item,График обслуживания позиции
 Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule',"График обслуживания не генерируется для всех элементов. Пожалуйста, нажмите на кнопку ""Generate Расписание"""
 Maintenance Schedule {0} exists against {0},График обслуживания {0} существует против {0}
 Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,График обслуживания {0} должно быть отменено до отмены этого заказ клиента
-Maintenance Schedules,Режимы технического обслуживания
+Maintenance Schedules,Графики технического обслуживания
 Maintenance Status,Техническое обслуживание Статус
 Maintenance Time,Техническое обслуживание Время
-Maintenance Type,Тип обслуживание
+Maintenance Type,Тип технического обслуживания
 Maintenance Visit,Техническое обслуживание Посетить
 Maintenance Visit Purpose,Техническое обслуживание Посетить Цель
 Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Техническое обслуживание Посетить {0} должно быть отменено до отмены этого заказ клиента
@@ -1577,9 +1577,9 @@ Maintenance start date can not be before delivery date for Serial No {0},Тех�
 Major/Optional Subjects,Основные / факультативных предметов
 Make ,Создать
 Make Accounting Entry For Every Stock Movement,Сделать учета запись для каждого фондовой Движения
-Make Bank Entry,Сделать банк ваучер
-Make Credit Note,Сделать кредит-нота
-Make Debit Note,Сделать Debit Примечание
+Make Bank Voucher,Сделать банк ваучер
+Make Credit Note,Сделать кредитную запись
+Make Debit Note,Сделать дебетовую запись
 Make Delivery,Произвести поставку
 Make Difference Entry,Сделать Разница запись
 Make Excise Invoice,Сделать акцизного счет-фактура
@@ -1610,12 +1610,12 @@ Management,Управление
 Manager,Менеджер
 "Mandatory if Stock Item is ""Yes"". Also the default warehouse where reserved quantity is set from Sales Order.","Обязательно, если со Пункт «Да». Также склад по умолчанию, где защищены количество установлено от заказа клиента."
 Manufacture against Sales Order,Производство против заказ клиента
-Manufacture/Repack,Производство / Repack
+Manufacture/Repack,Производство / Переупаковка
 Manufactured Qty,Изготовлено Кол-во
 Manufactured quantity will be updated in this warehouse,Изготовлено количество будет обновляться в этом склад
 Manufactured quantity {0} cannot be greater than planned quanitity {1} in Production Order {2},"Изготовлено количество {0} не может быть больше, чем планировалось Колличество {1} в производственного заказа {2}"
 Manufacturer,Производитель
-Manufacturer Part Number,Производитель Номер
+Manufacturer Part Number,Номенклатурный код производителя
 Manufacturing,Производство
 Manufacturing Quantity,Производство Количество
 Manufacturing Quantity is mandatory,Производство Количество является обязательным
@@ -1625,17 +1625,17 @@ Market Segment,Сегмент рынка
 Marketing,Маркетинг
 Marketing Expenses,Маркетинговые расходы
 Married,Замужем
-Mass Mailing,Рассылок
+Mass Mailing,Массовая рассылка
 Master Name,Мастер Имя
 Master Name is mandatory if account type is Warehouse,"Мастер Имя является обязательным, если тип счета Склад"
 Master Type,Мастер Тип
-Masters,Организация
+Masters,Мастеры
 Match non-linked Invoices and Payments.,"Подходим, не связанных Счета и платежи."
 Material Issue,Материал выпуск
 Material Receipt,Материал Поступление
 Material Request,Материал Запрос
-Material Request Detail No,Материал: Запрос подробной Нет
-Material Request For Warehouse,Материал Запрос Склад
+Material Request Detail No,Материал Запрос Деталь №
+Material Request For Warehouse,Материал Запрос для Склад
 Material Request Item,Материал Запрос товара
 Material Request Items,Материал Запрос товары
 Material Request No,Материал Запрос Нет
@@ -1705,7 +1705,7 @@ Music,Музыка
 Must be Whole Number,Должно быть Целое число
 Name,Имя
 Name and Description,Название и описание
-Name and Employee ID,Имя и Код сотрудника
+Name and Employee ID,Имя и ID сотрудника
 "Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master","Имя нового счета. Примечание: Пожалуйста, не создавать учетные записи для клиентов и поставщиков, они создаются автоматически от Заказчика и поставщика оригиналов"
 Name of person or organization that this address belongs to.,"Имя лица или организации, что этот адрес принадлежит."
 Name of the Budget Distribution,Название Распределение бюджета
@@ -1734,13 +1734,13 @@ New Cost Center,Новый Центр Стоимость
 New Cost Center Name,Новый Центр Стоимость Имя
 New Delivery Notes,Новые Облигации Доставка
 New Enquiries,Новые запросы
-New Leads,Новые снабжении
+New Leads,Новые лиды
 New Leave Application,Новый Оставить заявку
 New Leaves Allocated,Новые листья Выделенные
 New Leaves Allocated (In Days),Новые листья Выделенные (в днях)
 New Material Requests,Новые запросы Материал
 New Projects,Новые проекты
-New Purchase Orders,Новые Заказы
+New Purchase Orders,Новые заказы
 New Purchase Receipts,Новые поступления Покупка
 New Quotations,Новые Котировки
 New Sales Orders,Новые заказы на продажу
@@ -1750,39 +1750,39 @@ New Stock UOM,Новый фонда UOM
 New Stock UOM is required,Новый фонда Единица измерения требуется
 New Stock UOM must be different from current stock UOM,Новый фонда единица измерения должна отличаться от текущей фондовой UOM
 New Supplier Quotations,Новые Котировки Поставщик
-New Support Tickets,Новые билеты Поддержка
-New UOM must NOT be of type Whole Number,Новый UOM НЕ должен иметь тип целого числа
+New Support Tickets,Новые заявки в службу поддержки
+New UOM must NOT be of type Whole Number,Новая единица измерения НЕ должна быть целочисленной
 New Workplace,Новый Место работы
 Newsletter,Рассылка новостей
-Newsletter Content,Рассылка Содержимое
+Newsletter Content,Содержимое рассылки
 Newsletter Status, Статус рассылки
 Newsletter has already been sent,Информационный бюллетень уже был отправлен
 "Newsletters to contacts, leads.","Бюллетени для контактов, приводит."
 Newspaper Publishers,Газетных издателей
-Next,Следующий
+Next,Далее
 Next Contact By,Следующая Контактные По
 Next Contact Date,Следующая контакты
-Next Date,Следующая Дата
-Next email will be sent on:,Следующая будет отправлено письмо на:
+Next Date,Следующая дата
+Next email will be sent on:,Следующее письмо будет отправлено на:
 No,Нет
 No Customer Accounts found.,Не найдено ни Средства клиентов.
 No Customer or Supplier Accounts found,Не найдено ни одного клиента или поставщика счета
 No Expense Approvers. Please assign 'Expense Approver' Role to atleast one user,"Нет Расходные утверждающих. Пожалуйста, назначить ""расходов утверждающего"" роли для по крайней мере одного пользователя"
 No Item with Barcode {0},Нет товара со штрих-кодом {0}
 No Item with Serial No {0},Нет товара с серийным № {0}
-No Items to pack,Нет объектов для вьючных
+No Items to pack,Нет объектов для упаковки
 No Leave Approvers. Please assign 'Leave Approver' Role to atleast one user,"Нет Leave утверждающих. Пожалуйста назначить роль ""оставить утверждающий ', чтобы по крайней мере одного пользователя"
-No Permission,Отсутствует разрешение
+No Permission,Нет разрешения
 No Production Orders created,"Нет Производственные заказы, созданные"
 No Supplier Accounts found. Supplier Accounts are identified based on 'Master Type' value in account record.,"Не найдено ни Поставщик счета. Поставщик счета определяются на основе стоимости ""Мастер Type 'в счет записи."
 No accounting entries for the following warehouses,Нет учетной записи для следующих складов
 No addresses created,"Нет адреса, созданные"
-No contacts created,"Нет контактов, созданные"
+No contacts created,Нет созданных контактов
 No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template.,"Нет умолчанию Адрес шаблона не найдено. Пожалуйста, создайте новый из Setup> Печать и брендинга> Адресная шаблон."
 No default BOM exists for Item {0},Нет умолчанию спецификации не существует Пункт {0}
 No description given,Не введено описание
-No employee found,Не работник не найдено
-No employee found!,Ни один сотрудник не найден!
+No employee found,Сотрудник не найден
+No employee found!,Сотрудник не найден!
 No of Requested SMS,Нет запрашиваемых SMS
 No of Sent SMS,Нет отправленных SMS
 No of Visits,Нет посещений
@@ -1791,7 +1791,7 @@ No record found,Не запись не найдено
 No records found in the Invoice table,Не записи не найдено в таблице счетов
 No records found in the Payment table,Не записи не найдено в таблице оплаты
 No salary slip found for month: ,No salary slip found for month: 
-Non Profit,Не коммерческое
+Non Profit,Некоммерческое предприятие
 Nos,кол-во
 Not Active,Не активно
 Not Applicable,Не применяется
@@ -1916,7 +1916,7 @@ Packing Slip,Упаковочный лист
 Packing Slip Item,Упаковочный лист Пункт
 Packing Slip Items,Упаковочный лист товары
 Packing Slip(s) cancelled,Упаковочный лист (ы) отменяется
-Page Break,Перерыв
+Page Break,Разрыв страницы
 Page Name,Имя страницы
 Paid Amount,Выплаченная сумма
 Paid amount + Write Off Amount can not be greater than Grand Total,"Платные сумма + списания сумма не может быть больше, чем общий итог"
@@ -2248,7 +2248,7 @@ Purchase Returned,Покупка вернулся
 Purchase Taxes and Charges,Покупка Налоги и сборы
 Purchase Taxes and Charges Master,Покупка Налоги и сборы Мастер
 Purchse Order number required for Item {0},Число Purchse Заказать требуется для Пункт {0}
-Purpose,Цели
+Purpose,Цель
 Purpose must be one of {0},Цель должна быть одна из {0}
 QA Inspection,Инспекция контроля качества
 Qty,Кол-во
@@ -2276,7 +2276,7 @@ Quantity for Item {0} must be less than {1},Количество по пункт
 Quantity in row {0} ({1}) must be same as manufactured quantity {2},"Количество в строке {0} ({1}) должна быть такой же, как изготавливается количество {2}"
 Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,Количество пункта получены после изготовления / переупаковка от заданных величин сырья
 Quantity required for Item {0} in row {1},Кол-во для Пункт {0} в строке {1}
-Quarter,квартал
+Quarter,Квартал
 Quarterly,Ежеквартально
 Quick Help,Быстрая помощь
 Quotation,Расценки
@@ -2367,11 +2367,11 @@ Reference Name,Ссылка Имя
 Reference No & Reference Date is required for {0},Ссылка № & Ссылка Дата необходим для {0}
 Reference No is mandatory if you entered Reference Date,"Ссылка № является обязательным, если вы ввели Исходной дате"
 Reference Number,Номер для ссылок
-Reference Row #,Ссылка Row #
+Reference Row #,Ссылка строка #
 Refresh,Обновить
 Registration Details,Регистрационные данные
 Registration Info,Информация о регистрации
-Rejected,Отклонкнные
+Rejected,Отклоненные
 Rejected Quantity,Отклонен Количество
 Rejected Serial No,Отклонен Серийный номер
 Rejected Warehouse,Отклонен Склад
@@ -2392,7 +2392,7 @@ Repeat on Day of Month,Повторите с Днем Ежемесячно
 Replace,Заменить
 Replace Item / BOM in all BOMs,Заменить пункт / BOM во всех спецификациях
 Replied,Ответил
-Report Date,Дата наблюдений
+Report Date,Дата отчета
 Report Type,Тип отчета
 Report Type is mandatory,Тип отчета является обязательным
 Reports to,Доклады
@@ -2415,10 +2415,10 @@ Required only for sample item.,Требуется только для образ
 Required raw materials issued to the supplier for producing a sub - contracted item.,"Обязательные сырье, выпущенные к поставщику для получения суб - контракт пункт."
 Research,Исследования
 Research & Development,Научно-исследовательские и опытно-конструкторские работы
-Researcher,Научный сотрудник
-Reseller,Торговый посредник ы (Торговые Торговый посредник и)
-Reserved,Сохранено
-Reserved Qty,Защищены Кол-во
+Researcher,Исследователь
+Reseller,Торговый посредник
+Reserved,Зарезервировано
+Reserved Qty,Зарезервированное кол-во
 "Reserved Qty: Quantity ordered for sale, but not delivered.","Защищены Кол-во: Количество приказал на продажу, но не поставлены."
 Reserved Quantity,Зарезервировано Количество
 Reserved Warehouse,Зарезервировано Склад
@@ -2449,8 +2449,8 @@ Root cannot have a parent cost center,Корневая не может имет�
 Rounded Off,Округляется
 Rounded Total,Округлые Всего
 Rounded Total (Company Currency),Округлые Всего (Компания Валюта)
-Row # ,Row # 
-Row # {0}: ,Row # {0}: 
+Row # ,Строка #
+Row # {0}: ,Строка # {0}:
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Ряд # {0}: Заказал Количество может не менее минимального Кол порядка элемента (определяется в мастер пункт).
 Row #{0}: Please specify Serial No for Item {1},"Ряд # {0}: Пожалуйста, сформулируйте Серийный номер для Пункт {1}"
 Row {0}: Account does not match with \						Purchase Invoice Credit To account,Ряд {0}: Счет не соответствует \ Покупка Счет в плюс на счет
@@ -3068,7 +3068,7 @@ Types of activities for Time Sheets,Виды деятельности для В�
 "Types of employment (permanent, contract, intern etc.).","Виды занятости (постоянная, контракт, стажер и т.д.)."
 UOM Conversion Detail,Единица измерения Преобразование Подробно
 UOM Conversion Details,Единица измерения Детали преобразования
-UOM Conversion Factor,Коэффициент пересчета единица измерения
+UOM Conversion Factor,Коэффициент пересчета единицы измерения
 UOM Conversion factor is required in row {0},Фактор Единица измерения преобразования требуется в строке {0}
 UOM Name,Имя единица измерения
 UOM coversion factor required for UOM: {0} in Item: {1},Единица измерения фактором Конверсия требуется для UOM: {0} в пункте: {1}
@@ -3088,7 +3088,7 @@ Unsecured Loans,Необеспеченных кредитов
 Unstop,Откупоривать
 Unstop Material Request,Unstop Материал Запрос
 Unstop Purchase Order,Unstop Заказ
-Unsubscribed,Отписанный
+Unsubscribed,Отписавшийся
 Update,Обновить
 Update Clearance Date,Обновление просвет Дата
 Update Cost,Обновление Стоимость
@@ -3098,7 +3098,7 @@ Update Series,Серия обновление
 Update Series Number,Обновление Номер серии
 Update Stock,Обновление стока
 Update bank payment dates with journals.,Обновление банк платежные даты с журналов.
-Update clearance date of Journal Entries marked as 'Bank Entry',"Дата обновления оформление Записей в журнале отмечается как «Банк Ваучеры"""
+Update clearance date of Journal Entries marked as 'Bank Vouchers',"Дата обновления оформление Записей в журнале отмечается как «Банк Ваучеры"""
 Updated,Обновлено
 Updated Birthday Reminders,Обновлен День рождения Напоминания
 Upload Attendance,Добавить посещаемости
@@ -3107,7 +3107,7 @@ Upload Backups to Google Drive,Добавить резервных копий в
 Upload HTML,Загрузить HTML
 Upload a .csv file with two columns: the old name and the new name. Max 500 rows.,Загрузить файл CSV с двумя колонками. Старое название и новое имя. Макс 500 строк.
 Upload attendance from a .csv file,Добавить посещаемость от. Файл CSV
-Upload stock balance via csv.,Добавить складских остатков с помощью CSV.
+Upload stock balance via csv.,Загрузить складские остатки с помощью CSV.
 Upload your letter head and logo - you can edit them later.,Загрузить письмо голову и логотип - вы можете редактировать их позже.
 Upper Income,Верхний Доход
 Urgent,Важно
@@ -3115,24 +3115,24 @@ Use Multi-Level BOM,Использование Multi-Level BOM
 Use SSL,Использовать SSL
 Used for Production Plan,Используется для производственного плана
 User,Пользователь
-User ID,ID Пользователя
-User ID not set for Employee {0},ID пользователя не установлен Требуются {0}
+User ID,ID пользователя
+User ID not set for Employee {0},ID пользователя не установлен для сотрудника {0}
 User Name,Имя пользователя
 User Name or Support Password missing. Please enter and try again.,"Имя или поддержки Пароль пропавшими без вести. Пожалуйста, введите и повторите попытку."
 User Remark,Примечание Пользователь
 User Remark will be added to Auto Remark,Примечание Пользователь будет добавлен в Auto замечания
 User Remarks is mandatory,Пользователь Замечания является обязательным
 User Specific,Удельный Пользователь
-User must always select,Пользователь всегда должен выбрать
-User {0} is already assigned to Employee {1},Пользователь {0} уже назначен Employee {1}
-User {0} is disabled,Пользователь {0} отключена
-Username,Имя Пользователя
+User must always select,Пользователь всегда должен выбирать
+User {0} is already assigned to Employee {1},Пользователь {0} уже назначен сотрудником {1}
+User {0} is disabled,Пользователь {0} отключен
+Username,Имя пользователя
 Users with this role are allowed to create / modify accounting entry before frozen date,Пользователи с этой ролью могут создавать / изменять записи бухгалтерского учета перед замороженной даты
 Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,Пользователи с этой ролью могут устанавливать замороженных счетов и создания / изменения бухгалтерских проводок против замороженных счетов
 Utilities,Инженерное оборудование
 Utility Expenses,Коммунальные расходы
 Valid For Territories,Действительно для территорий
-Valid From,Действует с
+Valid From,Действительно с
 Valid Upto,Действительно До
 Valid for Territories,Действительно для территорий
 Validate,Подтвердить
@@ -3144,19 +3144,19 @@ Valuation and Total,Оценка и Всего
 Value,Значение
 Value or Qty,Значение или Кол-во
 Vehicle Dispatch Date,Автомобиль Отправка Дата
-Vehicle No,Автомобиль Нет
-Venture Capital,Венчурный капитал.
+Vehicle No,Автомобиль №
+Venture Capital,Венчурный капитал
 Verified By,Verified By
 View Ledger,Посмотреть Леджер
 View Now,Просмотр сейчас
 Visit report for maintenance call.,Посетите отчет за призыв обслуживания.
 Voucher #,Ваучер #
-Voucher Detail No,Ваучер Подробно Нет
+Voucher Detail No,Подробности ваучера №
 Voucher Detail Number,Ваучер Деталь Количество
-Voucher ID,Ваучер ID
-Voucher No,Ваучер
+Voucher ID,ID ваучера
+Voucher No,Ваучер №
 Voucher Type,Ваучер Тип
-Voucher Type and Date,Ваучер Тип и дата
+Voucher Type and Date,Тип и дата ваучера
 Walk In,Прогулка в
 Warehouse,Склад
 Warehouse Contact Info,Склад Контактная информация
@@ -3205,7 +3205,7 @@ Weight UOM,Вес Единица измерения
 "Weight is mentioned,\nPlease mention ""Weight UOM"" too","Вес упоминается, \n указать ""Вес UOM"" слишком"
 Weightage,Weightage
 Weightage (%),Weightage (%)
-Welcome,Добро пожаловать!
+Welcome,Добро пожаловать
 Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!,"Добро пожаловать в ERPNext. В течение следующих нескольких минут мы поможем вам настроить ваш аккаунт ERPNext. Попробуйте и заполнить столько информации, сколько у вас есть даже если это займет немного больше времени. Это сэкономит вам много времени спустя. Удачи Вам!"
 Welcome to ERPNext. Please select your language to begin the Setup Wizard.,"Добро пожаловать в ERPNext. Пожалуйста, выберите язык, чтобы запустить мастер установки."
 What does it do?,Что оно делает?
@@ -3237,13 +3237,13 @@ Write Off Amount <=,Списание Сумма <=
 Write Off Based On,Списание на основе
 Write Off Cost Center,Списание МВЗ
 Write Off Outstanding Amount,Списание суммы задолженности
-Write Off Entry,Списание ваучер
+Write Off Voucher,Списание ваучер
 Wrong Template: Unable to find head row.,Неправильный Шаблон: Не удается найти голову строку.
-Year,Года
+Year,Год
 Year Closed,Год закрыт
-Year End Date,Год Дата окончания
-Year Name,Год Имя
-Year Start Date,Год Дата начала
+Year End Date,Дата окончания года
+Year Name,Имя года
+Year Start Date,Дата начала года
 Year of Passing,Год Passing
 Yearly,Ежегодно
 Yes,Да
@@ -3255,7 +3255,7 @@ You can enter any date manually,Вы можете ввести любую дат
 You can enter the minimum quantity of this item to be ordered.,Вы можете ввести минимальное количество этого пункта заказывается.
 You can not change rate if BOM mentioned agianst any item,"Вы не можете изменить скорость, если спецификации упоминается agianst любого элемента"
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,"не Вы не можете войти как Delivery Note Нет и Расходная накладная номер Пожалуйста, введите любой."
-You can not enter current voucher in 'Against Journal Entry' column,"Вы не можете ввести текущий ваучер в ""Против Journal ваучер 'колонке"
+You can not enter current voucher in 'Against Journal Voucher' column,"Вы не можете ввести текущий ваучер в ""Против Journal ваучер 'колонке"
 You can set Default Bank Account in Company master,Вы можете установить по умолчанию банковский счет в мастер компании
 You can start by selecting backup frequency and granting access for sync,Вы можете начать с выбора частоты резервного копирования и предоставления доступа для синхронизации
 You can submit this Stock Reconciliation.,Вы можете представить эту Stock примирения.
@@ -3280,7 +3280,7 @@ Your support email id - must be a valid email - this is where your emails will c
 [Select],[Выберите]
 `Freeze Stocks Older Than` should be smaller than %d days.,`Мораторий Акции старше` должен быть меньше% D дней.
 and,и
-are not allowed.,не допускаются.
+are not allowed.,не разрешено.
 assigned by,присвоенный
 cannot be greater than 100,"не может быть больше, чем 100"
 "e.g. ""Build tools for builders""","например ""Построить инструменты для строителей """
@@ -3332,49 +3332,3 @@ website page link,сайт ссылку
 {0} {1} status is Unstopped,{0} {1} статус отверзутся
 {0} {1}: Cost Center is mandatory for Item {2},{0} {1}: МВЗ является обязательным для п. {2}
 {0}: {1} not found in Invoice Details table,{0} {1} не найден в счете-фактуре таблице
-"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group""> Добавить / Изменить </>"
-"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Добавить / Изменить </>"
-Billed,Объявленный
-Company,Организация
-Currency is required for Price List {0},Валюта необходима для Прейскурантом {0}
-Default Customer Group,По умолчанию Группа клиентов
-Default Territory,По умолчанию Территория
-Delivered,Доставлено
-Enable Shopping Cart,Включить Корзина
-Go ahead and add something to your cart.,Идем дальше и добавить что-то в корзину.
-Hey! Go ahead and add an address,16.35 Эй! Идем дальше и добавить адрес
-Invalid Billing Address,Неверный Адрес для выставления счета
-Invalid Shipping Address,Неверный адрес пересылки
-Missing Currency Exchange Rates for {0},Отсутствует валютный курс для {0}
-Name is required,Имя обязательно
-Not Allowed,Не разрешены
-Paid,Оплачено
-Partially Billed,Частично Объявленный
-Partially Delivered,Частично Поставляются
-Please specify a Price List which is valid for Territory,"Пожалуйста, сформулируйте прайс-лист, который действителен для территории"
-Please specify currency in Company,"Пожалуйста, сформулируйте валюту в компании"
-Please write something,"Пожалуйста, напишите что-нибудь"
-Please write something in subject and message!,"Пожалуйста, напишите что-нибудь в тему и текст сообщения!"
-Price List,Прайс-лист
-Price List not configured.,Прайс-лист не настроен.
-Quotation Series,Цитата серии
-Shipping Rule,Правило Доставка
-Shopping Cart,Корзина
-Shopping Cart Price List,Корзина Прайс-лист
-Shopping Cart Price Lists,Корзина Прайс-листы
-Shopping Cart Settings,Корзина Настройки
-Shopping Cart Shipping Rule,Корзина Правило Доставка
-Shopping Cart Shipping Rules,Корзина Правила Доставка
-Shopping Cart Taxes and Charges Master,Корзина Налоги и сборы Мастер
-Shopping Cart Taxes and Charges Masters,Налоги Корзина Торговые и сборы Мастера
-Something went wrong!,Что-то пошло не так!
-Something went wrong.,Что-то пошло не так.
-Tax Master,Налоговый Мастер
-To Pay,Платить
-Updated,Обновлено
-You are not allowed to reply to this ticket.,Вы не можете отвечать на этот билет.
-You need to be logged in to view your cart.,"Вы должны войти в систему, чтобы просмотреть свою корзину."
-You need to enable Shopping Cart,Вам необходимо включить Корзина
-{0} cannot be purchased using Shopping Cart,{0} не может быть приобретен с помощью Корзина
-{0} is required,{0} требуется
-{0} {1} has a common territory {2},{0} {1} имеет общую территорию {2}

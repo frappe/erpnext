@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.pages['stock-level'].onload = function(wrapper) {
+frappe.pages['stock-level'].on_page_load = function(wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
 		title: __('Stock Level'),

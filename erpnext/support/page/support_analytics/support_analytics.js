@@ -1,7 +1,7 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.pages['support-analytics'].onload = function(wrapper) {
+frappe.pages['support-analytics'].on_page_load = function(wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
 		title: __('Support Analytics'),
@@ -37,7 +37,7 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: __("Plot"), field: "check", width: 30,
+			{id: "_check", name: __("Plot"), field: "_check", width: 30,
 				formatter: this.check_formatter},
 			{id: "status", name: __("Status"), field: "status", width: 100},
 		];

@@ -103,7 +103,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-01-05 11:27:11.937653", 
+ "modified": "2015-02-05 05:11:42.268561", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Period Closing Voucher", 
@@ -120,6 +120,7 @@
    "read": 1, 
    "report": 1, 
    "role": "System Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -134,6 +135,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }

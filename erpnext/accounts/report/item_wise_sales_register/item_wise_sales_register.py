@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import msgprint, _
+from frappe import _
 from frappe.utils import flt
 
 def execute(filters=None):
@@ -67,7 +67,7 @@ def get_conditions(filters):
 def get_items(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select si_item.parent, si.posting_date, si.debit_to, si.project_name,
-		si.customer, si.remarks, si.territory, si.company, si_item.item_code, si_item.item_name,
+		si.customer, si.remarks, si.territory, si.company, si.net_total, si_item.item_code, si_item.item_name,
 		si_item.item_group, si_item.sales_order, si_item.delivery_note, si_item.income_account,
 		si_item.qty, si_item.base_rate, si_item.base_amount, si.customer_name,
 		si.customer_group, si_item.so_detail
@@ -79,14 +79,17 @@ def get_tax_accounts(item_list, columns):
 	import json
 	item_tax = {}
 	tax_accounts = []
+	invoice_wise_items = {}
+	for d in item_list:
+		invoice_wise_items.setdefault(d.parent, []).append(d)
 
-	tax_details = frappe.db.sql("""select parent, account_head, item_wise_tax_detail
+	tax_details = frappe.db.sql("""select parent, account_head, item_wise_tax_detail, charge_type, tax_amount
 		from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice'
 		and docstatus = 1 and ifnull(account_head, '') != ''
-		and parent in (%s)""" % ', '.join(['%s']*len(item_list)),
-		tuple([item.parent for item in item_list]))
+		and parent in (%s)""" % ', '.join(['%s']*len(invoice_wise_items)),
+		tuple(invoice_wise_items.keys()))
 
-	for parent, account_head, item_wise_tax_detail in tax_details:
+	for parent, account_head, item_wise_tax_detail, charge_type, tax_amount in tax_details:
 		if account_head not in tax_accounts:
 			tax_accounts.append(account_head)
 
@@ -98,6 +101,10 @@ def get_tax_accounts(item_list, columns):
 						 flt(tax_amount[1]) if isinstance(tax_amount, list) else flt(tax_amount)
 			except ValueError:
 				continue
+		elif charge_type == "Actual" and tax_amount:
+			for d in invoice_wise_items.get(parent, []):
+				item_tax.setdefault(parent, {}).setdefault(d.item_code, {})[account_head] = \
+					flt((tax_amount * d.base_amount) / d.net_total)
 
 	tax_accounts.sort()
 	columns += [account_head + ":Currency:80" for account_head in tax_accounts]

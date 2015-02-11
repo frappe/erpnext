@@ -46,7 +46,7 @@
  "icon": "icon-sitemap", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2014-12-24 16:40:11.941046", 
+ "modified": "2015-02-05 05:11:45.221748", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales BOM", 
@@ -62,6 +62,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -90,6 +91,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

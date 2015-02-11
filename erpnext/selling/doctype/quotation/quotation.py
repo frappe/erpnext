@@ -111,7 +111,7 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
 		target.ignore_pricing_rule = 1
-		target.ignore_permissions = ignore_permissions
+		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
@@ -152,7 +152,7 @@ def _make_customer(source_name, ignore_permissions=False):
 			from erpnext.selling.doctype.lead.lead import _make_customer
 			customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
 			customer = frappe.get_doc(customer_doclist)
-			customer.ignore_permissions = ignore_permissions
+			customer.flags.ignore_permissions = ignore_permissions
 			if quotation[1] == "Shopping Cart":
 				customer.customer_group = frappe.db.get_value("Shopping Cart Settings", None,
 					"default_customer_group")
