@@ -59,17 +59,11 @@
                 },
                 "Inventarios": {
                     "Productos Disponibles para la Venta": {
-                        "root_type": "Warehouse"
-                    },
-                    "Materia Prima": {
                         "root_type": "Stock"
                     },
-                    "Produccion en Proceso": {
-                        "root_type": "Stock"
-                    },
-                    "Producto Terminado": {
-                        "root_type": "Stock"
-                    },
+                    "Materia Prima": {},
+                    "Produccion en Proceso": {},
+                    "Producto Terminado": {},
                     "Mercaderia en Transito": {},
                     "Mercaderia de Reventa": {},
                     "Productos en Proceso": {},
