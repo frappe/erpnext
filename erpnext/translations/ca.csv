@@ -1,0 +1,3677 @@
+ (Half Day),
+ and year: ,
+""" does not exists","""No existeix"
+%  Delivered,
+% Amount Billed,% Import facturat
+% Billed,% Facturat
+% Completed,
+% Delivered,% Lliurat
+% Installed,% Instal·lat
+% Milestones Achieved,% Fites assolides
+% Milestones Completed,% Assoliments aconseguits
+% Received,% Rebut
+% Tasks Completed,
+% of materials billed against this Purchase Order.,% de materials facturats d'aquesta ordre de compra.
+% of materials billed against this Sales Order,% De materials facturats d'aquesta Ordre de Venda
+% of materials delivered against this Delivery Note,% Dels materials lliurats d'aquesta nota de lliurament
+% of materials delivered against this Sales Order,
+% of materials ordered against this Material Request,% De materials demanats per aquesta sol·licitud de materials
+% of materials received against this Purchase Order,% Dels materials rebuts d'aquesta ordre de compra
+'Actual Start Date' can not be greater than 'Actual End Date',
+'Based On' and 'Group By' can not be same,
+'Days Since Last Order' must be greater than or equal to zero,
+'Entries' cannot be empty,
+'Expected Start Date' can not be greater than 'Expected End Date',
+'From Date' is required,
+'From Date' must be after 'To Date',
+'From Time' cannot be later than 'To Time',
+'Has Serial No' can not be 'Yes' for non-stock item,
+'Notification Email Addresses' not specified for recurring %s,
+'Profit and Loss' type account {0} not allowed in Opening Entry,
+'To Case No.' cannot be less than 'From Case No.',
+'To Date' is required,
+'Update Stock' for Sales Invoice {0} must be set,
+* Will be calculated in the transaction.,
+"**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.
+
+To distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**",
+**Currency** Master,** Moneda ** MestreDivisa
+**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.,
+"1 Currency = [?] Fraction
+For e.g. 1 USD = 100 Cent",
+1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. Utilitza aquesta opció per mantenir el codi de l'article del client i incloure'l en les cerques en base al seu codi
+90-Above,
+"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group"">Add / Edit</a>"
+"<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group"">Add / Edit</a>"
+"<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory"">Add / Edit</a>"
+"<h4>Default Template</h4>
+<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
+<pre><code>{{ address_line1 }}&lt;br&gt;
+{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
+{{ city }}&lt;br&gt;
+{% if state %}{{ state }}&lt;br&gt;{% endif -%}
+{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
+{{ country }}&lt;br&gt;
+{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
+{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
+{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
+</code></pre>",
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Hi ha un grup de clients amb el mateix nom, si us plau canvia el nom del client o del nom del Grup de Clients"
+A Customer exists with same name,
+A Lead with this email id should exist,Hauria d'haver-hi un client potencial amb aquest correu electrònic
+A Product or Service,Un producte o servei
+"A Product or a Service that is bought, sold or kept in stock.",
+A Supplier exists with same name,
+A condition for a Shipping Rule,
+A logical Warehouse against which stock entries are made.,
+A symbol for this currency. For e.g. $,
+A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.,
+"A user with ""Expense Approver"" role","Un usuari amb rol de ""Aprovador de despeses"""
+AMC Expiry Date,
+Abbr,Abbr
+Abbreviation cannot have more than 5 characters,
+Above Value,
+Absent,
+Acceptance Criteria,Criteris d'acceptació
+Accepted,Acceptat
+Accepted + Rejected Qty must be equal to Received quantity for Item {0},
+Accepted Quantity,Quantitat Acceptada
+Accepted Warehouse,
+Account,Compte
+Account Balance,Saldo del compte
+Account Created: {0},Compte Creat: {0}
+Account Details,Detalls del compte
+Account Group,
+Account Head,
+Account Name,Nom del Compte
+Account Type,Tipus de compte
+"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","El saldo del compte ja està en crèdit, no tens permisos per establir-lo com 'El balanç ha de ser ""com ""Dèbit """
+"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'",
+Account for the warehouse (Perpetual Inventory) will be created under this Account.,Es crearà un Compte per al magatzem (Inventari Permanent) en aquest Compte
+Account head {0} created,
+Account must be a balance sheet account,
+Account with child nodes cannot be converted to ledger,
+Account with existing transaction can not be converted to group.,
+Account with existing transaction can not be deleted,Un compte amb transaccions no es pot eliminar
+Account with existing transaction cannot be converted to ledger,El Compte de la transacció existent no es pot convertir en llibre major
+Account {0} cannot be a Group,El Compte {0} no pot ser un grup
+Account {0} does not belong to Company {1},El compte {0} no pertany a l'empresa {1}
+Account {0} does not belong to company: {1},
+Account {0} does not exist,El compte {0} no existeix
+Account {0} does not exists,
+Account {0} has been entered more than once for fiscal year {1},Compte {0} s'ha introduït més d'una vegada per a l'any fiscal {1}
+Account {0} is frozen,El compte {0} està bloquejat
+Account {0} is inactive,
+Account {0} is not valid,EL compte {0} no és vàlid
+Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,El compte {0} ha de ser del tipus 'd'actius fixos' perquè l'article {1} és un element d'actiu
+Account {0}: Parent account {1} can not be a ledger,Compte {0}: compte pare {1} no pot ser un llibre de comptabilitat
+Account {0}: Parent account {1} does not belong to company: {2},Compte {0}: el compte Pare {1} no pertany a la companyia: {2}
+Account {0}: Parent account {1} does not exist,Compte {0}: el compte superior {1} no existeix
+Account {0}: You can not assign itself as parent account,
+Account: {0} can only be updated via Stock Transactions,El compte: {0} només pot ser actualitzat a través de transaccions d'estoc
+Accountant,Accountant
+Accounting,Comptabilitat
+"Accounting Entries can be made against leaf nodes, called","Accounting Entries can be made against leaf nodes, called"
+Accounting Entry for Stock,
+"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.",
+Accounting journal entries.,Entrades de diari de Comptabilitat.
+Accounts,Comptes
+Accounts Browser,
+Accounts Frozen Upto,Comptes bloquejats fins a
+Accounts Manager,Gerent de Comptes
+Accounts Payable,
+Accounts Receivable,Comptes Per Cobrar
+Accounts Settings,Ajustaments de comptabilitat
+Accounts User,
+Achieved,
+Active,
+Active: Will extract emails from ,
+Activity,
+Activity Log,Registre d'activitat
+Activity Log:,Registre d'activitat:
+Activity Type,
+Actual,
+Actual Budget,Pressupost Actual
+Actual Completion Date,
+Actual Date,Data actual
+Actual End Date,Data de finalització actual
+Actual Invoice Date,Data de la factura
+Actual Posting Date,Data de comptabilització actual
+Actual Qty,
+Actual Qty (at source/target),
+Actual Qty After Transaction,
+Actual Qty is mandatory,La quantitat actual és obligatòria
+Actual Qty: Quantity available in the warehouse.,
+Actual Quantity,Quantitat real
+Actual Start Date,Data d'inici real
+Add,Afegir
+Add / Edit Prices,Afegeix / Edita Preus
+Add / Edit Taxes and Charges,Afegeix / Edita les taxes i càrrecs
+Add Child,
+Add Serial No,Afegir Número de sèrie
+Add Taxes,Afegir Impostos
+Add or Deduct,Afegir o Deduir
+Add rows to set annual budgets on Accounts.,Afegir files per establir els pressupostos anuals de Comptes.
+Add to Cart,
+Add to calendar on this date,Afegir al calendari en aquesta data
+Add/Remove Recipients,
+Address,Adreça
+Address & Contact,
+Address & Contacts,
+Address Desc,Descripció de direcció
+Address Details,Detall de l'adreça
+Address HTML,Adreça HTML
+Address Line 1,Adreça Línia 1
+Address Line 2,Adreça Línia 2
+Address Template,
+Address Title,
+Address Title is mandatory.,Títol d'adreça obligatori.
+Address Type,Tipus d'adreça
+Address master.,
+Administrative Expenses,
+Administrative Officer,Oficial Administratiu
+Administrator,Administrador
+Advance Amount,
+Advance Paid,Bestreta pagada
+Advance amount,
+"Advance paid against {0} {1} cannot be greater \
+					than Grand Total {2}",
+Advances,Advances
+Advertisement,Anunci
+Advertising,
+Aerospace,
+After Sale Installations,Instal·lacions després de venda
+Against,Contra
+Against Account,Contra Compte
+Against Docname,
+Against Doctype,
+Against Document Detail No,Contra Detall del document núm
+Against Document No,
+Against Expense Account,Contra el Compte de Despeses
+Against Income Account,
+Against Invoice,Contra Factura
+Against Invoice Posting Date,Against Invoice Posting Date
+Against Journal Voucher,Contra Assentament de Diari
+Against Journal Voucher {0} does not have any unmatched {1} entry,
+Against Journal Voucher {0} is already adjusted against some other voucher,
+Against Purchase Invoice,
+Against Purchase Order,Per l'Ordre de Compra
+Against Sales Invoice,Contra la factura de venda
+Against Sales Order,Contra l'Ordre de Venda
+Against Supplier Invoice {0} dated {1},Contra Proveïdor Factura {0} {1} datat
+Against Voucher,Contra justificant
+Against Voucher No,Contra el comprovant número
+Against Voucher Type,Contra el val tipus
+"Against Voucher Type must be one of Purchase Order, Purchase Invoice or Journal Voucher","Against Voucher Type must be one of Purchase Order, Purchase Invoice or Journal Voucher"
+"Against Voucher Type must be one of Sales Order, Sales Invoice or Journal Voucher",
+Age,
+Ageing Based On,Envelliment basat en
+Ageing Date is mandatory for opening entry,La data d'envelliment és obligatòria per a l'entrada d'obertura
+Ageing date is mandatory for opening entry,Data d'envelliment és obligatori per a l'entrada d'obertura
+Agent,Agent
+"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+
+The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
+
+For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.
+
+Note: BOM = Bill of Materials",
+Aging Date,Data Envelliment
+Aging Date is mandatory for opening entry,
+Agriculture,Agricultura
+Airline,Aerolínia
+All,Tots
+All Addresses.,
+All Contact,All Contact
+All Contacts.,
+All Customer Contact,Contacte tot client
+All Customer Groups,
+All Day,Tot el dia
+All Employee (Active),
+All Item Groups,Tots els grups d'articles
+All Lead (Open),Tots els clients potencials (Obert)
+All Products or Services.,Tots els Productes o Serveis.
+All Sales Partner Contact,
+All Sales Person,Tot el personal de vendes
+All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,
+All Supplier Contact,Contacte de Tot el Proveïdor
+All Supplier Types,Tots els tipus de proveïdors
+All Territories,Tots els territoris
+"All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Tots els camps relacionats amb l'exportació, com la moneda, taxa de conversió, el total de les exportacions, els totals de les exportacions etc estan disponibles a notes de lliurament, TPV, ofertes, factura de venda, ordre de venda, etc."
+"All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Tots els camps relacionats amb la importació com la divisa, taxa de conversió, el total de l'import, els imports acumulats, etc estan disponibles en el rebut de compra, oferta de compra, factura de compra, ordres de compra, etc."
+All items have already been invoiced,S'han facturat tots els articles
+All these items have already been invoiced,Tots aquests elements ja s'han facturat
+Allocate,Assignar
+Allocate leaves for a period.,Assignar absències per un període.
+Allocate leaves for the year.,
+Allocated,Situat
+Allocated Amount,
+Allocated Budget,Pressupost assignat
+Allocated amount,Quantitat assignada
+Allocated amount can not be negative,Suma assignat no pot ser negatiu
+Allocated amount can not greater than unadusted amount,
+Allow Bill of Materials,
+Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item,Permetre llista de materials ha de ser 'Sí'. Perquè hi ha una o vàries llistes de materials actives per aquest article
+Allow Children,Permetre descendents a l'arbre
+Allow Dropbox Access,Allow Dropbox Access
+Allow Google Drive Access,Permetre l'accés de Google Drive
+Allow Negative Balance,Permetre balanç negatiu
+Allow Negative Stock,Permetre existències negatives
+Allow Production Order,
+Allow User,Permetre a l'usuari
+Allow Users,
+Allow the following users to approve Leave Applications for block days.,
+Allow user to edit Price List Rate in transactions,Permetre a l'usuari editar la Llista de Preus de Tarifa en transaccions
+Allowance Percent,
+Allowance for over-{0} crossed for Item {1},Permissió de superació {0} superat per l'article {1}
+Allowance for over-{0} crossed for Item {1}.,
+Allowed Role to Edit Entries Before Frozen Date,
+Amended From,Modificada Des de
+Amount,
+Amount (Company Currency),Import (Companyia moneda)
+Amount Paid,Quantitat pagada
+Amount to Bill,
+Amounts not reflected in bank,Les quantitats no es reflecteixen en el banc
+Amounts not reflected in system,
+Amt,
+An Customer exists with same name,
+"An Item Group exists with same name, please change the item name or rename the item group","Hi ha un grup d'articles amb el mateix nom, si us plau, canvieu el nom de l'article o del grup d'articles"
+"An item exists with same name ({0}), please change the item group name or rename the item",
+Analyst,Analista
+Annual,Anual
+Another Period Closing Entry {0} has been made after {1},
+Another Salary Structure {0} is active for employee {1}. Please make its status 'Inactive' to proceed.,"Una altra estructura salarial {0} està activa per l'empleat {1}. Si us plau, passeu el seu estat a 'inactiu' per seguir."
+"Any other comments, noteworthy effort that should go in the records.",
+Apparel & Accessories,
+Applicability,
+Applicable Charges,Càrrecs aplicables
+Applicable For,Aplicable per
+Applicable Holiday List,Llista de vacances aplicable
+Applicable Territory,
+Applicable To (Designation),Aplicable a (Designació)
+Applicable To (Employee),Aplicable a (Empleat)
+Applicable To (Role),Aplicable a (Rol)
+Applicable To (User),Aplicable a (Usuari)
+Applicant Name,Nom del sol·licitant
+Applicant for a Job,Sol·licitant d'ocupació
+Applicant for a Job.,
+Application of Funds (Assets),
+Applications for leave.,
+Applies to Company,S'aplica a l'empresa
+Apply / Approve Leaves,
+Apply On,Aplicar a
+Appraisal,Avaluació
+Appraisal Goal,Avaluació Meta
+Appraisal Goals,Valoració d'Objectius
+Appraisal Template,Plantilla d'Avaluació
+Appraisal Template Goal,
+Appraisal Template Title,Títol de plantilla d'avaluació
+Appraisal {0} created for Employee {1} in the given date range,
+Apprentice,
+Approval Status,
+Approval Status must be 'Approved' or 'Rejected',"Estat d'aprovació ha de ser ""Aprovat"" o ""Rebutjat"""
+Approved,
+Approver,
+Approving Role,Aprovar Rol
+Approving Role cannot be same as role the rule is Applicable To,El rol d'aprovador no pot ser el mateix que el rol al que la regla s'ha d'aplicar
+Approving User,Usuari aprovador
+Approving User cannot be same as user the rule is Applicable To,Approving User cannot be same as user the rule is Applicable To
+Are you sure you want to STOP ,
+Are you sure you want to UNSTOP ,
+Arrear Amount,Arrear Amount
+"As Production Order can be made for this item, it must be a stock item.",Per a poder fer aquest article Ordre de Producció cal designar-lo com a article d'estoc
+As per Stock UOM,Segons Stock UDM
+"As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'",
+Asset,
+Assistant,
+Associate,
+Atleast one of the Selling or Buying must be selected,Has de marcar compra o venda
+Atleast one warehouse is mandatory,Almenys un magatzem és obligatori
+Attach Image,
+Attach Letterhead,Afegir capçalera de carta
+Attach Logo,
+Attach Your Picture,Adjunta la teva imatge
+Attendance,Assistència
+Attendance Date,
+Attendance Details,
+Attendance From Date,Assistència des de data
+Attendance From Date and Attendance To Date is mandatory,Assistència Des de la data i Assistència a la data és obligatori
+Attendance To Date,Assistència fins a la Data
+Attendance can not be marked for future dates,No es poden entrar assistències per dates futures
+Attendance for employee {0} is already marked,Assistència per a l'empleat {0} ja està marcat
+Attendance record.,
+Auditor,Auditor
+Authorization Control,Control d'Autorització
+Authorization Rule,
+Auto Accounting For Stock Settings,
+Auto Material Request,Sol·licitud de material automàtica
+Auto-raise Material Request if quantity goes below re-order level in a warehouse,Puja automàticament la quantitat de material a demanar si la quantitat està per sota de nivell de re-ordre en un magatzem
+Automatically compose message on submission of transactions.,Compondre automàticament el missatge en la presentació de les transaccions.
+Automatically updated via Stock Entry of type Manufacture or Repack,
+Automotive,Automòbil
+Autoreply when a new mail is received,
+Available,
+Available Qty at Warehouse,
+Available Stock for Packing Items,Estoc disponible per articles d'embalatge
+"Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","Disponible a la llista de materials, nota de lliurament, factura de compra, ordre de producció, ordres de compra, rebut de compra, factura de venda, ordres de venda, entrada d'estoc, fulla d'hores"
+Average Age,
+Average Commission Rate,Comissió de Tarifes mitjana
+Average Discount,Descompte Mig
+Avg Daily Outgoing,
+Avg. Buying Rate,Quota de compra mitja
+Awesome Products,
+Awesome Services,
+BOM Detail No,Detall del BOM No
+BOM Explosion Item,Explosió de BOM d'article
+BOM Item,Article BOM
+BOM No,
+BOM No. for a Finished Good Item,
+BOM Operation,
+BOM Operations,Operacions BOM
+BOM Rate,BOM Rate
+BOM Replace Tool,
+BOM number is required for manufactured Item {0} in row {1},
+BOM number not allowed for non-manufactured Item {0} in row {1},Número de BOM (llista de materials) no permès per l'article no-manufacturat {0} a la fila {1}
+BOM recursion: {0} cannot be parent or child of {2},BOM recursiu: {0} no pot ser pare o fill de {2}
+BOM replaced,
+BOM {0} for Item {1} in row {2} is inactive or not submitted,
+BOM {0} is not active or not submitted,
+BOM {0} is not submitted or inactive BOM for Item {1},El BOM {0} no esta Presentat o està inactiu per l'article {1}
+Backup Manager,
+Backup Right Now,
+Backups will be uploaded to,Les còpies de seguretat es pujaran a
+Balance,
+Balance Qty,Saldo Quantitat
+Balance Sheet,Balanç
+Balance Value,
+Balance for Account {0} must always be {1},Balanç per compte {0} ha de ser sempre {1}
+Balance must be,El balanç ha de ser
+"Balances of Accounts of type ""Bank"" or ""Cash""",
+Bank,Banc
+Bank / Cash Account,
+Bank A/C No.,Número de Compte Corrent
+Bank Account,Compte Bancari
+Bank Account No.,Compte Bancari No.
+Bank Accounts,Comptes bancaris
+Bank Clearance Summary,
+Bank Draft,
+Bank Name,Nom del banc
+Bank Overdraft Account,Bank Overdraft Account
+Bank Reconciliation,Conciliació bancària
+Bank Reconciliation Detail,
+Bank Reconciliation Statement,Declaració de Conciliació Bancària
+Bank Voucher,
+Bank/Cash Balance,Banc / Balanç de Caixa
+Banking,Banca
+Barcode,Codi de barres
+Barcode {0} already used in Item {1},
+Based On,Basat en
+Basic,Bàsic
+Basic Info,
+Basic Information,Informació bàsica
+Basic Rate,Tarifa Bàsica
+Basic Rate (Company Currency),Tarifa Bàsica (En la divisa de la companyia)
+Batch,
+Batch (lot) of an Item.,
+Batch Finished Date,
+Batch ID,Identificació de lots
+Batch No,Lot número
+Batch Started Date,
+Batch Time Logs for Billing.,
+Batch Time Logs for billing.,
+Batch-Wise Balance History,Batch-Wise Balance History
+Batched for Billing,Agrupat per a la Facturació
+Better Prospects,
+Bill Date,Data de la factura
+Bill No,Factura Número
+Bill of Material,Llista de materials (BOM)
+Bill of Material to be considered for manufacturing,
+Bill of Materials (BOM),Llista de materials (BOM)
+Billable,
+Billed,Facturat
+Billed Amount,Quantitat facturada
+Billed Amt,Quantitat facturada
+Billing,
+Billing (Sales Invoice),
+Billing Address,
+Billing Address Name,Nom de l'adressa de facturació
+Billing Status,Estat de facturació
+Bills raised by Suppliers.,
+Bills raised to Customers.,Factures enviades als clients.
+Bin,Paperera
+Bio,Bio
+Biotechnology,
+Birthday,
+Block Date,Bloquejar Data
+Block Days,Bloc de Dies
+Block Holidays on important days.,
+Block leave applications by department.,Bloquejar sol·licituds d'absències per departament.
+Blog Post,Post Blog
+Blog Subscriber,
+Blood Group,
+Both Warehouse must belong to same Company,
+Box,
+Branch,Branca
+Brand,Marca comercial
+Brand Name,
+Brand master.,
+Brands,
+Breakdown,Breakdown
+Broadcasting,
+Brokerage,
+Budget,Pressupost
+Budget Allocated,Pressupost assignat
+Budget Detail,Detall del Pressupost
+Budget Details,Detalls del Pressupost
+Budget Distribution,Distribució del Pressupost
+Budget Distribution Detail,
+Budget Distribution Details,Budget Distribution Details
+Budget Variance Report,
+Budget cannot be set for Group Cost Centers,
+Build Report,Redactar Informe
+Bundle items at time of sale.,Articles agrupats en el moment de la venda.
+Business Development Manager,
+Buyer of Goods and Services.,Compradors de Productes i Serveis.
+Buying,
+Buying & Selling,
+Buying Amount,
+Buying Settings,
+"Buying must be checked, if Applicable For is selected as {0}",
+C-Form,C-Form
+C-Form Applicable,C-Form Applicable
+C-Form Invoice Detail,C-Form Invoice Detail
+C-Form No,
+C-Form records,
+CENVAT Capital Goods,
+CENVAT Edu Cess,
+CENVAT SHE Cess,
+CENVAT Service Tax,CENVAT Service Tax
+CENVAT Service Tax Cess 1,
+CENVAT Service Tax Cess 2,CENVAT Service Tax Cess 2
+Calculate Based On,
+Calculate Total Score,Calcular Puntuació total
+Calendar Events,
+Call,Truca
+Calls,Trucades
+Campaign,Campanya
+Campaign Name,
+Campaign Name is required,Cal un nom de Campanya
+Campaign Naming By,Naming de Campanya Per
+Campaign-.####,Campanya-.####
+Can be approved by {0},Pot ser aprovat per {0}
+"Can not filter based on Account, if grouped by Account",
+"Can not filter based on Voucher No, if grouped by Voucher","Can not filter based on Voucher No, if grouped by Voucher"
+Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total',
+Cancel Material Visit {0} before cancelling this Customer Issue,Cancel·la la visita de material {0} abans de cancel·lar aquesta incidència de client
+Cancel Material Visits {0} before cancelling this Maintenance Visit,Cancel·la Visites Materials {0} abans de cancel·lar aquesta visita de manteniment
+Cancelled,
+Cancelling this Stock Reconciliation will nullify its effect.,Cancel·lant aquesta reconciliació d'estocs anul·larà el seu efecte.
+Cannot Cancel Opportunity as Quotation Exists,No es pot Cancel·lar Oportunitat perquè hi ha ofertes
+Cannot approve leave as you are not authorized to approve leaves on Block Dates,No es pot aprovar l'absència perquè no estàs autoritzat per aprovar-les en dates bloquejades
+Cannot cancel because Employee {0} is already approved for {1},No es pot cancel·lar perquè Empleat {0} ja està aprovat per {1}
+Cannot cancel because submitted Stock Entry {0} exists,No es pot cancel·lar perquè l'entrada d'estoc {0} ja ha estat Presentada
+Cannot carry forward {0},No es pot tirar endavant {0}
+Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved.,No es poden canviar les dates de l'any finscal (inici i fi) una vegada ha estat desat
+"Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency.",
+Cannot convert Cost Center to ledger as it has child nodes,"No es pot convertir de centres de cost per al llibre major, ja que té nodes secundaris"
+Cannot covert to Group because Master Type or Account Type is selected.,No es pot convertir en Grup perquè està seleccionat Type Master o Tipus de Compte.
+Cannot deactive or cancle BOM as it is linked with other BOMs,No es pot Desactivar o cancelar el BOM ja que està vinculat a d'altres llistes de materials
+"Cannot declare as lost, because Quotation has been made.","No es pot declarar com perdut, perquè s'han fet ofertes"
+Cannot deduct when category is for 'Valuation' or 'Valuation and Total',
+"Cannot delete Serial No {0} in stock. First remove from stock, then delete.",
+"Cannot directly set amount. For 'Actual' charge type, use the rate field","No es pot establir directament quantitat. Per l'""Actual"" tipus de càrrec utilitzeu el camp de canvi"
+"Cannot overbill for Item {0} in row {1} more than {2}. To allow overbilling, please set in Stock Settings","No es pot sobrefacturar l'element {0} a la fila {1} més de {2}. Per permetre la sobrefacturació, configura-ho a configuració d'existències"
+Cannot produce more Item {0} than Sales Order quantity {1},
+Cannot refer row number greater than or equal to current row number for this Charge type,No es pot fer referència número de la fila superior o igual al nombre de fila actual d'aquest tipus de càrrega
+Cannot return more than {0} for Item {1},
+Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row,No es pot seleccionar el tipus de càrrega com 'Suma de la fila anterior' o 'Total de la fila anterior' per la primera fila
+Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for valuation. You can select only 'Total' option for previous row amount or previous row total,"No es pot seleccionar el tipus de càrrega com 'On Anterior Suma Fila ""o"" L'anterior Fila Total ""per a la valoració. Només podeu seleccionar l'opció ""Total"" per la quantitat fila anterior o següent total de la fila"
+Cannot set as Lost as Sales Order is made.,
+Cannot set authorization on basis of Discount for {0},No es pot establir l'autorització sobre la base de Descompte per {0}
+Capacity,Capacitat
+Capacity Units,Unitats de Capacitat
+Capital Account,Capital Account
+Capital Equipments,Capital Equipments
+Carry Forward,
+Carry Forwarded Leaves,
+Case No(s) already in use. Try from Case No {0},
+Case No. cannot be 0,
+Cash,
+Cash In Hand,Efectiu disponible
+Cash Voucher,Tiquet de caixa
+Cash or Bank Account is mandatory for making payment entry,
+Cash/Bank Account,Compte de Caixa / Banc
+Casual Leave,
+Cell Number,Número de cel·la
+Change Abbreviation,
+Change UOM for an Item.,Canviar la UDM d'un article
+Change the starting / current sequence number of an existing series.,Canviar el número de seqüència inicial/actual d'una sèrie existent.
+Channel Partner,Partner de Canal
+Charge of type 'Actual' in row {0} cannot be included in Item Rate,Càrrec del tipus 'real' a la fila {0} no pot ser inclòs en la partida Rate
+Chargeable,Facturable
+Charges are updated in Purchase Receipt against each item,Els càrrecs s'actualitzen amb els rebuts de compra contra cada un dels articles
+"Charges will be distributed proportionately based on item qty or amount, as per your selection","Els càrrecs es distribuiran proporcionalment basen en Quantitat o import de l'article, segons la teva selecció"
+Charity and Donations,Caritat i Donacions
+Chart Name,Nom del diagrama
+Chart of Accounts,Pla General de Comptabilitat
+Chart of Cost Centers,Gràfic de centres de cost
+Check how the newsletter looks in an email by sending it to your email.,Comprova com es veu el butlletí en un correu electrònic enviant-lo al teu correu electrònic.
+"Check if recurring invoice, uncheck to stop recurring or put proper End Date",
+"Check if recurring order, uncheck to stop recurring or put proper End Date","Marca-ho si és una ordre recurrent, desmarca per aturar recurrents o posa la data final"
+"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.","Comproveu si necessita factures recurrents automàtiques. Després de Presentar qualsevol factura de venda, la secció recurrent serà visible."
+Check if you want to send salary slip in mail to each employee while submitting salary slip,
+Check this if you want to force the user to select a series before saving. There will be no default if you check this.,Seleccioneu aquesta opció si voleu obligar l'usuari a seleccionar una sèrie abans de desar. No hi haurà cap valor per defecte si marca aquesta.
+Check this if you want to show in website,Seleccioneu aquesta opció si voleu que aparegui en el lloc web
+Check this to disallow fractions. (for Nos),Habiliteu aquesta opció per no permetre fraccions. (Per números)
+Check this to pull emails from your mailbox,Selecciona perenviar correus electrònics de la seva bústia de correu
+Check to activate,Marca per activar
+Check to make Shipping Address,
+Check to make primary address,Comproveu que hi hagi la direcció principal
+Chemical,
+Cheque,
+Cheque Date,Data Xec
+Cheque Number,Número de Xec
+Child account exists for this account. You can not delete this account.,
+City,
+City/Town,Ciutat / Poble
+Claim Amount,Reclamació Import
+Claims for company expense.,
+Class / Percentage,
+Classic,
+Classification of Customers by region,Classificació dels clients per regió
+Clear Table,Taula en blanc
+Clearance Date,Data Liquidació
+Clearance Date not mentioned,No s'esmenta l'espai de dates
+Clearance date cannot be before check date in row {0},La data de liquidació no pot ser anterior a la data de verificació a la fila {0}
+Click on 'Make Sales Invoice' button to create a new Sales Invoice.,
+Click on a link to get options to expand get options ,
+Client,Client
+Close,Close
+Close Balance Sheet and book Profit or Loss.,
+Closed,Tancat
+Closing (Cr),Tancament (Cr)
+Closing (Dr),Tancament (Dr)
+Closing Account Head,Tancant el Compte principal
+Closing Account {0} must be of type 'Liability',El Compte de tancament {0} ha de ser del tipus 'responsabilitat'
+Closing Date,Data de tancament
+Closing Fiscal Year,Tancant l'Any Fiscal
+CoA Help,CoA Help
+Code,Codi
+Cold Calling,Trucades en fred
+Color,Color
+Column Break,
+Column Break 1,Column Break 1
+Comma separated list of email addresses,
+Comment,
+Comments,Comentaris
+Commercial,Comercial
+Commission,Comissió
+Commission Rate,Percentatge de comissió
+Commission Rate (%),Comissió (%)
+Commission on Sales,Comissió de Vendes
+Commission rate cannot be greater than 100,La Comissió no pot ser major que 100
+Communication,Comunicació
+Communication HTML,Comunicació HTML
+Communication History,
+Communication log.,Registre de Comunicació.
+Communications,Comunicacions
+Company,Empresa
+Company (not Customer or Supplier) master.,Companyia (no client o proveïdor) mestre.
+Company Abbreviation,Abreviatura de l'empresa
+Company Details,
+Company Email,Email de l'empresa
+"Company Email ID not found, hence mail not sent","ID de correu electrònic de l'empresa no trobat, per tant, no s'ha enviat el correu"
+Company Info,
+Company Name,Nom de l'Empresa
+Company Settings,
+Company is missing in warehouses {0},Falta Empresa als magatzems {0}
+Company is required,
+Company registration numbers for your reference. Example: VAT Registration Numbers etc.,Els números de registre de l'empresa per la teva referència. Per exemple: Els números de registre d'IVA etc
+Company registration numbers for your reference. Tax numbers etc.,
+"Company, Month and Fiscal Year is mandatory","Empresa, mes i de l'any fiscal és obligatòri"
+Compensatory Off,Compensatori
+Complete,Complet
+Complete Setup,
+Completed,Acabat
+Completed Production Orders,
+Completed Qty,Quantitat completada
+Completion Date,Data d'acabament
+Completion Status,Estat de finalització
+Computer,Ordinador
+Computers,Ordinadors
+Confirmation Date,Data de confirmació
+Confirmed orders from Customers.,Comandes en ferm dels clients.
+Consider Tax or Charge for,Consider Tax or Charge for
+Considered as Opening Balance,Considerat com a saldo d'obertura
+Considered as an Opening Balance,Considerat com un saldo d'obertura
+Consultant,Consultor
+Consulting,Consulting
+Consumable,
+Consumable Cost,Cost de consumibles
+Consumable cost per hour,Cost de consumibles per hora
+Consumed,
+Consumed Amount,
+Consumed Qty,Quantitat utilitzada
+Consumer Products,
+Contact,Contacte
+Contact Desc,Descripció del Contacte
+Contact Details,
+Contact Email,
+Contact HTML,Contacte HTML
+Contact Info,Informació de Contacte
+Contact Mobile No,
+Contact Name,Nom de Contacte
+Contact No.,Número de Contacte
+Contact Person,Persona De Contacte
+Contact Type,Tipus de contacte
+Contact master.,
+Contacts,
+Content,Contingut
+Content Type,
+Contra Voucher,
+Contract,
+Contract End Date,Data de finalització de contracte
+Contract End Date must be greater than Date of Joining,La Data de finalització del contracte ha de ser major que la data d'inici
+Contribution %,
+Contribution (%),
+Contribution Amount,Quantitat aportada
+Contribution to Net Total,Contribució neta total
+Conversion Factor,Factor de conversió
+Conversion Factor is required,
+Conversion factor cannot be in fractions,Factor de conversió no pot estar en fraccions
+Conversion factor for default Unit of Measure must be 1 in row {0},
+Conversion rate cannot be 0 or 1,La taxa de conversió no pot ser 0 o 1
+Convert to Group,
+Convert to Ledger,Convertir a llibre major
+Converted,Convertit
+Copy From Item Group,Copiar del Grup d'Articles
+Cosmetics,Productes cosmètics
+Cost Center,Centre de Cost
+Cost Center Details,Detalls del centre de cost
+Cost Center For Item with Item Code ',Centre de cost per l'article amb Codi d'article '
+Cost Center Name,Nom del centre de cost
+Cost Center is required for 'Profit and Loss' account {0},
+Cost Center is required in row {0} in Taxes table for type {1},
+Cost Center with existing transactions can not be converted to group,Un Centre de costos amb transaccions existents no es pot convertir en grup
+Cost Center with existing transactions can not be converted to ledger,Centre de costos de les transaccions existents no es pot convertir en llibre major
+Cost Center {0} does not belong to Company {1},El Centre de cost {0} no pertany a l'empresa {1}
+Cost of Delivered Items,Cost dels articles lliurats
+Cost of Goods Sold,Cost de Vendes
+Cost of Issued Items,
+Cost of Purchased Items,El cost d'articles comprats
+Costing,
+Country,
+Country Name,Nom del país
+Country wise default Address Templates,
+"Country, Timezone and Currency","País, Zona horària i moneda"
+Cr,Cr
+Create Bank Voucher for the total salary paid for the above selected criteria,Create Bank Voucher for the total salary paid for the above selected criteria
+Create Customer,
+Create Material Requests,
+Create New,Crear nou
+Create Opportunity,Crear Oportunitats
+Create Payment Entries against Orders or Invoices.,
+Create Production Orders,Crear ordres de producció
+Create Quotation,
+Create Receiver List,Crear Llista de receptors
+Create Salary Slip,Crear fulla de nòmina
+Create Stock Ledger Entries when you submit a Sales Invoice,Crear moviments d'estoc quan es presenta una factura de venda
+Create and Send Newsletters,
+"Create and manage daily, weekly and monthly email digests.",
+Create rules to restrict transactions based on values.,Crear regles per restringir les transaccions basades en valors.
+Created By,Creat per
+Creates salary slip for above mentioned criteria.,Crea nòmina per als criteris abans esmentats.
+Creation Date,
+Creation Document No,Creació document nº
+Creation Document Type,Creació de tipus de document
+Creation Time,
+Credentials,
+Credit,
+Credit Amt,Credit Amt
+Credit Card,Targeta De Crèdit
+Credit Card Voucher,Tiquet de targeta de crèdit
+Credit Controller,
+Credit Days,
+Credit Limit,Límit de Crèdit
+Credit Note,
+Credit To,Crèdit Per
+Cross Listing of Item in multiple groups,Creu Fitxa d'article en diversos grups
+Currency,
+Currency Exchange,Valor de Canvi de divisa
+Currency Name,
+Currency Settings,Ajustaments de divises
+Currency and Price List,
+Currency exchange rate master.,Tipus de canvi principal.
+Current Address,Adreça actual
+Current Address Is,L'adreça actual és
+Current Assets,
+Current BOM,BOM actual
+Current BOM and New BOM can not be same,El BOM actual i el nou no poden ser el mateix
+Current Fiscal Year,Any fiscal actual
+Current Liabilities,
+Current Stock,Estoc actual
+Current Stock UOM,
+Current Value,
+Custom,A mida
+Custom Autoreply Message,
+Custom Message,Missatge personalitzat
+Customer,Client
+Customer (Receivable) Account,Compte de Clients (per cobrar)
+Customer / Item Name,
+Customer / Lead Address,
+Customer / Lead Name,nom del Client/Client Potencial
+Customer > Customer Group > Territory,Client> Grup de Clients> Territori
+Customer Account,
+Customer Account Head,
+Customer Acquisition and Loyalty,Captació i Fidelització
+Customer Address,
+Customer Addresses And Contacts,Adreces de clients i contactes
+Customer Addresses and Contacts,Adreces de clients i contactes
+Customer Code,Codi de Client
+Customer Codes,Codis de clients
+Customer Details,
+Customer Feedback,Comentaris del client
+Customer Group,Grup de Clients
+Customer Group / Customer,
+Customer Group Name,
+Customer Id,ID del client
+Customer Issue,Incidència de Client
+Customer Issue against Serial No.,Incidència de client amb l'article amb número de sèrie
+Customer Name,Nom del client
+Customer Naming By,Customer Naming By
+Customer Service,Servei Al Client
+Customer database.,Base de dades de clients.
+Customer is required,Es requereix client
+Customer master.,
+Customer required for 'Customerwise Discount',
+Customer {0} does not belong to project {1},
+Customer {0} does not exist,El client {0} no existeix
+Customer's Item Code,
+Customer's Purchase Order Date,Data de l'ordre de compra del client
+Customer's Purchase Order No,
+Customer's Purchase Order Number,Número de Comanda del Client
+Customer's Vendor,Venedor del Client
+Customers Not Buying Since Long Time,
+Customers Not Buying Since Long Time ,
+Customerwise Discount,
+Customize,Personalitza
+Customize the Notification,
+Customize the introductory text that goes as a part of that email. Each transaction has a separate introductory text.,Personalitza el text d'introducció que va com una part d'aquest correu electrònic. Cada transacció té un text introductori independent.
+DN Detail,Detall DN
+Daily,Diari
+Daily Time Log Summary,Resum diari del registre de temps
+Database Folder ID,Database Folder ID
+Database of potential customers.,Base de dades de clients potencials.
+Date,Data
+Date Format,Format de data
+Date Of Retirement,Data de la jubilació
+Date Of Retirement must be greater than Date of Joining,Data de la jubilació ha de ser major que la data del contracte
+Date is repeated,Data repetida
+Date of Birth,Data de naixement
+Date of Issue,
+Date of Joining,Data d'ingrés
+Date of Joining must be greater than Date of Birth,Data d'ingrés ha de ser major que la data de naixement
+Date on which lorry started from supplier warehouse,
+Date on which lorry started from your warehouse,Data en què el camió va sortir del teu magatzem
+Dates,Dates
+Days Since Last Order,
+Days for which Holidays are blocked for this department.,Dies de festa que estan bloquejats per aquest departament.
+Dealer,
+Debit,
+Debit Amt,Dèbit
+Debit Note,Nota de Dèbit
+Debit To,
+Debit and Credit not equal for this voucher. Difference is {0}.,Dèbit i credit diferent per aquest comprovant. La diferència és {0}.
+Deduct,
+Deduction,Deducció
+Deduction Type,
+Deduction1,Deducció 1
+Deductions,Deduccions
+Default,Defecte
+Default Account,Compte predeterminat
+Default Address Template cannot be deleted,La Plantilla de la direcció predeterminada no es pot eliminar
+Default Amount,Default Amount
+Default BOM,BOM predeterminat
+Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,El compte bancs/efectiu predeterminat s'actualitzarà automàticament a les factures de TPV quan es selecciona aquest.
+Default Bank Account,
+Default Buying Cost Center,Centres de cost de compres predeterminat
+Default Buying Price List,Llista de preus per defecte
+Default Cash Account,Compte de Tresoreria predeterminat
+Default Company,
+Default Cost Center,Centre de cost predeterminat
+Default Currency,
+Default Customer Group,
+Default Expense Account,Compte de Despeses predeterminat
+Default Income Account,Compte d'Ingressos predeterminat
+Default Item Group,Grup d'articles predeterminat
+Default Price List,Llista de preus per defecte
+Default Purchase Account in which cost of the item will be debited.,Compte de Compra predeterminat en la qual es carregarà el cost de l'article.
+Default Selling Cost Center,
+Default Settings,
+Default Source Warehouse,Magatzem d'origen predeterminat
+Default Stock UOM,UDM d'estoc predeterminat
+Default Supplier,
+Default Supplier Type,Tipus predeterminat de Proveïdor
+Default Target Warehouse,Magatzem de destí predeterminat
+Default Territory,Territori per defecte
+Default Unit of Measure,Unitat de mesura per defecte
+"Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module.",
+Default Valuation Method,Mètode de valoració predeterminat
+Default Warehouse,Magatzem predeterminat
+Default Warehouse is mandatory for stock Item.,El magatzem predeterminat és obligatòria pels articles d'estoc
+Default settings for accounting transactions.,Ajustos predeterminats per a les operacions comptables.
+Default settings for buying transactions.,Ajustos predeterminats per a transaccions de compra.
+Default settings for selling transactions.,Ajustos predeterminats per a les transaccions de venda
+Default settings for stock transactions.,
+Defense,
+"Define Budget for this Cost Center. To set budget action, see <a href=""#!List/Company"">Company Master</a>","Definir Pressupost per a aquest centre de cost. Per configurar l'acció de pressupost, consulteu <a href=""#!List/Company"">Company Master</a>"
+Del,Esborra
+Delete,Esborrar
+Delivered,
+Delivered Amount,
+Delivered Items To Be Billed,Articles lliurats pendents de facturar
+Delivered Qty,Quantitat lliurada
+Delivered Serial No {0} cannot be deleted,
+Delivery Date,Data De Lliurament
+Delivery Details,
+Delivery Document No,
+Delivery Document Type,Tipus de document de lliurament
+Delivery Note,Nota de lliurament
+Delivery Note Item,
+Delivery Note Items,
+Delivery Note Message,Missatge de la Nota de lliurament
+Delivery Note No,Número d'albarà de lliurament
+Delivery Note Required,Nota de lliurament Obligatòria
+Delivery Note Trends,Nota de lliurament Trends
+Delivery Note {0} is not submitted,La Nota de lliurament {0} no està presentada
+Delivery Note {0} must not be submitted,La Nota de lliurament {0} no es pot presentar
+Delivery Note/Sales Invoice,Nota de lliurament / Factura
+Delivery Notes {0} must be cancelled before cancelling this Sales Order,
+Delivery Status,Estat de l'enviament
+Delivery Time,Temps de Lliurament
+Delivery To,Lliurar a
+Department,Departament
+Department Stores,Grans Magatzems
+Depends on LWP,
+Depreciation,
+Description,Descripció
+Description HTML,Descripció HTML
+Description of a Job Opening,
+Designation,Designació
+Designer,
+Detailed Breakup of the totals,
+Details,
+Difference (Dr - Cr),Diferència (Dr - Cr)
+Difference Account,Compte de diferències
+"Difference Account must be a 'Liability' type account, since this Stock Reconciliation is an Opening Entry","El compte de diferències ha de ser un compte de tipus 'responsabilitat', ja que aquest ajust d'estocs és una entrada d'Obertura"
+Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,UDMs diferents per als articles provocarà pesos nets (Total) erronis. Assegureu-vos que pes net de cada article és de la mateixa UDM.
+Direct Expenses,
+Direct Income,
+Disable,
+Disable Rounded Total,Desactivar total arrodonit
+Disabled,Deshabilitat
+Discount,
+Discount  %,
+Discount %,% Descompte
+Discount (%),Descompte (%)
+Discount Amount,
+Discount Amount (Company Currency),
+"Discount Fields will be available in Purchase Order, Purchase Receipt, Purchase Invoice","Els camps de descompte estaran disponible a l'ordre de compra, rebut de compra, factura de compra"
+Discount Percentage,%Descompte
+Discount Percentage can be applied either against a Price List or for all Price List.,El percentatge de descompte es pot aplicar ja sigui contra una llista de preus o per a tot Llista de Preus.
+Discount must be less than 100,Descompte ha de ser inferior a 100
+Discount(%),
+Dispatch,
+Display all the individual items delivered with the main items,
+Distinct unit of an Item,
+Distribute Charges Based On,Distribuir els càrrecs en base a
+Distribution,Distribució
+Distribution Id,ID de Distribució
+Distribution Name,Distribution Name
+Distributor,Distribuïdor
+Divorced,Divorciat
+Do Not Contact,
+Do not show any symbol like $ etc next to currencies.,
+Do really want to unstop production order: ,
+Do you really want to STOP ,
+Do you really want to STOP this Material Request?,
+Do you really want to Submit all Salary Slip for month {0} and year {1},Realment vols presentar totes les nòmines del mes {0} i any {1}
+Do you really want to UNSTOP ,
+Do you really want to UNSTOP this Material Request?,
+Do you really want to stop production order: ,
+Doc Name,Nom del document
+Doc Type,
+Document Description,Descripció Document
+Document Type,Tipus de document
+Documents,
+Domain,
+Don't send Employee Birthday Reminders,
+Download Materials Required,Es requereix descàrrega de materials
+Download Reconcilation Data,
+Download Template,Descarregar plantilla
+Download a report containing all raw materials with their latest inventory status,Descarrega un informe amb totes les matèries primeres amb el seu estat últim inventari
+"Download the Template, fill appropriate data and attach the modified file.","Descarregueu la plantilla, omplir les dades adequades i adjuntar l'arxiu modificat."
+"Download the Template, fill appropriate data and attach the modified file.
+All dates and employee combination in the selected period will come in the template, with existing attendance records","Descarregueu la plantilla, ompliu les dades i adjuntar l'arxiu modificat.
+ Apareixeran tots els registres de presència del treballador en el període marcat"
+Dr,Dr
+Draft,Esborrany
+Dropbox,
+Dropbox Access Allowed,Dropbox Access Allowed
+Dropbox Access Key,Dropbox Access Key
+Dropbox Access Secret,Dropbox Access Secret
+Due Date,
+Due Date cannot be before Posting Date,Data de venciment no pot ser anterior Data de comptabilització
+Duplicate Entry. Please check Authorization Rule {0},"Entrada duplicada. Si us plau, consulteu Regla d'autorització {0}"
+Duplicate Serial No entered for Item {0},Número de sèrie duplicat per l'article {0}
+Duplicate entry,Entrada duplicada
+Duplicate row {0} with same {1},
+Duties and Taxes,Taxes i impostos
+ERPNext Setup,Configuració ERPNext
+Earliest,Earliest
+Earnest Money,
+Earning,Guany
+Earning & Deduction,Guanyar i Deducció
+Earning Type,
+Earning1,Benefici 1
+Edit,Edita
+Edu. Cess on Excise,
+Edu. Cess on Service Tax,Edu. Cess on Service Tax
+Edu. Cess on TDS,
+Education,Educació
+Educational Qualification,
+Educational Qualification Details,Detalls de les qualificacions de formació
+Eg. smsgateway.com/api/send_sms.cgi,
+Either debit or credit amount is required for {0},Es requereix ja sigui quantitat de dèbit o crèdit per {0}
+Either target qty or target amount is mandatory,Cal la Quantitat destí i la origen
+Either target qty or target amount is mandatory.,Tan quantitat destí com Quantitat són obligatoris.
+Electrical,
+Electricity Cost,Cost d'electricitat
+Electricity cost per hour,
+Electronics,
+Email,
+Email Digest,
+Email Digest Settings,Ajustos del processador d'emails
+Email Digest: ,
+Email ID,ID de correu electrònic
+Email Id,Identificació de l'email
+"Email Id where a job applicant will email e.g. ""jobs@example.com""","Email Id where a job applicant will email e.g. ""jobs@example.com"""
+Email Notifications,Notificacions per correu electrònic
+Email Sent?,
+Email Settings for Outgoing and Incoming Emails.,
+"Email id must be unique, already exists for {0}","L'adreça de correu electrònic ha de ser única, ja existeix per {0}"
+Email ids separated by commas.,Correus electrònics separats per comes.
+"Email settings for jobs email id ""jobs@example.com""",
+"Email settings to extract Leads from sales email id e.g. ""sales@example.com""","Configuració de l'adreça de correu electrònic per a clients potencials amb correus electrònic comercials. Per exemple ""sales@example.com"""
+Emergency Contact,Contacte d'Emergència
+Emergency Contact Details,
+Emergency Phone,Telèfon d'Emergència
+Employee,Empleat
+Employee Birthday,Aniversari d'Empleat
+Employee Details,
+Employee Education,Formació Empleat
+Employee External Work History,Historial de treball d'Empleat extern
+Employee Information,
+Employee Internal Work History,Historial de treball intern de l'empleat
+Employee Internal Work Historys,
+Employee Leave Approver,
+Employee Leave Balance,Balanç d'absències d'empleat
+Employee Name,Nom de l'Empleat
+Employee Number,Número d'empleat
+Employee Records to be created by,Registres d'empleats a ser creats per
+Employee Settings,Configuració dels empleats
+Employee Type,
+Employee can not be changed,
+"Employee designation (e.g. CEO, Director etc.).","Designació de l'empleat (per exemple, director general, director, etc.)."
+Employee master.,Taula Mestre d'Empleats.
+Employee record is created using selected field. ,
+Employee records.,
+Employee relieved on {0} must be set as 'Left',Empleat rellevat en {0} ha de ser establert com 'Esquerra'
+Employee {0} has already applied for {1} between {2} and {3},L'Empleat {0} ja ha sol·licitat {1} entre {2} i {3}
+Employee {0} is not active or does not exist,L'Empleat {0} no està actiu o no existeix
+Employee {0} was on leave on {1}. Cannot mark attendance.,
+Employees Email Id,
+Employment Details,Detalls d'Ocupació
+Employment Type,Tipus d'Ocupació
+Enable / disable currencies.,Activar / desactivar les divises.
+Enabled,Activat
+Encashment Date,Data Cobrament
+End Date,
+End Date can not be less than Start Date,
+End date of current invoice's period,Data de finalització del període de facturació actual
+End date of current order's period,Data de finalització del període de l'ordre actual
+End of Life,Final de la Vida
+Energy,Energia
+Engineer,
+Enter Verification Code,Introduïu el codi de verificació
+Enter campaign name if the source of lead is campaign.,Introduïu nom de la campanya si la font de clients potencials és una campanya.
+Enter department to which this Contact belongs,Introduïu departament al qual pertany aquest contacte
+Enter designation of this Contact,
+"Enter email id separated by commas, invoice will be mailed automatically on particular date",
+"Enter email id separated by commas, order will be mailed automatically on particular date",
+Enter items and planned qty for which you want to raise production orders or download raw materials for analysis.,
+Enter name of campaign if source of enquiry is campaign,
+"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)",
+Enter the company name under which Account Head will be created for this Supplier,Introduïu el nom de l'empresa per la que es crearà el compte principal per aquest proveïdor
+Enter url parameter for message,
+Enter url parameter for receiver nos,Introdueix els paràmetres URL per als receptors
+Entertainment & Leisure,Entreteniment i Oci
+Entertainment Expenses,Despeses d'Entreteniment
+Entries,
+Entries against ,
+Entries are not allowed against this Fiscal Year if the year is closed.,
+Equity,
+Error: {0} > {1},Error: {0}> {1}
+Estimated Material Cost,Cost estimat del material
+"Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Fins i tot si hi ha diverses regles de preus amb major prioritat, s'apliquen prioritats internes:"
+Everyone can read,
+"Example: ABCD.#####
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Exemple :. ABCD ##### 
+ Si la sèrie s'estableix i Número de sèrie no s'esmenta en les transaccions, llavors es crearà un número de sèrie automàticament basat en aquesta sèrie. Si sempre vol indicar explícitament els números de sèrie per a aquest article. deixeu en blanc."
+Exchange Rate,Tipus De Canvi
+Excise Duty 10,
+Excise Duty 14,
+Excise Duty 4,Impostos Especials 4
+Excise Duty 8,Impostos Especials 8
+Excise Duty @ 10,
+Excise Duty @ 14,
+Excise Duty @ 4,Excise Duty @ 4
+Excise Duty @ 8,
+Excise Duty Edu Cess 2,Excise Duty Edu Cess 2
+Excise Duty SHE Cess 1,Excise Duty SHE Cess 1
+Excise Page Number,Excise Page Number
+Excise Voucher,Excise Voucher
+Execution,
+Executive Search,
+Exhibition,Exposició
+Existing Customer,Client existent
+Exit,
+Exit Interview Details,Detalls de l'entrevista final
+Expected,Esperat
+Expected Completion Date can not be less than Project Start Date,
+Expected Date cannot be before Material Request Date,
+Expected Delivery Date,Data de lliurament esperada
+Expected Delivery Date cannot be before Purchase Order Date,Data prevista de lliurament no pot ser anterior a l'Ordre de Compra
+Expected Delivery Date cannot be before Sales Order Date,Data prevista de lliurament no pot ser abans de la data de l'ordres de venda
+Expected End Date,Esperat Data de finalització
+Expected Start Date,Data prevista d'inici
+Expected balance as per bank,Import pendent de rebre com per banc
+Expense,
+Expense / Difference account ({0}) must be a 'Profit or Loss' account,"El compte de despeses / diferències ({0}) ha de ser un compte ""Guany o Pèrdua '"
+Expense Account,Compte de Despeses
+Expense Account is mandatory,
+Expense Approver,Aprovador de despeses
+Expense Claim,Compte de despeses
+Expense Claim Approved,
+Expense Claim Approved Message,Missatge Reclamació d'aprovació de Despeses
+Expense Claim Detail,Reclamació de detall de despesa
+Expense Claim Details,
+Expense Claim Rejected,Compte de despeses Rebutjat
+Expense Claim Rejected Message,Missatge de rebuig de petició de despeses
+Expense Claim Type,Expense Claim Type
+Expense Claim has been approved.,El compte de despeses s'ha aprovat.
+Expense Claim has been rejected.,Compte de despeses rebutjada.
+Expense Claim is pending approval. Only the Expense Approver can update status.,El compte de despeses està pendent d'aprovació. Només l'aprovador de despeses pot actualitzar l'estat.
+Expense Date,Data de la Despesa
+Expense Details,
+Expense Head,
+Expense account is mandatory for item {0},El compte de despeses és obligatòria per a cada element {0}
+Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,
+Expenses,
+Expenses Booked,
+Expenses Included In Valuation,Despeses incloses en la valoració
+Expenses booked for the digest period,Despeses reservades pel període
+Expired,Caducat
+Expiry,
+Expiry Date,Data De Caducitat
+Exports,Exportacions
+External,Extern
+Extract Emails,Extracte dels correus electrònics
+FCFS Rate,FCFS Rate
+Failed: ,
+Family Background,Antecedents de família
+Fax,
+Features Setup,Característiques del programa d'instal·lació
+Feed,
+Feed Type,
+Feedback,Resposta
+Female,Dona
+Fetch exploded BOM (including sub-assemblies),Fetch exploded BOM (including sub-assemblies)
+"Field available in Delivery Note, Quotation, Sales Invoice, Sales Order","El camp disponible a la nota de lliurament, oferta, factura de venda, ordres de venda"
+Files Folder ID,ID Carpeta d'arxius
+Fill the form and save it,Ompliu el formulari i deseu
+Filter based on customer,Filtre basat en el client
+Filter based on item,
+Financial / accounting year.,
+Financial Analytics,Comptabilitat analítica
+Financial Chart of Accounts. Imported from file.,
+Financial Services,
+Financial Year End Date,Data de finalització de l'exercici fiscal
+Financial Year Start Date,Data d'Inici de l'Exercici fiscal
+Finished Goods,Béns Acabats
+First Name,
+First Responded On,Primer respost el
+Fiscal Year,Any Fiscal
+Fiscal Year Start Date and Fiscal Year End Date are already set in Fiscal Year {0},
+Fiscal Year Start Date and Fiscal Year End Date cannot be more than a year apart.,
+Fiscal Year Start Date should not be greater than Fiscal Year End Date,
+Fiscal Year {0} not found.,
+Fixed Asset,Actius Fixos
+Fixed Assets,Actius Fixos
+Fixed Cycle Cost,
+Fold,Plegar
+Follow via Email,
+"Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",
+Food,Menjar
+"Food, Beverage & Tobacco",
+"For 'Sales BOM' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Sales BOM' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.","Per als articles 'BOM Vendes', magatzem, Número de sèrie i de lot No es tindran en compte en el quadre ""Packing List '.Si Magatzems i Números de lot són els mateixos per a tots els articles d'embalatge per a qualsevol article 'BOM de vendes', aquests valors es poden introduir a la taula principal d'articles, els valors es copiaran a la taula ""Packing List '."
+For Company,Per a l'empresa
+For Employee,Per als Empleats
+For Employee Name,Per Nom de l'Empleat
+For Price List,
+For Production,Per Producció
+For Reference Only.,
+For Sales Invoice,Per Factura Vendes
+For Server Side Print Formats,
+For Supplier,
+For Warehouse,
+For Warehouse is required before Submit,Cal informar del magatzem destí abans de presentar
+"For e.g. 2012, 2012-13","Per exemple, 2012, 2012-13"
+For reference,
+For reference only.,Només per referència.
+"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","Per comoditat dels clients, aquests codis es poden utilitzar en formats d'impressió, com factures i albarans"
+"For {0}, only credit entries can be linked against another debit entry","Per {0}, només les entrades de crèdit poden vincular-se amb un altre assentament de dèbit"
+"For {0}, only debit entries can be linked against another credit entry",
+Fraction,Fracció
+Fraction Units,Fraction Units
+Freeze Stock Entries,
+Freeze Stocks Older Than [Days],Congela els estocs més vells de [dies]
+Freight and Forwarding Charges,Freight and Forwarding Charges
+Friday,
+From,
+From Bill of Materials,A partir de la llista de materials
+From Company,Des de l'empresa
+From Currency,De la divisa
+From Currency and To Currency cannot be same,
+From Customer,De Client
+From Customer Issue,De Incidència de Client
+From Date,
+From Date cannot be greater than To Date,
+From Date must be before To Date,
+From Date should be within the Fiscal Year. Assuming From Date = {0},
+From Datetime,
+From Delivery Note,De la nota de lliurament
+From Employee,
+From Lead,De client potencial
+From Maintenance Schedule,
+From Material Request,De Sol·licituds de materials
+From Opportunity,De Oportunitat
+From Package No.,Del paquet número
+From Purchase Order,De l'Ordre de Compra
+From Purchase Receipt,
+From Quotation,Des de l'oferta
+From Sales Order,
+From Supplier Quotation,Oferta de Proveïdor
+From Time,From Time
+From Value,
+From and To dates required,
+From value must be less than to value in row {0},De valor ha de ser inferior al valor de la fila {0}
+Frozen,Bloquejat
+Frozen Accounts Modifier,Modificador de Comptes bloquejats
+Fulfilled,Complert
+Full Name,Nom complet
+Full-time,Temps complet
+Fully Billed,
+Fully Completed,
+Fully Delivered,Totalment Lliurat
+Furniture and Fixture,Mobles
+Further accounts can be made under Groups but entries can be made against Ledger,"Es poden fer més comptes amb grups, però les entrades es poden fer contra Ledger"
+"Further accounts can be made under Groups, but entries can be made against Ledger",
+Further nodes can be only created under 'Group' type nodes,Només es poden crear més nodes amb el tipus 'Grup'
+GL Entry,Entrada GL
+Gantt Chart,Diagrama de Gantt
+Gantt chart of all tasks.,
+Gender,
+General,General
+General Ledger,
+General Settings,Configuració general
+Generate Description HTML,
+Generate Material Requests (MRP) and Production Orders.,
+Generate Salary Slips,
+Generate Schedule,Generar Calendari
+"Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.",
+Generates HTML to include selected image in the description,
+Get Advances Paid,Obtenir bestretes pagades
+Get Advances Received,Obtenir les bestretes rebudes
+Get Current Stock,
+Get Items,
+Get Items From Purchase Receipts,Obtenir els articles des dels rebuts de compra
+Get Items From Sales Orders,Obtenir els articles des de les comandes de client
+Get Items from BOM,
+Get Last Purchase Rate,
+Get Outstanding Invoices,Rep les factures pendents
+Get Outstanding Vouchers,Get Outstanding Vouchers
+Get Relevant Entries,Obtenir assentaments corresponents
+Get Sales Orders,Rep ordres de venda
+Get Specification Details,Obtenir Detalls d'Especificacions
+Get Stock and Rate,Obtenir Estoc i tarifa
+Get Template,Aconsegueix Plantilla
+Get Terms and Conditions,Obtenir Termes i Condicions
+Get Unreconciled Entries,
+Get Weekly Off Dates,Get Weekly Off Dates
+"Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.","Obtenir la tarifa de valorització i l'estoc disponible als magatzems origen/destí en la data esmentada. Si és un article amb número de sèrie, si us plau premeu aquest botó després d'introduir els números de sèrie."
+Global Defaults,Valors per defecte globals
+Global POS Setting {0} already created for company {1},L'ajust general del TPV {0} ja està creat per la companyia {1}
+Global Settings,Configuració global
+"Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts and create a new Account Ledger (by clicking on Add Child) of type ""Bank""","Salta al grup apropiat (generalment Aplicació de Fons> Actius Corrents> Comptes Bancàries i crea un nou compte de major (fent clic a Afegeix fill) de tipus ""Banc"""
+"Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties and create a new Account Ledger (by clicking on Add Child) of type ""Tax"" and do mention the Tax rate.","Salta al grup apropiat (en general Font dels fons> Passius actuals> Impostos i drets i crear un nou compte de major (fent clic a Afegeix Fill) de tipus ""impostos"" i fer parlar de la taxa d'impostos."
+Goal,Meta
+Goals,
+Goods received from Suppliers.,
+Google Drive,Google Drive
+Google Drive Access Allowed,Accés permès a Google Drive
+Government,
+Graduate,Graduat
+Grand Total,
+Grand Total (Company Currency),Total (En la moneda de la companyia)
+"Grid ""","Grid """
+Grocery,Botiga
+Gross Margin %,Marge Brut%
+Gross Margin Value,Valor Marge Brut
+Gross Pay,Sou brut
+Gross Pay + Arrear Amount +Encashment Amount - Total Deduction,
+Gross Profit,Benefici Brut
+Gross Profit %,Benefici Brut%
+Gross Weight,Pes Brut
+Gross Weight UOM,Pes brut UDM
+Group,Grup
+Group Node,Group Node
+Group by Account,Agrupa Per Comptes
+Group by Voucher,Agrupa per comprovants
+Group or Ledger,Group or Ledger
+Groups,Grups
+Guest,Convidat
+HR Manager,Gerent de Recursos Humans
+HR Settings,Configuració de recursos humans
+HR User,HR User
+HTML / Banner that will show on the top of product list.,HTML / Banner que apareixerà a la part superior de la llista de productes.
+Half Day,
+Half Yearly,Semestrals
+Half-yearly,
+Happy Birthday!,
+Hardware,Maquinari
+Has Batch No,Té número de lot
+Has Child Node,
+Has Serial No,
+Head of Marketing and Sales,
+Heads (or groups) against which Accounting Entries are made and balances are maintained.,Capçaleres (o grups) contra els quals es mantenen els assentaments comptables i els saldos
+Health Care,Sanitari
+Health Concerns,Problemes de Salut
+Health Details,Detalls de la Salut
+Held On,Held On
+Help HTML,
+"Help: To link to another record in the system, use ""#Form/Note/[Note Name]"" as the Link URL. (don't use ""http://"")","Ajuda: Per enllaçar a un altre registre en el sistema, utilitzeu ""#Form/Note/[Note Name]"" com a URL. (no utilitzis ""http://"")"
+"Here you can maintain family details like name and occupation of parent, spouse and children",
+"Here you can maintain height, weight, allergies, medical concerns etc","Aquí pot actualitzar l'alçada, el pes, al·lèrgies, problemes mèdics, etc."
+Hide Currency Symbol,
+High,
+History In Company,Història a la Companyia
+Hold,Mantenir
+Holiday,Festiu
+Holiday List,
+Holiday List Name,Nom de la Llista de vacances
+Holiday master.,
+Holidays,Vacances
+Home,Casa
+Host,Amfitrió
+"Host, Email and Password required if emails are to be pulled","Host, correu electrònic i la contrasenya necessaris si els correus electrònics han de ser enviats"
+Hour,Hora
+Hour Rate,Hour Rate
+Hour Rate Labour,
+Hours,Hores
+How Pricing Rule is applied?,Com s'aplica la regla de preus?
+How frequently?,Amb quina freqüència?
+"How should this currency be formatted? If not set, will use system defaults",
+Human Resources,Recursos Humans
+Identification of the package for the delivery (for print),La identificació del paquet per al lliurament (per imprimir)
+If Income or Expense,Si ingressos o despeses
+If Monthly Budget Exceeded,
+"If Supplier Part Number exists for given Item, it gets stored here","Si existeix el Part Number de proveïdor per un determinat article, s'emmagatzema aquí"
+If Yearly Budget Exceeded,Si s'exedeix el pressupost anual
+"If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.","If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material."
+"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day","Si es marca, número total. de dies de treball s'inclouran els festius, i això reduirà el valor de Salari per dia"
+"If checked, the tax amount will be considered as already included in the Print Rate / Print Amount","If checked, the tax amount will be considered as already included in the Print Rate / Print Amount"
+If different than customer address,Si és diferent de la direcció del client
+"If disable, 'Rounded Total' field will not be visible in any transaction","Si ho desactives, el camp 'Arrodonir Total' no serà visible a cap transacció"
+"If enabled, the system will post accounting entries for inventory automatically.","Si està activat, el sistema comptabilitza els assentaments comptables per a l'inventari automàticament."
+If more than one package of the same type (for print),Si més d'un paquet del mateix tipus (per impressió)
+"If multiple Pricing Rules continue to prevail, users are asked to set Priority manually to resolve conflict.","Si hi ha diverses regles de preus vàlides, es demanarà als usuaris que estableixin la prioritat manualment per resoldre el conflicte."
+"If no change in either Quantity or Valuation Rate, leave the cell blank.",
+"If not checked, the list will have to be added to each Department where it has to be applied.","Si no està habilitada, la llista haurà de ser afegit a cada departament en què s'ha d'aplicar."
+"If selected Pricing Rule is made for 'Price', it will overwrite Price List. Pricing Rule price is the final price, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.","Si la Regla de preus seleccionada està fet per a 'Preu', sobreescriurà Llista de Preus. El preu de la Regla de preus és el preu final, així que no s'hi aplicarà cap descompte addicional. Per tant, en les transaccions com comandes de venda, ordres de compra, etc,s'anirà a buscar al camp ""Quota"", en lloc de camp 'Quota de llista de preus'."
+"If specified, send the newsletter using this email address",
+"If the account is frozen, entries are allowed to restricted users.","Si el compte està bloquejat, només es permeten entrades alguns usuaris."
+"If this Account represents a Customer, Supplier or Employee, set it here.","Si aquest compte representa un client, proveïdor o empleat, establir aquí."
+"If two or more Pricing Rules are found based on the above conditions, Priority is applied. Priority is a number between 0 to 20 while default value is zero (blank). Higher number means it will take precedence if there are multiple Pricing Rules with same conditions.",
+If you follow Quality Inspection. Enables Item QA Required and QA No in Purchase Receipt,
+If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,
+"If you have created a standard template in Purchase Taxes and Charges Master, select one and click on the button below.",
+"If you have created a standard template in Sales Taxes and Charges Master, select one and click on the button below.","Si heu creat una plantilla estàndard en la configuració dels impostos de vendes i càrrecs, escolliu-ne un i feu clic al botó de sota."
+"If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page",
+If you involve in manufacturing activity. Enables Item 'Is Manufactured',Si s'involucra en alguna fabricació. Activa 'es fabrica'
+Ignore,Ignorar
+Ignore Pricing Rule,
+Ignored: ,
+Image,Imatge
+Image View,Veure imatges
+Implementation Partner,Soci d'Aplicació
+Import Attendance,Importa Assistència
+Import Failed!,
+Import Log,Importa registre
+Import Successful!,Importació correcta!
+Imports,Importacions
+In Hours,En Hores
+In Process,
+In Qty,En Quantitat
+In Stock,En estoc
+In Words,En Paraules
+In Words (Company Currency),En paraules (Divisa de la Companyia)
+In Words (Export) will be visible once you save the Delivery Note.,En paraules (exportació) seran visibles quan es desi l'albarà de lliurament.
+In Words will be visible once you save the Delivery Note.,
+In Words will be visible once you save the Purchase Invoice.,En paraules seran visibles un cop que guardi la factura de compra.
+In Words will be visible once you save the Purchase Order.,En paraules seran visibles un cop que es guardi l'ordre de compra.
+In Words will be visible once you save the Purchase Receipt.,En paraules seran visibles un cop guardi el rebut de compra.
+In Words will be visible once you save the Quotation.,En paraules seran visibles un cop que es guarda la Cotització.
+In Words will be visible once you save the Sales Invoice.,
+In Words will be visible once you save the Sales Order.,
+Incentives,Incentius
+Include Reconciled Entries,Inclogui els comentaris conciliades
+Include holidays in Total no. of Working Days,Inclou vacances en el número total de dies laborables
+Income,Ingressos
+Income / Expense,
+Income Account,Compte d'ingressos
+Income Booked,
+Income Tax,Impost sobre els guanys
+Income Year to Date,Ingressos de l'any fins a la data
+Income booked for the digest period,
+Incoming,
+Incoming Rate,
+Incoming quality inspection.,Inspecció de qualitat entrant.
+Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction.,Nombre incorrecte d'entrades del llibre major. És possible que hi hagi seleccionat un compte erroni en la transacció.
+Incorrect or Inactive BOM {0} for Item {1} at row {2},BOM incorrecte o Inactiu {0} per a l'article {1} a la fila {2}
+Indicates that the package is a part of this delivery (Only Draft),
+Indirect Expenses,
+Indirect Income,Ingressos Indirectes
+Individual,Individual
+Industry,Indústria
+Industry Type,Tipus d'Indústria
+Inspected By,Inspeccionat per
+Inspection Criteria,Criteris d'Inspecció
+Inspection Required,Inspecció requerida
+Inspection Type,Tipus d'Inspecció
+Installation Date,
+Installation Note,Nota d'instal·lació
+Installation Note Item,Nota d'instal·lació de l'article
+Installation Note {0} has already been submitted,La Nota d'Instal·lació {0} ja s'ha presentat
+Installation Status,
+Installation Time,Temps d'instal·lació
+Installation date cannot be before delivery date for Item {0},Data d'instal·lació no pot ser abans de la data de lliurament d'article {0}
+Installation record for a Serial No.,Registre d'instal·lació per a un nº de sèrie
+Installed Qty,Quantitat instal·lada
+Instructions,Instruccions
+Interested,Interessat
+Intern,Intern
+Internal,Interna
+Internet Publishing,Publicant a Internet
+Introduction,Introducció
+Invalid Barcode,Codi de barres no vàlid
+Invalid Barcode or Serial No,
+Invalid Mail Server. Please rectify and try again.,
+Invalid Master Name,Invalid Master Name
+Invalid User Name or Support Password. Please rectify and try again.,"Nom d'usuari o contrassenya de suport no vàlids. Si us plau, rectifica i torna a intentar-ho."
+Invalid quantity specified for item {0}. Quantity should be greater than 0.,Quantitat no vàlid per a l'aricle {0}. Quantitat ha de ser major que 0.
+Inventory,Inventari
+Inventory & Support,Inventory & Support
+Investment Banking,Banca d'Inversió
+Investments,Inversions
+Invoice,Factura
+Invoice Date,
+Invoice Details,
+Invoice No,Número de Factura
+Invoice Number,Número de factura
+Invoice Type,Tipus de Factura
+Invoice/Journal Voucher Details,Detalls de l'assentament de Diari o factura
+Invoiced Amount,Quantitat facturada
+Invoiced Amount (Exculsive Tax),
+Is Active,Està actiu
+Is Advance,És Avanç
+Is Cancelled,Està cancel·lat
+Is Carry Forward,Is Carry Forward
+Is Default,
+Is Encash,
+Is Fixed Asset Item,És la partida de l'actiu fix
+Is LWP,
+Is Opening,
+Is Opening Entry,
+Is POS,És TPV
+Is Primary Contact,És Contacte principal
+Is Purchase Item,
+Is Recurring,És recurrent
+Is Sales Item,És article de venda
+Is Service Item,És un servei
+Is Stock Item,És un article d'estoc
+Is Sub Contracted Item,Es subcontracta
+Is Subcontracted,Es subcontracta
+Is this Tax included in Basic Rate?,Aqeust impost està inclòs a la tarifa bàsica?
+Issue,Incidència
+Issue Date,
+Issue Details,Detalls de la incidència
+Issued Items Against Production Order,
+It can also be used to create opening stock entries and to fix stock value.,També es pot utilitzar per crear entrades en existències d'obertura i fixar valor de les accions.
+Item,Article
+Item #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,Article # {0}: La quantitat ordenada no pot ser menor que la quantitat mínima de comanda d'article (definit a la configuració d'articles).
+Item Advanced,Article Avançat
+Item Barcode,Codi de barres d'article
+Item Batch Nos,Números de Lot d'articles
+Item Classification,
+Item Code,Codi de l'article
+Item Code > Item Group > Brand,Codi de l'article> Grup Element> Marca
+Item Code and Warehouse should already exist.,
+Item Code cannot be changed for Serial No.,El Codi de l'article no es pot canviar de número de sèrie
+Item Code is mandatory because Item is not automatically numbered,El codi de l'article és obligatori perquè no s'havia numerat automàticament
+Item Code required at Row No {0},
+Item Customer Detail,Item Customer Detail
+Item Description,
+Item Desription,Desription de l'article
+Item Details,Detalls de l'article
+Item Group,Grup d'articles
+Item Group Name,Nom del Grup d'Articles
+Item Group Tree,Arbre de grups d'article
+Item Group not mentioned in item master for item {0},
+Item Groups in Details,Els grups d'articles en detalls
+Item Image (if not slideshow),
+Item Name,
+Item Naming By,
+Item Price,Preu d'article
+Item Prices,Preus de l'article
+Item Quality Inspection Parameter,
+Item Reorder,
+Item Row {0}: Purchase Receipt {1} does not exist in above 'Purchase Receipts' table,Article Fila {0}: Compra de Recepció {1} no existeix a la taulat 'Rebuts de compra'
+Item Serial No,Número de sèrie d'article
+Item Serial Nos,
+Item Shortage Report,Informe d'escassetat d'articles
+Item Supplier,
+Item Supplier Details,Detalls d'article Proveïdor
+Item Tax,Impost d'article
+Item Tax Amount,Suma d'impostos d'articles
+Item Tax Rate,
+Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,La fila de l'impost d'article {0} ha de tenir en compte el tipus d'impostos o ingressos o despeses o imposable
+Item Tax1,Impost d'article 1
+Item To Manufacture,Article a fabricar
+Item UOM,
+Item Website Specification,Especificacions d'article al Web
+Item Website Specifications,Especificacions del web d'articles
+Item Wise Tax Detail,Detall d'impostos de tots els articles
+Item Wise Tax Detail ,
+Item is required,Es requereix un article
+Item is updated,L'article s'ha actualitzat
+Item master.,Mestre d'articles.
+"Item must be a purchase item, as it is present in one or many Active BOMs",
+Item must be added using 'Get Items from Purchase Receipts' button,
+Item or Warehouse for row {0} does not match Material Request,
+Item table can not be blank,
+Item to be manufactured or repacked,Article que es fabricarà o embalarà de nou
+Item valuation rate is recalculated considering landed cost voucher amount,La taxa de valorització de l'article es torna a calcular tenint en compte landed cost voucher amount
+Item valuation updated,
+Item will be saved by this name in the data base.,
+Item {0} appears multiple times in Price List {1},
+Item {0} does not exist,
+Item {0} does not exist in the system or has expired,L'Article {0} no existeix en el sistema o ha caducat
+Item {0} does not exist in {1} {2},
+Item {0} has already been returned,
+Item {0} has been entered multiple times against same operation,
+Item {0} has been entered multiple times with same description or date,Article {0} s'ha introduït diverses vegades amb la mateixa descripció o data
+Item {0} has been entered multiple times with same description or date or warehouse,
+Item {0} has been entered twice,L'Article {0} ha estat entrat dues vegades
+Item {0} has reached its end of life on {1},
+Item {0} ignored since it is not a stock item,Article {0} ignorat ja que no és un article d'estoc
+Item {0} is cancelled,L'article {0} està cancel·lat
+Item {0} is not Purchase Item,Article {0} no és article de Compra
+Item {0} is not a serialized Item,Article {0} no és un article serialitzat
+Item {0} is not a stock Item,Article {0} no és un article d'estoc
+Item {0} is not active or end of life has been reached,L'article {0} no està actiu o ha arribat al final de la seva vida
+Item {0} is not setup for Serial Nos. Check Item master,L'Article {0} no està configurat per a números de sèrie. Comprova la configuració d'articles
+Item {0} is not setup for Serial Nos. Column must be blank,L'Article {0} no està configurat per números de sèrie. La columna ha d'estar en blanc
+Item {0} must be Sales Item,L'Article {0} ha de ser article de Vendes
+Item {0} must be Sales or Service Item in {1},
+Item {0} must be Service Item,
+Item {0} must be a Purchase Item,L'Article {0} ha de ser un article de compra
+Item {0} must be a Sales Item,L'Article {0} ha de ser un article de Vendes
+Item {0} must be a Service Item.,Article {0} ha de ser un element de servei.
+Item {0} must be a Sub-contracted Item,
+Item {0} must be a stock Item,Article {0} ha de ser un d'article de l'estoc
+Item {0} must be manufactured or sub-contracted,L'Article {0} s'ha de fabricar o subcontractar
+Item {0} not found,Article {0} no trobat
+Item {0} with Serial No {1} is already installed,L'article {0} amb número de sèrie {1} ja està instal·lat
+Item {0} with same description entered twice,Article {0} amb mateixa descripció entrar dues vegades
+"Item, Warranty, AMC (Annual Maintenance Contract) details will be automatically fetched when Serial Number is selected.","Els detalls d'Article, garantia, AMC (Contracte de Manteniment Anual) es recuperaran automàticament quan es selecciona el Número de sèrie."
+Item-wise Price List Rate,Llista de Preus de tarifa d'article
+Item-wise Purchase History,Historial de compres d'articles
+Item-wise Purchase Register,Registre de compra d'articles
+Item-wise Sales History,
+Item-wise Sales Register,
+Item: {0} does not exist in the system,Article: {0} no existeix en el sistema
+"Item: {0} managed batch-wise, can not be reconciled using \
+					Stock Reconciliation, instead use Stock Entry",
+Item: {0} not found in the system,Article: {0} no es troba en el sistema
+Items,Articles
+Items To Be Requested,Articles que s'han de demanar
+Items required,
+"Items to be requested which are ""Out of Stock"" considering all warehouses based on projected qty and minimum order qty","Els productes que es sol·licitaran i que estan ""Esgotat"", considerant tots els magatzems basat en Quantitat projectada i quantitat mínima de comanda"
+Items which do not exist in Item master can also be entered on customer's request,
+Itemwise Discount,Descompte d'articles
+Itemwise Recommended Reorder Level,Nivell d'articles recomanat per a tornar a passar comanda
+Job Applicant,Job Applicant
+Job Opening,Obertura de treball
+Job Profile,Perfil Laboral
+Job Title,
+"Job profile, qualifications required etc.","Perfil del lloc, formació necessària, etc."
+Jobs Email Settings,Configuració de les tasques de correu electrònic
+Journal Entries,Entrades de diari
+Journal Entry,Entrada de diari
+Journal Voucher,Assentament de Diari
+Journal Voucher Detail,Detall d'assentament de diari
+Journal Voucher Detail No,
+Journal Voucher {0} does not have account {1} or already matched against other voucher,L'assentament de Diari {0} no té compte {1} o coincideix amb un altre assentament
+"Journal Voucher {0} is linked against Order {1}, check if it should be pulled as advance in this invoice.","L'assentament de Diari {0} està enllaçat amb l'Ordre {1}, comproveu si s'ha de llençar com a avançament en aquesta factura."
+Journal Vouchers {0} are un-linked,
+"Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. ",
+Keep a track of communication related to this enquiry which will help for future reference.,
+Keep it web friendly 900px (w) by 100px (h),
+Key Performance Area,
+Key Responsibility Area,Àrea de Responsabilitat clau
+Kg,
+LR Date,LR Date
+LR No,LR No
+Label,Etiqueta
+Landed Cost Help,
+Landed Cost Item,
+Landed Cost Purchase Receipt,
+Landed Cost Taxes and Charges,
+Landed Cost Voucher,
+Landed Cost Voucher Amount,
+Language,Idioma
+Last Name,Cognoms
+Last Order Amount,
+Last Purchase Rate,
+Last Sales Order Date,
+Latest,Més recent
+Lead,Client potencial
+Lead Details,Detalls del client potencial
+Lead Id,Identificació de l'enviament
+Lead Name,
+Lead Owner,Responsable del client potencial
+Lead Source,Origen de clients potencials
+Lead Status,Estat de l'enviament
+Lead Time Date,
+Lead Time Days,
+Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,El temps d'arribada és el nombre de dies en què s'espera que aquest article al vostre magatzem. Aquest dia s'informa a Sol·licitud de material quan se selecciona aquest article.
+Lead Type,Tipus de client potencial
+Lead must be set if Opportunity is made from Lead,S'ha d'indicar el client potencial si la oportunitat té el seu origen en un client potencial
+Leave Allocation,Assignació d'absència
+Leave Allocation Tool,
+Leave Application,
+Leave Approver,Aprovador d'absències
+Leave Approver Name,Nom de l'aprovador d'absències
+Leave Approvers,Aprovadors d'absències
+Leave Balance Before Application,Leave Balance Before Application
+Leave Block List,
+Leave Block List Allow,Leave Block List Allow
+Leave Block List Allowed,Llista d'absències permeses bloquejades
+Leave Block List Date,
+Leave Block List Dates,
+Leave Block List Name,
+Leave Blocked,Absència bloquejada
+Leave Control Panel,
+Leave Encashed?,Leave Encashed?
+Leave Encashment Amount,
+Leave Type,
+Leave Type Name,
+Leave Without Pay,Absències sense sou
+Leave application has been approved.,La sol·licitud d'autorització d'absència ha estat aprovada.
+Leave application has been rejected.,
+Leave approver must be one of {0},L'aprovador d'absències ha de ser un de {0}
+Leave blank if considered for all branches,Deixar en blanc si es considera per a totes les branques
+Leave blank if considered for all departments,Deixar en blanc si es considera per a tots els departaments
+Leave blank if considered for all designations,Deixar en blanc si es considera per a totes les designacions
+Leave blank if considered for all employee types,Deixar en blanc si es considera per a tot tipus d'empleats
+"Leave can be approved by users with Role, ""Leave Approver""","L'absència només la pot aprovar un usuari amb rol, ""Revisador d'absències"""
+Leave of type {0} cannot be longer than {1},Una absència del tipus {0} no pot ser de més de {1}
+Leaves Allocated Successfully for {0},
+Leaves for type {0} already allocated for Employee {1} for Fiscal Year {0},Les absències per al tipus {0} ja han estat assignades per Empleat {1} per a l'Any Fiscal {0}
+Leaves must be allocated in multiples of 0.5,
+Ledger,
+Ledgers,Llibres majors
+Left,Esquerra
+Legal,Legal
+Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,
+Legal Expenses,
+Letter Head,Capçalera de la carta
+Letter Heads for print templates.,
+Level,Nivell
+Lft,Lft
+Liability,Responsabilitat
+Link,
+List a few of your customers. They could be organizations or individuals.,
+List a few of your suppliers. They could be organizations or individuals.,Enumera alguns de les teves proveïdors. Poden ser les organitzacions o individuals.
+List items that form the package.,Llista d'articles que formen el paquet.
+List of users who can edit a particular Note,Llista d'usuaris que poden editar una nota en particular
+List this Item in multiple groups on the website.,Fes una llista d'articles en diversos grups en el lloc web.
+"List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start.","Publica els teus productes o serveis de compra o venda Assegura't de revisar el Grup d'articles, unitat de mesura i altres propietats quan comencis"
+"List your tax heads (e.g. VAT, Excise; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later.","Enumereu els seus impostos principals (per exemple, IVA, impostos especials: han de tenir noms únics) i les seves quotes estàndard. Això crearà una plantilla estàndard, que pot editar i afegir més tard."
+Loading...,Carregant ...
+Loans (Liabilities),Préstecs (passius)
+Loans and Advances (Assets),Préstecs i bestretes (Actius)
+Local,
+"Log of Activities performed by users against Tasks that can be used for tracking time, billing.","Bloc d'activitats realitzades pels usuaris durant les feines que es poden utilitzar per al seguiment del temps, facturació."
+Login,Iniciar Sessió
+Login with your new User ID,
+Logo,Logo
+Logo and Letter Heads,
+Lost,
+Lost Reason,
+Low,
+Lower Income,Lower Income
+MTN Details,MTN Details
+Main,
+Main Reports,Informes principals
+Maintain Same Rate Throughout Sales Cycle,Mantenir la mateixa tarifa durant tot el cicle de vendes
+Maintain same rate throughout purchase cycle,
+Maintenance,Manteniment
+Maintenance Date,
+Maintenance Details,Detalls de Manteniment
+Maintenance Manager,Gerent de Manteniment
+Maintenance Schedule,
+Maintenance Schedule Detail,Detall del Programa de manteniment
+Maintenance Schedule Item,Programa de manteniment d'articles
+Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule',"El programa de manteniment no es genera per a tots els articles Si us plau, feu clic a ""Generar Planificació"""
+Maintenance Schedule {0} exists against {0},
+Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,Programa de manteniment {0} ha de ser cancel·lat abans de cancel·lar aquesta comanda de vendes
+Maintenance Schedules,Programes de manteniment
+Maintenance Status,
+Maintenance Time,Temps de manteniment
+Maintenance Type,Tipus de Manteniment
+Maintenance User,Usuari de Manteniment
+Maintenance Visit,
+Maintenance Visit Purpose,Manteniment Motiu de visita
+Maintenance Visit {0} must be cancelled before cancelling this Sales Order,
+Maintenance start date can not be before delivery date for Serial No {0},Data d'inici de manteniment no pot ser abans de la data de lliurament pel número de sèrie {0}
+Major/Optional Subjects,Major/Optional Subjects
+Make ,
+Make Accounting Entry For Every Stock Movement,Feu Entrada Comptabilitat Per Cada moviment d'estoc
+Make Bank Voucher,Fer justificant bancari
+Make Credit Note,
+Make Debit Note,Fer Nota de Dèbit
+Make Delivery,Feu Lliurament
+Make Difference Entry,
+Make Excise Invoice,Feu Factura impostos especials
+Make Installation Note,Fer nota s'instal·lació
+Make Invoice,Fer Factura
+Make Journal Voucher,
+Make Maint. Schedule,Fer Planificació de Manteniment
+Make Maint. Visit,Make Maint. Visita
+Make Maintenance Visit,
+Make Packing Slip,
+Make Payment,Realitzar Pagament
+Make Payment Entry,Feu Entrada Pagament
+Make Purchase Invoice,
+Make Purchase Order,
+Make Purchase Receipt,Fes el rebut de compra
+Make Salary Slip,
+Make Salary Structure,
+Make Sales Invoice,Fer Factura Vendes
+Make Sales Order,
+Make Supplier Quotation,Fer Oferta de Proveïdor
+Make Time Log Batch,Fer un registre de temps
+Make new POS Setting,
+Male,Home
+Manage Customer Group Tree.,
+Manage Sales Partners.,Administrar Punts de vendes.
+Manage Sales Person Tree.,Organigrama de vendes
+Manage Territory Tree.,
+Manage cost of operations,
+Management,
+Manager,Gerent
+"Mandatory if Stock Item is ""Yes"". Also the default warehouse where reserved quantity is set from Sales Order.","Obligatori si Article d'estoc és ""Sí"". També el magatzem predeterminat en què la quantitat reservada s'estableix a partir d'ordres de venda."
+Manufacture,
+Manufacture against Sales Order,Fabricació contra ordre de vendes
+Manufactured Item,
+Manufactured Qty,Quantitat fabricada
+Manufactured quantity will be updated in this warehouse,
+Manufactured quantity {0} cannot be greater than planned quanitity {1} in Production Order {2},La quantitat fabricada {0} no pot ser més gran que la quantitat planificada {1} a l'ordre de producció {2}
+Manufacturer,Fabricant
+Manufacturer Part Number,PartNumber del fabricant
+Manufacturing,
+Manufacturing Manager,Gerent de Fàbrica
+Manufacturing Quantity,Quantitat a fabricar
+Manufacturing Quantity is mandatory,Quantitat de fabricació és obligatori
+Manufacturing User,Usuari de fabricació
+Margin,
+Marital Status,Estat Civil
+Market Segment,
+Marketing,Màrqueting
+Marketing Expenses,Despeses de Màrqueting
+Married,
+Mass Mailing,Mass Mailing
+Master Name,Nom Mestre
+Master Name is mandatory if account type is Warehouse,El Nom principal és obligatori si el tipus de compte és Magatzem
+Master Type,
+Masters,Màsters
+Match non-linked Invoices and Payments.,
+Material Issue,
+Material Manager,
+Material Master Manager,Material Master Manager
+Material Receipt,
+Material Request,Sol·licitud de materials
+Material Request Detail No,Número de detall de petició de material
+Material Request For Warehouse,Sol·licitud de material per al magatzem
+Material Request Item,Material Request Item
+Material Request Items,
+Material Request No,Número de sol·licitud de Material
+Material Request Type,
+Material Request of maximum {0} can be made for Item {1} against Sales Order {2},Per l'article {1} es poden fer un màxim de {0} sol·licituds de materials destinats a l'ordre de venda {2}
+Material Request used to make this Stock Entry,
+Material Request {0} is cancelled or stopped,Material de Sol·licitud {0} es cancel·la o s'atura
+Material Requests for which Supplier Quotations are not created,Les sol·licituds de material per als quals no es creen Ofertes de Proveïdor
+Material Requests {0} created,Sol·licituds de material {0} creats
+Material Requirement,Requirement de Material
+Material Transfer,
+Material User,Material User
+Materials,
+Materials Required (Exploded),Materials necessaris (explotat)
+Max 5 characters,Max 5 caràcters
+Max Days Leave Allowed,Màxim de dies d'absència permesos
+Max Discount (%),Descompte màxim (%)
+Max Qty,Quantitat màxima
+Max discount allowed for item: {0} is {1}%,Descompte màxim permès per l'article: {0} és {1}%
+Maximum Amount,
+Maximum {0} rows allowed,Màxim {0} files permeses
+Maxiumm discount for Item {0} is {1}%,Maxim descompte per article {0} és {1}%
+Medical,
+Medium,Medium
+"Merging is only possible if following properties are same in both records. Group or Ledger, Root Type, Company",
+Message,Missatge
+Message Parameter,Paràmetre del Missatge
+Message Sent,Missatge enviat
+Message updated,Missatge actualitzat
+Messages,Missatges
+Messages greater than 160 characters will be split into multiple messages,
+Middle Income,Ingrés Mig
+Milestone,Fita
+Milestone Date,Data de la fita
+Milestones,Fites
+Milestones will be added as Events in the Calendar,S'afegiran les fites com esdeveniments en el calendari
+Min Order Qty,
+Min Qty,Quantitat mínima
+Min Qty can not be greater than Max Qty,Quantitat mínima no pot ser major que Quantitat màxima
+Minimum Amount,Quantitat mínima
+Minimum Inventory Level,
+Minimum Order Qty,Quantitat de comanda mínima
+Minute,
+Misc Details,Detalls diversos
+Miscellaneous Expenses,
+Miscelleneous,
+Mobile No,Número de Mòbil
+Mobile No.,
+Mode of Payment,
+Modern,Modern
+Monday,Dilluns
+Month,Mes
+Monthly,
+Monthly Attendance Sheet,Full d'Assistència Mensual
+Monthly Earning & Deduction,Ingressos mensuals i Deducció
+Monthly Salary Register,Registre de Salari mensual
+Monthly salary statement.,
+More Details,Més detalls
+More Info,Més Info
+Motion Picture & Video,Cinema i vídeo
+Moving Average,
+Moving Average Rate,Moving Average Rate
+Mr,Sr
+Ms,Sra
+Multiple Item prices.,Múltiples Preus d'articles
+"Multiple Price Rule exists with same criteria, please resolve \
+			conflict by assigning priority. Price Rules: {0}",
+Music,
+Must be Whole Number,Ha de ser nombre enter
+Name,Nom
+Name and Description,Nom i descripció
+Name and Employee ID,
+"Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master",
+Name of person or organization that this address belongs to.,Nom de la persona o organització a la que pertany aquesta direcció.
+Name of the Budget Distribution,Name of the Budget Distribution
+Naming Series,
+Negative Quantity is not allowed,No s'admenten quantitats negatives
+Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},
+Negative Valuation Rate is not allowed,No es permeten els ràtios de valoració negatius
+Net Pay,Pay Net
+Net Pay (in words) will be visible once you save the Salary Slip.,El sou net (en paraules) serà visible un cop que es guardi la nòmina.
+Net Profit / Loss,Guany/Pèrdua neta
+Net Total,Total Net
+Net Total (Company Currency),Net Total (En la moneda de la Companyia)
+Net Weight,Pes Net
+Net Weight UOM,
+Net Weight of each Item,Pes net de cada article
+Net pay cannot be negative,Salari net no pot ser negatiu
+Never,Mai
+New Account,
+New Account Name,
+New BOM,
+New Communications,Noves Comunicacions
+New Company,Nova Empresa
+New Cost Center,Nou Centre de Cost
+New Cost Center Name,Nou nom de centres de cost
+New Customer Revenue,
+New Customers,Clients Nous
+New Delivery Notes,Noves notes de lliurament
+New Enquiries,Noves consultes
+New Leads,
+New Leave Application,
+New Leaves Allocated,Noves absències Assignades
+New Leaves Allocated (In Days),
+New Material Requests,Noves peticions de material
+New Projects,Nous Projectes
+New Purchase Orders,Noves ordres de compra
+New Purchase Receipts,Nous rebuts de compra
+New Quotations,
+New Sales Orders,
+New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,
+New Stock Entries,
+New Stock UOM,Nova UDM d'existències
+New Stock UOM is required,
+New Stock UOM must be different from current stock UOM,
+New Supplier Quotations,
+New Support Tickets,Nous Tiquets de Suport
+New UOM must NOT be of type Whole Number,La nova UDM no pot ser de tipus Número sencer
+New Workplace,Nou lloc de treball
+New {0},Nova {0}
+New {0} Name,Nou {0} Nom
+New {0}: #{1},
+Newsletter,Newsletter
+Newsletter Content,Contingut del Newsletter
+Newsletter Status,Estat de la Newsletter
+Newsletter has already been sent,El Newsletter ja s'ha enviat
+"Newsletters to contacts, leads.","Newsletters a contactes, clients potencials."
+Newspaper Publishers,Editors de Newspapers
+Next,
+Next Contact By,Següent Contactar Per
+Next Contact Date,Data del següent contacte
+Next Date,
+Next Recurring {0} will be created on {1},Següent Recurrent {0} es crearà a {1}
+Next email will be sent on:,El següent correu electrònic s'enviarà a:
+No,No
+No Customer Accounts found.,
+No Customer or Supplier Accounts found,No s'han trobat comptes de clients ni proveïdors
+No Data,No hi ha dades
+No Item with Barcode {0},Número d'article amb Codi de barres {0}
+No Item with Serial No {0},
+No Items to pack,No hi ha articles per embalar
+No Permission,Sense Permís
+No Production Orders created,
+No Remarks,Sense Observacions
+No Supplier Accounts found. Supplier Accounts are identified based on 'Master Type' value in account record.,No s'han trobat comptes de Proveïdor. Els Comptes de Proveïdor s'identifiquen amb base en el valor de 'Type Master' en registre de compte.
+No Updates For,
+No accounting entries for the following warehouses,No hi ha assentaments comptables per als següents magatzems
+No address added yet.,
+No contacts added yet.,Encara no hi ha contactes.
+No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template.,"No hi ha adreça predeterminada. Si us plau, crea'n una de nova a Configuració> Premsa i Branding> plantilla d'adreça."
+No default BOM exists for Item {0},
+No description given,
+No employee found,No s'ha trobat cap empeat
+No employee found!,No s'ha trobat cap empleat!
+No of Requested SMS,No de SMS sol·licitada
+No of Sent SMS,No d'SMS enviats
+No of Visits,Número de Visites
+No permission,No permission
+No permission to use Payment Tool,
+No record found,No s'ha trobat registre
+No records found in the Invoice table,
+No records found in the Payment table,No hi ha registres a la taula de Pagaments
+No salary slip found for month: ,
+Non Profit,Sense ànim de lucre
+Nos,
+Not Active,No Actiu
+Not Applicable,No Aplicable
+Not Available,No Disponible
+Not Billed,
+Not Delivered,
+Not In Stock,No disponible
+Not Sent,No Enviat
+Not Set,
+Not allowed to update stock transactions older than {0},No es permet actualitzar les transaccions de valors més grans de {0}
+Not authorized to edit frozen Account {0},No autoritzat per editar el compte bloquejat {0}
+Not authroized since {0} exceeds limits,
+Not permitted,No permès
+Note,Nota
+Note User,
+Note is a free page where users can share documents / notes,Note és una pàgina gratuïta on els usuaris poden compartir documents/notes
+"Note: Backups and files are not deleted from Dropbox, you will have to delete them manually.","Nota: Les còpies de seguretat i arxius no s'eliminen de Dropbox, hauràs de fer-ho manualment."
+"Note: Backups and files are not deleted from Google Drive, you will have to delete them manually.",
+Note: Due Date exceeds the allowed credit days by {0} day(s),Nota: Data de venciment és superior als dies de crèdit permesos en {0} dia(es)
+Note: Email will not be sent to disabled users,
+"Note: If payment is not made against any reference, make Journal Voucher manually.","Nota: Si el pagament no es fa per una referència concreta, fes l'assentament de Diari manualment."
+Note: Item {0} entered multiple times,Nota: L'article {0} entrat diverses vegades
+Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified,"Nota: L'entrada de pagament no es crearà perquè no s'ha especificat 'Caixa o compte bancari"""
+Note: Reference Date {0} is after invoice due date {1},
+Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0,
+Note: There is not enough leave balance for Leave Type {0},Note: There is not enough leave balance for Leave Type {0}
+Note: This Cost Center is a Group. Cannot make accounting entries against groups.,
+Note: {0},
+Notes,Notes
+Notes:,Notes:
+Nothing to request,Res per sol·licitar
+Notice (days),
+Notification Control,
+Notification Email Address,Dir Adreça de correu electrònic per notificacions
+Notify by Email on creation of automatic Material Request,
+Number Format,
+Number of Order,Número d'ordre
+Offer Date,Data d'Oferta
+Office,
+Office Equipments,Material d'oficina
+Office Maintenance Expenses,Despeses de manteniment d'oficines
+Office Rent,lloguer de l'oficina
+Old Parent,Antic Pare
+On Net Total,En total net
+On Previous Row Amount,A limport de la fila anterior
+On Previous Row Total,Total fila anterior
+Online Auctions,Subhastes en línia
+Only Leave Applications with status 'Approved' can be submitted,"Només es poden presentar les Aplicacions d'absència amb estat ""Aprovat"""
+"Only Serial Nos with status ""Available"" can be delivered.","Només es poden lliurar els números de Sèrie amb l'estat ""disponible"""
+Only leaf nodes are allowed in transaction,Només els nodes fulla es permet l'entrada de transaccions
+Only the selected Leave Approver can submit this Leave Application,Només l'aprovador d'absències seleccionat pot presentar aquesta sol·licitud
+Open,Obert
+Open Production Orders,
+Open Tickets,
+Opening (Cr),
+Opening (Dr),Obertura (Dr)
+Opening Date,Data d'obertura
+Opening Entry,Entrada Obertura
+Opening Qty,Quantitat d'obertura
+Opening Time,Temps d'obertura
+Opening for a Job.,
+Operating Cost,Cost de funcionament
+Operation Description,Descripció de la operació
+Operation No,Número d'Operació
+Operation Time (mins),Temps de l'Operació (minuts)
+Operation {0} is repeated in Operations Table,Operació {0} es repeteix a la Taula d'Operacions
+Operation {0} not present in Operations Table,
+Operations,Operacions
+Opportunity,
+Opportunity Date,Data oportunitat
+Opportunity From,Oportunitat De
+Opportunity Item,Opportunity Item
+Opportunity Items,Articles d'oferta
+Opportunity Lost,
+Opportunity Type,Tipus d'Oportunitats
+Optional. This setting will be used to filter in various transactions.,
+Order Type,Tipus d'ordre
+Order Type must be one of {0},Tipus d'ordre ha de ser un de {0}
+Ordered,
+Ordered Items To Be Billed,
+Ordered Items To Be Delivered,
+Ordered Qty,Quantitat demanada
+"Ordered Qty: Quantity ordered for purchase, but not received.",
+Ordered Quantity,Quantitat demanada
+Orders released for production.,Comandes llançades per a la producció.
+Organization Name,
+Organization Profile,
+Organization branch master.,Organization branch master.
+Organization unit (department) master.,Unitat d'Organització (departament) mestre.
+Other,Un altre
+Other Details,Altres detalls
+Others,Altres
+Out Qty,Quantitat de sortida
+Out of AMC,Fora d'AMC
+Out of Warranty,
+Outgoing,
+Outstanding Amount,Quantitat Pendent
+Outstanding for {0} cannot be less than zero ({1}),Excedent per {0} no pot ser menor que zero ({1})
+Overdue,Endarrerit
+Overdue: ,
+Overhead,
+Overheads,Overheads
+Overlapping conditions found between:,La superposició de les condicions trobades entre:
+Overview,Visió de conjunt
+Owned,Propietat de
+Owner,Propietari
+P L A - Cess Portion,
+PL or BS,PL o BS
+PO Date,PO Date
+PO No,
+POP3 Mail Server,POP3 Mail Server
+POP3 Mail Settings,
+POP3 mail server (e.g. pop.gmail.com),Servidor de correu POP3 (per exemple pop.gmail.com)
+POP3 server e.g. (pop.gmail.com),
+POS,TPV
+POS Setting,Ajustos TPV
+POS Setting required to make POS Entry,Ajust TPV requereix fer l'entrada TPV
+POS Setting {0} already created for user: {1} and company {2},Ajust TPV {0} ja creat per a l'usuari: {1} i companyia {2}
+POS View,
+PR Detail,
+Package Item Details,Detalls d'embalatge d'articles
+Package Items,Articles d'embalatge
+Package Weight Details,
+Packed Item,Article amb embalatge
+Packed quantity must equal quantity for Item {0} in row {1},Quantitat embalada ha de ser igual a la quantitat d'articles per {0} a la fila {1}
+Packing Details,Detalls del embalatge
+Packing List,Llista De Embalatge
+Packing Slip,
+Packing Slip Item,Albarà d'article
+Packing Slip Items,Fulla d'embalatge d'articles
+Packing Slip(s) cancelled,Fulla(s) d'embalatge cancel·lat
+Page Break,Salt de pàgina
+Page Name,Nom de pàgina
+Paid,Pagat
+Paid Amount,Quantitat pagada
+Paid amount + Write Off Amount can not be greater than Grand Total,
+Pair,Parell
+Parameter,
+Parent Account,
+Parent Cost Center,
+Parent Customer Group,
+Parent Detail docname,
+Parent Item,
+Parent Item Group,Grup d'articles pare
+Parent Item {0} must be not Stock Item and must be a Sales Item,Pares d'article {0} no pot de ser article d'estoc i ha de ser un article de Vendes
+Parent Party Type,Parent Party Type
+Parent Sales Person,Parent Sales Person
+Parent Territory,Parent Territory
+Parent Website Route,Parent Website Route
+Parenttype,
+Part-time,Temps parcial
+Partially Completed,
+Partly Billed,Parcialment Facturat
+Partly Delivered,Parcialment Lliurat
+Partner Target Detail,
+Partner Type,Tipus de Partner
+Partner's Website,Lloc Web dels Partners
+Party,Party
+Party Account,
+Party Details,Party Details
+Party Type,Tipus Partit
+Party Type Name,Party Type Name
+Passive,Passiu
+Passport Number,Nombre de Passaport
+Password,
+Pay To / Recd From,Pagar a/Rebut de
+Payable,
+Payables,Comptes per Pagar
+Payables Group,
+Payment Account,
+Payment Amount,Quantitat de pagament
+Payment Days,Dies de pagament
+Payment Due Date,Data de pagament
+Payment Mode,Mètode de pagament
+Payment Pending,
+Payment Period Based On Invoice Date,Període de pagament basat en Data de la factura
+Payment Received,Pagament rebut
+Payment Reconciliation,Reconciliació de Pagaments
+Payment Reconciliation Invoice,Factura de Pagament de Reconciliació
+Payment Reconciliation Invoices,Factures de conciliació de pagaments
+Payment Reconciliation Payment,Payment Reconciliation Payment
+Payment Reconciliation Payments,Payment Reconciliation Payments
+Payment Tool,Eina de Pagament
+Payment Tool Detail,Detall mitjà de Pagament
+Payment Tool Details,Detalls eina de pagament
+Payment Type,Tipus de Pagament
+"Payment against {0} {1} cannot be greater \
+					than Outstanding Amount {2}",
+Payment cannot be made for empty cart,El pagament no es pot fer per al carro buit
+Payment of salary for the month {0} and year {1},
+Payments,Pagaments
+Payments Made,
+Payments Received,Pagaments rebuts
+Payments made during the digest period,
+Payments received during the digest period,Els pagaments rebuts durant el període
+Payroll Settings,Ajustaments de Nòmines
+Pending,
+Pending Amount,A l'espera de l'Import
+Pending Items {0} updated,Articles pendents {0} actualitzats
+Pending Review,
+Pending SO Items For Purchase Request,A l'espera dels Articles de la SO per la sol·licitud de compra
+Pension Funds,
+Percentage Allocation,Percentatge d'Assignació
+Percentage Allocation should be equal to 100%,Percentatge d'assignació ha de ser igual a 100%
+Percentage variation in quantity to be allowed while receiving or delivering this item.,Variació percentual tolerable en la quantitat al rebre o lliurar aquest article.
+Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.,
+Performance appraisal.,
+Period,
+Period Closing Entry,Entrada de Tancament de Període
+Period Closing Voucher,Comprovant de tancament de període
+Period From and Period To dates mandatory for recurring %s,Període Des de i Període Fins a obligatoris per recurrent %s
+Periodicity,
+Permanent Address,Adreça Permanent
+Permanent Address Is,Adreça permanent
+Permission,Permís
+Personal,Personal
+Personal Details,
+Personal Email,Email Personal
+Pharmaceutical,
+Pharmaceuticals,Farmacèutics
+Phone,
+Phone No,
+Piecework,Treball a preu fet
+Pincode,Codi PIN
+Place of Issue,Lloc de la incidència
+Plan for maintenance visits.,Pla de visites de manteniment.
+Planned Qty,
+"Planned Qty: Quantity, for which, Production Order has been raised, but is pending to be manufactured.","Planificada Quantitat: Quantitat, per a això, ordre de la producció s'ha elevat, però està a l'espera de ser fabricats."
+Planned Quantity,Quantitat planificada
+Planning,Planificació
+Plant,Planta
+Plant and Machinery,Instal·lacions tècniques i maquinària
+Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.,Si us plau entra una abreviació o Nom curt correctament perquè s'afegirà com sufix a tots Comptes principals
+Please Update SMS Settings,
+Please add expense voucher details,"Si us plau, afegeix els detalls del comprovant de despeses"
+Please add to Modes of Payment from Setup.,
+Please click on 'Generate Schedule',"Si us plau, feu clic a ""Generar Planificació"""
+Please click on 'Generate Schedule' to fetch Serial No added for Item {0},"Si us plau, feu clic a ""Generar Planificació 'per reservar números de sèrie per l'article {0}"
+Please click on 'Generate Schedule' to get schedule,
+Please create Customer from Lead {0},"Si us plau, crea Client a partir del client potencial {0}"
+Please create Salary Structure for employee {0},
+Please create new account from Chart of Accounts.,"Si us plau, creu un nou compte de Pla de Comptes."
+Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.,Please do NOT create Account (Ledgers) for Customers and Suppliers. Es creen directament dels mestres client / proveïdor.
+Please enter 'Expected Delivery Date',"Si us plau, introdueixi 'la data prevista de lliurament'"
+Please enter 'Is Subcontracted' as Yes or No,
+Please enter 'Repeat on Day of Month' field value,
+Please enter Account Receivable/Payable group in company master,
+Please enter Approving Role or Approving User,Si us plau entra el rol d'aprovació o l'usuari aprovador
+Please enter BOM for Item {0} at row {1},"Si us plau, introduïu la llista de materials per a l'article {0} a la fila {1}"
+Please enter Company,Si us plau entra l'Empresa
+Please enter Cost Center,Si us plau entra el centre de cost
+Please enter Delivery Note No or Sales Invoice No to proceed,
+Please enter Employee Id of this sales parson,Si us plau ingressi l'Id d'Empleat d'aquest venedor
+Please enter Expense Account,
+Please enter Item Code to get batch no,
+Please enter Item Code.,"Si us plau, introduïu el codi d'article."
+Please enter Item first,Si us plau entra primer l'article
+Please enter Maintaince Details first,Si us plau entra primer els detalls de manteniment
+Please enter Master Name once the account is created.,"Si us plau, introduïu el nom un cop creat el compte."
+Please enter Payment Amount in atleast one row,
+Please enter Planned Qty for Item {0} at row {1},Si us plau entra la quantitat Planificada per l'article {0} a la fila {1}
+Please enter Production Item first,Si us plau indica primer l'Article a Producció
+Please enter Purchase Receipt No to proceed,Si us plau entra el número de rebut de compra per a continuar
+Please enter Purchase Receipt first,Si us plau primer entra el rebut de compra
+Please enter Purchase Receipts,Si us plau ingressi rebuts de compra
+Please enter Reference date,"Si us plau, introduïu la data de referència"
+Please enter Taxes and Charges,Entra les taxes i càrrecs
+Please enter Warehouse for which Material Request will be raised,Si us plau indica el Magatzem en què es faràa la Sol·licitud de materials
+Please enter Write Off Account,Si us plau indica el Compte d'annotació
+Please enter atleast 1 invoice in the table,"Si us plau, introdueixi almenys 1 factura a la taula"
+Please enter company first,
+Please enter company name first,Si us plau introdueix el nom de l'empresa primer
+Please enter default Unit of Measure,
+Please enter default currency in Company Master,
+Please enter email address,Introduïu l'adreça de correu electrònic
+Please enter item details,
+Please enter message before sending,
+Please enter parent account group for warehouse {0},
+Please enter parent cost center,
+Please enter quantity for Item {0},Introduïu la quantitat d'articles per {0}
+Please enter relieving date.,Please enter relieving date.
+Please enter sales order in the above table,
+Please enter the Against Vouchers manually,Introduïu manualment la partida dels comprovants
+Please enter valid Company Email,Si us plau entra un correu electrònic d'empresa vàlid
+Please enter valid Email Id,Si us plau introdueixi un correu electrònic vàlid
+Please enter valid Personal Email,Si us plau entreu un correu electrònic personal vàlid
+Please enter valid mobile nos,Entra números de mòbil vàlids
+Please find attached {0} #{1},Troba adjunt {0} #{1}
+Please install dropbox python module,
+Please mention no of visits required,
+Please pull items from Delivery Note,
+Please remove this Invoice {0} from C-Form {1},
+Please save the Newsletter before sending,
+Please save the document before generating maintenance schedule,"Si us plau, guardi el document abans de generar el programa de manteniment"
+Please see attachment,
+"Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row",
+Please select Bank Account,
+Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,
+Please select Category first,"Si us plau, Selecciona primer la Categoria"
+Please select Charge Type first,Seleccioneu Tipus de Càrrec primer
+Please select Fiscal Year,
+Please select Group or Ledger value,Seleccioneu valor de Grup o Llibre major
+Please select Incharge Person's name,"Si us plau, seleccioneu el nom de la persona al càrrec"
+"Please select Item where ""Is Stock Item"" is ""No"" and ""Is Sales Item"" is ""Yes"" and there is no other Sales BOM",
+Please select Price List,Seleccionla llista de preus
+Please select Start Date and End Date for Item {0},Seleccioneu data d'inici i data de finalització per a l'article {0}
+Please select Time Logs.,Seleccioneu registres de temps
+Please select a csv file,Seleccioneu un arxiu csv
+Please select a valid csv file with data,
+Please select a value for {0} quotation_to {1},Please select a value for {0} quotation_to {1}
+"Please select an ""Image"" first","Seleccioneu una ""imatge"" primer"
+Please select charge type first,
+Please select company first,Si us plau primer seleccioneu l'empresa
+Please select company first.,Si us plau seleccioneu l'empresa en primer lloc.
+Please select item code,Seleccioneu el codi de l'article
+Please select month and year,Selecciona el mes i l'any
+Please select prefix first,Seleccioneu el prefix primer
+Please select the document type first,Si us plau. Primer seleccioneu el tipus de document
+Please select weekly off day,Si us plau seleccioni el dia lliure setmanal
+Please select {0},
+Please select {0} first,Seleccioneu {0} primer
+Please select {0} first.,
+Please set Dropbox access keys in your site config,Please set Dropbox access keys in your site config
+Please set Google Drive access keys in {0},Please set Google Drive access keys in {0}
+Please set User ID field in an Employee record to set Employee Role,
+Please set default Cash or Bank account in Mode of Payment {0},"Si us plau, estableix pagament en efectiu o Compte bancari predeterminat a la Forma de pagament {0}"
+Please set default value {0} in Company {0},"Si us plau, estableix el valor per defecte {0} a l'empresa {0}"
+Please set {0},"Si us plau, estableix {0}"
+Please setup Employee Naming System in Human Resource > HR Settings,Please setup Employee Naming System in Human Resource > HR Settings
+Please setup numbering series for Attendance via Setup > Numbering Series,"Si us plau, configureu sèries de numeració per a l'assistència a través de Configuració> Sèries de numeració"
+Please setup your POS Preferences,
+Please setup your chart of accounts before you start Accounting Entries,"Si us plau, configura el teu pla de comptes abans de començar els assentaments comptables"
+Please specify,
+Please specify Company,
+Please specify Company to proceed,
+Please specify Default Currency in Company Master and Global Defaults,
+Please specify a,"Si us plau, especifiqueu un"
+Please specify a valid 'From Case No.',"Si us plau, especifica un 'Des del Cas Número' vàlid"
+Please specify a valid Row ID for {0} in row {1},"Si us plau, especifiqueu un ID de fila vàlid per {0} a la fila {1}"
+Please specify either Quantity or Valuation Rate or both,
+Please submit to update Leave Balance.,Presenta per actualitzar el balanç d'absències
+Plot,Plot
+Point of Sale,Punt de Venda
+Point-of-Sale Setting,Ajustos de Punt de Venda
+Post Graduate,Postgrau
+Postal,Postal
+Postal Expenses,Despeses postals
+Posting Date,Data de publicació
+Posting Time,Temps d'enviament
+Posting date and posting time is mandatory,
+Posting timestamp must be after {0},Data i hora d'enviament ha de ser posterior a {0}
+Potential Sales Deal,
+Potential opportunities for selling.,
+Preferred Billing Address,
+Preferred Shipping Address,Adreça d'enviament preferida
+Prefix,Prefix
+Present,Present
+Prevdoc DocType,Prevdoc DocType
+Prevdoc Doctype,Prevdoc Doctype
+Preview,
+Previous,
+Previous Work Experience,Experiència laboral anterior
+Price,Preu
+Price / Discount,
+Price List,
+Price List Currency,Price List Currency
+Price List Currency not selected,No s'ha escollit una divisa per la llista de preus
+Price List Exchange Rate,Tipus de canvi per a la llista de preus
+Price List Master,Llista de preus Mestre
+Price List Name,nom de la llista de preus
+Price List Rate,
+Price List Rate (Company Currency),Tarifa de preus (en la moneda de la companyia)
+Price List master.,
+Price List must be applicable for Buying or Selling,
+Price List not found or disabled,La llista de preus no existeix o està deshabilitada
+Price List not selected,
+Price List {0} is disabled,La llista de preus {0} està deshabilitada
+Price or Discount,
+Pricing Rule,Regla preus
+Pricing Rule Help,Ajuda de la Regla de preus
+"Pricing Rule is first selected based on 'Apply On' field, which can be Item, Item Group or Brand.",
+"Pricing Rule is made to overwrite Price List / define discount percentage, based on some criteria.","Regla de preus està feta per a sobreescriure la llista de preus/defineix percentatge de descompte, en base a algun criteri."
+Pricing Rules are further filtered based on quantity.,
+Primary,Primari
+Print Format Style,
+Print Heading,Imprimir Capçalera
+Print Without Amount,
+Print and Stationary,
+Printing and Branding,Printing and Branding
+Priority,Prioritat
+Private,
+Private Equity,Private Equity
+Privilege Leave,Privilege Leave
+Probation,Probation
+Process Payroll,Process Payroll
+Produced,Produït
+Produced Quantity,Quantitat produïda
+Product Enquiry,Consulta de producte
+Production,
+Production Order,Ordre de Producció
+Production Order status is {0},
+Production Order {0} must be cancelled before cancelling this Sales Order,
+Production Order {0} must be submitted,L'Ordre de Producció {0} ha d'estar Presentada
+Production Orders,Ordres de Producció
+Production Orders in Progress,
+Production Plan Item,Pla de Producció d'articles
+Production Plan Items,Articles del Pla de Producció
+Production Plan Sales Order,
+Production Plan Sales Orders,
+Production Planning Tool,
+Production order number is mandatory for stock entry purpose manufacture,El Número d'ordre de producció és obligatori per a les entrades d'estoc de fabricació
+Products,
+"Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.","Els productes s'ordenaran per pes-antiguitat en les recerques predeterminades. A més del pes-antiguitat, el producte apareixerà més amunt a la llista."
+Professional Tax,Impost Professionals
+Profit and Loss,Pèrdues i Guanys
+Profit and Loss Statement,Guanys i Pèrdues
+Project,
+Project Costing,Costos del projecte
+Project Details,Detalls del projecte
+Project Id,Identificació del projecte
+Project Manager,Gerent De Projecte
+Project Milestone,
+Project Milestones,
+Project Name,Nom del projecte
+Project Start Date,
+Project Status,Estat del Projecte
+Project Type,Tipus de Projecte
+Project Value,Valor de Projecte
+Project activity / task.,
+Project master.,
+Project will get saved and will be searchable with project name given,Es desarà el projecte i es podrà buscar amb el nom assignat
+Project wise Stock Tracking,
+Project wise Stock Tracking ,
+Project-wise data is not available for Quotation,
+Projected,Projectat
+Projected Qty,Quantitat projectada
+Projects,
+Projects & System,Projectes i Sistema
+Projects Manager,
+Projects User,Usuari de Projectes
+Prompt for Email on Submission of,Demana el correu electrònic al Presentar
+Proposal Writing,Redacció de propostes
+Provide email id registered in company,Provide email id registered in company
+Provisional Profit / Loss (Credit),Compte de guanys / pèrdues provisional (Crèdit)
+Public,
+Published on website at: {0},
+Publishing,Publicant
+Pull sales orders (pending to deliver) based on the above criteria,
+Purchase,
+Purchase / Manufacture Details,
+Purchase Analytics,Anàlisi de Compres
+Purchase Common,Purchase Common
+Purchase Details,
+Purchase Discounts,
+Purchase Invoice,Factura de Compra
+Purchase Invoice Advance,Factura de compra anticipada
+Purchase Invoice Advances,Anticips de Factura de Compra
+Purchase Invoice Item,
+Purchase Invoice Trends,Tendències de les Factures de Compra
+Purchase Invoice {0} is already submitted,La Factura de compra {0} ja està Presentada
+Purchase Item,
+Purchase Manager,Gerent de Compres
+Purchase Master Manager,Administraodr principal de compres
+Purchase Order,
+Purchase Order Item,Ordre de compra d'articles
+Purchase Order Item No,Ordre de Compra No. l'article
+Purchase Order Item Supplied,Article de l'ordre de compra Subministrat
+Purchase Order Items,Ordre de Compra d'articles
+Purchase Order Items Supplied,Articles de l'ordre de compra lliurats
+Purchase Order Items To Be Billed,Ordre de Compra articles a facturar
+Purchase Order Items To Be Received,Articles a rebre de l'ordre de compra
+Purchase Order Message,Missatge de les Ordres de Compra
+Purchase Order Required,
+Purchase Order Trends,
+Purchase Order number required for Item {0},Número d'ordre de Compra per {0}
+Purchase Order {0} is 'Stopped',
+Purchase Order {0} is not submitted,
+Purchase Orders given to Suppliers.,Ordres de compra donades a Proveïdors.
+Purchase Price List,Llista de preus de Compra
+Purchase Receipt,Albarà de compra
+Purchase Receipt Item,
+Purchase Receipt Item Supplied,Rebut de compra dels articles subministrats
+Purchase Receipt Item Supplieds,
+Purchase Receipt Items,Rebut de compra d'articles
+Purchase Receipt Message,
+Purchase Receipt No,Número de rebut de compra
+Purchase Receipt Required,Es requereix rebut de compra
+Purchase Receipt Trends,Purchase Receipt Trends
+Purchase Receipt must be submitted,
+Purchase Receipt number required for Item {0},
+Purchase Receipt {0} is not submitted,El rebut de compra {0} no està presentat
+Purchase Receipts,Rebut de compra
+Purchase Register,
+Purchase Return,Devolució de Compra
+Purchase Returned,Compra retornada
+Purchase Taxes and Charges,
+Purchase Taxes and Charges Master,Purchase Taxes and Charges Master
+Purchase User,Usuari de compres
+"Purchase rate for item: {0} not found, which is required to book accounting entry (expense). Please mention item price against a buying price list.",
+Purchse Order number required for Item {0},
+Purpose,Propòsit
+Purpose must be one of {0},Propòsit ha de ser un de {0}
+QA Inspection,Inspecció de qualitat
+Qty,Quantitat
+Qty Consumed Per Unit,
+Qty To Manufacture,Quantitat a fabricar
+Qty as per Stock UOM,La quantitat d'existències ha d'estar expresada en la UDM
+Qty to Deliver,Quantitat a lliurar
+Qty to Order,
+Qty to Receive,
+Qty to Transfer,Quantitat a Transferir
+Qualification,Qualificació
+Quality,Qualitat
+Quality Inspection,Inspecció de Qualitat
+Quality Inspection Parameters,
+Quality Inspection Reading,
+Quality Inspection Readings,Lectures d'inspecció de qualitat
+Quality Inspection required for Item {0},Inspecció de qualitat requerida per a l'article {0}
+Quality Management,Gestió de la Qualitat
+Quality Manager,Gerent de Qualitat
+Quantity,
+Quantity Requested for Purchase,
+Quantity and Rate,
+Quantity and Warehouse,Quantitat i Magatzem
+Quantity cannot be a fraction in row {0},La quantitat no pot ser una fracció a la fila {0}
+Quantity for Item {0} must be less than {1},
+Quantity in row {0} ({1}) must be same as manufactured quantity {2},
+Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,
+Quantity required for Item {0} in row {1},
+Quarter,Trimestre
+Quarterly,Trimestral
+Quick Help,Ajuda Ràpida
+Quotation,Oferta
+Quotation Item,
+Quotation Items,
+Quotation Lost Reason,
+Quotation Message,
+Quotation To,Oferta per
+Quotation Trends,Quotation Trends
+Quotation {0} is cancelled,L'annotació {0} està cancel·lada
+Quotation {0} not of type {1},
+Quotations received from Suppliers.,Ofertes rebudes dels proveïdors.
+Quotes to Leads or Customers.,Cotitzacions a clients potencials o a clients.
+Raise Material Request when stock reaches re-order level,
+Raised By,Raised By
+Raised By (Email),Raised By (Email)
+Random,
+Range,
+Rate,Tarifa
+Rate ,
+Rate (%),Tarifa (%)
+Rate (Company Currency),
+Rate Of Materials Based On,Tarifa de materials basats en
+Rate and Amount,
+Rate at which Customer Currency is converted to customer's base currency,Canvi al qual la divisa del client es converteix la moneda base del client
+Rate at which Price list currency is converted to company's base currency,Valor pel qual la divisa de la llista de preus es converteix a la moneda base de la companyia
+Rate at which Price list currency is converted to customer's base currency,
+Rate at which customer's currency is converted to company's base currency,Rati a la qual es converteix la divisa del client es converteix en la moneda base de la companyia
+Rate at which supplier's currency is converted to company's base currency,Equivalència a la qual la divisa del proveïdor es converteixen a la moneda base de la companyia
+Rate at which this tax is applied,Rati a la qual s'aplica aquest impost
+Raw Material,Matèria Primera
+Raw Material Item Code,
+Raw Materials Supplied,Matèries primeres subministrades
+Raw Materials Supplied Cost,
+Raw material cannot be same as main Item,
+Re-Open Ticket,Reobrir tiquet
+Re-Order Level,
+Re-Order Qty,
+Re-order,
+Re-order Level,Reordenar Nivell
+Re-order Qty,Quantitat per comanda de manteniment de mínims
+Read,Llegir
+Reading 1,Lectura 1
+Reading 10,Reading 10
+Reading 2,
+Reading 3,Lectura 3
+Reading 4,Reading 4
+Reading 5,Lectura 5
+Reading 6,
+Reading 7,
+Reading 8,Lectura 8
+Reading 9,Lectura 9
+Real Estate,Real Estate
+Reason,
+Reason for Leaving,
+Reason for Resignation,Motiu del cessament
+Reason for losing,Motiu de pèrdua
+Recd Quantity,Recd Quantitat
+Receivable,Compte per cobrar
+Receivable / Payable account will be identified based on the field Master Type,Receivable / Payable account will be identified based on the field Master Type
+Receivables,Cobrables
+Receivables / Payables,
+Receivables Group,
+Received,Rebut
+Received Date,Data de recepció
+Received Items To Be Billed,Articles rebuts per a facturar
+Received Or Paid,
+Received Qty,Quantitat rebuda
+Received and Accepted,Rebut i acceptat
+Receiver List,
+Receiver List is empty. Please create Receiver List,"La llista de receptors és buida. Si us plau, crea la Llista de receptors"
+Receiver Parameter,Paràmetre de Receptor
+Recipients,Destinataris
+Reconcile,Conciliar
+Reconciliation Data,Reconciliation Data
+Reconciliation HTML,
+Reconciliation JSON,
+Record item movement.,Desa el Moviment d'article
+Recurring Id,
+Recurring Invoice,Factura Recurrent
+Recurring Order,Ordre Recurrent
+Recurring Type,Tipus Recurrent
+Reduce Deduction for Leave Without Pay (LWP),Reduir Deducció per absències sense sou (LWP)
+Reduce Earning for Leave Without Pay (LWP),Reduir el guany per absències sense sou (LWP)
+Ref,
+Ref Code,Codi de Referència
+Ref Date,
+Ref SQ,
+Reference,Referència
+Reference #{0} dated {1},Referència #{0} amb data {1}
+Reference Date,Data de Referència
+Reference Name,Referència Nom
+Reference No,Referència número
+Reference No & Reference Date is required for {0},
+Reference No is mandatory if you entered Reference Date,
+Reference Number,
+Reference Row #,Referència Fila #
+Refresh,Refrescar
+Registration Details,Detalls de registre
+Registration Info,
+Rejected,Rebutjat
+Rejected Quantity,Quantitat Rebutjada
+Rejected Serial No,Número de sèrie Rebutjat
+Rejected Warehouse,Magatzem no conformitats
+Rejected Warehouse is mandatory against regected item,Cal indicar el magatzem de no conformitats per la partida rebutjada
+Relation,Relació
+Relieving Date,
+Relieving Date must be greater than Date of Joining,
+Remark,
+Remarks,Observacions
+Remove item if charges is not applicable to that item,Treure article si els càrrecs no és aplicable a aquest
+Rename,Canviar el nom
+Rename Log,Canviar el nom de registre
+Rename Tool,Eina de canvi de nom
+Rent Cost,Cost de lloguer
+Rent per hour,Lloguer per hores
+Rented,Llogat
+Reorder Level,
+Reorder Qty,Quantitat per a generar comanda
+Repack,Torneu a embalar
+Repeat Customer Revenue,
+Repeat Customers,
+Repeat on Day of Month,
+Replace,Reemplaçar
+Replace Item / BOM in all BOMs,
+"Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate ""BOM Explosion Item"" table as per new BOM","Reemplaçar una llista de materials(BOM) a totes les altres llistes de materials(BOM) on s'utilitza. Substituirà l'antic enllaç de llista de materials(BOM), s'actualitzarà el cost i es regenerarà la taula ""BOM Explosionat"", segons la nova llista de materials"
+Replied,Respost
+Report Date,Data de l'informe
+Report Type,
+Report Type is mandatory,
+Reports to,Informes a
+Reqd By Date,Reqd By Date
+Reqd by Date,Reqd per data
+Request Type,
+Request for Information,Sol·licitud d'Informació
+Request for purchase.,Sol·licitud de venda.
+Requested,
+Requested For,Requerida Per
+Requested Items To Be Ordered,
+Requested Items To Be Transferred,Articles sol·licitats per a ser transferits
+Requested Qty,
+"Requested Qty: Quantity requested for purchase, but not ordered.","Quantitat Sol·licitada: Quantitat sol·licitada per a la compra, però sense demanar."
+Requests for items.,Sol·licituds d'articles.
+Required By,Requerit per
+Required Date,
+Required Qty,Quantitat necessària
+Required only for sample item.,Només és necessari per l'article de mostra.
+Required raw materials issued to the supplier for producing a sub - contracted item.,Matèries primeres necessàries emeses al proveïdor per a la producció d'un sub - element contractat.
+Research,Recerca
+Research & Development,
+Researcher,Investigador
+Reseller,Revenedor
+Reserved,
+Reserved Qty,
+"Reserved Qty: Quantity ordered for sale, but not delivered.",
+Reserved Quantity,Quantitat reservades
+Reserved Warehouse,Magatzem Reservat
+Reserved Warehouse in Sales Order / Finished Goods Warehouse,Magatzem Reservat a Ordres de venda / Magatzem de productes acabats
+Reserved Warehouse is missing in Sales Order,Falta la reserva de magatzem a ordres de venda
+Reserved Warehouse required for stock Item {0} in row {1},
+Reserved warehouse required for stock item {0},
+Reserves and Surplus,Reserves i Superàvit
+Reset Filters,
+Resignation Letter Date,
+Resolution,
+Resolution Date,
+Resolution Details,
+Resolved By,Resolta Per
+Rest Of The World,Resta del món
+Retail,Venda al detall
+Retail & Wholesale,Al detall i a l'engròs
+Retailer,
+Review Date,Data de revisió
+Rgt,Rgt
+Role Allowed to edit frozen stock,
+Role that is allowed to submit transactions that exceed credit limits set.,Rol al que es permet presentar les transaccions que excedeixin els límits de crèdit establerts.
+Root Type,
+Root Type is mandatory,Root Type is mandatory
+Root account can not be deleted,
+Root cannot be edited.,Root no es pot editar.
+Root cannot have a parent cost center,
+Rounded Off,
+Rounded Total,Total Arrodonit
+Rounded Total (Company Currency),Total arrodonit (en la divisa de la companyia)
+Row # ,
+Row # {0}: ,
+Row #{0}: Please specify Serial No for Item {1},Fila #{0}: Si us plau especifica el número de sèrie per l'article {1}
+Row {0}: Account {1} does not match with {2} {3} Name,
+Row {0}: Account {1} does not match with {2} {3} account,Fila {0}: Compte {1} no coincideix amb el compte {2} {3}
+Row {0}: Allocated amount {1} must be less than or equals to JV amount {2},Fila {0}: quantitat assignada {1} ha de ser menor o igual a l'import JV {2}
+Row {0}: Allocated amount {1} must be less than or equals to invoice outstanding amount {2},Fila {0}: quantitat assignada {1} ha de ser menor o igual a quantitat pendent de facturar {2}
+Row {0}: Conversion Factor is mandatory,Fila {0}: el factor de conversió és obligatori
+Row {0}: Credit entry can not be linked with a {1},
+Row {0}: Debit entry can not be linked with a {1},
+Row {0}: Payment Amount cannot be greater than Outstanding Amount,Fila {0}: Quantitat de pagament no pot ser superior a quantitat lliurada
+Row {0}: Payment against Sales/Purchase Order should always be marked as advance,Fila {0}: El pagament contra Vendes / Ordre de Compra sempre ha d'estar marcat com a pagamet anticipat (bestreta)
+Row {0}: Payment amount can not be negative,
+Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.,"Fila {0}: Si us plau, vegeu ""És Avanç 'contra el Compte {1} si es tracta d'una entrada amb antelació."
+Row {0}: Qty is mandatory,Fila {0}: Quantitat és obligatori
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
+					Available Qty: {4}, Transfer Qty: {5}",
+"Row {0}: To set {1} periodicity, difference between from and to date \
+						must be greater than or equal to {2}",
+Row {0}: {1} is not a valid {2},La fila {0}: {1} no és vàlida per {2}
+Row {0}:Start Date must be before End Date,
+Rules for adding shipping costs.,Regles per afegir les despeses d'enviament.
+Rules for applying pricing and discount.,
+Rules to calculate shipping amount for a sale,
+S.O. No.,S.O. No.
+SHE Cess on Excise,SHE Cess on Excise
+SHE Cess on Service Tax,SHE Cess on Service Tax
+SHE Cess on TDS,SHE Cess on TDS
+SMS Center,Centre d'SMS
+SMS Gateway URL,SMS Gateway URL
+SMS Log,
+SMS Parameter,Paràmetre SMS
+SMS Sender Name,
+SMS Settings,Ajustaments de SMS
+SO Date,SO Date
+SO Pending Qty,
+SO Qty,SO Qty
+Salary,
+Salary Information,Informació sobre sous
+Salary Manager,
+Salary Mode,Salary Mode
+Salary Slip,
+Salary Slip Deduction,Deducció de la fulla de nòmina
+Salary Slip Earning,Salary Slip Earning
+Salary Slip of employee {0} already created for this month,
+Salary Structure,Estructura salarial
+Salary Structure Deduction,Salary Structure Deduction
+Salary Structure Earning,Salary Structure Earning
+Salary Structure Earnings,
+Salary breakup based on Earning and Deduction.,Salary breakup based on Earning and Deduction.
+Salary components.,Components salarials.
+Salary template master.,Salary template master.
+Sales,
+Sales Analytics,
+Sales BOM,
+Sales BOM Help,
+Sales BOM Item,BOM d'article de venda
+Sales BOM Items,BOM d'articles de venda
+Sales Browser,Analista de Vendes
+Sales Details,
+Sales Discounts,Descomptes de venda
+Sales Email Settings,Ajustos dels correus electrònics de vendes
+Sales Expenses,Despeses de venda
+Sales Extras,
+Sales Funnel,Sales Funnel
+Sales Invoice,Factura de vendes
+Sales Invoice Advance,Factura proforma
+Sales Invoice Item,
+Sales Invoice Items,
+Sales Invoice Message,Missatge de Factura de vendes
+Sales Invoice No,Factura No
+Sales Invoice Trends,Tendències de Factures de Vendes
+Sales Invoice {0} has already been submitted,
+Sales Invoice {0} must be cancelled before cancelling this Sales Order,La factura {0} ha de ser cancel·lada abans de cancel·lar aquesta comanda de vendes
+Sales Item,Article de venda
+Sales Manager,Gerent De Vendes
+Sales Master Manager,Gerent de vendes
+Sales Order,Ordre de Venda
+Sales Order Date,
+Sales Order Item,
+Sales Order Items,
+Sales Order Message,
+Sales Order No,Ordre de Venda No
+Sales Order Required,
+Sales Order Trends,Sales Order Trends
+Sales Order required for Item {0},Ordres de venda requerides per l'article {0}
+Sales Order {0} is not submitted,
+Sales Order {0} is not valid,
+Sales Order {0} is stopped,
+Sales Partner,
+Sales Partner Name,Nom del revenedor
+Sales Partner Target,Sales Partner Target
+Sales Partners Commission,Comissió dels revenedors
+Sales Person,
+Sales Person Name,Nom del venedor
+Sales Person Target Variance Item Group-Wise,Sales Person Target Variance Item Group-Wise
+Sales Person Targets,
+Sales Person-wise Transaction Summary,Resum de transaccions de vendes Persona-savi
+Sales Price List,Llista de preus de venda
+Sales Register,Registre de vendes
+Sales Return,Devolucions de vendes
+Sales Returned,
+Sales Taxes and Charges,Els impostos i càrrecs de venda
+Sales Taxes and Charges Master,Configuració d'Impostos i càrregues
+Sales Team,Equip de vendes
+Sales Team Details,
+Sales Team1,Equip de Vendes 1
+Sales User,Usuari de vendes
+Sales and Purchase,Compra i Venda
+Sales campaigns.,Campanyes de venda.
+Salutation,Salutació
+Sample Size,Mida de la mostra
+Sanctioned Amount,Sanctioned Amount
+Saturday,
+Schedule,
+Schedule Date,
+Schedule Details,
+Scheduled,
+Scheduled Date,Data Prevista
+Scheduled to send to {0},Programat per enviar a {0}
+Scheduled to send to {0} recipients,
+Scheduler Failed Events,Scheduler Failed Events
+School/University,
+Score (0-5),Puntuació (0-5)
+Score Earned,Score Earned
+Score must be less than or equal to 5,Score ha de ser menor que o igual a 5
+Scrap %,Scrap%
+Seasonality for setting budgets.,Estacionalitat per fixar els pressupostos.
+Secretary,Secretari
+Secured Loans,Préstecs Garantits
+Securities & Commodity Exchanges,Securities & Commodity Exchanges
+Securities and Deposits,
+"See ""Rate Of Materials Based On"" in Costing Section",
+"Select ""Yes"" for sub - contracting items","Seleccioneu ""Sí"" per a articles subcontractables"
+"Select ""Yes"" if this item is used for some internal purpose in your company.","Seleccioneu ""Sí"" si aquest article s'utilitza per a algun propòsit intern en la seva empresa."
+"Select ""Yes"" if this item represents some work like training, designing, consulting etc.","Seleccioneu ""Sí"" si aquest article representa algun treball com formació, disseny, consultoria, etc."
+"Select ""Yes"" if you are maintaining stock of this item in your Inventory.",
+"Select ""Yes"" if you supply raw materials to your supplier to manufacture this item.","Seleccioneu ""Sí"" si subministres matèries primeres al teu proveïdor per a la fabricació d'aquest material."
+Select Budget Distribution to unevenly distribute targets across months.,Seleccioneu Pressupost distribució per distribuir de manera desigual a través d'objectius mesos.
+"Select Budget Distribution, if you want to track based on seasonality.","Seleccioneu Pressupost Distribució, si voleu fer un seguiment basat en l'estacionalitat."
+Select Company...,
+Select DocType,
+Select Fiscal Year,Seleccioneu l'any fiscal
+Select Fiscal Year...,Seleccioneu l'Any Fiscal ...
+Select Items,Seleccionar elements
+Select Sales Orders,
+Select Sales Orders from which you want to create Production Orders.,Seleccioneu ordres de venda a partir del qual vol crear ordres de producció.
+Select Time Logs and Submit to create a new Sales Invoice.,Selecciona Registres de temps i Presenta per a crear una nova factura de venda.
+Select Transaction,Seleccionar Transacció
+Select Your Language,Selecciona el teu idioma
+Select account head of the bank where cheque was deposited.,
+Select company name first.,Seleccioneu el nom de l'empresa en primer lloc.
+Select template from which you want to get the Goals,
+Select the Employee for whom you are creating the Appraisal.,Seleccioneu l'empleat per al qual està creant l'Avaluació.
+Select the period when the invoice will be generated automatically,Seleccioneu el període en què la factura es generarà de forma automàtica
+Select the relevant company name if you have multiple companies,Seleccioneu el nom de societats corresponent si disposa de diverses empreses
+Select the relevant company name if you have multiple companies.,Seleccioneu el nom de societats corresponent si disposa de diverses empreses.
+Select type of transaction,Seleccioneu el tipus de transacció
+Select who you want to send this newsletter to,
+Select your home country and check the timezone and currency.,Seleccioni el seu país d'origen i tria la zona horària i la moneda.
+"Selecting ""Yes"" will allow this item to appear in Purchase Order , Purchase Receipt.",
+"Selecting ""Yes"" will allow this item to figure in Sales Order, Delivery Note","En seleccionar ""Sí"" permetrà que aquest article estigui en ordres de venda, i notes de lliurament"
+"Selecting ""Yes"" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.","En seleccionar ""Sí"" li permetrà crear la llista de materials que mostra la matèria primera i els costos operatius incorreguts en la fabricació d'aquest element."
+"Selecting ""Yes"" will allow you to make a Production Order for this item.",
+"Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.","En seleccionar ""Sí"" li donarà una identitat única a cada entitat d'aquest article que es pot veure a la taula mestre de Números de sèrie"
+Selling,De venda
+Selling Amount,
+Selling Rate,La tarifa de venda
+Selling Settings,
+"Selling must be checked, if Applicable For is selected as {0}",
+Send,
+Send Autoreply,
+Send Email,
+Send From,
+Send Notifications To,Enviar notificacions a
+Send Now,
+Send SMS,Enviar SMS
+Send To,Enviar a
+Send To Type,Enviar a Tipus
+Send automatic emails to Contacts on Submitting transactions.,Enviar correus electrònics automàtics als Contactes al Presentar les transaccions
+Send mass SMS to your contacts,
+Send regular summary reports via Email.,Enviar informes periòdics resumits per correu electrònic.
+Send to this list,Enviar a la llista
+Sender Name,
+Sent,
+Sent On,
+Separate production order will be created for each finished good item.,
+Serial #,
+Serial No,Número de sèrie
+Serial No / Batch,Número de sèrie / lot
+Serial No Details,
+Serial No Service Contract Expiry,Número de sèrie del contracte de venciment del servei
+Serial No Status,Estat del número de sèrie
+Serial No Warranty Expiry,Venciment de la garantia del número de sèrie
+Serial No is mandatory for Item {0},
+Serial No {0} created,
+Serial No {0} does not belong to Delivery Note {1},El número de sèrie {0} no pertany a la nota de lliurament {1}
+Serial No {0} does not belong to Item {1},El número de Sèrie {0} no pertany a l'article {1}
+Serial No {0} does not belong to Warehouse {1},
+Serial No {0} does not exist,El número de sèrie {0} no existeix
+Serial No {0} has already been received,
+Serial No {0} is under maintenance contract upto {1},
+Serial No {0} is under warranty upto {1},El número de sèrie {0} està en garantia fins {1}
+Serial No {0} not found,
+Serial No {0} not in stock,El número de sèrie {0} no està en estoc
+Serial No {0} quantity {1} cannot be a fraction,Número de sèrie {0} quantitat {1} no pot ser una fracció
+Serial No {0} status must be 'Available' to Deliver,
+Serial Nos Required for Serialized Item {0},Nº de Sèrie Necessari per article serialitzat {0}
+Serial Number Series,
+Serial number {0} entered more than once,
+"Serialized Item {0} cannot be updated \
+					using Stock Reconciliation",
+Series,Sèrie
+Series List for this Transaction,Llista de Sèries per a aquesta transacció
+Series Updated,
+Series Updated Successfully,
+Series is mandatory,
+Series {0} already used in {1},La sèrie {0} ja s'utilitza a {1}
+Service,Servei
+Service Address,Adreça de Servei
+Service Tax,Service Tax
+Services,Serveis
+Set,Setembre
+"Set Default Values like Company, Currency, Current Fiscal Year, etc.",
+Set Item Group-wise budgets on this Territory. You can also include seasonality by setting the Distribution.,
+Set Status as Available,Estableix l'estat com Disponible
+Set as Default,Estableix com a predeterminat
+Set as Lost,Establir com a Perdut
+Set prefix for numbering series on your transactions,Establir prefix de numeracions seriades a les transaccions
+Set targets Item Group-wise for this Sales Person.,Establir Grup d'articles per aquest venedor.
+Setting Account Type helps in selecting this Account in transactions.,Configurar el Tipus de compte ajuda en la selecció d'aquest compte en les transaccions.
+Setting this Address Template as default as there is no other default,
+Setting up...,S'està configurant ...
+Settings,Ajustos
+Settings for Accounts,Ajustaments de Comptes
+Settings for Buying Module,Ajustaments del mòdul de Compres
+Settings for HR Module,
+Settings for Selling Module,Ajustos Mòdul de vendes
+"Settings to extract Job Applicants from a mailbox e.g. ""jobs@example.com""",
+Setup,Ajustos
+Setup Already Complete!!,Configuració acabada !!
+Setup Complete,Instal·lació completa
+Setup SMS gateway settings,
+Setup Series,
+Setup Wizard,Assistent de configuració
+Setup incoming server for jobs email id. (e.g. jobs@example.com),Setup incoming server for jobs email id. (e.g. jobs@example.com)
+Setup incoming server for sales email id. (e.g. sales@example.com),
+Setup incoming server for support email id. (e.g. support@example.com),
+Share,
+Share With,Compartir amb
+Shareholders Funds,Fons dels Accionistes
+Shipments to customers.,Enviaments a clients.
+Shipping,
+Shipping Account,Compte d'Enviaments
+Shipping Address,Adreça d'nviament
+Shipping Address Name,Nom de l'Adreça d'enviament
+Shipping Amount,Total de l'enviament
+Shipping Rule,Regla d'enviament
+Shipping Rule Condition,Condicions d'enviaments
+Shipping Rule Conditions,Condicions d'enviament
+Shipping Rule Label,
+Shop,Botiga
+Shopping Cart,
+Short biography for website and other publications.,Breu biografia de la pàgina web i altres publicacions.
+Shortage Qty,Quantitat escassetat
+"Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.","Mostra ""En estock"" o ""No en estoc"", basat en l'estoc disponible en aquest magatzem."
+"Show / Hide features like Serial Nos, POS etc.","Mostra / Amaga característiques com Nº de Sèrie, TPV etc."
+Show In Website,Mostra en el lloc web
+Show a slideshow at the top of the page,Mostra una presentació de diapositives a la part superior de la pàgina
+Show in Website,
+Show this slideshow at the top of the page,
+Show zero values,Mostra valors zero
+Shown in Website,
+Sick Leave,
+Signature,
+Signature to be appended at the end of every email,Firma que s'afegeix al final de cada correu electrònic
+Single,Solter
+Single unit of an Item.,Unitat individual d'un article
+Sit tight while your system is being setup. This may take a few moments.,"Si us plau, espera mentre el sistema està essent configurat. Aquest procés pot trigar una estona."
+Slideshow,Slideshow
+Soap & Detergent,Sabó i Detergent
+Software,
+Software Developer,Desenvolupador de Programari
+"Sorry, Serial Nos cannot be merged","Ho sentim, els números de sèrie no es poden combinar"
+"Sorry, companies cannot be merged",
+Source,
+Source File,Arxiu d'origen
+Source Warehouse,Magatzem d'origen
+Source and target warehouse cannot be same for row {0},
+Source of Funds (Liabilities),Font dels fons (Passius)
+Source warehouse is mandatory for row {0},Magatzem d'origen obligatori per a la fila {0}
+Spartan,
+"Special Characters except ""-"" and ""/"" not allowed in naming series","Els caràcters especials excepte ""-"" i ""/"" no es permeten en el nomenament de sèries"
+Specification Details,Specification Details
+Specifications,Especificacions
+Specify Exchange Rate to convert one currency into another,
+"Specify a list of Territories, for which, this Price List is valid",Especifiqueu una llista de territoris on aquesta llista de preus és vàlida
+"Specify a list of Territories, for which, this Shipping Rule is valid",
+"Specify a list of Territories, for which, this Taxes Master is valid",Especifiqueu la llista de territoris on s'aplica aquest Patró d'Impostos
+Specify conditions to calculate shipping amount,Especifica les condicions d'enviament per calcular l'import del transport
+"Specify the operations, operating cost and give a unique Operation no to your operations.","Especifiqueu les operacions, el cost d'operació i dona una número d'operació únic a les operacions."
+Split Delivery Note into packages.,
+Sports,Esports
+Sr,
+Standard,Estàndard
+Standard Buying,Compra Standard
+Standard Reports,Informes estàndard
+Standard Selling,Standard Selling
+"Standard Terms and Conditions that can be added to Sales and Purchases.
+
+Examples:
+
+1. Validity of the offer.
+1. Payment Terms (In Advance, On Credit, part advance etc).
+1. What is extra (or payable by the Customer).
+1. Safety / usage warning.
+1. Warranty if any.
+1. Returns Policy.
+1. Terms of shipping, if applicable.
+1. Ways of addressing disputes, indemnity, liability, etc.
+1. Address and Contact of your Company.",
+Standard contract terms for Sales or Purchase.,
+"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
+
+#### Note
+
+The tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.
+
+#### Description of Columns
+
+1. Calculation Type: 
+    - This can be on **Net Total** (that is the sum of basic amount).
+    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
+    - **Actual** (as mentioned).
+2. Account Head: The Account ledger under which this tax will be booked
+3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.
+4. Description: Description of the tax (that will be printed in invoices / quotes).
+5. Rate: Tax rate.
+6. Amount: Tax amount.
+7. Total: Cumulative total to this point.
+8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
+9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
+10. Add or Deduct: Whether you want to add or deduct the tax.",
+"Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
+
+#### Note
+
+The tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.
+
+#### Description of Columns
+
+1. Calculation Type: 
+    - This can be on **Net Total** (that is the sum of basic amount).
+    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
+    - **Actual** (as mentioned).
+2. Account Head: The Account ledger under which this tax will be booked
+3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.
+4. Description: Description of the tax (that will be printed in invoices / quotes).
+5. Rate: Tax rate.
+6. Amount: Tax amount.
+7. Total: Cumulative total to this point.
+8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.",
+Start,Començar
+Start Date,
+Start POS,Inicia TPV
+Start date of current invoice's period,Data inicial del període de facturació actual
+Start date of current order's period,Data inicial del període de l'ordre actual
+Start date should be less than end date for Item {0},La data d'inici ha de ser anterior a la data de finalització per l'article {0}
+State,
+Statement of Account,Estat de compte
+Static Parameters,Paràmetres estàtics
+Status,
+Status must be one of {0},Estat ha de ser un {0}
+Status of {0} {1} is now {2},Situació de {0} {1} és ara {2}
+Status updated to {0},Estat actualitzat a {0}
+Statutory info and other general information about your Supplier,Informació legal i altra informació general sobre el Proveïdor
+Stay Updated,
+Stock,Estoc
+Stock Adjustment,Ajust d'estoc
+Stock Adjustment Account,Compte d'Ajust d'estocs
+Stock Ageing,
+Stock Analytics,
+Stock Assets,Actius
+Stock Balance,Saldos d'estoc
+Stock Entries already created for Production Order ,
+Stock Entry,Entrada estoc
+Stock Entry Detail,Detall de les entrades d'estoc
+Stock Expenses,Despeses d'estoc
+Stock Frozen Upto,Estoc bloquejat fins a
+Stock Item,Article d'estoc
+Stock Ledger,
+Stock Ledger Entries and GL Entries are reposted for the selected Purchase Receipts,Les entrades d'ajust d'estocs i les entrades de GL estan inserits en els rebuts de compra seleccionats
+Stock Ledger Entry,
+Stock Ledger entries balances updated,Saldos d'entrades de moviments d'estocs actualitzats
+Stock Level,Nivell d'existències
+Stock Liabilities,Stock Liabilities
+Stock Projected Qty,Quantitat d'estoc previst
+Stock Queue (FIFO),
+Stock Received But Not Billed,Estoc Rebudes però no facturats
+Stock Reconcilation Data,
+Stock Reconcilation Template,Plantilla d'ajust d'estoc
+Stock Reconciliation,Reconciliació d'Estoc
+"Stock Reconciliation can be used to update the stock on a particular date, usually as per physical inventory.",
+Stock Settings,Ajustaments d'estocs
+Stock UOM,UDM de l'estoc
+Stock UOM Replace Utility,Utilitat de susbtitució de les UDM de l'estoc
+Stock UOM updatd for Item {0},S'ha actualitzat la UDM de l'article {0}
+Stock Uom,UDM de l'Estoc
+Stock Value,
+Stock Value Difference,Diferència del valor d'estoc
+Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3},
+Stock balances updated,Imatges de saldos actualitzats
+Stock cannot be updated against Delivery Note {0},L'estoc no es pot actualitzar contra la Nota de Lliurament {0}
+Stock entries exist against warehouse {0} cannot re-assign or modify 'Master Name',Stock entries exist against warehouse {0} cannot re-assign or modify 'Master Name'
+Stock transactions before {0} are frozen,
+Stock: ,
+Stop,Atura
+Stop Birthday Reminders,Aturar recordatoris d'aniversari
+Stop users from making Leave Applications on following days.,No permetis que els usuaris realitzin Aplicacions d'absències els següents dies.
+Stopped,Detingut
+Stopped order cannot be cancelled. Unstop to cancel.,
+Stores,Botigues
+Stub,
+Sub Assemblies,Sub Assemblies
+"Sub-currency. For e.g. ""Cent""","Parts de moneda. Per exemple ""Cèntims"""
+Subcontract,
+Subcontracted,Subcontractat
+Subject,
+Submit Salary Slip,Presentar nòmina
+Submit all salary slips for the above selected criteria,Presenta totes les nòmines amb els criteris anteriorment seleccionats
+Submit this Production Order for further processing.,Presentar aquesta ordre de producció per al seu posterior processament.
+Submitted,
+Subsidiary,Filial
+Successful: ,
+Successfully Reconciled,Reconciliats amb èxit
+Suggestions,Suggeriments
+Sunday,
+Supplier,
+Supplier (Payable) Account,Proveïdor (a pagar) Compte
+Supplier (vendor) name as entered in supplier master,Nom del Proveïdor (venedor) tal i com es va entrar a la configuració de proveïdors
+Supplier > Supplier Type,Proveïdor> Tipus Proveïdor
+Supplier Account,
+Supplier Account Head,
+Supplier Address,Adreça del Proveïdor
+Supplier Addresses and Contacts,Adreces i contactes dels proveïdors
+Supplier Details,
+Supplier Id,Identificador de Proveïdor
+Supplier Invoice Date,Data Factura Proveïdor
+Supplier Invoice No,Factura de Proveïdor No
+Supplier Name,Nom del proveïdor
+Supplier Naming By,NOmenament de proveïdors per
+Supplier Part Number,PartNumber del proveïdor
+Supplier Quotation,
+Supplier Quotation Item,Oferta del proveïdor d'article
+Supplier Reference,Referència Proveïdor
+Supplier Type,Tipus de Proveïdor
+Supplier Type / Supplier,
+Supplier Type master.,Taula metre de tipus de proveïdor
+Supplier Warehouse,Magatzem Proveïdor
+Supplier Warehouse mandatory for sub-contracted Purchase Receipt,
+Supplier database.,
+Supplier master.,Supplier master.
+Supplier of Goods or Services.,
+Supplier warehouse where you have issued raw materials for sub - contracting,Magatzem del proveïdor en què ha enviat les matèries primeres per a la subcontractació
+Supplier(s),Proveïdor (s)
+Supplier-Wise Sales Analytics,
+Support,Suport
+Support Analtyics,
+Support Analytics,
+Support Email,
+Support Email Settings,
+Support Manager,Gerent de Suport
+Support Password,Contrasenya de suport
+Support Team,Equip de suport
+Support Ticket,Tiquet
+Support queries from customers.,
+Symbol,
+Sync Support Mails,Sincronitzar Suport Mails
+Sync with Dropbox,Sincronització amb Dropbox
+Sync with Google Drive,Sincronitza amb Google Drive
+System,Sistema
+System Balance,Balanç de Sistema
+System Manager,Administrador del sistema
+System Settings,
+"System User (login) ID. If set, it will become default for all HR forms.","System User (login) ID. If set, it will become default for all HR forms."
+System for managing Backups,
+TDS (Advertisement),TDS (Publicitat)
+TDS (Commission),TDS (Comissió)
+TDS (Contractor),TDS (contractista)
+TDS (Interest),
+TDS (Rent),
+TDS (Salary),
+Table for Item that will be shown in Web Site,Taula d'article que es mostra en el lloc web
+Taken,
+Target,Objectiu
+Target  Amount,
+Target Detail,
+Target Details,Detalls del destí
+Target Details1,Target Details1
+Target Distribution,Target Distribution
+Target On,Target On
+Target Qty,
+Target Warehouse,Magatzem destí
+Target warehouse in row {0} must be same as Production Order,El magatzem de destinació de la fila {0} ha de ser igual que l'Ordre de Producció
+Target warehouse is mandatory for row {0},Magatzem destí obligatori per a la fila {0}
+Task,
+Task Details,Detalls de la feina
+Task Subject,
+Tasks,
+Tax,Impost
+Tax Amount After Discount Amount,Suma d'impostos Després del Descompte
+Tax Assets,
+Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,
+Tax Rate,Tax Rate
+Tax and other salary deductions.,
+"Tax detail table fetched from item master as a string and stored in this field.
+Used for Taxes and Charges","Tax detail table fetched from item master as a string and stored in this field.
+Used for Taxes and Charges"
+Tax template for buying transactions.,Plantilla d'Impostos per a les transaccions de compres
+Tax template for selling transactions.,
+Taxes,
+Taxes and Charges,Impostos i càrrecs
+Taxes and Charges Added,Impostos i càrregues afegides
+Taxes and Charges Added (Company Currency),Impostos i Càrrecs Afegits (Divisa de la Companyia)
+Taxes and Charges Calculation,
+Taxes and Charges Deducted,Impostos i despeses deduïdes
+Taxes and Charges Deducted (Company Currency),
+Taxes and Charges Total,
+Taxes and Charges Total (Company Currency),Els impostos i càrrecs totals (Divisa de la Companyia)
+Technology,Tecnologia
+Telecommunications,Telecomunicacions
+Telephone Expenses,Despeses telefòniques
+Television,Televisió
+Template,
+Template for performance appraisals.,Plantilla per a les avaluacions d'acompliment.
+Template of terms or contract.,Plantilla de termes o contracte.
+Temporary Accounts (Assets),Comptes temporals (Actius)
+Temporary Accounts (Liabilities),
+Temporary Assets,
+Temporary Liabilities,Passius temporals
+Term Details,Detalls termini
+Terms,Condicions
+Terms and Conditions,Condicions
+Terms and Conditions Content,Contingut de Termes i Condicions
+Terms and Conditions Details,
+Terms and Conditions Template,Plantilla de Termes i Condicions
+Terms and Conditions1,Termes i Condicions 1
+Terretory,
+Territory,Territori
+Territory / Customer,
+Territory Manager,Gerent de Territory
+Territory Name,Nom del Territori
+Territory Target Variance Item Group-Wise,
+Territory Targets,
+Test,Prova
+Test Email Id,Test Email Id
+Test the Newsletter,Proveu el Newsletter
+The BOM which will be replaced,Llista de materials que serà substituïda
+The First User: You,
+"The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""",
+The Organization,L'Organització
+"The account head under Liability, in which Profit/Loss will be booked","El compte capçalera amb responsabilitat, en el que es farà l'assentament de Guany / Pèrdua"
+The date on which next invoice will be generated. It is generated on submit.,
+"The date on which next invoice will be generated. It is generated on submit.
+","La data en què es generarà la següent factura. Es genera al Presentar.
+"
+The date on which recurring invoice will be stop,La data en què s'atura la factura recurrent
+The date on which recurring order will be stop,La data en què s'aturarà la comanda recurrent
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc","El dia del mes en què es generarà factura automàtica, per exemple 05, 28, etc."
+"The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",
+"The day of the month on which auto order will be generated e.g. 05, 28 etc","El dia del mes en el qual l'ordre automàtic es generarà per exemple 05, 28, etc."
+"The day of the month on which auto order will be generated e.g. 05, 28 etc ",
+The day(s) on which you are applying for leave are holiday. You need not apply for leave.,
+The first Leave Approver in the list will be set as the default Leave Approver,El primer aprovadorde d'absències de la llista s'establirà com a predeterminat
+The first user will become the System Manager (you can change that later).,El primer usuari es convertirà en l'Administrador del sistema (pot canviar això més endavant).
+The gross weight of the package. Usually net weight + packaging material weight. (for print),"El pes brut del paquet. En general, el pes net + embalatge pes del material. (Per imprimir)"
+The name of your company for which you are setting up this system.,El nom de la teva empresa per a la qual està creant aquest sistema.
+The net weight of this package. (calculated automatically as sum of net weight of items),
+The new BOM after replacement,
+The rate at which Bill Currency is converted into company's base currency,El canvi al qual la divisa de la Factura es converteix a la moneda base de la companyia
+The selected item cannot have Batch,
+The unique id for tracking all recurring invoices. It is generated on submit.,L'identificador únic per al seguiment de totes les factures recurrents. Es genera al Presentar.
+The unique id for tracking all recurring invoices. It is generated on submit.,
+"Then Pricing Rules are filtered out based on Customer, Customer Group, Territory, Supplier, Supplier Type, Campaign, Sales Partner etc.","Llavors Tarifes de Preu es filtren sobre la base de client, grup de clients, Territori, Proveïdor, Tipus Proveïdor, Campanya, soci de vendes, etc."
+There are more holidays than working days this month.,
+"There can only be one Shipping Rule Condition with 0 or blank value for ""To Value""",
+There is not enough leave balance for Leave Type {0},There is not enough leave balance for Leave Type {0}
+There is nothing to edit.,
+There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,"S'ha produït un error. Una raó probable podria ser que no ha guardat el formulari. Si us plau, poseu-vos en contacte amb support@erpnext.com si el problema persisteix."
+There were errors.,Hi han hagut errors.
+There were no updates in the items selected for this digest.,
+This Currency is disabled. Enable to use in transactions,Aquesta moneda és deshabilitada Habilitala per a utilitzar-la en les transaccions
+This Leave Application is pending approval. Only the Leave Approver can update status.,
+This Time Log Batch has been billed.,Aquest registre de temps ha estat facturat.
+This Time Log Batch has been cancelled.,Aquest registre de temps ha estat cancel·lat.
+This Time Log conflicts with {0},
+This format is used if country specific format is not found,Aquest format s'utilitza si no hi ha el format específic de cada país
+This is a root account and cannot be edited.,Es tracta d'un compte principal i no es pot editar.
+This is a root customer group and cannot be edited.,Es tracta d'un grup de clients de l'arrel i no es pot editar.
+This is a root item group and cannot be edited.,This is a root item group and cannot be edited.
+This is a root sales person and cannot be edited.,
+This is a root territory and cannot be edited.,This is a root territory and cannot be edited.
+This is an example website auto-generated from ERPNext,
+This is the number of the last created transaction with this prefix,Aquest és el nombre de l'última transacció creat amb aquest prefix
+This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,Aquesta eina us ajuda a actualitzar o corregir la quantitat i la valoració dels estocs en el sistema. Normalment s'utilitza per sincronitzar els valors del sistema i el que realment hi ha en els magatzems.
+This will be used for setting rule in HR module,
+Thread HTML,Thread HTML
+Thursday,Dijous
+Time Log,Hora de registre
+Time Log Batch,Registre de temps
+Time Log Batch Detail,Detall del registre de temps
+Time Log Batch Details,Detalls del registre de temps
+Time Log Batch {0} must be 'Submitted',S'ha de 'Presentar' el registre de temps {0}
+Time Log Status must be Submitted.,
+Time Log for tasks.,Registre de temps per a les tasques.
+Time Log is not billable,Registre d'hores no facturable
+Time Log {0} must be 'Submitted',
+Time Zone,Fus horari
+Time Zones,Zones horàries
+Time and Budget,Temps i Pressupost
+Time at which items were delivered from warehouse,Moment en què els articles van ser lliurats des del magatzem
+Time at which materials were received,Moment en què es van rebre els materials
+Title,Títol
+Titles for print templates e.g. Proforma Invoice.,"Títols per a plantilles d'impressió, per exemple, factura proforma."
+To,
+To Currency,
+To Date,
+To Date should be same as From Date for Half Day leave,
+To Date should be within the Fiscal Year. Assuming To Date = {0},
+To Datetime,To Datetime
+To Discuss,Per Discutir
+To Do List,
+To Package No.,Al paquet No.
+To Produce,Per a Produir
+To Time,
+To Value,
+To Warehouse,Magatzem destí
+"To add child nodes, explore tree and click on the node under which you want to add more nodes.","Per afegir nodes secundaris, explora arbre i feu clic al node en el qual voleu afegir més nodes."
+"To assign this issue, use the ""Assign"" button in the sidebar.","Per assignar aquest problema, utilitzeu el botó ""Assignar"" a la barra lateral."
+To create a Bank Account,Per crear un compte de banc
+To create a Tax Account,Per crear un compte d'impostos
+"To create an Account Head under a different company, select the company and save customer.","Per crear un Compte principal per una companyia diferent, seleccioneu l'empresa i deseu el client."
+To date cannot be before from date,Fins a la data no pot ser anterior a partir de la data
+To enable <b>Point of Sale</b> features,
+To enable <b>Point of Sale</b> view,To enable <b>Point of Sale</b> view
+To get Item Group in details table,Per obtenir Grup d'articles a la taula detalls
+"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Per incloure l'impost a la fila {0} en la tarifa d'article, els impostos a les files {1} també han de ser inclosos"
+"To merge, following properties must be same for both items",
+"To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled.",
+"To set this Fiscal Year as Default, click on 'Set as Default'","Per establir aquest any fiscal predeterminat, feu clic a ""Estableix com a predeterminat"""
+To track any installation or commissioning related work after sales,To track any installation or commissioning related work after sales
+"To track brand name in the following documents Delivery Note, Opportunity, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No",
+To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,Per realitzar el seguiment de l'article en vendes i documents de compra en base als seus números de sèrie. Aquest és també pugui utilitzat per rastrejar informació sobre la garantia del producte.
+To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>
+To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,
+Too many columns. Export the report and print it using a spreadsheet application.,Massa columnes. Exporta l'informe i utilitza una aplicació de full de càlcul.
+Tools,
+Total,
+Total ({0}),
+Total Absent,
+Total Achieved,Total Aconseguit
+Total Actual,Actual total
+Total Advance,Avanç total
+Total Amount,Quantitat total
+Total Amount To Pay,Import total a pagar
+Total Amount in Words,Suma total en Paraules
+Total Billing This Year: ,
+Total Characters,
+Total Claimed Amount,
+Total Commission,Total Comissió
+Total Cost,Cost total
+Total Credit,Crèdit Total
+Total Debit,Dèbit total
+Total Debit must be equal to Total Credit. The difference is {0},
+Total Deduction,Deducció total
+Total Earning,Benefici total
+Total Experience,
+Total Fixed Cost,Cost Total Fix
+Total Hours,Total d'hores
+Total Hours (Expected),Total d'hores (esperat)
+Total Invoiced Amount,Suma total facturada
+Total Leave Days,Dies totals d'absències
+Total Leaves Allocated,Absències totals assignades
+Total Message(s),Total Missatge(s)
+Total Operating Cost,Cost total de funcionament
+Total Order Considered,
+Total Order Value,Valor Total de la comanda
+Total Outgoing,Sortint total
+Total Payment Amount,Suma total de Pagament
+Total Points,Punts totals
+Total Present,
+Total Qty,Quantitat total
+Total Raw Material Cost,Cost Total de Matèries Primeres
+Total Revenue,Ingressos totals
+Total Sanctioned Amount,
+Total Score (Out of 5),Puntuació total (de 5)
+Total Target,
+Total Tax (Company Currency),
+Total Taxes and Charges,Total d'impostos i càrrecs
+Total Taxes and Charges (Company Currency),Total Impostos i càrrecs (En la moneda de la Companyia)
+Total Variable Cost,
+Total Variance,
+"Total advance ({0}) against Order {1} cannot be greater \
+				than the Grand Total ({2})",
+Total allocated percentage for sales team should be 100,El Percentatge del total assignat per a l'equip de vendes ha de ser de 100
+Total amount of invoices received from suppliers during the digest period,Import total de les factures rebudes dels proveïdors durant el període
+Total amount of invoices sent to the customer during the digest period,Import total de les factures enviades al client durant el període
+Total cannot be zero,El total no pot ser zero
+Total in words,Total en paraules
+Total points for all goals should be 100. It is {0},
+Total weightage assigned should be 100%. It is {0},El pes total assignat ha de ser 100%. És {0}
+Total(Amt),
+Total(Qty),
+Totals,
+Track Leads by Industry Type.,Seguiment dels clients potencials per tipus d'indústria.
+Track separate Income and Expense for product verticals or divisions.,Seguiment d'Ingressos i Despeses per separat per a les verticals de productes o divisions.
+Track this Delivery Note against any Project,
+Track this Sales Order against any Project,Seguir aquesta Ordre Vendes cap algun projecte
+Transaction,Transacció
+Transaction Date,Data de Transacció
+Transaction not allowed against stopped Production Order {0},No es permet la transacció cap a l'ordre de producció aturada {0}
+Transfer,Transferència
+Transfer Material,Transferir material
+Transfer Raw Materials,Transferència de Matèries Primeres
+Transferred Qty,Quantitat Transferida
+Transportation,Transports
+Transporter Info,Informació del transportista
+Transporter Name,Nom Transportista
+Transporter lorry number,Número de de camió del transportista
+Travel,Viatges
+Travel Expenses,
+Tree Type,
+Tree of Item Groups.,Arbre dels grups d'articles.
+Tree of finanial Cost Centers.,
+Tree of finanial accounts.,Arbre dels comptes financers
+Trial Balance,Balanç provisional
+Tuesday,Dimarts
+Type,Tipus
+Type of document to rename.,Tipus de document per canviar el nom.
+"Type of leaves like casual, sick etc.",
+Types of Expense Claim.,
+Types of activities for Time Sheets,Tipus d'activitats per a les fitxes de Temps
+"Types of employment (permanent, contract, intern etc.).",
+UOM Conversion Detail,
+UOM Conversion Details,
+UOM Conversion Factor,
+UOM Conversion factor is required in row {0},
+UOM Name,Nom UDM
+UOM coversion factor required for UOM: {0} in Item: {1},Es necessita un factor de coversió per la UDM: {0} per l'article: {1}
+Under AMC,Sota AMC
+Under Graduate,
+Under Warranty,Sota Garantia
+Unit,Unitat
+Unit of Measure,Unitat de mesura
+Unit of Measure {0} has been entered more than once in Conversion Factor Table,La unitat de mesura {0} s'ha introduït més d'una vegada a la taula de valors de conversió
+"Unit of measurement of this item (e.g. Kg, Unit, No, Pair).","Unitat de mesura d'aquest article (per exemple kg, unitat, parell)."
+Units/Hour,
+Units/Shifts,Units/Shifts
+Unpaid,No pagat
+Unreconciled Payment Details,Detalls de Pagaments Sense conciliar
+Unscheduled,
+Unsecured Loans,
+Unstop,Desencallar
+Unstop Material Request,Desbloqueja la sol·licitud material
+Unstop Purchase Order,
+Unsubscribed,
+Upcoming Calendar Events (max 10),
+Update,
+Update Clearance Date,
+Update Cost,Actualització de Costos
+Update Finished Goods,Actualitzar Productes Acabats
+Update Series,Actualitza Sèries
+Update Series Number,
+Update Stock,
+Update additional costs to calculate landed cost of items,
+Update bank payment dates with journals.,Actualització de les dates de pagament dels bancs amb les revistes.
+Update clearance date of Journal Entries marked as 'Bank Vouchers',Update clearance date of Journal Entries marked as 'Bank Vouchers'
+Updated,
+Updated Birthday Reminders,Actualitzat recordatoris d'aniversari
+Upload Attendance,Pujar Assistència
+Upload Backups to Dropbox,Upload Backups to Dropbox
+Upload Backups to Google Drive,Upload Backups to Google Drive
+Upload HTML,
+Upload a .csv file with two columns: the old name and the new name. Max 500 rows.,
+Upload attendance from a .csv file,
+Upload stock balance via csv.,
+Upload your letter head and logo - you can edit them later.,
+Upper Income,
+Urgent,Urgent
+Use Multi-Level BOM,
+Use SSL,Utilitza SSL
+Used for Production Plan,S'utilitza per al Pla de Producció
+User,
+User ID,ID d'usuari
+User ID not set for Employee {0},ID d'usuari no entrat per l'Empleat {0}
+User Name,
+User Name or Support Password missing. Please enter and try again.,Falta el Nom d'usuari o la contrasenya. Si us plau entra-ho i torna a intentar-ho.
+User Remark,
+User Remark will be added to Auto Remark,User Remark will be added to Auto Remark
+User Specific,Específiques d'usuari
+User must always select,
+User {0} is already assigned to Employee {1},L'usuari {0} ja està assignat a l'Empleat {1}
+User {0} is disabled,
+Username,Nom d'usuari
+Users who can approve a specific employee's leave applications,Els usuaris que poden aprovar les sol·licituds de llicència d'un empleat específic
+Users with this role are allowed to create / modify accounting entry before frozen date,Els usuaris amb aquest rol poden crear/modificar assentaments comptables abans de la data de bloqueig
+Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,Els usuaris amb aquest rol poden establir comptes bloquejats i crear/modificar els assentaments comptables contra els comptes bloquejats
+Utilities,Utilitats
+Utility Expenses,
+Valid For Territories,
+Valid From,Vàlid des
+Valid Upto,Vàlid Fins
+Valid for Territories,
+Validate,Validar
+Valuation,Valoració
+Valuation Method,Mètode de Valoració
+Valuation Rate,Tarifa de Valoració
+Valuation Rate required for Item {0},Es necessita tarifa de valoració per l'article {0}
+Valuation and Total,Valoració i total
+Value,Valor
+Value or Qty,Valor o Quantitat
+Variance,Desacord
+Vehicle Dispatch Date,Vehicle Dispatch Date
+Vehicle No,
+Venture Capital,
+Verified By,Verified Per
+View Details,
+View Ledger,
+View Now,
+Visit report for maintenance call.,
+Voucher #,Comprovant #
+Voucher Detail No,Número de detall del comprovant
+Voucher Detail Number,Voucher Detail Number
+Voucher ID,Val ID
+Voucher No,Número de comprovant
+Voucher Type,
+Voucher Type and Date,Tipus d'Vals i Data
+Walk In,
+Warehouse,Magatzem
+Warehouse Contact Info,Informació del contacte del magatzem
+Warehouse Detail,Detall Magatzem
+Warehouse Name,Nom Magatzem
+Warehouse and Reference,Magatzem i Referència
+Warehouse can not be deleted as stock ledger entry exists for this warehouse.,El Magatzem no es pot eliminar perquè hi ha entrades al llibre major d'existències d'aquest magatzem.
+Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,Magatzem només es pot canviar a través d'entrada d'estoc / Nota de lliurament / recepció de compra
+Warehouse cannot be changed for Serial No.,
+Warehouse is mandatory for stock Item {0} in row {1},El magatzem és obligatòria per l'article d'estoc {0} a la fila {1}
+Warehouse not found in the system,Magatzem no trobat al sistema
+Warehouse required for stock Item {0},Magatzem necessari per a l'article d'estoc {0}
+Warehouse where you are maintaining stock of rejected items,Magatzem en què es desen les existències dels articles rebutjats
+Warehouse {0} can not be deleted as quantity exists for Item {1},
+Warehouse {0} does not belong to company {1},
+Warehouse {0} does not exist,El magatzem {0} no existeix
+Warehouse {0}: Company is mandatory,Magatzem {0}: Empresa és obligatori
+Warehouse {0}: Parent account {1} does not bolong to the company {2},
+Warehouse-wise Item Reorder,Warehouse-wise Item Reorder
+Warehouses,Magatzems
+Warehouses.,Magatzems.
+Warn,Advertir
+Warning: Leave application contains following block dates,
+Warning: Material Requested Qty is less than Minimum Order Qty,Advertència: La quantitat de Material sol·licitada és inferior a la Quantitat mínima
+Warning: Sales Order {0} already exists against same Purchase Order number,Advertència: La comanda de client {0} ja existeix de la mateixa Ordre de Compra
+Warning: System will not check overbilling since amount for Item {0} in {1} is zero,Advertència: El sistema no comprovarà sobrefacturació si la quantitat de l'article {0} a {1} és zero
+Warranty / AMC Details,Detalls de la Garantia/AMC
+Warranty / AMC Status,Garantia / Estat de l'AMC
+Warranty Expiry Date,Data final de garantia
+Warranty Period (Days),Període de garantia (Dies)
+Warranty Period (in days),Període de garantia (en dies)
+We buy this Item,Comprem aquest article
+We sell this Item,Venem aquest article
+Website,Lloc web
+Website Description,Descripció del lloc web
+Website Item Group,
+Website Item Groups,Grups d'article del Web
+Website Manager,Gestor de la Pàgina web
+Website Settings,Configuració del lloc web
+Website Warehouse,Lloc Web del magatzem
+Wednesday,
+Weekly,
+Weekly Off,
+Weight UOM,UDM del pes
+"Weight is mentioned,\nPlease mention ""Weight UOM"" too","S'esmenta Pes, \n Si us plau, indica també ""UDM del pes"""
+Weightage,
+Weightage (%),Ponderació (%)
+Welcome,Benvinguda
+Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!,
+Welcome to ERPNext. Please select your language to begin the Setup Wizard.,
+What does it do?,
+"When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.","Quan es ""Presenta"" alguna de les operacions marcades, s'obre automàticament un correu electrònic emergent per enviar un correu electrònic al ""Contacte"" associat a aquesta transacció, amb la transacció com un arxiu adjunt. L'usuari pot decidir enviar, o no, el correu electrònic."
+"When submitted, the system creates difference entries to set the given stock and valuation on this date.","Quan es presenta, el sistema crea entrades de diferència per ajustar l'estoc i la valoració en aquesta data."
+Where items are stored.,Lloc d'emmagatzematge dels articles.
+Where manufacturing operations are carried out.,On es duen a terme les operacions de fabricació.
+Widowed,
+Will be calculated automatically when you enter the details,Es calculen automàticament quan introdueix els detalls
+Will be updated after Sales Invoice is Submitted.,
+Will be updated when batched.,Will be updated when batched.
+Will be updated when billed.,S'actualitzarà quan es facturi.
+Wire Transfer,
+With Operations,Amb Operacions
+Work Details,Detalls de treball
+Work Done,
+Work In Progress,
+Work-in-Progress Warehouse,Magatzem de treballs en procés
+Work-in-Progress Warehouse is required before Submit,Es requereix Magatzem de treballs en procés abans de Presentar
+Working,Treballant
+Working Days,
+Workstation,Lloc de treball
+Workstation Name,Nom de l'Estació de treball
+Write Off Account,
+Write Off Amount,Anota la quantitat
+Write Off Amount <=,Anota la quantitat <=
+Write Off Based On,Anotació basada en
+Write Off Cost Center,
+Write Off Outstanding Amount,Write Off Outstanding Amount
+Write Off Voucher,Anotar el comprovant
+Wrong Template: Unable to find head row.,Plantilla incorrecte: No es pot trobar la capçalera de la fila.
+Year,Any
+Year Closed,Any Tancat
+Year End Date,
+Year Name,
+Year Start Date,Any Data d'Inici
+Year of Passing,Any de defunció
+Yearly,Anual
+Yes,Sí
+You are not authorized to add or update entries before {0},
+You are not authorized to set Frozen value,No estàs autoritzat per establir el valor bloquejat
+You are the Expense Approver for this record. Please Update the 'Status' and Save,"Ets l'aprovador de despeses per a aquest registre. Actualitza l '""Estat"" i Desa"
+You are the Leave Approver for this record. Please Update the 'Status' and Save,
+You can enter any date manually,
+You can enter the minimum quantity of this item to be ordered.,Podeu introduir la quantitat mínima d'aquest article al demanar-lo.
+You can not change rate if BOM mentioned agianst any item,No es pot canviar la tarifa si el BOM va cap a un article
+You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,"No es pot deixar d'indicar el Número de nota de Lliurament Nota i Número de Factura. Si us plau, indica algun dels dos."
+You can not enter current voucher in 'Against Journal Voucher' column,No pots entrar aquest assentament a la columna 'Contra assentament de Diari'
+You can set Default Bank Account in Company master,Podeu configurar el compte bancari predeterminat a la configuració d'Empresa
+You can start by selecting backup frequency and granting access for sync,Pots començar per seleccionar la freqüència de còpia de seguretat i la concessió d'accés per a la sincronització
+You can submit this Stock Reconciliation.,Podeu presentar aquesta Reconciliació d'estoc.
+You can update either Quantity or Valuation Rate or both.,Pot actualitzar Quantitat o Tipus de valoració o ambdós.
+You cannot credit and debit same account at the same time,No es pot configurar el mateix compte com crèdit i dèbit a la vegada
+You have entered duplicate items. Please rectify and try again.,"Has introduït articles duplicats. Si us plau, rectifica-ho i torna a intentar-ho."
+You may need to update: {0},
+You must Save the form before proceeding,Has de desar el formulari abans de continuar
+Your Customer's TAX registration numbers (if applicable) or any general information,
+Your Customers,Els teus Clients
+Your Login Id,ID d'usuari
+Your Products or Services,Els Productes o Serveis de la teva companyia
+Your Suppliers,Els seus Proveïdors
+Your email address,La seva adreça de correu electrònic
+Your financial year begins on,
+Your financial year ends on,El seu exercici acaba el
+Your sales person who will contact the customer in future,La seva persona de vendes que es comunicarà amb el client en el futur
+Your sales person will get a reminder on this date to contact the customer,
+Your setup is complete. Refreshing...,La seva configuració s'ha completat. Actualitzant ...
+Your support email id - must be a valid email - this is where your emails will come!,El teu correu electrònic d'identificació - ha de ser un correu electrònic vàlid - aquí és on arribaran els teus correus electrònics!
+[Error],[Error]
+[Select],[Select]
+`Freeze Stocks Older Than` should be smaller than %d days.,`Bloqueja els estocs més antics que' ha de ser menor de %d dies.
+and,i
+are not allowed.,no estan permesos.
+assigned by,
+cannot be greater than 100,
+disabled user,
+"e.g. ""Build tools for builders""","per exemple ""Construir eines per als constructors """
+"e.g. ""MC""","per exemple ""MC """
+"e.g. ""My Company LLC""",
+e.g. 5,per exemple 5
+"e.g. Bank, Cash, Credit Card","per exemple bancària, Efectiu, Targeta de crèdit"
+"e.g. Kg, Unit, Nos, m","per exemple kg, unitat, m"
+e.g. VAT,"per exemple, l'IVA"
+eg. Cheque Number,
+example: Next Day Shipping,exemple: Enviament Dia següent
+fold,fold
+hidden,ocult
+hours,hores
+lft,
+old_parent,old_parent
+rgt,
+to,a
+website page link,website page link
+{0} '{1}' not in Fiscal Year {2},
+{0} ({1}) must have role 'Expense Approver',{0} ({1}) ha de tenir rol 'aprovador de despeses'
+{0} ({1}) must have role 'Leave Approver',
+{0} Credit limit {1} crossed,
+{0} Recipients,{0} Destinataris
+{0} Serial Numbers required for Item {0}. Only {0} provided.,{0} Números de sèrie d'articles requerits per {0}. Només {0} prevista.
+{0} Tree,{0} Arbre
+{0} against Purchase Order {1},{0} contra l'Ordre de Compra {1}
+{0} against Sales Invoice {1},
+{0} against Sales Order {1},
+{0} budget for Account {1} against Cost Center {2} will exceed by {3},
+{0} can not be negative,{0} no pot ser negatiu
+{0} created,{0} creat
+{0} days from {1},{0} dies des de {1}
+{0} does not belong to Company {1},
+{0} entered twice in Item Tax,{0} entrat dues vegades en l'Impost d'article
+"{0} is an invalid email address in 'Notification \
+					Email Address'",
+{0} is mandatory,{0} és obligatori
+{0} is mandatory for Item {1},{0} és obligatori per l'article {1}
+{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} és obligatori. Potser el registre de canvi de divisa no es crea per {1} a {2}.
+{0} is not a stock Item,{0} no és un article d'estoc
+{0} is not a valid Batch Number for Item {1},
+{0} is not a valid Leave Approver. Removing row #{1}.,
+{0} is not a valid email id,{0} no és un correu electrònicvàlid
+{0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.,"{0} és ara l'Any Fiscal.oer defecte Si us plau, actualitzi el seu navegador perquè el canvi tingui efecte."
+{0} is required,{0} és necessari
+{0} must be a Purchased or Sub-Contracted Item in row {1},{0} ha de ser un article de compra o de subcontractació a la fila {1}
+{0} must be reduced by {1} or you should increase overflow tolerance,{0} ha de ser reduït per {1} o s'ha d'augmentar la tolerància de desbordament
+{0} valid serial nos for Item {1},
+{0} {1} against Bill {2} dated {3},{0} {1} contra la factura {2} de data {3}
+{0} {1} has already been submitted,{0} {1} ja s'ha presentat
+{0} {1} has been modified. Please refresh.,"{0} {1} ha estat modificat. Si us plau, actualitzia"
+{0} {1} is fully billed,
+{0} {1} is not submitted,
+{0} {1} is stopped,{0} {1} està aturat
+{0} {1} must be submitted,{0} {1} s'ha de Presentar
+{0} {1} not in any Fiscal Year. For more details check {2}.,"{0} {1} sense any fiscal. Per a més detalls, consulta {2}."
+{0} {1} status is 'Stopped',"{0} {1} L'Estat és ""Aturat '"
+{0} {1} status is Stopped,{0} {1} Estat Aturat
+{0} {1} status is Unstopped,{0} {1} Estat és no aturat
+{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Centre de Cost és obligatori per l'article {2}
+{0}: {1} not found in Invoice Details table,
