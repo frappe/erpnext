@@ -1,22 +1,29 @@
 {
     "country_code": "ni",
     "name": "Catalogo de Cuentas",
-	"is_active": "Yes",
+    "is_active": "Yes",
     "tree": {
         "Activo": {
             "Activo Corriente": {
                 "Efectivo en Caja y Bancos": {
-                    "Caja Moneda Nacional": {},
-                    "Caja Moneda Extrangera": {},
-                    "Caja Chica Moneda Extranjera": {},
-                    "Caja Chica Moneda Nacional": {},
-                    "Cuentas Bancarias Moneda Nacional": {},
-                    "Cuentas Bancarias Moneda Extrangera": {}
+                    "Caja": {
+                        "Caja General Moneda Nacional": {},
+                        "Caja General Moneda Extrangera": {},
+                        "Caja Chica Moneda Nacional": {},
+                        "Caja Chica Moneda Extrangera": {},
+                        "Fondos por Depositar": {}
+                    },
+                    "Cuentas Bancarias": {
+                        "Cuenta Corriente Moneda Nacional": {},
+                        "Cuenta Corriente Moneda Extrangera": {}
+                    },
+                    "Otros Equivalentes a Efectivo": {}
                 },
-                "Activos Financieros": {
+                "Activos Financieros Realizables a Corto Plazo": {
                     "Inversiones a Corto Plazo": {},
                     "Bonos y Acciones Disponibles para la Venta": {},
-                    "Certificados Bancarios": {}
+                    "Certificados Bancarios": {},
+                    "Otros Valores Negociables a Corto Plazo": {}
                 },
                 "Cuentas y Documentos por Cobrar a Clientes": {
                     "Cuentas por Cobrar Moneda Nacional": {},
@@ -33,12 +40,14 @@
                     "Producto Terminado": {},
                     "Mercaderia en Transito": {},
                     "Mercaderia de Reventa": {},
-                    "Productos en Proceso": {}
+                    "Productos en Proceso": {},
+                    "Materiales y Suministros": {},
+                    "Deterioro de Valor de Inventarios": {},
+                    "Provicion por Obsolecencia de Inventaios": {}
                 },
                 "Impuestos Acreditables": {
                     "Impuesto a Valor Agregado Acreditable": {},
                     "Anticipos de IR o Pago Minimo Definitivo": {},
-                    "Impuestos diferidos": {},
                     "Retenciones a Cuenta de IR Acreditables": {},
                     "Retenciones a Cuenta de IMI Acreditables": {},
                     "Retenciones Definitivas Sobre Rentas o Ganancias de Capital": {}
@@ -46,19 +55,22 @@
                 "Otras Cuentas por Cobrar": {
                     "Anticipos a Proveedores": {},
                     "Anticipos por Justificar": {},
+                    "Accionistas": {},
+                    "Funcionarios y Empleados": {},
                     "Faltantes en Caja por Justificar": {},
                     "Adelantos a Trabajos": {},
                     "Reclamos por Cobrar": {},
                     "Depositos en Garantia": {},
                     "Faltantes de Inventario por Justificar": {},
-                    "Anticipos a Proveedores": {},
-                    "Anticipos a Proveedores": {},
                     "Casa Matriz": {},
                     "Sucursales": {},
                     "Empresas Controladoras": {},
                     "Empresas Controladas": {},
-                    "Depositos en Garantia": {},
                     "Pagos adelantados": {},
+                    "Gastos Pagados por Adelantados": {},
+                    "Adelantos de Salarios": {},
+                    "Papeleria y Utiles": {},
+                    "Materiales de Oficina": {},
                     "Otras Cuentas por Cobrar": {}
                 }
             },
@@ -76,8 +88,12 @@
                     "Depresiacion Acumulada": {}
                 },
                 "Inversiones Permanentes": {
-			"Inversiones Permanentes": {},
-			"Negocios Conjuntos": {}
+                    "Inversiones Permanentes": {},
+                    "Negocios Conjuntos": {}
+                },
+                "Bienes en Arrendamiento Financiero": {
+                    "Locales y Edificios en Arrendamiento": {},
+                    "Equipos y Maquinaria en Arrendamiento": {}
                 },
                 "Activos Intangibles": {
                     "Patentes": {},
@@ -86,12 +102,15 @@
                     "Concesiones": {},
                     "Licencias": {},
                     "Gastos de investigacion": {},
-                    "Amortizacion de Activos Intangibles": {}
+                    "Amortizacion de Activos Intangibles": {},
+                    "Deterioro de Valor de Activos Intangibles": {}
                 },
                 "Amortizables": {
                     "Gastos de Consitucion": {},
                     "Gastos Pre Operativos": {},
-                    "Mejoras en Bienes Arrendados": {}
+                    "Mejoras en Bienes Arrendados": {},
+                    "Amortizacion de Activos Amortizables": {},
+                    "Deterioro de Valaor de Activos Amortizables": {}
                 },
                 "Cuentas por Cobrar a Largo Plazo": {
                     "Creditos a Largo Plazo": {}
@@ -100,7 +119,8 @@
                     "Depositos Bancarios a Plazo": {},
                     "Intereses percibidos por adelantado": {},
                     "Titulos y Acciones": {}
-                }
+                },
+                "Activo por Impuestos Diferidos": {}
             },
             "root_type": "Asset"
         },
@@ -110,7 +130,7 @@
                 "Venta de Bienes o Prestacion de Servicios Exentos": {},
                 "Venta de Bienes o Prestacion de Servicios Exonerados": {},
                 "Venta por Exportaciones": {},
-            "root_type": "Income"
+                "root_type": "Income"
             },
             "Otros Ingresos Grabables": {},
             "Ingresos no Grabables": {},
@@ -123,7 +143,7 @@
                     "Cuentas por Pagar Moneda Extrangera": {},
                     "Documentos por Pagar Moneda Nacional": {},
                     "Documentos por Pagar Moneda Extrangera": {},
-                    "Proveedores por Importaciones": {}
+                    "Cuentas por Pagar por Importaciones": {}
                 },
                 "Anticipos de Clientes": {},
                 "Pasivos Financieros a Corto Plazo": {
@@ -137,7 +157,10 @@
                     "Salarios por Pagar": {}
                 },
                 "Provisiones por Pagar": {
-                    "Pasivos Laborales": {},
+                    "Pasivos Laborales": {
+                        "Indemnizacion Laboral": {},
+                        "Aguinaldo por Pagar": {}
+                    },
                     "Reclamos por Pagar": {},
                     "Responsabilidad frente a terceros": {}
                 },
@@ -159,18 +182,23 @@
                 "Otras Cuentas por Pagar a Largo Plazo": {},
                 "Otros Pasivos Financieros a Largo Plaso": {}
             },
+            "Obligaciones por Arrendamiento Financiero a Largo Plazo": {},
+            "Pasivo por Impuestos Diferidos": {},
             "root_type": "Liability"
         },
         "Patrimonio": {
             "Aporte de Socios": {
                 "Capital": {
-                    "Capital Social": {
+                    "Capital Social Pagado": {
+                        "account_type": "Equity"
+                    },
+                    "Capital Social no Pagado": {
                         "account_type": "Equity"
                     }
                 }
             },
             "Donaciones": {},
-            "Ganancieas Acumuladas": {
+            "Ganancias Acumuladas": {
                 "Reservas": {
                     "Reservas Legales": {
                         "account_type": "Equity"
@@ -180,7 +208,10 @@
                     }
                 },
                 "Resultados": {
-                     "Resultados Acumulados": {
+                    "Resultados Acumulados": {
+                        "account_type": "Equity"
+                    },
+                    "Ajustes a Periodos Anteriores": {
                         "account_type": "Equity"
                     },
                     "Resultados del ejercicio": {
@@ -193,27 +224,47 @@
         "Costos y Gastos": {
             "Costo de Venta": {
                 "Costo de Bienes": {},
-                "Costo de Servicios": {}
+                "Costo de Servicios": {},
+                "Costo de Produccion": {
+                    "Mano de Obra Directa": {},
+                    "Materiales Directos": {},
+                    "Costos Indirectos de Frabicacion": {}
+                }
             },
             "Gastos de Ventas": {
                 "Publicidad": {},
+                "Mercadeo": {},
+                "Muestras Gratis": {},
+                "Regalos a Clientes": {},
                 "Fletes": {},
                 "Promociones": {}
             },
             "Gastos de Administracion": {
                 "Alquileres": {},
                 "Combustible": {},
-                "Servicios Basicos": {},
+                "Servicios Basicos": {
+                    "Energia Electrica": {},
+                    "Agua Potable": {},
+                    "Internet": {},
+                    "Telefono Fijo": {},
+                    "Celular": {},
+                    "Costos por Servicios WEB": {}
+                },
                 "Vigilancia": {},
-                "Gastos Varios (def)": {},
+                "Gastos Varios": {},
                 "Mantenimiento y Reparaciones": {},
                 "Papeleria": {},
                 "Representacion": {},
                 "Amortizaciones": {},
                 "Inatec": {},
+                "Indemnizacion": {},
+                "Fletes y Correos": {},
+                "Cuentas Incobrables": {},
+                "Capacitacion al Personal": {},
+                "Uniformes": {},
                 "Seguros": {}
             },
-             "Gastos por Servicios Profesionales y Tecnicos": {
+            "Gastos por Servicios Profesionales y Tecnicos": {
                 "Servicios Profesionales": {},
                 "Servivios Tecnicos": {},
                 "Consultorias": {}
@@ -223,8 +274,21 @@
             "Gasto por Depreciacion": {},
             "Gastos por Financiamiento Nacional": {},
             "Gasto por Financiemiento Internacional": {},
-            "Otros Gastos": {},
-            "Costos y Gastos No Deducibles": {},
+            "Otros Gastos": {
+                "Perdida Cambiario": {},
+                "Perdida en Venta de Activo Fijo": {},
+                "Sinientros": {},
+                "Otros Gastos Financieros": {},
+                "Certificacion de Cheques y Chequeras": {},
+                "Otros Gastos": {}
+            },
+            "Costos y Gastos No Deducibles": {
+                "Multas": {},
+                "Recargos": {},
+                "Retenciones Asumidas": {},
+                "IVA no Trasladado": {},
+                "Deterioro de Activos": {}
+            },
             "Impuesto por Rentas y Ganancias de Capital": {},
             "Impuesto sobre la Renta de Activividades Economicas": {},
             "root_type": "Expense"
