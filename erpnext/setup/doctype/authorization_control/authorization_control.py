@@ -94,6 +94,9 @@ class AuthorizationControl(TransactionBase):
 			self.validate_auth_rule(doctype_name, auth_value, based_on, add_cond, company)
 
 	def validate_approving_authority(self, doctype_name,company, total, doc_obj = ''):
+		if not frappe.db.count("Authorization Rule"):
+			return
+
 		av_dis = 0
 		if doc_obj:
 			price_list_rate, base_rate = 0, 0
