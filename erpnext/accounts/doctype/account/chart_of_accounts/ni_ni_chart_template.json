@@ -344,9 +344,9 @@
                     "ManodeObraDirecta": {},
                     "MaterialesDirectos": {},
                     "CostosIndirectosdeFrabicacion": {},
-                    "root_type": "Cost of Goods Sold"
+                    "account_type": "Cost of Goods Sold"
                 },
-                "root_type": "Cost of Goods Sold"
+                "root_type": "Expense"
             },
             "GastosdeVentas": {
                 "Publicidad": {},
