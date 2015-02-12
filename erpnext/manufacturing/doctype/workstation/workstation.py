@@ -32,7 +32,7 @@ class Workstation(Document):
 
 	def validate_overlap_for_operation_timings(self):
 		for d in self.get("working_hours"):
-			existing = frappe.db.sql_list("""select idx from `tabWorkstation Operation Hours`
+			existing = frappe.db.sql_list("""select idx from `tabWorkstation Working Hour`
 				where parent = %s and name != %s
 					and (
 						(start_time between %s and %s) or
