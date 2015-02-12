@@ -97,5 +97,7 @@ def get_charts_for_country(country):
 		with open(os.path.join(os.path.dirname(__file__), "syscohada_syscohada_chart_template.json"), "r") as f:
 			_get_chart_name(f.read())
 
-	charts.append("Standard")
+	if len(charts) > 1:
+		charts.append("Standard")
+
 	return charts

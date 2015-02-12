@@ -68,3 +68,8 @@ scheduler_events = {
 
 default_mail_footer = """<div style="padding: 7px; text-align: right;">
 	<a style="color: #888; font-size: 80%;" href="https://erpnext.com">Sent via ERPNext</a></div>"""
+
+get_translated_dict = {
+	("page", "setup-wizard"): "frappe.geo.country_info.get_translated_dict",
+	("doctype", "Global Defaults"): "frappe.geo.country_info.get_translated_dict"
+}
