@@ -432,7 +432,7 @@ class StockEntry(StockController):
 		})
 
 	def get_item_details(self, args):
-		item = frappe.db.sql("""select stock_uom, description, item_name,
+		item = frappe.db.sql("""select stock_uom, description, image, item_name,
 			expense_account, buying_cost_center, item_group from `tabItem`
 			where name = %s and (ifnull(end_of_life,'0000-00-00')='0000-00-00' or end_of_life > now())""",
 			(args.get('item_code')), as_dict = 1)
@@ -444,6 +444,7 @@ class StockEntry(StockController):
 			'uom'			      	: item.stock_uom,
 			'stock_uom'			  	: item.stock_uom,
 			'description'		  	: item.description,
+			'image'					: item.image,
 			'item_name' 		  	: item.item_name,
 			'expense_account'		: args.get("expense_account") \
 				or frappe.db.get_value("Company", args.get("company"), "stock_adjustment_account"),
