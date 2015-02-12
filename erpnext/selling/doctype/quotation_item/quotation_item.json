@@ -69,9 +69,11 @@
   {
    "fieldname": "image", 
    "fieldtype": "Attach", 
+   "hidden": 1, 
    "label": "Image", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "print_hide": 1
   }, 
   {
    "fieldname": "image_view", 
@@ -347,7 +349,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-10 15:21:17.447331", 
+ "modified": "2015-02-12 15:18:41.236797", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation Item", 

@@ -93,9 +93,11 @@
   {
    "fieldname": "image", 
    "fieldtype": "Attach", 
+   "hidden": 1, 
    "label": "Image", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "print_hide": 1
   }, 
   {
    "fieldname": "image_view", 
@@ -482,7 +484,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-10 17:11:03.236900", 
+ "modified": "2015-02-12 15:11:13.784588", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order Item", 

@@ -67,9 +67,11 @@
   {
    "fieldname": "image", 
    "fieldtype": "Attach", 
+   "hidden": 1, 
    "label": "Image", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "print_hide": 1
   }, 
   {
    "fieldname": "image_view", 
@@ -586,7 +588,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-12 10:37:31.933726", 
+ "modified": "2015-02-12 15:20:26.299671", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt Item", 

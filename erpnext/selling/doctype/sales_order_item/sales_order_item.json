@@ -78,9 +78,11 @@
   {
    "fieldname": "image", 
    "fieldtype": "Attach", 
+   "hidden": 1, 
    "label": "Image", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "print_hide": 1
   }, 
   {
    "fieldname": "image_view", 

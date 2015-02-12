@@ -83,11 +83,12 @@
   {
    "fieldname": "image", 
    "fieldtype": "Attach", 
-   "hidden": 0, 
+   "hidden": 1, 
    "label": "Image", 
    "options": "", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "print_hide": 1
   }, 
   {
    "fieldname": "image_view", 
@@ -144,7 +145,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-10 13:03:39.188558", 
+ "modified": "2015-02-12 15:18:08.997193", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Opportunity Item", 
