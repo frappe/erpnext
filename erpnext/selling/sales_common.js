@@ -233,41 +233,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 
-	calculate_net_total: function() {
-		var me = this;
-		this.frm.doc.base_net_total = this.frm.doc.net_total = 0.0;
-
-		$.each(this.frm.doc["items"] || [], function(i, item) {
-			me.frm.doc.base_net_total += item.base_amount;
-			me.frm.doc.net_total += item.amount;
-		});
-
-		frappe.model.round_floats_in(this.frm.doc, ["base_net_total", "net_total"]);
-	},
-
-	calculate_totals: function() {
-		var me = this;
-		var tax_count = this.frm.doc["taxes"] ? this.frm.doc["taxes"].length: 0;
-
-		this.frm.doc.base_grand_total = flt(tax_count ? this.frm.doc["taxes"][tax_count - 1].total : this.frm.doc.base_net_total);
-
-		this.frm.doc.base_total_taxes_and_charges = flt(this.frm.doc.base_grand_total - this.frm.doc.base_net_total,
-			precision("base_total_taxes_and_charges"));
-
-		this.frm.doc.grand_total = (this.frm.doc.base_total_taxes_and_charges || this.frm.doc.discount_amount) ?
-			flt(this.frm.doc.base_grand_total / this.frm.doc.conversion_rate) : this.frm.doc.net_total;
-
-		this.frm.doc.total_taxes_and_charges = flt(this.frm.doc.grand_total -
-			this.frm.doc.net_total + flt(this.frm.doc.discount_amount),
-			precision("total_taxes_and_charges"));
-
-		this.frm.doc.base_grand_total = flt(this.frm.doc.base_grand_total, precision("base_grand_total"));
-		this.frm.doc.grand_total = flt(this.frm.doc.grand_total, precision("grand_total"));
-
-		this.frm.doc.base_rounded_total = Math.round(this.frm.doc.base_grand_total);
-		this.frm.doc.rounded_total = Math.round(this.frm.doc.grand_total);
-	},
-
 	calculate_outstanding_amount: function(update_paid_amount) {
 		// NOTE:
 		// paid_amount and write_off_amount is only for POS Invoice

@@ -343,8 +343,7 @@ class AccountsController(TransactionBase):
 	def _set_in_company_currency(self, item, print_field, base_field):
 		"""set values in base currency"""
 		value_in_company_currency = flt(self.conversion_rate *
-			flt(item.get(print_field), self.precision(print_field, item)),
-			self.precision(base_field, item))
+			flt(item.get(print_field), self.precision(print_field, item)), self.precision(base_field, item))
 		item.set(base_field, value_in_company_currency)
 
 	def validate_enabled_taxes_and_charges(self):

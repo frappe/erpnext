@@ -77,8 +77,7 @@ class BuyingController(StockController):
 		if self.meta.get_field("base_in_words"):
 			self.base_in_words = money_in_words(self.base_grand_total, company_currency)
 		if self.meta.get_field("in_words"):
-			self.in_words = money_in_words(self.grand_total,
-		 		self.currency)
+			self.in_words = money_in_words(self.grand_total, self.currency)
 
 	def calculate_taxes_and_totals(self):
 		super(BuyingController, self).calculate_taxes_and_totals()
@@ -174,10 +173,8 @@ class BuyingController(StockController):
 				stock_items_amount += flt(d.base_amount)
 				last_stock_item_idx = d.idx
 
-		total_valuation_amount = sum([flt(d.tax_amount) for d in
-			self.get("taxes")
+		total_valuation_amount = sum([flt(d.tax_amount) for d in self.get("taxes")
 			if d.category in ["Valuation", "Valuation and Total"]])
-
 
 		valuation_amount_adjustment = total_valuation_amount
 		for i, item in enumerate(self.get(parentfield)):
@@ -356,7 +353,6 @@ class BuyingController(StockController):
 					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return self._purchase_items
-
 
 	def is_item_table_empty(self):
 		if not len(self.get("items")):
