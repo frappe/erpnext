@@ -341,7 +341,7 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "net_total", 
+   "fieldname": "base_net_total", 
    "fieldtype": "Currency", 
    "label": "Net Total (Company Currency)", 
    "no_copy": 0, 
@@ -361,7 +361,7 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "net_total_export", 
+   "fieldname": "net_total", 
    "fieldtype": "Currency", 
    "label": "Net Total", 
    "options": "currency", 
@@ -435,18 +435,18 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "other_charges_total_export", 
+   "fieldname": "total_taxes_and_charges", 
    "fieldtype": "Currency", 
-   "label": "Taxes and Charges Total", 
-   "options": "Company:company:default_currency", 
+   "label": "Total Taxes and Charges", 
+   "options": "currency", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 1
   }, 
   {
-   "fieldname": "other_charges_total", 
+   "fieldname": "base_total_taxes_and_charges", 
    "fieldtype": "Currency", 
-   "label": "Taxes and Charges Total (Company Currency)", 
+   "label": "Total Taxes and Charges (Company Currency)", 
    "oldfieldname": "other_charges_total", 
    "oldfieldtype": "Currency", 
    "options": "Company:company:default_currency", 
@@ -489,7 +489,7 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "grand_total", 
+   "fieldname": "base_grand_total", 
    "fieldtype": "Currency", 
    "label": "Grand Total (Company Currency)", 
    "no_copy": 0, 
@@ -504,7 +504,7 @@
    "width": "150px"
   }, 
   {
-   "fieldname": "rounded_total", 
+   "fieldname": "base_rounded_total", 
    "fieldtype": "Currency", 
    "label": "Rounded Total (Company Currency)", 
    "no_copy": 0, 
@@ -519,7 +519,7 @@
   }, 
   {
    "description": "In Words will be visible once you save the Delivery Note.", 
-   "fieldname": "in_words", 
+   "fieldname": "base_in_words", 
    "fieldtype": "Data", 
    "label": "In Words (Company Currency)", 
    "no_copy": 0, 
@@ -539,7 +539,7 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "grand_total_export", 
+   "fieldname": "grand_total", 
    "fieldtype": "Currency", 
    "in_list_view": 1, 
    "label": "Grand Total", 
@@ -555,7 +555,7 @@
    "width": "150px"
   }, 
   {
-   "fieldname": "rounded_total_export", 
+   "fieldname": "rounded_total", 
    "fieldtype": "Currency", 
    "label": "Rounded Total", 
    "no_copy": 0, 
@@ -570,7 +570,7 @@
   }, 
   {
    "description": "In Words (Export) will be visible once you save the Delivery Note.", 
-   "fieldname": "in_words_export", 
+   "fieldname": "in_words", 
    "fieldtype": "Data", 
    "label": "In Words", 
    "no_copy": 0, 
@@ -1024,7 +1024,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2015-02-05 05:11:37.151596", 
+ "modified": "2015-02-11 15:45:06.803707", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note", 
