@@ -431,7 +431,7 @@ class StockEntry(StockController):
 			"planned_qty": (self.docstatus==1 and -1 or 1 ) * flt(self.fg_completed_qty)
 		})
 
-	def get_item_details(self, args):
+	def get_item_details(self, args=None):
 		item = frappe.db.sql("""select stock_uom, description, image, item_name,
 			expense_account, buying_cost_center, item_group from `tabItem`
 			where name = %s and (ifnull(end_of_life,'0000-00-00')='0000-00-00' or end_of_life > now())""",
@@ -452,7 +452,7 @@ class StockEntry(StockController):
 			'qty'					: 0,
 			'transfer_qty'			: 0,
 			'conversion_factor'		: 1,
-     		'batch_no'          	: '',
+			'batch_no'				: '',
 			'actual_qty'			: 0,
 			'incoming_rate'			: 0
 		}

@@ -55,7 +55,7 @@ class BOM(Document):
 
 	def get_item_det(self, item_code):
 		item = frappe.db.sql("""select name, item_name, is_asset_item, is_purchase_item,
-			docstatus, description, is_sub_contracted_item, stock_uom, default_bom,
+			docstatus, description, image, is_sub_contracted_item, stock_uom, default_bom,
 			last_purchase_rate
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
 
@@ -96,6 +96,7 @@ class BOM(Document):
 		ret_item = {
 			 'item_name'	: item and args['item_name'] or '',
 			 'description'  : item and args['description'] or '',
+			 'image'		: item and args['image'] or '',
 			 'stock_uom'	: item and args['stock_uom'] or '',
 			 'bom_no'		: args['bom_no'],
 			 'rate'			: rate
@@ -298,12 +299,13 @@ class BOM(Document):
 				self.get_child_exploded_items(d.bom_no, d.qty)
 			else:
 				self.add_to_cur_exploded_items(frappe._dict({
-					'item_code'				: d.item_code,
-					'item_name'				: d.item_name,
-					'description'			: d.description,
-					'stock_uom'				: d.stock_uom,
-					'qty'					: flt(d.qty),
-					'rate'					: flt(d.rate),
+					'item_code'		: d.item_code,
+					'item_name'		: d.item_name,
+					'description'	: d.description,
+					'image'			: d.image,
+					'stock_uom'		: d.stock_uom,
+					'qty'			: flt(d.qty),
+					'rate'			: flt(d.rate),
 				}))
 
 	def add_to_cur_exploded_items(self, args):
@@ -367,6 +369,7 @@ def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 				item.item_name,
 				sum(ifnull(bom_item.qty, 0)/ifnull(bom.quantity, 1)) * %(qty)s as qty,
 				item.description,
+				item.image,
 				item.stock_uom,
 				item.default_warehouse,
 				item.expense_account as expense_account,

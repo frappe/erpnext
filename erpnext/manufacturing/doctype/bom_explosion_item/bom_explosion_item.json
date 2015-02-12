@@ -17,6 +17,12 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "cb", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "item_name", 
    "fieldtype": "Data", 
    "in_list_view": 1, 
@@ -26,8 +32,8 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "column_break_2", 
-   "fieldtype": "Column Break", 
+   "fieldname": "section_break_3", 
+   "fieldtype": "Section Break", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -42,6 +48,27 @@
    "print_width": "300px", 
    "read_only": 1, 
    "width": "300px"
+  }, 
+  {
+   "fieldname": "column_break_2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "label": "Image", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "section_break_4", 
@@ -111,7 +138,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-01-20 13:28:52.258152", 
+ "modified": "2015-02-12 12:23:57.127210", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Explosion Item", 

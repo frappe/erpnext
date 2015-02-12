@@ -214,12 +214,39 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "section_break_25", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "description", 
    "fieldtype": "Small Text", 
    "in_list_view": 0, 
    "label": "Item Desription", 
    "permlevel": 0, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_27", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "label": "Image", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "Image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "depends_on": "eval:!doc.__islocal", 
