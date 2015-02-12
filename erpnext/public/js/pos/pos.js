@@ -26,23 +26,19 @@ erpnext.pos.PointOfSale = Class.extend({
 
 		// Check whether the transaction is "Sales" or "Purchase"
 		if (frappe.meta.has_field(cur_frm.doc.doctype, "customer")) {
-			this.set_transaction_defaults("Customer", "export");
+			this.set_transaction_defaults("Customer");
 		}
 		else if (frappe.meta.has_field(cur_frm.doc.doctype, "supplier")) {
-			this.set_transaction_defaults("Supplier", "import");
+			this.set_transaction_defaults("Supplier");
 		}
 	},
-	set_transaction_defaults: function(party, export_or_import) {
+	set_transaction_defaults: function(party) {
 		var me = this;
 		this.party = party;
 		this.price_list = (party == "Customer" ?
 			this.frm.doc.selling_price_list : this.frm.doc.buying_price_list);
 		this.price_list_field = (party == "Customer" ? "selling_price_list" : "buying_price_list");
 		this.sales_or_purchase = (party == "Customer" ? "Sales" : "Purchase");
-		this.net_total = "net_total_" + export_or_import;
-		this.grand_total = "grand_total_" + export_or_import;
-		// this.amount = export_or_import + "_amount";
-		// this.rate = export_or_import + "_rate";
 	},
 	make: function() {
 		this.make_party();
@@ -282,10 +278,8 @@ erpnext.pos.PointOfSale = Class.extend({
 	},
 	set_totals: function() {
 		var me = this;
-		this.wrapper.find(".net-total").text(format_currency(this.frm.doc[this.net_total],
-			me.frm.doc.currency));
-		this.wrapper.find(".grand-total").text(format_currency(this.frm.doc[this.grand_total],
-			me.frm.doc.currency));
+		this.wrapper.find(".net-total").text(format_currency(me.frm.doc["net_total"], me.frm.doc.currency));
+		this.wrapper.find(".grand-total").text(format_currency(me.frm.doc.grand_total, me.frm.doc.currency));
 	},
 	call_when_local: function() {
 		var me = this;
@@ -414,12 +408,12 @@ erpnext.pos.PointOfSale = Class.extend({
 						title: 'Payment',
 						fields: [
 							{fieldtype:'Currency', fieldname:'total_amount', label: __('Total Amount'), read_only:1,
-								options:"currency", default:me.frm.doc.grand_total_export, read_only: 1},
+								options:"currency", default:me.frm.doc.grand_total, read_only: 1},
 							{fieldtype:'Select', fieldname:'mode_of_payment', label: __('Mode of Payment'),
 								options:modes_of_payment.join('\n'), reqd: 1, default: default_mode},
 							{fieldtype:'Currency', fieldname:'paid_amount', label:__('Amount Paid'), reqd:1,
 								options: "currency",
-								default:me.frm.doc.grand_total_export, hidden: 1},
+								default:me.frm.doc.grand_total, hidden: 1},
 							{fieldtype:'Currency', fieldname:'change', label: __('Change'), options: "currency",
 								default: 0.0, hidden: 1},
 							{fieldtype:'Currency', fieldname:'write_off_amount', label: __('Write Off'), options: "currency",
@@ -473,7 +467,7 @@ erpnext.pos.PointOfSale = Class.extend({
 						me.frm.set_value("paid_amount", paid_amount);
 
 						// specifying writeoff amount here itself, so as to avoid recursion issue
-						me.frm.set_value("write_off_amount", me.frm.doc.grand_total - paid_amount);
+						me.frm.set_value("write_off_amount", me.frm.doc.base_grand_total - paid_amount);
 						me.frm.set_value("outstanding_amount", 0);
 
 						me.frm.savesubmit(this);

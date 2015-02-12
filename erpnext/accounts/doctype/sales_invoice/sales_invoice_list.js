@@ -3,7 +3,7 @@
 
 // render
 frappe.listview_settings['Sales Invoice'] = {
-	add_fields: ["customer", "customer_name", "grand_total", "outstanding_amount", "due_date", "company",
+	add_fields: ["customer", "customer_name", "base_grand_total", "outstanding_amount", "due_date", "company",
 		"currency"],
 	get_indicator: function(doc) {
 		if(doc.outstanding_amount==0) {
@@ -14,5 +14,5 @@ frappe.listview_settings['Sales Invoice'] = {
 			return [__("Overdue"), "red", "outstanding_amount,>,0|due_date,<=,Today"]
 		}
 	},
-	right_column: "grand_total_export"
+	right_column: "grand_total"
 };

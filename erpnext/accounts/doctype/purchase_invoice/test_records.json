@@ -41,7 +41,7 @@
    }
   ],
   "fiscal_year": "_Test Fiscal Year 2013",
-  "grand_total_import": 0,
+  "grand_total": 0,
   "naming_series": "_T-BILL",
   "taxes": [
    {
@@ -164,7 +164,7 @@
    }
   ],
   "fiscal_year": "_Test Fiscal Year 2013",
-  "grand_total_import": 0,
+  "grand_total": 0,
   "naming_series": "_T-Purchase Invoice-",
   "taxes": [
    {

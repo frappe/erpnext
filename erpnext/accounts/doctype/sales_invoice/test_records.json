@@ -25,11 +25,11 @@
    }
   ],
   "fiscal_year": "_Test Fiscal Year 2013",
+  "base_grand_total": 561.8,
   "grand_total": 561.8,
-  "grand_total_export": 561.8,
   "is_pos": 0,
   "naming_series": "_T-Sales Invoice-",
-  "net_total": 500.0,
+  "base_net_total": 500.0,
   "taxes": [
    {
     "account_head": "_Test Account VAT - _TC",
@@ -95,11 +95,11 @@
    }
   ],
   "fiscal_year": "_Test Fiscal Year 2013",
+  "base_grand_total": 630.0,
   "grand_total": 630.0,
-  "grand_total_export": 630.0,
   "is_pos": 0,
   "naming_series": "_T-Sales Invoice-",
-  "net_total": 500.0,
+  "base_net_total": 500.0,
   "taxes": [
    {
     "account_head": "_Test Account VAT - _TC",
@@ -163,7 +163,7 @@
    }
   ],
   "fiscal_year": "_Test Fiscal Year 2013",
-  "grand_total_export": 0,
+  "grand_total": 0,
   "is_pos": 0,
   "naming_series": "_T-Sales Invoice-",
   "taxes": [
@@ -287,7 +287,7 @@
    }
   ],
   "fiscal_year": "_Test Fiscal Year 2013",
-  "grand_total_export": 0,
+  "grand_total": 0,
   "is_pos": 0,
   "naming_series": "_T-Sales Invoice-",
   "taxes": [

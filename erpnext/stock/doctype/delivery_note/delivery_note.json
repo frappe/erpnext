@@ -1110,7 +1110,7 @@
   }
  ], 
  "read_only_onload": 1, 
- "search_fields": "status,customer,customer_name, territory,grand_total", 
+ "search_fields": "status,customer,customer_name, territory,base_grand_total", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "customer_name"

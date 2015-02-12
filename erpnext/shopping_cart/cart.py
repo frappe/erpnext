@@ -144,7 +144,7 @@ def decorate_quotation_doc(quotation_doc):
 		d["formatted_tax_amount"] = fmt_money(flt(d.get("tax_amount")) / doc.conversion_rate,
 			currency=doc.currency)
 
-	doc.formatted_grand_total_export = fmt_money(doc.grand_total_export,
+	doc.formatted_grand_total_export = fmt_money(doc.grand_total,
 		currency=doc.currency)
 
 	return doc

@@ -54,17 +54,17 @@ class CForm(Document):
 			frappe.throw(_("Please enter atleast 1 invoice in the table"))
 
 	def set_total_invoiced_amount(self):
-		total = sum([flt(d.grand_total) for d in self.get('invoices')])
+		total = sum([flt(d.base_grand_total) for d in self.get('invoices')])
 		frappe.db.set(self, 'total_invoiced_amount', total)
 
 	def get_invoice_details(self, invoice_no):
 		"""	Pull details from invoices for referrence """
 		if invoice_no:
 			inv = frappe.db.get_value("Sales Invoice", invoice_no,
-				["posting_date", "territory", "net_total", "grand_total"], as_dict=True)
+				["posting_date", "territory", "base_net_total", "base_grand_total"], as_dict=True)
 			return {
 				'invoice_date' : inv.posting_date,
 				'territory'    : inv.territory,
-				'net_total'    : inv.net_total,
-				'grand_total'  : inv.grand_total
+				'net_total'    : inv.base_net_total,
+				'grand_total'  : inv.base_grand_total
 			}

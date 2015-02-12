@@ -18,7 +18,7 @@ class AccountsController(TransactionBase):
 		self.validate_date_with_fiscal_year()
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
-			self.validate_value("grand_total", ">=", 0)
+			self.validate_value("base_grand_total", ">=", 0)
 			self.set_total_in_words()
 
 		self.validate_due_date()
@@ -291,7 +291,7 @@ class AccountsController(TransactionBase):
 			self.precision("tax_amount", tax))
 
 	def adjust_discount_amount_loss(self, tax):
-		discount_amount_loss = self.grand_total - flt(self.base_discount_amount) - tax.total
+		discount_amount_loss = self.base_grand_total - flt(self.base_discount_amount) - tax.total
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount +
 			discount_amount_loss, self.precision("tax_amount", tax))
 		tax.total = flt(tax.total + discount_amount_loss, self.precision("total", tax))
@@ -303,8 +303,8 @@ class AccountsController(TransactionBase):
 		if tax.charge_type == "Actual":
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.rate, self.precision("tax_amount", tax))
-			current_tax_amount = (self.net_total
-				and ((item.base_amount / self.net_total) * actual)
+			current_tax_amount = (self.base_net_total
+				and ((item.base_amount / self.base_net_total) * actual)
 				or 0)
 		elif tax.charge_type == "On Net Total":
 			current_tax_amount = (tax_rate / 100.0) * item.base_amount
@@ -510,12 +510,12 @@ class AccountsController(TransactionBase):
 
 		if advance_paid:
 			advance_paid = flt(advance_paid[0][0], self.precision("advance_paid"))
-		if flt(self.grand_total) >= advance_paid:
+		if flt(self.base_grand_total) >= advance_paid:
 			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
 		else:
 			frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater \
 				than the Grand Total ({2})")
-			.format(advance_paid, self.name, self.grand_total))
+			.format(advance_paid, self.name, self.base_grand_total))
 
 	@property
 	def company_abbr(self):

@@ -1,5 +1,5 @@
 frappe.listview_settings['Purchase Order'] = {
-	add_fields: ["grand_total", "company", "currency", "supplier",
+	add_fields: ["base_grand_total", "company", "currency", "supplier",
 		"supplier_name", "per_received", "per_billed", "status"],
 	get_indicator: function(doc) {
         if(doc.status==="Stopped") {

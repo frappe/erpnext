@@ -220,7 +220,7 @@ class JournalEntry(AccountsController):
 	def validate_against_order_fields(self, doctype, payment_against_voucher):
 		for voucher_no, payment_list in payment_against_voucher.items():
 			voucher_properties = frappe.db.get_value(doctype, voucher_no,
-				["docstatus", "per_billed", "status", "advance_paid", "grand_total"])
+				["docstatus", "per_billed", "status", "advance_paid", "base_grand_total"])
 
 			if voucher_properties[0] != 1:
 				frappe.throw(_("{0} {1} is not submitted").format(doctype, voucher_no))

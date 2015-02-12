@@ -21,7 +21,7 @@ class BuyingController(StockController):
 
 	def get_feed(self):
 		return _("From {0} | {1} {2}").format(self.supplier_name, self.currency,
-			self.grand_total_import)
+			self.grand_total)
 
 	def validate(self):
 		super(BuyingController, self).validate()
@@ -74,10 +74,10 @@ class BuyingController(StockController):
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
 		company_currency = get_company_currency(self.company)
+		if self.meta.get_field("base_in_words"):
+			self.base_in_words = money_in_words(self.base_grand_total, company_currency)
 		if self.meta.get_field("in_words"):
-			self.in_words = money_in_words(self.grand_total, company_currency)
-		if self.meta.get_field("in_words_import"):
-			self.in_words_import = money_in_words(self.grand_total_import,
+			self.in_words = money_in_words(self.grand_total,
 		 		self.currency)
 
 	def calculate_taxes_and_totals(self):
@@ -103,55 +103,55 @@ class BuyingController(StockController):
 
 
 	def calculate_net_total(self):
-		self.net_total = self.net_total_import = 0.0
+		self.base_net_total = self.net_total = 0.0
 
 		for item in self.get("items"):
-			self.net_total += item.base_amount
-			self.net_total_import += item.amount
+			self.base_net_total += item.base_amount
+			self.net_total += item.amount
 
-		self.round_floats_in(self, ["net_total", "net_total_import"])
+		self.round_floats_in(self, ["base_net_total", "net_total"])
 
 	def calculate_totals(self):
-		self.grand_total = flt(self.get("taxes")[-1].total if self.get("taxes") else self.net_total)
+		self.base_grand_total = flt(self.get("taxes")[-1].total if self.get("taxes") else self.base_net_total)
 
-		self.total_tax = flt(self.grand_total - self.net_total, self.precision("total_tax"))
+		self.base_total_taxes_and_charges = flt(self.base_grand_total - self.base_net_total, self.precision("base_total_taxes_and_charges"))
+
+		self.base_grand_total = flt(self.base_grand_total, self.precision("base_grand_total"))
+
+		if self.meta.get_field("base_rounded_total"):
+			self.base_rounded_total = rounded(self.base_grand_total)
+
+		if self.meta.get_field("base_taxes_and_charges_added"):
+			self.base_taxes_and_charges_added = flt(sum([flt(d.tax_amount) for d in self.get("taxes")
+				if d.add_deduct_tax=="Add" and d.category in ["Valuation and Total", "Total"]]),
+				self.precision("base_taxes_and_charges_added"))
+
+		if self.meta.get_field("base_taxes_and_charges_deducted"):
+			self.base_taxes_and_charges_deducted = flt(sum([flt(d.tax_amount) for d in self.get("taxes")
+				if d.add_deduct_tax=="Deduct" and d.category in ["Valuation and Total", "Total"]]),
+				self.precision("base_taxes_and_charges_deducted"))
+
+		self.grand_total = flt(self.base_grand_total / self.conversion_rate) \
+			if (self.base_taxes_and_charges_added or self.base_taxes_and_charges_deducted) else self.net_total
 
 		self.grand_total = flt(self.grand_total, self.precision("grand_total"))
 
 		if self.meta.get_field("rounded_total"):
 			self.rounded_total = rounded(self.grand_total)
 
-		if self.meta.get_field("other_charges_added"):
-			self.other_charges_added = flt(sum([flt(d.tax_amount) for d in self.get("taxes")
-				if d.add_deduct_tax=="Add" and d.category in ["Valuation and Total", "Total"]]),
-				self.precision("other_charges_added"))
+		if self.meta.get_field("taxes_and_charges_added"):
+			self.taxes_and_charges_added = flt(self.base_taxes_and_charges_added /
+				self.conversion_rate, self.precision("taxes_and_charges_added"))
 
-		if self.meta.get_field("other_charges_deducted"):
-			self.other_charges_deducted = flt(sum([flt(d.tax_amount) for d in self.get("taxes")
-				if d.add_deduct_tax=="Deduct" and d.category in ["Valuation and Total", "Total"]]),
-				self.precision("other_charges_deducted"))
-
-		self.grand_total_import = flt(self.grand_total / self.conversion_rate) \
-			if (self.other_charges_added or self.other_charges_deducted) else self.net_total_import
-
-		self.grand_total_import = flt(self.grand_total_import, self.precision("grand_total_import"))
-
-		if self.meta.get_field("rounded_total_import"):
-			self.rounded_total_import = rounded(self.grand_total_import)
-
-		if self.meta.get_field("other_charges_added_import"):
-			self.other_charges_added_import = flt(self.other_charges_added /
-				self.conversion_rate, self.precision("other_charges_added_import"))
-
-		if self.meta.get_field("other_charges_deducted_import"):
-			self.other_charges_deducted_import = flt(self.other_charges_deducted /
-				self.conversion_rate, self.precision("other_charges_deducted_import"))
+		if self.meta.get_field("taxes_and_charges_deducted"):
+			self.taxes_and_charges_deducted = flt(self.base_taxes_and_charges_deducted /
+				self.conversion_rate, self.precision("taxes_and_charges_deducted"))
 
 	def calculate_outstanding_amount(self):
 		if self.doctype == "Purchase Invoice" and self.docstatus == 0:
 			self.total_advance = flt(self.total_advance,
 				self.precision("total_advance"))
-			self.total_amount_to_pay = flt(self.grand_total - flt(self.write_off_amount,
+			self.total_amount_to_pay = flt(self.base_grand_total - flt(self.write_off_amount,
 				self.precision("write_off_amount")), self.precision("total_amount_to_pay"))
 			self.outstanding_amount = flt(self.total_amount_to_pay - self.total_advance,
 				self.precision("outstanding_amount"))

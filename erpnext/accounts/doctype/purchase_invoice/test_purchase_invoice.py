@@ -145,7 +145,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(item.item_tax_amount, expected_values[i][1])
 			self.assertEqual(item.valuation_rate, expected_values[i][2])
 
-		self.assertEqual(wrapper.net_total, 1250)
+		self.assertEqual(wrapper.base_net_total, 1250)
 
 		# tax amounts
 		expected_values = [
@@ -179,7 +179,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(item.item_tax_amount, expected_values[i][1])
 			self.assertEqual(item.valuation_rate, expected_values[i][2])
 
-		self.assertEqual(wrapper.net_total, 1250)
+		self.assertEqual(wrapper.base_net_total, 1250)
 
 		# tax amounts
 		expected_values = [

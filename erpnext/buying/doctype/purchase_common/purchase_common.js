@@ -175,65 +175,65 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	calculate_net_total: function() {
 		var me = this;
 
-		this.frm.doc.net_total = this.frm.doc.net_total_import = 0.0;
+		this.frm.doc.base_net_total = this.frm.doc.net_total = 0.0;
 		$.each(this.frm.doc["items"] || [], function(i, item) {
-			me.frm.doc.net_total += item.base_amount;
-			me.frm.doc.net_total_import += item.amount;
+			me.frm.doc.base_net_total += item.base_amount;
+			me.frm.doc.net_total += item.amount;
 		});
 
-		frappe.model.round_floats_in(this.frm.doc, ["net_total", "net_total_import"]);
+		frappe.model.round_floats_in(this.frm.doc, ["base_net_total", "net_total"]);
 	},
 
 	calculate_totals: function() {
 		var tax_count = this.frm.doc["taxes"] ? this.frm.doc["taxes"].length : 0;
-		this.frm.doc.grand_total = flt(tax_count ? this.frm.doc["taxes"][tax_count - 1].total : this.frm.doc.net_total);
+		this.frm.doc.base_grand_total = flt(tax_count ? this.frm.doc["taxes"][tax_count - 1].total : this.frm.doc.base_net_total);
 
-		this.frm.doc.total_tax = flt(this.frm.doc.grand_total - this.frm.doc.net_total, precision("total_tax"));
+		this.frm.doc.base_total_taxes_and_charges = flt(this.frm.doc.base_grand_total - this.frm.doc.base_net_total, precision("base_total_taxes_and_charges"));
 
-		this.frm.doc.grand_total = flt(this.frm.doc.grand_total, precision("grand_total"));
+		this.frm.doc.base_grand_total = flt(this.frm.doc.base_grand_total, precision("base_grand_total"));
 
 		// rounded totals
-		if(frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total", this.frm.doc.name)) {
-			this.frm.doc.rounded_total = Math.round(this.frm.doc.grand_total);
+		if(frappe.meta.get_docfield(this.frm.doc.doctype, "base_rounded_total", this.frm.doc.name)) {
+			this.frm.doc.base_rounded_total = Math.round(this.frm.doc.base_grand_total);
 		}
 
 		// other charges added/deducted
-		this.frm.doc.other_charges_added = 0.0
-		this.frm.doc.other_charges_deducted = 0.0
+		this.frm.doc.base_taxes_and_charges_added = 0.0
+		this.frm.doc.base_taxes_and_charges_deducted = 0.0
 		if(tax_count) {
-			this.frm.doc.other_charges_added = frappe.utils.sum($.map(this.frm.doc["taxes"],
+			this.frm.doc.base_taxes_and_charges_added = frappe.utils.sum($.map(this.frm.doc["taxes"],
 				function(tax) { return (tax.add_deduct_tax == "Add"
 					&& in_list(["Valuation and Total", "Total"], tax.category)) ?
 					tax.tax_amount : 0.0; }));
 
-			this.frm.doc.other_charges_deducted = frappe.utils.sum($.map(this.frm.doc["taxes"],
+			this.frm.doc.base_taxes_and_charges_deducted = frappe.utils.sum($.map(this.frm.doc["taxes"],
 				function(tax) { return (tax.add_deduct_tax == "Deduct"
 					&& in_list(["Valuation and Total", "Total"], tax.category)) ?
 					tax.tax_amount : 0.0; }));
 
 			frappe.model.round_floats_in(this.frm.doc,
-				["other_charges_added", "other_charges_deducted"]);
+				["base_taxes_and_charges_added", "base_taxes_and_charges_deducted"]);
 		}
 
-		this.frm.doc.grand_total_import = flt((this.frm.doc.other_charges_added || this.frm.doc.other_charges_deducted) ?
-			flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate) : this.frm.doc.net_total_import);
+		this.frm.doc.grand_total = flt((this.frm.doc.base_taxes_and_charges_added || this.frm.doc.base_taxes_and_charges_deducted) ?
+			flt(this.frm.doc.base_grand_total / this.frm.doc.conversion_rate) : this.frm.doc.net_total);
 
-		this.frm.doc.grand_total_import = flt(this.frm.doc.grand_total_import, precision("grand_total_import"));
+		this.frm.doc.grand_total = flt(this.frm.doc.grand_total, precision("grand_total"));
 
-		if(frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total_import", this.frm.doc.name)) {
-			this.frm.doc.rounded_total_import = Math.round(this.frm.doc.grand_total_import);
+		if(frappe.meta.get_docfield(this.frm.doc.doctype, "rounded_total", this.frm.doc.name)) {
+			this.frm.doc.rounded_total = Math.round(this.frm.doc.grand_total);
 		}
 
-		this.frm.doc.other_charges_added_import = flt(this.frm.doc.other_charges_added /
-			this.frm.doc.conversion_rate, precision("other_charges_added_import"));
-		this.frm.doc.other_charges_deducted_import = flt(this.frm.doc.other_charges_deducted /
-			this.frm.doc.conversion_rate, precision("other_charges_deducted_import"));
+		this.frm.doc.taxes_and_charges_added = flt(this.frm.doc.base_taxes_and_charges_added /
+			this.frm.doc.conversion_rate, precision("taxes_and_charges_added"));
+		this.frm.doc.taxes_and_charges_deducted = flt(this.frm.doc.base_taxes_and_charges_deducted /
+			this.frm.doc.conversion_rate, precision("taxes_and_charges_deducted"));
 	},
 
 	calculate_outstanding_amount: function() {
 		if(this.frm.doc.doctype == "Purchase Invoice" && this.frm.doc.docstatus < 2) {
-			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount"]);
-			this.frm.doc.total_amount_to_pay = flt(this.frm.doc.grand_total - this.frm.doc.write_off_amount,
+			frappe.model.round_floats_in(this.frm.doc, ["base_grand_total", "total_advance", "write_off_amount"]);
+			this.frm.doc.total_amount_to_pay = flt(this.frm.doc.base_grand_total - this.frm.doc.write_off_amount,
 				precision("total_amount_to_pay"));
 			this.frm.doc.outstanding_amount = flt(this.frm.doc.total_amount_to_pay - this.frm.doc.total_advance,
 				precision("outstanding_amount"));
@@ -267,13 +267,13 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		};
 
 
-		setup_field_label_map(["net_total", "total_tax", "grand_total", "in_words",
-			"other_charges_added", "other_charges_deducted",
-			"outstanding_amount", "total_advance", "total_amount_to_pay", "rounded_total"],
+		setup_field_label_map(["base_net_total", "base_total_taxes_and_charges", "base_grand_total", "base_in_words",
+			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted",
+			"outstanding_amount", "total_advance", "total_amount_to_pay", "base_rounded_total"],
 			company_currency);
 
-		setup_field_label_map(["net_total_import", "grand_total_import", "in_words_import",
-			"other_charges_added_import", "other_charges_deducted_import"], this.frm.doc.currency);
+		setup_field_label_map(["net_total", "grand_total", "in_words",
+			"taxes_and_charges_added", "taxes_and_charges_deducted"], this.frm.doc.currency);
 
 		cur_frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency
 			+ " = [?] " + company_currency);
@@ -284,8 +284,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 
 		// toggle fields
-		this.frm.toggle_display(["conversion_rate", "net_total", "grand_total",
-			"in_words", "other_charges_added", "other_charges_deducted"],
+		this.frm.toggle_display(["conversion_rate", "base_net_total", "base_grand_total",
+			"base_in_words", "base_taxes_and_charges_added", "base_taxes_and_charges_deducted"],
 			this.frm.doc.currency !== company_currency);
 
 		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"],

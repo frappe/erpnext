@@ -854,7 +854,7 @@
   }
  ], 
  "read_only_onload": 1, 
- "search_fields": "status, transaction_date, supplier,grand_total", 
+ "search_fields": "status, transaction_date, supplier,base_grand_total", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "supplier_name"

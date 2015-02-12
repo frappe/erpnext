@@ -1258,7 +1258,7 @@
   }
  ], 
  "read_only_onload": 1, 
- "search_fields": "posting_date, due_date, customer, fiscal_year, grand_total, outstanding_amount", 
+ "search_fields": "posting_date, due_date, customer, fiscal_year, base_grand_total, outstanding_amount", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "customer_name"

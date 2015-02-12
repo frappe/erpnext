@@ -33,7 +33,7 @@ def get_transaction_list(doctype, start, additional_fields=None):
 		else:
 			additional_fields = ""
 
-		transactions = frappe.db.sql("""select name, creation, currency, grand_total_export
+		transactions = frappe.db.sql("""select name, creation, currency, grand_total
 			%s
 			from `tab%s` where customer=%s and docstatus=1
 			order by creation desc

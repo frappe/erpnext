@@ -19,7 +19,7 @@ class SellingController(StockController):
 
 	def get_feed(self):
 		return _("To {0} | {1} {2}").format(self.customer_name, self.currency,
-			self.grand_total_export)
+			self.grand_total)
 
 	def onload(self):
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
@@ -65,7 +65,7 @@ class SellingController(StockController):
 	def apply_shipping_rule(self):
 		if self.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
-			value = self.net_total
+			value = self.base_net_total
 
 			# TODO
 			# shipping rule calculation based on item's net weight
@@ -114,12 +114,12 @@ class SellingController(StockController):
 		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None,
 			"disable_rounded_total"))
 
+		if self.meta.get_field("base_in_words"):
+			self.base_in_words = money_in_words(disable_rounded_total and
+				self.base_grand_total or self.base_rounded_total, company_currency)
 		if self.meta.get_field("in_words"):
 			self.in_words = money_in_words(disable_rounded_total and
-				self.grand_total or self.rounded_total, company_currency)
-		if self.meta.get_field("in_words_export"):
-			self.in_words_export = money_in_words(disable_rounded_total and
-				self.grand_total_export or self.rounded_total_export, self.currency)
+				self.grand_total or self.rounded_total, self.currency)
 
 	def calculate_taxes_and_totals(self):
 		super(SellingController, self).calculate_taxes_and_totals()
@@ -204,30 +204,30 @@ class SellingController(StockController):
 				self._set_in_company_currency(item, "amount", "base_amount")
 
 	def calculate_net_total(self):
-		self.net_total = self.net_total_export = 0.0
+		self.base_net_total = self.net_total = 0.0
 
 		for item in self.get("items"):
-			self.net_total += item.base_amount
-			self.net_total_export += item.amount
+			self.base_net_total += item.base_amount
+			self.net_total += item.amount
 
-		self.round_floats_in(self, ["net_total", "net_total_export"])
+		self.round_floats_in(self, ["base_net_total", "net_total"])
 
 	def calculate_totals(self):
-		self.grand_total = flt(self.get("taxes")[-1].total if self.get("taxes") else self.net_total)
+		self.base_grand_total = flt(self.get("taxes")[-1].total if self.get("taxes") else self.base_net_total)
 
-		self.other_charges_total = flt(self.grand_total - self.net_total, self.precision("other_charges_total"))
+		self.base_total_taxes_and_charges = flt(self.base_grand_total - self.base_net_total, self.precision("base_total_taxes_and_charges"))
 
-		self.grand_total_export = flt(self.grand_total / self.conversion_rate) \
-			if (self.other_charges_total or self.discount_amount) else self.net_total_export
+		self.grand_total = flt(self.base_grand_total / self.conversion_rate) \
+			if (self.base_total_taxes_and_charges or self.discount_amount) else self.net_total
 
-		self.other_charges_total_export = flt(self.grand_total_export - self.net_total_export +
-			flt(self.discount_amount), self.precision("other_charges_total_export"))
+		self.total_taxes_and_charges = flt(self.grand_total - self.net_total +
+			flt(self.discount_amount), self.precision("total_taxes_and_charges"))
 
+		self.base_grand_total = flt(self.base_grand_total, self.precision("base_grand_total"))
 		self.grand_total = flt(self.grand_total, self.precision("grand_total"))
-		self.grand_total_export = flt(self.grand_total_export, self.precision("grand_total_export"))
 
+		self.base_rounded_total = rounded(self.base_grand_total)
 		self.rounded_total = rounded(self.grand_total)
-		self.rounded_total_export = rounded(self.grand_total_export)
 
 	def apply_discount_amount(self):
 		if self.discount_amount:
@@ -257,8 +257,8 @@ class SellingController(StockController):
 					flt(tax.rate) / 100
 				actual_taxes_dict.setdefault(tax.idx, actual_tax_amount)
 
-		grand_total_for_discount_amount = flt(self.grand_total - sum(actual_taxes_dict.values()),
-			self.precision("grand_total"))
+		grand_total_for_discount_amount = flt(self.base_grand_total - sum(actual_taxes_dict.values()),
+			self.precision("base_grand_total"))
 		return grand_total_for_discount_amount
 
 	def calculate_outstanding_amount(self):
@@ -266,19 +266,19 @@ class SellingController(StockController):
 		# write_off_amount is only for POS Invoice
 		# total_advance is only for non POS Invoice
 		if self.doctype == "Sales Invoice" and self.docstatus == 0:
-			self.round_floats_in(self, ["grand_total", "total_advance", "write_off_amount",
+			self.round_floats_in(self, ["base_grand_total", "total_advance", "write_off_amount",
 				"paid_amount"])
-			total_amount_to_pay = self.grand_total - self.write_off_amount
+			total_amount_to_pay = self.base_grand_total - self.write_off_amount
 			self.outstanding_amount = flt(total_amount_to_pay - self.total_advance \
 				- self.paid_amount,	self.precision("outstanding_amount"))
 
 	def calculate_commission(self):
 		if self.meta.get_field("commission_rate"):
-			self.round_floats_in(self, ["net_total", "commission_rate"])
+			self.round_floats_in(self, ["base_net_total", "commission_rate"])
 			if self.commission_rate > 100.0:
 				throw(_("Commission rate cannot be greater than 100"))
 
-			self.total_commission = flt(self.net_total * self.commission_rate / 100.0,
+			self.total_commission = flt(self.base_net_total * self.commission_rate / 100.0,
 				self.precision("total_commission"))
 
 	def calculate_contribution(self):
@@ -291,7 +291,7 @@ class SellingController(StockController):
 			self.round_floats_in(sales_person)
 
 			sales_person.allocated_amount = flt(
-				self.net_total * sales_person.allocated_percentage / 100.0,
+				self.base_net_total * sales_person.allocated_percentage / 100.0,
 				self.precision("allocated_amount", sales_person))
 
 			total += sales_person.allocated_percentage

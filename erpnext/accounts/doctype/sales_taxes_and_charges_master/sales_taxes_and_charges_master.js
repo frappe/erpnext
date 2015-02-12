@@ -13,7 +13,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 }
 
 // For customizing print
-cur_frm.pformat.net_total_export = function(doc) {
+cur_frm.pformat.net_total = function(doc) {
 	return '';
 }
 
@@ -21,15 +21,15 @@ cur_frm.pformat.discount_amount = function(doc) {
 	return '';
 }
 
-cur_frm.pformat.grand_total_export = function(doc) {
+cur_frm.pformat.grand_total = function(doc) {
 	return '';
 }
 
-cur_frm.pformat.rounded_total_export = function(doc) {
+cur_frm.pformat.rounded_total = function(doc) {
 	return '';
 }
 
-cur_frm.pformat.in_words_export = function(doc) {
+cur_frm.pformat.in_words = function(doc) {
 	return '';
 }
 
@@ -63,8 +63,8 @@ cur_frm.pformat.taxes= function(doc){
 
 		out +='<table class="noborder" style="width:100%">';
 
-		if(!print_hide('net_total_export')) {
-			out += make_row('Net Total', doc.net_total_export, 1);
+		if(!print_hide('net_total')) {
+			out += make_row('Net Total', doc.net_total, 1);
 		}
 
 		// add rows
@@ -80,17 +80,17 @@ cur_frm.pformat.taxes= function(doc){
 			out += make_row('Discount Amount', doc.discount_amount, 0);
 
 		// grand total
-		if(!print_hide('grand_total_export'))
-			out += make_row('Grand Total', doc.grand_total_export, 1);
+		if(!print_hide('grand_total'))
+			out += make_row('Grand Total', doc.grand_total, 1);
 
-		if(!print_hide('rounded_total_export'))
-			out += make_row('Rounded Total', doc.rounded_total_export, 1);
+		if(!print_hide('rounded_total'))
+			out += make_row('Rounded Total', doc.rounded_total, 1);
 
-		if(doc.in_words_export && !print_hide('in_words_export')) {
+		if(doc.in_words && !print_hide('in_words')) {
 			out +='</table></td></tr>';
 			out += '<tr><td colspan = "2">';
 			out += '<table><tr><td style="width:25%;"><b>In Words</b></td>';
-			out += '<td style="width:50%;">' + doc.in_words_export + '</td></tr>';
+			out += '<td style="width:50%;">' + doc.in_words + '</td></tr>';
 		}
 		out += '</table></td></tr></table></div>';
 	}

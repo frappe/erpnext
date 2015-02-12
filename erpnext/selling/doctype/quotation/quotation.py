@@ -79,7 +79,7 @@ class Quotation(SellingController):
 		self.check_item_table()
 
 		# Check for Approving Authority
-		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total, self)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.base_grand_total, self)
 
 		#update enquiry status
 		self.update_opportunity()

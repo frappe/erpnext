@@ -67,7 +67,7 @@ class DeliveryNote(SellingController):
 
 		item_meta = frappe.get_meta("Delivery Note Item")
 		print_hide_fields = {
-			"parent": ["grand_total_export", "rounded_total_export", "in_words_export", "currency", "net_total_export"],
+			"parent": ["grand_total", "rounded_total", "in_words", "currency", "net_total"],
 			"items": ["rate", "amount", "price_list_rate", "discount_percentage"]
 		}
 
@@ -186,7 +186,7 @@ class DeliveryNote(SellingController):
 		self.validate_packed_qty()
 
 		# Check for Approving Authority
-		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total, self)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.base_grand_total, self)
 
 		# update delivered qty in sales order
 		self.update_prevdoc_status()

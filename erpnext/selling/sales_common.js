@@ -178,20 +178,20 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	total_commission: function() {
-		if(this.frm.doc.net_total) {
-			frappe.model.round_floats_in(this.frm.doc, ["net_total", "total_commission"]);
+		if(this.frm.doc.base_net_total) {
+			frappe.model.round_floats_in(this.frm.doc, ["base_net_total", "total_commission"]);
 
-			if(this.frm.doc.net_total < this.frm.doc.total_commission) {
+			if(this.frm.doc.base_net_total < this.frm.doc.total_commission) {
 				var msg = (__("[Error]") + " " +
 					__(frappe.meta.get_label(this.frm.doc.doctype, "total_commission",
 						this.frm.doc.name)) + " > " +
-					__(frappe.meta.get_label(this.frm.doc.doctype, "net_total", this.frm.doc.name)));
+					__(frappe.meta.get_label(this.frm.doc.doctype, "base_net_total", this.frm.doc.name)));
 				msgprint(msg);
 				throw msg;
 			}
 
 			this.frm.set_value("commission_rate",
-				flt(this.frm.doc.total_commission * 100.0 / this.frm.doc.net_total));
+				flt(this.frm.doc.total_commission * 100.0 / this.frm.doc.base_net_total));
 		}
 	},
 
@@ -201,7 +201,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		if(sales_person.allocated_percentage) {
 			sales_person.allocated_percentage = flt(sales_person.allocated_percentage,
 				precision("allocated_percentage", sales_person));
-			sales_person.allocated_amount = flt(this.frm.doc.net_total *
+			sales_person.allocated_amount = flt(this.frm.doc.base_net_total *
 				sales_person.allocated_percentage / 100.0,
 				precision("allocated_amount", sales_person));
 
@@ -235,37 +235,37 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	calculate_net_total: function() {
 		var me = this;
-		this.frm.doc.net_total = this.frm.doc.net_total_export = 0.0;
+		this.frm.doc.base_net_total = this.frm.doc.net_total = 0.0;
 
 		$.each(this.frm.doc["items"] || [], function(i, item) {
-			me.frm.doc.net_total += item.base_amount;
-			me.frm.doc.net_total_export += item.amount;
+			me.frm.doc.base_net_total += item.base_amount;
+			me.frm.doc.net_total += item.amount;
 		});
 
-		frappe.model.round_floats_in(this.frm.doc, ["net_total", "net_total_export"]);
+		frappe.model.round_floats_in(this.frm.doc, ["base_net_total", "net_total"]);
 	},
 
 	calculate_totals: function() {
 		var me = this;
 		var tax_count = this.frm.doc["taxes"] ? this.frm.doc["taxes"].length: 0;
 
-		this.frm.doc.grand_total = flt(tax_count ? this.frm.doc["taxes"][tax_count - 1].total : this.frm.doc.net_total);
+		this.frm.doc.base_grand_total = flt(tax_count ? this.frm.doc["taxes"][tax_count - 1].total : this.frm.doc.base_net_total);
 
-		this.frm.doc.other_charges_total = flt(this.frm.doc.grand_total - this.frm.doc.net_total,
-			precision("other_charges_total"));
+		this.frm.doc.base_total_taxes_and_charges = flt(this.frm.doc.base_grand_total - this.frm.doc.base_net_total,
+			precision("base_total_taxes_and_charges"));
 
-		this.frm.doc.grand_total_export = (this.frm.doc.other_charges_total || this.frm.doc.discount_amount) ?
-			flt(this.frm.doc.grand_total / this.frm.doc.conversion_rate) : this.frm.doc.net_total_export;
+		this.frm.doc.grand_total = (this.frm.doc.base_total_taxes_and_charges || this.frm.doc.discount_amount) ?
+			flt(this.frm.doc.base_grand_total / this.frm.doc.conversion_rate) : this.frm.doc.net_total;
 
-		this.frm.doc.other_charges_total_export = flt(this.frm.doc.grand_total_export -
-			this.frm.doc.net_total_export + flt(this.frm.doc.discount_amount),
-			precision("other_charges_total_export"));
+		this.frm.doc.total_taxes_and_charges = flt(this.frm.doc.grand_total -
+			this.frm.doc.net_total + flt(this.frm.doc.discount_amount),
+			precision("total_taxes_and_charges"));
 
+		this.frm.doc.base_grand_total = flt(this.frm.doc.base_grand_total, precision("base_grand_total"));
 		this.frm.doc.grand_total = flt(this.frm.doc.grand_total, precision("grand_total"));
-		this.frm.doc.grand_total_export = flt(this.frm.doc.grand_total_export, precision("grand_total_export"));
 
+		this.frm.doc.base_rounded_total = Math.round(this.frm.doc.base_grand_total);
 		this.frm.doc.rounded_total = Math.round(this.frm.doc.grand_total);
-		this.frm.doc.rounded_total_export = Math.round(this.frm.doc.grand_total_export);
 	},
 
 	calculate_outstanding_amount: function(update_paid_amount) {
@@ -273,9 +273,9 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		// paid_amount and write_off_amount is only for POS Invoice
 		// total_advance is only for non POS Invoice
 		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.docstatus==0) {
-			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount",
+			frappe.model.round_floats_in(this.frm.doc, ["base_grand_total", "total_advance", "write_off_amount",
 				"paid_amount"]);
-			var total_amount_to_pay = this.frm.doc.grand_total - this.frm.doc.write_off_amount
+			var total_amount_to_pay = this.frm.doc.base_grand_total - this.frm.doc.write_off_amount
 				- this.frm.doc.total_advance;
 			if(this.frm.doc.is_pos) {
 				if(!this.frm.doc.paid_amount || update_paid_amount===undefined || update_paid_amount) {
@@ -301,7 +301,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				throw msg;
 			}
 
-			this.frm.doc.total_commission = flt(this.frm.doc.net_total * this.frm.doc.commission_rate / 100.0,
+			this.frm.doc.total_commission = flt(this.frm.doc.base_net_total * this.frm.doc.commission_rate / 100.0,
 				precision("total_commission"));
 		}
 	},
@@ -312,7 +312,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				frappe.model.round_floats_in(sales_person);
 				if(sales_person.allocated_percentage) {
 					sales_person.allocated_amount = flt(
-						me.frm.doc.net_total * sales_person.allocated_percentage / 100.0,
+						me.frm.doc.base_net_total * sales_person.allocated_percentage / 100.0,
 						precision("allocated_amount", sales_person));
 				}
 			});
@@ -371,13 +371,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			});
 		};
-		setup_field_label_map(["net_total", "other_charges_total", "base_discount_amount", "grand_total",
-			"rounded_total", "in_words",
+		setup_field_label_map(["base_net_total", "base_total_taxes_and_charges", "base_discount_amount", "base_grand_total",
+			"base_rounded_total", "base_in_words",
 			"outstanding_amount", "total_advance", "paid_amount", "write_off_amount"],
 			company_currency);
 
-		setup_field_label_map(["net_total_export", "other_charges_total_export", "discount_amount", "grand_total_export",
-			"rounded_total_export", "in_words_export"], this.frm.doc.currency);
+		setup_field_label_map(["net_total", "total_taxes_and_charges", "discount_amount", "grand_total",
+			"rounded_total", "in_words"], this.frm.doc.currency);
 
 		cur_frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency
 			+ " = [?] " + company_currency)
@@ -388,8 +388,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 
 		// toggle fields
-		this.frm.toggle_display(["conversion_rate", "net_total", "other_charges_total",
-			"grand_total", "rounded_total", "in_words", "base_discount_amount"],
+		this.frm.toggle_display(["conversion_rate", "base_net_total", "base_total_taxes_and_charges",
+			"base_grand_total", "base_rounded_total", "base_in_words", "base_discount_amount"],
 			this.frm.doc.currency != company_currency);
 
 		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"],

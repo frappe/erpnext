@@ -34,14 +34,14 @@ def execute(filters=None):
 		inv.debit_to, inv.project_name, inv.remarks, ", ".join(sales_order), ", ".join(delivery_note)]
 
 		# map income values
-		net_total = 0
+		base_net_total = 0
 		for income_acc in income_accounts:
 			income_amount = flt(invoice_income_map.get(inv.name, {}).get(income_acc))
-			net_total += income_amount
+			base_net_total += income_amount
 			row.append(income_amount)
 
 		# net total
-		row.append(net_total or inv.net_total)
+		row.append(base_net_total or inv.base_net_total)
 
 		# tax account
 		total_tax = 0
@@ -52,7 +52,7 @@ def execute(filters=None):
 				row.append(tax_amount)
 
 		# total tax, grand total, outstanding amount & rounded total
-		row += [total_tax, inv.grand_total, inv.rounded_total, inv.outstanding_amount]
+		row += [total_tax, inv.base_grand_total, inv.base_rounded_total, inv.outstanding_amount]
 
 		data.append(row)
 
@@ -107,7 +107,7 @@ def get_conditions(filters):
 def get_invoices(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select name, posting_date, debit_to, project_name, customer,
-		customer_name, remarks, net_total, grand_total, rounded_total, outstanding_amount
+		customer_name, remarks, base_net_total, base_grand_total, base_rounded_total, outstanding_amount
 		from `tabSales Invoice`
 		where docstatus = 1 %s order by posting_date desc, name desc""" %
 		conditions, filters, as_dict=1)

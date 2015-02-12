@@ -7,11 +7,11 @@
   "currency": "INR", 
   "doctype": "Purchase Order", 
   "fiscal_year": "_Test Fiscal Year 2013", 
+  "base_grand_total": 5000.0, 
   "grand_total": 5000.0, 
-  "grand_total_import": 5000.0, 
   "is_subcontracted": "Yes", 
   "naming_series": "_T-Purchase Order-", 
-  "net_total": 5000.0, 
+  "base_net_total": 5000.0, 
   "items": [
    {
     "base_amount": 5000.0, 
@@ -41,11 +41,11 @@
   "currency": "INR", 
   "doctype": "Purchase Order", 
   "fiscal_year": "_Test Fiscal Year 2013", 
+  "base_grand_total": 5000.0, 
   "grand_total": 5000.0, 
-  "grand_total_import": 5000.0, 
   "is_subcontracted": "No", 
   "naming_series": "_T-Purchase Order-", 
-  "net_total": 5000.0, 
+  "base_net_total": 5000.0, 
   "items": [
    {
     "base_amount": 5000.0, 

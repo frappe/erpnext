@@ -978,7 +978,7 @@
   }
  ], 
  "read_only_onload": 1, 
- "search_fields": "posting_date, supplier, fiscal_year, bill_no, grand_total, outstanding_amount", 
+ "search_fields": "posting_date, supplier, fiscal_year, bill_no, base_grand_total, outstanding_amount", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "supplier_name"
