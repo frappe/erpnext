@@ -220,3 +220,14 @@ frappe.ui.form.on("Production Order Operation", "time_in_mins", function(frm, cd
 	calculate_cost(frm.doc);
 	calculate_total_cost(frm)
 });
+
+var company_filter = function(doc) {
+	return{
+		filters: {
+			'company': doc.company
+		}
+	}
+}
+
+cur_frm.fields_dict.fg_warehouse.get_query = company_filter
+cur_frm.fields_dict.wip_warehouse.get_query = company_filter
