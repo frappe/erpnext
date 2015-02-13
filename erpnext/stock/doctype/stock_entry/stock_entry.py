@@ -662,7 +662,7 @@ def get_party_details(ref_dt, ref_dn):
 def get_production_order_details(production_order):
 	res = frappe.db.sql("""select bom_no, use_multi_level_bom, wip_warehouse,
 		ifnull(qty, 0) - ifnull(produced_qty, 0) as fg_completed_qty,
-		(infull(additional_operating_cost, 0) / qty)*(ifnull(qty, 0) - ifnull(produced_qty, 0)) as additional_operating_cost
+		(ifnull(additional_operating_cost, 0) / qty)*(ifnull(qty, 0) - ifnull(produced_qty, 0)) as additional_operating_cost
 		from `tabProduction Order` where name = %s""", production_order, as_dict=1)
 
 	return res and res[0] or {}
