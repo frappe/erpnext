@@ -476,3 +476,19 @@ cur_frm.cscript.company = function(doc, cdt, cdn) {
 cur_frm.cscript.posting_date = function(doc, cdt, cdn){
 	erpnext.get_fiscal_year(doc.company, doc.posting_date);
 }
+
+var calculate_total = function(doc, cdt, cdn){
+	var d = locals[cdt][cdn];
+	amount = d.incoming_rate * d.qty
+	frappe.model.set_value(cdt, cdn, 'amount', amount);
+	return frappe.call({
+		doc: cur_frm.doc,
+		method: "set_total_amount",
+		callback: function(r) {
+			refresh_field('total_amount');
+		}
+	});
+}
+
+cur_frm.cscript.incoming_rate = calculate_total;
+cur_frm.cscript.qty = calculate_total;
