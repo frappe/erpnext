@@ -32,30 +32,16 @@
 'To Date' is required,
 'Update Stock' for Sales Invoice {0} must be set,
 * Will be calculated in the transaction.,
-"**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.
-
-To distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**",
+"**Budget Distribution** helps you distribute your budget across months if you have seasonality in your business.To distribute a budget using this distribution, set this **Budget Distribution** in the **Cost Center**",
 **Currency** Master,** Moneda ** MestreDivisa
 **Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.,
-"1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent",
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. Utilitza aquesta opció per mantenir el codi de l'article del client i incloure'l en les cerques en base al seu codi
 90-Above,
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group"">Add / Edit</a>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group"">Add / Edit</a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory"">Add / Edit</a>"
-"<h4>Default Template</h4>
-<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
-<pre><code>{{ address_line1 }}&lt;br&gt;
-{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
-{{ city }}&lt;br&gt;
-{% if state %}{{ state }}&lt;br&gt;{% endif -%}
-{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
-{{ country }}&lt;br&gt;
-{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
-{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
-{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>",
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>",
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Hi ha un grup de clients amb el mateix nom, si us plau canvia el nom del client o del nom del Grup de Clients"
 A Customer exists with same name,
 A Lead with this email id should exist,Hauria d'haver-hi un client potencial amb aquest correu electrònic
@@ -174,8 +160,7 @@ Administrator,Administrador
 Advance Amount,
 Advance Paid,Bestreta pagada
 Advance amount,
-"Advance paid against {0} {1} cannot be greater \
-					than Grand Total {2}",
+Advance paid against {0} {1} cannot be greater \					than Grand Total {2},
 Advances,Advances
 Advertisement,Anunci
 Advertising,
@@ -207,15 +192,9 @@ Against Voucher Type,Contra el val tipus
 Age,
 Ageing Based On,Envelliment basat en
 Ageing Date is mandatory for opening entry,La data d'envelliment és obligatòria per a l'entrada d'obertura
-Ageing date is mandatory for opening entry,Data d'envelliment és obligatori per a l'entrada d'obertura
+Ageing date is mandatory for opening entry,La data d'envelliment és obligatòria per a l'entrada d'obertura
 Agent,Agent
-"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
-
-The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
-
-For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.
-
-Note: BOM = Bill of Materials",
+"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.Note: BOM = Bill of Materials",
 Aging Date,Data Envelliment
 Aging Date is mandatory for opening entry,
 Agriculture,Agricultura
@@ -951,9 +930,7 @@ Download Reconcilation Data,
 Download Template,Descarregar plantilla
 Download a report containing all raw materials with their latest inventory status,Descarrega un informe amb totes les matèries primeres amb el seu estat últim inventari
 "Download the Template, fill appropriate data and attach the modified file.","Descarregueu la plantilla, omplir les dades adequades i adjuntar l'arxiu modificat."
-"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","Descarregueu la plantilla, ompliu les dades i adjuntar l'arxiu modificat.
- Apareixeran tots els registres de presència del treballador en el període marcat"
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records","Descarregueu la plantilla, ompliu les dades i adjuntar l'arxiu modificat. Apareixeran tots els registres de presència del treballador en el període marcat"
 Dr,Dr
 Draft,Esborrany
 Dropbox,
@@ -993,7 +970,7 @@ Email,
 Email Digest,
 Email Digest Settings,Ajustos del processador d'emails
 Email Digest: ,
-Email ID,ID de correu electrònic
+Email ID,Identificació de l'email
 Email Id,Identificació de l'email
 "Email Id where a job applicant will email e.g. ""jobs@example.com""","Email Id where a job applicant will email e.g. ""jobs@example.com"""
 Email Notifications,Notificacions per correu electrònic
@@ -1065,9 +1042,7 @@ Error: {0} > {1},Error: {0}> {1}
 Estimated Material Cost,Cost estimat del material
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:","Fins i tot si hi ha diverses regles de preus amb major prioritat, s'apliquen prioritats internes:"
 Everyone can read,
-"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Exemple :. ABCD ##### 
- Si la sèrie s'estableix i Número de sèrie no s'esmenta en les transaccions, llavors es crearà un número de sèrie automàticament basat en aquesta sèrie. Si sempre vol indicar explícitament els números de sèrie per a aquest article. deixeu en blanc."
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Exemple :. ABCD #####  Si la sèrie s'estableix i Número de sèrie no s'esmenta en les transaccions, llavors es crearà un número de sèrie automàticament basat en aquesta sèrie. Si sempre vol indicar explícitament els números de sèrie per a aquest article. deixeu en blanc."
 Exchange Rate,Tipus De Canvi
 Excise Duty 10,
 Excise Duty 14,
@@ -1159,7 +1134,7 @@ Fiscal Year {0} not found.,
 Fixed Asset,Actius Fixos
 Fixed Assets,Actius Fixos
 Fixed Cycle Cost,
-Fold,Plegar
+Fold,fold
 Follow via Email,
 "Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",
 Food,Menjar
@@ -1328,7 +1303,7 @@ Host,Amfitrió
 Hour,Hora
 Hour Rate,Hour Rate
 Hour Rate Labour,
-Hours,Hores
+Hours,hores
 How Pricing Rule is applied?,Com s'aplica la regla de preus?
 How frequently?,Amb quina freqüència?
 "How should this currency be formatted? If not set, will use system defaults",
@@ -1561,8 +1536,7 @@ Item-wise Purchase Register,Registre de compra d'articles
 Item-wise Sales History,
 Item-wise Sales Register,
 Item: {0} does not exist in the system,Article: {0} no existeix en el sistema
-"Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry",
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry",
 Item: {0} not found in the system,Article: {0} no es troba en el sistema
 Items,Articles
 Items To Be Requested,Articles que s'han de demanar
@@ -1840,8 +1814,7 @@ Moving Average Rate,Moving Average Rate
 Mr,Sr
 Ms,Sra
 Multiple Item prices.,Múltiples Preus d'articles
-"Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}",
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}",
 Music,
 Must be Whole Number,Ha de ser nombre enter
 Name,Nom
@@ -1916,7 +1889,7 @@ No Data,No hi ha dades
 No Item with Barcode {0},Número d'article amb Codi de barres {0}
 No Item with Serial No {0},
 No Items to pack,No hi ha articles per embalar
-No Permission,Sense Permís
+No Permission,No permission
 No Production Orders created,
 No Remarks,Sense Observacions
 No Supplier Accounts found. Supplier Accounts are identified based on 'Master Type' value in account record.,No s'han trobat comptes de Proveïdor. Els Comptes de Proveïdor s'identifiquen amb base en el valor de 'Type Master' en registre de compte.
@@ -2125,8 +2098,7 @@ Payment Tool,Eina de Pagament
 Payment Tool Detail,Detall mitjà de Pagament
 Payment Tool Details,Detalls eina de pagament
 Payment Type,Tipus de Pagament
-"Payment against {0} {1} cannot be greater \
-					than Outstanding Amount {2}",
+Payment against {0} {1} cannot be greater \					than Outstanding Amount {2},
 Payment cannot be made for empty cart,El pagament no es pot fer per al carro buit
 Payment of salary for the month {0} and year {1},
 Payments,Pagaments
@@ -2296,7 +2268,7 @@ Preferred Billing Address,
 Preferred Shipping Address,Adreça d'enviament preferida
 Prefix,Prefix
 Present,Present
-Prevdoc DocType,Prevdoc DocType
+Prevdoc DocType,Prevdoc Doctype
 Prevdoc Doctype,Prevdoc Doctype
 Preview,
 Previous,
@@ -2557,7 +2529,7 @@ Ref,
 Ref Code,Codi de Referència
 Ref Date,
 Ref SQ,
-Reference,Referència
+Reference,referència
 Reference #{0} dated {1},Referència #{0} amb data {1}
 Reference Date,Data de Referència
 Reference Name,Referència Nom
@@ -2566,7 +2538,7 @@ Reference No & Reference Date is required for {0},
 Reference No is mandatory if you entered Reference Date,
 Reference Number,
 Reference Row #,Referència Fila #
-Refresh,Refrescar
+Refresh,refrescar
 Registration Details,Detalls de registre
 Registration Info,
 Rejected,Rebutjat
@@ -2601,7 +2573,7 @@ Report Type,
 Report Type is mandatory,
 Reports to,Informes a
 Reqd By Date,Reqd By Date
-Reqd by Date,Reqd per data
+Reqd by Date,Reqd By Date
 Request Type,
 Request for Information,Sol·licitud d'Informació
 Request for purchase.,Sol·licitud de venda.
@@ -2668,10 +2640,8 @@ Row {0}: Payment against Sales/Purchase Order should always be marked as advance
 Row {0}: Payment amount can not be negative,
 Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.,"Fila {0}: Si us plau, vegeu ""És Avanç 'contra el Compte {1} si es tracta d'una entrada amb antelació."
 Row {0}: Qty is mandatory,Fila {0}: Quantitat és obligatori
-"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
-					Available Qty: {4}, Transfer Qty: {5}",
-"Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}",
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}",
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}",
 Row {0}: {1} is not a valid {2},La fila {0}: {1} no és vàlida per {2}
 Row {0}:Start Date must be before End Date,
 Rules for adding shipping costs.,Regles per afegir les despeses d'enviament.
@@ -2863,8 +2833,7 @@ Serial No {0} status must be 'Available' to Deliver,
 Serial Nos Required for Serialized Item {0},Nº de Sèrie Necessari per article serialitzat {0}
 Serial Number Series,
 Serial number {0} entered more than once,
-"Serialized Item {0} cannot be updated \
-					using Stock Reconciliation",
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,
 Series,Sèrie
 Series List for this Transaction,Llista de Sèries per a aquesta transacció
 Series Updated,
@@ -2961,61 +2930,10 @@ Standard,Estàndard
 Standard Buying,Compra Standard
 Standard Reports,Informes estàndard
 Standard Selling,Standard Selling
-"Standard Terms and Conditions that can be added to Sales and Purchases.
-
-Examples:
-
-1. Validity of the offer.
-1. Payment Terms (In Advance, On Credit, part advance etc).
-1. What is extra (or payable by the Customer).
-1. Safety / usage warning.
-1. Warranty if any.
-1. Returns Policy.
-1. Terms of shipping, if applicable.
-1. Ways of addressing disputes, indemnity, liability, etc.
-1. Address and Contact of your Company.",
+"Standard Terms and Conditions that can be added to Sales and Purchases.Examples:1. Validity of the offer.1. Payment Terms (In Advance, On Credit, part advance etc).1. What is extra (or payable by the Customer).1. Safety / usage warning.1. Warranty if any.1. Returns Policy.1. Terms of shipping, if applicable.1. Ways of addressing disputes, indemnity, liability, etc.1. Address and Contact of your Company.",
 Standard contract terms for Sales or Purchase.,
-"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
-
-#### Note
-
-The tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.
-
-#### Description of Columns
-
-1. Calculation Type: 
-    - This can be on **Net Total** (that is the sum of basic amount).
-    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
-    - **Actual** (as mentioned).
-2. Account Head: The Account ledger under which this tax will be booked
-3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.
-4. Description: Description of the tax (that will be printed in invoices / quotes).
-5. Rate: Tax rate.
-6. Amount: Tax amount.
-7. Total: Cumulative total to this point.
-8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.",
-"Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
-
-#### Note
-
-The tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.
-
-#### Description of Columns
-
-1. Calculation Type: 
-    - This can be on **Net Total** (that is the sum of basic amount).
-    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
-    - **Actual** (as mentioned).
-2. Account Head: The Account ledger under which this tax will be booked
-3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.
-4. Description: Description of the tax (that will be printed in invoices / quotes).
-5. Rate: Tax rate.
-6. Amount: Tax amount.
-7. Total: Cumulative total to this point.
-8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.",
+"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.#### NoteThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.#### Description of Columns1. Calculation Type:     - This can be on **Net Total** (that is the sum of basic amount).    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.    - **Actual** (as mentioned).2. Account Head: The Account ledger under which this tax will be booked3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.4. Description: Description of the tax (that will be printed in invoices / quotes).5. Rate: Tax rate.6. Amount: Tax amount.7. Total: Cumulative total to this point.8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.10. Add or Deduct: Whether you want to add or deduct the tax.",
+"Standard tax template that can be applied to all Sales Transactions. This template can contain list of tax heads and also other expense / income heads like ""Shipping"", ""Insurance"", ""Handling"" etc.#### NoteThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.#### Description of Columns1. Calculation Type:     - This can be on **Net Total** (that is the sum of basic amount).    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.    - **Actual** (as mentioned).2. Account Head: The Account ledger under which this tax will be booked3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.4. Description: Description of the tax (that will be printed in invoices / quotes).5. Rate: Tax rate.6. Amount: Tax amount.7. Total: Cumulative total to this point.8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.",
 Start,Començar
 Start Date,
 Start POS,Inicia TPV
@@ -3058,7 +2976,7 @@ Stock Reconcilation Template,Plantilla d'ajust d'estoc
 Stock Reconciliation,Reconciliació d'Estoc
 "Stock Reconciliation can be used to update the stock on a particular date, usually as per physical inventory.",
 Stock Settings,Ajustaments d'estocs
-Stock UOM,UDM de l'estoc
+Stock UOM,UDM de l'Estoc
 Stock UOM Replace Utility,Utilitat de susbtitució de les UDM de l'estoc
 Stock UOM updatd for Item {0},S'ha actualitzat la UDM de l'article {0}
 Stock Uom,UDM de l'Estoc
@@ -3169,9 +3087,7 @@ Tax Assets,
 Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,
 Tax Rate,Tax Rate
 Tax and other salary deductions.,
-"Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges","Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges"
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges
 Tax template for buying transactions.,Plantilla d'Impostos per a les transaccions de compres
 Tax template for selling transactions.,
 Taxes,
@@ -3216,10 +3132,7 @@ The First User: You,
 "The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""",
 The Organization,L'Organització
 "The account head under Liability, in which Profit/Loss will be booked","El compte capçalera amb responsabilitat, en el que es farà l'assentament de Guany / Pèrdua"
-The date on which next invoice will be generated. It is generated on submit.,
-"The date on which next invoice will be generated. It is generated on submit.
-","La data en què es generarà la següent factura. Es genera al Presentar.
-"
+The date on which next invoice will be generated. It is generated on submit.,La data en què es generarà la següent factura. Es genera al Presentar.
 The date on which recurring invoice will be stop,La data en què s'atura la factura recurrent
 The date on which recurring order will be stop,La data en què s'aturarà la comanda recurrent
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc","El dia del mes en què es generarà factura automàtica, per exemple 05, 28, etc."
@@ -3356,8 +3269,7 @@ Total Taxes and Charges,Total d'impostos i càrrecs
 Total Taxes and Charges (Company Currency),Total Impostos i càrrecs (En la moneda de la Companyia)
 Total Variable Cost,
 Total Variance,
-"Total advance ({0}) against Order {1} cannot be greater \
-				than the Grand Total ({2})",
+Total advance ({0}) against Order {1} cannot be greater \				than the Grand Total ({2}),
 Total allocated percentage for sales team should be 100,El Percentatge del total assignat per a l'equip de vendes ha de ser de 100
 Total amount of invoices received from suppliers during the digest period,Import total de les factures rebudes dels proveïdors durant el període
 Total amount of invoices sent to the customer during the digest period,Import total de les factures enviades al client durant el període
@@ -3625,7 +3537,7 @@ e.g. VAT,"per exemple, l'IVA"
 eg. Cheque Number,
 example: Next Day Shipping,exemple: Enviament Dia següent
 fold,fold
-hidden,ocult
+hidden,Ocult
 hours,hores
 lft,
 old_parent,old_parent
@@ -3648,8 +3560,7 @@ website page link,website page link
 {0} days from {1},{0} dies des de {1}
 {0} does not belong to Company {1},
 {0} entered twice in Item Tax,{0} entrat dues vegades en l'Impost d'article
-"{0} is an invalid email address in 'Notification \
-					Email Address'",
+{0} is an invalid email address in 'Notification \					Email Address',
 {0} is mandatory,{0} és obligatori
 {0} is mandatory for Item {1},{0} és obligatori per l'article {1}
 {0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} és obligatori. Potser el registre de canvi de divisa no es crea per {1} a {2}.
