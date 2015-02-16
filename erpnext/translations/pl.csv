@@ -1187,7 +1187,7 @@ If more than one package of the same type (for print),If more than one package o
 If not applicable please enter: NA,If not applicable please enter: NA
 "If not checked, the list will have to be added to each Department where it has to be applied.","If not checked, the list will have to be added to each Department where it has to be applied."
 "If specified, send the newsletter using this email address","If specified, send the newsletter using this email address"
-"If the account is frozen, entries are allowed to restricted users.","If the account is frozen, entries are allowed to restricted users."
+"If the account is frozen, entries are allowed to restricted users.","Jeśli konto jest zamrożone, zapisy mogą wykonywać tylko wyznaczone osoby."
 "If this Account represents a Customer, Supplier or Employee, set it here.","If this Account represents a Customer, Supplier or Employee, set it here."
 If you follow Quality Inspection. Enables Item QA Required and QA No in Purchase Receipt,If you follow Quality Inspection. Enables Item QA Required and QA No in Purchase Receipt
 If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity
@@ -1195,7 +1195,7 @@ If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged 
 "If you have created a standard template in Sales Taxes and Charges Master, select one and click on the button below.","If you have created a standard template in Sales Taxes and Charges Master, select one and click on the button below."
 "If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page","If you have long print formats, this feature can be used to split the page to be printed on multiple pages with all headers and footers on each page"
 If you involve in manufacturing activity. Enables Item 'Is Manufactured',If you involve in manufacturing activity. Enables Item 'Is Manufactured'
-Ignore,Ignore
+Ignore,Ignoruj
 Ignored: ,Ignored: 
 Image,Obrazek
 Image View,Image View
@@ -1629,7 +1629,7 @@ Monthly Attendance Sheet,Monthly Attendance Sheet
 Monthly Earning & Deduction,Monthly Earning & Deduction
 Monthly Salary Register,Monthly Salary Register
 Monthly salary statement.,Monthly salary statement.
-More Details,More Details
+More Details,Więcej szczegółów
 More Info,Więcej informacji
 Motion Picture & Video,Motion Picture & Video
 Moving Average,Moving Average
@@ -2417,10 +2417,10 @@ Sales Email Settings,Sales Email Settings
 Sales Expenses,Koszty Sprzedaży
 Sales Extras,Sales Extras
 Sales Funnel,Sales Funnel
-Sales Invoice,Sales Invoice
+Sales Invoice,Faktura sprzedaży
 Sales Invoice Advance,Sales Invoice Advance
 Sales Invoice Item,Sales Invoice Item
-Sales Invoice Items,Sales Invoice Items
+Sales Invoice Items,Pozycje na Fakturze sprzedaży
 Sales Invoice Message,Sales Invoice Message
 Sales Invoice No,Nr faktury sprzedażowej
 Sales Invoice Trends,Sales Invoice Trends
@@ -2510,7 +2510,7 @@ Select your home country and check the timezone and currency.,Wybierz kraj oraz 
 "Selecting ""Yes"" will allow you to make a Production Order for this item.","Selecting ""Yes"" will allow you to make a Production Order for this item."
 "Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.","Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master."
 Selling,Sprzedaż
-Selling Settings,Selling Settings
+Selling Settings,Ustawienia Sprzedaży
 Send,Wyślij
 Send Autoreply,Send Autoreply
 Send Email,Send Email
@@ -2709,7 +2709,7 @@ Supplier Addresses and Contacts,Supplier Addresses and Contacts
 Supplier Details,Szczegóły dostawcy
 Supplier Intro,Supplier Intro
 Supplier Invoice Date,Supplier Invoice Date
-Supplier Invoice No,Supplier Invoice No
+Supplier Invoice No,Nr faktury dostawcy
 Supplier Name,Nazwa dostawcy
 Supplier Naming By,Supplier Naming By
 Supplier Part Number,Numer katalogowy dostawcy

@@ -115,25 +115,25 @@ Add,Добавить
 Add / Edit Taxes and Charges,Добавить / Изменить Налоги и сборы
 Add Child,Добавить дочерний
 Add Serial No,Добавить серийный номер
-Add Taxes,Добавить Налоги
-Add Taxes and Charges,Добавить налогов и сборов
+Add Taxes,Добавить налоги
+Add Taxes and Charges,Добавить налоги и сборы
 Add or Deduct,Добавить или вычесть
 Add rows to set annual budgets on Accounts.,"Добавьте строки, чтобы установить годовые бюджеты на счетах."
 Add to Cart,Добавить в корзину
 Add to calendar on this date,Добавить в календарь в этот день
 Add/Remove Recipients,Добавить / Удалить получателей
 Address,Адрес
-Address & Contact,Адрес & Контактная
+Address & Contact,Адрес и контакт
 Address & Contacts,Адрес и контакты
 Address Desc,Адрес по убыванию
-Address Details,Адрес
+Address Details,Подробности адреса
 Address HTML,Адрес HTML
 Address Line 1,Адрес (1-я строка)
 Address Line 2,Адрес (2-я строка)
-Address Template,Адрес шаблона
-Address Title,Адрес Название
-Address Title is mandatory.,Адрес Название является обязательным.
-Address Type,Тип Адреса
+Address Template,Шаблон адреса
+Address Title,Название адреса
+Address Title is mandatory.,Название адреса является обязательным.
+Address Type,Тип адреса
 Address master.,Адрес мастер.
 Administrative Expenses,Административные затраты
 Administrative Officer,Администратор
@@ -168,34 +168,34 @@ Aging Date,Старение Дата
 Aging Date is mandatory for opening entry,Старение Дата является обязательным для открытия запись
 Agriculture,Сельское хозяйство
 Airline,Авиалиния
-All Addresses.,Все Адреса.
+All Addresses.,Все адреса.
 All Contact,Все Связаться
 All Contacts.,Все контакты.
 All Customer Contact,Все клиентов Связаться
 All Customer Groups,Все Группы клиентов
 All Day,Весь день
 All Employee (Active),Все Сотрудник (Активный)
-All Item Groups,Все Группы товаров
-All Lead (Open),Все Свинец (Открыть)
+All Item Groups,Все группы товаров
+All Lead (Open),Все лиды (Открыть)
 All Products or Services.,Все продукты или услуги.
 All Sales Partner Contact,Все Партнеры по сбыту Связаться
-All Sales Person,Все Менеджер по продажам
+All Sales Person,Все менеджеры по продажам
 All Supplier Contact,Все поставщиком Связаться
-All Supplier Types,Все типы Поставщик
+All Supplier Types,Все типы поставщиков
 All Territories,Все Территории
 "All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Все экспорт смежных областях, как валюты, обменный курс, экспорт Количество, экспорт общего итога и т.д. доступны в накладной, POS, цитаты, счет-фактура, заказ клиента и т.д."
 "All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Все импорта смежных областях, как валюты, обменный курс, общий объем импорта, импорт общего итога и т.д. доступны в ТОВАРНЫЙ ЧЕК, поставщиков цитаты, счета-фактуры Заказа т.д."
-All items have already been invoiced,Все детали уже выставлен счет
+All items have already been invoiced,На все товары уже выставлены счета
 All these items have already been invoiced,Все эти предметы уже выставлен счет
-Allocate,Выделять
+Allocate,Выделить
 Allocate leaves for a period.,Выделите листья на определенный срок.
 Allocate leaves for the year.,Выделите листья в течение года.
 Allocated Amount,Ассигнованная сумма
-Allocated Budget,Выделенные Бюджет
+Allocated Budget,Выделенный бюджет
 Allocated amount,Ассигнованная сумма
 Allocated amount can not be negative,Выделенные сумма не может быть отрицательным
 Allocated amount can not greater than unadusted amount,Выделенные количество не может превышать unadusted сумму
-Allow Bill of Materials,Разрешить Ведомость материалов
+Allow Bill of Materials,Разрешить BOM
 Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item,"Разрешить Ведомость материалов должно быть ""Да"". Потому что один или много активных спецификаций представляют для этого элемента"
 Allow Children,Разрешайте детям
 Allow Dropbox Access,Разрешить Dropbox Access
@@ -547,8 +547,8 @@ Company,Организация
 Company (not Customer or Supplier) master.,Компания (не клиента или поставщика) хозяин.
 Company Abbreviation,Аббревиатура компании
 Company Details,Данные предприятия
-Company Email,Адрес эл. почты
-"Company Email ID not found, hence mail not sent","Компании e-mail ID не найден, следовательно, Почта не отправляется"
+Company Email,Email предприятия
+"Company Email ID not found, hence mail not sent","Не найден e-mail ID предприятия, поэтому почта не отправляется"
 Company Info,Информация о компании
 Company Name,Название компании
 Company Settings,Настройки компании
@@ -1310,8 +1310,8 @@ Intern,Стажер
 Internal,Внутренний
 Internet Publishing,Интернет издания
 Introduction,Введение
-Invalid Barcode,Неверный штрихкод
-Invalid Barcode or Serial No,Неверный штрихкод или Серийный номер
+Invalid Barcode,Неверный штрих-код
+Invalid Barcode or Serial No,Неверный штрихкод или серийный номер
 Invalid Mail Server. Please rectify and try again.,"Неверный почтовый сервер. Пожалуйста, исправьте и попробуйте еще раз."
 Invalid Master Name,Неверный Мастер Имя
 Invalid User Name or Support Password. Please rectify and try again.,"Неверное имя пользователя или поддержки Пароль. Пожалуйста, исправить и попробовать еще раз."
@@ -1633,7 +1633,7 @@ Masters,Мастеры
 Match non-linked Invoices and Payments.,"Подходим, не связанных Счета и платежи."
 Material Issue,Материал выпуск
 Material Receipt,Материал Поступление
-Material Request,Материал Запрос
+Material Request,Заказ материалов
 Material Request Detail No,Материал Запрос Деталь №
 Material Request For Warehouse,Материал Запрос для Склад
 Material Request Item,Материал Запрос товара
@@ -2351,7 +2351,7 @@ Reconcile,Согласовать
 Reconciliation Data,Данные Примирение
 Reconciliation HTML,Примирение HTML
 Reconciliation JSON,Примирение JSON
-Record item movement.,Движение Запись пункт.
+Record item movement.,Запись движений предмета.
 Recurring Id,Периодическое Id
 Recurring Invoice,Периодическое Счет
 Recurring Type,Периодическое Тип
@@ -2528,7 +2528,7 @@ Sales Order required for Item {0},Заказать продаж требуетс
 Sales Order {0} is not submitted,Заказ на продажу {0} не представлено
 Sales Order {0} is not valid,Заказ на продажу {0} не является допустимым
 Sales Order {0} is stopped,Заказ на продажу {0} остановлен
-Sales Partner,Партнер по продажам
+Sales Partner,Торговый партнер
 Sales Partner Name,Партнер по продажам Имя
 Sales Partner Target,Партнеры по сбыту целям
 Sales Partners Commission,Партнеры по сбыту Комиссия
@@ -2754,7 +2754,7 @@ Stock Assets,"Капитал запасов
 "
 Stock Balance,Баланс запасов
 Stock Entries already created for Production Order ,Stock Entries already created for Production Order 
-Stock Entry,Фото Вступление
+Stock Entry,Складская запись
 Stock Entry Detail,Фото Вступление Подробно
 Stock Expenses,Акции Расходы
 Stock Frozen Upto,Фото Замороженные До
@@ -2786,8 +2786,8 @@ Stop Birthday Reminders,Стоп День рождения Напоминани�
 Stop Material Request,Стоп Материал Запрос
 Stop users from making Leave Applications on following days.,Остановить пользователям вносить Leave приложений на последующие дни.
 Stop!,Стоп!
-Stopped,Стоп
-Stopped order cannot be cancelled. Unstop to cancel.,Остановился заказ не может быть отменен. Unstop отменить.
+Stopped,Приостановлено
+Stopped order cannot be cancelled. Unstop to cancel.,"Приостановленный заказ не может быть отменен. Снимите с заказа статус ""Приостановлено"" для отмены"
 Stores,Магазины
 Stub,Огрызок
 Sub Assemblies,Sub сборки
@@ -2799,16 +2799,16 @@ Submit all salary slips for the above selected criteria,Представьте �
 Submit this Production Order for further processing.,Отправить эту производственного заказа для дальнейшей обработки.
 Submitted,Представленный
 Subsidiary,Филиал
-Successful: ,Successful: 
+Successful: ,Успешно:
 Successfully Reconciled,Успешно Примирение
-Suggestions,намеки
+Suggestions,Предложения
 Sunday,Воскресенье
 Supplier,Поставщик
 Supplier (Payable) Account,Поставщик (оплачивается) счета
 Supplier (vendor) name as entered in supplier master,"Поставщик (продавец) имя, как вступил в мастер поставщиком"
-Supplier > Supplier Type,Поставщик> Поставщик Тип
+Supplier > Supplier Type,Поставщик > Тип поставщика
 Supplier Account Head,Поставщик аккаунт руководитель
-Supplier Address,Поставщик Адрес
+Supplier Address,Адрес поставщика
 Supplier Addresses and Contacts,Поставщик Адреса и контакты
 Supplier Details,Подробная информация о поставщике
 Supplier Intro,Поставщик Введение
@@ -2820,16 +2820,16 @@ Supplier Part Number,Поставщик Номер детали
 Supplier Quotation,Поставщик цитаты
 Supplier Quotation Item,Поставщик Цитата Пункт
 Supplier Reference,Поставщик Ссылка
-Supplier Type,Тип Поставщик
+Supplier Type,Тип поставщика
 Supplier Type / Supplier,Тип Поставщик / Поставщик
 Supplier Type master.,Тип Поставщик мастер.
-Supplier Warehouse,Поставщик Склад
+Supplier Warehouse,Склад поставщика
 Supplier Warehouse mandatory for sub-contracted Purchase Receipt,Поставщик Склад обязательным для субподрядчиком ТОВАРНЫЙ ЧЕК
 Supplier database.,Поставщик базы данных.
 Supplier master.,Мастер Поставщик.
 Supplier warehouse where you have issued raw materials for sub - contracting,"Поставщик склад, где вы оформили сырье для суб - заказчик"
 Supplier-Wise Sales Analytics,Поставщик-Wise продаж Аналитика
-Support,Самолет поддержки
+Support,Поддержка
 Support Analtyics,Поддержка Analtyics
 Support Analytics,Поддержка Аналитика
 Support Email,Поддержка по электронной почте

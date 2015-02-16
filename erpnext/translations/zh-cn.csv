@@ -28,53 +28,29 @@
 'To Date' is required,“至今”是必需的
 'Update Stock' for Sales Invoice {0} must be set,'更新库存“的销售发票{0}必须设置
 * Will be calculated in the transaction.,*将被计算在该交易。
-"1 Currency = [?] Fraction
-For e.g. 1 USD = 100 Cent","1货币= [？]分数
-对于如1美元= 100美分"
+1 Currency = [?] FractionFor e.g. 1 USD = 100 Cent,1货币= [？]分数对于如1美元= 100美分
 1. To maintain the customer wise item code and to make them searchable based on their code use this option,1。为了保持客户明智的项目代码，并使其搜索根据自己的代码中使用这个选项
 "<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","<a href=""#Sales Browser/Customer Group"">添加/编辑</a>"
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group"">添加/编辑</a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory"">添加/编辑</a>"
-"<h4>Default Template</h4>
-<p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p>
-<pre><code>{{ address_line1 }}&lt;br&gt;
-{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}
-{{ city }}&lt;br&gt;
-{% if state %}{{ state }}&lt;br&gt;{% endif -%}
-{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}
-{{ country }}&lt;br&gt;
-{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
-{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
-{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<H4>默认模板</ H4> 
- <P>使用<a href=""http://jinja.pocoo.org/docs/templates/"">神社模板</ a>和地址的所有字段（包括自定义字段如果有的话）将可</ P> 
- <PRE>的<code> {{address_line1}} <BR> 
- {％如果address_line2％} {{address_line2}} {<BR> ％ENDIF - ％} 
- {{城市}} <BR> 
- {％，如果状态％} {{状态}} <BR> {％ENDIF - ％} 
- {％如果PIN代码％}密码：{{PIN码}} <BR> {％ENDIF - ％} 
- {{国家}} <BR> 
- {％，如果电话％}电话：{{电话}} {<BR> ％ENDIF - ％} 
- {％如果传真％}传真：{{传真}} <BR> {％ENDIF - ％} 
- {％如果email_id％}邮箱：{{email_id}} <BR> ; {％ENDIF - ％} 
- </代码> </预>"
-A Customer Group exists with same name please change the Customer name or rename the Customer Group,客户群组存在具有相同名称，请更改客户姓名或重命名客户集团
-A Customer exists with same name,一位顾客存在具有相同名称
-A Lead with this email id should exist,与此电子邮件id一个铅应该存在
+"<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<H4>默认模板</ H4>  <P>使用<a href=""http://jinja.pocoo.org/docs/templates/"">神社模板</ a>和地址的所有字段（包括自定义字段如果有的话）将可</ P>  <PRE>的<code> {{address_line1}} <BR>  {％如果address_line2％} {{address_line2}} {<BR> ％ENDIF - ％}  {{城市}} <BR>  {％，如果状态％} {{状态}} <BR> {％ENDIF - ％}  {％如果PIN代码％}密码：{{PIN码}} <BR> {％ENDIF - ％}  {{国家}} <BR>  {％，如果电话％}电话：{{电话}} {<BR> ％ENDIF - ％}  {％如果传真％}传真：{{传真}} <BR> {％ENDIF - ％}  {％如果email_id％}邮箱：{{email_id}} <BR> ; {％ENDIF - ％}  </代码> </预>"
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,具有相同名称的客户群组已经存在，请更改客户姓名或重命名客户集团
+A Customer exists with same name,具有相同名称的顾客已经存在
+A Lead with this email id should exist,与此电子邮件关联的一个潜在客户应该存在
 A Product or Service,产品或服务
-A Supplier exists with same name,A供应商存在具有相同名称
-A symbol for this currency. For e.g. $,符号的这种货币。对于如$
+A Supplier exists with same name,具有相同名称的供应商已存在
+A symbol for this currency. For e.g. $,这种货币的符号。例如$
 AMC Expiry Date,AMC到期时间
 Abbr,缩写
-Abbreviation cannot have more than 5 characters,缩写不能有超过5个字符
+Abbreviation cannot have more than 5 characters,缩写不能超过5个字符
 Above Value,上述值
 Absent,缺席
 Acceptance Criteria,验收标准
 Accepted,接受
-Accepted + Rejected Qty must be equal to Received quantity for Item {0},接受+拒绝的数量必须等于收稿量项目{0}
-Accepted Quantity,接受数量
-Accepted Warehouse,接受仓库
-Account,由于有现有的股票交易为这个项目，你不能改变的'有序列号“的价值观， ”是股票项目“和”估值方法“
+Accepted + Rejected Qty must be equal to Received quantity for Item {0},接受+拒绝的数量必须等于项目{0}的接收数量
+Accepted Quantity,接受的数量
+Accepted Warehouse,接受的仓库
+Account,账户
 Account Balance,账户余额
 Account Created: {0},帐户创建时间： {0}
 Account Details,帐户明细
@@ -83,7 +59,7 @@ Account Name,帐户名称
 Account Type,账户类型
 "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'",帐户余额已在信贷，你是不允许设置“余额必须是'为'借'
 "Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'",帐户已在借方余额，则不允许设置“余额必须是'为'信用'
-Account for the warehouse (Perpetual Inventory) will be created under this Account.,账户仓库（永续盘存）将在该帐户下创建。
+Account for the warehouse (Perpetual Inventory) will be created under this Account.,仓库（永续盘存）的账户将在该帐户下创建。
 Account head {0} created,帐户头{0}创建
 Account must be a balance sheet account,帐户必须是结算账户
 Account with child nodes cannot be converted to ledger,账户与子节点不能转换到总账
@@ -96,16 +72,14 @@ Account {0} does not belong to company: {1},帐户{0}不属于公司：{1}
 Account {0} does not exist,帐户{0}不存在
 Account {0} has been entered more than once for fiscal year {1},帐户{0}已多次输入会计年度{1}
 Account {0} is frozen,帐户{0}被冻结
-Account {0} is inactive,帐户{0}是无效的
-Account {0} is not valid,帐户{0}无效
-Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,帐户{0}的类型必须为“固定资产”作为项目{1}是一个资产项目
-Account {0}: Parent account {1} can not be a ledger,帐户{0}：家长帐户{1}不能是总账
-Account {0}: Parent account {1} does not belong to company: {2},帐户{0}：家长帐户{1}不属于公司：{2}
-Account {0}: Parent account {1} does not exist,帐户{0}：家长帐户{1}不存在
-Account {0}: You can not assign itself as parent account,帐户{0}：你不能将自己作为父母的帐户
-"Account: {0} can only be updated via \
-					Stock Transactions","帐号：\
-股票交易{0}只能通过更新"
+Account {0} is inactive,帐户{0}是停用的
+Account {0} is not valid,帐户{0}是无效的
+Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,因为项目{1}是一个资产项目，所以帐户{0}的类型必须为“固定资产”
+Account {0}: Parent account {1} can not be a ledger,帐户{0}：父帐户{1}不能是总账
+Account {0}: Parent account {1} does not belong to company: {2},帐户{0}：父帐户{1}不属于公司：{2}
+Account {0}: Parent account {1} does not exist,帐户{0}：父帐户{1}不存在
+Account {0}: You can not assign itself as parent account,帐户{0}：你不能将自己作为父的帐户
+Account: {0} can only be updated via \					Stock Transactions,帐号：{0}只能通过\证券交易更新
 Accountant,会计
 Accounting,会计
 "Accounting Entries can be made against leaf nodes, called",会计分录可以对叶节点进行，称为
@@ -310,7 +284,7 @@ Auto Accounting For Stock Settings,汽车占股票设置
 Auto Material Request,汽车材料要求
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,自动加注材料要求，如果数量低于再订购水平在一个仓库
 Automatically compose message on submission of transactions.,自动编写邮件在提交交易。
-Automatically extract Job Applicants from a mail box ,
+Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,从一个信箱，例如自动提取信息
 Automatically updated via Stock Entry of type Manufacture/Repack,通过股票输入型制造/重新包装的自动更新
 Automotive,汽车
@@ -867,13 +841,13 @@ Distributor,经销商
 Divorced,离婚
 Do Not Contact,不要联系
 Do not show any symbol like $ etc next to currencies.,不要显示，如$等任何符号旁边货币。
-Do really want to unstop production order: ,
-Do you really want to STOP ,
+Do really want to unstop production order: ,Do really want to unstop production order: 
+Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,你真的要停止这种材料要求？
 Do you really want to Submit all Salary Slip for month {0} and year {1},难道你真的想要提交的所有工资单的一个月{0}和年{1}
-Do you really want to UNSTOP ,
+Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,难道你真的想要UNSTOP此材料要求？
-Do you really want to stop production order: ,
+Do you really want to stop production order: ,Do you really want to stop production order: 
 Doc Name,文件名称
 Doc Type,文件类型
 Document Description,文档说明
@@ -886,9 +860,7 @@ Download Reconcilation Data,下载Reconcilation数据
 Download Template,下载模板
 Download a report containing all raw materials with their latest inventory status,下载一个包含所有原料一份报告，他们最新的库存状态
 "Download the Template, fill appropriate data and attach the modified file.",下载模板，填写相应的数据，并附加了修改后的文件。
-"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","下载模板，填写相应的数据，并附加了修改后的文件。
-所有时间和员工组合在选定的期限会在模板中，与现有的考勤记录"
+"Download the Template, fill appropriate data and attach the modified file.All dates and employee combination in the selected period will come in the template, with existing attendance records",下载模板，填写相应的数据，并附加了修改后的文件。所有时间和员工组合在选定的期限会在模板中，与现有的考勤记录
 Draft,草案
 Dropbox,Dropbox的
 Dropbox Access Allowed,Dropbox的允许访问
@@ -987,16 +959,14 @@ Enter url parameter for receiver nos,输入URL参数的接收器号
 Entertainment & Leisure,娱乐休闲
 Entertainment Expenses,娱乐费用
 Entries,项
-Entries against ,
+Entries against ,Entries against 
 Entries are not allowed against this Fiscal Year if the year is closed.,参赛作品不得对本财年，如果当年被关闭。
 Equity,公平
 Error: {0} > {1},错误： {0} > {1}
 Estimated Material Cost,预计材料成本
 "Even if there are multiple Pricing Rules with highest priority, then following internal priorities are applied:",即使有更高优先级的多个定价规则，然后按照内部优先级应用：
 Everyone can read,每个人都可以阅读
-"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","实施例：ABCD＃＃＃＃＃
-如果串联设置和序列号没有在交易中提到，然后自动序列号将基于该系列被创建。如果你总是想明确提到串行NOS为这个项目。留空。"
+"Example: ABCD.#####If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",实施例：ABCD＃＃＃＃＃如果串联设置和序列号没有在交易中提到，然后自动序列号将基于该系列被创建。如果你总是想明确提到串行NOS为这个项目。留空。
 Exchange Rate,汇率
 Excise Duty 10,消费税10
 Excise Duty 14,消费税14
@@ -1058,11 +1028,11 @@ Failed: ,失败：
 Family Background,家庭背景
 Fax,传真
 Features Setup,功能设置
-Feed,饲料
-Feed Type,饲料类型
+Feed,订阅
+Feed Type,订阅类型
 Feedback,反馈
 Female,女
-Fetch exploded BOM (including sub-assemblies),取爆炸BOM（包括子组件）
+Fetch exploded BOM (including sub-assemblies),取得展开的BOM（包括子组件）
 "Field available in Delivery Note, Quotation, Sales Invoice, Sales Order",在送货单，报价单，销售发票，销售订单可用字段
 Files Folder ID,文件夹的ID
 Fill the form and save it,填写表格，并将其保存
@@ -1470,9 +1440,7 @@ Item-wise Purchase History,项目明智的购买历史
 Item-wise Purchase Register,项目明智的购买登记
 Item-wise Sales History,项目明智的销售历史
 Item-wise Sales Register,项目明智的销售登记
-"Item: {0} managed batch-wise, can not be reconciled using \
-					Stock Reconciliation, instead use Stock Entry","货号：{0}管理分批，不能使用不甘心\
-股票和解，而是使用股票输入"
+"Item: {0} managed batch-wise, can not be reconciled using \					Stock Reconciliation, instead use Stock Entry",货号：{0}管理分批，不能使用不甘心\股票和解，而是使用股票输入
 Item: {0} not found in the system,货号： {0}没有在系统中找到
 Items,项目
 Items To Be Requested,项目要请求
@@ -1512,13 +1480,13 @@ Language,语
 Last Name,姓
 Last Purchase Rate,最后预订价
 Latest,最新
-Lead,铅
-Lead Details,铅详情
-Lead Id,铅标识
-Lead Name,铅名称
-Lead Owner,铅所有者
-Lead Source,铅源
-Lead Status,铅状态
+Lead,潜在客户
+Lead Details,潜在客户详情
+Lead Id,潜在客户ID
+Lead Name,潜在客户姓名
+Lead Owner,潜在客户的所有者
+Lead Source,潜在客户来源
+Lead Status,潜在客户状态
 Lead Time Date,交货时间日期
 Lead Time Days,交货期天
 Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,交货期天是天由该项目预计将在您的仓库的数量。这天是在申请材料中取出，当你选择这个项目。
@@ -1731,9 +1699,7 @@ Moving Average Rate,移动平均房价
 Mr,先生
 Ms,女士
 Multiple Item prices.,多个项目的价格。
-"Multiple Price Rule exists with same criteria, please resolve \
-			conflict by assigning priority. Price Rules: {0}","多价规则存在具有相同的标准，请解决\
-冲突通过分配优先级。价格规则：{0}"
+"Multiple Price Rule exists with same criteria, please resolve \			conflict by assigning priority. Price Rules: {0}",多价规则存在具有相同的标准，请解决\冲突通过分配优先级。价格规则：{0}
 Music,音乐
 Must be Whole Number,必须是整数
 Name,名称
@@ -2312,7 +2278,7 @@ Quantity required for Item {0} in row {1},要求项目数量{0}行{1}
 Quarter,季
 Quarterly,季刊
 Quick Help,快速帮助
-Quotation,行情
+Quotation,形式发票
 Quotation Item,产品报价
 Quotation Items,报价产品
 Quotation Lost Reason,报价遗失原因
@@ -2483,26 +2449,18 @@ Rounded Off,四舍五入
 Rounded Total,总圆角
 Rounded Total (Company Currency),圆润的总计（公司货币）
 Row # ,行＃
-Row # {0}: ,
+Row # {0}: ,Row # {0}: 
 Row #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).,行＃{0}：有序数量不能超过项目的最低订单数量（在项目主数据中定义）少。
 Row #{0}: Please specify Serial No for Item {1},行＃{0}：请注明序号为项目{1}
-"Row {0}: Account does not match with \
-						Purchase Invoice Credit To account","行{0}：\
-采购发票计入帐户帐户不具有匹配"
-"Row {0}: Account does not match with \
-						Sales Invoice Debit To account","行{0}：\
-销售发票借记帐户帐户不具有匹配"
+Row {0}: Account does not match with \						Purchase Invoice Credit To account,行{0}：\采购发票计入帐户帐户不具有匹配
+Row {0}: Account does not match with \						Sales Invoice Debit To account,行{0}：\销售发票借记帐户帐户不具有匹配
 Row {0}: Conversion Factor is mandatory,行{0}：转换系数是强制性的
 Row {0}: Credit entry can not be linked with a Purchase Invoice,行{0} ：信用记录无法与采购发票联
 Row {0}: Debit entry can not be linked with a Sales Invoice,行{0} ：借记不能与一个销售发票联
 Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,行{0}：付款金额必须小于或等于发票未偿还金额。请参考下面的说明。
 Row {0}: Qty is mandatory,行{0}：数量是强制性的
-"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
-					Available Qty: {4}, Transfer Qty: {5}","行{0}：数量不是在仓库{1} avalable {2} {3}。
-有货数量：{4}，转移数量：{5}"
-"Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}","行{0}：设置{1}的周期性，从和日期之间的差\
-必须大于或等于{2}"
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}",行{0}：数量不是在仓库{1} avalable {2} {3}。有货数量：{4}，转移数量：{5}
+"Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}",行{0}：设置{1}的周期性，从和日期之间的差\必须大于或等于{2}
 Row {0}:Start Date must be before End Date,行{0} ：开始日期必须是之前结束日期
 Rules for adding shipping costs.,规则增加运输成本。
 Rules for applying pricing and discount.,规则适用的定价和折扣。
@@ -2520,7 +2478,7 @@ SMS Settings,短信设置
 SO Date,SO日期
 SO Pending Qty,SO待定数量
 SO Qty,SO数量
-Salary,薪水
+Salary,工资
 Salary Information,薪资信息
 Salary Manager,薪资管理
 Salary Mode,薪酬模式
@@ -2683,9 +2641,7 @@ Serial No {0} status must be 'Available' to Deliver,序列号{0}的状态必须�
 Serial Nos Required for Serialized Item {0},序列号为必填项序列为{0}
 Serial Number Series,序列号系列
 Serial number {0} entered more than once,序号{0}多次输入
-"Serialized Item {0} cannot be updated \
-					using Stock Reconciliation","序列化的项目{0}不能更新\
-使用股票对账"
+Serialized Item {0} cannot be updated \					using Stock Reconciliation,序列化的项目{0}不能更新\使用股票对账
 Series,系列
 Series List for this Transaction,系列对表本交易
 Series Updated,系列更新
@@ -2788,7 +2744,7 @@ Status of {0} {1} is now {2},{0} {1}现在状态{2}
 Status updated to {0},状态更新为{0}
 Statutory info and other general information about your Supplier,法定的信息和你的供应商等一般资料
 Stay Updated,保持更新
-Stock,股票
+Stock,库存
 Stock Adjustment,库存调整
 Stock Adjustment Account,库存调整账户
 Stock Ageing,股票老龄化
@@ -2911,9 +2867,7 @@ Tax Assets,所得税资产
 Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items,税务类别不能为'估值'或'估值及总，因为所有的项目都是非库存产品
 Tax Rate,税率
 Tax and other salary deductions.,税务及其他薪金中扣除。
-"Tax detail table fetched from item master as a string and stored in this field.
-Used for Taxes and Charges","从项目主税的细节表读取为字符串，并存储在这个领域。
-用于税收和收费"
+Tax detail table fetched from item master as a string and stored in this field.Used for Taxes and Charges,从项目主税的细节表读取为字符串，并存储在这个领域。用于税收和收费
 Tax template for buying transactions.,税务模板购买交易。
 Tax template for selling transactions.,税务模板卖出的交易。
 Taxable,应课税
@@ -2959,9 +2913,7 @@ The First User: You,第一个用户：您
 "The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""",代表包装的项目。该项目必须有“是股票项目”为“否”和“是销售项目”为“是”
 The Organization,本组织
 "The account head under Liability, in which Profit/Loss will be booked",根据责任账号头，其中利润/亏损将被黄牌警告
-"The date on which next invoice will be generated. It is generated on submit.
-","在这接下来的发票将生成的日期。它是在提交生成的。
-"
+The date on which next invoice will be generated. It is generated on submit.,在这接下来的发票将生成的日期。它是在提交生成的。
 The date on which recurring invoice will be stop,在其经常性发票将被停止日期
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",这个月的日子，汽车发票将会产生如05，28等
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,在天在你申请许可的假期。你不需要申请许可。

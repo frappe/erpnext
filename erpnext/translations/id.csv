@@ -42,7 +42,7 @@ A Supplier exists with same name,Pemasok dengan nama yang sama sudah ada
 A symbol for this currency. For e.g. $,Simbol untuk mata uang ini. Contoh $
 AMC Expiry Date,AMC Tanggal Berakhir
 Abbr,Singkatan
-Abbreviation cannot have more than 5 characters,Singkatan tak bisa memiliki lebih dari 5 karakter
+Abbreviation cannot have more than 5 characters,Singkatan tidak dapat melebihi 5 karakter
 Above Value,Nilai di atas
 Absent,Absen
 Acceptance Criteria,Kriteria Penerimaan
@@ -86,7 +86,7 @@ Accounting,Akuntansi
 "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Pencatatan Akuntansi telah dibekukan sampai tanggal ini, tidak seorang pun yang bisa melakukan / memodifikasi pencatatan kecuali peran yang telah ditentukan di bawah ini."
 Accounting journal entries.,Pencatatan Jurnal akuntansi.
 Accounts,Akun / Rekening
-Accounts Browser,Account Browser
+Accounts Browser,Pencarian Akun
 Accounts Frozen Upto,Akun dibekukan sampai dengan
 Accounts Payable,Hutang
 Accounts Receivable,Piutang
@@ -130,7 +130,7 @@ Address HTML,Alamat HTML
 Address Line 1,Alamat Baris 1
 Address Line 2,Alamat Baris 2
 Address Template,Template Alamat
-Address Title,Alamat Judul
+Address Title,Judul Alamat
 Address Title is mandatory.,"Wajib masukan Judul Alamat.
 "
 Address Type,Tipe Alamat
@@ -141,7 +141,7 @@ Advance Amount,Jumlah Uang Muka
 Advance amount,Jumlah muka
 Advances,Uang Muka
 Advertisement,iklan
-Advertising,Pengiklanan
+Advertising,Periklanan
 Aerospace,Aerospace
 After Sale Installations,Pemasangan setelah Penjualan
 Against,Terhadap
@@ -150,8 +150,7 @@ Against Bill {0} dated {1},Terhadap Bill {0} tanggal {1}
 Against Docname,Terhadap Docname
 Against Doctype,Terhadap Doctype
 Against Document Detail No,Terhadap Detail Dokumen No.
-Against Document No,"Melawan Dokumen No.
-"
+Against Document No,Terhadap Dokumen No.
 Against Expense Account,Terhadap Akun Biaya
 Against Income Account,Terhadap Akun Pendapatan
 Against Journal Voucher,Terhadap Voucher Journal
@@ -175,12 +174,12 @@ All Contacts.,Semua Kontak.
 All Customer Contact,Semua Kontak Pelanggan
 All Customer Groups,Semua Grup Pelanggan
 All Day,Semua Hari
-All Employee (Active),Semua Karyawan (Active)
+All Employee (Active),Semua Karyawan (Aktif)
 All Item Groups,Semua Grup Barang/Item
 All Lead (Open),Semua Prospektus (Open)
 All Products or Services.,Semua Produk atau Jasa.
 All Sales Partner Contact,Kontak Semua Partner Penjualan
-All Sales Person,Semua Salesperson
+All Sales Person,Semua Salesmen
 All Supplier Contact,Kontak semua pemasok
 All Supplier Types,Semua Jenis pemasok
 All Territories,Semua Wilayah
@@ -190,7 +189,7 @@ All items have already been invoiced,Semua Barang telah tertagih
 All these items have already been invoiced,Semua barang-barang tersebut telah ditagih
 Allocate,Alokasi
 Allocate leaves for a period.,Alokasi cuti untuk periode tertentu
-Allocate leaves for the year.,Alokasi cuti untuk tahun ini.
+Allocate leaves for the year.,Alokasi cuti untuk tahunan.
 Allocated Amount,Jumlah alokasi
 Allocated Budget,Alokasi Anggaran
 Allocated amount,Jumlah yang dialokasikan
@@ -199,8 +198,8 @@ Allocated amount can not greater than unadusted amount,Jumlah yang dialokasikan 
 Allow Bill of Materials,Izinkan untuk Bill of Material
 Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item,Izinkan untuk Bill of Material harus 'Ya'. karena ada satu atau lebih BOM aktif untuk item barang ini.
 Allow Children,Izinkan Anak Akun
-Allow Dropbox Access,Izinkan Dropbox Access
-Allow Google Drive Access,Izinkan Google Drive Access
+Allow Dropbox Access,Izinkan Akses Dropbox
+Allow Google Drive Access,Izinkan Akses Google Drive
 Allow Negative Balance,Izinkan Saldo Negatif
 Allow Negative Stock,Izinkan Bursa Negatif
 Allow Production Order,Izinkan Pesanan Produksi
@@ -228,7 +227,7 @@ Another Salary Structure {0} is active for employee {0}. Please make its status 
 Apparel & Accessories,Pakaian & Aksesoris
 Applicability,Penerapan
 Applicable For,Berlaku Untuk
-Applicable Holiday List,Berlaku Libur
+Applicable Holiday List,Daftar hari libur yang berlaku
 Applicable Territory,Wilayah yang berlaku
 Applicable To (Designation),Berlaku Untuk (Penunjukan)
 Applicable To (Employee),Berlaku Untuk (Karyawan)
@@ -239,14 +238,14 @@ Applicant for a Job.,Pemohon untuk pekerjaan.
 Application of Funds (Assets),Penerapan Dana (Aset)
 Applications for leave.,Aplikasi untuk cuti.
 Applies to Company,Berlaku untuk Perusahaan
-Apply On,Terapkan On
+Apply On,Terapkan Pada
 Appraisal,Penilaian
-Appraisal Goal,Penilaian Goal
-Appraisal Goals,Penilaian Gol
-Appraisal Template,Appraisal Template
-Appraisal Template Goal,Gol Appraisal Template
-Appraisal Template Title,Appraisal Template Judul
-Appraisal {0} created for Employee {1} in the given date range,Penilaian {0} diciptakan untuk Employee {1} dalam rentang tanggal tertentu
+Appraisal Goal,Penilaian Pencapaian
+Appraisal Goals,Penilaian Pencapaian
+Appraisal Template,Template Penilaian
+Appraisal Template Goal,Template Penilaian Pencapaian
+Appraisal Template Title,Judul Template Penilaian
+Appraisal {0} created for Employee {1} in the given date range,Penilaian {0} telah dibuat untuk karyawan {1} dalam rentang tanggal tertentu
 Apprentice,Magang
 Approval Status,Status Persetujuan
 Approval Status must be 'Approved' or 'Rejected',Status Persetujuan harus 'Disetujui' atau 'Ditolak'
@@ -256,8 +255,8 @@ Approving Role,Menyetujui Peran
 Approving Role cannot be same as role the rule is Applicable To,Menyetujui Peran tidak bisa sama dengan peran aturan yang Berlaku Untuk
 Approving User,Menyetujui Pengguna
 Approving User cannot be same as user the rule is Applicable To,Menyetujui Pengguna tidak bisa sama dengan pengguna aturan yang Berlaku Untuk
-Are you sure you want to STOP ,Are you sure you want to STOP 
-Are you sure you want to UNSTOP ,Are you sure you want to UNSTOP 
+Are you sure you want to STOP ,Apakah anda yakin untuk berhenti
+Are you sure you want to UNSTOP ,Apakah anda yakin untuk batal berhenti
 Arrear Amount,Jumlah tunggakan
 "As Production Order can be made for this item, it must be a stock item.","Seperti Orde Produksi dapat dibuat untuk item ini, itu harus menjadi barang saham."
 As per Stock UOM,Per Saham UOM
@@ -265,41 +264,41 @@ As per Stock UOM,Per Saham UOM
 Asset,Aset
 Assistant,Asisten
 Associate,Rekan
-Atleast one of the Selling or Buying must be selected,Atleast salah satu Jual atau Beli harus dipilih
-Atleast one warehouse is mandatory,Atleast satu gudang adalah wajib
+Atleast one of the Selling or Buying must be selected,"Setidaknya salah satu, Jual atau Beli harus dipilih"
+Atleast one warehouse is mandatory,Setidaknya satu gudang adalah wajib
 Attach Image,Pasang Gambar
 Attach Letterhead,Lampirkan Surat
 Attach Logo,Pasang Logo
 Attach Your Picture,Pasang Gambar Anda
 Attendance,Kehadiran
-Attendance Date,Kehadiran Tanggal
+Attendance Date,Tanggal Kehadiran
 Attendance Details,Rincian Kehadiran
 Attendance From Date,Kehadiran Dari Tanggal
-Attendance From Date and Attendance To Date is mandatory,Kehadiran Dari Tanggal dan Kehadiran To Date adalah wajib
-Attendance To Date,Kehadiran To Date
+Attendance From Date and Attendance To Date is mandatory,Kehadiran Dari Tanggal dan Kehadiran Sampai Tanggal adalah wajib
+Attendance To Date,Kehadiran Sampai Tanggal
 Attendance can not be marked for future dates,Kehadiran tidak dapat ditandai untuk tanggal masa depan
 Attendance for employee {0} is already marked,Kehadiran bagi karyawan {0} sudah ditandai
 Attendance record.,Catatan kehadiran.
 Authorization Control,Pengendalian Otorisasi
-Authorization Rule,Aturan Otorisasi
-Auto Accounting For Stock Settings,Auto Akuntansi Untuk Stock Pengaturan
-Auto Material Request,Auto Material Permintaan
-Auto-raise Material Request if quantity goes below re-order level in a warehouse,Auto-meningkatkan Permintaan Material jika kuantitas berjalan di bawah tingkat re-order di gudang
+Authorization Rule,Regulasi Autorisasi
+Auto Accounting For Stock Settings,Akuntansi Otomatis Untuk Stock Pengaturan
+Auto Material Request,Permintaan Material Otomatis
+Auto-raise Material Request if quantity goes below re-order level in a warehouse,Naikan secara otomatis Permintaan Material jika kuantitas berjalan di bawah tingkat pemesanan ulang di gudang
 Automatically compose message on submission of transactions.,Secara otomatis menulis pesan pada pengajuan transaksi.
 Automatically extract Job Applicants from a mail box ,Automatically extract Job Applicants from a mail box 
 Automatically extract Leads from a mail box e.g.,Secara otomatis mengekstrak Memimpin dari kotak surat misalnya
 Automatically updated via Stock Entry of type Manufacture/Repack,Secara otomatis diperbarui melalui Bursa Masuknya jenis Industri / Repack
-Automotive,Ot
-Autoreply when a new mail is received,Autoreply ketika mail baru diterima
+Automotive,Otomotif
+Autoreply when a new mail is received,Jawab otomatis ketika email baru diterima
 Available,Tersedia
-Available Qty at Warehouse,Qty Tersedia di Gudang
+Available Qty at Warehouse,Jumlah Tersedia di Gudang
 Available Stock for Packing Items,Tersedia Stock untuk Packing Produk
 "Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","Tersedia dalam BOM, Pengiriman Catatan, Purchase Invoice, Pesanan Produksi, Purchase Order, Penerimaan Pembelian, Faktur Penjualan, Sales Order, Stock Masuk, Timesheet"
 Average Age,Rata-rata Usia
 Average Commission Rate,Rata-rata Komisi Tingkat
 Average Discount,Rata-rata Diskon
-Awesome Products,Mengagumkan Produk
-Awesome Services,Layanan yang mengagumkan
+Awesome Products,Produk Mengagumkan
+Awesome Services,Layanan mengagumkan
 BOM Detail No,No. Rincian BOM
 BOM Explosion Item,BOM Ledakan Barang
 BOM Item,Komponen BOM
@@ -316,13 +315,13 @@ BOM {0} for Item {1} in row {2} is inactive or not submitted,BOM {0} untuk Item 
 BOM {0} is not active or not submitted,BOM {0} tidak aktif atau tidak tersubmit
 BOM {0} is not submitted or inactive BOM for Item {1},BOM {0} tidak tersubmit atau BOM tidak aktif untuk Item {1}
 Backup Manager,Backup Manager
-Backup Right Now,Backup Right Now
+Backup Right Now,Backup Sekarang Juga
 Backups will be uploaded to,Backup akan di-upload ke
-Balance Qty,Balance Qty
+Balance Qty,Jumlah Saldo
 Balance Sheet,Neraca
 Balance Value,Nilai Saldo
 Balance for Account {0} must always be {1},Saldo Rekening {0} harus selalu {1}
-Balance must be,Balance harus
+Balance must be,Saldo harus
 "Balances of Accounts of type ""Bank"" or ""Cash""","Saldo Rekening jenis ""Bank"" atau ""Cash"""
 Bank,Bank
 Bank / Cash Account,Bank / Rekening Kas
@@ -3159,8 +3158,8 @@ Voucher Type,Voucher Type
 Voucher Type and Date,Voucher Jenis dan Tanggal
 Walk In,Walk In
 Warehouse,Gudang
-Warehouse Contact Info,Gudang Info Kontak
-Warehouse Detail,Gudang Detil
+Warehouse Contact Info,Info Kontak Gudang
+Warehouse Detail,Detil Gudang 
 Warehouse Name,Gudang Nama
 Warehouse and Reference,Gudang dan Referensi
 Warehouse can not be deleted as stock ledger entry exists for this warehouse.,Gudang tidak dapat dihapus sebagai entri stok buku ada untuk gudang ini.
@@ -3175,7 +3174,7 @@ Warehouse {0} can not be deleted as quantity exists for Item {1},Gudang {0} tida
 Warehouse {0} does not belong to company {1},Gudang {0} bukan milik perusahaan {1}
 Warehouse {0} does not exist,Gudang {0} tidak ada
 Warehouse {0}: Company is mandatory,Gudang {0}: Perusahaan wajib
-Warehouse {0}: Parent account {1} does not bolong to the company {2},Gudang {0}: akun Parent {1} tidak Bolong kepada perusahaan {2}
+Warehouse {0}: Parent account {1} does not bolong to the company {2},Gudang {0}: akun induk {1} tidak terkait kepada perusahaan {2}
 Warehouse-Wise Stock Balance,Gudang-Wise Stock Balance
 Warehouse-wise Item Reorder,Gudang-bijaksana Barang Reorder
 Warehouses,Gudang
@@ -3251,7 +3250,7 @@ You are not authorized to set Frozen value,Anda tidak diizinkan untuk menetapkan
 You are the Expense Approver for this record. Please Update the 'Status' and Save,Anda adalah Approver Beban untuk record ini. Silakan Update 'Status' dan Simpan
 You are the Leave Approver for this record. Please Update the 'Status' and Save,Anda adalah Leave Approver untuk record ini. Silakan Update 'Status' dan Simpan
 You can enter any date manually,Anda dapat memasukkan tanggal apapun secara manual
-You can enter the minimum quantity of this item to be ordered.,Anda dapat memasukkan jumlah minimum dari item ini yang akan dipesan.
+You can enter the minimum quantity of this item to be ordered.,Anda dapat memasukkan jumlah minimum dari item yang akan dipesan.
 You can not change rate if BOM mentioned agianst any item,Anda tidak dapat mengubah tingkat jika BOM disebutkan agianst item
 You can not enter both Delivery Note No and Sales Invoice No. Please enter any one.,Anda tidak dapat memasukkan kedua Delivery Note ada dan Faktur Penjualan No Masukkan salah satu.
 You can not enter current voucher in 'Against Journal Voucher' column,Anda tidak bisa masuk voucher saat ini di 'Melawan Journal Voucher' kolom
@@ -3260,19 +3259,19 @@ You can start by selecting backup frequency and granting access for sync,Anda da
 You can submit this Stock Reconciliation.,Anda bisa mengirimkan ini Stock Rekonsiliasi.
 You can update either Quantity or Valuation Rate or both.,Anda dapat memperbarui baik Quantity atau Tingkat Penilaian atau keduanya.
 You cannot credit and debit same account at the same time,Anda tidak dapat kredit dan mendebit rekening yang sama pada waktu yang sama
-You have entered duplicate items. Please rectify and try again.,Anda telah memasuki duplikat item. Harap memperbaiki dan coba lagi.
+You have entered duplicate items. Please rectify and try again.,Anda telah memasukkan item yang sama. Harap diperbaiki dan coba lagi.
 You may need to update: {0},Anda mungkin perlu memperbarui: {0}
-You must Save the form before proceeding,Anda harus Simpan formulir sebelum melanjutkan
-Your Customer's TAX registration numbers (if applicable) or any general information,Nomor registrasi PAJAK Pelanggan Anda (jika ada) atau informasi umum setiap
+You must Save the form before proceeding,Anda harus menyimpan formulir sebelum melanjutkan
+Your Customer's TAX registration numbers (if applicable) or any general information,Nomor registrasi PAJAK Pelanggan Anda (jika ada) atau informasi umum lainnya
 Your Customers,Pelanggan Anda
 Your Login Id,Login Id Anda
 Your Products or Services,Produk atau Jasa
 Your Suppliers,Pemasok Anda
 Your email address,Alamat email Anda
-Your financial year begins on,Tahun buku Anda dimulai di
+Your financial year begins on,Tahun pembukuan Anda dimulai
 Your financial year ends on,Tahun keuangan Anda berakhir pada
-Your sales person who will contact the customer in future,Orang sales Anda yang akan menghubungi pelanggan di masa depan
-Your sales person will get a reminder on this date to contact the customer,Orang penjualan Anda akan mendapatkan pengingat pada tanggal ini untuk menghubungi pelanggan
+Your sales person who will contact the customer in future,Sales Anda yang akan menghubungi pelanggan di masa depan
+Your sales person will get a reminder on this date to contact the customer,Sales Anda akan mendapatkan pengingat pada tanggal ini untuk menghubungi pelanggan
 Your setup is complete. Refreshing...,Setup Anda selesai. Refreshing ...
 Your support email id - must be a valid email - this is where your emails will come!,Dukungan email id Anda - harus email yang valid - ini adalah di mana email akan datang!
 [Error],[Kesalahan]

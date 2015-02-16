@@ -1043,7 +1043,7 @@ Financial / accounting year.,Point {0} a été saisi plusieurs fois contre une m
 Financial Analytics,Financial Analytics
 Financial Services,services financiers
 Financial Year End Date,Date de fin de l'exercice financier
-Financial Year Start Date,Les paramètres par défaut pour la vente de transactions .
+Financial Year Start Date,Date de Début de l'exercice financier
 Finished Goods,Produits finis
 First Name,Prénom
 First Responded On,D&#39;abord répondu le
@@ -2589,7 +2589,7 @@ Select Sales Orders from which you want to create Production Orders.,Sélectionn
 Select Time Logs and Submit to create a new Sales Invoice.,Sélectionnez registres de temps et de soumettre à créer une nouvelle facture de vente.
 Select Transaction,Sélectionnez Transaction
 Select Warehouse...,Sélectionnez Entrepôt ...
-Select Your Language,« Jours depuis la dernière commande» doit être supérieur ou égal à zéro
+Select Your Language,Sélectionnez votre langue
 Select account head of the bank where cheque was deposited.,Sélectionnez tête compte de la banque où chèque a été déposé.
 Select company name first.,Sélectionnez le nom de la première entreprise.
 Select template from which you want to get the Goals,Sélectionnez le modèle à partir duquel vous souhaitez obtenir des Objectifs
@@ -2669,7 +2669,7 @@ Settings for HR Module,Utilisateur {0} est désactivé
 "Settings to extract Job Applicants from a mailbox e.g. ""jobs@example.com""",Paramètres pour extraire demandeurs d&#39;emploi à partir d&#39;une boîte aux lettres par exemple &quot;jobs@example.com&quot;
 Setup,Configuration
 Setup Already Complete!!,Configuration déjà complet !
-Setup Complete,installation terminée
+Setup Complete,Installation terminée
 Setup SMS gateway settings,paramètres de la passerelle SMS de configuration
 Setup Series,Série de configuration
 Setup Wizard,actif à court terme
@@ -2703,7 +2703,7 @@ Signature,Signature
 Signature to be appended at the end of every email,Signature d&#39;être ajouté à la fin de chaque e-mail
 Single,Unique
 Single unit of an Item.,Une seule unité d&#39;un élément.
-Sit tight while your system is being setup. This may take a few moments.,Asseyez-vous serré alors que votre système est en cours d' installation. Cela peut prendre quelques instants .
+Sit tight while your system is being setup. This may take a few moments.,Veuillez patienter pendant l’installation. L’opération peut prendre quelques minutes. 
 Slideshow,Diaporama
 Soap & Detergent,Savons et de Détergents
 Software,logiciel
@@ -2919,7 +2919,7 @@ The date on which recurring invoice will be stop,La date à laquelle la facture 
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ","Le jour du mois au cours duquel la facture automatique sera généré, par exemple 05, 28, etc"
 The day(s) on which you are applying for leave are holiday. You need not apply for leave.,S'il vous plaît entrer comptes débiteurs groupe / à payer en master de l'entreprise
 The first Leave Approver in the list will be set as the default Leave Approver,Le premier congé approbateur dans la liste sera définie comme le congé approbateur de défaut
-The first user will become the System Manager (you can change that later).,Le premier utilisateur deviendra le gestionnaire du système ( vous pouvez changer cela plus tard ) .
+The first user will become the System Manager (you can change that later).,Le premier utilisateur deviendra le gestionnaire du système (vous pouvez changer cela plus tard).
 The gross weight of the package. Usually net weight + packaging material weight. (for print),Le poids brut du colis. Habituellement poids net + poids du matériau d&#39;emballage. (Pour l&#39;impression)
 The name of your company for which you are setting up this system.,Le nom de votre entreprise pour laquelle vous configurez ce système .
 The net weight of this package. (calculated automatically as sum of net weight of items),Le poids net de ce paquet. (Calculé automatiquement comme la somme du poids net des articles)
@@ -2971,7 +2971,7 @@ To Date,À ce jour
 To Date should be same as From Date for Half Day leave,Pour la date doit être le même que Date d' autorisation pour une demi-journée
 To Date should be within the Fiscal Year. Assuming To Date = {0},Pour la date doit être dans l'exercice. En supposant à ce jour = {0}
 To Discuss,Pour discuter
-To Do List,To Do List
+To Do List,Liste de choses à faire
 To Package No.,Pour Emballer n °
 To Produce,pour Produire
 To Time,To Time
@@ -3206,7 +3206,7 @@ Weightage,Weightage
 Weightage (%),Weightage (%)
 Welcome,Bienvenue
 Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!,"Bienvenue à ERPNext . Au cours des prochaines minutes, nous allons vous aider à configurer votre compte ERPNext . Essayez de remplir autant d'informations que vous avez même si cela prend un peu plus longtemps . Elle vous fera économiser beaucoup de temps plus tard . Bonne chance !"
-Welcome to ERPNext. Please select your language to begin the Setup Wizard.,Tête de compte {0} créé
+Welcome to ERPNext. Please select your language to begin the Setup Wizard.,Bienvenue sur ERPNext selecionnez votr langue pour démarrer l'assistant de configuration.
 What does it do?,Que faut-il faire ?
 "When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.","Lorsque l&#39;une des opérations contrôlées sont «soumis», un e-mail pop-up s&#39;ouvre automatiquement pour envoyer un courrier électronique à l&#39;associé &quot;Contact&quot; dans cette transaction, la transaction en pièce jointe. L&#39;utilisateur peut ou ne peut pas envoyer l&#39;e-mail."
 "When submitted, the system creates difference entries to set the given stock and valuation on this date.","Lorsqu'il est utilisé, le système crée des entrées de différence pour définir le stock et l'évaluation donnée à cette date ."
@@ -3268,8 +3268,8 @@ Your Login Id,Votre ID de connexion
 Your Products or Services,Vos produits ou services
 Your Suppliers,vos fournisseurs
 Your email address,Frais indirects
-Your financial year begins on,"Vous ne pouvez pas changer la devise par défaut de l'entreprise , car il ya des opérations existantes . Les opérations doivent être annulées pour changer la devise par défaut ."
-Your financial year ends on,Votre exercice se termine le
+Your financial year begins on,Date de début de la période comptable
+Your financial year ends on,Date de fin de la période comptable
 Your sales person who will contact the customer in future,Votre personne de ventes qui prendra contact avec le client dans le futur
 Your sales person will get a reminder on this date to contact the customer,Votre personne de ventes recevoir un rappel de cette date pour contacter le client
 Your setup is complete. Refreshing...,Votre installation est terminée. Rafraîchissant ...
@@ -3318,7 +3318,7 @@ website page link,Lien vers page web
 {0} must be reduced by {1} or you should increase overflow tolerance,{0} doit être réduite par {1} ou vous devez augmenter la tolérance de dépassement
 {0} must have role 'Leave Approver',Nouveau Stock UDM est nécessaire
 {0} valid serial nos for Item {1},BOM {0} pour objet {1} à la ligne {2} est inactif ou non soumis
-{0} {1} against Bill {2} dated {3},{0} {1} contre le projet de loi en date du {2} {3}
+{0} {1} against Bill {2} dated {3},S'il vous plaît entrer le titre !
 {0} {1} against Invoice {2},investissements
 {0} {1} has already been submitted,"S'il vous plaît entrer » est sous-traitée "" comme Oui ou Non"
 {0} {1} has been modified. Please refresh.,Point ou Entrepôt à la ligne {0} ne correspond pas à la Demande de Matériel
