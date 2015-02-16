@@ -135,7 +135,7 @@ class PurchaseReceipt(BuyingController):
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 
 				if pr_qty:
-					val_rate_db_precision = 6 if cint(self.precision("valuation_rate")) <= 6 else 9
+					val_rate_db_precision = 6 if cint(self.precision("valuation_rate", d)) <= 6 else 9
 					sl_entries.append(self.get_sl_entries(d, {
 						"actual_qty": flt(pr_qty),
 						"serial_no": cstr(d.serial_no).strip(),

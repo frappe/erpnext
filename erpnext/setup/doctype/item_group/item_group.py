@@ -34,6 +34,17 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		NestedSet.on_trash(self)
 		WebsiteGenerator.on_trash(self)
 
+	def set_parent_website_route(self):
+		"""Overwrite `parent_website_route` from `WebsiteGenerator`.
+			Only set `parent_website_route` if parent is visble.
+
+			e.g. If `show_in_website` is set for Products then url should be `/products`"""
+		if self.parent_item_group and frappe.db.get_value("Item Group",
+			self.parent_item_group, "show_in_website"):
+			super(WebsiteGenerator, self)()
+		else:
+			self.parent_website_route = ""
+
 	def validate_name_with_item(self):
 		if frappe.db.exists("Item", self.name):
 			frappe.throw(frappe._("An item exists with same name ({0}), please change the item group name or rename the item").format(self.name))

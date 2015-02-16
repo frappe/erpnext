@@ -104,7 +104,7 @@
    "in_list_view": 0, 
    "label": "Page Name", 
    "permlevel": 0, 
-   "read_only": 1
+   "read_only": 0
   }, 
   {
    "depends_on": "show_in_website", 
@@ -190,7 +190,7 @@
  "in_create": 1, 
  "issingle": 0, 
  "max_attachments": 3, 
- "modified": "2015-02-05 05:11:39.844136", 
+ "modified": "2015-02-16 05:44:59.435380", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Item Group", 
