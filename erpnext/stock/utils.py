@@ -34,19 +34,22 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 
 	return sum(sle_map.values())
 
-def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None):
+def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None, with_valuation_rate=False):
+	"""Returns stock balance quantity at given warehouse on given posting date or current date.
+
+	If `with_valuation_rate` is True, will return tuple (qty, rate)"""
 	if not posting_date: posting_date = nowdate()
 	if not posting_time: posting_time = nowtime()
-	last_entry = frappe.db.sql("""select qty_after_transaction from `tabStock Ledger Entry`
+	last_entry = frappe.db.sql("""select qty_after_transaction, valuation_rate from `tabStock Ledger Entry`
 		where item_code=%s and warehouse=%s
 			and timestamp(posting_date, posting_time) < timestamp(%s, %s)
 		order by timestamp(posting_date, posting_time) limit 1""",
 			(item_code, warehouse, posting_date, posting_time))
 
-	if last_entry:
-		return last_entry[0][0]
+	if with_valuation_rate:
+		return (last_entry[0][0], last_entry[0][1]) if last_entry else (0.0, 0.0)
 	else:
-		return 0.0
+		return last_entry[0][0] if last_entry else 0.0
 
 def get_latest_stock_balance():
 	bin_map = {}
