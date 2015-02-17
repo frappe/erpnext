@@ -247,15 +247,15 @@ class EmailDigest(Document):
 			date_field="transaction_date")
 
 	def get_new_quotations(self):
-		return self.get_new_sum("Quotation", self.meta.get_label("new_quotations"), "grand_total",
+		return self.get_new_sum("Quotation", self.meta.get_label("new_quotations"), "base_grand_total",
 			date_field="transaction_date")
 
 	def get_new_sales_orders(self):
-		return self.get_new_sum("Sales Order", self.meta.get_label("new_sales_orders"), "grand_total",
+		return self.get_new_sum("Sales Order", self.meta.get_label("new_sales_orders"), "base_grand_total",
 			date_field="transaction_date")
 
 	def get_new_delivery_notes(self):
-		return self.get_new_sum("Delivery Note", self.meta.get_label("new_delivery_notes"), "grand_total",
+		return self.get_new_sum("Delivery Note", self.meta.get_label("new_delivery_notes"), "base_grand_total",
 			date_field="posting_date")
 
 	def get_new_purchase_requests(self):
@@ -264,15 +264,15 @@ class EmailDigest(Document):
 
 	def get_new_supplier_quotations(self):
 		return self.get_new_sum("Supplier Quotation", self.meta.get_label("new_supplier_quotations"),
-			"grand_total", date_field="transaction_date")
+			"base_grand_total", date_field="transaction_date")
 
 	def get_new_purchase_orders(self):
 		return self.get_new_sum("Purchase Order", self.meta.get_label("new_purchase_orders"),
-			"grand_total", date_field="transaction_date")
+			"base_grand_total", date_field="transaction_date")
 
 	def get_new_purchase_receipts(self):
 		return self.get_new_sum("Purchase Receipt", self.meta.get_label("new_purchase_receipts"),
-			"grand_total", date_field="posting_date")
+			"base_grand_total", date_field="posting_date")
 
 	def get_new_stock_entries(self):
 		return self.get_new_sum("Stock Entry", self.meta.get_label("new_stock_entries"), "total_amount",

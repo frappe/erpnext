@@ -240,7 +240,7 @@ class PurchaseInvoice(BuyingController):
 		self.check_prev_docstatus()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
-			self.company, self.grand_total)
+			self.company, self.base_grand_total)
 
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
@@ -258,7 +258,7 @@ class PurchaseInvoice(BuyingController):
 		gl_entries = []
 
 		# parent's gl entry
-		if self.grand_total:
+		if self.base_grand_total:
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.credit_to,

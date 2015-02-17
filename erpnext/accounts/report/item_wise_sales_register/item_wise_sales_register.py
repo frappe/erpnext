@@ -67,7 +67,7 @@ def get_conditions(filters):
 def get_items(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select si_item.parent, si.posting_date, si.debit_to, si.project_name,
-		si.customer, si.remarks, si.territory, si.company, si.net_total, si_item.item_code, si_item.item_name,
+		si.customer, si.remarks, si.territory, si.company, si.base_net_total, si_item.item_code, si_item.item_name,
 		si_item.item_group, si_item.sales_order, si_item.delivery_note, si_item.income_account,
 		si_item.qty, si_item.base_rate, si_item.base_amount, si.customer_name,
 		si.customer_group, si_item.so_detail
@@ -104,7 +104,7 @@ def get_tax_accounts(item_list, columns):
 		elif charge_type == "Actual" and tax_amount:
 			for d in invoice_wise_items.get(parent, []):
 				item_tax.setdefault(parent, {}).setdefault(d.item_code, {})[account_head] = \
-					flt((tax_amount * d.base_amount) / d.net_total)
+					flt((tax_amount * d.base_amount) / d.base_net_total)
 
 	tax_accounts.sort()
 	columns += [account_head + ":Currency:80" for account_head in tax_accounts]

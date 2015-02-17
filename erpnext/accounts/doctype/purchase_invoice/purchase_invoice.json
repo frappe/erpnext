@@ -265,7 +265,7 @@
   }, 
   {
    "description": "Will be calculated automatically when you enter the details", 
-   "fieldname": "net_total", 
+   "fieldname": "base_net_total", 
    "fieldtype": "Currency", 
    "label": "Net Total (Company Currency)", 
    "oldfieldname": "net_total", 
@@ -281,7 +281,7 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "net_total_import", 
+   "fieldname": "net_total", 
    "fieldtype": "Currency", 
    "label": "Net Total", 
    "oldfieldname": "net_total_import", 
@@ -340,7 +340,7 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "other_charges_added", 
+   "fieldname": "base_taxes_and_charges_added", 
    "fieldtype": "Currency", 
    "label": "Taxes and Charges Added (Company Currency)", 
    "oldfieldname": "other_charges_added", 
@@ -351,7 +351,7 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "other_charges_deducted", 
+   "fieldname": "base_taxes_and_charges_deducted", 
    "fieldtype": "Currency", 
    "label": "Taxes and Charges Deducted (Company Currency)", 
    "oldfieldname": "other_charges_deducted", 
@@ -362,7 +362,18 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "grand_total", 
+   "fieldname": "base_total_taxes_and_charges", 
+   "fieldtype": "Currency", 
+   "label": "Total Taxes and Charges (Company Currency)", 
+   "oldfieldname": "total_tax", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "base_grand_total", 
    "fieldtype": "Currency", 
    "label": "Grand Total (Company Currency)", 
    "oldfieldname": "grand_total", 
@@ -374,7 +385,7 @@
   }, 
   {
    "description": "In Words will be visible once you save the Purchase Invoice.", 
-   "fieldname": "in_words", 
+   "fieldname": "base_in_words", 
    "fieldtype": "Data", 
    "label": "In Words (Company Currency)", 
    "oldfieldname": "in_words", 
@@ -393,7 +404,7 @@
    "width": "50%"
   }, 
   {
-   "fieldname": "other_charges_added_import", 
+   "fieldname": "taxes_and_charges_added", 
    "fieldtype": "Currency", 
    "label": "Taxes and Charges Added", 
    "oldfieldname": "other_charges_added_import", 
@@ -404,7 +415,7 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "other_charges_deducted_import", 
+   "fieldname": "taxes_and_charges_deducted", 
    "fieldtype": "Currency", 
    "label": "Taxes and Charges Deducted", 
    "oldfieldname": "other_charges_deducted_import", 
@@ -415,7 +426,15 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "grand_total_import", 
+   "fieldname": "total_taxes_and_charges", 
+   "fieldtype": "Currency", 
+   "label": "Total Taxes and Charges", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "grand_total", 
    "fieldtype": "Currency", 
    "in_list_view": 1, 
    "label": "Grand Total", 
@@ -427,7 +446,7 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "in_words_import", 
+   "fieldname": "in_words", 
    "fieldtype": "Data", 
    "label": "In Words", 
    "oldfieldname": "in_words_import", 
@@ -455,17 +474,6 @@
    "label": "Total Advance", 
    "no_copy": 1, 
    "oldfieldname": "total_advance", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "total_tax", 
-   "fieldtype": "Currency", 
-   "label": "Total Tax (Company Currency)", 
-   "oldfieldname": "total_tax", 
    "oldfieldtype": "Currency", 
    "options": "Company:company:default_currency", 
    "permlevel": 0, 
@@ -880,7 +888,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-05 05:11:43.312905", 
+ "modified": "2015-02-11 16:56:27.871736", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
@@ -970,7 +978,7 @@
   }
  ], 
  "read_only_onload": 1, 
- "search_fields": "posting_date, supplier, fiscal_year, bill_no, grand_total, outstanding_amount", 
+ "search_fields": "posting_date, supplier, fiscal_year, bill_no, base_grand_total, outstanding_amount", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "supplier_name"

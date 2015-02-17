@@ -30,10 +30,10 @@ def get_so_details():
 			cust.territory,
 			cust.customer_group,
 			count(distinct(so.name)) as 'num_of_order',
-			sum(net_total) as 'total_order_value',
+			sum(base_net_total) as 'total_order_value',
 			sum(if(so.status = "Stopped",
-				so.net_total * so.per_delivered/100,
-				so.net_total)) as 'total_order_considered',
+				so.base_net_total * so.per_delivered/100,
+				so.base_net_total)) as 'total_order_considered',
 			max(so.transaction_date) as 'last_sales_order_date',
 			DATEDIFF(CURDATE(), max(so.transaction_date)) as 'days_since_last_order'
 		from `tabCustomer` cust, `tabSales Order` so
@@ -42,7 +42,7 @@ def get_so_details():
 		order by 'days_since_last_order' desc """,as_list=1)
 
 def get_last_so_amt(customer):
-	res =  frappe.db.sql("""select net_total from `tabSales Order`
+	res =  frappe.db.sql("""select base_net_total from `tabSales Order`
 		where customer ='%(customer)s' and docstatus = 1 order by transaction_date desc
 		limit 1""" % {'customer':customer})
 

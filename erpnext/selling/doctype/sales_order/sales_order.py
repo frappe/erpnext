@@ -142,7 +142,7 @@ class SalesOrder(SellingController):
 		self.check_credit_limit()
 		self.update_stock_ledger(update_stock = 1)
 
-		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.grand_total, self)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.base_grand_total, self)
 
 		self.update_prevdoc_status('submit')
 		frappe.db.set(self, 'status', 'Submitted')

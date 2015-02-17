@@ -196,7 +196,7 @@ class StatusUpdater(Document):
 		ref_fieldname = ref_dt.lower().replace(" ", "_")
 		zero_amount_refdoc = []
 		all_zero_amount_refdoc = frappe.db.sql_list("""select name from `tab%s`
-			where docstatus=1 and net_total = 0""" % ref_dt)
+			where docstatus=1 and base_net_total = 0""" % ref_dt)
 
 		for item in self.get("items"):
 			if item.get(ref_fieldname) \

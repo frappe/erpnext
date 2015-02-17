@@ -35,14 +35,14 @@ def execute(filters=None):
 			", ".join(purchase_order), ", ".join(purchase_receipt)]
 
 		# map expense values
-		net_total = 0
+		base_net_total = 0
 		for expense_acc in expense_accounts:
 			expense_amount = flt(invoice_expense_map.get(inv.name, {}).get(expense_acc))
-			net_total += expense_amount
+			base_net_total += expense_amount
 			row.append(expense_amount)
 
 		# net total
-		row.append(net_total or inv.net_total)
+		row.append(base_net_total or inv.base_net_total)
 
 		# tax account
 		total_tax = 0
@@ -53,7 +53,7 @@ def execute(filters=None):
 				row.append(tax_amount)
 
 		# total tax, grand total, outstanding amount & rounded total
-		row += [total_tax, inv.grand_total, flt(inv.grand_total, 2), inv.outstanding_amount]
+		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 2), inv.outstanding_amount]
 		data.append(row)
 		# raise Exception
 
@@ -108,7 +108,7 @@ def get_conditions(filters):
 def get_invoices(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select name, posting_date, credit_to, supplier, supplier_name
-		bill_no, bill_date, remarks, net_total, grand_total, outstanding_amount
+		bill_no, bill_date, remarks, base_net_total, base_grand_total, outstanding_amount
 		from `tabPurchase Invoice` where docstatus = 1 %s
 		order by posting_date desc, name desc""" % conditions, filters, as_dict=1)
 

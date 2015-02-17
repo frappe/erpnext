@@ -3,7 +3,7 @@
 
 // render
 frappe.listview_settings['Purchase Invoice'] = {
-	add_fields: ["supplier", "supplier_name", "grand_total", "outstanding_amount", "due_date", "company",
+	add_fields: ["supplier", "supplier_name", "base_grand_total", "outstanding_amount", "due_date", "company",
 		"currency"],
 	get_indicator: function(doc) {
 		if(doc.outstanding_amount > 0 && doc.docstatus==1) {

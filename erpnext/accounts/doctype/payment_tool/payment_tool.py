@@ -82,8 +82,8 @@ def get_orders_to_be_billed(party_type, party):
 	orders = frappe.db.sql("""
 		select
 			name as voucher_no,
-			ifnull(grand_total, 0) as invoice_amount,
-			(ifnull(grand_total, 0) - ifnull(advance_paid, 0)) as outstanding_amount,
+			ifnull(base_grand_total, 0) as invoice_amount,
+			(ifnull(base_grand_total, 0) - ifnull(advance_paid, 0)) as outstanding_amount,
 			transaction_date as posting_date
 		from
 			`tab%s`
@@ -91,7 +91,7 @@ def get_orders_to_be_billed(party_type, party):
 			%s = %s
 			and docstatus = 1
 			and ifnull(status, "") != "Stopped"
-			and ifnull(grand_total, 0) > ifnull(advance_paid, 0)
+			and ifnull(base_grand_total, 0) > ifnull(advance_paid, 0)
 			and abs(100 - ifnull(per_billed, 0)) > 0.01
 		""" % (voucher_type, 'customer' if party_type == "Customer" else 'supplier', '%s'),
 			party, as_dict = True)
@@ -106,9 +106,9 @@ def get_orders_to_be_billed(party_type, party):
 @frappe.whitelist()
 def get_against_voucher_amount(against_voucher_type, against_voucher_no):
 	if against_voucher_type in ["Sales Order", "Purchase Order"]:
-		select_cond = "grand_total as total_amount, ifnull(grand_total, 0) - ifnull(advance_paid, 0) as outstanding_amount"
+		select_cond = "base_grand_total as total_amount, ifnull(base_grand_total, 0) - ifnull(advance_paid, 0) as outstanding_amount"
 	elif against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
-		select_cond = "grand_total as total_amount, outstanding_amount"
+		select_cond = "base_grand_total as total_amount, outstanding_amount"
 	elif against_voucher_type == "Journal Entry":
 		select_cond = "total_debit as total_amount"
 

@@ -123,7 +123,7 @@ def get_dashboard_info(customer):
 		out[doctype] = frappe.db.get_value(doctype,
 			{"customer": customer, "docstatus": ["!=", 2] }, "count(*)")
 
-	billing = frappe.db.sql("""select sum(grand_total), sum(outstanding_amount)
+	billing = frappe.db.sql("""select sum(base_grand_total), sum(outstanding_amount)
 		from `tabSales Invoice`
 		where customer=%s
 			and docstatus = 1
@@ -174,7 +174,7 @@ def get_customer_outstanding(customer, company):
 
 	# Outstanding based on Sales Order
 	outstanding_based_on_so = frappe.db.sql("""
-		select sum(grand_total*(100 - ifnull(per_billed, 0))/100)
+		select sum(base_grand_total*(100 - ifnull(per_billed, 0))/100)
 		from `tabSales Order`
 		where customer=%s and docstatus = 1 and company=%s
 		and ifnull(per_billed, 0) < 100 and status != 'Stopped'""", (customer, company))
@@ -189,8 +189,8 @@ def get_customer_outstanding(customer, company):
 					(ifnull(dn_item.amount, 0) - ifnull((select sum(ifnull(amount, 0))
 						from `tabSales Invoice Item`
 						where ifnull(dn_detail, '') = dn_item.name and docstatus = 1), 0)
-					)/dn.net_total
-				)*dn.grand_total
+					)/dn.base_net_total
+				)*dn.base_grand_total
 			)
 		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
 		where

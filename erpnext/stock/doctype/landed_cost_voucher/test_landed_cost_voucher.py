@@ -80,7 +80,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 			"purchase_receipt": pr.name,
 			"supplier": pr.supplier,
 			"posting_date": pr.posting_date,
-			"grand_total": pr.grand_total
+			"grand_total": pr.base_grand_total
 		}])
 		lcv.set("taxes", [{
 			"description": "Insurance Charges",

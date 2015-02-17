@@ -89,7 +89,7 @@ def get_dashboard_info(supplier):
 		out[doctype] = frappe.db.get_value(doctype,
 			{"supplier": supplier, "docstatus": ["!=", 2] }, "count(*)")
 
-	billing = frappe.db.sql("""select sum(grand_total), sum(outstanding_amount)
+	billing = frappe.db.sql("""select sum(base_grand_total), sum(outstanding_amount)
 		from `tabPurchase Invoice`
 		where supplier=%s
 			and docstatus = 1

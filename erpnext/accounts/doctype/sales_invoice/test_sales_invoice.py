@@ -53,8 +53,8 @@ class TestSalesInvoice(unittest.TestCase):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
 		# check net total
+		self.assertEquals(si.base_net_total, 1250)
 		self.assertEquals(si.net_total, 1250)
-		self.assertEquals(si.net_total_export, 1250)
 
 		# check tax calculation
 		expected_values = {
@@ -73,8 +73,8 @@ class TestSalesInvoice(unittest.TestCase):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 
+		self.assertEquals(si.base_grand_total, 1627.05)
 		self.assertEquals(si.grand_total, 1627.05)
-		self.assertEquals(si.grand_total_export, 1627.05)
 
 	def test_sales_invoice_calculation_export_currency(self):
 		si = frappe.copy_doc(test_records[2])
@@ -103,8 +103,8 @@ class TestSalesInvoice(unittest.TestCase):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
 		# check net total
-		self.assertEquals(si.net_total, 1250)
-		self.assertEquals(si.net_total_export, 25)
+		self.assertEquals(si.base_net_total, 1250)
+		self.assertEquals(si.net_total, 25)
 
 		# check tax calculation
 		expected_values = {
@@ -123,8 +123,8 @@ class TestSalesInvoice(unittest.TestCase):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEquals(si.grand_total, 1627.05)
-		self.assertEquals(si.grand_total_export, 32.54)
+		self.assertEquals(si.base_grand_total, 1627.05)
+		self.assertEquals(si.grand_total, 32.54)
 
 	def test_sales_invoice_discount_amount(self):
 		si = frappe.copy_doc(test_records[3])
@@ -157,8 +157,8 @@ class TestSalesInvoice(unittest.TestCase):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
 		# check net total
-		self.assertEquals(si.net_total, 1163.45)
-		self.assertEquals(si.net_total_export, 1578.3)
+		self.assertEquals(si.base_net_total, 1163.45)
+		self.assertEquals(si.net_total, 1578.3)
 
 		# check tax calculation
 		expected_values = {
@@ -178,8 +178,8 @@ class TestSalesInvoice(unittest.TestCase):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 
+		self.assertEquals(si.base_grand_total, 1500)
 		self.assertEquals(si.grand_total, 1500)
-		self.assertEquals(si.grand_total_export, 1500)
 
 	def test_discount_amount_gl_entry(self):
 		si = frappe.copy_doc(test_records[3])
@@ -268,8 +268,8 @@ class TestSalesInvoice(unittest.TestCase):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
 		# check net total
-		self.assertEquals(si.net_total, 1249.98)
-		self.assertEquals(si.net_total_export, 1578.3)
+		self.assertEquals(si.base_net_total, 1249.98)
+		self.assertEquals(si.net_total, 1578.3)
 
 		# check tax calculation
 		expected_values = {
@@ -288,8 +288,8 @@ class TestSalesInvoice(unittest.TestCase):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 
+		self.assertEquals(si.base_grand_total, 1622.98)
 		self.assertEquals(si.grand_total, 1622.98)
-		self.assertEquals(si.grand_total_export, 1622.98)
 
 	def test_sales_invoice_calculation_export_currency_with_tax_inclusive_price(self):
 		# prepare
@@ -320,8 +320,8 @@ class TestSalesInvoice(unittest.TestCase):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
 		# check net total
-		self.assertEquals(si.net_total, 49501.7)
-		self.assertEquals(si.net_total_export, 1250)
+		self.assertEquals(si.base_net_total, 49501.7)
+		self.assertEquals(si.net_total, 1250)
 
 		# check tax calculation
 		expected_values = {
@@ -340,12 +340,12 @@ class TestSalesInvoice(unittest.TestCase):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEquals(si.grand_total, 65205.16)
-		self.assertEquals(si.grand_total_export, 1304.1)
+		self.assertEquals(si.base_grand_total, 65205.16)
+		self.assertEquals(si.grand_total, 1304.1)
 
 	def test_outstanding(self):
 		w = self.make()
-		self.assertEquals(w.outstanding_amount, w.grand_total)
+		self.assertEquals(w.outstanding_amount, w.base_grand_total)
 
 	def test_payment(self):
 		frappe.db.sql("""delete from `tabGL Entry`""")

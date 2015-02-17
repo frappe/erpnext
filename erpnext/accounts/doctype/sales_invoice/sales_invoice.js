@@ -54,7 +54,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				frappe.set_route("query-report", "General Ledger");
 			}, "icon-table");
 
-			// var percent_paid = cint(flt(doc.grand_total - doc.outstanding_amount) / flt(doc.grand_total) * 100);
+			// var percent_paid = cint(flt(doc.base_grand_total - doc.outstanding_amount) / flt(doc.base_grand_total) * 100);
 			// cur_frm.dashboard.add_progress(percent_paid + "% Paid", percent_paid);
 
 			cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, 'icon-mobile-phone');
@@ -167,17 +167,16 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	allocated_amount: function() {
-		this.calculate_total_advance("Sales Invoice", "advances");
+		this.calculate_total_advance();
 		this.frm.refresh_fields();
 	},
 
 	write_off_outstanding_amount_automatically: function() {
 		if(cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
-			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
+			frappe.model.round_floats_in(this.frm.doc, ["base_grand_total", "paid_amount"]);
 			// this will make outstanding amount 0
 			this.frm.set_value("write_off_amount",
-				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount,
-					precision("write_off_amount"))
+				flt(this.frm.doc.base_grand_total - this.frm.doc.paid_amount, precision("write_off_amount"))
 			);
 		}
 
@@ -249,7 +248,7 @@ cur_frm.cscript.mode_of_payment = function(doc) {
 	if(doc.is_pos) {
 		return cur_frm.call({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
-			args: { 
+			args: {
 				"mode_of_payment": doc.mode_of_payment,
 				"company": doc.company
 			 },

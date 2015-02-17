@@ -212,7 +212,7 @@ class PurchaseReceipt(BuyingController):
 		purchase_controller = frappe.get_doc("Purchase Common")
 
 		# Check for Approving Authority
-		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.base_grand_total)
 
 		# Set status as Submitted
 		frappe.db.set(self, 'status', 'Submitted')

@@ -21,7 +21,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 		this.frm.add_fetch("purchase_receipt", "supplier", "supplier");
 		this.frm.add_fetch("purchase_receipt", "posting_date", "posting_date");
-		this.frm.add_fetch("purchase_receipt", "grand_total", "grand_total");
+		this.frm.add_fetch("purchase_receipt", "base_grand_total", "grand_total");
 
 	},
 

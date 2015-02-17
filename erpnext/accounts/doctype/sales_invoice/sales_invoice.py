@@ -77,7 +77,7 @@ class SalesInvoice(SellingController):
 			# Check for Approving Authority
 			if not self.recurring_id:
 				frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
-				 	self.company, self.grand_total, self)
+				 	self.company, self.base_grand_total, self)
 
 		self.check_prev_docstatus()
 
@@ -329,7 +329,7 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))
 
 		if flt(self.paid_amount) + flt(self.write_off_amount) \
-				- flt(self.grand_total) > 1/(10**(self.precision("grand_total") + 1)):
+				- flt(self.base_grand_total) > 1/(10**(self.precision("base_grand_total") + 1)):
 			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
 
 
@@ -410,7 +410,7 @@ class SalesInvoice(SellingController):
 			if flt(self.paid_amount) == 0:
 				if self.cash_bank_account:
 					frappe.db.set(self, 'paid_amount',
-						(flt(self.grand_total) - flt(self.write_off_amount)))
+						(flt(self.base_grand_total) - flt(self.write_off_amount)))
 				else:
 					# show message that the amount is not paid
 					frappe.db.set(self,'paid_amount',0)
@@ -483,14 +483,14 @@ class SalesInvoice(SellingController):
 		return gl_entries
 
 	def make_customer_gl_entry(self, gl_entries):
-		if self.grand_total:
+		if self.base_grand_total:
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
 					"party_type": "Customer",
 					"party": self.customer,
 					"against": self.against_income_account,
-					"debit": self.grand_total,
+					"debit": self.base_grand_total,
 					"remarks": self.remarks,
 					"against_voucher": self.name,
 					"against_voucher_type": self.doctype,

@@ -183,7 +183,7 @@ class PurchaseOrder(BuyingController):
 		self.update_ordered_qty()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
-			self.company, self.grand_total)
+			self.company, self.base_grand_total)
 
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 

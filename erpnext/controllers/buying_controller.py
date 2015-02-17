@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
-from frappe.utils import flt, rounded
+from frappe.utils import flt
 
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_details
@@ -21,7 +21,7 @@ class BuyingController(StockController):
 
 	def get_feed(self):
 		return _("From {0} | {1} {2}").format(self.supplier_name, self.currency,
-			self.grand_total_import)
+			self.grand_total)
 
 	def validate(self):
 		super(BuyingController, self).validate()
@@ -74,87 +74,10 @@ class BuyingController(StockController):
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
 		company_currency = get_company_currency(self.company)
+		if self.meta.get_field("base_in_words"):
+			self.base_in_words = money_in_words(self.base_grand_total, company_currency)
 		if self.meta.get_field("in_words"):
-			self.in_words = money_in_words(self.grand_total, company_currency)
-		if self.meta.get_field("in_words_import"):
-			self.in_words_import = money_in_words(self.grand_total_import,
-		 		self.currency)
-
-	def calculate_taxes_and_totals(self):
-		super(BuyingController, self).calculate_taxes_and_totals()
-		self.calculate_total_advance("Purchase Invoice", "advances")
-
-	def calculate_item_values(self):
-		for item in self.get("items"):
-			self.round_floats_in(item)
-
-			if item.discount_percentage == 100.0:
-				item.rate = 0.0
-			elif not item.rate:
-				item.rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
-					self.precision("rate", item))
-
-			item.amount = flt(item.rate * item.qty, self.precision("amount", item))
-			item.item_tax_amount = 0.0;
-
-			self._set_in_company_currency(item, "amount", "base_amount")
-			self._set_in_company_currency(item, "price_list_rate", "base_price_list_rate")
-			self._set_in_company_currency(item, "rate", "base_rate")
-
-
-	def calculate_net_total(self):
-		self.net_total = self.net_total_import = 0.0
-
-		for item in self.get("items"):
-			self.net_total += item.base_amount
-			self.net_total_import += item.amount
-
-		self.round_floats_in(self, ["net_total", "net_total_import"])
-
-	def calculate_totals(self):
-		self.grand_total = flt(self.get("taxes")[-1].total if self.get("taxes") else self.net_total)
-
-		self.total_tax = flt(self.grand_total - self.net_total, self.precision("total_tax"))
-
-		self.grand_total = flt(self.grand_total, self.precision("grand_total"))
-
-		if self.meta.get_field("rounded_total"):
-			self.rounded_total = rounded(self.grand_total)
-
-		if self.meta.get_field("other_charges_added"):
-			self.other_charges_added = flt(sum([flt(d.tax_amount) for d in self.get("taxes")
-				if d.add_deduct_tax=="Add" and d.category in ["Valuation and Total", "Total"]]),
-				self.precision("other_charges_added"))
-
-		if self.meta.get_field("other_charges_deducted"):
-			self.other_charges_deducted = flt(sum([flt(d.tax_amount) for d in self.get("taxes")
-				if d.add_deduct_tax=="Deduct" and d.category in ["Valuation and Total", "Total"]]),
-				self.precision("other_charges_deducted"))
-
-		self.grand_total_import = flt(self.grand_total / self.conversion_rate) \
-			if (self.other_charges_added or self.other_charges_deducted) else self.net_total_import
-
-		self.grand_total_import = flt(self.grand_total_import, self.precision("grand_total_import"))
-
-		if self.meta.get_field("rounded_total_import"):
-			self.rounded_total_import = rounded(self.grand_total_import)
-
-		if self.meta.get_field("other_charges_added_import"):
-			self.other_charges_added_import = flt(self.other_charges_added /
-				self.conversion_rate, self.precision("other_charges_added_import"))
-
-		if self.meta.get_field("other_charges_deducted_import"):
-			self.other_charges_deducted_import = flt(self.other_charges_deducted /
-				self.conversion_rate, self.precision("other_charges_deducted_import"))
-
-	def calculate_outstanding_amount(self):
-		if self.doctype == "Purchase Invoice" and self.docstatus == 0:
-			self.total_advance = flt(self.total_advance,
-				self.precision("total_advance"))
-			self.total_amount_to_pay = flt(self.grand_total - flt(self.write_off_amount,
-				self.precision("write_off_amount")), self.precision("total_amount_to_pay"))
-			self.outstanding_amount = flt(self.total_amount_to_pay - self.total_advance,
-				self.precision("outstanding_amount"))
+			self.in_words = money_in_words(self.grand_total, self.currency)
 
 	# update valuation rate
 	def update_valuation_rate(self, parentfield):
@@ -174,10 +97,8 @@ class BuyingController(StockController):
 				stock_items_amount += flt(d.base_amount)
 				last_stock_item_idx = d.idx
 
-		total_valuation_amount = sum([flt(d.tax_amount) for d in
-			self.get("taxes")
+		total_valuation_amount = sum([flt(d.tax_amount) for d in self.get("taxes")
 			if d.category in ["Valuation", "Valuation and Total"]])
-
 
 		valuation_amount_adjustment = total_valuation_amount
 		for i, item in enumerate(self.get(parentfield)):
@@ -356,7 +277,6 @@ class BuyingController(StockController):
 					(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return self._purchase_items
-
 
 	def is_item_table_empty(self):
 		if not len(self.get("items")):

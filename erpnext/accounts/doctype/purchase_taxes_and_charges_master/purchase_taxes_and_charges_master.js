@@ -8,15 +8,15 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 }
 
 // For customizing print
-cur_frm.pformat.net_total_import = function(doc) {
+cur_frm.pformat.net_total = function(doc) {
 	return '';
 }
 
-cur_frm.pformat.grand_total_import = function(doc) {
+cur_frm.pformat.grand_total = function(doc) {
 	return '';
 }
 
-cur_frm.pformat.in_words_import = function(doc) {
+cur_frm.pformat.in_words = function(doc) {
 	return '';
 }
 
@@ -49,8 +49,8 @@ cur_frm.pformat.taxes= function(doc) {
 
 	// main table
 	out +='<table class="noborder" style="width:100%">';
-	if(!print_hide('net_total_import'))
-		out += make_row('Net Total', doc.net_total_import, 1);
+	if(!print_hide('net_total'))
+		out += make_row('Net Total', doc.net_total, 1);
 
 	// add rows
 	if(cl.length){
@@ -60,14 +60,14 @@ cur_frm.pformat.taxes= function(doc) {
 	}
 
 	// grand total
-	if(!print_hide('grand_total_import'))
-		out += make_row('Grand Total', doc.grand_total_import, 1);
+	if(!print_hide('grand_total'))
+		out += make_row('Grand Total', doc.grand_total, 1);
 
-	if(doc.in_words_import && !print_hide('in_words_import')) {
+	if(doc.in_words && !print_hide('in_words')) {
 		out += '</table></td></tr>';
 		out += '<tr><td colspan = "2">';
 		out += '<table><tr><td style="width:25%;"><b>In Words</b></td>';
-		out += '<td style="width:50%;">' + doc.in_words_import + '</td></tr>';
+		out += '<td style="width:50%;">' + doc.in_words + '</td></tr>';
 	}
 
 	out +='</table></td></tr></table></div>';
