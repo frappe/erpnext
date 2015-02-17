@@ -286,7 +286,7 @@ class PurchaseReceipt(BuyingController):
 			if d.item_code in stock_items and flt(d.valuation_rate) and flt(d.qty):
 				if warehouse_account.get(d.warehouse):
 
-					val_rate_db_precision = 6 if cint(self.precision("valuation_rate")) <= 6 else 9
+					val_rate_db_precision = 6 if cint(d.precision("valuation_rate")) <= 6 else 9
 
 					# warehouse account
 					gl_entries.append(self.get_gl_dict({

@@ -13,24 +13,7 @@
 				<br>{%= doc.item_name %}{% } %}
 			{% if(doc.item_name != doc.description) { %}
 				<p>{%= doc.description %}</p>{% } %}
-			{% include "templates/form_grid/includes/visible_cols.html" %}
-			{% if(doc.schedule_date) { %}
-			<br><span title="{%= __("Reqd By Date") %}" class="label {%=
-				(frappe.datetime.get_diff(doc.schedule_date, frappe.datetime.get_today()) < 0
-					&& doc.ordered_qty < doc.qty)
-					? "label-danger" : "label-default" %}">
-					{%= doc.get_formatted("schedule_date") %}</span>
-			{% } %}
-		</div>
-
-		<!-- qty -->
-		<div class="col-sm-3 text-right">
-			{%= doc.get_formatted("qty") %}
-			<small>{%= doc.uom || doc.stock_uom %}</small>
-			{% var completed =
-				100 - cint((doc.qty - cint(doc.ordered_qty)) * 100 / doc.qty),
-				title = __("Ordered"); %}
-			{% include "templates/form_grid/includes/progress.html" %}
+			<div>
 			{% if(doc.warehouse) { %}
 				<div style="overflow:hidden; min-height: 25px;
 					white-space:nowrap; text-overflow: ellipsis;"
@@ -39,6 +22,26 @@
 						{%= doc.warehouse %}
 					</span>
 				</div>
+			{% } %}
+			{% if(doc.schedule_date) { %}
+                <span title="{%= __("Reqd By Date") %}" class="label {%=
+				(frappe.datetime.get_diff(doc.schedule_date, frappe.datetime.get_today()) < 0
+					&& doc.ordered_qty < doc.qty)
+					? "label-danger" : "label-default" %}">
+					{%= doc.get_formatted("schedule_date") %}</span>
+			{% } %}
+            </div>
+			{% include "templates/form_grid/includes/visible_cols.html" %}
+		</div>
+
+		<!-- qty -->
+		<div class="col-sm-3 text-right">
+			{%= doc.get_formatted("qty") %}
+			<div class="small">{%= doc.uom || doc.stock_uom %}</div>
+            {% if(doc.qty == doc.ordered_qty) { %}
+                <div class="small text-success">{%= __("Ordered") %}</div>
+            {% } else { %}
+                <div class="small text-muted">{%= __("{0} Ordered", doc.ordered_qty) %}</div>
 			{% } %}
 		</div>
 	</div>

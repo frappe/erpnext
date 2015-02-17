@@ -435,7 +435,7 @@ def create_territories():
 			}).insert()
 
 def login_as_first_user(args):
-	if args.get("email"):
+	if args.get("email") and hasattr(frappe.local, "login_manager"):
 		frappe.local.login_manager.user = args.get("email")
 		frappe.local.login_manager.post_login()
 
