@@ -22,7 +22,7 @@ frappe.ui.form.on("Stock Reconciliation", "get_items", function(frm) {
 				}
 			});
 		}
-	);
+	, __("Get Items"), __("Update"));
 });
 
 erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
@@ -51,7 +51,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 
 	setup: function() {
 		var me = this;
-		this.frm.get_field("items").grid.allow_build_edit();
+		this.frm.get_docfield("items").allow_bulk_edit = 1;
 
 		if (sys_defaults.auto_accounting_for_stock) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
@@ -77,28 +77,11 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	},
 
 	refresh: function() {
-		//
+		if(this.frm.doc.docstatus==1) {
+			this.show_stock_ledger();
+			this.show_general_ledger();
+		}
 	},
-
-	// show_download_template: function() {
-	// 	var me = this;
-	// 	this.frm.add_custom_button(__("Download Template"), function() {
-	// 		this.title = __("Stock Reconcilation Template");
-	// 		frappe.tools.downloadify([[__("Stock Reconciliation")],
-	// 			["----"],
-	// 			[__("Stock Reconciliation can be used to update the stock on a particular date, usually as per physical inventory.")],
-	// 			[__("When submitted, the system creates difference entries to set the given stock and valuation on this date.")],
-	// 			[__("It can also be used to create opening stock entries and to fix stock value.")],
-	// 			["----"],
-	// 			[__("Notes:")],
-	// 			[__("Item Code and Warehouse should already exist.")],
-	// 			[__("You can update either Quantity or Valuation Rate or both.")],
-	// 			[__("If no change in either Quantity or Valuation Rate, leave the cell blank.")],
-	// 			["----"],
-	// 			["Item Code", "Warehouse", "Quantity", "Valuation Rate"]], null, this);
-	// 		return false;
-	// 	}, "icon-download");
-	// },
 
 });
 

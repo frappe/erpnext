@@ -33,11 +33,12 @@ class StockReconciliation(StockController):
 		self.validation_messages = []
 		item_warehouse_combinations = []
 
+		default_currency = frappe.db.get_default("currency")
+
 		# validate no of rows
-		rows = self.items
-		if len(rows) > 100:
+		if len(self.items) > 100:
 			frappe.throw(_("""Max 100 rows for Stock Reconciliation."""))
-		for row_num, row in enumerate(rows):
+		for row_num, row in enumerate(self.items):
 			# find duplicates
 			if [row.item_code, row.warehouse] in item_warehouse_combinations:
 				self.validation_messages.append(_get_msg(row_num, _("Duplicate entry")))
@@ -64,6 +65,13 @@ class StockReconciliation(StockController):
 			if flt(row.valuation_rate) < 0:
 				self.validation_messages.append(_get_msg(row_num,
 					_("Negative Valuation Rate is not allowed")))
+
+			if row.qty and not row.valuation_rate:
+				# try if there is a buying price list in default currency
+				buying_rate = frappe.db.get_value("Item Price", {"item_code": row.item_code,
+					"buying": 1, "currency": default_currency}, "price_list_rate")
+				if buying_rate:
+					row.valuation_rate = buying_rate
 
 		# throw all validation messages
 		if self.validation_messages:
