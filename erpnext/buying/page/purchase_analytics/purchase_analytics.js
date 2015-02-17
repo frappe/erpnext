@@ -11,9 +11,10 @@ frappe.pages['purchase-analytics'].on_page_load = function(wrapper) {
 	new erpnext.PurchaseAnalytics(wrapper);
 
 
-	frappe.add_breadcrumbs("Buying")
-
+	frappe.add_breadcrumbs("Buying");
 }
+
+frappe.assets.views["Report"]();
 
 erpnext.PurchaseAnalytics = frappe.views.TreeGridReport.extend({
 	init: function(wrapper) {
