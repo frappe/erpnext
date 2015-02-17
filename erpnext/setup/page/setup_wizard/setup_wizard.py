@@ -75,6 +75,8 @@ def setup_account(args=None):
 		website_maker(args.company_name.strip(), args.company_tagline, args.name)
 		create_logo(args)
 
+		login_as_first_user(args)
+
 		frappe.clear_cache()
 		frappe.db.commit()
 
@@ -432,6 +434,11 @@ def create_territories():
 				"is_group": "No"
 			}).insert()
 
+def login_as_first_user(args):
+	if args.get("email"):
+		frappe.local.login_manager.user = args.get("email")
+		frappe.local.login_manager.post_login()
+
 @frappe.whitelist()
 def load_messages(language):
 	frappe.clear_cache()
@@ -444,8 +451,6 @@ def load_messages(language):
 
 @frappe.whitelist()
 def load_languages():
-	from frappe.sessions import get_geo_from_ip
-
 	return {
 		"default_language": get_language_from_code(frappe.local.lang),
 		"languages": sorted(get_lang_dict().keys())

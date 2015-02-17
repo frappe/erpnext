@@ -83,11 +83,11 @@ erpnext.wiz.Wizard = Class.extend({
 		this.hide_current_slide();
 
 		this.current_slide = this.slide_dict[id];
-		this.current_slide.$wrapper.toggle(true);
+		this.current_slide.$wrapper.removeClass("hidden");
 	},
 	hide_current_slide: function() {
 		if(this.current_slide) {
-			this.current_slide.$wrapper.toggle(false);
+			this.current_slide.$wrapper.addClass("hidden");
 			this.current_slide = null;
 		}
 	},
@@ -103,7 +103,7 @@ erpnext.wiz.Wizard = Class.extend({
 erpnext.wiz.WizardSlide = Class.extend({
 	init: function(opts) {
 		$.extend(this, opts);
-		this.$wrapper = $("<div>")
+		this.$wrapper = $('<div class="slide-wrapper hidden"></div>')
 			.appendTo(this.wiz.parent)
 			.attr("data-slide-id", this.id);
 	},
@@ -305,10 +305,11 @@ $.extend(erpnext.wiz, {
 				$timezone.empty();
 
 				// add country specific timezones first
-				if(country){
+				if(country) {
 					var timezone_list = data.country_info[country].timezones || [];
 					$timezone.add_options(timezone_list.sort());
 					slide.get_field("currency").set_input(data.country_info[country].currency);
+					slide.get_field("currency").$input.trigger("change");
 				}
 
 				// add all timezones at the end, so that user has the option to change it to any timezone
@@ -319,6 +320,23 @@ $.extend(erpnext.wiz, {
 				// temporarily set date format
 				frappe.boot.sysdefaults.date_format = (data.country_info[country].date_format
 					|| "dd-mm-yyyy");
+			});
+
+			slide.get_input("currency").on("change", function() {
+				var currency = slide.get_input("currency").val();
+				frappe.model.with_doc("Currency", currency, function() {
+					frappe.provide("locals.:Currency." + currency);
+					var currency_doc = frappe.model.get_doc("Currency", currency);
+					var number_format = currency_doc.number_format;
+					if (number_format==="#.###") {
+						number_format = "#.###,##";
+					} else if (number_format==="#,###") {
+						number_format = "#,###.##"
+					}
+
+					frappe.boot.sysdefaults.number_format = number_format;
+					locals[":Currency"][currency] = $.extend({}, currency_doc);
+				});
 			});
 		}
 	},
@@ -585,14 +603,7 @@ $.extend(erpnext.wiz, {
 			callback: function(r) {
 				wiz.show_complete();
 				setTimeout(function() {
-					if(user==="Administrator") {
-						msgprint(__("Login with your new User ID") + ": " + values.email);
-						setTimeout(function() {
-							frappe.app.logout();
-						}, 2000);
-					} else {
-						window.location = "/desk";
-					}
+					window.location = "/desk";
 				}, 2000);
 			},
 			error: function(r) {
