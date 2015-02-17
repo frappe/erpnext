@@ -8,7 +8,7 @@ def get_notification_config():
 	return { "for_doctype": 
 		{
 			"Issue": {"status":"Open"},
-			"Customer Issue": {"status":"Open"},
+			"Warranty Claim": {"status":"Open"},
 			"Task": {"status":"Open"},
 			"Lead": {"status":"Open"},
 			"Contact": {"status":"Open"},

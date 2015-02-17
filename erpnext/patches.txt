@@ -110,3 +110,4 @@ erpnext.patches.v5_0.remove_birthday_events
 erpnext.patches.v5_0.update_item_name_in_bom
 execute:frappe.reload_doc('crm', 'doctype', 'lead')
 execute:frappe.reload_doc('crm', 'doctype', 'opportunity')
+erpnext.patches.v5_0.rename_customer_issue

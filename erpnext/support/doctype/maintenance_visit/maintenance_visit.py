@@ -24,7 +24,7 @@ class MaintenanceVisit(TransactionBase):
 
 	def update_customer_issue(self, flag):
 		for d in self.get('purposes'):
-			if d.prevdoc_docname and d.prevdoc_doctype == 'Customer Issue' :
+			if d.prevdoc_docname and d.prevdoc_doctype == 'Warranty Claim' :
 				if flag==1:
 					mntc_date = self.mntc_date
 					service_person = d.service_person
@@ -48,11 +48,11 @@ class MaintenanceVisit(TransactionBase):
 						service_person = ''
 						work_done = ''
 
-				frappe.db.sql("update `tabCustomer Issue` set resolution_date=%s, resolved_by=%s, resolution_details=%s, status=%s where name =%s",(mntc_date,service_person,work_done,status,d.prevdoc_docname))
+				frappe.db.sql("update `tabWarranty Claim` set resolution_date=%s, resolved_by=%s, resolution_details=%s, status=%s where name =%s",(mntc_date,service_person,work_done,status,d.prevdoc_docname))
 
 
 	def check_if_last_visit(self):
-		"""check if last maintenance visit against same sales order/ customer issue"""
+		"""check if last maintenance visit against same sales order/ Warranty Claim"""
 		check_for_docname = None
 		for d in self.get('purposes'):
 			if d.prevdoc_docname:

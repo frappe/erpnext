@@ -4,14 +4,14 @@
 frappe.provide("erpnext.support");
 frappe.require("assets/erpnext/js/utils.js");
 
-frappe.ui.form.on_change("Customer Issue", "customer", function(frm) {
+frappe.ui.form.on_change("Warranty Claim", "customer", function(frm) {
 	erpnext.utils.get_party_details(frm) });
-frappe.ui.form.on_change("Customer Issue", "customer_address",
+frappe.ui.form.on_change("Warranty Claim", "customer_address",
 	erpnext.utils.get_address_display);
-frappe.ui.form.on_change("Customer Issue", "contact_person",
+frappe.ui.form.on_change("Warranty Claim", "contact_person",
 	erpnext.utils.get_contact_details);
 
-erpnext.support.CustomerIssue = frappe.ui.form.Controller.extend({
+erpnext.support.WarrantyClaim = frappe.ui.form.Controller.extend({
 	refresh: function() {
 		if((cur_frm.doc.status=='Open' || cur_frm.doc.status == 'Work In Progress')) {
 			cur_frm.add_custom_button(__('Make Maintenance Visit'),
@@ -27,7 +27,7 @@ erpnext.support.CustomerIssue = frappe.ui.form.Controller.extend({
 	}
 });
 
-$.extend(cur_frm.cscript, new erpnext.support.CustomerIssue({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.support.WarrantyClaim({frm: cur_frm}));
 
 cur_frm.cscript.onload = function(doc,cdt,cdn){
 	if(!doc.status)

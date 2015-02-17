@@ -11,7 +11,7 @@ from frappe.utils import today
 
 from erpnext.utilities.transaction_base import TransactionBase
 
-class CustomerIssue(TransactionBase):
+class WarrantyClaim(TransactionBase):
 	def get_feed(self):
 		return _("{0}: From {1}").format(self.status, self.customer_name)
 
@@ -20,7 +20,7 @@ class CustomerIssue(TransactionBase):
 			frappe.throw(_("Customer is required"))
 
 		if self.status=="Closed" and \
-			frappe.db.get_value("Customer Issue", self.name, "status")!="Closed":
+			frappe.db.get_value("Warranty Claim", self.name, "status")!="Closed":
 			self.resolution_date = today()
 
 	def on_cancel(self):
@@ -30,7 +30,7 @@ class CustomerIssue(TransactionBase):
 			(self.name))
 		if lst:
 			lst1 = ','.join([x[0] for x in lst])
-			frappe.throw(_("Cancel Material Visit {0} before cancelling this Customer Issue").format(lst1))
+			frappe.throw(_("Cancel Material Visit {0} before cancelling this Warranty Claim").format(lst1))
 		else:
 			frappe.db.set(self, 'status', 'Cancelled')
 
@@ -51,14 +51,14 @@ def make_maintenance_visit(source_name, target_doc=None):
 		and t1.docstatus=1 and t1.completion_status='Fully Completed'""", source_name)
 
 	if not visit:
-		target_doc = get_mapped_doc("Customer Issue", source_name, {
-			"Customer Issue": {
+		target_doc = get_mapped_doc("Warranty Claim", source_name, {
+			"Warranty Claim": {
 				"doctype": "Maintenance Visit",
 				"field_map": {}
 			}
 		}, target_doc)
 
-		source_doc = frappe.get_doc("Customer Issue", source_name)
+		source_doc = frappe.get_doc("Warranty Claim", source_name)
 		if source_doc.get("item_code"):
 			table_map = {
 				"doctype": "Maintenance Visit Purpose",
