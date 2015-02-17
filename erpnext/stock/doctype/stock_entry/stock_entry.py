@@ -286,7 +286,7 @@ class StockEntry(StockController):
 				if flt(d.completed_qty):
 					operation_cost_per_unit += flt(d.actual_operating_cost) / flt(d.completed_qty)
 				else:
-					operation_cost_per_unit += flt(d.planned_operating_cost) / flt(self.qty)
+					operation_cost_per_unit += flt(d.planned_operating_cost) / flt(pro_order.qty)
 
 		if not operation_cost_per_unit and bom_no:
 			bom = frappe.db.get_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=1)
