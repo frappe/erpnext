@@ -210,7 +210,7 @@ class ProductionOrder(Document):
 				d.status = "Completed"
 			else:
 				frappe.throw(_("Completed Qty can not be greater than 'Qty to Manufacture'"))
-		
+
 	def set_actual_dates(self):
 		if self.get("operations"):
 			actual_date = frappe.db.sql("""select min(actual_start_time) as start_date, max(actual_end_time) as end_date from `tabProduction Order Operation`
@@ -220,11 +220,11 @@ class ProductionOrder(Document):
 		else:
 			self.actual_start_date = None
 			self.actual_end_date = None
-			
+
 	def validate_delivery_date(self):
 		if self.planned_start_date and self.expected_delivery_date and getdate(self.expected_delivery_date) < getdate(self.planned_start_date):
 			frappe.throw(_("Expected Delivery Date cannot be greater than Planned Start Date"))
-			
+
 		if self.planned_end_date and self.expected_delivery_date and getdate(self.expected_delivery_date) < getdate(self.planned_end_date):
 			frappe.msgprint(_("Production might not be able to finish by the Expected Delivery Date."))
 
@@ -254,7 +254,7 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 	stock_entry.use_multi_level_bom = production_order.use_multi_level_bom
 	stock_entry.fg_completed_qty = qty or (flt(production_order.qty) - flt(production_order.produced_qty))
 
-	if purpose=="Material Transfer":
+	if purpose=="Material Transfer for Manufacture":
 		stock_entry.to_warehouse = production_order.wip_warehouse
 	else:
 		stock_entry.from_warehouse = production_order.wip_warehouse

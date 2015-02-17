@@ -7,7 +7,7 @@ $.extend(cur_frm.cscript, {
 		cfn_set_fields(doc, dt, dn);
 
 		this.frm.add_fetch("sales_order", "delivery_date", "expected_delivery_date");
-		
+
 		if(doc.__islocal) {
 			cur_frm.set_value({
 			"actual_start_date": "",
@@ -70,7 +70,7 @@ $.extend(cur_frm.cscript, {
 			method: "set_production_order_operations"
 		});
 	},
-	
+
 	planned_start_date: function() {
 		return this.frm.call({
 			doc: this.frm.doc,
@@ -144,7 +144,7 @@ cur_frm.cscript['Unstop Production Order'] = function() {
 }
 
 cur_frm.cscript['Transfer Raw Materials'] = function() {
-	cur_frm.cscript.make_se('Material Transfer');
+	cur_frm.cscript.make_se('Material Transfer for Manufacture');
 }
 
 cur_frm.cscript['Update Finished Goods'] = function() {
