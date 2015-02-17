@@ -7,12 +7,12 @@ frappe.ui.form.on_change("Opportunity", "customer_address", erpnext.utils.get_ad
 frappe.ui.form.on_change("Opportunity", "contact_person", erpnext.utils.get_contact_details);
 
 
-frappe.provide("erpnext.selling");
+frappe.provide("erpnext.crm");
 frappe.require("assets/erpnext/js/utils.js");
 cur_frm.email_field = "contact_email";
 
 // TODO commonify this code
-erpnext.selling.Opportunity = frappe.ui.form.Controller.extend({
+erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 	onload: function() {
 		if(!this.frm.doc.enquiry_from && this.frm.doc.customer)
 			this.frm.doc.enquiry_from = "Customer";
@@ -62,13 +62,13 @@ erpnext.selling.Opportunity = frappe.ui.form.Controller.extend({
 
 	create_quotation: function() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.opportunity.opportunity.make_quotation",
+			method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
 			frm: cur_frm
 		})
 	}
 });
 
-$.extend(cur_frm.cscript, new erpnext.selling.Opportunity({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.crm.Opportunity({frm: cur_frm}));
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	erpnext.toggle_naming_series();
@@ -102,7 +102,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 cur_frm.cscript.lead = function(doc, cdt, cdn) {
 	cur_frm.toggle_display("contact_info", doc.customer || doc.lead);
 	frappe.model.map_current_doc({
-		method: "erpnext.selling.doctype.lead.lead.make_opportunity",
+		method: "erpnext.crm.doctype.lead.lead.make_opportunity",
 		source_name: cur_frm.doc.lead,
 		frm: cur_frm
 	});

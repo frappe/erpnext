@@ -55,7 +55,7 @@ class SellingController(StockController):
 			self.update_if_missing(party_details)
 
 		elif getattr(self, "lead", None):
-			from erpnext.selling.doctype.lead.lead import get_lead_details
+			from erpnext.crm.doctype.lead.lead import get_lead_details
 			self.update_if_missing(get_lead_details(self.lead))
 
 	def set_price_list_and_item_details(self):

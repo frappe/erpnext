@@ -32,7 +32,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 			cur_frm.add_custom_button(__('From Opportunity'),
 				function() {
 					frappe.model.map_current_doc({
-						method: "erpnext.selling.doctype.opportunity.opportunity.make_quotation",
+						method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
 						source_doctype: "Opportunity",
 						get_query_filters: {
 							docstatus: 1,
@@ -94,7 +94,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	lead: function() {
 		var me = this;
 		frappe.call({
-			method: "erpnext.selling.doctype.lead.lead.get_lead_details",
+			method: "erpnext.crm.doctype.lead.lead.get_lead_details",
 			args: { "lead": this.frm.doc.lead },
 			callback: function(r) {
 				if(r.message) {

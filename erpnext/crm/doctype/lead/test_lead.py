@@ -10,7 +10,7 @@ test_records = frappe.get_test_records('Lead')
 
 class TestLead(unittest.TestCase):
 	def test_make_customer(self):
-		from erpnext.selling.doctype.lead.lead import make_customer
+		from erpnext.crm.doctype.lead.lead import make_customer
 
 		frappe.delete_doc_if_exists("Customer", "_Test Lead")
 

@@ -45,6 +45,11 @@ def get_data():
 			"icon": "octicon octicon-tag",
 			"type": "module"
 		},
+		"CRM": {
+			"color": "#EF4DB6",
+			"icon": "octicon octicon-broadcast",
+			"type": "module"
+		},
 		"Stock": {
 			"color": "#f39c12",
 			"icon": "icon-truck",
