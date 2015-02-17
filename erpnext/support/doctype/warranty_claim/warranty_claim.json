@@ -387,7 +387,7 @@
    "no_copy": 1, 
    "oldfieldname": "amended_from", 
    "oldfieldtype": "Data", 
-   "options": "Customer Issue", 
+   "options": "Warranty Claim", 
    "permlevel": 0, 
    "print_hide": 1, 
    "width": "150px"
@@ -396,10 +396,10 @@
  "icon": "icon-bug", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2015-02-05 05:11:36.857779", 
+ "modified": "2015-02-17 00:12:52.430072", 
  "modified_by": "Administrator", 
  "module": "Support", 
- "name": "Customer Issue", 
+ "name": "Warranty Claim", 
  "owner": "harshada@webnotestech.com", 
  "permissions": [
   {

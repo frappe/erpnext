@@ -149,7 +149,7 @@ def _make_customer(source_name, ignore_permissions=False):
 		customer_name = frappe.db.get_value("Customer", {"lead_name": lead_name},
 			["name", "customer_name"], as_dict=True)
 		if not customer_name:
-			from erpnext.selling.doctype.lead.lead import _make_customer
+			from erpnext.crm.doctype.lead.lead import _make_customer
 			customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
 			customer = frappe.get_doc(customer_doclist)
 			customer.flags.ignore_permissions = ignore_permissions

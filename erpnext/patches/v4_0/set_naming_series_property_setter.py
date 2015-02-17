@@ -10,7 +10,7 @@ doctype_series_map = {
 	'Attendance': 'ATT-',
 	'C-Form': 'C-FORM-',
 	'Customer': 'CUST-',
-	'Customer Issue': 'CI-',
+	'Warranty Claim': 'CI-',
 	'Delivery Note': 'DN-',
 	'Installation Note': 'IN-',
 	'Item': 'ITEM-',

@@ -4,7 +4,7 @@
 import frappe
 import unittest
 
-test_records = frappe.get_test_records('Customer Issue')
+test_records = frappe.get_test_records('Warranty Claim')
 
-class TestCustomerIssue(unittest.TestCase):
+class TestWarrantyClaim(unittest.TestCase):
 	pass

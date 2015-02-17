@@ -9,6 +9,13 @@
  "document_type": "Master", 
  "fields": [
   {
+   "fieldname": "gs", 
+   "fieldtype": "Section Break", 
+   "in_list_view": 0, 
+   "label": "General Settings", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "item_group_name", 
    "fieldtype": "Data", 
    "in_list_view": 1, 
@@ -19,13 +26,6 @@
    "permlevel": 0, 
    "reqd": 1, 
    "search_index": 0
-  }, 
-  {
-   "fieldname": "gs", 
-   "fieldtype": "Section Break", 
-   "in_list_view": 0, 
-   "label": "General Settings", 
-   "permlevel": 0
   }, 
   {
    "description": "", 
@@ -104,7 +104,7 @@
    "in_list_view": 0, 
    "label": "Page Name", 
    "permlevel": 0, 
-   "read_only": 1
+   "read_only": 0
   }, 
   {
    "depends_on": "show_in_website", 
@@ -190,7 +190,7 @@
  "in_create": 1, 
  "issingle": 0, 
  "max_attachments": 3, 
- "modified": "2015-02-05 05:11:39.844136", 
+ "modified": "2015-02-16 23:50:48.113171", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Item Group", 

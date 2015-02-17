@@ -331,9 +331,9 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:40.379661", 
+ "modified": "2015-02-16 23:54:10.622839", 
  "modified_by": "Administrator", 
- "module": "Selling", 
+ "module": "CRM", 
  "name": "Lead", 
  "owner": "Administrator", 
  "permissions": [

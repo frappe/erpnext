@@ -64,7 +64,7 @@ erpnext.feature_setup.feature_dict = {
 		'Stock Ledger Entry': {'fields':['batch_no']}
 	},
 	'fs_item_serial_nos': {
-		'Customer Issue': {'fields':['serial_no']},
+		'Warranty Claim': {'fields':['serial_no']},
 		'Delivery Note': {'items':['serial_no'],'packed_items':['serial_no']},
 		'Installation Note': {'items':['serial_no']},
 		'Item': {'fields':['has_serial_no']},
@@ -155,7 +155,7 @@ erpnext.feature_setup.feature_dict = {
 		'Sales Order': {'fields':['sales_team']}
 	},
 	'fs_more_info': {
-		"Customer Issue": {"fields": ["more_info"]},
+		"Warranty Claim": {"fields": ["more_info"]},
 		'Material Request': {'fields':['more_info']},
 		'Lead': {'fields':['more_info']},
 		'Opportunity': {'fields':['more_info']},

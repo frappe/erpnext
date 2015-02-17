@@ -7,7 +7,8 @@ import frappe, json
 from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.utils.file_manager import save_file
-from frappe.translate import set_default_language, get_dict, get_lang_dict, send_translations
+from frappe.translate import (set_default_language, get_dict,
+	get_lang_dict, send_translations, get_language_from_code)
 from frappe.geo.country_info import get_country_info
 from frappe.utils.nestedset import get_root_of
 from default_website import website_maker
@@ -443,4 +444,9 @@ def load_messages(language):
 
 @frappe.whitelist()
 def load_languages():
-	return sorted(get_lang_dict().keys())
+	from frappe.sessions import get_geo_from_ip
+
+	return {
+		"default_language": get_language_from_code(frappe.local.lang),
+		"languages": sorted(get_lang_dict().keys())
+	}

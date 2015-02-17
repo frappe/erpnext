@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cstr, now_datetime, cint
+import frappe.share
 
 from erpnext.controllers.status_updater import StatusUpdater
 
@@ -36,7 +37,7 @@ class TransactionBase(StatusUpdater):
 		opts = frappe._dict(opts)
 
 		if self.contact_date:
-			event_doclist = frappe.get_doc({
+			event = frappe.get_doc({
 				"doctype": "Event",
 				"owner": opts.owner or self.owner,
 				"subject": opts.subject,
@@ -48,12 +49,9 @@ class TransactionBase(StatusUpdater):
 			})
 
 			if frappe.db.exists("User", self.contact_by):
-				event_doclist.append("users", {
-					"doctype": "Event User",
-					"person": self.contact_by
-				})
+				frappe.share("Event", event.name, self.contact_by)
 
-			event_doclist.insert(ignore_permissions=True)
+			event.insert(ignore_permissions=True)
 
 	def validate_uom_is_integer(self, uom_field, qty_fields):
 		validate_uom_is_integer(self, uom_field, qty_fields)

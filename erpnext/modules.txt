@@ -1,10 +1,11 @@
 Accounts
+CRM
 Buying
-HR
-Manufacturing
 Projects
 Selling
 Setup
+HR
+Manufacturing
 Stock
 Support
 Utilities
