@@ -19,7 +19,7 @@ class taxes_and_totals(object):
 		if self.doc.meta.get_field("discount_amount"):
 			self.apply_discount_amount()
 
-		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
+		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
 			self.calculate_total_advance()
 
 	def _calculate(self):
@@ -37,7 +37,7 @@ class taxes_and_totals(object):
 		self.calculate_item_values()
 		self.initialize_taxes()
 
-		if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+		if self.doc.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
 			self.determine_exclusive_rate()
 
 		self.calculate_net_total()
@@ -186,7 +186,7 @@ class taxes_and_totals(object):
 			self.doc.base_net_total += item.base_amount
 			self.doc.net_total += item.amount
 
-		self.round_floats_in(self.doc, ["base_net_total", "net_total"])
+		self.doc.round_floats_in(self.doc, ["base_net_total", "net_total"])
 
 	def calculate_taxes(self):
 		# maintain actual tax rate based on idx
@@ -296,7 +296,7 @@ class taxes_and_totals(object):
 		self.doc.base_total_taxes_and_charges = flt(self.doc.base_grand_total - self.doc.base_net_total,
 			self.doc.precision("base_total_taxes_and_charges"))
 
-		if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+		if self.doc.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
 			self.doc.grand_total = flt(self.doc.base_grand_total / self.doc.conversion_rate) \
 				if (self.doc.base_total_taxes_and_charges or self.doc.discount_amount) else self.doc.net_total
 
@@ -384,13 +384,13 @@ class taxes_and_totals(object):
 		# write_off_amount is only for POS Invoice
 		# total_advance is only for non POS Invoice
 
-		if self.doctype == "Sales Invoice":
-			self.round_floats_in(self.doc, ["base_grand_total", "total_advance", "write_off_amount", "paid_amount"])
+		if self.doc.doctype == "Sales Invoice":
+			self.doc.round_floats_in(self.doc, ["base_grand_total", "total_advance", "write_off_amount", "paid_amount"])
 			total_amount_to_pay = self.doc.base_grand_total - self.doc.write_off_amount
 			self.doc.outstanding_amount = flt(total_amount_to_pay - self.doc.total_advance - self.doc.paid_amount,
 				self.doc.precision("outstanding_amount"))
 		else:
-			self.round_floats_in(self.doc, ["total_advance", "write_off_amount"])
+			self.doc.round_floats_in(self.doc, ["total_advance", "write_off_amount"])
 			self.doc.total_amount_to_pay = flt(self.doc.base_grand_total - self.doc.write_off_amount,
 				self.doc.precision("total_amount_to_pay"))
 			self.doc.outstanding_amount = flt(self.doc.total_amount_to_pay - self.doc.total_advance,

@@ -18,7 +18,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		}
 
 		// Sales person's commission
-		if(in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"])) {
+		if(in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"], this.frm.doc.doctype)) {
 			this.calculate_commission();
 			this.calculate_contribution();
 		}
@@ -316,7 +316,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		this.frm.doc.base_total_taxes_and_charges = flt(this.frm.doc.base_grand_total - this.frm.doc.base_net_total,
 			precision("base_total_taxes_and_charges"));
 
-		if(in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"])) {
+		if(in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"], this.frm.doc.doctype)) {
 			this.frm.doc.grand_total = (this.frm.doc.base_total_taxes_and_charges || this.frm.doc.discount_amount) ?
 				flt(this.frm.doc.base_grand_total / this.frm.doc.conversion_rate) : this.frm.doc.net_total;
 

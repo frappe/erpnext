@@ -177,15 +177,6 @@
    "width": "100px"
   }, 
   {
-   "fieldname": "net_amount", 
-   "fieldtype": "Currency", 
-   "label": "Net Amount", 
-   "options": "currency", 
-   "permlevel": 0, 
-   "precision": "", 
-   "read_only": 1
-  }, 
-  {
    "fieldname": "col_break3", 
    "fieldtype": "Column Break", 
    "permlevel": 0
@@ -218,15 +209,6 @@
    "read_only": 1, 
    "reqd": 0, 
    "width": "100px"
-  }, 
-  {
-   "fieldname": "base_net_amount", 
-   "fieldtype": "Currency", 
-   "label": "Net Amount (Company Currency)", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "precision": "", 
-   "read_only": 1
   }, 
   {
    "fieldname": "pricing_rule", 
@@ -433,7 +415,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-01-22 13:52:44.959126", 
+ "modified": "2015-02-17 12:50:20.121459", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order Item", 

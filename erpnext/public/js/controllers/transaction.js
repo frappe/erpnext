@@ -8,7 +8,6 @@ frappe.require("assets/erpnext/js/utils.js");
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	onload: function() {
 		var me = this;
-
 		if(this.frm.doc.__islocal) {
 			var today = get_today(),
 				currency = frappe.defaults.get_user_default("currency");
