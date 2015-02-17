@@ -4,12 +4,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import cint, today, flt
+from frappe.utils import today, flt
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
-import json
 
 class AccountsController(TransactionBase):
 	def validate(self):
@@ -51,6 +50,14 @@ class AccountsController(TransactionBase):
 				if not self.fiscal_year:
 					self.fiscal_year = get_fiscal_year(self.get(fieldname))[0]
 				break
+
+	def calculate_taxes_and_totals(self):
+		from erpnext.controllers.taxes_and_totals import taxes_and_totals
+		taxes_and_totals(self).calculate()
+
+		if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+			self.calculate_commission()
+			self.calculate_contribution()
 
 	def validate_date_with_fiscal_year(self):
 		if self.meta.get_field("fiscal_year") :
@@ -152,213 +159,11 @@ class AccountsController(TransactionBase):
 		self.set("taxes", [])
 		self.set_taxes("taxes", "taxes_and_charges")
 
-	def calculate_taxes_and_totals(self):
-		self.discount_amount_applied = False
-		self._calculate_taxes_and_totals()
-
-		if self.meta.get_field("discount_amount"):
-			self.apply_discount_amount()
-
-	def _calculate_taxes_and_totals(self):
-		# validate conversion rate
-		company_currency = get_company_currency(self.company)
-		if not self.currency or self.currency == company_currency:
-			self.currency = company_currency
-			self.conversion_rate = 1.0
-		else:
-			validate_conversion_rate(self.currency, self.conversion_rate,
-				self.meta.get_label("conversion_rate"), self.company)
-
-		self.conversion_rate = flt(self.conversion_rate)
-
-		self.calculate_item_values()
-		self.initialize_taxes()
-
-		if hasattr(self, "determine_exclusive_rate"):
-			self.determine_exclusive_rate()
-
-		self.calculate_net_total()
-		self.calculate_taxes()
-		self.calculate_totals()
-		self._cleanup()
-
-	def initialize_taxes(self):
-		for tax in self.get("taxes"):
-			tax.item_wise_tax_detail = {}
-			tax_fields = ["total", "tax_amount_after_discount_amount",
-				"tax_amount_for_current_item", "grand_total_for_current_item",
-				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
-
-			if not self.discount_amount_applied:
-				tax_fields.append("tax_amount")
-
-			for fieldname in tax_fields:
-				tax.set(fieldname, 0.0)
-
-			self.validate_on_previous_row(tax)
-			self.validate_inclusive_tax(tax)
-			self.round_floats_in(tax)
-
-	def validate_on_previous_row(self, tax):
-		"""
-			validate if a valid row id is mentioned in case of
-			On Previous Row Amount and On Previous Row Total
-		"""
-		if tax.charge_type in ["On Previous Row Amount", "On Previous Row Total"] and \
-				(not tax.row_id or cint(tax.row_id) >= tax.idx):
-			throw(_("Please specify a valid Row ID for {0} in row {1}").format(_(tax.doctype), tax.idx))
-
-	def validate_inclusive_tax(self, tax):
-		def _on_previous_row_error(row_range):
-			throw(_("To include tax in row {0} in Item rate, taxes in rows {1} must also be included").format(tax.idx,
-				row_range))
-
-		if cint(getattr(tax, "included_in_print_rate", None)):
-			if tax.charge_type == "Actual":
-				# inclusive tax cannot be of type Actual
-				throw(_("Charge of type 'Actual' in row {0} cannot be included in Item Rate").format(tax.idx))
-			elif tax.charge_type == "On Previous Row Amount" and \
-					not cint(self.get("taxes")[cint(tax.row_id) - 1].included_in_print_rate):
-				# referred row should also be inclusive
-				_on_previous_row_error(tax.row_id)
-			elif tax.charge_type == "On Previous Row Total" and \
-					not all([cint(t.included_in_print_rate) for t in self.get("taxes")[:cint(tax.row_id) - 1]]):
-				# all rows about the reffered tax should be inclusive
-				_on_previous_row_error("1 - %d" % (tax.row_id,))
-
-	def calculate_taxes(self):
-		# maintain actual tax rate based on idx
-		actual_tax_dict = dict([[tax.idx, flt(tax.rate, self.precision("tax_amount", tax))] for tax in self.get("taxes")
-			if tax.charge_type == "Actual"])
-
-		for n, item in enumerate(self.get("items")):
-			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
-
-			for i, tax in enumerate(self.get("taxes")):
-				# tax_amount represents the amount of tax for the current step
-				current_tax_amount = self.get_current_tax_amount(item, tax, item_tax_map)
-
-				# Adjust divisional loss to the last item
-				if tax.charge_type == "Actual":
-					actual_tax_dict[tax.idx] -= current_tax_amount
-					if n == len(self.get("items")) - 1:
-						current_tax_amount += actual_tax_dict[tax.idx]
-
-				# store tax_amount for current item as it will be used for
-				# charge type = 'On Previous Row Amount'
-				tax.tax_amount_for_current_item = current_tax_amount
-
-				# accumulate tax amount into tax.tax_amount
-				if not self.discount_amount_applied:
-					tax.tax_amount += current_tax_amount
-
-				tax.tax_amount_after_discount_amount += current_tax_amount
-
-				if getattr(tax, "category", None):
-					# if just for valuation, do not add the tax amount in total
-					# hence, setting it as 0 for further steps
-					current_tax_amount = 0.0 if (tax.category == "Valuation") \
-						else current_tax_amount
-
-					current_tax_amount *= -1.0 if (tax.add_deduct_tax == "Deduct") else 1.0
-
-				# Calculate tax.total viz. grand total till that step
-				# note: grand_total_for_current_item contains the contribution of
-				# item's amount, previously applied tax and the current tax on that item
-				if i==0:
-					tax.grand_total_for_current_item = flt(item.base_amount + current_tax_amount,
-						self.precision("total", tax))
-				else:
-					tax.grand_total_for_current_item = \
-						flt(self.get("taxes")[i-1].grand_total_for_current_item +
-							current_tax_amount, self.precision("total", tax))
-
-				# in tax.total, accumulate grand total of each item
-				tax.total += tax.grand_total_for_current_item
-
-				# set precision in the last item iteration
-				if n == len(self.get("items")) - 1:
-					self.round_off_totals(tax)
-
-					# adjust Discount Amount loss in last tax iteration
-					if i == (len(self.get("taxes")) - 1) and self.discount_amount_applied:
-						self.adjust_discount_amount_loss(tax)
-
-	def round_off_totals(self, tax):
-		tax.total = flt(tax.total, self.precision("total", tax))
-		tax.tax_amount = flt(tax.tax_amount, self.precision("tax_amount", tax))
-		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount,
-			self.precision("tax_amount", tax))
-
-	def adjust_discount_amount_loss(self, tax):
-		discount_amount_loss = self.base_grand_total - flt(self.base_discount_amount) - tax.total
-		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount +
-			discount_amount_loss, self.precision("tax_amount", tax))
-		tax.total = flt(tax.total + discount_amount_loss, self.precision("total", tax))
-
-	def get_current_tax_amount(self, item, tax, item_tax_map):
-		tax_rate = self._get_tax_rate(tax, item_tax_map)
-		current_tax_amount = 0.0
-
-		if tax.charge_type == "Actual":
-			# distribute the tax amount proportionally to each item row
-			actual = flt(tax.rate, self.precision("tax_amount", tax))
-			current_tax_amount = (self.base_net_total
-				and ((item.base_amount / self.base_net_total) * actual)
-				or 0)
-		elif tax.charge_type == "On Net Total":
-			current_tax_amount = (tax_rate / 100.0) * item.base_amount
-		elif tax.charge_type == "On Previous Row Amount":
-			current_tax_amount = (tax_rate / 100.0) * \
-				self.get("taxes")[cint(tax.row_id) - 1].tax_amount_for_current_item
-		elif tax.charge_type == "On Previous Row Total":
-			current_tax_amount = (tax_rate / 100.0) * \
-				self.get("taxes")[cint(tax.row_id) - 1].grand_total_for_current_item
-
-		current_tax_amount = flt(current_tax_amount, self.precision("tax_amount", tax))
-
-		# store tax breakup for each item
-		key = item.item_code or item.item_name
-		if tax.item_wise_tax_detail.get(key):
-			item_wise_tax_amount = tax.item_wise_tax_detail[key][1] + current_tax_amount
-			tax.item_wise_tax_detail[key] = [tax_rate,item_wise_tax_amount]
-		else:
-			tax.item_wise_tax_detail[key] = [tax_rate,current_tax_amount]
-
-		return current_tax_amount
-
-	def _load_item_tax_rate(self, item_tax_rate):
-		return json.loads(item_tax_rate) if item_tax_rate else {}
-
-	def _get_tax_rate(self, tax, item_tax_map):
-		if item_tax_map.has_key(tax.account_head):
-			return flt(item_tax_map.get(tax.account_head), self.precision("rate", tax))
-		else:
-			return tax.rate
-
-	def _cleanup(self):
-		for tax in self.get("taxes"):
-			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
-
-	def _set_in_company_currency(self, item, print_field, base_field):
-		"""set values in base currency"""
-		value_in_company_currency = flt(self.conversion_rate *
-			flt(item.get(print_field), self.precision(print_field, item)), self.precision(base_field, item))
-		item.set(base_field, value_in_company_currency)
-
 	def validate_enabled_taxes_and_charges(self):
 		taxes_and_charges_doctype = self.meta.get_options("taxes_and_charges")
 		if frappe.db.get_value(taxes_and_charges_doctype, self.taxes_and_charges, "disabled"):
 			frappe.throw(_("{0} '{1}' is disabled").format(taxes_and_charges_doctype, self.taxes_and_charges))
 
-	def calculate_total_advance(self, parenttype, advance_parentfield):
-		if self.doctype == parenttype and self.docstatus < 2:
-			sum_of_allocated_amount = sum([flt(adv.allocated_amount, self.precision("allocated_amount", adv))
-				for adv in self.get(advance_parentfield)])
-
-			self.total_advance = flt(sum_of_allocated_amount, self.precision("total_advance"))
-
-			self.calculate_outstanding_amount()
 
 	def get_gl_dict(self, args):
 		"""this method populates the common properties of a gl entry record"""
