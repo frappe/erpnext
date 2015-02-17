@@ -145,6 +145,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		var d = locals[cdt][cdn];
 		d.transfer_qty = flt(d.qty) * flt(d.conversion_factor);
 		refresh_field('items');
+		calculate_total(doc, cdt, cdn);
+	},
+	
+	incoming_rate: function(doc, cdt, cdn) {
+		calculate_total(doc, cdt, cdn);
 	},
 
 	production_order: function() {
@@ -479,16 +484,13 @@ cur_frm.cscript.posting_date = function(doc, cdt, cdn){
 
 var calculate_total = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
-	amount = d.incoming_rate * d.qty
+	amount = flt(d.incoming_rate) * flt(d.qty)
 	frappe.model.set_value(cdt, cdn, 'amount', amount);
-	return frappe.call({
-		doc: cur_frm.doc,
-		method: "set_total_amount",
-		callback: function(r) {
-			refresh_field('total_amount');
-		}
-	});
+	var total_amount = 0.0;
+	var items = doc.items || [];
+	for(var i=0;i<items.length;i++) {
+		total_amount += flt(items[i].amount);
+	}
+	doc.total_amount = total_amount;
+	refresh_field("total_amount");
 }
-
-cur_frm.cscript.incoming_rate = calculate_total;
-cur_frm.cscript.qty = calculate_total;
