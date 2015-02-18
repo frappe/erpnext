@@ -295,6 +295,7 @@ class calculate_taxes_and_totals(object):
 		self.doc.base_grand_total = flt(self.doc.get("taxes")[-1].total
 			if self.doc.get("taxes") else self.doc.base_net_total)
 
+		print self.doc
 		self.doc.base_total_taxes_and_charges = flt(self.doc.base_grand_total - self.doc.base_net_total,
 			self.doc.precision("base_total_taxes_and_charges"))
 

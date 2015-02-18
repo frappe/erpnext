@@ -340,7 +340,7 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "base_taxes_and_charges", 
+   "fieldname": "base_total_taxes_and_charges", 
    "fieldtype": "Currency", 
    "label": "Total Taxes and Charges (Company Currency)", 
    "no_copy": 1, 
@@ -783,7 +783,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-11 16:13:52.294735", 
+ "modified": "2015-02-18 15:05:33.635613", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 
@@ -854,7 +854,7 @@
   }
  ], 
  "read_only_onload": 1, 
- "search_fields": "status, transaction_date, supplier,base_grand_total", 
+ "search_fields": "status, transaction_date, supplier,grand_total", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
  "title_field": "supplier_name"
