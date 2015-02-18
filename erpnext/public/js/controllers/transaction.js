@@ -56,6 +56,19 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
 		erpnext.pos.make_pos_btn(this.frm);
+		this.setup_sms();
+	},
+
+	setup_sms: function() {
+		var me = this;
+		if(this.frm.doc.docstatus===1 && !in_list(["Lost", "Stopped"], this.frm.doc.status)) {
+			this.frm.page.add_menu_item(__('Send SMS'), function() { me.send_sms(); });
+		}
+	},
+
+	send_sms: function() {
+		frappe.require("assets/erpnext/js/sms_manager.js");
+		var sms_man = new SMSManager(this.doc);
 	},
 
 	hide_currency_and_price_list: function() {

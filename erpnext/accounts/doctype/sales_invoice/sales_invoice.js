@@ -57,8 +57,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			// var percent_paid = cint(flt(doc.base_grand_total - doc.outstanding_amount) / flt(doc.base_grand_total) * 100);
 			// cur_frm.dashboard.add_progress(percent_paid + "% Paid", percent_paid);
 
-			cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, 'icon-mobile-phone');
-
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
 				var from_delivery_note = false;
@@ -394,10 +392,7 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.cscript.send_sms = function() {
-	frappe.require("assets/erpnext/js/sms_manager.js");
-	var sms_man = new SMSManager(cur_frm.doc);
-}
+
 
 cur_frm.set_query("debit_to", function(doc) {
 	return{

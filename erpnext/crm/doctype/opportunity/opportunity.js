@@ -81,8 +81,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 			cur_frm.add_custom_button(__('Opportunity Lost'),
 				cur_frm.cscript['Declare Opportunity Lost'], "icon-remove", "btn-default");
 
-		cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms,
-			"icon-mobile-phone", true);
+		
 	}
 }
 
@@ -149,10 +148,7 @@ cur_frm.cscript['Declare Opportunity Lost'] = function() {
 	dialog.show();
 }
 
-cur_frm.cscript.send_sms = function() {
-	frappe.require("assets/erpnext/js/sms_manager.js");
-	var sms_man = new SMSManager(cur_frm.doc);
-}
+
 
 cur_frm.cscript.company = function(doc, cdt, cdn) {
 	erpnext.get_fiscal_year(doc.company, doc.transaction_date);

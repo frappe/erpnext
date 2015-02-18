@@ -27,8 +27,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Purchase Order'],
 					"icon-exclamation", "btn-default");
 
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms, "icon-mobile-phone", true);
-
 		} else if(doc.docstatus===0) {
 			cur_frm.cscript.add_from_mappers();
 		}
@@ -216,10 +214,7 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.cscript.send_sms = function() {
-	frappe.require("assets/erpnext/js/sms_manager.js");
-	var sms_man = new SMSManager(cur_frm.doc);
-}
+
 
 cur_frm.cscript.schedule_date = function(doc, cdt, cdn) {
 	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "schedule_date");

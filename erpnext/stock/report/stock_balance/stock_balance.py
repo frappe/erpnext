@@ -53,6 +53,9 @@ def get_conditions(filters):
 	else:
 		frappe.throw(_("'To Date' is required"))
 
+	if filters.get("item_code"):
+		conditions += " and item_code = '%s'" % frappe.db.escape(filters.get("item_code"))
+
 	return conditions
 
 #get all details

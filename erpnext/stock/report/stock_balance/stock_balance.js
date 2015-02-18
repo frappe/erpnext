@@ -16,6 +16,13 @@ frappe.query_reports["Stock Balance"] = {
 			"fieldtype": "Date",
 			"width": "80",
 			"default": frappe.datetime.get_today()
+		},
+		{
+			"fieldname": "item_code",
+			"label": __("Item"),
+			"fieldtype": "Link",
+			"width": "80",
+			"options": "Item"
 		}
 	]
 }

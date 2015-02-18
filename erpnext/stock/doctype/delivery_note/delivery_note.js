@@ -25,7 +25,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			cur_frm.add_custom_button(__('Make Installation Note'), this.make_installation_note);
 
 		if (doc.docstatus==1) {
-			cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
+			
 			this.show_stock_ledger();
 			this.show_general_ledger();
 		}
@@ -240,8 +240,5 @@ if (sys_defaults.auto_accounting_for_stock) {
 	}
 }
 
-cur_frm.cscript.send_sms = function() {
-	frappe.require("assets/erpnext/js/sms_manager.js");
-	var sms_man = new SMSManager(cur_frm.doc);
-}
+
 

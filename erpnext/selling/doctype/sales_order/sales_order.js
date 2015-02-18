@@ -45,8 +45,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 								this.make_maintenance_schedule, null, "btn-default");
 						}
 
-				cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone", true);
-
 			} else {
 				// un-stop
 				cur_frm.dashboard.set_headline_alert(__("Stopped"), "alert-danger", "icon-stop");
@@ -187,7 +185,4 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	}
 };
 
-cur_frm.cscript.send_sms = function() {
-	frappe.require("assets/erpnext/js/sms_manager.js");
-	var sms_man = new SMSManager(cur_frm.doc);
-};
+;

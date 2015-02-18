@@ -31,7 +31,6 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 				frappe.boot.doctype_icons["Customer"], "btn-default");
 			this.frm.add_custom_button(__("Create Opportunity"), this.create_opportunity,
 				frappe.boot.doctype_icons["Opportunity"], "btn-default");
-			cur_frm.add_custom_button(__("Send SMS"), this.frm.cscript.send_sms, "icon-mobile-phone");
 		}
 
 		if(!this.frm.doc.__islocal) {
@@ -56,8 +55,5 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 
 $.extend(cur_frm.cscript, new erpnext.LeadController({frm: cur_frm}));
 
-cur_frm.cscript.send_sms = function() {
-	frappe.require("assets/erpnext/js/sms_manager.js");
-	var sms_man = new SMSManager(cur_frm.doc);
-}
+
 

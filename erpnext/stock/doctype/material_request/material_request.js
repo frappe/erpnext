@@ -53,8 +53,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 				cur_frm.add_custom_button(__('Stop'),
 					cur_frm.cscript['Stop Material Request'], "icon-exclamation", "btn-default");
 			}
-			cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms,
-				"icon-mobile-phone", true);
+			
 
 		}
 
@@ -192,7 +191,4 @@ cur_frm.cscript['Unstop Material Request'] = function(){
 	}
 };
 
-cur_frm.cscript.send_sms = function() {
-	frappe.require("assets/erpnext/js/sms_manager.js");
-	var sms_man = new SMSManager(cur_frm.doc);
-}
+
