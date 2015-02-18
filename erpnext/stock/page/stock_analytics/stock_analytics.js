@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 
-frappe.pages['stock-analytics'].on_page_load = function(wrapper) { 
+frappe.pages['stock-analytics'].on_page_load = function(wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
 		title: __('Stock Analytics'),
@@ -13,7 +13,8 @@ frappe.pages['stock-analytics'].on_page_load = function(wrapper) {
 
 
 	frappe.add_breadcrumbs("Stock")
-	
-}
 
+};
+
+frappe.assets.views["Report"]();
 frappe.require("assets/erpnext/js/stock_analytics.js");

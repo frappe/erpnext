@@ -39,6 +39,7 @@ class JournalEntry(AccountsController):
 		self.check_credit_days()
 		self.validate_expense_claim()
 		self.validate_credit_debit_note()
+		self.validate_empty_accounts_table()
 
 	def on_submit(self):
 		self.check_credit_limit()
@@ -450,6 +451,10 @@ class JournalEntry(AccountsController):
 		})
 		if count:
 			frappe.throw(_("{0} already made against stock entry {1}".format(self.voucher_type, self.stock_entry)))
+			
+	def validate_empty_accounts_table(self):
+		if not self.get('accounts'):
+			frappe.throw("Accounts table cannot be blank.")
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):

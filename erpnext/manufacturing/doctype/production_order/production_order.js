@@ -176,7 +176,58 @@ cur_frm.set_query("bom_no", function(doc) {
 	} else msgprint(__("Please enter Production Item first"));
 });
 
-frappe.ui.form.on("Production Order", "additional_operating_cost", function(frm) {
+
+var calculate_total_cost = function(frm) {
 	var variable_cost = frm.doc.actual_operating_cost ? flt(frm.doc.actual_operating_cost) : flt(frm.doc.planned_operating_cost)
 	frm.set_value("total_operating_cost", (flt(frm.doc.additional_operating_cost) + variable_cost))
-})
+}
+
+frappe.ui.form.on("Production Order", "additional_operating_cost", function(frm) {
+	calculate_total_cost(frm);
+});
+
+frappe.ui.form.on("Production Order Operation", "workstation", function(frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	frappe.call({
+		"method": "frappe.client.get",
+		args: {
+			doctype: "Workstation",
+			name: d.workstation
+		},
+		callback: function (data) {
+			frappe.model.set_value(d.doctype, d.name, "hour_rate", data.message.hour_rate);
+			calculate_cost(frm.doc);
+			calculate_total_cost(frm);
+		}
+	})
+});
+
+var calculate_cost = function(doc) {
+	if (doc.operations){
+		var op = doc.operations;
+		doc.planned_operating_cost = 0.0;
+		for(var i=0;i<op.length;i++) {
+			planned_operating_cost = flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
+			frappe.model.set_value('Production Order Operation',op[i].name, "planned_operating_cost", planned_operating_cost);
+
+			doc.planned_operating_cost += planned_operating_cost;
+		}
+		refresh_field('planned_operating_cost');
+	}
+}
+
+frappe.ui.form.on("Production Order Operation", "time_in_mins", function(frm, cdt, cdn) {
+	calculate_cost(frm.doc);
+	calculate_total_cost(frm)
+});
+
+var company_filter = function(doc) {
+	return{
+		filters: {
+			'company': doc.company
+		}
+	}
+}
+
+cur_frm.fields_dict.fg_warehouse.get_query = company_filter
+cur_frm.fields_dict.wip_warehouse.get_query = company_filter

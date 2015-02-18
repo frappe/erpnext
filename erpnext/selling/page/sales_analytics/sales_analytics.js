@@ -12,7 +12,9 @@ frappe.pages['sales-analytics'].on_page_load = function(wrapper) {
 
 	frappe.add_breadcrumbs("Selling")
 
-}
+};
+
+frappe.assets.views["Report"]();
 
 erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 	init: function(wrapper) {
