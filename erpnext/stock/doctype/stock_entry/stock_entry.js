@@ -484,7 +484,7 @@ cur_frm.cscript.posting_date = function(doc, cdt, cdn){
 
 var calculate_total = function(doc, cdt, cdn){
 	var d = locals[cdt][cdn];
-	amount = flt(d.incoming_rate) * flt(d.qty)
+	amount = flt(d.incoming_rate) * flt(d.transfer_qty)
 	frappe.model.set_value(cdt, cdn, 'amount', amount);
 	var total_amount = 0.0;
 	var items = doc.items || [];
