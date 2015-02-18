@@ -166,4 +166,4 @@ def item_details(doctype, txt, searchfield, start, page_len, filters):
 	 			and %s like "%s" %s
 	 			limit  %s, %s """ % ("%s", searchfield, "%s",
 	 			get_match_cond(doctype), "%s", "%s"),
-	 			(filters["delivery_note"], "%%%s%%" % txt, start, page_len))
+	 			((filters or {}).get("delivery_note"), "%%%s%%" % txt, start, page_len))

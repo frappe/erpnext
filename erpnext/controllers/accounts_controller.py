@@ -119,6 +119,10 @@ class AccountsController(TransactionBase):
 							item.get(fieldname) is None and value is not None:
 								item.set(fieldname, value)
 
+						if fieldname == "cost_center" and item.meta.get_field("cost_center") \
+							and not item.get("cost_center") and value is not None:
+								item.set(fieldname, value)
+
 					if ret.get("pricing_rule"):
 						for field in ["base_price_list_rate", "price_list_rate",
 							"discount_percentage", "base_rate", "rate"]:
@@ -291,7 +295,7 @@ class AccountsController(TransactionBase):
 			self.precision("tax_amount", tax))
 
 	def adjust_discount_amount_loss(self, tax):
-		discount_amount_loss = self.grand_total - flt(self.discount_amount) - tax.total
+		discount_amount_loss = self.grand_total - flt(self.base_discount_amount) - tax.total
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount +
 			discount_amount_loss, self.precision("tax_amount", tax))
 		tax.total = flt(tax.total + discount_amount_loss, self.precision("total", tax))
@@ -467,7 +471,7 @@ class AccountsController(TransactionBase):
 					max_allowed_amt = flt(ref_amt * (100 + tolerance) / 100)
 
 					if total_billed_amt - max_allowed_amt > 0.01:
-						frappe.throw(_("Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in Stock Settings").format(item.item_code, item.idx, max_allowed_amt))
+						frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow overbilling, please set in Stock Settings").format(item.item_code, item.idx, max_allowed_amt))
 
 	def get_company_default(self, fieldname):
 		from erpnext.accounts.utils import get_company_default

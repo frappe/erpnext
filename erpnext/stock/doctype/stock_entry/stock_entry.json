@@ -238,11 +238,6 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "fold", 
-   "fieldtype": "Fold", 
-   "permlevel": 0
-  }, 
-  {
    "depends_on": "eval:(doc.purpose!==\"Sales Return\" && doc.purpose!==\"Purchase Return\")", 
    "fieldname": "sb1", 
    "fieldtype": "Section Break", 
@@ -338,6 +333,11 @@
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0
+  }, 
+  {
+   "fieldname": "fold", 
+   "fieldtype": "Fold", 
+   "permlevel": 0
   }, 
   {
    "depends_on": "eval:(doc.purpose==\"Sales Return\" || doc.purpose==\"Purchase Return\")", 
@@ -585,7 +585,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2014-09-16 15:56:37.514676", 
+ "modified": "2015-01-29 11:26:46.968041", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 

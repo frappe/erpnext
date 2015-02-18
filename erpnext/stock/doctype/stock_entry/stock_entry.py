@@ -45,7 +45,6 @@ class StockEntry(StockController):
 		self.validate_warehouse(pro_obj)
 		self.validate_production_order()
 		self.get_stock_and_rate()
-		self.validate_incoming_rate()
 		self.validate_bom()
 		self.validate_finished_goods()
 		self.validate_return_reference_doc()
@@ -110,8 +109,8 @@ class StockEntry(StockController):
 	def validate_warehouse(self, pro_obj):
 		"""perform various (sometimes conditional) validations on warehouse"""
 
-		source_mandatory = ["Material Issue", "Material Transfer", "Purchase Return"]
-		target_mandatory = ["Material Receipt", "Material Transfer", "Sales Return"]
+		source_mandatory = ["Material Issue", "Material Transfer", "Purchase Return", "Subcontract"]
+		target_mandatory = ["Material Receipt", "Material Transfer", "Sales Return", "Subcontract"]
 
 		validate_for_manufacture_repack = any([d.bom_no for d in self.get("mtn_details")])
 
@@ -190,16 +189,10 @@ class StockEntry(StockController):
 					+ self.production_order + ":" + ", ".join(other_ste), DuplicateEntryForProductionOrderError)
 
 	def validate_valuation_rate(self):
-		if self.purpose in ["Manufacture", "Repack"]:
-			valuation_at_source, valuation_at_target = 0, 0
-			for d in self.get("mtn_details"):
-				if d.s_warehouse and not d.t_warehouse:
-					valuation_at_source += flt(d.amount)
-				if d.t_warehouse and not d.s_warehouse:
-					valuation_at_target += flt(d.amount)
+		for d in self.get('mtn_details'):
+			if d.t_warehouse:
+				self.validate_value("incoming_rate", ">", 0, d, raise_exception=IncorrectValuationRateError)
 
-			if valuation_at_target < valuation_at_source:
-				frappe.throw(_("Total valuation for manufactured or repacked item(s) can not be less than total valuation of raw materials"))
 
 	def set_total_amount(self):
 		self.total_amount = sum([flt(item.amount) for item in self.get("mtn_details")])
@@ -241,7 +234,7 @@ class StockEntry(StockController):
 					incoming_rate = flt(self.get_incoming_rate(args), self.precision("incoming_rate", d))
 					if incoming_rate > 0:
 						d.incoming_rate = incoming_rate
-				d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
+				d.amount = flt(flt(d.transfer_qty) * flt(d.incoming_rate), self.precision("amount", d))
 				if not d.t_warehouse:
 					raw_material_cost += flt(d.amount)
 
@@ -255,8 +248,9 @@ class StockEntry(StockController):
 						if d.bom_no:
 							bom = frappe.db.get_value("BOM", d.bom_no, ["operating_cost", "quantity"], as_dict=1)
 							operation_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
-						d.incoming_rate = operation_cost_per_unit + (raw_material_cost + flt(self.total_fixed_cost)) / flt(d.transfer_qty)
-					d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
+						d.incoming_rate = flt(operation_cost_per_unit +
+							(raw_material_cost + flt(self.total_fixed_cost)) / flt(d.transfer_qty), self.precision("incoming_rate", d))
+					d.amount = flt(flt(d.transfer_qty) * flt(d.incoming_rate), self.precision("transfer_qty", d))
 					break
 
 	def get_incoming_rate(self, args):
@@ -279,11 +273,6 @@ class StockEntry(StockController):
 			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
 
 		return incoming_rate
-
-	def validate_incoming_rate(self):
-		for d in self.get('mtn_details'):
-			if d.t_warehouse:
-				self.validate_value("incoming_rate", ">", 0, d, raise_exception=IncorrectValuationRateError)
 
 	def validate_bom(self):
 		for d in self.get('mtn_details'):
@@ -478,6 +467,9 @@ class StockEntry(StockController):
 					"Subcontract"]:
 				if self.production_order and self.purpose == "Material Transfer":
 					item_dict = self.get_pending_raw_materials(pro_obj)
+					if self.to_warehouse and pro_obj:
+						for item in item_dict.values():
+							item["to_warehouse"] = pro_obj.wip_warehouse
 				else:
 					if not self.fg_completed_qty:
 						frappe.throw(_("Manufacturing Quantity is mandatory"))
@@ -485,7 +477,8 @@ class StockEntry(StockController):
 					for item in item_dict.values():
 						if pro_obj:
 							item["from_warehouse"] = pro_obj.wip_warehouse
-						item["to_warehouse"] = ""
+
+						item["to_warehouse"] = self.to_warehouse if self.purpose=="Subcontract" else ""
 
 				# add raw materials to Stock Entry Detail table
 				self.add_to_stock_entry_detail(item_dict)
@@ -536,7 +529,7 @@ class StockEntry(StockController):
 		item_dict = get_bom_items_as_dict(self.bom_no, qty=qty, fetch_exploded = self.use_multi_level_bom)
 
 		for item in item_dict.values():
-			item.from_warehouse = item.default_warehouse
+			item.from_warehouse = self.from_warehouse or item.default_warehouse
 
 		return item_dict
 

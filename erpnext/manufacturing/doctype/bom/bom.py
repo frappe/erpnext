@@ -9,7 +9,6 @@ from frappe import _
 from frappe.model.document import Document
 
 from operator import itemgetter, attrgetter
-
 class BOM(Document):
 
 	def autoname(self):
@@ -27,7 +26,7 @@ class BOM(Document):
 		self.validate_main_item()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
-		validate_uom_is_integer(self, "stock_uom", "qty")
+		validate_uom_is_integer(self, "stock_uom", "qty", "BOM Item")
 
 		self.validate_operations()
 		self.validate_materials()
@@ -58,6 +57,9 @@ class BOM(Document):
 			docstatus, description, is_sub_contracted_item, stock_uom, default_bom,
 			last_purchase_rate, is_manufactured_item
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
+
+		if not item:
+			frappe.throw(_("Item: {0} does not exist in the system").format(item_code))
 
 		return item
 
@@ -287,7 +289,10 @@ class BOM(Document):
 				if not d.hour_rate:
 					d.hour_rate = flt(w[0])
 
-				fixed_cost += flt(w[1])
+				if d.fixed_cycle_cost == None:
+					d.fixed_cycle_cost= flt(w[1])
+
+				fixed_cost += d.fixed_cycle_cost
 
 			if d.hour_rate and d.time_in_mins:
 				d.operating_cost = flt(d.hour_rate) * flt(d.time_in_mins) / 60.0

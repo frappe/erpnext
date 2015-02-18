@@ -124,10 +124,7 @@ def send_notification(new_rv):
 	frappe.sendmail(new_rv.notification_email_address,
 		subject=  _("New {0}: #{1}").format(new_rv.doctype, new_rv.name),
 		message = _("Please find attached {0} #{1}").format(new_rv.doctype, new_rv.name),
-		attachments = [{
-			"fname": new_rv.name + ".pdf",
-			"fcontent": frappe.get_print_format(new_rv.doctype, new_rv.name, as_pdf=True)
-		}])
+		attachments = [frappe.attach_print(new_rv.doctype, new_rv.name, file_name=new_rv.name)])
 
 def notify_errors(doc, doctype, party, owner):
 	from frappe.utils.user import get_system_managers

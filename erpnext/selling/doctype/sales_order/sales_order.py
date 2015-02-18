@@ -51,12 +51,12 @@ class SalesOrder(SellingController):
 					frappe.throw(_("Reserved warehouse required for stock item {0}").format(d.item_code))
 
 				if e in check_list:
-					frappe.throw(_("Item {0} has been entered twice").format(d.item_code))
+					frappe.msgprint(_("Item {0} has been entered twice").format(d.item_code))
 				else:
 					check_list.append(e)
 			else:
 				if f in chk_dupl_itm:
-					frappe.throw(_("Item {0} has been entered twice").format(d.item_code))
+					frappe.msgprint(_("Item {0} has been entered twice").format(d.item_code))
 				else:
 					chk_dupl_itm.append(f)
 
@@ -275,6 +275,14 @@ def make_material_request(source_name, target_doc=None):
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
 	def set_missing_values(source, target):
+		if source.po_no:
+			if target.po_no:
+				target_po_no = target.po_no.split(", ")
+				target_po_no.append(source.po_no)
+				target.po_no = ", ".join(list(set(target_po_no))) if len(target_po_no) > 1 else target_po_no[0]
+			else:
+				target.po_no = source.po_no
+
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")

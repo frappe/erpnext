@@ -108,6 +108,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 			// otherwise, only reset values
 			$.each(this.data, function(i, d) {
 				me.reset_item_values(d);
+				d["closing_qty_value"] = 0;
 			});
 		}
 

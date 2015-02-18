@@ -167,7 +167,7 @@ class StockController(AccountsController):
 		else:
 			is_expense_account = frappe.db.get_value("Account",
 				item.get("expense_account"), "report_type")=="Profit and Loss"
-			if self.doctype not in ("Purchase Receipt", "Stock Reconciliation") and not is_expense_account:
+			if self.doctype not in ("Purchase Receipt", "Stock Reconciliation", "Stock Entry") and not is_expense_account:
 				frappe.throw(_("Expense / Difference account ({0}) must be a 'Profit or Loss' account")
 					.format(item.get("expense_account")))
 			if is_expense_account and not item.get("cost_center"):
@@ -197,9 +197,9 @@ class StockController(AccountsController):
 		sl_dict.update(args)
 		return sl_dict
 
-	def make_sl_entries(self, sl_entries, is_amended=None):
+	def make_sl_entries(self, sl_entries, is_amended=None, allow_negative_stock=False):
 		from erpnext.stock.stock_ledger import make_sl_entries
-		make_sl_entries(sl_entries, is_amended)
+		make_sl_entries(sl_entries, is_amended, allow_negative_stock)
 
 	def make_gl_entries_on_cancel(self):
 		if frappe.db.sql("""select name from `tabGL Entry` where voucher_type=%s
@@ -245,7 +245,7 @@ def compare_existing_and_expected_gle(existing_gle, expected_gle):
 	for entry in expected_gle:
 		for e in existing_gle:
 			if entry.account==e.account and entry.against_account==e.against_account \
-				and entry.cost_center==e.cost_center \
+				and (not entry.cost_center or not e.cost_center or entry.cost_center==e.cost_center) \
 				and (entry.debit != e.debit or entry.credit != e.credit):
 					matched = False
 					break

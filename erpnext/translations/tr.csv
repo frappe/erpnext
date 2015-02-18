@@ -39,7 +39,7 @@ A Customer exists with same name,Bir Müşteri aynı adla
 A Lead with this email id should exist,Bu e-posta sistemde zaten kayıtlı
 A Product or Service,Ürün veya Hizmet
 A Supplier exists with same name,Aynı isimli bir Tedarikçi mevcuttur.
-A symbol for this currency. For e.g. $,Bu para birimi için bir sembol. örneğin $
+A symbol for this currency. For e.g. $,Bu para birimi için bir sembol. örn. $
 AMC Expiry Date,AMC Expiry Date
 Abbr,Kısaltma
 Abbreviation cannot have more than 5 characters,Kısaltma 5 karakterden fazla olamaz.
@@ -1455,9 +1455,9 @@ Job Profile,İş Profili
 Job Title,Meslek
 "Job profile, qualifications required etc.","Gerekli iş profili, nitelikleri vb"
 Jobs Email Settings,İş E-posta Ayarları
-Journal Entries,Alacak/Borç Girişleri
-Journal Entry,Alacak/Borç Girişleri
-Journal Voucher,Alacak/Borç Çeki
+Journal Entries,Yevmiye Girişleri
+Journal Entry,Yevmiye Girişi
+Journal Voucher,Yevmiye Fişi
 Journal Voucher Detail,Alacak/Borç Fiş Detay
 Journal Voucher Detail No,Alacak/Borç Fiş Detay No
 Journal Voucher {0} does not have account {1} or already matched,Dergi Çeki {0} hesabı yok {1} ya da zaten eşleşti
@@ -1480,13 +1480,13 @@ Language,Dil
 Last Name,Soyadı
 Last Purchase Rate,Son Satış Fiyatı
 Latest,Son
-Lead,Lead
+Lead,Aday
 Lead Details,Lead Details
 Lead Id,Kurşun Kimliği
 Lead Name,Lead Name
 Lead Owner,Lead Owner
-Lead Source,Kurşun Kaynak
-Lead Status,Kurşun Durum
+Lead Source,Aday Kaynak
+Lead Status,Aday Durumu
 Lead Time Date,Lead Time Date
 Lead Time Days,Lead Time Days
 Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.,"Lead Time gün bu öğe depoda beklenen hangi gün sayısıdır. Bu öğeyi seçtiğinizde, bu gün Malzeme İsteği getirildi."

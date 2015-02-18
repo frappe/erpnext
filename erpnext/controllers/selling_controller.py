@@ -218,9 +218,10 @@ class SellingController(StockController):
 	def calculate_totals(self):
 		self.grand_total = flt(self.tax_doclist[-1].total if self.tax_doclist else self.net_total)
 
-		self.grand_total_export = flt(self.grand_total / self.conversion_rate)
-
 		self.other_charges_total = flt(self.grand_total - self.net_total, self.precision("other_charges_total"))
+
+		self.grand_total_export = flt(self.grand_total / self.conversion_rate) \
+			if (self.other_charges_total or self.discount_amount) else self.net_total_export
 
 		self.other_charges_total_export = flt(self.grand_total_export - self.net_total_export +
 			flt(self.discount_amount), self.precision("other_charges_total_export"))
@@ -233,16 +234,20 @@ class SellingController(StockController):
 
 	def apply_discount_amount(self):
 		if self.discount_amount:
+			self.base_discount_amount = flt(self.discount_amount * self.conversion_rate, self.precision("base_discount_amount"))
+
 			grand_total_for_discount_amount = self.get_grand_total_for_discount_amount()
 
 			if grand_total_for_discount_amount:
 				# calculate item amount after Discount Amount
 				for item in self.item_doclist:
-					distributed_amount = flt(self.discount_amount) * item.base_amount / grand_total_for_discount_amount
+					distributed_amount = flt(self.base_discount_amount) * item.base_amount / grand_total_for_discount_amount
 					item.base_amount = flt(item.base_amount - distributed_amount, self.precision("base_amount", item))
 
 				self.discount_amount_applied = True
 				self._calculate_taxes_and_totals()
+		else:
+			self.base_discount_amount = 0
 
 	def get_grand_total_for_discount_amount(self):
 		actual_taxes_dict = {}

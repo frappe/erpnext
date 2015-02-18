@@ -402,20 +402,36 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 
 	_set_values_for_item_list: function(children) {
-		$.each(children, function(i, d) {
-			$.each(d, function(k, v) {
+		var me = this;
+		var price_list_rate_changed = false;
+		for(var i=0, l=children.length; i<l; i++) {
+			var d = children[i];
+			var existing_pricing_rule = frappe.model.get_value(d.doctype, d.name, "pricing_rule");
+
+			for(var k in d) {
+				var v = d[k];
 				if (["doctype", "name"].indexOf(k)===-1) {
+					if(k=="price_list_rate") {
+						if(flt(v) != flt(d.price_list_rate)) price_list_rate_changed = true;
+					}
 					frappe.model.set_value(d.doctype, d.name, k, v);
 				}
-			});
-		});
+			}
+
+			// if pricing rule set as blank from an existing value, apply price_list
+			if(!me.frm.doc.ignore_pricing_rule && existing_pricing_rule && !d.pricing_rule) {
+				me.apply_price_list(frappe.get_doc(d.doctype, d.name));
+			}
+		}
+
+		if(!price_list_rate_changed) me.calculate_taxes_and_totals();
 	},
 
-	apply_price_list: function() {
+	apply_price_list: function(item) {
 		var me = this;
 		return this.frm.call({
 			method: "erpnext.stock.get_item_details.apply_price_list",
-			args: {	args: this._get_args() },
+			args: {	args: this._get_args(item) },
 			callback: function(r) {
 				if (!r.exc) {
 					me.in_apply_price_list = true;
@@ -722,7 +738,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 	},
 
 	adjust_discount_amount_loss: function(tax) {
-		var discount_amount_loss = this.frm.doc.grand_total - flt(this.frm.doc.discount_amount) - tax.total;
+		var discount_amount_loss = this.frm.doc.grand_total - flt(this.frm.doc.base_discount_amount) - tax.total;
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount +
 			discount_amount_loss, precision("tax_amount", tax));
 		tax.total = flt(tax.total + discount_amount_loss, precision("total", tax));
@@ -736,8 +752,7 @@ erpnext.TransactionController = erpnext.stock.StockController.extend({
 			// distribute the tax amount proportionally to each item row
 			var actual = flt(tax.rate, precision("tax_amount", tax));
 			current_tax_amount = this.frm.doc.net_total ?
-				((item.base_amount / this.frm.doc.net_total) * actual) :
-				0.0;
+			((item.base_amount / this.frm.doc.net_total) * actual) : 0.0;
 
 		} else if(tax.charge_type == "On Net Total") {
 			current_tax_amount = (tax_rate / 100.0) * item.base_amount;

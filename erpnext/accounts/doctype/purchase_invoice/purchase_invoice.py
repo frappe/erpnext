@@ -405,7 +405,7 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 	# Hence the first condition is an "OR"
 	return frappe.db.sql("""select tabAccount.name from `tabAccount`
 			where (tabAccount.report_type = "Profit and Loss"
-					or tabAccount.account_type = "Expense Account")
+					or tabAccount.account_type in ("Expense Account", "Fixed Asset"))
 				and tabAccount.group_or_ledger="Ledger"
 				and tabAccount.docstatus!=2
 				and ifnull(tabAccount.master_type, "")=""

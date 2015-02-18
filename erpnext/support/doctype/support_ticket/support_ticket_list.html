@@ -3,7 +3,7 @@
 		<div class="text-ellipsis">
 			{%= list.get_avatar_and_id(doc) %}
 			<span class="label label-{%= frappe.utils.guess_style(doc.status) %} filterable"
-				data-filter="status,=,{%= doc.status %}">
+				data-filter="status,=,{%= doc.status%}">
 				{%= doc.status %}
 			</span>
 		</div>
