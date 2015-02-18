@@ -122,7 +122,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	clean_up: function() {
 		// Clear Production Order record from locals, because it is updated via Stock Entry
 		if(this.frm.doc.production_order &&
-				this.frm.doc.purpose == "Manufacture") {
+				in_list(["Manufacture", "Material Transfer for Manufacture"], this.frm.doc.purpose)) {
 			frappe.model.remove_from_locals("Production Order",
 				this.frm.doc.production_order);
 		}
@@ -164,7 +164,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	toggle_enable_bom: function() {
-		this.frm.toggle_enable("bom_no", this.frm.doc.purpose!="Manufacture");
+		this.frm.toggle_enable("bom_no", !in_list(["Manufacture", "Material Transfer for Manufacture"], this.frm.doc.purpose));
 	},
 
 	get_doctype_docname: function() {
@@ -233,8 +233,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 	},
 
-	source_mandatory: ["Material Issue", "Material Transfer", "Purchase Return", "Subcontract"],
-	target_mandatory: ["Material Receipt", "Material Transfer", "Sales Return", "Subcontract"],
+	source_mandatory: ["Material Issue", "Material Transfer", "Purchase Return", "Subcontract",
+		"Material Transfer for Manufacture"],
+	target_mandatory: ["Material Receipt", "Material Transfer", "Sales Return", "Subcontract",
+		"Material Transfer for Manufacture"],
 
 	from_warehouse: function(doc) {
 		var me = this;
@@ -251,6 +253,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	set_warehouse_if_missing: function(fieldname, value, condition) {
+		var changed = false;
 		for (var i=0, l=(this.frm.doc.items || []).length; i<l; i++) {
 			var row = this.frm.doc.items[i];
 			if (!row[fieldname]) {
@@ -259,8 +262,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				}
 
 				frappe.model.set_value(row.doctype, row.name, fieldname, value, "Link");
+				changed = true;
 			}
 		}
+		refresh_field("items");
 	},
 
 	items_on_form_rendered: function(doc, grid_row) {

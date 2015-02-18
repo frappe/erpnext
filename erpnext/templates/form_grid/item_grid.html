@@ -14,9 +14,9 @@
 				<br>{%= doc.item_name %}{% } %}
 			{% if(doc.item_name != doc.description) { %}
 				<p>{%= doc.description %}</p>{% } %}
-            <div>
+            <p>
     			{% if(doc.sales_order || doc.against_sales_order) { %}
-    				<span class="label label-default"
+    				<span class="label label-default" style="margin-right: 10px;"
     					title="{%= __("Sales Order") %}">
     					<i class="icon-file"></i>
     					{%= doc.sales_order || doc.against_sales_order %}
@@ -36,22 +36,28 @@
     					}
     				}
     				%}
-    				<span style="margin-left: 10px;"
+    				<span style="margin-right: 10px;"
     					title="{%= title %}">
     					<span class="label {%= label_class %}">
     						{%= doc.warehouse %}
     					</span>
     				</span>
     			{% } %}
-            </div>
+            </p>
 			{% include "templates/form_grid/includes/visible_cols.html" %}
 			{% if(doc.schedule_date) { %}
-			<div><span title="{%= __("Reqd By Date") %}" class="label {%=
-				(frappe.datetime.get_diff(doc.schedule_date) < 1
-					&& doc.received_qty < doc.qty)
-					? "label-danger" : "label-default" %}">
-					{%= doc.get_formatted("schedule_date") %}</span>
-			</div>
+            <div class="clearfix"></div>
+            <div>
+                {% if(frappe.datetime.get_diff(doc.schedule_date) < 1 && doc.received_qty < doc.qty) { %}
+                <span class="text-danger">
+                    {%= __("Overdue on {0}", [doc.get_formatted("schedule_date")]) %}
+                </span>
+                {% } else { %}
+                <span class="text-muted">
+                    {%= __("Due on {0}", [doc.get_formatted("schedule_date")]) %}
+                </span>
+                {% } %}
+            </div>
 			{% } %}
 		</div>
 

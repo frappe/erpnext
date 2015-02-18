@@ -18,15 +18,18 @@
 				<p>{%= doc.description %}</p>{% } %}
 			{% include "templates/form_grid/includes/visible_cols.html" %}
 			<div>
-				{% if(doc.s_warehouse) { %}<span class="label
-					{%= (doc.actual_qty >= doc.qty) ? "label-success"
-						: "label-danger" %}"
-					title="{%= (doc.actual_qty >= doc.qty) ? __("In Stock")
-						: __("Not In Stock") %}">
-					{%= doc.s_warehouse || "" %}</span>{% } %}
-				<i class="icon-long-arrow-right"></i>
+				{% if(doc.s_warehouse) { %}
+                    <span class="label label-primary">
+					{%= doc.s_warehouse || "" %}</span>
+                {% } %}
+				<i class="octicon octicon-arrow-small-right"></i>
 				{% if(doc.t_warehouse) { %}<span class="label label-primary">
 					{%= doc.t_warehouse || "" %}</span>{% } %}
+				{% if(doc.s_warehouse && doc.actual_qty < doc.qty) { %}
+                    <span class="text-danger small" style="margin-left: 15px;">
+                        <span class="octicon octicon-stop" style="font-size: 12px;"></span> Not in Stock
+                    </span>
+                {% } %}
 			</div>
 		</div>
 

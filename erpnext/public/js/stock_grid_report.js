@@ -1,6 +1,8 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+frappe.assets.views["Report"]();
+
 erpnext.StockGridReport = frappe.views.TreeGridReport.extend({
 	get_item_warehouse: function(warehouse, item) {
 		if(!this.item_warehouse[item]) this.item_warehouse[item] = {};

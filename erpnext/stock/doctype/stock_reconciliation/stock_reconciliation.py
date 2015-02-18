@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 import frappe.defaults
-import json
 from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint
 from erpnext.stock.stock_ledger import update_entries_after
@@ -28,63 +27,51 @@ class StockReconciliation(StockController):
 		self.make_gl_entries_on_cancel()
 
 	def validate_data(self):
-		if not self.reconciliation_json:
-			return
-
-		data = json.loads(self.reconciliation_json)
-
-		# strip out extra columns (if any)
-		data = [row[:4] for row in data]
-
-		if self.head_row not in data:
-			msgprint(_("""Wrong Template: Unable to find head row."""),
-				raise_exception=1)
-
-		# remove the help part and save the json
-		head_row_no = 0
-		if data.index(self.head_row) != 0:
-			head_row_no = data.index(self.head_row)
-			data = data[head_row_no:]
-			self.reconciliation_json = json.dumps(data)
-
 		def _get_msg(row_num, msg):
-			return _("Row # {0}: ").format(row_num+head_row_no+2) + msg
+			return _("Row # {0}: ").format(row_num+1) + msg
 
 		self.validation_messages = []
 		item_warehouse_combinations = []
 
+		default_currency = frappe.db.get_default("currency")
+
 		# validate no of rows
-		rows = data[1:]
-		if len(rows) > 100:
-			msgprint(_("""Sorry! We can only allow upto 100 rows for Stock Reconciliation."""),
-				raise_exception=True)
-		for row_num, row in enumerate(rows):
+		if len(self.items) > 100:
+			frappe.throw(_("""Max 100 rows for Stock Reconciliation."""))
+		for row_num, row in enumerate(self.items):
 			# find duplicates
-			if [row[0], row[1]] in item_warehouse_combinations:
+			if [row.item_code, row.warehouse] in item_warehouse_combinations:
 				self.validation_messages.append(_get_msg(row_num, _("Duplicate entry")))
 			else:
-				item_warehouse_combinations.append([row[0], row[1]])
+				item_warehouse_combinations.append([row.item_code, row.warehouse])
 
-			self.validate_item(row[0], row_num+head_row_no+2)
+			self.validate_item(row.item_code, row_num+1)
 
 			# validate warehouse
-			if not frappe.db.get_value("Warehouse", row[1]):
+			if not frappe.db.get_value("Warehouse", row.warehouse):
 				self.validation_messages.append(_get_msg(row_num, _("Warehouse not found in the system")))
 
 			# if both not specified
-			if row[2] in ["", None] and row[3] in ["", None]:
+			if row.qty in ["", None] and row.valuation_rate in ["", None]:
 				self.validation_messages.append(_get_msg(row_num,
 					_("Please specify either Quantity or Valuation Rate or both")))
 
 			# do not allow negative quantity
-			if flt(row[2]) < 0:
+			if flt(row.qty) < 0:
 				self.validation_messages.append(_get_msg(row_num,
 					_("Negative Quantity is not allowed")))
 
 			# do not allow negative valuation
-			if flt(row[3]) < 0:
+			if flt(row.valuation_rate) < 0:
 				self.validation_messages.append(_get_msg(row_num,
 					_("Negative Valuation Rate is not allowed")))
+
+			if row.qty and not row.valuation_rate:
+				# try if there is a buying price list in default currency
+				buying_rate = frappe.db.get_value("Item Price", {"item_code": row.item_code,
+					"buying": 1, "currency": default_currency}, "price_list_rate")
+				if buying_rate:
+					row.valuation_rate = buying_rate
 
 		# throw all validation messages
 		if self.validation_messages:
@@ -129,16 +116,7 @@ class StockReconciliation(StockController):
 			and create stock ledger entries based on the difference"""
 		from erpnext.stock.stock_ledger import get_previous_sle
 
-		row_template = ["item_code", "warehouse", "qty", "valuation_rate"]
-
-		if not self.reconciliation_json:
-			msgprint(_("""Stock Reconciliation file not uploaded"""), raise_exception=1)
-
-		data = json.loads(self.reconciliation_json)
-		for row_num, row in enumerate(data[data.index(self.head_row)+1:]):
-			row = frappe._dict(zip(row_template, row))
-			row["row_num"] = row_num
-
+		for row in self.items:
 			if row.qty in ("", None) or row.valuation_rate in ("", None):
 				previous_sle = get_previous_sle({
 					"item_code": row.item_code,
@@ -216,7 +194,14 @@ class StockReconciliation(StockController):
 				frappe.throw(_("Difference Account must be a 'Liability' type account, since this Stock Reconciliation is an Opening Entry"))
 
 @frappe.whitelist()
-def upload():
-	from frappe.utils.csvutils import read_csv_content_from_uploaded_file
-	csv_content = read_csv_content_from_uploaded_file()
-	return filter(lambda x: x and any(x), csv_content)
+def get_items(warehouse):
+	from erpnext.stock.utils import get_stock_balance
+	items = frappe.get_list("Item", fields=["name"], filters=
+		{"is_stock_item": "Yes", "has_serial_no": "No", "has_batch_no": "No"})
+	for item in items:
+		item.item_code = item.name
+		item.warehouse = warehouse
+		del item["name"]
+		item.qty, item.valuation_rate = get_stock_balance(item.name, warehouse, with_valuation_rate=True)
+
+	return items

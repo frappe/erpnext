@@ -9,7 +9,7 @@ from frappe.utils import cstr, cint, flt, comma_or, nowdate
 
 from frappe import _
 from erpnext.stock.utils import get_incoming_rate
-from erpnext.stock.stock_ledger import get_previous_sle
+from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError
 from erpnext.controllers.queries import get_match_cond
 from erpnext.stock.get_item_details import get_available_qty, get_default_cost_center, get_conversion_factor
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
@@ -82,7 +82,7 @@ class StockEntry(StockController):
 			self.meta.get_label("posting_date"))
 
 	def validate_purpose(self):
-		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer",
+		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer", "Material Transfer for Manufacture",
 			"Manufacture", "Repack", "Subcontract", "Sales Return", "Purchase Return"]
 		if self.purpose not in valid_purposes:
 			frappe.throw(_("Purpose must be one of {0}").format(comma_or(valid_purposes)))
@@ -112,7 +112,7 @@ class StockEntry(StockController):
 			if not item.transfer_qty:
 				item.transfer_qty = item.qty * item.conversion_factor
 
-			if (self.purpose in ("Material Transfer", "Sales Return", "Purchase Return")
+			if (self.purpose in ("Material Transfer", "Sales Return", "Purchase Return", "Material Transfer for Manufacture")
 				and not item.serial_no
 				and item.item_code in serialized_items):
 				frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}").format(item.idx, item.item_code),
@@ -121,8 +121,8 @@ class StockEntry(StockController):
 	def validate_warehouse(self, pro_obj):
 		"""perform various (sometimes conditional) validations on warehouse"""
 
-		source_mandatory = ["Material Issue", "Material Transfer", "Purchase Return", "Subcontract"]
-		target_mandatory = ["Material Receipt", "Material Transfer", "Sales Return", "Subcontract"]
+		source_mandatory = ["Material Issue", "Material Transfer", "Purchase Return", "Subcontract", "Material Transfer for Manufacture"]
+		target_mandatory = ["Material Receipt", "Material Transfer", "Sales Return", "Subcontract", "Material Transfer for Manufacture"]
 
 		validate_for_manufacture_repack = any([d.bom_no for d in self.get("items")])
 
@@ -169,13 +169,14 @@ class StockEntry(StockController):
 				frappe.throw(_("Source and target warehouse cannot be same for row {0}").format(d.idx))
 
 	def validate_production_order(self):
-		if self.purpose == "Manufacture":
+		if self.purpose in ("Manufacture", "Material Transfer for Manufacture"):
 			# check if production order is entered
 			if not self.production_order:
 				frappe.throw(_("Production order number is mandatory for stock entry purpose manufacture"))
 			# check for double entry
-			self.check_if_operations_completed()
-			self.check_duplicate_entry_for_production_order()
+			if self.purpose=="Manufacture":
+				self.check_if_operations_completed()
+				self.check_duplicate_entry_for_production_order()
 		elif self.purpose != "Material Transfer":
 			self.production_order = None
 
@@ -254,7 +255,7 @@ class StockEntry(StockController):
 			if d.docstatus==1 and d.s_warehouse and not allow_negative_stock and d.actual_qty < d.transfer_qty:
 				frappe.throw(_("""Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
 					Available Qty: {4}, Transfer Qty: {5}""").format(d.idx, d.s_warehouse,
-					self.posting_date, self.posting_time, d.actual_qty, d.transfer_qty))
+					self.posting_date, self.posting_time, d.actual_qty, d.transfer_qty), NegativeStockError)
 
 			# get incoming rate
 			if not flt(d.incoming_rate) or d.s_warehouse or self.purpose == "Sales Return" or force:
@@ -285,7 +286,7 @@ class StockEntry(StockController):
 				if flt(d.completed_qty):
 					operation_cost_per_unit += flt(d.actual_operating_cost) / flt(d.completed_qty)
 				else:
-					operation_cost_per_unit += flt(d.planned_operating_cost) / flt(self.qty)
+					operation_cost_per_unit += flt(d.planned_operating_cost) / flt(pro_order.qty)
 
 		if not operation_cost_per_unit and bom_no:
 			bom = frappe.db.get_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=1)
@@ -503,8 +504,8 @@ class StockEntry(StockController):
 
 		if self.bom_no:
 			if self.purpose in ["Material Issue", "Material Transfer", "Manufacture", "Repack",
-					"Subcontract"]:
-				if self.production_order and self.purpose == "Material Transfer":
+					"Subcontract", "Material Transfer for Manufacture"]:
+				if self.production_order and self.purpose == "Material Transfer for Manufacture":
 					item_dict = self.get_pending_raw_materials(pro_obj)
 					if self.to_warehouse and pro_obj:
 						for item in item_dict.values():
@@ -601,7 +602,7 @@ class StockEntry(StockController):
 		result = frappe.db.sql("""select t1.item_code, sum(t1.qty)
 			from `tabStock Entry Detail` t1, `tabStock Entry` t2
 			where t1.parent = t2.name and t2.production_order = %s and t2.docstatus = 1
-			and t2.purpose = 'Material Transfer'
+			and t2.purpose = 'Material Transfer for Manufacture'
 			group by t1.item_code""", self.production_order)
 		for t in result:
 			issued_item_qty[t[0]] = flt(t[1])
@@ -662,7 +663,7 @@ def get_party_details(ref_dt, ref_dn):
 def get_production_order_details(production_order):
 	res = frappe.db.sql("""select bom_no, use_multi_level_bom, wip_warehouse,
 		ifnull(qty, 0) - ifnull(produced_qty, 0) as fg_completed_qty,
-		(infull(additional_operating_cost, 0) / qty)*(ifnull(qty, 0) - ifnull(produced_qty, 0)) as additional_operating_cost
+		(ifnull(additional_operating_cost, 0) / qty)*(ifnull(qty, 0) - ifnull(produced_qty, 0)) as additional_operating_cost
 		from `tabProduction Order` where name = %s""", production_order, as_dict=1)
 
 	return res and res[0] or {}

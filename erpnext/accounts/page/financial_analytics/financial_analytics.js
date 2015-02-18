@@ -1,8 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.require("assets/erpnext/js/account_tree_grid.js");
-
 frappe.pages['financial-analytics'].on_page_load = function(wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
@@ -10,9 +8,11 @@ frappe.pages['financial-analytics'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 	erpnext.financial_analytics = new erpnext.FinancialAnalytics(wrapper, 'Financial Analytics');
-	frappe.add_breadcrumbs("Accounts")
+	frappe.add_breadcrumbs("Accounts");
 
-}
+};
+
+frappe.require("assets/erpnext/js/account_tree_grid.js");
 
 erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 	filters: [

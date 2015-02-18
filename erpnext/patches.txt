@@ -113,3 +113,7 @@ erpnext.patches.v5_0.update_item_name_in_bom
 erpnext.patches.v5_0.rename_customer_issue
 erpnext.patches.v5_0.rename_total_fields
 erpnext.patches.v5_0.replace_renamed_fields_in_custom_script_and_print_formats
+erpnext.patches.v5_0.new_crm_module
+erpnext.patches.v5_0.rename_customer_issue
+erpnext.patches.v5_0.update_material_transfer_for_manufacture
+erpnext.patches.v5_0.manufacturing_activity_type

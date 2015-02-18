@@ -15,6 +15,8 @@ frappe.pages['support-analytics'].on_page_load = function(wrapper) {
 
 }
 
+frappe.assets.views["Report"]();
+
 erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 	init: function(wrapper) {
 		this._super({
