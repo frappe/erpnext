@@ -177,11 +177,11 @@ class update_entries_after(object):
 		self.prev_stock_value = self.stock_value
 
 		# update current sle
-		frappe.db.sql("""update `tabStock Ledger Entry`
-			set qty_after_transaction=%s, valuation_rate=%s, stock_queue=%s,
-			stock_value=%s, stock_value_difference=%s where name=%s""",
-			(self.qty_after_transaction, self.valuation_rate,
-			json.dumps(self.stock_queue), self.stock_value, stock_value_difference, sle.name))
+		sle.qty_after_transaction = self.qty_after_transaction
+		sle.valuation_rate = self.valuation_rate
+		sle.stock_queue = json.dumps(self.stock_queue)
+		sle.stock_value_difference = stock_value_difference
+		sle.save()
 
 	def validate_negative_stock(self, sle):
 		"""

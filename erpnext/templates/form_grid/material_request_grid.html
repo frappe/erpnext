@@ -15,13 +15,10 @@
 				<p>{%= doc.description %}</p>{% } %}
 			<div>
 			{% if(doc.warehouse) { %}
-				<div style="overflow:hidden; min-height: 25px;
-					white-space:nowrap; text-overflow: ellipsis;"
-					title="{%= __("For Warehouse") %}">
-					<span class="label label-default">
-						{%= doc.warehouse %}
-					</span>
-				</div>
+				<span class="label label-default" title="{%= __("For Warehouse") %}"
+                    style="margin-right: 10px;">
+					{%= doc.warehouse %}
+				</span>
 			{% } %}
 			{% if(doc.schedule_date) { %}
                 <span title="{%= __("Reqd By Date") %}" class="label {%=
