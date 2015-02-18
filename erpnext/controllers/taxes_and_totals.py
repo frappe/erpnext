@@ -305,7 +305,7 @@ class calculate_taxes_and_totals(object):
 			self.doc.total_taxes_and_charges = flt(self.doc.grand_total - self.doc.net_total +
 				flt(self.doc.discount_amount), self.doc.precision("total_taxes_and_charges"))
 		else:
-			self.doc.base_taxes_and_charges_added, self.base_taxes_and_charges_deducted = 0.0, 0.0
+			self.doc.base_taxes_and_charges_added, self.doc.base_taxes_and_charges_deducted = 0.0, 0.0
 			for tax in self.doc.get("taxes"):
 				if tax.category in ["Valuation and Total", "Total"]:
 					if tax.add_deduct_tax == "Add":
