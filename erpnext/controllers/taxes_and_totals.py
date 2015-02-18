@@ -8,9 +8,11 @@ from frappe.utils import cint, flt, rounded
 from erpnext.setup.utils import get_company_currency
 from erpnext.controllers.accounts_controller import validate_conversion_rate
 
-class taxes_and_totals(object):
+class calculate_taxes_and_totals(object):
 	def __init__(self, doc):
 		self.doc = doc
+
+		self.calculate()
 
 	def calculate(self):
 		self.discount_amount_applied = False

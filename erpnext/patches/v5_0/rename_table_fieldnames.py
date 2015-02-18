@@ -105,7 +105,6 @@ rename_map = {
 		["experience_in_company_details", "internal_work_history"]
 	],
 	"Event": [
-		["event_individuals", "users"],
 		["event_roles", "roles"]
 	],
 	"Expense Claim": [

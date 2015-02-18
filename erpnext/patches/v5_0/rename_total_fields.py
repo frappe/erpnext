@@ -8,7 +8,7 @@ from frappe.modules import scrub, get_doctype_module
 
 selling_doctypes = ("Quotation", "Sales Order", "Delivery Note", "Sales Invoice")
 
-selling_doctypes = ("Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice")
+buying_doctypes = ("Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice")
 
 selling_renamed_fields = (
 	("net_total", "base_net_total"),
@@ -47,4 +47,5 @@ def execute():
 			rename_field(dt, f[0], f[1])
 
 		# Added new field "total_taxes_and_charges" in buying cycle, updating value
-		frappe.db.sql("update `tab{0}` set total_taxes_and_charges=round(base_total_taxes_and_charges/conversion_rate), 2")
+		frappe.db.sql("""update `tab{0}`
+			set total_taxes_and_charges = round(base_total_taxes_and_charges/conversion_rate, 2)""".format(dt))

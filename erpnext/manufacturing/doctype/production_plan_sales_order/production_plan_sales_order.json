@@ -1,6 +1,6 @@
 {
  "autoname": "PP/.SO/.#####", 
- "creation": "2013-02-22 01:27:49.000000", 
+ "creation": "2013-02-22 01:27:49", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -29,6 +29,12 @@
    "width": "120px"
   }, 
   {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "customer", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
@@ -53,9 +59,10 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:25.000000", 
+ "modified": "2015-02-17 14:29:14.479541", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Plan Sales Order", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }
