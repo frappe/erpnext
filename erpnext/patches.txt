@@ -97,6 +97,8 @@ execute:frappe.db.sql("update `tabItem` i set apply_warehouse_wise_reorder_level
 execute:frappe.rename_doc("DocType", "Support Ticket", "Issue", force=True)
 erpnext.patches.v5_0.set_default_company_in_bom
 erpnext.patches.v5_0.capacity_planning
+execute:frappe.reload_doc('crm', 'doctype', 'lead')
+execute:frappe.reload_doc('crm', 'doctype', 'opportunity')
 erpnext.patches.v5_0.rename_table_fieldnames
 execute:frappe.db.sql("update `tabJournal Entry` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
 erpnext.patches.v4_2.party_model
@@ -108,6 +110,6 @@ erpnext.patches.v5_0.remove_shopping_cart_app
 erpnext.patches.v5_0.update_companywise_payment_account
 erpnext.patches.v5_0.remove_birthday_events
 erpnext.patches.v5_0.update_item_name_in_bom
-execute:frappe.reload_doc('crm', 'doctype', 'lead')
-execute:frappe.reload_doc('crm', 'doctype', 'opportunity')
 erpnext.patches.v5_0.rename_customer_issue
+erpnext.patches.v5_0.rename_total_fields
+erpnext.patches.v5_0.replace_renamed_fields_in_custom_script_and_print_formats

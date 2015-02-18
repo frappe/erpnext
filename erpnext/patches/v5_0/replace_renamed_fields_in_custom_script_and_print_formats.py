@@ -43,7 +43,7 @@ def get_all_renamed_fields():
 	)
 
 	for fields in rename_map.values():
-		renamed_fields += fields
+		renamed_fields += tuple(fields)
 
 	return renamed_fields
 
