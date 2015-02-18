@@ -371,14 +371,14 @@ class calculate_taxes_and_totals(object):
 		return grand_total_for_discount_amount
 
 
-	def calculate_total_advance(self, parenttype, advance_parentfield):
-		if self.docstatus < 2:
+	def calculate_total_advance(self):
+		if self.doc.docstatus < 2:
 			sum_of_allocated_amount = sum([flt(adv.allocated_amount, self.doc.precision("allocated_amount", adv))
 				for adv in self.doc.get("advances")])
 
 			self.doc.total_advance = flt(sum_of_allocated_amount, self.doc.precision("total_advance"))
 
-			if self.docstatus == 0:
+			if self.doc.docstatus == 0:
 				self.calculate_outstanding_amount()
 
 	def calculate_outstanding_amount(self):
