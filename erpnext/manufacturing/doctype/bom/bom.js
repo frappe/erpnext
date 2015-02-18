@@ -23,6 +23,7 @@ cur_frm.cscript.update_cost = function() {
 }
 
 cur_frm.add_fetch("item", "description", "description");
+cur_frm.add_fetch("item", "image", "image");
 cur_frm.add_fetch("item", "item_name", "item_name");
 cur_frm.add_fetch("item", "stock_uom", "uom");
 
@@ -202,3 +203,7 @@ frappe.ui.form.on("BOM Item", "items_remove", function(frm) {
 	erpnext.bom.calculate_rm_cost(frm.doc);
 	erpnext.bom.calculate_total(frm.doc);
 });
+
+cur_frm.cscript.image = function() {
+	refresh_field("image_view");
+}

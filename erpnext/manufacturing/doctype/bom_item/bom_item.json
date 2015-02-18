@@ -25,6 +25,12 @@
    "precision": ""
   }, 
   {
+   "fieldname": "column_break_3", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "bom_no", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -40,9 +46,10 @@
    "width": "150px"
   }, 
   {
-   "fieldname": "col_break1", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
+   "fieldname": "section_break_5", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "description", 
@@ -54,6 +61,28 @@
    "print_width": "250px", 
    "reqd": 0, 
    "width": "250px"
+  }, 
+  {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "hidden": 1, 
+   "label": "Image", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "quantity_and_rate", 
@@ -133,8 +162,8 @@
   }
  ], 
  "idx": 1, 
- "istable": 1,
- "modified": "2015-01-20 13:28:35.152945", 
+ "istable": 1, 
+ "modified": "2015-02-12 15:17:18.324810", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Item", 

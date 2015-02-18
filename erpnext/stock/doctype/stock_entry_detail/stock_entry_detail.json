@@ -55,6 +55,11 @@
    "search_index": 1
   }, 
   {
+   "fieldname": "col_break2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "item_name", 
    "fieldtype": "Data", 
    "label": "Item Name", 
@@ -63,9 +68,10 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "col_break2", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
+   "fieldname": "section_break_8", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "description", 
@@ -78,6 +84,29 @@
    "print_width": "300px", 
    "read_only": 0, 
    "width": "300px"
+  }, 
+  {
+   "fieldname": "column_break_10", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "hidden": 1, 
+   "label": "Image", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "quantity_and_rate", 
@@ -302,7 +331,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-08-11 03:54:49.688635", 
+ "modified": "2015-02-12 15:20:56.815434", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry Detail", 

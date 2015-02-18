@@ -117,3 +117,4 @@ erpnext.patches.v5_0.new_crm_module
 erpnext.patches.v5_0.rename_customer_issue
 erpnext.patches.v5_0.update_material_transfer_for_manufacture
 erpnext.patches.v5_0.manufacturing_activity_type
+erpnext.patches.v5_0.update_item_desc_and_image

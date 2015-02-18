@@ -21,6 +21,12 @@
    "width": "100px"
   }, 
   {
+   "fieldname": "column_break_2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "item_name", 
    "fieldtype": "Data", 
    "in_filter": 0, 
@@ -35,9 +41,10 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "col_break1", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
+   "fieldname": "section_break_4", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "description", 
@@ -51,6 +58,28 @@
    "read_only": 0, 
    "reqd": 1, 
    "width": "300px"
+  }, 
+  {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "hidden": 1, 
+   "label": "Image", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "received_and_accepted", 
@@ -559,7 +588,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-01-01 14:30:00.032715", 
+ "modified": "2015-02-12 15:20:26.299671", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt Item", 

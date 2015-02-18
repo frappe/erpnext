@@ -147,7 +147,8 @@ def get_basic_details(args, item):
 	out = frappe._dict({
 		"item_code": item.name,
 		"item_name": item.item_name,
-		"description": cstr(item.description_html).strip() or cstr(item.description).strip(),
+		"description": cstr(item.description).strip(),
+		"image": cstr(item.image).strip(),
 		"warehouse": user_default_warehouse or args.warehouse or item.default_warehouse,
 		"income_account": get_default_income_account(args, item),
 		"expense_account": get_default_expense_account(args, item),

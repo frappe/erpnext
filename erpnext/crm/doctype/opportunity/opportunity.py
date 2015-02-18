@@ -59,18 +59,6 @@ class Opportunity(TransactionBase):
 			
 	def validate_cust_name(self):
 		self.customer_name = self.customer or self.lead
-		
-	def get_item_details(self, item_code):
-		item = frappe.db.sql("""select item_name, stock_uom, description_html, description, item_group, brand
-			from `tabItem` where name = %s""", item_code, as_dict=1)
-		ret = {
-			'item_name': item and item[0]['item_name'] or '',
-			'uom': item and item[0]['stock_uom'] or '',
-			'description': item and item[0]['description_html'] or item[0]['description'] or '',
-			'item_group': item and item[0]['item_group'] or '',
-			'brand': item and item[0]['brand'] or ''
-		}
-		return ret
 
 	def get_cust_address(self,name):
 		details = frappe.db.sql("""select customer_name, address, territory, customer_group
@@ -140,7 +128,20 @@ class Opportunity(TransactionBase):
 				msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
 			else:
 				self.lead = None
-		
+
+@frappe.whitelist()
+def get_item_details(item_code):
+	item = frappe.db.sql("""select item_name, stock_uom, image, description, item_group, brand
+		from `tabItem` where name = %s""", item_code, as_dict=1)
+	return {
+		'item_name': item and item[0]['item_name'] or '',
+		'uom': item and item[0]['stock_uom'] or '',
+		'description': item and item[0]['description'] or '',
+		'image': item and item[0]['image'] or '',
+		'item_group': item and item[0]['item_group'] or '',
+		'brand': item and item[0]['brand'] or ''
+	}
+
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):

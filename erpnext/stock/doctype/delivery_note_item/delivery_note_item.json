@@ -57,6 +57,12 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "section_break_6", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "description", 
    "fieldtype": "Small Text", 
    "in_list_view": 1, 
@@ -68,6 +74,29 @@
    "read_only": 0, 
    "reqd": 1, 
    "width": "300px"
+  }, 
+  {
+   "fieldname": "column_break_8", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "hidden": 1, 
+   "label": "Image", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "quantity_and_rate", 
@@ -438,7 +467,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-01-01 14:29:59.711539", 
+ "modified": "2015-02-12 15:19:29.701710", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note Item", 

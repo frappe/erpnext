@@ -30,6 +30,11 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "item_name", 
    "fieldtype": "Data", 
    "in_list_view": 1, 
@@ -44,9 +49,10 @@
    "width": "150"
   }, 
   {
-   "fieldname": "col_break1", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
+   "fieldname": "section_break_5", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "description", 
@@ -62,6 +68,29 @@
    "reqd": 1, 
    "search_index": 1, 
    "width": "300px"
+  }, 
+  {
+   "fieldname": "column_break_7", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "hidden": 1, 
+   "label": "Image", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "quantity_and_rate", 
