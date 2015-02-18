@@ -1,0 +1,17 @@
+[
+	{
+		"doctype": "Journal Entry Type",
+		"name": "Bank Entry",
+		"type": "Bank Entry"
+	},
+	{
+		"doctype": "Journal Entry Type",
+		"name": "Cash Entry",
+		"type": "Cash Entry"
+	},
+	{
+		"doctype": "Journal Entry Type",
+		"name": "Opening Entry",
+		"type": "Opening Entry"
+	}
+]

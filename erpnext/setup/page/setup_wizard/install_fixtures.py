@@ -122,12 +122,24 @@ def install(country=None):
 		{'uom_name': _('Hour'), 'doctype': 'UOM', 'name': _('Hour')},
 		{'uom_name': _('Minute'), 'doctype': 'UOM', 'name': _('Minute')},
 
+		#Journal Entry Type
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Journal Entry'), 'naming_series': 'JE-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Bank Entry'), 'naming_series': 'JE-BE-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Cash Entry'), 'naming_series': 'JE-CE-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Credit Card Entry'), 'naming_series': 'JE-CCE-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Debit Note'), 'naming_series': 'JE-DN-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Credit Note'), 'naming_series': 'JE-CN-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Contra Entry'), 'naming_series': 'JE-COE-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Excise Entry'), 'naming_series': 'JE-EE-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Write Off Entry'), 'naming_series': 'JE-WOE-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Opening Entry'), 'naming_series': 'JE-OE-'},
+		
 		# Mode of Payment
-		{'doctype': 'Mode of Payment', 'mode_of_payment': 'Check' if country=="United States" else _('Cheque')},
-		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Cash')},
-		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Credit Card')},
-		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Wire Transfer')},
-		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Bank Draft')},
+		{'doctype': 'Mode of Payment', 'mode_of_payment': 'Check' if country=="United States" else _('Cheque'),'journal_entry_type': _('Bank Entry')},
+		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Cash'),'journal_entry_type': _('Cash Entry')},
+		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Credit Card'),'journal_entry_type': _('Credit Card Entry')},
+		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Wire Transfer'),'journal_entry_type': _('Bank Entry')},
+		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Bank Draft'),'journal_entry_type': _('Bank Entry')},
 
 		# Activity Type
 		{'doctype': 'Activity Type', 'activity_type': _('Planning')},

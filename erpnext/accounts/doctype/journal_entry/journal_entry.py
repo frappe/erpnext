@@ -103,10 +103,11 @@ class JournalEntry(AccountsController):
 								.format(date_diff - flt(credit_days), d.party_type, d.party))
 
 	def validate_cheque_info(self):
-		if self.voucher_type in ['Bank Entry']:
-			if not self.cheque_no or not self.cheque_date:
-				msgprint(_("Reference No & Reference Date is required for {0}").format(self.voucher_type),
-					raise_exception=1)
+		if self.voucher_type:
+			if frappe.db.get_value("Journal Entry Type", self.voucher_type, "is_bank_entry"):
+				if not self.cheque_no or not self.cheque_date:
+					msgprint(_("Reference No & Reference Date is required for {0}").format(self.voucher_type),
+						raise_exception=1)
 
 		if self.cheque_date and not self.cheque_no:
 			msgprint(_("Reference No is mandatory if you entered Reference Date"), raise_exception=1)
@@ -455,6 +456,23 @@ class JournalEntry(AccountsController):
 	def validate_empty_accounts_table(self):
 		if not self.get('accounts'):
 			frappe.throw("Accounts table cannot be blank.")
+			
+	def set_naming_series(self):
+		if self.voucher_type:
+			naming_series = frappe.db.get_value("Journal Entry Type", self.voucher_type, "naming_series")
+			if naming_series:
+				self.naming_series = naming_series
+
+	def get_je_details(self):
+		self.set_naming_series()
+		if not self.get('accounts'):
+			je_type = frappe.db.get_value("Journal Entry Type", self.voucher_type, "type")
+			if je_type == "Bank Entry" or je_type == "Cash Entry":
+				data = get_default_bank_cash_account(self.company, self.voucher_type)
+				self.set('accounts',[data])
+			elif je_type == "Opening Entry":
+				self.is_opening = "Yes"
+				self.set('accounts', get_opening_accounts(self.company))
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
@@ -464,13 +482,18 @@ def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
 		if account.get("bank_cash_account"):
 			account.update({"balance": get_balance_on(account.get("cash_bank_account"))})
 			return account
-
-	account = frappe.db.get_value("Company", company, \
-		voucher_type=="Bank Voucher" and "default_bank_account" or "default_cash_account")
-
+	
+	je_type = get_journal_entry_type(voucher_type)
+	if je_type == "Bank Entry":
+		account = frappe.db.get_value("Company", company, "default_bank_account")
+	elif je_type == "Cash Entry":
+		account = frappe.db.get_value("Company", company, "default_cash_account")
+	else:
+		account = None
+		
 	if account:
 		return {
-			"cash_bank_account": account,
+			"account": account,
 			"balance": get_balance_on(account)
 		}
 
@@ -516,10 +539,10 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	return jv.as_dict()
 
 def get_payment_entry(doc):
-	bank_account = get_default_bank_cash_account(doc.company, "Bank Entry")
-
+	voucher_type = frappe.db.get_value("Mode of Payment", doc.mode_of_payment, "journal_entry_type")
+	bank_account = get_default_bank_cash_account(doc.company, voucher_type)
 	jv = frappe.new_doc('Journal Entry')
-	jv.voucher_type = 'Bank Entry'
+	jv.voucher_type = voucher_type
 	jv.company = doc.company
 	jv.fiscal_year = doc.fiscal_year
 
@@ -527,7 +550,7 @@ def get_payment_entry(doc):
 	d2 = jv.append("accounts")
 
 	if bank_account:
-		d2.account = bank_account["cash_bank_account"]
+		d2.account = bank_account["account"]
 		d2.balance = bank_account["balance"]
 
 	return jv
@@ -587,3 +610,8 @@ def get_party_account_and_balance(company, party_type, party):
 		"balance": account_balance,
 		"party_balance": party_balance
 	}
+	
+@frappe.whitelist()
+def get_journal_entry_type(name=None):
+	return frappe.db.get_value("Journal Entry Type", name, "type")
+

@@ -220,52 +220,15 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
-	cur_frm.set_df_property("cheque_no", "reqd", doc.voucher_type=="Bank Entry");
-	cur_frm.set_df_property("cheque_date", "reqd", doc.voucher_type=="Bank Entry");
-
-	if((doc.accounts || []).length!==0 || !doc.company) // too early
-		return;
-
-	var update_jv_details = function(doc, r) {
-		var jvdetail = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
-		$.each(r, function(i, d) {
-			var row = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
-			row.account = d.cash_bank_account;
-			row.balance = d.balance;
-		});
-		refresh_field("accounts");
-	}
-
-	if(in_list(["Bank Entry", "Cash Entry"], doc.voucher_type)) {
-		return frappe.call({
-			type: "GET",
-			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
-			args: {
-				"voucher_type": doc.voucher_type,
-				"company": doc.company
-			},
-			callback: function(r) {
-				if(r.message) {
-					update_jv_details(doc, [r.message]);
-				}
-			}
-		})
-	} else if(doc.voucher_type=="Opening Entry") {
-		return frappe.call({
-			type:"GET",
-			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_opening_accounts",
-			args: {
-				"company": doc.company
-			},
-			callback: function(r) {
-				frappe.model.clear_table(doc, "accounts");
-				if(r.message) {
-					update_jv_details(doc, r.message);
-				}
-				cur_frm.set_value("is_opening", "Yes")
-			}
-		})
-	}
+	frappe.call({
+		doc: this.frm.doc,
+		method: "get_je_details",
+		callback: function(r) {
+			refresh_field('naming_series');
+			refresh_field('is_opening');
+			refresh_field('accounts');
+		}
+	});
 }
 
 frappe.ui.form.on("Journal Entry Account", "party", function(frm, cdt, cdn) {
