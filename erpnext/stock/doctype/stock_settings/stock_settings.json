@@ -36,13 +36,6 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "allow_negative_stock", 
-   "fieldtype": "Check", 
-   "in_list_view": 1, 
-   "label": "Allow Negative Stock", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "valuation_method", 
    "fieldtype": "Select", 
    "label": "Default Valuation Method", 
@@ -54,6 +47,13 @@
    "fieldname": "tolerance", 
    "fieldtype": "Float", 
    "label": "Allowance Percent", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "allow_negative_stock", 
+   "fieldtype": "Check", 
+   "in_list_view": 1, 
+   "label": "Allow Negative Stock", 
    "permlevel": 0
   }, 
   {
@@ -103,7 +103,7 @@
  "icon": "icon-cog", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2015-02-05 05:11:47.229371", 
+ "modified": "2015-02-18 08:37:18.229705", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Settings", 
