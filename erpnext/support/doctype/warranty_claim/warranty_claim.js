@@ -21,7 +21,7 @@ erpnext.support.WarrantyClaim = frappe.ui.form.Controller.extend({
 
 	make_maintenance_visit: function() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.support.doctype.customer_issue.customer_issue.make_maintenance_visit",
+			method: "erpnext.support.doctype.warranty_claim.warranty_claim.make_maintenance_visit",
 			frm: cur_frm
 		})
 	}

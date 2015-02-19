@@ -11,5 +11,6 @@ frappe.listview_settings['Purchase Order'] = {
 		} else if(flt(doc.per_received) == 100 && flt(doc.per_billed) == 100 && doc.status!=="Stopped") {
 			return [__("Completed"), "green", "per_received,=,100|per_billed,=,100|status,!=,Stopped"];
 		}
-	}
+	},
+	order_by: "per_received asc, modified desc"
 };

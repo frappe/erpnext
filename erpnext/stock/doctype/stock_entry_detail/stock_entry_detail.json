@@ -60,18 +60,29 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "item_name", 
-   "fieldtype": "Data", 
-   "label": "Item Name", 
+   "fieldname": "qty", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Qty", 
+   "oldfieldname": "qty", 
+   "oldfieldtype": "Currency", 
    "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1
+   "read_only": 0, 
+   "reqd": 1
   }, 
   {
    "fieldname": "section_break_8", 
    "fieldtype": "Section Break", 
    "permlevel": 0, 
    "precision": ""
+  }, 
+  {
+   "fieldname": "item_name", 
+   "fieldtype": "Data", 
+   "label": "Item Name", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
   }, 
   {
    "fieldname": "description", 
@@ -115,15 +126,31 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "qty", 
-   "fieldtype": "Float", 
+   "fieldname": "incoming_rate", 
+   "fieldtype": "Currency", 
    "in_list_view": 1, 
-   "label": "Qty", 
-   "oldfieldname": "qty", 
+   "label": "Valuation Rate", 
+   "oldfieldname": "incoming_rate", 
    "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "amount", 
+   "fieldtype": "Currency", 
+   "label": "Amount", 
+   "oldfieldname": "amount", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "col_break3", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
   }, 
   {
    "fieldname": "uom", 
@@ -138,21 +165,15 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "incoming_rate", 
-   "fieldtype": "Currency", 
-   "in_list_view": 1, 
-   "label": "Valuation Rate", 
-   "oldfieldname": "incoming_rate", 
+   "fieldname": "conversion_factor", 
+   "fieldtype": "Float", 
+   "label": "Conversion Factor", 
+   "oldfieldname": "conversion_factor", 
    "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
    "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 0
-  }, 
-  {
-   "fieldname": "col_break3", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
+   "print_hide": 1, 
+   "read_only": 1, 
+   "reqd": 1
   }, 
   {
    "fieldname": "stock_uom", 
@@ -167,27 +188,6 @@
    "read_only": 1, 
    "reqd": 1, 
    "search_index": 0
-  }, 
-  {
-   "fieldname": "conversion_factor", 
-   "fieldtype": "Float", 
-   "label": "Conversion Factor", 
-   "oldfieldname": "conversion_factor", 
-   "oldfieldtype": "Currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1, 
-   "reqd": 1
-  }, 
-  {
-   "fieldname": "amount", 
-   "fieldtype": "Currency", 
-   "label": "Amount", 
-   "oldfieldname": "amount", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "read_only": 1
   }, 
   {
    "fieldname": "serial_no_batch", 
@@ -331,7 +331,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-19 01:07:02.254835", 
+ "modified": "2015-02-19 05:33:06.289852", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry Detail", 

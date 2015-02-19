@@ -30,7 +30,7 @@ erpnext.support.MaintenanceVisit = frappe.ui.form.Controller.extend({
 			cur_frm.add_custom_button(__('From Warranty Claim'),
 				function() {
 					frappe.model.map_current_doc({
-						method: "erpnext.support.doctype.customer_issue.customer_issue.make_maintenance_visit",
+						method: "erpnext.support.doctype.warranty_claim.warranty_claim.make_maintenance_visit",
 						source_doctype: "Warranty Claim",
 						get_query_filters: {
 							status: ["in", "Open, Work in Progress"],

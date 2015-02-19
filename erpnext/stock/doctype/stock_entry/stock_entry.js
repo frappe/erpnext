@@ -147,7 +147,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		refresh_field('items');
 		calculate_total(doc, cdt, cdn);
 	},
-	
+
 	incoming_rate: function(doc, cdt, cdn) {
 		calculate_total(doc, cdt, cdn);
 	},

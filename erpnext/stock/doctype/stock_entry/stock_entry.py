@@ -221,6 +221,16 @@ class StockEntry(StockController):
 				frappe.throw(_("Total valuation ({0}) for manufactured or repacked item(s) can not be less than total valuation of raw materials ({1})").format(valuation_at_target,
 					valuation_at_source))
 
+	def set_total_incoming_outgoing_value(self):
+		self.total_incoming_value = self.total_outgoing_value = 0.0
+		for d in self.get("items"):
+			if d.s_warehouse:
+				self.total_incoming_value += flt(d.amount)
+			if d.t_warehouse:
+				self.total_outgoing_value += flt(d.amount)
+
+		self.value_difference = self.total_outgoing_value - self.total_incoming_value
+
 	def set_total_amount(self):
 		self.total_amount = sum([flt(item.amount) for item in self.get("items")])
 

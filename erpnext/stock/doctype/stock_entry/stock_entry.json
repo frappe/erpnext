@@ -266,6 +266,42 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "section_break_19", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "total_incoming_value", 
+   "fieldtype": "Currency", 
+   "label": "Total Incoming Value", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_22", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "total_outgoing_value", 
+   "fieldtype": "Currency", 
+   "label": "Total Outgoing Value", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "value_difference", 
+   "fieldtype": "Currency", 
+   "label": "Total Value Difference (Out - In)", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
    "depends_on": "eval:(doc.purpose!==\"Sales Return\" && doc.purpose!==\"Purchase Return\")", 
    "fieldname": "sb1", 
    "fieldtype": "Section Break", 
@@ -596,7 +632,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2015-02-17 00:49:04.294855", 
+ "modified": "2015-02-19 04:53:05.361046", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 

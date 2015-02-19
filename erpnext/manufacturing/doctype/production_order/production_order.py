@@ -123,17 +123,17 @@ class ProductionOrder(Document):
 	def update_production_order_qty(self):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Production Order
 			based on Stock Entry"""
-		for status, fieldname in (("Manufacture", "produced_qty"),
+		for purpose, fieldname in (("Manufacture", "produced_qty"),
 			("Material Transfer for Manufacture", "material_transferred_for_qty")):
 			qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
 				from `tabStock Entry` where production_order=%s and docstatus=1
-				and purpose=%s""", (self.name, status))[0][0])
+				and purpose=%s""", (self.name, purpose))[0][0])
 
-		if qty > self.qty:
-			frappe.throw(_("{0} ({1}) cannot be greater than planned quanitity ({2}) in Production Order {3}").format(\
-				self.meta.get_label(fieldname), qty, self.qty, self.name), StockOverProductionError)
+			if qty > self.qty:
+				frappe.throw(_("{0} ({1}) cannot be greater than planned quanitity ({2}) in Production Order {3}").format(\
+					self.meta.get_label(fieldname), qty, self.qty, self.name), StockOverProductionError)
 
-		self.db_set(fieldname, qty)
+			self.db_set(fieldname, qty)
 
 	def on_submit(self):
 		if not self.wip_warehouse:
