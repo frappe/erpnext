@@ -10,6 +10,7 @@ from frappe import _
 from erpnext.stock.utils import get_valid_serial_nos
 
 from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.accounts.utils import validate_fiscal_year
 
 class InstallationNote(TransactionBase):
 	def __init__(self, arg1, arg2=None):
@@ -30,16 +31,12 @@ class InstallationNote(TransactionBase):
 		}]
 
 	def validate(self):
-		self.validate_fiscal_year()
+		validate_fiscal_year(self.inst_date, self.fiscal_year, _("Installation Date"), self)
 		self.validate_installation_date()
 		self.check_item_table()
 
 		from erpnext.controllers.selling_controller import check_active_sales_items
 		check_active_sales_items(self)
-
-	def validate_fiscal_year(self):
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.inst_date, self.fiscal_year, "Installation Date")
 
 	def is_serial_no_added(self, item_code, serial_no):
 		ar_required = frappe.db.get_value("Item", item_code, "has_serial_no")

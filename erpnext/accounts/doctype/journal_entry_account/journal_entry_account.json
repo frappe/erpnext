@@ -1,5 +1,5 @@
 {
- "autoname": "JVD.######", 
+ "autoname": "hash", 
  "creation": "2013-02-22 01:27:39", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -206,7 +206,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-12-25 15:44:03.077639", 
+ "modified": "2015-02-19 01:07:00.388689", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Entry Account", 

@@ -1,5 +1,5 @@
 {
- "autoname": "MTND/.######", 
+ "autoname": "hash", 
  "creation": "2013-03-29 18:22:12", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -331,7 +331,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-12 15:20:56.815434", 
+ "modified": "2015-02-19 01:07:02.254835", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry Detail", 

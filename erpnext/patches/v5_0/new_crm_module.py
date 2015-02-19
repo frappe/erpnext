@@ -21,4 +21,3 @@ def add_crm_to_user_desktop_items():
 				user_desktop_items.append("CRM")
 				frappe.db.set_default(key, json.dumps(user_desktop_items), parent=user)
 
-

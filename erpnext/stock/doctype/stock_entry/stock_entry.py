@@ -13,6 +13,7 @@ from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError
 from erpnext.controllers.queries import get_match_cond
 from erpnext.stock.get_item_details import get_available_qty, get_default_cost_center, get_conversion_factor
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.accounts.utils import validate_fiscal_year
 
 class NotUpdateStockError(frappe.ValidationError): pass
 class StockOverReturnError(frappe.ValidationError): pass
@@ -48,6 +49,8 @@ class StockEntry(StockController):
 		pro_obj = self.production_order and \
 			frappe.get_doc('Production Order', self.production_order) or None
 
+		validate_fiscal_year(self.posting_date, self.fiscal_year, self.meta.get_label("posting_date"), self)
+
 		self.validate_item()
 		self.set_transfer_qty()
 		self.validate_uom_is_integer("uom", "qty")
@@ -59,8 +62,7 @@ class StockEntry(StockController):
 		self.validate_finished_goods()
 		self.validate_return_reference_doc()
 		self.validate_with_material_request()
-		self.validate_fiscal_year()
-		self.validate_valuation_rate()
+		#self.validate_valuation_rate()
 		self.set_total_amount()
 
 	def on_submit(self):
@@ -75,11 +77,6 @@ class StockEntry(StockController):
 		self.update_stock_ledger()
 		self.update_production_order()
 		self.make_gl_entries_on_cancel()
-
-	def validate_fiscal_year(self):
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.posting_date, self.fiscal_year,
-			self.meta.get_label("posting_date"))
 
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer", "Material Transfer for Manufacture",
@@ -220,8 +217,9 @@ class StockEntry(StockController):
 				if d.t_warehouse and not d.s_warehouse:
 					valuation_at_target += flt(d.amount)
 
-			if valuation_at_target < valuation_at_source:
-				frappe.throw(_("Total valuation for manufactured or repacked item(s) can not be less than total valuation of raw materials"))
+			if valuation_at_target + 0.001 < valuation_at_source:
+				frappe.throw(_("Total valuation ({0}) for manufactured or repacked item(s) can not be less than total valuation of raw materials ({1})").format(valuation_at_target,
+					valuation_at_source))
 
 	def set_total_amount(self):
 		self.total_amount = sum([flt(item.amount) for item in self.get("items")])
@@ -419,7 +417,7 @@ class StockEntry(StockController):
 			_validate_production_order(pro_doc)
 			pro_doc.run_method("update_status")
 			if self.purpose == "Manufacture":
-				pro_doc.run_method("update_produced_qty")
+				pro_doc.run_method("update_production_order_qty")
 				self.update_planned_qty(pro_doc)
 
 	def update_planned_qty(self, pro_doc):

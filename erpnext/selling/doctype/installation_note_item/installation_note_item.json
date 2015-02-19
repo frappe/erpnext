@@ -1,6 +1,6 @@
 {
- "autoname": "IID/.#####", 
- "creation": "2013-02-22 01:27:51.000000", 
+ "autoname": "hash", 
+ "creation": "2013-02-22 01:27:51", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -100,9 +100,10 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:14.000000", 
+ "modified": "2015-02-19 01:07:00.200686", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Installation Note Item", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }

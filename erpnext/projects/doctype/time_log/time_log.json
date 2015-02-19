@@ -17,15 +17,6 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "time_log_for", 
-   "fieldtype": "Select", 
-   "label": "Time Log For", 
-   "options": "\nProject\nManufacturing", 
-   "permlevel": 0, 
-   "precision": "", 
-   "reqd": 0
-  }, 
-  {
    "fieldname": "from_time", 
    "fieldtype": "Datetime", 
    "in_list_view": 0, 
@@ -52,6 +43,14 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "billable", 
+   "fieldtype": "Check", 
+   "in_list_view": 0, 
+   "label": "Billable", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
    "fieldname": "column_break_3", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -65,6 +64,15 @@
    "options": "Draft\nSubmitted\nBatched for Billing\nBilled\nCancelled", 
    "permlevel": 0, 
    "read_only": 1, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "time_log_for", 
+   "fieldtype": "Select", 
+   "label": "Time Log For", 
+   "options": "\nProject\nManufacturing", 
+   "permlevel": 0, 
+   "precision": "", 
    "reqd": 0
   }, 
   {
@@ -89,6 +97,13 @@
   }, 
   {
    "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
+   "fieldname": "section_break_11", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
    "fieldname": "production_order", 
    "fieldtype": "Link", 
    "label": "Production Order", 
@@ -106,6 +121,12 @@
    "precision": ""
   }, 
   {
+   "fieldname": "column_break_14", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
    "fieldname": "workstation", 
    "fieldtype": "Link", 
@@ -116,20 +137,13 @@
    "read_only": 1
   }, 
   {
+   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
    "description": "Operation completed for how many finished goods?", 
    "fieldname": "completed_qty", 
    "fieldtype": "Float", 
    "label": "Completed Qty", 
    "permlevel": 0, 
    "precision": ""
-  }, 
-  {
-   "fieldname": "billable", 
-   "fieldtype": "Check", 
-   "in_list_view": 0, 
-   "label": "Billable", 
-   "permlevel": 0, 
-   "read_only": 0
   }, 
   {
    "fieldname": "section_break_7", 
@@ -199,7 +213,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-05 05:11:48.252723", 
+ "modified": "2015-02-19 04:16:33.756377", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 

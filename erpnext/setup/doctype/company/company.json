@@ -28,7 +28,7 @@
    "reqd": 1
   }, 
   {
-   "description": "Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.", 
+   "description": "", 
    "fieldname": "abbr", 
    "fieldtype": "Data", 
    "label": "Abbr", 
@@ -53,6 +53,14 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "default_letter_head", 
+   "fieldtype": "Link", 
+   "label": "Default Letter Head", 
+   "options": "Letter Head", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "domain", 
    "fieldtype": "Select", 
    "label": "Domain", 
@@ -64,8 +72,16 @@
    "fieldname": "charts_section", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
-   "label": "Chart of Accounts", 
+   "label": "Localization", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "default_holiday_list", 
+   "fieldtype": "Link", 
+   "label": "Default Holiday List", 
+   "options": "Holiday List", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "country", 
@@ -74,6 +90,22 @@
    "label": "Country", 
    "options": "Country", 
    "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "column_break_10", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "default_currency", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
+   "label": "Default Currency", 
+   "options": "Currency", 
+   "permlevel": 0, 
+   "read_only": 0, 
    "reqd": 1
   }, 
   {
@@ -131,6 +163,14 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "column_break0", 
+   "fieldtype": "Column Break", 
+   "oldfieldtype": "Column Break", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "width": "50%"
+  }, 
+  {
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "default_payable_account", 
    "fieldtype": "Link", 
@@ -164,36 +204,8 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "default_holiday_list", 
-   "fieldtype": "Link", 
-   "label": "Default Holiday List", 
-   "options": "Holiday List", 
-   "permlevel": 0, 
-   "precision": ""
-  }, 
-  {
-   "fieldname": "column_break0", 
-   "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "width": "50%"
-  }, 
-  {
-   "fieldname": "default_currency", 
-   "fieldtype": "Link", 
-   "ignore_user_permissions": 1, 
-   "label": "Default Currency", 
-   "options": "Currency", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 1
-  }, 
-  {
-   "fieldname": "default_letter_head", 
-   "fieldtype": "Link", 
-   "label": "Default Letter Head", 
-   "options": "Letter Head", 
+   "fieldname": "section_break_22", 
+   "fieldtype": "Section Break", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -227,6 +239,12 @@
    "options": "default_currency", 
    "permlevel": 0, 
    "read_only": 0
+  }, 
+  {
+   "fieldname": "column_break_26", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "depends_on": "eval:!doc.__islocal", 
@@ -277,6 +295,12 @@
    "options": "Account", 
    "permlevel": 0, 
    "read_only": 0
+  }, 
+  {
+   "fieldname": "column_break_32", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "expenses_included_in_valuation", 
@@ -375,7 +399,7 @@
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:35.790597", 
+ "modified": "2015-02-19 00:37:55.472911", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 

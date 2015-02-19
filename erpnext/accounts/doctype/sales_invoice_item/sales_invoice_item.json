@@ -1,5 +1,5 @@
 {
- "autoname": "INVD.######", 
+ "autoname": "hash", 
  "creation": "2013-06-04 11:02:19", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -439,7 +439,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-01-01 14:29:59.027192", 
+ "modified": "2015-02-19 01:07:01.862525", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Item", 

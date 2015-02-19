@@ -1,5 +1,5 @@
 {
- "autoname": "EVD.######", 
+ "autoname": "hash", 
  "creation": "2013-05-22 12:43:10", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -399,7 +399,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-01-01 14:29:58.851242", 
+ "modified": "2015-02-19 01:07:01.060411", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice Item", 

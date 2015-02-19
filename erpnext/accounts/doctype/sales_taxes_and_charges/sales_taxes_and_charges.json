@@ -1,5 +1,5 @@
 {
- "autoname": "INVTD.######", 
+ "autoname": "hash", 
  "creation": "2013-04-24 11:39:32", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -147,7 +147,7 @@
  "hide_heading": 1, 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-12-10 12:26:41.222471", 
+ "modified": "2015-02-19 01:07:02.165094", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Taxes and Charges", 

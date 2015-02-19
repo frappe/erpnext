@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import get_fullname
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
+from erpnext.accounts.utils import validate_fiscal_year
 
 class InvalidExpenseApproverError(frappe.ValidationError): pass
 
@@ -16,7 +17,7 @@ class ExpenseClaim(Document):
 			self.employee_name, self.total_claimed_amount)
 
 	def validate(self):
-		self.validate_fiscal_year()
+		validate_fiscal_year(self.posting_date, self.fiscal_year, _("Posting Date"), self)
 		self.validate_exp_details()
 		self.validate_expense_approver()
 		set_employee_name(self)
@@ -24,10 +25,6 @@ class ExpenseClaim(Document):
 	def on_submit(self):
 		if self.approval_status=="Draft":
 			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
-
-	def validate_fiscal_year(self):
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.posting_date, self.fiscal_year, "Posting Date")
 
 	def validate_exp_details(self):
 		if not self.get('expenses'):

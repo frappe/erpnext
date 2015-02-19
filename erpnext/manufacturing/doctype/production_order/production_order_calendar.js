@@ -3,10 +3,10 @@
 
 frappe.views.calendar["Production Order"] = {
 	field_map: {
-		"start": "production_start_date",
-		"end": "production_end_date",
+		"start": "planned_start_date",
+		"end": "planned_end_date",
 		"id": "name",
-		"title": "production_item",
+		"title": "name",
 		"allDay": "allDay"
 	},
 	gantt: true,

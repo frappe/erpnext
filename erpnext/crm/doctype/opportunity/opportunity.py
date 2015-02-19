@@ -29,7 +29,7 @@ class Opportunity(TransactionBase):
 		self.validate_cust_name()
 
 		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.transaction_date, self.fiscal_year, "Opportunity Date")
+		validate_fiscal_year(self.transaction_date, self.fiscal_year, _("Opportunity Date"), self)
 
 	def on_submit(self):
 		if self.lead:
@@ -52,11 +52,11 @@ class Opportunity(TransactionBase):
 
 	def has_quotation(self):
 		return frappe.db.get_value("Quotation Item", {"prevdoc_docname": self.name, "docstatus": 1})
-		
+
 	def has_ordered_quotation(self):
-		return frappe.db.sql("""select q.name from `tabQuotation` q, `tabQuotation Item` qi 
+		return frappe.db.sql("""select q.name from `tabQuotation` q, `tabQuotation Item` qi
 			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s and q.status = 'Ordered'""", self.name)
-			
+
 	def validate_cust_name(self):
 		self.customer_name = self.customer or self.lead
 

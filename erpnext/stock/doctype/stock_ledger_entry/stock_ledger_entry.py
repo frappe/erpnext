@@ -21,8 +21,7 @@ class StockLedgerEntry(Document):
 		self.scrub_posting_time()
 
 		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.posting_date, self.fiscal_year,
-			self.meta.get_label("posting_date"))
+		validate_fiscal_year(self.posting_date, self.fiscal_year, self.meta.get_label("posting_date"), self)
 
 	def on_submit(self):
 		self.check_stock_frozen_date()
@@ -67,10 +66,10 @@ class StockLedgerEntry(Document):
 					frappe.throw(_("Batch number is mandatory for Item {0}").format(self.item_code))
 				elif not frappe.db.get_value("Batch",{"item": self.item_code, "name": self.batch_no}):
 						frappe.throw(_("{0} is not a valid Batch Number for Item {1}").format(self.batch_no, self.item_code))
-			
+
 			elif item_det.has_batch_no =='No' and self.batch_no:
 					frappe.throw(_("The Item {0} cannot have Batch").format(self.item_code))
-			
+
 		if item_det.has_variants:
 			frappe.throw(_("Stock cannot exist for Item {0} since has variants").format(self.item_code),
 				ItemTemplateCannotHaveStock)

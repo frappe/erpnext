@@ -1,5 +1,5 @@
 {
- "autoname": "CBD/.######", 
+ "autoname": "hash", 
  "creation": "2013-03-07 11:55:04", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -44,7 +44,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-05-09 02:12:39.595788", 
+ "modified": "2015-02-19 01:06:59.471417", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Budget Detail", 

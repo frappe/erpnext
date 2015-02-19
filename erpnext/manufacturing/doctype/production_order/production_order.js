@@ -1,41 +1,142 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-$.extend(cur_frm.cscript, {
-	onload: function (doc, dt, dn) {
-		if (!doc.status) doc.status = 'Draft';
-		cfn_set_fields(doc, dt, dn);
+frappe.ui.form.on("Production Order", "onload", function(frm) {
+	if (!frm.doc.status)
+		frm.doc.status = 'Draft';
 
-		this.frm.add_fetch("sales_order", "delivery_date", "expected_delivery_date");
+	frm.add_fetch("sales_order", "delivery_date", "expected_delivery_date");
 
-		if(doc.__islocal) {
-			cur_frm.set_value({
+	if(frm.doc.__islocal) {
+		frm.set_value({
 			"actual_start_date": "",
 			"actual_end_date": ""
-			});
+		});
+	}
+
+	erpnext.production_order.set_custom_buttons(frm);
+	erpnext.production_order.setup_company_filter(frm);
+	erpnext.production_order.setup_bom_filter(frm);
+});
+
+frappe.ui.form.on("Production Order", "refresh", function(frm) {
+	erpnext.toggle_naming_series();
+	frm.set_intro("");
+	erpnext.production_order.set_custom_buttons(frm);
+
+	if (frm.doc.docstatus === 0 && !frm.doc.__islocal) {
+		frm.set_intro(__("Submit this Production Order for further processing."));
+	}
+});
+
+frappe.ui.form.on("Production Order", "additional_operating_cost", function(frm) {
+	erpnext.production_order.calculate_total_cost(frm);
+});
+
+frappe.ui.form.on("Production Order Operation", "workstation", function(frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	frappe.call({
+		"method": "frappe.client.get",
+		args: {
+			doctype: "Workstation",
+			name: d.workstation
+		},
+		callback: function (data) {
+			frappe.model.set_value(d.doctype, d.name, "hour_rate", data.message.hour_rate);
+			erpnext.production_order.calculate_cost(frm.doc);
+			erpnext.production_order.calculate_total_cost(frm);
 		}
-	},
+	})
+});
 
-	before_submit: function() {
-		cur_frm.toggle_reqd(["fg_warehouse", "wip_warehouse"], true);
-	},
+frappe.ui.form.on("Production Order Operation", "time_in_mins", function(frm, cdt, cdn) {
+	erpnext.production_order.calculate_cost(frm.doc);
+	erpnext.production_order.calculate_total_cost(frm)
+});
 
-	refresh: function(doc, dt, dn) {
-		this.frm.dashboard.reset();
-		erpnext.toggle_naming_series();
-		this.frm.set_intro("");
-		cfn_set_fields(doc, dt, dn);
+erpnext.production_order = {
+	set_custom_buttons: function(frm) {
+		var doc = frm.doc;
+		if (doc.docstatus === 1) {
 
-		if (doc.docstatus === 0 && !doc.__islocal) {
-			this.frm.set_intro(__("Submit this Production Order for further processing."));
-		} else if (doc.docstatus === 1) {
-			var percent = flt(doc.produced_qty) / flt(doc.qty) * 100;
-			this.frm.dashboard.add_progress(cint(percent) + "% " + __("Complete"), percent);
+			if (doc.material_transferred_for_qty < doc.qty) {
+				frm.add_custom_button(__('Transfer Materials for Manufacture'),
+					cur_frm.cscript['Transfer Raw Materials'], frappe.boot.doctype_icons["Stock Entry"]);
+			}
 
-			if(doc.status === "Stopped") {
-				this.frm.dashboard.set_headline_alert(__("Stopped"), "alert-danger", "icon-stop");
+			if (doc.produced_qty < doc.material_transferred_for_qty) {
+				frm.add_custom_button(__('Update Finished Goods'),
+					cur_frm.cscript['Update Finished Goods'], frappe.boot.doctype_icons["Stock Entry"]);
+			}
+
+			if(doc.status==="Completed") {
+				frm.add_custom_button(__("Show Stock Entries"), function() {
+					frappe.route_options = {
+						production_order: frm.doc.name
+					}
+					frappe.set_route("List", "Stock Entry");
+				});
+			}
+
+			if (doc.status != 'Stopped' && doc.status != 'Completed') {
+				frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Production Order'],
+					"icon-exclamation", "btn-default");
+			} else if (doc.status == 'Stopped') {
+				frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Production Order'],
+				"icon-check", "btn-default");
 			}
 		}
+
+	},
+	calculate_cost: function(doc) {
+		if (doc.operations){
+			var op = doc.operations;
+			doc.planned_operating_cost = 0.0;
+			for(var i=0;i<op.length;i++) {
+				planned_operating_cost = flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
+				frappe.model.set_value('Production Order Operation',op[i].name, "planned_operating_cost", planned_operating_cost);
+
+				doc.planned_operating_cost += planned_operating_cost;
+			}
+			refresh_field('planned_operating_cost');
+		}
+	},
+
+	calculate_total_cost: function(frm) {
+		var variable_cost = frm.doc.actual_operating_cost ?
+			flt(frm.doc.actual_operating_cost) : flt(frm.doc.planned_operating_cost)
+		frm.set_value("total_operating_cost", (flt(frm.doc.additional_operating_cost) + variable_cost))
+	},
+
+	setup_company_filter: function(frm) {
+		var company_filter = function(doc) {
+			return {
+				filters: {
+					'company': frm.doc.company
+				}
+			}
+		}
+
+		frm.fields_dict.fg_warehouse.get_query = company_filter;
+		frm.fields_dict.wip_warehouse.get_query = company_filter;
+	},
+
+	setup_bom_filter: function(frm) {
+		frm.set_query("bom_no", function(doc) {
+			if (doc.production_item) {
+				return{
+					query: "erpnext.controllers.queries.bom",
+					filters: {item: cstr(doc.production_item)}
+				}
+			} else msgprint(__("Please enter Production Item first"));
+		});
+	}
+}
+
+
+$.extend(cur_frm.cscript, {
+	before_submit: function() {
+		cur_frm.toggle_reqd(["fg_warehouse", "wip_warehouse"], true);
 	},
 
 	production_item: function(doc) {
@@ -105,28 +206,8 @@ $.extend(cur_frm.cscript, {
 				"production_order_id": doc.name
 			}
 		});
-	}
+	},
 });
-
-var cfn_set_fields = function(doc, dt, dn) {
-	if (doc.docstatus == 1) {
-
-		if (doc.status == 'Submitted' || doc.status == 'Material Transferred' || doc.status == 'In Process'){
-			cur_frm.add_custom_button(__('Transfer Raw Materials'),
-				cur_frm.cscript['Transfer Raw Materials'], frappe.boot.doctype_icons["Stock Entry"]);
-			cur_frm.add_custom_button(__('Update Finished Goods'),
-				cur_frm.cscript['Update Finished Goods'], frappe.boot.doctype_icons["Stock Entry"]);
-		}
-
-		if (doc.status != 'Stopped' && doc.status != 'Completed') {
-			cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Production Order'],
-				"icon-exclamation", "btn-default");
-		} else if (doc.status == 'Stopped') {
-			cur_frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Production Order'],
-			"icon-check", "btn-default");
-		}
-	}
-}
 
 cur_frm.cscript['Stop Production Order'] = function() {
 	var doc = cur_frm.doc;
@@ -167,67 +248,6 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
 	}
 }
 
-cur_frm.set_query("bom_no", function(doc) {
-	if (doc.production_item) {
-		return{
-			query: "erpnext.controllers.queries.bom",
-			filters: {item: cstr(doc.production_item)}
-		}
-	} else msgprint(__("Please enter Production Item first"));
-});
 
 
-var calculate_total_cost = function(frm) {
-	var variable_cost = frm.doc.actual_operating_cost ? flt(frm.doc.actual_operating_cost) : flt(frm.doc.planned_operating_cost)
-	frm.set_value("total_operating_cost", (flt(frm.doc.additional_operating_cost) + variable_cost))
-}
 
-frappe.ui.form.on("Production Order", "additional_operating_cost", function(frm) {
-	calculate_total_cost(frm);
-});
-
-frappe.ui.form.on("Production Order Operation", "workstation", function(frm, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	frappe.call({
-		"method": "frappe.client.get",
-		args: {
-			doctype: "Workstation",
-			name: d.workstation
-		},
-		callback: function (data) {
-			frappe.model.set_value(d.doctype, d.name, "hour_rate", data.message.hour_rate);
-			calculate_cost(frm.doc);
-			calculate_total_cost(frm);
-		}
-	})
-});
-
-var calculate_cost = function(doc) {
-	if (doc.operations){
-		var op = doc.operations;
-		doc.planned_operating_cost = 0.0;
-		for(var i=0;i<op.length;i++) {
-			planned_operating_cost = flt(flt(op[i].hour_rate) * flt(op[i].time_in_mins) / 60, 2);
-			frappe.model.set_value('Production Order Operation',op[i].name, "planned_operating_cost", planned_operating_cost);
-
-			doc.planned_operating_cost += planned_operating_cost;
-		}
-		refresh_field('planned_operating_cost');
-	}
-}
-
-frappe.ui.form.on("Production Order Operation", "time_in_mins", function(frm, cdt, cdn) {
-	calculate_cost(frm.doc);
-	calculate_total_cost(frm)
-});
-
-var company_filter = function(doc) {
-	return{
-		filters: {
-			'company': doc.company
-		}
-	}
-}
-
-cur_frm.fields_dict.fg_warehouse.get_query = company_filter
-cur_frm.fields_dict.wip_warehouse.get_query = company_filter

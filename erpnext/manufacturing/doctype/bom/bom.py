@@ -14,10 +14,9 @@ class BOM(Document):
 
 	def autoname(self):
 		last_name = frappe.db.sql("""select max(name) from `tabBOM`
-			where name like "BOM/%s/%%" """ % cstr(self.item).replace('"', '\\"'))
+			where name like "BOM/%s/%%" """ % frappe.db.escape(self.item))
 		if last_name:
 			idx = cint(cstr(last_name[0][0]).split('/')[-1].split('-')[0]) + 1
-
 		else:
 			idx = 1
 		self.name = 'BOM/' + self.item + ('/%.3i' % idx)

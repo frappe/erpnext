@@ -66,6 +66,14 @@
    "reqd": 1
   }, 
   {
+   "default": "1", 
+   "description": "Plan material for sub-assemblies", 
+   "fieldname": "use_multi_level_bom", 
+   "fieldtype": "Check", 
+   "label": "Use Multi-Level BOM", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "column_break1", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 
@@ -86,6 +94,15 @@
    "reqd": 1
   }, 
   {
+   "description": "Automatically updated via Stock Entry", 
+   "fieldname": "material_transferred_for_qty", 
+   "fieldtype": "Int", 
+   "label": "Material Transferred for Qty", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
    "default": "0", 
    "depends_on": "eval:doc.docstatus==1", 
    "description": "Automatically updated via Stock Entry of type Manufacture or Repack", 
@@ -99,12 +116,36 @@
    "read_only": 1
   }, 
   {
-   "default": "1", 
-   "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
-   "fieldname": "use_multi_level_bom", 
-   "fieldtype": "Check", 
-   "label": "Use Multi-Level BOM", 
+   "fieldname": "warehouses", 
+   "fieldtype": "Section Break", 
+   "label": "Warehouses", 
+   "options": "icon-building", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "wip_warehouse", 
+   "fieldtype": "Link", 
+   "label": "Work-in-Progress Warehouse", 
+   "options": "Warehouse", 
+   "permlevel": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "column_break_12", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "depends_on": "", 
+   "description": "", 
+   "fieldname": "fg_warehouse", 
+   "fieldtype": "Link", 
+   "in_list_view": 0, 
+   "label": "Target Warehouse", 
+   "options": "Warehouse", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 0
   }, 
   {
    "fieldname": "time", 
@@ -157,38 +198,6 @@
    "permlevel": 0, 
    "precision": "", 
    "read_only": 1
-  }, 
-  {
-   "fieldname": "warehouses", 
-   "fieldtype": "Section Break", 
-   "label": "Warehouses", 
-   "options": "icon-building", 
-   "permlevel": 0
-  }, 
-  {
-   "depends_on": "", 
-   "description": "Manufactured quantity will be updated in this warehouse", 
-   "fieldname": "fg_warehouse", 
-   "fieldtype": "Link", 
-   "in_list_view": 0, 
-   "label": "For Warehouse", 
-   "options": "Warehouse", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 0
-  }, 
-  {
-   "fieldname": "column_break_12", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "wip_warehouse", 
-   "fieldtype": "Link", 
-   "label": "Work-in-Progress Warehouse", 
-   "options": "Warehouse", 
-   "permlevel": 0, 
-   "reqd": 0
   }, 
   {
    "depends_on": "", 
@@ -351,7 +360,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2015-02-05 05:11:42.851377", 
+ "modified": "2015-02-19 03:58:23.460022", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 

@@ -1,5 +1,5 @@
 {
- "autoname": "POD/.#####", 
+ "autoname": "hash", 
  "creation": "2013-05-24 19:29:06", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -484,7 +484,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-12 15:11:13.784588", 
+ "modified": "2015-02-19 01:07:01.224244", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order Item", 

@@ -22,6 +22,12 @@ frappe.ui.form.on("Time Log", "hours", function(frm) {
 	frm._setting_hours = false;
 });
 
+// clear production order if making time log
+frappe.ui.form.on("Time Log", "before_save", function(frm) {
+	frm.doc.production_order && frappe.model.remove_from_locals("Production Order",
+		frm.doc.production_order);
+});
+
 // set hours if to_time is updated
 frappe.ui.form.on("Time Log", "to_time", function(frm) {
 	if(frm._setting_hours) return;
@@ -69,7 +75,7 @@ $.extend(cur_frm.cscript, {
 			}
 		});
 	},
-	
+
 	time_log_for: function(doc) {
 		if (doc.time_log_for == 'Manufacturing') {
 			cur_frm.set_value("activity_type", "Manufacturing")

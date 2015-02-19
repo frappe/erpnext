@@ -1,5 +1,5 @@
 {
- "autoname": "PP/.SO/.#####", 
+ "autoname": "hash", 
  "creation": "2013-02-22 01:27:49", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -59,7 +59,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-17 14:29:14.479541", 
+ "modified": "2015-02-19 01:07:00.991795", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Plan Sales Order", 

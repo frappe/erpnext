@@ -1,5 +1,5 @@
 {
- "autoname": "MVD.#####", 
+ "autoname": "hash", 
  "creation": "2013-02-22 01:28:06", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -123,7 +123,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-07-07 02:53:48.442249", 
+ "modified": "2015-02-19 01:07:00.623383", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Maintenance Visit Purpose", 

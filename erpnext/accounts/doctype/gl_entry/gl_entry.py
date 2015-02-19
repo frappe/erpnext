@@ -53,7 +53,7 @@ class GLEntry(Document):
 
 	def validate_posting_date(self):
 		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.posting_date, self.fiscal_year, "Posting Date")
+		validate_fiscal_year(self.posting_date, self.fiscal_year, _("Posting Date"), self)
 
 	def check_pl_account(self):
 		if self.is_opening=='Yes' and \

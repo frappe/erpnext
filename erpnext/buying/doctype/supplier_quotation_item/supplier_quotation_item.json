@@ -1,5 +1,5 @@
 {
- "autoname": "SQI-.#####", 
+ "autoname": "hash", 
  "creation": "2013-05-22 12:43:10", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -360,7 +360,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-12 15:16:13.616428", 
+ "modified": "2015-02-19 01:07:02.403267", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation Item", 

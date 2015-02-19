@@ -120,16 +120,20 @@ class ProductionOrder(Document):
 		if status != self.status:
 			self.db_set("status", status)
 
-	def update_produced_qty(self):
-		produced_qty = frappe.db.sql("""select sum(fg_completed_qty)
-			from `tabStock Entry` where production_order=%s and docstatus=1
-			and purpose='Manufacture'""", self.name)
-		produced_qty = flt(produced_qty[0][0]) if produced_qty else 0
+	def update_production_order_qty(self):
+		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Production Order
+			based on Stock Entry"""
+		for status, fieldname in (("Manufacture", "produced_qty"),
+			("Material Transfer for Manufacture", "material_transferred_for_qty")):
+			qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
+				from `tabStock Entry` where production_order=%s and docstatus=1
+				and purpose=%s""", (self.name, status))[0][0])
 
-		if produced_qty > self.qty:
-			frappe.throw(_("Manufactured quantity {0} cannot be greater than planned quanitity {1} in Production Order {2}").format(produced_qty, self.qty, self.name), StockOverProductionError)
+		if qty > self.qty:
+			frappe.throw(_("{0} ({1}) cannot be greater than planned quanitity ({2}) in Production Order {3}").format(\
+				self.meta.get_label(fieldname), qty, self.qty, self.name), StockOverProductionError)
 
-		self.db_set("produced_qty", produced_qty)
+		self.db_set(fieldname, qty)
 
 	def on_submit(self):
 		if not self.wip_warehouse:
@@ -223,10 +227,6 @@ class ProductionOrder(Document):
 
 	def validate_delivery_date(self):
 		if self.docstatus==1:
-			if self.planned_start_date and self.expected_delivery_date \
-				and getdate(self.expected_delivery_date) < getdate(self.planned_start_date):
-					frappe.throw(_("Expected Delivery Date cannot be greater than Planned Start Date"))
-		
 			if self.planned_end_date and self.expected_delivery_date \
 				and getdate(self.expected_delivery_date) < getdate(self.planned_end_date):
 					frappe.msgprint(_("Production might not be able to finish by the Expected Delivery Date."))
@@ -280,12 +280,12 @@ def get_events(start, end, filters=None):
 			if filters[key]:
 				conditions += " and " + key + ' = "' + filters[key].replace('"', '\"') + '"'
 
-	data = frappe.db.sql("""select name,production_item, production_start_date, production_end_date
+	data = frappe.db.sql("""select name, production_item, planned_start_date, planned_end_date
 		from `tabProduction Order`
-		where ((ifnull(production_start_date, '0000-00-00')!= '0000-00-00') \
-				and (production_start_date between %(start)s and %(end)s) \
-			or ((ifnull(production_start_date, '0000-00-00')!= '0000-00-00') \
-				and production_end_date between %(start)s and %(end)s)) {conditions}
+		where ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
+				and (planned_start_date between %(start)s and %(end)s) \
+			or ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
+				and planned_end_date between %(start)s and %(end)s)) {conditions}
 		""".format(conditions=conditions), {
 			"start": start,
 			"end": end
