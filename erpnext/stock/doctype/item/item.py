@@ -246,8 +246,6 @@ class Item(WebsiteGenerator):
 
 		for attr in template.variant_attributes[variant.item_code]:
 			variant.description += "\n" + attr[0] + ": " + attr[1]
-			if variant.description_html:
-				variant.description_html += "<div style='margin-top: 4px; font-size: 80%'>" + attr[0] + ": " + attr[1] + "</div>"
 		variant.variant_of = template.name
 		variant.has_variants = 0
 		variant.show_in_website = 0

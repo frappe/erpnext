@@ -63,6 +63,7 @@ class StockEntry(StockController):
 		self.validate_return_reference_doc()
 		self.validate_with_material_request()
 		#self.validate_valuation_rate()
+		self.set_total_incoming_outgoing_value()
 		self.set_total_amount()
 
 	def on_submit(self):

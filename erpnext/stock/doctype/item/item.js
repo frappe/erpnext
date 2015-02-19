@@ -72,8 +72,17 @@ frappe.ui.form.on("Item", "onload", function(frm) {
 						response($.map(r.message, function(d) { return d.attribute_value; }));
 					}
 				});
-			}
-		})
+			},
+			select: function(event, ui) {
+				field.$input.val(ui.item.value);
+				field.$input.trigger("change");
+			},
+			focus: function( event, ui ) {
+				if(ui.item.action) {
+					return false;
+				}
+			},
+		});
 	}
 });
 

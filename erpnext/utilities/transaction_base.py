@@ -49,7 +49,7 @@ class TransactionBase(StatusUpdater):
 			})
 
 			if frappe.db.exists("User", self.contact_by):
-				frappe.share("Event", event.name, self.contact_by)
+				frappe.share.add("Event", event.name, self.contact_by)
 
 			event.insert(ignore_permissions=True)
 

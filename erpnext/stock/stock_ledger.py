@@ -106,6 +106,7 @@ class update_entries_after(object):
 		self.build()
 
 	def build(self):
+		# includes current entry!
 		entries_to_fix = self.get_sle_after_datetime()
 
 		for sle in entries_to_fix:
@@ -169,7 +170,6 @@ class update_entries_after(object):
 					self.qty_after_transaction += flt(sle.actual_qty)
 					self.stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.stock_queue))
 
-
 		# rounding as per precision
 		self.stock_value = flt(self.stock_value, self.precision)
 
@@ -179,6 +179,7 @@ class update_entries_after(object):
 		# update current sle
 		sle.qty_after_transaction = self.qty_after_transaction
 		sle.valuation_rate = self.valuation_rate
+		sle.stock_value = self.stock_value
 		sle.stock_queue = json.dumps(self.stock_queue)
 		sle.stock_value_difference = stock_value_difference
 		sle.doctype="Stock Ledger Entry"
@@ -252,14 +253,18 @@ class update_entries_after(object):
 			if not self.stock_queue:
 				self.stock_queue.append([0, 0])
 
-			if self.stock_queue[-1][0] > 0:
-				self.stock_queue.append([actual_qty, incoming_rate])
+			# last row has the same rate, just updated the qty
+			if self.stock_queue[-1][1]==incoming_rate:
+				self.stock_queue[-1][0] += actual_qty
 			else:
-				qty = self.stock_queue[-1][0] + actual_qty
-				if qty == 0:
-					self.stock_queue.pop(-1)
+				if self.stock_queue[-1][0] > 0:
+					self.stock_queue.append([actual_qty, incoming_rate])
 				else:
-					self.stock_queue[-1] = [qty, incoming_rate]
+					qty = self.stock_queue[-1][0] + actual_qty
+					if qty == 0:
+						self.stock_queue.pop(-1)
+					else:
+						self.stock_queue[-1] = [qty, incoming_rate]
 		else:
 			qty_to_pop = abs(actual_qty)
 			while qty_to_pop:
@@ -299,7 +304,9 @@ class update_entries_after(object):
 
 	def get_sle_after_datetime(self):
 		"""get Stock Ledger Entries after a particular datetime, for reposting"""
-		return get_stock_ledger_entries(self.previous_sle or self.args, ">", "asc", for_update=True)
+		return get_stock_ledger_entries(self.previous_sle or frappe._dict({
+				"item_code": self.args.get("item_code"), "warehouse": self.args.get("warehouse") }),
+			">", "asc", for_update=True)
 
 	def raise_exceptions(self):
 		deficiency = min(e["diff"] for e in self.exceptions)
@@ -329,7 +336,7 @@ def get_previous_sle(args, for_update=False):
 	sle = get_stock_ledger_entries(args, "<=", "desc", "limit 1", for_update=for_update)
 	return sle and sle[0] or {}
 
-def get_stock_ledger_entries(previous_sle, operator=None, order="desc", limit=None, for_update=False):
+def get_stock_ledger_entries(previous_sle, operator=None, order="desc", limit=None, for_update=False, debug=False):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	conditions = "timestamp(posting_date, posting_time) {0} timestamp(%(posting_date)s, %(posting_time)s)".format(operator)
 	if not previous_sle.get("posting_date"):
@@ -351,7 +358,7 @@ def get_stock_ledger_entries(previous_sle, operator=None, order="desc", limit=No
 			"limit": limit or "",
 			"for_update": for_update and "for update" or "",
 			"order": order
-		}, previous_sle, as_dict=1)
+		}, previous_sle, as_dict=1, debug=debug)
 
 def get_valuation_rate(item_code, warehouse, allow_zero_rate=False):
 	last_valuation_rate = frappe.db.sql("""select valuation_rate

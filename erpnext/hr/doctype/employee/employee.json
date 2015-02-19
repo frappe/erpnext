@@ -21,14 +21,6 @@
    "width": "50%"
   }, 
   {
-   "fieldname": "image_view", 
-   "fieldtype": "Image", 
-   "in_list_view": 0, 
-   "label": "Image View", 
-   "options": "image", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "employee", 
    "fieldtype": "Data", 
    "hidden": 1, 
@@ -71,9 +63,17 @@
   }, 
   {
    "fieldname": "image", 
-   "fieldtype": "Select", 
+   "fieldtype": "Attach", 
    "label": "Image", 
-   "options": "attach_files:", 
+   "options": "", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "in_list_view": 0, 
+   "label": "Image View", 
+   "options": "image", 
    "permlevel": 0
   }, 
   {
@@ -674,7 +674,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:38.234802", 
+ "modified": "2015-02-19 09:28:40.628101", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee", 

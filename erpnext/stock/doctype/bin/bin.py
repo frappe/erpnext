@@ -37,7 +37,8 @@ class Bin(Document):
 				"item_code": self.item_code,
 				"warehouse": self.warehouse,
 				"posting_date": args.get("posting_date"),
-				"posting_time": args.get("posting_time")
+				"posting_time": args.get("posting_time"),
+				"voucher_no": args.get("voucher_no")
 			}, allow_negative_stock=allow_negative_stock)
 
 	def update_qty(self, args):

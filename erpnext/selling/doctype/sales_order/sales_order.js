@@ -12,10 +12,10 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		if(doc.docstatus==1) {
 			if(doc.status != 'Stopped') {
 
-				cur_frm.dashboard.add_progress(cint(doc.per_delivered) + __("% Delivered"),
-					doc.per_delivered);
-				cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
-					doc.per_billed);
+				// cur_frm.dashboard.add_progress(cint(doc.per_delivered) + __("% Delivered"),
+				// 	doc.per_delivered);
+				// cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
+				// 	doc.per_billed);
 
 				// delivery note
 				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1)

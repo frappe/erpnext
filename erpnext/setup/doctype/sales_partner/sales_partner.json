@@ -147,9 +147,9 @@
   }, 
   {
    "fieldname": "logo", 
-   "fieldtype": "Select", 
+   "fieldtype": "Attach", 
    "label": "Logo", 
-   "options": "attach_files:", 
+   "options": "", 
    "permlevel": 0
   }, 
   {
@@ -200,7 +200,7 @@
  "icon": "icon-user", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-02-05 05:11:46.087123", 
+ "modified": "2015-02-19 09:26:41.397649", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Partner", 

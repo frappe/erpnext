@@ -81,7 +81,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 			cur_frm.add_custom_button(__('Opportunity Lost'),
 				cur_frm.cscript['Declare Opportunity Lost'], "icon-remove", "btn-default");
 
-		
+
 	}
 }
 
@@ -94,7 +94,7 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
 		return frappe.call({
-			method: "erpnext.selling.doctype.opportunity.opportunity.get_item_details",
+			method: "erpnext.crm.doctype.opportunity.opportunity.get_item_details",
 			args: {"item_code":d.item_code},
 			callback: function(r, rt) {
 				if(r.message) {
