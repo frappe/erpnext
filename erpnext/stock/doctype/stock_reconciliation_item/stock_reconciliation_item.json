@@ -49,6 +49,12 @@
    "set_only_once": 0
   }, 
   {
+   "fieldname": "section_break_3", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "allow_on_submit": 0, 
    "description": "Leave blank if no change", 
    "fieldname": "qty", 
@@ -87,6 +93,30 @@
    "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0
+  }, 
+  {
+   "fieldname": "column_break_6", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "description": "Before reconciliation", 
+   "fieldname": "current_qty", 
+   "fieldtype": "Float", 
+   "label": "Current Qty", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "description": "Before reconciliation", 
+   "fieldname": "current_valuation_rate", 
+   "fieldtype": "Read Only", 
+   "label": "Current Valuation Rate", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
   }
  ], 
  "hide_heading": 0, 
@@ -96,7 +126,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-02-17 01:07:50.200649", 
+ "modified": "2015-02-20 04:20:46.692967", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Reconciliation Item", 

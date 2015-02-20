@@ -1,6 +1,6 @@
 {
  "allow_import": 1, 
- "autoname": "RFD/.#####", 
+ "autoname": "ITEM-PRICE-.#####", 
  "creation": "2013-05-02 16:29:48", 
  "description": "Multiple Item prices.", 
  "docstatus": 0, 
@@ -105,7 +105,7 @@
  "idx": 1, 
  "in_create": 0, 
  "istable": 0, 
- "modified": "2015-02-05 05:11:39.951804", 
+ "modified": "2015-02-20 00:26:20.161437", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Price", 

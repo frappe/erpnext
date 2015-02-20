@@ -160,7 +160,7 @@ class Item(WebsiteGenerator):
 
 		# delete missing variants
 		existing_variants = [d.name for d in frappe.get_all("Item",
-			{"variant_of":self.name})]
+			filters={"variant_of":self.name})]
 
 		updated, deleted = [], []
 		for existing_variant in existing_variants:
@@ -385,7 +385,7 @@ class Item(WebsiteGenerator):
 		super(Item, self).on_trash()
 		frappe.db.sql("""delete from tabBin where item_code=%s""", self.item_code)
 		frappe.db.sql("delete from `tabItem Price` where item_code=%s", self.name)
-		for variant_of in frappe.get_all("Item", {"variant_of": self.name}):
+		for variant_of in frappe.get_all("Item", filters={"variant_of": self.name}):
 			frappe.delete_doc("Item", variant_of.name)
 
 	def before_rename(self, olddn, newdn, merge=False):

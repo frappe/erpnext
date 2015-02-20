@@ -10,7 +10,11 @@ frappe.ui.form.on("Stock Reconciliation", "get_items", function(frm) {
 		function(data) {
 			frappe.call({
 				method:"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_items",
-				args: {warehouse: data.warehouse},
+				args: {
+					warehouse: data.warehouse,
+					posting_date: frm.doc.posting_date,
+					posting_time: frm.doc.posting_time
+				},
 				callback: function(r) {
 					var items = [];
 					frm.clear_table("items");

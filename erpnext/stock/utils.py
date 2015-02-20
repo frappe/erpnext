@@ -38,18 +38,22 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 	"""Returns stock balance quantity at given warehouse on given posting date or current date.
 
 	If `with_valuation_rate` is True, will return tuple (qty, rate)"""
+
+	from erpnext.stock.stock_ledger import get_previous_sle
+
 	if not posting_date: posting_date = nowdate()
 	if not posting_time: posting_time = nowtime()
-	last_entry = frappe.db.sql("""select qty_after_transaction, valuation_rate from `tabStock Ledger Entry`
-		where item_code=%s and warehouse=%s
-			and timestamp(posting_date, posting_time) < timestamp(%s, %s)
-		order by timestamp(posting_date, posting_time) limit 1""",
-			(item_code, warehouse, posting_date, posting_time))
+
+	last_entry = get_previous_sle({
+		"item_code": item_code,
+		"warehouse":warehouse,
+		"posting_date": posting_date,
+		"posting_time": posting_time })
 
 	if with_valuation_rate:
-		return (last_entry[0][0], last_entry[0][1]) if last_entry else (0.0, 0.0)
+		return (last_entry.qty_after_transaction, last_entry.valuation_rate) if last_entry else (0.0, 0.0)
 	else:
-		return last_entry[0][0] if last_entry else 0.0
+		return last_entry.qty_after_transaction or 0.0
 
 def get_latest_stock_balance():
 	bin_map = {}

@@ -8,6 +8,7 @@ from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import StockController
+from erpnext.stock.utils import get_stock_balance
 
 class StockReconciliation(StockController):
 	def __init__(self, arg1, arg2=None):
@@ -15,6 +16,7 @@ class StockReconciliation(StockController):
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
 
 	def validate(self):
+		self.remove_items_with_no_change()
 		self.validate_data()
 		self.validate_expense_account()
 
@@ -25,6 +27,28 @@ class StockReconciliation(StockController):
 	def on_cancel(self):
 		self.delete_and_repost_sle()
 		self.make_gl_entries_on_cancel()
+
+	def remove_items_with_no_change(self):
+		"""Remove items if qty or rate is not changed"""
+		self.difference_amount = 0.0
+		def _changed(item):
+			qty, rate = get_stock_balance(item.item_code, item.warehouse,
+					self.posting_date, self.posting_time, with_valuation_rate=True)
+			if (item.qty==None or item.qty==qty) and (item.valuation_rate==None or item.valuation_rate==rate):
+				return False
+			else:
+				item.current_qty = qty
+				item.current_valuation_rate = rate
+				self.difference_amount += ((item.qty or qty) * (item.valuation_rate or rate) - (qty * rate))
+				return True
+
+		items = filter(lambda d: _changed(d), self.items)
+
+		if len(items) != len(self.items):
+			self.items = items
+			for i, item in enumerate(self.items):
+				item.idx = i + 1
+			frappe.msgprint(_("Removed items with no change in quantity or value."))
 
 	def validate_data(self):
 		def _get_msg(row_num, msg):
@@ -38,6 +62,7 @@ class StockReconciliation(StockController):
 		# validate no of rows
 		if len(self.items) > 100:
 			frappe.throw(_("""Max 100 rows for Stock Reconciliation."""))
+
 		for row_num, row in enumerate(self.items):
 			# find duplicates
 			if [row.item_code, row.warehouse] in item_warehouse_combinations:
@@ -88,8 +113,6 @@ class StockReconciliation(StockController):
 
 		try:
 			item = frappe.get_doc("Item", item_code)
-			if not item:
-				raise frappe.ValidationError, (_("Item: {0} not found in the system").format(item_code))
 
 			# end of life and stock item
 			validate_end_of_life(item_code, item.end_of_life, verbose=0)
@@ -194,14 +217,16 @@ class StockReconciliation(StockController):
 				frappe.throw(_("Difference Account must be a 'Liability' type account, since this Stock Reconciliation is an Opening Entry"))
 
 @frappe.whitelist()
-def get_items(warehouse):
-	from erpnext.stock.utils import get_stock_balance
+def get_items(warehouse, posting_date, posting_time):
 	items = frappe.get_list("Item", fields=["name"], filters=
 		{"is_stock_item": "Yes", "has_serial_no": "No", "has_batch_no": "No"})
 	for item in items:
 		item.item_code = item.name
 		item.warehouse = warehouse
+		item.qty, item.valuation_rate = get_stock_balance(item.name, warehouse,
+			posting_date, posting_time, with_valuation_rate=True)
+		item.current_qty = item.qty
+		item.current_valuation_rate = item.valuation_rate
 		del item["name"]
-		item.qty, item.valuation_rate = get_stock_balance(item.name, warehouse, with_valuation_rate=True)
 
 	return items

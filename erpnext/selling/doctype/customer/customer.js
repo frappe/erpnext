@@ -1,6 +1,20 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+frappe.ui.form.on("Customer", "refresh", function(frm) {
+	cur_frm.cscript.setup_dashboard(frm.doc);
+
+	if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {
+		frm.toggle_display("naming_series", false);
+	} else {
+		erpnext.toggle_naming_series();
+	}
+
+	frm.toggle_display(['address_html','contact_html'], !frm.doc.__islocal);
+
+	if(!frm.doc.__islocal) erpnext.utils.render_address_and_contact(frm);
+})
+
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	cur_frm.cscript.load_defaults(doc, dt, dn);
 }
@@ -15,24 +29,6 @@ cur_frm.cscript.load_defaults = function(doc, dt, dn) {
 
 cur_frm.add_fetch('lead_name', 'company_name', 'customer_name');
 cur_frm.add_fetch('default_sales_partner','commission_rate','default_commission_rate');
-
-cur_frm.cscript.refresh = function(doc, dt, dn) {
-	cur_frm.cscript.setup_dashboard(doc);
-
-	if(frappe.defaults.get_default("cust_master_name")!="Naming Series") {
-		cur_frm.toggle_display("naming_series", false);
-	} else {
-		erpnext.toggle_naming_series();
-	}
-
-	if(doc.__islocal){
-		hide_field(['address_html','contact_html']);
-	}else{
-		unhide_field(['address_html','contact_html']);
-		// make lists
-		erpnext.utils.render_address_and_contact(cur_frm);
-	}
-}
 
 cur_frm.cscript.validate = function(doc, dt, dn) {
 	if(doc.lead_name) frappe.model.clear_doc("Lead", doc.lead_name);

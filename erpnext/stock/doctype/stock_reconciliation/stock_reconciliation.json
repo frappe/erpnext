@@ -32,11 +32,8 @@
    "reqd": 1
   }, 
   {
-   "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
-   "fieldname": "expense_account", 
-   "fieldtype": "Link", 
-   "label": "Difference Account", 
-   "options": "Account", 
+   "fieldname": "col1", 
+   "fieldtype": "Column Break", 
    "permlevel": 0
   }, 
   {
@@ -51,34 +48,12 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "col1", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "company", 
    "fieldtype": "Link", 
    "label": "Company", 
    "options": "Company", 
    "permlevel": 0, 
    "reqd": 1
-  }, 
-  {
-   "fieldname": "fiscal_year", 
-   "fieldtype": "Link", 
-   "label": "Fiscal Year", 
-   "options": "Fiscal Year", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "reqd": 1
-  }, 
-  {
-   "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
-   "fieldname": "cost_center", 
-   "fieldtype": "Link", 
-   "label": "Cost Center", 
-   "options": "Cost Center", 
-   "permlevel": 0
   }, 
   {
    "fieldname": "sb9", 
@@ -108,28 +83,20 @@
    "precision": ""
   }, 
   {
-   "fieldname": "upload_html", 
-   "fieldtype": "HTML", 
-   "label": "Upload HTML", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1
-  }, 
-  {
-   "depends_on": "reconciliation_json", 
-   "fieldname": "sb2", 
-   "fieldtype": "Section Break", 
-   "label": "Reconciliation Data", 
+   "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
+   "fieldname": "expense_account", 
+   "fieldtype": "Link", 
+   "label": "Difference Account", 
+   "options": "Account", 
    "permlevel": 0
   }, 
   {
-   "fieldname": "reconciliation_html", 
-   "fieldtype": "HTML", 
-   "hidden": 0, 
-   "label": "Reconciliation HTML", 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "read_only": 1
+   "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
+   "fieldname": "cost_center", 
+   "fieldtype": "Link", 
+   "label": "Cost Center", 
+   "options": "Cost Center", 
+   "permlevel": 0
   }, 
   {
    "fieldname": "reconciliation_json", 
@@ -140,20 +107,55 @@
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_13", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "difference_amount", 
+   "fieldtype": "Currency", 
+   "label": "Difference Amount", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "fold_15", 
+   "fieldtype": "Fold", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "section_break_16", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "fiscal_year", 
+   "fieldtype": "Link", 
+   "label": "Fiscal Year", 
+   "options": "Fiscal Year", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "reqd": 1
   }
  ], 
  "icon": "icon-upload-alt", 
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 1, 
- "modified": "2015-02-17 02:09:17.483016", 
+ "modified": "2015-02-20 04:39:46.585018", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Reconciliation", 
  "owner": "Administrator", 
  "permissions": [
   {
-   "amend": 0, 
+   "amend": 1, 
    "cancel": 1, 
    "create": 1, 
    "delete": 1, 
