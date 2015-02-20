@@ -91,11 +91,12 @@ erpnext.AccountsChart = Class.extend({
 		me.can_delete = frappe.model.can_delete(this.ctype);
 		me.can_write = frappe.model.can_write(this.ctype);
 
+		// __("Accounts"), __("Cost Centers")
 
 		me.company = company;
 		this.tree = new frappe.ui.Tree({
 			parent: $(wrapper),
-			label: ctype==="Account" ? __("Accounts") : __("Cost Centers"),
+			label: ctype==="Account" ? "Accounts" : "Cost Centers",
 			args: {ctype: ctype, comp: company},
 			method: 'erpnext.accounts.page.accounts_browser.accounts_browser.get_children',
 			click: function(link) {
