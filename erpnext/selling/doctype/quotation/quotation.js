@@ -25,7 +25,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 				cur_frm.add_custom_button(__('Set as Lost'),
 					cur_frm.cscript['Declare Order Lost'], "icon-exclamation", "btn-default");
 			}
-			
+
 		}
 
 		if (this.frm.doc.docstatus===0) {
@@ -159,4 +159,6 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 		cur_frm.email_doc(frappe.boot.notification_settings.quotation_message);
 }
 
-
+frappe.ui.form.on("Quotation Item", "items_on_form_rendered", function(frm, cdt, cdn) {
+	// enable tax_amount field if Actual
+})

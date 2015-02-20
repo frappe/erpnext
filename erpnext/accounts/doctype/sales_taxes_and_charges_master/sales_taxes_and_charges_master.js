@@ -165,10 +165,10 @@ cur_frm.cscript.tax_amount = function(doc, cdt, cdn) {
 		msgprint(__("Please select Charge Type first"));
 		d.tax_amount = '';
 	}
-	else if(d.charge_type && d.tax_amount) {
-		msgprint(__("Cannot directly set amount. For 'Actual' charge type, use the rate field"));
-		d.tax_amount = '';
-	}
+	// else if(d.charge_type && d.tax_amount) {
+	// 	msgprint(__("Cannot directly set amount. For 'Actual' charge type, use the rate field"));
+	// 	d.tax_amount = '';
+	// }
 	validated = false;
 	refresh_field('tax_amount', d.name, 'taxes');
 };

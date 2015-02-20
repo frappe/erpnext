@@ -560,24 +560,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		return valid;
 	},
 
-	validate_conversion_rate: function() {
-		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, precision("conversion_rate"));
-		var conversion_rate_label = frappe.meta.get_label(this.frm.doc.doctype, "conversion_rate",
-			this.frm.doc.name);
-		var company_currency = this.get_company_currency();
-
-		if(!this.frm.doc.conversion_rate) {
-			frappe.throw(repl('%(conversion_rate_label)s' +
-				__(' is mandatory. Maybe Currency Exchange record is not created for ') +
-				'%(from_currency)s' + __(" to ") + '%(to_currency)s',
-				{
-					"conversion_rate_label": conversion_rate_label,
-					"from_currency": this.frm.doc.currency,
-					"to_currency": company_currency
-				}));
-		}
-	},
-
 	get_terms: function() {
 		var me = this;
 		if(this.frm.doc.tc_name) {
