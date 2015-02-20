@@ -10,7 +10,7 @@
   {
    "fieldname": "basic_information", 
    "fieldtype": "Section Break", 
-   "label": "Basic Information", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0
   }, 
@@ -453,7 +453,7 @@
   {
    "fieldname": "sb53", 
    "fieldtype": "Section Break", 
-   "label": "Bio", 
+   "label": "", 
    "permlevel": 0
   }, 
   {
@@ -674,7 +674,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2015-02-19 09:28:40.628101", 
+ "modified": "2015-02-20 05:02:14.205144", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Employee", 

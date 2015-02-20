@@ -219,7 +219,7 @@
   {
    "fieldname": "item_details", 
    "fieldtype": "Section Break", 
-   "label": "Item Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "Simple", 
    "permlevel": 0
@@ -237,7 +237,7 @@
  "icon": "icon-wrench", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-05 05:11:39.246897", 
+ "modified": "2015-02-20 05:04:05.403625", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Installation Note", 

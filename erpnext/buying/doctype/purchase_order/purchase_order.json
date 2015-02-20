@@ -134,7 +134,7 @@
   {
    "fieldname": "currency_and_price_list", 
    "fieldtype": "Section Break", 
-   "label": "Currency and Price List", 
+   "label": "", 
    "options": "icon-tag", 
    "permlevel": 0
   }, 
@@ -208,7 +208,7 @@
   {
    "fieldname": "items_section", 
    "fieldtype": "Section Break", 
-   "label": "Items", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-shopping-cart", 
    "permlevel": 0
@@ -310,7 +310,7 @@
   {
    "fieldname": "totals", 
    "fieldtype": "Section Break", 
-   "label": "Totals", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-money", 
    "permlevel": 0
@@ -783,7 +783,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-18 15:05:33.635613", 
+ "modified": "2015-02-20 05:16:19.990723", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 

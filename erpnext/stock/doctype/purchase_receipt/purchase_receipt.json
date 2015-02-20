@@ -133,7 +133,7 @@
   {
    "fieldname": "currency_and_price_list", 
    "fieldtype": "Section Break", 
-   "label": "Currency and Price List", 
+   "label": "", 
    "options": "icon-tag", 
    "permlevel": 0
   }, 
@@ -205,7 +205,7 @@
   {
    "fieldname": "items_section", 
    "fieldtype": "Section Break", 
-   "label": "Items", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-shopping-cart", 
    "permlevel": 0
@@ -308,7 +308,7 @@
    "description": "Detailed Breakup of the totals", 
    "fieldname": "totals", 
    "fieldtype": "Section Break", 
-   "label": "Totals", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-money", 
    "permlevel": 0
@@ -775,7 +775,7 @@
  "icon": "icon-truck", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-11 16:13:02.294088", 
+ "modified": "2015-02-20 05:16:24.035630", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt", 

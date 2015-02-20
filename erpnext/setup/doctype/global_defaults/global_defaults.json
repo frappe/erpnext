@@ -8,7 +8,7 @@
    "fieldname": "currency_settings", 
    "fieldtype": "Section Break", 
    "in_list_view": 0, 
-   "label": "Currency Settings", 
+   "label": "", 
    "permlevel": 0
   }, 
   {
@@ -105,7 +105,7 @@
  "idx": 1, 
  "in_create": 1, 
  "issingle": 1, 
- "modified": "2015-02-05 05:11:39.042446", 
+ "modified": "2015-02-20 05:16:23.324563", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Global Defaults", 

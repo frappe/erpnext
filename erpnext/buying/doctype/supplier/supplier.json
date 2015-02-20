@@ -11,7 +11,7 @@
   {
    "fieldname": "basic_info", 
    "fieldtype": "Section Break", 
-   "label": "Basic Info", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-user", 
    "permlevel": 0
@@ -170,7 +170,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:47.468728", 
+ "modified": "2015-02-20 05:07:32.060901", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier", 

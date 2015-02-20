@@ -9,7 +9,7 @@
   {
    "fieldname": "contact_section", 
    "fieldtype": "Section Break", 
-   "label": "Contact Details", 
+   "label": "", 
    "options": "icon-user", 
    "permlevel": 0
   }, 
@@ -176,7 +176,7 @@
  "idx": 1, 
  "in_create": 0, 
  "in_dialog": 0, 
- "modified": "2015-02-05 05:11:35.962993", 
+ "modified": "2015-02-20 05:07:55.636970", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Contact", 

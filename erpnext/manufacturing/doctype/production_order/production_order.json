@@ -8,7 +8,7 @@
   {
    "fieldname": "item", 
    "fieldtype": "Section Break", 
-   "label": "Item", 
+   "label": "", 
    "options": "icon-gift", 
    "permlevel": 0
   }, 
@@ -360,7 +360,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2015-02-19 06:00:33.277637", 
+ "modified": "2015-02-20 05:04:13.881343", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 

@@ -404,7 +404,7 @@
   {
    "fieldname": "purchase_details", 
    "fieldtype": "Section Break", 
-   "label": "Purchase Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-shopping-cart", 
    "permlevel": 0, 
@@ -873,7 +873,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2015-02-19 09:24:59.397525", 
+ "modified": "2015-02-20 05:08:14.975549", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 

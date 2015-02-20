@@ -12,7 +12,7 @@
   {
    "fieldname": "sb0", 
    "fieldtype": "Section Break", 
-   "label": "Cost Center Details", 
+   "label": "", 
    "permlevel": 0
   }, 
   {
@@ -145,7 +145,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-02-05 05:11:36.155435", 
+ "modified": "2015-02-20 05:07:59.251051", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Cost Center", 

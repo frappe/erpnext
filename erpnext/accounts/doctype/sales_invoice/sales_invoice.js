@@ -71,7 +71,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}
 
 			if(doc.outstanding_amount!=0) {
-				cur_frm.page.add_menu_item(__('Make Payment Entry'), cur_frm.cscript.make_bank_entry, "icon-money");
+				cur_frm.add_custom_button(__('Make Payment Entry'), cur_frm.cscript.make_bank_entry, "icon-money");
 			}
 		}
 

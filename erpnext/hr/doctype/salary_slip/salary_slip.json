@@ -252,7 +252,7 @@
   {
    "fieldname": "totals", 
    "fieldtype": "Section Break", 
-   "label": "Totals", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0
   }, 
@@ -337,7 +337,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-05 05:11:44.967827", 
+ "modified": "2015-02-20 05:12:10.770423", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip", 

@@ -8,7 +8,7 @@
   {
    "fieldname": "entry_type_and_date", 
    "fieldtype": "Section Break", 
-   "label": "Entry Type and Date", 
+   "label": "", 
    "options": "icon-flag", 
    "permlevel": 0
   }, 
@@ -74,7 +74,7 @@
   {
    "fieldname": "2_add_edit_gl_entries", 
    "fieldtype": "Section Break", 
-   "label": "Journal Entries", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-table", 
    "permlevel": 0, 
@@ -273,7 +273,7 @@
   {
    "fieldname": "addtional_info", 
    "fieldtype": "Section Break", 
-   "label": "More Info", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-file-text", 
    "permlevel": 0, 
@@ -457,7 +457,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-05 05:11:40.139467", 
+ "modified": "2015-02-20 05:07:15.435166", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Entry", 

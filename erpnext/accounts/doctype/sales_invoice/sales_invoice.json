@@ -10,7 +10,7 @@
   {
    "fieldname": "customer_section", 
    "fieldtype": "Section Break", 
-   "label": "Customer", 
+   "label": "", 
    "options": "icon-user", 
    "permlevel": 0
   }, 
@@ -192,7 +192,7 @@
   {
    "fieldname": "currency_and_price_list", 
    "fieldtype": "Section Break", 
-   "label": "Currency and Price List", 
+   "label": "", 
    "options": "icon-tag", 
    "permlevel": 0, 
    "read_only": 0
@@ -272,7 +272,7 @@
   {
    "fieldname": "items_section", 
    "fieldtype": "Section Break", 
-   "label": "Items", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-shopping-cart", 
    "permlevel": 0, 
@@ -468,7 +468,7 @@
   {
    "fieldname": "totals", 
    "fieldtype": "Section Break", 
-   "label": "Totals", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-money", 
    "permlevel": 0, 
@@ -1202,7 +1202,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-11 15:57:57.399512", 
+ "modified": "2015-02-20 05:16:19.256361", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 

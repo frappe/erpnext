@@ -7,7 +7,7 @@
   {
    "fieldname": "customer_details", 
    "fieldtype": "Section Break", 
-   "label": "Customer Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-user", 
    "permlevel": 0
@@ -102,7 +102,7 @@
   {
    "fieldname": "maintenance_details", 
    "fieldtype": "Section Break", 
-   "label": "Maintenance Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-wrench", 
    "permlevel": 0
@@ -279,7 +279,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-05 05:11:41.072187", 
+ "modified": "2015-02-20 05:08:31.875844", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Maintenance Visit", 

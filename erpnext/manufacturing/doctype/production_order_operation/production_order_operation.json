@@ -11,7 +11,7 @@
   {
    "fieldname": "details", 
    "fieldtype": "Section Break", 
-   "label": "Details", 
+   "label": "", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -282,7 +282,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-02-13 16:26:30.441657", 
+ "modified": "2015-02-20 05:08:36.612612", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order Operation", 

@@ -11,7 +11,7 @@
   {
    "fieldname": "details", 
    "fieldtype": "Section Break", 
-   "label": "Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0, 
    "read_only": 0
@@ -417,7 +417,7 @@
  "icon": "icon-barcode", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-02-05 05:11:46.454105", 
+ "modified": "2015-02-20 05:08:12.961403", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Serial No", 

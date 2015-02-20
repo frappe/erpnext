@@ -8,7 +8,7 @@
   {
    "fieldname": "customer_section", 
    "fieldtype": "Section Break", 
-   "label": "Customer", 
+   "label": "", 
    "options": "icon-user", 
    "permlevel": 0
   }, 
@@ -92,7 +92,7 @@
   {
    "fieldname": "issue_details", 
    "fieldtype": "Section Break", 
-   "label": "Issue Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-ticket", 
    "permlevel": 0
@@ -396,7 +396,7 @@
  "icon": "icon-bug", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2015-02-17 00:12:52.430072", 
+ "modified": "2015-02-20 05:08:06.361985", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Warranty Claim", 

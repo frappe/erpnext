@@ -146,7 +146,7 @@
   {
    "fieldname": "section_break0", 
    "fieldtype": "Section Break", 
-   "label": "Project Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-list", 
    "permlevel": 0
@@ -273,7 +273,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2015-02-05 05:11:43.094638", 
+ "modified": "2015-02-20 05:08:08.569007", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 

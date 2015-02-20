@@ -42,7 +42,7 @@
   {
    "fieldname": "item_details", 
    "fieldtype": "Section Break", 
-   "label": "Item", 
+   "label": "", 
    "options": "icon-tag", 
    "permlevel": 0
   }, 
@@ -105,7 +105,7 @@
  "idx": 1, 
  "in_create": 0, 
  "istable": 0, 
- "modified": "2015-02-20 00:26:20.161437", 
+ "modified": "2015-02-20 05:04:11.609416", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Price", 

@@ -9,7 +9,7 @@
   {
    "fieldname": "packing_slip_details", 
    "fieldtype": "Section Break", 
-   "label": "Packing Slip Items", 
+   "label": "", 
    "permlevel": 0, 
    "read_only": 0
   }, 
@@ -91,7 +91,7 @@
   {
    "fieldname": "package_item_details", 
    "fieldtype": "Section Break", 
-   "label": "Package Item Details", 
+   "label": "", 
    "permlevel": 0, 
    "read_only": 0
   }, 
@@ -178,7 +178,7 @@
   {
    "fieldname": "misc_details", 
    "fieldtype": "Section Break", 
-   "label": "Misc Details", 
+   "label": "", 
    "permlevel": 0, 
    "read_only": 0
   }, 
@@ -197,7 +197,7 @@
  "icon": "icon-suitcase", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-05 05:11:41.872466", 
+ "modified": "2015-02-20 05:09:24.405911", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Packing Slip", 

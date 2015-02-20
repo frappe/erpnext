@@ -43,7 +43,7 @@
    "fieldname": "schedule_details", 
    "fieldtype": "Section Break", 
    "in_list_view": 0, 
-   "label": "Schedule Details", 
+   "label": "", 
    "permlevel": 0
   }, 
   {
@@ -133,7 +133,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-19 01:07:00.550040", 
+ "modified": "2015-02-20 05:07:52.854082", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Maintenance Schedule Item", 

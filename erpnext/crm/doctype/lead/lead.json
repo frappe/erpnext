@@ -9,7 +9,7 @@
   {
    "fieldname": "lead_details", 
    "fieldtype": "Section Break", 
-   "label": "Lead Details", 
+   "label": "", 
    "options": "icon-user", 
    "permlevel": 0
   }, 
@@ -331,7 +331,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2015-02-16 23:54:10.622839", 
+ "modified": "2015-02-20 05:07:57.739910", 
  "modified_by": "Administrator", 
  "module": "CRM", 
  "name": "Lead", 

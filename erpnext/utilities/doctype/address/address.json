@@ -9,7 +9,7 @@
   {
    "fieldname": "address_details", 
    "fieldtype": "Section Break", 
-   "label": "Address Details", 
+   "label": "", 
    "options": "icon-map-marker", 
    "permlevel": 0
   }, 
@@ -199,7 +199,7 @@
  "icon": "icon-map-marker", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2015-02-05 05:11:34.249167", 
+ "modified": "2015-02-20 05:07:56.567822", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Address", 

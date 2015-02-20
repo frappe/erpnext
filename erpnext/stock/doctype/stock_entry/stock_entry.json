@@ -180,7 +180,7 @@
   {
    "fieldname": "items_section", 
    "fieldtype": "Section Break", 
-   "label": "Items", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0, 
    "read_only": 0
@@ -632,7 +632,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2015-02-19 04:53:05.361046", 
+ "modified": "2015-02-20 05:04:09.060180", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 
