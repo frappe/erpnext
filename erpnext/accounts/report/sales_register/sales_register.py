@@ -160,7 +160,7 @@ def get_invoice_so_dn_map(invoice_list):
 			delivery_note_list = [d.delivery_note]
 		elif d.sales_order:
 			delivery_note_list = frappe.db.sql_list("""select distinct parent from `tabDelivery Note Item`
-				where docstatus=1 and prevdoc_detail_docname=%s""", d.so_detail)
+				where docstatus=1 and so_detail=%s""", d.so_detail)
 
 		if delivery_note_list:
 			invoice_so_dn_map.setdefault(d.parent, frappe._dict()).setdefault("delivery_note", delivery_note_list)

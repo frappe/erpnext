@@ -9,13 +9,13 @@ frappe.provide("erpnext.buying");
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
 	refresh: function(doc, cdt, cdn) {
 		this._super();
-		this.frm.dashboard.reset();
+		// this.frm.dashboard.reset();
 
 		if(doc.docstatus == 1 && doc.status != 'Stopped'){
-			cur_frm.dashboard.add_progress(cint(doc.per_received) + __("% Received"),
-				doc.per_received);
-			cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
-				doc.per_billed);
+			// cur_frm.dashboard.add_progress(cint(doc.per_received) + __("% Received"),
+			// 	doc.per_received);
+			// cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
+			// 	doc.per_billed);
 
 			if(flt(doc.per_received, 2) < 100)
 				cur_frm.add_custom_button(__('Make Purchase Receipt'),

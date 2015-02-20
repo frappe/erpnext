@@ -160,7 +160,7 @@ def get_invoice_po_pr_map(invoice_list):
 			pr_list = [d.purchase_receipt]
 		elif d.po_detail:
 			pr_list = frappe.db.sql_list("""select distinct parent from `tabPurchase Receipt Item`
-				where docstatus=1 and prevdoc_detail_docname=%s""", d.pr_detail)
+				where docstatus=1 and po_detail=%s""", d.pr_detail)
 
 		if pr_list:
 			invoice_po_pr_map.setdefault(d.parent, frappe._dict()).setdefault("purchase_receipt", pr_list)

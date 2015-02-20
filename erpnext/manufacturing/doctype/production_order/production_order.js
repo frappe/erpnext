@@ -59,12 +59,12 @@ erpnext.production_order = {
 		var doc = frm.doc;
 		if (doc.docstatus === 1) {
 
-			if (doc.material_transferred_for_qty < doc.qty) {
+			if (flt(doc.material_transferred_for_qty) < flt(doc.qty)) {
 				frm.add_custom_button(__('Transfer Materials for Manufacture'),
 					cur_frm.cscript['Transfer Raw Materials'], frappe.boot.doctype_icons["Stock Entry"]);
 			}
 
-			if (doc.produced_qty < doc.material_transferred_for_qty) {
+			if (flt(doc.produced_qty) < flt(doc.material_transferred_for_qty)) {
 				frm.add_custom_button(__('Update Finished Goods'),
 					cur_frm.cscript['Update Finished Goods'], frappe.boot.doctype_icons["Stock Entry"]);
 			}

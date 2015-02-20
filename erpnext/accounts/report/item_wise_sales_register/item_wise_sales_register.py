@@ -22,7 +22,7 @@ def execute(filters=None):
 			delivery_note = d.delivery_note
 		elif d.so_detail:
 			delivery_note = ", ".join(frappe.db.sql_list("""select distinct parent
-			from `tabDelivery Note Item` where docstatus=1 and prevdoc_detail_docname=%s""", d.so_detail))
+			from `tabDelivery Note Item` where docstatus=1 and so_detail=%s""", d.so_detail))
 
 		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.customer, d.customer_name,
 			d.customer_group, d.debit_to, d.territory, d.project_name, d.company, d.sales_order,
