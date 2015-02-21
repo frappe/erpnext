@@ -60,6 +60,15 @@
    "width": "50%"
   }, 
   {
+   "description": "", 
+   "fieldname": "serial_no", 
+   "fieldtype": "Link", 
+   "in_list_view": 0, 
+   "label": "Serial No", 
+   "options": "Serial No", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "customer", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -106,15 +115,6 @@
    "oldfieldtype": "Small Text", 
    "permlevel": 0, 
    "reqd": 1
-  }, 
-  {
-   "description": "Item, Warranty, AMC (Annual Maintenance Contract) details will be automatically fetched when Serial Number is selected.", 
-   "fieldname": "serial_no", 
-   "fieldtype": "Link", 
-   "in_list_view": 0, 
-   "label": "Serial No", 
-   "options": "Serial No", 
-   "permlevel": 0
   }, 
   {
    "fieldname": "item_code", 
@@ -396,7 +396,7 @@
  "icon": "icon-bug", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2015-02-20 05:08:06.361985", 
+ "modified": "2015-02-21 04:11:40.653543", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Warranty Claim", 

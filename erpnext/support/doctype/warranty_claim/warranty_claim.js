@@ -13,7 +13,8 @@ frappe.ui.form.on_change("Warranty Claim", "contact_person",
 
 erpnext.support.WarrantyClaim = frappe.ui.form.Controller.extend({
 	refresh: function() {
-		if((cur_frm.doc.status=='Open' || cur_frm.doc.status == 'Work In Progress')) {
+		if(!cur_frm.doc.__islocal &&
+			(cur_frm.doc.status=='Open' || cur_frm.doc.status == 'Work In Progress')) {
 			cur_frm.add_custom_button(__('Make Maintenance Visit'),
 				this.make_maintenance_visit, frappe.boot.doctype_icons["Maintenance Visit"], "btn-default")
 		}
