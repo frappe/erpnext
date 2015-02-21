@@ -5,7 +5,7 @@ frappe.provide("erpnext.payment_tool");
 
 // Help content
 frappe.ui.form.on("Payment Tool", "onload", function(frm) {
-	frm.set_value("make_jv_help", '<i class="icon-hand-right"></i> '
+	frm.set_value("make_jv_help",
 		+ __("Note: If payment is not made against any reference, make Journal Entry manually."));
 
 	frm.set_query("party_type", function() {
@@ -36,7 +36,7 @@ frappe.ui.form.on("Payment Tool", "refresh", function(frm) {
 });
 
 frappe.ui.form.on("Payment Tool", "party", function(frm) {
-	if(!frm.doc.party_account && frm.doc.party_type && frm.doc.party) {
+	if(frm.doc.party_type && frm.doc.party) {
 		return frappe.call({
 			method: "erpnext.accounts.party.get_party_account",
 			args: {
@@ -46,7 +46,7 @@ frappe.ui.form.on("Payment Tool", "party", function(frm) {
 			},
 			callback: function(r) {
 				if(!r.exc && r.message) {
-					frappe.model.set_value("party_account", r.message);
+					frm.set_value("party_account", r.message);
 					erpnext.payment_tool.check_mandatory_to_set_button(frm);
 				}
 			}
@@ -62,12 +62,16 @@ frappe.ui.form.on("Payment Tool", "received_or_paid", function(frm) {
 	erpnext.payment_tool.check_mandatory_to_set_button(frm);
 });
 
+frappe.ui.form.on("Payment Tool", "party", function(frm) {
+	erpnext.payment_tool.check_mandatory_to_set_button(frm);
+});
+
 // Fetch bank/cash account based on payment mode
 frappe.ui.form.on("Payment Tool", "payment_mode", function(frm) {
 	return  frappe.call({
 		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
 		args: {
-				"mode_of_payment": frm.doc.mode_of_payment,
+				"mode_of_payment": frm.doc.payment_mode,
 				"company": frm.doc.company
 		},
 		callback: function(r, rt) {
@@ -81,7 +85,7 @@ frappe.ui.form.on("Payment Tool", "payment_mode", function(frm) {
 
 
 erpnext.payment_tool.check_mandatory_to_set_button = function(frm) {
-	if (frm.doc.company && frm.doc.party_type && frm.doc.party && frm.doc.received_or_paid) {
+	if (frm.doc.company && frm.doc.party_type && frm.doc.party && frm.doc.received_or_paid && frm.doc.party_account) {
 		frm.fields_dict.get_outstanding_vouchers.$input.addClass("btn-primary");
 	}
 }
@@ -108,16 +112,18 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 				frm.fields_dict.get_outstanding_vouchers.$input.removeClass("btn-primary");
 				frm.fields_dict.make_journal_entry.$input.addClass("btn-primary");
 
-				frappe.model.clear_table(frm.doc, "vouchers");
+				frm.clear_table("vouchers");
+
 				$.each(r.message, function(i, d) {
-					var invoice_detail = frappe.model.add_child(frm.doc, "Payment Tool Detail", "vouchers");
-					invoice_detail.against_voucher_type = d.voucher_type;
-					invoice_detail.against_voucher_no = d.voucher_no;
-					invoice_detail.total_amount = d.invoice_amount;
-					invoice_detail.outstanding_amount = d.outstanding_amount;
+					var c = frm.add_child("vouchers");
+					c.against_voucher_type = d.voucher_type;
+					c.against_voucher_no = d.voucher_no;
+					c.total_amount = d.invoice_amount;
+					c.outstanding_amount = d.outstanding_amount;
 				});
 			}
 			refresh_field("vouchers");
+			frm.layout.refresh_sections();
 			erpnext.payment_tool.set_total_payment_amount(frm);
 		}
 	});

@@ -128,22 +128,26 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 
 @frappe.whitelist()
 def get_party_account(company, party, party_type):
+	"""Returns the account for the given `party`.
+		Will first search in party (Customer / Supplier) record, if not found,
+		will search in group (Customer Group / Supplier Type),
+		finally will return default."""
 	if not company:
 		frappe.throw(_("Please select company first."))
 
 	if party:
-		party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
-		party_details = frappe.db.sql("""select p.{0}, pa.account
-			from `tab{1}` p left join `tabParty Account` pa on pa.parent = p.name
-			where p.name = %s""".format(scrub(party_group_doctype), party_type), party)
-		if party_details:
-			party_group, account = party_details[0]
+		account = frappe.db.get_value("Party Account",
+			{"parenttype": party_type, "parent": party, "company": company}, "account")
 
 		if not account:
+			party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
+			group = frappe.db.get_value(party_type, party, scrub(party_group_doctype))
 			account = frappe.db.get_value("Party Account",
-				{"parenttype": party_group_doctype, "parent": party_group, "company": company}, "account") or \
-				frappe.db.get_value("Company", company,
-					"default_receivable_account" if party_type=="Customer" else "default_payable_account")
+				{"parenttype": party_group_doctype, "parent": group, "company": company}, "account")
+
+		if not account:
+			default_account_name = "default_receivable_account" if party_type=="Customer" else "default_payable_account"
+			account = frappe.db.get_value("Company", company, default_account_name)
 
 		return account
 
