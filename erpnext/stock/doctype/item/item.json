@@ -122,7 +122,7 @@
    "fieldname": "image", 
    "fieldtype": "Attach", 
    "label": "Image", 
-   "options": "", 
+   "options": "image", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -873,7 +873,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2015-02-20 05:08:14.975549", 
+ "modified": "2015-02-21 06:27:23.368218", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
