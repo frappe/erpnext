@@ -100,11 +100,6 @@ cur_frm.pformat.taxes= function(doc){
 		+ format_currency(val, doc.currency) + '</td></tr>';
 	}
 
-	function convert_rate(val) {
-		var new_val = flt(val)/flt(doc.conversion_rate);
-		return new_val;
-	}
-
 	function print_hide(fieldname) {
 		var doc_field = frappe.meta.get_docfield(doc.doctype, fieldname, doc.name);
 		return doc_field.print_hide;
@@ -132,8 +127,8 @@ cur_frm.pformat.taxes= function(doc){
 		// add rows
 		if(cl.length){
 			for(var i=0;i<cl.length;i++) {
-				if(convert_rate(cl[i].tax_amount)!=0 && !cl[i].included_in_print_rate)
-					out += make_row(cl[i].description, convert_rate(cl[i].tax_amount), 0);
+				if(cl[i].tax_amount!=0 && !cl[i].included_in_print_rate)
+					out += make_row(cl[i].description, cl[i].tax_amount, 0);
 			}
 		}
 
