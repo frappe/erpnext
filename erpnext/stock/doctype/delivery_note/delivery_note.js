@@ -25,7 +25,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			cur_frm.add_custom_button(__('Make Installation Note'), this.make_installation_note);
 
 		if (doc.docstatus==1) {
-			
+
 			this.show_stock_ledger();
 			this.show_general_ledger();
 		}
@@ -131,6 +131,7 @@ erpnext.stock.delivery_note.set_print_hide = function(doc, cdt, cdn){
 		dn_item_fields['discount_percentage'].print_hide = 1;
 		dn_item_fields['price_list_rate'].print_hide = 1;
 		dn_item_fields['amount'].print_hide = 1;
+		dn_fields['taxes'].print_hide = 1;
 	} else {
 		if (dn_fields_copy['currency'].print_hide != 1)
 			dn_fields['currency'].print_hide = 0;
@@ -138,6 +139,8 @@ erpnext.stock.delivery_note.set_print_hide = function(doc, cdt, cdn){
 			dn_item_fields['rate'].print_hide = 0;
 		if (dn_item_fields_copy['amount'].print_hide != 1)
 			dn_item_fields['amount'].print_hide = 0;
+		if (dn_fields_copy['taxes'].print_hide != 1)
+			dn_fields['taxes'].print_hide = 0;
 	}
 }
 
