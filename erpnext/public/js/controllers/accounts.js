@@ -93,11 +93,11 @@ cur_frm.pformat.in_words = function(doc) { return ''; }
 
 cur_frm.pformat.taxes= function(doc){
 	//function to make row of table
-	var make_row = function(title, val, bold){
+	var make_row = function(title, val, bold, is_negative) {
 		var bstart = '<b>'; var bend = '</b>';
 		return '<tr><td style="width:50%;">' + (bold?bstart:'') + title + (bold?bend:'') + '</td>'
-			+ '<td style="width:50%;text-align:right;">' + format_currency(val, doc.currency) + '</td>'
-			+ '</tr>';
+			+ '<td style="width:50%;text-align:right;">' + (is_negative ? '- ' : '')
+		+ format_currency(val, doc.currency) + '</td></tr>';
 	}
 
 	function convert_rate(val) {
@@ -125,6 +125,10 @@ cur_frm.pformat.taxes= function(doc){
 			out += make_row('Net Total', doc.print_total, 1);
 		}
 
+		// Discount Amount on net total
+		if(!print_hide('discount_amount') && doc.apply_discount_on == "Net Total" && doc.discount_amount)
+			out += make_row('Discount Amount', doc.discount_amount, 0, 1);
+
 		// add rows
 		if(cl.length){
 			for(var i=0;i<cl.length;i++) {
@@ -133,9 +137,9 @@ cur_frm.pformat.taxes= function(doc){
 			}
 		}
 
-		// Discount Amount
-		if(!print_hide('discount_amount') && doc.discount_amount)
-			out += make_row('Discount Amount', doc.discount_amount, 0);
+		// Discount Amount on grand total
+		if(!print_hide('discount_amount') && doc.apply_discount_on == "Grand Total" && doc.discount_amount)
+			out += make_row('Discount Amount', doc.discount_amount, 0, 1);
 
 		// grand total
 		if(!print_hide('grand_total'))

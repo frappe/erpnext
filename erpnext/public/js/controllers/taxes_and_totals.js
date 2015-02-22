@@ -88,8 +88,9 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				"tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
 
-			if (cstr(tax.charge_type) != "Actual" && !me.discount_amount_applied)
-				tax_fields.push("tax_amount");
+			if (cstr(tax.charge_type) != "Actual" &&
+				!(me.discount_amount_applied && me.frm.doc.apply_discount_on=="Grand Total"))
+					tax_fields.push("tax_amount");
 
 			$.each(tax_fields, function(i, fieldname) { tax[fieldname] = 0.0 });
 
@@ -217,8 +218,9 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				}
 
 				// accumulate tax amount into tax.tax_amount
-				if (tax.charge_type != "Actual" && !me.discount_amount_applied)
-					tax.tax_amount += current_tax_amount;
+				if (tax.charge_type != "Actual" &&
+					!(me.discount_amount_applied && me.frm.doc.apply_discount_on=="Grand Total"))
+						tax.tax_amount += current_tax_amount;
 
 				// store tax_amount for current item as it will be used for
 				// charge type = 'On Previous Row Amount'
@@ -254,7 +256,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 					me.round_off_totals(tax);
 
 					// adjust Discount Amount loss in last tax iteration
-					if ((i == me.frm.doc["taxes"].length - 1) && me.discount_amount_applied)
+					if ((i == me.frm.doc["taxes"].length - 1) && me.discount_amount_applied && me.frm.doc.apply_discount_on == "Grand Total")
 						me.adjust_discount_amount_loss(tax);
 				}
 			});
@@ -428,8 +430,8 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 	get_total_for_discount_amount: function() {
 		var me = this;
 
-		if(this.apply_discount_amount == "Print Total") {
-			return this.net_total
+		if(this.frm.doc.apply_discount_on == "Net Total") {
+			return this.frm.doc.net_total
 		} else {
 			var total_actual_tax = 0.0;
 			var actual_taxes_dict = {};

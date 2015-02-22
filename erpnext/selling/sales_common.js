@@ -154,6 +154,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 
+	apply_discount_on: function() {
+		this.calculate_taxes_and_totals();
+	},
+
 	discount_amount: function() {
 		this.calculate_taxes_and_totals();
 	},

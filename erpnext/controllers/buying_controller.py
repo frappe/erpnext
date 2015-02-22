@@ -14,7 +14,7 @@ from erpnext.controllers.stock_controller import StockController
 
 class BuyingController(StockController):
 	def __setup__(self):
-		if hasattr(self, "items"):
+		if hasattr(self, "taxes"):
 			self.print_templates = {
 				"taxes": "templates/print_formats/includes/taxes.html"
 			}

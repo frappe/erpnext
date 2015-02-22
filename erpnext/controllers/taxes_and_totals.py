@@ -76,8 +76,9 @@ class calculate_taxes_and_totals(object):
 				"tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
 
-			if tax.charge_type != "Actual" and not self.discount_amount_applied:
-				tax_fields.append("tax_amount")
+			if tax.charge_type != "Actual" and \
+				not (self.discount_amount_applied and self.doc.apply_discount_on=="Grand Total"):
+					tax_fields.append("tax_amount")
 
 			for fieldname in tax_fields:
 				tax.set(fieldname, 0.0)
@@ -215,8 +216,9 @@ class calculate_taxes_and_totals(object):
 						current_tax_amount += actual_tax_dict[tax.idx]
 
 				# accumulate tax amount into tax.tax_amount
-				if tax.charge_type != "Actual" and not self.discount_amount_applied:
-					tax.tax_amount += current_tax_amount
+				if tax.charge_type != "Actual" and \
+					not (self.discount_amount_applied and self.doc.apply_discount_on=="Grand Total"):
+						tax.tax_amount += current_tax_amount
 
 				# store tax_amount for current item as it will be used for
 				# charge type = 'On Previous Row Amount'
@@ -250,8 +252,9 @@ class calculate_taxes_and_totals(object):
 					self.round_off_totals(tax)
 
 					# adjust Discount Amount loss in last tax iteration
-					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied:
-						self.adjust_discount_amount_loss(tax)
+					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied \
+						and self.doc.apply_discount_on == "Grand Total":
+							self.adjust_discount_amount_loss(tax)
 
 	def get_current_tax_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
@@ -291,7 +294,7 @@ class calculate_taxes_and_totals(object):
 		tax.tax_amount = flt(tax.tax_amount, tax.precision("tax_amount"))
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount"))
 
-		self._set_in_company_currency(tax, ["total", "tax_amount", "tax_amount_after_discount_amount"]);
+		self._set_in_company_currency(tax, ["total", "tax_amount", "tax_amount_after_discount_amount"])
 
 	def adjust_discount_amount_loss(self, tax):
 		discount_amount_loss = self.doc.grand_total - flt(self.doc.discount_amount) - tax.total
@@ -360,8 +363,8 @@ class calculate_taxes_and_totals(object):
 			self.doc.base_discount_amount = 0
 
 	def get_total_for_discount_amount(self):
-		if self.doc.apply_discount_on == "Print Total":
-			return self.net_total
+		if self.doc.apply_discount_on == "Net Total":
+			return self.doc.net_total
 		else:
 			actual_taxes_dict = {}
 
