@@ -391,7 +391,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var item_grid = this.frm.fields_dict["items"].grid;
 		$.each(["base_rate", "base_price_list_rate", "base_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
-				item_grid.set_column_disp(fname, this.frm.doc.currency != company_currency);
+				item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
 		});
 
 		var show = (cint(cur_frm.doc.discount_amount)) ||
@@ -404,7 +404,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		$.each(["base_net_rate", "base_net_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
-				item_grid.set_column_disp(fname, (show && (this.frm.doc.currency != company_currency)));
+				item_grid.set_column_disp(fname, (show && (me.frm.doc.currency != company_currency)));
 		});
 
 		// set labels
