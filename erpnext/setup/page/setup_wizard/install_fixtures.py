@@ -160,7 +160,7 @@ def install(country=None):
 
 	from erpnext.setup.page.setup_wizard.fixtures import industry_type, operations
 	records += [{"doctype":"Industry Type", "industry": d} for d in industry_type.items]
-	records += [{"doctype":"Operation", "operation": d} for d in operations.items]
+	# records += [{"doctype":"Operation", "operation": d} for d in operations.items]
 
 	from frappe.modules import scrub
 	for r in records:

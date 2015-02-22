@@ -241,9 +241,9 @@ class update_entries_after(object):
 			if new_stock_qty:
 				self.valuation_rate = new_stock_value / flt(new_stock_qty)
 		elif not self.valuation_rate and self.qty_after_transaction <= 0:
-			valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, self.allow_zero_rate)
+			self.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, self.allow_zero_rate)
 
-		return abs(flt(valuation_rate))
+		return abs(flt(self.valuation_rate))
 
 	def get_fifo_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)

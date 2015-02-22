@@ -1,6 +1,15 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+frappe.ui.form.on("Project Task", "edit_task", function(frm, doctype, name) {
+	var doc = frappe.get_doc(doctype, name);
+	if(doc.task_id) {
+		frappe.set_route("Form", "Task", doc.task_id);
+	} else {
+		msgprint(__("Save the document first."));
+	}
+})
+
 // show tasks
 cur_frm.cscript.refresh = function(doc) {
 	if(!doc.__islocal) {

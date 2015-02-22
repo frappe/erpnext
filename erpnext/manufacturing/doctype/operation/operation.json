@@ -50,7 +50,7 @@
    "precision": ""
   }, 
   {
-   "fieldname": "opn_description", 
+   "fieldname": "description", 
    "fieldtype": "Text", 
    "label": "Operation Description", 
    "permlevel": 0, 
@@ -65,7 +65,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-02-05 05:11:41.666429", 
+ "modified": "2015-02-22 10:24:26.834166", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Operation", 

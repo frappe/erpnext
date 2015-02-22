@@ -170,7 +170,7 @@ class ProductionOrder(Document):
 
 		self.set('operations', [])
 
-		operations = frappe.db.sql("""select operation, opn_description, workstation,
+		operations = frappe.db.sql("""select operation, description, workstation,
 			hour_rate, time_in_mins, operating_cost as "planned_operating_cost", "Pending" as status
 			from `tabBOM Operation` where parent = %s""", self.bom_no, as_dict=1)
 

@@ -168,7 +168,7 @@
   {
    "fieldname": "more_info_section", 
    "fieldtype": "Section Break", 
-   "label": "More Info", 
+   "label": "", 
    "permlevel": 0
   }, 
   {
@@ -279,7 +279,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-02-18 14:58:32.967368", 
+ "modified": "2015-02-21 10:31:18.889394", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM", 

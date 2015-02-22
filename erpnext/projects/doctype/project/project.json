@@ -21,7 +21,7 @@
    "permlevel": 0
   }, 
   {
-   "description": "Project will get saved and will be searchable with project name given", 
+   "description": "", 
    "fieldname": "project_name", 
    "fieldtype": "Data", 
    "label": "Project Name", 
@@ -119,27 +119,24 @@
   {
    "fieldname": "sb_milestones", 
    "fieldtype": "Section Break", 
-   "label": "Milestones", 
+   "label": "Tasks", 
    "oldfieldtype": "Section Break", 
    "options": "icon-flag", 
    "permlevel": 0
   }, 
   {
-   "description": "Milestones will be added as Events in the Calendar", 
-   "fieldname": "milestones", 
+   "fieldname": "tasks", 
    "fieldtype": "Table", 
-   "label": "Milestones", 
-   "no_copy": 0, 
-   "oldfieldname": "project_milestones", 
-   "oldfieldtype": "Table", 
-   "options": "Project Milestone", 
+   "label": "Tasks", 
+   "options": "Project Task", 
    "permlevel": 0, 
-   "search_index": 0
+   "precision": ""
   }, 
   {
-   "fieldname": "percent_milestones_completed", 
+   "fieldname": "percent_complete", 
    "fieldtype": "Percent", 
-   "label": "% Milestones Completed", 
+   "in_list_view": 0, 
+   "label": "% Tasks Completed", 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -160,14 +157,6 @@
    "oldfieldtype": "Text Editor", 
    "permlevel": 0, 
    "search_index": 0
-  }, 
-  {
-   "fieldname": "percent_complete", 
-   "fieldtype": "Percent", 
-   "in_list_view": 0, 
-   "label": "% Tasks Completed", 
-   "permlevel": 0, 
-   "read_only": 1
   }, 
   {
    "fieldname": "company", 
@@ -273,7 +262,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2015-02-20 05:08:08.569007", 
+ "modified": "2015-02-22 11:17:49.051755", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 

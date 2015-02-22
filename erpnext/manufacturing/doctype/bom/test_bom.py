@@ -7,7 +7,7 @@ import unittest
 import frappe
 from frappe.utils import cstr
 
-test_records = frappe.get_test_records('Bom')
+test_records = frappe.get_test_records('BOM')
 
 class TestBOM(unittest.TestCase):
 	def test_get_items(self):

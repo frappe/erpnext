@@ -173,8 +173,12 @@ frappe.ui.form.on("BOM Operation", "operation", function(frm, cdt, cdn) {
 			name: d.operation
 		},
 		callback: function (data) {
-			frappe.model.set_value(d.doctype, d.name, "opn_description", data.message.opn_description);
-			frappe.model.set_value(d.doctype, d.name, "workstation", data.message.workstation);
+			if(data.message.description) {
+				frappe.model.set_value(d.doctype, d.name, "description", data.message.description);
+			}
+			if(data.message.workstation) {
+				frappe.model.set_value(d.doctype, d.name, "workstation", data.message.workstation);
+			}
 		}
 	})
 });

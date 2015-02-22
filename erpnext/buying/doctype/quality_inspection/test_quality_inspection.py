@@ -4,7 +4,7 @@
 import frappe
 import unittest
 
-test_records = frappe.get_test_records('Quality Inspection')
+# test_records = frappe.get_test_records('Quality Inspection')
 
 class TestQualityInspection(unittest.TestCase):
 	pass

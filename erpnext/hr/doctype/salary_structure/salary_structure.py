@@ -52,11 +52,22 @@ class SalaryStructure(Document):
 		self.make_table('Deduction Type','deductions', 'Salary Structure Deduction')
 
 	def check_existing(self):
+		ret = self.get_other_active_salary_structure()
+
+		if ret and self.is_active=='Yes':
+			frappe.throw(_("Another Salary Structure {0} is active for employee {1}. Please make its status 'Inactive' to proceed.").format(ret, self.employee))
+
+	def get_other_active_salary_structure(self):
 		ret = frappe.db.sql("""select name from `tabSalary Structure` where is_active = 'Yes'
 			and employee = %s and name!=%s""", (self.employee,self.name))
 
-		if ret and self.is_active=='Yes':
-			frappe.throw(_("Another Salary Structure {0} is active for employee {1}. Please make its status 'Inactive' to proceed.").format(cstr(ret[0][0]), self.employee))
+		return ret[0][0] if ret else None
+
+	def before_test_insert(self):
+		"""Make any existing salary structure for employee inactive."""
+		ret = self.get_other_active_salary_structure()
+		if ret:
+			frappe.db.set_value("Salary Structure", ret, "is_active", "No")
 
 	def validate_amount(self):
 		if flt(self.net_pay) < 0:

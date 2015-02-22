@@ -12,6 +12,9 @@ from erpnext.accounts.utils import get_fiscal_year, get_stock_and_account_differ
 
 
 class TestStockReconciliation(unittest.TestCase):
+	def setUp(self):
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+
 	def test_reco_for_fifo(self):
 		frappe.defaults.set_global_default("auto_accounting_for_stock", 0)
 		# [[qty, valuation_rate, posting_date,
@@ -183,10 +186,12 @@ class TestStockReconciliation(unittest.TestCase):
 			"company": "_Test Company",
 			"expense_account": "Stock Adjustment - _TC",
 			"cost_center": "_Test Cost Center - _TC",
-			"reconciliation_json": json.dumps([
-				["Item Code", "Warehouse", "Quantity", "Valuation Rate"],
-				["_Test Item", "_Test Warehouse - _TC", qty, rate]
-			]),
+			"items": [{
+				"item_code": "_Test Item",
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": qty,
+				"valuation_rate": rate
+			}]
 		})
 		stock_reco.insert()
 		stock_reco.submit()

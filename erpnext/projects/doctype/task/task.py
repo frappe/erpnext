@@ -44,7 +44,7 @@ class Task(Document):
 
 	def on_update(self):
 		"""update percent complete in project"""
-		if self.project:
+		if self.project and not self.flags.from_project:
 			project = frappe.get_doc("Project", self.project)
 			project.run_method("update_percent_complete")
 
