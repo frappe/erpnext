@@ -76,7 +76,7 @@ class calculate_taxes_and_totals(object):
 				"tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
 
-			if not self.discount_amount_applied:
+			if tax.charge_type != "Actual" and not self.discount_amount_applied:
 				tax_fields.append("tax_amount")
 
 			for fieldname in tax_fields:
@@ -214,14 +214,15 @@ class calculate_taxes_and_totals(object):
 					if n == len(self.doc.get("items")) - 1:
 						current_tax_amount += actual_tax_dict[tax.idx]
 
+				# accumulate tax amount into tax.tax_amount
+				if tax.charge_type != "Actual" and not self.discount_amount_applied:
+					tax.tax_amount += current_tax_amount
+
 				# store tax_amount for current item as it will be used for
 				# charge type = 'On Previous Row Amount'
 				tax.tax_amount_for_current_item = current_tax_amount
 
-				# accumulate tax amount into tax.tax_amount
-				if not self.discount_amount_applied:
-					tax.tax_amount += current_tax_amount
-
+				# set tax after discount
 				tax.tax_amount_after_discount_amount += current_tax_amount
 
 				if getattr(tax, "category", None):

@@ -35,7 +35,6 @@ doctype_series_map = {
 def execute():
 	series_to_set = get_series_to_set()
 	for doctype, opts in series_to_set.items():
-		print "Setting naming series", doctype, opts
 		set_series(doctype, opts["options"], opts["default"])
 
 def set_series(doctype, options, default):

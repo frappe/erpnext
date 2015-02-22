@@ -88,7 +88,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				"tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
 
-			if (!me.discount_amount_applied)
+			if (cstr(tax.charge_type) != "Actual" && !me.discount_amount_applied)
 				tax_fields.push("tax_amount");
 
 			$.each(tax_fields, function(i, fieldname) { tax[fieldname] = 0.0 });
@@ -216,14 +216,15 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 					}
 				}
 
+				// accumulate tax amount into tax.tax_amount
+				if (tax.charge_type != "Actual" && !me.discount_amount_applied)
+					tax.tax_amount += current_tax_amount;
+
 				// store tax_amount for current item as it will be used for
 				// charge type = 'On Previous Row Amount'
 				tax.tax_amount_for_current_item = current_tax_amount;
 
-				// accumulate tax amount into tax.tax_amount
-				if (!me.discount_amount_applied)
-					tax.tax_amount += current_tax_amount;
-
+				// tax amount after discount amount
 				tax.tax_amount_after_discount_amount += current_tax_amount;
 
 				// for buying
@@ -239,7 +240,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				// note: grand_total_for_current_item contains the contribution of
 				// item's amount, previously applied tax and the current tax on that item
 				if(i==0) {
-					tax.grand_total_for_current_item = flt(item.base_amount + current_tax_amount);
+					tax.grand_total_for_current_item = flt(item.net_amount + current_tax_amount);
 				} else {
 					tax.grand_total_for_current_item =
 						flt(me.frm.doc["taxes"][i-1].grand_total_for_current_item + current_tax_amount);
@@ -313,7 +314,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 	},
 
 	adjust_discount_amount_loss: function(tax) {
-		var discount_amount_loss = this.frm.doc.base_grand_total - flt(this.frm.doc.base_discount_amount) - tax.total;
+		var discount_amount_loss = this.frm.doc.grand_total - flt(this.frm.doc.discount_amount) - tax.total;
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount +
 			discount_amount_loss, precision("tax_amount", tax));
 		tax.total = flt(tax.total + discount_amount_loss, precision("total", tax));
@@ -326,7 +327,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		this.frm.doc.grand_total = flt(tax_count ? this.frm.doc["taxes"][tax_count - 1].total : this.frm.doc.net_total);
 
 		if(in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"], this.frm.doc.doctype)) {
-			this.frm.doc.base_grand_total = (this.frm.doc.base_total_taxes_and_charges) ?
+			this.frm.doc.base_grand_total = (this.frm.doc.total_taxes_and_charges) ?
 				flt(this.frm.doc.grand_total * this.frm.doc.conversion_rate) : this.frm.doc.base_net_total;
 		} else {
 			// other charges added/deducted
@@ -345,7 +346,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				frappe.model.round_floats_in(this.frm.doc, ["taxes_and_charges_added", "taxes_and_charges_deducted"]);
 			}
 
-			this.frm.doc.grand_total = flt((this.frm.doc.taxes_and_charges_added || this.frm.doc.taxes_and_charges_deducted) ?
+			this.frm.doc.base_grand_total = flt((this.frm.doc.taxes_and_charges_added || this.frm.doc.taxes_and_charges_deducted) ?
 				flt(this.frm.doc.grand_total * this.frm.doc.conversion_rate) : this.frm.doc.base_net_total);
 
 			this.set_in_company_currency(this.frm.doc, ["taxes_and_charges_added", "taxes_and_charges_deducted"]);
@@ -353,6 +354,8 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 
 		this.frm.doc.total_taxes_and_charges = flt(this.frm.doc.grand_total - this.frm.doc.net_total,
 			precision("total_taxes_and_charges"));
+
+		this.set_in_company_currency(this.frm.doc, ["total_taxes_and_charges"]);
 
 		// Round grand total as per precision
 		frappe.model.round_floats_in(this.frm.doc, ["grand_total", "base_grand_total"]);
@@ -408,7 +411,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 			if (total_for_discount_amount) {
 				$.each(this.frm.doc["items"] || [], function(i, item) {
 					distributed_amount = flt(me.frm.doc.discount_amount) * item.net_amount / total_for_discount_amount;
-					item.base_amount = flt(item.net_amount - distributed_amount, precision("base_amount", item));
+					item.net_amount = flt(item.net_amount - distributed_amount, precision("base_amount", item));
 					item.net_rate = flt(item.net_amount / item.qty, precision("net_rate", item));
 
 					me.set_in_company_currency(item, ["net_rate", "net_amount"]);
@@ -441,8 +444,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 			});
 
 			$.each(actual_taxes_dict, function(key, value) {
-				if (value)
-					total_actual_tax += value;
+				if (value) total_actual_tax += value;
 			});
 
 			return flt(this.frm.doc.grand_total - total_actual_tax, precision("grand_total"));

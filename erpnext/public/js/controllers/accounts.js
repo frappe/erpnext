@@ -1,10 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.ui.form.on(cur_frm.doctype, "refresh", function(frm) {
-	frm.set_footnote(frappe.markdown(frm.meta.description));
-}
-
 // get tax rate
 cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
@@ -28,8 +24,8 @@ var validate_taxes_and_charges = function(cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(!d.charge_type && (d.row_id || d.rate || d.tax_amount)) {
 		msgprint(__("Please select Charge Type first"));
-		d.row_id = ""
-		d.rate = d.tax_amount = 0.0
+		d.row_id = "";
+		d.rate = d.tax_amount = 0.0;
 	} else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total') && d.row_id) {
 		msgprint(__("Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'"));
 		d.row_id = "";
@@ -48,19 +44,19 @@ var validate_taxes_and_charges = function(cdt, cdn) {
 
 frappe.ui.form.on(cur_frm.cscript.tax_table, "row_id", function(frm, cdt, cdn) {
 	validate_taxes_and_charges(cdt, cdn);
-})
+});
 
 frappe.ui.form.on(cur_frm.cscript.tax_table, "rate", function(frm, cdt, cdn) {
 	validate_taxes_and_charges(cdt, cdn);
-})
+});
 
 frappe.ui.form.on(cur_frm.cscript.tax_table, "tax_amount", function(frm, cdt, cdn) {
 	validate_taxes_and_charges(cdt, cdn);
-})
+});
 
 frappe.ui.form.on(cur_frm.cscript.tax_table, "charge_type", function(frm, cdt, cdn) {
 	validate_taxes_and_charges(cdt, cdn);
-})
+});
 
 
 cur_frm.set_query("account_head", "taxes", function(doc) {
@@ -86,7 +82,7 @@ cur_frm.set_query("cost_center", "taxes", function(doc) {
 			'group_or_ledger': "Ledger"
 		}
 	}
-}
+});
 
 // For customizing print
 cur_frm.pformat.print_total = function(doc) { return ''; }
