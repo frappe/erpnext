@@ -187,15 +187,15 @@ class calculate_taxes_and_totals(object):
 			return tax.rate
 
 	def calculate_net_total(self):
-		self.doc.print_total = self.doc.base_print_total = self.doc.net_total = self.doc.base_net_total = 0.0
+		self.doc.total = self.doc.base_total = self.doc.net_total = self.doc.base_net_total = 0.0
 
 		for item in self.doc.get("items"):
-			self.doc.print_total += item.amount
-			self.doc.base_print_total += item.base_amount
+			self.doc.total += item.amount
+			self.doc.base_total += item.base_amount
 			self.doc.net_total += item.net_amount
 			self.doc.base_net_total += item.base_net_amount
 
-		self.doc.round_floats_in(self.doc, ["print_total", "base_print_total", "net_total", "base_net_total"])
+		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
 	def calculate_taxes(self):
 		# maintain actual tax rate based on idx

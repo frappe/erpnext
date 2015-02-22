@@ -85,7 +85,7 @@ cur_frm.set_query("cost_center", "taxes", function(doc) {
 });
 
 // For customizing print
-cur_frm.pformat.print_total = function(doc) { return ''; }
+cur_frm.pformat.total = function(doc) { return ''; }
 cur_frm.pformat.discount_amount = function(doc) { return ''; }
 cur_frm.pformat.grand_total = function(doc) { return ''; }
 cur_frm.pformat.rounded_total = function(doc) { return ''; }
@@ -116,8 +116,8 @@ cur_frm.pformat.taxes= function(doc){
 
 		out +='<table class="noborder" style="width:100%">';
 
-		if(!print_hide('print_total')) {
-			out += make_row('Net Total', doc.print_total, 1);
+		if(!print_hide('total')) {
+			out += make_row('Total', doc.total, 1);
 		}
 
 		// Discount Amount on net total

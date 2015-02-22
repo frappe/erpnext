@@ -326,12 +326,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			});
 		};
-		setup_field_label_map(["base_net_total", "base_total_taxes_and_charges", "base_discount_amount", "base_grand_total",
-			"base_rounded_total", "base_in_words",
+		setup_field_label_map(["base_total", "base_net_total", "base_total_taxes_and_charges",
+			"base_discount_amount", "base_grand_total", "base_rounded_total", "base_in_words",
 			"outstanding_amount", "total_advance", "paid_amount", "write_off_amount"],
 			company_currency);
 
-		setup_field_label_map(["net_total", "total_taxes_and_charges", "discount_amount", "grand_total",
+		setup_field_label_map(["total", "net_total", "total_taxes_and_charges", "discount_amount", "grand_total",
 			"rounded_total", "in_words"], this.frm.doc.currency);
 
 		cur_frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency
@@ -343,7 +343,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 
 		// toggle fields
-		this.frm.toggle_display(["conversion_rate", "base_net_total", "base_total_taxes_and_charges",
+		this.frm.toggle_display(["conversion_rate", "base_total", "base_net_total", "base_total_taxes_and_charges",
 			"base_grand_total", "base_rounded_total", "base_in_words", "base_discount_amount"],
 			this.frm.doc.currency != company_currency);
 
@@ -372,13 +372,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
-		setup_field_label_map(["base_rate", "base_price_list_rate", "base_amount"],
+		setup_field_label_map(["base_rate", "base_net_rate", "base_price_list_rate", "base_amount", "base_net_amount"],
 			company_currency, "items");
 
-		setup_field_label_map(["rate", "price_list_rate", "amount"],
+		setup_field_label_map(["rate", "net_rate", "price_list_rate", "amount", "net_amount"],
 			this.frm.doc.currency, "items");
 
-		setup_field_label_map(["tax_amount", "total"], company_currency, "taxes");
+		setup_field_label_map(["tax_amount", "total", "tax_amount_after_discount"], this.frm.doc.currency, "taxes");
+
+		setup_field_label_map(["base_tax_amount", "base_total", "base_tax_amount_after_discount"], company_currency, "taxes");
 
 		if(this.frm.fields_dict["advances"]) {
 			setup_field_label_map(["advance_amount", "allocated_amount"], company_currency,
@@ -387,13 +389,22 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		// toggle columns
 		var item_grid = this.frm.fields_dict["items"].grid;
-		var show = (this.frm.doc.currency != company_currency) ||
-			((cur_frm.doc.taxes || []).filter(
-					function(d) { return d.included_in_print_rate===1}).length);
-
 		$.each(["base_rate", "base_price_list_rate", "base_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
+				item_grid.set_column_disp(fname, this.frm.doc.currency != company_currency);
+		});
+
+		var show = (cint(cur_frm.doc.discount_amount)) ||
+			((cur_frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length);
+
+		$.each(["net_rate", "net_amount"], function(i, fname) {
+			if(frappe.meta.get_docfield(item_grid.doctype, fname))
 				item_grid.set_column_disp(fname, show);
+		});
+
+		$.each(["base_net_rate", "base_net_amount"], function(i, fname) {
+			if(frappe.meta.get_docfield(item_grid.doctype, fname))
+				item_grid.set_column_disp(fname, (show && (this.frm.doc.currency != company_currency)));
 		});
 
 		// set labels

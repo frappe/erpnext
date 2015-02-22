@@ -313,9 +313,9 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "base_print_total", 
+   "fieldname": "base_total", 
    "fieldtype": "Currency", 
-   "label": "Print Total (Company Currency)", 
+   "label": "Total (Company Currency)", 
    "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "precision": "", 
@@ -343,9 +343,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "print_total", 
+   "fieldname": "total", 
    "fieldtype": "Currency", 
-   "label": "Print Total", 
+   "label": "Total", 
    "options": "currency", 
    "permlevel": 0, 
    "precision": "", 
@@ -844,7 +844,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 1, 
- "modified": "2015-02-23 00:55:17.519474", 
+ "modified": "2015-02-23 01:18:17.421144", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation", 
