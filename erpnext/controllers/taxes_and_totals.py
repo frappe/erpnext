@@ -290,6 +290,8 @@ class calculate_taxes_and_totals(object):
 		tax.tax_amount = flt(tax.tax_amount, tax.precision("tax_amount"))
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount"))
 
+		self._set_in_company_currency(tax, ["total", "tax_amount", "tax_amount_after_discount_amount"]);
+
 	def adjust_discount_amount_loss(self, tax):
 		discount_amount_loss = self.doc.grand_total - flt(self.doc.discount_amount) - tax.total
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount +

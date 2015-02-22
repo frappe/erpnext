@@ -154,20 +154,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 
-	rate: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);
-
-		if(item.price_list_rate) {
-			item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0,
-				precision("discount_percentage", item));
-		} else {
-			item.discount_percentage = 0.0;
-		}
-
-		this.calculate_taxes_and_totals();
-	},
-
 	discount_amount: function() {
 		this.calculate_taxes_and_totals();
 	},
@@ -431,4 +417,8 @@ frappe.ui.form.on(cur_frm.doctype,"project_name", function(frm) {
 			}
 		})
 	}
+})
+
+frappe.ui.form.on("Sales Taxes and Charges", "rate", function(frm, cdt, cdn) {
+	cur_frm.cscript.calculate_taxes_and_totals();
 })

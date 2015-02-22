@@ -67,16 +67,17 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				item.net_amount = item.amount;
 				item.item_tax_amount = 0.0;
 
-				this.set_in_company_currency(item, ["price_list_rate", "rate", "amount", "net_rate", "net_amount"]);
+				me.set_in_company_currency(item, ["price_list_rate", "rate", "amount", "net_rate", "net_amount"]);
 			});
 		}
 	},
 
 	set_in_company_currency: function(doc, fields) {
+		var me = this;
 		$.each(fields, function(i, f) {
 			doc["base_"+f] = flt(flt(doc[f], precision(f, doc)) * me.frm.doc.conversion_rate, precision("base_" + f, doc));
 		})
-	}
+	},
 
 	initialize_taxes: function() {
 		var me = this;
@@ -99,6 +100,8 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 	},
 
 	determine_exclusive_rate: function() {
+		var me = this;
+
 		var has_inclusive_tax = false;
 		$.each(me.frm.doc["taxes"] || [], function(i, row) {
 			if(cint(row.included_in_print_rate)) has_inclusive_tax = true;
@@ -106,7 +109,6 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		if(has_inclusive_tax==false || !in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"], this.frm.doc.doctype))
 			return;
 
-		var me = this;
 		$.each(me.frm.doc["items"] || [], function(n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 			var cumulated_tax_fraction = 0.0;
@@ -132,7 +134,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 
 				item.net_rate = flt(item.net_amount / item.qty, precision("net_rate", item));
 
-				this.set_in_company_currency(item, ["net_rate", "net_amount"]);
+				me.set_in_company_currency(item, ["net_rate", "net_amount"]);
 
 				// if(item.discount_percentage == 100) {
 				// 	item.base_price_list_rate = item.base_rate;
@@ -295,7 +297,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		// store tax breakup for each item
 		var key = item.item_code || item.item_name;
 		var item_wise_tax_amount = current_tax_amount * this.frm.doc.conversion_rate;
-		if (tax.item_wise_tax_detail.get(key))
+		if (tax.item_wise_tax_detail && tax.item_wise_tax_detail[key])
 			item_wise_tax_amount += tax.item_wise_tax_detail[key][1]
 
 		tax.item_wise_tax_detail[key] = [tax_rate,flt(item_wise_tax_amount, precision("base_tax_amount", tax))]
@@ -305,8 +307,9 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 	round_off_totals: function(tax) {
 		tax.total = flt(tax.total, precision("total", tax));
 		tax.tax_amount = flt(tax.tax_amount, precision("tax_amount", tax));
-		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount,
-			precision("tax_amount", tax));
+		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount, precision("tax_amount", tax));
+
+		this.set_in_company_currency(tax, ["total", "tax_amount", "tax_amount_after_discount_amount"]);
 	},
 
 	adjust_discount_amount_loss: function(tax) {
@@ -330,7 +333,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 			this.frm.doc.taxes_and_charges_added = this.frm.doc.taxes_and_charges_deducted = 0.0;
 			if(tax_count) {
 				$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-					if in_list(["Valuation and Total", "Total"], tax.category) {
+					if (in_list(["Valuation and Total", "Total"], tax.category)) {
 						if(tax.add_deduct_tax == "Add") {
 							me.frm.doc.taxes_and_charges_added += flt(tax.tax_amount);
 						} else {

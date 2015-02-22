@@ -90,20 +90,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.price_list_rate(doc, cdt, cdn);
 	},
 
-	rate: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		frappe.model.round_floats_in(item, ["rate", "discount_percentage"]);
-
-		if(item.price_list_rate) {
-			item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0,
-				precision("discount_percentage", item));
-		} else {
-			item.discount_percentage = 0.0;
-		}
-
-		this.calculate_taxes_and_totals();
-	},
-
 	uom: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
@@ -293,3 +279,8 @@ erpnext.buying.get_default_bom = function(frm) {
 		}
 	});
 }
+
+
+frappe.ui.form.on("Purchase Taxes and Charges", "rate", function(frm, cdt, cdn) {
+	cur_frm.cscript.calculate_taxes_and_totals();
+})

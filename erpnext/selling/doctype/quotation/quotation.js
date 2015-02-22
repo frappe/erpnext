@@ -151,7 +151,6 @@ cur_frm.cscript['Declare Order Lost'] = function(){
 		})
 	});
 	dialog.show();
-
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
