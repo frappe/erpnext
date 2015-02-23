@@ -3,6 +3,8 @@
 
 from __future__ import unicode_literals
 import json
+import frappe
+from frappe import _
 from frappe.utils import cint, flt, rounded
 from erpnext.setup.utils import get_company_currency
 from erpnext.controllers.accounts_controller import validate_conversion_rate, \
@@ -89,9 +91,8 @@ class calculate_taxes_and_totals(object):
 			self.doc.round_floats_in(tax)
 
 	def determine_exclusive_rate(self):
-		if not any((cint(tax.included_in_print_rate) for tax in self.doc.get("taxes"))) or \
-			self.doc.doctype not in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
-				return
+		if not any((cint(tax.included_in_print_rate) for tax in self.doc.get("taxes"))):
+			return
 
 		for item in self.doc.get("items"):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
@@ -317,6 +318,9 @@ class calculate_taxes_and_totals(object):
 
 	def apply_discount_amount(self):
 		if self.doc.discount_amount:
+			if not self.doc.apply_discount_on:
+				frappe.throw(_("Please select Apply Discount On"))
+
 			self.doc.base_discount_amount = flt(self.doc.discount_amount * self.doc.conversion_rate,
 				self.doc.precision("base_discount_amount"))
 

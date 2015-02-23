@@ -285,7 +285,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.frm.refresh_fields();
 	},
 
-
 	change_form_labels: function(company_currency) {
 		var me = this;
 		var field_label_map = {};
@@ -302,8 +301,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		setup_field_label_map(["base_total", "base_net_total", "base_total_taxes_and_charges",
 			"base_discount_amount", "base_grand_total", "base_rounded_total", "base_in_words",
 			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted", "total_amount_to_pay",
-			"outstanding_amount", "total_advance", "paid_amount", "write_off_amount"],
-			company_currency);
+			"outstanding_amount", "total_advance", "paid_amount", "write_off_amount"], company_currency);
 
 		setup_field_label_map(["total", "net_total", "total_taxes_and_charges", "discount_amount",
 			"grand_total", "taxes_and_charges_added", "taxes_and_charges_deducted",
@@ -330,6 +328,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		$.each(field_label_map, function(fname, label) {
 			me.frm.fields_dict[fname].set_label(label);
 		});
+
 	},
 
 	change_grid_labels: function(company_currency) {
@@ -500,9 +499,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	apply_price_list: function(item) {
 		var me = this;
 		var args = this._get_args(item);
-		if(!args.item_list.length) {
-			return;
-		}
+
 		return this.frm.call({
 			method: "erpnext.stock.get_item_details.apply_price_list",
 			args: {	args: args },
@@ -512,7 +509,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					me.frm.set_value("price_list_currency", r.message.parent.price_list_currency);
 					me.frm.set_value("plc_conversion_rate", r.message.parent.plc_conversion_rate);
 					me.in_apply_price_list = false;
-					me._set_values_for_item_list(r.message.children);
+
+					if(args.item_list.length) {
+						me._set_values_for_item_list(r.message.children);
+					}
 				}
 			}
 		});
@@ -702,5 +702,13 @@ frappe.ui.form.on(cur_frm.cscript.tax_table, "row_id", function(frm, cdt, cdn) {
 })
 
 frappe.ui.form.on(cur_frm.cscript.tax_table, "included_in_print_rate", function(frm, cdt, cdn) {
+	cur_frm.cscript.calculate_taxes_and_totals();
+})
+
+frappe.ui.form.on(cur_frm.doctype, "apply_discount_on", function(frm) {
+	cur_frm.cscript.calculate_taxes_and_totals();
+})
+
+frappe.ui.form.on(cur_frm.doctype, "discount_amount", function(frm) {
 	cur_frm.cscript.calculate_taxes_and_totals();
 })

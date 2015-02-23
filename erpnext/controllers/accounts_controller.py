@@ -359,11 +359,9 @@ def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, c
 			conversion_rate_label, currency, company_currency))
 
 def validate_taxes_and_charges(tax):
-	if not tax.charge_type and (tax.row_id or tax.rate or tax.tax_amount):
-		frappe.throw(_("Please select Charge Type first"))
-	elif tax.charge_type in ['Actual', 'On Net Total'] and tax.row_id:
+	if tax.charge_type in ['Actual', 'On Net Total'] and tax.row_id:
 		frappe.throw(_("Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'"))
-	elif tax.charge_type in ['On Previous Row Amount', 'On Previous Row Total'] and tax.row_id:
+	elif tax.charge_type in ['On Previous Row Amount', 'On Previous Row Total']:
 		if cint(tax.idx) == 1:
 			frappe.throw(_("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"))
 		elif not tax.row_id:

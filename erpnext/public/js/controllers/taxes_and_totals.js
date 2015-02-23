@@ -107,8 +107,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		$.each(me.frm.doc["taxes"] || [], function(i, row) {
 			if(cint(row.included_in_print_rate)) has_inclusive_tax = true;
 		})
-		if(has_inclusive_tax==false || !in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"], this.frm.doc.doctype))
-			return;
+		if(has_inclusive_tax==false) return;
 
 		$.each(me.frm.doc["items"] || [], function(n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
@@ -402,6 +401,9 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		var distributed_amount = 0.0;
 
 		if (this.frm.doc.discount_amount) {
+			if(!this.frm.doc.apply_discount_on)
+				frappe.throw(__("Please select Apply Discount On"));
+
 			this.frm.set_value("base_discount_amount",
 				flt(this.frm.doc.discount_amount * this.frm.doc.conversion_rate, precision("base_discount_amount")))
 

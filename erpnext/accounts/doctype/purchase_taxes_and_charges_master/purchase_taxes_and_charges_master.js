@@ -1,8 +1,6 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
-
 {% include "public/js/controllers/accounts.js" %}
 
 frappe.ui.form.on("Purchase Taxes and Charges", "add_deduct_tax", function(doc, cdt, cdn) {
@@ -17,4 +15,4 @@ frappe.ui.form.on("Purchase Taxes and Charges", "add_deduct_tax", function(doc, 
 		d.add_deduct_tax = '';
 	}
 	refresh_field('add_deduct_tax', d.name, 'taxes');
-}
+});

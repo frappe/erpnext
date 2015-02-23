@@ -264,6 +264,16 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "base_total", 
+   "fieldtype": "Currency", 
+   "label": "Total (Company Currency)", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
    "description": "Will be calculated automatically when you enter the details", 
    "fieldname": "base_net_total", 
    "fieldtype": "Currency", 
@@ -279,6 +289,17 @@
    "fieldname": "column_break_28", 
    "fieldtype": "Column Break", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "total", 
+   "fieldtype": "Currency", 
+   "hidden": 0, 
+   "label": "Total", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
   }, 
   {
    "fieldname": "net_total", 
@@ -373,35 +394,10 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "base_grand_total", 
-   "fieldtype": "Currency", 
-   "label": "Grand Total (Company Currency)", 
-   "oldfieldname": "grand_total", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1
-  }, 
-  {
-   "description": "In Words will be visible once you save the Purchase Invoice.", 
-   "fieldname": "base_in_words", 
-   "fieldtype": "Data", 
-   "label": "In Words (Company Currency)", 
-   "oldfieldname": "in_words", 
-   "oldfieldtype": "Data", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "column_break8", 
+   "fieldname": "column_break_40", 
    "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
    "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 0, 
-   "width": "50%"
+   "precision": ""
   }, 
   {
    "fieldname": "taxes_and_charges_added", 
@@ -432,6 +428,84 @@
    "options": "currency", 
    "permlevel": 0, 
    "precision": ""
+  }, 
+  {
+   "fieldname": "section_break_44", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "default": "Grand Total", 
+   "fieldname": "apply_discount_on", 
+   "fieldtype": "Select", 
+   "label": "Apply Discount On", 
+   "options": "\nGrand Total\nNet Total", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "column_break_46", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "discount_amount", 
+   "fieldtype": "Currency", 
+   "label": "Discount Amount", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "base_discount_amount", 
+   "fieldtype": "Currency", 
+   "label": "Discount Amount (Company Currency)", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "section_break_49", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "base_grand_total", 
+   "fieldtype": "Currency", 
+   "label": "Grand Total (Company Currency)", 
+   "oldfieldname": "grand_total", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "description": "In Words will be visible once you save the Purchase Invoice.", 
+   "fieldname": "base_in_words", 
+   "fieldtype": "Data", 
+   "label": "In Words (Company Currency)", 
+   "oldfieldname": "in_words", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break8", 
+   "fieldtype": "Column Break", 
+   "oldfieldtype": "Column Break", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 0, 
+   "width": "50%"
   }, 
   {
    "fieldname": "grand_total", 
@@ -888,7 +962,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-20 05:16:22.693978", 
+ "modified": "2015-02-23 15:33:28.554922", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 

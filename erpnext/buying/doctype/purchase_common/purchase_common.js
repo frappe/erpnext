@@ -1,10 +1,11 @@
 // Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+frappe.provide("erpnext.buying");
+
 cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
 {% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
 
-frappe.provide("erpnext.buying");
 frappe.require("assets/erpnext/js/controllers/transaction.js");
 
 cur_frm.email_field = "contact_email";

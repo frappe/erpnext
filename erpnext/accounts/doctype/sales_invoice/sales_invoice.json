@@ -332,6 +332,16 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "base_total", 
+   "fieldtype": "Currency", 
+   "label": "Total (Company Currency)", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "base_net_total", 
    "fieldtype": "Currency", 
    "label": "Net Total (Company Currency)", 
@@ -347,6 +357,16 @@
    "fieldname": "column_break_32", 
    "fieldtype": "Column Break", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "total", 
+   "fieldtype": "Currency", 
+   "label": "Total", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
   }, 
   {
    "fieldname": "net_total", 
@@ -432,6 +452,12 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "column_break_47", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "base_total_taxes_and_charges", 
    "fieldtype": "Currency", 
    "label": "Total Taxes and Charges (Company Currency)", 
@@ -443,7 +469,23 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "column_break_45", 
+   "fieldname": "section_break_49", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "default": "Grand Total", 
+   "fieldname": "apply_discount_on", 
+   "fieldtype": "Select", 
+   "label": "Apply Discount On", 
+   "options": "\nGrand Total\nNet Total", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "column_break_51", 
    "fieldtype": "Column Break", 
    "permlevel": 0
   }, 
@@ -1202,7 +1244,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-20 05:16:19.256361", 
+ "modified": "2015-02-23 15:53:37.894033", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 
