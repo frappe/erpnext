@@ -113,6 +113,17 @@
    "read_only": 0
   }, 
   {
+   "default": "2099-12-31", 
+   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
+   "fieldname": "end_of_life", 
+   "fieldtype": "Date", 
+   "label": "End of Life", 
+   "oldfieldname": "end_of_life", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
    "fieldname": "column_break0", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -316,16 +327,6 @@
    "label": "Warranty Period (in days)", 
    "oldfieldname": "warranty_period", 
    "oldfieldtype": "Data", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-   "fieldname": "end_of_life", 
-   "fieldtype": "Date", 
-   "label": "End of Life", 
-   "oldfieldname": "end_of_life", 
-   "oldfieldtype": "Date", 
    "permlevel": 0, 
    "read_only": 0
   }, 
@@ -873,7 +874,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2015-02-21 06:27:23.368218", 
+ "modified": "2015-02-22 23:59:37.956424", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
