@@ -10,7 +10,7 @@
   {
    "fieldname": "description_and_warehouse", 
    "fieldtype": "Section Break", 
-   "label": "Description and Warehouse", 
+   "label": "", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -70,7 +70,7 @@
   {
    "description": "per hour", 
    "fieldname": "hour_rate_electricity", 
-   "fieldtype": "Float", 
+   "fieldtype": "Currency", 
    "label": "Electricity Cost", 
    "oldfieldname": "hour_rate_electricity", 
    "oldfieldtype": "Currency", 
@@ -79,7 +79,7 @@
   {
    "description": "per hour", 
    "fieldname": "hour_rate_consumable", 
-   "fieldtype": "Float", 
+   "fieldtype": "Currency", 
    "label": "Consumable Cost", 
    "oldfieldname": "hour_rate_consumable", 
    "oldfieldtype": "Currency", 
@@ -94,7 +94,7 @@
   {
    "description": "per hour", 
    "fieldname": "hour_rate_rent", 
-   "fieldtype": "Float", 
+   "fieldtype": "Currency", 
    "label": "Rent Cost", 
    "oldfieldname": "hour_rate_rent", 
    "oldfieldtype": "Currency", 
@@ -103,7 +103,7 @@
   {
    "description": "Wages per hour", 
    "fieldname": "hour_rate_labour", 
-   "fieldtype": "Float", 
+   "fieldtype": "Currency", 
    "label": "Wages", 
    "oldfieldname": "hour_rate_labour", 
    "oldfieldtype": "Currency", 
@@ -113,7 +113,7 @@
   {
    "description": "per hour", 
    "fieldname": "hour_rate", 
-   "fieldtype": "Float", 
+   "fieldtype": "Currency", 
    "label": "Net Hour Rate", 
    "oldfieldname": "hour_rate", 
    "oldfieldtype": "Currency", 
@@ -123,7 +123,7 @@
   {
    "fieldname": "working_hours_section", 
    "fieldtype": "Section Break", 
-   "label": "Wroking Hours", 
+   "label": "Working Hours", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -133,12 +133,13 @@
    "label": "Working Hours", 
    "options": "Workstation Working Hour", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "reqd": 1
   }
  ], 
  "icon": "icon-wrench", 
  "idx": 1, 
- "modified": "2015-02-05 05:13:38.580439", 
+ "modified": "2015-02-23 09:43:35.903827", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Workstation", 

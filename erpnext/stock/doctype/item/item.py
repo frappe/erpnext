@@ -187,6 +187,7 @@ class Item(WebsiteGenerator):
 			frappe.msgprint(_("Item Variants {0} deleted").format(", ".join(deleted)))
 
 	def get_variant_item_codes(self):
+		"""Get all possible suffixes for variants"""
 		if not self.variants:
 			return []
 
@@ -234,7 +235,7 @@ class Item(WebsiteGenerator):
 		from frappe.model import no_value_fields
 		for field in self.meta.fields:
 			if field.fieldtype not in no_value_fields and (insert or not field.no_copy)\
-				and field.fieldname != "item_code":
+				and field.fieldname not in ("item_code", "item_name"):
 				if variant.get(field.fieldname) != template.get(field.fieldname):
 					variant.set(field.fieldname, template.get(field.fieldname))
 					variant.__dirty = True
@@ -245,7 +246,10 @@ class Item(WebsiteGenerator):
 			template.get_variant_item_codes()
 
 		for attr in template.variant_attributes[variant.item_code]:
-			variant.description += "\n" + attr[0] + ": " + attr[1]
+			variant.description += "<p>" + attr[0] + ": " + attr[1] + "</p>"
+
+		variant.item_name = self.item_name + variant.item_code[len(self.name):]
+
 		variant.variant_of = template.name
 		variant.has_variants = 0
 		variant.show_in_website = 0
@@ -292,7 +296,7 @@ class Item(WebsiteGenerator):
 		if self.default_bom:
 			bom_item = frappe.db.get_value("BOM", self.default_bom, "item")
 			if bom_item not in (self.name, self.variant_of):
-				frappe.throw(_("Default BOM must be for this item or its template"))
+				frappe.throw(_("Default BOM ({0}) must be active for this item or its template").format(bom_item))
 
 		if self.is_purchase_item != "Yes":
 			bom_mat = frappe.db.sql("""select distinct t1.parent

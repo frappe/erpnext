@@ -124,6 +124,9 @@ def validate_item_details(args, item):
 		elif item.is_sales_item != "Yes":
 			throw(_("Item {0} must be a Sales Item").format(item.name))
 
+		if cint(item.has_variants):
+			throw(_("Item {0} is a template, please select one of its variants").format(item.name))
+
 	elif args.transaction_type == "buying" and args.parenttype != "Material Request":
 		# validate if purchase item or subcontracted item
 		if item.is_purchase_item != "Yes":

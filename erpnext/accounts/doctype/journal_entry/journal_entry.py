@@ -40,12 +40,16 @@ class JournalEntry(AccountsController):
 		self.validate_expense_claim()
 		self.validate_credit_debit_note()
 		self.validate_empty_accounts_table()
+		self.set_title()
 
 	def on_submit(self):
 		self.check_credit_limit()
 		self.make_gl_entries()
 		self.update_advance_paid()
 		self.update_expense_claim()
+
+	def set_title(self):
+		self.title = self.pay_to_recd_from or self.accounts[0].account
 
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
@@ -442,16 +446,16 @@ class JournalEntry(AccountsController):
 				if d.debit > pending_amount:
 					frappe.throw(_("Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. \
 						Pending Amount is {2}".format(d.idx, d.against_expense_claim, pending_amount)))
-						
+
 	def validate_credit_debit_note(self):
 		count = frappe.db.exists({
 			"doctype": "Journal Entry",
 			"stock_entry":self.stock_entry,
-			"docstatus":1	
+			"docstatus":1
 		})
 		if count:
 			frappe.throw(_("{0} already made against stock entry {1}".format(self.voucher_type, self.stock_entry)))
-			
+
 	def validate_empty_accounts_table(self):
 		if not self.get('accounts'):
 			frappe.throw("Accounts table cannot be blank.")
@@ -462,11 +466,17 @@ def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
 	if mode_of_payment:
 		account = get_bank_cash_account(mode_of_payment, company)
 		if account.get("bank_cash_account"):
-			account.update({"balance": get_balance_on(account.get("cash_bank_account"))})
+			account.update({"balance": get_balance_on(account.get("bank_cash_account"))})
 			return account
 
-	account = frappe.db.get_value("Company", company, \
-		voucher_type=="Bank Voucher" and "default_bank_account" or "default_cash_account")
+	if voucher_type=="Bank Entry":
+		account = frappe.db.get_value("Company", company, "default_bank_account")
+		if not account:
+			account = frappe.db.get_value("Account", {"company": company, "account_type": "Bank"})
+	elif voucher_type=="Cash Entry":
+		account = frappe.db.get_value("Company", company, "default_cash_account")
+		if not account:
+			account = frappe.db.get_value("Account", {"company": company, "account_type": "Cash"})
 
 	if account:
 		return {

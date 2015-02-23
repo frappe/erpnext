@@ -271,15 +271,6 @@
    "read_only": 1
   }, 
   {
-   "allow_on_submit": 1, 
-   "depends_on": "eval:doc.docstatus==1", 
-   "fieldname": "auto_time_log", 
-   "fieldtype": "Button", 
-   "label": "Automatically Make Time logs", 
-   "permlevel": 0, 
-   "precision": ""
-  }, 
-  {
    "fieldname": "more_info", 
    "fieldtype": "Section Break", 
    "label": "More Info", 
@@ -360,7 +351,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2015-02-20 05:04:13.881343", 
+ "modified": "2015-02-23 07:42:05.639225", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 

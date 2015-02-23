@@ -8,6 +8,7 @@ from frappe.utils import cstr, flt, cint, nowdate, now, add_days, comma_and
 from frappe import msgprint, _
 
 from frappe.model.document import Document
+from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 
 class ProductionPlanningTool(Document):
 	def __init__(self, arg1, arg2=None):
@@ -156,19 +157,9 @@ class ProductionPlanningTool(Document):
 	def validate_data(self):
 		self.validate_company()
 		for d in self.get('items'):
-			self.validate_bom_no(d)
+			validate_bom_no(d.item_code, d.bom_no)
 			if not flt(d.planned_qty):
 				frappe.throw(_("Please enter Planned Qty for Item {0} at row {1}").format(d.item_code, d.idx))
-
-	def validate_bom_no(self, d):
-		if not d.bom_no:
-			frappe.throw(_("Please enter BOM for Item {0} at row {1}").format(d.item_code, d.idx))
-		else:
-			bom = frappe.db.sql("""select name from `tabBOM` where name = %s and item = %s
-				and docstatus = 1 and is_active = 1""",
-				(d.bom_no, d.item_code), as_dict = 1)
-			if not bom:
-				frappe.throw(_("Incorrect or Inactive BOM {0} for Item {1} at row {2}").format(d.bom_no, d.item_code, d.idx))
 
 	def raise_production_order(self):
 		"""It will raise production order (Draft) for all distinct FG items"""
@@ -218,7 +209,7 @@ class ProductionPlanningTool(Document):
 		for key in items:
 			pro = frappe.new_doc("Production Order")
 			pro.update(items[key])
-		
+
 			pro.planned_start_date = now()
 			pro.set_production_order_operations()
 

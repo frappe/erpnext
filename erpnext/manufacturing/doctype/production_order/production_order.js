@@ -85,6 +85,14 @@ erpnext.production_order = {
 				frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Production Order'],
 				"icon-check", "btn-default");
 			}
+
+			// opertions
+			if ((doc.operations || []).length) {
+				frm.add_custom_button(__('Show Time Logs'), function() {
+					frappe.route_options = {"production_order": frm.doc.name};
+					frappe.set_route("List", "Time Log");
+				});
+			}
 		}
 
 	},
@@ -191,6 +199,11 @@ $.extend(cur_frm.cscript, {
 		});
 	},
 
+	show_time_logs: function(doc, doctype, name) {
+		frappe.route_options = {"operation_id": name};
+		frappe.set_route("List", "Time Log");
+	},
+
 	make_time_log: function(doc, cdt, cdn){
 		var child = locals[cdt][cdn]
 		frappe.call({
@@ -209,16 +222,7 @@ $.extend(cur_frm.cscript, {
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
-	},
-
-	auto_time_log: function(doc){
-		frappe.call({
-			method:"erpnext.manufacturing.doctype.production_order.production_order.auto_make_time_log",
-			args: {
-				"production_order_id": doc.name
-			}
-		});
-	},
+	}
 });
 
 cur_frm.cscript['Stop Production Order'] = function() {

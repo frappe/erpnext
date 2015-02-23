@@ -10,7 +10,7 @@ from frappe.utils import flt, cint, getdate, formatdate, comma_and
 from frappe.model.document import Document
 
 class WorkstationHolidayError(frappe.ValidationError): pass
-class WorkstationIsClosedError(frappe.ValidationError): pass
+class NotInWorkingHoursError(frappe.ValidationError): pass
 class OverlapError(frappe.ValidationError): pass
 
 class Workstation(Document):
@@ -31,6 +31,7 @@ class Workstation(Document):
 		self.update_bom_operation()
 
 	def validate_overlap_for_operation_timings(self):
+		"""Check if there is no overlap in setting Workstation Operating Hours"""
 		for d in self.get("working_hours"):
 			existing = frappe.db.sql_list("""select idx from `tabWorkstation Working Hour`
 				where parent = %s and name != %s
@@ -49,7 +50,7 @@ def get_default_holiday_list():
 
 def check_if_within_operating_hours(workstation, from_datetime, to_datetime):
 	if not is_within_operating_hours(workstation, from_datetime, to_datetime):
-		frappe.throw(_("Time Log timings outside workstation operating hours"), WorkstationIsClosedError)
+		frappe.throw(_("Time Log timings outside workstation operating hours"), NotInWorkingHoursError)
 
 	if not cint(frappe.db.get_value("Manufacturing Settings", "None", "allow_production_on_holidays")):
 		check_workstation_for_holiday(workstation, from_datetime, to_datetime)

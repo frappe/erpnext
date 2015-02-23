@@ -6,7 +6,9 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe import _
-from frappe.utils import cstr, comma_and, flt
+from frappe.utils import cstr, flt, add_days, get_datetime, get_time
+from dateutil.relativedelta import relativedelta
+from dateutil.parser import parse
 
 class OverlapError(frappe.ValidationError): pass
 class OverProductionError(frappe.ValidationError): pass
@@ -52,24 +54,35 @@ class TimeLog(Document):
 			self.status="Billed"
 
 	def validate_overlap(self):
-		"""Checks if 'Time Log' entries overlap each other. """
-		existing = frappe.db.sql_list("""select name from `tabTime Log` where owner=%s and
+		"""Checks if 'Time Log' entries overlap for a user, workstation. """
+		self.validate_overlap_for("user")
+		self.validate_overlap_for("workstation")
+
+	def validate_overlap_for(self, fieldname):
+		existing = self.get_overlap_for(fieldname)
+		if existing:
+			frappe.throw(_("This Time Log conflicts with {0} for {1}").format(existing.name,
+				self.meta.get_label(fieldname)), OverlapError)
+
+	def get_overlap_for(self, fieldname):
+		if not self.get(fieldname):
+			return
+		existing = frappe.db.sql("""select name, from_time, to_time from `tabTime Log` where `{0}`=%s and
 			(
 				(from_time between %s and %s) or
 				(to_time between %s and %s) or
 				(%s between from_time and to_time))
 			and name!=%s
 			and ifnull(task, "")=%s
-			and docstatus < 2""",
-			(self.owner, self.from_time, self.to_time, self.from_time,
+			and docstatus < 2""".format(fieldname),
+			(self.get(fieldname), self.from_time, self.to_time, self.from_time,
 				self.to_time, self.from_time, self.name or "No Name",
-				cstr(self.task)))
+				cstr(self.task)), as_dict=True)
 
-		if existing:
-			frappe.throw(_("This Time Log conflicts with {0}").format(comma_and(existing)), OverlapError)
+		return existing[0] if existing else None
 
 	def validate_timings(self):
-		if self.to_time < self.from_time:
+		if get_datetime(self.to_time) < get_datetime(self.from_time):
 			frappe.throw(_("From Time cannot be greater than To Time"))
 
 	def calculate_total_hours(self):
@@ -97,7 +110,7 @@ class TimeLog(Document):
 		"""Updates `start_date`, `end_date`, `status` for operation in Production Order."""
 
 		if self.time_log_for=="Manufacturing" and self.operation:
-			operation = self.operation.split('. ',1)
+			operation = self.operation
 
 			dates = self.get_operation_start_end_time()
 			tl = self.get_all_time_logs()
@@ -121,6 +134,31 @@ class TimeLog(Document):
 		return frappe.db.sql("""select min(from_time) as start_date, max(to_time) as end_date from `tabTime Log`
 				where production_order = %s and operation = %s and docstatus=1""",
 				(self.production_order, self.operation), as_dict=1)[0]
+
+	def move_to_next_day(self):
+		"""Move start and end time one day forward"""
+		self.from_time = add_days(self.from_time, 1)
+
+	def move_to_next_working_slot(self):
+		"""Move to next working slot from workstation"""
+		workstation = frappe.get_doc("Workstation", self.workstation)
+		slot_found = False
+		for working_hour in workstation.working_hours:
+			if get_datetime(self.from_time).time() < get_time(working_hour.start_time):
+				self.from_time = self.from_time.split()[0] + " " + working_hour.start_time
+				slot_found = True
+				break
+
+		if not slot_found:
+			# later than last time
+			self.from_time = self.from_time.split()[0] + workstation.working_hours[0].start_time
+			self.move_to_next_day()
+
+	def move_to_next_non_overlapping_slot(self):
+		"""If in overlap, set start as the end point of the overlapping time log"""
+		overlapping = self.get_overlap_for("workstation")
+		if overlapping:
+			self.from_time = parse(overlapping.to_time) + relativedelta(minutes=10)
 
 	def get_all_time_logs(self):
 		"""Returns 'Actual Operating Time'. """

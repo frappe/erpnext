@@ -179,13 +179,13 @@ class StockEntry(StockController):
 			self.production_order = None
 
 	def check_if_operations_completed(self):
+		"""Check if Time Logs are completed against before manufacturing to capture operating costs."""
 		prod_order = frappe.get_doc("Production Order", self.production_order)
-		if prod_order.actual_operating_cost:
-			for d in prod_order.get("operations"):
-				total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
-				if total_completed_qty > flt(d.completed_qty):
-					frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Production Order # {3}. Please update operation status via Time Logs")
-						.format(d.idx, d.operation, total_completed_qty, self.production_order))
+		for d in prod_order.get("operations"):
+			total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
+			if total_completed_qty > flt(d.completed_qty):
+				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Production Order # {3}. Please update operation status via Time Logs")
+					.format(d.idx, d.operation, total_completed_qty, self.production_order))
 
 	def check_duplicate_entry_for_production_order(self):
 		other_ste = [t[0] for t in frappe.db.get_values("Stock Entry",  {

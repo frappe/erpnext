@@ -51,6 +51,14 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "user", 
+   "fieldtype": "Link", 
+   "label": "User", 
+   "options": "User", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "column_break_3", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -119,6 +127,15 @@
    "options": "", 
    "permlevel": 0, 
    "precision": ""
+  }, 
+  {
+   "fieldname": "operation_id", 
+   "fieldtype": "Data", 
+   "label": "Operation ID", 
+   "options": "", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
   }, 
   {
    "fieldname": "column_break_14", 
@@ -213,7 +230,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-19 04:16:33.756377", 
+ "modified": "2015-02-23 08:00:48.195775", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 

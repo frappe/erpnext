@@ -10,6 +10,14 @@ frappe.ui.form.on("Time Log", "onload", function(frm) {
 	}
 });
 
+frappe.ui.form.on("Time Log", "refresh", function(frm) {
+	// set default user if created
+	if (frm.doc.__islocal && !frm.doc.user) {
+		frm.set_value("user", user);
+	}
+});
+
+
 // set to time if hours is updated
 frappe.ui.form.on("Time Log", "hours", function(frm) {
 	if(!frm.doc.from_time) {

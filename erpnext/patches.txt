@@ -123,3 +123,4 @@ erpnext.patches.v5_0.stock_entry_update_value
 erpnext.patches.v5_0.convert_stock_reconciliation
 erpnext.patches.v5_0.update_projects
 erpnext.patches.v5_0.item_patches
+erpnext.patches.v5_0.update_journal_entry_title

@@ -4,14 +4,19 @@
 from __future__ import unicode_literals
 import frappe, json
 
-from frappe.utils import flt, nowdate, cstr, get_datetime, getdate
+from frappe.utils import flt, nowdate, get_datetime, getdate, date_diff, time_diff_in_seconds
 from frappe import _
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from dateutil.relativedelta import relativedelta
+from dateutil.parser import parse
 
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
+class OperationTooLongError(frappe.ValidationError): pass
+
+from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError, NotInWorkingHoursError
+from erpnext.projects.doctype.time_log.time_log import OverlapError
 
 form_grid_templates = {
 	"operations": "templates/form_grid/production_order_grid.html"
@@ -141,6 +146,7 @@ class ProductionOrder(Document):
 		if not self.fg_warehouse:
 			frappe.throw(_("For Warehouse is required before Submit"))
 		frappe.db.set(self,'status', 'Submitted')
+		self.make_time_logs()
 		self.update_planned_qty(self.qty)
 
 
@@ -203,6 +209,58 @@ class ProductionOrder(Document):
 			self.holidays[holiday_list] = holiday_list_days
 
 		return self.holidays[holiday_list]
+
+	def make_time_logs(self):
+		time_logs = []
+
+		plan_days = frappe.db.get_single_value("Manufacturing Settings", "capacity_planning_for_days") or 30
+
+		for d in self.operations:
+			time_log = make_time_log(self.name, d.operation, d.planned_start_time, d.planned_end_time,
+				flt(self.qty) - flt(d.completed_qty), self.project_name, d.workstation)
+
+			self.check_operation_fits_in_working_hours(d)
+
+			original_start_time = time_log.from_time
+			while True:
+				try:
+					time_log.save()
+					break
+				except WorkstationHolidayError:
+					time_log.move_to_next_day()
+				except NotInWorkingHoursError:
+					time_log.move_to_next_working_slot()
+				except OverlapError:
+					time_log.move_to_next_non_overlapping_slot()
+
+				# reset end time
+				time_log.to_time = get_datetime(time_log.from_time) + relativedelta(minutes=d.time_in_mins)
+
+				if date_diff(time_log.from_time, original_start_time) > plan_days:
+					frappe.msgprint(_("Unable to find Time Slot in the next {0} days for Operation {1}").format(plan_days, d.operation))
+					break
+
+				print time_log.as_json()
+
+			if time_log.name:
+				time_logs.append(time_log.name)
+
+		if time_logs:
+			frappe.msgprint(_("Time Logs created:") + "\n" + "\n".join(time_logs))
+
+
+	def check_operation_fits_in_working_hours(self, d):
+		"""Raises expection if operation is longer than working hours in the given workstation."""
+		operation_length = time_diff_in_seconds(d.planned_end_time, d.planned_start_time)
+
+		workstation = frappe.get_doc("Workstation", d.workstation)
+		for working_hour in workstation.working_hours:
+			slot_length = (parse(working_hour.end_time) - parse(working_hour.start_time)).total_seconds()
+			if slot_length >= operation_length:
+				return
+
+		frappe.throw(_("Operation {0} longer than any available working hours in workstation {1}, break down the operation into multiple operations").format(d.operation, d.workstation),
+			OperationTooLongError)
 
 	def update_operation_status(self):
 		for d in self.get("operations"):
@@ -293,13 +351,14 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_time_log(name, operation, from_time, to_time, qty=None,  project=None, workstation=None):
+def make_time_log(name, operation, from_time, to_time, qty=None,  project=None, workstation=None, operation_id=None):
 	time_log =  frappe.new_doc("Time Log")
 	time_log.time_log_for = 'Manufacturing'
 	time_log.from_time = from_time
 	time_log.to_time = to_time
 	time_log.production_order = name
 	time_log.project = project
+	time_log.operation_id = operation_id
 	time_log.operation= operation
 	time_log.workstation= workstation
 	time_log.activity_type= "Manufacturing"
@@ -307,20 +366,3 @@ def make_time_log(name, operation, from_time, to_time, qty=None,  project=None, 
 	if from_time and to_time :
 		time_log.calculate_total_hours()
 	return time_log
-
-@frappe.whitelist()
-def auto_make_time_log(production_order_id):
-	if frappe.db.get_value("Time Log", filters={"production_order": production_order_id, "docstatus":1}):
-		frappe.throw(_("Time logs already exists against this Production Order"))
-
-	time_logs = []
-	prod_order = frappe.get_doc("Production Order", production_order_id)
-
-	for d in prod_order.operations:
-		operation = cstr(d.idx) + ". " + d.operation
-		time_log = make_time_log(prod_order.name, operation, d.planned_start_time, d.planned_end_time,
-			flt(prod_order.qty) - flt(d.completed_qty), prod_order.project_name, d.workstation)
-		time_log.save()
-		time_logs.append(time_log.name)
-	if time_logs:
-		frappe.msgprint(_("Time Logs created:") + "\n" + "\n".join(time_logs))
