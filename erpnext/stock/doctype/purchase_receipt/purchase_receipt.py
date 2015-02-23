@@ -295,7 +295,7 @@ class PurchaseReceipt(BuyingController):
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 						"debit": flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty) * flt(d.conversion_factor),
-							self.precision("base_amount", d))
+							self.precision("base_net_amount", d))
 					}))
 
 					# stock received but not billed
@@ -304,7 +304,7 @@ class PurchaseReceipt(BuyingController):
 						"against": warehouse_account[d.warehouse],
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-						"credit": flt(d.base_amount, self.precision("base_amount", d))
+						"credit": flt(d.base_net_amount, self.precision("base_net_amount", d))
 					}))
 
 					negative_expense_to_be_booked += flt(d.item_tax_amount)
@@ -332,12 +332,12 @@ class PurchaseReceipt(BuyingController):
 					# divisional loss adjustment
 					if not self.get("other_charges"):
 						sle_valuation_amount = flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty) * flt(d.conversion_factor),
-								self.precision("base_amount", d))
+								self.precision("base_net_amount", d))
 
-						distributed_amount = flt(flt(d.base_amount, self.precision("base_amount", d))) + \
+						distributed_amount = flt(flt(d.base_net_amount, self.precision("base_net_amount", d))) + \
 							flt(d.landed_cost_voucher_amount) + flt(d.rm_supp_cost)
 
-						divisional_loss = flt(distributed_amount - sle_valuation_amount, self.precision("base_amount", d))
+						divisional_loss = flt(distributed_amount - sle_valuation_amount, self.precision("base_net_amount", d))
 						if divisional_loss:
 							gl_entries.append(self.get_gl_dict({
 								"account": stock_rbnb,
@@ -354,12 +354,12 @@ class PurchaseReceipt(BuyingController):
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
-			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount):
+			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
 				if not tax.cost_center:
 					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
 				valuation_tax.setdefault(tax.cost_center, 0)
 				valuation_tax[tax.cost_center] += \
-					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
+					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
 
 		if negative_expense_to_be_booked and valuation_tax:
 			# Backward compatibility:

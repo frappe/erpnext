@@ -170,6 +170,8 @@ def get_basic_details(args, item):
 		"base_rate": 0.0,
 		"amount": 0.0,
 		"base_amount": 0.0,
+		"net_rate": 0.0,
+		"net_amount": 0.0,
 		"discount_percentage": 0.0
 	})
 

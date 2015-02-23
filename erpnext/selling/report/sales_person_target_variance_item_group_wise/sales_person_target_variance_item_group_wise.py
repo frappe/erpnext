@@ -82,7 +82,7 @@ def get_target_distribution_details(filters):
 def get_achieved_details(filters):
 	start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
 
-	item_details = frappe.db.sql("""select soi.item_code, soi.qty, soi.base_amount, so.transaction_date,
+	item_details = frappe.db.sql("""select soi.item_code, soi.qty, soi.base_net_amount, so.transaction_date,
 		st.sales_person, MONTHNAME(so.transaction_date) as month_name
 		from `tabSales Order Item` soi, `tabSales Order` so, `tabSales Team` st
 		where soi.parent=so.name and so.docstatus=1 and
@@ -125,7 +125,7 @@ def get_salesperson_item_month_map(filters):
 				if (filters["target_on"] == "Amount"):
 					tav_dict.target = flt(sd.target_amount) * month_percentage / 100
 					if ad.month_name == month:
-							tav_dict.achieved += ad.base_amount
+							tav_dict.achieved += ad.base_net_amount
 
 	return sim_map
 

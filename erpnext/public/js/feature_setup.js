@@ -111,34 +111,54 @@ erpnext.feature_setup.feature_dict = {
 		'Sales Order': {'items':['page_break']}
 	},
 	'fs_exports': {
-		'Delivery Note': {'fields':['conversion_rate','currency','base_grand_total','base_in_words','base_rounded_total'],'items':['base_price_list_rate','base_amount','base_rate']},
+		'Delivery Note': {
+			'fields': ['conversion_rate','currency','base_grand_total','base_in_words','base_rounded_total',
+				'base_total', 'base_net_total', 'base_discount_amount', 'base_total_taxes_and_charges'],
+			'items': ['base_price_list_rate','base_amount','base_rate', 'base_net_rate', 'base_net_amount']
+		},
 		'POS Setting': {'fields':['conversion_rate','currency']},
-		'Quotation': {'fields':['conversion_rate','currency','base_grand_total','base_in_words','base_rounded_total'],'items':['base_price_list_rate','base_amount','base_rate']},
-		'Sales Invoice': {'fields':['conversion_rate','currency','base_grand_total','base_in_words','base_rounded_total'],'items':['base_price_list_rate','base_amount','base_rate']},
+		'Quotation': {
+			'fields': ['conversion_rate','currency','base_grand_total','base_in_words','base_rounded_total',
+				'base_total', 'base_net_total', 'base_discount_amount', 'base_total_taxes_and_charges'],
+			'items': ['base_price_list_rate','base_amount','base_rate', 'base_net_rate', 'base_net_amount']
+		},
+		'Sales Invoice': {
+			'fields': ['conversion_rate','currency','base_grand_total','base_in_words','base_rounded_total',
+				'base_total', 'base_net_total', 'base_discount_amount', 'base_total_taxes_and_charges'],
+			'items': ['base_price_list_rate','base_amount','base_rate', 'base_net_rate', 'base_net_amount']
+		},
 		'Sales BOM': {'fields':['currency']},
-		'Sales Order': {'fields':['conversion_rate','currency','base_grand_total','base_in_words','base_rounded_total'],'items':['base_price_list_rate','base_amount','base_rate']}
+		'Sales Order': {
+			'fields': ['conversion_rate','currency','base_grand_total','base_in_words','base_rounded_total',
+				'base_total', 'base_net_total', 'base_discount_amount', 'base_total_taxes_and_charges'],
+			'items': ['base_price_list_rate','base_amount','base_rate', 'base_net_rate', 'base_net_amount']
+		}
 	},
 
 	'fs_imports': {
 		'Purchase Invoice': {
-			'fields': ['conversion_rate', 'currency', 'base_grand_total',
-		 		'base_in_words', 'base_net_total', 'base_taxes_and_charges_added',
-		 		'base_taxes_and_charges_deducted'],
-			'items': ['base_price_list_rate', 'base_amount','base_rate']
+			'fields': ['conversion_rate', 'currency', 'base_grand_total', 'base_discount_amount',
+		 		'base_in_words', 'base_total', 'base_net_total', 'base_taxes_and_charges_added',
+		 		'base_taxes_and_charges_deducted', 'base_total_taxes_and_charges'],
+			'items': ['base_price_list_rate', 'base_amount','base_rate', 'base_net_rate', 'base_net_amount']
 		},
 		'Purchase Order': {
-			'fields': ['conversion_rate','currency', 'base_grand_total',
-			'base_in_words', 'base_net_total', 'base_taxes_and_charges_added',
-			 'base_taxes_and_charges_deducted'],
-			'items': ['base_price_list_rate', 'base_amount','base_rate']
+			'fields': ['conversion_rate','currency', 'base_grand_total', 'base_discount_amount',
+				'base_in_words', 'base_total', 'base_net_total', 'base_taxes_and_charges_added',
+			 	'base_taxes_and_charges_deducted', 'base_total_taxes_and_charges'],
+			'items': ['base_price_list_rate', 'base_amount','base_rate', 'base_net_rate', 'base_net_amount']
 		},
 		'Purchase Receipt': {
-			'fields': ['conversion_rate', 'currency','base_grand_total', 'base_in_words',
-			 	'base_net_total', 'base_taxes_and_charges_added', 'base_taxes_and_charges_deducted'],
-			'items': ['base_price_list_rate','base_amount','base_rate']
+			'fields': ['conversion_rate', 'currency','base_grand_total', 'base_in_words', 'base_total',
+			 	'base_net_total', 'base_taxes_and_charges_added', 'base_taxes_and_charges_deducted',
+				'base_total_taxes_and_charges', 'base_discount_amount'],
+			'items': ['base_price_list_rate','base_amount','base_rate', 'base_net_rate', 'base_net_amount']
 		},
 		'Supplier Quotation': {
-			'fields':['conversion_rate','currency']
+			'fields': ['conversion_rate', 'currency','base_grand_total', 'base_in_words', 'base_total',
+			 	'base_net_total', 'base_taxes_and_charges_added', 'base_taxes_and_charges_deducted',
+				'base_total_taxes_and_charges', 'base_discount_amount'],
+			'items': ['base_price_list_rate','base_amount','base_rate', 'base_net_rate', 'base_net_amount']
 		}
 	},
 

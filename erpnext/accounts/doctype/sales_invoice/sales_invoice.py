@@ -496,12 +496,12 @@ class SalesInvoice(SellingController):
 
 	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.get("taxes"):
-			if flt(tax.tax_amount_after_discount_amount):
+			if flt(tax.base_tax_amount_after_discount_amount):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.debit_to,
-						"credit": flt(tax.tax_amount_after_discount_amount),
+						"credit": flt(tax.base_tax_amount_after_discount_amount),
 						"remarks": self.remarks,
 						"cost_center": tax.cost_center
 					})
@@ -510,12 +510,12 @@ class SalesInvoice(SellingController):
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
 		for item in self.get("items"):
-			if flt(item.base_amount):
+			if flt(item.base_net_amount):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.income_account,
 						"against": self.debit_to,
-						"credit": item.base_amount,
+						"credit": item.base_net_amount,
 						"remarks": self.remarks,
 						"cost_center": item.cost_center
 					})
