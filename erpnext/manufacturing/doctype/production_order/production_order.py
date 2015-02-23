@@ -204,7 +204,7 @@ class ProductionOrder(Document):
 
 		if holiday_list not in self.holidays:
 			holiday_list_days = [getdate(d[0]) for d in frappe.get_all("Holiday", fields=["holiday_date"],
-				filters={"parent": holiday_list}, order_by="holiday_date", limit_page_length=0, as_list=1)]
+				filters={"parent": holiday_list}, order_by="holiday_date", as_list=1)]
 
 			self.holidays[holiday_list] = holiday_list_days
 

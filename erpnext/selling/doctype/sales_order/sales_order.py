@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.utils
 from frappe.utils import cstr, flt, getdate, comma_and
-from frappe import _ , msgprint
+from frappe import _
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
@@ -231,8 +231,12 @@ class SalesOrder(SellingController):
 	def on_update(self):
 		pass
 
-	def get_portal_page(self):
-		return "order" if self.docstatus==1 else None
+	@staticmethod
+	def get_list_context(context=None):
+		from erpnext.controllers.website_list_for_contact import get_list_context
+		list_context = get_list_context(context)
+		list_context["title"] = _("My Orders")
+		return list_context
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):

@@ -75,9 +75,6 @@ class DeliveryNote(SellingController):
 			for f in fieldname:
 				toggle_print_hide(self.meta if key == "parent" else item_meta, f)
 
-	def get_portal_page(self):
-		return "shipment" if self.docstatus==1 else None
-
 	def set_actual_qty(self):
 		for d in self.get('items'):
 			if d.item_code and d.warehouse:
@@ -287,6 +284,13 @@ class DeliveryNote(SellingController):
 				"is_amended": self.amended_from and 'Yes' or 'No'
 			}
 			update_bin(args)
+
+	@staticmethod
+	def get_list_context(context=None):
+		from erpnext.controllers.website_list_for_contact import get_list_context
+		list_context = get_list_context(context)
+		list_context["title"] = _("My Shipments")
+		return list_context
 
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""

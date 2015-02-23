@@ -20,7 +20,28 @@ notification_config = "erpnext.startup.notifications.get_notification_config"
 
 on_session_creation = "erpnext.shopping_cart.utils.set_cart_count"
 on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
-update_website_context = ["erpnext.shopping_cart.utils.update_website_context", "erpnext.startup.webutils.update_website_context"]
+
+# website
+update_website_context = "erpnext.shopping_cart.utils.update_website_context"
+my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
+
+website_route_rules = [
+	{"from_route": "/orders", "to_route": "Sales Order"},
+	{"from_route": "/orders/<name>", "to_route": "print", "defaults": {"doctype": "Sales Order"}},
+	{"from_route": "/invoices", "to_route": "Sales Invoice"},
+	{"from_route": "/invoices/<name>", "to_route": "print", "defaults": {"doctype": "Sales Invoice"}},
+	{"from_route": "/shipments", "to_route": "Delivery Note"},
+	{"from_route": "/shipments/<name>", "to_route": "print", "defaults": {"doctype": "Delivery Note"}},
+	{"from_route": "/issues", "to_route": "Issue"},
+	{"from_route": "/issues/<name>", "to_route": "print", "defaults": {"doctype": "Issue"}},
+	{"from_route": "/addresses", "to_route": "Address"},
+]
+
+has_website_permission = {
+	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
+	"Sales Invoice": "erpnext.controllers.website_list_for_contact.has_website_permission",
+	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission"
+}
 
 dump_report_map = "erpnext.startup.report_data_map.data_map"
 

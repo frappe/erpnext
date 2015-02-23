@@ -8,9 +8,12 @@ from frappe.website.website_generator import WebsiteGenerator
 from erpnext.utilities.address_and_contact import load_address_and_contact
 
 class SalesPartner(WebsiteGenerator):
-	page_title_field = "partner_name"
-	condition_field = "show_in_website"
-	template = "templates/generators/sales_partner.html"
+	website = frappe._dict(
+		page_title_field = "partner_name",
+		condition_field = "show_in_website",
+		template = "templates/generators/sales_partner.html"
+	)
+
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self, "sales_partner")

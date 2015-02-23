@@ -134,9 +134,6 @@ class SalesInvoice(SellingController):
 					where name=`tabSales Invoice Item`.parent and ifnull(update_stock, 0) = 1)"""
 			})
 
-	def get_portal_page(self):
-		return "invoice" if self.docstatus==1 else None
-
 	def set_missing_values(self, for_validate=False):
 		self.set_pos_fields(for_validate)
 
@@ -575,6 +572,13 @@ class SalesInvoice(SellingController):
 						"cost_center": self.write_off_cost_center
 					})
 				)
+
+	@staticmethod
+	def get_list_context(context=None):
+		from erpnext.controllers.website_list_for_contact import get_list_context
+		list_context = get_list_context(context)
+		list_context["title"] = _("My Invoices")
+		return list_context
 
 @frappe.whitelist()
 def get_bank_cash_account(mode_of_payment, company):

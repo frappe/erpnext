@@ -16,10 +16,12 @@ class DuplicateVariant(frappe.ValidationError): pass
 class ItemTemplateCannotHaveStock(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
-	page_title_field = "item_name"
-	condition_field = "show_in_website"
-	template = "templates/generators/item.html"
-	parent_website_route_field = "item_group"
+	website = frappe._dict(
+		page_title_field = "item_name",
+		condition_field = "show_in_website",
+		template = "templates/generators/item.html",
+		parent_website_route_field = "item_group",
+	)
 
 	def onload(self):
 		super(Item, self).onload()
@@ -81,6 +83,8 @@ class Item(WebsiteGenerator):
 			[{"name": self.name}]
 		if self.slideshow:
 			context.update(get_slideshow(self))
+
+		context["parents"] = self.get_parents(context)
 
 		return context
 

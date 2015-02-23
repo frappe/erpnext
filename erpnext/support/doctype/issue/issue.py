@@ -7,13 +7,11 @@ from frappe import _
 
 from frappe.model.document import Document
 from frappe.utils import now
+from frappe.utils.user import is_website_user
 
 class Issue(Document):
 	def get_feed(self):
 		return "{0}: {1}".format(_(self.status), self.subject)
-
-	def get_portal_page(self):
-		return "ticket"
 
 	def set_sender(self, sender):
 		"""Will be called by **Communication** when the Issue is created from an incoming email."""
@@ -49,6 +47,24 @@ class Issue(Document):
 		if self.status=="Open" and status !="Open":
 			# if no date, it should be set as None and not a blank string "", as per mysql strict config
 			self.resolution_date = None
+
+	@staticmethod
+	def get_list_context(context=None):
+		return {
+			"title": _("My Issues"),
+			"get_list": get_issue_list
+		}
+
+def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20):
+	from frappe.templates.pages.list import get_list
+	user = frappe.session.user
+	ignore_permissions = False
+	if is_website_user(user):
+		if not filters: filters = []
+		filters.append(("Issue", "raised_by", "=", user))
+		ignore_permissions = True
+
+	return get_list(doctype, txt, filters, limit_start, limit_page_length, ignore_permissions=ignore_permissions)
 
 @frappe.whitelist()
 def set_status(name, status):

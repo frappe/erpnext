@@ -288,4 +288,3 @@ class BuyingController(StockController):
 				if not d.conversion_factor:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory"))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
-

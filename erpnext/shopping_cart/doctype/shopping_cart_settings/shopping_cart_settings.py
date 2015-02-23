@@ -158,10 +158,13 @@ def get_shopping_cart_settings():
 
 	return frappe.local.shopping_cart_settings
 
+def is_cart_enabled():
+	return get_shopping_cart_settings().enabled
+
 def get_default_territory():
 	return get_shopping_cart_settings().default_territory
 
-def is_shopping_cart_enabled():
+def check_shopping_cart_enabled():
 	if not get_shopping_cart_settings().enabled:
 		frappe.throw(_("You need to enable Shopping Cart"), ShoppingCartSetupError)
 

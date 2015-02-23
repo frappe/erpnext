@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import get_fullname, flt
-from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import is_shopping_cart_enabled, get_default_territory
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import check_shopping_cart_enabled, get_default_territory
 
 # TODO
 # validate stock of each item in Website Warehouse or have a list of possible warehouses in Shopping Cart Settings
@@ -17,7 +17,7 @@ def get_quotation(user=None):
 	if user == "Guest":
 		raise frappe.PermissionError
 
-	is_shopping_cart_enabled()
+	check_shopping_cart_enabled()
 	party = get_party(user)
 	values = {
 		"order_type": "Shopping Cart",

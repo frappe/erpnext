@@ -12,9 +12,11 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
-	condition_field = "show_in_website"
-	template = "templates/generators/item_group.html"
-	parent_website_route_field = "parent_item_group"
+	website = frappe._dict(
+		condition_field = "show_in_website",
+		template = "templates/generators/item_group.html",
+		parent_website_route_field = "parent_item_group"
+	)
 
 	def autoname(self):
 		self.name = self.item_group_name
