@@ -21,9 +21,10 @@ def get_all_renamed_fields():
 	from erpnext.patches.v5_0.rename_table_fieldnames import rename_map
 
 	renamed_fields = (
+		("base_amount", "base_net_amount"),
 		("net_total", "base_net_total"),
-		("net_total_export", "net_total"),
-		("net_total_import", "net_total"),
+		("net_total_export", "total"),
+		("net_total_import", "total"),
 		("other_charges_total", "base_total_taxes_and_charges"),
 		("other_charges_total_export", "total_taxes_and_charges"),
 		("other_charges_added", "base_taxes_and_charges_added"),
@@ -39,7 +40,9 @@ def get_all_renamed_fields():
 		("rounded_total_import", "rounded_total"),
 		("in_words", "base_in_words"),
 		("in_words_export", "in_words"),
-		("in_words_import", "in_words")
+		("in_words_import", "in_words"),
+		("tax_amount", "base_tax_amount"),
+		("tax_amount_after_discount_amount", "base_tax_amount_after_discount_amount"),
 	)
 
 	for fields in rename_map.values():
