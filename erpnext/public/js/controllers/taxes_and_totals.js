@@ -94,7 +94,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 
 			$.each(tax_fields, function(i, fieldname) { tax[fieldname] = 0.0 });
 
-			me.validate_on_previous_row(tax);
+			cur_frm.cscript.validate_taxes_and_charges(tax.doctype, tax.name);
 			me.validate_inclusive_tax(tax);
 			frappe.model.round_floats_in(tax);
 		});
@@ -129,10 +129,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 			});
 
 			if(cumulated_tax_fraction && !me.discount_amount_applied) {
-				item.net_amount = flt(
-					(item.amount * me.frm.doc.conversion_rate) / (1 + cumulated_tax_fraction),
-					precision("net_amount", item));
-
+				item.net_amount = flt(item.amount / (1 + cumulated_tax_fraction), precision("net_amount", item));
 				item.net_rate = flt(item.net_amount / item.qty, precision("net_rate", item));
 
 				me.set_in_company_currency(item, ["net_rate", "net_amount"]);

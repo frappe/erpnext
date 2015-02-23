@@ -19,45 +19,94 @@ cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	}
 }
 
-
-var validate_taxes_and_charges = function(cdt, cdn) {
+cur_frm.cscript.validate_taxes_and_charges = function(cdt, cdn) {
 	var d = locals[cdt][cdn];
+	var msg = "";
 	if(!d.charge_type && (d.row_id || d.rate || d.tax_amount)) {
-		msgprint(__("Please select Charge Type first"));
+		msg = __("Please select Charge Type first");
 		d.row_id = "";
 		d.rate = d.tax_amount = 0.0;
 	} else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total') && d.row_id) {
-		msgprint(__("Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'"));
+		msg = __("Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'");
 		d.row_id = "";
 	} else if((d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') && d.row_id) {
 		if (d.idx == 1) {
-			msgprint(__("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"));
+			msg = __("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row");
 			d.charge_type = '';
-		} else if (d.row_i && d.row_id >= d.idx) {
-			msgprint(__("Cannot refer row number greater than or equal to current row number for this Charge type"));
+		} else if (!d.row_id) {
+			msg = __("Please specify a valid Row ID for row {0} in table {1}", [d.idx, __(d.doctype)]);
+			d.row_id = "";
+		} else if(d.row_id && d.row_id >= d.idx) {
+			msg = __("Cannot refer row number greater than or equal to current row number for this Charge type");
 			d.row_id = "";
 		}
 	}
-	validated = false;
-	refresh_field('row_id', d.name, 'taxes');
+	if(msg) {
+		validated = false;
+		refresh_field("taxes");
+		frappe.throw(msg);
+	}
+
+}
+
+cur_frm.cscript.validate_inclusive_tax = function(tax) {
+	var actual_type_error = function() {
+		var msg = __("Actual type tax cannot be included in Item rate in row {0}", [tax.idx])
+		frappe.throw(msg);
+	};
+
+	var on_previous_row_error = function(row_range) {
+		var msg = __("For row {0} in {1}. To include {2} in Item rate, rows {3} must also be included",
+			[tax.idx, __(tax.doctype), tax.charge_type, row_range])
+		frappe.throw(msg);
+	};
+
+	if(cint(tax.included_in_print_rate)) {
+		if(tax.charge_type == "Actual") {
+			// inclusive tax cannot be of type Actual
+			actual_type_error();
+		} else if(tax.charge_type == "On Previous Row Amount" &&
+			!cint(this.frm.doc["taxes"][tax.row_id - 1].included_in_print_rate)) {
+				// referred row should also be an inclusive tax
+				on_previous_row_error(tax.row_id);
+		} else if(tax.charge_type == "On Previous Row Total") {
+			var taxes_not_included = $.map(this.frm.doc["taxes"].slice(0, tax.row_id),
+				function(t) { return cint(t.included_in_print_rate) ? null : t; });
+			if(taxes_not_included.length > 0) {
+				// all rows above this tax should be inclusive
+				on_previous_row_error(tax.row_id == 1 ? "1" : "1 - " + tax.row_id);
+			}
+		}
+	}
 }
 
 frappe.ui.form.on(cur_frm.cscript.tax_table, "row_id", function(frm, cdt, cdn) {
-	validate_taxes_and_charges(cdt, cdn);
+	cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
 });
 
 frappe.ui.form.on(cur_frm.cscript.tax_table, "rate", function(frm, cdt, cdn) {
-	validate_taxes_and_charges(cdt, cdn);
+	cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
 });
 
 frappe.ui.form.on(cur_frm.cscript.tax_table, "tax_amount", function(frm, cdt, cdn) {
-	validate_taxes_and_charges(cdt, cdn);
+	cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
 });
 
 frappe.ui.form.on(cur_frm.cscript.tax_table, "charge_type", function(frm, cdt, cdn) {
-	validate_taxes_and_charges(cdt, cdn);
+	cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
 });
 
+frappe.ui.form.on(cur_frm.cscript.tax_table, "included_in_print_rate", function(frm, cdt, cdn) {
+	var tax = frappe.get_doc(cdt, cdn);
+	try {
+		cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
+		cur_frm.cscript.validate_inclusive_tax(tax);
+	} catch(e) {
+		tax.included_in_print_rate = 0;
+		refresh_field("included_in_print_rate", tax.name, tax.parentfield);
+		throw e;
+	}
+});
 
 cur_frm.set_query("account_head", "taxes", function(doc) {
 	if(cur_frm.cscript.tax_table == "Sales Taxes and Charges") {

@@ -3,10 +3,10 @@
 
 from __future__ import unicode_literals
 import json
-from frappe import _, throw
 from frappe.utils import cint, flt, rounded
 from erpnext.setup.utils import get_company_currency
-from erpnext.controllers.accounts_controller import validate_conversion_rate
+from erpnext.controllers.accounts_controller import validate_conversion_rate, \
+	validate_taxes_and_charges, validate_inclusive_tax
 
 class calculate_taxes_and_totals(object):
 	def __init__(self, doc):
@@ -71,6 +71,9 @@ class calculate_taxes_and_totals(object):
 
 	def initialize_taxes(self):
 		for tax in self.doc.get("taxes"):
+			validate_taxes_and_charges(tax)
+			validate_inclusive_tax(tax, self.doc)
+
 			tax.item_wise_tax_detail = {}
 			tax_fields = ["total", "tax_amount_after_discount_amount",
 				"tax_amount_for_current_item", "grand_total_for_current_item",
@@ -83,36 +86,7 @@ class calculate_taxes_and_totals(object):
 			for fieldname in tax_fields:
 				tax.set(fieldname, 0.0)
 
-			self.validate_on_previous_row(tax)
-			self.validate_inclusive_tax(tax)
 			self.doc.round_floats_in(tax)
-
-	def validate_on_previous_row(self, tax):
-		"""
-			validate if a valid row id is mentioned in case of
-			On Previous Row Amount and On Previous Row Total
-		"""
-		if tax.charge_type in ["On Previous Row Amount", "On Previous Row Total"] and \
-				(not tax.row_id or cint(tax.row_id) >= tax.idx):
-			throw(_("Please specify a valid Row ID for {0} in row {1}").format(_(tax.doctype), tax.idx))
-
-	def validate_inclusive_tax(self, tax):
-		def _on_previous_row_error(row_range):
-			throw(_("To include tax in row {0} in Item rate, taxes in rows {1} must also be included").format(tax.idx,
-				row_range))
-
-		if cint(getattr(tax, "included_in_print_rate", None)):
-			if tax.charge_type == "Actual":
-				# inclusive tax cannot be of type Actual
-				throw(_("Charge of type 'Actual' in row {0} cannot be included in Item Rate").format(tax.idx))
-			elif tax.charge_type == "On Previous Row Amount" and \
-					not cint(self.doc.get("taxes")[cint(tax.row_id) - 1].included_in_print_rate):
-				# referred row should also be inclusive
-				_on_previous_row_error(tax.row_id)
-			elif tax.charge_type == "On Previous Row Total" and \
-					not all([cint(t.included_in_print_rate) for t in self.doc.get("taxes")[:cint(tax.row_id) - 1]]):
-				# all rows about the reffered tax should be inclusive
-				_on_previous_row_error("1 - %d" % (tax.row_id,))
 
 	def determine_exclusive_rate(self):
 		if not any((cint(tax.included_in_print_rate) for tax in self.doc.get("taxes"))) or \

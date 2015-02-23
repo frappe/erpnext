@@ -2,7 +2,6 @@
 // License: GNU General Public License v3. See license.txt
 
 {% include 'selling/sales_common.js' %};
-{% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
 
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
