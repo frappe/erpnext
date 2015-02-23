@@ -19,6 +19,26 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "column_break_2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "journal_entry_type", 
+   "fieldtype": "Link", 
+   "label": "Journal Entry Type", 
+   "options": "Journal Entry Type", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "section_break_4", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "accounts", 
    "fieldtype": "Table", 
    "label": "Accounts", 
@@ -29,7 +49,7 @@
  ], 
  "icon": "icon-credit-card", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:41.346436", 
+ "modified": "2015-02-19 17:02:38.757596", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Mode of Payment", 

@@ -2,7 +2,7 @@
  "allow_copy": 0, 
  "allow_import": 0, 
  "allow_rename": 0, 
- "creation": "2015-01-05 14:17:53.101432", 
+ "creation": "2015-02-18 15:56:33.424001", 
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -24,7 +24,7 @@
    "print_hide": 0, 
    "read_only": 0, 
    "report_hide": 0, 
-   "reqd": 0, 
+   "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0
   }, 
@@ -36,7 +36,6 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "description": "Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.", 
    "fieldname": "default_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -51,7 +50,7 @@
    "print_hide": 0, 
    "read_only": 0, 
    "report_hide": 0, 
-   "reqd": 0, 
+   "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0
   }
@@ -63,10 +62,10 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-02-20 14:30:12.156148", 
+ "modified": "2015-02-18 16:06:53.223312", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
- "name": "Mode of Payment Account", 
+ "name": "Journal Entry Type Account", 
  "name_case": "", 
  "owner": "Administrator", 
  "permissions": [], 

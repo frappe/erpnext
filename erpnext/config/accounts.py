@@ -32,6 +32,11 @@ def get_data():
 					"description": _("Supplier database.")
 				},
 				{
+					"type": "doctype",
+					"name": "Journal Entry Type",
+					"description": _("Type of Journal Entries.")
+				},
+				{
 					"type": "page",
 					"name": "Accounts Browser",
 					"icon": "icon-sitemap",
