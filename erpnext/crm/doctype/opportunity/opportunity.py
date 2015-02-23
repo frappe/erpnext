@@ -120,6 +120,14 @@ class Opportunity(TransactionBase):
 		if not self.get('items'):
 			frappe.throw(_("Items required"))
 
+		# set missing values
+		item_fields = ("item_name", "description", "item_group", "brand")
+
+		for d in self.items:
+			item = frappe.db.get_value("Item", d.item_code, item_fields, as_dict=True)
+			for key in item_fields:
+				if not d.get(key): d.set(key, item.get(key))
+
 	def validate_lead_cust(self):
 		if self.enquiry_from == 'Lead':
 			if not self.lead:
