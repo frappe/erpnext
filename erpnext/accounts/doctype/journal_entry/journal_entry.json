@@ -18,7 +18,7 @@
    "fieldtype": "Link", 
    "in_filter": 1, 
    "in_list_view": 1, 
-   "label": "Voucher Type", 
+   "label": "Entry Type", 
    "oldfieldname": "voucher_type", 
    "oldfieldtype": "Select", 
    "options": "Journal Entry Type", 
@@ -29,24 +29,17 @@
    "search_index": 1
   }, 
   {
-   "fieldname": "column_break0", 
-   "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "width": "50%"
-  }, 
-  {
    "fieldname": "naming_series", 
-   "fieldtype": "Select", 
+   "fieldtype": "Data", 
    "label": "Series", 
-   "options": "\nJE-\nJE-BE-\nJE-CE-\nJE-CCE-\nJE-DN-\nJE-CN-\nJE-COE-\nJE-EE-\nJE-WOE-\nJE-OE-", 
+   "options": "", 
    "permlevel": 0, 
    "precision": "", 
+   "read_only": 1, 
    "reqd": 1
   }, 
   {
-   "fieldname": "column_break1", 
+   "fieldname": "column_break0", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 
    "permlevel": 0, 
@@ -452,8 +445,8 @@
  ], 
  "icon": "icon-file-text", 
  "idx": 1, 
- "is_submittable": 1,
- "modified": "2015-02-20 05:07:15.435166", 
+ "is_submittable": 1, 
+ "modified": "2015-02-23 01:11:05.216410", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Entry", 

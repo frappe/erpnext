@@ -122,18 +122,6 @@ def install(country=None):
 		{'uom_name': _('Hour'), 'doctype': 'UOM', 'name': _('Hour')},
 		{'uom_name': _('Minute'), 'doctype': 'UOM', 'name': _('Minute')},
 
-		#Journal Entry Type
-		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Journal Entry'), 'naming_series': 'JE-'},
-		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Bank Entry'), 'naming_series': 'JE-BE-'},
-		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Cash Entry'), 'naming_series': 'JE-CE-'},
-		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Credit Card Entry'), 'naming_series': 'JE-CCE-'},
-		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Debit Note'), 'naming_series': 'JE-DN-'},
-		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Credit Note'), 'naming_series': 'JE-CN-'},
-		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Contra Entry'), 'naming_series': 'JE-COE-'},
-		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Excise Entry'), 'naming_series': 'JE-EE-'},
-		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Write Off Entry'), 'naming_series': 'JE-WOE-'},
-		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Opening Entry'), 'naming_series': 'JE-OE-'},
-		
 		# Mode of Payment
 		{'doctype': 'Mode of Payment', 'mode_of_payment': 'Check' if country=="United States" else _('Cheque'),'journal_entry_type': _('Bank Entry')},
 		{'doctype': 'Mode of Payment', 'mode_of_payment': _('Cash'),'journal_entry_type': _('Cash Entry')},
@@ -170,9 +158,11 @@ def install(country=None):
 		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"}
 	]
 
-	from erpnext.setup.page.setup_wizard.fixtures import industry_type, operations
+	from erpnext.setup.page.setup_wizard.fixtures import industry_type
 	records += [{"doctype":"Industry Type", "industry": d} for d in industry_type.items]
 	# records += [{"doctype":"Operation", "operation": d} for d in operations.items]
+
+	records += get_journal_entry_types()
 
 	from frappe.modules import scrub
 	for r in records:
@@ -185,3 +175,23 @@ def install(country=None):
 			doc.flags.ignore_mandatory = True
 
 		doc.insert()
+
+def get_journal_entry_types():
+	return [
+		#Journal Entry Type
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Journal Entry'), 'naming_series': 'JE-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Bank Entry'),
+			'naming_series': 'JE-BANK-', 'type': "Bank Entry"},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Cash Entry'),
+			'naming_series': 'JE-CASH-', "type": "Cash Entry"},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Credit Card Entry'),
+			'naming_series': 'JE-CC-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Debit Note'),
+			'naming_series': 'DEBIT-NOTE-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Credit Note'),
+			'naming_series': 'CREDIT-NOTE-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Contra Entry'), 'naming_series': 'CONTRA-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Write Off Entry'), 'naming_series': 'WOFF-'},
+		{'doctype': 'Journal Entry Type', 'journal_entry_type': _('Opening Entry'),
+			'naming_series': 'JE-OPEN-', "type": "Opening Entry"},
+	]
