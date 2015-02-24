@@ -174,6 +174,7 @@
    "precision": ""
   }, 
   {
+   "default": "0", 
    "description": "Automatically set. If this item has variants, then it cannot be selected in sales orders etc.", 
    "fieldname": "has_variants", 
    "fieldtype": "Check", 
@@ -875,7 +876,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2015-02-23 06:12:13.359646", 
+ "modified": "2015-02-24 05:19:07.382483", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 

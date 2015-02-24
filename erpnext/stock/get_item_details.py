@@ -205,7 +205,6 @@ def get_price_list_rate(args, item_doc, out):
 		validate_price_list(args)
 		validate_conversion_rate(args, meta)
 
-
 		price_list_rate = get_price_list_rate_for(args, item_doc.name)
 		if not price_list_rate and item_doc.variant_of:
 			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
