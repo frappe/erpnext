@@ -5,13 +5,14 @@ def execute():
 	frappe.reload_doctype("Project")
 
 	for m in frappe.get_all("Project Milestone", "*"):
-		frappe.get_doc({
-			"doctype": "Task",
-			"subject": m.milestone,
-			"expected_start_date": m.milestone_date,
-			"status": "Open" if m.status=="Pending" else "Closed",
-			"project": m.parent,
-		}).insert(ignore_permissions=True)
+		if m.milestone and m.milestone_date:
+			frappe.get_doc({
+				"doctype": "Task",
+				"subject": m.milestone,
+				"expected_start_date": m.milestone_date,
+				"status": "Open" if m.status=="Pending" else "Closed",
+				"project": m.parent,
+			}).insert(ignore_permissions=True)
 
 	# remove project milestone
 	frappe.delete_doc("DocType", "Project Milestone")
