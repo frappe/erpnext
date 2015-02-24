@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from frappe import _
 from frappe.widgets.moduleview import add_setup_section
 
