@@ -19,6 +19,7 @@ class NotUpdateStockError(frappe.ValidationError): pass
 class StockOverReturnError(frappe.ValidationError): pass
 class IncorrectValuationRateError(frappe.ValidationError): pass
 class DuplicateEntryForProductionOrderError(frappe.ValidationError): pass
+class OperationsNotCompleteError(frappe.ValidationError): pass
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -185,7 +186,7 @@ class StockEntry(StockController):
 			total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
 			if total_completed_qty > flt(d.completed_qty):
 				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Production Order # {3}. Please update operation status via Time Logs")
-					.format(d.idx, d.operation, total_completed_qty, self.production_order))
+					.format(d.idx, d.operation, total_completed_qty, self.production_order), OperationsNotCompleteError)
 
 	def check_duplicate_entry_for_production_order(self):
 		other_ste = [t[0] for t in frappe.db.get_values("Stock Entry",  {

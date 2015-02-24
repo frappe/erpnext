@@ -75,12 +75,14 @@
    "reqd": 0
   }, 
   {
+   "default": "Project", 
    "fieldname": "time_log_for", 
    "fieldtype": "Select", 
    "label": "Time Log For", 
    "options": "\nProject\nManufacturing", 
    "permlevel": 0, 
    "precision": "", 
+   "read_only": 1, 
    "reqd": 0
   }, 
   {
@@ -117,7 +119,8 @@
    "label": "Production Order", 
    "options": "Production Order", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "read_only": 1
   }, 
   {
    "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
@@ -126,7 +129,8 @@
    "label": "Operation", 
    "options": "", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "read_only": 1
   }, 
   {
    "fieldname": "operation_id", 
@@ -230,7 +234,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-23 08:00:48.195775", 
+ "modified": "2015-02-24 03:57:27.652685", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 

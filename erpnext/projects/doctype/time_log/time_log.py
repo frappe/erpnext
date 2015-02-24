@@ -6,7 +6,7 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe import _
-from frappe.utils import cstr, flt, add_days, get_datetime, get_time
+from frappe.utils import cstr, flt, get_datetime, get_time, getdate
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse
 
@@ -109,25 +109,28 @@ class TimeLog(Document):
 	def update_production_order(self):
 		"""Updates `start_date`, `end_date`, `status` for operation in Production Order."""
 
-		if self.time_log_for=="Manufacturing" and self.operation:
-			operation = self.operation
+		if self.time_log_for=="Manufacturing" and self.production_order:
+			if not self.operation_id:
+				frappe.throw(_("Operation ID not set"))
 
 			dates = self.get_operation_start_end_time()
-			tl = self.get_all_time_logs()
+			summary = self.get_time_log_summary()
+
+			pro = frappe.get_doc("Production Order", self.production_order)
+			for o in pro.operations:
+				if o.name == self.operation_id:
+					o.actual_start_time = dates.start_date
+					o.actual_end_time = dates.end_date
+					o.completed_qty = summary.completed_qty
+					o.actual_operation_time = summary.mins
+					break
 
 
-			frappe.db.sql("""update `tabProduction Order Operation`
-				set actual_start_time = %s, actual_end_time = %s, completed_qty = %s, actual_operation_time = %s
-				where parent=%s and idx=%s and operation = %s""",
-				(dates.start_date, dates.end_date, tl.completed_qty,
-					tl.hours, self.production_order, operation[0], operation[1]))
-
-			pro_order = frappe.get_doc("Production Order", self.production_order)
-			pro_order.flags.ignore_validate_update_after_submit = True
-			pro_order.update_operation_status()
-			pro_order.calculate_operating_cost()
-			pro_order.set_actual_dates()
-			pro_order.save()
+			pro.flags.ignore_validate_update_after_submit = True
+			pro.update_operation_status()
+			pro.calculate_operating_cost()
+			pro.set_actual_dates()
+			pro.save()
 
 	def get_operation_start_end_time(self):
 		"""Returns Min From and Max To Dates of Time Logs against a specific Operation. """
@@ -137,7 +140,7 @@ class TimeLog(Document):
 
 	def move_to_next_day(self):
 		"""Move start and end time one day forward"""
-		self.from_time = add_days(self.from_time, 1)
+		self.from_time = get_datetime(self.from_time) + relativedelta(day=1)
 
 	def move_to_next_working_slot(self):
 		"""Move to next working slot from workstation"""
@@ -145,13 +148,13 @@ class TimeLog(Document):
 		slot_found = False
 		for working_hour in workstation.working_hours:
 			if get_datetime(self.from_time).time() < get_time(working_hour.start_time):
-				self.from_time = self.from_time.split()[0] + " " + working_hour.start_time
+				self.from_time = getdate(self.from_time).strftime("%Y-%m-%d") + " " + working_hour.start_time
 				slot_found = True
 				break
 
 		if not slot_found:
 			# later than last time
-			self.from_time = self.from_time.split()[0] + workstation.working_hours[0].start_time
+			self.from_time = getdate(self.from_time).strftime("%Y-%m-%d") + " " + workstation.working_hours[0].start_time
 			self.move_to_next_day()
 
 	def move_to_next_non_overlapping_slot(self):
@@ -160,13 +163,13 @@ class TimeLog(Document):
 		if overlapping:
 			self.from_time = parse(overlapping.to_time) + relativedelta(minutes=10)
 
-	def get_all_time_logs(self):
+	def get_time_log_summary(self):
 		"""Returns 'Actual Operating Time'. """
 		return frappe.db.sql("""select
-			sum(hours*60) as hours, sum(ifnull(completed_qty, 0)) as completed_qty
+			sum(hours*60) as mins, sum(ifnull(completed_qty, 0)) as completed_qty
 			from `tabTime Log`
-			where production_order = %s and operation = %s and docstatus=1""",
-			(self.production_order, self.operation), as_dict=1)[0]
+			where production_order = %s and operation_id = %s and docstatus=1""",
+			(self.production_order, self.operation_id), as_dict=1)[0]
 
 	def validate_project(self):
 		if self.time_log_for == 'Project':

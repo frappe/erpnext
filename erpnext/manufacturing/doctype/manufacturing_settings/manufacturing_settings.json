@@ -9,10 +9,17 @@
  "document_type": "Master", 
  "fields": [
   {
-   "description": "Will not allow to make time logs outside \"Workstation operation timings\"", 
-   "fieldname": "dont_allow_overtime", 
+   "fieldname": "capacity_planning", 
+   "fieldtype": "Section Break", 
+   "label": "Capacity Planning", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "description": "Plan time logs outside Workstation Working Hours.", 
+   "fieldname": "allow_overtime", 
    "fieldtype": "Check", 
-   "label": "Don't allow overtime", 
+   "label": "Allow Overtime", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -40,6 +47,14 @@
    "label": "Capacity Planning For (Days)", 
    "permlevel": 0, 
    "precision": ""
+  }, 
+  {
+   "description": "Default 10 mins", 
+   "fieldname": "mins_between_operations", 
+   "fieldtype": "Data", 
+   "label": "Time Between Operations (in mins)", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "hide_heading": 0, 
@@ -50,7 +65,7 @@
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
- "modified": "2015-02-23 09:05:58.927098", 
+ "modified": "2015-02-23 23:44:45.917027", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Manufacturing Settings", 

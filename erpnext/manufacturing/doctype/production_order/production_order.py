@@ -23,9 +23,6 @@ form_grid_templates = {
 }
 
 class ProductionOrder(Document):
-	def __setup__(self):
-		self.holidays = frappe._dict()
-
 	def validate(self):
 		if self.docstatus == 0:
 			self.status = "Draft"
@@ -159,6 +156,7 @@ class ProductionOrder(Document):
 
 		frappe.db.set(self,'status', 'Cancelled')
 		self.update_planned_qty(-self.qty)
+		self.delete_time_logs()
 
 	def update_planned_qty(self, qty):
 		"""update planned qty in bin"""
@@ -182,47 +180,44 @@ class ProductionOrder(Document):
 
 		self.set('operations', operations)
 
-		self.plan_operations()
 		self.calculate_operating_cost()
-
-	def plan_operations(self):
-		if self.planned_start_date:
-			scheduled_datetime = self.planned_start_date
-			for d in self.get('operations'):
-				while getdate(scheduled_datetime) in self.get_holidays(d.workstation):
-					scheduled_datetime = get_datetime(scheduled_datetime) + relativedelta(days=1)
-
-				d.planned_start_time = scheduled_datetime
-				scheduled_datetime = get_datetime(scheduled_datetime) + relativedelta(minutes=d.time_in_mins)
-				d.planned_end_time = scheduled_datetime
-
-			self.planned_end_date = scheduled_datetime
 
 
 	def get_holidays(self, workstation):
 		holiday_list = frappe.db.get_value("Workstation", workstation, "holiday_list")
 
-		if holiday_list not in self.holidays:
+		holidays = {}
+
+		if holiday_list not in holidays:
 			holiday_list_days = [getdate(d[0]) for d in frappe.get_all("Holiday", fields=["holiday_date"],
-				filters={"parent": holiday_list}, order_by="holiday_date", as_list=1)]
+				filters={"parent": holiday_list}, order_by="holiday_date", limit_page_length=0, as_list=1)]
 
-			self.holidays[holiday_list] = holiday_list_days
+			holidays[holiday_list] = holiday_list_days
 
-		return self.holidays[holiday_list]
+		return holidays[holiday_list]
 
 	def make_time_logs(self):
-		time_logs = []
+		"""Capacity Planning. Plan time logs based on earliest availablity of workstation after
+			Planned Start Date. Time logs will be created and remain in Draft mode and must be submitted
+			before manufacturing entry can be made."""
 
+		if not self.operations:
+			return
+
+		time_logs = []
 		plan_days = frappe.db.get_single_value("Manufacturing Settings", "capacity_planning_for_days") or 30
 
-		for d in self.operations:
+		for i, d in enumerate(self.operations):
+			self.set_operation_start_end_time(i, d)
+
 			time_log = make_time_log(self.name, d.operation, d.planned_start_time, d.planned_end_time,
-				flt(self.qty) - flt(d.completed_qty), self.project_name, d.workstation)
+				flt(self.qty) - flt(d.completed_qty), self.project_name, d.workstation, operation_id=d.name)
 
 			self.check_operation_fits_in_working_hours(d)
 
 			original_start_time = time_log.from_time
 			while True:
+				_from_time = time_log.from_time
 				try:
 					time_log.save()
 					break
@@ -240,14 +235,41 @@ class ProductionOrder(Document):
 					frappe.msgprint(_("Unable to find Time Slot in the next {0} days for Operation {1}").format(plan_days, d.operation))
 					break
 
-				print time_log.as_json()
+				if _from_time == time_log.from_time:
+					frappe.throw("Capacity Planning Error")
+
+			d.planned_start_time = time_log.from_time
+			d.planned_end_time = time_log.to_time
+			d.db_update()
 
 			if time_log.name:
 				time_logs.append(time_log.name)
 
+		self.planned_end_date = self.operations[-1].planned_end_time
+
 		if time_logs:
 			frappe.msgprint(_("Time Logs created:") + "\n" + "\n".join(time_logs))
 
+	def set_operation_start_end_time(self, i, d):
+		"""Set start and end time for given operation. If first operation, set start as
+		`planned_start_date`, else add time diff to end time of earlier operation."""
+		if i==0:
+			# first operation at planned_start date
+			d.planned_start_time = self.planned_start_date
+		else:
+			d.planned_start_time = get_datetime(self.operations[i-1].planned_end_time)\
+				+ self.get_mins_between_operations()
+
+		d.planned_end_time = get_datetime(d.planned_start_time) + relativedelta(minutes = d.time_in_mins)
+
+		if d.planned_start_time == d.planned_end_time:
+			frappe.throw(_("Capacity Planning Error"))
+
+	def get_mins_between_operations(self):
+		if not hasattr(self, "_mins_between_operations"):
+			self._mins_between_operations = frappe.db.get_single_value("Manufacturing Settings",
+				"mins_between_operations") or 10
+		return relativedelta(minutes = self._mins_between_operations)
 
 	def check_operation_fits_in_working_hours(self, d):
 		"""Raises expection if operation is longer than working hours in the given workstation."""
@@ -288,6 +310,10 @@ class ProductionOrder(Document):
 			if self.planned_end_date and self.expected_delivery_date \
 				and getdate(self.expected_delivery_date) < getdate(self.planned_end_date):
 					frappe.msgprint(_("Production might not be able to finish by the Expected Delivery Date."))
+
+	def delete_time_logs(self):
+		for time_log in frappe.get_all("Time Log", ["name"], {"production_order": self.name}):
+			frappe.delete_doc("Time Log", time_log.name)
 
 @frappe.whitelist()
 def get_item_details(item):

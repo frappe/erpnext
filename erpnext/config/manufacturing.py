@@ -37,11 +37,6 @@ def get_data():
 					"name": "Operation",
 					"description": _("Details of the operations carried out."),
 				},
-				{
-					"type": "doctype",
-					"name": "Manufacturing Settings",
-					"description": _("Global settings for all manufacturing processes."),
-				},
 
 			]
 		},
@@ -59,6 +54,16 @@ def get_data():
 					"name": "BOM Replace Tool",
 					"description": _("Replace Item / BOM in all BOMs"),
 				},
+			]
+		},
+		{
+			"label": _("Setup"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Manufacturing Settings",
+					"description": _("Global settings for all manufacturing processes."),
+				}
 			]
 		},
 		{

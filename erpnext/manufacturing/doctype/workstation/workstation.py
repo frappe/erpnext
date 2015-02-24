@@ -3,9 +3,8 @@
 
 from __future__ import unicode_literals
 import frappe
-import datetime
 from frappe import _
-from frappe.utils import flt, cint, getdate, formatdate, comma_and
+from frappe.utils import flt, cint, getdate, formatdate, comma_and, get_datetime
 
 from frappe.model.document import Document
 
@@ -49,23 +48,27 @@ def get_default_holiday_list():
 	return frappe.db.get_value("Company", frappe.defaults.get_user_default("company"), "default_holiday_list")
 
 def check_if_within_operating_hours(workstation, from_datetime, to_datetime):
-	if not is_within_operating_hours(workstation, from_datetime, to_datetime):
-		frappe.throw(_("Time Log timings outside workstation operating hours"), NotInWorkingHoursError)
+	if not cint(frappe.db.get_value("Manufacturing Settings", None, "allow_overtime")):
+		is_within_operating_hours(workstation, from_datetime, to_datetime)
 
 	if not cint(frappe.db.get_value("Manufacturing Settings", "None", "allow_production_on_holidays")):
 		check_workstation_for_holiday(workstation, from_datetime, to_datetime)
 
 def is_within_operating_hours(workstation, from_datetime, to_datetime):
-	if not cint(frappe.db.get_value("Manufacturing Settings", None, "dont_allow_overtime")):
-		return True
+	start_time = get_datetime(from_datetime).time()
+	end_time = get_datetime(to_datetime).time()
 
-	start_time = datetime.datetime.strptime(from_datetime,'%Y-%m-%d %H:%M:%S').strftime('%H:%M:%S')
-	end_time = datetime.datetime.strptime(to_datetime,'%Y-%m-%d %H:%M:%S').strftime('%H:%M:%S')
+	working_hours = frappe.db.sql_list("""select idx from `tabWorkstation Working Hour`
+		where parent = %s
+			and (
+				(start_time between %s and %s) or
+				(end_time between %s and %s) or
+				(%s between start_time and end_time))
+		""", (workstation, start_time, end_time, start_time, end_time, start_time))
 
-	for d in frappe.db.sql("""select start_time, end_time from `tabWorkstation Operation Hours`
-		where parent = %s and ifnull(enabled, 0) = 1""", workstation, as_dict=1):
-			if d.end_time >= start_time >= d.start_time and d.end_time >= end_time >= d.start_time:
-				return True
+	if not working_hours:
+		frappe.throw(_("Time Log timings outside workstation operating hours"), NotInWorkingHoursError)
+
 
 def check_workstation_for_holiday(workstation, from_datetime, to_datetime):
 	holiday_list = frappe.db.get_value("Workstation", workstation, "holiday_list")

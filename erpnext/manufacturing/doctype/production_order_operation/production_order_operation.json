@@ -148,7 +148,8 @@
    "no_copy": 1, 
    "permlevel": 0, 
    "precision": "", 
-   "reqd": 1
+   "read_only": 1, 
+   "reqd": 0
   }, 
   {
    "fieldname": "planned_end_time", 
@@ -158,7 +159,8 @@
    "no_copy": 1, 
    "permlevel": 0, 
    "precision": "", 
-   "reqd": 1
+   "read_only": 1, 
+   "reqd": 0
   }, 
   {
    "fieldname": "column_break_10", 
@@ -290,7 +292,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-02-23 07:55:19.368919", 
+ "modified": "2015-02-24 00:27:44.651084", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order Operation", 
