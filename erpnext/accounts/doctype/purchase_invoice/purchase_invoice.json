@@ -427,7 +427,8 @@
    "label": "Total Taxes and Charges", 
    "options": "currency", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "print_hide": 1
   }, 
   {
    "fieldname": "section_break_44", 
@@ -962,7 +963,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-24 15:24:24.402882", 
+ "modified": "2015-02-24 15:59:49.908324", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 

@@ -410,6 +410,7 @@
    "options": "currency", 
    "permlevel": 0, 
    "precision": "", 
+   "print_hide": 1, 
    "read_only": 1
   }, 
   {
@@ -856,7 +857,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-24 15:23:59.609724", 
+ "modified": "2015-02-24 16:00:36.892356", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 
