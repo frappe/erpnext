@@ -59,7 +59,7 @@
   "operations": [
    {
     "operation": "_Test Operation 1",
-    "opn_description": "_Test",
+    "description": "_Test",
     "workstation": "_Test Workstation 1",
     "time_in_mins": 60,
     "operating_cost": 100
@@ -98,7 +98,7 @@
   "operations": [
    {
     "operation": "_Test Operation 1",
-    "opn_description": "_Test",
+    "description": "_Test",
     "workstation": "_Test Workstation 1",
     "time_in_mins": 60,
     "operating_cost": 140
