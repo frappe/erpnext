@@ -17,10 +17,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.toggle_editable_price_list_rate();
 	},
 
-	onload_post_render: function() {
-		cur_frm.get_field("items").grid.set_multiple_add("item_code", "qty");
-	},
-
 	setup_queries: function() {
 		var me = this;
 

@@ -330,7 +330,7 @@ class PurchaseReceipt(BuyingController):
 						}))
 
 					# divisional loss adjustment
-					if not self.get("other_charges"):
+					if not self.get("taxes"):
 						sle_valuation_amount = flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty) * flt(d.conversion_factor),
 								self.precision("base_net_amount", d))
 

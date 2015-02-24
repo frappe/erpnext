@@ -356,8 +356,8 @@ class calculate_taxes_and_totals(object):
 			return flt(self.doc.grand_total - sum(actual_taxes_dict.values()), self.doc.precision("grand_total"))
 
 
-	def calculate_total_advance(self, parenttype, advance_parentfield):
-		if self.docstatus < 2:
+	def calculate_total_advance(self):
+		if self.doc.docstatus < 2:
 			total_allocated_amount = sum([flt(adv.allocated_amount, adv.precision("allocated_amount"))
 				for adv in self.doc.get("advances")])
 
