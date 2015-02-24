@@ -275,36 +275,36 @@ class PurchaseInvoice(BuyingController):
 		# tax table gl entries
 		valuation_tax = {}
 		for tax in self.get("taxes"):
-			if tax.category in ("Total", "Valuation and Total") and flt(tax.tax_amount):
+			if tax.category in ("Total", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.credit_to,
-						"debit": tax.add_deduct_tax == "Add" and tax.tax_amount or 0,
-						"credit": tax.add_deduct_tax == "Deduct" and tax.tax_amount or 0,
+						"debit": tax.add_deduct_tax == "Add" and tax.base_tax_amount_after_discount_amount or 0,
+						"credit": tax.add_deduct_tax == "Deduct" and tax.base_tax_amount_after_discount_amount or 0,
 						"remarks": self.remarks,
 						"cost_center": tax.cost_center
 					})
 				)
 
 			# accumulate valuation tax
-			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.tax_amount):
+			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
 				if auto_accounting_for_stock and not tax.cost_center:
 					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
 				valuation_tax.setdefault(tax.cost_center, 0)
 				valuation_tax[tax.cost_center] += \
-					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.tax_amount)
+					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
 
 		# item gl entries
 		negative_expense_to_be_booked = 0.0
 		stock_items = self.get_stock_items()
 		for item in self.get("items"):
-			if flt(item.base_amount):
+			if flt(item.base_net_amount):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.expense_account,
 						"against": self.credit_to,
-						"debit": item.base_amount,
+						"debit": item.base_net_amount,
 						"remarks": self.remarks,
 						"cost_center": item.cost_center
 					})

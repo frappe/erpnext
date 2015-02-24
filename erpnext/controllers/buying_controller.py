@@ -14,7 +14,7 @@ from erpnext.controllers.stock_controller import StockController
 
 class BuyingController(StockController):
 	def __setup__(self):
-		if hasattr(self, "items"):
+		if hasattr(self, "taxes"):
 			self.print_templates = {
 				"taxes": "templates/print_formats/includes/taxes.html"
 			}
@@ -94,16 +94,16 @@ class BuyingController(StockController):
 		for d in self.get(parentfield):
 			if d.item_code and d.item_code in stock_items:
 				stock_items_qty += flt(d.qty)
-				stock_items_amount += flt(d.base_amount)
+				stock_items_amount += flt(d.base_net_amount)
 				last_stock_item_idx = d.idx
 
-		total_valuation_amount = sum([flt(d.tax_amount) for d in self.get("taxes")
+		total_valuation_amount = sum([flt(d.base_tax_amount_after_discount_amount) for d in self.get("taxes")
 			if d.category in ["Valuation", "Valuation and Total"]])
 
 		valuation_amount_adjustment = total_valuation_amount
 		for i, item in enumerate(self.get(parentfield)):
 			if item.item_code and item.qty and item.item_code in stock_items:
-				item_proportion = flt(item.base_amount) / stock_items_amount if stock_items_amount \
+				item_proportion = flt(item.base_net_amount) / stock_items_amount if stock_items_amount \
 					else flt(item.qty) / stock_items_qty
 
 				if i == (last_stock_item_idx - 1):
@@ -124,7 +124,7 @@ class BuyingController(StockController):
 				landed_cost_voucher_amount = flt(item.landed_cost_voucher_amount) \
 					if self.doctype == "Purchase Receipt" else 0.0
 
-				item.valuation_rate = ((item.base_amount + item.item_tax_amount + rm_supp_cost
+				item.valuation_rate = ((item.base_net_amount + item.item_tax_amount + rm_supp_cost
 					 + landed_cost_voucher_amount) / qty_in_stock_uom)
 			else:
 				item.valuation_rate = 0.0

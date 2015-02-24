@@ -1,5 +1,5 @@
 {
- "autoname": "hash", 
+ "autoname": "QUOD/.#####", 
  "creation": "2013-03-07 11:42:57", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -188,6 +188,16 @@
    "width": "100px"
   }, 
   {
+   "fieldname": "net_rate", 
+   "fieldtype": "Currency", 
+   "hidden": 0, 
+   "label": "Net Rate", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "amount", 
    "fieldtype": "Currency", 
    "in_filter": 0, 
@@ -205,6 +215,16 @@
    "width": "100px"
   }, 
   {
+   "fieldname": "net_amount", 
+   "fieldtype": "Currency", 
+   "label": "Net Amount", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "col_break3", 
    "fieldtype": "Column Break", 
    "permlevel": 0
@@ -213,7 +233,7 @@
    "fieldname": "base_rate", 
    "fieldtype": "Currency", 
    "in_filter": 0, 
-   "label": "Basic Rate (Company Currency)", 
+   "label": "Rate (Company Currency)", 
    "oldfieldname": "basic_rate", 
    "oldfieldtype": "Currency", 
    "options": "Company:company:default_currency", 
@@ -224,6 +244,15 @@
    "reqd": 0, 
    "search_index": 0, 
    "width": "100px"
+  }, 
+  {
+   "fieldname": "base_net_rate", 
+   "fieldtype": "Currency", 
+   "label": "Net Rate (Company Currency)", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
   }, 
   {
    "fieldname": "base_amount", 
@@ -240,6 +269,16 @@
    "reqd": 0, 
    "search_index": 0, 
    "width": "100px"
+  }, 
+  {
+   "fieldname": "base_net_amount", 
+   "fieldtype": "Currency", 
+   "label": "Net Amount (Company Currency)", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
   }, 
   {
    "fieldname": "pricing_rule", 
@@ -349,7 +388,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-19 01:07:01.742936", 
+ "modified": "2015-02-23 00:48:08.477241", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation Item", 

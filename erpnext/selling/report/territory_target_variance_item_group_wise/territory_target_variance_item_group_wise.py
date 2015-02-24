@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
 from frappe.utils import flt
-import time
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
 
@@ -81,7 +80,7 @@ def get_target_distribution_details(filters):
 def get_achieved_details(filters):
 	start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
 
-	item_details = frappe.db.sql("""select soi.item_code, soi.qty, soi.base_amount, so.transaction_date,
+	item_details = frappe.db.sql("""select soi.item_code, soi.qty, soi.base_net_amount, so.transaction_date,
 		so.territory, MONTHNAME(so.transaction_date) as month_name
 		from `tabSales Order Item` soi, `tabSales Order` so
 		where soi.parent=so.name and so.docstatus=1 and so.transaction_date>=%s and
@@ -125,7 +124,7 @@ def get_territory_item_month_map(filters):
 				if (filters["target_on"] == "Amount"):
 					tav_dict.target = flt(td.target_amount) * month_percentage / 100
 					if ad.month_name == month:
-							tav_dict.achieved += ad.base_amount
+							tav_dict.achieved += ad.base_net_amount
 
 	return tim_map
 

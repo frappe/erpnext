@@ -114,7 +114,7 @@ def get_invoices(filters):
 
 
 def get_invoice_expense_map(invoice_list):
-	expense_details = frappe.db.sql("""select parent, expense_account, sum(base_amount) as amount
+	expense_details = frappe.db.sql("""select parent, expense_account, sum(base_net_amount) as amount
 		from `tabPurchase Invoice Item` where parent in (%s) group by parent, expense_account""" %
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 
@@ -126,7 +126,7 @@ def get_invoice_expense_map(invoice_list):
 	return invoice_expense_map
 
 def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
-	tax_details = frappe.db.sql("""select parent, account_head, sum(tax_amount) as tax_amount
+	tax_details = frappe.db.sql("""select parent, account_head, sum(base_tax_amount_after_discount_amount) as tax_amount
 		from `tabPurchase Taxes and Charges` where parent in (%s) group by parent, account_head""" %
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 

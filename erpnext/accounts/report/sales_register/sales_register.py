@@ -78,7 +78,7 @@ def get_columns(invoice_list):
 
 		tax_accounts = 	frappe.db.sql_list("""select distinct account_head
 			from `tabSales Taxes and Charges` where parenttype = 'Sales Invoice'
-			and docstatus = 1 and ifnull(tax_amount_after_discount_amount, 0) != 0
+			and docstatus = 1 and ifnull(base_tax_amount_after_discount_amount, 0) != 0
 			and parent in (%s) order by account_head""" %
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 
@@ -113,7 +113,7 @@ def get_invoices(filters):
 		conditions, filters, as_dict=1)
 
 def get_invoice_income_map(invoice_list):
-	income_details = frappe.db.sql("""select parent, income_account, sum(base_amount) as amount
+	income_details = frappe.db.sql("""select parent, income_account, sum(base_net_amount) as amount
 		from `tabSales Invoice Item` where parent in (%s) group by parent, income_account""" %
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 
@@ -126,7 +126,7 @@ def get_invoice_income_map(invoice_list):
 
 def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts):
 	tax_details = frappe.db.sql("""select parent, account_head,
-		sum(tax_amount_after_discount_amount) as tax_amount
+		sum(base_tax_amount_after_discount_amount) as tax_amount
 		from `tabSales Taxes and Charges` where parent in (%s) group by parent, account_head""" %
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 

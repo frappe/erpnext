@@ -1,6 +1,21 @@
+{%- macro render_discount_amount(doc) -%}
+	{%- if doc.discount_amount -%}
+		<div class="row">
+			<div class="col-xs-5 text-right">
+				<label>{{ "Discount Amount" }}</label></div>
+			<div class="col-xs-7 text-right">
+				- {{ doc.get_formatted("discount_amount", doc) }}
+			</div>
+		</div>
+	{%- endif -%}
+{%- endmacro -%}
+
 <div class="row">
 	<div class="col-xs-6"></div>
 	<div class="col-xs-6">
+		{%- if doc.apply_discount_on == "Net Total" -%}
+			{{ render_discount_amount(doc) }}
+		{%- endif -%}
 		{%- for charge in data -%}
 			{%- if not charge.included_in_print_rate -%}
 			<div class="row">
@@ -13,5 +28,8 @@
 			</div>
 			{%- endif -%}
 		{%- endfor -%}
+		{%- if doc.apply_discount_on == "Grand Total" -%}
+			{{ render_discount_amount(doc) }}
+		{%- endif -%}
 	</div>
 </div>

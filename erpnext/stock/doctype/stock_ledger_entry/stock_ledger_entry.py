@@ -53,7 +53,7 @@ class StockLedgerEntry(Document):
 
 	def validate_item(self):
 		item_det = frappe.db.sql("""select name, has_batch_no, docstatus,
-			is_stock_item, has_variants
+			is_stock_item, has_variants, stock_uom
 			from tabItem where name=%s""", self.item_code, as_dict=True)[0]
 
 		if item_det.is_stock_item != 'Yes':

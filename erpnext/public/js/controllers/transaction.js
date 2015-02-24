@@ -274,23 +274,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.apply_pricing_rule(frappe.get_doc(cdt, cdn), true);
 	},
 
-	// tax rate
-	rate: function(doc, cdt, cdn) {
-		this.calculate_taxes_and_totals();
-	},
-
-	row_id: function(doc, cdt, cdn) {
-		var tax = frappe.get_doc(cdt, cdn);
-		try {
-			this.validate_on_previous_row(tax);
-			this.calculate_taxes_and_totals();
-		} catch(e) {
-			tax.row_id = null;
-			refresh_field("row_id", tax.name, tax.parentfield);
-			throw e;
-		}
-	},
-
 	set_dynamic_labels: function() {
 		// What TODO? should we make price list system non-mandatory?
 		this.frm.toggle_reqd("plc_conversion_rate",
@@ -300,6 +283,113 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.change_form_labels(company_currency);
 		this.change_grid_labels(company_currency);
 		this.frm.refresh_fields();
+	},
+
+	change_form_labels: function(company_currency) {
+		var me = this;
+		var field_label_map = {};
+
+		var setup_field_label_map = function(fields_list, currency) {
+			$.each(fields_list, function(i, fname) {
+				var docfield = frappe.meta.docfield_map[me.frm.doc.doctype][fname];
+				if(docfield) {
+					var label = __(docfield.label || "").replace(/\([^\)]*\)/g, "");
+					field_label_map[fname] = label.trim() + " (" + currency + ")";
+				}
+			});
+		};
+		setup_field_label_map(["base_total", "base_net_total", "base_total_taxes_and_charges",
+			"base_discount_amount", "base_grand_total", "base_rounded_total", "base_in_words",
+			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted", "total_amount_to_pay",
+			"outstanding_amount", "total_advance", "paid_amount", "write_off_amount"], company_currency);
+
+		setup_field_label_map(["total", "net_total", "total_taxes_and_charges", "discount_amount",
+			"grand_total", "taxes_and_charges_added", "taxes_and_charges_deducted",
+			"rounded_total", "in_words"], this.frm.doc.currency);
+
+		cur_frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency
+			+ " = [?] " + company_currency)
+
+		if(this.frm.doc.price_list_currency && this.frm.doc.price_list_currency!=company_currency) {
+			cur_frm.set_df_property("plc_conversion_rate", "description", "1 " + this.frm.doc.price_list_currency
+				+ " = [?] " + company_currency)
+		}
+
+		// toggle fields
+		this.frm.toggle_display(["conversion_rate", "base_total", "base_net_total", "base_total_taxes_and_charges",
+			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted",
+			"base_grand_total", "base_rounded_total", "base_in_words", "base_discount_amount"],
+			this.frm.doc.currency != company_currency);
+
+		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"],
+			this.frm.doc.price_list_currency != company_currency);
+
+		// set labels
+		$.each(field_label_map, function(fname, label) {
+			me.frm.fields_dict[fname].set_label(label);
+		});
+
+	},
+
+	change_grid_labels: function(company_currency) {
+		var me = this;
+		var field_label_map = {};
+
+		var setup_field_label_map = function(fields_list, currency, parentfield) {
+			var grid_doctype = me.frm.fields_dict[parentfield].grid.doctype;
+			$.each(fields_list, function(i, fname) {
+				var docfield = frappe.meta.docfield_map[grid_doctype][fname];
+				if(docfield) {
+					var label = __(docfield.label || "").replace(/\([^\)]*\)/g, "");
+					field_label_map[grid_doctype + "-" + fname] =
+						label.trim() + " (" + currency + ")";
+				}
+			});
+		}
+
+		setup_field_label_map(["base_rate", "base_net_rate", "base_price_list_rate", "base_amount", "base_net_amount"],
+			company_currency, "items");
+
+		setup_field_label_map(["rate", "net_rate", "price_list_rate", "amount", "net_amount"],
+			this.frm.doc.currency, "items");
+
+		if(this.frm.fields_dict["taxes"]) {
+			setup_field_label_map(["tax_amount", "total", "tax_amount_after_discount"], this.frm.doc.currency, "taxes");
+
+			setup_field_label_map(["base_tax_amount", "base_total", "base_tax_amount_after_discount"], company_currency, "taxes");
+		}
+
+		if(this.frm.fields_dict["advances"]) {
+			setup_field_label_map(["advance_amount", "allocated_amount"], company_currency, "advances");
+		}
+
+		// toggle columns
+		var item_grid = this.frm.fields_dict["items"].grid;
+		$.each(["base_rate", "base_price_list_rate", "base_amount"], function(i, fname) {
+			if(frappe.meta.get_docfield(item_grid.doctype, fname))
+				item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
+		});
+
+		var show = (cint(cur_frm.doc.discount_amount)) ||
+			((cur_frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length);
+
+		$.each(["net_rate", "net_amount"], function(i, fname) {
+			if(frappe.meta.get_docfield(item_grid.doctype, fname))
+				item_grid.set_column_disp(fname, show);
+		});
+
+		$.each(["base_net_rate", "base_net_amount"], function(i, fname) {
+			if(frappe.meta.get_docfield(item_grid.doctype, fname))
+				item_grid.set_column_disp(fname, (show && (me.frm.doc.currency != company_currency)));
+		});
+
+		// set labels
+		var $wrapper = $(this.frm.wrapper);
+		$.each(field_label_map, function(fname, label) {
+			fname = fname.split("-");
+			var df = frappe.meta.get_docfield(fname[0], fname[1], me.frm.doc.name);
+			if(df) df.label = label;
+		});
 	},
 
 	recalculate: function() {
@@ -409,9 +499,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	apply_price_list: function(item) {
 		var me = this;
 		var args = this._get_args(item);
-		if(!args.item_list.length) {
-			return;
-		}
+
 		return this.frm.call({
 			method: "erpnext.stock.get_item_details.apply_price_list",
 			args: {	args: args },
@@ -421,64 +509,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					me.frm.set_value("price_list_currency", r.message.parent.price_list_currency);
 					me.frm.set_value("plc_conversion_rate", r.message.parent.plc_conversion_rate);
 					me.in_apply_price_list = false;
-					me._set_values_for_item_list(r.message.children);
+
+					if(args.item_list.length) {
+						me._set_values_for_item_list(r.message.children);
+					}
 				}
 			}
 		});
-	},
-
-	included_in_print_rate: function(doc, cdt, cdn) {
-		var tax = frappe.get_doc(cdt, cdn);
-		try {
-			this.validate_on_previous_row(tax);
-			this.validate_inclusive_tax(tax);
-			this.calculate_taxes_and_totals();
-		} catch(e) {
-			tax.included_in_print_rate = 0;
-			refresh_field("included_in_print_rate", tax.name, tax.parentfield);
-			throw e;
-		}
-	},
-
-	validate_on_previous_row: function(tax) {
-		// validate if a valid row id is mentioned in case of
-		// On Previous Row Amount and On Previous Row Total
-		if((["On Previous Row Amount", "On Previous Row Total"].indexOf(tax.charge_type) != -1) &&
-			(!tax.row_id || cint(tax.row_id) >= tax.idx)) {
-				var msg = __("Please specify a valid Row ID for row {0} in table {1}", [tax.idx, __(tax.doctype)])
-				frappe.throw(msg);
-			}
-	},
-
-	validate_inclusive_tax: function(tax) {
-		var actual_type_error = function() {
-			var msg = __("Actual type tax cannot be included in Item rate in row {0}", [tax.idx])
-			frappe.throw(msg);
-		};
-
-		var on_previous_row_error = function(row_range) {
-			var msg = __("For row {0} in {1}. To include {2} in Item rate, rows {3} must also be included",
-				[tax.idx, __(tax.doctype), tax.charge_type, row_range])
-			frappe.throw(msg);
-		};
-
-		if(cint(tax.included_in_print_rate)) {
-			if(tax.charge_type == "Actual") {
-				// inclusive tax cannot be of type Actual
-				actual_type_error();
-			} else if(tax.charge_type == "On Previous Row Amount" &&
-				!cint(this.frm.doc["taxes"][tax.row_id - 1].included_in_print_rate)) {
-					// referred row should also be an inclusive tax
-					on_previous_row_error(tax.row_id);
-			} else if(tax.charge_type == "On Previous Row Total") {
-				var taxes_not_included = $.map(this.frm.doc["taxes"].slice(0, tax.row_id),
-					function(t) { return cint(t.included_in_print_rate) ? null : t; });
-				if(taxes_not_included.length > 0) {
-					// all rows above this tax should be inclusive
-					on_previous_row_error(tax.row_id == 1 ? "1" : "1 - " + tax.row_id);
-				}
-			}
-		}
 	},
 
 	get_item_wise_taxes_html: function() {
@@ -560,24 +597,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		return valid;
 	},
 
-	validate_conversion_rate: function() {
-		this.frm.doc.conversion_rate = flt(this.frm.doc.conversion_rate, precision("conversion_rate"));
-		var conversion_rate_label = frappe.meta.get_label(this.frm.doc.doctype, "conversion_rate",
-			this.frm.doc.name);
-		var company_currency = this.get_company_currency();
-
-		if(!this.frm.doc.conversion_rate) {
-			frappe.throw(repl('%(conversion_rate_label)s' +
-				__(' is mandatory. Maybe Currency Exchange record is not created for ') +
-				'%(from_currency)s' + __(" to ") + '%(to_currency)s',
-				{
-					"conversion_rate_label": conversion_rate_label,
-					"from_currency": this.frm.doc.currency,
-					"to_currency": company_currency
-				}));
-		}
-	},
-
 	get_terms: function() {
 		var me = this;
 		if(this.frm.doc.tc_name) {
@@ -656,3 +675,40 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	}
 });
+
+frappe.ui.form.on(cur_frm.doctype + "Item", "rate", function(frm, cdt, cdn) {
+	var item = frappe.get_doc(cdt, cdn);
+	frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);
+
+	if(item.price_list_rate) {
+		item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0, precision("discount_percentage", item));
+	} else {
+		item.discount_percentage = 0.0;
+	}
+
+	cur_frm.cscript.calculate_taxes_and_totals();
+})
+
+frappe.ui.form.on(cur_frm.cscript.tax_table, "rate", function(frm, cdt, cdn) {
+	cur_frm.cscript.calculate_taxes_and_totals();
+})
+
+frappe.ui.form.on(cur_frm.cscript.tax_table, "tax_amount", function(frm, cdt, cdn) {
+	cur_frm.cscript.calculate_taxes_and_totals();
+})
+
+frappe.ui.form.on(cur_frm.cscript.tax_table, "row_id", function(frm, cdt, cdn) {
+	cur_frm.cscript.calculate_taxes_and_totals();
+})
+
+frappe.ui.form.on(cur_frm.cscript.tax_table, "included_in_print_rate", function(frm, cdt, cdn) {
+	cur_frm.cscript.calculate_taxes_and_totals();
+})
+
+frappe.ui.form.on(cur_frm.doctype, "apply_discount_on", function(frm) {
+	cur_frm.cscript.calculate_taxes_and_totals();
+})
+
+frappe.ui.form.on(cur_frm.doctype, "discount_amount", function(frm) {
+	cur_frm.cscript.calculate_taxes_and_totals();
+})

@@ -4,7 +4,6 @@
 frappe.provide("erpnext.buying");
 
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
-{% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
 	refresh: function(doc, cdt, cdn) {

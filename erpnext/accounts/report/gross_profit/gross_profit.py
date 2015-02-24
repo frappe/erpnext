@@ -95,7 +95,7 @@ class GrossProfitGenerator(object):
 			if self.skip_row(row, self.sales_boms):
 				continue
 
-			row.selling_amount = flt(row.base_amount)
+			row.selling_amount = flt(row.base_net_amount)
 
 			sales_boms = self.sales_boms.get(row.parenttype, {}).get(row.name, frappe._dict())
 
@@ -175,7 +175,7 @@ class GrossProfitGenerator(object):
 		# sorted by posting_date desc, posting_time desc
 		if item_code in self.non_stock_items:
 			# average purchasing rate for non-stock items
-			item_rate = frappe.db.sql("""select sum(base_amount) / sum(qty)
+			item_rate = frappe.db.sql("""select sum(base_net_amount) / sum(qty)
 				from `tabPurchase Invoice Item`
 				where item_code = %s and docstatus=1""", item_code)
 
@@ -211,7 +211,7 @@ class GrossProfitGenerator(object):
 				si.customer, si.customer_group, si.territory,
 				item.item_code, item.item_name, item.description, item.warehouse,
 				item.item_group, item.brand, item.dn_detail, item.delivery_note,
-				item.qty, item.base_rate, item.base_amount, item.name as "item_row",
+				item.qty, item.base_net_rate, item.base_net_amount, item.name as "item_row",
 				sales.sales_person, sales.sales_designation, sales.allocated_amount,
 				sales.incentives
 			from `tabSales Invoice` si

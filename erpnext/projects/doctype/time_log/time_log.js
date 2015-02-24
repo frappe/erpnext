@@ -77,7 +77,6 @@ $.extend(cur_frm.cscript, {
 			},
 			callback: function(r) {
 				if(!r.exc) {
-					console.log(r.message)
 					cur_frm.set_value("workstation", r.message)
 				}
 			}

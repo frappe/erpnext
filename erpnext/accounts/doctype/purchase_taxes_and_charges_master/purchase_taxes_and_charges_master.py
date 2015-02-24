@@ -2,8 +2,11 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
 from frappe.model.document import Document
+from erpnext.controllers.accounts_controller import validate_taxes_and_charges, validate_inclusive_tax
 
 class PurchaseTaxesandChargesMaster(Document):
-	pass
+	def validate(self):
+		for tax in self.get("taxes"):
+			validate_taxes_and_charges(tax)
+			validate_inclusive_tax(tax, self)
