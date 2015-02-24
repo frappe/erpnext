@@ -374,30 +374,23 @@ def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 				item.expense_account as expense_account,
 				item.buying_cost_center as cost_center
 			from
-				`tab%(table)s` bom_item, `tabBOM` bom, `tabItem` item
+				`tab{table}` bom_item, `tabBOM` bom, `tabItem` item
 			where
 				bom_item.parent = bom.name
 				and bom_item.docstatus < 2
-				and bom_item.parent = "%(bom)s"
+				and bom_item.parent = %(bom)s
 				and item.name = bom_item.item_code
-				%(conditions)s
+				{conditions}
 				group by item_code, stock_uom"""
 
 	if fetch_exploded:
-		items = frappe.db.sql(query % {
-			"qty": qty,
-			"table": "BOM Explosion Item",
-			"bom": bom,
-			"conditions": """and ifnull(item.is_pro_applicable, 'No') = 'No'
-					and ifnull(item.is_sub_contracted_item, 'No') = 'No' """
-		}, as_dict=True)
+		query = query.format(table="BOM Explosion Item",
+			conditions="""and ifnull(item.is_pro_applicable, 'No') = 'No'
+				and ifnull(item.is_sub_contracted_item, 'No') = 'No' """)
+		items = frappe.db.sql(query, { "qty": qty,	"bom": bom }, as_dict=True)
 	else:
-		items = frappe.db.sql(query % {
-			"qty": qty,
-			"table": "BOM Item",
-			"bom": bom,
-			"conditions": ""
-		}, as_dict=True)
+		query = query.format(table="BOM Item", conditions="")
+		items = frappe.db.sql(query, { "qty": qty, "bom": bom }, as_dict=True)
 
 	# make unique
 	for item in items:

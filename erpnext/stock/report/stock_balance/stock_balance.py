@@ -22,7 +22,7 @@ def execute(filters=None):
 					item_map[item]["item_group"],
 					item_map[item]["brand"],
 					item_map[item]["description"], wh,
-					qty_dict.uom, qty_dict.opening_qty,
+					item_map[item]["stock_uom"], qty_dict.opening_qty,
 					qty_dict.opening_val, qty_dict.in_qty,
 					qty_dict.in_val, qty_dict.out_qty,
 					qty_dict.out_val, qty_dict.bal_qty,
@@ -36,7 +36,7 @@ def get_columns(filters):
 	"""return columns based on filters"""
 
 	columns = ["Item:Link/Item:100", "Item Name::150", "Item Group::100", "Brand::90", \
-	"Description::140", "Warehouse:Link/Warehouse:100", "Stock UOM::90", "Opening Qty:Float:100", \
+	"Description::140", "Warehouse:Link/Warehouse:100", "Stock UOM:Link/UOM:90", "Opening Qty:Float:100", \
 	"Opening Value:Float:110", "In Qty:Float:80", "In Value:Float:80", "Out Qty:Float:80", \
 	"Out Value:Float:80", "Balance Qty:Float:100", "Balance Value:Float:100", \
 	"Valuation Rate:Float:90", "Company:Link/Company:100"]
@@ -62,7 +62,7 @@ def get_conditions(filters):
 def get_stock_ledger_entries(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select item_code, warehouse, posting_date, actual_qty, valuation_rate,
-	stock_uom, company, voucher_type, qty_after_transaction, stock_value_difference
+	company, voucher_type, qty_after_transaction, stock_value_difference
 		from `tabStock Ledger Entry`
 		where docstatus < 2 %s order by posting_date, posting_time, name""" %
 		conditions, as_dict=1)
@@ -81,7 +81,6 @@ def get_item_warehouse_map(filters):
 				"val_rate": 0.0, "uom": None
 			}))
 		qty_dict = iwb_map[d.company][d.item_code][d.warehouse]
-		qty_dict.uom = d.stock_uom
 
 		if d.voucher_type == "Stock Reconciliation":
 			qty_diff = flt(d.qty_after_transaction) - qty_dict.bal_qty
@@ -109,7 +108,7 @@ def get_item_warehouse_map(filters):
 
 def get_item_details(filters):
 	item_map = {}
-	for d in frappe.db.sql("select name, item_name, item_group, brand, \
+	for d in frappe.db.sql("select name, item_name, stock_uom, item_group, brand, \
 		description from tabItem", as_dict=1):
 		item_map.setdefault(d.name, d)
 

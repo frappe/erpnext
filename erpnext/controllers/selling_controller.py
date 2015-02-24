@@ -215,6 +215,7 @@ class SellingController(StockController):
 					'qty': d.qty,
 					'reserved_qty': reserved_qty_for_main_item,
 					'uom': d.stock_uom,
+                                        'stock_uom': d.stock_uom,
 					'batch_no': cstr(d.get("batch_no")).strip(),
 					'serial_no': cstr(d.get("serial_no")).strip(),
 					'name': d.name
