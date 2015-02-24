@@ -105,8 +105,7 @@ $.extend(shopping_cart, {
 
 	render_item_row: function($cart_items, doc) {
 		doc.image_html = doc.website_image ?
-			'<div style="height: 120px; overflow: hidden;"><img src="' + doc.website_image + '" /></div>' :
-			'{% include "templates/includes/product_missing_image.html" %}';
+		'<div style="height: 120px; overflow: hidden;"><img src="' + doc.website_image + '" /></div>': "";
 
 		if(doc.description === doc.item_name) doc.description = "";
 
@@ -265,7 +264,7 @@ $.extend(shopping_cart, {
 						.html(msg || frappe._("Something went wrong!"))
 						.toggle(true);
 				} else {
-					window.location.href = "order?name=" + encodeURIComponent(r.message);
+					window.location.href = "/orders/" + encodeURIComponent(r.message);
 				}
 			}
 		});

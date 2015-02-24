@@ -1,6 +1,7 @@
 frappe.listview_settings['Item'] = {
 	add_fields: ["item_name", "stock_uom", "item_group", "image", "variant_of",
 		"has_variants", "end_of_life", "is_sales_item"],
+
 	get_indicator: function(doc) {
 		if(doc.end_of_life < frappe.datetime.get_today()) {
 			return [__("Expired"), "grey", "end_of_life,<,Today"]

@@ -1,8 +1,8 @@
+{% from "erpnext/templates/includes/macros.html" import product_image_square %}
+
 <a class="product-link" href="{{ route or page_name }}">
-	<div class="col-sm-2 product-image-wrapper">
-		<div class="product-image {% if not website_image -%}missing-image{%- endif %}"
-			{% if website_image -%} style="background-image: url({{ website_image }});" {%- endif %}>
-		</div>
+	<div class="col-sm-2 col-xs-4 product-image-wrapper">
+		{{ product_image_square(website_image) }}
 		<div class="product-text small">{{ item_name }}</div>
 	</div>
 </a>

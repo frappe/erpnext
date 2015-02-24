@@ -45,22 +45,16 @@ $.extend(shopping_cart, {
 
 	set_cart_count: function() {
 		var cart_count = getCookie("cart_count");
-		var $cart = $("#website-post-login").find('[data-label="Cart"]');
+		var $cart = $('.dropdown [data-label="Cart"]');
 		var $badge = $cart.find(".badge");
-		var $cog = $("#website-post-login").find(".dropdown-toggle");
-		var $cog_count = $cog.find(".cart-count");
 		if(cart_count) {
 			if($badge.length === 0) {
-				var $badge = $('<span class="badge pull-right"></span>').prependTo($cart.find("a"));
+				var $badge = $('<span class="badge pull-right"></span>')
+					.prependTo($cart.find("a").addClass("badge-hover"));
 			}
 			$badge.html(cart_count);
-			if($cog_count.length === 0) {
-				var $cog_count = $('<sup class="cart-count"></span>').insertAfter($cog.find(".icon-cog"));
-			}
-			$cog_count.html(cart_count);
 		} else {
 			$badge.remove();
-			$cog_count.remove();
 		}
 	}
 });

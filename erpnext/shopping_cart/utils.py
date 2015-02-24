@@ -25,7 +25,7 @@ def clear_cart_count(login_manager):
 	if show_cart_count():
 		frappe.local.cookie_manager.delete_cookie("cart_count")
 
-def update_website_params(context):
+def update_website_context(context):
 	cart_enabled = is_cart_enabled()
 	context["shopping_cart_enabled"] = cart_enabled
 
@@ -44,6 +44,6 @@ def update_my_account_context(context):
 		{"label": _("Orders"), "url": "orders"},
 		{"label": _("Invoices"), "url": "invoices"},
 		{"label": _("Shipments"), "url": "shipments"},
-		{"label": _("Issues"), "url": "tickets"},
+		# {"label": _("Issues"), "url": "tickets"},
 		{"label": _("Addresses"), "url": "addresses"},
 	])
