@@ -386,3 +386,5 @@ def validate_inclusive_tax(tax, doc):
 				not all([cint(t.included_in_print_rate) for t in doc.get("taxes")[:cint(tax.row_id) - 1]]):
 			# all rows about the reffered tax should be inclusive
 			_on_previous_row_error("1 - %d" % (tax.row_id,))
+		elif tax.category == "Valuation":
+			frappe.throw(_("Valuation type charges can not marked as Inclusive"))

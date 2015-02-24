@@ -76,6 +76,8 @@ cur_frm.cscript.validate_inclusive_tax = function(tax) {
 				// all rows above this tax should be inclusive
 				on_previous_row_error(tax.row_id == 1 ? "1" : "1 - " + tax.row_id);
 			}
+		} else if(tax.category == "Valuation") {
+			frappe.throw(__("Valuation type charges can not marked as Inclusive"));
 		}
 	}
 }
