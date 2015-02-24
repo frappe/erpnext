@@ -685,7 +685,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	}
 });
 
-frappe.ui.form.on(cur_frm.doctype + "Item", "rate", function(frm, cdt, cdn) {
+frappe.ui.form.on(cur_frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 	var item = frappe.get_doc(cdt, cdn);
 	frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);
 

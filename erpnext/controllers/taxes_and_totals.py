@@ -214,10 +214,10 @@ class calculate_taxes_and_totals(object):
 				# note: grand_total_for_current_item contains the contribution of
 				# item's amount, previously applied tax and the current tax on that item
 				if i==0:
-					tax.grand_total_for_current_item = flt(item.net_amount + current_tax_amount)
+					tax.grand_total_for_current_item = flt(item.net_amount + current_tax_amount, tax.precision("total"))
 				else:
 					tax.grand_total_for_current_item = \
-						self.doc.get("taxes")[i-1].grand_total_for_current_item + current_tax_amount
+						flt(self.doc.get("taxes")[i-1].grand_total_for_current_item + current_tax_amount, tax.precision("total_taxes_and_charges"))
 
 				# in tax.total, accumulate grand total of each item
 				tax.total += tax.grand_total_for_current_item
@@ -249,7 +249,7 @@ class calculate_taxes_and_totals(object):
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.doc.get("taxes")[cint(tax.row_id) - 1].grand_total_for_current_item
 
-		# current_tax_amount = flt(current_tax_amount, tax.precision("tax_amount", tax))
+		current_tax_amount = flt(current_tax_amount, tax.precision("tax_amount"))
 
 		self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 

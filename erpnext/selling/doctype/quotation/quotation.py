@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr
 from frappe.model.mapper import get_mapped_doc
 from frappe import _
 
@@ -18,20 +17,11 @@ class Quotation(SellingController):
 		super(Quotation, self).validate()
 		self.set_status()
 		self.validate_order_type()
-		self.validate_for_items()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_quotation_to()
 
 	def has_sales_order(self):
 		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
-
-	def validate_for_items(self):
-		chk_dupl_itm = []
-		for d in self.get('items'):
-			if [cstr(d.item_code),cstr(d.description)] in chk_dupl_itm:
-				frappe.throw(_("Item {0} with same description entered twice").format(d.item_code))
-			else:
-				chk_dupl_itm.append([cstr(d.item_code),cstr(d.description)])
 
 	def validate_order_type(self):
 		super(Quotation, self).validate_order_type()
@@ -169,7 +159,6 @@ def _make_customer(source_name, ignore_permissions=False):
 				else:
 					raise
 			except frappe.MandatoryError:
-				from frappe.utils import get_url_to_form
 				frappe.throw(_("Please create Customer from Lead {0}").format(lead_name))
 		else:
 			return customer_name

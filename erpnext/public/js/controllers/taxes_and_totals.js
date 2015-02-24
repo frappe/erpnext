@@ -238,10 +238,10 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				// note: grand_total_for_current_item contains the contribution of
 				// item's amount, previously applied tax and the current tax on that item
 				if(i==0) {
-					tax.grand_total_for_current_item = flt(item.net_amount + current_tax_amount);
+					tax.grand_total_for_current_item = flt(item.net_amount + current_tax_amount, precision("total", tax));
 				} else {
 					tax.grand_total_for_current_item =
-						flt(me.frm.doc["taxes"][i-1].grand_total_for_current_item + current_tax_amount);
+						flt(me.frm.doc["taxes"][i-1].grand_total_for_current_item + current_tax_amount, precision("total", tax));
 				}
 
 				// in tax.total, accumulate grand total for each item
@@ -285,7 +285,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_for_current_item;
 		}
 
-		// current_tax_amount = flt(current_tax_amount, precision("tax_amount", tax));
+		current_tax_amount = flt(current_tax_amount, precision("tax_amount", tax));
 
 		this.set_item_wise_tax(item, tax, tax_rate, current_tax_amount);
 
