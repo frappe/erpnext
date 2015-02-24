@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe
 from frappe.templates.pages.style_settings import default_properties
 
