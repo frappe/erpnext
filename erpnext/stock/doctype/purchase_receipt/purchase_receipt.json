@@ -274,7 +274,7 @@
    "options": "currency", 
    "permlevel": 0, 
    "precision": "", 
-   "print_hide": 1, 
+   "print_hide": 0, 
    "read_only": 1
   }, 
   {
@@ -285,7 +285,7 @@
    "oldfieldtype": "Currency", 
    "options": "currency", 
    "permlevel": 0, 
-   "print_hide": 0, 
+   "print_hide": 1, 
    "read_only": 1
   }, 
   {
@@ -849,7 +849,7 @@
  "icon": "icon-truck", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-23 15:16:36.617354", 
+ "modified": "2015-02-24 15:24:11.158048", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt", 

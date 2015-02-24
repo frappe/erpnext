@@ -377,7 +377,7 @@
    "options": "currency", 
    "permlevel": 0, 
    "precision": "", 
-   "print_hide": 1, 
+   "print_hide": 0, 
    "read_only": 1
   }, 
   {
@@ -386,6 +386,7 @@
    "label": "Net Total", 
    "options": "currency", 
    "permlevel": 0, 
+   "print_hide": 1, 
    "read_only": 1
   }, 
   {
@@ -507,7 +508,8 @@
    "fieldtype": "Currency", 
    "label": "Discount Amount", 
    "options": "currency", 
-   "permlevel": 0
+   "permlevel": 0, 
+   "print_hide": 1
   }, 
   {
    "fieldname": "base_discount_amount", 
@@ -1065,7 +1067,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2015-02-23 15:49:10.972483", 
+ "modified": "2015-02-24 15:23:10.431286", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note", 
