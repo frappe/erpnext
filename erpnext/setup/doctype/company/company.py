@@ -106,27 +106,29 @@ class Company(Document):
 		account.insert()
 
 	def set_default_accounts(self):
-		def _set_default_account(fieldname, account_type):
-			if self.get(fieldname):
-				return
+		self._set_default_account("default_cash_account", "Cash")
+		self._set_default_account("default_bank_account", "Bank")
 
-			account = frappe.db.get_value("Account", {"account_type": account_type,
-				"group_or_ledger": "Ledger", "company": self.name})
-
-			if account:
-				self.db_set(fieldname, account)
-
-		_set_default_account("default_cash_account", "Cash")
-		_set_default_account("default_bank_account", "Bank")
-
-		if cint(frappe.db.get_value("Accounts Settings", None, "auto_accounting_for_stock")):
-			_set_default_account("stock_received_but_not_billed", "Stock Received But Not Billed")
-			_set_default_account("stock_adjustment_account", "Stock Adjustment")
-			_set_default_account("expenses_included_in_valuation", "Expenses Included In Valuation")
+		if cint(frappe.db.get_single_value("Accounts Settings", "auto_accounting_for_stock")):
+			self._set_default_account("stock_received_but_not_billed", "Stock Received But Not Billed")
+			self._set_default_account("stock_adjustment_account", "Stock Adjustment")
+			self._set_default_account("expenses_included_in_valuation", "Expenses Included In Valuation")
+			self._set_default_account("default_expense_account", "Cost of Goods Sold")
 
 		if not self.default_income_account:
 			self.db_set("default_income_account", frappe.db.get_value("Account",
 				{"account_name": _("Sales"), "company": self.name}))
+
+
+	def _set_default_account(self, fieldname, account_type):
+		if self.get(fieldname):
+			return
+
+		account = frappe.db.get_value("Account", {"account_type": account_type,
+			"group_or_ledger": "Ledger", "company": self.name})
+
+		if account:
+			self.db_set(fieldname, account)
 
 	def create_default_cost_center(self):
 		cc_list = [

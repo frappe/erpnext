@@ -386,6 +386,15 @@
    "read_only": 1
   }, 
   {
+   "description": "This will override Difference Account in Item", 
+   "fieldname": "difference_account", 
+   "fieldtype": "Link", 
+   "label": "Difference Account", 
+   "options": "Account", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "fold", 
    "fieldtype": "Fold", 
    "permlevel": 0
@@ -645,7 +654,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2015-02-25 01:59:14.371042", 
+ "modified": "2015-02-25 06:13:11.899840", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 

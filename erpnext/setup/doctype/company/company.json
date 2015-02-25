@@ -188,7 +188,7 @@
    "fieldname": "default_expense_account", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
-   "label": "Default Expense Account", 
+   "label": "Default Cost of Goods Sold Account", 
    "no_copy": 1, 
    "options": "Account", 
    "permlevel": 0
@@ -399,7 +399,7 @@
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2015-02-21 10:32:38.523900", 
+ "modified": "2015-02-25 06:28:13.565128", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 
