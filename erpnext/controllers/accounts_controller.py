@@ -370,6 +370,15 @@ def validate_taxes_and_charges(tax):
 		elif tax.row_id and cint(tax.row_id) >= cint(tax.idx):
 			frappe.throw(_("Cannot refer row number greater than or equal to current row number for this Charge type"))
 
+	if tax.charge_type == "Actual":
+		if not tax.tax_amount:
+			frappe.throw(_("Amount is mandatory for charge type 'Actual'"))
+		tax.rate = None
+	else:
+		if not tax.rate:
+			frappe.throw(_("Rate is mandatory for charge type '{0}'").format(tax.charge_type))
+		tax.tax_amount = None
+
 def validate_inclusive_tax(tax, doc):
 	def _on_previous_row_error(row_range):
 		throw(_("To include tax in row {0} in Item rate, taxes in rows {1} must also be included").format(tax.idx,

@@ -199,8 +199,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.hide_fields(this.frm.doc);
 	},
 
-	items_on_form_rendered: function(doc, grid_row) {
-		erpnext.setup_serial_no(grid_row)
+	items_on_form_rendered: function() {
+		erpnext.setup_serial_no();
 	}
 
 });

@@ -126,3 +126,4 @@ erpnext.patches.v5_0.item_patches
 erpnext.patches.v5_0.update_journal_entry_title
 erpnext.patches.v5_0.taxes_and_totals_in_party_currency
 erpnext.patches.v5_0.replace_renamed_fields_in_custom_scripts_and_print_formats
+execute:frappe.db.sql("update `tabStock Entry` set from_bom = if(ifnull(bom_no, '')='', 0, 1)")

@@ -79,7 +79,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	},
 
 	items_on_form_rendered: function(doc, grid_row) {
-		erpnext.setup_serial_no(grid_row)
+		erpnext.setup_serial_no();
 	}
 
 });

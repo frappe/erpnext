@@ -150,7 +150,7 @@ class update_entries_after(object):
 				return
 
 		if sle.serial_no:
-			self.valuation_rate = self.get_serialized_values(sle)
+			self.get_serialized_values(sle)
 			self.qty_after_transaction += flt(sle.actual_qty)
 			self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 		else:
@@ -208,12 +208,14 @@ class update_entries_after(object):
 		if incoming_rate < 0:
 			# wrong incoming rate
 			incoming_rate = self.valuation_rate
-		elif incoming_rate == 0 or flt(sle.actual_qty) < 0:
-			# In case of delivery/stock issue, get average purchase rate
-			# of serial nos of current entry
-			incoming_rate = flt(frappe.db.sql("""select avg(ifnull(purchase_rate, 0))
-				from `tabSerial No` where name in (%s)""" % (", ".join(["%s"]*len(serial_no))),
-				tuple(serial_no))[0][0])
+
+		elif incoming_rate == 0:
+			if flt(sle.actual_qty) < 0:
+				# In case of delivery/stock issue, get average purchase rate
+				# of serial nos of current entry
+				incoming_rate = flt(frappe.db.sql("""select avg(ifnull(purchase_rate, 0))
+					from `tabSerial No` where name in (%s)""" % (", ".join(["%s"]*len(serial_no))),
+					tuple(serial_no))[0][0])
 
 		if incoming_rate and not self.valuation_rate:
 			self.valuation_rate = incoming_rate

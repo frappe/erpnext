@@ -20,3 +20,4 @@ class SalesTaxesandChargesMaster(Document):
 			validate_taxes_and_charges(tax)
 			validate_inclusive_tax(tax, self)
 
+

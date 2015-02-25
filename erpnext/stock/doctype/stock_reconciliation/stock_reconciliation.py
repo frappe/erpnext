@@ -10,12 +10,18 @@ from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.utils import get_stock_balance
 
+class OpeningEntryAccountError(frappe.ValidationError): pass
+
 class StockReconciliation(StockController):
 	def __init__(self, arg1, arg2=None):
 		super(StockReconciliation, self).__init__(arg1, arg2)
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
 
 	def validate(self):
+		if not self.expense_account:
+			self.expense_account = frappe.db.get_value("Company", self.company, "stock_adjustment_account")
+		if not self.cost_center:
+			self.cost_center = frappe.db.get_value("Company", self.company, "cost_center")
 		self.validate_posting_time()
 		self.remove_items_with_no_change()
 		self.validate_data()
@@ -215,7 +221,12 @@ class StockReconciliation(StockController):
 			msgprint(_("Please enter Expense Account"), raise_exception=1)
 		elif not frappe.db.sql("""select name from `tabStock Ledger Entry` limit 1"""):
 			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
-				frappe.throw(_("Difference Account must be a 'Liability' type account, since this Stock Reconciliation is an Opening Entry"))
+				frappe.throw(_("Difference Account must be a 'Liability' type account, since this Stock Reconciliation is an Opening Entry"), OpeningEntryAccountError)
+
+	def get_items_for(self, warehouse):
+		self.items = []
+		for item in get_items(warehouse, self.posting_date, self.posting_time):
+			self.append("items", item)
 
 @frappe.whitelist()
 def get_items(warehouse, posting_date, posting_time):

@@ -274,7 +274,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	items_on_form_rendered: function(doc, grid_row) {
-		erpnext.setup_serial_no(grid_row)
+		erpnext.setup_serial_no();
 	},
 
 	customer: function() {

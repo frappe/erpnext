@@ -282,14 +282,15 @@ class StockEntry(StockController):
 	def add_operation_cost(self, raw_material_cost, force):
 		"""Adds operating cost if Production Order is set"""
 		# set incoming rate for fg item
-		if self.production_order:
-			number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
-			for d in self.get("items"):
-				if d.bom_no or (d.t_warehouse and number_of_fg_items == 1):
+		number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
+		for d in self.get("items"):
+			if (d.t_warehouse and number_of_fg_items == 1):
+				operation_cost_per_unit = 0.0
+				if self.production_order:
 					operation_cost_per_unit = self.get_operation_cost_per_unit(d.bom_no, d.qty)
-					d.incoming_rate = operation_cost_per_unit + (raw_material_cost / flt(d.transfer_qty))
-					d.amount = flt(flt(d.transfer_qty) * flt(d.incoming_rate), self.precision("transfer_qty", d))
-					break
+				d.incoming_rate = operation_cost_per_unit + (raw_material_cost / flt(d.transfer_qty))
+				d.amount = flt(flt(d.transfer_qty) * flt(d.incoming_rate), self.precision("transfer_qty", d))
+				break
 
 	def get_operation_cost_per_unit(self, bom_no, qty):
 		"""Returns operating cost from Production Order for given `bom_no`"""
@@ -510,10 +511,14 @@ class StockEntry(StockController):
 		self.set('items', [])
 		self.validate_production_order()
 
+		if not getattr(self, "pro_doc", None):
+			self.pro_doc = None
+
 		if self.production_order:
 			# common validations
-			if not getattr(self, "pro_doc", None):
+			if not self.pro_doc:
 				self.pro_doc = frappe.get_doc('Production Order', self.production_order)
+
 			if self.pro_doc:
 				self.bom_no = self.pro_doc.bom_no
 			else:

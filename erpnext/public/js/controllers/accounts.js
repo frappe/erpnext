@@ -2,6 +2,10 @@
 // License: GNU General Public License v3. See license.txt
 
 // get tax rate
+frappe.provide("erpnext.taxes");
+frappe.provide("erpnext.taxes.flags");
+
+
 cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(!d.charge_type && d.account_head){
@@ -82,33 +86,59 @@ cur_frm.cscript.validate_inclusive_tax = function(tax) {
 	}
 }
 
-frappe.ui.form.on(cur_frm.cscript.tax_table, "row_id", function(frm, cdt, cdn) {
-	cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
-});
+if(!erpnext.taxes.flags[cur_frm.cscript.tax_table]) {
+	erpnext.taxes.flags[cur_frm.cscript.tax_table] = true;
 
-frappe.ui.form.on(cur_frm.cscript.tax_table, "rate", function(frm, cdt, cdn) {
-	cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
-});
-
-frappe.ui.form.on(cur_frm.cscript.tax_table, "tax_amount", function(frm, cdt, cdn) {
-	cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
-});
-
-frappe.ui.form.on(cur_frm.cscript.tax_table, "charge_type", function(frm, cdt, cdn) {
-	cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
-});
-
-frappe.ui.form.on(cur_frm.cscript.tax_table, "included_in_print_rate", function(frm, cdt, cdn) {
-	var tax = frappe.get_doc(cdt, cdn);
-	try {
+	frappe.ui.form.on(cur_frm.cscript.tax_table, "row_id", function(frm, cdt, cdn) {
 		cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
-		cur_frm.cscript.validate_inclusive_tax(tax);
-	} catch(e) {
-		tax.included_in_print_rate = 0;
-		refresh_field("included_in_print_rate", tax.name, tax.parentfield);
-		throw e;
+	});
+
+	frappe.ui.form.on(cur_frm.cscript.tax_table, "rate", function(frm, cdt, cdn) {
+		cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
+	});
+
+	frappe.ui.form.on(cur_frm.cscript.tax_table, "tax_amount", function(frm, cdt, cdn) {
+		cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
+	});
+
+	frappe.ui.form.on(cur_frm.cscript.tax_table, "charge_type", function(frm, cdt, cdn) {
+		cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
+		erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm);
+	});
+
+	frappe.ui.form.on(cur_frm.cscript.tax_table, "included_in_print_rate", function(frm, cdt, cdn) {
+		var tax = frappe.get_doc(cdt, cdn);
+		try {
+			cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
+			cur_frm.cscript.validate_inclusive_tax(tax);
+		} catch(e) {
+			tax.included_in_print_rate = 0;
+			refresh_field("included_in_print_rate", tax.name, tax.parentfield);
+			throw e;
+		}
+	});
+}
+
+erpnext.taxes.set_conditional_mandatory_rate_or_amount = function(frm) {
+	var grid_row = frm.open_grid_row();
+	if(grid_row.doc.charge_type==="Actual") {
+		grid_row.toggle_display("tax_amount", true);
+		grid_row.toggle_reqd("tax_amount", true);
+		grid_row.toggle_display("rate", false);
+		grid_row.toggle_reqd("rate", false);
+	} else {
+		grid_row.toggle_display("rate", true);
+		grid_row.toggle_reqd("rate", true);
+		grid_row.toggle_display("tax_amount", false);
+		grid_row.toggle_reqd("tax_amount", false);
 	}
+}
+
+// setup conditional mandatory for tax and rates
+frappe.ui.form.on(cur_frm.doctype, "taxes_on_form_rendered", function(frm) {
+	erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm);
 });
+
 
 cur_frm.set_query("account_head", "taxes", function(doc) {
 	if(cur_frm.cscript.tax_table == "Sales Taxes and Charges") {
