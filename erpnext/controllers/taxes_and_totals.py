@@ -217,7 +217,7 @@ class calculate_taxes_and_totals(object):
 					tax.grand_total_for_current_item = flt(item.net_amount + current_tax_amount, tax.precision("total"))
 				else:
 					tax.grand_total_for_current_item = \
-						flt(self.doc.get("taxes")[i-1].grand_total_for_current_item + current_tax_amount, tax.precision("total_taxes_and_charges"))
+						flt(self.doc.get("taxes")[i-1].grand_total_for_current_item + current_tax_amount, tax.precision("total"))
 
 				# in tax.total, accumulate grand total of each item
 				tax.total += tax.grand_total_for_current_item
