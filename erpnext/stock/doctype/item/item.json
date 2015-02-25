@@ -772,7 +772,7 @@
    "label": "Page Name", 
    "no_copy": 1, 
    "permlevel": 0, 
-   "read_only": 1
+   "read_only": 0
   }, 
   {
    "depends_on": "show_in_website", 
@@ -876,7 +876,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2015-02-24 05:19:07.382483", 
+ "modified": "2015-02-25 02:46:14.483577", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
