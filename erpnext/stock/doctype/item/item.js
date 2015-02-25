@@ -89,7 +89,7 @@ frappe.ui.form.on("Item", {
 		refresh_field("image_view");
 	},
 
-	page_name: frappe.utils.warn_page_name_change
+	page_name: frappe.utils.warn_page_name_change,
 
 	item_code: function(frm) {
 		if(!frm.doc.item_name)
