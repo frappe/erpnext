@@ -161,7 +161,8 @@ def add_total_row(out, balance_must_be, period_list):
 def get_accounts(company, root_type):
 	# root lft, rgt
 	root_account = frappe.db.sql("""select lft, rgt from `tabAccount`
-		where company=%s and root_type=%s order by lft limit 1""",
+		where company=%s and root_type=%s and ifnull(parent_account, '') = ''
+		order by lft limit 1""",
 		(company, root_type), as_dict=True)
 
 	if not root_account:
