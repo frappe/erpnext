@@ -5,5 +5,5 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doctype("BOM")
+	frappe.reload_doctype("Stock Entry")
 	frappe.db.sql("update `tabStock Entry` set from_bom = if(ifnull(bom_no, '')='', 0, 1)")
