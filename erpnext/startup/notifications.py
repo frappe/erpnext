@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 def get_notification_config():
-	return { "for_doctype": 
+	return { "for_doctype":
 		{
 			"Issue": {"status":"Open"},
 			"Warranty Claim": {"status":"Open"},
@@ -14,9 +14,9 @@ def get_notification_config():
 			"Contact": {"status":"Open"},
 			"Opportunity": {"docstatus":0},
 			"Quotation": {"docstatus":0},
-			"Sales Order": {"docstatus":0},
+			"Sales Order": { "per_delivered": ("<", 100) },
 			"Journal Entry": {"docstatus":0},
-			"Sales Invoice": {"docstatus":0},
+			"Sales Invoice": { "outstanding_amount": (">", 0) },
 			"Purchase Invoice": {"docstatus":0},
 			"Leave Application": {"status":"Open"},
 			"Expense Claim": {"approval_status":"Draft"},
@@ -25,8 +25,8 @@ def get_notification_config():
 			"Delivery Note": {"docstatus":0},
 			"Stock Entry": {"docstatus":0},
 			"Material Request": {"docstatus":0},
-			"Purchase Order": {"docstatus":0},
-			"Production Order": {"docstatus":0},
+			"Purchase Order": { "per_received": ("<", 100) },
+			"Production Order": { "status": "In Process" },
 			"BOM": {"docstatus":0},
 			"Timesheet": {"docstatus":0},
 			"Time Log": {"status":"Draft"},

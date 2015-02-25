@@ -16,6 +16,7 @@ class StockReconciliation(StockController):
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
 
 	def validate(self):
+		self.validate_posting_time()
 		self.remove_items_with_no_change()
 		self.validate_data()
 		self.validate_expense_account()
