@@ -131,8 +131,7 @@ Address Line 1,Alamat Baris 1
 Address Line 2,Alamat Baris 2
 Address Template,Template Alamat
 Address Title,Judul Alamat
-Address Title is mandatory.,"Wajib masukan Judul Alamat.
-"
+Address Title is mandatory.,Wajib masukan Judul Alamat.
 Address Type,Tipe Alamat
 Address master.,Alamat utama.
 Administrative Expenses,Beban Administrasi
@@ -3307,7 +3306,7 @@ website page link,tautan halaman situs web
 {0} is an invalid email address in 'Notification Email Address',{0} adalah alamat email yang tidak valid dalam 'Pemberitahuan Alamat Email'
 {0} is mandatory,{0} adalah wajib
 {0} is mandatory for Item {1},{0} adalah wajib untuk Item {1}
-{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} adalah wajib. Mungkin catatan mata uang tidak diciptakan untuk {1} ke {} 2.
+{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,
 {0} is not a stock Item,{0} bukan merupakan saham Barang
 {0} is not a valid Batch Number for Item {1},{0} tidak Nomor Batch berlaku untuk Item {1}
 {0} is not a valid Leave Approver. Removing row #{1}.,{0} tidak valid Tinggalkan Approver. Menghapus row # {1}.

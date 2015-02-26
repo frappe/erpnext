@@ -1612,7 +1612,7 @@ Manufacture against Sales Order,Satış Emrine Karşı Üretim
 Manufacture/Repack,İmalat / Yeniden Ambalajlama
 Manufactured Qty,Üretilen Miktar
 Manufactured quantity will be updated in this warehouse,Üretilen miktar bu depoda güncellenecektir
-Manufactured quantity {0} cannot be greater than planned quanitity {1} in Production Order {2},Üretilen miktar {0} Üretim Emrindeki {2} planlanan miktardan fazla olamaz
+Manufactured quantity {0} cannot be greater than planned quanitity {1} in Production Order {2},
 Manufacturer,Üretici
 Manufacturer Part Number,Üretici kısım numarası
 Manufacturing,İmalat
@@ -1710,7 +1710,7 @@ Name of person or organization that this address belongs to.,Bu adresin ait oldu
 Name of the Budget Distribution,Bütçe Dağılımı Adı
 Naming Series,Seri Adlandırma
 Negative Quantity is not allowed,Negatif Miktara izin verilmez
-Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},Negatif Stok Hatası ({6}) Ürün {0} için {4} {5} de {2} {3} üzerindeki Depoda
+Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},
 Negative Valuation Rate is not allowed,Negatif Değerleme Br.Fiyatına izin verilmez
 Negative balance in Batch {0} for Item {1} at Warehouse {2} on {3} {4},{3} {4} üzerinde Depo {2} de Ürün {1} için Partide {0} Negatif Bakiye
 Net Pay,Net Ödeme

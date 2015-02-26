@@ -844,7 +844,7 @@ Do not show any symbol like $ etc next to currencies.,Να μην εμφανίζ
 Do really want to unstop production order: ,Do really want to unstop production order: 
 Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,Θέλετε πραγματικά να σταματήσει αυτό το υλικό την Αίτηση Συμμετοχής;
-Do you really want to Submit all Salary Slip for month {0} and year {1},Θέλετε πραγματικά να υποβληθούν όλα τα Slip Μισθός για το μήνα {0} και {1 χρόνο }
+Do you really want to Submit all Salary Slip for month {0} and year {1},
 Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,Θέλετε πραγματικά να ξεβουλώνω αυτό Υλικό Αίτηση Συμμετοχής;
 Do you really want to stop production order: ,Do you really want to stop production order: 
@@ -3009,7 +3009,7 @@ Total Commission,Σύνολο Επιτροπής
 Total Cost,Συνολικό Κόστος
 Total Credit,Συνολική πίστωση
 Total Debit,Σύνολο χρέωσης
-Total Debit must be equal to Total Credit. The difference is {0},Συνολική Χρέωση πρέπει να ισούται προς το σύνολο Credit .
+Total Debit must be equal to Total Credit. The difference is {0},
 Total Deduction,Συνολική έκπτωση
 Total Earning,Σύνολο Κερδίζουν
 Total Experience,Συνολική εμπειρία
@@ -3317,7 +3317,7 @@ website page link,Ιστοσελίδα link της σελίδας
 {0} must be reduced by {1} or you should increase overflow tolerance,{0} πρέπει να μειωθεί κατά {1} ή θα πρέπει να αυξήσει την ανοχή υπερχείλισης
 {0} must have role 'Leave Approver',{0} πρέπει να έχει ρόλο « Αφήστε Έγκρισης »
 {0} valid serial nos for Item {1},{0} έγκυρο σειριακό nos για τη θέση {1}
-{0} {1} against Bill {2} dated {3},{0} {1} εναντίον Bill {2} { 3 με ημερομηνία }
+{0} {1} against Bill {2} dated {3},
 {0} {1} against Invoice {2},{0} {1} κατά Τιμολόγιο {2}
 {0} {1} has already been submitted,{0} {1} έχει ήδη υποβληθεί
 {0} {1} has been modified. Please refresh.,{0} {1} έχει τροποποιηθεί . Παρακαλώ ανανεώσετε .

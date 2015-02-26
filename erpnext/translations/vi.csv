@@ -3312,7 +3312,7 @@ website page link,liên kết trang web
 {0} is not a valid Leave Approver. Removing row #{1}.,{0} không phải là một Để lại phê duyệt hợp lệ. Loại bỏ hàng # {1}.
 {0} is not a valid email id,{0} không phải là một id email hợp lệ
 {0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.,{0} bây giờ là mặc định năm tài chính. Xin vui lòng làm mới trình duyệt của bạn để thay đổi có hiệu lực.
-{0} is required,Cho phép Giỏ hàng
+{0} is required,
 {0} must be a Purchased or Sub-Contracted Item in row {1},{0} phải là một mục Mua hoặc Chi ký hợp đồng trong hàng {1}
 {0} must be reduced by {1} or you should increase overflow tolerance,{0} phải được giảm {1} hoặc bạn nên tăng khả năng chịu tràn
 {0} must have role 'Leave Approver',{0} phải có vai trò 'Để lại phê duyệt'

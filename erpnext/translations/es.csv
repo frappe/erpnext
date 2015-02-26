@@ -561,12 +561,10 @@ Complete,Completar
 Complete Setup,Configuracion Completa
 Completed,Completado
 Completed Production Orders,Órdenes de fabricación completadas
-Completed Qty,"Cantidad Completada
-"
+Completed Qty,Cantidad Completada
 Completion Date,Fecha de Terminación
 Completion Status,Estado de finalización
-Computer,"Computador
-"
+Computer,Computador
 Computers,Computadoras
 Confirmation Date,Fecha Confirmación 
 Confirmed orders from Customers.,Pedidos en firme de los clientes.
@@ -585,8 +583,7 @@ Contact Control,Contacto de Control
 Contact Desc,Desc. de Contacto
 Contact Details,Datos del Contacto
 Contact Email,Correo electrónico de contacto
-Contact HTML,"HTML del Contacto
-"
+Contact HTML,HTML del Contacto
 Contact Info,Información de Contacto
 Contact Mobile No,No Móvil del Contacto
 Contact Name,Nombre de contacto
@@ -1907,10 +1904,8 @@ POS Setting required to make POS Entry,POS de ajuste necesario para hacer la ent
 POS Setting {0} already created for user: {1} and company {2},POS Ajuste {0} ya creado para el usuario: {1} y {2} empresa
 POS View,POS Ver
 PR Detail,Detalle PR
-Package Item Details,"Detalles del Contenido del Paquete
-"
-Package Items,"Contenido del Paquete
-"
+Package Item Details,Detalles del Contenido del Paquete
+Package Items,Contenido del Paquete
 Package Weight Details,Peso Detallado del Paquete
 Packed Item,Artículo Empacado
 Packed quantity must equal quantity for Item {0} in row {1},La cantidad embalada debe ser igual a la del elmento {0} en la fila {1}
@@ -2745,7 +2740,7 @@ Statement of Account,Estado de cuenta
 Static Parameters,Parámetros estáticos
 Status,estado
 Status must be one of {0},Estado debe ser uno de {0}
-Status of {0} {1} is now {2},Situación de {0} {1} { 2 es ahora }
+Status of {0} {1} is now {2},
 Status updated to {0},Estado actualizado a {0}
 Statutory info and other general information about your Supplier,Información legal y otra información general acerca de su proveedor
 Stay Updated,Manténgase actualizado
@@ -3014,7 +3009,7 @@ Total Commission,Total Comisión
 Total Cost,Coste total
 Total Credit,Crédito Total
 Total Debit,Débito Total
-Total Debit must be equal to Total Credit. The difference is {0},Débito total debe ser igual al crédito total .
+Total Debit must be equal to Total Credit. The difference is {0},
 Total Deduction,Deducción total
 Total Earning,Ganar total
 Total Experience,Experiencia total
@@ -3322,7 +3317,7 @@ website page link,el vínculo web
 {0} must be reduced by {1} or you should increase overflow tolerance,{0} debe reducirse en {1} o se debe aumentar la tolerancia de desbordamiento
 {0} must have role 'Leave Approver',{0} debe tener rol ' Dejar aprobador '
 {0} valid serial nos for Item {1},{0} nn serie válidos para el elemento {1}
-{0} {1} against Bill {2} dated {3},{0} {1} { 2 contra Bill } {3} de fecha
+{0} {1} against Bill {2} dated {3},
 {0} {1} against Invoice {2},{0} {1} contra Factura {2}
 {0} {1} has already been submitted,{0} {1} ya ha sido presentado
 {0} {1} has been modified. Please refresh.,{0} {1} ha sido modificado. Por favor regenere .

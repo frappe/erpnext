@@ -844,7 +844,7 @@ Do not show any symbol like $ etc next to currencies.,Nu prezintă nici un simbo
 Do really want to unstop production order: ,Do really want to unstop production order: 
 Do you really want to STOP ,Do you really want to STOP 
 Do you really want to STOP this Material Request?,Chiar vrei pentru a opri această cerere Material?
-Do you really want to Submit all Salary Slip for month {0} and year {1},Chiar vrei să prezinte toate Slip Salariul pentru luna {0} și {1 an}
+Do you really want to Submit all Salary Slip for month {0} and year {1},
 Do you really want to UNSTOP ,Do you really want to UNSTOP 
 Do you really want to UNSTOP this Material Request?,Chiar vrei să unstop această cerere Material?
 Do you really want to stop production order: ,Do you really want to stop production order: 
@@ -1962,7 +1962,7 @@ Payment Reconciliation Payment,Reconciliere de plata
 Payment Reconciliation Payments,Plăți de reconciliere plată
 Payment Type,Tipul de plată
 Payment cannot be made for empty cart,Plata nu se poate face pentru cart gol
-Payment of salary for the month {0} and year {1},Plata salariului pentru luna {0} și {1 an}
+Payment of salary for the month {0} and year {1},
 Payments,Plăți
 Payments Made,Plățile efectuate
 Payments Received,Plăți primite

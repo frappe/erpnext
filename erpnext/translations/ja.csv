@@ -1908,8 +1908,7 @@ Package Item Details,パッケージアイテムの詳細
 Package Items,パッケージアイテム
 Package Weight Details,パッケージの重量の詳細
 Packed Item,梱包されたアイテム
-Packed quantity must equal quantity for Item {0} in row {1},"梱包された量は、列{1}の中のアイテム{0}のための量と等しくなければなりません。
-"
+Packed quantity must equal quantity for Item {0} in row {1},梱包された量は、列{1}の中のアイテム{0}のための量と等しくなければなりません。
 Packing Details,梱包の詳細
 Packing List,パッキングリスト
 Packing Slip,梱包伝票
@@ -2902,8 +2901,7 @@ Terms and Conditions1,ご利用条件1／契約条件１
 Terretory,地域／範囲
 Territory,地域／範囲
 Territory / Customer,領域/顧客
-Territory Manager,"地域経営者／責任者
-"
+Territory Manager,地域経営者／責任者
 Territory Name,地域名
 Territory Target Variance Item Group-Wise,領土ターゲット分散項目のグループごとの
 Territory Targets,目標地域／目標範囲
@@ -2912,10 +2910,9 @@ Test Email Id,メールIDのテスト
 Test the Newsletter,ニュースレター（会報）のテスト
 The BOM which will be replaced,部品表は取り替えられます。
 The First User: You,最初のユーザー（利用者）：あなたです。
-"The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""","この項目は荷物を表します。この項目には「在庫品です。''いいえ’’」そして「販売商品です。 ""はい’’」とされている必要がある。
-"
+"The Item that represents the Package. This Item must have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes""","この項目は荷物を表します。この項目には「在庫品です。''いいえ’’」そして「販売商品です。 ""はい’’」とされている必要がある。"
 The Organization,組織／整理
-"The account head under Liability, in which Profit/Loss will be booked",負債の下の''利益/損失’’の口座の上部は発行されます。
+"The account head under Liability, in which Profit/Loss will be booked",負債の下の''利益/損失’’の口座の上部は発行されます。
 The date on which next invoice will be generated. It is generated on submit.,次の請求書が作成される日付。提出すると作成されます。
 The date on which recurring invoice will be stop,定期的な請求書が停止される日。
 "The day of the month on which auto invoice will be generated e.g. 05, 28 etc ",毎月自動請求書が制作される日。例）５日、２８日など。
@@ -2933,7 +2930,7 @@ There are more holidays than working days this month.,今月営業日以上の�
 "There can only be one Shipping Rule Condition with 0 or blank value for ""To Value""",'‘価格’’には０か空白を使うという唯一の送料ルール条件がある。
 There is not enough leave balance for Leave Type {0},休暇タイプ{0}のための十分な休暇残高がありません。
 There is nothing to edit.,編集するものは何もありません。
-There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,エラーが発生しました。フォームが保存していないことが原因だと考えられます。問題が解決しない場合はsupport@erpnext.comにお問い合わせください。
+There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,エラーが発生しました。フォームが保存していないことが原因だと考えられます。問題が解決しない場合はsupport@erpnext.comにお問い合わせください。
 There were errors.,エラーが発生しました。
 This Currency is disabled. Enable to use in transactions,この通貨は無効になっています。処理で使用可能にすることが出来ます。
 This Leave Application is pending approval. Only the Leave Apporver can update status.,この休暇願い届けは保留中です。休暇承認者のみが情報を更新することができます。
@@ -2946,7 +2943,7 @@ This is a root customer group and cannot be edited.,これは、ルートの顧�
 This is a root item group and cannot be edited.,これは、ルート·アイテム·グループであり、編集することはできません。
 This is a root sales person and cannot be edited.,これは、ルートの販売員であり、編集できません。
 This is a root territory and cannot be edited.,これは、ルートの領土であり、編集できません。
-This is an example website auto-generated from ERPNext,これはERPNextの自動生成ウェブサイトの例です。
+This is an example website auto-generated from ERPNext,これはERPNextの自動生成ウェブサイトの例です。
 This is the number of the last created transaction with this prefix,これはこの接頭辞が付いた最後の処理／取引番号です。
 This will be used for setting rule in HR module,これはHRモジュール（設定の基準寸法）で規則を設定するために使用される。
 Thread HTML,スレッドのHTML
@@ -2967,8 +2964,7 @@ Time at which items were delivered from warehouse,アイテムが倉庫から納
 Time at which materials were received,材料が受け取られた時刻
 Title,タイトル／題
 Titles for print templates e.g. Proforma Invoice.,印刷テンプレートのタイトルは、例えば見積書。
-To,"〜宛。
-"
+To,〜宛。
 To Currency,通貨に
 To Date,日付
 To Date should be same as From Date for Half Day leave,半日休暇の日と同じ日である必要があります。
@@ -2995,7 +2991,7 @@ To get Item Group in details table,詳細表に項目グループを取得する
 "To set this Fiscal Year as Default, click on 'Set as Default'",デフォルト（既定値）としてこの会計年度を設定するには、「デフォルトに設定」を押してください。
 To track any installation or commissioning related work after sales,販売後、業務に関わる取り付けや遂行を記録するために
 "To track brand name in the following documents Delivery Note, Opportunity, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No",次の書類で商標名を追跡します　納品書、機会、素材の依頼、商品、発注、購買伝票、領収書、見積書、販売請求書、販売部品表、受注、製造番号
-To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,製造番号が基になっている販売と購入書類は追跡用の商品です。それは商品の保証詳細を追跡するのにも使えます。　
+To track item in sales and purchase documents based on their serial nos. This is can also used to track warranty details of the product.,製造番号が基になっている販売と購入書類は追跡用の商品です。それは商品の保証詳細を追跡するのにも使えます。　
 To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>,売上高のアイテムを追跡し、バッチ番号検索<B>優先産業との文書を購入するには化学薬品など</ B>
 To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,バーコードを使用してアイテムを追跡します。商品のバーコードをスキャンすることによって納品書や売上請求書にこの商品を入力することができます。
 Too many columns. Export the report and print it using a spreadsheet application.,コラム（縦の行）が多すぎます。書類をを転送して、スプレッドシート（計算表）アプリケーションを印刷して使用します。
@@ -3149,10 +3145,8 @@ Vehicle Dispatch Date,車の発送日
 Vehicle No,車両番号
 Venture Capital,ベンチャーキャピタル(投資会社）
 Verified By,によって証明／確認された。
-View Ledger,"元帳の表示
-"
-View Now,"表示
-"
+View Ledger,元帳の表示
+View Now,表示
 Visit report for maintenance call.,メンテナンス要請の訪問レポート。
 Voucher #,伝票番号
 Voucher Detail No,伝票詳細番号
@@ -3233,7 +3227,7 @@ Work-in-Progress Warehouse is required before Submit,送信する前に作業中
 Working,{0}{/0} {1}就労{/1}
 Working Days,勤務日
 Workstation,ワークステーション（仕事場）
-Workstation Name,ワークステーション名（仕事名）
+Workstation Name,ワークステーション名（仕事名）
 Write Off Account,償却勘定
 Write Off Amount,償却額
 Write Off Amount <=,金額を償却<=

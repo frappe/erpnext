@@ -35,8 +35,7 @@
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory""> Добавить / Изменить </>"
 "<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>","<h4> умолчанию шаблона </ h4>  <p> Использует <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja шаблонов </ A> и все поля Адрес ( в том числе пользовательских полей если таковые имеются) будут доступны </ P>  <pre> <code> {{address_line1}} инструменты  {%, если address_line2%} {{address_line2}} инструменты { % ENDIF -%}  {{город}} инструменты  {%, если состояние%} {{состояние}} инструменты {% ENDIF -%}  {%, если пин-код%} PIN-код: {{пин-код}} инструменты {% ENDIF -%}  {{страна}} инструменты  {%, если телефон%} Телефон: {{телефон}} инструменты { % ENDIF -%}  {%, если факс%} Факс: {{факс}} инструменты {% ENDIF -%}  {%, если email_id%} Email: {{email_id}} инструменты ; {% ENDIF -%}  </ код> </ предварительно>"
 A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Группа клиентов с таким именем уже существует. Пожалуйста, измените имя клиента или имя группы клиентов"
-A Customer exists with same name,"Клиент с таким именем уже существует
-"
+A Customer exists with same name,Клиент с таким именем уже существует
 A Lead with this email id should exist,Руководитеть с таким email должен существовать
 A Product or Service,Продукт или сервис
 A Supplier exists with same name,Поставщик с таким именем уже существует
@@ -2750,8 +2749,7 @@ Stock Adjustment,Регулирование запасов
 Stock Adjustment Account,Регулирование счета запасов
 Stock Ageing,Старение запасов
 Stock Analytics, Анализ запасов
-Stock Assets,"Капитал запасов
-"
+Stock Assets,Капитал запасов
 Stock Balance,Баланс запасов
 Stock Entries already created for Production Order ,Stock Entries already created for Production Order 
 Stock Entry,Складская запись
@@ -3221,8 +3219,7 @@ Will be updated when billed.,Будет обновляться при счет.
 Wire Transfer,Банковский перевод
 With Operations,С операций
 With Period Closing Entry,С Период закрытия въезда
-Work Details,"Подробности работы
-"
+Work Details,Подробности работы
 Work Done,Сделано
 Work In Progress,Работа продолжается
 Work-in-Progress Warehouse,Работа-в-Прогресс Склад
