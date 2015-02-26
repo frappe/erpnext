@@ -638,7 +638,7 @@ Create Salary Slip,Créer bulletin de salaire
 Create Stock Ledger Entries when you submit a Sales Invoice,Créer un registre des stocks entrées lorsque vous soumettez une facture de vente
 "Create and manage daily, weekly and monthly email digests.","Créer et gérer des recueils d' email quotidiens, hebdomadaires et mensuels ."
 Create rules to restrict transactions based on values.,Créer des règles pour restreindre les transactions fondées sur des valeurs .
-Created By,Créé par
+Created By,Etabli par
 Creates salary slip for above mentioned criteria.,Crée le bulletin de salaire pour les critères mentionnés ci-dessus.
 Creation Date,date de création
 Creation Document No,Création document n
@@ -671,7 +671,7 @@ Current Stock,Stock actuel
 Current Stock UOM,Emballage Stock actuel
 Current Value,Valeur actuelle
 Custom,Coutume
-Custom Autoreply Message,Message personnalisé Autoreply
+Custom Autoreply Message,Message personnalisé pour la réponse automatique
 Custom Message,Message personnalisé
 Customer,Client
 Customer (Receivable) Account,Compte client (à recevoir)
@@ -1301,7 +1301,7 @@ Installation Note {0} has already been submitted,Les demandes matérielles {0} c
 Installation Status,Etat de l&#39;installation
 Installation Time,Temps d&#39;installation
 Installation date cannot be before delivery date for Item {0},Date d'installation ne peut pas être avant la date de livraison pour l'article {0}
-Installation record for a Serial No.,Dossier d&#39;installation d&#39;un n ° de série
+Installation record for a Serial No.,N° de série pour un dossier d'installation 
 Installed Qty,Qté installée
 Instructions,Instructions
 Integrate incoming support emails to Support Ticket,Intégrer des emails entrants soutien à l'appui de billets
@@ -1467,7 +1467,7 @@ Keep a track of communication related to this enquiry which will help for future
 Keep it web friendly 900px (w) by 100px (h),Gardez web 900px amical ( w) par 100px ( h )
 Key Performance Area,Section de performance clé
 Key Responsibility Area,Section à responsabilité importante
-Kg,kg
+Kg,Kg
 LR Date,LR Date
 LR No,LR Non
 Label,Étiquette
@@ -1604,7 +1604,7 @@ Male,Masculin
 Manage Customer Group Tree.,Gérer l'arborescence de groupe de clients .
 Manage Sales Partners.,Gérer partenaires commerciaux.
 Manage Sales Person Tree.,Gérer les ventes personne Arbre .
-Manage Territory Tree.,"Un élément existe avec le même nom ( {0} ) , s'il vous plaît changer le nom du groupe de l'article ou renommer l'élément"
+Manage Territory Tree.,Gérer l'arboressence des territoirs.
 Manage cost of operations,Gérer les coûts d&#39;exploitation
 Management,gestion
 Manager,directeur
@@ -1764,7 +1764,7 @@ Next Contact By,Suivant Par
 Next Contact Date,Date Contact Suivant
 Next Date,Date suivante
 Next email will be sent on:,Email sera envoyé le:
-No,Non
+No,Aucun
 No Customer Accounts found.,Aucun client ne représente trouvés.
 No Customer or Supplier Accounts found,Aucun compte client ou fournisseur trouvé
 No Expense Approvers. Please assign 'Expense Approver' Role to atleast one user,Compte {0} est inactif
@@ -1896,9 +1896,9 @@ P L A - Cess Portion,PLA - Cess Portion
 PL or BS,PL ou BS
 PO Date,date de PO
 PO No,PO Non
-POP3 Mail Server,Serveur de messagerie POP3
+POP3 Mail Server,Serveur E-mail POP3
 POP3 Mail Settings,Paramètres de messagerie POP3
-POP3 mail server (e.g. pop.gmail.com),POP3 serveur de messagerie (par exemple pop.gmail.com)
+POP3 mail server (e.g. pop.gmail.com),Adresse serveur POP3 de votre E-mail (par exemple pop.gmail.com)
 POP3 server e.g. (pop.gmail.com),Serveur POP3 par exemple (pop.gmail.com)
 POS Setting,Réglage POS
 POS Setting required to make POS Entry,POS Réglage nécessaire pour faire POS Entrée
@@ -1996,7 +1996,7 @@ Pharmaceuticals,médicaments
 Phone,Téléphone
 Phone No,N ° de téléphone
 Piecework,travail à la pièce
-Pincode,Le code PIN
+Pincode,Code Postal
 Place of Issue,Lieu d&#39;émission
 Plan for maintenance visits.,Plan pour les visites de maintenance.
 Planned Qty,Quantité planifiée
@@ -2044,7 +2044,7 @@ Please enter company first,S'il vous plaît entrez première entreprise
 Please enter company name first,S'il vous plaît entrez le nom de l'entreprise d'abord
 Please enter default Unit of Measure,Entrepôt de cible dans la ligne {0} doit être la même que la production de commande
 Please enter default currency in Company Master,S'il vous plaît entrer devise par défaut en maître de compagnie
-Please enter email address,Allouer des feuilles pour une période .
+Please enter email address,Veuillez entrer une adresse E-mail .
 Please enter item details,"Pour signaler un problème, passez à"
 Please enter message before sending,"Vous ne pouvez pas supprimer Aucune série {0} en stock . Première retirer du stock, puis supprimer ."
 Please enter parent account group for warehouse account,Matière première
@@ -2307,14 +2307,14 @@ Rate at which Price list currency is converted to customer's base currency,Taux 
 Rate at which customer's currency is converted to company's base currency,Vitesse à laquelle la devise du client est converti en devise de base entreprise
 Rate at which supplier's currency is converted to company's base currency,Taux auquel la monnaie du fournisseur est converti en devise de base entreprise
 Rate at which this tax is applied,Vitesse à laquelle cet impôt est appliqué
-Raw Material,S'il vous plaît entrez la date et l'heure de l'événement !
-Raw Material Item Code,Raw Code article Matière
+Raw Material,Matières premières
+Raw Material Item Code,Numéro d'article de la matériel première
 Raw Materials Supplied,Des matières premières fournies
 Raw Materials Supplied Cost,Coût des matières premières fournies
 Raw material cannot be same as main Item,Point {0} ignoré car il n'est pas un article en stock
-Re-Order Level,Re-Order niveau
+Re-Order Level,Niveau pour re-commander
 Re-Order Qty,Re-Cdt
-Re-order,Re-order
+Re-order,Re-commander
 Re-order Level,Re-order niveau
 Re-order Qty,Re-order Quantité
 Read,Lire
@@ -2351,7 +2351,7 @@ Reconcile,réconcilier
 Reconciliation Data,Données de réconciliation
 Reconciliation HTML,Réconciliation HTML
 Reconciliation JSON,Réconciliation JSON
-Record item movement.,Enregistrer le mouvement de l&#39;objet.
+Record item movement.,Gestion des mouvements du stock.
 Recurring Id,Id récurrent
 Recurring Invoice,Facture récurrente
 Recurring Type,Type de courant
@@ -2361,7 +2361,7 @@ Ref,Réf
 Ref Code,Code de référence de
 Ref SQ,Réf SQ
 Reference,Référence
-Reference #{0} dated {1},"Vous ne pouvez pas surfacturer pour objet {0} à la ligne {0} plus de {1} . Pour permettre la surfacturation , s'il vous plaît mettre dans 'Configuration '> ' par défaut globales'"
+Reference #{0} dated {1},Référence #{0} daté {1}
 Reference Date,Date de Référence
 Reference Name,Nom de référence
 Reference No & Reference Date is required for {0},contacts
@@ -2384,7 +2384,7 @@ Remarks,Remarques
 Remarks Custom,Remarques sur commande
 Rename,Renommer
 Rename Log,Renommez identifiez-vous
-Rename Tool,Outils de renommage
+Rename Tool,Outil de renommage
 Rent Cost,louer coût
 Rent per hour,Louer par heure
 Rented,Loué
@@ -2407,7 +2407,7 @@ Requested Items To Be Ordered,Articles demandés à commander
 Requested Items To Be Transferred,Articles demandé à être transférés
 Requested Qty,Quantité demandée
 "Requested Qty: Quantity requested for purchase, but not ordered.","Demandé Quantité: Quantité demandée pour l'achat , mais pas ordonné ."
-Requests for items.,Les demandes d&#39;articles.
+Requests for items.,Gestion des demandes d'articles.
 Required By,Requis par
 Required Date,Requis Date
 Required Qty,Quantité requise
@@ -2427,7 +2427,7 @@ Reserved Warehouse is missing in Sales Order,Réservé entrepôt est manquant da
 Reserved Warehouse required for stock Item {0} in row {1},Centre de coûts par défaut de vente
 Reserved warehouse required for stock item {0},Ajoutez à cela les restrictions de l'utilisateur
 Reserves and Surplus,Réserves et de l'excédent
-Reset Filters,réinitialiser les filtres
+Reset Filters,Réinitialiser les filtres
 Resignation Letter Date,Date de lettre de démission
 Resolution,Résolution
 Resolution Date,Date de Résolution
@@ -2828,16 +2828,16 @@ Supplier database.,Base de données fournisseurs.
 Supplier master.,Maître du fournisseur .
 Supplier warehouse where you have issued raw materials for sub - contracting,Fournisseur entrepôt où vous avez émis des matières premières pour la sous - traitance
 Supplier-Wise Sales Analytics,Fournisseur - Wise ventes Analytics
-Support,Soutenir
-Support Analtyics,Analtyics de soutien
-Support Analytics,Analytics soutien
-Support Email,Soutien Email
-Support Email Settings,Soutien des paramètres de messagerie
-Support Password,Mot de passe soutien
+Support,Support
+Support Analtyics,Analyse du support
+Support Analytics,Analyse du support
+Support Email,support E-mail
+Support Email Settings,Paramètres E-mail du support
+Support Password,Mot de passe
 Support Ticket,Support Ticket
 Support queries from customers.,En charge les requêtes des clients.
 Symbol,Symbole
-Sync Support Mails,Synchroniser mails de soutien
+Sync Support Mails,Synchroniser les E-mails du support
 Sync with Dropbox,Synchroniser avec Dropbox
 Sync with Google Drive,Synchronisation avec Google Drive
 System,Système
@@ -3206,8 +3206,8 @@ Weightage,Weightage
 Weightage (%),Weightage (%)
 Welcome,Bienvenue
 Welcome to ERPNext. Over the next few minutes we will help you setup your ERPNext account. Try and fill in as much information as you have even if it takes a bit longer. It will save you a lot of time later. Good Luck!,"Bienvenue à ERPNext . Au cours des prochaines minutes, nous allons vous aider à configurer votre compte ERPNext . Essayez de remplir autant d'informations que vous avez même si cela prend un peu plus longtemps . Elle vous fera économiser beaucoup de temps plus tard . Bonne chance !"
-Welcome to ERPNext. Please select your language to begin the Setup Wizard.,Bienvenue sur ERPNext selecionnez votr langue pour démarrer l'assistant de configuration.
-What does it do?,Que faut-il faire ?
+Welcome to ERPNext. Please select your language to begin the Setup Wizard.,Bienvenue sur ERPNext selecionnez votre langue pour démarrer l'assistant de configuration.
+What does it do?,Que fait-elle ?
 "When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.","Lorsque l&#39;une des opérations contrôlées sont «soumis», un e-mail pop-up s&#39;ouvre automatiquement pour envoyer un courrier électronique à l&#39;associé &quot;Contact&quot; dans cette transaction, la transaction en pièce jointe. L&#39;utilisateur peut ou ne peut pas envoyer l&#39;e-mail."
 "When submitted, the system creates difference entries to set the given stock and valuation on this date.","Lorsqu'il est utilisé, le système crée des entrées de différence pour définir le stock et l'évaluation donnée à cette date ."
 Where items are stored.,Lorsque des éléments sont stockés.
@@ -3227,8 +3227,8 @@ Work-in-Progress Warehouse,Entrepôt Work-in-Progress
 Work-in-Progress Warehouse is required before Submit,Les travaux en progrès entrepôt est nécessaire avant Soumettre
 Working,De travail
 Working Days,Jours ouvrables
-Workstation,Workstation
-Workstation Name,Nom de station de travail
+Workstation,station de travail
+Workstation Name,Nom de la station de travail
 Write Off Account,Ecrire Off compte
 Write Off Amount,Ecrire Off Montant
 Write Off Amount <=,Ecrire Off Montant &lt;=
