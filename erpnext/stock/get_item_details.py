@@ -171,7 +171,8 @@ def get_basic_details(args, item_doc):
 	# if default specified in item is for another company, fetch from company
 	for d in [["Account", "income_account", "default_income_account"], ["Account", "expense_account", "default_expense_account"],
 		["Cost Center", "cost_center", "cost_center"], ["Warehouse", "warehouse", ""]]:
-			if not out[d[1]] or args.company != frappe.db.get_value(d[0], out.get(d[1]), "company"):
+			company = frappe.db.get_value(d[0], out.get(d[1]), "company")
+			if not out[d[1]] or (company and args.company != company):
 				out[d[1]] = frappe.db.get_value("Company", args.company, d[2]) if d[2] else None
 
 	for fieldname in ("item_name", "item_group", "barcode", "brand", "stock_uom"):
