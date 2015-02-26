@@ -9,7 +9,7 @@ $(document).bind('toolbar_setup', function() {
 
 	$('.navbar-home').html('ERPNext');
 
-	$('[data-link="docs"]').attr("href", "https://erpnext.com/user-guide")
+	$('[data-link="docs"]').attr("href", "https://manual.erpnext.com")
 });
 
 // doctypes created via tree

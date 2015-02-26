@@ -8,7 +8,7 @@ Includes: Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Requires 
 
 ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web app framework in Python & Javascript.
 
-- [User Guide](https://erpnext.com/user-guide)
+- [User Guide](https://manual.erpnext.com)
 - [Getting Help](http://erpnext.org/getting-help.html)
 - [Discussion Forum](https://discuss.frappe.io/)
 

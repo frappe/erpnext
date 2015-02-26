@@ -5,7 +5,8 @@ def execute():
 	frappe.reload_doctype("Project")
 
 	for m in frappe.get_all("Project Milestone", "*"):
-		if m.milestone and m.milestone_date:
+		if (m.milestone and m.milestone_date
+			and frappe.db.exists("Project", m.parent)):
 			frappe.get_doc({
 				"doctype": "Task",
 				"subject": m.milestone,
