@@ -42,7 +42,7 @@
 "<a href=""#Sales Browser/Item Group"">Add / Edit</a>","<a href=""#Sales Browser/Item Group"">Add / Edit</a>"
 "<a href=""#Sales Browser/Territory"">Add / Edit</a>","<a href=""#Sales Browser/Territory"">Add / Edit</a>"
 "<h4>Default Template</h4><p>Uses <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja Templating</a> and all the fields of Address (including Custom Fields if any) will be available</p><pre><code>{{ address_line1 }}&lt;br&gt;{% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%}{{ city }}&lt;br&gt;{% if state %}{{ state }}&lt;br&gt;{% endif -%}{% if pincode %} PIN:  {{ pincode }}&lt;br&gt;{% endif -%}{{ country }}&lt;br&gt;{% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}{% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}{% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code></pre>",
-A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Hi ha un grup de clients amb el mateix nom, si us plau canvia el nom del client o del nom del Grup de Clients"
+A Customer Group exists with same name please change the Customer name or rename the Customer Group,"Hi ha un grup de clients amb el mateix nom, si us plau canvia el nom del client o el nom del Grup de Clients"
 A Customer exists with same name,
 A Lead with this email id should exist,Hauria d'haver-hi un client potencial amb aquest correu electrònic
 A Product or Service,Un producte o servei
@@ -79,7 +79,7 @@ Account must be a balance sheet account,
 Account with child nodes cannot be converted to ledger,
 Account with existing transaction can not be converted to group.,
 Account with existing transaction can not be deleted,Un compte amb transaccions no es pot eliminar
-Account with existing transaction cannot be converted to ledger,El Compte de la transacció existent no es pot convertir en llibre major
+Account with existing transaction cannot be converted to ledger,El Compte de la transacció existent no es pot convertir a llibre major
 Account {0} cannot be a Group,El Compte {0} no pot ser un grup
 Account {0} does not belong to Company {1},El compte {0} no pertany a l'empresa {1}
 Account {0} does not belong to company: {1},
@@ -201,7 +201,7 @@ Agriculture,Agricultura
 Airline,Aerolínia
 All,Tots
 All Addresses.,
-All Contact,All Contact
+All Contact,Tots els contactes
 All Contacts.,
 All Customer Contact,Contacte tot client
 All Customer Groups,
@@ -1582,7 +1582,7 @@ Last Sales Order Date,
 Latest,Més recent
 Lead,Client potencial
 Lead Details,Detalls del client potencial
-Lead Id,Identificació de l'enviament
+Lead Id,Identificador del client potencial
 Lead Name,
 Lead Owner,Responsable del client potencial
 Lead Source,Origen de clients potencials
@@ -2788,7 +2788,7 @@ Select your home country and check the timezone and currency.,Seleccioni el seu 
 "Selecting ""Yes"" will allow you to create Bill of Material showing raw material and operational costs incurred to manufacture this item.","En seleccionar ""Sí"" li permetrà crear la llista de materials que mostra la matèria primera i els costos operatius incorreguts en la fabricació d'aquest element."
 "Selecting ""Yes"" will allow you to make a Production Order for this item.",
 "Selecting ""Yes"" will give a unique identity to each entity of this item which can be viewed in the Serial No master.","En seleccionar ""Sí"" li donarà una identitat única a cada entitat d'aquest article que es pot veure a la taula mestre de Números de sèrie"
-Selling,De venda
+Selling,Vendes
 Selling Amount,
 Selling Rate,La tarifa de venda
 Selling Settings,
@@ -3012,7 +3012,7 @@ Sunday,
 Supplier,
 Supplier (Payable) Account,Proveïdor (a pagar) Compte
 Supplier (vendor) name as entered in supplier master,Nom del Proveïdor (venedor) tal i com es va entrar a la configuració de proveïdors
-Supplier > Supplier Type,Proveïdor> Tipus Proveïdor
+Supplier > Supplier Type,Proveïdor > Tipus Proveïdor
 Supplier Account,
 Supplier Account Head,
 Supplier Address,Adreça del Proveïdor
@@ -3020,7 +3020,7 @@ Supplier Addresses and Contacts,Adreces i contactes dels proveïdors
 Supplier Details,
 Supplier Id,Identificador de Proveïdor
 Supplier Invoice Date,Data Factura Proveïdor
-Supplier Invoice No,Factura de Proveïdor No
+Supplier Invoice No,Número de Factura de Proveïdor
 Supplier Name,Nom del proveïdor
 Supplier Naming By,NOmenament de proveïdors per
 Supplier Part Number,PartNumber del proveïdor
@@ -3029,7 +3029,7 @@ Supplier Quotation Item,Oferta del proveïdor d'article
 Supplier Reference,Referència Proveïdor
 Supplier Type,Tipus de Proveïdor
 Supplier Type / Supplier,
-Supplier Type master.,Taula metre de tipus de proveïdor
+Supplier Type master.,Taula mestre de tipus de proveïdor
 Supplier Warehouse,Magatzem Proveïdor
 Supplier Warehouse mandatory for sub-contracted Purchase Receipt,
 Supplier database.,
@@ -3046,7 +3046,7 @@ Support Email Settings,
 Support Manager,Gerent de Suport
 Support Password,Contrasenya de suport
 Support Team,Equip de suport
-Support Ticket,Tiquet
+Support Ticket,Tiquet de suport
 Support queries from customers.,
 Symbol,
 Sync Support Mails,Sincronitzar Suport Mails

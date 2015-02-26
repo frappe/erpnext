@@ -131,8 +131,7 @@ Address Line 1,Alamat Baris 1
 Address Line 2,Alamat Baris 2
 Address Template,Template Alamat
 Address Title,Judul Alamat
-Address Title is mandatory.,"Wajib masukan Judul Alamat.
-"
+Address Title is mandatory.,Wajib masukan Judul Alamat.
 Address Type,Tipe Alamat
 Address master.,Alamat utama.
 Administrative Expenses,Beban Administrasi
@@ -887,7 +886,7 @@ Edu. Cess on Excise,Edu. Cess tentang Cukai
 Edu. Cess on Service Tax,Edu. Cess Pajak Layanan
 Edu. Cess on TDS,Edu. Cess pada TDS
 Education,Pendidikan
-Educational Qualification,Kualifikasi pendidikan
+Educational Qualification,Kualifikasi Pendidikan
 Educational Qualification Details,Kualifikasi Pendidikan Detail
 Eg. smsgateway.com/api/send_sms.cgi,Misalnya. smsgateway.com / api / send_sms.cgi
 Either debit or credit amount is required for {0},Entah debit atau jumlah kredit diperlukan untuk {0}
@@ -897,7 +896,7 @@ Electrical,Listrik
 Electricity Cost,Biaya Listrik
 Electricity cost per hour,Biaya listrik per jam
 Electronics,Elektronik
-Email,siska_chute34@yahoo.com
+Email,Email
 Email Digest,Email Digest
 Email Digest Settings,Email Digest Pengaturan
 Email Digest: ,Email Digest: 
@@ -3307,7 +3306,7 @@ website page link,tautan halaman situs web
 {0} is an invalid email address in 'Notification Email Address',{0} adalah alamat email yang tidak valid dalam 'Pemberitahuan Alamat Email'
 {0} is mandatory,{0} adalah wajib
 {0} is mandatory for Item {1},{0} adalah wajib untuk Item {1}
-{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,{0} adalah wajib. Mungkin catatan mata uang tidak diciptakan untuk {1} ke {} 2.
+{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,
 {0} is not a stock Item,{0} bukan merupakan saham Barang
 {0} is not a valid Batch Number for Item {1},{0} tidak Nomor Batch berlaku untuk Item {1}
 {0} is not a valid Leave Approver. Removing row #{1}.,{0} tidak valid Tinggalkan Approver. Menghapus row # {1}.

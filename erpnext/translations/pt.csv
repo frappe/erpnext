@@ -3009,7 +3009,7 @@ Total Commission,Total Comissão
 Total Cost,Custo Total
 Total Credit,Crédito Total
 Total Debit,Débito total
-Total Debit must be equal to Total Credit. The difference is {0},Débito total deve ser igual ao total de crédito.
+Total Debit must be equal to Total Credit. The difference is {0},
 Total Deduction,Dedução Total
 Total Earning,Ganhar total
 Total Experience,Experiência total
@@ -3151,8 +3151,7 @@ Visit report for maintenance call.,Relatório de visita para a chamada manutenç
 Voucher #,voucher #
 Voucher Detail No,Detalhe folha no
 Voucher Detail Number,Número Detalhe voucher
-Voucher ID,"ID de Vale
-"
+Voucher ID,ID de Vale
 Voucher No,Vale No.
 Voucher Type,Tipo de Vale
 Voucher Type and Date,Tipo de Vale e Data

@@ -195,7 +195,7 @@ Allocated amount,cantidad asignada
 Allocated amount can not be negative,Monto asignado no puede ser negativo
 Allocated amount can not greater than unadusted amount,Monto asignado no puede superar el importe no ajustado
 Allow Bill of Materials,Permitir lista de materiales
-Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item,"Permitir la facturación de Materiales debe ser ""Sí"". Debido a que hay una o varias Solicitudes de Materiales activas presentes para este artículo"
+Allow Bill of Materials should be 'Yes'. Because one or many active BOMs present for this item,"Permitir lista de Materiales debe ser ""Sí"". Debido a que hay una o varias Listas de Materiales activas presentes para este artículo"
 Allow Children,Permitir hijos
 Allow Dropbox Access,Permitir Acceso a Dropbox
 Allow Google Drive Access,Permitir Acceso a Google Drive
@@ -561,12 +561,10 @@ Complete,Completar
 Complete Setup,Configuracion Completa
 Completed,Completado
 Completed Production Orders,Órdenes de fabricación completadas
-Completed Qty,"Cantidad Completada
-"
+Completed Qty,Cantidad Completada
 Completion Date,Fecha de Terminación
 Completion Status,Estado de finalización
-Computer,"Computador
-"
+Computer,Computador
 Computers,Computadoras
 Confirmation Date,Fecha Confirmación 
 Confirmed orders from Customers.,Pedidos en firme de los clientes.
@@ -585,8 +583,7 @@ Contact Control,Contacto de Control
 Contact Desc,Desc. de Contacto
 Contact Details,Datos del Contacto
 Contact Email,Correo electrónico de contacto
-Contact HTML,"HTML del Contacto
-"
+Contact HTML,HTML del Contacto
 Contact Info,Información de Contacto
 Contact Mobile No,No Móvil del Contacto
 Contact Name,Nombre de contacto
@@ -1557,39 +1554,39 @@ Lower Income,Ingreso Bajo
 MTN Details,MTN Detalles
 Main,Principal
 Main Reports,Informes Principales
-Maintain Same Rate Throughout Sales Cycle,Mantener mismo ritmo durante todo el ciclo de ventas
-Maintain same rate throughout purchase cycle,Mantener mismo ritmo durante todo el ciclo de compra
+Maintain Same Rate Throughout Sales Cycle,Mantener misma tasa durante todo el ciclo de ventas
+Maintain same rate throughout purchase cycle,Mantener misma tasa durante todo el ciclo de compra
 Maintenance,Mantenimiento
 Maintenance Date,Fecha de Mantenimiento
 Maintenance Details,Detalles de Mantenimiento
 Maintenance Schedule,Calendario de Mantenimiento
 Maintenance Schedule Detail,Detalle de Calendario de Mantenimiento
 Maintenance Schedule Item,Programa de mantenimiento de artículos
-Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule',"Programa de mantenimiento no se genera para todos los artículos. Por favor, haga clic en ' Generar la Lista de"
+Maintenance Schedule is not generated for all the items. Please click on 'Generate Schedule',"Programa de mantenimiento no se genera para todos los artículos. Por favor, haga clic en ¨ Generar Programación¨"
 Maintenance Schedule {0} exists against {0},Programa de mantenimiento {0} existe en contra de {0}
-Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,Programa de mantenimiento {0} debe ser cancelado antes de cancelar esta orden Ventas
-Maintenance Schedules,Programas de mantenimiento
+Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,Programa de mantenimiento {0} debe ser cancelado antes de cancelar esta orden de venta
+Maintenance Schedules,Programas de Mantenimiento
 Maintenance Status,Estado del Mantenimiento
-Maintenance Time,Tiempo de mantenimiento
+Maintenance Time,Tiempo de Mantenimiento
 Maintenance Type,Tipo de Mantenimiento
 Maintenance Visit,Visita de Mantenimiento
 Maintenance Visit Purpose,Propósito de la Visita de Mantenimiento
-Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Mantenimiento Visita {0} debe ser cancelado antes de cancelar el pedido de ventas
+Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Visita de Mantenimiento {0} debe ser cancelado antes de cancelar la Orden de Ventas
 Maintenance start date can not be before delivery date for Serial No {0},Mantenimiento fecha de inicio no puede ser antes de la fecha de entrega para la serie n {0}
 Major/Optional Subjects,Principales / Asignaturas optativas
 Make ,Hacer
-Make Accounting Entry For Every Stock Movement,Hacer asiento contable para cada movimiento de acciones
-Make Bank Voucher,Hacer Banco Voucher
+Make Accounting Entry For Every Stock Movement,Hacer Asiento Contable para cada movimiento de acciones
+Make Bank Voucher,Hacer Comprobante de Banco
 Make Credit Note,Hacer Nota de Crédito
 Make Debit Note,Haga Nota de Débito
 Make Delivery,Hacer Entrega
-Make Difference Entry,Hacer Entrada Diferencia
+Make Difference Entry,Hacer Entrada de Diferencia
 Make Excise Invoice,Haga Impuestos Especiales de la factura
-Make Installation Note,Hacer Nota de instalación
+Make Installation Note,Hacer Nota de Instalación
 Make Invoice,Hacer Factura
 Make Maint. Schedule,Hacer Maint . horario
 Make Maint. Visit,Hacer Maint . visita
-Make Maintenance Visit,Hacer mantenimiento Visita
+Make Maintenance Visit,Hacer Visita de Mantenimiento
 Make Packing Slip,Hacer lista de empaque
 Make Payment,Realizar Pago
 Make Payment Entry,Hacer Entrada de Pago
@@ -1907,10 +1904,8 @@ POS Setting required to make POS Entry,POS de ajuste necesario para hacer la ent
 POS Setting {0} already created for user: {1} and company {2},POS Ajuste {0} ya creado para el usuario: {1} y {2} empresa
 POS View,POS Ver
 PR Detail,Detalle PR
-Package Item Details,"Detalles del Contenido del Paquete
-"
-Package Items,"Contenido del Paquete
-"
+Package Item Details,Detalles del Contenido del Paquete
+Package Items,Contenido del Paquete
 Package Weight Details,Peso Detallado del Paquete
 Packed Item,Artículo Empacado
 Packed quantity must equal quantity for Item {0} in row {1},La cantidad embalada debe ser igual a la del elmento {0} en la fila {1}
@@ -2745,7 +2740,7 @@ Statement of Account,Estado de cuenta
 Static Parameters,Parámetros estáticos
 Status,estado
 Status must be one of {0},Estado debe ser uno de {0}
-Status of {0} {1} is now {2},Situación de {0} {1} { 2 es ahora }
+Status of {0} {1} is now {2},
 Status updated to {0},Estado actualizado a {0}
 Statutory info and other general information about your Supplier,Información legal y otra información general acerca de su proveedor
 Stay Updated,Manténgase actualizado
@@ -3014,7 +3009,7 @@ Total Commission,Total Comisión
 Total Cost,Coste total
 Total Credit,Crédito Total
 Total Debit,Débito Total
-Total Debit must be equal to Total Credit. The difference is {0},Débito total debe ser igual al crédito total .
+Total Debit must be equal to Total Credit. The difference is {0},
 Total Deduction,Deducción total
 Total Earning,Ganar total
 Total Experience,Experiencia total
@@ -3322,7 +3317,7 @@ website page link,el vínculo web
 {0} must be reduced by {1} or you should increase overflow tolerance,{0} debe reducirse en {1} o se debe aumentar la tolerancia de desbordamiento
 {0} must have role 'Leave Approver',{0} debe tener rol ' Dejar aprobador '
 {0} valid serial nos for Item {1},{0} nn serie válidos para el elemento {1}
-{0} {1} against Bill {2} dated {3},{0} {1} { 2 contra Bill } {3} de fecha
+{0} {1} against Bill {2} dated {3},
 {0} {1} against Invoice {2},{0} {1} contra Factura {2}
 {0} {1} has already been submitted,{0} {1} ya ha sido presentado
 {0} {1} has been modified. Please refresh.,{0} {1} ha sido modificado. Por favor regenere .

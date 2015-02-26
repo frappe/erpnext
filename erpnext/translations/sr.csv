@@ -75,9 +75,9 @@ Account {0} is frozen,Счет {0} заморожен
 Account {0} is inactive,Счет {0} неактивен
 Account {0} is not valid,Рачун {0} није важећа
 Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Счет {0} должен быть типа "" Fixed Asset "", как товара {1} является активом Пункт"
-Account {0}: Parent account {1} can not be a ledger,Рачун {0}: {1 Родитељ рачун} не може бити књига
-Account {0}: Parent account {1} does not belong to company: {2},Рачун {0}: {1 Родитељ рачун} не припада компанији: {2}
-Account {0}: Parent account {1} does not exist,Рачун {0}: {1 Родитељ рачун} не постоји
+Account {0}: Parent account {1} can not be a ledger,
+Account {0}: Parent account {1} does not belong to company: {2},
+Account {0}: Parent account {1} does not exist,
 Account {0}: You can not assign itself as parent account,Рачун {0}: Не може да се доделити као родитељ налог
 Account: {0} can only be updated via \					Stock Transactions,Рачун: {0} може да се ажурира само преко \ Сток трансакција
 Accountant,рачуновођа
@@ -207,7 +207,7 @@ Allow Users,Дозволи корисницима
 Allow the following users to approve Leave Applications for block days.,Дозволи следеће корисницима да одобри Апликације оставити за блок дана.
 Allow user to edit Price List Rate in transactions,Дозволите кориснику да измените Рате Ценовник у трансакцијама
 Allowance Percent,Исправка Проценат
-Allowance for over-{0} crossed for Item {1},Исправка за преко-{0} {прешао за тачке 1}
+Allowance for over-{0} crossed for Item {1},
 Allowance for over-{0} crossed for Item {1}.,Исправка за преко-{0} прешао за пункт {1}.
 Allowed Role to Edit Entries Before Frozen Date,Дозвољено Улога на Измене уноса Пре Фрозен Дате
 Amended From,Измењена од
@@ -452,7 +452,7 @@ Cannot deactive or cancle BOM as it is linked with other BOMs,Не можете 
 Cannot deduct when category is for 'Valuation' or 'Valuation and Total',"Не можете вычесть , когда категория для "" Оценка "" или "" Оценка и Всего"""
 "Cannot delete Serial No {0} in stock. First remove from stock, then delete.","Не удается удалить серийный номер {0} в наличии . Сначала снимите со склада , а затем удалить ."
 "Cannot directly set amount. For 'Actual' charge type, use the rate field","Не можете непосредственно установить сумму. Для «Актуальные ' типа заряда , используйте поле скорости"
-"Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in Stock Settings","Не могу овербилл за пункт {0} у реду {0} {1 више него}. Да бисте дозволили Овербиллинг, молимо вас да поставите у складишту Сеттингс"
+"Cannot overbill for Item {0} in row {0} more than {1}. To allow overbilling, please set in Stock Settings",
 Cannot produce more Item {0} than Sales Order quantity {1},"Не можете производить больше элемент {0} , чем количество продаж Заказать {1}"
 Cannot refer row number greater than or equal to current row number for this Charge type,"Не можете обратиться номер строки , превышающую или равную текущему номеру строки для этого типа зарядки"
 Cannot return more than {0} for Item {1},Не можете вернуть более {0} для Пункт {1}
@@ -3009,7 +3009,7 @@ Total Commission,Укупно Комисија
 Total Cost,Укупни трошкови
 Total Credit,Укупна кредитна
 Total Debit,Укупно задуживање
-Total Debit must be equal to Total Credit. The difference is {0},Укупно задуживање мора бити једнак укупном кредитном .
+Total Debit must be equal to Total Credit. The difference is {0},
 Total Deduction,Укупно Одбитак
 Total Earning,Укупна Зарада
 Total Experience,Укупно Искуство
@@ -3173,7 +3173,7 @@ Warehouse {0} can not be deleted as quantity exists for Item {1},Склад {0} 
 Warehouse {0} does not belong to company {1},Склад {0} не принадлежит компания {1}
 Warehouse {0} does not exist,Склад {0} не существует
 Warehouse {0}: Company is mandatory,Магацин {0}: Предузеће је обавезно
-Warehouse {0}: Parent account {1} does not bolong to the company {2},Магацин {0}: {1 Родитељ рачун} не Болонг предузећу {2}
+Warehouse {0}: Parent account {1} does not bolong to the company {2},
 Warehouse-Wise Stock Balance,Магацин-Висе салда залиха
 Warehouse-wise Item Reorder,Магацин у питању шифра Реордер
 Warehouses,Складишта
