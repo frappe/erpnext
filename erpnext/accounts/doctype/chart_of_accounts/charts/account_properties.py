@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 account_properties = {
 	"Deutscher Kontenplan SKR03": {
 		"Bilanzkonten": {
