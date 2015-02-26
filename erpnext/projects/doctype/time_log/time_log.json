@@ -229,12 +229,20 @@
    "permlevel": 1, 
    "print_hide": 1, 
    "read_only": 0
+  }, 
+  {
+   "fieldname": "title", 
+   "fieldtype": "Data", 
+   "hidden": 1, 
+   "label": "Title", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-24 03:57:27.652685", 
+ "modified": "2015-02-26 02:22:10.312376", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 
@@ -271,5 +279,5 @@
    "write": 1
   }
  ], 
- "title_field": "activity_type"
+ "title_field": "title"
 }

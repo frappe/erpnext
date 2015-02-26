@@ -1,8 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-# For license information, please see license.txt
-
 from __future__ import unicode_literals
 import frappe, json
 from frappe import _
@@ -19,6 +17,7 @@ from frappe.model.document import Document
 class TimeLog(Document):
 	def validate(self):
 		self.set_status()
+		self.set_title()
 		self.validate_overlap()
 		self.validate_timings()
 		self.calculate_total_hours()
@@ -52,6 +51,16 @@ class TimeLog(Document):
 
 		if self.sales_invoice:
 			self.status="Billed"
+
+	def set_title(self):
+		if self.production_order:
+			self.title = _("{0} for {1}").format(self.operation, self.production_order)
+		elif self.task:
+			self.title = _("{0} for {1}").format(self.activity_type, self.task)
+		elif self.project:
+			self.title = _("{0} for {1}").format(self.activity_type, self.project)
+		else:
+			self.title = self.activity_type
 
 	def validate_overlap(self):
 		"""Checks if 'Time Log' entries overlap for a user, workstation. """

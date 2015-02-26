@@ -5,7 +5,7 @@ var display_activity_log = function(msg) {
 	if(!cur_frm.ss_html)
 		cur_frm.ss_html = $a(cur_frm.fields_dict['activity_log'].wrapper,'div');
 	cur_frm.ss_html.innerHTML =
-		'<div class="panel"><div class="panel-heading">'+__("Activity Log:")+'</div>'+msg+'</div>';
+		'<div class="padding"><h4>'+__("Activity Log:")+'</h4>'+msg+'</div>';
 }
 
 //Create salary slip
@@ -38,25 +38,8 @@ cur_frm.cscript.make_bank_entry = function(doc,cdt,cdn){
 }
 
 cur_frm.cscript.make_jv = function(doc, dt, dn) {
-	var call_back = function(r, rt){
-		var jv = frappe.model.make_new_doc_and_get_name('Journal Entry');
-		jv = locals['Journal Entry'][jv];
-		jv.voucher_type = 'Bank Entry';
-		jv.user_remark = __('Payment of salary for the month {0} and year {1}', [doc.month, doc.fiscal_year]);
-		jv.fiscal_year = doc.fiscal_year;
-		jv.company = doc.company;
-		jv.posting_date = dateutil.obj_to_str(new Date());
-
-		// credit to bank
-		var d1 = frappe.model.add_child(jv, 'Journal Entry Account', 'accounts');
-		d1.account = r.message['default_bank_account'];
-		d1.credit = r.message['amount']
-
-		// debit to salary account
-		var d2 = frappe.model.add_child(jv, 'Journal Entry Account', 'accounts');
-		d2.debit = r.message['amount']
-
-		loaddoc('Journal Entry', jv.name);
-	}
-	return $c_obj(doc, 'get_acc_details', '', call_back);
+	return $c_obj(doc, 'make_journal_entry', '', function(r) {
+		var doc = frappe.model.sync(r.message)[0];
+		frappe.set_route("Form", doc.doctype, doc.name);
+	});
 }

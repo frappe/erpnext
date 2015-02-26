@@ -130,3 +130,4 @@ erpnext.patches.v5_0.update_from_bom
 erpnext.patches.v5_0.update_account_types
 erpnext.patches.v5_0.update_sms_sender
 erpnext.patches.v5_0.set_appraisal_remarks
+erpnext.patches.v5_0.update_time_log_title

@@ -157,6 +157,7 @@ def get_item_details(item_code):
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		quotation = frappe.get_doc(target)
+		quotation.currency = None # set it as default from customer
 		quotation.run_method("set_missing_values")
 		quotation.run_method("calculate_taxes_and_totals")
 

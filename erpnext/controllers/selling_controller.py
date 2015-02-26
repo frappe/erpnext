@@ -48,7 +48,8 @@ class SellingController(StockController):
 	def set_missing_lead_customer_details(self):
 		if getattr(self, "customer", None):
 			from erpnext.accounts.party import _get_party_details
-			party_details = _get_party_details(self.customer, ignore_permissions=self.flags.ignore_permissions)
+			party_details = _get_party_details(self.customer,
+				ignore_permissions=self.flags.ignore_permissions)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
 
