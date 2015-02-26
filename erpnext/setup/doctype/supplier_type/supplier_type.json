@@ -30,6 +30,8 @@
    "permlevel": 0
   }, 
   {
+   "depends_on": "eval:!doc.__islocal", 
+   "description": "Mention if non-standard receivable account applicable", 
    "fieldname": "accounts", 
    "fieldtype": "Table", 
    "label": "Accounts", 
@@ -39,7 +41,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:47.821736", 
+ "modified": "2015-02-24 17:35:22.087557", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Supplier Type", 

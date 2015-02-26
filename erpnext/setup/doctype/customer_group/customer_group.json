@@ -116,6 +116,8 @@
    "permlevel": 0
   }, 
   {
+   "depends_on": "eval:!doc.__islocal", 
+   "description": "Mention if non-standard receivable account applicable", 
    "fieldname": "accounts", 
    "fieldtype": "Table", 
    "label": "Accounts", 
@@ -126,7 +128,7 @@
  "icon": "icon-sitemap", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-02-05 05:11:36.752161", 
+ "modified": "2015-02-24 17:34:40.749511", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Customer Group", 
