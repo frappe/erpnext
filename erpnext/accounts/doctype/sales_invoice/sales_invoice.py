@@ -55,6 +55,7 @@ class SalesInvoice(SellingController):
 
 		if cint(self.update_stock):
 			self.validate_item_code()
+			self.validate_warehouse()
 			self.update_current_stock()
 			self.validate_delivery_note()
 
@@ -334,6 +335,11 @@ class SalesInvoice(SellingController):
 		for d in self.get('items'):
 			if not d.item_code:
 				msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
+
+	def validate_warehouse(self):
+		for d in self.get('entries'):
+			if not d.warehouse:
+				frappe.throw(_("Warehouse required at Row No {0}").format(d.idx))
 
 	def validate_delivery_note(self):
 		for d in self.get("items"):
