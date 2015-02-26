@@ -410,7 +410,7 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 				and tabAccount.docstatus!=2
 				and ifnull(tabAccount.master_type, "")=""
 				and ifnull(tabAccount.master_name, "")=""
-				and tabAccount.company = '%(company)s'
-				and tabAccount.%(key)s LIKE '%(txt)s'
-				%(mcond)s""" % {'company': filters['company'], 'key': searchfield,
-			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype)})
+				and tabAccount.company = %(company)s
+				and tabAccount.{key} LIKE %(txt)s
+				{mcond}""".format(key=searchfield, mcond=get_match_cond(doctype)),
+				{'company': filters['company'], 'txt': "%%{0}%%".format(txt)})

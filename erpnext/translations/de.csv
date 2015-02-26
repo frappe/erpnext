@@ -54,7 +54,7 @@ A third party distributor / dealer / commission agent / affiliate / reseller who
 AMC Expiry Date,AMC Verfalldatum
 Abbr,Abk.
 Abbreviation cannot have more than 5 characters,Abkürzung darf nicht länger als 5 Zeichen sein
-Above Value,Über Wert
+Above Value,Wertgrenze wurde überschritten
 Absent,Abwesend
 Acceptance Criteria,Akzeptanzkriterium
 Accepted,Genehmigt
@@ -63,7 +63,7 @@ Accepted Quantity,Akzeptierte Menge
 Accepted Warehouse,Akzeptiertes Lager
 Account,Konto
 Account Balance,Kontostand
-Account Created: {0},Konto {0} erstellt
+Account Created: {0},Konto für: {0} wurde erstellt
 Account Details,Kontendaten
 Account Head,Kostenstelleninhaber
 Account Name,Kontenname
@@ -83,9 +83,9 @@ Account {0} does not belong to company: {1},Konto {0} gehört nicht zum Unterneh
 Account {0} does not exist,Konto {0} existiert nicht
 Account {0} does not exists,Konto {0} existiert nicht
 Account {0} has been entered more than once for fiscal year {1},Konto {0} wurde mehr als einmal für das Geschäftsjahr {1} erfasst
-Account {0} is frozen,Konto {0} ist gesperrt
-Account {0} is inactive,Konto {0} ist inaktiv
-Account {0} is not valid,Konto {0} ist nicht gültig
+Account {0} is frozen,
+Account {0} is inactive,
+Account {0} is not valid,
 Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Konto {0} muss vom Typ ""Aktivposten"" sein, weil der Artikel {1} ein Aktivposten ist"
 Account {0}: Parent account {1} can not be a ledger,Konto {0}: Eltern-Konto {1} kann kein Kontenblatt sein
 Account {0}: Parent account {1} does not belong to company: {2},Konto {0}: Eltern-Konto {1} gehört nicht zur Firma {2}
@@ -130,7 +130,7 @@ Add / Edit Taxes and Charges,Hinzufügen/Bearbeiten von Steuern und Abgaben
 Add Child,Untergeordnetes Element hinzufügen
 Add Serial No,Seriennummer hinzufügen
 Add Taxes,Steuern hinzufügen
-Add or Deduct,Hinzuaddieren oder abziehen
+Add or Deduct,Addieren/Subtrahieren
 Add rows to set annual budgets on Accounts.,Zeilen hinzufügen um Jahresbudgets in Konten festzulegen.
 Add to Cart,In den Warenkorb
 Add to calendar on this date,An diesem Tag zum Kalender hinzufügen
@@ -140,7 +140,7 @@ Address & Contact,Adresse & Kontakt
 Address & Contacts,Adresse & Kontakte
 Address Desc,Adresszusatz
 Address Details,Adressdetails
-Address HTML,Adresse HTML
+Address HTML,Adresse im HTML-Format
 Address Line 1,Adresszeile 1
 Address Line 2,Adresszeile 2
 Address Template,Adressvorlage
@@ -151,7 +151,7 @@ Address master.,Hauptanschrift.
 Administrative Expenses,Verwaltungskosten
 Administrative Officer,Administrative Officer
 Administrator,Administrator
-Advance Amount,Vorausbetrag
+Advance Amount,Vorauskasse
 Advance amount,Vorausbetrag
 Advances,Vorschüsse
 Advertisement,Anzeige
@@ -914,7 +914,7 @@ Duties and Taxes,Zölle und Steuern
 ERPNext Setup,ERPNext -Setup
 Earliest,Frühest
 Earnest Money,Angeld
-Earning,Einkommen
+Earning,Ertrag
 Earning & Deduction,Einkommen & Abzug
 Earning Type,Einkommensart
 Earning1,Einkommen1
@@ -1228,7 +1228,7 @@ Groups,Gruppen
 Guest,Gast
 HR Manager,HR-Manager
 HR Settings,HR-Einstellungen
-HR User,HR Mitarbeiter
+HR User,HR-Mitarbeiter
 HTML / Banner that will show on the top of product list.,"HTML/Banner, das oben auf der der Produktliste angezeigt wird."
 Half Day,Halbtags
 Half Yearly,Halbjährlich
@@ -1236,8 +1236,8 @@ Half-yearly,Halbjährlich
 Happy Birthday!,Happy Birthday!
 Hardware,Hardware
 Has Batch No,Hat Stapelnr.
-Has Child Node,Hat untergeordneten Knoten
-Has Serial No,Hat Seriennummer
+Has Child Node,Weitere Elemente vorhanden
+Has Serial No,Seriennummer vorhanden
 Head of Marketing and Sales,Leiter Marketing und Vertrieb
 Header,Kopfzeile
 Heads (or groups) against which Accounting Entries are made and balances are maintained.,"Vorgesetzte (oder Gruppen), für die Buchungseinträge vorgenommen und Salden geführt werden."
@@ -1256,7 +1256,7 @@ Hold,Anhalten
 Holiday,Urlaub
 Holiday List,Urlaubsliste
 Holiday List Name,Urlaubslistenname
-Holiday master.,Ferien Master.
+Holiday master.,Vorlage Feiertage
 Holidays,Feiertage
 Home,Startseite
 Host,Host
@@ -2554,7 +2554,7 @@ Row {0}: Credit entry can not be linked with a Purchase Invoice,Row {0} : Kredit
 Row {0}: Debit entry can not be linked with a Sales Invoice,Zeile {0}: Debit-Eintrag kann nicht mit einer Ausgangsrechnung verknüpft werden
 Row {0}: Payment amount must be less than or equals to invoice outstanding amount. Please refer Note below.,Row {0}: Zahlungsbetrag muss kleiner als oder gleich zu ausstehenden Betrag in Rechnung stellen können. Bitte beachten Sie folgenden Hinweis.
 Row {0}: Qty is mandatory,Row {0}: Menge ist obligatorisch
-"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}",Zeile {0}: Menge {2} {3} ist auf Lager {1} nicht verfügbar. Verfügbare Menge: {4}
+"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.					Available Qty: {4}, Transfer Qty: {5}",
 "Row {0}: To set {1} periodicity, difference between from and to date \						must be greater than or equal to {2}",Zeile {0}: Um {1} als wiederholend zu setzen muss der Unterschied zwischen von und bis Datum größer oder gleich {2} sein
 Row {0}:Start Date must be before End Date,Row {0}: Startdatum muss vor dem Enddatum liegen
 Rules for adding shipping costs.,Regeln für das Hinzufügen von Versandkosten.
@@ -3133,7 +3133,7 @@ Total Commission,Gesamtbetrag Kommission
 Total Cost,Gesamtkosten
 Total Credit,Gesamtkredit
 Total Debit,Gesamtschuld
-Total Debit must be equal to Total Credit. The difference is {0},Insgesamt muss Debit gleich Gesamt-Credit ist.
+Total Debit must be equal to Total Credit. The difference is {0},
 Total Deduction,Gesamtabzug
 Total Earning,Gesamteinnahmen
 Total Experience,Intensive Erfahrung

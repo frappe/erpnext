@@ -212,7 +212,7 @@ Amount >=,Wartość >=
 Amount to Bill,Amount to Bill
 An Customer exists with same name,An Customer exists with same name
 "An Item Group exists with same name, please change the item name or rename the item group",Istnieje element Grupy o takiej nazwie. Zmień nazwę elementu lub tamtej Grupy.
-"An item exists with same name ({0}), please change the item group name or rename the item",Istnieje element  o takiej nazwie. Zmień nazwę Grupy lub tego elementu.
+"An item exists with same name ({0}), please change the item group name or rename the item",
 Analyst,Analyst
 Annual,Roczny
 Another Period Closing Entry {0} has been made after {1},Another Period Closing Entry {0} has been made after {1}

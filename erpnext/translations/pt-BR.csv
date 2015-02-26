@@ -280,8 +280,7 @@ Attendance for employee {0} is already marked,Comparecimento para o empregado {0
 Attendance record.,Registro de comparecimento.
 Authorization Control,Controle de autorização
 Authorization Rule,Regra de autorização
-Auto Accounting For Stock Settings,"Contabilidade Automática para as 
-Configurações de Estoque"
+Auto Accounting For Stock Settings,Contabilidade Automática para as Configurações de Estoque
 Auto Material Request,Requisição de material automática
 Auto-raise Material Request if quantity goes below re-order level in a warehouse,Auto-executar Requisição de Material se quantidade for inferior ao nível de re-ordem no estoque
 Automatically compose message on submission of transactions.,Compor automaticamente mensagem no envio de transações.
@@ -2295,12 +2294,12 @@ Raised By,Levantadas por
 Raised By (Email),Levantadas por (e-mail)
 Random,Aleatório
 Range,Alcance
-Rate,Taxa
+Rate,Preço
 Rate ,Taxa
 Rate (%),Taxa (%)
-Rate (Company Currency),Rate (moeda da empresa)
+Rate (Company Currency),Preço (moeda da empresa)
 Rate Of Materials Based On,Taxa de materiais com base em
-Rate and Amount,Taxa e montante
+Rate and Amount,Preço e Total
 Rate at which Customer Currency is converted to customer's base currency,Taxa na qual a moeda do cliente é convertida para a moeda base do cliente
 Rate at which Price list currency is converted to company's base currency,Taxa na qual a moeda da lista de preços é convertida para a moeda base da empresa
 Rate at which Price list currency is converted to customer's base currency,Taxa na qual a moeda da lista de preços é convertida para a moeda base do cliente
@@ -3010,7 +3009,7 @@ Total Commission,Total da Comissão
 Total Cost,Custo Total
 Total Credit,Crédito Total
 Total Debit,Débito Total
-Total Debit must be equal to Total Credit. The difference is {0},Débito total deve ser igual ao total de crédito.
+Total Debit must be equal to Total Credit. The difference is {0},
 Total Deduction,Dedução Total
 Total Earning,Total de Ganhos
 Total Experience,Experiência total
@@ -3156,8 +3155,7 @@ Voucher ID,ID do Comprovante
 Voucher No,Nº do comprovante
 Voucher Type,Tipo de comprovante
 Voucher Type and Date,Tipo Vale e Data
-Walk In,"Caminhe em
-"
+Walk In,Caminhe em
 Warehouse,Armazém
 Warehouse Contact Info,Informações de Contato do Almoxarifado
 Warehouse Detail,Detalhe do Almoxarifado
@@ -3240,8 +3238,7 @@ Write Off Voucher,Eliminar comprovante
 Wrong Template: Unable to find head row.,Template errado: Não é possível encontrar linha cabeça.
 Year,Ano
 Year Closed,Ano encerrado
-Year End Date,"Data final do ano
-"
+Year End Date,Data final do ano
 Year Name,Nome do ano
 Year Start Date,Data do início do ano
 Year of Passing,Ano de passagem

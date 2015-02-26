@@ -357,7 +357,7 @@ Batched for Billing,دفعات عن الفواتير
 Better Prospects,آفاق أفضل
 Bill Date,تاريخ الفاتورة
 Bill No,رقم الفاتورة
-Bill No {0} already booked in Purchase Invoice {1},مشروع القانون لا { 0 ​​} حجزت بالفعل في شراء الفاتورة {1}
+Bill No {0} already booked in Purchase Invoice {1},
 Bill of Material,فاتورة المواد
 Bill of Material to be considered for manufacturing,فاتورة المواد التي سينظر فيها لتصنيع
 Bill of Materials (BOM),مشروع القانون المواد (BOM)
@@ -465,7 +465,7 @@ Capital Account,حساب رأس المال
 Capital Equipments,معدات العاصمة
 Carry Forward,المضي قدما
 Carry Forwarded Leaves,تحمل أوراق واحال
-Case No(s) already in use. Try from Case No {0},الحالة رقم ( ق ) قيد الاستخدام بالفعل. محاولة من القضية لا { 0 ​​}
+Case No(s) already in use. Try from Case No {0},
 Case No. cannot be 0,القضية رقم لا يمكن أن يكون 0
 Cash,نقد
 Cash In Hand,نقد في الصندوق
@@ -1361,7 +1361,7 @@ Item Code > Item Group > Brand,كود البند> مجموعة المدينة> �
 Item Code and Warehouse should already exist.,يجب أن تكون موجودة بالفعل البند المدونة و المستودعات.
 Item Code cannot be changed for Serial No.,لا يمكن تغيير رمز المدينة لل رقم التسلسلي
 Item Code is mandatory because Item is not automatically numbered,كود البند إلزامي لأن السلعة بسهولة و غير مرقمة تلقائيا
-Item Code required at Row No {0},كود البند المطلوبة في صف لا { 0 ​​}
+Item Code required at Row No {0},
 Item Customer Detail,البند تفاصيل العملاء
 Item Description,وصف السلعة
 Item Desription,البند Desription
@@ -1709,7 +1709,7 @@ Name of person or organization that this address belongs to.,اسم الشخص �
 Name of the Budget Distribution,اسم توزيع الميزانية
 Naming Series,تسمية السلسلة
 Negative Quantity is not allowed,لا يسمح السلبية الكمية
-Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},خطأ الأسهم السلبية ( { } 6 ) القطعة ل {0} في {1} في معرض النماذج ثلاثية على {2} {3} {4} في {5}
+Negative Stock Error ({6}) for Item {0} in Warehouse {1} on {2} {3} in {4} {5},
 Negative Valuation Rate is not allowed,لا يسمح السلبية قيم التقييم
 Negative balance in Batch {0} for Item {1} at Warehouse {2} on {3} {4},الرصيد السلبي في الدفعة {0} القطعة ل {1} في {2} مستودع في {3} {4}
 Net Pay,صافي الراتب
@@ -2484,7 +2484,7 @@ Salary Mode,وضع الراتب
 Salary Slip,إيصال الراتب
 Salary Slip Deduction,زلة الراتب خصم
 Salary Slip Earning,مسير الرواتب /الكسب
-Salary Slip of employee {0} already created for this month,إيصال راتب الموظف تم إنشاؤها مسبقا لهذا الشهر 
+Salary Slip of employee {0} already created for this month,
 Salary Structure,هيكل المرتبات
 Salary Structure Deduction,هيكل المرتبات / الخصومات
 Salary Structure Earning,هيكل المرتبات / الكسب
@@ -3008,7 +3008,7 @@ Total Commission,مجموع العمولة
 Total Cost,التكلفة الكلية لل
 Total Credit,إجمالي الائتمان
 Total Debit,مجموع الخصم
-Total Debit must be equal to Total Credit. The difference is {0},يجب أن يكون إجمالي الخصم يساوي إجمالي الائتمان .
+Total Debit must be equal to Total Credit. The difference is {0},
 Total Deduction,مجموع الخصم
 Total Earning,إجمالي الدخل
 Total Experience,مجموع الخبرة
