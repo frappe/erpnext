@@ -426,7 +426,21 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 			}
 		});
 	}
+}
 
+cur_frm.cscript.barcode = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	if (d.barcode) {
+		frappe.call({
+			method: "erpnext.stock.get_item_details.get_item_code",
+			args: {"barcode": d.barcode },
+			callback: function(r) {
+				if (!r.exe){
+					frappe.model.set_value(cdt, cdn, "item_code", r.message);
+				}
+			}
+		});
+	}
 }
 
 cur_frm.cscript.s_warehouse = function(doc, cdt, cdn) {

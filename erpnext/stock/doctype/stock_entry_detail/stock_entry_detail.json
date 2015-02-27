@@ -5,6 +5,19 @@
  "doctype": "DocType", 
  "fields": [
   {
+   "fieldname": "barcode", 
+   "fieldtype": "Data", 
+   "label": "Barcode", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "section_break_2", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "s_warehouse", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -331,7 +344,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-19 05:33:06.289852", 
+ "modified": "2015-02-25 04:31:21.801200", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry Detail", 

@@ -80,7 +80,8 @@ erpnext.feature_setup.feature_dict = {
 	'fs_item_barcode': {
 		'Item': {'fields': ['barcode']},
 		'Delivery Note': {'items': ['barcode']},
-		'Sales Invoice': {'items': ['barcode']}
+		'Sales Invoice': {'items': ['barcode']},
+		'Stock Entry': {'items': ['barcode']}
 	},
 	'fs_item_group_in_details': {
 		'Delivery Note': {'items':['item_group']},
