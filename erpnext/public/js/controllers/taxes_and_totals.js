@@ -94,8 +94,10 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 
 			$.each(tax_fields, function(i, fieldname) { tax[fieldname] = 0.0 });
 
-			cur_frm.cscript.validate_taxes_and_charges(tax.doctype, tax.name);
-			me.validate_inclusive_tax(tax);
+			if (!this.discount_amount_applied) {
+				cur_frm.cscript.validate_taxes_and_charges(tax.doctype, tax.name);
+				me.validate_inclusive_tax(tax);
+			}
 			frappe.model.round_floats_in(tax);
 		});
 	},

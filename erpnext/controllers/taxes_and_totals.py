@@ -73,8 +73,9 @@ class calculate_taxes_and_totals(object):
 
 	def initialize_taxes(self):
 		for tax in self.doc.get("taxes"):
-			validate_taxes_and_charges(tax)
-			validate_inclusive_tax(tax, self.doc)
+			if not self.discount_amount_applied:
+				validate_taxes_and_charges(tax)
+				validate_inclusive_tax(tax, self.doc)
 
 			tax.item_wise_tax_detail = {}
 			tax_fields = ["total", "tax_amount_after_discount_amount",
