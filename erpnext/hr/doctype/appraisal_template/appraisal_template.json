@@ -36,18 +36,11 @@
    "oldfieldtype": "Table", 
    "options": "Appraisal Template Goal", 
    "permlevel": 0
-  }, 
-  {
-   "fieldname": "total_points", 
-   "fieldtype": "Int", 
-   "in_list_view": 1, 
-   "label": "Total Points", 
-   "permlevel": 0
   }
  ], 
  "icon": "icon-file-text", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:34.496238", 
+ "modified": "2015-03-02 06:32:50.109677", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Appraisal Template", 
