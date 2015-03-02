@@ -128,3 +128,4 @@ erpnext.patches.v5_0.taxes_and_totals_in_party_currency
 erpnext.patches.v5_0.replace_renamed_fields_in_custom_scripts_and_print_formats
 erpnext.patches.v5_0.update_from_bom
 erpnext.patches.v5_0.update_account_types
+erpnext.patches.v5_0.update_sms_sender

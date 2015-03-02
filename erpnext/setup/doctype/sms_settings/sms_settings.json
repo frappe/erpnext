@@ -40,6 +40,13 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "sms_sender_name", 
+   "fieldtype": "Data", 
+   "label": "SMS Sender Name", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "static_parameters_section", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -58,7 +65,7 @@
  "idx": 1, 
  "in_create": 0, 
  "issingle": 1, 
- "modified": "2015-02-05 05:11:46.834990", 
+ "modified": "2015-03-02 02:24:19.692599", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "SMS Settings", 

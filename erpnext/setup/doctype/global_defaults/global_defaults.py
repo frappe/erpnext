@@ -10,7 +10,6 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 
 keydict = {
 	# "key in defaults": "key in Global Defaults"
-	"print_style": "print_style",
 	"fiscal_year": "current_fiscal_year",
 	'company': 'default_company',
 	'currency': 'default_currency',

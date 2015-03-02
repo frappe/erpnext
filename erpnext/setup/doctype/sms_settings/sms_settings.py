@@ -29,7 +29,7 @@ def validate_receiver_nos(receiver_list):
 
 def get_sender_name():
 	"returns name as SMS sender"
-	sender_name = frappe.db.get_value('Global Defaults', None, 'sms_sender_name') or \
+	sender_name = frappe.db.get_single_value('SMS Settings', 'sms_sender_name') or \
 		'ERPNXT'
 	if len(sender_name) > 6 and \
 			frappe.db.get_default("country") == "India":
