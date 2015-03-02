@@ -108,12 +108,12 @@ erpnext.pos.PointOfSale = Class.extend({
 						var item = r.message[0];
 						if (item.serial_no) {
 							me.add_to_cart(item.item_code, item.serial_no);
-							this.search.$input.val("");
+							me.search.$input.val("");
 							return;
 
 						} else if (item.barcode) {
 							me.add_to_cart(item.item_code);
-							this.search.$input.val("");
+							me.search.$input.val("");
 							return;
 						}
 					}

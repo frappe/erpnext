@@ -23,7 +23,7 @@ def get_items(price_list, sales_or_purchase, item=None):
 			return item_code
 
 		# search barcode
-		item_code = frappe.db.sql("""select name from `tabItem` where barcode=%s""",
+		item_code = frappe.db.sql("""select name, item_code from `tabItem` where barcode=%s""",
 			(item), as_dict=1)
 		if item_code:
 			item_code[0]["barcode"] = item
