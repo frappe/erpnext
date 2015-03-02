@@ -142,10 +142,10 @@
    "permlevel": 0
   }, 
   {
-   "description": "Any other comments, noteworthy effort that should go in the records.", 
-   "fieldname": "comments", 
+   "description": "Any other remarks, noteworthy effort that should go in the records.", 
+   "fieldname": "remarks", 
    "fieldtype": "Text", 
-   "label": "Comments", 
+   "label": "Remarks", 
    "permlevel": 0
   }, 
   {
@@ -165,6 +165,12 @@
    "options": "Company", 
    "permlevel": 0, 
    "reqd": 1
+  }, 
+  {
+   "fieldname": "column_break_17", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "fiscal_year", 
@@ -197,7 +203,7 @@
  "icon": "icon-thumbs-up", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-20 05:08:10.903126", 
+ "modified": "2015-03-02 07:00:45.803789", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Appraisal", 
