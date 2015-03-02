@@ -19,7 +19,7 @@ def get_doctypes():
 
 @frappe.whitelist()
 def upload(select_doctype=None, rows=None):
-	from frappe.utils.csvutils import read_csv_content_from_uploaded_file
+	from frappe.utils.csvutils import read_csv_content_from_attached_file
 	from frappe.model.rename_doc import rename_doc
 
 	if not select_doctype:
@@ -29,7 +29,7 @@ def upload(select_doctype=None, rows=None):
 		raise frappe.PermissionError
 
 	if not rows:
-		rows = read_csv_content_from_uploaded_file()
+		rows = read_csv_content_from_attached_file(frappe.get_doc("Rename Tool", "Rename Tool"))
 	if not rows:
 		frappe.throw(_("Please select a valid csv file with data"))
 

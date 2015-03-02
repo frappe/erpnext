@@ -13,9 +13,10 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "upload_html", 
-   "fieldtype": "HTML", 
-   "label": "Upload HTML", 
+   "description": "Attach .csv file with two columns, one for the old name and one for the new name", 
+   "fieldname": "file_to_rename", 
+   "fieldtype": "Attach", 
+   "label": "File to Rename", 
    "permlevel": 0
   }, 
   {
@@ -31,7 +32,7 @@
  "idx": 1, 
  "issingle": 1, 
  "max_attachments": 1, 
- "modified": "2015-02-05 05:11:44.714515", 
+ "modified": "2015-03-02 02:35:34.129309", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Rename Tool", 
