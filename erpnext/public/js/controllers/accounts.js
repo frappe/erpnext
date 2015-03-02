@@ -139,31 +139,37 @@ frappe.ui.form.on(cur_frm.doctype, "taxes_on_form_rendered", function(frm) {
 	erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm);
 });
 
+// setup queries for taxes
+frappe.ui.form.on(cur_frm.doctype, "onload", function(frm) {
+	if(frm.get_field("taxes")) {
+		frm.set_query("account_head", "taxes", function(doc) {
+			if(frm.cscript.tax_table == "Sales Taxes and Charges") {
+				var account_type = ["Tax", "Chargeable", "Expense Account"];
+			} else {
+				var account_type = ["Tax", "Chargeable", "Income Account"];
+			}
 
-cur_frm.set_query("account_head", "taxes", function(doc) {
-	if(cur_frm.cscript.tax_table == "Sales Taxes and Charges") {
-		var account_type = ["Tax", "Chargeable", "Expense Account"];
-	} else {
-		var account_type = ["Tax", "Chargeable", "Income Account"];
-	}
+			return {
+				query: "erpnext.controllers.queries.tax_account_query",
+				filters: {
+					"account_type": account_type,
+					"company": doc.company
+				}
+			}
+		});
 
-	return {
-		query: "erpnext.controllers.queries.tax_account_query",
-		filters: {
-			"account_type": account_type,
-			"company": doc.company
-		}
+		frm.set_query("cost_center", "taxes", function(doc) {
+			return {
+				filters: {
+					'company': doc.company,
+					'group_or_ledger': "Ledger"
+				}
+			}
+		});
 	}
 });
 
-cur_frm.set_query("cost_center", "taxes", function(doc) {
-	return {
-		filters: {
-			'company': doc.company,
-			'group_or_ledger': "Ledger"
-		}
-	}
-});
+
 
 // For customizing print
 cur_frm.pformat.total = function(doc) { return ''; }
