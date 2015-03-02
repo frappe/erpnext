@@ -336,6 +336,7 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 	stock_entry.purpose = purpose
 	stock_entry.production_order = production_order_id
 	stock_entry.company = production_order.company
+	stock_entry.from_bom = 1
 	stock_entry.bom_no = production_order.bom_no
 	stock_entry.additional_operating_cost = production_order.additional_operating_cost
 	stock_entry.use_multi_level_bom = production_order.use_multi_level_bom
