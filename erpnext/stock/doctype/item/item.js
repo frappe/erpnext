@@ -109,6 +109,9 @@ frappe.ui.form.on("Item", {
 			method: "copy_specification_from_item_group"
 		});
 	},
+	is_stock_item: function(frm) {
+		erpnext.item.toggle_reqd(frm);
+	}
 });
 
 $.extend(erpnext.item, {
