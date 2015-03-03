@@ -86,7 +86,7 @@ class EmailDigest(Document):
 					frappe.sendmail(recipients=user_id,
 						subject="[ERPNext] [{frequency} Digest] {name}".format(
 							frequency=self.frequency, name=self.name),
-						msg=msg_for_this_receipient, bulk=True)
+						message=msg_for_this_receipient, bulk=True)
 
 	def get_digest_msg(self):
 		return self.get_msg_html(self.get_user_specific_content(frappe.session.user) + \

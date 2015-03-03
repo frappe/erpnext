@@ -75,4 +75,4 @@ def send_email(success, service_name, error_status=None):
 		frappe.connect()
 
 	recipients = frappe.db.get_value("Backup Manager", None, "send_notifications_to").split(",")
-	frappe.sendmail(recipients=recipients, subject=subject, msg=message)
+	frappe.sendmail(recipients=recipients, subject=subject, message=message)

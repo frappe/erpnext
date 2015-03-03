@@ -173,7 +173,8 @@ def send_email_notification(mr_list):
 			msg += "<tr><td>" + item.item_code + "</td><td>" + item.warehouse + "</td><td>" + \
 				cstr(item.qty) + "</td><td>" + cstr(item.uom) + "</td></tr>"
 		msg += "</table>"
-	frappe.sendmail(recipients=email_list, subject='Auto Material Request Generation Notification', msg = msg)
+	frappe.sendmail(recipients=email_list, 
+		subject='Auto Material Request Generation Notification', message = msg)
 
 def notify_errors(exceptions_list):
 	subject = "[Important] [ERPNext] Auto Reorder Errors"
