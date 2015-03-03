@@ -82,7 +82,7 @@
    "permlevel": 0
   }, 
   {
-   "depends_on": "with_operations", 
+   "depends_on": "", 
    "description": "Specify the operations, operating cost and give a unique Operation no to your operations.", 
    "fieldname": "operations_section", 
    "fieldtype": "Section Break", 
@@ -279,7 +279,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-02-21 10:31:18.889394", 
+ "modified": "2015-03-03 14:22:44.725097", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM", 

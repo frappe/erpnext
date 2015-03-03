@@ -5,6 +5,7 @@
 frappe.provide("erpnext.bom");
 cur_frm.cscript.refresh = function(doc,dt,dn){
 	cur_frm.toggle_enable("item", doc.__islocal);
+	toggle_operations(cur_frm);
 
 	if (!doc.__islocal && doc.docstatus<2) {
 		cur_frm.add_custom_button(__("Update Cost"), cur_frm.cscript.update_cost,
@@ -210,6 +211,20 @@ frappe.ui.form.on("BOM Item", "items_remove", function(frm) {
 	erpnext.bom.calculate_total(frm.doc);
 });
 
+var toggle_operations = function(frm) {
+	frm.toggle_display("operations_section", cint(frm.doc.with_operations) == 1);
+}
+
+frappe.ui.form.on("BOM", "with_operations", function(frm) {
+	if(!cint(frm.doc.with_operations)) {
+		frm.set_value("operations", []);
+	}
+	toggle_operations(frm);
+});
+
+
 cur_frm.cscript.image = function() {
 	refresh_field("image_view");
 }
+
+
