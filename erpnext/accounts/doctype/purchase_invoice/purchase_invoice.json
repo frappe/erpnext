@@ -8,7 +8,7 @@
   {
    "fieldname": "supplier_section", 
    "fieldtype": "Section Break", 
-   "label": "Supplier", 
+   "label": "", 
    "options": "icon-user", 
    "permlevel": 0
   }, 
@@ -315,7 +315,7 @@
   {
    "fieldname": "taxes_section", 
    "fieldtype": "Section Break", 
-   "label": "Taxes and Charges", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-money", 
    "permlevel": 0, 
@@ -655,7 +655,7 @@
   {
    "fieldname": "terms_section_break", 
    "fieldtype": "Section Break", 
-   "label": "Terms and Conditions", 
+   "label": "", 
    "options": "icon-legal", 
    "permlevel": 0
   }, 
@@ -710,7 +710,7 @@
   {
    "fieldname": "more_info", 
    "fieldtype": "Section Break", 
-   "label": "More Info", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-file-text", 
    "permlevel": 0, 
@@ -963,7 +963,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-24 15:59:49.908324", 
+ "modified": "2015-03-03 02:46:30.118418", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 

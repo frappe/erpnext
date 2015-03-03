@@ -245,23 +245,23 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 	from_warehouse: function(doc) {
 		var me = this;
-		this.set_warehouse_if_missing("s_warehouse", doc.from_warehouse, function(row) {
+		this.set_warehouse_if_different("s_warehouse", doc.from_warehouse, function(row) {
 			return me.source_mandatory.indexOf(me.frm.doc.purpose)!==-1;
 		});
 	},
 
 	to_warehouse: function(doc) {
 		var me = this;
-		this.set_warehouse_if_missing("t_warehouse", doc.to_warehouse, function(row) {
+		this.set_warehouse_if_different("t_warehouse", doc.to_warehouse, function(row) {
 			return me.target_mandatory.indexOf(me.frm.doc.purpose)!==-1;
 		});
 	},
 
-	set_warehouse_if_missing: function(fieldname, value, condition) {
+	set_warehouse_if_different: function(fieldname, value, condition) {
 		var changed = false;
 		for (var i=0, l=(this.frm.doc.items || []).length; i<l; i++) {
 			var row = this.frm.doc.items[i];
-			if (!row[fieldname]) {
+			if (row[fieldname] != value) {
 				if (condition && !condition(row)) {
 					continue;
 				}
@@ -352,20 +352,6 @@ cur_frm.cscript.toggle_related_fields = function(doc) {
 	cur_frm.fields_dict["items"].grid.set_column_disp("t_warehouse", !disable_to_warehouse);
 
 	cur_frm.cscript.toggle_enable_bom();
-
-	if(doc.purpose == 'Purchase Return') {
-		doc.customer = doc.customer_name = doc.customer_address =
-			doc.delivery_note_no = doc.sales_invoice_no = null;
-		doc.bom_no = doc.production_order = doc.fg_completed_qty = null;
-	} else if(doc.purpose == 'Sales Return') {
-		doc.supplier=doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no=null;
-		doc.bom_no = doc.production_order = doc.fg_completed_qty = null;
-	} else {
-		doc.customer = doc.customer_name = doc.customer_address =
-			doc.delivery_note_no = doc.sales_invoice_no = doc.supplier =
-			doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = null;
-	}
-
 
 }
 

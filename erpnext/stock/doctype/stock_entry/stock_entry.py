@@ -73,6 +73,7 @@ class StockEntry(StockController):
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "items")
 		self.update_production_order()
+		self.validate_purchase_order()
 		self.make_gl_entries()
 
 	def on_cancel(self):
@@ -286,20 +287,22 @@ class StockEntry(StockController):
 			if not d.t_warehouse:
 				raw_material_cost += flt(d.amount)
 
+
 		self.add_operation_cost(raw_material_cost, force)
 
 	def add_operation_cost(self, raw_material_cost, force):
 		"""Adds operating cost if Production Order is set"""
 		# set incoming rate for fg item
-		number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
-		for d in self.get("items"):
-			if (d.t_warehouse and number_of_fg_items == 1):
-				operation_cost_per_unit = 0.0
-				if self.production_order:
-					operation_cost_per_unit = self.get_operation_cost_per_unit(d.bom_no, d.qty)
-				d.incoming_rate = operation_cost_per_unit + (raw_material_cost / flt(d.transfer_qty))
-				d.amount = flt(flt(d.transfer_qty) * flt(d.incoming_rate), self.precision("transfer_qty", d))
-				break
+		if self.purpose in ("Manufacture", "Repack"):
+			number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
+			for d in self.get("items"):
+				if (d.t_warehouse and number_of_fg_items == 1):
+					operation_cost_per_unit = 0.0
+					if self.production_order:
+						operation_cost_per_unit = self.get_operation_cost_per_unit(d.bom_no, d.qty)
+					d.incoming_rate = operation_cost_per_unit + (raw_material_cost / flt(d.transfer_qty))
+					d.amount = flt(flt(d.transfer_qty) * flt(d.incoming_rate), self.precision("transfer_qty", d))
+					break
 
 	def get_operation_cost_per_unit(self, bom_no, qty):
 		"""Returns operating cost from Production Order for given `bom_no`"""
@@ -341,6 +344,26 @@ class StockEntry(StockController):
 			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
 
 		return incoming_rate
+
+	def validate_purchase_order(self):
+		"""Throw exception if more raw material is transferred against Purchase Order than in
+		the raw materials supplied table"""
+		if self.purpose == "Subcontract" and self.purchase_order:
+			purchase_order = frappe.get_doc("Purchase Order", self.purchase_order)
+			for se_item in self.items:
+				total_allowed = [d.required_qty for d in purchase_order.supplied_items \
+					if d.rm_item_code == se_item.item_code][0]
+				total_supplied = frappe.db.sql("""select sum(qty)
+					from `tabStock Entry Detail`, `tabStock Entry`
+					where `tabStock Entry`.purchase_order = %s
+						and `tabStock Entry`.docstatus = 1
+						and `tabStock Entry Detail`.item_code = %s
+						and `tabStock Entry Detail`.parent = `tabStock Entry`.name""",
+							(self.purchase_order, se_item.item_code))[0][0]
+
+				if total_supplied > total_allowed:
+					frappe.throw(_("Not allowed to tranfer more {0} than {1} against Purchase Order {2}").format(se_item.item_code,
+						total_allowed, self.purchase_order))
 
 	def validate_bom(self):
 		for d in self.get('items'):

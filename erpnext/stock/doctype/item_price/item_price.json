@@ -18,6 +18,7 @@
    "fieldname": "price_list", 
    "fieldtype": "Link", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Price List", 
    "options": "Price List", 
    "permlevel": 0, 
@@ -26,7 +27,7 @@
   {
    "fieldname": "buying", 
    "fieldtype": "Check", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Buying", 
    "permlevel": 0, 
    "read_only": 1
@@ -34,7 +35,7 @@
   {
    "fieldname": "selling", 
    "fieldtype": "Check", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Selling", 
    "permlevel": 0, 
    "read_only": 1
@@ -50,7 +51,7 @@
    "fieldname": "item_code", 
    "fieldtype": "Link", 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Item Code", 
    "oldfieldname": "price_list_name", 
    "oldfieldtype": "Select", 
@@ -105,7 +106,7 @@
  "idx": 1, 
  "in_create": 0, 
  "istable": 0, 
- "modified": "2015-02-20 05:04:11.609416", 
+ "modified": "2015-03-03 01:05:09.876025", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Price", 
@@ -138,5 +139,6 @@
    "write": 1
   }
  ], 
- "read_only": 0
+ "read_only": 0, 
+ "title_field": "item_code"
 }

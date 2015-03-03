@@ -82,6 +82,15 @@
    "search_index": 1
   }, 
   {
+   "depends_on": "eval:doc.purpose==\"Subcontract\"", 
+   "fieldname": "purchase_order", 
+   "fieldtype": "Link", 
+   "label": "Purchase Order", 
+   "options": "Purchase Order", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "allow_on_submit": 0, 
    "depends_on": "eval:doc.purpose==\"Sales Return\"", 
    "fieldname": "delivery_note_no", 
@@ -224,7 +233,7 @@
    "fieldtype": "Float", 
    "hidden": 0, 
    "in_filter": 0, 
-   "label": "Manufacturing Quantity", 
+   "label": "For Quantity", 
    "no_copy": 0, 
    "oldfieldname": "fg_completed_qty", 
    "oldfieldtype": "Currency", 
@@ -400,16 +409,16 @@
    "permlevel": 0
   }, 
   {
-   "depends_on": "eval:(doc.purpose==\"Sales Return\" || doc.purpose==\"Purchase Return\")", 
+   "depends_on": "eval: in_list([\"Sales Return\", \"Purchase Return\", \"Subcontract\"], doc.purpose)", 
    "fieldname": "contact_section", 
    "fieldtype": "Section Break", 
-   "label": "Contact Info", 
+   "label": "", 
    "permlevel": 0, 
    "read_only": 0
   }, 
   {
    "allow_on_submit": 0, 
-   "depends_on": "eval:doc.purpose==\"Purchase Return\"", 
+   "depends_on": "eval:doc.purpose==\"Purchase Return\" || doc.purpose==\"Subcontract\"", 
    "fieldname": "supplier", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -428,7 +437,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "depends_on": "eval:doc.purpose==\"Purchase Return\"", 
+   "depends_on": "eval:doc.purpose==\"Purchase Return\" || doc.purpose==\"Subcontract\"", 
    "fieldname": "supplier_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -446,7 +455,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "depends_on": "eval:doc.purpose==\"Purchase Return\"", 
+   "depends_on": "eval:doc.purpose==\"Purchase Return\" || doc.purpose==\"Subcontract\"", 
    "fieldname": "supplier_address", 
    "fieldtype": "Small Text", 
    "hidden": 0, 
@@ -461,6 +470,12 @@
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0
+  }, 
+  {
+   "fieldname": "column_break_39", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "allow_on_submit": 0, 
@@ -520,7 +535,7 @@
   {
    "fieldname": "more_info", 
    "fieldtype": "Section Break", 
-   "label": "More Info", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0, 
    "read_only": 0
@@ -654,7 +669,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2015-02-25 06:13:11.899840", 
+ "modified": "2015-03-03 01:53:07.157141", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 

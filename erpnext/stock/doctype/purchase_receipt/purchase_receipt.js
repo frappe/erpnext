@@ -32,6 +32,8 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					})
 				}, "icon-download", "btn-default");
 		}
+
+		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
 	},
 
 	received_qty: function(doc, cdt, cdn) {
@@ -178,4 +180,5 @@ frappe.ui.form.on("Purchase Receipt", "is_subcontracted", function(frm) {
 	if (frm.doc.is_subcontracted === "Yes") {
 		erpnext.buying.get_default_bom(frm);
 	}
+	frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
 });

@@ -749,7 +749,7 @@
   {
    "fieldname": "terms_section_break", 
    "fieldtype": "Section Break", 
-   "label": "Terms and Conditions", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-legal", 
    "permlevel": 0, 
@@ -780,7 +780,7 @@
    "fieldname": "contact_section", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
-   "label": "Contact Info", 
+   "label": "", 
    "options": "icon-bullhorn", 
    "permlevel": 0, 
    "read_only": 0
@@ -1244,7 +1244,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-24 15:23:28.554373", 
+ "modified": "2015-03-03 02:47:05.467179", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 

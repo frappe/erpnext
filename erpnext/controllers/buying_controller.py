@@ -149,12 +149,11 @@ class BuyingController(StockController):
 	def create_raw_materials_supplied(self, raw_material_table):
 		if self.is_subcontracted=="Yes":
 			parent_items = []
-			rm_supplied_idx = 0
 			for item in self.get("items"):
 				if self.doctype == "Purchase Receipt":
 					item.rm_supp_cost = 0.0
 				if item.item_code in self.sub_contracted_items:
-					self.update_raw_materials_supplied(item, raw_material_table, rm_supplied_idx)
+					self.update_raw_materials_supplied(item, raw_material_table)
 
 					if [item.item_code, item.name] not in parent_items:
 						parent_items.append([item.item_code, item.name])
@@ -165,7 +164,7 @@ class BuyingController(StockController):
 			for item in self.get("items"):
 				item.rm_supp_cost = 0.0
 
-	def update_raw_materials_supplied(self, item, raw_material_table, rm_supplied_idx):
+	def update_raw_materials_supplied(self, item, raw_material_table):
 		bom_items = self.get_items_from_bom(item.item_code, item.bom)
 		raw_materials_cost = 0
 
@@ -190,15 +189,12 @@ class BuyingController(StockController):
 			rm.required_qty = required_qty
 
 			rm.conversion_factor = item.conversion_factor
-			rm.idx = rm_supplied_idx
 
 			if self.doctype == "Purchase Receipt":
 				rm.consumed_qty = required_qty
 				rm.description = bom_item.description
 				if item.batch_no and not rm.batch_no:
 					rm.batch_no = item.batch_no
-
-			rm_supplied_idx += 1
 
 			# get raw materials rate
 			if self.doctype == "Purchase Receipt":

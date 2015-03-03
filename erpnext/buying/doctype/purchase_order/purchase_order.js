@@ -7,6 +7,7 @@ frappe.provide("erpnext.buying");
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
 	refresh: function(doc, cdt, cdn) {
+		var me = this;
 		this._super();
 		// this.frm.dashboard.reset();
 
@@ -16,9 +17,14 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			// cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
 			// 	doc.per_billed);
 
-			if(flt(doc.per_received, 2) < 100)
+			if(flt(doc.per_received, 2) < 100) {
 				cur_frm.add_custom_button(__('Make Purchase Receipt'),
-					this.make_purchase_receipt, frappe.boot.doctype_icons["Purchase Receipt"]);
+					this.make_purchase_receipt);
+				if(doc.is_subcontracted==="Yes") {
+					cur_frm.add_custom_button(__('Transfer Material to Supplier'),
+						function() { me.make_stock_entry() });
+				}
+			}
 			if(flt(doc.per_billed, 2) < 100)
 				cur_frm.add_custom_button(__('Make Invoice'), this.make_purchase_invoice,
 					frappe.boot.doctype_icons["Purchase Invoice"]);
@@ -33,6 +39,33 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
 			cur_frm.add_custom_button(__('Unstop Purchase Order'),
 				cur_frm.cscript['Unstop Purchase Order'], "icon-check");
+	},
+
+	make_stock_entry: function() {
+		var items = $.map(cur_frm.doc.items, function(d) { return d.bom ? d.item_code : false; }),
+			me = this;
+		if(items.length===1) {
+			me._make_stock_entry(items[0]);
+			return;
+		}
+		frappe.prompt({fieldname:"item", options: items, fieldtype:"Select",
+			label: __("Select Item for Transfer"), reqd: 1}, function(data) {
+			me._make_stock_entry(data.item);
+		}, __("Select Item"), __("Make"));
+	},
+
+	_make_stock_entry: function(item) {
+		frappe.call({
+			method:"erpnext.buying.doctype.purchase_order.purchase_order.make_stock_entry",
+			args: {
+				purchase_order: cur_frm.doc.name,
+				item_code: item
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
 	},
 
 	make_purchase_receipt: function() {
