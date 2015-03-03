@@ -80,8 +80,7 @@ class update_entries_after(object):
 		self.verbose = verbose
 		self.allow_zero_rate = allow_zero_rate
 		self.allow_negative_stock = allow_negative_stock
-
-		if self.allow_negative_stock==None:
+		if not self.allow_negative_stock:
 			self.allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings",
 				"allow_negative_stock"))
 
