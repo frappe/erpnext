@@ -141,6 +141,7 @@
    "search_index": 1
   }, 
   {
+   "depends_on": "eval:in_list([\"Material Issue\", \"Material Transfer\", \"Manufacture\", \"Repack\", \t\t\t\t\t\"Subcontract\", \"Material Transfer for Manufacture\"], doc.purpose)", 
    "fieldname": "from_bom", 
    "fieldtype": "Check", 
    "label": "From BOM", 
@@ -201,7 +202,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:!inList([\"Sales Return\", \"Purchase Return\"], doc.purpose)", 
+   "depends_on": "from_bom", 
    "fieldname": "bom_no", 
    "fieldtype": "Link", 
    "label": "BOM No", 
@@ -210,7 +211,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:inList([\"Manufacture\", \"Repack\"], doc.purpose)", 
+   "depends_on": "from_bom", 
    "fieldname": "additional_operating_cost", 
    "fieldtype": "Currency", 
    "label": "Additional Operating Cost", 
@@ -227,7 +228,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "depends_on": "eval:!inList([\"Sales Return\", \"Purchase Return\"], doc.purpose)", 
+   "depends_on": "from_bom", 
    "description": "As per Stock UOM", 
    "fieldname": "fg_completed_qty", 
    "fieldtype": "Float", 
@@ -246,7 +247,7 @@
   }, 
   {
    "default": "1", 
-   "depends_on": "eval:!inList([\"Sales Return\", \"Purchase Return\"], doc.purpose)", 
+   "depends_on": "from_bom", 
    "description": "Including items for sub assemblies", 
    "fieldname": "use_multi_level_bom", 
    "fieldtype": "Check", 
@@ -257,7 +258,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "depends_on": "eval:!inList([\"Sales Return\", \"Purchase Return\"], doc.purpose)", 
+   "depends_on": "from_bom", 
    "fieldname": "get_items", 
    "fieldtype": "Button", 
    "hidden": 0, 
@@ -669,7 +670,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2015-03-03 01:53:07.157141", 
+ "modified": "2015-03-03 18:09:12.035606", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 

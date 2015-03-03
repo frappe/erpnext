@@ -278,14 +278,15 @@ class StockEntry(StockController):
 					self.posting_date, self.posting_time, d.actual_qty, d.transfer_qty), NegativeStockError)
 
 			# get incoming rate
-			if not flt(d.incoming_rate) or d.s_warehouse or self.purpose == "Sales Return" or force:
-				incoming_rate = flt(self.get_incoming_rate(args), self.precision("incoming_rate", d))
-				if incoming_rate > 0:
-					d.incoming_rate = incoming_rate
+			if not d.bom_no:
+				if not flt(d.incoming_rate) or d.s_warehouse or self.purpose == "Sales Return" or force:
+					incoming_rate = flt(self.get_incoming_rate(args), self.precision("incoming_rate", d))
+					if incoming_rate > 0:
+						d.incoming_rate = incoming_rate
 
-			d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
-			if not d.t_warehouse:
-				raw_material_cost += flt(d.amount)
+				d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
+				if not d.t_warehouse:
+					raw_material_cost += flt(d.amount)
 
 
 		self.add_operation_cost(raw_material_cost, force)
@@ -293,10 +294,10 @@ class StockEntry(StockController):
 	def add_operation_cost(self, raw_material_cost, force):
 		"""Adds operating cost if Production Order is set"""
 		# set incoming rate for fg item
-		if self.purpose in ("Manufacture", "Repack"):
+		if self.purpose in ["Manufacture", "Repack"]:
 			number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
 			for d in self.get("items"):
-				if (d.t_warehouse and number_of_fg_items == 1):
+				if d.bom_no or (d.t_warehouse and number_of_fg_items == 1):
 					operation_cost_per_unit = 0.0
 					if self.production_order:
 						operation_cost_per_unit = self.get_operation_cost_per_unit(d.bom_no, d.qty)
@@ -540,6 +541,9 @@ class StockEntry(StockController):
 		return ret
 
 	def get_items(self):
+		if not self.fg_completed_qty or not self.bom_no:
+			frappe.throw(_("BOM and Manufacturing Quantity are required"))
+			
 		self.set('items', [])
 		self.validate_production_order()
 

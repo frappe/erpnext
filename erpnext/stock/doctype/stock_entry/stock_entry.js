@@ -129,10 +129,14 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	get_items: function() {
+		var me = this;
+		if(!this.frm.doc.fg_completed_qty || !this.frm.doc.bom_no)
+			frappe.throw(__("BOM and Manufacturing Quantity are required"));
+		
 		if(this.frm.doc.production_order || this.frm.doc.bom_no) {
 			// if production order / bom is mentioned, get items
 			return this.frm.call({
-				doc: this.frm.doc,
+				doc: me.frm.doc,
 				method: "get_items",
 				callback: function(r) {
 					if(!r.exc) refresh_field("items");
@@ -161,8 +165,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			args: {production_order: this.frm.doc.production_order},
 			callback: function(r) {
 				if (!r.exc) {
-					if (me.frm.doc.purpose == "Material Transfer" && !me.frm.doc.to_warehouse)
+					if (me.frm.doc.purpose == "Material Transfer for Manufacture" && !me.frm.doc.to_warehouse)
 						me.frm.set_value("to_warehouse", r.message["wip_warehouse"]);
+					me.frm.set_value("from_bom", 1);
 				}
 			}
 		});
@@ -353,6 +358,24 @@ cur_frm.cscript.toggle_related_fields = function(doc) {
 
 	cur_frm.cscript.toggle_enable_bom();
 
+	if(doc.purpose == 'Purchase Return') {
+		doc.customer = doc.customer_name = doc.customer_address =
+			doc.delivery_note_no = doc.sales_invoice_no = null;
+		doc.bom_no = doc.production_order = doc.fg_completed_qty = null;
+	} else if(doc.purpose == 'Sales Return') {
+		doc.supplier=doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no=null;
+		doc.bom_no = doc.production_order = doc.fg_completed_qty = null;
+	} else if (doc.purpose == 'Subcontract') {
+		doc.customer = doc.customer_name = doc.customer_address =
+			doc.delivery_note_no = doc.sales_invoice_no = null;
+	} else {
+		doc.customer = doc.customer_name = doc.customer_address =
+			doc.delivery_note_no = doc.sales_invoice_no = doc.supplier =
+			doc.supplier_name = doc.supplier_address = doc.purchase_receipt_no = null;
+	}
+	if(in_list(["Material Receipt", "Sales Return", "Purchase Return"], doc.purpose)) {
+		cur_frm.set_value("from_bom", 0);
+	}
 }
 
 cur_frm.fields_dict['production_order'].get_query = function(doc) {
