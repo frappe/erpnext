@@ -9,7 +9,7 @@ setup(
     name='erpnext',
     version=version,
     description='Open Source ERP',
-    author='Web Notes Technologies',
+    author='Frappe Technologies',
     author_email='info@erpnext.com',
     packages=find_packages(),
     zip_safe=False,
