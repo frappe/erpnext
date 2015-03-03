@@ -52,7 +52,8 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 			["against_invoice", "Sales Invoice", "customer"]], function(i, opts) {
 				me.frm.set_query(opts[0], "accounts", function(doc, cdt, cdn) {
 					var jvd = frappe.get_doc(cdt, cdn);
-					frappe.model.validate_missing(jvd, ["party_type", "party"]);
+					frappe.model.validate_missing(jvd, "party_type");
+					frappe.model.validate_missing(jvd, "party");
 					return {
 						filters: [
 							[opts[1], opts[2], "=", jvd.party],
