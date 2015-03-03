@@ -232,7 +232,7 @@ def set_defaults(args):
 	hr_settings.save()
 
 def create_feed_and_todo():
-	"""update activty feed and create todo for creation of item, customer, vendor"""
+	"""update Activity feed and create todo for creation of item, customer, vendor"""
 	frappe.get_doc({
 		"doctype": "Feed",
 		"feed_type": "Comment",
