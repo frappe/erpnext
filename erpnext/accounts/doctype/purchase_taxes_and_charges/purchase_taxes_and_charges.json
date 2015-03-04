@@ -104,6 +104,12 @@
    "width": "300px"
   }, 
   {
+   "fieldname": "section_break_10", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "rate", 
    "fieldtype": "Float", 
    "in_list_view": 1, 
@@ -216,7 +222,7 @@
  "hide_heading": 1, 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-23 15:01:31.895131", 
+ "modified": "2015-03-04 16:05:08.553606", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Taxes and Charges", 

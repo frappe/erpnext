@@ -443,10 +443,12 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "total_taxes_and_charges", 
+   "fieldname": "base_total_taxes_and_charges", 
    "fieldtype": "Currency", 
-   "label": "Total Taxes and Charges", 
-   "options": "currency", 
+   "label": "Total Taxes and Charges (Company Currency)", 
+   "oldfieldname": "other_charges_total", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 1
@@ -458,12 +460,10 @@
    "precision": ""
   }, 
   {
-   "fieldname": "base_total_taxes_and_charges", 
+   "fieldname": "total_taxes_and_charges", 
    "fieldtype": "Currency", 
-   "label": "Total Taxes and Charges (Company Currency)", 
-   "oldfieldname": "other_charges_total", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
+   "label": "Total Taxes and Charges", 
+   "options": "currency", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 1
@@ -554,30 +554,6 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "total_advance", 
-   "fieldtype": "Currency", 
-   "label": "Total Advance", 
-   "oldfieldname": "total_advance", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "outstanding_amount", 
-   "fieldtype": "Currency", 
-   "in_list_view": 0, 
-   "label": "Outstanding Amount", 
-   "no_copy": 1, 
-   "oldfieldname": "outstanding_amount", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1
-  }, 
-  {
    "fieldname": "column_break5", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 
@@ -618,6 +594,30 @@
    "oldfieldtype": "Data", 
    "permlevel": 0, 
    "print_hide": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "total_advance", 
+   "fieldtype": "Currency", 
+   "label": "Total Advance", 
+   "oldfieldname": "total_advance", 
+   "oldfieldtype": "Currency", 
+   "options": "", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "outstanding_amount", 
+   "fieldtype": "Currency", 
+   "in_list_view": 0, 
+   "label": "Outstanding Amount", 
+   "no_copy": 1, 
+   "oldfieldname": "outstanding_amount", 
+   "oldfieldtype": "Currency", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
    "read_only": 1
   }, 
   {
@@ -676,7 +676,7 @@
    "no_copy": 1, 
    "oldfieldname": "paid_amount", 
    "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
+   "options": "currency", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0
@@ -716,7 +716,7 @@
    "fieldtype": "Currency", 
    "label": "Write Off Amount", 
    "no_copy": 1, 
-   "options": "Company:company:default_currency", 
+   "options": "currency", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0
@@ -749,7 +749,7 @@
   {
    "fieldname": "terms_section_break", 
    "fieldtype": "Section Break", 
-   "label": "", 
+   "label": "Terms and Conditions", 
    "oldfieldtype": "Section Break", 
    "options": "icon-legal", 
    "permlevel": 0, 
@@ -780,7 +780,7 @@
    "fieldname": "contact_section", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
-   "label": "", 
+   "label": "Contact Info", 
    "options": "icon-bullhorn", 
    "permlevel": 0, 
    "read_only": 0
@@ -1244,7 +1244,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-03-03 02:47:05.467179", 
+ "modified": "2015-03-04 16:08:58.641155", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 
