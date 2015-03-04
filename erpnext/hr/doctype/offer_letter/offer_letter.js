@@ -12,3 +12,15 @@ cur_frm.cscript.job_applicant = function() {
 		}
 	});
 }
+
+cur_frm.cscript.terms = function() {
+	frappe.call({
+		doc: cur_frm.doc,
+		method: "set_view_terms",
+		callback: function(r) {
+			if(!r.exe){
+				refresh_field("view_terms");
+			}
+		}
+	});
+}
