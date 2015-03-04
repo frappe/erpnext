@@ -102,10 +102,10 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "update", 
+   "fieldname": "set_message", 
    "fieldtype": "Button", 
    "label": "Update", 
-   "options": "set_message", 
+   "options": "", 
    "permlevel": 0
   }, 
   {
@@ -176,7 +176,7 @@
  "icon": "icon-envelope", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2015-02-05 05:11:41.580894", 
+ "modified": "2015-03-04 01:13:46.715113", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Notification Control", 
