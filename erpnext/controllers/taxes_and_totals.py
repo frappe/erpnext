@@ -226,11 +226,13 @@ class calculate_taxes_and_totals(object):
 				# set precision in the last item iteration
 				if n == len(self.doc.get("items")) - 1:
 					self.round_off_totals(tax)
-
+					
 					# adjust Discount Amount loss in last tax iteration
 					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied \
 						and self.doc.discount_amount:
 							self.adjust_discount_amount_loss(tax)
+							
+					
 
 	def get_current_tax_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
@@ -275,8 +277,10 @@ class calculate_taxes_and_totals(object):
 	def adjust_discount_amount_loss(self, tax):
 		discount_amount_loss = self.doc.grand_total - flt(self.doc.discount_amount) - tax.total
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount +
-			discount_amount_loss, self.doc.precision("tax_amount", tax))
-		tax.total = flt(tax.total + discount_amount_loss, self.doc.precision("total", tax))
+			discount_amount_loss, tax.precision("tax_amount"))
+		tax.total = flt(tax.total + discount_amount_loss, tax.precision("total"))
+		
+		self._set_in_company_currency(tax, ["total", "tax_amount_after_discount_amount"])
 
 	def calculate_totals(self):
 		self.doc.grand_total = flt(self.doc.get("taxes")[-1].total
