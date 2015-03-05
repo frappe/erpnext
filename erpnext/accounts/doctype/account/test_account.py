@@ -29,6 +29,7 @@ def _make_test_records(verbose):
 		["_Test Account S&H Education Cess", "_Test Account Tax Assets", "Ledger", "Tax"],
 		["_Test Account CST", "Direct Expenses", "Ledger", "Tax"],
 		["_Test Account Discount", "Direct Expenses", "Ledger", None],
+		["_Test Write Off", "Indirect Expenses", "Ledger", None],
 
 		# related to Account Inventory Integration
 		["_Test Account Stock In Hand", "Current Assets", "Ledger", None],

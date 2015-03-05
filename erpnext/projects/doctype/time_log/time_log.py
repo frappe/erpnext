@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse
 
 class OverlapError(frappe.ValidationError): pass
-class OverProductionError(frappe.ValidationError): pass
+class OverProductionLoggedError(frappe.ValidationError): pass
 class NotSubmittedError(frappe.ValidationError): pass
 
 from frappe.model.document import Document
@@ -76,17 +76,22 @@ class TimeLog(Document):
 	def get_overlap_for(self, fieldname):
 		if not self.get(fieldname):
 			return
-		existing = frappe.db.sql("""select name, from_time, to_time from `tabTime Log` where `{0}`=%s and
+
+		existing = frappe.db.sql("""select name, from_time, to_time from `tabTime Log` where `{0}`=%(val)s and
 			(
-				(from_time between %s and %s) or
-				(to_time between %s and %s) or
-				(%s between from_time and to_time))
-			and name!=%s
-			and ifnull(task, "")=%s
+				(from_time between %(from_time)s and %(to_time)s) or
+				(to_time between %(from_time)s and %(to_time)s) or
+				(%(from_time)s between from_time and to_time))
+			and name!=%(name)s
+			and ifnull(task, "")=%(task)s
 			and docstatus < 2""".format(fieldname),
-			(self.get(fieldname), self.from_time, self.to_time, self.from_time,
-				self.to_time, self.from_time, self.name or "No Name",
-				cstr(self.task)), as_dict=True)
+			{
+				"val": self.get(fieldname),
+				"from_time": self.from_time,
+				"to_time": self.to_time,
+				"name": self.name or "No Name",
+				"task": cstr(self.task)
+			}, as_dict=True)
 
 		return existing[0] if existing else None
 
@@ -107,7 +112,7 @@ class TimeLog(Document):
 		"""Checks if **Time Log** is between operating hours of the **Workstation**."""
 		if self.workstation:
 			from erpnext.manufacturing.doctype.workstation.workstation import check_if_within_operating_hours
-			check_if_within_operating_hours(self.workstation, self.from_time, self.to_time)
+			check_if_within_operating_hours(self.workstation, self.operation, self.from_time, self.to_time)
 
 	def validate_production_order(self):
 		"""Throws 'NotSubmittedError' if **production order** is not submitted. """
@@ -194,7 +199,14 @@ class TimeLog(Document):
 			if not self.operation:
 				frappe.throw(_("Operation is Mandatory"))
 			if not self.completed_qty:
-				self.completed_qty=0
+				self.completed_qty = 0
+
+			production_order = frappe.get_doc("Production Order", self.production_order)
+			pending_qty = flt(production_order.qty) - flt(production_order.produced_qty)
+			if flt(self.completed_qty) > pending_qty:
+				frappe.throw(_("Completed Qty cannot be more than {0} for operation {1}").format(pending_qty, self.operation),
+					OverProductionLoggedError)
+
 		else:
 			self.production_order = None
 			self.operation = None

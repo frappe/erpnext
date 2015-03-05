@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
+from .workstation import check_if_within_operating_hours, NotInWorkingHoursError, WorkstationHolidayError
 
 test_dependencies = ["Warehouse"]
 test_records = frappe.get_test_records('Workstation')
@@ -11,6 +12,11 @@ test_records = frappe.get_test_records('Workstation')
 class TestWorkstation(unittest.TestCase):
 
 	def test_validate_timings(self):
-		wks = frappe.get_doc("Workstation", "_Test Workstation 1")
-		self.assertEqual(1,wks.check_workstation_for_operation_time("2013-02-01 05:00:00", "2013-02-02 20:00:00"))
-		self.assertEqual(None,wks.check_workstation_for_operation_time("2013-02-03 10:00:00", "2013-02-03 20:00:00"))
+		check_if_within_operating_hours("_Test Workstation 1", "Operation 1", "2013-02-02 11:00:00", "2013-02-02 19:00:00")
+		check_if_within_operating_hours("_Test Workstation 1", "Operation 1", "2013-02-02 10:00:00", "2013-02-02 20:00:00")
+		self.assertRaises(NotInWorkingHoursError, check_if_within_operating_hours,
+			"_Test Workstation 1", "Operation 1", "2013-02-02 05:00:00", "2013-02-02 20:00:00")
+		self.assertRaises(NotInWorkingHoursError, check_if_within_operating_hours,
+			"_Test Workstation 1", "Operation 1", "2013-02-02 05:00:00", "2013-02-02 20:00:00")
+		self.assertRaises(WorkstationHolidayError, check_if_within_operating_hours,
+			"_Test Workstation 1", "Operation 1", "2013-02-01 10:00:00", "2013-02-02 20:00:00")

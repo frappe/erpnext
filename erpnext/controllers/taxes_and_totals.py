@@ -226,13 +226,13 @@ class calculate_taxes_and_totals(object):
 				# set precision in the last item iteration
 				if n == len(self.doc.get("items")) - 1:
 					self.round_off_totals(tax)
-					
+
 					# adjust Discount Amount loss in last tax iteration
 					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied \
 						and self.doc.discount_amount:
 							self.adjust_discount_amount_loss(tax)
-							
-					
+
+
 
 	def get_current_tax_amount(self, item, tax, item_tax_map):
 		tax_rate = self._get_tax_rate(tax, item_tax_map)
@@ -279,18 +279,23 @@ class calculate_taxes_and_totals(object):
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount +
 			discount_amount_loss, tax.precision("tax_amount"))
 		tax.total = flt(tax.total + discount_amount_loss, tax.precision("total"))
-		
+
 		self._set_in_company_currency(tax, ["total", "tax_amount_after_discount_amount"])
 
 	def calculate_totals(self):
 		self.doc.grand_total = flt(self.doc.get("taxes")[-1].total
 			if self.doc.get("taxes") else self.doc.net_total)
 
+		self.doc.total_taxes_and_charges = flt(self.doc.grand_total - self.doc.net_total,
+			self.doc.precision("total_taxes_and_charges"))
+
+		self._set_in_company_currency(self.doc, ["total_taxes_and_charges"])
+
 		if self.doc.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
 			self.doc.base_grand_total = flt(self.doc.grand_total * self.doc.conversion_rate) \
 				if self.doc.total_taxes_and_charges else self.doc.base_net_total
 		else:
-			self.doc.taxes_and_charges_added, self.taxes_and_charges_deducted = 0.0, 0.0
+			self.doc.taxes_and_charges_added = self.doc.taxes_and_charges_deducted = 0.0
 			for tax in self.doc.get("taxes"):
 				if tax.category in ["Valuation and Total", "Total"]:
 					if tax.add_deduct_tax == "Add":
@@ -306,10 +311,6 @@ class calculate_taxes_and_totals(object):
 
 			self._set_in_company_currency(self.doc, ["taxes_and_charges_added", "taxes_and_charges_deducted"])
 
-		self.doc.total_taxes_and_charges = flt(self.doc.grand_total - self.doc.net_total,
-			self.doc.precision("total_taxes_and_charges"))
-
-		self._set_in_company_currency(self.doc, ["total_taxes_and_charges"])
 		self.doc.round_floats_in(self.doc, ["grand_total", "base_grand_total"])
 
 		if self.doc.meta.get_field("rounded_total"):
@@ -338,20 +339,20 @@ class calculate_taxes_and_totals(object):
 				for i, item in enumerate(self.doc.get("items")):
 					distributed_amount = flt(self.doc.discount_amount) * \
 						item.net_amount / total_for_discount_amount
-											
+
 					item.net_amount = flt(item.net_amount - distributed_amount, item.precision("net_amount"))
 					net_total += item.net_amount
-					
+
 					# discount amount rounding loss adjustment if no taxes
 					if (not taxes or self.doc.apply_discount_on == "Net Total") \
 						and i == len(self.doc.get("items")) - 1:
-							discount_amount_loss = flt(self.doc.total - net_total - self.doc.discount_amount, 
+							discount_amount_loss = flt(self.doc.total - net_total - self.doc.discount_amount,
 								self.doc.precision("net_total"))
-							item.net_amount = flt(item.net_amount + discount_amount_loss, 
+							item.net_amount = flt(item.net_amount + discount_amount_loss,
 								item.precision("net_amount"))
-					
+
 					item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
-					
+
 					self._set_in_company_currency(item, ["net_rate", "net_amount"])
 
 				self.discount_amount_applied = True

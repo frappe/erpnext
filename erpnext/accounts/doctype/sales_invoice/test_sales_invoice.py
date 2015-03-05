@@ -254,9 +254,9 @@ class TestSalesInvoice(unittest.TestCase):
 
 		expected_values = {
 			"keys": ["price_list_rate", "discount_percentage", "rate", "amount",
-				"base_price_list_rate", "base_rate", "base_amount"],
-			"_Test Item Home Desktop 100": [62.5, 0, 62.5, 625.0, 50, 50, 499.98],
-			"_Test Item Home Desktop 200": [190.66, 0, 190.66, 953.3, 150, 150, 750],
+				"base_price_list_rate", "base_rate", "base_amount", "net_rate", "net_amount"],
+			"_Test Item Home Desktop 100": [62.5, 0, 62.5, 625.0, 62.5, 62.5, 625.0, 50, 499.98],
+			"_Test Item Home Desktop 200": [190.66, 0, 190.66, 953.3, 190.66, 190.66, 953.3, 150, 750],
 		}
 
 		# check if children are saved
@@ -500,7 +500,9 @@ class TestSalesInvoice(unittest.TestCase):
 			"naming_series": "_T-POS Setting-",
 			"selling_price_list": "_Test Price List",
 			"territory": "_Test Territory",
-			"warehouse": "_Test Warehouse - _TC"
+			"warehouse": "_Test Warehouse - _TC",
+			"write_off_account": "_Test Write Off - _TC",
+			"write_off_cost_center": "_Test Write Off Cost Center - _TC"
 		})
 
 		if not frappe.db.exists("POS Setting", "_Test POS Setting"):

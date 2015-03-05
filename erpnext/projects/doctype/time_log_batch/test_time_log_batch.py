@@ -34,7 +34,8 @@ def create_time_log():
 	time_log.update({
 		"from_time": "2013-01-02 10:00:00.000000",
 		"to_time": "2013-01-02 11:00:00.000000",
-		"docstatus": 0
+		"docstatus": 0,
+		"time_log_for": "Project"
 	})
 	time_log.insert()
 	time_log.submit()

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_add, cint
+from frappe.utils import getdate, validate_email_add, cint, today
 from frappe.model.naming import make_autoname
 from frappe import throw, _, msgprint
 import frappe.permissions
@@ -205,6 +205,6 @@ def send_birthday_reminders():
 def get_employees_who_are_born_today():
 	"""Get Employee properties whose birthday is today."""
 	return frappe.db.sql("""select name, personal_email, company_email, employee_name
-		from tabEmployee where day(date_of_birth) = day(curdate())
-		and month(date_of_birth) = month(curdate())
-		and status = 'Active'""", as_dict=True)
+		from tabEmployee where day(date_of_birth) = day(%(date)s)
+		and month(date_of_birth) = month(%(date)s)
+		and status = 'Active'""", {"date": today()}, as_dict=True)

@@ -53,7 +53,7 @@
     "description": "Shipping Charges",
     "doctype": "Purchase Taxes and Charges",
     "parentfield": "taxes",
-    "rate": 100
+    "tax_amount": 100
    },
    {
     "account_head": "_Test Account Customs Duty - _TC",
@@ -176,7 +176,7 @@
     "description": "Shipping Charges",
     "doctype": "Purchase Taxes and Charges",
     "parentfield": "taxes",
-    "rate": 100.0
+    "tax_amount": 100.0
    },
    {
     "account_head": "_Test Account VAT - _TC",
@@ -187,7 +187,7 @@
     "description": "VAT",
     "doctype": "Purchase Taxes and Charges",
     "parentfield": "taxes",
-    "rate": 120.0
+    "tax_amount": 120.0
    },
    {
     "account_head": "_Test Account Customs Duty - _TC",
@@ -198,7 +198,7 @@
     "description": "Customs Duty",
     "doctype": "Purchase Taxes and Charges",
     "parentfield": "taxes",
-    "rate": 150.0
+    "tax_amount": 150.0
    }
   ],
   "posting_date": "2013-02-03",

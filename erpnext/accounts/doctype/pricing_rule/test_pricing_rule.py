@@ -15,6 +15,7 @@ class TestPricingRule(unittest.TestCase):
 
 		test_record = {
 			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule",
 			"apply_on": "Item Code",
 			"item_code": "_Test Item",
 			"selling": 1,

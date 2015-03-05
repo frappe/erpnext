@@ -4,12 +4,11 @@
 from __future__ import unicode_literals
 import frappe, json
 
-from frappe.utils import flt, nowdate, get_datetime, getdate, date_diff, time_diff_in_seconds
+from frappe.utils import flt, nowdate, get_datetime, getdate, date_diff
 from frappe import _
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from dateutil.relativedelta import relativedelta
-from dateutil.parser import parse
 
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
@@ -64,7 +63,7 @@ class ProductionOrder(Document):
 	def calculate_operating_cost(self):
 		self.planned_operating_cost, self.actual_operating_cost = 0.0, 0.0
 		for d in self.get("operations"):
-			d.actual_operating_cost = flt(d.hour_rate) * flt(d.actual_operation_time) / 60
+			d.actual_operating_cost = flt(d.hour_rate) * (flt(d.actual_operation_time) / 60.0)
 
 			self.planned_operating_cost += flt(d.planned_operating_cost)
 			self.actual_operating_cost += flt(d.actual_operating_cost)
@@ -273,16 +272,8 @@ class ProductionOrder(Document):
 
 	def check_operation_fits_in_working_hours(self, d):
 		"""Raises expection if operation is longer than working hours in the given workstation."""
-		operation_length = time_diff_in_seconds(d.planned_end_time, d.planned_start_time)
-
-		workstation = frappe.get_doc("Workstation", d.workstation)
-		for working_hour in workstation.working_hours:
-			slot_length = (parse(working_hour.end_time) - parse(working_hour.start_time)).total_seconds()
-			if slot_length >= operation_length:
-				return
-
-		frappe.throw(_("Operation {0} longer than any available working hours in workstation {1}, break down the operation into multiple operations").format(d.operation, d.workstation),
-			OperationTooLongError)
+		from erpnext.manufacturing.doctype.workstation.workstation import check_if_within_operating_hours
+		check_if_within_operating_hours(d.workstation, d.operation, d.planned_start_time, d.planned_end_time)
 
 	def update_operation_status(self):
 		for d in self.get("operations"):
@@ -386,10 +377,11 @@ def make_time_log(name, operation, from_time, to_time, qty=None,  project=None, 
 	time_log.production_order = name
 	time_log.project = project
 	time_log.operation_id = operation_id
-	time_log.operation= operation
+	time_log.operation = operation
 	time_log.workstation= workstation
 	time_log.activity_type= "Manufacturing"
 	time_log.completed_qty = flt(qty)
+
 	if from_time and to_time :
 		time_log.calculate_total_hours()
 	return time_log

@@ -124,6 +124,9 @@ class Opportunity(TransactionBase):
 		item_fields = ("item_name", "description", "item_group", "brand")
 
 		for d in self.items:
+			if not d.item_code:
+				continue
+
 			item = frappe.db.get_value("Item", d.item_code, item_fields, as_dict=True)
 			for key in item_fields:
 				if not d.get(key): d.set(key, item.get(key))

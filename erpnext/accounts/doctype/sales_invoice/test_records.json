@@ -174,7 +174,7 @@
     "description": "Shipping Charges",
     "doctype": "Sales Taxes and Charges",
     "parentfield": "taxes",
-    "rate": 100
+    "tax_amount": 100
    },
    {
     "account_head": "_Test Account Customs Duty - _TC",
@@ -367,7 +367,7 @@
     "doctype": "Sales Taxes and Charges",
     "idx": 7,
     "parentfield": "taxes",
-    "rate": 100
+    "tax_amount": 100
    },
    {
     "account_head": "_Test Account Discount - _TC",

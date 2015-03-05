@@ -469,7 +469,7 @@ class StockEntry(StockController):
 			pro_doc = frappe.get_doc("Production Order", self.production_order)
 			_validate_production_order(pro_doc)
 			pro_doc.run_method("update_status")
-			if self.purpose in ("Manufacture", "Material Transfer for Manufacture"):
+			if self.purpose in "Manufacture":
 				pro_doc.run_method("update_production_order_qty")
 				self.update_planned_qty(pro_doc)
 
@@ -543,7 +543,7 @@ class StockEntry(StockController):
 	def get_items(self):
 		if not self.fg_completed_qty or not self.bom_no:
 			frappe.throw(_("BOM and Manufacturing Quantity are required"))
-			
+
 		self.set('items', [])
 		self.validate_production_order()
 

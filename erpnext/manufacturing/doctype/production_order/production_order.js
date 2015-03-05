@@ -200,7 +200,7 @@ $.extend(cur_frm.cscript, {
 	},
 
 	show_time_logs: function(doc, doctype, name) {
-		frappe.route_options = {"operation_id": name};
+		frappe.route_options = {"operation": name};
 		frappe.set_route("List", "Time Log");
 	},
 

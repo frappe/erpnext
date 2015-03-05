@@ -4,7 +4,10 @@
 		"name": "_Test Workstation 1",
 		"workstation_name": "_Test Workstation 1",
 		"warehouse": "_Test warehouse - _TC",
-		"hour_rate":100,
+		"hour_rate_labour": 25,
+		"hour_rate_electricity": 25,
+		"hour_rate_consumable": 25,
+		"hour_rate_rent": 25,
 		"holiday_list": "_Test Holiday List",
 		"working_hours": [
 			{
