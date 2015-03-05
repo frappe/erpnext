@@ -41,7 +41,3 @@ def get_items(price_list, sales_or_purchase, item=None):
 			item_det.item_code=i.name
 		where
 			%s""" % ('%(price_list)s', condition), args, as_dict=1)
-
-@frappe.whitelist()
-def get_mode_of_payment():
-	return sorted([d.name for d in frappe.get_list("Mode of Payment")])

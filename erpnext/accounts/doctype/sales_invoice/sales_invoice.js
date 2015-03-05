@@ -9,6 +9,7 @@ cur_frm.pformat.print_heading = 'Invoice';
 frappe.provide("erpnext.accounts");
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
 	onload: function() {
+		var me = this;
 		this._super();
 
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
@@ -22,7 +23,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				this.frm.set_value("is_pos", 1);
 				this.is_pos(function() {
 					if (cint(frappe.defaults.get_user_defaults("fs_pos_view"))===1)
-						cur_frm.cscript.toggle_pos(true);
+						erpnext.pos.toggle(me.frm);
 				});
 			}
 		}

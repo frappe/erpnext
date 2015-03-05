@@ -335,19 +335,15 @@ erpnext.pos.PointOfSale = Class.extend({
 			if (!this.frm.doc.is_pos) {
 				this.frm.set_value("is_pos", 1);
 			}
-			this.frm.page.clear_actions();
 			this.frm.page.set_primary_action(__("Pay"), function() {
 				me.make_payment();
 			});
-			this.frm.toolbar.current_status = null;
 		} else if (this.frm.doc.docstatus===1) {
-			this.frm.page.clear_actions();
 			this.frm.page.set_primary_action(__("New"), function() {
 				me.frm.pos_active = false;
 				erpnext.open_as_pos = true;
 				new_doc(me.frm.doctype);
 			});
-			this.frm.toolbar.current_status = null;
 		}
 	},
 	refresh_delete_btn: function() {
@@ -382,6 +378,18 @@ erpnext.pos.PointOfSale = Class.extend({
 		this.frm.script_manager.trigger("calculate_taxes_and_totals");
 		this.refresh();
 	},
+	with_modes_of_payment: function(callback) {
+		var me = this;
+		if(me.modes_of_payment) {
+			callback();
+		} else {
+			me.modes_of_payment = [];
+			$.ajax("/api/resource/Mode of Payment").success(function(data) {
+				$.each(data.data, function(i, d) { me.modes_of_payment.push(d.name); });
+				callback();
+			});
+		}
+	},
 	make_payment: function() {
 		var me = this;
 		var no_of_items = this.frm.doc.items.length;
@@ -389,95 +397,92 @@ erpnext.pos.PointOfSale = Class.extend({
 		if (no_of_items == 0)
 			msgprint(__("Payment cannot be made for empty cart"));
 		else {
-			frappe.call({
-				method: 'erpnext.accounts.doctype.sales_invoice.pos.get_mode_of_payment',
-				callback: function(r) {
-					if(!r.message) {
-						msgprint(__("Please add to Modes of Payment from Setup."))
-						return;
+
+			this.with_modes_of_payment(function() {
+				// prefer cash payment!
+				var default_mode = me.modes_of_payment.indexOf(__("Cash"))!==-1 ? __("Cash") : undefined;
+
+				// show payment wizard
+				var dialog = new frappe.ui.Dialog({
+					width: 400,
+					title: 'Payment',
+					fields: [
+						{fieldtype:'Currency',
+							fieldname:'total_amount', label: __('Total Amount'), read_only:1,
+							"default": me.frm.doc.grand_total, read_only: 1},
+						{fieldtype:'Select', fieldname:'mode_of_payment',
+							label: __('Mode of Payment'),
+							options: me.modes_of_payment.join('\n'), reqd: 1,
+							"default": default_mode},
+						{fieldtype:'Currency', fieldname:'paid_amount', label:__('Amount Paid'),
+							reqd:1, "default": me.frm.doc.grand_total, hidden: 1, change: function() {
+								var values = dialog.get_values();
+								dialog.set_value("change", Math.round(values.paid_amount - values.total_amount));
+								dialog.get_input("change").trigger("change");
+
+							}},
+						{fieldtype:'Currency', fieldname:'change', label: __('Change'),
+							"default": 0.0, hidden: 1, change: function() {
+								var values = dialog.get_values();
+								var write_off_amount = (flt(values.paid_amount) - flt(values.change)) - values.total_amount;
+								dialog.get_field("write_off_amount").toggle(write_off_amount);
+								dialog.set_value("write_off_amount", write_off_amount);
+							}
+						},
+						{fieldtype:'Currency', fieldname:'write_off_amount',
+							label: __('Write Off'), default: 0.0, hidden: 1},
+					]
+				});
+				me.dialog = dialog;
+				dialog.show();
+
+				// make read only
+				dialog.get_input("total_amount").prop("disabled", true);
+				dialog.get_input("write_off_amount").prop("disabled", true);
+
+				// toggle amount paid and change
+				dialog.get_input("mode_of_payment").on("change", function() {
+					var is_cash = dialog.get_value("mode_of_payment") === __("Cash");
+					dialog.get_field("paid_amount").toggle(is_cash);
+					dialog.get_field("change").toggle(is_cash);
+
+					if (is_cash && !dialog.get_value("change")) {
+						// set to nearest 5
+						var paid_amount = 5 * Math.ceil(dialog.get_value("total_amount") / 5);
+						dialog.set_value("paid_amount", paid_amount);
+						dialog.get_input("paid_amount").trigger("change");
 					}
+				}).trigger("change");
 
-					var modes_of_payment = r.message;
-
-					// prefer cash payment!
-					var default_mode = modes_of_payment.indexOf(__("Cash"))!==-1 ? __("Cash") : undefined;
-
-					// show payment wizard
-					var dialog = new frappe.ui.Dialog({
-						width: 400,
-						title: 'Payment',
-						fields: [
-							{fieldtype:'Currency', fieldname:'total_amount', label: __('Total Amount'), read_only:1,
-								options:"currency", default:me.frm.doc.grand_total, read_only: 1},
-							{fieldtype:'Select', fieldname:'mode_of_payment', label: __('Mode of Payment'),
-								options:modes_of_payment.join('\n'), reqd: 1, default: default_mode},
-							{fieldtype:'Currency', fieldname:'paid_amount', label:__('Amount Paid'), reqd:1,
-								options: "currency",
-								default:me.frm.doc.grand_total, hidden: 1},
-							{fieldtype:'Currency', fieldname:'change', label: __('Change'), options: "currency",
-								default: 0.0, hidden: 1},
-							{fieldtype:'Currency', fieldname:'write_off_amount', label: __('Write Off'), options: "currency",
-								default: 0.0, hidden: 1},
-							{fieldtype:'Button', fieldname:'pay', label:'Pay'}
-						]
-					});
-					dialog.show();
-
-					// make read only
-					dialog.get_input("total_amount").prop("disabled", true);
-					dialog.get_input("write_off_amount").prop("disabled", true);
-
-					dialog.get_input("paid_amount").on("change", function() {
-						var values = dialog.get_values();
-						dialog.set_value("change", Math.round(values.paid_amount - values.total_amount));
-						dialog.get_input("change").trigger("change");
-					});
-
-					dialog.get_input("change").on("change", function() {
-						var values = dialog.get_values();
-						var write_off_amount = (flt(values.paid_amount) - flt(values.change)) - values.total_amount;
-						dialog.set_value("write_off_amount", write_off_amount);
-						dialog.fields_dict.write_off_amount.$wrapper.toggleClass("hide", !!!write_off_amount);
-					});
-
-					// toggle amount paid and change
-					dialog.get_input("mode_of_payment").on("change", function() {
-						var is_cash = dialog.get_value("mode_of_payment") === __("Cash");
-						dialog.fields_dict.paid_amount.$wrapper.toggleClass("hide", !is_cash);
-						dialog.fields_dict.change.$wrapper.toggleClass("hide", !is_cash);
-
-						if (is_cash && !dialog.get_value("change")) {
-							// set to nearest 5
-							var paid_amount = 5 * Math.ceil(dialog.get_value("total_amount") / 5);
-							dialog.set_value("paid_amount", paid_amount);
-							dialog.get_input("paid_amount").trigger("change");
-						}
-					}).trigger("change");
-
-					dialog.fields_dict.pay.input.onclick = function() {
-						var values = dialog.get_values();
-						var is_cash = values.mode_of_payment === __("Cash");
-						if (!is_cash) {
-							values.write_off_amount = values.change = 0.0;
-							values.paid_amount = values.total_amount;
-						}
-						me.frm.set_value("mode_of_payment", values.mode_of_payment);
-
-						var paid_amount = flt((flt(values.paid_amount) - flt(values.change)) / me.frm.doc.conversion_rate, precision("paid_amount"));
-						me.frm.set_value("paid_amount", paid_amount);
-
-						// specifying writeoff amount here itself, so as to avoid recursion issue
-						me.frm.set_value("write_off_amount", me.frm.doc.base_grand_total - paid_amount);
-						me.frm.set_value("outstanding_amount", 0);
-
-						me.frm.savesubmit(this);
-						dialog.hide();
-						me.refresh();
-					};
-				}
+				me.set_pay_button(dialog);
 			});
 		}
 	},
+	set_pay_button: function(dialog) {
+		var me = this;
+		dialog.set_primary_action(__("Pay"), function() {
+			var values = dialog.get_values();
+			console.log(values);
+			var is_cash = values.mode_of_payment === __("Cash");
+			if (!is_cash) {
+				values.write_off_amount = values.change = 0.0;
+				values.paid_amount = values.total_amount;
+			}
+			me.frm.set_value("mode_of_payment", values.mode_of_payment);
+
+			var paid_amount = flt((flt(values.paid_amount) - flt(values.change)) / me.frm.doc.conversion_rate, precision("paid_amount"));
+			me.frm.set_value("paid_amount", paid_amount);
+
+			// specifying writeoff amount here itself, so as to avoid recursion issue
+			me.frm.set_value("write_off_amount", me.frm.doc.base_grand_total - paid_amount);
+			me.frm.set_value("outstanding_amount", 0);
+
+			me.frm.savesubmit(this);
+			dialog.hide();
+			me.refresh();
+		})
+
+	}
 });
 
 erpnext.pos.make_pos_btn = function(frm) {
@@ -486,28 +491,13 @@ erpnext.pos.make_pos_btn = function(frm) {
 		return;
 	}
 
-	if(frm.doc.docstatus <= 1) {
-		if(!frm.pos_active) {
-			var btn_label = __("POS View"),
-				icon = "icon-th";
-		} else {
-			var btn_label = __("Form View"),
-				icon = "icon-file-text";
-		}
+	if(!frm.pos_btn) {
+		frm.pos_btn = frm.page.add_action_icon("icon-th", function() {
+			erpnext.pos.toggle(frm) });
+	}
 
-		if(erpnext.open_as_pos) {
-			erpnext.pos.toggle(frm, true);
-			erpnext.open_as_pos = false;
-		}
-
-		frm.$pos_btn && frm.$pos_btn.remove();
-
-		frm.$pos_btn = frm.page.add_menu_item(btn_label, function() {
-			erpnext.pos.toggle(frm);
-		});
-	} else {
-		// hack: will avoid calling refresh from refresh
-		setTimeout(function() { erpnext.pos.toggle(frm, false); }, 100);
+	if(erpnext.open_as_pos && !frm.pos_active) {
+		erpnext.pos.toggle(frm);
 	}
 }
 
@@ -534,6 +524,7 @@ erpnext.pos.toggle = function(frm, show) {
 	frm.page.set_view(frm.pos_active ? "main" : "pos");
 	frm.pos_active = !frm.pos_active;
 
+	frm.toolbar.current_status = null;
 	frm.refresh();
 
 	// refresh
