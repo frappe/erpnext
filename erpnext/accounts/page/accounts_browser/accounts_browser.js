@@ -203,7 +203,8 @@ erpnext.AccountsChart = Class.extend({
 						'Equity', 'Cost of Goods Sold', 'Fixed Asset', 'Expense Account',
 						'Income Account', 'Tax', 'Chargeable'].join('\n'),
 					description: __("Optional. This setting will be used to filter in various transactions.") },
-				{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate')}
+				{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate')},
+				{fieldtype:'Link', fieldname:'warehouse', label:__('Warehouse'), options:"Warehouse"}
 			]
 		})
 
@@ -214,21 +215,16 @@ erpnext.AccountsChart = Class.extend({
 			if($(this).val()=='Group') {
 				$(fd.account_type.wrapper).toggle(false);
 				$(fd.tax_rate.wrapper).toggle(false);
+				$(fd.warehouse.wrapper).toggle(false);
 			} else {
-				$(fd.account_type.wrapper).toggle(true);
-				if(fd.account_type.get_value()=='Tax') {
-					$(fd.tax_rate.wrapper).toggle(true);
-				}
+				fd.account_type.$input.trigger("change");
 			}
 		});
 
 		// tax rate if tax
 		$(fd.account_type.input).change(function() {
-			if($(this).val()=='Tax') {
-				$(fd.tax_rate.wrapper).toggle(true);
-			} else {
-				$(fd.tax_rate.wrapper).toggle(false);
-			}
+			$(fd.tax_rate.wrapper).toggle(fd.account_type.get_value()==='Tax');
+			$(fd.warehouse.wrapper).toggle(fd.account_type.get_value()==='Warehouse');
 		})
 
 		// create
@@ -236,6 +232,11 @@ erpnext.AccountsChart = Class.extend({
 			var btn = this;
 			var v = d.get_values();
 			if(!v) return;
+
+			if(v.account_type==="Warehouse" && !v.warehouse) {
+				msgprint(__("Warehouse is required"));
+				return;
+			}
 
 			var node = me.tree.get_selected_node();
 			v.parent_account = node.label;

@@ -23,13 +23,14 @@ def get_items(price_list, sales_or_purchase, item=None):
 			return item_code
 
 		# search barcode
-		item_code = frappe.db.sql("""select name, item_code from `tabItem` where barcode=%s""",
+		item_code = frappe.db.sql("""select name, item_code from `tabItem`
+			where barcode=%s""",
 			(item), as_dict=1)
 		if item_code:
 			item_code[0]["barcode"] = item
 			return item_code
 
-		condition += " and CONCAT(i.name, i.item_name) like %(name)s"
+		condition += " and (CONCAT(i.name, i.item_name) like %(name)s or (i.variant_of like %(name)s))"
 		args["name"] = "%%%s%%" % item
 
 	return frappe.db.sql("""select i.name, i.item_name, i.image,
@@ -38,6 +39,7 @@ def get_items(price_list, sales_or_purchase, item=None):
 			(select item_code, price_list_rate, currency from
 				`tabItem Price`	where price_list=%s) item_det
 		ON
-			item_det.item_code=i.name
+			(item_det.item_code=i.name or item_det.item_code=i.variant_of)
 		where
+			ifnull(i.has_variants, 0) = 0 and
 			%s""" % ('%(price_list)s', condition), args, as_dict=1)
