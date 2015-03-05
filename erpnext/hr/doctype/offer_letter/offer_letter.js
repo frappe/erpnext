@@ -1,26 +1,10 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.job_applicant = function() {
-	frappe.call({
-		doc: cur_frm.doc,
-		method: "set_applicant_name",
-		callback: function(r) {
-			if(!r.exe){
-				refresh_field("applicant_name");
-			}
-		}
-	});
-}
-
-cur_frm.cscript.terms = function() {
-	frappe.call({
-		doc: cur_frm.doc,
-		method: "set_view_terms",
-		callback: function(r) {
-			if(!r.exe){
-				refresh_field("view_terms");
-			}
-		}
-	});
-}
+frappe.ui.form.on("Offer Letter", {
+	select_terms: function(frm) {
+		frappe.model.get_value("Terms and Conditions", frm.doc.select_terms, "terms", function(value) {
+			frm.set_value("terms", value.terms);
+		});
+	}
+});

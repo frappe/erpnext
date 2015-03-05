@@ -6,11 +6,4 @@ import frappe
 from frappe.model.document import Document
 
 class OfferLetter(Document):
-	def validate(self):
-		self.set_applicant_name()
-		
-	def set_applicant_name(self):
-		self.applicant_name = frappe.db.get_value("Job Applicant", self.job_applicant, "applicant_name")
-		
-	def set_view_terms(self):
-		self.view_terms = frappe.db.get_value("Terms and Conditions", self.terms, "terms")
+	pass
