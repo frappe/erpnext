@@ -14,8 +14,6 @@ frappe.pages['sales-analytics'].on_page_load = function(wrapper) {
 
 };
 
-frappe.assets.views["Report"]();
-
 erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 	init: function(wrapper) {
 		this._super({

@@ -16,5 +16,4 @@ frappe.pages['stock-analytics'].on_page_load = function(wrapper) {
 
 };
 
-frappe.assets.views["Report"]();
 frappe.require("assets/erpnext/js/stock_analytics.js");
