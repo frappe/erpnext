@@ -85,6 +85,10 @@ class TestSalesInvoice(unittest.TestCase):
 		si.get("items")[0].price_list_rate = 1
 		si.get("items")[1].rate = 3
 		si.get("items")[1].price_list_rate = 3
+
+		# change shipping to $2
+		si.get("taxes")[0].tax_amount = 2
+
 		si.insert()
 
 		expected_values = {
@@ -109,23 +113,23 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check tax calculation
 		expected_values = {
-			"keys": ["tax_amount", "total"],
-			"_Test Account Shipping Charges - _TC": [100, 1350],
-			"_Test Account Customs Duty - _TC": [125, 1475],
-			"_Test Account Excise Duty - _TC": [140, 1615],
-			"_Test Account Education Cess - _TC": [2.8, 1617.8],
-			"_Test Account S&H Education Cess - _TC": [1.4, 1619.2],
-			"_Test Account CST - _TC": [32.38, 1651.58],
-			"_Test Account VAT - _TC": [156.25, 1807.83],
-			"_Test Account Discount - _TC": [-180.78, 1627.05]
+			"keys": ["base_tax_amount", "base_total", "tax_amount", "total"],
+			"_Test Account Shipping Charges - _TC": [100, 1350, 2, 27],
+			"_Test Account Customs Duty - _TC": [125, 1475, 2.5, 29.5],
+			"_Test Account Excise Duty - _TC": [140, 1615, 2.8, 32.3],
+			"_Test Account Education Cess - _TC": [3, 1618, 0.06, 32.36],
+			"_Test Account S&H Education Cess - _TC": [1.5, 1619.5, 0.03, 32.39],
+			"_Test Account CST - _TC": [32.5, 1652, 0.65, 33.04],
+			"_Test Account VAT - _TC": [156.5, 1808.5, 3.13, 36.17],
+			"_Test Account Discount - _TC": [-180.5, 1628, -3.61, 32.56]
 		}
 
 		for d in si.get("taxes"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEquals(si.base_grand_total, 1627.05)
-		self.assertEquals(si.grand_total, 32.54)
+		self.assertEquals(si.base_grand_total, 1628)
+		self.assertEquals(si.grand_total, 32.56)
 
 	def test_sales_invoice_discount_amount(self):
 		si = frappe.copy_doc(test_records[3])
@@ -141,25 +145,40 @@ class TestSalesInvoice(unittest.TestCase):
 		})
 		si.insert()
 
-		expected_values = {
-			"keys": ["price_list_rate", "discount_percentage", "rate", "amount",
-				"base_price_list_rate", "base_rate", "base_amount"],
-			"_Test Item Home Desktop 100": [62.5, 0, 62.5, 625.0, 50, 50, 465.37],
-			"_Test Item Home Desktop 200": [190.66, 0, 190.66, 953.3, 150, 150, 698.08],
-		}
+		expected_values = [
+			{
+				"item_code": "_Test Item Home Desktop 100",
+				"price_list_rate": 62.5,
+				"discount_percentage": 0,
+				"rate": 62.5, "amount": 625,
+				"base_price_list_rate": 62.5,
+				"base_rate": 62.5, "base_amount": 625,
+				"net_rate": 46.54, "net_amount": 465.37,
+				"base_net_rate": 46.54, "base_net_amount": 465.37
+			},
+			{
+				"item_code": "_Test Item Home Desktop 200",
+				"price_list_rate": 190.66,
+				"discount_percentage": 0,
+				"rate": 190.66, "amount": 953.3,
+				"base_price_list_rate": 190.66,
+				"base_rate": 190.66, "base_amount": 953.3,
+				"net_rate": 139.62, "net_amount": 698.08,
+				"base_net_rate": 139.62, "base_net_amount": 698.08
+			}
+		]
 
 		# check if children are saved
-		self.assertEquals(len(si.get("items")),
-			len(expected_values)-1)
+		self.assertEquals(len(si.get("items")),	len(expected_values))
 
 		# check if item values are calculated
-		for d in si.get("items"):
-			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.get(k), expected_values[d.item_code][i])
+		for i, d in enumerate(si.get("items")):
+			for k, v in expected_values[i].items():
+				self.assertEquals(d.get(k), v)
 
 		# check net total
 		self.assertEquals(si.base_net_total, 1163.45)
-		self.assertEquals(si.net_total, 1578.3)
+		self.assertEquals(si.total, 1578.3)
 
 		# check tax calculation
 		expected_values = {
@@ -270,7 +289,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check net total
 		self.assertEquals(si.base_net_total, 1249.98)
-		self.assertEquals(si.net_total, 1578.3)
+		self.assertEquals(si.total, 1578.3)
 
 		# check tax calculation
 		expected_values = {
@@ -301,48 +320,67 @@ class TestSalesInvoice(unittest.TestCase):
 		si.get("items")[0].discount_percentage = 10
 		si.get("items")[1].price_list_rate = 187.5
 		si.get("items")[1].discount_percentage = 20
-		si.get("taxes")[6].rate = 5000
+
+		# change shipping to $2
+		si.get("taxes")[6].tax_amount = 2
 
 		si.insert()
 
-		expected_values = {
-			"keys": ["price_list_rate", "discount_percentage", "rate", "amount",
-				"base_price_list_rate", "base_rate", "base_amount"],
-			"_Test Item Home Desktop 100": [55.56, 10, 50, 500, 2222.11, 1999.9, 19999.04],
-			"_Test Item Home Desktop 200": [187.5, 20, 150, 750, 7375.66, 5900.53, 29502.66],
-		}
+		expected_values = [
+			{
+				"item_code": "_Test Item Home Desktop 100",
+				"price_list_rate": 55.56,
+				"discount_percentage": 10,
+				"rate": 50, "amount": 500,
+				"base_price_list_rate": 2778,
+				"base_rate": 2500, "base_amount": 25000,
+				"net_rate": 40, "net_amount": 399.98,
+				"base_net_rate": 2000, "base_net_amount": 19999
+			},
+			{
+				"item_code": "_Test Item Home Desktop 200",
+				"price_list_rate": 187.5,
+				"discount_percentage": 20,
+				"rate": 150, "amount": 750,
+				"base_price_list_rate": 9375,
+				"base_rate": 7500, "base_amount": 37500,
+				"net_rate": 118.01, "net_amount": 590.05,
+				"base_net_rate": 5900.5, "base_net_amount": 29502.5
+			}
+		]
 
 		# check if children are saved
-		self.assertEquals(len(si.get("items")), len(expected_values)-1)
+		self.assertEquals(len(si.get("items")), len(expected_values))
 
 		# check if item values are calculated
-		for d in si.get("items"):
-			for i, k in enumerate(expected_values["keys"]):
-				self.assertEquals(d.get(k), expected_values[d.item_code][i])
+		for i, d in enumerate(si.get("items")):
+			for key, val in expected_values[i].items():
+				self.assertEquals(d.get(key), val)
 
 		# check net total
-		self.assertEquals(si.base_net_total, 49501.7)
-		self.assertEquals(si.net_total, 1250)
+		self.assertEquals(si.base_net_total, 49501.5)
+		self.assertEquals(si.net_total, 990.03)
+		self.assertEquals(si.total, 1250)
 
 		# check tax calculation
 		expected_values = {
-			"keys": ["tax_amount", "total"],
-			"_Test Account Excise Duty - _TC": [5540.22, 55041.92],
-			"_Test Account Education Cess - _TC": [110.81, 55152.73],
-			"_Test Account S&H Education Cess - _TC": [55.4, 55208.13],
-			"_Test Account CST - _TC": [1104.16, 56312.29],
-			"_Test Account VAT - _TC": [6187.71, 62500],
-			"_Test Account Customs Duty - _TC": [4950.17, 67450.17],
-			"_Test Account Shipping Charges - _TC": [5000, 72450.17],
-			"_Test Account Discount - _TC": [-7245.01, 65205.16]
+			"keys": ["base_tax_amount", "base_total", "tax_amount", "total"],
+			"_Test Account Excise Duty - _TC": [5540.5, 55042, 110.81, 1100.84],
+			"_Test Account Education Cess - _TC": [111, 55153, 2.22, 1103.06],
+			"_Test Account S&H Education Cess - _TC": [55.5, 55208.5, 1.11, 1104.17],
+			"_Test Account CST - _TC": [1104, 56312.5, 22.08, 1126.25],
+			"_Test Account VAT - _TC": [6188, 62500.5, 123.76, 1250.01],
+			"_Test Account Customs Duty - _TC": [4950.5, 67451, 99.01, 1349.02],
+			"_Test Account Shipping Charges - _TC": [ 100, 67551, 2, 1351.02],
+			"_Test Account Discount - _TC": [ -6755, 60796, -135.10, 1215.92]
 		}
 
 		for d in si.get("taxes"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEquals(si.base_grand_total, 65205.16)
-		self.assertEquals(si.grand_total, 1304.1)
+		self.assertEquals(si.base_grand_total, 60796)
+		self.assertEquals(si.grand_total, 1215.92)
 
 	def test_outstanding(self):
 		w = self.make()

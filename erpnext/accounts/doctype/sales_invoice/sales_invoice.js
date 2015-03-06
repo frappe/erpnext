@@ -96,7 +96,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						company: cur_frm.doc.company
 					}
 				})
-			}, "icon-download", "btn-default");
+			});
 	},
 
 	delivery_note_btn: function() {
@@ -116,7 +116,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						};
 					}
 				});
-			}, "icon-download", "btn-default");
+			});
 	},
 
 	tc_name: function() {
