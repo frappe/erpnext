@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from .workstation import check_if_within_operating_hours, NotInWorkingHoursError, WorkstationHolidayError
+from erpnext.manufacturing.doctype.workstation.workstation import check_if_within_operating_hours, NotInWorkingHoursError, WorkstationHolidayError
 
 test_dependencies = ["Warehouse"]
 test_records = frappe.get_test_records('Workstation')

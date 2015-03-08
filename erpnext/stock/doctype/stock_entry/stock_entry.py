@@ -301,6 +301,7 @@ class StockEntry(StockController):
 					operation_cost_per_unit = 0.0
 					if self.production_order:
 						operation_cost_per_unit = self.get_operation_cost_per_unit(d.bom_no, d.qty)
+
 					d.incoming_rate = operation_cost_per_unit + (raw_material_cost / flt(d.transfer_qty))
 					d.amount = flt(flt(d.transfer_qty) * flt(d.incoming_rate), self.precision("transfer_qty", d))
 					break

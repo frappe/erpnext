@@ -15,6 +15,7 @@ def _make_test_records(verbose):
 		["_Test Account Shipping Charges", "_Test Account Stock Expenses", "Ledger", "Chargeable"],
 		["_Test Account Customs Duty", "_Test Account Stock Expenses", "Ledger", "Tax"],
 		["_Test Account Insurance Charges", "_Test Account Stock Expenses", "Ledger", "Chargeable"],
+		["_Test Account Stock Adjustment", "_Test Account Stock Expenses", "Ledger", "Stock Adjustment"],
 
 
 		["_Test Account Tax Assets", "Current Assets", "Group", None],

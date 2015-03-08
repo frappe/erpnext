@@ -560,6 +560,7 @@ class TestStockEntry(unittest.TestCase):
 		se.purchase_receipt_no = pr.name
 		se.posting_date = "2013-03-01"
 		se.fiscal_year = "_Test Fiscal Year 2013"
+		se.difference_account = "_Test Account Stock Adjustment - _TC"
 		se.get("items")[0].qty = se.get("items")[0].transfer_qty = 5
 		se.get("items")[0].s_warehouse = "_Test Warehouse - _TC"
 		se.insert()
@@ -584,6 +585,7 @@ class TestStockEntry(unittest.TestCase):
 		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Purchase Return"
 		se.purchase_receipt_no = pr_docname
+		se.difference_account = "_Test Account Stock Adjustment - _TC"
 		se.posting_date = "2013-03-01"
 		se.fiscal_year = "_Test Fiscal Year 2013"
 		se.get("items")[0].qty = se.get("items")[0].transfer_qty = 6
@@ -661,6 +663,7 @@ class TestStockEntry(unittest.TestCase):
 		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Purchase Return"
 		se.purchase_receipt_no = pr.name
+		se.difference_account = "_Test Account Stock Adjustment - _TC"
 		se.posting_date = "2013-03-01"
 		se.fiscal_year = "_Test Fiscal Year 2013"
 		se.get("items")[0].qty = se.get("items")[0].transfer_qty = 5
