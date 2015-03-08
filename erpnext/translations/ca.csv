@@ -115,7 +115,7 @@ DocType: Warehouse,Warehouse Detail,Detall Magatzem
 apps/erpnext/erpnext/selling/doctype/customer/customer.py +159,Credit limit has been crossed for customer {0} {1}/{2},Límit de crèdit s'ha creuat pel client {0} {1} / {2}
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +114,You are not authorized to add or update entries before {0},No té permisos per afegir o actualitzar les entrades abans de {0}
 apps/erpnext/erpnext/selling/doctype/sales_bom/sales_bom.py +27,Parent Item {0} must be not Stock Item and must be a Sales Item,Pares d'article {0} no pot de ser article d'estoc i ha de ser un article de Vendes
-DocType: Item,Item Image (if not slideshow),Item Image (si no presentació de diapositives)
+DocType: Item,Item Image (if not slideshow),Imatge de l'article (si no hi ha presentació de diapositives)
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.py +20,An Customer exists with same name,Hi ha un client amb el mateix nom
 DocType: SMS Log,SMS Log,SMS Log
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +26,Cost of Delivered Items,Cost dels articles lliurats
@@ -375,7 +375,7 @@ apps/erpnext/erpnext/utilities/transaction_base.py +112,Quantity cannot be a fra
 DocType: Purchase Invoice Item,Quantity and Rate,Quantitat i taxa
 DocType: Delivery Note,% Installed,% Instal·lat
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +60,Please enter company name first,Si us plau introdueix el nom de l'empresa primer
-DocType: BOM,Item Desription,Desription de l'article
+DocType: BOM,Item Desription,Desripció de l'article
 DocType: Buying Settings,Supplier Name,Nom del proveïdor
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +57,'To Case No.' cannot be less than 'From Case No.',"""Per al cas núm ' no pot ser inferior a 'De Cas No.'"
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +100,Non Profit,Sense ànim de lucre

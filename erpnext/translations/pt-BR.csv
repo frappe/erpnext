@@ -1812,7 +1812,7 @@ DocType: Quality Inspection,Verified By,Verificado Por
 DocType: Address,Subsidiary,Subsidiário
 apps/erpnext/erpnext/setup/doctype/company/company.py +37,"Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency.","Não é possível alterar a moeda padrão da empresa, porque existem operações existentes. Transações devem ser canceladas para alterar a moeda padrão."
 DocType: Quality Inspection,Purchase Receipt No,Nº do Recibo de Compra
-apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/standard_chart_of_accounts.py +29,Earnest Money,Dinheiro Earnest
+apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/standard_chart_of_accounts.py +29,Earnest Money,Dinheiro Ganho
 DocType: Time Log Batch,In Hours,Em Horas
 DocType: Salary Manager,Create Salary Slip,Criar Folha de Pagamento
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +44,Expected balance as per bank,Equilíbrio esperado como por banco
