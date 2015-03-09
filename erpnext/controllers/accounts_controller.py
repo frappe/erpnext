@@ -112,6 +112,8 @@ class AccountsController(TransactionBase):
 				if item.get("item_code"):
 					args = parent_dict.copy()
 					args.update(item.as_dict())
+					if not args.get("transaction_date"):
+						args["transaction_date"] = args.get("posting_date")
 					ret = get_item_details(args)
 
 					for fieldname, value in ret.items():
