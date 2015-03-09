@@ -13,7 +13,7 @@ frappe.pages["Accounts Browser"].on_page_load  = function(wrapper){
 		single_column: true
 	})
 
-	frappe.add_breadcrumbs("Accounts");
+	frappe.breadcrumbs.add("Accounts");
 
 	var main = wrapper.page.main,
 		chart_area = $("<div>")

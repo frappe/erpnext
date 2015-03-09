@@ -12,7 +12,7 @@ frappe.pages['stock-analytics'].on_page_load = function(wrapper) {
 	new erpnext.StockAnalytics(wrapper);
 
 
-	frappe.add_breadcrumbs("Stock")
+	frappe.breadcrumbs.add("Stock")
 
 };
 

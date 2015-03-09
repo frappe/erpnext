@@ -11,7 +11,7 @@ frappe.pages['support-analytics'].on_page_load = function(wrapper) {
 	new erpnext.SupportAnalytics(wrapper);
 
 
-	frappe.add_breadcrumbs("Support")
+	frappe.breadcrumbs.add("Support")
 
 }
 

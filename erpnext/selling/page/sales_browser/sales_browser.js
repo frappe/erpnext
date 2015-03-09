@@ -7,7 +7,7 @@ frappe.pages["Sales Browser"].on_page_load = function(wrapper){
 		single_column: true,
 	});
 
-	frappe.add_breadcrumbs("Selling")
+	frappe.breadcrumbs.add("Selling")
 
 	wrapper.page.set_secondary_action(__('Refresh'), function() {
 			wrapper.make_tree();

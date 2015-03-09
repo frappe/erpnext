@@ -8,7 +8,7 @@ frappe.pages['financial-analytics'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 	erpnext.financial_analytics = new erpnext.FinancialAnalytics(wrapper, 'Financial Analytics');
-	frappe.add_breadcrumbs("Accounts");
+	frappe.breadcrumbs.add("Accounts");
 
 };
 

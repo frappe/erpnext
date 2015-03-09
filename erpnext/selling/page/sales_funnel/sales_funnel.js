@@ -10,7 +10,7 @@ frappe.pages['sales-funnel'].on_page_load = function(wrapper) {
 
 	wrapper.sales_funnel = new erpnext.SalesFunnel(wrapper);
 
-	frappe.add_breadcrumbs("Selling");
+	frappe.breadcrumbs.add("Selling");
 }
 
 erpnext.SalesFunnel = Class.extend({

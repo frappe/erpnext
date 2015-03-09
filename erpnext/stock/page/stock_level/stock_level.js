@@ -11,7 +11,7 @@ frappe.pages['stock-level'].on_page_load = function(wrapper) {
 	new erpnext.StockLevel(wrapper);
 
 
-	frappe.add_breadcrumbs("Stock")
+	frappe.breadcrumbs.add("Stock")
 	;
 }
 

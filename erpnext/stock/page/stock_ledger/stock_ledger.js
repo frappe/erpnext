@@ -9,7 +9,7 @@ frappe.pages['stock-ledger'].on_page_load = function(wrapper) {
 	});
 
 	new erpnext.StockLedger(wrapper);
-	frappe.add_breadcrumbs("Stock")
+	frappe.breadcrumbs.add("Stock")
 };
 
 frappe.require("assets/erpnext/js/stock_grid_report.js");
