@@ -192,13 +192,6 @@ $.extend(cur_frm.cscript, {
 		});
 	},
 
-	planned_start_date: function() {
-		return this.frm.call({
-			doc: this.frm.doc,
-			method: "plan_operations"
-		});
-	},
-
 	show_time_logs: function(doc, doctype, name) {
 		frappe.route_options = {"operation": name};
 		frappe.set_route("List", "Time Log");
