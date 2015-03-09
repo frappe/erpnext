@@ -94,3 +94,4 @@ erpnext.patches.v4_2.discount_amount
 erpnext.patches.v4_2.update_landed_cost_voucher
 erpnext.patches.v4_2.set_item_has_batch
 erpnext.patches.v4_2.update_stock_uom_for_dn_in_sle
+erpnext.patches.v4_2.repost_reserved_qty
