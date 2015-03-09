@@ -172,4 +172,12 @@ def install(country=None):
 		if doc.meta.get_field(parent_link_field) and not doc.get(parent_link_field):
 			doc.flags.ignore_mandatory = True
 
-		doc.insert()
+		try:
+			doc.insert()
+		except NameError, e:
+			if e.args[0] == r.get("doctype") and e.args[2] and e.args[2].args[0] == 1062:
+				# duplicate entry
+				pass
+			else:
+				raise
+
