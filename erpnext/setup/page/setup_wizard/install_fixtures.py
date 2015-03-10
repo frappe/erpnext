@@ -135,7 +135,7 @@ def install(country=None):
 		{'doctype': 'Activity Type', 'activity_type': _('Proposal Writing')},
 		{'doctype': 'Activity Type', 'activity_type': _('Execution')},
 		{'doctype': 'Activity Type', 'activity_type': _('Communication')},
-		{'doctype': 'Activity Type', 'activity_type': 'Manufacturing'},
+		{'doctype': 'Activity Type', 'activity_type': _('Manufacturing')},
 
 		{'doctype': "Item Attribute", "attribute_name": _("Size"), "item_attribute_values": [
 			{"attribute_value": _("Extra Small"), "abbr": "XS"},
