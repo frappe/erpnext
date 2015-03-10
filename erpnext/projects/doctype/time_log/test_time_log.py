@@ -93,6 +93,7 @@ def make_prod_order(self):
 			"qty": 1,
 			"wip_warehouse": "_Test Warehouse - _TC",
 			"fg_warehouse": "_Test Warehouse 1 - _TC",
+			"company": "_Test Company"
 		})
 
 test_records = frappe.get_test_records('Time Log')

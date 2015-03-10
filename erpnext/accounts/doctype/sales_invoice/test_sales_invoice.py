@@ -88,19 +88,17 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# change shipping to $2
 		si.get("taxes")[0].tax_amount = 2
-
 		si.insert()
 
 		expected_values = {
 			"keys": ["price_list_rate", "discount_percentage", "rate", "amount",
 				"base_price_list_rate", "base_rate", "base_amount"],
-			"_Test Item Home Desktop 100": [1, 0, 1, 10, 50, 50, 500],
-			"_Test Item Home Desktop 200": [3, 0, 3, 15, 150, 150, 750],
+			"_Test Item Home Desktop 100": [50, 0, 50, 500, 2500, 2500, 25000],
+			"_Test Item Home Desktop 200": [150, 0, 150, 750, 7500, 7500, 37500],
 		}
 
 		# check if children are saved
-		self.assertEquals(len(si.get("items")),
-			len(expected_values)-1)
+		self.assertEquals(len(si.get("items")), len(expected_values)-1)
 
 		# check if item values are calculated
 		for d in si.get("items"):
@@ -108,8 +106,8 @@ class TestSalesInvoice(unittest.TestCase):
 				self.assertEquals(d.get(k), expected_values[d.item_code][i])
 
 		# check net total
-		self.assertEquals(si.base_net_total, 1250)
-		self.assertEquals(si.net_total, 25)
+		self.assertEquals(si.net_total, 1250)
+		self.assertEquals(si.base_net_total, 62500)
 
 		# check tax calculation
 		expected_values = {

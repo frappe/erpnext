@@ -386,11 +386,6 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertRaises(frappe.CancelledLinkError, delivery_note.submit)
 
-	def test_recurring_order(self):
-		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
-
-		test_recurring_document(self, test_records)
-
 test_dependencies = ["Sales BOM", "Currency Exchange"]
 
 test_records = frappe.get_test_records('Sales Order')

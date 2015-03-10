@@ -7,7 +7,6 @@ import frappe.permissions
 from erpnext.controllers.recurring_document import date_field_map
 
 def test_recurring_document(obj, test_records):
-	pass
 	from frappe.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate, add_days
 	from erpnext.accounts.utils import get_fiscal_year
 	frappe.db.set_value("Print Settings", "Print Settings", "send_print_as_pdf", 1)
@@ -104,7 +103,6 @@ def test_recurring_document(obj, test_records):
 	_test_recurring_document(obj, doc7, date_field, True)
 
 def _test_recurring_document(obj, base_doc, date_field, first_and_last_day):
-	pass
 	from frappe.utils import add_months, get_last_day
 	from erpnext.controllers.recurring_document import manage_recurring_documents, \
 		get_next_date
