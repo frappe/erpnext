@@ -94,10 +94,13 @@
    "reqd": 1
   }, 
   {
+   "default": "0", 
+   "depends_on": "eval:doc.docstatus==1", 
    "description": "", 
-   "fieldname": "material_transferred_for_qty", 
-   "fieldtype": "Int", 
-   "label": "Material Transferred for Qty", 
+   "fieldname": "material_transferred_for_manufacturing", 
+   "fieldtype": "Float", 
+   "label": "Material Transferred for Manufacturing", 
+   "no_copy": 1, 
    "permlevel": 0, 
    "precision": "", 
    "read_only": 1
@@ -351,8 +354,8 @@
  "icon": "icon-cogs", 
  "idx": 1, 
  "in_create": 0, 
- "is_submittable": 1, 
- "modified": "2015-03-09 15:28:12.535414", 
+ "is_submittable": 1,
+ "modified": "2015-03-10 17:02:28.401930", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 

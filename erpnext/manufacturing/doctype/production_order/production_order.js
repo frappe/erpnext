@@ -59,12 +59,12 @@ erpnext.production_order = {
 		var doc = frm.doc;
 		if (doc.docstatus === 1) {
 
-			if (flt(doc.material_transferred_for_qty) < flt(doc.qty)) {
+			if (flt(doc.material_transferred_for_manufacturing) < flt(doc.qty)) {
 				frm.add_custom_button(__('Transfer Materials for Manufacture'),
 					cur_frm.cscript['Transfer Raw Materials'], frappe.boot.doctype_icons["Stock Entry"]);
 			}
 
-			if (flt(doc.produced_qty) < flt(doc.material_transferred_for_qty)) {
+			if (flt(doc.produced_qty) < flt(doc.material_transferred_for_manufacturing)) {
 				frm.add_custom_button(__('Update Finished Goods'),
 					cur_frm.cscript['Update Finished Goods'], frappe.boot.doctype_icons["Stock Entry"]);
 			}
@@ -160,8 +160,8 @@ $.extend(cur_frm.cscript, {
 	make_se: function(purpose) {
 		var me = this;
 		var max = (purpose === "Manufacture") ?
-			flt(this.frm.doc.material_transferred_for_qty) - flt(this.frm.doc.produced_qty) :
-			flt(this.frm.doc.qty) - flt(this.frm.doc.material_transferred_for_qty);
+			flt(this.frm.doc.qty) - flt(this.frm.doc.produced_qty) :
+			flt(this.frm.doc.qty) - flt(this.frm.doc.material_transferred_for_manufacturing);
 
 		frappe.prompt({fieldtype:"Int", label: __("Qty for {0}", [purpose]), fieldname:"qty",
 			description: __("Max: {0}", [max]) },

@@ -124,8 +124,9 @@ class ProductionOrder(Document):
 	def update_production_order_qty(self):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Production Order
 			based on Stock Entry"""
+		print "call"
 		for purpose, fieldname in (("Manufacture", "produced_qty"),
-			("Material Transfer for Manufacture", "material_transferred_for_qty")):
+			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
 			qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
 				from `tabStock Entry` where production_order=%s and docstatus=1
 				and purpose=%s""", (self.name, purpose))[0][0])
