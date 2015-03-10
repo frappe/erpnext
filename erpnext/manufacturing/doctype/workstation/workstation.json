@@ -41,17 +41,6 @@
    "precision": ""
   }, 
   {
-   "fieldname": "warehouse", 
-   "fieldtype": "Link", 
-   "in_list_view": 1, 
-   "label": "Warehouse", 
-   "oldfieldname": "warehouse", 
-   "oldfieldtype": "Link", 
-   "options": "Warehouse", 
-   "permlevel": 0, 
-   "reqd": 1
-  }, 
-  {
    "default": "", 
    "fieldname": "holiday_list", 
    "fieldtype": "Link", 
@@ -134,13 +123,13 @@
    "options": "Workstation Working Hour", 
    "permlevel": 0, 
    "precision": "", 
-   "reqd": 1
+   "reqd": 0
   }
  ], 
  "icon": "icon-wrench", 
  "idx": 1, 
- "modified": "2015-02-23 09:43:35.903827", 
- "modified_by": "Administrator", 
+ "modified": "2015-03-10 15:12:52.857454", 
+ "modified_by": "neil@frappe.io", 
  "module": "Manufacturing", 
  "name": "Workstation", 
  "owner": "Administrator", 
