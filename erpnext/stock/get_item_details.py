@@ -302,7 +302,7 @@ def get_available_qty(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 		["projected_qty", "actual_qty"], as_dict=True) or {}
 
-@frappe.whitelist(allow_guest=False)
+@frappe.whitelist()
 def get_batch_qty(batch_no,warehouse,item_code):
 	actual_batch_qty = get_actual_batch_qty(batch_no,warehouse,item_code)
 	if batch_no:

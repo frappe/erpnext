@@ -218,7 +218,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var me = this;
 		this.batch_no(doc, cdt, cdn);
 		var item = frappe.get_doc(cdt, cdn);
-		this.batch_no(doc)
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
 				method: "erpnext.stock.get_item_details.get_available_qty",
