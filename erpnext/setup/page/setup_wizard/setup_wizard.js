@@ -368,7 +368,7 @@ $.extend(erpnext.wiz, {
 					if(user_image) {
 						var $attach_user = slide.form.fields_dict.attach_user.$wrapper;
 						$attach_user.find(".missing-image").toggle(false);
-						$attach_user.find("img").attr("src", user_image).toggle(true);
+						$attach_user.find("img").attr("src", decodeURIComponent(user_image)).toggle(true);
 					}
 
 					delete slide.form.fields_dict.email;
