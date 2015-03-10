@@ -278,6 +278,15 @@ def get_serial_nos_by_fifo(args, item_doc):
 			"qty": cint(args.qty)
 		}))
 
+def get_actual_batch_qty(batch_no,warehouse,item_code):
+        actual_batch_qty = 0
+        if batch_no:
+            actual_batch_qty = flt(frappe.db.sql("""select sum(actual_qty)
+				from `tabStock Ledger Entry`
+				where warehouse=%s and item_code=%s and batch_no=%s""",
+				(warehouse, item_code, batch_no))[0][0])
+        return actual_batch_qty
+
 @frappe.whitelist()
 def get_conversion_factor(item_code, uom):
 	return {"conversion_factor": frappe.db.get_value("UOM Conversion Detail",
@@ -293,6 +302,12 @@ def get_available_qty(item_code, warehouse):
 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 		["projected_qty", "actual_qty"], as_dict=True) or {}
 
+@frappe.whitelist(allow_guest=False)
+def get_batch_qty(batch_no,warehouse,item_code):
+	actual_batch_qty = get_actual_batch_qty(batch_no,warehouse,item_code)
+	if batch_no:
+		return {'actual_batch_qty': actual_batch_qty}
+	
 @frappe.whitelist()
 def apply_price_list(args):
 	"""
