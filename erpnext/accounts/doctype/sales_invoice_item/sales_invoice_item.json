@@ -341,6 +341,19 @@
   }, 
   {
    "allow_on_submit": 1, 
+   "fieldname": "actual_batch_qty", 
+   "fieldtype": "Float", 
+   "label": "Available Batch Qty at Warehouse", 
+   "no_copy": 1, 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "print_width": "150px", 
+   "read_only": 1, 
+   "width": "150px"
+  }, 
+  {
+   "allow_on_submit": 1, 
    "fieldname": "actual_qty", 
    "fieldtype": "Float", 
    "label": "Available Qty at Warehouse", 
@@ -439,7 +452,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-09-09 05:35:36.019576", 
+ "modified": "2015-03-10 14:56:45.641026", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Item", 

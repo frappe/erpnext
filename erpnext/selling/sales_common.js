@@ -215,6 +215,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	warehouse: function(doc, cdt, cdn) {
+		var me = this;
+		this.batch_no(doc, cdt, cdn);
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
@@ -474,6 +476,21 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			})
 		}
+	},
+
+	batch_no: function(doc, cdt, cdn) {
+		var me = this;
+		var item = frappe.get_doc(cdt, cdn);
+	    return this.frm.call({
+	        method: "erpnext.stock.get_item_details.get_batch_qty",
+	        child: item,
+	        args: {
+	           "batch_no": item.batch_no,
+	           "warehouse": item.warehouse,
+	           "item_code": item.item_code
+	        },
+	         "fieldname": "actual_batch_qty"
+	    });
 	},
 
 	set_dynamic_labels: function() {
