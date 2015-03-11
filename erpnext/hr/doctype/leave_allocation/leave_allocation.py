@@ -11,7 +11,7 @@ from erpnext.hr.utils import set_employee_name
 class LeaveAllocation(Document):
 	def validate(self):
 		self.validate_new_leaves_allocated_value()
-		self.check_existing_leave_allocation()
+		#self.check_existing_leave_allocation()
 		if not self.total_leaves_allocated:
 			self.total_leaves_allocated = self.new_leaves_allocated
 
@@ -52,11 +52,21 @@ class LeaveAllocation(Document):
 		return leaves_applied and flt(leaves_applied[0][0]) or 0
 
 	def get_leaves_allocated(self, fiscal_year):
-		leaves_allocated = frappe.db.sql("""select SUM(ifnull(total_leaves_allocated, 0))
+		leaves_allocated = frappe.db.sql("""select MAX(ifnull(total_leaves_allocated, 0))
 			from `tabLeave Allocation` where employee=%s and leave_type=%s
 			and fiscal_year=%s and docstatus=1 and name!=%s""",
 			(self.employee, self.leave_type, fiscal_year, self.name))
 		return leaves_allocated and flt(leaves_allocated[0][0]) or 0
+
+	def get_totalleaves_allocated(self, fiscal_year):
+		leaves_allocated = frappe.db.sql("""select MAX(ifnull(total_leaves_allocated, 0))
+			from `tabLeave Allocation` where employee=%s and leave_type=%s
+			and fiscal_year=%s and docstatus=1""",
+			(self.employee, self.leave_type, fiscal_year))
+		ret = {
+			'total_leaves_allocated': flt(self.new_leaves_allocated)+ flt(leaves_allocated[0][0])
+		}
+		return ret
 
 	def allow_carry_forward(self):
 		"""check whether carry forward is allowed or not for this leave type"""
@@ -74,20 +84,24 @@ class LeaveAllocation(Document):
 			where year_start_date = (select date_add(year_start_date, interval -1 year)
 				from `tabFiscal Year` where name=%s)
 			order by name desc limit 1""", self.fiscal_year)
+		leaves_allocated = frappe.db.sql("""select MAX(ifnull(total_leaves_allocated, 0))
+			from `tabLeave Allocation` where employee=%s and leave_type=%s
+			and fiscal_year=%s and docstatus=1""",
+			(self.employee, self.leave_type, self.fiscal_year))
 		prev_fiscal_year = prev_fiscal_year and prev_fiscal_year[0][0] or ''
 		prev_bal = 0
 		if prev_fiscal_year and cint(self.carry_forward) == 1:
 			prev_bal = self.get_leave_bal(prev_fiscal_year)
 		ret = {
 			'carry_forwarded_leaves': prev_bal,
-			'total_leaves_allocated': flt(prev_bal) + flt(self.new_leaves_allocated)
+			'total_leaves_allocated': flt(prev_bal) + flt(self.new_leaves_allocated)+ flt(leaves_allocated[0][0])
 		}
 		return ret
 
 	def get_total_allocated_leaves(self):
-		leave_det = self.get_carry_forwarded_leaves()
-		frappe.db.set(self,'carry_forwarded_leaves',flt(leave_det['carry_forwarded_leaves']))
-		frappe.db.set(self,'total_leaves_allocated',flt(leave_det['total_leaves_allocated']))
+		#leave_det = self.get_carry_forwarded_leaves()
+		frappe.db.set(self,'carry_forwarded_leaves',self.carry_forwarded_leaves)
+		frappe.db.set(self,'total_leaves_allocated',self.total_leaves_allocated)
 
 	def check_for_leave_application(self):
 		exists = frappe.db.sql("""select name from `tabLeave Application`
