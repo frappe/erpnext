@@ -25,20 +25,24 @@ cur_frm.cscript.carry_forward = function(doc, dt, dn) {
 }
 
 cur_frm.cscript.carry_forwarded_leaves = function(doc, dt, dn) {
-  set_multiple(dt,dn,{total_leaves_allocated : flt(doc.carry_forwarded_leaves)+flt(doc.new_leaves_allocated)});
+  set_multiple(dt,dn,{total_leaves_allocated : flt(doc.carry_forwarded_leaves)+flt(doc.new_leaves_allocated)+flt(doc.total_leaves_allocated)});
 }
 
 cur_frm.cscript.new_leaves_allocated = function(doc, dt, dn) {
-  set_multiple(dt,dn,{total_leaves_allocated : flt(doc.carry_forwarded_leaves)+flt(doc.new_leaves_allocated)});
+ calculate_total_leaves_allocated(doc, dt, dn);
+  
+set_multiple(dt,dn,{total_leaves_allocated : flt(doc.carry_forwarded_leaves)+flt(doc.new_leaves_allocated)+flt(doc.total_leaves_allocated)});
 }
 
 calculate_total_leaves_allocated = function(doc, dt, dn) {
   if(cint(doc.carry_forward) == 1 && doc.leave_type && doc.fiscal_year && doc.employee){
     return get_server_fields('get_carry_forwarded_leaves','','', doc, dt, dn, 1);
 	}
-  else if(cint(doc.carry_forward) == 0){
-    set_multiple(dt,dn,{carry_forwarded_leaves : 0,total_leaves_allocated : flt(doc.new_leaves_allocated)});
-  }
+  else if(cint(doc.carry_forward) == 0 && doc.leave_type && doc.fiscal_year && doc.employee){
+	return get_server_fields('get_totalleaves_allocated',doc.fiscal_year,'', doc, dt, dn, 1);
+
+}
+
 }
 
 cur_frm.fields_dict.employee.get_query = function(doc,cdt,cdn) {

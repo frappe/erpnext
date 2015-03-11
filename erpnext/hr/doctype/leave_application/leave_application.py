@@ -231,7 +231,7 @@ def get_total_leave_days(leave_app):
 
 @frappe.whitelist()
 def get_leave_balance(employee, leave_type, fiscal_year):
-	leave_all = frappe.db.sql("""select total_leaves_allocated
+	leave_all = frappe.db.sql("""select MAX(total_leaves_allocated)
 		from `tabLeave Allocation` where employee = %s and leave_type = %s
 		and fiscal_year = %s and docstatus = 1""", (employee,
 			leave_type, fiscal_year))
