@@ -192,8 +192,9 @@ $.extend(cur_frm.cscript, {
 		});
 	},
 
-	show_time_logs: function(doc, doctype, name) {
-		frappe.route_options = {"operation": name};
+	show_time_logs: function(doc, cdt, cdn) {
+		var child = locals[cdt][cdn]
+		frappe.route_options = {"operation_id": child.name};
 		frappe.set_route("List", "Time Log");
 	},
 
