@@ -279,7 +279,15 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	items_on_form_rendered: function(doc, grid_row) {
-		erpnext.setup_serial_no();
+		if (doc.purpose =='Material Receipt'){
+			erpnext.setup_serial_no('Not Available');
+		}
+		else if (doc.purpose == 'Sales Return') {
+			erpnext.setup_serial_no('Delivered');
+		}
+		else {
+			erpnext.setup_serial_no();
+		}
 	},
 
 	customer: function() {
