@@ -30,4 +30,4 @@ class SalesPerson(NestedSet):
 	
 	def validate_employee_id(self):
 		if frappe.db.exists({"doctype": "Sales Person","employee": self.employee}):
-			frappe.throw("Another sales person with the same empoyee id exists.")
+			frappe.throw("Another sales person with the same employee id exists.")
