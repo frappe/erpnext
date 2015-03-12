@@ -62,7 +62,7 @@ def get_entries(filters):
 			and jvd.account = %(account)s and jv.posting_date <= %(report_date)s
 			and ifnull(jv.clearance_date, '4000-01-01') > %(report_date)s
 			and ifnull(jv.is_opening, 'No') = 'No'
-		order by jv.name DESC""", filters, as_list=1)
+		order by jv.posting_date DESC, jv.name DESC""", filters, as_list=1)
 
 	return entries
 
