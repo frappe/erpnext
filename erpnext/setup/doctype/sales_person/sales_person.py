@@ -14,6 +14,7 @@ class SalesPerson(NestedSet):
 		for d in self.get('targets') or []:
 			if not flt(d.target_qty) and not flt(d.target_amount):
 				frappe.throw(_("Either target qty or target amount is mandatory."))
+		self.validate_employee_id()
 
 	def on_update(self):
 		super(SalesPerson, self).on_update()
@@ -26,3 +27,7 @@ class SalesPerson(NestedSet):
 				frappe.throw(_("User ID not set for Employee {0}").format(self.employee))
 			else:
 				return frappe.db.get_value("User", user, "email") or user
+	
+	def validate_employee_id(self):
+		if frappe.db.exists({"doctype": "Sales Person","employee": self.employee}):
+			frappe.throw("Another sales person with the same employee id exists.")
