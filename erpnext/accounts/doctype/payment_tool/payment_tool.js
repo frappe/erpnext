@@ -109,6 +109,7 @@ frappe.ui.form.on("Payment Tool", "get_outstanding_vouchers", function(frm) {
 					invoice_detail.against_voucher_no = d.voucher_no;
 					invoice_detail.total_amount = d.invoice_amount;
 					invoice_detail.outstanding_amount = d.outstanding_amount;
+					invoice_detail.outstanding_amount = invoice_detail.outstanding_amount.toFixed(2);
 				});
 			}
 			refresh_field("payment_tool_details");
