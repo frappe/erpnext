@@ -471,7 +471,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				var diff = this.frm.doc.net_total_export
 					- flt(last_tax.total / this.frm.doc.conversion_rate, precision("grand_total_export"));
 
-				if (diff) {
+				if ( diff && Math.abs(diff) <= (2.0 / Math.pow(10, precision("total", last_tax)) ) {
 					last_tax.total += flt(diff * this.frm.doc.conversion_rate, precision("total", last_tax));
 				}
 			}

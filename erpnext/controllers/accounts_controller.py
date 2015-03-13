@@ -364,7 +364,7 @@ class AccountsController(TransactionBase):
 			diff = self.net_total_export - flt(last_tax.total / self.conversion_rate,
 				self.precision("grand_total_export"))
 
-			if diff:
+			if diff and abs(diff) <= (2.0 / 10**(self.precision("total", last_tax))):
 				last_tax.total = last_tax.total + flt(diff * self.conversion_rate, self.precision("total", last_tax))
 
 	def calculate_total_advance(self, parenttype, advance_parentfield):
