@@ -48,12 +48,11 @@ class Issue(Document):
 			# if no date, it should be set as None and not a blank string "", as per mysql strict config
 			self.resolution_date = None
 
-	@staticmethod
-	def get_list_context(context=None):
-		return {
-			"title": _("My Issues"),
-			"get_list": get_issue_list
-		}
+def get_list_context(context=None):
+	return {
+		"title": _("My Issues"),
+		"get_list": get_issue_list
+	}
 
 def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20):
 	from frappe.templates.pages.list import get_list

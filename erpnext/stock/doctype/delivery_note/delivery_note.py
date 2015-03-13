@@ -285,12 +285,11 @@ class DeliveryNote(SellingController):
 			}
 			update_bin(args)
 
-	@staticmethod
-	def get_list_context(context=None):
-		from erpnext.controllers.website_list_for_contact import get_list_context
-		list_context = get_list_context(context)
-		list_context["title"] = _("My Shipments")
-		return list_context
+def get_list_context(context=None):
+	from erpnext.controllers.website_list_for_contact import get_list_context
+	list_context = get_list_context(context)
+	list_context["title"] = _("My Shipments")
+	return list_context
 
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""

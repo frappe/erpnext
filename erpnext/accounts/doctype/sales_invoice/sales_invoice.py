@@ -579,12 +579,11 @@ class SalesInvoice(SellingController):
 					})
 				)
 
-	@staticmethod
-	def get_list_context(context=None):
-		from erpnext.controllers.website_list_for_contact import get_list_context
-		list_context = get_list_context(context)
-		list_context["title"] = _("My Invoices")
-		return list_context
+def get_list_context(context=None):
+	from erpnext.controllers.website_list_for_contact import get_list_context
+	list_context = get_list_context(context)
+	list_context["title"] = _("My Invoices")
+	return list_context
 
 @frappe.whitelist()
 def get_bank_cash_account(mode_of_payment, company):
