@@ -2,7 +2,6 @@
  {
   "company": "_Test Company", 
   "doctype": "Stock Entry", 
-  "fiscal_year": "_Test Fiscal Year 2013", 
   "items": [
    {
     "conversion_factor": 1.0, 
@@ -19,10 +18,10 @@
     "uom": "_Test UOM"
    }
   ], 
-  "posting_date": "2013-01-01", 
-  "posting_time": "17:14:24", 
   "purpose": "Material Receipt"
  }, 
+ 
+ 
  {
   "company": "_Test Company", 
   "doctype": "Stock Entry", 
@@ -47,6 +46,8 @@
   "posting_time": "17:15", 
   "purpose": "Material Issue"
  }, 
+ 
+ 
  {
   "company": "_Test Company", 
   "doctype": "Stock Entry", 
@@ -72,6 +73,8 @@
   "posting_time": "17:14:24", 
   "purpose": "Material Transfer"
  }, 
+ 
+ 
  {
   "company": "_Test Company", 
   "doctype": "Stock Entry", 
@@ -106,8 +109,6 @@
     "uom": "_Test UOM"
    }
   ], 
-  "posting_date": "2013-01-25", 
-  "posting_time": "17:14:24", 
   "purpose": "Repack"
  }
 ]

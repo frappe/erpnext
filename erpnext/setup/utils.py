@@ -30,9 +30,10 @@ def get_ancestors_of(doctype, name):
 	return result or []
 
 def before_tests():
+	frappe.clear_cache()
 	# complete setup if missing
 	from erpnext.setup.page.setup_wizard.setup_wizard import setup_account
-	if not frappe.get_list("Item Group"):
+	if not frappe.get_list("Company"):
 		setup_account({
 			"currency"			:"USD",
 			"first_name"		:"Test",

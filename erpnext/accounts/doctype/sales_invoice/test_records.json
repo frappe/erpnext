@@ -7,7 +7,6 @@
   "customer_name": "_Test Customer",
   "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
-  "due_date": "2013-01-23",
   "items": [
    {
     "amount": 500.0,
@@ -49,7 +48,6 @@
    }
   ],
   "plc_conversion_rate": 1.0,
-  "posting_date": "2013-01-23",
   "price_list_currency": "INR",
   "sales_team": [
    {
@@ -68,6 +66,8 @@
   "selling_price_list": "_Test Price List",
   "territory": "_Test Territory"
  },
+ 
+ 
  {
   "company": "_Test Company",
   "conversion_rate": 1.0,
@@ -76,7 +76,6 @@
   "customer_name": "_Test Customer",
   "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
-  "due_date": "2013-03-07",
   "items": [
    {
     "amount": 500.0,
@@ -94,7 +93,6 @@
     "qty": 1.0
    }
   ],
-  "fiscal_year": "_Test Fiscal Year 2013",
   "base_grand_total": 630.0,
   "grand_total": 630.0,
   "is_pos": 0,
@@ -119,7 +117,6 @@
    }
   ],
   "plc_conversion_rate": 1.0,
-  "posting_date": "2013-03-07",
   "price_list_currency": "INR",
   "selling_price_list": "_Test Price List",
   "territory": "_Test Territory"
@@ -132,7 +129,6 @@
   "customer_name": "_Test Customer",
   "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
-  "due_date": "2013-01-23",
   "items": [
    {
     "cost_center": "_Test Cost Center - _TC",
@@ -245,7 +241,6 @@
    }
   ],
   "plc_conversion_rate": 1.0,
-  "posting_date": "2013-01-23",
   "price_list_currency": "INR",
   "selling_price_list": "_Test Price List",
   "territory": "_Test Territory"
@@ -258,7 +253,6 @@
   "customer_name": "_Test Customer",
   "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
-  "due_date": "2013-01-23",
   "items": [
    {
     "cost_center": "_Test Cost Center - _TC",
@@ -382,7 +376,6 @@
    }
   ],
   "plc_conversion_rate": 1.0,
-  "posting_date": "2013-01-23",
   "price_list_currency": "INR",
   "selling_price_list": "_Test Price List",
   "territory": "_Test Territory"

@@ -58,6 +58,9 @@ class TestShoppingCart(unittest.TestCase):
 	def test_add_to_cart(self):
 		self.login_as_lead()
 
+		# remove from cart
+		self.remove_all_items_from_cart()
+		
 		# add first item
 		set_item_in_cart("_Test Item", 1)
 		quotation = self.test_get_cart_lead()
@@ -84,7 +87,7 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEquals(quotation.get("items")[0].item_code, "_Test Item")
 		self.assertEquals(quotation.get("items")[0].qty, 5)
 		self.assertEquals(quotation.get("items")[0].amount, 50)
-		self.assertEquals(quotation.base_net_total, 70)
+		self.assertEquals(quotation.net_total, 70)
 		self.assertEquals(len(quotation.get("items")), 2)
 
 	def test_remove_from_cart(self):
@@ -97,13 +100,13 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEquals(quotation.get("items")[0].item_code, "_Test Item 2")
 		self.assertEquals(quotation.get("items")[0].qty, 1)
 		self.assertEquals(quotation.get("items")[0].amount, 20)
-		self.assertEquals(quotation.base_net_total, 20)
+		self.assertEquals(quotation.net_total, 20)
 		self.assertEquals(len(quotation.get("items")), 1)
 
 		# remove second item
 		set_item_in_cart("_Test Item 2", 0)
 		quotation = self.test_get_cart_lead()
-		self.assertEquals(quotation.base_net_total, 0)
+		self.assertEquals(quotation.net_total, 0)
 		self.assertEquals(len(quotation.get("items")), 0)
 
 	def test_set_billing_address(self):
@@ -141,7 +144,7 @@ class TestShoppingCart(unittest.TestCase):
 	def enable_shopping_cart(self):
 		settings = frappe.get_doc("Shopping Cart Settings", "Shopping Cart Settings")
 
-		if settings.default_territory == "_Test Territory Rest Of The World":
+		if settings.get("price_lists"):
 			settings.enabled = 1
 		else:
 			settings.update({
@@ -224,6 +227,11 @@ class TestShoppingCart(unittest.TestCase):
 			"lead_name": "_Test Website Lead",
 			"phone": "+91 0000000000"
 		}).insert(ignore_permissions=True)
+		
+	def remove_all_items_from_cart(self):
+		quotation = get_quotation()
+		quotation.set("items", [])
+		quotation.save(ignore_permissions=True)
 
 
 test_dependencies = ["Sales Taxes and Charges Master", "Price List", "Item Price", "Shipping Rule", "Currency Exchange",

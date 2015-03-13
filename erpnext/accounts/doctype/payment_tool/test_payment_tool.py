@@ -4,33 +4,26 @@
 from __future__ import unicode_literals
 import unittest, frappe, json
 from frappe.utils import flt
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import test_records as si_test_records
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import test_records as pi_test_records
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import test_records as jv_test_records
 
 test_dependencies = ["Item"]
 
 class TestPaymentTool(unittest.TestCase):
 	def test_make_journal_entry(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry \
-			import test_records as jv_test_records
-		from erpnext.selling.doctype.sales_order.test_sales_order \
-			import test_records as so_test_records
-		from erpnext.buying.doctype.purchase_order.test_purchase_order \
-			import test_records as po_test_records
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice \
-			import test_records as si_test_records
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice \
-			import test_records as pi_test_records
-
 		self.clear_table_entries()
+		frappe.db.set_default("currency", "INR")
 
 		base_customer_jv = self.create_against_jv(jv_test_records[2], { "party": "_Test Customer 3"})
 		base_supplier_jv = self.create_against_jv(jv_test_records[1], { "party": "_Test Supplier 1"})
 
 
 		# Create SO with partial outstanding
-		so1 = self.create_voucher(so_test_records[0], {
-			"customer": "_Test Customer 3"
-		})
-
+		so1 = make_sales_order(customer="_Test Customer 3", qty=10, rate=100)
+		
 		self.create_against_jv(jv_test_records[0], {
 			"party": "_Test Customer 3",
 			"against_sales_order": so1.name,
@@ -39,9 +32,7 @@ class TestPaymentTool(unittest.TestCase):
 
 
 		#Create SO with no outstanding
-		so2 = self.create_voucher(so_test_records[0], {
-			"customer": "_Test Customer 3"
-		})
+		so2 = make_sales_order(customer="_Test Customer 3")
 
 		self.create_against_jv(jv_test_records[0], {
 			"party": "_Test Customer 3",
@@ -51,9 +42,7 @@ class TestPaymentTool(unittest.TestCase):
 		})
 
 		# Purchase order
-		po = self.create_voucher(po_test_records[1], {
-			"supplier": "_Test Supplier 1"
-		})
+		po = create_purchase_order(supplier="_Test Supplier 1")
 
 		#Create SI with partial outstanding
 		si1 = self.create_voucher(si_test_records[0], {
@@ -136,7 +125,7 @@ class TestPaymentTool(unittest.TestCase):
 	def make_voucher_for_party(self, args, expected_outstanding):
 		#Make Journal Entry for Party
 		payment_tool_doc = frappe.new_doc("Payment Tool")
-
+		
 		for k, v in args.items():
 			payment_tool_doc.set(k, v)
 

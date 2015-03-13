@@ -4,27 +4,26 @@
 from __future__ import unicode_literals
 import unittest, frappe
 from frappe.utils import flt
+from erpnext.accounts.utils import get_actual_expense, BudgetError, get_fiscal_year
+
 
 class TestJournalEntry(unittest.TestCase):
 	def test_journal_entry_with_against_jv(self):
-
 		jv_invoice = frappe.copy_doc(test_records[2])
 		base_jv = frappe.copy_doc(test_records[0])
 		self.jv_against_voucher_testcase(base_jv, jv_invoice)
 
 	def test_jv_against_sales_order(self):
-		from erpnext.selling.doctype.sales_order.test_sales_order \
-			import test_records as so_test_records
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
-		sales_order = frappe.copy_doc(so_test_records[0])
+		sales_order = make_sales_order(do_not_save=True)
 		base_jv = frappe.copy_doc(test_records[0])
 		self.jv_against_voucher_testcase(base_jv, sales_order)
 
 	def test_jv_against_purchase_order(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order \
-			import test_records as po_test_records
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
-		purchase_order = frappe.copy_doc(po_test_records[0])
+		purchase_order = create_purchase_order(do_not_save=True)
 		base_jv = frappe.copy_doc(test_records[1])
 		self.jv_against_voucher_testcase(base_jv, purchase_order)
 
@@ -35,7 +34,6 @@ class TestJournalEntry(unittest.TestCase):
 			'Purchase Order': "against_purchase_order"
 			}
 
-		self.clear_account_balance()
 		test_voucher.insert()
 		test_voucher.submit()
 
@@ -104,88 +102,101 @@ class TestJournalEntry(unittest.TestCase):
 
 	def test_monthly_budget_crossed_ignore(self):
 		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
-		self.clear_account_balance()
-
-		jv = frappe.copy_doc(test_records[0])
-		jv.get("accounts")[1].account = "_Test Account Cost for Goods Sold - _TC"
-		jv.get("accounts")[1].cost_center = "_Test Cost Center - _TC"
-		jv.get("accounts")[1].debit = 20000.0
-		jv.get("accounts")[0].credit = 20000.0
-		jv.insert()
-		jv.submit()
+		
+		existing_expense = self.get_actual_expense("2013-02-28")
+		current_expense = - existing_expense + 20000 if existing_expense < 0 else 20000
+		
+		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
+			"_Test Account Bank Account - _TC", current_expense, "_Test Cost Center - _TC", submit=True)
+			
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv.name}))
 
 	def test_monthly_budget_crossed_stop(self):
-		from erpnext.accounts.utils import BudgetError
 		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
-		self.clear_account_balance()
-
-		jv = frappe.copy_doc(test_records[0])
-		jv.get("accounts")[1].account = "_Test Account Cost for Goods Sold - _TC"
-		jv.get("accounts")[1].cost_center = "_Test Cost Center - _TC"
-		jv.get("accounts")[1].debit = 20000.0
-		jv.get("accounts")[0].credit = 20000.0
-		jv.insert()
-
+		
+		existing_expense = self.get_actual_expense("2013-02-28")
+		current_expense = - existing_expense + 20000 if existing_expense < 0 else 20000
+		
+		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
+			"_Test Account Bank Account - _TC", current_expense, "_Test Cost Center - _TC")
+			
 		self.assertRaises(BudgetError, jv.submit)
 
 		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
 
 	def test_yearly_budget_crossed_stop(self):
-		from erpnext.accounts.utils import BudgetError
-		self.clear_account_balance()
 		self.test_monthly_budget_crossed_ignore()
 
 		frappe.db.set_value("Company", "_Test Company", "yearly_bgt_flag", "Stop")
+		
+		existing_expense = self.get_actual_expense("2013-02-28")
+		current_expense = - existing_expense + 150000 if existing_expense < 0 else 150000
 
-		jv = frappe.copy_doc(test_records[0])
-		jv.posting_date = "2013-08-12"
-		jv.get("accounts")[1].account = "_Test Account Cost for Goods Sold - _TC"
-		jv.get("accounts")[1].cost_center = "_Test Cost Center - _TC"
-		jv.get("accounts")[1].debit = 150000.0
-		jv.get("accounts")[0].credit = 150000.0
-		jv.insert()
-
+		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
+			"_Test Account Bank Account - _TC", current_expense, "_Test Cost Center - _TC")
+		
 		self.assertRaises(BudgetError, jv.submit)
 
 		frappe.db.set_value("Company", "_Test Company", "yearly_bgt_flag", "Ignore")
 
 	def test_monthly_budget_on_cancellation(self):
-		from erpnext.accounts.utils import BudgetError
 		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
-		self.clear_account_balance()
 
-		jv = frappe.copy_doc(test_records[0])
-		jv.get("accounts")[0].update({
-			"account": "_Test Account Cost for Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-			"party_type": None,
-			"party": None,
-			"credit": 30000.0
-		})
-		jv.get("accounts")[1].debit = 30000.0
-		jv.submit()
-
+		existing_expense = self.get_actual_expense("2013-02-28")
+		current_expense = - existing_expense - 30000 if existing_expense < 0 else 30000
+		
+		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
+			"_Test Account Bank Account - _TC", current_expense, "_Test Cost Center - _TC", submit=True)
+		
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv.name}))
 
-		jv1 = frappe.copy_doc(test_records[0])
-		jv1.get("accounts")[1].account = "_Test Account Cost for Goods Sold - _TC"
-		jv1.get("accounts")[1].cost_center = "_Test Cost Center - _TC"
-		jv1.get("accounts")[1].debit = 40000.0
-		jv1.get("accounts")[0].credit = 40000.0
-		jv1.submit()
-
+		jv1 = make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
+			"_Test Account Bank Account - _TC", 40000, "_Test Cost Center - _TC", submit=True)
+					
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv1.name}))
 
 		self.assertRaises(BudgetError, jv.cancel)
 
 		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
-
-	def clear_account_balance(self):
-		frappe.db.sql("""delete from `tabGL Entry`""")
-
+		
+	def get_actual_expense(self, monthly_end_date):
+		return get_actual_expense({
+			"account": "_Test Account Cost for Goods Sold - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"monthly_end_date": monthly_end_date,
+			"company": "_Test Company",
+			"fiscal_year": get_fiscal_year(monthly_end_date)[0]
+		})
+		
+def make_journal_entry(account1, account2, amount, cost_center=None, submit=False):
+	jv = frappe.new_doc("Journal Entry")
+	jv.posting_date = "2013-02-14"
+	jv.company = "_Test Company"
+	jv.fiscal_year = "_Test Fiscal Year 2013"
+	jv.user_remark = "test"
+	
+	jv.set("accounts", [
+		{
+			"account": account1,
+			"cost_center": cost_center,
+			"debit": amount if amount > 0 else 0,
+			"credit": abs(amount) if amount < 0 else 0,
+		}, {
+			"account": account2,
+			"cost_center": cost_center,
+			"credit": amount if amount > 0 else 0,
+			"debit": abs(amount) if amount < 0 else 0,
+		}
+	])
+	jv.insert()
+	
+	if submit:
+		jv.submit()
+	
+	return jv
+		
 
 test_records = frappe.get_test_records('Journal Entry')

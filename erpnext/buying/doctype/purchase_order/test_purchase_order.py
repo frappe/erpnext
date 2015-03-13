@@ -5,119 +5,106 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import frappe.defaults
-from frappe.utils import flt
+from frappe.utils import flt, add_days, nowdate
+from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt, make_purchase_invoice
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
-
-		po = frappe.copy_doc(test_records[0]).insert()
-
-		self.assertRaises(frappe.ValidationError, make_purchase_receipt,
-			po.name)
-
-		po = frappe.get_doc("Purchase Order", po.name)
+		po = create_purchase_order(do_not_submit=True)
+		self.assertRaises(frappe.ValidationError, make_purchase_receipt, po.name)
 		po.submit()
 
-		pr = make_purchase_receipt(po.name)
-		pr.supplier_warehouse = "_Test Warehouse 1 - _TC"
-		pr.posting_date = "2013-05-12"
-		self.assertEquals(pr.doctype, "Purchase Receipt")
-		self.assertEquals(len(pr.get("items")), len(test_records[0]["items"]))
-
-		pr.naming_series = "_T-Purchase Receipt-"
-		frappe.get_doc(pr).insert()
+		pr = create_pr_against_po(po.name)
+		self.assertEquals(len(pr.get("items")), 1)
 
 	def test_ordered_qty(self):
-		existing_ordered_qty = self._get_ordered_qty("_Test Item", "_Test Warehouse - _TC")
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
-
-		po = frappe.copy_doc(test_records[0]).insert()
-
+		existing_ordered_qty = get_ordered_qty()
+		
+		po = create_purchase_order(do_not_submit=True)
 		self.assertRaises(frappe.ValidationError, make_purchase_receipt, po.name)
-
-		po = frappe.get_doc("Purchase Order", po.name)
-		po.is_subcontracted = "No"
-		po.get("items")[0].item_code = "_Test Item"
+		
 		po.submit()
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 10)
 
-		self.assertEquals(self._get_ordered_qty("_Test Item", "_Test Warehouse - _TC"), existing_ordered_qty + 10)
-
-		pr = make_purchase_receipt(po.name)
-
-		self.assertEquals(pr.doctype, "Purchase Receipt")
-		self.assertEquals(len(pr.get("items", [])), len(test_records[0]["items"]))
-		pr.posting_date = "2013-05-12"
-		pr.naming_series = "_T-Purchase Receipt-"
-		pr.items[0].qty = 4.0
-		pr.insert()
-		pr.submit()
-
+		create_pr_against_po(po.name)	
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 6)
+		
 		po.load_from_db()
 		self.assertEquals(po.get("items")[0].received_qty, 4)
-		self.assertEquals(self._get_ordered_qty("_Test Item", "_Test Warehouse - _TC"), existing_ordered_qty + 6)
 
 		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
 
-		pr1 = make_purchase_receipt(po.name)
-		pr1.naming_series = "_T-Purchase Receipt-"
-		pr1.posting_date = "2013-05-12"
-		pr1.get("items")[0].qty = 8
-		pr1.insert()
-		pr1.submit()
-
+		pr = create_pr_against_po(po.name, received_qty=8)
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
+		
 		po.load_from_db()
 		self.assertEquals(po.get("items")[0].received_qty, 12)
-		self.assertEquals(self._get_ordered_qty("_Test Item", "_Test Warehouse - _TC"), existing_ordered_qty)
 
-		pr1.load_from_db()
-		pr1.cancel()
-
+		pr.cancel()
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 6)
+		
 		po.load_from_db()
 		self.assertEquals(po.get("items")[0].received_qty, 4)
-		self.assertEquals(self._get_ordered_qty("_Test Item", "_Test Warehouse - _TC"), existing_ordered_qty + 6)
 
 	def test_make_purchase_invoice(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+		po = create_purchase_order(do_not_submit=True)
 
-		po = frappe.copy_doc(test_records[0]).insert()
+		self.assertRaises(frappe.ValidationError, make_purchase_invoice, po.name)
 
-		self.assertRaises(frappe.ValidationError, make_purchase_invoice,
-			po.name)
-
-		po = frappe.get_doc("Purchase Order", po.name)
 		po.submit()
 		pi = make_purchase_invoice(po.name)
 
 		self.assertEquals(pi.doctype, "Purchase Invoice")
-		self.assertEquals(len(pi.get("items", [])), len(test_records[0]["items"]))
-
-		pi.credit_to = "_Test Payable - _TC"
-		pi.posting_date = "2013-05-12"
-		pi.bill_no = "NA"
-		frappe.get_doc(pi).insert()
+		self.assertEquals(len(pi.get("items", [])), 1)
 
 	def test_subcontracting(self):
-		po = frappe.copy_doc(test_records[0])
-		po.insert()
+		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
 		self.assertEquals(len(po.get("supplied_items")), 2)
 
 	def test_warehouse_company_validation(self):
 		from erpnext.stock.utils import InvalidWarehouseCompany
-		po = frappe.copy_doc(test_records[0])
-		po.company = "_Test Company 1"
-		po.conversion_rate = 0.0167
+		po = create_purchase_order(company="_Test Company 1", do_not_save=True)
 		self.assertRaises(InvalidWarehouseCompany, po.insert)
 
 	def test_uom_integer_validation(self):
 		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
-		po = frappe.copy_doc(test_records[0])
-		po.get("items")[0].qty = 3.4
+		po = create_purchase_order(qty=3.4, do_not_save=True)
 		self.assertRaises(UOMMustBeIntegerError, po.insert)
 
-	def _get_ordered_qty(self, item_code, warehouse):
-		return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "ordered_qty"))
+def create_purchase_order(**args):
+	po = frappe.new_doc("Purchase Order")
+	args = frappe._dict(args)
+	if args.transaction_date:
+		po.transaction_date = args.transaction_date
 
+	po.company = args.company or "_Test Company"
+	po.supplier = args.customer or "_Test Supplier"
+	po.is_subcontracted = args.is_subcontracted or "No"
+
+	po.append("items", {
+		"item_code": args.item or args.item_code or "_Test Item",
+		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"qty": args.qty or 10,
+		"rate": args.rate or 500,
+		"schedule_date": add_days(nowdate(), 1)
+	})
+	if not args.do_not_save:
+		po.insert()
+		if not args.do_not_submit:
+			po.submit()
+			
+	return po
+	
+def create_pr_against_po(po, received_qty=4):
+	pr = make_purchase_receipt(po)
+	pr.get("items")[0].qty = received_qty
+	pr.insert()
+	pr.submit()
+	return pr
+
+def get_ordered_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
+	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
+		"ordered_qty"))
 
 test_dependencies = ["BOM", "Item Price"]
 

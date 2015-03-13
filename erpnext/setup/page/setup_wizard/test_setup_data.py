@@ -48,7 +48,7 @@ args = {
 "supplier_3": "Digital Ocean",
 "tax_1": "Service Tax",
 "tax_rate_1": "12.5",
-"timezone": "Asia/Calcutta",
+"timezone": "America/New_York",
 "password": "password",
 "email": "test@erpnext.com",
 }

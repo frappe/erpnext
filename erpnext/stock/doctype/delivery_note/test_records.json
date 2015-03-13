@@ -7,7 +7,7 @@
   "customer_name": "_Test Customer", 
   "items": [
    {
-    "base_amount": 500.0, 
+    "base_amount": 100.0, 
     "base_rate": 100.0, 
     "cost_center": "Main - _TC", 
     "description": "CPU", 
@@ -16,7 +16,7 @@
     "item_code": "_Test Item", 
     "item_name": "_Test Item", 
     "parentfield": "items", 
-    "qty": 5.0, 
+    "qty": 1.0, 
     "rate": 100.0, 
     "stock_uom": "_Test UOM", 
     "warehouse": "_Test Warehouse - _TC"
@@ -24,10 +24,10 @@
   ], 
   "doctype": "Delivery Note", 
   "fiscal_year": "_Test Fiscal Year 2013", 
-  "base_grand_total": 500.0, 
-  "grand_total": 500.0, 
+  "base_grand_total": 100.0, 
+  "grand_total": 100.0, 
   "naming_series": "_T-Delivery Note-", 
-  "base_net_total": 500.0, 
+  "base_net_total": 100.0, 
   "plc_conversion_rate": 1.0, 
   "posting_date": "2013-02-21", 
   "posting_time": "9:00:00", 

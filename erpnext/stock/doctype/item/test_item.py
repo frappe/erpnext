@@ -7,6 +7,7 @@ import frappe
 
 from frappe.test_runner import make_test_records
 from erpnext.stock.doctype.item.item import WarehouseNotSet, DuplicateVariant, ItemTemplateCannotHaveStock
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
@@ -29,17 +30,8 @@ class TestItem(unittest.TestCase):
 
 	def test_template_cannot_have_stock(self):
 		item = self.get_item(10)
-
-		se = frappe.new_doc("Stock Entry")
-		se.purpose = "Material Receipt"
-		se.append("items", {
-			"item_code": item.name,
-			"t_warehouse": "Stores - _TC",
-			"qty": 1,
-			"incoming_rate": 1
-		})
-		se.insert()
-		se.submit()
+		
+		se = make_stock_entry(item_code=item.name, target="Stores - _TC", qty=1, incoming_rate=1)
 
 		item.has_variants = 1
 		self.assertRaises(ItemTemplateCannotHaveStock, item.save)

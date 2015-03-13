@@ -5,7 +5,6 @@
   "conversion_rate": 1.0, 
   "currency": "INR", 
   "doctype": "Purchase Receipt", 
-  "fiscal_year": "_Test Fiscal Year 2013", 
   "base_grand_total": 720.0, 
   "naming_series": "_T-Purchase Receipt-", 
   "base_net_total": 500.0, 
@@ -47,8 +46,6 @@
 	"cost_center": "Main - _TC"
    }
   ], 
-  "posting_date": "2013-02-12", 
-  "posting_time": "15:33:30", 
   "items": [
    {
     "base_amount": 250.0, 
@@ -62,7 +59,7 @@
     "rate": 50.0, 
     "received_qty": 5.0, 
     "rejected_qty": 0.0, 
-    "stock_uom": "Nos", 
+    "stock_uom": "_Test UOM", 
     "uom": "_Test UOM", 
     "warehouse": "_Test Warehouse - _TC",
 	"cost_center": "Main - _TC"
@@ -79,7 +76,7 @@
     "rate": 50.0, 
     "received_qty": 5.0, 
     "rejected_qty": 0.0, 
-    "stock_uom": "Nos", 
+    "stock_uom": "_Test UOM", 
     "uom": "_Test UOM", 
     "warehouse": "_Test Warehouse 1 - _TC",
 	"cost_center": "Main - _TC"
@@ -87,6 +84,8 @@
   ], 
   "supplier": "_Test Supplier"
  }, 
+ 
+ 
  {
   "buying_price_list": "_Test Price List", 
   "company": "_Test Company", 
@@ -112,7 +111,7 @@
     "rate": 500.0, 
     "received_qty": 10.0, 
     "rejected_qty": 0.0, 
-    "stock_uom": "Nos", 
+    "stock_uom": "_Test UOM", 
     "uom": "_Test UOM", 
     "warehouse": "_Test Warehouse - _TC",
 	"cost_center": "Main - _TC"

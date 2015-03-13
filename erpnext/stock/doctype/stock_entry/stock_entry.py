@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.defaults
 
-from frappe.utils import cstr, cint, flt, comma_or, nowdate
+from frappe.utils import cstr, cint, flt, comma_or, nowdate, get_datetime
 
 from frappe import _
 from erpnext.stock.utils import get_incoming_rate
@@ -283,7 +283,7 @@ class StockEntry(StockController):
 					incoming_rate = flt(self.get_incoming_rate(args), self.precision("incoming_rate", d))
 					if incoming_rate > 0:
 						d.incoming_rate = incoming_rate
-
+				
 				d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
 				if not d.t_warehouse:
 					raw_material_cost += flt(d.amount)
@@ -298,9 +298,7 @@ class StockEntry(StockController):
 			number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
 			for d in self.get("items"):
 				if d.bom_no or (d.t_warehouse and number_of_fg_items == 1):
-					operation_cost_per_unit = 0.0
-					if self.production_order:
-						operation_cost_per_unit = self.get_operation_cost_per_unit(d.bom_no, d.qty)
+					operation_cost_per_unit = self.get_operation_cost_per_unit(d.bom_no, d.qty)
 
 					d.incoming_rate = operation_cost_per_unit + (raw_material_cost / flt(d.transfer_qty))
 					d.amount = flt(flt(d.transfer_qty) * flt(d.incoming_rate), self.precision("transfer_qty", d))
@@ -382,7 +380,7 @@ class StockEntry(StockController):
 	def validate_return_reference_doc(self):
 		"""validate item with reference doc"""
 		ref = get_return_doc_and_details(self)
-
+		
 		if ref.doc:
 			# validate docstatus
 			if ref.doc.docstatus != 1:
@@ -394,13 +392,13 @@ class StockEntry(StockController):
 				frappe.throw(_("'Update Stock' for Sales Invoice {0} must be set").format(ref.doc.name), NotUpdateStockError)
 
 			# posting date check
-			ref_posting_datetime = "%s %s" % (cstr(ref.doc.posting_date),
-				cstr(ref.doc.posting_time) or "00:00:00")
-			this_posting_datetime = "%s %s" % (cstr(self.posting_date),
-				cstr(self.posting_time))
-			if this_posting_datetime < ref_posting_datetime:
+			ref_posting_datetime = "%s %s" % (ref.doc.posting_date, ref.doc.posting_time or "00:00:00")
+			this_posting_datetime = "%s %s" % (self.posting_date, self.posting_time)
+			
+			if get_datetime(ref_posting_datetime) < get_datetime(ref_posting_datetime):
 				from frappe.utils.dateutils import datetime_in_user_format
-				frappe.throw(_("Posting timestamp must be after {0}").format(datetime_in_user_format(ref_posting_datetime)))
+				frappe.throw(_("Posting timestamp must be after {0}")
+					.format(datetime_in_user_format(ref_posting_datetime)))
 
 			stock_items = get_stock_items_for_return(ref.doc, ref.parentfields)
 			already_returned_item_qty = self.get_already_returned_item_qty(ref.fieldname)

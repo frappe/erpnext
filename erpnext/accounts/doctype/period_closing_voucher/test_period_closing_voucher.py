@@ -5,43 +5,48 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from erpnext.accounts.doctype.journal_entry.test_journal_entry import test_records as jv_records
+from frappe.utils import flt
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
 class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):
-		# clear GL Entries
-		frappe.db.sql("""delete from `tabGL Entry`""")
-		jv = frappe.copy_doc(jv_records[2])
-		jv.insert()
-		jv.submit()
+		make_journal_entry("_Test Account Bank Account - _TC", "Sales - _TC", 400, 
+			"_Test Cost Center - _TC", submit=True)
+		
+		make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
+			"_Test Account Bank Account - _TC", 600, "_Test Cost Center - _TC", submit=True)
+			
+		profit_or_loss = frappe.db.sql("""select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) as balance
+			from `tabGL Entry` t1, `tabAccount` t2
+			where t1.account = t2.name and ifnull(t2.report_type, '') = 'Profit and Loss'
+			and t2.docstatus < 2 and t2.company = '_Test Company'
+			and t1.posting_date between '2013-01-01' and '2013-12-31'""")
+			
+		profit_or_loss = flt(profit_or_loss[0][0]) if profit_or_loss else 0
+		
+		pcv = self.make_period_closing_voucher()
+		
+		gle_value = frappe.db.sql("""select ifnull(debit, 0) - ifnull(credit, 0)
+			from `tabGL Entry` where voucher_type='Period Closing Voucher' and voucher_no=%s
+			and account = '_Test Account Reserves and Surplus - _TC'""", pcv.name)
+			
+		gle_value = flt(gle_value[0][0]) if gle_value else 0
 
-		jv1 = frappe.copy_doc(jv_records[0])
-		jv1.get("accounts")[1].account = "_Test Account Cost for Goods Sold - _TC"
-		jv1.get("accounts")[1].cost_center = "_Test Cost Center - _TC"
-		jv1.get("accounts")[1].debit = 600.0
-		jv1.get("accounts")[0].credit = 600.0
-		jv1.insert()
-		jv1.submit()
-
-		pcv = frappe.copy_doc(test_records[0])
+		self.assertEqual(gle_value, profit_or_loss)
+		
+	def make_period_closing_voucher(self):
+		pcv = frappe.get_doc({
+			"doctype": "Period Closing Voucher",
+			"closing_account_head": "_Test Account Reserves and Surplus - _TC",
+			"company": "_Test Company",
+			"fiscal_year": "_Test Fiscal Year 2013",
+			"posting_date": "2013-12-31",
+			"remarks": "test"
+		})
 		pcv.insert()
 		pcv.submit()
-
-		gl_entries = frappe.db.sql("""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Period Closing Voucher' and voucher_no=%s
-			order by account asc, debit asc""", pcv.name, as_dict=1)
-
-		self.assertTrue(gl_entries)
-
-		expected_gl_entries = sorted([
-			["_Test Account Reserves and Surplus - _TC", 200.0, 0.0],
-			["_Test Account Cost for Goods Sold - _TC", 0.0, 600.0],
-			["Sales - _TC", 400.0, 0.0]
-		])
-		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_gl_entries[i][0], gle.account)
-			self.assertEquals(expected_gl_entries[i][1], gle.debit)
-			self.assertEquals(expected_gl_entries[i][2], gle.credit)
+		
+		return pcv
 
 
 test_dependencies = ["Customer", "Cost Center"]
