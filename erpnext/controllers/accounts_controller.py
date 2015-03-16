@@ -364,8 +364,11 @@ class AccountsController(TransactionBase):
 			diff = self.net_total_export - flt(last_tax.total / self.conversion_rate,
 				self.precision("grand_total_export"))
 
-			if diff and abs(diff) <= (2.0 / 10**(self.precision("total", last_tax))):
-				last_tax.total = last_tax.total + flt(diff * self.conversion_rate, self.precision("total", last_tax))
+			if diff and abs(diff) <= (2.0 / 10**(self.precision("tax_amount", last_tax))):
+				adjustment_amount = flt(diff * self.conversion_rate, self.precision("tax_amount", last_tax))
+				last_tax.tax_amount += adjustment_amount
+				last_tax.tax_amount_after_discount_amount += adjustment_amount
+				last_tax.total += adjustment_amount
 
 	def calculate_total_advance(self, parenttype, advance_parentfield):
 		if self.doctype == parenttype and self.docstatus < 2:
