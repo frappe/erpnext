@@ -137,7 +137,7 @@ def get_party_account(company, party, party_type):
 			"master_type": party_type, "company": company})
 
 		if not acc_head:
-			create_party_account(party, party_type, company)
+			acc_head = create_party_account(party, party_type, company)
 
 		return acc_head
 
@@ -183,3 +183,6 @@ def create_party_account(party, party_type, company):
 		}).insert(ignore_permissions=True)
 
 		frappe.msgprint(_("Account Created: {0}").format(account.name))
+
+		return account.name
+	return party.strip() + " - " + company_details.abbr
