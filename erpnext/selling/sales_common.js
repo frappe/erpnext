@@ -215,6 +215,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	warehouse: function(doc, cdt, cdn) {
+		var me = this;
+		this.batch_no(doc, cdt, cdn);
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code && item.warehouse) {
 			return this.frm.call({
@@ -456,6 +458,29 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 	},
 
+	manipulate_grand_total_for_inclusive_tax: function() {
+		// if fully inclusive taxes and diff
+		if (this.frm.tax_doclist.length) {
+			var all_inclusive = frappe.utils.all(this.frm.tax_doclist.map(function(d) {
+				return cint(d.included_in_print_rate);
+			}));
+
+			if (all_inclusive) {
+				var last_tax = this.frm.tax_doclist.slice(-1)[0];
+
+				var diff = this.frm.doc.net_total_export
+					- flt(last_tax.total / this.frm.doc.conversion_rate, precision("grand_total_export"));
+
+				if ( diff && Math.abs(diff) <= (2.0 / Math.pow(10, precision("tax_amount", last_tax))) ) {
+					var adjustment_amount = flt(diff * this.frm.doc.conversion_rate, precision("tax_amount", last_tax));
+					last_tax.tax_amount += adjustment_amount;
+					last_tax.tax_amount_after_discount += adjustment_amount;
+					last_tax.total += adjustment_amount;
+				}
+			}
+		}
+	},
+
 	_cleanup: function() {
 		this._super();
 		this.frm.doc.in_words = this.frm.doc.in_words_export = "";
@@ -474,6 +499,21 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			})
 		}
+	},
+
+	batch_no: function(doc, cdt, cdn) {
+		var me = this;
+		var item = frappe.get_doc(cdt, cdn);
+	    return this.frm.call({
+	        method: "erpnext.stock.get_item_details.get_batch_qty",
+	        child: item,
+	        args: {
+	           "batch_no": item.batch_no,
+	           "warehouse": item.warehouse,
+	           "item_code": item.item_code
+	        },
+	         "fieldname": "actual_batch_qty"
+	    });
 	},
 
 	set_dynamic_labels: function() {

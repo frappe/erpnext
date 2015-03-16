@@ -5,7 +5,7 @@ app_publisher = "Web Notes Technologies Pvt. Ltd. and Contributors"
 app_description = "Open Source Enterprise Resource Planning for Small and Midsized Organizations"
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "4.24.0"
+app_version = "4.24.1"
 
 error_report_email = "support@erpnext.com"
 

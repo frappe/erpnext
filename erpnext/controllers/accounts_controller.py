@@ -185,6 +185,7 @@ class AccountsController(TransactionBase):
 
 		self.calculate_net_total()
 		self.calculate_taxes()
+		self.manipulate_grand_total_for_inclusive_tax()
 		self.calculate_totals()
 		self._cleanup()
 
@@ -352,6 +353,22 @@ class AccountsController(TransactionBase):
 			flt(item.get(print_field), self.precision(print_field, item)),
 			self.precision(base_field, item))
 		item.set(base_field, value_in_company_currency)
+
+	def manipulate_grand_total_for_inclusive_tax(self):
+		# if fully inclusive taxes and diff
+		if (self.meta.get_field("net_total_export") and self.tax_doclist
+			and all(cint(t.included_in_print_rate) for t in self.tax_doclist)):
+
+			last_tax = self.tax_doclist[-1]
+
+			diff = self.net_total_export - flt(last_tax.total / self.conversion_rate,
+				self.precision("grand_total_export"))
+
+			if diff and abs(diff) <= (2.0 / 10**(self.precision("tax_amount", last_tax))):
+				adjustment_amount = flt(diff * self.conversion_rate, self.precision("tax_amount", last_tax))
+				last_tax.tax_amount += adjustment_amount
+				last_tax.tax_amount_after_discount_amount += adjustment_amount
+				last_tax.total += adjustment_amount
 
 	def calculate_total_advance(self, parenttype, advance_parentfield):
 		if self.doctype == parenttype and self.docstatus < 2:
