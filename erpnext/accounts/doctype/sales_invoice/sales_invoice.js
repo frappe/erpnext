@@ -201,7 +201,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	items_on_form_rendered: function() {
-		erpnext.setup_serial_no('Available');
+		erpnext.setup_serial_no();
 	}
 
 });

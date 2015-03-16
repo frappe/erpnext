@@ -57,7 +57,7 @@ $.extend(erpnext, {
 		}
 	},
 
-	setup_serial_no: function(status) {
+	setup_serial_no: function() {
 		var grid_row = cur_frm.open_grid_row();
 		if(!grid_row.fields_dict.serial_no ||
 			grid_row.fields_dict.serial_no.get_status()!=="Write") return;
@@ -79,8 +79,7 @@ $.extend(erpnext, {
 							return { 
 								filters: { 
 									item_code:grid_row.doc.item_code ,
-									warehouse:grid_row.doc.warehouse,
-									status: status
+									warehouse:grid_row.doc.warehouse
 								}
 							}
 						}
