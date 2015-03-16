@@ -458,6 +458,26 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 	},
 
+	manipulate_grand_total_for_inclusive_tax: function() {
+		// if fully inclusive taxes and diff
+		if (this.frm.tax_doclist.length) {
+			var all_inclusive = frappe.utils.all(this.frm.tax_doclist.map(function(d) {
+				return cint(d.included_in_print_rate);
+			}));
+
+			if (all_inclusive) {
+				var last_tax = this.frm.tax_doclist.slice(-1)[0];
+
+				var diff = this.frm.doc.net_total_export
+					- flt(last_tax.total / this.frm.doc.conversion_rate, precision("grand_total_export"));
+
+				if ( diff && Math.abs(diff) <= (2.0 / Math.pow(10, precision("total", last_tax)) ) {
+					last_tax.total += flt(diff * this.frm.doc.conversion_rate, precision("total", last_tax));
+				}
+			}
+		}
+	},
+
 	_cleanup: function() {
 		this._super();
 		this.frm.doc.in_words = this.frm.doc.in_words_export = "";
