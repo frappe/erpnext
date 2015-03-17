@@ -119,6 +119,8 @@ class AccountsController(TransactionBase):
 				if item.get("item_code"):
 					args = parent_dict.copy()
 					args.update(item.as_dict())
+					if not args.get("transaction_date"):
+						args["transaction_date"] = args.get("posting_date")
 					ret = get_item_details(args)
 
 					for fieldname, value in ret.items():
@@ -164,7 +166,6 @@ class AccountsController(TransactionBase):
 		taxes_and_charges_doctype = self.meta.get_options("taxes_and_charges")
 		if frappe.db.get_value(taxes_and_charges_doctype, self.taxes_and_charges, "disabled"):
 			frappe.throw(_("{0} '{1}' is disabled").format(taxes_and_charges_doctype, self.taxes_and_charges))
-
 
 	def get_gl_dict(self, args):
 		"""this method populates the common properties of a gl entry record"""

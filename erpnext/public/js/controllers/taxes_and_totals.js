@@ -33,6 +33,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		this.determine_exclusive_rate();
 		this.calculate_net_total();
 		this.calculate_taxes();
+		this.manipulate_grand_total_for_inclusive_tax();
 		this.calculate_totals();
 		this._cleanup();
 		this.show_item_wise_taxes();
@@ -318,6 +319,31 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount +
 			discount_amount_loss, precision("tax_amount", tax));
 		tax.total = flt(tax.total + discount_amount_loss, precision("total", tax));
+	},
+	
+	manipulate_grand_total_for_inclusive_tax: function() {
+		var me = this;
+		// if fully inclusive taxes and diff
+		if (this.frm.doc["taxes"].length) {
+			var all_inclusive = frappe.utils.all(this.frm.doc["taxes"].map(function(d) {
+				return cint(d.included_in_print_rate);
+			}));
+
+			if (all_inclusive) {
+				var last_tax = me.frm.doc["taxes"].slice(-1)[0];
+
+				var diff = me.frm.doc.net_total
+					- flt(last_tax.total / me.frm.doc.conversion_rate, precision("grand_total"));
+
+				if ( diff && Math.abs(diff) <= (2.0 / Math.pow(10, last_tax.precision("tax_amount"))) ) {
+					var adjustment_amount = flt(diff * me.frm.doc.conversion_rate, 
+							last_tax.precision("tax_amount"));
+					last_tax.tax_amount += adjustment_amount;
+					last_tax.tax_amount_after_discount += adjustment_amount;
+					last_tax.total += adjustment_amount;
+				}
+			}
+		}
 	},
 
 	calculate_totals: function() {

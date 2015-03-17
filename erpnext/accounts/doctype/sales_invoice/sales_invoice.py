@@ -613,7 +613,6 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 				%(mcond)s""" % {'company': filters['company'], 'key': searchfield,
 			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype)})
 
-
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
 	def set_missing_values(source, target):
