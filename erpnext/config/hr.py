@@ -47,6 +47,11 @@ def get_data():
 					"name": "Job Opening",
 					"description": _("Opening for a Job."),
 				},
+				{
+					"type": "doctype",
+					"name": "Offer Letter",
+					"description": _("Offer candidate a Job."),
+				},
 			]
 		},
 		{

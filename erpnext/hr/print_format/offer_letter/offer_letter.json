@@ -1,0 +1,16 @@
+{
+ "creation": "2015-03-05 14:34:26.751210", 
+ "custom_format": 0, 
+ "disabled": 0, 
+ "doc_type": "Offer Letter", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "html": "{% if letter_head and not no_letterhead %}\n<div class=\"letter-head\">{{ letter_head }}</div><hr>\n{% endif %}\n<div class=\"page-break\">\n\nDear {{ doc.applicant_name }}, <br><br>\n\nWe are pleased to appoint you in the services of {{ doc.company }} on the terms and conditions detailed in this letter.\n\n<br><br>\n\nYour designation shall be {{ doc.designation }}.\n\n<br>\n{%- for row in doc.offer_terms -%}\n{{ row.offer_term }}: {{ row.value }}\n<br>\n{%- endfor -%}\n<br>\n\nPlease read the detailed terms as below. If you have any queries, feel free to get in touch with us.\nWe look forward to your long and fruitful career association with our organisation.\nIf you decide to join us, 'Welcome to {{ doc.company }} !'\n\n<br>\n<br>\n<p class=\"strong\">\n\nYours truely,\n\n<br><br><br><br>\n\nAuthorized Signatory\n\n<br>{{ doc.company }}</p>\n</div>\n<div>\n\t{{doc.terms}}\n</div>", 
+ "modified": "2015-03-09 18:51:17.400960", 
+ "modified_by": "Administrator", 
+ "name": "Offer Letter", 
+ "owner": "Administrator", 
+ "print_format_builder": 0, 
+ "print_format_type": "Server", 
+ "standard": "Yes"
+}

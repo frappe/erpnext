@@ -1,5 +1,5 @@
 {
- "autoname": "field:applicant_name", 
+ "autoname": "JA-.######", 
  "creation": "2013-01-29 19:25:37", 
  "description": "Applicant for a Job", 
  "docstatus": 0, 
@@ -65,7 +65,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:40.029237", 
+ "modified": "2015-03-09 12:03:18.138226", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Job Applicant", 
@@ -84,5 +84,7 @@
    "share": 1, 
    "write": 1
   }
- ]
+ ], 
+ "search_fields": "applicant_name", 
+ "title_field": "applicant_name"
 }
