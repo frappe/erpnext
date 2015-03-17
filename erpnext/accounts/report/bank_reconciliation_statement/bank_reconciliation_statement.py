@@ -41,7 +41,7 @@ def execute(filters=None):
 		["", _("Outstanding Cheques and Deposits to clear"), total_debit, total_credit, "", "", "", ""],
 		get_balance_row(_("Cheques and Deposits incorrectly cleared"), amounts_not_reflected_in_system),
 		[""]*len(columns),
-		get_balance_row(_("Current Bank Statement balance"), bank_bal)
+		get_balance_row(_("Calculated Bank Statement balance"), bank_bal)
 	]
 
 	return columns, data
