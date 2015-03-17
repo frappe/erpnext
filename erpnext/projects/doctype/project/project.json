@@ -1,5 +1,4 @@
 {
- "allow_attach": 1, 
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:project_name", 
@@ -22,7 +21,7 @@
    "permlevel": 0
   }, 
   {
-   "description": "Project will get saved and will be searchable with project name given", 
+   "description": "", 
    "fieldname": "project_name", 
    "fieldtype": "Data", 
    "label": "Project Name", 
@@ -60,6 +59,7 @@
   {
    "fieldname": "priority", 
    "fieldtype": "Select", 
+   "in_list_view": 0, 
    "label": "Priority", 
    "no_copy": 0, 
    "oldfieldname": "priority", 
@@ -119,34 +119,31 @@
   {
    "fieldname": "sb_milestones", 
    "fieldtype": "Section Break", 
-   "label": "Milestones", 
+   "label": "Tasks", 
    "oldfieldtype": "Section Break", 
    "options": "icon-flag", 
    "permlevel": 0
   }, 
   {
-   "description": "Milestones will be added as Events in the Calendar", 
-   "fieldname": "project_milestones", 
+   "fieldname": "tasks", 
    "fieldtype": "Table", 
-   "label": "Project Milestones", 
-   "no_copy": 0, 
-   "oldfieldname": "project_milestones", 
-   "oldfieldtype": "Table", 
-   "options": "Project Milestone", 
+   "label": "Tasks", 
+   "options": "Project Task", 
    "permlevel": 0, 
-   "search_index": 0
+   "precision": ""
   }, 
   {
-   "fieldname": "percent_milestones_completed", 
+   "fieldname": "percent_complete", 
    "fieldtype": "Percent", 
-   "label": "% Milestones Completed", 
+   "in_list_view": 0, 
+   "label": "% Tasks Completed", 
    "permlevel": 0, 
    "read_only": 1
   }, 
   {
    "fieldname": "section_break0", 
    "fieldtype": "Section Break", 
-   "label": "Project Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-list", 
    "permlevel": 0
@@ -160,14 +157,6 @@
    "oldfieldtype": "Text Editor", 
    "permlevel": 0, 
    "search_index": 0
-  }, 
-  {
-   "fieldname": "percent_complete", 
-   "fieldtype": "Percent", 
-   "in_list_view": 1, 
-   "label": "% Tasks Completed", 
-   "permlevel": 0, 
-   "read_only": 1
   }, 
   {
    "fieldname": "company", 
@@ -273,7 +262,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2014-08-26 14:59:27.052172", 
+ "modified": "2015-02-22 11:17:49.051755", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 
@@ -290,6 +279,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Projects User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

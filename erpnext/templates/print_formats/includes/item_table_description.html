@@ -1,0 +1,19 @@
+{% if doc.in_format_data("image") and doc.get("image") -%}
+<div class="pull-left" style="max-width: 20%; margin-right: 10px;">
+    <img src="{{ doc.image }}" style="max-width: 100%">
+</div>
+{%- endif %}
+<div>
+    {% if doc.in_format_data("item_code") -%}
+    	<div class="primary">{{ doc.item_code }}</div>
+    {%- endif %}
+    {% if (doc.in_format_data("item_name") and
+    	(not doc.in_format_data("item_code") or doc.item_code != doc.item_name)) -%}
+    	<div class="primary">{{ doc.get_formatted("item_name") }}</div>
+    {%- endif %}
+    {% if (doc.in_format_data("description") and doc.description and
+    	((not doc.in_format_data("item_code") and not doc.in_format_data("item_name"))
+    		or not (doc.item_code == doc.item_name == doc.description))) -%}
+    <p>{{ doc.get_formatted("description") }}</p>
+    {%- endif %}
+</div>

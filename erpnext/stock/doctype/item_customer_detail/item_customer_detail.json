@@ -1,6 +1,6 @@
 {
- "autoname": "ITEMCUST/.#####", 
- "creation": "2013-03-08 15:37:16.000000", 
+ "autoname": "hash", 
+ "creation": "2013-03-08 15:37:16", 
  "description": "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -38,10 +38,11 @@
  "idx": 1, 
  "in_create": 0, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:16.000000", 
+ "modified": "2015-02-19 01:07:00.255330", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Customer Detail", 
  "owner": "Administrator", 
+ "permissions": [], 
  "read_only": 0
 }

@@ -7,32 +7,25 @@ services:
   - mysql
 
 install:
-  - sudo service mysql stop
-  - sudo apt-get install python-software-properties
-  - sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xcbcb082a1bb943db
-  - sudo add-apt-repository 'deb http://ftp.osuosl.org/pub/mariadb/repo/5.5/ubuntu precise main'
-  - sudo apt-get update
   - sudo apt-get purge -y mysql-common
-  - sudo apt-get install mariadb-server mariadb-common libmariadbclient-dev
-  - ./ci/fix-mariadb.sh
+  - wget https://raw.githubusercontent.com/frappe/bench/master/install_scripts/setup_frappe.sh
+  - sudo bash setup_frappe.sh --skip-setup-bench --mysql-root-password travis
+  - sudo service redis-server start
+  - rm $TRAVIS_BUILD_DIR/.git/shallow
+  - cd ~/ && bench init frappe-bench --frappe-path https://github.com/frappe/frappe.git --frappe-branch v5.0
+  - cp -r $TRAVIS_BUILD_DIR/test_sites/test_site ~/frappe-bench/sites/
 
-  - sudo apt-get install xfonts-75dpi xfonts-base -y
-  - wget http://downloads.sourceforge.net/project/wkhtmltopdf/0.12.2.1/wkhtmltox-0.12.2.1_linux-precise-amd64.deb
-  - sudo dpkg -i wkhtmltox-0.12.2.1_linux-precise-amd64.deb
-  - CFLAGS=-O0 pip install git+https://github.com/frappe/frappe.git@develop
-  - CFLAGS=-O0 pip install --editable .
+script:
+  - cd ~/frappe-bench
+  - bench get-app erpnext $TRAVIS_BUILD_DIR
+  - bench set-default-site test_site
+  - bench frappe --reinstall
+  - bench frappe --build_website
+  - bench frappe --serve_test &
+  - bench frappe --verbose --run_tests
 
 before_script:
   - mysql -e 'create database test_frappe'
-  - echo "USE mysql;\nCREATE USER 'test_frappe'@'localhost' IDENTIFIED BY 'test_frappe';\nFLUSH PRIVILEGES;\n" | mysql -u root
-  - echo "USE mysql;\nGRANT ALL PRIVILEGES ON \`test_frappe\`.* TO 'test_frappe'@'localhost';\n" | mysql -u root
+  - echo "USE mysql;\nCREATE USER 'test_frappe'@'localhost' IDENTIFIED BY 'test_frappe';\nFLUSH PRIVILEGES;\n" | mysql -u root -ptravis
+  - echo "USE mysql;\nGRANT ALL PRIVILEGES ON \`test_frappe\`.* TO 'test_frappe'@'localhost';\n" | mysql -u root -ptravis
 
-script:
-  - cd ./test_sites/
-  - frappe --use test_site
-  - frappe --reinstall
-  - frappe --install_app erpnext --verbose
-  - frappe -b
-  - frappe --build_website
-  - frappe --serve_test &
-  - frappe --verbose --run_tests --app erpnext

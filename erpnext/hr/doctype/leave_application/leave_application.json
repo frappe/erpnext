@@ -10,7 +10,7 @@
    "default": "Open", 
    "fieldname": "status", 
    "fieldtype": "Select", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Status", 
    "no_copy": 1, 
    "options": "Open\nApproved\nRejected", 
@@ -36,7 +36,7 @@
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Leave Type", 
    "options": "Leave Type", 
    "permlevel": 0, 
@@ -94,7 +94,7 @@
    "fieldname": "employee_name", 
    "fieldtype": "Data", 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Employee Name", 
    "permlevel": 0, 
    "read_only": 1, 
@@ -111,6 +111,7 @@
   {
    "fieldname": "total_leave_days", 
    "fieldtype": "Float", 
+   "in_list_view": 1, 
    "label": "Total Leave Days", 
    "no_copy": 1, 
    "permlevel": 0, 
@@ -191,7 +192,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2014-12-09 16:33:29.626849", 
+ "modified": "2015-02-05 05:11:40.611487", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Application", 
@@ -207,6 +208,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Employee", 
+   "share": 1, 
    "user_permission_doctypes": "[\"Company\",\"Employee\",\"Fiscal Year\",\"Leave Application\"]", 
    "write": 1
   }, 
@@ -224,6 +226,7 @@
    "report": 1, 
    "role": "HR Manager", 
    "set_user_permissions": 1, 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -251,6 +254,7 @@
    "report": 1, 
    "role": "HR User", 
    "set_user_permissions": 1, 
+   "share": 1, 
    "submit": 1, 
    "user_permission_doctypes": "[\"Company\"]", 
    "write": 1
@@ -267,6 +271,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Leave Approver", 
+   "share": 1, 
    "submit": 1, 
    "user_permission_doctypes": "[\"Company\",\"User\"]", 
    "write": 1
@@ -298,5 +303,6 @@
  ], 
  "search_fields": "employee,employee_name,leave_type,from_date,to_date,total_leave_days,fiscal_year", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "employee_name"
 }

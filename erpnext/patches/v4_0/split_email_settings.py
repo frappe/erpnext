@@ -1,10 +1,20 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
 
 def execute():
+	print "WARNING!!!! Email Settings not migrated. Please setup your email again."
+
+	# this will happen if you are migrating very old accounts
+	# comment out this line below and remember to create new Email Accounts
+	# for incoming and outgoing mails
+	raise Exception
+
+	return
+
+
 	frappe.reload_doc("core", "doctype", "outgoing_email_settings")
 	frappe.reload_doc("support", "doctype", "support_email_settings")
 
@@ -12,7 +22,6 @@ def execute():
 	map_outgoing_email_settings(email_settings)
 	map_support_email_settings(email_settings)
 
-	frappe.delete_doc("DocType", "Email Settings")
 
 def map_outgoing_email_settings(email_settings):
 	outgoing_email_settings = frappe.get_doc("Outgoing Email Settings")

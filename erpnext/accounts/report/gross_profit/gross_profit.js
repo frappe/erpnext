@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 frappe.query_reports["Gross Profit"] = {
@@ -21,6 +21,13 @@ frappe.query_reports["Gross Profit"] = {
 			"label": __("To Date"),
 			"fieldtype": "Date",
 			"default": frappe.defaults.get_user_default("year_end_date")
+		},
+		{
+			"fieldname":"group_by",
+			"label": __("Group By"),
+			"fieldtype": "Select",
+			"options": "Invoice\nItem Code\nItem Group\nBrand\nWarehouse\nCustomer\nCustomer Group\nTerritory\nSales Person\nProject",
+			"default": "Invoice"
 		},
 	]
 }

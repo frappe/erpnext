@@ -1,8 +1,33 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 frappe.require("assets/erpnext/js/controllers/stock_controller.js");
+frappe.require("assets/erpnext/js/utils.js");
 frappe.provide("erpnext.stock");
+
+frappe.ui.form.on("Stock Reconciliation", "get_items", function(frm) {
+	frappe.prompt({label:"Warehouse", fieldtype:"Link", options:"Warehouse", reqd: 1},
+		function(data) {
+			frappe.call({
+				method:"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_items",
+				args: {
+					warehouse: data.warehouse,
+					posting_date: frm.doc.posting_date,
+					posting_time: frm.doc.posting_time
+				},
+				callback: function(r) {
+					var items = [];
+					frm.clear_table("items");
+					for(var i=0; i< r.message.length; i++) {
+						var d = frm.add_child("items");
+						$.extend(d, r.message[i]);
+					}
+					frm.refresh_field("items");
+				}
+			});
+		}
+	, __("Get Items"), __("Update"));
+});
 
 erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	onload: function() {
@@ -30,6 +55,8 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 
 	setup: function() {
 		var me = this;
+		this.frm.get_docfield("items").allow_bulk_edit = 1;
+
 		if (sys_defaults.auto_accounting_for_stock) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
 			this.frm.add_fetch("company", "cost_center", "cost_center");
@@ -54,108 +81,20 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	},
 
 	refresh: function() {
-		if(this.frm.doc.docstatus===0) {
-			this.show_download_template();
-			this.show_upload();
-			if(this.frm.doc.reconciliation_json) {
-				this.frm.set_intro(__("You can submit this Stock Reconciliation."));
-			} else {
-				this.frm.set_intro(__("Download the Template, fill appropriate data and attach the modified file."));
-			}
-		} else if(this.frm.doc.docstatus == 1) {
-			this.frm.set_intro(__("Cancelling this Stock Reconciliation will nullify its effect."));
+		if(this.frm.doc.docstatus==1) {
 			this.show_stock_ledger();
 			this.show_general_ledger();
-		} else {
-			this.frm.set_intro("");
-		}
-		this.show_reconciliation_data();
-		this.show_download_reconciliation_data();
-	},
-
-	show_download_template: function() {
-		var me = this;
-		this.frm.add_custom_button(__("Download Template"), function() {
-			this.title = __("Stock Reconcilation Template");
-			frappe.tools.downloadify([[__("Stock Reconciliation")],
-				["----"],
-				[__("Stock Reconciliation can be used to update the stock on a particular date, usually as per physical inventory.")],
-				[__("When submitted, the system creates difference entries to set the given stock and valuation on this date.")],
-				[__("It can also be used to create opening stock entries and to fix stock value.")],
-				["----"],
-				[__("Notes:")],
-				[__("Item Code and Warehouse should already exist.")],
-				[__("You can update either Quantity or Valuation Rate or both.")],
-				[__("If no change in either Quantity or Valuation Rate, leave the cell blank.")],
-				["----"],
-				["Item Code", "Warehouse", "Quantity", "Valuation Rate"]], null, this);
-			return false;
-		}, "icon-download");
-	},
-
-	show_upload: function() {
-		var me = this;
-		var $wrapper = $(cur_frm.fields_dict.upload_html.wrapper).empty();
-
-		// upload
-		frappe.upload.make({
-			parent: $wrapper,
-			args: {
-				method: 'erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.upload'
-			},
-			sample_url: "e.g. http://example.com/somefile.csv",
-			callback: function(attachment, r) {
-				me.frm.set_value("reconciliation_json", JSON.stringify(r.message));
-				me.show_reconciliation_data();
-				me.frm.save();
-			}
-		});
-
-		// rename button
-		$wrapper.find('form input[type="submit"]')
-			.attr('value', 'Upload')
-
-	},
-
-	show_download_reconciliation_data: function() {
-		var me = this;
-		if(this.frm.doc.reconciliation_json) {
-			this.frm.add_custom_button(__("Download Reconcilation Data"), function() {
-				this.title = __("Stock Reconcilation Data");
-				frappe.tools.downloadify(JSON.parse(me.frm.doc.reconciliation_json), null, this);
-				return false;
-			}, "icon-download", "btn-default");
 		}
 	},
 
-	show_reconciliation_data: function() {
-		var $wrapper = $(cur_frm.fields_dict.reconciliation_html.wrapper).empty();
-		if(this.frm.doc.reconciliation_json) {
-			var reconciliation_data = JSON.parse(this.frm.doc.reconciliation_json);
-
-			var _make = function(data, header) {
-				var result = "";
-
-				var _render = header
-					? function(col) { return "<th>" + col + "</th>"; }
-					: function(col) { return "<td>" + col + "</td>"; };
-
-				$.each(data, function(i, row) {
-					result += "<tr>"
-						+ $.map(row, _render).join("")
-						+ "</tr>";
-				});
-				return result;
-			};
-
-			var $reconciliation_table = $("<div style='overflow-x: auto;'>\
-					<table class='table table-striped table-bordered'>\
-					<thead>" + _make([reconciliation_data[0]], true) + "</thead>\
-					<tbody>" + _make(reconciliation_data.splice(1)) + "</tbody>\
-					</table>\
-				</div>").appendTo($wrapper);
-		}
-	},
 });
 
 cur_frm.cscript = new erpnext.stock.StockReconciliation({frm: cur_frm});
+
+cur_frm.cscript.company = function(doc, cdt, cdn) {
+	erpnext.get_fiscal_year(doc.company, doc.posting_date);
+}
+
+cur_frm.cscript.posting_date = function(doc, cdt, cdn){
+	erpnext.get_fiscal_year(doc.company, doc.posting_date);
+}

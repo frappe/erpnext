@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch('employee', 'company', 'company');
@@ -51,8 +51,10 @@ cur_frm.cscript.e_modified_amount = function(doc,dt,dn){
 	calculate_net_pay(doc, dt, dn);
 }
 
-cur_frm.cscript.e_depends_on_lwp = cur_frm.cscript.e_modified_amount;
-
+cur_frm.cscript.e_depends_on_lwp = function(doc,dt,dn){
+	calculate_earning_total(doc, dt, dn, true);
+	calculate_net_pay(doc, dt, dn);
+}
 // Trigger on earning modified amount and depends on lwp
 // ------------------------------------------------------------------------
 cur_frm.cscript.d_modified_amount = function(doc,dt,dn){
@@ -60,18 +62,25 @@ cur_frm.cscript.d_modified_amount = function(doc,dt,dn){
 	calculate_net_pay(doc, dt, dn);
 }
 
-cur_frm.cscript.d_depends_on_lwp = cur_frm.cscript.d_modified_amount;
+cur_frm.cscript.d_depends_on_lwp = function(doc, dt, dn) {
+	calculate_ded_total(doc, dt, dn, true);
+	calculate_net_pay(doc, dt, dn);
+};
 
 // Calculate earning total
 // ------------------------------------------------------------------------
-var calculate_earning_total = function(doc, dt, dn) {
-	var tbl = doc.earning_details || [];
+var calculate_earning_total = function(doc, dt, dn, reset_amount) {
+	var tbl = doc.earnings || [];
 
 	var total_earn = 0;
 	for(var i = 0; i < tbl.length; i++){
 		if(cint(tbl[i].e_depends_on_lwp) == 1) {
-			tbl[i].e_modified_amount = Math.round(tbl[i].e_amount)*(flt(doc.payment_days)/cint(doc.total_days_in_month)*100)/100;			
-			refresh_field('e_modified_amount', tbl[i].name, 'earning_details');
+			tbl[i].e_modified_amount =  Math.round(tbl[i].e_amount)*(flt(doc.payment_days) / 
+				cint(doc.total_days_in_month)*100)/100;			
+			refresh_field('e_modified_amount', tbl[i].name, 'earnings');
+		} else if(reset_amount) {
+			tbl[i].e_modified_amount = tbl[i].e_amount;
+			refresh_field('e_modified_amount', tbl[i].name, 'earnings');
 		}
 		total_earn += flt(tbl[i].e_modified_amount);
 	}
@@ -81,14 +90,17 @@ var calculate_earning_total = function(doc, dt, dn) {
 
 // Calculate deduction total
 // ------------------------------------------------------------------------
-var calculate_ded_total = function(doc, dt, dn) {
-	var tbl = doc.deduction_details || [];
+var calculate_ded_total = function(doc, dt, dn, reset_amount) {
+	var tbl = doc.deductions || [];
 
 	var total_ded = 0;
 	for(var i = 0; i < tbl.length; i++){
 		if(cint(tbl[i].d_depends_on_lwp) == 1) {
 			tbl[i].d_modified_amount = Math.round(tbl[i].d_amount)*(flt(doc.payment_days)/cint(doc.total_days_in_month)*100)/100;
-			refresh_field('d_modified_amount', tbl[i].name, 'deduction_details');
+			refresh_field('d_modified_amount', tbl[i].name, 'deductions');
+		} else if(reset_amount) {
+			tbl[i].d_modified_amount = tbl[i].d_amount;
+			refresh_field('d_modified_amount', tbl[i].name, 'earnings');
 		}
 		total_ded += flt(tbl[i].d_modified_amount);
 	}

@@ -1,6 +1,6 @@
 {
- "autoname": "IMD.#####", 
- "creation": "2013-02-22 01:28:05.000000", 
+ "autoname": "hash", 
+ "creation": "2013-02-22 01:28:05", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -43,7 +43,7 @@
    "fieldname": "schedule_details", 
    "fieldtype": "Section Break", 
    "in_list_view": 0, 
-   "label": "Schedule Details", 
+   "label": "", 
    "permlevel": 0
   }, 
   {
@@ -133,9 +133,10 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-31 12:08:32.000000", 
+ "modified": "2015-02-20 05:07:52.854082", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Maintenance Schedule Item", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }

@@ -1,12 +1,12 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 // render
 frappe.listview_settings['Time Log'] = {
-	add_fields: ["status", "billable", "activity_type", "task", "project", "hours"],
+	add_fields: ["status", "billable", "activity_type", "task", "project", "hours", "time_log_for"],
 	selectable: true,
 	onload: function(me) {
-		me.appframe.add_primary_action(__("Make Time Log Batch"), function() {
+		me.page.add_menu_item(__("Make Time Log Batch"), function() {
 			var selected = me.get_checked_items() || [];
 
 			if(!selected.length) {
@@ -32,7 +32,7 @@ frappe.listview_settings['Time Log'] = {
 				var tlb = frappe.model.get_new_doc("Time Log Batch");
 				$.each(selected, function(i, d) {
 					var detail = frappe.model.get_new_doc("Time Log Batch Detail", tlb,
-						"time_log_batch_details");
+						"time_logs");
 
 					$.extend(detail, {
 						"time_log": d.name,

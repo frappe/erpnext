@@ -1,6 +1,6 @@
 {
- "autoname": "FBD/.######", 
- "creation": "2013-03-07 11:42:57.000000", 
+ "autoname": "hash", 
+ "creation": "2013-03-07 11:42:57", 
  "default_print_format": "Standard", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -17,6 +17,27 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "cb", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "item_name", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Item Name", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "section_break_3", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "description", 
    "fieldtype": "Text", 
    "in_list_view": 1, 
@@ -27,6 +48,35 @@
    "print_width": "300px", 
    "read_only": 1, 
    "width": "300px"
+  }, 
+  {
+   "fieldname": "column_break_2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "hidden": 1, 
+   "label": "Image", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "section_break_4", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "qty", 
@@ -40,23 +90,30 @@
   }, 
   {
    "fieldname": "rate", 
-   "fieldtype": "Float", 
+   "fieldtype": "Currency", 
    "in_list_view": 1, 
    "label": "Rate", 
    "oldfieldname": "standard_rate", 
    "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "read_only": 1
   }, 
   {
-   "fieldname": "amount", 
+   "fieldname": "qty_consumed_per_unit", 
    "fieldtype": "Float", 
+   "hidden": 0, 
    "in_list_view": 1, 
-   "label": "Amount", 
-   "oldfieldname": "amount_as_per_sr", 
-   "oldfieldtype": "Currency", 
+   "label": "Qty Consumed Per Unit", 
+   "no_copy": 0, 
    "permlevel": 0, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_8", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "stock_uom", 
@@ -70,22 +127,24 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "qty_consumed_per_unit", 
-   "fieldtype": "Float", 
-   "hidden": 0, 
+   "fieldname": "amount", 
+   "fieldtype": "Currency", 
    "in_list_view": 1, 
-   "label": "Qty Consumed Per Unit", 
-   "no_copy": 0, 
+   "label": "Amount", 
+   "oldfieldname": "amount_as_per_sr", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "read_only": 1
   }
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:22:57.000000", 
+ "modified": "2015-02-19 01:06:59.399382", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Explosion Item", 
  "owner": "Administrator", 
+ "permissions": [], 
  "read_only": 0
 }

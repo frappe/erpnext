@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -8,12 +8,14 @@ from frappe import _
 from erpnext.utilities.transaction_base import TransactionBase
 
 class MaintenanceVisit(TransactionBase):
+	def get_feed(self):
+		return _("To {0}").format(self.customer_name)
 
 	def get_item_details(self, item_code):
 		return frappe.db.get_value("Item", item_code, ["item_name", "description"], as_dict=1)
 
 	def validate_serial_no(self):
-		for d in self.get('maintenance_visit_details'):
+		for d in self.get('purposes'):
 			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):
 				frappe.throw(_("Serial No {0} does not exist").format(d.serial_no))
 
@@ -21,8 +23,8 @@ class MaintenanceVisit(TransactionBase):
 		self.validate_serial_no()
 
 	def update_customer_issue(self, flag):
-		for d in self.get('maintenance_visit_details'):
-			if d.prevdoc_docname and d.prevdoc_doctype == 'Customer Issue' :
+		for d in self.get('purposes'):
+			if d.prevdoc_docname and d.prevdoc_doctype == 'Warranty Claim' :
 				if flag==1:
 					mntc_date = self.mntc_date
 					service_person = d.service_person
@@ -46,13 +48,13 @@ class MaintenanceVisit(TransactionBase):
 						service_person = ''
 						work_done = ''
 
-				frappe.db.sql("update `tabCustomer Issue` set resolution_date=%s, resolved_by=%s, resolution_details=%s, status=%s where name =%s",(mntc_date,service_person,work_done,status,d.prevdoc_docname))
+				frappe.db.sql("update `tabWarranty Claim` set resolution_date=%s, resolved_by=%s, resolution_details=%s, status=%s where name =%s",(mntc_date,service_person,work_done,status,d.prevdoc_docname))
 
 
 	def check_if_last_visit(self):
-		"""check if last maintenance visit against same sales order/ customer issue"""
+		"""check if last maintenance visit against same sales order/ Warranty Claim"""
 		check_for_docname = None
-		for d in self.get('maintenance_visit_details'):
+		for d in self.get('purposes'):
 			if d.prevdoc_docname:
 				check_for_docname = d.prevdoc_docname
 				#check_for_doctype = d.prevdoc_doctype

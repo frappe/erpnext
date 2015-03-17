@@ -111,22 +111,22 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "target_details", 
+   "fieldname": "targets", 
    "fieldtype": "Table", 
-   "label": "Target Details1", 
+   "label": "Targets", 
    "oldfieldname": "target_details", 
    "oldfieldtype": "Table", 
    "options": "Target Detail", 
    "permlevel": 0
   }, 
   {
-   "description": "Select Budget Distribution to unevenly distribute targets across months.", 
+   "description": "Select Monthly Distribution to unevenly distribute targets across months.", 
    "fieldname": "distribution_id", 
    "fieldtype": "Link", 
    "label": "Target Distribution", 
    "oldfieldname": "distribution_id", 
    "oldfieldtype": "Link", 
-   "options": "Budget Distribution", 
+   "options": "Monthly Distribution", 
    "permlevel": 0, 
    "search_index": 0
   }, 
@@ -142,8 +142,8 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "in_create": 1, 
- "modified": "2014-05-27 03:49:18.900175", 
+ "in_create": 0, 
+ "modified": "2015-02-05 05:11:46.204837", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Person", 
@@ -186,9 +186,10 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }
  ], 
- "search_fields": "name,parent_sales_person"
+ "search_fields": "parent_sales_person"
 }

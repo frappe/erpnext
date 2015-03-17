@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -192,9 +192,6 @@ class SerialNo(StockController):
 			self.set_sales_details(last_sle.get("delivery_sle"))
 			self.set_maintenance_status()
 
-	def on_communication(self):
-		return
-
 def process_serial_no(sle):
 	item_det = get_item_details(sle.item_code)
 	validate_serial_no(sle, item_det)
@@ -281,7 +278,7 @@ def make_serial_no(serial_no, sle):
 	sr = frappe.new_doc("Serial No")
 	sr.warehouse = None
 	sr.dont_update_if_missing.append("warehouse")
-	sr.ignore_permissions = True
+	sr.flags.ignore_permissions = True
 
 	sr.serial_no = serial_no
 	sr.item_code = sle.item_code

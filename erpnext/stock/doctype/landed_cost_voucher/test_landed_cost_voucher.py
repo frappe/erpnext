@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 
@@ -34,8 +34,8 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 		self.assertTrue(gl_entries)
 
-		stock_in_hand_account = pr.get("purchase_receipt_details")[0].warehouse
-		fixed_asset_account = pr.get("purchase_receipt_details")[1].warehouse
+		stock_in_hand_account = pr.get("items")[0].warehouse
+		fixed_asset_account = pr.get("items")[1].warehouse
 
 
 		expected_values = {
@@ -56,8 +56,8 @@ class TestLandedCostVoucher(unittest.TestCase):
 		frappe.db.sql("delete from `tabSerial No` where name in ('SN001', 'SN002', 'SN003', 'SN004', 'SN005')")
 
 		pr = frappe.copy_doc(pr_test_records[0])
-		pr.purchase_receipt_details[0].item_code = "_Test Serialized Item"
-		pr.purchase_receipt_details[0].serial_no = "SN001\nSN002\nSN003\nSN004\nSN005"
+		pr.items[0].item_code = "_Test Serialized Item"
+		pr.items[0].serial_no = "SN001\nSN002\nSN003\nSN004\nSN005"
 		pr.submit()
 
 		serial_no_rate = frappe.db.get_value("Serial No", "SN001", "purchase_rate")
@@ -76,13 +76,13 @@ class TestLandedCostVoucher(unittest.TestCase):
 	def submit_landed_cost_voucher(self, pr):
 		lcv = frappe.new_doc("Landed Cost Voucher")
 		lcv.company = "_Test Company"
-		lcv.set("landed_cost_purchase_receipts", [{
+		lcv.set("purchase_receipts", [{
 			"purchase_receipt": pr.name,
 			"supplier": pr.supplier,
 			"posting_date": pr.posting_date,
-			"grand_total": pr.grand_total
+			"grand_total": pr.base_grand_total
 		}])
-		lcv.set("landed_cost_taxes_and_charges", [{
+		lcv.set("taxes", [{
 			"description": "Insurance Charges",
 			"account": "_Test Account Insurance Charges - _TC",
 			"amount": 50.0

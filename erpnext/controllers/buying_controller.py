@@ -1,23 +1,27 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
-from frappe.utils import flt, rounded
+from frappe.utils import flt
 
 from erpnext.setup.utils import get_company_currency
 from erpnext.accounts.party import get_party_details
+from erpnext.stock.get_item_details import get_conversion_factor
 
 from erpnext.controllers.stock_controller import StockController
 
 class BuyingController(StockController):
 	def __setup__(self):
-		if hasattr(self, "fname"):
-			self.table_print_templates = {
-				self.fname: "templates/print_formats/includes/item_grid.html",
-				"other_charges": "templates/print_formats/includes/taxes.html",
+		if hasattr(self, "taxes"):
+			self.print_templates = {
+				"taxes": "templates/print_formats/includes/taxes.html"
 			}
+
+	def get_feed(self):
+		return _("From {0} | {1} {2}").format(self.supplier_name, self.currency,
+			self.grand_total)
 
 	def validate(self):
 		super(BuyingController, self).validate()
@@ -41,11 +45,11 @@ class BuyingController(StockController):
 
 		self.set_missing_item_details()
 		if self.get("__islocal"):
-			self.set_taxes("other_charges", "taxes_and_charges")
+			self.set_taxes("taxes", "taxes_and_charges")
 
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.supplier:
-			for d in self.get(self.fname):
+			for d in self.get("items"):
 				supplier = frappe.db.get_value("Item", d.item_code, "default_supplier")
 				if supplier:
 					self.supplier = supplier
@@ -55,14 +59,14 @@ class BuyingController(StockController):
 		from erpnext.stock.utils import validate_warehouse_company
 
 		warehouses = list(set([d.warehouse for d in
-			self.get(self.fname) if getattr(d, "warehouse", None)]))
+			self.get("items") if getattr(d, "warehouse", None)]))
 
 		for w in warehouses:
 			validate_warehouse_company(w, self.company)
 
 	def validate_stock_or_nonstock_items(self):
-		if self.meta.get_field("other_charges") and not self.get_stock_items():
-			tax_for_valuation = [d.account_head for d in self.get("other_charges")
+		if self.meta.get_field("taxes") and not self.get_stock_items():
+			tax_for_valuation = [d.account_head for d in self.get("taxes")
 				if d.category in ["Valuation", "Valuation and Total"]]
 			if tax_for_valuation:
 				frappe.throw(_("Tax Category can not be 'Valuation' or 'Valuation and Total' as all items are non-stock items"))
@@ -70,88 +74,10 @@ class BuyingController(StockController):
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
 		company_currency = get_company_currency(self.company)
+		if self.meta.get_field("base_in_words"):
+			self.base_in_words = money_in_words(self.base_grand_total, company_currency)
 		if self.meta.get_field("in_words"):
-			self.in_words = money_in_words(self.grand_total, company_currency)
-		if self.meta.get_field("in_words_import"):
-			self.in_words_import = money_in_words(self.grand_total_import,
-		 		self.currency)
-
-	def calculate_taxes_and_totals(self):
-		self.other_fname = "other_charges"
-		super(BuyingController, self).calculate_taxes_and_totals()
-		self.calculate_total_advance("Purchase Invoice", "advance_allocation_details")
-
-	def calculate_item_values(self):
-		for item in self.item_doclist:
-			self.round_floats_in(item)
-
-			if item.discount_percentage == 100.0:
-				item.rate = 0.0
-			elif not item.rate:
-				item.rate = flt(item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
-					self.precision("rate", item))
-
-			item.amount = flt(item.rate * item.qty, self.precision("amount", item))
-			item.item_tax_amount = 0.0;
-
-			self._set_in_company_currency(item, "amount", "base_amount")
-			self._set_in_company_currency(item, "price_list_rate", "base_price_list_rate")
-			self._set_in_company_currency(item, "rate", "base_rate")
-
-
-	def calculate_net_total(self):
-		self.net_total = self.net_total_import = 0.0
-
-		for item in self.item_doclist:
-			self.net_total += item.base_amount
-			self.net_total_import += item.amount
-
-		self.round_floats_in(self, ["net_total", "net_total_import"])
-
-	def calculate_totals(self):
-		self.grand_total = flt(self.tax_doclist[-1].total if self.tax_doclist else self.net_total)
-
-		self.total_tax = flt(self.grand_total - self.net_total, self.precision("total_tax"))
-
-		self.grand_total = flt(self.grand_total, self.precision("grand_total"))
-
-		if self.meta.get_field("rounded_total"):
-			self.rounded_total = rounded(self.grand_total)
-
-		if self.meta.get_field("other_charges_added"):
-			self.other_charges_added = flt(sum([flt(d.tax_amount) for d in self.tax_doclist
-				if d.add_deduct_tax=="Add" and d.category in ["Valuation and Total", "Total"]]),
-				self.precision("other_charges_added"))
-
-		if self.meta.get_field("other_charges_deducted"):
-			self.other_charges_deducted = flt(sum([flt(d.tax_amount) for d in self.tax_doclist
-				if d.add_deduct_tax=="Deduct" and d.category in ["Valuation and Total", "Total"]]),
-				self.precision("other_charges_deducted"))
-
-		self.grand_total_import = flt(self.grand_total / self.conversion_rate) \
-			if (self.other_charges_added or self.other_charges_deducted) else self.net_total_import
-
-		self.grand_total_import = flt(self.grand_total_import, self.precision("grand_total_import"))
-
-		if self.meta.get_field("rounded_total_import"):
-			self.rounded_total_import = rounded(self.grand_total_import)
-
-		if self.meta.get_field("other_charges_added_import"):
-			self.other_charges_added_import = flt(self.other_charges_added /
-				self.conversion_rate, self.precision("other_charges_added_import"))
-
-		if self.meta.get_field("other_charges_deducted_import"):
-			self.other_charges_deducted_import = flt(self.other_charges_deducted /
-				self.conversion_rate, self.precision("other_charges_deducted_import"))
-
-	def calculate_outstanding_amount(self):
-		if self.doctype == "Purchase Invoice" and self.docstatus == 0:
-			self.total_advance = flt(self.total_advance,
-				self.precision("total_advance"))
-			self.total_amount_to_pay = flt(self.grand_total - flt(self.write_off_amount,
-				self.precision("write_off_amount")), self.precision("total_amount_to_pay"))
-			self.outstanding_amount = flt(self.total_amount_to_pay - self.total_advance,
-				self.precision("outstanding_amount"))
+			self.in_words = money_in_words(self.grand_total, self.currency)
 
 	# update valuation rate
 	def update_valuation_rate(self, parentfield):
@@ -168,18 +94,16 @@ class BuyingController(StockController):
 		for d in self.get(parentfield):
 			if d.item_code and d.item_code in stock_items:
 				stock_items_qty += flt(d.qty)
-				stock_items_amount += flt(d.base_amount)
+				stock_items_amount += flt(d.base_net_amount)
 				last_stock_item_idx = d.idx
 
-		total_valuation_amount = sum([flt(d.tax_amount) for d in
-			self.get("other_charges")
+		total_valuation_amount = sum([flt(d.base_tax_amount_after_discount_amount) for d in self.get("taxes")
 			if d.category in ["Valuation", "Valuation and Total"]])
-
 
 		valuation_amount_adjustment = total_valuation_amount
 		for i, item in enumerate(self.get(parentfield)):
 			if item.item_code and item.qty and item.item_code in stock_items:
-				item_proportion = flt(item.base_amount) / stock_items_amount if stock_items_amount \
+				item_proportion = flt(item.base_net_amount) / stock_items_amount if stock_items_amount \
 					else flt(item.qty) / stock_items_qty
 
 				if i == (last_stock_item_idx - 1):
@@ -192,16 +116,15 @@ class BuyingController(StockController):
 
 				self.round_floats_in(item)
 
-				item.conversion_factor = item.conversion_factor or flt(frappe.db.get_value(
-					"UOM Conversion Detail", {"parent": item.item_code, "uom": item.uom},
-					"conversion_factor")) or 1
+				item.conversion_factor = get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
+
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
 				rm_supp_cost = flt(item.rm_supp_cost) if self.doctype=="Purchase Receipt" else 0.0
 
 				landed_cost_voucher_amount = flt(item.landed_cost_voucher_amount) \
 					if self.doctype == "Purchase Receipt" else 0.0
 
-				item.valuation_rate = ((item.base_amount + item.item_tax_amount + rm_supp_cost
+				item.valuation_rate = ((item.base_net_amount + item.item_tax_amount + rm_supp_cost
 					 + landed_cost_voucher_amount) / qty_in_stock_uom)
 			else:
 				item.valuation_rate = 0.0
@@ -210,19 +133,27 @@ class BuyingController(StockController):
 		if not self.is_subcontracted and self.sub_contracted_items:
 			frappe.throw(_("Please enter 'Is Subcontracted' as Yes or No"))
 
-		if self.doctype == "Purchase Receipt" and self.is_subcontracted=="Yes" \
-			and not self.supplier_warehouse:
+		if self.is_subcontracted == "Yes":
+			if self.doctype == "Purchase Receipt" and not self.supplier_warehouse:
 				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted Purchase Receipt"))
+
+			for item in self.get("items"):
+				if item in self.sub_contracted_items and not item.bom:
+					frappe.throw(_("Please select BOM in BOM field for Item {0}").format(item.item_code))
+
+		else:
+			for item in self.get("items"):
+				if item.bom:
+					item.bom = None
 
 	def create_raw_materials_supplied(self, raw_material_table):
 		if self.is_subcontracted=="Yes":
 			parent_items = []
-			rm_supplied_idx = 0
-			for item in self.get(self.fname):
+			for item in self.get("items"):
 				if self.doctype == "Purchase Receipt":
 					item.rm_supp_cost = 0.0
 				if item.item_code in self.sub_contracted_items:
-					self.update_raw_materials_supplied(item, raw_material_table, rm_supplied_idx)
+					self.update_raw_materials_supplied(item, raw_material_table)
 
 					if [item.item_code, item.name] not in parent_items:
 						parent_items.append([item.item_code, item.name])
@@ -230,11 +161,11 @@ class BuyingController(StockController):
 			self.cleanup_raw_materials_supplied(parent_items, raw_material_table)
 
 		elif self.doctype == "Purchase Receipt":
-			for item in self.get(self.fname):
+			for item in self.get("items"):
 				item.rm_supp_cost = 0.0
 
-	def update_raw_materials_supplied(self, item, raw_material_table, rm_supplied_idx):
-		bom_items = self.get_items_from_default_bom(item.item_code)
+	def update_raw_materials_supplied(self, item, raw_material_table):
+		bom_items = self.get_items_from_bom(item.item_code, item.bom)
 		raw_materials_cost = 0
 
 		for bom_item in bom_items:
@@ -258,15 +189,12 @@ class BuyingController(StockController):
 			rm.required_qty = required_qty
 
 			rm.conversion_factor = item.conversion_factor
-			rm.idx = rm_supplied_idx
 
 			if self.doctype == "Purchase Receipt":
 				rm.consumed_qty = required_qty
 				rm.description = bom_item.description
 				if item.batch_no and not rm.batch_no:
 					rm.batch_no = item.batch_no
-
-			rm_supplied_idx += 1
 
 			# get raw materials rate
 			if self.doctype == "Purchase Receipt":
@@ -307,15 +235,16 @@ class BuyingController(StockController):
 				if d not in delete_list:
 					self.append(raw_material_table, d)
 
-	def get_items_from_default_bom(self, item_code):
+	def get_items_from_bom(self, item_code, bom):
 		bom_items = frappe.db.sql("""select t2.item_code,
 			ifnull(t2.qty, 0) / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
 			t2.rate, t2.stock_uom, t2.name, t2.description
 			from `tabBOM` t1, `tabBOM Item` t2
-			where t2.parent = t1.name and t1.item = %s and t1.is_default = 1
-			and t1.docstatus = 1 and t1.is_active = 1""", item_code, as_dict=1)
+			where t2.parent = t1.name and t1.item = %s
+			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s""", (item_code, bom), as_dict=1)
+
 		if not bom_items:
-			msgprint(_("No default BOM exists for Item {0}").format(item_code), raise_exception=1)
+			msgprint(_("Specified BOM {0} does not exist for Item {1}").format(bom, item_code), raise_exception=1)
 
 		return bom_items
 
@@ -324,7 +253,7 @@ class BuyingController(StockController):
 		if not hasattr(self, "_sub_contracted_items"):
 			self._sub_contracted_items = []
 			item_codes = list(set(item.item_code for item in
-				self.get(self.fname)))
+				self.get("items")))
 			if item_codes:
 				self._sub_contracted_items = [r[0] for r in frappe.db.sql("""select name
 					from `tabItem` where name in (%s) and is_sub_contracted_item='Yes'""" % \
@@ -337,7 +266,7 @@ class BuyingController(StockController):
 		if not hasattr(self, "_purchase_items"):
 			self._purchase_items = []
 			item_codes = list(set(item.item_code for item in
-				self.get(self.fname)))
+				self.get("items")))
 			if item_codes:
 				self._purchase_items = [r[0] for r in frappe.db.sql("""select name
 					from `tabItem` where name in (%s) and is_purchase_item='Yes'""" % \
@@ -345,13 +274,12 @@ class BuyingController(StockController):
 
 		return self._purchase_items
 
-
 	def is_item_table_empty(self):
-		if not len(self.get(self.fname)):
+		if not len(self.get("items")):
 			frappe.throw(_("Item table can not be blank"))
 
 	def set_qty_as_per_stock_uom(self):
-		for d in self.get(self.fname):
+		for d in self.get("items"):
 			if d.meta.get_field("stock_qty") and not d.stock_qty:
 				if not d.conversion_factor:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory"))

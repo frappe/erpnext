@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -52,6 +52,9 @@ def get_conditions(filters):
 		conditions += " and posting_date <= '%s'" % filters["to_date"]
 	else:
 		frappe.throw(_("'To Date' is required"))
+
+	if filters.get("item_code"):
+		conditions += " and item_code = '%s'" % frappe.db.escape(filters.get("item_code"))
 
 	return conditions
 

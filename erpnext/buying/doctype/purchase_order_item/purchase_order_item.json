@@ -1,5 +1,5 @@
 {
- "autoname": "POD/.#####", 
+ "autoname": "hash", 
  "creation": "2013-05-24 19:29:06", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -45,6 +45,12 @@
    "search_index": 1
   }, 
   {
+   "fieldname": "column_break_4", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "schedule_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -61,9 +67,10 @@
    "search_index": 1
   }, 
   {
-   "fieldname": "col_break1", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
+   "fieldname": "section_break_5", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "description", 
@@ -77,6 +84,28 @@
    "read_only": 0, 
    "reqd": 1, 
    "width": "300px"
+  }, 
+  {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "hidden": 1, 
+   "label": "Image", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "quantity_and_rate", 
@@ -98,26 +127,6 @@
    "width": "60px"
   }, 
   {
-   "fieldname": "uom", 
-   "fieldtype": "Link", 
-   "in_list_view": 1, 
-   "label": "UOM", 
-   "oldfieldname": "uom", 
-   "oldfieldtype": "Link", 
-   "options": "UOM", 
-   "permlevel": 0, 
-   "print_hide": 0, 
-   "print_width": "100px", 
-   "read_only": 0, 
-   "reqd": 1, 
-   "width": "100px"
-  }, 
-  {
-   "fieldname": "col_break2", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "stock_uom", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -130,6 +139,26 @@
    "print_hide": 1, 
    "print_width": "100px", 
    "read_only": 1, 
+   "reqd": 1, 
+   "width": "100px"
+  }, 
+  {
+   "fieldname": "col_break2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "uom", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "UOM", 
+   "oldfieldname": "uom", 
+   "oldfieldtype": "Link", 
+   "options": "UOM", 
+   "permlevel": 0, 
+   "print_hide": 0, 
+   "print_width": "100px", 
+   "read_only": 0, 
    "reqd": 1, 
    "width": "100px"
   }, 
@@ -253,6 +282,58 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "section_break_29", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "net_rate", 
+   "fieldtype": "Currency", 
+   "label": "Net Rate", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "net_amount", 
+   "fieldtype": "Currency", 
+   "label": "Net Amount", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_32", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "base_net_rate", 
+   "fieldtype": "Currency", 
+   "label": "Net Rate (Company Currency)", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "base_net_amount", 
+   "fieldtype": "Currency", 
+   "label": "Net Amount (Company Currency)", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "warehouse_and_reference", 
    "fieldtype": "Section Break", 
    "label": "Warehouse and Reference", 
@@ -354,7 +435,7 @@
    "permlevel": 0
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
    "hidden": 1, 
@@ -379,6 +460,16 @@
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "bom", 
+   "fieldtype": "Link", 
+   "label": "BOM", 
+   "no_copy": 1, 
+   "options": "BOM", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
   }, 
   {
    "fieldname": "stock_qty", 
@@ -445,7 +536,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-09-09 05:35:36.346557", 
+ "modified": "2015-03-04 16:12:29.821493", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order Item", 

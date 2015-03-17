@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -21,18 +21,18 @@ class BankReconciliation(Document):
 		dl = frappe.db.sql("""select t1.name, t1.cheque_no, t1.cheque_date, t2.debit,
 				t2.credit, t1.posting_date, t2.against_account, t1.clearance_date
 			from
-				`tabJournal Voucher` t1, `tabJournal Voucher Detail` t2
+				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
 				t2.parent = t1.name and t2.account = %s
 				and t1.posting_date >= %s and t1.posting_date <= %s and t1.docstatus=1
 				and ifnull(t1.is_opening, 'No') = 'No' %s""" %
 				('%s', '%s', '%s', condition), (self.bank_account, self.from_date, self.to_date), as_dict=1)
 
-		self.set('entries', [])
+		self.set('journal_entries', [])
 		self.total_amount = 0.0
 
 		for d in dl:
-			nl = self.append('entries', {})
+			nl = self.append('journal_entries', {})
 			nl.posting_date = d.posting_date
 			nl.voucher_id = d.name
 			nl.cheque_number = d.cheque_no
@@ -45,13 +45,13 @@ class BankReconciliation(Document):
 
 	def update_details(self):
 		vouchers = []
-		for d in self.get('entries'):
+		for d in self.get('journal_entries'):
 			if d.clearance_date:
 				if d.cheque_date and getdate(d.clearance_date) < getdate(d.cheque_date):
 					frappe.throw(_("Clearance date cannot be before check date in row {0}").format(d.idx))
 
-				frappe.db.set_value("Journal Voucher", d.voucher_id, "clearance_date", d.clearance_date)
-				frappe.db.sql("""update `tabJournal Voucher` set clearance_date = %s, modified = %s
+				frappe.db.set_value("Journal Entry", d.voucher_id, "clearance_date", d.clearance_date)
+				frappe.db.sql("""update `tabJournal Entry` set clearance_date = %s, modified = %s
 					where name=%s""", (d.clearance_date, nowdate(), d.voucher_id))
 				vouchers.append(d.voucher_id)
 

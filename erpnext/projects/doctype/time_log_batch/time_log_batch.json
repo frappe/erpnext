@@ -30,7 +30,7 @@
    "default": "Draft", 
    "fieldname": "status", 
    "fieldtype": "Select", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Status", 
    "options": "Draft\nSubmitted\nBilled\nCancelled", 
    "permlevel": 0, 
@@ -40,7 +40,7 @@
    "description": "Will be updated after Sales Invoice is Submitted.", 
    "fieldname": "sales_invoice", 
    "fieldtype": "Link", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Sales Invoice", 
    "options": "Sales Invoice", 
    "permlevel": 0, 
@@ -52,9 +52,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "time_log_batch_details", 
+   "fieldname": "time_logs", 
    "fieldtype": "Table", 
-   "label": "Time Log Batch Details", 
+   "label": "Time Logs", 
    "options": "Time Log Batch Detail", 
    "permlevel": 0, 
    "reqd": 1
@@ -83,7 +83,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-27 03:49:21.339026", 
+ "modified": "2015-02-05 05:11:48.360822", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log Batch", 
@@ -101,6 +101,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Projects User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }

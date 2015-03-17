@@ -26,7 +26,7 @@
    "fieldname": "employee_name", 
    "fieldtype": "Data", 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Employee Name", 
    "oldfieldname": "employee_name", 
    "oldfieldtype": "Data", 
@@ -82,19 +82,6 @@
    "print_hide": 1
   }, 
   {
-   "fieldname": "fiscal_year", 
-   "fieldtype": "Link", 
-   "in_filter": 1, 
-   "in_list_view": 1, 
-   "label": "Fiscal Year", 
-   "oldfieldname": "fiscal_year", 
-   "oldfieldtype": "Data", 
-   "options": "Fiscal Year", 
-   "permlevel": 0, 
-   "reqd": 1, 
-   "search_index": 0
-  }, 
-  {
    "fieldname": "company", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -123,6 +110,19 @@
    "reqd": 1, 
    "search_index": 1, 
    "width": "37%"
+  }, 
+  {
+   "fieldname": "fiscal_year", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Fiscal Year", 
+   "oldfieldname": "fiscal_year", 
+   "oldfieldtype": "Data", 
+   "options": "Fiscal Year", 
+   "permlevel": 0, 
+   "reqd": 1, 
+   "search_index": 0
   }, 
   {
    "fieldname": "total_days_in_month", 
@@ -218,9 +218,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "earning_details", 
+   "fieldname": "earnings", 
    "fieldtype": "Table", 
-   "label": "Salary Structure Earnings", 
+   "label": "Earnings", 
    "oldfieldname": "earning_details", 
    "oldfieldtype": "Table", 
    "options": "Salary Slip Earning", 
@@ -241,7 +241,7 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "deduction_details", 
+   "fieldname": "deductions", 
    "fieldtype": "Table", 
    "label": "Deductions", 
    "oldfieldname": "deduction_details", 
@@ -252,7 +252,7 @@
   {
    "fieldname": "totals", 
    "fieldtype": "Section Break", 
-   "label": "Totals", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0
   }, 
@@ -337,7 +337,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-09-09 05:35:33.807228", 
+ "modified": "2015-02-20 05:12:10.770423", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Slip", 
@@ -354,6 +354,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 1, 
    "user_permission_doctypes": "[\"Branch\",\"Company\",\"Department\",\"Designation\",\"Fiscal Year\",\"Salary Slip\"]", 
    "write": 1
@@ -369,6 +370,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -380,5 +382,6 @@
   }
  ], 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "employee_name"
 }

@@ -8,7 +8,7 @@
   {
    "fieldname": "type_section", 
    "fieldtype": "Section Break", 
-   "label": "Basic Info", 
+   "label": "", 
    "options": "icon-pushpin", 
    "permlevel": 0
   }, 
@@ -17,7 +17,7 @@
    "fieldtype": "Select", 
    "in_list_view": 1, 
    "label": "Type", 
-   "options": "Purchase\nTransfer", 
+   "options": "Purchase\nMaterial Transfer\nMaterial Issue", 
    "permlevel": 0, 
    "reqd": 1
   }, 
@@ -54,7 +54,7 @@
    "width": "150px"
   }, 
   {
-   "description": "Select the relevant company name if you have multiple companies", 
+   "description": "", 
    "fieldname": "company", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -70,18 +70,18 @@
    "width": "150px"
   }, 
   {
-   "fieldname": "items", 
+   "fieldname": "items_section", 
    "fieldtype": "Section Break", 
-   "label": "Items", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-shopping-cart", 
    "permlevel": 0
   }, 
   {
    "allow_on_submit": 0, 
-   "fieldname": "indent_details", 
+   "fieldname": "items", 
    "fieldtype": "Table", 
-   "label": "Material Request Items", 
+   "label": "Items", 
    "no_copy": 0, 
    "oldfieldname": "indent_details", 
    "oldfieldtype": "Table", 
@@ -113,6 +113,7 @@
   {
    "fieldname": "requested_by", 
    "fieldtype": "Data", 
+   "in_list_view": 1, 
    "label": "Requested For", 
    "permlevel": 0
   }, 
@@ -157,7 +158,7 @@
    "fieldname": "status", 
    "fieldtype": "Select", 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Status", 
    "no_copy": 1, 
    "oldfieldname": "status", 
@@ -195,7 +196,7 @@
    "description": "% of materials ordered against this Material Request", 
    "fieldname": "per_ordered", 
    "fieldtype": "Percent", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "% Completed", 
    "no_copy": 1, 
    "oldfieldname": "per_ordered", 
@@ -235,7 +236,7 @@
  "icon": "icon-ticket", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-09-09 05:35:31.735821", 
+ "modified": "2015-02-20 05:07:33.215371", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request", 
@@ -252,6 +253,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Purchase Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -266,6 +268,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -281,6 +284,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -296,6 +300,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Purchase User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }
@@ -303,5 +308,6 @@
  "read_only_onload": 1, 
  "search_fields": "status,transaction_date", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "material_request_type"
 }

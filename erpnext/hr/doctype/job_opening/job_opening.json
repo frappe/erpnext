@@ -33,7 +33,7 @@
  ], 
  "icon": "icon-bookmark", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:12.248194", 
+ "modified": "2015-02-05 05:11:40.083704", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Job Opening", 
@@ -49,6 +49,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "write": 1
   }
  ]

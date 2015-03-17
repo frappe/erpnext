@@ -2,7 +2,7 @@
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:title", 
- "creation": "2013-01-10 16:34:08.000000", 
+ "creation": "2013-01-10 16:34:08", 
  "description": "Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like \"Shipping\", \"Insurance\", \"Handling\" etc.\n\n#### Note\n\nThe tax rate you define here will be the standard tax rate for all **Items**. If there are **Items** that have different rates, they must be added in the **Item Tax** table in the **Item** master.\n\n#### Description of Columns\n\n1. Calculation Type: \n    - This can be on **Net Total** (that is the sum of basic amount).\n    - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.\n    - **Actual** (as mentioned).\n2. Account Head: The Account ledger under which this tax will be booked\n3. Cost Center: If the tax / charge is an income (like shipping) or expense it needs to be booked against a Cost Center.\n4. Description: Description of the tax (that will be printed in invoices / quotes).\n5. Rate: Tax rate.\n6. Amount: Tax amount.\n7. Total: Cumulative total to this point.\n8. Enter Row: If based on \"Previous Row Total\" you can select the row number which will be taken as a base for this calculation (default is the previous row).\n9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.\n10. Add or Deduct: Whether you want to add or deduct the tax.", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -12,6 +12,7 @@
    "fieldname": "title", 
    "fieldtype": "Data", 
    "in_filter": 1, 
+   "in_list_view": 0, 
    "label": "Title", 
    "oldfieldname": "title", 
    "oldfieldtype": "Data", 
@@ -22,20 +23,44 @@
   {
    "fieldname": "is_default", 
    "fieldtype": "Check", 
+   "in_list_view": 1, 
    "label": "Default", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "disabled", 
+   "fieldtype": "Check", 
+   "in_list_view": 1, 
+   "label": "Disabled", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "column_break4", 
+   "fieldtype": "Column Break", 
+   "label": "", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "company", 
    "fieldtype": "Link", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Company", 
    "options": "Company", 
    "permlevel": 0, 
    "reqd": 1
   }, 
   {
-   "fieldname": "other_charges", 
+   "fieldname": "section_break6", 
+   "fieldtype": "Section Break", 
+   "label": "", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "taxes", 
    "fieldtype": "Table", 
    "label": "Purchase Taxes and Charges", 
    "oldfieldname": "purchase_tax_details", 
@@ -46,7 +71,7 @@
  ], 
  "icon": "icon-money", 
  "idx": 1, 
- "modified": "2014-01-29 12:26:38.000000", 
+ "modified": "2015-02-05 05:11:44.223684", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Taxes and Charges Master", 
@@ -76,6 +101,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Purchase Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

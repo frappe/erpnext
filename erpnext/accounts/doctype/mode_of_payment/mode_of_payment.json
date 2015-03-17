@@ -10,7 +10,7 @@
   {
    "fieldname": "mode_of_payment", 
    "fieldtype": "Data", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Mode of Payment", 
    "oldfieldname": "mode_of_payment", 
    "oldfieldtype": "Data", 
@@ -19,29 +19,17 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "company", 
-   "fieldtype": "Link", 
-   "in_list_view": 1, 
-   "label": "Company", 
-   "options": "Company", 
+   "fieldname": "accounts", 
+   "fieldtype": "Table", 
+   "label": "Accounts", 
+   "options": "Mode of Payment Account", 
    "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "description": "Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.", 
-   "fieldname": "default_account", 
-   "fieldtype": "Link", 
-   "ignore_user_permissions": 1, 
-   "in_list_view": 1, 
-   "label": "Default Account", 
-   "options": "Account", 
-   "permlevel": 0, 
-   "read_only": 0
+   "precision": ""
   }
  ], 
  "icon": "icon-credit-card", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:13.846602", 
+ "modified": "2015-02-05 05:11:41.346436", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Mode of Payment", 
@@ -55,6 +43,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 frappe.query_reports["General Ledger"] = {
@@ -28,9 +28,6 @@ frappe.query_reports["General Ledger"] = {
 			"width": "60px"
 		},
 		{
-			"fieldtype": "Break",
-		},
-		{
 			"fieldname":"account",
 			"label": __("Account"),
 			"fieldtype": "Link",
@@ -38,7 +35,7 @@ frappe.query_reports["General Ledger"] = {
 			"get_query": function() {
 				var company = frappe.query_report.filters_by_name.company.get_value();
 				return {
-					"doctype": "Account", 
+					"doctype": "Account",
 					"filters": {
 						"company": company,
 					}
@@ -49,6 +46,9 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname":"voucher_no",
 			"label": __("Voucher No"),
 			"fieldtype": "Data",
+		},
+		{
+			"fieldtype": "Break",
 		},
 		{
 			"fieldname":"group_by_voucher",

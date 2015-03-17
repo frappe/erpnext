@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -30,9 +30,10 @@ def get_ancestors_of(doctype, name):
 	return result or []
 
 def before_tests():
+	frappe.clear_cache()
 	# complete setup if missing
 	from erpnext.setup.page.setup_wizard.setup_wizard import setup_account
-	if not frappe.get_list("Item Group"):
+	if not frappe.get_list("Company"):
 		setup_account({
 			"currency"			:"USD",
 			"first_name"		:"Test",
@@ -47,7 +48,8 @@ def before_tests():
 			"language"			:"english",
 			"company_tagline"	:"Testing",
 			"email"				:"test@erpnext.com",
-			"password"			:"test"
+			"password"			:"test",
+			"chart_of_accounts" : "Standard"
 		})
 
 	frappe.db.sql("delete from `tabLeave Allocation`")

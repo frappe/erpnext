@@ -1,16 +1,7 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// Module CRM
-
-cur_frm.cscript.tname = "Sales Order Item";
-cur_frm.cscript.fname = "sales_order_details";
-cur_frm.cscript.other_fname = "other_charges";
-cur_frm.cscript.sales_team_fname = "sales_team";
-
 {% include 'selling/sales_common.js' %}
-{% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
-{% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
@@ -20,10 +11,10 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		if(doc.docstatus==1) {
 			if(doc.status != 'Stopped') {
 
-				cur_frm.dashboard.add_progress(cint(doc.per_delivered) + __("% Delivered"),
-					doc.per_delivered);
-				cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
-					doc.per_billed);
+				// cur_frm.dashboard.add_progress(cint(doc.per_delivered) + __("% Delivered"),
+				// 	doc.per_delivered);
+				// cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
+				// 	doc.per_billed);
 
 				// delivery note
 				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1)
@@ -52,8 +43,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							cur_frm.add_custom_button(__('Make Maint. Schedule'),
 								this.make_maintenance_schedule, null, "btn-default");
 						}
-
-				cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone", true);
 
 			} else {
 				// un-stop
@@ -195,7 +184,4 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	}
 };
 
-cur_frm.cscript.send_sms = function() {
-	frappe.require("assets/erpnext/js/sms_manager.js");
-	var sms_man = new SMSManager(cur_frm.doc);
-};
+;

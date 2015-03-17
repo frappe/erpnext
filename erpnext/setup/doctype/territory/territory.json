@@ -20,7 +20,7 @@
    "reqd": 1
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "parent_territory", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
@@ -91,7 +91,7 @@
    "search_index": 1
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "old_parent", 
    "fieldtype": "Link", 
    "hidden": 1, 
@@ -114,29 +114,29 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "target_details", 
+   "fieldname": "targets", 
    "fieldtype": "Table", 
-   "label": "Target Details", 
+   "label": "Targets", 
    "oldfieldname": "target_details", 
    "oldfieldtype": "Table", 
    "options": "Target Detail", 
    "permlevel": 0
   }, 
   {
-   "description": "Select Budget Distribution to unevenly distribute targets across months.", 
+   "description": "Select Monthly Distribution to unevenly distribute targets across months.", 
    "fieldname": "distribution_id", 
    "fieldtype": "Link", 
    "label": "Target Distribution", 
    "oldfieldname": "distribution_id", 
    "oldfieldtype": "Link", 
-   "options": "Budget Distribution", 
+   "options": "Monthly Distribution", 
    "permlevel": 0
   }
  ], 
  "icon": "icon-map-marker", 
  "idx": 1, 
- "in_create": 1, 
- "modified": "2014-05-27 03:49:20.981624", 
+ "in_create": 0, 
+ "modified": "2015-02-05 05:11:48.158225", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Territory", 
@@ -153,6 +153,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -196,6 +197,6 @@
    "role": "Maintenance User"
   }
  ], 
- "read_only": 1, 
- "search_fields": "name,parent_territory,territory_manager"
+ "read_only": 0, 
+ "search_fields": "parent_territory,territory_manager"
 }

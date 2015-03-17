@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 frappe.require("assets/erpnext/js/stock_grid_report.js");
@@ -9,7 +9,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 			title: __("Stock Analytics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
-			appframe: wrapper.appframe,
+			page: wrapper.page,
 			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand",
 				"Fiscal Year", "Serial No"],
 			tree_grid: {
@@ -36,7 +36,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	},
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: __("Plot"), field: "check", width: 30,
+			{id: "_check", name: __("Plot"), field: "_check", width: 30,
 				formatter: this.check_formatter},
 			{id: "name", name: __("Item"), field: "name", width: 300,
 				formatter: this.tree_formatter},
@@ -62,12 +62,9 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", fieldname: "warehouse",
 			default_value: __("Select Warehouse...")},
 		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
-		{fieldtype:"Label", label: __("To")},
 		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
 		{fieldtype:"Select", label: __("Range"), fieldname: "range",
-			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: __("Reset Filters"), icon: "icon-filter"}
+			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]}
 	],
 	setup_filters: function() {
 		var me = this;

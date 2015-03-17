@@ -1,0 +1,187 @@
+{
+    "country_code": "us",
+    "name": "Basic Chart of Account",
+	"is_active": "Yes",
+    "tree": {
+        "Assets": {
+            "Current Assets": {
+                "Cash or Cash Equivalents": {
+                    "account_type": "Cash"
+                },
+                "Client Trust Account": {},
+                "Receivable": {
+                    "Account Receivable": {
+                        "account_type": "Receivable"
+                    }
+                }
+            },
+            "Fixed Assets": {
+                "Accumulated Depreciation": {},
+                "Furniture and Equipment": {
+                    "account_type": "Fixed Asset"
+                },
+                "account_type": "Fixed Asset"
+            },
+            "Other Assets": {
+                "Security Deposits Asset": {}
+            },
+            "Other Current Assets": {
+                "Advanced Client Costs": {},
+                "Court Costs": {},
+                "Expert Witness Fees": {},
+                "Filing Fees": {}
+            },
+            "root_type": "Asset"
+        },
+        "Cost of Goods Sold": {
+            "Commissions Paid": {
+                "account_type": "Cost of Goods Sold"
+            },
+            "Equipment Rental for Jobs": {
+                "account_type": "Cost of Goods Sold"
+            },
+            "Freight and Shipping Costs": {
+                "account_type": "Cost of Goods Sold"
+            },
+            "Job Materials Purchased": {
+                "account_type": "Cost of Goods Sold"
+            },
+            "Media Purchased for Clients": {
+                "account_type": "Cost of Goods Sold"
+            },
+            "Merchant Account Fees": {
+                "account_type": "Cost of Goods Sold"
+            },
+            "Other Job Related Costs": {
+                "account_type": "Cost of Goods Sold"
+            },
+            "Purchase Discounts": {
+                "account_type": "Cost of Goods Sold"
+            },
+            "Purchases - Resale Items": {
+                "account_type": "Cost of Goods Sold"
+            },
+            "Subcontracted Services": {
+                "account_type": "Cost of Goods Sold"
+            },
+            "Subcontractors Expense": {
+                "account_type": "Cost of Goods Sold"
+            },
+            "Tools and Small Equipment": {
+                "account_type": "Cost of Goods Sold"
+            },
+            "account_type": "Cost of Goods Sold",
+            "root_type": "Expense"
+        },
+        "Expenses": {
+            "Advertising and Promotion": {},
+            "Automobile Expense": {},
+            "Bank Service Charges": {},
+            "Business Licenses and Permits": {},
+            "Car and Truck Expenses": {},
+            "Charitable Contributions": {},
+            "Chemicals Purchased": {},
+            "Computer and Internet Expenses": {},
+            "Conservation Expenses": {},
+            "Continuing Education": {},
+            "Custom Hire and Contract Labor": {},
+            "Depreciation Expense": {},
+            "Dues and Subscriptions": {},
+            "Equipment Rental": {},
+            "Feed Purchased": {},
+            "Fertilizers and Lime": {},
+            "Freight and Trucking": {},
+            "Gasoline, Fuel and Oil": {},
+            "Insurance Expense": {
+                "General Liability Insurance": {},
+                "Health Insurance": {},
+                "Life and Disability Insurance": {},
+                "Professional Liability": {},
+                "Worker's Compensation": {}
+            },
+            "Interest Expense": {},
+            "Janitorial Expense": {},
+            "Marketing Expense": {},
+            "Meals and Entertainment": {},
+            "Miscellaneous Expense": {},
+            "Office Supplies": {},
+            "Payroll Expenses": {},
+            "Postage and Delivery": {},
+            "Printing and Reproduction": {},
+            "Professional Fees": {},
+            "Rent Expense": {},
+            "Repairs and Maintenance": {},
+            "Seeds and Plants Purchased": {},
+            "Small Tools and Equipment": {},
+            "Storage and Warehousing": {},
+            "Taxes - Property": {},
+            "Telephone Expense": {},
+            "Travel Expense": {},
+            "Uniforms": {},
+            "Utilities": {},
+            "Veterinary, Breeding, Medicine": {},
+            "root_type": "Expense"
+        },
+        "Income": {
+            "Administrative Fees": {},
+            "Agricultural Program Payments": {},
+            "Commission income": {},
+            "Commodity Credit Loans": {},
+            "Cooperative Distributions": {},
+            "Crop Insurance Proceeds": {},
+            "Crop Sales": {},
+            "Custom Hire Income": {},
+            "Farmers Market Sales": {},
+            "Fuel Tax Credits and Other Inc.": {},
+            "Job Income": {},
+            "Legal Fee Income": {},
+            "Livestock Sales": {},
+            "Miscellaneous Income": {},
+            "Rental Income": {},
+            "Sales": {},
+            "Sales Discounts": {},
+            "Service Income": {},
+            "Settlement Income": {},
+            "Shipping and Delivery Income": {},
+            "root_type": "Income"
+        },
+        "Liabilities and Equity": {
+            "Equity": {
+                "Capital Stock": {
+                    "account_type": "Equity"
+                },
+                "Dividends Paid": {
+                    "account_type": "Equity"
+                },
+                "Opening Balance Equity": {
+                    "account_type": "Equity"
+                },
+                "Retained Earnings": {
+                    "account_type": "Equity"
+                },
+                "account_type": "Equity"
+            },
+            "Liabilities": {
+                "Current Liabilities": {
+                    "Payable": {
+                        "Account Payable": {}
+                    }
+                },
+                "Other Current Liabilities": {
+                    "Customer Deposits Received": {},
+                    "Payroll Liabilities": {},
+                    "Sales Tax Payable": {},
+                    "Use Tax Payable": {}
+                }
+            },
+            "root_type": "Liability"
+        },
+        "Other Income": {
+            "Finance Charge Income": {},
+            "Insurance Proceeds Received": {},
+            "Interest Income": {},
+            "Proceeds from Sale of Assets": {},
+            "root_type": "Income"
+        }
+    }
+}

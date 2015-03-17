@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -81,7 +81,7 @@ def save_entries(gl_map, adv_adj, update_outstanding):
 def make_entry(args, adv_adj, update_outstanding):
 	args.update({"doctype": "GL Entry"})
 	gle = frappe.get_doc(args)
-	gle.ignore_permissions = 1
+	gle.flags.ignore_permissions = 1
 	gle.insert()
 	gle.run_method("on_update_with_args", adv_adj, update_outstanding)
 	gle.submit()
@@ -91,9 +91,9 @@ def validate_total_debit_credit(total_debit, total_credit):
 		frappe.throw(_("Debit and Credit not equal for this voucher. Difference is {0}.").format(total_debit - total_credit))
 
 def validate_account_for_auto_accounting_for_stock(gl_map):
-	if gl_map[0].voucher_type=="Journal Voucher":
+	if gl_map[0].voucher_type=="Journal Entry":
 		aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
-			where account_type = 'Warehouse' and ifnull(master_name, '')!=''""")]
+			where account_type = 'Warehouse' and ifnull(warehouse, '')!=''""")]
 
 		for entry in gl_map:
 			if entry.account in aii_accounts:
@@ -121,5 +121,5 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		validate_expense_against_budget(entry)
 
 		if entry.get("against_voucher") and update_outstanding == 'Yes':
-			update_outstanding_amt(entry["account"], entry.get("against_voucher_type"),
+			update_outstanding_amt(entry["account"], entry.get("party_type"), entry.get("party"), entry.get("against_voucher_type"),
 				entry.get("against_voucher"), on_cancel=True)

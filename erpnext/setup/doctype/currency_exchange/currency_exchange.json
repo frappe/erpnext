@@ -35,7 +35,7 @@
  ], 
  "icon": "icon-exchange", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:09.092389", 
+ "modified": "2015-02-05 05:11:36.356182", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Currency Exchange", 
@@ -50,6 +50,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts Manager", 
+   "share": 1, 
    "write": 1
   }, 
   {

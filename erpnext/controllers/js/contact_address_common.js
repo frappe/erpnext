@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
@@ -20,7 +20,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 				docname = last_route.slice(2).join("/");
 
 			if(["Customer", "Quotation", "Sales Order", "Sales Invoice", "Delivery Note",
-				"Installation Note", "Opportunity", "Customer Issue", "Maintenance Visit",
+				"Installation Note", "Opportunity", "Warranty Claim", "Maintenance Visit",
 				"Maintenance Schedule"]
 				.indexOf(doctype)!==-1) {
 				var refdoc = frappe.get_doc(doctype, docname);

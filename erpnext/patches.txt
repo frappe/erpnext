@@ -36,7 +36,6 @@ erpnext.patches.v4_0.countrywise_coa
 execute:frappe.delete_doc("DocType", "MIS Control")
 execute:frappe.delete_doc("Page", "Financial Statements")
 execute:frappe.delete_doc("DocType", "Stock Ledger")
-execute:frappe.db.sql("update `tabJournal Voucher` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
 execute:frappe.delete_doc("DocType", "Grade")
 execute:frappe.db.sql("delete from `tabWebsite Item Group` where ifnull(item_group, '')=''")
 execute:frappe.delete_doc("Print Format", "SalesInvoice")
@@ -52,8 +51,8 @@ erpnext.patches.v4_0.fix_address_template
 erpnext.patches.v4_0.reset_permissions_for_masters
 
 erpnext.patches.v4_0.update_tax_amount_after_discount
-execute:frappe.reset_perms("GL Entry") #2014-06-09
-execute:frappe.reset_perms("Stock Ledger Entry") #2014-06-09
+execute:frappe.permissions.reset_perms("GL Entry") #2014-06-09
+execute:frappe.permissions.reset_perms("Stock Ledger Entry") #2014-06-09
 erpnext.patches.v4_0.create_custom_fields_for_india_specific_fields
 erpnext.patches.v4_0.save_default_letterhead
 erpnext.patches.v4_0.update_custom_print_formats_for_renamed_fields
@@ -64,7 +63,6 @@ erpnext.patches.v4_0.update_users_report_view_settings
 erpnext.patches.v4_0.set_pricing_rule_for_buying_or_selling
 erpnext.patches.v4_0.set_naming_series_property_setter
 erpnext.patches.v4_1.set_outgoing_email_footer
-erpnext.patches.v4_1.fix_jv_remarks
 erpnext.patches.v4_1.fix_sales_order_delivered_status
 erpnext.patches.v4_1.fix_delivery_and_billing_status
 execute:frappe.db.sql("update `tabAccount` set root_type='Liability' where root_type='Income' and report_type='Balance Sheet'")
@@ -80,7 +78,6 @@ execute:frappe.delete_doc("DocType", "Landed Cost Wizard")
 erpnext.patches.v4_2.default_website_style
 erpnext.patches.v4_2.set_company_country
 erpnext.patches.v4_2.update_sales_order_invoice_field_name
-erpnext.patches.v4_2.cost_of_production_cycle
 erpnext.patches.v4_2.seprate_manufacture_and_repack
 execute:frappe.delete_doc("Report", "Warehouse-Wise Stock Balance")
 execute:frappe.delete_doc("DocType", "Purchase Request")
@@ -88,11 +85,51 @@ execute:frappe.delete_doc("DocType", "Purchase Request Item")
 erpnext.patches.v4_2.recalculate_bom_cost
 erpnext.patches.v4_2.fix_gl_entries_for_stock_transactions
 erpnext.patches.v4_2.update_requested_and_ordered_qty
+erpnext.patches.v4_4.make_email_accounts
 execute:frappe.delete_doc("DocType", "Contact Control")
-erpnext.patches.v4_2.recalculate_bom_costs
 erpnext.patches.v4_2.discount_amount
+erpnext.patches.v4_2.reset_bom_costs
+erpnext.patches.v5_0.update_frozen_accounts_permission_role
+erpnext.patches.v5_0.update_dn_against_doc_fields
+execute:frappe.db.sql("update `tabMaterial Request` set material_request_type = 'Material Transfer' where material_request_type = 'Transfer'")
+execute:frappe.reload_doc('stock', 'doctype', 'item')
+execute:frappe.db.sql("update `tabItem` i set apply_warehouse_wise_reorder_level=1, re_order_level=0, re_order_qty=0 where exists(select name from `tabItem Reorder` where parent=i.name)")
+execute:frappe.rename_doc("DocType", "Support Ticket", "Issue", force=True)
+erpnext.patches.v5_0.set_default_company_in_bom
+erpnext.patches.v5_0.capacity_planning
+execute:frappe.reload_doc('crm', 'doctype', 'lead')
+execute:frappe.reload_doc('crm', 'doctype', 'opportunity')
+erpnext.patches.v5_0.rename_table_fieldnames
+execute:frappe.db.sql("update `tabJournal Entry` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
+erpnext.patches.v4_2.party_model
+erpnext.patches.v4_1.fix_jv_remarks
 erpnext.patches.v4_2.update_landed_cost_voucher
 erpnext.patches.v4_2.set_item_has_batch
 erpnext.patches.v4_2.update_stock_uom_for_dn_in_sle
+erpnext.patches.v5_0.recalculate_total_amount_in_jv
+erpnext.patches.v5_0.remove_shopping_cart_app
+erpnext.patches.v5_0.update_companywise_payment_account
+erpnext.patches.v5_0.remove_birthday_events
+erpnext.patches.v5_0.update_item_name_in_bom
+erpnext.patches.v5_0.rename_customer_issue
+erpnext.patches.v5_0.rename_total_fields
+erpnext.patches.v5_0.new_crm_module
+erpnext.patches.v5_0.rename_customer_issue
+erpnext.patches.v5_0.update_material_transfer_for_manufacture
+erpnext.patches.v5_0.manufacturing_activity_type
+erpnext.patches.v5_0.update_item_description_and_image
+erpnext.patches.v5_0.update_material_transferred_for_manufacturing
+erpnext.patches.v5_0.stock_entry_update_value
+erpnext.patches.v5_0.convert_stock_reconciliation
+erpnext.patches.v5_0.update_projects
+erpnext.patches.v5_0.item_patches
+erpnext.patches.v5_0.update_journal_entry_title
+erpnext.patches.v5_0.taxes_and_totals_in_party_currency
+erpnext.patches.v5_0.replace_renamed_fields_in_custom_scripts_and_print_formats
+erpnext.patches.v5_0.update_from_bom
+erpnext.patches.v5_0.update_account_types
+erpnext.patches.v5_0.update_sms_sender
+erpnext.patches.v5_0.set_appraisal_remarks
+erpnext.patches.v5_0.update_time_log_title
 erpnext.patches.v4_2.repost_reserved_qty
 erpnext.patches.v4_2.repost_sle_for_si_with_no_warehouse

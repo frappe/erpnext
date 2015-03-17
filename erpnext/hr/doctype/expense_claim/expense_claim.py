@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -7,12 +7,17 @@ from frappe import _
 from frappe.utils import get_fullname
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
+from erpnext.accounts.utils import validate_fiscal_year
 
 class InvalidExpenseApproverError(frappe.ValidationError): pass
 
 class ExpenseClaim(Document):
+	def get_feed(self):
+		return _("{0}: From {0} for {1}").format(self.approval_status,
+			self.employee_name, self.total_claimed_amount)
+
 	def validate(self):
-		self.validate_fiscal_year()
+		validate_fiscal_year(self.posting_date, self.fiscal_year, _("Posting Date"), self)
 		self.validate_exp_details()
 		self.validate_expense_approver()
 		set_employee_name(self)
@@ -21,12 +26,8 @@ class ExpenseClaim(Document):
 		if self.approval_status=="Draft":
 			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
 
-	def validate_fiscal_year(self):
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.posting_date, self.fiscal_year, "Posting Date")
-
 	def validate_exp_details(self):
-		if not self.get('expense_voucher_details'):
+		if not self.get('expenses'):
 			frappe.throw(_("Please add expense voucher details"))
 
 	def validate_expense_approver(self):

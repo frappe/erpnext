@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -8,47 +8,30 @@ from frappe import msgprint, _, throw
 from frappe.model.document import Document
 
 status_map = {
-	"Contact": [
-		["Replied", "communication_sent"],
-		["Open", "communication_received"]
-	],
-	"Job Applicant": [
-		["Replied", "communication_sent"],
-		["Open", "communication_received"]
-	],
 	"Lead": [
-		["Replied", "communication_sent"],
 		["Converted", "has_customer"],
 		["Opportunity", "has_opportunity"],
-		["Open", "communication_received"],
 	],
 	"Opportunity": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
 		["Lost", "eval:self.status=='Lost'"],
 		["Quotation", "has_quotation"],
-		["Replied", "communication_sent"],
+		["Converted", "has_ordered_quotation"],
 		["Cancelled", "eval:self.docstatus==2"],
-		["Open", "communication_received"],
 	],
 	"Quotation": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
 		["Lost", "eval:self.status=='Lost'"],
 		["Ordered", "has_sales_order"],
-		["Replied", "communication_sent"],
 		["Cancelled", "eval:self.docstatus==2"],
-		["Open", "communication_received"],
 	],
 	"Sales Order": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
 		["Stopped", "eval:self.status=='Stopped'"],
 		["Cancelled", "eval:self.docstatus==2"],
-	],
-	"Support Ticket": [
-		["Replied", "communication_sent"],
-		["Open", "communication_received"]
 	],
 }
 
@@ -85,34 +68,13 @@ class StatusUpdater(Document):
 					break
 
 			if self.status != _status:
-				self.add_comment("Label", self.status)
+				self.add_comment("Label", _(self.status))
 
 			if update:
 				frappe.db.set_value(self.doctype, self.name, "status", self.status)
 
-	def on_communication(self):
-		if not self.get("communications"): return
-		self.communication_set = True
-		self.get("communications").sort(key=lambda d: d.creation)
-		self.set_status(update=True)
-		del self.communication_set
-
-	def communication_received(self):
-		if getattr(self, "communication_set", False):
-			last_comm = self.get("communications")
-			if last_comm:
-				return last_comm[-1].sent_or_received == "Received"
-
-	def communication_sent(self):
-		if getattr(self, "communication_set", False):
-			last_comm = self.get("communications")
-			if last_comm:
-				return last_comm[-1].sent_or_received == "Sent"
-
 	def validate_qty(self):
-		"""
-			Validates qty at row level
-		"""
+		"""Validates qty at row level"""
 		self.tolerance = {}
 		self.global_tolerance = None
 
@@ -190,16 +152,21 @@ class StatusUpdater(Document):
 					args['second_source_condition'] = ""
 					if args.get('second_source_dt') and args.get('second_source_field') \
 							and args.get('second_join_field'):
+						if not args.get("second_source_extra_cond"):
+							args["second_source_extra_cond"] = ""
+
 						args['second_source_condition'] = """ + ifnull((select sum(%(second_source_field)s)
 							from `tab%(second_source_dt)s`
 							where `%(second_join_field)s`="%(detail_id)s"
-							and (docstatus=1)), 0)""" % args
+							and (`tab%(second_source_dt)s`.docstatus=1) %(second_source_extra_cond)s), 0) """ % args
 
 					if args['detail_id']:
+						if not args.get("extra_cond"): args["extra_cond"] = ""
+
 						frappe.db.sql("""update `tab%(target_dt)s`
 							set %(target_field)s = (select sum(%(source_field)s)
 								from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s"
-								and (docstatus=1 %(cond)s)) %(second_source_condition)s
+								and (docstatus=1 %(cond)s) %(extra_cond)s) %(second_source_condition)s
 							where name='%(detail_id)s'""" % args)
 
 			# get unique transactions to update
@@ -208,12 +175,13 @@ class StatusUpdater(Document):
 					args['name'] = name
 
 					# update percent complete in the parent table
-					frappe.db.sql("""update `tab%(target_parent_dt)s`
-						set %(target_parent_field)s = (select sum(if(%(target_ref_field)s >
-							ifnull(%(target_field)s, 0), %(target_field)s,
-							%(target_ref_field)s))/sum(%(target_ref_field)s)*100
-							from `tab%(target_dt)s` where parent="%(name)s") %(modified_cond)s
-						where name='%(name)s'""" % args)
+					if args.get('target_parent_field'):
+						frappe.db.sql("""update `tab%(target_parent_dt)s`
+							set %(target_parent_field)s = (select sum(if(%(target_ref_field)s >
+								ifnull(%(target_field)s, 0), %(target_field)s,
+								%(target_ref_field)s))/sum(%(target_ref_field)s)*100
+								from `tab%(target_dt)s` where parent="%(name)s") %(modified_cond)s
+							where name='%(name)s'""" % args)
 
 					# update field
 					if args.get('status_field'):
@@ -228,9 +196,9 @@ class StatusUpdater(Document):
 		ref_fieldname = ref_dt.lower().replace(" ", "_")
 		zero_amount_refdoc = []
 		all_zero_amount_refdoc = frappe.db.sql_list("""select name from `tab%s`
-			where docstatus=1 and net_total = 0""" % ref_dt)
+			where docstatus=1 and base_net_total = 0""" % ref_dt)
 
-		for item in self.get("entries"):
+		for item in self.get("items"):
 			if item.get(ref_fieldname) \
 				and item.get(ref_fieldname) in all_zero_amount_refdoc \
 				and item.get(ref_fieldname) not in zero_amount_refdoc:

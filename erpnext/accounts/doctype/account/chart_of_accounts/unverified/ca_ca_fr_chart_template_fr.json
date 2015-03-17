@@ -1,0 +1,154 @@
+{
+    "country_code": "ca",
+    "name": "Plan comptable pour les provinces francophones",
+	"is_active": "Yes",
+    "tree": {
+        "ACTIF": {
+            "ACTIFS COURANTS": {
+                "CERTIFICATS DE D\u00c9P\u00d4TS": {},
+                "COMPTES CLIENTS": {
+                    "Comptes clients": {
+                        "account_type": "Receivable"
+                    },
+                    "PROVISION POUR CR\u00c9ANCES DOUTEUSES": {}
+                },
+                "ENCAISSE": {},
+                "FRAIS PAY\u00c9S D'AVANCE": {},
+                "IMP\u00d4TS \u00c0 RECEVOIR": {
+                    "TPS \u00e0 recevoir": {},
+                    "TVH \u00e0 recevoir": {
+                        "TVH \u00e0 recevoir - 13%": {},
+                        "TVH \u00e0 recevoir - 14%": {},
+                        "TVH \u00e0 recevoir - 15%": {}
+                    },
+                    "TVP/TVQ \u00e0 recevoir": {}
+                },
+                "PLACEMENTS D\u00c9TENUS \u00c0 DES FINS DE TRANSACTION": {},
+                "STOCKS": {
+                    "Stock": {},
+                    "Stock exp\u00e9di\u00e9 non-factur\u00e9": {}
+                },
+                "TR\u00c9SORERIE OU \u00c9QUIVALENTS DE TR\u00c9SORERIE": {}
+            },
+            "ACTIFS NON-COURANTS": {
+                "IMMOBILISATIONS CORPORELLES": {
+                    "AMORTISSEMENTS CUMUL\u00c9S": {}
+                },
+                "IMMOBILISATIONS INCORPORELLES": {
+                    "BREVETS, MARQUES DE COMMERCE ET DROITS D'AUTEURS": {}
+                },
+                "PLACEMENTS DISPONIBLES \u00c0 LA VENTE": {}
+            },
+            "root_type": "Asset"
+        },
+        "CAPITAUX PROPRES": {
+            "AUTRES \u00c9L\u00c9MENTS DU R\u00c9SULTAT GLOBAL": {},
+            "B\u00c9N\u00c9FICES NON R\u00c9PARTIS": {},
+            "CAPITAL-ACTIONS": {},
+            "DIVIDENDES": {},
+            "PRIMES": {},
+            "SURPLUS D'APPORT": {},
+            "root_type": "Equity",
+            "\u00c9CARTS DE CONVERSION": {}
+        },
+        "CHARGES": {
+            "CHARGES D'EXPLOITATION": {
+                "AUTRES FRAIS D'EXPLOITATION": {},
+                "CO\u00dbT DES PRODUITS VENDUS": {
+                    "Achats": {},
+                    "Achats dans des provinces harmonis\u00e9es": {},
+                    "Achats dans des provinces non-harmonis\u00e9es": {},
+                    "Achats \u00e0 l'\u00e9tranger": {}
+                },
+                "FRAIS DE RECHERCHE ET D\u00c9VELOPPEMENT": {},
+                "FRAIS G\u00c9N\u00c9RAUX": {},
+                "FRAIS SUR VENTE": {},
+                "SALAIRES ET CHARGES SOCIALES": {
+                    "Assurance Emploi": {},
+                    "Assurance parentale": {},
+                    "Fonds des services de sant\u00e9": {},
+                    "Imp\u00f4t f\u00e9d\u00e9ral": {},
+                    "Imp\u00f4t provincial": {},
+                    "Normes du travail": {},
+                    "Rentes": {},
+                    "Salaires": {},
+                    "Sant\u00e9 et s\u00e9curit\u00e9 au travail": {},
+                    "Vacances": {}
+                }
+            },
+            "FRAIS NON LI\u00c9S \u00c0 L'EXPLOITATION": {
+                "AUTRES FRAIS NON LI\u00c9S \u00c0 L'EXPLOITATION": {},
+                "INT\u00c9R\u00caTS D\u00c9BITEURS": {}
+            },
+            "root_type": "Expense"
+        },
+        "PASSIF": {
+            "PASSIFS COURANTS": {
+                "AUTRES COMPTES CR\u00c9DITEURS": {},
+                "DETTES FINANCI\u00c8RES COURANTES": {},
+                "FOURNISSEURS ET COMPTES RATTACH\u00c9S": {
+                    "Comptes fournisseurs": {
+                        "account_type": "Payable"
+                    }
+                },
+                "IMP\u00d4TS LI\u00c9S AUX SALAIRES \u00c0 PAYER": {
+                    "AGENCE DU REVENU DU CANADA": {
+                        "ASSURANCE EMPLOI \u00c0 PAYER": {
+                            "AE - Contribution de l'employeur": {},
+                            "AE - Contribution des employ\u00e9s": {}
+                        },
+                        "Imp\u00f4t f\u00e9d\u00e9ral sur les revenus": {}
+                    },
+                    "AGENCE DU REVENU PROVINCIAL": {
+                        "ASSURANCE PARENTALE \u00c0 PAYER": {
+                            "AP - Contribution de l'employeur": {},
+                            "AP - Contribution des employ\u00e9s": {}
+                        },
+                        "Fond des Services de Sant\u00e9 \u00e0 payer": {},
+                        "Imp\u00f4t provincial sur les revenus": {},
+                        "Normes du Travail \u00e0 payer": {},
+                        "RENTES \u00c0 PAYER": {
+                            "Rentes - Contribution de l'employeur": {},
+                            "Rentes - Contribution des employ\u00e9s": {}
+                        },
+                        "Sant\u00e9 et S\u00e9curit\u00e9 au Travail \u00e0 payer": {}
+                    }
+                },
+                "IMP\u00d4TS \u00c0 PAYER": {
+                    "TPS \u00e0 payer": {},
+                    "TVH \u00e0 payer": {
+                        "TVH \u00e0 payer - 13%": {},
+                        "TVH \u00e0 payer - 14%": {},
+                        "TVH \u00e0 payer - 15%": {}
+                    },
+                    "TVP/TVQ \u00e0 payer": {}
+                },
+                "PASSIFS DE STOCK": {
+                    "Stock re\u00e7u non factur\u00e9": {}
+                },
+                "PASSIFS LI\u00c9S AUX ACTIFS D\u00c9TENUS EN VUE DE LEUR CESSION": {}
+            },
+            "PASSIFS NON-COURANTS": {
+                "AUTRES PASSIFS NON-COURANTS": {},
+                "DETTES FINANCI\u00c8RES NON-COURANTES": {},
+                "IMP\u00d4TS DIFF\u00c9R\u00c9S": {},
+                "PROVISIONS POUR RETRAITES ET AUTRES AVANTAGES POST\u00c9RIEURS \u00c0 L'EMPLOI": {}
+            },
+            "root_type": "Liability"
+        },
+        "PRODUITS": {
+            "PRODUITS D'EXPLOITATION": {
+                "AUTRES PRODUITS D'EXPLOITATION": {},
+                "Ventes": {},
+                "Ventes avec des provinces harmonis\u00e9es": {},
+                "Ventes avec des provinces non-harmonis\u00e9es": {},
+                "Ventes \u00e0 l'\u00e9tranger": {}
+            },
+            "PRODUITS NON LI\u00c9S \u00c0 L'EXPLOITATION": {
+                "AUTRES PRODUITS NON LI\u00c9S \u00c0 L'EXPLOITATION": {},
+                "INT\u00c9R\u00caTS": {}
+            },
+            "root_type": "Income"
+        }
+    }
+}

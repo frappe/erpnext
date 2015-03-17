@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("POS Setting", "onload", function(frm) {
@@ -77,4 +77,25 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 
 cur_frm.fields_dict.user.get_query = function(doc,cdt,cdn) {
 	return{	query:"frappe.core.doctype.user.user.user_query"}
+}
+
+cur_frm.fields_dict.write_off_account.get_query = function(doc) {
+	return{
+		filters:{
+			'report_type': 'Profit and Loss',
+			'group_or_ledger': 'Ledger',
+			'company': doc.company
+		}
+	}
+}
+
+// Write off cost center
+//-----------------------
+cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
+	return{
+		filters:{
+			'group_or_ledger': 'Ledger',
+			'company': doc.company
+		}
+	}
 }

@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 frappe.query_reports["Accounts Receivable"] = {
@@ -11,21 +11,10 @@ frappe.query_reports["Accounts Receivable"] = {
 			"default": frappe.defaults.get_user_default("company")
 		},
 		{
-			"fieldname":"account",
-			"label": __("Account"),
+			"fieldname":"customer",
+			"label": __("Customer"),
 			"fieldtype": "Link",
-			"options": "Account",
-			"get_query": function() {
-				var company = frappe.query_report.filters_by_name.company.get_value();
-				return {
-					"query": "erpnext.controllers.queries.get_account_list", 
-					"filters": {
-						"report_type": "Balance Sheet",
-						"company": company,
-						"master_type": "Customer"
-					}
-				}
-			}
+			"options": "Customer"
 		},
 		{
 			"fieldname":"report_date",
@@ -39,6 +28,30 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldtype": "Select",
 			"options": 'Posting Date' + NEWLINE + 'Due Date',
 			"default": "Posting Date"
+		},
+		{
+			"fieldtype": "Break",
+		},
+		{
+			"fieldname":"range1",
+			"label": __("Ageing Range 1"),
+			"fieldtype": "Int",
+			"default": "30",
+			"reqd": 1
+		},
+		{
+			"fieldname":"range2",
+			"label": __("Ageing Range 2"),
+			"fieldtype": "Int",
+			"default": "60",
+			"reqd": 1
+		},
+		{
+			"fieldname":"range3",
+			"label": __("Ageing Range 3"),
+			"fieldtype": "Int",
+			"default": "90",
+			"reqd": 1
 		}
 	]
 }

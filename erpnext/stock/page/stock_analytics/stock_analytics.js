@@ -1,8 +1,8 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 
-frappe.pages['stock-analytics'].onload = function(wrapper) { 
+frappe.pages['stock-analytics'].on_page_load = function(wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
 		title: __('Stock Analytics'),
@@ -12,8 +12,8 @@ frappe.pages['stock-analytics'].onload = function(wrapper) {
 	new erpnext.StockAnalytics(wrapper);
 
 
-	wrapper.appframe.add_module_icon("Stock")
-	
-}
+	frappe.breadcrumbs.add("Stock")
+
+};
 
 frappe.require("assets/erpnext/js/stock_analytics.js");

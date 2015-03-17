@@ -143,10 +143,10 @@
    "width": "50%"
   }, 
   {
-   "fieldname": "earning_details", 
+   "fieldname": "earnings", 
    "fieldtype": "Table", 
    "hidden": 0, 
-   "label": "Earning1", 
+   "label": "Earnings", 
    "oldfieldname": "earning_details", 
    "oldfieldtype": "Table", 
    "options": "Salary Structure Earning", 
@@ -165,10 +165,10 @@
    "width": "50%"
   }, 
   {
-   "fieldname": "deduction_details", 
+   "fieldname": "deductions", 
    "fieldtype": "Table", 
    "hidden": 0, 
-   "label": "Deduction1", 
+   "label": "Deductions", 
    "oldfieldname": "deduction_details", 
    "oldfieldtype": "Table", 
    "options": "Salary Structure Deduction", 
@@ -227,7 +227,7 @@
  ], 
  "icon": "icon-file-text", 
  "idx": 1, 
- "modified": "2014-08-05 06:56:27.038404", 
+ "modified": "2015-02-05 05:11:45.120566", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Structure", 
@@ -243,6 +243,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -255,6 +256,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

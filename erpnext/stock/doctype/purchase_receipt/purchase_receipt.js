@@ -1,13 +1,7 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.tname = "Purchase Receipt Item";
-cur_frm.cscript.fname = "purchase_receipt_details";
-cur_frm.cscript.other_fname = "other_charges";
-
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
-{% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
-{% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 frappe.provide("erpnext.stock");
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
@@ -19,7 +13,6 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 				cur_frm.add_custom_button(__('Make Purchase Invoice'), this.make_purchase_invoice,
 					frappe.boot.doctype_icons["Purchase Invoice"]);
 			}
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms, "icon-mobile-phone", true);
 
 			this.show_stock_ledger();
 			this.show_general_ledger();
@@ -39,6 +32,8 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					})
 				}, "icon-download", "btn-default");
 		}
+
+		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
 	},
 
 	received_qty: function(doc, cdt, cdn) {
@@ -119,7 +114,7 @@ cur_frm.cscript.new_contact = function() {
 	loaddoc('Contact', tn);
 }
 
-cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
 	return {
 		filters: [
 			['Project', 'status', 'not in', 'Completed, Cancelled']
@@ -127,7 +122,7 @@ cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('project_name').g
 	}
 }
 
-cur_frm.fields_dict['purchase_receipt_details'].grid.get_field('batch_no').get_query= function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field('batch_no').get_query= function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if(d.item_code) {
 		return {
@@ -153,11 +148,22 @@ cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) 
 	}
 }
 
-cur_frm.fields_dict.purchase_receipt_details.grid.get_field("qa_no").get_query = function(doc) {
+cur_frm.fields_dict.items.grid.get_field("qa_no").get_query = function(doc) {
 	return {
 		filters: {
 			'docstatus': 1
 		}
+	}
+}
+
+cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn]
+	return {
+		filters: [
+			['BOM', 'item', '=', d.item_code],
+			['BOM', 'is_active', '=', '1'],
+			['BOM', 'docstatus', '=', '1']
+		]
 	}
 }
 
@@ -166,8 +172,13 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 		cur_frm.email_doc(frappe.boot.notification_settings.purchase_receipt_message);
 }
 
-cur_frm.cscript.send_sms = function() {
-	frappe.require("assets/erpnext/js/sms_manager.js");
-	var sms_man = new SMSManager(cur_frm.doc);
-}
 
+
+frappe.provide("erpnext.buying");
+
+frappe.ui.form.on("Purchase Receipt", "is_subcontracted", function(frm) {
+	if (frm.doc.is_subcontracted === "Yes") {
+		erpnext.buying.get_default_bom(frm);
+	}
+	frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
+});

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -88,7 +88,7 @@ class AuthorizationControl(TransactionBase):
 				add_cond = " and master_name = '"+cstr(customer).replace("'", "\\'")+"'"
 		if based_on == 'Itemwise Discount':
 			if doc_obj:
-				for t in doc_obj.get(doc_obj.fname):
+				for t in doc_obj.get("items"):
 					self.validate_auth_rule(doctype_name, t.discount_percentage, based_on, add_cond, company,t.item_code )
 		else:
 			self.validate_auth_rule(doctype_name, auth_value, based_on, add_cond, company)
@@ -100,7 +100,7 @@ class AuthorizationControl(TransactionBase):
 		av_dis = 0
 		if doc_obj:
 			price_list_rate, base_rate = 0, 0
-			for d in doc_obj.get(doc_obj.fname):
+			for d in doc_obj.get("items"):
 				if d.base_rate:
 					price_list_rate += flt(d.base_price_list_rate) or flt(d.base_rate)
 					base_rate += flt(d.base_rate)

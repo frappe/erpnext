@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -12,7 +12,7 @@ class CForm(Document):
 		"""Validate invoice that c-form is applicable
 			and no other c-form is received for that"""
 
-		for d in self.get('invoice_details'):
+		for d in self.get('invoices'):
 			if d.invoice_no:
 				inv = frappe.db.sql("""select c_form_applicable, c_form_no from
 					`tabSales Invoice` where name = %s and docstatus = 1""", d.invoice_no)
@@ -42,7 +42,7 @@ class CForm(Document):
 		frappe.db.sql("""update `tabSales Invoice` set c_form_no=null where c_form_no=%s""", self.name)
 
 	def set_cform_in_sales_invoices(self):
-		inv = [d.invoice_no for d in self.get('invoice_details')]
+		inv = [d.invoice_no for d in self.get('invoices')]
 		if inv:
 			frappe.db.sql("""update `tabSales Invoice` set c_form_no=%s, modified=%s where name in (%s)""" %
 				('%s', '%s', ', '.join(['%s'] * len(inv))), tuple([self.name, self.modified] + inv))
@@ -54,17 +54,17 @@ class CForm(Document):
 			frappe.throw(_("Please enter atleast 1 invoice in the table"))
 
 	def set_total_invoiced_amount(self):
-		total = sum([flt(d.grand_total) for d in self.get('invoice_details')])
+		total = sum([flt(d.base_grand_total) for d in self.get('invoices')])
 		frappe.db.set(self, 'total_invoiced_amount', total)
 
 	def get_invoice_details(self, invoice_no):
 		"""	Pull details from invoices for referrence """
 		if invoice_no:
 			inv = frappe.db.get_value("Sales Invoice", invoice_no,
-				["posting_date", "territory", "net_total", "grand_total"], as_dict=True)
+				["posting_date", "territory", "base_net_total", "base_grand_total"], as_dict=True)
 			return {
 				'invoice_date' : inv.posting_date,
 				'territory'    : inv.territory,
-				'net_total'    : inv.net_total,
-				'grand_total'  : inv.grand_total
+				'net_total'    : inv.base_net_total,
+				'grand_total'  : inv.base_grand_total
 			}

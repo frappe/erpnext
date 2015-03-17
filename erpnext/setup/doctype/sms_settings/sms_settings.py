@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -29,7 +29,7 @@ def validate_receiver_nos(receiver_list):
 
 def get_sender_name():
 	"returns name as SMS sender"
-	sender_name = frappe.db.get_value('Global Defaults', None, 'sms_sender_name') or \
+	sender_name = frappe.db.get_single_value('SMS Settings', 'sms_sender_name') or \
 		'ERPNXT'
 	if len(sender_name) > 6 and \
 			frappe.db.get_default("country") == "India":
@@ -71,7 +71,7 @@ def send_sms(receiver_list, msg, sender_name = ''):
 def send_via_gateway(arg):
 	ss = frappe.get_doc('SMS Settings', 'SMS Settings')
 	args = {ss.message_parameter : arg.get('message')}
-	for d in ss.get("static_parameter_details"):
+	for d in ss.get("parameters"):
 		args[d.parameter] = d.value
 
 	resp = []

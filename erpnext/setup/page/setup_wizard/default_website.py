@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -6,7 +6,6 @@ import frappe
 
 from frappe import _
 from frappe.utils import nowdate
-from frappe.templates.pages.style_settings import default_properties
 
 class website_maker(object):
 	def __init__(self, company, tagline, user):
@@ -14,7 +13,6 @@ class website_maker(object):
 		self.tagline = tagline
 		self.user = user
 		self.make_web_page()
-		self.make_style_settings()
 		self.make_website_settings()
 		self.make_blog()
 
@@ -28,17 +26,11 @@ class website_maker(object):
 				'<p>'+_("This is an example website auto-generated from ERPNext")+"</p>"+\
 				'<p><a class="btn btn-primary" href="/login">Login</a></p>',
 			"description": self.company + ":" + (self.tagline or ""),
-			"css": frappe.get_template("setup/page/setup_wizard/sample_home_page.css").render(),
-			"main_section": frappe.get_template("setup/page/setup_wizard/sample_home_page.html").render({
+			"css": frappe.get_template("setup/page/setup_wizard/data/sample_home_page.css").render(),
+			"main_section": frappe.get_template("setup/page/setup_wizard/data/sample_home_page.html").render({
 				"company": self.company, "tagline": (self.tagline or "")
 			})
 		}).insert()
-
-	def make_style_settings(self):
-		style_settings = frappe.get_doc("Style Settings", "Style Settings")
-		style_settings.update(default_properties)
-		style_settings.apply_style = 1
-		style_settings.save()
 
 	def make_website_settings(self):
 		# update in home page in settings
@@ -88,7 +80,7 @@ class website_maker(object):
 			"blogger": blogger.name,
 			"blog_category": blog_category.name,
 			"blog_intro": "My First Blog",
-			"content": frappe.get_template("setup/page/setup_wizard/sample_blog_post.html").render(),
+			"content": frappe.get_template("setup/page/setup_wizard/data/sample_blog_post.html").render(),
 		}).insert()
 
 def test():

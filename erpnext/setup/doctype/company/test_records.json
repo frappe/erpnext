@@ -5,7 +5,8 @@
   "country": "India",
   "default_currency": "INR",
   "doctype": "Company",
-  "domain": "Manufacturing"
+  "domain": "Manufacturing",
+  "chart_of_accounts": "Standard"
  },
  {
   "abbr": "_TC1",
@@ -13,7 +14,8 @@
   "country": "United States",
   "default_currency": "USD",
   "doctype": "Company",
-  "domain": "Retail"
+  "domain": "Retail",
+  "chart_of_accounts": "Standard"
  },
  {
   "abbr": "_TC2",
@@ -21,6 +23,7 @@
   "default_currency": "EUR",
   "country": "Germany",
   "doctype": "Company",
-  "domain": "Retail"
+  "domain": "Retail",
+  "chart_of_accounts": "Standard"
  }
 ]

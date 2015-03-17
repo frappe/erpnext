@@ -1,1 +1,0 @@
-Support Ticket (query) raised by customer via website or email (if configured).

@@ -1,0 +1,50 @@
+{% block title %} {{ "My Addresses" }} {% endblock %}
+
+{% block header %}<h2>My Addresses</h2>{% endblock %}
+
+{% block breadcrumbs %}{% include "templates/includes/breadcrumbs.html" %}{% endblock %}
+
+{% block content %}
+<div class="addresses-content">
+	<p><a class="btn btn-default" href="address"><i class="icon-plus"> New Address</i></a></p>
+	<hr>
+	<div id="address-list">
+		<div class="text-muted progress">{{ _("Loading") }}...</div>
+	</div>
+</div>
+
+<script>
+;(function() {
+	var fetch_addresses = function() {
+		frappe.call({
+			method: "erpnext.templates.pages.addresses.get_addresses",
+			callback: function(r) {
+				$("#address-list .progress").remove();
+				var $list = $("#address-list");
+
+				if(!(r.message && r.message.length)) {
+					$list.html("<div class='alert'>No Addresses Found</div>");
+					return;
+				}
+
+				$.each(r.message, function(i, address) {
+					address.url_name = encodeURIComponent(address.name);
+					$(repl('<div> \
+						<p><a href="address?name=%(url_name)s">%(name)s</a></p> \
+						<p>%(display)s</p> \
+						<hr> \
+					</div>', address)).appendTo($list);
+				});
+			}
+		});
+	};
+
+	$(document).ready(function() {
+		fetch_addresses();
+	});
+})();
+</script>
+
+<!-- no-sidebar -->
+{% endblock %}
+

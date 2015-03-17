@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -7,8 +7,9 @@ import frappe, json
 from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.utils.file_manager import save_file
-from frappe.translate import set_default_language, get_dict, get_lang_dict, send_translations
-from frappe.country_info import get_country_info
+from frappe.translate import (set_default_language, get_dict,
+	get_lang_dict, send_translations, get_language_from_code)
+from frappe.geo.country_info import get_country_info
 from frappe.utils.nestedset import get_root_of
 from default_website import website_maker
 import install_fixtures
@@ -16,8 +17,6 @@ import install_fixtures
 @frappe.whitelist()
 def setup_account(args=None):
 	try:
-		frappe.clear_cache()
-
 		if frappe.db.sql("select name from tabCompany"):
 			frappe.throw(_("Setup Already Complete!!"))
 
@@ -73,6 +72,8 @@ def setup_account(args=None):
 
 		website_maker(args.company_name.strip(), args.company_tagline, args.name)
 		create_logo(args)
+
+		login_as_first_user(args)
 
 		frappe.clear_cache()
 		frappe.db.commit()
@@ -142,6 +143,8 @@ def create_fiscal_year_and_company(args):
 		'chart_of_accounts': args.get(('chart_of_accounts')),
 	}).insert()
 
+	# Bank Account
+
 	args["curr_fiscal_year"] = curr_fiscal_year
 
 def create_price_lists(args):
@@ -153,7 +156,7 @@ def create_price_lists(args):
 			"buying": 1 if pl_type == "Buying" else 0,
 			"selling": 1 if pl_type == "Selling" else 0,
 			"currency": args["currency"],
-			"valid_for_territories": [{
+			"territories": [{
 				"territory": get_root_of("Territory")
 			}]
 		}).insert()
@@ -227,10 +230,12 @@ def set_defaults(args):
 	hr_settings.save()
 
 def create_feed_and_todo():
-	"""update activty feed and create todo for creation of item, customer, vendor"""
-	from erpnext.home import make_feed
-	make_feed('Comment', 'ToDo', '', frappe.session['user'],
-		'ERNext Setup Complete!', '#6B24B3')
+	"""update Activity feed and create todo for creation of item, customer, vendor"""
+	frappe.get_doc({
+		"doctype": "Feed",
+		"feed_type": "Comment",
+		"subject": "ERPNext Setup Complete!"
+	}).insert(ignore_permissions=True)
 
 def create_email_digest():
 	from frappe.utils.user import get_system_managers
@@ -283,16 +288,19 @@ def create_taxes(args):
 			tax_rate = (args.get("tax_rate_" + str(i)) or "").replace("%", "")
 
 			try:
-				frappe.get_doc({
-					"doctype":"Account",
-					"company": args.get("company_name").strip(),
-					"parent_account": _("Duties and Taxes") + " - " + args.get("company_abbr"),
-					"account_name": args.get("tax_" + str(i)),
-					"group_or_ledger": "Ledger",
-					"report_type": "Balance Sheet",
-					"account_type": "Tax",
-					"tax_rate": flt(tax_rate) if tax_rate else None
-				}).insert()
+				tax_group = frappe.db.get_value("Account", {"company": args.get("company_name"),
+					"group_or_ledger": "Group", "account_type": "Tax", "root_type": "Liability"})
+				if tax_group:
+					frappe.get_doc({
+						"doctype":"Account",
+						"company": args.get("company_name").strip(),
+						"parent_account": tax_group,
+						"account_name": args.get("tax_" + str(i)),
+						"group_or_ledger": "Ledger",
+						"report_type": "Balance Sheet",
+						"account_type": "Tax",
+						"tax_rate": flt(tax_rate) if tax_rate else None
+					}).insert()
 			except frappe.NameError, e:
 				if e.args[2][0]==1062:
 					pass
@@ -309,10 +317,10 @@ def create_items(args):
 			is_stock_item = item_group!=_("Services")
 			default_warehouse = ""
 			if is_stock_item:
-				if is_sales_item:
-					default_warehouse = _("Finished Goods") + " - " + args.get("company_abbr")
-				else:
-					default_warehouse = _("Stores") + " - " + args.get("company_abbr")
+				default_warehouse = frappe.db.get_value("Warehouse", filters={
+					"warehouse_name": _("Finished Goods") if is_sales_item else _("Stores"),
+					"company": args.get("company_name").strip()
+				})
 
 			frappe.get_doc({
 				"doctype":"Item",
@@ -424,6 +432,11 @@ def create_territories():
 				"is_group": "No"
 			}).insert()
 
+def login_as_first_user(args):
+	if args.get("email") and hasattr(frappe.local, "login_manager"):
+		frappe.local.login_manager.user = args.get("email")
+		frappe.local.login_manager.post_login()
+
 @frappe.whitelist()
 def load_messages(language):
 	frappe.clear_cache()
@@ -436,4 +449,7 @@ def load_messages(language):
 
 @frappe.whitelist()
 def load_languages():
-	return sorted(get_lang_dict().keys())
+	return {
+		"default_language": get_language_from_code(frappe.local.lang),
+		"languages": sorted(get_lang_dict().keys())
+	}

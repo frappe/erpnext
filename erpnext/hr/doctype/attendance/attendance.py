@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -29,10 +29,6 @@ class Attendance(Document):
 				frappe.throw(_("Employee {0} was on leave on {1}. Cannot mark attendance.").format(self.employee,
 					self.att_date))
 
-	def validate_fiscal_year(self):
-		from erpnext.accounts.utils import validate_fiscal_year
-		validate_fiscal_year(self.att_date, self.fiscal_year)
-
 	def validate_att_date(self):
 		if getdate(self.att_date) > getdate(nowdate()):
 			frappe.throw(_("Attendance can not be marked for future dates"))
@@ -45,8 +41,9 @@ class Attendance(Document):
 
 	def validate(self):
 		from erpnext.utilities import validate_status
+		from erpnext.accounts.utils import validate_fiscal_year
 		validate_status(self.status, ["Present", "Absent", "Half Day"])
-		self.validate_fiscal_year()
+		validate_fiscal_year(self.att_date, self.fiscal_year, _("Attendance Date"), self)
 		self.validate_att_date()
 		self.validate_duplicate_record()
 		self.check_leave_record()

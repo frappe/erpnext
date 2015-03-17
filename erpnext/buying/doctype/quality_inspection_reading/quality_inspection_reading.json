@@ -1,6 +1,6 @@
 {
- "autoname": "QASD/.#####", 
- "creation": "2013-02-22 01:27:43.000000", 
+ "autoname": "hash", 
+ "creation": "2013-02-22 01:27:43", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -120,9 +120,10 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:39.000000", 
+ "modified": "2015-02-19 01:07:01.658125", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Quality Inspection Reading", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }

@@ -8,6 +8,14 @@
  "doctype": "DocType", 
  "fields": [
   {
+   "fieldname": "items_section", 
+   "fieldtype": "Section Break", 
+   "label": "", 
+   "oldfieldtype": "Section Break", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
    "fieldname": "col1", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 
@@ -46,13 +54,41 @@
    "no_copy": 0, 
    "oldfieldname": "purpose", 
    "oldfieldtype": "Select", 
-   "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nManufacture\nRepack\nSubcontract\nSales Return\nPurchase Return", 
+   "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nManufacture\nRepack\nSubcontract\nSales Return\nPurchase Return", 
    "permlevel": 0, 
    "print_hide": 0, 
    "read_only": 0, 
    "report_hide": 0, 
    "reqd": 1, 
    "search_index": 0
+  }, 
+  {
+   "allow_on_submit": 0, 
+   "depends_on": "eval:in_list([\"Material Transfer for Manufacture\", \"Manufacture\"], doc.purpose)", 
+   "fieldname": "production_order", 
+   "fieldtype": "Link", 
+   "hidden": 0, 
+   "in_filter": 1, 
+   "label": "Production Order", 
+   "no_copy": 0, 
+   "oldfieldname": "production_order", 
+   "oldfieldtype": "Link", 
+   "options": "Production Order", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 0, 
+   "report_hide": 0, 
+   "reqd": 0, 
+   "search_index": 1
+  }, 
+  {
+   "depends_on": "eval:doc.purpose==\"Subcontract\"", 
+   "fieldname": "purchase_order", 
+   "fieldtype": "Link", 
+   "label": "Purchase Order", 
+   "options": "Purchase Order", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "allow_on_submit": 0, 
@@ -105,6 +141,14 @@
    "search_index": 1
   }, 
   {
+   "depends_on": "eval:in_list([\"Material Issue\", \"Material Transfer\", \"Manufacture\", \"Repack\", \t\t\t\t\t\"Subcontract\", \"Material Transfer for Manufacture\"], doc.purpose)", 
+   "fieldname": "from_bom", 
+   "fieldtype": "Check", 
+   "label": "From BOM", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "col2", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 
@@ -150,12 +194,90 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "items_section", 
+   "depends_on": "eval: doc.from_bom && (doc.purpose!==\"Sales Return\" && doc.purpose!==\"Purchase Return\")", 
+   "fieldname": "sb1", 
    "fieldtype": "Section Break", 
-   "label": "Items", 
-   "oldfieldtype": "Section Break", 
+   "label": "", 
    "permlevel": 0, 
    "read_only": 0
+  }, 
+  {
+   "depends_on": "from_bom", 
+   "fieldname": "bom_no", 
+   "fieldtype": "Link", 
+   "label": "BOM No", 
+   "options": "BOM", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "from_bom", 
+   "fieldname": "additional_operating_cost", 
+   "fieldtype": "Currency", 
+   "label": "Additional Operating Cost", 
+   "no_copy": 1, 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "fieldname": "cb1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "allow_on_submit": 0, 
+   "depends_on": "from_bom", 
+   "description": "As per Stock UOM", 
+   "fieldname": "fg_completed_qty", 
+   "fieldtype": "Float", 
+   "hidden": 0, 
+   "in_filter": 0, 
+   "label": "For Quantity", 
+   "no_copy": 0, 
+   "oldfieldname": "fg_completed_qty", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 0, 
+   "report_hide": 0, 
+   "reqd": 0, 
+   "search_index": 0
+  }, 
+  {
+   "default": "1", 
+   "depends_on": "from_bom", 
+   "description": "Including items for sub assemblies", 
+   "fieldname": "use_multi_level_bom", 
+   "fieldtype": "Check", 
+   "label": "Use Multi-Level BOM", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 0
+  }, 
+  {
+   "allow_on_submit": 0, 
+   "depends_on": "from_bom", 
+   "fieldname": "get_items", 
+   "fieldtype": "Button", 
+   "hidden": 0, 
+   "in_filter": 0, 
+   "label": "Get Items", 
+   "no_copy": 0, 
+   "oldfieldtype": "Button", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 0, 
+   "report_hide": 0, 
+   "reqd": 0, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "section_break_12", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "allow_on_submit": 0, 
@@ -210,11 +332,11 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "fieldname": "mtn_details", 
+   "fieldname": "items", 
    "fieldtype": "Table", 
    "hidden": 0, 
    "in_filter": 0, 
-   "label": "MTN Details", 
+   "label": "Items", 
    "no_copy": 0, 
    "oldfieldname": "mtn_details", 
    "oldfieldtype": "Table", 
@@ -238,101 +360,49 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:(doc.purpose!==\"Sales Return\" && doc.purpose!==\"Purchase Return\")", 
-   "fieldname": "sb1", 
+   "fieldname": "section_break_19", 
    "fieldtype": "Section Break", 
-   "label": "From Bill of Materials", 
    "permlevel": 0, 
-   "read_only": 0
+   "precision": ""
   }, 
   {
-   "allow_on_submit": 0, 
-   "depends_on": "eval:inList([\"Material Transfer\", \"Manufacture\"], doc.purpose)", 
-   "fieldname": "production_order", 
-   "fieldtype": "Link", 
-   "hidden": 0, 
-   "in_filter": 1, 
-   "label": "Production Order", 
-   "no_copy": 0, 
-   "oldfieldname": "production_order", 
-   "oldfieldtype": "Link", 
-   "options": "Production Order", 
+   "fieldname": "total_incoming_value", 
+   "fieldtype": "Currency", 
+   "label": "Total Incoming Value", 
    "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 0, 
-   "report_hide": 0, 
-   "reqd": 0, 
-   "search_index": 1
+   "precision": "", 
+   "read_only": 1
   }, 
   {
-   "depends_on": "eval:!inList([\"Sales Return\", \"Purchase Return\"], doc.purpose)", 
-   "fieldname": "bom_no", 
-   "fieldtype": "Link", 
-   "label": "BOM No", 
-   "options": "BOM", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "allow_on_submit": 0, 
-   "depends_on": "eval:!inList([\"Sales Return\", \"Purchase Return\"], doc.purpose)", 
-   "description": "As per Stock UOM", 
-   "fieldname": "fg_completed_qty", 
-   "fieldtype": "Float", 
-   "hidden": 0, 
-   "in_filter": 0, 
-   "label": "Manufacturing Quantity", 
-   "no_copy": 0, 
-   "oldfieldname": "fg_completed_qty", 
-   "oldfieldtype": "Currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 0, 
-   "report_hide": 0, 
-   "reqd": 0, 
-   "search_index": 0
-  }, 
-  {
-   "depends_on": "eval:inList([\"Manufacture\", \"Repack\"], doc.purpose)", 
-   "fieldname": "total_fixed_cost", 
-   "fieldtype": "Float", 
-   "label": "Total Fixed Cost", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "fieldname": "cb1", 
+   "fieldname": "column_break_22", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
-   "read_only": 0
+   "precision": ""
   }, 
   {
-   "default": "1", 
-   "depends_on": "eval:!inList([\"Sales Return\", \"Purchase Return\"], doc.purpose)", 
-   "description": "If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.", 
-   "fieldname": "use_multi_level_bom", 
-   "fieldtype": "Check", 
-   "label": "Use Multi-Level BOM", 
+   "fieldname": "total_outgoing_value", 
+   "fieldtype": "Currency", 
+   "label": "Total Outgoing Value", 
    "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 0
+   "precision": "", 
+   "read_only": 1
   }, 
   {
-   "allow_on_submit": 0, 
-   "depends_on": "eval:!inList([\"Sales Return\", \"Purchase Return\"], doc.purpose)", 
-   "fieldname": "get_items", 
-   "fieldtype": "Button", 
-   "hidden": 0, 
-   "in_filter": 0, 
-   "label": "Get Items", 
-   "no_copy": 0, 
-   "oldfieldtype": "Button", 
+   "fieldname": "value_difference", 
+   "fieldtype": "Currency", 
+   "label": "Total Value Difference (Out - In)", 
    "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 0, 
-   "report_hide": 0, 
-   "reqd": 0, 
-   "search_index": 0
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "description": "This will override Difference Account in Item", 
+   "fieldname": "difference_account", 
+   "fieldtype": "Link", 
+   "label": "Difference Account", 
+   "options": "Account", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "fold", 
@@ -340,16 +410,16 @@
    "permlevel": 0
   }, 
   {
-   "depends_on": "eval:(doc.purpose==\"Sales Return\" || doc.purpose==\"Purchase Return\")", 
+   "depends_on": "eval: in_list([\"Sales Return\", \"Purchase Return\", \"Subcontract\"], doc.purpose)", 
    "fieldname": "contact_section", 
    "fieldtype": "Section Break", 
-   "label": "Contact Info", 
+   "label": "", 
    "permlevel": 0, 
    "read_only": 0
   }, 
   {
    "allow_on_submit": 0, 
-   "depends_on": "eval:doc.purpose==\"Purchase Return\"", 
+   "depends_on": "eval:doc.purpose==\"Purchase Return\" || doc.purpose==\"Subcontract\"", 
    "fieldname": "supplier", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -368,7 +438,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "depends_on": "eval:doc.purpose==\"Purchase Return\"", 
+   "depends_on": "eval:doc.purpose==\"Purchase Return\" || doc.purpose==\"Subcontract\"", 
    "fieldname": "supplier_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -386,7 +456,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "depends_on": "eval:doc.purpose==\"Purchase Return\"", 
+   "depends_on": "eval:doc.purpose==\"Purchase Return\" || doc.purpose==\"Subcontract\"", 
    "fieldname": "supplier_address", 
    "fieldtype": "Small Text", 
    "hidden": 0, 
@@ -401,6 +471,12 @@
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0
+  }, 
+  {
+   "fieldname": "column_break_39", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "allow_on_submit": 0, 
@@ -460,7 +536,7 @@
   {
    "fieldname": "more_info", 
    "fieldtype": "Section Break", 
-   "label": "More Info", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0, 
    "read_only": 0
@@ -510,17 +586,6 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "fiscal_year", 
-   "fieldtype": "Link", 
-   "in_filter": 0, 
-   "label": "Fiscal Year", 
-   "options": "Fiscal Year", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 0, 
-   "reqd": 1
-  }, 
-  {
    "allow_on_submit": 0, 
    "fieldname": "company", 
    "fieldtype": "Link", 
@@ -537,6 +602,17 @@
    "report_hide": 0, 
    "reqd": 1, 
    "search_index": 0
+  }, 
+  {
+   "fieldname": "fiscal_year", 
+   "fieldtype": "Link", 
+   "in_filter": 0, 
+   "label": "Fiscal Year", 
+   "options": "Fiscal Year", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 0, 
+   "reqd": 1
   }, 
   {
    "allow_on_submit": 1, 
@@ -574,6 +650,15 @@
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0
+  }, 
+  {
+   "fieldname": "credit_note", 
+   "fieldtype": "Link", 
+   "hidden": 1, 
+   "label": "Credit Note", 
+   "options": "Journal Entry", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "hide_heading": 0, 
@@ -585,7 +670,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2015-01-29 11:26:46.968041", 
+ "modified": "2015-03-03 18:09:12.035606", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 
@@ -603,6 +688,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -618,6 +704,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Manufacturing User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -632,6 +719,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Manufacturing Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -646,6 +734,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }
@@ -654,5 +743,6 @@
  "read_only_onload": 0, 
  "search_fields": "posting_date, from_warehouse, to_warehouse, purpose, remarks", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "purpose"
 }

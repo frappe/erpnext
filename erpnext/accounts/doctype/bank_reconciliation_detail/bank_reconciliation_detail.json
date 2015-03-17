@@ -11,7 +11,7 @@
    "no_copy": 0, 
    "oldfieldname": "voucher_id", 
    "oldfieldtype": "Link", 
-   "options": "Journal Voucher", 
+   "options": "Journal Entry", 
    "permlevel": 0, 
    "search_index": 0
   }, 

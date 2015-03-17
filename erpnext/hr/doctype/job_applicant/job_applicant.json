@@ -1,5 +1,5 @@
 {
-  "autoname": "field:applicant_name", 
+ "autoname": "field:applicant_name", 
  "creation": "2013-01-29 19:25:37", 
  "description": "Applicant for a Job", 
  "docstatus": 0, 
@@ -9,7 +9,7 @@
   {
    "fieldname": "applicant_name", 
    "fieldtype": "Data", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Applicant Name", 
    "permlevel": 0, 
    "reqd": 1
@@ -65,7 +65,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:12.168814", 
+ "modified": "2015-02-05 05:11:40.029237", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Job Applicant", 
@@ -81,6 +81,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "write": 1
   }
  ]

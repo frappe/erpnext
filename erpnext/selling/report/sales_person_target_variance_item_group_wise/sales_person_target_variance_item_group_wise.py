@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -71,9 +71,9 @@ def get_salesperson_details(filters):
 def get_target_distribution_details(filters):
 	target_details = {}
 
-	for d in frappe.db.sql("""select bd.name, bdd.month, bdd.percentage_allocation
-		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
-		where bdd.parent=bd.name and bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
+	for d in frappe.db.sql("""select md.name, mdp.month, mdp.percentage_allocation
+		from `tabMonthly Distribution Percentage` mdp, `tabMonthly Distribution` mdp
+		where mdp.parent=md.name and md.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
 			target_details.setdefault(d.name, {}).setdefault(d.month, flt(d.percentage_allocation))
 
 	return target_details
@@ -82,7 +82,7 @@ def get_target_distribution_details(filters):
 def get_achieved_details(filters):
 	start_date, end_date = get_fiscal_year(fiscal_year = filters["fiscal_year"])[1:]
 
-	item_details = frappe.db.sql("""select soi.item_code, soi.qty, soi.base_amount, so.transaction_date,
+	item_details = frappe.db.sql("""select soi.item_code, soi.qty, soi.base_net_amount, so.transaction_date,
 		st.sales_person, MONTHNAME(so.transaction_date) as month_name
 		from `tabSales Order Item` soi, `tabSales Order` so, `tabSales Team` st
 		where soi.parent=so.name and so.docstatus=1 and
@@ -125,7 +125,7 @@ def get_salesperson_item_month_map(filters):
 				if (filters["target_on"] == "Amount"):
 					tav_dict.target = flt(sd.target_amount) * month_percentage / 100
 					if ad.month_name == month:
-							tav_dict.achieved += ad.base_amount
+							tav_dict.achieved += ad.base_net_amount
 
 	return sim_map
 

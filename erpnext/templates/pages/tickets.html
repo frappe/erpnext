@@ -1,0 +1,92 @@
+{% block title %} {{ title }} {% endblock %}
+
+{% block header %}<h2>{{ title }}</h2>{% endblock %}
+
+{% block content %}
+{% include "templates/includes/transactions.html" %}
+
+<script>
+	var status_label = {
+		"Open": "label-success",
+		"Waiting for Customer": "label-danger",
+		"Closed": "label-default"
+	}
+
+	var render = function(doc) {
+		doc.status = doc.status.trim();
+		doc.label_class = status_label[doc.status] || "label-default";
+		if(doc.status==="Waiting for Customer") doc.status = "To Reply";
+
+		$(repl('<a href="{{ page }}?name=%(name)s" class="list-group-item">\
+				<div class="row">\
+					<div class="col-md-2" style="margin-bottom: 7px;"><span class="label %(label_class)s">\
+						%(status)s</span></div>\
+					<div class="col-md-8">\
+						<div class="row col-md-12">%(name)s</div>\
+						<div class="row col-md-12 text-muted">%(subject)s</div>\
+					</div>\
+					<div class="col-md-2 pull-right">\
+						<span class="text-muted">%(creation)s</span>\
+					</div>\
+				</div>\
+			</a>', doc)).appendTo($list);
+	};
+
+	frappe.ready(function() {
+		if(!window.$new_ticket) {
+			window.$new_ticket = $('<div>\
+					<button class="btn btn-primary" style="margin-bottom: 15px;" id="new-ticket">\
+						<i class="icon-tag icon-fixed-width"></i> New Ticket\
+					</button>\
+					<button class="btn btn-success hide" style="margin-bottom: 15px;" id="new-ticket-send">\
+						<i class="icon-arrow-right icon-fixed-width"></i> Send\
+					</button>\
+				</div>').insertBefore(".transaction-list");
+		}
+
+		window.$new_ticket.find("#new-ticket").on("click", function() {
+			$(this).addClass("hide");
+			$(window.$new_ticket).find("#new-ticket-send").removeClass("hide");
+			$('<div class="well" id="ticket-editor">\
+					<div class="form-group"><input class="form-control" type="data"\
+						 placeholder="Subject" data-fieldname="subject"></div>\
+					<div class="form-group"><textarea rows=10 class="form-control" \
+						 style="resize: vertical;" placeholder="Message" \
+						 data-fieldname="message"></textarea></div>\
+				</div>')
+				.insertAfter(window.$new_ticket);
+		});
+
+		window.$new_ticket.find("#new-ticket-send").on("click", function() {
+			var subject = $("#ticket-editor").find('[data-fieldname="subject"]').val().trim();
+			var message = $("#ticket-editor").find('[data-fieldname="message"]').val().trim();
+			if(!(subject && message)) {
+				msgprint("Please write something in subject and message!");
+			} else {
+				frappe.call({
+					type: "POST",
+					method: "erpnext.templates.pages.tickets.make_new_ticket",
+					btn: this,
+					args: { subject: subject, message: message },
+					callback: function(r) {
+						if(r.exc) {
+							msgprint(r._server_messages
+								? JSON.parse(r._server_messages).join("<br>")
+								: "Something went wrong!");
+						} else {
+							window.location.href = "ticket?name=" + encodeURIComponent(r.message);
+						}
+					}
+				})
+			}
+		});
+	});
+
+	var msgprint = function(txt) {
+		if(txt) $("#msgprint-alert").html(txt).toggle(true);
+	}
+</script>
+
+<!-- no-sidebar -->
+{% endblock %}
+

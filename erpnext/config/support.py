@@ -9,13 +9,13 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Support Ticket",
+					"name": "Issue",
 					"description": _("Support queries from customers."),
 				},
 				{
 					"type": "doctype",
-					"name": "Customer Issue",
-					"description": _("Customer Issue against Serial No."),
+					"name": "Warranty Claim",
+					"description": _("Warranty Claim against Serial No."),
 				},
 				{
 					"type": "doctype",
@@ -50,7 +50,7 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Support Email Settings",
+					"name": "Email Account",
 					"description": _("Setup incoming server for support email id. (e.g. support@example.com)")
 				},
 			]

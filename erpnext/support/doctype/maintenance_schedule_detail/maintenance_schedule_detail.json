@@ -1,6 +1,6 @@
 {
- "autoname": "MSD.#####", 
- "creation": "2013-02-22 01:28:05.000000", 
+ "autoname": "hash", 
+ "creation": "2013-02-22 01:28:05", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -89,9 +89,10 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-31 12:13:38.000000", 
+ "modified": "2015-02-19 01:07:00.495149", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Maintenance Schedule Detail", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }

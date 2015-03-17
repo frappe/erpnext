@@ -1,0 +1,432 @@
+{
+	"country_code": "ni",
+	"name": "Catalogo de Cuentas",
+	"is_active": "Yes",
+	"tree": {
+		"Activo": {
+			"Activo Corriente": {
+				"Efectivo en Caja y Bancos": {
+					"Caja": {
+						"Caja General Moneda Nacional": {
+							"account_type": "Cash"
+						},
+						"Caja General Moneda Extrangera": {
+							"account_type": "Cash"
+						},
+						"Caja Chica Moneda Nacional": {
+							"account_type": "Cash"
+						},
+						"Caja Chica Moneda Extrangera": {
+							"account_type": "Cash"
+						},
+						"Fondos por Depositar": {
+							"account_type": "Cash"
+						}
+					},
+					"Cuentas Bancarias": {
+						"Cuenta Corriente Moneda Nacional": {
+							"account_type": "Bank"
+						},
+						"Cuenta Corriente Moneda Extrangera": {
+							"account_type": "Bank"
+						}
+					},
+					"Otros Equivalentes a Efectivo": {
+						"group_or_ledger": "Group",
+						"account_type": "Cash"
+					}
+				},
+				"Activos Financieros Realizables a Corto Plazo": {
+					"Inversiones a Corto Plazo": {},
+					"Bonos y Acciones Disponibles para la Venta": {},
+					"Certificados Bancarios": {},
+					"Otros Valores Negociables a Corto Plazo": {}
+				},
+				"Cuentas y Documentos por Cobrar a Clientes": {
+					"Cuentas por Cobrar Moneda Nacional": {
+						"account_type": "Receivable"
+					},
+					"Cuentas por Cobrar Moneda Extrangera": {
+						"account_type": "Receivable"
+					},
+					"Documentos por Cobrar Moneda Nacional": {
+						"account_type": "Receivable"
+					},
+					"Documentos por Cobrar Moneda Extrangera": {
+						"account_type": "Receivable"
+					},
+					"Cuentas por Cobrar por Exportaciones": {
+						"account_type": "Receivable"
+					},
+					"Estimacion para Cuentas Incobrables": {}
+				},
+				"Inventarios": {
+					"group_or_ledger": "Group",
+					"account_type": "Stock"
+				},
+				"Impuestos Acreditables": {
+					"Impuesto a Valor Agregado Acreditable": {
+						"IVA Acreditable por Compra de Bienes": {
+							"account_type": "Tax"
+						},
+						"IVA Acreditable por Importaciones": {
+							"account_type": "Tax"
+						},
+						"IVA Acreditable por Prestacion de Servicios": {
+							"account_type": "Tax"
+						},
+						"Acreditacion Proporcional": {}
+					},
+					"Anticipos de IR o Pago Minimo Definitivo": {},
+					"Retenciones a Cuenta de IR Acreditables": {
+						"Retencion por V/Bienes o P/Servicios 2%": {
+							"account_type": "Tax"
+						},
+						"Retencion Operaciones Targeta Debito/Credito 1.5%": {
+							"account_type": "Tax"
+						}
+					},
+					"Retenciones a Cuenta de IMI Acreditables": {},
+					"Retenciones Definitivas Sobre Rentas o Ganancias de Capital": {}
+				},
+				"Otras Cuentas por Cobrar": {
+					"group_or_ledger": "Group",
+					"account_type": "Receivable"
+				}
+			},
+			"Activo no Corriente": {
+				"Propiedad Planta y Equipo": {
+					"Terrenos": {},
+					"Edificios": {},
+					"Almacenes": {},
+					"Otros Activos Inmobiliarios": {},
+					"Parque Vehicular": {},
+					"Equipo de Computo": {},
+					"Mobiliario y Equipo de Oficinas": {},
+					"Maquinaria Industrial": {},
+					"Otra Bienes Mobiliarios": {},
+					"Depresiacion Acumulada": {},
+					"account_type": "Fixed Asset"
+				},
+				"Inversiones Permanentes": {
+					"Inversiones Permanentes": {
+						"group_or_ledger": "Group",
+						"account_type": "Fixed Asset"
+					},
+					"Negocios Conjuntos": {
+						"group_or_ledger": "Group",
+						"account_type": "Fixed Asset"
+					}
+				},
+				"Bienes en Arrendamiento Financiero": {
+					"Locales y Edificios en Arrendamiento": {},
+					"Equipos y Maquinaria en Arrendamiento": {}
+				},
+				"Activos Intangibles": {
+					"Patentes": {
+						"group_or_ledger": "Group"
+					},
+					"Marcas Registradas": {
+						"group_or_ledger": "Group"
+					},
+					"Derechos de Autor": {
+						"group_or_ledger": "Group"
+					},
+					"Concesiones": {
+						"group_or_ledger": "Group"
+					},
+					"Licencias": {
+						"group_or_ledger": "Group"
+					},
+					"Gastos de investigacion": {
+						"group_or_ledger": "Group"
+					},
+					"Amortizacion de Activos Intangibles": {
+						"group_or_ledger": "Group"
+					},
+					"Deterioro de Valor de Activos Intangibles": {}
+				},
+				"Amortizables": {
+					"Gastos de Consitucion": {},
+					"Gastos Pre Operativos": {},
+					"Mejoras en Bienes Arrendados": {
+						"group_or_ledger": "Group"
+					},
+					"Amortizacion de Activos Amortizables": {},
+					"Deterioro de Valaor de Activos Amortizables": {}
+				},
+				"Cuentas por Cobrar a Largo Plazo": {
+					"Creditos a Largo Plazo": {
+						"group_or_ledger": "Group"
+					}
+				},
+				"Inversiones a Largo Plazo": {
+					"Depositos Bancarios a Plazo": {
+						"group_or_ledger": "Group"
+					},
+					"Intereses percibidos por adelantado": {
+						"group_or_ledger": "Group"
+					},
+					"Titulos y Acciones": {
+						"group_or_ledger": "Group"
+					}
+				},
+				"Activo por Impuestos Diferidos": {
+					"group_or_ledger": "Group"
+				}
+			},
+			"root_type": "Asset"
+		},
+		"Pasivo": {
+			"Pasivo Corriente": {
+				"Cuentas por Pagar Proveedores": {
+					"Cuentas por Pagar Moneda Nacional": {
+						"account_type": "Payable"
+					},
+					"Cuentas por Pagar Moneda Extrangera": {
+						"account_type": "Payable"
+					},
+					"Documentos por Pagar Moneda Nacional": {
+						"account_type": "Payable"
+					},
+					"Documentos por Pagar Moneda Extrangera": {
+						"account_type": "Payable"
+					},
+					"Cuentas por Pagar por Importaciones": {
+						"account_type": "Payable"
+					}
+				},
+				"Anticipos de Clientes": {},
+				"Pasivos Financieros a Corto Plazo": {
+					"Prestamos por Pagar a Corto Plazo": {
+						"group_or_ledger": "Group"
+					},
+					"Sobregiros Bancarios": {
+						"group_or_ledger": "Group"
+					},
+					"Otras Deudas Bancarias": {
+						"group_or_ledger": "Group"
+					}
+				},
+				"Gastos por Pagar": {
+					"Servicios Basicos": {
+						"group_or_ledger": "Group"
+					},
+					"Prestaciones Sociales": {
+						"group_or_ledger": "Group"
+					},
+					"Salarios por Pagar": {}
+				},
+				"Provisiones por Pagar": {
+					"Pasivos Laborales": {
+						"Indemnizacion Laboral": {},
+						"Aguinaldo por Pagar": {}
+					},
+					"Reclamos por Pagar": {},
+					"Responsabilidad frente a terceros": {}
+				},
+				"Impuestos por Pagar": {
+					"Impuesto al Valor Agregado por Pagar": {
+						"account_type": "Tax"
+					},
+					"Impuesto sobre la Renta": {
+						"account_type": "Tax"
+					},
+					"Impuestos Municipales": {
+						"account_type": "Tax"
+					}
+				},
+				"Retenciones por Pagar": {
+					"Rentas del Trabajo": {
+						"Retencion Rentas del Trabajo Tarifa Progresiva": {
+							"account_type": "Tax"
+						},
+						"Retencion Definitiva por Rentas del Trabajo": {
+							"account_type": "Tax"
+						}
+					},
+					"Rentas de Actividades Economicas": {
+						"Retencion 2% por C/Bienes o P/Servicios": {
+							"account_type": "Tax"
+						},
+						"Retencion 10% Servicios Profesionales": {
+							"account_type": "Tax"
+						},
+						"Retencion 3% compra Bienes Agropecuarios": {
+							"account_type": "Tax"
+						},
+						"Retencion 5% compra Madera en Rollo": {
+							"account_type": "Tax"
+						},
+						"Otras Retenciones 10%": {
+							"account_type": "Tax"
+						}
+					},
+					"Rentas y Ganancias de Capital": {
+						"Retencion Defintiva 10% por Rentas de Capital": {
+							"account_type": "Tax"
+						},
+						"Retencion Definitiva 5% por Rentas de Capital": {
+							"account_type": "Tax"
+						},
+						"Retencion Definitiva 10% por Ganancia de Capital": {
+							"account_type": "Tax"
+						},
+						"Retencion Definitiva Actividades Economicas No Residentes": {
+							"account_type": "Tax"
+						},
+						"Retencion Definitiva Transacciones Bursatiles": {
+							"account_type": "Tax"
+						},
+						"Retenciones Defintiva 5% Fondos de Inversion": {
+							"account_type": "Tax"
+						}
+					},
+					"Retencion 17% Operaciones con Paraisos Fiscales": {
+						"account_type": "Tax"
+					}
+				},
+				"Otras Cuentas por Pagar": {
+					"group_or_ledger": "Group"
+				}
+			},
+			"Pasivo No Corriente": {
+				"Prestamos a Largo Plazo": {
+					"group_or_ledger": "Group"
+				},
+				"Cuentas por Pagar a Largo Plaso": {
+					"group_or_ledger": "Group"
+				},
+				"Otras Cuentas por Pagar a Largo Plazo": {
+					"group_or_ledger": "Group"
+				},
+				"Otros Pasivos Financieros a Largo Plaso": {
+					"group_or_ledger": "Group"
+				}
+			},
+			"Obligaciones por Arrendamiento Financiero a Largo Plazo": {
+				"group_or_ledger": "Group"
+			},
+			"Pasivo por Impuestos Diferidos": {
+				"group_or_ledger": "Group"
+			},
+			"root_type": "Liability"
+		},
+		"Patrimonio": {
+			"Aporte de Socios": {
+				"Capital": {
+					"Capital Social Pagado": {
+						"account_type": "Equity"
+					},
+					"Capital Social no Pagado": {
+						"account_type": "Equity"
+					}
+				}
+			},
+			"Donaciones": {
+				"group_or_ledger": "Group"
+			},
+			"Ganancias Acumuladas": {
+				"Reservas": {
+					"Reservas Legales": {
+						"account_type": "Equity"
+					},
+					"Reservas Voluntarias": {
+						"account_type": "Equity"
+					}
+				},
+				"Resultados": {
+					"Resultados Acumulados": {
+						"account_type": "Equity"
+					},
+					"Ajustes a Periodos Anteriores": {
+						"account_type": "Equity"
+					},
+					"Resultado del ejercicio": {
+						"account_type": "Equity"
+					}
+				}
+			},
+			"root_type": "Equity"
+		},
+		"Ingresos": {
+			"Ventas": {
+				"Venta de Bienes o Prestacion de Servicios Grabados": {},
+				"Venta de Bienes o Prestacion de Servicios Exentos": {},
+				"Venta de Bienes o Prestacion de Servicios Exonerados": {},
+				"Venta por Exportaciones": {}
+			},
+			"Otros Ingresos Grabables": {
+				"Ganacia Cambiaria": {},
+				"Sobrante en Arqueo de Caja": {},
+				"Otros Ingresos Grabables": {}
+			},
+			"Ingresos no Grabables": {
+				"Ingreso por Rentas y Ganacias de Capital sujetas a Retencion Definitiva": {},
+				"Interes Bancarios": {},
+				"Otros Ingresos no Grabables": {}
+			},
+			"root_type": "Income"
+		},
+		"Costos y Gastos": {
+			"Costo de Venta": {
+				"Costo de Bienes": {},
+				"Costo de Servicios": {},
+				"Costo de Produccion": {},
+				"account_type": "Cost of Goods Sold"
+			},
+			"Gastos de Ventas": {
+				"Publicidad": {},
+				"Mercadeo": {},
+				"Muestras Gratis": {},
+				"Regalosa Clientes": {},
+				"Fletes": {},
+				"Promociones": {}
+			},
+			"Gastos de Administracion": {
+				"Alquileres": {},
+				"Combustible": {},
+				"Servicios Basicos": {
+					"Energia Electrica": {},
+					"Agua Potable": {},
+					"Internet": {},
+					"Telefono Fijo": {},
+					"Celular": {},
+					"Costos por Servicios WEB": {}
+				},
+				"Vigilancia": {},
+				"Gastos Varios": {},
+				"Mantenimiento y Reparaciones": {},
+				"Papeleria": {},
+				"Representacion": {},
+				"Amortizaciones": {},
+				"Inatec": {},
+				"Indemnizacion": {},
+				"Fletes y Correos": {},
+				"Cuentas Incobrables": {},
+				"Capacitacion al Personal": {},
+				"Uniformes": {},
+				"Seguros": {},
+				"Donaciones": {},
+				"Impuesto Municipal": {},
+				"Matricula": {},
+				"Recoleccion de Basura": {},
+				"IVA Proporcional no Acreditado": {},
+				"Ayuda a Empleados": {}
+			},
+			"Gastos por Servicios Profesionales y Tecnicos": {},
+			"Gastos por Salarios y Otras Compensaciones": {},
+			"Gastopor Depreciacion": {},
+			"Otros Gastos": {
+				"Perdida Cambiario": {},
+				"Perdida e nVenta de Activo Fijo": {},
+				"Siniestros": {},
+				"Certificacion de Cheques y Chequeras": {}
+			},
+			"Costos y Gastos No Deducibles": {},
+			"Impuesto por Rentas y Ganancias de Capital": {},
+			"Impuesto sobre la Rentade Activividades Economicas": {},
+			"root_type": "Expense"
+		}
+	}
+}

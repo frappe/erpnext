@@ -19,7 +19,7 @@
   {
    "fieldname": "from_time", 
    "fieldtype": "Datetime", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "From Time", 
    "permlevel": 0, 
    "read_only": 0, 
@@ -28,7 +28,7 @@
   {
    "fieldname": "to_time", 
    "fieldtype": "Datetime", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "To Time", 
    "permlevel": 0, 
    "read_only": 0, 
@@ -43,6 +43,22 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "billable", 
+   "fieldtype": "Check", 
+   "in_list_view": 0, 
+   "label": "Billable", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "fieldname": "user", 
+   "fieldtype": "Link", 
+   "label": "User", 
+   "options": "User", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "column_break_3", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -51,7 +67,7 @@
   {
    "fieldname": "status", 
    "fieldtype": "Select", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Status", 
    "options": "Draft\nSubmitted\nBatched for Billing\nBilled\nCancelled", 
    "permlevel": 0, 
@@ -59,9 +75,21 @@
    "reqd": 0
   }, 
   {
+   "default": "Project", 
+   "fieldname": "time_log_for", 
+   "fieldtype": "Select", 
+   "label": "Time Log For", 
+   "options": "Project\nManufacturing", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1, 
+   "reqd": 0
+  }, 
+  {
+   "depends_on": "", 
    "fieldname": "activity_type", 
    "fieldtype": "Link", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Activity Type", 
    "options": "Activity Type", 
    "permlevel": 0, 
@@ -69,6 +97,7 @@
    "reqd": 1
   }, 
   {
+   "depends_on": "eval:doc.time_log_for != 'Manufacturing'", 
    "fieldname": "task", 
    "fieldtype": "Link", 
    "label": "Task", 
@@ -77,12 +106,67 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "billable", 
-   "fieldtype": "Check", 
-   "in_list_view": 1, 
-   "label": "Billable", 
+   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
+   "fieldname": "section_break_11", 
+   "fieldtype": "Section Break", 
    "permlevel": 0, 
-   "read_only": 0
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
+   "fieldname": "production_order", 
+   "fieldtype": "Link", 
+   "label": "Production Order", 
+   "options": "Production Order", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
+   "fieldname": "operation", 
+   "fieldtype": "Select", 
+   "label": "Operation", 
+   "options": "", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "operation_id", 
+   "fieldtype": "Data", 
+   "hidden": 1, 
+   "label": "Operation ID", 
+   "options": "", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_14", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
+   "fieldname": "workstation", 
+   "fieldtype": "Link", 
+   "label": "Workstation", 
+   "options": "Workstation", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
+   "description": "Operation completed for how many finished goods?", 
+   "fieldname": "completed_qty", 
+   "fieldtype": "Float", 
+   "label": "Completed Qty", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "section_break_7", 
@@ -104,6 +188,7 @@
    "read_only": 0
   }, 
   {
+   "depends_on": "eval:doc.time_log_for", 
    "fieldname": "project", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
@@ -146,12 +231,20 @@
    "permlevel": 1, 
    "print_hide": 1, 
    "read_only": 0
+  }, 
+  {
+   "fieldname": "title", 
+   "fieldtype": "Data", 
+   "hidden": 1, 
+   "label": "Title", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-10-22 16:53:26.993828", 
+ "modified": "2015-03-10 17:07:35.506886", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 
@@ -169,6 +262,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Projects User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -182,8 +276,10 @@
    "read": 1, 
    "report": 1, 
    "role": "Projects Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }
- ]
+ ], 
+ "title_field": "title"
 }

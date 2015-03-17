@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 # For license information, please see license.txt
@@ -15,7 +15,7 @@ class TimeLogBatch(Document):
 	def validate(self):
 		self.set_status()
 		self.total_hours = 0.0
-		for d in self.get("time_log_batch_details"):
+		for d in self.get("time_logs"):
 			tl = frappe.get_doc("Time Log", d.time_log)
 			self.update_time_log_values(d, tl)
 			self.validate_time_log_is_submitted(tl)
@@ -53,11 +53,11 @@ class TimeLogBatch(Document):
 
 	def update_status(self, time_log_batch):
 		self.set_status()
-		for d in self.get("time_log_batch_details"):
+		for d in self.get("time_logs"):
 			tl = frappe.get_doc("Time Log", d.time_log)
 			tl.time_log_batch = time_log_batch
 			tl.sales_invoice = self.sales_invoice
-			tl.ignore_validate_update_after_submit = True
+			tl.flags.ignore_validate_update_after_submit = True
 			tl.save()
 
 @frappe.whitelist()
@@ -67,7 +67,7 @@ def make_sales_invoice(source_name, target=None):
 		target_doc.description = "via Time Logs"
 
 	target = frappe.new_doc("Sales Invoice")
-	target.append("entries", get_mapped_doc("Time Log Batch", source_name, {
+	target.append("items", get_mapped_doc("Time Log Batch", source_name, {
 		"Time Log Batch": {
 			"doctype": "Sales Invoice Item",
 			"field_map": {

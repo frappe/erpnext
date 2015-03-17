@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 $(document).ready(function() {
@@ -7,7 +7,7 @@ $(document).ready(function() {
 	
 	frappe.call({
 		type: "POST",
-		method: "shopping_cart.shopping_cart.product.get_product_info",
+		method: "erpnext.shopping_cart.product.get_product_info",
 		args: {
 			item_code: "{{ name }}"
 		},

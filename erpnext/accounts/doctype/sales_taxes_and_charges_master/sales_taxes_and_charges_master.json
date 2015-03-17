@@ -12,7 +12,7 @@
    "fieldname": "title", 
    "fieldtype": "Data", 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Title", 
    "oldfieldname": "title", 
    "oldfieldtype": "Data", 
@@ -26,6 +26,14 @@
    "in_list_view": 1, 
    "label": "Default", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "disabled", 
+   "fieldtype": "Check", 
+   "in_list_view": 0, 
+   "label": "Disabled", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "column_break_3", 
@@ -52,9 +60,9 @@
   }, 
   {
    "description": "* Will be calculated in the transaction.", 
-   "fieldname": "other_charges", 
+   "fieldname": "taxes", 
    "fieldtype": "Table", 
-   "label": "Sales Taxes and Charges Master", 
+   "label": "Sales Taxes and Charges", 
    "oldfieldname": "other_charges", 
    "oldfieldtype": "Table", 
    "options": "Sales Taxes and Charges", 
@@ -62,7 +70,7 @@
   }, 
   {
    "description": "Specify a list of Territories, for which, this Taxes Master is valid", 
-   "fieldname": "valid_for_territories", 
+   "fieldname": "territories", 
    "fieldtype": "Table", 
    "label": "Valid for Territories", 
    "options": "Applicable Territory", 
@@ -72,7 +80,7 @@
  ], 
  "icon": "icon-money", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:19.023941", 
+ "modified": "2015-02-05 05:11:46.282418", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Taxes and Charges Master", 
@@ -102,6 +110,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -115,6 +124,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

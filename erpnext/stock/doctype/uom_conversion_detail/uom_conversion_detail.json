@@ -1,6 +1,6 @@
 {
- "autoname": "UCDD/.#####", 
- "creation": "2013-02-22 01:28:04.000000", 
+ "autoname": "hash", 
+ "creation": "2013-02-22 01:28:04", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -26,9 +26,10 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:21:53.000000", 
+ "modified": "2015-02-19 01:07:02.522989", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "UOM Conversion Detail", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }

@@ -1,14 +1,8 @@
-<div class="col-sm-3">
-	<div style="height: 120px; overflow: hidden;">
-		<a href="{{ route or page_name }}">
-		{%- if website_image -%}
-		<img class="product-image" style="width: 80%; margin: auto;" src="{{ website_image }}">
-		{%- else -%}
-		{% include 'templates/includes/product_missing_image.html' %}
-		{%- endif -%}
-		</a>
+{% from "erpnext/templates/includes/macros.html" import product_image_square %}
+
+<a class="product-link" href="{{ route or page_name }}">
+	<div class="col-sm-2 col-xs-4 product-image-wrapper">
+		{{ product_image_square(website_image) }}
+		<div class="text-ellipsis inline-block small product-text">{{ item_name }}</div>
 	</div>
-	<div style="height: 100px; overflow: hidden; font-size: 80%;">
-		<div style="margin-bottom: 2px;"><a href="{{ route or page_name }}">{{ item_name }}</a></div>
-	</div>
-</div>
+</a>

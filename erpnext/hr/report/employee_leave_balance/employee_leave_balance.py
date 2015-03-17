@@ -1,10 +1,10 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.widgets.reportview import execute as runreport
+from frappe.desk.reportview import execute as runreport
 
 def execute(filters=None):
 	if not filters: filters = {}

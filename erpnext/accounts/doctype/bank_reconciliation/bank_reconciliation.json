@@ -54,13 +54,13 @@
    "fieldname": "get_relevant_entries", 
    "fieldtype": "Button", 
    "label": "Get Relevant Entries", 
-   "options": "get_details", 
+   "options": "", 
    "permlevel": 0
   }, 
   {
-   "fieldname": "entries", 
+   "fieldname": "journal_entries", 
    "fieldtype": "Table", 
-   "label": "Entries", 
+   "label": "Journal Entries", 
    "options": "Bank Reconciliation Detail", 
    "permlevel": 0
   }, 
@@ -68,7 +68,7 @@
    "fieldname": "update_clearance_date", 
    "fieldtype": "Button", 
    "label": "Update Clearance Date", 
-   "options": "update_details", 
+   "options": "", 
    "permlevel": 0
   }, 
   {
@@ -85,7 +85,7 @@
  "icon": "icon-check", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2014-05-27 03:37:21.783216", 
+ "modified": "2015-02-05 05:11:34.776660", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Bank Reconciliation", 
@@ -100,6 +100,7 @@
    "read": 1, 
    "report": 0, 
    "role": "Accounts User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

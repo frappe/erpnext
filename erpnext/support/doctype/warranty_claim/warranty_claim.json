@@ -1,0 +1,425 @@
+{
+ "allow_import": 1, 
+ "autoname": "naming_series:", 
+ "creation": "2013-01-10 16:34:30", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "customer_section", 
+   "fieldtype": "Section Break", 
+   "label": "", 
+   "options": "icon-user", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "naming_series", 
+   "fieldtype": "Select", 
+   "in_filter": 0, 
+   "label": "Series", 
+   "no_copy": 1, 
+   "oldfieldname": "naming_series", 
+   "oldfieldtype": "Select", 
+   "options": "CI-", 
+   "permlevel": 0, 
+   "reqd": 1, 
+   "search_index": 0
+  }, 
+  {
+   "default": "Open", 
+   "fieldname": "status", 
+   "fieldtype": "Select", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Status", 
+   "no_copy": 1, 
+   "oldfieldname": "status", 
+   "oldfieldtype": "Select", 
+   "options": "\nOpen\nClosed\nWork In Progress\nCancelled", 
+   "permlevel": 0, 
+   "reqd": 1, 
+   "search_index": 1
+  }, 
+  {
+   "default": "Today", 
+   "fieldname": "complaint_date", 
+   "fieldtype": "Date", 
+   "in_filter": 1, 
+   "label": "Issue Date", 
+   "oldfieldname": "complaint_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0, 
+   "reqd": 1, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "column_break0", 
+   "fieldtype": "Column Break", 
+   "oldfieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "description": "", 
+   "fieldname": "serial_no", 
+   "fieldtype": "Link", 
+   "in_list_view": 0, 
+   "label": "Serial No", 
+   "options": "Serial No", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "customer", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "in_list_view": 0, 
+   "label": "Customer", 
+   "oldfieldname": "customer", 
+   "oldfieldtype": "Link", 
+   "options": "Customer", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "reqd": 1, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "customer_address", 
+   "fieldtype": "Link", 
+   "label": "Customer Address", 
+   "options": "Address", 
+   "permlevel": 0, 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "contact_person", 
+   "fieldtype": "Link", 
+   "label": "Contact Person", 
+   "options": "Contact", 
+   "permlevel": 0, 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "issue_details", 
+   "fieldtype": "Section Break", 
+   "label": "", 
+   "oldfieldtype": "Section Break", 
+   "options": "icon-ticket", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "complaint", 
+   "fieldtype": "Small Text", 
+   "label": "Issue", 
+   "no_copy": 1, 
+   "oldfieldname": "complaint", 
+   "oldfieldtype": "Small Text", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "item_code", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Item Code", 
+   "oldfieldname": "item_code", 
+   "oldfieldtype": "Link", 
+   "options": "Item", 
+   "permlevel": 0, 
+   "reqd": 0, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "column_break1", 
+   "fieldtype": "Column Break", 
+   "oldfieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "depends_on": "eval:doc.item_code", 
+   "fieldname": "item_name", 
+   "fieldtype": "Data", 
+   "label": "Item Name", 
+   "oldfieldname": "item_name", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "depends_on": "eval:doc.item_code", 
+   "fieldname": "description", 
+   "fieldtype": "Small Text", 
+   "label": "Description", 
+   "oldfieldname": "description", 
+   "oldfieldtype": "Small Text", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "width": "300px"
+  }, 
+  {
+   "fieldname": "warranty_amc_status", 
+   "fieldtype": "Select", 
+   "hidden": 0, 
+   "in_filter": 1, 
+   "in_list_view": 0, 
+   "label": "Warranty / AMC Status", 
+   "options": "\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "warranty_expiry_date", 
+   "fieldtype": "Date", 
+   "label": "Warranty Expiry Date", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "amc_expiry_date", 
+   "fieldtype": "Date", 
+   "label": "AMC Expiry Date", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "To assign this issue, use the \"Assign\" button in the sidebar.", 
+   "fieldname": "resolution_section", 
+   "fieldtype": "Section Break", 
+   "label": "Resolution", 
+   "oldfieldtype": "Section Break", 
+   "options": "icon-thumbs-up", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "resolution_date", 
+   "fieldtype": "Datetime", 
+   "in_filter": 1, 
+   "label": "Resolution Date", 
+   "no_copy": 1, 
+   "oldfieldname": "resolution_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "resolved_by", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
+   "in_filter": 1, 
+   "label": "Resolved By", 
+   "no_copy": 1, 
+   "oldfieldname": "resolved_by", 
+   "oldfieldtype": "Link", 
+   "options": "User", 
+   "permlevel": 0, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "resolution_details", 
+   "fieldtype": "Text", 
+   "label": "Resolution Details", 
+   "no_copy": 1, 
+   "oldfieldname": "resolution_details", 
+   "oldfieldtype": "Text", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "contact_info", 
+   "fieldtype": "Section Break", 
+   "label": "Contact Info", 
+   "options": "icon-bullhorn", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "col_break3", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "depends_on": "customer", 
+   "fieldname": "customer_name", 
+   "fieldtype": "Data", 
+   "label": "Customer Name", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "depends_on": "customer", 
+   "description": "", 
+   "fieldname": "customer_group", 
+   "fieldtype": "Link", 
+   "label": "Customer Group", 
+   "options": "Customer Group", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "reqd": 0
+  }, 
+  {
+   "depends_on": "customer", 
+   "description": "", 
+   "fieldname": "territory", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "label": "Territory", 
+   "oldfieldname": "territory", 
+   "oldfieldtype": "Link", 
+   "options": "Territory", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "reqd": 0, 
+   "search_index": 1
+  }, 
+  {
+   "depends_on": "customer", 
+   "fieldname": "contact_display", 
+   "fieldtype": "Small Text", 
+   "label": "Contact", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "depends_on": "customer", 
+   "fieldname": "contact_mobile", 
+   "fieldtype": "Data", 
+   "label": "Mobile No", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "depends_on": "customer", 
+   "fieldname": "contact_email", 
+   "fieldtype": "Data", 
+   "label": "Contact Email", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "col_break4", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "depends_on": "customer", 
+   "description": "If different than customer address", 
+   "fieldname": "service_address", 
+   "fieldtype": "Small Text", 
+   "label": "Service Address", 
+   "oldfieldname": "service_address", 
+   "oldfieldtype": "Small Text", 
+   "permlevel": 0
+  }, 
+  {
+   "depends_on": "customer", 
+   "fieldname": "address_display", 
+   "fieldtype": "Small Text", 
+   "hidden": 0, 
+   "label": "Address", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "more_info", 
+   "fieldtype": "Section Break", 
+   "label": "More Info", 
+   "options": "icon-file-text", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "col_break5", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "fieldname": "company", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "label": "Company", 
+   "oldfieldname": "company", 
+   "oldfieldtype": "Link", 
+   "options": "Company", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "reqd": 1, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "fiscal_year", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "label": "Fiscal Year", 
+   "oldfieldname": "fiscal_year", 
+   "oldfieldtype": "Select", 
+   "options": "Fiscal Year", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "reqd": 1, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "col_break6", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "fieldname": "complaint_raised_by", 
+   "fieldtype": "Data", 
+   "label": "Raised By", 
+   "oldfieldname": "complaint_raised_by", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "from_company", 
+   "fieldtype": "Data", 
+   "label": "From Company", 
+   "oldfieldname": "from_company", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "amended_from", 
+   "fieldtype": "Link", 
+   "hidden": 1, 
+   "ignore_user_permissions": 1, 
+   "label": "Amended From", 
+   "no_copy": 1, 
+   "oldfieldname": "amended_from", 
+   "oldfieldtype": "Data", 
+   "options": "Warranty Claim", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "width": "150px"
+  }
+ ], 
+ "icon": "icon-bug", 
+ "idx": 1, 
+ "is_submittable": 0, 
+ "modified": "2015-02-21 04:11:40.653543", 
+ "modified_by": "Administrator", 
+ "module": "Support", 
+ "name": "Warranty Claim", 
+ "owner": "harshada@webnotestech.com", 
+ "permissions": [
+  {
+   "amend": 0, 
+   "apply_user_permissions": 1, 
+   "create": 1, 
+   "delete": 1, 
+   "email": 1, 
+   "permlevel": 0, 
+   "print": 1, 
+   "read": 1, 
+   "report": 1, 
+   "role": "Maintenance User", 
+   "share": 1, 
+   "submit": 0, 
+   "write": 1
+  }
+ ], 
+ "search_fields": "status,customer,customer_name,territory", 
+ "sort_field": "modified", 
+ "sort_order": "DESC", 
+ "title_field": "customer_name"
+}

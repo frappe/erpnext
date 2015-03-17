@@ -1,23 +1,17 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-pscript['onload_Sales Browser'] = function(wrapper){
-	frappe.ui.make_app_page({
+frappe.pages["Sales Browser"].on_page_load = function(wrapper){
+	var page = frappe.ui.make_app_page({
 		parent: wrapper,
-	})
+		single_column: true,
+	});
 
-	wrapper.appframe.add_module_icon("Selling")
+	frappe.breadcrumbs.add("Selling")
 
-	wrapper.appframe.set_title_right(__('Refresh'), function() {
+	wrapper.page.set_secondary_action(__('Refresh'), function() {
 			wrapper.make_tree();
 		});
-
-
-	$(wrapper)
-		.find(".layout-side-section")
-		.html('<div class="text-muted">'+
-			__('Click on a link to get options to expand get options ') +
-			__('Add') + ' / ' + __('Edit') + ' / '+ __('Delete') + '.</div>')
 
 	wrapper.make_tree = function() {
 		var ctype = frappe.get_route()[1] || 'Territory';
@@ -26,13 +20,11 @@ pscript['onload_Sales Browser'] = function(wrapper){
 			args: {ctype: ctype},
 			callback: function(r) {
 				var root = r.message[0]["value"];
-				erpnext.sales_chart = new erpnext.SalesChart(ctype, root,
-					$(wrapper)
-						.find(".layout-main-section")
-						.css({
-							"min-height": "300px",
-							"padding-bottom": "25px"
-						}));
+				erpnext.sales_chart = new erpnext.SalesChart(ctype, root, page,
+					page.main.css({
+						"min-height": "300px",
+						"padding-bottom": "25px"
+					}));
 			}
 		});
 	}
@@ -40,11 +32,11 @@ pscript['onload_Sales Browser'] = function(wrapper){
 	wrapper.make_tree();
 }
 
-pscript['onshow_Sales Browser'] = function(wrapper){
+frappe.pages['Sales Browser'].on_page_show = function(wrapper){
 	// set route
 	var ctype = frappe.get_route()[1] || 'Territory';
 
-	wrapper.appframe.set_title(__('{0} Tree',[__(ctype)]));
+	wrapper.page.set_title(__('{0} Tree',[__(ctype)]));
 
 	if(erpnext.sales_chart && erpnext.sales_chart.ctype != ctype) {
 		wrapper.make_tree();
@@ -52,15 +44,20 @@ pscript['onshow_Sales Browser'] = function(wrapper){
 };
 
 erpnext.SalesChart = Class.extend({
-	init: function(ctype, root, parent) {
+	init: function(ctype, root, page, parent) {
 		$(parent).empty();
 		var me = this;
 		me.ctype = ctype;
+		me.page = page;
 		me.can_read = frappe.model.can_read(this.ctype);
 		me.can_create = frappe.boot.user.can_create.indexOf(this.ctype) !== -1 ||
 					frappe.boot.user.in_create.indexOf(this.ctype) !== -1;
 		me.can_write = frappe.model.can_write(this.ctype);
 		me.can_delete = frappe.model.can_delete(this.ctype);
+
+		me.page.set_primary_action(__("New"), function() {
+			me.new_node();
+		});
 
 		this.tree = new frappe.ui.Tree({
 			parent: $(parent),
@@ -109,13 +106,18 @@ erpnext.SalesChart = Class.extend({
 	},
 	new_node: function() {
 		var me = this;
+		var node = me.tree.get_selected_node();
+
+		if(!(node && node.expandable)) {
+			frappe.msgprint(__("Select a group node first."));
+			return;
+		}
 
 		var fields = [
 			{fieldtype:'Data', fieldname: 'name_field',
 				label:__('New {0} Name',[__(me.ctype)]), reqd:true},
 			{fieldtype:'Select', fieldname:'is_group', label:__('Group Node'), options:'No\nYes',
-				description: __("Further nodes can be only created under 'Group' type nodes")},
-			{fieldtype:'Button', fieldname:'create_new', label:__('Create New') }
+				description: __("Further nodes can be only created under 'Group' type nodes")}
 		]
 
 		if(me.ctype == "Sales Person") {
@@ -131,7 +133,7 @@ erpnext.SalesChart = Class.extend({
 
 		d.set_value("is_group", "No");
 		// create
-		$(d.fields_dict.create_new.input).click(function() {
+		d.set_primary_action(__("Create New"), function() {
 			var btn = this;
 			var v = d.get_values();
 			if(!v) return;
@@ -155,6 +157,7 @@ erpnext.SalesChart = Class.extend({
 				}
 			});
 		});
+
 		d.show();
 	},
 });

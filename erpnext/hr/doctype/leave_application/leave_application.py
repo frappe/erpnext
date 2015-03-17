@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -17,6 +17,10 @@ class LeaveApproverIdentityError(frappe.ValidationError): pass
 
 from frappe.model.document import Document
 class LeaveApplication(Document):
+	def get_feed(self):
+		return _("{0}: From {0} of type {1}").format(self.status,
+			self.employee_name, self.leave_type)
+
 	def validate(self):
 		if not getattr(self, "__islocal", None) and frappe.db.exists(self.doctype, self.name):
 			self.previous_doc = frappe.db.get_value(self.doctype, self.name, "*", as_dict=True)
@@ -139,7 +143,7 @@ class LeaveApplication(Document):
 
 	def validate_leave_approver(self):
 		employee = frappe.get_doc("Employee", self.employee)
-		leave_approvers = [l.leave_approver for l in employee.get("employee_leave_approvers")]
+		leave_approvers = [l.leave_approver for l in employee.get("leave_approvers")]
 
 		if len(leave_approvers) and self.leave_approver not in leave_approvers:
 			frappe.throw(_("Leave approver must be one of {0}").format(comma_or(leave_approvers)), InvalidLeaveApproverError)
@@ -196,7 +200,7 @@ class LeaveApplication(Document):
 
 	def notify(self, args):
 		args = frappe._dict(args)
-		from frappe.core.page.messages.messages import post
+		from frappe.desk.page.messages.messages import post
 		post(**{"txt": args.message, "contact": args.message_to, "subject": args.subject,
 			"notify": cint(self.follow_via_email)})
 
@@ -262,7 +266,7 @@ def get_events(start, end):
 
 	employee, company = employee.name, employee.company
 
-	from frappe.widgets.reportview import build_match_conditions
+	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("Leave Application")
 
 	# show department leaves for employee

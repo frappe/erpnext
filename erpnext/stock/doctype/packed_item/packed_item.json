@@ -51,6 +51,12 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "column_break_5", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "description", 
    "fieldtype": "Text", 
    "in_list_view": 1, 
@@ -83,16 +89,35 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "section_break_9", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "serial_no", 
    "fieldtype": "Text", 
    "label": "Serial No", 
    "permlevel": 0
   }, 
   {
+   "fieldname": "column_break_11", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "batch_no", 
-   "fieldtype": "Data", 
+   "fieldtype": "Link", 
    "label": "Batch No", 
+   "options": "Batch", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "section_break_13", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "allow_on_submit": 1, 
@@ -101,17 +126,6 @@
    "label": "Actual Qty", 
    "no_copy": 1, 
    "oldfieldname": "actual_qty", 
-   "oldfieldtype": "Currency", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
-   "allow_on_submit": 1, 
-   "fieldname": "projected_qty", 
-   "fieldtype": "Float", 
-   "label": "Projected Qty", 
-   "no_copy": 1, 
-   "oldfieldname": "projected_qty", 
    "oldfieldtype": "Currency", 
    "permlevel": 0, 
    "read_only": 1
@@ -126,6 +140,23 @@
    "permlevel": 0, 
    "read_only": 1, 
    "search_index": 0
+  }, 
+  {
+   "fieldname": "column_break_16", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "allow_on_submit": 1, 
+   "fieldname": "projected_qty", 
+   "fieldtype": "Float", 
+   "label": "Projected Qty", 
+   "no_copy": 1, 
+   "oldfieldname": "projected_qty", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "read_only": 1
   }, 
   {
    "fieldname": "prevdoc_doctype", 
@@ -151,7 +182,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-09-09 05:35:38.216185", 
+ "modified": "2015-02-25 02:04:42.022503", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Packed Item", 

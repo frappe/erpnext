@@ -9,7 +9,7 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Journal Voucher",
+					"name": "Journal Entry",
 					"description": _("Accounting journal entries.")
 				},
 				{
@@ -139,8 +139,8 @@ def get_data():
 				},
 				{
 					"type":"doctype",
-					"name": "Budget Distribution",
-					"description": _("Seasonality for setting budgets.")
+					"name": "Monthly Distribution",
+					"description": _("Seasonality for setting budgets, targets etc.")
 				},
 				{
 					"type": "doctype",
@@ -235,7 +235,7 @@ def get_data():
 					"type": "report",
 					"name": "Bank Reconciliation Statement",
 					"is_query_report": True,
-					"doctype": "Journal Voucher"
+					"doctype": "Journal Entry"
 				},
 				{
 					"type": "report",
@@ -265,31 +265,19 @@ def get_data():
 					"type": "report",
 					"name": "Bank Clearance Summary",
 					"is_query_report": True,
-					"doctype": "Journal Voucher"
+					"doctype": "Journal Entry"
 				},
 				{
 					"type": "report",
 					"name": "Payment Period Based On Invoice Date",
 					"is_query_report": True,
-					"doctype": "Journal Voucher"
+					"doctype": "Journal Entry"
 				},
 				{
 					"type": "report",
 					"name": "Sales Partners Commission",
 					"is_query_report": True,
 					"doctype": "Sales Invoice"
-				},
-				{
-					"type": "report",
-					"name": "Customer Account Head",
-					"is_query_report": True,
-					"doctype": "Account"
-				},
-				{
-					"type": "report",
-					"name": "Supplier Account Head",
-					"is_query_report": True,
-					"doctype": "Account"
 				},
 				{
 					"type": "report",
@@ -320,6 +308,24 @@ def get_data():
 					"name": "Sales Invoice Trends",
 					"is_query_report": True,
 					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"name": "Accounts Receivable Summary",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Accounts Payable Summary",
+					"doctype": "Purchase Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Customer Credit Balance",
+					"doctype": "Customer"
 				},
 			]
 		},

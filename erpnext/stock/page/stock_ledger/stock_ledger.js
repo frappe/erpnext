@@ -1,7 +1,7 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.pages['stock-ledger'].onload = function(wrapper) {
+frappe.pages['stock-ledger'].on_page_load = function(wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
 		title: __('Stock Ledger'),
@@ -9,8 +9,8 @@ frappe.pages['stock-ledger'].onload = function(wrapper) {
 	});
 
 	new erpnext.StockLedger(wrapper);
-	wrapper.appframe.add_module_icon("Stock")
-}
+	frappe.breadcrumbs.add("Stock")
+};
 
 frappe.require("assets/erpnext/js/stock_grid_report.js");
 
@@ -20,7 +20,7 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 			title: __("Stock Ledger"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
-			appframe: wrapper.appframe,
+			page: wrapper.page,
 			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand", "Serial No"],
 		})
 	},
@@ -80,12 +80,9 @@ erpnext.StockLedger = erpnext.StockGridReport.extend({
 		{fieldtype:"Date", label: __("From Date"), filter: function(val, item) {
 			return dateutil.str_to_obj(val) <= dateutil.str_to_obj(item.posting_date);
 		}},
-		{fieldtype:"Label", label: __("To")},
 		{fieldtype:"Date", label: __("To Date"), filter: function(val, item) {
 			return dateutil.str_to_obj(val) >= dateutil.str_to_obj(item.posting_date);
-		}},
-		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: __("Reset Filters"), icon: "icon-filter"}
+		}}
 	],
 
 	setup_filters: function() {

@@ -1,16 +1,8 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// Module CRM
-// =====================================================================================
-cur_frm.cscript.tname = "Quotation Item";
-cur_frm.cscript.fname = "quotation_details";
-cur_frm.cscript.other_fname = "other_charges";
-cur_frm.cscript.sales_team_fname = "sales_team";
 
 {% include 'selling/sales_common.js' %}
-{% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
-{% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	onload: function(doc, dt, dn) {
@@ -32,14 +24,14 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 				cur_frm.add_custom_button(__('Set as Lost'),
 					cur_frm.cscript['Declare Order Lost'], "icon-exclamation", "btn-default");
 			}
-			cur_frm.appframe.add_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone");
+
 		}
 
 		if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('From Opportunity'),
 				function() {
 					frappe.model.map_current_doc({
-						method: "erpnext.selling.doctype.opportunity.opportunity.make_quotation",
+						method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
 						source_doctype: "Opportunity",
 						get_query_filters: {
 							docstatus: 1,
@@ -51,15 +43,6 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 						}
 					})
 				}, "icon-download", "btn-default");
-		}
-
-		if (!doc.__islocal) {
-			cur_frm.communication_view = new frappe.views.CommunicationList({
-				list: frappe.get_list("Communication", {"parent": doc.name, "parenttype": "Quotation"}),
-				parent: cur_frm.fields_dict.communication_html.wrapper,
-				doc: doc,
-				recipients: doc.contact_email
-			});
 		}
 
 		this.toggle_reqd_lead_customer();
@@ -110,7 +93,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	lead: function() {
 		var me = this;
 		frappe.call({
-			method: "erpnext.selling.doctype.lead.lead.get_lead_details",
+			method: "erpnext.crm.doctype.lead.lead.get_lead_details",
 			args: { "lead": this.frm.doc.lead },
 			callback: function(r) {
 				if(r.message) {
@@ -175,8 +158,6 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 		cur_frm.email_doc(frappe.boot.notification_settings.quotation_message);
 }
 
-cur_frm.cscript.send_sms = function() {
-	frappe.require("assets/erpnext/js/sms_manager.js");
-	var sms_man = new SMSManager(cur_frm.doc);
-}
-
+frappe.ui.form.on("Quotation Item", "items_on_form_rendered", function(frm, cdt, cdn) {
+	// enable tax_amount field if Actual
+})

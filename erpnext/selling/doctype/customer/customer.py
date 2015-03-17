@@ -1,17 +1,20 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
 from frappe.model.naming import make_autoname
-from frappe import msgprint, _
+from frappe import _, msgprint, throw
 import frappe.defaults
+from frappe.utils import flt
 
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.utilities.address_and_contact import load_address_and_contact
-from erpnext.accounts.party import create_party_account
 
 class Customer(TransactionBase):
+	def get_feed(self):
+		return self.customer_name
+
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self, "customer")
@@ -19,14 +22,9 @@ class Customer(TransactionBase):
 	def autoname(self):
 		cust_master_name = frappe.defaults.get_global_default('cust_master_name')
 		if cust_master_name == 'Customer Name':
-			if frappe.db.exists("Supplier", self.customer_name):
-				msgprint(_("A Supplier exists with same name"), raise_exception=1)
 			self.name = self.customer_name
 		else:
 			self.name = make_autoname(self.naming_series+'.#####')
-
-	def get_company_abbr(self):
-		return frappe.db.get_value('Company', self.company, 'abbr')
 
 	def validate_values(self):
 		if frappe.defaults.get_global_default('cust_master_name') == 'Naming Series' and not self.naming_series:
@@ -47,11 +45,6 @@ class Customer(TransactionBase):
 		frappe.db.sql("""update `tabContact` set customer_name=%s, modified=NOW()
 			where customer=%s""", (self.customer_name, self.name))
 
-	def update_credit_days_limit(self):
-		frappe.db.sql("""update tabAccount set credit_days = %s, credit_limit = %s
-			where master_type='Customer' and master_name = %s""",
-			(self.credit_days or 0, self.credit_limit or 0, self.name))
-
 	def create_lead_address_contact(self):
 		if self.lead_name:
 			if not frappe.db.get_value("Address", {"lead": self.lead_name, "customer": self.name}):
@@ -68,7 +61,7 @@ class Customer(TransactionBase):
 			c.customer = self.name
 			c.customer_name = self.customer_name
 			c.is_primary_contact = 1
-			c.ignore_permissions = getattr(self, "ignore_permissions", None)
+			c.flags.ignore_permissions = self.flags.ignore_permissions
 			c.autoname()
 			if not frappe.db.exists("Contact", c.name):
 				c.insert()
@@ -79,13 +72,6 @@ class Customer(TransactionBase):
 		self.update_lead_status()
 		self.update_address()
 		self.update_contact()
-
-		# create account head
-		create_party_account(self.name, "Customer", self.company)
-
-		# update credit days and limit in account
-		self.update_credit_days_limit()
-		#create address and contact from lead
 		self.create_lead_address_contact()
 
 	def validate_name_with_customer_group(self):
@@ -108,23 +94,11 @@ class Customer(TransactionBase):
 			where customer=%s""", self.name):
 				frappe.delete_doc("Contact", contact)
 
-	def delete_customer_account(self):
-		"""delete customer's ledger if exist and check balance before deletion"""
-		acc = frappe.db.sql("select name from `tabAccount` where master_type = 'Customer' \
-			and master_name = %s and docstatus < 2", self.name)
-		if acc:
-			frappe.delete_doc('Account', acc[0][0])
-
 	def on_trash(self):
 		self.delete_customer_address()
 		self.delete_customer_contact()
-		self.delete_customer_account()
 		if self.lead_name:
 			frappe.db.sql("update `tabLead` set status='Interested' where name=%s",self.lead_name)
-
-	def before_rename(self, olddn, newdn, merge=False):
-		from erpnext.accounts.utils import rename_account_for
-		rename_account_for("Customer", olddn, newdn, merge)
 
 	def after_rename(self, olddn, newdn, merge=False):
 		set_field = ''
@@ -149,7 +123,7 @@ def get_dashboard_info(customer):
 		out[doctype] = frappe.db.get_value(doctype,
 			{"customer": customer, "docstatus": ["!=", 2] }, "count(*)")
 
-	billing = frappe.db.sql("""select sum(grand_total), sum(outstanding_amount)
+	billing = frappe.db.sql("""select sum(base_grand_total), sum(outstanding_amount)
 		from `tabSales Invoice`
 		where customer=%s
 			and docstatus = 1
@@ -157,6 +131,7 @@ def get_dashboard_info(customer):
 
 	out["total_billing"] = billing[0][0]
 	out["total_unpaid"] = billing[0][1]
+	out["company_currency"] = frappe.db.sql_list("select distinct default_currency from tabCompany")
 
 	return out
 
@@ -174,3 +149,68 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
 		name, customer_name limit %s, %s""" %
 		(", ".join(fields), searchfield, "%s", "%s", "%s", "%s", "%s", "%s"),
 		("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))
+
+
+def check_credit_limit(customer, company):
+	customer_outstanding = get_customer_outstanding(customer, company)
+
+	credit_limit = get_credit_limit(customer, company)
+	if credit_limit > 0 and flt(customer_outstanding) > credit_limit:
+		msgprint(_("Credit limit has been crossed for customer {0} {1}/{2}")
+			.format(customer, customer_outstanding, credit_limit))
+
+		# If not authorized person raise exception
+		credit_controller = frappe.db.get_value('Accounts Settings', None, 'credit_controller')
+		if not credit_controller or credit_controller not in frappe.user.get_roles():
+			throw(_("Please contact to the user who have Sales Master Manager {0} role")
+				.format(" / " + credit_controller if credit_controller else ""))
+
+def get_customer_outstanding(customer, company):
+	# Outstanding based on GL Entries
+	outstanding_based_on_gle = frappe.db.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+		from `tabGL Entry` where party_type = 'Customer' and party = %s and company=%s""", (customer, company))
+
+	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
+
+	# Outstanding based on Sales Order
+	outstanding_based_on_so = frappe.db.sql("""
+		select sum(base_grand_total*(100 - ifnull(per_billed, 0))/100)
+		from `tabSales Order`
+		where customer=%s and docstatus = 1 and company=%s
+		and ifnull(per_billed, 0) < 100 and status != 'Stopped'""", (customer, company))
+
+	outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0.0
+
+	# Outstanding based on Delivery Note
+	outstanding_based_on_dn = frappe.db.sql("""
+		select
+			sum(
+				(
+					(ifnull(dn_item.amount, 0) - ifnull((select sum(ifnull(amount, 0))
+						from `tabSales Invoice Item`
+						where ifnull(dn_detail, '') = dn_item.name and docstatus = 1), 0)
+					)/dn.base_net_total
+				)*dn.base_grand_total
+			)
+		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
+		where
+			dn.name = dn_item.parent and dn.customer=%s and dn.company=%s
+			and dn.docstatus = 1 and dn.status != 'Stopped'
+			and ifnull(dn_item.against_sales_order, '') = ''
+			and ifnull(dn_item.against_sales_invoice, '') = ''
+			and ifnull(dn_item.amount, 0) > ifnull((select sum(ifnull(amount, 0))
+				from `tabSales Invoice Item`
+				where ifnull(dn_detail, '') = dn_item.name and docstatus = 1), 0)""", (customer, company))
+
+	outstanding_based_on_dn = flt(outstanding_based_on_dn[0][0]) if outstanding_based_on_dn else 0.0
+
+	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn
+
+
+def get_credit_limit(customer, company):
+	credit_limit, customer_group = frappe.db.get_value("Customer", customer, ["credit_limit", "customer_group"])
+	if not credit_limit:
+		credit_limit = frappe.db.get_value("Customer Group", customer_group, "credit_limit") or \
+			frappe.db.get_value("Company", company, "credit_limit")
+
+	return credit_limit

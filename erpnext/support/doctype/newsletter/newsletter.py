@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -94,7 +94,7 @@ class Newsletter(Document):
 
 		sender = self.send_from or frappe.utils.get_formatted_email(self.owner)
 
-		from frappe.utils.email_lib.bulk import send
+		from frappe.email.bulk import send
 
 		if not frappe.flags.in_test:
 			frappe.db.auto_commit_on_many_writes = True

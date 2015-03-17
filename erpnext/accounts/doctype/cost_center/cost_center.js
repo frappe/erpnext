@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.accounts");
@@ -12,8 +12,8 @@ erpnext.accounts.CostCenterController = frappe.ui.form.Controller.extend({
 
 	setup_queries: function() {
 		var me = this;
-		if(this.frm.fields_dict["budget_details"].grid.get_field("account")) {
-			this.frm.set_query("account", "budget_details", function() {
+		if(this.frm.fields_dict["budgets"].grid.get_field("account")) {
+			this.frm.set_query("account", "budgets", function() {
 				return {
 					filters:[
 						['Account', 'company', '=', me.frm.doc.company],
@@ -51,7 +51,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_display('sb1', doc.group_or_ledger=='Ledger')
 	cur_frm.set_intro(intro_txt);
 
-	cur_frm.appframe.add_button(__('Chart of Cost Centers'),
+	cur_frm.add_custom_button(__('Chart of Cost Centers'),
 		function() { frappe.set_route("Accounts Browser", "Cost Center"); }, 'icon-sitemap')
 }
 

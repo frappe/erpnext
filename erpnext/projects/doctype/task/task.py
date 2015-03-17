@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -11,6 +11,9 @@ from frappe import _
 from frappe.model.document import Document
 
 class Task(Document):
+	def get_feed(self):
+		return '{0}: {1}'.format(_(self.status), self.subject)
+
 	def get_project_details(self):
 		return {
 			"project": self.project
@@ -41,13 +44,13 @@ class Task(Document):
 
 	def on_update(self):
 		"""update percent complete in project"""
-		if self.project:
+		if self.project and not self.flags.from_project:
 			project = frappe.get_doc("Project", self.project)
 			project.run_method("update_percent_complete")
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
-	from frappe.widgets.reportview import build_match_conditions
+	from frappe.desk.reportview import build_match_conditions
 	if not frappe.has_permission("Task"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 

@@ -1,0 +1,30 @@
+{% set doc = frappe.get_doc(doc) %}
+<a class="website-list-row" href="/{{ pathname }}/{{ doc.name }}" no-pjax>
+<div class="row">
+	<div class="col-sm-6 col-xs-7">
+		<div class="row">
+			<div class="col-sm-9">{{ doc.customer or doc.supplier }}</div>
+			<div class="col-sm-3">
+				{%- if doc.status_percent > 0 -%}
+					{%- if doc.status_percent % 100 == 0 -%}
+					<span class="indicator green">{{ doc.status_display }}</span>
+					{%- else -%}
+					<span class="indicator orange">{{ doc.status_display }}</span>
+					{%- endif -%}
+				{%- elif doc.status -%}
+					<span class="indicator">{{ doc.status }}</span>
+				{%- endif -%}
+			</div>
+		</div>
+	</div>
+	<div class="col-sm-2 col-xs-5 text-right">
+		{{ doc.get_formatted("grand_total") }}
+	</div>
+	<div class="col-sm-2 text-muted text-right">
+		{{ doc.name }}
+	</div>
+	<div class="col-sm-2 small text-muted text-right" title="{{ frappe.utils.format_datetime(doc.creation, "medium") }}">
+		{{ frappe.utils.pretty_date(doc.creation) }}</div>
+</div>
+</a>
+

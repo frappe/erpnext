@@ -16,11 +16,32 @@
    "oldfieldtype": "Data", 
    "permlevel": 0, 
    "reqd": 1
+  }, 
+  {
+   "fieldname": "credit_days", 
+   "fieldtype": "Int", 
+   "label": "Credit Days", 
+   "permlevel": 1
+  }, 
+  {
+   "fieldname": "default_payable_account", 
+   "fieldtype": "Section Break", 
+   "label": "Default Payable Account", 
+   "permlevel": 0
+  }, 
+  {
+   "depends_on": "eval:!doc.__islocal", 
+   "description": "Mention if non-standard receivable account applicable", 
+   "fieldname": "accounts", 
+   "fieldtype": "Table", 
+   "label": "Accounts", 
+   "options": "Party Account", 
+   "permlevel": 0
   }
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:20.505739", 
+ "modified": "2015-02-24 17:35:22.087557", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Supplier Type", 
@@ -63,8 +84,25 @@
    "read": 1, 
    "report": 1, 
    "role": "Purchase Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
+  }, 
+  {
+   "permlevel": 1, 
+   "read": 1, 
+   "role": "Purchase Master Manager", 
+   "write": 1
+  }, 
+  {
+   "permlevel": 1, 
+   "read": 1, 
+   "role": "Purchase Manager"
+  }, 
+  {
+   "permlevel": 1, 
+   "read": 1, 
+   "role": "Purchase User"
   }
  ]
 }

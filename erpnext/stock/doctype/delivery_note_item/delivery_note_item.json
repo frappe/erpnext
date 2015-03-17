@@ -1,5 +1,5 @@
 {
- "autoname": "DND/.#######", 
+ "autoname": "hash", 
  "creation": "2013-04-22 13:15:44", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -57,6 +57,12 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "section_break_6", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "description", 
    "fieldtype": "Small Text", 
    "in_list_view": 1, 
@@ -68,6 +74,29 @@
    "read_only": 0, 
    "reqd": 1, 
    "width": "300px"
+  }, 
+  {
+   "fieldname": "column_break_8", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "hidden": 1, 
+   "label": "Image", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "quantity_and_rate", 
@@ -226,6 +255,58 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "section_break_25", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "net_rate", 
+   "fieldtype": "Currency", 
+   "label": "Net Rate", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "net_amount", 
+   "fieldtype": "Currency", 
+   "label": "Net Amount", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_28", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "base_net_rate", 
+   "fieldtype": "Currency", 
+   "label": "Net Rate (Company Currency)", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "base_net_amount", 
+   "fieldtype": "Currency", 
+   "label": "Net Amount (Company Currency)", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "warehouse_and_reference", 
    "fieldtype": "Section Break", 
    "label": "Warehouse and Reference", 
@@ -272,7 +353,7 @@
    "read_only": 0
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
    "hidden": 1, 
@@ -386,11 +467,11 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "prevdoc_detail_docname", 
+   "fieldname": "so_detail", 
    "fieldtype": "Data", 
    "hidden": 1, 
    "in_filter": 1, 
-   "label": "Against Document Detail No", 
+   "label": "Against Sales Order Item", 
    "no_copy": 1, 
    "oldfieldname": "prevdoc_detail_docname", 
    "oldfieldtype": "Data", 
@@ -400,6 +481,18 @@
    "read_only": 1, 
    "search_index": 0, 
    "width": "150px"
+  }, 
+  {
+   "fieldname": "si_detail", 
+   "fieldtype": "Data", 
+   "hidden": 1, 
+   "in_filter": 1, 
+   "label": "Against Sales Invoice Item", 
+   "no_copy": 1, 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
   }, 
   {
    "fieldname": "installed_qty", 
@@ -413,17 +506,6 @@
    "print_width": "150px", 
    "read_only": 1, 
    "width": "150px"
-  }, 
-  {
-   "fieldname": "buying_amount", 
-   "fieldtype": "Currency", 
-   "hidden": 1, 
-   "label": "Buying Amount", 
-   "no_copy": 1, 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 1
   }, 
   {
    "allow_on_submit": 1, 

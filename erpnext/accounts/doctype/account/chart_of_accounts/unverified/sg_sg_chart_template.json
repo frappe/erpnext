@@ -1,0 +1,223 @@
+{
+    "country_code": "sg",
+    "name": "Singapore Chart of Accounts",
+	"is_active": "Yes",
+    "tree": {
+        "Assets": {
+            "Cash and cash equivalents": {
+                "Cash on hand": {
+                    "account_type": "Cash"
+                },
+                "Client trust account": {
+                    "account_type": "Cash"
+                },
+                "Current": {
+                    "account_type": "Bank"
+                },
+                "Money market": {
+                    "account_type": "Cash"
+                },
+                "Rents held in trust": {
+                    "account_type": "Cash"
+                },
+                "Savings": {
+                    "account_type": "Cash"
+                },
+                "account_type": "Cash"
+            },
+            "Current assets": {
+                "Allowance for bad debts": {},
+                "Development costs": {},
+                "Employee cash advances": {},
+                "Inventory": {},
+                "Investments - other": {},
+                "Loans to officers": {},
+                "Loans to others": {},
+                "Loans to shareholders": {},
+                "Other Current Assets": {},
+                "Prepaid expenses": {},
+                "Retainage": {},
+                "Undeposited funds": {}
+            },
+            "Non-current assets": {
+                "Accumulated amortization of non-current assets": {},
+                "Available-for-sale financial assets": {},
+                "Deferred tax": {},
+                "Goodwill": {},
+                "Intangible Assets": {},
+                "Investments": {},
+                "Lease Buyout": {},
+                "Licences": {},
+                "Organisational costs": {},
+                "Other intangible assets": {},
+                "Other non-current assets": {},
+                "Prepayments and accrued income": {},
+                "Security Deposits": {}
+            },
+            "Property, plant and equipment": {
+                "Accumulated amortisation": {},
+                "Accumulated depletion": {},
+                "Accumulated depreciation": {},
+                "Buildings": {},
+                "Depletable assets": {},
+                "Furniture and fixtures": {},
+                "Leasehold improvements": {},
+                "Machinery and equipment": {},
+                "Other Assets": {},
+                "Vehicles": {}
+            },
+            "Purchase Tax Receivable": {
+                "Purchase Tax Account 0% EP": {},
+                "Purchase Tax Account 0% ME": {},
+                "Purchase Tax Account 0% NR": {},
+                "Purchase Tax Account 0% OP": {},
+                "Purchase Tax Account 0% ZP": {},
+                "Purchase Tax Account 7% BL": {},
+                "Purchase Tax Account 7% IM": {},
+                "Purchase Tax Account 7% TX-E33": {},
+                "Purchase Tax Account 7% TX-N33": {},
+                "Purchase Tax Account 7% TX-RE": {},
+                "Purchase Tax Account 7% TX7": {},
+                "Purchase Tax Account MES": {}
+            },
+            "Trade and other receivable": {
+                "Other Receivable Account": {
+                    "account_type": "Receivable"
+                },
+                "Trade Receivable Account": {
+                    "account_type": "Receivable"
+                },
+                "account_type": "Receivable"
+            },
+			"root_type": "Asset"
+        },
+        "Liabilities": {
+            "Current liabilities": {
+                "Client Trust Accounts - Liabilities": {},
+                "Current Tax Liability": {},
+                "Current portion of employee benefits obligations": {},
+                "Current portion of obligations under finance leases": {},
+                "GST Payable": {},
+                "Insurance Payable": {},
+                "Interest payables": {},
+                "Line of Credit": {},
+                "Loan Payable": {},
+                "Payroll Clearing": {},
+                "Payroll liabilities": {},
+                "Prepaid Expenses Payable": {},
+                "Provision for warranty obligations": {},
+                "Rents in trust - Liability": {},
+                "Short term borrowings": {}
+            },
+            "Equity": {
+                "Accumulated Adjustment": {},
+                "Opening Balance Equity": {},
+                "Ordinary shares": {},
+                "Owner's Equity": {},
+                "Paid-in capital or surplus": {},
+                "Partner's Equity": {},
+                "Preferred shares": {},
+                "Retained Earnings": {},
+                "Share capital": {},
+                "Treasury Shares": {}
+            },
+            "Non-current liabilities": {
+                "Accruals and Deferred Income": {},
+                "Bank loans": {},
+                "Long term borrowings": {},
+                "Long term employee benefit obligations": {},
+                "Notes Payable": {},
+                "Obligations under finance leases": {},
+                "Other non-current liabilities": {},
+                "Shareholder Notes Payable": {}
+            },
+            "Sale Tax Payables": {
+                " Sales Tax Account 0% ES33": {},
+                "Sales Tax Account 0% ESN33": {},
+                "Sales Tax Account 0% OS": {},
+                "Sales Tax Account 0% ZR": {},
+                "Sales Tax Account 7% DS": {},
+                "Sales Tax Account 7% SR": {}
+            },
+            "Trade and other payables": {
+                "Other Payable Account": {
+                    "account_type": "Payable"
+                },
+                "Trade Payable Account": {
+                    "account_type": "Payable"
+                },
+                "account_type": "Payable"
+            },
+			"root_type": "Liability"
+        },
+        "Cost of sales": {
+            "Cost of Good Sold": {
+                "Cost of Labour - COS": {},
+                "Equipment rental - COS": {},
+                "Freight and delivery - COS": {},
+                "Other costs of sales - COS": {},
+                "Supplies and materials - COS": {}
+            },
+			"root_type": "Expense"
+        },
+        "Income": {
+            "Other revenue": {
+                "Dividend revenue": {},
+                "Gain/loss on sale of fixed assets or investments": {},
+                "Interest earned": {},
+                "Other investment revenue": {},
+                "Other miscellaneous revenue": {},
+                "Tax-exempt interest": {}
+            },
+            "Revenue": {
+                "Discounts/refunds given": {},
+                "Non-profit revenue": {},
+                "Other primary revenue": {},
+                "Sales of product revenue": {},
+                "Service/fee revenue": {},
+                "Unapplied cash payment income": {}
+            },
+			"root_type": "Income"
+        },
+        "Indirect Expenses": {
+            "Expenses": {
+                "Administrative expenses": {},
+                "Advertising/promotional": {},
+                "Auto": {},
+                "Bad debts": {},
+                "Bank charges": {},
+                "Charitable contributions": {},
+                "Cost of labour": {},
+                "Distribution costs": {},
+                "Dues and subscriptions": {},
+                "Entertainment": {},
+                "Equipment rental": {},
+                "Finance costs": {},
+                "Insurance": {},
+                "Interest paid": {},
+                "Legal and professional fees": {},
+                "Meals and entertainment": {},
+                "Other miscellaneous service cost": {},
+                "Payroll expenses": {},
+                "Promotional meals": {},
+                "Rent or lease of buildings": {},
+                "Repair and maintenance": {},
+                "Shipping, freight, and delivery": {},
+                "Supplies": {},
+                "Taxes paid": {},
+                "Travel": {},
+                "Travel meals": {},
+                "Unapplied cash bill payment expense": {},
+                "Utilities": {}
+            },
+            "Other Expenses": {
+                "Amortisation": {},
+                "Depreciation": {},
+                "Exchange Gain or Loss": {},
+                "Other Expense": {},
+                "Penalties and settlements": {}
+            },
+			"root_type": "Expense"
+        }
+    }
+}

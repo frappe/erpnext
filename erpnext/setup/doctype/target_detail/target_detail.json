@@ -4,7 +4,7 @@
  "doctype": "DocType", 
  "fields": [
   {
-   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -54,7 +54,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-05-09 02:16:41.436257", 
+ "modified": "2015-01-01 14:29:58.758761", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Target Detail", 

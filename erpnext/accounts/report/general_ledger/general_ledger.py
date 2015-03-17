@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -78,7 +78,7 @@ def get_conditions(filters):
 		conditions.append("voucher_no=%(voucher_no)s")
 
 
-	from frappe.widgets.reportview import build_match_conditions
+	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
 	if match_conditions: conditions.append(match_conditions)
 

@@ -9,7 +9,7 @@
    "fieldtype": "Data", 
    "in_list_view": 1, 
    "label": "Invoice Type", 
-   "options": "Sales Invoice\nPurchase Invoice\nJournal Voucher", 
+   "options": "Sales Invoice\nPurchase Invoice\nJournal Entry", 
    "permlevel": 0, 
    "read_only": 1
   }, 

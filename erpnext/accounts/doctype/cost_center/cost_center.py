@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -51,7 +51,7 @@ class CostCenter(NestedSet):
 
 	def validate_budget_details(self):
 		check_acc_list = []
-		for d in self.get('budget_details'):
+		for d in self.get('budgets'):
 			if self.group_or_ledger=="Group":
 				msgprint(_("Budget cannot be set for Group Cost Centers"), raise_exception=1)
 

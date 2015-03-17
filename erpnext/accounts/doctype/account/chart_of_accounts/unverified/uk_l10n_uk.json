@@ -1,0 +1,186 @@
+{
+    "country_code": "uk",
+    "name": "UK Tax and Account Chart Template (by SmartMode)",
+	"is_active": "Yes",
+    "tree": {
+		"Asset": {
+	        "Current assets": {
+	            "Cash at bank and in hand": {
+	                "Bank Accounts": {},
+	                "Company Credit Card": {}
+	            },
+	            "Investment current assets": {},
+	            "Prepayments and accrued income": {
+	                "Prepayments": {}
+	            },
+	            "Stocks & WIP": {
+	                "Finished Goods": {},
+	                "Stock": {},
+	                "Work in Progress": {}
+	            },
+	            "Trade Debtors": {
+	                "Debtors Control Account": {},
+	                "Other Debtors": {},
+	                "Sundry Debtors": {}
+	            }
+	        },
+	        "Fixed assets": {
+	            "Intangible assets": {
+	                "Patents & Trademarks": {},
+	                "Patents & Trademarks Depreciation": {},
+	                "Software": {},
+	                "Software Depreciation": {}
+	            },
+	            "Investments": {},
+	            "Tangible assets": {
+	                "Fixtures and fittings": {},
+	                "Fixtures and fittings Depreciation": {},
+	                "Land and buildings": {},
+	                "Land and buildings Depreciation": {},
+	                "Motor vehicles": {},
+	                "Motor vehicles Depreciation": {},
+	                "Office equipment (inc computer equipment)": {},
+	                "Office equipment (inc computer equipment) Depreciation": {},
+	                "Plant and machinery": {},
+	                "Plant and machinery Depreciation": {}
+	            }
+	        },
+			"root_type": "Asset"
+		},
+		"Liabilities": {
+	        "Capital & Reserves": {
+	            "Called up share capital": {},
+	            "Other reserves": {},
+	            "Profit and loss account": {},
+	            "Revaluation reserve": {},
+	            "Share premium account": {}
+	        },
+	        "Current Liabilities": {
+	            "Accruals and deferred income": {
+	                "Accruals": {},
+	                "Corporation Tax": {}
+	            },
+	            "Creditors due within one year": {
+	                "Creditors Control Account": {},
+	                "HMRC - VAT Account": {},
+	                "Manual Adjustments \uff96 VAT": {},
+	                "Net Wages": {},
+	                "Other Creditors": {},
+	                "P.A.Y.E. & NI": {},
+	                "Pension Fund": {},
+	                "Purchase Tax Control Account": {},
+	                "Sales Tax Control Account": {},
+	                "Sundry Creditors": {}
+	            },
+	            "Provisions for liabilities and charges": {
+	                "Bad debt provision": {}
+	            }
+	        },
+	        "Non Current Liabilities": {
+	            "Creditors due after one year": {
+	                "Hire Purchase": {},
+	                "Loans": {},
+	                "Mortgages": {}
+	            }
+	        },
+			"root_type": "Liability"
+		},
+        "Expenses": {
+	        "Administrative expenses": {
+	            "Accountancy and audit": {
+	                "Accounting": {},
+	                "Auditing": {}
+	            },
+	            "Administration and office expenses": {
+	                "Books": {},
+	                "Internet & hosting": {},
+	                "Mobiles": {},
+	                "Network costs": {},
+	                "Office consumables": {},
+	                "Other admin expenses": {},
+	                "Other computer costs": {},
+	                "Postage and Carriage": {},
+	                "Recruitment fees": {},
+	                "Software expenses": {},
+	                "Stationery": {},
+	                "Telephone": {},
+	                "Travel and subsistence": {}
+	            },
+	            "Depreciation expense": {
+	                "Intangible assets depn": {},
+	                "Tangible assets depn": {}
+	            },
+	            "Legal and professional costs": {
+	                "Consultancy": {},
+	                "Legal and professional charges": {}
+	            },
+	            "Property costs": {
+	                "Light, heat and power": {},
+	                "Rent and rates": {},
+	                "Repairs, renewals and maintenance": {}
+	            },
+	            "Salaries & wages": {
+	                "Admin gross salaries": {},
+	                "Directors pension": {},
+	                "Directors remuneration": {},
+	                "Employers NIC": {},
+	                "Management gross salaries": {},
+	                "Subcontractors payments": {}
+	            },
+	            "Sundry expenses": {
+	                "Bad debts": {},
+	                "Bank, credit card and other financial charges": {},
+	                "Donations": {},
+	                "Entertaining": {},
+	                "Exchange gains/losses": {},
+	                "Insurance": {},
+	                "Other sundry expenses": {}
+	            },
+	            "Vehicle expenses": {
+	                "Car fuel": {},
+	                "Car hire": {},
+	                "Car maintenance": {}
+	            }
+	        },
+	        "Cost of sales": {
+	            "Cost of sales 1": {},
+	            "Cost of sales 2": {},
+	            "Cost of sales 3": {},
+	            "Cost of sales 4": {}
+	        },
+	        "Distribution costs": {
+	            "Advertising and promotions": {
+	                "Exhibitions and events": {},
+	                "Marketing, POS": {},
+	                "PR": {}
+	            },
+	            "Distribution salaries and wages": {},
+	            "Distribution vehicles": {},
+	            "Shipping": {}
+	        },
+	        "Interest payable and similar charges": {
+	            "Interest paid": {}
+	        },
+	        "Tax on profit or loss on ordinary activities": {
+	            "Corporation tax expense": {}
+	        },
+			"root_type": "Expense"
+        },
+		"Incomes": {
+	        "Interest receivable and similar income:": {
+	            "Bank Interest received": {},
+	            "Investment Interest received": {}
+	        },
+	        "Other operating income": {
+	            "Profits/Losses on disposals of assets": {}
+	        },
+	        "Turnover": {
+	            "Sales category 1": {},
+	            "Sales category 2": {},
+	            "Sales category 3": {},
+	            "Sales category 4": {}
+	        },
+			"root_type": "Income"
+		}
+    }
+}

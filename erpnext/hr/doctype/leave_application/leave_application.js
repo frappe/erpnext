@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch('employee','employee_name','employee_name');
@@ -35,18 +35,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 			} else {
 				cur_frm.set_intro(__("This Leave Application is pending approval. Only the Leave Approver can update status."))
 				cur_frm.toggle_enable("status", false);
-				if(!doc.__islocal) {
-						cur_frm.frm_head.appframe.set_title_right("");
-				}
-			}
-		} else {
- 			if(doc.status=="Approved") {
-				cur_frm.set_intro(__("Leave application has been approved."));
-				if(cur_frm.doc.docstatus==0) {
-					cur_frm.set_intro(__("Please submit to update Leave Balance."));
-				}
-			} else if(doc.status=="Rejected") {
-				cur_frm.set_intro(__("Leave application has been rejected."));
 			}
 		}
 	}

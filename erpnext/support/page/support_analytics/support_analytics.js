@@ -1,18 +1,18 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.pages['support-analytics'].onload = function(wrapper) { 
+frappe.pages['support-analytics'].on_page_load = function(wrapper) {
 	frappe.ui.make_app_page({
 		parent: wrapper,
 		title: __('Support Analytics'),
 		single_column: true
-	});					
+	});
 
 	new erpnext.SupportAnalytics(wrapper);
-	
 
-	wrapper.appframe.add_module_icon("Support")
-	
+
+	frappe.breadcrumbs.add("Support")
+
 }
 
 erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
@@ -21,33 +21,30 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 			title: __("Support Analtyics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
-			appframe: wrapper.appframe,
-			doctypes: ["Support Ticket", "Fiscal Year"],
+			page: wrapper.page,
+			doctypes: ["Issue", "Fiscal Year"],
 		});
 	},
-	
+
 	filters: [
-		{fieldtype:"Select", label: __("Fiscal Year"), link:"Fiscal Year", 
+		{fieldtype:"Select", label: __("Fiscal Year"), link:"Fiscal Year",
 			default_value: __("Select Fiscal Year") + "..."},
 		{fieldtype:"Date", label: __("From Date")},
-		{fieldtype:"Label", label: __("To")},
 		{fieldtype:"Date", label: __("To Date")},
-		{fieldtype:"Select", label: __("Range"), 
-			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: __("Reset Filters"), icon: "icon-filter"}
+		{fieldtype:"Select", label: __("Range"),
+			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]}
 	],
 
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: __("Plot"), field: "check", width: 30,
+			{id: "_check", name: __("Plot"), field: "_check", width: 30,
 				formatter: this.check_formatter},
 			{id: "status", name: __("Status"), field: "status", width: 100},
 		];
-		this.make_date_range_columns();		
+		this.make_date_range_columns();
 		this.columns = std_columns.concat(this.columns);
 	},
-	
+
 	prepare_data: function() {
 		// add Opening, Closing, Totals rows
 		// if filtered by account and / or voucher
@@ -57,14 +54,14 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 		var days_to_close = {status:"Days to Close", "id":"days-to-close",
 			checked:false};
 		var total_closed = {};
-		var hours_to_close = {status:"Hours to Close", "id":"hours-to-close", 
+		var hours_to_close = {status:"Hours to Close", "id":"hours-to-close",
 			checked:false};
-		var hours_to_respond = {status:"Hours to Respond", "id":"hours-to-respond", 
+		var hours_to_respond = {status:"Hours to Respond", "id":"hours-to-respond",
 			checked:false};
 		var total_responded = {};
 
-		
-		$.each(frappe.report_dump.data["Support Ticket"], function(i, d) {
+
+		$.each(frappe.report_dump.data["Issue"], function(i, d) {
 			var dateobj = dateutil.str_to_obj(d.creation);
 			var date = d.creation.split(" ")[0];
 			var col = me.column_map[date];
@@ -76,20 +73,20 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 
 					days_to_close[col.field] = flt(days_to_close[col.field])
 						+ dateutil.get_diff(d.resolution_date, d.creation);
-						
+
 					hours_to_close[col.field] = flt(hours_to_close[col.field])
 						+ dateutil.get_hour_diff(d.resolution_date, d.creation);
 
-				} 
+				}
 				if (d.first_responded_on) {
 					total_responded[col.field] = flt(total_responded[col.field]) + 1;
-					
+
 					hours_to_respond[col.field] = flt(hours_to_respond[col.field])
 						+ dateutil.get_hour_diff(d.first_responded_on, d.creation);
 				}
 			}
 		});
-		
+
 		// make averages
 		$.each(this.columns, function(i, col) {
 			if(col.formatter==me.currency_formatter && total_tickets[col.field]) {
@@ -97,17 +94,17 @@ erpnext.SupportAnalytics = frappe.views.GridReportWithPlot.extend({
 					flt(total_closed[col.field]);
 				hours_to_close[col.field] = flt(hours_to_close[col.field]) /
 					flt(total_closed[col.field]);
-				hours_to_respond[col.field] = flt(hours_to_respond[col.field]) / 
+				hours_to_respond[col.field] = flt(hours_to_respond[col.field]) /
 					flt(total_responded[col.field]);
 			}
 		})
-		
+
 		this.data = [total_tickets, days_to_close, hours_to_close, hours_to_respond];
 	},
 
 	get_plot_points: function(item, col, idx) {
-		return [[dateutil.str_to_obj(col.id).getTime(), item[col.field]], 
+		return [[dateutil.str_to_obj(col.id).getTime(), item[col.field]],
 			[dateutil.user_to_obj(col.name).getTime(), item[col.field]]];
 	}
-	
+
 });

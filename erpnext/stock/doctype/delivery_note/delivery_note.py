@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -13,19 +13,16 @@ from erpnext.stock.utils import update_bin
 from erpnext.controllers.selling_controller import SellingController
 
 form_grid_templates = {
-	"delivery_note_details": "templates/form_grid/item_grid.html"
+	"items": "templates/form_grid/item_grid.html"
 }
 
 class DeliveryNote(SellingController):
-	tname = 'Delivery Note Item'
-	fname = 'delivery_note_details'
-
 	def __init__(self, arg1, arg2=None):
 		super(DeliveryNote, self).__init__(arg1, arg2)
 		self.status_updater = [{
 			'source_dt': 'Delivery Note Item',
 			'target_dt': 'Sales Order Item',
-			'join_field': 'prevdoc_detail_docname',
+			'join_field': 'so_detail',
 			'target_field': 'delivered_qty',
 			'target_parent_dt': 'Sales Order',
 			'target_parent_field': 'per_delivered',
@@ -34,6 +31,22 @@ class DeliveryNote(SellingController):
 			'percent_join_field': 'against_sales_order',
 			'status_field': 'delivery_status',
 			'keyword': 'Delivered',
+			'second_source_dt': 'Sales Invoice Item',
+			'second_source_field': 'qty',
+			'second_join_field': 'so_detail',
+			'overflow_type': 'delivery',
+			'second_source_extra_cond': """ and exists(select name from `tabSales Invoice`
+				where name=`tabSales Invoice Item`.parent and ifnull(update_stock, 0) = 1)"""
+		},
+		{
+			'source_dt': 'Delivery Note Item',
+			'target_dt': 'Sales Invoice Item',
+			'join_field': 'si_detail',
+			'target_field': 'delivered_qty',
+			'target_parent_dt': 'Sales Invoice',
+			'target_ref_field': 'qty',
+			'source_field': 'qty',
+			'percent_join_field': 'against_sales_invoice',
 			'overflow_type': 'delivery'
 		}]
 
@@ -41,7 +54,7 @@ class DeliveryNote(SellingController):
 		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabSales Invoice Item`
 			where docstatus=1 and delivery_note=%s""", self.name)
 		if billed_qty:
-			total_qty = sum((item.qty for item in self.get("delivery_note_details")))
+			total_qty = sum((item.qty for item in self.get("items")))
 			self.get("__onload").billing_complete = (billed_qty[0][0] == total_qty)
 
 	def before_print(self):
@@ -54,7 +67,7 @@ class DeliveryNote(SellingController):
 
 		item_meta = frappe.get_meta("Delivery Note Item")
 		print_hide_fields = {
-			"parent": ["grand_total_export", "rounded_total_export", "in_words_export", "currency", "net_total_export"],
+			"parent": ["grand_total", "rounded_total", "in_words", "currency", "net_total"],
 			"items": ["rate", "amount", "price_list_rate", "discount_percentage"]
 		}
 
@@ -62,11 +75,8 @@ class DeliveryNote(SellingController):
 			for f in fieldname:
 				toggle_print_hide(self.meta if key == "parent" else item_meta, f)
 
-	def get_portal_page(self):
-		return "shipment" if self.docstatus==1 else None
-
 	def set_actual_qty(self):
-		for d in self.get('delivery_note_details'):
+		for d in self.get('items'):
 			if d.item_code and d.warehouse:
 				actual_qty = frappe.db.sql("""select actual_qty from `tabBin`
 					where item_code = %s and warehouse = %s""", (d.item_code, d.warehouse))
@@ -75,7 +85,7 @@ class DeliveryNote(SellingController):
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
 		if frappe.db.get_value("Selling Settings", None, 'so_required') == 'Yes':
-			 for d in self.get('delivery_note_details'):
+			 for d in self.get('items'):
 				 if not d.against_sales_order:
 					 frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
 
@@ -94,7 +104,7 @@ class DeliveryNote(SellingController):
 		self.validate_with_previous_doc()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		make_packing_list(self, 'delivery_note_details')
+		make_packing_list(self, 'items')
 
 		self.update_current_stock()
 
@@ -102,11 +112,11 @@ class DeliveryNote(SellingController):
 		if not self.installation_status: self.installation_status = 'Not Installed'
 
 	def validate_with_previous_doc(self):
-		items = self.get("delivery_note_details")
+		items = self.get("items")
 
 		for fn in (("Sales Order", "against_sales_order"), ("Sales Invoice", "against_sales_invoice")):
 			if filter(None, [getattr(d, fn[1], None) for d in items]):
-				super(DeliveryNote, self).validate_with_previous_doc(self.tname, {
+				super(DeliveryNote, self).validate_with_previous_doc({
 					fn[0]: {
 						"ref_dn_field": fn[1],
 						"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
@@ -115,9 +125,9 @@ class DeliveryNote(SellingController):
 				})
 
 				if cint(frappe.defaults.get_global_default('maintain_same_sales_rate')):
-					super(DeliveryNote, self).validate_with_previous_doc(self.tname, {
+					super(DeliveryNote, self).validate_with_previous_doc({
 						fn[0] + " Item": {
-							"ref_dn_field": "prevdoc_detail_docname",
+							"ref_dn_field": "so_detail",
 							"compare_fields": [["rate", "="]],
 							"is_child_table": True
 						}
@@ -134,7 +144,7 @@ class DeliveryNote(SellingController):
 
 	def validate_for_items(self):
 		check_list, chk_dupl_itm = [], []
-		for d in self.get('delivery_note_details'):
+		for d in self.get('items'):
 			e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
 			f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
 
@@ -158,11 +168,11 @@ class DeliveryNote(SellingController):
 
 	def update_current_stock(self):
 		if self.get("_action") and self._action != "update_after_submit":
-			for d in self.get('delivery_note_details'):
+			for d in self.get('items'):
 				d.actual_qty = frappe.db.get_value("Bin", {"item_code": d.item_code,
 					"warehouse": d.warehouse}, "actual_qty")
 
-			for d in self.get('packing_details'):
+			for d in self.get('packed_items'):
 				bin_qty = frappe.db.get_value("Bin", {"item_code": d.item_code,
 					"warehouse": d.warehouse}, ["actual_qty", "projected_qty"], as_dict=True)
 				if bin_qty:
@@ -173,15 +183,15 @@ class DeliveryNote(SellingController):
 		self.validate_packed_qty()
 
 		# Check for Approving Authority
-		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total, self)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.base_grand_total, self)
 
 		# update delivered qty in sales order
 		self.update_prevdoc_status()
 
+		self.check_credit_limit()
+
 		# create stock ledger entry
 		self.update_stock_ledger()
-
-		self.credit_limit()
 
 		self.make_gl_entries()
 
@@ -206,10 +216,10 @@ class DeliveryNote(SellingController):
 		"""
 			Validate that if packed qty exists, it should be equal to qty
 		"""
-		if not any([flt(d.get('packed_qty')) for d in self.get(self.fname)]):
+		if not any([flt(d.get('packed_qty')) for d in self.get("items")]):
 			return
 		has_error = False
-		for d in self.get(self.fname):
+		for d in self.get("items"):
 			if flt(d.get('qty')) != flt(d.get('packed_qty')):
 				frappe.msgprint(_("Packed quantity must equal quantity for Item {0} in row {1}").format(d.item_code, d.idx))
 				has_error = True
@@ -275,15 +285,11 @@ class DeliveryNote(SellingController):
 			}
 			update_bin(args)
 
-	def credit_limit(self):
-		"""check credit limit of items in DN Detail which are not fetched from sales order"""
-		amount, total = 0, 0
-		for d in self.get('delivery_note_details'):
-			if not (d.against_sales_order or d.against_sales_invoice):
-				amount += d.base_amount
-		if amount != 0:
-			total = (amount/self.net_total)*self.grand_total
-			self.check_credit(total)
+def get_list_context(context=None):
+	from erpnext.controllers.website_list_for_contact import get_list_context
+	list_context = get_list_context(context)
+	list_context["title"] = _("My Shipments")
+	return list_context
 
 def get_invoiced_qty_map(delivery_note):
 	"""returns a map: {dn_detail: invoiced_qty}"""
@@ -306,7 +312,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 
-		if len(target.get("entries")) == 0:
+		if len(target.get("items")) == 0:
 			frappe.throw(_("All these items have already been invoiced"))
 
 		target.run_method("calculate_taxes_and_totals")
@@ -326,7 +332,7 @@ def make_sales_invoice(source_name, target_doc=None):
 			"field_map": {
 				"name": "dn_detail",
 				"parent": "delivery_note",
-				"prevdoc_detail_docname": "so_detail",
+				"so_detail": "so_detail",
 				"against_sales_order": "sales_order",
 				"serial_no": "serial_no"
 			},

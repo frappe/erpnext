@@ -1,5 +1,5 @@
 {
-  "allow_import": 1, 
+ "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:serial_no", 
  "creation": "2013-05-16 10:59:15", 
@@ -11,7 +11,7 @@
   {
    "fieldname": "details", 
    "fieldtype": "Section Break", 
-   "label": "Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0, 
    "read_only": 0
@@ -21,23 +21,6 @@
    "fieldtype": "Column Break", 
    "permlevel": 0, 
    "read_only": 0
-  }, 
-  {
-   "default": "Not Available", 
-   "description": "Only Serial Nos with status \"Available\" can be delivered.", 
-   "fieldname": "status", 
-   "fieldtype": "Select", 
-   "in_filter": 1, 
-   "in_list_view": 1, 
-   "label": "Status", 
-   "no_copy": 1, 
-   "oldfieldname": "status", 
-   "oldfieldtype": "Select", 
-   "options": "Not Available\nAvailable\nDelivered\nPurchase Returned\nSales Returned", 
-   "permlevel": 0, 
-   "read_only": 1, 
-   "reqd": 1, 
-   "search_index": 1
   }, 
   {
    "fieldname": "serial_no", 
@@ -67,6 +50,23 @@
    "search_index": 0
   }, 
   {
+   "default": "Not Available", 
+   "description": "Only Serial Nos with status \"Available\" can be delivered.", 
+   "fieldname": "status", 
+   "fieldtype": "Select", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Status", 
+   "no_copy": 1, 
+   "oldfieldname": "status", 
+   "oldfieldtype": "Select", 
+   "options": "Not Available\nAvailable\nDelivered\nPurchase Returned\nSales Returned", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "reqd": 1, 
+   "search_index": 1
+  }, 
+  {
    "description": "Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt", 
    "fieldname": "warehouse", 
    "fieldtype": "Link", 
@@ -91,7 +91,7 @@
   {
    "fieldname": "item_name", 
    "fieldtype": "Data", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Item Name", 
    "permlevel": 0, 
    "read_only": 1
@@ -109,7 +109,7 @@
    "width": "300px"
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
    "in_filter": 0, 
@@ -417,7 +417,7 @@
  "icon": "icon-barcode", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-06-26 12:33:49.911829", 
+ "modified": "2015-02-20 05:08:12.961403", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Serial No", 
@@ -432,6 +432,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

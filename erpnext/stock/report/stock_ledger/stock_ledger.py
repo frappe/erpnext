@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -29,7 +29,8 @@ def get_columns():
 		_("Stock UOM") + ":Link/UOM:100", _("Qty") + ":Float:50", _("Balance Qty") + ":Float:100",
 		_("Incoming Rate") + ":Currency:110", _("Valuation Rate") + ":Currency:110", _("Balance Value") + ":Currency:110",
 		_("Voucher Type") + "::110", _("Voucher #") + ":Dynamic Link/Voucher Type:100", _("Batch") + ":Link/Batch:100",
-		_("Serial #") + ":Link/Serial No:100", _("Company") + ":Link/Company:100"]
+		_("Serial #") + ":Link/Serial No:100", _("Company") + ":Link/Company:100"
+	]
 
 def get_stock_ledger_entries(filters):
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,

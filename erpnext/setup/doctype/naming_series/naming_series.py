@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -12,15 +12,26 @@ from frappe.model.document import Document
 class NamingSeries(Document):
 
 	def get_transactions(self, arg=None):
+		doctypes = list(set(frappe.db.sql_list("""select parent
+				from `tabDocField` where fieldname='naming_series'""")
+			+ frappe.db.sql_list("""select dt from `tabCustom Field`
+				where fieldname='naming_series'""")))
+
+		prefixes = ""
+		for d in doctypes:
+			try:
+				options = self.get_options(d)
+			except frappe.DoesNotExistError:
+				continue
+
+			prefixes = prefixes + "\n" + options
+
+		prefixes.replace("\n\n", "\n")
+		prefixes = "\n".join(sorted(prefixes.split()))
+
 		return {
-			"transactions": "\n".join([''] + sorted(list(set(
-				frappe.db.sql_list("""select parent
-					from `tabDocField` where fieldname='naming_series'""")
-				+ frappe.db.sql_list("""select dt from `tabCustom Field`
-					where fieldname='naming_series'""")
-				)))),
-			"prefixes": "\n".join([''] + [i[0] for i in
-				frappe.db.sql("""select name from tabSeries order by name""")])
+			"transactions": "\n".join([''] + sorted(doctypes)),
+			"prefixes": prefixes
 		}
 
 	def scrub_options_list(self, ol):
@@ -106,11 +117,11 @@ class NamingSeries(Document):
 
 	def validate_series_name(self, n):
 		import re
-		if not re.match("^[a-zA-Z0-9- /.#]*$", n):
-			throw(_('Special Characters except "-" and "/" not allowed in naming series'))
+		if not re.match("^[\w\- /.#]*$", n, re.UNICODE):
+			throw(_('Special Characters except "-", "#", "." and "/" not allowed in naming series'))
 
-	def get_options(self, arg=''):
-		return frappe.get_meta(self.select_doc_for_series).get_field("naming_series").options
+	def get_options(self, arg=None):
+		return frappe.get_meta(arg or self.select_doc_for_series).get_field("naming_series").options
 
 	def get_current(self, arg=None):
 		"""get series current"""
@@ -134,7 +145,7 @@ class NamingSeries(Document):
 			msgprint(_("Please select prefix first"))
 
 def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True):
-	from frappe.core.doctype.property_setter.property_setter import make_property_setter
+	from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 	if naming_series:
 		make_property_setter(doctype, "naming_series", "hidden", 0, "Check")
 		make_property_setter(doctype, "naming_series", "reqd", 1, "Check")

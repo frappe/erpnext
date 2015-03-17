@@ -1,6 +1,6 @@
 {
- "autoname": "IISD/.#####", 
- "creation": "2013-02-22 01:28:01.000000", 
+ "autoname": "hash", 
+ "creation": "2013-02-22 01:28:01", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -30,9 +30,10 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:16.000000", 
+ "modified": "2015-02-19 01:07:00.296584", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Quality Inspection Parameter", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }
