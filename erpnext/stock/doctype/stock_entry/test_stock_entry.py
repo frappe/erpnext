@@ -82,18 +82,17 @@ class TestStockEntry(unittest.TestCase):
 		else:
 			template = item
 
-		warehouse = "_Test Warehouse - _TC"
-
 		# stock entry reqd for auto-reorder
-		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, incoming_rate=1)
+		create_stock_reconciliation(item_code=item_code, warehouse="_Test Warehouse - _TC", 
+			qty=10, rate=100)
 
 		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
 		projected_qty = frappe.db.get_value("Bin", {"item_code": item_code,
-			"warehouse": warehouse}, "projected_qty") or 0
+			"warehouse": "_Test Warehouse - _TC"}, "projected_qty") or 0
 
 		# update re-level qty so that it is more than projected_qty
 		if projected_qty > template.reorder_levels[0].warehouse_reorder_level:
-			template.reorder_levels[0].warehouse_reorder_level = projected_qty
+			template.reorder_levels[0].warehouse_reorder_level += projected_qty
 			template.save()
 
 		from erpnext.stock.reorder_item import reorder_item

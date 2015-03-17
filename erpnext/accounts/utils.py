@@ -338,12 +338,12 @@ def get_actual_expense(args):
 	args["condition"] = " and posting_date<='%s'" % args.month_end_date \
 		if args.get("month_end_date") else ""
 
-	return frappe.db.sql("""
+	return flt(frappe.db.sql("""
 		select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 		from `tabGL Entry`
 		where account='%(account)s' and cost_center='%(cost_center)s'
 		and fiscal_year='%(fiscal_year)s' and company='%(company)s' %(condition)s
-	""" % (args))[0][0]
+	""" % (args))[0][0])
 
 def get_currency_precision(currency=None):
 	if not currency:

@@ -89,7 +89,7 @@ def make_prod_order(self):
 	return frappe.get_doc({
 			"doctype":"Production Order",
 			"production_item": "_Test FG Item 2",
-			"bom_no": "BOM/_Test FG Item 2/002",
+			"bom_no": "BOM/_Test FG Item 2/001",
 			"qty": 1,
 			"wip_warehouse": "_Test Warehouse - _TC",
 			"fg_warehouse": "_Test Warehouse 1 - _TC",
