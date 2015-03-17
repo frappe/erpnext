@@ -8,6 +8,8 @@ frappe.pages['setup-wizard'].on_page_load = function(wrapper) {
 	$(".navbar:first").toggle(false);
 	$("body").css({"padding-top":"30px"});
 
+	frappe.require("/assets/frappe/css/animate.min.css");
+
 	var wizard_settings = {
 		page_name: "setup-wizard",
 		parent: wrapper,
@@ -579,11 +581,13 @@ $.extend(erpnext.wiz, {
 	},
 
 	working_html: function() {
-		return frappe.render_template("setup_wizard_message", {
+		var msg = $(frappe.render_template("setup_wizard_message", {
 			image: "/assets/frappe/images/ui/bubble-tea-smile.svg",
 			title: __("Setting Up"),
 			message: __('Sit tight while your system is being setup. This may take a few moments.')
-		});
+		}));
+		msg.find(".setup-wizard-message-image").addClass("animated infinite bounce");
+		return msg.html();
 	},
 
 	complete_html: function() {
