@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = "5.0.0-alpha"
+version = "5.0.0-beta"
 
 with open("requirements.txt", "r") as f:
 	install_requires = f.readlines()
