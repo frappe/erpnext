@@ -99,11 +99,14 @@ class StockReconciliation(StockController):
 					_("Negative Valuation Rate is not allowed")))
 
 			if row.qty and not row.valuation_rate:
-				# try if there is a buying price list in default currency
-				buying_rate = frappe.db.get_value("Item Price", {"item_code": row.item_code,
-					"buying": 1, "currency": default_currency}, "price_list_rate")
-				if buying_rate:
-					row.valuation_rate = buying_rate
+				row.valuation_rate = get_stock_balance(row.item_code, row.warehouse,
+							self.posting_date, self.posting_time, with_valuation_rate=True)[1]
+				if not row.valuation_rate:
+					# try if there is a buying price list in default currency
+					buying_rate = frappe.db.get_value("Item Price", {"item_code": row.item_code,
+						"buying": 1, "currency": default_currency}, "price_list_rate")
+					if buying_rate:
+						row.valuation_rate = buying_rate
 
 		# throw all validation messages
 		if self.validation_messages:
@@ -147,14 +150,13 @@ class StockReconciliation(StockController):
 		from erpnext.stock.stock_ledger import get_previous_sle
 
 		for row in self.items:
-			if row.qty in ("", None) or row.valuation_rate in ("", None):
-				previous_sle = get_previous_sle({
-					"item_code": row.item_code,
-					"warehouse": row.warehouse,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time
-				})
-
+			previous_sle = get_previous_sle({
+				"item_code": row.item_code,
+				"warehouse": row.warehouse,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time
+			})
+			if previous_sle:
 				if row.qty in ("", None):
 					row.qty = previous_sle.get("qty_after_transaction")
 
@@ -163,7 +165,11 @@ class StockReconciliation(StockController):
 
 			if row.qty and not row.valuation_rate:
 				frappe.throw(_("Valuation Rate required for Item {0}").format(row.item_code))
-
+			
+			if previous_sle and row.qty == previous_sle.get("qty_after_transaction") \
+				and row.valuation_rate == previous_sle.get("valuation_rate"):
+					continue
+				
 			self.insert_entries(row)
 
 	def insert_entries(self, row):

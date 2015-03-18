@@ -513,8 +513,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertFalse(gle)
 
-		self.assertFalse(get_stock_and_account_difference([stock_in_hand]))
-
 		set_perpetual_inventory(0)
 
 		frappe.db.sql("delete from `tabPOS Setting`")

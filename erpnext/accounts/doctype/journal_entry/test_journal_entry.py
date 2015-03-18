@@ -103,11 +103,10 @@ class TestJournalEntry(unittest.TestCase):
 	def test_monthly_budget_crossed_ignore(self):
 		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
 		
-		existing_expense = self.get_actual_expense("2013-02-28")
-		current_expense = - existing_expense + 20000 if existing_expense < 0 else 20000
+		self.set_total_expense_zero("2013-02-28")
 		
 		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
-			"_Test Account Bank Account - _TC", current_expense, "_Test Cost Center - _TC", submit=True)
+			"_Test Account Bank Account - _TC", 40000, "_Test Cost Center - _TC", submit=True)
 			
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv.name}))
@@ -115,12 +114,11 @@ class TestJournalEntry(unittest.TestCase):
 	def test_monthly_budget_crossed_stop(self):
 		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
 		
-		existing_expense = self.get_actual_expense("2013-02-28")
-		current_expense = - existing_expense + 20000 if existing_expense < 0 else 20000
+		self.set_total_expense_zero("2013-02-28")
 		
 		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
-			"_Test Account Bank Account - _TC", current_expense, "_Test Cost Center - _TC")
-			
+			"_Test Account Bank Account - _TC", 40000, "_Test Cost Center - _TC")
+		
 		self.assertRaises(BudgetError, jv.submit)
 
 		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
@@ -130,35 +128,33 @@ class TestJournalEntry(unittest.TestCase):
 
 		frappe.db.set_value("Company", "_Test Company", "yearly_bgt_flag", "Stop")
 		
-		existing_expense = self.get_actual_expense("2013-02-28")
-		current_expense = - existing_expense + 150000 if existing_expense < 0 else 150000
+		self.set_total_expense_zero("2013-02-28")
 
 		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
-			"_Test Account Bank Account - _TC", current_expense, "_Test Cost Center - _TC")
+			"_Test Account Bank Account - _TC", 150000, "_Test Cost Center - _TC")
 		
 		self.assertRaises(BudgetError, jv.submit)
 
 		frappe.db.set_value("Company", "_Test Company", "yearly_bgt_flag", "Ignore")
 
 	def test_monthly_budget_on_cancellation(self):
-		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
-
-		existing_expense = self.get_actual_expense("2013-02-28")
-		current_expense = - existing_expense - 30000 if existing_expense < 0 else 30000
+		self.set_total_expense_zero("2013-02-28")
 		
-		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
-			"_Test Account Bank Account - _TC", current_expense, "_Test Cost Center - _TC", submit=True)
-		
-		self.assertTrue(frappe.db.get_value("GL Entry",
-			{"voucher_type": "Journal Entry", "voucher_no": jv.name}))
-
 		jv1 = make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
-			"_Test Account Bank Account - _TC", 40000, "_Test Cost Center - _TC", submit=True)
-					
+			"_Test Account Bank Account - _TC", 20000, "_Test Cost Center - _TC", submit=True)
+		
 		self.assertTrue(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Journal Entry", "voucher_no": jv1.name}))
+			
+		jv2 = make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
+			"_Test Account Bank Account - _TC", 20000, "_Test Cost Center - _TC", submit=True)
+		
+		self.assertTrue(frappe.db.get_value("GL Entry",
+			{"voucher_type": "Journal Entry", "voucher_no": jv2.name}))
+			
+		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Stop")
 
-		self.assertRaises(BudgetError, jv.cancel)
+		self.assertRaises(BudgetError, jv1.cancel)
 
 		frappe.db.set_value("Company", "_Test Company", "monthly_bgt_flag", "Ignore")
 		
@@ -170,6 +166,11 @@ class TestJournalEntry(unittest.TestCase):
 			"company": "_Test Company",
 			"fiscal_year": get_fiscal_year(monthly_end_date)[0]
 		})
+		
+	def set_total_expense_zero(self, posting_date):
+		existing_expense = self.get_actual_expense(posting_date)
+		make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
+			"_Test Account Bank Account - _TC", -existing_expense, "_Test Cost Center - _TC", submit=True)
 		
 def make_journal_entry(account1, account2, amount, cost_center=None, submit=False):
 	jv = frappe.new_doc("Journal Entry")

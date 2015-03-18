@@ -8,11 +8,11 @@ import unittest
 
 from erpnext.projects.doctype.time_log.time_log import OverlapError
 from erpnext.projects.doctype.time_log.time_log import NotSubmittedError
-
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
 from erpnext.manufacturing.doctype.workstation.workstation import NotInWorkingHoursError
-
 from erpnext.projects.doctype.time_log_batch.test_time_log_batch import *
+from erpnext.manufacturing.doctype.production_order.test_production_order import make_prod_order_test_record
+
 
 class TestTimeLog(unittest.TestCase):
 	def test_duplication(self):
@@ -30,8 +30,8 @@ class TestTimeLog(unittest.TestCase):
 		frappe.db.sql("delete from `tabTime Log`")
 
 	def test_production_order_status(self):
-		prod_order = make_prod_order(self)
-
+		prod_order = make_prod_order_test_record(item="_Test FG Item 2", qty=1, do_not_submit=True)
+		prod_order.set_production_order_operations()
 		prod_order.save()
 
 		time_log = frappe.get_doc({
@@ -46,7 +46,8 @@ class TestTimeLog(unittest.TestCase):
 		self.assertRaises(NotSubmittedError, time_log.save)
 
 	def test_time_log_on_holiday(self):
-		prod_order = make_prod_order(self)
+		prod_order = make_prod_order_test_record(item="_Test FG Item 2", qty=1, 
+			planned_start_date="2014-11-25 00:00:00", do_not_save=True)
 		prod_order.set_production_order_operations()
 		prod_order.save()
 		prod_order.submit()
@@ -84,17 +85,6 @@ class TestTimeLog(unittest.TestCase):
 		test_time_log.to_time = "2013-01-01 10:00:00.000000"
 		self.assertRaises(frappe.ValidationError, test_time_log.save)
 		frappe.db.sql("delete from `tabTime Log`")
-
-def make_prod_order(self):
-	return frappe.get_doc({
-			"doctype":"Production Order",
-			"production_item": "_Test FG Item 2",
-			"bom_no": "BOM/_Test FG Item 2/001",
-			"qty": 1,
-			"wip_warehouse": "_Test Warehouse - _TC",
-			"fg_warehouse": "_Test Warehouse 1 - _TC",
-			"company": "_Test Company"
-		})
 
 test_records = frappe.get_test_records('Time Log')
 test_ignore = ["Time Log Batch", "Sales Invoice"]

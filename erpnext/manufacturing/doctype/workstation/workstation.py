@@ -48,11 +48,12 @@ def get_default_holiday_list():
 	return frappe.db.get_value("Company", frappe.defaults.get_user_default("company"), "default_holiday_list")
 
 def check_if_within_operating_hours(workstation, operation, from_datetime, to_datetime):
-	if not cint(frappe.db.get_value("Manufacturing Settings", "None", "allow_production_on_holidays")):
-		check_workstation_for_holiday(workstation, from_datetime, to_datetime)
+	if from_datetime and to_datetime:
+		if not cint(frappe.db.get_value("Manufacturing Settings", "None", "allow_production_on_holidays")):
+			check_workstation_for_holiday(workstation, from_datetime, to_datetime)
 
-	if not cint(frappe.db.get_value("Manufacturing Settings", None, "allow_overtime")):
-		is_within_operating_hours(workstation, operation, from_datetime, to_datetime)
+		if not cint(frappe.db.get_value("Manufacturing Settings", None, "allow_overtime")):
+			is_within_operating_hours(workstation, operation, from_datetime, to_datetime)
 
 def is_within_operating_hours(workstation, operation, from_datetime, to_datetime):
 	operation_length = time_diff_in_seconds(to_datetime, from_datetime)
@@ -67,10 +68,11 @@ def is_within_operating_hours(workstation, operation, from_datetime, to_datetime
 
 def check_workstation_for_holiday(workstation, from_datetime, to_datetime):
 	holiday_list = frappe.db.get_value("Workstation", workstation, "holiday_list")
-	if holiday_list:
+	if holiday_list and from_datetime and to_datetime:
 		applicable_holidays = []
 		for d in frappe.db.sql("""select holiday_date from `tabHoliday` where parent = %s
-			and holiday_date between %s and %s """, (holiday_list, getdate(from_datetime), getdate(to_datetime))):
+			and holiday_date between %s and %s """, 
+			(holiday_list, getdate(from_datetime), getdate(to_datetime))):
 				applicable_holidays.append(formatdate(d[0]))
 
 		if applicable_holidays:

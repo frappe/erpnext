@@ -143,7 +143,8 @@ def make_purchase_receipt(**args):
 		"received_qty": args.qty or 5,
 		"rate": args.rate or 50,
 		"conversion_factor": 1.0,
-		"serial_no": args.serial_no
+		"serial_no": args.serial_no,
+		"stock_uom": "_Test UOM"
 	})
 	if not args.do_not_save:
 		pr.insert()

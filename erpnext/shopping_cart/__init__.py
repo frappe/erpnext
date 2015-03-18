@@ -24,11 +24,13 @@ def get_quotation(user=None):
 		party.doctype.lower(): party.name,
 		"docstatus": 0,
 		"contact_email": user,
-		"selling_price_list": "_Test Price List Rest of the World"
+		"selling_price_list": "_Test Price List Rest of the World",
+		"currency": "USD"
 	}
 
 	try:
 		quotation = frappe.get_doc("Quotation", values)
+		
 	except frappe.DoesNotExistError:
 		quotation = frappe.new_doc("Quotation")
 		quotation.update(values)
@@ -43,7 +45,6 @@ def set_item_in_cart(item_code, qty, user=None):
 	quotation = get_quotation(user=user)
 	qty = flt(qty)
 	quotation_item = quotation.get("items", {"item_code": item_code})
-
 	if qty==0:
 		if quotation_item:
 			# remove
@@ -58,7 +59,6 @@ def set_item_in_cart(item_code, qty, user=None):
 				"item_code": item_code,
 				"qty": qty
 			})
-
 	quotation.save(ignore_permissions=True)
 	return quotation
 

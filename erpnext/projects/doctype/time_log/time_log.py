@@ -96,12 +96,13 @@ class TimeLog(Document):
 		return existing[0] if existing else None
 
 	def validate_timings(self):
-		if get_datetime(self.to_time) < get_datetime(self.from_time):
+		if self.to_time and self.from_time and get_datetime(self.to_time) < get_datetime(self.from_time):
 			frappe.throw(_("From Time cannot be greater than To Time"))
 
 	def calculate_total_hours(self):
-		from frappe.utils import time_diff_in_seconds
-		self.hours = flt(time_diff_in_seconds(self.to_time, self.from_time)) / 3600
+		if self.to_time and self.from_time:
+			from frappe.utils import time_diff_in_seconds
+			self.hours = flt(time_diff_in_seconds(self.to_time, self.from_time)) / 3600
 
 	def validate_time_log_for(self):
 		if self.time_log_for == "Project":
@@ -110,7 +111,7 @@ class TimeLog(Document):
 
 	def check_workstation_timings(self):
 		"""Checks if **Time Log** is between operating hours of the **Workstation**."""
-		if self.workstation:
+		if self.workstation and self.from_time and self.to_time:
 			from erpnext.manufacturing.doctype.workstation.workstation import check_if_within_operating_hours
 			check_if_within_operating_hours(self.workstation, self.operation, self.from_time, self.to_time)
 

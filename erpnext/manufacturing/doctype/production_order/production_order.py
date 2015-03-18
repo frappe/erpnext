@@ -253,17 +253,18 @@ class ProductionOrder(Document):
 	def set_operation_start_end_time(self, i, d):
 		"""Set start and end time for given operation. If first operation, set start as
 		`planned_start_date`, else add time diff to end time of earlier operation."""
-		if i==0:
-			# first operation at planned_start date
-			d.planned_start_time = self.planned_start_date
-		else:
-			d.planned_start_time = get_datetime(self.operations[i-1].planned_end_time)\
-				+ self.get_mins_between_operations()
+		if self.planned_start_date:
+			if i==0:
+				# first operation at planned_start date
+				d.planned_start_time = self.planned_start_date
+			else:
+				d.planned_start_time = get_datetime(self.operations[i-1].planned_end_time)\
+					+ self.get_mins_between_operations()
 
-		d.planned_end_time = get_datetime(d.planned_start_time) + relativedelta(minutes = d.time_in_mins)
+			d.planned_end_time = get_datetime(d.planned_start_time) + relativedelta(minutes = d.time_in_mins)
 
-		if d.planned_start_time == d.planned_end_time:
-			frappe.throw(_("Capacity Planning Error"))
+			if d.planned_start_time == d.planned_end_time:
+				frappe.throw(_("Capacity Planning Error"))
 
 	def get_mins_between_operations(self):
 		if not hasattr(self, "_mins_between_operations"):

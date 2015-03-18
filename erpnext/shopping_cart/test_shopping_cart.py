@@ -25,7 +25,8 @@ class TestShoppingCart(unittest.TestCase):
 		# test if lead is created and quotation with new lead is fetched
 		quotation = get_quotation()
 		self.assertEquals(quotation.quotation_to, "Lead")
-		self.assertEquals(frappe.db.get_value("Lead", quotation.lead, "email_id"), "test_cart_user@example.com")
+		self.assertEquals(frappe.db.get_value("Lead", quotation.lead, "email_id"), 
+			"test_cart_user@example.com")
 		self.assertEquals(quotation.customer, None)
 		self.assertEquals(quotation.contact_email, frappe.session.user)
 
@@ -109,37 +110,6 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEquals(quotation.net_total, 0)
 		self.assertEquals(len(quotation.get("items")), 0)
 
-	def test_set_billing_address(self):
-		return
-
-		# first, add to cart
-		self.test_add_to_cart()
-
-		quotation = self.test_get_cart_lead()
-		default_address = frappe.get_doc("Address", {"lead": quotation.lead, "is_primary_address": 1})
-		self.assertEquals("customer_address", default_address.name)
-
-	def test_set_shipping_address(self):
-		# first, add to cart
-		self.test_add_to_cart()
-
-
-
-	def test_shipping_rule(self):
-		self.test_set_shipping_address()
-
-		# check if shipping rule changed
-		pass
-
-	def test_price_list(self):
-		self.test_set_billing_address()
-
-		# check if price changed
-		pass
-
-	def test_place_order(self):
-		pass
-
 	# helper functions
 	def enable_shopping_cart(self):
 		settings = frappe.get_doc("Shopping Cart Settings", "Shopping Cart Settings")
@@ -199,7 +169,8 @@ class TestShoppingCart(unittest.TestCase):
 			"email_id": "test_cart_lead@example.com",
 			"lead_name": "_Test Website Lead",
 			"status": "Open",
-			"territory": "_Test Territory Rest Of The World"
+			"territory": "_Test Territory Rest Of The World",
+			"company": "_Test Company"
 		})
 		lead.insert(ignore_permissions=True)
 
