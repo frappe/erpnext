@@ -782,8 +782,8 @@ class TestStockEntry(unittest.TestCase):
 				rm_cost += flt(d.amount)
 
 		fg_cost = filter(lambda x: x.item_code=="_Test FG Item 2", stock_entry.get("items"))[0].amount
-
-		self.assertEqual(fg_cost, rm_cost + bom_operation_cost + stock_entry.additional_operating_cost)
+		self.assertEqual(fg_cost, 
+			flt(rm_cost + bom_operation_cost + stock_entry.additional_operating_cost, 2))
 
 
 	def test_variant_production_order(self):
