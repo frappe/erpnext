@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import frappe
 import frappe.utils
-from frappe.utils import cstr
 from frappe import throw, _
 from frappe.model.document import Document
 import erpnext.tasks
@@ -19,7 +18,6 @@ class Newsletter(Document):
 
 	def test_send(self, doctype="Lead"):
 		self.recipients = self.test_email_id.split(",")
-		self.send_to_doctype = "Lead"
 		self.send_bulk()
 		frappe.msgprint(_("Scheduled to send to {0}").format(self.test_email_id))
 
@@ -44,46 +42,8 @@ class Newsletter(Document):
 		frappe.db.set(self, "email_sent", 1)
 
 	def get_recipients(self):
-		self.email_field = None
-		if self.send_to_type=="Contact":
-			self.send_to_doctype = "Contact"
-			if self.contact_type == "Customer":
-				return frappe.db.sql_list("""select email_id from tabContact
-					where ifnull(email_id, '') != '' and ifnull(customer, '') != ''""")
-
-			elif self.contact_type == "Supplier":
-				return frappe.db.sql_list("""select email_id from tabContact
-					where ifnull(email_id, '') != '' and ifnull(supplier, '') != ''""")
-
-		elif self.send_to_type=="Lead":
-			self.send_to_doctype = "Lead"
-			conditions = []
-			if self.lead_source and self.lead_source != "All":
-				conditions.append(" and source='%s'" % self.lead_source.replace("'", "\'"))
-			if self.lead_status and self.lead_status != "All":
-				conditions.append(" and status='%s'" % self.lead_status.replace("'", "\'"))
-
-			if conditions:
-				conditions = "".join(conditions)
-
-			return frappe.db.sql_list("""select email_id from tabLead
-				where ifnull(email_id, '') != '' %s""" % (conditions or ""))
-
-		elif self.send_to_type=="Employee":
-			self.send_to_doctype = "Employee"
-			self.email_field = "company_email"
-
-			return frappe.db.sql_list("""select
-				if(ifnull(company_email, '')!='', company_email, personal_email) as email_id
-				from `tabEmployee` where status='Active'""")
-
-		elif self.email_list:
-			email_list = [cstr(email).strip() for email in self.email_list.split(",")]
-			for email in email_list:
-				create_lead(email)
-
-			self.send_to_doctype = "Lead"
-			return email_list
+		"""Get recipients from Newsletter List"""
+		return frappe.db.get_all("Newsletter List Subscriber", ["email"], {"unsubscribed": 0})
 
 	def send_bulk(self):
 		if not self.get("recipients"):
@@ -101,8 +61,8 @@ class Newsletter(Document):
 
 		send(recipients = self.recipients, sender = sender,
 			subject = self.subject, message = self.message,
-			doctype = self.send_to_doctype, email_field = self.get("email_field") or "email_id",
-			ref_doctype = self.doctype, ref_docname = self.name)
+			ref_doctype = self.doctype, ref_docname = self.name,
+			unsubscribe_url = "/api/method/erpnext.crm.doctype.newsletter.newsletter.unsubscribe?name=%s&email={email}" % self.name)
 
 		if not frappe.flags.in_test:
 			frappe.db.auto_commit_on_many_writes = False
@@ -120,6 +80,18 @@ def get_lead_options():
 			frappe.db.sql_list("""select distinct status from tabLead"""))
 	}
 
+
+@frappe.whitelist(allow_guest=True)
+def unsubscribe(email, name):
+	from frappe.email.bulk import return_unsubscribed_page
+
+	name = frappe.db.get_value("Newsletter List Subscriber", {"email": email, "newsletter_list": name})
+	if name:
+		subscriber = frappe.get_doc("Newsletter List Subscriber", name)
+		subscriber.unsubscribe = 1
+		subscriber.save(ignore_permissions=True)
+
+	return_unsubscribed_page(email)
 
 def create_lead(email_id):
 	"""create a lead if it does not exist"""

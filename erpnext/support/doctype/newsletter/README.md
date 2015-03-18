@@ -1,1 +1,0 @@
-Newsletter to be sent to Leads / Contacts.

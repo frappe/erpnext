@@ -82,6 +82,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Newsletter List",
+					"description": _("Newsletter Mailing List"),
+				},
+				{
+					"type": "doctype",
 					"name": "SMS Settings",
 					"description": _("Setup SMS gateway settings")
 				},

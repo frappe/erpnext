@@ -3,7 +3,7 @@
 
 cur_frm.cscript.onload = function(doc) {
 	return frappe.call({
-		method: "erpnext.support.doctype.newsletter.newsletter.get_lead_options",
+		method: "erpnext.crm.doctype.newsletter.newsletter.get_lead_options",
 		type: "GET",
 		callback: function(r) {
 			set_field_options("lead_source", r.message.sources.join("\n"))

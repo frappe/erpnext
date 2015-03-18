@@ -53,6 +53,7 @@
    "label": "Email Id", 
    "oldfieldname": "email_id", 
    "oldfieldtype": "Data", 
+   "options": "Email", 
    "permlevel": 0, 
    "reqd": 0, 
    "search_index": 1
@@ -176,7 +177,7 @@
  "idx": 1, 
  "in_create": 0, 
  "in_dialog": 0, 
- "modified": "2015-02-20 05:07:55.636970", 
+ "modified": "2015-03-18 07:06:43.906702", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Contact", 
