@@ -233,7 +233,9 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
 
 	if filters.has_key('warehouse'):
-		return frappe.db.sql("""select batch_no from `tabStock Ledger Entry` sle
+		return frappe.db.sql("""select batch_no, round(sum(actual_qty),2), stock_uom, expiry_date from `tabStock Ledger Entry` sle
+			    INNER JOIN `tabBatch`
+				on sle.batch_no = `tabBatch`.batch_id 
 				where item_code = '%(item_code)s'
 					and warehouse = '%(warehouse)s'
 					and batch_no like '%(txt)s'
@@ -243,7 +245,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 								and docstatus != 2)
 					%(mcond)s
 				group by batch_no having sum(actual_qty) > 0
-				order by batch_no desc
+				order by expiry_date,batch_no desc
 				limit %(start)s, %(page_len)s """ % {'item_code': filters['item_code'],
 					'warehouse': filters['warehouse'], 'posting_date': filters['posting_date'],
 					'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype),
