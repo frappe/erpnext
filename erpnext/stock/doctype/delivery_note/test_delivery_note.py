@@ -189,6 +189,7 @@ def create_delivery_note(**args):
 	
 	dn.company = args.company or "_Test Company"
 	dn.customer = args.customer or "_Test Customer"
+	dn.currency = args.currency or "INR"
 	
 	dn.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",

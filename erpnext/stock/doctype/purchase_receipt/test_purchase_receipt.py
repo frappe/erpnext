@@ -78,6 +78,12 @@ class TestPurchaseReceipt(unittest.TestCase):
 		set_perpetual_inventory(0)
 
 	def test_subcontracting(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse 1 - _TC", qty=100, incoming_rate=100)
+		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse 1 - _TC", 
+			qty=100, incoming_rate=100)
+		
 		pr = make_purchase_receipt(item_code="_Test FG Item", qty=10, rate=500, is_subcontracted="Yes")
 		self.assertEquals(len(pr.get("supplied_items")), 2)
 		
@@ -135,6 +141,7 @@ def make_purchase_receipt(**args):
 	pr.supplier = args.supplier or "_Test Supplier"
 	pr.is_subcontracted = args.is_subcontracted or "No"
 	pr.supplier_warehouse = "_Test Warehouse 1 - _TC"
+	pr.currency = args.currency or "INR"
 	
 	pr.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",

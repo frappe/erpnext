@@ -233,6 +233,7 @@ def make_sales_order(**args):
 	so.company = args.company or "_Test Company"
 	so.customer = args.customer or "_Test Customer"
 	so.delivery_date = add_days(so.transaction_date, 10)
+	so.currency = args.currency or "INR"
 
 	so.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
