@@ -389,13 +389,14 @@ def apply_price_list_on_item(args):
 	return item_details
 
 def get_price_list_currency(price_list):
-	result = frappe.db.get_value("Price List", {"name": price_list,
-		"enabled": 1}, ["name", "currency"], as_dict=True)
+	if price_list:
+		result = frappe.db.get_value("Price List", {"name": price_list,
+			"enabled": 1}, ["name", "currency"], as_dict=True)
 
-	if not result:
-		throw(_("Price List {0} is disabled").format(price_list))
+		if not result:
+			throw(_("Price List {0} is disabled").format(price_list))
 
-	return result.currency
+		return result.currency
 
 def get_price_list_currency_and_exchange_rate(args):
 	price_list_currency = get_price_list_currency(args.price_list)
