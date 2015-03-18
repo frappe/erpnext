@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, getdate, formatdate, comma_and, time_diff_in_seconds
+from frappe.utils import flt, cint, getdate, formatdate, comma_and, time_diff_in_seconds, get_datetime
 from frappe.model.document import Document
 from dateutil.parser import parse
 
@@ -60,7 +60,7 @@ def is_within_operating_hours(workstation, operation, from_datetime, to_datetime
 	workstation = frappe.get_doc("Workstation", workstation)
 
 	for working_hour in workstation.working_hours:
-		slot_length = (parse(working_hour.end_time) - parse(working_hour.start_time)).total_seconds()
+		slot_length = (get_datetime(working_hour.end_time) - get_datetime(working_hour.start_time)).total_seconds()
 		if slot_length >= operation_length:
 			return
 
@@ -71,7 +71,7 @@ def check_workstation_for_holiday(workstation, from_datetime, to_datetime):
 	if holiday_list and from_datetime and to_datetime:
 		applicable_holidays = []
 		for d in frappe.db.sql("""select holiday_date from `tabHoliday` where parent = %s
-			and holiday_date between %s and %s """, 
+			and holiday_date between %s and %s """,
 			(holiday_list, getdate(from_datetime), getdate(to_datetime))):
 				applicable_holidays.append(formatdate(d[0]))
 

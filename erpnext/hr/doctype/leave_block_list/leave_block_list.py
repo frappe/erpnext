@@ -7,7 +7,6 @@ from __future__ import unicode_literals
 import frappe
 from erpnext.accounts.utils import validate_fiscal_year
 from frappe import _
-
 from frappe.model.document import Document
 
 class LeaveBlockList(Document):

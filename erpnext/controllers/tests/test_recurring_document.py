@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.permissions
 from erpnext.controllers.recurring_document import date_field_map
+from frappe.utils import getdate
 
 def test_recurring_document(obj, test_records):
 	from frappe.utils import get_first_day, get_last_day, add_to_date, nowdate, getdate, add_days
@@ -132,19 +133,14 @@ def _test_recurring_document(obj, base_doc, date_field, first_and_last_day):
 				obj.assertEquals(base_doc.get(fieldname),
 					new_doc.get(fieldname))
 
-		obj.assertEquals(new_doc.get(date_field), unicode(next_date))
+		obj.assertEquals(new_doc.get(date_field), getdate(next_date))
 
-		obj.assertEquals(new_doc.from_date,
-			unicode(add_months(base_doc.from_date, no_of_months)))
+		obj.assertEquals(new_doc.from_date,	getdate(add_months(base_doc.from_date, no_of_months)))
 
 		if first_and_last_day:
-			obj.assertEquals(new_doc.to_date,
-				unicode(get_last_day(add_months(base_doc.to_date,
-					no_of_months))))
+			obj.assertEquals(new_doc.to_date, getdate(get_last_day(add_months(base_doc.to_date, no_of_months))))
 		else:
-			obj.assertEquals(new_doc.to_date,
-				unicode(add_months(base_doc.to_date, no_of_months)))
-
+			obj.assertEquals(new_doc.to_date, getdate(add_months(base_doc.to_date, no_of_months)))
 
 		return new_doc
 
