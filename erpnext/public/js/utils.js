@@ -59,7 +59,6 @@ $.extend(erpnext, {
 
 	setup_serial_no: function() {
 		var grid_row = cur_frm.open_grid_row();
-
 		if(!grid_row.fields_dict.serial_no ||
 			grid_row.fields_dict.serial_no.get_status()!=="Write") return;
 
@@ -76,9 +75,13 @@ $.extend(erpnext, {
 						"fieldtype": "Link",
 						"options": "Serial No",
 						"label": __("Serial No"),
-						"get_query": {
-							item_code: grid_row.doc.item_code,
-							warehouse: grid_row.doc.warehouse
+						"get_query": function () {
+							return { 
+								filters: { 
+									item_code:grid_row.doc.item_code ,
+									warehouse:grid_row.doc.warehouse
+								}
+							}
 						}
 					},
 					{
