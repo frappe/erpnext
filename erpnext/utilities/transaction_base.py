@@ -78,9 +78,9 @@ class TransactionBase(StatusUpdater):
 				self.compare_values(ref_doc, val["compare_fields"])
 
 	def compare_values(self, ref_doc, fields, doc=None):
-		for ref_doctype, ref_dn_list in ref_doc.items():
-			for ref_docname in ref_dn_list:
-				prevdoc_values = frappe.db.get_value(ref_doctype, ref_docname,
+		for reference_doctype, ref_dn_list in ref_doc.items():
+			for reference_name in ref_dn_list:
+				prevdoc_values = frappe.db.get_value(reference_doctype, reference_name,
 					[d[0] for d in fields], as_dict=1)
 
 				for field, condition in fields:

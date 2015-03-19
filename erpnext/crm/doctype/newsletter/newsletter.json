@@ -30,7 +30,7 @@
    "label": "Sender", 
    "no_copy": 1, 
    "permlevel": 0, 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
    "fieldname": "email_sent", 
@@ -78,7 +78,7 @@
  ], 
  "icon": "icon-envelope", 
  "idx": 1, 
- "modified": "2015-03-18 08:19:24.393173", 
+ "modified": "2015-03-19 07:39:53.550198", 
  "modified_by": "Administrator", 
  "module": "CRM", 
  "name": "Newsletter", 

@@ -7,13 +7,14 @@ import frappe
 import frappe.utils
 from frappe import throw, _
 from frappe.model.document import Document
+from frappe.utils.verified_command import verify_request
 import erpnext.tasks
 
 class Newsletter(Document):
 	def onload(self):
 		if self.email_sent:
 			self.get("__onload").status_count = dict(frappe.db.sql("""select status, count(name)
-				from `tabBulk Email` where ref_doctype=%s and ref_docname=%s
+				from `tabBulk Email` where reference_doctype=%s and reference_name=%s
 				group by status""", (self.doctype, self.name))) or None
 
 	def test_send(self, doctype="Lead"):
@@ -41,10 +42,6 @@ class Newsletter(Document):
 
 		frappe.db.set(self, "email_sent", 1)
 
-	def get_recipients(self):
-		"""Get recipients from Newsletter List"""
-		return frappe.db.get_all("Newsletter List Subscriber", ["email"], {"unsubscribed": 0})
-
 	def send_bulk(self):
 		if not self.get("recipients"):
 			# in case it is called via worker
@@ -61,11 +58,17 @@ class Newsletter(Document):
 
 		send(recipients = self.recipients, sender = sender,
 			subject = self.subject, message = self.message,
-			ref_doctype = self.doctype, ref_docname = self.name,
-			unsubscribe_url = "/api/method/erpnext.crm.doctype.newsletter.newsletter.unsubscribe?name=%s&email={email}" % self.name)
+			reference_doctype = self.doctype, reference_name = self.name,
+			unsubscribe_method = "/api/method/erpnext.crm.doctype.newsletter.newsletter.unsubscribe",
+			unsubscribe_params = {"name": self.name})
 
 		if not frappe.flags.in_test:
 			frappe.db.auto_commit_on_many_writes = False
+
+	def get_recipients(self):
+		"""Get recipients from Newsletter List"""
+		return [d.email for d in frappe.db.get_all("Newsletter List Subscriber", ["email"],
+			{"unsubscribed": 0, "newsletter_list": self.newsletter_list})]
 
 	def validate_send(self):
 		if self.get("__islocal"):
@@ -85,10 +88,13 @@ def get_lead_options():
 def unsubscribe(email, name):
 	from frappe.email.bulk import return_unsubscribed_page
 
-	name = frappe.db.get_value("Newsletter List Subscriber", {"email": email, "newsletter_list": name})
+	if not verify_request():
+		return
+
+	subs_id = frappe.db.get_value("Newsletter List Subscriber", {"email": email, "newsletter_list": name})
 	if name:
-		subscriber = frappe.get_doc("Newsletter List Subscriber", name)
-		subscriber.unsubscribe = 1
+		subscriber = frappe.get_doc("Newsletter List Subscriber", subs_id)
+		subscriber.unsubscribed = 1
 		subscriber.save(ignore_permissions=True)
 
 	return_unsubscribed_page(email)
