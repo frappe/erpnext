@@ -7,7 +7,6 @@ import frappe
 import frappe.utils
 from frappe import throw, _
 from frappe.model.document import Document
-from frappe.utils.verified_command import verify_request
 import erpnext.tasks
 
 class Newsletter(Document):
@@ -87,6 +86,7 @@ def get_lead_options():
 @frappe.whitelist(allow_guest=True)
 def unsubscribe(email, name):
 	from frappe.email.bulk import return_unsubscribed_page
+	from frappe.utils.verified_command import verify_request
 
 	if not verify_request():
 		return
