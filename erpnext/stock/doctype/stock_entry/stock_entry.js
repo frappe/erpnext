@@ -378,18 +378,20 @@ cur_frm.cscript.purpose = function(doc, cdt, cdn) {
 
 // Overloaded query for link batch_no
 cur_frm.fields_dict['mtn_details'].grid.get_field('batch_no').get_query = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if(d.item_code) {
-		return{
-			query: "erpnext.stock.doctype.stock_entry.stock_entry.get_batch_no",
-			filters:{
-				'item_code': d.item_code,
-				's_warehouse': d.s_warehouse,
-				'posting_date': doc.posting_date
-			}
-		}
+	var item = locals[cdt][cdn];
+	if(!item.item_code) {
+		frappe.throw(__("Please enter Item Code to get batch nos"));
 	} else {
-		msgprint(__("Please enter Item Code to get batch no"));
+		filters = {
+			'item_code': item.item_code,
+			'posting_date': me.frm.doc.posting_date,
+		}
+		if(item.s_warehouse) filters["warehouse"] = item.s_warehouse
+
+		return {
+			query : "erpnext.controllers.queries.get_batch_no",
+			filters: filters
+		}
 	}
 }
 
