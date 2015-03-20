@@ -696,16 +696,15 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	}
 
 	if filters.get("s_warehouse"):
-		batch_nos = frappe.db.sql("""select batch_no
-			from `tabStock Ledger Entry` sle
-			where item_code = '%(item_code)s'
-				and warehouse = '%(s_warehouse)s'
-				and batch_no like '%(txt)s'
-				and exists(select * from `tabBatch`
-					where name = sle.batch_no
-					and (ifnull(expiry_date, '2099-12-31') >= %(posting_date)s
-						or expiry_date = '')
-					and docstatus != 2)
+		batch_nos = frappe.db.sql("""select sle.batch_no
+			from `tabStock Ledger Entry` sle, `tabBatch`
+			where sle.batch_no = `tabBatch`.name
+				and sle.item_code = '%(item_code)s'
+				and sle.warehouse = '%(s_warehouse)s'
+				and sle.batch_no like '%(txt)s'
+				and (ifnull(`tabBatch`.expiry_date, '2099-12-31') >= %(posting_date)s
+						or `tabBatch`.expiry_date = '')
+				and `tabBatch`.docstatus != 2
 			%(mcond)s
 			group by batch_no having sum(actual_qty) > 0
 			order by batch_no desc
