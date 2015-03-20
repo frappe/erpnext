@@ -9,12 +9,13 @@ def execute():
 			{"reconciliation_json": ["!=", ""]}):
 			sr = frappe.get_doc("Stock Reconciliation", sr.name)
 			for item in json.loads(sr.reconciliation_json):
-				sr.append("items", {
-					"item_code": item.item_code,
-					"warehouse": item.warehouse,
-					"valuation_rate": item.valuation_rate,
-					"qty": item.qty
-				})
+				if item.get("item_code"):
+					sr.append("items", {
+						"item_code": item.item_code,
+						"warehouse": item.warehouse,
+						"valuation_rate": item.valuation_rate,
+						"qty": item.qty
+					})
 
 			for item in sr.items:
 				item.db_update()
