@@ -20,7 +20,7 @@ content_sequence = [
 	["Buying", ["new_purchase_requests", "new_supplier_quotations", "new_purchase_orders"]],
 	["Selling", ["new_leads", "new_enquiries", "new_quotations", "new_sales_orders"]],
 	["Stock", ["new_delivery_notes",  "new_purchase_receipts", "new_stock_entries"]],
-	["Support", ["new_communications", "new_support_tickets", "open_tickets"]],
+	["Support", ["new_communications", "new_support_tickets", "replied_tickets_ascending", "replied_tickets_descending",  "open_tickets_ascending",  "open_tickets"]],
 	["Projects", ["new_projects"]],
 	["System", ["scheduler_errors"]],
 ]
@@ -456,6 +456,45 @@ class EmailDigest(Document):
 		self.next_send = formatdate(next_send_date) + " at midnight"
 
 		return send_date
+
+	def get_replied_tickets_ascending(self):
+		replied_tickets_ascending = frappe.db.sql("""select name, subject, modified, raised_by
+			from `tabSupport Ticket` where status='replied'
+			order by modified asc limit 10""", as_dict=True)
+
+		if replied_tickets_ascending:
+			return 1, """<hr><h4>Oldest Replied Tickets (max 10):</h4>%s""" % \
+			 "".join(["<p>%(name)s: %(subject)s <br>by %(raised_by)s on %(modified)s</p>" % \
+				t for t in replied_tickets_ascending])
+		else:
+			return 0, "No Replied Tickets!"
+
+
+	def get_replied_tickets_descending(self):
+		replied_tickets_descending = frappe.db.sql("""select name, subject, modified, raised_by
+			from `tabSupport Ticket` where status='replied'
+			order by modified desc limit 10""", as_dict=True)
+
+		if replied_tickets_descending:
+			return 1, """<hr><h4>Latest Replied Tickets (max 10):</h4>%s""" % \
+			 "".join(["<p>%(name)s: %(subject)s <br>by %(raised_by)s on %(modified)s</p>" % \
+				t for t in replied_tickets_descending])
+		else:
+			return 0, "No Replied Tickets!"
+
+	def get_open_tickets_ascending(self):
+		open_tickets_ascending = frappe.db.sql("""select name, subject, modified, raised_by
+			from `tabSupport Ticket` where status='Open'
+			order by modified asc limit 10""", as_dict=True)
+
+		if open_tickets_ascending:
+			return 1, """<hr><h4>Oldest Open Tickets (max 10):</h4>%s""" % \
+			 "".join(["<p>%(name)s: %(subject)s <br>by %(raised_by)s on %(modified)s</p>" % \
+				t for t in open_tickets_ascending])
+		else:
+			return 0, "No Open Tickets!"
+
+
 
 	def get_open_tickets(self):
 		open_tickets = frappe.db.sql("""select name, subject, modified, raised_by
