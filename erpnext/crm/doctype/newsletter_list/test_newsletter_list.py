@@ -9,4 +9,23 @@ import unittest
 # test_records = frappe.get_test_records('Newletter List')
 
 class TestNewletterList(unittest.TestCase):
-	pass
+	def test_import(self):
+		frappe.delete_doc("Newsletter List", "_Test Newsletter List 1")
+
+		new_list = frappe.get_doc({
+			"doctype": "Newsletter List",
+			"title": "_Test Newsletter List 1"
+		}).insert()
+
+		n_leads = frappe.db.count("Lead")
+
+		added = new_list.import_from("Lead")
+
+		print added
+
+		self.assertEquals(added, n_leads)
+
+		frappe.delete_doc("Newsletter List", new_list.name)
+
+test_dependencies = ["Lead"]
+

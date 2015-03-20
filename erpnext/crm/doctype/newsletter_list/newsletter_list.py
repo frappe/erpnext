@@ -47,6 +47,10 @@ class NewsletterList(Document):
 		self.db_update()
 		return self.total_subscribers
 
+	def on_trash(self):
+		for d in frappe.get_all("Newsletter List Subscriber", {"newsletter_list": self.name}):
+			frappe.delete_doc(d.doctype, d.name)
+
 @frappe.whitelist()
 def import_from(name, doctype):
 	nlist = frappe.get_doc("Newsletter List", name)
