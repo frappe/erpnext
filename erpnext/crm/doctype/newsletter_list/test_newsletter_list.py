@@ -10,8 +10,6 @@ import unittest
 
 class TestNewletterList(unittest.TestCase):
 	def test_import(self):
-		frappe.delete_doc("Newsletter List", "_Test Newsletter List 1")
-
 		new_list = frappe.get_doc({
 			"doctype": "Newsletter List",
 			"title": "_Test Newsletter List 1"
@@ -20,8 +18,6 @@ class TestNewletterList(unittest.TestCase):
 		n_leads = frappe.db.count("Lead")
 
 		added = new_list.import_from("Lead")
-
-		print added
 
 		self.assertEquals(added, n_leads)
 
