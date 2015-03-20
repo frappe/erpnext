@@ -5,6 +5,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils import validate_email_add
+from frappe import _
 
 class NewsletterList(Document):
 	def onload(self):
@@ -35,7 +37,7 @@ class NewsletterList(Document):
 				if e.args[0]!=1062:
 					raise
 
-		frappe.msgprint(frappe._("{0} subscribers added").format(added))
+		frappe.msgprint(_("{0} subscribers added").format(added))
 
 		return self.update_total_subscribers()
 
@@ -50,3 +52,29 @@ def import_from(name, doctype):
 	nlist = frappe.get_doc("Newsletter List", name)
 	if nlist.has_permission("write"):
 		return nlist.import_from(doctype)
+
+@frappe.whitelist()
+def add_subscribers(name, email_list):
+	count = 0
+	for email in email_list.replace(",", "\n").split("\n"):
+		email = email.strip()
+		if not validate_email_add(email):
+			frappe.throw(_("Invalid Email '{0}'").format(email))
+
+		if email:
+			try:
+				frappe.get_doc({
+					"doctype": "Newsletter List Subscriber",
+					"newsletter_list": name,
+					"email": email
+				}).insert()
+
+				count += 1
+			except Exception, e:
+				# ignore duplicate
+				if e.args[0] != 1062:
+					raise
+
+	frappe.msgprint(_("{0} subscribers added").format(count))
+
+	return frappe.get_doc("Newsletter List", name).update_total_subscribers()
