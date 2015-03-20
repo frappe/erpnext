@@ -185,6 +185,7 @@ def set_missing_values(source, target_doc):
 def update_item(obj, target, source_parent):
 	target.conversion_factor = 1
 	target.qty = flt(obj.qty) - flt(obj.ordered_qty)
+	target.stock_qty = target.qty
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
