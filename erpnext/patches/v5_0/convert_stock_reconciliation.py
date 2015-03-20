@@ -15,8 +15,8 @@ def execute():
 					sr.append("items", {
 						"item_code": item[0],
 						"warehouse": item[1],
-						"valuation_rate": item[3],
-						"qty": item[4]
+						"qty": item[3] if len(item) > 2 else None,
+						"valuation_rate": item[4] if len(item) > 3 else None
 					})
 
 				elif item[0]=="Item Code":
