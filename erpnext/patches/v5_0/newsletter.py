@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-import frappe.permisssions
+import frappe.permissions
 
 def execute():
 	frappe.reload_doctype("User")
@@ -13,7 +13,7 @@ def execute():
 	frappe.reload_doc('crm', 'doctype', 'newsletter_list_subscriber')
 	frappe.reload_doc('crm', 'doctype', 'newsletter')
 
-	frappe.permisssions.reset_perms("Newsletter")
+	frappe.permissions.reset_perms("Newsletter")
 
 	if not frappe.db.exists("Role", "Newsletter Manager"):
 		frappe.get_doc({"doctype": "Role", "role": "Newsletter Manager"}).insert()
