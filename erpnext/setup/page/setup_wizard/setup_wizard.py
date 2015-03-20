@@ -75,8 +75,9 @@ def setup_account(args=None):
 
 		login_as_first_user(args)
 
-		frappe.clear_cache()
 		frappe.db.commit()
+
+		frappe.clear_cache()
 
 	except:
 		if args:

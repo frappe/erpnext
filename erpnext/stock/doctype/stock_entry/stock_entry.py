@@ -153,10 +153,16 @@ class StockEntry(StockController):
 				frappe.throw(_("Atleast one warehouse is mandatory"))
 
 			if self.purpose in source_mandatory and not d.s_warehouse:
-				frappe.throw(_("Source warehouse is mandatory for row {0}").format(d.idx))
+				if self.from_warehouse:
+					d.s_warehouse = self.from_warehouse
+				else:
+					frappe.throw(_("Source warehouse is mandatory for row {0}").format(d.idx))
 
 			if self.purpose in target_mandatory and not d.t_warehouse:
-				frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
+				if self.to_warehouse:
+					d.t_warehouse = self.to_warehouse
+				else:
+					frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
 
 			if self.purpose in ["Manufacture", "Repack"]:
 				if validate_for_manufacture_repack:

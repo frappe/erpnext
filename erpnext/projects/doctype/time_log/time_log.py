@@ -6,7 +6,6 @@ import frappe, json
 from frappe import _
 from frappe.utils import cstr, flt, get_datetime, get_time, getdate
 from dateutil.relativedelta import relativedelta
-from dateutil.parser import parse
 
 class OverlapError(frappe.ValidationError): pass
 class OverProductionLoggedError(frappe.ValidationError): pass
@@ -176,7 +175,7 @@ class TimeLog(Document):
 		"""If in overlap, set start as the end point of the overlapping time log"""
 		overlapping = self.get_overlap_for("workstation")
 		if overlapping:
-			self.from_time = parse(overlapping.to_time) + relativedelta(minutes=10)
+			self.from_time = get_datetime(overlapping.to_time) + relativedelta(minutes=10)
 
 	def get_time_log_summary(self):
 		"""Returns 'Actual Operating Time'. """

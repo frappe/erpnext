@@ -121,6 +121,10 @@ class AccountsController(TransactionBase):
 					args.update(item.as_dict())
 					if not args.get("transaction_date"):
 						args["transaction_date"] = args.get("posting_date")
+
+					if self.get("is_subcontracted"):
+						args["is_subcontracted"] = self.is_subcontracted
+
 					ret = get_item_details(args)
 
 					for fieldname, value in ret.items():
