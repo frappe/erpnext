@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.defaults
 
-from frappe.utils import cstr, cint, flt, comma_or, nowdate
+from frappe.utils import cstr, cint, flt, comma_or
 
 from frappe import _
 from erpnext.stock.utils import get_incoming_rate
@@ -679,50 +679,6 @@ def query_return_item(doctype, txt, searchfield, start, page_len, filters):
 					result.append(val)
 
 	return result[start:start+page_len]
-
-def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
-	if not filters.get("posting_date"):
-		filters["posting_date"] = nowdate()
-
-	batch_nos = None
-	args = {
-		'item_code': filters.get("item_code"),
-		's_warehouse': filters.get('s_warehouse'),
-		'posting_date': filters.get('posting_date'),
-		'txt': "%%%s%%" % txt,
-		'mcond':get_match_cond(doctype),
-		"start": start,
-		"page_len": page_len
-	}
-
-	if filters.get("s_warehouse"):
-		batch_nos = frappe.db.sql("""select sle.batch_no
-			from `tabStock Ledger Entry` sle, `tabBatch`
-			where sle.batch_no = `tabBatch`.name
-				and sle.item_code = '%(item_code)s'
-				and sle.warehouse = '%(s_warehouse)s'
-				and sle.batch_no like '%(txt)s'
-				and (ifnull(`tabBatch`.expiry_date, '2099-12-31') >= %(posting_date)s
-						or `tabBatch`.expiry_date = '')
-				and `tabBatch`.docstatus != 2
-			%(mcond)s
-			group by batch_no having sum(actual_qty) > 0
-			order by batch_no desc
-			limit %(start)s, %(page_len)s """
-			% args)
-
-	if batch_nos:
-		return batch_nos
-	else:
-		return frappe.db.sql("""select name from `tabBatch`
-			where item = '%(item_code)s'
-			and docstatus < 2
-			and (ifnull(expiry_date, '2099-12-31') >= %(posting_date)s
-				or expiry_date = '' or expiry_date = "0000-00-00")
-			%(mcond)s
-			order by name desc
-			limit %(start)s, %(page_len)s
-		""" % args)
 
 def get_stock_items_for_return(ref_doc, parentfields):
 	"""return item codes filtered from doc, which are stock items"""
