@@ -59,7 +59,7 @@ def get_gl_entries(filters):
 		{group_by_condition}
 		order by posting_date, account"""\
 		.format(conditions=get_conditions(filters), group_by_condition=group_by_condition),
-		filters, as_dict=1)
+		filters, as_dict=1, debug=True)
 
 	return gl_entries
 
@@ -77,6 +77,10 @@ def get_conditions(filters):
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
 
+	from flows.utils import get_insight_depth_condition
+	depth_condition = get_insight_depth_condition(filters["insight_depth"], old_styp_format_escaped=True)
+	if depth_condition:
+		conditions.append(depth_condition)
 
 	from frappe.widgets.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")

@@ -203,9 +203,14 @@ def filter_accounts(accounts, depth=10):
 
 	return filtered_accounts, accounts_by_name
 
-def get_gl_entries(company, from_date, to_date, root_lft, root_rgt, ignore_closing_entries=False):
+def get_gl_entries(company, from_date, to_date, root_lft, root_rgt, ignore_closing_entries=False, depth=1):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	additional_conditions = []
+
+	from flows.utils import get_insight_depth_condition
+	depth_condition = get_insight_depth_condition(depth, old_styp_format_escaped=True)
+	if depth_condition:
+		additional_conditions.append("and {}".format(depth_condition))
 
 	if ignore_closing_entries:
 		additional_conditions.append("and ifnull(voucher_type, '')!='Period Closing Voucher'")
@@ -227,7 +232,7 @@ def get_gl_entries(company, from_date, to_date, root_lft, root_rgt, ignore_closi
 			"lft": root_lft,
 			"rgt": root_rgt
 		},
-		as_dict=True)
+		as_dict=True, debug=True)
 
 	gl_entries_by_account = {}
 	for entry in gl_entries:

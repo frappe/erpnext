@@ -57,7 +57,7 @@ def get_data(filters):
 		where company=%s""", (filters.company,))[0]
 
 	gl_entries_by_account = get_gl_entries(filters.company, None, filters.to_date, min_lft, max_rgt,
-		ignore_closing_entries=not flt(filters.with_period_closing_entry))
+		ignore_closing_entries=not flt(filters.with_period_closing_entry), depth=filters['insight_depth'])
 
 	total_row = calculate_values(accounts, gl_entries_by_account, filters)
 	accumulate_values_into_parents(accounts, accounts_by_name)

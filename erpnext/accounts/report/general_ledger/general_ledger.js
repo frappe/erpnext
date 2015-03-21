@@ -60,6 +60,13 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname":"group_by_account",
 			"label": __("Group by Account"),
 			"fieldtype": "Check",
+		},
+        {
+			"fieldname":"insight_depth",
+			"label": __("Insight Depth"),
+			"fieldtype": "Select",
+			"options": '1' + NEWLINE + '2' + NEWLINE + '3',
+			"default": "1"
 		}
 	]
 }

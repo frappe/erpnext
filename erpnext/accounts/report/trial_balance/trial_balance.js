@@ -56,6 +56,13 @@ frappe.query_reports["Trial Balance"] = {
 			"label": __("Show zero values"),
 			"fieldtype": "Check"
 		},
+        {
+			"fieldname":"insight_depth",
+			"label": __("Insight Depth"),
+			"fieldtype": "Select",
+			"options": '1' + NEWLINE + '2' + NEWLINE + '3',
+			"default": "1"
+		}
 	],
 	"formatter": erpnext.financial_statements.formatter,
 	"tree": true,
