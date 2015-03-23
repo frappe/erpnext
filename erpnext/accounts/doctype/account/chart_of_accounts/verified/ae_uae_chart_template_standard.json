@@ -40,7 +40,8 @@
                         "Bank Margin On LC & LG": {},
                         "Banks Blocked Deposits": {},
                         "Banks Call Deposit Accounts": {},
-                        "Banks Current Accounts": {}
+                        "Banks Current Accounts": {},
+						"account_type": "Bank"
                     },
                     "Cash in Hand": {
                         "Cash in Safe": {
@@ -163,7 +164,11 @@
             "Cost of Sale": {
                 "Cost Of Goods Sold": {
                     "Cost Of Goods Sold I/C Sales": {},
-                    "Cost of Goods Sold in Trading": {}
+                    "Cost of Goods Sold in Trading": {},
+					"account_type": "Cost of Goods Sold"
+                },
+                "Expenses Included In Valuation": {
+                    "account_type": "Expenses Included In Valuation"
                 }
             },
             "Depreciation": {
@@ -314,6 +319,15 @@
                         "account_type": "Payable"
                     }
                 },
+			    "Stock Liabilities": {
+				    "Stock Received But Not Billed": {
+				        "account_type": "Stock Received But Not Billed"
+				    }
+			    },
+				"Duties and Taxes": {
+					"account_type": "Tax",
+					"group_or_ledger": "Group"
+				},
                 "Accruals & Provisions": {
                     "Accruals": {
                         "Accrued Personnel Cost": {
@@ -417,6 +431,7 @@
                 "Dividends Paid": {},
                 "Previous Years Results": {}
             },
+			"account_type": "Equity",
             "root_type": "Equity"
         }
     }

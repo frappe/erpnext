@@ -153,10 +153,6 @@ coa = {
 		"root_type": "Income"
     },
     _("Source of Funds (Liabilities)"): {
-        _("Capital Account"): {
-            _("Reserves and Surplus"): {},
-            _("Shareholders Funds"): {}
-        },
         _("Current Liabilities"): {
 		    _("Accounts Payable"): {
 		        _("Creditors"): {
@@ -182,5 +178,20 @@ coa = {
             _("Temporary Liabilities"): {}
         },
 		"root_type": "Liability"
-    }
+    },
+	_("Equity"): {
+        _("Capital Stock"): {
+            "account_type": "Equity"
+        },
+        _("Dividends Paid"): {
+            "account_type": "Equity"
+        },
+        _("Opening Balance Equity"): {
+            "account_type": "Equity"
+        },
+        _("Retained Earnings"): {
+            "account_type": "Equity"
+        },
+		"root_type": "Equity"
+	}
 }
