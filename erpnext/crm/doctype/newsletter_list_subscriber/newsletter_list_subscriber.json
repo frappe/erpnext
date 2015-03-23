@@ -75,7 +75,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-03-18 08:07:24.748431", 
+ "modified": "2015-03-23 04:47:36.505462", 
  "modified_by": "Administrator", 
  "module": "CRM", 
  "name": "Newsletter List Subscriber", 
@@ -105,5 +105,6 @@
  "read_only": 0, 
  "read_only_onload": 0, 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "email"
 }
