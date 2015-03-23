@@ -68,14 +68,16 @@ def get_item_warehouse_batch_map(filters):
 			}))
 		qty_dict = iwb_map[d.item_code][d.warehouse][d.batch_no]
 		if d.posting_date < filters["from_date"]:
-			qty_dict.opening_qty += flt(d.actual_qty, float_precision)
+			qty_dict.opening_qty = flt(qty_dict.opening_qty, float_precision) \
+				+ flt(d.actual_qty, float_precision)
 		elif d.posting_date >= filters["from_date"] and d.posting_date <= filters["to_date"]:
 			if flt(d.actual_qty) > 0:
-				qty_dict.in_qty += flt(d.actual_qty, float_precision)
+				qty_dict.in_qty = flt(qty_dict.in_qty, float_precision) + flt(d.actual_qty, float_precision)
 			else:
-				qty_dict.out_qty += abs(flt(d.actual_qty, float_precision))
+				qty_dict.out_qty = flt(qty_dict.out_qty, float_precision) \
+					+ abs(flt(d.actual_qty, float_precision))
 
-		qty_dict.bal_qty += flt(d.actual_qty, float_precision)
+		qty_dict.bal_qty = flt(qty_dict.bal_qty, float_precision) + flt(d.actual_qty, float_precision)
 
 	return iwb_map
 
