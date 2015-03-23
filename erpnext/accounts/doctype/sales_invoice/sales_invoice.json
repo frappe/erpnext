@@ -217,6 +217,7 @@
    "oldfieldname": "conversion_rate", 
    "oldfieldtype": "Currency", 
    "permlevel": 0, 
+   "precision": "9", 
    "print_hide": 1, 
    "read_only": 0, 
    "reqd": 1
@@ -257,6 +258,7 @@
    "label": "Price List Exchange Rate", 
    "no_copy": 0, 
    "permlevel": 0, 
+   "precision": "9", 
    "print_hide": 1, 
    "read_only": 0, 
    "reqd": 1
@@ -1244,7 +1246,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-03-05 01:42:46.778216", 
+ "modified": "2015-03-23 14:46:49.412013", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 

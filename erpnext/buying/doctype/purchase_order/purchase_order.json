@@ -174,6 +174,7 @@
    "oldfieldname": "conversion_rate", 
    "oldfieldtype": "Currency", 
    "permlevel": 0, 
+   "precision": "9", 
    "print_hide": 1, 
    "reqd": 1
   }, 
@@ -204,6 +205,7 @@
    "fieldtype": "Float", 
    "label": "Price List Exchange Rate", 
    "permlevel": 0, 
+   "precision": "9", 
    "print_hide": 1
   }, 
   {
@@ -870,7 +872,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-03-03 01:58:41.152545", 
+ "modified": "2015-03-23 14:47:26.072237", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 

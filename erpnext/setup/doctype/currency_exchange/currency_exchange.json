@@ -30,12 +30,13 @@
    "in_list_view": 1, 
    "label": "Exchange Rate", 
    "permlevel": 0, 
+   "precision": "9", 
    "reqd": 1
   }
  ], 
  "icon": "icon-exchange", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:36.356182", 
+ "modified": "2015-03-23 14:45:09.645344", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Currency Exchange", 

@@ -195,6 +195,7 @@
    "oldfieldname": "conversion_rate", 
    "oldfieldtype": "Currency", 
    "permlevel": 0, 
+   "precision": "9", 
    "print_hide": 1, 
    "read_only": 0
   }, 
@@ -227,6 +228,7 @@
    "fieldtype": "Float", 
    "label": "Price List Exchange Rate", 
    "permlevel": 0, 
+   "precision": "9", 
    "print_hide": 1, 
    "read_only": 0
   }, 
@@ -963,7 +965,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-03-03 02:46:30.118418", 
+ "modified": "2015-03-23 14:47:57.373436", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
