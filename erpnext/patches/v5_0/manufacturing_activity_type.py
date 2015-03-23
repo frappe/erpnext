@@ -4,7 +4,7 @@
 import frappe
 
 def execute():
-	if not frappe.db.exists('Activity Type','Manufacturing'):
+	if not frappe.db.exists('Activity Type','Manufacturing') and frappe.get_all("Company"):
 		frappe.get_doc({
 			"doctype": "Activity Type",
 			"activity_type": "Manufacturing"
