@@ -10,16 +10,16 @@ def execute():
 			{"reconciliation_json": ["!=", ""]}):
 			start = False
 			sr = frappe.get_doc("Stock Reconciliation", sr.name)
-			for item in json.loads(sr.reconciliation_json):
+			for row in json.loads(sr.reconciliation_json):
 				if start:
 					sr.append("items", {
-						"item_code": item[0],
-						"warehouse": item[1],
-						"qty": item[3] if len(item) > 2 else None,
-						"valuation_rate": item[4] if len(item) > 3 else None
+						"item_code": row[0],
+						"warehouse": row[1],
+						"qty": row[3] if len(row) > 2 else None,
+						"valuation_rate": row[4] if len(row) > 3 else None
 					})
 
-				elif item[0]=="Item Code":
+				elif row[0]=="Item Code":
 					start = True
 
 

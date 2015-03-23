@@ -62,8 +62,7 @@ def add_subscribers(name, email_list):
 	count = 0
 	for email in email_list.replace(",", "\n").split("\n"):
 		email = email.strip()
-		if not validate_email_add(email):
-			frappe.throw(_("Invalid Email '{0}'").format(email))
+		validate_email_add(email, True)
 
 		if email:
 			try:

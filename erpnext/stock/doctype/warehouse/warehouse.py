@@ -15,8 +15,8 @@ class Warehouse(Document):
 			self.name = self.warehouse_name + suffix
 
 	def validate(self):
-		if self.email_id and not validate_email_add(self.email_id):
-				throw(_("Please enter valid Email Id"))
+		if self.email_id:
+			validate_email_add(self.email_id, True)
 
 		self.update_parent_account()
 

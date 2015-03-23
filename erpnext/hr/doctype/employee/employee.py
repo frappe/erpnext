@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_add, cint, today
+from frappe.utils import getdate, validate_email_add, today
 from frappe.model.naming import make_autoname
 from frappe import throw, _, msgprint
 import frappe.permissions
@@ -110,10 +110,10 @@ class Employee(Document):
 			throw(_("Contract End Date must be greater than Date of Joining"))
 
 	def validate_email(self):
-		if self.company_email and not validate_email_add(self.company_email):
-			throw(_("Please enter valid Company Email"))
-		if self.personal_email and not validate_email_add(self.personal_email):
-			throw(_("Please enter valid Personal Email"))
+		if self.company_email:
+			validate_email_add(self.company_email, True)
+		if self.personal_email:
+			validate_email_add(self.personal_email, True)
 
 	def validate_status(self):
 		if self.status == 'Left' and not self.relieving_date:
