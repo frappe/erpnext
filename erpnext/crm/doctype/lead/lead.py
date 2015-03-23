@@ -125,6 +125,20 @@ def make_opportunity(source_name, target_doc=None):
 		}}, target_doc)
 
 	return target_doc
+	
+@frappe.whitelist()
+def make_quotation(source_name, target_doc=None):
+	target_doc = get_mapped_doc("Lead", source_name,
+		{"Lead": {
+			"doctype": "Quotation",
+			"field_map": {
+				"name": "lead",
+				"lead_name": "customer_name",
+			}
+		}}, target_doc)
+	target_doc.quotation_to = "Lead"
+
+	return target_doc
 
 @frappe.whitelist()
 def get_lead_details(lead):
