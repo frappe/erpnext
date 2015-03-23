@@ -324,7 +324,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 	manipulate_grand_total_for_inclusive_tax: function() {
 		var me = this;
 		// if fully inclusive taxes and diff
-		if (this.frm.doc["taxes"].length) {
+		if (this.frm.doc["taxes"] && this.frm.doc["taxes"].length) {
 			var all_inclusive = frappe.utils.all(this.frm.doc["taxes"].map(function(d) {
 				return cint(d.included_in_print_rate);
 			}));
