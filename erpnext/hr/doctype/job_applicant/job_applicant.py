@@ -5,6 +5,15 @@
 
 from __future__ import unicode_literals
 from frappe.model.document import Document
+import frappe
+from frappe import _
 
 class JobApplicant(Document):
-	pass
+	def autoname(self):
+		keys = filter(None, (self.applicant_name, self.email_id))
+		if not keys:
+			frappe.throw(_("Name or Email is mandatory"), frappe.NameError)
+		self.name = " - ".join(keys)
+
+	def set_sender(self, sender):
+		self.email_id = sender

@@ -1,5 +1,5 @@
 {
- "autoname": "field:applicant_name", 
+ "autoname": "", 
  "creation": "2013-01-29 19:25:37", 
  "description": "Applicant for a Job", 
  "docstatus": 0, 
@@ -12,12 +12,13 @@
    "in_list_view": 0, 
    "label": "Applicant Name", 
    "permlevel": 0, 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
    "fieldname": "email_id", 
    "fieldtype": "Data", 
    "label": "Email Id", 
+   "options": "Email", 
    "permlevel": 0
   }, 
   {
@@ -65,7 +66,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:40.029237", 
+ "modified": "2015-03-23 05:42:02.016041", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Job Applicant", 
