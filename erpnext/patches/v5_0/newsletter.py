@@ -19,8 +19,9 @@ def execute():
 		frappe.get_doc({"doctype": "Role", "role": "Newsletter Manager"}).insert()
 
 	for userrole in frappe.get_all("UserRole", "parent", {"role": "Sales Manager"}):
-		user = frappe.get_doc("User", userrole.parent)
-		user.add_roles("Newsletter Manager")
+		if frappe.db.exists("User", userrole.parent):
+			user = frappe.get_doc("User", userrole.parent)
+			user.add_roles("Newsletter Manager")
 
 	# create default lists
 	general = frappe.new_doc("Newsletter List")
