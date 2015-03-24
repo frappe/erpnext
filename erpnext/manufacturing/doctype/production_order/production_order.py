@@ -373,7 +373,7 @@ def get_events(start, end, filters=None):
 @frappe.whitelist()
 def make_time_log(name, operation, from_time, to_time, qty=None,  project=None, workstation=None, operation_id=None):
 	time_log =  frappe.new_doc("Time Log")
-	time_log.against_manufacturing = 1
+	time_log.for_manufacturing = 1
 	time_log.from_time = from_time
 	time_log.to_time = to_time
 	time_log.production_order = name

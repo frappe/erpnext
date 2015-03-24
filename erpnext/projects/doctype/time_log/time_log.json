@@ -75,15 +75,15 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "against_manufacturing", 
+   "fieldname": "for_manufacturing", 
    "fieldtype": "Check", 
-   "label": "Against Manufacturing", 
+   "label": "For Manufacturing", 
    "permlevel": 0, 
    "precision": "", 
    "read_only": 1
   }, 
   {
-   "depends_on": "eval:!doc.against_manufacturing", 
+   "depends_on": "eval:!doc.for_manufacturing", 
    "fieldname": "activity_type", 
    "fieldtype": "Link", 
    "in_list_view": 0, 
@@ -94,7 +94,7 @@
    "reqd": 0
   }, 
   {
-   "depends_on": "eval:!doc.against_manufacturing", 
+   "depends_on": "eval:!doc.for_manufacturing", 
    "fieldname": "task", 
    "fieldtype": "Link", 
    "label": "Task", 
@@ -103,7 +103,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.against_manufacturing", 
+   "depends_on": "eval:doc.for_manufacturing", 
    "fieldname": "section_break_11", 
    "fieldtype": "Section Break", 
    "permlevel": 0, 
@@ -242,7 +242,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-03-24 07:10:31.412669", 
+ "modified": "2015-03-24 08:10:31.412670", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 

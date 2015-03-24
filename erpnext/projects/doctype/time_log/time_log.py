@@ -103,9 +103,11 @@ class TimeLog(Document):
 			self.hours = flt(time_diff_in_seconds(self.to_time, self.from_time)) / 3600
 
 	def validate_time_log_for(self):
-		if not self.against_manufacturing:
+		if not self.for_manufacturing:
 			for fld in ["production_order", "operation", "workstation", "completed_qty"]:
 				self.set(fld, None)
+		else:
+			self.activity_type=None
 
 	def check_workstation_timings(self):
 		"""Checks if **Time Log** is between operating hours of the **Workstation**."""
@@ -122,7 +124,7 @@ class TimeLog(Document):
 	def update_production_order(self):
 		"""Updates `start_date`, `end_date`, `status` for operation in Production Order."""
 
-		if self.against_manufacturing and self.production_order:
+		if self.for_manufacturing and self.production_order:
 			if not self.operation_id:
 				frappe.throw(_("Operation ID not set"))
 
@@ -185,7 +187,7 @@ class TimeLog(Document):
 			(self.production_order, self.operation_id), as_dict=1)[0]
 
 	def validate_manufacturing(self):
-		if self.against_manufacturing:
+		if self.for_manufacturing:
 			if not self.production_order:
 				frappe.throw(_("Production Order is Mandatory"))
 			if not self.operation:

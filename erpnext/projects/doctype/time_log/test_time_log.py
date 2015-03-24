@@ -36,7 +36,7 @@ class TestTimeLog(unittest.TestCase):
 
 		time_log = frappe.get_doc({
 			"doctype": "Time Log",
-			"against_manufacturing": 1,
+			"for_manufacturing": 1,
 			"production_order": prod_order.name,
 			"qty": 1,
 			"from_time": "2014-12-26 00:00:00",
@@ -54,7 +54,7 @@ class TestTimeLog(unittest.TestCase):
 
 		time_log = frappe.get_doc({
 			"doctype": "Time Log",
-			"against_manufacturing": 1,
+			"for_manufacturing": 1,
 			"production_order": prod_order.name,
 			"operation": prod_order.operations[0].operation,
 			"operation_id": prod_order.operations[0].name,

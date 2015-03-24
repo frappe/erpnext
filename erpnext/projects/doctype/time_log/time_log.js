@@ -5,7 +5,7 @@ frappe.provide("erpnext.projects");
 
 frappe.ui.form.on("Time Log", "onload", function(frm) {
 	frm.set_query("task", erpnext.queries.task);
-	if (frm.doc.against_manufacturing) {
+	if (frm.doc.for_manufacturing) {
 		frappe.ui.form.trigger("Time Log", "production_order");
 	}
 });
