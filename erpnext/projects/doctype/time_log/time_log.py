@@ -23,7 +23,6 @@ class TimeLog(Document):
 		self.validate_time_log_for()
 		self.check_workstation_timings()
 		self.validate_production_order()
-		self.validate_project()
 		self.validate_manufacturing()
 
 	def on_submit(self):
@@ -104,7 +103,7 @@ class TimeLog(Document):
 			self.hours = flt(time_diff_in_seconds(self.to_time, self.from_time)) / 3600
 
 	def validate_time_log_for(self):
-		if self.time_log_for == "Project":
+		if not self.against_manufacturing:
 			for fld in ["production_order", "operation", "workstation", "completed_qty"]:
 				self.set(fld, None)
 
@@ -123,7 +122,7 @@ class TimeLog(Document):
 	def update_production_order(self):
 		"""Updates `start_date`, `end_date`, `status` for operation in Production Order."""
 
-		if self.time_log_for=="Manufacturing" and self.production_order:
+		if self.against_manufacturing and self.production_order:
 			if not self.operation_id:
 				frappe.throw(_("Operation ID not set"))
 
@@ -185,15 +184,8 @@ class TimeLog(Document):
 			where production_order = %s and operation_id = %s and docstatus=1""",
 			(self.production_order, self.operation_id), as_dict=1)[0]
 
-	def validate_project(self):
-		if self.time_log_for == 'Project':
-			if not self.project:
-				frappe.throw(_("Project is Mandatory."))
-		if self.time_log_for == "":
-			self.project = None
-
 	def validate_manufacturing(self):
-		if self.time_log_for == 'Manufacturing':
+		if self.against_manufacturing:
 			if not self.production_order:
 				frappe.throw(_("Production Order is Mandatory"))
 			if not self.operation:

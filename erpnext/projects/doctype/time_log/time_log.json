@@ -43,14 +43,6 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "billable", 
-   "fieldtype": "Check", 
-   "in_list_view": 0, 
-   "label": "Billable", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
    "fieldname": "user", 
    "fieldtype": "Link", 
    "label": "User", 
@@ -75,18 +67,23 @@
    "reqd": 0
   }, 
   {
-   "default": "Project", 
-   "fieldname": "time_log_for", 
-   "fieldtype": "Select", 
-   "label": "Time Log For", 
-   "options": "Project\nManufacturing", 
+   "fieldname": "billable", 
+   "fieldtype": "Check", 
+   "in_list_view": 0, 
+   "label": "Billable", 
    "permlevel": 0, 
-   "precision": "", 
-   "read_only": 1, 
-   "reqd": 0
+   "read_only": 0
   }, 
   {
-   "depends_on": "", 
+   "fieldname": "against_manufacturing", 
+   "fieldtype": "Check", 
+   "label": "Against Manufacturing", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "depends_on": "eval:!doc.against_manufacturing", 
    "fieldname": "activity_type", 
    "fieldtype": "Link", 
    "in_list_view": 0, 
@@ -94,10 +91,10 @@
    "options": "Activity Type", 
    "permlevel": 0, 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
-   "depends_on": "eval:doc.time_log_for != 'Manufacturing'", 
+   "depends_on": "eval:!doc.against_manufacturing", 
    "fieldname": "task", 
    "fieldtype": "Link", 
    "label": "Task", 
@@ -106,33 +103,34 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
+   "depends_on": "eval:doc.against_manufacturing", 
    "fieldname": "section_break_11", 
    "fieldtype": "Section Break", 
    "permlevel": 0, 
    "precision": ""
   }, 
   {
-   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
+   "depends_on": "", 
    "fieldname": "production_order", 
    "fieldtype": "Link", 
    "label": "Production Order", 
    "options": "Production Order", 
    "permlevel": 0, 
    "precision": "", 
-   "read_only": 1
+   "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
+   "depends_on": "", 
    "fieldname": "operation", 
-   "fieldtype": "Select", 
+   "fieldtype": "Link", 
    "label": "Operation", 
-   "options": "", 
+   "options": "Operation", 
    "permlevel": 0, 
    "precision": "", 
-   "read_only": 1
+   "read_only": 0
   }, 
   {
+   "depends_on": "", 
    "fieldname": "operation_id", 
    "fieldtype": "Data", 
    "hidden": 1, 
@@ -150,17 +148,17 @@
    "precision": ""
   }, 
   {
-   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
+   "depends_on": "", 
    "fieldname": "workstation", 
    "fieldtype": "Link", 
    "label": "Workstation", 
    "options": "Workstation", 
    "permlevel": 0, 
    "precision": "", 
-   "read_only": 1
+   "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.time_log_for == 'Manufacturing'", 
+   "depends_on": "", 
    "description": "Operation completed for how many finished goods?", 
    "fieldname": "completed_qty", 
    "fieldtype": "Float", 
@@ -188,7 +186,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.time_log_for", 
+   "depends_on": "", 
    "fieldname": "project", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
@@ -244,7 +242,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-03-10 17:07:35.506886", 
+ "modified": "2015-03-24 07:10:31.412669", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 
