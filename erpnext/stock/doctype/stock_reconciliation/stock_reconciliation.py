@@ -46,7 +46,7 @@ class StockReconciliation(StockController):
 			else:
 				item.current_qty = qty
 				item.current_valuation_rate = rate
-				self.difference_amount += ((item.qty or qty) * (item.valuation_rate or rate) - (qty * rate))
+				self.difference_amount += (flt(item.qty or qty) * flt(item.valuation_rate or rate) - (flt(qty) * flt(rate)))
 				return True
 
 		items = filter(lambda d: _changed(d), self.items)
@@ -165,11 +165,11 @@ class StockReconciliation(StockController):
 
 			if row.qty and not row.valuation_rate:
 				frappe.throw(_("Valuation Rate required for Item {0}").format(row.item_code))
-			
+
 			if previous_sle and row.qty == previous_sle.get("qty_after_transaction") \
 				and row.valuation_rate == previous_sle.get("valuation_rate"):
 					continue
-				
+
 			self.insert_entries(row)
 
 	def insert_entries(self, row):

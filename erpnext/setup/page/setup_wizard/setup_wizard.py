@@ -408,8 +408,8 @@ def create_logo(args):
 			filename, filetype, content = attach_logo
 			fileurl = save_file(filename, content, "Website Settings", "Website Settings",
 				decode=True).file_url
-			frappe.db.set_value("Website Settings", "Website Settings", "banner_html",
-				"<img src='%s' style='max-width: 100%%;'>" % fileurl)
+			frappe.db.set_value("Website Settings", "Website Settings", "brand_html",
+				"<img src='{0}' style='max-width: 40px; max-height: 25px;'> {1}".format(fileurl, args.get("company_name").strip()))
 
 def add_all_roles_to(name):
 	user = frappe.get_doc("User", name)
