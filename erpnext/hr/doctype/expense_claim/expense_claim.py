@@ -18,6 +18,7 @@ class ExpenseClaim(Document):
 
 	def validate(self):
 		validate_fiscal_year(self.posting_date, self.fiscal_year, _("Posting Date"), self)
+		self.validate_sanctioned_amount()
 		self.validate_exp_details()
 		self.validate_expense_approver()
 		set_employee_name(self)
@@ -25,6 +26,12 @@ class ExpenseClaim(Document):
 	def on_submit(self):
 		if self.approval_status=="Draft":
 			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
+		if self.project:
+			self.update_project()
+			
+	def on_cancel(self):
+		if self.project:
+			self.update_project()
 
 	def validate_exp_details(self):
 		if not self.get('expenses'):
@@ -34,3 +41,12 @@ class ExpenseClaim(Document):
 		if self.exp_approver and "Expense Approver" not in frappe.get_roles(self.exp_approver):
 			frappe.throw(_("{0} ({1}) must have role 'Expense Approver'")\
 				.format(get_fullname(self.exp_approver), self.exp_approver), InvalidExpenseApproverError)
+	
+	def update_project(self):
+		expense_amount = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim` 
+			where project = %s and approval_status = "Approved" and docstatus=1""",self.project)
+		frappe.db.set_value("Project", self.project, "total_expense_claims", expense_amount)
+
+	def validate_sanctioned_amount(self):
+		if self.total_sanctioned_amount > self.total_claimed_amount:
+			frappe.throw(_("Total sanctioned amount cannot be greater than total claimed amount."))

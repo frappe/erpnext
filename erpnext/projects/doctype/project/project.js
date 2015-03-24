@@ -21,6 +21,14 @@ cur_frm.cscript.refresh = function(doc) {
 			frappe.route_options = {"project": doc.name}
 			frappe.set_route("List", "Task");
 		}, "icon-list", true);
+		cur_frm.add_custom_button(__("Time Logs"), function() {
+			frappe.route_options = {"project": doc.name}
+			frappe.set_route("List", "Time Log");
+		}, "icon-list", true);
+		cur_frm.add_custom_button(__("Expense Claims"), function() {
+			frappe.route_options = {"project": doc.name}
+			frappe.set_route("List", "Expense Claim");
+		}, "icon-list", true);
 	}
 }
 

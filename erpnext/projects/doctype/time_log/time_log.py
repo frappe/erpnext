@@ -63,6 +63,7 @@ class TimeLog(Document):
 	def validate_overlap(self):
 		"""Checks if 'Time Log' entries overlap for a user, workstation. """
 		self.validate_overlap_for("user")
+		self.validate_overlap_for("employee")
 		self.validate_overlap_for("workstation")
 
 	def validate_overlap_for(self, fieldname):

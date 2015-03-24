@@ -198,6 +198,22 @@
    "search_index": 0
   }, 
   {
+   "fieldname": "total_activity_cost", 
+   "fieldtype": "Currency", 
+   "label": "Total Activity Cost", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "total_expense_claims", 
+   "fieldtype": "Currency", 
+   "label": "Total Expense Claims", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "cost_center", 
    "fieldtype": "Link", 
    "label": "Default Cost Center", 
@@ -262,7 +278,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2015-02-22 11:17:49.051755", 
+ "modified": "2015-03-23 06:44:19.538443", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 

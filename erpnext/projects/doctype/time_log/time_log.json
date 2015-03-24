@@ -51,6 +51,14 @@
    "precision": ""
   }, 
   {
+   "fieldname": "employee", 
+   "fieldtype": "Link", 
+   "label": "Employee", 
+   "options": "Employee", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "column_break_3", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -196,6 +204,26 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "billing_rate", 
+   "fieldtype": "Currency", 
+   "label": "Billing Rate", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "internal_rate", 
+   "fieldtype": "Currency", 
+   "label": "Internal Rate", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "column_break_25", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "description": "Will be updated when batched.", 
    "fieldname": "time_log_batch", 
    "fieldtype": "Link", 
@@ -212,12 +240,6 @@
    "options": "Sales Invoice", 
    "permlevel": 0, 
    "read_only": 1
-  }, 
-  {
-   "fieldname": "column_break_16", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0, 
-   "read_only": 0
   }, 
   {
    "fieldname": "amended_from", 
