@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, flt
+from frappe.utils import cstr, flt, getdate
 from frappe import _
 
 def execute(filters=None):
@@ -137,10 +137,11 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 
 	for gle in gl_entries:
 		amount = flt(gle.debit, 3) - flt(gle.credit, 3)
-		if filters.get("account") and (gle.posting_date<filters.from_date or cstr(gle.is_opening)=="Yes"):
-			gle_map[gle.account].opening += amount
-			opening += amount
-		elif gle.posting_date <= filters.to_date:
+		if filters.get("account") and \
+			(gle.posting_date < getdate(filters.from_date) or cstr(gle.is_opening)=="Yes"):
+				gle_map[gle.account].opening += amount
+				opening += amount
+		elif gle.posting_date <= getdate(filters.to_date):
 			gle_map[gle.account].entries.append(gle)
 			gle_map[gle.account].total_debit += flt(gle.debit, 3)
 			gle_map[gle.account].total_credit += flt(gle.credit, 3)
