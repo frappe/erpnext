@@ -5,7 +5,7 @@ frappe.provide("erpnext.projects");
 
 frappe.ui.form.on("Time Log", "onload", function(frm) {
 	frm.set_query("task", erpnext.queries.task);
-	if (frm.doc.time_log_for == "Manufacturing") {
+	if (frm.doc.for_manufacturing) {
 		frappe.ui.form.trigger("Time Log", "production_order");
 	}
 });
@@ -60,7 +60,7 @@ $.extend(cur_frm.cscript, {
 			frappe.model.with_doc("Production Order", doc.production_order, function(pro) {
 				doc = frappe.get_doc("Production Order",pro);
 				$.each(doc.operations , function(i, row){
-					operations[i] = (i+1) +". "+ row.operation;
+					operations[i] = row.operation;
 				});
 			frappe.meta.get_docfield("Time Log", "operation", me.frm.doc.name).options = "\n" + operations.join("\n");
 			refresh_field("operation");
@@ -81,11 +81,5 @@ $.extend(cur_frm.cscript, {
 				}
 			}
 		});
-	},
-
-	time_log_for: function(doc) {
-		if (doc.time_log_for == 'Manufacturing') {
-			cur_frm.set_value("activity_type", "Manufacturing")
-		}
 	}
 });

@@ -135,7 +135,6 @@ def install(country=None):
 		{'doctype': 'Activity Type', 'activity_type': _('Proposal Writing')},
 		{'doctype': 'Activity Type', 'activity_type': _('Execution')},
 		{'doctype': 'Activity Type', 'activity_type': _('Communication')},
-		{'doctype': 'Activity Type', 'activity_type': 'Manufacturing'},
 
 		{'doctype': "Item Attribute", "attribute_name": _("Size"), "item_attribute_values": [
 			{"attribute_value": _("Extra Small"), "abbr": "XS"},
@@ -158,7 +157,7 @@ def install(country=None):
 		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"}
 	]
 
-	from erpnext.setup.page.setup_wizard.fixtures import industry_type, operations
+	from erpnext.setup.page.setup_wizard.fixtures import industry_type
 	records += [{"doctype":"Industry Type", "industry": d} for d in industry_type.items]
 	# records += [{"doctype":"Operation", "operation": d} for d in operations.items]
 
