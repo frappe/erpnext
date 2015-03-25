@@ -80,13 +80,16 @@ def set_party_in_jv_and_gl_entry(receivable_payable_accounts):
 	for dt in ["Journal Entry Account", "GL Entry"]:
 		records = frappe.db.sql("""select name, account from `tab%s` where account in (%s)""" %
 			(dt, ", ".join(['%s']*len(account_map))), tuple(account_map.keys()), as_dict=1)
-		for d in records:
+		for i, d in enumerate(records):
 			account_details = account_map.get(d.account, {})
 			account_type = "Receivable" if account_details.get("master_type")=="Customer" else "Payable"
 			new_account = receivable_payable_accounts[account_details.get("company")][account_type]
 
 			frappe.db.sql("update `tab{0}` set account=%s, party_type=%s, party=%s where name=%s".format(dt),
 				(new_account, account_details.get("master_type"), account_details.get("master_name"), d.name))
+				
+			if i%500 == 0:
+				frappe.db.commit()
 
 def delete_individual_party_account():
 	frappe.db.sql("""delete from `tabAccount` where ifnull(master_type, '') in ('Customer', 'Supplier')

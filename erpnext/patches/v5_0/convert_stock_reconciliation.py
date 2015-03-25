@@ -4,7 +4,9 @@ def execute():
 	# stock reco now amendable
 	frappe.db.sql("""update tabDocPerm set `amend` = 1 where parent='Stock Reconciliation' and submit = 1""")
 
-
+	frappe.reload_doc("stock", "doctype", "stock_reconciliation_item")
+	frappe.reload_doctype("Stock Reconciliation")
+	
 	if frappe.db.has_column("Stock Reconciliation", "reconciliation_json"):
 		for sr in frappe.db.get_all("Stock Reconciliation", ["name"],
 			{"reconciliation_json": ["!=", ""]}):
@@ -15,8 +17,8 @@ def execute():
 					sr.append("items", {
 						"item_code": row[0],
 						"warehouse": row[1],
-						"qty": row[3] if len(row) > 2 else None,
-						"valuation_rate": row[4] if len(row) > 3 else None
+						"qty": row[2] if len(row) > 2 else None,
+						"valuation_rate": row[3] if len(row) > 3 else None
 					})
 
 				elif row[0]=="Item Code":
