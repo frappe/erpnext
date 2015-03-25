@@ -5,7 +5,6 @@ import frappe
 import frappe.permissions
 
 def execute():
-	frappe.reload_doc("core", "doctype", "block_module")
 	frappe.reload_doctype("User")
 	frappe.reload_doctype("Lead")
 	frappe.reload_doctype("Contact")
@@ -22,7 +21,12 @@ def execute():
 	for userrole in frappe.get_all("UserRole", "parent", {"role": "Sales Manager"}):
 		if frappe.db.exists("User", userrole.parent):
 			user = frappe.get_doc("User", userrole.parent)
-			user.add_roles("Newsletter Manager")
+			user.append("user_roles", {
+				"doctype": "UserRole",
+				"role": "Newsletter Manager"
+			})
+			user.flags.ignore_mandatory = True
+			user.save()
 
 	# create default lists
 	general = frappe.new_doc("Newsletter List")
