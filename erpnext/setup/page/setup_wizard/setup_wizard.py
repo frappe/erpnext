@@ -255,9 +255,9 @@ def create_email_digest():
 				"recipient_list": "\n".join(system_managers)
 			})
 
-			for fieldname in edigest.meta.get("fields", {"fieldtype": "Check"}):
-				if fieldname != "scheduler_errors":
-					edigest.set(fieldname, 1)
+			for df in edigest.meta.get("fields", {"fieldtype": "Check"}):
+				if df.fieldname != "scheduler_errors":
+					edigest.set(df.fieldname, 1)
 
 			edigest.insert()
 

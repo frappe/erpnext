@@ -29,14 +29,6 @@
    "search_index": 1
   }, 
   {
-   "fieldname": "column_break0", 
-   "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "width": "50%"
-  }, 
-  {
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "label": "Series", 
@@ -465,7 +457,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-23 04:46:05.569476", 
+ "modified": "2015-03-25 07:11:27.108475", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Entry", 
