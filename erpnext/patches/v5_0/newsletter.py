@@ -5,6 +5,7 @@ import frappe
 import frappe.permissions
 
 def execute():
+	frappe.reload_doc("core", "doctype", "block_module")
 	frappe.reload_doctype("User")
 	frappe.reload_doctype("Lead")
 	frappe.reload_doctype("Contact")
