@@ -56,7 +56,7 @@ class ProductionOrder(Document):
 
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_warehouse_company
-
+		
 		for w in [self.fg_warehouse, self.wip_warehouse]:
 			validate_warehouse_company(w, self.company)
 
@@ -176,7 +176,7 @@ class ProductionOrder(Document):
 
 		operations = frappe.db.sql("""select operation, description, workstation,
 			hour_rate, time_in_mins, operating_cost as "planned_operating_cost", "Pending" as status
-			from `tabBOM Operation` where parent = %s""", self.bom_no, as_dict=1)
+			from `tabBOM Operation` where parent = %s order by idx""", self.bom_no, as_dict=1)
 
 		self.set('operations', operations)
 
