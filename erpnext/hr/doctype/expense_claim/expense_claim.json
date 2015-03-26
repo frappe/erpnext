@@ -164,6 +164,16 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "total_amount_reimbursed", 
+   "fieldtype": "Currency", 
+   "label": "Total Amount Reimbursed", 
+   "no_copy": 1, 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
    "allow_on_submit": 0, 
    "fieldname": "remark", 
    "fieldtype": "Small Text", 
@@ -172,6 +182,14 @@
    "oldfieldname": "remark", 
    "oldfieldtype": "Small Text", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "project", 
+   "fieldtype": "Link", 
+   "label": "Project", 
+   "options": "Project", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "email_id", 
@@ -202,7 +220,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-20 05:08:42.455478", 
+ "modified": "2015-03-26 04:41:50.473196", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Expense Claim", 
