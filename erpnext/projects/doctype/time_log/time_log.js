@@ -41,4 +41,44 @@ frappe.ui.form.on("Time Log", "to_time", function(frm) {
 	if(frm._setting_hours) return;
 	frm.set_value("hours", moment(cur_frm.doc.to_time).diff(moment(cur_frm.doc.from_time),
 		"hours"));
+
 });
+
+var calculate_cost = function(doc) {
+	cur_frm.set_value("internal_cost", doc.internal_rate * doc.hours);
+	if (doc.billable==1){
+		cur_frm.set_value("billing_amount", doc.billing_rate * doc.hours);
+	}
+}
+
+frappe.ui.form.on("Time Log", "hours", function(frm) {
+	calculate_cost(frm.doc);
+});
+
+frappe.ui.form.on("Time Log", "activity_type", function(frm) {
+	return frappe.call({
+		method: "erpnext.projects.doctype.time_log.time_log.get_activity_cost",
+		args: {
+			"employee": frm.doc.employee,
+			"activity_type": frm.doc.activity_type
+		},
+		callback: function(r) {
+			if(!r.exc) {
+				cur_frm.set_value("internal_rate", r.message.internal_rate);
+				cur_frm.set_value("billing_rate", r.message.billing_rate);
+				calculate_cost(frm.doc);
+			}
+		}
+	});
+});
+
+cur_frm.cscript.employee = cur_frm.cscript.activity_type;
+
+cur_frm.cscript.billable = function(doc) {
+	if (doc.billable==1) {
+		calculate_cost(doc);
+	}
+	else {
+		cur_frm.set_value("billing_amount", 0);
+	}
+}

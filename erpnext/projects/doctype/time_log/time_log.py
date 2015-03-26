@@ -24,12 +24,15 @@ class TimeLog(Document):
 		self.check_workstation_timings()
 		self.validate_production_order()
 		self.validate_manufacturing()
+		self.validate_cost()
 
 	def on_submit(self):
 		self.update_production_order()
+		self.update_project()
 
 	def on_cancel(self):
 		self.update_production_order()
+		self.update_project()
 
 	def before_update_after_submit(self):
 		self.set_status()
@@ -206,6 +209,18 @@ class TimeLog(Document):
 			self.production_order = None
 			self.operation = None
 			self.quantity = None
+	
+	def validate_cost(self):
+		self.internal_cost = self.internal_rate * self.hours
+		if self.billable:
+			self.billing_amount = self.billing_rate * self.hours
+		else:
+			self.billing_amount = 0
+				
+	def update_project(self):
+		activity_cost = frappe.db.sql("""select sum(billing_cost) from `tabTime Log` 
+			where project = %s and docstatus=1""",self.project)
+		frappe.db.set_value("Project", self.project, "total_activity_cost", activity_cost)
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
@@ -243,3 +258,10 @@ def get_events(start, end, filters=None):
 			d.title += " for Project: " + d.project
 
 	return data
+	
+@frappe.whitelist()
+def get_activity_cost(employee=None, activity_type=None):
+	internal_rate = frappe.db.get_value("Activity Cost", {"employee":employee,"activity_type":activity_type}, "internal_rate")
+	billing_rate = frappe.db.get_value("Activity Cost", {"employee":employee,"activity_type":activity_type}, "billing_rate")
+	return {"internal_rate": internal_rate, "billing_rate": billing_rate }
+

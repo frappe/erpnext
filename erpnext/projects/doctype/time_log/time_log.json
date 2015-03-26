@@ -35,6 +35,7 @@
    "reqd": 1
   }, 
   {
+   "default": "0", 
    "fieldname": "hours", 
    "fieldtype": "Float", 
    "in_list_view": 1, 
@@ -204,22 +205,60 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "billing_rate", 
-   "fieldtype": "Currency", 
-   "label": "Billing Rate", 
+   "depends_on": "", 
+   "fieldname": "section_break_24", 
+   "fieldtype": "Section Break", 
    "permlevel": 0, 
    "precision": ""
   }, 
   {
+   "default": "0", 
+   "description": "per hour", 
    "fieldname": "internal_rate", 
    "fieldtype": "Currency", 
    "label": "Internal Rate", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "default": "0", 
+   "fieldname": "internal_cost", 
+   "fieldtype": "Currency", 
+   "label": "Internal Cost", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
   }, 
   {
    "fieldname": "column_break_25", 
    "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "default": "0", 
+   "description": "per hour", 
+   "fieldname": "billing_rate", 
+   "fieldtype": "Currency", 
+   "label": "Billing Rate", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "default": "0", 
+   "description": "will be updated only if Time Log is 'Billable'", 
+   "fieldname": "billing_amount", 
+   "fieldtype": "Currency", 
+   "label": "Billing Amount", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "section_break_29", 
+   "fieldtype": "Section Break", 
    "permlevel": 0, 
    "precision": ""
   }, 

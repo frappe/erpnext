@@ -3,8 +3,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+from frappe import _
 from frappe.model.document import Document
 
 class ActivityCost(Document):
-	pass
+	def validate(self):
+		self.set_title()
+		
+	def set_title(self):
+		self.title = _("{0} for {1}").format(self.employee_name, self.activity_type)

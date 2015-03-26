@@ -51,7 +51,7 @@
   {
    "fieldname": "edit_task", 
    "fieldtype": "Button", 
-   "label": "Edit Task", 
+   "label": "View Task", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -143,7 +143,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-02-23 01:55:18.865117", 
+ "modified": "2015-03-26 04:55:36.680900", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project Task", 
