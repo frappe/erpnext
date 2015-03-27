@@ -27,8 +27,9 @@ class StockLedgerEntry(Document):
 		self.check_stock_frozen_date()
 		self.actual_amt_check()
 
-		from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
-		process_serial_no(self)
+		if not self.get("via_landed_cost_voucher"):
+			from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
+			process_serial_no(self)
 
 	#check for item quantity available in stock
 	def actual_amt_check(self):
