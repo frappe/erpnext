@@ -59,7 +59,7 @@ class Newsletter(Document):
 			subject = self.subject, message = self.message,
 			reference_doctype = self.doctype, reference_name = self.name,
 			unsubscribe_method = "/api/method/erpnext.crm.doctype.newsletter.newsletter.unsubscribe",
-			unsubscribe_params = {"name": self.name})
+			unsubscribe_params = {"name": self.newsletter_list})
 
 		if not frappe.flags.in_test:
 			frappe.db.auto_commit_on_many_writes = False
@@ -85,9 +85,7 @@ def get_lead_options():
 
 @frappe.whitelist(allow_guest=True)
 def unsubscribe(email, name):
-	from frappe.email.bulk import return_unsubscribed_page
 	from frappe.utils.verified_command import verify_request
-
 	if not verify_request():
 		return
 
@@ -97,7 +95,12 @@ def unsubscribe(email, name):
 		subscriber.unsubscribed = 1
 		subscriber.save(ignore_permissions=True)
 
+	frappe.db.commit()
+
 	return_unsubscribed_page(email)
+
+def return_unsubscribed_page(email):
+	frappe.respond_as_web_page(_("Unsubscribed"), _("{0} has been successfully unsubscribed from this list.").format(email))
 
 def create_lead(email_id):
 	"""create a lead if it does not exist"""
