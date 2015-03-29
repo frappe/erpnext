@@ -1006,7 +1006,7 @@ DocType: DocField,Label,Etikett
 DocType: Payment Reconciliation,Unreconciled Payment Details,Nicht abgestimmte Zahlungsdetails
 apps/erpnext/erpnext/projects/doctype/activity_type/activity_type.py +19,Activity Type 'Manufacturing' cannot be deleted/renamed.,"Aktivitätstyp ""Fertigung"" kann nicht gelöscht / umbenannt werden."
 DocType: Global Defaults,Current Fiscal Year,Laufendes Geschäftsjahr
-DocType: Global Defaults,Disable Rounded Total,Abgerundete Gesamtsumme deaktivieren
+DocType: Global Defaults,Disable Rounded Total,Gerundete Gesamtsumme deaktivieren
 DocType: Task,Time and Budget,Zeit und Budget
 DocType: Lead,Call,Anruf
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +365,'Entries' cannot be empty,' Einträge ' darf nicht leer sein
@@ -1881,7 +1881,7 @@ DocType: Delivery Note,Transporter Name,Name des Transportunternehmers
 DocType: Contact,Enter department to which this Contact belongs,"Abteilung eingeben, zu der dieser Kontakt gehört"
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +56,Total Absent,Insgesamt Abwesend
 DocType: Project,Project Details,Projektdetails
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +659,Item or Warehouse for row {0} does not match Material Request,Artikel- oder Lagerreihe{0} ist Materialanforderung nicht überein
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +659,Item or Warehouse for row {0} does not match Material Request,Artikel oder Lager in Reihe {0} stimmen nicht mit Materialanforderung überein
 apps/erpnext/erpnext/config/stock.py +108,Unit of Measure,Mengeneimheit
 DocType: Fiscal Year,Year End Date,Geschäftsjahr Ende
 DocType: Lead,Opportunity,Gelegenheit
@@ -1899,7 +1899,7 @@ apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.p
 DocType: Production Order,Actual End Date,Tatsächliches Enddatum
 DocType: Authorization Rule,Applicable To (Role),Anwendbar auf (Rolle)
 DocType: Stock Entry,Purpose,Zweck
-DocType: Item,Will also apply for variants unless overrridden,"Wird auch für Varianten, es sei denn overrridden"
+DocType: Item,Will also apply for variants unless overrridden,"Wird auch auf Varianten angewendet, sofern nicht aufgehoben"
 DocType: Purchase Invoice,Advances,Vorschüsse
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +32,Approving User cannot be same as user the rule is Applicable To,Genehmigen Benutzer kann nicht dieselbe sein wie Benutzer die Regel ist anwendbar auf
 DocType: SMS Log,No of Requested SMS,Anzahl angeforderter SMS
@@ -2553,7 +2553,7 @@ apps/erpnext/erpnext/config/setup.py +36,Country wise default Address Templates,
 apps/erpnext/erpnext/accounts/party.py +186,Due / Reference Date cannot be after {0},Aufgrund / Referenzdatum kann nicht nach {0} sein
 DocType: Account,Account Details,Kontendaten
 DocType: Features Setup,If you involve in manufacturing activity. Enables Item 'Is Manufactured',Wenn Sie in die produzierenden Aktivitäten einzubeziehen. Ermöglicht Item ' hergestellt '
-DocType: Sales Invoice,Rounded Total,Abgerundete Gesamtsumme
+DocType: Sales Invoice,Rounded Total,Gerundete Gesamtsumme
 DocType: Sales BOM,List items that form the package.,"Listenelemente, die das Paket bilden."
 apps/erpnext/erpnext/accounts/doctype/monthly_distribution/monthly_distribution.py +26,Percentage Allocation should be equal to 100%,Prozentuale Aufteilung sollte gleich 100%
 DocType: Serial No,Out of AMC,Außerhalb AMC
