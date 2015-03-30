@@ -92,20 +92,11 @@ rename_map = {
 	"C-Form": [
 		["invoice_details", "invoices"]
 	],
-	"Customize Form": [
-		["customize_form_fields", "fields"]
-	],
-	"Email Alert": [
-		["email_alert_recipients", "recipients"]
-	],
 	"Employee": [
 		["employee_leave_approvers", "leave_approvers"],
 		["educational_qualification_details", "education"],
 		["previous_experience_details", "external_work_history"],
 		["experience_in_company_details", "internal_work_history"]
-	],
-	"Event": [
-		["event_roles", "roles"]
 	],
 	"Expense Claim": [
 		["expense_voucher_details", "expenses"]
@@ -200,10 +191,6 @@ rename_map = {
 	],
 	"Time Log Batch": [
 		["time_log_batch_details", "time_logs"]
-	],
-	"Workflow": [
-		["workflow_document_states", "states"],
-		["workflow_transitions", "transitions"]
 	],
 	"Workstation": [
 		["workstation_operation_hours", "working_hours"]
