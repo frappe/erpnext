@@ -64,7 +64,7 @@ class Lead(SellingController):
 				self.email_id)
 			if len(email_list) > 1:
 				items = [e[0] for e in email_list if e[0]!=self.name]
-				frappe.throw(_("Email id must be unique, already exists for {0}").format(comma_and(items)))
+				frappe.throw(_("Email id must be unique, already exists for {0}").format(comma_and(items)), frappe.DuplicateEntryError)
 
 	def on_trash(self):
 		frappe.db.sql("""update `tabIssue` set lead='' where lead=%s""",
@@ -124,7 +124,7 @@ def make_opportunity(source_name, target_doc=None):
 		}}, target_doc)
 
 	return target_doc
-	
+
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 	target_doc = get_mapped_doc("Lead", source_name,
