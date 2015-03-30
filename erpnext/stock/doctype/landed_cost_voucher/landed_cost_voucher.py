@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 from frappe.model.document import Document
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 class LandedCostVoucher(Document):
 	def get_items_from_purchase_receipts(self):
@@ -92,13 +93,25 @@ class LandedCostVoucher(Document):
 			# save will update landed_cost_voucher_amount and voucher_amount in PR,
 			# as those fields are allowed to edit after submit
 			pr.save()
+			
+			# update latest valuation rate in serial no
+			self.update_rate_in_serial_no(pr)
 
 			# update stock & gl entries for cancelled state of PR
 			pr.docstatus = 2
-			pr.update_stock_ledger(allow_negative_stock=True)
+			pr.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
 			pr.make_gl_entries_on_cancel()
+			
 
 			# update stock & gl entries for submit state of PR
 			pr.docstatus = 1
-			pr.update_stock_ledger()
+			pr.update_stock_ledger(via_landed_cost_voucher=True)
 			pr.make_gl_entries()
+			
+	def update_rate_in_serial_no(self, purchase_receipt):
+		for item in purchase_receipt.get("purchase_receipt_details"):
+			if item.serial_no:
+				serial_nos = get_serial_nos(item.serial_no)
+				if serial_nos:
+					frappe.db.sql("update `tabSerial No` set purchase_rate=%s where name in ({0})"
+						.format(", ".join(["%s"]*len(serial_nos))), tuple([item.valuation_rate] + serial_nos))
