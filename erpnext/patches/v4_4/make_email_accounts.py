@@ -21,7 +21,6 @@ def execute():
 
 		account.enable_outgoing = 1
 		account.enable_incoming = 0
-		account.is_global = 1
 
 		account.insert()
 
@@ -44,7 +43,7 @@ def execute():
 			account.set(target_fieldname, support.get(source_fieldname))
 
 		account.enable_outgoing = 0
-		account.is_global = 1
+		account.append_to = "Issue"
 
 		account.insert()
 
@@ -65,7 +64,6 @@ def execute():
 				account.set(target_fieldname, source.get(source_fieldname))
 
 			account.enable_outgoing = 0
-			account.is_global = 1
 			account.append_to = "Lead" if doctype=="Sales Email Settings" else "Job Applicant"
 
 			account.insert()
