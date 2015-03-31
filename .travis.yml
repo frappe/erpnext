@@ -19,7 +19,7 @@ install:
   - sudo apt-get install xfonts-75dpi xfonts-base -y
   - wget http://downloads.sourceforge.net/project/wkhtmltopdf/0.12.2.1/wkhtmltox-0.12.2.1_linux-precise-amd64.deb
   - sudo dpkg -i wkhtmltox-0.12.2.1_linux-precise-amd64.deb
-  - CFLAGS=-O0 pip install git+https://github.com/frappe/frappe.git@develop
+  - CFLAGS=-O0 pip install git+https://github.com/frappe/frappe.git@v4.x.x
   - CFLAGS=-O0 pip install --editable .
 
 before_script:
