@@ -85,6 +85,7 @@ execute:frappe.delete_doc("DocType", "Purchase Request Item")
 erpnext.patches.v4_2.recalculate_bom_cost
 erpnext.patches.v4_2.fix_gl_entries_for_stock_transactions
 erpnext.patches.v4_2.update_requested_and_ordered_qty
+execute:frappe.rename_doc("DocType", "Support Ticket", "Issue", force=True)
 erpnext.patches.v4_4.make_email_accounts
 execute:frappe.delete_doc("DocType", "Contact Control")
 erpnext.patches.v4_2.discount_amount
@@ -94,7 +95,6 @@ erpnext.patches.v5_0.update_dn_against_doc_fields
 execute:frappe.db.sql("update `tabMaterial Request` set material_request_type = 'Material Transfer' where material_request_type = 'Transfer'")
 execute:frappe.reload_doc('stock', 'doctype', 'item')
 execute:frappe.db.sql("update `tabItem` i set apply_warehouse_wise_reorder_level=1, re_order_level=0, re_order_qty=0 where exists(select name from `tabItem Reorder` where parent=i.name)")
-execute:frappe.rename_doc("DocType", "Support Ticket", "Issue", force=True)
 erpnext.patches.v5_0.set_default_company_in_bom
 erpnext.patches.v5_0.capacity_planning
 execute:frappe.reload_doc('crm', 'doctype', 'lead')

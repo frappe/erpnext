@@ -228,7 +228,6 @@ def execute():
 	frappe.reload_doc("stock", "doctype", "item_variant")
 	frappe.reload_doc("accounts", "doctype", "party_account")
 	frappe.reload_doc("accounts", "doctype", "fiscal_year_company")
-	frappe.reload_doc("workflow", "doctype", "workflow")
 
 	#rename table fieldnames
 	for dn in rename_map:
