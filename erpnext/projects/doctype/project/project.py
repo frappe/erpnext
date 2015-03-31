@@ -34,11 +34,18 @@ class Project(Document):
 		return ret
 
 	def validate(self):
+		self.validate_dates()
+		self.validate_tasks()
+		self.sync_tasks()
+
+	def validate_dates(self):
 		if self.project_start_date and self.completion_date:
 			if getdate(self.completion_date) < getdate(self.project_start_date):
 				frappe.throw(_("Expected Completion Date can not be less than Project Start Date"))
-
-		self.sync_tasks()
+				
+	def validate_tasks(self):
+		if not self.tasks:
+			frappe.throw("Task is mandatory against a project")
 
 	def sync_tasks(self):
 		"""sync tasks and remove table"""
