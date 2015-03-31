@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, json
 
-from frappe.utils import getdate, today
+from frappe.utils import getdate
 from frappe import _
 
 
@@ -26,27 +26,33 @@ class Task(Document):
 			return ret
 
 	def validate(self):
+		self.validate_dates()
+		
+	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
 			frappe.throw(_("'Expected Start Date' can not be greater than 'Expected End Date'"))
 
 		if self.act_start_date and self.act_end_date and getdate(self.act_start_date) > getdate(self.act_end_date):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
 
-		self.update_status()
-
-	def update_status(self):
-		status = frappe.db.get_value("Task", self.name, "status")
-		if self.status=="Working" and status !="Working" and not self.act_start_date:
-			self.act_start_date = today()
-
-		if self.status=="Closed" and status != "Closed" and not self.act_end_date:
-			self.act_end_date = today()
-
 	def on_update(self):
+		self.update_percentage()
+		self.update_project()
+			
+	def update_percentage(self):
 		"""update percent complete in project"""
 		if self.project and not self.flags.from_project:
 			project = frappe.get_doc("Project", self.project)
 			project.run_method("update_percent_complete")
+			
+	def update_project(self):
+		total_activity_cost = frappe.db.sql("""select sum(actual_cost) from `tabTask` 
+			where project = %s""",self.project)
+		frappe.db.set_value("Project", self.project, "total_activity_cost", total_activity_cost)
+		
+		total_expense_claim = frappe.db.sql("""select sum(total_expense_claim) from `tabTask` 
+			where project = %s""",self.project)
+		frappe.db.set_value("Project", self.project, "total_expense_claim", total_expense_claim)
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

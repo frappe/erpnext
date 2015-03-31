@@ -92,6 +92,25 @@
    "read_only": 1
   }, 
   {
+   "depends_on": "", 
+   "fieldname": "project", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Project", 
+   "options": "Project", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "", 
+   "fieldname": "task", 
+   "fieldtype": "Link", 
+   "label": "Task", 
+   "options": "Task", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
    "depends_on": "eval:!doc.for_manufacturing", 
    "fieldname": "activity_type", 
    "fieldtype": "Link", 
@@ -101,15 +120,6 @@
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 0
-  }, 
-  {
-   "depends_on": "eval:!doc.for_manufacturing", 
-   "fieldname": "task", 
-   "fieldtype": "Link", 
-   "label": "Task", 
-   "options": "Task", 
-   "permlevel": 0, 
-   "read_only": 0
   }, 
   {
    "depends_on": "eval:doc.for_manufacturing", 
@@ -185,22 +195,6 @@
    "fieldname": "note", 
    "fieldtype": "Text Editor", 
    "label": "Note", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "fieldname": "section_break_9", 
-   "fieldtype": "Section Break", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "", 
-   "fieldname": "project", 
-   "fieldtype": "Link", 
-   "in_list_view": 1, 
-   "label": "Project", 
-   "options": "Project", 
    "permlevel": 0, 
    "read_only": 0
   }, 

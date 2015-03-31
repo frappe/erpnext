@@ -21,17 +21,18 @@ class ExpenseClaim(Document):
 		self.validate_sanctioned_amount()
 		self.validate_exp_details()
 		self.validate_expense_approver()
+		self.validate_task()
 		set_employee_name(self)
 
 	def on_submit(self):
 		if self.approval_status=="Draft":
 			frappe.throw(_("""Approval Status must be 'Approved' or 'Rejected'"""))
-		if self.project:
-			self.update_project()
+		if self.task:
+			self.update_task()
 			
 	def on_cancel(self):
 		if self.project:
-			self.update_project()
+			self.update_task()
 
 	def validate_exp_details(self):
 		if not self.get('expenses'):
@@ -42,10 +43,14 @@ class ExpenseClaim(Document):
 			frappe.throw(_("{0} ({1}) must have role 'Expense Approver'")\
 				.format(get_fullname(self.exp_approver), self.exp_approver), InvalidExpenseApproverError)
 	
-	def update_project(self):
+	def update_task(self):
 		expense_amount = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim` 
-			where project = %s and approval_status = "Approved" and docstatus=1""",self.project)
-		frappe.db.set_value("Project", self.project, "total_expense_claims", expense_amount)
+			where project = %s and task = %s and approval_status = "Approved" and docstatus=1""",(self.project, self.task))
+		frappe.db.set_value("Project", self.project, "total_expense_claim", expense_amount)
+
+	def validate_task(self):
+		if self.project and not self.task:
+			frappe.throw(_("Task is Mandatory if Time Log is against a project"))
 
 	def validate_sanctioned_amount(self):
 		if self.total_sanctioned_amount > self.total_claimed_amount:

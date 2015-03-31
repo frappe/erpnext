@@ -24,15 +24,20 @@ class TimeLog(Document):
 		self.check_workstation_timings()
 		self.validate_production_order()
 		self.validate_manufacturing()
+		self.validate_task()
 		self.validate_cost()
 
 	def on_submit(self):
-		self.update_production_order()
-		self.update_project()
+		if self.for_manufacturing:
+			self.update_production_order()
+		if self.task:
+			self.update_task()
 
 	def on_cancel(self):
-		self.update_production_order()
-		self.update_project()
+		if self.for_manufacturing:
+			self.update_production_order()
+		if self.task:
+			self.update_task()
 
 	def before_update_after_submit(self):
 		self.set_status()
@@ -128,7 +133,7 @@ class TimeLog(Document):
 	def update_production_order(self):
 		"""Updates `start_date`, `end_date`, `status` for operation in Production Order."""
 
-		if self.for_manufacturing and self.production_order:
+		if self.production_order:
 			if not self.operation_id:
 				frappe.throw(_("Operation ID not set"))
 
@@ -217,10 +222,22 @@ class TimeLog(Document):
 		else:
 			self.billing_amount = 0
 				
-	def update_project(self):
-		activity_cost = frappe.db.sql("""select sum(billing_cost) from `tabTime Log` 
-			where project = %s and docstatus=1""",self.project)
-		frappe.db.set_value("Project", self.project, "total_activity_cost", activity_cost)
+	def validate_task(self):
+		if self.project and not self.task:
+			frappe.throw(_("Task is Mandatory if Time Log is against a project"))
+	
+	def update_task(self):
+		tl = frappe.db.sql("""select min(from_time) as start_date, max(to_time) as end_date, sum(billing_amount) as cost, sum(hours) as time 
+			from `tabTime Log` where project = %s and task = %s and docstatus=1""",(self.project, self.task),as_dict=1)[0]
+			
+		task = frappe.get_doc("Task", self.task)
+		if task.status == "Open":
+			task.status = "Working"
+		task.actual_cost= tl.cost
+		task.actual_time= tl.time
+		task.act_start_date= tl.start_date
+		task.act_end_date= tl.end_date
+		task.save()
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

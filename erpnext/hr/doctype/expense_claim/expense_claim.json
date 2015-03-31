@@ -192,6 +192,14 @@
    "precision": ""
   }, 
   {
+   "fieldname": "task", 
+   "fieldtype": "Link", 
+   "label": "Task", 
+   "options": "Task", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "email_id", 
    "fieldtype": "Data", 
    "hidden": 1, 
@@ -219,8 +227,8 @@
  ], 
  "icon": "icon-money", 
  "idx": 1, 
- "is_submittable": 1, 
- "modified": "2015-03-26 04:41:50.473196", 
+ "is_submittable": 1,
+ "modified": "2015-03-30 05:17:43.963137", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Expense Claim", 

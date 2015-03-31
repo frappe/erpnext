@@ -206,9 +206,9 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "total_expense_claims", 
+   "fieldname": "total_expense_claim", 
    "fieldtype": "Currency", 
-   "label": "Total Expense Claims", 
+   "label": "Total Expense Claim", 
    "permlevel": 0, 
    "precision": "", 
    "read_only": 1
@@ -278,7 +278,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2015-03-23 06:44:19.538443", 
+ "modified": "2015-03-30 08:42:33.940104", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 
