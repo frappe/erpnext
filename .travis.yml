@@ -19,10 +19,9 @@ script:
   - cd ~/frappe-bench
   - bench get-app erpnext $TRAVIS_BUILD_DIR
   - bench use test_site
-  - bench frappe --reinstall
-  - bench frappe --build_website
-  - bench frappe --serve_test &
-  - bench frappe --verbose --run_tests
+  - bench reinstall
+  - bench build-website
+  - bench --verbose run-tests
 
 before_script:
   - mysql -e 'create database test_frappe'
