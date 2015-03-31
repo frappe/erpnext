@@ -216,6 +216,9 @@ class TimeLog(Document):
 			self.quantity = None
 	
 	def validate_cost(self):
+		rate = get_activity_cost(self.employee, self.activity_type)
+		self.internal_rate = rate.get('internal_rate')
+		self.billing_rate = rate.get('billing_rate')
 		self.internal_cost = self.internal_rate * self.hours
 		if self.billable:
 			self.billing_amount = self.billing_rate * self.hours

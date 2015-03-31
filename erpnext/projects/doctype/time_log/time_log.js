@@ -51,11 +51,7 @@ var calculate_cost = function(doc) {
 	}
 }
 
-frappe.ui.form.on("Time Log", "hours", function(frm) {
-	calculate_cost(frm.doc);
-});
-
-frappe.ui.form.on("Time Log", "activity_type", function(frm) {
+var get_activity_cost = function(frm) {
 	return frappe.call({
 		method: "erpnext.projects.doctype.time_log.time_log.get_activity_cost",
 		args: {
@@ -70,9 +66,19 @@ frappe.ui.form.on("Time Log", "activity_type", function(frm) {
 			}
 		}
 	});
+}
+
+frappe.ui.form.on("Time Log", "hours", function(frm) {
+	calculate_cost(frm.doc);
 });
 
-cur_frm.cscript.employee = cur_frm.cscript.activity_type;
+frappe.ui.form.on("Time Log", "activity_type", function(frm) {
+	get_activity_cost(frm);
+});
+
+frappe.ui.form.on("Time Log", "employee", function(frm) {
+	get_activity_cost(frm);
+});
 
 cur_frm.cscript.billable = function(doc) {
 	if (doc.billable==1) {

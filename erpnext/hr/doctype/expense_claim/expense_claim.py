@@ -46,7 +46,10 @@ class ExpenseClaim(Document):
 	def update_task(self):
 		expense_amount = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim` 
 			where project = %s and task = %s and approval_status = "Approved" and docstatus=1""",(self.project, self.task))
-		frappe.db.set_value("Project", self.project, "total_expense_claim", expense_amount)
+			
+		task = frappe.get_doc("Task", self.task)
+		task.total_expense_claim = expense_amount
+		task.save()
 
 	def validate_task(self):
 		if self.project and not self.task:
