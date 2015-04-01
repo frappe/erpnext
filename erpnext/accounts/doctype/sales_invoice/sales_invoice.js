@@ -176,6 +176,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			this.frm.set_value("write_off_amount",
 				flt(this.frm.doc.base_grand_total - this.frm.doc.paid_amount, precision("write_off_amount"))
 			);
+			this.frm.toggle_enable("write_off_amount", false);
+
+		} else {
+			this.frm.toggle_enable("write_off_amount", true);
 		}
 
 		this.calculate_outstanding_amount(false);
@@ -219,10 +223,8 @@ cur_frm.cscript.hide_fields = function(doc) {
 
 	if(cint(doc.is_pos) == 1) {
 		hide_field(par_flds);
-		unhide_field('payments_section');
 		cur_frm.fields_dict['items'].grid.set_column_disp(item_flds_normal, false);
 	} else {
-		hide_field('payments_section');
 		for (i in par_flds) {
 			var docfield = frappe.meta.docfield_map[doc.doctype][par_flds[i]];
 			if(!docfield.hidden) unhide_field(par_flds[i]);
@@ -237,6 +239,8 @@ cur_frm.cscript.hide_fields = function(doc) {
 	// India related fields
 	if (frappe.boot.sysdefaults.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
 	else hide_field(['c_form_applicable', 'c_form_no']);
+
+	this.frm.toggle_enable("write_off_amount", !!!cint(doc.write_off_outstanding_amount_automatically));
 
 	cur_frm.refresh_fields();
 }

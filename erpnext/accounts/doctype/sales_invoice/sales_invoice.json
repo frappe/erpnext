@@ -654,7 +654,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "is_pos", 
+   "depends_on": "eval:doc.is_pos===1||(doc.advances && doc.advances.length>0)", 
    "fieldname": "payments_section", 
    "fieldtype": "Section Break", 
    "label": "Payments", 
@@ -696,7 +696,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "is_pos", 
+   "depends_on": "eval:doc.is_pos===1||(doc.advances && doc.advances.length>0)", 
    "fieldname": "column_break4", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -704,7 +704,7 @@
    "width": "50%"
   }, 
   {
-   "depends_on": "is_pos", 
+   "depends_on": "eval:doc.is_pos===1||(doc.advances && doc.advances.length>0)", 
    "fieldname": "write_off_outstanding_amount_automatically", 
    "fieldtype": "Check", 
    "label": "Write Off Outstanding Amount", 
@@ -713,7 +713,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "is_pos", 
+   "depends_on": "eval:doc.is_pos===1||(doc.advances && doc.advances.length>0)", 
    "fieldname": "write_off_amount", 
    "fieldtype": "Currency", 
    "label": "Write Off Amount", 
@@ -724,7 +724,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "is_pos", 
+   "depends_on": "eval:doc.is_pos===1||(doc.advances && doc.advances.length>0)", 
    "fieldname": "write_off_account", 
    "fieldtype": "Link", 
    "label": "Write Off Account", 
@@ -734,7 +734,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "is_pos", 
+   "depends_on": "eval:doc.is_pos===1||(doc.advances && doc.advances.length>0)", 
    "fieldname": "write_off_cost_center", 
    "fieldtype": "Link", 
    "label": "Write Off Cost Center", 
@@ -1246,7 +1246,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-03-23 14:46:49.412013", 
+ "modified": "2015-04-01 06:50:49.748285", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 
