@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
-from frappe.utils import getdate, add_days, add_years
+from frappe.utils import getdate, add_days, add_years, cstr
 from datetime import timedelta
 
 from frappe.model.document import Document
@@ -48,17 +48,17 @@ def check_duplicate_fiscal_year(doc):
 
 @frappe.whitelist()
 def auto_create_fiscal_year():
-	for d in frappe.db.sql("""select name from `tabFiscal Year` where year_end_date =(current_date + 3)"""):
+	for d in frappe.db.sql("""select name from `tabFiscal Year` where year_end_date = date_add(current_date, interval 3 day)"""):
 		try:
 			current_fy = frappe.get_doc("Fiscal Year", d[0])
 
-			new_fy = frappe.copy_doc(current_fy)
+			new_fy = frappe.copy_doc(current_fy, ignore_no_copy=False)
 
 			new_fy.year_start_date = add_days(current_fy.year_end_date, 1)
 			new_fy.year_end_date = add_years(current_fy.year_end_date, 1)
 
-			start_year = new_fy.year_start_date[:4]
-			end_year = new_fy.year_end_date[:4]
+			start_year = cstr(new_fy.year_start_date.year)
+			end_year = cstr(new_fy.year_end_date.year)
 			new_fy.year = start_year if start_year==end_year else (start_year + "-" + end_year)
 
 			new_fy.insert()
