@@ -217,9 +217,9 @@ class TimeLog(Document):
 	
 	def validate_cost(self):
 		rate = get_activity_cost(self.employee, self.activity_type)
-		self.internal_rate = rate.get('internal_rate')
-		self.billing_rate = rate.get('billing_rate')
-		self.internal_cost = self.internal_rate * self.hours
+		self.costing_rate = rate.get('costing_rate') or 0
+		self.billing_rate = rate.get('billing_rate') or 0 
+		self.costing_amount = self.costing_rate * self.hours
 		if self.billable:
 			self.billing_amount = self.billing_rate * self.hours
 		else:
@@ -281,7 +281,7 @@ def get_events(start, end, filters=None):
 	
 @frappe.whitelist()
 def get_activity_cost(employee=None, activity_type=None):
-	internal_rate = frappe.db.get_value("Activity Cost", {"employee":employee,"activity_type":activity_type}, "internal_rate")
+	costing_rate = frappe.db.get_value("Activity Cost", {"employee":employee,"activity_type":activity_type}, "costing_rate")
 	billing_rate = frappe.db.get_value("Activity Cost", {"employee":employee,"activity_type":activity_type}, "billing_rate")
-	return {"internal_rate": internal_rate, "billing_rate": billing_rate }
+	return {"costing_rate": costing_rate, "billing_rate": billing_rate }
 

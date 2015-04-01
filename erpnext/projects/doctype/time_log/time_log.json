@@ -208,18 +208,18 @@
   {
    "default": "0", 
    "description": "per hour", 
-   "fieldname": "internal_rate", 
+   "fieldname": "costing_rate", 
    "fieldtype": "Currency", 
-   "label": "Internal Rate", 
+   "label": "Costing Rate", 
    "permlevel": 0, 
    "precision": "", 
    "read_only": 1
   }, 
   {
    "default": "0", 
-   "fieldname": "internal_cost", 
+   "fieldname": "costing_amount", 
    "fieldtype": "Currency", 
-   "label": "Internal Cost", 
+   "label": "Costing Amount", 
    "permlevel": 0, 
    "precision": "", 
    "read_only": 1

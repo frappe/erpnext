@@ -45,7 +45,7 @@ frappe.ui.form.on("Time Log", "to_time", function(frm) {
 });
 
 var calculate_cost = function(doc) {
-	cur_frm.set_value("internal_cost", doc.internal_rate * doc.hours);
+	cur_frm.set_value("costing_amount", doc.costing_rate * doc.hours);
 	if (doc.billable==1){
 		cur_frm.set_value("billing_amount", doc.billing_rate * doc.hours);
 	}
@@ -60,7 +60,7 @@ var get_activity_cost = function(frm) {
 		},
 		callback: function(r) {
 			if(!r.exc) {
-				cur_frm.set_value("internal_rate", r.message.internal_rate);
+				cur_frm.set_value("costing_rate", r.message.costing_rate);
 				cur_frm.set_value("billing_rate", r.message.billing_rate);
 				calculate_cost(frm.doc);
 			}
