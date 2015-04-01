@@ -57,6 +57,14 @@
    "print_hide": 1
   }, 
   {
+   "default": "", 
+   "fieldname": "offer_date", 
+   "fieldtype": "Date", 
+   "label": "Offer Date", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "allow_on_submit": 0, 
    "fieldname": "designation", 
    "fieldtype": "Link", 
@@ -95,8 +103,8 @@
   {
    "fieldname": "offer_terms", 
    "fieldtype": "Table", 
-   "label": "Offer Terms", 
-   "options": "Offer Letter Terms", 
+   "label": "Offer Letter Terms", 
+   "options": "Offer Letter Term", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -114,7 +122,7 @@
    "ignore_user_permissions": 0, 
    "in_filter": 0, 
    "in_list_view": 0, 
-   "label": "Select Terms", 
+   "label": "Select Terms and Conditions", 
    "no_copy": 0, 
    "options": "Terms and Conditions", 
    "permlevel": 0, 
@@ -129,7 +137,7 @@
   {
    "fieldname": "terms", 
    "fieldtype": "Text Editor", 
-   "label": "Terms", 
+   "label": "Terms and Conditions", 
    "options": "", 
    "permlevel": 0, 
    "precision": ""
@@ -152,7 +160,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-03-10 11:41:24.870015", 
+ "modified": "2015-04-01 05:51:39.841591", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Offer Letter", 
