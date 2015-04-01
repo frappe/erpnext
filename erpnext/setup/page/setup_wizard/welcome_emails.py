@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import add_days, nowdate, get_fullname
+import markdown2
 
 def setup_welcome_emails():
 	for email in (
@@ -15,5 +16,5 @@ def setup_welcome_emails():
 
 		frappe.sendmail(recipients = frappe.session.user, subject = email["subject"],
 			sender = "hello@erpnext.com",
-			content=content, as_bulk = True,
+			content=markdown2.markdown(content), as_bulk = True,
 			send_after= add_days(nowdate(), email["after"]))
