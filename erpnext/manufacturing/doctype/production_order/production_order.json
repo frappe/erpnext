@@ -172,7 +172,8 @@
    "fieldtype": "Datetime", 
    "label": "Planned Start Date", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "reqd": 1
   }, 
   {
    "fieldname": "planned_end_date", 
@@ -354,8 +355,8 @@
  "icon": "icon-cogs", 
  "idx": 1, 
  "in_create": 0, 
- "is_submittable": 1,
- "modified": "2015-03-10 17:02:28.401930", 
+ "is_submittable": 1, 
+ "modified": "2015-04-01 07:32:38.426624", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 

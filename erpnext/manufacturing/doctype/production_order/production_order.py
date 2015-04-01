@@ -201,7 +201,7 @@ class ProductionOrder(Document):
 			Planned Start Date. Time logs will be created and remain in Draft mode and must be submitted
 			before manufacturing entry can be made."""
 
-		if not self.operations:
+		if not self.operations and not self.planned_start_date:
 			return
 
 		time_logs = []
@@ -248,6 +248,7 @@ class ProductionOrder(Document):
 		self.planned_end_date = self.operations[-1].planned_end_time
 
 		if time_logs:
+			frappe.local.message_log = []
 			frappe.msgprint(_("Time Logs created:") + "\n" + "\n".join(time_logs))
 
 	def set_operation_start_end_time(self, i, d):
