@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, flt
+from frappe.utils import cstr, flt, cint
 from frappe import _
 
 def execute(filters=None):
@@ -55,8 +55,7 @@ def get_gl_entries(filters):
 			sum(ifnull(debit, 0)) as debit, sum(ifnull(credit, 0)) as credit,
 			voucher_type, voucher_no, cost_center, remarks, is_opening, against
 		from `tabGL Entry`
-		where company=%(company)s {conditions}
-		{group_by_condition}
+		where {conditions} {group_by_condition}
 		order by posting_date, account"""\
 		.format(conditions=get_conditions(filters), group_by_condition=group_by_condition),
 		filters, as_dict=1, debug=True)
@@ -66,11 +65,13 @@ def get_gl_entries(filters):
 def get_conditions(filters):
 	conditions = []
 	if filters.get("account"):
-		if not frappe.db.exists("Account", filters["account"]):
-			frappe.throw(_("Account {0} is not valid").format(filters["account"]))
-		lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
+		account_like = filters.get("account")
+		if cint(filters.get("show_like_accounts")) == 1:
+			account_like = filters.get("account").split("-")[0].strip()
+		account_list_dict = frappe.db.sql("""SELECT lft, rgt FROM `tabAccount` WHERE NAME LIKE "{}%";""".format(account_like), as_dict=True)
+
 		conditions.append("""account in (select name from tabAccount
-			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+			where ({}) and docstatus<2)""".format(" or ".join(["(lft>={} and rgt<={})".format(a.lft, a.rgt) for a in account_list_dict])))
 	else:
 		conditions.append("posting_date between %(from_date)s and %(to_date)s")
 
@@ -82,11 +83,14 @@ def get_conditions(filters):
 	if depth_condition:
 		conditions.append(depth_condition)
 
+	if cint(filters.get("show_like_accounts")) == 0:
+		conditions.append("company=%(company)s")
+
 	from frappe.widgets.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
 	if match_conditions: conditions.append(match_conditions)
 
-	return "and {}".format(" and ".join(conditions)) if conditions else ""
+	return "{}".format(" and ".join(conditions)) if conditions else ""
 
 def get_data_with_opening_closing(filters, account_details, gl_entries):
 	data = []

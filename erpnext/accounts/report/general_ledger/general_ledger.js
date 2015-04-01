@@ -67,6 +67,12 @@ frappe.query_reports["General Ledger"] = {
 			"fieldtype": "Select",
 			"options": '1' + NEWLINE + '2' + NEWLINE + '3',
 			"default": "1"
+		},
+		{
+			"fieldname":"show_like_accounts",
+			"label": __("Like Accounts"),
+			"fieldtype": "Check",
+			"default": 0
 		}
 	]
 }
