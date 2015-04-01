@@ -21,7 +21,7 @@ class JobApplicant(Document):
 
 	def check_email_id_is_unique(self):
 		if self.email_id:
-			names = frappe.db.sql_list("""select name from `tabJob Application`
+			names = frappe.db.sql_list("""select name from `tabJob Applicant`
 				where email_id=%s and name!=%s""", (self.email_id, self.name))
 
 			if names:
