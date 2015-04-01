@@ -179,4 +179,3 @@ def install(country=None):
 				pass
 			else:
 				raise
-

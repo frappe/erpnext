@@ -13,6 +13,7 @@ from frappe.geo.country_info import get_country_info
 from frappe.utils.nestedset import get_root_of
 from default_website import website_maker
 import install_fixtures
+from welcome_emails import setup_welcome_emails
 
 @frappe.whitelist()
 def setup_account(args=None):
@@ -74,6 +75,8 @@ def setup_account(args=None):
 		create_logo(args)
 
 		login_as_first_user(args)
+
+		setup_welcome_emails()
 
 		frappe.db.commit()
 

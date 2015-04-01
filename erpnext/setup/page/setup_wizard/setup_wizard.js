@@ -50,7 +50,7 @@ erpnext.wiz.Wizard = Class.extend({
 		this.slides = this.slides;
 		this.slide_dict = {};
 		this.welcomed = true;
-		frappe.set_route(this.page_name, "0");
+		frappe.set_route("setup-wizard/0");
 	},
 	make: function() {
 		this.parent = $('<div class="setup-wizard-wrapper">').appendTo(this.parent);
