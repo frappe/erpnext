@@ -48,10 +48,10 @@ class SalesInvoice(SellingController):
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
 		self.validate_advance_jv("advances", "sales_order")
 		self.add_remarks()
+		self.validate_write_off_account()
 
 		if cint(self.is_pos):
 			self.validate_pos()
-			self.validate_write_off_account()
 
 		if cint(self.update_stock):
 			self.validate_item_code()
@@ -453,8 +453,10 @@ class SalesInvoice(SellingController):
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
 
+			# if POS and amount is written off, there's no outstanding and hence no need to update it
 			update_outstanding = cint(self.is_pos) and self.write_off_account \
 				and 'No' or 'Yes'
+
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False)
 
@@ -482,6 +484,8 @@ class SalesInvoice(SellingController):
 		gl_entries = merge_similar_entries(gl_entries)
 
 		self.make_pos_gl_entries(gl_entries)
+
+		self.make_write_off_gl_entry(gl_entries)
 
 		return gl_entries
 
@@ -555,29 +559,31 @@ class SalesInvoice(SellingController):
 					"remarks": self.remarks,
 				})
 			)
-			# write off entries, applicable if only pos
-			if self.write_off_account and self.write_off_amount:
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": self.debit_to,
-						"party_type": "Customer",
-						"party": self.customer,
-						"against": self.write_off_account,
-						"credit": self.write_off_amount,
-						"remarks": self.remarks,
-						"against_voucher": self.name,
-						"against_voucher_type": self.doctype,
-					})
-				)
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": self.write_off_account,
-						"against": self.debit_to,
-						"debit": self.write_off_amount,
-						"remarks": self.remarks,
-						"cost_center": self.write_off_cost_center
-					})
-				)
+
+	def make_write_off_gl_entry(self, gl_entries):
+		# write off entries, applicable if only pos
+		if self.write_off_account and self.write_off_amount:
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.debit_to,
+					"party_type": "Customer",
+					"party": self.customer,
+					"against": self.write_off_account,
+					"credit": self.write_off_amount,
+					"remarks": self.remarks,
+					"against_voucher": self.name,
+					"against_voucher_type": self.doctype,
+				})
+			)
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.write_off_account,
+					"against": self.debit_to,
+					"debit": self.write_off_amount,
+					"remarks": self.remarks,
+					"cost_center": self.write_off_cost_center
+				})
+			)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
