@@ -25,6 +25,7 @@ on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
 # website
 update_website_context = "erpnext.shopping_cart.utils.update_website_context"
 my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
+email_append_to = ["Lead", "Job Applicant", "Opportunity", "Issue", "Warranty Claim"]
 
 website_route_rules = [
 	{"from_route": "/orders", "to_route": "Sales Order"},

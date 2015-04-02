@@ -60,6 +60,12 @@
    "search_index": 1
   }, 
   {
+   "fieldname": "col_break123", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
    "default": "Lead", 
    "fieldname": "status", 
    "fieldtype": "Select", 
@@ -89,12 +95,6 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "col_break123", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0, 
-   "width": "50%"
-  }, 
-  {
    "depends_on": "eval:doc.source == 'Customer'", 
    "fieldname": "customer", 
    "fieldtype": "Link", 
@@ -107,7 +107,7 @@
   }, 
   {
    "depends_on": "eval:doc.source == 'Campaign'", 
-   "description": "Enter campaign name if the source of lead is campaign.", 
+   "description": "", 
    "fieldname": "campaign_name", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -116,6 +116,12 @@
    "oldfieldtype": "Link", 
    "options": "Campaign", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "section_break_12", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "default": "__user", 
@@ -128,6 +134,12 @@
    "options": "User", 
    "permlevel": 0, 
    "search_index": 1
+  }, 
+  {
+   "fieldname": "column_break_14", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "allow_on_submit": 0, 
@@ -332,7 +344,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2015-03-30 21:50:08.852355", 
+ "modified": "2015-04-02 15:13:02.621854", 
  "modified_by": "Administrator", 
  "module": "CRM", 
  "name": "Lead", 
