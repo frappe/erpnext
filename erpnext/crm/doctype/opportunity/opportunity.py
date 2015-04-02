@@ -16,10 +16,10 @@ class Opportunity(TransactionBase):
 		if not lead_name:
 			lead = frappe.get_doc({
 				"doctype": "Lead",
-				"email_id": email_id
+				"email_id": email_id,
 				"lead_name": email_id
 			})
-			lead.insert()
+			lead.insert(ignore_permissions=True)
 			lead_name = lead.name
 
 		self.enquiry_from = "Lead"
