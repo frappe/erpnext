@@ -616,7 +616,7 @@ $.extend(erpnext.wiz, {
 
 				var d = msgprint(__("There were errors."));
 				d.custom_onhide = function() {
-					frappe.set_route(erpnext.wiz.page_name, "0");
+					frappe.set_route(erpnext.wiz.wizard.page_name, erpnext.wiz.wizard.slides.length - 1);
 				};
 			}
 		});

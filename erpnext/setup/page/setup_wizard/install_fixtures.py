@@ -87,7 +87,6 @@ def install(country=None):
 		{'doctype': 'Designation', 'designation_name': _('Head of Marketing and Sales')},
 		{'doctype': 'Designation', 'designation_name': _('Software Developer')},
 		{'doctype': 'Designation', 'designation_name': _('Designer')},
-		{'doctype': 'Designation', 'designation_name': _('Assistant')},
 		{'doctype': 'Designation', 'designation_name': _('Researcher')},
 
 		# territory
