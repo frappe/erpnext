@@ -92,12 +92,20 @@
    "width": "50%"
   }, 
   {
+   "fieldname": "title", 
+   "fieldtype": "Data", 
+   "label": "Title", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "default": "Sales", 
    "fieldname": "enquiry_type", 
    "fieldtype": "Select", 
    "label": "Opportunity Type", 
    "oldfieldname": "enquiry_type", 
    "oldfieldtype": "Select", 
-   "options": "\nSales\nMaintenance", 
+   "options": "Sales\nMaintenance", 
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 1
@@ -118,6 +126,14 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "with_items", 
+   "fieldtype": "Check", 
+   "label": "With Items", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "with_items", 
    "fieldname": "items_section", 
    "fieldtype": "Section Break", 
    "label": "", 
@@ -127,7 +143,7 @@
    "read_only": 0
   }, 
   {
-   "description": "Items which do not exist in Item master can also be entered on customer's request", 
+   "description": "", 
    "fieldname": "items", 
    "fieldtype": "Table", 
    "label": "Items", 
@@ -391,8 +407,8 @@
  "icon": "icon-info-sign", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-23 02:19:39.853388", 
- "modified_by": "Administrator", 
+ "modified": "2015-04-02 21:33:55.090127", 
+ "modified_by": "rmehta@gmail.com", 
  "module": "CRM", 
  "name": "Opportunity", 
  "owner": "Administrator", 
@@ -432,5 +448,5 @@
  "search_fields": "status,transaction_date,customer,lead,enquiry_type,territory,company", 
  "sort_field": "modified", 
  "sort_order": "DESC", 
- "title_field": "customer_name"
+ "title_field": "title"
 }

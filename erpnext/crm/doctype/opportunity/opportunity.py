@@ -10,6 +10,23 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.utilities.transaction_base import TransactionBase
 
 class Opportunity(TransactionBase):
+	def set_sender(self, email_id):
+		"""Set lead against new opportunity"""
+		lead_name = frappe.get_value("Lead", {"email_id": email_id})
+		if not lead_name:
+			lead = frappe.get_doc({
+				"doctype": "Lead",
+				"email_id": email_id
+				"lead_name": email_id
+			})
+			lead.insert()
+			lead_name = lead.name
+
+		self.enquiry_from = "Lead"
+		self.lead = lead_name
+
+	def set_subject(self, subject):
+		self.title = subject
 
 	def validate(self):
 		self._prev = frappe._dict({
@@ -27,6 +44,9 @@ class Opportunity(TransactionBase):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_lead_cust()
 		self.validate_cust_name()
+
+		if not self.title:
+			self.title = self.customer_name
 
 		from erpnext.accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.transaction_date, self.fiscal_year, _("Opportunity Date"), self)
@@ -118,7 +138,7 @@ class Opportunity(TransactionBase):
 
 	def validate_item_details(self):
 		if not self.get('items'):
-			frappe.throw(_("Items required"))
+			return
 
 		# set missing values
 		item_fields = ("item_name", "description", "item_group", "brand")

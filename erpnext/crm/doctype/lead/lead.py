@@ -33,6 +33,7 @@ class Lead(SellingController):
 		})
 
 		self.set_status()
+		self.check_email_id_is_unique()
 
 		if self.source == 'Campaign' and not self.campaign_name and session['user'] != 'Guest':
 			frappe.throw(_("Campaign Name is required"))
@@ -45,7 +46,6 @@ class Lead(SellingController):
 				self.lead_owner = None
 
 	def on_update(self):
-		self.check_email_id_is_unique()
 		self.add_calendar_event()
 
 	def add_calendar_event(self, opts=None, force=False):
@@ -62,9 +62,10 @@ class Lead(SellingController):
 			# validate email is unique
 			email_list = frappe.db.sql("""select name from tabLead where email_id=%s""",
 				self.email_id)
+			email_list = [e[0] for e in email_list if e[0]!=self.name]
 			if len(email_list) > 1:
-				items = [e[0] for e in email_list if e[0]!=self.name]
-				frappe.throw(_("Email id must be unique, already exists for {0}").format(comma_and(items)), frappe.DuplicateEntryError)
+				frappe.throw(_("Email id must be unique, already exists for {0}").format(comma_and(email_list)),
+					frappe.DuplicateEntryError)
 
 	def on_trash(self):
 		frappe.db.sql("""update `tabIssue` set lead='' where lead=%s""",
