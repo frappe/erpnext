@@ -440,8 +440,7 @@ def create_territories():
 
 def login_as_first_user(args):
 	if args.get("email") and hasattr(frappe.local, "login_manager"):
-		frappe.local.login_manager.user = args.get("email")
-		frappe.local.login_manager.post_login()
+		frappe.local.login_manager.login_as(args.get("email"))
 
 @frappe.whitelist()
 def load_messages(language):
