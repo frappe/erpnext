@@ -174,7 +174,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			frappe.model.round_floats_in(this.frm.doc, ["base_grand_total", "paid_amount"]);
 			// this will make outstanding amount 0
 			this.frm.set_value("write_off_amount",
-				flt(this.frm.doc.base_grand_total - this.frm.doc.paid_amount, precision("write_off_amount"))
+				flt(this.frm.doc.base_grand_total - this.frm.doc.paid_amount - this.frm.doc.total_advance, precision("write_off_amount"))
 			);
 			this.frm.toggle_enable("write_off_amount", false);
 
