@@ -151,7 +151,7 @@ def install(country=None):
 			{"attribute_value": _("White"), "abbr": "WHI"}
 		]},
 
-		{'doctype': "Email Account", "email_id": "sales@example.com", "append_to": "Lead"},
+		{'doctype': "Email Account", "email_id": "sales@example.com", "append_to": "Opportunity"},
 		{'doctype': "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
 		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"}
 	]

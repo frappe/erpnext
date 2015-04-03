@@ -135,4 +135,5 @@ erpnext.patches.v4_2.repost_sle_for_si_with_no_warehouse
 erpnext.patches.v5_0.newsletter
 execute:frappe.delete_doc("DocType", "Chart of Accounts")
 execute:frappe.delete_doc("DocType", "Style Settings")
+erpnext.patches.v5_0.update_opportunity
 
