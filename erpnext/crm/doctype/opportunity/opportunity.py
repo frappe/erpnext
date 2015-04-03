@@ -12,7 +12,7 @@ from erpnext.utilities.transaction_base import TransactionBase
 class Opportunity(TransactionBase):
 	def set_sender(self, email_id):
 		"""Set lead against new opportunity"""
-		lead_name = frappe.get_value("Lead", {"email_id": email_id})
+		lead_name = frappe.db.get_value("Lead", {"email_id": email_id})
 		if not lead_name:
 			lead = frappe.get_doc({
 				"doctype": "Lead",
