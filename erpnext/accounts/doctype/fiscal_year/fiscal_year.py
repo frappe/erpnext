@@ -5,12 +5,11 @@ from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
 from frappe.utils import getdate, add_days, add_years, cstr
-from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 
 from frappe.model.document import Document
 
 class FiscalYear(Document):
-
 	def set_as_default(self):
 		frappe.db.set_value("Global Defaults", None, "current_fiscal_year", self.name)
 		frappe.get_doc("Global Defaults").on_update()
@@ -24,18 +23,21 @@ class FiscalYear(Document):
 		year_start_end_dates = frappe.db.sql("""select year_start_date, year_end_date
 			from `tabFiscal Year` where name=%s""", (self.name))
 
+		self.validate_dates()
+
 		if year_start_end_dates:
 			if getdate(self.year_start_date) != year_start_end_dates[0][0] or getdate(self.year_end_date) != year_start_end_dates[0][1]:
 				frappe.throw(_("Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved."))
 
-	def on_update(self):
-		# validate year start date and year end date
+	def validate_dates(self):
 		if getdate(self.year_start_date) > getdate(self.year_end_date):
 			frappe.throw(_("Fiscal Year Start Date should not be greater than Fiscal Year End Date"))
 
 		if (getdate(self.year_end_date) - getdate(self.year_start_date)).days > 366:
-			frappe.throw(_("Fiscal Year Start Date and Fiscal Year End Date cannot be more than a year apart."))
+			date = getdate(self.year_start_date) + relativedelta(years=1) - relativedelta(days=1)
+			self.year_end_date = date.strftime("%Y-%m-%d")
 
+	def on_update(self):
 		check_duplicate_fiscal_year(self)
 
 @frappe.whitelist()
