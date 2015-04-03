@@ -157,9 +157,6 @@ rename_map = {
 		["pp_so_details", "sales_orders"],
 		["pp_details", "items"]
 	],
-	"Project": [
-		["project_milestones", "milestones"]
-	],
 	"Quality Inspection": [
 		["qa_specification_details", "readings"]
 	],
