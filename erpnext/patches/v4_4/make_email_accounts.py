@@ -1,4 +1,5 @@
 import frappe
+from frappe.model import default_fields
 
 def execute():
 	frappe.reload_doc("email", "doctype", "email_account")
@@ -45,7 +46,20 @@ def execute():
 		account.enable_outgoing = 0
 		account.append_to = "Issue"
 
-		account.insert()
+		try:
+			account.insert()
+		except frappe.NameError, e:
+			if e.args[0]=="Email Account":
+				existing_account = frappe.get_doc("Email Account", e.args[1])
+				for key, value in account.as_dict().items():
+					if not existing_account.get(key) and value and key not in default_fields:
+						existing_account.set(key, value)
+
+				existing_account.save()
+
+			else:
+				raise
+
 
 	# sales, jobs
 	for doctype in ("Sales Email Settings", "Jobs Email Settings"):
@@ -66,7 +80,18 @@ def execute():
 			account.enable_outgoing = 0
 			account.append_to = "Lead" if doctype=="Sales Email Settings" else "Job Applicant"
 
-			account.insert()
+			try:
+				account.insert()
+			except frappe.NameError, e:
+				if e.args[0]=="Email Account":
+					existing_account = frappe.get_doc("Email Account", e.args[1])
+					for key, value in account.as_dict().items():
+						if not existing_account.get(key) and value and key not in default_fields:
+							existing_account.set(key, value)
+
+					existing_account.save()
+				else:
+					raise
 
 	for doctype in ("Outgoing Email Settings", "Support Email Settings",
 		"Sales Email Settings", "Jobs Email Settings"):

@@ -326,6 +326,7 @@ $.extend(erpnext.wiz, {
 
 			slide.get_input("currency").on("change", function() {
 				var currency = slide.get_input("currency").val();
+				if (!currency) return;
 				frappe.model.with_doc("Currency", currency, function() {
 					frappe.provide("locals.:Currency." + currency);
 					var currency_doc = frappe.model.get_doc("Currency", currency);
