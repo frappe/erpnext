@@ -25,6 +25,7 @@ on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
 # website
 update_website_context = "erpnext.shopping_cart.utils.update_website_context"
 my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
+email_append_to = ["Job Applicant", "Opportunity", "Issue"]
 
 website_route_rules = [
 	{"from_route": "/orders", "to_route": "Sales Order"},
@@ -90,7 +91,7 @@ scheduler_events = {
 	]
 }
 
-default_mail_footer = """<div style="padding: 7px; margin-top: 7px; text-align: center;">
+default_mail_footer = """<div style="padding: 7px; margin-top: 7px;">
 	<a style="color: #8D99A6; font-size: 85%; text-decoration: none;" href="https://erpnext.com" target="_blank">
 		Sent via ERPNext
 	</a>

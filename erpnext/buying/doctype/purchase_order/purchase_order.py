@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe.utils import cstr, flt
 from frappe import msgprint, _, throw
 from frappe.model.mapper import get_mapped_doc
@@ -216,6 +217,25 @@ class PurchaseOrder(BuyingController):
 
 	def on_update(self):
 		pass
+
+@frappe.whitelist()
+def stop_or_unstop_purchase_orders(names, status):
+	if not frappe.has_permission("Purchase Order", "write"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	names = json.loads(names)
+	for name in names:
+		po = frappe.get_doc("Purchase Order", name)
+		if po.docstatus == 1:
+			if status=="Stopped":
+				if po.status not in ("Stopped", "Cancelled") and (po.per_received < 100 or po.per_billed < 100):
+					po.update_status("Stopped")
+			else:
+				if po.status == "Stopped":
+					po.update_status("Submitted")
+
+	frappe.local.message_log = []
+
 
 def set_missing_values(source, target):
 	target.ignore_pricing_rule = 1

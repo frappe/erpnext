@@ -41,12 +41,12 @@ buying_renamed_fields = (
 def execute():
 	for doctypes, fields in [[selling_doctypes, selling_renamed_fields], [buying_doctypes, buying_renamed_fields]]:
 		for dt in doctypes:
-			meta = frappe.get_meta(dt)
 			frappe.reload_doc(get_doctype_module(dt), "doctype", scrub(dt))
+			table_columns = frappe.db.get_table_columns(dt)
 			base_net_total = frappe.db.sql("select sum(ifnull({0}, 0)) from `tab{1}`".format(fields[0][1], dt))[0][0]
 			if not base_net_total:
 				for f in fields:
-					if meta.get_field(f[0]):
+					if f[0] in table_columns:
 						rename_field(dt, f[0], f[1])
 
 				# Added new field "total_taxes_and_charges" in buying cycle, updating value

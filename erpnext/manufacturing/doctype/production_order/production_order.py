@@ -56,7 +56,7 @@ class ProductionOrder(Document):
 
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_warehouse_company
-		
+
 		for w in [self.fg_warehouse, self.wip_warehouse]:
 			validate_warehouse_company(w, self.company)
 
@@ -124,7 +124,7 @@ class ProductionOrder(Document):
 	def update_production_order_qty(self):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Production Order
 			based on Stock Entry"""
-		
+
 		for purpose, fieldname in (("Manufacture", "produced_qty"),
 			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
 			qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
@@ -174,7 +174,7 @@ class ProductionOrder(Document):
 
 		self.set('operations', [])
 
-		operations = frappe.db.sql("""select operation, description, workstation,
+		operations = frappe.db.sql("""select operation, description, workstation, idx,
 			hour_rate, time_in_mins, operating_cost as "planned_operating_cost", "Pending" as status
 			from `tabBOM Operation` where parent = %s order by idx""", self.bom_no, as_dict=1)
 

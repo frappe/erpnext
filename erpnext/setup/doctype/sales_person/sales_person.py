@@ -27,7 +27,7 @@ class SalesPerson(NestedSet):
 				frappe.throw(_("User ID not set for Employee {0}").format(self.employee))
 			else:
 				return frappe.db.get_value("User", user, "email") or user
-	
+
 	def validate_employee_id(self):
 		if frappe.db.exists({"doctype": "Sales Person","employee": self.employee}):
-			frappe.throw("Another sales person with the same employee id exists.")
+			frappe.throw("Another sales person with the same employee id exists.", frappe.DuplicateEntryError)

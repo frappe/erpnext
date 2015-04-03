@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from frappe.utils import flt, get_datetime, cstr, time_diff_in_hours
+from frappe.utils import flt, get_datetime, time_diff_in_hours
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.manufacturing.doctype.production_order.production_order import make_stock_entry, make_time_log
 from erpnext.stock.doctype.stock_entry import test_stock_entry
@@ -15,14 +15,14 @@ class TestProductionOrder(unittest.TestCase):
 	def check_planned_qty(self):
 		set_perpetual_inventory(0)
 
-		planned0 = frappe.db.get_value("Bin", {"item_code": "_Test FG Item", 
+		planned0 = frappe.db.get_value("Bin", {"item_code": "_Test FG Item",
 			"warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty") or 0
 
 		pro_order = make_prod_order_test_record()
-		
-		planned1 = frappe.db.get_value("Bin", {"item_code": "_Test FG Item", 
+
+		planned1 = frappe.db.get_value("Bin", {"item_code": "_Test FG Item",
 			"warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty")
-			
+
 		self.assertEqual(planned1, planned0 + 10)
 
 		# add raw materials to stores
@@ -44,10 +44,10 @@ class TestProductionOrder(unittest.TestCase):
 		s.submit()
 
 		self.assertEqual(frappe.db.get_value("Production Order", pro_order.name, "produced_qty"), 4)
-		
-		planned2 = frappe.db.get_value("Bin", {"item_code": "_Test FG Item", 
+
+		planned2 = frappe.db.get_value("Bin", {"item_code": "_Test FG Item",
 			"warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty")
-			
+
 		self.assertEqual(planned2, planned0 + 6)
 
 		return pro_order
@@ -67,18 +67,18 @@ class TestProductionOrder(unittest.TestCase):
 		self.assertRaises(StockOverProductionError, s.submit)
 
 	def test_make_time_log(self):
-		prod_order = make_prod_order_test_record(item="_Test FG Item 2", 
+		prod_order = make_prod_order_test_record(item="_Test FG Item 2",
 			planned_start_date="2014-11-25 00:00:00", qty=1, do_not_save=True)
 
 		prod_order.set_production_order_operations()
 		prod_order.insert()
 		prod_order.submit()
-		
+
 		d = prod_order.operations[0]
 
 		d.completed_qty = flt(d.completed_qty)
 
-		time_log = make_time_log(prod_order.name, cstr(d.idx) + ". " + d.operation, \
+		time_log = make_time_log(prod_order.name, d.operation, \
 			d.planned_start_time, d.planned_end_time, prod_order.qty - d.completed_qty,
 			operation_id=d.name)
 
@@ -100,9 +100,9 @@ class TestProductionOrder(unittest.TestCase):
 		self.assertEqual(prod_order.operations[0].status, "Completed")
 		self.assertEqual(prod_order.operations[0].completed_qty, prod_order.qty)
 
-		self.assertEqual(get_datetime(prod_order.operations[0].actual_start_time), 
+		self.assertEqual(get_datetime(prod_order.operations[0].actual_start_time),
 			get_datetime(time_log.from_time))
-		self.assertEqual(get_datetime(prod_order.operations[0].actual_end_time), 
+		self.assertEqual(get_datetime(prod_order.operations[0].actual_end_time),
 			get_datetime(time_log.to_time))
 
 		self.assertEqual(prod_order.operations[0].actual_operation_time, 60)
@@ -128,10 +128,10 @@ class TestProductionOrder(unittest.TestCase):
 
 def make_prod_order_test_record(**args):
 	args = frappe._dict(args)
-	
+
 	pro_order = frappe.new_doc("Production Order")
 	pro_order.production_item = args.production_item or args.item or args.item_code or "_Test FG Item"
-	pro_order.bom_no = frappe.db.get_value("BOM", {"item": pro_order.production_item, 
+	pro_order.bom_no = frappe.db.get_value("BOM", {"item": pro_order.production_item,
 		"is_active": 1, "is_default": 1})
 	pro_order.qty = args.qty or 10
 	pro_order.wip_warehouse = args.wip_warehouse or "_Test Warehouse - _TC"
@@ -146,5 +146,5 @@ def make_prod_order_test_record(**args):
 		if not args.do_not_submit:
 			pro_order.submit()
 	return pro_order
-	
+
 test_records = frappe.get_test_records('Production Order')

@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 import frappe.utils
 from frappe.utils import cstr, flt, getdate, comma_and
 from frappe import _
@@ -236,6 +237,24 @@ def get_list_context(context=None):
 	list_context = get_list_context(context)
 	list_context["title"] = _("My Orders")
 	return list_context
+
+@frappe.whitelist()
+def stop_or_unstop_sales_orders(names, status):
+	if not frappe.has_permission("Sales Order", "write"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	names = json.loads(names)
+	for name in names:
+		so = frappe.get_doc("Sales Order", name)
+		if so.docstatus == 1:
+			if status=="Stop":
+				if so.status not in ("Stopped", "Cancelled") and (so.per_delivered < 100 or so.per_billed < 100):
+					so.stop_sales_order()
+			else:
+				if so.status == "Stopped":
+					so.unstop_sales_order()
+
+	frappe.local.message_log = []
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):

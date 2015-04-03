@@ -85,6 +85,7 @@ execute:frappe.delete_doc("DocType", "Purchase Request Item")
 erpnext.patches.v4_2.recalculate_bom_cost
 erpnext.patches.v4_2.fix_gl_entries_for_stock_transactions
 erpnext.patches.v4_2.update_requested_and_ordered_qty
+execute:frappe.rename_doc("DocType", "Support Ticket", "Issue", force=True)
 erpnext.patches.v4_4.make_email_accounts
 execute:frappe.delete_doc("DocType", "Contact Control")
 erpnext.patches.v4_2.discount_amount
@@ -94,7 +95,6 @@ erpnext.patches.v5_0.update_dn_against_doc_fields
 execute:frappe.db.sql("update `tabMaterial Request` set material_request_type = 'Material Transfer' where material_request_type = 'Transfer'")
 execute:frappe.reload_doc('stock', 'doctype', 'item')
 execute:frappe.db.sql("update `tabItem` i set apply_warehouse_wise_reorder_level=1, re_order_level=0, re_order_qty=0 where exists(select name from `tabItem Reorder` where parent=i.name)")
-execute:frappe.rename_doc("DocType", "Support Ticket", "Issue", force=True)
 erpnext.patches.v5_0.set_default_company_in_bom
 erpnext.patches.v5_0.capacity_planning
 execute:frappe.reload_doc('crm', 'doctype', 'lead')
@@ -102,6 +102,7 @@ execute:frappe.reload_doc('crm', 'doctype', 'opportunity')
 erpnext.patches.v5_0.rename_table_fieldnames
 execute:frappe.db.sql("update `tabJournal Entry` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
 erpnext.patches.v4_2.party_model
+erpnext.patches.v5_0.party_model_patch_fix
 erpnext.patches.v4_1.fix_jv_remarks
 erpnext.patches.v4_2.update_landed_cost_voucher
 erpnext.patches.v4_2.set_item_has_batch
@@ -134,4 +135,5 @@ erpnext.patches.v4_2.repost_sle_for_si_with_no_warehouse
 erpnext.patches.v5_0.newsletter
 execute:frappe.delete_doc("DocType", "Chart of Accounts")
 execute:frappe.delete_doc("DocType", "Style Settings")
+erpnext.patches.v5_0.update_opportunity
 

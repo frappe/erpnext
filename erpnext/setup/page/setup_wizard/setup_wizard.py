@@ -11,8 +11,9 @@ from frappe.translate import (set_default_language, get_dict,
 	get_lang_dict, send_translations, get_language_from_code)
 from frappe.geo.country_info import get_country_info
 from frappe.utils.nestedset import get_root_of
-from default_website import website_maker
+from .default_website import website_maker
 import install_fixtures
+from .welcome_emails import setup_welcome_emails
 
 @frappe.whitelist()
 def setup_account(args=None):
@@ -73,7 +74,11 @@ def setup_account(args=None):
 		website_maker(args.company_name.strip(), args.company_tagline, args.name)
 		create_logo(args)
 
+		frappe.db.commit()
+
 		login_as_first_user(args)
+
+		setup_welcome_emails()
 
 		frappe.db.commit()
 
@@ -435,8 +440,7 @@ def create_territories():
 
 def login_as_first_user(args):
 	if args.get("email") and hasattr(frappe.local, "login_manager"):
-		frappe.local.login_manager.user = args.get("email")
-		frappe.local.login_manager.post_login()
+		frappe.local.login_manager.login_as(args.get("email"))
 
 @frappe.whitelist()
 def load_messages(language):

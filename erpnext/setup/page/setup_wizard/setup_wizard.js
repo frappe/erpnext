@@ -50,7 +50,7 @@ erpnext.wiz.Wizard = Class.extend({
 		this.slides = this.slides;
 		this.slide_dict = {};
 		this.welcomed = true;
-		frappe.set_route(this.page_name, "0");
+		frappe.set_route("setup-wizard/0");
 	},
 	make: function() {
 		this.parent = $('<div class="setup-wizard-wrapper">').appendTo(this.parent);
@@ -326,6 +326,7 @@ $.extend(erpnext.wiz, {
 
 			slide.get_input("currency").on("change", function() {
 				var currency = slide.get_input("currency").val();
+				if (!currency) return;
 				frappe.model.with_doc("Currency", currency, function() {
 					frappe.provide("locals.:Currency." + currency);
 					var currency_doc = frappe.model.get_doc("Currency", currency);
@@ -565,10 +566,12 @@ $.extend(erpnext.wiz, {
 							placeholder:__("A Product or Service")},
 						{fieldtype:"Select", label:__("Group"), fieldname:"item_group_" + i,
 							options:[__("Products"), __("Services"),
-								__("Raw Material"), __("Consumable"), __("Sub Assemblies")]},
+								__("Raw Material"), __("Consumable"), __("Sub Assemblies")],
+							"default": __("Products")},
 						{fieldtype:"Select", fieldname:"item_uom_" + i, label:__("UOM"),
 							options:[__("Unit"), __("Nos"), __("Box"), __("Pair"), __("Kg"), __("Set"),
-								__("Hour"), __("Minute")]},
+								__("Hour"), __("Minute")],
+							"default": __("Unit")},
 						{fieldtype: "Check", fieldname: "is_sales_item_" + i, label:__("We sell this Item"), default: 1},
 						{fieldtype: "Check", fieldname: "is_purchase_item_" + i, label:__("We buy this Item")},
 						{fieldtype:"Column Break"},
@@ -614,7 +617,7 @@ $.extend(erpnext.wiz, {
 
 				var d = msgprint(__("There were errors."));
 				d.custom_onhide = function() {
-					frappe.set_route(erpnext.wiz.page_name, "0");
+					frappe.set_route(erpnext.wiz.wizard.page_name, erpnext.wiz.wizard.slides.length - 1);
 				};
 			}
 		});

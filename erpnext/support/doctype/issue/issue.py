@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe import _
 
 from frappe.model.document import Document
@@ -75,3 +76,9 @@ def auto_close_tickets():
 	frappe.db.sql("""update `tabIssue` set status = 'Closed'
 		where status = 'Replied'
 		and date_sub(curdate(),interval 15 Day) > modified""")
+
+@frappe.whitelist()
+def set_multiple_status(names, status):
+	names = json.loads(names)
+	for name in names:
+		set_status(name, status)

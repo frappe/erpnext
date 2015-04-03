@@ -87,7 +87,6 @@ def install(country=None):
 		{'doctype': 'Designation', 'designation_name': _('Head of Marketing and Sales')},
 		{'doctype': 'Designation', 'designation_name': _('Software Developer')},
 		{'doctype': 'Designation', 'designation_name': _('Designer')},
-		{'doctype': 'Designation', 'designation_name': _('Assistant')},
 		{'doctype': 'Designation', 'designation_name': _('Researcher')},
 
 		# territory
@@ -152,7 +151,7 @@ def install(country=None):
 			{"attribute_value": _("White"), "abbr": "WHI"}
 		]},
 
-		{'doctype': "Email Account", "email_id": "sales@example.com", "append_to": "Lead"},
+		{'doctype': "Email Account", "email_id": "sales@example.com", "append_to": "Opportunity"},
 		{'doctype': "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
 		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"}
 	]
@@ -170,13 +169,4 @@ def install(country=None):
 		parent_link_field = ("parent_" + scrub(doc.doctype))
 		if doc.meta.get_field(parent_link_field) and not doc.get(parent_link_field):
 			doc.flags.ignore_mandatory = True
-
-		try:
-			doc.insert()
-		except NameError, e:
-			if e.args[0] == r.get("doctype") and e.args[2] and e.args[2].args[0] == 1062:
-				# duplicate entry
-				pass
-			else:
-				raise
-
+		doc.insert()

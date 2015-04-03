@@ -14,6 +14,9 @@ from erpnext.utilities.doctype.contact.contact import get_contact_details
 def get_party_details(party=None, account=None, party_type="Customer", company=None,
 	posting_date=None, price_list=None, currency=None, doctype=None):
 
+	if not party:
+		return {}
+
 	return _get_party_details(party, account, party_type,
 		company, posting_date, price_list, currency, doctype)
 
@@ -161,6 +164,9 @@ def get_due_date(posting_date, party_type, party, company):
 	return due_date
 
 def get_credit_days(party_type, party, company):
+	if not party:
+		return None
+
 	party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
 	credit_days, party_group = frappe.db.get_value(party_type, party, ["credit_days", frappe.scrub(party_group_doctype)])
 

@@ -131,7 +131,7 @@ class Employee(Document):
 		employee = frappe.db.sql_list("""select name from `tabEmployee` where
 			user_id=%s and status='Active' and name!=%s""", (self.user_id, self.name))
 		if employee:
-			throw(_("User {0} is already assigned to Employee {1}").format(self.user_id, employee[0]))
+			throw(_("User {0} is already assigned to Employee {1}").format(self.user_id, employee[0]), frappe.DuplicateEntryError)
 
 	def validate_employee_leave_approver(self):
 		for l in self.get("leave_approvers")[:]:

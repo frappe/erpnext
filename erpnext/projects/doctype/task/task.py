@@ -85,3 +85,12 @@ def get_project(doctype, txt, searchfield, start, page_len, filters):
 			limit %(start)s, %(page_len)s """ % {'key': searchfield,
 			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype),
 			'start': start, 'page_len': page_len})
+
+
+@frappe.whitelist()
+def set_multiple_status(names, status):
+	names = json.loads(names)
+	for name in names:
+		task = frappe.get_doc("Task", name)
+		task.status = status
+		task.save()
