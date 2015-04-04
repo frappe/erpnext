@@ -445,12 +445,11 @@ def login_as_first_user(args):
 @frappe.whitelist()
 def load_messages(language):
 	frappe.clear_cache()
-	lang = get_lang_dict()[language]
-	frappe.local.lang = lang
+	set_default_language(language)
 	m = get_dict("page", "setup-wizard")
 	m.update(get_dict("boot"))
 	send_translations(m)
-	return lang
+	return frappe.local.lang
 
 @frappe.whitelist()
 def load_languages():
