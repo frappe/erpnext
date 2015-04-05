@@ -282,15 +282,15 @@ class calculate_taxes_and_totals(object):
 		tax.total = flt(tax.total + discount_amount_loss, tax.precision("total"))
 
 		self._set_in_company_currency(tax, ["total", "tax_amount_after_discount_amount"])
-		
+
 	def manipulate_grand_total_for_inclusive_tax(self):
 		# if fully inclusive taxes and diff
 		if self.doc.get("taxes") and all(cint(t.included_in_print_rate) for t in self.doc.get("taxes")):
 
 			last_tax = self.doc.get("taxes")[-1]
 
-			diff = self.doc.net_total - flt(last_tax.total / self.doc.conversion_rate, 
-				self.precision("grand_total_export"))
+			diff = self.doc.net_total - flt(last_tax.total / self.doc.conversion_rate,
+				self.doc.precision("grand_total_export"))
 
 			if diff and abs(diff) <= (2.0 / 10**last_tax.precision("tax_amount")):
 				adjustment_amount = flt(diff * self.doc.conversion_rate, last_tax.precision("tax_amount"))
