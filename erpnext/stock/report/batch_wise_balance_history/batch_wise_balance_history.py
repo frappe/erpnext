@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, cint
+from frappe.utils import flt, cint, getdate
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -61,16 +61,19 @@ def get_item_warehouse_batch_map(filters):
 	sle = get_stock_ledger_entries(filters)
 	iwb_map = {}
 
+	from_date = getdate(filters["from_date"])
+	to_date = getdate(filters["to_date"])
+
 	for d in sle:
 		iwb_map.setdefault(d.item_code, {}).setdefault(d.warehouse, {})\
 			.setdefault(d.batch_no, frappe._dict({
 				"opening_qty": 0.0, "in_qty": 0.0, "out_qty": 0.0, "bal_qty": 0.0
 			}))
 		qty_dict = iwb_map[d.item_code][d.warehouse][d.batch_no]
-		if d.posting_date < filters["from_date"]:
+		if d.posting_date < from_date:
 			qty_dict.opening_qty = flt(qty_dict.opening_qty, float_precision) \
 				+ flt(d.actual_qty, float_precision)
-		elif d.posting_date >= filters["from_date"] and d.posting_date <= filters["to_date"]:
+		elif d.posting_date >= from_date and d.posting_date <= to_date:
 			if flt(d.actual_qty) > 0:
 				qty_dict.in_qty = flt(qty_dict.in_qty, float_precision) + flt(d.actual_qty, float_precision)
 			else:

@@ -10,7 +10,7 @@ from frappe.model.document import Document
 class QualityInspection(Document):
 	def get_item_specification_details(self):
 		self.set('readings', [])
-		variant_of = frappe.db.get_query("Item", self.item_code, "variant_of")
+		variant_of = frappe.db.get_value("Item", self.item_code, "variant_of")
 		if variant_of:
 			specification = frappe.db.sql("select specification, value from `tabItem Quality Inspection Parameter` \
 				where parent in (%s, %s) order by idx", (self.item_code, variant_of))
