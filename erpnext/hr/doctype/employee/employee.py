@@ -97,6 +97,9 @@ class Employee(Document):
 		user.save()
 
 	def validate_date(self):
+		if self.date_of_birth and getdate(self.date_of_birth) > getdate(today()):
+			throw(_("Date of Birth cannot be greater than today."))
+
 		if self.date_of_birth and self.date_of_joining and getdate(self.date_of_birth) >= getdate(self.date_of_joining):
 			throw(_("Date of Joining must be greater than Date of Birth"))
 
