@@ -207,20 +207,6 @@ class TimeLog(Document):
 			self.quantity = None
 
 @frappe.whitelist()
-def get_workstation(production_order, operation):
-	"""Returns workstation name from Production Order against an associated Operation.
-
-	:param production_order string
-	:param operation string
-	"""
-	if operation:
-		idx, operation = operation.split('. ',1)
-
-		workstation = frappe.db.sql("""select workstation from `tabProduction Order Operation` where idx=%s and
-			parent=%s and operation = %s""", (idx, production_order, operation))
-		return workstation[0][0] if workstation else ""
-
-@frappe.whitelist()
 def get_events(start, end, filters=None):
 	"""Returns events for Gantt / Calendar view rendering.
 
