@@ -126,7 +126,7 @@ class PurchaseReceipt(BuyingController):
 				 if not d.prevdoc_docname:
 					 frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
 
-	def update_stock_ledger(self, allow_negative_stock=False):
+	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
 		sl_entries = []
 		stock_items = self.get_stock_items()
 
@@ -151,7 +151,8 @@ class PurchaseReceipt(BuyingController):
 					}))
 
 		self.bk_flush_supp_wh(sl_entries)
-		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
+		self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock, 
+			via_landed_cost_voucher=via_landed_cost_voucher)
 
 	def update_ordered_qty(self):
 		po_map = {}

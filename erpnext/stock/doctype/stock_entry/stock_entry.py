@@ -289,8 +289,8 @@ class StockEntry(StockController):
 					incoming_rate = flt(self.get_incoming_rate(args), self.precision("incoming_rate", d))
 					if incoming_rate > 0:
 						d.incoming_rate = incoming_rate
-				
-				d.amount = flt(d.transfer_qty) * flt(d.incoming_rate)
+
+				d.amount = flt(flt(d.transfer_qty) * flt(d.incoming_rate), d.precision("amount"))
 				if not d.t_warehouse:
 					raw_material_cost += flt(d.amount)
 
@@ -386,7 +386,7 @@ class StockEntry(StockController):
 	def validate_return_reference_doc(self):
 		"""validate item with reference doc"""
 		ref = get_return_doc_and_details(self)
-		
+
 		if ref.doc:
 			# validate docstatus
 			if ref.doc.docstatus != 1:
@@ -400,7 +400,7 @@ class StockEntry(StockController):
 			# posting date check
 			ref_posting_datetime = "%s %s" % (ref.doc.posting_date, ref.doc.posting_time or "00:00:00")
 			this_posting_datetime = "%s %s" % (self.posting_date, self.posting_time)
-			
+
 			if get_datetime(ref_posting_datetime) < get_datetime(ref_posting_datetime):
 				from frappe.utils.dateutils import datetime_in_user_format
 				frappe.throw(_("Posting timestamp must be after {0}")
@@ -783,51 +783,6 @@ def query_return_item(doctype, txt, searchfield, start, page_len, filters):
 					result.append(val)
 
 	return result[start:start+page_len]
-
-def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
-	if not filters.get("posting_date"):
-		filters["posting_date"] = nowdate()
-
-	batch_nos = None
-	args = {
-		'item_code': filters.get("item_code"),
-		's_warehouse': filters.get('s_warehouse'),
-		'posting_date': filters.get('posting_date'),
-		'txt': "%%%s%%" % txt,
-		'mcond':get_match_cond(doctype),
-		"start": start,
-		"page_len": page_len
-	}
-
-	if filters.get("s_warehouse"):
-		batch_nos = frappe.db.sql("""select batch_no
-			from `tabStock Ledger Entry` sle
-			where item_code = '%(item_code)s'
-				and warehouse = '%(s_warehouse)s'
-				and batch_no like '%(txt)s'
-				and exists(select * from `tabBatch`
-					where name = sle.batch_no
-					and (ifnull(expiry_date, '2099-12-31') >= %(posting_date)s
-						or expiry_date = '')
-					and docstatus != 2)
-			%(mcond)s
-			group by batch_no having sum(actual_qty) > 0
-			order by batch_no desc
-			limit %(start)s, %(page_len)s """
-			% args)
-
-	if batch_nos:
-		return batch_nos
-	else:
-		return frappe.db.sql("""select name from `tabBatch`
-			where item = '%(item_code)s'
-			and docstatus < 2
-			and (ifnull(expiry_date, '2099-12-31') >= %(posting_date)s
-				or expiry_date = '' or expiry_date = "0000-00-00")
-			%(mcond)s
-			order by name desc
-			limit %(start)s, %(page_len)s
-		""" % args)
 
 def get_stock_items_for_return(ref_doc, parentfields):
 	"""return item codes filtered from doc, which are stock items"""

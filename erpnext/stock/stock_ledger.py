@@ -14,7 +14,7 @@ class NegativeStockError(frappe.ValidationError): pass
 _exceptions = frappe.local('stockledger_exceptions')
 # _exceptions = []
 
-def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False):
+def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via_landed_cost_voucher=False):
 	if sl_entries:
 		from erpnext.stock.utils import update_bin
 
@@ -28,14 +28,14 @@ def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False):
 				sle['actual_qty'] = -flt(sle['actual_qty'])
 
 			if sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
-				sle_id = make_entry(sle, allow_negative_stock)
+				sle_id = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
 
 			args = sle.copy()
 			args.update({
 				"sle_id": sle_id,
 				"is_amended": is_amended
 			})
-			update_bin(args, allow_negative_stock)
+			update_bin(args, allow_negative_stock, via_landed_cost_voucher)
 
 		if cancel:
 			delete_cancelled_entry(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
@@ -46,11 +46,12 @@ def set_as_cancel(voucher_type, voucher_no):
 		where voucher_no=%s and voucher_type=%s""",
 		(now(), frappe.session.user, voucher_type, voucher_no))
 
-def make_entry(args, allow_negative_stock=False):
+def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	args.update({"doctype": "Stock Ledger Entry"})
 	sle = frappe.get_doc(args)
 	sle.flags.ignore_permissions = 1
 	sle.allow_negative_stock=allow_negative_stock
+	sle.via_landed_cost_voucher = via_landed_cost_voucher
 	sle.insert()
 	sle.submit()
 	return sle.name
@@ -73,13 +74,14 @@ class update_entries_after(object):
 				"posting_time": "12:00"
 			}
 	"""
-	def __init__(self, args, allow_zero_rate=False, allow_negative_stock=None, verbose=1):
+	def __init__(self, args, allow_zero_rate=False, allow_negative_stock=None, via_landed_cost_voucher=False, verbose=1):
 		from frappe.model.meta import get_field_precision
 
 		self.exceptions = []
 		self.verbose = verbose
 		self.allow_zero_rate = allow_zero_rate
 		self.allow_negative_stock = allow_negative_stock
+		self.via_landed_cost_voucher = via_landed_cost_voucher
 		if not self.allow_negative_stock:
 			self.allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings",
 				"allow_negative_stock"))
@@ -141,7 +143,7 @@ class update_entries_after(object):
 		bin_doc.save(ignore_permissions=True)
 
 	def process_sle(self, sle):
-		if sle.serial_no or not cint(self.allow_negative_stock):
+		if (sle.serial_no and not self.via_landed_cost_voucher) or not cint(self.allow_negative_stock):
 			# validate negative stock for serialized items, fifo valuation
 			# or when negative stock is not allowed for moving average
 			if not self.validate_negative_stock(sle):

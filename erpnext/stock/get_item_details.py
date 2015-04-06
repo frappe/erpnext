@@ -305,13 +305,13 @@ def get_serial_nos_by_fifo(args, item_doc):
 		}))
 
 def get_actual_batch_qty(batch_no,warehouse,item_code):
-        actual_batch_qty = 0
-        if batch_no:
-            actual_batch_qty = flt(frappe.db.sql("""select sum(actual_qty)
-				from `tabStock Ledger Entry`
-				where warehouse=%s and item_code=%s and batch_no=%s""",
-				(warehouse, item_code, batch_no))[0][0])
-        return actual_batch_qty
+	actual_batch_qty = 0
+	if batch_no:
+		actual_batch_qty = flt(frappe.db.sql("""select sum(actual_qty)
+			from `tabStock Ledger Entry`
+			where warehouse=%s and item_code=%s and batch_no=%s""",
+			(warehouse, item_code, batch_no))[0][0])
+	return actual_batch_qty
 
 @frappe.whitelist()
 def get_conversion_factor(item_code, uom):

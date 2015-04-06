@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.desk.reportview import get_match_cond
 from frappe.model.db_query import DatabaseQuery
+from frappe.utils import nowdate
 
 def get_filters_cond(doctype, filters, conditions):
 	if filters:
@@ -154,8 +155,6 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 	return tax_accounts
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
-	from frappe.utils import nowdate
-
 	conditions = []
 
 	return frappe.db.sql("""select tabItem.name,
@@ -230,38 +229,45 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 			}, { "start": start, "page_len": page_len, "txt": ("%%%s%%" % txt) })
 
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
-	from erpnext.controllers.queries import get_match_cond
+	if not filters.get("posting_date"):
+		filters["posting_date"] = nowdate()
 
-	if filters.has_key('warehouse'):
-		return frappe.db.sql("""select batch_no, round(sum(actual_qty),2), stock_uom, expiry_date from `tabStock Ledger Entry` sle
-			    INNER JOIN `tabBatch`
-				on sle.batch_no = `tabBatch`.batch_id 
-				where item_code = '%(item_code)s'
-					and warehouse = '%(warehouse)s'
-					and batch_no like '%(txt)s'
-					and exists(select * from `tabBatch`
-							where name = sle.batch_no
-								and (ifnull(expiry_date, '')='' or expiry_date >= '%(posting_date)s')
-								and docstatus != 2)
-					%(mcond)s
-				group by batch_no having sum(actual_qty) > 0
-				order by expiry_date,batch_no desc
-				limit %(start)s, %(page_len)s """ % {'item_code': filters['item_code'],
-					'warehouse': filters['warehouse'], 'posting_date': filters['posting_date'],
-					'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype),
-					'start': start, 'page_len': page_len})
+	batch_nos = None
+	args = {
+		'item_code': filters.get("item_code"),
+		'warehouse': filters.get("warehouse"),
+		'posting_date': filters.get('posting_date'),
+		'txt': "%{0}%".format(txt),
+		"start": start,
+		"page_len": page_len
+	}
+
+	if args.get('warehouse'):
+		batch_nos = frappe.db.sql("""select sle.batch_no, round(sum(sle.actual_qty),2), sle.stock_uom, batch.expiry_date
+				from `tabStock Ledger Entry` sle
+				    INNER JOIN `tabBatch` batch on sle.batch_no = batch.name
+				where
+					sle.item_code = %(item_code)s
+					and sle.warehouse = %(warehouse)s
+					and sle.batch_no like %(txt)s
+					and batch.docstatus < 2
+					and (ifnull(batch.expiry_date, '')='' or batch.expiry_date >= %(posting_date)s)
+					{match_conditions}
+				group by batch_no having sum(sle.actual_qty) > 0
+				order by batch.expiry_date, sle.batch_no desc
+				limit %(start)s, %(page_len)s""".format(match_conditions=get_match_cond(doctype)), args)
+
+	if batch_nos:
+		return batch_nos
 	else:
-		return frappe.db.sql("""select name from tabBatch
-				where docstatus != 2
-					and item = '%(item_code)s'
-					and (ifnull(expiry_date, '')='' or expiry_date >= '%(posting_date)s')
-					and name like '%(txt)s'
-					%(mcond)s
-				order by name desc
-				limit %(start)s, %(page_len)s""" % {'item_code': filters['item_code'],
-				'posting_date': filters['posting_date'], 'txt': "%%%s%%" % txt,
-				'mcond':get_match_cond(doctype),'start': start,
-				'page_len': page_len})
+		return frappe.db.sql("""select name, expiry_date from `tabBatch`
+			where item = %(item_code)s
+			and name like %(txt)s
+			and docstatus < 2
+			and (ifnull(batch.expiry_date, '')='' or batch.expiry_date >= %(posting_date)s)
+			{match_conditions}
+			order by expiry_date, name desc
+			limit %(start)s, %(page_len)s""".format(match_conditions=get_match_cond(doctype)), args)
 
 def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 	filter_list = []
