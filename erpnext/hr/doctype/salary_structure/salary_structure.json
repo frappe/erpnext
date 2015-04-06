@@ -151,7 +151,8 @@
    "oldfieldtype": "Table", 
    "options": "Salary Structure Earning", 
    "permlevel": 0, 
-   "read_only": 0
+   "read_only": 0, 
+   "reqd": 1
   }, 
   {
    "fieldname": "deduction", 
@@ -227,7 +228,7 @@
  ], 
  "icon": "icon-file-text", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:45.120566", 
+ "modified": "2015-04-06 06:56:02.395512", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Structure", 
