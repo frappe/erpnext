@@ -18,10 +18,10 @@ class TestStockReconciliation(unittest.TestCase):
 
 	def test_reco_for_fifo(self):
 		self._test_reco_sle_gle("FIFO")
-		
+
 	def test_reco_for_moving_average(self):
 		self._test_reco_sle_gle("Moving Average")
-		
+
 	def _test_reco_sle_gle(self, valuation_method):
 		set_perpetual_inventory()
 		# [[qty, valuation_rate, posting_date,
@@ -36,7 +36,7 @@ class TestStockReconciliation(unittest.TestCase):
 
 		for d in input_data:
 			repost_stock_as_per_valuation_method(valuation_method)
-			
+
 			last_sle = get_previous_sle({
 				"item_code": "_Test Item",
 				"warehouse": "_Test Warehouse - _TC",
@@ -45,51 +45,51 @@ class TestStockReconciliation(unittest.TestCase):
 			})
 
 			# submit stock reconciliation
-			stock_reco = create_stock_reconciliation(qty=d[0], rate=d[1], 
+			stock_reco = create_stock_reconciliation(qty=d[0], rate=d[1],
 				posting_date=d[2], posting_time=d[3])
-			
+
 			# check stock value
-			sle = frappe.db.sql("""select * from `tabStock Ledger Entry` 
+			sle = frappe.db.sql("""select * from `tabStock Ledger Entry`
 				where voucher_type='Stock Reconciliation' and voucher_no=%s""", stock_reco.name, as_dict=1)
-			
+
 			qty_after_transaction = flt(d[0]) if d[0] != "" else flt(last_sle.get("qty_after_transaction"))
-				
+
 			valuation_rate = flt(d[1]) if d[1] != "" else flt(last_sle.get("valuation_rate"))
-			
+
 			if qty_after_transaction == last_sle.get("qty_after_transaction") \
 				and valuation_rate == last_sle.get("valuation_rate"):
 					self.assertFalse(sle)
 			else:
 				self.assertEqual(sle[0].qty_after_transaction, qty_after_transaction)
 				self.assertEqual(sle[0].stock_value, qty_after_transaction * valuation_rate)
-			
+
 				# no gl entries
-				self.assertTrue(frappe.db.get_value("Stock Ledger Entry", 
+				self.assertTrue(frappe.db.get_value("Stock Ledger Entry",
 					{"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name}))
 				self.assertFalse(get_stock_and_account_difference(["_Test Account Stock In Hand - _TC"]))
-					
+
 			stock_reco.cancel()
-			
-			self.assertFalse(frappe.db.get_value("Stock Ledger Entry", 
+
+			self.assertFalse(frappe.db.get_value("Stock Ledger Entry",
 				{"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name}))
-				
-			self.assertFalse(frappe.db.get_value("GL Entry", 
+
+			self.assertFalse(frappe.db.get_value("GL Entry",
 				{"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name}))
-				
+
 			set_perpetual_inventory(0)
 
 	def insert_existing_sle(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-			
-		make_stock_entry(posting_date="2012-12-15", posting_time="02:00", item_code="_Test Item", 
+
+		make_stock_entry(posting_date="2012-12-15", posting_time="02:00", item_code="_Test Item",
 			target="_Test Warehouse - _TC", qty=10, incoming_rate=700)
 
-		make_stock_entry(posting_date="2012-12-25", posting_time="03:00", item_code="_Test Item", 
+		make_stock_entry(posting_date="2012-12-25", posting_time="03:00", item_code="_Test Item",
 			source="_Test Warehouse - _TC", qty=15)
 
-		make_stock_entry(posting_date="2013-01-05", posting_time="07:00", item_code="_Test Item", 
+		make_stock_entry(posting_date="2013-01-05", posting_time="07:00", item_code="_Test Item",
 			target="_Test Warehouse - _TC", qty=15, incoming_rate=1200)
-			
+
 def create_stock_reconciliation(**args):
 	args = frappe._dict(args)
 	sr = frappe.new_doc("Stock Reconciliation")
@@ -105,7 +105,9 @@ def create_stock_reconciliation(**args):
 		"qty": args.qty,
 		"valuation_rate": args.rate
 	})
+
 	sr.insert()
+
 	sr.submit()
 	return sr
 

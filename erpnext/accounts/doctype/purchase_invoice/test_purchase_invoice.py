@@ -55,7 +55,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			order by account asc""", pi.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
-		expected_values = sorted([
+		expected_values = dict((d[0], d) for d in [
 			["_Test Payable - _TC", 0, 720],
 			["Stock Received But Not Billed - _TC", 750.0, 0],
 			["Expenses Included In Valuation - _TC", 0.0, 250.0],
@@ -64,9 +64,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 		])
 
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[i][0], gle.account)
-			self.assertEquals(expected_values[i][1], gle.debit)
-			self.assertEquals(expected_values[i][2], gle.credit)
+			self.assertEquals(expected_values[gle.account][0], gle.account)
+			self.assertEquals(expected_values[gle.account][1], gle.debit)
+			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
 		set_perpetual_inventory(0)
 
@@ -88,7 +88,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			order by account asc""", pi.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
-		expected_values = sorted([
+		expected_values = dict((d[0], d) for d in [
 			["_Test Payable - _TC", 0, 720],
 			["Stock Received But Not Billed - _TC", 500.0, 0],
 			["_Test Account Shipping Charges - _TC", 100.0, 0],
@@ -96,9 +96,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 		])
 
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[i][0], gle.account)
-			self.assertEquals(expected_values[i][1], gle.debit)
-			self.assertEquals(expected_values[i][2], gle.credit)
+			self.assertEquals(expected_values[gle.account][0], gle.account)
+			self.assertEquals(expected_values[gle.account][1], gle.debit)
+			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
 		set_perpetual_inventory(0)
 

@@ -197,7 +197,7 @@ class StockController(AccountsController):
 		sl_dict.update(args)
 		return sl_dict
 
-	def make_sl_entries(self, sl_entries, is_amended=None, allow_negative_stock=False, 
+	def make_sl_entries(self, sl_entries, is_amended=None, allow_negative_stock=False,
 			via_landed_cost_voucher=False):
 		from erpnext.stock.stock_ledger import make_sl_entries
 		make_sl_entries(sl_entries, is_amended, allow_negative_stock, via_landed_cost_voucher)
@@ -237,7 +237,11 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 			if not existing_gle or not compare_existing_and_expected_gle(existing_gle,
 				expected_gle):
 					_delete_gl_entries(voucher_type, voucher_no)
-					voucher_obj.make_gl_entries(repost_future_gle=False)
+					try:
+						voucher_obj.make_gl_entries(repost_future_gle=False)
+					except:
+						print voucher_obj.as_json()
+						raise
 		else:
 			_delete_gl_entries(voucher_type, voucher_no)
 

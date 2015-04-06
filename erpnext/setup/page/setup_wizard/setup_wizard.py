@@ -197,7 +197,7 @@ def set_defaults(args):
 		"float_precision": 3,
 		'date_format': frappe.db.get_value("Country", args.get("country"), "date_format"),
 		'number_format': number_format,
-		'enable_scheduler': 1
+		'enable_scheduler': 1 if not frappe.flags.in_test else 0
 	})
 	system_settings.save()
 

@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest, copy
+import time
 from erpnext.accounts.utils import get_stock_and_account_difference
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.projects.doctype.time_log_batch.test_time_log_batch import *
@@ -221,7 +222,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertTrue(gl_entries)
 
-		expected_values = sorted([
+		expected_values = dict((d[0], d) for d in [
 			[si.debit_to, 1500, 0.0],
 			[test_records[3]["items"][0]["income_account"], 0.0, 1163.45],
 			[test_records[3]["taxes"][0]["account_head"], 0.0, 130.31],
@@ -235,10 +236,10 @@ class TestSalesInvoice(unittest.TestCase):
 			["_Test Account Service Tax - _TC", 16.88, 0.0],
 		])
 
-		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[i][0], gle.account)
-			self.assertEquals(expected_values[i][1], gle.debit)
-			self.assertEquals(expected_values[i][2], gle.credit)
+		for gle in gl_entries:
+			self.assertEquals(expected_values[gle.account][0], gle.account)
+			self.assertEquals(expected_values[gle.account][1], gle.debit)
+			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
 		# cancel
 		si.cancel()
@@ -439,7 +440,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertTrue(gl_entries)
 
-		expected_values = sorted([
+		expected_values = dict((d[0], d) for d in [
 			[si.debit_to, 630.0, 0.0],
 			[test_records[1]["items"][0]["income_account"], 0.0, 500.0],
 			[test_records[1]["taxes"][0]["account_head"], 0.0, 80.0],
@@ -447,9 +448,9 @@ class TestSalesInvoice(unittest.TestCase):
 		])
 
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[i][0], gle.account)
-			self.assertEquals(expected_values[i][1], gle.debit)
-			self.assertEquals(expected_values[i][2], gle.credit)
+			self.assertEquals(expected_values[gle.account][0], gle.account)
+			self.assertEquals(expected_values[gle.account][1], gle.debit)
+			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
 		# cancel
 		si.cancel()
@@ -502,7 +503,8 @@ class TestSalesInvoice(unittest.TestCase):
 			[si.debit_to, 0.0, 600.0],
 			["_Test Account Bank Account - _TC", 600.0, 0.0]
 		])
-		for i, gle in enumerate(gl_entries):
+
+		for i, gle in enumerate(sorted(gl_entries, key=lambda gle: gle.account)):
 			self.assertEquals(expected_gl_entries[i][0], gle.account)
 			self.assertEquals(expected_gl_entries[i][1], gle.debit)
 			self.assertEquals(expected_gl_entries[i][2], gle.credit)
@@ -574,16 +576,16 @@ class TestSalesInvoice(unittest.TestCase):
 			order by account asc, debit asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
-		expected_gl_entries = sorted([
+		expected_gl_entries = dict((d[0], d) for d in [
 			[si.debit_to, 630.0, 0.0],
 			[si_doc.get("items")[0]["income_account"], 0.0, 500.0],
 			[si_doc.get("taxes")[0]["account_head"], 0.0, 80.0],
 			[si_doc.get("taxes")[1]["account_head"], 0.0, 50.0],
 		])
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_gl_entries[i][0], gle.account)
-			self.assertEquals(expected_gl_entries[i][1], gle.debit)
-			self.assertEquals(expected_gl_entries[i][2], gle.credit)
+			self.assertEquals(expected_gl_entries[gle.account][0], gle.account)
+			self.assertEquals(expected_gl_entries[gle.account][1], gle.debit)
+			self.assertEquals(expected_gl_entries[gle.account][2], gle.credit)
 
 		si.cancel()
 		gle = frappe.db.sql("""select * from `tabGL Entry`
@@ -605,16 +607,16 @@ class TestSalesInvoice(unittest.TestCase):
 			order by account asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
-		expected_values = sorted([
+		expected_values = dict((d[0], d) for d in [
 			[si.debit_to, 630.0, 0.0],
 			[test_records[1]["items"][0]["income_account"], 0.0, 500.0],
 			[test_records[1]["taxes"][0]["account_head"], 0.0, 80.0],
 			[test_records[1]["taxes"][1]["account_head"], 0.0, 50.0],
 		])
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[i][0], gle.account)
-			self.assertEquals(expected_values[i][1], gle.debit)
-			self.assertEquals(expected_values[i][2], gle.credit)
+			self.assertEquals(expected_values[gle.account][0], gle.account)
+			self.assertEquals(expected_values[gle.account][1], gle.debit)
+			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
 		set_perpetual_inventory(0)
 
@@ -630,16 +632,16 @@ class TestSalesInvoice(unittest.TestCase):
 			order by account asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
-		expected_values = sorted([
+		expected_values = dict((d[0], d) for d in [
 			[si.debit_to, 630.0, 0.0],
 			[test_records[1]["items"][0]["income_account"], 0.0, 500.0],
 			[test_records[1]["taxes"][0]["account_head"], 0.0, 80.0],
 			[test_records[1]["taxes"][1]["account_head"], 0.0, 50.0],
 		])
 		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[i][0], gle.account)
-			self.assertEquals(expected_values[i][1], gle.debit)
-			self.assertEquals(expected_values[i][2], gle.credit)
+			self.assertEquals(expected_values[gle.account][0], gle.account)
+			self.assertEquals(expected_values[gle.account][1], gle.debit)
+			self.assertEquals(expected_values[gle.account][2], gle.credit)
 
 		set_perpetual_inventory(0)
 
@@ -733,7 +735,7 @@ class TestSalesInvoice(unittest.TestCase):
 			"delivery_document_no"))
 
 	def test_serialize_status(self):
-		from erpnext.stock.doctype.serial_no.serial_no import SerialNoStatusError, get_serial_nos
+		from erpnext.stock.doctype.serial_no.serial_no import SerialNoStatusError, get_serial_nos, SerialNoDuplicateError
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item()
@@ -751,7 +753,10 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 
 		self.assertRaises(SerialNoStatusError, si.submit)
-		
+
+		# hack! because stock ledger entires are already inserted and are not rolled back!
+		self.assertRaises(SerialNoDuplicateError, si.cancel)
+
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)
@@ -759,13 +764,13 @@ def create_sales_invoice(**args):
 		si.posting_date = args.posting_date
 	if args.posting_time:
 		si.posting_time = args.posting_time
-	
+
 	si.company = args.company or "_Test Company"
 	si.customer = args.customer or "_Test Customer"
 	si.debit_to = args.debit_to or "Debtors - _TC"
 	si.update_stock = args.update_stock
 	si.is_pos = args.is_pos
-	
+
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
@@ -775,7 +780,7 @@ def create_sales_invoice(**args):
 		"cost_center": "_Test Cost Center - _TC",
 		"serial_no": args.serial_no
 	})
-	
+
 	if not args.do_not_save:
 		si.insert()
 		if not args.do_not_submit:
