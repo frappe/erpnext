@@ -46,13 +46,14 @@ class Task(Document):
 			project.run_method("update_percent_complete")
 			
 	def update_project(self):
-		total_activity_cost = frappe.db.sql("""select sum(actual_cost) from `tabTask` 
-			where project = %s""",self.project)
-		frappe.db.set_value("Project", self.project, "total_activity_cost", total_activity_cost)
-		
-		total_expense_claim = frappe.db.sql("""select sum(total_expense_claim) from `tabTask` 
-			where project = %s""",self.project)
-		frappe.db.set_value("Project", self.project, "total_expense_claim", total_expense_claim)
+		if self.project:
+			total_activity_cost = frappe.db.sql("""select sum(actual_cost) from `tabTask` 
+				where project = %s""",self.project)
+			frappe.db.set_value("Project", self.project, "total_activity_cost", total_activity_cost)
+	
+			total_expense_claim = frappe.db.sql("""select sum(total_expense_claim) from `tabTask` 
+				where project = %s""",self.project)
+			frappe.db.set_value("Project", self.project, "total_expense_claim", total_expense_claim)
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

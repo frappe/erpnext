@@ -5,5 +5,3 @@ from __future__ import unicode_literals
 
 import frappe
 test_records = frappe.get_test_records('Task')
-test_dependencies = ["Project"]
-test_ignore = ["Customer"]

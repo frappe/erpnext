@@ -1,0 +1,9 @@
+[
+ {
+  "employee": "_T-Employee-0001",
+  "employee_name": "_Test Employee",
+  "activity_type": "_Test Activity Type",
+  "billing_rate": 100,
+  "costing_rate": 50
+ }
+]

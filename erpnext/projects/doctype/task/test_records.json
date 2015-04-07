@@ -1,8 +1,8 @@
 [
  {
-  "project": "_Test Project", 
   "status": "Open", 
-  "subject": "_Test Task"
+  "subject": "_Test Task",
+  "name": "task001"
  }, 
  {
   "status": "Open", 
