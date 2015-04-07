@@ -18,8 +18,9 @@ class ExpenseClaim(Document):
 
 	def validate(self):
 		validate_fiscal_year(self.posting_date, self.fiscal_year, _("Posting Date"), self)
-		self.validate_sanctioned_amount()
 		self.validate_exp_details()
+		self.validate_cost()
+		self.validate_sanctioned_amount()
 		self.validate_expense_approver()
 		self.validate_task()
 		set_employee_name(self)
@@ -33,6 +34,15 @@ class ExpenseClaim(Document):
 	def on_cancel(self):
 		if self.project:
 			self.update_task()
+			
+	def validate_cost(self):
+		total_claimed_amount = 0 
+		total_sanctioned_amount = 0
+		for d in self.expenses:
+			total_claimed_amount += d.claim_amount
+			total_sanctioned_amount += d.sanctioned_amount
+		self.total_claimed_amount = total_claimed_amount
+		self.total_sanctioned_amount = total_sanctioned_amount
 
 	def validate_exp_details(self):
 		if not self.get('expenses'):
