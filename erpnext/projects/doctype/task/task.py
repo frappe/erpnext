@@ -45,6 +45,10 @@ class Task(Document):
 			project = frappe.get_doc("Project", self.project)
 			project.run_method("update_percent_complete")
 			
+	def update_total_expense_claim(self):
+		self.total_expense_claim = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim` 
+			where project = %s and task = %s and approval_status = "Approved" and docstatus=1""",(self.project, self.name))
+			
 	def update_project(self):
 		if self.project:
 			total_activity_cost = frappe.db.sql("""select sum(actual_cost) from `tabTask` 

@@ -19,7 +19,7 @@ class ExpenseClaim(Document):
 	def validate(self):
 		validate_fiscal_year(self.posting_date, self.fiscal_year, _("Posting Date"), self)
 		self.validate_exp_details()
-		self.validate_cost()
+		self.calculate_total_amount()
 		self.validate_sanctioned_amount()
 		self.validate_expense_approver()
 		self.validate_task()
@@ -32,17 +32,15 @@ class ExpenseClaim(Document):
 			self.update_task()
 			
 	def on_cancel(self):
-		if self.project:
+		if self.task:
 			self.update_task()
 			
-	def validate_cost(self):
-		total_claimed_amount = 0 
-		total_sanctioned_amount = 0
+	def calculate_total_amount(self):
+		self.total_claimed_amount = 0 
+		self.total_sanctioned_amount = 0
 		for d in self.expenses:
-			total_claimed_amount += d.claim_amount
-			total_sanctioned_amount += d.sanctioned_amount
-		self.total_claimed_amount = total_claimed_amount
-		self.total_sanctioned_amount = total_sanctioned_amount
+			self.total_claimed_amount += d.claim_amount
+			self.total_sanctioned_amount += d.sanctioned_amount
 
 	def validate_exp_details(self):
 		if not self.get('expenses'):
@@ -54,17 +52,15 @@ class ExpenseClaim(Document):
 				.format(get_fullname(self.exp_approver), self.exp_approver), InvalidExpenseApproverError)
 	
 	def update_task(self):
-		expense_amount = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim` 
-			where project = %s and task = %s and approval_status = "Approved" and docstatus=1""",(self.project, self.task))
-			
 		task = frappe.get_doc("Task", self.task)
-		task.total_expense_claim = expense_amount
+		task.update_total_expense_claim()
 		task.save()
 
 	def validate_task(self):
 		if self.project and not self.task:
-			frappe.throw(_("Task is Mandatory if Time Log is against a project"))
+			frappe.throw(_("Task is mandatory if Expense Claim is against a Project"))
 
 	def validate_sanctioned_amount(self):
-		if self.total_sanctioned_amount > self.total_claimed_amount:
-			frappe.throw(_("Total sanctioned amount cannot be greater than total claimed amount."))
+		for d in self.expenses:
+			if d.sanctioned_amount > d.claim_amount:
+				frappe.throw(_("Sanctioned Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))

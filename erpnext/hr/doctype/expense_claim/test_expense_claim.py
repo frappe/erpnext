@@ -8,7 +8,7 @@ import unittest
 test_records = frappe.get_test_records('Expense Claim')
 
 class TestExpenseClaim(unittest.TestCase):
-	def test_project_costing(self):
+	def test_total_expense_claim_for_project(self):
 		frappe.db.sql("delete from `tabTask`")
 		frappe.db.sql("delete from `tabProject`")
 		
