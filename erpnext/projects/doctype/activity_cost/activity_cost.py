@@ -16,6 +16,7 @@ class ActivityCost(Document):
 		self.title = _("{0} for {1}").format(self.employee_name, self.activity_type)
 		
 	def check_unique(self):
-		if frappe.db.exists({ "doctype": "Activity Cost", "employee": self.employee, "activity_type": self.activity_type }):
-			frappe.throw(_("Activity Cost exists for Employee {0} against Activity Type {1}")
-				.format(self.employee, self.activity_type))
+		if frappe.db.sql("""select name from `tabActivity Cost` where employee_name= %s and activity_type= %s and name != %s""",
+			(self.employee_name, self.activity_type, self.name)):
+				frappe.throw(_("Activity Cost exists for Employee {0} against Activity Type - {1}")
+					.format(self.employee, self.activity_type))
