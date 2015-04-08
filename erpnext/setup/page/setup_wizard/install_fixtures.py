@@ -153,7 +153,21 @@ def install(country=None):
 
 		{'doctype': "Email Account", "email_id": "sales@example.com", "append_to": "Opportunity"},
 		{'doctype': "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
-		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"}
+		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"},
+		
+		{"doctype": "Offer Term", "offer_term": _("Date of Joining")},
+		{"doctype": "Offer Term", "offer_term": _("Annual Salary")},
+		{"doctype": "Offer Term", "offer_term": _("Probationary Period")},
+		{"doctype": "Offer Term", "offer_term": _("Employee Benefits")},
+		{"doctype": "Offer Term", "offer_term": _("Working Hours")},
+		{"doctype": "Offer Term", "offer_term": _("Stock Options")},
+		{"doctype": "Offer Term", "offer_term": _("Department")},
+		{"doctype": "Offer Term", "offer_term": _("Job Description")},
+		{"doctype": "Offer Term", "offer_term": _("Responsibilities")},
+		{"doctype": "Offer Term", "offer_term": _("Leaves per Year")},
+		{"doctype": "Offer Term", "offer_term": _("Notice Period")},
+		{"doctype": "Offer Term", "offer_term": _("Incentives")},
+		
 	]
 
 	from erpnext.setup.page.setup_wizard.fixtures import industry_type

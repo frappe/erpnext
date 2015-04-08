@@ -10,6 +10,11 @@ from frappe import _
 from frappe.utils import comma_and
 
 class JobApplicant(Document):
+	def onload(self):
+		offer_letter = frappe.get_all("Offer Letter", filters={"job_applicant": self.name})
+		if offer_letter:
+			self.__onload.offer_letter = offer_letter[0].name
+	
 	def autoname(self):
 		keys = filter(None, (self.applicant_name, self.email_id))
 		if not keys:
