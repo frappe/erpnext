@@ -469,7 +469,7 @@ class TestSalesInvoice(unittest.TestCase):
 		pos = copy.deepcopy(test_records[1])
 		pos["is_pos"] = 1
 		pos["update_stock"] = 1
-		pos["posting_time"] = "12:05"
+		# pos["posting_time"] = "12:05"
 		pos["cash_bank_account"] = "_Test Account Bank Account - _TC"
 		pos["paid_amount"] = 600.0
 
@@ -555,7 +555,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si_doc = copy.deepcopy(test_records[1])
 		si_doc["update_stock"] = 1
-		si_doc["posting_time"] = "12:05"
+		# si_doc["posting_time"] = "12:05"
 		si_doc.get("items")[0]["warehouse"] = "_Test Warehouse No Account - _TC"
 
 		si = frappe.copy_doc(si_doc)
