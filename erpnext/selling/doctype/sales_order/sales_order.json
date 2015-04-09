@@ -90,6 +90,15 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "customer_language", 
+   "fieldtype": "Link", 
+   "label": "Customer Language", 
+   "options": "Language", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
    "default": "Sales", 
    "fieldname": "order_type", 
    "fieldtype": "Select", 
@@ -1033,7 +1042,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "issingle": 0, 
- "modified": "2015-01-12 15:16:51.611467", 
+ "modified": "2015-03-31 09:39:49.659619", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 

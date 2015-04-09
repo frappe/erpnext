@@ -135,22 +135,44 @@ def get_basic_details(args, item_doc):
 	user_default_warehouse_list = get_user_default_as_list('warehouse')
 	user_default_warehouse = user_default_warehouse_list[0] \
 		if len(user_default_warehouse_list)==1 else ""
+	# Modif CAF
+	argsCustomer =  {
+                doctype: "Customer",
+                name: args.customer
+            }
+	customerData = frappe.client.get(argsCustomer)
+
+	translate_description = ""
+	if item.Description_Table[0].Language == customerData.customer_language:
+		translate_description = item.Description_Table[0].Description
+	if item.Description_Table[1].Language == customerData.customer_language:
+                translate_description = item.Description_Table[1].Description
+	if item.Description_Table[2].Language == customerData.customer_language:
+                translate_description = item.Description_Table[2].Description
+	if item.Description_Table[3].Language == customerData.customer_language:
+                translate_description = item.Description_Table[3].Description
+
+	# Fin modif caf
 
 	out = frappe._dict({
 
 		"item_code": item.name,
 		"item_name": item.item_name,
-		"description": cstr(item.description_html).strip() or cstr(item.description).strip(),
+		#"description": cstr(item.description_html).strip() or cstr(item.description).strip(),
+		"description": cstr(item.description_html).strip() or cstr(translate_description).strip(),
 		"warehouse": user_default_warehouse or args.warehouse or item.default_warehouse,
 		"income_account": (item.income_account
 			or args.income_account
-			or frappe.db.get_value("Item Group", item.item_group, "default_income_account")),
+			or frappe.db.get_value("Item Group", item.item_group, "default_income_account")
+			or frappe.db.get_value("Company", args.company, "default_income_account")),
 		"expense_account": (item.expense_account
 			or args.expense_account
-			or frappe.db.get_value("Item Group", item.item_group, "default_expense_account")),
+			or frappe.db.get_value("Item Group", item.item_group, "default_expense_account")
+			or frappe.db.get_value("Company", args.company, "default_expense_account")),
 		"cost_center": (frappe.db.get_value("Project", args.project_name, "cost_center")
 			or (item.selling_cost_center if args.transaction_type == "selling" else item.buying_cost_center)
-			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")),
+			or frappe.db.get_value("Item Group", item.item_group, "default_cost_center")
+			or frappe.db.get_value("Company", args.company, "cost_center")),
 		"batch_no": None,
 		"item_tax_rate": json.dumps(dict(([d.tax_type, d.tax_rate] for d in
 			item_doc.get("item_tax")))),
@@ -167,12 +189,6 @@ def get_basic_details(args, item_doc):
 		"base_amount": 0.0,
 		"discount_percentage": 0.0
 	})
-
-	# if default specified in item is for another company, fetch from company
-	for d in [["Account", "income_account", "default_income_account"], ["Account", "expense_account", "default_expense_account"],
-		["Cost Center", "cost_center", "cost_center"], ["Warehouse", "warehouse", ""]]:
-			if not out[d[1]] or args.company != frappe.db.get_value(d[0], out.get(d[1]), "company"):
-				out[d[1]] = frappe.db.get_value("Company", args.company, d[2]) if d[2] else None
 
 	for fieldname in ("item_name", "item_group", "barcode", "brand", "stock_uom"):
 		out[fieldname] = item.get(fieldname)
