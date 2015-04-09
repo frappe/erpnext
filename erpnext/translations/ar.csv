@@ -30,7 +30,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +73,Legal,قا�
 DocType: C-Form,Customer,زبون
 DocType: Purchase Receipt Item,Required By,المطلوبة من قبل
 DocType: Department,Department,قسم
-DocType: Purchase Order,% Billed,وصفت٪
+DocType: Purchase Order,% Billed,% أصدر من قيمة الفاتورة 
 DocType: Selling Settings,Customer Name,اسم العميل
 DocType: Features Setup,"All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.",هي المجالات ذات الصلة عن تصدير مثل العملة ، ومعدل التحويل ، ومجموع التصدير، تصدير الخ المجموع الكلي المتاحة في توصيل ملاحظة ، ونقاط البيع ، اقتباس، فاتورة المبيعات ، ترتيب المبيعات الخ
 DocType: Purchase Receipt,"Following table will show values if items are sub - contracted. These values will be fetched from the master of ""Bill of Materials"" of sub - contracted items.",سوف تظهر بعد الجدول القيم البنود الفرعية إذا - المتعاقد عليها. وسيتم جلب من هذه القيم سيد &quot;بيل من مواد&quot; من دون - البنود المتعاقد عليها.
@@ -1160,7 +1160,7 @@ DocType: Pricing Rule,Campaign,حملة
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +27,Approval Status must be 'Approved' or 'Rejected',يجب الحالة موافقة ' وافق ' أو ' رفض '
 DocType: Sales Invoice,Sales BOM Help,مبيعات BOM تعليمات
 DocType: Purchase Invoice,Contact Person,اتصل شخص
-apps/erpnext/erpnext/projects/doctype/task/task.py +30,'Expected Start Date' can not be greater than 'Expected End Date',"' تاريخ بدء المتوقعة ' لا يمكن أن يكون أكبر من "" تاريخ الانتهاء المتوقع '"
+apps/erpnext/erpnext/projects/doctype/task/task.py +30,'Expected Start Date' can not be greater than 'Expected End Date',' تاريخ البدء المتوقع ' لا يمكن أن يكون أكبر من ' تاريخ الانتهاء المتوقع '
 DocType: Holiday List,Holidays,العطل
 DocType: Sales Order Item,Planned Quantity,المخطط الكمية
 DocType: Purchase Invoice Item,Item Tax Amount,البند ضريبة المبلغ
@@ -1687,7 +1687,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +148,Banking,م
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +48,Please click on 'Generate Schedule' to get schedule,الرجاء انقر على ' إنشاء الجدول ' للحصول على الجدول الزمني
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +271,New Cost Center,مركز تكلفة جديدة
 DocType: Bin,Ordered Quantity,أمرت الكمية
-apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +392,"e.g. ""Build tools for builders""","على سبيل المثال "" بناء أدوات لبناة """
+apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +392,"e.g. ""Build tools for builders""","مثلاً: ""نبني أدوات البنائين"""
 DocType: Quality Inspection,In Process,في عملية
 DocType: Authorization Rule,Itemwise Discount,Itemwise الخصم
 DocType: Purchase Receipt,Detailed Breakup of the totals,مفصلة تفكك مجاميع
@@ -2236,7 +2236,7 @@ DocType: Expense Claim,Expense Approver,حساب الموافق
 DocType: Purchase Receipt Item Supplied,Purchase Receipt Item Supplied,شراء السلعة استلام الموردة
 apps/erpnext/erpnext/projects/report/daily_time_log_summary/daily_time_log_summary.py +17,To Datetime,إلى التاريخ والوقت
 DocType: SMS Settings,SMS Gateway URL,SMS بوابة URL
-DocType: Email Account,Email Id,البريد الإلكتروني معرف
+DocType: Email Account,Email Id,معرف البريد الإلكتروني
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +52,Supplier > Supplier Type,المورد> نوع مورد
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +120,Please enter relieving date.,من فضلك ادخل تاريخ التخفيف .
 apps/erpnext/erpnext/controllers/trends.py +134,Amt,AMT
@@ -3512,7 +3512,7 @@ apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +37,Fiscal Year
 DocType: Purchase Invoice,Contact Email,عنوان البريد الإلكتروني
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +104,Purchase Order {0} is 'Stopped',شراء بالدفع {0} ' توقف '
 DocType: Appraisal Goal,Score Earned,نقاط المكتسبة
-apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +388,"e.g. ""My Company LLC""","على سبيل المثال ""شركتي LLC """
+apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +388,"e.g. ""My Company LLC""","على سبيل المثال ""شركتي ذ.م.م. """
 DocType: Bank Reconciliation Detail,Voucher ID,قسيمة ID
 apps/erpnext/erpnext/setup/doctype/territory/territory.js +14,This is a root territory and cannot be edited.,هذا هو الجذر الأرض والتي لا يمكن تحريرها.
 DocType: Packing Slip,Gross Weight UOM,الوزن الإجمالي UOM

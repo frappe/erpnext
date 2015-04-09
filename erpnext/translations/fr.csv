@@ -1607,7 +1607,7 @@ apps/erpnext/erpnext/projects/doctype/time_log/time_log.py +73,From Time cannot 
 DocType: Purchase Receipt,Warehouse where you are maintaining stock of rejected items,Entrepôt où vous êtes maintenant le bilan des éléments rejetés
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +403,Your financial year ends on,Date de fin de la période comptable
 DocType: POS Setting,Price List,Liste des prix
-apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +21,{0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.,matériel
+apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +21,{0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.,{0} est maintenant l'Année Fiscale par défaut. Rafraîchissez la page svp pour que les modifications soient prises en compte.
 DocType: Email Digest,Support,Support
 DocType: Authorization Rule,Approving Role,Approuver rôle
 apps/erpnext/erpnext/controllers/taxes_and_totals.py +98,Please specify a valid Row ID for {0} in row {1},Il s'agit d'un site d'exemple généré automatiquement à partir de ERPNext
@@ -1961,6 +1961,7 @@ DocType: Payment Reconciliation,Bank / Cash Account,Compte en Banque / trésorer
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.js +36,This Leave Application is pending approval. Only the Leave Approver can update status.,Cette application congé est en attente d'approbation. Seul le congé approbateur peut mettre à jour le statut.
 DocType: Global Defaults,Hide Currency Symbol,Masquer le symbole monétaire
 apps/erpnext/erpnext/config/accounts.py +153,"e.g. Bank, Cash, Credit Card","par exemple, bancaire, Carte de crédit"
+apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +314,(Half Day),Demi-journée
 DocType: Journal Entry,Credit Note,Note de crédit
 DocType: Features Setup,Quality,Qualité
 DocType: Contact Us Settings,Introduction,Introduction
@@ -2260,7 +2261,7 @@ DocType: Sales Invoice,Sales Team,Équipe des ventes
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +44,Duplicate entry,dupliquer entrée
 DocType: Serial No,Under Warranty,Sous garantie
 DocType: Production Order,Material Transferred for Qty,Matériel transféré pour Quantité
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +208,[Error],[Error]
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +208,[Error],[Erreur]
 DocType: Sales Order,In Words will be visible once you save the Sales Order.,Dans les mots seront visibles une fois que vous enregistrez le bon de commande.
 ,Employee Birthday,Anniversaire des employés
 DocType: GL Entry,Debit Amt,Débit Amt
@@ -3059,6 +3060,7 @@ DocType: Employee,Reports to,Rapports au
 DocType: SMS Settings,Enter url parameter for receiver nos,Entrez le paramètre url pour nos récepteurs
 DocType: Sales Invoice,Paid Amount,Montant payé
 apps/erpnext/erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py +25,Closing Account {0} must be of type 'Liability',S'il vous plaît sélectionner valide volet n ° de procéder
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +112,Row #,Ligne # 
 ,Available Stock for Packing Items,Disponible en stock pour l&#39;emballage Articles
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +278,Reserved Warehouse is missing in Sales Order,Réservé entrepôt est manquant dans l&#39;ordre des ventes
 DocType: Item Variant,Item Variant,Point Variant
@@ -3447,7 +3449,7 @@ DocType: Journal Entry,Entry Type and Date,Type d'entrée et date
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +60,Item {0} must be a stock Item,Point {0} doit être un stock Article
 apps/erpnext/erpnext/config/accounts.py +101,Default settings for accounting transactions.,Les paramètres par défaut pour les opérations comptables .
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/standard_chart_of_accounts.py +181,Temporary Accounts (Liabilities),"S'il vous plaît sélectionner Point où "" Est Stock Item"" est ""Non"" et "" Est- Point de vente "" est ""Oui"" et il n'y a pas d'autre nomenclature ventes"
-apps/frappe/frappe/email/doctype/email_account/email_account.py +63,{0} is required,{0} ne peut pas être acheté en utilisant Panier
+apps/frappe/frappe/email/doctype/email_account/email_account.py +63,{0} is required,{0} est indispensable
 apps/erpnext/erpnext/hr/doctype/salary_manager/salary_manager.py +190,You can set Default Bank Account in Company master,Articles en attente {0} mise à jour
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +57,Expected Date cannot be before Material Request Date,Date prévu ne peut pas être avant Matériel Date de la demande
 DocType: Contact Us Settings,City,Ville

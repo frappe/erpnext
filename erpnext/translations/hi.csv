@@ -1009,7 +1009,7 @@ DocType: Global Defaults,Current Fiscal Year,चालू वित्त वर
 DocType: Global Defaults,Disable Rounded Total,गोल कुल अक्षम
 DocType: Task,Time and Budget,समय और बजट
 DocType: Lead,Call,कॉल
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +365,'Entries' cannot be empty,' प्रविष्टियां ' खाली नहीं हो सकता
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +365,'Entries' cannot be empty,' प्रविष्टियां ' खाली नहीं हो सकती
 apps/erpnext/erpnext/utilities/transaction_base.py +72,Duplicate row {0} with same {1},डुप्लिकेट पंक्ति {0} के साथ एक ही {1}
 ,Trial Balance,शेष - परीक्षण
 sites/assets/js/erpnext.min.js +2,"Grid ""","ग्रिड """
@@ -2352,14 +2352,14 @@ DocType: Features Setup,Sales Extras,बिक्री अतिरिक्त
 apps/erpnext/erpnext/accounts/utils.py +311,{0} budget for Account {1} against Cost Center {2} will exceed by {3},{0} खाते के लिए बजट {1} लागत केंद्र के खिलाफ {2} {3} से अधिक होगा
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +127,Purchase Order number required for Item {0},क्रय आदेश संख्या मद के लिए आवश्यक {0}
 DocType: Leave Allocation,Carry Forwarded Leaves,कैर्री अग्रेषित पत्तियां
-apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +17,'From Date' must be after 'To Date','तिथि ' से 'तिथि ' करने के बाद होना चाहिए
+apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +17,'From Date' must be after 'To Date','तिथि से' 'तिथि तक' के बाद होना चाहिए
 ,Stock Projected Qty,शेयर मात्रा अनुमानित
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +325,Customer {0} does not belong to project {1},ग्राहक {0} परियोजना से संबंधित नहीं है {1}
 DocType: Warranty Claim,From Company,कंपनी से
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +97,Value or Qty,मूल्य या मात्रा
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +569,Minute,मिनट
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +121,Items required,आवश्यक वस्तुओं
-DocType: Project,% Milestones Completed,% एक ज़रूरी पड़ाव पूरा हुआ
+DocType: Project,% Milestones Completed,% पड़ाव पूरे हुए
 DocType: Purchase Invoice,Purchase Taxes and Charges,खरीद कर और शुल्क
 DocType: Backup Manager,Upload Backups to Dropbox,ड्रॉपबॉक्स के लिए बैकअप अपलोड
 ,Qty to Receive,प्राप्त करने के लिए मात्रा
@@ -3364,7 +3364,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +391,What does it d
 DocType: Delivery Note,To Warehouse,गोदाम के लिए
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +59,Account {0} has been entered more than once for fiscal year {1},खाते {0} अधिक वित्तीय वर्ष के लिए एक बार से अधिक दर्ज किया गया है {1}
 ,Average Commission Rate,औसत कमीशन दर
-apps/erpnext/erpnext/stock/doctype/item/item.py +285,'Has Serial No' can not be 'Yes' for non-stock item,' धारावाहिक नहीं है' गैर स्टॉक आइटम के लिए ' हां ' नहीं हो सकता
+apps/erpnext/erpnext/stock/doctype/item/item.py +285,'Has Serial No' can not be 'Yes' for non-stock item,गैर स्टॉक आइटम के लिए क्रमांक 'हाँ' नहीं हो सकता
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +34,Attendance can not be marked for future dates,उपस्थिति भविष्य तारीखों के लिए चिह्नित नहीं किया जा सकता
 DocType: Pricing Rule,Pricing Rule Help,मूल्य निर्धारण नियम मदद
 DocType: Purchase Taxes and Charges,Account Head,लेखाशीर्ष

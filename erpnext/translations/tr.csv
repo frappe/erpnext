@@ -1078,7 +1078,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +357,Attach Your Pi
 DocType: Journal Entry,Total Amount in Words,Sözlü Toplam Tutar
 DocType: Workflow State,Stop,dur
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +7,There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,Hata oluştu. Bunun sebebi formu kaydetmemeniz olabilir. Sorun devam ederse support@erpnext.com adresi ile iltişime geçiniz
-DocType: Purchase Order,% of materials billed against this Purchase Order.,"Malzeme%, bu Satın Alma Emri karşılığı faturalandı"
+DocType: Purchase Order,% of materials billed against this Purchase Order.,% malzemenin faturası bu Satın Alma Emri karşılığında oluşturuldu
 apps/erpnext/erpnext/controllers/selling_controller.py +156,Order Type must be one of {0},Sipariş türü şunlardan biri olmalıdır {0}
 DocType: Lead,Next Contact Date,Sonraki İrtibat Tarihi
 apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py +33,Opening Qty,Açılış Miktarı
@@ -1219,8 +1219,8 @@ DocType: Company,Registration Info,Kayıt Bilgileri
 DocType: Sales Invoice Advance,Sales Invoice Advance,Satış Fatura Avansı
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +409,Nothing to request,Talep edecek bir şey yok
 DocType: Appraisal,Employee Details,Çalışan Bilgileri
-apps/erpnext/erpnext/projects/doctype/task/task.py +33,'Actual Start Date' can not be greater than 'Actual End Date',"'Fiili Başlangıç ​​Tarihi', 'Gerçek Bitiş Tarihi' den büyük olamaz"
-apps/erpnext/erpnext/projects/doctype/task/task.py +33,'Actual Start Date' can not be greater than 'Actual End Date',"'Fiili Başlangıç ​​Tarihi', 'Gerçek Bitiş Tarihi' den büyük olamaz"
+apps/erpnext/erpnext/projects/doctype/task/task.py +33,'Actual Start Date' can not be greater than 'Actual End Date',"'Fiili Başlangıç ​​Tarihi', 'Fiili Bitiş Tarihi' den büyük olamaz"
+apps/erpnext/erpnext/projects/doctype/task/task.py +33,'Actual Start Date' can not be greater than 'Actual End Date',"'Fiili Başlangıç ​​Tarihi', 'Fiili Bitiş Tarihi' den büyük olamaz"
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +70,Management,Yönetim
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +70,Management,Yönetim
 apps/erpnext/erpnext/config/projects.py +32,Types of activities for Time Sheets,Zaman Cetveli için faaliyet türleri
@@ -2044,7 +2044,7 @@ DocType: Salary Slip,Deduction,Kesinti
 DocType: Salary Slip,Deduction,Kesinti
 DocType: Address Template,Address Template,Adres Şablonu
 DocType: Territory,Classification of Customers by region,Bölgelere göre Müşteriler sınıflandırılması
-DocType: Project,% Tasks Completed,% Görevler Tamamlandı
+DocType: Project,% Tasks Completed,% Görev Tamamlandı
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +131,Please enter Production Item first,Önce Üretim Ürününü giriniz
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +76,disabled user,Engelli kullanıcı
 DocType: Opportunity,Quotation,Fiyat Teklifi
@@ -2459,6 +2459,7 @@ DocType: Payment Reconciliation,Bank / Cash Account,Banka / Kasa Hesabı
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.js +36,This Leave Application is pending approval. Only the Leave Approver can update status.,Bu bırak Uygulama onay bekliyor. Sadece bırak Approver durumunu güncelleyebilirsiniz.
 DocType: Global Defaults,Hide Currency Symbol,Para birimi simgesini gizle
 apps/erpnext/erpnext/config/accounts.py +153,"e.g. Bank, Cash, Credit Card","Örneğin: Banka, Nakit, Kredi Kartı"
+apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +314,(Half Day),(Yarım Gün)
 DocType: Journal Entry,Credit Note,Kredi mektubu
 DocType: Journal Entry,Credit Note,Kredi mektubu
 DocType: Features Setup,Quality,Kalite
@@ -2860,7 +2861,7 @@ DocType: Expense Claim,"A user with ""Expense Approver"" role","""Gider Approver
 DocType: Pricing Rule,Purchase Manager,Satınalma Yöneticisi
 DocType: Payment Tool,Payment Tool,Ödeme Aracı
 DocType: Target Detail,Target Detail,Hedef Detayı
-DocType: Sales Order,% of materials billed against this Sales Order,"Malzeme%, bu Satış Emri karşılığı faturalandı"
+DocType: Sales Order,% of materials billed against this Sales Order,% malzemenin faturası bu Satış Emri karşılığında oluşturuldu
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +50,Period Closing Entry,Dönem Kapanış Girişi
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +39,Cost Center with existing transactions can not be converted to group,Maliyet Merkezi mevcut işlemlere gruba dönüştürülemez
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/standard_chart_of_accounts.py +87,Depreciation,Amortisman
@@ -3818,7 +3819,7 @@ DocType: Page,Page Name,Sayfa Adı
 DocType: Purchase Invoice,Exchange Rate,Döviz Kuru
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +427,Sales Order {0} is not submitted,Satış Sipariş {0} teslim edilmedi
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +74,Warehouse {0}: Parent account {1} does not bolong to the company {2},Depo {0}: Ana hesap {1} Şirket {2} ye ait değildir
-DocType: Material Request,% of materials ordered against this Material Request,"Malzemelerin%, bu Malzeme Talebi karşılığı sipariş edildi"
+DocType: Material Request,% of materials ordered against this Material Request,% malzeme bu Malzeme Talebi karşılığında sipariş edildi
 DocType: BOM,Last Purchase Rate,Son Satış Fiyatı
 DocType: Account,Asset,Varlık
 DocType: Account,Asset,Varlık
@@ -3831,7 +3832,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +104,Warehouse {0} doe
 apps/erpnext/erpnext/hub_node/page/hub/register_in_hub.html +2,Register For ERPNext Hub,ERPNext Hub için Kayıt
 DocType: Monthly Distribution,Monthly Distribution Percentages,Aylık Dağılımı Yüzdeler
 apps/erpnext/erpnext/stock/doctype/batch/batch.py +16,The selected item cannot have Batch,Seçilen öğe Toplu olamaz
-DocType: Delivery Note,% of materials delivered against this Delivery Note,"Malzemelerin%, bu İrsaliye karşılığı teslim edildi"
+DocType: Delivery Note,% of materials delivered against this Delivery Note,% malzeme bu İrsaliye karşılığında teslim edildi
 DocType: Project,Customer Details,Müşteri Detayları
 DocType: Project,Customer Details,Müşteri Detayları
 DocType: Employee,Reports to,Raporlar
@@ -4135,7 +4136,7 @@ apps/erpnext/erpnext/stock/doctype/stock_uom_replace_utility/stock_uom_replace_u
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.js +16,To date cannot be before from date,Tarihine kadar kısmı tarihinden itibaren kısmından önce olamaz
 DocType: Purchase Receipt Item,Prevdoc DocType,Prevdoc Doctype
 DocType: Purchase Receipt Item,Prevdoc DocType,Prevdoc DocType
-apps/erpnext/erpnext/stock/doctype/item/item.js +96,Add / Edit Prices,/ Düzenle Fiyatları ekle
+apps/erpnext/erpnext/stock/doctype/item/item.js +96,Add / Edit Prices,Fiyatları Ekle / Düzenle
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +54,Chart of Cost Centers,Maliyet Merkezlerinin Grafikleri
 ,Requested Items To Be Ordered,Sipariş edilmesi istenen Ürünler
 DocType: Price List,Price List Name,Fiyat Listesi Adı
@@ -4346,7 +4347,7 @@ DocType: Sales Partner,Partner Type,Ortak Türü
 DocType: Sales Partner,Partner Type,Ortak Türü
 DocType: Purchase Taxes and Charges,Actual,Gerçek
 DocType: Purchase Taxes and Charges,Actual,Gerçek
-DocType: Purchase Order,% of materials received against this Purchase Order,"Malzemelerin%, bu Satın Alma Emri karşılığı teslim alındı"
+DocType: Purchase Order,% of materials received against this Purchase Order,% malzeme bu Satın Alma Emri karşılığında teslim alındı
 DocType: Authorization Rule,Customerwise Discount,Müşteri İndirimi
 DocType: Purchase Invoice,Against Expense Account,Gider Hesabı Karşılığı
 DocType: Production Order,Production Order,Üretim Siparişi
@@ -4569,7 +4570,7 @@ DocType: Purchase Invoice,Net Total (Company Currency),Net Toplam (Şirket par
 DocType: Notification Control,Purchase Receipt Message,Satın alma makbuzu mesajı
 DocType: Production Order,Actual Start Date,Fiili Başlangıç ​​Tarihi
 DocType: Production Order,Actual Start Date,Fiili Başlangıç ​​Tarihi
-DocType: Sales Order,% of materials delivered against this Sales Order,"Malzemelerin%, bu Satış Emri karşılığı teslim edildi"
+DocType: Sales Order,% of materials delivered against this Sales Order,% malzeme bu Satış Emri karşılığında teslim edildi
 apps/erpnext/erpnext/config/stock.py +17,Record item movement.,Tutanak madde hareketi.
 apps/erpnext/erpnext/config/stock.py +17,Record item movement.,Tutanak madde hareketi.
 DocType: Email Account,Service,Servis

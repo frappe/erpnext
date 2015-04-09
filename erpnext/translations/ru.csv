@@ -333,7 +333,7 @@ apps/erpnext/erpnext/templates/includes/footer_extension.html +6,Your email addr
 DocType: Email Digest,Income booked for the digest period,Доход заказали за период дайджест
 apps/erpnext/erpnext/config/setup.py +105,Supplier master.,Мастер Поставщик.
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +191,Please see attachment,"Пожалуйста, см. приложение"
-DocType: Purchase Order,% Received,% В редакцию
+DocType: Purchase Order,% Received,% Получено
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.py +23,Setup Already Complete!!,Настройка Уже завершена!!
 ,Finished Goods,Готовая продукция
 DocType: Delivery Note,Instructions,Инструкции
@@ -1444,7 +1444,7 @@ DocType: Quality Inspection Reading,Rejected,Отклоненные
 DocType: Pricing Rule,Brand,Бренд
 DocType: Global Defaults,For Server Side Print Formats,Для стороне сервера форматов печати
 DocType: Item,Will also apply for variants,Будет также применяться для вариантов
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +655,% Delivered,% При поставке
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +655,% Delivered,% Доставлен
 apps/erpnext/erpnext/config/selling.py +157,Bundle items at time of sale.,Bundle детали на момент продажи.
 DocType: Sales Order Item,Actual Qty,Фактический Кол-во
 DocType: Quality Inspection Reading,Reading 10,Чтение 10
@@ -1621,7 +1621,7 @@ apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py
 DocType: Salary Slip,Deduction,Вычет
 DocType: Address Template,Address Template,Шаблон адреса
 DocType: Territory,Classification of Customers by region,Классификация клиентов по регионам
-DocType: Project,% Tasks Completed,"% Задачи, решаемые"
+DocType: Project,% Tasks Completed,% Задачи решены
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +131,Please enter Production Item first,"Пожалуйста, введите выпуска изделия сначала"
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +76,disabled user,отключенный пользователь
 DocType: Opportunity,Quotation,Расценки
@@ -2371,7 +2371,7 @@ apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +130,A
 apps/erpnext/erpnext/stock/doctype/item/item.py +33,Item Code is mandatory because Item is not automatically numbered,"Код товара является обязательным, поскольку Деталь не автоматически нумеруются"
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +60,Quotation {0} not of type {1},Цитата {0} не типа {1}
 DocType: Maintenance Schedule Item,Maintenance Schedule Item,График обслуживания позиции
-DocType: Sales Order,%  Delivered,% При поставке
+DocType: Sales Order,%  Delivered,% Доставлен
 DocType: Quality Inspection,Specification Details,Подробности спецификации
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/standard_chart_of_accounts.py +178,Bank Overdraft Account,Банк овердрафтовый счет
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +15,Make Salary Slip,Сделать Зарплата Слип
