@@ -242,7 +242,7 @@
   }, 
   {
    "default": "0", 
-   "description": "will be updated only if Time Log is 'Billable'", 
+   "description": "Will be updated only if Time Log is 'Billable'", 
    "fieldname": "billing_amount", 
    "fieldtype": "Currency", 
    "label": "Billing Amount", 
@@ -297,7 +297,11 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
+<<<<<<< HEAD
  "modified": "2015-04-06 02:47:16.187046", 
+=======
+ "modified": "2015-04-09 08:29:34.464429", 
+>>>>>>> Fixes in time_log
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 

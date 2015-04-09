@@ -80,11 +80,11 @@ frappe.ui.form.on("Time Log", "employee", function(frm) {
 	get_activity_cost(frm);
 });
 
-cur_frm.cscript.billable = function(doc) {
-	if (doc.billable==1) {
-		calculate_cost(doc);
+frappe.ui.form.on("Time Log", "billable", function(frm) {
+	if (frm.doc.billable==1) {
+		calculate_cost(frm.doc);
 	}
 	else {
-		cur_frm.set_value("billing_amount", 0);
+		frm.doc("billing_amount", 0);
 	}
-}
+});

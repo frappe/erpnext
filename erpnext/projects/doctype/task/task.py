@@ -49,6 +49,17 @@ class Task(Document):
 		self.total_expense_claim = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim` 
 			where project = %s and task = %s and approval_status = "Approved" and docstatus=1""",(self.project, self.name))
 			
+	def update_actual_time_and_costing(self):
+		tl = frappe.db.sql("""select min(from_time) as start_date, max(to_time) as 
+			end_date, sum(billing_amount) as cost, sum(hours) as time from `tabTime Log` where 
+			project = %s and task = %s and docstatus=1""",(self.project, self.name),as_dict=1)[0]
+		if self.status == "Open":
+			self.status = "Working"
+		self.actual_cost= tl.cost
+		self.actual_time= tl.time
+		self.act_start_date= tl.start_date
+		self.act_end_date= tl.end_date
+			
 	def update_project(self):
 		if self.project:
 			total_activity_cost = frappe.db.sql("""select sum(actual_cost) from `tabTask` 

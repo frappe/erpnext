@@ -85,7 +85,7 @@ class TestTimeLog(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, test_time_log.save)
 		frappe.db.sql("delete from `tabTime Log`")
 		
-	def test_time_log_costing(self):
+	def test_total_activity_cost_for_project(self):
 		frappe.db.sql("delete from `tabTask`")
 		frappe.db.sql("delete from `tabProject`")
 		

@@ -217,29 +217,22 @@ class TimeLog(Document):
 	
 	def validate_cost(self):
 		rate = get_activity_cost(self.employee, self.activity_type)
-		self.costing_rate = rate.get('costing_rate') or 0
-		self.billing_rate = rate.get('billing_rate') or 0 
-		self.costing_amount = self.costing_rate * self.hours
-		if self.billable:
-			self.billing_amount = self.billing_rate * self.hours
-		else:
-			self.billing_amount = 0
+		if rate:
+			self.costing_rate = rate.get('costing_rate')
+			self.billing_rate = rate.get('billing_rate') 
+			self.costing_amount = self.costing_rate * self.hours
+			if self.billable:
+				self.billing_amount = self.billing_rate * self.hours
+			else:
+				self.billing_amount = 0
 				
 	def validate_task(self):
 		if self.project and not self.task:
 			frappe.throw(_("Task is Mandatory if Time Log is against a project"))
 	
 	def update_task(self):
-		tl = frappe.db.sql("""select min(from_time) as start_date, max(to_time) as end_date, sum(billing_amount) as cost, sum(hours) as time 
-			from `tabTime Log` where project = %s and task = %s and docstatus=1""",(self.project, self.task),as_dict=1)[0]
-			
 		task = frappe.get_doc("Task", self.task)
-		if task.status == "Open":
-			task.status = "Working"
-		task.actual_cost= tl.cost
-		task.actual_time= tl.time
-		task.act_start_date= tl.start_date
-		task.act_end_date= tl.end_date
+		task.update_actual_time_and_costing()
 		task.save()
 
 @frappe.whitelist()
@@ -281,7 +274,7 @@ def get_events(start, end, filters=None):
 	
 @frappe.whitelist()
 def get_activity_cost(employee=None, activity_type=None):
-	costing_rate = frappe.db.get_value("Activity Cost", {"employee":employee,"activity_type":activity_type}, "costing_rate")
-	billing_rate = frappe.db.get_value("Activity Cost", {"employee":employee,"activity_type":activity_type}, "billing_rate")
-	return {"costing_rate": costing_rate, "billing_rate": billing_rate }
-
+	rate = frappe.db.sql("""select costing_rate, billing_rate from `tabActivity Cost` where employee= %s
+		and activity_type= %s""", (employee, activity_type), as_dict=1)
+	if rate:
+		return {"costing_rate": rate[0].costing_rate, "billing_rate": rate[0].billing_rate }
