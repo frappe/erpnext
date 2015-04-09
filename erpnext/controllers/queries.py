@@ -264,7 +264,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 			where item = %(item_code)s
 			and name like %(txt)s
 			and docstatus < 2
-			and (ifnull(batch.expiry_date, '')='' or batch.expiry_date >= %(posting_date)s)
+			and (ifnull(expiry_date, '')='' or expiry_date >= %(posting_date)s)
 			{match_conditions}
 			order by expiry_date, name desc
 			limit %(start)s, %(page_len)s""".format(match_conditions=get_match_cond(doctype)), args)
