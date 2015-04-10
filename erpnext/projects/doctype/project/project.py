@@ -35,17 +35,12 @@ class Project(Document):
 
 	def validate(self):
 		self.validate_dates()
-		self.validate_tasks()
 		self.sync_tasks()
 
 	def validate_dates(self):
 		if self.project_start_date and self.completion_date:
 			if getdate(self.completion_date) < getdate(self.project_start_date):
 				frappe.throw(_("Expected Completion Date can not be less than Project Start Date"))
-				
-	def validate_tasks(self):
-		if not self.tasks:
-			frappe.throw("Task is mandatory against a project")
 
 	def sync_tasks(self):
 		"""sync tasks and remove table"""
@@ -74,8 +69,6 @@ class Project(Document):
 		for t in frappe.get_all("Task", ["name"], {"project": self.name, "name": ("not in", task_names)}):
 			frappe.delete_doc("Task", t.name)
 
-		self.tasks = []
-
 	def update_percent_complete(self):
 		total = frappe.db.sql("""select count(*) from tabTask where project=%s""",
 			self.name)[0][0]
@@ -84,7 +77,6 @@ class Project(Document):
 				project=%s and status in ('Closed', 'Cancelled')""", self.name)[0][0]
 			frappe.db.set_value("Project", self.name, "percent_complete",
 			 	int(float(completed) / total * 100))
-
 
 @frappe.whitelist()
 def get_cost_center_name(project_name):

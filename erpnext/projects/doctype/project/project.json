@@ -131,7 +131,7 @@
    "options": "Project Task", 
    "permlevel": 0, 
    "precision": "", 
-   "reqd": 0
+   "reqd": 1
   }, 
   {
    "fieldname": "percent_complete", 
@@ -279,7 +279,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2015-03-31 06:12:03.372091", 
+ "modified": "2015-04-10 05:11:18.849171", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 

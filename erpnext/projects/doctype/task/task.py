@@ -61,14 +61,11 @@ class Task(Document):
 		self.act_end_date= tl.end_date
 			
 	def update_project(self):
-		if self.project:
-			total_activity_cost = frappe.db.sql("""select sum(actual_cost) from `tabTask` 
-				where project = %s""",self.project)
-			frappe.db.set_value("Project", self.project, "total_activity_cost", total_activity_cost)
-	
-			total_expense_claim = frappe.db.sql("""select sum(total_expense_claim) from `tabTask` 
-				where project = %s""",self.project)
-			frappe.db.set_value("Project", self.project, "total_expense_claim", total_expense_claim)
+		if self.project and frappe.db.exists("Project", self.project):
+			total_cost = frappe.db.sql("""select sum(actual_cost) as actual_cost, sum(total_expense_claim) as expense_claim
+				from `tabTask` where project = %s""", self.project, as_dict=1)[0]
+			frappe.db.set_value("Project", self.project, "total_activity_cost", total_cost.actual_cost)
+			frappe.db.set_value("Project", self.project, "total_expense_claim", total_cost.expense_claim)
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
