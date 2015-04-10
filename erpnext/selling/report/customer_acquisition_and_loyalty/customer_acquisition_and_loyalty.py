@@ -22,7 +22,7 @@ def execute(filters=None):
 		{company_condition} order by posting_date""".format(company_condition=company_condition),
 		filters, as_dict=1):
 
-		key = si.posting_date.strftime("%Y-%m-%d")
+		key = si.posting_date.strftime("%Y-%m")
 		if not si.customer in customers:
 			new_customers_in.setdefault(key, [0, 0.0])
 			new_customers_in[key][0] += 1
