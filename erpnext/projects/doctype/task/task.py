@@ -49,23 +49,33 @@ class Task(Document):
 		self.total_expense_claim = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim` 
 			where project = %s and task = %s and approval_status = "Approved" and docstatus=1""",(self.project, self.name))
 			
-	def update_actual_time_and_costing(self):
-		tl = frappe.db.sql("""select min(from_time) as start_date, max(to_time) as 
-			end_date, sum(billing_amount) as cost, sum(hours) as time from `tabTime Log` where 
-			project = %s and task = %s and docstatus=1""",(self.project, self.name),as_dict=1)[0]
+	def update_time_and_costing(self):
+		tl = frappe.db.sql("""select min(from_time) as start_date, max(to_time) as end_date,
+			 sum(billing_amount) as total_billing_amount, sum(costing_amount) as total_costing_amount,
+			sum(hours) as time from `tabTime Log` where project = %s and task = %s and docstatus=1""",
+			(self.project, self.name),as_dict=1)[0]
 		if self.status == "Open":
 			self.status = "Working"
-		self.actual_cost= tl.cost
+		self.total_costing_amount= tl.total_costing_amount
+		self.total_billing_amount= tl.total_billing_amount
 		self.actual_time= tl.time
 		self.act_start_date= tl.start_date
 		self.act_end_date= tl.end_date
 			
 	def update_project(self):
 		if self.project and frappe.db.exists("Project", self.project):
-			total_cost = frappe.db.sql("""select sum(actual_cost) as actual_cost, sum(total_expense_claim) as expense_claim
+			total_cost = frappe.db.sql("""select sum(total_costing_amount) as costing_amount,
+				sum(total_billing_amount) as billing_amount, sum(total_expense_claim) as expense_claim,
+				min(act_start_date) as start_date, max(act_end_date) as end_date, sum(actual_time) as time
 				from `tabTask` where project = %s""", self.project, as_dict=1)[0]
-			frappe.db.set_value("Project", self.project, "total_activity_cost", total_cost.actual_cost)
-			frappe.db.set_value("Project", self.project, "total_expense_claim", total_cost.expense_claim)
+			frappe.db.set_values("Project", self.project, {
+				"total_costing_amount": total_cost.costing_amount,
+				"total_billing_amount": total_cost.billing_amount,
+				"total_expense_claim": total_cost.expense_claim,
+				"actual_start_date": total_cost.start_date,
+				"actual_end_date": total_cost.end_date,
+				"actual_time": total_cost.time
+				})
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

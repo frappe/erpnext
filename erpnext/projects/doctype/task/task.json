@@ -149,6 +149,17 @@
    "read_only": 1
   }, 
   {
+   "default": "", 
+   "description": "in Hours", 
+   "fieldname": "actual_time", 
+   "fieldtype": "Float", 
+   "label": "Actual Time", 
+   "options": "", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "column_break_15", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -170,26 +181,9 @@
    "precision": ""
   }, 
   {
-   "default": "0", 
-   "description": "in Hours", 
-   "fieldname": "actual_time", 
-   "fieldtype": "Float", 
-   "label": "Actual Time", 
-   "options": "", 
-   "permlevel": 0, 
-   "precision": "", 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "column_break_20", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0, 
-   "precision": ""
-  }, 
-  {
-   "fieldname": "actual_cost", 
+   "fieldname": "total_costing_amount", 
    "fieldtype": "Currency", 
-   "label": "Actual Cost", 
+   "label": "Total Costing Amount", 
    "oldfieldname": "actual_budget", 
    "oldfieldtype": "Currency", 
    "options": "Company:company:default_currency", 
@@ -201,6 +195,21 @@
    "fieldtype": "Currency", 
    "label": "Total Expense Claim", 
    "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_20", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "total_billing_amount", 
+   "fieldtype": "Currency", 
+   "hidden": 0, 
+   "label": "Total Billing Amount", 
    "permlevel": 0, 
    "precision": "", 
    "read_only": 1
@@ -248,7 +257,7 @@
  "idx": 1, 
  "istable": 0, 
  "max_attachments": 5, 
- "modified": "2015-03-31 03:31:13.055284", 
+ "modified": "2015-04-13 05:36:33.544083", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Task", 

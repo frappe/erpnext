@@ -17,19 +17,32 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "column_break_2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "status", 
+   "fieldtype": "Select", 
+   "in_list_view": 0, 
+   "label": "Status", 
+   "options": "Draft\nSubmitted\nBatched for Billing\nBilled\nCancelled", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "section_break_4", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "from_time", 
    "fieldtype": "Datetime", 
    "in_list_view": 0, 
    "label": "From Time", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 1
-  }, 
-  {
-   "fieldname": "to_time", 
-   "fieldtype": "Datetime", 
-   "in_list_view": 0, 
-   "label": "To Time", 
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 1
@@ -44,52 +57,19 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "user", 
-   "fieldtype": "Link", 
-   "label": "User", 
-   "options": "User", 
+   "fieldname": "to_time", 
+   "fieldtype": "Datetime", 
+   "in_list_view": 0, 
+   "label": "To Time", 
    "permlevel": 0, 
-   "precision": ""
+   "read_only": 0, 
+   "reqd": 1
   }, 
   {
-   "fieldname": "employee", 
-   "fieldtype": "Link", 
-   "label": "Employee", 
-   "options": "Employee", 
-   "permlevel": 0, 
-   "precision": ""
-  }, 
-  {
-   "fieldname": "column_break_3", 
+   "fieldname": "column_break_8", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "fieldname": "status", 
-   "fieldtype": "Select", 
-   "in_list_view": 0, 
-   "label": "Status", 
-   "options": "Draft\nSubmitted\nBatched for Billing\nBilled\nCancelled", 
-   "permlevel": 0, 
-   "read_only": 1, 
-   "reqd": 0
-  }, 
-  {
-   "fieldname": "billable", 
-   "fieldtype": "Check", 
-   "in_list_view": 0, 
-   "label": "Billable", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "fieldname": "for_manufacturing", 
-   "fieldtype": "Check", 
-   "label": "For Manufacturing", 
-   "permlevel": 0, 
-   "precision": "", 
-   "read_only": 1
+   "precision": ""
   }, 
   {
    "depends_on": "", 
@@ -120,6 +100,51 @@
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 0
+  }, 
+  {
+   "fieldname": "section_break_12", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "user", 
+   "fieldtype": "Link", 
+   "label": "User", 
+   "options": "User", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "employee", 
+   "fieldtype": "Link", 
+   "label": "Employee", 
+   "options": "Employee", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "column_break_3", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "fieldname": "for_manufacturing", 
+   "fieldtype": "Check", 
+   "hidden": 1, 
+   "label": "For Manufacturing", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "billable", 
+   "fieldtype": "Check", 
+   "in_list_view": 0, 
+   "label": "Billable", 
+   "permlevel": 0, 
+   "read_only": 0
   }, 
   {
    "depends_on": "eval:doc.for_manufacturing", 
@@ -298,10 +323,14 @@
  "idx": 1, 
  "is_submittable": 1, 
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2015-04-06 02:47:16.187046", 
 =======
  "modified": "2015-04-09 08:29:34.464429", 
 >>>>>>> Fixes in time_log
+=======
+ "modified": "2015-04-13 04:31:20.855439", 
+>>>>>>> task and project- billing amount and actual amount added
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 

@@ -232,7 +232,7 @@ class TimeLog(Document):
 	
 	def update_task(self):
 		task = frappe.get_doc("Task", self.task)
-		task.update_actual_time_and_costing()
+		task.update_time_and_costing()
 		task.save()
 
 @frappe.whitelist()

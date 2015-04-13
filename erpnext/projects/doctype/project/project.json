@@ -15,12 +15,6 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "cb_project_status", 
-   "fieldtype": "Column Break", 
-   "label": "Status", 
-   "permlevel": 0
-  }, 
-  {
    "description": "", 
    "fieldname": "project_name", 
    "fieldtype": "Data", 
@@ -46,6 +40,23 @@
    "search_index": 1
   }, 
   {
+   "fieldname": "project_type", 
+   "fieldtype": "Select", 
+   "label": "Project Type", 
+   "no_copy": 0, 
+   "oldfieldname": "project_type", 
+   "oldfieldtype": "Data", 
+   "options": "Internal\nExternal\nOther", 
+   "permlevel": 0, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "column_break_5", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "is_active", 
    "fieldtype": "Select", 
    "label": "Is Active", 
@@ -69,16 +80,16 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "cb_project_dates", 
-   "fieldtype": "Column Break", 
-   "label": "Dates", 
-   "permlevel": 0
+   "fieldname": "section_break_12", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
-   "fieldname": "project_start_date", 
+   "fieldname": "expected_start_date", 
    "fieldtype": "Date", 
    "in_filter": 1, 
-   "label": "Project Start Date", 
+   "label": "Expected Start Date", 
    "no_copy": 0, 
    "oldfieldname": "project_start_date", 
    "oldfieldtype": "Date", 
@@ -86,33 +97,18 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "completion_date", 
+   "fieldname": "column_break_11", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "expected_end_date", 
    "fieldtype": "Date", 
-   "label": "Completion Date", 
+   "label": "Expected End Date", 
    "no_copy": 0, 
    "oldfieldname": "completion_date", 
    "oldfieldtype": "Date", 
-   "permlevel": 0, 
-   "search_index": 0
-  }, 
-  {
-   "fieldname": "act_completion_date", 
-   "fieldtype": "Date", 
-   "label": "Actual Completion Date", 
-   "no_copy": 0, 
-   "oldfieldname": "act_completion_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0, 
-   "search_index": 0
-  }, 
-  {
-   "fieldname": "project_type", 
-   "fieldtype": "Select", 
-   "label": "Project Type", 
-   "no_copy": 0, 
-   "oldfieldname": "project_type", 
-   "oldfieldtype": "Data", 
-   "options": "Internal\nExternal\nOther", 
    "permlevel": 0, 
    "search_index": 0
   }, 
@@ -131,7 +127,7 @@
    "options": "Project Task", 
    "permlevel": 0, 
    "precision": "", 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
    "fieldname": "percent_complete", 
@@ -167,6 +163,45 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "section_break_18", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "actual_start_date", 
+   "fieldtype": "Data", 
+   "label": "Actual Start Date", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "actual_time", 
+   "fieldtype": "Float", 
+   "label": "Actual Time", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_20", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "actual_end_date", 
+   "fieldtype": "Date", 
+   "label": "Actual End Date", 
+   "no_copy": 0, 
+   "oldfieldname": "act_completion_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "search_index": 0
+  }, 
+  {
    "fieldname": "project_details", 
    "fieldtype": "Section Break", 
    "label": "Project Costing", 
@@ -188,20 +223,9 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "est_material_cost", 
+   "fieldname": "total_costing_amount", 
    "fieldtype": "Currency", 
-   "label": "Estimated Material Cost", 
-   "no_copy": 0, 
-   "oldfieldname": "est_material_cost", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "search_index": 0
-  }, 
-  {
-   "fieldname": "total_activity_cost", 
-   "fieldtype": "Currency", 
-   "label": "Total Activity Cost", 
+   "label": "Total Costing Amount", 
    "permlevel": 0, 
    "precision": "", 
    "read_only": 1
@@ -215,6 +239,31 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "column_break_22", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "est_material_cost", 
+   "fieldtype": "Currency", 
+   "label": "Estimated Material Cost", 
+   "no_copy": 0, 
+   "oldfieldname": "est_material_cost", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "total_billing_amount", 
+   "fieldtype": "Currency", 
+   "label": "Total Billing Amount", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "cost_center", 
    "fieldtype": "Link", 
    "label": "Default Cost Center", 
@@ -222,8 +271,8 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "column_break0", 
-   "fieldtype": "Column Break", 
+   "fieldname": "margin", 
+   "fieldtype": "Section Break", 
    "label": "Margin", 
    "oldfieldtype": "Column Break", 
    "permlevel": 0, 
@@ -240,6 +289,12 @@
    "permlevel": 0, 
    "reqd": 0, 
    "search_index": 0
+  }, 
+  {
+   "fieldname": "column_break_28", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "per_gross_margin", 
@@ -279,7 +334,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2015-04-10 05:11:18.849171", 
+ "modified": "2015-04-13 07:13:06.962942", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 
