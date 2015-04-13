@@ -179,6 +179,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Gross Profit",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
 					"name": "Accounts Receivable",
 					"doctype": "Sales Invoice",
 					"is_query_report": True
@@ -218,13 +224,7 @@ def get_data():
 					"name": "financial-analytics",
 					"label": _("Financial Analytics"),
 					"icon": "icon-bar-chart",
-				},
-				{
-					"type": "report",
-					"name": "Gross Profit",
-					"doctype": "Sales Invoice",
-					"is_query_report": True
-				},
+				}
 			]
 		},
 		{

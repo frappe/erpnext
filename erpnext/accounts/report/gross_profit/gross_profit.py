@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
-from frappe.utils import flt, cstr, cint
+from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -82,6 +82,7 @@ def get_columns(group_wise_columns, filters):
 class GrossProfitGenerator(object):
 	def __init__(self, filters=None):
 		self.data = []
+		self.average_buying_rate = {}
 		self.filters = frappe._dict(filters)
 		self.load_invoice_items()
 		self.load_stock_ledger_entries()
@@ -95,7 +96,7 @@ class GrossProfitGenerator(object):
 			if self.skip_row(row, self.sales_boms):
 				continue
 
-			row.selling_amount = flt(row.base_net_amount)
+			row.base_amount = flt(row.base_net_amount)
 
 			sales_boms = self.sales_boms.get(row.parenttype, {}).get(row.name, frappe._dict())
 
@@ -107,14 +108,15 @@ class GrossProfitGenerator(object):
 
 			# get buying rate
 			if row.qty:
-				row.buying_rate = (row.buying_amount / row.qty) * 100.0
+				row.buying_rate = row.buying_amount / row.qty
+				row.base_rate = row.base_amount / row.qty
 			else:
-				row.buying_rate = 0.0
+				row.buying_rate, row.base_rate = 0.0, 0.0
 
 			# calculate gross profit
-			row.gross_profit = row.selling_amount - row.buying_amount
-			if row.selling_amount:
-				row.gross_profit_percent = (row.gross_profit / row.selling_amount) * 100.0
+			row.gross_profit = row.base_amount - row.buying_amount
+			if row.base_amount:
+				row.gross_profit_percent = (row.gross_profit / row.base_amount) * 100.0
 			else:
 				row.gross_profit_percent = 0.0
 
@@ -139,26 +141,19 @@ class GrossProfitGenerator(object):
 				else:
 					new_row.qty += row.qty
 					new_row.buying_amount += row.buying_amount
-					new_row.selling_amount += row.selling_amount
+					new_row.base_amount += row.base_amount
 					# new_row.allocated_amount += (row.allocated_amount or 0) if new_row.allocated_amount else 0
 
-			new_row.gross_profit = new_row.selling_amount - new_row.buying_amount
-			new_row.gross_profit_percent = ((new_row.gross_profit / new_row.selling_amount) * 100.0) \
-				if new_row.selling_amount else 0
-			new_row.buying_rate = ((new_row.buying_amount / new_row.qty) * 100.0) \
+			new_row.gross_profit = new_row.base_amount - new_row.buying_amount
+			new_row.gross_profit_percent = ((new_row.gross_profit / new_row.base_amount) * 100.0) \
+				if new_row.base_amount else 0
+			new_row.buying_rate = (new_row.buying_amount / new_row.qty) \
 				if new_row.qty else 0
 
 			self.grouped_data.append(new_row)
 
 	def skip_row(self, row, sales_boms):
-		if cint(row.update_stock) == 0 and not row.dn_detail:
-			if row.item_code not in self.non_stock_items:
-				return True
-			elif row.item_code in sales_boms:
-				for child_item in sales_boms[row.item_code]:
-					if child_item not in self.non_stock_items:
-						return True
-		elif self.filters.get("group_by") != "Invoice" and not row.get(scrub(self.filters.get("group_by"))):
+		if self.filters.get("group_by") != "Invoice" and not row.get(scrub(self.filters.get("group_by"))):
 			return True
 
 	def get_buying_amount_from_sales_bom(self, row, sales_bom):
@@ -175,27 +170,41 @@ class GrossProfitGenerator(object):
 		# sorted by posting_date desc, posting_time desc
 		if item_code in self.non_stock_items:
 			# average purchasing rate for non-stock items
-			item_rate = frappe.db.sql("""select sum(base_net_amount) / sum(qty)
-				from `tabPurchase Invoice Item`
-				where item_code = %s and docstatus=1""", item_code)
-
-			return flt(row.qty) * (flt(item_rate[0][0]) if item_rate else 0)
+			item_rate = self.get_average_buying_rate(item_code)
+			return flt(row.qty) * item_rate
 
 		else:
 			if row.dn_detail:
 				row.parenttype = "Delivery Note"
 				row.parent = row.delivery_note
 				row.name = row.dn_detail
-			my_sle = self.sle.get((item_code, row.warehouse))
-			for i, sle in enumerate(my_sle):
-				# find the stock valution rate from stock ledger entry
-				if sle.voucher_type == row.parenttype and row.parent == sle.voucher_no and \
-					sle.voucher_detail_no == row.name:
-						previous_stock_value = len(my_sle) > i+1 and \
-							flt(my_sle[i+1].stock_value) or 0.0
-						return  previous_stock_value - flt(sle.stock_value)
+
+				my_sle = self.sle.get((item_code, row.warehouse))
+				for i, sle in enumerate(my_sle):
+					# find the stock valution rate from stock ledger entry
+					if sle.voucher_type == row.parenttype and row.parent == sle.voucher_no and \
+						sle.voucher_detail_no == row.name:
+							previous_stock_value = len(my_sle) > i+1 and \
+								flt(my_sle[i+1].stock_value) or 0.0
+							return  previous_stock_value - flt(sle.stock_value)
+			else:
+				return flt(row.qty) * self.get_average_buying_rate(item_code)
+
 
 		return 0.0
+
+	def get_average_buying_rate(self, item_code):
+		if not item_code in self.average_buying_rate:
+			if item_code in self.non_stock_items:
+				self.average_buying_rate[item_code] = flt(frappe.db.sql("""select sum(base_net_amount) / sum(qty)
+					from `tabPurchase Invoice Item`
+					where item_code = %s and docstatus=1""", item_code)[0][0])
+			else:
+				self.average_buying_rate[item_code] = flt(frappe.db.sql("""select avg(valuation_rate)
+					from `tabStock Ledger Entry`
+					where item_code = %s and ifnull(qty_after_transaction,0) > 0""", item_code)[0][0])
+
+		return self.average_buying_rate[item_code]
 
 	def load_invoice_items(self):
 		conditions = ""
