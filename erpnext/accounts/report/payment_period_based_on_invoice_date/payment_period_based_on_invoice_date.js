@@ -29,7 +29,7 @@ frappe.query_reports["Payment Period Based On Invoice Date"] = {
 			options: "Account",
 			get_query: function() {
 				return {
-					query: "erpnext.controllers.queries.get_account_list", 
+					query: "erpnext.controllers.queries.get_account_list",
 					filters: {
 						"report_type": "Balance Sheet",
 						company: frappe.query_report.filters_by_name.company.get_value()
@@ -42,6 +42,7 @@ frappe.query_reports["Payment Period Based On Invoice Date"] = {
 			label: __("Company"),
 			fieldtype: "Link",
 			options: "Company",
+			reqd: 1,
 			default: frappe.defaults.get_user_default("company")
 		},
 	]
