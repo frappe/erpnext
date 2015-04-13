@@ -111,7 +111,7 @@
    "reqd": 1
   }, 
   {
-   "default": "Draft", 
+   "default": "Open", 
    "fieldname": "status", 
    "fieldtype": "Select", 
    "in_list_view": 0, 
@@ -407,7 +407,7 @@
  "icon": "icon-info-sign", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2015-04-13 07:25:51.598251", 
+ "modified": "2015-04-13 12:53:43.490817", 
  "modified_by": "Administrator", 
  "module": "CRM", 
  "name": "Opportunity", 
