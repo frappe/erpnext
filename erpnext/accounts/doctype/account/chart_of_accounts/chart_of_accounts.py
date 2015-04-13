@@ -64,7 +64,7 @@ def get_chart(chart_name):
 	chart = {}
 	if chart_name == "Standard":
 		from erpnext.accounts.doctype.account.chart_of_accounts.verified import standard_chart_of_accounts
-		return standard_chart_of_accounts.coa
+		return standard_chart_of_accounts.get()
 	else:
 		path = os.path.join(os.path.dirname(__file__), "verified")
 		for fname in os.listdir(path):
