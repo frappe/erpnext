@@ -13,7 +13,7 @@ def get_notification_config():
 			"Lead": {"status": "Open"},
 			"Contact": {"status": "Open"},
 			"Opportunity": {"docstatus": 0},
-			"Quotation": {"docstatus": 0},
+			"Quotation": {"status": "Open"},
 			"Sales Order": { "per_delivered": ("<", 100), "status": ("!=", "Stopped"), "docstatus": ("<", 2) },
 			"Journal Entry": {"docstatus": 0},
 			"Sales Invoice": { "outstanding_amount": (">", 0), "docstatus": ("<", 2) },
