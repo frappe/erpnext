@@ -133,12 +133,14 @@ cur_frm.cscript.calculate_total = function(doc,cdt,cdn){
 cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
 }
+
 cur_frm.cscript.claim_amount = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
 
 	var child = locals[cdt][cdn];
 	refresh_field("sanctioned_amount", child.name, child.parentfield);
 }
+
 cur_frm.cscript.sanctioned_amount = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
 }
@@ -148,3 +150,22 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 		cur_frm.email_doc(frappe.boot.notification_settings.expense_claim_message);
 	}
 }
+
+erpnext.expense_claim = {
+	set_title :function(frm) {
+		if (!frm.doc.task) {
+			frm.set_value("title", frm.doc.employee_name);
+		}
+		else {
+			frm.set_value("title", frm.doc.employee_name + " for "+ frm.doc.task);
+		}
+	}
+}
+
+frappe.ui.form.on("Expense Claim", "employee_name", function(frm) {
+	erpnext.expense_claim.set_title(frm);
+});
+
+frappe.ui.form.on("Expense Claim", "task", function(frm) {
+	erpnext.expense_claim.set_title(frm);
+});
