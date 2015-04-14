@@ -269,6 +269,8 @@ def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 				filter_list.append([doctype, key, val[0], val[1]])
 			else:
 				filter_list.append([doctype, key, "=", val])
+	elif isinstance(filters, list):
+		filter_list.extend(filters)
 
 	if "group_or_ledger" not in [d[1] for d in filter_list]:
 		filter_list.append(["Account", "group_or_ledger", "=", "Ledger"])
