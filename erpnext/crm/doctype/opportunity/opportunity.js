@@ -73,7 +73,7 @@ $.extend(cur_frm.cscript, new erpnext.crm.Opportunity({frm: cur_frm}));
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	erpnext.toggle_naming_series();
 
-	if(doc.docstatus === 1 && doc.status!=="Lost") {
+	if(doc.status!=="Lost") {
 		cur_frm.add_custom_button(__('Create Quotation'),
 			cur_frm.cscript.create_quotation, frappe.boot.doctype_icons["Quotation"],
 			"btn-default");
