@@ -123,7 +123,7 @@ class BOM(Document):
 	def update_cost(self):
 		if self.docstatus == 2:
 			return
-		
+
 		items_rate = frappe._dict()
 		for d in self.get("items"):
 			rate = self.get_bom_material_detail({'item_code': d.item_code, 'bom_no': d.bom_no,
@@ -131,15 +131,17 @@ class BOM(Document):
 			if rate:
 				d.rate = rate
 				items_rate.setdefault(d.item_code, d.rate)
-				
+
 		for e in self.get("exploded_items"):
 			if items_rate.get(e.item_code):
 				e.rate = items_rate.get(e.item_code)
-			
+
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
 			self.calculate_cost()
 		self.save()
+
+		frappe.msgprint(_("Cost Updated"))
 
 	def get_bom_unitcost(self, bom_no):
 		bom = frappe.db.sql("""select name, total_cost/quantity as unit_cost from `tabBOM`
