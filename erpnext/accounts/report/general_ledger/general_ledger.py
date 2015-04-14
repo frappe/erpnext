@@ -67,7 +67,7 @@ def get_conditions(filters):
 	if filters.get("account"):
 		account_like = filters.get("account")
 		if cint(filters.get("show_like_accounts")) == 1:
-			account_like = filters.get("account").split("-")[0].strip()
+			account_like = filters.get("account").split("-")[0].strip() + " - "
 		account_list_dict = frappe.db.sql("""SELECT lft, rgt FROM `tabAccount` WHERE NAME LIKE "{}%";""".format(account_like), as_dict=True)
 
 		conditions.append("""account in (select name from tabAccount
