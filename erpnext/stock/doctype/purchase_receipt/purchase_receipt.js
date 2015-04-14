@@ -4,6 +4,27 @@
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 
 frappe.provide("erpnext.stock");
+
+frappe.ui.form.on("Purchase Receipt", {
+	onload: function(frm) {
+		// default values for quotation no
+		var qa_no = frappe.meta.get_docfield("Purchase Receipt Item", "qa_no");
+		qa_no.get_route_options_for_new_doc = function(field) {
+			if(frm.is_new()) return;
+			var doc = field.doc;
+			return {
+				"inspection_type": "Incoming",
+				"purchase_receipt_no": frm.doc.name,
+				"item_code": doc.item_code,
+				"description": doc.description,
+				"item_serial_no": doc.serial_no ? doc.serial_no.split("\n")[0] : null,
+				"batch_no": doc.batch_no
+			}
+		}
+	}
+});
+
+
 erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
 		this._super();
@@ -90,6 +111,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	},
 
 });
+
 
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.stock.PurchaseReceiptController({frm: cur_frm}));
