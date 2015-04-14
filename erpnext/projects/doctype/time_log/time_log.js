@@ -4,7 +4,6 @@
 frappe.provide("erpnext.projects");
 
 frappe.ui.form.on("Time Log", "onload", function(frm) {
-	frm.set_query("task", erpnext.queries.task);
 	if (frm.doc.for_manufacturing) {
 		frappe.ui.form.trigger("Time Log", "production_order");
 	}
@@ -88,3 +87,11 @@ frappe.ui.form.on("Time Log", "billable", function(frm) {
 		frm.doc("billing_amount", 0);
 	}
 });
+
+cur_frm.fields_dict['task'].get_query = function(doc) {
+	return {
+		filters:{
+			'project': doc.project
+		}
+	}	
+}

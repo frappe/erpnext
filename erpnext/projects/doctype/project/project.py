@@ -44,6 +44,8 @@ class Project(Document):
 
 	def sync_tasks(self):
 		"""sync tasks and remove table"""
+		if self.flags.dont_sync_tasks: return
+		
 		task_names = []
 		for t in self.tasks:
 			if t.task_id:
@@ -79,6 +81,22 @@ class Project(Document):
 				project=%s and status in ('Closed', 'Cancelled')""", self.name)[0][0]
 			frappe.db.set_value("Project", self.name, "percent_complete",
 			 	int(float(completed) / total * 100))
+				
+	def update_costing(self):
+		total_cost = frappe.db.sql("""select sum(total_costing_amount) as costing_amount,
+			sum(total_billing_amount) as billing_amount, sum(total_expense_claim) as expense_claim,
+			min(act_start_date) as start_date, max(act_end_date) as end_date, sum(actual_time) as time
+			from `tabTask` where project = %s""", self.name, as_dict=1)[0]
+			
+		self.total_costing_amount = total_cost.costing_amount
+		self.total_billing_amount = total_cost.billing_amount
+		self.total_expense_claim = total_cost.expense_claim
+		self.actual_start_date = total_cost.start_date
+		self.actual_end_date = total_cost.end_date
+		self.actual_time = total_cost.time
+		self.gross_margin = flt(total_cost.billing_amount) - flt(total_cost.costing_amount)
+		if self.total_billing_amount:
+			self.per_gross_margin = (self.gross_margin / flt(self.total_billing_amount)) *100
 
 @frappe.whitelist()
 def get_cost_center_name(project_name):

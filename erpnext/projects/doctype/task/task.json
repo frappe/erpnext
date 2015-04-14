@@ -18,24 +18,14 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "exp_start_date", 
-   "fieldtype": "Date", 
-   "label": "Expected Start Date", 
-   "oldfieldname": "exp_start_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0, 
-   "reqd": 0
-  }, 
-  {
-   "fieldname": "exp_end_date", 
-   "fieldtype": "Date", 
-   "in_filter": 1, 
-   "label": "Expected End Date", 
-   "oldfieldname": "exp_end_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0, 
-   "reqd": 0, 
-   "search_index": 1
+   "fieldname": "project", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Project", 
+   "oldfieldname": "project", 
+   "oldfieldtype": "Link", 
+   "options": "Project", 
+   "permlevel": 0
   }, 
   {
    "fieldname": "column_break0", 
@@ -54,16 +44,6 @@
    "oldfieldname": "status", 
    "oldfieldtype": "Select", 
    "options": "Open\nWorking\nPending Review\nClosed\nCancelled", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "project", 
-   "fieldtype": "Link", 
-   "in_list_view": 1, 
-   "label": "Project", 
-   "oldfieldname": "project", 
-   "oldfieldtype": "Link", 
-   "options": "Project", 
    "permlevel": 0
   }, 
   {
@@ -105,32 +85,44 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "exp_start_date", 
+   "fieldtype": "Date", 
+   "label": "Expected Start Date", 
+   "oldfieldname": "exp_start_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0, 
+   "reqd": 0
+  }, 
+  {
    "default": "0", 
-   "description": "in Hours", 
+   "description": "", 
    "fieldname": "expected_time", 
    "fieldtype": "Float", 
-   "label": "Expected Time", 
+   "label": "Expected Time (in hours)", 
    "oldfieldname": "exp_total_hrs", 
    "oldfieldtype": "Data", 
    "permlevel": 0, 
    "reqd": 0
   }, 
   {
-   "fieldname": "column_break_12", 
+   "fieldname": "column_break_11", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
    "precision": ""
   }, 
   {
-   "fieldname": "allocated_budget", 
-   "fieldtype": "Currency", 
-   "label": "Allocated Budget", 
-   "oldfieldname": "allocated_budget", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0
+   "fieldname": "exp_end_date", 
+   "fieldtype": "Date", 
+   "in_filter": 1, 
+   "label": "Expected End Date", 
+   "oldfieldname": "exp_end_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0, 
+   "reqd": 0, 
+   "search_index": 1
   }, 
   {
+   "description": "", 
    "fieldname": "actual", 
    "fieldtype": "Section Break", 
    "label": "", 
@@ -142,7 +134,7 @@
   {
    "fieldname": "act_start_date", 
    "fieldtype": "Date", 
-   "label": "Actual Start Date", 
+   "label": "Actual Start Date (via Time Logs)", 
    "oldfieldname": "act_start_date", 
    "oldfieldtype": "Date", 
    "permlevel": 0, 
@@ -150,10 +142,10 @@
   }, 
   {
    "default": "", 
-   "description": "in Hours", 
+   "description": "", 
    "fieldname": "actual_time", 
    "fieldtype": "Float", 
-   "label": "Actual Time", 
+   "label": "Actual Time (in hours)", 
    "options": "", 
    "permlevel": 0, 
    "precision": "", 
@@ -168,7 +160,7 @@
   {
    "fieldname": "act_end_date", 
    "fieldtype": "Date", 
-   "label": "Actual End Date", 
+   "label": "Actual End Date (via Time Logs)", 
    "oldfieldname": "act_end_date", 
    "oldfieldtype": "Date", 
    "permlevel": 0, 
@@ -183,7 +175,7 @@
   {
    "fieldname": "total_costing_amount", 
    "fieldtype": "Currency", 
-   "label": "Total Costing Amount", 
+   "label": "Total Costing Amount (via Time Logs)", 
    "oldfieldname": "actual_budget", 
    "oldfieldtype": "Currency", 
    "options": "Company:company:default_currency", 
@@ -193,7 +185,7 @@
   {
    "fieldname": "total_expense_claim", 
    "fieldtype": "Currency", 
-   "label": "Total Expense Claim", 
+   "label": "Total Expense Claim (via Expense Claim)", 
    "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "precision": "", 
@@ -209,7 +201,7 @@
    "fieldname": "total_billing_amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
-   "label": "Total Billing Amount", 
+   "label": "Total Billing Amount (via Time Logs)", 
    "permlevel": 0, 
    "precision": "", 
    "read_only": 1
@@ -257,7 +249,7 @@
  "idx": 1, 
  "istable": 0, 
  "max_attachments": 5, 
- "modified": "2015-04-13 05:36:33.544083", 
+ "modified": "2015-04-14 07:56:24.481667", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Task", 

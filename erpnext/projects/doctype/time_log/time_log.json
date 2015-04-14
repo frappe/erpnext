@@ -232,10 +232,10 @@
   }, 
   {
    "default": "0", 
-   "description": "per hour", 
+   "description": "", 
    "fieldname": "costing_rate", 
    "fieldtype": "Currency", 
-   "label": "Costing Rate", 
+   "label": "Costing Rate (per hour)", 
    "permlevel": 0, 
    "precision": "", 
    "read_only": 1
@@ -257,10 +257,10 @@
   }, 
   {
    "default": "0", 
-   "description": "per hour", 
+   "description": "", 
    "fieldname": "billing_rate", 
    "fieldtype": "Currency", 
-   "label": "Billing Rate", 
+   "label": "Billing Rate (per hour)", 
    "permlevel": 0, 
    "precision": "", 
    "read_only": 1
@@ -322,15 +322,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
-<<<<<<< HEAD
-<<<<<<< HEAD
- "modified": "2015-04-06 02:47:16.187046", 
-=======
- "modified": "2015-04-09 08:29:34.464429", 
->>>>>>> Fixes in time_log
-=======
- "modified": "2015-04-13 04:31:20.855439", 
->>>>>>> task and project- billing amount and actual amount added
+ "modified": "2015-04-14 09:07:28.468792", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 

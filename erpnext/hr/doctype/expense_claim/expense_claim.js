@@ -169,3 +169,11 @@ frappe.ui.form.on("Expense Claim", "employee_name", function(frm) {
 frappe.ui.form.on("Expense Claim", "task", function(frm) {
 	erpnext.expense_claim.set_title(frm);
 });
+
+cur_frm.fields_dict['task'].get_query = function(doc) {
+	return {
+		filters:{
+			'project': doc.project
+		}
+	}	
+}
