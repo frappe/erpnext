@@ -7,7 +7,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
- "document_type": "", 
+ "document_type": "Master", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -135,7 +135,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-04-01 02:06:37.510007", 
+ "modified": "2015-04-14 02:08:33.690406", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Activity Cost", 

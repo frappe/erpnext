@@ -7,6 +7,8 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
+class DuplicationError(frappe.ValidationError): pass
+
 class ActivityCost(Document):
 	def validate(self):
 		self.set_title()
@@ -19,4 +21,4 @@ class ActivityCost(Document):
 		if frappe.db.sql("""select name from `tabActivity Cost` where employee_name= %s and activity_type= %s and name != %s""",
 			(self.employee_name, self.activity_type, self.name)):
 				frappe.throw(_("Activity Cost exists for Employee {0} against Activity Type - {1}")
-					.format(self.employee, self.activity_type))
+					.format(self.employee, self.activity_type), DuplicationError)

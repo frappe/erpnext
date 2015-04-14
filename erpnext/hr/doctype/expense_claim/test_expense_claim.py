@@ -9,8 +9,8 @@ test_records = frappe.get_test_records('Expense Claim')
 
 class TestExpenseClaim(unittest.TestCase):
 	def test_total_expense_claim_for_project(self):
-		frappe.db.sql("delete from `tabTask`")
-		frappe.db.sql("delete from `tabProject`")
+		frappe.db.sql("""delete from `tabTask` where project = "_Test Project 1" """)
+		frappe.db.sql("""delete from `tabProject` where name = "_Test Project 1" """)
 		
 		frappe.get_doc({
 			"project_name": "_Test Project 1",

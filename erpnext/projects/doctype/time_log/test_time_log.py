@@ -86,8 +86,8 @@ class TestTimeLog(unittest.TestCase):
 		frappe.db.sql("delete from `tabTime Log`")
 		
 	def test_total_activity_cost_for_project(self):
-		frappe.db.sql("delete from `tabTask`")
-		frappe.db.sql("delete from `tabProject`")
+		frappe.db.sql("""delete from `tabTask` where project = "_Test Project 1" """)
+		frappe.db.sql("""delete from `tabProject` where name = "_Test Project 1" """)
 		
 		frappe.get_doc({
 			"project_name": "_Test Project 1",
@@ -116,8 +116,8 @@ class TestTimeLog(unittest.TestCase):
 		self.assertEqual(time_log.billing_amount, 200)
 		time_log.submit()
 		
-		self.assertEqual(frappe.db.get_value("Task", task_name, "actual_cost"), 200)
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_activity_cost"), 200)
+		self.assertEqual(frappe.db.get_value("Task", task_name, "total_billing_amount"), 200)
+		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_billing_amount"), 200)
 		
 		time_log2 = frappe.get_doc({
 			 "activity_type": "_Test Activity Type",
@@ -132,13 +132,13 @@ class TestTimeLog(unittest.TestCase):
 		})
 		time_log2.save()
 		
-		self.assertEqual(frappe.db.get_value("Task", task_name, "actual_cost"), 400)
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_activity_cost"), 400)
+		self.assertEqual(frappe.db.get_value("Task", task_name, "total_billing_amount"), 400)
+		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_billing_amount"), 400)
 		
 		time_log2.cancel()
 		
-		self.assertEqual(frappe.db.get_value("Task", task_name, "actual_cost"), 200)
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_activity_cost"), 200)
+		self.assertEqual(frappe.db.get_value("Task", task_name, "total_billing_amount"), 200)
+		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_billing_amount"), 200)
 		
 test_records = frappe.get_test_records('Time Log')
 test_ignore = ["Time Log Batch", "Sales Invoice"]
