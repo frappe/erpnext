@@ -201,7 +201,7 @@ class ProductionOrder(Document):
 			Planned Start Date. Time logs will be created and remain in Draft mode and must be submitted
 			before manufacturing entry can be made."""
 
-		if not (self.operations and self.planned_start_date):
+		if not self.operations:
 			return
 
 		time_logs = []
