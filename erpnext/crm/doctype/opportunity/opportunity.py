@@ -186,9 +186,6 @@ def make_quotation(source_name, target_doc=None):
 				"enquiry_from": "quotation_to",
 				"enquiry_type": "order_type",
 				"name": "enq_no",
-			},
-			"validation": {
-				"docstatus": ["=", 1]
 			}
 		},
 		"Opportunity Item": {
