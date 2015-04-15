@@ -78,7 +78,7 @@ def insert_or_update(account):
 		account.insert()
 	except frappe.NameError, e:
 		if e.args[0]=="Email Account":
-			existing_account = frappe.get_doc("Email Account", e.args[0])
+			existing_account = frappe.get_doc("Email Account", e.args[1])
 			for key, value in account.as_dict().items():
 				if not existing_account.get(key) and value \
 					and key not in default_fields \
