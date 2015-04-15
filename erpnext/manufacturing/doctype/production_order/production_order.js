@@ -204,12 +204,13 @@ $.extend(cur_frm.cscript, {
 			method:"erpnext.manufacturing.doctype.production_order.production_order.make_time_log",
 			args: {
 				"name": doc.name,
-				"operation": child.idx + ". " + child.operation,
+				"operation": child.operation,
 				"from_time": child.planned_start_time,
 				"to_time": child.planned_end_time,
 				"project": doc.project,
 				"workstation": child.workstation,
-				"qty": flt(doc.qty) - flt(child.completed_qty)
+				"qty": flt(doc.qty) - flt(child.completed_qty),
+				"operation_id": child.name
 			},
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);

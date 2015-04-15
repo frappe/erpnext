@@ -248,6 +248,7 @@ class ProductionOrder(Document):
 		self.planned_end_date = self.operations[-1].planned_end_time
 
 		if time_logs:
+			frappe.local.message_log = []
 			frappe.msgprint(_("Time Logs created:") + "\n" + "\n".join(time_logs))
 
 	def set_operation_start_end_time(self, i, d):

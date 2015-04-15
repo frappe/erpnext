@@ -474,8 +474,8 @@ class StockEntry(StockController):
 			pro_doc = frappe.get_doc("Production Order", self.production_order)
 			_validate_production_order(pro_doc)
 			pro_doc.run_method("update_status")
+			pro_doc.run_method("update_production_order_qty")
 			if self.purpose == "Manufacture":
-				pro_doc.run_method("update_production_order_qty")
 				self.update_planned_qty(pro_doc)
 
 	def update_planned_qty(self, pro_doc):

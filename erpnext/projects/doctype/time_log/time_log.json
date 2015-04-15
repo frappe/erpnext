@@ -117,7 +117,7 @@
    "options": "Production Order", 
    "permlevel": 0, 
    "precision": "", 
-   "read_only": 0
+   "read_only": 1
   }, 
   {
    "depends_on": "", 
@@ -127,7 +127,7 @@
    "options": "Operation", 
    "permlevel": 0, 
    "precision": "", 
-   "read_only": 0
+   "read_only": 1
   }, 
   {
    "depends_on": "", 
@@ -155,7 +155,7 @@
    "options": "Workstation", 
    "permlevel": 0, 
    "precision": "", 
-   "read_only": 0
+   "read_only": 1
   }, 
   {
    "depends_on": "", 
@@ -242,7 +242,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-03-24 08:10:31.412670", 
+ "modified": "2015-04-06 02:47:16.187046", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 
