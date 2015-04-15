@@ -32,6 +32,7 @@
    "fieldtype": "Select", 
    "in_list_view": 0, 
    "label": "Status", 
+   "no_copy": 1, 
    "options": "Draft\nSubmitted\nBilled\nCancelled", 
    "permlevel": 0, 
    "read_only": 1
@@ -60,12 +61,35 @@
    "reqd": 1
   }, 
   {
-   "description": "In Hours", 
+   "fieldname": "section_break_8", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "default": "0", 
+   "description": "updated via Time Logs", 
    "fieldname": "total_hours", 
    "fieldtype": "Float", 
    "in_list_view": 1, 
    "label": "Total Hours", 
    "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_10", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "default": "0", 
+   "description": "updated via Time Logs", 
+   "fieldname": "total_billing_amount", 
+   "fieldtype": "Float", 
+   "label": "Total Billing Amount", 
+   "permlevel": 0, 
+   "precision": "", 
    "read_only": 1
   }, 
   {
@@ -83,7 +107,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-05 05:11:48.360822", 
+ "modified": "2015-04-15 06:07:41.771962", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log Batch", 

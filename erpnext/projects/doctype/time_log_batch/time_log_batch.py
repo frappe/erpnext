@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 
+from frappe.utils import flt
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
@@ -14,12 +15,12 @@ class TimeLogBatch(Document):
 
 	def validate(self):
 		self.set_status()
-		self.total_hours = 0.0
 		for d in self.get("time_logs"):
 			tl = frappe.get_doc("Time Log", d.time_log)
 			self.update_time_log_values(d, tl)
 			self.validate_time_log_is_submitted(tl)
-			self.total_hours += float(tl.hours or 0.0)
+			self.total_hours += flt(tl.hours)
+			self.total_billing_amount += flt(tl.billing_amount)
 
 	def update_time_log_values(self, d, tl):
 		d.update({
@@ -29,7 +30,9 @@ class TimeLogBatch(Document):
 		})
 
 	def validate_time_log_is_submitted(self, tl):
-		if tl.status != "Submitted" and self.docstatus == 0:
+		if tl.status == "Batched for Billing":
+			frappe.throw(_("Time Log {0} already billed").format(tl.name))
+		elif tl.status != "Submitted":
 			frappe.throw(_("Time Log {0} must be 'Submitted'").format(tl.name))
 
 	def set_status(self):
@@ -65,15 +68,15 @@ def make_sales_invoice(source_name, target=None):
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.stock_uom = "Hour"
 		target_doc.description = "via Time Logs"
+		target_doc.qty = 1
 
 	target = frappe.new_doc("Sales Invoice")
 	target.append("items", get_mapped_doc("Time Log Batch", source_name, {
 		"Time Log Batch": {
 			"doctype": "Sales Invoice Item",
 			"field_map": {
-				"rate": "base_rate",
-				"name": "time_log_batch",
-				"total_hours": "qty",
+				"total_billing_amount": "rate",
+				"name": "time_log_batch"
 			},
 			"postprocess": update_item
 		}

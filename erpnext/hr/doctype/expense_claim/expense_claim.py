@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import get_fullname
+from frappe.utils import get_fullname, flt
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
 from erpnext.accounts.utils import validate_fiscal_year
@@ -39,8 +39,8 @@ class ExpenseClaim(Document):
 		self.total_claimed_amount = 0 
 		self.total_sanctioned_amount = 0
 		for d in self.expenses:
-			self.total_claimed_amount += d.claim_amount
-			self.total_sanctioned_amount += d.sanctioned_amount
+			self.total_claimed_amount += flt(d.claim_amount)
+			self.total_sanctioned_amount += flt(d.sanctioned_amount)
 
 	def validate_exp_details(self):
 		if not self.get('expenses'):
@@ -62,5 +62,5 @@ class ExpenseClaim(Document):
 
 	def validate_sanctioned_amount(self):
 		for d in self.expenses:
-			if d.sanctioned_amount > d.claim_amount:
+			if flt(d.sanctioned_amount) > flt(d.claim_amount):
 				frappe.throw(_("Sanctioned Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))

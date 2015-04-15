@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch("time_log", "activity_type", "activity_type");
-cur_frm.add_fetch("time_log", "owner", "created_by");
+cur_frm.add_fetch("time_log", "billing_amount", "billing_amount");
 cur_frm.add_fetch("time_log", "hours", "hours");
 
 cur_frm.set_query("time_log", "time_logs", function(doc) {

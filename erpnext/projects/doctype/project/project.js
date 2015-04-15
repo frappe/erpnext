@@ -1,6 +1,19 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+frappe.ui.form.on("Project", {
+	onload: function(frm) {
+		var so = frappe.meta.get_docfield("Project", "sales_order");
+		so.get_route_options_for_new_doc = function(field) {
+			if(frm.is_new()) return;
+			return {
+				"customer": frm.doc.customer,
+				"project_name": frm.doc.name
+			}
+		}
+	}
+});
+
 frappe.ui.form.on("Project Task", "edit_task", function(frm, doctype, name) {
 	var doc = frappe.get_doc(doctype, name);
 	if(doc.task_id) {
@@ -36,4 +49,12 @@ cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
 	return{
 		query: "erpnext.controllers.queries.customer_query"
 	}
+}
+
+cur_frm.fields_dict['sales_order'].get_query = function(doc) {
+	return {
+		filters:{
+			'project_name': doc.name
+		}
+	}	
 }
