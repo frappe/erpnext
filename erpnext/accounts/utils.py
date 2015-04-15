@@ -408,6 +408,7 @@ def get_outstanding_invoices(amount_query, account, party_type, party):
 			}), (account, party_type, party, d.voucher_type, d.voucher_no))
 
 		payment_amount = -1*payment_amount[0][0] if payment_amount else 0
+		precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
 
 		if d.invoice_amount > payment_amount:
 
@@ -415,9 +416,9 @@ def get_outstanding_invoices(amount_query, account, party_type, party):
 				'voucher_no': d.voucher_no,
 				'voucher_type': d.voucher_type,
 				'posting_date': d.posting_date,
-				'invoice_amount': flt(d.invoice_amount),
-				'outstanding_amount': d.invoice_amount - payment_amount
-				})
+				'invoice_amount': flt(d.invoice_amount, precision),
+				'outstanding_amount': flt(d.invoice_amount - payment_amount, precision)
+			})
 
 	return all_outstanding_vouchers
 
