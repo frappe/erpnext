@@ -21,7 +21,7 @@ frappe.query_reports["Bank Clearance Summary"] = {
 			"label": __("Bank Account"),
 			"fieldtype": "Link",
 			"options": "Account",
-            "reqd": 1,
+			"reqd": 1,
 			"get_query": function() {
 				return {
 					"query": "erpnext.controllers.queries.get_account_list", 
