@@ -15,18 +15,6 @@
    "reqd": 1
   }, 
   {
-   "description": "For Sales Invoice", 
-   "fieldname": "rate", 
-   "fieldtype": "Currency", 
-   "label": "Rate", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "column_break_3", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
-  }, 
-  {
    "default": "Draft", 
    "fieldname": "status", 
    "fieldtype": "Select", 
@@ -36,6 +24,11 @@
    "options": "Draft\nSubmitted\nBilled\nCancelled", 
    "permlevel": 0, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_3", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
   }, 
   {
    "description": "Will be updated after Sales Invoice is Submitted.", 
@@ -107,7 +100,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-04-15 06:07:41.771962", 
+ "modified": "2015-04-15 08:00:52.746961", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log Batch", 
