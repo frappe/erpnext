@@ -73,4 +73,4 @@ Please note that it is not the goal of this policy to limit commercial activity 
 
 When in doubt about your use of the ERPNext name or logo, please contact the Frappe Technologies for clarification.
 
-(inspired from Wordpress)
+(inspired from WordPress)
