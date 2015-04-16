@@ -28,16 +28,12 @@ class TimeLog(Document):
 		self.validate_cost()
 
 	def on_submit(self):
-		if self.for_manufacturing:
-			self.update_production_order()
-		if self.task:
-			self.update_task()
+		self.update_production_order()
+		self.update_task()
 
 	def on_cancel(self):
-		if self.for_manufacturing:
-			self.update_production_order()
-		if self.task:
-			self.update_task()
+		self.update_production_order()
+		self.update_task()
 
 	def before_update_after_submit(self):
 		self.set_status()
@@ -132,8 +128,8 @@ class TimeLog(Document):
 
 	def update_production_order(self):
 		"""Updates `start_date`, `end_date`, `status` for operation in Production Order."""
-
-		if self.production_order:
+		
+		if self.production_order and self.for_manufacturing:
 			if not self.operation_id:
 				frappe.throw(_("Operation ID not set"))
 
@@ -231,9 +227,10 @@ class TimeLog(Document):
 			frappe.throw(_("Task is Mandatory if Time Log is against a project"))
 	
 	def update_task(self):
-		task = frappe.get_doc("Task", self.task)
-		task.update_time_and_costing()
-		task.save()
+		if self.task and frappe.db.exists("Task", self.task):
+			task = frappe.get_doc("Task", self.task)
+			task.update_time_and_costing()
+			task.save()
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

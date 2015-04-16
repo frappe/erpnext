@@ -88,6 +88,17 @@ class TestTimeLog(unittest.TestCase):
 	def test_total_activity_cost_for_project(self):
 		frappe.db.sql("""delete from `tabTask` where project = "_Test Project 1" """)
 		frappe.db.sql("""delete from `tabProject` where name = "_Test Project 1" """)
+		frappe.db.sql("""delete from `tabActivity Cost` where employee = "_T-Employee-0001" and activity_type = "_Test Activity Type" """)
+		
+		activity_cost = frappe.new_doc('Activity Cost')
+		activity_cost.update({
+			"employee": "_T-Employee-0001",
+			"employee_name": "_Test Employee",
+			"activity_type": "_Test Activity Type",
+			"billing_rate": 100,
+			"costing_rate": 50
+		})
+		activity_cost.insert()
 		
 		frappe.get_doc({
 			"project_name": "_Test Project 1",
