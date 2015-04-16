@@ -138,3 +138,4 @@ execute:frappe.delete_doc("DocType", "Chart of Accounts")
 execute:frappe.delete_doc("DocType", "Style Settings")
 erpnext.patches.v5_0.update_opportunity
 erpnext.patches.v5_0.opportunity_not_submittable
+execute:frappe.permissions.reset_perms("Purchase Taxes and Charges Master") #2014-06-09
