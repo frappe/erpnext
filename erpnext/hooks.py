@@ -28,8 +28,8 @@ my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
 email_append_to = ["Job Applicant", "Opportunity", "Issue"]
 
 website_context = {
-	"favicon": 	"/assets/erpnext/images/favicon.png"
-
+	"favicon": 	"/assets/erpnext/images/favicon.png",
+	"splash_image": "/assets/erpnext/images/splash.png"
 }
 
 website_route_rules = [
