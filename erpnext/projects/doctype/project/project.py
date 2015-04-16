@@ -25,14 +25,6 @@ class Project(Document):
 				"task_id": task.name
 			})
 
-	def get_gross_profit(self):
-		pft, per_pft =0, 0
-		pft = flt(self.project_value) - flt(self.est_material_cost)
-		#if pft > 0:
-		per_pft = (flt(pft) / flt(self.project_value)) * 100
-		ret = {'gross_margin_value': pft, 'per_gross_margin': per_pft}
-		return ret
-
 	def validate(self):
 		self.validate_dates()
 		self.sync_tasks()
