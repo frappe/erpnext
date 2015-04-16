@@ -28,3 +28,10 @@ before_script:
   - echo "USE mysql;\nCREATE USER 'test_frappe'@'localhost' IDENTIFIED BY 'test_frappe';\nFLUSH PRIVILEGES;\n" | mysql -u root -ptravis
   - echo "USE mysql;\nGRANT ALL PRIVILEGES ON \`test_frappe\`.* TO 'test_frappe'@'localhost';\n" | mysql -u root -ptravis
 
+notifications:
+  webhooks:
+    urls:
+      - https://webhooks.gitter.im/e/92b3bea86d8c5397beef
+    on_success: always  
+    on_failure: always  
+    on_start: never
