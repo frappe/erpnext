@@ -249,6 +249,17 @@ class SalesOrder(SellingController):
 	def get_portal_page(self):
 		return "order" if self.docstatus==1 else None
 
+	def before_recurring(self):
+		super(SalesOrder, self).before_recurring()
+		
+		for field in ("delivery_status", "per_delivered", "billing_status", "per_billed"):
+			self.set(field, None)
+
+		for d in self.get("sales_order_details"):
+			for field in ("delivered_qty", "billed_amt", "planned_qty", "prevdoc_docname"):
+				d.set(field, None)
+			
+
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
 	def postprocess(source, doc):

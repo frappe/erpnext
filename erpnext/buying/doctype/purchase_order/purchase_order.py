@@ -198,6 +198,17 @@ class PurchaseOrder(BuyingController):
 	def on_update(self):
 		pass
 
+	def before_recurring(self):
+		super(PurchaseOrder, self).before_recurring()
+		
+		for field in ("per_received", "per_billed"):
+			self.set(field, None)
+
+		for d in self.get("po_details"):
+			for field in ("received_qty", "billed_amt", "prevdoc_doctype", "prevdoc_docname", 
+				"prevdoc_detail_docname", "supplier_quotation", "supplier_quotation_item"):
+					d.set(field, None)
+
 def set_missing_values(source, target):
 	target.ignore_pricing_rule = 1
 	target.run_method("set_missing_values")
