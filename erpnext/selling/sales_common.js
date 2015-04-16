@@ -17,7 +17,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	onload: function() {
 		this._super();
 		this.setup_queries();
-		this.toggle_editable_price_list_rate();
 	},
 
 	onload_post_render: function() {
@@ -104,6 +103,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			var packing_list_exists = (this.frm.doc.packing_details || []).length;
 			this.frm.toggle_display("packing_list", packing_list_exists ? true : false);
 		}
+		this.toggle_editable_price_list_rate();
 	},
 
 	customer: function() {
