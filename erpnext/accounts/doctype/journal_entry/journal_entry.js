@@ -138,7 +138,6 @@ cur_frm.script_manager.make(erpnext.accounts.JournalVoucher);
 cur_frm.cscript.refresh = function(doc) {
 	cur_frm.cscript.is_opening(doc)
 	erpnext.toggle_naming_series();
-	cur_frm.cscript.voucher_type(doc);
 	if(doc.docstatus==1) {
 		cur_frm.add_custom_button(__('View Ledger'), function() {
 			frappe.route_options = {
@@ -226,8 +225,6 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 
 	if(!doc.company) return;
 
-	cur_frm.clear_table("accounts");
-
 	var update_jv_details = function(doc, r) {
 		var jvdetail = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
 		$.each(r, function(i, d) {
@@ -239,6 +236,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	}
 
 	if(in_list(["Bank Entry", "Cash Entry"], doc.voucher_type)) {
+		cur_frm.clear_table("accounts");
 		return frappe.call({
 			type: "GET",
 			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
@@ -253,6 +251,7 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 			}
 		})
 	} else if(doc.voucher_type=="Opening Entry") {
+		cur_frm.clear_table("accounts");
 		return frappe.call({
 			type:"GET",
 			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_opening_accounts",
