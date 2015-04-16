@@ -27,6 +27,11 @@ update_website_context = "erpnext.shopping_cart.utils.update_website_context"
 my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
 email_append_to = ["Job Applicant", "Opportunity", "Issue"]
 
+website_context = {
+	"favicon": 	"/assets/erpnext/images/favicon.png"
+
+}
+
 website_route_rules = [
 	{"from_route": "/orders", "to_route": "Sales Order"},
 	{"from_route": "/orders/<name>", "to_route": "print", "defaults": {"doctype": "Sales Order"}},
@@ -101,3 +106,4 @@ get_translated_dict = {
 	("page", "setup-wizard"): "frappe.geo.country_info.get_translated_dict",
 	("doctype", "Global Defaults"): "frappe.geo.country_info.get_translated_dict"
 }
+
