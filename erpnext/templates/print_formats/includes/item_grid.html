@@ -23,8 +23,12 @@
 		<tr>
 			<td>{{ row.idx }}</td>
 			<td>
+				{% if(row.item_code.upper()=="TITLE")-%}
+					<div class="primary">{{ " " }}</div>
+				{% else-%}
 				{% if not row.meta.is_print_hide("item_code") -%}
 					<div class="primary">{{ row.item_code }}</div>
+				{%- endif %}
 				{%- endif %}
 				{% if (not row.meta.is_print_hide("item_name") and
 					(row.meta.is_print_hide("item_code") or row.item_code != row.item_name)) -%}
@@ -43,10 +47,16 @@
 					{%- endif -%}
 				{%- endfor -%}
 			</td>
+			if(row.item_code.upper()=="TITLE")-%}	
+			<td style="text-align: right;">{{ row.get_formatted(" ") }}</td>
+			<td style="text-align: right;">{{ row.get_formatted(" ") }}</td>
+			<td style="text-align: right;">{{ row.get_formatted(" ") }}</td>
+			{% else-%}
 			<td style="text-align: right;">{{ row.get_formatted("qty", doc) }}<br>
 				<small>{{ row.uom or row.stock_uom }}</small></td>
 			{% if not hide_rate -%}<td style="text-align: right;">{{ row.get_formatted("rate", doc) }}</td>{%- endif %}
 			{% if not hide_amount -%}<td style="text-align: right;">{{ row.get_formatted("amount", doc) }}</td>{%- endif %}
+			{%- endif %}
 		</tr>
 		{%- endfor -%}
 	</tbody>
