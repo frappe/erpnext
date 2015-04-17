@@ -135,23 +135,23 @@ class AccountsReceivableReport(object):
 
 	def prepare_conditions(self):
 		conditions = [""]
-		values = {}
+		values = []
 
 		if self.filters.company:
-			conditions.append("company=%(company)s")
-			values["company"] = self.filters.company
+			conditions.append("company=%s")
+			values.append(self.filters.company)
 
 		if self.filters.account:
-			conditions.append("account=%(account)s")
-			values["account"] = self.filters.account
+			conditions.append("account=%s")
+			values.apppend(self.filters.account)
 		else:
 			account_map = self.get_account_map()
 			if not account_map:
 				frappe.throw(_("No Customer Accounts found."))
 			else:
-				accounts_list = ["'{0}'".format(frappe.db.escape(ac)) for ac in account_map]
-				conditions.append("account in ({0})".format(", ".join(accounts_list)))
-
+				conditions.append("account in ({0})".format(", ".join(["%s"] * len(account_map))))
+				values += account_map.keys()
+				
 		return " and ".join(conditions), values
 
 	def get_gl_entries_for(self, account, against_voucher_type, against_voucher):
