@@ -377,7 +377,7 @@
    "read_only": 0
   }, 
   {
-   "description": "Company registration numbers for your reference. Example: VAT Registration Numbers etc.", 
+   "description": "", 
    "fieldname": "registration_info", 
    "fieldtype": "Section Break", 
    "label": "", 
@@ -395,11 +395,18 @@
    "oldfieldtype": "Code", 
    "permlevel": 0, 
    "read_only": 0
+  }, 
+  {
+   "fieldname": "delete_company", 
+   "fieldtype": "Button", 
+   "label": "Delete Company", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2015-02-25 06:28:13.565128", 
+ "modified": "2015-04-17 01:37:32.304374", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 

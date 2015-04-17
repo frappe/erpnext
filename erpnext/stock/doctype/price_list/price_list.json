@@ -75,7 +75,7 @@
  "icon": "icon-tags", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2015-02-12 17:39:02.825767", 
+ "modified": "2015-04-17 01:54:01.907175", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Price List", 
@@ -130,5 +130,6 @@
    "report": 0, 
    "role": "Manufacturing User"
   }
- ]
+ ], 
+ "search_fields": "currency"
 }
