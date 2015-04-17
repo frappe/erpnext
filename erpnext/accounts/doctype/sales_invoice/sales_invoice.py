@@ -464,7 +464,7 @@ class SalesInvoice(SellingController):
 
 	def make_gl_entries(self, repost_future_gle=True):
 		gl_entries = self.get_gl_entries()
-
+		
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
 
@@ -481,6 +481,10 @@ class SalesInvoice(SellingController):
 				and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
 					items, warehouses = self.get_items_and_warehouses()
 					update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items)
+		elif self.docstatus == 2 and cint(self.update_stock) \
+			and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
+				from erpnext.accounts.general_ledger import delete_gl_entries
+				delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import merge_similar_entries
@@ -509,7 +513,7 @@ class SalesInvoice(SellingController):
 					"debit": self.grand_total,
 					"remarks": self.remarks,
 					"against_voucher": self.name,
-					"against_voucher_type": self.doctype,
+					"against_voucher_type": self.doctype
 				})
 			)
 
@@ -543,6 +547,7 @@ class SalesInvoice(SellingController):
 		# expense account gl entries
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) \
 				and cint(self.update_stock):
+
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
 	def make_pos_gl_entries(self, gl_entries):

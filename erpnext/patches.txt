@@ -97,3 +97,4 @@ erpnext.patches.v4_2.update_stock_uom_for_dn_in_sle
 erpnext.patches.v4_2.repost_reserved_qty
 erpnext.patches.v4_2.repost_sle_for_si_with_no_warehouse
 erpnext.patches.v4_2.fix_recurring_orders
+erpnext.patches.v4_2.delete_gl_entries_for_cancelled_invoices
