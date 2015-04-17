@@ -290,7 +290,7 @@ class calculate_taxes_and_totals(object):
 			last_tax = self.doc.get("taxes")[-1]
 
 			diff = self.doc.net_total - flt(last_tax.total / self.doc.conversion_rate,
-				self.doc.precision("grand_total_export"))
+				self.doc.precision("grand_total"))
 
 			if diff and abs(diff) <= (2.0 / 10**last_tax.precision("tax_amount")):
 				adjustment_amount = flt(diff * self.doc.conversion_rate, last_tax.precision("tax_amount"))
