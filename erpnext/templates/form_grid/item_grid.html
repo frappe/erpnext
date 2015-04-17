@@ -21,6 +21,13 @@
 					{%= doc.sales_order || doc.against_sales_order %}
 				</span></p>
 			{% } %}
+			{% if(doc.purchase_order || doc.against_purchase_order) { %}
+				<p><span class="label label-default"
+					title="{%= __("Purchase Order") %}">
+					<i class="icon-file"></i>
+					{%= doc.purchase_order || doc.against_purchase_order %}
+				</span></p>
+			{% } %}
 			{% include "templates/form_grid/includes/visible_cols.html" %}
 			{% if(doc.schedule_date) { %}
 			<div><span title="{%= __("Reqd By Date") %}" class="label {%=
