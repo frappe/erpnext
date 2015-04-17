@@ -41,9 +41,8 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 			Only set `parent_website_route` if parent is visble.
 
 			e.g. If `show_in_website` is set for Products then url should be `/products`"""
-		if self.parent_item_group and frappe.db.get_value("Item Group",
-			self.parent_item_group, "show_in_website"):
-			super(WebsiteGenerator, self)()
+		if self.parent_item_group and frappe.db.get_value("Item Group", self.parent_item_group, "show_in_website"):
+			WebsiteGenerator.set_parent_website_route(self)
 		else:
 			self.parent_website_route = ""
 
