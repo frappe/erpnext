@@ -69,14 +69,12 @@ erpnext.production_order = {
 					cur_frm.cscript['Update Finished Goods'], frappe.boot.doctype_icons["Stock Entry"]);
 			}
 
-			if(doc.status==="Completed") {
-				frm.add_custom_button(__("Show Stock Entries"), function() {
-					frappe.route_options = {
-						production_order: frm.doc.name
-					}
-					frappe.set_route("List", "Stock Entry");
-				});
-			}
+			frm.add_custom_button(__("Show Stock Entries"), function() {
+				frappe.route_options = {
+					production_order: frm.doc.name
+				}
+				frappe.set_route("List", "Stock Entry");
+			});
 
 			if (doc.status != 'Stopped' && doc.status != 'Completed') {
 				frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Production Order'],
