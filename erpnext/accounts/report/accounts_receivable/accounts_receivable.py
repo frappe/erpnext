@@ -143,7 +143,7 @@ class AccountsReceivableReport(object):
 
 		if self.filters.account:
 			conditions.append("account=%s")
-			values.apppend(self.filters.account)
+			values.append(self.filters.account)
 		else:
 			account_map = self.get_account_map()
 			if not account_map:
