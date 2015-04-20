@@ -60,8 +60,10 @@ def import_from(name, doctype):
 
 @frappe.whitelist()
 def add_subscribers(name, email_list):
+	if not isinstance(email_list, (list, tuple)):
+		email_list = email_list.replace(",", "\n").split("\n")
 	count = 0
-	for email in email_list.replace(",", "\n").split("\n"):
+	for email in email_list:
 		email = email.strip()
 		validate_email_add(email, True)
 
