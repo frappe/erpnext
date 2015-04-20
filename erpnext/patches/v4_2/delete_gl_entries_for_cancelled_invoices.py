@@ -8,6 +8,7 @@ def execute():
 	cancelled_invoices = frappe.db.sql_list("""select name from `tabSales Invoice` 
 		where docstatus = 2 and ifnull(update_stock, 0) = 1""")
 
-	frappe.db.sql("""delete from `tabGL Entry` 
-		where voucher_type = 'Sales Invoice' and voucher_no in (%s)""" 
-		% (', '.join(['%s']*len(cancelled_invoices))), tuple(cancelled_invoices))
+	if cancelled_invoices:
+		frappe.db.sql("""delete from `tabGL Entry` 
+			where voucher_type = 'Sales Invoice' and voucher_no in (%s)""" 
+			% (', '.join(['%s']*len(cancelled_invoices))), tuple(cancelled_invoices))
