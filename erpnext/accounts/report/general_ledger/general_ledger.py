@@ -12,6 +12,7 @@ def execute(filters=None):
 			account_details.setdefault(acc.name, acc)
 
 	validate_filters(filters, account_details)
+	validate_party(filters)
 
 	columns = get_columns()
 
@@ -33,10 +34,22 @@ def validate_filters(filters, account_details):
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
 
+
+def validate_party(filters):
+	party_type, party = filters.get("party_type"), filters.get("party")
+
+	if party:
+		if not party_type:
+			frappe.throw(_("To filter based on Party, select Party Type first"))
+		elif not frappe.db.exists(party_type, party):
+			frappe.throw(_("Invalid {0}: {1}").format(party_type, party))
+
 def get_columns():
-	return [_("Posting Date") + ":Date:100", _("Account") + ":Link/Account:200", _("Debit") + ":Float:100",
-		_("Credit") + ":Float:100", _("Voucher Type") + "::120", _("Voucher No") + ":Dynamic Link/Voucher Type:160",
-		_("Against Account") + "::120", _("Cost Center") + ":Link/Cost Center:100", _("Remarks") + "::400"]
+	return [_("Posting Date") + ":Date:90", _("Account") + ":Link/Account:200", 
+		_("Debit") + ":Float:100", _("Credit") + ":Float:100", 
+		_("Voucher Type") + "::120", _("Voucher No") + ":Dynamic Link/Voucher Type:160", 
+		_("Against Account") + "::120", _("Party Type") + "::80", _("Party") + "::150", 
+		_("Cost Center") + ":Link/Cost Center:100", _("Remarks") + "::400"]
 
 def get_result(filters, account_details):
 	gl_entries = get_gl_entries(filters)
@@ -51,7 +64,7 @@ def get_gl_entries(filters):
 	group_by_condition = "group by voucher_type, voucher_no, account" \
 		if filters.get("group_by_voucher") else "group by name"
 
-	gl_entries = frappe.db.sql("""select posting_date, account,
+	gl_entries = frappe.db.sql("""select posting_date, account, party_type, party,
 			sum(ifnull(debit, 0)) as debit, sum(ifnull(credit, 0)) as credit,
 			voucher_type, voucher_no, cost_center, remarks, is_opening, against
 		from `tabGL Entry`
@@ -66,8 +79,6 @@ def get_gl_entries(filters):
 def get_conditions(filters):
 	conditions = []
 	if filters.get("account"):
-		if not frappe.db.exists("Account", filters["account"]):
-			frappe.throw(_("Account {0} is not valid").format(filters["account"]))
 		lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
 		conditions.append("""account in (select name from tabAccount
 			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
@@ -77,6 +88,11 @@ def get_conditions(filters):
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
 
+	if filters.get("party_type"):
+		conditions.append("party_type=%(party_type)s")
+
+	if filters.get("party"):
+		conditions.append("party=%(party)s")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
@@ -163,6 +179,7 @@ def get_result_as_list(data):
 	for d in data:
 		result.append([d.get("posting_date"), d.get("account"), d.get("debit"),
 			d.get("credit"), d.get("voucher_type"), d.get("voucher_no"),
-			d.get("against"), d.get("cost_center"), d.get("remarks")])
+			d.get("against"), d.get("party_type"), d.get("party"), 
+			d.get("cost_center"), d.get("remarks")])
 
 	return result

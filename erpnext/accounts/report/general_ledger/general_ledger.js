@@ -51,6 +51,30 @@ frappe.query_reports["General Ledger"] = {
 			"fieldtype": "Break",
 		},
 		{
+			"fieldname":"party_type",
+			"label": __("Party Type"),
+			"fieldtype": "Link",
+			"options": "DocType",
+			"get_query": function() {
+				return {
+					filters: {"name": ["in", ["Customer", "Supplier"]]}
+				}
+			}
+		},
+		{
+			"fieldname":"party",
+			"label": __("Party"),
+			"fieldtype": "Dynamic Link",
+			"get_options": function() {
+				var party_type = frappe.query_report.filters_by_name.party_type.get_value();
+				var party = frappe.query_report.filters_by_name.party.get_value();
+				if(party && !party_type) {
+					frappe.throw(__("Please select Party Type first"));
+				}
+				return party_type;
+			}
+		},
+		{
 			"fieldname":"group_by_voucher",
 			"label": __("Group by Voucher"),
 			"fieldtype": "Check",
