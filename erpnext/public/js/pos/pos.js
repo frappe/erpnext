@@ -250,6 +250,8 @@ erpnext.pos.PointOfSale = Class.extend({
 				item_code: d.item_code,
 				item_name: (d.item_name===d.item_code || !d.item_name) ? "" : ("<br>" + d.item_name),
 				qty: d.qty,
+				actual_qty: d.actual_qty,
+				projected_qty: d.projected_qty,
 				rate: format_currency(d.rate, me.frm.doc.currency),
 				amount: format_currency(d.amount, me.frm.doc.currency)
 			})).appendTo($items);

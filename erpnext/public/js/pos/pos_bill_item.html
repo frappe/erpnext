@@ -4,7 +4,15 @@
         <div class="row pos-qty-row">
             <div class="col-xs-2 text-center pos-qty-btn" data-action="decrease-qty"><i class="icon-minus-sign text-muted"></i></div>
             <div class="col-xs-8">
-				<input type="text" value="{%= qty %}" class="form-control input-sm pos-item-qty text-right">
+				<div>
+                    <input type="text" value="{%= qty %}" class="form-control input-sm pos-item-qty text-right">
+                </div>
+                {% if(actual_qty != null) { %}
+                <div style="margin-top: 5px;" class="text-muted small text-right">
+                    <span title="{%= __("In Stock") %}">{%= actual_qty %}<span>
+                    <span title="{%= __("Projected") %}">({%= projected_qty %})<span>
+                </div>
+                {% } %}
             </div>
             <div class="col-xs-2 text-center pos-qty-btn" data-action="increase-qty"><i class="icon-plus-sign text-muted"></i></div>
         </div>
