@@ -36,3 +36,15 @@ $.extend(cur_frm.cscript, {
 		});
 	}
 });
+
+frappe.ui.form.on("Time Log Batch Detail", "time_log", function(frm, cdt, cdn) {
+	var tl = frm.doc.time_logs || [];
+	total_hr = 0;
+	total_amt = 0;
+	for(var i=0; i<tl.length; i++) {
+		total_hr += tl[i].hours;
+		total_amt += tl[i].billing_amount;
+	}
+	cur_frm.set_value("total_hours", total_hr);
+	cur_frm.set_value("total_billing_amount", total_amt);
+});
