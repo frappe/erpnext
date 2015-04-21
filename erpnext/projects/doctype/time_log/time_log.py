@@ -25,7 +25,7 @@ class TimeLog(Document):
 		self.validate_production_order()
 		self.validate_manufacturing()
 		self.validate_task()
-		self.validate_cost()
+		self.update_cost()
 
 	def on_submit(self):
 		self.update_production_order()
@@ -211,7 +211,7 @@ class TimeLog(Document):
 			self.operation = None
 			self.quantity = None
 	
-	def validate_cost(self):
+	def update_cost(self):
 		rate = get_activity_cost(self.employee, self.activity_type)
 		if rate:
 			self.costing_rate = rate.get('costing_rate')
