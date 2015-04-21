@@ -43,32 +43,34 @@ frappe.ui.form.on("Time Log", "to_time", function(frm) {
 
 });
 
-var calculate_cost = function(doc) {
-	cur_frm.set_value("costing_amount", doc.costing_rate * doc.hours);
-	if (doc.billable==1){
-		cur_frm.set_value("billing_amount", doc.billing_rate * doc.hours);
+var calculate_cost = function(frm) {
+	frm.set_value("costing_amount", frm.doc.costing_rate * frm.doc.hours);
+	if (frm.doc.billable==1){
+		frm.set_value("billing_amount", frm.doc.billing_rate * frm.doc.hours);
 	}
 }
 
 var get_activity_cost = function(frm) {
-	return frappe.call({
-		method: "erpnext.projects.doctype.time_log.time_log.get_activity_cost",
-		args: {
-			"employee": frm.doc.employee,
-			"activity_type": frm.doc.activity_type
-		},
-		callback: function(r) {
-			if(!r.exc) {
-				cur_frm.set_value("costing_rate", r.message.costing_rate);
-				cur_frm.set_value("billing_rate", r.message.billing_rate);
-				calculate_cost(frm.doc);
+	if (frm.doc.employee && frm.doc.activity_type){
+		return frappe.call({
+			method: "erpnext.projects.doctype.time_log.time_log.get_activity_cost",
+			args: {
+				"employee": frm.doc.employee,
+				"activity_type": frm.doc.activity_type
+			},
+			callback: function(r) {
+				if(!r.exc && r.message) {
+					frm.set_value("costing_rate", r.message.costing_rate);
+					frm.set_value("billing_rate", r.message.billing_rate);
+					calculate_cost(frm);
+				}
 			}
-		}
-	});
+		});
+	}
 }
 
 frappe.ui.form.on("Time Log", "hours", function(frm) {
-	calculate_cost(frm.doc);
+	calculate_cost(frm);
 });
 
 frappe.ui.form.on("Time Log", "activity_type", function(frm) {
@@ -81,10 +83,10 @@ frappe.ui.form.on("Time Log", "employee", function(frm) {
 
 frappe.ui.form.on("Time Log", "billable", function(frm) {
 	if (frm.doc.billable==1) {
-		calculate_cost(frm.doc);
+		calculate_cost(frm);
 	}
 	else {
-		frm.doc("billing_amount", 0);
+		frm.set_value("billing_amount", 0);
 	}
 });
 

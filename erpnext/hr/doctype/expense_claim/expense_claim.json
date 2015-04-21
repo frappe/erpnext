@@ -93,7 +93,8 @@
    "oldfieldname": "expense_voucher_details", 
    "oldfieldtype": "Table", 
    "options": "Expense Claim Detail", 
-   "permlevel": 0
+   "permlevel": 0, 
+   "reqd": 1
   }, 
   {
    "fieldname": "sb1", 
@@ -235,7 +236,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-04-14 05:08:06.541441", 
+ "modified": "2015-04-21 09:32:00.971151", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Expense Claim", 

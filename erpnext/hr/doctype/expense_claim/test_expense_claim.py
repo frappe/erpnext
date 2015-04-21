@@ -23,8 +23,6 @@ class TestExpenseClaim(unittest.TestCase):
 		expense_claim = frappe.get_doc({
 			 "doctype": "Expense Claim",
 			 "employee": "_T-Employee-0001",
-			 "posting_date": "2015-07-07",
-			 "fiscal_year": "_Test Fiscal Year 2015",
 			 "approval_status": "Approved",
 			 "project": "_Test Project 1",
 			 "task": task_name,
@@ -39,7 +37,6 @@ class TestExpenseClaim(unittest.TestCase):
 		expense_claim2 = frappe.get_doc({
 			 "doctype": "Expense Claim",
 			 "employee": "_T-Employee-0001",
-			 "posting_date": "2015-07-07",
 			 "approval_status": "Approved",
 			 "project": "_Test Project 1",
 			 "task": task_name,
