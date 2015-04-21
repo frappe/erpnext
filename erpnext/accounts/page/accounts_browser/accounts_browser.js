@@ -49,8 +49,8 @@ frappe.pages["Accounts Browser"].on_page_load  = function(wrapper){
 		});
 
 	wrapper.page.set_primary_action(__('New'), function() {
-			erpnext.account_chart && erpnext.account_chart.new_account();
-		});
+		erpnext.account_chart && erpnext.account_chart.make_new();
+	});
 
 	// company-select
 	wrapper.$company_select = wrapper.page.add_select("Company", [])
@@ -118,11 +118,7 @@ erpnext.AccountsChart = Class.extend({
 					condition: function(node) { return !node.root && node.expandable; },
 					label: __("Add Child"),
 					click: function() {
-						if(me.ctype=='Account') {
-							me.new_account();
-						} else {
-							me.new_cost_center();
-						}
+						me.make_new()
 					}
 				},
 				{
@@ -180,6 +176,15 @@ erpnext.AccountsChart = Class.extend({
 			wrapper.page.set_title(chart_str);
 		}
 	},
+
+	make_new: function() {
+		if(this.ctype=='Account') {
+			this.new_account();
+		} else {
+			this.new_cost_center();
+		}
+	},
+
 	new_account: function() {
 		var me = this;
 
@@ -197,7 +202,8 @@ erpnext.AccountsChart = Class.extend({
 				{fieldtype:'Data', fieldname:'account_name', label:__('New Account Name'), reqd:true,
 					description: __("Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master")},
 				{fieldtype:'Select', fieldname:'group_or_ledger', label:__('Group or Ledger'),
-					options:'Group\nLedger', description: __('Further accounts can be made under Groups, but entries can be made against Ledger')},
+					options:'Group\nLedger', "default": "Ledger",
+					description: __('Further accounts can be made under Groups, but entries can be made against Ledger')},
 				{fieldtype:'Select', fieldname:'account_type', label:__('Account Type'),
 					options: ['', 'Bank', 'Cash', 'Warehouse', 'Receivable', 'Payable',
 						'Equity', 'Cost of Goods Sold', 'Fixed Asset', 'Expense Account',
