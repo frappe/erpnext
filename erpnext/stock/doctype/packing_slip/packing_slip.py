@@ -65,9 +65,7 @@ class PackingSlip(Document):
 			frappe.throw(_("""Case No(s) already in use. Try from Case No {0}""").format(self.get_recommended_case_no()))
 
 	def validate_qty(self):
-		"""
-			Check packed qty across packing slips and delivery note
-		"""
+		"""Check packed qty across packing slips and delivery note"""
 		# Get Delivery Note Items, Item Quantity Dict and No. of Cases for this Packing slip
 		dn_details, ps_item_qty, no_of_cases = self.get_details_for_packing()
 
@@ -98,7 +96,7 @@ class PackingSlip(Document):
 				from `tabPacking Slip` ps, `tabPacking Slip Item` psi
 				where ps.name = psi.parent and ps.docstatus = 1
 				and ps.delivery_note = dni.parent and psi.item_code=dni.item_code) as packed_qty,
-			stock_uom, item_name
+			stock_uom, item_name, description, dni.batch_no
 			from `tabDelivery Note Item` dni
 			where parent=%s %s
 			group by item_code""" % ("%s", condition),
@@ -155,6 +153,8 @@ class PackingSlip(Document):
 				ch.item_code = item.item_code
 				ch.item_name = item.item_name
 				ch.stock_uom = item.stock_uom
+				ch.description = item.description
+				ch.batch_no = item.batch_no
 				ch.qty = flt(item.qty) - flt(item.packed_qty)
 		self.update_item_details()
 

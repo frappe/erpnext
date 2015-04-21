@@ -27,6 +27,21 @@
    "width": "200px"
   }, 
   {
+   "fieldname": "batch_no", 
+   "fieldtype": "Link", 
+   "label": "Batch No", 
+   "options": "Batch", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "description", 
+   "fieldtype": "Small Text", 
+   "label": "Description", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "qty", 
    "fieldtype": "Float", 
    "in_list_view": 1, 
@@ -90,7 +105,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-19 01:07:00.840553", 
+ "modified": "2015-04-21 01:42:24.312967", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Packing Slip Item", 
