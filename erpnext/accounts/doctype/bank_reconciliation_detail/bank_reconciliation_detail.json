@@ -1,17 +1,28 @@
 {
- "creation": "2013-02-22 01:27:37.000000", 
+ "creation": "2013-02-22 01:27:37", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
   {
    "fieldname": "voucher_id", 
    "fieldtype": "Link", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Voucher ID", 
    "no_copy": 0, 
    "oldfieldname": "voucher_id", 
    "oldfieldtype": "Link", 
    "options": "Journal Entry", 
+   "permlevel": 0, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "clearance_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 1, 
+   "label": "Clearance Date", 
+   "no_copy": 0, 
+   "oldfieldname": "clearance_date", 
+   "oldfieldtype": "Date", 
    "permlevel": 0, 
    "search_index": 0
   }, 
@@ -28,29 +39,6 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "posting_date", 
-   "fieldtype": "Date", 
-   "in_list_view": 1, 
-   "label": "Posting Date", 
-   "no_copy": 0, 
-   "oldfieldname": "posting_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0, 
-   "read_only": 1, 
-   "search_index": 0
-  }, 
-  {
-   "fieldname": "clearance_date", 
-   "fieldtype": "Date", 
-   "in_list_view": 1, 
-   "label": "Clearance Date", 
-   "no_copy": 0, 
-   "oldfieldname": "clearance_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0, 
-   "search_index": 0
-  }, 
-  {
    "fieldname": "cheque_number", 
    "fieldtype": "Data", 
    "in_list_view": 1, 
@@ -58,6 +46,44 @@
    "no_copy": 0, 
    "oldfieldname": "cheque_number", 
    "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "debit", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Debit", 
+   "no_copy": 0, 
+   "oldfieldname": "debit", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "credit", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Credit", 
+   "no_copy": 0, 
+   "oldfieldname": "credit", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "posting_date", 
+   "fieldtype": "Date", 
+   "in_list_view": 0, 
+   "label": "Posting Date", 
+   "no_copy": 0, 
+   "oldfieldname": "posting_date", 
+   "oldfieldtype": "Date", 
    "permlevel": 0, 
    "read_only": 1, 
    "search_index": 0
@@ -73,37 +99,14 @@
    "permlevel": 0, 
    "read_only": 1, 
    "search_index": 0
-  }, 
-  {
-   "fieldname": "debit", 
-   "fieldtype": "Currency", 
-   "label": "Debit", 
-   "no_copy": 0, 
-   "oldfieldname": "debit", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "read_only": 1, 
-   "search_index": 0
-  }, 
-  {
-   "fieldname": "credit", 
-   "fieldtype": "Currency", 
-   "label": "Credit", 
-   "no_copy": 0, 
-   "oldfieldname": "credit", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "read_only": 1, 
-   "search_index": 0
   }
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:22:55.000000", 
+ "modified": "2015-04-21 01:29:29.570890", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Bank Reconciliation Detail", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }
