@@ -217,6 +217,17 @@ class PurchaseOrder(BuyingController):
 
 	def on_update(self):
 		pass
+		
+	def before_recurring(self):
+		super(PurchaseOrder, self).before_recurring()
+		
+		for field in ("per_received", "per_billed"):
+			self.set(field, None)
+
+		for d in self.get("items"):
+			for field in ("received_qty", "billed_amt", "prevdoc_doctype", "prevdoc_docname", 
+				"prevdoc_detail_docname", "supplier_quotation", "supplier_quotation_item"):
+					d.set(field, None)
 
 @frappe.whitelist()
 def stop_or_unstop_purchase_orders(names, status):

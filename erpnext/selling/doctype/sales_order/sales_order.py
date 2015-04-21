@@ -256,6 +256,17 @@ def stop_or_unstop_sales_orders(names, status):
 
 	frappe.local.message_log = []
 
+	def before_recurring(self):
+		super(SalesOrder, self).before_recurring()
+		
+		for field in ("delivery_status", "per_delivered", "billing_status", "per_billed"):
+			self.set(field, None)
+
+		for d in self.get("items"):
+			for field in ("delivered_qty", "billed_amt", "planned_qty", "prevdoc_docname"):
+				d.set(field, None)
+			
+
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
 	def postprocess(source, doc):

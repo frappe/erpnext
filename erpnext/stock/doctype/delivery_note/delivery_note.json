@@ -1,4 +1,5 @@
 {
+ "allow_import": 1, 
  "autoname": "naming_series:", 
  "creation": "2013-05-24 19:29:09", 
  "docstatus": 0, 
@@ -1069,7 +1070,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2015-03-23 14:46:25.491139", 
+ "modified": "2015-04-07 00:12:12.119039", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note", 
