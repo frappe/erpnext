@@ -10,6 +10,7 @@ install:
   - sudo apt-get purge -y mysql-common
   - wget https://raw.githubusercontent.com/frappe/bench/master/install_scripts/setup_frappe.sh
   - sudo bash setup_frappe.sh --skip-setup-bench --mysql-root-password travis
+  - sudo pip install --upgrade pip
   - sudo service redis-server start
   - rm $TRAVIS_BUILD_DIR/.git/shallow
   - cd ~/ && bench init frappe-bench --frappe-path https://github.com/frappe/frappe.git --frappe-branch develop
