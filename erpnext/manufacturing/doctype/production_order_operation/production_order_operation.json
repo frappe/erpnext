@@ -194,7 +194,7 @@
   {
    "allow_on_submit": 0, 
    "fieldname": "hour_rate", 
-   "fieldtype": "Currency", 
+   "fieldtype": "Float", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "in_filter": 0, 
@@ -293,7 +293,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-04-21 07:10:43.341203", 
+ "modified": "2015-04-22 03:25:18.542350", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order Operation", 
