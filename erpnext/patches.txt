@@ -143,3 +143,4 @@ execute:frappe.permissions.reset_perms("Expense Claim Type") #2014-06-19
 erpnext.patches.v5_0.execute_on_doctype_update
 erpnext.patches.v4_2.fix_recurring_orders
 erpnext.patches.v4_2.delete_gl_entries_for_cancelled_invoices
+erpnext.patches.v5_0.project_costing

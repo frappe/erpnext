@@ -25,23 +25,19 @@ class Project(Document):
 				"task_id": task.name
 			})
 
-	def get_gross_profit(self):
-		pft, per_pft =0, 0
-		pft = flt(self.project_value) - flt(self.est_material_cost)
-		#if pft > 0:
-		per_pft = (flt(pft) / flt(self.project_value)) * 100
-		ret = {'gross_margin_value': pft, 'per_gross_margin': per_pft}
-		return ret
-
 	def validate(self):
-		if self.project_start_date and self.completion_date:
-			if getdate(self.completion_date) < getdate(self.project_start_date):
-				frappe.throw(_("Expected Completion Date can not be less than Project Start Date"))
-
+		self.validate_dates()
 		self.sync_tasks()
+
+	def validate_dates(self):
+		if self.expected_start_date and self.expected_end_date:
+			if getdate(self.expected_end_date) < getdate(self.expected_start_date):
+				frappe.throw(_("Expected End Date can not be less than Expected Start Date"))
 
 	def sync_tasks(self):
 		"""sync tasks and remove table"""
+		if self.flags.dont_sync_tasks: return
+		
 		task_names = []
 		for t in self.tasks:
 			if t.task_id:
@@ -66,7 +62,7 @@ class Project(Document):
 		# delete
 		for t in frappe.get_all("Task", ["name"], {"project": self.name, "name": ("not in", task_names)}):
 			frappe.delete_doc("Task", t.name)
-
+		
 		self.tasks = []
 
 	def update_percent_complete(self):
@@ -77,7 +73,22 @@ class Project(Document):
 				project=%s and status in ('Closed', 'Cancelled')""", self.name)[0][0]
 			frappe.db.set_value("Project", self.name, "percent_complete",
 			 	int(float(completed) / total * 100))
-
+				
+	def update_costing(self):
+		total_cost = frappe.db.sql("""select sum(total_costing_amount) as costing_amount,
+			sum(total_billing_amount) as billing_amount, sum(total_expense_claim) as expense_claim,
+			min(act_start_date) as start_date, max(act_end_date) as end_date, sum(actual_time) as time
+			from `tabTask` where project = %s""", self.name, as_dict=1)[0]
+			
+		self.total_costing_amount = total_cost.costing_amount
+		self.total_billing_amount = total_cost.billing_amount
+		self.total_expense_claim = total_cost.expense_claim
+		self.actual_start_date = total_cost.start_date
+		self.actual_end_date = total_cost.end_date
+		self.actual_time = total_cost.time
+		self.gross_margin = flt(total_cost.billing_amount) - flt(total_cost.costing_amount)
+		if self.total_billing_amount:
+			self.per_gross_margin = (self.gross_margin / flt(self.total_billing_amount)) *100
 
 @frappe.whitelist()
 def get_cost_center_name(project_name):

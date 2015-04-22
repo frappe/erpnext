@@ -10,7 +10,6 @@ from erpnext.projects.doctype.time_log.time_log import OverlapError
 from erpnext.projects.doctype.time_log.time_log import NotSubmittedError
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
 from erpnext.manufacturing.doctype.workstation.workstation import NotInWorkingHoursError
-from erpnext.projects.doctype.time_log_batch.test_time_log_batch import *
 from erpnext.manufacturing.doctype.production_order.test_production_order import make_prod_order_test_record
 
 
@@ -85,6 +84,72 @@ class TestTimeLog(unittest.TestCase):
 		test_time_log.to_time = "2013-01-01 10:00:00.000000"
 		self.assertRaises(frappe.ValidationError, test_time_log.save)
 		frappe.db.sql("delete from `tabTime Log`")
-
+		
+	def test_total_activity_cost_for_project(self):
+		frappe.db.sql("""delete from `tabTask` where project = "_Test Project 1" """)
+		frappe.db.sql("""delete from `tabProject` where name = "_Test Project 1" """)
+		frappe.db.sql("""delete from `tabActivity Cost` where employee = "_T-Employee-0001" and activity_type = "_Test Activity Type" """)
+		
+		activity_cost = frappe.new_doc('Activity Cost')
+		activity_cost.update({
+			"employee": "_T-Employee-0001",
+			"employee_name": "_Test Employee",
+			"activity_type": "_Test Activity Type",
+			"billing_rate": 100,
+			"costing_rate": 50
+		})
+		activity_cost.insert()
+		
+		frappe.get_doc({
+			"project_name": "_Test Project 1",
+			"doctype": "Project",
+			"tasks" :
+				[{ "title": "_Test Project Task 1", "status": "Open" }]
+		}).save()
+		
+		task_name = frappe.db.get_value("Task",{"project": "_Test Project 1"})
+		
+		time_log = frappe.get_doc({
+			 "activity_type": "_Test Activity Type",
+			 "docstatus": 1,
+			 "doctype": "Time Log",
+			 "from_time": "2013-02-02 09:00:00.000000",
+			 "to_time": "2013-02-02 11:00:00.000000",
+			 "employee": "_T-Employee-0001",
+			 "project": "_Test Project 1",
+			 "task": task_name,
+			 "billable": 1
+		})
+		time_log.save()
+		self.assertEqual(time_log.costing_rate, 50)
+		self.assertEqual(time_log.costing_amount, 100)
+		self.assertEqual(time_log.billing_rate, 100)
+		self.assertEqual(time_log.billing_amount, 200)
+		time_log.submit()
+		
+		self.assertEqual(frappe.db.get_value("Task", task_name, "total_billing_amount"), 200)
+		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_billing_amount"), 200)
+		
+		time_log2 = frappe.get_doc({
+			 "activity_type": "_Test Activity Type",
+			 "docstatus": 1,
+			 "doctype": "Time Log",
+			 "from_time": "2013-02-03 09:00:00.000000",
+			 "to_time": "2013-02-03 11:00:00.000000",
+			 "employee": "_T-Employee-0001",
+			 "project": "_Test Project 1",
+			 "task": task_name,
+			 "billable": 1
+		})
+		time_log2.save()
+		
+		self.assertEqual(frappe.db.get_value("Task", task_name, "total_billing_amount"), 400)
+		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_billing_amount"), 400)
+		
+		time_log2.cancel()
+		
+		self.assertEqual(frappe.db.get_value("Task", task_name, "total_billing_amount"), 200)
+		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_billing_amount"), 200)
+		
 test_records = frappe.get_test_records('Time Log')
 test_ignore = ["Time Log Batch", "Sales Invoice"]

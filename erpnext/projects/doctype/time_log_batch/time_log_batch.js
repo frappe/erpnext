@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch("time_log", "activity_type", "activity_type");
-cur_frm.add_fetch("time_log", "owner", "created_by");
+cur_frm.add_fetch("time_log", "billing_amount", "billing_amount");
 cur_frm.add_fetch("time_log", "hours", "hours");
 
 cur_frm.set_query("time_log", "time_logs", function(doc) {
@@ -35,4 +35,16 @@ $.extend(cur_frm.cscript, {
 			frm: cur_frm
 		});
 	}
+});
+
+frappe.ui.form.on("Time Log Batch Detail", "time_log", function(frm, cdt, cdn) {
+	var tl = frm.doc.time_logs || [];
+	total_hr = 0;
+	total_amt = 0;
+	for(var i=0; i<tl.length; i++) {
+		total_hr += tl[i].hours;
+		total_amt += tl[i].billing_amount;
+	}
+	cur_frm.set_value("total_hours", total_hr);
+	cur_frm.set_value("total_billing_amount", total_amt);
 });

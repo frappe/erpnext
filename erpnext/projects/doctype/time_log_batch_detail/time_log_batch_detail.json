@@ -1,5 +1,5 @@
 {
- "creation": "2013-03-05 09:11:06.000000", 
+ "creation": "2013-03-05 09:11:06", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -15,13 +15,18 @@
    "width": "200px"
   }, 
   {
-   "fieldname": "created_by", 
-   "fieldtype": "Link", 
+   "fieldname": "hours", 
+   "fieldtype": "Float", 
    "in_list_view": 1, 
-   "label": "Created By", 
-   "options": "User", 
+   "label": "Hours", 
    "permlevel": 0, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "section_break_3", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "activity_type", 
@@ -32,18 +37,21 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "hours", 
+   "fieldname": "billing_amount", 
    "fieldtype": "Float", 
    "in_list_view": 1, 
-   "label": "Hours", 
-   "permlevel": 0
+   "label": "Billing Amount", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
   }
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:21:54.000000", 
+ "modified": "2015-04-15 05:35:08.805589", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log Batch Detail", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }
