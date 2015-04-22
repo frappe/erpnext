@@ -28,6 +28,14 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "depends_on", 
+   "fieldtype": "Link", 
+   "label": "Depends on (Task)", 
+   "options": "Task", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "column_break0", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 
@@ -249,7 +257,7 @@
  "idx": 1, 
  "istable": 0, 
  "max_attachments": 5, 
- "modified": "2015-04-14 07:56:24.481667", 
+ "modified": "2015-04-22 04:58:30.865304", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Task", 

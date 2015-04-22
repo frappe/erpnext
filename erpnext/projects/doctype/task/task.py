@@ -27,6 +27,7 @@ class Task(Document):
 
 	def validate(self):
 		self.validate_dates()
+		self.validate_depends_on()
 		
 	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
@@ -68,6 +69,21 @@ class Task(Document):
 			project.flags.dont_sync_tasks = True
 			project.update_costing()
 			project.save()
+			
+	def validate_depends_on(self):
+		if not self.depends_on:
+			return
+		task_list = [self.name]
+		task = self.depends_on
+		while task:
+			task = self.check_recursion(task, task_list)
+			
+	def check_recursion(self, task, task_list):
+		if task in task_list:
+			frappe.throw("Circular Reference Error")
+		else :
+			task_list.append(task)
+			return frappe.db.get_value("Task", task, "depends_on")
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
