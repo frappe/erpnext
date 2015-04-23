@@ -49,6 +49,7 @@
    "set_only_once": 0
   }, 
   {
+   "depends_on": "task_id", 
    "fieldname": "edit_task", 
    "fieldtype": "Button", 
    "label": "View Task", 
@@ -143,7 +144,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-04-13 04:56:18.766659", 
+ "modified": "2015-04-23 05:48:00.504508", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project Task", 

@@ -128,13 +128,6 @@
    "search_index": 1
   }, 
   {
-   "fieldname": "company", 
-   "fieldtype": "Link", 
-   "label": "Company", 
-   "options": "Company", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "column_break_14", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -256,6 +249,13 @@
    "precision": ""
   }, 
   {
+   "fieldname": "company", 
+   "fieldtype": "Link", 
+   "label": "Company", 
+   "options": "Company", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "cost_center", 
    "fieldtype": "Link", 
    "label": "Default Cost Center", 
@@ -347,7 +347,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2015-04-14 07:37:56.810833", 
+ "modified": "2015-04-23 05:51:53.642253", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 
