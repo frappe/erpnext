@@ -220,6 +220,7 @@ erpnext.AccountsChart = Class.extend({
 				$(fd.tax_rate.wrapper).toggle(false);
 				$(fd.warehouse.wrapper).toggle(false);
 			} else {
+				$(fd.account_type.wrapper).toggle(true);
 				fd.account_type.$input.trigger("change");
 			}
 		});
