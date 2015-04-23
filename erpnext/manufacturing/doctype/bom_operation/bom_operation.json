@@ -42,7 +42,7 @@
   }, 
   {
    "fieldname": "hour_rate", 
-   "fieldtype": "Currency", 
+   "fieldtype": "Float", 
    "in_list_view": 0, 
    "label": "Hour Rate", 
    "oldfieldname": "hour_rate", 
@@ -77,7 +77,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-04-21 07:11:38.730014", 
+ "modified": "2015-04-22 03:24:47.809532", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Operation", 

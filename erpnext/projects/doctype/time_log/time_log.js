@@ -7,6 +7,9 @@ frappe.ui.form.on("Time Log", "onload", function(frm) {
 	if (frm.doc.for_manufacturing) {
 		frappe.ui.form.trigger("Time Log", "production_order");
 	}
+	if (frm.doc.from_time && frm.doc.to_time) {
+		frappe.ui.form.trigger("Time Log", "to_time");
+	}
 });
 
 frappe.ui.form.on("Time Log", "refresh", function(frm) {
