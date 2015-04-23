@@ -6,6 +6,7 @@ import frappe, json
 
 from frappe.utils import getdate
 from frappe import _
+from data import date_diff, add_days
 
 
 from frappe.model.document import Document
@@ -28,6 +29,7 @@ class Task(Document):
 	def validate(self):
 		self.validate_dates()
 		self.validate_depends_on()
+		self.reschedule_depending_task()
 		
 	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
@@ -84,6 +86,14 @@ class Task(Document):
 		else :
 			task_list.append(task)
 			return frappe.db.get_value("Task", task, "depends_on")
+			
+	def reschedule_depending_task(self):
+		for task_name in frappe.db.sql("select name from `tabTask` where depends_on = %s", self.name, as_dict=1):
+			task = frappe.get_doc("Task", task_name.name)
+			task_duration = date_diff(task.exp_end_date, task.exp_start_date)
+			task.exp_start_date = add_days(self.act_end_date if self.act_end_date else self.exp_end_date, 1)
+			task.exp_end_date = add_days(task.exp_start_date, task_duration)
+			task.save()
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
