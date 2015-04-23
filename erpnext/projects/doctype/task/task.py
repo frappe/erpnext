@@ -4,10 +4,8 @@
 from __future__ import unicode_literals
 import frappe, json
 
-from frappe.utils import getdate
+from frappe.utils import getdate, date_diff, add_days
 from frappe import _
-from data import date_diff, add_days
-
 
 from frappe.model.document import Document
 
