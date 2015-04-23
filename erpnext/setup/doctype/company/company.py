@@ -55,7 +55,7 @@ class Company(Document):
 			self.create_default_warehouses()
 			self.install_country_fixtures()
 
-		if not frappe.db.get_value("Cost Center", {"group_or_ledger": "Ledger", "company": self.name}):
+		if not frappe.db.get_value("Cost Center", {"is_group": 0, "company": self.name}):
 			self.create_default_cost_center()
 
 		self.set_default_accounts()
@@ -71,7 +71,7 @@ class Company(Document):
 		for whname in (_("Stores"), _("Work In Progress"), _("Finished Goods")):
 			if not frappe.db.exists("Warehouse", whname + " - " + self.abbr):
 				stock_group = frappe.db.get_value("Account", {"account_type": "Stock",
-					"group_or_ledger": "Group", "company": self.name})
+					"is_group": 1, "company": self.name})
 				if stock_group:
 					frappe.get_doc({
 						"doctype":"Warehouse",
@@ -125,7 +125,7 @@ class Company(Document):
 			return
 
 		account = frappe.db.get_value("Account", {"account_type": account_type,
-			"group_or_ledger": "Ledger", "company": self.name})
+			"is_group": 0, "company": self.name})
 
 		if account:
 			self.db_set(fieldname, account)
@@ -135,13 +135,13 @@ class Company(Document):
 			{
 				'cost_center_name': self.name,
 				'company':self.name,
-				'group_or_ledger':'Group',
+				'is_group': 1,
 				'parent_cost_center':None
 			},
 			{
 				'cost_center_name':_('Main'),
 				'company':self.name,
-				'group_or_ledger':'Ledger',
+				'is_group':0,
 				'parent_cost_center':self.name + ' - ' + self.abbr
 			},
 		]

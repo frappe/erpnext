@@ -21,7 +21,7 @@ def get_children():
 	# root
 	if args['parent'] in ("Accounts", "Cost Centers"):
 		acc = frappe.db.sql(""" select
-			name as value, if(group_or_ledger='Group', 1, 0) as expandable
+			name as value, is_group as expandable
 			from `tab%s`
 			where ifnull(parent_%s,'') = ''
 			and `company` = %s	and docstatus<2
@@ -30,7 +30,7 @@ def get_children():
 	else:
 		# other
 		acc = frappe.db.sql("""select
-			name as value, if(group_or_ledger='Group', 1, 0) as expandable
+			name as value, is_group as expandable
 	 		from `tab%s`
 			where ifnull(parent_%s,'') = %s
 			and docstatus<2

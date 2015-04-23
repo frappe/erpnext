@@ -394,7 +394,7 @@ class EmailDigest(Document):
 		if not hasattr(self, "accounts"):
 			self.accounts = frappe.db.sql("""select name, account_type, account_name, root_type
 				from `tabAccount` where company=%s and docstatus < 2
-				and group_or_ledger = "Ledger" order by lft""",
+				and is_group = 0 order by lft""",
 				(self.company,), as_dict=1)
 		return self.accounts
 

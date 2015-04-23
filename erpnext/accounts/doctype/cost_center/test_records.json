@@ -13,21 +13,21 @@
   "cost_center_name": "_Test Cost Center",
   "distribution_id": "_Test Distribution",
   "doctype": "Cost Center",
-  "group_or_ledger": "Ledger",
+  "is_group": 0,
   "parent_cost_center": "_Test Company - _TC"
  },
  {
   "company": "_Test Company",
   "cost_center_name": "_Test Cost Center 2",
   "doctype": "Cost Center",
-  "group_or_ledger": "Ledger",
+  "is_group": 0,
   "parent_cost_center": "_Test Company - _TC"
  },
  {
   "company": "_Test Company",
   "cost_center_name": "_Test Write Off Cost Center",
   "doctype": "Cost Center",
-  "group_or_ledger": "Ledger",
+  "is_group": 0,
   "parent_cost_center": "_Test Company - _TC"
  }
 ]

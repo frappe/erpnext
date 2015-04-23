@@ -18,7 +18,7 @@ erpnext.accounts.CostCenterController = frappe.ui.form.Controller.extend({
 					filters:[
 						['Account', 'company', '=', me.frm.doc.company],
 						['Account', 'report_type', '=', 'Profit and Loss'],
-						['Account', 'group_or_ledger', '=', 'Ledger'],
+						['Account', 'is_group', '=', '0'],
 					]
 				}
 			});
@@ -27,7 +27,7 @@ erpnext.accounts.CostCenterController = frappe.ui.form.Controller.extend({
 		this.frm.set_query("parent_cost_center", function() {
 			return {
 				filters:[
-					['Cost Center', 'group_or_ledger', '=', 'Group'],
+					['Cost Center', 'is_group', '=', '1'],
 					['Cost Center', 'company', '=', me.frm.doc.company],
 				]
 			}
@@ -40,15 +40,15 @@ $.extend(cur_frm.cscript, new erpnext.accounts.CostCenterController({frm: cur_fr
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	var intro_txt = '';
 	cur_frm.toggle_display('cost_center_name', doc.__islocal);
-	cur_frm.toggle_enable(['group_or_ledger', 'company'], doc.__islocal);
+	cur_frm.toggle_enable(['is_group', 'company'], doc.__islocal);
 
-	if(!doc.__islocal && doc.group_or_ledger=='Group') {
+	if(!doc.__islocal && doc.is_group==1) {
 		intro_txt += __('Note: This Cost Center is a Group. Cannot make accounting entries against groups.');
 	}
 
 	cur_frm.cscript.hide_unhide_group_ledger(doc);
 
-	cur_frm.toggle_display('sb1', doc.group_or_ledger=='Ledger')
+	cur_frm.toggle_display('sb1', doc.is_group==0)
 	cur_frm.set_intro(intro_txt);
 
 	cur_frm.add_custom_button(__('Chart of Cost Centers'),
@@ -62,11 +62,11 @@ cur_frm.cscript.parent_cost_center = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.hide_unhide_group_ledger = function(doc) {
-	if (cstr(doc.group_or_ledger) == 'Group') {
-		cur_frm.add_custom_button(__('Convert to Ledger'),
+	if (doc.is_group == 1) {
+		cur_frm.add_custom_button(__('Convert to non-Group'),
 			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet',
 				"btn-default")
-	} else if (cstr(doc.group_or_ledger) == 'Ledger') {
+	} else if (doc.is_group == 0) {
 		cur_frm.add_custom_button(__('Convert to Group'),
 			function() { cur_frm.cscript.convert_to_group(); }, 'icon-retweet',
 				"btn-default")

@@ -38,18 +38,12 @@
    "search_index": 1
   }, 
   {
-   "default": "Ledger", 
-   "fieldname": "group_or_ledger", 
-   "fieldtype": "Select", 
-   "in_filter": 1, 
-   "in_list_view": 1, 
-   "label": "Group or Ledger", 
-   "oldfieldname": "group_or_ledger", 
-   "oldfieldtype": "Select", 
-   "options": "\nLedger\nGroup", 
+   "default": "0", 
+   "fieldname": "is_group", 
+   "fieldtype": "Check", 
+   "label": "Is Group", 
    "permlevel": 0, 
-   "read_only": 1, 
-   "reqd": 1, 
+   "precision": "", 
    "search_index": 1
   }, 
   {
@@ -177,7 +171,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-02-20 05:09:22.108350", 
+ "modified": "2015-04-23 02:53:48.056520", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Account", 
@@ -261,5 +255,5 @@
    "write": 1
   }
  ], 
- "search_fields": "group_or_ledger"
+ "search_fields": "is_group"
 }

@@ -8,7 +8,7 @@ from frappe import _
 
 def execute(filters=None):
 	account_details = {}
-	for acc in frappe.db.sql("""select name, group_or_ledger from tabAccount""", as_dict=1):
+	for acc in frappe.db.sql("""select name, is_group from tabAccount""", as_dict=1):
 			account_details.setdefault(acc.name, acc)
 
 	validate_filters(filters, account_details)
@@ -25,7 +25,7 @@ def validate_filters(filters, account_details):
 		frappe.throw(_("Account {0} does not exists").format(filters.account))
 
 	if filters.get("account") and filters.get("group_by_account") \
-			and account_details[filters.account].group_or_ledger == "Ledger":
+			and account_details[filters.account].is_group == 0:
 		frappe.throw(_("Can not filter based on Account, if grouped by Account"))
 
 	if filters.get("voucher_no") and filters.get("group_by_voucher"):
@@ -45,10 +45,10 @@ def validate_party(filters):
 			frappe.throw(_("Invalid {0}: {1}").format(party_type, party))
 
 def get_columns():
-	return [_("Posting Date") + ":Date:90", _("Account") + ":Link/Account:200", 
-		_("Debit") + ":Float:100", _("Credit") + ":Float:100", 
-		_("Voucher Type") + "::120", _("Voucher No") + ":Dynamic Link/Voucher Type:160", 
-		_("Against Account") + "::120", _("Party Type") + "::80", _("Party") + "::150", 
+	return [_("Posting Date") + ":Date:90", _("Account") + ":Link/Account:200",
+		_("Debit") + ":Float:100", _("Credit") + ":Float:100",
+		_("Voucher Type") + "::120", _("Voucher No") + ":Dynamic Link/Voucher Type:160",
+		_("Against Account") + "::120", _("Party Type") + "::80", _("Party") + "::150",
 		_("Cost Center") + ":Link/Cost Center:100", _("Remarks") + "::400"]
 
 def get_result(filters, account_details):
@@ -179,7 +179,7 @@ def get_result_as_list(data):
 	for d in data:
 		result.append([d.get("posting_date"), d.get("account"), d.get("debit"),
 			d.get("credit"), d.get("voucher_type"), d.get("voucher_no"),
-			d.get("against"), d.get("party_type"), d.get("party"), 
+			d.get("against"), d.get("party_type"), d.get("party"),
 			d.get("cost_center"), d.get("remarks")])
 
 	return result

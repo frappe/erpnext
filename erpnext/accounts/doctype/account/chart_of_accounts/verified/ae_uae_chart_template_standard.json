@@ -85,7 +85,7 @@
                     },
                     "Stock in Hand": {
 		                "account_type": "Stock",
-						"group_or_ledger": "Group"
+						"is_group": 1
                     }
                 },
                 "Perliminary and Preoperating Expenses": {
@@ -326,7 +326,7 @@
 			    },
 				"Duties and Taxes": {
 					"account_type": "Tax",
-					"group_or_ledger": "Group"
+					"is_group": 1
 				},
                 "Accruals & Provisions": {
                     "Accruals": {

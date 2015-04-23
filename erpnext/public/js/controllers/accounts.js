@@ -162,7 +162,7 @@ frappe.ui.form.on(cur_frm.doctype, "onload", function(frm) {
 			return {
 				filters: {
 					'company': doc.company,
-					'group_or_ledger': "Ledger"
+					"is_group": 0
 				}
 			}
 		});

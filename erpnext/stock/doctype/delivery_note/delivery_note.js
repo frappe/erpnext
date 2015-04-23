@@ -214,7 +214,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 			filters: {
 				"report_type": "Profit and Loss",
 				"company": doc.company,
-				"group_or_ledger": "Ledger"
+				"is_group": 0
 			}
 		}
 	}
@@ -236,7 +236,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 
 			filters: {
 				'company': doc.company,
-				'group_or_ledger': "Ledger"
+				"is_group": 0
 			}
 		}
 	}

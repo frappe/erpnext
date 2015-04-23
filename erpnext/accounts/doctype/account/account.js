@@ -12,12 +12,12 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.toggle_display('account_name', doc.__islocal);
 
 	// hide fields if group
-	cur_frm.toggle_display(['account_type', 'tax_rate'], doc.group_or_ledger=='Ledger')
+	cur_frm.toggle_display(['account_type', 'tax_rate'], cint(doc.is_group)==0)
 
 	// disable fields
-	cur_frm.toggle_enable(['account_name', 'group_or_ledger', 'company'], false);
+	cur_frm.toggle_enable(['account_name', 'is_group', 'company'], false);
 
-	if(doc.group_or_ledger=='Ledger') {
+	if(cint(doc.is_group)==0) {
 		cur_frm.toggle_display('freeze_account', doc.__onload && doc.__onload.can_freeze_account);
 	}
 
@@ -40,7 +40,7 @@ cur_frm.add_fetch('parent_account', 'report_type', 'report_type');
 cur_frm.add_fetch('parent_account', 'root_type', 'root_type');
 
 cur_frm.cscript.account_type = function(doc, cdt, cdn) {
-	if(doc.group_or_ledger=='Ledger') {
+	if(doc.is_group==0) {
 		cur_frm.toggle_display(['tax_rate'], doc.account_type == 'Tax');
 		cur_frm.toggle_display('warehouse', doc.account_type=='Warehouse');
 	}
@@ -50,10 +50,10 @@ cur_frm.cscript.add_toolbar_buttons = function(doc) {
 	cur_frm.add_custom_button(__('Chart of Accounts'),
 		function() { frappe.set_route("Accounts Browser", "Account"); }, 'icon-sitemap')
 
-	if (cstr(doc.group_or_ledger) == 'Group') {
-		cur_frm.add_custom_button(__('Convert to Ledger'),
+	if (doc.is_group == 1) {
+		cur_frm.add_custom_button(__('Convert to non-Group'),
 			function() { cur_frm.cscript.convert_to_ledger(); }, 'icon-retweet', 'btn-default');
-	} else if (cstr(doc.group_or_ledger) == 'Ledger') {
+	} else if (cint(doc.is_group) == 0) {
 		cur_frm.add_custom_button(__('View Ledger'), function() {
 			frappe.route_options = {
 				"account": doc.name,
@@ -88,7 +88,7 @@ cur_frm.cscript.convert_to_group = function(doc, cdt, cdn) {
 cur_frm.fields_dict['parent_account'].get_query = function(doc) {
 	return {
 		filters: {
-			"group_or_ledger": "Group",
+			"is_group": 1,
 			"company": doc.company
 		}
 	}

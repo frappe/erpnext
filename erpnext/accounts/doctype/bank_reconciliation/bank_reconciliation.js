@@ -26,7 +26,7 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 		return {
 			"filters": {
 				"account_type": "Bank",
-				"group_or_ledger": "Ledger"
+				"is_group": 0
 			}
 		};
 	});

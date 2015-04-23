@@ -12,7 +12,7 @@
 	            },
 	            "Bank Accounts": {
 	                "account_type": "Bank",
-					"group_or_ledger": "Group"
+					"is_group": 1
 	            },
 	            "Cash In Hand": {
 	                "Cash": {
@@ -21,17 +21,17 @@
 	                "account_type": "Cash"
 	            },
 	            "Loans and Advances (Assets)": {
-	            	"group_or_ledger": "Group"
+	            	"is_group": 1
 	            },
 	            "Securities and Deposits": {
 	                "Earnest Money": {}
 	            },
 	            "Stock Assets": {
 	                "account_type": "Stock",
-					"group_or_ledger": "Group"
+					"is_group": 1
 	            },
 	            "Tax Assets": {
-					"group_or_ledger": "Group"
+					"is_group": 1
 				}
 	        },
 	        "Fixed Assets": {
@@ -52,7 +52,7 @@
 	            }
 	        },
 	        "Investments": {
-	        	"group_or_ledger": "Group"
+	        	"is_group": 1
 	        },
 	        "Temporary Accounts (Assets)": {
 	            "Temporary Assets": {}
@@ -146,7 +146,7 @@
 	        },
 	        "Indirect Income": {
 	            "account_type": "Income Account",
-				"group_or_ledger": "Group"
+				"is_group": 1
 	        },
 			"root_type": "Income"
 	    },
@@ -168,7 +168,7 @@
 			    },
 				"Duties and Taxes": {
 					"account_type": "Tax",
-					"group_or_ledger": "Group"
+					"is_group": 1
 				},
 				"Loans (Liabilities)": {
 					"Secured Loans": {},

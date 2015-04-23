@@ -546,7 +546,7 @@ def get_payment_entry(doc):
 def get_opening_accounts(company):
 	"""get all balance sheet accounts for opening entry"""
 	accounts = frappe.db.sql_list("""select name from tabAccount
-		where group_or_ledger='Ledger' and report_type='Balance Sheet' and company=%s""", company)
+		where is_group=0 and report_type='Balance Sheet' and company=%s""", company)
 
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 

@@ -188,17 +188,6 @@ class ReceivablePayableReport(object):
 			conditions.append("party_type=%s and party=%s")
 			values += [party_type, self.filters.get(party_type_field)]
 
-		if self.filters.account:
-			conditions.append("account=%s")
-			values.append(self.filters.account)
-		else:
-			account_map = self.get_account_map()
-			if not account_map:
-				frappe.throw(_("No Customer Accounts found."))
-			else:
-				conditions.append("account in ({0})".format(", ".join(["%s"] * len(account_map))))
-				values += account_map.keys()
-				
 		return " and ".join(conditions), values
 
 	def get_gl_entries_for(self, party, party_type, against_voucher_type, against_voucher):

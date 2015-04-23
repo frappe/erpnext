@@ -89,7 +89,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None):
 				% year_start_date)
 
 		# different filter for group and ledger - improved performance
-		if acc.group_or_ledger=="Group":
+		if acc.is_group:
 			cond.append("""exists (
 				select * from `tabAccount` ac where ac.name = gle.account
 				and ac.lft >= %s and ac.rgt <= %s

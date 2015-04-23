@@ -24,18 +24,16 @@ frappe.pages["Accounts Browser"].on_page_load  = function(wrapper){
 		'<ol>'+
 			'<li>'+__('To add child nodes, explore tree and click on the node under which you want to add more nodes.')+'</li>'+
 			'<li>'+
-			      __('Accounting Entries can be made against leaf nodes, called')+
-				 ' <b>' +__('Ledgers')+'</b>. '+ __('Entries against ') +
-				 '<b>' +__('Groups') + '</b> '+ __('are not allowed.')+
+			      __('Accounting Entries can be made against leaf nodes. Entries against Groups are not allowed.')+
 		    '</li>'+
-			'<li>'+__('Please do NOT create Account (Ledgers) for Customers and Suppliers. They are created directly from the Customer / Supplier masters.')+'</li>'+
+			'<li>'+__('Please do NOT create Accounts for Customers and Suppliers. They are created directly from the Customer / Supplier masters.')+'</li>'+
 			'<li>'+
 			     '<b>'+__('To create a Bank Account')+'</b>: '+
-			      __('Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts and create a new Account Ledger (by clicking on Add Child) of type "Bank"')+
+			      __('Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts and create a new Account (by clicking on Add Child) of type "Bank"')+
 			'</li>'+
 			'<li>'+
 			      '<b>'+__('To create a Tax Account') +'</b>: '+
-			      __('Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties and create a new Account Ledger (by clicking on Add Child) of type "Tax" and do mention the Tax rate.')+
+			      __('Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties and create a new Account (by clicking on Add Child) of type "Tax" and do mention the Tax rate.')+
 			'</li>'+
 		'</ol>'+
 		'<p>'+__('Please setup your chart of accounts before you start Accounting Entries')+'</p></div>').appendTo(main);
@@ -201,9 +199,8 @@ erpnext.AccountsChart = Class.extend({
 			fields: [
 				{fieldtype:'Data', fieldname:'account_name', label:__('New Account Name'), reqd:true,
 					description: __("Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master")},
-				{fieldtype:'Select', fieldname:'group_or_ledger', label:__('Group or Ledger'),
-					options:'Group\nLedger', "default": "Ledger",
-					description: __('Further accounts can be made under Groups, but entries can be made against Ledger')},
+				{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
+					description: __('Further accounts can be made under Groups, but entries can be made against non-Groups')},
 				{fieldtype:'Select', fieldname:'account_type', label:__('Account Type'),
 					options: ['', 'Bank', 'Cash', 'Warehouse', 'Receivable', 'Payable',
 						'Equity', 'Cost of Goods Sold', 'Fixed Asset', 'Expense Account',
@@ -217,8 +214,8 @@ erpnext.AccountsChart = Class.extend({
 		var fd = d.fields_dict;
 
 		// account type if ledger
-		$(fd.group_or_ledger.input).change(function() {
-			if($(this).val()=='Group') {
+		$(fd.is_group.input).change(function() {
+			if($(this).prop("checked")) {
 				$(fd.account_type.wrapper).toggle(false);
 				$(fd.tax_rate.wrapper).toggle(false);
 				$(fd.warehouse.wrapper).toggle(false);
@@ -263,11 +260,11 @@ erpnext.AccountsChart = Class.extend({
 
 		// show
 		d.on_page_show = function() {
-			$(fd.group_or_ledger.input).change();
+			$(fd.is_group.input).change();
 			$(fd.account_type.input).change();
 		}
 
-		$(fd.group_or_ledger.input).val("Ledger").change();
+		$(fd.is_group.input).prop("checked", false).change();
 		d.show();
 	},
 
@@ -278,8 +275,8 @@ erpnext.AccountsChart = Class.extend({
 			title:__('New Cost Center'),
 			fields: [
 				{fieldtype:'Data', fieldname:'cost_center_name', label:__('New Cost Center Name'), reqd:true},
-				{fieldtype:'Select', fieldname:'group_or_ledger', label:__('Group or Ledger'),
-					options:'Group\nLedger', description:__('Further accounts can be made under Groups but entries can be made against Ledger')},
+				{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
+					description:__('Further cost centers can be made under Groups but entries can be made against non-Groups')},
 				{fieldtype:'Button', fieldname:'create_new', label:__('Create New') }
 			]
 		});

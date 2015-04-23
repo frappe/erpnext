@@ -122,7 +122,7 @@ $.extend(erpnext.item, {
 			return {
 				filters: {
 					"report_type": "Profit and Loss",
-					"group_or_ledger": "Ledger"
+					"is_group": 0
 				}
 			}
 		}
@@ -133,7 +133,7 @@ $.extend(erpnext.item, {
 			return {
 				filters: {
 					"report_type": "Profit and Loss",
-					'group_or_ledger': "Ledger",
+					"is_group": 0,
 					'account_type': "Income Account"
 				}
 			}
@@ -144,7 +144,7 @@ $.extend(erpnext.item, {
 		// -----------------------------
 		frm.fields_dict['buying_cost_center'].get_query = function(doc) {
 			return {
-				filters:{ 'group_or_ledger': "Ledger" }
+				filters:{ "is_group": 0 }
 			}
 		}
 
@@ -153,7 +153,7 @@ $.extend(erpnext.item, {
 		// -----------------------------
 		frm.fields_dict['selling_cost_center'].get_query = function(doc) {
 			return {
-				filters:{ 'group_or_ledger': "Ledger" }
+				filters:{ "is_group": 0 }
 			}
 		}
 

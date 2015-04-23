@@ -138,7 +138,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 	tax_accounts = frappe.db.sql("""select name, parent_account	from tabAccount
 		where tabAccount.docstatus!=2
 			and account_type in (%s)
-			and group_or_ledger = 'Ledger'
+			and is_group = 0
 			and company = %s
 			and `%s` LIKE %s
 		limit %s, %s""" %
@@ -147,7 +147,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 			start, page_len]))
 	if not tax_accounts:
 		tax_accounts = frappe.db.sql("""select name, parent_account	from tabAccount
-			where tabAccount.docstatus!=2 and group_or_ledger = 'Ledger'
+			where tabAccount.docstatus!=2 and is_group = 0
 				and company = %s and `%s` LIKE %s limit %s, %s"""
 			% ("%s", searchfield, "%s", "%s", "%s"),
 			(filters.get("company"), "%%%s%%" % txt, start, page_len))
@@ -281,8 +281,8 @@ def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 	elif isinstance(filters, list):
 		filter_list.extend(filters)
 
-	if "group_or_ledger" not in [d[1] for d in filter_list]:
-		filter_list.append(["Account", "group_or_ledger", "=", "Ledger"])
+	if "is_group" not in [d[1] for d in filter_list]:
+		filter_list.append(["Account", "is_group", "=", "0"])
 
 	if searchfield and txt:
 		filter_list.append([doctype, searchfield, "like", "%%%s%%" % txt])

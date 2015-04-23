@@ -22,7 +22,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 				return{
 					filters: {
 						"company": me.frm.doc.company,
-						"group_or_ledger": "Ledger",
+						"is_group": 0,
 						"account_type": (me.frm.doc.party_type == "Customer" ? "Receivable" : "Payable")
 					}
 				};
@@ -37,7 +37,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 				return{
 					filters:[
 						['Account', 'company', '=', me.frm.doc.company],
-						['Account', 'group_or_ledger', '=', 'Ledger'],
+						['Account', 'is_group', '=', 0],
 						['Account', 'account_type', 'in', ['Bank', 'Cash']]
 					]
 				};
