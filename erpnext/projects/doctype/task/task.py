@@ -9,7 +9,7 @@ from frappe import _
 
 from frappe.model.document import Document
 
-class ReferenceError(frappe.ValidationError): pass
+class CircularReferenceError(frappe.ValidationError): pass
 
 class Task(Document):
 	def get_feed(self):
@@ -82,7 +82,7 @@ class Task(Document):
 			
 	def check_recursion(self, task, task_list):
 		if task in task_list:
-			frappe.throw("Circular Reference Error", ReferenceError)
+			frappe.throw("Circular Reference Error", CircularReferenceError)
 		else :
 			task_list.append(task)
 			return frappe.db.get_value("Task", task, "depends_on")

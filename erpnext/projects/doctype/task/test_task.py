@@ -7,7 +7,7 @@ from frappe.utils import getdate
 
 test_records = frappe.get_test_records('Task')
 
-from erpnext.projects.doctype.task.task import ReferenceError
+from erpnext.projects.doctype.task.task import CircularReferenceError
 
 class TestTask(unittest.TestCase):
 	def test_circular_refereence(self):
@@ -37,7 +37,7 @@ class TestTask(unittest.TestCase):
 		task1.update({
 			"depends_on": task3.name
 		})
-		self.assertRaises(ReferenceError, task1.save)
+		self.assertRaises(CircularReferenceError, task1.save)
 		
 	def test_reschedule_depending_task(self):
 		task1 =  frappe.new_doc('Task')
