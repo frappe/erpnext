@@ -90,10 +90,11 @@ class Task(Document):
 	def reschedule_depending_task(self):
 		for task_name in frappe.db.sql("select name from `tabTask` where depends_on = %s", self.name, as_dict=1):
 			task = frappe.get_doc("Task", task_name.name)
-			task_duration = date_diff(task.exp_end_date, task.exp_start_date)
-			task.exp_start_date = add_days(self.act_end_date if self.act_end_date else self.exp_end_date, 1)
-			task.exp_end_date = add_days(task.exp_start_date, task_duration)
-			task.save()
+			if task.exp_start_date and task.exp_end_date and (self.exp_end_date or self.act_end_date):
+				task_duration = date_diff(task.exp_end_date, task.exp_start_date)
+				task.exp_start_date = add_days(self.act_end_date if self.act_end_date else self.exp_end_date, 1)
+				task.exp_end_date = add_days(task.exp_start_date, task_duration)
+				task.save()
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
