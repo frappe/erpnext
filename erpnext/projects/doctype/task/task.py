@@ -9,6 +9,8 @@ from frappe import _
 
 from frappe.model.document import Document
 
+class ReferenceError(frappe.ValidationError): pass
+
 class Task(Document):
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.subject)
@@ -53,8 +55,8 @@ class Task(Document):
 	def update_time_and_costing(self):
 		tl = frappe.db.sql("""select min(from_time) as start_date, max(to_time) as end_date,
 			 sum(billing_amount) as total_billing_amount, sum(costing_amount) as total_costing_amount,
-			sum(hours) as time from `tabTime Log` where project = %s and task = %s and docstatus=1""",
-			(self.project, self.name),as_dict=1)[0]
+			sum(hours) as time from `tabTime Log` where task = %s and docstatus=1"""
+			,self.name, as_dict=1)[0]
 		if self.status == "Open":
 			self.status = "Working"
 		self.total_costing_amount= tl.total_costing_amount
@@ -80,7 +82,7 @@ class Task(Document):
 			
 	def check_recursion(self, task, task_list):
 		if task in task_list:
-			frappe.throw("Circular Reference Error")
+			frappe.throw("Circular Reference Error", ReferenceError)
 		else :
 			task_list.append(task)
 			return frappe.db.get_value("Task", task, "depends_on")
