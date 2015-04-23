@@ -14,7 +14,7 @@ frappe.query_reports["Bank Reconciliation Statement"] = {
 					"query": "erpnext.controllers.queries.get_account_list",
 					"filters": [
 						['Account', 'account_type', 'in', 'Bank, Cash'],
-						['Account', 'group_or_ledger', '=', 'Ledger'],
+						['Account', 'is_group', '=', 0],
 					]
 				}
 			}

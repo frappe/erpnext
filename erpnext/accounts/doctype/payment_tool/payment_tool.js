@@ -18,7 +18,7 @@ frappe.ui.form.on("Payment Tool", "onload", function(frm) {
 		return {
 			filters: {
 				"account_type": ["in", ["Bank", "Cash"]],
-				"group_or_ledger": "Ledger",
+				"is_group": 0,
 				"company": frm.doc.company
 			}
 		}

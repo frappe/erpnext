@@ -13,18 +13,18 @@ def create_charts(chart_name, company):
 		accounts = []
 
 		def _import_accounts(children, parent, root_type, root_account=False):
-			for account_name, children in children.items():
+			for account_name, child in children.items():
 				if root_account:
-					root_type = children.get("root_type")
+					root_type = child.get("root_type")
 
-				if account_name not in ["account_type", "root_type", "group_or_ledger"]:
+				if account_name not in ["account_type", "root_type", "is_group"]:
 
 					account_name_in_db = unidecode(account_name.strip().lower())
 					if account_name_in_db in accounts:
 						count = accounts.count(account_name_in_db)
 						account_name = account_name + " " + cstr(count)
 
-					group_or_ledger = identify_group_or_ledger(children)
+					is_group = identify_is_group(child)
 					report_type = "Balance Sheet" if root_type in ["Asset", "Liability", "Equity"] \
 						else "Profit and Loss"
 
@@ -33,10 +33,10 @@ def create_charts(chart_name, company):
 						"account_name": account_name,
 						"company": company,
 						"parent_account": parent,
-						"group_or_ledger": group_or_ledger,
+						"is_group": is_group,
 						"root_type": root_type,
 						"report_type": report_type,
-						"account_type": children.get("account_type")
+						"account_type": child.get("account_type")
 					})
 
 					if root_account:
@@ -46,19 +46,19 @@ def create_charts(chart_name, company):
 
 					accounts.append(account_name_in_db)
 
-					_import_accounts(children, account.name, root_type)
+					_import_accounts(child, account.name, root_type)
 
 		_import_accounts(chart, None, None, root_account=True)
 
-def identify_group_or_ledger(children):
-	if children.get("group_or_ledger"):
-		group_or_ledger = children.get("group_or_ledger")
-	elif len(set(children.keys()) - set(["account_type", "root_type", "group_or_ledger"])):
-		group_or_ledger = "Group"
+def identify_is_group(child):
+	if child.get("is_group"):
+		is_group = child.get("is_group")
+	elif len(set(child.keys()) - set(["account_type", "root_type", "is_group"])):
+		is_group = 1
 	else:
-		group_or_ledger = "Ledger"
+		is_group = 0
 
-	return group_or_ledger
+	return is_group
 
 def get_chart(chart_name):
 	chart = {}

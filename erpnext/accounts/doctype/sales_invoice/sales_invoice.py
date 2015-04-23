@@ -449,7 +449,7 @@ class SalesInvoice(SellingController):
 
 	def make_gl_entries(self, repost_future_gle=True):
 		gl_entries = self.get_gl_entries()
-		
+
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
 
@@ -617,7 +617,7 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select tabAccount.name from `tabAccount`
 			where (tabAccount.report_type = "Profit and Loss"
 					or tabAccount.account_type = "Income Account")
-				and tabAccount.group_or_ledger="Ledger"
+				and tabAccount.is_group=0
 				and tabAccount.docstatus!=2
 				and tabAccount.company = '%(company)s'
 				and tabAccount.%(key)s LIKE '%(txt)s'

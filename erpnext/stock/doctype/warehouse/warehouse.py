@@ -48,7 +48,7 @@ class Warehouse(Document):
 						"doctype": "Account",
 						'account_name': self.warehouse_name,
 						'parent_account': self.create_account_under,
-						'group_or_ledger':'Ledger',
+						'is_group':0,
 						'company':self.company,
 						"account_type": "Warehouse",
 						"warehouse": self.name,

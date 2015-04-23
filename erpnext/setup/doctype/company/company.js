@@ -114,7 +114,7 @@ cur_frm.fields_dict.default_bank_account.get_query = function(doc) {
 	return{
 		filters: [
 			['Account', 'account_type', '=', 'Bank'],
-			['Account', 'group_or_ledger', '=', 'Ledger'],
+			['Account', 'is_group', '=', 0],
 			['Account', 'company', '=', doc.name]
 		]
 	}
@@ -124,7 +124,7 @@ cur_frm.fields_dict.default_cash_account.get_query = function(doc) {
 	return{
 		filters: [
 			['Account', 'account_type', '=', 'Cash'],
-			['Account', 'group_or_ledger', '=', 'Ledger'],
+			['Account', 'is_group', '=', 0],
 			['Account', 'company', '=', doc.name]
 		]
 	}
@@ -134,7 +134,7 @@ cur_frm.fields_dict.default_receivable_account.get_query = function(doc) {
 	return{
 		filters:{
 			'company': doc.name,
-			'group_or_ledger': "Ledger",
+			"is_group": 0,
 			"account_type": "Receivable"
 		}
 	}
@@ -144,7 +144,7 @@ cur_frm.fields_dict.default_payable_account.get_query = function(doc) {
 	return{
 		filters:{
 			'company': doc.name,
-			'group_or_ledger': "Ledger",
+			"is_group": 0,
 			"account_type": "Payable"
 		}
 	}
@@ -156,7 +156,7 @@ cur_frm.fields_dict.default_expense_account.get_query = function(doc) {
 	return{
 		filters:{
 			'company': doc.name,
-			'group_or_ledger': "Ledger",
+			"is_group": 0,
 			"report_type": "Profit and Loss"
 		}
 	}
@@ -166,7 +166,7 @@ cur_frm.fields_dict.default_income_account.get_query = function(doc) {
 	return{
 		filters:{
 			'company': doc.name,
-			'group_or_ledger': "Ledger",
+			"is_group": 0,
 			"report_type": "Profit and Loss"
 		}
 	}
@@ -176,7 +176,7 @@ cur_frm.fields_dict.cost_center.get_query = function(doc) {
 	return{
 		filters:{
 			'company': doc.name,
-			'group_or_ledger': "Ledger",
+			"is_group": 0,
 		}
 	}
 }
@@ -187,7 +187,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 			"filters": {
 				"report_type": "Profit and Loss",
 				"company": doc.name,
-				'group_or_ledger': "Ledger"
+				"is_group": 0
 			}
 		}
 	}
@@ -200,7 +200,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 			"filters": {
 				"report_type": "Balance Sheet",
 				"company": doc.name,
-				'group_or_ledger': "Ledger"
+				"is_group": 0
 			}
 		}
 	}

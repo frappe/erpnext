@@ -25,7 +25,7 @@ def create_receivable_payable_account():
 
 	def _create_account(args):
 		account = frappe.new_doc("Account")
-		account.group_or_ledger = "Ledger"
+		account.is_group = 0
 		account.update(args)
 		account.insert()
 
@@ -87,7 +87,7 @@ def set_party_in_jv_and_gl_entry(receivable_payable_accounts):
 
 			frappe.db.sql("update `tab{0}` set account=%s, party_type=%s, party=%s where name=%s".format(dt),
 				(new_account, account_details.get("master_type"), account_details.get("master_name"), d.name))
-				
+
 			if i%500 == 0:
 				frappe.db.commit()
 

@@ -36,7 +36,7 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 				return {
 					filters: {
 						company: me.frm.doc.company,
-						group_or_ledger: "Ledger"
+						is_group: 0
 					}
 				};
 			});

@@ -32,7 +32,7 @@
 						}
 					},
 					"Otros Equivalentes a Efectivo": {
-						"group_or_ledger": "Group",
+						"is_group": 1,
 						"account_type": "Cash"
 					}
 				},
@@ -61,7 +61,7 @@
 					"Estimacion para Cuentas Incobrables": {}
 				},
 				"Inventarios": {
-					"group_or_ledger": "Group",
+					"is_group": 1,
 					"account_type": "Stock"
 				},
 				"Impuestos Acreditables": {
@@ -90,7 +90,7 @@
 					"Retenciones Definitivas Sobre Rentas o Ganancias de Capital": {}
 				},
 				"Otras Cuentas por Cobrar": {
-					"group_or_ledger": "Group",
+					"is_group": 1,
 					"account_type": "Receivable"
 				}
 			},
@@ -110,11 +110,11 @@
 				},
 				"Inversiones Permanentes": {
 					"Inversiones Permanentes": {
-						"group_or_ledger": "Group",
+						"is_group": 1,
 						"account_type": "Fixed Asset"
 					},
 					"Negocios Conjuntos": {
-						"group_or_ledger": "Group",
+						"is_group": 1,
 						"account_type": "Fixed Asset"
 					}
 				},
@@ -124,25 +124,25 @@
 				},
 				"Activos Intangibles": {
 					"Patentes": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					},
 					"Marcas Registradas": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					},
 					"Derechos de Autor": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					},
 					"Concesiones": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					},
 					"Licencias": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					},
 					"Gastos de investigacion": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					},
 					"Amortizacion de Activos Intangibles": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					},
 					"Deterioro de Valor de Activos Intangibles": {}
 				},
@@ -150,29 +150,29 @@
 					"Gastos de Consitucion": {},
 					"Gastos Pre Operativos": {},
 					"Mejoras en Bienes Arrendados": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					},
 					"Amortizacion de Activos Amortizables": {},
 					"Deterioro de Valaor de Activos Amortizables": {}
 				},
 				"Cuentas por Cobrar a Largo Plazo": {
 					"Creditos a Largo Plazo": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					}
 				},
 				"Inversiones a Largo Plazo": {
 					"Depositos Bancarios a Plazo": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					},
 					"Intereses percibidos por adelantado": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					},
 					"Titulos y Acciones": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					}
 				},
 				"Activo por Impuestos Diferidos": {
-					"group_or_ledger": "Group"
+					"is_group": 1
 				}
 			},
 			"root_type": "Asset"
@@ -199,21 +199,21 @@
 				"Anticipos de Clientes": {},
 				"Pasivos Financieros a Corto Plazo": {
 					"Prestamos por Pagar a Corto Plazo": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					},
 					"Sobregiros Bancarios": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					},
 					"Otras Deudas Bancarias": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					}
 				},
 				"Gastos por Pagar": {
 					"Servicios Basicos": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					},
 					"Prestaciones Sociales": {
-						"group_or_ledger": "Group"
+						"is_group": 1
 					},
 					"Salarios por Pagar": {}
 				},
@@ -287,28 +287,28 @@
 					}
 				},
 				"Otras Cuentas por Pagar": {
-					"group_or_ledger": "Group"
+					"is_group": 1
 				}
 			},
 			"Pasivo No Corriente": {
 				"Prestamos a Largo Plazo": {
-					"group_or_ledger": "Group"
+					"is_group": 1
 				},
 				"Cuentas por Pagar a Largo Plaso": {
-					"group_or_ledger": "Group"
+					"is_group": 1
 				},
 				"Otras Cuentas por Pagar a Largo Plazo": {
-					"group_or_ledger": "Group"
+					"is_group": 1
 				},
 				"Otros Pasivos Financieros a Largo Plaso": {
-					"group_or_ledger": "Group"
+					"is_group": 1
 				}
 			},
 			"Obligaciones por Arrendamiento Financiero a Largo Plazo": {
-				"group_or_ledger": "Group"
+				"is_group": 1
 			},
 			"Pasivo por Impuestos Diferidos": {
-				"group_or_ledger": "Group"
+				"is_group": 1
 			},
 			"root_type": "Liability"
 		},
@@ -324,7 +324,7 @@
 				}
 			},
 			"Donaciones": {
-				"group_or_ledger": "Group"
+				"is_group": 1
 			},
 			"Ganancias Acumuladas": {
 				"Reservas": {

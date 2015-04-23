@@ -63,10 +63,10 @@ class GLEntry(Document):
 	def validate_account_details(self, adv_adj):
 		"""Account must be ledger, active and not freezed"""
 
-		ret = frappe.db.sql("""select group_or_ledger, docstatus, company
+		ret = frappe.db.sql("""select is_group, docstatus, company
 			from tabAccount where name=%s""", self.account, as_dict=1)[0]
 
-		if ret.group_or_ledger=='Group':
+		if ret.is_group==1:
 			frappe.throw(_("Account {0} cannot be a Group").format(self.account))
 
 		if ret.docstatus==2:

@@ -161,7 +161,7 @@ cur_frm.fields_dict['credit_to'].get_query = function(doc) {
 		filters:{
 			'account_type': 'Payable',
 			'root_type': 'Liability',
-			'group_or_ledger': 'Ledger',
+			'is_group': 0,
 			'company': doc.company
 		}
 	}
@@ -198,7 +198,7 @@ cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(
 	return {
 		filters: {
 			'company': doc.company,
-			'group_or_ledger': 'Ledger'
+			'is_group': 0
 		}
 
 	}

@@ -5,7 +5,7 @@ cur_frm.set_query("default_account", "accounts", function(doc, cdt, cdn) {
 	return{
 		filters: [
 			['Account', 'account_type', 'in', 'Bank, Cash'],
-			['Account', 'group_or_ledger', '=', 'Ledger'],
+			['Account', 'is_group', '=', 0],
 			['Account', 'company', '=', doc.company]
 		]
 	}

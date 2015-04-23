@@ -15,7 +15,7 @@ def get():
 	            },
 	            _("Bank Accounts"): {
 	                "account_type": "Bank",
-					"group_or_ledger": "Group"
+					"is_group": 1
 	            },
 	            _("Cash In Hand"): {
 	                _("Cash"): {
@@ -24,17 +24,17 @@ def get():
 	                "account_type": "Cash"
 	            },
 	            _("Loans and Advances (Assets)"): {
-	            	"group_or_ledger": "Group"
+	            	"is_group": 1
 	            },
 	            _("Securities and Deposits"): {
 	                _("Earnest Money"): {}
 	            },
 	            _("Stock Assets"): {
 	                "account_type": "Stock",
-					"group_or_ledger": "Group"
+					"is_group": 1
 	            },
 	            _("Tax Assets"): {
-					"group_or_ledger": "Group"
+					"is_group": 1
 				}
 	        },
 	        _("Fixed Assets"): {
@@ -55,7 +55,7 @@ def get():
 	            }
 	        },
 	        _("Investments"): {
-	        	"group_or_ledger": "Group"
+	        	"is_group": 1
 	        },
 	        _("Temporary Accounts (Assets)"): {
 	            _("Temporary Assets"): {}
@@ -149,7 +149,7 @@ def get():
 	        },
 	        _("Indirect Income"): {
 	            "account_type": "Income Account",
-				"group_or_ledger": "Group"
+				"is_group": 1
 	        },
 			"root_type": "Income"
 	    },
@@ -167,7 +167,7 @@ def get():
 			    },
 				_("Duties and Taxes"): {
 					"account_type": "Tax",
-					"group_or_ledger": "Group"
+					"is_group": 1
 				},
 				_("Loans (Liabilities)"): {
 					_("Secured Loans"): {},

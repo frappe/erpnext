@@ -58,18 +58,12 @@
    "width": "50%"
   }, 
   {
-   "fieldname": "group_or_ledger", 
-   "fieldtype": "Select", 
-   "hidden": 0, 
-   "label": "Group or Ledger", 
-   "no_copy": 1, 
-   "oldfieldname": "group_or_ledger", 
-   "oldfieldtype": "Select", 
-   "options": "\nGroup\nLedger", 
+   "default": "0", 
+   "fieldname": "is_group", 
+   "fieldtype": "Check", 
+   "label": "Is Group", 
    "permlevel": 0, 
-   "print_hide": 1, 
-   "report_hide": 1, 
-   "reqd": 1
+   "precision": ""
   }, 
   {
    "description": "Define Budget for this Cost Center. To set budget action, see <a href=\"#!List/Company\">Company Master</a>", 
@@ -145,7 +139,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-02-20 05:07:59.251051", 
+ "modified": "2015-04-23 02:54:26.934607", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Cost Center", 
@@ -198,5 +192,5 @@
    "role": "Material User"
   }
  ], 
- "search_fields": "parent_cost_center"
+ "search_fields": "parent_cost_center, is_group"
 }

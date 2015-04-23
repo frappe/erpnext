@@ -297,14 +297,14 @@ def create_taxes(args):
 
 			try:
 				tax_group = frappe.db.get_value("Account", {"company": args.get("company_name"),
-					"group_or_ledger": "Group", "account_type": "Tax", "root_type": "Liability"})
+					"is_group": 1, "account_type": "Tax", "root_type": "Liability"})
 				if tax_group:
 					frappe.get_doc({
 						"doctype":"Account",
 						"company": args.get("company_name").strip(),
 						"parent_account": tax_group,
 						"account_name": args.get("tax_" + str(i)),
-						"group_or_ledger": "Ledger",
+						"is_group": 0,
 						"report_type": "Balance Sheet",
 						"account_type": "Tax",
 						"tax_rate": flt(tax_rate) if tax_rate else None
@@ -330,68 +330,77 @@ def create_items(args):
 					"company": args.get("company_name").strip()
 				})
 
-			frappe.get_doc({
-				"doctype":"Item",
-				"item_code": item,
-				"item_name": item,
-				"description": item,
-				"is_sales_item": "Yes" if is_sales_item else "No",
-				"is_purchase_item": "Yes" if is_purchase_item else "No",
-				"show_in_website": 1,
-				"is_stock_item": is_stock_item and "Yes" or "No",
-				"item_group": item_group,
-				"stock_uom": args.get("item_uom_" + str(i)),
-				"default_warehouse": default_warehouse
-			}).insert()
+			try:
+				frappe.get_doc({
+					"doctype":"Item",
+					"item_code": item,
+					"item_name": item,
+					"description": item,
+					"is_sales_item": "Yes" if is_sales_item else "No",
+					"is_purchase_item": "Yes" if is_purchase_item else "No",
+					"show_in_website": 1,
+					"is_stock_item": is_stock_item and "Yes" or "No",
+					"item_group": item_group,
+					"stock_uom": args.get("item_uom_" + str(i)),
+					"default_warehouse": default_warehouse
+				}).insert()
 
-			if args.get("item_img_" + str(i)):
-				item_image = args.get("item_img_" + str(i)).split(",")
-				if len(item_image)==3:
-					filename, filetype, content = item_image
-					fileurl = save_file(filename, content, "Item", item, decode=True).file_url
-					frappe.db.set_value("Item", item, "image", fileurl)
+				if args.get("item_img_" + str(i)):
+					item_image = args.get("item_img_" + str(i)).split(",")
+					if len(item_image)==3:
+						filename, filetype, content = item_image
+						fileurl = save_file(filename, content, "Item", item, decode=True).file_url
+						frappe.db.set_value("Item", item, "image", fileurl)
+			except frappe.NameError:
+				pass
 
 def create_customers(args):
 	for i in xrange(1,6):
 		customer = args.get("customer_" + str(i))
 		if customer:
-			frappe.get_doc({
-				"doctype":"Customer",
-				"customer_name": customer,
-				"customer_type": "Company",
-				"customer_group": _("Commercial"),
-				"territory": args.get("country"),
-				"company": args.get("company_name").strip()
-			}).insert()
-
-			if args.get("customer_contact_" + str(i)):
-				contact = args.get("customer_contact_" + str(i)).split(" ")
+			try:
 				frappe.get_doc({
-					"doctype":"Contact",
-					"customer": customer,
-					"first_name":contact[0],
-					"last_name": len(contact) > 1 and contact[1] or ""
+					"doctype":"Customer",
+					"customer_name": customer,
+					"customer_type": "Company",
+					"customer_group": _("Commercial"),
+					"territory": args.get("country"),
+					"company": args.get("company_name").strip()
 				}).insert()
+
+				if args.get("customer_contact_" + str(i)):
+					contact = args.get("customer_contact_" + str(i)).split(" ")
+					frappe.get_doc({
+						"doctype":"Contact",
+						"customer": customer,
+						"first_name":contact[0],
+						"last_name": len(contact) > 1 and contact[1] or ""
+					}).insert()
+			except frappe.NameError:
+				pass
 
 def create_suppliers(args):
 	for i in xrange(1,6):
 		supplier = args.get("supplier_" + str(i))
 		if supplier:
-			frappe.get_doc({
-				"doctype":"Supplier",
-				"supplier_name": supplier,
-				"supplier_type": _("Local"),
-				"company": args.get("company_name").strip()
-			}).insert()
-
-			if args.get("supplier_contact_" + str(i)):
-				contact = args.get("supplier_contact_" + str(i)).split(" ")
+			try:
 				frappe.get_doc({
-					"doctype":"Contact",
-					"supplier": supplier,
-					"first_name":contact[0],
-					"last_name": len(contact) > 1 and contact[1] or ""
+					"doctype":"Supplier",
+					"supplier_name": supplier,
+					"supplier_type": _("Local"),
+					"company": args.get("company_name").strip()
 				}).insert()
+
+				if args.get("supplier_contact_" + str(i)):
+					contact = args.get("supplier_contact_" + str(i)).split(" ")
+					frappe.get_doc({
+						"doctype":"Contact",
+						"supplier": supplier,
+						"first_name":contact[0],
+						"last_name": len(contact) > 1 and contact[1] or ""
+					}).insert()
+			except frappe.NameError:
+				pass
 
 
 def create_letter_head(args):

@@ -265,7 +265,7 @@ erpnext.FinancialAnalytics = erpnext.AccountTreeGrid.extend({
 		var me= this;
 		$.each(this.data, function(i, account) {
 			// update groups
-			if((account.group_or_ledger == "Ledger") || (account.rgt - account.lft == 1)) {
+			if((account.is_group == 0) || (account.rgt - account.lft == 1)) {
 				var parent = me.parent_map[account.name];
 				while(parent) {
 					var parent_account = me.item_by_name[parent];

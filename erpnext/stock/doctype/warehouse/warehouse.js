@@ -9,7 +9,7 @@ cur_frm.set_query("create_account_under", function() {
 	return {
 		filters: {
 			"company": cur_frm.doc.company,
-			'group_or_ledger': "Group"
+			'is_group': 1
 		}
 	}
 })

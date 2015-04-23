@@ -51,7 +51,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				return {
 					filters: {
 						"company": me.frm.doc.company,
-						"group_or_ledger": "Ledger"
+						"is_group": 0
 					}
 				}
 			}
