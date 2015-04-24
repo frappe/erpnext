@@ -29,6 +29,8 @@ class SellingController(StockController):
 
 	def validate(self):
 		super(SellingController, self).validate()
+		self.is_item_table_empty()
+		self.set_qty_as_per_stock_uom()
 		self.validate_max_discount()
 		check_active_sales_items(self)
 
@@ -177,8 +179,8 @@ class SellingController(StockController):
 					self.has_sales_bom(d.item_code)) and not d.warehouse:
 						frappe.throw(_("Reserved Warehouse required for stock Item {0} in row {1}").format(d.item_code, d.idx))
 				reserved_warehouse = d.warehouse
-				if flt(d.qty) > flt(d.delivered_qty):
-					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
+				if flt(d.stock_qty) > flt(d.delivered_qty):
+					reserved_qty_for_main_item = flt(d.stock_qty) - flt(d.delivered_qty)
 
 			elif self.doctype == "Delivery Note" and d.against_sales_order:
 				# if SO qty is 10 and there is tolerance of 20%, then it will allow DN of 12.
@@ -188,7 +190,7 @@ class SellingController(StockController):
 					d.against_sales_order, d.so_detail)
 				so_qty, reserved_warehouse = self.get_so_qty_and_warehouse(d.so_detail)
 
-				if already_delivered_qty + d.qty > so_qty:
+				if already_delivered_qty + d.stock_qty > so_qty:
 					reserved_qty_for_main_item = -(so_qty - already_delivered_qty)
 				else:
 					reserved_qty_for_main_item = -flt(d.qty)
@@ -202,7 +204,8 @@ class SellingController(StockController):
 							'reserved_warehouse': reserved_warehouse,
 							'item_code': p.item_code,
 							'qty': flt(p.qty),
-							'reserved_qty': (flt(p.qty)/flt(d.qty)) * reserved_qty_for_main_item,
+							'stock_qty': d.stock_qty,
+							'reserved_qty': (flt(p.qty)/flt(d.stock_qty)) * reserved_qty_for_main_item, #sales bom will store qty only in stock uom
 							'uom': p.uom,
 							'batch_no': cstr(p.batch_no).strip(),
 							'serial_no': cstr(p.serial_no).strip(),
@@ -214,6 +217,7 @@ class SellingController(StockController):
 					'reserved_warehouse': reserved_warehouse,
 					'item_code': d.item_code,
 					'qty': d.qty,
+					'stock_qty': d.stock_qty,
 					'reserved_qty': reserved_qty_for_main_item,
 					'uom': d.stock_uom,
                                         'stock_uom': d.stock_uom,
@@ -235,9 +239,9 @@ class SellingController(StockController):
 		return qty and flt(qty[0][0]) or 0.0
 
 	def get_so_qty_and_warehouse(self, so_detail):
-		so_item = frappe.db.sql("""select qty, warehouse from `tabSales Order Item`
+		so_item = frappe.db.sql("""select stock_qty, warehouse from `tabSales Order Item`
 			where name = %s and docstatus = 1""", so_detail, as_dict=1)
-		so_qty = so_item and flt(so_item[0]["qty"]) or 0.0
+		so_qty = so_item and flt(so_item[0]["stock_qty"]) or 0.0
 		so_warehouse = so_item and so_item[0]["warehouse"] or ""
 		return so_qty, so_warehouse
 
@@ -247,6 +251,18 @@ class SellingController(StockController):
 				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status")
 				if status == "Stopped":
 					frappe.throw(_("Sales Order {0} is stopped").format(d.get(ref_fieldname)))
+
+	def is_item_table_empty(self):
+		if not len(self.get("items")):
+			frappe.throw(_("Item table can not be blank"))
+
+	def set_qty_as_per_stock_uom(self):
+		for d in self.get("items"):
+			if d.meta.get_field("stock_qty") and not d.stock_qty:
+				if not d.conversion_factor:
+					frappe.throw(_("Row {0}: Conversion Factor is mandatory"))
+				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
+
 
 def check_active_sales_items(obj):
 	for d in obj.get("items"):
