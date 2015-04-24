@@ -86,6 +86,15 @@
    "reqd": 0
   }, 
   {
+   "fieldname": "stock_uom", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Stock UOM", 
+   "options": "UOM", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "price_list_rate", 
    "fieldtype": "Currency", 
    "label": "Price List Rate", 
@@ -114,13 +123,28 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "stock_uom", 
+   "fieldname": "uom", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
    "label": "UOM", 
    "options": "UOM", 
    "permlevel": 0, 
-   "read_only": 1
+   "precision": "", 
+   "print_hide": 1, 
+   "print_width": "100px", 
+   "reqd": 1, 
+   "width": "100px"
+  }, 
+  {
+   "fieldname": "conversion_factor", 
+   "fieldtype": "Float", 
+   "label": "UOM Conversion Factor", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "print_width": "100px", 
+   "reqd": 1, 
+   "width": "100px"
   }, 
   {
    "fieldname": "base_price_list_rate", 
@@ -392,6 +416,17 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "stock_qty", 
+   "fieldtype": "Float", 
+   "label": "Qty as per Stock UOM", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "print_width": "100px", 
+   "read_only": 1, 
+   "width": "100px"
+  }, 
+  {
    "allow_on_submit": 1, 
    "fieldname": "actual_batch_qty", 
    "fieldtype": "Float", 
@@ -504,7 +539,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-03-23 14:56:45.641026", 
+ "modified": "2015-04-24 16:24:56.978575", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Item", 
