@@ -3,6 +3,8 @@ import frappe
 def execute():
 	# convert milestones to tasks
 	frappe.reload_doctype("Project")
+	frappe.reload_doc("projects", "doctype", "project_task")
+	frappe.reload_doctype("Task")
 
 	for m in frappe.get_all("Project Milestone", "*"):
 		if (m.milestone and m.milestone_date
