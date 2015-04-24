@@ -57,8 +57,8 @@ def get():
 	        _("Investments"): {
 	        	"is_group": 1
 	        },
-	        _("Temporary Accounts (Assets)"): {
-	            _("Temporary Assets"): {}
+	        _("Temporary Accounts"): {
+	            _("Temporary Opening"): {}
 	        },
 			"root_type": "Asset"
 	    },
@@ -174,9 +174,6 @@ def get():
 					_("Unsecured Loans"): {},
 					_("Bank Overdraft Account"): {},
 				},
-	        },
-	        _("Temporary Accounts (Liabilities)"): {
-	            _("Temporary Liabilities"): {}
 	        },
 			"root_type": "Liability"
 	    },

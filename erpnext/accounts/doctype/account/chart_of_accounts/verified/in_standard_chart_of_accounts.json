@@ -54,8 +54,8 @@
 	        "Investments": {
 	        	"is_group": 1
 	        },
-	        "Temporary Accounts (Assets)": {
-	            "Temporary Assets": {}
+	        "Temporary Accounts": {
+	            "Temporary Opening": {}
 	        },
 			"root_type": "Asset"
 	    },
@@ -175,9 +175,6 @@
 					"Unsecured Loans": {},
 					"Bank Overdraft Account": {}
 				}
-	        },
-	        "Temporary Accounts (Liabilities)": {
-	            "Temporary Liabilities": {}
 	        },
 			"root_type": "Liability"
 		}
