@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="addresses-content">
-	<p><a class="btn btn-default" href="address"><i class="icon-plus"> New Address</i></a></p>
+	<p><a class="btn btn-default" href="/address"><i class="icon-plus"> New Address</i></a></p>
 	<hr>
 	<div id="address-list">
 		<div class="text-muted progress">{{ _("Loading") }}...</div>
@@ -30,7 +30,7 @@
 				$.each(r.message, function(i, address) {
 					address.url_name = encodeURIComponent(address.name);
 					$(repl('<div> \
-						<p><a href="address?name=%(url_name)s">%(name)s</a></p> \
+						<p><a href="/address?name=%(url_name)s">%(name)s</a></p> \
 						<p>%(display)s</p> \
 						<hr> \
 					</div>', address)).appendTo($list);
