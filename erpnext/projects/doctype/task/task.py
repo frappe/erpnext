@@ -92,7 +92,7 @@ class Task(Document):
 		if end_date:
 			for task_name in frappe.db.sql("select name from `tabTask` where depends_on = %s", self.name, as_dict=1):
 				task = frappe.get_doc("Task", task_name.name)
-				if task.exp_start_date and task.exp_end_date and task.exp_start_date < end_date and task.status == "Open" :
+				if task.exp_start_date and task.exp_end_date and task.exp_start_date < getdate(end_date) and task.status == "Open" :
 					task_duration = date_diff(task.exp_end_date, task.exp_start_date)
 					task.exp_start_date = add_days(end_date, 1)
 					task.exp_end_date = add_days(task.exp_start_date, task_duration)
