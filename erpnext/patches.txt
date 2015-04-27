@@ -145,3 +145,4 @@ erpnext.patches.v5_0.execute_on_doctype_update
 erpnext.patches.v4_2.fix_recurring_orders
 erpnext.patches.v4_2.delete_gl_entries_for_cancelled_invoices
 erpnext.patches.v5_0.project_costing
+erpnext.patches.v5_0.update_temporary_account
