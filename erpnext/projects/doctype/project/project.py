@@ -89,6 +89,10 @@ class Project(Document):
 		self.gross_margin = flt(total_cost.billing_amount) - flt(total_cost.costing_amount)
 		if self.total_billing_amount:
 			self.per_gross_margin = (self.gross_margin / flt(self.total_billing_amount)) *100
+			
+	def update_purchase_costing(self):
+		self.total_purchase_cost = frappe.db.sql("""select sum(grand_total) as cost
+			from `tabPurchase Invoice` where project = %s and docstatus=1 """, self.name, as_dict=1)[0].cost
 
 @frappe.whitelist()
 def get_cost_center_name(project_name):

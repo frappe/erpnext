@@ -304,6 +304,15 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "total_purchase_cost", 
+   "fieldtype": "Currency", 
+   "hidden": 0, 
+   "label": "Total Purchase Cost (via Purchase Invoice)", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "margin", 
    "fieldtype": "Section Break", 
    "label": "", 
@@ -347,7 +356,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2015-04-23 05:51:53.642253", 
+ "modified": "2015-04-27 07:37:44.239930", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 

@@ -6,21 +6,6 @@
  "doctype": "DocType", 
  "fields": [
   {
-   "fieldname": "supplier_section", 
-   "fieldtype": "Section Break", 
-   "label": "", 
-   "options": "icon-user", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "column_break0", 
-   "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "width": "50%"
-  }, 
-  {
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "label": "Series", 
@@ -90,6 +75,14 @@
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "project", 
+   "fieldtype": "Link", 
+   "label": "Project", 
+   "options": "Project", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "column_break1", 
