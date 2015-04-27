@@ -358,7 +358,7 @@ def get_taxes_and_charges(master_doctype, master_name, tax_parentfield):
 def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, company):
 	"""common validation for currency and price list currency"""
 
-	company_currency = frappe.db.get_value("Company", company, "default_currency")
+	company_currency = frappe.db.get_value("Company", company, "default_currency", cache=True)
 
 	if not conversion_rate:
 		throw(_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.").format(

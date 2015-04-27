@@ -7,7 +7,7 @@ from frappe import _, throw
 from frappe.utils import flt
 
 def get_company_currency(company):
-	currency = frappe.db.get_value("Company", company, "default_currency")
+	currency = frappe.db.get_value("Company", company, "default_currency", cache=True)
 	if not currency:
 		currency = frappe.db.get_default("currency")
 	if not currency:
