@@ -25,17 +25,6 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "aging_date", 
-   "fieldtype": "Date", 
-   "in_filter": 1, 
-   "in_list_view": 1, 
-   "label": "Aging Date", 
-   "oldfieldname": "aging_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0, 
-   "search_index": 0
-  }, 
-  {
    "fieldname": "account", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -203,7 +192,7 @@
  "icon": "icon-list", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-09-11 18:35:22.822064", 
+ "modified": "2015-04-27 20:32:48.246818", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "GL Entry", 

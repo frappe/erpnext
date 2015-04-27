@@ -204,7 +204,7 @@ erpnext.AccountsChart = Class.extend({
 				{fieldtype:'Select', fieldname:'account_type', label:__('Account Type'),
 					options: ['', 'Bank', 'Cash', 'Warehouse', 'Receivable', 'Payable',
 						'Equity', 'Cost of Goods Sold', 'Fixed Asset', 'Expense Account',
-						'Income Account', 'Tax', 'Chargeable'].join('\n'),
+						'Income Account', 'Tax', 'Chargeable', 'Temporary'].join('\n'),
 					description: __("Optional. This setting will be used to filter in various transactions.") },
 				{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate')},
 				{fieldtype:'Link', fieldname:'warehouse', label:__('Warehouse'), options:"Warehouse"}

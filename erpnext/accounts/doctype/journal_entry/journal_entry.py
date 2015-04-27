@@ -32,7 +32,6 @@ class JournalEntry(AccountsController):
 		self.validate_against_purchase_invoice()
 		self.set_against_account()
 		self.create_remarks()
-		self.set_aging_date()
 		self.set_print_format_fields()
 		self.validate_against_sales_order()
 		self.validate_against_purchase_order()
@@ -305,18 +304,6 @@ class JournalEntry(AccountsController):
 
 		if r:
 			self.remark = ("\n").join(r) #User Remarks is not mandatory
-
-
-	def set_aging_date(self):
-		if self.is_opening != 'Yes':
-			self.aging_date = self.posting_date
-		else:
-			party_list = [d.party for d in self.get("accounts") if d.party_type and d.party]
-
-			if len(party_list) and not self.aging_date:
-				frappe.throw(_("Aging Date is mandatory for opening entry"))
-			else:
-				self.aging_date = self.posting_date
 
 	def set_print_format_fields(self):
 		for d in self.get('accounts'):

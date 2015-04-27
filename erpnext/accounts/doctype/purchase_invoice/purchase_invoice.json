@@ -750,18 +750,6 @@
    "search_index": 1
   }, 
   {
-   "description": "Actual Invoice Date", 
-   "fieldname": "aging_date", 
-   "fieldtype": "Date", 
-   "label": "Aging Date", 
-   "oldfieldname": "aging_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 0, 
-   "search_index": 0
-  }, 
-  {
    "allow_on_submit": 1, 
    "fieldname": "select_print_heading", 
    "fieldtype": "Link", 
@@ -965,7 +953,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-03-23 14:47:57.373436", 
+ "modified": "2015-04-27 20:32:12.436976", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 

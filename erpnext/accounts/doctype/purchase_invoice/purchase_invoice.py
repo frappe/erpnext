@@ -47,7 +47,6 @@ class PurchaseInvoice(BuyingController):
 		self.check_for_stopped_status()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
-		self.set_aging_date()
 		self.set_against_expense_account()
 		self.validate_write_off_account()
 		self.update_valuation_rate("items")
@@ -141,13 +140,6 @@ class PurchaseInvoice(BuyingController):
 				}
 			})
 
-
-	def set_aging_date(self):
-		if self.is_opening != 'Yes':
-			self.aging_date = self.posting_date
-		elif not self.aging_date:
-			throw(_("Ageing date is mandatory for opening entry"))
-
 	def set_against_expense_account(self):
 		auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 
@@ -173,7 +165,7 @@ class PurchaseInvoice(BuyingController):
 			elif item.expense_account not in against_accounts:
 				# if no auto_accounting_for_stock or not a stock item
 				against_accounts.append(item.expense_account)
-
+				
 		self.against_expense_account = ",".join(against_accounts)
 
 	def po_required(self):
@@ -393,7 +385,7 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 	# Hence the first condition is an "OR"
 	return frappe.db.sql("""select tabAccount.name from `tabAccount`
 			where (tabAccount.report_type = "Profit and Loss"
-					or tabAccount.account_type in ("Expense Account", "Fixed Asset"))
+					or tabAccount.account_type in ("Expense Account", "Fixed Asset", "Temporary"))
 				and tabAccount.is_group=0
 				and tabAccount.docstatus!=2
 				and tabAccount.company = '%(company)s'

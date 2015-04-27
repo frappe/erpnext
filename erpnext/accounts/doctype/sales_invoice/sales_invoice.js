@@ -262,11 +262,6 @@ cur_frm.cscript.update_stock = function(doc, dt, dn) {
 	cur_frm.cscript.hide_fields(doc, dt, dn);
 }
 
-cur_frm.cscript.is_opening = function(doc, dt, dn) {
-	hide_field('aging_date');
-	if (doc.is_opening == 'Yes') unhide_field('aging_date');
-}
-
 cur_frm.cscript['Make Delivery Note'] = function() {
 	frappe.model.open_mapped_doc({
 		method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_delivery_note",

@@ -55,7 +55,9 @@
 	        	"is_group": 1
 	        },
 	        "Temporary Accounts": {
-	            "Temporary Opening": {}
+	            "Temporary Opening": {
+	            	"account_type": "Temporary"
+	            }
 	        },
 			"root_type": "Asset"
 	    },

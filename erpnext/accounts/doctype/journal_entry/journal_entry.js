@@ -163,11 +163,6 @@ cur_frm.cscript.posting_date = function(doc, cdt, cdn){
 	erpnext.get_fiscal_year(doc.company, doc.posting_date);
 }
 
-cur_frm.cscript.is_opening = function(doc, cdt, cdn) {
-	hide_field('aging_date');
-	if (doc.is_opening == 'Yes') unhide_field('aging_date');
-}
-
 cur_frm.cscript.update_totals = function(doc) {
 	var td=0.0; var tc =0.0;
 	var el = doc.accounts || [];

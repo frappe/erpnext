@@ -62,7 +62,6 @@ class SalesInvoice(SellingController):
 		if not self.is_opening:
 			self.is_opening = 'No'
 
-		self.set_aging_date()
 		self.set_against_income_account()
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
@@ -281,13 +280,6 @@ class SalesInvoice(SellingController):
 					"is_child_table": True
 				}
 			})
-
-
-	def set_aging_date(self):
-		if self.is_opening != 'Yes':
-			self.aging_date = self.posting_date
-		elif not self.aging_date:
-			throw(_("Ageing Date is mandatory for opening entry"))
 
 	def set_against_income_account(self):
 		"""Set against account for debit to account"""
@@ -616,7 +608,7 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	# Hence the first condition is an "OR"
 	return frappe.db.sql("""select tabAccount.name from `tabAccount`
 			where (tabAccount.report_type = "Profit and Loss"
-					or tabAccount.account_type = "Income Account")
+					or tabAccount.account_type in ("Income Account", "Temporary"))
 				and tabAccount.is_group=0
 				and tabAccount.docstatus!=2
 				and tabAccount.company = '%(company)s'

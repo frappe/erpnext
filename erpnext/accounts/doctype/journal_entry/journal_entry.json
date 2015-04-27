@@ -295,18 +295,6 @@
    "search_index": 1
   }, 
   {
-   "description": "", 
-   "fieldname": "aging_date", 
-   "fieldtype": "Date", 
-   "label": "Ageing Date", 
-   "no_copy": 0, 
-   "oldfieldname": "aging_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 0
-  }, 
-  {
    "default": "Accounts Receivable", 
    "depends_on": "eval:doc.voucher_type == 'Write Off Entry'", 
    "fieldname": "write_off_based_on", 
@@ -457,7 +445,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-03-25 07:11:27.108475", 
+ "modified": "2015-04-27 20:32:31.655580", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Entry", 

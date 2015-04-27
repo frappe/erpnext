@@ -58,7 +58,9 @@ def get():
 	        	"is_group": 1
 	        },
 	        _("Temporary Accounts"): {
-	            _("Temporary Opening"): {}
+	            _("Temporary Opening"): {
+	            	"account_type": "Temporary"
+	            }
 	        },
 			"root_type": "Asset"
 	    },

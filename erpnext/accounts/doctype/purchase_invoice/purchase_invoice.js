@@ -116,11 +116,6 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
 
-cur_frm.cscript.is_opening = function(doc, dt, dn) {
-	hide_field('aging_date');
-	if (doc.is_opening == 'Yes') unhide_field('aging_date');
-}
-
 cur_frm.cscript.make_bank_entry = function() {
 	return frappe.call({
 		method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_from_purchase_invoice",

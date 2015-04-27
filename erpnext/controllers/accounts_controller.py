@@ -39,9 +39,8 @@ class AccountsController(TransactionBase):
 
 	def before_recurring(self):
 		self.fiscal_year = None
-		for fieldname in ("due_date", "aging_date"):
-			if self.meta.get_field(fieldname):
-				self.set(fieldname, None)
+		if self.meta.get_field("due_date"):
+			self.due_date = None
 
 	def set_missing_values(self, for_validate=False):
 		for fieldname in ["posting_date", "transaction_date"]:
@@ -178,7 +177,6 @@ class AccountsController(TransactionBase):
 			'posting_date': self.posting_date,
 			'voucher_type': self.doctype,
 			'voucher_no': self.name,
-			'aging_date': self.get("aging_date") or self.posting_date,
 			'remarks': self.get("remarks"),
 			'fiscal_year': self.fiscal_year,
 			'debit': 0,
