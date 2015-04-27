@@ -39,7 +39,7 @@ class TestTask(unittest.TestCase):
 		})
 		self.assertRaises(CircularReferenceError, task1.save)
 		
-	def test_reschedule_depending_task(self):
+	def test_reschedule_dependent_task(self):
 		task1 =  frappe.new_doc('Task')
 		task1.update({
 			"status": "Open", 
