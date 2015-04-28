@@ -39,7 +39,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	refresh: function(doc, dt, dn) {
 		this._super();
 
-		cur_frm.cscript.is_opening(doc, dt, dn);
 		cur_frm.dashboard.reset();
 
 		if(doc.docstatus==1) {
