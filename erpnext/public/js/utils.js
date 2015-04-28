@@ -41,6 +41,8 @@ $.extend(erpnext, {
 			if(companies.length === 1) {
 				if(!cur_frm.doc.company) cur_frm.set_value("company", companies[0]);
 				cur_frm.toggle_display("company", false);
+			} else if(erpnext.last_selected_company) {
+				if(!cur_frm.doc.company) cur_frm.set_value("company", erpnext.last_selected_company);
 			}
 		}
 	},
@@ -76,8 +78,8 @@ $.extend(erpnext, {
 						"options": "Serial No",
 						"label": __("Serial No"),
 						"get_query": function () {
-							return { 
-								filters: { 
+							return {
+								filters: {
 									item_code:grid_row.doc.item_code ,
 									warehouse:grid_row.doc.warehouse
 								}

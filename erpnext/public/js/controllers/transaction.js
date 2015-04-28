@@ -190,8 +190,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if (this.frm.doc.posting_date) var date = this.frm.doc.posting_date;
 		else var date = this.frm.doc.transaction_date;
 		erpnext.get_fiscal_year(this.frm.doc.company, date, fn);
-
 		erpnext.get_letter_head(this.frm.doc.company);
+
+		if(this.frm.doc.company) {
+			erpnext.last_selected_company = this.frm.doc.company;
+		}
 	},
 
 	transaction_date: function() {

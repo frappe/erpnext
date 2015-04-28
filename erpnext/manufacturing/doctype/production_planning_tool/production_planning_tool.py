@@ -320,8 +320,9 @@ class ProductionPlanningTool(Document):
 				# shortage
 				requested_qty = total_qty - flt(item_projected_qty.get(item))
 				# consider minimum order qty
-				requested_qty = requested_qty > flt(so_item_qty[0][3]) and \
-					requested_qty or flt(so_item_qty[0][3])
+
+				if requested_qty < flt(so_item_qty[0][3]):
+					requested_qty = flt(so_item_qty[0][3])
 
 			# distribute requested qty SO wise
 			for item_details in so_item_qty:

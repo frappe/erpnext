@@ -68,7 +68,10 @@ class PurchaseOrder(BuyingController):
 		})
 
 	def validate_minimum_order_qty(self):
-		itemwise_min_order_qty = frappe._dict(frappe.db.sql("select name, min_order_qty from tabItem"))
+		items = list(set([d.item_code for d in self.get("items")]))
+
+		itemwise_min_order_qty = frappe._dict(frappe.db.sql("""select name, min_order_qty
+			from tabItem where name in ({0})""".format(", ".join(["%s"] * len(items))), items))
 
 		itemwise_qty = frappe._dict()
 		for d in self.get("items"):
@@ -77,7 +80,8 @@ class PurchaseOrder(BuyingController):
 
 		for item_code, qty in itemwise_qty.items():
 			if flt(qty) < flt(itemwise_min_order_qty.get(item_code)):
-				frappe.throw(_("Item #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).").format(item_code))
+				frappe.throw(_("Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).").format(item_code,
+					qty, itemwise_min_order_qty.get(item_code)))
 
 	def get_schedule_dates(self):
 		for d in self.get('items'):
@@ -217,15 +221,15 @@ class PurchaseOrder(BuyingController):
 
 	def on_update(self):
 		pass
-		
+
 	def before_recurring(self):
 		super(PurchaseOrder, self).before_recurring()
-		
+
 		for field in ("per_received", "per_billed"):
 			self.set(field, None)
 
 		for d in self.get("items"):
-			for field in ("received_qty", "billed_amt", "prevdoc_doctype", "prevdoc_docname", 
+			for field in ("received_qty", "billed_amt", "prevdoc_doctype", "prevdoc_docname",
 				"prevdoc_detail_docname", "supplier_quotation", "supplier_quotation_item"):
 					d.set(field, None)
 
