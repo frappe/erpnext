@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import frappe.model
-import json
 from frappe.utils import cint
 import frappe.defaults
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory, \
@@ -234,5 +233,35 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def test_recurring_invoice(self):
 		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
 		test_recurring_document(self, test_records)
+		
+	def test_total_purchase_cost_for_project(self):		
+		purchase_invoice = frappe.new_doc('Purchase Invoice')
+		purchase_invoice.update({
+			"credit_to": "_Test Payable - _TC",
+			"project": "_Test Project",
+			"supplier": "_Test Supplier",
+			"company": "_Test Company",
+			"items": [
+				{
+					"rate": 500,
+					"qty": 1,
+					"item_code": "_Test Item Home Desktop 100",
+					"expense_account": "_Test Account Cost for Goods Sold - _TC"
+				},
+				{
+					"rate": 1500,
+					"qty": 1,
+					"item_code": "_Test Item Home Desktop 200",
+					"expense_account": "_Test Account Cost for Goods Sold - _TC"
+				}
+			]
+		})
+		purchase_invoice.save()
+		purchase_invoice.submit()		
+		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 2000)
+		
+		purchase_invoice.cancel()		
+		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 0)
+		
 
 test_records = frappe.get_test_records('Purchase Invoice')
