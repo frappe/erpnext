@@ -136,7 +136,6 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 cur_frm.script_manager.make(erpnext.accounts.JournalVoucher);
 
 cur_frm.cscript.refresh = function(doc) {
-	cur_frm.cscript.is_opening(doc)
 	erpnext.toggle_naming_series();
 	cur_frm.cscript.voucher_type(doc);
 
