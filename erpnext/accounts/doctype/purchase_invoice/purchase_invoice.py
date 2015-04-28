@@ -280,7 +280,7 @@ class PurchaseInvoice(BuyingController):
 				)
 
 			# accumulate valuation tax
-			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
+			if self.is_opening == "No" and tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
 				if auto_accounting_for_stock and not tax.cost_center:
 					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
 				valuation_tax.setdefault(tax.cost_center, 0)
@@ -302,7 +302,8 @@ class PurchaseInvoice(BuyingController):
 					})
 				)
 
-			if auto_accounting_for_stock and item.item_code in stock_items and item.item_tax_amount:
+			if auto_accounting_for_stock and self.is_opening == "No" and \
+				item.item_code in stock_items and item.item_tax_amount:
 					# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
 					negative_expense_booked_in_pi = None
 					if item.purchase_receipt:
@@ -322,7 +323,7 @@ class PurchaseInvoice(BuyingController):
 
 						negative_expense_to_be_booked += flt(item.item_tax_amount, self.precision("item_tax_amount", item))
 
-		if negative_expense_to_be_booked and valuation_tax:
+		if self.is_opening == "No" and negative_expense_to_be_booked and valuation_tax:
 			# credit valuation tax amount in "Expenses Included In Valuation"
 			# this will balance out valuation amount included in cost of goods sold
 
