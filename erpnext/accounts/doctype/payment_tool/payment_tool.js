@@ -74,10 +74,9 @@ frappe.ui.form.on("Payment Tool", "payment_mode", function(frm) {
 				"mode_of_payment": frm.doc.payment_mode,
 				"company": frm.doc.company
 		},
-		callback: function(r, rt) {
+		callback: function(r, rt) {			
 			if(r.message) {
-				frm.doc.set_value("payment_account", r.message['bank_cash_account']
-);
+				cur_frm.set_value("payment_account", r.message['account']);
 			}
 		}
 	});

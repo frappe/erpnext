@@ -253,6 +253,12 @@ cur_frm.cscript.mode_of_payment = function(doc) {
 				"mode_of_payment": doc.mode_of_payment,
 				"company": doc.company
 			 },
+			 callback: function(r, rt) {
+				if(r.message) {
+					cur_frm.set_value("cash_bank_account", r.message["account"]);
+				}
+			 	
+			 }
 		});
 	 }
 }
