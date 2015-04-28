@@ -170,14 +170,15 @@ class ReceivablePayableReport(object):
 		if not hasattr(self, "gl_entries"):
 			conditions, values = self.prepare_conditions(party_type)
 			self.gl_entries = frappe.db.sql("""select * from `tabGL Entry`
-				where docstatus < 2 {0} order by posting_date, party"""
+				where docstatus < 2 and party_type=%s {0} order by posting_date, party"""
 				.format(conditions), values, as_dict=True)
 
 		return self.gl_entries
 
 	def prepare_conditions(self, party_type):
 		conditions = [""]
-		values = []
+		values = [party_type]
+		
 		party_type_field = scrub(party_type)
 
 		if self.filters.company:
@@ -185,8 +186,8 @@ class ReceivablePayableReport(object):
 			values.append(self.filters.company)
 
 		if self.filters.get(party_type_field):
-			conditions.append("party_type=%s and party=%s")
-			values += [party_type, self.filters.get(party_type_field)]
+			conditions.append("party=%s")
+			values.append(self.filters.get(party_type_field))
 
 		return " and ".join(conditions), values
 
