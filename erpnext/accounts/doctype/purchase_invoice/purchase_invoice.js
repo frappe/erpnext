@@ -67,8 +67,6 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				}, "icon-download", "btn-default");
 
 		}
-
-		this.is_opening(doc);
 	},
 
 	supplier: function() {
