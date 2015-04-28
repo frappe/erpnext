@@ -508,6 +508,7 @@
    "fieldname": "advance_paid", 
    "fieldtype": "Currency", 
    "label": "Advance Paid", 
+   "no_copy": 1, 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 1
@@ -872,7 +873,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-03-23 14:47:26.072237", 
+ "modified": "2015-04-28 15:27:28.755816", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 
