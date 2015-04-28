@@ -7,6 +7,7 @@ services:
   - mysql
 
 install:
+  - sudo rm -rf /etc/mysql
   - sudo apt-get purge -y mysql-common
   - wget https://raw.githubusercontent.com/frappe/bench/master/install_scripts/setup_frappe.sh
   - sudo bash setup_frappe.sh --skip-setup-bench --mysql-root-password travis
