@@ -364,8 +364,6 @@ class PurchaseInvoice(BuyingController):
 			)
 
 		if gl_entries:
-			for d in gl_entries:
-				print d.account, d.debit, d.credit
 			from erpnext.accounts.general_ledger import make_gl_entries
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2))
 
