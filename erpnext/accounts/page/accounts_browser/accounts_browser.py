@@ -6,6 +6,7 @@ import frappe
 import frappe.defaults
 from frappe.utils import flt
 from erpnext.accounts.utils import get_balance_on
+from erpnext.accounts.report.financial_statements import sort_root_accounts
 
 @frappe.whitelist()
 def get_companies():
@@ -21,12 +22,15 @@ def get_children():
 	# root
 	if args['parent'] in ("Accounts", "Cost Centers"):
 		acc = frappe.db.sql(""" select 
-			name as value, if(group_or_ledger='Group', 1, 0) as expandable
+			name as value, if(group_or_ledger='Group', 1, 0) as expandable, root_type, report_type
 			from `tab%s`
 			where ifnull(parent_%s,'') = ''
 			and `company` = %s	and docstatus<2 
 			order by name""" % (ctype, ctype.lower().replace(' ','_'), '%s'),
 				company, as_dict=1)
+				
+		if args["parent"]=="Accounts":
+			sort_root_accounts(acc)
 	else:	
 		# other
 		acc = frappe.db.sql("""select 
