@@ -246,18 +246,29 @@ class TestPurchaseInvoice(unittest.TestCase):
 					"rate": 500,
 					"qty": 1,
 					"item_code": "_Test Item Home Desktop 100",
-					"expense_account": "_Test Account Cost for Goods Sold - _TC"
+					"expense_account": "_Test Account Cost for Goods Sold - _TC",
+					"cost_center": "_Test Cost Center - _TC"
 				},
 				{
 					"rate": 1500,
 					"qty": 1,
 					"item_code": "_Test Item Home Desktop 200",
-					"expense_account": "_Test Account Cost for Goods Sold - _TC"
+					"expense_account": "_Test Account Cost for Goods Sold - _TC",
+					"cost_center": "_Test Cost Center - _TC"
 				}
 			]
 		})
 		purchase_invoice.save()
 		purchase_invoice.submit()		
+		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 2000)
+		
+		purchase_invoice1 = frappe.copy_doc(purchase_invoice)
+		purchase_invoice1.save()
+		purchase_invoice1.submit()
+		
+		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 4000)
+		
+		purchase_invoice1.cancel()		
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 2000)
 		
 		purchase_invoice.cancel()		
