@@ -335,9 +335,9 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				var diff = me.frm.doc.net_total
 					- flt(last_tax.total / me.frm.doc.conversion_rate, precision("grand_total"));
 
-				if ( diff && Math.abs(diff) <= (2.0 / Math.pow(10, last_tax.precision("tax_amount"))) ) {
+				if ( diff && Math.abs(diff) <= (2.0 / Math.pow(10, precision("tax_amount", last_tax))) ) {
 					var adjustment_amount = flt(diff * me.frm.doc.conversion_rate, 
-							last_tax.precision("tax_amount"));
+							precision("tax_amount", last_tax));
 					last_tax.tax_amount += adjustment_amount;
 					last_tax.tax_amount_after_discount += adjustment_amount;
 					last_tax.total += adjustment_amount;
