@@ -8,6 +8,7 @@ frappe.query_reports["Gross Profit"] = {
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
+			"reqd": 1,
 			"default": frappe.defaults.get_user_default("company")
 		},
 		{
