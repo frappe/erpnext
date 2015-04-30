@@ -5,45 +5,17 @@ import frappe
 import unittest
 from frappe.utils import getdate
 
-test_records = frappe.get_test_records('Task')
+# test_records = frappe.get_test_records('Task')
 
 from erpnext.projects.doctype.task.task import CircularReferenceError
 
 class TestTask(unittest.TestCase):
-	def test_circular_refereence(self):
+	def test_circular_reference(self):
+		
 		task1 =  frappe.new_doc('Task')
 		task1.update({
 			"status": "Open", 
-			"subject": "_Test Task 3"
-		})
-		task1.save()
-		
-		task2 =  frappe.new_doc('Task')
-		task2.update({
-			"status": "Open", 
-			"subject": "_Test Task 4",
-			"depends_on": task1.name
-		})
-		task2.save()
-		
-		task3 =  frappe.new_doc('Task')
-		task3.update({
-			"status": "Open", 
-			"subject": "_Test Task 5",
-			"depends_on": task2.name
-		})
-		task3.save()
-		
-		task1.update({
-			"depends_on": task3.name
-		})
-		self.assertRaises(CircularReferenceError, task1.save)
-		
-	def test_reschedule_dependent_task(self):
-		task1 =  frappe.new_doc('Task')
-		task1.update({
-			"status": "Open", 
-			"subject": "_Test Task 6",
+			"subject": "_Test Task 1",
 			"exp_start_date": "2015-1-1",
 			"exp_end_date": "2015-1-10"
 		})
@@ -52,20 +24,92 @@ class TestTask(unittest.TestCase):
 		task2 =  frappe.new_doc('Task')
 		task2.update({
 			"status": "Open", 
-			"subject": "_Test Task 7",
+			"subject": "_Test Task 2",
 			"exp_start_date": "2015-1-11",
 			"exp_end_date": "2015-1-15",
-			"depends_on": task1.name
+			"depends_on":[
+				{
+					"task": task1.name
+				}
+			]
 		})
 		task2.save()
 		
 		task3 =  frappe.new_doc('Task')
 		task3.update({
 			"status": "Open", 
-			"subject": "_Test Task 5",
+			"subject": "_Test Task 2",
+			"exp_start_date": "2015-1-11",
+			"exp_end_date": "2015-1-15",
+			"depends_on":[
+				{
+					"task": task2.name
+				}
+			]
+		})
+		task3.save()
+
+		task1.append("depends_on", {
+			"task": task3.name
+		})
+		self.assertRaises(CircularReferenceError, task1.save)
+		
+		task1.set("depends_on", [])
+		task1.save()
+		
+		task4 =  frappe.new_doc('Task')
+		task4.update({
+			"status": "Open", 
+			"subject": "_Test Task 1",
+			"exp_start_date": "2015-1-1",
+			"exp_end_date": "2015-1-15",
+			"depends_on":[
+				{
+					"task": task1.name
+				}
+			]
+		})
+		task4.save()
+
+		task3.append("depends_on", {
+			"task": task4.name
+		})
+		
+	def test_reschedule_dependent_task(self):
+		task1 =  frappe.new_doc('Task')
+		task1.update({
+			"status": "Open", 
+			"subject": "_Test Task 1",
+			"exp_start_date": "2015-1-1",
+			"exp_end_date": "2015-1-10"
+		})
+		task1.save()
+		
+		task2 =  frappe.new_doc('Task')
+		task2.update({
+			"status": "Open", 
+			"subject": "_Test Task 2",
+			"exp_start_date": "2015-1-11",
+			"exp_end_date": "2015-1-15",
+			"depends_on":[
+				{
+					"task": task1.name
+				}
+			]
+		})
+		task2.save()
+		
+		task3 =  frappe.new_doc('Task')
+		task3.update({
+			"status": "Open", 
+			"subject": "_Test Task 3",
 			"exp_start_date": "2015-1-16",
 			"exp_end_date": "2015-1-18",
-			"depends_on": task2.name
+			"depends_on":[
+				{
+					"task": task2.name
+				}
+			]
 		})
 		task3.save()
 		
