@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, json
 from frappe.utils import cstr, cint
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
@@ -200,3 +200,11 @@ def make_quotation(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+@frappe.whitelist()
+def set_multiple_status(names, status):
+	names = json.loads(names)
+	for name in names:
+		opp = frappe.get_doc("Opportunity", name)
+		opp.status = status
+		opp.save()
