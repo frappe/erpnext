@@ -9,19 +9,20 @@ from frappe.utils import flt, cint
 def execute(filters=None):
 	if not filters: filters = {}
 
+	float_precision = cint(frappe.db.get_default("float_precision")) or 3
+	
 	columns = get_columns(filters)
 	item_map = get_item_details(filters)
-	iwb_map = get_item_warehouse_batch_map(filters)
+	iwb_map = get_item_warehouse_batch_map(filters, float_precision)
 
 	data = []
 	for item in sorted(iwb_map):
 		for wh in sorted(iwb_map[item]):
 			for batch in sorted(iwb_map[item][wh]):
 				qty_dict = iwb_map[item][wh][batch]
-				data.append([item, item_map[item]["item_name"],
-					item_map[item]["description"], wh, batch,
-					qty_dict.opening_qty, qty_dict.in_qty,
-					qty_dict.out_qty, qty_dict.bal_qty
+				data.append([item, item_map[item]["item_name"], item_map[item]["description"], wh, batch,
+					flt(qty_dict.opening_qty, float_precision), flt(qty_dict.in_qty, float_precision),
+					flt(qty_dict.out_qty, float_precision), flt(qty_dict.bal_qty, float_precision)
 				])
 
 	return columns, data
@@ -56,8 +57,7 @@ def get_stock_ledger_entries(filters):
 		where docstatus < 2 %s order by item_code, warehouse""" %
 		conditions, as_dict=1)
 
-def get_item_warehouse_batch_map(filters):
-	float_precision = cint(frappe.db.get_default("float_precision")) or 3
+def get_item_warehouse_batch_map(filters, float_precision):
 	sle = get_stock_ledger_entries(filters)
 	iwb_map = {}
 

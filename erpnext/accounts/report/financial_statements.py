@@ -186,7 +186,10 @@ def filter_accounts(accounts, depth=10):
 	filtered_accounts = []
 	def add_to_list(parent, level):
 		if level < depth:
-			for child in (parent_children_map.get(parent) or []):
+			children = parent_children_map.get(parent) or []
+			if parent == None:
+				sort_root_accounts(children)
+			for child in children:
 				child.indent = level
 				filtered_accounts.append(child)
 				add_to_list(child.name, level + 1)
@@ -202,6 +205,22 @@ def filter_accounts(accounts, depth=10):
 	add_to_list(None, 0)
 
 	return filtered_accounts, accounts_by_name
+	
+def sort_root_accounts(roots):
+	"""Sort root types as Asset, Liability, Equity, Income, Expense"""
+
+	def compare_roots(a, b):
+		if a.report_type != b.report_type and a.report_type == "Balance Sheet":
+			return -1
+		if a.root_type != b.root_type and a.root_type == "Asset":
+			return -1
+		if a.root_type == "Liability" and b.root_type == "Equity":
+			return -1
+		if a.root_type == "Income" and b.root_type == "Expense":
+			return -1
+		return 1
+
+	roots.sort(compare_roots)
 
 def get_gl_entries(company, from_date, to_date, root_lft, root_rgt, ignore_closing_entries=False):
 	"""Returns a dict like { "account": [gl entries], ... }"""

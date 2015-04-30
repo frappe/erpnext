@@ -123,7 +123,8 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 def prepare_data(accounts, filters, total_row):
 	show_zero_values = cint(filters.show_zero_values)
 	data = []
-	for i, d in enumerate(accounts):
+	accounts_with_zero_value = []
+	for d in accounts:
 		has_value = False
 		row = {
 			"account_name": d.account_name,
@@ -140,9 +141,14 @@ def prepare_data(accounts, filters, total_row):
 			row[key] = d.get(key, 0.0)
 			if row[key]:
 				has_value = True
-
-		if has_value or show_zero_values:
+		
+		if show_zero_values:
 			data.append(row)
+		else:
+			if not has_value:
+				accounts_with_zero_value.append(d.name)
+			elif d.parent_account not in accounts_with_zero_value:
+				data.append(row)
 
 	data.extend([{},total_row])
 
