@@ -51,7 +51,7 @@ class SalesOrder(SellingController):
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
 		unique_chk_list = set(check_list)
 		if len(unique_chk_list) != len(check_list):
-			frappe.msgprint(_("Warning:Same item has been entered multiple times."))
+			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
 
 	def validate_sales_mntc_quotation(self):
 		for d in self.get('items'):

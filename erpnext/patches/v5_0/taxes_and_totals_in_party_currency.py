@@ -3,6 +3,8 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.model.meta import get_field_precision
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 def execute():
 	selling_doctypes = ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]
@@ -18,19 +20,31 @@ def update_values(dt, tax_table):
 	frappe.reload_doctype(dt)
 	frappe.reload_doctype(dt + " Item")
 	frappe.reload_doctype(tax_table)
-
+	
+	net_total_precision = get_field_precision(frappe.get_meta(dt).get_field("net_total"))
+	make_property_setter(dt, "base_total", "precision", net_total_precision, "Select")
+	
+	rate_field_precision = get_field_precision(frappe.get_meta(dt + " Item").get_field("rate"))
+	for field in ("net_rate", "base_net_rate", "net_amount", "base_net_amount", "base_rate", "base_amount"):
+		make_property_setter(dt + " Item", field, "precision", rate_field_precision, "Select")
+		
+	tax_amount_precision = get_field_precision(frappe.get_meta(tax_table).get_field("tax_amount"))
+	for field in ("base_tax_amount", "total", "base_total", "tax_amount_after_discount_amount", 
+		"base_tax_amount_after_discount_amount"):
+			make_property_setter(tax_table, field, "precision", tax_amount_precision, "Select")
+	
 	# update net_total, discount_on
 	frappe.db.sql("""
 		UPDATE
 			`tab{0}`
 		SET
 			total = net_total,
-			base_total = net_total*conversion_rate,
-			net_total = base_net_total / conversion_rate,
+			base_total = round(net_total*conversion_rate, {1}),
+			net_total = round(base_net_total / conversion_rate, {1}),
 			apply_discount_on = "Grand Total"
 		WHERE
 			docstatus < 2
-	""".format(dt))
+	""".format(dt, net_total_precision))
 
 
 	# update net_amount
@@ -40,14 +54,14 @@ def update_values(dt, tax_table):
 		SET
 			item.base_net_amount = item.base_amount,
 			item.base_net_rate = item.base_rate,
-			item.net_amount = item.base_net_amount / par.conversion_rate,
-			item.net_rate = item.base_net_rate / par.conversion_rate,
-			item.base_amount = item.amount * par.conversion_rate,
-			item.base_rate = item.rate * par.conversion_rate
+			item.net_amount = round(item.base_net_amount / par.conversion_rate, {2}),
+			item.net_rate = round(item.base_net_rate / par.conversion_rate, {2}),
+			item.base_amount = round(item.amount * par.conversion_rate, {2}),
+			item.base_rate = round(item.rate * par.conversion_rate, {2})
 		WHERE
 			par.name = item.parent
 			and par.docstatus < 2
-	""".format(dt, dt + " Item"))
+	""".format(dt, dt + " Item", rate_field_precision))
 
 	# update tax in party currency
 	frappe.db.sql("""
@@ -55,12 +69,12 @@ def update_values(dt, tax_table):
 			`tab{0}` par, `tab{1}` tax
 		SET
 			tax.base_tax_amount = tax.tax_amount,
-			tax.tax_amount = tax.base_tax_amount / par.conversion_rate,
-			tax.base_total = tax.total,
-			tax.total = tax.base_total / conversion_rate,
-			tax.base_tax_amount_after_discount_amount = tax.tax_amount_after_discount_amount,
-			tax.tax_amount_after_discount_amount = tax.base_tax_amount_after_discount_amount / conversion_rate
+			tax.tax_amount = round(tax.base_tax_amount / par.conversion_rate, {2}),
+			tax.base_total = round(tax.total, {2}),
+			tax.total = round(tax.base_total / conversion_rate, {2}),
+			tax.base_tax_amount_after_discount_amount = round(tax.tax_amount_after_discount_amount, {2}),
+			tax.tax_amount_after_discount_amount = round(tax.base_tax_amount_after_discount_amount / conversion_rate, {2})
 		WHERE
 			par.name = tax.parent
 			and par.docstatus < 2
-	""".format(dt, tax_table))
+	""".format(dt, tax_table, tax_amount_precision))
