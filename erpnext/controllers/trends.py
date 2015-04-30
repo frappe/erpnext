@@ -31,7 +31,10 @@ def validate_filters(filters):
 	for f in ["Fiscal Year", "Based On", "Period", "Company"]:
 		if not filters.get(f.lower().replace(" ", "_")):
 			frappe.throw(_("{0} is mandatory").format(f))
-
+			
+	if not frappe.db.exists("Fiscal Year", filters.get("fiscal_year")):
+		frappe.throw(_("Fiscal Year: {0} does not exists").format(filters.get("fiscal_year")))
+		
 	if filters.get("based_on") == filters.get("group_by"):
 		frappe.throw(_("'Based On' and 'Group By' can not be same"))
 
