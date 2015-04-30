@@ -238,13 +238,13 @@ class TestPurchaseInvoice(unittest.TestCase):
 		purchase_invoice = frappe.new_doc('Purchase Invoice')
 		purchase_invoice.update({
 			"credit_to": "_Test Payable - _TC",
-			"project": "_Test Project",
 			"supplier": "_Test Supplier",
 			"company": "_Test Company",
 			"items": [
 				{
 					"rate": 500,
 					"qty": 1,
+					"project_name": "_Test Project",
 					"item_code": "_Test Item Home Desktop 100",
 					"expense_account": "_Test Account Cost for Goods Sold - _TC",
 					"cost_center": "_Test Cost Center - _TC"
@@ -252,6 +252,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 				{
 					"rate": 1500,
 					"qty": 1,
+					"project_name": "_Test Project",
 					"item_code": "_Test Item Home Desktop 200",
 					"expense_account": "_Test Account Cost for Goods Sold - _TC",
 					"cost_center": "_Test Cost Center - _TC"

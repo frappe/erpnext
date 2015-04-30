@@ -377,11 +377,14 @@ class PurchaseInvoice(BuyingController):
 		self.update_project()
 		
 	def update_project(self):
-		if self.project and frappe.db.exists("Project", self.project):
-			project = frappe.get_doc("Project", self.project)
-			project.flags.dont_sync_tasks = True
-			project.update_purchase_costing()
-			project.save()
+		project_list = []
+		for d in self.items:
+			if d.project_name and d.project_name not in project_list:
+				project = frappe.get_doc("Project", d.project_name)
+				project.flags.dont_sync_tasks = True
+				project.update_purchase_costing()
+				project.save()
+				project_list.append(d.project_name)
 
 @frappe.whitelist()
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
