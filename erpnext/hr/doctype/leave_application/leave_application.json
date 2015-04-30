@@ -17,17 +17,8 @@
    "permlevel": 1
   }, 
   {
-   "description": "Leave can be approved by users with Role, \"Leave Approver\"", 
-   "fieldname": "leave_approver", 
-   "fieldtype": "Link", 
-   "label": "Leave Approver", 
-   "options": "User", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "leave_approver_name", 
-   "fieldtype": "Read Only", 
-   "label": "Leave Approver Name", 
+   "fieldname": "column_break_12", 
+   "fieldtype": "Column Break", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -42,6 +33,20 @@
    "permlevel": 0, 
    "reqd": 1, 
    "search_index": 1
+  }, 
+  {
+   "fieldname": "leave_balance", 
+   "fieldtype": "Float", 
+   "label": "Leave Balance Before Application", 
+   "no_copy": 1, 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "section_break_5", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "from_date", 
@@ -68,6 +73,15 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "total_leave_days", 
+   "fieldtype": "Float", 
+   "in_list_view": 1, 
+   "label": "Total Leave Days", 
+   "no_copy": 1, 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "column_break1", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -79,6 +93,12 @@
    "fieldtype": "Small Text", 
    "label": "Reason", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "section_break_7", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "employee", 
@@ -101,36 +121,31 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "leave_balance", 
-   "fieldtype": "Float", 
-   "label": "Leave Balance Before Application", 
-   "no_copy": 1, 
+   "fieldname": "column_break_15", 
+   "fieldtype": "Column Break", 
    "permlevel": 0, 
-   "read_only": 1
+   "precision": ""
   }, 
   {
-   "fieldname": "total_leave_days", 
-   "fieldtype": "Float", 
-   "in_list_view": 1, 
-   "label": "Total Leave Days", 
-   "no_copy": 1, 
+   "description": "", 
+   "fieldname": "leave_approver", 
+   "fieldtype": "Link", 
+   "label": "Leave Approver", 
+   "options": "User", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "leave_approver_name", 
+   "fieldtype": "Read Only", 
+   "label": "Leave Approver Name", 
    "permlevel": 0, 
-   "read_only": 1
+   "precision": ""
   }, 
   {
    "fieldname": "sb10", 
    "fieldtype": "Section Break", 
-   "label": "More Info", 
+   "label": "", 
    "permlevel": 0
-  }, 
-  {
-   "allow_on_submit": 1, 
-   "default": "1", 
-   "fieldname": "follow_via_email", 
-   "fieldtype": "Check", 
-   "label": "Follow via Email", 
-   "permlevel": 0, 
-   "print_hide": 1
   }, 
   {
    "default": "Today", 
@@ -151,6 +166,15 @@
    "read_only": 0, 
    "reqd": 1, 
    "search_index": 0
+  }, 
+  {
+   "allow_on_submit": 1, 
+   "default": "1", 
+   "fieldname": "follow_via_email", 
+   "fieldtype": "Check", 
+   "label": "Follow via Email", 
+   "permlevel": 0, 
+   "print_hide": 1
   }, 
   {
    "fieldname": "column_break_17", 
@@ -192,7 +216,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2015-02-05 05:11:40.611487", 
+ "modified": "2015-04-30 02:19:39.330689", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Application", 

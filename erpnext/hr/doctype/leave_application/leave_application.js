@@ -3,6 +3,10 @@
 
 cur_frm.add_fetch('employee','employee_name','employee_name');
 
+frappe.ui.form.on("Leave Application", "leave_approver", function(frm) {
+	frm.set_value("leave_approver_name", frappe.user.full_name(frm.doc.leave_approver));
+});
+
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.posting_date)
 		set_multiple(dt,dn,{posting_date:get_today()});
@@ -13,7 +17,10 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 
 	cur_frm.set_query("leave_approver", function() {
 		return {
-			filters: [["UserRole", "role", "=", "Leave Approver"]]
+			query: "erpnext.hr.doctype.leave_application.leave_application.get_approvers",
+			filters: {
+				employee: cur_frm.doc.employee
+			}
 		};
 	});
 
@@ -106,18 +113,3 @@ cur_frm.cscript.calculate_total_days = function(doc, dt, dn) {
 }
 
 cur_frm.fields_dict.employee.get_query = erpnext.queries.employee;
-
-frappe.ui.form.on("Leave Application", "leave_approver", function(frm) {
-	frappe.call({
-		"method": "frappe.client.get",
-		args: {
-			doctype: "User",
-			name: frm.doc.leave_approver
-		},
-		callback: function (data) {
-			frappe.model.set_value(frm.doctype, frm.docname, "leave_approver_name",
-				data.message.first_name
-				+ (data.message.last_name ? (" " + data.message.last_name) : ""))
-		}
-	})
-})

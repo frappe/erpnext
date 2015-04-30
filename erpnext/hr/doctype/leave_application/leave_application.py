@@ -204,6 +204,17 @@ class LeaveApplication(Document):
 		post(**{"txt": args.message, "contact": args.message_to, "subject": args.subject,
 			"notify": cint(self.follow_via_email)})
 
+@frappe.whitelist()
+def get_approvers(doctype, txt, searchfield, start, page_len, filters):
+	if not filters.get("employee"):
+		frappe.throw(_("Please select Employee Record first."))
+
+	return frappe.db.sql("""select user.name, user.first_name, user.last_name from
+		tabUser user, `tabEmployee Leave Approver` approver where
+		approver.parent = %s
+		and user.name like %s
+		and approver.leave_approver=user.name""", (filters.get("employee"), "%" + txt + "%"))
+
 def get_holidays(leave_app):
 	tot_hol = frappe.db.sql("""select count(*) from `tabHoliday` h1, `tabHoliday List` h2, `tabEmployee` e1
 		where e1.name = %s and h1.parent = h2.name and e1.holiday_list = h2.name

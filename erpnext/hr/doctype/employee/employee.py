@@ -6,7 +6,7 @@ import frappe
 
 from frappe.utils import getdate, validate_email_add, today
 from frappe.model.naming import make_autoname
-from frappe import throw, _, msgprint
+from frappe import throw, _
 import frappe.permissions
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
@@ -139,8 +139,8 @@ class Employee(Document):
 	def validate_employee_leave_approver(self):
 		for l in self.get("leave_approvers")[:]:
 			if "Leave Approver" not in frappe.get_roles(l.leave_approver):
-				self.get("leave_approvers").remove(l)
-				msgprint(_("{0} is not a valid Leave Approver. Removing row #{1}.").format(l.leave_approver, l.idx))
+				frappe.get_doc("User", l.leave_approver).add_roles("Leave Approver")
+
 
 	def validate_reports_to(self):
 		if self.reports_to == self.name:
