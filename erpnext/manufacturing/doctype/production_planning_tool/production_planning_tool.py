@@ -248,8 +248,10 @@ class ProductionPlanningTool(Document):
 					ifnull(sum(ifnull(fb.qty, 0)/ifnull(bom.quantity, 1)), 0) as qty,
 					fb.description, fb.stock_uom, it.min_order_qty
 					from `tabBOM Explosion Item` fb, `tabBOM` bom, `tabItem` it
-					where bom.name = fb.parent and it.name = fb.item_code and ifnull(it.is_pro_applicable, 'No') = 'No'
+					where bom.name = fb.parent and it.name = fb.item_code 
+					and ifnull(it.is_pro_applicable, 'No') = 'No'
 					and ifnull(it.is_sub_contracted_item, 'No') = 'No'
+					and ifnull(it.is_stock_item, 'No') = 'Yes'
 					and fb.docstatus<2 and bom.name=%s
 					group by item_code, stock_uom""", bom, as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
@@ -262,6 +264,7 @@ class ProductionPlanningTool(Document):
 					from `tabBOM Item` bom_item, `tabBOM` bom, tabItem item
 					where bom.name = bom_item.parent and bom.name = %s and bom_item.docstatus < 2
 					and bom_item.item_code = item.name
+					and ifnull(item.is_stock_item, 'No') = 'Yes'
 					group by item_code""", bom, as_dict=1):
 						bom_wise_item_details.setdefault(d.item_code, d)
 
