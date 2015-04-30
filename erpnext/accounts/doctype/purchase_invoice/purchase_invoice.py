@@ -239,6 +239,7 @@ class PurchaseInvoice(BuyingController):
 		self.update_against_document_in_jv()
 		self.update_prevdoc_status()
 		self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
+		self.update_project()
 
 	def make_gl_entries(self):
 		auto_accounting_for_stock = \
@@ -373,9 +374,14 @@ class PurchaseInvoice(BuyingController):
 		self.update_prevdoc_status()
 		self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 		self.make_gl_entries_on_cancel()
-
-	def on_update(self):
-		pass
+		self.update_project()
+		
+	def update_project(self):
+		if self.project and frappe.db.exists("Project", self.project):
+			project = frappe.get_doc("Project", self.project)
+			project.flags.dont_sync_tasks = True
+			project.update_purchase_costing()
+			project.save()
 
 @frappe.whitelist()
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
