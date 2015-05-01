@@ -22,7 +22,8 @@ def update_values(dt, tax_table):
 	frappe.reload_doctype(tax_table)
 	
 	net_total_precision = get_field_precision(frappe.get_meta(dt).get_field("net_total"))
-	make_property_setter(dt, "base_total", "precision", net_total_precision, "Select")
+	for field in ("total", "base_total", "base_net_total"):
+		make_property_setter(dt, field, "precision", net_total_precision, "Select")
 	
 	rate_field_precision = get_field_precision(frappe.get_meta(dt + " Item").get_field("rate"))
 	for field in ("net_rate", "base_net_rate", "net_amount", "base_net_amount", "base_rate", "base_amount"):
@@ -38,7 +39,7 @@ def update_values(dt, tax_table):
 		UPDATE
 			`tab{0}`
 		SET
-			total = net_total,
+			total = round(net_total, {1}),
 			base_total = round(net_total*conversion_rate, {1}),
 			net_total = round(base_net_total / conversion_rate, {1}),
 			apply_discount_on = "Grand Total"
