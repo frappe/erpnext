@@ -97,8 +97,8 @@ class PurchaseCommon(BuyingController):
 					frappe.throw(_("{0} must be a Purchased or Sub-Contracted Item in row {1}").format(d.item_code, d.idx))
 
 			items.append(cstr(d.item_code))
-			if items and len(items) != len(set(items)):
-				frappe.msgprint(_("Warning: Same item has been entered multiple times."))
+		if items and len(items) != len(set(items)):
+			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
 			
 
 	def check_for_stopped_status(self, doctype, docname):
