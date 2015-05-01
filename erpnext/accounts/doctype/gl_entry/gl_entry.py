@@ -110,7 +110,7 @@ def check_freezing_date(posting_date, adv_adj=False):
 		if acc_frozen_upto:
 			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
 			if getdate(posting_date) <= getdate(acc_frozen_upto) \
-					and not frozen_accounts_modifier in frappe.user.get_roles():
+					and not frozen_accounts_modifier in frappe.get_roles():
 				frappe.throw(_("You are not authorized to add or update entries before {0}").format(formatdate(acc_frozen_upto)))
 
 def update_outstanding_amt(account, party_type, party, against_voucher_type, against_voucher, on_cancel=False):
@@ -155,5 +155,5 @@ def validate_frozen_account(account, adv_adj=None):
 
 		if not frozen_accounts_modifier:
 			frappe.throw(_("Account {0} is frozen").format(account))
-		elif frozen_accounts_modifier not in frappe.user.get_roles():
+		elif frozen_accounts_modifier not in frappe.get_roles():
 			frappe.throw(_("Not authorized to edit frozen Account {0}").format(account))

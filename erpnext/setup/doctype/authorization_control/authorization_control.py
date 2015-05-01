@@ -32,7 +32,7 @@ class AuthorizationControl(TransactionBase):
 				if(d[0]): appr_users.append(d[0])
 				if(d[1]): appr_roles.append(d[1])
 
-			if not has_common(appr_roles, frappe.user.get_roles()) and not has_common(appr_users, [session['user']]):
+			if not has_common(appr_roles, frappe.get_roles()) and not has_common(appr_users, [session['user']]):
 				frappe.msgprint(_("Not authroized since {0} exceeds limits").format(_(based_on)))
 				frappe.throw(_("Can be approved by {0}").format(comma_or(appr_roles + appr_users)))
 
@@ -77,7 +77,7 @@ class AuthorizationControl(TransactionBase):
 		auth_value = av_dis
 
 		if val == 1: add_cond += " and system_user = '"+session['user'].replace("'", "\\'")+"'"
-		elif val == 2: add_cond += " and system_role IN %s" % ("('"+"','".join(frappe.user.get_roles())+"')")
+		elif val == 2: add_cond += " and system_role IN %s" % ("('"+"','".join(frappe.get_roles())+"')")
 		else: add_cond += " and ifnull(system_user,'') = '' and ifnull(system_role,'') = ''"
 
 		if based_on == 'Grand Total': auth_value = total
@@ -130,7 +130,7 @@ class AuthorizationControl(TransactionBase):
 			where transaction = %s and system_role IN (%s) and based_on IN (%s)
 			and (company = %s or ifnull(company,'')='')
 			and docstatus != 2
-		""" % ('%s', "'"+"','".join(frappe.user.get_roles())+"'", "'"+"','".join(final_based_on)+"'", '%s'), (doctype_name, company))]
+		""" % ('%s', "'"+"','".join(frappe.get_roles())+"'", "'"+"','".join(final_based_on)+"'", '%s'), (doctype_name, company))]
 
 		for d in based_on:
 			self.bifurcate_based_on_type(doctype_name, total, av_dis, d, doc_obj, 2, company)

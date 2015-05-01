@@ -161,7 +161,7 @@ def check_credit_limit(customer, company):
 
 		# If not authorized person raise exception
 		credit_controller = frappe.db.get_value('Accounts Settings', None, 'credit_controller')
-		if not credit_controller or credit_controller not in frappe.user.get_roles():
+		if not credit_controller or credit_controller not in frappe.get_roles():
 			throw(_("Please contact to the user who have Sales Master Manager {0} role")
 				.format(" / " + credit_controller if credit_controller else ""))
 

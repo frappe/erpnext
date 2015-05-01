@@ -186,7 +186,7 @@ def validate_due_date(posting_date, due_date, party_type, party, company):
 		frappe.throw(_("Due Date cannot be before Posting Date"))
 	elif credit_days is not None and diff > flt(credit_days):
 		is_credit_controller = frappe.db.get_value("Accounts Settings", None,
-			"credit_controller") in frappe.user.get_roles()
+			"credit_controller") in frappe.get_roles()
 
 		if is_credit_controller:
 			msgprint(_("Note: Due / Reference Date exceeds allowed customer credit days by {0} day(s)")

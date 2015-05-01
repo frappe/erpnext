@@ -13,7 +13,7 @@ class Account(Document):
 	def onload(self):
 		frozen_accounts_modifier = frappe.db.get_value("Accounts Settings", "Accounts Settings",
 			"frozen_accounts_modifier")
-		if not frozen_accounts_modifier or frozen_accounts_modifier in frappe.user.get_roles():
+		if not frozen_accounts_modifier or frozen_accounts_modifier in frappe.get_roles():
 			self.get("__onload").can_freeze_account = True
 
 	def autoname(self):
@@ -59,7 +59,7 @@ class Account(Document):
 		if old_value and old_value != self.freeze_account:
 			frozen_accounts_modifier = frappe.db.get_value('Accounts Settings', None, 'frozen_accounts_modifier')
 			if not frozen_accounts_modifier or \
-				frozen_accounts_modifier not in frappe.user.get_roles():
+				frozen_accounts_modifier not in frappe.get_roles():
 					throw(_("You are not authorized to set Frozen value"))
 
 	def validate_balance_must_be_debit_or_credit(self):
