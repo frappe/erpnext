@@ -21,12 +21,13 @@ def get_children():
 	
 	# root
 	if args['parent'] in ("Accounts", "Cost Centers"):
+		select_cond = ", root_type, report_type" if args["parent"]=="Accounts" else ""
 		acc = frappe.db.sql(""" select 
-			name as value, if(group_or_ledger='Group', 1, 0) as expandable, root_type, report_type
+			name as value, if(group_or_ledger='Group', 1, 0) as expandable %s
 			from `tab%s`
 			where ifnull(parent_%s,'') = ''
 			and `company` = %s	and docstatus<2 
-			order by name""" % (ctype, ctype.lower().replace(' ','_'), '%s'),
+			order by name""" % (select_cond, ctype, ctype.lower().replace(' ','_'), '%s'),
 				company, as_dict=1)
 				
 		if args["parent"]=="Accounts":
