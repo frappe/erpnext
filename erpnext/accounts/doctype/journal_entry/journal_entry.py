@@ -435,13 +435,12 @@ class JournalEntry(AccountsController):
 						Pending Amount is {2}".format(d.idx, d.against_expense_claim, pending_amount)))
 
 	def validate_credit_debit_note(self):
-		count = frappe.db.exists({
-			"doctype": "Journal Entry",
-			"stock_entry":self.stock_entry,
-			"docstatus":1
-		})
-		if count:
-			frappe.throw(_("{0} already made against stock entry {1}".format(self.voucher_type, self.stock_entry)))
+		if self.stock_entry:
+			if frappe.db.get_value("Stock Entry", self.stock_entry, "docstatus") != 1:
+				frappe.throw(_("Stock Entry {0} is not submitted").format(self.stock_entry))
+				
+			if frappe.db.exists({"doctype": "Journal Entry", "stock_entry": self.stock_entry, "docstatus":1}):
+				frappe.msgprint(_("Warning: Another {0} # {1} exists against stock entry {2}".format(self.voucher_type, self.name, self.stock_entry)))
 
 	def validate_empty_accounts_table(self):
 		if not self.get('accounts'):
