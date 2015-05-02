@@ -388,6 +388,7 @@ def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 				and bom_item.docstatus < 2
 				and bom_item.parent = %(bom)s
 				and item.name = bom_item.item_code
+				and ifnull(item.is_stock_item, 'No') = 'Yes'
 				{conditions}
 				group by item_code, stock_uom"""
 
