@@ -30,7 +30,8 @@ def execute():
 			
 		count = 1
 		for d in records:
-			if cstr(d.description) == item_details.get(d.item_code).old_description:
+			if d.item_code and item_details.get(d.item_code) \
+					and cstr(d.description) == item_details.get(d.item_code).old_description:
 				image_url = item_details.get(d.item_code).image_url
 				desc = item_details.get(d.item_code).new_description
 			else:

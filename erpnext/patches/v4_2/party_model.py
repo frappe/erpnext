@@ -15,11 +15,6 @@ def execute():
 		delete_individual_party_account()
 		remove_customer_supplier_account_report()
 
-
-def link_warehouse_account():
-	frappe.db.sql("""update tabAccount set warehouse=master_name
-		where ifnull(account_type, '') = 'Warehouse' and ifnull(master_name, '') != ''""")
-
 def create_receivable_payable_account():
 	receivable_payable_accounts = frappe._dict()
 

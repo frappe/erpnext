@@ -147,3 +147,4 @@ erpnext.patches.v4_2.delete_gl_entries_for_cancelled_invoices
 erpnext.patches.v5_0.project_costing
 erpnext.patches.v5_0.update_temporary_account
 erpnext.patches.v5_0.update_advance_paid
+erpnext.patches.v5_0.link_warehouse_with_account
