@@ -59,7 +59,7 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20):
 	from frappe.templates.pages.list import get_list
 	user = frappe.session.user
 	ignore_permissions = False
-	if is_website_user(user):
+	if is_website_user():
 		if not filters: filters = []
 		filters.append(("Issue", "raised_by", "=", user))
 		ignore_permissions = True
