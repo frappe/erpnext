@@ -214,7 +214,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.set_dynamic_labels();
 
 		var company_currency = this.get_company_currency();
-		if(this.frm.doc.currency !== company_currency) {
+		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
+		if(this.frm.doc.currency !== company_currency  && !this.frm.doc.ignore_pricing_rule) {
 			this.get_exchange_rate(this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
 					me.frm.set_value("conversion_rate", exchange_rate);
