@@ -22,7 +22,7 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 	from frappe.templates.pages.list import get_list
 	user = frappe.session.user
 
-	if user != "Guest" and is_website_user(user):
+	if user != "Guest" and is_website_user():
 		# find party for this contact
 		customers, suppliers = get_customers_suppliers(doctype, user)
 		if customers:
