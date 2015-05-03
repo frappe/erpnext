@@ -5,6 +5,66 @@
 frappe.provide("erpnext.taxes");
 frappe.provide("erpnext.taxes.flags");
 
+frappe.ui.form.on(cur_frm.doctype, {
+	onload: function(frm) {
+		if(frm.get_field("taxes")) {
+			frm.set_query("account_head", "taxes", function(doc) {
+				if(frm.cscript.tax_table == "Sales Taxes and Charges") {
+					var account_type = ["Tax", "Chargeable", "Expense Account"];
+				} else {
+					var account_type = ["Tax", "Chargeable", "Income Account"];
+				}
+
+				return {
+					query: "erpnext.controllers.queries.tax_account_query",
+					filters: {
+						"account_type": account_type,
+						"company": doc.company
+					}
+				}
+			});
+
+			frm.set_query("cost_center", "taxes", function(doc) {
+				return {
+					filters: {
+						'company': doc.company,
+						"is_group": 0
+					}
+				}
+			});
+		}
+	},
+	validate: function(frm) {
+		// neither is absolutely mandatory
+		// check mandatory based on charge_type
+		frm.get_docfield("taxes", "rate").reqd = 0;
+		frm.get_docfield("taxes", "tax_amount").reqd = 0;
+
+		$.each(frm.doc.taxes, function(i, d) {
+			if(d.charge_type==="Actual") {
+				d.rate = 0;
+				if(!d.tax_amount) {
+					msgprint(__("Amount is mandatory for {0}", [d.account_head]));
+					validated = false;
+				}
+			} else {
+				d.tax_amount = 0;
+				if(!d.rate) {
+					msgprint(__("Rate is mandatory for {0}", [d.account_head]));
+					validated = false;
+				}
+			}
+		});
+	},
+	taxes_on_form_rendered: function(frm) {
+		erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm);
+	}
+});
+
+
+
+
+
 
 cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
@@ -133,42 +193,6 @@ erpnext.taxes.set_conditional_mandatory_rate_or_amount = function(frm) {
 		grid_row.toggle_reqd("tax_amount", false);
 	}
 }
-
-// setup conditional mandatory for tax and rates
-frappe.ui.form.on(cur_frm.doctype, "taxes_on_form_rendered", function(frm) {
-	erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm);
-});
-
-// setup queries for taxes
-frappe.ui.form.on(cur_frm.doctype, "onload", function(frm) {
-	if(frm.get_field("taxes")) {
-		frm.set_query("account_head", "taxes", function(doc) {
-			if(frm.cscript.tax_table == "Sales Taxes and Charges") {
-				var account_type = ["Tax", "Chargeable", "Expense Account"];
-			} else {
-				var account_type = ["Tax", "Chargeable", "Income Account"];
-			}
-
-			return {
-				query: "erpnext.controllers.queries.tax_account_query",
-				filters: {
-					"account_type": account_type,
-					"company": doc.company
-				}
-			}
-		});
-
-		frm.set_query("cost_center", "taxes", function(doc) {
-			return {
-				filters: {
-					'company': doc.company,
-					"is_group": 0
-				}
-			}
-		});
-	}
-});
-
 
 
 // For customizing print
