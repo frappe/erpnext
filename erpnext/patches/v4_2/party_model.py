@@ -19,15 +19,17 @@ def create_receivable_payable_account():
 	receivable_payable_accounts = frappe._dict()
 
 	def _create_account(args):
-		account = frappe.new_doc("Account")
-		account.is_group = 0
-		account.update(args)
-		account.insert()
+		if not frappe.db.get_value("Account", 
+				{"account_name": args["account_name"], "company": args["company"]}):
+			account = frappe.new_doc("Account")
+			account.is_group = 0
+			account.update(args)
+			account.insert()
 
-		frappe.db.set_value("Company", args["company"], ("default_receivable_account"
-			if args["account_type"]=="Receivable" else "default_payable_account"), account.name)
+			frappe.db.set_value("Company", args["company"], ("default_receivable_account"
+				if args["account_type"]=="Receivable" else "default_payable_account"), account.name)
 
-		receivable_payable_accounts.setdefault(args["company"], {}).setdefault(args["account_type"], account.name)
+			receivable_payable_accounts.setdefault(args["company"], {}).setdefault(args["account_type"], account.name)
 
 	for company in frappe.db.sql_list("select name from tabCompany"):
 		_create_account({
@@ -47,8 +49,11 @@ def create_receivable_payable_account():
 	return receivable_payable_accounts
 
 def get_parent_account(company, master_type):
-	parent_account = frappe.db.get_value("Company", company,
-		"receivables_group" if master_type=="Customer" else "payables_group")
+	parent_account = None
+	
+	if "receivables_group" in frappe.db.get_table_columns("Company"):
+		parent_account = frappe.db.get_value("Company", company,
+			"receivables_group" if master_type=="Customer" else "payables_group")
 	if not parent_account:
 		parent_account = frappe.db.get_value("Account", {"company": company,
 			"account_name": "Accounts Receivable" if master_type=="Customer" else "Accounts Payable"})
@@ -73,7 +78,8 @@ def set_party_in_jv_and_gl_entry(receivable_payable_accounts):
 		return
 
 	for dt in ["Journal Entry Account", "GL Entry"]:
-		records = frappe.db.sql("""select name, account from `tab%s` where account in (%s)""" %
+		records = frappe.db.sql("""select name, account from `tab%s` 
+			where account in (%s) and ifnull(party, '') != ''""" % 
 			(dt, ", ".join(['%s']*len(account_map))), tuple(account_map.keys()), as_dict=1)
 		for i, d in enumerate(records):
 			account_details = account_map.get(d.account, {})
