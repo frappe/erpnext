@@ -428,6 +428,7 @@
    "reqd": 1
   }, 
   {
+   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
    "fieldname": "default_supplier", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
@@ -448,7 +449,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
+   "depends_on": "", 
    "description": "Default Purchase Account in which cost of the item will be debited.", 
    "fieldname": "expense_account", 
    "fieldtype": "Link", 
@@ -461,7 +462,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
+   "depends_on": "", 
    "description": "", 
    "fieldname": "buying_cost_center", 
    "fieldtype": "Link", 
@@ -877,7 +878,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2015-03-03 06:18:35.717586", 
+ "modified": "2015-05-04 18:44:46.090445", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
