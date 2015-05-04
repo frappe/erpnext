@@ -10,13 +10,11 @@ from frappe.model.document import Document
 from frappe.utils import now
 from frappe.utils.user import is_website_user
 
+sender_field = "raised_by"
+
 class Issue(Document):
 	def get_feed(self):
 		return "{0}: {1}".format(_(self.status), self.subject)
-
-	def set_sender(self, sender):
-		"""Will be called by **Communication** when the Issue is created from an incoming email."""
-		self.raised_by = sender
 
 	def validate(self):
 		self.update_status()

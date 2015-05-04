@@ -9,25 +9,10 @@ from frappe.model.mapper import get_mapped_doc
 
 from erpnext.utilities.transaction_base import TransactionBase
 
+subject_field = "title"
+sender_field = "contact_email"
+
 class Opportunity(TransactionBase):
-	def set_sender(self, email_id):
-		"""Set lead against new opportunity"""
-		lead_name = frappe.db.get_value("Lead", {"email_id": email_id})
-		if not lead_name:
-			lead = frappe.get_doc({
-				"doctype": "Lead",
-				"email_id": email_id,
-				"lead_name": email_id
-			})
-			lead.insert(ignore_permissions=True)
-			lead_name = lead.name
-
-		self.enquiry_from = "Lead"
-		self.lead = lead_name
-
-	def set_subject(self, subject):
-		self.title = subject
-
 	def after_insert(self):
 		if self.lead:
 			frappe.get_doc("Lead", self.lead).set_status(update=True)
@@ -39,6 +24,8 @@ class Opportunity(TransactionBase):
 			"contact_by": frappe.db.get_value("Opportunity", self.name, "contact_by") if \
 				(not cint(self.get("__islocal"))) else None,
 		})
+
+		self.make_new_lead_if_required()
 
 		if not self.enquiry_from:
 			frappe.throw(_("Opportunity From field is mandatory"))
@@ -54,6 +41,22 @@ class Opportunity(TransactionBase):
 
 		from erpnext.accounts.utils import validate_fiscal_year
 		validate_fiscal_year(self.transaction_date, self.fiscal_year, _("Opportunity Date"), self)
+
+	def make_new_lead_if_required(self):
+		"""Set lead against new opportunity"""
+		if not self.lead or self.customer:
+			lead_name = frappe.db.get_value("Lead", {"email_id": self.contact_email})
+			if not lead_name:
+				lead = frappe.get_doc({
+					"doctype": "Lead",
+					"email_id": self.contact_email,
+					"lead_name": self.contact_email
+				})
+				lead.insert(ignore_permissions=True)
+				lead_name = lead.name
+
+			self.enquiry_from = "Lead"
+			self.lead = lead_name
 
 	def declare_enquiry_lost(self,arg):
 		if not self.has_quotation():

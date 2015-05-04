@@ -9,12 +9,14 @@ import frappe
 from frappe import _
 from frappe.utils import comma_and
 
+sender_field = "email_id"
+
 class JobApplicant(Document):
 	def onload(self):
 		offer_letter = frappe.get_all("Offer Letter", filters={"job_applicant": self.name})
 		if offer_letter:
 			self.get("__onload").offer_letter = offer_letter[0].name
-	
+
 	def autoname(self):
 		keys = filter(None, (self.applicant_name, self.email_id))
 		if not keys:
@@ -31,6 +33,3 @@ class JobApplicant(Document):
 
 			if names:
 				frappe.throw(_("Email id must be unique, already exists for {0}").format(comma_and(names)), frappe.DuplicateEntryError)
-
-	def set_sender(self, sender):
-		self.email_id = sender
