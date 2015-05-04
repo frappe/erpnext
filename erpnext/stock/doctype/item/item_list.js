@@ -3,7 +3,7 @@ frappe.listview_settings['Item'] = {
 		"has_variants", "end_of_life", "is_sales_item"],
 
 	get_indicator: function(doc) {
-		if(doc.end_of_life < frappe.datetime.get_today()) {
+		if(doc.end_of_life && doc.end_of_life < frappe.datetime.get_today()) {
 			return [__("Expired"), "grey", "end_of_life,<,Today"]
 		} else if(doc.has_variants) {
 			return [__("Template"), "blue", "has_variant,=,1"]
