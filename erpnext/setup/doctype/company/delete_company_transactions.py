@@ -8,26 +8,19 @@ from frappe.utils import cint
 from frappe import _
 
 @frappe.whitelist()
-def delete_company(company_name):
+def delete_company_transactions(company_name):
 	frappe.only_for("System Manager")
 	doc = frappe.get_doc("Company", company_name)
 
 	if frappe.session.user != doc.owner:
-		frappe.throw(_("Company can only be deleted by the creator"), frappe.PermissionError)
+		frappe.throw(_("Transactions can only be deleted by the creator of the Company"), frappe.PermissionError)
 
 	delete_bins(company_name)
 
 	for doctype in frappe.db.sql_list("""select parent from
 		tabDocField where fieldtype='Link' and options='Company'"""):
-		delete_for_doctype(doctype, company_name)
-
-	frappe.delete_doc("Company", company_name)
-
-	frappe.defaults.clear_default("company", value=doc.name)
-
-	frappe.db.sql("""update `tabSingles` set value=""
-		where doctype='Global Defaults' and field='default_company'
-		and value=%s""", doc.name)
+		if doctype not in ("Account", "Cost Center", "Warehouse", "Budget Detail", "Party Account"):
+			delete_for_doctype(doctype, company_name)
 
 def delete_for_doctype(doctype, company_name):
 	meta = frappe.get_meta(doctype)

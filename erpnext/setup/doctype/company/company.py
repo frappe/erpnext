@@ -167,6 +167,33 @@ class Company(Document):
 			where defkey='Company' and defvalue=%s""", (newdn, olddn))
 
 		frappe.defaults.clear_cache()
+		
+	def on_trash(self):
+		"""
+			Trash accounts and cost centers for this company if no gl entry exists
+		"""
+		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.name)
+		if not rec:
+			# delete Account
+			frappe.db.sql("delete from `tabAccount` where company = %s", self.name)
+
+			# delete cost center child table - budget detail
+			frappe.db.sql("""delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc 
+				where bd.parent = cc.name and cc.company = %s""", self.name)
+			#delete cost center
+			frappe.db.sql("delete from `tabCost Center` WHERE company = %s", self.name)
+
+			# delete account from customer and supplier
+			frappe.db.sql("delete from `tabParty Account` where company=%s", self.name)
+
+		if not frappe.db.get_value("Stock Ledger Entry", {"company": self.name}):
+			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)
+
+		frappe.defaults.clear_default("company", value=self.name)
+
+		frappe.db.sql("""update `tabSingles` set value=""
+			where doctype='Global Defaults' and field='default_company'
+			and value=%s""", self.name)
 
 @frappe.whitelist()
 def replace_abbr(company, old, new):

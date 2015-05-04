@@ -40,7 +40,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 		frm.get_docfield("taxes", "rate").reqd = 0;
 		frm.get_docfield("taxes", "tax_amount").reqd = 0;
 
-		$.each(frm.doc.taxes, function(i, d) {
+		$.each(frm.doc.taxes || [], function(i, d) {
 			if(d.charge_type==="Actual") {
 				d.rate = 0;
 				if(!d.tax_amount) {

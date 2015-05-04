@@ -397,16 +397,16 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "delete_company", 
+   "fieldname": "delete_company_transactions", 
    "fieldtype": "Button", 
-   "label": "Delete Company", 
+   "label": "Delete Company Transactions", 
    "permlevel": 0, 
    "precision": ""
   }
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2015-04-17 01:37:32.304374", 
+ "modified": "2015-05-04 11:22:42.116328", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 
