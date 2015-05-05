@@ -375,8 +375,6 @@ def validate_taxes_and_charges(tax):
 
 	if tax.charge_type == "Actual":
 		tax.rate = None
-		if not tax.tax_amount:
-			frappe.throw(_("Amount is mandatory for charge type 'Actual'"))
 
 def validate_inclusive_tax(tax, doc):
 	def _on_previous_row_error(row_range):

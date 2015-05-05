@@ -36,25 +36,8 @@ frappe.ui.form.on(cur_frm.doctype, {
 	},
 	validate: function(frm) {
 		// neither is absolutely mandatory
-		// check mandatory based on charge_type
 		frm.get_docfield("taxes", "rate").reqd = 0;
 		frm.get_docfield("taxes", "tax_amount").reqd = 0;
-
-		$.each(frm.doc.taxes || [], function(i, d) {
-			if(d.charge_type==="Actual") {
-				d.rate = 0;
-				if(!d.tax_amount) {
-					msgprint(__("Amount is mandatory for {0}", [d.account_head]));
-					validated = false;
-				}
-			} else {
-				d.tax_amount = 0;
-				if(!d.rate) {
-					msgprint(__("Rate is mandatory for {0}", [d.account_head]));
-					validated = false;
-				}
-			}
-		});
 	},
 	taxes_on_form_rendered: function(frm) {
 		erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm);
