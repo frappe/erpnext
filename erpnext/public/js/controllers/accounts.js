@@ -36,18 +36,16 @@ frappe.ui.form.on(cur_frm.doctype, {
 	},
 	validate: function(frm) {
 		// neither is absolutely mandatory
-		frm.get_docfield("taxes", "rate").reqd = 0;
-		frm.get_docfield("taxes", "tax_amount").reqd = 0;
+		if(frm.get_docfield("taxes")) {
+			frm.get_docfield("taxes", "rate").reqd = 0;
+			frm.get_docfield("taxes", "tax_amount").reqd = 0;
+		}
+		
 	},
 	taxes_on_form_rendered: function(frm) {
 		erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm);
 	}
 });
-
-
-
-
-
 
 cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
