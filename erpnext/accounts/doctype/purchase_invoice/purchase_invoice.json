@@ -6,21 +6,6 @@
  "doctype": "DocType", 
  "fields": [
   {
-   "fieldname": "supplier_section", 
-   "fieldtype": "Section Break", 
-   "label": "", 
-   "options": "icon-user", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "column_break0", 
-   "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "width": "50%"
-  }, 
-  {
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "label": "Series", 
@@ -953,7 +938,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-04-27 20:32:12.436976", 
+ "modified": "2015-04-30 03:05:13.790265", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
