@@ -82,7 +82,7 @@ def set_party_in_jv_and_gl_entry(receivable_payable_accounts):
 
 	for dt in ["Journal Entry Account", "GL Entry"]:
 		records = frappe.db.sql("""select name, account from `tab%s` 
-			where account in (%s) and ifnull(party, '') = ''""" % 
+			where account in (%s) and ifnull(party, '') = '' and docstatus < 2""" % 
 			(dt, ", ".join(['%s']*len(account_map))), tuple(account_map.keys()), as_dict=1)
 		for i, d in enumerate(records):
 			account_details = account_map.get(d.account, {})
