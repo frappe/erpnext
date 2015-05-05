@@ -11,13 +11,11 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.utilities.address_and_contact import load_address_and_contact
 
+sender_field = "email_id"
+
 class Lead(SellingController):
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.lead_name)
-
-	def set_sender(self, sender):
-		"""Will be called by **Communication** when a Lead is created from an incoming email."""
-		self.email_id = sender
 
 	def onload(self):
 		customer = frappe.db.get_value("Customer", {"lead_name": self.name})
