@@ -35,7 +35,7 @@ class ProductionOrder(Document):
 
 		self.validate_sales_order()
 		self.validate_warehouse()
-		self.calculate_operating_cost()
+		self.calculate_time()
 		self.validate_delivery_date()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
@@ -63,6 +63,7 @@ class ProductionOrder(Document):
 	def calculate_operating_cost(self):
 		self.planned_operating_cost, self.actual_operating_cost = 0.0, 0.0
 		for d in self.get("operations"):
+			d.planned_operating_cost = flt(d.hour_rate) * (flt(d.time_in_mins) / 60.0)
 			d.actual_operating_cost = flt(d.hour_rate) * (flt(d.actual_operation_time) / 60.0)
 
 			self.planned_operating_cost += flt(d.planned_operating_cost)
@@ -175,13 +176,19 @@ class ProductionOrder(Document):
 		self.set('operations', [])
 
 		operations = frappe.db.sql("""select operation, description, workstation, idx,
-			hour_rate, time_in_mins, operating_cost as "planned_operating_cost", "Pending" as status
+			hour_rate, time_in_mins, 0 as "planned_operating_cost", "Pending" as status
 			from `tabBOM Operation` where parent = %s order by idx""", self.bom_no, as_dict=1)
 
 		self.set('operations', operations)
-
+		self.calculate_time()
+		
+	def calculate_time(self):
+		bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
+		
+		for d in self.get("operations"):
+			d.time_in_mins = d.time_in_mins / bom_qty * flt(self.qty)
+			
 		self.calculate_operating_cost()
-
 
 	def get_holidays(self, workstation):
 		holiday_list = frappe.db.get_value("Workstation", workstation, "holiday_list")

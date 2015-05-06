@@ -189,6 +189,13 @@ $.extend(cur_frm.cscript, {
 			method: "set_production_order_operations"
 		});
 	},
+	
+	qty: function() {
+		return this.frm.call({
+			doc: this.frm.doc,
+			method: "set_production_order_operations"
+		});
+	},
 
 	show_time_logs: function(doc, cdt, cdn) {
 		var child = locals[cdt][cdn]
