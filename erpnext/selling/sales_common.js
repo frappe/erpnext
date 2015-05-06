@@ -35,8 +35,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.frm.set_query("taxes_and_charges", function() {
 				return {
 					filters: [
-						['Sales Taxes and Charges Master', 'company', '=', me.frm.doc.company],
-						['Sales Taxes and Charges Master', 'docstatus', '!=', 2]
+						['sales Taxes and Charges Template', 'company', '=', me.frm.doc.company],
+						['sales Taxes and Charges Template', 'docstatus', '!=', 2]
 					]
 				}
 			});

@@ -67,7 +67,7 @@ rename_map = {
 		["other_charges", "taxes"],
 		["valid_for_territories", "territories"]
 	],
-	"Purchase Taxes and Charges Master": [
+	"Purchase Taxes and Charges Template": [
 		["other_charges", "taxes"]
 	],
 	"Shipping Rule": [

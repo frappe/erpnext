@@ -148,3 +148,4 @@ erpnext.patches.v5_0.project_costing
 erpnext.patches.v5_0.update_temporary_account
 erpnext.patches.v5_0.update_advance_paid
 erpnext.patches.v5_0.link_warehouse_with_account
+erpnext.patches.v5_0.rename_taxes_and_charges_master

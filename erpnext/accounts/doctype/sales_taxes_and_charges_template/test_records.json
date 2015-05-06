@@ -1,7 +1,7 @@
 [
  {
   "company": "_Test Company",
-  "doctype": "Sales Taxes and Charges Master",
+  "doctype": "Sales Taxes and Charges Template",
   "taxes": [
    {
     "account_head": "_Test Account VAT - _TC",
@@ -20,7 +20,7 @@
     "rate": 6.36
    }
   ],
-  "title": "_Test Sales Taxes and Charges Master",
+  "title": "_Test Sales Taxes and Charges Template",
   "territories": [
    {
     "doctype": "Applicable Territory",
@@ -36,7 +36,7 @@
  },
  {
   "company": "_Test Company",
-  "doctype": "Sales Taxes and Charges Master",
+  "doctype": "Sales Taxes and Charges Template",
   "taxes": [
    {
     "account_head": "_Test Account Shipping Charges - _TC",
@@ -126,7 +126,7 @@
  },
  {
   "company": "_Test Company",
-  "doctype": "Sales Taxes and Charges Master",
+  "doctype": "Sales Taxes and Charges Template",
   "taxes": [
    {
     "account_head": "_Test Account VAT - _TC",
@@ -145,7 +145,7 @@
     "rate": 4
    }
   ],
-  "title": "_Test Sales Taxes and Charges Master - Rest of the World",
+  "title": "_Test Sales Taxes and Charges Template - Rest of the World",
   "territories": [
    {
     "doctype": "Applicable Territory",

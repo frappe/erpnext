@@ -71,10 +71,10 @@
  ], 
  "icon": "icon-money", 
  "idx": 1, 
- "modified": "2015-04-16 01:15:24.620310", 
+ "modified": "2015-05-06 08:52:01.499434", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
- "name": "Purchase Taxes and Charges Master", 
+ "name": "Purchase Taxes and Charges Template", 
  "owner": "wasim@webnotestech.com", 
  "permissions": [
   {

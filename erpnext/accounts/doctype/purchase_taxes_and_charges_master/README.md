@@ -1,1 +1,0 @@
-Template for tax structure in purchase transactions.
