@@ -245,10 +245,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	get_exchange_rate: function(from_currency, to_currency, callback) {
-		var exchange_name = from_currency + "-" + to_currency;
-		frappe.model.with_doc("Currency Exchange", exchange_name, function(name) {
-			var exchange_doc = frappe.get_doc("Currency Exchange", exchange_name);
-			callback(exchange_doc ? flt(exchange_doc.exchange_rate) : 0);
+		frappe.call({
+			method: "erpnext.setup.utils.get_exchange_rate",
+			args: {
+				from_currency: from_currency,
+				to_currency: to_currency
+			},
+			callback: function(r) {
+				callback(flt(r.message));
+			}
 		});
 	},
 

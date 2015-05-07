@@ -9,7 +9,6 @@ from frappe import _
 from frappe.model.document import Document
 
 class CurrencyExchange(Document):
-
 	def autoname(self):
 		self.name = self.from_currency + "-" + self.to_currency
 
