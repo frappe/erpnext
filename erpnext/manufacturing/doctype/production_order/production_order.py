@@ -35,7 +35,7 @@ class ProductionOrder(Document):
 
 		self.validate_sales_order()
 		self.validate_warehouse()
-		self.calculate_time()
+		self.calculate_operating_cost()
 		self.validate_delivery_date()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
