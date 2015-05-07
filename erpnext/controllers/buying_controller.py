@@ -239,9 +239,10 @@ class BuyingController(StockController):
 		bom_items = frappe.db.sql("""select t2.item_code,
 			ifnull(t2.qty, 0) / ifnull(t1.quantity, 1) as qty_consumed_per_unit,
 			t2.rate, t2.stock_uom, t2.name, t2.description
-			from `tabBOM` t1, `tabBOM Item` t2
+			from `tabBOM` t1, `tabBOM Item` t2, tabItem t3
 			where t2.parent = t1.name and t1.item = %s
-			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s""", (item_code, bom), as_dict=1)
+			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s 
+			and t2.item_code = t3.name and ifnull(t3.is_stock_item, 'No') = 'Yes'""", (item_code, bom), as_dict=1)
 
 		if not bom_items:
 			msgprint(_("Specified BOM {0} does not exist for Item {1}").format(bom, item_code), raise_exception=1)
