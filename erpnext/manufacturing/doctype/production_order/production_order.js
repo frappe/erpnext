@@ -191,10 +191,7 @@ $.extend(cur_frm.cscript, {
 	},
 	
 	qty: function() {
-		return this.frm.call({
-			doc: this.frm.doc,
-			method: "set_production_order_operations"
-		});
+		frappe.ui.form.trigger("Production Order", 'bom_no')
 	},
 
 	show_time_logs: function(doc, cdt, cdn) {
