@@ -60,14 +60,16 @@ def before_tests():
 
 @frappe.whitelist()
 def get_exchange_rate(from_currency, to_currency):
-	if frappe.conf.jsonrates_api_key:
+	jsonrates_api_key = frappe.conf.jsonrates_api_key or frappe.db.get_default("jsonrates_api_key")
+
+	if jsonrates_api_key:
 		cache = frappe.cache()
 		key = "currency_exchange_rate:{0}:{1}".format(from_currency, to_currency)
 		value = cache.get(key)
 		if not value:
 			import requests
 			response = requests.get("http://jsonrates.com/get/?from={0}&to={1}&apiKey={2}".format(from_currency,
-				to_currency, frappe.conf.jsonrates_api_key))
+				to_currency, jsonrates_api_key))
 			# expire in 24 hours
 			value = response.json().get("rate")
 			cache.setex(key, value, 24 * 60 * 60)

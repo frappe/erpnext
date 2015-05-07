@@ -17,6 +17,7 @@ keydict = {
 	'hide_currency_symbol':'hide_currency_symbol',
 	'account_url':'account_url',
 	'disable_rounded_total': 'disable_rounded_total',
+	'jsonrates_api_key': 'jsonrates_api_key'
 }
 
 from frappe.model.document import Document
