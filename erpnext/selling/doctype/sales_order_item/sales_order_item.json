@@ -66,7 +66,7 @@
    "print_width": "300px", 
    "read_only": 0, 
    "reqd": 1, 
-   "search_index": 1, 
+   "search_index": 0, 
    "width": "300px"
   }, 
   {
@@ -496,7 +496,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-03-23 15:43:08.156543", 
+ "modified": "2015-05-07 08:45:19.554719", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order Item", 
