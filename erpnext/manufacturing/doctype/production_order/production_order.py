@@ -176,8 +176,8 @@ class ProductionOrder(Document):
 		self.set('operations', [])
 
 		operations = frappe.db.sql("""select operation, description, workstation, idx,
-			hour_rate, time_in_mins, 0 as "planned_operating_cost", "Pending" as status
-			from `tabBOM Operation` where parent = %s order by idx""", self.bom_no, as_dict=1)
+			hour_rate, time_in_mins, "Pending" as status from `tabBOM Operation` 
+			where parent = %s order by idx""", self.bom_no, as_dict=1)
 
 		self.set('operations', operations)
 		self.calculate_time()
@@ -186,7 +186,7 @@ class ProductionOrder(Document):
 		bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
 		
 		for d in self.get("operations"):
-			d.time_in_mins = d.time_in_mins / bom_qty * flt(self.qty)
+			d.time_in_mins = flt(d.time_in_mins) / flt(bom_qty) * flt(self.qty)
 			
 		self.calculate_operating_cost()
 
