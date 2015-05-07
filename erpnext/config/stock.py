@@ -140,13 +140,13 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Ledger",
-					"doctype": "Item",
+					"doctype": "Stock Ledger Entry",
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Balance",
-					"doctype": "Warehouse"
+					"doctype": "Stock Ledger Entry"
 				},
 				{
 					"type": "report",
