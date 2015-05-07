@@ -189,6 +189,40 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 
+	uom: function(doc, cdt, cdn) {
+		var me = this;
+		var item = frappe.get_doc(cdt, cdn);
+		if(item.item_code && item.uom) {
+			return this.frm.call({
+				method: "erpnext.stock.get_item_details.get_conversion_factor",
+				child: item,
+				args: {
+					item_code: item.item_code,
+					uom: item.uom
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						me.conversion_factor(me.frm.doc, cdt, cdn);
+					}
+				}
+			});
+		}
+	},
+
+	qty: function(doc, cdt, cdn) {
+		this._super(doc, cdt, cdn);
+		this.conversion_factor(doc, cdt, cdn);
+	},
+
+	conversion_factor: function(doc, cdt, cdn) {
+		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
+			var item = frappe.get_doc(cdt, cdn);
+			frappe.model.round_floats_in(item, ["qty", "conversion_factor"]);
+			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
+			refresh_field("stock_qty", item.name, item.parentfield);
+		}
+	},
+	
 	warehouse: function(doc, cdt, cdn) {
 		var me = this;
 		this.batch_no(doc, cdt, cdn);

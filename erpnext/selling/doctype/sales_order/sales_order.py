@@ -85,7 +85,8 @@ class SalesOrder(SellingController):
 		self.validate_mandatory()
 		self.validate_proj_cust()
 		self.validate_po()
-		self.validate_uom_is_integer("stock_uom", "qty")
+		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_for_items()
 		self.validate_warehouse()
 
@@ -306,9 +307,10 @@ def make_delivery_note(source_name, target_doc=None):
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
-		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
-		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
-		target.qty = flt(source.qty) - flt(source.delivered_qty)
+		target.base_amount = (flt(source.qty) - (flt(source.delivered_qty)/flt(source.conversion_factor))) * flt(source.base_rate)
+		target.amount = (flt(source.qty) - (flt(source.delivered_qty)/flt(source.conversion_factor))) * flt(source.rate)
+		target.qty = flt(source.qty) - (flt(source.delivered_qty)/flt(source.conversion_factor))
+		target.stock_qty = flt(source.stock_qty) - flt(source.delivered_qty)
 
 	target_doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -325,7 +327,7 @@ def make_delivery_note(source_name, target_doc=None):
 				"parent": "against_sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.delivered_qty < doc.qty
+			"condition": lambda doc: doc.delivered_qty < doc.stock_qty
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

@@ -100,7 +100,8 @@ class DeliveryNote(SellingController):
 		self.check_stop_sales_order("against_sales_order")
 		self.validate_for_items()
 		self.validate_warehouse()
-		self.validate_uom_is_integer("stock_uom", "qty")
+		self.validate_uom_is_integer("uom", "qty")
+		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_with_previous_doc()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
@@ -259,11 +260,11 @@ class DeliveryNote(SellingController):
 		sl_entries = []
 		for d in self.get_item_list():
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
-					and d.warehouse and flt(d['qty']):
+					and d.warehouse and flt(d['stock_qty']):
 				self.update_reserved_qty(d)
 
 				sl_entries.append(self.get_sl_entries(d, {
-					"actual_qty": -1*flt(d['qty']),
+					"actual_qty": -1*flt(d['stock_qty']),
 				}))
 
 		self.make_sl_entries(sl_entries)
