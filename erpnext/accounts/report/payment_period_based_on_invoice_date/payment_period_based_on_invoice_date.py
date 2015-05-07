@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
+from frappe.utils import flt
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import get_ageing_data
 
 def execute(filters=None):
@@ -19,10 +20,10 @@ def execute(filters=None):
 	for d in entries:
 		if d.against_voucher:
 			against_date = d.against_voucher and invoice_posting_date_map[d.against_voucher] or ""
-			outstanding_amount = d.debit or -1*d.credit
+			outstanding_amount = flt(d.debit) or -1*flt(d.credit)
 		else:
 			against_date = d.against_invoice and invoice_posting_date_map[d.against_invoice] or ""
-			outstanding_amount = d.credit or -1*d.debit
+			outstanding_amount = flt(d.credit) or -1*flt(d.debit)
 
 		row = [d.name, d.account, d.posting_date, d.against_voucher or d.against_invoice,
 			against_date, d.debit, d.credit, d.cheque_no, d.cheque_date, d.remark]
