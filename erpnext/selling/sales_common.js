@@ -3,7 +3,7 @@
 
 
 cur_frm.cscript.tax_table = "Sales Taxes and Charges";
-{% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
+{% include 'accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.js' %}
 
 frappe.provide("erpnext.selling");
 frappe.require("assets/erpnext/js/controllers/transaction.js");
@@ -35,8 +35,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			this.frm.set_query("taxes_and_charges", function() {
 				return {
 					filters: [
-						['Sales Taxes and Charges Master', 'company', '=', me.frm.doc.company],
-						['Sales Taxes and Charges Master', 'docstatus', '!=', 2]
+						['sales Taxes and Charges Template', 'company', '=', me.frm.doc.company],
+						['sales Taxes and Charges Template', 'docstatus', '!=', 2]
 					]
 				}
 			});

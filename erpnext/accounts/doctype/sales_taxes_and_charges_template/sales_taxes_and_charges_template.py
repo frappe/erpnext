@@ -6,11 +6,13 @@ import frappe
 from frappe.model.document import Document
 from erpnext.controllers.accounts_controller import validate_taxes_and_charges, validate_inclusive_tax
 
-class SalesTaxesandChargesMaster(Document):
+class SalesTaxesandChargesTemplate(Document):
 	def validate(self):
 		if self.is_default == 1:
-			frappe.db.sql("""update `tabSales Taxes and Charges Master` set is_default = 0
-				where ifnull(is_default,0) = 1 and name != %s and company = %s""",
+			frappe.db.sql("""update `tabSales Taxes and Charges Template`
+				set is_default = 0
+				where ifnull(is_default,0) = 1
+				and name != %s and company = %s""",
 				(self.name, self.company))
 
 		# at least one territory

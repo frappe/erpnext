@@ -80,10 +80,10 @@
  ], 
  "icon": "icon-money", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:46.282418", 
+ "modified": "2015-05-06 08:51:54.662853", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
- "name": "Sales Taxes and Charges Master", 
+ "name": "Sales Taxes and Charges Template", 
  "owner": "Administrator", 
  "permissions": [
   {

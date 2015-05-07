@@ -8,7 +8,7 @@
    "fieldtype": "Link", 
    "in_list_view": 1, 
    "label": "Tax Master", 
-   "options": "Sales Taxes and Charges Master", 
+   "options": "Sales Taxes and Charges Template", 
    "permlevel": 0, 
    "reqd": 1
   }

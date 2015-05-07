@@ -4,7 +4,7 @@
 frappe.provide("erpnext.buying");
 
 cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
-{% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
+{% include 'accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.js' %}
 
 frappe.require("assets/erpnext/js/controllers/transaction.js");
 

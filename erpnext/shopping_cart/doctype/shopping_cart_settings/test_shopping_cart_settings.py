@@ -52,14 +52,14 @@ class TestShoppingCartSettings(unittest.TestCase):
 				"sales_taxes_and_charges_master": tax_master
 			})
 		
-		for tax_master in ("_Test Sales Taxes and Charges Master", "_Test India Tax Master"):
+		for tax_master in ("_Test Sales Taxes and Charges Template", "_Test India Tax Master"):
 			_add_tax_master(tax_master)
 			
 		controller = cart_settings
 		controller.validate_overlapping_territories("sales_taxes_and_charges_masters",
 			"sales_taxes_and_charges_master")
 			
-		_add_tax_master("_Test Sales Taxes and Charges Master - Rest of the World")
+		_add_tax_master("_Test Sales Taxes and Charges Template - Rest of the World")
 		
 		controller = cart_settings
 		self.assertRaises(ShoppingCartSetupError, controller.validate_overlapping_territories,

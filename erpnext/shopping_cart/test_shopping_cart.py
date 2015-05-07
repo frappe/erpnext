@@ -136,7 +136,7 @@ class TestShoppingCart(unittest.TestCase):
 				{"doctype": "Shopping Cart Taxes and Charges Master", "parentfield": "sales_taxes_and_charges_masters",
 					"sales_taxes_and_charges_master": "_Test India Tax Master"},
 				{"doctype": "Shopping Cart Taxes and Charges Master", "parentfield": "sales_taxes_and_charges_masters",
-					"sales_taxes_and_charges_master": "_Test Sales Taxes and Charges Master - Rest of the World"},
+					"sales_taxes_and_charges_master": "_Test Sales Taxes and Charges Template - Rest of the World"},
 			])
 			settings.set("shipping_rules", {"doctype": "Shopping Cart Shipping Rule", "parentfield": "shipping_rules",
 					"shipping_rule": "_Test Shipping Rule - India"})
@@ -205,5 +205,5 @@ class TestShoppingCart(unittest.TestCase):
 		quotation.save(ignore_permissions=True)
 
 
-test_dependencies = ["Sales Taxes and Charges Master", "Price List", "Item Price", "Shipping Rule", "Currency Exchange",
+test_dependencies = ["Sales Taxes and Charges Template", "Price List", "Item Price", "Shipping Rule", "Currency Exchange",
 	"Customer Group", "Lead", "Customer", "Contact", "Address", "Item"]

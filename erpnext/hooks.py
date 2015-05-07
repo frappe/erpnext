@@ -71,7 +71,7 @@ doc_events = {
 		"validate": "erpnext.hr.doctype.employee.employee.validate_employee_role",
 		"on_update": "erpnext.hr.doctype.employee.employee.update_user_permissions"
 	},
-	"Sales Taxes and Charges Master": {
+	"Sales Taxes and Charges Template": {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
 	},
 	"Price List": {

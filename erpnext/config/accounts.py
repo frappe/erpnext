@@ -103,12 +103,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Sales Taxes and Charges Master",
+					"name": "Sales Taxes and Charges Template",
 					"description": _("Tax template for selling transactions.")
 				},
 				{
 					"type": "doctype",
-					"name": "Purchase Taxes and Charges Master",
+					"name": "Purchase Taxes and Charges Template",
 					"description": _("Tax template for buying transactions.")
 				},
 				{

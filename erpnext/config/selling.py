@@ -118,7 +118,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Sales Taxes and Charges Master",
+					"name": "Sales Taxes and Charges Template",
 					"description": _("Tax template for selling transactions.")
 				},
 				{
