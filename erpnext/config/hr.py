@@ -91,11 +91,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Employee",
-					"description": _("Employee master.")
-				},
-				{
-					"type": "doctype",
 					"name": "Employment Type",
 					"description": _("Types of employment (permanent, contract, intern etc.).")
 				},
