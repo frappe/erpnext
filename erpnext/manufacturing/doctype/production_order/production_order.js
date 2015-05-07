@@ -189,6 +189,10 @@ $.extend(cur_frm.cscript, {
 			method: "set_production_order_operations"
 		});
 	},
+	
+	qty: function() {
+		frappe.ui.form.trigger("Production Order", 'bom_no')
+	},
 
 	show_time_logs: function(doc, cdt, cdn) {
 		var child = locals[cdt][cdn]
