@@ -51,7 +51,7 @@
   {
    "fieldname": "is_lwp", 
    "fieldtype": "Check", 
-   "label": "Is LWP", 
+   "label": "Is Leave Without Pay", 
    "permlevel": 0
   }, 
   {
@@ -63,7 +63,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:40.849495", 
+ "modified": "2015-05-08 05:15:24.194053", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Type", 
