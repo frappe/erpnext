@@ -7,7 +7,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cstr, flt
+from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 
@@ -53,7 +53,7 @@ class MaterialRequest(BuyingController):
 
 	def validate_schedule_date(self):
 		for d in self.get('items'):
-			if d.schedule_date and d.schedule_date < self.transaction_date:
+			if d.schedule_date and getdate(d.schedule_date) < getdate(self.transaction_date):
 				frappe.throw(_("Expected Date cannot be before Material Request Date"))
 
 	# Validate
@@ -94,8 +94,8 @@ class MaterialRequest(BuyingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
-		self.update_requested_qty()
 		frappe.db.set(self, 'status', cstr(status))
+		self.update_requested_qty()
 		frappe.msgprint(_("Status updated to {0}").format(_(status)))
 
 	def on_cancel(self):
