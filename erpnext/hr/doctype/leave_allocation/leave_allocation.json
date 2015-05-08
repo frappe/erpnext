@@ -48,6 +48,22 @@
    "search_index": 1
   }, 
   {
+   "fieldname": "description", 
+   "fieldtype": "Small Text", 
+   "hidden": 0, 
+   "label": "Description", 
+   "oldfieldname": "reason", 
+   "oldfieldtype": "Small Text", 
+   "permlevel": 0, 
+   "width": "300px"
+  }, 
+  {
+   "fieldname": "column_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
    "default": "Today", 
    "fieldname": "posting_date", 
    "fieldtype": "Date", 
@@ -73,22 +89,6 @@
    "permlevel": 0, 
    "reqd": 1, 
    "search_index": 1
-  }, 
-  {
-   "fieldname": "description", 
-   "fieldtype": "Small Text", 
-   "hidden": 0, 
-   "label": "Description", 
-   "oldfieldname": "reason", 
-   "oldfieldtype": "Small Text", 
-   "permlevel": 0, 
-   "width": "300px"
-  }, 
-  {
-   "fieldname": "column_break1", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0, 
-   "width": "50%"
   }, 
   {
    "fieldname": "carry_forward", 
@@ -138,7 +138,7 @@
  "icon": "icon-ok", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-04-06 06:03:27.883985", 
+ "modified": "2015-05-08 03:44:08.092937", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Allocation", 
