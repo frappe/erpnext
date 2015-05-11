@@ -227,12 +227,13 @@ def execute():
 	frappe.reload_doc("accounts", "doctype", "fiscal_year_company")
 
 	#rename table fieldnames
-	for dn in rename_map:
-		frappe.reload_doc(get_doctype_module(dn), "doctype", scrub(dn))
+	if frappe.db.exists("DocType", dn):
+		for dn in rename_map:
+			frappe.reload_doc(get_doctype_module(dn), "doctype", scrub(dn))
 
-	for dt, field_list in rename_map.items():
-		for field in field_list:
-			rename_field(dt, field[0], field[1])
+		for dt, field_list in rename_map.items():
+			for field in field_list:
+				rename_field(dt, field[0], field[1])
 
 	# update voucher type
 	for old, new in [["Bank Voucher", "Bank Entry"], ["Cash Voucher", "Cash Entry"],
