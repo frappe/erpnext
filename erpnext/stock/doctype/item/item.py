@@ -50,6 +50,7 @@ class Item(WebsiteGenerator):
 
 		if self.variant_of:
 			self.copy_attributes_to_variant(frappe.get_doc("Item", self.variant_of), self)
+			
 		self.check_warehouse_is_set_for_stock_item()
 		self.check_stock_uom_with_bin()
 		self.add_default_uom_in_conversion_factor_table()
@@ -147,17 +148,21 @@ class Item(WebsiteGenerator):
 	def validate_variants_are_unique(self):
 		if not self.has_variants:
 			self.variants = []
+			return
 
-		if self.variants and self.variant_of:
-			frappe.throw(_("Item cannot be a variant of a variant"))
-
-		variants = []
-		for d in self.variants:
-			key = (d.item_attribute, d.item_attribute_value)
-			if key in variants:
-				frappe.throw(_("{0} {1} is entered more than once in Item Variants table").format(d.item_attribute,
-					d.item_attribute_value), DuplicateVariant)
-			variants.append(key)
+		if self.variants:
+			if self.variant_of:
+				frappe.throw(_("Item cannot be a variant of a variant"))
+	
+			variants = []
+			for d in self.variants:
+				key = (d.item_attribute, d.item_attribute_value)
+				if key in variants:
+					frappe.throw(_("{0} {1} is entered more than once in Item Variants table")
+						.format(d.item_attribute, d.item_attribute_value), DuplicateVariant)
+				variants.append(key)
+		else:
+			frappe.throw(_("Please enter atleast one attribute row in Item Variants table"))
 
 	def sync_variants(self):
 		variant_item_codes = self.get_variant_item_codes()

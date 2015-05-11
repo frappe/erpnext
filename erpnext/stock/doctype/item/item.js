@@ -83,8 +83,9 @@ frappe.ui.form.on("Item", {
 
 	validate: function(frm){
 		erpnext.item.weight_to_validate(frm);
+		erpnext.item.variants_can_not_be_created_manually(frm);
 	},
-
+	
 	image: function(frm) {
 		refresh_field("image_view");
 	},
@@ -208,5 +209,11 @@ $.extend(erpnext.item, {
 			validated = 0;
 		}
 	},
+	
+	variants_can_not_be_created_manually: function(frm) {
+		if (frm.doc.__islocal && frm.doc.variant_of)
+			frappe.throw(__("Variants can not be created manually, add item attributes in the template item"))
+	}
+	
 
 });
