@@ -219,7 +219,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.get_exchange_rate(this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
 					me.frm.set_value("conversion_rate", exchange_rate);
-					me.conversion_rate();
 				});
 		} else {
 			this.conversion_rate();
@@ -234,6 +233,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 				this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
+		
 		if(flt(this.frm.doc.conversion_rate)>0.0) {
 			if(this.frm.doc.ignore_pricing_rule) {
 				this.calculate_taxes_and_totals();
@@ -452,6 +452,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"currency": me.frm.doc.currency,
 			"conversion_rate": me.frm.doc.conversion_rate,
 			"price_list": me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
+			"price_list_currency": me.frm.doc.price_list_currency,
 			"plc_conversion_rate": me.frm.doc.plc_conversion_rate,
 			"company": me.frm.doc.company,
 			"transaction_date": me.frm.doc.transaction_date || me.frm.doc.posting_date,

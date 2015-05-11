@@ -402,9 +402,9 @@ def get_price_list_currency_and_exchange_rate(args):
 	price_list_currency = get_price_list_currency(args.price_list)
 	plc_conversion_rate = args.plc_conversion_rate
 
-	if (not plc_conversion_rate) or (price_list_currency != args.price_list_currency):
-		plc_conversion_rate = get_exchange_rate(price_list_currency, args.currency) \
-			or plc_conversion_rate
+	if (not plc_conversion_rate) or (price_list_currency and args.price_list_currency \
+		and price_list_currency != args.price_list_currency):
+			plc_conversion_rate = get_exchange_rate(price_list_currency, args.currency) or plc_conversion_rate
 
 	return {
 		"price_list_currency": price_list_currency,
