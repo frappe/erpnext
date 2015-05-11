@@ -7,6 +7,7 @@ import frappe
 import frappe.utils
 from frappe import throw, _
 from frappe.model.document import Document
+from frappe.email.bulk import check_bulk_limit
 import erpnext.tasks
 
 class Newsletter(Document):
@@ -72,6 +73,7 @@ class Newsletter(Document):
 	def validate_send(self):
 		if self.get("__islocal"):
 			throw(_("Please save the Newsletter before sending"))
+		check_bulk_limit(self.recipients)
 
 @frappe.whitelist()
 def get_lead_options():
