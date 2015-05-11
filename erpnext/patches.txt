@@ -99,6 +99,7 @@ erpnext.patches.v5_0.set_default_company_in_bom
 erpnext.patches.v5_0.capacity_planning
 execute:frappe.reload_doc('crm', 'doctype', 'lead')
 execute:frappe.reload_doc('crm', 'doctype', 'opportunity')
+erpnext.patches.v5_0.rename_taxes_and_charges_master
 erpnext.patches.v5_0.rename_table_fieldnames
 execute:frappe.db.sql("update `tabJournal Entry` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
 erpnext.patches.v5_0.is_group
@@ -125,7 +126,6 @@ erpnext.patches.v5_0.convert_stock_reconciliation
 erpnext.patches.v5_0.update_projects
 erpnext.patches.v5_0.item_patches
 erpnext.patches.v5_0.update_journal_entry_title
-erpnext.patches.v5_0.rename_taxes_and_charges_master
 erpnext.patches.v5_0.taxes_and_totals_in_party_currency
 erpnext.patches.v5_0.replace_renamed_fields_in_custom_scripts_and_print_formats
 erpnext.patches.v5_0.update_from_bom

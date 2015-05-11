@@ -63,11 +63,11 @@ rename_map = {
 		["payment_reconciliation_payments", "payments"],
 		["payment_reconciliation_invoices", "invoices"]
 	],
-	"Sales Taxes and Charges Master": [
+	"Sales Taxes and Charges Template": [
 		["other_charges", "taxes"],
 		["valid_for_territories", "territories"]
 	],
-	"Purchase Taxes and Charges Master": [
+	"Purchase Taxes and Charges Template": [
 		["other_charges", "taxes"]
 	],
 	"Shipping Rule": [
