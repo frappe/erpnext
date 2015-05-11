@@ -419,23 +419,25 @@ $.extend(erpnext.wiz, {
 		load_chart_of_accounts: function(slide) {
 			var country = slide.wiz.get_values().country;
 
-			frappe.call({
-				method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
-				args: {"country": country},
-				callback: function(r) {
-					if(r.message) {
-						slide.get_input("chart_of_accounts").empty()
-							.add_options(r.message);
+			if(country) {
+				frappe.call({
+					method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
+					args: {"country": country},
+					callback: function(r) {
+						if(r.message) {
+							slide.get_input("chart_of_accounts").empty()
+								.add_options(r.message);
 
-						if (r.message.length===1) {
-							var field = slide.get_field("chart_of_accounts");
-							field.set_value(r.message[0]);
-							field.df.hidden = 1;
-							field.refresh();
+							if (r.message.length===1) {
+								var field = slide.get_field("chart_of_accounts");
+								field.set_value(r.message[0]);
+								field.df.hidden = 1;
+								field.refresh();
+							}
 						}
 					}
-				}
-			})
+				})
+			}
 		},
 
 		bind_events: function(slide) {
