@@ -44,7 +44,7 @@ def get_so_details():
 def get_last_so_amt(customer):
 	res =  frappe.db.sql("""select base_net_total from `tabSales Order`
 		where customer ='%(customer)s' and docstatus = 1 order by transaction_date desc
-		limit 1""" % {'customer':customer})
+		limit 1""" % {'customer': frappe.db.escape(customer)})
 
 	return res and res[0][0] or 0
 
