@@ -68,7 +68,8 @@ def add_subscribers(name, email_list):
 		validate_email_add(email, True)
 
 		if email:
-			try:
+			if not frappe.db.get_value("Newsletter List Subscriber",
+				{"newsletter_list": name, "email": email}):
 				frappe.get_doc({
 					"doctype": "Newsletter List Subscriber",
 					"newsletter_list": name,
@@ -76,10 +77,8 @@ def add_subscribers(name, email_list):
 				}).insert()
 
 				count += 1
-			except Exception, e:
-				# ignore duplicate
-				if e.args[0] != 1062:
-					raise
+			else:
+				pass
 
 	frappe.msgprint(_("{0} subscribers added").format(count))
 
