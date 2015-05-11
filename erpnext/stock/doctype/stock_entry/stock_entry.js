@@ -43,6 +43,15 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				return erpnext.queries.item({is_stock_item: "Yes"});
 			}
 		};
+		
+		this.frm.set_query("purchase_order", function() {
+			return {
+				"filters": {
+					"docstatus": 1,
+					"is_subcontracted": "Yes"
+				}
+			};
+		});
 
 		if(cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
 			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
