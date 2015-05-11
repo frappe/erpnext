@@ -260,22 +260,29 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	price_list_currency: function() {
 		var me=this;
 		this.set_dynamic_labels();
-		this.set_plc_conversion_rate();
+
+		var company_currency = this.get_company_currency();
+		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
+		if(this.frm.doc.price_list_currency !== company_currency  && !this.frm.doc.ignore_pricing_rule) {
+			this.get_exchange_rate(this.frm.doc.price_list_currency, company_currency,
+				function(exchange_rate) {
+					me.frm.set_value("plc_conversion_rate", exchange_rate);
+				});
+		} else {
+			this.plc_conversion_rate();
+		}
 	},
 
 	plc_conversion_rate: function() {
-		this.set_plc_conversion_rate();
-		if(!this.in_apply_price_list) {
-			this.apply_price_list();
-		}
-	},
-
-	set_plc_conversion_rate: function() {
 		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
 			this.frm.set_value("plc_conversion_rate", 1.0);
+		} else if(this.frm.doc.price_list_currency === this.frm.doc.currency && 			this.frm.doc.plc_conversion_rate && cint(this.frm.doc.plc_conversion_rate) != 1 &&
+			cint(this.frm.doc.plc_conversion_rate) != cint(this.frm.doc.conversion_rate)) {
+				this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);
 		}
-		if(this.frm.doc.price_list_currency === this.frm.doc.currency) {
-			this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);
+		
+		if(!this.in_apply_price_list) {
+			this.apply_price_list();
 		}
 	},
 
