@@ -46,12 +46,20 @@ def get_all_renamed_fields():
 	)
 
 	for fields in rename_map.values():
-		renamed_fields += tuple(fields)
+		if fields[0] != "entries":
+			renamed_fields += tuple(fields)
 
 	return renamed_fields
 
 def update_script(dt, name, script_field, script, renamed_fields):
 	for from_field, to_field in renamed_fields:
 		script = re.sub(r"\b{}\b".format(from_field), to_field, script)
+		
+	if dt == "Journal Entry":
+		script = re.sub(r"\bentries\b", "accounts", script)
+	elif dt == "Bank Reconciliation":
+		script = re.sub(r"\bentries\b", "journal_entries", script)
+	elif dt in ("Sales Invoice", "Purchase Invoice"):
+		script = re.sub(r"\bentries\b", "items", script)
 
 	frappe.db.set_value(dt, name, script_field, script)
