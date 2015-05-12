@@ -42,8 +42,6 @@ class SellingController(StockController):
 		# set contact and address details for customer, if they are not mentioned
 		self.set_missing_lead_customer_details()
 		self.set_price_list_and_item_details()
-		if self.get("__islocal"):
-			self.set_taxes("taxes", "taxes_and_charges")
 
 	def set_missing_lead_customer_details(self):
 		if getattr(self, "customer", None):

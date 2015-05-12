@@ -41,6 +41,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	onload_post_render: function() {
 		var me = this;
+		if(this.frm.doc.__islocal && !(this.frm.doc.taxes || []).length
+			&& !(this.frm.doc.__onload ? this.frm.doc.__onload.load_after_mapping : false)) {
+				this.apply_default_taxes();
+		}
+		
 		if(this.frm.doc.__islocal && this.frm.doc.company && this.frm.doc["items"] && !this.frm.doc.is_pos) {
 			this.calculate_taxes_and_totals();
 		}
@@ -57,6 +62,23 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.set_dynamic_labels();
 		erpnext.pos.make_pos_btn(this.frm);
 		this.setup_sms();
+	},
+	
+	apply_default_taxes: function() {
+		var me = this;
+		return frappe.call({
+			method: "erpnext.controllers.accounts_controller.get_default_taxes_and_charges",
+			args: {
+				"master_doctype": frappe.meta.get_docfield(me.frm.doc.doctype, "taxes_and_charges",
+					me.frm.doc.name).options
+			},
+			callback: function(r) {
+				if(!r.exc) {
+					me.frm.set_value("taxes", r.message);
+					me.calculate_taxes_and_totals();
+				}
+			}
+		});
 	},
 
 	setup_sms: function() {
@@ -646,7 +668,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"master_doctype": frappe.meta.get_docfield(this.frm.doc.doctype, "taxes_and_charges",
 						this.frm.doc.name).options,
 					"master_name": this.frm.doc.taxes_and_charges,
-					"tax_parentfield": "taxes"
 				},
 				callback: function(r) {
 					if(!r.exc) {

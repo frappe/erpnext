@@ -44,8 +44,6 @@ class BuyingController(StockController):
 			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier"))
 
 		self.set_missing_item_details()
-		if self.get("__islocal"):
-			self.set_taxes("taxes", "taxes_and_charges")
 
 	def set_supplier_from_item_default(self):
 		if self.meta.get_field("supplier") and not self.supplier:

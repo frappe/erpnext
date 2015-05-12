@@ -140,30 +140,29 @@ class AccountsController(TransactionBase):
 							"discount_percentage", "base_rate", "rate"]:
 								item.set(field, ret.get(field))
 
-	def set_taxes(self, tax_parentfield, tax_master_field):
-		if not self.meta.get_field(tax_parentfield):
+	def set_taxes(self):
+		if not self.meta.get_field("taxes"):
 			return
 
-		tax_master_doctype = self.meta.get_field(tax_master_field).options
+		tax_master_doctype = self.meta.get_field("taxes_and_charges").options
 
-		if not self.get(tax_parentfield):
-			if not self.get(tax_master_field):
+		if not self.get("taxes"):
+			if not self.get("taxes_and_charges"):
 				# get the default tax master
-				self.set(tax_master_field, frappe.db.get_value(tax_master_doctype, {"is_default": 1}))
+				self.set("taxes_and_charges", frappe.db.get_value(tax_master_doctype, {"is_default": 1}))
 
-			self.append_taxes_from_master(tax_parentfield, tax_master_field, tax_master_doctype)
+			self.append_taxes_from_master(tax_master_doctype)
 
-	def append_taxes_from_master(self, tax_parentfield, tax_master_field, tax_master_doctype=None):
-		if self.get(tax_master_field):
+	def append_taxes_from_master(self, tax_master_doctype=None):
+		if self.get("taxes_and_charges"):
 			if not tax_master_doctype:
-				tax_master_doctype = self.meta.get_field(tax_master_field).options
+				tax_master_doctype = self.meta.get_field("taxes_and_charges").options
 
-			self.extend(tax_parentfield,
-				get_taxes_and_charges(tax_master_doctype, self.get(tax_master_field), tax_parentfield))
+			self.extend("taxes", get_taxes_and_charges(tax_master_doctype, self.get("taxes_and_charges")))
 
 	def set_other_charges(self):
 		self.set("taxes", [])
-		self.set_taxes("taxes", "taxes_and_charges")
+		self.set_taxes()
 
 	def validate_enabled_taxes_and_charges(self):
 		taxes_and_charges_doctype = self.meta.get_options("taxes_and_charges")
@@ -335,14 +334,19 @@ class AccountsController(TransactionBase):
 @frappe.whitelist()
 def get_tax_rate(account_head):
 	return frappe.db.get_value("Account", account_head, "tax_rate")
+	
+@frappe.whitelist()
+def get_default_taxes_and_charges(master_doctype):
+	default_tax = frappe.db.get_value(master_doctype, {"is_default": 1})
+	return get_taxes_and_charges(master_doctype, default_tax)
 
 @frappe.whitelist()
-def get_taxes_and_charges(master_doctype, master_name, tax_parentfield):
+def get_taxes_and_charges(master_doctype, master_name):
 	from frappe.model import default_fields
 	tax_master = frappe.get_doc(master_doctype, master_name)
 
 	taxes_and_charges = []
-	for i, tax in enumerate(tax_master.get(tax_parentfield)):
+	for i, tax in enumerate(tax_master.get("taxes")):
 		tax = tax.as_dict()
 
 		for fieldname in default_fields:

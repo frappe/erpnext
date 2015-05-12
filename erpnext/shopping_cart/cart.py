@@ -256,7 +256,7 @@ def set_taxes(quotation, cart_settings, billing_territory):
 	quotation.set("taxes", [])
 
 	# append taxes
-	quotation.append_taxes_from_master("taxes", "taxes_and_charges")
+	quotation.append_taxes_from_master()
 
 def get_lead_or_customer():
 	customer = frappe.db.get_value("Contact", {"email_id": frappe.session.user}, "customer")

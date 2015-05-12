@@ -196,7 +196,7 @@ class SalesInvoice(SellingController):
 
 			# fetch charges
 			if self.taxes_and_charges and not len(self.get("taxes")):
-				self.set_taxes("taxes", "taxes_and_charges")
+				self.set_taxes()
 
 	def get_advances(self):
 		super(SalesInvoice, self).get_advances(self.debit_to, "Customer", self.customer,
