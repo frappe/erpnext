@@ -46,17 +46,16 @@ def update_values(dt, tax_table):
 		WHERE
 			docstatus < 2
 	""".format(dt, net_total_precision))
-
-
+	
 	# update net_amount
 	frappe.db.sql("""
 		UPDATE
 			`tab{0}` par, `tab{1}` item
 		SET
-			item.base_net_amount = item.base_amount,
-			item.base_net_rate = item.base_rate,
-			item.net_amount = round(item.base_net_amount / par.conversion_rate, {2}),
-			item.net_rate = round(item.base_net_rate / par.conversion_rate, {2}),
+			item.base_net_amount = round(item.base_amount, {2}),
+			item.base_net_rate = round(item.base_rate, {2}),
+			item.net_amount = round(item.base_amount / par.conversion_rate, {2}),
+			item.net_rate = round(item.base_rate / par.conversion_rate, {2}),
 			item.base_amount = round(item.amount * par.conversion_rate, {2}),
 			item.base_rate = round(item.rate * par.conversion_rate, {2})
 		WHERE
@@ -69,12 +68,12 @@ def update_values(dt, tax_table):
 		UPDATE
 			`tab{0}` par, `tab{1}` tax
 		SET
-			tax.base_tax_amount = tax.tax_amount,
-			tax.tax_amount = round(tax.base_tax_amount / par.conversion_rate, {2}),
+			tax.base_tax_amount = round(tax.tax_amount, {2}),
+			tax.tax_amount = round(tax.tax_amount / par.conversion_rate, {2}),
 			tax.base_total = round(tax.total, {2}),
-			tax.total = round(tax.base_total / conversion_rate, {2}),
+			tax.total = round(tax.total / conversion_rate, {2}),
 			tax.base_tax_amount_after_discount_amount = round(tax.tax_amount_after_discount_amount, {2}),
-			tax.tax_amount_after_discount_amount = round(tax.base_tax_amount_after_discount_amount / conversion_rate, {2})
+			tax.tax_amount_after_discount_amount = round(tax.tax_amount_after_discount_amount / conversion_rate, {2})
 		WHERE
 			par.name = tax.parent
 			and par.docstatus < 2
