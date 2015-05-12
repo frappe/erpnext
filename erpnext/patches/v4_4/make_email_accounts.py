@@ -6,7 +6,7 @@ def execute():
 
 	# outgoing
 	outgoing = dict(frappe.db.sql("select field, value from tabSingles where doctype='Outgoing Email Settings'"))
-	if outgoing and outgoing['mail_server']:
+	if outgoing and outgoing['mail_server'] and outgoing['mail_login']:
 		account = frappe.new_doc("Email Account")
 		mapping = {
 			"email_id": "mail_login",
@@ -27,7 +27,7 @@ def execute():
 
 	# support
 	support = dict(frappe.db.sql("select field, value from tabSingles where doctype='Support Email Settings'"))
-	if support and support['mail_server']:
+	if support and support['mail_server'] and support['mail_login']:
 		account = frappe.new_doc("Email Account")
 		mapping = {
 			"enable_incoming": "sync_support_mails",
@@ -51,7 +51,7 @@ def execute():
 	# sales, jobs
 	for doctype in ("Sales Email Settings", "Jobs Email Settings"):
 		source = dict(frappe.db.sql("select field, value from tabSingles where doctype=%s", doctype))
-		if source and  source.get('host'):
+		if source and  source.get('host') and source.get('username'):
 			account = frappe.new_doc("Email Account")
 			mapping = {
 				"enable_incoming": "extract_emails",
