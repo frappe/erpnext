@@ -229,19 +229,15 @@ cur_frm.cscript.hide_fields = function(doc) {
 	'advance_adjustment_details', 'sales_partner', 'commission_rate',
 	'total_commission', 'advances', 'from_date', 'to_date'];
 
-	item_flds_normal = ['sales_order', 'delivery_note']
-
 	if(cint(doc.is_pos) == 1) {
 		hide_field(par_flds);
 		unhide_field('payments_section');
-		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, false);
 	} else {
 		hide_field('payments_section');
 		for (i in par_flds) {
 			var docfield = frappe.meta.docfield_map[doc.doctype][par_flds[i]];
 			if(!docfield.hidden) unhide_field(par_flds[i]);
 		}
-		cur_frm.fields_dict['entries'].grid.set_column_disp(item_flds_normal, true);
 	}
 
 	item_flds_stock = ['serial_no', 'batch_no', 'actual_qty', 'actual_batch_qty', 'expense_account', 'warehouse']
