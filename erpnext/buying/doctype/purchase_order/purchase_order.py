@@ -26,7 +26,7 @@ class PurchaseOrder(BuyingController):
 			'target_parent_dt': 'Material Request',
 			'target_parent_field': 'per_ordered',
 			'target_ref_field': 'qty',
-			'source_field': 'qty',
+			'source_field': 'stock_qty',
 			'percent_join_field': 'prevdoc_docname',
 			'overflow_type': 'order'
 		}]
@@ -61,8 +61,7 @@ class PurchaseOrder(BuyingController):
 			},
 			"Supplier Quotation Item": {
 				"ref_dn_field": "supplier_quotation_item",
-				"compare_fields": [["rate", "="], ["project_name", "="], ["item_code", "="],
-					["uom", "="]],
+				"compare_fields": [["rate", "="], ["project_name", "="], ["item_code", "="]],
 				"is_child_table": True
 			}
 		})
