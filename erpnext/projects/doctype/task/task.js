@@ -40,6 +40,7 @@ erpnext.projects.Task = frappe.ui.form.Controller.extend({
 	}
 });
 
+cur_frm.add_fetch('task', 'subject', 'subject');
 
 cur_frm.cscript = new erpnext.projects.Task({frm: cur_frm});
 

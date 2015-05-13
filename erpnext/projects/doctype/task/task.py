@@ -4,11 +4,12 @@
 from __future__ import unicode_literals
 import frappe, json
 
-from frappe.utils import getdate
+from frappe.utils import getdate, date_diff, add_days, cstr
 from frappe import _
 
-
 from frappe.model.document import Document
+
+class CircularReferenceError(frappe.ValidationError): pass
 
 class Task(Document):
 	def get_feed(self):
@@ -36,6 +37,8 @@ class Task(Document):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
 
 	def on_update(self):
+		self.check_recursion()
+		self.reschedule_dependent_tasks()
 		self.update_percentage()
 		self.update_project()
 			
@@ -52,8 +55,8 @@ class Task(Document):
 	def update_time_and_costing(self):
 		tl = frappe.db.sql("""select min(from_time) as start_date, max(to_time) as end_date,
 			 sum(billing_amount) as total_billing_amount, sum(costing_amount) as total_costing_amount,
-			sum(hours) as time from `tabTime Log` where project = %s and task = %s and docstatus=1""",
-			(self.project, self.name),as_dict=1)[0]
+			sum(hours) as time from `tabTime Log` where task = %s and docstatus=1"""
+			,self.name, as_dict=1)[0]
 		if self.status == "Open":
 			self.status = "Working"
 		self.total_costing_amount= tl.total_costing_amount
@@ -68,6 +71,36 @@ class Task(Document):
 			project.flags.dont_sync_tasks = True
 			project.update_costing()
 			project.save()
+			
+	def check_recursion(self):
+		if self.flags.ignore_recursion_check: return
+		check_list = [['task', 'parent'], ['parent', 'task']]
+		for d in check_list:
+			task_list, count = [self.name], 0
+			while (len(task_list) > count ):
+				tasks = frappe.db.sql(" select %s from `tabTask Depends On` where %s = %s " %
+					(d[0], d[1], '%s'), cstr(task_list[count]))
+				count = count + 1
+				for b in tasks:
+					if b[0] == self.name:
+						frappe.throw(_("Circular Reference Error"), CircularReferenceError)
+					if b[0]:
+						task_list.append(b[0])
+				if count == 15:
+					break
+			
+	def reschedule_dependent_tasks(self):
+		end_date = self.exp_end_date or self.act_end_date
+		if end_date:
+			for task_name in frappe.db.sql("select name from `tabTask` as parent where %s in \
+				(select task from `tabTask Depends On` as child where parent.name = child.parent )", self.name, as_dict=1):
+				task = frappe.get_doc("Task", task_name.name)
+				if task.exp_start_date and task.exp_end_date and task.exp_start_date < getdate(end_date) and task.status == "Open" :
+					task_duration = date_diff(task.exp_end_date, task.exp_start_date)
+					task.exp_start_date = add_days(end_date, 1)
+					task.exp_end_date = add_days(task.exp_start_date, task_duration)
+					task.flags.ignore_recursion_check = True
+					task.save()
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

@@ -78,11 +78,25 @@
    "width": "300px"
   }, 
   {
-   "fieldname": "time_and_budget", 
+   "fieldname": "section_break", 
    "fieldtype": "Section Break", 
-   "label": "", 
+   "label": "Depends On", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "depends_on", 
+   "fieldtype": "Table", 
+   "label": "depends_on", 
+   "options": "Task Depends On", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "section_break_10", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "exp_start_date", 
@@ -249,7 +263,7 @@
  "idx": 1, 
  "istable": 0, 
  "max_attachments": 5, 
- "modified": "2015-04-14 07:56:24.481667", 
+ "modified": "2015-04-30 05:48:55.176993", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Task", 
