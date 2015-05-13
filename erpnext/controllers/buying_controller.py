@@ -281,5 +281,5 @@ class BuyingController(StockController):
 		for d in self.get("items"):
 			if d.meta.get_field("stock_qty") and not d.stock_qty:
 				if not d.conversion_factor:
-					frappe.throw(_("Row {0}: Conversion Factor is mandatory"))
+					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
