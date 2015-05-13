@@ -73,7 +73,7 @@ class Task(Document):
 			project.save()
 			
 	def check_recursion(self):
-		if self.flags.recursion_check: return
+		if self.flags.ignore_recursion_check: return
 		check_list = [['task', 'parent'], ['parent', 'task']]
 		for d in check_list:
 			task_list, count = [self.name], 0
@@ -99,7 +99,7 @@ class Task(Document):
 					task_duration = date_diff(task.exp_end_date, task.exp_start_date)
 					task.exp_start_date = add_days(end_date, 1)
 					task.exp_end_date = add_days(task.exp_start_date, task_duration)
-					task.flags.recursion_check = True
+					task.flags.ignore_recursion_check = True
 					task.save()
 
 @frappe.whitelist()
