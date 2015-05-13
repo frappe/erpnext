@@ -69,6 +69,9 @@ class LandedCostVoucher(Document):
 	def set_applicable_charges_for_item(self):
 		based_on = self.distribute_charges_based_on.lower()
 		total = sum([flt(d.get(based_on)) for d in self.get("items")])
+		
+		if not total:
+			frappe.throw(_("Total {0} for all items is zero, may you should change 'Distribute Charges Based On'").format(based_on))
 
 		for item in self.get("items"):
 			item.applicable_charges = flt(item.get(based_on)) *  flt(self.total_taxes_and_charges) / flt(total)
