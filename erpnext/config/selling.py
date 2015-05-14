@@ -202,7 +202,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Customer Addresses and Contacts",
+					"name": "Customer Addresses And Contacts",
 					"doctype": "Contact"
 				},
 				{
