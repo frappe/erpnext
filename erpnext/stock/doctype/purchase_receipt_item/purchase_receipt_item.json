@@ -71,7 +71,7 @@
    "label": "Image", 
    "permlevel": 0, 
    "precision": "", 
-   "print_hide": 1
+   "print_hide": 0
   }, 
   {
    "fieldname": "image_view", 
@@ -79,7 +79,8 @@
    "label": "Image View", 
    "options": "image", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "print_hide": 1
   }, 
   {
    "fieldname": "received_and_accepted", 
@@ -640,7 +641,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-03-23 15:19:26.294450", 
+ "modified": "2015-05-14 14:54:02.462587", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt Item", 

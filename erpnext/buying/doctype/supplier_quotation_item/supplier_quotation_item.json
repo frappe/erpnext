@@ -81,7 +81,7 @@
    "label": "Image", 
    "permlevel": 0, 
    "precision": "", 
-   "print_hide": 1
+   "print_hide": 0
   }, 
   {
    "fieldname": "image_view", 
@@ -89,7 +89,8 @@
    "label": "Image View", 
    "options": "image", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "print_hide": 1
   }, 
   {
    "fieldname": "quantity_and_rate", 
@@ -411,7 +412,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-03-23 15:28:03.712608", 
+ "modified": "2015-05-14 14:54:36.253819", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation Item", 

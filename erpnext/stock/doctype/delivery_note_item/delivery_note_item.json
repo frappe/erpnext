@@ -88,7 +88,7 @@
    "label": "Image", 
    "permlevel": 0, 
    "precision": "", 
-   "print_hide": 1
+   "print_hide": 0
   }, 
   {
    "fieldname": "image_view", 
@@ -96,7 +96,8 @@
    "label": "Image View", 
    "options": "image", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "print_hide": 1
   }, 
   {
    "fieldname": "quantity_and_rate", 
@@ -521,7 +522,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-03-23 12:21:17.028911", 
+ "modified": "2015-05-14 14:52:20.610748", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note Item", 
