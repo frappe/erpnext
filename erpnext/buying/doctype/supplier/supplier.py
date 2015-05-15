@@ -89,14 +89,18 @@ def get_dashboard_info(supplier):
 		out[doctype] = frappe.db.get_value(doctype,
 			{"supplier": supplier, "docstatus": ["!=", 2] }, "count(*)")
 
-	billing = frappe.db.sql("""select sum(base_grand_total), sum(outstanding_amount)
+	billing_this_year = frappe.db.sql("""select sum(base_grand_total)
 		from `tabPurchase Invoice`
-		where supplier=%s
-			and docstatus = 1
-			and fiscal_year = %s""", (supplier, frappe.db.get_default("fiscal_year")))
+		where supplier=%s and docstatus = 1 and fiscal_year = %s""", 
+		(supplier, frappe.db.get_default("fiscal_year")))
+			
+	total_unpaid = frappe.db.sql("""select sum(outstanding_amount)
+		from `tabPurchase Invoice`
+		where supplier=%s and docstatus = 1""", supplier)
+	
 
-	out["total_billing"] = billing[0][0]
-	out["total_unpaid"] = billing[0][1]
+	out["billing_this_year"] = billing_this_year[0][0] if billing_this_year else 0
+	out["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
 	out["company_currency"] = frappe.db.sql_list("select distinct default_currency from tabCompany")
 
 	return out
