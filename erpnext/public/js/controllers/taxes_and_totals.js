@@ -135,14 +135,6 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				item.net_rate = flt(item.net_amount / item.qty, precision("net_rate", item));
 
 				me.set_in_company_currency(item, ["net_rate", "net_amount"]);
-
-				// if(item.discount_percentage == 100) {
-				// 	item.base_price_list_rate = item.base_rate;
-				// 	item.base_rate = 0.0;
-				// } else {
-				// 	item.base_price_list_rate = flt(item.base_rate / (1 - item.discount_percentage / 100.0),
-				// 		precision("base_price_list_rate", item));
-				// }
 			}
 		});
 	},
@@ -168,6 +160,9 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 			}
 		}
 
+		if(tax.add_deduct_tax) {
+			current_tax_fraction *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
+		}
 		return current_tax_fraction;
 	},
 
@@ -332,15 +327,12 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 			if (all_inclusive) {
 				var last_tax = me.frm.doc["taxes"].slice(-1)[0];
 
-				var diff = me.frm.doc.net_total
-					- flt(last_tax.total / me.frm.doc.conversion_rate, precision("grand_total"));
+				var diff = me.frm.doc.total - flt(last_tax.total, precision("grand_total"));
 
 				if ( diff && Math.abs(diff) <= (2.0 / Math.pow(10, precision("tax_amount", last_tax))) ) {
-					var adjustment_amount = flt(diff * me.frm.doc.conversion_rate, 
-							precision("tax_amount", last_tax));
-					last_tax.tax_amount += adjustment_amount;
-					last_tax.tax_amount_after_discount += adjustment_amount;
-					last_tax.total += adjustment_amount;
+					last_tax.tax_amount += diff;
+					last_tax.tax_amount_after_discount += diff;
+					last_tax.total += diff;
 				}
 			}
 		}

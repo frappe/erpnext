@@ -116,20 +116,7 @@ class calculate_taxes_and_totals(object):
 				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
 				item.discount_percentage = flt(item.discount_percentage, item.precision("discount_percentage"))
 
-
 				self._set_in_company_currency(item, ["net_rate", "net_amount"])
-
-				# below part need to be fixed???
-
-				# if item.discount_percentage == 100:
-				# 	item.price_list_rate = item.net_rate
-				# 	item.base_price_list_rate = flt(item.price_list_rate*self.doc.conversion_rate,
-				# 		self.doc.precision("base_price_list_rate", item))
-				# 	item.rate = item.base_rate = item.net_rate = item.base_net_rate = 0.0
-				# else:
-				# 	item.base_price_list_rate = flt(item.net_rate / (1 - (item.discount_percentage / 100.0)),
-				# 		self.doc.precision("price_list_rate", item))
-
 
 	def _load_item_tax_rate(self, item_tax_rate):
 		return json.loads(item_tax_rate) if item_tax_rate else {}
@@ -155,6 +142,8 @@ class calculate_taxes_and_totals(object):
 				current_tax_fraction = (tax_rate / 100.0) * \
 					self.doc.get("taxes")[cint(tax.row_id) - 1].grand_total_fraction_for_current_item
 
+		if getattr(tax, "add_deduct_tax", None):
+			current_tax_fraction *= -1.0 if (tax.add_deduct_tax == "Deduct") else 1.0
 		return current_tax_fraction
 
 	def _get_tax_rate(self, tax, item_tax_map):
@@ -286,17 +275,13 @@ class calculate_taxes_and_totals(object):
 	def manipulate_grand_total_for_inclusive_tax(self):
 		# if fully inclusive taxes and diff
 		if self.doc.get("taxes") and all(cint(t.included_in_print_rate) for t in self.doc.get("taxes")):
-
 			last_tax = self.doc.get("taxes")[-1]
-
-			diff = self.doc.net_total - flt(last_tax.total / self.doc.conversion_rate,
-				self.doc.precision("grand_total"))
+			diff = self.doc.total - flt(last_tax.total, self.doc.precision("grand_total"))
 
 			if diff and abs(diff) <= (2.0 / 10**last_tax.precision("tax_amount")):
-				adjustment_amount = flt(diff * self.doc.conversion_rate, last_tax.precision("tax_amount"))
-				last_tax.tax_amount += adjustment_amount
-				last_tax.tax_amount_after_discount_amount += adjustment_amount
-				last_tax.total += adjustment_amount
+				last_tax.tax_amount += diff
+				last_tax.tax_amount_after_discount_amount += diff
+				last_tax.total += diff
 
 	def calculate_totals(self):
 		self.doc.grand_total = flt(self.doc.get("taxes")[-1].total

@@ -159,6 +159,9 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			this.calculate_taxes_and_totals();
 		}
 	},
+	add_deduct_tax: function(doc, cdt, cdn) {
+		this.calculate_taxes_and_totals();
+	},
 
 	calculate_outstanding_amount: function() {
 		if(this.frm.doc.doctype == "Purchase Invoice" && this.frm.doc.docstatus < 2) {
