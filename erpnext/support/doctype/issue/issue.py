@@ -31,7 +31,8 @@ class Issue(Document):
 			if not self.lead:
 				self.lead = frappe.db.get_value("Lead", {"email_id": email_id})
 			if not self.contact:
-				self.contact = frappe.db.get_value("Contact", {"email_id": email_id})
+				self.contact, self.customer = frappe.db.get_value("Contact",
+					{"email_id": email_id}, ("name", "customer"))
 
 			if not self.company:
 				self.company = frappe.db.get_value("Lead", self.lead, "company") or \
