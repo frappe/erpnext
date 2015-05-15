@@ -7,8 +7,6 @@ frappe.pages["Sales Browser"].on_page_load = function(wrapper){
 		single_column: true,
 	});
 
-	frappe.breadcrumbs.add("Selling")
-
 	wrapper.page.set_secondary_action(__('Refresh'), function() {
 			wrapper.make_tree();
 		});
@@ -41,6 +39,8 @@ frappe.pages['Sales Browser'].on_page_show = function(wrapper){
 	if(erpnext.sales_chart && erpnext.sales_chart.ctype != ctype) {
 		wrapper.make_tree();
 	}
+
+	frappe.breadcrumbs.add(frappe.breadcrumbs.last_module || "Selling");
 };
 
 erpnext.SalesChart = Class.extend({
