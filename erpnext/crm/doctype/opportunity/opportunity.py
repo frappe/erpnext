@@ -44,7 +44,7 @@ class Opportunity(TransactionBase):
 
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
-		if not self.lead or self.customer:
+		if not (self.lead or self.customer):
 			lead_name = frappe.db.get_value("Lead", {"email_id": self.contact_email})
 			if not lead_name:
 				lead = frappe.get_doc({
