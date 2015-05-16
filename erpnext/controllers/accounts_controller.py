@@ -342,6 +342,8 @@ def get_default_taxes_and_charges(master_doctype):
 
 @frappe.whitelist()
 def get_taxes_and_charges(master_doctype, master_name):
+	if not master_name:
+		return
 	from frappe.model import default_fields
 	tax_master = frappe.get_doc(master_doctype, master_name)
 
