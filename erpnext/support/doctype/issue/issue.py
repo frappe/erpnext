@@ -26,7 +26,7 @@ class Issue(Document):
 
 	def set_lead_contact(self, email_id):
 		import email.utils
-		email_id = email.utils.parseaddr(email_id)
+		email_id = email.utils.parseaddr(email_id)[1]
 		if email_id:
 			if not self.lead:
 				self.lead = frappe.db.get_value("Lead", {"email_id": email_id})
