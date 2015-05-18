@@ -67,7 +67,7 @@ class MaterialRequest(BuyingController):
 		if not self.status:
 			self.status = "Draft"
 
-		from erpnext.utilities import validate_status
+		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
 
 		self.validate_value("material_request_type", "in", ["Purchase", "Material Transfer", "Material Issue"])

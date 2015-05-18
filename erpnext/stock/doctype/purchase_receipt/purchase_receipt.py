@@ -42,13 +42,7 @@ class PurchaseReceipt(BuyingController):
 		super(PurchaseReceipt, self).validate()
 
 		self.po_required()
-
-		if not self.status:
-			self.status = "Draft"
-
-		from erpnext.utilities import validate_status
-		validate_status(self.status, ["Draft", "Submitted", "Cancelled"])
-
+		self.set_status()
 		self.validate_with_previous_doc()
 		self.validate_rejected_warehouse()
 		self.validate_accepted_rejected_qty()

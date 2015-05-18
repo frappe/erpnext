@@ -26,7 +26,7 @@ class ProductionOrder(Document):
 		if self.docstatus == 0:
 			self.status = "Draft"
 
-		from erpnext.utilities import validate_status
+		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Stopped",
 			"In Process", "Completed", "Cancelled"])
 

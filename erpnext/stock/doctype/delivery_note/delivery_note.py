@@ -91,10 +91,7 @@ class DeliveryNote(SellingController):
 
 	def validate(self):
 		super(DeliveryNote, self).validate()
-
-		from erpnext.utilities import validate_status
-		validate_status(self.status, ["Draft", "Submitted", "Cancelled"])
-
+		self.set_status()
 		self.so_required()
 		self.validate_proj_cust()
 		self.check_stop_sales_order("against_sales_order")
@@ -108,7 +105,6 @@ class DeliveryNote(SellingController):
 
 		self.update_current_stock()
 
-		if not self.status: self.status = 'Draft'
 		if not self.installation_status: self.installation_status = 'Not Installed'
 
 	def validate_with_previous_doc(self):

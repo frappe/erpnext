@@ -3,9 +3,13 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt
+from frappe.utils import flt, comma_or
 from frappe import msgprint, _, throw
 from frappe.model.document import Document
+
+def validate_status(status, options):
+	if status not in options:
+		frappe.throw(_("Status must be one of {0}").format(comma_or(options)))
 
 status_map = {
 	"Lead": [
@@ -30,6 +34,16 @@ status_map = {
 		["Stopped", "eval:self.status=='Stopped'"],
 		["Cancelled", "eval:self.docstatus==2"],
 	],
+	"Delivery Note": [
+		["Draft", None],
+		["Submitted", "eval:self.docstatus==1"],
+		["Cancelled", "eval:self.docstatus==2"],
+	],
+	"Purchase Receipt": [
+		["Draft", None],
+		["Submitted", "eval:self.docstatus==1"],
+		["Cancelled", "eval:self.docstatus==2"],
+	]
 }
 
 class StatusUpdater(Document):

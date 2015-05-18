@@ -97,7 +97,7 @@ class SalesOrder(SellingController):
 		if not self.status:
 			self.status = "Draft"
 
-		from erpnext.utilities import validate_status
+		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Stopped",
 			"Cancelled"])
 

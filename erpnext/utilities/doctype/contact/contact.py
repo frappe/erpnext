@@ -8,7 +8,6 @@ from frappe.utils import cstr, extract_email_id
 from erpnext.controllers.status_updater import StatusUpdater
 
 class Contact(StatusUpdater):
-
 	def autoname(self):
 		# concat first and last name
 		self.name = " ".join(filter(None,

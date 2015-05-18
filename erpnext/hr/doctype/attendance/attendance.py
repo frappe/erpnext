@@ -40,7 +40,7 @@ class Attendance(Document):
 			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
 
 	def validate(self):
-		from erpnext.utilities import validate_status
+		from erpnext.controllers.status_updater import validate_status
 		from erpnext.accounts.utils import validate_fiscal_year
 		validate_status(self.status, ["Present", "Absent", "Half Day"])
 		validate_fiscal_year(self.att_date, self.fiscal_year, _("Attendance Date"), self)

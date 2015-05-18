@@ -32,7 +32,7 @@ class Employee(Document):
 		self.employee = self.name
 
 	def validate(self):
-		from erpnext.utilities import validate_status
+		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Active", "Left"])
 
 		self.employee = self.name
