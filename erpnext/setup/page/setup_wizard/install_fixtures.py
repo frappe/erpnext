@@ -154,7 +154,7 @@ def install(country=None):
 		{'doctype': "Email Account", "email_id": "sales@example.com", "append_to": "Opportunity"},
 		{'doctype': "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
 		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"},
-		
+
 		{"doctype": "Offer Term", "offer_term": _("Date of Joining")},
 		{"doctype": "Offer Term", "offer_term": _("Annual Salary")},
 		{"doctype": "Offer Term", "offer_term": _("Probationary Period")},
@@ -167,7 +167,7 @@ def install(country=None):
 		{"doctype": "Offer Term", "offer_term": _("Leaves per Year")},
 		{"doctype": "Offer Term", "offer_term": _("Notice Period")},
 		{"doctype": "Offer Term", "offer_term": _("Incentives")},
-		
+
 	]
 
 	from erpnext.setup.page.setup_wizard.fixtures import industry_type

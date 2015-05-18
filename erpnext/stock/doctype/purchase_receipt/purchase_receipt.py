@@ -41,8 +41,8 @@ class PurchaseReceipt(BuyingController):
 	def validate(self):
 		super(PurchaseReceipt, self).validate()
 
-		self.po_required()
 		self.set_status()
+		self.po_required()
 		self.validate_with_previous_doc()
 		self.validate_rejected_warehouse()
 		self.validate_accepted_rejected_qty()

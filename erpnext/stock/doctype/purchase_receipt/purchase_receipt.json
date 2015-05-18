@@ -631,6 +631,7 @@
    "permlevel": 0
   }, 
   {
+   "default": "Draft", 
    "fieldname": "status", 
    "fieldtype": "Select", 
    "in_filter": 1, 
@@ -853,7 +854,7 @@
  "icon": "icon-truck", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-05-15 14:21:33.694753", 
+ "modified": "2015-05-18 05:06:04.723299", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt", 
