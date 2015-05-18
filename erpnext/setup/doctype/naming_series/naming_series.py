@@ -9,6 +9,8 @@ from frappe import msgprint, throw, _
 
 from frappe.model.document import Document
 
+class NamingSeriesNotSetError(frappe.ValidationError): pass
+
 class NamingSeries(Document):
 
 	def get_transactions(self, arg=None):
@@ -151,9 +153,12 @@ def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True
 		make_property_setter(doctype, "naming_series", "reqd", 1, "Check")
 
 		# set values for mandatory
-		frappe.db.sql("""update `tab{doctype}` set naming_series={s} where
-			ifnull(naming_series, '')=''""".format(doctype=doctype, s="%s"),
-			get_default_naming_series(doctype))
+		try:
+			frappe.db.sql("""update `tab{doctype}` set naming_series={s} where
+				ifnull(naming_series, '')=''""".format(doctype=doctype, s="%s"),
+				get_default_naming_series(doctype))
+		except NamingSeriesNotSetError:
+			pass
 
 		if hide_name_field:
 			make_property_setter(doctype, fieldname, "reqd", 0, "Check")
@@ -175,4 +180,5 @@ def get_default_naming_series(doctype):
 	naming_series = naming_series.split("\n")
 	out = naming_series[0] or (naming_series[1] if len(naming_series) > 1 else None)
 	if out:
-		frappe.throw(_("Please set Naming Series for {0} via Setup > Settings > Naming Series").format(doctype))
+		frappe.throw(_("Please set Naming Series for {0} via Setup > Settings > Naming Series").format(doctype),
+			NamingSeriesNotSetError)
