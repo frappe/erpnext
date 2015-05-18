@@ -37,7 +37,6 @@ class Issue(Document):
 				if values:
 					self.contact, self.customer = values
 
-
 			if not self.company:
 				self.company = frappe.db.get_value("Lead", self.lead, "company") or \
 					frappe.db.get_default("company")
