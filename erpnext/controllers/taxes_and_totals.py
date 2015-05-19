@@ -282,6 +282,9 @@ class calculate_taxes_and_totals(object):
 				last_tax.tax_amount += diff
 				last_tax.tax_amount_after_discount_amount += diff
 				last_tax.total += diff
+				
+				self._set_in_company_currency(last_tax, 
+					["total", "tax_amount", "tax_amount_after_discount_amount"])
 
 	def calculate_totals(self):
 		self.doc.grand_total = flt(self.doc.get("taxes")[-1].total
