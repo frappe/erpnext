@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -6,11 +6,10 @@ from __future__ import unicode_literals
 import frappe
 import frappe.defaults
 from frappe.utils import cint
-from frappe.core.doctype.property_setter.property_setter import make_property_setter
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 keydict = {
 	# "key in defaults": "key in Global Defaults"
-	"print_style": "print_style",
 	"fiscal_year": "current_fiscal_year",
 	'company': 'default_company',
 	'currency': 'default_currency',
@@ -18,6 +17,7 @@ keydict = {
 	'hide_currency_symbol':'hide_currency_symbol',
 	'account_url':'account_url',
 	'disable_rounded_total': 'disable_rounded_total',
+	'jsonrates_api_key': 'jsonrates_api_key'
 }
 
 from frappe.model.document import Document
@@ -57,8 +57,8 @@ class GlobalDefaults(Document):
 
 		# Make property setters to hide rounded total fields
 		for doctype in ("Quotation", "Sales Order", "Sales Invoice", "Delivery Note"):
-			make_property_setter(doctype, "rounded_total", "hidden", self.disable_rounded_total, "Check")
-			make_property_setter(doctype, "rounded_total", "print_hide", 1, "Check")
+			make_property_setter(doctype, "base_rounded_total", "hidden", self.disable_rounded_total, "Check")
+			make_property_setter(doctype, "base_rounded_total", "print_hide", 1, "Check")
 
-			make_property_setter(doctype, "rounded_total_export", "hidden", self.disable_rounded_total, "Check")
-			make_property_setter(doctype, "rounded_total_export", "print_hide", self.disable_rounded_total, "Check")
+			make_property_setter(doctype, "rounded_total", "hidden", self.disable_rounded_total, "Check")
+			make_property_setter(doctype, "rounded_total", "print_hide", self.disable_rounded_total, "Check")

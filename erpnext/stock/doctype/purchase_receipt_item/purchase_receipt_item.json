@@ -1,5 +1,5 @@
 {
- "autoname": "GRND/.#######", 
+ "autoname": "hash", 
  "creation": "2013-05-24 19:29:10", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -21,6 +21,12 @@
    "width": "100px"
   }, 
   {
+   "fieldname": "column_break_2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "item_name", 
    "fieldtype": "Data", 
    "in_filter": 0, 
@@ -35,9 +41,10 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "col_break1", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
+   "fieldname": "section_break_4", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "description", 
@@ -51,6 +58,29 @@
    "read_only": 0, 
    "reqd": 1, 
    "width": "300px"
+  }, 
+  {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "hidden": 1, 
+   "label": "Image", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 0
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
   }, 
   {
    "fieldname": "received_and_accepted", 
@@ -255,6 +285,58 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "section_break_29", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "net_rate", 
+   "fieldtype": "Currency", 
+   "label": "Net Rate", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "net_amount", 
+   "fieldtype": "Currency", 
+   "label": "Net Amount", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_32", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "base_net_rate", 
+   "fieldtype": "Currency", 
+   "label": "Net Rate (Company Currency)", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "base_net_amount", 
+   "fieldtype": "Currency", 
+   "label": "Net Amount (Company Currency)", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "warehouse_and_reference", 
    "fieldtype": "Section Break", 
    "label": "Warehouse and Reference", 
@@ -400,6 +482,16 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "bom", 
+   "fieldtype": "Link", 
+   "label": "BOM", 
+   "no_copy": 1, 
+   "options": "BOM", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
    "fieldname": "serial_no", 
    "fieldtype": "Text", 
    "in_filter": 1, 
@@ -447,7 +539,7 @@
    "read_only": 1
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
    "hidden": 1, 
@@ -549,7 +641,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-09-09 05:35:38.908372", 
+ "modified": "2015-05-14 14:54:02.462587", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt Item", 

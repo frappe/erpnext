@@ -1,15 +1,15 @@
 <!-- TODO product listing -->
 <div class="container content">
 	<div style="height: 120px; overflow: hidden;">
-		<a href="{{ route or page_name }}">
+		<a href="{{ (route or page_name)|with_leading_slash }}">
 		{%- if website_image -%}
-		<img class="product-image" style="width: 80%; margin: auto;" src="{{ website_image }}">
+		<img class="product-image" style="width: 80%; margin: auto;" src="{{ website_image|with_leading_slash }}">
 		{%- else -%}
-		{% include 'templates/includes/product_missing_image.html' %}
+        <div style="width: 80%; height: 120px; background-color: #F7FAFC;"></div>
 		{%- endif -%}
 		</a>
 	</div>
 	<div style="height: 100px; overflow: hidden; font-size: 80%;">
-		<div><a href="{{ route or page_name }}">{{ item_name }}</a></div>
+		<div><a href="{{ (route or page_name)|with_leading_slash }}">{{ item_name }}</a></div>
 	</div>
 </div>

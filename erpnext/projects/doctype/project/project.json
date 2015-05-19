@@ -1,5 +1,4 @@
 {
- "allow_attach": 1, 
  "allow_import": 1, 
  "allow_rename": 1, 
  "autoname": "field:project_name", 
@@ -9,20 +8,7 @@
  "document_type": "Master", 
  "fields": [
   {
-   "fieldname": "overview", 
-   "fieldtype": "Section Break", 
-   "label": "Overview", 
-   "options": "icon-file", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "cb_project_status", 
-   "fieldtype": "Column Break", 
-   "label": "Status", 
-   "permlevel": 0
-  }, 
-  {
-   "description": "Project will get saved and will be searchable with project name given", 
+   "description": "", 
    "fieldname": "project_name", 
    "fieldtype": "Data", 
    "label": "Project Name", 
@@ -47,6 +33,23 @@
    "search_index": 1
   }, 
   {
+   "fieldname": "project_type", 
+   "fieldtype": "Select", 
+   "label": "Project Type", 
+   "no_copy": 0, 
+   "oldfieldname": "project_type", 
+   "oldfieldtype": "Data", 
+   "options": "Internal\nExternal\nOther", 
+   "permlevel": 0, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "column_break_5", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "is_active", 
    "fieldtype": "Select", 
    "label": "Is Active", 
@@ -60,6 +63,7 @@
   {
    "fieldname": "priority", 
    "fieldtype": "Select", 
+   "in_list_view": 0, 
    "label": "Priority", 
    "no_copy": 0, 
    "oldfieldname": "priority", 
@@ -69,16 +73,16 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "cb_project_dates", 
-   "fieldtype": "Column Break", 
-   "label": "Dates", 
-   "permlevel": 0
+   "fieldname": "section_break_12", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
-   "fieldname": "project_start_date", 
+   "fieldname": "expected_start_date", 
    "fieldtype": "Date", 
    "in_filter": 1, 
-   "label": "Project Start Date", 
+   "label": "Expected Start Date", 
    "no_copy": 0, 
    "oldfieldname": "project_start_date", 
    "oldfieldtype": "Date", 
@@ -86,9 +90,15 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "completion_date", 
+   "fieldname": "column_break_11", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "expected_end_date", 
    "fieldtype": "Date", 
-   "label": "Completion Date", 
+   "label": "Expected End Date", 
    "no_copy": 0, 
    "oldfieldname": "completion_date", 
    "oldfieldtype": "Date", 
@@ -96,161 +106,9 @@
    "search_index": 0
   }, 
   {
-   "fieldname": "act_completion_date", 
-   "fieldtype": "Date", 
-   "label": "Actual Completion Date", 
-   "no_copy": 0, 
-   "oldfieldname": "act_completion_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0, 
-   "search_index": 0
-  }, 
-  {
-   "fieldname": "project_type", 
-   "fieldtype": "Select", 
-   "label": "Project Type", 
-   "no_copy": 0, 
-   "oldfieldname": "project_type", 
-   "oldfieldtype": "Data", 
-   "options": "Internal\nExternal\nOther", 
-   "permlevel": 0, 
-   "search_index": 0
-  }, 
-  {
-   "fieldname": "sb_milestones", 
-   "fieldtype": "Section Break", 
-   "label": "Milestones", 
-   "oldfieldtype": "Section Break", 
-   "options": "icon-flag", 
-   "permlevel": 0
-  }, 
-  {
-   "description": "Milestones will be added as Events in the Calendar", 
-   "fieldname": "project_milestones", 
-   "fieldtype": "Table", 
-   "label": "Project Milestones", 
-   "no_copy": 0, 
-   "oldfieldname": "project_milestones", 
-   "oldfieldtype": "Table", 
-   "options": "Project Milestone", 
-   "permlevel": 0, 
-   "search_index": 0
-  }, 
-  {
-   "fieldname": "percent_milestones_completed", 
-   "fieldtype": "Percent", 
-   "label": "% Milestones Completed", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "section_break0", 
-   "fieldtype": "Section Break", 
-   "label": "Project Details", 
-   "oldfieldtype": "Section Break", 
-   "options": "icon-list", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "notes", 
-   "fieldtype": "Text Editor", 
-   "label": "Notes", 
-   "no_copy": 0, 
-   "oldfieldname": "notes", 
-   "oldfieldtype": "Text Editor", 
-   "permlevel": 0, 
-   "search_index": 0
-  }, 
-  {
-   "fieldname": "percent_complete", 
-   "fieldtype": "Percent", 
-   "in_list_view": 1, 
-   "label": "% Tasks Completed", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
-   "fieldname": "company", 
-   "fieldtype": "Link", 
-   "label": "Company", 
-   "options": "Company", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "project_details", 
-   "fieldtype": "Section Break", 
-   "label": "Project Costing", 
-   "oldfieldtype": "Section Break", 
-   "options": "icon-money", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "project_value", 
-   "fieldtype": "Currency", 
-   "in_list_view": 1, 
-   "label": "Project Value", 
-   "no_copy": 0, 
-   "oldfieldname": "project_value", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "reqd": 0, 
-   "search_index": 0
-  }, 
-  {
-   "fieldname": "est_material_cost", 
-   "fieldtype": "Currency", 
-   "label": "Estimated Material Cost", 
-   "no_copy": 0, 
-   "oldfieldname": "est_material_cost", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "search_index": 0
-  }, 
-  {
-   "fieldname": "cost_center", 
-   "fieldtype": "Link", 
-   "label": "Default Cost Center", 
-   "options": "Cost Center", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "column_break0", 
-   "fieldtype": "Column Break", 
-   "label": "Margin", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "width": "50%"
-  }, 
-  {
-   "fieldname": "gross_margin_value", 
-   "fieldtype": "Currency", 
-   "label": "Gross Margin Value", 
-   "no_copy": 0, 
-   "oldfieldname": "gross_margin_value", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "reqd": 0, 
-   "search_index": 0
-  }, 
-  {
-   "fieldname": "per_gross_margin", 
-   "fieldtype": "Currency", 
-   "label": "Gross Margin %", 
-   "no_copy": 0, 
-   "oldfieldname": "per_gross_margin", 
-   "oldfieldtype": "Currency", 
-   "options": "Company:company:default_currency", 
-   "permlevel": 0, 
-   "reqd": 0, 
-   "search_index": 0
-  }, 
-  {
    "fieldname": "customer_details", 
    "fieldtype": "Section Break", 
-   "label": "Customer Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-user", 
    "permlevel": 0
@@ -268,12 +126,237 @@
    "print_hide": 1, 
    "reqd": 0, 
    "search_index": 1
+  }, 
+  {
+   "fieldname": "column_break_14", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "sales_order", 
+   "fieldtype": "Link", 
+   "label": "Sales Order", 
+   "options": "Sales Order", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "sb_milestones", 
+   "fieldtype": "Section Break", 
+   "label": "Tasks", 
+   "oldfieldtype": "Section Break", 
+   "options": "icon-flag", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "tasks", 
+   "fieldtype": "Table", 
+   "label": "Tasks", 
+   "options": "Project Task", 
+   "permlevel": 0, 
+   "precision": "", 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "percent_complete", 
+   "fieldtype": "Percent", 
+   "in_list_view": 0, 
+   "label": "% Tasks Completed", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "section_break0", 
+   "fieldtype": "Section Break", 
+   "label": "", 
+   "oldfieldtype": "Section Break", 
+   "options": "icon-list", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "notes", 
+   "fieldtype": "Text Editor", 
+   "label": "Notes", 
+   "no_copy": 0, 
+   "oldfieldname": "notes", 
+   "oldfieldtype": "Text Editor", 
+   "permlevel": 0, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "section_break_18", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "actual_start_date", 
+   "fieldtype": "Data", 
+   "label": "Actual Start Date", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "actual_time", 
+   "fieldtype": "Float", 
+   "label": "Actual Time (in Hours)", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_20", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "actual_end_date", 
+   "fieldtype": "Date", 
+   "label": "Actual End Date", 
+   "no_copy": 0, 
+   "oldfieldname": "act_completion_date", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "section_break_26", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "estimated_costing", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Estimated Costing", 
+   "no_copy": 0, 
+   "oldfieldname": "project_value", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "reqd": 0, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "column_break_22", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "company", 
+   "fieldtype": "Link", 
+   "label": "Company", 
+   "options": "Company", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "cost_center", 
+   "fieldtype": "Link", 
+   "label": "Default Cost Center", 
+   "options": "Cost Center", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "project_details", 
+   "fieldtype": "Section Break", 
+   "label": "", 
+   "oldfieldtype": "Section Break", 
+   "options": "icon-money", 
+   "permlevel": 0
+  }, 
+  {
+   "description": "", 
+   "fieldname": "total_costing_amount", 
+   "fieldtype": "Currency", 
+   "label": "Total Costing Amount (via Time Logs)", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "description": "", 
+   "fieldname": "total_expense_claim", 
+   "fieldtype": "Currency", 
+   "label": "Total Expense Claim (via Expense Claims)", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_28", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "description": "", 
+   "fieldname": "total_billing_amount", 
+   "fieldtype": "Currency", 
+   "label": "Total Billing Amount (via Time Logs)", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "total_purchase_cost", 
+   "fieldtype": "Currency", 
+   "hidden": 0, 
+   "label": "Total Purchase Cost (via Purchase Invoice)", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "margin", 
+   "fieldtype": "Section Break", 
+   "label": "", 
+   "oldfieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
+   "fieldname": "gross_margin", 
+   "fieldtype": "Currency", 
+   "label": "Gross Margin", 
+   "no_copy": 0, 
+   "oldfieldname": "gross_margin_value", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "reqd": 0, 
+   "search_index": 0
+  }, 
+  {
+   "fieldname": "column_break_37", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "per_gross_margin", 
+   "fieldtype": "Percent", 
+   "label": "Gross Margin %", 
+   "no_copy": 0, 
+   "oldfieldname": "per_gross_margin", 
+   "oldfieldtype": "Currency", 
+   "options": "", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "reqd": 0, 
+   "search_index": 0
   }
  ], 
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2014-08-26 14:59:27.052172", 
+ "modified": "2015-04-27 07:37:44.239930", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 
@@ -290,6 +373,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Projects User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

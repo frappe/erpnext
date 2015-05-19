@@ -1,5 +1,5 @@
 {
- "autoname": "PSD/.#######", 
+ "autoname": "hash", 
  "creation": "2013-04-08 13:10:16", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -25,6 +25,21 @@
    "print_width": "200px", 
    "read_only": 1, 
    "width": "200px"
+  }, 
+  {
+   "fieldname": "batch_no", 
+   "fieldtype": "Link", 
+   "label": "Batch No", 
+   "options": "Batch", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "description", 
+   "fieldtype": "Small Text", 
+   "label": "Description", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "qty", 
@@ -90,7 +105,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2014-09-09 05:35:38.604554", 
+ "modified": "2015-04-21 01:42:24.312967", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Packing Slip Item", 

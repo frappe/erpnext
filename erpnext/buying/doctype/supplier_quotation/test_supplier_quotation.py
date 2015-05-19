@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 
@@ -21,11 +21,11 @@ class TestPurchaseOrder(unittest.TestCase):
 		po = make_purchase_order(sq.name)
 
 		self.assertEquals(po.doctype, "Purchase Order")
-		self.assertEquals(len(po.get("po_details")), len(sq.get("quotation_items")))
+		self.assertEquals(len(po.get("items")), len(sq.get("items")))
 
 		po.naming_series = "_T-Purchase Order-"
 
-		for doc in po.get("po_details"):
+		for doc in po.get("items"):
 			if doc.get("item_code"):
 				doc.set("schedule_date", "2013-04-12")
 

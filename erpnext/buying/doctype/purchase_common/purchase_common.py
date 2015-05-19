@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -16,7 +16,7 @@ class PurchaseCommon(BuyingController):
 		import frappe.utils
 		this_purchase_date = frappe.utils.getdate(obj.get('posting_date') or obj.get('transaction_date'))
 
-		for d in obj.get(obj.fname):
+		for d in obj.get("items"):
 			# get last purchase details
 			last_purchase_details = get_last_purchase_details(d.item_code, obj.name)
 
@@ -38,34 +38,9 @@ class PurchaseCommon(BuyingController):
 				frappe.db.sql("""update `tabItem` set last_purchase_rate = %s where name = %s""",
 					(flt(last_purchase_rate), d.item_code))
 
-	def get_last_purchase_rate(self, obj):
-		"""get last purchase rates for all items"""
-		doc_name = obj.name
-		conversion_rate = flt(obj.get('conversion_rate')) or 1.0
-
-		for d in obj.get(obj.fname):
-			if d.item_code:
-				last_purchase_details = get_last_purchase_details(d.item_code, doc_name)
-
-				if last_purchase_details:
-					d.base_price_list_rate = last_purchase_details['base_price_list_rate'] * (flt(d.conversion_factor) or 1.0)
-					d.discount_percentage = last_purchase_details['discount_percentage']
-					d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
-					d.price_list_rate = d.base_price_list_rate / conversion_rate
-					d.rate = d.base_rate / conversion_rate
-				else:
-					# if no last purchase found, reset all values to 0
-					d.base_price_list_rate = d.base_rate = d.price_list_rate = d.rate = d.discount_percentage = 0
-
-					item_last_purchase_rate = frappe.db.get_value("Item",
-						d.item_code, "last_purchase_rate")
-					if item_last_purchase_rate:
-						d.base_price_list_rate = d.base_rate = d.price_list_rate \
-							= d.rate = item_last_purchase_rate
-
 	def validate_for_items(self, obj):
 		items = []
-		for d in obj.get(obj.fname):
+		for d in obj.get("items"):
 			# validation for valid qty
 			if flt(d.qty) < 0 or (d.parenttype != 'Purchase Receipt' and not flt(d.qty)):
 				frappe.throw(_("Please enter quantity for Item {0}").format(d.item_code))
@@ -92,7 +67,7 @@ class PurchaseCommon(BuyingController):
 				frappe.throw(_("Warehouse is mandatory for stock Item {0} in row {1}").format(d.item_code, d.idx))
 
 			# validate purchase item
-			if not (obj.doctype=="Material Request" and getattr(obj, "material_request_type", None)=="Transfer"):
+			if not (obj.doctype=="Material Request" and getattr(obj, "material_request_type", None)=="Material Transfer"):
 				if item[0][1] != 'Yes' and item[0][2] != 'Yes':
 					frappe.throw(_("{0} must be a Purchased or Sub-Contracted Item in row {1}").format(d.item_code, d.idx))
 

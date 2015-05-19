@@ -1,1 +1,0 @@
-Important date in the project lifecycle.

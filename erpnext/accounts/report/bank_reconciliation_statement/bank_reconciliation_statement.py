@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -24,7 +24,7 @@ def execute(filters=None):
 		total_credit += flt(d[3])
 
 	amounts_not_reflected_in_system = frappe.db.sql("""select sum(ifnull(jvd.debit, 0) - ifnull(jvd.credit, 0))
-		from `tabJournal Voucher Detail` jvd, `tabJournal Voucher` jv
+		from `tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		where jvd.parent = jv.name and jv.docstatus=1 and jvd.account=%s
 		and jv.posting_date > %s and jv.clearance_date <= %s and ifnull(jv.is_opening, 'No') = 'No'
 		""", (filters["account"], filters["report_date"], filters["report_date"]))
@@ -47,7 +47,7 @@ def execute(filters=None):
 	return columns, data
 
 def get_columns():
-	return [_("Posting Date") + ":Date:100", _("Journal Voucher") + ":Link/Journal Voucher:220",
+	return [_("Posting Date") + ":Date:100", _("Journal Entry") + ":Link/Journal Entry:220",
 		_("Debit") + ":Currency:120", _("Credit") + ":Currency:120",
 		_("Against Account") + ":Link/Account:200", _("Reference") + "::100", _("Ref Date") + ":Date:110", _("Clearance Date") + ":Date:110"
 	]
@@ -57,7 +57,7 @@ def get_entries(filters):
 			jv.posting_date, jv.name, jvd.debit, jvd.credit,
 			jvd.against_account, jv.cheque_no, jv.cheque_date, jv.clearance_date
 		from
-			`tabJournal Voucher Detail` jvd, `tabJournal Voucher` jv
+			`tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		where jvd.parent = jv.name and jv.docstatus=1
 			and jvd.account = %(account)s and jv.posting_date <= %(report_date)s
 			and ifnull(jv.clearance_date, '4000-01-01') > %(report_date)s

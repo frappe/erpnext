@@ -1,6 +1,6 @@
 {
- "autoname": "PPID/.#####", 
- "creation": "2013-02-22 01:27:49.000000", 
+ "autoname": "hash", 
+ "creation": "2013-02-22 01:27:49", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -104,9 +104,10 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:25.000000", 
+ "modified": "2015-02-19 01:07:00.936590", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Plan Item", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }

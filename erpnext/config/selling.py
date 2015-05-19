@@ -9,18 +9,8 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Lead",
-					"description": _("Database of potential customers."),
-				},
-				{
-					"type": "doctype",
 					"name": "Customer",
 					"description": _("Customer database."),
-				},
-				{
-					"type": "doctype",
-					"name": "Opportunity",
-					"description": _("Potential opportunities for selling."),
 				},
 				{
 					"type": "doctype",
@@ -128,7 +118,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Sales Taxes and Charges Master",
+					"name": "Sales Taxes and Charges Template",
 					"description": _("Tax template for selling transactions.")
 				},
 				{
@@ -159,7 +149,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Sales Email Settings",
+					"name": "Email Account",
 					"description": _("Setup incoming server for sales email id. (e.g. sales@example.com)")
 				},
 				{
@@ -212,7 +202,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Customer Addresses and Contacts",
+					"name": "Customer Addresses And Contacts",
 					"doctype": "Contact"
 				},
 				{
@@ -276,6 +266,12 @@ def get_data():
 					"is_query_report": True,
 					"name": "Pending SO Items For Purchase Request",
 					"doctype": "Sales Order"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Customer Credit Balance",
+					"doctype": "Customer"
 				},
 			]
 		},

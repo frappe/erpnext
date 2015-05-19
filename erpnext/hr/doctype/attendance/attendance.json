@@ -9,7 +9,7 @@
   {
    "fieldname": "attendance_details", 
    "fieldtype": "Section Break", 
-   "label": "Attendance Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "Simple", 
    "permlevel": 0
@@ -40,7 +40,7 @@
   {
    "fieldname": "employee_name", 
    "fieldtype": "Data", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Employee Name", 
    "oldfieldname": "employee_name", 
    "oldfieldtype": "Data", 
@@ -51,7 +51,7 @@
    "fieldname": "status", 
    "fieldtype": "Select", 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Status", 
    "no_copy": 1, 
    "oldfieldname": "status", 
@@ -65,7 +65,7 @@
    "fieldname": "leave_type", 
    "fieldtype": "Link", 
    "hidden": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Leave Type", 
    "oldfieldname": "leave_type", 
    "oldfieldtype": "Link", 
@@ -85,6 +85,7 @@
    "fieldname": "att_date", 
    "fieldtype": "Date", 
    "in_filter": 1, 
+   "in_list_view": 1, 
    "label": "Attendance Date", 
    "oldfieldname": "att_date", 
    "oldfieldtype": "Date", 
@@ -129,7 +130,7 @@
  "icon": "icon-ok", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-08-05 06:52:02.226904", 
+ "modified": "2015-02-20 05:09:39.161541", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Attendance", 
@@ -145,6 +146,7 @@
    "read": 1, 
    "report": 1, 
    "role": "System Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -159,6 +161,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -172,6 +175,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }

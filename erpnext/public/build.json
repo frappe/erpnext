@@ -3,7 +3,8 @@
 		"public/css/erpnext.css"
 	],
 	"js/erpnext-web.min.js": [
-		"public/js/website_utils.js"
+		"public/js/website_utils.js",
+		"public/js/shopping_cart.js"
 	],
 	"js/erpnext.min.js": [
 		"public/js/conf.js",
@@ -12,6 +13,11 @@
 		"public/js/queries.js",
 		"public/js/utils/party.js",
 		"public/js/templates/address_list.html",
-		"public/js/templates/contact_list.html"
+		"public/js/templates/contact_list.html",
+		"public/js/pos/pos.html",
+		"public/js/pos/pos_bill_item.html",
+		"public/js/pos/pos_item.html",
+		"public/js/pos/pos_tax_row.html",
+		"public/js/pos/pos.js"
 	]
 }

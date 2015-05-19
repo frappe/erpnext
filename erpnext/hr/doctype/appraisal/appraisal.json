@@ -7,7 +7,7 @@
   {
    "fieldname": "employee_details", 
    "fieldtype": "Section Break", 
-   "label": "Employee Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0
   }, 
@@ -41,7 +41,7 @@
    "fieldname": "employee_name", 
    "fieldtype": "Data", 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "For Employee Name", 
    "oldfieldname": "employee_name", 
    "oldfieldtype": "Data", 
@@ -62,7 +62,7 @@
    "fieldname": "status", 
    "fieldtype": "Select", 
    "in_filter": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Status", 
    "no_copy": 1, 
    "oldfieldname": "status", 
@@ -107,9 +107,9 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "fieldname": "appraisal_details", 
+   "fieldname": "goals", 
    "fieldtype": "Table", 
-   "label": "Appraisal Goals", 
+   "label": "Goals", 
    "oldfieldname": "appraisal_details", 
    "oldfieldtype": "Table", 
    "options": "Appraisal Goal", 
@@ -142,17 +142,17 @@
    "permlevel": 0
   }, 
   {
-   "description": "Any other comments, noteworthy effort that should go in the records.", 
-   "fieldname": "comments", 
+   "description": "Any other remarks, noteworthy effort that should go in the records.", 
+   "fieldname": "remarks", 
    "fieldtype": "Text", 
-   "label": "Comments", 
+   "label": "Remarks", 
    "permlevel": 0
   }, 
   {
    "depends_on": "kra_template", 
    "fieldname": "other_details", 
    "fieldtype": "Section Break", 
-   "label": "Other Details", 
+   "label": "", 
    "permlevel": 0
   }, 
   {
@@ -165,6 +165,12 @@
    "options": "Company", 
    "permlevel": 0, 
    "reqd": 1
+  }, 
+  {
+   "fieldname": "column_break_17", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "fiscal_year", 
@@ -197,7 +203,7 @@
  "icon": "icon-thumbs-up", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-06-23 07:55:40.801381", 
+ "modified": "2015-03-02 07:00:45.803789", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Appraisal", 
@@ -214,6 +220,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Employee", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -228,6 +235,7 @@
    "read": 1, 
    "report": 1, 
    "role": "System Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -243,11 +251,13 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }
  ], 
  "search_fields": "status, employee, employee_name", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "employee_name"
 }

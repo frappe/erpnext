@@ -17,24 +17,38 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "column_break_2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "status", 
+   "fieldtype": "Select", 
+   "in_list_view": 0, 
+   "label": "Status", 
+   "options": "Draft\nSubmitted\nBatched for Billing\nBilled\nCancelled", 
+   "permlevel": 0, 
+   "read_only": 1, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "section_break_4", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "from_time", 
    "fieldtype": "Datetime", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "From Time", 
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 1
   }, 
   {
-   "fieldname": "to_time", 
-   "fieldtype": "Datetime", 
-   "in_list_view": 1, 
-   "label": "To Time", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 1
-  }, 
-  {
+   "default": "0", 
    "fieldname": "hours", 
    "fieldtype": "Float", 
    "in_list_view": 1, 
@@ -43,32 +57,32 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "column_break_3", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "fieldname": "status", 
-   "fieldtype": "Select", 
-   "in_list_view": 1, 
-   "label": "Status", 
-   "options": "Draft\nSubmitted\nBatched for Billing\nBilled\nCancelled", 
-   "permlevel": 0, 
-   "read_only": 1, 
-   "reqd": 0
-  }, 
-  {
-   "fieldname": "activity_type", 
-   "fieldtype": "Link", 
-   "in_list_view": 1, 
-   "label": "Activity Type", 
-   "options": "Activity Type", 
+   "fieldname": "to_time", 
+   "fieldtype": "Datetime", 
+   "in_list_view": 0, 
+   "label": "To Time", 
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 1
   }, 
   {
+   "fieldname": "column_break_8", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "", 
+   "fieldname": "project", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Project", 
+   "options": "Project", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "", 
    "fieldname": "task", 
    "fieldtype": "Link", 
    "label": "Task", 
@@ -77,12 +91,124 @@
    "read_only": 0
   }, 
   {
+   "depends_on": "eval:!doc.for_manufacturing", 
+   "fieldname": "activity_type", 
+   "fieldtype": "Link", 
+   "in_list_view": 0, 
+   "label": "Activity Type", 
+   "options": "Activity Type", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "section_break_12", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "user", 
+   "fieldtype": "Link", 
+   "label": "User", 
+   "options": "User", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "employee", 
+   "fieldtype": "Link", 
+   "label": "Employee", 
+   "options": "Employee", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "column_break_3", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "fieldname": "for_manufacturing", 
+   "fieldtype": "Check", 
+   "hidden": 1, 
+   "label": "For Manufacturing", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "billable", 
    "fieldtype": "Check", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Billable", 
    "permlevel": 0, 
    "read_only": 0
+  }, 
+  {
+   "depends_on": "eval:doc.for_manufacturing", 
+   "fieldname": "section_break_11", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "", 
+   "fieldname": "production_order", 
+   "fieldtype": "Link", 
+   "label": "Production Order", 
+   "options": "Production Order", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "depends_on": "", 
+   "fieldname": "operation", 
+   "fieldtype": "Link", 
+   "label": "Operation", 
+   "options": "Operation", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "depends_on": "", 
+   "fieldname": "operation_id", 
+   "fieldtype": "Data", 
+   "hidden": 1, 
+   "label": "Operation ID", 
+   "options": "", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_14", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "", 
+   "fieldname": "workstation", 
+   "fieldtype": "Link", 
+   "label": "Workstation", 
+   "options": "Workstation", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "depends_on": "", 
+   "description": "Operation completed for how many finished goods?", 
+   "fieldname": "completed_qty", 
+   "fieldtype": "Float", 
+   "label": "Completed Qty", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "section_break_7", 
@@ -98,19 +224,62 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "section_break_9", 
+   "depends_on": "", 
+   "fieldname": "section_break_24", 
    "fieldtype": "Section Break", 
    "permlevel": 0, 
-   "read_only": 0
+   "precision": ""
   }, 
   {
-   "fieldname": "project", 
-   "fieldtype": "Link", 
-   "in_list_view": 1, 
-   "label": "Project", 
-   "options": "Project", 
+   "default": "0", 
+   "description": "", 
+   "fieldname": "costing_rate", 
+   "fieldtype": "Currency", 
+   "label": "Costing Rate (per hour)", 
    "permlevel": 0, 
-   "read_only": 0
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "default": "0", 
+   "fieldname": "costing_amount", 
+   "fieldtype": "Currency", 
+   "label": "Costing Amount", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_25", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "default": "0", 
+   "description": "", 
+   "fieldname": "billing_rate", 
+   "fieldtype": "Currency", 
+   "label": "Billing Rate (per hour)", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "default": "0", 
+   "description": "Will be updated only if Time Log is 'Billable'", 
+   "fieldname": "billing_amount", 
+   "fieldtype": "Currency", 
+   "label": "Billing Amount", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "section_break_29", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "description": "Will be updated when batched.", 
@@ -131,12 +300,6 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "column_break_16", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
    "fieldname": "amended_from", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
@@ -146,12 +309,20 @@
    "permlevel": 1, 
    "print_hide": 1, 
    "read_only": 0
+  }, 
+  {
+   "fieldname": "title", 
+   "fieldtype": "Data", 
+   "hidden": 1, 
+   "label": "Title", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-10-22 16:53:26.993828", 
+ "modified": "2015-04-14 09:07:28.468792", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log", 
@@ -169,6 +340,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Projects User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -182,8 +354,10 @@
    "read": 1, 
    "report": 1, 
    "role": "Projects Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }
- ]
+ ], 
+ "title_field": "title"
 }

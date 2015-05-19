@@ -8,7 +8,7 @@ Includes: Accounting, Inventory, CRM, Sales, Purchase, Projects, HRMS. Requires 
 
 ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web app framework in Python & Javascript.
 
-- [User Guide](https://erpnext.com/user-guide)
+- [User Guide](https://manual.erpnext.com)
 - [Getting Help](http://erpnext.org/getting-help.html)
 - [Discussion Forum](https://discuss.frappe.io/)
 
@@ -34,25 +34,25 @@ System and user credentials are listed on the download page.
 
 GNU/General Public License (see LICENSE.txt)
 
-The ERPNext code is licensed as GNU General Public License (v3) and the Documentation is licensed as Creative Commons (CC-BY-SA-3.0) and the copyright is owned by Web Notes Technologies Pvt Ltd (Web Notes) and Contributors.
+The ERPNext code is licensed as GNU General Public License (v3) and the Documentation is licensed as Creative Commons (CC-BY-SA-3.0) and the copyright is owned by Frappe Technologies Pvt Ltd (Frappe) and Contributors.
 
 ---
 
 ## Logo and Trademark
 
-The brand name ERPNext and the logo are trademarks of Web Notes Technologies Pvt. Ltd.
+The brand name ERPNext and the logo are trademarks of Frappe Technologies Pvt. Ltd.
 
 ### Introduction
 
-Web Notes Technologies Pvt. Ltd. (Web Notes) owns and oversees the trademarks for the ERPNext name and logos. We have developed this trademark usage policy with the following goals in mind:
+Frappe Technologies Pvt. Ltd. (Frappe) owns and oversees the trademarks for the ERPNext name and logos. We have developed this trademark usage policy with the following goals in mind:
 
 - We’d like to make it easy for anyone to use the ERPNext name or logo for community-oriented efforts that help spread and improve ERPNext.
 - We’d like to make it clear how ERPNext-related businesses and projects can (and cannot) use the ERPNext name and logo.
 - We’d like to make it hard for anyone to use the ERPNext name and logo to unfairly profit from, trick or confuse people who are looking for official ERPNext resources.
 
-### Web Notes Trademark Usage Policy
+### Frappe Trademark Usage Policy
 
-Permission from Web Notes is required to use the ERPNext name or logo as part of any project, product, service, domain or company name.
+Permission from Frappe is required to use the ERPNext name or logo as part of any project, product, service, domain or company name.
 
 We will grant permission to use the ERPNext name and logo for projects that meet the following criteria:
 
@@ -71,6 +71,6 @@ We do not allow the use of the trademark in advertising, including AdSense/AdWor
 
 Please note that it is not the goal of this policy to limit commercial activity around ERPNext. We encourage ERPNext-based businesses, and we would love to see hundreds of them.
 
-When in doubt about your use of the ERPNext name or logo, please contact the Web Notes Technologies for clarification.
+When in doubt about your use of the ERPNext name or logo, please contact the Frappe Technologies for clarification.
 
-(inspired from Wordpress)
+(inspired from WordPress)

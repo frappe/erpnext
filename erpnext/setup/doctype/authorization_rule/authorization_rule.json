@@ -120,7 +120,7 @@
  ], 
  "icon": "icon-shield", 
  "idx": 1, 
- "modified": "2014-05-07 06:39:38.981478", 
+ "modified": "2015-02-05 05:11:34.624998", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Authorization Rule", 
@@ -136,6 +136,7 @@
    "read": 1, 
    "report": 1, 
    "role": "System Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

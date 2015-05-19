@@ -1,5 +1,5 @@
 {
-  "allow_copy": 0, 
+ "allow_copy": 0, 
  "allow_email": 1, 
  "allow_import": 1, 
  "allow_print": 1, 
@@ -27,6 +27,7 @@
    "fieldname": "price_list_name", 
    "fieldtype": "Data", 
    "label": "Price List Name", 
+   "no_copy": 1, 
    "oldfieldname": "price_list_name", 
    "oldfieldtype": "Data", 
    "permlevel": 0, 
@@ -63,7 +64,7 @@
   }, 
   {
    "description": "Specify a list of Territories, for which, this Price List is valid", 
-   "fieldname": "valid_for_territories", 
+   "fieldname": "territories", 
    "fieldtype": "Table", 
    "label": "Valid for Territories", 
    "options": "Applicable Territory", 
@@ -74,7 +75,7 @@
  "icon": "icon-tags", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2014-05-27 03:49:14.866933", 
+ "modified": "2015-04-17 01:54:01.907175", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Price List", 
@@ -100,6 +101,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -118,6 +120,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Purchase Master Manager", 
+   "share": 1, 
    "write": 1
   }, 
   {
@@ -127,5 +130,6 @@
    "report": 0, 
    "role": "Manufacturing User"
   }
- ]
+ ], 
+ "search_fields": "currency"
 }

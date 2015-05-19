@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -16,7 +16,8 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False)
 	frappe.db.auto_commit_on_many_writes = 1
 
 	if allow_negative_stock:
-		frappe.db.set_default("allow_negative_stock", 1)
+		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 	for d in frappe.db.sql("""select distinct item_code, warehouse from
 		(select item_code, warehouse from tabBin
@@ -29,8 +30,7 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False)
 				frappe.db.rollback()
 
 	if allow_negative_stock:
-		frappe.db.set_default("allow_negative_stock",
-			frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 	frappe.db.auto_commit_on_many_writes = 0
 
 def repost_stock(item_code, warehouse, allow_zero_rate=False, only_actual=False):
@@ -179,6 +179,8 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 		}
 
 		sle_doc = frappe.get_doc(sle_dict)
+		sle_doc.flags.ignore_validate = True
+		sle_doc.flags.ignore_links = True
 		sle_doc.insert()
 
 		args = sle_dict.copy()

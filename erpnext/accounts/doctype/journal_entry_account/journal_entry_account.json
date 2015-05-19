@@ -1,0 +1,215 @@
+{
+ "autoname": "hash", 
+ "creation": "2013-02-22 01:27:39", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "account", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Account", 
+   "oldfieldname": "account", 
+   "oldfieldtype": "Link", 
+   "options": "Account", 
+   "permlevel": 0, 
+   "print_width": "250px", 
+   "reqd": 1, 
+   "search_index": 1, 
+   "width": "250px"
+  }, 
+  {
+   "fieldname": "balance", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Account Balance", 
+   "no_copy": 1, 
+   "oldfieldname": "balance", 
+   "oldfieldtype": "Data", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "default": ":Company", 
+   "description": "If Income or Expense", 
+   "fieldname": "cost_center", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Cost Center", 
+   "oldfieldname": "cost_center", 
+   "oldfieldtype": "Link", 
+   "options": "Cost Center", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "print_width": "180px", 
+   "search_index": 0, 
+   "width": "180px"
+  }, 
+  {
+   "fieldname": "col_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "party_type", 
+   "fieldtype": "Link", 
+   "label": "Party Type", 
+   "options": "DocType", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "party", 
+   "fieldtype": "Dynamic Link", 
+   "label": "Party", 
+   "options": "party_type", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "party_balance", 
+   "fieldtype": "Currency", 
+   "label": "Party Balance", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "sec_break1", 
+   "fieldtype": "Section Break", 
+   "label": "Amount", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "debit", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Debit", 
+   "oldfieldname": "debit", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "col_break2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "credit", 
+   "fieldtype": "Currency", 
+   "in_list_view": 1, 
+   "label": "Credit", 
+   "oldfieldname": "credit", 
+   "oldfieldtype": "Currency", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "reference", 
+   "fieldtype": "Section Break", 
+   "label": "Reference", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "against_invoice", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "label": "Against Sales Invoice", 
+   "no_copy": 1, 
+   "oldfieldname": "against_invoice", 
+   "oldfieldtype": "Link", 
+   "options": "Sales Invoice", 
+   "permlevel": 0, 
+   "print_hide": 0, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "against_voucher", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "in_list_view": 1, 
+   "label": "Against Purchase Invoice", 
+   "no_copy": 1, 
+   "oldfieldname": "against_voucher", 
+   "oldfieldtype": "Link", 
+   "options": "Purchase Invoice", 
+   "permlevel": 0, 
+   "print_hide": 0, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "against_jv", 
+   "fieldtype": "Link", 
+   "in_filter": 1, 
+   "label": "Against Journal Entry", 
+   "no_copy": 1, 
+   "oldfieldname": "against_jv", 
+   "oldfieldtype": "Link", 
+   "options": "Journal Entry", 
+   "permlevel": 0, 
+   "print_hide": 0, 
+   "search_index": 1
+  }, 
+  {
+   "fieldname": "col_break3", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "against_sales_order", 
+   "fieldtype": "Link", 
+   "label": "Against Sales Order", 
+   "options": "Sales Order", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "against_purchase_order", 
+   "fieldtype": "Link", 
+   "label": "Against Purchase Order", 
+   "options": "Purchase Order", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "against_expense_claim", 
+   "fieldtype": "Link", 
+   "label": "Against Expense Claim", 
+   "options": "Expense Claim", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "is_advance", 
+   "fieldtype": "Select", 
+   "label": "Is Advance", 
+   "no_copy": 1, 
+   "oldfieldname": "is_advance", 
+   "oldfieldtype": "Select", 
+   "options": "No\nYes", 
+   "permlevel": 0, 
+   "print_hide": 1
+  }, 
+  {
+   "fieldname": "against_account", 
+   "fieldtype": "Text", 
+   "hidden": 1, 
+   "label": "Against Account", 
+   "no_copy": 1, 
+   "oldfieldname": "against_account", 
+   "oldfieldtype": "Text", 
+   "permlevel": 0, 
+   "print_hide": 1
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2015-02-19 01:07:00.388689", 
+ "modified_by": "Administrator", 
+ "module": "Accounts", 
+ "name": "Journal Entry Account", 
+ "owner": "Administrator", 
+ "permissions": []
+}

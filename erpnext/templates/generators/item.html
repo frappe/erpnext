@@ -3,25 +3,19 @@
 {% block header %}<h2>{{ title }}</h2>{% endblock %}
 
 {% block content %}
+{% from "erpnext/templates/includes/macros.html" import product_image %}
 <div class="item-content">
 	{% include 'templates/includes/product_search_box.html' %}
 	<div class="product-page-content" itemscope itemtype="http://schema.org/Product">
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-sm-5">
 				{% if slideshow %}
 					{% include "templates/includes/slideshow.html" %}
 				{% else %}
-					{% if website_image %}
-					<image itemprop="image" class="item-main-image"
-						src="{{ website_image }}" />
-					{% else %}
-					<div class="img-area">
-		{% include 'templates/includes/product_missing_image.html' %}
-					</div>
-					{% endif %}
+					{{ product_image(website_image, "product-full-image") }}
 				{% endif %}
 			</div>
-			<div class="col-md-6">
+			<div class="col-sm-7">
 				<!-- <h3 itemprop="name" style="margin-top: 0px;">{{ item_name }}</h3> -->
 				<div itemprop="description">
 				{{ web_long_description or description or _("No description given") }}
@@ -80,5 +74,3 @@
 	});
 </script>
 {% endblock %}
-
-{% block sidebar %}{% include "templates/includes/sidebar.html" %}{% endblock %}

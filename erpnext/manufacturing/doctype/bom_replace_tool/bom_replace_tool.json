@@ -2,7 +2,7 @@
  "allow_copy": 1, 
  "allow_email": 1, 
  "allow_print": 1, 
- "creation": "2012-12-06 12:10:10.000000", 
+ "creation": "2012-12-06 12:10:10", 
  "description": "Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate \"BOM Explosion Item\" table as per new BOM", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -43,7 +43,7 @@
  "idx": 1, 
  "in_create": 1, 
  "issingle": 1, 
- "modified": "2013-07-05 14:27:52.000000", 
+ "modified": "2015-02-05 05:11:35.233845", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Replace Tool", 
@@ -55,6 +55,7 @@
    "read": 1, 
    "report": 0, 
    "role": "Manufacturing Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

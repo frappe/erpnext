@@ -5,11 +5,11 @@
  "document_type": "", 
  "fields": [
   {
-   "fieldname": "journal_voucher", 
+   "fieldname": "journal_entry", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
-   "label": "Journal Voucher", 
-   "options": "Journal Voucher", 
+   "label": "Journal Entry", 
+   "options": "Journal Entry", 
    "permlevel": 0, 
    "read_only": 1, 
    "reqd": 0
@@ -68,7 +68,7 @@
    "fieldtype": "Select", 
    "in_list_view": 0, 
    "label": "Invoice Type", 
-   "options": "\nSales Invoice\nPurchase Invoice\nJournal Voucher", 
+   "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry", 
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 1
@@ -104,7 +104,7 @@
   }
  ], 
  "istable": 1, 
- "modified": "2014-10-16 17:40:54.040194", 
+ "modified": "2014-12-25 16:26:48.345281", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Reconciliation Payment", 

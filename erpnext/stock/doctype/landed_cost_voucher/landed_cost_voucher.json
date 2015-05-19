@@ -16,7 +16,7 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "landed_cost_purchase_receipts", 
+   "fieldname": "purchase_receipts", 
    "fieldtype": "Table", 
    "label": "Purchase Receipts", 
    "options": "Landed Cost Purchase Receipt", 
@@ -29,7 +29,7 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "landed_cost_items", 
+   "fieldname": "items", 
    "fieldtype": "Table", 
    "label": "Purchase Receipt Items", 
    "no_copy": 1, 
@@ -38,7 +38,7 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "landed_cost_taxes_and_charges", 
+   "fieldname": "taxes", 
    "fieldtype": "Table", 
    "label": "Taxes and Charges", 
    "options": "Landed Cost Taxes and Charges", 
@@ -102,7 +102,7 @@
  ], 
  "icon": "icon-usd", 
  "is_submittable": 1, 
- "modified": "2015-01-21 11:56:37.698326", 
+ "modified": "2015-02-11 16:21:49.528566", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Landed Cost Voucher", 
@@ -119,6 +119,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }

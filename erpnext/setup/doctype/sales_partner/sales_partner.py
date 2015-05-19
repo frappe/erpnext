@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -8,9 +8,12 @@ from frappe.website.website_generator import WebsiteGenerator
 from erpnext.utilities.address_and_contact import load_address_and_contact
 
 class SalesPartner(WebsiteGenerator):
-	page_title_field = "partner_name"
-	condition_field = "show_in_website"
-	template = "templates/generators/sales_partner.html"
+	website = frappe._dict(
+		page_title_field = "partner_name",
+		condition_field = "show_in_website",
+		template = "templates/generators/sales_partner.html"
+	)
+
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self, "sales_partner")

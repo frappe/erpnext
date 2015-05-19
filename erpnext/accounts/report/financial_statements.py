@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -184,11 +184,13 @@ def filter_accounts(accounts, depth=10):
 		parent_children_map.setdefault(d.parent_account or None, []).append(d)
 
 	filtered_accounts = []
+
 	def add_to_list(parent, level):
 		if level < depth:
 			children = parent_children_map.get(parent) or []
 			if parent == None:
 				sort_root_accounts(children)
+
 			for child in children:
 				child.indent = level
 				filtered_accounts.append(child)
@@ -217,6 +219,20 @@ def sort_root_accounts(roots):
 		if a.root_type == "Liability" and b.root_type == "Equity":
 			return -1
 		if a.root_type == "Income" and b.root_type == "Expense":
+			return -1
+		return 1
+
+	roots.sort(compare_roots)
+
+def sort_root_accounts(roots):
+	"""Sort root types as Asset, Liability, Equity, Income, Expense"""
+
+	def compare_roots(a, b):
+		if a.report_type != b.report_type and a.report_type == "Balance Sheet":
+			return -1
+		if a.root_type != b.root_type and a.root_type == "Asset":
+			return -1
+		if a.root_type == "Liability" and b.root_type == "Equity":
 			return -1
 		return 1
 

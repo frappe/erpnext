@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -7,17 +7,17 @@ import frappe, json
 from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.utils.file_manager import save_file
-from frappe.translate import set_default_language, get_dict, get_lang_dict, send_translations
-from frappe.country_info import get_country_info
+from frappe.translate import (set_default_language, get_dict,
+	get_lang_dict, send_translations, get_language_from_code)
+from frappe.geo.country_info import get_country_info
 from frappe.utils.nestedset import get_root_of
-from default_website import website_maker
+from .default_website import website_maker
 import install_fixtures
+from .welcome_emails import setup_welcome_emails
 
 @frappe.whitelist()
 def setup_account(args=None):
 	try:
-		frappe.clear_cache()
-
 		if frappe.db.sql("select name from tabCompany"):
 			frappe.throw(_("Setup Already Complete!!"))
 
@@ -74,8 +74,15 @@ def setup_account(args=None):
 		website_maker(args.company_name.strip(), args.company_tagline, args.name)
 		create_logo(args)
 
-		frappe.clear_cache()
 		frappe.db.commit()
+
+		login_as_first_user(args)
+
+		setup_welcome_emails()
+
+		frappe.db.commit()
+
+		frappe.clear_cache()
 
 	except:
 		if args:
@@ -94,12 +101,14 @@ def update_user_name(args):
 	if args.get("email"):
 		args['name'] = args.get("email")
 		frappe.flags.mute_emails = True
-		frappe.get_doc({
+		doc = frappe.get_doc({
 			"doctype":"User",
 			"email": args.get("email"),
 			"first_name": args.get("first_name"),
 			"last_name": args.get("last_name")
-		}).insert()
+		})
+		doc.flags.no_welcome_mail = True
+		doc.insert()
 		frappe.flags.mute_emails = False
 		from frappe.auth import _update_password
 		_update_password(args.get("email"), args.get("password"))
@@ -142,6 +151,8 @@ def create_fiscal_year_and_company(args):
 		'chart_of_accounts': args.get(('chart_of_accounts')),
 	}).insert()
 
+	# Bank Account
+
 	args["curr_fiscal_year"] = curr_fiscal_year
 
 def create_price_lists(args):
@@ -153,7 +164,7 @@ def create_price_lists(args):
 			"buying": 1 if pl_type == "Buying" else 0,
 			"selling": 1 if pl_type == "Selling" else 0,
 			"currency": args["currency"],
-			"valid_for_territories": [{
+			"territories": [{
 				"territory": get_root_of("Territory")
 			}]
 		}).insert()
@@ -188,7 +199,7 @@ def set_defaults(args):
 		"float_precision": 3,
 		'date_format': frappe.db.get_value("Country", args.get("country"), "date_format"),
 		'number_format': number_format,
-		'enable_scheduler': 1
+		'enable_scheduler': 1 if not frappe.flags.in_test else 0
 	})
 	system_settings.save()
 
@@ -227,10 +238,12 @@ def set_defaults(args):
 	hr_settings.save()
 
 def create_feed_and_todo():
-	"""update activty feed and create todo for creation of item, customer, vendor"""
-	from erpnext.home import make_feed
-	make_feed('Comment', 'ToDo', '', frappe.session['user'],
-		'ERNext Setup Complete!', '#6B24B3')
+	"""update Activity feed and create todo for creation of item, customer, vendor"""
+	frappe.get_doc({
+		"doctype": "Feed",
+		"feed_type": "Comment",
+		"subject": "ERPNext Setup Complete!"
+	}).insert(ignore_permissions=True)
 
 def create_email_digest():
 	from frappe.utils.user import get_system_managers
@@ -249,9 +262,9 @@ def create_email_digest():
 				"recipient_list": "\n".join(system_managers)
 			})
 
-			for fieldname in edigest.meta.get("fields", {"fieldtype": "Check"}):
-				if fieldname != "scheduler_errors":
-					edigest.set(fieldname, 1)
+			for df in edigest.meta.get("fields", {"fieldtype": "Check"}):
+				if df.fieldname != "scheduler_errors":
+					edigest.set(df.fieldname, 1)
 
 			edigest.insert()
 
@@ -283,16 +296,19 @@ def create_taxes(args):
 			tax_rate = (args.get("tax_rate_" + str(i)) or "").replace("%", "")
 
 			try:
-				frappe.get_doc({
-					"doctype":"Account",
-					"company": args.get("company_name").strip(),
-					"parent_account": _("Duties and Taxes") + " - " + args.get("company_abbr"),
-					"account_name": args.get("tax_" + str(i)),
-					"group_or_ledger": "Ledger",
-					"report_type": "Balance Sheet",
-					"account_type": "Tax",
-					"tax_rate": flt(tax_rate) if tax_rate else None
-				}).insert()
+				tax_group = frappe.db.get_value("Account", {"company": args.get("company_name"),
+					"is_group": 1, "account_type": "Tax", "root_type": "Liability"})
+				if tax_group:
+					frappe.get_doc({
+						"doctype":"Account",
+						"company": args.get("company_name").strip(),
+						"parent_account": tax_group,
+						"account_name": args.get("tax_" + str(i)),
+						"is_group": 0,
+						"report_type": "Balance Sheet",
+						"account_type": "Tax",
+						"tax_rate": flt(tax_rate) if tax_rate else None
+					}).insert()
 			except frappe.NameError, e:
 				if e.args[2][0]==1062:
 					pass
@@ -309,73 +325,82 @@ def create_items(args):
 			is_stock_item = item_group!=_("Services")
 			default_warehouse = ""
 			if is_stock_item:
-				if is_sales_item:
-					default_warehouse = _("Finished Goods") + " - " + args.get("company_abbr")
-				else:
-					default_warehouse = _("Stores") + " - " + args.get("company_abbr")
+				default_warehouse = frappe.db.get_value("Warehouse", filters={
+					"warehouse_name": _("Finished Goods") if is_sales_item else _("Stores"),
+					"company": args.get("company_name").strip()
+				})
 
-			frappe.get_doc({
-				"doctype":"Item",
-				"item_code": item,
-				"item_name": item,
-				"description": item,
-				"is_sales_item": "Yes" if is_sales_item else "No",
-				"is_purchase_item": "Yes" if is_purchase_item else "No",
-				"show_in_website": 1,
-				"is_stock_item": is_stock_item and "Yes" or "No",
-				"item_group": item_group,
-				"stock_uom": args.get("item_uom_" + str(i)),
-				"default_warehouse": default_warehouse
-			}).insert()
+			try:
+				frappe.get_doc({
+					"doctype":"Item",
+					"item_code": item,
+					"item_name": item,
+					"description": item,
+					"is_sales_item": "Yes" if is_sales_item else "No",
+					"is_purchase_item": "Yes" if is_purchase_item else "No",
+					"show_in_website": 1,
+					"is_stock_item": is_stock_item and "Yes" or "No",
+					"item_group": item_group,
+					"stock_uom": args.get("item_uom_" + str(i)),
+					"default_warehouse": default_warehouse
+				}).insert()
 
-			if args.get("item_img_" + str(i)):
-				item_image = args.get("item_img_" + str(i)).split(",")
-				if len(item_image)==3:
-					filename, filetype, content = item_image
-					fileurl = save_file(filename, content, "Item", item, decode=True).file_url
-					frappe.db.set_value("Item", item, "image", fileurl)
+				if args.get("item_img_" + str(i)):
+					item_image = args.get("item_img_" + str(i)).split(",")
+					if len(item_image)==3:
+						filename, filetype, content = item_image
+						fileurl = save_file(filename, content, "Item", item, decode=True).file_url
+						frappe.db.set_value("Item", item, "image", fileurl)
+			except frappe.NameError:
+				pass
 
 def create_customers(args):
 	for i in xrange(1,6):
 		customer = args.get("customer_" + str(i))
 		if customer:
-			frappe.get_doc({
-				"doctype":"Customer",
-				"customer_name": customer,
-				"customer_type": "Company",
-				"customer_group": _("Commercial"),
-				"territory": args.get("country"),
-				"company": args.get("company_name").strip()
-			}).insert()
-
-			if args.get("customer_contact_" + str(i)):
-				contact = args.get("customer_contact_" + str(i)).split(" ")
+			try:
 				frappe.get_doc({
-					"doctype":"Contact",
-					"customer": customer,
-					"first_name":contact[0],
-					"last_name": len(contact) > 1 and contact[1] or ""
+					"doctype":"Customer",
+					"customer_name": customer,
+					"customer_type": "Company",
+					"customer_group": _("Commercial"),
+					"territory": args.get("country"),
+					"company": args.get("company_name").strip()
 				}).insert()
+
+				if args.get("customer_contact_" + str(i)):
+					contact = args.get("customer_contact_" + str(i)).split(" ")
+					frappe.get_doc({
+						"doctype":"Contact",
+						"customer": customer,
+						"first_name":contact[0],
+						"last_name": len(contact) > 1 and contact[1] or ""
+					}).insert()
+			except frappe.NameError:
+				pass
 
 def create_suppliers(args):
 	for i in xrange(1,6):
 		supplier = args.get("supplier_" + str(i))
 		if supplier:
-			frappe.get_doc({
-				"doctype":"Supplier",
-				"supplier_name": supplier,
-				"supplier_type": _("Local"),
-				"company": args.get("company_name").strip()
-			}).insert()
-
-			if args.get("supplier_contact_" + str(i)):
-				contact = args.get("supplier_contact_" + str(i)).split(" ")
+			try:
 				frappe.get_doc({
-					"doctype":"Contact",
-					"supplier": supplier,
-					"first_name":contact[0],
-					"last_name": len(contact) > 1 and contact[1] or ""
+					"doctype":"Supplier",
+					"supplier_name": supplier,
+					"supplier_type": _("Local"),
+					"company": args.get("company_name").strip()
 				}).insert()
+
+				if args.get("supplier_contact_" + str(i)):
+					contact = args.get("supplier_contact_" + str(i)).split(" ")
+					frappe.get_doc({
+						"doctype":"Contact",
+						"supplier": supplier,
+						"first_name":contact[0],
+						"last_name": len(contact) > 1 and contact[1] or ""
+					}).insert()
+			except frappe.NameError:
+				pass
 
 
 def create_letter_head(args):
@@ -399,8 +424,8 @@ def create_logo(args):
 			filename, filetype, content = attach_logo
 			fileurl = save_file(filename, content, "Website Settings", "Website Settings",
 				decode=True).file_url
-			frappe.db.set_value("Website Settings", "Website Settings", "banner_html",
-				"<img src='%s' style='max-width: 100%%;'>" % fileurl)
+			frappe.db.set_value("Website Settings", "Website Settings", "brand_html",
+				"<img src='{0}' style='max-width: 40px; max-height: 25px;'> {1}".format(fileurl, args.get("company_name").strip()))
 
 def add_all_roles_to(name):
 	user = frappe.get_doc("User", name)
@@ -424,16 +449,22 @@ def create_territories():
 				"is_group": "No"
 			}).insert()
 
+def login_as_first_user(args):
+	if args.get("email") and hasattr(frappe.local, "login_manager"):
+		frappe.local.login_manager.login_as(args.get("email"))
+
 @frappe.whitelist()
 def load_messages(language):
 	frappe.clear_cache()
-	lang = get_lang_dict()[language]
-	frappe.local.lang = lang
+	set_default_language(language)
 	m = get_dict("page", "setup-wizard")
 	m.update(get_dict("boot"))
 	send_translations(m)
-	return lang
+	return frappe.local.lang
 
 @frappe.whitelist()
 def load_languages():
-	return sorted(get_lang_dict().keys())
+	return {
+		"default_language": get_language_from_code(frappe.local.lang),
+		"languages": sorted(get_lang_dict().keys())
+	}

@@ -1,0 +1,94 @@
+[
+ {
+  "cheque_date": "2013-03-14",
+  "cheque_no": "33",
+  "company": "_Test Company",
+  "doctype": "Journal Entry",
+  "accounts": [
+   {
+    "account": "_Test Receivable - _TC",
+	"party_type": "Customer",
+	"party": "_Test Customer",
+    "credit": 400.0,
+    "debit": 0.0,
+    "doctype": "Journal Entry Account",
+    "parentfield": "accounts"
+   },
+   {
+    "account": "_Test Account Bank Account - _TC",
+    "credit": 0.0,
+    "debit": 400.0,
+    "doctype": "Journal Entry Account",
+    "parentfield": "accounts"
+   }
+  ],
+  "fiscal_year": "_Test Fiscal Year 2013",
+  "naming_series": "_T-Journal Entry-",
+  "posting_date": "2013-02-14",
+  "user_remark": "test",
+  "voucher_type": "Bank Entry"
+ },
+ 
+ 
+ {
+  "cheque_date": "2013-02-14",
+  "cheque_no": "33",
+  "company": "_Test Company",
+  "doctype": "Journal Entry",
+  "accounts": [
+   {
+    "account": "_Test Payable - _TC",
+	"party_type": "Supplier",
+	"party": "_Test Supplier",
+    "credit": 0.0,
+    "debit": 400.0,
+    "doctype": "Journal Entry Account",
+    "parentfield": "accounts"
+   },
+   {
+    "account": "_Test Account Bank Account - _TC",
+    "credit": 400.0,
+    "debit": 0.0,
+    "doctype": "Journal Entry Account",
+    "parentfield": "accounts"
+   }
+  ],
+  "fiscal_year": "_Test Fiscal Year 2013",
+  "naming_series": "_T-Journal Entry-",
+  "posting_date": "2013-02-14",
+  "user_remark": "test",
+  "voucher_type": "Bank Entry"
+ },
+ 
+ 
+ {
+  "cheque_date": "2013-02-14",
+  "cheque_no": "33",
+  "company": "_Test Company",
+  "doctype": "Journal Entry",
+  "accounts": [
+   {
+    "account": "_Test Receivable - _TC",
+	"party_type": "Customer",
+	"party": "_Test Customer",
+    "credit": 0.0,
+    "debit": 400.0,
+    "doctype": "Journal Entry Account",
+    "parentfield": "accounts"
+   },
+   {
+    "account": "Sales - _TC",
+    "cost_center": "_Test Cost Center - _TC",
+    "credit": 400.0,
+    "debit": 0.0,
+    "doctype": "Journal Entry Account",
+    "parentfield": "accounts"
+   }
+  ],
+  "fiscal_year": "_Test Fiscal Year 2013",
+  "naming_series": "_T-Journal Entry-",
+  "posting_date": "2013-02-14",
+  "user_remark": "test",
+  "voucher_type": "Bank Entry"
+ }
+]

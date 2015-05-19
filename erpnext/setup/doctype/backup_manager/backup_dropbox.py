@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 # SETUP:
@@ -15,6 +15,8 @@ import os
 import frappe
 from frappe.utils import get_request_site_address, cstr
 from frappe import _
+
+ignore_list = [".DS_Store"]
 
 @frappe.whitelist()
 def get_dropbox_authorize_url():
@@ -35,12 +37,12 @@ def get_dropbox_authorize_url():
 def dropbox_callback(oauth_token=None, not_approved=False):
 	from dropbox import client
 	if not not_approved:
-		if frappe.db.get_value("Backup Manager", None, "dropbox_access_key")==oauth_token:		
+		if frappe.db.get_value("Backup Manager", None, "dropbox_access_key")==oauth_token:
 			allowed = 1
 			message = "Dropbox access allowed."
 
 			sess = get_dropbox_session()
-			sess.set_request_token(frappe.db.get_value("Backup Manager", None, "dropbox_access_key"), 
+			sess.set_request_token(frappe.db.get_value("Backup Manager", None, "dropbox_access_key"),
 				frappe.db.get_value("Backup Manager", None, "dropbox_access_secret"))
 			access_token = sess.obtain_access_token()
 			frappe.db.set_value("Backup Manager", "Backup Manager", "dropbox_access_key", access_token.key)
@@ -61,10 +63,10 @@ def dropbox_callback(oauth_token=None, not_approved=False):
 
 	frappe.local.message_title = "Dropbox Approval"
 	frappe.local.message = "<h3>%s</h3><p>Please close this window.</p>" % message
-	
+
 	if allowed:
 		frappe.local.message_success = True
-	
+
 	frappe.db.commit()
 	frappe.response['type'] = 'page'
 	frappe.response['page_name'] = 'message.html'
@@ -80,7 +82,7 @@ def backup_to_dropbox():
 
 	sess.set_token(frappe.db.get_value("Backup Manager", None, "dropbox_access_key"),
 		frappe.db.get_value("Backup Manager", None, "dropbox_access_secret"))
-	
+
 	dropbox_client = client.DropboxClient(sess)
 
 	# upload database
@@ -90,13 +92,16 @@ def backup_to_dropbox():
 
 	frappe.db.close()
 	response = dropbox_client.metadata("/files")
-	
+
 	# upload files to files folder
 	did_not_upload = []
 	error_log = []
 	path = get_files_path()
 	for filename in os.listdir(path):
 		filename = cstr(filename)
+
+		if filename in ignore_list:
+			continue
 
 		found = False
 		filepath = os.path.join(path, filename)
@@ -110,7 +115,7 @@ def backup_to_dropbox():
 			except Exception:
 				did_not_upload.append(filename)
 				error_log.append(frappe.get_traceback())
-	
+
 	frappe.connect()
 	return did_not_upload, list(set(error_log))
 
@@ -119,7 +124,7 @@ def get_dropbox_session():
 		from dropbox import session
 	except:
 		frappe.msgprint(_("Please install dropbox python module"), raise_exception=1)
-	
+
 	if not (frappe.conf.dropbox_access_key or frappe.conf.dropbox_secret_key):
 		frappe.throw(_("Please set Dropbox access keys in your site config"))
 
@@ -129,11 +134,11 @@ def get_dropbox_session():
 def upload_file_to_dropbox(filename, folder, dropbox_client):
 	from dropbox import rest
 	size = os.stat(filename).st_size
-	
+
 	with open(filename, 'r') as f:
 		# if max packet size reached, use chunked uploader
 		max_packet_size = 4194304
-	
+
 		if size > max_packet_size:
 			uploader = dropbox_client.get_chunked_uploader(f, size)
 			while uploader.offset < size:

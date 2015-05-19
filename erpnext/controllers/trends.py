@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -31,7 +31,10 @@ def validate_filters(filters):
 	for f in ["Fiscal Year", "Based On", "Period", "Company"]:
 		if not filters.get(f.lower().replace(" ", "_")):
 			frappe.throw(_("{0} is mandatory").format(f))
-
+			
+	if not frappe.db.exists("Fiscal Year", filters.get("fiscal_year")):
+		frappe.throw(_("Fiscal Year: {0} does not exists").format(filters.get("fiscal_year")))
+		
 	if filters.get("based_on") == filters.get("group_by"):
 		frappe.throw(_("'Based On' and 'Group By' can not be same"))
 
@@ -132,9 +135,9 @@ def period_wise_columns_query(filters, trans):
 	else:
 		pwc = [_(filters.get("fiscal_year")) + " ("+_("Qty") + "):Float:120",
 			_(filters.get("fiscal_year")) + " ("+ _("Amt") + "):Currency:120"]
-		query_details = " SUM(t2.qty), SUM(t2.base_amount),"
+		query_details = " SUM(t2.qty), SUM(t2.base_net_amount),"
 
-	query_details += 'SUM(t2.qty), SUM(t2.base_amount)'
+	query_details += 'SUM(t2.qty), SUM(t2.base_net_amount)'
 	return pwc, query_details
 
 def get_period_wise_columns(bet_dates, period, pwc):
@@ -147,7 +150,7 @@ def get_period_wise_columns(bet_dates, period, pwc):
 
 def get_period_wise_query(bet_dates, trans_date, query_details):
 	query_details += """SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.qty, NULL)),
-					SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.base_amount, NULL)),
+					SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.base_net_amount, NULL)),
 				""" % {"trans_date": trans_date, "sd": bet_dates[0],"ed": bet_dates[1]}
 	return query_details
 

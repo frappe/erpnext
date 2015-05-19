@@ -1,9 +1,9 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, nowdate
 from frappe import _
 
 from frappe.model.document import Document
@@ -75,7 +75,6 @@ class SalaryManager(Document):
 	def create_sal_slip(self):
 		"""
 			Creates salary slip for selected employees if already not created
-
 		"""
 
 		emp_list = self.get_emp_list()
@@ -99,9 +98,9 @@ class SalaryManager(Document):
 
 
 	def create_log(self, ss_list):
-		log = "<b>No employee for the above selected criteria OR salary slip already created</b>"
+		log = "<p>No employee for the above selected criteria OR salary slip already created</p>"
 		if ss_list:
-			log = "<b>Created Salary Slip has been created: </b>\
+			log = "<b>Salary Slip Created For</b>\
 			<br><br>%s" % '<br>'.join(ss_list)
 		return log
 
@@ -149,7 +148,7 @@ class SalaryManager(Document):
 		if submitted_ss:
 			mail_sent_msg = self.send_email and " (Mail has been sent to the employee)" or ""
 			log = """
-			<b>Submitted Salary Slips%s:</b>\
+			<b>Salary Slips Submitted %s:</b>\
 			<br><br> %s <br><br>
 			""" % (mail_sent_msg, '<br>'.join(submitted_ss))
 
@@ -179,17 +178,27 @@ class SalaryManager(Document):
 		return flt(tot[0][0])
 
 
-	def get_acc_details(self):
-		"""
-			get default bank account,default salary acount from company
-		"""
-		amt = self.get_total_salary()
+	def make_journal_entry(self, salary_account = None):
+		amount = self.get_total_salary()
 		default_bank_account = frappe.db.get_value("Company", self.company,
 			"default_bank_account")
-		if not default_bank_account:
-			frappe.msgprint(_("You can set Default Bank Account in Company master"))
 
-		return {
-			'default_bank_account' : default_bank_account,
-			'amount' : amt
-		}
+		journal_entry = frappe.new_doc('Journal Entry')
+		journal_entry.voucher_type = 'Bank Entry'
+		journal_entry.user_remark = _('Payment of salary for the month {0} and year {1}').format(self.month,
+			self.fiscal_year)
+		journal_entry.fiscal_year = self.fiscal_year
+		journal_entry.company = self.company
+		journal_entry.posting_date = nowdate()
+		journal_entry.set("accounts", [
+			{
+				"account": salary_account,
+				"debit": amount
+			},
+			{
+				"account": default_bank_account,
+				"credit": amount
+			},
+		])
+
+		return journal_entry.as_dict()

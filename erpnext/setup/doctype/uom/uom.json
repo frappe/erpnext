@@ -9,7 +9,7 @@
   {
    "fieldname": "uom_name", 
    "fieldtype": "Data", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "UOM Name", 
    "oldfieldname": "uom_name", 
    "oldfieldtype": "Data", 
@@ -20,14 +20,14 @@
    "description": "Check this to disallow fractions. (for Nos)", 
    "fieldname": "must_be_whole_number", 
    "fieldtype": "Check", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Must be Whole Number", 
    "permlevel": 0
   }
  ], 
  "icon": "icon-compass", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:22.050899", 
+ "modified": "2015-02-05 05:11:48.493718", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "UOM", 
@@ -43,6 +43,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

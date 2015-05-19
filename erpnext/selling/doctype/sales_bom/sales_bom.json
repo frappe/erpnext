@@ -9,7 +9,7 @@
   {
    "fieldname": "basic_section", 
    "fieldtype": "Section Break", 
-   "label": "Sales BOM Item", 
+   "label": "", 
    "permlevel": 0
   }, 
   {
@@ -29,13 +29,13 @@
    "description": "List items that form the package.", 
    "fieldname": "item_section", 
    "fieldtype": "Section Break", 
-   "label": "Package Items", 
+   "label": "", 
    "permlevel": 0
   }, 
   {
-   "fieldname": "sales_bom_items", 
+   "fieldname": "items", 
    "fieldtype": "Table", 
-   "label": "Sales BOM Items", 
+   "label": "Items", 
    "oldfieldname": "sales_bom_items", 
    "oldfieldtype": "Table", 
    "options": "Sales BOM Item", 
@@ -46,7 +46,7 @@
  "icon": "icon-sitemap", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2014-05-27 03:49:17.656569", 
+ "modified": "2015-02-20 05:05:03.719573", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales BOM", 
@@ -62,6 +62,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -90,6 +91,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

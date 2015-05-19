@@ -142,7 +142,7 @@ def notify_errors(doc, doctype, party, owner):
 
 def assign_task_to_owner(doc, doctype, msg, users):
 	for d in users:
-		from frappe.widgets.form import assign_to
+		from frappe.desk.form import assign_to
 		args = {
 			'assign_to' 	:	d,
 			'doctype'		:	doctype,

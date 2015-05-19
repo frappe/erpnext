@@ -1,18 +1,29 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 // For license information, please see license.txt
 
-cur_frm.cscript = {
-	refresh: function(doc) {
-		cur_frm.cscript.make_listing(doc);
-	},
-	make_listing: function(doc) {
-		cur_frm.communication_view = new frappe.views.CommunicationList({
-			list: frappe.get_list("Communication", {"parent": doc.name, "parenttype": "Job Applicant"}),
-			parent: cur_frm.fields_dict['thread_html'].wrapper,
-			doc: doc,
-			recipients: doc.email_id
-		})
-	},
-}
+// for communication
+cur_frm.email_field = "email_id";
+
+frappe.ui.form.on("Job Applicant", {
+	refresh: function(frm) {
+		if (!frm.doc.__islocal) {
+			if (frm.doc.__onload && frm.doc.__onload.offer_letter) {
+				frm.add_custom_button(__("View Offer Letter"), function() {
+					frappe.set_route("Form", "Offer Letter", frm.doc.__onload.offer_letter);
+				});
+			} else {
+				frm.add_custom_button(__("Make Offer Letter"), function() {
+					frappe.route_options = {
+						"job_applicant": frm.doc.name,
+						"applicant_name": frm.doc.applicant_name,
+						"designation": frm.doc.job_opening,
+					};
+					new_doc("Offer Letter");
+				});
+			}
+		}
+		
+	}
+});

@@ -328,7 +328,7 @@
  ], 
  "icon": "icon-envelope", 
  "idx": 1, 
- "modified": "2014-05-20 14:02:36.762220", 
+ "modified": "2015-02-05 05:11:38.024529", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Email Digest", 
@@ -344,6 +344,7 @@
    "read": 1, 
    "report": 1, 
    "role": "System Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

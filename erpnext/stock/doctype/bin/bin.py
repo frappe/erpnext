@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -33,11 +33,14 @@ class Bin(Document):
 				args["posting_date"] = nowdate()
 
 			# update valuation and qty after transaction for post dated entry
+			if args.get("is_cancelled") == "Yes" and via_landed_cost_voucher:
+				return
 			update_entries_after({
 				"item_code": self.item_code,
 				"warehouse": self.warehouse,
 				"posting_date": args.get("posting_date"),
-				"posting_time": args.get("posting_time")
+				"posting_time": args.get("posting_time"),
+				"voucher_no": args.get("voucher_no")
 			}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
 
 	def update_qty(self, args):

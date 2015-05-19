@@ -1,5 +1,6 @@
 {
  "allow_import": 1, 
+ "allow_rename": 1, 
  "autoname": "field:leave_type_name", 
  "creation": "2013-02-21 09:55:58", 
  "docstatus": 0, 
@@ -50,7 +51,7 @@
   {
    "fieldname": "is_lwp", 
    "fieldtype": "Check", 
-   "label": "Is LWP", 
+   "label": "Is Leave Without Pay", 
    "permlevel": 0
   }, 
   {
@@ -62,7 +63,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:13.297832", 
+ "modified": "2015-05-08 05:15:24.194053", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Type", 
@@ -78,6 +79,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -90,6 +92,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

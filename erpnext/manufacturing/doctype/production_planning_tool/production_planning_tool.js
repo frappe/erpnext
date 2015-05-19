@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
@@ -13,14 +13,14 @@ cur_frm.cscript.refresh = function(doc) {
 cur_frm.cscript.sales_order = function(doc,cdt,cdn) {
 	var d = locals[cdt][cdn];
 	if (d.sales_order) {
-		return get_server_fields('get_so_details', d.sales_order, 'pp_so_details', doc, cdt, cdn, 1);
+		return get_server_fields('get_so_details', d.sales_order, 'sales_orders', doc, cdt, cdn, 1);
 	}
 }
 
 cur_frm.cscript.item_code = function(doc,cdt,cdn) {
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
-		return get_server_fields('get_item_details', d.item_code, 'pp_details', doc, cdt, cdn, 1);
+		return get_server_fields('get_item_details', d.item_code, 'items', doc, cdt, cdn, 1);
 	}
 }
 
@@ -39,7 +39,7 @@ cur_frm.cscript.download_materials_required = function(doc, cdt, cdn) {
 }
 
 
-cur_frm.fields_dict['pp_so_details'].grid.get_field('sales_order').get_query = function(doc) {
+cur_frm.fields_dict['sales_orders'].grid.get_field('sales_order').get_query = function(doc) {
 	var args = { "docstatus": 1 };
 	if(doc.customer) {
 		args["customer"] = doc.customer;
@@ -48,13 +48,13 @@ cur_frm.fields_dict['pp_so_details'].grid.get_field('sales_order').get_query = f
  	return { filters: args }
 }
 
-cur_frm.fields_dict['pp_details'].grid.get_field('item_code').get_query = function(doc) {
+cur_frm.fields_dict['items'].grid.get_field('item_code').get_query = function(doc) {
  	return erpnext.queries.item({
 		'is_pro_applicable': 'Yes'
 	});
 }
 
-cur_frm.fields_dict['pp_details'].grid.get_field('bom_no').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field('bom_no').get_query = function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
 		return {
@@ -70,5 +70,5 @@ cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
 	}
 }
 
-cur_frm.fields_dict.pp_so_details.grid.get_field("customer").get_query =
+cur_frm.fields_dict.sales_orders.grid.get_field("customer").get_query =
 	cur_frm.fields_dict.customer.get_query;

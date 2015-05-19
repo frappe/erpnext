@@ -75,7 +75,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Purchase Taxes and Charges Master",
+					"name": "Purchase Taxes and Charges Template",
 					"description": _("Tax template for buying transactions.")
 				},
 				{

@@ -1,18 +1,21 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 
 import frappe
-from frappe import _
+from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
-from frappe.utils import add_days
+from frappe.utils import add_days, getdate, formatdate, flt
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.utilities.doctype.contact.contact import get_contact_details
 
 @frappe.whitelist()
 def get_party_details(party=None, account=None, party_type="Customer", company=None,
 	posting_date=None, price_list=None, currency=None, doctype=None):
+
+	if not party:
+		return {}
 
 	return _get_party_details(party, account, party_type,
 		company, posting_date, price_list, currency, doctype)
@@ -116,70 +119,78 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 
 	if party:
 		account = get_party_account(company, party, party_type)
-	elif account:
-		party = frappe.db.get_value('Account', account, 'master_name')
 
 	account_fieldname = "debit_to" if party_type=="Customer" else "credit_to"
 
 	out = {
 		party_type.lower(): party,
 		account_fieldname : account,
-		"due_date": get_due_date(posting_date, party, party_type, account, company)
+		"due_date": get_due_date(posting_date, party_type, party, company)
 	}
 	return out
 
+@frappe.whitelist()
 def get_party_account(company, party, party_type):
+	"""Returns the account for the given `party`.
+		Will first search in party (Customer / Supplier) record, if not found,
+		will search in group (Customer Group / Supplier Type),
+		finally will return default."""
 	if not company:
 		frappe.throw(_("Please select company first."))
 
 	if party:
-		acc_head = frappe.db.get_value("Account", {"master_name":party,
-			"master_type": party_type, "company": company})
+		account = frappe.db.get_value("Party Account",
+			{"parenttype": party_type, "parent": party, "company": company}, "account")
 
-		if not acc_head:
-			create_party_account(party, party_type, company)
+		if not account:
+			party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
+			group = frappe.db.get_value(party_type, party, scrub(party_group_doctype))
+			account = frappe.db.get_value("Party Account",
+				{"parenttype": party_group_doctype, "parent": group, "company": company}, "account")
 
-		return acc_head
+		if not account:
+			default_account_name = "default_receivable_account" if party_type=="Customer" else "default_payable_account"
+			account = frappe.db.get_value("Company", company, default_account_name)
 
-def get_due_date(posting_date, party, party_type, account, company):
+		return account
+
+def get_due_date(posting_date, party_type, party, company):
 	"""Set Due Date = Posting Date + Credit Days"""
 	due_date = None
 	if posting_date:
-		credit_days = 0
-		if account:
-			credit_days = frappe.db.get_value("Account", account, "credit_days")
-		if party and not credit_days:
-			credit_days = frappe.db.get_value(party_type, party, "credit_days")
-		if company and not credit_days:
-			credit_days = frappe.db.get_value("Company", company, "credit_days")
-
+		credit_days = get_credit_days(party_type, party, company)
 		due_date = add_days(posting_date, credit_days) if credit_days else posting_date
 
 	return due_date
 
-def create_party_account(party, party_type, company):
-	if not company:
-		frappe.throw(_("Company is required"))
+def get_credit_days(party_type, party, company):
+	if not party:
+		return None
 
-	company_details = frappe.db.get_value("Company", company,
-		["abbr", "receivables_group", "payables_group"], as_dict=True)
-	if not frappe.db.exists("Account", (party.strip() + " - " + company_details.abbr)):
-		parent_account = company_details.receivables_group \
-			if party_type=="Customer" else company_details.payables_group
-		if not parent_account:
-			frappe.throw(_("Please enter Account Receivable/Payable group in company master"))
+	party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
+	credit_days, party_group = frappe.db.get_value(party_type, party, ["credit_days", frappe.scrub(party_group_doctype)])
 
-		# create
-		account = frappe.get_doc({
-			"doctype": "Account",
-			'account_name': party,
-			'parent_account': parent_account,
-			'group_or_ledger':'Ledger',
-			'company': company,
-			'master_type': party_type,
-			'master_name': party,
-			"freeze_account": "No",
-			"report_type": "Balance Sheet"
-		}).insert(ignore_permissions=True)
+	if not credit_days:
+		credit_days = frappe.db.get_value(party_group_doctype, party_group, "credit_days") or \
+			frappe.db.get_value("Company", company, "credit_days")
 
-		frappe.msgprint(_("Account Created: {0}").format(account.name))
+	return credit_days
+
+def validate_due_date(posting_date, due_date, party_type, party, company):
+	credit_days = get_credit_days(party_type, party, company)
+
+	posting_date, due_date = getdate(posting_date), getdate(due_date)
+	diff = (due_date - posting_date).days
+
+	if diff < 0:
+		frappe.throw(_("Due Date cannot be before Posting Date"))
+	elif credit_days is not None and diff > flt(credit_days):
+		is_credit_controller = frappe.db.get_value("Accounts Settings", None,
+			"credit_controller") in frappe.get_roles()
+
+		if is_credit_controller:
+			msgprint(_("Note: Due / Reference Date exceeds allowed customer credit days by {0} day(s)")
+				.format(diff - flt(credit_days)))
+		else:
+			max_due_date = formatdate(add_days(posting_date, credit_days))
+			frappe.throw(_("Due / Reference Date cannot be after {0}").format(max_due_date))

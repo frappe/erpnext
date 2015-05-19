@@ -1,10 +1,12 @@
 [
  {
-  "project_name": "_Test Project", 
-  "status": "Open"
- }, 
- {
-  "project_name": "_Test Project 1", 
-  "status": "Open"
+  "project_name": "_Test Project",
+  "status": "Open",
+  "tasks":[ 
+   {
+	  "title": "_Test Task",
+	  "status": "Open"
+   }
+  ]
  }
 ]

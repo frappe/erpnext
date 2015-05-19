@@ -7,12 +7,12 @@
   "currency": "INR", 
   "doctype": "Purchase Order", 
   "fiscal_year": "_Test Fiscal Year 2013", 
+  "base_grand_total": 5000.0, 
   "grand_total": 5000.0, 
-  "grand_total_import": 5000.0, 
   "is_subcontracted": "Yes", 
   "naming_series": "_T-Purchase Order-", 
-  "net_total": 5000.0, 
-  "po_details": [
+  "base_net_total": 5000.0, 
+  "items": [
    {
     "base_amount": 5000.0, 
     "conversion_factor": 1.0, 
@@ -20,7 +20,7 @@
     "doctype": "Purchase Order Item", 
     "item_code": "_Test FG Item", 
     "item_name": "_Test FG Item", 
-    "parentfield": "po_details", 
+    "parentfield": "items", 
     "qty": 10.0, 
     "rate": 500.0, 
     "schedule_date": "2013-03-01", 
@@ -41,12 +41,12 @@
   "currency": "INR", 
   "doctype": "Purchase Order", 
   "fiscal_year": "_Test Fiscal Year 2013", 
+  "base_grand_total": 5000.0, 
   "grand_total": 5000.0, 
-  "grand_total_import": 5000.0, 
   "is_subcontracted": "No", 
   "naming_series": "_T-Purchase Order-", 
-  "net_total": 5000.0, 
-  "po_details": [
+  "base_net_total": 5000.0, 
+  "items": [
    {
     "base_amount": 5000.0, 
     "conversion_factor": 1.0, 
@@ -54,7 +54,7 @@
     "doctype": "Purchase Order Item", 
     "item_code": "_Test Item", 
     "item_name": "_Test Item", 
-    "parentfield": "po_details", 
+    "parentfield": "items", 
     "qty": 10.0, 
     "rate": 500.0, 
     "schedule_date": "2013-03-01", 

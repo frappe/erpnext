@@ -1,5 +1,16 @@
 frappe.listview_settings['Item'] = {
-	add_fields: ["`tabItem`.`item_name`", "`tabItem`.`stock_uom`", "`tabItem`.`item_group`", "`tabItem`.`image`",
-		"`tabItem`.`is_stock_item`", "`tabItem`.`is_sales_item`", "`tabItem`.`is_purchase_item`",
-		"`tabItem`.`is_manufactured_item`", "`tabItem`.`show_in_website`"]
+	add_fields: ["item_name", "stock_uom", "item_group", "image", "variant_of",
+		"has_variants", "end_of_life", "is_sales_item"],
+
+	get_indicator: function(doc) {
+		if(doc.end_of_life && doc.end_of_life < frappe.datetime.get_today()) {
+			return [__("Expired"), "grey", "end_of_life,<,Today"]
+		} else if(doc.has_variants) {
+			return [__("Template"), "blue", "has_variant,=,1"]
+		} else if(doc.variant_of) {
+			return [__("Variant"), "green", "variant_of,=," + doc.variant_of]
+		} else {
+			return [__("Active"), "blue", "end_of_life,>=,Today"]
+		}
+	}
 };

@@ -30,7 +30,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:09.624972", 
+ "modified": "2015-02-05 05:11:37.070363", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Deduction Type", 
@@ -46,6 +46,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

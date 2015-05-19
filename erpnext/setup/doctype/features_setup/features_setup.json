@@ -205,7 +205,7 @@
  "icon": "icon-glass", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2014-08-21 16:24:18.503070", 
+ "modified": "2015-02-05 05:11:38.842809", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Features Setup", 
@@ -220,6 +220,7 @@
    "read": 1, 
    "report": 0, 
    "role": "System Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -231,6 +232,7 @@
    "read": 1, 
    "report": 0, 
    "role": "Administrator", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

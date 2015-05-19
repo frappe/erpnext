@@ -1,0 +1,23 @@
+{
+ "creation": "2013-06-20 16:00:18.000000", 
+ "docstatus": 0, 
+ "doctype": "DocType", 
+ "fields": [
+  {
+   "fieldname": "selling_price_list", 
+   "fieldtype": "Link", 
+   "in_list_view": 1, 
+   "label": "Price List", 
+   "options": "Price List", 
+   "permlevel": 0, 
+   "reqd": 1
+  }
+ ], 
+ "idx": 1, 
+ "istable": 1, 
+ "modified": "2013-12-20 19:30:47.000000", 
+ "modified_by": "Administrator", 
+ "module": "Shopping Cart", 
+ "name": "Shopping Cart Price List", 
+ "owner": "Administrator"
+}

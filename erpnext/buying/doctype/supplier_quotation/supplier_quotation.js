@@ -1,15 +1,8 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
-
-// define defaults for purchase common
-cur_frm.cscript.tname = "Supplier Quotation Item";
-cur_frm.cscript.fname = "quotation_items";
-cur_frm.cscript.other_fname = "other_charges";
 
 // attach required files
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
-{% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
-{% include 'accounts/doctype/sales_invoice/pos.js' %}
 
 erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.extend({
 	refresh: function() {
@@ -17,7 +10,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 
 		if (this.frm.doc.docstatus === 1) {
 			cur_frm.add_custom_button(__("Make Purchase Order"), this.make_purchase_order,
-				frappe.boot.doctype_icons["Journal Voucher"]);
+				frappe.boot.doctype_icons["Journal Entry"]);
 		}
 		else if (this.frm.doc.docstatus===0) {
 			cur_frm.add_custom_button(__('From Material Request'),
@@ -52,7 +45,7 @@ cur_frm.cscript.uom = function(doc, cdt, cdn) {
 	// no need to trigger updation of stock uom, as this field doesn't exist in supplier quotation
 }
 
-cur_frm.fields_dict['quotation_items'].grid.get_field('project_name').get_query =
+cur_frm.fields_dict['items'].grid.get_field('project_name').get_query =
 	function(doc, cdt, cdn) {
 		return{
 			filters:[

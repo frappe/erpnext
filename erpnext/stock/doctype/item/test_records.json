@@ -1,15 +1,16 @@
 [
  {
   "default_warehouse": "_Test Warehouse - _TC",
-  "description": "_Test Item",
+  "description": "_Test Item 1",
   "doctype": "Item",
   "expense_account": "_Test Account Cost for Goods Sold - _TC",
+  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": "No",
   "has_serial_no": "No",
   "income_account": "Sales - _TC",
   "inspection_required": "No",
   "is_asset_item": "No",
-  "is_pro_applicable": "Yes",
+  "is_pro_applicable": "No",
   "is_purchase_item": "Yes",
   "is_sales_item": "Yes",
   "is_service_item": "No",
@@ -18,11 +19,10 @@
   "item_code": "_Test Item",
   "item_group": "_Test Item Group",
   "item_name": "_Test Item",
-  "item_reorder": [
+  "apply_warehouse_wise_reorder_level": 1,
+  "reorder_levels": [
    {
-    "doctype": "Item Reorder",
     "material_request_type": "Purchase",
-    "parentfield": "item_reorder",
     "warehouse": "_Test Warehouse - _TC",
     "warehouse_reorder_level": 20,
     "warehouse_reorder_qty": 20
@@ -37,12 +37,13 @@
   "description": "_Test Item 2",
   "doctype": "Item",
   "expense_account": "_Test Account Cost for Goods Sold - _TC",
+  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": "No",
   "has_serial_no": "No",
   "income_account": "Sales - _TC",
   "inspection_required": "No",
   "is_asset_item": "No",
-  "is_pro_applicable": "Yes",
+  "is_pro_applicable": "No",
   "is_purchase_item": "Yes",
   "is_sales_item": "Yes",
   "is_service_item": "No",
@@ -57,15 +58,15 @@
  },
  {
   "default_warehouse": "_Test Warehouse - _TC",
-  "description": "_Test Item Home Desktop 100",
+  "description": "_Test Item Home Desktop 100 3",
   "doctype": "Item",
   "expense_account": "_Test Account Cost for Goods Sold - _TC",
+  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": "No",
   "has_serial_no": "No",
   "income_account": "Sales - _TC",
   "inspection_required": "No",
   "is_asset_item": "No",
-  "is_manufactured_item": "No",
   "is_pro_applicable": "No",
   "is_purchase_item": "Yes",
   "is_sales_item": "Yes",
@@ -75,27 +76,27 @@
   "item_code": "_Test Item Home Desktop 100",
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Item Home Desktop 100",
-  "item_tax": [
+  "taxes": [
    {
     "doctype": "Item Tax",
-    "parentfield": "item_tax",
+    "parentfield": "taxes",
     "tax_rate": 10,
     "tax_type": "_Test Account Excise Duty - _TC"
    }
   ],
-  "stock_uom": "_Test UOM"
+  "stock_uom": "_Test UOM 1"
  },
  {
   "default_warehouse": "_Test Warehouse - _TC",
-  "description": "_Test Item Home Desktop 200",
+  "description": "_Test Item Home Desktop 200 4",
   "doctype": "Item",
   "expense_account": "_Test Account Cost for Goods Sold - _TC",
+  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": "No",
   "has_serial_no": "No",
   "income_account": "Sales - _TC",
   "inspection_required": "No",
   "is_asset_item": "No",
-  "is_manufactured_item": "No",
   "is_pro_applicable": "No",
   "is_purchase_item": "Yes",
   "is_sales_item": "Yes",
@@ -105,12 +106,13 @@
   "item_code": "_Test Item Home Desktop 200",
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test Item Home Desktop 200",
-  "stock_uom": "_Test UOM"
+  "stock_uom": "_Test UOM 1"
  },
  {
-  "description": "_Test Sales BOM Item",
+  "description": "_Test Sales BOM Item 5",
   "doctype": "Item",
   "expense_account": "_Test Account Cost for Goods Sold - _TC",
+  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": "No",
   "has_serial_no": "No",
   "income_account": "Sales - _TC",
@@ -129,9 +131,10 @@
  },
  {
   "default_warehouse": "_Test Warehouse - _TC",
-  "description": "_Test FG Item",
+  "description": "_Test FG Item 6",
   "doctype": "Item",
   "expense_account": "_Test Account Cost for Goods Sold - _TC",
+  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": "No",
   "has_serial_no": "No",
   "income_account": "Sales - _TC",
@@ -149,7 +152,7 @@
   "stock_uom": "_Test UOM"
  },
  {
-  "description": "_Test Non Stock Item",
+  "description": "_Test Non Stock Item 7",
   "doctype": "Item",
   "has_batch_no": "No",
   "has_serial_no": "No",
@@ -168,7 +171,7 @@
  },
  {
   "default_warehouse": "_Test Warehouse - _TC",
-  "description": "_Test Serialized Item",
+  "description": "_Test Serialized Item 8",
   "doctype": "Item",
   "has_batch_no": "No",
   "has_serial_no": "Yes",
@@ -187,13 +190,13 @@
  },
  {
   "default_warehouse": "_Test Warehouse - _TC",
-  "description": "_Test Serialized Item",
+  "description": "_Test Serialized Item 9",
   "doctype": "Item",
   "has_batch_no": "No",
   "has_serial_no": "Yes",
   "inspection_required": "No",
   "is_asset_item": "No",
-  "is_pro_applicable": "Yes",
+  "is_pro_applicable": "No",
   "is_purchase_item": "Yes",
   "is_sales_item": "Yes",
   "is_service_item": "No",
@@ -207,17 +210,16 @@
  },
  {
   "default_warehouse": "_Test Warehouse - _TC",
-  "description": "_Test Item Home Desktop Manufactured",
+  "description": "_Test Item Home Desktop Manufactured 10",
   "doctype": "Item",
   "expense_account": "_Test Account Cost for Goods Sold - _TC",
+  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": "No",
   "has_serial_no": "No",
   "income_account": "Sales - _TC",
   "inspection_required": "No",
   "is_asset_item": "No",
-  "is_manufactured_item": "Yes",
   "is_pro_applicable": "Yes",
-  "is_purchase_item": "Yes",
   "is_sales_item": "Yes",
   "is_service_item": "No",
   "is_stock_item": "Yes",
@@ -229,9 +231,10 @@
  },
  {
   "default_warehouse": "_Test Warehouse - _TC",
-  "description": "_Test FG Item 2",
+  "description": "_Test FG Item 2 11",
   "doctype": "Item",
   "expense_account": "_Test Account Cost for Goods Sold - _TC",
+  "cost_center": "_Test Cost Center - _TC",
   "has_batch_no": "No",
   "has_serial_no": "No",
   "income_account": "Sales - _TC",
@@ -247,5 +250,43 @@
   "item_group": "_Test Item Group Desktops",
   "item_name": "_Test FG Item 2",
   "stock_uom": "_Test UOM"
+ },
+ {
+  "default_warehouse": "_Test Warehouse - _TC",
+  "description": "_Test Variant Item 12",
+  "doctype": "Item",
+  "expense_account": "_Test Account Cost for Goods Sold - _TC",
+  "cost_center": "_Test Cost Center - _TC",
+  "has_batch_no": "No",
+  "has_serial_no": "No",
+  "income_account": "Sales - _TC",
+  "inspection_required": "No",
+  "is_asset_item": "No",
+  "is_pro_applicable": "Yes",
+  "is_purchase_item": "Yes",
+  "is_sales_item": "Yes",
+  "is_service_item": "No",
+  "is_stock_item": "Yes",
+  "is_sub_contracted_item": "Yes",
+  "item_code": "_Test Variant Item",
+  "item_group": "_Test Item Group Desktops",
+  "item_name": "_Test Variant Item",
+  "stock_uom": "_Test UOM",
+  "has_variants": 1,
+  "variants": [
+	  {"item_attribute": "Test Size", "item_attribute_value": "Small"},
+	  {"item_attribute": "Test Size", "item_attribute_value": "Medium"},
+	  {"item_attribute": "Test Size", "item_attribute_value": "Large"}
+  ],
+  "apply_warehouse_wise_reorder_level": 1,
+  "reorder_levels": [
+      {
+       "material_request_type": "Purchase",
+       "warehouse": "_Test Warehouse - _TC",
+       "warehouse_reorder_level": 20,
+       "warehouse_reorder_qty": 20
+      }
+  ]
  }
+
 ]

@@ -1,8 +1,9 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
+import json
 import frappe.utils
 from frappe.utils import cstr, flt, getdate, comma_and
 from frappe import _
@@ -11,16 +12,10 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
 
 form_grid_templates = {
-	"sales_order_details": "templates/form_grid/item_grid.html"
+	"items": "templates/form_grid/item_grid.html"
 }
 
 class SalesOrder(SellingController):
-	tname = 'Sales Order Item'
-	fname = 'sales_order_details'
-	person_tname = 'Target Detail'
-	partner_tname = 'Partner Target Detail'
-	territory_tname = 'Territory Target Detail'
-
 	def validate_mandatory(self):
 		# validate transaction date v/s delivery date
 		if self.delivery_date:
@@ -40,25 +35,13 @@ class SalesOrder(SellingController):
 				frappe.msgprint(_("Warning: Sales Order {0} already exists against same Purchase Order number").format(so[0][0]))
 
 	def validate_for_items(self):
-		check_list, flag = [], 0
-		chk_dupl_itm = []
-		for d in self.get('sales_order_details'):
-			e = [d.item_code, d.description, d.warehouse, d.prevdoc_docname or '']
-			f = [d.item_code, d.description]
+		check_list = []
+		for d in self.get('items'):
+			check_list.append(cstr(d.item_code))
 
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes':
 				if not d.warehouse:
 					frappe.throw(_("Reserved warehouse required for stock item {0}").format(d.item_code))
-
-				if e in check_list:
-					frappe.msgprint(_("Item {0} has been entered twice").format(d.item_code))
-				else:
-					check_list.append(e)
-			else:
-				if f in chk_dupl_itm:
-					frappe.msgprint(_("Item {0} has been entered twice").format(d.item_code))
-				else:
-					chk_dupl_itm.append(f)
 
 			# used for production plan
 			d.transaction_date = self.transaction_date
@@ -66,9 +49,12 @@ class SalesOrder(SellingController):
 			tot_avail_qty = frappe.db.sql("select projected_qty from `tabBin` \
 				where item_code = %s and warehouse = %s", (d.item_code,d.warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
+		unique_chk_list = set(check_list)
+		if len(unique_chk_list) != len(check_list):
+			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
 
 	def validate_sales_mntc_quotation(self):
-		for d in self.get('sales_order_details'):
+		for d in self.get('items'):
 			if d.prevdoc_docname:
 				res = frappe.db.sql("select name from `tabQuotation` where name=%s and order_type = %s", (d.prevdoc_docname, self.order_type))
 				if not res:
@@ -104,14 +90,14 @@ class SalesOrder(SellingController):
 		self.validate_warehouse()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		make_packing_list(self,'sales_order_details')
+		make_packing_list(self,'items')
 
 		self.validate_with_previous_doc()
 
 		if not self.status:
 			self.status = "Draft"
 
-		from erpnext.utilities import validate_status
+		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Stopped",
 			"Cancelled"])
 
@@ -122,13 +108,13 @@ class SalesOrder(SellingController):
 		from erpnext.stock.utils import validate_warehouse_company
 
 		warehouses = list(set([d.warehouse for d in
-			self.get(self.fname) if d.warehouse]))
+			self.get("items") if d.warehouse]))
 
 		for w in warehouses:
 			validate_warehouse_company(w, self.company)
 
 	def validate_with_previous_doc(self):
-		super(SalesOrder, self).validate_with_previous_doc(self.tname, {
+		super(SalesOrder, self).validate_with_previous_doc({
 			"Quotation": {
 				"ref_dn_field": "prevdoc_docname",
 				"compare_fields": [["company", "="], ["currency", "="]]
@@ -142,22 +128,22 @@ class SalesOrder(SellingController):
 			frappe.db.sql("update `tabOpportunity` set status = %s where name=%s",(flag,enq[0][0]))
 
 	def update_prevdoc_status(self, flag):
-		for quotation in list(set([d.prevdoc_docname for d in self.get(self.fname)])):
+		for quotation in list(set([d.prevdoc_docname for d in self.get("items")])):
 			if quotation:
 				doc = frappe.get_doc("Quotation", quotation)
 				if doc.docstatus==2:
 					frappe.throw(_("Quotation {0} is cancelled").format(quotation))
 
 				doc.set_status(update=True)
+				doc.update_opportunity()
 
 	def on_submit(self):
 		super(SalesOrder, self).on_submit()
 
+		self.check_credit_limit()
 		self.update_stock_ledger(update_stock = 1)
 
-		self.check_credit(self.grand_total)
-
-		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.grand_total, self)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.base_grand_total, self)
 
 		self.update_prevdoc_status('submit')
 		frappe.db.set(self, 'status', 'Submitted')
@@ -246,8 +232,29 @@ class SalesOrder(SellingController):
 	def on_update(self):
 		pass
 
-	def get_portal_page(self):
-		return "order" if self.docstatus==1 else None
+def get_list_context(context=None):
+	from erpnext.controllers.website_list_for_contact import get_list_context
+	list_context = get_list_context(context)
+	list_context["title"] = _("My Orders")
+	return list_context
+
+@frappe.whitelist()
+def stop_or_unstop_sales_orders(names, status):
+	if not frappe.has_permission("Sales Order", "write"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	names = json.loads(names)
+	for name in names:
+		so = frappe.get_doc("Sales Order", name)
+		if so.docstatus == 1:
+			if status=="Stop":
+				if so.status not in ("Stopped", "Cancelled") and (so.per_delivered < 100 or so.per_billed < 100):
+					so.stop_sales_order()
+			else:
+				if so.status == "Stopped":
+					so.unstop_sales_order()
+
+	frappe.local.message_log = []
 
 	def before_recurring(self):
 		super(SalesOrder, self).before_recurring()
@@ -255,7 +262,7 @@ class SalesOrder(SellingController):
 		for field in ("delivery_status", "per_delivered", "billing_status", "per_billed"):
 			self.set(field, None)
 
-		for d in self.get("sales_order_details"):
+		for d in self.get("items"):
 			for field in ("delivered_qty", "billed_amt", "planned_qty", "prevdoc_docname"):
 				d.set(field, None)
 			
@@ -314,7 +321,7 @@ def make_delivery_note(source_name, target_doc=None):
 			"doctype": "Delivery Note Item",
 			"field_map": {
 				"rate": "rate",
-				"name": "prevdoc_detail_docname",
+				"name": "so_detail",
 				"parent": "against_sales_order",
 			},
 			"postprocess": update_item,
@@ -336,7 +343,7 @@ def make_delivery_note(source_name, target_doc=None):
 def make_sales_invoice(source_name, target_doc=None):
 	def postprocess(source, target):
 		set_missing_values(source, target)
-		#Get the advance paid Journal Vouchers in Sales Invoice Advance
+		#Get the advance paid Journal Entries in Sales Invoice Advance
 		target.get_advances()
 
 	def set_missing_values(source, target):

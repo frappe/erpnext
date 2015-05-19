@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors and contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors and contributors
 // For license information, please see license.txt
 
 frappe.query_reports["Stock Balance"] = {
@@ -16,6 +16,13 @@ frappe.query_reports["Stock Balance"] = {
 			"fieldtype": "Date",
 			"width": "80",
 			"default": frappe.datetime.get_today()
+		},
+		{
+			"fieldname": "item_code",
+			"label": __("Item"),
+			"fieldtype": "Link",
+			"width": "80",
+			"options": "Item"
 		}
 	]
 }

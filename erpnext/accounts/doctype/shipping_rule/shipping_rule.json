@@ -1,5 +1,5 @@
 {
- "autoname": "Prompt", 
+ "autoname": "field:label", 
  "creation": "2013-06-25 11:48:03", 
  "description": "Specify conditions to calculate shipping amount", 
  "docstatus": 0, 
@@ -38,7 +38,7 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "shipping_rule_conditions", 
+   "fieldname": "conditions", 
    "fieldtype": "Table", 
    "label": "Shipping Rule Conditions", 
    "options": "Shipping Rule Condition", 
@@ -52,7 +52,7 @@
   }, 
   {
    "description": "Specify a list of Territories, for which, this Shipping Rule is valid", 
-   "fieldname": "valid_for_territories", 
+   "fieldname": "territories", 
    "fieldtype": "Table", 
    "label": "Valid For Territories", 
    "options": "Applicable Territory", 
@@ -102,7 +102,7 @@
  ], 
  "icon": "icon-truck", 
  "idx": 1, 
- "modified": "2014-05-27 03:49:19.387875", 
+ "modified": "2015-02-05 05:11:46.634371", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Shipping Rule", 
@@ -137,6 +137,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts Manager", 
+   "share": 1, 
    "write": 1
   }, 
   {
@@ -148,6 +149,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Sales Master Manager", 
+   "share": 1, 
    "write": 1
   }
  ]

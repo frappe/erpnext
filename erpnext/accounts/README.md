@@ -6,7 +6,7 @@ Accounting heads are called "Accounts" and they can be groups in a tree like
 
 Entries are:
 
-- Journal Vouchers
+- Journal Entries
 - Sales Invoice (Itemised)
 - Purchase Invoice (Itemised)
 

@@ -1,10 +1,10 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cint, cstr, flt, add_days, nowdate
+from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate
 from frappe import _, ValidationError
 
 from erpnext.controllers.stock_controller import StockController
@@ -38,16 +38,16 @@ class SerialNo(StockController):
 		if not self.warranty_expiry_date and not self.amc_expiry_date:
 			self.maintenance_status = None
 
-		if self.warranty_expiry_date and self.warranty_expiry_date < nowdate():
+		if self.warranty_expiry_date and getdate(self.warranty_expiry_date) < getdate(nowdate()):
 			self.maintenance_status = "Out of Warranty"
 
-		if self.amc_expiry_date and self.amc_expiry_date < nowdate():
+		if self.amc_expiry_date and getdate(self.amc_expiry_date) < getdate(nowdate()):
 			self.maintenance_status = "Out of AMC"
 
-		if self.amc_expiry_date and self.amc_expiry_date >= nowdate():
+		if self.amc_expiry_date and getdate(self.amc_expiry_date) >= getdate(nowdate()):
 			self.maintenance_status = "Under AMC"
 
-		if self.warranty_expiry_date and self.warranty_expiry_date >= nowdate():
+		if self.warranty_expiry_date and getdate(self.warranty_expiry_date) >= getdate(nowdate()):
 			self.maintenance_status = "Under Warranty"
 
 	def validate_warehouse(self):
@@ -192,9 +192,6 @@ class SerialNo(StockController):
 			self.set_sales_details(last_sle.get("delivery_sle"))
 			self.set_maintenance_status()
 
-	def on_communication(self):
-		return
-
 def process_serial_no(sle):
 	item_det = get_item_details(sle.item_code)
 	validate_serial_no(sle, item_det)
@@ -281,7 +278,7 @@ def make_serial_no(serial_no, sle):
 	sr = frappe.new_doc("Serial No")
 	sr.warehouse = None
 	sr.dont_update_if_missing.append("warehouse")
-	sr.ignore_permissions = True
+	sr.flags.ignore_permissions = True
 
 	sr.serial_no = serial_no
 	sr.item_code = sle.item_code

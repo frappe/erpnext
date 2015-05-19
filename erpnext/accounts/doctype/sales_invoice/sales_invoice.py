@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -13,13 +13,10 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
 
 form_grid_templates = {
-	"entries": "templates/form_grid/item_grid.html"
+	"items": "templates/form_grid/item_grid.html"
 }
 
 class SalesInvoice(SellingController):
-	tname = 'Sales Invoice Item'
-	fname = 'entries'
-
 	def __init__(self, arg1, arg2=None):
 		super(SalesInvoice, self).__init__(arg1, arg2)
 		self.status_updater = [{
@@ -46,16 +43,15 @@ class SalesInvoice(SellingController):
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.check_stop_sales_order("sales_order")
-		self.validate_customer_account()
-		self.validate_debit_acc()
+		self.validate_debit_to_acc()
 		self.validate_fixed_asset_account()
-		self.clear_unallocated_advances("Sales Invoice Advance", "advance_adjustment_details")
-		self.validate_advance_jv("advance_adjustment_details", "sales_order")
+		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
+		self.validate_advance_jv("advances", "sales_order")
 		self.add_remarks()
+		self.validate_write_off_account()
 
 		if cint(self.is_pos):
 			self.validate_pos()
-			self.validate_write_off_account()
 
 		if cint(self.update_stock):
 			self.validate_item_code()
@@ -66,15 +62,11 @@ class SalesInvoice(SellingController):
 		if not self.is_opening:
 			self.is_opening = 'No'
 
-		self.set_aging_date()
-
-		frappe.get_doc("Account", self.debit_to).validate_due_date(self.posting_date, self.due_date)
-
 		self.set_against_income_account()
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount",
-			"delivery_note_details")
+			"items")
 
 	def on_submit(self):
 		super(SalesInvoice, self).on_submit()
@@ -85,17 +77,16 @@ class SalesInvoice(SellingController):
 			# Check for Approving Authority
 			if not self.recurring_id:
 				frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
-				 	self.company, self.grand_total, self)
+				 	self.company, self.base_grand_total, self)
 
 		self.check_prev_docstatus()
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.update_billing_status_for_zero_amount_refdoc("Sales Order")
-
+		self.check_credit_limit()
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
-		self.check_credit_limit(self.debit_to)
 
 		if not cint(self.is_pos) == 1:
 			self.update_against_document_in_jv()
@@ -137,12 +128,11 @@ class SalesInvoice(SellingController):
 				'keyword':'Delivered',
 				'second_source_dt': 'Delivery Note Item',
 				'second_source_field': 'qty',
-				'second_join_field': 'prevdoc_detail_docname',
-				'overflow_type': 'delivery'
+				'second_join_field': 'so_detail',
+				'overflow_type': 'delivery',
+				'extra_cond': """ and exists(select name from `tabSales Invoice`
+					where name=`tabSales Invoice Item`.parent and ifnull(update_stock, 0) = 1)"""
 			})
-
-	def get_portal_page(self):
-		return "invoice" if self.docstatus==1 else None
 
 	def set_missing_values(self, for_validate=False):
 		self.set_pos_fields(for_validate)
@@ -150,21 +140,20 @@ class SalesInvoice(SellingController):
 		if not self.debit_to:
 			self.debit_to = get_party_account(self.company, self.customer, "Customer")
 		if not self.due_date:
-			self.due_date = get_due_date(self.posting_date, self.customer, "Customer",
-				self.debit_to, self.company)
+			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
 
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
 	def update_time_log_batch(self, sales_invoice):
-		for d in self.get(self.fname):
+		for d in self.get("items"):
 			if d.time_log_batch:
 				tlb = frappe.get_doc("Time Log Batch", d.time_log_batch)
 				tlb.sales_invoice = sales_invoice
-				tlb.ignore_validate_update_after_submit = True
+				tlb.flags.ignore_validate_update_after_submit = True
 				tlb.save()
 
 	def validate_time_logs_are_submitted(self):
-		for d in self.get(self.fname):
+		for d in self.get("items"):
 			if d.time_log_batch:
 				status = frappe.db.get_value("Time Log Batch", d.time_log_batch, "status")
 				if status!="Submitted":
@@ -184,7 +173,8 @@ class SalesInvoice(SellingController):
 				# self.set_customer_defaults()
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',
-				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account'):
+				'selling_price_list', 'company', 'select_print_heading', 'cash_bank_account',
+				'write_off_account', 'write_off_cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
 
@@ -192,7 +182,7 @@ class SalesInvoice(SellingController):
 				self.update_stock = cint(pos.get("update_stock"))
 
 			# set pos values in items
-			for item in self.get("entries"):
+			for item in self.get("items"):
 				if item.get('item_code'):
 					for fname, val in get_pos_settings_item_details(pos,
 						frappe._dict(item.as_dict()), pos).items():
@@ -205,12 +195,12 @@ class SalesInvoice(SellingController):
 				self.terms = frappe.db.get_value("Terms and Conditions", self.tc_name, "terms")
 
 			# fetch charges
-			if self.taxes_and_charges and not len(self.get("other_charges")):
-				self.set_taxes("other_charges", "taxes_and_charges")
+			if self.taxes_and_charges and not len(self.get("taxes")):
+				self.set_taxes()
 
 	def get_advances(self):
-		super(SalesInvoice, self).get_advances(self.debit_to,
-			"Sales Invoice Advance", "advance_adjustment_details", "credit", "sales_order")
+		super(SalesInvoice, self).get_advances(self.debit_to, "Customer", self.customer,
+			"Sales Invoice Advance", "advances", "credit", "sales_order")
 
 	def get_company_abbr(self):
 		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
@@ -224,14 +214,16 @@ class SalesInvoice(SellingController):
 		"""
 
 		lst = []
-		for d in self.get('advance_adjustment_details'):
+		for d in self.get('advances'):
 			if flt(d.allocated_amount) > 0:
 				args = {
-					'voucher_no' : d.journal_voucher,
+					'voucher_no' : d.journal_entry,
 					'voucher_detail_no' : d.jv_detail_no,
 					'against_voucher_type' : 'Sales Invoice',
 					'against_voucher'  : self.name,
 					'account' : self.debit_to,
+					'party_type': 'Customer',
+					'party': self.customer,
 					'is_advance' : 'Yes',
 					'dr_or_cr' : 'credit',
 					'unadjusted_amt' : flt(d.advance_amount),
@@ -243,24 +235,16 @@ class SalesInvoice(SellingController):
 			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
 
-	def validate_customer_account(self):
-		"""Validates Debit To Account and Customer Matches"""
-		if self.customer and self.debit_to and not cint(self.is_pos):
-			acc_head = frappe.db.sql("select master_name from `tabAccount` where name = %s and docstatus != 2", self.debit_to)
-
-			if (acc_head and cstr(acc_head[0][0]) != cstr(self.customer)) or \
-				(not acc_head and (self.debit_to != cstr(self.customer) + " - " + self.get_company_abbr())):
-				msgprint("Debit To: %s do not match with Customer: %s for Company: %s.\n If both correctly entered, please select Master Type \
-					and Master Name in account master." %(self.debit_to, self.customer,self.company), raise_exception=1)
-
-
-	def validate_debit_acc(self):
-		if frappe.db.get_value("Account", self.debit_to, "report_type") != "Balance Sheet":
-			frappe.throw(_("Account must be a balance sheet account"))
+	def validate_debit_to_acc(self):
+		root_type, account_type = frappe.db.get_value("Account", self.debit_to, ["root_type", "account_type"])
+		if root_type != "Asset":
+			frappe.throw(_("Debit To account must be a liability account"))
+		if account_type != "Receivable":
+			frappe.throw(_("Debit To account must be a Receivable account"))
 
 	def validate_fixed_asset_account(self):
 		"""Validate Fixed Asset and whether Income Account Entered Exists"""
-		for d in self.get('entries'):
+		for d in self.get('items'):
 			item = frappe.db.sql("""select name,is_asset_item,is_sales_item from `tabItem`
 				where name = %s""", d.item_code)
 			acc = frappe.db.sql("""select account_type from `tabAccount`
@@ -269,7 +253,7 @@ class SalesInvoice(SellingController):
 				msgprint(_("Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item").format(acc[0][0], d.item_code), raise_exception=True)
 
 	def validate_with_previous_doc(self):
-		super(SalesInvoice, self).validate_with_previous_doc(self.tname, {
+		super(SalesInvoice, self).validate_with_previous_doc({
 			"Sales Order": {
 				"ref_dn_field": "sales_order",
 				"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
@@ -283,7 +267,7 @@ class SalesInvoice(SellingController):
 		})
 
 		if cint(frappe.defaults.get_global_default('maintain_same_sales_rate')):
-			super(SalesInvoice, self).validate_with_previous_doc(self.tname, {
+			super(SalesInvoice, self).validate_with_previous_doc({
 				"Sales Order Item": {
 					"ref_dn_field": "so_detail",
 					"compare_fields": [["rate", "="]],
@@ -297,17 +281,10 @@ class SalesInvoice(SellingController):
 				}
 			})
 
-
-	def set_aging_date(self):
-		if self.is_opening != 'Yes':
-			self.aging_date = self.posting_date
-		elif not self.aging_date:
-			throw(_("Ageing Date is mandatory for opening entry"))
-
 	def set_against_income_account(self):
 		"""Set against account for debit to account"""
 		against_acc = []
-		for d in self.get('entries'):
+		for d in self.get('items'):
 			if d.income_account not in against_acc:
 				against_acc.append(d.income_account)
 		self.against_income_account = ','.join(against_acc)
@@ -322,7 +299,7 @@ class SalesInvoice(SellingController):
 		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
 		for i in dic:
 			if frappe.db.get_value('Selling Settings', None, dic[i]) == 'Yes':
-				for d in self.get('entries'):
+				for d in self.get('items'):
 					if frappe.db.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
 						and not d.get(i.lower().replace(' ','_')):
 						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
@@ -342,22 +319,22 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("Cash or Bank Account is mandatory for making payment entry"))
 
 		if flt(self.paid_amount) + flt(self.write_off_amount) \
-				- flt(self.grand_total) > 1/(10**(self.precision("grand_total") + 1)):
+				- flt(self.base_grand_total) > 1/(10**(self.precision("base_grand_total") + 1)):
 			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
 
 
 	def validate_item_code(self):
-		for d in self.get('entries'):
+		for d in self.get('items'):
 			if not d.item_code:
 				msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
 
 	def validate_warehouse(self):
-		for d in self.get('entries'):
+		for d in self.get('items'):
 			if not d.warehouse:
 				frappe.throw(_("Warehouse required at Row No {0}").format(d.idx))
 
 	def validate_delivery_note(self):
-		for d in self.get("entries"):
+		for d in self.get("items"):
 			if d.delivery_note:
 				msgprint(_("Stock cannot be updated against Delivery Note {0}").format(d.delivery_note), raise_exception=1)
 
@@ -382,12 +359,12 @@ class SalesInvoice(SellingController):
 				.format(self.name, self.c_form_no), raise_exception = 1)
 
 	def update_current_stock(self):
-		for d in self.get('entries'):
+		for d in self.get('items'):
 			if d.item_code and d.warehouse:
 				bin = frappe.db.sql("select actual_qty from `tabBin` where item_code = %s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 				d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 
-		for d in self.get('packing_details'):
+		for d in self.get('packed_items'):
 			bin = frappe.db.sql("select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s", (d.item_code, d.warehouse), as_dict = 1)
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
@@ -415,20 +392,20 @@ class SalesInvoice(SellingController):
 			if cint(self.is_pos) == 1:
 				w = self.get_warehouse()
 				if w:
-					for d in self.get('entries'):
+					for d in self.get('items'):
 						if not d.warehouse:
 							d.warehouse = cstr(w)
 
 			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-			make_packing_list(self, 'entries')
+			make_packing_list(self, 'items')
 		else:
-			self.set('packing_details', [])
+			self.set('packed_items', [])
 
 		if cint(self.is_pos) == 1:
 			if flt(self.paid_amount) == 0:
 				if self.cash_bank_account:
 					frappe.db.set(self, 'paid_amount',
-						(flt(self.grand_total) - flt(self.write_off_amount)))
+						(flt(self.base_grand_total) - flt(self.write_off_amount)))
 				else:
 					# show message that the amount is not paid
 					frappe.db.set(self,'paid_amount',0)
@@ -437,7 +414,7 @@ class SalesInvoice(SellingController):
 			frappe.db.set(self,'paid_amount',0)
 
 	def check_prev_docstatus(self):
-		for d in self.get('entries'):
+		for d in self.get('items'):
 			if d.sales_order:
 				submitted = frappe.db.sql("""select name from `tabSales Order`
 					where docstatus = 1 and name = %s""", d.sales_order)
@@ -464,18 +441,20 @@ class SalesInvoice(SellingController):
 
 	def make_gl_entries(self, repost_future_gle=True):
 		gl_entries = self.get_gl_entries()
-		
+
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
 
+			# if POS and amount is written off, there's no outstanding and hence no need to update it
 			update_outstanding = cint(self.is_pos) and self.write_off_account \
 				and 'No' or 'Yes'
+
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False)
 
 			if update_outstanding == "No":
 				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
-				update_outstanding_amt(self.debit_to, self.doctype, self.name)
+				update_outstanding_amt(self.debit_to, "Customer", self.customer, self.doctype, self.name)
 
 			if repost_future_gle and cint(self.update_stock) \
 				and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
@@ -502,15 +481,19 @@ class SalesInvoice(SellingController):
 
 		self.make_pos_gl_entries(gl_entries)
 
+		self.make_write_off_gl_entry(gl_entries)
+
 		return gl_entries
 
 	def make_customer_gl_entry(self, gl_entries):
-		if self.grand_total:
+		if self.base_grand_total:
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
+					"party_type": "Customer",
+					"party": self.customer,
 					"against": self.against_income_account,
-					"debit": self.grand_total,
+					"debit": self.base_grand_total,
 					"remarks": self.remarks,
 					"against_voucher": self.name,
 					"against_voucher_type": self.doctype
@@ -518,13 +501,13 @@ class SalesInvoice(SellingController):
 			)
 
 	def make_tax_gl_entries(self, gl_entries):
-		for tax in self.get("other_charges"):
-			if flt(tax.tax_amount_after_discount_amount):
+		for tax in self.get("taxes"):
+			if flt(tax.base_tax_amount_after_discount_amount):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.debit_to,
-						"credit": flt(tax.tax_amount_after_discount_amount),
+						"credit": flt(tax.base_tax_amount_after_discount_amount),
 						"remarks": self.remarks,
 						"cost_center": tax.cost_center
 					})
@@ -532,13 +515,13 @@ class SalesInvoice(SellingController):
 
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
-		for item in self.get("entries"):
-			if flt(item.base_amount):
+		for item in self.get("items"):
+			if flt(item.base_net_amount):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.income_account,
 						"against": self.debit_to,
-						"credit": item.base_amount,
+						"credit": item.base_net_amount,
 						"remarks": self.remarks,
 						"cost_center": item.cost_center
 					})
@@ -556,6 +539,8 @@ class SalesInvoice(SellingController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
+					"party_type": "Customer",
+					"party": self.customer,
 					"against": self.cash_bank_account,
 					"credit": self.paid_amount,
 					"remarks": self.remarks,
@@ -571,36 +556,48 @@ class SalesInvoice(SellingController):
 					"remarks": self.remarks,
 				})
 			)
-			# write off entries, applicable if only pos
-			if self.write_off_account and self.write_off_amount:
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": self.debit_to,
-						"against": self.write_off_account,
-						"credit": self.write_off_amount,
-						"remarks": self.remarks,
-						"against_voucher": self.name,
-						"against_voucher_type": self.doctype,
-					})
-				)
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": self.write_off_account,
-						"against": self.debit_to,
-						"debit": self.write_off_amount,
-						"remarks": self.remarks,
-						"cost_center": self.write_off_cost_center
-					})
-				)
+
+	def make_write_off_gl_entry(self, gl_entries):
+		# write off entries, applicable if only pos
+		if self.write_off_account and self.write_off_amount:
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.debit_to,
+					"party_type": "Customer",
+					"party": self.customer,
+					"against": self.write_off_account,
+					"credit": self.write_off_amount,
+					"remarks": self.remarks,
+					"against_voucher": self.name,
+					"against_voucher_type": self.doctype,
+				})
+			)
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.write_off_account,
+					"against": self.debit_to,
+					"debit": self.write_off_amount,
+					"remarks": self.remarks,
+					"cost_center": self.write_off_cost_center
+				})
+			)
+
+def get_list_context(context=None):
+	from erpnext.controllers.website_list_for_contact import get_list_context
+	list_context = get_list_context(context)
+	list_context["title"] = _("My Invoices")
+	return list_context
 
 @frappe.whitelist()
-def get_bank_cash_account(mode_of_payment):
-	val = frappe.db.get_value("Mode of Payment", mode_of_payment, "default_account")
-	if not val:
+def get_bank_cash_account(mode_of_payment, company):
+	account = frappe.db.get_value("Mode of Payment Account", 
+		{"parent": mode_of_payment, "company": company}, "default_account")
+	if not account:
 		frappe.msgprint(_("Please set default Cash or Bank account in Mode of Payment {0}").format(mode_of_payment))
 	return {
-		"cash_bank_account": val
+		"account": account
 	}
+
 
 @frappe.whitelist()
 def get_income_account(doctype, txt, searchfield, start, page_len, filters):
@@ -611,15 +608,13 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	# Hence the first condition is an "OR"
 	return frappe.db.sql("""select tabAccount.name from `tabAccount`
 			where (tabAccount.report_type = "Profit and Loss"
-					or tabAccount.account_type = "Income Account")
-				and tabAccount.group_or_ledger="Ledger"
+					or tabAccount.account_type in ("Income Account", "Temporary"))
+				and tabAccount.is_group=0
 				and tabAccount.docstatus!=2
-				and ifnull(tabAccount.master_type, "")=""
-				and ifnull(tabAccount.master_name, "")=""
-				and tabAccount.company = %(company)s
-				and tabAccount.{key} LIKE %(txt)s
-				{mcond}""".format(key=searchfield, mcond=get_match_cond(doctype)),
-				{'company': filters['company'], 'txt': "%%{0}%%".format(txt)})
+				and tabAccount.company = '%(company)s'
+				and tabAccount.%(key)s LIKE '%(txt)s'
+				%(mcond)s""" % {'company': filters['company'], 'key': searchfield,
+			'txt': "%%%s%%" % txt, 'mcond':get_match_cond(doctype)})
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None):
@@ -645,9 +640,11 @@ def make_delivery_note(source_name, target_doc=None):
 		"Sales Invoice Item": {
 			"doctype": "Delivery Note Item",
 			"field_map": {
-				"name": "prevdoc_detail_docname",
+				"name": "si_detail",
 				"parent": "against_sales_invoice",
-				"serial_no": "serial_no"
+				"serial_no": "serial_no",
+				"sales_order": "against_sales_order",
+				"so_detail": "so_detail"
 			},
 			"postprocess": update_item
 		},

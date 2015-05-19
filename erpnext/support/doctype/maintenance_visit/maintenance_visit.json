@@ -7,7 +7,7 @@
   {
    "fieldname": "customer_details", 
    "fieldtype": "Section Break", 
-   "label": "Customer Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-user", 
    "permlevel": 0
@@ -35,7 +35,7 @@
    "fieldname": "customer_name", 
    "fieldtype": "Data", 
    "hidden": 1, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Customer Name", 
    "permlevel": 0, 
    "read_only": 1
@@ -102,7 +102,7 @@
   {
    "fieldname": "maintenance_details", 
    "fieldtype": "Section Break", 
-   "label": "Maintenance Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-wrench", 
    "permlevel": 0
@@ -145,9 +145,9 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "maintenance_visit_details", 
+   "fieldname": "purposes", 
    "fieldtype": "Table", 
-   "label": "Maintenance Visit Purpose", 
+   "label": "Purposes", 
    "oldfieldname": "maintenance_visit_details", 
    "oldfieldtype": "Table", 
    "options": "Maintenance Visit Purpose", 
@@ -258,7 +258,7 @@
    "permlevel": 0
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "territory", 
    "fieldtype": "Link", 
    "label": "Territory", 
@@ -267,7 +267,7 @@
    "print_hide": 1
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "customer_group", 
    "fieldtype": "Link", 
    "label": "Customer Group", 
@@ -279,7 +279,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-09-26 11:37:41.026433", 
+ "modified": "2015-02-20 05:08:31.875844", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Maintenance Visit", 
@@ -297,11 +297,13 @@
    "read": 1, 
    "report": 1, 
    "role": "Maintenance User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }
  ], 
  "search_fields": "status,maintenance_type,customer,customer_name,mntc_date,company,fiscal_year", 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "customer_name"
 }

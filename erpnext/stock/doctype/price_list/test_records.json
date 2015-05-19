@@ -6,10 +6,10 @@
   "enabled": 1, 
   "price_list_name": "_Test Price List", 
   "selling": 1, 
-  "valid_for_territories": [
+  "territories": [
    {
     "doctype": "Applicable Territory", 
-    "parentfield": "valid_for_territories", 
+    "parentfield": "territories", 
     "territory": "All Territories"
    }
   ]
@@ -21,10 +21,10 @@
   "enabled": 1, 
   "price_list_name": "_Test Price List 2", 
   "selling": 1, 
-  "valid_for_territories": [
+  "territories": [
    {
     "doctype": "Applicable Territory", 
-    "parentfield": "valid_for_territories", 
+    "parentfield": "territories", 
     "territory": "_Test Territory Rest Of The World"
    }
   ]
@@ -36,10 +36,10 @@
   "enabled": 1, 
   "price_list_name": "_Test Price List India", 
   "selling": 1, 
-  "valid_for_territories": [
+  "territories": [
    {
     "doctype": "Applicable Territory", 
-    "parentfield": "valid_for_territories", 
+    "parentfield": "territories", 
     "territory": "_Test Territory India"
    }
   ]
@@ -51,15 +51,15 @@
   "enabled": 1, 
   "price_list_name": "_Test Price List Rest of the World", 
   "selling": 1, 
-  "valid_for_territories": [
+  "territories": [
    {
     "doctype": "Applicable Territory", 
-    "parentfield": "valid_for_territories", 
+    "parentfield": "territories", 
     "territory": "_Test Territory Rest Of The World"
    }, 
    {
     "doctype": "Applicable Territory", 
-    "parentfield": "valid_for_territories", 
+    "parentfield": "territories", 
     "territory": "_Test Territory United States"
    }
   ]

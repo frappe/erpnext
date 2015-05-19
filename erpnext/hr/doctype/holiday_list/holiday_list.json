@@ -1,5 +1,7 @@
 {
  "allow_import": 1, 
+ "allow_rename": 1, 
+ "autoname": "field:holiday_list_name", 
  "creation": "2013-01-10 16:34:14", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -53,7 +55,7 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "holiday_list_details", 
+   "fieldname": "holidays", 
    "fieldtype": "Table", 
    "label": "Holidays", 
    "oldfieldname": "holiday_list_details", 
@@ -72,7 +74,7 @@
  ], 
  "icon": "icon-calendar", 
  "idx": 1, 
- "modified": "2014-05-09 02:16:38.887266", 
+ "modified": "2015-02-05 05:11:39.099428", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Holiday List", 
@@ -88,6 +90,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

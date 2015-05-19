@@ -11,7 +11,7 @@
   {
    "fieldname": "details", 
    "fieldtype": "Section Break", 
-   "label": "Company Details", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0, 
    "read_only": 0
@@ -28,7 +28,7 @@
    "reqd": 1
   }, 
   {
-   "description": "Please Enter Abbreviation or Short Name properly as it will be added as Suffix to all Account Heads.", 
+   "description": "", 
    "fieldname": "abbr", 
    "fieldtype": "Data", 
    "label": "Abbr", 
@@ -53,12 +53,35 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "default_letter_head", 
+   "fieldtype": "Link", 
+   "label": "Default Letter Head", 
+   "options": "Letter Head", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "domain", 
    "fieldtype": "Select", 
    "label": "Domain", 
    "options": "Distribution\nManufacturing\nRetail\nServices", 
    "permlevel": 0, 
    "reqd": 0
+  }, 
+  {
+   "fieldname": "charts_section", 
+   "fieldtype": "Section Break", 
+   "hidden": 0, 
+   "label": "Country Settings", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "default_holiday_list", 
+   "fieldtype": "Link", 
+   "label": "Default Holiday List", 
+   "options": "Holiday List", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "country", 
@@ -70,19 +93,28 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "charts_section", 
-   "fieldtype": "Section Break", 
-   "hidden": 1, 
-   "label": "Chart of Accounts", 
-   "permlevel": 0
+   "fieldname": "column_break_10", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "default_currency", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
+   "label": "Default Currency", 
+   "options": "Currency", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
   }, 
   {
    "fieldname": "chart_of_accounts", 
-   "fieldtype": "Link", 
+   "fieldtype": "Select", 
    "hidden": 0, 
    "ignore_user_permissions": 1, 
    "label": "Chart of Accounts", 
-   "options": "Chart of Accounts", 
+   "options": "", 
    "permlevel": 0
   }, 
   {
@@ -107,6 +139,7 @@
    "read_only": 0
   }, 
   {
+   "depends_on": "eval:!doc.__islocal", 
    "fieldname": "default_cash_account", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
@@ -118,47 +151,16 @@
   }, 
   {
    "depends_on": "eval:!doc.__islocal", 
-   "fieldname": "receivables_group", 
+   "fieldname": "default_receivable_account", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
-   "label": "Receivables Group", 
+   "label": "Default Receivable Account", 
    "no_copy": 1, 
    "oldfieldname": "receivables_group", 
    "oldfieldtype": "Link", 
    "options": "Account", 
    "permlevel": 0, 
    "read_only": 0
-  }, 
-  {
-   "depends_on": "eval:!doc.__islocal", 
-   "fieldname": "payables_group", 
-   "fieldtype": "Link", 
-   "ignore_user_permissions": 1, 
-   "label": "Payables Group", 
-   "no_copy": 1, 
-   "oldfieldname": "payables_group", 
-   "oldfieldtype": "Link", 
-   "options": "Account", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "fieldname": "default_expense_account", 
-   "fieldtype": "Link", 
-   "ignore_user_permissions": 1, 
-   "label": "Default Expense Account", 
-   "no_copy": 1, 
-   "options": "Account", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "default_income_account", 
-   "fieldtype": "Link", 
-   "ignore_user_permissions": 1, 
-   "label": "Default Income Account", 
-   "no_copy": 1, 
-   "options": "Account", 
-   "permlevel": 0
   }, 
   {
    "fieldname": "column_break0", 
@@ -169,14 +171,43 @@
    "width": "50%"
   }, 
   {
-   "fieldname": "default_currency", 
+   "depends_on": "eval:!doc.__islocal", 
+   "fieldname": "default_payable_account", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
-   "label": "Default Currency", 
-   "options": "Currency", 
+   "label": "Default Payable Account", 
+   "no_copy": 1, 
+   "oldfieldname": "payables_group", 
+   "oldfieldtype": "Link", 
+   "options": "Account", 
    "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 1
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "eval:!doc.__islocal", 
+   "fieldname": "default_expense_account", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
+   "label": "Default Cost of Goods Sold Account", 
+   "no_copy": 1, 
+   "options": "Account", 
+   "permlevel": 0
+  }, 
+  {
+   "depends_on": "eval:!doc.__islocal", 
+   "fieldname": "default_income_account", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
+   "label": "Default Income Account", 
+   "no_copy": 1, 
+   "options": "Account", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "section_break_22", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "depends_on": "eval:!doc.__islocal", 
@@ -210,6 +241,12 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "column_break_26", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "yearly_bgt_flag", 
    "fieldtype": "Select", 
@@ -235,7 +272,7 @@
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "auto_accounting_for_stock_settings", 
    "fieldtype": "Section Break", 
-   "label": "Auto Accounting For Stock Settings", 
+   "label": "Stock Settings", 
    "permlevel": 0, 
    "read_only": 0
   }, 
@@ -258,6 +295,12 @@
    "options": "Account", 
    "permlevel": 0, 
    "read_only": 0
+  }, 
+  {
+   "fieldname": "column_break_32", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "expenses_included_in_valuation", 
@@ -334,10 +377,10 @@
    "read_only": 0
   }, 
   {
-   "description": "Company registration numbers for your reference. Example: VAT Registration Numbers etc.", 
+   "description": "", 
    "fieldname": "registration_info", 
    "fieldtype": "Section Break", 
-   "label": "Registration Info", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0, 
    "read_only": 0, 
@@ -352,11 +395,18 @@
    "oldfieldtype": "Code", 
    "permlevel": 0, 
    "read_only": 0
+  }, 
+  {
+   "fieldname": "delete_company_transactions", 
+   "fieldtype": "Button", 
+   "label": "Delete Company Transactions", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2014-08-07 05:20:47.711849", 
+ "modified": "2015-05-04 11:22:42.116328", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 
@@ -372,6 +422,7 @@
    "read": 1, 
    "report": 1, 
    "role": "System Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 

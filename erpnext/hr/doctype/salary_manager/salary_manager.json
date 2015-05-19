@@ -8,15 +8,9 @@
  "document_type": "Other", 
  "fields": [
   {
-   "fieldname": "document_description", 
-   "fieldtype": "HTML", 
-   "label": "Document Description", 
-   "options": "<div class=\"alert alert-info\">You can generate multiple salary slips based on the selected criteria, submit and mail those to the employee directly from here</div>", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "section_break0", 
    "fieldtype": "Section Break", 
+   "label": "Select Employees", 
    "permlevel": 0
   }, 
   {
@@ -43,6 +37,19 @@
    "permlevel": 0
   }, 
   {
+   "description": "Check if you want to send salary slip in mail to each employee while submitting salary slip", 
+   "fieldname": "send_email", 
+   "fieldtype": "Check", 
+   "label": "Send Email", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "column_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
    "fieldname": "department", 
    "fieldtype": "Link", 
    "label": "Department", 
@@ -57,10 +64,11 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "column_break1", 
-   "fieldtype": "Column Break", 
+   "fieldname": "select_payroll_year_and_month", 
+   "fieldtype": "Section Break", 
+   "label": "Select Payroll Year and Month", 
    "permlevel": 0, 
-   "width": "50%"
+   "precision": ""
   }, 
   {
    "fieldname": "fiscal_year", 
@@ -71,6 +79,12 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "column_break_11", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "month", 
    "fieldtype": "Select", 
    "label": "Month", 
@@ -79,16 +93,11 @@
    "reqd": 1
   }, 
   {
-   "description": "Check if you want to send salary slip in mail to each employee while submitting salary slip", 
-   "fieldname": "send_email", 
-   "fieldtype": "Check", 
-   "label": "Send Email", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "section_break1", 
+   "fieldname": "process_payroll", 
    "fieldtype": "Section Break", 
-   "permlevel": 0
+   "label": "Process Payroll", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "column_break2", 
@@ -123,10 +132,10 @@
    "width": "25%"
   }, 
   {
-   "description": "Create Bank Voucher for the total salary paid for the above selected criteria", 
-   "fieldname": "make_bank_voucher", 
+   "description": "Create Bank Entry for the total salary paid for the above selected criteria", 
+   "fieldname": "make_bank_entry", 
    "fieldtype": "Button", 
-   "label": "Make Bank Voucher", 
+   "label": "Make Bank Entry", 
    "permlevel": 0
   }, 
   {
@@ -144,7 +153,7 @@
  "icon": "icon-cog", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2014-06-04 06:46:39.437061", 
+ "modified": "2015-02-25 07:21:04.778082", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Manager", 
@@ -155,6 +164,7 @@
    "permlevel": 0, 
    "read": 1, 
    "role": "HR Manager", 
+   "share": 1, 
    "write": 1
   }
  ], 

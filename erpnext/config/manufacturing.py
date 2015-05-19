@@ -20,13 +20,23 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Time Log",
+					"description": _("Time Logs for manufacturing."),
+				},
+				{
+					"type": "doctype",
 					"name": "Item",
 					"description": _("All Products or Services."),
 				},
 				{
 					"type": "doctype",
 					"name": "Workstation",
-					"description": _("Where manufacturing operations are carried out."),
+					"description": _("Where manufacturing operations are carried."),
+				},
+				{
+					"type": "doctype",
+					"name": "Operation",
+					"description": _("Details of the operations carried out."),
 				},
 
 			]
@@ -45,6 +55,16 @@ def get_data():
 					"name": "BOM Replace Tool",
 					"description": _("Replace Item / BOM in all BOMs"),
 				},
+			]
+		},
+		{
+			"label": _("Setup"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Manufacturing Settings",
+					"description": _("Global settings for all manufacturing processes."),
+				}
 			]
 		},
 		{

@@ -8,7 +8,7 @@
 	<thead>
 		<tr>
 			<th style="width: 15%">{%= __("Posting Date") %}</th>
-			<th style="width: 15%">{%= __("Journal Voucher") %}</th>
+			<th style="width: 15%">{%= __("Journal Entry") %}</th>
 			<th style="width: 40%">{%= __("Reference") %}</th>
 			<th style="width: 15%; text-align: right;">{%= __("Debit") %}</th>
 			<th style="width: 15%; text-align: right;">{%= __("Credit") %}</th>
@@ -19,7 +19,7 @@
 			{% if (data[i][__("Posting Date")]) { %}
 			<tr>
 				<td>{%= dateutil.str_to_user(data[i][__("Posting Date")]) %}</td>
-				<td>{%= data[i][__("Journal Voucher")] %}</td>
+				<td>{%= data[i][__("Journal Entry")] %}</td>
 				<td>{%= __("Against") %}: {%= data[i][__("Against Account")] %}
 					{% if (data[i][__("Reference")]) { %}
 						<br>{%= __("Reference") %}: {%= data[i][__("Reference")] %}
@@ -38,7 +38,7 @@
 			<tr>
 				<td></td>
 				<td></td>
-				<td>{%= data[i][__("Journal Voucher")] %}</td>
+				<td>{%= data[i][__("Journal Entry")] %}</td>
 				<td style="text-align: right">{%= format_currency(data[i][__("Debit")]) %}</td>
 				<td style="text-align: right">{%= format_currency(data[i][__("Credit")]) %}</td>
 			</tr>

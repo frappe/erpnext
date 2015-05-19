@@ -1,5 +1,5 @@
 {
- "creation": "2013-06-24 16:37:54.000000", 
+ "creation": "2013-06-24 16:37:54", 
  "description": "Settings", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -8,14 +8,16 @@
    "default": "Item Code", 
    "fieldname": "item_naming_by", 
    "fieldtype": "Select", 
+   "in_list_view": 1, 
    "label": "Item Naming By", 
    "options": "Item Code\nNaming Series", 
    "permlevel": 0
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "Default Item Group", 
    "options": "Item Group", 
    "permlevel": 0
@@ -23,6 +25,7 @@
   {
    "fieldname": "stock_uom", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "Default Stock UOM", 
    "options": "UOM", 
    "permlevel": 0
@@ -30,12 +33,6 @@
   {
    "fieldname": "column_break_4", 
    "fieldtype": "Column Break", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "allow_negative_stock", 
-   "fieldtype": "Check", 
-   "label": "Allow Negative Stock", 
    "permlevel": 0
   }, 
   {
@@ -50,6 +47,13 @@
    "fieldname": "tolerance", 
    "fieldtype": "Float", 
    "label": "Allowance Percent", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "allow_negative_stock", 
+   "fieldtype": "Check", 
+   "in_list_view": 1, 
+   "label": "Allow Negative Stock", 
    "permlevel": 0
   }, 
   {
@@ -99,7 +103,7 @@
  "icon": "icon-cog", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2014-02-19 19:02:23.000000", 
+ "modified": "2015-02-18 08:37:18.229705", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Settings", 
@@ -112,6 +116,7 @@
    "print": 1, 
    "read": 1, 
    "role": "Material Manager", 
+   "share": 1, 
    "write": 1
   }
  ]

@@ -1,7 +1,7 @@
 {
-  "allow_import": 1, 
+ "allow_import": 1, 
  "autoname": "field:batch_id", 
- "creation": "2013-03-05 14:50:38.000000", 
+ "creation": "2013-03-05 14:50:38", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -19,7 +19,7 @@
   {
    "fieldname": "item", 
    "fieldtype": "Link", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Item", 
    "oldfieldname": "item", 
    "oldfieldtype": "Link", 
@@ -28,45 +28,41 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "description", 
-   "fieldtype": "Small Text", 
-   "in_list_view": 1, 
-   "label": "Description", 
-   "oldfieldname": "description", 
-   "oldfieldtype": "Small Text", 
+   "fieldname": "column_break_3", 
+   "fieldtype": "Column Break", 
    "permlevel": 0, 
-   "width": "300px"
+   "precision": ""
   }, 
   {
    "fieldname": "expiry_date", 
    "fieldtype": "Date", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Expiry Date", 
    "oldfieldname": "expiry_date", 
    "oldfieldtype": "Date", 
    "permlevel": 0
   }, 
   {
-   "fieldname": "start_date", 
-   "fieldtype": "Date", 
-   "label": "Batch Started Date", 
-   "oldfieldname": "start_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0
+   "fieldname": "section_break_7", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
-   "fieldname": "finished_date", 
-   "fieldtype": "Date", 
-   "label": "Batch Finished Date", 
-   "oldfieldname": "finished_date", 
-   "oldfieldtype": "Date", 
-   "permlevel": 0
+   "fieldname": "description", 
+   "fieldtype": "Small Text", 
+   "in_list_view": 0, 
+   "label": "Batch Description", 
+   "oldfieldname": "description", 
+   "oldfieldtype": "Small Text", 
+   "permlevel": 0, 
+   "width": "300px"
   }
  ], 
  "icon": "icon-archive", 
  "idx": 1, 
  "max_attachments": 5, 
- "modified": "2014-01-20 17:48:24.000000", 
+ "modified": "2015-02-05 05:11:34.824412", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Batch", 
@@ -82,8 +78,10 @@
    "read": 1, 
    "report": 1, 
    "role": "Material Master Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }
- ]
+ ], 
+ "title_field": "item"
 }

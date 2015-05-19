@@ -12,7 +12,7 @@
   {
    "fieldname": "sb0", 
    "fieldtype": "Section Break", 
-   "label": "Cost Center Details", 
+   "label": "", 
    "permlevel": 0
   }, 
   {
@@ -58,18 +58,12 @@
    "width": "50%"
   }, 
   {
-   "fieldname": "group_or_ledger", 
-   "fieldtype": "Select", 
-   "hidden": 0, 
-   "label": "Group or Ledger", 
-   "no_copy": 1, 
-   "oldfieldname": "group_or_ledger", 
-   "oldfieldtype": "Select", 
-   "options": "\nGroup\nLedger", 
+   "default": "0", 
+   "fieldname": "is_group", 
+   "fieldtype": "Check", 
+   "label": "Is Group", 
    "permlevel": 0, 
-   "print_hide": 1, 
-   "report_hide": 1, 
-   "reqd": 1
+   "precision": ""
   }, 
   {
    "description": "Define Budget for this Cost Center. To set budget action, see <a href=\"#!List/Company\">Company Master</a>", 
@@ -79,20 +73,20 @@
    "permlevel": 0
   }, 
   {
-   "description": "Select Budget Distribution, if you want to track based on seasonality.", 
+   "description": "Select Monthly Distribution, if you want to track based on seasonality.", 
    "fieldname": "distribution_id", 
    "fieldtype": "Link", 
    "label": "Distribution Id", 
    "oldfieldname": "distribution_id", 
    "oldfieldtype": "Link", 
-   "options": "Budget Distribution", 
+   "options": "Monthly Distribution", 
    "permlevel": 0
   }, 
   {
    "description": "Add rows to set annual budgets on Accounts.", 
-   "fieldname": "budget_details", 
+   "fieldname": "budgets", 
    "fieldtype": "Table", 
-   "label": "Budget Details", 
+   "label": "Budgets", 
    "oldfieldname": "budget_details", 
    "oldfieldtype": "Table", 
    "options": "Budget Detail", 
@@ -145,7 +139,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2014-08-26 12:16:11.163750", 
+ "modified": "2015-04-23 02:54:26.934607", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Cost Center", 
@@ -161,6 +155,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Accounts Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }, 
@@ -197,5 +192,5 @@
    "role": "Material User"
   }
  ], 
- "search_fields": "name,parent_cost_center"
+ "search_fields": "parent_cost_center, is_group"
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
@@ -34,7 +34,8 @@ def create_time_log():
 	time_log.update({
 		"from_time": "2013-01-02 10:00:00.000000",
 		"to_time": "2013-01-02 11:00:00.000000",
-		"docstatus": 0
+		"docstatus": 0,
+		"for_manufacturing": 0
 	})
 	time_log.insert()
 	time_log.submit()
@@ -43,11 +44,10 @@ def create_time_log():
 def create_time_log_batch(time_log):
 	tlb = frappe.get_doc({
 		"doctype": "Time Log Batch",
-		"rate": "500",
-		"time_log_batch_details": [
+		"time_logs": [
 			{
 			"doctype": "Time Log Batch Detail",
-			"parentfield": "time_log_batch_details",
+			"parentfield": "time_logs",
 			"parenttype": "Time Log Batch",
 			"time_log": time_log
 			}

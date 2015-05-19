@@ -1,13 +1,14 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, flt, cint, nowdate, add_days, comma_and
+from frappe.utils import cstr, flt, cint, nowdate, now, add_days, comma_and
 
 from frappe import msgprint, _
 
 from frappe.model.document import Document
+from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 
 class ProductionPlanningTool(Document):
 	def __init__(self, arg1, arg2=None):
@@ -16,12 +17,12 @@ class ProductionPlanningTool(Document):
 
 	def get_so_details(self, so):
 		"""Pull other details from so"""
-		so = frappe.db.sql("""select transaction_date, customer, grand_total
+		so = frappe.db.sql("""select transaction_date, customer, base_grand_total
 			from `tabSales Order` where name = %s""", so, as_dict = 1)
 		ret = {
 			'sales_order_date': so and so[0]['transaction_date'] or '',
 			'customer' : so[0]['customer'] or '',
-			'grand_total': so[0]['grand_total']
+			'grand_total': so[0]['base_grand_total']
 		}
 		return ret
 
@@ -38,10 +39,10 @@ class ProductionPlanningTool(Document):
 		return ret
 
 	def clear_so_table(self):
-		self.set('pp_so_details', [])
+		self.set('sales_orders', [])
 
 	def clear_item_table(self):
-		self.set('pp_details', [])
+		self.set('items', [])
 
 	def validate_company(self):
 		if not self.company:
@@ -61,7 +62,7 @@ class ProductionPlanningTool(Document):
 			item_filter += ' and item.name = "' + self.fg_item + '"'
 
 		open_so = frappe.db.sql("""
-			select distinct so.name, so.transaction_date, so.customer, so.grand_total
+			select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
 			from `tabSales Order` so, `tabSales Order Item` so_item
 			where so_item.parent = so.name
 				and so.docstatus = 1 and so.status != "Stopped"
@@ -83,14 +84,14 @@ class ProductionPlanningTool(Document):
 		""" Add sales orders in the table"""
 		self.clear_so_table()
 
-		so_list = [d.sales_order for d in self.get('pp_so_details')]
+		so_list = [d.sales_order for d in self.get('sales_orders')]
 		for r in open_so:
 			if cstr(r['name']) not in so_list:
-				pp_so = self.append('pp_so_details', {})
+				pp_so = self.append('sales_orders', {})
 				pp_so.sales_order = r['name']
 				pp_so.sales_order_date = cstr(r['transaction_date'])
 				pp_so.customer = cstr(r['customer'])
-				pp_so.grand_total = flt(r['grand_total'])
+				pp_so.grand_total = flt(r['base_grand_total'])
 
 	def get_items_from_so(self):
 		""" Pull items from Sales Order, only proction item
@@ -101,7 +102,7 @@ class ProductionPlanningTool(Document):
 		self.add_items(items)
 
 	def get_items(self):
-		so_list = filter(None, [d.sales_order for d in self.get('pp_so_details')])
+		so_list = filter(None, [d.sales_order for d in self.get('sales_orders')])
 		if not so_list:
 			msgprint(_("Please enter sales order in the above table"))
 			return []
@@ -143,7 +144,7 @@ class ProductionPlanningTool(Document):
 		for p in items:
 			item_details = frappe.db.sql("""select description, stock_uom, default_bom
 				from tabItem where name=%s""", p['item_code'])
-			pi = self.append('pp_details', {})
+			pi = self.append('items', {})
 			pi.sales_order				= p['parent']
 			pi.warehouse				= p['warehouse']
 			pi.item_code				= p['item_code']
@@ -155,20 +156,10 @@ class ProductionPlanningTool(Document):
 
 	def validate_data(self):
 		self.validate_company()
-		for d in self.get('pp_details'):
-			self.validate_bom_no(d)
+		for d in self.get('items'):
+			validate_bom_no(d.item_code, d.bom_no)
 			if not flt(d.planned_qty):
 				frappe.throw(_("Please enter Planned Qty for Item {0} at row {1}").format(d.item_code, d.idx))
-
-	def validate_bom_no(self, d):
-		if not d.bom_no:
-			frappe.throw(_("Please enter BOM for Item {0} at row {1}").format(d.item_code, d.idx))
-		else:
-			bom = frappe.db.sql("""select name from `tabBOM` where name = %s and item = %s
-				and docstatus = 1 and is_active = 1""",
-				(d.bom_no, d.item_code), as_dict = 1)
-			if not bom:
-				frappe.throw(_("Incorrect or Inactive BOM {0} for Item {1} at row {2}").format(d.bom_no, d.item_code, d.idx))
 
 	def raise_production_order(self):
 		"""It will raise production order (Draft) for all distinct FG items"""
@@ -193,7 +184,7 @@ class ProductionPlanningTool(Document):
 			}
 		"""
 		item_dict, bom_dict = {}, {}
-		for d in self.get("pp_details"):
+		for d in self.get("items"):
 			bom_dict.setdefault(d.bom_no, []).append([d.sales_order, flt(d.planned_qty)])
 			item_dict[(d.item_code, d.sales_order, d.warehouse)] = {
 				"production_item"	: d.item_code,
@@ -218,6 +209,9 @@ class ProductionPlanningTool(Document):
 		for key in items:
 			pro = frappe.new_doc("Production Order")
 			pro.update(items[key])
+
+			pro.planned_start_date = now()
+			pro.set_production_order_operations()
 
 			frappe.flags.mute_messages = True
 			try:
@@ -329,8 +323,9 @@ class ProductionPlanningTool(Document):
 				# shortage
 				requested_qty = total_qty - flt(item_projected_qty.get(item))
 				# consider minimum order qty
-				requested_qty = requested_qty > flt(so_item_qty[0][3]) and \
-					requested_qty or flt(so_item_qty[0][3])
+
+				if requested_qty < flt(so_item_qty[0][3]):
+					requested_qty = flt(so_item_qty[0][3])
 
 			# distribute requested qty SO wise
 			for item_details in so_item_qty:
@@ -382,7 +377,7 @@ class ProductionPlanningTool(Document):
 					"material_request_type": "Purchase"
 				})
 				for sales_order, requested_qty in items_to_be_requested[item].items():
-					pr_doc.append("indent_details", {
+					pr_doc.append("items", {
 						"doctype": "Material Request Item",
 						"__islocal": 1,
 						"item_code": item,
@@ -397,7 +392,7 @@ class ProductionPlanningTool(Document):
 						"sales_order_no": sales_order if sales_order!="No Sales Order" else None
 					})
 
-				pr_doc.ignore_permissions = 1
+				pr_doc.flags.ignore_permissions = 1
 				pr_doc.submit()
 				purchase_request_list.append(pr_doc.name)
 

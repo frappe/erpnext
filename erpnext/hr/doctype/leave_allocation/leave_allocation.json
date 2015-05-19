@@ -48,6 +48,22 @@
    "search_index": 1
   }, 
   {
+   "fieldname": "description", 
+   "fieldtype": "Small Text", 
+   "hidden": 0, 
+   "label": "Description", 
+   "oldfieldname": "reason", 
+   "oldfieldtype": "Small Text", 
+   "permlevel": 0, 
+   "width": "300px"
+  }, 
+  {
+   "fieldname": "column_break1", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "width": "50%"
+  }, 
+  {
    "default": "Today", 
    "fieldname": "posting_date", 
    "fieldtype": "Date", 
@@ -75,22 +91,6 @@
    "search_index": 1
   }, 
   {
-   "fieldname": "description", 
-   "fieldtype": "Small Text", 
-   "hidden": 0, 
-   "label": "Description", 
-   "oldfieldname": "reason", 
-   "oldfieldtype": "Small Text", 
-   "permlevel": 0, 
-   "width": "300px"
-  }, 
-  {
-   "fieldname": "column_break1", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0, 
-   "width": "50%"
-  }, 
-  {
    "fieldname": "carry_forward", 
    "fieldtype": "Check", 
    "label": "Carry Forward", 
@@ -112,6 +112,7 @@
    "permlevel": 0
   }, 
   {
+   "allow_on_submit": 1, 
    "fieldname": "total_leaves_allocated", 
    "fieldtype": "Float", 
    "label": "Total Leaves Allocated", 
@@ -137,7 +138,7 @@
  "icon": "icon-ok", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-06-23 07:55:48.989894", 
+ "modified": "2015-05-08 03:44:08.092937", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Allocation", 
@@ -155,6 +156,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }, 
@@ -169,6 +171,7 @@
    "read": 1, 
    "report": 1, 
    "role": "HR Manager", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }

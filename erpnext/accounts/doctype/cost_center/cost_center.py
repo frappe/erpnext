@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -16,9 +16,6 @@ class CostCenter(NestedSet):
 			frappe.db.get_value("Company", self.company, "abbr")
 
 	def validate_mandatory(self):
-		if not self.group_or_ledger:
-			msgprint(_("Please select Group or Ledger value"), raise_exception=1)
-
 		if self.cost_center_name != self.company and not self.parent_cost_center:
 			msgprint(_("Please enter parent cost center"), raise_exception=1)
 		elif self.cost_center_name == self.company and self.parent_cost_center:
@@ -30,7 +27,7 @@ class CostCenter(NestedSet):
 		elif self.check_gle_exists():
 			msgprint(_("Cost Center with existing transactions can not be converted to ledger"), raise_exception=1)
 		else:
-			self.group_or_ledger = 'Ledger'
+			self.is_group = 0
 			self.save()
 			return 1
 
@@ -38,7 +35,7 @@ class CostCenter(NestedSet):
 		if self.check_gle_exists():
 			msgprint(_("Cost Center with existing transactions can not be converted to group"), raise_exception=1)
 		else:
-			self.group_or_ledger = 'Group'
+			self.is_group = 1
 			self.save()
 			return 1
 
@@ -51,8 +48,8 @@ class CostCenter(NestedSet):
 
 	def validate_budget_details(self):
 		check_acc_list = []
-		for d in self.get('budget_details'):
-			if self.group_or_ledger=="Group":
+		for d in self.get('budgets'):
+			if self.is_group==1:
 				msgprint(_("Budget cannot be set for Group Cost Centers"), raise_exception=1)
 
 			if [d.account, d.fiscal_year] in check_acc_list:
@@ -70,7 +67,7 @@ class CostCenter(NestedSet):
 		new_cost_center = get_name_with_abbr(newdn, self.company)
 
 		# Validate properties before merging
-		super(CostCenter, self).before_rename(olddn, new_cost_center, merge, "group_or_ledger")
+		super(CostCenter, self).before_rename(olddn, new_cost_center, merge, "is_group")
 
 		return new_cost_center
 

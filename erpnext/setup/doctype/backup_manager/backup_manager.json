@@ -1,5 +1,5 @@
 {
- "creation": "2013-04-30 12:58:38.000000", 
+ "creation": "2013-04-30 12:58:38", 
  "description": "System for managing Backups", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -140,7 +140,7 @@
  "icon": "icon-cloud-upload", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2013-12-20 19:22:55.000000", 
+ "modified": "2015-02-05 05:11:34.700674", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Backup Manager", 
@@ -153,6 +153,7 @@
    "print": 1, 
    "read": 1, 
    "role": "System Manager", 
+   "share": 1, 
    "write": 1
   }
  ]

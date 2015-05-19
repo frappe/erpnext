@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -7,7 +7,7 @@ from frappe import _, throw
 from frappe.utils import flt
 
 def get_company_currency(company):
-	currency = frappe.db.get_value("Company", company, "default_currency")
+	currency = frappe.db.get_value("Company", company, "default_currency", cache=True)
 	if not currency:
 		currency = frappe.db.get_default("currency")
 	if not currency:
@@ -30,9 +30,10 @@ def get_ancestors_of(doctype, name):
 	return result or []
 
 def before_tests():
+	frappe.clear_cache()
 	# complete setup if missing
 	from erpnext.setup.page.setup_wizard.setup_wizard import setup_account
-	if not frappe.get_list("Item Group"):
+	if not frappe.get_list("Company"):
 		setup_account({
 			"currency"			:"USD",
 			"first_name"		:"Test",
@@ -47,7 +48,8 @@ def before_tests():
 			"language"			:"english",
 			"company_tagline"	:"Testing",
 			"email"				:"test@erpnext.com",
-			"password"			:"test"
+			"password"			:"test",
+			"chart_of_accounts" : "Standard"
 		})
 
 	frappe.db.sql("delete from `tabLeave Allocation`")
@@ -56,6 +58,22 @@ def before_tests():
 	frappe.db.sql("delete from `tabItem Price`")
 	frappe.db.commit()
 
+@frappe.whitelist()
 def get_exchange_rate(from_currency, to_currency):
-	exchange = "%s-%s" % (from_currency, to_currency)
-	return flt(frappe.db.get_value("Currency Exchange", exchange, "exchange_rate"))
+	jsonrates_api_key = frappe.conf.jsonrates_api_key or frappe.db.get_default("jsonrates_api_key")
+
+	if jsonrates_api_key:
+		cache = frappe.cache()
+		key = "currency_exchange_rate:{0}:{1}".format(from_currency, to_currency)
+		value = cache.get(key)
+		if not value:
+			import requests
+			response = requests.get("http://jsonrates.com/get/?from={0}&to={1}&apiKey={2}".format(from_currency,
+				to_currency, jsonrates_api_key))
+			# expire in 24 hours
+			value = response.json().get("rate")
+			cache.setex(key, value, 24 * 60 * 60)
+		return flt(value)
+	else:
+		exchange = "%s-%s" % (from_currency, to_currency)
+		return flt(frappe.db.get_value("Currency Exchange", exchange, "exchange_rate"))

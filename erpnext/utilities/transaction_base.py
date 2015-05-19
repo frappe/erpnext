@@ -1,10 +1,11 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cstr, now_datetime, cint
+import frappe.share
 
 from erpnext.controllers.status_updater import StatusUpdater
 
@@ -36,7 +37,7 @@ class TransactionBase(StatusUpdater):
 		opts = frappe._dict(opts)
 
 		if self.contact_date:
-			event_doclist = frappe.get_doc({
+			event = frappe.get_doc({
 				"doctype": "Event",
 				"owner": opts.owner or self.owner,
 				"subject": opts.subject,
@@ -47,23 +48,20 @@ class TransactionBase(StatusUpdater):
 				"ref_name": self.name
 			})
 
-			if frappe.db.exists("User", self.contact_by):
-				event_doclist.append("event_individuals", {
-					"doctype": "Event User",
-					"person": self.contact_by
-				})
+			event.insert(ignore_permissions=True)
 
-			event_doclist.insert(ignore_permissions=True)
+			if frappe.db.exists("User", self.contact_by):
+				frappe.share.add("Event", event.name, self.contact_by)
 
 	def validate_uom_is_integer(self, uom_field, qty_fields):
 		validate_uom_is_integer(self, uom_field, qty_fields)
 
-	def validate_with_previous_doc(self, source_dt, ref):
+	def validate_with_previous_doc(self, ref):
 		for key, val in ref.items():
 			is_child = val.get("is_child_table")
 			ref_doc = {}
 			item_ref_dn = []
-			for d in self.get_all_children(source_dt):
+			for d in self.get_all_children(self.doctype + " Item"):
 				ref_dn = d.get(val["ref_dn_field"])
 				if ref_dn:
 					if is_child:
@@ -80,14 +78,15 @@ class TransactionBase(StatusUpdater):
 				self.compare_values(ref_doc, val["compare_fields"])
 
 	def compare_values(self, ref_doc, fields, doc=None):
-		for ref_doctype, ref_dn_list in ref_doc.items():
-			for ref_docname in ref_dn_list:
-				prevdoc_values = frappe.db.get_value(ref_doctype, ref_docname,
+		for reference_doctype, ref_dn_list in ref_doc.items():
+			for reference_name in ref_dn_list:
+				prevdoc_values = frappe.db.get_value(reference_doctype, reference_name,
 					[d[0] for d in fields], as_dict=1)
 
 				for field, condition in fields:
 					if prevdoc_values[field] is not None:
 						self.validate_value(field, condition, prevdoc_values[field], doc)
+
 
 def delete_events(ref_type, ref_name):
 	frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent`

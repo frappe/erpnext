@@ -5,20 +5,36 @@
  "doctype": "DocType", 
  "fields": [
   {
-   "fieldname": "currency_settings", 
-   "fieldtype": "Section Break", 
-   "in_list_view": 0, 
-   "label": "Currency Settings", 
+   "fieldname": "default_company", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
+   "label": "Default Company", 
+   "options": "Company", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "fieldname": "current_fiscal_year", 
+   "fieldtype": "Link", 
+   "label": "Current Fiscal Year", 
+   "options": "Fiscal Year", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "country", 
+   "fieldtype": "Link", 
+   "label": "Country", 
+   "options": "Country", 
    "permlevel": 0
   }, 
   {
-   "description": "If disable, 'Rounded Total' field will not be visible in any transaction", 
-   "fieldname": "disable_rounded_total", 
-   "fieldtype": "Check", 
-   "in_list_view": 1, 
-   "label": "Disable Rounded Total", 
+   "fieldname": "column_break_8", 
+   "fieldtype": "Column Break", 
    "permlevel": 0, 
-   "read_only": 0
+   "precision": ""
   }, 
   {
    "default": "INR", 
@@ -43,61 +59,27 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "company", 
-   "fieldtype": "Section Break", 
-   "in_list_view": 0, 
-   "label": "Company Settings", 
+   "description": "If disable, 'Rounded Total' field will not be visible in any transaction", 
+   "fieldname": "disable_rounded_total", 
+   "fieldtype": "Check", 
+   "in_list_view": 1, 
+   "label": "Disable Rounded Total", 
    "permlevel": 0, 
    "read_only": 0
   }, 
   {
-   "fieldname": "default_company", 
-   "fieldtype": "Link", 
-   "ignore_user_permissions": 1, 
-   "label": "Default Company", 
-   "options": "Company", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 0
-  }, 
-  {
-   "fieldname": "current_fiscal_year", 
-   "fieldtype": "Link", 
-   "label": "Current Fiscal Year", 
-   "options": "Fiscal Year", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 1
-  }, 
-  {
-   "fieldname": "system", 
+   "fieldname": "section_break_8", 
    "fieldtype": "Section Break", 
-   "label": "System Settings", 
    "permlevel": 0, 
-   "read_only": 0
+   "precision": ""
   }, 
   {
-   "fieldname": "country", 
-   "fieldtype": "Link", 
-   "label": "Country", 
-   "options": "Country", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "sms_sender_name", 
+   "description": "For automatic exchange rates go to jsonrates.com and signup for an API key", 
+   "fieldname": "jsonrates_api_key", 
    "fieldtype": "Data", 
-   "label": "SMS Sender Name", 
+   "label": "jsonrates.com API Key", 
    "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "description": "For Server Side Print Formats", 
-   "fieldname": "print_style", 
-   "fieldtype": "Select", 
-   "label": "Print Format Style", 
-   "options": "Standard\nClassic\nModern\nSpartan", 
-   "permlevel": 0, 
-   "read_only": 0
+   "precision": ""
   }
  ], 
  "hide_toolbar": 0, 
@@ -105,7 +87,7 @@
  "idx": 1, 
  "in_create": 1, 
  "issingle": 1, 
- "modified": "2014-05-26 03:05:48.838329", 
+ "modified": "2015-05-07 05:43:49.760061", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Global Defaults", 
@@ -119,6 +101,7 @@
    "read": 1, 
    "report": 0, 
    "role": "System Manager", 
+   "share": 1, 
    "submit": 0, 
    "write": 1
   }

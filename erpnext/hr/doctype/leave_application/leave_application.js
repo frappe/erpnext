@@ -1,7 +1,11 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch('employee','employee_name','employee_name');
+
+frappe.ui.form.on("Leave Application", "leave_approver", function(frm) {
+	frm.set_value("leave_approver_name", frappe.user.full_name(frm.doc.leave_approver));
+});
 
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.posting_date)
@@ -13,7 +17,10 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 
 	cur_frm.set_query("leave_approver", function() {
 		return {
-			filters: [["UserRole", "role", "=", "Leave Approver"]]
+			query: "erpnext.hr.doctype.leave_application.leave_application.get_approvers",
+			filters: {
+				employee: cur_frm.doc.employee
+			}
 		};
 	});
 
@@ -35,18 +42,6 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 			} else {
 				cur_frm.set_intro(__("This Leave Application is pending approval. Only the Leave Approver can update status."))
 				cur_frm.toggle_enable("status", false);
-				if(!doc.__islocal) {
-						cur_frm.frm_head.appframe.set_title_right("");
-				}
-			}
-		} else {
- 			if(doc.status=="Approved") {
-				cur_frm.set_intro(__("Leave application has been approved."));
-				if(cur_frm.doc.docstatus==0) {
-					cur_frm.set_intro(__("Please submit to update Leave Balance."));
-				}
-			} else if(doc.status=="Rejected") {
-				cur_frm.set_intro(__("Leave application has been rejected."));
 			}
 		}
 	}
@@ -118,18 +113,3 @@ cur_frm.cscript.calculate_total_days = function(doc, dt, dn) {
 }
 
 cur_frm.fields_dict.employee.get_query = erpnext.queries.employee;
-
-frappe.ui.form.on("Leave Application", "leave_approver", function(frm) {
-	frappe.call({
-		"method": "frappe.client.get",
-		args: {
-			doctype: "User",
-			name: frm.doc.leave_approver
-		},
-		callback: function (data) {
-			frappe.model.set_value(frm.doctype, frm.docname, "leave_approver_name",
-				data.message.first_name
-				+ (data.message.last_name ? (" " + data.message.last_name) : ""))
-		}
-	})
-})

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -141,7 +141,7 @@ def prepare_data(accounts, filters, total_row):
 			row[key] = d.get(key, 0.0)
 			if row[key]:
 				has_value = True
-		
+
 		if show_zero_values:
 			data.append(row)
 		else:

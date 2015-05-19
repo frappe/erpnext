@@ -1,10 +1,10 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, getdate
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -53,6 +53,9 @@ def get_conditions(filters):
 	else:
 		frappe.throw(_("'To Date' is required"))
 
+	if filters.get("item_code"):
+		conditions += " and item_code = '%s'" % frappe.db.escape(filters.get("item_code"))
+
 	return conditions
 
 #get all details
@@ -85,11 +88,11 @@ def get_item_warehouse_map(filters):
 			qty_diff = flt(d.actual_qty)
 
 		value_diff = flt(d.stock_value_difference)
-
-		if d.posting_date < filters["from_date"]:
+		
+		if d.posting_date < getdate(filters["from_date"]):
 			qty_dict.opening_qty += qty_diff
 			qty_dict.opening_val += value_diff
-		elif d.posting_date >= filters["from_date"] and d.posting_date <= filters["to_date"]:
+		elif d.posting_date >= getdate(filters["from_date"]) and d.posting_date <= getdate(filters["to_date"]):
 			qty_dict.val_rate = d.valuation_rate
 			if qty_diff > 0:
 				qty_dict.in_qty += qty_diff

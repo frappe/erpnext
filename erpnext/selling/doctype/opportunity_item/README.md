@@ -1,1 +1,0 @@
-Items considered in the parent Opportunity.

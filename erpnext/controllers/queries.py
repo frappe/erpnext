@@ -1,9 +1,9 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
-from frappe.widgets.reportview import get_match_cond
+from frappe.desk.reportview import get_match_cond
 from frappe.model.db_query import DatabaseQuery
 from frappe.utils import nowdate
 
@@ -138,7 +138,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 	tax_accounts = frappe.db.sql("""select name, parent_account	from tabAccount
 		where tabAccount.docstatus!=2
 			and account_type in (%s)
-			and group_or_ledger = 'Ledger'
+			and is_group = 0
 			and company = %s
 			and `%s` LIKE %s
 		limit %s, %s""" %
@@ -147,7 +147,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 			start, page_len]))
 	if not tax_accounts:
 		tax_accounts = frappe.db.sql("""select name, parent_account	from tabAccount
-			where tabAccount.docstatus!=2 and group_or_ledger = 'Ledger'
+			where tabAccount.docstatus!=2 and is_group = 0
 				and company = %s and `%s` LIKE %s limit %s, %s"""
 			% ("%s", searchfield, "%s", "%s", "%s"),
 			(filters.get("company"), "%%%s%%" % txt, start, page_len))
@@ -164,6 +164,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 			concat(substr(tabItem.description, 1, 40), "..."), description) as decription
 		from tabItem
 		where tabItem.docstatus < 2
+			and ifnull(tabItem.has_variants, 0)=0
 			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
 			and (tabItem.`{key}` LIKE %(txt)s
 				or tabItem.item_name LIKE %(txt)s
@@ -236,40 +237,37 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 		'item_code': filters.get("item_code"),
 		'warehouse': filters.get("warehouse"),
 		'posting_date': filters.get('posting_date'),
-		'txt': "%%%s%%" % txt,
-		'mcond':get_match_cond(doctype),
+		'txt': "%{0}%".format(txt),
 		"start": start,
 		"page_len": page_len
 	}
 
-	if args.get("warehouse"):
-		batch_nos = frappe.db.sql("""select sle.batch_no
-			from `tabStock Ledger Entry` sle, `tabBatch`
-			where sle.batch_no = `tabBatch`.name
-				and sle.item_code = '%(item_code)s'
-				and sle.warehouse = '%(warehouse)s'
-				and sle.batch_no like '%(txt)s'
-				and (ifnull(`tabBatch`.expiry_date, '2099-12-31') >= %(posting_date)s
-						or `tabBatch`.expiry_date = '')
-				and `tabBatch`.docstatus != 2
-			%(mcond)s
-			group by batch_no having sum(actual_qty) > 0
-			order by batch_no desc
-			limit %(start)s, %(page_len)s """
-			% args)
+	if args.get('warehouse'):
+		batch_nos = frappe.db.sql("""select sle.batch_no, round(sum(sle.actual_qty),2), sle.stock_uom, batch.expiry_date
+				from `tabStock Ledger Entry` sle
+				    INNER JOIN `tabBatch` batch on sle.batch_no = batch.name
+				where
+					sle.item_code = %(item_code)s
+					and sle.warehouse = %(warehouse)s
+					and sle.batch_no like %(txt)s
+					and batch.docstatus < 2
+					and (ifnull(batch.expiry_date, '')='' or batch.expiry_date >= %(posting_date)s)
+					{match_conditions}
+				group by batch_no having sum(sle.actual_qty) > 0
+				order by batch.expiry_date, sle.batch_no desc
+				limit %(start)s, %(page_len)s""".format(match_conditions=get_match_cond(doctype)), args)
 
 	if batch_nos:
 		return batch_nos
 	else:
-		return frappe.db.sql("""select name from `tabBatch`
-			where item = '%(item_code)s'
+		return frappe.db.sql("""select name, expiry_date from `tabBatch`
+			where item = %(item_code)s
+			and name like %(txt)s
 			and docstatus < 2
-			and (ifnull(expiry_date, '2099-12-31') >= %(posting_date)s
-				or expiry_date = '' or expiry_date = "0000-00-00")
-			%(mcond)s
-			order by name desc
-			limit %(start)s, %(page_len)s
-		""" % args)
+			and (ifnull(expiry_date, '')='' or expiry_date >= %(posting_date)s)
+			{match_conditions}
+			order by expiry_date, name desc
+			limit %(start)s, %(page_len)s""".format(match_conditions=get_match_cond(doctype)), args)
 
 def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 	filter_list = []
@@ -280,14 +278,16 @@ def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 				filter_list.append([doctype, key, val[0], val[1]])
 			else:
 				filter_list.append([doctype, key, "=", val])
+	elif isinstance(filters, list):
+		filter_list.extend(filters)
 
-	if "group_or_ledger" not in [d[1] for d in filter_list]:
-		filter_list.append(["Account", "group_or_ledger", "=", "Ledger"])
+	if "is_group" not in [d[1] for d in filter_list]:
+		filter_list.append(["Account", "is_group", "=", "0"])
 
 	if searchfield and txt:
 		filter_list.append([doctype, searchfield, "like", "%%%s%%" % txt])
 
-	return frappe.widgets.reportview.execute("Account", filters = filter_list,
+	return frappe.desk.reportview.execute("Account", filters = filter_list,
 		fields = ["name", "parent_account"],
 		limit_start=start, limit_page_length=page_len, as_list=True)
 

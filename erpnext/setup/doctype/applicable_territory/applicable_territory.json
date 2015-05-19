@@ -1,10 +1,10 @@
 {
- "creation": "2013-06-20 12:48:38.000000", 
+ "creation": "2013-06-20 12:48:38", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
   {
-   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "territory", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
@@ -16,9 +16,10 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:22:53.000000", 
+ "modified": "2015-01-01 14:29:58.724652", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Applicable Territory", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -77,7 +77,7 @@ class StockController(AccountsController):
 			return [frappe._dict({ "name": voucher_detail_no, "expense_account": default_expense_account,
 				"cost_center": default_cost_center }) for voucher_detail_no, sle in sle_map.items()]
 		else:
-			details = self.get(self.fname)
+			details = self.get("items")
 
 			if default_expense_account or default_cost_center:
 				for d in details:
@@ -91,8 +91,8 @@ class StockController(AccountsController):
 	def get_items_and_warehouses(self):
 		items, warehouses = [], []
 
-		if hasattr(self, "fname"):
-			item_doclist = self.get(self.fname)
+		if hasattr(self, "items"):
+			item_doclist = self.get("items")
 		elif self.doctype == "Stock Reconciliation":
 			import json
 			item_doclist = []
@@ -197,7 +197,7 @@ class StockController(AccountsController):
 		sl_dict.update(args)
 		return sl_dict
 
-	def make_sl_entries(self, sl_entries, is_amended=None, allow_negative_stock=False, 
+	def make_sl_entries(self, sl_entries, is_amended=None, allow_negative_stock=False,
 			via_landed_cost_voucher=False):
 		from erpnext.stock.stock_ledger import make_sl_entries
 		make_sl_entries(sl_entries, is_amended, allow_negative_stock, via_landed_cost_voucher)
@@ -209,7 +209,7 @@ class StockController(AccountsController):
 
 	def get_serialized_items(self):
 		serialized_items = []
-		item_codes = list(set([d.item_code for d in self.get(self.fname)]))
+		item_codes = list(set([d.item_code for d in self.get("items")]))
 		if item_codes:
 			serialized_items = frappe.db.sql_list("""select name from `tabItem`
 				where has_serial_no='Yes' and name in ({})""".format(", ".join(["%s"]*len(item_codes))),
@@ -286,6 +286,6 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 	return gl_entries
 
 def get_warehouse_account():
-	warehouse_account = dict(frappe.db.sql("""select master_name, name from tabAccount
-		where account_type = 'Warehouse' and ifnull(master_name, '') != ''"""))
+	warehouse_account = dict(frappe.db.sql("""select warehouse, name from tabAccount
+		where account_type = 'Warehouse' and ifnull(warehouse, '') != ''"""))
 	return warehouse_account

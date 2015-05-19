@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -14,7 +14,7 @@ class Territory(NestedSet):
 	nsm_parent_field = 'parent_territory'
 
 	def validate(self):
-		for d in self.get('target_details'):
+		for d in self.get('targets') or []:
 			if not flt(d.target_qty) and not flt(d.target_amount):
 				frappe.throw(_("Either target qty or target amount is mandatory"))
 

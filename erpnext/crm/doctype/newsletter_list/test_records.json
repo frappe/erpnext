@@ -1,0 +1,21 @@
+[
+	{
+		"doctype": "Newsletter List",
+		"title": "_Test Newsletter List"
+	},
+	{
+		"doctype": "Newsletter List Subscriber",
+		"email": "test_subscriber1@example.com",
+		"newsletter_list": "_Test Newsletter List"
+	},
+	{
+		"doctype": "Newsletter List Subscriber",
+		"email": "test_subscriber2@example.com",
+		"newsletter_list": "_Test Newsletter List"
+	},
+	{
+		"doctype": "Newsletter List Subscriber",
+		"email": "test_subscriber3@example.com",
+		"newsletter_list": "_Test Newsletter List"
+	}
+]

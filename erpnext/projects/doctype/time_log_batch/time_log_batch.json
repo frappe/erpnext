@@ -15,11 +15,15 @@
    "reqd": 1
   }, 
   {
-   "description": "For Sales Invoice", 
-   "fieldname": "rate", 
-   "fieldtype": "Currency", 
-   "label": "Rate", 
-   "permlevel": 0
+   "default": "Draft", 
+   "fieldname": "status", 
+   "fieldtype": "Select", 
+   "in_list_view": 0, 
+   "label": "Status", 
+   "no_copy": 1, 
+   "options": "Draft\nSubmitted\nBilled\nCancelled", 
+   "permlevel": 0, 
+   "read_only": 1
   }, 
   {
    "fieldname": "column_break_3", 
@@ -27,20 +31,10 @@
    "permlevel": 0
   }, 
   {
-   "default": "Draft", 
-   "fieldname": "status", 
-   "fieldtype": "Select", 
-   "in_list_view": 1, 
-   "label": "Status", 
-   "options": "Draft\nSubmitted\nBilled\nCancelled", 
-   "permlevel": 0, 
-   "read_only": 1
-  }, 
-  {
    "description": "Will be updated after Sales Invoice is Submitted.", 
    "fieldname": "sales_invoice", 
    "fieldtype": "Link", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Sales Invoice", 
    "options": "Sales Invoice", 
    "permlevel": 0, 
@@ -52,20 +46,43 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "time_log_batch_details", 
+   "fieldname": "time_logs", 
    "fieldtype": "Table", 
-   "label": "Time Log Batch Details", 
+   "label": "Time Logs", 
    "options": "Time Log Batch Detail", 
    "permlevel": 0, 
    "reqd": 1
   }, 
   {
-   "description": "In Hours", 
+   "fieldname": "section_break_8", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "default": "0", 
+   "description": "updated via Time Logs", 
    "fieldname": "total_hours", 
    "fieldtype": "Float", 
    "in_list_view": 1, 
    "label": "Total Hours", 
    "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_10", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "default": "0", 
+   "description": "updated via Time Logs", 
+   "fieldname": "total_billing_amount", 
+   "fieldtype": "Float", 
+   "label": "Total Billing Amount", 
+   "permlevel": 0, 
+   "precision": "", 
    "read_only": 1
   }, 
   {
@@ -83,7 +100,7 @@
  "icon": "icon-time", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2014-05-27 03:49:21.339026", 
+ "modified": "2015-04-15 08:00:52.746961", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Time Log Batch", 
@@ -101,6 +118,7 @@
    "read": 1, 
    "report": 1, 
    "role": "Projects User", 
+   "share": 1, 
    "submit": 1, 
    "write": 1
   }

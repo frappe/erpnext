@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -12,7 +12,7 @@ from erpnext.controllers.trends import get_period_date_ranges, get_period_month_
 
 def execute(filters=None):
 	if not filters: filters = {}
-	
+
 	columns = get_columns(filters)
 	period_month_ranges = get_period_month_ranges(filters["period"], filters["fiscal_year"])
 	cam_map = get_costcenter_account_month_map(filters)
@@ -37,7 +37,7 @@ def execute(filters=None):
 			data.append(row)
 
 	return columns, sorted(data, key=lambda x: (x[0], x[1]))
-	
+
 def get_columns(filters):
 	for fieldname in ["fiscal_year", "period", "company"]:
 		if not filters.get(fieldname):
@@ -55,45 +55,45 @@ def get_columns(filters):
 				label = label % (formatdate(from_date, format_string="MMM") + " - " + formatdate(from_date, format_string="MMM"))
 			else:
 				label = label % formatdate(from_date, format_string="MMM")
-				
+
 			columns.append(label+":Float:120")
 
-	return columns + [_("Total Target") + ":Float:120", _("Total Actual") + ":Float:120", 
+	return columns + [_("Total Target") + ":Float:120", _("Total Actual") + ":Float:120",
 		_("Total Variance") + ":Float:120"]
 
 #Get cost center & target details
 def get_costcenter_target_details(filters):
-	return frappe.db.sql("""select cc.name, cc.distribution_id, 
-		cc.parent_cost_center, bd.account, bd.budget_allocated 
-		from `tabCost Center` cc, `tabBudget Detail` bd 
-		where bd.parent=cc.name and bd.fiscal_year=%s and 
-		cc.company=%s order by cc.name""" % ('%s', '%s'), 
+	return frappe.db.sql("""select cc.name, cc.distribution_id,
+		cc.parent_cost_center, bd.account, bd.budget_allocated
+		from `tabCost Center` cc, `tabBudget Detail` bd
+		where bd.parent=cc.name and bd.fiscal_year=%s and
+		cc.company=%s order by cc.name""" % ('%s', '%s'),
 		(filters.get("fiscal_year"), filters.get("company")), as_dict=1)
 
 #Get target distribution details of accounts of cost center
 def get_target_distribution_details(filters):
 	target_details = {}
 
-	for d in frappe.db.sql("""select bd.name, bdd.month, bdd.percentage_allocation  
-		from `tabBudget Distribution Detail` bdd, `tabBudget Distribution` bd
-		where bdd.parent=bd.name and bd.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
+	for d in frappe.db.sql("""select md.name, mdp.month, mdp.percentage_allocation
+		from `tabMonthly Distribution Percentage` mdp, `tabMonthly Distribution` md
+		where mdp.parent=md.name and md.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
 			target_details.setdefault(d.name, {}).setdefault(d.month, flt(d.percentage_allocation))
 
 	return target_details
 
 #Get actual details from gl entry
 def get_actual_details(filters):
-	ac_details = frappe.db.sql("""select gl.account, gl.debit, gl.credit, 
-		gl.cost_center, MONTHNAME(gl.posting_date) as month_name 
-		from `tabGL Entry` gl, `tabBudget Detail` bd 
+	ac_details = frappe.db.sql("""select gl.account, gl.debit, gl.credit,
+		gl.cost_center, MONTHNAME(gl.posting_date) as month_name
+		from `tabGL Entry` gl, `tabBudget Detail` bd
 		where gl.fiscal_year=%s and company=%s
-		and bd.account=gl.account and bd.parent=gl.cost_center""" % ('%s', '%s'), 
+		and bd.account=gl.account and bd.parent=gl.cost_center""" % ('%s', '%s'),
 		(filters.get("fiscal_year"), filters.get("company")), as_dict=1)
-		
+
 	cc_actual_details = {}
 	for d in ac_details:
 		cc_actual_details.setdefault(d.cost_center, {}).setdefault(d.account, []).append(d)
-		
+
 	return cc_actual_details
 
 def get_costcenter_account_month_map(filters):
@@ -107,7 +107,7 @@ def get_costcenter_account_month_map(filters):
 	for ccd in costcenter_target_details:
 		for month_id in range(1, 13):
 			month = datetime.date(2013, month_id, 1).strftime('%B')
-			
+
 			cam_map.setdefault(ccd.name, {}).setdefault(ccd.account, {})\
 				.setdefault(month, frappe._dict({
 					"target": 0.0, "actual": 0.0
@@ -117,11 +117,11 @@ def get_costcenter_account_month_map(filters):
 
 			month_percentage = tdd.get(ccd.distribution_id, {}).get(month, 0) \
 				if ccd.distribution_id else 100.0/12
-				
+
 			tav_dict.target = flt(ccd.budget_allocated) * month_percentage / 100
-			
+
 			for ad in actual_details.get(ccd.name, {}).get(ccd.account, []):
 				if ad.month_name == month:
 						tav_dict.actual += flt(ad.debit) - flt(ad.credit)
-						
+
 	return cam_map

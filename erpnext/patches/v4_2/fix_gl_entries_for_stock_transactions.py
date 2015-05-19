@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -8,6 +8,8 @@ from frappe.utils import flt
 def execute():
 	from erpnext.utilities.repost_stock import repost
 	repost(allow_zero_rate=True, only_actual=True)
+	
+	frappe.reload_doctype("Account")
 
 	warehouse_account = frappe.db.sql("""select name, master_name from tabAccount
 		where ifnull(account_type, '') = 'Warehouse'""")

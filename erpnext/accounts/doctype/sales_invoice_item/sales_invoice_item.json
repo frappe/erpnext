@@ -1,5 +1,5 @@
 {
- "autoname": "INVD.######", 
+ "autoname": "hash", 
  "creation": "2013-06-04 11:02:19", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -202,6 +202,58 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "section_break_21", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "net_rate", 
+   "fieldtype": "Currency", 
+   "label": "Net Rate", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "net_amount", 
+   "fieldtype": "Currency", 
+   "label": "Net Amount", 
+   "options": "currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "column_break_24", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "base_net_rate", 
+   "fieldtype": "Currency", 
+   "label": "Net Rate (Company Currency)", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "base_net_amount", 
+   "fieldtype": "Currency", 
+   "label": "Net Amount (Company Currency)", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "accounting", 
    "fieldtype": "Section Break", 
    "label": "Accounting", 
@@ -298,7 +350,7 @@
    "read_only": 0
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Item Group\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
    "hidden": 1, 
@@ -452,7 +504,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-03-10 14:56:45.641026", 
+ "modified": "2015-03-23 14:56:45.641026", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Item", 

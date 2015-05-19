@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 
@@ -28,10 +28,10 @@ class TestSalarySlip(unittest.TestCase):
 		ss.insert()
 		self.assertEquals(ss.total_days_in_month, 31)
 		self.assertEquals(ss.payment_days, 30)
-		self.assertEquals(ss.earning_details[0].e_modified_amount, 14516.13)
-		self.assertEquals(ss.earning_details[1].e_modified_amount, 500)
-		self.assertEquals(ss.deduction_details[0].d_modified_amount, 100)
-		self.assertEquals(ss.deduction_details[1].d_modified_amount, 48.39)
+		self.assertEquals(ss.earnings[0].e_modified_amount, 14516.13)
+		self.assertEquals(ss.earnings[1].e_modified_amount, 500)
+		self.assertEquals(ss.deductions[0].d_modified_amount, 100)
+		self.assertEquals(ss.deductions[1].d_modified_amount, 48.39)
 		self.assertEquals(ss.gross_pay, 15016.13)
 		self.assertEquals(ss.net_pay, 14867.74)
 
@@ -40,10 +40,10 @@ class TestSalarySlip(unittest.TestCase):
 		ss.insert()
 		self.assertEquals(ss.total_days_in_month, 30)
 		self.assertEquals(ss.payment_days, 29)
-		self.assertEquals(ss.earning_details[0].e_modified_amount, 14500)
-		self.assertEquals(ss.earning_details[1].e_modified_amount, 500)
-		self.assertEquals(ss.deduction_details[0].d_modified_amount, 100)
-		self.assertEquals(ss.deduction_details[1].d_modified_amount, 48.33)
+		self.assertEquals(ss.earnings[0].e_modified_amount, 14500)
+		self.assertEquals(ss.earnings[1].e_modified_amount, 500)
+		self.assertEquals(ss.deductions[0].d_modified_amount, 100)
+		self.assertEquals(ss.deductions[1].d_modified_amount, 48.33)
 		self.assertEquals(ss.gross_pay, 15000)
 		self.assertEquals(ss.net_pay, 14851.67)
 
@@ -59,7 +59,6 @@ class TestSalarySlip(unittest.TestCase):
 
 		frappe.set_user("test_employee@example.com")
 		self.assertTrue(salary_slip_test_employee.has_permission("read"))
-		self.assertFalse(salary_slip_test_employee_2.has_permission("read"))
 
 	def make_employee(self, user):
 		if not frappe.db.get_value("User", user):

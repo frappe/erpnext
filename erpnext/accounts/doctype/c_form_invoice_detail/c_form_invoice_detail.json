@@ -1,5 +1,5 @@
 {
- "creation": "2013-02-22 01:27:38.000000", 
+ "creation": "2013-02-22 01:27:38", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -24,7 +24,7 @@
    "width": "120px"
   }, 
   {
-   "description": "<a href=\"#Sales Browser/Territory\">Add / Edit</a>", 
+   "description": "", 
    "fieldname": "territory", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
@@ -60,9 +60,10 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:23:00.000000", 
+ "modified": "2015-01-01 14:29:58.597428", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "C-Form Invoice Detail", 
- "owner": "Administrator"
+ "owner": "Administrator", 
+ "permissions": []
 }

@@ -1,5 +1,5 @@
 {
- "creation": "2013-06-24 15:49:57.000000", 
+ "creation": "2013-06-24 15:49:57", 
  "description": "Settings for Accounts", 
  "docstatus": 0, 
  "doctype": "DocType", 
@@ -9,6 +9,7 @@
    "description": "If enabled, the system will post accounting entries for inventory automatically.", 
    "fieldname": "auto_accounting_for_stock", 
    "fieldtype": "Check", 
+   "in_list_view": 1, 
    "label": "Make Accounting Entry For Every Stock Movement", 
    "permlevel": 0
   }, 
@@ -16,22 +17,16 @@
    "description": "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.", 
    "fieldname": "acc_frozen_upto", 
    "fieldtype": "Date", 
+   "in_list_view": 1, 
    "label": "Accounts Frozen Upto", 
-   "permlevel": 0
-  }, 
-  {
-   "description": "Users with this role are allowed to create / modify accounting entry before frozen date", 
-   "fieldname": "bde_auth_role", 
-   "fieldtype": "Link", 
-   "label": "Allowed Role to Edit Entries Before Frozen Date", 
-   "options": "Role", 
    "permlevel": 0
   }, 
   {
    "description": "Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts", 
    "fieldname": "frozen_accounts_modifier", 
    "fieldtype": "Link", 
-   "label": "Frozen Accounts Modifier", 
+   "in_list_view": 1, 
+   "label": "Role Allowed to Set Frozen Accounts & Edit Frozen Entries", 
    "options": "Role", 
    "permlevel": 0
   }, 
@@ -39,6 +34,7 @@
    "description": "Role that is allowed to submit transactions that exceed credit limits set.", 
    "fieldname": "credit_controller", 
    "fieldtype": "Link", 
+   "in_list_view": 1, 
    "label": "Credit Controller", 
    "options": "Role", 
    "permlevel": 0
@@ -47,7 +43,7 @@
  "icon": "icon-cog", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2013-12-20 19:22:52.000000", 
+ "modified": "2015-02-05 05:11:34.163902", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Accounts Settings", 
@@ -60,6 +56,7 @@
    "print": 1, 
    "read": 1, 
    "role": "Accounts Manager", 
+   "share": 1, 
    "write": 1
   }
  ]

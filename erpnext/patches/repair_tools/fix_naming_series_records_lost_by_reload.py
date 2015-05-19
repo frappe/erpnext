@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -7,17 +7,17 @@ import json
 import re
 from frappe.model.naming import make_autoname
 from frappe.utils import cint
-from frappe.utils.email_lib import sendmail_to_system_managers
+from frappe.email import sendmail_to_system_managers
 
 doctype_series_map = {
 	'Attendance': 'ATT-',
 	'C-Form': 'C-FORM-',
 	'Customer': 'CUST-',
-	'Customer Issue': 'CI-',
+	'Warranty Claim': 'CI-',
 	'Delivery Note': 'DN-',
 	'Installation Note': 'IN-',
 	'Item': 'ITEM-',
-	'Journal Voucher': 'JV-',
+	'Journal Entry': 'JV-',
 	'Lead': 'LEAD-',
 	'Opportunity': 'OPTY-',
 	'Packing Slip': 'PS-',
@@ -32,7 +32,7 @@ doctype_series_map = {
 	'Stock Entry': 'STE-',
 	'Supplier': 'SUPP-',
 	'Supplier Quotation': 'SQTN-',
-	'Support Ticket': 'SUP-'
+	'Issue': 'SUP-'
 }
 
 def check_docs_to_rename():

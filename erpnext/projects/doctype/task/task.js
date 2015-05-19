@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.projects");
@@ -25,8 +25,22 @@ erpnext.projects.Task = frappe.ui.form.Controller.extend({
 		this.frm.doc.project && frappe.model.remove_from_locals("Project",
 			this.frm.doc.project);
 	},
+	
+	refresh: function(doc) {
+		if(!doc.__islocal) {
+			cur_frm.add_custom_button(__("Time Logs"), function() {
+				frappe.route_options = {"project": doc.project, "task": doc.name}
+				frappe.set_route("List", "Time Log");
+			}, "icon-list", true);
+			cur_frm.add_custom_button(__("Expense Claims"), function() {
+				frappe.route_options = {"project": doc.project, "task": doc.name}
+				frappe.set_route("List", "Expense Claim");
+			}, "icon-list", true);
+		}
+	}
 });
 
+cur_frm.add_fetch('task', 'subject', 'subject');
 
 cur_frm.cscript = new erpnext.projects.Task({frm: cur_frm});
 
