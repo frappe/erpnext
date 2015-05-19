@@ -319,6 +319,8 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount +
 			discount_amount_loss, precision("tax_amount", tax));
 		tax.total = flt(tax.total + discount_amount_loss, precision("total", tax));
+		
+		this.set_in_company_currency(tax, ["total", "tax_amount_after_discount_amount"]);
 	},
 	
 	manipulate_grand_total_for_inclusive_tax: function() {
@@ -338,6 +340,9 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 					last_tax.tax_amount += diff;
 					last_tax.tax_amount_after_discount += diff;
 					last_tax.total += diff;
+					
+					this.set_in_company_currency(last_tax, 
+						["total", "tax_amount", "tax_amount_after_discount_amount"]);
 				}
 			}
 		}
