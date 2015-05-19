@@ -45,7 +45,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			&& !(this.frm.doc.__onload ? this.frm.doc.__onload.load_after_mapping : false)) {
 				this.apply_default_taxes();
 		}
-		
+
 		if(this.frm.doc.__islocal && this.frm.doc.company && this.frm.doc["items"] && !this.frm.doc.is_pos) {
 			this.calculate_taxes_and_totals();
 		}
@@ -63,7 +63,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		erpnext.pos.make_pos_btn(this.frm);
 		this.setup_sms();
 	},
-	
+
 	apply_default_taxes: function() {
 		var me = this;
 		return frappe.call({
@@ -83,14 +83,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	setup_sms: function() {
 		var me = this;
-		if(this.frm.doc.docstatus===1 && !in_list(["Lost", "Stopped"], this.frm.doc.status)) {
+		if(this.frm.doc.docstatus===1 && !in_list(["Lost", "Stopped"], this.frm.doc.status)
+			&& this.frm.doctype != "Purchase Invoice") {
 			this.frm.page.add_menu_item(__('Send SMS'), function() { me.send_sms(); });
 		}
 	},
 
 	send_sms: function() {
 		frappe.require("assets/erpnext/js/sms_manager.js");
-		var sms_man = new SMSManager(this.doc);
+		var sms_man = new SMSManager(this.frm.doc);
 	},
 
 	hide_currency_and_price_list: function() {
@@ -255,7 +256,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 				this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
-		
+
 		if(flt(this.frm.doc.conversion_rate)>0.0) {
 			if(this.frm.doc.ignore_pricing_rule) {
 				this.calculate_taxes_and_totals();
@@ -302,7 +303,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			cint(this.frm.doc.plc_conversion_rate) != cint(this.frm.doc.conversion_rate)) {
 				this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);
 		}
-		
+
 		if(!this.in_apply_price_list) {
 			this.apply_price_list();
 		}
