@@ -33,6 +33,8 @@ class Bin(Document):
 				args["posting_date"] = nowdate()
 
 			# update valuation and qty after transaction for post dated entry
+			if args.get("is_cancelled") == "Yes" and via_landed_cost_voucher:
+				return
 			update_entries_after({
 				"item_code": self.item_code,
 				"warehouse": self.warehouse,
