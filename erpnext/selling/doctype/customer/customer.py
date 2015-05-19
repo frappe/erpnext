@@ -76,7 +76,7 @@ class Customer(TransactionBase):
 
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):
-			frappe.throw(_("A Customer Group exists with same name please change the Customer name or rename the Customer Group"))
+			frappe.throw(_("A Customer Group exists with same name please change the Customer name or rename the Customer Group"), frappe.NameError)
 
 	def delete_customer_address(self):
 		addresses = frappe.db.sql("""select name, lead from `tabAddress`
@@ -125,9 +125,9 @@ def get_dashboard_info(customer):
 
 	billing_this_year = frappe.db.sql("""select sum(base_grand_total)
 		from `tabSales Invoice`
-		where customer=%s and docstatus = 1 and fiscal_year = %s""", 
+		where customer=%s and docstatus = 1 and fiscal_year = %s""",
 		(customer, frappe.db.get_default("fiscal_year")))
-		
+
 	total_unpaid = frappe.db.sql("""select sum(outstanding_amount)
 		from `tabSales Invoice`
 		where customer=%s and docstatus = 1""", customer)

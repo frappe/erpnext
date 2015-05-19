@@ -421,8 +421,3 @@ def get_outstanding_invoices(amount_query, account, party_type, party):
 			})
 
 	return all_outstanding_vouchers
-
-@frappe.whitelist()
-def get_letter_head(company):
-	return frappe.db.get_value("Company",company,"default_letter_head")
-
