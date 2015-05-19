@@ -50,7 +50,7 @@ def execute(filters=None):
 def get_columns(group_wise_columns, filters):
 	columns = []
 	column_map = frappe._dict({
-		"name": _("Sales Invoice") + "::120",
+		"name": _("Sales Invoice") + ":Link/Sales Invoice:120",
 		"posting_date": _("Posting Date") + ":Date",
 		"posting_time": _("Posting Time"),
 		"item_code": _("Item Code") + ":Link/Item",
@@ -159,7 +159,7 @@ class GrossProfitGenerator(object):
 	def get_buying_amount_from_sales_bom(self, row, sales_bom):
 		buying_amount = 0.0
 		for bom_item in sales_bom[row.item_code]:
-			if bom_item.get("parent_detail_docname")==row.name:
+			if bom_item.get("parent_detail_docname")==row.item_row:
 				buying_amount += self.get_buying_amount(row, bom_item.item_code)
 
 		return buying_amount
@@ -177,13 +177,13 @@ class GrossProfitGenerator(object):
 			if row.dn_detail:
 				row.parenttype = "Delivery Note"
 				row.parent = row.delivery_note
-				row.name = row.dn_detail
+				row.item_row = row.dn_detail
 
 				my_sle = self.sle.get((item_code, row.warehouse))
 				for i, sle in enumerate(my_sle):
 					# find the stock valution rate from stock ledger entry
 					if sle.voucher_type == row.parenttype and row.parent == sle.voucher_no and \
-						sle.voucher_detail_no == row.name:
+						sle.voucher_detail_no == row.item_row:
 							previous_stock_value = len(my_sle) > i+1 and \
 								flt(my_sle[i+1].stock_value) or 0.0
 							return  previous_stock_value - flt(sle.stock_value)
