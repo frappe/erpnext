@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import validate_email_add, strip
 from frappe import _
+from email.utils import parseaddr
 
 class NewsletterList(Document):
 	def onload(self):
@@ -23,7 +24,7 @@ class NewsletterList(Document):
 
 		for user in frappe.db.get_all(doctype, [email_field, unsubscribed_field or "name"]):
 			try:
-				email = strip(user.get(email_field))
+				email = parseaddr(user.get(email_field))[1]
 				if email:
 					frappe.get_doc({
 						"doctype": "Newsletter List Subscriber",

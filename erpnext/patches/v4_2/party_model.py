@@ -96,8 +96,19 @@ def set_party_in_jv_and_gl_entry(receivable_payable_accounts):
 				frappe.db.commit()
 
 def delete_individual_party_account():
-	frappe.db.sql("""delete from `tabAccount` where ifnull(master_type, '') in ('Customer', 'Supplier')
-		and ifnull(master_name, '') != ''""")
+	frappe.db.sql("""delete from `tabAccount` acc 
+		where ifnull(acc.master_type, '') in ('Customer', 'Supplier')
+		and ifnull(acc.master_name, '') != '' 
+		and not exists(select gle.name from `tabGL Entry` gle where gle.account = acc.name)""")
+		
+	accounts_not_deleted = frappe.db.sql_list("""select name from `tabAccount` acc 
+		where ifnull(acc.master_type, '') in ('Customer', 'Supplier')
+		and ifnull(acc.master_name, '') != '' 
+		and exists(select gle.name from `tabGL Entry` gle where gle.account = acc.name)""")
+		
+	if accounts_not_deleted:
+		print "Accounts not deleted: " + "\n".join(accounts_not_deleted)
+		
 
 def remove_customer_supplier_account_report():
 	for d in ["Customer Account Head", "Supplier Account Head"]:
