@@ -71,12 +71,11 @@ def save_entries(gl_map, adv_adj, update_outstanding):
 		# check against budget
 		validate_expense_against_budget(entry)
 
-
 		# update total debit / credit
 		total_debit += flt(entry.debit)
 		total_credit += flt(entry.credit)
 
-	validate_total_debit_credit(total_debit, total_credit)
+	validate_total_debit_credit(total_debit, total_credit, gl_map)
 
 def make_entry(args, adv_adj, update_outstanding):
 	args.update({"doctype": "GL Entry"})
@@ -86,9 +85,9 @@ def make_entry(args, adv_adj, update_outstanding):
 	gle.run_method("on_update_with_args", adv_adj, update_outstanding)
 	gle.submit()
 
-def validate_total_debit_credit(total_debit, total_credit):
+def validate_total_debit_credit(total_debit, total_credit, gl_map):
 	if abs(total_debit - total_credit) > 0.005:
-		frappe.throw(_("Debit and Credit not equal for this voucher. Difference is {0}.").format(total_debit - total_credit))
+		frappe.throw(_("Debit and Credit not equal for {0} #{1}. Difference is {2}.").format(gl_map[0].voucher_type, gl_map[0].voucher_no, total_debit - total_credit))
 
 def validate_account_for_auto_accounting_for_stock(gl_map):
 	if gl_map[0].voucher_type=="Journal Entry":
