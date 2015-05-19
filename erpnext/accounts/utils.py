@@ -420,13 +420,12 @@ def get_outstanding_invoices(amount_query, account):
 		payment_amount = -1*payment_amount[0][0] if payment_amount else 0
 
 		if d.invoice_amount > payment_amount:
-
 			all_outstanding_vouchers.append({
 				'voucher_no': d.voucher_no,
 				'voucher_type': d.voucher_type,
 				'posting_date': d.posting_date,
 				'invoice_amount': flt(d.invoice_amount),
-				'outstanding_amount': d.invoice_amount - payment_amount
+				'outstanding_amount': flt(d.invoice_amount - payment_amount, 2)
 				})
 
 	return all_outstanding_vouchers
