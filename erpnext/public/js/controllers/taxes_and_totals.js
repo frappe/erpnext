@@ -46,14 +46,19 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		var company_currency = this.get_company_currency();
 
 		if(!this.frm.doc.conversion_rate) {
-			frappe.throw(repl('%(conversion_rate_label)s' +
-				__(' is mandatory. Maybe Currency Exchange record is not created for ') +
-				'%(from_currency)s' + __(" to ") + '%(to_currency)s',
-				{
-					"conversion_rate_label": conversion_rate_label,
-					"from_currency": this.frm.doc.currency,
-					"to_currency": company_currency
-				}));
+			if(this.frm.doc.currency == company_currency) {
+				this.frm.set_value("conversion_rate", 1);
+			} else {
+				frappe.throw(repl('%(conversion_rate_label)s' +
+					__(' is mandatory. Maybe Currency Exchange record is not created for ') +
+					'%(from_currency)s' + __(" to ") + '%(to_currency)s',
+					{
+						"conversion_rate_label": conversion_rate_label,
+						"from_currency": this.frm.doc.currency,
+						"to_currency": company_currency
+					}));
+			}
+			
 		}
 	},
 
@@ -314,6 +319,8 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount +
 			discount_amount_loss, precision("tax_amount", tax));
 		tax.total = flt(tax.total + discount_amount_loss, precision("total", tax));
+		
+		this.set_in_company_currency(tax, ["total", "tax_amount_after_discount_amount"]);
 	},
 	
 	manipulate_grand_total_for_inclusive_tax: function() {
@@ -333,6 +340,9 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 					last_tax.tax_amount += diff;
 					last_tax.tax_amount_after_discount += diff;
 					last_tax.total += diff;
+					
+					this.set_in_company_currency(last_tax, 
+						["total", "tax_amount", "tax_amount_after_discount_amount"]);
 				}
 			}
 		}
