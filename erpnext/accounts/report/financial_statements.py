@@ -224,20 +224,6 @@ def sort_root_accounts(roots):
 
 	roots.sort(compare_roots)
 
-def sort_root_accounts(roots):
-	"""Sort root types as Asset, Liability, Equity, Income, Expense"""
-
-	def compare_roots(a, b):
-		if a.report_type != b.report_type and a.report_type == "Balance Sheet":
-			return -1
-		if a.root_type != b.root_type and a.root_type == "Asset":
-			return -1
-		if a.root_type == "Liability" and b.root_type == "Equity":
-			return -1
-		return 1
-
-	roots.sort(compare_roots)
-
 def get_gl_entries(company, from_date, to_date, root_lft, root_rgt, ignore_closing_entries=False):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	additional_conditions = []

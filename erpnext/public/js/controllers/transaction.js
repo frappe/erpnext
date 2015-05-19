@@ -194,6 +194,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var fn = function() {
 			if(me.frm.doc.company && me.frm.fields_dict.currency) {
 				var company_currency = me.get_company_currency();
+				var company_doc = frappe.get_doc(":Company", me.frm.doc.company);
 				if (!me.frm.doc.currency) {
 					me.frm.set_value("currency", company_currency);
 				}
@@ -204,6 +205,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				if (me.frm.doc.price_list_currency == company_currency) {
 					me.frm.set_value('plc_conversion_rate', 1.0);
 				}
+				if (company_doc.default_letter_head) {
+					me.frm.set_value("letter_head", company_doc.default_letter_head);
+				}
+				if (company_doc.default_terms) {
+					me.frm.set_value("tc_name", company_doc.default_terms);
+				}
 
 				me.frm.script_manager.trigger("currency");
 				me.apply_pricing_rule();
@@ -213,7 +220,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if (this.frm.doc.posting_date) var date = this.frm.doc.posting_date;
 		else var date = this.frm.doc.transaction_date;
 		erpnext.get_fiscal_year(this.frm.doc.company, date, fn);
-		erpnext.get_letter_head(this.frm.doc.company);
 
 		if(this.frm.doc.company) {
 			erpnext.last_selected_company = this.frm.doc.company;
