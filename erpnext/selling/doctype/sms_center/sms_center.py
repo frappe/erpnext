@@ -44,8 +44,10 @@ class SMSCenter(Document):
 				ifnull(cell_number,'')!='' %s""" % where_clause)
 
 		elif self.send_to == 'All Sales Person':
-			rec = frappe.db.sql("""select sales_person_name, mobile_no from
-				`tabSales Person` where docstatus!=2 and ifnull(mobile_no,'')!=''""")
+			rec = frappe.db.sql("""select sales_person_name, tabEmployee.cell_number from
+				`tabSales Person`, tabEmployee
+				and `tabSales Person`.employee = tabEmployee.name
+				where ifnull(tabEmployee.cell_number,'')!=''""")
 
 		rec_list = ''
 
