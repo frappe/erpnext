@@ -53,14 +53,6 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "default_letter_head", 
-   "fieldtype": "Link", 
-   "label": "Default Letter Head", 
-   "options": "Letter Head", 
-   "permlevel": 0, 
-   "precision": ""
-  }, 
-  {
    "fieldname": "domain", 
    "fieldtype": "Select", 
    "label": "Domain", 
@@ -72,8 +64,16 @@
    "fieldname": "charts_section", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
-   "label": "Country Settings", 
+   "label": "Default Values", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "default_letter_head", 
+   "fieldtype": "Link", 
+   "label": "Default Letter Head", 
+   "options": "Letter Head", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "default_holiday_list", 
@@ -118,9 +118,17 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "default_terms", 
+   "fieldtype": "Link", 
+   "label": "Default Terms", 
+   "options": "Terms and Conditions", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "default_settings", 
    "fieldtype": "Section Break", 
-   "label": "Default Settings", 
+   "label": "Accounts Settings", 
    "oldfieldtype": "Section Break", 
    "permlevel": 0, 
    "read_only": 0
@@ -406,7 +414,7 @@
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2015-05-04 11:22:42.116328", 
+ "modified": "2015-05-19 02:00:41.055138", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 

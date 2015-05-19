@@ -63,6 +63,8 @@ class Company(Document):
 		if self.default_currency:
 			frappe.db.set_value("Currency", self.default_currency, "enabled", 1)
 
+		frappe.clear_cache()
+
 	def install_country_fixtures(self):
 		if os.path.exists(os.path.join(os.path.dirname(__file__), "fixtures", self.country.lower())):
 			frappe.get_attr("erpnext.setup.doctype.company.fixtures.{0}.install".format(self.country.lower()))(self)
@@ -167,7 +169,7 @@ class Company(Document):
 			where defkey='Company' and defvalue=%s""", (newdn, olddn))
 
 		frappe.defaults.clear_cache()
-		
+
 	def on_trash(self):
 		"""
 			Trash accounts and cost centers for this company if no gl entry exists
@@ -178,7 +180,7 @@ class Company(Document):
 			frappe.db.sql("delete from `tabAccount` where company = %s", self.name)
 
 			# delete cost center child table - budget detail
-			frappe.db.sql("""delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc 
+			frappe.db.sql("""delete bd.* from `tabBudget Detail` bd, `tabCost Center` cc
 				where bd.parent = cc.name and cc.company = %s""", self.name)
 			#delete cost center
 			frappe.db.sql("delete from `tabCost Center` WHERE company = %s", self.name)
