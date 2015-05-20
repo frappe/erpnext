@@ -1,13 +1,13 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.ui.form.on("POS Setting", "onload", function(frm) {
+frappe.ui.form.on("POS Profile", "onload", function(frm) {
 	frm.set_query("selling_price_list", function() {
 		return { filter: { selling: 1 } };
 	});
 
 	frm.call({
-		method: "erpnext.accounts.doctype.pos_setting.pos_setting.get_series",
+		method: "erpnext.accounts.doctype.pos_profile.pos_profile.get_series",
 		callback: function(r) {
 			if(!r.exc) {
 				set_field_options("naming_series", r.message);

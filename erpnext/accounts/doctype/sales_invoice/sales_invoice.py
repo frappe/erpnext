@@ -160,12 +160,12 @@ class SalesInvoice(SellingController):
 					frappe.throw(_("Time Log Batch {0} must be 'Submitted'").format(d.time_log_batch))
 
 	def set_pos_fields(self, for_validate=False):
-		"""Set retail related fields from pos settings"""
+		"""Set retail related fields from POS Profiles"""
 		if cint(self.is_pos) != 1:
 			return
 
-		from erpnext.stock.get_item_details import get_pos_settings_item_details, get_pos_settings
-		pos = get_pos_settings(self.company)
+		from erpnext.stock.get_item_details import get_pos_profiles_item_details, get_pos_profiles
+		pos = get_pos_profiles(self.company)
 
 		if pos:
 			if not for_validate and not self.customer:
@@ -184,7 +184,7 @@ class SalesInvoice(SellingController):
 			# set pos values in items
 			for item in self.get("items"):
 				if item.get('item_code'):
-					for fname, val in get_pos_settings_item_details(pos,
+					for fname, val in get_pos_profiles_item_details(pos,
 						frappe._dict(item.as_dict()), pos).items():
 
 						if (not for_validate) or (for_validate and not item.get(fname)):
@@ -371,24 +371,24 @@ class SalesInvoice(SellingController):
 
 
 	def get_warehouse(self):
-		user_pos_setting = frappe.db.sql("""select name, warehouse from `tabPOS Setting`
+		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
 			where ifnull(user,'') = %s and company = %s""", (frappe.session['user'], self.company))
-		warehouse = user_pos_setting[0][1] if user_pos_setting else None
+		warehouse = user_pos_profile[0][1] if user_pos_profile else None
 
 		if not warehouse:
-			global_pos_setting = frappe.db.sql("""select name, warehouse from `tabPOS Setting`
+			global_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
 				where ifnull(user,'') = '' and company = %s""", self.company)
 
-			if global_pos_setting:
-				warehouse = global_pos_setting[0][1]
-			elif not user_pos_setting:
-				msgprint(_("POS Setting required to make POS Entry"), raise_exception=True)
+			if global_pos_profile:
+				warehouse = global_pos_profile[0][1]
+			elif not user_pos_profile:
+				msgprint(_("POS Profile required to make POS Entry"), raise_exception=True)
 
 		return warehouse
 
 	def on_update(self):
 		if cint(self.update_stock) == 1:
-			# Set default warehouse from pos setting
+			# Set default warehouse from POS Profile
 			if cint(self.is_pos) == 1:
 				w = self.get_warehouse()
 				if w:

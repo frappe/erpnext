@@ -8,22 +8,22 @@ from frappe.utils import cint
 
 from frappe.model.document import Document
 
-class POSSetting(Document):
+class POSProfile(Document):
 	def validate(self):
 		self.check_for_duplicate()
 		self.validate_expense_account()
 		self.validate_all_link_fields()
 
 	def check_for_duplicate(self):
-		res = frappe.db.sql("""select name, user from `tabPOS Setting`
+		res = frappe.db.sql("""select name, user from `tabPOS Profile`
 			where ifnull(user, '') = %s and name != %s and company = %s""",
 			(self.user, self.name, self.company))
 		if res:
 			if res[0][1]:
-				msgprint(_("POS Setting {0} already created for user: {1} and company {2}").format(res[0][0],
+				msgprint(_("POS Profile {0} already created for user: {1} and company {2}").format(res[0][0],
 					res[0][1], self.company), raise_exception=1)
 			else:
-				msgprint(_("Global POS Setting {0} already created for company {1}").format(res[0][0],
+				msgprint(_("Global POS Profile {0} already created for company {1}").format(res[0][0],
 					self.company), raise_exception=1)
 
 	def validate_expense_account(self):
@@ -57,7 +57,7 @@ class POSSetting(Document):
 			condition = ""
 
 		pos_view_users = frappe.db.sql_list("""select user
-			from `tabPOS Setting` {0}""".format(condition))
+			from `tabPOS Profile` {0}""".format(condition))
 
 		for user in pos_view_users:
 			if user:
