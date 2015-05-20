@@ -18,18 +18,18 @@ def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1, compan
 
 def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verbose=1, company=None):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
-	cond = ""
+	cond = " ifnull(disabled, 0) = 0"
 	if fiscal_year:
-		cond = "fy.name = %(fiscal_year)s"
+		cond = " and fy.name = %(fiscal_year)s"
 	else:
-		cond = "%(transaction_date)s >= fy.year_start_date and %(transaction_date)s <= fy.year_end_date"
+		cond = " and %(transaction_date)s >= fy.year_start_date and %(transaction_date)s <= fy.year_end_date"
 
 	if company:
 		cond += """ and (not exists(select name from `tabFiscal Year Company` fyc where fyc.parent = fy.name)
 			or exists(select company from `tabFiscal Year Company` fyc where fyc.parent = fy.name and fyc.company=%(company)s ))"""
 
 	fy = frappe.db.sql("""select fy.name, fy.year_start_date, fy.year_end_date from `tabFiscal Year` fy
-		where %s and ifnull(disabled, 0) = 0 order by fy.year_start_date desc""" % cond, {
+		where %s order by fy.year_start_date desc""" % cond, {
 			"fiscal_year": fiscal_year,
 			"transaction_date": transaction_date,
 			"company": company
