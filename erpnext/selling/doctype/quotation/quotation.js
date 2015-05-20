@@ -34,7 +34,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 						method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
 						source_doctype: "Opportunity",
 						get_query_filters: {
-							status: ["!=", "Lost"],
+							status: ["not in", ["Lost", "Closed"]],
 							enquiry_type: cur_frm.doc.order_type,
 							customer: cur_frm.doc.customer || undefined,
 							lead: cur_frm.doc.lead || undefined,
