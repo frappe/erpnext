@@ -20,9 +20,9 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
 	cond = " ifnull(disabled, 0) = 0"
 	if fiscal_year:
-		cond = " and fy.name = %(fiscal_year)s"
+		cond += " and fy.name = %(fiscal_year)s"
 	else:
-		cond = " and %(transaction_date)s >= fy.year_start_date and %(transaction_date)s <= fy.year_end_date"
+		cond += " and %(transaction_date)s >= fy.year_start_date and %(transaction_date)s <= fy.year_end_date"
 
 	if company:
 		cond += """ and (not exists(select name from `tabFiscal Year Company` fyc where fyc.parent = fy.name)
