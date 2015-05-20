@@ -18,11 +18,11 @@ def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1, compan
 
 def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verbose=1, company=None):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
-	cond = ""
+	cond = " ifnull(disabled, 0) = 0"
 	if fiscal_year:
-		cond = "fy.name = %(fiscal_year)s"
+		cond = " and fy.name = %(fiscal_year)s"
 	else:
-		cond = "%(transaction_date)s >= fy.year_start_date and %(transaction_date)s <= fy.year_end_date"
+		cond = " and %(transaction_date)s >= fy.year_start_date and %(transaction_date)s <= fy.year_end_date"
 
 	if company:
 		cond += """ and (not exists(select name from `tabFiscal Year Company` fyc where fyc.parent = fy.name)
@@ -36,7 +36,7 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 		})
 
 	if not fy:
-		error_msg = _("""{0} {1} not in any Fiscal Year. For more details check {2}.""").format(label, formatdate(transaction_date), "https://erpnext.com/kb/accounts/fiscal-year-error")
+		error_msg = _("""{0} {1} not in any active Fiscal Year. For more details check {2}.""").format(label, formatdate(transaction_date), "https://erpnext.com/kb/accounts/fiscal-year-error")
 		if verbose==1: frappe.msgprint(error_msg)
 		raise FiscalYearError, error_msg
 	return fy
