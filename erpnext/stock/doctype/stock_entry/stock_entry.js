@@ -43,7 +43,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				return erpnext.queries.item({is_stock_item: "Yes"});
 			}
 		};
-		
+
 		this.frm.set_query("purchase_order", function() {
 			return {
 				"filters": {
@@ -68,8 +68,13 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	onload_post_render: function() {
+		var me = this;
 		cur_frm.get_field("items").grid.set_multiple_add("item_code", "qty");
-		this.set_default_account();
+		this.set_default_account(function() {
+			if(me.frm.doc.__islocal && me.frm.doc.company && !me.frm.doc.amended_from) {
+				cur_frm.script_manager.trigger("company");
+			}
+		});
 	},
 
 	refresh: function() {
@@ -102,7 +107,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		this.clean_up();
 	},
 
-	set_default_account: function() {
+	set_default_account: function(callback) {
 		var me = this;
 
 		if(cint(frappe.defaults.get_default("auto_accounting_for_stock")) && this.frm.doc.company) {
@@ -122,6 +127,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 						$.each(me.frm.doc.items || [], function(i, d) {
 							if(!d.expense_account) d.expense_account = r.message;
 						});
+						if(callback) callback();
 					}
 				}
 			});
@@ -521,7 +527,14 @@ cur_frm.fields_dict.supplier.get_query = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.company = function(doc, cdt, cdn) {
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
+	if(doc.company) {
+		erpnext.get_fiscal_year(doc.company, doc.posting_date, function() {
+			var company_doc = frappe.get_doc(":Company", doc.company);
+			if(company_doc.default_letter_head) {
+				cur_frm.set_value("letter_head", company_doc.default_letter_head);
+			}
+		});
+	}
 }
 
 cur_frm.cscript.posting_date = function(doc, cdt, cdn){
