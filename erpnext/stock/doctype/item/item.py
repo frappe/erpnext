@@ -12,8 +12,6 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 import copy
 
 class WarehouseNotSet(frappe.ValidationError): pass
-class DuplicateVariant(frappe.ValidationError): pass
-class ItemTemplateCannotHaveStock(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
 	website = frappe._dict(
@@ -63,7 +61,6 @@ class Item(WebsiteGenerator):
 		self.cant_change()
 		self.validate_reorder_level()
 		self.validate_warehouse_for_reorder()
-		self.validate_variants()
 		self.update_item_desc()
 		self.synced_with_hub = 0
 
@@ -77,7 +74,6 @@ class Item(WebsiteGenerator):
 		invalidate_cache_for_item(self)
 		self.validate_name_with_item_group()
 		self.update_item_price()
-		self.sync_variants()
 
 	def get_context(self, context):
 		context["parent_groups"] = get_parent_item_groups(self.item_group) + \
@@ -132,43 +128,6 @@ class Item(WebsiteGenerator):
 
 			if not matched:
 				frappe.throw(_("Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module."))
-
-	def validate_variants(self):
-		self.validate_variants_are_unique()
-		self.validate_stock_for_template_must_be_zero()
-
-	def validate_stock_for_template_must_be_zero(self):
-		if self.has_variants:
-			stock_in = frappe.db.sql_list("""select warehouse from tabBin
-				where item_code=%s and ifnull(actual_qty, 0) > 0""", self.name)
-			if stock_in:
-				frappe.throw(_("Item Template cannot have stock and varaiants. Please remove stock from warehouses {0}").format(", ".join(stock_in)),
-					ItemTemplateCannotHaveStock)
-
-	def validate_variants_are_unique(self):
-		if not self.has_variants:
-			self.variants = []
-			return
-
-		if self.variants:
-			if self.variant_of:
-				frappe.throw(_("Item cannot be a variant of a variant"))
-	
-			variants, attributes = [], {}
-			for d in self.variants:
-				key = (d.item_attribute, d.item_attribute_value)
-				if key in variants:
-					frappe.throw(_("{0} {1} is entered more than once in Item Variants table")
-						.format(d.item_attribute, d.item_attribute_value), DuplicateVariant)
-				variants.append(key)
-
-				attributes.setdefault(d.item_attribute, [t.attribute_value for t in frappe.db.get_all("Item Attribute Value",
-					fields=["attribute_value"],	filters={"parent": d.item_attribute })])
-				
-				if d.item_attribute_value not in attributes.get(d.item_attribute):
-					frappe.throw(_("Attribute value {0} does not exist in Item Attribute Master.").format(d.item_attribute_value))
-		else:
-			frappe.throw(_("Please enter atleast one attribute row in Item Variants table"))
 
 	def sync_variants(self):
 		variant_item_codes = self.get_variant_item_codes()
@@ -460,9 +419,11 @@ class Item(WebsiteGenerator):
 	def update_item_desc(self):
 		if frappe.db.get_value('BOM',self.name, 'description') != self.description:
 			frappe.db.sql("""update `tabBOM` set description = %s where item = %s and docstatus < 2""",(self.description, self.name))
-			frappe.db.sql("""update `tabBOM Item` set description = %s where item_code = %s and docstatus < 2""",(self.description, self.name))
-			frappe.db.sql("""update `tabBOM Explosion Item` set description = %s where item_code = %s and docstatus < 2""",(self.description, self.name))
-
+			frappe.db.sql("""update `tabBOM Item` set description = %s where 
+				item_code = %s and docstatus < 2""",(self.description, self.name))
+			frappe.db.sql("""update `tabBOM Explosion Item` set description = %s where 
+				item_code = %s and docstatus < 2""",(self.description, self.name))
+	
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
 		end_of_life = frappe.db.get_value("Item", item_code, "end_of_life")
@@ -567,3 +528,4 @@ def invalidate_cache_for_item(doc):
 
 	if doc.get("old_item_group") and doc.get("old_item_group") != doc.item_group:
 		invalidate_cache_for(doc, doc.old_item_group)
+

@@ -186,16 +186,6 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "has_variants", 
-   "description": "A new variant (Item) will be created for each attribute value combination", 
-   "fieldname": "variants", 
-   "fieldtype": "Table", 
-   "label": "Variants", 
-   "options": "Item Variant", 
-   "permlevel": 0, 
-   "precision": ""
-  }, 
-  {
    "fieldname": "inventory", 
    "fieldtype": "Section Break", 
    "label": "Inventory", 
@@ -877,7 +867,7 @@
   }
  ], 
  "icon": "icon-tag", 
- "idx": 1, 
+ "idx": 1,
  "max_attachments": 1, 
  "modified": "2015-06-26 17:20:18.204558", 
  "modified_by": "Administrator", 

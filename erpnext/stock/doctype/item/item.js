@@ -5,40 +5,6 @@ frappe.provide("erpnext.item");
 
 frappe.ui.form.on("Item", {
 	onload: function(frm) {
-		var df = frappe.meta.get_docfield("Item Variant", "item_attribute_value");
-		df.on_make = function(field) {
-			$(field.input_area).addClass("ui-front");
-			field.$input.autocomplete({
-				minLength: 0,
-				minChars: 0,
-				source: function(request, response) {
-					frappe.call({
-						method:"frappe.client.get_list",
-						args:{
-							doctype:"Item Attribute Value",
-							filters: [
-								["parent","=", field.doc.item_attribute],
-								["attribute_value", "like", request.term + "%"]
-							],
-							fields: ["attribute_value"]
-						},
-						callback: function(r) {
-							response($.map(r.message, function(d) { return d.attribute_value; }));
-						}
-					});
-				},
-				select: function(event, ui) {
-					field.$input.val(ui.item.value);
-					field.$input.trigger("change");
-				},
-				focus: function( event, ui ) {
-					if(ui.item.action) {
-						return false;
-					}
-				},
-			});
-		}
-
 		erpnext.item.setup_queries(frm);
 	},
 
@@ -64,6 +30,10 @@ frappe.ui.form.on("Item", {
 			frm.add_custom_button(__("Show Variants"), function() {
 				frappe.set_route("List", "Item", {"variant_of": frm.doc.name});
 			}, "icon-list", "btn-default");
+			frm.add_custom_button(__("Manage Variants"), function() {
+				frappe.route_options = {"item": frm.doc.name };
+				new_doc("Manage Variants");
+			});
 		}
 		if (frm.doc.variant_of) {
 			frm.set_intro(__("This Item is a Variant of {0} (Template). Attributes will be copied over from the template unless 'No Copy' is set", [frm.doc.variant_of]), true);
@@ -114,6 +84,7 @@ frappe.ui.form.on("Item", {
 			method: "copy_specification_from_item_group"
 		});
 	},
+	
 	is_stock_item: function(frm) {
 		erpnext.item.toggle_reqd(frm);
 	}
