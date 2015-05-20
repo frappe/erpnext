@@ -29,14 +29,14 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 			or exists(select company from `tabFiscal Year Company` fyc where fyc.parent = fy.name and fyc.company=%(company)s ))"""
 
 	fy = frappe.db.sql("""select fy.name, fy.year_start_date, fy.year_end_date from `tabFiscal Year` fy
-		where %s order by fy.year_start_date desc""" % cond, {
+		where %s and ifnull(disabled, 0) = 0 order by fy.year_start_date desc""" % cond, {
 			"fiscal_year": fiscal_year,
 			"transaction_date": transaction_date,
 			"company": company
 		})
 
 	if not fy:
-		error_msg = _("""{0} {1} not in any Fiscal Year. For more details check {2}.""").format(label, formatdate(transaction_date), "https://erpnext.com/kb/accounts/fiscal-year-error")
+		error_msg = _("""{0} {1} not in any active Fiscal Year. For more details check {2}.""").format(label, formatdate(transaction_date), "https://erpnext.com/kb/accounts/fiscal-year-error")
 		if verbose==1: frappe.msgprint(error_msg)
 		raise FiscalYearError, error_msg
 	return fy
