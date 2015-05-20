@@ -100,7 +100,7 @@ def delete_individual_party_account():
 		where ifnull(master_type, '') in ('Customer', 'Supplier') 
 			and ifnull(master_name, '') != '' 
 			and not exists(select gle.name from `tabGL Entry` gle 
-				where gle.account = tabAccount.name);""")
+				where gle.account = tabAccount.name)""")
 		
 	accounts_not_deleted = frappe.db.sql_list("""select tabAccount.name from `tabAccount` 
 		where ifnull(master_type, '') in ('Customer', 'Supplier')
