@@ -117,7 +117,7 @@ erpnext.feature_setup.feature_dict = {
 				'base_total', 'base_net_total', 'base_discount_amount', 'base_total_taxes_and_charges'],
 			'items': ['base_price_list_rate','base_amount','base_rate', 'base_net_rate', 'base_net_amount']
 		},
-		'POS Setting': {'fields':['conversion_rate','currency']},
+		'POS Profile': {'fields':['conversion_rate','currency']},
 		'Quotation': {
 			'fields': ['conversion_rate','currency','base_grand_total','base_in_words','base_rounded_total',
 				'base_total', 'base_net_total', 'base_discount_amount', 'base_total_taxes_and_charges'],

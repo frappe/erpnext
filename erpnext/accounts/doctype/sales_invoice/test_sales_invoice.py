@@ -462,7 +462,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_pos_gl_entry_with_aii(self):
 		set_perpetual_inventory()
-		self.make_pos_setting()
+		self.make_pos_profile()
 
 		self._insert_purchase_receipt()
 
@@ -517,19 +517,19 @@ class TestSalesInvoice(unittest.TestCase):
 
 		set_perpetual_inventory(0)
 
-		frappe.db.sql("delete from `tabPOS Setting`")
+		frappe.db.sql("delete from `tabPOS Profile`")
 
-	def make_pos_setting(self):
-		pos_setting = frappe.get_doc({
+	def make_pos_profile(self):
+		pos_profile = frappe.get_doc({
 			"cash_bank_account": "_Test Account Bank Account - _TC",
 			"company": "_Test Company",
 			"cost_center": "_Test Cost Center - _TC",
 			"currency": "INR",
-			"doctype": "POS Setting",
+			"doctype": "POS Profile",
 			"expense_account": "_Test Account Cost for Goods Sold - _TC",
 			"income_account": "Sales - _TC",
-			"name": "_Test POS Setting",
-			"naming_series": "_T-POS Setting-",
+			"name": "_Test POS Profile",
+			"naming_series": "_T-POS Profile-",
 			"selling_price_list": "_Test Price List",
 			"territory": "_Test Territory",
 			"warehouse": "_Test Warehouse - _TC",
@@ -537,8 +537,8 @@ class TestSalesInvoice(unittest.TestCase):
 			"write_off_cost_center": "_Test Write Off Cost Center - _TC"
 		})
 
-		if not frappe.db.exists("POS Setting", "_Test POS Setting"):
-			pos_setting.insert()
+		if not frappe.db.exists("POS Profile", "_Test POS Profile"):
+			pos_profile.insert()
 
 	def test_si_gl_entry_with_aii_and_update_stock_with_warehouse_but_no_account(self):
 		set_perpetual_inventory()
