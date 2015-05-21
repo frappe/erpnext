@@ -146,7 +146,7 @@ def prepare_data(accounts, balance_must_be, period_list):
 
 def add_total_row(out, balance_must_be, period_list):
 	row = {
-		"account_name": _("'Total ({0})'").format(balance_must_be),
+		"account_name": "'" + _("Total ({0})").format(balance_must_be) + "'",
 		"account": None
 	}
 	for period in period_list:

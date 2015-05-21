@@ -33,7 +33,7 @@
    "print_hide": 0, 
    "read_only": 1, 
    "report_hide": 0, 
-   "reqd": 1, 
+   "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -293,7 +293,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-04-22 03:25:18.542350", 
+ "modified": "2015-05-21 13:46:27.730392", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order Operation", 

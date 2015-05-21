@@ -156,3 +156,4 @@ erpnext.patches.v5_0.repost_requested_qty
 erpnext.patches.v5_0.fix_taxes_and_totals_in_party_currency
 erpnext.patches.v5_0.update_tax_amount_after_discount_in_purchase_cycle
 erpnext.patches.v5_0.rename_pos_setting
+execute:frappe.db.sql("update `tabBOM Operation` set description=opn_description where ifnull(description, '') = ''")

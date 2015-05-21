@@ -446,9 +446,9 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 			callback: function(r) {
 				if(r.message) {
 					$.each(r.message, function(k, v) {
-						frappe.model.set_value(cdt, cdn, k, v);
+						d[k] = v;
 					});
-				refresh_field('image_view', d.name, 'items');
+				refresh_field('items');
 				}
 			}
 		});
