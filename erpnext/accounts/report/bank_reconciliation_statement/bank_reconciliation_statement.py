@@ -38,7 +38,7 @@ def execute(filters=None):
 	data += [
 		get_balance_row(_("System Balance"), balance_as_per_system),
 		[""]*len(columns),
-		["", _("Amounts not reflected in bank"), total_debit, total_credit, "", "", "", ""],
+		["", '"' + _("Amounts not reflected in bank") + '"', total_debit, total_credit, "", "", "", ""],
 		get_balance_row(_("Amounts not reflected in system"), amounts_not_reflected_in_system),
 		[""]*len(columns),
 		get_balance_row(_("Expected balance as per bank"), bank_bal)
@@ -68,6 +68,6 @@ def get_entries(filters):
 
 def get_balance_row(label, amount):
 	if amount > 0:
-		return ["", label, amount, 0, "", "", "", ""]
+		return ["", '"' + label + '"', amount, 0, "", "", "", ""]
 	else:
-		return ["", label, 0, abs(amount), "", "", "", ""]
+		return ["", '"' + label + '"', 0, abs(amount), "", "", "", ""]

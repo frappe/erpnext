@@ -120,14 +120,14 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 
 			# Totals and closing for individual ledger, if grouped by account
 			if filters.get("group_by_account"):
-				data += [{"account": "Totals", "debit": acc_dict.total_debit,
+				data += [{"account": "'Totals'", "debit": acc_dict.total_debit,
 					"credit": acc_dict.total_credit},
 					get_balance_row("Closing (Opening + Totals)",
 						(acc_dict.opening + acc_dict.total_debit - acc_dict.total_credit)), {}]
 
 	# Total debit and credit between from and to date
 	if total_debit or total_credit:
-		data.append({"account": "Totals", "debit": total_debit, "credit": total_credit})
+		data.append({"account": "'Totals'", "debit": total_debit, "credit": total_credit})
 
 	# Closing for filtered account
 	if filters.get("account"):
@@ -168,7 +168,7 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 
 def get_balance_row(label, balance):
 	return {
-		"account": label,
+		"account": "'" + label + "'",
 		"debit": balance if balance > 0 else 0,
 		"credit": -1*balance if balance < 0 else 0,
 	}
