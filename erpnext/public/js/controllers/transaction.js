@@ -66,18 +66,22 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	apply_default_taxes: function() {
 		var me = this;
-		return frappe.call({
-			method: "erpnext.controllers.accounts_controller.get_default_taxes_and_charges",
-			args: {
-				"master_doctype": frappe.meta.get_docfield(me.frm.doc.doctype, "taxes_and_charges",
-					me.frm.doc.name).options
-			},
-			callback: function(r) {
-				if(!r.exc) {
-					me.frm.set_value("taxes", r.message);
+		var taxes_and_charges_field = frappe.meta.get_docfield(me.frm.doc.doctype, "taxes_and_charges",
+			me.frm.doc.name);
+
+		if(taxes_and_charges_field) {
+			frappe.call({
+				method: "erpnext.controllers.accounts_controller.get_default_taxes_and_charges",
+				args: {
+					"master_doctype": taxes_and_charges_field.options
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						me.frm.set_value("taxes", r.message);
+					}
 				}
-			}
-		});
+			});
+		}
 	},
 
 	setup_sms: function() {
