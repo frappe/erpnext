@@ -17,13 +17,14 @@ class ManageVariants(Document):
 		self.validate_attributes()
 		self.validate_template_item()
 		self.validate_stock_for_template_must_be_zero()
+		self.validate_attribute_values()
 		self.validate_attributes_are_unique()
 		self.get_variant_item_codes()
-	
+
 	def validate_attributes(self):
 		if not self.attributes:
 			frappe.throw("Enter atleast one Attribute & its Value in Attribute table.")
-	
+
 	def validate_template_item(self):
 		template_item = frappe.get_doc("Item", self.item)
 		if not template_item.has_variants:
@@ -31,7 +32,7 @@ class ManageVariants(Document):
 			
 		if template_item.variant_of:
 			frappe.throw(_("Item cannot be a variant of a variant"))
-		
+
 	def validate_stock_for_template_must_be_zero(self):
 		stock_in = frappe.db.sql_list("""select warehouse from tabBin
 			where item_code=%s and ifnull(actual_qty, 0) > 0""", self.item)
@@ -39,15 +40,24 @@ class ManageVariants(Document):
 			frappe.throw(_("Item Template cannot have stock and varaiants. Please remove \
 				stock from warehouses {0}").format(", ".join(stock_in)), ItemTemplateCannotHaveStock)
 
+	def validate_attribute_values(self):
+		attributes = {}
+		for d in self.attributes:
+			attributes.setdefault(d.attribute, 
+				[t.attribute_value for t in 
+					frappe.db.get_all("Item Attribute Value", fields=["attribute_value"], filters={"parent": d.attribute })])
+			if d.attribute_value not in attributes.get(d.attribute):
+				frappe.throw(_("Attribute value {0} does not exist in Item Attribute Master.").format(d.attribute_value))
+
 	def validate_attributes_are_unique(self):
-			attributes = []
-			for d in self.attributes:
-				key = (d.attribute, d.attribute_value)
-				if key in attributes:
-					frappe.throw(_("{0} {1} is entered more than once in Attributes table")
-						.format(d.attribute, d.attribute_value), DuplicateAttribute)
-				attributes.append(key)
-				
+		attributes = []
+		for d in self.attributes:
+			key = (d.attribute, d.attribute_value)
+			if key in attributes:
+				frappe.throw(_("{0} {1} is entered more than once in Attributes table")
+					.format(d.attribute, d.attribute_value), DuplicateAttribute)
+			attributes.append(key)
+
 	def get_variant_item_codes(self):
 		"""Get all possible suffixes for variants"""
 		variant_dict = {}
@@ -74,4 +84,8 @@ class ManageVariants(Document):
 
 		add_attribute_suffixes(self.item, [], attributes)
 
-		print variant_item_codes
+		for v in variant_item_codes:
+			self.append('variants', {"variant": v})
+			
+	def create_variants(self):
+		pass
