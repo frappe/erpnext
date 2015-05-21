@@ -35,18 +35,20 @@ frappe.ui.form.on("Production Order", "additional_operating_cost", function(frm)
 
 frappe.ui.form.on("Production Order Operation", "workstation", function(frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	frappe.call({
-		"method": "frappe.client.get",
-		args: {
-			doctype: "Workstation",
-			name: d.workstation
-		},
-		callback: function (data) {
-			frappe.model.set_value(d.doctype, d.name, "hour_rate", data.message.hour_rate);
-			erpnext.production_order.calculate_cost(frm.doc);
-			erpnext.production_order.calculate_total_cost(frm);
-		}
-	})
+	if (d.workstation) {
+		frappe.call({
+			"method": "frappe.client.get",
+			args: {
+				doctype: "Workstation",
+				name: d.workstation
+			},
+			callback: function (data) {
+				frappe.model.set_value(d.doctype, d.name, "hour_rate", data.message.hour_rate);
+				erpnext.production_order.calculate_cost(frm.doc);
+				erpnext.production_order.calculate_total_cost(frm);
+			}
+		})
+	}
 });
 
 frappe.ui.form.on("Production Order Operation", "time_in_mins", function(frm, cdt, cdn) {

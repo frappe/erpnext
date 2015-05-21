@@ -611,7 +611,7 @@
   {
    "fieldname": "advances_section", 
    "fieldtype": "Section Break", 
-   "label": "Advances", 
+   "label": "", 
    "oldfieldtype": "Section Break", 
    "options": "icon-money", 
    "permlevel": 0, 
@@ -665,7 +665,7 @@
    "depends_on": "supplier", 
    "fieldname": "contact_section", 
    "fieldtype": "Section Break", 
-   "label": "Contact Info", 
+   "label": "", 
    "options": "icon-bullhorn", 
    "permlevel": 0, 
    "read_only": 0
@@ -939,7 +939,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-05-15 14:20:47.718194", 
+ "modified": "2015-05-21 05:34:42.436924", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 

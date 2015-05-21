@@ -29,7 +29,7 @@ def execute(filters=None):
 def get_provisional_profit_loss(asset, liability, equity, period_list):
 	if asset and (liability or equity):
 		provisional_profit_loss = {
-			"account_name": _("Provisional Profit / Loss (Credit)"),
+			"account_name": "'" + _("Provisional Profit / Loss (Credit)") + "'",
 			"account": None,
 			"warn_if_negative": True
 		}

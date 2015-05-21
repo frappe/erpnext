@@ -27,7 +27,7 @@ def execute(filters=None):
 def get_net_profit_loss(income, expense, period_list):
 	if income and expense:
 		net_profit_loss = {
-			"account_name": _("Net Profit / Loss"),
+			"account_name": "'" + _("Net Profit / Loss") + "'",
 			"account": None,
 			"warn_if_negative": True
 		}

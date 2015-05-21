@@ -146,7 +146,7 @@ def prepare_data(accounts, balance_must_be, period_list):
 
 def add_total_row(out, balance_must_be, period_list):
 	row = {
-		"account_name": _("Total ({0})").format(balance_must_be),
+		"account_name": "'" + _("Total ({0})").format(balance_must_be) + "'",
 		"account": None
 	}
 	for period in period_list:
@@ -207,7 +207,7 @@ def filter_accounts(accounts, depth=10):
 	add_to_list(None, 0)
 
 	return filtered_accounts, accounts_by_name
-	
+
 def sort_root_accounts(roots):
 	"""Sort root types as Asset, Liability, Equity, Income, Expense"""
 

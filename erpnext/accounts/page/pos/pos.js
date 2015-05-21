@@ -35,7 +35,7 @@ frappe.pages['pos'].on_page_load = function(wrapper) {
 	});
 
 	$.ajax({
-		url: "/api/resource/POS Setting",
+		url: "/api/resource/POS Profile",
 		success: function(data) {
 			if(!data.data.length) {
 				page.main.find(".pos-setting-message").removeClass('hide');

@@ -154,13 +154,19 @@ class Item(WebsiteGenerator):
 			if self.variant_of:
 				frappe.throw(_("Item cannot be a variant of a variant"))
 	
-			variants = []
+			variants, attributes = [], {}
 			for d in self.variants:
 				key = (d.item_attribute, d.item_attribute_value)
 				if key in variants:
 					frappe.throw(_("{0} {1} is entered more than once in Item Variants table")
 						.format(d.item_attribute, d.item_attribute_value), DuplicateVariant)
 				variants.append(key)
+
+				attributes.setdefault(d.item_attribute, [t.attribute_value for t in frappe.db.get_all("Item Attribute Value",
+					fields=["attribute_value"],	filters={"parent": d.item_attribute })])
+				
+				if d.item_attribute_value not in attributes.get(d.item_attribute):
+					frappe.throw(_("Attribute value {0} does not exist in Item Attribute Master.").format(d.item_attribute_value))
 		else:
 			frappe.throw(_("Please enter atleast one attribute row in Item Variants table"))
 
