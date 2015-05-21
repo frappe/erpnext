@@ -161,6 +161,10 @@ class Item(WebsiteGenerator):
 					frappe.throw(_("{0} {1} is entered more than once in Item Variants table")
 						.format(d.item_attribute, d.item_attribute_value), DuplicateVariant)
 				variants.append(key)
+				
+				if not d.item_attribute_value in [t.attribute_value for t in frappe.db.get_all("Item Attribute Value",
+					fields=["attribute_value"],	filters={"parent": d.item_attribute })]:
+					frappe.throw(_("Attribute value {0} does not exist in Item Attribute Master.").format(d.item_attribute_value))
 		else:
 			frappe.throw(_("Please enter atleast one attribute row in Item Variants table"))
 
