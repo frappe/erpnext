@@ -10,7 +10,7 @@ from erpnext.accounts.report.accounts_receivable.accounts_receivable import get_
 def execute(filters=None):
 	if not filters: filters = {}
 
-	columns = get_columns()
+	columns = get_columns(filters)
 	entries = get_entries(filters)
 	invoice_posting_date_map = get_invoice_posting_date_map(filters)
 	against_date = ""
@@ -37,14 +37,20 @@ def execute(filters=None):
 
 	return columns, data
 
-def get_columns():
-	return [_("Journal Voucher") + ":Link/Journal Voucher:140", _("Account") + ":Link/Account:140",
-		_("Posting Date") + ":Date:100", _("Against Invoice") + ":Link/Purchase Invoice:130",
-		_("Against Invoice Posting Date") + ":Date:130", _("Debit") + ":Currency:120", _("Credit") + ":Currency:120",
-		_("Reference No") + "::100", _("Reference Date") + ":Date:100", _("Remarks") + "::150", _("Age") +":Int:40",
-		"0-30:Currency:100", "30-60:Currency:100", "60-90:Currency:100", _("90-Above") + ":Currency:100"
-	]
+def get_columns(filters):
+    linkType = ""
+    if filters.get("payment_type") == "Incoming":
+        linkType = "Sales Invoice"
+    else:
+        linkType = "Purchase Invoice"
 
+    return [_("Journal Voucher") + ":Link/Journal Voucher:140", _("Account") + ":Link/Account:140",
+        _("Posting Date") + ":Date:100", _("Against Invoice") + ":Link/"+linkType+":130",
+        _("Against Invoice Posting Date") + ":Date:130", _("Debit") + ":Currency:120", _("Credit") + ":Currency:120",
+        _("Reference No") + "::100", _("Reference Date") + ":Date:100", _("Remarks") + "::150", _("Age") + ":Int:40",
+        "0-30:Currency:100", "30-60:Currency:100", "60-90:Currency:100", _("90-Above") + ":Currency:100"
+        ]
+        
 def get_conditions(filters):
 	conditions = ""
 	party_accounts = []
