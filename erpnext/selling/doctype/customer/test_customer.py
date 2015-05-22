@@ -34,7 +34,6 @@ class TestCustomer(unittest.TestCase):
 
 		make_test_records("Address")
 		make_test_records("Contact")
-
 		details = get_party_details("_Test Customer")
 
 		for key, value in to_check.iteritems():
