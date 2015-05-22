@@ -445,10 +445,11 @@ cur_frm.cscript.item_code = function(doc, cdt, cdn) {
 			args: args,
 			callback: function(r) {
 				if(r.message) {
+					var d = locals[cdt][cdn];
 					$.each(r.message, function(k, v) {
 						d[k] = v;
 					});
-				refresh_field('items');
+					refresh_field("items");
 				}
 			}
 		});
