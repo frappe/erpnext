@@ -28,6 +28,30 @@
    "reqd": 1, 
    "search_index": 0, 
    "set_only_once": 0
+  }, 
+  {
+   "fieldname": "column_break_2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "variant_attributes", 
+   "fieldtype": "Data", 
+   "in_list_view": 1, 
+   "label": "Variant Attributes", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "attributes", 
+   "fieldtype": "Text", 
+   "hidden": 1, 
+   "label": "attributes", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
   }
  ], 
  "hide_heading": 0, 
@@ -38,7 +62,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-05-21 16:18:16.605271", 
+ "modified": "2015-05-28 04:58:20.495616", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Variant Item", 

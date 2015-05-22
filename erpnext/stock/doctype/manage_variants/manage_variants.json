@@ -14,7 +14,8 @@
    "label": "Item", 
    "options": "Item", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "reqd": 1
   }, 
   {
    "allow_on_submit": 0, 
@@ -74,7 +75,7 @@
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
- "modified": "2015-05-21 16:21:33.707125", 
+ "modified": "2015-05-27 04:43:52.051367", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Manage Variants", 

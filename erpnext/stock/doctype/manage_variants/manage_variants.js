@@ -12,7 +12,7 @@ frappe.ui.form.on("Manage Variants", {
 					frappe.call({
 						method:"frappe.client.get_list",
 						args:{
-							doctype:"Variant Attribute",
+							doctype:"Item Attribute Value",
 							filters: [
 								["parent","=", field.doc.attribute],
 								["attribute_value", "like", request.term + "%"]
@@ -39,6 +39,17 @@ frappe.ui.form.on("Manage Variants", {
 
 	refresh: function(frm) {
 		frm.disable_save();
+	},
+	
+	item:function(frm) {
+		return frappe.call({
+			method: "get_item_details",
+			doc:frm.doc,
+			callback: function(r) {
+				refresh_field('attributes');
+				refresh_field('variants');
+			}
+		})
 	}
 	
 });

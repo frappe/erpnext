@@ -30,10 +30,6 @@ frappe.ui.form.on("Item", {
 			frm.add_custom_button(__("Show Variants"), function() {
 				frappe.set_route("List", "Item", {"variant_of": frm.doc.name});
 			}, "icon-list", "btn-default");
-			frm.add_custom_button(__("Manage Variants"), function() {
-				frappe.route_options = {"item": frm.doc.name };
-				new_doc("Manage Variants");
-			});
 		}
 		if (frm.doc.variant_of) {
 			frm.set_intro(__("This Item is a Variant of {0} (Template). Attributes will be copied over from the template unless 'No Copy' is set", [frm.doc.variant_of]), true);
@@ -87,6 +83,11 @@ frappe.ui.form.on("Item", {
 	
 	is_stock_item: function(frm) {
 		erpnext.item.toggle_reqd(frm);
+	},
+	
+	manage_variants: function(frm) {
+		frappe.route_options = {"item": frm.doc.name };
+		frappe.set_route("List", "Manage Variants");
 	}
 });
 
