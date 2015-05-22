@@ -6,8 +6,6 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
-# test_records = frappe.get_test_records('Newletter List')
-
 class TestNewletterList(unittest.TestCase):
 	def test_import(self):
 		new_list = frappe.get_doc({
@@ -15,13 +13,13 @@ class TestNewletterList(unittest.TestCase):
 			"title": "_Test Newsletter List 1"
 		}).insert()
 
-		n_leads = frappe.db.count("Lead")
-
+		n_leads = frappe.db.sql("select count(distinct email_id) from `tabLead`")[0][0]
+		
 		added = new_list.import_from("Lead")
-
 		self.assertEquals(added, n_leads)
 
-		frappe.delete_doc("Newsletter List", new_list.name)
+	def tearDown(self):
+		frappe.delete_doc("Newsletter List", "_Test Newsletter List 1")
 
 test_dependencies = ["Lead"]
 

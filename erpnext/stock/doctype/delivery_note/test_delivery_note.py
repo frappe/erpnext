@@ -7,7 +7,7 @@ import unittest
 import frappe
 import json
 import frappe.defaults
-from frappe.utils import cint, nowdate, nowtime, cstr, add_days
+from frappe.utils import cint, nowdate, nowtime, cstr, add_days, flt
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.accounts.utils import get_balance_on
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
@@ -136,7 +136,7 @@ class TestDeliveryNote(unittest.TestCase):
 
 		# check stock in hand balance
 		bal = get_balance_on(stock_in_hand_account)
-		self.assertEquals(bal, prev_bal - stock_value_diff)
+		self.assertEquals(flt(bal, 2), flt(prev_bal - stock_value_diff, 2))
 
 		dn.cancel()
 		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
