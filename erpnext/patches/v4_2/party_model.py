@@ -19,20 +19,21 @@ def create_receivable_payable_account():
 	receivable_payable_accounts = frappe._dict()
 
 	def _create_account(args):
-		account_id = frappe.db.get_value("Account", 
-				{"account_name": args["account_name"], "company": args["company"]})
-		if not account_id:
-			account = frappe.new_doc("Account")
-			account.is_group = 0
-			account.update(args)
-			account.insert()
+		if args["parent_account"]:
+			account_id = frappe.db.get_value("Account", 
+					{"account_name": args["account_name"], "company": args["company"]})
+			if not account_id:
+				account = frappe.new_doc("Account")
+				account.is_group = 0
+				account.update(args)
+				account.insert()
 			
-			account_id = account.name
+				account_id = account.name
 			
-			frappe.db.set_value("Company", args["company"], ("default_receivable_account"
-				if args["account_type"]=="Receivable" else "default_payable_account"), account_id)
+				frappe.db.set_value("Company", args["company"], ("default_receivable_account"
+					if args["account_type"]=="Receivable" else "default_payable_account"), account_id)
 
-		receivable_payable_accounts.setdefault(args["company"], {}).setdefault(args["account_type"], account_id)
+			receivable_payable_accounts.setdefault(args["company"], {}).setdefault(args["account_type"], account_id)
 
 	for company in frappe.db.sql_list("select name from tabCompany"):
 		_create_account({

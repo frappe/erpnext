@@ -51,7 +51,8 @@ class TransactionBase(StatusUpdater):
 			event.insert(ignore_permissions=True)
 
 			if frappe.db.exists("User", self.contact_by):
-				frappe.share.add("Event", event.name, self.contact_by)
+				frappe.share.add("Event", event.name, self.contact_by, 
+					flags={"ignore_share_permission": True})
 
 	def validate_uom_is_integer(self, uom_field, qty_fields):
 		validate_uom_is_integer(self, uom_field, qty_fields)
