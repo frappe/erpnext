@@ -114,7 +114,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "POS Profile",
-					"label": _("Point-of-Sale Setting"),
+					"label": _("Point-of-Sale Profile"),
 					"description": _("Rules to calculate shipping amount for a sale")
 				},
 				{
