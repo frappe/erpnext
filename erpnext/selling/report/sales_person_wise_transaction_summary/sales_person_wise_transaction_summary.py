@@ -42,7 +42,7 @@ def get_entries(filters):
 		where st.parent = dt.name and dt.name = dt_item.parent and st.parenttype = %s
 		and dt.docstatus = 1 %s order by st.sales_person, dt.name desc""" %
 		(date_field, filters["doc_type"], filters["doc_type"], '%s', conditions),
-		tuple([filters["doc_type"]] + values), as_dict=1, debug=1)
+		tuple([filters["doc_type"]] + values), as_dict=1)
 
 	return entries
 
