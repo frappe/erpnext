@@ -12,6 +12,7 @@ from dateutil.relativedelta import relativedelta
 
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
+class StockOverTransferError(frappe.ValidationError): pass
 class OperationTooLongError(frappe.ValidationError): pass
 
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError, NotInWorkingHoursError
@@ -323,8 +324,8 @@ class ProductionOrder(Document):
 
 		qty = in_qty - out_qty
 		if qty > self.qty:
-			frappe.throw(_("Material Transferred for Qty ({1}) cannot be greater than planned quanitity ({2}) in Production Order {3}")
-				.format(qty, self.qty, self.name), StockOverProductionError)
+			frappe.throw(_("Material Transferred for Qty {0} cannot be greater than planned quanitity {1} in Production Order {2}")
+				.format(qty, self.qty, self.name), StockOverTransferError)
 		self.db_set("material_transferred_for_manufacturing", qty)
 
 	def update_produced_qty(self):
@@ -332,10 +333,9 @@ class ProductionOrder(Document):
 		self.validate_status()
 		qty = flt(frappe.db.sql("""select sum(fg_completed_qty) from `tabStock Entry` where 
 				docstatus=1 and purpose="Manufacture" and production_order=%s """, self.name)[0][0])
-
 		if qty > self.qty:
-			frappe.throw(_("Manufacture Quantity ({1}) cannot be greater than planned quanitity ({2}) in Production Order {3}")
-				.format(qty, self.qty, self.name), StockOverProductionError)
+			frappe.throw(_("Manufacture Quantity {0} cannot be greater than planned quanitity {1} in Production Order {2}")
+				.format( qty, self.qty, self.name), StockOverProductionError)
 		self.db_set("produced_qty", qty)
 
 @frappe.whitelist()
