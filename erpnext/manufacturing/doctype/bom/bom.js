@@ -1,6 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+frappe.provide("erpnext.bom");
+
 frappe.ui.form.on("BOM", {
 	onload_post_render: function(frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
@@ -12,6 +14,9 @@ frappe.ui.form.on("BOM", {
 		if (!frm.doc.__islocal && frm.doc.docstatus<2) {
 			frm.add_custom_button(__("Update Cost"), function() {
 				frm.events.update_cost(frm);
+			});
+			frm.add_custom_button(__("Browse BOM"), function() {
+				frappe.set_route("bom-browser", frm.doc.name);
 			});
 		}
 	},
@@ -26,10 +31,6 @@ frappe.ui.form.on("BOM", {
 		})
 	}
 });
-
-
-// On REFRESH
-frappe.provide("erpnext.bom");
 
 cur_frm.add_fetch("item", "description", "description");
 cur_frm.add_fetch("item", "image", "image");
