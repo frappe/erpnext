@@ -32,4 +32,4 @@ class SalesPerson(NestedSet):
 		sales_person = frappe.db.get_value("Sales Person", {"employee": self.employee})
 		
 		if sales_person and sales_person != self.name:
-			frappe.throw(_("Another sales person {0} exists with the same employee id").format(sales_person))
+			frappe.throw(_("Another Sales Person {0} exists with the same Employee id").format(sales_person))

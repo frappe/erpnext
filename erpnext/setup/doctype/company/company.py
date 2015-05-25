@@ -206,7 +206,7 @@ class Company(Document):
 			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)""" 
 				% (f, f, ', '.join(['%s']*len(warehouses))), tuple(warehouses))
 				
-		frappe.db.sql("""update `tabItem Reorder` set warehouse=NULL where warehouse in (%s)""" 
+		frappe.db.sql("""delete from `tabItem Reorder` where warehouse in (%s)""" 
 			% ', '.join(['%s']*len(warehouses)), tuple(warehouses))
 				
 		for f in ["income_account", "expense_account"]:
