@@ -178,6 +178,10 @@ class Company(Document):
 		"""
 			Trash accounts and cost centers for this company if no gl entry exists
 		"""
+		accounts = frappe.db.sql_list("select name from tabAccount where company=%s", self.name)
+		cost_centers = frappe.db.sql_list("select name from `tabCost Center` where company=%s", self.name)
+		warehouses = frappe.db.sql_list("select name from tabWarehouse where company=%s", self.name)
+		
 		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.name)
 		if not rec:
 			# delete Account
@@ -196,7 +200,24 @@ class Company(Document):
 			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)
 
 		frappe.defaults.clear_default("company", value=self.name)
+		
+		# clear default accounts, warehouses from item
+		for f in ["default_warehouse", "website_warehouse"]:
+			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)""" 
+				% (f, f, ', '.join(['%s']*len(warehouses))), tuple(warehouses))
+				
+		frappe.db.sql("""update `tabItem Reorder` set warehouse=NULL where warehouse in (%s)""" 
+			% ', '.join(['%s']*len(warehouses)), tuple(warehouses))
+				
+		for f in ["income_account", "expense_account"]:
+			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)""" 
+				% (f, f, ', '.join(['%s']*len(accounts))), tuple(accounts))
+				
+		for f in ["selling_cost_center", "buying_cost_center"]:
+			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)""" 
+				% (f, f, ', '.join(['%s']*len(cost_centers))), tuple(cost_centers))
 
+		# reset default company
 		frappe.db.sql("""update `tabSingles` set value=""
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""", self.name)
