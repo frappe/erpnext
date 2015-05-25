@@ -28,7 +28,7 @@ def setup_account(args=None):
 
 		args = frappe._dict(args)
 
-		if args.language != "english":
+		if args.language and args.language != "english":
 			set_default_language(args.language)
 
 		install_fixtures.install(args.get("country"))
