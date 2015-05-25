@@ -97,7 +97,8 @@ def create_stock_reconciliation(**args):
 	sr.posting_time = args.posting_time or nowtime()
 	sr.company = args.company or "_Test Company"
 	sr.fiscal_year = get_fiscal_year(sr.posting_date)[0]
-	sr.expense_account = args.expense_account or "Stock Adjustment - _TC"
+	sr.expense_account = args.expense_account or \
+		("Stock Adjustment - _TC" if frappe.get_all("Stock Ledger Entry") else "Temporary Opening - _TC")
 	sr.cost_center = args.cost_center or "_Test Cost Center - _TC"
 	sr.append("items", {
 		"item_code": args.item_code or "_Test Item",

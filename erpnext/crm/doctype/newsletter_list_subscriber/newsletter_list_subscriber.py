@@ -10,4 +10,4 @@ class NewsletterListSubscriber(Document):
 	pass
 
 def after_doctype_insert():
-	frappe.db.add_unique("Newsletter List Subscriber", ("name", "email"))
+	frappe.db.add_unique("Newsletter List Subscriber", ("newsletter_list", "email"))

@@ -81,17 +81,21 @@ class TestStockEntry(unittest.TestCase):
 			template = frappe.get_doc("Item", item.variant_of)
 		else:
 			template = item
+			
+		projected_qty, actual_qty = frappe.db.get_value("Bin", {"item_code": item_code,
+			"warehouse": "_Test Warehouse - _TC"}, ["projected_qty", "actual_qty"]) or [0, 0]
 
 		# stock entry reqd for auto-reorder
 		create_stock_reconciliation(item_code=item_code, warehouse="_Test Warehouse - _TC",
-			qty=10, rate=100)
-
-		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
+			qty = actual_qty + abs(projected_qty) + 10, rate=100)
+			
 		projected_qty = frappe.db.get_value("Bin", {"item_code": item_code,
 			"warehouse": "_Test Warehouse - _TC"}, "projected_qty") or 0
-
+		
+		frappe.db.set_value("Stock Settings", None, "auto_indent", 1)
+		
 		# update re-level qty so that it is more than projected_qty
-		if projected_qty > template.reorder_levels[0].warehouse_reorder_level:
+		if projected_qty >= template.reorder_levels[0].warehouse_reorder_level:
 			template.reorder_levels[0].warehouse_reorder_level += projected_qty
 			template.save()
 

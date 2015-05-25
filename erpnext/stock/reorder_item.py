@@ -11,10 +11,7 @@ def reorder_item():
 	if not frappe.db.sql("select name from `tabFiscal Year` limit 1"):
 		return
 
-	if getattr(frappe.local, "auto_indent", None) is None:
-		frappe.local.auto_indent = cint(frappe.db.get_value('Stock Settings', None, 'auto_indent'))
-
-	if frappe.local.auto_indent:
+	if cint(frappe.db.get_value('Stock Settings', None, 'auto_indent')):
 		return _reorder_item()
 
 def _reorder_item():
