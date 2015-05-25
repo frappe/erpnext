@@ -157,3 +157,4 @@ erpnext.patches.v5_0.fix_taxes_and_totals_in_party_currency
 erpnext.patches.v5_0.update_tax_amount_after_discount_in_purchase_cycle
 erpnext.patches.v5_0.rename_pos_setting
 erpnext.patches.v5_0.update_operation_description
+erpnext.patches.v5_0.set_footer_address
