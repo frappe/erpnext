@@ -27,8 +27,12 @@ class Company(Document):
 		return exists
 
 	def validate(self):
+		self.abbr = self.abbr.strip()
 		if self.get('__islocal') and len(self.abbr) > 5:
 			frappe.throw(_("Abbreviation cannot have more than 5 characters"))
+			
+		if not self.abbr.strip():
+			frappe.throw(_("Abbr can not be blank or space"))
 
 		self.previous_default_currency = frappe.db.get_value("Company", self.name, "default_currency")
 		if self.default_currency and self.previous_default_currency and \
@@ -174,6 +178,10 @@ class Company(Document):
 		"""
 			Trash accounts and cost centers for this company if no gl entry exists
 		"""
+		accounts = frappe.db.sql_list("select name from tabAccount where company=%s", self.name)
+		cost_centers = frappe.db.sql_list("select name from `tabCost Center` where company=%s", self.name)
+		warehouses = frappe.db.sql_list("select name from tabWarehouse where company=%s", self.name)
+		
 		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.name)
 		if not rec:
 			# delete Account
@@ -192,23 +200,43 @@ class Company(Document):
 			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)
 
 		frappe.defaults.clear_default("company", value=self.name)
+		
+		# clear default accounts, warehouses from item
+		for f in ["default_warehouse", "website_warehouse"]:
+			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)""" 
+				% (f, f, ', '.join(['%s']*len(warehouses))), tuple(warehouses))
+				
+		frappe.db.sql("""delete from `tabItem Reorder` where warehouse in (%s)""" 
+			% ', '.join(['%s']*len(warehouses)), tuple(warehouses))
+				
+		for f in ["income_account", "expense_account"]:
+			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)""" 
+				% (f, f, ', '.join(['%s']*len(accounts))), tuple(accounts))
+				
+		for f in ["selling_cost_center", "buying_cost_center"]:
+			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)""" 
+				% (f, f, ', '.join(['%s']*len(cost_centers))), tuple(cost_centers))
 
+		# reset default company
 		frappe.db.sql("""update `tabSingles` set value=""
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""", self.name)
 
 @frappe.whitelist()
 def replace_abbr(company, old, new):
+	new = new.strip()
+	if not new:
+		frappe.throw(_("Abbr can not be blank or space"))
+		
 	frappe.only_for("System Manager")
 
 	frappe.db.set_value("Company", company, "abbr", new)
 
 	def _rename_record(dt):
 		for d in frappe.db.sql("select name from `tab%s` where company=%s" % (dt, '%s'), company):
-			parts = d[0].split(" - ")
-			if parts[-1].lower() == old.lower():
-				name_without_abbr = " - ".join(parts[:-1])
-				frappe.rename_doc(dt, d[0], name_without_abbr + " - " + new)
+			parts = d[0].rsplit(" - ", 1)
+			if len(parts) == 1 or parts[1].lower() == old.lower():
+				frappe.rename_doc(dt, d[0], parts[0] + " - " + new)
 
 	for dt in ["Account", "Cost Center", "Warehouse"]:
 		_rename_record(dt)

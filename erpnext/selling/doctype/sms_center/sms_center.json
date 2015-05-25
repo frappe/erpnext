@@ -37,6 +37,15 @@
    "permlevel": 0
   }, 
   {
+   "depends_on": "eval:doc.send_to=='All Sales Partner Contact'", 
+   "fieldname": "sales_partner", 
+   "fieldtype": "Link", 
+   "label": "Sales Partner", 
+   "options": "Sales Partner", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "depends_on": "eval:doc.send_to=='All Employee (Active)'", 
    "fieldname": "department", 
    "fieldtype": "Link", 
@@ -108,7 +117,7 @@
  "idx": 1, 
  "in_create": 0, 
  "issingle": 1, 
- "modified": "2015-02-05 05:11:46.773913", 
+ "modified": "2015-05-25 17:46:37.555503", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "SMS Center", 

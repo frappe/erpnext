@@ -10,8 +10,8 @@ from frappe import _
 from frappe.model.document import Document
 
 class GLEntry(Document):
-
 	def validate(self):
+		self.flags.ignore_submit_comment = True
 		self.check_mandatory()
 		self.pl_must_have_cost_center()
 		self.validate_posting_date()

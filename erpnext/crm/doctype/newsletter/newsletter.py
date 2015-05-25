@@ -92,7 +92,7 @@ def unsubscribe(email, name):
 		return
 
 	subs_id = frappe.db.get_value("Newsletter List Subscriber", {"email": email, "newsletter_list": name})
-	if name:
+	if subs_id:
 		subscriber = frappe.get_doc("Newsletter List Subscriber", subs_id)
 		subscriber.unsubscribed = 1
 		subscriber.save(ignore_permissions=True)

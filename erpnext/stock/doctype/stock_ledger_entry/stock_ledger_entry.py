@@ -14,6 +14,7 @@ class StockFreezeError(frappe.ValidationError): pass
 
 class StockLedgerEntry(Document):
 	def validate(self):
+		self.flags.ignore_submit_comment = True
 		from erpnext.stock.utils import validate_warehouse_company
 		self.validate_mandatory()
 		self.validate_item()

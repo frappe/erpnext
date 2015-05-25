@@ -34,7 +34,9 @@ class TestCustomer(unittest.TestCase):
 
 		make_test_records("Address")
 		make_test_records("Contact")
-
+		frappe.db.set_value("Contact", "_Test Contact For _Test Customer-_Test Customer", 
+			"is_primary_contact", 1)
+		
 		details = get_party_details("_Test Customer")
 
 		for key, value in to_check.iteritems():

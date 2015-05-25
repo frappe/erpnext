@@ -130,10 +130,9 @@ class TestProductionOrder(unittest.TestCase):
 		prod_order = make_prod_order_test_record(item="_Test FG Item 2",
 			planned_start_date="2014-11-25 00:00:00", qty=1, do_not_save=True)
 		prod_order.set_production_order_operations()
-		prod_order.save()
 		cost = prod_order.planned_operating_cost
 		prod_order.qty = 2
-		prod_order.save()
+		prod_order.set_production_order_operations()
 		self.assertEqual(prod_order.planned_operating_cost, cost*2)
 		
 def make_prod_order_test_record(**args):
