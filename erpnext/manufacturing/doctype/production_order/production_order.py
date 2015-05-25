@@ -122,22 +122,6 @@ class ProductionOrder(Document):
 		if status != self.status:
 			self.db_set("status", status)
 
-	def update_production_order_qty(self):
-		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Production Order
-			based on Stock Entry"""
-
-		for purpose, fieldname in (("Manufacture", "produced_qty"),
-			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
-			qty = flt(frappe.db.sql("""select sum(fg_completed_qty)
-				from `tabStock Entry` where production_order=%s and docstatus=1
-				and purpose=%s""", (self.name, purpose))[0][0])
-
-			if qty > self.qty:
-				frappe.throw(_("{0} ({1}) cannot be greater than planned quanitity ({2}) in Production Order {3}").format(\
-					self.meta.get_label(fieldname), qty, self.qty, self.name), StockOverProductionError)
-
-			self.db_set(fieldname, qty)
-
 	def on_submit(self):
 		if not self.wip_warehouse:
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
@@ -315,6 +299,44 @@ class ProductionOrder(Document):
 	def delete_time_logs(self):
 		for time_log in frappe.get_all("Time Log", ["name"], {"production_order": self.name}):
 			frappe.delete_doc("Time Log", time_log.name)
+			
+	def validate_status(self):
+		if flt(self.docstatus) != 1:
+			frappe.throw(_("Production Order {0} must be submitted").format(self.name))
+
+		if self.status == 'Stopped':
+			frappe.throw(_("Transaction not allowed against stopped Production Order {0}").format(self.name))
+
+	def update_material_transferred_for_manufacturing(self):
+		"""Update **Material Transferred for Qty** in Production Order based on Stock Entry"""
+		self.validate_status()
+		in_qty = flt(frappe.db.sql("""select sum(fg_completed_qty) from `tabStock Entry` where 
+				docstatus=1 and purpose= "Material Transfer for Manufacture" and production_order=%s 
+				and to_warehouse =%s""", (self.name, self.wip_warehouse))[0][0])
+		
+		out_qty = flt(frappe.db.sql("""select sum(fg_completed_qty) from `tabStock Entry` where 
+				docstatus=1 and purpose= "Material Transfer for Manufacture" and production_order=%s 
+				and from_warehouse =%s""", (self.name, self.wip_warehouse))[0][0])
+		
+		if in_qty < out_qty:
+			frappe.throw(_("Rejected Quantity cannot be greater than Transfered Quantity."))
+
+		qty = in_qty - out_qty
+		if qty > self.qty:
+			frappe.throw(_("Material Transferred for Qty ({1}) cannot be greater than planned quanitity ({2}) in Production Order {3}")
+				.format(qty, self.qty, self.name), StockOverProductionError)
+		self.db_set("material_transferred_for_manufacturing", qty)
+
+	def update_produced_qty(self):
+		"""Update **Manufactured Qty** in Production Order based on Stock Entry"""
+		self.validate_status()
+		qty = flt(frappe.db.sql("""select sum(fg_completed_qty) from `tabStock Entry` where 
+				docstatus=1 and purpose="Manufacture" and production_order=%s """, self.name)[0][0])
+
+		if qty > self.qty:
+			frappe.throw(_("Manufacture Quantity ({1}) cannot be greater than planned quanitity ({2}) in Production Order {3}")
+				.format(qty, self.qty, self.name), StockOverProductionError)
+		self.db_set("produced_qty", qty)
 
 @frappe.whitelist()
 def get_item_details(item):
