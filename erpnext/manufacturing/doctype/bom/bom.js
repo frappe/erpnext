@@ -1,27 +1,35 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+frappe.ui.form.on("BOM", {
+	onload_post_render: function(frm) {
+		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
+	},
+	refresh: function(frm) {
+		frm.toggle_enable("item", frm.doc.__islocal);
+		toggle_operations(frm);
+
+		if (!frm.doc.__islocal && frm.doc.docstatus<2) {
+			frm.add_custom_button(__("Update Cost"), function() {
+				frm.events.update_cost(frm);
+			});
+		}
+	},
+	update_cost: function(frm) {
+		return frappe.call({
+			doc: frm.doc,
+			method: "update_cost",
+			freeze: true,
+			callback: function(r) {
+				if(!r.exc) frm.refresh_fields();
+			}
+		})
+	}
+});
+
+
 // On REFRESH
 frappe.provide("erpnext.bom");
-cur_frm.cscript.refresh = function(doc,dt,dn){
-	cur_frm.toggle_enable("item", doc.__islocal);
-	toggle_operations(cur_frm);
-
-	if (!doc.__islocal && doc.docstatus<2) {
-		cur_frm.add_custom_button(__("Update Cost"), cur_frm.cscript.update_cost);
-	}
-}
-
-cur_frm.cscript.update_cost = function() {
-	return frappe.call({
-		doc: cur_frm.doc,
-		method: "update_cost",
-		freeze: true,
-		callback: function(r) {
-			if(!r.exc) cur_frm.refresh_fields();
-		}
-	})
-}
 
 cur_frm.add_fetch("item", "description", "description");
 cur_frm.add_fetch("item", "image", "image");
