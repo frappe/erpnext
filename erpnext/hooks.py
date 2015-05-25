@@ -96,9 +96,10 @@ scheduler_events = {
 	]
 }
 
-default_mail_footer = """<div style="padding: 7px; margin-top: 7px;">
-	<a style="color: #8D99A6; font-size: 85%; text-decoration: none;" href="https://erpnext.com" target="_blank">
-		Sent via ERPNext
+default_mail_footer = """<div style="padding: 15px; text-align: center;">
+	<a href="https://erpnext.com?source=via_email_footer" target="_blank">
+		<img src="https://erpnext.com/assets/erpnext_com/img/erpnext-footer.png" title="Sent via ERPNext"
+		alt="Sent via ERPNext">
 	</a>
 </div>"""
 
