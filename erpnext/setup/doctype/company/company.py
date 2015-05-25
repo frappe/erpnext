@@ -27,8 +27,12 @@ class Company(Document):
 		return exists
 
 	def validate(self):
+		self.abbr = self.abbr.strip()
 		if self.get('__islocal') and len(self.abbr) > 5:
 			frappe.throw(_("Abbreviation cannot have more than 5 characters"))
+			
+		if not self.abbr.strip():
+			frappe.throw(_("Abbr can not be blank or space"))
 
 		self.previous_default_currency = frappe.db.get_value("Company", self.name, "default_currency")
 		if self.default_currency and self.previous_default_currency and \
@@ -199,16 +203,19 @@ class Company(Document):
 
 @frappe.whitelist()
 def replace_abbr(company, old, new):
+	new = new.strip()
+	if not new:
+		frappe.throw(_("Abbr can not be blank or space"))
+		
 	frappe.only_for("System Manager")
 
 	frappe.db.set_value("Company", company, "abbr", new)
 
 	def _rename_record(dt):
 		for d in frappe.db.sql("select name from `tab%s` where company=%s" % (dt, '%s'), company):
-			parts = d[0].split(" - ")
-			if parts[-1].lower() == old.lower():
-				name_without_abbr = " - ".join(parts[:-1])
-				frappe.rename_doc(dt, d[0], name_without_abbr + " - " + new)
+			parts = d[0].rsplit(" - ", 1)
+			if len(parts) == 1 or parts[1].lower() == old.lower():
+				frappe.rename_doc(dt, d[0], parts[0] + " - " + new)
 
 	for dt in ["Account", "Cost Center", "Warehouse"]:
 		_rename_record(dt)
