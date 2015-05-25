@@ -575,6 +575,7 @@
    "description": "Publish Item to hub.erpnext.com", 
    "fieldname": "publish_in_hub", 
    "fieldtype": "Check", 
+   "hidden": 1, 
    "label": "Publish in Hub", 
    "permlevel": 0, 
    "precision": ""
@@ -878,7 +879,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2015-05-04 18:44:46.090445", 
+ "modified": "2015-05-22 02:16:57.435105", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 

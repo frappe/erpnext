@@ -76,9 +76,9 @@ class JournalEntry(AccountsController):
 			account_type = frappe.db.get_value("Account", d.account, "account_type")
 			if account_type in ["Receivable", "Payable"]:
 				if not (d.party_type and d.party):
-					frappe.throw(_("Row{0}: Party Type and Party is required for Receivable / Payable account {1}").format(d.idx, d.account))
+					frappe.throw(_("Row {0}: Party Type and Party is required for Receivable / Payable account {1}").format(d.idx, d.account))
 			elif d.party_type and d.party:
-				frappe.throw(_("Row{0}: Party Type and Party is only applicable against Receivable / Payable account").format(d.idx))
+				frappe.throw(_("Row {0}: Party Type and Party is only applicable against Receivable / Payable account").format(d.idx))
 
 	def check_credit_limit(self):
 		customers = list(set([d.party for d in self.get("accounts") if d.party_type=="Customer" and flt(d.debit) > 0]))
@@ -438,7 +438,7 @@ class JournalEntry(AccountsController):
 		if self.stock_entry:
 			if frappe.db.get_value("Stock Entry", self.stock_entry, "docstatus") != 1:
 				frappe.throw(_("Stock Entry {0} is not submitted").format(self.stock_entry))
-				
+
 			if frappe.db.exists({"doctype": "Journal Entry", "stock_entry": self.stock_entry, "docstatus":1}):
 				frappe.msgprint(_("Warning: Another {0} # {1} exists against stock entry {2}".format(self.voucher_type, self.name, self.stock_entry)))
 
