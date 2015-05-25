@@ -110,7 +110,8 @@ class DeliveryNote(SellingController):
 	def validate_with_previous_doc(self):
 		items = self.get("items")
 
-		for fn in (("Sales Order", "against_sales_order"), ("Sales Invoice", "against_sales_invoice")):
+		for fn in (("Sales Order", "against_sales_order", "so_detail"), 
+				("Sales Invoice", "against_sales_invoice", "si_detail")):
 			if filter(None, [getattr(d, fn[1], None) for d in items]):
 				super(DeliveryNote, self).validate_with_previous_doc({
 					fn[0]: {
@@ -123,7 +124,7 @@ class DeliveryNote(SellingController):
 				if cint(frappe.defaults.get_global_default('maintain_same_sales_rate')):
 					super(DeliveryNote, self).validate_with_previous_doc({
 						fn[0] + " Item": {
-							"ref_dn_field": "so_detail",
+							"ref_dn_field": fn[2],
 							"compare_fields": [["rate", "="]],
 							"is_child_table": True
 						}
