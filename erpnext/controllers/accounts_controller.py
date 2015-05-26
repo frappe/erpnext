@@ -9,11 +9,17 @@ from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
+from erpnext.utilities.doctype.address.address import get_territory_from_address
 
 class AccountsController(TransactionBase):
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
+
+			if self.meta.get_field("taxes_and_charges"):
+				self.set_missing_taxes()
+				self.validate_enabled_taxes_and_charges()
+
 		self.validate_date_with_fiscal_year()
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
@@ -24,9 +30,6 @@ class AccountsController(TransactionBase):
 
 		if self.meta.get_field("is_recurring"):
 			validate_recurring_document(self)
-
-		if self.meta.get_field("taxes_and_charges"):
-			self.validate_enabled_taxes_and_charges()
 
 	def on_submit(self):
 		if self.meta.get_field("is_recurring"):
@@ -85,6 +88,9 @@ class AccountsController(TransactionBase):
 			# price list part
 			fieldname = "selling_price_list" if buying_or_selling.lower() == "selling" \
 				else "buying_price_list"
+
+			self.set_price_list(buying_or_selling, fieldname)
+
 			if self.meta.get_field(fieldname) and self.get(fieldname):
 				self.price_list_currency = frappe.db.get_value("Price List",
 					self.get(fieldname), "currency")
@@ -105,6 +111,48 @@ class AccountsController(TransactionBase):
 			elif not self.conversion_rate:
 				self.conversion_rate = get_exchange_rate(self.currency,
 					company_currency)
+
+	def set_price_list(self, buying_or_selling, fieldname):
+		if not self.get("auto_price_list"):
+			return
+
+		price_list_set = self.set_price_list_from_party() or self.set_price_list_from_territory()
+
+		if price_list_set:
+			for item in self.get("items"):
+				item.price_list_rate = item.discount_percentage = item.rate = item.amount = None
+
+	def set_price_list_from_party(self, buying_or_selling, fieldname):
+		if buying_or_selling == "Buying":
+			price_list = frappe.db.get_value("Supplier", self.supplier, "default_price_list")
+		else:
+			price_list = frappe.db.get_value("Customer", self.customer, "default_price_list")
+
+		if price_list:
+			if hasattr(self, "_subset_of_price_lists"):
+				if price_list in self.get("_subset_of_price_lists"):
+					self.set(fieldname, price_list)
+					return True
+
+			else:
+				self.set(fieldname, price_list)
+				return True
+
+	def set_price_list_from_territory(self, buying_or_selling, fieldname):
+		if not self.meta.get_field("customer_address"):
+			return
+
+		billing_territory = get_territory_from_address(self.customer_address)
+
+		if billing_territory:
+			filters = {"parenttype": "Price List", "territory": billing_territory}
+			if hasattr(self, "_subset_of_price_lists"):
+				filters.update({"parent": ["in", self.get("_subset_of_price_lists")]})
+
+			applicable_territory = frappe.get_all("Applicable Template", filters, ["parent"])
+			if applicable_territory:
+				self.set(fieldname, applicable_territory[0].parent)
+				return True
 
 	def set_missing_item_details(self):
 		"""set missing item values"""
@@ -169,6 +217,70 @@ class AccountsController(TransactionBase):
 		taxes_and_charges_doctype = self.meta.get_options("taxes_and_charges")
 		if frappe.db.get_value(taxes_and_charges_doctype, self.taxes_and_charges, "disabled"):
 			frappe.throw(_("{0} '{1}' is disabled").format(taxes_and_charges_doctype, self.taxes_and_charges))
+
+	def set_missing_taxes(self):
+		if self.meta.get_field("customer") and (not self.taxes or self.get("auto_tax_and_shipping_rule")):
+			if not self.taxes_and_charges:
+				# taxes
+				self.set_tax_template_from_customer()
+
+				if not self.taxes_and_charges:
+					self.set_tax_template_from_territory()
+
+			if self.get("auto_tax_and_shipping_rule"):
+				if frappe.db.get_value(self.doctype, self.name, "taxes_and_charges") != self.taxes_and_charges:
+					self.set("taxes", [])
+					self.set_other_charges()
+			else:
+				self.set_other_charges()
+
+			# shipping rule
+			if not self.shipping_rule:
+				self.set_shipping_rule_from_territory()
+
+			self.apply_shipping_rule()
+
+	def set_tax_template_from_customer(self):
+		if not self.customer:
+			return
+
+		customer_tax_template = frappe.db.get_value("Customer", self.customer, "default_taxes_and_charges")
+		if customer_tax_template:
+			if hasattr(self, "_subset_of_tax_templates"):
+				if customer_tax_template in self._subset_of_tax_templates:
+					self.taxes_and_charges = customer_tax_template
+			else:
+				self.taxes_and_charges = customer_tax_template
+
+	def set_tax_template_from_territory(self):
+		if not self.customer_address:
+			return
+
+		billing_territory = get_territory_from_address(self.customer_address)
+
+		if billing_territory:
+			filters = {"parenttype": "Sales Taxes and Charges Template", "territory": billing_territory}
+			if hasattr(self, "_subset_of_tax_templates"):
+				filters.update({"parent": ["in", self.get("_subset_of_tax_templates")]})
+
+			applicable_territory = frappe.get_all("Applicable Territory", filters, ["parent"])
+			if applicable_territory:
+				self.taxes_and_charges = applicable_territory[0].parent
+
+	def set_shipping_rule_from_territory(self):
+		if not self.shipping_address_name:
+			return
+
+		shipping_territory = get_territory_from_address(self.shipping_address_name)
+
+		if shipping_territory:
+			filters = {"parenttype": "Shipping Rule", "territory": shipping_territory}
+			if hasattr(self, "_subset_of_shipping_rules"):
+				filters.update({"parent": ["in", self.get("_subset_of_shipping_rules")]})
+
+			applicable_territory = frappe.get_all("Applicable Territory", filters, ["parent"])
+			if applicable_territory:
+				self.shipping_rule = applicable_territory[0].parent
 
 	def get_gl_dict(self, args):
 		"""this method populates the common properties of a gl entry record"""

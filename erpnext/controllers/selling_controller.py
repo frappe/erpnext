@@ -91,8 +91,6 @@ class SellingController(StockController):
 				shipping_charge["description"] = shipping_rule.label
 				self.append("taxes", shipping_charge)
 
-			self.calculate_taxes_and_totals()
-
 	def remove_shipping_charge(self):
 		if self.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
