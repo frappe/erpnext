@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, getdate, formatdate, comma_and, time_diff_in_seconds, get_datetime
+from frappe.utils import flt, cint, getdate, formatdate, comma_and, time_diff_in_seconds, to_timedelta
 from frappe.model.document import Document
 from dateutil.parser import parse
 
@@ -60,7 +60,7 @@ def is_within_operating_hours(workstation, operation, from_datetime, to_datetime
 	workstation = frappe.get_doc("Workstation", workstation)
 
 	for working_hour in workstation.working_hours:
-		slot_length = (get_datetime(working_hour.end_time) - get_datetime(working_hour.start_time)).total_seconds()
+		slot_length = (to_timedelta(working_hour.end_time or "") - to_timedelta(working_hour.start_time or "")).total_seconds()
 		if slot_length >= operation_length:
 			return
 
