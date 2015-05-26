@@ -85,9 +85,9 @@ class SellingController(StockController):
 			existing_shipping_charge = self.get("taxes", filters=shipping_charge)
 			if existing_shipping_charge:
 				# take the last record found
-				existing_shipping_charge[-1].rate = shipping_amount
+				existing_shipping_charge[-1].tax_amount = shipping_amount
 			else:
-				shipping_charge["rate"] = shipping_amount
+				shipping_charge["tax_amount"] = shipping_amount
 				shipping_charge["description"] = shipping_rule.label
 				self.append("taxes", shipping_charge)
 
