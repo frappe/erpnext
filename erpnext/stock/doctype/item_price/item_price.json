@@ -100,13 +100,26 @@
    "label": "Item Description", 
    "permlevel": 0, 
    "read_only": 1
+  }, 
+  {
+   "fieldname": "section_break_12", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "bulk_import_help", 
+   "fieldtype": "HTML", 
+   "label": "Bulk Import Help", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
  "in_create": 0, 
  "istable": 0, 
- "modified": "2015-03-03 01:05:09.876025", 
+ "modified": "2015-05-26 03:15:02.324161", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Price", 
