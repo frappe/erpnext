@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import msgprint, _
+from frappe import _
 from frappe.utils import flt
 
 def execute(filters=None):
@@ -23,7 +23,7 @@ def execute(filters=None):
 			purchase_receipt = d.purchase_receipt
 		elif d.po_detail:
 			purchase_receipt = ", ".join(frappe.db.sql_list("""select distinct parent
-			from `tabPurchase Receipt Item` where docstatus=1 and po_detail=%s""", d.po_detail))
+			from `tabPurchase Receipt Item` where docstatus=1 and prevdoc_detail_docname=%s""", d.po_detail))
 
 		expense_account = d.expense_account or aii_account_map.get(d.company)
 		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.supplier,
