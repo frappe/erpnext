@@ -55,6 +55,14 @@ def get_data():
 					"name": "BOM Replace Tool",
 					"description": _("Replace Item / BOM in all BOMs"),
 				},
+				{
+					"type": "page",
+					"name": "bom-browser",
+					"icon": "icon-sitemap",
+					"label": _("BOM Browser"),
+					"description": _("Tree of Bill of Materials"),
+					"doctype": "BOM"
+				}
 			]
 		},
 		{
