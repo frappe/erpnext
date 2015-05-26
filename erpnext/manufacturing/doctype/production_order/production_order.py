@@ -13,6 +13,7 @@ from dateutil.relativedelta import relativedelta
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
 class StockOverTransferError(frappe.ValidationError): pass
+class StockOverReturnError(frappe.ValidationError): pass
 class OperationTooLongError(frappe.ValidationError): pass
 
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError, NotInWorkingHoursError
@@ -320,7 +321,7 @@ class ProductionOrder(Document):
 				and from_warehouse =%s""", (self.name, self.wip_warehouse))[0][0])
 		
 		if in_qty < out_qty:
-			frappe.throw(_("Rejected Quantity cannot be greater than Transfered Quantity."))
+			frappe.throw(_("Rejected Quantity cannot be greater than Transfered Quantity."), StockOverReturnError)
 
 		qty = in_qty - out_qty
 		if qty > self.qty:
