@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import validate_email_add, strip
+from frappe.utils import validate_email_add
 from frappe import _
 from email.utils import parseaddr
 
@@ -75,7 +75,7 @@ def add_subscribers(name, email_list):
 					"doctype": "Newsletter List Subscriber",
 					"newsletter_list": name,
 					"email": email
-				}).insert()
+				}).insert(ignore_permissions = frappe.flags.ignore_permissions)
 
 				count += 1
 			else:

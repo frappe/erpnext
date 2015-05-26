@@ -5,7 +5,7 @@ app_publisher = "Frappe Technologies Pvt. Ltd. and Contributors"
 app_description = "Open Source Enterprise Resource Planning for Small and Midsized Organizations"
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "5.0.9"
+app_version = "5.0.10"
 
 error_report_email = "support@erpnext.com"
 
@@ -96,8 +96,8 @@ scheduler_events = {
 	]
 }
 
-default_mail_footer = """<div style="padding: 7px; margin-top: 7px;">
-	<a style="color: #8D99A6; font-size: 85%; text-decoration: none;" href="https://erpnext.com" target="_blank">
+default_mail_footer = """<div style="padding: 15px; text-align: center;">
+	<a href="https://erpnext.com?source=via_email_footer" target="_blank" style="color: #8d99a6;">
 		Sent via ERPNext
 	</a>
 </div>"""

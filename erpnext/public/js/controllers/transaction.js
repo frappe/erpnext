@@ -98,7 +98,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	hide_currency_and_price_list: function() {
-		if(this.frm.doc.docstatus > 0) {
+		if(this.frm.doc.conversion_rate == 1 && this.frm.doc.docstatus > 0) {
 			hide_field("currency_and_price_list");
 		} else {
 			unhide_field("currency_and_price_list");

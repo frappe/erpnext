@@ -197,6 +197,7 @@ def set_defaults(args):
 		"language": args.get("language"),
 		"time_zone": args.get("timezone"),
 		"float_precision": 3,
+		"email_footer_address": args.get("company"),
 		'date_format': frappe.db.get_value("Country", args.get("country"), "date_format"),
 		'number_format': number_format,
 		'enable_scheduler': 1 if not frappe.flags.in_test else 0

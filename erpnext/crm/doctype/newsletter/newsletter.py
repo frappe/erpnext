@@ -8,7 +8,9 @@ import frappe.utils
 from frappe import throw, _
 from frappe.model.document import Document
 from frappe.email.bulk import check_bulk_limit
+from frappe.utils.verified_command import get_signed_params, verify_request
 import erpnext.tasks
+from erpnext.crm.doctype.newsletter_list.newsletter_list import add_subscribers
 
 class Newsletter(Document):
 	def onload(self):
@@ -87,7 +89,6 @@ def get_lead_options():
 
 @frappe.whitelist(allow_guest=True)
 def unsubscribe(email, name):
-	from frappe.utils.verified_command import verify_request
 	if not verify_request():
 		return
 
@@ -123,3 +124,47 @@ def create_lead(email_id):
 		"source": "Email"
 	})
 	lead.insert()
+
+
+@frappe.whitelist(allow_guest=True)
+def subscribe(email):
+	url = frappe.utils.get_url("/api/method/erpnext.crm.doctype.newsletter.newsletter.confirm_subscription") +\
+		"?" + get_signed_params({"email": email})
+
+	messages = (
+		_("Thank you for your interest in subscribing to our updates"),
+		_("Please verify your email id"),
+		url,
+		_("Click here to verify")
+	)
+
+	print url
+
+	content = """
+	<p>{0}. {1}.</p>
+	<p><a href="{2}">{3}</a></p>
+	"""
+
+	frappe.sendmail(email, subject=_("Confirm Your Email"), content=content.format(*messages), bulk=True)
+
+@frappe.whitelist(allow_guest=True)
+def confirm_subscription(email):
+	if not verify_request():
+		return
+
+	if not frappe.db.exists("Newsletter List", _("Website")):
+		frappe.get_doc({
+			"doctype": "Newsletter List",
+			"title": _("Website")
+		}).insert(ignore_permissions=True)
+
+
+	frappe.flags.ignore_permissions = True
+
+	add_subscribers(_("Website"), email)
+	frappe.db.commit()
+
+	frappe.respond_as_web_page(_("Confirmed"), _("{0} has been successfully added to our Newsletter list.").format(email))
+
+
+

@@ -50,10 +50,14 @@ def get_conditions(filters, date_field):
 	conditions = [""]
 	values = []
 	
-	for field in ["company", "customer", "territory", "sales_person"]:
+	for field in ["company", "customer", "territory"]:
 		if filters.get(field):
 			conditions.append("dt.{0}=%s".format(field))
 			values.append(filters[field])
+			
+	if filters.get("sales_person"):
+		conditions.append("st.sales_person=%s")
+		values.append(filters["sales_person"])
 		
 	if filters.get("from_date"):
 		conditions.append("dt.{0}>=%s".format(date_field))
