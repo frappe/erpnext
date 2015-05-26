@@ -48,6 +48,7 @@ def dropbox_callback(oauth_token=None, not_approved=False):
 			frappe.db.set_value("Backup Manager", "Backup Manager", "dropbox_access_key", access_token.key)
 			frappe.db.set_value("Backup Manager", "Backup Manager", "dropbox_access_secret", access_token.secret)
 			frappe.db.set_value("Backup Manager", "Backup Manager", "dropbox_access_allowed", allowed)
+			frappe.db.set_value("Backup Manager", "Backup Manager", "send_backups_to_dropbox", 1)
 			dropbox_client = client.DropboxClient(sess)
 			try:
 				dropbox_client.file_create_folder("files")
