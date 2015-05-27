@@ -209,9 +209,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					me.frm.set_value('plc_conversion_rate', 1.0);
 				}
 				if (company_doc.default_letter_head) {
-					me.frm.set_value("letter_head", company_doc.default_letter_head);
+					if(me.frm.fields_dict.letter_head) {
+						me.frm.set_value("letter_head", company_doc.default_letter_head);
+					}
 				}
-				if (company_doc.default_terms) {
+				if (company_doc.default_terms && me.frm.doc.doctype != "Purchase Invoice") {
 					me.frm.set_value("tc_name", company_doc.default_terms);
 				}
 
