@@ -16,9 +16,6 @@ def execute():
 
 		for name, script in frappe.db.sql("select name, {0} as script from `tab{1}` where ({2}) {3}".format(script_field, dt, cond1, cond2)):
 			update_script(dt, name, script_field, script, renamed_fields)
-			
-	# update fieldnames in property setter for idx
-	update_idx_property(renamed_fields)
 
 def get_all_renamed_fields():
 	from erpnext.patches.v5_0.rename_table_fieldnames import rename_map
@@ -49,9 +46,9 @@ def get_all_renamed_fields():
 	)
 
 	for fields in rename_map.values():
-		if fields[0] != "entries":
-			renamed_fields += tuple(fields)
-
+		valid_fields = [d for d in fields if d[0] != "entries"]
+		renamed_fields += tuple(valid_fields)
+	
 	return renamed_fields
 
 def update_script(dt, name, script_field, script, renamed_fields):
@@ -66,20 +63,3 @@ def update_script(dt, name, script_field, script, renamed_fields):
 		script = re.sub(r"\bentries\b", "items", script)
 
 	frappe.db.set_value(dt, name, script_field, script)
-
-def update_idx_property(renamed_fields):
-	for ps, ordered_fields, dt in frappe.db.sql("select name, value, doc_type from `tabProperty Setter` where property = '_idx'"):
-		for from_field, to_field in renamed_fields:
-			if from_field in ordered_fields:	
-				ordered_fields[ordered_fields.index(from_field)] = to_field
-			
-		# remove invalid fields
-		valid_fields = [f.fieldname for f in frappe.get_meta(dt).fields]
-		for fld in ordered_fields:
-			if fld not in valid_fields:
-				ordered_fields.pop(fld)
-		
-		frappe.db.set_value("Property Setter", ps, "value", ordered_fields)
-		
-	
-	frappe.db.sql("delete from `tabProperty Setter` where `property` = 'idx'")
