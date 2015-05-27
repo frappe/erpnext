@@ -4,13 +4,36 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from frappe.utils import get_site_path
+from frappe.utils.data import convert_utc_to_user_timezone
+import os
+import datetime
 import frappe
-from frappe import _
 
 from frappe.model.document import Document
 
 class BackupManager(Document):
-	pass
+	def onload(self):
+		self.set_onload("files", get_files())
+
+def get_files():
+	def get_time(path):
+		dt = os.path.getmtime(path)
+		return convert_utc_to_user_timezone(datetime.datetime.utcfromtimestamp(dt)).strftime('%Y-%m-%d %H:%M')
+
+	def get_size(path):
+		size = os.path.getsize(path)
+		if size > 1048576:
+			return "{0:.1f}M".format(float(size) / 1048576)
+		else:
+			return "{0:.1f}K".format(float(size) / 1024)
+
+	path = get_site_path('private', 'backups')
+	files = [x for x in os.listdir(path) if os.path.isfile(os.path.join(path, x))]
+	files = [('/backups/' + _file,
+		get_time(os.path.join(path, _file)),
+		get_size(os.path.join(path, _file))) for _file in files]
+	return files
 
 def take_backups_daily():
 	take_backups_if("Daily")
@@ -19,11 +42,12 @@ def take_backups_weekly():
 	take_backups_if("Weekly")
 
 def take_backups_if(freq):
-	if frappe.db.get_value("Backup Manager", None, "upload_backups_to_dropbox")==freq:
-		take_backups_dropbox()
+	if frappe.db.get_value("Backup Manager", None, "send_backups_to_dropbox"):
+		if frappe.db.get_value("Backup Manager", None, "upload_backups_to_dropbox")==freq:
+			take_backups_dropbox()
 
-	# if frappe.db.get_value("Backup Manager", None, "upload_backups_to_gdrive")==freq:
-	# 	take_backups_gdrive()
+		# if frappe.db.get_value("Backup Manager", None, "upload_backups_to_gdrive")==freq:
+		# 	take_backups_gdrive()
 
 @frappe.whitelist()
 def take_backups_dropbox():
