@@ -629,12 +629,13 @@ class StockEntry(StockController):
 		"""
 		item_dict = self.get_bom_raw_materials(1)
 		issued_item_qty = self.get_issued_qty()
+		rejected_item_qty = self.get_rejected_qty()
 
 		max_qty = flt(self.pro_doc.qty)
 		only_pending_fetched = []
 
 		for item in item_dict:
-			pending_to_issue = (max_qty * item_dict[item]["qty"]) - issued_item_qty.get(item, 0)
+			pending_to_issue = (max_qty * item_dict[item]["qty"]) - (issued_item_qty.get(item, 0) - rejected_item_qty.get(item, 0))
 			desire_to_transfer = flt(self.fg_completed_qty) * item_dict[item]["qty"]
 			if desire_to_transfer <= pending_to_issue:
 				item_dict[item]["qty"] = desire_to_transfer
@@ -659,15 +660,27 @@ class StockEntry(StockController):
 
 	def get_issued_qty(self):
 		issued_item_qty = {}
-		result = frappe.db.sql("""select t1.item_code, sum(t1.qty)
+		wip_warehouse = frappe.db.get_value("Production Order", self.production_order, "wip_warehouse")
+		in_qty = frappe.db.sql("""select t1.item_code, sum(t1.qty)
 			from `tabStock Entry Detail` t1, `tabStock Entry` t2
 			where t1.parent = t2.name and t2.production_order = %s and t2.docstatus = 1
-			and t2.purpose = 'Material Transfer for Manufacture'
-			group by t1.item_code""", self.production_order)
-		for t in result:
+			and t2.purpose = 'Material Transfer for Manufacture' and t1.t_warehouse = %s
+			group by t1.item_code""", (self.production_order, wip_warehouse))
+		for t in in_qty:
 			issued_item_qty[t[0]] = flt(t[1])
-
 		return issued_item_qty
+
+	def get_rejected_qty(self):
+		rejected_item_qty = {}
+		wip_warehouse = frappe.db.get_value("Production Order", self.production_order, "wip_warehouse")
+		out_qty = frappe.db.sql("""select t1.item_code, sum(t1.qty)
+			from `tabStock Entry Detail` t1, `tabStock Entry` t2
+			where t1.parent = t2.name and t2.production_order = %s and t2.docstatus = 1
+			and t2.purpose = 'Material Transfer for Manufacture' and t1.s_warehouse = %s
+			group by t1.item_code""", (self.production_order, wip_warehouse))
+		for t in out_qty:
+			rejected_item_qty[t[0]] = flt(t[1])
+		return rejected_item_qty
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
 		expense_account, cost_center = frappe.db.get_values("Company", self.company, \

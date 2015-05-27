@@ -312,14 +312,16 @@ class ProductionOrder(Document):
 	def update_material_transferred_for_manufacturing(self):
 		"""Update **Material Transferred for Qty** in Production Order based on Stock Entry"""
 		self.validate_status()
-		in_qty = flt(frappe.db.sql("""select sum(fg_completed_qty) from `tabStock Entry` where 
+		in_qty = flt(frappe.db.sql("""select sum(fg_completed_qty) from `tabStock Entry` as se where 
 				docstatus=1 and purpose= "Material Transfer for Manufacture" and production_order=%s 
-				and to_warehouse =%s""", (self.name, self.wip_warehouse))[0][0])
-		
-		out_qty = flt(frappe.db.sql("""select sum(fg_completed_qty) from `tabStock Entry` where 
+				and exists (select * from `tabStock Entry Detail` as sed where sed.parent = se.name 
+				and sed.t_warehouse =%s)""", (self.name, self.wip_warehouse))[0][0])
+
+		out_qty = flt(frappe.db.sql("""select sum(fg_completed_qty) from `tabStock Entry` as se where 
 				docstatus=1 and purpose= "Material Transfer for Manufacture" and production_order=%s 
-				and from_warehouse =%s""", (self.name, self.wip_warehouse))[0][0])
-		
+				and exists (select * from `tabStock Entry Detail` as sed where sed.parent = se.name
+				and sed.s_warehouse =%s )""", (self.name, self.wip_warehouse))[0][0])
+
 		if in_qty < out_qty:
 			frappe.throw(_("Rejected Quantity cannot be greater than Transfered Quantity."), StockOverReturnError)
 

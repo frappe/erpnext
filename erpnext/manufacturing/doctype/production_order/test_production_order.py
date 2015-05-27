@@ -77,48 +77,36 @@ class TestProductionOrder(unittest.TestCase):
 
 		# Material Transfer for Manufacture ( stores to WIP)
 		se = frappe.get_doc(make_stock_entry(pro_order.name, "Material Transfer for Manufacture", 8))
-		se.from_warehouse = "Stores - _TC"
-		se.to_warehouse = "Work In Progress - _TC"
 		for d in se.get("items"):
 			d.s_warehouse = "Stores - _TC"
 			d.t_warehouse = "Work In Progress - _TC"
 		se.save()
 		se.submit()
-		
+		self.assertEqual(frappe.db.get_value("Production Order", pro_order.name, "material_transferred_for_manufacturing"), 8)
+
 		se1 = frappe.get_doc(make_stock_entry(pro_order.name, "Material Transfer for Manufacture", 4))
-		se1.from_warehouse = "Stores - _TC"
-		se1.to_warehouse = "Work In Progress - _TC"
 		for d in se1.get("items"):
 			d.s_warehouse = "Stores - _TC"
 			d.t_warehouse = "Work In Progress - _TC"
 		self.assertRaises(StockOverTransferError, se1.submit)
 		se1.cancel()
-		
+		self.assertEqual(frappe.db.get_value("Production Order", pro_order.name, "material_transferred_for_manufacturing"), 8)
+
+	
 		# Rejected Material Transfer for Manufacture ( WIP to Stores)		
 		se2 = frappe.get_doc(make_stock_entry(pro_order.name, "Material Transfer for Manufacture", 2))
-		se2.from_warehouse = "Work In Progress - _TC"
-		se2.to_warehouse = "Stores - _TC"
 		for d in se2.get("items"):
 			d.s_warehouse = "Work In Progress - _TC"
 			d.t_warehouse = "Stores - _TC"
 		se2.save()
 		se2.submit()
-		
-		se3 = frappe.get_doc(make_stock_entry(pro_order.name, "Material Transfer for Manufacture", 4))
-		se3.from_warehouse = "Stores - _TC"
-		se3.to_warehouse = "Work In Progress - _TC"
+		self.assertEqual(frappe.db.get_value("Production Order", pro_order.name, "material_transferred_for_manufacturing"), 6)
+
+		se3 = frappe.get_doc(make_stock_entry(pro_order.name, "Material Transfer for Manufacture", 7))
 		for d in se3.get("items"):
-			d.s_warehouse = "Stores - _TC"
-			d.t_warehouse = "Work In Progress - _TC"
-		se3.submit()
-		
-		se4 = frappe.get_doc(make_stock_entry(pro_order.name, "Material Transfer for Manufacture", 11))
-		se4.from_warehouse = "Work In Progress - _TC"
-		se4.to_warehouse = "Stores - _TC"
-		for d in se4.get("items"):
 			d.s_warehouse = "Work In Progress - _TC"
 			d.t_warehouse = "Stores - _TC"
-		self.assertRaises(StockOverReturnError, se4.submit)
+		self.assertRaises(StockOverReturnError, se3.submit)
 
 	def test_make_time_log(self):
 		prod_order = make_prod_order_test_record(item="_Test FG Item 2",
