@@ -105,4 +105,15 @@ def get_data():
 				},
 			]
 		},
+		{
+			"label": _("Help"),
+			"icon": "icon-facetime-video",
+			"items": [
+				{
+					"type": "help",
+					"label": _("Bill of Materials"),
+					"youtube_id": "hDV0c1OeWLo"
+				},
+			]
+		}
 	]

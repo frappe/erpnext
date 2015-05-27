@@ -254,4 +254,25 @@ def get_data():
 				},
 			]
 		},
+		{
+			"label": _("Help"),
+			"icon": "icon-facetime-video",
+			"items": [
+				{
+					"type": "help",
+					"label": _("Items and Pricing"),
+					"youtube_id": "qXaEwld4_Ps"
+				},
+				{
+					"type": "help",
+					"label": _("Opening Stock Balance"),
+					"youtube_id": "yPgrtfeCTs"
+				},
+				{
+					"type": "help",
+					"label": _("Item Variants"),
+					"youtube_id": "OGBETlCzU5o"
+				},
+			]
+		}
 	]

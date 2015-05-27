@@ -128,4 +128,14 @@ def get_data():
 				},
 			]
 		},
+		{
+			"label": _("Help"),
+			"items": [
+				{
+					"type": "help",
+					"label": _("Lead to Quotation"),
+					"youtube_id": "TxYX4r4JAKA"
+				},
+			]
+		},
 	]

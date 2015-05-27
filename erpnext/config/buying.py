@@ -156,4 +156,14 @@ def get_data():
 				}
 			]
 		},
+		{
+			"label": _("Help"),
+			"items": [
+				{
+					"type": "help",
+					"label": _("Customer and Supplier"),
+					"youtube_id": "anoGi_RpQ20"
+				},
+			]
+		},
 	]
