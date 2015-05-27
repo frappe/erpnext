@@ -48,3 +48,9 @@
 .product-text {
   padding: 15px 0px;
 }
+@media (max-width: 767px) {
+  .product-search {
+    width: 100%;
+    margin-bottom: 13px;
+  }
+}
