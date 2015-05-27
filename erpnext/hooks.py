@@ -34,13 +34,13 @@ website_context = {
 
 website_route_rules = [
 	{"from_route": "/orders", "to_route": "Sales Order"},
-	{"from_route": "/orders/<name>", "to_route": "print", "defaults": {"doctype": "Sales Order"}},
+	{"from_route": "/orders/<path:name>", "to_route": "print", "defaults": {"doctype": "Sales Order"}},
 	{"from_route": "/invoices", "to_route": "Sales Invoice"},
-	{"from_route": "/invoices/<name>", "to_route": "print", "defaults": {"doctype": "Sales Invoice"}},
+	{"from_route": "/invoices/<path:name>", "to_route": "print", "defaults": {"doctype": "Sales Invoice"}},
 	{"from_route": "/shipments", "to_route": "Delivery Note"},
-	{"from_route": "/shipments/<name>", "to_route": "print", "defaults": {"doctype": "Delivery Note"}},
+	{"from_route": "/shipments/<path:name>", "to_route": "print", "defaults": {"doctype": "Delivery Note"}},
 	{"from_route": "/issues", "to_route": "Issue"},
-	{"from_route": "/issues/<name>", "to_route": "print", "defaults": {"doctype": "Issue"}},
+	{"from_route": "/issues/<path:name>", "to_route": "print", "defaults": {"doctype": "Issue"}},
 	{"from_route": "/addresses", "to_route": "Address"},
 ]
 

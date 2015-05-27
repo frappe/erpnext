@@ -130,6 +130,9 @@ class ShoppingCartSettings(Document):
 
 	def get_price_list(self, billing_territory):
 		price_list = self.get_name_from_territory(billing_territory, "price_lists", "selling_price_list")
+		if not (price_list and price_list[0]):
+			price_list = self.get_name_from_territory(self.default_territory, "price_lists", "selling_price_list")
+
 		return price_list and price_list[0] or None
 
 	def get_tax_master(self, billing_territory):

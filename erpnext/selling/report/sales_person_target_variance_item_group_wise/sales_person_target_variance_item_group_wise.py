@@ -72,7 +72,7 @@ def get_target_distribution_details(filters):
 	target_details = {}
 
 	for d in frappe.db.sql("""select md.name, mdp.month, mdp.percentage_allocation
-		from `tabMonthly Distribution Percentage` mdp, `tabMonthly Distribution` mdp
+		from `tabMonthly Distribution Percentage` mdp, `tabMonthly Distribution` md
 		where mdp.parent=md.name and md.fiscal_year=%s""", (filters["fiscal_year"]), as_dict=1):
 			target_details.setdefault(d.name, {}).setdefault(d.month, flt(d.percentage_allocation))
 
