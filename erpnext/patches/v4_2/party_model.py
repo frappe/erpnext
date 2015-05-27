@@ -19,7 +19,7 @@ def create_receivable_payable_account():
 	receivable_payable_accounts = frappe._dict()
 
 	def _create_account(args):
-		if args["parent_account"]:
+		if args["parent_account"] and frappe.db.exists("Account", args["parent_account"]):
 			account_id = frappe.db.get_value("Account", 
 					{"account_name": args["account_name"], "company": args["company"]})
 			if not account_id:
