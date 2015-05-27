@@ -9,7 +9,7 @@ from frappe import _
 def execute(filters=None):
 	account_details = {}
 	for acc in frappe.db.sql("""select name, is_group from tabAccount""", as_dict=1):
-			account_details.setdefault(acc.name, acc)
+		account_details.setdefault(acc.name, acc)
 
 	validate_filters(filters, account_details)
 	validate_party(filters)
@@ -82,8 +82,6 @@ def get_conditions(filters):
 		lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
 		conditions.append("""account in (select name from tabAccount
 			where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
-	else:
-		conditions.append("posting_date between %(from_date)s and %(to_date)s")
 
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
@@ -107,7 +105,7 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 	opening, total_debit, total_credit, gle_map = get_accountwise_gle(filters, gl_entries, gle_map)
 
 	# Opening for filtered account
-	if filters.get("account"):
+	if filters.get("account") or filters.get("party"):
 		data += [get_balance_row(_("Opening"), opening), {}]
 
 	for acc, acc_dict in gle_map.items():
@@ -130,7 +128,7 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 		data.append({"account": "'" + _("Totals") + "'", "debit": total_debit, "credit": total_credit})
 
 	# Closing for filtered account
-	if filters.get("account"):
+	if filters.get("account") or filters.get("party"):
 		data.append(get_balance_row(_("Closing (Opening + Totals)"),
 			(opening + total_debit - total_credit)))
 
@@ -153,9 +151,10 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 
 	for gle in gl_entries:
 		amount = flt(gle.debit, 3) - flt(gle.credit, 3)
-		if filters.get("account") and gle.posting_date < getdate(filters.from_date):
+		if gle.posting_date < getdate(filters.from_date):
 			gle_map[gle.account].opening += amount
-			opening += amount
+			if filters.get("account") or filters.get("party"):
+				opening += amount
 		elif gle.posting_date <= getdate(filters.to_date):
 			gle_map[gle.account].entries.append(gle)
 			gle_map[gle.account].total_debit += flt(gle.debit, 3)
