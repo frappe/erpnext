@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from erpnext.controllers.accounts_controller import validate_taxes_and_charges, validate_inclusive_tax
+from erpnext.utilities.match_address import validate_address_params
 
 class SalesTaxesandChargesTemplate(Document):
 	def validate(self):
@@ -15,11 +16,9 @@ class SalesTaxesandChargesTemplate(Document):
 				and name != %s and company = %s""",
 				(self.name, self.company))
 
-		# at least one territory
-		self.validate_table_has_rows("territories")
-
 		for tax in self.get("taxes"):
 			validate_taxes_and_charges(tax)
 			validate_inclusive_tax(tax, self)
 
+		validate_address_params(self)
 

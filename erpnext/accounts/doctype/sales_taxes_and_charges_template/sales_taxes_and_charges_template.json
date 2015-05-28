@@ -69,18 +69,60 @@
    "permlevel": 0
   }, 
   {
-   "description": "Specify a list of Territories, for which, this Taxes Master is valid", 
-   "fieldname": "territories", 
-   "fieldtype": "Table", 
-   "label": "Valid for Territories", 
-   "options": "Applicable Territory", 
+   "fieldname": "section_break_8", 
+   "fieldtype": "Section Break", 
+   "label": "", 
    "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "default": "Any Country", 
+   "fieldname": "if_address_matches", 
+   "fieldtype": "Select", 
+   "label": "Auto-select Template if Address matches", 
+   "options": "Any Country\nHome Country\nRest of the World\nCountry, State, Post Code Pattern", 
+   "permlevel": 0, 
+   "precision": "", 
    "reqd": 1
+  }, 
+  {
+   "depends_on": "eval:doc.if_address_matches===\"Any Country Except\" || doc.if_address_matches===\"Country, State, Post Code Pattern\"", 
+   "fieldname": "column_break_10", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.if_address_matches===\"Any Country Except\" || doc.if_address_matches===\"Country, State, Post Code Pattern\"", 
+   "fieldname": "country", 
+   "fieldtype": "Link", 
+   "label": "Country", 
+   "options": "Country", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.if_address_matches===\"Country, State, Post Code Pattern\"", 
+   "fieldname": "state", 
+   "fieldtype": "Link", 
+   "label": "State", 
+   "options": "State", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.if_address_matches===\"Country, State, Post Code Pattern\"", 
+   "description": "A pattern to match like \"123XX\". This will match any code between 12300 and 12399.", 
+   "fieldname": "post_code_pattern", 
+   "fieldtype": "Data", 
+   "label": "Post Code Pattern", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "icon": "icon-money", 
  "idx": 1, 
- "modified": "2015-05-06 08:51:54.662853", 
+ "modified": "2015-05-27 21:06:29.210284", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Taxes and Charges Template", 

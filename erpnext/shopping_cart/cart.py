@@ -41,6 +41,7 @@ class ShoppingCart:
 	"""Wrapper around Quotation for Shopping Cart feature"""
 	def __init__(self, quotation=None):
 		self.email_id = frappe.session.user
+		self.settings = frappe.get_doc("Shopping Cart Settings")
 		self.doc = self.get_quotation(quotation)
 		if quotation:
 			self.check_permission()
@@ -130,19 +131,18 @@ class ShoppingCart:
 		# TODO
 		# apply shipping rule and set shipping charge
 		# was part of apply cart settings
-		shopping_cart_settings = frappe.get_doc("Shopping Cart Settings")
 
 		# reset values and price list
-		price_lists = [d.price_list for d in shopping_cart_settings.get("price_lists")]
+		price_lists = [d.price_list for d in self.settings.get("price_lists")]
 		self.doc._subset_of_price_lists = price_lists
 
 		# taxes
 		cart_tax_templates = [d.sales_taxes_and_charges_master for d in
-			shopping_cart_settings.get("sales_taxes_and_charges_masters")]
+			self.settings.get("sales_taxes_and_charges_masters")]
 		self.doc._subset_of_tax_templates = cart_tax_templates
 
 		# shipping rule
-		cart_shipping_rules = [d.shipping_rule for d in shopping_cart_settings.get("shipping_rules")]
+		cart_shipping_rules = [d.shipping_rule for d in self.settings.get("shipping_rules")]
 		self.doc._subset_of_shipping_rules = cart_shipping_rules
 
 		self.doc.auto_price_list = True
@@ -198,5 +198,5 @@ class ShoppingCart:
 		if geoip_country:
 			territory = frappe.db.get_value("Territory", geoip_country)
 
-		return territory or frappe.db.get_single_value("Shopping Cart Settings", "default_territory")
+		return territory or self.settings.default_territory
 
