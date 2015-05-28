@@ -132,4 +132,17 @@ $.extend(erpnext.utils, {
 			);
 		}
 	}
-})
+});
+
+// add description on posting time
+$(document).on('app_ready', function() {
+	if(!frappe.datetime.is_timezone_same()) {
+		$.each(["Stock Reconciliation", "Stock Entry", "Stock Ledger Entry",
+			"Delivery Note", "Purchase Receipt", "Sales Invoice"], function(i, d) {
+			frappe.ui.form.on(d, "onload", function(frm) {
+				cur_frm.set_df_property("posting_time", "description",
+					sys_defaults.time_zone);
+			});
+		});
+	}
+});
