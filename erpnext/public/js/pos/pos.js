@@ -463,7 +463,6 @@ erpnext.pos.PointOfSale = Class.extend({
 		var me = this;
 		dialog.set_primary_action(__("Pay"), function() {
 			var values = dialog.get_values();
-			console.log(values);
 			var is_cash = values.mode_of_payment === __("Cash");
 			if (!is_cash) {
 				values.write_off_amount = values.change = 0.0;
@@ -513,8 +512,6 @@ erpnext.pos.toggle = function(frm, show) {
 			return;
 		}
 	}
-
-	console.log(frm.page.current_view_name);
 
 	if(frm.page.current_view_name!=="pos") {
 		// before switching, ask for pos name
