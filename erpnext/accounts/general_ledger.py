@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt, cstr
 from frappe import _
+import copy
+from frappe.model.meta import get_field_precision
 from erpnext.accounts.utils import validate_expense_against_budget
 
 
@@ -64,18 +66,12 @@ def check_if_in_list(gle, gl_map):
 
 def save_entries(gl_map, adv_adj, update_outstanding):
 	validate_account_for_auto_accounting_for_stock(gl_map)
-
-	total_debit = total_credit = 0.0
+	round_off_debit_credit(gl_map)
+	
 	for entry in gl_map:
 		make_entry(entry, adv_adj, update_outstanding)
 		# check against budget
 		validate_expense_against_budget(entry)
-
-		# update total debit / credit
-		total_debit += flt(entry.debit)
-		total_credit += flt(entry.credit)
-
-	validate_total_debit_credit(total_debit, total_credit, gl_map)
 
 def make_entry(args, adv_adj, update_outstanding):
 	args.update({"doctype": "GL Entry"})
@@ -85,10 +81,6 @@ def make_entry(args, adv_adj, update_outstanding):
 	gle.run_method("on_update_with_args", adv_adj, update_outstanding)
 	gle.submit()
 
-def validate_total_debit_credit(total_debit, total_credit, gl_map):
-	if abs(total_debit - total_credit) > 0.005:
-		frappe.throw(_("Debit and Credit not equal for {0} #{1}. Difference is {2}.").format(gl_map[0].voucher_type, gl_map[0].voucher_no, total_debit - total_credit))
-
 def validate_account_for_auto_accounting_for_stock(gl_map):
 	if gl_map[0].voucher_type=="Journal Entry":
 		aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
@@ -97,6 +89,43 @@ def validate_account_for_auto_accounting_for_stock(gl_map):
 		for entry in gl_map:
 			if entry.account in aii_accounts:
 				frappe.throw(_("Account: {0} can only be updated via Stock Transactions").format(entry.account), StockAccountInvalidTransaction)
+
+def round_off_debit_credit(gl_map):
+	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
+		currency=frappe.db.get_value("Company", gl_map[0].company, "default_currency", cache=True))
+	
+	debit_credit_diff = 0.0
+	for entry in gl_map:
+		entry.debit = flt(entry.debit, precision)
+		entry.credit = flt(entry.credit, precision)
+		debit_credit_diff += entry.debit - entry.credit
+	
+	debit_credit_diff = flt(debit_credit_diff, precision)
+	if abs(debit_credit_diff) >= (2.0 / (10**precision)):
+		frappe.throw(_("Debit and Credit not equal for {0} #{1}. Difference is {2}.")
+			.format(gl_map[0].voucher_type, gl_map[0].voucher_no, debit_credit_diff))
+		
+	elif abs(debit_credit_diff) >= (1.0 / (10**precision)):
+		make_round_off_gle(gl_map, debit_credit_diff)
+		
+def make_round_off_gle(gl_map, debit_credit_diff):
+	round_off_account, round_off_cost_center = frappe.db.get_value("Company", gl_map[0].company, 
+		["round_off_account", "round_off_cost_center"]) or [None, None]
+	if not round_off_account:
+		frappe.throw(_("Please mention Round Off Account in Company"))
+		
+	if not round_off_cost_center:
+		frappe.throw(_("Please mention Round Off Cost Center in Company"))
+		
+	round_off_gle = copy.deepcopy(gl_map[0])
+	round_off_gle.update({
+		"account": round_off_account,
+		"debit": abs(debit_credit_diff) if debit_credit_diff < 0 else 0,
+		"credit": debit_credit_diff if debit_credit_diff > 0 else 0,
+		"cost_center": round_off_cost_center
+	})
+	
+	gl_map.append(round_off_gle)
 
 
 def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,

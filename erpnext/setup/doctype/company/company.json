@@ -171,6 +171,15 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "round_off_account", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 0, 
+   "label": "Round Off Account", 
+   "options": "Account", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "column_break0", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 
@@ -210,6 +219,15 @@
    "no_copy": 1, 
    "options": "Account", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "round_off_cost_center", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 0, 
+   "label": "Round Off Cost Center", 
+   "options": "Cost Center", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "section_break_22", 
@@ -414,7 +432,7 @@
  ], 
  "icon": "icon-building", 
  "idx": 1, 
- "modified": "2015-05-19 02:00:41.055138", 
+ "modified": "2015-05-28 12:56:18.175509", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Company", 
