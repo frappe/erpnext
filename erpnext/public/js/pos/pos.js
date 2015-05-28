@@ -331,7 +331,7 @@ erpnext.pos.PointOfSale = Class.extend({
 	},
 	set_primary_action: function() {
 		var me = this;
-		if (!this.frm.pos_active) return;
+		if (this.frm.page.current_view_name==="main") return;
 
 		if (this.frm.doctype == "Sales Invoice" && this.frm.doc.docstatus===0) {
 			if (!this.frm.doc.is_pos) {
@@ -342,7 +342,6 @@ erpnext.pos.PointOfSale = Class.extend({
 			});
 		} else if (this.frm.doc.docstatus===1) {
 			this.frm.page.set_primary_action(__("New"), function() {
-				me.frm.pos_active = false;
 				erpnext.open_as_pos = true;
 				new_doc(me.frm.doctype);
 			});
@@ -498,8 +497,8 @@ erpnext.pos.make_pos_btn = function(frm) {
 			erpnext.pos.toggle(frm) });
 	}
 
-	if(erpnext.open_as_pos && !frm.pos_active) {
-		erpnext.pos.toggle(frm);
+	if(erpnext.open_as_pos && frm.page.current_view_name !== "pos") {
+		erpnext.pos.toggle(frm, true);
 	}
 }
 
@@ -508,12 +507,24 @@ erpnext.pos.toggle = function(frm, show) {
 	var price_list = frappe.meta.has_field(cur_frm.doc.doctype, "selling_price_list") ?
 		frm.doc.selling_price_list : frm.doc.buying_price_list;
 
-	if((show===true && frm.pos_active) || (show===false && !frm.pos_active)) {
-		return;
+	if(show!==undefined) {
+		if((show===true && frm.page.current_view_name === "pos")
+			|| (show===false && frm.page.current_view_name === "main")) {
+			return;
+		}
 	}
 
-	if(show && !price_list) {
-		frappe.throw(__("Please select Price List"));
+	console.log(frm.page.current_view_name);
+
+	if(frm.page.current_view_name!=="pos") {
+		// before switching, ask for pos name
+		if(!price_list) {
+			frappe.throw(__("Please select Price List"));
+		}
+
+		if(!frm.doc.company) {
+			frappe.throw(__("Please select Company"));
+		}
 	}
 
 	// make pos
@@ -523,14 +534,13 @@ erpnext.pos.toggle = function(frm, show) {
 	}
 
 	// toggle view
-	frm.page.set_view(frm.pos_active ? "main" : "pos");
-	frm.pos_active = !frm.pos_active;
+	frm.page.set_view(frm.page.current_view_name==="pos" ? "main" : "pos");
 
 	frm.toolbar.current_status = null;
 	frm.refresh();
 
 	// refresh
-	if(frm.pos_active) {
+	if(frm.page.current_view_name==="pos") {
 		frm.pos.refresh();
 	}
 }
