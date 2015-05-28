@@ -134,10 +134,11 @@
    "width": "100px"
   }, 
   {
+   "depends_on": "price_list_rate", 
    "fieldname": "discount_percentage", 
    "fieldtype": "Float", 
    "in_list_view": 1, 
-   "label": "Discount (%)", 
+   "label": "Discount on Price List Rate (%)", 
    "oldfieldname": "adj_rate", 
    "oldfieldtype": "Float", 
    "permlevel": 0, 
@@ -522,7 +523,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-05-14 14:52:20.610748", 
+ "modified": "2015-05-27 02:47:16.946934", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note Item", 

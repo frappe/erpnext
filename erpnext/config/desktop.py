@@ -62,5 +62,12 @@ def get_data():
 			"icon": "icon-phone",
 			"icon": "octicon octicon-issue-opened",
 			"type": "module"
+		},
+		"Learn": {
+			"color": "#7272FF",
+			"force_show": True,
+			"icon": "icon-facetime-video",
+			"type": "module",
+			"is_help": True
 		}
 	}

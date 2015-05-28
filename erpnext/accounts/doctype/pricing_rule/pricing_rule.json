@@ -217,7 +217,7 @@
    "depends_on": "eval:doc.price_or_discount==\"Discount Percentage\"", 
    "fieldname": "discount_percentage", 
    "fieldtype": "Float", 
-   "label": "Discount Percentage", 
+   "label": "Discount on Price List Rate (%)", 
    "permlevel": 0
   }, 
   {
@@ -245,7 +245,7 @@
  "icon": "icon-gift", 
  "idx": 1, 
  "istable": 0, 
- "modified": "2015-02-26 04:26:13.240166", 
+ "modified": "2015-05-27 02:47:16.777466", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Pricing Rule", 

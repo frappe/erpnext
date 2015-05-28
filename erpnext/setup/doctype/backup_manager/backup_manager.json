@@ -8,16 +8,22 @@
   {
    "fieldname": "setup", 
    "fieldtype": "Section Break", 
-   "label": "Setup", 
+   "label": "Download Backups", 
    "permlevel": 0
   }, 
   {
-   "description": "Email ids separated by commas.", 
-   "fieldname": "send_notifications_to", 
-   "fieldtype": "Data", 
-   "label": "Send Notifications To", 
+   "fieldname": "current_backups", 
+   "fieldtype": "HTML", 
+   "label": "Current Backups", 
    "permlevel": 0, 
-   "reqd": 1
+   "precision": ""
+  }, 
+  {
+   "description": "", 
+   "fieldname": "sync_with_dropbox", 
+   "fieldtype": "Section Break", 
+   "label": "Sync with Dropbox", 
+   "permlevel": 0
   }, 
   {
    "fieldname": "backup_right_now", 
@@ -28,18 +34,29 @@
    "read_only": 1
   }, 
   {
-   "description": "Note: Backups and files are not deleted from Dropbox, you will have to delete them manually.", 
-   "fieldname": "sync_with_dropbox", 
-   "fieldtype": "Section Break", 
-   "label": "Sync with Dropbox", 
-   "permlevel": 0
+   "fieldname": "send_backups_to_dropbox", 
+   "fieldtype": "Check", 
+   "label": "Send Backups to Dropbox", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
+   "depends_on": "send_backups_to_dropbox", 
+   "description": "Note: Backups and files are not deleted from Dropbox, you will have to delete them manually.", 
    "fieldname": "upload_backups_to_dropbox", 
    "fieldtype": "Select", 
    "label": "Upload Backups to Dropbox", 
    "options": "Never\nWeekly\nDaily", 
    "permlevel": 0
+  }, 
+  {
+   "depends_on": "send_backups_to_dropbox", 
+   "description": "Email ids separated by commas.", 
+   "fieldname": "send_notifications_to", 
+   "fieldtype": "Data", 
+   "label": "Send Notifications To", 
+   "permlevel": 0, 
+   "reqd": 0
   }, 
   {
    "fieldname": "dropbox_access_key", 
@@ -66,6 +83,7 @@
    "read_only": 1
   }, 
   {
+   "depends_on": "send_backups_to_dropbox", 
    "fieldname": "allow_dropbox_access", 
    "fieldtype": "Button", 
    "label": "Allow Dropbox Access", 
@@ -140,7 +158,7 @@
  "icon": "icon-cloud-upload", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2015-02-05 05:11:34.700674", 
+ "modified": "2015-05-26 04:54:10.193573", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Backup Manager", 

@@ -14,19 +14,21 @@ $.extend(erpnext, {
 	},
 
 	get_fiscal_year: function(company, date, fn) {
-		frappe.call({
-			type:"GET",
-			method: "erpnext.accounts.utils.get_fiscal_year",
-			args: {
-				"company": company,
-				"date": date,
-				"verbose": 0
-			},
-			callback: function(r) {
-				if (r.message)	cur_frm.set_value("fiscal_year", r.message[0]);
-				if (fn) fn();
-			}
-		});
+		if(frappe.meta.get_docfield(cur_frm.doctype, "fiscal_year")) {
+			frappe.call({
+				type:"GET",
+				method: "erpnext.accounts.utils.get_fiscal_year",
+				args: {
+					"company": company,
+					"date": date,
+					"verbose": 0
+				},
+				callback: function(r) {
+					if (r.message)	cur_frm.set_value("fiscal_year", r.message[0]);
+					if (fn) fn();
+				}
+			});
+		}
 	},
 
 	toggle_naming_series: function() {
@@ -130,4 +132,17 @@ $.extend(erpnext.utils, {
 			);
 		}
 	}
-})
+});
+
+// add description on posting time
+$(document).on('app_ready', function() {
+	if(!frappe.datetime.is_timezone_same()) {
+		$.each(["Stock Reconciliation", "Stock Entry", "Stock Ledger Entry",
+			"Delivery Note", "Purchase Receipt", "Sales Invoice"], function(i, d) {
+			frappe.ui.form.on(d, "onload", function(frm) {
+				cur_frm.set_df_property("posting_time", "description",
+					sys_defaults.time_zone);
+			});
+		});
+	}
+});

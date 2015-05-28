@@ -46,9 +46,9 @@ def get_all_renamed_fields():
 	)
 
 	for fields in rename_map.values():
-		if fields[0] != "entries":
-			renamed_fields += tuple(fields)
-
+		valid_fields = [d for d in fields if d[0] != "entries"]
+		renamed_fields += tuple(valid_fields)
+	
 	return renamed_fields
 
 def update_script(dt, name, script_field, script, renamed_fields):

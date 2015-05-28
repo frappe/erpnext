@@ -55,7 +55,7 @@ frappe.pages["Accounts Browser"].on_page_load  = function(wrapper){
 		.change(function() {
 			var ctype = frappe.get_route()[1] || 'Account';
 			erpnext.account_chart = new erpnext.AccountsChart(ctype, $(this).val(),
-				chart_area.get(0));
+				chart_area.get(0), wrapper.page);
 		})
 
 	// load up companies
@@ -75,19 +75,23 @@ frappe.pages["Accounts Browser"].on_page_show = function(wrapper){
 	// set route
 	var ctype = frappe.get_route()[1] || 'Account';
 
+
+
 	if(erpnext.account_chart && erpnext.account_chart.ctype != ctype) {
 		wrapper.$company_select.change();
 	}
 }
 
 erpnext.AccountsChart = Class.extend({
-	init: function(ctype, company, wrapper) {
+	init: function(ctype, company, wrapper, page) {
 		$(wrapper).empty();
 		var me = this;
 		me.ctype = ctype;
 		me.can_create = frappe.model.can_create(this.ctype);
 		me.can_delete = frappe.model.can_delete(this.ctype);
 		me.can_write = frappe.model.can_write(this.ctype);
+		me.page = page;
+		me.set_title();
 
 		// __("Accounts"), __("Cost Centers")
 
@@ -169,9 +173,9 @@ erpnext.AccountsChart = Class.extend({
 	set_title: function(val) {
 		var chart_str = this.ctype=="Account" ? __("Chart of Accounts") : __("Chart of Cost Centers");
 		if(val) {
-			wrapper.page.set_title(chart_str + " - " + cstr(val));
+			this.page.set_title(chart_str + " - " + cstr(val));
 		} else {
-			wrapper.page.set_title(chart_str);
+			this.page.set_title(chart_str);
 		}
 	},
 

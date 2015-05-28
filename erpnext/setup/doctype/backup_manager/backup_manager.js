@@ -2,35 +2,16 @@
 // License: GNU General Public License v3. See license.txt
 
 $.extend(cur_frm.cscript, {
+	onload_post_render: function() {
+		cur_frm.fields_dict.allow_dropbox_access.$input.addClass("btn-primary");
+
+		if(cur_frm.doc.__onload && cur_frm.doc.__onload.files) {
+			$(frappe.render_template("backup_files_list", {files:cur_frm.doc.__onload.files}))
+				.appendTo(cur_frm.fields_dict.current_backups.$wrapper.empty());
+		}
+	},
 	refresh: function() {
 		cur_frm.disable_save();
-
-		if(!(cint(cur_frm.doc.dropbox_access_allowed) ||
-			cint(cur_frm.doc.gdrive_access_allowed))) {
-				cur_frm.set_intro(__("You can start by selecting backup frequency and granting access for sync"));
-		} else {
-			var services = {
-				"dropbox": __("Dropbox")
-				// "gdrive": __("Google Drive")
-			}
-			var active_services = [];
-
-			$.each(services, function(service, label) {
-				var access_allowed = cint(cur_frm.doc[service + "_access_allowed"]);
-				var frequency = cur_frm.doc["upload_backups_to_" + service];
-				if(access_allowed && frequency && frequency !== "Never") {
-					active_services.push(label + " [" + frequency + "]");
-				}
-			});
-
-			if(active_services.length > 0) {
-				cur_frm.set_intro(__("Backups will be uploaded to") + ": " +
-					frappe.utils.comma_and(active_services));
-			} else {
-				cur_frm.set_intro("");
-			}
-		}
-
 	},
 
 	validate_send_notifications_to: function() {

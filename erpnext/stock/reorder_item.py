@@ -3,12 +3,11 @@
 
 import frappe
 from frappe.utils import flt, cstr, nowdate, add_days, cint
-from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
 	# if initial setup not completed, return
-	if not frappe.db.sql("select name from `tabFiscal Year` limit 1"):
+	if not (frappe.db.a_row_exists("Company") and frappe.db.a_row_exists("Fiscal Year")):
 		return
 
 	if cint(frappe.db.get_value('Stock Settings', None, 'auto_indent')):
@@ -83,7 +82,6 @@ def get_item_warehouse_projected_qty():
 def create_material_request(material_requests):
 	"""	Create indent on reaching reorder level	"""
 	mr_list = []
-	defaults = frappe.defaults.get_defaults()
 	exceptions_list = []
 
 	def _log_exception():
@@ -92,14 +90,6 @@ def create_material_request(material_requests):
 			frappe.local.message_log = []
 		else:
 			exceptions_list.append(frappe.get_traceback())
-
-	try:
-		current_fiscal_year = get_fiscal_year(nowdate())[0] or defaults.fiscal_year
-
-	except FiscalYearError:
-		_log_exception()
-		notify_errors(exceptions_list)
-		return
 
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
@@ -111,7 +101,6 @@ def create_material_request(material_requests):
 				mr = frappe.new_doc("Material Request")
 				mr.update({
 					"company": company,
-					"fiscal_year": current_fiscal_year,
 					"transaction_date": nowdate(),
 					"material_request_type": request_type
 				})
@@ -170,7 +159,7 @@ def send_email_notification(mr_list):
 			msg += "<tr><td>" + item.item_code + "</td><td>" + item.warehouse + "</td><td>" + \
 				cstr(item.qty) + "</td><td>" + cstr(item.uom) + "</td></tr>"
 		msg += "</table>"
-	frappe.sendmail(recipients=email_list, 
+	frappe.sendmail(recipients=email_list,
 		subject='Auto Material Request Generation Notification', message = msg)
 
 def notify_errors(exceptions_list):

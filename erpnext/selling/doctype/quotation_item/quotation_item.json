@@ -121,10 +121,11 @@
    "width": "100px"
   }, 
   {
+   "depends_on": "price_list_rate", 
    "fieldname": "discount_percentage", 
    "fieldtype": "Percent", 
    "in_list_view": 1, 
-   "label": "Discount (%)", 
+   "label": "Discount on Price List Rate (%)", 
    "oldfieldname": "adj_rate", 
    "oldfieldtype": "Float", 
    "permlevel": 0, 
@@ -389,7 +390,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-05-14 14:51:21.557189", 
+ "modified": "2015-05-27 02:47:15.474119", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation Item", 

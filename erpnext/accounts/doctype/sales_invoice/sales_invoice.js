@@ -23,7 +23,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				this.frm.set_value("is_pos", 1);
 				this.is_pos(function() {
 					if (cint(frappe.defaults.get_user_defaults("fs_pos_view"))===1)
-						erpnext.pos.toggle(me.frm);
+						erpnext.pos.toggle(me.frm, true);
 				});
 			}
 		}
@@ -75,7 +75,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 
 		// Show buttons only when pos view is active
-		if (doc.docstatus===0 && !this.pos_active) {
+		if (doc.docstatus===0 && !cur_frm.page.current_view_name!=="pos") {
 			cur_frm.cscript.sales_order_btn();
 			cur_frm.cscript.delivery_note_btn();
 		}
@@ -253,7 +253,7 @@ cur_frm.cscript.mode_of_payment = function(doc) {
 				if(r.message) {
 					cur_frm.set_value("cash_bank_account", r.message["account"]);
 				}
-			 	
+
 			 }
 		});
 	 }
