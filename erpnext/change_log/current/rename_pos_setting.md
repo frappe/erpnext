@@ -1,1 +1,0 @@
-- POS Setting is renamed to POS Profile
