@@ -125,6 +125,11 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	barcode: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if(d.barcode=="" || d.barcode==null) {
+			// barcode cleared, remove item
+			d.item_code = "";
+		}
 		this.item_code(doc, cdt, cdn);
 	},
 
