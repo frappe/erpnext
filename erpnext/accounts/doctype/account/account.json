@@ -101,7 +101,7 @@
    "label": "Account Type", 
    "oldfieldname": "account_type", 
    "oldfieldtype": "Select", 
-   "options": "\nBank\nCash\nTax\nChargeable\nWarehouse\nReceivable\nPayable\nEquity\nFixed Asset\nCost of Goods Sold\nExpense Account\nIncome Account\nStock Received But Not Billed\nExpenses Included In Valuation\nStock Adjustment\nStock\nTemporary", 
+   "options": "\nBank\nCash\nTax\nChargeable\nWarehouse\nReceivable\nPayable\nEquity\nFixed Asset\nCost of Goods Sold\nExpense Account\nRound Off\nIncome Account\nStock Received But Not Billed\nExpenses Included In Valuation\nStock Adjustment\nStock\nTemporary", 
    "permlevel": 0, 
    "search_index": 0
   }, 
@@ -171,7 +171,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-04-27 20:07:37.147184", 
+ "modified": "2015-05-28 14:10:40.606010", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Account", 

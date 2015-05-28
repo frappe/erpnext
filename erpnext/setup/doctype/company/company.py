@@ -114,6 +114,7 @@ class Company(Document):
 	def set_default_accounts(self):
 		self._set_default_account("default_cash_account", "Cash")
 		self._set_default_account("default_bank_account", "Bank")
+		self._set_default_account("round_off_account", "Round Off")
 
 		if cint(frappe.db.get_single_value("Accounts Settings", "auto_accounting_for_stock")):
 			self._set_default_account("stock_received_but_not_billed", "Stock Received But Not Billed")
@@ -161,6 +162,7 @@ class Company(Document):
 			cc_doc.insert()
 
 		frappe.db.set(self, "cost_center", _("Main") + " - " + self.abbr)
+		frappe.db.set(self, "round_off_cost_center", _("Main") + " - " + self.abbr)
 
 	def before_rename(self, olddn, newdn, merge=False):
 		if merge:

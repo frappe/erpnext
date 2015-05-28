@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt, cstr
 from frappe import _
-import copy
 from frappe.model.meta import get_field_precision
 from erpnext.accounts.utils import validate_expense_against_budget
 
@@ -88,7 +87,8 @@ def validate_account_for_auto_accounting_for_stock(gl_map):
 
 		for entry in gl_map:
 			if entry.account in aii_accounts:
-				frappe.throw(_("Account: {0} can only be updated via Stock Transactions").format(entry.account), StockAccountInvalidTransaction)
+				frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
+					.format(entry.account), StockAccountInvalidTransaction)
 
 def round_off_debit_credit(gl_map):
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
@@ -101,6 +101,7 @@ def round_off_debit_credit(gl_map):
 		debit_credit_diff += entry.debit - entry.credit
 	
 	debit_credit_diff = flt(debit_credit_diff, precision)
+	print debit_credit_diff, 1.0 / (10**precision)
 	if abs(debit_credit_diff) >= (2.0 / (10**precision)):
 		frappe.throw(_("Debit and Credit not equal for {0} #{1}. Difference is {2}.")
 			.format(gl_map[0].voucher_type, gl_map[0].voucher_no, debit_credit_diff))
@@ -117,7 +118,12 @@ def make_round_off_gle(gl_map, debit_credit_diff):
 	if not round_off_cost_center:
 		frappe.throw(_("Please mention Round Off Cost Center in Company"))
 		
-	round_off_gle = copy.deepcopy(gl_map[0])
+	
+	round_off_gle = frappe._dict()
+	for k in ["voucher_type", "voucher_no", "company", 
+		"posting_date", "remarks", "fiscal_year", "is_opening"]:
+			round_off_gle[k] = gl_map[0][k]
+	
 	round_off_gle.update({
 		"account": round_off_account,
 		"debit": abs(debit_credit_diff) if debit_credit_diff < 0 else 0,
@@ -128,6 +134,7 @@ def make_round_off_gle(gl_map, debit_credit_diff):
 		"against_voucher_type": None,
 		"against_voucher": None
 	})
+	
 	gl_map.append(round_off_gle)
 
 
