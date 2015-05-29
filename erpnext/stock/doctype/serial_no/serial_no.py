@@ -34,6 +34,9 @@ class SerialNo(StockController):
 		self.validate_item()
 		self.on_stock_ledger_entry()
 
+		valid_purchase_document_type = ("Purchase Receipt", "Stock Entry", "Serial No")
+		self.validate_value("purchase_document_type", "in", valid_purchase_document_type)
+
 	def set_maintenance_status(self):
 		if not self.warranty_expiry_date and not self.amc_expiry_date:
 			self.maintenance_status = None
