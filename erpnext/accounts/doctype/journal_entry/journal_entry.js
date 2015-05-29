@@ -4,7 +4,7 @@
 frappe.provide("erpnext.accounts");
 frappe.require("assets/erpnext/js/utils.js");
 
-erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
+erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 	onload: function() {
 		this.load_defaults();
 		this.setup_queries();
@@ -130,10 +130,31 @@ erpnext.accounts.JournalVoucher = frappe.ui.form.Controller.extend({
 				cur_frm.cscript.update_totals(me.frm.doc);
 			}
 		});
-	}
+	},
+
+	accounts_add: function(doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		$.each(doc.accounts, function(i, d) {
+			if(d.account && d.party && d.party_type) {
+				row.account = d.account;
+				row.party = d.party;
+				row.party_type = d.party_type;
+			}
+		});
+
+		// set difference
+		if(doc.difference) {
+			if(doc.difference > 0) {
+				row.credit = doc.difference;
+			} else {
+				row.debit = -doc.difference;
+			}
+		}
+	},
+
 });
 
-cur_frm.script_manager.make(erpnext.accounts.JournalVoucher);
+cur_frm.script_manager.make(erpnext.accounts.JournalEntry);
 
 cur_frm.cscript.refresh = function(doc) {
 	erpnext.toggle_naming_series();
