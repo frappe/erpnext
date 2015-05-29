@@ -6,6 +6,10 @@ python:
 services:
   - mysql
 
+before_install:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+
 install:
   - sudo apt-get purge -y mysql-common
   - wget https://raw.githubusercontent.com/frappe/bench/master/install_scripts/setup_frappe.sh
@@ -22,7 +26,9 @@ script:
   - bench use test_site
   - bench reinstall
   - bench build-website
-  - bench --verbose run-tests
+  - bench serve &
+  - sleep 10
+  - bench --verbose run-tests --driver Firefox
 
 before_script:
   - mysql -e 'create database test_frappe'
@@ -33,6 +39,6 @@ notifications:
   webhooks:
     urls:
       - https://webhooks.gitter.im/e/92b3bea86d8c5397beef
-    on_success: always  
-    on_failure: always  
+    on_success: always
+    on_failure: always
     on_start: never
