@@ -12,7 +12,6 @@ frappe.listview_settings['Purchase Order'] = {
 			return [__("Completed"), "green", "per_received,=,100|per_billed,=,100|status,!=,Stopped"];
 		}
 	},
-	order_by: "per_received asc, modified desc",
 	onload: function(listview) {
 		var method = "erpnext.buying.doctype.purchase_order.purchase_order.stop_or_unstop_purchase_orders";
 

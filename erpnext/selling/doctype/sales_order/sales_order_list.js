@@ -14,7 +14,6 @@ frappe.listview_settings['Sales Order'] = {
 			return [__("Completed"), "green", "per_delivered,=,100|per_billed,=,100|status,!=,Stopped"];
 		}
 	},
-	order_by: "per_delivered asc, modified desc",
 	onload: function(listview) {
 		var method = "erpnext.selling.doctype.sales_order.sales_order.stop_or_unstop_sales_orders";
 
