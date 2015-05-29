@@ -160,3 +160,4 @@ erpnext.patches.v5_0.update_operation_description
 erpnext.patches.v5_0.set_footer_address
 execute:frappe.db.set_value("Backup Manager", None, "send_backups_to_dropbox", 1 if frappe.db.get_value("Backup Manager", None, "upload_backups_to_dropbox") in ("Daily", "Weekly") else 0)
 execute:frappe.db.sql_list("delete from `tabDocPerm` where parent='Issue' and modified_by='Administrator' and role='Guest'")
+erpnext.patches.v5_0.update_item_and_description_again
