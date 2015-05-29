@@ -9,13 +9,13 @@ def execute():
 	# NOTE: sequence is important
 	renamed_fields = get_all_renamed_fields()
 
-	for dt, script_field in (("Custom Script", "script"), ("Print Format", "html")):
+	for dt, script_field, ref_dt_field in (("Custom Script", "script", "dt"), ("Print Format", "html", "doc_type")):
 
 		cond1 = " or ".join("""{0} like "%%{1}%%" """.format(script_field, d[0].replace("_", "\\_")) for d in renamed_fields)
 		cond2 = " and standard = 'No'" if dt == "Print Format" else ""
 
-		for name, script in frappe.db.sql("select name, {0} as script from `tab{1}` where ({2}) {3}".format(script_field, dt, cond1, cond2)):
-			update_script(dt, name, script_field, script, renamed_fields)
+		for name, script, ref_dt in frappe.db.sql("select name, {0} as script, {1} as ref_dt from `tab{2}` where ({3}) {4}".format(script_field, ref_dt_field, dt, cond1, cond2)):
+			update_script(dt, name, ref_dt, script_field, script, renamed_fields)
 
 def get_all_renamed_fields():
 	from erpnext.patches.v5_0.rename_table_fieldnames import rename_map
@@ -46,20 +46,20 @@ def get_all_renamed_fields():
 	)
 
 	for fields in rename_map.values():
-		valid_fields = [d for d in fields if d[0] != "entries"]
-		renamed_fields += tuple(valid_fields)
+		renamed_fields += tuple(fields)
 	
 	return renamed_fields
 
-def update_script(dt, name, script_field, script, renamed_fields):
+def update_script(dt, name, ref_dt, script_field, script, renamed_fields):
 	for from_field, to_field in renamed_fields:
-		script = re.sub(r"\b{}\b".format(from_field), to_field, script)
-		
-	if dt == "Journal Entry":
+		if from_field != "entries":
+			script = re.sub(r"\b{}\b".format(from_field), to_field, script)
+			
+	if ref_dt == "Journal Entry":
 		script = re.sub(r"\bentries\b", "accounts", script)
-	elif dt == "Bank Reconciliation":
+	elif ref_dt == "Bank Reconciliation":
 		script = re.sub(r"\bentries\b", "journal_entries", script)
-	elif dt in ("Sales Invoice", "Purchase Invoice"):
+	elif ref_dt in ("Sales Invoice", "Purchase Invoice"):
 		script = re.sub(r"\bentries\b", "items", script)
 
 	frappe.db.set_value(dt, name, script_field, script)
