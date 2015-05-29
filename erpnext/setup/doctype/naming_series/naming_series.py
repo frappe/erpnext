@@ -12,7 +12,6 @@ from frappe.model.document import Document
 class NamingSeriesNotSetError(frappe.ValidationError): pass
 
 class NamingSeries(Document):
-
 	def get_transactions(self, arg=None):
 		doctypes = list(set(frappe.db.sql_list("""select parent
 				from `tabDocField` where fieldname='naming_series'""")

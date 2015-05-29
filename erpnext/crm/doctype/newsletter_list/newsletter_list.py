@@ -44,10 +44,13 @@ class NewsletterList(Document):
 		return self.update_total_subscribers()
 
 	def update_total_subscribers(self):
-		self.total_subscribers = frappe.db.sql("""select count(*) from `tabNewsletter List Subscriber`
-			where newsletter_list=%s""", self.name)[0][0]
+		self.total_subscribers = self.get_total_subscribers()
 		self.db_update()
 		return self.total_subscribers
+
+	def get_total_subscribers(self):
+		return frappe.db.sql("""select count(*) from `tabNewsletter List Subscriber`
+			where newsletter_list=%s""", self.name)[0][0]
 
 	def on_trash(self):
 		for d in frappe.get_all("Newsletter List Subscriber", "name", {"newsletter_list": self.name}):
