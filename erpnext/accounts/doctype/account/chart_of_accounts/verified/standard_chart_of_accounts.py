@@ -117,8 +117,8 @@ def get():
 	            _("Print and Stationary"): {
 	                "account_type": "Expense Account"
 	            },
-	            _("Rounded Off"): {
-	                "account_type": "Expense Account"
+	            _("Round Off"): {
+	                "account_type": "Round Off"
 	            },
 	            _("Salary"): {
 	                "account_type": "Expense Account"

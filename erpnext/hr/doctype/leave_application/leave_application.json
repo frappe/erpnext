@@ -130,6 +130,7 @@
    "description": "", 
    "fieldname": "leave_approver", 
    "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
    "label": "Leave Approver", 
    "options": "User", 
    "permlevel": 0
@@ -216,7 +217,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 3, 
- "modified": "2015-04-30 02:19:39.330689", 
+ "modified": "2015-05-27 18:44:36.708614", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Application", 
