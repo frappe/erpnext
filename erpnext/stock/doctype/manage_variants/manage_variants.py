@@ -15,8 +15,10 @@ class ItemTemplateCannotHaveStock(frappe.ValidationError): pass
 class ManageVariants(Document):
 
 	def get_item_details(self):
-		self.get_attributes()
-		self.get_variants()
+		self.clear_tables()
+		if self.item:
+			self.get_attributes()
+			self.get_variants()
 		
 	def generate_combinations(self):
 		self.validate_attributes()
@@ -28,6 +30,10 @@ class ManageVariants(Document):
 		
 	def create_variants(self):
 		self.sync_variants()
+	
+	def clear_tables(self):
+		self.set('attributes', [])
+		self.set('variants', [])
 	
 	def get_attributes(self):
 		attributes = {}
@@ -41,15 +47,14 @@ class ManageVariants(Document):
 				self.append('attributes',{"attribute": d, "attribute_value": value})
 
 	def get_variants(self):
-		self.set('variants', [])
 		variants = [d.name for d in frappe.get_all("Item",
 			filters={"variant_of":self.item})]
 		for d in variants:
 			variant_attributes, attributes = "", []
 			for attribute in frappe.db.sql("""select attribute, attribute_value from `tabVariant Attribute` where parent = %s""", d):
-				variant_attributes += attribute[1] + " "
+				variant_attributes += attribute[1] + " | "
 				attributes.append([attribute[0], attribute[1]])
-			self.append('variants',{"variant": d, "variant_attributes": variant_attributes, "attributes": json.dumps(attributes)})
+			self.append('variants',{"variant": d, "variant_attributes": variant_attributes[: -2], "attributes": json.dumps(attributes)})
 
 	def validate_attributes(self):
 		if not self.attributes:
@@ -112,39 +117,59 @@ class ManageVariants(Document):
 					else:
 						variant_attributes = ""
 						for d in _my_attributes:
-							variant_attributes += d[1] + " "
+							variant_attributes += d[1] + " | "
 						self.append('variants', {"variant": item_code + "-" + value.abbr, 
-							"attributes": json.dumps(_my_attributes), "variant_attributes": variant_attributes})
-
+							"attributes": json.dumps(_my_attributes), "variant_attributes": variant_attributes[: -2]})
 		add_attribute_suffixes(self.item, [], attributes)
 
 	def sync_variants(self):
 		variant_item_codes = []
+		item_variants_attributes = {}
+		inserted, updated, renamed_old, renamed_new, deleted = [], [], [], [], []
+		
 		for v in self.variants:
 			variant_item_codes.append(v.variant)
 
 		existing_variants = [d.name for d in frappe.get_all("Item",
 			filters={"variant_of":self.item})]
+		
+		for d in existing_variants:
+			attributes = []
+			for attribute in frappe.db.sql("""select attribute, attribute_value from `tabVariant Attribute` where parent = %s""", d):
+				attributes.append([attribute[0], attribute[1]])
+			item_variants_attributes.setdefault(d, []).append(attributes)
 
-		inserted, updated, deleted = [], [], []
 		for existing_variant in existing_variants:
 			if existing_variant not in variant_item_codes:
-				frappe.delete_doc("Item", existing_variant)
-				deleted.append(existing_variant)
+				att = item_variants_attributes[existing_variant][0]
+				for variant in self.variants:
+					if sorted(json.loads(variant.attributes) ,key=lambda x: x[0]) == \
+						sorted(att ,key=lambda x: x[0]):
+							rename_variant(existing_variant, variant.variant)
+							renamed_old.append(existing_variant)
+							renamed_new.append(variant.variant)
+
+				if existing_variant not in renamed_old:
+					delete_variant(existing_variant)
+					deleted.append(existing_variant)
 
 		for item_code in variant_item_codes:
 			if item_code not in existing_variants:
-				make_variant(self.item, item_code, self.variants)
-				inserted.append(item_code)
+				if item_code not in renamed_new:
+					make_variant(self.item, item_code, self.variants)
+					inserted.append(item_code)
 			else:
-				update_variant(self.item, existing_variant, self.variants)
-				updated.append(existing_variant)
+				update_variant(self.item, item_code, self.variants)
+				updated.append(item_code)
 
 		if inserted:
 			frappe.msgprint(_("Item Variants {0} created").format(", ".join(inserted)))
 
 		if updated:
 			frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
+
+		if renamed_old:
+			frappe.msgprint(_("Item Variants {0} renamed").format(", ".join(renamed_old)))
 
 		if deleted:
 			frappe.msgprint(_("Item Variants {0} deleted").format(", ".join(deleted)))
@@ -161,6 +186,12 @@ def update_variant(item, variant_code, variant_attribute=None):
 	template = frappe.get_doc("Item", item)
 	copy_attributes_to_variant(template, variant, variant_attribute, insert=True)
 	variant.save()
+
+def rename_variant(old_variant_code, new_variant_code):
+	frappe.rename_doc("Item", old_variant_code, new_variant_code)
+
+def delete_variant(variant_code):
+	frappe.delete_doc("Item", variant_code)
 
 def copy_attributes_to_variant(template, variant, variant_attribute=None, insert=False):
 	from frappe.model import no_value_fields

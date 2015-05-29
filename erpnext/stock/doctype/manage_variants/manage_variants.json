@@ -58,14 +58,6 @@
    "options": "Variant Item", 
    "permlevel": 0, 
    "precision": ""
-  }, 
-  {
-   "fieldname": "create_variants", 
-   "fieldtype": "Button", 
-   "label": "Create Variants", 
-   "options": "create_variants", 
-   "permlevel": 0, 
-   "precision": ""
   }
  ], 
  "hide_heading": 0, 
@@ -75,7 +67,7 @@
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
- "modified": "2015-05-27 04:43:52.051367", 
+ "modified": "2015-05-28 06:18:03.238411", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Manage Variants", 

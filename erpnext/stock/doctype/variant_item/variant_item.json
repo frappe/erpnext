@@ -47,7 +47,7 @@
   {
    "fieldname": "attributes", 
    "fieldtype": "Text", 
-   "hidden": 1, 
+   "hidden": 0, 
    "label": "attributes", 
    "permlevel": 0, 
    "precision": "", 
@@ -62,7 +62,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-05-28 04:58:20.495616", 
+ "modified": "2015-05-29 02:09:33.622631", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Variant Item", 

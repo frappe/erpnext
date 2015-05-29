@@ -39,8 +39,14 @@ frappe.ui.form.on("Manage Variants", {
 
 	refresh: function(frm) {
 		frm.disable_save();
+		frm.page.set_primary_action(__("Create Variants"), function() {
+			frappe.call({
+				method: "create_variants",
+				doc:frm.doc
+			})
+		});
 	},
-	
+
 	item:function(frm) {
 		return frappe.call({
 			method: "get_item_details",
@@ -51,5 +57,4 @@ frappe.ui.form.on("Manage Variants", {
 			}
 		})
 	}
-	
 });
