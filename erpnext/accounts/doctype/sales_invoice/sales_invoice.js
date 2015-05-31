@@ -65,7 +65,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					});
 
 				if(!from_delivery_note) {
-					cur_frm.page.add_menu_item(__('Make Delivery'), cur_frm.cscript['Make Delivery Note'], "icon-truck")
+					cur_frm.add_custom_button(__('Make Delivery'), cur_frm.cscript['Make Delivery Note'], "icon-truck")
 				}
 			}
 
@@ -75,14 +75,14 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		}
 
 		// Show buttons only when pos view is active
-		if (doc.docstatus===0 && !cur_frm.page.current_view_name!=="pos") {
+		if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos") {
 			cur_frm.cscript.sales_order_btn();
 			cur_frm.cscript.delivery_note_btn();
 		}
 	},
 
 	sales_order_btn: function() {
-		this.$sales_order_btn = cur_frm.page.add_menu_item(__('From Sales Order'),
+		this.$sales_order_btn = cur_frm.add_custom_button(__('From Sales Order'),
 			function() {
 				frappe.model.map_current_doc({
 					method: "erpnext.selling.doctype.sales_order.sales_order.make_sales_invoice",
@@ -99,7 +99,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	delivery_note_btn: function() {
-		this.$delivery_note_btn = cur_frm.page.add_menu_item(__('From Delivery Note'),
+		this.$delivery_note_btn = cur_frm.add_custom_button(__('From Delivery Note'),
 			function() {
 				frappe.model.map_current_doc({
 					method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
