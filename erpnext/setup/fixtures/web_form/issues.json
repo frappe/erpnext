@@ -10,7 +10,7 @@
   "doctype": "Web Form", 
   "introduction_text": null, 
   "login_required": 1, 
-  "modified": "2015-06-01 05:59:03.697380", 
+  "modified": "2015-06-01 08:14:26.350792", 
   "name": "issues", 
   "page_name": "issues", 
   "published": 1, 
@@ -50,6 +50,17 @@
     "options": null, 
     "read_only": 0, 
     "reqd": 0
+   }, 
+   {
+    "default": null, 
+    "description": null, 
+    "fieldname": "attachment", 
+    "fieldtype": "Attach", 
+    "hidden": null, 
+    "label": "Attachment", 
+    "options": null, 
+    "read_only": null, 
+    "reqd": null
    }
   ], 
   "web_page_link_text": null

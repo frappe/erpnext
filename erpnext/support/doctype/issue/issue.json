@@ -229,11 +229,19 @@
    "hidden": 1, 
    "label": "Content Type", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "attachment", 
+   "fieldtype": "Attach", 
+   "hidden": 1, 
+   "label": "Attachment", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "icon": "icon-ticket", 
  "idx": 1, 
- "modified": "2015-06-01 03:48:24.849210", 
+ "modified": "2015-06-01 08:14:01.750421", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Issue", 
