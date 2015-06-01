@@ -124,9 +124,9 @@ erpnext.company.setup_queries = function(frm) {
 		["default_cash_account", {"account_type": "Cash"}], 
 		["default_receivable_account", {"account_type": "Receivable"}], 
 		["default_payable_account", {"account_type": "Payable"}], 
-		["default_expense_account", {"report_type": "Profit and Loss"}], 
-		["default_income_account", {"report_type": "Profit and Loss"}], 
-		["round_off_account", {"account_type": "Profit and Loss"}],
+		["default_expense_account", {"root_type": "Expense"}], 
+		["default_income_account", {"root_type": "Income"}], 
+		["round_off_account", {"root_type": "Expense"}],
 		["cost_center", {}],
 		["round_off_cost_center", {}]
 	], function(i, v) {
@@ -135,8 +135,8 @@ erpnext.company.setup_queries = function(frm) {
 	
 	if (sys_defaults.auto_accounting_for_stock) {
 		$.each([
-			["stock_adjustment_account", {"report_type": "Profit and Loss"}], 
-			["expenses_included_in_valuation", {"report_type": "Profit and Loss"}],
+			["stock_adjustment_account", {"root_type": "Expense"}], 
+			["expenses_included_in_valuation", {"root_type": "Expense"}],
 			["stock_received_but_not_billed", {"report_type": "Balance Sheet"}]
 		], function(i, v) {
 			erpnext.company.set_custom_query(frm, v);
