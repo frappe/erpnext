@@ -1,6 +1,9 @@
+{% block header_actions %}
+{% include 'templates/includes/product_search_box.html' %}
+{% endblock %}
+
 {% block content %}
 <div class="item-group-content">
-	{% include 'templates/includes/product_search_box.html' %}
 	<div>
 		{% if slideshow %}<!-- slideshow -->
 		{% include "templates/includes/slideshow.html" %}
