@@ -31,7 +31,7 @@ def get_data():
 				{
 					"type": "help",
 					"label": _("Opening Stock Balance"),
-					"youtube_id": "yPgrtfeCTs"
+					"youtube_id": "0yPgrtfeCTs"
 				},
 				{
 					"type": "help",
@@ -106,7 +106,7 @@ def get_data():
 				{
 					"type": "help",
 					"label": _("Opening Stock Balance"),
-					"youtube_id": "yPgrtfeCTs"
+					"youtube_id": "0yPgrtfeCTs"
 				},
 				{
 					"type": "help",

@@ -205,9 +205,9 @@ def get_pricing_rules(args):
 
 def filter_pricing_rules(args, pricing_rules):
 	# filter for qty
-	if pricing_rules and args.get("qty"):
-		pricing_rules = filter(lambda x: (args.qty>=flt(x.min_qty)
-			and (args.qty<=x.max_qty if x.max_qty else True)), pricing_rules)
+	if pricing_rules:
+		pricing_rules = filter(lambda x: (flt(args.get("qty"))>=flt(x.min_qty)
+			and (flt(args.get("qty"))<=x.max_qty if x.max_qty else True)), pricing_rules)
 
 	# find pricing rule with highest priority
 	if pricing_rules:

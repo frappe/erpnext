@@ -23,9 +23,6 @@ class LeaveAllocation(Document):
 	def on_update(self):
 		self.get_total_allocated_leaves()
 
-	def on_cancel(self):
-		self.check_for_leave_application()
-
 	def validate_new_leaves_allocated_value(self):
 		"""validate that leave allocation is in multiples of 0.5"""
 		if flt(self.new_leaves_allocated) % 0.5:
