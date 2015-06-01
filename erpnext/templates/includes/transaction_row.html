@@ -1,5 +1,6 @@
 {% set doc = frappe.get_doc(doc) %}
-<a class="website-list-row" href="/{{ pathname }}/{{ doc.name }}" no-pjax>
+<div class="web-list-item">
+<a href="/{{ pathname }}/{{ doc.name }}" no-pjax>
 <div class="row">
 	<div class="col-sm-6 col-xs-7">
 		<div class="row">
@@ -12,7 +13,7 @@
 					<span class="indicator orange">{{ doc.status_display }}</span>
 					{%- endif -%}
 				{%- elif doc.status -%}
-					<span class="indicator">{{ doc.status }}</span>
+					<span class="indicator blue">{{ doc.status }}</span>
 				{%- endif -%}
 			</div>
 		</div>
@@ -27,4 +28,4 @@
 		{{ frappe.utils.pretty_date(doc.creation) }}</div>
 </div>
 </a>
-
+</div>

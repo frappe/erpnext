@@ -38,16 +38,14 @@ website_route_rules = [
 	{"from_route": "/invoices", "to_route": "Sales Invoice"},
 	{"from_route": "/invoices/<path:name>", "to_route": "print", "defaults": {"doctype": "Sales Invoice"}},
 	{"from_route": "/shipments", "to_route": "Delivery Note"},
-	{"from_route": "/shipments/<path:name>", "to_route": "print", "defaults": {"doctype": "Delivery Note"}},
-	{"from_route": "/issues", "to_route": "Issue"},
-	{"from_route": "/issues/<path:name>", "to_route": "print", "defaults": {"doctype": "Issue"}},
-	{"from_route": "/addresses", "to_route": "Address"},
+	{"from_route": "/shipments/<path:name>", "to_route": "print", "defaults": {"doctype": "Delivery Note"}}
 ]
 
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Sales Invoice": "erpnext.controllers.website_list_for_contact.has_website_permission",
-	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission"
+	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
+	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission"
 }
 
 dump_report_map = "erpnext.startup.report_data_map.data_map"

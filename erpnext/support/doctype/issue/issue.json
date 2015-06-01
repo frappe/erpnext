@@ -66,7 +66,7 @@
    "oldfieldtype": "Data", 
    "options": "Email", 
    "permlevel": 0, 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
    "fieldname": "fold", 
@@ -233,7 +233,7 @@
  ], 
  "icon": "icon-ticket", 
  "idx": 1, 
- "modified": "2015-05-28 03:21:04.690112", 
+ "modified": "2015-06-01 03:48:24.849210", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Issue", 

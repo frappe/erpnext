@@ -8,7 +8,7 @@ import frappe
 from frappe import _, msgprint
 from frappe.utils import comma_and
 from frappe.model.document import Document
-from frappe.utils.nestedset import get_ancestors_of
+from frappe.utils.nestedset import get_ancestors_of, get_root_of
 from erpnext.utilities.doctype.address.address import get_territory_from_address
 
 class ShoppingCartSetupError(frappe.ValidationError): pass
@@ -42,7 +42,7 @@ class ShoppingCartSettings(Document):
 		return territory_name_map
 
 	def validate_price_lists(self):
-		territory_name_map = self.validate_overlapping_territories("price_lists", "selling_price_list")
+		self.validate_overlapping_territories("price_lists", "selling_price_list")
 
 		# validate that a Shopping Cart Price List exists for the default territory as a catch all!
 		price_list_for_default_territory = self.get_name_from_territory(self.default_territory, "price_lists",
@@ -131,7 +131,8 @@ class ShoppingCartSettings(Document):
 	def get_price_list(self, billing_territory):
 		price_list = self.get_name_from_territory(billing_territory, "price_lists", "selling_price_list")
 		if not (price_list and price_list[0]):
-			price_list = self.get_name_from_territory(self.default_territory, "price_lists", "selling_price_list")
+			price_list = self.get_name_from_territory(self.default_territory or get_root_of("Territory"),
+				"price_lists", "selling_price_list")
 
 		return price_list and price_list[0] or None
 
@@ -165,7 +166,7 @@ def is_cart_enabled():
 	return get_shopping_cart_settings().enabled
 
 def get_default_territory():
-	return get_shopping_cart_settings().default_territory
+	return get_shopping_cart_settings().default_territory or get_root_of("Territory")
 
 def check_shopping_cart_enabled():
 	if not get_shopping_cart_settings().enabled:
