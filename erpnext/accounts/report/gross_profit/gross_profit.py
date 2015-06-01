@@ -183,8 +183,6 @@ class GrossProfitGenerator(object):
 				my_sle = self.sle.get((item_code, row.warehouse))
 				for i, sle in enumerate(my_sle):
 					# find the stock valution rate from stock ledger entry
-					print sle.voucher_type, row.parenttype, sle.voucher_no, row.parent, \
-						sle.voucher_detail_no, row.item_row
 					if sle.voucher_type == row.parenttype and row.parent == sle.voucher_no and \
 						sle.voucher_detail_no == row.item_row:
 							previous_stock_value = len(my_sle) > i+1 and \
