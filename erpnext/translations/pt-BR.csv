@@ -120,7 +120,7 @@ apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +114,You are not auth
 apps/erpnext/erpnext/selling/doctype/sales_bom/sales_bom.py +27,Parent Item {0} must be not Stock Item and must be a Sales Item,Pai item {0} não deve ser Stock item e deve ser um item de vendas
 DocType: Item,Item Image (if not slideshow),Imagem do Item (se não for slideshow)
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.py +20,An Customer exists with same name,Existe um cliente com o mesmo nome
-DocType: Production Order Operation,(Hour Rate / 60) * Actual Operation Time,(Hora Taxa / 60) * Tempo real Operação
+DocType: Production Order Operation,(Hour Rate / 60) * Actual Operation Time,(Hora Taxa / 60) * Tempo de operação atual
 DocType: SMS Log,SMS Log,Log de SMS
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +27,Cost of Delivered Items,Custo de Produtos Entregues
 DocType: Blog Post,Guest,Convidado
@@ -1377,7 +1377,7 @@ DocType: Company,Default Payable Account,Conta a Pagar Padrão
 DocType: Party Type,Contacts,Contatos
 apps/erpnext/erpnext/config/website.py +13,"Settings for online shopping cart such as shipping rules, price list etc.","Definições para carrinho de compras on-line, tais como regras de navegação, lista de preços etc."
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +601,Setup Complete,Instalação concluída
-apps/erpnext/erpnext/controllers/website_list_for_contact.py +48,{0}% Billed,{0}% Tida
+apps/erpnext/erpnext/controllers/website_list_for_contact.py +48,{0}% Billed,{0}% Cobrada
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py +33,Reserved Qty,reservados Qtde
 DocType: Party Account,Party Account,Conta Party
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +69,Human Resources,Recursos Humanos
@@ -1521,7 +1521,7 @@ apps/erpnext/erpnext/stock/doctype/batch/batch_list.js +5,Expired,Expirado
 DocType: Packing Slip,To Package No.,Para Pacote Nº.
 DocType: DocType,System,Sistema
 DocType: Warranty Claim,Issue Date,Data da Questão
-DocType: Activity Cost,Activity Cost,Atividade Custo
+DocType: Activity Cost,Activity Cost,Custo de atividade
 DocType: Purchase Receipt Item Supplied,Consumed Qty,Qtde consumida
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +51,Telecommunications,Telecomunicações
 DocType: Packing Slip,Indicates that the package is a part of this delivery (Only Draft),Indica que o pacote é uma parte desta entrega (Só Projecto)
@@ -2259,7 +2259,7 @@ DocType: Purchase Order Item,Material Request No,Pedido de material no
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +201,Quality Inspection required for Item {0},Inspeção de Qualidade exigido para item {0}
 DocType: Quotation,Rate at which customer's currency is converted to company's base currency,Taxa na qual a moeda do cliente é convertida para a moeda base da empresa
 DocType: Purchase Invoice,Discount Amount (Company Currency),Montante Discount (Empresa de moeda)
-apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +105,{0} has been successfully unsubscribed from this list.,{0} foi retirado com sucesso a partir desta lista.
+apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +105,{0} has been successfully unsubscribed from this list.,{0} foi retirado com sucesso desta lista.
 DocType: Purchase Invoice Item,Net Rate (Company Currency),Taxa Líquida (Companhia de moeda)
 apps/erpnext/erpnext/config/crm.py +71,Manage Territory Tree.,Gerenciar territórios
 DocType: Payment Reconciliation Payment,Sales Invoice,Nota Fiscal de Venda
@@ -2622,7 +2622,7 @@ DocType: Time Log,Will be updated when billed.,Será atualizado quando faturado.
 apps/erpnext/erpnext/manufacturing/doctype/bom_replace_tool/bom_replace_tool.py +25,Current BOM and New BOM can not be same,A LDM Atual e a Nova LDM não podem ser as mesmas
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +107,Date Of Retirement must be greater than Date of Joining,Data da aposentadoria deve ser maior que Data de Efetivação
 DocType: Sales Invoice,Against Income Account,Contra a Conta de Rendimentos
-apps/erpnext/erpnext/controllers/website_list_for_contact.py +52,{0}% Delivered,{0}% Proferido
+apps/erpnext/erpnext/controllers/website_list_for_contact.py +52,{0}% Delivered,{0}% Entregue
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +82,Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).,Item {0}: Quant Pedi {1} não pode ser inferior a qty mínimo de pedido {2} (definido no Item).
 DocType: Monthly Distribution Percentage,Monthly Distribution Percentage,Distribuição percentual mensal
 DocType: Territory,Territory Targets,Metas do Território
@@ -3769,7 +3769,7 @@ apps/erpnext/erpnext/config/accounts.py +18,Bills raised to Customers.,Faturas l
 DocType: DocField,Default,Padrão
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +26,Project Id,Id Projeto
 DocType: Item,"Selecting ""Yes"" will allow this item to appear in Purchase Order , Purchase Receipt.","Selecionando &quot;Sim&quot; vai permitir que este item apareça na Ordem de Compra, Recibo de Compra."
-apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.py +41,{0} subscribers added,{0} assinantes acrescentado
+apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.py +41,{0} subscribers added,{0} assinantes acrescentados
 DocType: Maintenance Schedule,Schedule,Agendar
 DocType: Account,Parent Account,Conta pai
 DocType: Serial No,Available,Disponível

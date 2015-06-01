@@ -1000,7 +1000,7 @@ DocType: Lead,Consultant,Konsultan
 DocType: Salary Slip,Earnings,Penghasilan
 DocType: Sales Invoice Advance,Sales Invoice Advance,Faktur Penjualan Muka
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +404,Nothing to request,Tidak ada yang meminta
-apps/erpnext/erpnext/projects/doctype/task/task.py +37,'Actual Start Date' can not be greater than 'Actual End Date','Aktual Tanggal Mulai' tidak dapat lebih besar dari 'Aktual Tanggal Selesai'
+apps/erpnext/erpnext/projects/doctype/task/task.py +37,'Actual Start Date' can not be greater than 'Actual End Date','Tanggal Mulai Sebenarnya' tidak dapat lebih besar dari 'Tanggal Selesai Sebenarnya'
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +70,Management,Manajemen
 apps/erpnext/erpnext/config/projects.py +33,Types of activities for Time Sheets,Jenis kegiatan untuk Waktu Sheets
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +13,Investment casting,Investasi casting
@@ -3421,7 +3421,7 @@ DocType: Salary Slip Deduction,Default Amount,Jumlah standar
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +84,Warehouse not found in the system,Gudang tidak ditemukan dalam sistem
 DocType: Quality Inspection Reading,Quality Inspection Reading,Inspeksi Kualitas Reading
 DocType: Party Account,col_break1,col_break1
-apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,`Freeze Saham Lama Dari` harus lebih kecil dari% d hari.
+apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,`Freeze Stock yang sudah lebih lama dari` harus lebih kecil dari %d hari.
 ,Project wise Stock Tracking,Project Tracking Stock bijaksana
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +176,Maintenance Schedule {0} exists against {0},Jadwal pemeliharaan {0} ada terhadap {0}
 DocType: Stock Entry Detail,Actual Qty (at source/target),Jumlah Aktual (di sumber/target)
