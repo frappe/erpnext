@@ -146,13 +146,12 @@ erpnext.company.setup_queries = function(frm) {
 
 erpnext.company.set_custom_query = function(frm, v) {
 	var filters = {
-		"company": frm.doc.company,
+		"company": frm.doc.name,
 		"is_group": 0
 	};
-	
 	for (var key in v[1]) 
 		filters[key] = v[1][key];
-	
+
 	frm.set_query(v[0], function() {
 		return {
 			filters: filters
