@@ -125,7 +125,7 @@ class ManageVariants(Document):
 	def sync_variants(self):
 		variant_item_codes = []
 		item_variants_attributes = {}
-		inserted, updated, renamed_old, renamed_new, deleted = [], [], [], [], []
+		inserted, updated, old_variant_name, new_variant_name, deleted = [], [], [], [], []
 		
 		for v in self.variants:
 			variant_item_codes.append(v.variant)
@@ -146,16 +146,16 @@ class ManageVariants(Document):
 					if sorted(json.loads(variant.attributes) ,key=lambda x: x[0]) == \
 						sorted(att ,key=lambda x: x[0]):
 							rename_variant(existing_variant, variant.variant)
-							renamed_old.append(existing_variant)
-							renamed_new.append(variant.variant)
+							old_variant_name.append(existing_variant)
+							new_variant_name.append(variant.variant)
 
-				if existing_variant not in renamed_old:
+				if existing_variant not in old_variant_name:
 					delete_variant(existing_variant)
 					deleted.append(existing_variant)
 
 		for item_code in variant_item_codes:
 			if item_code not in existing_variants:
-				if item_code not in renamed_new:
+				if item_code not in new_variant_name:
 					make_variant(self.item, item_code, self.variants)
 					inserted.append(item_code)
 			else:
@@ -168,8 +168,8 @@ class ManageVariants(Document):
 		if updated:
 			frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
 
-		if renamed_old:
-			frappe.msgprint(_("Item Variants {0} renamed").format(", ".join(renamed_old)))
+		if old_variant_name:
+			frappe.msgprint(_("Item Variants {0} renamed").format(", ".join(old_variant_name)))
 
 		if deleted:
 			frappe.msgprint(_("Item Variants {0} deleted").format(", ".join(deleted)))

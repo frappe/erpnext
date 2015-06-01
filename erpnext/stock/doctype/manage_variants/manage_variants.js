@@ -27,12 +27,7 @@ frappe.ui.form.on("Manage Variants", {
 				select: function(event, ui) {
 					field.$input.val(ui.item.value);
 					field.$input.trigger("change");
-				},
-				focus: function( event, ui ) {
-					if(ui.manage_variants.action) {
-						return false;
-					}
-				},
+				}
 			});
 		}
 	},
