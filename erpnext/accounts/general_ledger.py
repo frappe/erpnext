@@ -56,12 +56,13 @@ def merge_similar_entries(gl_map):
 
 def check_if_in_list(gle, gl_map):
 	for e in gl_map:
-		if e.account == gle.account and \
-				cstr(e.get('against_voucher'))==cstr(gle.get('against_voucher')) \
-				and cstr(e.get('against_voucher_type')) == \
-					cstr(gle.get('against_voucher_type')) \
-				and cstr(e.get('cost_center')) == cstr(gle.get('cost_center')):
-			return e
+		if e.account == gle.account \
+			and cstr(e.get('party_type'))==cstr(gle.get('party_type')) \
+			and cstr(e.get('party'))==cstr(gle.get('party')) \
+			and cstr(e.get('against_voucher'))==cstr(gle.get('against_voucher')) \
+			and cstr(e.get('against_voucher_type')) == cstr(gle.get('against_voucher_type')) \
+			and cstr(e.get('cost_center')) == cstr(gle.get('cost_center')):
+				return e
 
 def save_entries(gl_map, adv_adj, update_outstanding):
 	validate_account_for_auto_accounting_for_stock(gl_map)
