@@ -282,7 +282,7 @@ def get_lead_or_customer():
 
 		return lead_doc
 
-def get_address_docs(doctype, txt, filters, limit_start, limit_page_length=20, party=None):
+def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_page_length=20, party=None):
 	if not party:
 		party = get_lead_or_customer()
 
