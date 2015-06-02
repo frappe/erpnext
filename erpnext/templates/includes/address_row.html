@@ -1,0 +1,20 @@
+<div class="web-list-item">
+    <a href="/addresses?name={{ doc.name }}" no-pjax>
+    <div class="row">
+        <div class="col-sm-4">
+            <span class="strong">{{ doc.address_title }}</span>
+        </div>
+        <div class="col-sm-2">
+            {{ doc.address_type }}
+        </div>
+        <div class="col-sm-4">
+            {{ doc.address_line1 }}<br>
+            {% if doc.address_line2 %}{{ doc.address_line2 }}<br>{% endif %}
+            {{ doc.city }}<br>
+        </div>
+        <div class="col-sm-2">
+            {% if doc.state %}{{ doc.state }}, {% endif %}{{ doc.country }}
+        </div>
+    </div>
+    </a>
+</div>

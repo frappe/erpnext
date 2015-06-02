@@ -15,6 +15,7 @@ def after_install():
 	feature_setup()
 	from erpnext.setup.page.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
+	add_web_forms()
 	frappe.db.commit()
 
 def feature_setup():
@@ -48,3 +49,12 @@ def set_single_defaults():
 				pass
 
 	frappe.db.set_default("date_format", "dd-mm-yyyy")
+
+def add_web_forms():
+	"""Import web forms for Issues and Addresses"""
+	from frappe.modules.import_file import import_file_by_path
+
+	import_file_by_path(frappe.get_app_path("erpnext", "setup/fixtures/web_form/issues.json"),
+		data_import=True)
+	import_file_by_path(frappe.get_app_path("erpnext", "setup/fixtures/web_form/addresses.json"),
+		data_import=True)

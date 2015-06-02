@@ -1,0 +1,167 @@
+[
+ {
+  "allow_comments": 0, 
+  "allow_delete": 0, 
+  "allow_edit": 1, 
+  "allow_multiple": 1, 
+  "breadcrumbs": null, 
+  "doc_type": "Address", 
+  "docstatus": 0, 
+  "doctype": "Web Form", 
+  "introduction_text": null, 
+  "login_required": 1, 
+  "modified": "2015-06-01 06:53:43.699336", 
+  "name": "addresses", 
+  "page_name": "addresses", 
+  "published": 1, 
+  "success_message": null, 
+  "success_url": "/addresses", 
+  "title": "Addresses", 
+  "web_form_fields": [
+   {
+    "default": null, 
+    "description": "", 
+    "fieldname": "address_title", 
+    "fieldtype": "Data", 
+    "hidden": 0, 
+    "label": "Address Title", 
+    "options": null, 
+    "read_only": 0, 
+    "reqd": 0
+   }, 
+   {
+    "default": null, 
+    "description": null, 
+    "fieldname": "address_type", 
+    "fieldtype": "Select", 
+    "hidden": 0, 
+    "label": "Address Type", 
+    "options": "Billing\nShipping\nOffice\nPersonal\nPlant\nPostal\nShop\nSubsidiary\nWarehouse\nOther", 
+    "read_only": 0, 
+    "reqd": 1
+   }, 
+   {
+    "default": null, 
+    "description": null, 
+    "fieldname": "address_line1", 
+    "fieldtype": "Data", 
+    "hidden": 0, 
+    "label": "Address Line 1", 
+    "options": null, 
+    "read_only": 0, 
+    "reqd": 1
+   }, 
+   {
+    "default": null, 
+    "description": null, 
+    "fieldname": "address_line2", 
+    "fieldtype": "Data", 
+    "hidden": 0, 
+    "label": "Address Line 2", 
+    "options": null, 
+    "read_only": 0, 
+    "reqd": 0
+   }, 
+   {
+    "default": null, 
+    "description": null, 
+    "fieldname": "city", 
+    "fieldtype": "Data", 
+    "hidden": 0, 
+    "label": "City/Town", 
+    "options": null, 
+    "read_only": 0, 
+    "reqd": 1
+   }, 
+   {
+    "default": null, 
+    "description": null, 
+    "fieldname": "state", 
+    "fieldtype": "Data", 
+    "hidden": 0, 
+    "label": "State", 
+    "options": null, 
+    "read_only": 0, 
+    "reqd": 0
+   }, 
+   {
+    "default": null, 
+    "description": null, 
+    "fieldname": "pincode", 
+    "fieldtype": "Data", 
+    "hidden": 0, 
+    "label": "Pincode", 
+    "options": null, 
+    "read_only": 0, 
+    "reqd": 0
+   }, 
+   {
+    "default": null, 
+    "description": null, 
+    "fieldname": "country", 
+    "fieldtype": "Data", 
+    "hidden": 0, 
+    "label": "Country", 
+    "options": "Country", 
+    "read_only": 0, 
+    "reqd": 1
+   }, 
+   {
+    "default": null, 
+    "description": null, 
+    "fieldname": null, 
+    "fieldtype": "Column Break", 
+    "hidden": null, 
+    "label": null, 
+    "options": null, 
+    "read_only": null, 
+    "reqd": null
+   }, 
+   {
+    "default": null, 
+    "description": null, 
+    "fieldname": "email_id", 
+    "fieldtype": "Data", 
+    "hidden": 0, 
+    "label": "Email Id", 
+    "options": null, 
+    "read_only": 0, 
+    "reqd": 0
+   }, 
+   {
+    "default": null, 
+    "description": null, 
+    "fieldname": "phone", 
+    "fieldtype": "Data", 
+    "hidden": 0, 
+    "label": "Phone", 
+    "options": null, 
+    "read_only": 0, 
+    "reqd": 1
+   }, 
+   {
+    "default": "0", 
+    "description": "", 
+    "fieldname": "is_primary_address", 
+    "fieldtype": "Check", 
+    "hidden": 0, 
+    "label": "Preferred Billing Address", 
+    "options": null, 
+    "read_only": 0, 
+    "reqd": 0
+   }, 
+   {
+    "default": "0", 
+    "description": "", 
+    "fieldname": "is_shipping_address", 
+    "fieldtype": "Check", 
+    "hidden": 0, 
+    "label": "Preferred Shipping Address", 
+    "options": null, 
+    "read_only": 0, 
+    "reqd": 0
+   }
+  ], 
+  "web_page_link_text": null
+ }
+]

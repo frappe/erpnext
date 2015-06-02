@@ -565,7 +565,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +77,Manager,ผ
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +512,From Purchase Receipt,จากการรับซื้อ
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +222,Same item has been entered multiple times.,รายการเดียวกันได้รับการป้อนหลายครั้ง
 DocType: SMS Settings,Receiver Parameter,พารามิเตอร์รับ
-apps/erpnext/erpnext/controllers/trends.py +39,'Based On' and 'Group By' can not be same,' อยู่ ใน ' และ ' จัดกลุ่มตาม ' ไม่ สามารถเดียวกัน
+apps/erpnext/erpnext/controllers/trends.py +39,'Based On' and 'Group By' can not be same,' อยู่ ใน ' และ ' จัดกลุ่มตาม ' ต้องไม่เหมือนกัน
 DocType: Sales Person,Sales Person Targets,ขายเป้าหมายคน
 sites/assets/js/form.min.js +253,To,ไปยัง
 apps/erpnext/erpnext/templates/includes/footer_extension.html +39,Please enter email address,กรุณากรอกอีเมล์

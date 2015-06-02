@@ -5,17 +5,18 @@ from __future__ import unicode_literals
 import frappe
 from frappe import throw, _
 import frappe.defaults
-from frappe.utils import flt, get_fullname, fmt_money, cstr
+from frappe.utils import cint, flt, get_fullname, fmt_money, cstr
 from erpnext.utilities.doctype.address.address import get_address_display
 from frappe.utils.nestedset import get_root_of
 
 class WebsitePriceListMissingError(frappe.ValidationError): pass
 
 def set_cart_count(quotation=None):
-	if not quotation:
-		quotation = _get_cart_quotation()
-	cart_count = cstr(len(quotation.get("items")))
-	frappe.local.cookie_manager.set_cookie("cart_count", cart_count)
+	if cint(frappe.db.get_singles_value("Shopping Cart Settings", "enabled")):
+		if not quotation:
+			quotation = _get_cart_quotation()
+		cart_count = cstr(len(quotation.get("items")))
+		frappe.local.cookie_manager.set_cookie("cart_count", cart_count)
 
 @frappe.whitelist()
 def get_cart_quotation(doc=None):
@@ -29,7 +30,7 @@ def get_cart_quotation(doc=None):
 	return {
 		"doc": decorate_quotation_doc(doc),
 		"addresses": [{"name": address.name, "display": address.display}
-			for address in get_address_docs(party)],
+			for address in get_address_docs(party=party)],
 		"shipping_rules": get_applicable_shipping_rules(party)
 	}
 
@@ -281,12 +282,13 @@ def get_lead_or_customer():
 
 		return lead_doc
 
-def get_address_docs(party=None):
+def get_address_docs(doctype, txt, filters, limit_start, limit_page_length=20, party=None):
 	if not party:
 		party = get_lead_or_customer()
 
 	address_docs = frappe.db.sql("""select * from `tabAddress`
-		where `%s`=%s order by name""" % (party.doctype.lower(), "%s"), party.name,
+		where `{0}`=%s order by name limit {1}, {2}""".format(party.doctype.lower(),
+			limit_start, limit_page_length), party.name,
 		as_dict=True, update={"doctype": "Address"})
 
 	for address in address_docs:

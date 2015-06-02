@@ -334,7 +334,7 @@ class AccountsController(TransactionBase):
 @frappe.whitelist()
 def get_tax_rate(account_head):
 	return frappe.db.get_value("Account", account_head, "tax_rate")
-	
+
 @frappe.whitelist()
 def get_default_taxes_and_charges(master_doctype):
 	default_tax = frappe.db.get_value(master_doctype, {"is_default": 1})

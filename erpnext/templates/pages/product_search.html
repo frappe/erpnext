@@ -2,6 +2,10 @@
 
 {% block header %}<h2>Product Search</h2>{% endblock %}
 
+{% block header_actions %}
+{% include 'templates/includes/product_search_box.html' %}
+{% endblock %}
+
 {% block content %}
 <script>{% include "templates/includes/product_list.js" %}</script>
 
@@ -15,7 +19,6 @@ $(document).ready(function() {
 });
 </script>
 
-{% include "templates/includes/product_search_box.html" %}
 <div class="product-search-content">
 	<h3 class="search-results">Search Results</h3>
 	<div id="search-list" class="row">
