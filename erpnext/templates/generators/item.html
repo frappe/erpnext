@@ -2,10 +2,13 @@
 
 {% block header %}<h2>{{ title }}</h2>{% endblock %}
 
+{% block header_actions %}
+{% include 'templates/includes/product_search_box.html' %}
+{% endblock %}
+
 {% block content %}
 {% from "erpnext/templates/includes/macros.html" import product_image %}
 <div class="item-content">
-	{% include 'templates/includes/product_search_box.html' %}
 	<div class="product-page-content" itemscope itemtype="http://schema.org/Product">
 		<div class="row">
 			<div class="col-sm-5">

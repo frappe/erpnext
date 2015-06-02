@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 import frappe.defaults
-from frappe.utils import cint
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import is_cart_enabled
 
 def show_cart_count():
@@ -44,6 +43,6 @@ def update_my_account_context(context):
 		{"label": _("Orders"), "url": "orders"},
 		{"label": _("Invoices"), "url": "invoices"},
 		{"label": _("Shipments"), "url": "shipments"},
-		# {"label": _("Issues"), "url": "tickets"},
+		{"label": _("Issues"), "url": "issues"},
 		{"label": _("Addresses"), "url": "addresses"},
 	])

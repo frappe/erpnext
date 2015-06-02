@@ -17,6 +17,8 @@ class Issue(Document):
 		return "{0}: {1}".format(_(self.status), self.subject)
 
 	def validate(self):
+		if not self.raised_by:
+			self.raised_by = frappe.session.user
 		self.update_status()
 		self.set_lead_contact(self.raised_by)
 
@@ -54,7 +56,8 @@ class Issue(Document):
 def get_list_context(context=None):
 	return {
 		"title": _("My Issues"),
-		"get_list": get_issue_list
+		"get_list": get_issue_list,
+		"row_template": "templates/includes/issue_row.html"
 	}
 
 def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20):
@@ -84,3 +87,6 @@ def set_multiple_status(names, status):
 	names = json.loads(names)
 	for name in names:
 		set_status(name, status)
+
+def has_website_permission(doc, ptype, user, verbose=False):
+	return doc.raised_by==user

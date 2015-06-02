@@ -1,0 +1,16 @@
+<div class="web-list-item">
+    <div class="row">
+        <div class="col-sm-8">
+            <a class="no-decoration" href="/issues?name={{ doc.name }}" no-pjax>
+                {{ doc.subject }}
+            </a>
+        </div>
+        <div class="col-sm-2">
+            <span class="indicator {{ "red" if doc.status=="Open" else "blue" }}">
+                {{ doc.status }}</span>
+        </div>
+        <div class="col-sm-2 text-muted text-right small">
+            {{ frappe.format_date(doc.creation) }}
+        </div>
+    </div>
+</div>

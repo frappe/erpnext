@@ -112,7 +112,7 @@
   }, 
   {
    "default": "0", 
-   "description": "Check to make primary address", 
+   "description": "", 
    "fieldname": "is_primary_address", 
    "fieldtype": "Check", 
    "label": "Preferred Billing Address", 
@@ -120,7 +120,7 @@
   }, 
   {
    "default": "0", 
-   "description": "Check to make Shipping Address", 
+   "description": "", 
    "fieldname": "is_shipping_address", 
    "fieldtype": "Check", 
    "in_list_view": 0, 
@@ -199,7 +199,7 @@
  "icon": "icon-map-marker", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2015-02-20 05:07:56.567822", 
+ "modified": "2015-06-01 06:42:18.331818", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Address", 
