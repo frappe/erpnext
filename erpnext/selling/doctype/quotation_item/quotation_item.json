@@ -55,7 +55,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Small Text", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Description", 
    "oldfieldname": "description", 
    "oldfieldtype": "Small Text", 
@@ -392,7 +392,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-06-01 18:22:28.595765", 
+ "modified": "2015-06-02 14:18:00.266748", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation Item", 

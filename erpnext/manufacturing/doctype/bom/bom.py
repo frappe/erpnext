@@ -425,5 +425,5 @@ def validate_bom_no(item, bom_no):
 		if not getattr(frappe.flags, "in_test", False):
 			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
 	if item and not (bom.item.lower() == item.lower() or \
-		bom.item.lower() == frappe.db.get_value("Item", item, "variant_of").lower()):
+		bom.item.lower() == cstr(frappe.db.get_value("Item", item, "variant_of")).lower()):
 		frappe.throw(_("BOM {0} does not belong to Item {1}").format(bom_no, item))

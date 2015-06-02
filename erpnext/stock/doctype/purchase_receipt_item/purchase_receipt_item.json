@@ -49,7 +49,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Text", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Description", 
    "oldfieldname": "description", 
    "oldfieldtype": "Text", 
@@ -642,7 +642,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-05-27 02:47:16.086625", 
+ "modified": "2015-06-02 14:19:13.528248", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt Item", 

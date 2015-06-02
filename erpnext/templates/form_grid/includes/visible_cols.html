@@ -1,6 +1,6 @@
 {% $.each(visible_columns || [], function(i, df) { %}
 	{% 	var val = doc.get_formatted(df.fieldname);
-	if((df.fieldname !== "description") && val) { %}
+	if(val) { %}
 		<div class="row">
 			<div class="col-xs-4 text-ellipsis">
 				<strong title="{%= __(df.label) %}">{%= __(df.label) %}:</strong>

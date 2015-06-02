@@ -48,7 +48,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Text", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Description", 
    "oldfieldname": "description", 
    "oldfieldtype": "Text", 
@@ -264,7 +264,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-19 01:07:00.695393", 
+ "modified": "2015-06-02 14:19:45.611733", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request Item", 
