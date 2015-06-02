@@ -1,6 +1,6 @@
 {
 	"country_code": "ni",
-	"name": "Catalogo de Cuentas",
+	"name": "Catalogo de Cuentas Nicaragua",
 	"is_active": "Yes",
 	"tree": {
 		"Activo": {
@@ -72,7 +72,7 @@
 						"IVA Acreditable por Importaciones": {
 							"account_type": "Tax"
 						},
-						"IVA Acreditable por Prestacion de Servicios": {
+						"IVA Acreditable por Prestacion de Servicios y Uso y Goce de Bienes": {
 							"account_type": "Tax"
 						},
 						"Acreditacion Proporcional": {}
@@ -229,11 +229,19 @@
 					"Impuesto al Valor Agregado por Pagar": {
 						"account_type": "Tax"
 					},
-					"Impuesto sobre la Renta": {
+					"Impuesto sobre la Renta por Actividades Economicas": {
 						"account_type": "Tax"
 					},
 					"Impuestos Municipales": {
-						"account_type": "Tax"
+						"Impuesto Municipal Sobre Ingresos": {
+							"account_type": "Tax"
+						},
+						"Recoleccion Basura": {
+							"account_type": "Tax"
+						},
+						"Matricula Municipal": {
+							"account_type": "Tax"
+						}
 					}
 				},
 				"Retenciones por Pagar": {
@@ -241,7 +249,13 @@
 						"Retencion Rentas del Trabajo Tarifa Progresiva": {
 							"account_type": "Tax"
 						},
-						"Retencion Definitiva por Rentas del Trabajo": {
+						"Retencion Definitiva 10% por Rentas del Trabajo - Indemnizacion Adicional": {
+							"account_type": "Tax"
+						},
+						"Retencion Definitiva 12.5% por Rentas del Trabajo - Dietas": {
+							"account_type": "Tax"
+						},
+						"Retencion Definitiva 15% por Rentas del Trabajo - No Residentes": {
 							"account_type": "Tax"
 						}
 					},
@@ -258,11 +272,26 @@
 						"Retencion 5% compra Madera en Rollo": {
 							"account_type": "Tax"
 						},
+						"Retencion Definitiva 1.5% Actividades Economicas No Residentes": {
+							"account_type": "Tax"
+						},
+						"Retencion Definitiva 3% Actividades Economicas No Residentes": {
+							"account_type": "Tax"
+						},
+						"Retencion Definitiva 10% Actividades Economicas No Residentes": {
+							"account_type": "Tax"
+						},
+						"Retencion Definitiva 15% Actividades Economicas No Residentes": {
+							"account_type": "Tax"
+						},									
 						"Otras Retenciones 10%": {
 							"account_type": "Tax"
 						}
 					},
 					"Rentas y Ganancias de Capital": {
+						"Retencion Defintiva 15% por Rentas de Capital": {
+							"account_type": "Tax"
+						},			
 						"Retencion Defintiva 10% por Rentas de Capital": {
 							"account_type": "Tax"
 						},
@@ -272,10 +301,16 @@
 						"Retencion Definitiva 10% por Ganancia de Capital": {
 							"account_type": "Tax"
 						},
-						"Retencion Definitiva Actividades Economicas No Residentes": {
+						"Retencion Definitiva 0.25% Transacciones Bursatiles": {
 							"account_type": "Tax"
 						},
-						"Retencion Definitiva Transacciones Bursatiles": {
+						"Retencion Definitiva 1% Transacciones Bursatiles": {
+							"account_type": "Tax"
+						},
+						"Retencion Definitiva 1.5% Transacciones Bursatiles": {
+							"account_type": "Tax"
+						},
+						"Retencion Definitiva 2% Transacciones Bursatiles": {
 							"account_type": "Tax"
 						},
 						"Retenciones Defintiva 5% Fondos de Inversion": {
