@@ -139,7 +139,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 
 					if(sl.voucher_type=="Stock Reconciliation") {
 						var diff = (sl.qty_after_transaction * sl.valuation_rate) - item.closing_qty_value;
-						wh.fifo_stack.push([sl.qty_after_transaction, sl.valuation_rate, sl.posting_date]);
+						wh.fifo_stack = [[sl.qty_after_transaction, sl.valuation_rate, sl.posting_date]];
 						wh.balance_qty = sl.qty_after_transaction;
 						wh.balance_value = sl.valuation_rate * sl.qty_after_transaction;
 					} else {
@@ -167,7 +167,6 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	},
 	update_groups: function() {
 		var me = this;
-
 		$.each(this.data, function(i, item) {
 			// update groups
 			if(!item.is_group && me.apply_filter(item, "brand")) {
