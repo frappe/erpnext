@@ -65,7 +65,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Small Text", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Description", 
    "oldfieldname": "description", 
    "oldfieldtype": "Small Text", 
@@ -523,7 +523,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-05-27 02:47:16.946934", 
+ "modified": "2015-06-02 14:18:34.512236", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note Item", 

@@ -30,7 +30,8 @@ def execute(filters=None):
 		delivery_note = list(set(invoice_so_dn_map.get(inv.name, {}).get("delivery_note", [])))
 
 		row = [inv.name, inv.posting_date, inv.customer, inv.customer_name,
-		customer_map.get(inv.customer)["customer_group"], customer_map.get(inv.customer)["territory"],
+		customer_map.get(inv.customer, {}).get("customer_group"), 
+		customer_map.get(inv.customer, {}).get("territory"),
 		inv.debit_to, inv.project_name, inv.remarks, ", ".join(sales_order), ", ".join(delivery_note)]
 
 		# map income values

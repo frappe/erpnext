@@ -215,6 +215,7 @@ $.extend(erpnext.wiz, {
 
 					slide.get_field("language")
 						.set_input(erpnext.wiz.welcome.data.default_language || "english");
+					moment.locale("en");
 				}
 			});
 		},

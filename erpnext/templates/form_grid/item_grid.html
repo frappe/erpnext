@@ -1,4 +1,4 @@
-{% var visible_columns = row.get_visible_columns(["item_code", "item_name", "description", "qty", "rate", "amount", "stock_uom", "uom", "discount_percentage", "schedule_date", "warehouse", "against_sales_order", "sales_order"]); %}
+{% var visible_columns = row.get_visible_columns(["item_code", "item_name", "qty", "rate", "amount", "stock_uom", "uom", "discount_percentage", "schedule_date", "warehouse", "against_sales_order", "sales_order"]); %}
 
 {% if(!doc) { %}
 	<div class="row">

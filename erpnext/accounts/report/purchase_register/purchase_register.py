@@ -12,7 +12,6 @@ def execute(filters=None):
 	invoice_list = get_invoices(filters)
 	columns, expense_accounts, tax_accounts = get_columns(invoice_list)
 
-
 	if not invoice_list:
 		msgprint(_("No record found"))
 		return columns, invoice_list
@@ -30,7 +29,8 @@ def execute(filters=None):
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
 		project_name = list(set(invoice_po_pr_map.get(inv.name, {}).get("project_name", [])))
 
-		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name, supplier_details.get(inv.supplier),
+		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name, 
+			supplier_details.get(inv.supplier),
 			inv.credit_to, ", ".join(project_name), inv.bill_no, inv.bill_date, inv.remarks,
 			", ".join(purchase_order), ", ".join(purchase_receipt)]
 
@@ -54,8 +54,7 @@ def execute(filters=None):
 
 		# total tax, grand total, outstanding amount & rounded total
 		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 2), inv.outstanding_amount]
-		data.append(row)
-		# raise Exception
+		data.append(row)		
 
 	return columns, data
 
@@ -107,7 +106,7 @@ def get_conditions(filters):
 
 def get_invoices(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select name, posting_date, credit_to, supplier, supplier_name
+	return frappe.db.sql("""select name, posting_date, credit_to, supplier, supplier_name,
 		bill_no, bill_date, remarks, base_net_total, base_grand_total, outstanding_amount
 		from `tabPurchase Invoice` where docstatus = 1 %s
 		order by posting_date desc, name desc""" % conditions, filters, as_dict=1)
