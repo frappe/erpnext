@@ -75,7 +75,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Small Text", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Description", 
    "oldfieldname": "description", 
    "oldfieldtype": "Small Text", 
@@ -538,7 +538,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-05-27 02:47:16.553472", 
+ "modified": "2015-06-02 14:19:21.459032", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order Item", 

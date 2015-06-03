@@ -27,12 +27,7 @@ def delete_for_doctype(doctype, company_name):
 	company_fieldname = meta.get("fields", {"fieldtype": "Link",
 		"options": "Company"})[0].fieldname
 
-	if meta.issingle:
-		single = frappe.get_doc(doctype, doctype)
-		single.set(company_fieldname, "")
-		single.flags.ignore_mandatory = True
-		single.save()
-	else:
+	if not meta.issingle:
 		if not meta.istable:
 			# delete children
 			for df in meta.get_table_fields():

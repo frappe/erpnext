@@ -58,7 +58,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Text", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Description", 
    "oldfieldname": "description", 
    "oldfieldtype": "Text", 
@@ -505,7 +505,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-05-27 02:47:15.645114", 
+ "modified": "2015-06-02 14:18:45.176726", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Item", 

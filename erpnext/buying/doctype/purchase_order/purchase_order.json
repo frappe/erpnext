@@ -26,7 +26,7 @@
    "reqd": 1
   }, 
   {
-   "description": "Supplier (vendor) name as entered in supplier master", 
+   "description": "", 
    "fieldname": "supplier", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -873,7 +873,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-05-27 02:48:02.452899", 
+ "modified": "2015-06-02 17:15:44.711032", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 
