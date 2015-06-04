@@ -12,6 +12,7 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 from erpnext.stock.doctype.manage_variants.manage_variants import update_variant
 
 class WarehouseNotSet(frappe.ValidationError): pass
+class ItemTemplateCannotHaveStock(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
 	website = frappe._dict(
@@ -61,6 +62,7 @@ class Item(WebsiteGenerator):
 		self.update_item_desc()
 		self.synced_with_hub = 0
 		self.validate_has_variants()
+		self.validate_stock_for_template_must_be_zero()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -338,6 +340,14 @@ class Item(WebsiteGenerator):
 		if not self.has_variants and frappe.db.get_value("Item", self.name, "has_variants"):
 			if frappe.db.exists("Item", {"variant_of": self.name}):
 				frappe.throw("Item has variants.")
+
+	def validate_stock_for_template_must_be_zero(self):
+		if self.has_variants:
+			stock_in = frappe.db.sql_list("""select warehouse from tabBin
+				where item_code=%s and ifnull(actual_qty, 0) > 0""", self.name)
+			if stock_in:
+				frappe.throw(_("Item Template cannot have stock and varaiants. Please remove \
+					stock from warehouses {0}").format(", ".join(stock_in)), ItemTemplateCannotHaveStock)
 	
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:

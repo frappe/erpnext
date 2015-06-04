@@ -6,7 +6,7 @@ import unittest
 import frappe
 
 from frappe.test_runner import make_test_records
-from erpnext.stock.doctype.item.item import WarehouseNotSet, DuplicateVariant, ItemTemplateCannotHaveStock
+from erpnext.stock.doctype.item.item import WarehouseNotSet, ItemTemplateCannotHaveStock
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 test_ignore = ["BOM"]
@@ -20,60 +20,14 @@ class TestItem(unittest.TestCase):
 			item.insert()
 		else:
 			item = frappe.get_doc("Item", item_code)
-
 		return item
-
-	def test_duplicate_variant(self):
-		item = frappe.copy_doc(test_records[11])
-		item.append("variants", {"item_attribute": "Test Size", "item_attribute_value": "Small"})
-		self.assertRaises(DuplicateVariant, item.insert)
-
+	
 	def test_template_cannot_have_stock(self):
-		item = self.get_item(10)
-		
-		se = make_stock_entry(item_code=item.name, target="Stores - _TC", qty=1, incoming_rate=1)
-
-		item.has_variants = 1
-		item.append("variants", {"item_attribute": "Test Size", "item_attribute_value": "Small"})
-		
-		self.assertRaises(ItemTemplateCannotHaveStock, item.save)
-
-	def test_variant_item_codes(self):
-		item = self.get_item(11)
-
-		variants = ['_Test Variant Item-S', '_Test Variant Item-M', '_Test Variant Item-L']
-		self.assertEqual(item.get_variant_item_codes(), variants)
-		for v in variants:
-			self.assertTrue(frappe.db.get_value("Item", {"variant_of": item.name, "name": v}))
-
-		item.append("variants", {"item_attribute": "Test Colour", "item_attribute_value": "Red"})
-		item.append("variants", {"item_attribute": "Test Colour", "item_attribute_value": "Blue"})
-		item.append("variants", {"item_attribute": "Test Colour", "item_attribute_value": "Green"})
-
-		self.assertEqual(item.get_variant_item_codes(), ['_Test Variant Item-S-R',
-			'_Test Variant Item-S-G', '_Test Variant Item-S-B',
-			'_Test Variant Item-M-R', '_Test Variant Item-M-G',
-			'_Test Variant Item-M-B', '_Test Variant Item-L-R',
-			'_Test Variant Item-L-G', '_Test Variant Item-L-B'])
-
-		self.assertEqual(item.variant_attributes['_Test Variant Item-L-R'], [['Test Size', 'Large'], ['Test Colour', 'Red']])
-		self.assertEqual(item.variant_attributes['_Test Variant Item-S-G'], [['Test Size', 'Small'], ['Test Colour', 'Green']])
-
-		# check stock entry cannot be made
-	def test_stock_entry_cannot_be_made_for_template(self):
-		item = self.get_item(11)
-
-		se = frappe.new_doc("Stock Entry")
-		se.purpose = "Material Receipt"
-		se.append("items", {
-			"item_code": item.name,
-			"t_warehouse": "Stores - _TC",
-			"qty": 1,
-			"incoming_rate": 1
-		})
-		se.insert()
-		self.assertRaises(ItemTemplateCannotHaveStock, se.submit)
-
+			item = self.get_item(10)
+			se = make_stock_entry(item_code=item.name, target="Stores - _TC", qty=1, incoming_rate=1)
+			item.has_variants = 1
+			self.assertRaises(ItemTemplateCannotHaveStock, item.save)
+	
 	def test_default_warehouse(self):
 		item = frappe.copy_doc(test_records[0])
 		item.is_stock_item = "Yes"

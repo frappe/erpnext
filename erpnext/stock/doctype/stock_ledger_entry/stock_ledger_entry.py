@@ -8,7 +8,7 @@ from frappe import _
 from frappe.utils import flt, getdate, add_days, formatdate
 from frappe.model.document import Document
 from datetime import date
-from erpnext.stock.doctype.manage_variants.manage_variants import ItemTemplateCannotHaveStock
+from erpnext.stock.doctype.item.item import ItemTemplateCannotHaveStock
 
 class StockFreezeError(frappe.ValidationError): pass
 

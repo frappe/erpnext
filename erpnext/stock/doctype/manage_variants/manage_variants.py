@@ -10,7 +10,6 @@ import copy
 import json
 
 class DuplicateAttribute(frappe.ValidationError): pass
-class ItemTemplateCannotHaveStock(frappe.ValidationError): pass
 
 class ManageVariants(Document):
 
@@ -23,7 +22,6 @@ class ManageVariants(Document):
 	def generate_combinations(self):
 		self.validate_attributes()
 		self.validate_template_item()
-		self.validate_stock_for_template_must_be_zero()
 		self.validate_attribute_values()
 		self.validate_attributes_are_unique()
 		self.get_variant_item_codes()
@@ -54,7 +52,7 @@ class ManageVariants(Document):
 			for attribute in frappe.db.sql("""select attribute, attribute_value from `tabVariant Attribute` where parent = %s""", d):
 				variant_attributes += attribute[1] + " | "
 				attributes.append([attribute[0], attribute[1]])
-			self.append('variants',{"variant": d, "variant_attributes": variant_attributes[: -2], "attributes": json.dumps(attributes)})
+			self.append('variants',{"variant": d, "variant_attributes": variant_attributes[: -3], "attributes": json.dumps(attributes)})
 
 	def validate_attributes(self):
 		if not self.attributes:
@@ -64,16 +62,9 @@ class ManageVariants(Document):
 		template_item = frappe.get_doc("Item", self.item)
 		if not template_item.has_variants:
 			frappe.throw(_("Selected Item cannot have Variants."))
-			
+
 		if template_item.variant_of:
 			frappe.throw(_("Item cannot be a variant of a variant"))
-
-	def validate_stock_for_template_must_be_zero(self):
-		stock_in = frappe.db.sql_list("""select warehouse from tabBin
-			where item_code=%s and ifnull(actual_qty, 0) > 0""", self.item)
-		if stock_in:
-			frappe.throw(_("Item Template cannot have stock and varaiants. Please remove \
-				stock from warehouses {0}").format(", ".join(stock_in)), ItemTemplateCannotHaveStock)
 
 	def validate_attribute_values(self):
 		attributes = {}
@@ -119,7 +110,7 @@ class ManageVariants(Document):
 						for d in _my_attributes:
 							variant_attributes += d[1] + " | "
 						self.append('variants', {"variant": item_code + "-" + value.abbr, 
-							"attributes": json.dumps(_my_attributes), "variant_attributes": variant_attributes[: -2]})
+							"attributes": json.dumps(_my_attributes), "variant_attributes": variant_attributes[: -3]})
 		add_attribute_suffixes(self.item, [], attributes)
 
 	def sync_variants(self):
