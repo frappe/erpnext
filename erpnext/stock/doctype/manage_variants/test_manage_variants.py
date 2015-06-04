@@ -29,6 +29,7 @@ class TestManageVariants(unittest.TestCase):
 		
 		self.assertEqual(manage_variant.variants[0].variant_attributes, "Small")
 		self.assertEqual(manage_variant.variants[1].variant_attributes, "Large")
+		manage_variant.create_variants()
 
 	def test_attributes_are_unique(self):
 		manage_variant = frappe.new_doc("Manage Variants")
