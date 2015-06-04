@@ -1,5 +1,6 @@
 {
- "autoname": "field:label", 
+ "allow_rename": 0, 
+ "autoname": "field:title", 
  "creation": "2013-06-25 11:48:03", 
  "description": "Specify conditions to calculate shipping amount", 
  "docstatus": 0, 
@@ -7,17 +8,12 @@
  "fields": [
   {
    "description": "example: Next Day Shipping", 
-   "fieldname": "label", 
+   "fieldname": "title", 
    "fieldtype": "Data", 
    "in_list_view": 1, 
-   "label": "Shipping Rule Label", 
+   "label": "Title", 
    "permlevel": 0, 
    "reqd": 1
-  }, 
-  {
-   "fieldname": "column_break_2", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
   }, 
   {
    "default": "Net Total", 
@@ -32,6 +28,27 @@
    "reqd": 0
   }, 
   {
+   "fieldname": "disabled", 
+   "fieldtype": "Check", 
+   "label": "Disabled", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "column_break_2", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
+   "fieldname": "company", 
+   "fieldtype": "Link", 
+   "in_list_view": 0, 
+   "label": "Company", 
+   "options": "Company", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
    "fieldname": "rule_conditions_section", 
    "fieldtype": "Section Break", 
    "label": "Shipping Rule Conditions", 
@@ -42,34 +59,6 @@
    "fieldtype": "Table", 
    "label": "Shipping Rule Conditions", 
    "options": "Shipping Rule Condition", 
-   "permlevel": 0, 
-   "reqd": 1
-  }, 
-  {
-   "fieldname": "section_break_6", 
-   "fieldtype": "Section Break", 
-   "permlevel": 0
-  }, 
-  {
-   "description": "Specify a list of Territories, for which, this Shipping Rule is valid", 
-   "fieldname": "territories", 
-   "fieldtype": "Table", 
-   "label": "Valid For Territories", 
-   "options": "Applicable Territory", 
-   "permlevel": 0, 
-   "reqd": 1
-  }, 
-  {
-   "fieldname": "column_break_8", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "company", 
-   "fieldtype": "Link", 
-   "in_list_view": 0, 
-   "label": "Company", 
-   "options": "Company", 
    "permlevel": 0, 
    "reqd": 1
   }, 
@@ -98,11 +87,60 @@
    "options": "Cost Center", 
    "permlevel": 0, 
    "reqd": 1
+  }, 
+  {
+   "fieldname": "section_break_11", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "default": "Home Country", 
+   "fieldname": "if_address_matches", 
+   "fieldtype": "Select", 
+   "label": "Auto-select Shipping Rule if Address Matches", 
+   "options": "Home Country\nRest of the World\nCountry, State, Postal Code Pattern\nAny Country", 
+   "permlevel": 0, 
+   "precision": "", 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "column_break_13", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.if_address_matches===\"Any Country Except\" || doc.if_address_matches===\"Country, State, Postal Code Pattern\"", 
+   "fieldname": "country", 
+   "fieldtype": "Link", 
+   "label": "Country", 
+   "options": "Country", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.if_address_matches===\"Country, State, Postal Code Pattern\"", 
+   "fieldname": "state", 
+   "fieldtype": "Link", 
+   "label": "State", 
+   "options": "State", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.if_address_matches===\"Country, State, Postal Code Pattern\"", 
+   "description": "A pattern to match like \"123XX\". This will match any code between 12300 and 12399.", 
+   "fieldname": "postal_code_pattern", 
+   "fieldtype": "Data", 
+   "label": "Postal Code Pattern", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "icon": "icon-truck", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:46.634371", 
+ "modified": "2015-06-03 17:27:46.571403", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Shipping Rule", 

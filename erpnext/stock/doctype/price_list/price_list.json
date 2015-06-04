@@ -12,18 +12,6 @@
  "document_type": "Master", 
  "fields": [
   {
-   "default": "1", 
-   "fieldname": "enabled", 
-   "fieldtype": "Check", 
-   "label": "Enabled", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "sb_1", 
-   "fieldtype": "Section Break", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "price_list_name", 
    "fieldtype": "Data", 
    "label": "Price List Name", 
@@ -43,6 +31,19 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "column_break_3", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "default": "1", 
+   "fieldname": "enabled", 
+   "fieldtype": "Check", 
+   "label": "Enabled", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "buying", 
    "fieldtype": "Check", 
    "in_list_view": 1, 
@@ -58,24 +59,58 @@
    "reqd": 0
   }, 
   {
-   "fieldname": "column_break_3", 
-   "fieldtype": "Column Break", 
+   "fieldname": "sb_1", 
+   "fieldtype": "Section Break", 
    "permlevel": 0
   }, 
   {
-   "description": "Specify a list of Territories, for which, this Price List is valid", 
-   "fieldname": "territories", 
-   "fieldtype": "Table", 
-   "label": "Valid for Territories", 
-   "options": "Applicable Territory", 
+   "default": "Home Country", 
+   "fieldname": "if_address_matches", 
+   "fieldtype": "Select", 
+   "label": "Auto-select Price List if Address Matches", 
+   "options": "Home Country\nRest of the World\nCountry, State, Postal Code Pattern\nAny Country", 
    "permlevel": 0, 
+   "precision": "", 
    "reqd": 1
+  }, 
+  {
+   "fieldname": "column_break_9", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.if_address_matches===\"Any Country Except\" || doc.if_address_matches===\"Country, State, Postal Code Pattern\"", 
+   "fieldname": "country", 
+   "fieldtype": "Link", 
+   "label": "Country", 
+   "options": "Country", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.if_address_matches===\"Country, State, Postal Code Pattern\"", 
+   "fieldname": "state", 
+   "fieldtype": "Link", 
+   "label": "State", 
+   "options": "State", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.if_address_matches===\"Country, State, Postal Code Pattern\"", 
+   "description": "A pattern to match like \"123XX\". This will match any code between 12300 and 12399.", 
+   "fieldname": "postal_code_pattern", 
+   "fieldtype": "Data", 
+   "label": "Postal Code Pattern", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "icon": "icon-tags", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2015-04-17 01:54:01.907175", 
+ "modified": "2015-06-03 17:13:11.962621", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Price List", 

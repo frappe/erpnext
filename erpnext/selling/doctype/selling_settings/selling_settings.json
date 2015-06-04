@@ -44,7 +44,7 @@
   {
    "fieldname": "select_price_list_based_on_address", 
    "fieldtype": "Check", 
-   "label": "Select Price List based on Address", 
+   "label": "Select Price List Based on Address", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -153,7 +153,7 @@
  "icon": "icon-cog", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2015-05-27 20:03:47.442326", 
+ "modified": "2015-06-03 17:11:10.777446", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Selling Settings", 

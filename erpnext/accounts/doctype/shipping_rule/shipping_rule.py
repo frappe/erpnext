@@ -9,6 +9,7 @@ from frappe import _, msgprint, throw
 from frappe.utils import flt, fmt_money
 from frappe.model.document import Document
 from erpnext.setup.utils import get_company_currency
+from erpnext.utilities.match_address import validate_address_params
 
 class OverlappingConditionError(frappe.ValidationError): pass
 class FromGreaterThanToError(frappe.ValidationError): pass
@@ -21,6 +22,7 @@ class ShippingRule(Document):
 		self.validate_from_to_values()
 		self.sort_shipping_rule_conditions()
 		self.validate_overlapping_shipping_rule_conditions()
+		validate_address_params(self, unique=False)
 
 	def validate_from_to_values(self):
 		zero_to_values = []
