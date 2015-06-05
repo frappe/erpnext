@@ -195,8 +195,6 @@ class TimeLog(Document):
 		if self.for_manufacturing:
 			if not self.production_order:
 				frappe.throw(_("Production Order is Mandatory"))
-			if not self.operation:
-				frappe.throw(_("Operation is Mandatory"))
 			if not self.completed_qty:
 				self.completed_qty = 0
 
