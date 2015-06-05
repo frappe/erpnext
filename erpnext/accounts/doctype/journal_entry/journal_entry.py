@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, cint
+from frappe.utils import cstr, flt, fmt_money, formatdate, getdate
 from frappe import msgprint, _, scrub
 from erpnext.setup.utils import get_company_currency
 from erpnext.controllers.accounts_controller import AccountsController
@@ -428,12 +428,11 @@ class JournalEntry(AccountsController):
 	def validate_expense_claim(self):
 		for d in self.accounts:
 			if d.against_expense_claim:
-				sanctioned_amount, reimbursed_amount = frappe.db.get_value("Expense Claim", d.against_expense_claim,
-					("total_sanctioned_amount", "total_amount_reimbursed"))
-				pending_amount = cint(sanctioned_amount) - cint(reimbursed_amount)
+				sanctioned_amount, reimbursed_amount = frappe.db.get_value("Expense Claim", 
+					d.against_expense_claim, ("total_sanctioned_amount", "total_amount_reimbursed"))
+				pending_amount = flt(sanctioned_amount) - flt(reimbursed_amount)
 				if d.debit > pending_amount:
-					frappe.throw(_("Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. \
-						Pending Amount is {2}".format(d.idx, d.against_expense_claim, pending_amount)))
+					frappe.throw(_("Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2}".format(d.idx, d.against_expense_claim, pending_amount)))
 
 	def validate_credit_debit_note(self):
 		if self.stock_entry:

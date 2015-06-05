@@ -43,3 +43,8 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
 		frappe.set_route("Form", doc.doctype, doc.name);
 	});
 }
+
+
+frappe.ui.form.on("Salary Manager", "refresh", function(frm) {
+	frm.disable_save();
+});

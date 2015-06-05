@@ -44,6 +44,10 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 			}
 		});
 	},
+	
+	refresh: function() {
+		this.frm.disable_save();
+	},
 
 	party: function() {
 		var me = this

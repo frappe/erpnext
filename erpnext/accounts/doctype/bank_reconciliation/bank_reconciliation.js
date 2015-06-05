@@ -2,6 +2,10 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ui.form.on("Bank Reconciliation", {
+	refresh: function(frm) {
+		frm.disable_save();
+	},
+	
 	update_clearance_date: function(frm) {
 		return frappe.call({
 			method: "update_details",
@@ -34,4 +38,3 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	cur_frm.set_value("from_date", frappe.datetime.month_start());
 	cur_frm.set_value("to_date", frappe.datetime.month_end());
 }
-
