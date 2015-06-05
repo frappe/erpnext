@@ -32,6 +32,7 @@ frappe.ui.form.on("Payment Tool", "onload", function(frm) {
 });
 
 frappe.ui.form.on("Payment Tool", "refresh", function(frm) {
+	frm.disable_save();
 	frappe.ui.form.trigger("Payment Tool", "party_type");
 });
 

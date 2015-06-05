@@ -94,11 +94,11 @@
   }
  ], 
  "hide_heading": 0, 
- "hide_toolbar": 0, 
+ "hide_toolbar": 1, 
  "icon": "icon-cog", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2015-02-05 05:11:40.791976", 
+ "modified": "2015-06-05 11:38:19.994852", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Control Panel", 
@@ -110,7 +110,7 @@
    "read": 1, 
    "report": 0, 
    "role": "HR User", 
-   "share": 1, 
+   "share": 0, 
    "submit": 0, 
    "write": 1
   }

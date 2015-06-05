@@ -150,10 +150,11 @@
    "permlevel": 0
   }
  ], 
+ "hide_toolbar": 1, 
  "icon": "icon-cog", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2015-02-25 07:21:04.778082", 
+ "modified": "2015-06-05 11:33:00.152362", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Salary Manager", 

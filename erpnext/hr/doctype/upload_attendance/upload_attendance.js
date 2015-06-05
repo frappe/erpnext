@@ -12,6 +12,7 @@ erpnext.hr.AttendanceControlPanel = frappe.ui.form.Controller.extend({
 	},
 
 	refresh: function() {
+		this.frm.disable_save();
 		this.show_upload();
 	},
 

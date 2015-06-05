@@ -14,7 +14,7 @@ def execute(filters=None):
 	source = gross_profit_data.grouped_data if filters.get("group_by") != "Invoice" else gross_profit_data.data
 
 	group_wise_columns = frappe._dict({
-		"invoice": ["parent", "posting_date", "posting_time", "item_code", "item_name", "brand", "description", \
+		"invoice": ["parent", "customer", "posting_date", "posting_time", "item_code", "item_name", "brand", "description", \
 			"warehouse", "qty", "base_rate", "buying_rate", "base_amount",
 			"buying_amount", "gross_profit", "gross_profit_percent", "project"],
 		"item_code": ["item_code", "item_name", "brand", "description", "warehouse", "qty", "base_rate",

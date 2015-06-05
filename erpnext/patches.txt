@@ -163,3 +163,4 @@ execute:frappe.db.sql_list("delete from `tabDocPerm` where parent='Issue' and mo
 erpnext.patches.v5_0.update_item_and_description_again
 erpnext.patches.v5_0.repost_gle_for_jv_with_multiple_party
 erpnext.patches.v5_0.portal_fixes
+erpnext.patches.v5_0.reset_values_in_tools
