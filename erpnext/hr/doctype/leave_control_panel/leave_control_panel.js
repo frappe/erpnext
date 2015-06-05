@@ -25,3 +25,7 @@ cur_frm.cscript.allocation_type = function (doc, cdt, cdn){
 	doc.no_of_days = '';
 	refresh_field('no_of_days');
 }
+
+frappe.ui.form.on("Leave Control Panel", "refresh", function(frm) {
+	frm.disable_save();
+});
