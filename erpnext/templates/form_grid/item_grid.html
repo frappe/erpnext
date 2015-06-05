@@ -47,6 +47,12 @@
 
 			{% if(doc.item_name != doc.item_code) { %}
 				<br>{%= doc.item_name %}{% } %}
+				
+			{% if((doc.description != doc.item_code != doc.item_name) && 
+				in_list($.map(visible_columns, function(x, i) {return x.fieldname}), "description")) { %}
+				<br>
+				<strong>Description: </strong>
+				{%= doc.get_formatted("description") %}{% } %}
 			{% include "templates/form_grid/includes/visible_cols.html" %}
 		</div>
 
