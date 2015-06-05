@@ -165,3 +165,4 @@ erpnext.patches.v5_0.repost_gle_for_jv_with_multiple_party
 erpnext.patches.v5_0.portal_fixes
 erpnext.patches.v5_0.reset_values_in_tools
 execute:frappe.delete_doc("Page", "users")
+erpnext.patches.v5_0.update_material_transferred_for_manufacturing_again
