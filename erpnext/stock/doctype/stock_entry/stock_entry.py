@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.defaults
 
-from frappe.utils import cstr, cint, flt, comma_or, nowdate, get_datetime
+from frappe.utils import cstr, cint, flt, comma_or, get_datetime
 
 from frappe import _
 from erpnext.stock.utils import get_incoming_rate
@@ -185,11 +185,16 @@ class StockEntry(StockController):
 
 	def validate_production_order(self):
 		if self.purpose in ("Manufacture", "Material Transfer for Manufacture"):
+			if not self.bom_no:
+				frappe.throw(_("BOM No is mandatory"))
+				
 			# check if production order is entered
 			if not self.production_order:
 				frappe.throw(_("Production order number is mandatory for stock entry purpose manufacture"))
 			# check for double entry
 			if self.purpose=="Manufacture":
+				if not self.fg_completed_qty:
+					frappe.throw(_("For Quantity (Manufactured Qty) is mandatory"))
 				self.check_if_operations_completed()
 				self.check_duplicate_entry_for_production_order()
 		elif self.purpose != "Material Transfer":
@@ -378,10 +383,21 @@ class StockEntry(StockController):
 
 	def validate_finished_goods(self):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
+		items_with_target_warehouse = []
 		for d in self.get('items'):
 			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty):
 				frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}"). \
 					format(d.idx, d.transfer_qty, self.fg_completed_qty))
+					
+			if self.production_order and self.purpose == "Manufacture" and d.t_warehouse:
+				items_with_target_warehouse.append(d.item_code)
+				
+		if self.production_order and self.purpose == "Manufacture":
+			production_item = frappe.db.get_value("Production Order", 
+				self.production_order, "production_item")
+			if production_item not in items_with_target_warehouse:
+				frappe.throw(_("Finished Item {0} must be entered for Manufacture type entry")
+					.format(production_item))
 
 	def validate_return_reference_doc(self):
 		"""validate item with reference doc"""
@@ -399,7 +415,6 @@ class StockEntry(StockController):
 
 			# posting date check
 			ref_posting_datetime = "%s %s" % (ref.doc.posting_date, ref.doc.posting_time or "00:00:00")
-			this_posting_datetime = "%s %s" % (self.posting_date, self.posting_time)
 
 			if get_datetime(ref_posting_datetime) < get_datetime(ref_posting_datetime):
 				from frappe.utils.dateutils import datetime_in_user_format
@@ -474,9 +489,10 @@ class StockEntry(StockController):
 			pro_doc = frappe.get_doc("Production Order", self.production_order)
 			_validate_production_order(pro_doc)
 			pro_doc.run_method("update_status")
-			pro_doc.run_method("update_production_order_qty")
-			if self.purpose == "Manufacture":
-				self.update_planned_qty(pro_doc)
+			if self.fg_completed_qty:
+				pro_doc.run_method("update_production_order_qty")
+				if self.purpose == "Manufacture":
+					self.update_planned_qty(pro_doc)
 
 	def update_planned_qty(self, pro_doc):
 		from erpnext.stock.utils import update_bin
@@ -546,9 +562,6 @@ class StockEntry(StockController):
 		return ret
 
 	def get_items(self):
-		if not self.fg_completed_qty or not self.bom_no:
-			frappe.throw(_("BOM and Manufacturing Quantity are required"))
-
 		self.set('items', [])
 		self.validate_production_order()
 
@@ -638,17 +651,16 @@ class StockEntry(StockController):
 		issued_item_qty = self.get_issued_qty()
 
 		max_qty = flt(self.pro_doc.qty)
-		only_pending_fetched = []
-
 		for item in item_dict:
 			pending_to_issue = (max_qty * item_dict[item]["qty"]) - issued_item_qty.get(item, 0)
 			desire_to_transfer = flt(self.fg_completed_qty) * item_dict[item]["qty"]
+
 			if desire_to_transfer <= pending_to_issue:
 				item_dict[item]["qty"] = desire_to_transfer
-			else:
+			elif pending_to_issue > 0:
 				item_dict[item]["qty"] = pending_to_issue
-				if pending_to_issue:
-					only_pending_fetched.append(item)
+			else:
+				item_dict[item]["qty"] = 0
 
 		# delete items with 0 qty
 		for item in item_dict.keys():
@@ -658,9 +670,6 @@ class StockEntry(StockController):
 		# show some message
 		if not len(item_dict):
 			frappe.msgprint(_("""All items have already been transferred for this Production Order."""))
-
-		elif only_pending_fetched:
-			frappe.msgprint(_("Pending Items {0} updated").format(only_pending_fetched))
 
 		return item_dict
 

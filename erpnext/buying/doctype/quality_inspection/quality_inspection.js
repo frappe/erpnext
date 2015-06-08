@@ -57,3 +57,7 @@ cur_frm.fields_dict['item_serial_no'].get_query = function(doc, cdt, cdn) {
 
 	return { filters: filter }
 }
+
+cur_frm.add_fetch('item_code', 'item_name', 'item_name');
+cur_frm.add_fetch('item_code', 'description', 'description');
+
