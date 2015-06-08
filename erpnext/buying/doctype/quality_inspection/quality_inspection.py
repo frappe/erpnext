@@ -31,18 +31,12 @@ class QualityInspection(Document):
 				(self.name, self.modified, self.purchase_receipt_no,
 					self.item_code))
 
-
 	def on_cancel(self):
 		if self.purchase_receipt_no:
 			frappe.db.sql("""update `tabPurchase Receipt Item` t1, `tabPurchase Receipt` t2
 				set t1.qa_no = '', t2.modified = %s
 				where t1.parent = %s and t1.item_code = %s and t1.parent = t2.name""",
 				(self.modified, self.purchase_receipt_no, self.item_code))
-
-@frappe.whitelist()
-def get_item_details(item_code):
-	item_details = frappe.db.sql("select item_name, description from tabItem where item_code=%s", item_code, as_dict=1)
-	return item_details[0] if item_details else {}
 
 def item_query(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("from"):
