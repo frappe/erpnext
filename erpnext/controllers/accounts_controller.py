@@ -38,7 +38,8 @@ class AccountsController(TransactionBase):
 			convert_to_recurring(self, self.get("posting_date") or self.get("transaction_date"))
 
 	def before_recurring(self):
-		self.fiscal_year = None
+		if self.meta.get_field("fiscal_year"):
+			self.fiscal_year = None
 		if self.meta.get_field("due_date"):
 			self.due_date = None
 
@@ -46,7 +47,7 @@ class AccountsController(TransactionBase):
 		for fieldname in ["posting_date", "transaction_date"]:
 			if not self.get(fieldname) and self.meta.get_field(fieldname):
 				self.set(fieldname, today())
-				if not self.fiscal_year:
+				if self.meta.get_field("fiscal_year") and not self.fiscal_year:
 					self.fiscal_year = get_fiscal_year(self.get(fieldname))[0]
 				break
 
