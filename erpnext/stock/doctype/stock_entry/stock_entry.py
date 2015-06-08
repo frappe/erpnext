@@ -112,7 +112,7 @@ class StockEntry(StockController):
 
 			for f in ("uom", "stock_uom", "description", "item_name", "expense_account",
 				"cost_center", "conversion_factor"):
-					if f not in ["expense_account", "cost_center"] or not item.get(f):
+					if f in ["stock_uom", "conversion_factor"] or not item.get(f):
 						item.set(f, item_details.get(f))
 
 			if self.difference_account:
