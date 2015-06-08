@@ -16,12 +16,16 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 
 	if not party:
 		return {}
+		
+	if not frappe.db.exists(party_type, party):
+		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 
 	return _get_party_details(party, account, party_type,
 		company, posting_date, price_list, currency, doctype)
 
 def _get_party_details(party=None, account=None, party_type="Customer", company=None,
 	posting_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False):
+	
 	out = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, doctype))
 
 	party = out[party_type.lower()]
