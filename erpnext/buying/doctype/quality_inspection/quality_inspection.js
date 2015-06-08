@@ -57,3 +57,18 @@ cur_frm.fields_dict['item_serial_no'].get_query = function(doc, cdt, cdn) {
 
 	return { filters: filter }
 }
+
+frappe.ui.form.on("Quality Inspection", "item_code", function(frm) {
+	frappe.call({
+		method: 'erpnext.buying.doctype.quality_inspection.quality_inspection.get_item_details',
+		args: {
+			"item_code": frm.doc.item_code
+		},
+		callback: function(r) {
+			if(!r.exc && r.message) {
+				frm.set_value("item_name", r.message.item_name);
+				frm.set_value("description", r.message.description);
+			}
+		}
+	});
+})
