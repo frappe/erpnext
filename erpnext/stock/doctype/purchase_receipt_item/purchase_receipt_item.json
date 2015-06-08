@@ -5,6 +5,19 @@
  "doctype": "DocType", 
  "fields": [
   {
+   "fieldname": "barcode", 
+   "fieldtype": "Data", 
+   "label": "Barcode", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "section_break_2", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "item_code", 
    "fieldtype": "Link", 
    "in_filter": 1, 
@@ -642,7 +655,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-06-02 14:19:13.528248", 
+ "modified": "2015-06-08 08:21:18.024324", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Purchase Receipt Item", 
