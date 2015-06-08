@@ -128,6 +128,14 @@
    "width": "50%"
   }, 
   {
+   "fieldname": "item_name", 
+   "fieldtype": "Data", 
+   "label": "Item Name", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "description", 
    "fieldtype": "Small Text", 
    "in_filter": 1, 
@@ -219,7 +227,7 @@
  "icon": "icon-search", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-04-14 07:37:07.331291", 
+ "modified": "2015-06-08 02:40:25.121948", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Quality Inspection", 
