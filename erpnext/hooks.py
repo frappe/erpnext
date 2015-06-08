@@ -5,7 +5,7 @@ app_publisher = "Frappe Technologies Pvt. Ltd. and Contributors"
 app_description = "Open Source Enterprise Resource Planning for Small and Midsized Organizations"
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "5.0.18"
+app_version = "5.0.19"
 
 error_report_email = "support@erpnext.com"
 
