@@ -102,7 +102,7 @@ def round_off_debit_credit(gl_map):
 		debit_credit_diff += entry.debit - entry.credit
 	
 	debit_credit_diff = flt(debit_credit_diff, precision)
-	if abs(debit_credit_diff) >= (2.0 / (10**precision)):
+	if abs(debit_credit_diff) >= (5.0 / (10**precision)):
 		frappe.throw(_("Debit and Credit not equal for {0} #{1}. Difference is {2}.")
 			.format(gl_map[0].voucher_type, gl_map[0].voucher_no, debit_credit_diff))
 		
