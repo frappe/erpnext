@@ -105,6 +105,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	barcode: function(doc, cdt, cdn) {
+		var d = locals[cdt][cdn];
+		if(d.barcode=="" || d.barcode==null) {
+			// barcode cleared, remove item
+			d.item_code = "";
+		}
+		this.item_code(doc, cdt, cdn);
+	},
+
 	item_code: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);

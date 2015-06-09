@@ -124,15 +124,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.apply_pricing_rule();
 	},
 
-	barcode: function(doc, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		if(d.barcode=="" || d.barcode==null) {
-			// barcode cleared, remove item
-			d.item_code = "";
-		}
-		this.item_code(doc, cdt, cdn);
-	},
-
 	selling_price_list: function() {
 		this.apply_price_list();
 	},

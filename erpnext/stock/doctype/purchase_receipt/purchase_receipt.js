@@ -204,18 +204,3 @@ frappe.ui.form.on("Purchase Receipt", "is_subcontracted", function(frm) {
 	}
 	frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
 });
-
-cur_frm.cscript.barcode = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if (d.barcode) {
-		frappe.call({
-			method: "erpnext.stock.get_item_details.get_item_code",
-			args: {"barcode": d.barcode },
-			callback: function(r) {
-				if (!r.exe){
-					frappe.model.set_value(cdt, cdn, "item_code", r.message);
-				}
-			}
-		});
-	}
-}
