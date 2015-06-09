@@ -458,11 +458,11 @@ def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
 	if voucher_type=="Bank Entry":
 		account = frappe.db.get_value("Company", company, "default_bank_account")
 		if not account:
-			account = frappe.db.get_value("Account", {"company": company, "account_type": "Bank"})
+			account = frappe.db.get_value("Account", {"company": company, "account_type": "Bank", "is_group": 0})
 	elif voucher_type=="Cash Entry":
 		account = frappe.db.get_value("Company", company, "default_cash_account")
 		if not account:
-			account = frappe.db.get_value("Account", {"company": company, "account_type": "Cash"})
+			account = frappe.db.get_value("Account", {"company": company, "account_type": "Cash", "is_group": 0})
 
 	if account:
 		return {
