@@ -21,18 +21,7 @@
    }
   ],
   "title": "_Test Sales Taxes and Charges Template",
-  "territories": [
-   {
-    "doctype": "Applicable Territory",
-    "parentfield": "territories",
-    "territory": "All Territories"
-   },
-   {
-    "doctype": "Applicable Territory",
-    "parentfield": "territories",
-    "territory": "_Test Territory Rest Of The World"
-   }
-  ]
+  "if_address_matches": "Any Country"
  },
  {
   "company": "_Test Company",
@@ -116,13 +105,8 @@
    }
   ],
   "title": "_Test India Tax Master",
-  "territories": [
-   {
-    "doctype": "Applicable Territory",
-    "parentfield": "territories",
-    "territory": "_Test Territory India"
-   }
-  ]
+  "if_address_matches": "Country, State, Postal Code Pattern",
+  "country": "India"
  },
  {
   "company": "_Test Company",
@@ -146,12 +130,6 @@
    }
   ],
   "title": "_Test Sales Taxes and Charges Template - Rest of the World",
-  "territories": [
-   {
-    "doctype": "Applicable Territory",
-    "parentfield": "territories",
-    "territory": "_Test Territory Rest Of The World"
-   }
-  ]
+  "if_address_matches": "Rest of the World",
  }
 ]
