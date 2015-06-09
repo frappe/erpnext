@@ -28,7 +28,11 @@ class Task(Document):
 
 	def validate(self):
 		self.validate_dates()
-		
+
+		if self.status!=self.get_db_value("status") and self.status == "Closed":
+			from frappe.desk.form.assign_to import clear
+			clear(self.doctype, self.name)
+
 	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
 			frappe.throw(_("'Expected Start Date' can not be greater than 'Expected End Date'"))
@@ -41,17 +45,17 @@ class Task(Document):
 		self.reschedule_dependent_tasks()
 		self.update_percentage()
 		self.update_project()
-			
+
 	def update_percentage(self):
 		"""update percent complete in project"""
 		if self.project and not self.flags.from_project:
 			project = frappe.get_doc("Project", self.project)
 			project.run_method("update_percent_complete")
-			
+
 	def update_total_expense_claim(self):
-		self.total_expense_claim = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim` 
+		self.total_expense_claim = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim`
 			where project = %s and task = %s and approval_status = "Approved" and docstatus=1""",(self.project, self.name))
-			
+
 	def update_time_and_costing(self):
 		tl = frappe.db.sql("""select min(from_time) as start_date, max(to_time) as end_date,
 			 sum(billing_amount) as total_billing_amount, sum(costing_amount) as total_costing_amount,
@@ -64,14 +68,14 @@ class Task(Document):
 		self.actual_time= tl.time
 		self.act_start_date= tl.start_date
 		self.act_end_date= tl.end_date
-			
+
 	def update_project(self):
 		if self.project and frappe.db.exists("Project", self.project):
 			project = frappe.get_doc("Project", self.project)
 			project.flags.dont_sync_tasks = True
 			project.update_costing()
 			project.save()
-			
+
 	def check_recursion(self):
 		if self.flags.ignore_recursion_check: return
 		check_list = [['task', 'parent'], ['parent', 'task']]
@@ -88,7 +92,7 @@ class Task(Document):
 						task_list.append(b[0])
 				if count == 15:
 					break
-			
+
 	def reschedule_dependent_tasks(self):
 		end_date = self.exp_end_date or self.act_end_date
 		if end_date:
