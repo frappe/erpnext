@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-
+import urllib
 from frappe.utils.nestedset import NestedSet
 from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.render import clear_cache
@@ -91,7 +91,7 @@ def get_item_for_list_in_html(context):
 	# add missing absolute link in files
 	# user may forget it during upload
 	if (context.get("website_image") or "").startswith("files/"):
-		context["website_image"] = "/" + context["website_image"]
+		context["website_image"] = "/" + urllib.quote(context["website_image"])
 	return frappe.get_template("templates/includes/product_in_grid.html").render(context)
 
 def get_group_item_count(item_group):
