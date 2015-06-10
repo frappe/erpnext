@@ -458,11 +458,11 @@ def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
 	if voucher_type=="Bank Entry":
 		account = frappe.db.get_value("Company", company, "default_bank_account")
 		if not account:
-			account = frappe.db.get_value("Account", {"company": company, "account_type": "Bank"})
+			account = frappe.db.get_value("Account", {"company": company, "account_type": "Bank", "is_group": 0})
 	elif voucher_type=="Cash Entry":
 		account = frappe.db.get_value("Company", company, "default_cash_account")
 		if not account:
-			account = frappe.db.get_value("Account", {"company": company, "account_type": "Cash"})
+			account = frappe.db.get_value("Account", {"company": company, "account_type": "Cash", "is_group": 0})
 
 	if account:
 		return {
@@ -538,15 +538,13 @@ def get_opening_accounts(company):
 
 
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
-	if not filters.get("party"):
-		return []
 	return frappe.db.sql("""select jv.name, jv.posting_date, jv.user_remark
 		from `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
-		where jv_detail.parent = jv.name and jv_detail.account = %s and jv_detail.party = %s
+		where jv_detail.parent = jv.name and jv_detail.account = %s and ifnull(jv_detail.party, '') = %s
 		and (ifnull(jv_detail.against_invoice, '') = '' and ifnull(jv_detail.against_voucher, '') = ''
 		and ifnull(jv_detail.against_jv, '') = '' )
 		and jv.docstatus = 1 and jv.{0} like %s order by jv.name desc limit %s, %s""".format(searchfield),
-		(filters["account"], filters["party"], "%{0}%".format(txt), start, page_len))
+		(filters["account"], cstr(filters["party"]), "%{0}%".format(txt), start, page_len))
 
 @frappe.whitelist()
 def get_outstanding(args):
