@@ -185,9 +185,6 @@ class StockEntry(StockController):
 
 	def validate_production_order(self):
 		if self.purpose in ("Manufacture", "Material Transfer for Manufacture"):
-			if not self.bom_no:
-				frappe.throw(_("BOM No is mandatory"))
-				
 			# check if production order is entered
 			if not self.production_order:
 				frappe.throw(_("Production order number is mandatory for stock entry purpose manufacture"))
