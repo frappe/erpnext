@@ -13,8 +13,9 @@ class Project(Document):
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.project_name)
 
-	def onload(self):
+	def __setup__(self):
 		"""Load project tasks for quick view"""
+		self.tasks = []
 		for task in frappe.get_all("Task", "*", {"project": self.name}, order_by="exp_start_date asc"):
 			self.append("tasks", {
 				"title": task.subject,
