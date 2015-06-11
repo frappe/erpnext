@@ -8,6 +8,13 @@ frappe.query_reports["Customers Not Buying Since Long Time"] = {
 			"label": __("Days Since Last Order"),
 			"fieldtype": "Int",
 			"default": 60
+		},
+		{
+			"fieldname":"doctype",
+			"label": __("Doctype"),
+			"fieldtype": "Select",
+			"default": "Sales Order",
+			"options": "Sales Order\nSales Invoice"
 		}
 	]
 }
