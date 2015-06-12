@@ -5,6 +5,13 @@
  "doctype": "DocType", 
  "fields": [
   {
+   "fieldname": "check_supplier_invoice_uniqueness", 
+   "fieldtype": "Check", 
+   "label": "Check Supplier Invoice Number Uniqueness", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "default": "1", 
    "description": "If enabled, the system will post accounting entries for inventory automatically.", 
    "fieldname": "auto_accounting_for_stock", 
@@ -43,7 +50,7 @@
  "icon": "icon-cog", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2015-02-05 05:11:34.163902", 
+ "modified": "2015-06-11 06:06:34.047890", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Accounts Settings", 
