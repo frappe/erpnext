@@ -13,19 +13,25 @@ class Project(Document):
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.project_name)
 
-	def __setup__(self):
+	def onload(self):
 		"""Load project tasks for quick view"""
-		self.tasks = []
-		for task in frappe.get_all("Task", "*", {"project": self.name}, order_by="exp_start_date asc"):
-			self.append("tasks", {
-				"title": task.subject,
-				"status": task.status,
-				"start_date": task.exp_start_date,
-				"end_date": task.exp_end_date,
-				"description": task.description,
-				"task_id": task.name
-			})
-
+		if not self.get("tasks"):
+			for task in self.get_tasks():
+				self.append("tasks", {
+					"title": task.subject,
+					"status": task.status,
+					"start_date": task.exp_start_date,
+					"end_date": task.exp_end_date,
+					"description": task.description,
+					"task_id": task.name
+				})
+			
+	def __setup__(self):
+		self.onload()
+	
+	def get_tasks(self):
+		return frappe.get_all("Task", "*", {"project": self.name}, order_by="exp_start_date asc")
+		
 	def validate(self):
 		self.validate_dates()
 		self.sync_tasks()
