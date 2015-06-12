@@ -128,7 +128,7 @@ class TimeLog(Document):
 
 	def update_production_order(self):
 		"""Updates `start_date`, `end_date`, `status` for operation in Production Order."""
-		
+
 		if self.production_order and self.for_manufacturing:
 			if not self.operation_id:
 				frappe.throw(_("Operation ID not set"))
@@ -208,22 +208,23 @@ class TimeLog(Document):
 			self.production_order = None
 			self.operation = None
 			self.quantity = None
-	
+
 	def update_cost(self):
 		rate = get_activity_cost(self.employee, self.activity_type)
 		if rate:
 			self.costing_rate = rate.get('costing_rate')
-			self.billing_rate = rate.get('billing_rate') 
+			self.billing_rate = rate.get('billing_rate')
 			self.costing_amount = self.costing_rate * self.hours
 			if self.billable:
 				self.billing_amount = self.billing_rate * self.hours
 			else:
 				self.billing_amount = 0
-				
+
 	def validate_task(self):
-		if self.project and not self.task:
+		# if a time log is being created against a project without production order
+		if (self.project and not self.production_order) and not self.task:
 			frappe.throw(_("Task is Mandatory if Time Log is against a project"))
-	
+
 	def update_task(self):
 		if self.task and frappe.db.exists("Task", self.task):
 			task = frappe.get_doc("Task", self.task)
@@ -266,7 +267,7 @@ def get_events(start, end, filters=None):
 			d.title += " for Project: " + d.project
 
 	return data
-	
+
 @frappe.whitelist()
 def get_activity_cost(employee=None, activity_type=None):
 	rate = frappe.db.sql("""select costing_rate, billing_rate from `tabActivity Cost` where employee= %s
