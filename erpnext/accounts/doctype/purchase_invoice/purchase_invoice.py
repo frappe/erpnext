@@ -39,6 +39,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.po_required()
 		self.pr_required()
+		self.validate_supplier_invoice()
 		self.check_active_purchase_items()
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
@@ -385,6 +386,16 @@ class PurchaseInvoice(BuyingController):
 				project.update_purchase_costing()
 				project.save()
 				project_list.append(d.project_name)
+				
+	def validate_supplier_invoice(self):
+		if self.bill_date:
+			if self.bill_date > self.posting_date:
+				frappe.throw("Supplier Invoice Date cannot be greater than Posting Date")
+		if self.bill_no:
+			if cint(frappe.db.get_single_value("Accounts Settings", "check_supplier_invoice_uniqueness")):
+				pi = frappe.db.exists("Purchase Invoice", {"bill_no": self.bill_no, "fiscal_year": self.fiscal_year})
+				if pi:
+					frappe.throw("Supplier Invoice No exists in Purchase Invoice {0}".format(pi))
 
 @frappe.whitelist()
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):

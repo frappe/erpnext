@@ -15,6 +15,8 @@ class ActivityCost(Document):
 		self.check_unique()
 		
 	def set_title(self):
+		if not self.employee_name:
+			self.employee_name = frappe.db.get_value("Employee", self.employee, "employee_name")
 		self.title = _("{0} for {1}").format(self.employee_name, self.activity_type)
 		
 	def check_unique(self):

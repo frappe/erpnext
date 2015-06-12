@@ -2,7 +2,7 @@
  "allow_copy": 0, 
  "allow_import": 1, 
  "allow_rename": 1, 
- "autoname": "Activity Cost - .#", 
+ "autoname": "AC-.#####", 
  "creation": "2015-03-23 02:00:21.861546", 
  "custom": 0, 
  "docstatus": 0, 
@@ -31,11 +31,12 @@
   }, 
   {
    "fieldname": "employee_name", 
-   "fieldtype": "Read Only", 
+   "fieldtype": "Data", 
    "label": "Employee Name", 
-   "options": "employee.employee_name", 
+   "options": "", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "read_only": 1
   }, 
   {
    "fieldname": "column_break_2", 
@@ -135,7 +136,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-04-14 02:08:33.690406", 
+ "modified": "2015-06-11 06:50:47.999788", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Activity Cost", 
