@@ -48,7 +48,8 @@
    "fieldtype": "Dynamic Link", 
    "label": "Party", 
    "options": "party_type", 
-   "permlevel": 0
+   "permlevel": 0, 
+   "search_index": 1
   }, 
   {
    "fieldname": "cost_center", 
@@ -192,7 +193,7 @@
  "icon": "icon-list", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2015-04-27 20:32:48.246818", 
+ "modified": "2015-06-14 20:57:19.800276", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "GL Entry", 
