@@ -35,7 +35,7 @@
    "permlevel": 0, 
    "read_only": 1, 
    "reqd": 1, 
-   "search_index": 1
+   "search_index": 0
   }, 
   {
    "default": "0", 
@@ -44,7 +44,7 @@
    "label": "Is Group", 
    "permlevel": 0, 
    "precision": "", 
-   "search_index": 1
+   "search_index": 0
   }, 
   {
    "fieldname": "company", 
@@ -57,7 +57,7 @@
    "permlevel": 0, 
    "read_only": 1, 
    "reqd": 1, 
-   "search_index": 1
+   "search_index": 0
   }, 
   {
    "fieldname": "root_type", 
@@ -147,7 +147,8 @@
    "label": "Lft", 
    "permlevel": 0, 
    "print_hide": 1, 
-   "read_only": 1
+   "read_only": 1, 
+   "search_index": 1
   }, 
   {
    "fieldname": "rgt", 
@@ -156,7 +157,8 @@
    "label": "Rgt", 
    "permlevel": 0, 
    "print_hide": 1, 
-   "read_only": 1
+   "read_only": 1, 
+   "search_index": 1
   }, 
   {
    "fieldname": "old_parent", 
@@ -171,7 +173,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-05-28 14:10:40.606010", 
+ "modified": "2015-06-14 20:57:55.471334", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Account", 

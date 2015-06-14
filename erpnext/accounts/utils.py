@@ -91,7 +91,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None):
 		# different filter for group and ledger - improved performance
 		if acc.is_group:
 			cond.append("""exists (
-				select * from `tabAccount` ac where ac.name = gle.account
+				select name from `tabAccount` ac where ac.name = gle.account
 				and ac.lft >= %s and ac.rgt <= %s
 			)""" % (acc.lft, acc.rgt))
 		else:
@@ -397,7 +397,7 @@ def get_outstanding_invoices(amount_query, account, party_type, party):
 
 	for d in outstanding_voucher_list:
 		payment_amount = frappe.db.sql("""
-			select ifnull(sum(ifnull({amount_query}, 0)), 0)
+			select ifnull(sum({amount_query}), 0)
 			from
 				`tabGL Entry`
 			where
