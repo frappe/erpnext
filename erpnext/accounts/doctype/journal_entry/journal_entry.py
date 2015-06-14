@@ -544,7 +544,7 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 		and (ifnull(jv_detail.against_invoice, '') = '' and ifnull(jv_detail.against_voucher, '') = ''
 		and ifnull(jv_detail.against_jv, '') = '' )
 		and jv.docstatus = 1 and jv.{0} like %s order by jv.name desc limit %s, %s""".format(searchfield),
-		(filters["account"], cstr(filters["party"]), "%{0}%".format(txt), start, page_len))
+		(filters.get("account"), cstr(filters.get("party")), "%{0}%".format(txt), start, page_len))
 
 @frappe.whitelist()
 def get_outstanding(args):

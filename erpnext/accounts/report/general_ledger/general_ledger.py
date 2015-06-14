@@ -66,7 +66,7 @@ def get_gl_entries(filters):
 
 	gl_entries = frappe.db.sql("""select posting_date, account, party_type, party,
 			sum(ifnull(debit, 0)) as debit, sum(ifnull(credit, 0)) as credit,
-			voucher_type, voucher_no, cost_center, remarks, is_opening, against
+			voucher_type, voucher_no, cost_center, remarks, against
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
 		{group_by_condition}
@@ -91,6 +91,9 @@ def get_conditions(filters):
 
 	if filters.get("party"):
 		conditions.append("party=%(party)s")
+		
+	if not (filters.get("account") or filters.get("party") or filters.get("group_by_account")):
+		conditions.append("posting_date >=%(from_date)s")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
@@ -148,14 +151,15 @@ def initialize_gle_map(gl_entries):
 
 def get_accountwise_gle(filters, gl_entries, gle_map):
 	opening, total_debit, total_credit = 0, 0, 0
-
+	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	for gle in gl_entries:
 		amount = flt(gle.debit, 3) - flt(gle.credit, 3)
-		if gle.posting_date < getdate(filters.from_date):
+		if (filters.get("account") or filters.get("party") or filters.get("group_by_account")) \
+				and gle.posting_date < from_date:
 			gle_map[gle.account].opening += amount
 			if filters.get("account") or filters.get("party"):
 				opening += amount
-		elif gle.posting_date <= getdate(filters.to_date):
+		elif gle.posting_date <= to_date:
 			gle_map[gle.account].entries.append(gle)
 			gle_map[gle.account].total_debit += flt(gle.debit, 3)
 			gle_map[gle.account].total_credit += flt(gle.credit, 3)
