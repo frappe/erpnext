@@ -55,6 +55,13 @@
    "label": "Time Between Operations (in mins)", 
    "permlevel": 0, 
    "precision": ""
+  }, 
+  {
+   "fieldname": "over_production_allowance_percentage", 
+   "fieldtype": "Percent", 
+   "label": "Over Production Allowance Percentage", 
+   "permlevel": 0, 
+   "precision": ""
   }
  ], 
  "hide_heading": 0, 
@@ -65,7 +72,7 @@
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
- "modified": "2015-04-21 07:57:40.260862", 
+ "modified": "2015-06-15 05:52:22.986958", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Manufacturing Settings", 
