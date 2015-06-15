@@ -217,12 +217,14 @@ class ProductionOrder(Document):
 		for i, d in enumerate(self.operations):
 			self.set_operation_start_end_time(i, d)
 
+			if not d.workstation:
+				continue
+
 			time_log = make_time_log(self.name, d.operation, d.planned_start_time, d.planned_end_time,
 				flt(self.qty) - flt(d.completed_qty), self.project_name, d.workstation, operation_id=d.name)
 
-			if d.workstation:
-				# validate operating hours if workstation [not mandatory] is specified
-				self.check_operation_fits_in_working_hours(d)
+			# validate operating hours if workstation [not mandatory] is specified
+			self.check_operation_fits_in_working_hours(d)
 
 			original_start_time = time_log.from_time
 			while True:
