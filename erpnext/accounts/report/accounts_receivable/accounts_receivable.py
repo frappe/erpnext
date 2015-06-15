@@ -171,7 +171,7 @@ class ReceivablePayableReport(object):
 	def get_gl_entries(self, party_type):
 		if not hasattr(self, "gl_entries"):
 			conditions, values = self.prepare_conditions(party_type)
-			self.gl_entries = frappe.db.sql("""select posting_date, account, party_type, party, debit, credit,
+			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party, debit, credit,
 				voucher_type, voucher_no, against_voucher_type, against_voucher from `tabGL Entry`
 				where docstatus < 2 and party_type=%s {0} order by posting_date, party"""
 				.format(conditions), values, as_dict=True)
