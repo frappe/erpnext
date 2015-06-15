@@ -493,7 +493,7 @@
   {
    "fieldname": "base_discount_amount", 
    "fieldtype": "Currency", 
-   "label": "Discount Amount (Company Currency)", 
+   "label": "Additional Discount Amount (Company Currency)", 
    "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "precision": "", 
@@ -1080,7 +1080,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "issingle": 0, 
- "modified": "2015-05-27 02:48:01.160307", 
+ "modified": "2015-06-15 15:36:38.898462", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 
