@@ -63,7 +63,7 @@ cur_frm.cscript.onload = function(doc,cdt,cdn) {
 
 	cur_frm.set_query("exp_approver", function() {
 		return {
-			filters: [["UserRole", "role", "=", "Expense Approver"]]
+			query: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_approver"
 		};
 	});
 }

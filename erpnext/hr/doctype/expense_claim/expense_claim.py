@@ -59,3 +59,12 @@ class ExpenseClaim(Document):
 		for d in self.get('expenses'):
 			if flt(d.sanctioned_amount) > flt(d.claim_amount):
 				frappe.throw(_("Sanctioned Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))
+				
+
+@frappe.whitelist()
+def get_expense_approver(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""
+		select u.name, concat(u.first_name, ' ', u.last_name) 
+		from tabUser u, tabUserRole r
+		where u.name = r.parent and r.role = 'Expense Approver' and u.name like %s
+	""", ("%" + txt + "%"))
