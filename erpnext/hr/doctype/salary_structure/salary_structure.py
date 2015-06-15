@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cstr, flt
+from frappe.utils import cstr, flt, getdate
 from frappe.model.naming import make_autoname
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
@@ -14,6 +14,13 @@ from erpnext.hr.utils import set_employee_name
 class SalaryStructure(Document):
 	def autoname(self):
 		self.name = make_autoname(self.employee + '/.SST' + '/.#####')
+		
+	def validate(self):
+		self.check_existing()
+		self.validate_amount()
+		self.validate_employee()
+		self.validate_joining_date()
+		set_employee_name(self)
 
 	def get_employee_details(self):
 		ret = {}
@@ -77,14 +84,11 @@ class SalaryStructure(Document):
 		old_employee = frappe.db.get_value("Salary Structure", self.name, "employee")
 		if old_employee and self.employee != old_employee:
 			frappe.throw(_("Employee can not be changed"))
-
-
-	def validate(self):
-		self.check_existing()
-		self.validate_amount()
-		self.validate_employee()
-		set_employee_name(self)
-
+			
+	def validate_joining_date(self):
+		joining_date = getdate(frappe.db.get_value("Employee", self.employee, "date_of_joining"))
+		if getdate(self.from_date) < joining_date:
+			frappe.throw(_("From Date in Salary Structure cannot be lesser than Employee Joining Date."))
 
 @frappe.whitelist()
 def make_salary_slip(source_name, target_doc=None):
