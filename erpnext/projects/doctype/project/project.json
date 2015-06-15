@@ -163,6 +163,7 @@
    "fieldtype": "Percent", 
    "in_list_view": 0, 
    "label": "% Tasks Completed", 
+   "no_copy": 1, 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -356,7 +357,7 @@
  "icon": "icon-puzzle-piece", 
  "idx": 1, 
  "max_attachments": 4, 
- "modified": "2015-04-27 07:37:44.239930", 
+ "modified": "2015-06-12 09:00:54.080220", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 
