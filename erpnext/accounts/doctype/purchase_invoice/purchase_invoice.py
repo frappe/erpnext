@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, formatdate, flt
+from frappe.utils import cint, formatdate, flt, getdate
 from frappe import msgprint, _, throw
 from erpnext.setup.utils import get_company_currency
 import frappe.defaults
@@ -389,7 +389,7 @@ class PurchaseInvoice(BuyingController):
 				
 	def validate_supplier_invoice(self):
 		if self.bill_date:
-			if self.bill_date > self.posting_date:
+			if getdate(self.bill_date) > getdate(self.posting_date):
 				frappe.throw("Supplier Invoice Date cannot be greater than Posting Date")
 		if self.bill_no:
 			if cint(frappe.db.get_single_value("Accounts Settings", "check_supplier_invoice_uniqueness")):
