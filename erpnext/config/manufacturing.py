@@ -103,6 +103,12 @@ def get_data():
 					"name": "Completed Production Orders",
 					"doctype": "Production Order"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "BOM Search",
+					"doctype": "BOM"
+				},
 			]
 		},
 		{
