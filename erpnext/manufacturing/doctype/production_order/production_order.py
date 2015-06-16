@@ -90,8 +90,9 @@ class ProductionOrder(Document):
 			(self.sales_order, self.production_item))[0][0]
 		# total qty in SO
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
-
-		if total_qty > so_qty:
+		
+		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings", "over_production_allowance_percentage"))
+		if total_qty > so_qty + (allowance_percentage/100 * so_qty):
 			frappe.throw(_("Cannot produce more Item {0} than Sales Order quantity {1}").format(self.production_item,
 				so_qty), OverProductionError)
 

@@ -272,4 +272,7 @@ def get_events(start, end, filters=None):
 def get_activity_cost(employee=None, activity_type=None):
 	rate = frappe.db.sql("""select costing_rate, billing_rate from `tabActivity Cost` where employee= %s
 		and activity_type= %s""", (employee, activity_type), as_dict=1)
+	if not rate:
+		rate = frappe.db.sql("""select costing_rate, billing_rate from `tabActivity Cost` where ifnull(employee, '')=''
+			and activity_type= %s""", (activity_type), as_dict=1)
 	return rate[0] if rate else {}
