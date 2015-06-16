@@ -517,7 +517,7 @@
   {
    "fieldname": "base_discount_amount", 
    "fieldtype": "Currency", 
-   "label": "Discount Amount (Company Currency)", 
+   "label": "Additional Discount Amount (Company Currency)", 
    "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "precision": "", 
@@ -1070,7 +1070,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2015-05-27 02:47:59.778147", 
+ "modified": "2015-06-15 15:37:54.699371", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note", 
