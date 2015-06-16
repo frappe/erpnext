@@ -29,7 +29,7 @@ class ActivityCost(Document):
 					frappe.throw(_("Activity Cost exists for Employee {0} against Activity Type - {1}")
 						.format(self.employee, self.activity_type), DuplicationError)
 		else:
-			if frappe.db.sql("""select name from `tabActivity Cost` where employee_name IS NULL and activity_type= %s and name != %s""",
+			if frappe.db.sql("""select name from `tabActivity Cost` where ifnull(employee, '')='' and activity_type= %s and name != %s""",
 				(self.activity_type, self.name)):
 					frappe.throw(_("Default Activity Cost exists for Activity Type - {0}")
 						.format(self.activity_type), DuplicationError)
