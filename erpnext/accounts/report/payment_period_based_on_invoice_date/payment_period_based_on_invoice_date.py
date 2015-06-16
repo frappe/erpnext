@@ -9,8 +9,9 @@ from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
-
-	columns = get_columns()
+	validate_filters(filters)
+			
+	columns = get_columns(filters)
 	entries = get_entries(filters)
 	invoice_posting_date_map = get_invoice_posting_date_map(filters)
 	against_date = ""
@@ -36,11 +37,18 @@ def execute(filters=None):
 		data.append(row)
 
 	return columns, data
+	
+def validate_filters(filters):
+	if (filters.get("payment_type") == "Incoming" and filters.get("party_type") == "Supplier") or \
+		(filters.get("payment_type") == "Outgoing" and filters.get("party_type") == "Customer"):
+			frappe.throw(_("{0} payment entries can not be filtered by {1}")\
+				.format(filters.payment_type, filters.party_type))
 
-def get_columns():
+def get_columns(filters):
 	return [_("Journal Entry") + ":Link/Journal Entry:140", 
-		_("Party Type") + ":Link/DocType:100", _("Party") + ":Dynamic Link/party_type:140",
-		_("Posting Date") + ":Date:100", _("Against Invoice") + ":Link/Purchase Invoice:130",
+		_("Party Type") + ":Link/DocType:100", _("Party") + ":Dynamic Link/Party Type:140",
+		_("Posting Date") + ":Date:100", 
+		_("Against Invoice") + (":Link/Purchase Invoice:130" if filters.get("payment_type") == "Outgoing" else ":Link/Sales Invoice:130"),
 		_("Against Invoice Posting Date") + ":Date:130", _("Debit") + ":Currency:120", _("Credit") + ":Currency:120",
 		_("Reference No") + "::100", _("Reference Date") + ":Date:100", _("Remarks") + "::150", _("Age") +":Int:40",
 		"0-30:Currency:100", "30-60:Currency:100", "60-90:Currency:100", _("90-Above") + ":Currency:100"

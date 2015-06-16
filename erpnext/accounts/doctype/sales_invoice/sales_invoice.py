@@ -65,8 +65,7 @@ class SalesInvoice(SellingController):
 		self.set_against_income_account()
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
-		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount",
-			"items")
+		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
 
 	def on_submit(self):
 		super(SalesInvoice, self).on_submit()
