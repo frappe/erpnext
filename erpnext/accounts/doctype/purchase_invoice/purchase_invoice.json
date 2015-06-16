@@ -29,7 +29,8 @@
    "options": "Supplier", 
    "permlevel": 0, 
    "print_hide": 1, 
-   "read_only": 0
+   "read_only": 0, 
+   "search_index": 1
   }, 
   {
    "depends_on": "supplier", 
@@ -112,7 +113,7 @@
    "print_hide": 1, 
    "read_only": 0, 
    "reqd": 0, 
-   "search_index": 1
+   "search_index": 0
   }, 
   {
    "fieldname": "bill_date", 
@@ -125,7 +126,7 @@
    "print_hide": 1, 
    "read_only": 0, 
    "reqd": 0, 
-   "search_index": 1
+   "search_index": 0
   }, 
   {
    "fieldname": "amended_from", 
@@ -151,7 +152,7 @@
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0, 
-   "search_index": 1
+   "search_index": 0
   }, 
   {
    "fieldname": "currency_and_price_list", 
@@ -556,7 +557,7 @@
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 1, 
-   "search_index": 1
+   "search_index": 0
   }, 
   {
    "fieldname": "write_off_amount", 
@@ -733,7 +734,7 @@
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0, 
-   "search_index": 1
+   "search_index": 0
   }, 
   {
    "allow_on_submit": 1, 
@@ -760,7 +761,7 @@
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0, 
-   "search_index": 1
+   "search_index": 0
   }, 
   {
    "fieldname": "mode_of_payment", 
@@ -789,7 +790,7 @@
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0, 
-   "search_index": 1
+   "search_index": 0
   }, 
   {
    "fieldname": "remarks", 
@@ -930,7 +931,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-06-15 15:38:19.220184", 
+ "modified": "2015-06-16 16:46:47.308287", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 
