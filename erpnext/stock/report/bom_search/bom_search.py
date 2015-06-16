@@ -41,7 +41,3 @@ def execute(filters=None):
 		"width": 200,
 		"fieldtype": "Data"
 	}], data
-
-	#print json.dumps(all_boms, indent=1)
-	#columns, data = [], []
-	#return columns, data
