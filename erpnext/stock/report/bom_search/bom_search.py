@@ -6,6 +6,11 @@ import frappe, json
 
 def execute(filters=None):
 	data = []
+	parents = {
+		"Sales BOM Item": "Sales BOM",
+		"BOM Explosion Item": "BOM",
+		"BOM Item": "BOM"
+	}
 
 	for doctype in ("Sales BOM Item",
 		"BOM Explosion Item" if filters.search_sub_assemblies else "BOM Item"):
@@ -21,7 +26,7 @@ def execute(filters=None):
 						valid = False
 
 			if valid:
-				data.append((parent, doctype[:-5]))
+				data.append((parent, parents[doctype]))
 
 	return [{
 		"fieldname": "parent",
