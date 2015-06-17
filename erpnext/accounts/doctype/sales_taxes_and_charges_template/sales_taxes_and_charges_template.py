@@ -6,8 +6,12 @@ import frappe
 from frappe.model.document import Document
 from erpnext.controllers.accounts_controller import validate_taxes_and_charges, validate_inclusive_tax
 from erpnext.utilities.match_address import validate_address_params
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import onload_for_shopping_cart_settings
 
 class SalesTaxesandChargesTemplate(Document):
+	def onload(self):
+		onload_for_shopping_cart_settings(self)
+
 	def validate(self):
 		if self.is_default == 1:
 			frappe.db.sql("""update `tabSales Taxes and Charges Template`

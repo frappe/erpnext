@@ -49,18 +49,6 @@ $.extend(erpnext, {
 		}
 	},
 
-	add_applicable_territory: function() {
-		if(cur_frm.doc.__islocal && (cur_frm.doc.territories || []).length===0) {
-				var default_territory = frappe.defaults.get_user_default("territory");
-				if(default_territory) {
-					var territory = frappe.model.add_child(cur_frm.doc, "Applicable Territory",
-						"territories");
-					territory.territory = default_territory;
-				}
-
-		}
-	},
-
 	setup_serial_no: function() {
 		var grid_row = cur_frm.open_grid_row();
 		if(!grid_row.fields_dict.serial_no ||
@@ -130,6 +118,27 @@ $.extend(erpnext.utils, {
 					new_doc("Contact");
 				}
 			);
+		}
+	},
+	add_to_shopping_cart_settings: function(frm) {
+		frappe.set_intro();
+		if (frm.doc.__onload) {
+			if (frm.doc.__onload.in_shopping_cart) {
+				frappe.set_intro(__("This {0} is used in Shopping Cart", [frm.doc.doctype]))
+			} else {
+				frm.add_custom_button(__("Use in Shopping Cart"), function() {
+					frappe.call({
+						method: "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.add_to_shopping_cart_settings",
+						args: {
+							doctype: frm.doc.doctype,
+							name: frm.doc.name
+						},
+						callback: function(r) {
+							frm.refresh();
+						}
+					});
+				});
+			}
 		}
 	}
 });
