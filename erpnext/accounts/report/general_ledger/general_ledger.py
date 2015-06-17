@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, getdate
+from frappe.utils import flt, getdate, cstr
 from frappe import _
 
 def execute(filters=None):

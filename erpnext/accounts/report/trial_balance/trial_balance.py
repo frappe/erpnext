@@ -90,8 +90,7 @@ def get_rootwise_opening_balances(filters, report_type):
 		where 
 			company=%(company)s
 			{additional_conditions}
-			and (posting_date < %(from_date)s or 
-				(posting_date >= %(from_date)s and ifnull(is_opening, 'No') = 'Yes'))
+			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
 			and account in (select name from `tabAccount` where report_type=%(report_type)s)
 		group by account""".format(additional_conditions=additional_conditions),
 		{
