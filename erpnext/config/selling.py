@@ -240,6 +240,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "BOM Search",
+					"doctype": "BOM"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Customers Not Buying Since Long Time",
 					"doctype": "Sales Order"
 				},
