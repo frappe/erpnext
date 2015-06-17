@@ -26,7 +26,8 @@ class NamingSeries(Document):
 			except frappe.DoesNotExistError:
 				continue
 
-			prefixes = prefixes + "\n" + options
+			if options:
+				prefixes = prefixes + "\n" + options
 
 		prefixes.replace("\n\n", "\n")
 		prefixes = "\n".join(sorted(prefixes.split()))
