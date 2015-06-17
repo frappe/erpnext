@@ -90,7 +90,7 @@ def get_rootwise_opening_balances(filters, report_type):
 		where 
 			company=%(company)s
 			{additional_conditions}
-			and posting_date < %(from_date)s
+			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
 			and account in (select name from `tabAccount` where report_type=%(report_type)s)
 		group by account""".format(additional_conditions=additional_conditions),
 		{
@@ -128,16 +128,21 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters)
 	for d in accounts:
 		d.update(init.copy())
 
+		# add opening
+		d["opening_debit"] = opening_balances.get(d.name, {}).get("opening_debit", 0)
+		d["opening_credit"] = opening_balances.get(d.name, {}).get("opening_credit", 0)
+
 		for entry in gl_entries_by_account.get(d.name, []):
-			d["debit"] += flt(entry.debit)
-			d["credit"] += flt(entry.credit)
+			if entry.is_opening == "Yes" and d.root_type in ("Asset", "Liability", "Equity"):
+				d["opening_debit"] += flt(entry.debit)
+				d["opening_credit"] += flt(entry.credit)
+			else:
+				d["debit"] += flt(entry.debit)
+				d["credit"] += flt(entry.credit)
 
 		total_row["debit"] += d["debit"]
 		total_row["credit"] += d["credit"]
 		
-		# add opening
-		d["opening_debit"] = opening_balances.get(d.name, {}).get("opening_debit", 0)
-		d["opening_credit"] = opening_balances.get(d.name, {}).get("opening_credit", 0)
 
 	return total_row
 

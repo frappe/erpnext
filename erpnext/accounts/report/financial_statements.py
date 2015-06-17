@@ -210,7 +210,7 @@ def get_gl_entries(company, from_date, to_date, root_lft, root_rgt, ignore_closi
 	if from_date:
 		additional_conditions.append("and posting_date >= %(from_date)s")
 
-	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit from `tabGL Entry`
+	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening from `tabGL Entry`
 		where company=%(company)s
 		{additional_conditions}
 		and posting_date <= %(to_date)s
