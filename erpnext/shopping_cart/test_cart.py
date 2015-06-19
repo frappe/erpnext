@@ -26,6 +26,10 @@ def enable_shopping_cart():
 	settings.default_customer_group = "_Test Customer Group"
 	settings.quotation_series = "_T-Cart-"
 
+	settings.set("countries", [
+		{"country": "United States"},
+		{"country": "India"}
+	])
 	settings.set("price_lists", [
 		{"selling_price_list": _name("Price List", "INR")},
 		{"selling_price_list": _name("Price List", "USD")},
@@ -39,7 +43,6 @@ def enable_shopping_cart():
 		{"shipping_rule": _name("Shipping Rule", "Rest of the World")},
 	])
 
-	# TODO is this field needed?
 	settings.default_territory = "Rest of the World"
 
 	settings.enabled = 1
@@ -56,6 +59,10 @@ def make_items():
 
 		item = frappe.new_doc("Item")
 		item.item_code = item_code
+		item.item_name = item_code
+		item.description = item_code
+		item.default_warehouse = "_Test Warehouse - _TC"
+		item.item_group = "_Test Item Group"
 		item.insert()
 
 def make_price_lists():
@@ -70,6 +77,7 @@ def _make_price_list(price_list_name, currency, exchange_rate, params):
 	price_list = frappe.new_doc("Price List")
 	price_list.price_list_name = price_list_name
 	price_list.currency = currency
+	price_list.selling = 1
 	price_list.update(params)
 	price_list.insert()
 
@@ -90,7 +98,7 @@ def make_tax_templates():
 
 def _make_tax_template(params, taxes):
 	doctype = "Sales Taxes and Charges Template"
-	tax_template_name = _name("Tax Template", params["if_address_matches"])
+	tax_template_name = params.get("title") or _name("Tax Template", params["if_address_matches"])
 	if frappe.db.exists(doctype, tax_template_name):
 		return
 

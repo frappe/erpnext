@@ -5,7 +5,7 @@
   "company": "_Test Company",
   "cost_center": "_Test Cost Center - _TC",
   "doctype": "Shipping Rule",
-  "label": "_Test Shipping Rule",
+  "title": "_Test Shipping Rule",
   "name": "_Test Shipping Rule",
   "conditions": [
    {
@@ -37,7 +37,7 @@
   "company": "_Test Company",
   "cost_center": "_Test Cost Center - _TC",
   "doctype": "Shipping Rule",
-  "label": "_Test Shipping Rule - India",
+  "title": "_Test Shipping Rule - India",
   "name": "_Test Shipping Rule - India",
   "conditions": [
    {
@@ -70,7 +70,7 @@
   "company": "_Test Company",
   "cost_center": "_Test Cost Center - _TC",
   "doctype": "Shipping Rule",
-  "label": "_Test Shipping Rule - Rest of the World",
+  "title": "_Test Shipping Rule - Rest of the World",
   "name": "_Test Shipping Rule - Rest of the World",
   "conditions": [
    {

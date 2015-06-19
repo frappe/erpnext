@@ -130,6 +130,6 @@
    }
   ],
   "title": "_Test Sales Taxes and Charges Template - Rest of the World",
-  "if_address_matches": "Rest of the World",
+  "if_address_matches": "Rest of the World"
  }
 ]

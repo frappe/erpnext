@@ -6,10 +6,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import cint
 from frappe.model.document import Document
-from erpnext.utilities.match_address import prepare_filters
+from erpnext.utilities.match_address import prepare_filters, validate_unique_combinations
 
-class ShoppingCartSetupError(frappe.ValidationError): pass
 class DocumentNotFoundForCountryError(frappe.ValidationError): pass
 class MissingCurrencyExchangeError(frappe.ValidationError): pass
 
@@ -45,10 +45,12 @@ class ShoppingCartSettings(Document):
 	def validate_price_lists(self):
 		self.deduplicate("Price List")
 		self.validate_for_countries("Price List")
+		self.validate_unique_combinations("Price List")
 
 	def validate_tax_templates(self):
 		self.deduplicate("Sales Taxes and Charges Template")
 		self.validate_for_countries("Sales Taxes and Charges Template")
+		self.validate_unique_combinations("Sales Taxes and Charges Template")
 
 	def validate_shipping_rules(self):
 		self.deduplicate("Shipping Rule")
@@ -142,8 +144,23 @@ class ShoppingCartSettings(Document):
 			if not (home_country and rest_of_the_world):
 				frappe.throw(_("Please select a '{0}' which has 'If Address Matches' as 'Any Country'").format(doctype), DocumentNotFoundForCountryError)
 
+	def validate_unique_combinations(self, doctype):
+		table_fieldname = self.doctype_fieldnames[doctype]["table_fieldname"]
+		link_fieldname = self.doctype_fieldnames[doctype]["link_fieldname"]
+		names = [d.get(link_fieldname) for d in self.get(table_fieldname)]
+		for name in names:
+			doc = frappe.get_doc(doctype, name)
+
+			# we determine other_names because "name" != current_name filter is being replaced in validate_unique_combinations queries
+			other_names = [n for n in names if n!=name]
+
+			validate_unique_combinations(doc, additional_filters={"name": ("in", other_names)})
+
 def validate_cart_settings(doc, method):
 	frappe.get_doc("Shopping Cart Settings", "Shopping Cart Settings").run_method("validate")
+
+def is_cart_enabled():
+	return cint(frappe.db.get_value("Shopping Cart Settings", "Shopping Cart Settings", "enabled"))
 
 @frappe.whitelist()
 def add_to_shopping_cart_settings(doctype, name):

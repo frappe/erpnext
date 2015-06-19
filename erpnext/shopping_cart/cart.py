@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, cint
 from erpnext.selling.doctype.quotation.quotation import Quotation
 from erpnext.utilities.doctype.contact.contact import get_contact_details
 from erpnext.utilities.doctype.address.address import get_address_display
@@ -47,8 +47,16 @@ class ShoppingCart:
 			self.check_permission()
 
 	def save(self):
-		self.apply_cart_settings()
+		self.validate()
 		self.doc.save(ignore_permissions=True)
+
+	def validate(self):
+		# validate show in website
+		for item in self.doc.get("items"):
+			if not cint(frappe.db.get_value("Item", item.item_code, "show_in_website")):
+				frappe.throw(_("Item '{0}' is not available for Shopping Cart").format(item.item_name))
+
+		self.apply_cart_settings()
 
 	def get_quotation(self, quotation=None):
 		if quotation:

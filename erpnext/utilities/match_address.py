@@ -21,8 +21,9 @@ import re
 def validate_address_params(doc, unique=True):
 	validate_postal_code_pattern(doc)
 
-	if unique:
-		validate_unique_combinations(doc)
+	# TODO instead of blocking because of uniqueness requirement, ask in pop-up which one do you want
+	# if unique:
+	# 	validate_unique_combinations(doc)
 
 def validate_postal_code_pattern(doc):
 	value = doc.postal_code_pattern
@@ -41,7 +42,9 @@ def validate_postal_code_pattern(doc):
 	# set the stripped and uppercase value or None
 	doc.postal_code_pattern = value or None
 
-def validate_unique_combinations(doc):
+def validate_unique_combinations(doc, additional_filters=None):
+	"""Check if there are any overlaps in conditions for auto-selection"""
+
 	if doc.if_address_matches == "Country, State, Postal Code Pattern":
 		doc.postal_code_pattern = doc.postal_code_pattern and strip(doc.postal_code_pattern) or None
 
@@ -52,10 +55,12 @@ def validate_unique_combinations(doc):
 					"country": doc.country,
 					"postal_code_pattern": doc.postal_code_pattern,
 					"name": ("!=", doc.name)
-				}))
+				}, additional_filters=additional_filters))
 			if match_country_postal_code:
-				frappe.throw(_("Another {0} exists for the combination of {1} and {2}")\
-					.format(doc.doctype, doc.country, doc.postal_code_pattern), frappe.DuplicateEntryError)
+				match_country_postal_code = [d.name for d in match_country_postal_code]
+				frappe.throw(_("Another {0} exists for the combination of {1} and {2}: {3}")\
+					.format(doc.doctype, doc.country, doc.postal_code_pattern, ", ".join(match_country_postal_code)),
+					frappe.DuplicateEntryError)
 
 		# 2 - unique country - state combination
 		elif doc.country and doc.state:
@@ -64,10 +69,12 @@ def validate_unique_combinations(doc):
 					"country": doc.country,
 					"state": doc.state,
 					"name": ("!=", doc.name)
-				}))
+				}, additional_filters=additional_filters))
 			if match_country_state:
-				frappe.throw(_("Another {0} exists for the combination of {1} and {2}")\
-					.format(doc.doctype, doc.country, doc.state), frappe.DuplicateEntryError)
+				match_country_state = [d.name for d in match_country_state]
+				frappe.throw(_("Another {0} exists for the combination of {1} and {2}: {3}")\
+					.format(doc.doctype, doc.country, doc.state, ", ".join(match_country_state)),
+					frappe.DuplicateEntryError)
 
 		# 3 - unique country
 		else:
@@ -77,17 +84,24 @@ def validate_unique_combinations(doc):
 					"state": ("in", ("", None)),
 					"postal_code_pattern": ("in", ("", None)),
 					"name": ("!=", doc.name)
-				}))
+				}, additional_filters=additional_filters))
 			if match_country:
-				frappe.throw(_("Another {0} exists for {1}").format(doc.doctype, doc.country), frappe.DuplicateEntryError)
+				match_country = [d.name for d in match_country]
+				frappe.throw(_("Another {0} exists for {1}: {2}")\
+					.format(doc.doctype, doc.country, ", ".join(match_country)),
+					frappe.DuplicateEntryError)
 
 	else:
-		if frappe.get_all(doc.doctype,
+		match_rest = frappe.get_all(doc.doctype,
 			filters=prepare_filters(doc.doctype, doc.get("company"), {
 				"if_address_matches": doc.if_address_matches,
 				"name": ("!=", doc.name)
-			})):
-			frappe.throw(_("Another {0} exists for Address Matching with {1}").format(doc.doctype, doc.if_address_matches), frappe.DuplicateEntryError)
+			}, additional_filters=additional_filters))
+		if match_rest:
+			match_rest = [d.name for d in match_rest]
+			frappe.throw(_("Another {0} exists for Address Matching with {1}: {2}")\
+				.format(doc.doctype, doc.if_address_matches, ", ".join(match_rest)),
+				frappe.DuplicateEntryError)
 
 
 def get_all_from_address(doctype, company, address):
@@ -172,7 +186,7 @@ def match_rest_of_the_cases(doctype, company, address):
 		or (address.country!=home_country and _get("Rest of the World"))
 		or _get("Any Country"))
 
-def prepare_filters(doctype, company, filters):
+def prepare_filters(doctype, company, filters, additional_filters=None):
 	meta = frappe.get_meta(doctype)
 	if meta.get_field("enabled"):
 		filters["enabled"] = 1
@@ -181,5 +195,8 @@ def prepare_filters(doctype, company, filters):
 
 	if meta.get_field("company"):
 		filters["company"] = company
+
+	if additional_filters:
+		filters.update(additional_filters)
 
 	return filters
