@@ -183,5 +183,3 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 		cur_frm.email_doc(frappe.boot.notification_settings.sales_order_message);
 	}
 };
-
-;
