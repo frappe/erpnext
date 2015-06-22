@@ -235,9 +235,7 @@ class SalesInvoice(SellingController):
 			reconcile_against_document(lst)
 
 	def validate_debit_to_acc(self):
-		root_type, account_type = frappe.db.get_value("Account", self.debit_to, ["root_type", "account_type"])
-		if root_type != "Asset":
-			frappe.throw(_("Debit To account must be a liability account"))
+		account_type = frappe.db.get_value("Account", self.debit_to, "account_type")
 		if account_type != "Receivable":
 			frappe.throw(_("Debit To account must be a Receivable account"))
 
