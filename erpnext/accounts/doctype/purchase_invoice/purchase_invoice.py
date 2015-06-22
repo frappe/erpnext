@@ -88,9 +88,7 @@ class PurchaseInvoice(BuyingController):
 			throw(_("Conversion rate cannot be 0 or 1"))
 
 	def validate_credit_to_acc(self):
-		root_type, account_type = frappe.db.get_value("Account", self.credit_to, ["root_type", "account_type"])
-		if root_type != "Liability":
-			frappe.throw(_("Credit To account must be a liability account"))
+		account_type = frappe.db.get_value("Account", self.credit_to, "account_type")
 		if account_type != "Payable":
 			frappe.throw(_("Credit To account must be a Payable account"))
 
