@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import flt, fmt_money, getdate, formatdate
+from frappe.utils import flt, fmt_money, getdate, formatdate, cstr
 from frappe import _
 
 from frappe.model.document import Document
@@ -118,7 +118,7 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 	bal = flt(frappe.db.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 		from `tabGL Entry`
 		where against_voucher_type=%s and against_voucher=%s
-		and account = %s and party_type=%s and party=%s""",
+		and account = %s and ifnull(party_type, '')=%s and ifnull(party, '')=%s""",
 		(against_voucher_type, against_voucher, account, party_type, party))[0][0] or 0.0)
 
 	if against_voucher_type == 'Purchase Invoice':
@@ -127,8 +127,9 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 		against_voucher_amount = flt(frappe.db.sql("""
 			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 			from `tabGL Entry` where voucher_type = 'Journal Entry' and voucher_no = %s
-			and account = %s and party_type=%s and party=%s and ifnull(against_voucher, '') = ''""",
-			(against_voucher, account, party_type, party))[0][0])
+			and account = %s and ifnull(party_type, '')=%s and ifnull(party, '')=%s 
+			and ifnull(against_voucher, '') = ''""",
+			(against_voucher, account, cstr(party_type), cstr(party)))[0][0])
 
 		if not against_voucher_amount:
 			frappe.throw(_("Against Journal Entry {0} is already adjusted against some other voucher")

@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, cstr
+from frappe.utils import flt, cstr, cint
 from frappe import _
 from frappe.model.meta import get_field_precision
 from erpnext.accounts.utils import validate_expense_against_budget
