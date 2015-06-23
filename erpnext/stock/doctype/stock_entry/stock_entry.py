@@ -359,8 +359,11 @@ class StockEntry(StockController):
 		if self.purpose == "Subcontract" and self.purchase_order:
 			purchase_order = frappe.get_doc("Purchase Order", self.purchase_order)
 			for se_item in self.items:
-				total_allowed = [d.required_qty for d in purchase_order.supplied_items \
-					if d.rm_item_code == se_item.item_code][0]
+				total_allowed = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
+					if d.rm_item_code == se_item.item_code])
+				if not total_allowed:
+					frappe.throw(_("Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1}")
+						.format(se_item.item_code, self.purchase_order))
 				total_supplied = frappe.db.sql("""select sum(qty)
 					from `tabStock Entry Detail`, `tabStock Entry`
 					where `tabStock Entry`.purchase_order = %s
