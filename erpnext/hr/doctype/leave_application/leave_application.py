@@ -339,6 +339,7 @@ def add_block_dates(events, start, end, employee, company):
 		events.append({
 			"doctype": "Leave Block List Date",
 			"from_date": block_date.block_date,
+			"to_date": block_date.block_date,
 			"title": _("Leave Blocked") + ": " + block_date.reason,
 			"name": "_" + str(cnt),
 		})
@@ -355,6 +356,7 @@ def add_holidays(events, start, end, employee, company):
 			events.append({
 				"doctype": "Holiday",
 				"from_date": holiday.holiday_date,
+				"to_date":  holiday.holiday_date,
 				"title": _("Holiday") + ": " + cstr(holiday.description),
 				"name": holiday.name
 			})

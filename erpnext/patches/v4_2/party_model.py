@@ -30,8 +30,8 @@ def create_receivable_payable_account():
 			
 				account_id = account.name
 			
-				frappe.db.set_value("Company", args["company"], ("default_receivable_account"
-					if args["account_type"]=="Receivable" else "default_payable_account"), account_id)
+			frappe.db.set_value("Company", args["company"], ("default_receivable_account"
+				if args["account_type"]=="Receivable" else "default_payable_account"), account_id)
 
 			receivable_payable_accounts.setdefault(args["company"], {}).setdefault(args["account_type"], account_id)
 

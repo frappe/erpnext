@@ -274,30 +274,28 @@ class JournalEntry(AccountsController):
 				r.append(_('Reference #{0} dated {1}').format(self.cheque_no, formatdate(self.cheque_date)))
 			else:
 				msgprint(_("Please enter Reference date"), raise_exception=frappe.MandatoryError)
-
+				
+		company_currency = get_company_currency(self.company)
+		
 		for d in self.get('accounts'):
 			if d.against_invoice and d.credit:
-				currency = frappe.db.get_value("Sales Invoice", d.against_invoice, "currency")
-
-				r.append(_("{0} against Sales Invoice {1}").format(fmt_money(flt(d.credit), currency = currency), \
+				r.append(_("{0} against Sales Invoice {1}").format(fmt_money(flt(d.credit), currency = company_currency), \
 					d.against_invoice))
 
 			if d.against_sales_order and d.credit:
-				currency = frappe.db.get_value("Sales Order", d.against_sales_order, "currency")
-				r.append(_("{0} against Sales Order {1}").format(fmt_money(flt(d.credit), currency = currency), \
+				r.append(_("{0} against Sales Order {1}").format(fmt_money(flt(d.credit), currency = company_currency), \
 					d.against_sales_order))
 
 			if d.against_voucher and d.debit:
-				bill_no = frappe.db.sql("""select bill_no, bill_date, currency
+				bill_no = frappe.db.sql("""select bill_no, bill_date
 					from `tabPurchase Invoice` where name=%s""", d.against_voucher)
 				if bill_no and bill_no[0][0] and bill_no[0][0].lower().strip() \
 						not in ['na', 'not applicable', 'none']:
-					r.append(_('{0} against Bill {1} dated {2}').format(fmt_money(flt(d.debit), currency=bill_no[0][2]), bill_no[0][0],
+					r.append(_('{0} against Bill {1} dated {2}').format(fmt_money(flt(d.debit), currency=company_currency), bill_no[0][0],
 						bill_no[0][1] and formatdate(bill_no[0][1].strftime('%Y-%m-%d'))))
 
 			if d.against_purchase_order and d.debit:
-				currency = frappe.db.get_value("Purchase Order", d.against_purchase_order, "currency")
-				r.append(_("{0} against Purchase Order {1}").format(fmt_money(flt(d.credit), currency = currency), \
+				r.append(_("{0} against Purchase Order {1}").format(fmt_money(flt(d.credit), currency = company_currency), \
 					d.against_purchase_order))
 
 		if self.user_remark:
