@@ -42,6 +42,15 @@
    "precision": ""
   }, 
   {
+   "default": "BOM", 
+   "fieldname": "update_fg_based_on", 
+   "fieldtype": "Select", 
+   "label": "Update FG Based On", 
+   "options": "BOM\nMaterial Transfer for Manufacture", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "column_break_3", 
    "fieldtype": "Column Break", 
    "permlevel": 0, 
@@ -79,7 +88,7 @@
  "in_dialog": 0, 
  "is_submittable": 0, 
  "issingle": 1, 
- "istable": 0, 
+ "istable": 0,
  "modified": "2015-07-23 08:12:33.889753", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
