@@ -551,6 +551,12 @@ class StockEntry(StockController):
 					if self.to_warehouse and self.pro_doc:
 						for item in item_dict.values():
 							item["to_warehouse"] = self.pro_doc.wip_warehouse
+					self.add_to_stock_entry_detail(item_dict)
+					
+				elif self.production_order and self.purpose == "Manufacture" and \
+					frappe.db.get_single_value("Manufacturing Settings", "update_fg_based_on")== "Material Transfer for Manufacture":
+					self.get_transfered_raw_materials()
+
 				else:
 					if not self.fg_completed_qty:
 						frappe.throw(_("Manufacturing Quantity is mandatory"))
@@ -561,9 +567,7 @@ class StockEntry(StockController):
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
 
 						item["to_warehouse"] = self.to_warehouse if self.purpose=="Subcontract" else ""
-
-				# add raw materials to Stock Entry Detail table
-				self.add_to_stock_entry_detail(item_dict)
+					self.add_to_stock_entry_detail(item_dict)
 
 			# add finished goods item
 			if self.purpose in ("Manufacture", "Repack"):
@@ -604,8 +608,27 @@ class StockEntry(StockController):
 
 		for item in item_dict.values():
 			item.from_warehouse = self.from_warehouse or item.default_warehouse
-
 		return item_dict
+		
+	def get_transfered_raw_materials(self):
+		items_dict = frappe.db.sql("""select item_name, item_code, sum(qty) as qty, to_warehouse, from_warehouse,
+			description, stock_uom, expense_account, cost_center from `tabStock Entry` se,`tabStock Entry Detail` sed 
+			where se.name = sed.parent and se.docstatus=1 and se.purpose='Material Transfer for Manufacture' and 
+			se.production_order= %s and se.to_warehouse= %s group by sed.item_code;""", 
+			(self.production_order, self.from_warehouse), as_dict=1)
+		for item in items_dict:
+			self.add_to_stock_entry_detail({
+				item.item_code: {
+					"to_warehouse": item.to_warehouse,
+					"from_warehouse": item.from_warehouse,
+					"qty": item.qty,
+					"item_name": item.item_name,
+					"description": item.description,
+					"stock_uom": item.stock_uom,
+					"expense_account": item.expense_account,
+					"cost_center": item.buying_cost_center,
+				}
+			})
 
 	def get_pending_raw_materials(self):
 		"""
