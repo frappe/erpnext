@@ -36,7 +36,7 @@ def get_items(price_list, sales_or_purchase, item=None):
 			if(locate(%(_name)s, i.item_name), locate(%(_name)s, i.item_name), 99999),
 			if(locate(%(_name)s, i.variant_of), locate(%(_name)s, i.variant_of), 99999),
 			if(locate(%(_name)s, i.item_group), locate(%(_name)s, i.item_group), 99999),"""
-		args["name"] = "%%%s%%" % item
+		args["name"] = "%%%s%%" % frappe.db.escape(item)
 		args["_name"] = item.replace("%", "")
 
 	# locate function is used to sort by closest match from the beginning of the value

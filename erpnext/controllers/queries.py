@@ -194,7 +194,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 			and tabBOM.is_active=1
 			and tabBOM.%(key)s like "%(txt)s"
 			%(fcond)s  %(mcond)s
-		limit %(start)s, %(page_len)s """ %  {'key': searchfield, 'txt': "%%%s%%" % txt,
+		limit %(start)s, %(page_len)s """ %  {'key': searchfield, 'txt': "%%%s%%" % frappe.db.escape(txt),
 		'fcond': get_filters_cond(doctype, filters, conditions),
 		'mcond':get_match_cond(doctype), 'start': start, 'page_len': page_len})
 
@@ -207,7 +207,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 		where `tabProject`.status not in ("Completed", "Cancelled")
 			and %(cond)s `tabProject`.name like "%(txt)s" %(mcond)s
 		order by `tabProject`.name asc
-		limit %(start)s, %(page_len)s """ % {'cond': cond,'txt': "%%%s%%" % txt,
+		limit %(start)s, %(page_len)s """ % {'cond': cond,'txt': "%%%s%%" % frappe.db.escape(txt),
 		'mcond':get_match_cond(doctype),'start': start, 'page_len': page_len})
 
 def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters):
