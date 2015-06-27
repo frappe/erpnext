@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.defaults
 
-from frappe.utils import cstr, cint, flt, comma_or, get_datetime
+from frappe.utils import cstr, cint, flt, comma_or, get_datetime, getdate
 
 from frappe import _
 from erpnext.stock.utils import get_incoming_rate
@@ -66,6 +66,7 @@ class StockEntry(StockController):
 		self.validate_valuation_rate()
 		self.set_total_incoming_outgoing_value()
 		self.set_total_amount()
+		self.validate_batch()
 
 	def on_submit(self):
 		self.update_stock_ledger()
@@ -359,8 +360,11 @@ class StockEntry(StockController):
 		if self.purpose == "Subcontract" and self.purchase_order:
 			purchase_order = frappe.get_doc("Purchase Order", self.purchase_order)
 			for se_item in self.items:
-				total_allowed = [d.required_qty for d in purchase_order.supplied_items \
-					if d.rm_item_code == se_item.item_code][0]
+				total_allowed = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
+					if d.rm_item_code == se_item.item_code])
+				if not total_allowed:
+					frappe.throw(_("Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1}")
+						.format(se_item.item_code, self.purchase_order))
 				total_supplied = frappe.db.sql("""select sum(qty)
 					from `tabStock Entry Detail`, `tabStock Entry`
 					where `tabStock Entry`.purchase_order = %s
@@ -721,6 +725,13 @@ class StockEntry(StockController):
 				mreq_item.warehouse != (item.s_warehouse if self.purpose== "Material Issue" else item.t_warehouse):
 					frappe.throw(_("Item or Warehouse for row {0} does not match Material Request").format(item.idx),
 						frappe.MappingMismatchError)
+						
+	def validate_batch(self):
+		if self.purpose == "Material Transfer for Manufacture":
+			for item in self.get("items"):
+				if item.batch_no:
+					if getdate(self.posting_date) > getdate(frappe.db.get_value("Batch", item.batch_no, "expiry_date")):
+						frappe.throw(_("Batch {0} of Item {1} has expired.").format(item.batch_no, item.item_code))
 
 @frappe.whitelist()
 def get_party_details(ref_dt, ref_dn):
