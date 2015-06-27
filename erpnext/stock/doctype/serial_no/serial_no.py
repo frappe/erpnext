@@ -180,7 +180,7 @@ class SerialNo(StockController):
 			where fieldname='serial_no' and fieldtype='Text'"""):
 
 			for item in frappe.db.sql("""select name, serial_no from `tab%s`
-				where serial_no like '%%%s%%'""" % (dt[0], old)):
+				where serial_no like '%%%s%%'""" % (dt[0], frappe.db.escape(old))):
 
 				serial_nos = map(lambda i: i==old and new or i, item[1].split('\n'))
 				frappe.db.sql("""update `tab%s` set serial_no = %s
