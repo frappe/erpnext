@@ -22,16 +22,21 @@ class TransactionBase(StatusUpdater):
 			self.posting_time = now_datetime().strftime('%H:%M:%S')
 
 	def add_calendar_event(self, opts, force=False):
-		if self.contact_by != cstr(self._prev.contact_by) or \
-				self.contact_date != cstr(self._prev.contact_date) or force:
+		if cstr(self.contact_by) != cstr(self._prev.contact_by) or \
+				cstr(self.contact_date) != cstr(self._prev.contact_date) or force:
 
 			self.delete_events()
 			self._add_calendar_event(opts)
 
 	def delete_events(self):
-		frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent`
-			where ref_type=%s and ref_name=%s""", (self.doctype, self.name)),
-			ignore_permissions=True)
+		events = frappe.db.sql_list("""select name from `tabEvent`
+			where ref_type=%s and ref_name=%s""", (self.doctype, self.name))
+		if events:
+			frappe.db.sql("delete from `tabEvent` where name in (%s)"
+				.format(", ".join(['%s']*len(events))), tuple(events))
+				
+			frappe.db.sql("delete from `tabEvent Role` where parent in (%s)"
+				.format(", ".join(['%s']*len(events))), tuple(events))
 
 	def _add_calendar_event(self, opts):
 		opts = frappe._dict(opts)
