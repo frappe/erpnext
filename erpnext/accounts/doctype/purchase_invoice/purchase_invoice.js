@@ -224,3 +224,4 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 	else
 		cur_frm.pformat.print_heading = __("Purchase Invoice");
 }
+

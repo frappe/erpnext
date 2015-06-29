@@ -37,6 +37,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(this.frm.fields_dict["items"]) {
 			this["items_remove"] = this.calculate_taxes_and_totals;
 		}
+		
+		if(this.frm.fields_dict["recurring_print_format"]) {
+			this.frm.set_query("recurring_print_format", function(doc) {
+				return{
+					filters: [
+						['Print Format', 'doc_type', '=', cur_frm.doctype],
+					]
+				}
+			});
+		}
 	},
 
 	onload_post_render: function() {
@@ -782,3 +792,5 @@ frappe.ui.form.on(cur_frm.doctype, "discount_amount", function(frm) {
 	cur_frm.cscript.set_dynamic_labels();
 	cur_frm.cscript.calculate_taxes_and_totals();
 })
+
+
