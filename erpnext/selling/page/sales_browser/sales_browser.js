@@ -122,7 +122,7 @@ erpnext.SalesChart = Class.extend({
 
 		if(me.ctype == "Sales Person") {
 			fields.splice(-1, 0, {fieldtype:'Link', fieldname:'employee', label:__('Employee'),
-				options:'Employee', description: __("Please enter Employee Id of this sales parson")});
+				options:'Employee', description: __("Please enter Employee Id of this sales person")});
 		}
 
 		// the dialog
