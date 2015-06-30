@@ -60,20 +60,21 @@ def before_tests():
 
 @frappe.whitelist()
 def get_exchange_rate(from_currency, to_currency):
-	jsonrates_api_key = frappe.conf.jsonrates_api_key or frappe.db.get_default("jsonrates_api_key")
-
-	if jsonrates_api_key:
+	try:
 		cache = frappe.cache()
 		key = "currency_exchange_rate:{0}:{1}".format(from_currency, to_currency)
 		value = cache.get(key)
 		if not value:
 			import requests
-			response = requests.get("http://jsonrates.com/get/?from={0}&to={1}&apiKey={2}".format(from_currency,
-				to_currency, jsonrates_api_key))
+			response = requests.get("http://api.fixer.io/latest", params={
+				"base": from_currency,
+				"symbols": to_currency
+			})
 			# expire in 24 hours
-			value = response.json().get("rate")
+			response.raise_for_status()
+			value = response.json()["rates"][to_currency]
 			cache.setex(key, value, 24 * 60 * 60)
 		return flt(value)
-	else:
+	except:
 		exchange = "%s-%s" % (from_currency, to_currency)
 		return flt(frappe.db.get_value("Currency Exchange", exchange, "exchange_rate"))
