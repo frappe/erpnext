@@ -5,6 +5,7 @@ frappe.ui.form.on("Manage Variants", {
 	onload: function(frm) {
 		var df = frappe.meta.get_docfield("Variant Attribute", "attribute_value");
 		df.on_make = function(field) {
+			$(field.input_area).addClass("ui-front");
 			field.$input.autocomplete({
 				minLength: 0,
 				minChars: 0,
