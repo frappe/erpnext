@@ -18,6 +18,13 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "section_break_2", 
+   "fieldtype": "Section Break", 
+   "label": "Item Variant Attributes", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "allow_on_submit": 0, 
    "fieldname": "attributes", 
    "fieldtype": "Table", 
@@ -48,6 +55,7 @@
   {
    "fieldname": "section_break_4", 
    "fieldtype": "Section Break", 
+   "label": "Item Variants", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -55,7 +63,7 @@
    "fieldname": "variants", 
    "fieldtype": "Table", 
    "label": "Variants", 
-   "options": "Variant Item", 
+   "options": "Manage Variants Item", 
    "permlevel": 0, 
    "precision": ""
   }
@@ -67,7 +75,7 @@
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
- "modified": "2015-05-28 06:18:03.238411", 
+ "modified": "2015-06-30 03:18:13.787883", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Manage Variants", 

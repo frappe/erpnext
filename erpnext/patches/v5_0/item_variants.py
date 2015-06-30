@@ -9,3 +9,4 @@ def execute():
 			from `tabItem Variant` where parent = %s", d.name, as_dict=1)
 		manage_variant.generate_combinations()
 		manage_variant.create_variants()
+	frappe.delete_doc("doctype", "Item Variant")
