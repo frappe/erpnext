@@ -35,6 +35,7 @@ class Project(Document):
 	def validate(self):
 		self.validate_dates()
 		self.sync_tasks()
+		self.tasks = []
 
 	def validate_dates(self):
 		if self.expected_start_date and self.expected_end_date:
@@ -69,8 +70,6 @@ class Project(Document):
 		# delete
 		for t in frappe.get_all("Task", ["name"], {"project": self.name, "name": ("not in", task_names)}):
 			frappe.delete_doc("Task", t.name)
-
-		self.tasks = []
 
 	def update_percent_complete(self):
 		total = frappe.db.sql("""select count(*) from tabTask where project=%s""",
