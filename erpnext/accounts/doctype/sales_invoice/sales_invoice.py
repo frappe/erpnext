@@ -503,7 +503,7 @@ class SalesInvoice(SellingController):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
-						"against": self.debit_to,
+						"against": self.customer,
 						"credit": flt(tax.base_tax_amount_after_discount_amount),
 						"remarks": self.remarks,
 						"cost_center": tax.cost_center
@@ -517,7 +517,7 @@ class SalesInvoice(SellingController):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.income_account,
-						"against": self.debit_to,
+						"against": self.customer,
 						"credit": item.base_net_amount,
 						"remarks": self.remarks,
 						"cost_center": item.cost_center
@@ -548,7 +548,7 @@ class SalesInvoice(SellingController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.cash_bank_account,
-					"against": self.debit_to,
+					"against": self.customer,
 					"debit": self.paid_amount,
 					"remarks": self.remarks,
 				})
@@ -572,7 +572,7 @@ class SalesInvoice(SellingController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.write_off_account,
-					"against": self.debit_to,
+					"against": self.customer,
 					"debit": self.write_off_amount,
 					"remarks": self.remarks,
 					"cost_center": self.write_off_cost_center
@@ -587,7 +587,7 @@ def get_list_context(context=None):
 
 @frappe.whitelist()
 def get_bank_cash_account(mode_of_payment, company):
-	account = frappe.db.get_value("Mode of Payment Account", 
+	account = frappe.db.get_value("Mode of Payment Account",
 		{"parent": mode_of_payment, "company": company}, "default_account")
 	if not account:
 		frappe.msgprint(_("Please set default Cash or Bank account in Mode of Payment {0}").format(mode_of_payment))

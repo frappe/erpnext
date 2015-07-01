@@ -81,7 +81,7 @@ class JournalEntry(AccountsController):
 				frappe.throw(_("Row {0}: Party Type and Party is only applicable against Receivable / Payable account").format(d.idx))
 
 	def check_credit_limit(self):
-		customers = list(set([d.party for d in self.get("accounts") 
+		customers = list(set([d.party for d in self.get("accounts")
 			if d.party_type=="Customer" and d.party and flt(d.debit) > 0]))
 		if customers:
 			from erpnext.selling.doctype.customer.customer import check_credit_limit
@@ -243,8 +243,8 @@ class JournalEntry(AccountsController):
 	def set_against_account(self):
 		accounts_debited, accounts_credited = [], []
 		for d in self.get("accounts"):
-			if flt(d.debit > 0): accounts_debited.append(d.account)
-			if flt(d.credit) > 0: accounts_credited.append(d.account)
+			if flt(d.debit > 0): accounts_debited.append(d.party or d.account)
+			if flt(d.credit) > 0: accounts_credited.append(d.party or d.account)
 
 		for d in self.get("accounts"):
 			if flt(d.debit > 0): d.against_account = ", ".join(list(set(accounts_credited)))
@@ -274,9 +274,9 @@ class JournalEntry(AccountsController):
 				r.append(_('Reference #{0} dated {1}').format(self.cheque_no, formatdate(self.cheque_date)))
 			else:
 				msgprint(_("Please enter Reference date"), raise_exception=frappe.MandatoryError)
-				
+
 		company_currency = get_company_currency(self.company)
-		
+
 		for d in self.get('accounts'):
 			if d.against_invoice and d.credit:
 				r.append(_("{0} against Sales Invoice {1}").format(fmt_money(flt(d.credit), currency = company_currency), \
@@ -426,7 +426,7 @@ class JournalEntry(AccountsController):
 	def validate_expense_claim(self):
 		for d in self.accounts:
 			if d.against_expense_claim:
-				sanctioned_amount, reimbursed_amount = frappe.db.get_value("Expense Claim", 
+				sanctioned_amount, reimbursed_amount = frappe.db.get_value("Expense Claim",
 					d.against_expense_claim, ("total_sanctioned_amount", "total_amount_reimbursed"))
 				pending_amount = flt(sanctioned_amount) - flt(reimbursed_amount)
 				if d.debit > pending_amount:
