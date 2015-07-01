@@ -43,14 +43,7 @@ class Task(Document):
 	def on_update(self):
 		self.check_recursion()
 		self.reschedule_dependent_tasks()
-		self.update_percentage()
 		self.update_project()
-
-	def update_percentage(self):
-		"""update percent complete in project"""
-		if self.project and not self.flags.from_project:
-			project = frappe.get_doc("Project", self.project)
-			project.run_method("update_percent_complete")
 
 	def update_total_expense_claim(self):
 		self.total_expense_claim = frappe.db.sql("""select sum(total_sanctioned_amount) from `tabExpense Claim`
@@ -70,10 +63,10 @@ class Task(Document):
 		self.act_end_date= tl.end_date
 
 	def update_project(self):
-		if self.project and frappe.db.exists("Project", self.project):
+		if self.project and not self.flags.from_project:
 			project = frappe.get_doc("Project", self.project)
 			project.flags.dont_sync_tasks = True
-			project.update_costing()
+			project.update_project()
 			project.save()
 
 	def check_recursion(self):
