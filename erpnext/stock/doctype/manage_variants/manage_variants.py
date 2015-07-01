@@ -69,10 +69,10 @@ class ManageVariants(Document):
 
 	def validate_attribute_values(self):
 		attributes = {}
+		for t in frappe.db.get_all("Item Attribute Value", fields=["parent", "attribute_value"]):
+			attributes.setdefault(t.parent, []).append(t.attribute_value)
+		
 		for d in self.attributes:
-			attributes.setdefault(d.attribute, 
-				[t.attribute_value for t in 
-					frappe.db.get_all("Item Attribute Value", fields=["attribute_value"], filters={"parent": d.attribute })])
 			if d.attribute_value not in attributes.get(d.attribute):
 				frappe.throw(_("Attribute value {0} does not exist in Item Attribute Master.").format(d.attribute_value))
 
