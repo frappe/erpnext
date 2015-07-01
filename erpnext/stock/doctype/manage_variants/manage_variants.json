@@ -9,9 +9,9 @@
  "document_type": "", 
  "fields": [
   {
-   "fieldname": "item", 
+   "fieldname": "item_code", 
    "fieldtype": "Link", 
-   "label": "Item", 
+   "label": "Item Code", 
    "options": "Item", 
    "permlevel": 0, 
    "precision": "", 
@@ -75,7 +75,7 @@
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
- "modified": "2015-06-30 03:18:13.787883", 
+ "modified": "2015-06-30 13:40:59.946655", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Manage Variants", 

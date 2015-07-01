@@ -43,7 +43,7 @@ frappe.ui.form.on("Manage Variants", {
 		});
 	},
 
-	item:function(frm) {
+	item_code:function(frm) {
 		return frappe.call({
 			method: "get_item_details",
 			doc:frm.doc,

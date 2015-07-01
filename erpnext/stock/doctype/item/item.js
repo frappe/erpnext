@@ -86,7 +86,7 @@ frappe.ui.form.on("Item", {
 	},
 	
 	manage_variants: function(frm) {
-		frappe.route_options = {"item": frm.doc.name };
+		frappe.route_options = {"item_code": frm.doc.name };
 		frappe.set_route("List", "Manage Variants");
 	}
 });

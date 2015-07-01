@@ -15,7 +15,7 @@ class ManageVariants(Document):
 
 	def get_item_details(self):
 		self.clear_tables()
-		if self.item:
+		if self.item_code:
 			self.get_attributes()
 			self.get_variants()
 		
@@ -37,7 +37,7 @@ class ManageVariants(Document):
 		attributes = {}
 		self.set('attributes', [])
 		for d in frappe.db.sql("""select attribute, attribute_value from `tabVariant Attribute` as attribute, 
-			`tabItem` as item where attribute.parent= item.name and item.variant_of = %s""", self.item, as_dict=1):
+			`tabItem` as item where attribute.parent= item.name and item.variant_of = %s""", self.item_code, as_dict=1):
 				attributes.setdefault(d.attribute, []).append(d.attribute_value)
 		for d in attributes:
 			attribute_values = set(attributes[d])
@@ -46,24 +46,25 @@ class ManageVariants(Document):
 
 	def get_variants(self):
 		variants = [d.name for d in frappe.get_all("Item",
-			filters={"variant_of":self.item})]
+			filters={"variant_of":self.item_code})]
+		data = frappe.db.sql("""select parent, attribute, attribute_value from `tabVariant Attribute`""", as_dict=1)
 		for d in variants:
 			variant_attributes, attributes = "", []
-			for attribute in frappe.db.sql("""select attribute, attribute_value from `tabVariant Attribute` where parent = %s""", d):
-				variant_attributes += attribute[1] + " | "
-				attributes.append([attribute[0], attribute[1]])
+			for attribute in data:
+				if attribute.parent == d:
+					variant_attributes += attribute.attribute_value + " | "
+					attributes.append([attribute.attribute, attribute.attribute_value])
 			self.append('variants',{"variant": d, "variant_attributes": variant_attributes[: -3], "attributes": json.dumps(attributes)})
 
 	def validate_attributes(self):
 		if not self.attributes:
-			frappe.throw("Enter atleast one Attribute & its Value in Attribute table.")
+			frappe.throw(_("Enter atleast one Attribute & its Value in Attribute table."))
 
 	def validate_template_item(self):
-		template_item = frappe.get_doc("Item", self.item)
-		if not template_item.has_variants:
+		if not frappe.db.get_value("Item", self.item_code, "has_variants"):
 			frappe.throw(_("Selected Item cannot have Variants."))
 
-		if template_item.variant_of:
+		if frappe.db.get_value("Item", self.item_code, "variant_of"):
 			frappe.throw(_("Item cannot be a variant of a variant"))
 
 	def validate_attribute_values(self):
@@ -111,7 +112,7 @@ class ManageVariants(Document):
 							variant_attributes += d[1] + " | "
 						self.append('variants', {"variant": item_code + "-" + value.abbr, 
 							"attributes": json.dumps(_my_attributes), "variant_attributes": variant_attributes[: -3]})
-		add_attribute_suffixes(self.item, [], attributes)
+		add_attribute_suffixes(self.item_code, [], attributes)
 
 	def sync_variants(self):
 		variant_item_codes = []
@@ -122,7 +123,7 @@ class ManageVariants(Document):
 			variant_item_codes.append(v.variant)
 
 		existing_variants = [d.name for d in frappe.get_all("Item",
-			filters={"variant_of":self.item})]
+			filters={"variant_of":self.item_code})]
 		
 		for d in existing_variants:
 			attributes = []
@@ -147,10 +148,10 @@ class ManageVariants(Document):
 		for item_code in variant_item_codes:
 			if item_code not in existing_variants:
 				if item_code not in new_variant_name:
-					make_variant(self.item, item_code, self.variants)
+					make_variant(self.item_code, item_code, self.variants)
 					inserted.append(item_code)
 			else:
-				update_variant(self.item, item_code, self.variants)
+				update_variant(self.item_code, item_code, self.variants)
 				updated.append(item_code)
 
 		if inserted:
@@ -168,14 +169,12 @@ class ManageVariants(Document):
 def make_variant(item, variant_code, variant_attribute):
 	variant = frappe.new_doc("Item")
 	variant.item_code = variant_code
-	template = frappe.get_doc("Item", item)
-	copy_attributes_to_variant(template, variant, variant_attribute, insert=True)
+	copy_attributes_to_variant(item, variant, variant_attribute, insert=True)
 	variant.insert()
 
 def update_variant(item, variant_code, variant_attribute=None):
 	variant = frappe.get_doc("Item", variant_code)
-	template = frappe.get_doc("Item", item)
-	copy_attributes_to_variant(template, variant, variant_attribute, insert=True)
+	copy_attributes_to_variant(item, variant, variant_attribute, insert=True)
 	variant.save()
 
 def rename_variant(old_variant_code, new_variant_code):
@@ -184,7 +183,8 @@ def rename_variant(old_variant_code, new_variant_code):
 def delete_variant(variant_code):
 	frappe.delete_doc("Item", variant_code)
 
-def copy_attributes_to_variant(template, variant, variant_attribute=None, insert=False):
+def copy_attributes_to_variant(item, variant, variant_attribute=None, insert=False):
+	template = frappe.get_doc("Item", item)
 	from frappe.model import no_value_fields
 	for field in template.meta.fields:
 		if field.fieldtype not in no_value_fields and (insert or not field.no_copy)\
