@@ -5,7 +5,7 @@ import frappe
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_against_account
 
 def execute():
-    from_date = "2015-01-01"
+    from_date = "2015-05-01"
 
     for doc in frappe.get_all("Journal Entry",
         filters={"creation": (">", from_date), "docstatus": "1"}):
