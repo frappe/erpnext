@@ -61,7 +61,7 @@ var get_bom_material_detail= function(doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
 		return frappe.call({
-			doc: cur_frm.doc,
+			doc: doc,
 			method: "get_bom_material_detail",
 			args: {
 				'item_code': d.item_code,
@@ -234,5 +234,3 @@ frappe.ui.form.on("BOM", "with_operations", function(frm) {
 cur_frm.cscript.image = function() {
 	refresh_field("image_view");
 }
-
-

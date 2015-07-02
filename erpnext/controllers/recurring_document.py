@@ -33,11 +33,13 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 	next_date = next_date or nowdate()
 
 	date_field = date_field_map[doctype]
+	
+	condition = " and ifnull(status, '') != 'Stopped'" if doctype in ("Sales Order", "Purchase Order") else ""
 
 	recurring_documents = frappe.db.sql("""select name, recurring_id
-		from `tab{}` where ifnull(is_recurring, 0)=1
-		and docstatus=1 and next_date='{}'
-		and next_date <= ifnull(end_date, '2199-12-31')""".format(doctype, next_date))
+		from `tab{0}` where ifnull(is_recurring, 0)=1
+		and docstatus=1 and next_date=%s
+		and next_date <= ifnull(end_date, '2199-12-31') {1}""".format(doctype, condition), next_date)
 
 	exception_list = []
 	for ref_document, recurring_id in recurring_documents:
@@ -124,7 +126,7 @@ def send_notification(new_rv):
 	frappe.sendmail(new_rv.notification_email_address,
 		subject=  _("New {0}: #{1}").format(new_rv.doctype, new_rv.name),
 		message = _("Please find attached {0} #{1}").format(new_rv.doctype, new_rv.name),
-		attachments = [frappe.attach_print(new_rv.doctype, new_rv.name, file_name=new_rv.name)])
+		attachments = [frappe.attach_print(new_rv.doctype, new_rv.name, file_name=new_rv.name, print_format=new_rv.recurring_print_format)])
 
 def notify_errors(doc, doctype, party, owner):
 	from frappe.utils.user import get_system_managers

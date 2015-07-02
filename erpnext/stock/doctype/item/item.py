@@ -9,10 +9,9 @@ from frappe.website.website_generator import WebsiteGenerator
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
-import copy
+from erpnext.stock.doctype.manage_variants.manage_variants import update_variant
 
 class WarehouseNotSet(frappe.ValidationError): pass
-class DuplicateVariant(frappe.ValidationError): pass
 class ItemTemplateCannotHaveStock(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
@@ -48,9 +47,6 @@ class Item(WebsiteGenerator):
 		if self.image and not self.website_image:
 			self.website_image = self.image
 
-		if self.variant_of:
-			self.copy_attributes_to_variant(frappe.get_doc("Item", self.variant_of), self)
-			
 		self.check_warehouse_is_set_for_stock_item()
 		self.check_stock_uom_with_bin()
 		self.add_default_uom_in_conversion_factor_table()
@@ -63,9 +59,10 @@ class Item(WebsiteGenerator):
 		self.cant_change()
 		self.validate_reorder_level()
 		self.validate_warehouse_for_reorder()
-		self.validate_variants()
 		self.update_item_desc()
 		self.synced_with_hub = 0
+		self.validate_has_variants()
+		self.validate_stock_for_template_must_be_zero()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -77,7 +74,7 @@ class Item(WebsiteGenerator):
 		invalidate_cache_for_item(self)
 		self.validate_name_with_item_group()
 		self.update_item_price()
-		self.sync_variants()
+		self.update_variants()
 
 	def get_context(self, context):
 		context["parent_groups"] = get_parent_item_groups(self.item_group) + \
@@ -132,142 +129,6 @@ class Item(WebsiteGenerator):
 
 			if not matched:
 				frappe.throw(_("Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module."))
-
-	def validate_variants(self):
-		self.validate_variants_are_unique()
-		self.validate_stock_for_template_must_be_zero()
-
-	def validate_stock_for_template_must_be_zero(self):
-		if self.has_variants:
-			stock_in = frappe.db.sql_list("""select warehouse from tabBin
-				where item_code=%s and ifnull(actual_qty, 0) > 0""", self.name)
-			if stock_in:
-				frappe.throw(_("Item Template cannot have stock and varaiants. Please remove stock from warehouses {0}").format(", ".join(stock_in)),
-					ItemTemplateCannotHaveStock)
-
-	def validate_variants_are_unique(self):
-		if not self.has_variants:
-			self.variants = []
-			return
-
-		if self.variants:
-			if self.variant_of:
-				frappe.throw(_("Item cannot be a variant of a variant"))
-	
-			variants, attributes = [], {}
-			for d in self.variants:
-				key = (d.item_attribute, d.item_attribute_value)
-				if key in variants:
-					frappe.throw(_("{0} {1} is entered more than once in Item Variants table")
-						.format(d.item_attribute, d.item_attribute_value), DuplicateVariant)
-				variants.append(key)
-
-				attributes.setdefault(d.item_attribute, [t.attribute_value for t in frappe.db.get_all("Item Attribute Value",
-					fields=["attribute_value"],	filters={"parent": d.item_attribute })])
-				
-				if d.item_attribute_value not in attributes.get(d.item_attribute):
-					frappe.throw(_("Attribute value {0} does not exist in Item Attribute Master.").format(d.item_attribute_value))
-		else:
-			frappe.throw(_("Please enter atleast one attribute row in Item Variants table"))
-
-	def sync_variants(self):
-		variant_item_codes = self.get_variant_item_codes()
-
-		# delete missing variants
-		existing_variants = [d.name for d in frappe.get_all("Item",
-			filters={"variant_of":self.name})]
-
-		updated, deleted = [], []
-		for existing_variant in existing_variants:
-			if existing_variant not in variant_item_codes:
-				frappe.delete_doc("Item", existing_variant)
-				deleted.append(existing_variant)
-			else:
-				self.update_variant(existing_variant)
-				updated.append(existing_variant)
-
-		inserted = []
-		for item_code in variant_item_codes:
-			if item_code not in existing_variants:
-				self.make_variant(item_code)
-				inserted.append(item_code)
-
-		if inserted:
-			frappe.msgprint(_("Item Variants {0} created").format(", ".join(inserted)))
-
-		if updated:
-			frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
-
-		if deleted:
-			frappe.msgprint(_("Item Variants {0} deleted").format(", ".join(deleted)))
-
-	def get_variant_item_codes(self):
-		"""Get all possible suffixes for variants"""
-		if not self.variants:
-			return []
-
-		self.variant_attributes = {}
-		variant_dict = {}
-		variant_item_codes = []
-
-		for d in self.variants:
-			variant_dict.setdefault(d.item_attribute, []).append(d.item_attribute_value)
-
-		all_attributes = [d.name for d in frappe.get_all("Item Attribute", order_by = "priority asc")]
-
-		# sort attributes by their priority
-		attributes = filter(None, map(lambda d: d if d in variant_dict else None, all_attributes))
-
-		def add_attribute_suffixes(item_code, my_attributes, attributes):
-			attr = frappe.get_doc("Item Attribute", attributes[0])
-			for value in attr.item_attribute_values:
-				if value.attribute_value in variant_dict[attr.name]:
-					_my_attributes = copy.deepcopy(my_attributes)
-					_my_attributes.append([attr.name, value.attribute_value])
-					if len(attributes) > 1:
-						add_attribute_suffixes(item_code + "-" + value.abbr, _my_attributes, attributes[1:])
-					else:
-						variant_item_codes.append(item_code + "-" + value.abbr)
-						self.variant_attributes[item_code + "-" + value.abbr] = _my_attributes
-
-		add_attribute_suffixes(self.name, [], attributes)
-
-		return variant_item_codes
-
-	def make_variant(self, item_code):
-		item = frappe.new_doc("Item")
-		item.item_code = item_code
-		self.copy_attributes_to_variant(self, item, insert=True)
-		item.insert()
-
-	def update_variant(self, item_code):
-		item = frappe.get_doc("Item", item_code)
-		item.item_code = item_code
-		self.copy_attributes_to_variant(self, item)
-		item.save()
-
-	def copy_attributes_to_variant(self, template, variant, insert=False):
-		from frappe.model import no_value_fields
-		for field in self.meta.fields:
-			if field.fieldtype not in no_value_fields and (insert or not field.no_copy)\
-				and field.fieldname not in ("item_code", "item_name"):
-				if variant.get(field.fieldname) != template.get(field.fieldname):
-					variant.set(field.fieldname, template.get(field.fieldname))
-					variant.__dirty = True
-
-		variant.description += "\n"
-
-		if not getattr(template, "variant_attributes", None):
-			template.get_variant_item_codes()
-
-		for attr in template.variant_attributes[variant.item_code]:
-			variant.description += "<p>" + attr[0] + ": " + attr[1] + "</p>"
-
-		variant.item_name = self.item_name + variant.item_code[len(self.name):]
-
-		variant.variant_of = template.name
-		variant.has_variants = 0
-		variant.show_in_website = 0
 
 	def update_template_tables(self):
 		template = frappe.get_doc("Item", self.variant_of)
@@ -361,7 +222,8 @@ class Item(WebsiteGenerator):
 				vals.has_batch_no != self.has_batch_no or
 				cstr(vals.valuation_method) != cstr(self.valuation_method)):
 					if self.check_if_sle_exists() == "exists":
-						frappe.throw(_("As there are existing stock transactions for this item, you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'"))
+						frappe.throw(_("As there are existing stock transactions for this item, \
+							you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'"))
 
 	def validate_reorder_level(self):
 		if cint(self.apply_warehouse_wise_reorder_level):
@@ -460,9 +322,33 @@ class Item(WebsiteGenerator):
 	def update_item_desc(self):
 		if frappe.db.get_value('BOM',self.name, 'description') != self.description:
 			frappe.db.sql("""update `tabBOM` set description = %s where item = %s and docstatus < 2""",(self.description, self.name))
-			frappe.db.sql("""update `tabBOM Item` set description = %s where item_code = %s and docstatus < 2""",(self.description, self.name))
-			frappe.db.sql("""update `tabBOM Explosion Item` set description = %s where item_code = %s and docstatus < 2""",(self.description, self.name))
+			frappe.db.sql("""update `tabBOM Item` set description = %s where 
+				item_code = %s and docstatus < 2""",(self.description, self.name))
+			frappe.db.sql("""update `tabBOM Explosion Item` set description = %s where 
+				item_code = %s and docstatus < 2""",(self.description, self.name))
+				
+	def update_variants(self):
+		if self.has_variants:
+			updated = []
+			variants = frappe.db.get_all("Item", fields=["item_code"], filters={"variant_of": self.name })
+			for d in variants:
+				update_variant(self.name, d)
+				updated.append(d.item_code)
+			frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
+				
+	def validate_has_variants(self):
+		if not self.has_variants and frappe.db.get_value("Item", self.name, "has_variants"):
+			if frappe.db.exists("Item", {"variant_of": self.name}):
+				frappe.throw(_("Item has variants."))
 
+	def validate_stock_for_template_must_be_zero(self):
+		if self.has_variants:
+			stock_in = frappe.db.sql_list("""select warehouse from tabBin
+				where item_code=%s and (ifnull(actual_qty, 0) > 0 or ifnull(ordered_qty, 0) > 0 
+				or ifnull(reserved_qty, 0) > 0 or ifnull(indented_qty, 0) > 0 or ifnull(planned_qty, 0) > 0)""", self.name)
+			if stock_in:
+				frappe.throw(_("Item Template cannot have stock or Open Sales/Purchase/Production Orders."), ItemTemplateCannotHaveStock)
+	
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
 		end_of_life = frappe.db.get_value("Item", item_code, "end_of_life")
@@ -567,3 +453,4 @@ def invalidate_cache_for_item(doc):
 
 	if doc.get("old_item_group") and doc.get("old_item_group") != doc.item_group:
 		invalidate_cache_for(doc, doc.old_item_group)
+

@@ -1228,6 +1228,15 @@
    "read_only": 0
   }, 
   {
+   "depends_on": "eval:doc.is_recurring==1", 
+   "fieldname": "recurring_print_format", 
+   "fieldtype": "Link", 
+   "label": "Recurring Print Format", 
+   "options": "Print Format", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "against_income_account", 
    "fieldtype": "Small Text", 
    "hidden": 1, 
@@ -1244,7 +1253,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-06-16 16:45:06.618286", 
+ "modified": "2015-06-22 06:39:22.072544", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 

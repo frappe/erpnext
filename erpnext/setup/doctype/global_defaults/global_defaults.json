@@ -66,20 +66,6 @@
    "label": "Disable Rounded Total", 
    "permlevel": 0, 
    "read_only": 0
-  }, 
-  {
-   "fieldname": "section_break_8", 
-   "fieldtype": "Section Break", 
-   "permlevel": 0, 
-   "precision": ""
-  }, 
-  {
-   "description": "For automatic exchange rates go to jsonrates.com and signup for an API key", 
-   "fieldname": "jsonrates_api_key", 
-   "fieldtype": "Data", 
-   "label": "jsonrates.com API Key", 
-   "permlevel": 0, 
-   "precision": ""
   }
  ], 
  "hide_toolbar": 0, 
@@ -87,7 +73,7 @@
  "idx": 1, 
  "in_create": 1, 
  "issingle": 1, 
- "modified": "2015-05-07 05:43:49.760061", 
+ "modified": "2015-06-30 03:00:26.420003", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Global Defaults", 

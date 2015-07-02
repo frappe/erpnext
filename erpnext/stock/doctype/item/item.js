@@ -5,39 +5,6 @@ frappe.provide("erpnext.item");
 
 frappe.ui.form.on("Item", {
 	onload: function(frm) {
-		var df = frappe.meta.get_docfield("Item Variant", "item_attribute_value");
-		df.on_make = function(field) {
-			field.$input.autocomplete({
-				minLength: 0,
-				minChars: 0,
-				source: function(request, response) {
-					frappe.call({
-						method:"frappe.client.get_list",
-						args:{
-							doctype:"Item Attribute Value",
-							filters: [
-								["parent","=", field.doc.item_attribute],
-								["attribute_value", "like", request.term + "%"]
-							],
-							fields: ["attribute_value"]
-						},
-						callback: function(r) {
-							response($.map(r.message, function(d) { return d.attribute_value; }));
-						}
-					});
-				},
-				select: function(event, ui) {
-					field.$input.val(ui.item.value);
-					field.$input.trigger("change");
-				},
-				focus: function( event, ui ) {
-					if(ui.item.action) {
-						return false;
-					}
-				},
-			});
-		}
-
 		erpnext.item.setup_queries(frm);
 	},
 
@@ -113,8 +80,14 @@ frappe.ui.form.on("Item", {
 			method: "copy_specification_from_item_group"
 		});
 	},
+	
 	is_stock_item: function(frm) {
 		erpnext.item.toggle_reqd(frm);
+	},
+	
+	manage_variants: function(frm) {
+		frappe.route_options = {"item_code": frm.doc.name };
+		frappe.set_route("List", "Manage Variants");
 	}
 });
 

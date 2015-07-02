@@ -5,7 +5,7 @@ app_publisher = "Frappe Technologies Pvt. Ltd. and Contributors"
 app_description = "Open Source Enterprise Resource Planning for Small and Midsized Organizations"
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "5.0.29"
+app_version = "5.1.0"
 
 error_report_email = "support@erpnext.com"
 
@@ -78,8 +78,10 @@ doc_events = {
 }
 
 scheduler_events = {
+	"hourly": [
+		"erpnext.controllers.recurring_document.create_recurring_documents"
+	],
 	"daily": [
-		"erpnext.controllers.recurring_document.create_recurring_documents",
 		"erpnext.stock.reorder_item.reorder_item",
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",

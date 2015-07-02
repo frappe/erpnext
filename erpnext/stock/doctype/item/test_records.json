@@ -273,11 +273,6 @@
   "item_name": "_Test Variant Item",
   "stock_uom": "_Test UOM",
   "has_variants": 1,
-  "variants": [
-	  {"item_attribute": "Test Size", "item_attribute_value": "Small"},
-	  {"item_attribute": "Test Size", "item_attribute_value": "Medium"},
-	  {"item_attribute": "Test Size", "item_attribute_value": "Large"}
-  ],
   "apply_warehouse_wise_reorder_level": 1,
   "reorder_levels": [
       {

@@ -12,7 +12,7 @@
   {
    "fieldname": "name_and_description_section", 
    "fieldtype": "Section Break", 
-   "label": "Name and Description", 
+   "label": "", 
    "no_copy": 0, 
    "oldfieldtype": "Section Break", 
    "options": "icon-flag", 
@@ -167,16 +167,17 @@
    "search_index": 0
   }, 
   {
-   "depends_on": "eval:!!!doc.variant_of", 
+   "depends_on": "eval:!doc.variant_of", 
    "fieldname": "variants_section", 
    "fieldtype": "Section Break", 
-   "label": "Variants", 
+   "label": "Variant", 
    "permlevel": 0, 
    "precision": ""
   }, 
   {
    "default": "0", 
-   "description": "Automatically set. If this item has variants, then it cannot be selected in sales orders etc.", 
+   "depends_on": "", 
+   "description": "If this item has variants, then it cannot be selected in sales orders etc.", 
    "fieldname": "has_variants", 
    "fieldtype": "Check", 
    "label": "Has Variants", 
@@ -186,14 +187,36 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "has_variants", 
-   "description": "A new variant (Item) will be created for each attribute value combination", 
-   "fieldname": "variants", 
-   "fieldtype": "Table", 
-   "label": "Variants", 
-   "options": "Item Variant", 
+   "fieldname": "column_break_18", 
+   "fieldtype": "Column Break", 
    "permlevel": 0, 
    "precision": ""
+  }, 
+  {
+   "depends_on": "has_variants", 
+   "fieldname": "manage_variants", 
+   "fieldtype": "Button", 
+   "label": "Manage Variants", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "section_break_20", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "variant_of", 
+   "fieldname": "attributes", 
+   "fieldtype": "Table", 
+   "hidden": 0, 
+   "label": "Attributes", 
+   "no_copy": 1, 
+   "options": "Variant Attribute", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 0
   }, 
   {
    "fieldname": "inventory", 
@@ -877,9 +900,9 @@
   }
  ], 
  "icon": "icon-tag", 
- "idx": 1, 
+ "idx": 1,
  "max_attachments": 1, 
- "modified": "2015-06-26 17:20:18.204558", 
+ "modified": "2015-07-01 17:20:18.204558", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
