@@ -31,7 +31,9 @@ def execute():
 				desc, image = extract_image_and_description(cstr(d.description))
 				
 				if not image:
-					image = item_details.get(d.item_code).image
+					item_detail = item_details.get(d.item_code)
+					if item_detail:
+						image = item_detail.image
 
 			frappe.db.sql("""update `tab{0}` set description = %s, image = %s
 				where name = %s """.format(dt), (desc, image, d.name))
