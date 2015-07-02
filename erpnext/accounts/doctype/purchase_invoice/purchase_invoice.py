@@ -164,7 +164,7 @@ class PurchaseInvoice(BuyingController):
 			elif item.expense_account not in against_accounts:
 				# if no auto_accounting_for_stock or not a stock item
 				against_accounts.append(item.expense_account)
-				
+
 		self.against_expense_account = ",".join(against_accounts)
 
 	def po_required(self):
@@ -271,7 +271,7 @@ class PurchaseInvoice(BuyingController):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
-						"against": self.credit_to,
+						"against": self.supplier,
 						"debit": tax.add_deduct_tax == "Add" and tax.base_tax_amount_after_discount_amount or 0,
 						"credit": tax.add_deduct_tax == "Deduct" and tax.base_tax_amount_after_discount_amount or 0,
 						"remarks": self.remarks,
@@ -295,7 +295,7 @@ class PurchaseInvoice(BuyingController):
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.expense_account,
-						"against": self.credit_to,
+						"against": self.supplier,
 						"debit": item.base_net_amount,
 						"remarks": self.remarks,
 						"cost_center": item.cost_center
@@ -315,7 +315,7 @@ class PurchaseInvoice(BuyingController):
 						gl_entries.append(
 							self.get_gl_dict({
 								"account": stock_received_but_not_billed,
-								"against": self.credit_to,
+								"against": self.supplier,
 								"debit": flt(item.item_tax_amount, self.precision("item_tax_amount", item)),
 								"remarks": self.remarks or "Accounting Entry for Stock"
 							})
@@ -341,7 +341,7 @@ class PurchaseInvoice(BuyingController):
 					self.get_gl_dict({
 						"account": expenses_included_in_valuation,
 						"cost_center": cost_center,
-						"against": self.credit_to,
+						"against": self.supplier,
 						"credit": applicable_amount,
 						"remarks": self.remarks or "Accounting Entry for Stock"
 					})
@@ -355,7 +355,7 @@ class PurchaseInvoice(BuyingController):
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.write_off_account,
-					"against": self.credit_to,
+					"against": self.supplier,
 					"credit": flt(self.write_off_amount),
 					"remarks": self.remarks,
 					"cost_center": self.write_off_cost_center
@@ -374,7 +374,7 @@ class PurchaseInvoice(BuyingController):
 		self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 		self.make_gl_entries_on_cancel()
 		self.update_project()
-		
+
 	def update_project(self):
 		project_list = []
 		for d in self.items:
@@ -384,7 +384,7 @@ class PurchaseInvoice(BuyingController):
 				project.update_purchase_costing()
 				project.save()
 				project_list.append(d.project_name)
-				
+
 	def validate_supplier_invoice(self):
 		if self.bill_date:
 			if getdate(self.bill_date) > getdate(self.posting_date):
