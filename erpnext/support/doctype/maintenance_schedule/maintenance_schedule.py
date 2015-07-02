@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import add_days, getdate, cint
+from frappe.utils import add_days, getdate, cint, cstr
 
 from frappe import throw, _
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
@@ -73,7 +73,7 @@ class MaintenanceSchedule(TransactionBase):
 						"owner": email_map[d.sales_person] or self.owner,
 						"subject": description,
 						"description": description,
-						"starts_on": key["scheduled_date"] + " 10:00:00",
+						"starts_on": cstr(key["scheduled_date"]) + " 10:00:00",
 						"event_type": "Private",
 						"ref_type": self.doctype,
 						"ref_name": self.name
