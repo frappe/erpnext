@@ -174,15 +174,6 @@ class Item(WebsiteGenerator):
 			if bom_item not in (self.name, self.variant_of):
 				frappe.throw(_("Default BOM ({0}) must be active for this item or its template").format(bom_item))
 
-		if self.is_purchase_item != "Yes":
-			bom_mat = frappe.db.sql("""select distinct t1.parent
-				from `tabBOM Item` t1, `tabBOM` t2 where t2.name = t1.parent
-				and t1.item_code =%s and ifnull(t1.bom_no, '') = '' and t2.is_active = 1
-				and t2.docstatus = 1 and t1.docstatus =1 """, self.name)
-
-			if bom_mat and bom_mat[0][0]:
-				frappe.throw(_("Item must be a purchase item, as it is present in one or many Active BOMs"))
-
 	def fill_customer_code(self):
 		""" Append all the customer codes and insert into "customer_code" field of item table """
 		cust_code=[]
