@@ -20,12 +20,11 @@ def execute():
 	for dt in dt_list:
 		frappe.reload_doctype(dt)
 		records = frappe.db.sql("""select name, item_code, description from `tab{0}`
-			where description is not null """.format(dt), as_dict=1)
+			where ifnull(item_code, '') != '' and description is not null """.format(dt), as_dict=1)
 
 		count = 1
 		for d in records:
-			if d.item_code and item_details.get(d.item_code) \
-					and cstr(d.description) == item_details.get(d.item_code).description:
+			if item_details.get(d.item_code) and cstr(d.description) == item_details.get(d.item_code).description:
 				desc = item_details.get(d.item_code).description
 				image = item_details.get(d.item_code).image
 			else:
