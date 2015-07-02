@@ -344,10 +344,10 @@ class Item(WebsiteGenerator):
 	def validate_stock_for_template_must_be_zero(self):
 		if self.has_variants:
 			stock_in = frappe.db.sql_list("""select warehouse from tabBin
-				where item_code=%s and ifnull(actual_qty, 0) > 0""", self.name)
+				where item_code=%s and (ifnull(actual_qty, 0) > 0 or ifnull(ordered_qty, 0) > 0 
+				or ifnull(reserved_qty, 0) > 0 or ifnull(indented_qty, 0) > 0 or ifnull(planned_qty, 0) > 0)""", self.name)
 			if stock_in:
-				frappe.throw(_("Item Template cannot have stock and varaiants. Please remove \
-					stock from warehouses {0}").format(", ".join(stock_in)), ItemTemplateCannotHaveStock)
+				frappe.throw(_("Item Template cannot have stock or Open Sales/Purchase/Production Orders."), ItemTemplateCannotHaveStock)
 	
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
