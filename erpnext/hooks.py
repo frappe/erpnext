@@ -78,8 +78,10 @@ doc_events = {
 }
 
 scheduler_events = {
+	"hourly": [
+		"erpnext.controllers.recurring_document.create_recurring_documents"
+	],
 	"daily": [
-		"erpnext.controllers.recurring_document.create_recurring_documents",
 		"erpnext.stock.reorder_item.reorder_item",
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
