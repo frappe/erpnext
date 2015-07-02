@@ -1,4 +1,6 @@
-{% var visible_columns = row.get_visible_columns(["item_code", "qty", "rate", "amount", "stock_uom", "uom", "discount_percentage", "schedule_date", "warehouse", "against_sales_order", "sales_order"]); %}
+{% var visible_columns = row.get_visible_columns(["item_code", "qty", "rate", "amount",
+	"stock_uom", "uom", "discount_percentage", "schedule_date", "warehouse",
+	"against_sales_order", "sales_order"]); %}
 
 {% if(!doc) { %}
 	<div class="row">
@@ -48,12 +50,7 @@
 
 			{% if(doc.item_name != doc.item_code && in_list(visible_column_fieldnames, "item_name")) { %}
 				<br>{%= doc.item_name %}{% } %}
-				
-			{% if((doc.description != doc.item_code != doc.item_name) && 
-				in_list(visible_column_fieldnames, "description")) { %}
-				<br>
-				<strong>Description: </strong>
-				{%= doc.get_formatted("description") %}{% } %}
+
 			{% include "templates/form_grid/includes/visible_cols.html" %}
 		</div>
 

@@ -100,7 +100,7 @@
   {
    "fieldname": "description", 
    "fieldtype": "Text", 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Description", 
    "oldfieldname": "description", 
    "oldfieldtype": "Text", 
@@ -344,7 +344,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-25 04:31:21.801200", 
+ "modified": "2015-07-02 05:32:56.511570", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry Detail", 
