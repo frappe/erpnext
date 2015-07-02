@@ -69,6 +69,23 @@
    "width": "200px"
   }, 
   {
+   "fieldname": "image", 
+   "fieldtype": "Attach", 
+   "hidden": 1, 
+   "label": "Image", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "image_view", 
+   "fieldtype": "Image", 
+   "label": "Image View", 
+   "options": "image", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
    "fieldname": "quantity_and_rate", 
    "fieldtype": "Section Break", 
    "label": "Quantity and Rate", 
@@ -505,7 +522,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-06-02 14:18:45.176726", 
+ "modified": "2015-07-02 02:59:08.413213", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice Item", 
