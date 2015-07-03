@@ -52,7 +52,7 @@
    "fieldname": "customer_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
-   "label": "Name", 
+   "label": "Customer Name", 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -1089,7 +1089,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "issingle": 0, 
- "modified": "2015-06-22 07:29:24.379272", 
+ "modified": "2015-07-03 03:25:20.180721", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 
