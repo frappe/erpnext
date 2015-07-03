@@ -49,14 +49,11 @@ class calculate_taxes_and_totals(object):
 
 	def calculate_item_values(self):
 		if not self.discount_amount_applied:
+			self.set_margin()
+
 			for item in self.doc.get("items"):
 				self.doc.round_floats_in(item)
-
-				if item.discount_percentage == 100:
-					item.rate = 0.0
-				elif not item.rate:
-					item.rate = flt(item.price_list_rate *
-						(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
+				self.set_rate(item)
 
 				item.net_rate = item.rate
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
@@ -65,6 +62,46 @@ class calculate_taxes_and_totals(object):
 				self._set_in_company_currency(item, ["price_list_rate", "rate", "net_rate", "amount", "net_amount"])
 
 				item.item_tax_amount = 0.0
+
+	def set_margin(self):
+		self.enable_margin = cint(frappe.db.get_default("fs_margin")) and self.doc.meta.get_field("margin")
+		self.enable_margin_per_item = None
+
+		if not self.enable_margin:
+			self.doc.margin = None
+
+		for item in self.doc.get("items"):
+			if self.enable_margin_per_item==None:
+				self.enable_margin_per_item = (cint(frappe.db.get_default("fs_margin_per_item"))
+					and item.meta.get_field("margin"))
+
+			if self.enable_margin and self.enable_margin_per_item:
+				if not item.margin:
+					item.margin = self.doc.margin
+
+			elif self.enable_margin:
+				item.margin = self.doc.margin
+
+			elif self.enable_margin_per_item:
+				pass
+
+			else:
+				item.margin = None
+
+	def set_rate(self, item):
+		if item.discount_percentage == 100:
+			item.rate = 0.0
+
+		elif not item.rate:
+			if item.discount_percentage:
+				item.rate = item.price_list_rate * (1.0 - (item.discount_percentage / 100.0))
+
+			elif item.margin:
+				item.rate = item.price_list_rate * (1.0 + (item.margin / 100.0))
+			else:
+				item.rate = item.price_list_rate
+
+			item.rate = flt(item.rate, item.precision("rate"))
 
 	def _set_in_company_currency(self, doc, fields):
 		"""set values in base currency"""
@@ -282,8 +319,8 @@ class calculate_taxes_and_totals(object):
 				last_tax.tax_amount += diff
 				last_tax.tax_amount_after_discount_amount += diff
 				last_tax.total += diff
-				
-				self._set_in_company_currency(last_tax, 
+
+				self._set_in_company_currency(last_tax,
 					["total", "tax_amount", "tax_amount_after_discount_amount"])
 
 	def calculate_totals(self):

@@ -345,6 +345,14 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "margin", 
+   "fieldtype": "Percent", 
+   "label": "Margin (%)", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
    "fieldname": "total", 
    "fieldtype": "Currency", 
    "label": "Total", 
@@ -858,7 +866,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 1, 
- "modified": "2015-06-15 15:37:39.199814", 
+ "modified": "2015-07-02 20:18:18.758436", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation", 

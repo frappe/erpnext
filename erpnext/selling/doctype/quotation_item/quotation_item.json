@@ -135,6 +135,16 @@
    "width": "100px"
   }, 
   {
+   "description": "", 
+   "fieldname": "margin", 
+   "fieldtype": "Percent", 
+   "in_list_view": 1, 
+   "label": "Margin on Price List Rate (%)", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
    "fieldname": "col_break2", 
    "fieldtype": "Column Break", 
    "permlevel": 0
@@ -168,7 +178,7 @@
    "width": "100px"
   }, 
   {
-   "fieldname": "Section_break1", 
+   "fieldname": "section_break1", 
    "fieldtype": "Section Break", 
    "permlevel": 0
   }, 
@@ -392,7 +402,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-06-02 14:18:00.266748", 
+ "modified": "2015-07-02 20:18:03.556596", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Quotation Item", 

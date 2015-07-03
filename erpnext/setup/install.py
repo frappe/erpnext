@@ -27,6 +27,7 @@ def feature_setup():
 	flds = ['fs_item_serial_nos', 'fs_item_batch_nos', 'fs_brands', 'fs_item_barcode',
 		'fs_item_advanced', 'fs_packing_details', 'fs_item_group_in_details',
 		'fs_exports', 'fs_imports', 'fs_discounts', 'fs_purchase_discounts',
+		'fs_sales_margin', 'fs_sales_margin_per_item',
 		'fs_after_sales_installations', 'fs_projects', 'fs_sales_extras',
 		'fs_recurring_invoice', 'fs_pos', 'fs_manufacturing', 'fs_quality',
 		'fs_page_break', 'fs_more_info', 'fs_pos_view'

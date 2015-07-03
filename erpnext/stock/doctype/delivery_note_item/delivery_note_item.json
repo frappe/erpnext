@@ -148,6 +148,15 @@
    "width": "100px"
   }, 
   {
+   "fieldname": "margin", 
+   "fieldtype": "Percent", 
+   "in_list_view": 1, 
+   "label": "Margin on Price List Rate (%)", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
    "fieldname": "col_break2", 
    "fieldtype": "Column Break", 
    "permlevel": 0
@@ -523,7 +532,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-06-02 14:18:34.512236", 
+ "modified": "2015-07-02 20:16:02.653589", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Delivery Note Item", 
