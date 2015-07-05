@@ -247,3 +247,30 @@ class TestLeaveApplication(unittest.TestCase):
 			"_T-Employee-0001")
 
 		frappe.db.set_value("Employee", "_T-Employee-0001", "department", original_department)
+		
+	def test_exclude_holiday_in_leave(self):
+		frappe.db.set_value("Leave Type", self.leave_type, "include_holiday", 0)
+		application = frappe.copy_doc(_test_records[2])
+		application.from_date = "2015-07-01"
+		application.to_date = "2015-07-05"
+		application.get_holidays = "2015-07-03"
+		application.insert()
+		
+		self.assertEquals(application.tot_days, 5)
+		self.assertEquals(application.holidays, 1)
+		self.assertEquals(application.ret, 4)
+		
+	def test_include_holiday_in_leave(self):
+		frappe.db.set_value("Leave Type", self.leave_type, "include_holiday", 1)
+		application = frappe.copy_doc(_test_records[2])
+		application.from_date = "2015-07-01"
+		application.to_date = "2015-07-05"
+		application.get_holidays = "2015-07-03"
+		application.insert()
+		
+		self.assertEquals(application.tot_days, 5)
+		self.assertEquals(application.holidays, 1)
+		self.assertEquals(application.ret, 5)
+	
+	def tearDown(self):
+		frappe.db.set_value("Leave Type", self.leave_type, "include_holiday", 0)
