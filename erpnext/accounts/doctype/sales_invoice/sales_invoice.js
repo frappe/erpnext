@@ -194,6 +194,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	items_add: function(doc, cdt, cdn) {
+		this._super();
+
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("items", row, ["income_account", "cost_center"]);
 	},

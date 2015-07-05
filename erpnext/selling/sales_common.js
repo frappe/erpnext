@@ -129,13 +129,23 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	},
 
 	price_list_rate: function(doc, cdt, cdn) {
+		this.calculate_rate(doc, cdt, cdn);
+		this.calculate_taxes_and_totals();
+	},
+
+	calculate_rate: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
-		item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
-			precision("rate", item));
+		if (item.discount_percentage) {
+			item.rate = item.price_list_rate * (1 - item.discount_percentage / 100.0);
+		} else if (item.margin) {
+			item.rate = item.price_list_rate * (1 + item.margin / 100.0);
+		} else {
+			item.rate = item.price_list_rate;
+		}
 
-		this.calculate_taxes_and_totals();
+		item.rate = flt(item.rate, precision("rate", item));
 	},
 
 	discount_percentage: function(doc, cdt, cdn) {
@@ -316,6 +326,68 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			}
 		}
 		refresh_field('sales_bom_help');
+	},
+
+	margin: function(doc, doctype, docname) {
+		var enable_margin = erpnext.feature_setup.is_enabled("fs_sales_margin");
+		var enable_margin_per_item = erpnext.feature_setup.is_enabled("fs_sales_margin_per_item");
+
+		var me = this;
+		var d = frappe.model.get_doc(doctype, docname);
+		if (d.parentfield==="items") {
+			if (!(enable_margin_per_item)) {
+				d.margin = undefined;
+			}
+
+			// item level field
+			this.price_list_rate(doc, doctype, docname);
+		} else {
+			if (!enable_margin) {
+				// defensive programming
+				this.frm.doc.margin = undefined;
+				this.frm.refresh_field("margin");
+
+			} else {
+				// if main form field, set this value in all items after getting confirmation from the user
+				var exists = false;
+				var items = this.frm.doc.items || [];
+				for (var i=0, l=items.length; i < l; i++) {
+					var d = items[i];
+					if (!is_null(d.margin)) {
+						exists = true;
+						break;
+					}
+				}
+				if (exists) {
+					// if there is already margin specified, ask if you want to replace it
+					frappe.confirm(__("Do you want to replace Margin in all Items?"),
+						function() { me.set_margin_in_items(true); }, // ifyes
+						function() { me.set_margin_in_items(false); } // ifno
+					)
+				} else {
+					this.set_margin_in_items(true);
+				}
+			}
+		}
+	},
+
+	set_margin_in_items: function(force) {
+		for (var i=0, l=this.frm.doc.items.length; i < l; i++) {
+			var d = this.frm.doc.items[i];
+			if (force || is_null(d.margin)) {
+				d.margin = this.frm.doc.margin;
+				this.calculate_rate(this.frm.doc, d.doctype, d.name);
+			}
+		}
+		this.frm.refresh_field("items");
+		this.calculate_taxes_and_totals();
+	},
+
+	items_add: function(doc, cdt, cdn) {
+		var item = frappe.model.get_doc(cdt, cdn);
+		if (this.frm.doc.margin && is_null(item.margin)) {
+			item.margin = this.frm.doc.margin;
+		}
 	}
 });
 

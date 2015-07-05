@@ -362,6 +362,14 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "margin", 
+   "fieldtype": "Percent", 
+   "label": "Margin (%)", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
    "fieldname": "total", 
    "fieldtype": "Currency", 
    "label": "Total", 
@@ -1253,7 +1261,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-06-22 06:39:22.072544", 
+ "modified": "2015-07-02 20:17:04.730678", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 

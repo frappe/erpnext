@@ -141,6 +141,15 @@
    "width": "70px"
   }, 
   {
+   "fieldname": "margin", 
+   "fieldtype": "Percent", 
+   "in_list_view": 1, 
+   "label": "Margin on Price List Rate (%)", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1
+  }, 
+  {
    "fieldname": "col_break2", 
    "fieldtype": "Column Break", 
    "permlevel": 0
@@ -498,7 +507,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-07-02 05:37:29.289574", 
+ "modified": "2015-07-02 20:16:27.923799", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order Item", 

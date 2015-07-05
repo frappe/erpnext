@@ -100,6 +100,22 @@
    "permlevel": 0
   }, 
   {
+   "description": "Field available in Delivery Note, Quotation, Sales Invoice, Sales Order", 
+   "fieldname": "fs_sales_margin", 
+   "fieldtype": "Check", 
+   "label": "Sales Margin", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "description": "Field available in Delivery Note Item, Quotation Item, Sales Invoice Item, Sales Order Item", 
+   "fieldname": "fs_sales_margin_per_item", 
+   "fieldtype": "Check", 
+   "label": "Sales Margin Per Item", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "description": "To track any installation or commissioning related work after sales", 
    "fieldname": "fs_after_sales_installations", 
    "fieldtype": "Check", 
@@ -205,7 +221,7 @@
  "icon": "icon-glass", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2015-02-05 05:11:38.842809", 
+ "modified": "2015-07-02 19:34:36.403558", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Features Setup", 

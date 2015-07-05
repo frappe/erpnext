@@ -14,6 +14,10 @@ Dictionary Format
 	}
 // ====================================================================*/
 frappe.provide("erpnext.feature_setup");
+erpnext.feature_setup.is_enabled = function(key) {
+	return cint(sys_defaults[key]) ? true : false;
+}
+
 erpnext.feature_setup.feature_dict = {
 	'fs_projects': {
 		'BOM': {'fields':['project_name']},
@@ -37,6 +41,18 @@ erpnext.feature_setup.feature_dict = {
 		'Purchase Order': {'items':['base_price_list_rate', 'discount_percentage', 'price_list_rate']},
 		'Purchase Receipt': {'items':['base_price_list_rate', 'discount_percentage', 'price_list_rate']},
 		'Purchase Invoice': {'items':['base_price_list_rate', 'discount_percentage', 'price_list_rate']}
+	},
+	'fs_sales_margin': {
+		'Delivery Note': {'fields': ['margin']},
+		'Quotation': {'fields': ['margin']},
+		'Sales Invoice': {'fields': ['margin']},
+		'Sales Order': {'fields': ['margin']}
+	},
+	'fs_sales_margin_per_item': {
+		'Delivery Note': {'items':['margin']},
+		'Quotation': {'items':['margin']},
+		'Sales Invoice': {'items':['margin']},
+		'Sales Order': {'items':['margin']}
 	},
 	'fs_brands': {
 		'Delivery Note': {'items':['brand']},
@@ -224,4 +240,5 @@ $(document).bind('form_refresh', function() {
 
 		}
 	}
-})
+});
+
