@@ -75,8 +75,20 @@ def get_conditions(filters):
 	filters["month"] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
 		"Dec"].index(filters["month"]) + 1
 
+	from frappe.model.document import Document
+	fiscal_years = frappe.get_doc("Fiscal Year",filters["fiscal_year"])
+	import datetime
+	year_start = fiscal_years.year_start_date.strftime("%Y")
+	year_end = fiscal_years.year_end_date.strftime("%Y")
+	dt_test = datetime.datetime.strptime(year_end + "-" + str(100+int(filters["month"]))[2:3] + "-01", "%Y-%m-%d")
+	date_test = datetime.date(dt_test.year, dt_test.month, dt_test.day)
+	if date_test > fiscal_years.year_end_date:
+		year_target = year_start
+	else:
+		year_target = year_end
+
 	from calendar import monthrange
-	filters["total_days_in_month"] = monthrange(cint(filters["fiscal_year"].split("-")[-1]),
+	filters["total_days_in_month"] = monthrange(cint(year_target),
 		filters["month"])[1]
 
 	conditions = " and month(att_date) = %(month)s and fiscal_year = %(fiscal_year)s"

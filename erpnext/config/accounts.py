@@ -75,6 +75,11 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Company",
+					"description": _("Company (not Customer or Supplier) master.")
+				},
+				{
+					"type": "doctype",
 					"name": "Fiscal Year",
 					"description": _("Financial / accounting year.")
 				},
