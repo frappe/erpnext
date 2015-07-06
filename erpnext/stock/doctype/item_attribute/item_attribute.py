@@ -33,4 +33,4 @@ class ItemAttribute(Document):
 		if variant_attributes:
 			for d in variant_attributes:
 				if d[0] not in attribute_values:
-					frappe.throw(_("Attribute Value {0} cannot be removed from {1} as it has Variants.").format(d[0], self.name))
+					frappe.throw(_("Attribute Value {0} cannot be removed from {1} as Item Variants exist with this Attribute.").format(d[0], self.name))
