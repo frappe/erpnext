@@ -498,9 +498,9 @@ cur_frm.cscript.uom = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.validate = function(doc, cdt, cdn) {
-	cur_frm.cscript.validate_items(doc);
 	if($.inArray(cur_frm.doc.purpose, ["Purchase Return", "Sales Return"])!==-1)
 		validated = cur_frm.cscript.get_doctype_docname() ? true : false;
+	cur_frm.cscript.validate_items(doc);
 }
 
 cur_frm.cscript.validate_items = function(doc) {
