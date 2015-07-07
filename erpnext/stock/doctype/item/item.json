@@ -181,6 +181,7 @@
    "fieldname": "has_variants", 
    "fieldtype": "Check", 
    "label": "Has Variants", 
+   "no_copy": 1, 
    "options": "", 
    "permlevel": 0, 
    "precision": "", 
