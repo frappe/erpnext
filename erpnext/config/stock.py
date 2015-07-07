@@ -83,6 +83,11 @@ def get_data():
 					"name": "Stock UOM Replace Utility",
 					"description": _("Change UOM for an Item."),
 				},
+				{
+					"type": "doctype",
+					"name": "Manage Variants",
+					"description": _("Manage Item Variants."),
+				},
 			]
 		},
 		{
