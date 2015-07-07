@@ -8,7 +8,7 @@ from frappe import _
 
 from frappe.model.document import Document
 
-class SalaryManager(Document):
+class ProcessPayroll(Document):
 
 	def get_emp_list(self):
 		"""

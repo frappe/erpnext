@@ -174,3 +174,4 @@ erpnext.patches.v5_1.fix_against_account
 erpnext.patches.v5_1.fix_credit_days_based_on
 erpnext.patches.v5_1.track_operations
 erpnext.patches.v5_1.sales_bom_rename
+execute:frappe.rename_doc("DocType", "Salary Manager", "Process Payroll", force=True)

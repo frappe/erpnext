@@ -49,7 +49,7 @@ class SalarySlip(TransactionBase):
 		if not self.month:
 			self.month = "%02d" % getdate(nowdate()).month
 
-		m = frappe.get_doc('Salary Manager').get_month_details(self.fiscal_year, self.month)
+		m = frappe.get_doc('Process Payroll').get_month_details(self.fiscal_year, self.month)
 		holidays = self.get_holidays_for_employee(m)
 
 		if not cint(frappe.db.get_value("HR Settings", "HR Settings",

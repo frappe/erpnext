@@ -59,6 +59,6 @@ cur_frm.cscript.make_jv = function(doc, dt, dn) {
 }
 
 
-frappe.ui.form.on("Salary Manager", "refresh", function(frm) {
+frappe.ui.form.on("Process Payroll", "refresh", function(frm) {
 	frm.disable_save();
 });

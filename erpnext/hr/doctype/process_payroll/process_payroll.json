@@ -154,10 +154,10 @@
  "icon": "icon-cog", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2015-06-05 11:33:00.152362", 
+ "modified": "2015-07-07 07:16:02.380839", 
  "modified_by": "Administrator", 
  "module": "HR", 
- "name": "Salary Manager", 
+ "name": "Process Payroll", 
  "owner": "Administrator", 
  "permissions": [
   {
