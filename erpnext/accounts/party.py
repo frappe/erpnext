@@ -74,6 +74,15 @@ def set_contact_details(out, party, party_type):
 		{party_type.lower(): party.name, "is_primary_contact":1}, "name")
 
 	if not out.contact_person:
+		out.update({
+			"contact_person": None,
+			"contact_display": None,
+			"contact_email": None,
+			"contact_mobile": None,
+			"contact_phone": None,
+			"contact_designation": None,
+			"contact_department": None
+		})
 		return
 
 	out.update(get_contact_details(out.contact_person))

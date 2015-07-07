@@ -112,10 +112,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		erpnext.utils.get_address_display(this.frm, "shipping_address_name", "shipping_address");
 	},
 
-	contact_person: function() {
-		erpnext.utils.get_contact_details(this.frm);
-	},
-
 	sales_partner: function() {
 		this.apply_pricing_rule();
 	},
