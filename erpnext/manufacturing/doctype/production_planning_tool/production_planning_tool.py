@@ -153,6 +153,7 @@ class ProductionPlanningTool(Document):
 			pi.bom_no					= item_details and item_details[0][2] or ''
 			pi.so_pending_qty			= flt(p['pending_qty'])
 			pi.planned_qty				= flt(p['pending_qty'])
+			pi.planned_start_date		= now()
 
 	def validate_data(self):
 		self.validate_company()
@@ -211,8 +212,6 @@ class ProductionPlanningTool(Document):
 		for key in items:
 			pro = frappe.new_doc("Production Order")
 			pro.update(items[key])
-
-			pro.planned_start_date = now()
 			pro.set_production_order_operations()
 
 			frappe.flags.mute_messages = True
