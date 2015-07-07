@@ -1,1 +1,1 @@
-Child Item grouped in parent Sales BOM.
+Child Item grouped in parent Product Bundle.

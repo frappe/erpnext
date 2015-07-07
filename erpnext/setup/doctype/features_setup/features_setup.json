@@ -26,7 +26,7 @@
    "permlevel": 0
   }, 
   {
-   "description": "To track brand name in the following documents Delivery Note, Opportunity, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Sales BOM, Sales Order, Serial No", 
+   "description": "To track brand name in the following documents Delivery Note, Opportunity, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Product Bundle, Sales Order, Serial No", 
    "fieldname": "fs_brands", 
    "fieldtype": "Check", 
    "in_list_view": 1, 
@@ -205,7 +205,7 @@
  "icon": "icon-glass", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2015-02-05 05:11:38.842809", 
+ "modified": "2015-07-06 06:11:10.534423", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Features Setup", 

@@ -112,7 +112,7 @@ class TestDeliveryNote(unittest.TestCase):
 		stock_in_hand_account = frappe.db.get_value("Account", {"warehouse": "_Test Warehouse - _TC"})
 		prev_bal = get_balance_on(stock_in_hand_account)
 
-		dn = create_delivery_note(item_code="_Test Sales BOM Item")
+		dn = create_delivery_note(item_code="_Test Product Bundle Item")
 
 		stock_value_diff_rm1 = abs(frappe.db.get_value("Stock Ledger Entry",
 			{"voucher_type": "Delivery Note", "voucher_no": dn.name, "item_code": "_Test Item"},
@@ -208,4 +208,4 @@ def create_delivery_note(**args):
 			dn.submit()
 	return dn
 
-test_dependencies = ["Sales BOM"]
+test_dependencies = ["Product Bundle"]
