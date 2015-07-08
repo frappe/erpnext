@@ -101,7 +101,7 @@ class TransactionBase(StatusUpdater):
 					ref_rate = frappe.db.get_value(ref_dt + " Item", d.get(ref_link_field), "rate")
 					
 					if abs(flt(d.rate - ref_rate, d.precision("rate"))) >= .01:
-						frappe.throw(_("Row #{0}: Rate must be same with {1}: {2} ({3} / {4}) ")
+						frappe.throw(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ")
 							.format(d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate))
 
 
