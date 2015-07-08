@@ -83,9 +83,8 @@ def set_contact_details(out, party, party_type):
 			"contact_designation": None,
 			"contact_department": None
 		})
-		return
-
-	out.update(get_contact_details(out.contact_person))
+	else:
+		out.update(get_contact_details(out.contact_person))
 
 def set_other_values(out, party, party_type):
 	# copy

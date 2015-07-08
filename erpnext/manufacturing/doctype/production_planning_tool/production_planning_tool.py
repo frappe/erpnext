@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, flt, cint, nowdate, now, add_days, comma_and
+from frappe.utils import cstr, flt, cint, nowdate, add_days, comma_and
 
 from frappe import msgprint, _
 
@@ -153,7 +153,6 @@ class ProductionPlanningTool(Document):
 			pi.bom_no					= item_details and item_details[0][2] or ''
 			pi.so_pending_qty			= flt(p['pending_qty'])
 			pi.planned_qty				= flt(p['pending_qty'])
-			pi.planned_start_date		= now()
 
 	def validate_data(self):
 		self.validate_company()

@@ -519,11 +519,11 @@ cur_frm.cscript.validate_items = function(doc) {
 }
 
 cur_frm.cscript.expense_account = function(doc, cdt, cdn) {
-	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "expense_account");
+	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "expense_account");
 }
 
 cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
-	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "cost_center");
+	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "cost_center");
 }
 
 cur_frm.fields_dict.customer.get_query = function(doc, cdt, cdn) {
