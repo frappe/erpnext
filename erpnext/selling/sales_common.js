@@ -71,7 +71,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				} else {
 					filters = {
 						'item_code': item.item_code,
-						'posting_date': me.frm.doc.posting_date,
+						'posting_date': me.frm.doc.posting_date || nowdate(),
 					}
 					if(item.warehouse) filters["warehouse"] = item.warehouse
 
