@@ -870,8 +870,6 @@ def make_return_jv(stock_entry):
 			"account": r.get("account"),
 			"party_type": r.get("party_type"),
 			"party": r.get("party"),
-			"against_invoice": r.get("against_invoice"),
-			"against_voucher": r.get("against_voucher"),
 			"balance": get_balance_on(r.get("account"), se.posting_date) if r.get("account") else 0
 		})
 
@@ -882,8 +880,7 @@ def make_return_jv_from_sales_invoice(se, ref):
 	parent = {
 		"account": ref.doc.debit_to,
 		"party_type": "Customer",
-		"party": ref.doc.customer,
-		"against_invoice": ref.doc.name,
+		"party": ref.doc.customer
 	}
 
 	# income account entries
@@ -957,9 +954,6 @@ def make_return_jv_from_delivery_note(se, ref):
 
 			break
 
-	if len(invoices_against_delivery) == 1:
-		parent["against_invoice"] = invoices_against_delivery[0]
-
 	result = [parent] + [{"account": account} for account in children]
 
 	return result
@@ -1014,9 +1008,6 @@ def make_return_jv_from_purchase_receipt(se, ref):
 				}
 
 			break
-
-	if len(invoice_against_receipt) == 1:
-		parent["against_voucher"] = invoice_against_receipt[0]
 
 	result = [parent] + [{"account": account} for account in children]
 
