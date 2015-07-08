@@ -73,8 +73,9 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_auto_material_request_for_variant(self):
 		manage_variant = frappe.new_doc("Manage Variants")
+		
 		manage_variant.update({
-			"item": "_Test Variant Item",
+			"item_code": "_Test Variant Item",
 			"attributes": [
 				{
 					"attribute": "Test Size",
@@ -391,7 +392,6 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(jv.get("accounts")[0].get("account"), "Debtors - _TC")
 		self.assertEqual(jv.get("accounts")[0].get("party_type"), "Customer")
 		self.assertEqual(jv.get("accounts")[0].get("party"), "_Test Customer")
-		self.assertTrue(jv.get("accounts")[0].get("against_invoice"))
 		self.assertEqual(jv.get("accounts")[1].get("account"), "Sales - _TC")
 
 	def test_make_return_jv_for_sales_invoice_non_packing_item(self):
@@ -496,7 +496,6 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(jv.get("accounts")[0].get("account"), "_Test Payable - _TC")
 		self.assertEqual(jv.get("accounts")[0].get("party"), "_Test Supplier")
 		self.assertEqual(jv.get("accounts")[1].get("account"), "_Test Account Cost for Goods Sold - _TC")
-		self.assertTrue(jv.get("accounts")[0].get("against_voucher"))
 
 	def test_make_return_jv_for_purchase_receipt(self):
 		se, pr_name = self.test_purchase_receipt_return()
