@@ -169,6 +169,7 @@ class SalesInvoice(SellingController):
 		if pos:
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
+				self.mode_of_payment = pos.mode_of_payment
 				# self.set_customer_defaults()
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'taxes_and_charges', 'letter_head', 'tc_name',

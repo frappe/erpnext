@@ -78,6 +78,51 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "warehouse", 
+   "fieldtype": "Link", 
+   "label": "Warehouse", 
+   "oldfieldname": "warehouse", 
+   "oldfieldtype": "Link", 
+   "options": "Warehouse", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 0
+  }, 
+  {
+   "allow_on_submit": 1, 
+   "fieldname": "letter_head", 
+   "fieldtype": "Link", 
+   "label": "Letter Head", 
+   "oldfieldname": "letter_head", 
+   "oldfieldtype": "Select", 
+   "options": "Letter Head", 
+   "permlevel": 0, 
+   "print_hide": 1, 
+   "read_only": 0
+  }, 
+  {
+   "fieldname": "tc_name", 
+   "fieldtype": "Link", 
+   "label": "Terms and Conditions", 
+   "oldfieldname": "tc_name", 
+   "oldfieldtype": "Link", 
+   "options": "Terms and Conditions", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "allow_on_submit": 1, 
+   "fieldname": "select_print_heading", 
+   "fieldtype": "Link", 
+   "in_filter": 0, 
+   "label": "Print Heading", 
+   "oldfieldname": "select_print_heading", 
+   "oldfieldtype": "Select", 
+   "options": "Print Heading", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
    "fieldname": "column_break0", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 
@@ -104,6 +149,14 @@
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 0
+  }, 
+  {
+   "fieldname": "mode_of_payment", 
+   "fieldtype": "Link", 
+   "label": "Mode of Payment", 
+   "options": "Mode of Payment", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "cash_bank_account", 
@@ -140,17 +193,6 @@
    "reqd": 0
   }, 
   {
-   "fieldname": "warehouse", 
-   "fieldtype": "Link", 
-   "label": "Warehouse", 
-   "oldfieldname": "warehouse", 
-   "oldfieldtype": "Link", 
-   "options": "Warehouse", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 0
-  }, 
-  {
    "fieldname": "cost_center", 
    "fieldtype": "Link", 
    "label": "Cost Center", 
@@ -160,16 +202,6 @@
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 1
-  }, 
-  {
-   "fieldname": "taxes_and_charges", 
-   "fieldtype": "Link", 
-   "label": "Taxes and Charges", 
-   "oldfieldname": "charge", 
-   "oldfieldtype": "Link", 
-   "options": "Sales Taxes and Charges Template", 
-   "permlevel": 0, 
-   "read_only": 0
   }, 
   {
    "fieldname": "write_off_account", 
@@ -190,43 +222,19 @@
    "reqd": 1
   }, 
   {
-   "allow_on_submit": 1, 
-   "fieldname": "letter_head", 
+   "fieldname": "taxes_and_charges", 
    "fieldtype": "Link", 
-   "label": "Letter Head", 
-   "oldfieldname": "letter_head", 
-   "oldfieldtype": "Select", 
-   "options": "Letter Head", 
-   "permlevel": 0, 
-   "print_hide": 1, 
-   "read_only": 0
-  }, 
-  {
-   "fieldname": "tc_name", 
-   "fieldtype": "Link", 
-   "label": "Terms and Conditions", 
-   "oldfieldname": "tc_name", 
+   "label": "Taxes and Charges", 
+   "oldfieldname": "charge", 
    "oldfieldtype": "Link", 
-   "options": "Terms and Conditions", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "allow_on_submit": 1, 
-   "fieldname": "select_print_heading", 
-   "fieldtype": "Link", 
-   "in_filter": 0, 
-   "label": "Print Heading", 
-   "oldfieldname": "select_print_heading", 
-   "oldfieldtype": "Select", 
-   "options": "Print Heading", 
+   "options": "Sales Taxes and Charges Template", 
    "permlevel": 0, 
    "read_only": 0
   }
  ], 
  "icon": "icon-cog", 
  "idx": 1, 
- "modified": "2015-05-20 05:38:44.482696", 
+ "modified": "2015-07-07 08:56:04.381471", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "POS Profile", 
