@@ -108,11 +108,9 @@ class DeliveryNote(SellingController):
 		if not self.installation_status: self.installation_status = 'Not Installed'
 
 	def validate_with_previous_doc(self):
-		items = self.get("items")
-
 		for fn in (("Sales Order", "against_sales_order", "so_detail"), 
 				("Sales Invoice", "against_sales_invoice", "si_detail")):
-			if filter(None, [getattr(d, fn[1], None) for d in items]):
+			if filter(None, [getattr(d, fn[1], None) for d in self.get("items")]):
 				super(DeliveryNote, self).validate_with_previous_doc({
 					fn[0]: {
 						"ref_dn_field": fn[1],
@@ -120,15 +118,10 @@ class DeliveryNote(SellingController):
 							["currency", "="]],
 					},
 				})
-
-				if cint(frappe.defaults.get_global_default('maintain_same_sales_rate')):
-					super(DeliveryNote, self).validate_with_previous_doc({
-						fn[0] + " Item": {
-							"ref_dn_field": fn[2],
-							"compare_fields": [["rate", "="]],
-							"is_child_table": True
-						}
-					})
+				
+		if cint(frappe.db.get_single_value('Selling Settings', 'maintain_same_sales_rate')):
+			self.validate_rate_with_reference_doc([["Sales Order", "sales_order", "so_detail"], 
+				["Sales Invoice", "sales_invoice", "si_detail"]])
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
