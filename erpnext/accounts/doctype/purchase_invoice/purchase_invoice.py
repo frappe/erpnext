@@ -124,20 +124,11 @@ class PurchaseInvoice(BuyingController):
 			}
 		})
 
-		if cint(frappe.defaults.get_global_default('maintain_same_rate')):
-			super(PurchaseInvoice, self).validate_with_previous_doc({
-				"Purchase Order Item": {
-					"ref_dn_field": "po_detail",
-					"compare_fields": [["rate", "="]],
-					"is_child_table": True,
-					"allow_duplicate_prev_row_id": True
-				},
-				"Purchase Receipt Item": {
-					"ref_dn_field": "pr_detail",
-					"compare_fields": [["rate", "="]],
-					"is_child_table": True
-				}
-			})
+		if cint(frappe.db.get_single_value('Buying Settings', 'maintain_same_rate')):
+			self.validate_rate_with_reference_doc([
+				["Purchase Order", "purchase_order", "po_detail"], 
+				["Purchase Receipt", "purchase_receipt", "pr_detail"]
+			])
 
 	def set_against_expense_account(self):
 		auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))

@@ -101,7 +101,7 @@ class SalaryManager(Document):
 		log = "<p>No employee for the above selected criteria OR salary slip already created</p>"
 		if ss_list:
 			log = "<b>Salary Slip Created For</b>\
-			<br><br>%s" % '<br>'.join(ss_list)
+			<br><br>%s" % '<br>'.join(self.format_as_links(ss_list))
 		return log
 
 
@@ -144,7 +144,7 @@ class SalaryManager(Document):
 		else:
 			all_ss = [d[0] for d in all_ss]
 
-		submitted_ss = list(set(all_ss) - set(not_submitted_ss))
+		submitted_ss = self.format_as_links(list(set(all_ss) - set(not_submitted_ss)))
 		if submitted_ss:
 			mail_sent_msg = self.send_email and " (Mail has been sent to the employee)" or ""
 			log = """
@@ -163,6 +163,9 @@ class SalaryManager(Document):
 				Then try to submit Salary Slip again.
 			"""% ('<br>'.join(not_submitted_ss))
 		return log
+
+	def format_as_links(self, ss_list):
+		return ['<a href="#Form/Salary Slip/{0}">{0}</a>'.format(s) for s in ss_list]
 
 
 	def get_total_salary(self):

@@ -401,7 +401,8 @@ erpnext.pos.PointOfSale = Class.extend({
 
 			this.with_modes_of_payment(function() {
 				// prefer cash payment!
-				var default_mode = me.modes_of_payment.indexOf(__("Cash"))!==-1 ? __("Cash") : undefined;
+				var default_mode = me.frm.doc.mode_of_payment ? me.frm.doc.mode_of_payment : 
+					me.modes_of_payment.indexOf(__("Cash"))!==-1 ? __("Cash") : undefined;
 
 				// show payment wizard
 				var dialog = new frappe.ui.Dialog({

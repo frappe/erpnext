@@ -5,7 +5,7 @@ app_publisher = "Frappe Technologies Pvt. Ltd. and Contributors"
 app_description = "Open Source Enterprise Resource Planning for Small and Midsized Organizations"
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "5.1.3"
+app_version = "5.1.4"
 
 error_report_email = "support@erpnext.com"
 
@@ -25,7 +25,12 @@ on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
 # website
 update_website_context = "erpnext.shopping_cart.utils.update_website_context"
 my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
+
 email_append_to = ["Job Applicant", "Opportunity", "Issue"]
+
+calendars = ["Task", "Production Order", "Time Log", "Leave Application"]
+
+website_generators = ["Item Group", "Item", "Sales Partner"]
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/favicon.png",
@@ -52,13 +57,9 @@ dump_report_map = "erpnext.startup.report_data_map.data_map"
 
 before_tests = "erpnext.setup.utils.before_tests"
 
-website_generators = ["Item Group", "Item", "Sales Partner"]
-
 standard_queries = {
 	"Customer": "erpnext.selling.doctype.customer.customer.get_customer_list"
 }
-
-communication_covert_to = ["Lead", "Issue", "Job Application"]
 
 doc_events = {
 	"Stock Entry": {
@@ -106,4 +107,3 @@ get_translated_dict = {
 	("page", "setup-wizard"): "frappe.geo.country_info.get_translated_dict",
 	("doctype", "Global Defaults"): "frappe.geo.country_info.get_translated_dict"
 }
-

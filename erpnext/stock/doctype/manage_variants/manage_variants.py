@@ -36,8 +36,8 @@ class ManageVariants(Document):
 	def get_attributes(self):
 		attributes = {}
 		self.set('attributes', [])
-		for d in frappe.db.sql("""select attribute, attribute_value from `tabVariant Attribute` as attribute, 
-			`tabItem` as item where attribute.parent= item.name and item.variant_of = %s""", self.item_code, as_dict=1):
+		for d in frappe.db.sql("""select attr.attribute, attr.attribute_value from `tabVariant Attribute` as attr, 
+			`tabItem` as item where attr.parent = item.name and item.variant_of = %s""", self.item_code, as_dict=1):
 				attributes.setdefault(d.attribute, []).append(d.attribute_value)
 		for d in attributes:
 			attribute_values = set(attributes[d])
