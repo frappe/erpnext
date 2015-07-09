@@ -250,7 +250,8 @@ cur_frm.cscript['Update Finished Goods'] = function() {
 cur_frm.fields_dict['production_item'].get_query = function(doc) {
 	return {
 		filters:[
-			['Item', 'is_pro_applicable', '=', 'Yes']
+			['Item', 'is_pro_applicable', '=', 'Yes'],
+			['Item', 'has_variants', '=', 'No']
 		]
 	}
 }
