@@ -18,6 +18,7 @@ class StockLedgerEntry(Document):
 		from erpnext.stock.utils import validate_warehouse_company
 		self.validate_mandatory()
 		self.validate_item()
+		self.validate_batch()
 		validate_warehouse_company(self.warehouse, self.company)
 		self.scrub_posting_time()
 
@@ -96,6 +97,13 @@ class StockLedgerEntry(Document):
 	def scrub_posting_time(self):
 		if not self.posting_time or self.posting_time == '00:0':
 			self.posting_time = '00:00'
+			
+	def validate_batch(self):
+		if self.batch_no and self.voucher_type != "Stock Entry":
+			expiry_date = getdate(frappe.db.get_value("Batch", self.batch_no, "expiry_date"))
+			if expiry_date:
+				if getdate(self.posting_date) > expiry_date:
+					frappe.throw(_("Batch {0} of Item {1} has expired.").format(self.batch_no, self.item_code))
 
 def on_doctype_update():
 	if not frappe.db.sql("""show index from `tabStock Ledger Entry`
