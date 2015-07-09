@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, json
 
-from frappe.utils import flt, nowdate, get_datetime, getdate, date_diff, cint
+from frappe.utils import flt, nowdate, get_datetime, getdate, date_diff, cint, now
 from frappe import _
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
@@ -174,13 +174,17 @@ class ProductionOrder(Document):
 
 	def set_production_order_operations(self):
 		"""Fetch operations from BOM and set in 'Production Order'"""
-
+		if not self.bom_no:
+			return
 		self.set('operations', [])
-
 		operations = frappe.db.sql("""select operation, description, workstation, idx,
 			hour_rate, time_in_mins, "Pending" as status from `tabBOM Operation`
 			where parent = %s order by idx""", self.bom_no, as_dict=1)
-
+		if operations:
+			self.track_operations=1
+		else:
+			self.track_operations=0
+			frappe.msgprint(_("Cannot 'track operations' as selected BOM does not have Operations."))
 		self.set('operations', operations)
 		self.calculate_time()
 
@@ -219,14 +223,12 @@ class ProductionOrder(Document):
 		for i, d in enumerate(self.operations):
 			self.set_operation_start_end_time(i, d)
 
-			if not d.workstation:
-				continue
-
 			time_log = make_time_log(self.name, d.operation, d.planned_start_time, d.planned_end_time,
 				flt(self.qty) - flt(d.completed_qty), self.project_name, d.workstation, operation_id=d.name)
 
-			# validate operating hours if workstation [not mandatory] is specified
-			self.check_operation_fits_in_working_hours(d)
+			if d.workstation:
+				# validate operating hours if workstation [not mandatory] is specified
+				self.check_operation_fits_in_working_hours(d)
 
 			original_start_time = time_log.from_time
 			while True:
@@ -327,6 +329,12 @@ class ProductionOrder(Document):
 		
 		if frappe.db.get_value("Item", self.production_item, "has_variants"):
 			frappe.throw(_("Production Order cannot be raised against a Item Template"))
+	
+	def track_operation(self):
+		if self.track_operations:
+			self.set_production_order_operations()
+		else:
+			self.set('operations', [])
 
 @frappe.whitelist()
 def get_item_details(item):
@@ -391,7 +399,7 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_time_log(name, operation, from_time, to_time, qty=None,  project=None, workstation=None, operation_id=None):
+def make_time_log(name, operation, from_time=now(), to_time=now(), qty=None,  project=None, workstation=None, operation_id=None):
 	time_log =  frappe.new_doc("Time Log")
 	time_log.for_manufacturing = 1
 	time_log.from_time = from_time
