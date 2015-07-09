@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest, copy
 import time
+from frappe.utils import nowdate, add_days
 from erpnext.accounts.utils import get_stock_and_account_difference
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.projects.doctype.time_log_batch.test_time_log_batch import *
@@ -756,14 +757,28 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# hack! because stock ledger entires are already inserted and are not rolled back!
 		self.assertRaises(SerialNoDuplicateError, si.cancel)
+		
+	def test_invoice_due_date_against_customers_credit_days(self):
+		si = create_sales_invoice()
+		# set customer's credit days
+		frappe.db.set_value("Customer", "_Test Customer", "credit_days_based_on", "Fixed Days")
+		frappe.db.set_value("Customer", "_Test Customer", "credit_days", 10)
+		
+		si.validate()
+		self.assertEqual(si.due_date, add_days(nowdate(), 10))
+		
+		# set customer's credit days is last day of the next month
+		frappe.db.set_value("Customer", "_Test Customer", "credit_days_based_on", "Last Day of the Next Month")
+		
+		si1 = create_sales_invoice(posting_date="2015-07-05")		
+		self.assertEqual(si1.due_date, "2015-08-31")
+		
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)
 	if args.posting_date:
-		si.posting_date = args.posting_date
-	if args.posting_time:
-		si.posting_time = args.posting_time
+		si.posting_date = args.posting_date or nowdate()
 
 	si.company = args.company or "_Test Company"
 	si.customer = args.customer or "_Test Customer"

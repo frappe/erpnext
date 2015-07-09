@@ -146,6 +146,33 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}
 		}
 	},
+	
+	posting_date: function() {
+		var me = this;
+		if (this.frm.doc.posting_date) {
+			if (this.frm.doc.customer) {
+				return frappe.call({
+					method: "erpnext.accounts.party.get_due_date",
+					args: {
+						"posting_date": me.frm.doc.posting_date,
+						"party_type": "Customer",
+						"party": me.frm.doc.customer,
+						"company": me.frm.doc.company
+					}, 
+					callback: function(r, rt) {
+						if(r.message) {
+							me.frm.set_value("due_date", r.message);
+						}
+						erpnext.get_fiscal_year(me.frm.doc.company, me.frm.doc.posting_date);
+					}
+				})
+			} else {
+				erpnext.get_fiscal_year(me.frm.doc.company, me.frm.doc.posting_date);
+			}
+		}
+		
+	},
+	
 
 	customer: function() {
 		var me = this;

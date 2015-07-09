@@ -14,7 +14,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			$.each({
 				posting_date: today,
-				due_date: today,
 				transaction_date: today,
 				currency: currency,
 				price_list_currency: currency,

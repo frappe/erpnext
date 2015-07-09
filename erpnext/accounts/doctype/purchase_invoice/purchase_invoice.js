@@ -68,6 +68,32 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 		}
 	},
+	
+	posting_date: function() {
+		var me = this;
+		if (this.frm.doc.posting_date) {
+			if (this.frm.doc.supplier) {
+				return frappe.call({
+					method: "erpnext.accounts.party.get_due_date",
+					args: {
+						"posting_date": me.frm.doc.posting_date,
+						"party_type": "Supplier",
+						"party": me.frm.doc.supplier,
+						"company": me.frm.doc.company
+					}, 
+					callback: function(r, rt) {
+						if(r.message) {
+							me.frm.set_value("due_date", r.message);
+						}
+						erpnext.get_fiscal_year(me.frm.doc.company, me.frm.doc.posting_date);
+					}
+				})
+			} else {
+				erpnext.get_fiscal_year(me.frm.doc.company, me.frm.doc.posting_date);
+			}
+		}
+		
+	},
 
 	supplier: function() {
 		var me = this;
