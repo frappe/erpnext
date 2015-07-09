@@ -759,12 +759,11 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertRaises(SerialNoDuplicateError, si.cancel)
 		
 	def test_invoice_due_date_against_customers_credit_days(self):
-		si = create_sales_invoice()
 		# set customer's credit days
 		frappe.db.set_value("Customer", "_Test Customer", "credit_days_based_on", "Fixed Days")
 		frappe.db.set_value("Customer", "_Test Customer", "credit_days", 10)
 		
-		si.validate()
+		si = create_sales_invoice()
 		self.assertEqual(si.due_date, add_days(nowdate(), 10))
 		
 		# set customer's credit days is last day of the next month

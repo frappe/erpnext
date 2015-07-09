@@ -164,7 +164,7 @@ def get_due_date(posting_date, party_type, party, company):
 	"""Set Due Date = Posting Date + Credit Days"""
 	due_date = None
 	if posting_date and party:
-		due_date = nowdate()
+		due_date = posting_date
 		if party_type=="Customer":
 			credit_days_based_on, credit_days = get_credit_days(party_type, party, company)
 			if credit_days_based_on == "Fixed Days" and credit_days:
