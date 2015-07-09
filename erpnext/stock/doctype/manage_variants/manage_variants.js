@@ -42,6 +42,10 @@ frappe.ui.form.on("Manage Variants", {
 			})
 		});
 	},
+	
+	onload_post_render: function(frm) {
+		frm.get_field("variants").grid.cannot_add_rows = true;
+	},
 
 	item_code:function(frm) {
 		return frappe.call({
