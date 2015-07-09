@@ -30,6 +30,7 @@ class ProductionOrder(Document):
 		validate_status(self.status, ["Draft", "Submitted", "Stopped",
 			"In Process", "Completed", "Cancelled"])
 
+		self.validate_production_item()
 		if self.bom_no:
 			validate_bom_no(self.production_item, self.bom_no)
 
@@ -319,6 +320,13 @@ class ProductionOrder(Document):
 	def delete_time_logs(self):
 		for time_log in frappe.get_all("Time Log", ["name"], {"production_order": self.name}):
 			frappe.delete_doc("Time Log", time_log.name)
+	
+	def validate_production_item(self):
+		if frappe.db.get_value("Item", self.production_item, "is_pro_applicable")=='No':
+			frappe.throw(_("Item is not allowed to have Production Order."))
+		
+		if frappe.db.get_value("Item", self.production_item, "has_variants"):
+			frappe.throw(_("Production Order cannot be raised against a Item Template"))
 
 @frappe.whitelist()
 def get_item_details(item):
