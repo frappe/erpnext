@@ -1037,7 +1037,7 @@ DocType: Leave Control Panel,Leave blank if considered for all branches,Laat lee
 DocType: DocField,Label,Label
 DocType: Payment Reconciliation,Unreconciled Payment Details,Niet-afgeletterde Betalingsgegevens
 DocType: Global Defaults,Current Fiscal Year,Huidige fiscale jaar
-DocType: Global Defaults,Disable Rounded Total,Uitschakelen Afgerond Totaal
+DocType: Global Defaults,Disable Rounded Total,Deactiveer Afgerond Totaal
 DocType: Lead,Call,Bellen
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +356,'Entries' cannot be empty,'Invoer' kan niet leeg zijn
 apps/erpnext/erpnext/utilities/transaction_base.py +72,Duplicate row {0} with same {1},Dubbele rij {0} met dezelfde {1}
@@ -1660,7 +1660,7 @@ DocType: Leave Control Panel,Leave blank if considered for all employee types,La
 DocType: Landed Cost Voucher,Distribute Charges Based On,Verdeel Toeslagen op basis van
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +253,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,"Rekening {0} moet van het type 'vaste activa', omdat Artikel {1} een Activa Artikel is"
 DocType: HR Settings,HR Settings,HR-instellingen
-apps/frappe/frappe/config/setup.py +130,Printing,Het drukken
+apps/frappe/frappe/config/setup.py +130,Printing,Afdrukken
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +107,Expense Claim is pending approval. Only the Expense Approver can update status.,Kostendeclaratie is in afwachting van goedkeuring. Alleen de Kosten Goedkeurder kan status bijwerken.
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +99,The day(s) on which you are applying for leave are holiday. You need not apply for leave.,De dag(en) waarvoor je verlof aanvraagt zijn feestdagen. Hier hoef je niet voor aan te vragen.
 sites/assets/js/desk.min.js +684,and,en

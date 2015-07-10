@@ -2150,7 +2150,7 @@ apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +679,Please select a
 DocType: Global Defaults,For automatic exchange rates go to jsonrates.com and signup for an API key,Für die automatische Wechselkurse gehen jsonrates.com und signup für einen API-Schlüssel
 apps/erpnext/erpnext/config/selling.py +33,All Addresses.,Alle Adressen
 DocType: Company,Stock Settings,Bestandseinstellungen
-DocType: User,Bio,Bio
+DocType: User,Bio,Lebenslauf
 apps/erpnext/erpnext/accounts/doctype/account/account.py +166,"Merging is only possible if following properties are same in both records. Is Group, Root Type, Company","Merging ist nur möglich, wenn folgende Eigenschaften sind in beiden Datensätzen. Ist Group, der Starttyp, Company"
 apps/erpnext/erpnext/config/crm.py +62,Manage Customer Group Tree.,Verwalten von Kundengruppen
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +278,New Cost Center Name,Neue Kostenstellennamen
@@ -2568,7 +2568,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +94,Boring,L
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +680,From Sales Order,Aus Kundenauftrag
 DocType: Blog Category,Parent Website Route,Eltern- Webseite Routen
 DocType: Sales Order,Not Billed,nicht abgerechnet
-apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +107,Both Warehouse must belong to same Company,Beide Lager müssen zur gleichen Gesellschaft gehören
+apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +107,Both Warehouse must belong to same Company,Beide Lager müssen zur gleichen Firma gehören
 sites/assets/js/erpnext.min.js +20,No contacts added yet.,Noch keine Kontakte hinzugefügt.
 apps/frappe/frappe/workflow/doctype/workflow/workflow_list.js +7,Not active,Nicht aktiv
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +43,Against Invoice Posting Date,Gegen Rechnung Buchungsdatum
@@ -3531,7 +3531,7 @@ apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +62,Item: {0} does not exi
 apps/erpnext/erpnext/accounts/doctype/account/account.py +63,You are not authorized to set Frozen value,Sie haben keine Berechtigung eingefrorene Werte zu setzen
 DocType: Payment Reconciliation,Get Unreconciled Entries,Holen Nicht abgestimmte Einträge
 DocType: Purchase Receipt,Date on which lorry started from supplier warehouse,Abfahrtdatum des LKW aus dem Lieferantenlager
-DocType: Cost Center,Budgets,Haushalts
+DocType: Cost Center,Budgets,Haushalte
 apps/frappe/frappe/core/page/modules_setup/modules_setup.py +11,Updated,Aktualisiert
 DocType: Employee,Emergency Contact Details,Notfallkontaktdaten
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +394,What does it do?,Unternehmenszweck?
