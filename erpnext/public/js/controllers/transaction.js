@@ -14,7 +14,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			$.each({
 				posting_date: today,
-				due_date: today,
 				transaction_date: today,
 				currency: currency,
 				price_list_currency: currency,
@@ -255,7 +254,29 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	posting_date: function() {
-		erpnext.get_fiscal_year(this.frm.doc.company, this.frm.doc.posting_date);
+		var me = this;
+		if (this.frm.doc.posting_date) {
+			if ((this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.customer) || 
+				(this.frm.doc.doctype == "Purchase Invoice" && this.frm.doc.supplier)) {
+				return frappe.call({
+					method: "erpnext.accounts.party.get_due_date",
+					args: {
+						"posting_date": me.frm.doc.posting_date,
+						"party_type": me.frm.doc.doctype == "Sales Invoice" ? "Customer" : "Supplier",
+						"party": me.frm.doc.doctype == "Sales Invoice" ? me.frm.doc.customer : me.frm.doc.supplier,
+						"company": me.frm.doc.company
+					}, 
+					callback: function(r, rt) {
+						if(r.message) {
+							me.frm.set_value("due_date", r.message);
+						}
+						erpnext.get_fiscal_year(me.frm.doc.company, me.frm.doc.posting_date);
+					}
+				})
+			} else {
+				erpnext.get_fiscal_year(me.frm.doc.company, me.frm.doc.posting_date);
+			}
+		}
 	},
 
 	get_company_currency: function() {

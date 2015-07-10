@@ -68,7 +68,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 		}
 	},
-
+	
 	supplier: function() {
 		var me = this;
 		if(this.frm.updating_party_details)

@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, flt, fmt_money, formatdate, getdate
+from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, date_diff
 from frappe import msgprint, _, scrub
 from erpnext.setup.utils import get_company_currency
 from erpnext.controllers.accounts_controller import AccountsController
@@ -35,7 +35,7 @@ class JournalEntry(AccountsController):
 		self.set_print_format_fields()
 		self.validate_against_sales_order()
 		self.validate_against_purchase_order()
-		self.check_credit_days()
+		self.check_due_date()
 		self.validate_expense_claim()
 		self.validate_credit_debit_note()
 		self.validate_empty_accounts_table()
@@ -88,23 +88,21 @@ class JournalEntry(AccountsController):
 			for customer in customers:
 				check_credit_limit(customer, self.company)
 
-	def check_credit_days(self):
-		from erpnext.accounts.party import get_credit_days
-		posting_date = None
+	def check_due_date(self):
 		if self.cheque_date:
 			for d in self.get("accounts"):
 				if d.party_type and d.party and d.get("credit" if d.party_type=="Customer" else "debit") > 0:
+					due_date = None
 					if d.against_invoice:
-						posting_date = frappe.db.get_value("Sales Invoice", d.against_invoice, "posting_date")
+						due_date = frappe.db.get_value("Sales Invoice", d.against_invoice, "due_date")
 					elif d.against_voucher:
-						posting_date = frappe.db.get_value("Purchase Invoice", d.against_voucher, "posting_date")
+						due_date = frappe.db.get_value("Purchase Invoice", d.against_voucher, "due_date")
 
-					credit_days = get_credit_days(d.party_type, d.party, self.company)
-					if posting_date and credit_days:
-						date_diff = (getdate(self.cheque_date) - getdate(posting_date)).days
-						if  date_diff > flt(credit_days):
-							msgprint(_("Note: Reference Date exceeds allowed credit days by {0} days for {1} {2}")
-								.format(date_diff - flt(credit_days), d.party_type, d.party))
+					if due_date and getdate(self.cheque_date) > getdate(due_date):
+						diff = date_diff(self.cheque_date, due_date)
+						if  diff > 0:
+							msgprint(_("Note: Reference Date exceeds invoice due date by {0} days for {1} {2}")
+								.format(diff, d.party_type, d.party))
 
 	def validate_cheque_info(self):
 		if self.voucher_type in ['Bank Entry']:
