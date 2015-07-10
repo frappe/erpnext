@@ -53,7 +53,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py +35,Expected End Date c
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +235,Do really want to unstop production order:,खरोखर उत्पादन ऑर्डर बूच करू इच्छिता:
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +190,New Leave Application,नवी रजेचा अर्ज
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +129,Bank Draft,बँक ड्राफ्ट
-DocType: Features Setup,1. To maintain the customer wise item code and to make them searchable based on their code use this option,"1. ग्राहक शहाणा आयटम कोड ठेवणे, त्यांचा कोड वापर हा पर्याय आधारित ते शोध करण्यासाठी"
+DocType: Features Setup,1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. या पर्याय चा वापर ग्राहक नुसार आयटम कोड ठेवणे आणि आयटम कोड  चा शोध करण्यासाठी करावा 
 DocType: Mode of Payment Account,Mode of Payment Account,भरणा खाते मोड
 apps/erpnext/erpnext/stock/doctype/item/item.js +60,Show Variants,दर्शवा रूपे
 DocType: Sales Invoice Item,Quantity,प्रमाण
@@ -379,7 +379,7 @@ DocType: Item,"Selecting ""Yes"" will allow this item to figure in Sales Order, 
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +212,Please enter Purchase Receipt No to proceed,पुढे जाण्यासाठी कोणतीही खरेदी पावती प्रविष्ट करा
 DocType: Landed Cost Item,Applicable Charges,लागू असलेले शुल्क
 DocType: Workstation,Consumable Cost,Consumable खर्च
-apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +153,{0} ({1}) must have role 'Leave Approver',{0} ({1}) भूमिका असणे आवश्यक आहे &#39;रजा मंजुरी&#39;
+apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +153,{0} ({1}) must have role 'Leave Approver',{0} ({1}) 'रजा मंजुरी' भूमिका असणे आवश्यक आहे
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +39,Medical,वैद्यकीय
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +124,Reason for losing,तोट्याचा कारण
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +35,Tube beading,नळी मण्यांचे काम
@@ -401,7 +401,7 @@ DocType: Buying Settings,Supplier Name,पुरवठादार नाव
 DocType: Account,Is Group,आहे गट
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +30,Thermoforming,Thermoforming
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +65,Slitting,Slitting
-apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +57,'To Case No.' cannot be less than 'From Case No.',&#39;केस क्रमांक&#39; &#39;प्रकरण क्रमांक पासून&#39; पेक्षा कमी असू शकत नाही
+apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +57,'To Case No.' cannot be less than 'From Case No.','प्रकरण क्रमांक' पेक्षा 'प्रकरण क्रमांक पासून' कमी असू शकत नाही
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +99,Non Profit,ना नफा
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order_list.js +7,Not Started,प्रारंभ नाही
 DocType: Lead,Channel Partner,चॅनेल पार्टनर
@@ -548,7 +548,7 @@ DocType: Email Digest,New Enquiries,न्यू चौकशी
 DocType: Employee,Reason for Resignation,राजीनामा कारण
 apps/erpnext/erpnext/config/hr.py +150,Template for performance appraisals.,कामगिरी मूल्यमापने साचा.
 DocType: Payment Reconciliation,Invoice/Journal Entry Details,चलन / जर्नल प्रवेश तपशील
-apps/erpnext/erpnext/accounts/utils.py +50,{0} '{1}' not in Fiscal Year {2},{0} &#39;{1}&#39; नाही आथिर्क वर्षात {2}
+apps/erpnext/erpnext/accounts/utils.py +50,{0} '{1}' not in Fiscal Year {2},{0} '{1}' आथिर्क वर्षात नाही {2}
 DocType: Buying Settings,Settings for Buying Module,विभाग खरेदी साठी सेटिंग्ज
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +62,Please enter Purchase Receipt first,पहिल्या खरेदी पावती प्रविष्ट करा
 DocType: Buying Settings,Supplier Naming By,करून पुरवठादार नामांकन
@@ -1593,7 +1593,7 @@ apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +137,N
 DocType: Communication,Date,तारीख
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +61,Repeat Customer Revenue,पुन्हा करा ग्राहक महसूल
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +592,Sit tight while your system is being setup. This may take a few moments.,"तुमची प्रणाली सेटअप केले जात आहे, तर खिळून बसा,. या काही क्षण लागू शकतात."
-apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +46,{0} ({1}) must have role 'Expense Approver',{0} ({1}) भूमिका &#39;एक्सपेन्स मंजुरी&#39; असणे आवश्यक आहे
+apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +46,{0} ({1}) must have role 'Expense Approver',{0} ({1}) 'एक्सपेन्स मंजुरी' भूमिका असणे आवश्यक आहे
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +574,Pair,जोडी
 DocType: Bank Reconciliation Detail,Against Account,खाते विरुद्ध
 DocType: Maintenance Schedule Detail,Actual Date,वास्तविक तारीख
@@ -2421,7 +2421,7 @@ apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +15,Make Sa
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +83,Unstop,बूच
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +175,Secured Loans,सुरक्षित कर्ज
 apps/erpnext/erpnext/utilities/doctype/rename_tool/rename_tool.py +49,Ignored:,दुर्लक्ष केले:
-apps/erpnext/erpnext/shopping_cart/__init__.py +68,{0} cannot be purchased using Shopping Cart,{0} हे खरेदी सूचीत टाका खरेदी वापर केला जाऊ शकत नाही
+apps/erpnext/erpnext/shopping_cart/__init__.py +68,{0} cannot be purchased using Shopping Cart,{0} शॉपिंग कार्ट चा वापर करून खरेदी करू शकत नाही
 apps/erpnext/erpnext/setup/page/setup_wizard/data/sample_home_page.html +3,Awesome Products,अप्रतिम उत्पादने
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +189,Opening Balance Equity,उघडणे शिल्लक इक्विटी
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +80,Cannot approve leave as you are not authorized to approve leaves on Block Dates,तुम्ही ब्लॉक तारखा वर पाने मंजूर करण्यासाठी अधिकृत नाही रजा मंजूर करू शकत नाही
@@ -2895,7 +2895,7 @@ DocType: GL Entry,Is Advance,आगाऊ आहे
 apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.js +20,Attendance From Date and Attendance To Date is mandatory,तारीख करण्यासाठी तारीख आणि विधान परिषदेच्या पासून उपस्थिती अनिवार्य आहे
 apps/erpnext/erpnext/controllers/buying_controller.py +132,Please enter 'Is Subcontracted' as Yes or No,होय किंवा नाही म्हणून &#39;Subcontracted आहे&#39; प्रविष्ट करा
 DocType: Sales Team,Contact No.,संपर्क क्रमांक
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +61,'Profit and Loss' type account {0} not allowed in Opening Entry,प्रवेश उघडत परवानगी नाही &#39;नफा व तोटा&#39; प्रकार खाते {0}
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +61,'Profit and Loss' type account {0} not allowed in Opening Entry,'नफा व तोटा' प्रकार खाते {0} प्रवेशास परवानगी नाही 
 DocType: Workflow State,Time,वेळ
 DocType: Features Setup,Sales Discounts,विक्री सवलत
 DocType: Hub Settings,Seller Country,विक्रेता देश
@@ -3258,7 +3258,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +79,Row{0}:
 DocType: Salary Slip,Salary Slip,पगाराच्या स्लिप्स
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +115,Burnishing,Burnishing
 DocType: Features Setup,To enable <b>Point of Sale</b> view,<b>विक्री दृष्टिकोनातून</b> सक्षम करण्यासाठी
-apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +54,'To Date' is required,&#39;तारीख करण्यासाठी&#39; आवश्यक आहे
+apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +54,'To Date' is required,'तारीख' आवश्यक आहे
 DocType: Packing Slip,"Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.","संकुल वितरित करण्यासाठी स्लिप पॅकिंग व्युत्पन्न. पॅकेज संख्या, संकुल सामुग्री आणि त्याचे वजन सूचित करण्यासाठी वापरले जाते."
 DocType: Sales Invoice Item,Sales Order Item,विक्री ऑर्डर आयटम
 DocType: Salary Slip,Payment Days,भरणा दिवस

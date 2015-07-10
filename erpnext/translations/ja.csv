@@ -305,7 +305,7 @@ DocType: Period Closing Voucher,Closing Account Head,決算科目
 DocType: Shopping Cart Settings,"<a href=""#Sales Browser/Customer Group"">Add / Edit</a>","もし、ごhref=""#Sales Browser/Customer Group"">追加/編集</ A>"
 DocType: Employee,External Work History,職歴（他社）
 apps/erpnext/erpnext/projects/doctype/task/task.py +86,Circular Reference Error,循環参照エラー
-DocType: ToDo,Closed,非公開
+DocType: ToDo,Closed,クローズ
 DocType: Delivery Note,In Words (Export) will be visible once you save the Delivery Note.,納品書を保存すると「表記（エクスポート）」が表示されます。
 DocType: Lead,Industry,業種
 DocType: Employee,Job Profile,職務内容
@@ -694,7 +694,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 税率の異なる「アイテム（複数）」がある場合、アイテムマスタで「アイテムごとの税率」テーブルを追加しなければなりません。
 ＃＃＃＃表の説明
 1. 計算タイプ：
-・「総計」（基本的な計の合計）
+・「差引計」（基本的な計の合計）
 ・「前行の計」（税・費用累計用）このオプションを選択した場合、税額は（税テーブルの）前行の率で適用されます。
 ・「実費」（前述の通り）
 2. 科目：
@@ -707,7 +707,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 税率
 6. 額：
 税額
-7. 合計：
+7. 計：
 ここまでの累計額
 8. 入力行：
 「前行の計」に対して計算基準となる行番号を選択することができます（デフォルトは「前行」です）
@@ -1046,7 +1046,7 @@ DocType: DocField,Label,ラベル
 DocType: Payment Reconciliation,Unreconciled Payment Details,未照合支払いの詳細
 DocType: Global Defaults,Current Fiscal Year,現在の会計年度
 DocType: Global Defaults,Disable Rounded Total,合計の四捨五入を無効にする
-DocType: Lead,Call,呼び出します
+DocType: Lead,Call,電話
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +356,'Entries' cannot be empty,「エントリ」は空にできません
 apps/erpnext/erpnext/utilities/transaction_base.py +72,Duplicate row {0} with same {1},行{0}は{1}と重複しています
 ,Trial Balance,試算表
@@ -1103,7 +1103,7 @@ DocType: Material Request,% Completed,% 完了
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +59,Account head {0} created,勘定科目{0}を作成しました
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +148,Green,グリーン
 DocType: Sales Order Item,Discount(%),割引（％）
-apps/erpnext/erpnext/selling/report/territory_target_variance_item_group_wise/territory_target_variance_item_group_wise.py +57,Total Achieved,達成合計
+apps/erpnext/erpnext/selling/report/territory_target_variance_item_group_wise/territory_target_variance_item_group_wise.py +57,Total Achieved,達成計
 DocType: Employee,Place of Issue,発生場所
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +54,Contract,契約書
 DocType: Report,Disabled,無効
@@ -1141,7 +1141,7 @@ apps/erpnext/erpnext/config/projects.py +43,Tools,ツール
 DocType: Sales Taxes and Charges Template,Valid For Territories,有効な地域
 DocType: Item,Website Item Groups,ウェブサイトのアイテムグループ
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +190,Production order number is mandatory for stock entry purpose manufacture,在庫エントリー目的の製造には製造指示番号が必須です
-DocType: Purchase Invoice,Total (Company Currency),合計（会社通貨）
+DocType: Purchase Invoice,Total (Company Currency),計（会社通貨）
 DocType: Applicable Territory,Applicable Territory,適切な地域
 apps/erpnext/erpnext/stock/utils.py +162,Serial number {0} entered more than once,シリアル番号{0}は複数回入力されています
 DocType: Journal Entry,Journal Entry,仕訳
@@ -1279,7 +1279,7 @@ DocType: Item Attribute,Item Attribute,アイテム属性
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +100,Government,政府
 DocType: Item,Re-order,再注文
 DocType: Company,Services,サービス
-apps/erpnext/erpnext/accounts/report/financial_statements.py +149,Total ({0}),合計（{0}）
+apps/erpnext/erpnext/accounts/report/financial_statements.py +149,Total ({0}),計（{0}）
 DocType: Cost Center,Parent Cost Center,親コストセンター
 DocType: Sales Invoice,Source,ソース
 DocType: Leave Type,Is Leave Without Pay,無給休暇
@@ -1679,7 +1679,7 @@ apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +99,The d
 sites/assets/js/desk.min.js +684,and,＆
 DocType: Leave Block List Allow,Leave Block List Allow,許可する休暇リスト
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +49,Sports,スポーツ
-apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +61,Total Actual,実費合計
+apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +61,Total Actual,実費計
 DocType: Stock Entry,"Get valuation rate and available stock at source/target warehouse on mentioned posting date-time. If serialized item, please press this button after entering serial nos.","記載された転記日時の、元／先倉庫での評価額と利用可能な在庫を取得します。
 アイテムにシリアル番号を付ける場合は、シリアル番号を入力した後、このボタンを押してください。"
 apps/erpnext/erpnext/templates/includes/cart.js +288,Something went wrong.,問題が発生しました。
@@ -1986,7 +1986,7 @@ DocType: UOM,Check this to disallow fractions. (for Nos),数に小数を許可�
 apps/erpnext/erpnext/config/crm.py +86,Newsletter Mailing List,ニュースレターメーリングリスト
 DocType: Delivery Note,Transporter Name,輸送者名
 DocType: Contact,Enter department to which this Contact belongs,この連絡先の所属部署を入力してください
-apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +56,Total Absent,欠席合計
+apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +56,Total Absent,欠席計
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +716,Item or Warehouse for row {0} does not match Material Request,行{0}のアイテムまたは倉庫が材料要求と一致していません
 apps/erpnext/erpnext/config/stock.py +109,Unit of Measure,数量単位
 DocType: Fiscal Year,Year End Date,年終日
@@ -2047,7 +2047,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 税率の異なる「アイテム（複数）」がある場合、アイテムマスタで「アイテムごとの税率」テーブルを追加しなければなりません。
 ＃＃＃＃表の説明
 1. 計算タイプ：
-・「総計」（基本的な計の合計）
+・「差引計」（基本的な計の合計）
 ・「前行の計」（税・費用累計用）このオプションを選択した場合、税額は（税テーブルの）前行の率で適用されます。
 ・「実費」（前述の通り）
 2. 科目：
@@ -2060,7 +2060,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 税率
 6. 額：
 税額
-7. 合計：
+7. 計：
 ここまでの累計額
 8. 入力行：
 「前行の計」に対して計算基準となる行数を選択することができます（デフォルトは「前行」です）
@@ -2153,7 +2153,7 @@ apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.js +48,Voucher #,伝
 DocType: Notification Control,Purchase Order Message,発注メッセージ
 DocType: Upload Attendance,Upload HTML,HTMLアップロード
 apps/erpnext/erpnext/controllers/accounts_controller.py +323,"Total advance ({0}) against Order {1} cannot be greater \
-				than the Grand Total ({2})",注文{1}に対する前受金合計（{0}）は総計（{2}）より大きくすることはできません
+				than the Grand Total ({2})",注文{1}に対する前受金計（{0}）は総計（{2}）より大きくすることはできません
 DocType: Employee,Relieving Date,退職日
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +12,"Pricing Rule is made to overwrite Price List / define discount percentage, based on some criteria.",価格設定ルールは、価格表を上書きし、いくつかの基準に基づいて値引きの割合を定義します
 DocType: Serial No,Warehouse can only be changed via Stock Entry / Delivery Note / Purchase Receipt,倉庫は在庫エントリー/納品書/領収書を介してのみ変更可能です
@@ -2219,7 +2219,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +111,Electro
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.js +14,This is a root customer group and cannot be edited.,ルート（大元の）顧客グループなので編集できません
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +39,Please setup your chart of accounts before you start Accounting Entries,会計エントリーを開始する前に、勘定科目を設定してください
 DocType: Purchase Invoice,Ignore Pricing Rule,価格設定ルールを無視
-sites/assets/js/list.min.js +23,Cancelled,キャンセル済み
+sites/assets/js/list.min.js +23,Cancelled,キャンセル
 DocType: Employee Education,Graduate,大卒
 DocType: Leave Block List,Block Days,ブロック日数
 DocType: Journal Entry,Excise Entry,消費税​​エントリ
@@ -2254,7 +2254,7 @@ DocType: Purchase Invoice,"Check if recurring invoice, uncheck to stop recurring
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +18,Attendance for employee {0} is already marked,従業員{0}の出勤はすでにマークされています
 DocType: Packing Slip,If more than one package of the same type (for print),同じタイプで複数パッケージの場合（印刷用）
 apps/erpnext/erpnext/utilities/doctype/rename_tool/rename_tool.py +38,Maximum {0} rows allowed,最大 {0} 行許容
-DocType: C-Form Invoice Detail,Net Total,合計額
+DocType: C-Form Invoice Detail,Net Total,差引計
 DocType: Bin,FCFS Rate,FCFSレート
 apps/erpnext/erpnext/accounts/page/pos/pos.js +15,Billing (Sales Invoice),請求書
 DocType: Payment Reconciliation Invoice,Outstanding Amount,残高
@@ -2301,7 +2301,7 @@ DocType: Sales Invoice,Sales Team1,販売チーム1
 apps/erpnext/erpnext/stock/doctype/item/item.py +408,Item {0} does not exist,アイテム{0}は存在しません
 DocType: Item,"Selecting ""Yes"" will allow you to make a Production Order for this item.",「はい」を選択すると、このアイテムの製造指示を行うことができます。
 DocType: Sales Invoice,Customer Address,顧客の住所
-DocType: Purchase Invoice,Total,合計
+DocType: Purchase Invoice,Total,計
 DocType: Backup Manager,System for managing Backups,バックアップ管理システム
 DocType: Account,Root Type,ルートタイプ
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +52,Plot,プロット
@@ -2568,7 +2568,7 @@ DocType: Item Group,Check this if you want to show in website,ウェブサイト
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +189,Welcome to ERPNext,ERPNextへようこそ
 DocType: Payment Reconciliation Payment,Voucher Detail Number,伝票詳細番号
 DocType: Lead,From Customer,顧客から
-apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +37,Calls,通話
+apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +37,Calls,電話
 DocType: Project,Total Costing Amount (via Time Logs),総原価額（時間ログ経由）
 DocType: Purchase Order Item Supplied,Stock UOM,在庫単位
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +192,Purchase Order {0} is not submitted,発注{0}は提出されていません
@@ -3701,7 +3701,7 @@ DocType: Period Closing Voucher,Period Closing Voucher,決算伝票
 apps/erpnext/erpnext/config/stock.py +125,Price List master.,価格表マスター
 DocType: Task,Review Date,レビュー日
 DocType: DocPerm,Level,レベル
-DocType: Purchase Taxes and Charges,On Net Total,合計額
+DocType: Purchase Taxes and Charges,On Net Total,差引計
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +176,Target warehouse in row {0} must be same as Production Order,{0}列のターゲット倉庫は製造注文と同じでなければなりません。
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.py +61,No permission to use Payment Tool,支払ツールを使用する権限がありません
 apps/erpnext/erpnext/controllers/recurring_document.py +191,'Notification Email Addresses' not specified for recurring %s,％sの繰り返しに「通知メールアドレス」が指定されていません
@@ -3755,7 +3755,7 @@ DocType: Lead,Blog Subscriber,ブログ購読者
 DocType: Email Digest,Income Year to Date,年度収入
 apps/erpnext/erpnext/config/setup.py +58,Create rules to restrict transactions based on values.,値に基づいて取引を制限するルールを作成
 DocType: HR Settings,"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day",チェックした場合、営業日数は全て祝日を含みますが、これにより1日あたりの給与の値は小さくなります
-DocType: Purchase Invoice,Total Advance,前払金合計
+DocType: Purchase Invoice,Total Advance,前払金計
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +543,Unstop Material Request,材料要求停止解除
 DocType: Workflow State,User,ユーザー
 DocType: Opportunity Item,Basic Rate,基本料金
@@ -3830,7 +3830,7 @@ DocType: GL Entry,Transaction Date,取引日
 DocType: Production Plan Item,Planned Qty,計画数量
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +92,Total Tax,税合計
 DocType: Stock Entry,Default Target Warehouse,デフォルト入庫先倉庫
-DocType: Purchase Invoice,Net Total (Company Currency),合計額（会社通貨）
+DocType: Purchase Invoice,Net Total (Company Currency),差引計（会社通貨）
 DocType: Notification Control,Purchase Receipt Message,領収書のメッセージ
 DocType: Production Order,Actual Start Date,実際の開始日
 DocType: Sales Order,% of materials delivered against this Sales Order,％の材料が納品済（この受注を対象）

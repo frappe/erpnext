@@ -2084,7 +2084,7 @@ apps/erpnext/erpnext/config/hr.py +100,Organization branch master.,فرع الم
 DocType: Purchase Invoice,Will be calculated automatically when you enter the details,وسيتم احتساب تلقائيا عند إدخال تفاصيل
 DocType: Delivery Note,Transporter lorry number,نقل الشاحنة رقم
 DocType: Sales Order,Billing Status,الحالة الفواتير
-DocType: Backup Manager,Backup Right Now,النسخ الاحتياطي الحق الآن
+DocType: Backup Manager,Backup Right Now,خذ نسخة احتياطية الان
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +135,Utility Expenses,مصاريف فائدة
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +45,90-Above,90 وفوق
 DocType: Buying Settings,Default Buying Price List,الافتراضي شراء قائمة الأسعار
@@ -2478,7 +2478,7 @@ DocType: Backup Manager,Upload Backups to Dropbox,تحميل النسخ الاح
 ,Qty to Receive,الكمية لاستقبال
 DocType: Leave Block List,Leave Block List Allowed,ترك قائمة الحظر مسموح
 apps/erpnext/erpnext/stock/doctype/stock_uom_replace_utility/stock_uom_replace_utility.py +104,Conversion factor cannot be in fractions,معامل التحويل لا يمكن أن يكون في الكسور
-apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +356,You will use it to Login,سوف استخدامه لتسجيل الدخول
+apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +356,You will use it to Login,ستستخدم هذا لتسجيل الدخول
 DocType: Sales Partner,Retailer,متاجر التجزئة
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +128,All Supplier Types,جميع أنواع مزود
 apps/erpnext/erpnext/stock/doctype/item/item.py +35,Item Code is mandatory because Item is not automatically numbered,كود البند إلزامي لأن السلعة بسهولة و غير مرقمة تلقائيا
