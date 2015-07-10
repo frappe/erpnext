@@ -185,20 +185,22 @@ class ProductionPlanningTool(Document):
 		"""
 		item_dict, bom_dict = {}, {}
 		for d in self.get("items"):
-			bom_dict.setdefault(d.bom_no, []).append([d.sales_order, flt(d.planned_qty)])
-			item_dict[(d.item_code, d.sales_order, d.warehouse)] = {
-				"production_item"	: d.item_code,
-				"sales_order"		: d.sales_order,
-				"qty" 				: flt(item_dict.get((d.item_code, d.sales_order, d.warehouse),
-										{}).get("qty")) + flt(d.planned_qty),
-				"bom_no"			: d.bom_no,
-				"description"		: d.description,
-				"stock_uom"			: d.stock_uom,
-				"company"			: self.company,
-				"wip_warehouse"		: "",
-				"fg_warehouse"		: d.warehouse,
-				"status"			: "Draft",
-			}
+			if d.bom_no:
+				bom_dict.setdefault(d.bom_no, []).append([d.sales_order, flt(d.planned_qty)])
+				if frappe.db.get_value("Item", d.item_code, "is_pro_applicable") == "Yes":
+					item_dict[(d.item_code, d.sales_order, d.warehouse)] = {
+						"production_item"	: d.item_code,
+						"sales_order"		: d.sales_order,
+						"qty" 				: flt(item_dict.get((d.item_code, d.sales_order, d.warehouse),
+												{}).get("qty")) + flt(d.planned_qty),
+						"bom_no"			: d.bom_no,
+						"description"		: d.description,
+						"stock_uom"			: d.stock_uom,
+						"company"			: self.company,
+						"wip_warehouse"		: "",
+						"fg_warehouse"		: d.warehouse,
+						"status"			: "Draft",
+					}
 		return bom_dict, item_dict
 
 	def create_production_order(self, items):
