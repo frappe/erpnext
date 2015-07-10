@@ -53,13 +53,9 @@ frappe.query_reports["General Ledger"] = {
 		{
 			"fieldname":"party_type",
 			"label": __("Party Type"),
-			"fieldtype": "Link",
-			"options": "DocType",
-			"get_query": function() {
-				return {
-					filters: {"name": ["in", ["Customer", "Supplier"]]}
-				}
-			}
+			"fieldtype": "Select",
+			"options": ["Customer", "Supplier"],
+			"default": "Customer"
 		},
 		{
 			"fieldname":"party",
