@@ -43,6 +43,15 @@
    "width": "100px"
   }, 
   {
+   "default": "", 
+   "fieldname": "planned_start_date", 
+   "fieldtype": "Datetime", 
+   "label": "Planned Start Date", 
+   "permlevel": 0, 
+   "precision": "", 
+   "reqd": 1
+  }, 
+  {
    "fieldname": "sales_order", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
@@ -104,7 +113,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-02-19 01:07:00.936590", 
+ "modified": "2015-07-08 07:12:11.211808", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Plan Item", 

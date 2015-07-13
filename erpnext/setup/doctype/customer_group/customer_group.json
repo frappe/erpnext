@@ -57,6 +57,15 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "credit_days_based_on", 
+   "fieldtype": "Select", 
+   "label": "Credit Days Based On", 
+   "options": "\nFixed Days\nLast Day of the Next Month", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.credit_days_based_on=='Fixed Days'", 
    "fieldname": "credit_days", 
    "fieldtype": "Int", 
    "label": "Credit Days", 
@@ -128,7 +137,7 @@
  "icon": "icon-sitemap", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-02-24 17:34:40.749511", 
+ "modified": "2015-07-09 12:43:18.846143", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Customer Group", 

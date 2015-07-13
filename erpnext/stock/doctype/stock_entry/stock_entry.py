@@ -201,6 +201,9 @@ class StockEntry(StockController):
 	def check_if_operations_completed(self):
 		"""Check if Time Logs are completed against before manufacturing to capture operating costs."""
 		prod_order = frappe.get_doc("Production Order", self.production_order)
+		if not prod_order.track_operations:
+			return
+			
 		for d in prod_order.get("operations"):
 			total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
 			if total_completed_qty > flt(d.completed_qty):
@@ -730,8 +733,10 @@ class StockEntry(StockController):
 		if self.purpose in ["Material Transfer for Manufacture", "Manufacture", "Repack", "Subcontract"]:
 			for item in self.get("items"):
 				if item.batch_no:
-					if getdate(self.posting_date) > getdate(frappe.db.get_value("Batch", item.batch_no, "expiry_date")):
-						frappe.throw(_("Batch {0} of Item {1} has expired.").format(item.batch_no, item.item_code))
+					expiry_date = frappe.db.get_value("Batch", item.batch_no, "expiry_date")
+					if expiry_date:
+						if getdate(self.posting_date) > getdate(expiry_date):
+							frappe.throw(_("Batch {0} of Item {1} has expired.").format(item.batch_no, item.item_code))
 
 @frappe.whitelist()
 def get_party_details(ref_dt, ref_dn):

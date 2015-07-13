@@ -144,7 +144,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Sales BOM",
+					"name": "Product Bundle",
 					"description": _("Bundle items at time of sale."),
 				},
 				{

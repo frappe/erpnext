@@ -66,5 +66,4 @@ def get_contact_details(contact):
 		"contact_designation": contact.get("designation"),
 		"contact_department": contact.get("department")
 	}
-
 	return out

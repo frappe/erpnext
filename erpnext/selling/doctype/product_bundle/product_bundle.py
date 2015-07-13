@@ -8,9 +8,7 @@ from frappe import _
 
 from frappe.model.document import Document
 
-class SalesBOM(Document):
-
-
+class ProductBundle(Document):
 	def autoname(self):
 		self.name = self.new_item_code
 
@@ -39,7 +37,7 @@ def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
 
 	return frappe.db.sql("""select name, item_name, description from tabItem
 		where is_stock_item="No" and is_sales_item="Yes"
-		and name not in (select name from `tabSales BOM`) and %s like %s
+		and name not in (select name from `tabProduct Bundle`) and %s like %s
 		%s limit %s, %s""" % (searchfield, "%s",
 		get_match_cond(doctype),"%s", "%s"),
 		("%%%s%%" % txt, start, page_len))

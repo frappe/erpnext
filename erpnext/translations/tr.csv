@@ -1918,7 +1918,7 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +37,"Selling 
 DocType: Purchase Order Item,Supplier Quotation Item,Tedarikçi Teklif ürünü
 apps/erpnext/erpnext/hr/doctype/employee/employee.js +27,Make Salary Structure,Maaş Yapısı oluşturun
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +53,Shearing,Makaslama
-DocType: Item,Has Variants,Değişkenleri Has
+DocType: Item,Has Variants,Varyasyoları var
 apps/erpnext/erpnext/projects/doctype/time_log_batch/time_log_batch.js +22,Click on 'Make Sales Invoice' button to create a new Sales Invoice.,Yeni Satış Faturası oluşturmak için 'Satış Fatura Yap' butonuna tıklayın.
 apps/erpnext/erpnext/controllers/recurring_document.py +164,Period From and Period To dates mandatory for recurring %s,Kimden ve Dönemi% s yinelenen zorunlu tarihleri ​​için Dönemi
 DocType: Journal Entry Account,Against Expense Claim,Gider İstem Karşı
@@ -4204,7 +4204,7 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py 
 DocType: Quality Inspection Reading,Quality Inspection Reading,Kalite Kontrol Okuma
 DocType: Quality Inspection Reading,Quality Inspection Reading,Kalite Kontrol Okuma
 DocType: Party Account,col_break1,col_break1
-apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,'Şundan eski stokları dondur' %günden daha küçük olmalıdır
+apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,'Şundan eski stokları dondur' %d günden daha küçük olmalıdır
 ,Project wise Stock Tracking,Proje bilgisi Stok Takibi
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +176,Maintenance Schedule {0} exists against {0},Bakım Programı {0} {0} karşılığında mevcuttur
 DocType: Stock Entry Detail,Actual Qty (at source/target),Fiili Miktar (kaynak / hedef)
@@ -4656,7 +4656,7 @@ DocType: Serial No,Available,Uygun
 DocType: Serial No,Available,Uygun
 DocType: Quality Inspection Reading,Reading 3,Reading 3
 DocType: Quality Inspection Reading,Reading 3,Reading 3
-,Hub,Merkez
+,Hub,Hub
 DocType: GL Entry,Voucher Type,Föy Türü
 DocType: Expense Claim,Approved,Onaylandı
 DocType: Pricing Rule,Price,Fiyat

@@ -131,6 +131,17 @@ $.extend(erpnext.utils, {
 				}
 			);
 		}
+	}, 
+	
+	copy_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname) {
+		var d = locals[dt][dn];
+		if(d[fieldname]){
+			var cl = doc[table_fieldname] || [];
+			for(var i = 0; i < cl.length; i++) {
+				if(!cl[i][fieldname]) cl[i][fieldname] = d[fieldname];
+			}
+		}
+		refresh_field(table_fieldname);
 	}
 });
 

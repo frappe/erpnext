@@ -70,16 +70,5 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 				frappe.set_route("query-report", "General Ledger");
 			}, "icon-table");
 		}
-	},
-
-	copy_account_in_all_row: function(doc, dt, dn, fieldname) {
-		var d = locals[dt][dn];
-		if(d[fieldname]){
-			var cl = doc["items"] || [];
-			for(var i = 0; i < cl.length; i++) {
-				if(!cl[i][fieldname]) cl[i][fieldname] = d[fieldname];
-			}
-		}
-		refresh_field("items");
 	}
 });

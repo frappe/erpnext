@@ -1,5 +1,9 @@
 # Contributing to Frappe / ERPNext
 
+## Questions
+
+If you have questions on how to use ERPNext or want help in customization or debugging of your scripts, please post on https://discuss.frappe.io. This is only for bug reports and feature requests.
+
 ## Reporting issues
 
 We only accept issues that are bug reports or feature requests. Bugs must be isolated and reproducible problems. Please read the following guidelines before opening any issue.

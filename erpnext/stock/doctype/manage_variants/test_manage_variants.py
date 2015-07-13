@@ -11,7 +11,7 @@ class TestManageVariants(unittest.TestCase):
 	def test_variant_item_codes(self):
 		manage_variant = frappe.new_doc("Manage Variants")
 		manage_variant.update({
-			"item": "_Test Variant Item",
+			"item_code": "_Test Variant Item",
 			"attributes": [
 				{
 					"attribute": "Test Size",
@@ -34,7 +34,7 @@ class TestManageVariants(unittest.TestCase):
 	def test_attributes_are_unique(self):
 		manage_variant = frappe.new_doc("Manage Variants")
 		manage_variant.update({
-			"item": "_Test Variant Item",
+			"item_code": "_Test Variant Item",
 			"attributes": [
 				{
 					"attribute": "Test Size",

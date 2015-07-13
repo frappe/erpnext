@@ -74,6 +74,14 @@
    "permlevel": 0
   }, 
   {
+   "default": "1", 
+   "fieldname": "track_operations", 
+   "fieldtype": "Check", 
+   "label": "Track Operations", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "column_break1", 
    "fieldtype": "Column Break", 
    "oldfieldtype": "Column Break", 
@@ -207,7 +215,7 @@
    "read_only": 1
   }, 
   {
-   "depends_on": "", 
+   "depends_on": "track_operations", 
    "fieldname": "operations_section", 
    "fieldtype": "Section Break", 
    "label": "Operations", 
@@ -216,6 +224,7 @@
    "precision": ""
   }, 
   {
+   "depends_on": "", 
    "fieldname": "operations", 
    "fieldtype": "Table", 
    "label": "Operations", 
@@ -225,6 +234,7 @@
    "read_only": 1
   }, 
   {
+   "depends_on": "track_operations", 
    "fieldname": "section_break_22", 
    "fieldtype": "Section Break", 
    "label": "Operation Cost", 
@@ -358,7 +368,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2015-04-13 02:44:17.319988", 
+ "modified": "2015-07-09 03:31:01.291811", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 

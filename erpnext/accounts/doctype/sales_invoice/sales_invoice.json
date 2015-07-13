@@ -322,9 +322,9 @@
    "read_only": 0
   }, 
   {
-   "fieldname": "sales_bom_help", 
+   "fieldname": "product_bundle_help", 
    "fieldtype": "HTML", 
-   "label": "Sales BOM Help", 
+   "label": "Product Bundle Help", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0
@@ -605,7 +605,7 @@
    "label": "Total Advance", 
    "oldfieldname": "total_advance", 
    "oldfieldtype": "Currency", 
-   "options": "", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 1
@@ -618,7 +618,7 @@
    "no_copy": 1, 
    "oldfieldname": "outstanding_amount", 
    "oldfieldtype": "Currency", 
-   "options": "currency", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 1
@@ -671,7 +671,7 @@
    "no_copy": 1, 
    "oldfieldname": "paid_amount", 
    "oldfieldtype": "Currency", 
-   "options": "currency", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0
@@ -711,7 +711,7 @@
    "fieldtype": "Currency", 
    "label": "Write Off Amount", 
    "no_copy": 1, 
-   "options": "currency", 
+   "options": "Company:company:default_currency", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0
@@ -1252,8 +1252,8 @@
  ], 
  "icon": "icon-file-text", 
  "idx": 1, 
- "is_submittable": 1, 
- "modified": "2015-07-03 03:25:40.519956", 
+ "is_submittable": 1,
+ "modified": "2015-07-09 17:33:28.583808", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 

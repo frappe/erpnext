@@ -60,7 +60,7 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Salary Manager",
+					"name": "Process Payroll",
 					"label": _("Process Payroll"),
 					"description":_("Generate Salary Slips"),
 					"hide_count": True
