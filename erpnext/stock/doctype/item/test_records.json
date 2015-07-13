@@ -109,7 +109,7 @@
   "stock_uom": "_Test UOM 1"
  },
  {
-  "description": "_Test Sales BOM Item 5",
+  "description": "_Test Product Bundle Item 5",
   "doctype": "Item",
   "expense_account": "_Test Account Cost for Goods Sold - _TC",
   "cost_center": "_Test Cost Center - _TC",
@@ -124,9 +124,9 @@
   "is_service_item": "No",
   "is_stock_item": "No",
   "is_sub_contracted_item": "No",
-  "item_code": "_Test Sales BOM Item",
+  "item_code": "_Test Product Bundle Item",
   "item_group": "_Test Item Group Desktops",
-  "item_name": "_Test Sales BOM Item",
+  "item_name": "_Test Product Bundle Item",
   "stock_uom": "_Test UOM"
  },
  {

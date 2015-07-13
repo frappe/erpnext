@@ -282,6 +282,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	get_company_currency: function() {
 		return erpnext.get_currency(this.frm.doc.company);
 	},
+	
+	contact_person: function() {
+		erpnext.utils.get_contact_details(this.frm);
+	},
 
 	currency: function() {
 		var me = this;

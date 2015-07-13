@@ -1,16 +1,16 @@
 [
  {
-  "doctype": "Sales BOM", 
-  "new_item_code": "_Test Sales BOM Item", 
+  "doctype": "Product Bundle", 
+  "new_item_code": "_Test Product Bundle Item", 
   "items": [
    {
-    "doctype": "Sales BOM Item", 
+    "doctype": "Product Bundle Item", 
     "item_code": "_Test Item", 
     "parentfield": "items", 
     "qty": 5.0
    }, 
    {
-    "doctype": "Sales BOM Item", 
+    "doctype": "Product Bundle Item", 
     "item_code": "_Test Item Home Desktop 100", 
     "parentfield": "items", 
     "qty": 2.0

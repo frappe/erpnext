@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, flt, cint, nowdate, now, add_days, comma_and
+from frappe.utils import cstr, flt, cint, nowdate, add_days, comma_and
 
 from frappe import msgprint, _
 
@@ -211,8 +211,6 @@ class ProductionPlanningTool(Document):
 		for key in items:
 			pro = frappe.new_doc("Production Order")
 			pro.update(items[key])
-
-			pro.planned_start_date = now()
 			pro.set_production_order_operations()
 
 			frappe.flags.mute_messages = True

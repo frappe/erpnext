@@ -1,5 +1,5 @@
 {
- "creation": "2013-05-23 16:55:51.000000", 
+ "creation": "2013-05-23 16:55:51", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
@@ -60,9 +60,10 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2013-12-20 19:21:38.000000", 
+ "modified": "2015-07-06 06:05:18.854360", 
  "modified_by": "Administrator", 
  "module": "Selling", 
- "name": "Sales BOM Item", 
- "owner": "Administrator"
+ "name": "Product Bundle Item", 
+ "owner": "Administrator", 
+ "permissions": []
 }

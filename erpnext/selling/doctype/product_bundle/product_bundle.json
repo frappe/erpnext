@@ -1,7 +1,7 @@
 {
  "allow_import": 1, 
  "creation": "2013-06-20 11:53:21", 
- "description": "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. \n\nThe package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".\n\nFor Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Sales BOM Item.\n\nNote: BOM = Bill of Materials", 
+ "description": "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. \n\nThe package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".\n\nFor Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Product Bundle Item.\n\nNote: BOM = Bill of Materials", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "document_type": "Master", 
@@ -38,7 +38,7 @@
    "label": "Items", 
    "oldfieldname": "sales_bom_items", 
    "oldfieldtype": "Table", 
-   "options": "Sales BOM Item", 
+   "options": "Product Bundle Item", 
    "permlevel": 0, 
    "reqd": 1
   }
@@ -46,10 +46,10 @@
  "icon": "icon-sitemap", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2015-02-20 05:05:03.719573", 
+ "modified": "2015-07-06 06:11:10.534423", 
  "modified_by": "Administrator", 
  "module": "Selling", 
- "name": "Sales BOM", 
+ "name": "Product Bundle", 
  "owner": "Administrator", 
  "permissions": [
   {

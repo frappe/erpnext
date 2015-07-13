@@ -7,12 +7,12 @@ import frappe, json
 def execute(filters=None):
 	data = []
 	parents = {
-		"Sales BOM Item": "Sales BOM",
+		"Product Bundle Item": "Product Bundle",
 		"BOM Explosion Item": "BOM",
 		"BOM Item": "BOM"
 	}
 
-	for doctype in ("Sales BOM Item",
+	for doctype in ("Product Bundle Item",
 		"BOM Explosion Item" if filters.search_sub_assemblies else "BOM Item"):
 		all_boms = {}
 		for d in frappe.get_all(doctype, fields=["parent", "item_code"]):

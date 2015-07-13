@@ -67,7 +67,8 @@
    "label": "Items", 
    "options": "Stock Reconciliation Item", 
    "permlevel": 0, 
-   "precision": ""
+   "precision": "", 
+   "reqd": 1
   }, 
   {
    "fieldname": "get_items", 
@@ -148,7 +149,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "max_attachments": 1, 
- "modified": "2015-02-20 04:39:46.585018", 
+ "modified": "2015-07-06 03:13:52.054017", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Reconciliation", 

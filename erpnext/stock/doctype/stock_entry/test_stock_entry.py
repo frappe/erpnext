@@ -346,7 +346,7 @@ class TestStockEntry(unittest.TestCase):
 		self._test_sales_invoice_return("_Test Item", 5, 2)
 
 	def test_sales_invoice_return_of_packing_item(self):
-		self._test_sales_invoice_return("_Test Sales BOM Item", 25, 20)
+		self._test_sales_invoice_return("_Test Product Bundle Item", 25, 20)
 
 	def _test_delivery_note_return(self, item_code, delivered_qty, returned_qty):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -381,7 +381,7 @@ class TestStockEntry(unittest.TestCase):
 		self._test_delivery_note_return("_Test Item", 5, 2)
 
 	def test_delivery_note_return_of_packing_item(self):
-		self._test_delivery_note_return("_Test Sales BOM Item", 25, 20)
+		self._test_delivery_note_return("_Test Product Bundle Item", 25, 20)
 
 	def _test_sales_return_jv(self, se):
 		jv = make_return_jv(se.name)
@@ -399,7 +399,7 @@ class TestStockEntry(unittest.TestCase):
 		self._test_sales_return_jv(se)
 
 	def test_make_return_jv_for_sales_invoice_packing_item(self):
-		se = self._test_sales_invoice_return("_Test Sales BOM Item", 25, 20)
+		se = self._test_sales_invoice_return("_Test Product Bundle Item", 25, 20)
 		self._test_sales_return_jv(se)
 
 	def test_make_return_jv_for_delivery_note_non_packing_item(self):
@@ -410,10 +410,10 @@ class TestStockEntry(unittest.TestCase):
 		self._test_sales_return_jv(se)
 
 	def test_make_return_jv_for_delivery_note_packing_item(self):
-		se = self._test_delivery_note_return("_Test Sales BOM Item", 25, 20)
+		se = self._test_delivery_note_return("_Test Product Bundle Item", 25, 20)
 		self._test_sales_return_jv(se)
 
-		se = self._test_delivery_note_return_against_sales_order("_Test Sales BOM Item", 25, 20)
+		se = self._test_delivery_note_return_against_sales_order("_Test Product Bundle Item", 25, 20)
 		self._test_sales_return_jv(se)
 
 	def _test_delivery_note_return_against_sales_order(self, item_code, delivered_qty, returned_qty):

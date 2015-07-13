@@ -1,6 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+frappe.require("assets/erpnext/js/utils.js");
+
 cur_frm.cscript.onload = function(doc, cdt, cdn) {
 	cur_frm.set_value("company", frappe.defaults.get_user_default("company"))
 	cur_frm.set_value("use_multi_level_bom", 1)
@@ -72,3 +74,7 @@ cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
 
 cur_frm.fields_dict.sales_orders.grid.get_field("customer").get_query =
 	cur_frm.fields_dict.customer.get_query;
+
+cur_frm.cscript.planned_start_date = function(doc, cdt, cdn) {
+	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "planned_start_date");
+}

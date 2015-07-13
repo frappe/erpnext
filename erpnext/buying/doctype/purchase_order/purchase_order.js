@@ -249,7 +249,7 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 
 
 cur_frm.cscript.schedule_date = function(doc, cdt, cdn) {
-	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "schedule_date");
+	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "schedule_date");
 }
 
 frappe.provide("erpnext.buying");

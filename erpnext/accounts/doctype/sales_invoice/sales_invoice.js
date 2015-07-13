@@ -369,15 +369,15 @@ cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(
 }
 
 cur_frm.cscript.income_account = function(doc, cdt, cdn) {
-	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "income_account");
+	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "income_account");
 }
 
 cur_frm.cscript.expense_account = function(doc, cdt, cdn) {
-	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "expense_account");
+	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "expense_account");
 }
 
 cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
-	cur_frm.cscript.copy_account_in_all_row(doc, cdt, cdn, "cost_center");
+	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "cost_center");
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {

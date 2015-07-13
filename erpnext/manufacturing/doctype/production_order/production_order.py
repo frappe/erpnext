@@ -317,7 +317,7 @@ class ProductionOrder(Document):
 	def validate_delivery_date(self):
 		if self.planned_start_date and self.expected_delivery_date \
 			and getdate(self.expected_delivery_date) < getdate(self.planned_start_date):
-				frappe.throw(_("Expected Delivery Date must be greater than Planned Start Date."))
+				frappe.msgprint(_("Expected Delivery Date is lesser than Planned Start Date."))
 
 	def delete_time_logs(self):
 		for time_log in frappe.get_all("Time Log", ["name"], {"production_order": self.name}):
