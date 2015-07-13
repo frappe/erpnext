@@ -162,7 +162,7 @@
  "hide_toolbar": 1, 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2014-05-27 03:49:07.654364", 
+ "modified": "2015-07-13 05:28:24.087304", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Bin", 
@@ -197,7 +197,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material User", 
+   "role": "Stock User", 
    "submit": 0, 
    "write": 0
   }

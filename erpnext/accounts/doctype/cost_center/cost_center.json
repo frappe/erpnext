@@ -139,7 +139,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-04-23 02:54:26.934607", 
+ "modified": "2015-07-13 05:28:25.504801", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Cost Center", 
@@ -189,7 +189,7 @@
    "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
-   "role": "Material User"
+   "role": "Stock User"
   }
  ], 
  "search_fields": "parent_cost_center, is_group"

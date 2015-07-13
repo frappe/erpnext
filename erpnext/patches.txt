@@ -175,3 +175,6 @@ erpnext.patches.v5_1.fix_credit_days_based_on
 erpnext.patches.v5_1.track_operations
 erpnext.patches.v5_1.sales_bom_rename
 execute:frappe.rename_doc("DocType", "Salary Manager", "Process Payroll", force=True)
+execute:frappe.rename_doc("Role", "Material User", "Stock User")
+execute:frappe.rename_doc("Role", "Material Manager", "Stock Manager")
+execute:frappe.rename_doc("Role", "Material Master Manager", "Item Manager")

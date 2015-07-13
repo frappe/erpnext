@@ -75,7 +75,7 @@
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
- "modified": "2015-06-30 13:40:59.946655", 
+ "modified": "2015-07-13 05:28:29.057918", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Manage Variants", 
@@ -91,7 +91,7 @@
    "print": 1, 
    "read": 1, 
    "report": 0, 
-   "role": "Material Master Manager", 
+   "role": "Item Manager", 
    "share": 1, 
    "write": 1
   }

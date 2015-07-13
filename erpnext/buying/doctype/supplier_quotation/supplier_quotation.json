@@ -660,7 +660,7 @@
  "icon": "icon-shopping-cart", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-06-15 15:39:08.954248", 
+ "modified": "2015-07-13 05:28:30.252636", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation", 
@@ -723,7 +723,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material User", 
+   "role": "Stock User", 
    "submit": 0, 
    "write": 0
   }, 

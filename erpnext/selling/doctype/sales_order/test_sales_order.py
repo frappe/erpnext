@@ -192,11 +192,11 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.permissions.add_user_permission("Company", "_Test Company 1", "test2@example.com")
 
 		test_user = frappe.get_doc("User", "test@example.com")
-		test_user.add_roles("Sales User", "Material User")
+		test_user.add_roles("Sales User", "Stock User")
 		test_user.remove_roles("Sales Manager")
 
 		test_user_2 = frappe.get_doc("User", "test2@example.com")
-		test_user_2.add_roles("Sales User", "Material User")
+		test_user_2.add_roles("Sales User", "Stock User")
 		test_user_2.remove_roles("Sales Manager")
 
 		frappe.set_user("test@example.com")

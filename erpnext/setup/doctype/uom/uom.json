@@ -27,7 +27,7 @@
  ], 
  "icon": "icon-compass", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:48.493718", 
+ "modified": "2015-07-13 05:28:23.143040", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "UOM", 
@@ -42,7 +42,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material Master Manager", 
+   "role": "Item Manager", 
    "share": 1, 
    "submit": 0, 
    "write": 1
@@ -56,7 +56,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material Manager", 
+   "role": "Stock Manager", 
    "submit": 0, 
    "write": 0
   }, 
@@ -70,7 +70,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material User", 
+   "role": "Stock User", 
    "submit": 0, 
    "write": 0
   }

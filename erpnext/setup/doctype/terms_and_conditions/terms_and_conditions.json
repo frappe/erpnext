@@ -32,7 +32,7 @@
  ], 
  "icon": "icon-legal", 
  "idx": 1, 
- "modified": "2015-02-05 05:11:48.092112", 
+ "modified": "2015-07-13 05:28:25.035649", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Terms and Conditions", 
@@ -103,7 +103,7 @@
    "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
-   "role": "Material User"
+   "role": "Stock User"
   }
  ]
 }

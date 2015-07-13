@@ -221,7 +221,7 @@
  "icon": "icon-ticket", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-06-09 05:47:05.934432", 
+ "modified": "2015-07-13 05:28:25.935998", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request", 
@@ -252,7 +252,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material Manager", 
+   "role": "Stock Manager", 
    "share": 1, 
    "submit": 1, 
    "write": 1
@@ -268,7 +268,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material User", 
+   "role": "Stock User", 
    "share": 1, 
    "submit": 1, 
    "write": 1

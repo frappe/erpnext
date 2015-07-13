@@ -1,0 +1,3 @@
+- Role rename: **Material User** is now **Stock User**
+- Role rename: **Material Manager** is now **Stock Manager**
+- Role rename: **Material Master Manager** is now **Item Manager**

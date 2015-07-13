@@ -1089,7 +1089,7 @@
  "idx": 1, 
  "is_submittable": 1, 
  "issingle": 0, 
- "modified": "2015-07-03 03:25:20.180721", 
+ "modified": "2015-07-13 05:28:26.889049", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 
@@ -1170,7 +1170,7 @@
    "permlevel": 0, 
    "read": 1, 
    "report": 1, 
-   "role": "Material User"
+   "role": "Stock User"
   }, 
   {
    "permlevel": 1, 
