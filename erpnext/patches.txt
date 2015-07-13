@@ -172,3 +172,4 @@ erpnext.patches.v5_0.item_variants
 erpnext.patches.v5_0.update_item_desc_in_invoice
 erpnext.patches.v5_1.fix_against_account
 erpnext.patches.v5_1.fix_credit_days_based_on
+erpnext.patches.v5_1.track_operations
