@@ -15,8 +15,12 @@ def get_data():
 					"type": "help",
 					"label": _("Setup Wizard"),
 					"youtube_id": "oIOf_zCFWKQ"
-				}
-
+				},
+				{
+					"type": "help",
+					"label": _("Customizing Forms"),
+					"youtube_id": "pJhL9mmxV_U"
+				},
 			]
 
 		},
@@ -93,6 +97,16 @@ def get_data():
 					"label": _("Customer and Supplier"),
 					"youtube_id": "anoGi_RpQ20"
 				},
+				{
+					"type": "help",
+					"label": _("Sales Order to Payment"),
+					"youtube_id": "7AMq4lqkN4A"
+				},
+				{
+					"type": "help",
+					"label": _("Point-of-Sale"),
+					"youtube_id": "4WkelWkbP_c"
+				}
 			]
 		},
 		{
@@ -108,11 +122,6 @@ def get_data():
 					"label": _("Opening Stock Balance"),
 					"youtube_id": "0yPgrtfeCTs"
 				},
-				{
-					"type": "help",
-					"label": _("Item Variants"),
-					"youtube_id": "OGBETlCzU5o"
-				},
 			]
 		},
 		{
@@ -123,6 +132,12 @@ def get_data():
 					"label": _("Customer and Supplier"),
 					"youtube_id": "anoGi_RpQ20"
 				},
+				{
+					"type": "help",
+					"label": _("Material Request to Purchase Order"),
+					"youtube_id": "4TN9kPyfIqM"
+				},
+
 			]
 		},
 		{
@@ -133,6 +148,47 @@ def get_data():
 					"label": _("Bill of Materials"),
 					"youtube_id": "hDV0c1OeWLo"
 				},
+				{
+					"type": "help",
+					"label": _("Production Planning Tool"),
+					"youtube_id": "CzatSl4zJ2Y"
+				},
+				{
+					"type": "help",
+					"label": _("Production Order"),
+					"youtube_id": "ZotgLyp2YFY"
+				},
+
 			]
-		}
+		},
+		{
+			"label": _("Human Resource"),
+			"items": [
+				{
+					"type": "help",
+					"label": _("Setting up Employees"),
+					"youtube_id": "USfIUdZlUhw"
+				},
+				{
+					"type": "help",
+					"label": _("Leave Management"),
+					"youtube_id": "fc0p_AXebc8"
+				},
+				{
+					"type": "help",
+					"label": _("Expense Claims"),
+					"youtube_id": "5SZHJF--ZFY"
+				},
+			]
+		},
+		{
+			"label": _("Projects"),
+			"items": [
+				{
+					"type": "help",
+					"label": _("Managing Projects"),
+					"youtube_id": "egxIGwtoKI4"
+				},
+			]
+		},
 	]

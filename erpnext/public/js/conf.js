@@ -7,6 +7,10 @@ frappe.provide('erpnext');
 $(document).bind('toolbar_setup', function() {
 	frappe.app.name = "ERPNext";
 
+	frappe.help_feedback_link = '<p><a class="text-muted" \
+		href="https://discuss.erpnext.com">Feedback</a></p>'
+
+
 	$('.navbar-home').html('ERPNext');
 
 	$('[data-link="docs"]').attr("href", "https://manual.erpnext.com")
