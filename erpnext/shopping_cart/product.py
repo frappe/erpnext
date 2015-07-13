@@ -4,19 +4,19 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import cint, fmt_money, cstr
+from frappe.utils import cint, fmt_money
 from erpnext.shopping_cart.cart import _get_cart_quotation
-from urllib import unquote
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import is_cart_enabled
 
 @frappe.whitelist(allow_guest=True)
 def get_product_info(item_code):
 	"""get product price / stock info"""
-	if not cint(frappe.db.get_default("shopping_cart_enabled")):
+	if not is_cart_enabled():
 		return {}
 
 	cart_quotation = _get_cart_quotation()
 
-	price_list = cstr(unquote(frappe.local.request.cookies.get("selling_price_list")))
+	price_list = cart_quotation.selling_price_list
 
 	warehouse = frappe.db.get_value("Item", item_code, "website_warehouse")
 	if warehouse:
