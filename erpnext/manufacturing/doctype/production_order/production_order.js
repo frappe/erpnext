@@ -186,14 +186,25 @@ $.extend(cur_frm.cscript, {
 	},
 
 	bom_no: function() {
-		return this.frm.call({
-			doc: this.frm.doc,
-			method: "set_production_order_operations"
-		});
+		if (this.frm.doc.track_operations) {
+			return this.frm.call({
+				doc: this.frm.doc,
+				method: "set_production_order_operations"
+			});
+		}
 	},
 	
 	qty: function() {
 		frappe.ui.form.trigger("Production Order", 'bom_no')
+	},
+	
+	track_operations: function(doc) {
+		if (doc.track_operations) {
+			frappe.ui.form.trigger("Production Order", 'bom_no')
+		}
+		else {
+			doc.operations =[];
+		}
 	},
 
 	show_time_logs: function(doc, cdt, cdn) {
