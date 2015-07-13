@@ -25,7 +25,7 @@ class TestShoppingCart(unittest.TestCase):
 		# test if lead is created and quotation with new lead is fetched
 		quotation = get_quotation()
 		self.assertEquals(quotation.quotation_to, "Lead")
-		self.assertEquals(frappe.db.get_value("Lead", quotation.lead, "email_id"), 
+		self.assertEquals(frappe.db.get_value("Lead", quotation.lead, "email_id"),
 			"test_cart_user@example.com")
 		self.assertEquals(quotation.customer, None)
 		self.assertEquals(quotation.contact_email, frappe.session.user)
@@ -61,7 +61,7 @@ class TestShoppingCart(unittest.TestCase):
 
 		# remove from cart
 		self.remove_all_items_from_cart()
-		
+
 		# add first item
 		set_item_in_cart("_Test Item", 1)
 		quotation = self.test_get_cart_lead()
@@ -198,7 +198,7 @@ class TestShoppingCart(unittest.TestCase):
 			"lead_name": "_Test Website Lead",
 			"phone": "+91 0000000000"
 		}).insert(ignore_permissions=True)
-		
+
 	def remove_all_items_from_cart(self):
 		quotation = get_quotation()
 		quotation.set("items", [])

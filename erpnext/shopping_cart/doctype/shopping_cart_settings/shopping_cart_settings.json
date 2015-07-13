@@ -42,6 +42,13 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "quotation_series", 
+   "fieldtype": "Select", 
+   "label": "Quotation Series", 
+   "permlevel": 0, 
+   "reqd": 1
+  }, 
+  {
    "description": "<a href=\"#Sales Browser/Customer Group\">Add / Edit</a>", 
    "fieldname": "default_customer_group", 
    "fieldtype": "Link", 
@@ -52,32 +59,27 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "quotation_series", 
-   "fieldtype": "Select", 
-   "label": "Quotation Series", 
-   "permlevel": 0, 
-   "reqd": 1
-  }, 
-  {
    "fieldname": "section_break_6", 
    "fieldtype": "Section Break", 
    "permlevel": 0
   }, 
   {
+   "description": "Enable Shopping Cart for specific Countries", 
+   "fieldname": "countries", 
+   "fieldtype": "Table", 
+   "label": "Countries", 
+   "options": "Shopping Cart Country", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "description": "Select Price Lists to be used for Shopping Cart", 
    "fieldname": "price_lists", 
    "fieldtype": "Table", 
    "label": "Price Lists", 
    "options": "Shopping Cart Price List", 
    "permlevel": 0, 
-   "reqd": 0
-  }, 
-  {
-   "fieldname": "shipping_rules", 
-   "fieldtype": "Table", 
-   "label": "Shipping Rules", 
-   "options": "Shopping Cart Shipping Rule", 
-   "permlevel": 0, 
-   "reqd": 0
+   "reqd": 1
   }, 
   {
    "fieldname": "column_break_10", 
@@ -85,10 +87,20 @@
    "permlevel": 0
   }, 
   {
+   "description": "Select Tax Templates to be used for Shopping Cart", 
    "fieldname": "sales_taxes_and_charges_masters", 
    "fieldtype": "Table", 
    "label": "Taxes and Charges", 
    "options": "Shopping Cart Taxes and Charges Master", 
+   "permlevel": 0, 
+   "reqd": 0
+  }, 
+  {
+   "description": "Select Shipping Rules to be used for Shopping Cart", 
+   "fieldname": "shipping_rules", 
+   "fieldtype": "Table", 
+   "label": "Shipping Rules", 
+   "options": "Shopping Cart Shipping Rule", 
    "permlevel": 0, 
    "reqd": 0
   }
@@ -96,7 +108,7 @@
  "icon": "icon-shopping-cart", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2015-02-05 05:11:46.714019", 
+ "modified": "2015-06-16 17:01:08.688460", 
  "modified_by": "Administrator", 
  "module": "Shopping Cart", 
  "name": "Shopping Cart Settings", 

@@ -9,18 +9,24 @@ from frappe import _, msgprint, throw
 from frappe.utils import flt, fmt_money
 from frappe.model.document import Document
 from erpnext.setup.utils import get_company_currency
+from erpnext.utilities.match_address import validate_address_params
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import onload_for_shopping_cart_settings
 
 class OverlappingConditionError(frappe.ValidationError): pass
 class FromGreaterThanToError(frappe.ValidationError): pass
 class ManyBlankToValuesError(frappe.ValidationError): pass
 
 class ShippingRule(Document):
+	def onload(self):
+		onload_for_shopping_cart_settings(self)
+
 	def validate(self):
 		self.validate_value("calculate_based_on", "in", ["Net Total", "Net Weight"])
 		self.conditions = self.get("conditions")
 		self.validate_from_to_values()
 		self.sort_shipping_rule_conditions()
 		self.validate_overlapping_shipping_rule_conditions()
+		validate_address_params(self, unique=False)
 
 	def validate_from_to_values(self):
 		zero_to_values = []

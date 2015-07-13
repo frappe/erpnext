@@ -5,218 +5,177 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _, msgprint
-from frappe.utils import comma_and
+from frappe import _
+from frappe.utils import cint
 from frappe.model.document import Document
-from frappe.utils.nestedset import get_ancestors_of, get_root_of
-from erpnext.utilities.doctype.address.address import get_territory_from_address
+from erpnext.utilities.match_address import prepare_filters, validate_unique_combinations
 
-class ShoppingCartSetupError(frappe.ValidationError): pass
+class DocumentNotFoundForCountryError(frappe.ValidationError): pass
+class MissingCurrencyExchangeError(frappe.ValidationError): pass
 
 class ShoppingCartSettings(Document):
+	def __setup__(self):
+		self.doctype_fieldnames = {
+			"Price List": {
+				"table_fieldname": "price_lists",
+				"link_fieldname": "selling_price_list"
+			},
+			"Sales Taxes and Charges Template": {
+				"table_fieldname": "sales_taxes_and_charges_masters",
+				"link_fieldname": "sales_taxes_and_charges_master"
+			},
+			"Shipping Rule": {
+				"table_fieldname": "shipping_rules",
+				"link_fieldname": "shipping_rule"
+			}
+		}
+
 	def onload(self):
 		self.get("__onload").quotation_series = frappe.get_meta("Quotation").get_options("naming_series")
 
 	def validate(self):
-		if self.enabled:
-			self.validate_price_lists()
-			self.validate_tax_masters()
-			self.validate_exchange_rates_exist()
+		if not self.enabled:
+			return
 
-	def on_update(self):
-		frappe.db.set_default("shopping_cart_enabled", self.get("enabled") or 0)
-		frappe.db.set_default("shopping_cart_quotation_series", self.get("quotation_series"))
-
-	def validate_overlapping_territories(self, parentfield, fieldname):
-		# for displaying message
-		doctype = self.meta.get_field(parentfield).options
-
-		# specify atleast one entry in the table
-		self.validate_table_has_rows(parentfield, raise_exception=ShoppingCartSetupError)
-
-		territory_name_map = self.get_territory_name_map(parentfield, fieldname)
-		for territory, names in territory_name_map.items():
-			if len(names) > 1:
-				frappe.throw(_("{0} {1} has a common territory {2}").format(_(doctype), comma_and(names), territory), ShoppingCartSetupError)
-
-		return territory_name_map
+		self.validate_price_lists()
+		self.validate_tax_templates()
+		self.validate_shipping_rules()
+		self.validate_exchange_rates()
 
 	def validate_price_lists(self):
-		self.validate_overlapping_territories("price_lists", "selling_price_list")
+		self.deduplicate("Price List")
+		self.validate_for_countries("Price List")
+		self.validate_unique_combinations("Price List")
 
-		# validate that a Shopping Cart Price List exists for the default territory as a catch all!
-		price_list_for_default_territory = self.get_name_from_territory(self.default_territory, "price_lists",
-			"selling_price_list")
+	def validate_tax_templates(self):
+		self.deduplicate("Sales Taxes and Charges Template")
+		self.validate_for_countries("Sales Taxes and Charges Template")
+		self.validate_unique_combinations("Sales Taxes and Charges Template")
 
-		if not price_list_for_default_territory:
-			msgprint(_("Please specify a Price List which is valid for Territory") +
-				": " + self.default_territory, raise_exception=ShoppingCartSetupError)
+	def validate_shipping_rules(self):
+		self.deduplicate("Shipping Rule")
+		self.validate_for_countries("Shipping Rule")
 
-	def validate_tax_masters(self):
-		self.validate_overlapping_territories("sales_taxes_and_charges_masters",
-			"sales_taxes_and_charges_master")
-
-	def get_territory_name_map(self, parentfield, fieldname):
-		territory_name_map = {}
-
-		# entries in table
-		names = [doc.get(fieldname) for doc in self.get(parentfield)]
-
-		if names:
-			# for condition in territory check
-			parenttype = frappe.get_meta(self.meta.get_options(parentfield)).get_options(fieldname)
-
-			# to validate territory overlap
-			# make a map of territory: [list of names]
-			# if list against each territory has more than one element, raise exception
-			territory_name = frappe.db.sql("""select `territory`, `parent`
-				from `tabApplicable Territory`
-				where `parenttype`=%s and `parent` in (%s)""" %
-				("%s", ", ".join(["%s"]*len(names))), tuple([parenttype] + names))
-
-			for territory, name in territory_name:
-				territory_name_map.setdefault(territory, []).append(name)
-
-				if len(territory_name_map[territory]) > 1:
-					territory_name_map[territory].sort(key=lambda val: names.index(val))
-
-		return territory_name_map
-
-	def validate_exchange_rates_exist(self):
-		"""check if exchange rates exist for all Price List currencies (to company's currency)"""
+	def validate_exchange_rates(self):
 		company_currency = frappe.db.get_value("Company", self.company, "default_currency")
-		if not company_currency:
-			msgprint(_("Please specify currency in Company") + ": " + self.company,
-				raise_exception=ShoppingCartSetupError)
+		price_list_currencies = list(set([frappe.db.get_value("Price List", d.selling_price_list, "currency")
+			for d in self.price_lists]))
 
-		price_list_currency_map = frappe.db.get_values("Price List",
-			[d.selling_price_list for d in self.get("price_lists")],
-			"currency")
+		missing_currency_exchange = []
+		for currency in price_list_currencies:
+			if currency != company_currency and not frappe.db.get_value("Currency Exchange",
+				filters={"from_currency": currency, "to_currency": company_currency}):
+				missing_currency_exchange.append((currency, company_currency))
 
-		# check if all price lists have a currency
-		for price_list, currency in price_list_currency_map.items():
-			if not currency:
-				frappe.throw(_("Currency is required for Price List {0}").format(price_list))
+		if missing_currency_exchange:
+			missing_currency_exchange = ", ".join("{0} - {1}".format(*tup) for tup in missing_currency_exchange)
+			frappe.throw(_("You need to create Currency Exchange records for: {0}").format(missing_currency_exchange), MissingCurrencyExchangeError)
 
-		expected_to_exist = [currency + "-" + company_currency
-			for currency in price_list_currency_map.values()
-			if currency != company_currency]
+	def deduplicate(self, doctype):
+		table_fieldname = self.doctype_fieldnames[doctype]["table_fieldname"]
+		link_fieldname = self.doctype_fieldnames[doctype]["link_fieldname"]
+		new_list = []
+		names = []
+		for d in self.get(table_fieldname):
+			if d.get(link_fieldname) not in names:
+				new_list.append(d)
+				names.append(d.get(link_fieldname))
 
-		if expected_to_exist:
-			exists = frappe.db.sql_list("""select name from `tabCurrency Exchange`
-				where name in (%s)""" % (", ".join(["%s"]*len(expected_to_exist)),),
-				tuple(expected_to_exist))
+		if len(self.get(table_fieldname)) != len(new_list):
+			self.set(table_fieldname, new_list)
 
-			missing = list(set(expected_to_exist).difference(exists))
+	def validate_for_countries(self, doctype):
+		table_fieldname = self.doctype_fieldnames[doctype]["table_fieldname"]
+		link_fieldname = self.doctype_fieldnames[doctype]["link_fieldname"]
 
-			if missing:
-				msgprint(_("Missing Currency Exchange Rates for {0}").format(comma_and(missing)),
-					raise_exception=ShoppingCartSetupError)
+		# eg. names of price lists selected in Shopping Cart Settings
+		names = [d.get(link_fieldname) for d in self.get(table_fieldname)]
+		if not names:
+			return
 
-	def get_name_from_territory(self, territory, parentfield, fieldname):
-		name = None
-		territory_name_map = self.get_territory_name_map(parentfield, fieldname)
-
-		if territory_name_map.get(territory):
-			name = territory_name_map.get(territory)
+		if self.countries:
+			# if countries are listed, check that record exists for the mentioned countries
+			self.validate_for_specific_country(doctype, names)
 		else:
-			territory_ancestry = self.get_territory_ancestry(territory)
-			for ancestor in territory_ancestry:
-				if territory_name_map.get(ancestor):
-					name = territory_name_map.get(ancestor)
-					break
+			# if countries are not listed, check if "Any Country" or ("Home Country" and "Rest of the World") combination exists
+			self.validate_for_any_country(doctype, names)
 
-		return name
+	def validate_for_specific_country(self, doctype, names):
+		home_country = frappe.db.get_value("Company", self.company, "country")
 
-	def get_price_list(self, billing_territory):
-		price_list = self.get_name_from_territory(billing_territory, "price_lists", "selling_price_list")
-		if not (price_list and price_list[0]):
-			price_list = self.get_name_from_territory(self.default_territory or get_root_of("Territory"),
-				"price_lists", "selling_price_list")
+		for country in self.countries:
+			country = country.country
+			results = frappe.get_all(doctype, filters=prepare_filters(doctype, self.company, {
+				"if_address_matches": "Country, State, Postal Code Pattern",
+				"country": country,
+				"state": "",
+				"postal_code_pattern": "",
+				"name": ("in", names)
+			}))
 
-		return price_list and price_list[0] or None
+			if not results and country==home_country:
+				results = frappe.get_all(doctype, filters=prepare_filters(doctype, self.company, {
+					"if_address_matches": "Home Country",
+					"name": ("in", names)
+				}))
+				if not results:
+					frappe.throw(_("Please select a '{0}' which has 'If Address Matches' as 'Home Country'").format(doctype), DocumentNotFoundForCountryError)
 
-	def get_tax_master(self, billing_territory):
-		tax_master = self.get_name_from_territory(billing_territory, "sales_taxes_and_charges_masters",
-			"sales_taxes_and_charges_master")
-		return tax_master and tax_master[0] or None
+			if not results:
+				frappe.throw(_("Please select a '{0}' which has 'If Address Matches' as 'Country, State, Post Code Pattern', 'Country' as '{1}', and 'State' and 'Post Code Pattern' as blank").format(doctype, country), DocumentNotFoundForCountryError)
 
-	def get_shipping_rules(self, shipping_territory):
-		return self.get_name_from_territory(shipping_territory, "shipping_rules", "shipping_rule")
+	def validate_for_any_country(self, doctype, names):
+		any_country = frappe.get_all(doctype, filters=prepare_filters(doctype, self.company, {
+			"if_address_matches": "Any Country",
+			"name": ("in", names)
+		}))
 
-	def get_territory_ancestry(self, territory):
-		if not hasattr(self, "_territory_ancestry"):
-			self._territory_ancestry = {}
+		if not any_country:
+			home_country = frappe.get_all(doctype, filters=prepare_filters(doctype, self.company, {
+				"if_address_matches": "Home Country",
+				"name": ("in", names)
+			}))
 
-		if not self._territory_ancestry.get(territory):
-			self._territory_ancestry[territory] = get_ancestors_of("Territory", territory)
+			rest_of_the_world = frappe.get_all(doctype, filters=prepare_filters(doctype, self.company, {
+				"if_address_matches": "Rest of the World",
+				"name": ("in", names)
+			}))
 
-		return self._territory_ancestry[territory]
+			if not (home_country and rest_of_the_world):
+				frappe.throw(_("Please select a '{0}' which has 'If Address Matches' as 'Any Country'").format(doctype), DocumentNotFoundForCountryError)
+
+	def validate_unique_combinations(self, doctype):
+		table_fieldname = self.doctype_fieldnames[doctype]["table_fieldname"]
+		link_fieldname = self.doctype_fieldnames[doctype]["link_fieldname"]
+		names = [d.get(link_fieldname) for d in self.get(table_fieldname)]
+		for name in names:
+			doc = frappe.get_doc(doctype, name)
+
+			# we determine other_names because "name" != current_name filter is being replaced in validate_unique_combinations queries
+			other_names = [n for n in names if n!=name]
+
+			validate_unique_combinations(doc, additional_filters={"name": ("in", other_names)})
 
 def validate_cart_settings(doc, method):
 	frappe.get_doc("Shopping Cart Settings", "Shopping Cart Settings").run_method("validate")
 
-def get_shopping_cart_settings():
-	if not getattr(frappe.local, "shopping_cart_settings", None):
-		frappe.local.shopping_cart_settings = frappe.get_doc("Shopping Cart Settings", "Shopping Cart Settings")
-
-	return frappe.local.shopping_cart_settings
-
 def is_cart_enabled():
-	return get_shopping_cart_settings().enabled
+	return cint(frappe.db.get_value("Shopping Cart Settings", "Shopping Cart Settings", "enabled"))
 
-def get_default_territory():
-	return get_shopping_cart_settings().default_territory or get_root_of("Territory")
+@frappe.whitelist()
+def add_to_shopping_cart_settings(doctype, name):
+	settings = frappe.get_doc("Shopping Cart Settings")
+	table_fieldname = settings.doctype_fieldnames[doctype]["table_fieldname"]
+	link_fieldname = settings.doctype_fieldnames[doctype]["link_fieldname"]
+	settings.append(table_fieldname, {link_fieldname: name})
+	settings.save()
 
-def check_shopping_cart_enabled():
-	if not get_shopping_cart_settings().enabled:
-		frappe.throw(_("You need to enable Shopping Cart"), ShoppingCartSetupError)
+def onload_for_shopping_cart_settings(doc):
+	settings = frappe.get_doc("Shopping Cart Settings")
+	table_fieldname = settings.doctype_fieldnames[doc.doctype]["table_fieldname"]
+	link_fieldname = settings.doctype_fieldnames[doc.doctype]["link_fieldname"]
 
-def apply_shopping_cart_settings(quotation, method):
-	"""Called via a validate hook on Quotation"""
-	from erpnext.shopping_cart import get_party
-	if quotation.order_type != "Shopping Cart":
-		return
-
-	quotation.billing_territory = (get_territory_from_address(quotation.customer_address)
-		or get_party(quotation.contact_email).territory or get_default_territory())
-	quotation.shipping_territory = (get_territory_from_address(quotation.shipping_address_name)
-		or get_party(quotation.contact_email).territory or get_default_territory())
-
-	set_price_list(quotation)
-	set_taxes_and_charges(quotation)
-	quotation.calculate_taxes_and_totals()
-	set_shipping_rule(quotation)
-
-def set_price_list(quotation):
-	previous_selling_price_list = quotation.selling_price_list
-	quotation.selling_price_list = get_shopping_cart_settings().get_price_list(quotation.billing_territory)
-
-	if not quotation.selling_price_list:
-		quotation.selling_price_list = get_shopping_cart_settings().get_price_list(get_default_territory())
-
-	if previous_selling_price_list != quotation.selling_price_list:
-		quotation.price_list_currency = quotation.currency = quotation.plc_conversion_rate = quotation.conversion_rate = None
-		for d in quotation.get("items"):
-			d.price_list_rate = d.discount_percentage = d.rate = d.amount = None
-
-	quotation.set_price_list_and_item_details()
-
-def set_taxes_and_charges(quotation):
-	previous_taxes_and_charges = quotation.taxes_and_charges
-	quotation.taxes_and_charges = get_shopping_cart_settings().get_tax_master(quotation.billing_territory)
-
-	if previous_taxes_and_charges != quotation.taxes_and_charges:
-		quotation.set_other_charges()
-
-def set_shipping_rule(quotation):
-	shipping_rules = get_shopping_cart_settings().get_shipping_rules(quotation.shipping_territory)
-	if not shipping_rules:
-		quotation.remove_shipping_charge()
-		return
-
-	if quotation.shipping_rule not in shipping_rules:
-		quotation.remove_shipping_charge()
-		quotation.shipping_rule = shipping_rules[0]
-
-	quotation.apply_shipping_rule()
+	for d in settings.get(table_fieldname):
+		if d.get(link_fieldname)==doc.name:
+			doc.get("__onload").in_shopping_cart = True
+			break

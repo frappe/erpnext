@@ -7,24 +7,19 @@ from frappe import _, throw
 from frappe.utils import cint
 from frappe.model.document import Document
 import frappe.defaults
+from erpnext.utilities.match_address import validate_address_params
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import onload_for_shopping_cart_settings
 
 class PriceList(Document):
+	def onload(self):
+		if self.selling:
+			onload_for_shopping_cart_settings(self)
+
 	def validate(self):
 		if not cint(self.buying) and not cint(self.selling):
 			throw(_("Price List must be applicable for Buying or Selling"))
 
-		try:
-			# at least one territory
-			self.validate_table_has_rows("territories")
-		except frappe.EmptyTableError:
-			# if no territory, set default territory
-			if frappe.defaults.get_user_default("territory"):
-				self.append("territories", {
-					"doctype": "Applicable Territory",
-					"territory": frappe.defaults.get_user_default("territory")
-				})
-			else:
-				raise
+		validate_address_params(self)
 
 	def on_update(self):
 		self.set_default_if_missing()

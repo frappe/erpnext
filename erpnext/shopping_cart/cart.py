@@ -3,359 +3,208 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import throw, _
-import frappe.defaults
-from frappe.utils import cint, flt, get_fullname, fmt_money, cstr
+from frappe import _
+from frappe.utils import flt, cint
+from erpnext.selling.doctype.quotation.quotation import Quotation
+from erpnext.utilities.doctype.contact.contact import get_contact_details
 from erpnext.utilities.doctype.address.address import get_address_display
-from frappe.utils.nestedset import get_root_of
-
-class WebsitePriceListMissingError(frappe.ValidationError): pass
-
-def set_cart_count(quotation=None):
-	if cint(frappe.db.get_singles_value("Shopping Cart Settings", "enabled")):
-		if not quotation:
-			quotation = _get_cart_quotation()
-		cart_count = cstr(len(quotation.get("items")))
-		frappe.local.cookie_manager.set_cookie("cart_count", cart_count)
+from erpnext.crm.doctype.lead.lead import _make_customer
+from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 
 @frappe.whitelist()
-def get_cart_quotation(doc=None):
-	party = get_lead_or_customer()
-
-	if not doc:
-		quotation = _get_cart_quotation(party)
-		doc = quotation
-		set_cart_count(quotation)
-
-	return {
-		"doc": decorate_quotation_doc(doc),
-		"addresses": [{"name": address.name, "display": address.display}
-			for address in get_address_docs(party=party)],
-		"shipping_rules": get_applicable_shipping_rules(party)
-	}
+def get_cart(quotation=None):
+	return ShoppingCart(quotation).render()
 
 @frappe.whitelist()
-def place_order():
-	quotation = _get_cart_quotation()
-	quotation.company = frappe.db.get_value("Shopping Cart Settings", None, "company")
-	for fieldname in ["customer_address", "shipping_address_name"]:
-		if not quotation.get(fieldname):
-			throw(_("{0} is required").format(quotation.meta.get_label(fieldname)))
-
-	quotation.flags.ignore_permissions = True
-	quotation.submit()
-
-	if quotation.lead:
-		# company used to create customer accounts
-		frappe.defaults.set_user_default("company", quotation.company)
-
-	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
-	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
-	for item in sales_order.get("items"):
-		item.reserved_warehouse = frappe.db.get_value("Item", item.item_code, "website_warehouse") or None
-
-	sales_order.flags.ignore_permissions = True
-	sales_order.insert()
-	sales_order.submit()
-	frappe.local.cookie_manager.delete_cookie("cart_count")
-
-	return sales_order.name
+def set_qty(quotation, item_code, qty):
+	cart = ShoppingCart(quotation)
+	cart.set_qty(item_code, qty)
+	return cart.render()
 
 @frappe.whitelist()
-def update_cart(item_code, qty, with_doc):
-	quotation = _get_cart_quotation()
-
-	qty = flt(qty)
-	if qty == 0:
-		quotation.set("items", quotation.get("items", {"item_code": ["!=", item_code]}))
-		if not quotation.get("items") and \
-			not quotation.get("__islocal"):
-				quotation.__delete = True
-
-	else:
-		quotation_items = quotation.get("items", {"item_code": item_code})
-		if not quotation_items:
-			quotation.append("items", {
-				"doctype": "Quotation Item",
-				"item_code": item_code,
-				"qty": qty
-			})
-		else:
-			quotation_items[0].qty = qty
-
-	apply_cart_settings(quotation=quotation)
-
-	if hasattr(quotation, "__delete"):
-		frappe.delete_doc("Quotation", quotation.name, ignore_permissions=True)
-		quotation = _get_cart_quotation()
-	else:
-		quotation.flags.ignore_permissions = True
-		quotation.save()
-
-	set_cart_count(quotation)
-
-	if with_doc:
-		return get_cart_quotation(quotation)
-	else:
-		return quotation.name
+def set_address(quotation, address_fieldname, address_name):
+	cart = ShoppingCart(quotation)
+	cart.set_address(address_fieldname, address_name)
+	return cart.render()
 
 @frappe.whitelist()
-def update_cart_address(address_fieldname, address_name):
-	quotation = _get_cart_quotation()
-	address_display = get_address_display(frappe.get_doc("Address", address_name).as_dict())
-
-	if address_fieldname == "shipping_address_name":
-		quotation.shipping_address_name = address_name
-		quotation.shipping_address = address_display
-
-		if not quotation.customer_address:
-			address_fieldname == "customer_address"
-
-	if address_fieldname == "customer_address":
-		quotation.customer_address = address_name
-		quotation.address_display = address_display
-
-
-	apply_cart_settings(quotation=quotation)
-
-	quotation.flags.ignore_permissions = True
-	quotation.save()
-
-	return get_cart_quotation(quotation)
-
-def guess_territory():
-	territory = None
-	geoip_country = frappe.session.get("session_country")
-	if geoip_country:
-		territory = frappe.db.get_value("Territory", geoip_country)
-
-	return territory or \
-		frappe.db.get_value("Shopping Cart Settings", None, "territory") or \
-			get_root_of("Territory")
-
-def decorate_quotation_doc(quotation_doc):
-	doc = frappe._dict(quotation_doc.as_dict())
-	for d in doc.get("items", []):
-		d.update(frappe.db.get_value("Item", d["item_code"],
-			["website_image", "description", "page_name"], as_dict=True))
-		d["formatted_rate"] = fmt_money(d.get("rate"), currency=doc.currency)
-		d["formatted_amount"] = fmt_money(d.get("amount"), currency=doc.currency)
-
-	for d in doc.get("taxes", []):
-		d["formatted_tax_amount"] = fmt_money(flt(d.get("tax_amount_after_discount_amount")),
-			currency=doc.currency)
-
-	doc.formatted_grand_total_export = fmt_money(doc.grand_total,
-		currency=doc.currency)
-
-	return doc
-
-def _get_cart_quotation(party=None):
-	if not party:
-		party = get_lead_or_customer()
-
-	quotation = frappe.db.get_value("Quotation",
-		{party.doctype.lower(): party.name, "order_type": "Shopping Cart", "docstatus": 0})
-
-	if quotation:
-		qdoc = frappe.get_doc("Quotation", quotation)
-	else:
-		qdoc = frappe.get_doc({
-			"doctype": "Quotation",
-			"naming_series": frappe.defaults.get_user_default("shopping_cart_quotation_series") or "QTN-CART-",
-			"quotation_to": party.doctype,
-			"company": frappe.db.get_value("Shopping Cart Settings", None, "company"),
-			"order_type": "Shopping Cart",
-			"status": "Draft",
-			"docstatus": 0,
-			"__islocal": 1,
-			(party.doctype.lower()): party.name
-		})
-
-		if party.doctype == "Customer":
-			qdoc.contact_person = frappe.db.get_value("Contact", {"email_id": frappe.session.user,
-				"customer": party.name})
-
-		qdoc.flags.ignore_permissions = True
-		qdoc.run_method("set_missing_values")
-		apply_cart_settings(party, qdoc)
-
-	return qdoc
-
-def update_party(fullname, company_name=None, mobile_no=None, phone=None):
-	party = get_lead_or_customer()
-
-	if party.doctype == "Lead":
-		party.company_name = company_name
-		party.lead_name = fullname
-		party.mobile_no = mobile_no
-		party.phone = phone
-	else:
-		party.customer_name = company_name or fullname
-		party.customer_type == "Company" if company_name else "Individual"
-
-		contact_name = frappe.db.get_value("Contact", {"email_id": frappe.session.user,
-			"customer": party.name})
-		contact = frappe.get_doc("Contact", contact_name)
-		contact.first_name = fullname
-		contact.last_name = None
-		contact.customer_name = party.customer_name
-		contact.mobile_no = mobile_no
-		contact.phone = phone
-		contact.flags.ignore_permissions = True
-		contact.save()
-
-	party_doc = frappe.get_doc(party.as_dict())
-	party_doc.flags.ignore_permissions = True
-	party_doc.save()
-
-	qdoc = _get_cart_quotation(party)
-	if not qdoc.get("__islocal"):
-		qdoc.customer_name = company_name or fullname
-		qdoc.run_method("set_missing_lead_customer_details")
-		qdoc.flags.ignore_permissions = True
-		qdoc.save()
-
-def apply_cart_settings(party=None, quotation=None):
-	if not party:
-		party = get_lead_or_customer()
-	if not quotation:
-		quotation = _get_cart_quotation(party)
-
-	cart_settings = frappe.get_doc("Shopping Cart Settings")
-	billing_territory = get_address_territory(quotation.customer_address) or \
-		party.territory or get_root_of("Territory")
-
-	set_price_list_and_rate(quotation, cart_settings, billing_territory)
-
-	quotation.run_method("calculate_taxes_and_totals")
-
-	set_taxes(quotation, cart_settings, billing_territory)
-
-	_apply_shipping_rule(party, quotation, cart_settings)
-
-def set_price_list_and_rate(quotation, cart_settings, billing_territory):
-	"""set price list based on billing territory"""
-	quotation.selling_price_list = cart_settings.get_price_list(billing_territory)
-	# reset values
-	quotation.price_list_currency = quotation.currency = \
-		quotation.plc_conversion_rate = quotation.conversion_rate = None
-	for item in quotation.get("items"):
-		item.price_list_rate = item.discount_percentage = item.rate = item.amount = None
-
-	# refetch values
-	quotation.run_method("set_price_list_and_item_details")
-
-	# set it in cookies for using in product page
-	frappe.local.cookie_manager.set_cookie("selling_price_list", quotation.selling_price_list)
-
-def set_taxes(quotation, cart_settings, billing_territory):
-	"""set taxes based on billing territory"""
-	quotation.taxes_and_charges = cart_settings.get_tax_master(billing_territory)
-
-	# clear table
-	quotation.set("taxes", [])
-
-	# append taxes
-	quotation.append_taxes_from_master()
-
-def get_lead_or_customer():
-	customer = frappe.db.get_value("Contact", {"email_id": frappe.session.user}, "customer")
-	if customer:
-		return frappe.get_doc("Customer", customer)
-
-	lead = frappe.db.get_value("Lead", {"email_id": frappe.session.user})
-	if lead:
-		return frappe.get_doc("Lead", lead)
-	else:
-		lead_doc = frappe.get_doc({
-			"doctype": "Lead",
-			"email_id": frappe.session.user,
-			"lead_name": get_fullname(frappe.session.user),
-			"territory": guess_territory(),
-			"status": "Open" # TODO: set something better???
-		})
-
-		if frappe.session.user not in ("Guest", "Administrator"):
-			lead_doc.flags.ignore_permissions = True
-			lead_doc.insert()
-
-		return lead_doc
-
-def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_page_length=20, party=None):
-	if not party:
-		party = get_lead_or_customer()
-
-	address_docs = frappe.db.sql("""select * from `tabAddress`
-		where `{0}`=%s order by name limit {1}, {2}""".format(party.doctype.lower(),
-			limit_start, limit_page_length), party.name,
-		as_dict=True, update={"doctype": "Address"})
-
-	for address in address_docs:
-		address.display = get_address_display(address)
-		address.display = (address.display).replace("\n", "<br>\n")
-
-	return address_docs
+def select_shipping_rule(quotation, shipping_rule):
+	cart = ShoppingCart(quotation)
+	cart.select_shipping_rule(shipping_rule)
+	return cart.render()
 
 @frappe.whitelist()
-def apply_shipping_rule(shipping_rule):
-	quotation = _get_cart_quotation()
+def place_order(quotation):
+	return ShoppingCart(quotation).place_order()
 
-	quotation.shipping_rule = shipping_rule
+class ShoppingCart:
+	"""Wrapper around Quotation for Shopping Cart feature"""
+	def __init__(self, quotation=None):
+		self.email_id = frappe.session.user
+		self.settings = frappe.get_doc("Shopping Cart Settings")
+		self.doc = self.get_quotation(quotation)
+		if quotation:
+			self.check_permission()
 
-	apply_cart_settings(quotation=quotation)
+	def save(self):
+		self.validate()
+		self.doc.save(ignore_permissions=True)
 
-	quotation.flags.ignore_permissions = True
-	quotation.save()
+	def validate(self):
+		# validate show in website
+		for item in self.doc.get("items"):
+			if not cint(frappe.db.get_value("Item", item.item_code, "show_in_website")):
+				frappe.throw(_("Item '{0}' is not available for Shopping Cart").format(item.item_name))
 
-	return get_cart_quotation(quotation)
+		self.apply_cart_settings()
 
-def _apply_shipping_rule(party=None, quotation=None, cart_settings=None):
-	shipping_rules = get_shipping_rules(party, quotation, cart_settings)
+	def get_quotation(self, quotation=None):
+		if quotation:
+			doc = frappe.get_doc("Quotation", quotation)
+			if (doc.docstatus == 0 and doc.status in ("Draft", "Open")):
+				# additional validation to make sure this is a valid quotation
+				return doc
 
-	if not shipping_rules:
-		return
+		return self.get_open_cart_quotation() or self.create_new_cart_quotation()
 
-	elif quotation.shipping_rule not in shipping_rules:
-		quotation.shipping_rule = shipping_rules[0]
+	def check_permission(self):
+		if not ((self.doc.contact_email == self.email_id)
+			and (self.doc.customer == self.get_customer_and_contact()["customer"])):
+			frappe.throw(_("You are not permitted to access this shopping cart"),
+				frappe.PermissionError)
 
-	quotation.run_method("apply_shipping_rule")
-	quotation.run_method("calculate_taxes_and_totals")
+	def render(self):
+		pass
 
-def get_applicable_shipping_rules(party=None, quotation=None):
-	shipping_rules = get_shipping_rules(party, quotation)
+	def set_qty(self, item_code, qty):
+		qty = flt(qty)
+		item = self.doc.get("items", {"item_code": item_code})
 
-	if shipping_rules:
-		rule_label_map = frappe.db.get_values("Shipping Rule", shipping_rules, "label")
-		# we need this in sorted order as per the position of the rule in the settings page
-		return [[rule, rule_label_map.get(rule)] for rule in shipping_rules]
+		if qty:
+			if item:
+				item[0].qty = qty
+			else:
+				self.doc.append("items", {
+					"doctype": "Quotation Item",
+					"item_code": item_code,
+					"qty": qty
+				})
 
-def get_shipping_rules(party=None, quotation=None, cart_settings=None):
-	if not party:
-		party = get_lead_or_customer()
-	if not quotation:
-		quotation = _get_cart_quotation()
-	if not cart_settings:
-		cart_settings = frappe.get_doc("Shopping Cart Settings")
+		elif item:
+			self.doc.items.remove(item[0])
 
-	# set shipping rule based on shipping territory
-	shipping_territory = get_address_territory(quotation.shipping_address_name) or \
-		party.territory
+		self.save()
 
-	shipping_rules = cart_settings.get_shipping_rules(shipping_territory)
+	def set_address(self, address_fieldname, address_name):
+		address_display = get_address_display(frappe.get_doc("Address", address_name).as_dict())
+		if address_fieldname == "shipping_address_name":
+			self.doc.shipping_address_name = address_name
+			self.doc.shipping_address = address_display
 
-	return shipping_rules
+			if not self.doc.customer_address:
+				address_fieldname = "customer_address"
 
-def get_address_territory(address_name):
-	"""Tries to match city, state and country of address to existing territory"""
-	territory = None
+		if address_fieldname == "customer_address":
+			self.doc.customer_address = address_name
+			self.doc.address_display = address_display
 
-	if address_name:
-		address_fields = frappe.db.get_value("Address", address_name,
-			["city", "state", "country"])
-		for value in address_fields:
-			territory = frappe.db.get_value("Territory", value)
-			if territory:
-				break
+		self.save()
 
-	return territory
+	def select_shipping_rule(self, shipping_rule):
+		self.doc.shipping_rule = shipping_rule
+		self.save()
+
+	def place_order(self):
+		for fieldname in ("customer_address", "shipping_address_name"):
+			if not self.doc.get(fieldname):
+				frappe.throw(_("{0} is required to place order").format(self.doc.meta.get_label(fieldname)))
+
+		self.doc.flags.ignore_permissions = True
+		self.save()
+		self.doc.submit()
+
+		sales_order = frappe.get_doc(_make_sales_order(self.doc.name, ignore_permissions=True))
+		for item in sales_order.get("items"):
+			# TODO should be a better place to set this
+			# possible solution: normalize Item table into Website Item
+			item.reserved_warehouse = frappe.db.get_value("Item", item.item_code, "website_warehouse") or None
+
+		sales_order.flags.ignore_permissions = True
+		sales_order.insert()
+		sales_order.submit()
+
+		return sales_order.name
+
+	def apply_cart_settings(self):
+		# TODO
+		# apply shipping rule and set shipping charge
+		# was part of apply cart settings
+
+		# reset values and price list
+		price_lists = [d.price_list for d in self.settings.get("price_lists")]
+		self.doc._subset_of_price_lists = price_lists
+
+		# taxes
+		cart_tax_templates = [d.sales_taxes_and_charges_master for d in
+			self.settings.get("sales_taxes_and_charges_masters")]
+		self.doc._subset_of_tax_templates = cart_tax_templates
+
+		# shipping rule
+		cart_shipping_rules = [d.shipping_rule for d in self.settings.get("shipping_rules")]
+		self.doc._subset_of_shipping_rules = cart_shipping_rules
+
+		self.doc.auto_price_list = True
+		self.doc.auto_tax_and_shipping_rule = True
+
+	def get_open_cart_quotation(self):
+		try:
+			return frappe.get_doc("Quotation", {"contact_email": self.email_id,
+				"status": ("in", ("Open", "Draft")), "docstatus": 0})
+
+		except frappe.DoesNotExistError:
+			pass
+
+	def create_new_cart_quotation(self):
+		doc = frappe.new_doc("Quotation")
+		doc.update(self.get_customer_and_contact())
+		doc.run_method("validate")
+		return doc
+
+	def get_customer_and_contact(self):
+		contact = self.get_contact()
+		out = get_contact_details(contact)
+		out["customer"] = frappe.db.get_value("Contact", contact, "customer")
+		return out
+
+	def get_contact(self):
+		contact = frappe.db.get_value("Contact", {"email_id": self.email_id}, "name")
+		if not contact:
+			contact = self.make_contact_from_lead()
+
+		return contact
+
+	def make_contact_from_lead(self):
+		lead = frappe.db.get_value("Lead", {"email_id": self.email_id}, "name")
+		if not lead:
+			# create new lead
+			lead_doc = frappe.new_doc("Lead")
+			lead_doc.email_id = self.email_id
+			lead_doc.lead_name = self.email_id.split("@")[0].title()
+			lead_doc.territory = self.guess_territory()
+			lead_doc.insert(ignore_permissions=True)
+			lead = lead_doc.name
+
+		# convert lead to customer and contact
+		customer = _make_customer(lead, ignore_permissions=True)
+		customer.insert(ignore_permissions=True)
+
+		return frappe.db.get_value("Contact", {"email_id": self.email_id}, "name")
+
+	def guess_territory(self):
+		territory = None
+		geoip_country = frappe.session.get("session_country")
+		if geoip_country:
+			territory = frappe.db.get_value("Territory", geoip_country)
+
+		return territory or self.settings.default_territory
+

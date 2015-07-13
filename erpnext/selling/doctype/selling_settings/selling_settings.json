@@ -6,6 +6,13 @@
  "document_type": "Other", 
  "fields": [
   {
+   "fieldname": "naming", 
+   "fieldtype": "Section Break", 
+   "label": "Naming", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "default": "Customer Name", 
    "fieldname": "cust_master_name", 
    "fieldtype": "Select", 
@@ -15,12 +22,61 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "column_break_5", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0
+  }, 
+  {
    "fieldname": "campaign_naming_by", 
    "fieldtype": "Select", 
    "in_list_view": 1, 
    "label": "Campaign Naming By", 
    "options": "Campaign Name\nNaming Series", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "automation", 
+   "fieldtype": "Section Break", 
+   "label": "Automation", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "select_price_list_based_on_address", 
+   "fieldtype": "Check", 
+   "label": "Select Price List Based on Address", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "select_tax_template_and_shipping_rule_based_on_address", 
+   "fieldtype": "Check", 
+   "label": "Select Tax Template and Shipping Rule based on Address", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "column_break_9", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "default": "Billing Address", 
+   "description": "Note: Shipping Rule selection will always be based on Shipping Address", 
+   "fieldname": "selection_based_on", 
+   "fieldtype": "Select", 
+   "label": "Selection Based On", 
+   "options": "Billing Address\nShipping Address", 
+   "permlevel": 0, 
+   "precision": "", 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "section_break_11", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "description": "", 
@@ -41,6 +97,12 @@
    "permlevel": 0
   }, 
   {
+   "fieldname": "column_break_8", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "selling_price_list", 
    "fieldtype": "Link", 
    "in_list_view": 1, 
@@ -49,21 +111,16 @@
    "permlevel": 0
   }, 
   {
-   "fieldname": "column_break_5", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0
+   "fieldname": "validations", 
+   "fieldtype": "Section Break", 
+   "label": "Validations", 
+   "permlevel": 0, 
+   "precision": ""
   }, 
   {
    "fieldname": "so_required", 
    "fieldtype": "Select", 
    "label": "Sales Order Required", 
-   "options": "No\nYes", 
-   "permlevel": 0
-  }, 
-  {
-   "fieldname": "dn_required", 
-   "fieldtype": "Select", 
-   "label": "Delivery Note Required", 
    "options": "No\nYes", 
    "permlevel": 0
   }, 
@@ -78,12 +135,25 @@
    "fieldtype": "Check", 
    "label": "Allow user to edit Price List Rate in transactions", 
    "permlevel": 0
+  }, 
+  {
+   "fieldname": "column_break_12", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "fieldname": "dn_required", 
+   "fieldtype": "Select", 
+   "label": "Delivery Note Required", 
+   "options": "No\nYes", 
+   "permlevel": 0
   }
  ], 
  "icon": "icon-cog", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2015-02-05 05:11:46.384538", 
+ "modified": "2015-06-03 17:11:10.777446", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Selling Settings", 
