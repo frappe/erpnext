@@ -32,11 +32,11 @@ $.extend(shopping_cart, {
 		});
 
 		$("#cart-add-shipping-address").on("click", function() {
-			window.location.href = "address?address_fieldname=shipping_address_name";
+			window.location.href = "addresses";
 		});
 
 		$("#cart-add-billing-address").on("click", function() {
-			window.location.href = "address?address_fieldname=customer_address";
+			window.location.href = "address";
 		});
 
 		$(".btn-place-order").on("click", function() {

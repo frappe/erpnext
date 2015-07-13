@@ -9,7 +9,7 @@ import frappe.defaults
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import is_cart_enabled
 
 def show_cart_count():
-	if (frappe.db.get_default("shopping_cart_enabled") and
+	if (is_cart_enabled() and
 		frappe.db.get_value("User", frappe.session.user, "user_type") == "Website User"):
 		return True
 
