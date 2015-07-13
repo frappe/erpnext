@@ -198,11 +198,13 @@ $.extend(cur_frm.cscript, {
 		frappe.ui.form.trigger("Production Order", 'bom_no')
 	},
 	
-	track_operations: function() {
-		return this.frm.call({
-			doc: this.frm.doc,
-			method: "track_operation"
-		});
+	track_operations: function(doc) {
+		if (doc.track_operations) {
+			frappe.ui.form.trigger("Production Order", 'bom_no')
+		}
+		else {
+			doc.operations =[];
+		}
 	},
 
 	show_time_logs: function(doc, cdt, cdn) {
