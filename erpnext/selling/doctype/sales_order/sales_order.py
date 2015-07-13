@@ -40,7 +40,7 @@ class SalesOrder(SellingController):
 			check_list.append(cstr(d.item_code))
 
 			if (frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or
-				self.has_sales_bom(d.item_code)) and not d.warehouse:
+				self.has_product_bundle(d.item_code)) and not d.warehouse:
 					frappe.throw(_("Reserved warehouse required for stock item {0}").format(d.item_code))
 
 			# used for production plan
