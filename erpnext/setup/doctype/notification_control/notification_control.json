@@ -176,19 +176,12 @@
  "icon": "icon-envelope", 
  "idx": 1, 
  "issingle": 1, 
- "modified": "2015-03-04 01:13:46.715113", 
+ "modified": "2015-07-13 06:24:05.436127", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Notification Control", 
  "owner": "Administrator", 
  "permissions": [
-  {
-   "create": 0, 
-   "permlevel": 0, 
-   "read": 1, 
-   "role": "Guest", 
-   "write": 0
-  }, 
   {
    "create": 1, 
    "permlevel": 0, 
