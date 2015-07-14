@@ -102,7 +102,7 @@
  ], 
  "icon": "icon-usd", 
  "is_submittable": 1, 
- "modified": "2015-02-11 16:21:49.528566", 
+ "modified": "2015-07-13 05:28:22.039577", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Landed Cost Voucher", 
@@ -118,7 +118,7 @@
    "permlevel": 0, 
    "read": 1, 
    "report": 1, 
-   "role": "Material Manager", 
+   "role": "Stock Manager", 
    "share": 1, 
    "submit": 1, 
    "write": 1

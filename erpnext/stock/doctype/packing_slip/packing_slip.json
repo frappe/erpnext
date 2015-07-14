@@ -197,7 +197,7 @@
  "icon": "icon-suitcase", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-02-20 05:09:24.405911", 
+ "modified": "2015-07-13 05:28:24.850528", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Packing Slip", 
@@ -214,7 +214,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material User", 
+   "role": "Stock User", 
    "share": 1, 
    "submit": 1, 
    "write": 1
@@ -245,7 +245,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material Master Manager", 
+   "role": "Item Manager", 
    "share": 1, 
    "submit": 1, 
    "write": 1
@@ -260,7 +260,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material Manager", 
+   "role": "Stock Manager", 
    "share": 1, 
    "submit": 1, 
    "write": 1
