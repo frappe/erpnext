@@ -126,7 +126,7 @@ class PurchaseInvoice(BuyingController):
 
 		if cint(frappe.db.get_single_value('Buying Settings', 'maintain_same_rate')):
 			self.validate_rate_with_reference_doc([
-				["Purchase Order", "purchase_order", "po_detail"], 
+				["Purchase Order", "purchase_order", "po_detail"],
 				["Purchase Receipt", "purchase_receipt", "pr_detail"]
 			])
 
@@ -382,7 +382,8 @@ class PurchaseInvoice(BuyingController):
 				frappe.throw("Supplier Invoice Date cannot be greater than Posting Date")
 		if self.bill_no:
 			if cint(frappe.db.get_single_value("Accounts Settings", "check_supplier_invoice_uniqueness")):
-				pi = frappe.db.exists("Purchase Invoice", {"bill_no": self.bill_no, "fiscal_year": self.fiscal_year})
+				pi = frappe.db.exists("Purchase Invoice", {"bill_no": self.bill_no,
+					"fiscal_year": self.fiscal_year, "name": ("!=", self.name)})
 				if pi:
 					frappe.throw("Supplier Invoice No exists in Purchase Invoice {0}".format(pi))
 
