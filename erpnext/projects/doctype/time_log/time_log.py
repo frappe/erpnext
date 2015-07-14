@@ -85,7 +85,8 @@ class TimeLog(Document):
 			(
 				(from_time > %(from_time)s and from_time < %(to_time)s) or
 				(to_time > %(from_time)s and to_time < %(to_time)s) or
-				(%(from_time)s > from_time and %(from_time)s < to_time))
+				(%(from_time)s > from_time and %(from_time)s < to_time) or
+				(%(from_time)s = from_time and %(to_time)s = to_time))
 			and name!=%(name)s
 			and ifnull(task, "")=%(task)s
 			and docstatus < 2""".format(fieldname),
