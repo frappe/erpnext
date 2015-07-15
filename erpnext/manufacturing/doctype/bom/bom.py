@@ -181,15 +181,12 @@ class BOM(Document):
 			if item.default_bom != self.name:
 				item.default_bom = self.name
 				item.save()
-
 		else:
-			if not self.is_active:
-				frappe.db.set(self, "is_default", 0)
-
-				item = frappe.get_doc("Item", self.item)
-				if item.default_bom == self.name:
-					item.default_bom = None
-					item.save()
+			frappe.db.set(self, "is_default", 0)
+			item = frappe.get_doc("Item", self.item)
+			if item.default_bom == self.name:
+				item.default_bom = None
+				item.save()
 
 	def clear_operations(self):
 		if not self.with_operations:
