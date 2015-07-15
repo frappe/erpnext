@@ -3,14 +3,14 @@
 
 #### General
 
-- [CWT (connector & wire technology GmbH)](http://www.cwt-assembly.com/) (2013)
+- [CWT (Connector & Wire Technology GmbH)](http://www.cwt-assembly.com/) (2013)
 - [Pinnacle GIS](http://pinnaclegis.com.au/) (2014)
 - [Rohit Industries](www.rigpl.com) (2014)
 
 
 #### Features
 
-<table>
+<table style="width: 100%">
 	<tbody>
 		<tr>
 			<td style="width: 30%">
