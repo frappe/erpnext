@@ -368,7 +368,7 @@
  "idx": 1, 
  "in_create": 0, 
  "is_submittable": 1, 
- "modified": "2015-07-09 03:31:01.291811", 
+ "modified": "2015-07-13 05:28:23.259016", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 
@@ -395,7 +395,7 @@
    "permlevel": 0, 
    "read": 1, 
    "report": 1, 
-   "role": "Material User"
+   "role": "Stock User"
   }
  ], 
  "title_field": "production_item"

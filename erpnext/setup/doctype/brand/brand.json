@@ -33,7 +33,7 @@
  "icon": "icon-certificate", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2015-02-05 05:11:35.319683", 
+ "modified": "2015-07-13 05:28:24.597639", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Brand", 
@@ -47,7 +47,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material Master Manager", 
+   "role": "Item Manager", 
    "share": 1, 
    "write": 1
   }, 
@@ -61,7 +61,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material User", 
+   "role": "Stock User", 
    "submit": 0, 
    "write": 0
   }, 

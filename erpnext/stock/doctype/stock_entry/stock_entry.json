@@ -678,7 +678,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "max_attachments": 0, 
- "modified": "2015-05-20 07:58:59.025553", 
+ "modified": "2015-07-13 05:28:26.085266", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry", 
@@ -695,7 +695,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material User", 
+   "role": "Stock User", 
    "share": 1, 
    "submit": 1, 
    "write": 1
@@ -741,7 +741,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material Manager", 
+   "role": "Stock Manager", 
    "share": 1, 
    "submit": 1, 
    "write": 1

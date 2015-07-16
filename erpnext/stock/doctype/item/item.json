@@ -903,7 +903,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2015-07-09 02:23:47.669199", 
+ "modified": "2015-07-13 05:28:28.698107", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
@@ -918,7 +918,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material Master Manager", 
+   "role": "Item Manager", 
    "share": 1, 
    "submit": 0, 
    "write": 1
@@ -932,7 +932,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material Manager", 
+   "role": "Stock Manager", 
    "submit": 0, 
    "write": 0
   }, 
@@ -946,7 +946,7 @@
    "print": 1, 
    "read": 1, 
    "report": 1, 
-   "role": "Material User", 
+   "role": "Stock User", 
    "submit": 0, 
    "write": 0
   }, 

@@ -704,7 +704,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_warehouse_company_validation(self):
 		set_perpetual_inventory(0)
 		frappe.get_doc("User", "test2@example.com")\
-			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+			.add_roles("Sales User", "Sales Manager", "Stock User", "Stock Manager")
 		frappe.set_user("test2@example.com")
 
 		from erpnext.stock.utils import InvalidWarehouseCompany
@@ -720,11 +720,11 @@ class TestStockEntry(unittest.TestCase):
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com", "User Permission")
 		frappe.defaults.add_default("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com", "User Permission")
 		test_user = frappe.get_doc("User", "test@example.com")
-		test_user.add_roles("Sales User", "Sales Manager", "Material User")
-		test_user.remove_roles("Material Manager")
+		test_user.add_roles("Sales User", "Sales Manager", "Stock User")
+		test_user.remove_roles("Stock Manager")
 
 		frappe.get_doc("User", "test2@example.com")\
-			.add_roles("Sales User", "Sales Manager", "Material User", "Material Manager")
+			.add_roles("Sales User", "Sales Manager", "Stock User", "Stock Manager")
 
 		frappe.set_user("test@example.com")
 		st1 = frappe.copy_doc(test_records[0])

@@ -43,7 +43,7 @@
  "idx": 1, 
  "in_create": 0, 
  "issingle": 1, 
- "modified": "2015-02-05 05:11:47.290476", 
+ "modified": "2015-07-13 05:28:25.689187", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock UOM Replace Utility", 
@@ -56,7 +56,7 @@
    "print": 1, 
    "read": 1, 
    "report": 0, 
-   "role": "Material Master Manager", 
+   "role": "Item Manager", 
    "share": 1, 
    "submit": 0, 
    "write": 1
@@ -68,7 +68,7 @@
    "print": 1, 
    "read": 1, 
    "report": 0, 
-   "role": "Material Manager", 
+   "role": "Stock Manager", 
    "share": 1, 
    "submit": 0, 
    "write": 1

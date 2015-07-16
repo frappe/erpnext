@@ -73,18 +73,20 @@ class TimeLog(Document):
 	def validate_overlap_for(self, fieldname):
 		existing = self.get_overlap_for(fieldname)
 		if existing:
-			frappe.throw(_("This Time Log conflicts with {0} for {1}").format(existing.name,
-				self.meta.get_label(fieldname)), OverlapError)
+			frappe.throw(_("This Time Log conflicts with {0} for {1} {2}").format(existing.name,
+				self.meta.get_label(fieldname), self.get(fieldname)), OverlapError)
 
 	def get_overlap_for(self, fieldname):
 		if not self.get(fieldname):
 			return
 
-		existing = frappe.db.sql("""select name, from_time, to_time from `tabTime Log` where `{0}`=%(val)s and
+		existing = frappe.db.sql("""select name, from_time, to_time from `tabTime Log`
+			where `{0}`=%(val)s and
 			(
-				(from_time between %(from_time)s and %(to_time)s) or
-				(to_time between %(from_time)s and %(to_time)s) or
-				(%(from_time)s between from_time and to_time))
+				(from_time > %(from_time)s and from_time < %(to_time)s) or
+				(to_time > %(from_time)s and to_time < %(to_time)s) or
+				(%(from_time)s > from_time and %(from_time)s < to_time) or
+				(%(from_time)s = from_time and %(to_time)s = to_time))
 			and name!=%(name)s
 			and ifnull(task, "")=%(task)s
 			and docstatus < 2""".format(fieldname),

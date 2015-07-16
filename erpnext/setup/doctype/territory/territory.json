@@ -136,7 +136,7 @@
  "icon": "icon-map-marker", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-02-05 05:11:48.158225", 
+ "modified": "2015-07-13 05:28:25.602509", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Territory", 
@@ -188,7 +188,7 @@
    "apply_user_permissions": 1, 
    "permlevel": 0, 
    "read": 1, 
-   "role": "Material User"
+   "role": "Stock User"
   }, 
   {
    "apply_user_permissions": 1, 

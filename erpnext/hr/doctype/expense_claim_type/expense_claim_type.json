@@ -29,7 +29,7 @@
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2015-04-19 06:47:51.860833", 
+ "modified": "2015-07-13 04:46:38.897484", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Expense Claim Type", 
@@ -55,7 +55,7 @@
    "print": 0, 
    "read": 1, 
    "report": 0, 
-   "role": "All", 
+   "role": "Employee", 
    "share": 0, 
    "write": 0
   }
