@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+import frappe
 
 from frappe import _, throw, msgprint
 from frappe.utils import cstr, nowdate
@@ -92,6 +92,8 @@ def send_request(gateway_url, args):
 	conn.request('GET', api_url + urllib.urlencode(args), headers = headers)    # send request
 	resp = conn.getresponse()     # get response
 	resp = resp.read()
+	if resp.status==200:
+		create_sms_log()
 	return resp
 
 # Split gateway url to server and api url
