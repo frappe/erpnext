@@ -1,1 +1,0 @@
-- Display images in website's Item and Item List pages when the filename has paranthesis in its name
