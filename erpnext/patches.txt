@@ -100,6 +100,7 @@ erpnext.patches.v5_0.capacity_planning
 execute:frappe.reload_doc('crm', 'doctype', 'lead')
 execute:frappe.reload_doc('crm', 'doctype', 'opportunity')
 erpnext.patches.v5_0.rename_taxes_and_charges_master
+erpnext.patches.v5_1.sales_bom_rename
 erpnext.patches.v5_0.rename_table_fieldnames
 execute:frappe.db.sql("update `tabJournal Entry` set voucher_type='Journal Entry' where ifnull(voucher_type, '')=''")
 erpnext.patches.v5_0.is_group
@@ -173,6 +174,5 @@ erpnext.patches.v5_0.update_item_desc_in_invoice
 erpnext.patches.v5_1.fix_against_account
 erpnext.patches.v5_1.fix_credit_days_based_on
 erpnext.patches.v5_1.track_operations
-erpnext.patches.v5_1.sales_bom_rename
 execute:frappe.rename_doc("DocType", "Salary Manager", "Process Payroll", force=True)
 erpnext.patches.v5_1.rename_roles
