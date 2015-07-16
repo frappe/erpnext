@@ -111,7 +111,6 @@ rename_map = {
 		["installed_item_details", "items"]
 	],
 	"Item": [
-		["item_variants", "variants"],
 		["item_reorder", "reorder_levels"],
 		["uom_conversion_details", "uoms"],
 		["item_supplier_details", "supplier_items"],
@@ -168,7 +167,7 @@ rename_map = {
 		["earning_details", "earnings"],
 		["deduction_details", "deductions"]
 	],
-	"Sales BOM": [
+	"Product Bundle": [
 		["sales_bom_items", "items"]
 	],
 	"SMS Settings": [
