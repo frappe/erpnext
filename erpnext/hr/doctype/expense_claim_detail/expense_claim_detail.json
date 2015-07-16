@@ -35,6 +35,18 @@
    "width": "150px"
   }, 
   {
+   "depends_on": "expense_type", 
+   "fieldname": "default_account", 
+   "fieldtype": "Link", 
+   "hidden": 1, 
+   "label": "Default Account", 
+   "options": "Account", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1, 
+   "unique": 0
+  }, 
+  {
    "fieldname": "section_break_4", 
    "fieldtype": "Section Break", 
    "permlevel": 0, 
@@ -93,7 +105,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-04-08 06:18:47.539134", 
+ "modified": "2015-07-16 06:13:32.090048", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Expense Claim Detail", 
