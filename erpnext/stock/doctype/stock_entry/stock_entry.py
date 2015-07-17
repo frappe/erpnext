@@ -51,7 +51,6 @@ class StockEntry(StockController):
 		self.get_stock_and_rate()
 		self.validate_bom()
 		self.validate_finished_goods()
-		self.validate_return_reference_doc()
 		self.validate_with_material_request()
 		self.validate_valuation_rate()
 		self.set_total_incoming_outgoing_value()

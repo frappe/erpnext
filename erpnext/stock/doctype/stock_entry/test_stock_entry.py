@@ -12,7 +12,7 @@ from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFre
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order, create_dn_against_so
-from erpnext.stock.doctype.stock_entry.stock_entry import make_return_jv, NotUpdateStockError
+from erpnext.stock.doctype.stock_entry.stock_entry import NotUpdateStockError
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 
 def get_sle(**args):

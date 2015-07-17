@@ -71,7 +71,6 @@ class PurchaseReceipt(BuyingController):
 			
 	def validate_purchase_return(self):
 		for d in self.get("items"):
-			print flt(d.rejected_qty)
 			if self.is_return and flt(d.rejected_qty) != 0:
 				frappe.throw(_("Row #{0}: Rejected Qty can not be entered in Purchase Return").format(d.idx))
 				

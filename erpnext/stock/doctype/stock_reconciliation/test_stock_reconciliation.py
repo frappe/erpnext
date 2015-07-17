@@ -107,8 +107,6 @@ def create_stock_reconciliation(**args):
 		"valuation_rate": args.rate
 	})
 
-	sr.insert()
-
 	sr.submit()
 	return sr
 

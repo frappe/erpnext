@@ -26,7 +26,7 @@ class AccountsController(TransactionBase):
 			self.validate_return_doc()
 			self.set_total_in_words()
 
-		if not self.is_return:
+		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.is_return:
 			self.validate_due_date()
 
 		if self.meta.get_field("is_recurring"):
