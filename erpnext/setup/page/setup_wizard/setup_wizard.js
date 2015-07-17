@@ -25,6 +25,7 @@ frappe.pages['setup-wizard'].on_page_load = function(wrapper) {
 			erpnext.wiz.user.slide,
 			erpnext.wiz.org.slide,
 			erpnext.wiz.branding.slide,
+			erpnext.wiz.users.slide,
 			erpnext.wiz.taxes.slide,
 			erpnext.wiz.customers.slide,
 			erpnext.wiz.suppliers.slide,
@@ -137,7 +138,7 @@ erpnext.wiz.WizardSlide = Class.extend({
 			});
 			this.form.make();
 		} else {
-			$(this.body).html(this.html)
+			$(this.body).html(this.html);
 		}
 
 		if(this.id > 0) {
@@ -412,9 +413,28 @@ $.extend(erpnext.wiz, {
 			onload: function(slide) {
 				erpnext.wiz.org.load_chart_of_accounts(slide);
 				erpnext.wiz.org.bind_events(slide);
+				erpnext.wiz.org.set_fy_dates(slide);
 			},
 
 			css_class: "single-column"
+		},
+
+		set_fy_dates: function(slide) {
+			var country = slide.wiz.get_values().country;
+
+			if(country) {
+				var fy = erpnext.wiz.fiscal_years[country];
+				var current_year = moment(new Date()).year();
+				var next_year = current_year + 1;
+				if(!fy) {
+					fy = ["01-01", "12-31"];
+					next_year = current_year;
+				}
+
+				slide.get_field("fy_start_date").set_input(current_year + "-" + fy[0]);
+				slide.get_field("fy_end_date").set_input(next_year + "-" + fy[1]);
+			}
+
 		},
 
 		load_chart_of_accounts: function(slide) {
@@ -486,11 +506,41 @@ $.extend(erpnext.wiz, {
 		},
 	},
 
+	users: {
+		slide: {
+			icon: "icon-money",
+			"title": __("Add Users"),
+			"help": __("Add users to your organization"),
+			"fields": [],
+			before_load: function(slide) {
+				slide.fields = [];
+				for(var i=1; i<5; i++) {
+					slide.fields = slide.fields.concat([
+						{fieldtype:"Section Break"},
+						{fieldtype:"Data", fieldname:"user_fullname_"+ i,
+							label:__("Full Name")},
+						{fieldtype:"Data", fieldname:"user_email_" + i,
+							label:__("Email ID"), placeholder:__("user@example.com"),
+							options: "Email"},
+						{fieldtype:"Column Break"},
+						{fieldtype: "Check", fieldname: "user_sales_" + i,
+							label:__("Sales"), default: 1},
+						{fieldtype: "Check", fieldname: "user_purchaser_" + i,
+							label:__("Purchaser"), default: 1},
+						{fieldtype: "Check", fieldname: "user_accountant_" + i,
+							label:__("Accountant"), default: 1},
+					]);
+				}
+			},
+			css_class: "two-column"
+		},
+	},
+
 	taxes: {
 		slide: {
 			icon: "icon-money",
 			"title": __("Add Taxes"),
-			"help": __("List your tax heads (e.g. VAT, Excise; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later."),
+			"help": __("List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later."),
 			"fields": [],
 			before_load: function(slide) {
 				slide.fields = [];
@@ -526,6 +576,7 @@ $.extend(erpnext.wiz, {
 							label:__("Contact Name") + " " + i, placeholder:__("Contact Name")}
 					])
 				}
+				slide.fields[1].reqd = 1;
 			},
 			css_class: "two-column"
 		},
@@ -549,6 +600,7 @@ $.extend(erpnext.wiz, {
 							label:__("Contact Name") + " " + i, placeholder:__("Contact Name")},
 					])
 				}
+				slide.fields[1].reqd = 1;
 			},
 			css_class: "two-column"
 		},
@@ -578,9 +630,11 @@ $.extend(erpnext.wiz, {
 						{fieldtype: "Check", fieldname: "is_sales_item_" + i, label:__("We sell this Item"), default: 1},
 						{fieldtype: "Check", fieldname: "is_purchase_item_" + i, label:__("We buy this Item")},
 						{fieldtype:"Column Break"},
+						{fieldtype:"Currency", fieldname:"item_price_" + i, label:__("Rate")},
 						{fieldtype:"Attach Image", fieldname:"item_img_" + i, label:__("Attach Image")},
 					])
 				}
+				slide.fields[1].reqd = 1;
 			},
 			css_class: "two-column"
 		},
@@ -627,3 +681,25 @@ $.extend(erpnext.wiz, {
 	},
 });
 
+// Source: https://en.wikipedia.org/wiki/Fiscal_year
+// default 1st Jan - 31st Dec
+
+erpnext.wiz.fiscal_years = {
+	"Afghanistan": ["12-20", "12-21"],
+	"Australia": ["07-01", "06-30"],
+	"Bangladesh": ["07-01", "06-30"],
+	"Canada": ["04-01", "03-31"],
+	"Costa Rica": ["10-01", "09-30"],
+	"Egypt": ["07-01", "06-30"],
+	"Hong Kong": ["04-01", "03-31"],
+	"India": ["04-01", "03-31"],
+	"Iran": ["06-23", "06-22"],
+	"Italy": ["07-01", "06-30"],
+	"Myanmar": ["04-01", "03-31"],
+	"New Zealand": ["04-01", "03-31"],
+	"Pakistan": ["07-01", "06-30"],
+	"Singapore": ["04-01", "03-31"],
+	"South Africa": ["03-01", "02-28"],
+	"Thailand": ["10-01", "09-30"],
+	"United Kingdom": ["04-01", "03-31"],
+}
