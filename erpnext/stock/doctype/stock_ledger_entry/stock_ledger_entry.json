@@ -151,6 +151,15 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "outgoing_rate", 
+   "fieldtype": "Currency", 
+   "label": "Outgoing Rate", 
+   "options": "Company:company:default_currency", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
+  }, 
+  {
    "fieldname": "stock_uom", 
    "fieldtype": "Link", 
    "label": "Stock UOM", 
@@ -266,7 +275,7 @@
  "icon": "icon-list", 
  "idx": 1, 
  "in_create": 1, 
- "modified": "2015-07-13 05:28:27.826340", 
+ "modified": "2015-07-16 16:37:54.452944", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Ledger Entry", 
