@@ -81,20 +81,19 @@ class SerialNo(StockController):
 	def set_status(self, last_sle):
 		if last_sle:
 			if last_sle.voucher_type == "Stock Entry":
-				document_type = frappe.db.get_value("Stock Entry", last_sle.voucher_no,
-					"purpose")
+				document_type = frappe.db.get_value("Stock Entry", last_sle.voucher_no, "purpose")
 			else:
 				document_type = last_sle.voucher_type
 
 			if last_sle.actual_qty > 0:
-				if document_type == "Sales Return":
+				if document_type in ("Delivery Note", "Sales Invoice", "Sales Return"):
 					self.status = "Sales Returned"
 				else:
 					self.status = "Available"
 			else:
-				if document_type == "Purchase Return":
+				if document_type in ("Purchase Receipt", "Purchase Invoice", "Purchase Return"):
 					self.status = "Purchase Returned"
-				elif last_sle.voucher_type in ("Delivery Note", "Sales Invoice"):
+				elif document_type in ("Delivery Note", "Sales Invoice"):
 					self.status = "Delivered"
 				else:
 					self.status = "Not Available"
