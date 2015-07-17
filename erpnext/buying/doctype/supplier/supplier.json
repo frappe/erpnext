@@ -55,6 +55,13 @@
    "reqd": 1
   }, 
   {
+   "fieldname": "is_frozen", 
+   "fieldtype": "Check", 
+   "label": "Is Frozen ?", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "address_contacts", 
    "fieldtype": "Section Break", 
@@ -172,7 +179,7 @@
  ], 
  "icon": "icon-user", 
  "idx": 1, 
- "modified": "2015-07-13 05:28:29.121285", 
+ "modified": "2015-07-17 02:01:36.727437", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier", 

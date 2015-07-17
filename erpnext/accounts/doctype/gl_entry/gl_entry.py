@@ -17,6 +17,7 @@ class GLEntry(Document):
 		self.validate_posting_date()
 		self.check_pl_account()
 		self.validate_cost_center()
+		self.validate_party()
 
 	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes'):
 		self.validate_account_details(adv_adj)
@@ -88,6 +89,11 @@ class GLEntry(Document):
 
 		if self.cost_center and _get_cost_center_company() != self.company:
 			frappe.throw(_("Cost Center {0} does not belong to Company {1}").format(self.cost_center, self.company))
+			
+	def validate_party(self):
+		if self.meta.get_field("party_type"):
+			if frappe.db.get_value(self.party_type, self.party, "is_frozen"):
+				frappe.throw("Accounts for {0} {1} is frozen".format(self.party_type, self.party))
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:

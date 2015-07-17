@@ -16,6 +16,7 @@ class AccountsController(TransactionBase):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 		self.validate_date_with_fiscal_year()
+		
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
 			if not self.meta.get_field("is_return") or not self.is_return:
@@ -32,6 +33,8 @@ class AccountsController(TransactionBase):
 
 		if self.meta.get_field("taxes_and_charges"):
 			self.validate_enabled_taxes_and_charges()
+			
+		self.validate_party()
 
 	def on_submit(self):
 		if self.meta.get_field("is_recurring"):
@@ -339,6 +342,20 @@ class AccountsController(TransactionBase):
 			self._abbr = frappe.db.get_value("Company", self.company, "abbr")
 
 		return self._abbr
+
+	def validate_party(self):
+		party = None
+		if self.meta.get_field("customer"):
+			party_type = 'customer'
+			party = self.customer
+
+		elif self.meta.get_field("suppier"):
+			party_type = 'supplier'
+			party = self.supplier
+			
+		if party:
+			if frappe.db.get_value(party_type, party, "is_frozen"):
+				frappe.throw("Accounts for {0} {1} is frozen".format(party_type, party))
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
