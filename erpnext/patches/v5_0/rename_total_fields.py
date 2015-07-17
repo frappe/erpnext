@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.model import rename_field
+from frappe.model.utils import rename_field
 from frappe.modules import scrub, get_doctype_module
 
 selling_doctypes = ("Quotation", "Sales Order", "Delivery Note", "Sales Invoice")
