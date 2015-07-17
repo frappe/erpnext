@@ -614,21 +614,46 @@ class StockEntry(StockController):
 		items_dict = frappe.db.sql("""select item_name, item_code, sum(qty) as qty, to_warehouse, from_warehouse,
 			description, stock_uom, expense_account, cost_center from `tabStock Entry` se,`tabStock Entry Detail` sed 
 			where se.name = sed.parent and se.docstatus=1 and se.purpose='Material Transfer for Manufacture' and 
-			se.production_order= %s and se.to_warehouse= %s group by sed.item_code;""", 
+			se.production_order= %s and se.to_warehouse= %s group by sed.item_code""", 
 			(self.production_order, self.from_warehouse), as_dict=1)
+		
+		transfered_materials = frappe.db.sql("""select item_code, sum(qty) as qty from `tabStock Entry` se,
+			`tabStock Entry Detail` sed where se.name = sed.parent and se.docstatus=1 and 
+			se.purpose='Manufacture' and se.production_order= %s and se.from_warehouse= %s 
+			group by sed.item_code""", (self.production_order, self.from_warehouse), as_dict=1)
+		
+		transfered_qty= {}
+		for d in transfered_materials:
+			transfered_qty.setdefault(d.item_code, d.qty)
+		
+		po_qty = frappe.db.sql("""select qty, produced_qty, material_transferred_for_manufacturing from
+			`tabProduction Order` where name=%s""", self.production_order, as_dict=1)[0]
+		manufacturing_qty = flt(po_qty.qty)
+		produced_qty = flt(po_qty.produced_qty)
+		trans_qty = flt(po_qty.material_transferred_for_manufacturing)
+		
 		for item in items_dict:
-			self.add_to_stock_entry_detail({
-				item.item_code: {
-					"to_warehouse": item.to_warehouse,
-					"from_warehouse": item.from_warehouse,
-					"qty": item.qty,
-					"item_name": item.item_name,
-					"description": item.description,
-					"stock_uom": item.stock_uom,
-					"expense_account": item.expense_account,
-					"cost_center": item.buying_cost_center,
-				}
-			})
+			qty= item.qty
+			
+			if manufacturing_qty > (produced_qty + flt(self.fg_completed_qty)):
+				qty = (qty/trans_qty) * flt(self.fg_completed_qty)
+			
+			elif transfered_qty.get(item.item_code):
+				qty-= transfered_qty.get(item.item_code)
+				
+			if qty > 0:
+				self.add_to_stock_entry_detail({
+					item.item_code: {
+						"to_warehouse": item.to_warehouse,
+						"from_warehouse": item.from_warehouse,
+						"qty": qty,
+						"item_name": item.item_name,
+						"description": item.description,
+						"stock_uom": item.stock_uom,
+						"expense_account": item.expense_account,
+						"cost_center": item.buying_cost_center,
+					}
+				})
 
 	def get_pending_raw_materials(self):
 		"""
