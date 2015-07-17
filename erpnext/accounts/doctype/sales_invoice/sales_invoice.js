@@ -53,9 +53,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				frappe.set_route("query-report", "General Ledger");
 			}, "icon-table");
 
-			// var percent_paid = cint(flt(doc.base_grand_total - doc.outstanding_amount) / flt(doc.base_grand_total) * 100);
-			// cur_frm.dashboard.add_progress(percent_paid + "% Paid", percent_paid);
-
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
 				var from_delivery_note = false;
@@ -69,9 +66,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			}
 
-			if(doc.outstanding_amount!=0) {
+			if(doc.outstanding_amount!=0 && !cint(doc.is_return)) {
 				cur_frm.add_custom_button(__('Make Payment Entry'), cur_frm.cscript.make_bank_entry, "icon-money");
 			}
+			
+			cur_frm.add_custom_button(__('Make Sales Return'), this.make_sales_return,
+				frappe.boot.doctype_icons["Sales Invoice"]);
 		}
 
 		// Show buttons only when pos view is active
@@ -205,8 +205,14 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 	items_on_form_rendered: function() {
 		erpnext.setup_serial_no();
+	},
+	
+	make_sales_return: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_return",
+			frm: cur_frm
+		})
 	}
-
 });
 
 // for backward compatibility: combine new and previous states
@@ -281,16 +287,6 @@ cur_frm.cscript.make_bank_entry = function() {
 			frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 		}
 	});
-}
-
-cur_frm.fields_dict.debit_to.get_query = function(doc) {
-	return{
-		filters: {
-			'report_type': 'Balance Sheet',
-			'is_group': 0,
-			'company': doc.company
-		}
-	}
 }
 
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {

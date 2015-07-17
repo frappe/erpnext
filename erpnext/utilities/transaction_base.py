@@ -128,3 +128,36 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 				if d.get(f):
 					if cint(d.get(f))!=d.get(f):
 						frappe.throw(_("Quantity cannot be a fraction in row {0}").format(d.idx), UOMMustBeIntegerError)
+
+def make_return_doc(doctype, source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
+	def set_missing_values(source, target):
+		doc = frappe.get_doc(target)
+		doc.is_return = 1
+		doc.return_against = source.name
+		doc.ignore_pricing_rule = 1
+		doc.run_method("calculate_taxes_and_totals")
+
+	def update_item(source_doc, target_doc, source_parent):
+		target_doc.qty = -1* source_doc.qty
+		if doctype == "Purchase Receipt":
+			target_doc.received_qty = -1* source_doc.qty
+		elif doctype == "Purchase Invoice":
+			target_doc.purchase_receipt = source_doc.purchase_receipt
+			target_doc.pr_detail = source_doc.pr_detail
+
+	doclist = get_mapped_doc(doctype, source_name,	{
+		doctype: {
+			"doctype": doctype,
+			
+			"validation": {
+				"docstatus": ["=", 1],
+			}
+		},
+		doctype +" Item": {
+			"doctype": doctype + " Item",
+			"postprocess": update_item
+		},
+	}, target_doc, set_missing_values)
+
+	return doclist

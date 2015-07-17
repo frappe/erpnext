@@ -4,11 +4,14 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, throw
-from frappe.utils import today, flt, cint
+from frappe.utils import today, flt, cint, format_datetime, get_datetime
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
+
+class StockOverReturnError(frappe.ValidationError): pass
+
 
 class AccountsController(TransactionBase):
 	def validate(self):
@@ -17,10 +20,14 @@ class AccountsController(TransactionBase):
 		self.validate_date_with_fiscal_year()
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
-			self.validate_value("base_grand_total", ">=", 0)
+			if not self.meta.get_field("is_return") or not self.is_return:
+				self.validate_value("base_grand_total", ">=", 0)
+			
+			self.validate_return_doc()
 			self.set_total_in_words()
 
-		self.validate_due_date()
+		if not self.is_return:
+			self.validate_due_date()
 
 		if self.meta.get_field("is_recurring"):
 			validate_recurring_document(self)
@@ -50,6 +57,94 @@ class AccountsController(TransactionBase):
 				if self.meta.get_field("fiscal_year") and not self.fiscal_year:
 					self.fiscal_year = get_fiscal_year(self.get(fieldname))[0]
 				break
+
+	def validate_return_doc(self):
+		if not self.meta.get_field("is_return") or not self.is_return:
+			return
+			
+		self.validate_return_against()
+		self.validate_returned_items()
+			
+	def validate_return_against(self):
+		if not self.return_against:
+			frappe.throw(_("{0} is mandatory for Return").format(self.meta.get_label("return_against")))
+		else:
+			filters = {"doctype": self.doctype, "docstatus": 1, "company": self.company}
+			if self.meta.get_field("customer"):
+				filters["customer"] = self.customer
+			elif self.meta.get_field("supplier"):
+				filters["supplier"] = self.supplier
+				
+			if not frappe.db.exists(filters):
+					frappe.throw(_("Invalid {0}: {1}")
+						.format(self.meta.get_label("return_against"), self.return_against))
+			else:
+				ref_doc = frappe.get_doc(self.doctype, self.return_against)
+					
+				# validate posting date time
+				return_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
+				ref_posting_datetime = "%s %s" % (ref_doc.posting_date, ref_doc.get("posting_time") or "00:00:00")
+				
+				if get_datetime(return_posting_datetime) < get_datetime(ref_posting_datetime):
+					frappe.throw(_("Posting timestamp must be after {0}")
+						.format(datetime_in_user_format(ref_posting_datetime)))
+				
+				# validate same exchange rate
+				if self.conversion_rate != ref_doc.conversion_rate:
+					frappe.throw(_("Exchange Rate must be same as {0} {1} ({2})")
+						.format(self.doctype, self.return_against, ref_doc.conversion_rate))
+						
+				# validate update stock
+				if self.doctype == "Sales Invoice" and self.update_stock \
+					and not frappe.db.get_value("Sales Invoice", self.return_against, "update_stock"):
+						frappe.throw(_("'Update Stock' can not be checked because items are not delivered via {0}")
+							.format(self.return_against))
+					
+	def validate_returned_items(self):
+		valid_items = frappe._dict()
+		for d in frappe.db.sql("""select item_code, sum(qty) as qty, rate from `tab{0} Item` 
+			where parent = %s group by item_code""".format(self.doctype), self.return_against, as_dict=1):
+				valid_items.setdefault(d.item_code, d)
+				
+		already_returned_items = self.get_already_returned_items()
+		
+		items_returned = False
+		for d in self.get("items"):
+			if flt(d.qty) < 0:
+				if d.item_code not in valid_items:
+					frappe.throw(_("Row # {0}: Returned Item {1} does not exists in {2} {3}")
+						.format(d.idx, d.item_code, self.doctype, self.return_against))
+				else:
+					ref = valid_items.get(d.item_code, frappe._dict())
+					already_returned_qty = flt(already_returned_items.get(d.item_code))
+					max_return_qty = flt(ref.qty) - already_returned_qty
+					
+					if already_returned_qty >= ref.qty:
+						frappe.throw(_("Item {0} has already been returned").format(d.item_code), StockOverReturnError)
+					elif abs(d.qty) > max_return_qty:
+						frappe.throw(_("Row # {0}: Cannot return more than {1} for Item {2}")
+							.format(d.idx, ref.qty, d.item_code), StockOverReturnError)
+					elif flt(d.rate) != ref.rate:
+						frappe.throw(_("Row # {0}: Rate must be same as {1} {2}")
+							.format(d.idx, self.doctype, self.return_against))
+					
+				
+				items_returned = True
+				
+		if not items_returned:
+			frappe.throw(_("Atleast one item should be entered with negative quantity in return document"))
+			
+	def get_already_returned_items(self):
+		return frappe._dict(frappe.db.sql("""
+			select 
+				child.item_code, sum(abs(child.qty)) as qty
+			from 
+				`tab{0} Item` child, `tab{1}` par 
+			where 
+				child.parent = par.name and par.docstatus = 1
+				and ifnull(par.is_return, 0) = 1 and par.return_against = %s and child.qty < 0 
+			group by item_code
+		""".format(self.doctype, self.doctype), self.return_against))
 
 	def calculate_taxes_and_totals(self):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals

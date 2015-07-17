@@ -24,7 +24,9 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			cur_frm.add_custom_button(__('Make Installation Note'), this.make_installation_note);
 
 		if (doc.docstatus==1) {
-
+			cur_frm.add_custom_button(__('Make Sales Return'), this.make_sales_return,
+				frappe.boot.doctype_icons["Delivery Note"]);
+				
 			this.show_stock_ledger();
 			this.show_general_ledger();
 		}
@@ -72,6 +74,13 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",
 			frm: cur_frm
 		});
+	},
+	
+	make_sales_return: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_return",
+			frm: cur_frm
+		})
 	},
 
 	tc_name: function() {

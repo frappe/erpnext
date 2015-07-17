@@ -34,6 +34,9 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 				cur_frm.add_custom_button(__('Make Purchase Invoice'), this.make_purchase_invoice,
 					frappe.boot.doctype_icons["Purchase Invoice"]);
 			}
+			
+			cur_frm.add_custom_button(__('Make Purchase Return'), this.make_purchase_return,
+				frappe.boot.doctype_icons["Purchase Receipt"]);
 
 			this.show_stock_ledger();
 			this.show_general_ledger();
@@ -102,6 +105,13 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	make_purchase_invoice: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
+			frm: cur_frm
+		})
+	},
+	
+	make_purchase_return: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_return",
 			frm: cur_frm
 		})
 	},

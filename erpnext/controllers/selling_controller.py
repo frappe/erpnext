@@ -175,7 +175,7 @@ class SellingController(StockController):
 				if flt(d.qty) > flt(d.delivered_qty):
 					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
 
-			elif self.doctype == "Delivery Note" and d.against_sales_order:
+			elif self.doctype == "Delivery Note" and d.against_sales_order and not self.is_return:
 				# if SO qty is 10 and there is tolerance of 20%, then it will allow DN of 12.
 				# But in this case reserved qty should only be reduced by 10 and not 12
 
@@ -211,7 +211,7 @@ class SellingController(StockController):
 					'qty': d.qty,
 					'reserved_qty': reserved_qty_for_main_item,
 					'uom': d.stock_uom,
-                                        'stock_uom': d.stock_uom,
+					'stock_uom': d.stock_uom,
 					'batch_no': cstr(d.get("batch_no")).strip(),
 					'serial_no': cstr(d.get("serial_no")).strip(),
 					'name': d.name

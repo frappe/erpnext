@@ -25,6 +25,9 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				frappe.boot.doctype_icons["Journal Entry"]);
 
 		if(doc.docstatus==1) {
+			cur_frm.add_custom_button(__('Make Purchase Return'), this.make_purchase_return,
+				frappe.boot.doctype_icons["Purchase Invoice"]);
+			
 			cur_frm.add_custom_button(__('View Ledger'), function() {
 				frappe.route_options = {
 					"voucher_no": doc.name,
@@ -109,7 +112,14 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		$.each(this.frm.doc["items"] || [], function(i, row) {
 			if(row.purchase_receipt) frappe.model.clear_doc("Purchase Receipt", row.purchase_receipt)
 		})
-	}
+	},
+	
+	make_purchase_return: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_purchase_return",
+			frm: cur_frm
+		})
+	},
 });
 
 cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
