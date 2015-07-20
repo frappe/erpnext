@@ -9,6 +9,8 @@ from frappe import _
 
 from frappe.model.document import Document
 
+class CustomerFrozen(frappe.ValidationError): pass
+
 class GLEntry(Document):
 	def validate(self):
 		self.flags.ignore_submit_comment = True
@@ -91,9 +93,9 @@ class GLEntry(Document):
 			frappe.throw(_("Cost Center {0} does not belong to Company {1}").format(self.cost_center, self.company))
 			
 	def validate_party(self):
-		if self.meta.get_field("party_type"):
+		if self.party_type and self.party:
 			if frappe.db.get_value(self.party_type, self.party, "is_frozen"):
-				frappe.throw("Accounts for {0} {1} is frozen".format(self.party_type, self.party))
+				frappe.throw("{0} {1} is frozen".format(self.party_type, self.party), CustomerFrozen)
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:

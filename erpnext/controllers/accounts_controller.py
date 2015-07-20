@@ -11,6 +11,8 @@ from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 from erpnext.controllers.sales_and_purchase_return import validate_return
 
+class CustomerFrozen(frappe.ValidationError): pass
+
 class AccountsController(TransactionBase):
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
@@ -344,18 +346,17 @@ class AccountsController(TransactionBase):
 		return self._abbr
 
 	def validate_party(self):
-		party = None
+		party_type = None
 		if self.meta.get_field("customer"):
-			party_type = 'customer'
-			party = self.customer
+			party_type = 'Customer'
 
-		elif self.meta.get_field("suppier"):
-			party_type = 'supplier'
-			party = self.supplier
+		elif self.meta.get_field("supplier"):
+			party_type = 'Supplier'
 			
-		if party:
+		if party_type:
+			party = self.get(party_type.lower())
 			if frappe.db.get_value(party_type, party, "is_frozen"):
-				frappe.throw("Accounts for {0} {1} is frozen".format(party_type, party))
+				frappe.throw("{0} {1} is frozen".format(party_type, party), CustomerFrozen)
 
 @frappe.whitelist()
 def get_tax_rate(account_head):

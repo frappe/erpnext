@@ -7,6 +7,7 @@ import frappe
 import unittest
 
 from frappe.test_runner import make_test_records
+from erpnext.controllers.accounts_controller import CustomerFrozen
 
 test_ignore = ["Price List"]
 
@@ -65,5 +66,19 @@ class TestCustomer(unittest.TestCase):
 			{"comment_doctype": "Customer", "comment_docname": "_Test Customer 1 Renamed"}), comment.name)
 
 		frappe.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
-
-
+		
+	def test_freezed_customer(self):
+		cust = frappe.get_doc("Customer", "_Test Customer")
+		cust.is_frozen = 1
+		cust.save()
+		
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		
+		so = make_sales_order(do_not_save= True)
+		so.customer = "_Test Customer"
+		self.assertRaises(CustomerFrozen, so.save)
+		
+		cust.is_frozen = 0
+		cust.save()
+		
+		so.save()
