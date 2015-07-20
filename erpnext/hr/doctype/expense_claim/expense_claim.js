@@ -19,10 +19,13 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 				jv.company = cur_frm.doc.company;
 				jv.remark = 'Payment against Expense Claim: ' + cur_frm.doc.name;
 				jv.fiscal_year = cur_frm.doc.fiscal_year;
-
-				var d1 = frappe.model.add_child(jv, 'Journal Entry Account', 'accounts');
-				d1.debit = cur_frm.doc.total_sanctioned_amount;
-				d1.against_expense_claim = cur_frm.doc.name;
+				var expense = cur_frm.doc.expenses || [];
+				for(var i = 0; i < expense.length; i++){
+					var d1 = frappe.model.add_child(jv, 'Journal Entry Account', 'accounts');
+					d1.debit = expense[i].sanctioned_amount;
+					d1.account = expense[i].default_account;
+					d1.against_expense_claim = cur_frm.doc.name;
+				}
 
 				// credit to bank
 				var d1 = frappe.model.add_child(jv, 'Journal Entry Account', 'accounts');
@@ -43,6 +46,7 @@ $.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}))
 
 cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee','employee_name','employee_name');
+cur_frm.add_fetch('expense_type', 'default_account', 'default_account');
 
 cur_frm.cscript.onload = function(doc,cdt,cdn) {
 	if(!doc.approval_status)
