@@ -173,7 +173,7 @@
  "icon": "icon-money", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-06-14 20:57:55.471334", 
+ "modified": "2015-07-20 03:54:14.297995", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Account", 
@@ -257,5 +257,5 @@
    "write": 1
   }
  ], 
- "search_fields": "is_group"
+ "search_fields": ""
 }
