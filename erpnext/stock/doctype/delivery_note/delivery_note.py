@@ -257,7 +257,7 @@ class DeliveryNote(SellingController):
 					
 				sl_entries.append(self.get_sl_entries(d, {
 					"actual_qty": -1*flt(d['qty']),
-					incoming_rate: incoming_rate
+					"incoming_rate": incoming_rate
 				}))
 
 		self.make_sl_entries(sl_entries)

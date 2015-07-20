@@ -4,11 +4,10 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest, copy
-import time
-from frappe.utils import nowdate, add_days
-from erpnext.accounts.utils import get_stock_and_account_difference
+from frappe.utils import nowdate, add_days, flt
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.projects.doctype.time_log_batch.test_time_log_batch import *
+from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 
 
 class TestSalesInvoice(unittest.TestCase):
@@ -772,6 +771,53 @@ class TestSalesInvoice(unittest.TestCase):
 		si1 = create_sales_invoice(posting_date="2015-07-05")		
 		self.assertEqual(si1.due_date, "2015-08-31")
 		
+	def test_return_sales_invoice(self):
+		set_perpetual_inventory()
+		
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, incoming_rate=100)
+		
+		actual_qty_0 = get_qty_after_transaction()
+		
+		si = create_sales_invoice(qty=5, rate=500, update_stock=1)
+
+		actual_qty_1 = get_qty_after_transaction()
+		self.assertEquals(actual_qty_0 - 5, actual_qty_1)
+		
+		# outgoing_rate
+		outgoing_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Sales Invoice", 
+			"voucher_no": si.name}, "stock_value_difference") / 5
+		
+		# return entry
+		si1 = create_sales_invoice(is_return=1, return_against=si.name, qty=-2, rate=500, update_stock=1)
+
+		actual_qty_2 = get_qty_after_transaction()
+			
+		self.assertEquals(actual_qty_1 + 2, actual_qty_2)
+		
+		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry", 
+			{"voucher_type": "Sales Invoice", "voucher_no": si1.name}, 
+			["incoming_rate", "stock_value_difference"])
+			
+		self.assertEquals(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
+		
+		
+		# Check gl entry
+		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice", 
+			"voucher_no": si1.name, "account": "_Test Warehouse - _TC"}, "debit")
+			
+		self.assertEquals(gle_warehouse_amount, stock_value_difference)
+		
+		party_credited = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice", 
+			"voucher_no": si1.name, "account": "Debtors - _TC", "party": "_Test Customer"}, "credit")
+			
+		self.assertEqual(party_credited, 1000)
+		
+		# Check outstanding amount
+		self.assertFalse(si1.outstanding_amount)
+		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 1500)
+		
+		set_perpetual_inventory(0)
+		
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
@@ -784,6 +830,10 @@ def create_sales_invoice(**args):
 	si.debit_to = args.debit_to or "Debtors - _TC"
 	si.update_stock = args.update_stock
 	si.is_pos = args.is_pos
+	si.is_return = args.is_return
+	si.return_against = args.return_against
+	si.currency="INR"
+	si.conversion_rate = 1
 
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",

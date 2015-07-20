@@ -493,7 +493,7 @@ class SalesInvoice(SellingController):
 					"against": self.against_income_account,
 					"debit": self.base_grand_total,
 					"remarks": self.remarks,
-					"against_voucher": self.against_invoice if cint(self.is_return) else self.name,
+					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype
 				})
 			)
@@ -541,7 +541,7 @@ class SalesInvoice(SellingController):
 					"against": self.cash_bank_account,
 					"credit": self.paid_amount,
 					"remarks": self.remarks,
-					"against_voucher": self.against_invoice if cint(self.is_return) else self.name,
+					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 				})
 			)
@@ -565,7 +565,7 @@ class SalesInvoice(SellingController):
 					"against": self.write_off_account,
 					"credit": self.write_off_amount,
 					"remarks": self.remarks,
-					"against_voucher": self.against_invoice if cint(self.is_return) else self.name,
+					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 				})
 			)

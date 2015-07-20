@@ -86,8 +86,7 @@ class AccountsController(TransactionBase):
 				ref_posting_datetime = "%s %s" % (ref_doc.posting_date, ref_doc.get("posting_time") or "00:00:00")
 				
 				if get_datetime(return_posting_datetime) < get_datetime(ref_posting_datetime):
-					frappe.throw(_("Posting timestamp must be after {0}")
-						.format(datetime_in_user_format(ref_posting_datetime)))
+					frappe.throw(_("Posting timestamp must be after {0}").format(format_datetime(ref_posting_datetime)))
 				
 				# validate same exchange rate
 				if self.conversion_rate != ref_doc.conversion_rate:
@@ -105,6 +104,11 @@ class AccountsController(TransactionBase):
 		for d in frappe.db.sql("""select item_code, sum(qty) as qty, rate from `tab{0} Item` 
 			where parent = %s group by item_code""".format(self.doctype), self.return_against, as_dict=1):
 				valid_items.setdefault(d.item_code, d)
+		
+		if self.doctype in ("Delivery Note", "Sales Invoice"):
+			for d in frappe.db.sql("""select item_code, sum(qty) as qty from `tabPacked Item` 
+				where parent = %s group by item_code""".format(self.doctype), self.return_against, as_dict=1):
+					valid_items.setdefault(d.item_code, d)
 				
 		already_returned_items = self.get_already_returned_items()
 		
@@ -124,7 +128,7 @@ class AccountsController(TransactionBase):
 					elif abs(d.qty) > max_return_qty:
 						frappe.throw(_("Row # {0}: Cannot return more than {1} for Item {2}")
 							.format(d.idx, ref.qty, d.item_code), StockOverReturnError)
-					elif flt(d.rate) != ref.rate:
+					elif ref.rate and flt(d.rate) != ref.rate:
 						frappe.throw(_("Row # {0}: Rate must be same as {1} {2}")
 							.format(d.idx, self.doctype, self.return_against))
 					
