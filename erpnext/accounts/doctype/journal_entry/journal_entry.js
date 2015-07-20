@@ -109,7 +109,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 	against_jv: function(doc, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
-		if (d.against_jv && d.party && !flt(d.credit) && !flt(d.debit)) {
+		if (d.against_jv && !flt(d.credit) && !flt(d.debit)) {
 			this.get_outstanding('Journal Entry', d.against_jv, d);
 		}
 	},
@@ -119,7 +119,8 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		var args = {
 			"doctype": doctype,
 			"docname": docname,
-			"party": child.party
+			"party": child.party,
+			"account": child.account
 		}
 
 		return this.frm.call({

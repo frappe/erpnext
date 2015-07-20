@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.model import rename_field
+from frappe.model.utils.rename_field import rename_field
 from frappe.modules import scrub, get_doctype_module
 
 rename_map = {
