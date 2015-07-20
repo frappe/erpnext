@@ -545,12 +545,14 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def get_outstanding(args):
 	args = eval(args)
-	if args.get("doctype") == "Journal Entry" and args.get("party"):
+	if args.get("doctype") == "Journal Entry":
+		condition = " and party=%(party)s" if args.get("party") else ""
+			
 		against_jv_amount = frappe.db.sql("""
 			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
-			from `tabJournal Entry Account` where parent=%s and party=%s
+			from `tabJournal Entry Account` where parent=%(docname)s and account=%(account)s {0}
 			and ifnull(against_invoice, '')='' and ifnull(against_voucher, '')=''
-			and ifnull(against_jv, '')=''""", (args['docname'], args['party']))
+			and ifnull(against_jv, '')=''""".format(condition), args)
 
 		against_jv_amount = flt(against_jv_amount[0][0]) if against_jv_amount else 0
 		if against_jv_amount > 0:
