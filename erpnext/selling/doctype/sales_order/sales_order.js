@@ -46,7 +46,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 			} else {
 				// un-stop
-				cur_frm.dashboard.set_headline_alert(__("Stopped"), "alert-danger", "icon-stop");
 				cur_frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Sales Order'], "icon-check");
 			}
 		}
