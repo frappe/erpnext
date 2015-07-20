@@ -9,8 +9,13 @@ from frappe.desk.reportview import execute as runreport
 def execute(filters=None):
 	if not filters: filters = {}
 
-	employee_filters = filters.get("company") and \
-		[["Employee", "company", "=", filters.get("company")]] or None
+	employee_filters = {
+		"status": "Active"
+	}
+	
+	if filters.get("company"):
+		filters["company"] = filters.company
+
 	employees = runreport(doctype="Employee", fields=["name", "employee_name", "department"],
 		filters=employee_filters, limit_page_length=None)
 
