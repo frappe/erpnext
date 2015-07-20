@@ -554,7 +554,7 @@ class StockEntry(StockController):
 					self.add_to_stock_entry_detail(item_dict)
 					
 				elif self.production_order and self.purpose == "Manufacture" and \
-					frappe.db.get_single_value("Manufacturing Settings", "update_fg_based_on")== "Material Transfer for Manufacture":
+					frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")== "Material Transferred for Manufacture":
 					self.get_transfered_raw_materials()
 
 				else:

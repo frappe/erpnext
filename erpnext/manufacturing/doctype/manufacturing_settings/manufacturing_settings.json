@@ -43,10 +43,10 @@
   }, 
   {
    "default": "BOM", 
-   "fieldname": "update_fg_based_on", 
+   "fieldname": "backflush_raw_materials_based_on", 
    "fieldtype": "Select", 
-   "label": "Update FG Based On", 
-   "options": "BOM\nMaterial Transfer for Manufacture", 
+   "label": "Backflush Raw Materials Based On", 
+   "options": "BOM\nMaterial Transferred for Manufacture", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -87,7 +87,7 @@
  "in_create": 0, 
  "in_dialog": 0, 
  "is_submittable": 0, 
- "issingle": 1, 
+ "issingle": 1,
  "istable": 0,
  "modified": "2015-07-23 08:12:33.889753", 
  "modified_by": "Administrator", 
