@@ -611,16 +611,16 @@ class StockEntry(StockController):
 		return item_dict
 		
 	def get_transfered_raw_materials(self):
-		items_dict = frappe.db.sql("""select item_name, item_code, sum(qty) as qty, to_warehouse, from_warehouse,
-			description, stock_uom, expense_account, cost_center from `tabStock Entry` se,`tabStock Entry Detail` sed 
+		items_dict = frappe.db.sql("""select item_name, item_code, sum(qty) as qty, sed.s_warehouse as s_warehouse, sed.t_warehouse 
+			as t_warehouse, description, stock_uom, expense_account, cost_center from `tabStock Entry` se,`tabStock Entry Detail` sed 
 			where se.name = sed.parent and se.docstatus=1 and se.purpose='Material Transfer for Manufacture' and 
-			se.production_order= %s and se.to_warehouse= %s group by sed.item_code""", 
-			(self.production_order, self.from_warehouse), as_dict=1)
+			se.production_order= %s and ifnull(sed.s_warehouse, '') != '' group by sed.item_code, sed.s_warehouse, sed.t_warehouse""", 
+			self.production_order, as_dict=1)
 		
 		transfered_materials = frappe.db.sql("""select item_code, sum(qty) as qty from `tabStock Entry` se,
 			`tabStock Entry Detail` sed where se.name = sed.parent and se.docstatus=1 and 
-			se.purpose='Manufacture' and se.production_order= %s and se.from_warehouse= %s 
-			group by sed.item_code""", (self.production_order, self.from_warehouse), as_dict=1)
+			se.purpose='Manufacture' and se.production_order= %s and ifnull(sed.s_warehouse, '') != '' 
+			group by sed.item_code, sed.s_warehouse, sed.t_warehouse""", self.production_order, as_dict=1)
 		
 		transfered_qty= {}
 		for d in transfered_materials:
@@ -644,8 +644,8 @@ class StockEntry(StockController):
 			if qty > 0:
 				self.add_to_stock_entry_detail({
 					item.item_code: {
-						"to_warehouse": item.to_warehouse,
-						"from_warehouse": item.from_warehouse,
+						"to_warehouse": item.t_warehouse,
+						"from_warehouse": item.s_warehouse,
 						"qty": qty,
 						"item_name": item.item_name,
 						"description": item.description,
