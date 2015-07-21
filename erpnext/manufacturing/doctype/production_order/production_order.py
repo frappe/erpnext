@@ -14,6 +14,8 @@ from erpnext.stock.doctype.item.item import validate_end_of_life
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
 class OperationTooLongError(frappe.ValidationError): pass
+class ProductionNotApplicableError(frappe.ValidationError): pass
+class ItemHasVariantError(frappe.ValidationError): pass
 
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError, NotInWorkingHoursError
 from erpnext.projects.doctype.time_log.time_log import OverlapError
@@ -326,10 +328,10 @@ class ProductionOrder(Document):
 	
 	def validate_production_item(self):
 		if frappe.db.get_value("Item", self.production_item, "is_pro_applicable")=='No':
-			frappe.throw(_("Item is not allowed to have Production Order."))
+			frappe.throw(_("Item is not allowed to have Production Order."), ProductionNotApplicableError)
 		
 		if frappe.db.get_value("Item", self.production_item, "has_variants"):
-			frappe.throw(_("Production Order cannot be raised against a Item Template"))
+			frappe.throw(_("Production Order cannot be raised against a Item Template"), ItemHasVariantError)
 		
 		validate_end_of_life(self.production_item)
 
