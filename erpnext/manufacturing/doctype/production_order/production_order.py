@@ -9,6 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from dateutil.relativedelta import relativedelta
+from erpnext.stock.doctype.item.item import validate_end_of_life
 
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
@@ -329,6 +330,8 @@ class ProductionOrder(Document):
 		
 		if frappe.db.get_value("Item", self.production_item, "has_variants"):
 			frappe.throw(_("Production Order cannot be raised against a Item Template"))
+		
+		validate_end_of_life(self.production_item)
 
 @frappe.whitelist()
 def get_item_details(item):

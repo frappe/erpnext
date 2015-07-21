@@ -135,6 +135,12 @@ class TestProductionOrder(unittest.TestCase):
 		prod_order.set_production_order_operations()
 		self.assertEqual(prod_order.planned_operating_cost, cost*2)
 		
+	def test_production_item(self):
+		item = frappe.get_doc("Item", "_Test FG Item")
+		item.end_of_life = 
+		
+		prod_order = make_prod_order_test_record(item="_Test FG Item", qty=1, do_not_save=True)
+		
 def make_prod_order_test_record(**args):
 	args = frappe._dict(args)
 
