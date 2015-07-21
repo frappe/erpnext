@@ -80,6 +80,13 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname":"group_by_account",
 			"label": __("Group by Account"),
 			"fieldtype": "Check",
+		},
+		{
+			"fieldname":"letter_head",
+			"label": __("Letter Head"),
+			"fieldtype": "Link",
+			"options": "Letter Head",
+			"default": frappe.defaults.get_default("letter_head"),
 		}
 	]
 }
