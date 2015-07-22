@@ -9,6 +9,7 @@ from frappe import msgprint, _
 
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
+from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
 
 class ProductionPlanningTool(Document):
 	def __init__(self, arg1, arg2=None):
@@ -27,16 +28,7 @@ class ProductionPlanningTool(Document):
 		return ret
 
 	def get_item_details(self, item_code):
-		""" Pull other item details from item master"""
-
-		item = frappe.db.sql("""select description, stock_uom, default_bom
-			from `tabItem` where name = %s""", item_code, as_dict =1)
-		ret = {
-			'description'	: item and item[0]['description'],
-			'stock_uom'		: item and item[0]['stock_uom'],
-			'bom_no'		: item and item[0]['default_bom']
-		}
-		return ret
+		return get_item_details(item_code)
 
 	def clear_so_table(self):
 		self.set('sales_orders', [])
@@ -142,15 +134,14 @@ class ProductionPlanningTool(Document):
 		self.clear_item_table()
 
 		for p in items:
-			item_details = frappe.db.sql("""select description, stock_uom, default_bom
-				from tabItem where name=%s""", p['item_code'])
+			item_details = get_item_details(p['item_code'])
 			pi = self.append('items', {})
 			pi.sales_order				= p['parent']
 			pi.warehouse				= p['warehouse']
 			pi.item_code				= p['item_code']
-			pi.description				= item_details and item_details[0][0] or ''
-			pi.stock_uom				= item_details and item_details[0][1] or ''
-			pi.bom_no					= item_details and item_details[0][2] or ''
+			pi.description				= item_details and item_details.description or ''
+			pi.stock_uom				= item_details and item_details.stock_uom or ''
+			pi.bom_no					= item_details and item_details.bom_no or ''
 			pi.so_pending_qty			= flt(p['pending_qty'])
 			pi.planned_qty				= flt(p['pending_qty'])
 
