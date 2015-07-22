@@ -11,6 +11,7 @@ from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.utils import get_stock_balance
 
 class OpeningEntryAccountError(frappe.ValidationError): pass
+class EmptyStockReconciliationItemsError(frappe.ValidationError): pass
 
 class StockReconciliation(StockController):
 	def __init__(self, arg1, arg2=None):
@@ -51,7 +52,11 @@ class StockReconciliation(StockController):
 
 		items = filter(lambda d: _changed(d), self.items)
 
-		if len(items) != len(self.items):
+		if not items:
+			frappe.throw(_("None of the items have any change in quantity or value."),
+				EmptyStockReconciliationItemsError)
+
+		elif len(items) != len(self.items):
 			self.items = items
 			for i, item in enumerate(self.items):
 				item.idx = i + 1
