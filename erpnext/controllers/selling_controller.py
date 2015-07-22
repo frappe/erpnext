@@ -110,15 +110,14 @@ class SellingController(StockController):
 		from frappe.utils import money_in_words
 		company_currency = get_company_currency(self.company)
 
-		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None,
-			"disable_rounded_total"))
+		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 
 		if self.meta.get_field("base_in_words"):
 			self.base_in_words = money_in_words(disable_rounded_total and
-				self.base_grand_total or self.base_rounded_total, company_currency)
+				abs(self.base_grand_total) or abs(self.base_rounded_total), company_currency)
 		if self.meta.get_field("in_words"):
 			self.in_words = money_in_words(disable_rounded_total and
-				self.grand_total or self.rounded_total, self.currency)
+				abs(self.grand_total) or abs(self.rounded_total), self.currency)
 
 	def calculate_commission(self):
 		if self.meta.get_field("commission_rate"):

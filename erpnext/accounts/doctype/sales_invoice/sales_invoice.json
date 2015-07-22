@@ -156,7 +156,7 @@
    "oldfieldtype": "Date", 
    "permlevel": 0, 
    "read_only": 0, 
-   "reqd": 1, 
+   "reqd": 0, 
    "search_index": 0
   }, 
   {
@@ -1275,7 +1275,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-07-17 13:29:36.922418", 
+ "modified": "2015-07-22 16:53:52.995407", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 

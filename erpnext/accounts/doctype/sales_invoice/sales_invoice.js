@@ -40,7 +40,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this._super();
 
 		cur_frm.dashboard.reset();
-
+		
+		this.frm.toggle_reqd("due_date", !this.frm.doc.is_return);
+		
 		if(doc.docstatus==1) {
 			cur_frm.add_custom_button('View Ledger', function() {
 				frappe.route_options = {
