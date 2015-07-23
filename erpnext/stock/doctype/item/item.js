@@ -86,8 +86,12 @@ frappe.ui.form.on("Item", {
 	},
 	
 	manage_variants: function(frm) {
-		frappe.route_options = {"item_code": frm.doc.name };
-		frappe.set_route("List", "Manage Variants");
+		if (cur_frm.doc.__unsaved==1) {
+			frappe.throw(__("You have unsaved changes. Please save."))
+		} else {
+			frappe.route_options = {"item_code": frm.doc.name };
+			frappe.set_route("List", "Manage Variants");
+		}
 	}
 });
 

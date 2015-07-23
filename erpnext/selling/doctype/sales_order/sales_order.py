@@ -272,6 +272,10 @@ def make_material_request(source_name, target_doc=None):
 	def postprocess(source, doc):
 		doc.material_request_type = "Purchase"
 
+	so = frappe.get_doc("Sales Order", source_name)
+	
+	item_table = "Packed Item" if so.packed_items else "Sales Order Item"
+	
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Material Request",
@@ -279,7 +283,7 @@ def make_material_request(source_name, target_doc=None):
 				"docstatus": ["=", 1]
 			}
 		},
-		"Sales Order Item": {
+		item_table: {
 			"doctype": "Material Request Item",
 			"field_map": {
 				"parent": "sales_order_no",

@@ -3,9 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-
-from frappe import msgprint, _
-
+from frappe import _
 from frappe.utils.nestedset import NestedSet
 
 class CostCenter(NestedSet):
@@ -14,18 +12,46 @@ class CostCenter(NestedSet):
 	def autoname(self):
 		self.name = self.cost_center_name.strip() + ' - ' + \
 			frappe.db.get_value("Company", self.company, "abbr")
+			
+
+	def validate(self):
+		self.validate_mandatory()
+		self.validate_accounts()
 
 	def validate_mandatory(self):
 		if self.cost_center_name != self.company and not self.parent_cost_center:
-			msgprint(_("Please enter parent cost center"), raise_exception=1)
+			frappe.throw(_("Please enter parent cost center"))
 		elif self.cost_center_name == self.company and self.parent_cost_center:
-			msgprint(_("Root cannot have a parent cost center"), raise_exception=1)
+			frappe.throw(_("Root cannot have a parent cost center"))
+			
+	def validate_accounts(self):
+		if self.is_group==1 and self.get("budgets"):
+			frappe.throw(_("Budget cannot be set for Group Cost Center"))
+			
+		check_acc_list = []
+		for d in self.get('budgets'):
+			if d.account:
+				account_details = frappe.db.get_value("Account", d.account, 
+					["is_group", "company", "root_type"], as_dict=1)
+				if account_details.is_group:
+					frappe.throw(_("Budget cannot be assigned against Group Account {0}").format(d.account))
+				elif account_details.company != self.company:
+					frappe.throw(_("Account {0} does not belongs to company {1}").format(d.account, self.company))
+				elif account_details.root_type != "Expense":
+					frappe.throw(_("Budget cannot be assigned against {0}, as it's not an Expense account")
+						.format(d.account))
+
+				if [d.account, d.fiscal_year] in check_acc_list:
+					frappe.throw(_("Account {0} has been entered more than once for fiscal year {1}")
+						.format(d.account, d.fiscal_year))
+				else:
+					check_acc_list.append([d.account, d.fiscal_year])
 
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
-			msgprint(_("Cannot convert Cost Center to ledger as it has child nodes"), raise_exception=1)
+			frappe.throw(_("Cannot convert Cost Center to ledger as it has child nodes"))
 		elif self.check_gle_exists():
-			msgprint(_("Cost Center with existing transactions can not be converted to ledger"), raise_exception=1)
+			frappe.throw(_("Cost Center with existing transactions can not be converted to ledger"))
 		else:
 			self.is_group = 0
 			self.save()
@@ -33,7 +59,7 @@ class CostCenter(NestedSet):
 
 	def convert_ledger_to_group(self):
 		if self.check_gle_exists():
-			msgprint(_("Cost Center with existing transactions can not be converted to group"), raise_exception=1)
+			frappe.throw(_("Cost Center with existing transactions can not be converted to group"))
 		else:
 			self.is_group = 1
 			self.save()
@@ -45,21 +71,6 @@ class CostCenter(NestedSet):
 	def check_if_child_exists(self):
 		return frappe.db.sql("select name from `tabCost Center` where \
 			parent_cost_center = %s and docstatus != 2", self.name)
-
-	def validate_budget_details(self):
-		check_acc_list = []
-		for d in self.get('budgets'):
-			if self.is_group==1:
-				msgprint(_("Budget cannot be set for Group Cost Centers"), raise_exception=1)
-
-			if [d.account, d.fiscal_year] in check_acc_list:
-				msgprint(_("Account {0} has been entered more than once for fiscal year {1}").format(d.account, d.fiscal_year), raise_exception=1)
-			else:
-				check_acc_list.append([d.account, d.fiscal_year])
-
-	def validate(self):
-		self.validate_mandatory()
-		self.validate_budget_details()
 
 	def before_rename(self, olddn, newdn, merge=False):
 		# Add company abbr if not provided

@@ -42,6 +42,11 @@ def get_data():
 					"name": "SMS Center",
 					"description":_("Send mass SMS to your contacts"),
 				},
+				{
+					"type": "doctype",
+					"name": "SMS Log",
+					"description":_("Logs for maintaining sms delivery status"),
+				}
 			]
 		},
 		{

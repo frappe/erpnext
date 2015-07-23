@@ -335,12 +335,15 @@ def get_item_details(item):
 	res = frappe.db.sql("""select stock_uom, description
 		from `tabItem` where (ifnull(end_of_life, "0000-00-00")="0000-00-00" or end_of_life > now())
 		and name=%s""", item, as_dict=1)
-
 	if not res:
 		return {}
 
 	res = res[0]
 	res["bom_no"] = frappe.db.get_value("BOM", filters={"item": item, "is_default": 1})
+	if not res["bom_no"]:
+		variant_of= frappe.db.get_value("Item", item, "variant_of")
+		if variant_of:
+			res["bom_no"] = frappe.db.get_value("BOM", filters={"item": variant_of, "is_default": 1})
 	return res
 
 @frappe.whitelist()
