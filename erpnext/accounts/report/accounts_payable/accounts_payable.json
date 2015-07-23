@@ -6,12 +6,12 @@
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-06-03 07:18:10.985354", 
+ "modified": "2015-07-23 01:08:20.996267", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Accounts Payable", 
  "owner": "Administrator", 
  "ref_doctype": "Purchase Invoice", 
  "report_name": "Accounts Payable", 
- "report_type": "Report Builder"
+ "report_type": "Query Report"
 }
