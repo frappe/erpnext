@@ -263,7 +263,7 @@ cur_frm.fields_dict['production_item'].get_query = function(doc) {
 		filters:[
 			['Item', 'is_pro_applicable', '=', 'Yes'],
 			['Item', 'has_variants', '=', 'No'],
-			['Item', 'end_of_life', '>', frappe.datetime.now_datetime()]
+			['Item', 'end_of_life', '>=', frappe.datetime.nowdate()]
 		]
 	}
 }
