@@ -109,9 +109,14 @@ def make_projects():
 				"end_date": frappe.utils.add_days(current_date, 5)
 			},
 			{
-				"title": "Go Live!",
+				"title": "Import Data",
 				"start_date": frappe.utils.add_days(current_date, 5),
 				"end_date": frappe.utils.add_days(current_date, 6)
+			},
+			{
+				"title": "Go Live!",
+				"start_date": frappe.utils.add_days(current_date, 6),
+				"end_date": frappe.utils.add_days(current_date, 7)
 			}])
 
 	project.insert(ignore_permissions=True)
