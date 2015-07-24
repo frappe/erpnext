@@ -367,6 +367,8 @@ class StockEntry(StockController):
 	def update_stock_ledger(self):
 		sl_entries = []
 		for d in self.get('items'):
+			tax_amount_per_qty = flt(flt(d.tax_amount) / flt(d.qty), d.precision("tax_amount"))
+			
 			if cstr(d.s_warehouse) and self.docstatus == 1:
 				sl_entries.append(self.get_sl_entries(d, {
 					"warehouse": cstr(d.s_warehouse),
@@ -378,7 +380,7 @@ class StockEntry(StockController):
 				sl_entries.append(self.get_sl_entries(d, {
 					"warehouse": cstr(d.t_warehouse),
 					"actual_qty": flt(d.transfer_qty),
-					"incoming_rate": flt(d.incoming_rate)
+					"incoming_rate": flt(d.incoming_rate) + tax_amount_per_qty
 				}))
 
 			# On cancellation, make stock ledger entry for
@@ -392,6 +394,31 @@ class StockEntry(StockController):
 				}))
 
 		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No')
+		
+	def get_gl_entries(self, warehouse_account):
+		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+		
+		gl_entries = super(StockEntry, self).get_gl_entries(warehouse_account)
+		
+		for d in self.get("items"):
+			tax_amount = flt(d.tax_amount, d.precision("tax_amount"))
+			gl_entries.append(self.get_gl_dict({
+				"account": d.expense_account,
+				"against": expenses_included_in_valuation,
+				"cost_center": d.cost_center,
+				"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+				"debit": tax_amount
+			}))
+			
+			gl_entries.append(self.get_gl_dict({
+				"account": expenses_included_in_valuation,
+				"against": warehouse_account[d.warehouse],
+				"cost_center": d.cost_center,
+				"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+				"credit": tax_amount
+			}))
+			
+		return gl_entries
 
 	def update_production_order(self):
 		def _validate_production_order(pro_doc):
