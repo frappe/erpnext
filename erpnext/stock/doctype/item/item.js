@@ -43,7 +43,7 @@ frappe.ui.form.on("Item", {
 
 		erpnext.item.edit_prices_button(frm);
 
-		if (!frm.doc.__islocal && frm.doc.is_stock_item == 'Yes') {
+		if (!frm.doc.__islocal && frm.doc.is_stock_item) {
 			frm.toggle_enable(['has_serial_no', 'is_stock_item', 'valuation_method', 'has_batch_no'],
 				(frm.doc.__onload && frm.doc.__onload.sle_exists=="exists") ? false : true);
 		}
@@ -80,11 +80,11 @@ frappe.ui.form.on("Item", {
 			method: "copy_specification_from_item_group"
 		});
 	},
-	
+
 	is_stock_item: function(frm) {
 		erpnext.item.toggle_reqd(frm);
 	},
-	
+
 	manage_variants: function(frm) {
 		if (cur_frm.doc.__unsaved==1) {
 			frappe.throw(__("You have unsaved changes. Please save."))
@@ -168,7 +168,7 @@ $.extend(erpnext.item, {
 	},
 
 	toggle_reqd: function(frm) {
-		frm.toggle_reqd("default_warehouse", frm.doc.is_stock_item==="Yes");
+		frm.toggle_reqd("default_warehouse", frm.doc.is_stock_item);
 	},
 
 	make_dashboard: function(frm) {

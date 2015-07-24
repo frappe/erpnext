@@ -212,7 +212,7 @@ class StockController(AccountsController):
 		item_codes = list(set([d.item_code for d in self.get("items")]))
 		if item_codes:
 			serialized_items = frappe.db.sql_list("""select name from `tabItem`
-				where has_serial_no='Yes' and name in ({})""".format(", ".join(["%s"]*len(item_codes))),
+				where has_serial_no=1 and name in ({})""".format(", ".join(["%s"]*len(item_codes))),
 				tuple(item_codes))
 
 		return serialized_items

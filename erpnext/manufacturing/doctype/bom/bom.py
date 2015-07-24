@@ -107,7 +107,7 @@ class BOM(Document):
 		rate = 0
 		if arg['bom_no']:
 			rate = self.get_bom_unitcost(arg['bom_no'])
-		elif arg and (arg['is_purchase_item'] == 'Yes' or arg['is_sub_contracted_item'] == 'Yes'):
+		elif arg and (arg['is_purchase_item'] == 1 or arg['is_sub_contracted_item'] == 1):
 			if self.rm_cost_as_per == 'Valuation Rate':
 				rate = self.get_valuation_rate(arg)
 			elif self.rm_cost_as_per == 'Last Purchase Rate':
@@ -385,14 +385,14 @@ def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 				and bom_item.docstatus < 2
 				and bom_item.parent = %(bom)s
 				and item.name = bom_item.item_code
-				and ifnull(item.is_stock_item, 'No') = 'Yes'
+				and is_stock_item = 1
 				{conditions}
 				group by item_code, stock_uom"""
 
 	if fetch_exploded:
 		query = query.format(table="BOM Explosion Item",
-			conditions="""and ifnull(item.is_pro_applicable, 'No') = 'No'
-				and ifnull(item.is_sub_contracted_item, 'No') = 'No' """)
+			conditions="""and item.is_pro_applicable = 0
+				and item.is_sub_contracted_item = 0 """)
 		items = frappe.db.sql(query, { "qty": qty,	"bom": bom }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", conditions="")

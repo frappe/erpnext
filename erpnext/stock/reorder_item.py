@@ -69,7 +69,7 @@ def get_item_warehouse_projected_qty():
 		from tabBin where ifnull(item_code, '') != '' and ifnull(warehouse, '') != ''
 		and exists (select name from `tabItem`
 			where `tabItem`.name = `tabBin`.item_code and
-			is_stock_item='Yes' and (is_purchase_item='Yes' or is_sub_contracted_item='Yes') and
+			is_stock_item=1 and (is_purchase_item=1 or is_sub_contracted_item=1) and
 			(ifnull(end_of_life, '0000-00-00')='0000-00-00' or end_of_life > %s))
 		and exists (select name from `tabWarehouse`
 			where `tabWarehouse`.name = `tabBin`.warehouse

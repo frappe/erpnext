@@ -198,10 +198,7 @@ class PurchaseReceipt(BuyingController):
 
 	def validate_inspection(self):
 		for d in self.get('items'):		 #Enter inspection date for all items that require inspection
-			ins_reqd = frappe.db.sql("select inspection_required from `tabItem` where name = %s",
-				(d.item_code,), as_dict = 1)
-			ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'
-			if ins_reqd == 'Yes' and not d.qa_no:
+			if frappe.db.get_value("Item", d.item_code, "inspection_required") and not d.qa_no:
 				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
 				if self.docstatus==1:
 					raise frappe.ValidationError

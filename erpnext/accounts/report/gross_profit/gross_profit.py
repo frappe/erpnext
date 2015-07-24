@@ -215,7 +215,7 @@ class GrossProfitGenerator(object):
 		if self.filters.to_date:
 			conditions += " and posting_date <= %(to_date)s"
 
-		self.si_list = frappe.db.sql("""select item.parenttype, item.parent, 
+		self.si_list = frappe.db.sql("""select item.parenttype, item.parent,
 				si.posting_date, si.posting_time, si.project_name, si.update_stock,
 				si.customer, si.customer_group, si.territory,
 				item.item_code, item.item_name, item.description, item.warehouse,
@@ -257,4 +257,4 @@ class GrossProfitGenerator(object):
 
 	def load_non_stock_items(self):
 		self.non_stock_items = frappe.db.sql_list("""select name from tabItem
-			where ifnull(is_stock_item, 'No')='No'""")
+			where is_stock_item=0""")

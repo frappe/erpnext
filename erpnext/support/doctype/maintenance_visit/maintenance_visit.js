@@ -77,7 +77,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 
 cur_frm.fields_dict['purposes'].grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
 	return{
-    	filters:{ 'is_service_item': "Yes"}
+    	filters:{ 'is_service_item': 1}
   	}
 }
 

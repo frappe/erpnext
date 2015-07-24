@@ -354,12 +354,12 @@ class StockEntry(StockController):
 			if d.bom_no and flt(d.transfer_qty) != flt(self.fg_completed_qty):
 				frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}"). \
 					format(d.idx, d.transfer_qty, self.fg_completed_qty))
-					
+
 			if self.production_order and self.purpose == "Manufacture" and d.t_warehouse:
 				items_with_target_warehouse.append(d.item_code)
-				
+
 		if self.production_order and self.purpose == "Manufacture":
-			production_item = frappe.db.get_value("Production Order", 
+			production_item = frappe.db.get_value("Production Order",
 				self.production_order, "production_item")
 			if production_item not in items_with_target_warehouse:
 				frappe.throw(_("Finished Item {0} must be entered for Manufacture type entry")
@@ -427,7 +427,7 @@ class StockEntry(StockController):
 			(args.get('item_code')), as_dict = 1)
 		if not item:
 			frappe.throw(_("Item {0} is not active or end of life has been reached").format(args.get("item_code")))
-			
+
 		item = item[0]
 
 		ret = {
@@ -642,7 +642,7 @@ class StockEntry(StockController):
 				mreq_item.warehouse != (item.s_warehouse if self.purpose== "Material Issue" else item.t_warehouse):
 					frappe.throw(_("Item or Warehouse for row {0} does not match Material Request").format(item.idx),
 						frappe.MappingMismatchError)
-						
+
 	def validate_batch(self):
 		if self.purpose in ["Material Transfer for Manufacture", "Manufacture", "Repack", "Subcontract"]:
 			for item in self.get("items"):

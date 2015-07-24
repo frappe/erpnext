@@ -134,12 +134,12 @@ class StockReconciliation(StockController):
 			validate_is_stock_item(item_code, item.is_stock_item, verbose=0)
 
 			# item should not be serialized
-			if item.has_serial_no == "Yes":
+			if item.has_serial_no == 1:
 				raise frappe.ValidationError, _("Serialized Item {0} cannot be updated \
 					using Stock Reconciliation").format(item_code)
 
 			# item managed batch-wise not allowed
-			if item.has_batch_no == "Yes":
+			if item.has_batch_no == 1:
 				raise frappe.ValidationError, _("Item: {0} managed batch-wise, can not be reconciled using \
 					Stock Reconciliation, instead use Stock Entry").format(item_code)
 
@@ -242,7 +242,7 @@ class StockReconciliation(StockController):
 @frappe.whitelist()
 def get_items(warehouse, posting_date, posting_time):
 	items = frappe.get_list("Item", fields=["name"], filters=
-		{"is_stock_item": "Yes", "has_serial_no": "No", "has_batch_no": "No"})
+		{"is_stock_item": 1, "has_serial_no": 0, "has_batch_no": 0})
 	for item in items:
 		item.item_code = item.name
 		item.warehouse = warehouse

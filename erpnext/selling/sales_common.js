@@ -57,8 +57,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				return {
 					query: "erpnext.controllers.queries.item_query",
 					filters: (me.frm.doc.order_type === "Maintenance" ?
-						{'is_service_item': 'Yes'}:
-						{'is_sales_item': 'Yes'	})
+						{'is_service_item': 1}:
+						{'is_sales_item': 1	})
 				}
 			});
 		}
