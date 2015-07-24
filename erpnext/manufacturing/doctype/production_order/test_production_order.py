@@ -137,21 +137,17 @@ class TestProductionOrder(unittest.TestCase):
 		self.assertEqual(prod_order.planned_operating_cost, cost*2)
 		
 	def test_production_item(self):
-		item = frappe.get_doc("Item", "_Test FG Item")
-		item.is_pro_applicable= "No"
-		item.save()
-		
+		frappe.db.set_value("Item", "_Test FG Item", "is_pro_applicable", "No")
+
 		prod_order = make_prod_order_test_record(item="_Test FG Item", qty=1, do_not_save=True)
 		self.assertRaises(ProductionNotApplicableError, prod_order.save)
 		
-		item.is_pro_applicable= "Yes"
-		item.end_of_life = "2000-1-1"
-		item.save()
+		frappe.db.set_value("Item", "_Test FG Item", "is_pro_applicable", "Yes")
+		frappe.db.set_value("Item", "_Test FG Item", "end_of_life", "2000-1-1")
 		
 		self.assertRaises(frappe.ValidationError, prod_order.save)
 		
-		item.end_of_life=None
-		item.save()
+		frappe.db.set_value("Item", "_Test FG Item", "end_of_life", None)
 		
 		prod_order = make_prod_order_test_record(item="_Test Variant Item", qty=1, do_not_save=True)
 		self.assertRaises(ItemHasVariantError, prod_order.save)
