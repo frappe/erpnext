@@ -244,7 +244,7 @@
    "in_filter": 1, 
    "label": "Delivery Document Type", 
    "no_copy": 1, 
-   "options": "\nDelivery Note\nSales Invoice\nStock Entry", 
+   "options": "\nDelivery Note\nSales Invoice\nStock Entry\nPurchase Receipt", 
    "permlevel": 0, 
    "read_only": 1
   }, 
@@ -418,7 +418,7 @@
  "icon": "icon-barcode", 
  "idx": 1, 
  "in_create": 0, 
- "modified": "2015-07-13 05:28:27.961178", 
+ "modified": "2015-07-24 03:55:29.946944", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Serial No", 

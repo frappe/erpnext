@@ -110,15 +110,14 @@ class SellingController(StockController):
 		from frappe.utils import money_in_words
 		company_currency = get_company_currency(self.company)
 
-		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None,
-			"disable_rounded_total"))
+		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 
 		if self.meta.get_field("base_in_words"):
 			self.base_in_words = money_in_words(disable_rounded_total and
-				self.base_grand_total or self.base_rounded_total, company_currency)
+				abs(self.base_grand_total) or abs(self.base_rounded_total), company_currency)
 		if self.meta.get_field("in_words"):
 			self.in_words = money_in_words(disable_rounded_total and
-				self.grand_total or self.rounded_total, self.currency)
+				abs(self.grand_total) or abs(self.rounded_total), self.currency)
 
 	def calculate_commission(self):
 		if self.meta.get_field("commission_rate"):
@@ -175,7 +174,7 @@ class SellingController(StockController):
 				if flt(d.qty) > flt(d.delivered_qty):
 					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
 
-			elif self.doctype == "Delivery Note" and d.against_sales_order:
+			elif self.doctype == "Delivery Note" and d.against_sales_order and not self.is_return:
 				# if SO qty is 10 and there is tolerance of 20%, then it will allow DN of 12.
 				# But in this case reserved qty should only be reduced by 10 and not 12
 
@@ -211,7 +210,7 @@ class SellingController(StockController):
 					'qty': d.qty,
 					'reserved_qty': reserved_qty_for_main_item,
 					'uom': d.stock_uom,
-                                        'stock_uom': d.stock_uom,
+					'stock_uom': d.stock_uom,
 					'batch_no': cstr(d.get("batch_no")).strip(),
 					'serial_no': cstr(d.get("serial_no")).strip(),
 					'name': d.name

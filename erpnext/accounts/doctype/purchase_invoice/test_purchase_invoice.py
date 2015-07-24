@@ -275,5 +275,58 @@ class TestPurchaseInvoice(unittest.TestCase):
 		purchase_invoice.cancel()		
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 0)
 		
+	def test_return_purchase_invoice(self):
+		set_perpetual_inventory()
+		
+		pi = make_purchase_invoice()
+		
+		return_pi = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2)
+		
+		
+		# check gl entries for return
+		gl_entries = frappe.db.sql("""select account, debit, credit
+			from `tabGL Entry` where voucher_type=%s and voucher_no=%s
+			order by account desc""", ("Purchase Invoice", return_pi.name), as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		expected_values = {
+			"Creditors - _TC": [100.0, 0.0],
+			"Stock Received But Not Billed - _TC": [0.0, 100.0],
+		}
+
+		for gle in gl_entries:
+			self.assertEquals(expected_values[gle.account][0], gle.debit)
+			self.assertEquals(expected_values[gle.account][1], gle.credit)
+		
+		set_perpetual_inventory(0)
+		
+def make_purchase_invoice(**args):
+	pi = frappe.new_doc("Purchase Invoice")
+	args = frappe._dict(args)
+	if args.posting_date:
+		pi.posting_date = args.posting_date
+	if args.posting_time:
+		pi.posting_time = args.posting_time
+	pi.company = args.company or "_Test Company"
+	pi.supplier = args.supplier or "_Test Supplier"
+	pi.currency = args.currency or "INR"
+	pi.is_return = args.is_return
+	pi.return_against = args.return_against
+	
+	pi.append("items", {
+		"item_code": args.item or args.item_code or "_Test Item",
+		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"qty": args.qty or 5,
+		"rate": args.rate or 50,
+		"conversion_factor": 1.0,
+		"serial_no": args.serial_no,
+		"stock_uom": "_Test UOM"
+	})
+	if not args.do_not_save:
+		pi.insert()
+		if not args.do_not_submit:
+			pi.submit()
+	return pi
 
 test_records = frappe.get_test_records('Purchase Invoice')

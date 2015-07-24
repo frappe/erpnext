@@ -109,7 +109,7 @@ class update_entries_after(object):
 	def build(self):
 		# includes current entry!
 		entries_to_fix = self.get_sle_after_datetime()
-
+		
 		for sle in entries_to_fix:
 			self.process_sle(sle)
 
@@ -230,19 +230,21 @@ class update_entries_after(object):
 					self.valuation_rate = new_stock_value / new_stock_qty
 
 	def get_moving_average_values(self, sle):
-		incoming_rate = flt(sle.incoming_rate)
 		actual_qty = flt(sle.actual_qty)
-
-		if flt(sle.actual_qty) > 0:
+		
+		if actual_qty > 0 or flt(sle.outgoing_rate) > 0:
+			rate = flt(sle.incoming_rate) if actual_qty > 0 else flt(sle.outgoing_rate)
+			
 			if self.qty_after_transaction < 0 and not self.valuation_rate:
 				# if negative stock, take current valuation rate as incoming rate
-				self.valuation_rate = incoming_rate
+				self.valuation_rate = rate
 
 			new_stock_qty = abs(self.qty_after_transaction) + actual_qty
-			new_stock_value = (abs(self.qty_after_transaction) * self.valuation_rate) + (actual_qty * incoming_rate)
+			new_stock_value = (abs(self.qty_after_transaction) * self.valuation_rate) + (actual_qty * rate)
 
 			if new_stock_qty:
 				self.valuation_rate = new_stock_value / flt(new_stock_qty)
+							
 		elif not self.valuation_rate and self.qty_after_transaction <= 0:
 			self.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, self.allow_zero_rate)
 
@@ -251,6 +253,7 @@ class update_entries_after(object):
 	def get_fifo_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
 		actual_qty = flt(sle.actual_qty)
+		outgoing_rate = flt(sle.outgoing_rate)
 
 		if actual_qty > 0:
 			if not self.stock_queue:
@@ -278,16 +281,34 @@ class update_entries_after(object):
 						_rate = 0
 					self.stock_queue.append([0, _rate])
 
-				batch = self.stock_queue[0]
+				index = None
+				if outgoing_rate > 0:
+					# Find the entry where rate matched with outgoing rate
+					for i, v in enumerate(self.stock_queue):
+						if v[1] == outgoing_rate:
+							index = i
+							break
+							
+					# If no entry found with outgoing rate, collapse stack
+					if index == None:
+						new_stock_value = sum((d[0]*d[1] for d in self.stock_queue)) - qty_to_pop*outgoing_rate
+						new_stock_qty = sum((d[0] for d in self.stock_queue)) - qty_to_pop
+						self.stock_queue = [[new_stock_qty, new_stock_value/new_stock_qty if new_stock_qty > 0 else outgoing_rate]]
+						break
+				else:
+					index = 0
+
+				# select first batch or the batch with same rate
+				batch = self.stock_queue[index]
 
 				if qty_to_pop >= batch[0]:
 					# consume current batch
 					qty_to_pop = qty_to_pop - batch[0]
-					self.stock_queue.pop(0)
+					self.stock_queue.pop(index)
 					if not self.stock_queue and qty_to_pop:
 						# stock finished, qty still remains to be withdrawn
 						# negative stock, keep in as a negative batch
-						self.stock_queue.append([-qty_to_pop, batch[1]])
+						self.stock_queue.append([-qty_to_pop, outgoing_rate or batch[1]])
 						break
 
 				else:

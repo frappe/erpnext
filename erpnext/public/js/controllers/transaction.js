@@ -46,6 +46,23 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			});
 		}
+		
+		if(this.frm.fields_dict["return_against"]) {
+			this.frm.set_query("return_against", function(doc) {
+				var filters = {
+					"docstatus": 1,
+					"is_return": 0,
+					"company": doc.company
+				};
+				if (me.frm.fields_dict["customer"] && doc.customer) filters["customer"] = doc.customer;
+				if (me.frm.fields_dict["supplier"] && doc.supplier) filters["supplier"] = doc.supplier;
+	
+				return {
+					filters: filters
+				}
+			});
+		}
+		
 	},
 
 	onload_post_render: function() {
@@ -354,7 +371,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	plc_conversion_rate: function() {
 		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
 			this.frm.set_value("plc_conversion_rate", 1.0);
-		} else if(this.frm.doc.price_list_currency === this.frm.doc.currency && 			this.frm.doc.plc_conversion_rate && cint(this.frm.doc.plc_conversion_rate) != 1 &&
+		} else if(this.frm.doc.price_list_currency === this.frm.doc.currency 
+			&& this.frm.doc.plc_conversion_rate && cint(this.frm.doc.plc_conversion_rate) != 1 &&
 			cint(this.frm.doc.plc_conversion_rate) != cint(this.frm.doc.conversion_rate)) {
 				this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);
 		}

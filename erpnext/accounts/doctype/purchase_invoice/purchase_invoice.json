@@ -12,7 +12,7 @@
    "no_copy": 1, 
    "oldfieldname": "naming_series", 
    "oldfieldtype": "Select", 
-   "options": "PINV-", 
+   "options": "PINV-\nPINV-RET-", 
    "permlevel": 0, 
    "print_hide": 1, 
    "read_only": 0, 
@@ -153,6 +153,28 @@
    "print_hide": 1, 
    "read_only": 0, 
    "search_index": 0
+  }, 
+  {
+   "fieldname": "is_return", 
+   "fieldtype": "Check", 
+   "label": "Is Return", 
+   "no_copy": 0, 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
+  }, 
+  {
+   "depends_on": "is_return", 
+   "fieldname": "return_against", 
+   "fieldtype": "Link", 
+   "label": "Return Against Purchase Invoice", 
+   "no_copy": 0, 
+   "options": "Purchase Invoice", 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1
   }, 
   {
    "fieldname": "currency_and_price_list", 
@@ -940,7 +962,7 @@
  "icon": "icon-file-text", 
  "idx": 1, 
  "is_submittable": 1, 
- "modified": "2015-07-03 03:26:32.934540", 
+ "modified": "2015-07-24 11:49:59.762109", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Purchase Invoice", 

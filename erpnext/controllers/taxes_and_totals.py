@@ -77,6 +77,9 @@ class calculate_taxes_and_totals(object):
 			if not self.discount_amount_applied:
 				validate_taxes_and_charges(tax)
 				validate_inclusive_tax(tax, self.doc)
+				
+			if self.doc.meta.get_field("is_return") and self.doc.is_return and tax.charge_type == "Actual":
+				tax.tax_amount = -1 * tax.tax_amount
 
 			tax.item_wise_tax_detail = {}
 			tax_fields = ["total", "tax_amount_after_discount_amount",
@@ -396,13 +399,15 @@ class calculate_taxes_and_totals(object):
 		# total_advance is only for non POS Invoice
 
 		if self.doc.doctype == "Sales Invoice":
-			self.doc.round_floats_in(self.doc, ["base_grand_total", "total_advance", "write_off_amount", "paid_amount"])
-			total_amount_to_pay = self.doc.base_grand_total - self.doc.write_off_amount
-			self.doc.outstanding_amount = flt(total_amount_to_pay - self.doc.total_advance - self.doc.paid_amount,
-				self.doc.precision("outstanding_amount"))
+			if not self.doc.is_return:
+				self.doc.round_floats_in(self.doc, ["base_grand_total", "total_advance", "write_off_amount", "paid_amount"])
+				total_amount_to_pay = self.doc.base_grand_total - self.doc.write_off_amount
+				self.doc.outstanding_amount = flt(total_amount_to_pay - self.doc.total_advance - self.doc.paid_amount,
+					self.doc.precision("outstanding_amount"))
 		else:
 			self.doc.round_floats_in(self.doc, ["total_advance", "write_off_amount"])
 			self.doc.total_amount_to_pay = flt(self.doc.base_grand_total - self.doc.write_off_amount,
 				self.doc.precision("total_amount_to_pay"))
-			self.doc.outstanding_amount = flt(self.doc.total_amount_to_pay - self.doc.total_advance,
-				self.doc.precision("outstanding_amount"))
+			if not self.doc.is_return:
+				self.doc.outstanding_amount = flt(self.doc.total_amount_to_pay - self.doc.total_advance,
+					self.doc.precision("outstanding_amount"))

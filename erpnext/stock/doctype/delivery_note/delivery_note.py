@@ -84,7 +84,7 @@ class DeliveryNote(SellingController):
 
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
-		if frappe.db.get_value("Selling Settings", None, 'so_required') == 'Yes':
+		if not self.is_return and frappe.db.get_value("Selling Settings", None, 'so_required') == 'Yes':
 			 for d in self.get('items'):
 				 if not d.against_sales_order:
 					 frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
@@ -175,17 +175,15 @@ class DeliveryNote(SellingController):
 		# Check for Approving Authority
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.base_grand_total, self)
 
-		# update delivered qty in sales order
-		self.update_prevdoc_status()
+		if not self.is_return:
+			# update delivered qty in sales order
+			self.update_prevdoc_status()
 
-		self.check_credit_limit()
+			self.check_credit_limit()
 
-		# create stock ledger entry
 		self.update_stock_ledger()
-
 		self.make_gl_entries()
 
-		# set DN status
 		frappe.db.set(self, 'status', 'Submitted')
 
 
@@ -193,7 +191,8 @@ class DeliveryNote(SellingController):
 		self.check_stop_sales_order("against_sales_order")
 		self.check_next_docstatus()
 
-		self.update_prevdoc_status()
+		if not self.is_return:
+			self.update_prevdoc_status()
 
 		self.update_stock_ledger()
 
@@ -251,9 +250,14 @@ class DeliveryNote(SellingController):
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
 					and d.warehouse and flt(d['qty']):
 				self.update_reserved_qty(d)
-
+				
+				incoming_rate = 0
+				if cint(self.is_return) and self.return_against and self.docstatus==1:
+					incoming_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
+					
 				sl_entries.append(self.get_sl_entries(d, {
 					"actual_qty": -1*flt(d['qty']),
+					"incoming_rate": incoming_rate
 				}))
 
 		self.make_sl_entries(sl_entries)
@@ -387,3 +391,9 @@ def make_packing_slip(source_name, target_doc=None):
 	}, target_doc)
 
 	return doclist
+
+	
+@frappe.whitelist()
+def make_sales_return(source_name, target_doc=None):
+	from erpnext.controllers.sales_and_purchase_return import make_return_doc
+	return make_return_doc("Delivery Note", source_name, target_doc)

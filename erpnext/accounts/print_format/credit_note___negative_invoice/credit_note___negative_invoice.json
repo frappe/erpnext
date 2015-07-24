@@ -1,0 +1,17 @@
+{
+ "creation": "2015-07-22 17:45:22.220567", 
+ "custom_format": 1, 
+ "disabled": 0, 
+ "doc_type": "Sales Invoice", 
+ "docstatus": 0, 
+ "doctype": "Print Format", 
+ "font": "Default", 
+ "html": "<style>\n\t.print-format table, .print-format tr, \n\t.print-format td, .print-format div, .print-format p {\n\t\tfont-family: Monospace;\n\t\tline-height: 200%;\n\t\tvertical-align: middle;\n\t}\n\t@media screen {\n\t\t.print-format {\n\t\t\twidth: 4in;\n\t\t\tpadding: 0.25in;\n\t\t\tmin-height: 6in;\n\t\t}\n\t}\n</style>\n\n<p class=\"text-center\">\n\t{{ doc.company }}<br>\n\t{{ doc.select_print_heading or _(\"Credit Note\") }}<br>\n</p>\n\n<hr>\n\n{%- for label, value in (\n    (_(\"Receipt No\"), doc.name),\n    (_(\"Date\"), doc.get_formatted(\"posting_date\")),\n\t(_(\"Customer\"), doc.customer_name),\n    (_(\"Amount\"), \"<strong>\" + doc.get_formatted(\"grand_total\", absolute_value=True) + \"</strong><br>\" + (doc.in_words or \"\")),\n\t(_(\"Against\"), doc.return_against),\n    (_(\"Remarks\"), doc.remarks)\n) -%}\n\n\t\t<div class=\"row\">\n\t\t    <div class=\"col-xs-4\"><label class=\"text-right\">{{ label }}</label></div>\n\t\t    <div class=\"col-xs-8\">{{ value }}</div>\n\t\t</div>\n{%- endfor -%}\n\n<hr>\n<br>\n<p class=\"strong\">\n    {{ _(\"For\") }} {{ doc.company }},<br>\n    <br>\n    <br>\n    <br>\n        {{ _(\"Authorized Signatory\") }}\n</p>", 
+ "modified": "2015-07-22 17:45:22.220567", 
+ "modified_by": "Administrator", 
+ "name": "Credit Note - Negative Invoice", 
+ "owner": "Administrator", 
+ "print_format_builder": 0, 
+ "print_format_type": "Server", 
+ "standard": "Yes"
+}

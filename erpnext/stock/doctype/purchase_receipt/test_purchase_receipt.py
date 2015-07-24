@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import frappe.defaults
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, cstr
 
 class TestPurchaseReceipt(unittest.TestCase):
 	def test_make_purchase_invoice(self):
@@ -119,6 +119,65 @@ class TestPurchaseReceipt(unittest.TestCase):
 		for serial_no in rejected_serial_nos:
 			self.assertEquals(frappe.db.get_value("Serial No", serial_no, "warehouse"),
 				pr.get("items")[0].rejected_warehouse)
+				
+	def test_purchase_return(self):
+		set_perpetual_inventory()
+		
+		pr = make_purchase_receipt()
+		
+		return_pr = make_purchase_receipt(is_return=1, return_against=pr.name, qty=-2)
+		
+		# check sle
+		outgoing_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Purchase Receipt", 
+			"voucher_no": return_pr.name}, "outgoing_rate")
+			
+		self.assertEqual(outgoing_rate, 50)
+		
+		
+		# check gl entries for return
+		gl_entries = get_gl_entries("Purchase Receipt", return_pr.name)
+
+		self.assertTrue(gl_entries)
+
+		expected_values = {
+			"_Test Warehouse - _TC": [0.0, 100.0],
+			"Stock Received But Not Billed - _TC": [100.0, 0.0],
+		}
+
+		for gle in gl_entries:
+			self.assertEquals(expected_values[gle.account][0], gle.debit)
+			self.assertEquals(expected_values[gle.account][1], gle.credit)
+		
+		set_perpetual_inventory(0)
+		
+	def test_purchase_return_for_serialized_items(self):
+		def _check_serial_no_values(serial_no, field_values):
+			serial_no = frappe.get_doc("Serial No", serial_no)
+			for field, value in field_values.items():
+				self.assertEquals(cstr(serial_no.get(field)), value)
+		
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		
+		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
+		
+		serial_no = get_serial_nos(pr.get("items")[0].serial_no)[0]
+		
+		_check_serial_no_values(serial_no, {
+			"status": "Available",
+			"warehouse": "_Test Warehouse - _TC",
+			"purchase_document_no": pr.name
+		})
+		
+		return_pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=-1, 
+			is_return=1, return_against=pr.name, serial_no=serial_no)
+			
+		_check_serial_no_values(serial_no, {
+			"status": "Purchase Returned",
+			"warehouse": "",
+			"purchase_document_no": pr.name,
+			"delivery_document_no": return_pr.name
+		})
+		
 
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit
@@ -142,6 +201,8 @@ def make_purchase_receipt(**args):
 	pr.is_subcontracted = args.is_subcontracted or "No"
 	pr.supplier_warehouse = "_Test Warehouse 1 - _TC"
 	pr.currency = args.currency or "INR"
+	pr.is_return = args.is_return
+	pr.return_against = args.return_against
 	
 	pr.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
