@@ -346,6 +346,10 @@ class AccountsController(TransactionBase):
 		return self._abbr
 
 	def validate_party(self):
+		frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
+		if frozen_accounts_modifier in frappe.get_roles():
+			return
+		
 		party_type = None
 		if self.meta.get_field("customer"):
 			party_type = 'Customer'

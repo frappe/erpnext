@@ -68,17 +68,13 @@ class TestCustomer(unittest.TestCase):
 		frappe.rename_doc("Customer", "_Test Customer 1 Renamed", "_Test Customer 1")
 		
 	def test_freezed_customer(self):
-		cust = frappe.get_doc("Customer", "_Test Customer")
-		cust.is_frozen = 1
-		cust.save()
+		frappe.db.set_value("Customer", "_Test Customer", "is_frozen", 1)
 		
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 		
 		so = make_sales_order(do_not_save= True)
-		so.customer = "_Test Customer"
 		self.assertRaises(CustomerFrozen, so.save)
 		
-		cust.is_frozen = 0
-		cust.save()
+		frappe.db.set_value("Customer", "_Test Customer", "is_frozen", 0)
 		
 		so.save()
