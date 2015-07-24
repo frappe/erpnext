@@ -18,7 +18,7 @@
    "permlevel": 0
   }, 
   {
-   "description": "To track items in sales and purchase documents with batch nos.\"Preferred Industry: Chemicals etc\"", 
+   "description": "To track items in sales and purchase documents with batch nos. \"Preferred Industry: Chemicals\"", 
    "fieldname": "fs_item_batch_nos", 
    "fieldtype": "Check", 
    "in_list_view": 1, 
