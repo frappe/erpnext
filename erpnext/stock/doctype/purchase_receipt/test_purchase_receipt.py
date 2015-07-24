@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 import frappe.defaults
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, cstr
 
 class TestPurchaseReceipt(unittest.TestCase):
 	def test_make_purchase_invoice(self):
@@ -127,7 +127,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 		
 		return_pr = make_purchase_receipt(is_return=1, return_against=pr.name, qty=-2)
 		
-		
 		# check sle
 		outgoing_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Purchase Receipt", 
 			"voucher_no": return_pr.name}, "outgoing_rate")
@@ -150,6 +149,34 @@ class TestPurchaseReceipt(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][1], gle.credit)
 		
 		set_perpetual_inventory(0)
+		
+	def test_purchase_return_for_serialized_items(self):
+		def _check_serial_no_values(serial_no, field_values):
+			serial_no = frappe.get_doc("Serial No", serial_no)
+			for field, value in field_values.items():
+				self.assertEquals(cstr(serial_no.get(field)), value)
+		
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		
+		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
+		
+		serial_no = get_serial_nos(pr.get("items")[0].serial_no)[0]
+		
+		_check_serial_no_values(serial_no, {
+			"status": "Available",
+			"warehouse": "_Test Warehouse - _TC",
+			"purchase_document_no": pr.name
+		})
+		
+		return_pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=-1, 
+			is_return=1, return_against=pr.name, serial_no=serial_no)
+			
+		_check_serial_no_values(serial_no, {
+			"status": "Purchase Returned",
+			"warehouse": "",
+			"purchase_document_no": pr.name,
+			"delivery_document_no": return_pr.name
+		})
 		
 
 def get_gl_entries(voucher_type, voucher_no):

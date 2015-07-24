@@ -3,12 +3,12 @@
 
 from __future__ import unicode_literals
 import frappe
+import frappe.share
 from frappe import _
 from frappe.utils import cstr, now_datetime, cint, flt
-import frappe.share
-
 from erpnext.controllers.status_updater import StatusUpdater
 
+class UOMMustBeIntegerError(frappe.ValidationError): pass
 
 class TransactionBase(StatusUpdater):
 	def load_notification_message(self):
@@ -109,8 +109,6 @@ def delete_events(ref_type, ref_name):
 	frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent`
 		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)
 
-class UOMMustBeIntegerError(frappe.ValidationError): pass
-
 def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	if isinstance(qty_fields, basestring):
 		qty_fields = [qty_fields]
@@ -128,36 +126,3 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 				if d.get(f):
 					if cint(d.get(f))!=d.get(f):
 						frappe.throw(_("Quantity cannot be a fraction in row {0}").format(d.idx), UOMMustBeIntegerError)
-
-def make_return_doc(doctype, source_name, target_doc=None):
-	from frappe.model.mapper import get_mapped_doc
-	def set_missing_values(source, target):
-		doc = frappe.get_doc(target)
-		doc.is_return = 1
-		doc.return_against = source.name
-		doc.ignore_pricing_rule = 1
-		doc.run_method("calculate_taxes_and_totals")
-
-	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty = -1* source_doc.qty
-		if doctype == "Purchase Receipt":
-			target_doc.received_qty = -1* source_doc.qty
-		elif doctype == "Purchase Invoice":
-			target_doc.purchase_receipt = source_doc.purchase_receipt
-			target_doc.pr_detail = source_doc.pr_detail
-
-	doclist = get_mapped_doc(doctype, source_name,	{
-		doctype: {
-			"doctype": doctype,
-			
-			"validation": {
-				"docstatus": ["=", 1],
-			}
-		},
-		doctype +" Item": {
-			"doctype": doctype + " Item",
-			"postprocess": update_item
-		},
-	}, target_doc, set_missing_values)
-
-	return doclist

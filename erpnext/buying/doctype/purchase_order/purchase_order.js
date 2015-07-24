@@ -11,39 +11,32 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		this._super();
 		// this.frm.dashboard.reset();
 
-		if(doc.docstatus == 1 && doc.status != 'Stopped'){
-			// cur_frm.dashboard.add_progress(cint(doc.per_received) + __("% Received"),
-			// 	doc.per_received);
-			// cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
-			// 	doc.per_billed);
-
+		if(doc.docstatus == 1 && doc.status != 'Stopped') {
 			if(flt(doc.per_received, 2) < 100) {
-				cur_frm.add_custom_button(__('Make Purchase Receipt'),
-					this.make_purchase_receipt);
+				cur_frm.add_custom_button(__('Make Purchase Receipt'), this.make_purchase_receipt);
+				
 				if(doc.is_subcontracted==="Yes") {
-					cur_frm.add_custom_button(__('Transfer Material to Supplier'),
-						function() { me.make_stock_entry() });
+					cur_frm.add_custom_button(__('Transfer Material to Supplier'), this.make_stock_entry);
 				}
 			}
 			if(flt(doc.per_billed, 2) < 100)
-				cur_frm.add_custom_button(__('Make Invoice'), this.make_purchase_invoice,
-					frappe.boot.doctype_icons["Purchase Invoice"]);
+				cur_frm.add_custom_button(__('Make Invoice'), this.make_purchase_invoice);
+			
 			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100)
-				cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Purchase Order'],
-					"icon-exclamation", "btn-default");
+				cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Purchase Order']);
 
 		} else if(doc.docstatus===0) {
 			cur_frm.cscript.add_from_mappers();
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
-			cur_frm.add_custom_button(__('Unstop Purchase Order'),
-				cur_frm.cscript['Unstop Purchase Order'], "icon-check");
+			cur_frm.add_custom_button(__('Unstop Purchase Order'), cur_frm.cscript['Unstop Purchase Order']);
 	},
 
 	make_stock_entry: function() {
 		var items = $.map(cur_frm.doc.items, function(d) { return d.bom ? d.item_code : false; }),
-			me = this;
+		var me = this;
+		
 		if(items.length===1) {
 			me._make_stock_entry(items[0]);
 			return;
@@ -96,7 +89,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						company: cur_frm.doc.company
 					}
 				})
-			}, "icon-download", "btn-default"
+			}
 		);
 
 		cur_frm.add_custom_button(__('From Supplier Quotation'),
@@ -110,7 +103,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						company: cur_frm.doc.company
 					}
 				})
-			}, "icon-download", "btn-default"
+			}
 		);
 
 		cur_frm.add_custom_button(__('For Supplier'),
@@ -122,7 +115,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						docstatus: ["!=", 2],
 					}
 				})
-			}, "icon-download", "btn-default"
+			}
 		);
 	},
 

@@ -395,5 +395,5 @@ def make_packing_slip(source_name, target_doc=None):
 	
 @frappe.whitelist()
 def make_sales_return(source_name, target_doc=None):
-	from erpnext.utilities.transaction_base import make_return_doc
+	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Delivery Note", source_name, target_doc)

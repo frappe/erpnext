@@ -53,7 +53,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					group_by_voucher: 0
 				};
 				frappe.set_route("query-report", "General Ledger");
-			}, "icon-table");
+			});
 
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
@@ -64,16 +64,15 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					});
 
 				if(!from_delivery_note) {
-					cur_frm.add_custom_button(__('Make Delivery'), cur_frm.cscript['Make Delivery Note'], "icon-truck")
+					cur_frm.add_custom_button(__('Make Delivery'), cur_frm.cscript['Make Delivery Note'])
 				}
 			}
 
 			if(doc.outstanding_amount!=0 && !cint(doc.is_return)) {
-				cur_frm.add_custom_button(__('Make Payment Entry'), cur_frm.cscript.make_bank_entry, "icon-money");
+				cur_frm.add_custom_button(__('Make Payment Entry'), cur_frm.cscript.make_bank_entry);
 			}
 			
-			cur_frm.add_custom_button(__('Make Sales Return'), this.make_sales_return,
-				frappe.boot.doctype_icons["Sales Invoice"]);
+			cur_frm.add_custom_button(__('Make Sales Return'), this.make_sales_return);
 		}
 
 		// Show buttons only when pos view is active

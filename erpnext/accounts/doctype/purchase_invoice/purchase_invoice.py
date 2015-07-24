@@ -412,5 +412,5 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def make_purchase_return(source_name, target_doc=None):
-	from erpnext.utilities.transaction_base import make_return_doc
+	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Purchase Invoice", source_name, target_doc)	

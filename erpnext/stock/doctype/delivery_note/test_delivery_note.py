@@ -177,8 +177,9 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertRaises(SerialNoStatusError, dn.submit)
 
 	def check_serial_no_values(self, serial_no, field_values):
+		serial_no = frappe.get_doc("Serial No", serial_no)
 		for field, value in field_values.items():
-			self.assertEquals(cstr(frappe.db.get_value("Serial No", serial_no, field)), value)
+			self.assertEquals(cstr(serial_no.get(field)), value)
 			
 	def test_sales_return_for_non_bundled_items(self):
 		set_perpetual_inventory()
@@ -286,6 +287,45 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEquals(gle_warehouse_amount, 1400)
 		
 		set_perpetual_inventory(0)
+		
+	def test_return_for_serialized_items(self):
+		se = make_serialized_item()
+		serial_no = get_serial_nos(se.get("items")[0].serial_no)[0]
+
+		dn = create_delivery_note(item_code="_Test Serialized Item With Series", rate=500, serial_no=serial_no)
+
+		self.check_serial_no_values(serial_no, {
+			"status": "Delivered",
+			"warehouse": "",
+			"delivery_document_no": dn.name
+		})
+
+		# return entry
+		dn1 = create_delivery_note(item_code="_Test Serialized Item With Series", 
+			is_return=1, return_against=dn.name, qty=-1, rate=500, serial_no=serial_no)
+
+		self.check_serial_no_values(serial_no, {
+			"status": "Sales Returned",
+			"warehouse": "_Test Warehouse - _TC",
+			"delivery_document_no": ""
+		})
+				
+		dn1.cancel()
+		
+		self.check_serial_no_values(serial_no, {
+			"status": "Delivered",
+			"warehouse": "",
+			"delivery_document_no": dn.name
+		})
+		
+		dn.cancel()
+		
+		self.check_serial_no_values(serial_no, {
+			"status": "Available",
+			"warehouse": "_Test Warehouse - _TC",
+			"delivery_document_no": "",
+			"purchase_document_no": se.name
+		})
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

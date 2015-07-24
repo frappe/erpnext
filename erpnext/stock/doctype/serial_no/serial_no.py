@@ -33,10 +33,7 @@ class SerialNo(StockController):
 		self.validate_warehouse()
 		self.validate_item()
 		self.on_stock_ledger_entry()
-
-		valid_purchase_document_type = ("Purchase Receipt", "Stock Entry", "Serial No")
-		self.validate_value("purchase_document_type", "in", valid_purchase_document_type)
-
+		
 	def set_maintenance_status(self):
 		if not self.warranty_expiry_date and not self.amc_expiry_date:
 			self.maintenance_status = None
@@ -122,9 +119,10 @@ class SerialNo(StockController):
 			self.delivery_document_no = delivery_sle.voucher_no
 			self.delivery_date = delivery_sle.posting_date
 			self.delivery_time = delivery_sle.posting_time
-			self.customer, self.customer_name = \
-				frappe.db.get_value(delivery_sle.voucher_type, delivery_sle.voucher_no,
-					["customer", "customer_name"])
+			if delivery_sle.voucher_type  in ("Delivery Note", "Sales Invoice"):
+				self.customer, self.customer_name = \
+					frappe.db.get_value(delivery_sle.voucher_type, delivery_sle.voucher_no,
+						["customer", "customer_name"])
 			if self.warranty_period:
 				self.warranty_expiry_date	= add_days(cstr(delivery_sle.posting_date),
 					cint(self.warranty_period))
@@ -234,10 +232,10 @@ def validate_serial_no(sle, item_det):
 							frappe.throw(_("Serial No {0} does not belong to Warehouse {1}").format(serial_no,
 								sle.warehouse), SerialNoWarehouseError)
 
-						if sle.voucher_type in ("Delivery Note", "Sales Invoice") \
+						if sle.voucher_type in ("Delivery Note", "Sales Invoice") and sle.is_cancelled=="No" \
 							and sr.status != "Available":
-							frappe.throw(_("Serial No {0} status must be 'Available' to Deliver").format(serial_no),
-								SerialNoStatusError)
+								frappe.throw(_("Serial No {0} status must be 'Available' to Deliver").format(serial_no),
+									SerialNoStatusError)
 
 				elif sle.actual_qty < 0:
 					# transfer out

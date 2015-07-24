@@ -469,5 +469,5 @@ def get_invoiced_qty_map(purchase_receipt):
 
 @frappe.whitelist()
 def make_purchase_return(source_name, target_doc=None):
-	from erpnext.utilities.transaction_base import make_return_doc
+	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Purchase Receipt", source_name, target_doc)
