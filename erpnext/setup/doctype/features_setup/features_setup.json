@@ -18,7 +18,7 @@
    "permlevel": 0
   }, 
   {
-   "description": "To track items in sales and purchase documents with batch nos<br><b>Preferred Industry: Chemicals etc</b>", 
+   "description": "To track items in sales and purchase documents with batch nos. \"Preferred Industry: Chemicals\"", 
    "fieldname": "fs_item_batch_nos", 
    "fieldtype": "Check", 
    "in_list_view": 1, 
@@ -139,14 +139,14 @@
    "permlevel": 0
   }, 
   {
-   "description": "To enable <b>Point of Sale</b> features", 
+   "description": "To enable \"Point of Sale\" features", 
    "fieldname": "fs_pos", 
    "fieldtype": "Check", 
    "label": "Point of Sale", 
    "permlevel": 0
   }, 
   {
-   "description": "To enable <b>Point of Sale</b> view", 
+   "description": "To enable \"Point of Sale\" view", 
    "fieldname": "fs_pos_view", 
    "fieldtype": "Check", 
    "label": "POS View", 

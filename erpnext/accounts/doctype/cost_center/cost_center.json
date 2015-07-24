@@ -66,7 +66,7 @@
    "precision": ""
   }, 
   {
-   "description": "Define Budget for this Cost Center. To set budget action, see <a href=\"#!List/Company\">Company Master</a>", 
+   "description": "Define Budget for this Cost Center. To set budget action, see \"Company List\"", 
    "fieldname": "sb1", 
    "fieldtype": "Section Break", 
    "label": "Budget", 
