@@ -177,17 +177,12 @@ class ProductionOrder(Document):
 
 	def set_production_order_operations(self):
 		"""Fetch operations from BOM and set in 'Production Order'"""
-		if not self.bom_no:
+		if not self.bom_no or cint(frappe.db.get_single_value("Manufacturing Settings", "disable_capacity_planning")):
 			return
 		self.set('operations', [])
 		operations = frappe.db.sql("""select operation, description, workstation, idx,
 			hour_rate, time_in_mins, "Pending" as status from `tabBOM Operation`
 			where parent = %s order by idx""", self.bom_no, as_dict=1)
-		if operations:
-			self.track_operations=1
-		else:
-			self.track_operations=0
-			frappe.msgprint(_("Cannot 'track operations' as selected BOM does not have Operations."))
 		self.set('operations', operations)
 		self.calculate_time()
 

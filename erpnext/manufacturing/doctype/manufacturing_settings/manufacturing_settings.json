@@ -16,6 +16,14 @@
    "precision": ""
   }, 
   {
+   "description": "Disables creation of time logs against Production Orders.\nOperations shall not be tracked against Production Order", 
+   "fieldname": "disable_capacity_planning", 
+   "fieldtype": "Check", 
+   "label": "Disable Capacity Planning and Time Tracking", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "description": "Plan time logs outside Workstation Working Hours.", 
    "fieldname": "allow_overtime", 
    "fieldtype": "Check", 
@@ -72,7 +80,7 @@
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
- "modified": "2015-06-15 05:52:22.986958", 
+ "modified": "2015-07-23 08:12:33.889753", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Manufacturing Settings", 
