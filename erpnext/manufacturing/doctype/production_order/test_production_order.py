@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from frappe.utils import flt, get_datetime, time_diff_in_hours
+from frappe.utils import flt, get_datetime, time_diff_in_hours, now, add_days
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.manufacturing.doctype.production_order.production_order \
 	import make_stock_entry, make_time_log, ProductionNotApplicableError,ItemHasVariantError
@@ -69,7 +69,7 @@ class TestProductionOrder(unittest.TestCase):
 
 	def test_make_time_log(self):
 		prod_order = make_prod_order_test_record(item="_Test FG Item 2",
-			planned_start_date="2014-11-25 00:00:00", qty=1, do_not_save=True)
+			planned_start_date=now(), qty=1, do_not_save=True)
 
 		prod_order.set_production_order_operations()
 		prod_order.insert()
@@ -121,15 +121,15 @@ class TestProductionOrder(unittest.TestCase):
 		time_log2 = frappe.copy_doc(time_log)
 		time_log2.update({
 			"completed_qty": 10,
-			"from_time": "2014-11-26 00:00:00",
-			"to_time": "2014-11-26 00:00:00",
+			"from_time": now(),
+			"to_time": add_days(now(), 1),
 			"docstatus": 0
 		})
 		self.assertRaises(OverProductionLoggedError, time_log2.save)
 
 	def test_planned_operating_cost(self):
 		prod_order = make_prod_order_test_record(item="_Test FG Item 2",
-			planned_start_date="2014-11-25 00:00:00", qty=1, do_not_save=True)
+			planned_start_date=now(), qty=1, do_not_save=True)
 		prod_order.set_production_order_operations()
 		cost = prod_order.planned_operating_cost
 		prod_order.qty = 2
