@@ -9,10 +9,13 @@ from frappe import _
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from dateutil.relativedelta import relativedelta
+from erpnext.stock.doctype.item.item import validate_end_of_life
 
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
 class OperationTooLongError(frappe.ValidationError): pass
+class ProductionNotApplicableError(frappe.ValidationError): pass
+class ItemHasVariantError(frappe.ValidationError): pass
 
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError, NotInWorkingHoursError
 from erpnext.projects.doctype.time_log.time_log import OverlapError
@@ -174,17 +177,12 @@ class ProductionOrder(Document):
 
 	def set_production_order_operations(self):
 		"""Fetch operations from BOM and set in 'Production Order'"""
-		if not self.bom_no:
+		if not self.bom_no or cint(frappe.db.get_single_value("Manufacturing Settings", "disable_capacity_planning")):
 			return
 		self.set('operations', [])
 		operations = frappe.db.sql("""select operation, description, workstation, idx,
 			hour_rate, time_in_mins, "Pending" as status from `tabBOM Operation`
 			where parent = %s order by idx""", self.bom_no, as_dict=1)
-		if operations:
-			self.track_operations=1
-		else:
-			self.track_operations=0
-			frappe.msgprint(_("Cannot 'track operations' as selected BOM does not have Operations."))
 		self.set('operations', operations)
 		self.calculate_time()
 
@@ -325,22 +323,27 @@ class ProductionOrder(Document):
 	
 	def validate_production_item(self):
 		if frappe.db.get_value("Item", self.production_item, "is_pro_applicable")=='No':
-			frappe.throw(_("Item is not allowed to have Production Order."))
+			frappe.throw(_("Item is not allowed to have Production Order."), ProductionNotApplicableError)
 		
 		if frappe.db.get_value("Item", self.production_item, "has_variants"):
-			frappe.throw(_("Production Order cannot be raised against a Item Template"))
+			frappe.throw(_("Production Order cannot be raised against a Item Template"), ItemHasVariantError)
+		
+		validate_end_of_life(self.production_item)
 
 @frappe.whitelist()
 def get_item_details(item):
 	res = frappe.db.sql("""select stock_uom, description
 		from `tabItem` where (ifnull(end_of_life, "0000-00-00")="0000-00-00" or end_of_life > now())
 		and name=%s""", item, as_dict=1)
-
 	if not res:
 		return {}
 
 	res = res[0]
 	res["bom_no"] = frappe.db.get_value("BOM", filters={"item": item, "is_default": 1})
+	if not res["bom_no"]:
+		variant_of= frappe.db.get_value("Item", item, "variant_of")
+		if variant_of:
+			res["bom_no"] = frappe.db.get_value("BOM", filters={"item": variant_of, "is_default": 1})
 	return res
 
 @frappe.whitelist()

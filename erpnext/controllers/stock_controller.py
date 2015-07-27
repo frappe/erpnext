@@ -216,6 +216,17 @@ class StockController(AccountsController):
 				tuple(item_codes))
 
 		return serialized_items
+		
+	def get_incoming_rate_for_sales_return(self, item_code, against_document):
+		incoming_rate = 0.0
+		if against_document and item_code:
+			incoming_rate = frappe.db.sql("""select abs(ifnull(stock_value_difference, 0) / actual_qty)
+				from `tabStock Ledger Entry`
+				where voucher_type = %s and voucher_no = %s and item_code = %s limit 1""",
+				(self.doctype, against_document, item_code))
+			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
+
+		return incoming_rate
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):

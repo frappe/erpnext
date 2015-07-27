@@ -31,9 +31,10 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 
 		if(this.frm.doc.docstatus == 1) {
 			if(this.frm.doc.__onload && !this.frm.doc.__onload.billing_complete) {
-				cur_frm.add_custom_button(__('Make Purchase Invoice'), this.make_purchase_invoice,
-					frappe.boot.doctype_icons["Purchase Invoice"]);
+				cur_frm.add_custom_button(__('Make Purchase Invoice'), this.make_purchase_invoice);
 			}
+			
+			cur_frm.add_custom_button(__('Make Purchase Return'), this.make_purchase_return);
 
 			this.show_stock_ledger();
 			this.show_general_ledger();
@@ -51,7 +52,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 							company: cur_frm.doc.company
 						}
 					})
-				}, "icon-download", "btn-default");
+				});
 		}
 
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
@@ -102,6 +103,13 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	make_purchase_invoice: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
+			frm: cur_frm
+		})
+	},
+	
+	make_purchase_return: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_return",
 			frm: cur_frm
 		})
 	},

@@ -26,8 +26,7 @@ class BuyingController(StockController):
 	def validate(self):
 		super(BuyingController, self).validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:
-			self.supplier_name = frappe.db.get_value("Supplier",
-				self.supplier, "supplier_name")
+			self.supplier_name = frappe.db.get_value("Supplier", self.supplier, "supplier_name")
 		self.is_item_table_empty()
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()

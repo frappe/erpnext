@@ -186,27 +186,16 @@ $.extend(cur_frm.cscript, {
 	},
 
 	bom_no: function() {
-		if (this.frm.doc.track_operations) {
-			return this.frm.call({
-				doc: this.frm.doc,
-				method: "set_production_order_operations"
-			});
-		}
+		return this.frm.call({
+		doc: this.frm.doc,
+		method: "set_production_order_operations"
+		});
 	},
 	
 	qty: function() {
 		frappe.ui.form.trigger("Production Order", 'bom_no')
 	},
 	
-	track_operations: function(doc) {
-		if (doc.track_operations) {
-			frappe.ui.form.trigger("Production Order", 'bom_no')
-		}
-		else {
-			doc.operations =[];
-		}
-	},
-
 	show_time_logs: function(doc, cdt, cdn) {
 		var child = locals[cdt][cdn]
 		frappe.route_options = {"operation_id": child.name};
@@ -262,7 +251,8 @@ cur_frm.fields_dict['production_item'].get_query = function(doc) {
 	return {
 		filters:[
 			['Item', 'is_pro_applicable', '=', 'Yes'],
-			['Item', 'has_variants', '=', 'No']
+			['Item', 'has_variants', '=', 'No'],
+			['Item', 'end_of_life', '>=', frappe.datetime.nowdate()]
 		]
 	}
 }

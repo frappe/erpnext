@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe import _, throw, msgprint
-from frappe.utils import cstr, nowdate
+from frappe.utils import nowdate
 
 from frappe.model.document import Document
 
@@ -63,8 +63,7 @@ def send_sms(receiver_list, msg, sender_name = ''):
 	}
 
 	if frappe.db.get_value('SMS Settings', None, 'sms_gateway_url'):
-		ret = send_via_gateway(arg)
-		msgprint(ret)
+		send_via_gateway(arg)
 	else:
 		msgprint(_("Please Update SMS Settings"))
 
@@ -74,12 +73,17 @@ def send_via_gateway(arg):
 	for d in ss.get("parameters"):
 		args[d.parameter] = d.value
 
-	resp = []
+	success_list = []
 	for d in arg.get('receiver_list'):
 		args[ss.receiver_parameter] = d
-		resp.append(send_request(ss.sms_gateway_url, args))
+		status = send_request(ss.sms_gateway_url, args)
+		if status == 200:
+			success_list.append(d)
 
-	return resp
+	if len(success_list) > 0:
+		args.update(arg)
+		create_sms_log(args, success_list)
+		frappe.msgprint(_("SMS sent to following numbers: {0}").format("\n" + "\n".join(success_list)))
 
 # Send Request
 # =========================================================
@@ -90,11 +94,8 @@ def send_request(gateway_url, args):
 	headers = {}
 	headers['Accept'] = "text/plain, text/html, */*"
 	conn.request('GET', api_url + urllib.urlencode(args), headers = headers)    # send request
-	resp = conn.getresponse()     # get response
-	resp = resp.read()
-	if resp.status==200:
-		create_sms_log()
-	return resp
+	resp = conn.getresponse()     # get response		
+	return resp.status
 
 # Split gateway url to server and api url
 # =========================================================
@@ -109,12 +110,13 @@ def scrub_gateway_url(url):
 
 # Create SMS Log
 # =========================================================
-def create_sms_log(arg, sent_sms):
-	sl = frappe.get_doc('SMS Log')
-	sl.sender_name = arg['sender_name']
+def create_sms_log(args, sent_to):
+	sl = frappe.new_doc('SMS Log')
+	sl.sender_name = args['sender_name']
 	sl.sent_on = nowdate()
-	sl.receiver_list = cstr(arg['receiver_list'])
-	sl.message = arg['message']
-	sl.no_of_requested_sms = len(arg['receiver_list'])
-	sl.no_of_sent_sms = sent_sms
+	sl.message = args['message']
+	sl.no_of_requested_sms = len(args['receiver_list'])
+	sl.requested_numbers = "\n".join(args['receiver_list'])
+	sl.no_of_sent_sms = len(sent_to)
+	sl.sent_to = "\n".join(sent_to)
 	sl.save()

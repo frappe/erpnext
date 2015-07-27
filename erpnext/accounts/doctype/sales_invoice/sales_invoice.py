@@ -80,14 +80,16 @@ class SalesInvoice(SellingController):
 
 		self.check_prev_docstatus()
 
-		self.update_status_updater_args()
-		self.update_prevdoc_status()
-		self.update_billing_status_for_zero_amount_refdoc("Sales Order")
-		self.check_credit_limit()
+		if not self.is_return:
+			self.update_status_updater_args()
+			self.update_prevdoc_status()
+			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
+			self.check_credit_limit()
+			
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
 
-		if not cint(self.is_pos) == 1:
+		if not cint(self.is_pos) == 1 and not self.is_return:
 			self.update_against_document_in_jv()
 
 		self.update_time_log_batch(self.name)
@@ -100,13 +102,15 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		self.check_stop_sales_order("sales_order")
-
+		
 		from erpnext.accounts.utils import remove_against_link_from_jv
 		remove_against_link_from_jv(self.doctype, self.name, "against_invoice")
-
-		self.update_status_updater_args()
-		self.update_prevdoc_status()
-		self.update_billing_status_for_zero_amount_refdoc("Sales Order")
+		
+		if not self.is_return:
+			self.update_status_updater_args()
+			self.update_prevdoc_status()
+			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
+			
 		self.validate_c_form_on_cancel()
 
 		self.make_gl_entries_on_cancel()
@@ -199,8 +203,9 @@ class SalesInvoice(SellingController):
 				self.set_taxes()
 
 	def get_advances(self):
-		super(SalesInvoice, self).get_advances(self.debit_to, "Customer", self.customer,
-			"Sales Invoice Advance", "advances", "credit", "sales_order")
+		if not self.is_return:
+			super(SalesInvoice, self).get_advances(self.debit_to, "Customer", self.customer,
+				"Sales Invoice Advance", "advances", "credit", "sales_order")
 
 	def get_company_abbr(self):
 		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
@@ -285,6 +290,8 @@ class SalesInvoice(SellingController):
 
 	def so_dn_required(self):
 		"""check in manage account if sales order / delivery note required or not."""
+		if self.is_return:
+			return
 		dic = {'Sales Order':'so_required','Delivery Note':'dn_required'}
 		for i in dic:
 			if frappe.db.get_value('Selling Settings', None, dic[i]) == 'Yes':
@@ -419,13 +426,16 @@ class SalesInvoice(SellingController):
 	def update_stock_ledger(self):
 		sl_entries = []
 		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
-					and d.warehouse:
+			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" and d.warehouse:
+				incoming_rate = 0
+				if cint(self.is_return) and self.return_against and self.docstatus==1:
+					incoming_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
+					
 				sl_entries.append(self.get_sl_entries(d, {
 					"actual_qty": -1*flt(d.qty),
-					"stock_uom": frappe.db.get_value("Item", d.item_code, "stock_uom")
+					"stock_uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
+					"incoming_rate": incoming_rate
 				}))
-
 		self.make_sl_entries(sl_entries)
 
 	def make_gl_entries(self, repost_future_gle=True):
@@ -435,8 +445,7 @@ class SalesInvoice(SellingController):
 			from erpnext.accounts.general_ledger import make_gl_entries
 
 			# if POS and amount is written off, there's no outstanding and hence no need to update it
-			update_outstanding = cint(self.is_pos) and self.write_off_account \
-				and 'No' or 'Yes'
+			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account) else "Yes"
 
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False)
@@ -484,7 +493,7 @@ class SalesInvoice(SellingController):
 					"against": self.against_income_account,
 					"debit": self.base_grand_total,
 					"remarks": self.remarks,
-					"against_voucher": self.name,
+					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype
 				})
 			)
@@ -519,7 +528,6 @@ class SalesInvoice(SellingController):
 		# expense account gl entries
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")) \
 				and cint(self.update_stock):
-
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
 	def make_pos_gl_entries(self, gl_entries):
@@ -533,7 +541,7 @@ class SalesInvoice(SellingController):
 					"against": self.cash_bank_account,
 					"credit": self.paid_amount,
 					"remarks": self.remarks,
-					"against_voucher": self.name,
+					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 				})
 			)
@@ -557,7 +565,7 @@ class SalesInvoice(SellingController):
 					"against": self.write_off_account,
 					"credit": self.write_off_amount,
 					"remarks": self.remarks,
-					"against_voucher": self.name,
+					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 				})
 			)
@@ -651,3 +659,9 @@ def make_delivery_note(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+
+@frappe.whitelist()
+def make_sales_return(source_name, target_doc=None):
+	from erpnext.controllers.sales_and_purchase_return import make_return_doc
+	return make_return_doc("Sales Invoice", source_name, target_doc)

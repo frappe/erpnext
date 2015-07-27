@@ -1,32 +1,58 @@
 {
  "autoname": "SMSLOG/.########", 
- "creation": "2012-03-27 14:36:47.000000", 
+ "creation": "2012-03-27 14:36:47", 
  "docstatus": 0, 
  "doctype": "DocType", 
  "fields": [
   {
-   "fieldname": "column_break0", 
-   "fieldtype": "Column Break", 
-   "permlevel": 0, 
-   "width": "50%"
-  }, 
-  {
    "fieldname": "sender_name", 
    "fieldtype": "Data", 
    "label": "Sender Name", 
-   "permlevel": 0
+   "permlevel": 0, 
+   "read_only": 1
   }, 
   {
    "fieldname": "sent_on", 
    "fieldtype": "Date", 
    "label": "Sent On", 
-   "permlevel": 0
+   "permlevel": 0, 
+   "read_only": 1
   }, 
   {
-   "fieldname": "receiver_list", 
+   "fieldname": "column_break0", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "width": "50%"
+  }, 
+  {
+   "fieldname": "message", 
    "fieldtype": "Small Text", 
-   "label": "Receiver List", 
-   "permlevel": 0
+   "label": "Message", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "sec_break1", 
+   "fieldtype": "Section Break", 
+   "options": "Simple", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 0
+  }, 
+  {
+   "fieldname": "no_of_requested_sms", 
+   "fieldtype": "Int", 
+   "label": "No of Requested SMS", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "fieldname": "requested_numbers", 
+   "fieldtype": "Small Text", 
+   "label": "Requested Numbers", 
+   "permlevel": 0, 
+   "read_only": 1
   }, 
   {
    "fieldname": "column_break1", 
@@ -35,27 +61,24 @@
    "width": "50%"
   }, 
   {
-   "fieldname": "no_of_requested_sms", 
-   "fieldtype": "Int", 
-   "label": "No of Requested SMS", 
-   "permlevel": 0
-  }, 
-  {
    "fieldname": "no_of_sent_sms", 
    "fieldtype": "Int", 
    "label": "No of Sent SMS", 
-   "permlevel": 0
+   "permlevel": 0, 
+   "read_only": 1
   }, 
   {
-   "fieldname": "message", 
+   "fieldname": "sent_to", 
    "fieldtype": "Small Text", 
-   "label": "Message", 
-   "permlevel": 0
+   "label": "Sent To", 
+   "permlevel": 0, 
+   "precision": "", 
+   "read_only": 1
   }
  ], 
  "icon": "icon-mobile-phone", 
  "idx": 1, 
- "modified": "2013-12-20 19:24:35.000000", 
+ "modified": "2015-07-22 11:53:25.998578", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "SMS Log", 

@@ -4,10 +4,8 @@
 from __future__ import unicode_literals
 import frappe
 import frappe.defaults
-
-from frappe.utils import cstr, cint, flt, comma_or, get_datetime, getdate
-
 from frappe import _
+from frappe.utils import cstr, cint, flt, comma_or, get_datetime, getdate
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError
 from erpnext.controllers.queries import get_match_cond
@@ -15,8 +13,6 @@ from erpnext.stock.get_item_details import get_available_qty, get_default_cost_c
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.accounts.utils import validate_fiscal_year
 
-class NotUpdateStockError(frappe.ValidationError): pass
-class StockOverReturnError(frappe.ValidationError): pass
 class IncorrectValuationRateError(frappe.ValidationError): pass
 class DuplicateEntryForProductionOrderError(frappe.ValidationError): pass
 class OperationsNotCompleteError(frappe.ValidationError): pass
@@ -37,13 +33,6 @@ class StockEntry(StockController):
 				item.update(get_available_qty(item.item_code,
 					item.s_warehouse))
 
-		count = frappe.db.exists({
-			"doctype": "Journal Entry",
-			"stock_entry":self.name,
-			"docstatus":1
-		})
-		self.get("__onload").credit_debit_note_exists = 1 if count else 0
-
 	def validate(self):
 		self.pro_doc = None
 		if self.production_order:
@@ -61,7 +50,6 @@ class StockEntry(StockController):
 		self.get_stock_and_rate()
 		self.validate_bom()
 		self.validate_finished_goods()
-		self.validate_return_reference_doc()
 		self.validate_with_material_request()
 		self.validate_valuation_rate()
 		self.set_total_incoming_outgoing_value()
@@ -84,15 +72,12 @@ class StockEntry(StockController):
 
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer", "Material Transfer for Manufacture",
-			"Manufacture", "Repack", "Subcontract", "Sales Return", "Purchase Return"]
+			"Manufacture", "Repack", "Subcontract"]
 		if self.purpose not in valid_purposes:
 			frappe.throw(_("Purpose must be one of {0}").format(comma_or(valid_purposes)))
 
-		if self.purpose in ("Manufacture", "Repack", "Sales Return") and not self.difference_account:
+		if self.purpose in ("Manufacture", "Repack") and not self.difference_account:
 			self.difference_account = frappe.db.get_value("Company", self.company, "default_expense_account")
-
-		if self.purpose in ("Purchase Return") and not self.difference_account:
-			frappe.throw(_("Difference Account mandatory for purpose '{0}'").format(self.purpose))
 
 	def set_transfer_qty(self):
 		for item in self.get("items"):
@@ -122,7 +107,7 @@ class StockEntry(StockController):
 			if not item.transfer_qty:
 				item.transfer_qty = item.qty * item.conversion_factor
 
-			if (self.purpose in ("Material Transfer", "Sales Return", "Purchase Return", "Material Transfer for Manufacture")
+			if (self.purpose in ("Material Transfer", "Material Transfer for Manufacture")
 				and not item.serial_no
 				and item.item_code in serialized_items):
 				frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}").format(item.idx, item.item_code),
@@ -131,8 +116,8 @@ class StockEntry(StockController):
 	def validate_warehouse(self):
 		"""perform various (sometimes conditional) validations on warehouse"""
 
-		source_mandatory = ["Material Issue", "Material Transfer", "Purchase Return", "Subcontract", "Material Transfer for Manufacture"]
-		target_mandatory = ["Material Receipt", "Material Transfer", "Sales Return", "Subcontract", "Material Transfer for Manufacture"]
+		source_mandatory = ["Material Issue", "Material Transfer", "Subcontract", "Material Transfer for Manufacture"]
+		target_mandatory = ["Material Receipt", "Material Transfer", "Subcontract", "Material Transfer for Manufacture"]
 
 		validate_for_manufacture_repack = any([d.bom_no for d in self.get("items")])
 
@@ -201,9 +186,7 @@ class StockEntry(StockController):
 	def check_if_operations_completed(self):
 		"""Check if Time Logs are completed against before manufacturing to capture operating costs."""
 		prod_order = frappe.get_doc("Production Order", self.production_order)
-		if not prod_order.track_operations:
-			return
-			
+
 		for d in prod_order.get("operations"):
 			total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
 			if total_completed_qty > flt(d.completed_qty):
@@ -291,8 +274,8 @@ class StockEntry(StockController):
 
 			# get incoming rate
 			if not d.bom_no:
-				if not flt(d.incoming_rate) or d.s_warehouse or self.purpose == "Sales Return" or force:
-					incoming_rate = flt(self.get_incoming_rate(args), self.precision("incoming_rate", d))
+				if not flt(d.incoming_rate) or d.s_warehouse or force:
+					incoming_rate = flt(get_incoming_rate(args), self.precision("incoming_rate", d))
 					if incoming_rate > 0:
 						d.incoming_rate = incoming_rate
 
@@ -335,27 +318,6 @@ class StockEntry(StockController):
 			operation_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
 
 		return operation_cost_per_unit + (flt(self.additional_operating_cost) / flt(qty))
-
-	def get_incoming_rate(self, args):
-		incoming_rate = 0
-		if self.purpose == "Sales Return":
-			incoming_rate = self.get_incoming_rate_for_sales_return(args)
-		else:
-			incoming_rate = get_incoming_rate(args)
-
-		return incoming_rate
-
-	def get_incoming_rate_for_sales_return(self, args):
-		incoming_rate = 0.0
-		if (self.delivery_note_no or self.sales_invoice_no) and args.get("item_code"):
-			incoming_rate = frappe.db.sql("""select abs(ifnull(stock_value_difference, 0) / actual_qty)
-				from `tabStock Ledger Entry`
-				where voucher_type = %s and voucher_no = %s and item_code = %s limit 1""",
-				((self.delivery_note_no and "Delivery Note" or "Sales Invoice"),
-				self.delivery_note_no or self.sales_invoice_no, args.item_code))
-			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
-
-		return incoming_rate
 
 	def validate_purchase_order(self):
 		"""Throw exception if more raw material is transferred against Purchase Order than in
@@ -402,55 +364,6 @@ class StockEntry(StockController):
 			if production_item not in items_with_target_warehouse:
 				frappe.throw(_("Finished Item {0} must be entered for Manufacture type entry")
 					.format(production_item))
-
-	def validate_return_reference_doc(self):
-		"""validate item with reference doc"""
-		ref = get_return_doc_and_details(self)
-
-		if ref.doc:
-			# validate docstatus
-			if ref.doc.docstatus != 1:
-				frappe.throw(_("{0} {1} must be submitted").format(ref.doc.doctype, ref.doc.name),
-					frappe.InvalidStatusError)
-
-			# update stock check
-			if ref.doc.doctype == "Sales Invoice" and cint(ref.doc.update_stock) != 1:
-				frappe.throw(_("'Update Stock' for Sales Invoice {0} must be set").format(ref.doc.name), NotUpdateStockError)
-
-			# posting date check
-			ref_posting_datetime = "%s %s" % (ref.doc.posting_date, ref.doc.posting_time or "00:00:00")
-
-			if get_datetime(ref_posting_datetime) < get_datetime(ref_posting_datetime):
-				from frappe.utils.dateutils import datetime_in_user_format
-				frappe.throw(_("Posting timestamp must be after {0}")
-					.format(datetime_in_user_format(ref_posting_datetime)))
-
-			stock_items = get_stock_items_for_return(ref.doc, ref.parentfields)
-			already_returned_item_qty = self.get_already_returned_item_qty(ref.fieldname)
-
-			for item in self.get("items"):
-				# validate if item exists in the ref doc and that it is a stock item
-				if item.item_code not in stock_items:
-					frappe.throw(_("Item {0} does not exist in {1} {2}").format(item.item_code, ref.doc.doctype, ref.doc.name),
-						frappe.DoesNotExistError)
-
-				# validate quantity <= ref item's qty - qty already returned
-				if self.purpose == "Purchase Return":
-					ref_item_qty = sum([flt(d.qty)*flt(d.conversion_factor) for d in ref.doc.get({"item_code": item.item_code})])
-				elif self.purpose == "Sales Return":
-					ref_item_qty = sum([flt(d.qty) for d in ref.doc.get({"item_code": item.item_code})])
-				returnable_qty = ref_item_qty - flt(already_returned_item_qty.get(item.item_code))
-				if not returnable_qty:
-					frappe.throw(_("Item {0} has already been returned").format(item.item_code), StockOverReturnError)
-				elif item.transfer_qty > returnable_qty:
-					frappe.throw(_("Cannot return more than {0} for Item {1}").format(returnable_qty, item.item_code),
-						StockOverReturnError)
-
-	def get_already_returned_item_qty(self, ref_fieldname):
-		return dict(frappe.db.sql("""select item_code, sum(transfer_qty) as qty
-			from `tabStock Entry Detail` where parent in (
-				select name from `tabStock Entry` where `%s`=%s and docstatus=1)
-			group by item_code""" % (ref_fieldname, "%s"), (self.get(ref_fieldname),)))
 
 	def update_stock_ledger(self):
 		sl_entries = []
@@ -514,6 +427,7 @@ class StockEntry(StockController):
 			(args.get('item_code')), as_dict = 1)
 		if not item:
 			frappe.throw(_("Item {0} is not active or end of life has been reached").format(args.get("item_code")))
+			
 		item = item[0]
 
 		ret = {
@@ -561,7 +475,7 @@ class StockEntry(StockController):
 
 			ret = {
 				"actual_qty" : get_previous_sle(args).get("qty_after_transaction") or 0,
-				"incoming_rate" : self.get_incoming_rate(args)
+				"incoming_rate" : get_incoming_rate(args)
 			}
 		return ret
 
@@ -738,15 +652,6 @@ class StockEntry(StockController):
 						if getdate(self.posting_date) > getdate(expiry_date):
 							frappe.throw(_("Batch {0} of Item {1} has expired.").format(item.batch_no, item.item_code))
 
-@frappe.whitelist()
-def get_party_details(ref_dt, ref_dn):
-	if ref_dt in ["Delivery Note", "Sales Invoice"]:
-		res = frappe.db.get_value(ref_dt, ref_dn,
-			["customer", "customer_name", "address_display as customer_address"], as_dict=1)
-	else:
-		res = frappe.db.get_value(ref_dt, ref_dn,
-			["supplier", "supplier_name", "address_display as supplier_address"], as_dict=1)
-	return res or {}
 
 @frappe.whitelist()
 def get_production_order_details(production_order):
@@ -756,264 +661,3 @@ def get_production_order_details(production_order):
 		from `tabProduction Order` where name = %s""", production_order, as_dict=1)
 
 	return res and res[0] or {}
-
-def query_sales_return_doc(doctype, txt, searchfield, start, page_len, filters):
-	conditions = ""
-	if doctype == "Sales Invoice":
-		conditions = "and update_stock=1"
-
-	return frappe.db.sql("""select name, customer, customer_name
-		from `tab%s` where docstatus = 1
-			and (`%s` like %%(txt)s
-				or `customer` like %%(txt)s) %s %s
-		order by name, customer, customer_name
-		limit %s""" % (doctype, searchfield, conditions,
-		get_match_cond(doctype), "%(start)s, %(page_len)s"),
-		{"txt": "%%%s%%" % txt, "start": start, "page_len": page_len},
-		as_list=True)
-
-def query_purchase_return_doc(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql("""select name, supplier, supplier_name
-		from `tab%s` where docstatus = 1
-			and (`%s` like %%(txt)s
-				or `supplier` like %%(txt)s) %s
-		order by name, supplier, supplier_name
-		limit %s""" % (doctype, searchfield, get_match_cond(doctype),
-		"%(start)s, %(page_len)s"),	{"txt": "%%%s%%" % txt, "start":
-		start, "page_len": page_len}, as_list=True)
-
-def query_return_item(doctype, txt, searchfield, start, page_len, filters):
-	txt = txt.replace("%", "")
-
-	ref = get_return_doc_and_details(filters)
-
-	stock_items = get_stock_items_for_return(ref.doc, ref.parentfields)
-
-	result = []
-	for item in ref.doc.get_all_children():
-		if getattr(item, "item_code", None) in stock_items:
-			item.item_name = cstr(item.item_name)
-			item.description = cstr(item.description)
-			if (txt in item.item_code) or (txt in item.item_name) or (txt in item.description):
-				val = [
-					item.item_code,
-					(len(item.item_name) > 40) and (item.item_name[:40] + "...") or item.item_name,
-					(len(item.description) > 40) and (item.description[:40] + "...") or \
-						item.description
-				]
-				if val not in result:
-					result.append(val)
-
-	return result[start:start+page_len]
-
-def get_stock_items_for_return(ref_doc, parentfields):
-	"""return item codes filtered from doc, which are stock items"""
-	if isinstance(parentfields, basestring):
-		parentfields = [parentfields]
-
-	all_items = list(set([d.item_code for d in
-		ref_doc.get_all_children() if d.get("item_code")]))
-	stock_items = frappe.db.sql_list("""select name from `tabItem`
-		where is_stock_item='Yes' and name in (%s)""" % (", ".join(["%s"] * len(all_items))),
-		tuple(all_items))
-
-	return stock_items
-
-def get_return_doc_and_details(args):
-	ref = frappe._dict()
-
-	# get ref_doc
-	if args.get("purpose") in return_map:
-		for fieldname, val in return_map[args.get("purpose")].items():
-			if args.get(fieldname):
-				ref.fieldname = fieldname
-				ref.doc = frappe.get_doc(val[0], args.get(fieldname))
-				ref.parentfields = val[1]
-				break
-
-	return ref
-
-return_map = {
-	"Sales Return": {
-		# [Ref DocType, [Item tables' parentfields]]
-		"delivery_note_no": ["Delivery Note", ["items", "packed_items"]],
-		"sales_invoice_no": ["Sales Invoice", ["items", "packed_items"]]
-	},
-	"Purchase Return": {
-		"purchase_receipt_no": ["Purchase Receipt", ["items"]]
-	}
-}
-
-@frappe.whitelist()
-def make_return_jv(stock_entry):
-	se = frappe.get_doc("Stock Entry", stock_entry)
-	if not se.purpose in ["Sales Return", "Purchase Return"]:
-		return
-
-	ref = get_return_doc_and_details(se)
-
-	if ref.doc.doctype == "Delivery Note":
-		result = make_return_jv_from_delivery_note(se, ref)
-	elif ref.doc.doctype == "Sales Invoice":
-		result = make_return_jv_from_sales_invoice(se, ref)
-	elif ref.doc.doctype == "Purchase Receipt":
-		result = make_return_jv_from_purchase_receipt(se, ref)
-
-	# create jv doc and fetch balance for each unique row item
-	jv = frappe.new_doc("Journal Entry")
-	jv.update({
-		"posting_date": se.posting_date,
-		"voucher_type": se.purpose == "Sales Return" and "Credit Note" or "Debit Note",
-		"fiscal_year": se.fiscal_year,
-		"company": se.company,
-		"stock_entry": se.name
-	})
-
-	from erpnext.accounts.utils import get_balance_on
-	for r in result:
-		jv.append("accounts", {
-			"account": r.get("account"),
-			"party_type": r.get("party_type"),
-			"party": r.get("party"),
-			"balance": get_balance_on(r.get("account"), se.posting_date) if r.get("account") else 0
-		})
-
-	return jv
-
-def make_return_jv_from_sales_invoice(se, ref):
-	# customer account entry
-	parent = {
-		"account": ref.doc.debit_to,
-		"party_type": "Customer",
-		"party": ref.doc.customer
-	}
-
-	# income account entries
-	children = []
-	for se_item in se.get("items"):
-		# find item in ref.doc
-		ref_item = ref.doc.get({"item_code": se_item.item_code})[0]
-
-		account = get_sales_account_from_item(ref.doc, ref_item)
-
-		if account not in children:
-			children.append(account)
-
-	return [parent] + [{"account": account} for account in children]
-
-def get_sales_account_from_item(doc, ref_item):
-	account = None
-	if not getattr(ref_item, "income_account", None):
-		if ref_item.parent_item:
-			parent_item = doc.get("items", {"item_code": ref_item.parent_item})[0]
-			account = parent_item.income_account
-	else:
-		account = ref_item.income_account
-
-	return account
-
-def make_return_jv_from_delivery_note(se, ref):
-	invoices_against_delivery = get_invoice_list("Sales Invoice Item", "delivery_note",
-		ref.doc.name)
-
-	if not invoices_against_delivery:
-		sales_orders_against_delivery = [d.against_sales_order for d in ref.doc.get_all_children() if getattr(d, "against_sales_order", None)]
-
-		if sales_orders_against_delivery:
-			invoices_against_delivery = get_invoice_list("Sales Invoice Item", "sales_order",
-				sales_orders_against_delivery)
-
-	if not invoices_against_delivery:
-		return []
-
-	packing_item_parent_map = dict([[d.item_code, d.parent_item] for d in ref.doc.get(ref.parentfields[1])])
-
-	parent = {}
-	children = []
-
-	for se_item in se.get("items"):
-		for sales_invoice in invoices_against_delivery:
-			si = frappe.get_doc("Sales Invoice", sales_invoice)
-
-			if se_item.item_code in packing_item_parent_map:
-				ref_item = si.get({"item_code": packing_item_parent_map[se_item.item_code]})
-			else:
-				ref_item = si.get({"item_code": se_item.item_code})
-
-			if not ref_item:
-				continue
-
-			ref_item = ref_item[0]
-
-			account = get_sales_account_from_item(si, ref_item)
-
-			if account not in children:
-				children.append(account)
-
-			if not parent:
-				parent = {
-					"account": si.debit_to,
-					"party_type": "Customer",
-					"party": si.customer
-				}
-
-			break
-
-	result = [parent] + [{"account": account} for account in children]
-
-	return result
-
-def get_invoice_list(doctype, link_field, value):
-	if isinstance(value, basestring):
-		value = [value]
-
-	return frappe.db.sql_list("""select distinct parent from `tab%s`
-		where docstatus = 1 and `%s` in (%s)""" % (doctype, link_field,
-			", ".join(["%s"]*len(value))), tuple(value))
-
-def make_return_jv_from_purchase_receipt(se, ref):
-	invoice_against_receipt = get_invoice_list("Purchase Invoice Item", "purchase_receipt",
-		ref.doc.name)
-
-	if not invoice_against_receipt:
-		purchase_orders_against_receipt = [d.prevdoc_docname for d in
-			ref.doc.get("items", {"prevdoc_doctype": "Purchase Order"})
-			if getattr(d, "prevdoc_docname", None)]
-
-		if purchase_orders_against_receipt:
-			invoice_against_receipt = get_invoice_list("Purchase Invoice Item", "purchase_order",
-				purchase_orders_against_receipt)
-
-	if not invoice_against_receipt:
-		return []
-
-	parent = {}
-	children = []
-
-	for se_item in se.get("items"):
-		for purchase_invoice in invoice_against_receipt:
-			pi = frappe.get_doc("Purchase Invoice", purchase_invoice)
-			ref_item = pi.get({"item_code": se_item.item_code})
-
-			if not ref_item:
-				continue
-
-			ref_item = ref_item[0]
-
-			account = ref_item.expense_account
-
-			if account not in children:
-				children.append(account)
-
-			if not parent:
-				parent = {
-					"account": pi.credit_to,
-					"party_type": "Supplier",
-					"party": pi.supplier
-				}
-
-			break
-
-	result = [parent] + [{"account": account} for account in children]
-
-	return result

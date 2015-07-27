@@ -52,7 +52,7 @@
    "fieldtype": "Text Editor", 
    "label": "Message", 
    "permlevel": 0, 
-   "reqd": 0
+   "reqd": 1
   }, 
   {
    "description": "", 
@@ -78,7 +78,7 @@
  ], 
  "icon": "icon-envelope", 
  "idx": 1, 
- "modified": "2015-03-20 05:27:31.613881", 
+ "modified": "2015-07-20 05:43:33.818567", 
  "modified_by": "Administrator", 
  "module": "CRM", 
  "name": "Newsletter", 

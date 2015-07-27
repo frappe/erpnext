@@ -3,12 +3,12 @@
 
 from __future__ import unicode_literals
 import frappe
+import frappe.share
 from frappe import _
 from frappe.utils import cstr, now_datetime, cint, flt
-import frappe.share
-
 from erpnext.controllers.status_updater import StatusUpdater
 
+class UOMMustBeIntegerError(frappe.ValidationError): pass
 
 class TransactionBase(StatusUpdater):
 	def load_notification_message(self):
@@ -108,8 +108,6 @@ class TransactionBase(StatusUpdater):
 def delete_events(ref_type, ref_name):
 	frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent`
 		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)
-
-class UOMMustBeIntegerError(frappe.ValidationError): pass
 
 def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	if isinstance(qty_fields, basestring):

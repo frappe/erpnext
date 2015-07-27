@@ -49,7 +49,7 @@ class Account(Document):
 				self.root_type = par.root_type
 
 	def validate_root_details(self):
-		#does not exists parent
+		# does not exists parent
 		if frappe.db.exists("Account", self.name):
 			if not frappe.db.get_value("Account", self.name, "parent_account"):
 				throw(_("Root cannot be edited."))

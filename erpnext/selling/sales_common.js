@@ -210,7 +210,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		// NOTE:
 		// paid_amount and write_off_amount is only for POS Invoice
 		// total_advance is only for non POS Invoice
-		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.docstatus==0) {
+		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.docstatus==0 && !this.frm.doc.is_return) {
 			frappe.model.round_floats_in(this.frm.doc, ["base_grand_total", "total_advance", "write_off_amount",
 				"paid_amount"]);
 			var total_amount_to_pay = this.frm.doc.base_grand_total - this.frm.doc.write_off_amount

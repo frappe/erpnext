@@ -173,7 +173,7 @@ erpnext.patches.v5_0.item_variants
 erpnext.patches.v5_0.update_item_desc_in_invoice
 erpnext.patches.v5_1.fix_against_account
 erpnext.patches.v5_1.fix_credit_days_based_on
-erpnext.patches.v5_1.track_operations
 execute:frappe.rename_doc("DocType", "Salary Manager", "Process Payroll", force=True)
 erpnext.patches.v5_1.rename_roles
 erpnext.patches.v5_1.default_bom
+execute:frappe.delete_doc("DocType", "Party Type")

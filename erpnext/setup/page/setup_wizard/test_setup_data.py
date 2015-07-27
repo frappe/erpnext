@@ -51,4 +51,15 @@ args = {
 "timezone": "America/New_York",
 "password": "password",
 "email": "test@erpnext.com",
+"user_email_1": "testsetup1@example.com",
+"user_fullname_1": "test setup user",
+"user_sales_1": 1,
+"user_purchaser_1": 1,
+"user_accountant_1": 1,
+"user_email_1": "testsetup2@example.com",
+"user_fullname_1": "test setup user",
+"user_sales_2": 1,
+"user_purchaser_2": 0,
+"user_accountant_2": 0
+
 }

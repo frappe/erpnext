@@ -44,6 +44,7 @@ class PurchaseReceipt(BuyingController):
 		self.set_status()
 		self.po_required()
 		self.validate_with_previous_doc()
+		self.validate_purchase_return()
 		self.validate_rejected_warehouse()
 		self.validate_accepted_rejected_qty()
 		self.validate_inspection()
@@ -60,12 +61,20 @@ class PurchaseReceipt(BuyingController):
 		self.set_landed_cost_voucher_amount()
 		self.update_valuation_rate("items")
 
+
 	def set_landed_cost_voucher_amount(self):
 		for d in self.get("items"):
 			lc_voucher_amount = frappe.db.sql("""select sum(ifnull(applicable_charges, 0))
 				from `tabLanded Cost Item`
 				where docstatus = 1 and purchase_receipt_item = %s""", d.name)
 			d.landed_cost_voucher_amount = lc_voucher_amount[0][0] if lc_voucher_amount else 0.0
+			
+	def validate_purchase_return(self):
+		for d in self.get("items"):
+			if self.is_return and flt(d.rejected_qty) != 0:
+				frappe.throw(_("Row #{0}: Rejected Qty can not be entered in Purchase Return").format(d.idx))
+				
+			# validate rate with ref PR
 
 	def validate_rejected_warehouse(self):
 		for d in self.get("items"):
@@ -108,7 +117,7 @@ class PurchaseReceipt(BuyingController):
 			self.validate_rate_with_reference_doc([["Purchase Order", "prevdoc_docname", "prevdoc_detail_docname"]])
 
 	def po_required(self):
-		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
+		if not self.is_return and frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
 			 for d in self.get('items'):
 				 if not d.prevdoc_docname:
 					 frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
@@ -123,11 +132,20 @@ class PurchaseReceipt(BuyingController):
 
 				if pr_qty:
 					val_rate_db_precision = 6 if cint(self.precision("valuation_rate", d)) <= 6 else 9
-					sl_entries.append(self.get_sl_entries(d, {
+					rate = flt(d.valuation_rate, val_rate_db_precision)
+					sle = self.get_sl_entries(d, {
 						"actual_qty": flt(pr_qty),
-						"serial_no": cstr(d.serial_no).strip(),
-						"incoming_rate": flt(d.valuation_rate, val_rate_db_precision)
-					}))
+						"serial_no": cstr(d.serial_no).strip()
+					})
+					if self.is_return:
+						sle.update({
+							"outgoing_rate": rate
+						})
+					else:
+						sle.update({
+							"incoming_rate": rate
+						})
+					sl_entries.append(sle)
 
 				if flt(d.rejected_qty) > 0:
 					sl_entries.append(self.get_sl_entries(d, {
@@ -176,7 +194,6 @@ class PurchaseReceipt(BuyingController):
 				"item_code": d.rm_item_code,
 				"warehouse": self.supplier_warehouse,
 				"actual_qty": -1*flt(d.consumed_qty),
-				"incoming_rate": 0
 			}))
 
 	def validate_inspection(self):
@@ -207,16 +224,15 @@ class PurchaseReceipt(BuyingController):
 		# Set status as Submitted
 		frappe.db.set(self, 'status', 'Submitted')
 
-		self.update_prevdoc_status()
-
-		self.update_ordered_qty()
+		if not self.is_return:
+			self.update_prevdoc_status()
+			self.update_ordered_qty()
+			purchase_controller.update_last_purchase_rate(self, 1)
 
 		self.update_stock_ledger()
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "items")
-
-		purchase_controller.update_last_purchase_rate(self, 1)
 
 		self.make_gl_entries()
 
@@ -244,12 +260,13 @@ class PurchaseReceipt(BuyingController):
 
 		self.update_stock_ledger()
 
-		self.update_prevdoc_status()
+		if not self.is_return:
+			self.update_prevdoc_status()
 
-		# Must be called after updating received qty in PO
-		self.update_ordered_qty()
+			# Must be called after updating received qty in PO
+			self.update_ordered_qty()
 
-		pc_obj.update_last_purchase_rate(self, 0)
+			pc_obj.update_last_purchase_rate(self, 0)
 
 		self.make_gl_entries_on_cancel()
 
@@ -417,7 +434,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 			"doctype": "Purchase Invoice",
 			"validation": {
 				"docstatus": ["=", 1],
-			}
+			},
 		},
 		"Purchase Receipt Item": {
 			"doctype": "Purchase Invoice Item",
@@ -449,3 +466,8 @@ def get_invoiced_qty_map(purchase_receipt):
 			invoiced_qty_map[pr_detail] += qty
 
 	return invoiced_qty_map
+
+@frappe.whitelist()
+def make_purchase_return(source_name, target_doc=None):
+	from erpnext.controllers.sales_and_purchase_return import make_return_doc
+	return make_return_doc("Purchase Receipt", source_name, target_doc)

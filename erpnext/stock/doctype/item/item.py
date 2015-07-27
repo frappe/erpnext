@@ -325,7 +325,8 @@ class Item(WebsiteGenerator):
 			for d in variants:
 				update_variant(self.name, d)
 				updated.append(d.item_code)
-			frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
+			if updated:
+				frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
 				
 	def validate_has_variants(self):
 		if not self.has_variants and frappe.db.get_value("Item", self.name, "has_variants"):

@@ -164,8 +164,10 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			frappe.model.round_floats_in(this.frm.doc, ["base_grand_total", "total_advance", "write_off_amount"]);
 			this.frm.doc.total_amount_to_pay = flt(this.frm.doc.base_grand_total - this.frm.doc.write_off_amount,
 				precision("total_amount_to_pay"));
-			this.frm.doc.outstanding_amount = flt(this.frm.doc.total_amount_to_pay - this.frm.doc.total_advance,
-				precision("outstanding_amount"));
+			if (!this.frm.doc.is_return) {
+				this.frm.doc.outstanding_amount = flt(this.frm.doc.total_amount_to_pay - this.frm.doc.total_advance,
+					precision("outstanding_amount"));
+			}
 		}
 	}
 });

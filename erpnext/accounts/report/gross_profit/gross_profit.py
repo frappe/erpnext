@@ -174,12 +174,12 @@ class GrossProfitGenerator(object):
 			return flt(row.qty) * item_rate
 
 		else:
-			if row.update_stock or row.dn_detail:
+			my_sle = self.sle.get((item_code, row.warehouse))
+			if (row.update_stock or row.dn_detail) and my_sle:
 				parenttype, parent, item_row = row.parenttype, row.parent, row.item_row
 				if row.dn_detail:
 					parenttype, parent, item_row = "Delivery Note", row.delivery_note, row.dn_detail
-
-				my_sle = self.sle.get((item_code, row.warehouse))
+				
 				for i, sle in enumerate(my_sle):
 					# find the stock valution rate from stock ledger entry
 					if sle.voucher_type == parenttype and parent == sle.voucher_no and \

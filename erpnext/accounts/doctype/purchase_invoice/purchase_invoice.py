@@ -37,14 +37,16 @@ class PurchaseInvoice(BuyingController):
 
 		super(PurchaseInvoice, self).validate()
 
-		self.po_required()
-		self.pr_required()
-		self.validate_supplier_invoice()
+		if not self.is_return:
+			self.po_required()
+			self.pr_required()
+			self.validate_supplier_invoice()
+			self.validate_advance_jv("advances", "purchase_order")
+			
 		self.check_active_purchase_items()
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
-		self.validate_advance_jv("advances", "purchase_order")
 		self.check_for_stopped_status()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
@@ -71,8 +73,9 @@ class PurchaseInvoice(BuyingController):
 		super(PurchaseInvoice, self).set_missing_values(for_validate)
 
 	def get_advances(self):
-		super(PurchaseInvoice, self).get_advances(self.credit_to, "Supplier", self.supplier,
-			"Purchase Invoice Advance", "advances", "debit", "purchase_order")
+		if not self.is_return:
+			super(PurchaseInvoice, self).get_advances(self.credit_to, "Supplier", self.supplier,
+				"Purchase Invoice Advance", "advances", "debit", "purchase_order")
 
 	def check_active_purchase_items(self):
 		for d in self.get('items'):
@@ -226,9 +229,11 @@ class PurchaseInvoice(BuyingController):
 
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
-		self.update_against_document_in_jv()
-		self.update_prevdoc_status()
-		self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
+		if not self.is_return:
+			self.update_against_document_in_jv()
+			self.update_prevdoc_status()
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
+			
 		self.update_project()
 
 	def make_gl_entries(self):
@@ -358,11 +363,12 @@ class PurchaseInvoice(BuyingController):
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2))
 
 	def on_cancel(self):
-		from erpnext.accounts.utils import remove_against_link_from_jv
-		remove_against_link_from_jv(self.doctype, self.name, "against_voucher")
+		if not self.is_return:
+			from erpnext.accounts.utils import remove_against_link_from_jv
+			remove_against_link_from_jv(self.doctype, self.name, "against_voucher")
 
-		self.update_prevdoc_status()
-		self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
+			self.update_prevdoc_status()
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
 		self.make_gl_entries_on_cancel()
 		self.update_project()
 
@@ -403,3 +409,8 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 				and tabAccount.%(key)s LIKE '%(txt)s'
 				%(mcond)s""" % {'company': filters['company'], 'key': searchfield,
 			'txt': "%%%s%%" % frappe.db.escape(txt), 'mcond':get_match_cond(doctype)})
+
+@frappe.whitelist()
+def make_purchase_return(source_name, target_doc=None):
+	from erpnext.controllers.sales_and_purchase_return import make_return_doc
+	return make_return_doc("Purchase Invoice", source_name, target_doc)	

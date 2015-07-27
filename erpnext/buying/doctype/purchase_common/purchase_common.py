@@ -41,8 +41,7 @@ class PurchaseCommon(BuyingController):
 	def validate_for_items(self, obj):
 		items = []
 		for d in obj.get("items"):
-			# validation for valid qty
-			if flt(d.qty) < 0 or (d.parenttype != 'Purchase Receipt' and not flt(d.qty)):
+			if not d.qty:
 				frappe.throw(_("Please enter quantity for Item {0}").format(d.item_code))
 
 			# udpate with latest quantities

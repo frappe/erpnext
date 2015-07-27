@@ -183,4 +183,4 @@ def install(country=None):
 		parent_link_field = ("parent_" + scrub(doc.doctype))
 		if doc.meta.get_field(parent_link_field) and not doc.get(parent_link_field):
 			doc.flags.ignore_mandatory = True
-		doc.insert()
+		doc.insert(ignore_permissions=True)

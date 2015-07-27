@@ -21,10 +21,11 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 		// Show / Hide button
 		if(doc.docstatus==1 && doc.outstanding_amount > 0)
-			this.frm.add_custom_button(__('Make Payment Entry'), this.make_bank_entry,
-				frappe.boot.doctype_icons["Journal Entry"]);
+			this.frm.add_custom_button(__('Make Payment Entry'), this.make_bank_entry);
 
 		if(doc.docstatus==1) {
+			cur_frm.add_custom_button(__('Make Purchase Return'), this.make_purchase_return);
+			
 			cur_frm.add_custom_button(__('View Ledger'), function() {
 				frappe.route_options = {
 					"voucher_no": doc.name,
@@ -34,7 +35,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 					group_by_voucher: 0
 				};
 				frappe.set_route("query-report", "General Ledger");
-			}, "icon-table");
+			});
 		}
 
 		if(doc.docstatus===0) {
@@ -51,7 +52,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				}, "icon-download", "btn-default");
+				});
 
 			cur_frm.add_custom_button(__('From Purchase Receipt'),
 				function() {
@@ -64,7 +65,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 							company: cur_frm.doc.company
 						}
 					})
-				}, "icon-download", "btn-default");
+				});
 
 		}
 	},
@@ -109,7 +110,14 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		$.each(this.frm.doc["items"] || [], function(i, row) {
 			if(row.purchase_receipt) frappe.model.clear_doc("Purchase Receipt", row.purchase_receipt)
 		})
-	}
+	},
+	
+	make_purchase_return: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_purchase_return",
+			frm: cur_frm
+		})
+	},
 });
 
 cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
