@@ -10,7 +10,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 		this.frm.fields_dict.bom_no.get_query = function() {
 			return {
-				filters:{ 'docstatus': 1 }
+				filters:{
+					"docstatus": 1,
+					"is_active": 1
+				}
 			};
 		};
 
