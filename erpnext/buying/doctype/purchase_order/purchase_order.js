@@ -34,7 +34,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	},
 
 	make_stock_entry: function() {
-		var items = $.map(cur_frm.doc.items, function(d) { return d.bom ? d.item_code : false; }),
+		var items = $.map(cur_frm.doc.items, function(d) { return d.bom ? d.item_code : false; });
 		var me = this;
 		
 		if(items.length===1) {
