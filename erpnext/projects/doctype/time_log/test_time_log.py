@@ -14,15 +14,12 @@ from erpnext.manufacturing.doctype.production_order.test_production_order import
 
 class TestTimeLog(unittest.TestCase):
 	def test_duplication(self):
-		date = now_datetime()
-		tl1 = make_time_log_test_record(user= "test@example.com", employee= "_T-Employee-0002",
-			from_time= date, to_time= date + datetime.timedelta(seconds=1))
+		tl1 = make_time_log_test_record(user= "test@example.com", employee= "_T-Employee-0002", simulate= True)
 
 		tl2 = make_time_log_test_record(user= "test@example.com", employee= "_T-Employee-0002",
-			from_time= date, to_time= date + datetime.timedelta(seconds=1), do_not_save= 1)
+			from_time= tl1.from_time, to_time= tl1.to_time, do_not_save= 1)
 
 		self.assertRaises(OverlapError, tl2.insert)
-		tl1.cancel()
 
 	def test_production_order_status(self):
 		prod_order = make_prod_order_test_record(item= "_Test FG Item 2", qty= 1, do_not_submit= True)
@@ -30,7 +27,7 @@ class TestTimeLog(unittest.TestCase):
 		prod_order.save()
 
 		time_log = make_time_log_test_record(for_manufacturing= 1, production_order= prod_order.name, qty= 1, 
-			employee= "_T-Employee-0003", do_not_save= True)
+			employee= "_T-Employee-0003", do_not_save= True, simulate=1)
 
 		self.assertRaises(NotSubmittedError, time_log.save)
 
@@ -114,11 +111,8 @@ def make_time_log_test_record(**args):
 	time_log = frappe.new_doc("Time Log")
 	
 	time_log.from_time = args.from_time or now_datetime()
-	time_log.to_time = args.to_time or time_log.from_time + datetime.timedelta(seconds=1)
-	
-	if args.hours>0:
-		time_log.hours = args.hours
-		time_log.to_time = time_log.from_time + datetime.timedelta(hours= args.hours)
+	time_log.hours = args.hours or 1
+	time_log.to_time = args.to_time or time_log.from_time + datetime.timedelta(hours= time_log.hours)
 	
 	time_log.project = args.project
 	time_log.task = args.task
@@ -127,14 +121,23 @@ def make_time_log_test_record(**args):
 	time_log.operation = args.operation
 	time_log.operation_id = args.operation_id
 	time_log.workstation = args.workstation
-	time_log.qty = args.qty or 1
+	time_log.completed_qty = args.completed_qty
 	time_log.activity_type = args.activity_type or "_Test Activity Type"
 	time_log.billable = args.billable or 1
 	time_log.employee = args.employee
 	time_log.user = args.user
 	
 	if not args.do_not_save:
-		time_log.insert()
+		if args.simulate:
+			while True:
+				try:
+					time_log.save()
+					break
+				except OverlapError:
+					time_log.from_time = time_log.from_time + datetime.timedelta(minutes=10)
+					time_log.to_time = time_log.from_time + datetime.timedelta(hours= time_log.hours)
+		else:
+			time_log.save()
 		if not args.do_not_submit:
 			time_log.submit()
 

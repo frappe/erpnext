@@ -7,7 +7,7 @@ from erpnext.projects.doctype.time_log.test_time_log import make_time_log_test_r
 
 class TimeLogBatchTest(unittest.TestCase):
 	def test_time_log_status(self):
-		time_log = make_time_log_test_record(employee= "_T-Employee-0002")
+		time_log = make_time_log_test_record(simulate=True)
 
 		self.assertEquals(frappe.db.get_value("Time Log", time_log.name, "status"), "Submitted")
 
