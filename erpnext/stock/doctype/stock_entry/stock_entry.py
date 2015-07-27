@@ -50,6 +50,7 @@ class StockEntry(StockController):
 		self.validate_bom()
 		self.validate_finished_goods()
 		self.validate_with_material_request()
+		self.distribute_taxes()
 		self.validate_valuation_rate()
 		self.set_total_incoming_outgoing_value()
 		self.set_total_amount()
@@ -221,7 +222,7 @@ class StockEntry(StockController):
 				if d.s_warehouse and not d.t_warehouse:
 					valuation_at_source += flt(d.amount)
 				if d.t_warehouse and not d.s_warehouse:
-					valuation_at_target += flt(d.amount)
+					valuation_at_target += flt(d.amount) + flt(d.tax_amount)
 
 			if valuation_at_target + 0.001 < valuation_at_source:
 				frappe.throw(_("Total valuation ({0}) for manufactured or repacked item(s) can not be less than total valuation of raw materials ({1})").format(valuation_at_target,
@@ -230,10 +231,10 @@ class StockEntry(StockController):
 	def set_total_incoming_outgoing_value(self):
 		self.total_incoming_value = self.total_outgoing_value = 0.0
 		for d in self.get("items"):
-			if d.s_warehouse:
-				self.total_incoming_value += flt(d.amount)
 			if d.t_warehouse:
-				self.total_outgoing_value += flt(d.amount)
+				self.total_incoming_value += flt(d.amount)
+			if d.s_warehouse:
+				self.total_outgoing_value += flt(d.amount) + flt(d.tax_amount)
 
 		self.value_difference = self.total_outgoing_value - self.total_incoming_value
 
@@ -316,7 +317,7 @@ class StockEntry(StockController):
 			bom = frappe.db.get_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=1)
 			operation_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
 
-		return operation_cost_per_unit + (flt(self.additional_operating_cost) / flt(qty))
+		return operation_cost_per_unit
 
 	def validate_purchase_order(self):
 		"""Throw exception if more raw material is transferred against Purchase Order than in
@@ -402,22 +403,23 @@ class StockEntry(StockController):
 		
 		for d in self.get("items"):
 			tax_amount = flt(d.tax_amount, d.precision("tax_amount"))
-			gl_entries.append(self.get_gl_dict({
-				"account": d.expense_account,
-				"against": expenses_included_in_valuation,
-				"cost_center": d.cost_center,
-				"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-				"debit": tax_amount
-			}))
+			if tax_amount:			
+				gl_entries.append(self.get_gl_dict({
+					"account": expenses_included_in_valuation,
+					"against": d.expense_account,
+					"cost_center": d.cost_center,
+					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+					"credit": tax_amount
+				}))
 			
-			gl_entries.append(self.get_gl_dict({
-				"account": expenses_included_in_valuation,
-				"against": warehouse_account[d.warehouse],
-				"cost_center": d.cost_center,
-				"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-				"credit": tax_amount
-			}))
-			
+				gl_entries.append(self.get_gl_dict({
+					"account": d.expense_account,
+					"against": expenses_included_in_valuation,
+					"cost_center": d.cost_center,
+					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+					"credit": -1 * tax_amount
+				}))
+
 		return gl_entries
 
 	def update_production_order(self):
@@ -693,6 +695,12 @@ class StockEntry(StockController):
 					if expiry_date:
 						if getdate(self.posting_date) > getdate(expiry_date):
 							frappe.throw(_("Batch {0} of Item {1} has expired.").format(item.batch_no, item.item_code))
+							
+	def distribute_taxes(self):
+		self.total_taxes_and_charges = sum([flt(t.amount) for t in self.get("taxes")])
+		for d in self.get("items"):
+			if d.t_warehouse and self.total_incoming_value:
+				d.tax_amount = (flt(d.amount) / flt(self.total_incoming_value)) * self.total_taxes_and_charges
 
 
 @frappe.whitelist()

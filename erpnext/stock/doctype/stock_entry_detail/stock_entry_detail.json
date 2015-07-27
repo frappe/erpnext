@@ -161,6 +161,13 @@
    "read_only": 1
   }, 
   {
+   "fieldname": "tax_amount", 
+   "fieldtype": "Currency", 
+   "label": "Tax Amount", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "fieldname": "col_break3", 
    "fieldtype": "Column Break", 
    "permlevel": 0
@@ -344,7 +351,7 @@
  ], 
  "idx": 1, 
  "istable": 1, 
- "modified": "2015-07-02 05:32:56.511570", 
+ "modified": "2015-07-24 17:03:44.214018", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Entry Detail", 
