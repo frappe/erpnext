@@ -163,16 +163,17 @@ class StockReconciliation(StockController):
 			})
 			if previous_sle:
 				if row.qty in ("", None):
-					row.qty = previous_sle.get("qty_after_transaction")
+					row.qty = previous_sle.get("qty_after_transaction", 0)
 
 				if row.valuation_rate in ("", None):
-					row.valuation_rate = previous_sle.get("valuation_rate")
+					row.valuation_rate = previous_sle.get("valuation_rate", 0)
 
 			if row.qty and not row.valuation_rate:
 				frappe.throw(_("Valuation Rate required for Item {0}").format(row.item_code))
 
-			if previous_sle and row.qty == previous_sle.get("qty_after_transaction") \
-				and row.valuation_rate == previous_sle.get("valuation_rate"):
+			if ((previous_sle and row.qty == previous_sle.get("qty_after_transaction") 
+				and row.valuation_rate == previous_sle.get("valuation_rate"))
+				or (not previous_sle and not row.qty)):
 					continue
 
 			self.insert_entries(row)
