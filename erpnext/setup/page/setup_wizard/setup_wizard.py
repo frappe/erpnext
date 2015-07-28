@@ -542,13 +542,15 @@ def create_users(args):
 				user.append_roles("Accounts Manager", "Accounts User")
 
 			user.flags.delay_emails = True
-			user.insert(ignore_permissions=True)
+
+			if not frappe.db.get_value("User", email):
+				user.insert(ignore_permissions=True)
 
 			# create employee
 			emp = frappe.get_doc({
 				"doctype": "Employee",
 				"full_name": fullname,
-				"user_id": user.name,
+				"user_id": email,
 				"status": "Active",
 				"company": args.get("company_name")
 			})
