@@ -546,16 +546,16 @@ def create_users(args):
 			if not frappe.db.get_value("User", email):
 				user.insert(ignore_permissions=True)
 
-			# create employee
-			emp = frappe.get_doc({
-				"doctype": "Employee",
-				"full_name": fullname,
-				"user_id": email,
-				"status": "Active",
-				"company": args.get("company_name")
-			})
-			emp.flags.ignore_mandatory = True
-			emp.insert(ignore_permissions = True)
+				# create employee
+				emp = frappe.get_doc({
+					"doctype": "Employee",
+					"full_name": fullname,
+					"user_id": email,
+					"status": "Active",
+					"company": args.get("company_name")
+				})
+				emp.flags.ignore_mandatory = True
+				emp.insert(ignore_permissions = True)
 
 @frappe.whitelist()
 def load_messages(language):
