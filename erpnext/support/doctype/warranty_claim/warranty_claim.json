@@ -222,6 +222,7 @@
    "permlevel": 0
   }, 
   {
+   "depends_on": "customer", 
    "fieldname": "contact_info", 
    "fieldtype": "Section Break", 
    "label": "Contact Info", 
@@ -396,7 +397,7 @@
  "icon": "icon-bug", 
  "idx": 1, 
  "is_submittable": 0, 
- "modified": "2015-02-21 04:11:40.653543", 
+ "modified": "2015-07-28 11:59:38.762393", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Warranty Claim", 
