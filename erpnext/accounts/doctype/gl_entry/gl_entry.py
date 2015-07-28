@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import flt, fmt_money, getdate, formatdate, cstr, cint
+from frappe.utils import flt, fmt_money, getdate, formatdate, cstr
 from frappe import _
 
 from frappe.model.document import Document
@@ -93,10 +93,11 @@ class GLEntry(Document):
 			frappe.throw(_("Cost Center {0} does not belong to Company {1}").format(self.cost_center, self.company))
 			
 	def validate_party(self):
-		frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
-		if self.party_type and self.party and not frozen_accounts_modifier in frappe.get_roles():
-			if frappe.db.get_value(self.party_type, self.party, "is_frozen"):
-				frappe.throw("{0} {1} is frozen".format(self.party_type, self.party), CustomerFrozen)
+		if self.party_type and self.party:
+			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
+			if not frozen_accounts_modifier in frappe.get_roles():
+				if frappe.db.get_value(self.party_type, self.party, "is_frozen"):
+					frappe.throw("{0} {1} is frozen".format(self.party_type, self.party), CustomerFrozen)
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
