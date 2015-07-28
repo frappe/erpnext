@@ -14,6 +14,7 @@ from frappe.utils.nestedset import get_root_of
 from .default_website import website_maker
 import install_fixtures
 from .sample_data import make_sample_data
+from erpnext.accounts.utils import FiscalYearError
 
 @frappe.whitelist()
 def setup_account(args=None):
@@ -85,7 +86,10 @@ def setup_account(args=None):
 
 		frappe.clear_cache()
 
-		make_sample_data()
+		try:
+			make_sample_data()
+		except FiscalYearError:
+			pass
 	except:
 		if args:
 			traceback = frappe.get_traceback()
