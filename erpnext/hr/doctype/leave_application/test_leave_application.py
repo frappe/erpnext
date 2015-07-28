@@ -19,8 +19,7 @@ _test_records = [
   "from_date": "2013-05-01",
   "leave_type": "_Test Leave Type",
   "posting_date": "2013-01-02",
-  "to_date": "2013-05-05",
-  "get_holidays": "2013-05-03"
+  "to_date": "2013-05-05"
  },
  {
   "company": "_Test Company",
@@ -30,8 +29,7 @@ _test_records = [
   "from_date": "2013-05-01",
   "leave_type": "_Test Leave Type",
   "posting_date": "2013-01-02",
-  "to_date": "2013-05-05",
-  "get_holidays": "2013-05-03"
+  "to_date": "2013-05-05"
  },
  {
   "company": "_Test Company",
@@ -41,8 +39,7 @@ _test_records = [
   "from_date": "2013-01-15",
   "leave_type": "_Test Leave Type LWP",
   "posting_date": "2013-01-02",
-  "to_date": "2013-01-15",
-  "get_holidays": "2013-05-03"
+  "to_date": "2013-01-15"
  }
 ]
 
@@ -250,21 +247,3 @@ class TestLeaveApplication(unittest.TestCase):
 			"_T-Employee-0001")
 
 		frappe.db.set_value("Employee", "_T-Employee-0001", "department", original_department)
-		
-	def test_exclude_holiday_in_leave(self):
-		frappe.db.set_value("Leave Type", self.leave_type, "include_holiday", 0)
-		application = frappe.copy_doc(_test_records[0])
-		application.insert()
-
-		self.assertEquals(application.tot_days, 5)
-		self.assertEquals(application.holidays, 1)
-		self.assertEquals(application.ret, 4)
-		
-	def test_include_holiday_in_leave(self):
-		frappe.db.set_value("Leave Type", self.leave_type, "include_holiday", 1)
-		application = frappe.copy_doc(_test_records[0])
-		application.insert()
-
-		self.assertEquals(application.tot_days, 5)
-		self.assertEquals(application.holidays, 1)
-		self.assertEquals(application.ret, 5)
