@@ -59,6 +59,12 @@
    "fieldtype": "Check", 
    "label": "Allow Negative Balance", 
    "permlevel": 0
+  },
+  {
+   "fieldname": "include_holiday", 
+   "fieldtype": "Check", 
+   "label": "Include holidays within leaves as leaves", 
+   "permlevel": 0
   }
  ], 
  "icon": "icon-flag", 
