@@ -1,0 +1,2 @@
+- Fixed logic of reserved qty calculation while delivered product bundle via Sales Invoice
+- Delete stock ledger entries on cancellation of Sales Invoice while product bundle delivered

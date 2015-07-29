@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import frappe.defaults
-from frappe.utils import cint, cstr, flt
+from frappe.utils import cint, flt
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.controllers.stock_controller import update_gl_entries_after
@@ -66,6 +66,7 @@ class SalesInvoice(SellingController):
 		self.validate_c_form()
 		self.validate_time_logs_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
+		self.update_packing_list()
 
 	def on_submit(self):
 		super(SalesInvoice, self).on_submit()
@@ -363,6 +364,13 @@ class SalesInvoice(SellingController):
 			d.actual_qty = bin and flt(bin[0]['actual_qty']) or 0
 			d.projected_qty = bin and flt(bin[0]['projected_qty']) or 0
 
+	def update_packing_list(self):
+		if cint(self.update_stock) == 1:
+			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+			make_packing_list(self, 'items')
+		else:
+			self.set('packed_items', [])
+
 
 	def get_warehouse(self):
 		user_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
@@ -381,20 +389,6 @@ class SalesInvoice(SellingController):
 		return warehouse
 
 	def on_update(self):
-		if cint(self.update_stock) == 1:
-			# Set default warehouse from POS Profile
-			if cint(self.is_pos) == 1:
-				w = self.get_warehouse()
-				if w:
-					for d in self.get('items'):
-						if not d.warehouse:
-							d.warehouse = cstr(w)
-
-			from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-			make_packing_list(self, 'items')
-		else:
-			self.set('packed_items', [])
-
 		if cint(self.is_pos) == 1:
 			if flt(self.paid_amount) == 0:
 				if self.cash_bank_account:
@@ -424,8 +418,9 @@ class SalesInvoice(SellingController):
 	def update_stock_ledger(self):
 		sl_entries = []
 		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 \
-				and d.warehouse:
+			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 and d.warehouse and flt(d['qty']):
+				self.update_reserved_qty(d)
+				
 				incoming_rate = 0
 				if cint(self.is_return) and self.return_against and self.docstatus==1:
 					incoming_rate = self.get_incoming_rate_for_sales_return(d.item_code,
