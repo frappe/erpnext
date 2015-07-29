@@ -5,10 +5,9 @@ from __future__ import unicode_literals
 import frappe
 import frappe.defaults
 from frappe import _
-from frappe.utils import cstr, cint, flt, comma_or, get_datetime, getdate
+from frappe.utils import cstr, cint, flt, comma_or, getdate
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError
-from erpnext.controllers.queries import get_match_cond
 from erpnext.stock.get_item_details import get_available_qty, get_default_cost_center, get_conversion_factor
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from erpnext.accounts.utils import validate_fiscal_year
@@ -436,8 +435,7 @@ class StockEntry(StockController):
 			'description'		  	: item.description,
 			'image'					: item.image,
 			'item_name' 		  	: item.item_name,
-			'expense_account'		: args.get("expense_account") \
-				or frappe.db.get_value("Company", args.get("company"), "stock_adjustment_account"),
+			'expense_account'		: args.get("expense_account"),
 			'cost_center'			: get_default_cost_center(args, item),
 			'qty'					: 0,
 			'transfer_qty'			: 0,
@@ -446,6 +444,15 @@ class StockEntry(StockController):
 			'actual_qty'			: 0,
 			'incoming_rate'			: 0
 		}
+		for d in [["Account", "expense_account", "default_expense_account"], 
+			["Cost Center", "cost_center", "cost_center"]]:
+				company = frappe.db.get_value(d[0], ret.get(d[1]), "company")
+				if not ret[d[1]] or (company and self.company != company):
+					ret[d[1]] = frappe.db.get_value("Company", self.company, d[2]) if d[2] else None
+					
+		if not ret["expense_account"]:
+			ret["expense_account"] = frappe.db.get_value("Company", self.company, "stock_adjustment_account")
+		
 		stock_and_rate = args.get('warehouse') and self.get_warehouse_details(args) or {}
 		ret.update(stock_and_rate)
 		return ret
