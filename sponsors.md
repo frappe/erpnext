@@ -21,5 +21,13 @@
 				for Customer <a href="https://github.com/frappe/erpnext/issues/3451">#3451</a>
 			</td>
 		</tr>
+		<tr>
+			<td style="width: 30%">
+				<a href="http://www.strellagroup.com">Strella Consulting Sdn Bhd</a>
+			</td>
+			<td>
+				For Sales / Purchase Return Enhancement <a href="https://github.com/frappe/erpnext/issues/3582">#3582</a>
+			</td>
+		</tr>
 	</tbody>
 </table>
