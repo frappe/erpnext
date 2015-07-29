@@ -11,8 +11,8 @@ def make_sample_data():
 	"""Create a few opportunities, quotes, material requests, issues, todos, projects
 	to help the user get started"""
 
-	selling_items = frappe.get_all("Item", filters = {"is_sales_item": "Yes"})
-	buying_items = frappe.get_all("Item", filters = {"is_sales_item": "No"})
+	selling_items = frappe.get_all("Item", filters = {"is_sales_item": 1})
+	buying_items = frappe.get_all("Item", filters = {"is_sales_item": 0})
 
 	if selling_items:
 		for i in range(3):
@@ -37,7 +37,7 @@ def make_opportunity(selling_items):
 
 	add_random_children(b, "items", rows=len(selling_items), randomize = {
 		"qty": (1, 5),
-		"item_code": ("Item", {"is_sales_item": "Yes"})
+		"item_code": ("Item", {"is_sales_item": 1})
 	}, unique="item_code")
 
 	b.insert(ignore_permissions=True)
@@ -54,7 +54,7 @@ def make_quote(selling_items):
 
 	add_random_children(qtn, "items", rows=len(selling_items), randomize = {
 		"qty": (1, 5),
-		"item_code": ("Item", {"is_sales_item": "Yes"})
+		"item_code": ("Item", {"is_sales_item": 1})
 	}, unique="item_code")
 
 	qtn.insert(ignore_permissions=True)

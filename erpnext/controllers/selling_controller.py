@@ -248,7 +248,7 @@ def check_active_sales_items(obj):
 			item = frappe.db.sql("""select docstatus, is_sales_item,
 				is_service_item, income_account from tabItem where name = %s""",
 				d.item_code, as_dict=True)[0]
-			if item.is_sales_item == 'No' and item.is_service_item == 'No':
+			if item.is_sales_item == 0 and item.is_service_item == 0:
 				frappe.throw(_("Item {0} must be Sales or Service Item in {1}").format(d.item_code, d.idx))
 			if getattr(d, "income_account", None) and not item.income_account:
 				frappe.db.set_value("Item", d.item_code, "income_account",

@@ -146,7 +146,7 @@ class Warehouse(Document):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		for item in frappe.db.sql("""select distinct item_code from (
-			select name as item_code from `tabItem` where ifnull(is_stock_item, 'Yes')='Yes'
+			select name as item_code from `tabItem` where is_stock_item=1
 			union
 			select distinct item_code from tabBin) a"""):
 				repost_stock(item[0], newdn)

@@ -85,7 +85,7 @@ class SalesInvoice(SellingController):
 			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.check_credit_limit()
-			
+
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
 
@@ -102,15 +102,15 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		self.check_stop_sales_order("sales_order")
-		
+
 		from erpnext.accounts.utils import remove_against_link_from_jv
 		remove_against_link_from_jv(self.doctype, self.name, "against_invoice")
-		
+
 		if not self.is_return:
 			self.update_status_updater_args()
 			self.update_prevdoc_status()
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
-			
+
 		self.validate_c_form_on_cancel()
 
 		self.make_gl_entries_on_cancel()
@@ -248,12 +248,10 @@ class SalesInvoice(SellingController):
 	def validate_fixed_asset_account(self):
 		"""Validate Fixed Asset and whether Income Account Entered Exists"""
 		for d in self.get('items'):
-			item = frappe.db.sql("""select name,is_asset_item,is_sales_item from `tabItem`
-				where name = %s""", d.item_code)
-			acc = frappe.db.sql("""select account_type from `tabAccount`
-				where name = %s and docstatus != 2""", d.income_account)
-			if item and item[0][1] == 'Yes' and acc and acc[0][0] != 'Fixed Asset':
-				msgprint(_("Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item").format(acc[0][0], d.item_code), raise_exception=True)
+			is_asset_item = frappe.db.get_value("Item", d.item_code, "is_asset_item")
+			account_type = frappe.db.get_value("Account", d.income_account, "account_type")
+			if is_asset_item == 1 and account_type != 'Fixed Asset':
+				msgprint(_("Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item").format(d.income_account, d.item_code), raise_exception=True)
 
 	def validate_with_previous_doc(self):
 		super(SalesInvoice, self).validate_with_previous_doc({
@@ -271,7 +269,7 @@ class SalesInvoice(SellingController):
 
 		if cint(frappe.db.get_single_value('Selling Settings', 'maintain_same_sales_rate')):
 			self.validate_rate_with_reference_doc([
-				["Sales Order", "sales_order", "so_detail"], 
+				["Sales Order", "sales_order", "so_detail"],
 				["Delivery Note", "delivery_note", "dn_detail"]
 			])
 
@@ -296,7 +294,7 @@ class SalesInvoice(SellingController):
 		for i in dic:
 			if frappe.db.get_value('Selling Settings', None, dic[i]) == 'Yes':
 				for d in self.get('items'):
-					if frappe.db.get_value('Item', d.item_code, 'is_stock_item') == 'Yes' \
+					if frappe.db.get_value('Item', d.item_code, 'is_stock_item') == 1 \
 						and not d.get(i.lower().replace(' ','_')):
 						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
@@ -426,11 +424,13 @@ class SalesInvoice(SellingController):
 	def update_stock_ledger(self):
 		sl_entries = []
 		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" and d.warehouse:
+			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 \
+				and d.warehouse:
 				incoming_rate = 0
 				if cint(self.is_return) and self.return_against and self.docstatus==1:
-					incoming_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
-					
+					incoming_rate = self.get_incoming_rate_for_sales_return(d.item_code,
+						self.return_against)
+
 				sl_entries.append(self.get_sl_entries(d, {
 					"actual_qty": -1*flt(d.qty),
 					"stock_uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),

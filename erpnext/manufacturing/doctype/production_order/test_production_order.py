@@ -126,7 +126,7 @@ class TestProductionOrder(unittest.TestCase):
 			"docstatus": 0
 		})
 		self.assertRaises(OverProductionLoggedError, time_log2.save)
-		
+
 	def test_planned_operating_cost(self):
 		prod_order = make_prod_order_test_record(item="_Test FG Item 2",
 			planned_start_date="2014-11-25 00:00:00", qty=1, do_not_save=True)
@@ -135,20 +135,20 @@ class TestProductionOrder(unittest.TestCase):
 		prod_order.qty = 2
 		prod_order.set_production_order_operations()
 		self.assertEqual(prod_order.planned_operating_cost, cost*2)
-		
+
 	def test_production_item(self):
-		frappe.db.set_value("Item", "_Test FG Item", "is_pro_applicable", "No")
+		frappe.db.set_value("Item", "_Test FG Item", "is_pro_applicable", 0)
 
 		prod_order = make_prod_order_test_record(item="_Test FG Item", qty=1, do_not_save=True)
 		self.assertRaises(ProductionNotApplicableError, prod_order.save)
-		
-		frappe.db.set_value("Item", "_Test FG Item", "is_pro_applicable", "Yes")
+
+		frappe.db.set_value("Item", "_Test FG Item", "is_pro_applicable", 1)
 		frappe.db.set_value("Item", "_Test FG Item", "end_of_life", "2000-1-1")
-		
+
 		self.assertRaises(frappe.ValidationError, prod_order.save)
-		
+
 		frappe.db.set_value("Item", "_Test FG Item", "end_of_life", None)
-		
+
 		prod_order = make_prod_order_test_record(item="_Test Variant Item", qty=1, do_not_save=True)
 		self.assertRaises(ItemHasVariantError, prod_order.save)
 

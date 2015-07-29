@@ -368,10 +368,10 @@ def create_items(args):
 					"item_code": item,
 					"item_name": item,
 					"description": item,
-					"is_sales_item": "Yes" if is_sales_item else "No",
-					"is_purchase_item": "Yes" if is_purchase_item else "No",
+					"is_sales_item": 1 if is_sales_item else 0,
+					"is_purchase_item": 1 if is_purchase_item else 0,
 					"show_in_website": 1,
-					"is_stock_item": is_stock_item and "Yes" or "No",
+					"is_stock_item": is_stock_item and 1 or 0,
 					"item_group": item_group,
 					"stock_uom": args.get("item_uom_" + str(i)),
 					"default_warehouse": default_warehouse

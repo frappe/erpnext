@@ -21,16 +21,16 @@ class TestItem(unittest.TestCase):
 		else:
 			item = frappe.get_doc("Item", item_code)
 		return item
-	
+
 	def test_template_cannot_have_stock(self):
 			item = self.get_item(10)
-			se = make_stock_entry(item_code=item.name, target="Stores - _TC", qty=1, incoming_rate=1)
+			make_stock_entry(item_code=item.name, target="Stores - _TC", qty=1, incoming_rate=1)
 			item.has_variants = 1
 			self.assertRaises(ItemTemplateCannotHaveStock, item.save)
-	
+
 	def test_default_warehouse(self):
 		item = frappe.copy_doc(test_records[0])
-		item.is_stock_item = "Yes"
+		item.is_stock_item = 1
 		item.default_warehouse = None
 		self.assertRaises(WarehouseNotSet, item.insert)
 

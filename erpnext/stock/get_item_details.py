@@ -37,7 +37,6 @@ def get_item_details(args):
 	item_doc = frappe.get_doc("Item", args.item_code)
 	item = item_doc
 
-
 	validate_item_details(args, item)
 
 	out = get_basic_details(args, item)
@@ -61,7 +60,7 @@ def get_item_details(args):
 	out.update(get_pricing_rule_for_item(args))
 
 	if args.get("parenttype") in ("Sales Invoice", "Delivery Note"):
-		if item_doc.has_serial_no == "Yes" and not args.serial_no:
+		if item_doc.has_serial_no == 1 and not args.serial_no:
 			out.serial_no = get_serial_nos_by_fifo(args, item_doc)
 
 	if args.transaction_date and item.lead_time_days:
@@ -119,10 +118,10 @@ def validate_item_details(args, item):
 	if args.transaction_type == "selling":
 		# validate if sales item or service item
 		if args.get("order_type") == "Maintenance":
-			if item.is_service_item != "Yes":
+			if item.is_service_item != 1:
 				throw(_("Item {0} must be a Service Item.").format(item.name))
 
-		elif item.is_sales_item != "Yes":
+		elif item.is_sales_item != 1:
 			throw(_("Item {0} must be a Sales Item").format(item.name))
 
 		if cint(item.has_variants):
@@ -130,10 +129,10 @@ def validate_item_details(args, item):
 
 	elif args.transaction_type == "buying" and args.parenttype != "Material Request":
 		# validate if purchase item or subcontracted item
-		if item.is_purchase_item != "Yes":
+		if item.is_purchase_item != 1:
 			throw(_("Item {0} must be a Purchase Item").format(item.name))
 
-		if args.get("is_subcontracted") == "Yes" and item.is_sub_contracted_item != "Yes":
+		if args.get("is_subcontracted") == "Yes" and item.is_sub_contracted_item != 1:
 			throw(_("Item {0} must be a Sub-contracted Item").format(item.name))
 
 def get_basic_details(args, item):
@@ -338,7 +337,7 @@ def get_batch_qty(batch_no,warehouse,item_code):
 	actual_batch_qty = get_actual_batch_qty(batch_no,warehouse,item_code)
 	if batch_no:
 		return {'actual_batch_qty': actual_batch_qty}
-	
+
 @frappe.whitelist()
 def apply_price_list(args):
 	"""

@@ -94,7 +94,7 @@ class ProductionOrder(Document):
 			(self.sales_order, self.production_item))[0][0]
 		# total qty in SO
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
-		
+
 		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings", "over_production_allowance_percentage"))
 		if total_qty > so_qty + (allowance_percentage/100 * so_qty):
 			frappe.throw(_("Cannot produce more Item {0} than Sales Order quantity {1}").format(self.production_item,
@@ -320,14 +320,14 @@ class ProductionOrder(Document):
 	def delete_time_logs(self):
 		for time_log in frappe.get_all("Time Log", ["name"], {"production_order": self.name}):
 			frappe.delete_doc("Time Log", time_log.name)
-	
+
 	def validate_production_item(self):
-		if frappe.db.get_value("Item", self.production_item, "is_pro_applicable")=='No':
+		if not frappe.db.get_value("Item", self.production_item, "is_pro_applicable"):
 			frappe.throw(_("Item is not allowed to have Production Order."), ProductionNotApplicableError)
-		
+
 		if frappe.db.get_value("Item", self.production_item, "has_variants"):
 			frappe.throw(_("Production Order cannot be raised against a Item Template"), ItemHasVariantError)
-		
+
 		validate_end_of_life(self.production_item)
 
 @frappe.whitelist()
