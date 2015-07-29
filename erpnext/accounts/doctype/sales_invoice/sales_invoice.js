@@ -65,7 +65,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				cur_frm.add_custom_button(__('Make Payment Entry'), cur_frm.cscript.make_bank_entry);
 			}
 			
-			cur_frm.add_custom_button(__('Make Sales Return'), this.make_sales_return);
+			cur_frm.add_custom_button(doc.update_stock ? __('Make Sales Return') : __('Make Credit Note'), 
+				this.make_sales_return);
 		}
 
 		// Show buttons only when pos view is active

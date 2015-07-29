@@ -411,6 +411,6 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 			'txt': "%%%s%%" % frappe.db.escape(txt), 'mcond':get_match_cond(doctype)})
 
 @frappe.whitelist()
-def make_purchase_return(source_name, target_doc=None):
+def make_debit_note(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
-	return make_return_doc("Purchase Invoice", source_name, target_doc)	
+	return make_return_doc("Purchase Invoice", source_name, target_doc)

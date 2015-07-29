@@ -28,7 +28,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 					this.frm.add_custom_button(__('Make Payment Entry'), this.make_bank_entry);
 				}
 				
-				cur_frm.add_custom_button(__('Make Purchase Return'), this.make_purchase_return);
+				cur_frm.add_custom_button(__('Make Debit Note'), this.make_debit_note);
 			}
 			
 			if(doc.docstatus===0) {
@@ -103,9 +103,9 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		})
 	},
 	
-	make_purchase_return: function() {
+	make_debit_note: function() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_purchase_return",
+			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_debit_note",
 			frm: cur_frm
 		})
 	},
