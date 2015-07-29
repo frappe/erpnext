@@ -1,2 +1,0 @@
-- Sales / Purchase Return Enahancement - **[Sponsored by Strella Consulting Sdn Bhd](http://www.strellagroup.com)**
-	 * Now you can make Delivery Note, Purchase Receipt or Sales / Purchase Invoice with negative quantity
