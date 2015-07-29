@@ -43,18 +43,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		
 		this.frm.toggle_reqd("due_date", !this.frm.doc.is_return);
 		
-		if(doc.docstatus==1) {
-			cur_frm.add_custom_button('View Ledger', function() {
-				frappe.route_options = {
-					"voucher_no": doc.name,
-					"from_date": doc.posting_date,
-					"to_date": doc.posting_date,
-					"company": doc.company,
-					group_by_voucher: 0
-				};
-				frappe.set_route("query-report", "General Ledger");
-			});
-
+		this.show_general_ledger();
+		
+		if(doc.update_stock) this.show_stock_ledger();
+		
+		if(doc.docstatus==1 && !doc.is_return) {
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
 				var from_delivery_note = false;
@@ -72,11 +65,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				cur_frm.add_custom_button(__('Make Payment Entry'), cur_frm.cscript.make_bank_entry);
 			}
 			
-			cur_frm.add_custom_button(__('Make Sales Return'), this.make_sales_return);
+			cur_frm.add_custom_button(doc.update_stock ? __('Make Sales Return') : __('Make Credit Note'), 
+				this.make_sales_return);
 		}
 
 		// Show buttons only when pos view is active
-		if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos") {
+		if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !doc.is_return) {
 			cur_frm.cscript.sales_order_btn();
 			cur_frm.cscript.delivery_note_btn();
 		}

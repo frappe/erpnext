@@ -83,7 +83,9 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	refresh: function() {
 		if(this.frm.doc.docstatus==1) {
 			this.show_stock_ledger();
-			this.show_general_ledger();
+			if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
+				this.show_general_ledger();
+			}
 		}
 	},
 

@@ -57,7 +57,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
 		this.show_stock_ledger();
-		this.show_general_ledger();
+		if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
+			this.show_general_ledger();
+		}
 	},
 
 	on_submit: function() {

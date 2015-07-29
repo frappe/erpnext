@@ -29,32 +29,37 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	refresh: function() {
 		this._super();
 
-		if(this.frm.doc.docstatus == 1) {
-			if(this.frm.doc.__onload && !this.frm.doc.__onload.billing_complete) {
-				cur_frm.add_custom_button(__('Make Purchase Invoice'), this.make_purchase_invoice);
+		this.show_stock_ledger();
+		if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
+			this.show_general_ledger();
+		}
+		if(!this.frm.doc.is_return) {
+			if(this.frm.doc.docstatus==0) {
+				cur_frm.add_custom_button(__('From Purchase Order'),
+					function() {
+						frappe.model.map_current_doc({
+							method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
+							source_doctype: "Purchase Order",
+							get_query_filters: {
+								supplier: cur_frm.doc.supplier || undefined,
+								docstatus: 1,
+								status: ["!=", "Stopped"],
+								per_received: ["<", 99.99],
+								company: cur_frm.doc.company
+							}
+						})
+				});
 			}
 			
-			cur_frm.add_custom_button(__('Make Purchase Return'), this.make_purchase_return);
-
-			this.show_stock_ledger();
-			this.show_general_ledger();
-		} else {
-			cur_frm.add_custom_button(__('From Purchase Order'),
-				function() {
-					frappe.model.map_current_doc({
-						method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
-						source_doctype: "Purchase Order",
-						get_query_filters: {
-							supplier: cur_frm.doc.supplier || undefined,
-							docstatus: 1,
-							status: ["!=", "Stopped"],
-							per_received: ["<", 99.99],
-							company: cur_frm.doc.company
-						}
-					})
-				});
+			if(this.frm.doc.docstatus == 1) {
+				if(this.frm.doc.__onload && !this.frm.doc.__onload.billing_complete) {
+					cur_frm.add_custom_button(__('Make Purchase Invoice'), this.make_purchase_invoice);
+				}
+			
+				cur_frm.add_custom_button(__('Make Purchase Return'), this.make_purchase_return);
+			}
 		}
-
+		
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
 	},
 
