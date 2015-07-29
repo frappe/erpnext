@@ -245,7 +245,7 @@ def get_total_leave_days(leave_app):
 			}
 		else:
 			ret = {
-			'total_leave_days' : flt(tot_days)
+				'total_leave_days' : flt(tot_days)
 			}
 	return ret
 
