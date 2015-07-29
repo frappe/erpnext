@@ -9,7 +9,6 @@ from frappe.utils import flt, cint
 from frappe import msgprint, _
 import frappe.defaults
 from frappe.model.mapper import get_mapped_doc
-from erpnext.stock.utils import update_bin
 from erpnext.controllers.selling_controller import SellingController
 
 form_grid_templates = {
@@ -261,23 +260,6 @@ class DeliveryNote(SellingController):
 				}))
 
 		self.make_sl_entries(sl_entries)
-
-	def update_reserved_qty(self, d):
-		if d['reserved_qty'] < 0 :
-			# Reduce reserved qty from reserved warehouse mentioned in so
-			if not d["reserved_warehouse"]:
-				frappe.throw(_("Reserved Warehouse is missing in Sales Order"))
-
-			args = {
-				"item_code": d['item_code'],
-				"warehouse": d["reserved_warehouse"],
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"reserved_qty": (self.docstatus==1 and 1 or -1)*flt(d['reserved_qty']),
-				"posting_date": self.posting_date,
-				"is_amended": self.amended_from and 'Yes' or 'No'
-			}
-			update_bin(args)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

@@ -180,3 +180,4 @@ execute:frappe.rename_doc("DocType", "Salary Manager", "Process Payroll", force=
 erpnext.patches.v5_1.rename_roles
 erpnext.patches.v5_1.default_bom
 execute:frappe.delete_doc("DocType", "Party Type")
+erpnext.patches.v5_4.fix_reserved_qty_and_sle_for_packed_items

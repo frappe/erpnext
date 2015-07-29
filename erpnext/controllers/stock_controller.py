@@ -9,6 +9,8 @@ import frappe.defaults
 
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
+from erpnext.stock.utils import update_bin
+
 
 class StockController(AccountsController):
 	def make_gl_entries(self, repost_future_gle=True):
@@ -227,6 +229,23 @@ class StockController(AccountsController):
 			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
 
 		return incoming_rate
+		
+	def update_reserved_qty(self, d):
+		if d['reserved_qty'] < 0 :
+			# Reduce reserved qty from reserved warehouse mentioned in so
+			if not d["reserved_warehouse"]:
+				frappe.throw(_("Reserved Warehouse is missing in Sales Order"))
+
+			args = {
+				"item_code": d['item_code'],
+				"warehouse": d["reserved_warehouse"],
+				"voucher_type": self.doctype,
+				"voucher_no": self.name,
+				"reserved_qty": (self.docstatus==1 and 1 or -1)*flt(d['reserved_qty']),
+				"posting_date": self.posting_date,
+				"is_amended": self.amended_from and 'Yes' or 'No'
+			}
+			update_bin(args)
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):

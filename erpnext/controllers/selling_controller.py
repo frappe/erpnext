@@ -174,12 +174,14 @@ class SellingController(StockController):
 				if flt(d.qty) > flt(d.delivered_qty):
 					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
 
-			elif self.doctype == "Delivery Note" and d.against_sales_order and not self.is_return:
+			elif (((self.doctype == "Delivery Note" and d.against_sales_order) 
+					or (self.doctype == "Sales Invoice" and d.sales_order and self.update_stock)) 
+					and not self.is_return):
 				# if SO qty is 10 and there is tolerance of 20%, then it will allow DN of 12.
 				# But in this case reserved qty should only be reduced by 10 and not 12
 
 				already_delivered_qty = self.get_already_delivered_qty(self.name,
-					d.against_sales_order, d.so_detail)
+					d.against_sales_order if self.doctype=="Delivery Note" else d.sales_order, d.so_detail)
 				so_qty, reserved_warehouse = self.get_so_qty_and_warehouse(d.so_detail)
 
 				if already_delivered_qty + d.qty > so_qty:
@@ -221,12 +223,21 @@ class SellingController(StockController):
 		return frappe.db.sql("""select name from `tabProduct Bundle`
 			where new_item_code=%s and docstatus != 2""", item_code)
 
-	def get_already_delivered_qty(self, dn, so, so_detail):
-		qty = frappe.db.sql("""select sum(qty) from `tabDelivery Note Item`
+	def get_already_delivered_qty(self, current_docname, so, so_detail):
+		delivered_via_dn = frappe.db.sql("""select sum(qty) from `tabDelivery Note Item`
 			where so_detail = %s and docstatus = 1
 			and against_sales_order = %s
-			and parent != %s""", (so_detail, so, dn))
-		return qty and flt(qty[0][0]) or 0.0
+			and parent != %s""", (so_detail, so, current_docname))
+			
+		delivered_via_si = frappe.db.sql("""select sum(qty) from `tabSales Invoice Item`
+			where so_detail = %s and docstatus = 1
+			and sales_order = %s
+			and parent != %s""", (so_detail, so, current_docname))
+			
+		total_delivered_qty = (flt(delivered_via_dn[0][0]) if delivered_via_dn else 0) \
+			+ (flt(delivered_via_si[0][0]) if delivered_via_si else 0)
+		
+		return total_delivered_qty
 
 	def get_so_qty_and_warehouse(self, so_detail):
 		so_item = frappe.db.sql("""select qty, warehouse from `tabSales Order Item`
