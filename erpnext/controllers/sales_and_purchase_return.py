@@ -107,8 +107,15 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		doc.is_return = 1
 		doc.return_against = source.name
 		doc.ignore_pricing_rule = 1
+		if doctype == "Sales Invoice":
+			doc.is_pos = 0
+			
+		for tax in doc.get("taxes"):
+			if tax.charge_type == "Actual":
+				tax.tax_amount = -1 * tax.tax_amount
+					
 		doc.run_method("calculate_taxes_and_totals")
-
+		
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = -1* source_doc.qty
 		if doctype == "Purchase Receipt":

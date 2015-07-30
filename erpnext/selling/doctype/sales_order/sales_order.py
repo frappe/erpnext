@@ -39,7 +39,7 @@ class SalesOrder(SellingController):
 		for d in self.get('items'):
 			check_list.append(cstr(d.item_code))
 
-			if (frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or
+			if (frappe.db.get_value("Item", d.item_code, "is_stock_item")==1 or
 				self.has_product_bundle(d.item_code)) and not d.warehouse:
 					frappe.throw(_("Reserved warehouse required for stock item {0}").format(d.item_code))
 
@@ -217,7 +217,7 @@ class SalesOrder(SellingController):
 	def update_stock_ledger(self, update_stock):
 		from erpnext.stock.utils import update_bin
 		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
+			if frappe.db.get_value("Item", d['item_code'], "is_stock_item")==1:
 				args = {
 					"item_code": d['item_code'],
 					"warehouse": d['reserved_warehouse'],
@@ -258,14 +258,14 @@ def stop_or_unstop_sales_orders(names, status):
 
 	def before_recurring(self):
 		super(SalesOrder, self).before_recurring()
-		
+
 		for field in ("delivery_status", "per_delivered", "billing_status", "per_billed"):
 			self.set(field, None)
 
 		for d in self.get("items"):
 			for field in ("delivered_qty", "billed_amt", "planned_qty", "prevdoc_docname"):
 				d.set(field, None)
-			
+
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
@@ -273,9 +273,9 @@ def make_material_request(source_name, target_doc=None):
 		doc.material_request_type = "Purchase"
 
 	so = frappe.get_doc("Sales Order", source_name)
-	
+
 	item_table = "Packed Item" if so.packed_items else "Sales Order Item"
-	
+
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Material Request",

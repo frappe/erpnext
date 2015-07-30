@@ -77,9 +77,6 @@ class calculate_taxes_and_totals(object):
 			if not self.discount_amount_applied:
 				validate_taxes_and_charges(tax)
 				validate_inclusive_tax(tax, self.doc)
-				
-			if self.doc.meta.get_field("is_return") and self.doc.is_return and tax.charge_type == "Actual":
-				tax.tax_amount = -1 * tax.tax_amount
 
 			tax.item_wise_tax_detail = {}
 			tax_fields = ["total", "tax_amount_after_discount_amount",

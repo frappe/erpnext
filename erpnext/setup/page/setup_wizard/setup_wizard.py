@@ -14,6 +14,7 @@ from frappe.utils.nestedset import get_root_of
 from .default_website import website_maker
 import install_fixtures
 from .sample_data import make_sample_data
+from erpnext.accounts.utils import FiscalYearError
 
 @frappe.whitelist()
 def setup_account(args=None):
@@ -85,7 +86,11 @@ def setup_account(args=None):
 
 		frappe.clear_cache()
 
-		make_sample_data()
+		if args.get("add_sample_data"):
+			try:
+				make_sample_data()
+			except FiscalYearError:
+				pass
 	except:
 		if args:
 			traceback = frappe.get_traceback()
@@ -363,10 +368,10 @@ def create_items(args):
 					"item_code": item,
 					"item_name": item,
 					"description": item,
-					"is_sales_item": "Yes" if is_sales_item else "No",
-					"is_purchase_item": "Yes" if is_purchase_item else "No",
+					"is_sales_item": 1 if is_sales_item else 0,
+					"is_purchase_item": 1 if is_purchase_item else 0,
 					"show_in_website": 1,
-					"is_stock_item": is_stock_item and "Yes" or "No",
+					"is_stock_item": is_stock_item and 1 or 0,
 					"item_group": item_group,
 					"stock_uom": args.get("item_uom_" + str(i)),
 					"default_warehouse": default_warehouse
@@ -542,18 +547,20 @@ def create_users(args):
 				user.append_roles("Accounts Manager", "Accounts User")
 
 			user.flags.delay_emails = True
-			user.insert(ignore_permissions=True)
 
-			# create employee
-			emp = frappe.get_doc({
-				"doctype": "Employee",
-				"full_name": fullname,
-				"user_id": user.name,
-				"status": "Active",
-				"company": args.get("company_name")
-			})
-			emp.flags.ignore_mandatory = True
-			emp.insert(ignore_permissions = True)
+			if not frappe.db.get_value("User", email):
+				user.insert(ignore_permissions=True)
+
+				# create employee
+				emp = frappe.get_doc({
+					"doctype": "Employee",
+					"full_name": fullname,
+					"user_id": email,
+					"status": "Active",
+					"company": args.get("company_name")
+				})
+				emp.flags.ignore_mandatory = True
+				emp.insert(ignore_permissions = True)
 
 @frappe.whitelist()
 def load_messages(language):

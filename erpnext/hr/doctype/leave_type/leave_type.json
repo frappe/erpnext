@@ -59,11 +59,17 @@
    "fieldtype": "Check", 
    "label": "Allow Negative Balance", 
    "permlevel": 0
+  },
+  {
+   "fieldname": "include_holiday", 
+   "fieldtype": "Check", 
+   "label": "Include holidays within leaves as leaves", 
+   "permlevel": 0
   }
  ], 
  "icon": "icon-flag", 
  "idx": 1, 
- "modified": "2015-05-08 05:15:24.194053", 
+ "modified": "2015-07-29 05:15:24", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Leave Type", 

@@ -29,7 +29,7 @@ frappe.pages['setup-wizard'].on_page_load = function(wrapper) {
 			erpnext.wiz.taxes.slide,
 			erpnext.wiz.customers.slide,
 			erpnext.wiz.suppliers.slide,
-			erpnext.wiz.items.slide,
+			erpnext.wiz.items.slide
 		]
 	}
 
@@ -406,7 +406,6 @@ $.extend(erpnext.wiz, {
 					description: __('Your financial year begins on'), reqd:1},
 				{fieldname:'fy_end_date', label:__('Financial Year End Date'), fieldtype:'Date',
 					description: __('Your financial year ends on'), reqd:1},
-
 			],
 			help: __('The name of your company for which you are setting up this system.'),
 
@@ -510,7 +509,7 @@ $.extend(erpnext.wiz, {
 		slide: {
 			icon: "icon-money",
 			"title": __("Add Users"),
-			"help": __("Add users to your organization"),
+			"help": __("Add users to your organization, other than yourself"),
 			"fields": [],
 			before_load: function(slide) {
 				slide.fields = [];
@@ -635,6 +634,11 @@ $.extend(erpnext.wiz, {
 					])
 				}
 				slide.fields[1].reqd = 1;
+
+				// dummy data
+				slide.fields.push({fieldtype: "Section Break"});
+				slide.fields.push({fieldtype: "Check", fieldname: "add_sample_data",
+					label: __("Add a few sample records"), "default": 1});
 			},
 			css_class: "two-column"
 		},

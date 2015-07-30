@@ -87,7 +87,7 @@ class Item(WebsiteGenerator):
 		return context
 
 	def check_warehouse_is_set_for_stock_item(self):
-		if self.is_stock_item=="Yes" and not self.default_warehouse and frappe.get_all("Warehouse"):
+		if self.is_stock_item==1 and not self.default_warehouse and frappe.get_all("Warehouse"):
 			frappe.msgprint(_("Default Warehouse is mandatory for stock Item."),
 				raise_exception=WarehouseNotSet)
 
@@ -158,13 +158,13 @@ class Item(WebsiteGenerator):
 				frappe.throw(_("Conversion factor for default Unit of Measure must be 1 in row {0}").format(d.idx))
 
 	def validate_item_type(self):
-		if self.is_pro_applicable == 'Yes' and self.is_stock_item == 'No':
+		if self.is_pro_applicable == 1 and self.is_stock_item==0:
 			frappe.throw(_("As Production Order can be made for this item, it must be a stock item."))
 
-		if self.has_serial_no == 'Yes' and self.is_stock_item == 'No':
+		if self.has_serial_no == 1 and self.is_stock_item == 0:
 			msgprint(_("'Has Serial No' can not be 'Yes' for non-stock item"), raise_exception=1)
 
-		if self.has_serial_no == "No" and self.serial_no_series:
+		if self.has_serial_no == 0 and self.serial_no_series:
 			self.serial_no_series = None
 
 
@@ -208,7 +208,7 @@ class Item(WebsiteGenerator):
 			vals = frappe.db.get_value("Item", self.name,
 				["has_serial_no", "is_stock_item", "valuation_method", "has_batch_no"], as_dict=True)
 
-			if vals and ((self.is_stock_item == "No" and vals.is_stock_item == "Yes") or
+			if vals and ((self.is_stock_item == 0 and vals.is_stock_item == 1) or
 				vals.has_serial_no != self.has_serial_no or
 				vals.has_batch_no != self.has_batch_no or
 				cstr(vals.valuation_method) != cstr(self.valuation_method)):
@@ -313,11 +313,11 @@ class Item(WebsiteGenerator):
 	def update_item_desc(self):
 		if frappe.db.get_value('BOM',self.name, 'description') != self.description:
 			frappe.db.sql("""update `tabBOM` set description = %s where item = %s and docstatus < 2""",(self.description, self.name))
-			frappe.db.sql("""update `tabBOM Item` set description = %s where 
+			frappe.db.sql("""update `tabBOM Item` set description = %s where
 				item_code = %s and docstatus < 2""",(self.description, self.name))
-			frappe.db.sql("""update `tabBOM Explosion Item` set description = %s where 
+			frappe.db.sql("""update `tabBOM Explosion Item` set description = %s where
 				item_code = %s and docstatus < 2""",(self.description, self.name))
-				
+
 	def update_variants(self):
 		if self.has_variants:
 			updated = []
@@ -327,7 +327,7 @@ class Item(WebsiteGenerator):
 				updated.append(d.item_code)
 			if updated:
 				frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
-				
+
 	def validate_has_variants(self):
 		if not self.has_variants and frappe.db.get_value("Item", self.name, "has_variants"):
 			if frappe.db.exists("Item", {"variant_of": self.name}):
@@ -336,11 +336,11 @@ class Item(WebsiteGenerator):
 	def validate_stock_for_template_must_be_zero(self):
 		if self.has_variants:
 			stock_in = frappe.db.sql_list("""select warehouse from tabBin
-				where item_code=%s and (ifnull(actual_qty, 0) > 0 or ifnull(ordered_qty, 0) > 0 
+				where item_code=%s and (ifnull(actual_qty, 0) > 0 or ifnull(ordered_qty, 0) > 0
 				or ifnull(reserved_qty, 0) > 0 or ifnull(indented_qty, 0) > 0 or ifnull(planned_qty, 0) > 0)""", self.name)
 			if stock_in:
 				frappe.throw(_("Item Template cannot have stock or Open Sales/Purchase/Production Orders."), ItemTemplateCannotHaveStock)
-	
+
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
 		end_of_life = frappe.db.get_value("Item", item_code, "end_of_life")
@@ -353,7 +353,7 @@ def validate_is_stock_item(item_code, is_stock_item=None, verbose=1):
 	if not is_stock_item:
 		is_stock_item = frappe.db.get_value("Item", item_code, "is_stock_item")
 
-	if is_stock_item != "Yes":
+	if is_stock_item != 1:
 		msg = _("Item {0} is not a stock Item").format(item_code)
 
 		_msgprint(msg, verbose)
@@ -445,4 +445,3 @@ def invalidate_cache_for_item(doc):
 
 	if doc.get("old_item_group") and doc.get("old_item_group") != doc.item_group:
 		invalidate_cache_for(doc, doc.old_item_group)
-

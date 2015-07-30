@@ -27,7 +27,7 @@
    "options": "Territory", 
    "permlevel": 0, 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
    "fieldname": "naming_series", 
@@ -167,7 +167,7 @@
    "options": "Account", 
    "permlevel": 0, 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
    "fieldname": "income_account", 
@@ -178,7 +178,7 @@
    "options": "Account", 
    "permlevel": 0, 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
    "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
@@ -201,7 +201,7 @@
    "options": "Cost Center", 
    "permlevel": 0, 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
    "fieldname": "write_off_account", 
@@ -234,7 +234,7 @@
  ], 
  "icon": "icon-cog", 
  "idx": 1, 
- "modified": "2015-07-07 08:56:04.381471", 
+ "modified": "2015-07-28 15:07:14.417200", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "POS Profile", 

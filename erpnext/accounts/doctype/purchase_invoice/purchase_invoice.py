@@ -80,7 +80,7 @@ class PurchaseInvoice(BuyingController):
 	def check_active_purchase_items(self):
 		for d in self.get('items'):
 			if d.item_code:		# extra condn coz item_code is not mandatory in PV
-				if frappe.db.get_value("Item", d.item_code, "is_purchase_item") != 'Yes':
+				if frappe.db.get_value("Item", d.item_code, "is_purchase_item") != 1:
 					msgprint(_("Item {0} is not Purchase Item").format(d.item_code), raise_exception=True)
 
 	def check_conversion_rate(self):
@@ -255,7 +255,7 @@ class PurchaseInvoice(BuyingController):
 					"against": self.against_expense_account,
 					"credit": self.total_amount_to_pay,
 					"remarks": self.remarks,
-					"against_voucher": self.name,
+					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 				})
 			)
@@ -411,6 +411,6 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 			'txt': "%%%s%%" % frappe.db.escape(txt), 'mcond':get_match_cond(doctype)})
 
 @frappe.whitelist()
-def make_purchase_return(source_name, target_doc=None):
+def make_debit_note(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
-	return make_return_doc("Purchase Invoice", source_name, target_doc)	
+	return make_return_doc("Purchase Invoice", source_name, target_doc)

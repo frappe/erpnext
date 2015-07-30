@@ -107,7 +107,7 @@ class BOM(Document):
 		rate = 0
 		if arg['bom_no']:
 			rate = self.get_bom_unitcost(arg['bom_no'])
-		elif arg and (arg['is_purchase_item'] == 'Yes' or arg['is_sub_contracted_item'] == 'Yes'):
+		elif arg and (arg['is_purchase_item'] == 1 or arg['is_sub_contracted_item'] == 1):
 			if self.rm_cost_as_per == 'Valuation Rate':
 				rate = self.get_valuation_rate(arg)
 			elif self.rm_cost_as_per == 'Last Purchase Rate':
@@ -364,7 +364,7 @@ class BOM(Document):
 		if self.with_operations and not self.get('operations'):
 			frappe.throw(_("Operations cannot be left blank."))
 
-def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
+def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1):
 	item_dict = {}
 
 	# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
@@ -385,14 +385,14 @@ def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 				and bom_item.docstatus < 2
 				and bom_item.parent = %(bom)s
 				and item.name = bom_item.item_code
-				and ifnull(item.is_stock_item, 'No') = 'Yes'
+				and is_stock_item = 1
 				{conditions}
 				group by item_code, stock_uom"""
 
 	if fetch_exploded:
 		query = query.format(table="BOM Explosion Item",
-			conditions="""and ifnull(item.is_pro_applicable, 'No') = 'No'
-				and ifnull(item.is_sub_contracted_item, 'No') = 'No' """)
+			conditions="""and item.is_pro_applicable = 0
+				and item.is_sub_contracted_item = 0 """)
 		items = frappe.db.sql(query, { "qty": qty,	"bom": bom }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", conditions="")
@@ -405,11 +405,18 @@ def get_bom_items_as_dict(bom, qty=1, fetch_exploded=1):
 		else:
 			item_dict[item.item_code] = item
 
+	for item, item_details in item_dict.items():
+		for d in [["Account", "expense_account", "default_expense_account"],
+			["Cost Center", "cost_center", "cost_center"], ["Warehouse", "default_warehouse", ""]]:
+				company_in_record = frappe.db.get_value(d[0], item_details.get(d[1]), "company")
+				if not item_details.get(d[1]) or (company_in_record and company != company_in_record):
+					item_dict[item][d[1]] = frappe.db.get_value("Company", company, d[2]) if d[2] else None
+
 	return item_dict
 
 @frappe.whitelist()
-def get_bom_items(bom, qty=1, fetch_exploded=1):
-	items = get_bom_items_as_dict(bom, qty, fetch_exploded).values()
+def get_bom_items(bom, company, qty=1, fetch_exploded=1):
+	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded).values()
 	items.sort(lambda a, b: a.item_code > b.item_code and 1 or -1)
 	return items
 

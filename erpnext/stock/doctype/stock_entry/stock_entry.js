@@ -7,7 +7,7 @@ frappe.provide("erpnext.stock");
 erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	setup: function() {
 		var me = this;
-		
+
 		this.frm.fields_dict.bom_no.get_query = function() {
 			return {
 				filters:{ 'docstatus': 1 }
@@ -15,7 +15,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		};
 
 		this.frm.fields_dict.items.grid.get_field('item_code').get_query = function() {
-			return erpnext.queries.item({is_stock_item: "Yes"});
+			return erpnext.queries.item({is_stock_item: 1});
 		};
 
 		this.frm.set_query("purchase_order", function() {
@@ -57,7 +57,9 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
 		this.show_stock_ledger();
-		this.show_general_ledger();
+		if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
+			this.show_general_ledger();
+		}
 	},
 
 	on_submit: function() {
@@ -252,13 +254,13 @@ cur_frm.fields_dict['items'].grid.get_field('batch_no').get_query = function(doc
 			var filters = {
 				'item_code': item.item_code,
 				'posting_date': me.frm.doc.posting_date || nowdate()
-			}	
+			}
 		} else {
 			var filters = {
 				'item_code': item.item_code
 			}
 		}
-		
+
 
 		if(item.s_warehouse) filters["warehouse"] = item.s_warehouse
 		return {

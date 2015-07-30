@@ -28,7 +28,7 @@
    "read_only": 0
   }, 
   {
-   "description": "Item will be saved by this name in the data base.", 
+   "description": "", 
    "fieldname": "item_code", 
    "fieldtype": "Data", 
    "in_filter": 0, 
@@ -80,7 +80,7 @@
    "reqd": 1
   }, 
   {
-   "description": "Unit of measurement of this item (e.g. Kg, Unit, No, Pair).", 
+   "description": "", 
    "fieldname": "stock_uom", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
@@ -110,17 +110,6 @@
    "fieldtype": "Data", 
    "label": "Barcode", 
    "no_copy": 1, 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "default": "2099-12-31", 
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-   "fieldname": "end_of_life", 
-   "fieldtype": "Date", 
-   "label": "End of Life", 
-   "oldfieldname": "end_of_life", 
-   "oldfieldtype": "Date", 
    "permlevel": 0, 
    "read_only": 0
   }, 
@@ -167,10 +156,232 @@
    "search_index": 0
   }, 
   {
+   "fieldname": "inventory", 
+   "fieldtype": "Section Break", 
+   "label": "Inventory", 
+   "oldfieldtype": "Section Break", 
+   "options": "icon-truck", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "default": "1", 
+   "description": "", 
+   "fieldname": "is_stock_item", 
+   "fieldtype": "Check", 
+   "label": "Maintain Stock", 
+   "oldfieldname": "is_stock_item", 
+   "oldfieldtype": "Select", 
+   "options": "", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "default": "", 
+   "depends_on": "eval:doc.is_stock_item", 
+   "fieldname": "has_batch_no", 
+   "fieldtype": "Check", 
+   "label": "Has Batch No", 
+   "oldfieldname": "has_batch_no", 
+   "oldfieldtype": "Select", 
+   "options": "", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "default": "", 
+   "depends_on": "eval:doc.is_stock_item", 
+   "description": "Selecting \"Yes\" will give a unique identity to each entity of this item which can be viewed in the Serial No master.", 
+   "fieldname": "has_serial_no", 
+   "fieldtype": "Check", 
+   "in_filter": 1, 
+   "label": "Has Serial No", 
+   "oldfieldname": "has_serial_no", 
+   "oldfieldtype": "Select", 
+   "options": "", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "depends_on": "has_serial_no", 
+   "description": "Example: ABCD.#####\nIf series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.", 
+   "fieldname": "serial_no_series", 
+   "fieldtype": "Data", 
+   "label": "Serial Number Series", 
+   "no_copy": 0, 
+   "permlevel": 0
+  }, 
+  {
+   "default": "", 
+   "depends_on": "eval:doc.is_stock_item", 
+   "description": "", 
+   "fieldname": "is_asset_item", 
+   "fieldtype": "Check", 
+   "label": "Is Fixed Asset Item", 
+   "oldfieldname": "is_asset_item", 
+   "oldfieldtype": "Select", 
+   "options": "", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "depends_on": "is_stock_item", 
+   "fieldname": "column_break1", 
+   "fieldtype": "Column Break", 
+   "oldfieldtype": "Column Break", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "width": "50%"
+  }, 
+  {
+   "depends_on": "", 
+   "description": "", 
+   "fieldname": "default_warehouse", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
+   "label": "Default Warehouse", 
+   "oldfieldname": "default_warehouse", 
+   "oldfieldtype": "Link", 
+   "options": "Warehouse", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "is_stock_item", 
+   "description": "", 
+   "fieldname": "tolerance", 
+   "fieldtype": "Float", 
+   "label": "Allow over delivery or receipt upto this percent", 
+   "oldfieldname": "tolerance", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "is_stock_item", 
+   "fieldname": "valuation_method", 
+   "fieldtype": "Select", 
+   "label": "Valuation Method", 
+   "options": "\nFIFO\nMoving Average", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "default": "0.00", 
+   "depends_on": "is_stock_item", 
+   "description": "", 
+   "fieldname": "min_order_qty", 
+   "fieldtype": "Float", 
+   "hidden": 0, 
+   "label": "Minimum Order Qty", 
+   "oldfieldname": "min_order_qty", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "eval:doc.is_stock_item", 
+   "fieldname": "warranty_period", 
+   "fieldtype": "Data", 
+   "label": "Warranty Period (in days)", 
+   "oldfieldname": "warranty_period", 
+   "oldfieldtype": "Data", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "default": "2099-12-31", 
+   "depends_on": "is_stock_item", 
+   "fieldname": "end_of_life", 
+   "fieldtype": "Date", 
+   "label": "End of Life", 
+   "oldfieldname": "end_of_life", 
+   "oldfieldtype": "Date", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "is_stock_item", 
+   "description": "", 
+   "fieldname": "net_weight", 
+   "fieldtype": "Float", 
+   "label": "Net Weight", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "eval:doc.is_stock_item", 
+   "fieldname": "weight_uom", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
+   "label": "Weight UOM", 
+   "options": "UOM", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "eval:doc.is_stock_item", 
+   "description": "", 
+   "fieldname": "reorder_section", 
+   "fieldtype": "Section Break", 
+   "label": "Auto re-order", 
+   "options": "icon-rss", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "eval:(doc.is_stock_item && !doc.apply_warehouse_wise_reorder_level)", 
+   "description": "Automatically create Material Request if quantity falls below this level", 
+   "fieldname": "re_order_level", 
+   "fieldtype": "Float", 
+   "label": "Re-order Level", 
+   "oldfieldname": "re_order_level", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "eval:(doc.is_stock_item && !doc.apply_warehouse_wise_reorder_level)", 
+   "fieldname": "re_order_qty", 
+   "fieldtype": "Float", 
+   "label": "Re-order Qty", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "is_stock_item", 
+   "fieldname": "apply_warehouse_wise_reorder_level", 
+   "fieldtype": "Check", 
+   "label": "Apply Warehouse-wise Reorder Level", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:(doc.is_stock_item && doc.apply_warehouse_wise_reorder_level)", 
+   "fieldname": "section_break_31", 
+   "fieldtype": "Section Break", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "eval:(doc.is_stock_item && doc.apply_warehouse_wise_reorder_level)", 
+   "description": "Will also apply for variants unless overrridden", 
+   "fieldname": "reorder_levels", 
+   "fieldtype": "Table", 
+   "label": "Warehouse-wise Reorder Levels", 
+   "options": "Item Reorder", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
    "depends_on": "eval:!doc.variant_of", 
    "fieldname": "variants_section", 
    "fieldtype": "Section Break", 
-   "label": "Variant", 
+   "label": "Variants", 
    "permlevel": 0, 
    "precision": ""
   }, 
@@ -220,252 +431,33 @@
    "read_only": 1
   }, 
   {
-   "fieldname": "inventory", 
-   "fieldtype": "Section Break", 
-   "label": "Inventory", 
-   "oldfieldtype": "Section Break", 
-   "options": "icon-truck", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "default": "Yes", 
-   "description": "Select \"Yes\" if you are maintaining stock of this item in your Inventory.", 
-   "fieldname": "is_stock_item", 
-   "fieldtype": "Select", 
-   "label": "Is Stock Item", 
-   "oldfieldname": "is_stock_item", 
-   "oldfieldtype": "Select", 
-   "options": "Yes\nNo", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 1
-  }, 
-  {
-   "depends_on": "", 
-   "description": "Mandatory if Stock Item is \"Yes\". Also the default warehouse where reserved quantity is set from Sales Order.", 
-   "fieldname": "default_warehouse", 
-   "fieldtype": "Link", 
-   "ignore_user_permissions": 1, 
-   "label": "Default Warehouse", 
-   "oldfieldname": "default_warehouse", 
-   "oldfieldtype": "Link", 
-   "options": "Warehouse", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-   "description": "Percentage variation in quantity to be allowed while receiving or delivering this item.", 
-   "fieldname": "tolerance", 
-   "fieldtype": "Float", 
-   "label": "Allowance Percent", 
-   "oldfieldname": "tolerance", 
-   "oldfieldtype": "Currency", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-   "fieldname": "valuation_method", 
-   "fieldtype": "Select", 
-   "label": "Valuation Method", 
-   "options": "\nFIFO\nMoving Average", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "default": "0.00", 
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-   "description": "You can enter the minimum quantity of this item to be ordered.", 
-   "fieldname": "min_order_qty", 
-   "fieldtype": "Float", 
-   "hidden": 0, 
-   "label": "Minimum Order Qty", 
-   "oldfieldname": "min_order_qty", 
-   "oldfieldtype": "Currency", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-   "fieldname": "column_break1", 
-   "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "width": "50%"
-  }, 
-  {
-   "default": "No", 
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-   "description": "Select \"Yes\" if this item is used for some internal purpose in your company.", 
-   "fieldname": "is_asset_item", 
-   "fieldtype": "Select", 
-   "label": "Is Fixed Asset Item", 
-   "oldfieldname": "is_asset_item", 
-   "oldfieldtype": "Select", 
-   "options": "Yes\nNo", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 1
-  }, 
-  {
-   "default": "No", 
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-   "fieldname": "has_batch_no", 
-   "fieldtype": "Select", 
-   "label": "Has Batch No", 
-   "oldfieldname": "has_batch_no", 
-   "oldfieldtype": "Select", 
-   "options": "Yes\nNo", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 1
-  }, 
-  {
-   "default": "No", 
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-   "description": "Selecting \"Yes\" will give a unique identity to each entity of this item which can be viewed in the Serial No master.", 
-   "fieldname": "has_serial_no", 
-   "fieldtype": "Select", 
-   "in_filter": 1, 
-   "label": "Has Serial No", 
-   "oldfieldname": "has_serial_no", 
-   "oldfieldtype": "Select", 
-   "options": "Yes\nNo", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 1
-  }, 
-  {
-   "depends_on": "eval: doc.has_serial_no===\"Yes\"", 
-   "description": "Example: ABCD.#####\nIf series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.", 
-   "fieldname": "serial_no_series", 
-   "fieldtype": "Data", 
-   "label": "Serial Number Series", 
-   "no_copy": 0, 
-   "permlevel": 0
-  }, 
-  {
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-   "fieldname": "warranty_period", 
-   "fieldtype": "Data", 
-   "label": "Warranty Period (in days)", 
-   "oldfieldname": "warranty_period", 
-   "oldfieldtype": "Data", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-   "description": "Net Weight of each Item", 
-   "fieldname": "net_weight", 
-   "fieldtype": "Float", 
-   "label": "Net Weight", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-   "fieldname": "weight_uom", 
-   "fieldtype": "Link", 
-   "ignore_user_permissions": 1, 
-   "label": "Weight UOM", 
-   "options": "UOM", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-   "description": "Auto-raise Material Request if quantity goes below re-order level in default warehouse", 
-   "fieldname": "reorder_section", 
-   "fieldtype": "Section Break", 
-   "label": "Re-order", 
-   "options": "icon-rss", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "eval:(doc.is_stock_item==\"Yes\" && !doc.apply_warehouse_wise_reorder_level)", 
-   "fieldname": "re_order_level", 
-   "fieldtype": "Float", 
-   "label": "Re-Order Level", 
-   "oldfieldname": "re_order_level", 
-   "oldfieldtype": "Currency", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "eval:(doc.is_stock_item==\"Yes\" && !doc.apply_warehouse_wise_reorder_level)", 
-   "fieldname": "re_order_qty", 
-   "fieldtype": "Float", 
-   "label": "Re-Order Qty", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "eval:doc.is_stock_item==\"Yes\"", 
-   "fieldname": "apply_warehouse_wise_reorder_level", 
-   "fieldtype": "Check", 
-   "label": "Apply Warehouse-wise Reorder Level", 
-   "permlevel": 0, 
-   "precision": ""
-  }, 
-  {
-   "depends_on": "eval:(doc.is_stock_item==\"Yes\" && doc.apply_warehouse_wise_reorder_level)", 
-   "fieldname": "section_break_31", 
-   "fieldtype": "Section Break", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "eval:(doc.is_stock_item==\"Yes\" && doc.apply_warehouse_wise_reorder_level)", 
-   "description": "Will also apply for variants unless overrridden", 
-   "fieldname": "reorder_levels", 
-   "fieldtype": "Table", 
-   "label": "Warehouse-wise Reorder Levels", 
-   "options": "Item Reorder", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
    "fieldname": "purchase_details", 
    "fieldtype": "Section Break", 
-   "label": "", 
+   "label": "Purchase Details", 
    "oldfieldtype": "Section Break", 
    "options": "icon-shopping-cart", 
    "permlevel": 0, 
    "read_only": 0
   }, 
   {
-   "default": "Yes", 
-   "description": "Selecting \"Yes\" will allow this item to appear in Purchase Order , Purchase Receipt.", 
+   "default": "1", 
+   "description": "", 
    "fieldname": "is_purchase_item", 
-   "fieldtype": "Select", 
+   "fieldtype": "Check", 
    "label": "Is Purchase Item", 
    "oldfieldname": "is_purchase_item", 
    "oldfieldtype": "Select", 
-   "options": "Yes\nNo", 
+   "options": "", 
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 1
   }, 
   {
-   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-   "fieldname": "default_supplier", 
-   "fieldtype": "Link", 
-   "ignore_user_permissions": 1, 
-   "label": "Default Supplier", 
-   "options": "Supplier", 
-   "permlevel": 0
-  }, 
-  {
-   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-   "description": "Lead Time days is number of days by which this item is expected in your warehouse. This days is fetched in Material Request when you select this item.", 
+   "depends_on": "is_purchase_item", 
+   "description": "Average time taken by the supplier to deliver", 
    "fieldname": "lead_time_days", 
    "fieldtype": "Int", 
-   "label": "Lead Time Days", 
+   "label": "Lead Time in days", 
    "no_copy": 0, 
    "oldfieldname": "lead_time_days", 
    "oldfieldtype": "Int", 
@@ -473,20 +465,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "", 
-   "description": "Default Purchase Account in which cost of the item will be debited.", 
-   "fieldname": "expense_account", 
-   "fieldtype": "Link", 
-   "ignore_user_permissions": 1, 
-   "label": "Default Expense Account", 
-   "oldfieldname": "purchase_account", 
-   "oldfieldtype": "Link", 
-   "options": "Account", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "", 
+   "depends_on": "is_purchase_item", 
    "description": "", 
    "fieldname": "buying_cost_center", 
    "fieldtype": "Link", 
@@ -499,27 +478,28 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-   "fieldname": "last_purchase_rate", 
-   "fieldtype": "Float", 
-   "label": "Last Purchase Rate", 
-   "no_copy": 1, 
-   "oldfieldname": "last_purchase_rate", 
-   "oldfieldtype": "Currency", 
+   "depends_on": "is_purchase_item", 
+   "description": "", 
+   "fieldname": "expense_account", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
+   "label": "Default Expense Account", 
+   "oldfieldname": "purchase_account", 
+   "oldfieldtype": "Link", 
+   "options": "Account", 
    "permlevel": 0, 
-   "read_only": 1
+   "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
-   "fieldname": "column_break2", 
+   "depends_on": "is_purchase_item", 
+   "fieldname": "unit_of_measure_conversion", 
    "fieldtype": "Column Break", 
-   "oldfieldtype": "Column Break", 
+   "label": "Unit of Measure Conversion", 
    "permlevel": 0, 
-   "read_only": 0, 
-   "width": "50%"
+   "precision": ""
   }, 
   {
-   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
+   "depends_on": "is_purchase_item", 
    "description": "Will also apply for variants", 
    "fieldname": "uoms", 
    "fieldtype": "Table", 
@@ -532,7 +512,35 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
+   "depends_on": "is_purchase_item", 
+   "fieldname": "last_purchase_rate", 
+   "fieldtype": "Float", 
+   "label": "Last Purchase Rate", 
+   "no_copy": 1, 
+   "oldfieldname": "last_purchase_rate", 
+   "oldfieldtype": "Currency", 
+   "permlevel": 0, 
+   "read_only": 1
+  }, 
+  {
+   "depends_on": "is_purchase_item", 
+   "fieldname": "supplier_details", 
+   "fieldtype": "Section Break", 
+   "label": "Supplier Details", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
+   "depends_on": "eval:doc.is_purchase_item", 
+   "fieldname": "default_supplier", 
+   "fieldtype": "Link", 
+   "ignore_user_permissions": 1, 
+   "label": "Default Supplier", 
+   "options": "Supplier", 
+   "permlevel": 0
+  }, 
+  {
+   "depends_on": "eval:doc.is_purchase_item", 
    "fieldname": "manufacturer", 
    "fieldtype": "Data", 
    "label": "Manufacturer", 
@@ -540,7 +548,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
+   "depends_on": "eval:doc.is_purchase_item", 
    "fieldname": "manufacturer_part_no", 
    "fieldtype": "Data", 
    "label": "Manufacturer Part Number", 
@@ -548,7 +556,17 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.is_purchase_item==\"Yes\"", 
+   "depends_on": "is_purchase_item", 
+   "fieldname": "column_break2", 
+   "fieldtype": "Column Break", 
+   "label": "Item Code for Suppliers", 
+   "oldfieldtype": "Column Break", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "width": "50%"
+  }, 
+  {
+   "depends_on": "is_purchase_item", 
    "fieldname": "supplier_items", 
    "fieldtype": "Table", 
    "label": "Supplier Items", 
@@ -566,30 +584,30 @@
    "read_only": 0
   }, 
   {
-   "default": "Yes", 
-   "description": "Selecting \"Yes\" will allow this item to figure in Sales Order, Delivery Note", 
+   "default": "1", 
+   "description": "", 
    "fieldname": "is_sales_item", 
-   "fieldtype": "Select", 
+   "fieldtype": "Check", 
    "in_filter": 1, 
    "label": "Is Sales Item", 
    "oldfieldname": "is_sales_item", 
    "oldfieldtype": "Select", 
-   "options": "Yes\nNo", 
+   "options": "", 
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 1
   }, 
   {
-   "default": "No", 
-   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
-   "description": "Select \"Yes\" if this item represents some work like training, designing, consulting etc.", 
+   "default": "", 
+   "depends_on": "eval:doc.is_sales_item", 
+   "description": "Allow in Sales Order of type \"Service\"", 
    "fieldname": "is_service_item", 
-   "fieldtype": "Select", 
+   "fieldtype": "Check", 
    "in_filter": 1, 
    "label": "Is Service Item", 
    "oldfieldname": "is_service_item", 
    "oldfieldtype": "Select", 
-   "options": "Yes\nNo", 
+   "options": "", 
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 1
@@ -614,17 +632,7 @@
    "precision": ""
   }, 
   {
-   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
-   "fieldname": "max_discount", 
-   "fieldtype": "Float", 
-   "label": "Max Discount (%)", 
-   "oldfieldname": "max_discount", 
-   "oldfieldtype": "Currency", 
-   "permlevel": 0, 
-   "read_only": 0
-  }, 
-  {
-   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
+   "depends_on": "is_sales_item", 
    "fieldname": "income_account", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
@@ -634,7 +642,7 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
+   "depends_on": "is_sales_item", 
    "fieldname": "selling_cost_center", 
    "fieldtype": "Link", 
    "ignore_user_permissions": 1, 
@@ -644,21 +652,32 @@
    "read_only": 0
   }, 
   {
-   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
+   "depends_on": "is_sales_item", 
    "fieldname": "column_break3", 
    "fieldtype": "Column Break", 
+   "label": "Customer Item Codes", 
    "oldfieldtype": "Column Break", 
    "permlevel": 0, 
    "read_only": 0, 
    "width": "50%"
   }, 
   {
-   "depends_on": "eval:doc.is_sales_item==\"Yes\"", 
-   "description": "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes", 
+   "depends_on": "is_sales_item", 
+   "description": "", 
    "fieldname": "customer_items", 
    "fieldtype": "Table", 
    "label": "Customer Items", 
    "options": "Item Customer Detail", 
+   "permlevel": 0, 
+   "read_only": 0
+  }, 
+  {
+   "depends_on": "eval:doc.is_sales_item", 
+   "fieldname": "max_discount", 
+   "fieldtype": "Float", 
+   "label": "Max Discount (%)", 
+   "oldfieldname": "max_discount", 
+   "oldfieldtype": "Currency", 
    "permlevel": 0, 
    "read_only": 0
   }, 
@@ -692,20 +711,20 @@
    "read_only": 0
   }, 
   {
-   "default": "No", 
+   "default": "", 
    "fieldname": "inspection_required", 
-   "fieldtype": "Select", 
+   "fieldtype": "Check", 
    "label": "Inspection Required", 
    "no_copy": 0, 
    "oldfieldname": "inspection_required", 
    "oldfieldtype": "Select", 
-   "options": "\nYes\nNo", 
+   "options": "", 
    "permlevel": 0, 
    "read_only": 0, 
    "reqd": 1
   }, 
   {
-   "depends_on": "eval:doc.inspection_required==\"Yes\"", 
+   "depends_on": "inspection_required", 
    "description": "Will also apply to variants", 
    "fieldname": "quality_parameters", 
    "fieldtype": "Table", 
@@ -726,6 +745,39 @@
    "read_only": 0
   }, 
   {
+   "default": "", 
+   "depends_on": "", 
+   "description": "", 
+   "fieldname": "is_pro_applicable", 
+   "fieldtype": "Check", 
+   "label": "Allow Production Order", 
+   "oldfieldname": "is_pro_applicable", 
+   "oldfieldtype": "Select", 
+   "options": "", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "default": "", 
+   "description": "If subcontracted to a vendor", 
+   "fieldname": "is_sub_contracted_item", 
+   "fieldtype": "Check", 
+   "label": "Supply Raw Materials for Purchase", 
+   "oldfieldname": "is_sub_contracted_item", 
+   "oldfieldtype": "Select", 
+   "options": "", 
+   "permlevel": 0, 
+   "read_only": 0, 
+   "reqd": 1
+  }, 
+  {
+   "fieldname": "column_break_74", 
+   "fieldtype": "Column Break", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "depends_on": "", 
    "fieldname": "default_bom", 
    "fieldtype": "Link", 
@@ -737,33 +789,6 @@
    "options": "BOM", 
    "permlevel": 0, 
    "read_only": 1
-  }, 
-  {
-   "default": "No", 
-   "depends_on": "", 
-   "description": "Selecting \"Yes\" will allow you to make a Production Order for this item.", 
-   "fieldname": "is_pro_applicable", 
-   "fieldtype": "Select", 
-   "label": "Allow Production Order", 
-   "oldfieldname": "is_pro_applicable", 
-   "oldfieldtype": "Select", 
-   "options": "Yes\nNo", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 1
-  }, 
-  {
-   "default": "No", 
-   "description": "", 
-   "fieldname": "is_sub_contracted_item", 
-   "fieldtype": "Select", 
-   "label": "Supply Raw Materials for Purchase", 
-   "oldfieldname": "is_sub_contracted_item", 
-   "oldfieldtype": "Select", 
-   "options": "Yes\nNo", 
-   "permlevel": 0, 
-   "read_only": 0, 
-   "reqd": 1
   }, 
   {
    "fieldname": "customer_code", 
@@ -803,7 +828,7 @@
   }, 
   {
    "depends_on": "show_in_website", 
-   "description": "Products will be sorted by weight-age in default searches. More the weight-age, higher the product will appear in the list.", 
+   "description": "Items with higher weightage will be shown higher", 
    "fieldname": "weightage", 
    "fieldtype": "Int", 
    "label": "Weightage", 
@@ -866,6 +891,13 @@
    "read_only": 0
   }, 
   {
+   "fieldname": "website_specifications_cb", 
+   "fieldtype": "Column Break", 
+   "label": "Website Specifications", 
+   "permlevel": 0, 
+   "precision": ""
+  }, 
+  {
    "depends_on": "show_in_website", 
    "fieldname": "copy_from_item_group", 
    "fieldtype": "Button", 
@@ -903,7 +935,7 @@
  "icon": "icon-tag", 
  "idx": 1, 
  "max_attachments": 1, 
- "modified": "2015-07-13 05:28:28.698107", 
+ "modified": "2015-07-24 06:04:28.448050", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 
