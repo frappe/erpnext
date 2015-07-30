@@ -5,10 +5,8 @@ from __future__ import unicode_literals
 import frappe
 import unittest, copy
 from frappe.utils import nowdate, add_days, flt
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
-from erpnext.projects.doctype.time_log_batch.test_time_log_batch import *
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
-
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -401,32 +399,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 		jv.cancel()
 		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 561.8)
-
-	def test_time_log_batch(self):
-		delete_time_log_and_batch()
-		time_log = create_time_log()
-		tlb = create_time_log_batch(time_log)
-
-		tlb = frappe.get_doc("Time Log Batch", tlb.name)
-		tlb.submit()
-
-		si = frappe.get_doc(frappe.copy_doc(test_records[0]))
-		si.get("items")[0].time_log_batch = tlb.name
-		si.insert()
-		si.submit()
-
-		self.assertEquals(frappe.db.get_value("Time Log Batch", tlb.name, "status"), "Billed")
-
-		self.assertEquals(frappe.db.get_value("Time Log", time_log, "status"), "Billed")
-
-		si.cancel()
-
-		self.assertEquals(frappe.db.get_value("Time Log Batch", tlb.name, "status"), "Submitted")
-
-		self.assertEquals(frappe.db.get_value("Time Log", time_log, "status"), "Batched for Billing")
-
-		frappe.delete_doc("Sales Invoice", si.name)
-		delete_time_log_and_batch()
 
 	def test_sales_invoice_gl_entry_without_aii(self):
 		set_perpetual_inventory(0)

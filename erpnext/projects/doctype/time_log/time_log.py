@@ -10,6 +10,7 @@ from dateutil.relativedelta import relativedelta
 class OverlapError(frappe.ValidationError): pass
 class OverProductionLoggedError(frappe.ValidationError): pass
 class NotSubmittedError(frappe.ValidationError): pass
+class NegativeHoursError(frappe.ValidationError): pass
 
 from frappe.model.document import Document
 
@@ -101,8 +102,8 @@ class TimeLog(Document):
 		return existing[0] if existing else None
 
 	def validate_timings(self):
-		if self.to_time and self.from_time and get_datetime(self.to_time) < get_datetime(self.from_time):
-			frappe.throw(_("From Time cannot be greater than To Time"))
+		if self.to_time and self.from_time and get_datetime(self.to_time) <= get_datetime(self.from_time):
+			frappe.throw(_("To Time must be greater than From Time"), NegativeHoursError)
 
 	def calculate_total_hours(self):
 		if self.to_time and self.from_time:
