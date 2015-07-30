@@ -181,6 +181,6 @@ erpnext.patches.v5_1.rename_roles
 erpnext.patches.v5_1.default_bom
 execute:frappe.delete_doc("DocType", "Party Type")
 execute:frappe.delete_doc("Module Def", "Contacts")
-erpnext.patches.v5_4.fix_reserved_qty_and_sle_for_packed_items
+erpnext.patches.v5_4.fix_reserved_qty_and_sle_for_packed_items # 30-07-2015
 execute:frappe.reload_doctype("Leave Type")
-execute:frappe.db.sql("update `tabLeave Type` set include_holiday=1")
+execute:frappe.db.sql("update `tabLeave Type` set include_holiday=0")
