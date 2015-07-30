@@ -300,7 +300,7 @@ def get_serial_nos_by_fifo(args, item_doc):
 		order by timestamp(purchase_date, purchase_time) asc limit %(qty)s""", {
 			"item_code": args.item_code,
 			"warehouse": args.warehouse,
-			"qty": cint(args.qty)
+			"qty": abs(cint(args.qty))
 		}))
 
 def get_actual_batch_qty(batch_no,warehouse,item_code):

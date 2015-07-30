@@ -190,8 +190,9 @@ class PaymentReconciliation(Document):
 				if flt(p.allocated_amount) > flt(p.amount):
 					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equals to JV amount {2}")
 						.format(p.idx, p.allocated_amount, p.amount))
-
-				if flt(p.allocated_amount) > unreconciled_invoices.get(p.invoice_type, {}).get(p.invoice_number):
+				
+				invoice_outstanding = unreconciled_invoices.get(p.invoice_type, {}).get(p.invoice_number)
+				if abs(flt(p.allocated_amount) - invoice_outstanding) > 0.009:
 					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equals to invoice outstanding amount {2}")
 						.format(p.idx, p.allocated_amount, unreconciled_invoices.get(p.invoice_type, {}).get(p.invoice_number)))
 
