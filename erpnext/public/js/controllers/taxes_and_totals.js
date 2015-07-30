@@ -94,10 +94,6 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 			tax_fields = ["total", "tax_amount_after_discount_amount",
 				"tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
-			
-			if (frappe.meta.get_docfield(me.frm.doc.doctype, "is_return") && me.frm.doc.is_return 
-					&& tax.charge_type == "Actual")
-				tax.tax_amount = -1 * tax.tax_amount;
 
 			if (cstr(tax.charge_type) != "Actual" &&
 				!(me.discount_amount_applied && me.frm.doc.apply_discount_on=="Grand Total"))
