@@ -58,7 +58,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 						filters: [
 							[opts[1], opts[2], "=", jvd.party],
 							[opts[1], "docstatus", "=", 1],
-							[opts[1], "outstanding_amount", ">", 0]
+							[opts[1], "outstanding_amount", "!=", 0]
 						]
 					};
 				});

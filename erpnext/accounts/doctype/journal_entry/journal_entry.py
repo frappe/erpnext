@@ -156,12 +156,10 @@ class JournalEntry(AccountsController):
 							.format(d.against_jv, dr_or_cr))
 
 	def validate_against_sales_invoice(self):
-		payment_against_voucher = self.validate_account_in_against_voucher("against_invoice", "Sales Invoice")
-		self.validate_against_invoice_fields("Sales Invoice", payment_against_voucher)
+		self.validate_account_in_against_voucher("against_invoice", "Sales Invoice")
 
 	def validate_against_purchase_invoice(self):
-		payment_against_voucher = self.validate_account_in_against_voucher("against_voucher", "Purchase Invoice")
-		self.validate_against_invoice_fields("Purchase Invoice", payment_against_voucher)
+		self.validate_account_in_against_voucher("against_voucher", "Purchase Invoice")
 
 	def validate_against_sales_order(self):
 		payment_against_voucher = self.validate_account_in_against_voucher("against_sales_order", "Sales Order")
@@ -210,7 +208,7 @@ class JournalEntry(AccountsController):
 
 	def validate_against_invoice_fields(self, doctype, payment_against_voucher):
 		for voucher_no, payment_list in payment_against_voucher.items():
-			voucher_properties = frappe.db.get_value(doctype, voucher_no,
+			voucher_properties = frappe.db.get_value(doctype, voucher_no, 
 				["docstatus", "outstanding_amount"])
 
 			if voucher_properties[0] != 1:
@@ -555,18 +553,18 @@ def get_outstanding(args):
 			and ifnull(against_jv, '')=''""".format(condition), args)
 
 		against_jv_amount = flt(against_jv_amount[0][0]) if against_jv_amount else 0
-		if against_jv_amount > 0:
-			return {"credit": against_jv_amount}
-		else:
-			return {"debit": -1* against_jv_amount}
-
-	elif args.get("doctype") == "Sales Invoice":
 		return {
-			"credit": flt(frappe.db.get_value("Sales Invoice", args["docname"], "outstanding_amount"))
+			"credit" if against_jv_amount > 0 else "debit": abs(against_jv_amount)
+		}
+	elif args.get("doctype") == "Sales Invoice":
+		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", args["docname"], "outstanding_amount"))
+		return {
+			"credit" if outstanding_amount > 0 else "debit": abs(outstanding_amount)
 		}
 	elif args.get("doctype") == "Purchase Invoice":
+		outstanding_amount = flt(frappe.db.get_value("Purchase Invoice", args["docname"], "outstanding_amount"))
 		return {
-			"debit": flt(frappe.db.get_value("Purchase Invoice", args["docname"], "outstanding_amount"))
+			"debit" if outstanding_amount > 0 else "credit": abs(outstanding_amount)
 		}
 
 @frappe.whitelist()
