@@ -183,10 +183,10 @@ class JournalEntry(AccountsController):
 			if d.get(against_field):
 				dr_or_cr = "credit" if against_field in ["against_invoice", "against_sales_order"] \
 					else "debit"
-				if against_field in ["against_invoice", "against_sales_order"] and flt(d.debit) > 0:
+				if against_field == "against_sales_order" and flt(d.debit) > 0:
 					frappe.throw(_("Row {0}: Debit entry can not be linked with a {1}").format(d.idx, doctype))
 
-				if against_field in ["against_voucher", "against_purchase_order"] and flt(d.credit) > 0:
+				if against_field == "against_purchase_order" and flt(d.credit) > 0:
 					frappe.throw(_("Row {0}: Credit entry can not be linked with a {1}").format(d.idx, doctype))
 
 				against_voucher = frappe.db.get_value(doctype, d.get(against_field),
