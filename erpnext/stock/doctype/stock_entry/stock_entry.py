@@ -93,7 +93,7 @@ class StockEntry(StockController):
 				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
 
 			item_details = self.get_item_details(frappe._dict({"item_code": item.item_code,
-				"company": self.company, "project_name": self.project_name, "uom": item.uom}))
+				"company": self.company, "project_name": self.project_name, "uom": item.uom}), for_update=True)
 
 			for f in ("uom", "stock_uom", "description", "item_name", "expense_account",
 				"cost_center", "conversion_factor"):
@@ -419,7 +419,7 @@ class StockEntry(StockController):
 			"planned_qty": (self.docstatus==1 and -1 or 1 ) * flt(self.fg_completed_qty)
 		})
 
-	def get_item_details(self, args=None):
+	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select stock_uom, description, image, item_name,
 			expense_account, buying_cost_center, item_group from `tabItem`
 			where name = %s and (ifnull(end_of_life,'0000-00-00')='0000-00-00' or end_of_life > now())""",
@@ -451,7 +451,8 @@ class StockEntry(StockController):
 					ret[d[1]] = frappe.db.get_value("Company", self.company, d[2]) if d[2] else None
 
 		# update uom
-		ret.update(self.get_uom_details(args))
+		if args.get("uom") and for_update:
+			ret.update(self.get_uom_details(args))
 
 		if not ret["expense_account"]:
 			ret["expense_account"] = frappe.db.get_value("Company", self.company, "stock_adjustment_account")
