@@ -439,7 +439,7 @@ class SalesInvoice(SellingController):
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
 
-			# if POS and amount is written off, there's no outstanding and hence no need to update it
+			# if POS and amount is written off, updating outstanding amt after posting all gl entries
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account) else "Yes"
 
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
@@ -447,7 +447,8 @@ class SalesInvoice(SellingController):
 
 			if update_outstanding == "No":
 				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
-				update_outstanding_amt(self.debit_to, "Customer", self.customer, self.doctype, self.name)
+				update_outstanding_amt(self.debit_to, "Customer", self.customer, 
+					self.doctype, self.return_against if cint(self.is_return) else self.name)
 
 			if repost_future_gle and cint(self.update_stock) \
 				and cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
