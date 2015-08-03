@@ -34,10 +34,8 @@ class NewsletterList(Document):
 					}).insert(ignore_permissions=True)
 
 					added += 1
-			except Exception, e:
-				# already added, ignore
-				if e.args[0]!=1062:
-					raise
+			except frappe.UniqueValidationError:
+				pass
 
 		frappe.msgprint(_("{0} subscribers added").format(added))
 
