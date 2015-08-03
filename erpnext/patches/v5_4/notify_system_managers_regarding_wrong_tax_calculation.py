@@ -31,8 +31,10 @@ Please check following Entries:
 Regards,
 
 Administrator""" % "\n".join([(d[0] + ": " + ", ".join(d[1])) for d in wrong_records])
-
-		sendmail_to_system_managers("[Important] [ERPNext] Tax calculation might be wrong, please check.", content)
+		try:
+			sendmail_to_system_managers("[Important] [ERPNext] Tax calculation might be wrong, please check.", content)
+		except:
+			pass
 		
 		print "="*50
 		print content
