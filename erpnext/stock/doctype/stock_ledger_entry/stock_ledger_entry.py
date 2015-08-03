@@ -82,8 +82,7 @@ class StockLedgerEntry(Document):
 			frappe.throw(_("Stock cannot exist for Item {0} since has variants").format(self.item_code),
 				ItemTemplateCannotHaveStock)
 
-		if not self.stock_uom:
-			self.stock_uom = item_det.stock_uom
+		self.stock_uom = item_det.stock_uom
 
 	def check_stock_frozen_date(self):
 		stock_frozen_upto = frappe.db.get_value('Stock Settings', None, 'stock_frozen_upto') or ''

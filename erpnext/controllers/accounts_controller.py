@@ -11,6 +11,8 @@ from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 from erpnext.controllers.sales_and_purchase_return import validate_return
 
+force_item_fields = ("item_name", "item_group", "barcode", "brand", "stock_uom")
+
 class CustomerFrozen(frappe.ValidationError): pass
 
 class AccountsController(TransactionBase):
@@ -18,12 +20,12 @@ class AccountsController(TransactionBase):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 		self.validate_date_with_fiscal_year()
-		
+
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
 			if not self.meta.get_field("is_return") or not self.is_return:
 				self.validate_value("base_grand_total", ">=", 0)
-			
+
 			validate_return(self)
 			self.set_total_in_words()
 
@@ -35,7 +37,7 @@ class AccountsController(TransactionBase):
 
 		if self.meta.get_field("taxes_and_charges"):
 			self.validate_enabled_taxes_and_charges()
-			
+
 		self.validate_party()
 
 	def on_submit(self):
@@ -86,7 +88,7 @@ class AccountsController(TransactionBase):
 		if self.doctype == "Sales Invoice":
 			if not self.due_date:
 				frappe.throw(_("Due Date is mandatory"))
-			
+
 			validate_due_date(self.posting_date, self.due_date, "Customer", self.customer, self.company)
 		elif self.doctype == "Purchase Invoice":
 			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.company)
@@ -142,7 +144,8 @@ class AccountsController(TransactionBase):
 
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and \
-							item.get(fieldname) is None and value is not None:
+							(item.get(fieldname) is None or fieldname in force_item_fields) \
+								and value is not None:
 								item.set(fieldname, value)
 
 						if fieldname == "cost_center" and item.meta.get_field("cost_center") \
@@ -349,14 +352,14 @@ class AccountsController(TransactionBase):
 		frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
 		if frozen_accounts_modifier in frappe.get_roles():
 			return
-		
+
 		party_type = None
 		if self.meta.get_field("customer"):
 			party_type = 'Customer'
 
 		elif self.meta.get_field("supplier"):
 			party_type = 'Supplier'
-			
+
 		if party_type:
 			party = self.get(party_type.lower())
 			if frappe.db.get_value(party_type, party, "is_frozen"):
