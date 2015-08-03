@@ -12,7 +12,7 @@ def execute():
 		"Purchase Order", "Purchase Receipt", "Purchase Invoice"):
 			records = frappe.db.sql_list("""select name from `tab{0}` 
 				where apply_discount_on = 'Net Total' and ifnull(discount_amount, 0) != 0
-				and modified > '2015-02-17' and docstatus=1""".format(dt))
+				and modified >= '2015-02-17' and docstatus=1""".format(dt))
 		
 			if records:
 				records = [get_url_to_form(dt, d) for d in records]
