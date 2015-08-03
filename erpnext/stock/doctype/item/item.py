@@ -108,9 +108,13 @@ class Item(WebsiteGenerator):
 
 	def check_stock_uom_with_bin(self):
 		if not self.get("__islocal"):
+			if self.stock_uom == frappe.db.get_value("Item", self.name, "stock_uom"):
+				return
+
 			matched=True
 			ref_uom = frappe.db.get_value("Stock Ledger Entry",
 				{"item_code": self.name}, "stock_uom")
+
 			if ref_uom:
 				if cstr(ref_uom) != cstr(self.stock_uom):
 					matched = False
@@ -128,7 +132,7 @@ class Item(WebsiteGenerator):
 						(self.stock_uom, self.name))
 
 			if not matched:
-				frappe.throw(_("Default Unit of Measure can not be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module."))
+				frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module.").format(self.name))
 
 	def update_template_tables(self):
 		template = frappe.get_doc("Item", self.variant_of)
