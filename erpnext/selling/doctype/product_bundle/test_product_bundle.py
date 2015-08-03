@@ -13,7 +13,6 @@ def make_product_bundle(parent, items):
 
 	product_bundle = frappe.get_doc({
 		"doctype": "Product Bundle",
-		"parent_item": parent,
 		"new_item_code": parent
 	})
 

@@ -30,7 +30,7 @@ class Company(Document):
 		self.abbr = self.abbr.strip()
 		if self.get('__islocal') and len(self.abbr) > 5:
 			frappe.throw(_("Abbreviation cannot have more than 5 characters"))
-			
+
 		if not self.abbr.strip():
 			frappe.throw(_("Abbr can not be blank or space"))
 
@@ -70,7 +70,8 @@ class Company(Document):
 		frappe.clear_cache()
 
 	def install_country_fixtures(self):
-		if os.path.exists(os.path.join(os.path.dirname(__file__), "fixtures", self.country.lower())):
+		path = os.path.join(os.path.dirname(__file__), "fixtures", self.country.lower())
+		if os.path.exists(path.encode("utf-8")):
 			frappe.get_attr("erpnext.setup.doctype.company.fixtures.{0}.install".format(self.country.lower()))(self)
 
 	def create_default_warehouses(self):
@@ -183,7 +184,7 @@ class Company(Document):
 		accounts = frappe.db.sql_list("select name from tabAccount where company=%s", self.name)
 		cost_centers = frappe.db.sql_list("select name from `tabCost Center` where company=%s", self.name)
 		warehouses = frappe.db.sql_list("select name from tabWarehouse where company=%s", self.name)
-		
+
 		rec = frappe.db.sql("SELECT name from `tabGL Entry` where company = %s", self.name)
 		if not rec:
 			# delete Account
@@ -202,21 +203,21 @@ class Company(Document):
 			frappe.db.sql("""delete from `tabWarehouse` where company=%s""", self.name)
 
 		frappe.defaults.clear_default("company", value=self.name)
-		
+
 		# clear default accounts, warehouses from item
 		for f in ["default_warehouse", "website_warehouse"]:
-			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)""" 
+			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
 				% (f, f, ', '.join(['%s']*len(warehouses))), tuple(warehouses))
-				
-		frappe.db.sql("""delete from `tabItem Reorder` where warehouse in (%s)""" 
+
+		frappe.db.sql("""delete from `tabItem Reorder` where warehouse in (%s)"""
 			% ', '.join(['%s']*len(warehouses)), tuple(warehouses))
-				
+
 		for f in ["income_account", "expense_account"]:
-			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)""" 
+			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
 				% (f, f, ', '.join(['%s']*len(accounts))), tuple(accounts))
-				
+
 		for f in ["selling_cost_center", "buying_cost_center"]:
-			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)""" 
+			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
 				% (f, f, ', '.join(['%s']*len(cost_centers))), tuple(cost_centers))
 
 		# reset default company
@@ -229,7 +230,7 @@ def replace_abbr(company, old, new):
 	new = new.strip()
 	if not new:
 		frappe.throw(_("Abbr can not be blank or space"))
-		
+
 	frappe.only_for("System Manager")
 
 	frappe.db.set_value("Company", company, "abbr", new)

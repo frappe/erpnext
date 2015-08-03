@@ -26,7 +26,13 @@ def make_item(item_code, properties=None):
 
 	if properties:
 		item.update(properties)
-		item.insert()
+
+
+	if item.is_stock_item and not item.default_warehouse:
+		item.default_warehouse = "_Test Warehouse - _TC"
+
+	item.insert()
+
 	return item
 
 class TestItem(unittest.TestCase):

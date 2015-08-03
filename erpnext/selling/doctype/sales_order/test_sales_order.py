@@ -6,7 +6,7 @@ from frappe.utils import flt, add_days
 import frappe.permissions
 import unittest
 from erpnext.selling.doctype.sales_order.sales_order \
-	import make_material_request, make_delivery_note, make_sales_invoice
+	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
 
 class TestSalesOrder(unittest.TestCase):
 	def tearDown(self):
@@ -235,10 +235,23 @@ class TestSalesOrder(unittest.TestCase):
 		make_product_bundle("_Test Service Product Bundle",
 			["_Test Service Product Bundle Item 1", "_Test Service Product Bundle Item 2"])
 
-		so = make_sales_order(item_code = "_Test Service Product Bundle")
+		so = make_sales_order(item_code = "_Test Service Product Bundle", warehouse=None)
 
 		self.assertTrue("_Test Service Product Bundle Item 1" in [d.item_code for d in so.packed_items])
 		self.assertTrue("_Test Service Product Bundle Item 2" in [d.item_code for d in so.packed_items])
+
+	def test_mix_type_product_bundle(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		make_item("_Test Mix Product Bundle", {"is_stock_item": 0, "is_sales_item": 1})
+		make_item("_Test Mix Product Bundle Item 1", {"is_stock_item": 1, "is_sales_item": 1})
+		make_item("_Test Mix Product Bundle Item 2", {"is_stock_item": 0, "is_sales_item": 1})
+
+		make_product_bundle("_Test Mix Product Bundle",
+			["_Test Mix Product Bundle Item 1", "_Test Mix Product Bundle Item 2"])
+
+		self.assertRaises(WarehouseRequired, make_sales_order, item_code = "_Test Mix Product Bundle", warehouse="")
 
 	def test_auto_insert_price(self):
 		from erpnext.stock.doctype.item.test_item import make_item
@@ -284,13 +297,17 @@ def make_sales_order(**args):
 	if args.selling_price_list:
 		so.selling_price_list = args.selling_price_list
 
+	if "warehouse" not in args:
+		args.warehouse = "_Test Warehouse - _TC"
+
 	so.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
-		"warehouse": args.warehouse or "_Test Warehouse - _TC",
+		"warehouse": args.warehouse,
 		"qty": args.qty or 10,
 		"rate": args.rate or 100,
 		"conversion_factor": 1.0,
 	})
+
 	if not args.do_not_save:
 		so.insert()
 		if not args.do_not_submit:

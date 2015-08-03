@@ -15,6 +15,8 @@ form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
 
+class WarehouseRequired(frappe.ValidationError): pass
+
 class SalesOrder(SellingController):
 	def validate_mandatory(self):
 		# validate transaction date v/s delivery date
@@ -39,8 +41,11 @@ class SalesOrder(SellingController):
 		for d in self.get('items'):
 			check_list.append(cstr(d.item_code))
 
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") and not d.warehouse:
-					frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code))
+			if (frappe.db.get_value("Item", d.item_code, "is_stock_item")==1 or
+				(self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
+				and not d.warehouse:
+				frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code),
+					WarehouseRequired)
 
 			# used for production plan
 			d.transaction_date = self.transaction_date
@@ -51,6 +56,12 @@ class SalesOrder(SellingController):
 		unique_chk_list = set(check_list)
 		if len(unique_chk_list) != len(check_list):
 			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
+
+	def product_bundle_has_stock_item(self, product_bundle):
+		"""Returns true if product bundle has stock item"""
+		ret = len(frappe.db.sql("""select i.name from tabItem i, `tabProduct Bundle Item` pbi
+			where pbi.parent = %s and pbi.item_code = i.name and i.is_stock_item = 1""", product_bundle))
+		return ret
 
 	def validate_sales_mntc_quotation(self):
 		for d in self.get('items'):
