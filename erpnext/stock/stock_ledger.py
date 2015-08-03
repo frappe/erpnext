@@ -300,22 +300,22 @@ class update_entries_after(object):
 
 				# select first batch or the batch with same rate
 				batch = self.stock_queue[index]
+				if batch[0]:
+					if qty_to_pop >= batch[0]:
+						# consume current batch
+						qty_to_pop = qty_to_pop - batch[0]
+						self.stock_queue.pop(index)
+						if not self.stock_queue and qty_to_pop:
+							# stock finished, qty still remains to be withdrawn
+							# negative stock, keep in as a negative batch
+							self.stock_queue.append([-qty_to_pop, outgoing_rate or batch[1]])
+							break
 
-				if qty_to_pop >= batch[0]:
-					# consume current batch
-					qty_to_pop = qty_to_pop - batch[0]
-					self.stock_queue.pop(index)
-					if not self.stock_queue and qty_to_pop:
-						# stock finished, qty still remains to be withdrawn
-						# negative stock, keep in as a negative batch
-						self.stock_queue.append([-qty_to_pop, outgoing_rate or batch[1]])
-						break
-
-				else:
-					# qty found in current batch
-					# consume it and exit
-					batch[0] = batch[0] - qty_to_pop
-					qty_to_pop = 0
+					else:
+						# qty found in current batch
+						# consume it and exit
+						batch[0] = batch[0] - qty_to_pop
+						qty_to_pop = 0
 
 		stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.stock_queue))
 		stock_qty = sum((flt(batch[0]) for batch in self.stock_queue))
