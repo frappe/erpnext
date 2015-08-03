@@ -554,17 +554,17 @@ def get_outstanding(args):
 
 		against_jv_amount = flt(against_jv_amount[0][0]) if against_jv_amount else 0
 		return {
-			"credit" if against_jv_amount > 0 else "debit": abs(against_jv_amount)
+			("credit" if against_jv_amount > 0 else "debit"): abs(against_jv_amount)
 		}
 	elif args.get("doctype") == "Sales Invoice":
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", args["docname"], "outstanding_amount"))
 		return {
-			"credit" if outstanding_amount > 0 else "debit": abs(outstanding_amount)
+			("credit" if outstanding_amount > 0 else "debit"): abs(outstanding_amount)
 		}
 	elif args.get("doctype") == "Purchase Invoice":
 		outstanding_amount = flt(frappe.db.get_value("Purchase Invoice", args["docname"], "outstanding_amount"))
 		return {
-			"debit" if outstanding_amount > 0 else "credit": abs(outstanding_amount)
+			("debit" if outstanding_amount > 0 else "credit"): abs(outstanding_amount)
 		}
 
 @frappe.whitelist()

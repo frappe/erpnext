@@ -136,7 +136,9 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			"doctype": doctype + " Item",
 			"fields": {
 				"purchase_order": "purchase_order",
-				"purchase_receipt": "purchase_receipt"
+				"purchase_receipt": "purchase_receipt",
+				"serial_no": "serial_no",
+				"batch_no": "batch_no"
 			},
 			"postprocess": update_item
 		},
