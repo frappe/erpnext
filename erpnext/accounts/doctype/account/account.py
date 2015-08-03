@@ -23,6 +23,7 @@ class Account(Document):
 	def validate(self):
 		self.validate_parent()
 		self.validate_root_details()
+		self.set_root_and_report_type()
 		self.validate_mandatory()
 		self.validate_warehouse_account()
 		self.validate_frozen_accounts_modifier()
@@ -32,7 +33,7 @@ class Account(Document):
 		"""Fetch Parent Details and validate parent account"""
 		if self.parent_account:
 			par = frappe.db.get_value("Account", self.parent_account,
-				["name", "is_group", "report_type", "root_type", "company"], as_dict=1)
+				["name", "is_group", "company"], as_dict=1)
 			if not par:
 				throw(_("Account {0}: Parent account {1} does not exist").format(self.name, self.parent_account))
 			elif par.name == self.name:
@@ -43,10 +44,24 @@ class Account(Document):
 				throw(_("Account {0}: Parent account {1} does not belong to company: {2}")
 					.format(self.name, self.parent_account, self.company))
 
+	def set_root_and_report_type(self):
+		if self.parent_account:
+			par = frappe.db.get_value("Account", self.parent_account, ["report_type", "root_type"], as_dict=1)
+			
 			if par.report_type:
 				self.report_type = par.report_type
 			if par.root_type:
 				self.root_type = par.root_type
+			
+		if self.is_group:
+			db_value = frappe.db.get_value("Account", self.name, ["report_type", "root_type"], as_dict=1)
+			if db_value:
+				if self.report_type != db_value.report_type:
+					frappe.db.sql("update `tabAccount` set report_type=%s where lft > %s and rgt < %s", 
+						(self.report_type, self.lft, self.rgt))
+				if self.root_type != db_value.root_type:
+					frappe.db.sql("update `tabAccount` set root_type=%s where lft > %s and rgt < %s", 
+						(self.root_type, self.lft, self.rgt))
 
 	def validate_root_details(self):
 		# does not exists parent
