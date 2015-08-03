@@ -10,7 +10,7 @@ from frappe.utils import flt
 def execute(filters=None):
 	if not filters: filters = {}
 	validate_filters(filters)
-			
+
 	columns = get_columns(filters)
 	entries = get_entries(filters)
 	invoice_posting_date_map = get_invoice_posting_date_map(filters)
@@ -37,7 +37,7 @@ def execute(filters=None):
 		data.append(row)
 
 	return columns, data
-	
+
 def validate_filters(filters):
 	if (filters.get("payment_type") == "Incoming" and filters.get("party_type") == "Supplier") or \
 		(filters.get("payment_type") == "Outgoing" and filters.get("party_type") == "Customer"):
@@ -45,9 +45,9 @@ def validate_filters(filters):
 				.format(filters.payment_type, filters.party_type))
 
 def get_columns(filters):
-	return [_("Journal Entry") + ":Link/Journal Entry:140", 
-		_("Party Type") + ":Link/DocType:100", _("Party") + ":Dynamic Link/Party Type:140",
-		_("Posting Date") + ":Date:100", 
+	return [_("Journal Entry") + ":Link/Journal Entry:140",
+		_("Party Type") + "::100", _("Party") + ":Dynamic Link/Party Type:140",
+		_("Posting Date") + ":Date:100",
 		_("Against Invoice") + (":Link/Purchase Invoice:130" if filters.get("payment_type") == "Outgoing" else ":Link/Sales Invoice:130"),
 		_("Against Invoice Posting Date") + ":Date:130", _("Debit") + ":Currency:120", _("Credit") + ":Currency:120",
 		_("Reference No") + "::100", _("Reference Date") + ":Date:100", _("Remarks") + "::150", _("Age") +":Int:40",
@@ -62,7 +62,7 @@ def get_conditions(filters):
 			filters["party_type"] = "Supplier"
 		else:
 			filters["party_type"] = "Customer"
-	
+
 	if filters.get("party_type"):
 		conditions.append("jvd.party_type=%(party_type)s")
 
