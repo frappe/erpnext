@@ -790,6 +790,58 @@ class TestSalesInvoice(unittest.TestCase):
 		
 		set_perpetual_inventory(0)
 		
+	def test_discount_on_net_total(self):
+		si = frappe.copy_doc(test_records[2])
+		si.apply_discount_on = "Net Total"
+		si.discount_amount = 625
+		si.insert()
+
+		expected_values = {
+			"keys": ["price_list_rate", "discount_percentage", "rate", "amount",
+				"base_price_list_rate", "base_rate", "base_amount", 
+				"net_rate", "base_net_rate", "net_amount", "base_net_amount"],
+			"_Test Item Home Desktop 100": [50, 0, 50, 500, 50, 50, 500, 25, 25, 250, 250],
+			"_Test Item Home Desktop 200": [150, 0, 150, 750, 150, 150, 750, 75, 75, 375, 375],
+		}
+
+		# check if children are saved
+		self.assertEquals(len(si.get("items")),
+			len(expected_values)-1)
+
+		# check if item values are calculated
+		for d in si.get("items"):
+			for i, k in enumerate(expected_values["keys"]):
+				self.assertEquals(d.get(k), expected_values[d.item_code][i])
+
+		# check net total
+		self.assertEquals(si.base_total, 1250)
+		self.assertEquals(si.total, 1250)
+		self.assertEquals(si.base_net_total, 625)
+		self.assertEquals(si.net_total, 625)
+
+		# check tax calculation
+		expected_values = {
+			"keys": ["tax_amount", "tax_amount_after_discount_amount", 
+				"base_tax_amount_after_discount_amount"],
+			"_Test Account Shipping Charges - _TC": [100, 100, 100],
+			"_Test Account Customs Duty - _TC": [62.5, 62.5, 62.5],
+			"_Test Account Excise Duty - _TC": [70, 70, 70],
+			"_Test Account Education Cess - _TC": [1.4, 1.4, 1.4],
+			"_Test Account S&H Education Cess - _TC": [.7, 0.7, 0.7],
+			"_Test Account CST - _TC": [17.2, 17.2, 17.2],
+			"_Test Account VAT - _TC": [78.13, 78.13, 78.13],
+			"_Test Account Discount - _TC": [-95.49, -95.49, -95.49]
+		}
+
+		for d in si.get("taxes"):
+			for i, k in enumerate(expected_values["keys"]):
+				self.assertEquals(d.get(k), expected_values[d.account_head][i])
+				
+		
+		self.assertEquals(si.total_taxes_and_charges, 234.44)
+		self.assertEquals(si.base_grand_total, 859.44)
+		self.assertEquals(si.grand_total, 859.44)
+		
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")

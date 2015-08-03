@@ -256,7 +256,8 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 					me.round_off_totals(tax);
 
 					// adjust Discount Amount loss in last tax iteration
-					if ((i == me.frm.doc["taxes"].length - 1) && me.discount_amount_applied && me.frm.doc.apply_discount_on == "Grand Total")
+					if ((i == me.frm.doc["taxes"].length - 1) && me.discount_amount_applied 
+							&& me.frm.doc.apply_discount_on == "Grand Total" && me.frm.doc.discount_amount)
 						me.adjust_discount_amount_loss(tax);
 				}
 			});
@@ -365,9 +366,9 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 				$.each(this.frm.doc["taxes"] || [], function(i, tax) {
 					if (in_list(["Valuation and Total", "Total"], tax.category)) {
 						if(tax.add_deduct_tax == "Add") {
-							me.frm.doc.taxes_and_charges_added += flt(tax.tax_amount);
+							me.frm.doc.taxes_and_charges_added += flt(tax.tax_amount_after_discount_amount);
 						} else {
-							me.frm.doc.taxes_and_charges_deducted += flt(tax.tax_amount);
+							me.frm.doc.taxes_and_charges_deducted += flt(tax.tax_amount_after_discount_amount);
 						}
 					}
 				})
