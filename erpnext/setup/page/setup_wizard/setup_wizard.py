@@ -220,6 +220,7 @@ def set_defaults(args):
 	stock_settings.valuation_method = "FIFO"
 	stock_settings.stock_uom = _("Nos")
 	stock_settings.auto_indent = 1
+	stock_settings.auto_insert_price_list_rate_if_missing = 1
 	stock_settings.save()
 
 	selling_settings = frappe.get_doc("Selling Settings")

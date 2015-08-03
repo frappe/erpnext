@@ -214,6 +214,8 @@ def get_price_list_rate(args, item_doc, out):
 			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
 
 		if not price_list_rate:
+			if args.price_list and args.rate:
+				insert_item_price(args)
 			return {}
 
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) \
@@ -223,6 +225,22 @@ def get_price_list_rate(args, item_doc, out):
 			from erpnext.stock.doctype.item.item import get_last_purchase_details
 			out.update(get_last_purchase_details(item_doc.name,
 				args.parent, args.conversion_rate))
+
+def insert_item_price(args):
+	"""Insert Item Price if Price List and Price List Rate are specified and currency is the same"""
+	if frappe.db.get_value("Price List", args.price_list, "currency") == args.currency \
+		and cint(frappe.db.get_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing")):
+		if frappe.has_permission("Item Price", "write"):
+			item_price = frappe.get_doc({
+				"doctype": "Item Price",
+				"price_list": args.price_list,
+				"item_code": args.item_code,
+				"currency": args.currency,
+				"price_list_rate": args.rate
+			})
+			item_price.insert()
+			frappe.msgprint("Item Price added for {0} in Price List {1}".format(args.item_code,
+				args.price_list))
 
 def get_price_list_rate_for(args, item_code):
 	return frappe.db.get_value("Item Price",

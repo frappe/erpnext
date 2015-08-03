@@ -240,6 +240,37 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertTrue("_Test Service Product Bundle Item 1" in [d.item_code for d in so.packed_items])
 		self.assertTrue("_Test Service Product Bundle Item 2" in [d.item_code for d in so.packed_items])
 
+	def test_auto_insert_price(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		make_item("_Test Item for Auto Price List", {"is_stock_item": 0, "is_sales_item": 1})
+		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
+
+		item_price = frappe.db.get_value("Item Price", {"price_list": "_Test Price List",
+			"item_code": "_Test Item for Auto Price List"})
+		if item_price:
+			frappe.delete_doc("Item Price", item_price)
+
+		make_sales_order(item_code = "_Test Item for Auto Price List", selling_price_list="_Test Price List", rate=100)
+
+		self.assertEquals(frappe.db.get_value("Item Price",
+			{"price_list": "_Test Price List", "item_code": "_Test Item for Auto Price List"}, "price_list_rate"), 100)
+
+
+		# do not update price list
+		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 0)
+
+		item_price = frappe.db.get_value("Item Price", {"price_list": "_Test Price List",
+			"item_code": "_Test Item for Auto Price List"})
+		if item_price:
+			frappe.delete_doc("Item Price", item_price)
+
+		make_sales_order(item_code = "_Test Item for Auto Price List", selling_price_list="_Test Price List", rate=100)
+
+		self.assertEquals(frappe.db.get_value("Item Price",
+			{"price_list": "_Test Price List", "item_code": "_Test Item for Auto Price List"}, "price_list_rate"), None)
+
+		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
+
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
 	args = frappe._dict(args)
@@ -250,6 +281,8 @@ def make_sales_order(**args):
 	so.customer = args.customer or "_Test Customer"
 	so.delivery_date = add_days(so.transaction_date, 10)
 	so.currency = args.currency or "INR"
+	if args.selling_price_list:
+		so.selling_price_list = args.selling_price_list
 
 	so.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
