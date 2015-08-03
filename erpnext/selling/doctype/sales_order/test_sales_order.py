@@ -80,7 +80,7 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_reserved_qty_for_partial_delivery(self):
 		existing_reserved_qty = get_reserved_qty()
-		
+
 		so = make_sales_order()
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 10)
 
@@ -91,7 +91,7 @@ class TestSalesOrder(unittest.TestCase):
 		so.load_from_db()
 		so.stop_sales_order()
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty)
-		
+
 		# unstop so
 		so.load_from_db()
 		so.unstop_sales_order()
@@ -99,7 +99,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		dn.cancel()
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 10)
-		
+
 		# cancel
 		so.load_from_db()
 		so.cancel()
@@ -108,9 +108,9 @@ class TestSalesOrder(unittest.TestCase):
 	def test_reserved_qty_for_over_delivery(self):
 		# set over-delivery tolerance
 		frappe.db.set_value('Item', "_Test Item", 'tolerance', 50)
-		
+
 		existing_reserved_qty = get_reserved_qty()
-		
+
 		so = make_sales_order()
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty + 10)
 
@@ -124,39 +124,39 @@ class TestSalesOrder(unittest.TestCase):
 	def test_reserved_qty_for_partial_delivery_with_packing_list(self):
 		existing_reserved_qty_item1 = get_reserved_qty("_Test Item")
 		existing_reserved_qty_item2 = get_reserved_qty("_Test Item Home Desktop 100")
-		
+
 		so = make_sales_order(item_code="_Test Product Bundle Item")
-		
+
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1 + 50)
-		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), 
+		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"),
 			existing_reserved_qty_item2 + 20)
-		
+
 		dn = create_dn_against_so(so.name)
-		
+
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1 + 25)
-		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), 
+		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"),
 			existing_reserved_qty_item2 + 10)
 
 		# stop so
 		so.load_from_db()
 		so.stop_sales_order()
-		
+
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), existing_reserved_qty_item2)
 
 		# unstop so
 		so.load_from_db()
 		so.unstop_sales_order()
-		
+
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1 + 25)
-		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), 
+		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"),
 			existing_reserved_qty_item2 + 10)
 
 		dn.cancel()
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1 + 50)
-		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), 
+		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"),
 			existing_reserved_qty_item2 + 20)
-		
+
 		so.load_from_db()
 		so.cancel()
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
@@ -165,25 +165,25 @@ class TestSalesOrder(unittest.TestCase):
 	def test_reserved_qty_for_over_delivery_with_packing_list(self):
 		# set over-delivery tolerance
 		frappe.db.set_value('Item', "_Test Product Bundle Item", 'tolerance', 50)
-		
+
 		existing_reserved_qty_item1 = get_reserved_qty("_Test Item")
 		existing_reserved_qty_item2 = get_reserved_qty("_Test Item Home Desktop 100")
-		
+
 		so = make_sales_order(item_code="_Test Product Bundle Item")
-		
+
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1 + 50)
-		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), 
+		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"),
 			existing_reserved_qty_item2 + 20)
-		
+
 		dn = create_dn_against_so(so.name, 15)
-		
+
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
-		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), 
+		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"),
 			existing_reserved_qty_item2)
-		
+
 		dn.cancel()
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1 + 50)
-		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), 
+		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"),
 			existing_reserved_qty_item2 + 20)
 
 	def test_warehouse_user(self):
@@ -201,7 +201,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		frappe.set_user("test@example.com")
 
-		so = make_sales_order(company="_Test Company 1", 
+		so = make_sales_order(company="_Test Company 1",
 			warehouse="_Test Warehouse 2 - _TC1", do_not_save=True)
 		so.conversion_rate = 0.02
 		so.plc_conversion_rate = 0.02
@@ -216,14 +216,30 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_block_delivery_note_against_cancelled_sales_order(self):
 		so = make_sales_order()
-		
+
 		dn = make_delivery_note(so.name)
 		dn.insert()
-		
+
 		so.cancel()
-		
+
 		self.assertRaises(frappe.CancelledLinkError, dn.submit)
-		
+
+	def test_service_type_product_bundle(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+
+		make_item("_Test Service Product Bundle", {"is_stock_item": 0, "is_sales_item": 1})
+		make_item("_Test Service Product Bundle Item 1", {"is_stock_item": 0, "is_sales_item": 1})
+		make_item("_Test Service Product Bundle Item 2", {"is_stock_item": 0, "is_sales_item": 1})
+
+		make_product_bundle("_Test Service Product Bundle",
+			["_Test Service Product Bundle Item 1", "_Test Service Product Bundle Item 2"])
+
+		so = make_sales_order(item_code = "_Test Service Product Bundle")
+
+		self.assertTrue("_Test Service Product Bundle Item 1" in [d.item_code for d in so.packed_items])
+		self.assertTrue("_Test Service Product Bundle Item 2" in [d.item_code for d in so.packed_items])
+
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
 	args = frappe._dict(args)
@@ -246,12 +262,12 @@ def make_sales_order(**args):
 		so.insert()
 		if not args.do_not_submit:
 			so.submit()
-			
+
 	return so
-	
+
 def create_dn_against_so(so, delivered_qty=0):
 	frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
-	
+
 	dn = make_delivery_note(so)
 	dn.get("items")[0].qty = delivered_qty or 5
 	dn.insert()
@@ -261,5 +277,5 @@ def create_dn_against_so(so, delivered_qty=0):
 def get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"):
 	return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 		"reserved_qty"))
-	
+
 test_dependencies = ["Currency Exchange"]

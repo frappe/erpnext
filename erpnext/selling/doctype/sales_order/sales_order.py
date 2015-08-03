@@ -39,9 +39,8 @@ class SalesOrder(SellingController):
 		for d in self.get('items'):
 			check_list.append(cstr(d.item_code))
 
-			if (frappe.db.get_value("Item", d.item_code, "is_stock_item")==1 or
-				self.has_product_bundle(d.item_code)) and not d.warehouse:
-					frappe.throw(_("Reserved warehouse required for stock item {0}").format(d.item_code))
+			if frappe.db.get_value("Item", d.item_code, "is_stock_item") and not d.warehouse:
+					frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code))
 
 			# used for production plan
 			d.transaction_date = self.transaction_date
