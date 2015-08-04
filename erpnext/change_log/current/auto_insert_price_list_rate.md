@@ -1,0 +1,1 @@
+- Automatically insert Price List Rate in Price List if added in transaction if permission exists and allowed from Stock Settings

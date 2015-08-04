@@ -1,0 +1,1 @@
+- Product Bundle now allowed for all Items (stock or non-stock)
