@@ -6,6 +6,7 @@ import frappe
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 
 def execute():
+	frappe.reload_doctype("Sales Invoice")
 	return_entries = frappe.get_list("Sales Invoice", filters={"is_return": 1, "docstatus": 1}, 
 		fields=["debit_to", "customer", "return_against"])
 	for d in return_entries:
