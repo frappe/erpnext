@@ -10,7 +10,7 @@ ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a 
 
 - [User Guide](https://manual.erpnext.com)
 - [Getting Help](http://erpnext.org/getting-help.html)
-- [Discussion Forum](https://discuss.frappe.io/)
+- [Discussion Forum](https://discuss.erpnext.com/)
 
 ---
 
