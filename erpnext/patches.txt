@@ -187,3 +187,4 @@ execute:frappe.db.sql("update `tabLeave Type` set include_holiday=0")
 erpnext.patches.v5_4.set_root_and_report_type
 erpnext.patches.v5_4.notify_system_managers_regarding_wrong_tax_calculation
 erpnext.patches.v5_4.fix_invoice_outstanding
+execute:frappe.db.sql("update `tabStock Ledger Entry` set stock_queue = '[]' where voucher_type = 'Stock Reconciliation' and ifnull(qty_after_transaction, 0) = 0")
