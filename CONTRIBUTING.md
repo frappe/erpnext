@@ -2,7 +2,7 @@
 
 ## Questions
 
-If you have questions on how to use ERPNext or want help in customization or debugging of your scripts, please post on https://discuss.frappe.io. This is only for bug reports and feature requests.
+If you have questions on how to use ERPNext or want help in customization or debugging of your scripts, please post on https://discuss.erpnext.com. This is only for bug reports and feature requests.
 
 ## Reporting issues
 

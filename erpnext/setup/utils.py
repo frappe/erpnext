@@ -56,6 +56,9 @@ def before_tests():
 	frappe.db.sql("delete from `tabLeave Application`")
 	frappe.db.sql("delete from `tabSalary Slip`")
 	frappe.db.sql("delete from `tabItem Price`")
+
+	frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 0)
+
 	frappe.db.commit()
 
 @frappe.whitelist()

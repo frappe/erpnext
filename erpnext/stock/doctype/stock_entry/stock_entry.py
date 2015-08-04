@@ -93,7 +93,7 @@ class StockEntry(StockController):
 				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
 
 			item_details = self.get_item_details(frappe._dict({"item_code": item.item_code,
-				"company": self.company, "project_name": self.project_name}))
+				"company": self.company, "project_name": self.project_name, "uom": item.uom}), for_update=True)
 
 			for f in ("uom", "stock_uom", "description", "item_name", "expense_account",
 				"cost_center", "conversion_factor"):
@@ -419,7 +419,7 @@ class StockEntry(StockController):
 			"planned_qty": (self.docstatus==1 and -1 or 1 ) * flt(self.fg_completed_qty)
 		})
 
-	def get_item_details(self, args=None):
+	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select stock_uom, description, image, item_name,
 			expense_account, buying_cost_center, item_group from `tabItem`
 			where name = %s and (ifnull(end_of_life,'0000-00-00')='0000-00-00' or end_of_life > now())""",
@@ -444,20 +444,28 @@ class StockEntry(StockController):
 			'actual_qty'			: 0,
 			'incoming_rate'			: 0
 		}
-		for d in [["Account", "expense_account", "default_expense_account"], 
+		for d in [["Account", "expense_account", "default_expense_account"],
 			["Cost Center", "cost_center", "cost_center"]]:
 				company = frappe.db.get_value(d[0], ret.get(d[1]), "company")
 				if not ret[d[1]] or (company and self.company != company):
 					ret[d[1]] = frappe.db.get_value("Company", self.company, d[2]) if d[2] else None
-					
+
+		# update uom
+		if args.get("uom") and for_update:
+			ret.update(self.get_uom_details(args))
+
 		if not ret["expense_account"]:
 			ret["expense_account"] = frappe.db.get_value("Company", self.company, "stock_adjustment_account")
-		
+
 		stock_and_rate = args.get('warehouse') and self.get_warehouse_details(args) or {}
 		ret.update(stock_and_rate)
+
 		return ret
 
 	def get_uom_details(self, args):
+		"""Returns dict `{"conversion_factor": [value], "transfer_qty": qty * [value]}`
+
+		:param args: dict with `item_code`, `uom` and `qty`"""
 		conversion_factor = get_conversion_factor(args.get("item_code"), args.get("uom")).get("conversion_factor")
 
 		if not conversion_factor:

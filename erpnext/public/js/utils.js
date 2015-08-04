@@ -83,7 +83,7 @@ $.extend(erpnext, {
 							return {
 								filters: {
 									item_code:grid_row.doc.item_code ,
-									warehouse:grid_row.doc.warehouse
+									warehouse:cur_frm.doc.is_return ? null : grid_row.doc.warehouse
 								}
 							}
 						}

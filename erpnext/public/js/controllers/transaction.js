@@ -36,7 +36,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(this.frm.fields_dict["items"]) {
 			this["items_remove"] = this.calculate_taxes_and_totals;
 		}
-		
+
 		if(this.frm.fields_dict["recurring_print_format"]) {
 			this.frm.set_query("recurring_print_format", function(doc) {
 				return{
@@ -46,7 +46,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			});
 		}
-		
+
 		if(this.frm.fields_dict["return_against"]) {
 			this.frm.set_query("return_against", function(doc) {
 				var filters = {
@@ -56,13 +56,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				};
 				if (me.frm.fields_dict["customer"] && doc.customer) filters["customer"] = doc.customer;
 				if (me.frm.fields_dict["supplier"] && doc.supplier) filters["supplier"] = doc.supplier;
-	
+
 				return {
 					filters: filters
 				}
 			});
 		}
-		
+
 	},
 
 	onload_post_render: function() {
@@ -218,7 +218,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					item.serial_no += sr_no[x] + '\n';
 
 				refresh_field("serial_no", item.name, item.parentfield);
-				frappe.model.set_value(item.doctype, item.name, "qty", sr_no.length);
+				if(!doc.is_return) {
+					frappe.model.set_value(item.doctype, item.name, "qty", sr_no.length);
+				}
 			}
 		}
 	},
@@ -273,7 +275,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	posting_date: function() {
 		var me = this;
 		if (this.frm.doc.posting_date) {
-			if ((this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.customer) || 
+			if ((this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.customer) ||
 				(this.frm.doc.doctype == "Purchase Invoice" && this.frm.doc.supplier)) {
 				return frappe.call({
 					method: "erpnext.accounts.party.get_due_date",
@@ -282,7 +284,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						"party_type": me.frm.doc.doctype == "Sales Invoice" ? "Customer" : "Supplier",
 						"party": me.frm.doc.doctype == "Sales Invoice" ? me.frm.doc.customer : me.frm.doc.supplier,
 						"company": me.frm.doc.company
-					}, 
+					},
 					callback: function(r, rt) {
 						if(r.message) {
 							me.frm.set_value("due_date", r.message);
@@ -299,7 +301,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	get_company_currency: function() {
 		return erpnext.get_currency(this.frm.doc.company);
 	},
-	
+
 	contact_person: function() {
 		erpnext.utils.get_contact_details(this.frm);
 	},
@@ -371,7 +373,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	plc_conversion_rate: function() {
 		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
 			this.frm.set_value("plc_conversion_rate", 1.0);
-		} else if(this.frm.doc.price_list_currency === this.frm.doc.currency 
+		} else if(this.frm.doc.price_list_currency === this.frm.doc.currency
 			&& this.frm.doc.plc_conversion_rate && cint(this.frm.doc.plc_conversion_rate) != 1 &&
 			cint(this.frm.doc.plc_conversion_rate) != cint(this.frm.doc.conversion_rate)) {
 				this.frm.set_value("conversion_rate", this.frm.doc.plc_conversion_rate);

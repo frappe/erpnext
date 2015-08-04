@@ -12,6 +12,29 @@ from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
 
+def make_item(item_code, properties=None):
+	if frappe.db.exists("Item", item_code):
+		return frappe.get_doc("Item", item_code)
+
+	item = frappe.get_doc({
+		"doctype": "Item",
+		"item_code": item_code,
+		"item_name": item_code,
+		"description": item_code,
+		"item_group": "Products"
+	})
+
+	if properties:
+		item.update(properties)
+
+
+	if item.is_stock_item and not item.default_warehouse:
+		item.default_warehouse = "_Test Warehouse - _TC"
+
+	item.insert()
+
+	return item
+
 class TestItem(unittest.TestCase):
 	def get_item(self, idx):
 		item_code = test_records[idx].get("item_code")

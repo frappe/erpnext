@@ -218,7 +218,7 @@ class StockController(AccountsController):
 				tuple(item_codes))
 
 		return serialized_items
-		
+
 	def get_incoming_rate_for_sales_return(self, item_code, against_document):
 		incoming_rate = 0.0
 		if against_document and item_code:
@@ -229,12 +229,12 @@ class StockController(AccountsController):
 			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
 
 		return incoming_rate
-		
+
 	def update_reserved_qty(self, d):
 		if d['reserved_qty'] < 0 :
 			# Reduce reserved qty from reserved warehouse mentioned in so
 			if not d["reserved_warehouse"]:
-				frappe.throw(_("Reserved Warehouse is missing in Sales Order"))
+				frappe.throw(_("Delivery Warehouse is missing in Sales Order"))
 
 			args = {
 				"item_code": d['item_code'],

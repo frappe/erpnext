@@ -8,7 +8,6 @@ from frappe.utils import flt, get_datetime, format_datetime
 
 class StockOverReturnError(frappe.ValidationError): pass
 
-
 def validate_return(doc):
 	if not doc.meta.get_field("is_return") or not doc.is_return:
 		return
@@ -50,13 +49,19 @@ def validate_return_against(doc):
 						.format(doc.return_against))
 				
 def validate_returned_items(doc):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+	
 	valid_items = frappe._dict()
-	for d in frappe.db.sql("""select item_code, sum(qty) as qty, rate from `tab{0} Item` 
-		where parent = %s group by item_code""".format(doc.doctype), doc.return_against, as_dict=1):
-			valid_items.setdefault(d.item_code, d)
+	
+	select_fields = "item_code, sum(qty) as qty, rate" if doc.doctype=="Purchase Invoice" \
+		else "item_code, sum(qty) as qty, rate, serial_no, batch_no"
+	
+	for d in frappe.db.sql("""select {0} from `tab{1} Item` where parent = %s 
+		group by item_code""".format(select_fields, doc.doctype), doc.return_against, as_dict=1):
+			valid_items.setdefault(d.item_code, d)	
 	
 	if doc.doctype in ("Delivery Note", "Sales Invoice"):
-		for d in frappe.db.sql("""select item_code, sum(qty) as qty from `tabPacked Item` 
+		for d in frappe.db.sql("""select item_code, sum(qty) as qty, serial_no, batch_no from `tabPacked Item` 
 			where parent = %s group by item_code""".format(doc.doctype), doc.return_against, as_dict=1):
 				valid_items.setdefault(d.item_code, d)
 			
@@ -81,8 +86,20 @@ def validate_returned_items(doc):
 				elif ref.rate and flt(d.rate) != ref.rate:
 					frappe.throw(_("Row # {0}: Rate must be same as {1} {2}")
 						.format(d.idx, doc.doctype, doc.return_against))
+				elif ref.batch_no and d.batch_no != ref.batch_no:
+					frappe.throw(_("Row # {0}: Batch No must be same as {1} {2}")
+						.format(d.idx, doc.doctype, doc.return_against))
+				elif ref.serial_no:
+					if not d.serial_no:
+						frappe.throw(_("Row # {0}: Serial No is mandatory").format(d.idx))
+					else:
+						serial_nos = get_serial_nos(d.serial_no)
+						ref_serial_nos = get_serial_nos(ref.serial_no)
+						for s in serial_nos:
+							if s not in ref_serial_nos:
+								frappe.throw(_("Row # {0}: Serial No {1} does not match with {2} {3}")
+									.format(d.idx, s, doc.doctype, doc.return_against))
 				
-			
 			items_returned = True
 			
 	if not items_returned:
@@ -134,9 +151,11 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		},
 		doctype +" Item": {
 			"doctype": doctype + " Item",
-			"fields": {
+			"field_map": {
 				"purchase_order": "purchase_order",
-				"purchase_receipt": "purchase_receipt"
+				"purchase_receipt": "purchase_receipt",
+				"serial_no": "serial_no",
+				"batch_no": "batch_no"
 			},
 			"postprocess": update_item
 		},
