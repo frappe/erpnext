@@ -218,7 +218,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					item.serial_no += sr_no[x] + '\n';
 
 				refresh_field("serial_no", item.name, item.parentfield);
-				frappe.model.set_value(item.doctype, item.name, "qty", sr_no.length);
+				if(!doc.is_return) {
+					frappe.model.set_value(item.doctype, item.name, "qty", sr_no.length);
+				}
 			}
 		}
 	},
