@@ -52,9 +52,13 @@ def validate_returned_items(doc):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 	
 	valid_items = frappe._dict()
-	for d in frappe.db.sql("""select item_code, sum(qty) as qty, rate, serial_no, batch_no from `tab{0} Item` 
-		where parent = %s group by item_code""".format(doc.doctype), doc.return_against, as_dict=1):
-			valid_items.setdefault(d.item_code, d)
+	
+	select_fields = "item_code, sum(qty) as qty, rate" if doc.doctype=="Purchase Invoice" \
+		else "item_code, sum(qty) as qty, rate, serial_no, batch_no"
+	
+	for d in frappe.db.sql("""select {0} from `tab{1} Item` where parent = %s 
+		group by item_code""".format(select_fields, doc.doctype), doc.return_against, as_dict=1):
+			valid_items.setdefault(d.item_code, d)	
 	
 	if doc.doctype in ("Delivery Note", "Sales Invoice"):
 		for d in frappe.db.sql("""select item_code, sum(qty) as qty, serial_no, batch_no from `tabPacked Item` 
