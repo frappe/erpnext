@@ -27,7 +27,7 @@ blogs.
 """
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "5.4.2"
+app_version = "5.5.0"
 github_link = "https://github.com/frappe/erpnext"
 
 error_report_email = "support@erpnext.com"
