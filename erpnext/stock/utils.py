@@ -133,20 +133,19 @@ def get_fifo_rate(previous_stock_queue, qty):
 		qty_to_pop = abs(qty)
 		while qty_to_pop and previous_stock_queue:
 			batch = previous_stock_queue[0]
-			if batch[0]:
-				if 0 < batch[0] <= qty_to_pop:
-					# if batch qty > 0
-					# not enough or exactly same qty in current batch, clear batch
-					available_qty_for_outgoing += flt(batch[0])
-					outgoing_cost += flt(batch[0]) * flt(batch[1])
-					qty_to_pop -= batch[0]
-					previous_stock_queue.pop(0)
-				else:
-					# all from current batch
-					available_qty_for_outgoing += flt(qty_to_pop)
-					outgoing_cost += flt(qty_to_pop) * flt(batch[1])
-					batch[0] -= qty_to_pop
-					qty_to_pop = 0
+			if 0 < batch[0] <= qty_to_pop:
+				# if batch qty > 0
+				# not enough or exactly same qty in current batch, clear batch
+				available_qty_for_outgoing += flt(batch[0])
+				outgoing_cost += flt(batch[0]) * flt(batch[1])
+				qty_to_pop -= batch[0]
+				previous_stock_queue.pop(0)
+			else:
+				# all from current batch
+				available_qty_for_outgoing += flt(qty_to_pop)
+				outgoing_cost += flt(qty_to_pop) * flt(batch[1])
+				batch[0] -= qty_to_pop
+				qty_to_pop = 0
 
 		return outgoing_cost / available_qty_for_outgoing
 

@@ -152,7 +152,9 @@ $.extend(cur_frm.cscript, {
 			method: "erpnext.manufacturing.doctype.production_order.production_order.get_item_details",
 			args: { item: doc.production_item },
 			callback: function(r) {
-				cur_frm.set_value(r.message);
+				$.each(["description", "stock_uom", "bom_no"], function(i, field) {
+					cur_frm.set_value(field, r.message[field]);
+				});
 			}
 		});
 	},
@@ -187,8 +189,8 @@ $.extend(cur_frm.cscript, {
 
 	bom_no: function() {
 		return this.frm.call({
-		doc: this.frm.doc,
-		method: "set_production_order_operations"
+			doc: this.frm.doc,
+			method: "set_production_order_operations"
 		});
 	},
 
