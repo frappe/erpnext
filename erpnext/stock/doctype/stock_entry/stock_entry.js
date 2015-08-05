@@ -133,11 +133,12 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		var me = this;
 		this.toggle_enable_bom();
 
-		return this.frm.call({
-			method: "get_production_order_details",
+		return frappe.call({
+			method: "erpnext.stock.doctype.stock_entry.stock_entry.get_production_order_details",
 			args: {production_order: this.frm.doc.production_order},
 			callback: function(r) {
 				if (!r.exc) {
+					me.frm.set_value(r.message);
 					if (me.frm.doc.purpose == "Material Transfer for Manufacture" && !me.frm.doc.to_warehouse)
 						me.frm.set_value("to_warehouse", r.message["wip_warehouse"]);
 					me.frm.set_value("from_bom", 1);
