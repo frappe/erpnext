@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cstr
 import copy
 import json
 
@@ -204,4 +205,4 @@ def copy_attributes_to_variant(item, variant, variant_attribute=None, insert=Fal
 	if variant.attributes:
 		variant.description += "\n"
 		for d in variant.attributes:
-			variant.description += "<p>" + d.attribute + ": " + d.attribute_value + "</p>"
+			variant.description += "<p>" + d.attribute + ": " + cstr(d.attribute_value) + "</p>"

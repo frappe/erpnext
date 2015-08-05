@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate
 from frappe.website.website_generator import WebsiteGenerator
@@ -63,6 +64,7 @@ class Item(WebsiteGenerator):
 		self.synced_with_hub = 0
 		self.validate_has_variants()
 		self.validate_stock_for_template_must_be_zero()
+		self.validate_template_attributes()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -315,7 +317,7 @@ class Item(WebsiteGenerator):
 				or ifnull(reserved_qty, 0) > 0 or ifnull(indented_qty, 0) > 0 or ifnull(planned_qty, 0) > 0)""", self.name)
 			if stock_in:
 				frappe.throw(_("Item Template cannot have stock or Open Sales/Purchase/Production Orders."), ItemTemplateCannotHaveStock)
-				
+
 	def validate_uom(self):
 		if not self.get("__islocal"):
 			check_stock_uom_with_bin(self.name, self.stock_uom)
@@ -326,6 +328,15 @@ class Item(WebsiteGenerator):
 			template_uom = frappe.db.get_value("Item", self.variant_of, "stock_uom")
 			if template_uom != self.stock_uom:
 				frappe.throw(_("Default Unit of Measure for Variant must be same as Template"))
+
+	def validate_template_attributes(self):
+		if self.has_variants:
+			attributes = []
+			for d in self.valid_attributes:
+				if d.attribute in attributes:
+					frappe.throw(_("Attribute {0} selected multiple times in Attributes Table".format(d.attribute)))
+				else:
+					attributes.append(d.attribute)
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
@@ -458,3 +469,60 @@ def check_stock_uom_with_bin(item, stock_uom):
 		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because \
 			you have already made some transaction(s) with another UOM. To change default UOM, \
 			use 'UOM Replace Utility' tool under Stock module.").format(item))
+
+@frappe.whitelist()
+def get_variant(item, param):
+	args = json.loads(param)
+	attributes = {}
+	numeric_attributes = []
+	for t in frappe.db.get_all("Item Attribute Value", fields=["parent", "attribute_value"]):
+		attributes.setdefault(t.parent, []).append(t.attribute_value)
+	
+	for t in frappe.get_list("Item Attribute", filters={"numeric_values":1}):
+		numeric_attributes.append(t.name)
+
+	for d in args:
+		if d in numeric_attributes:
+			values = frappe.db.sql("""select from_range, to_range, increment from `tabItem Template Attribute` \
+				where parent = %s and attribute = %s""", (item, d), as_dict=1)[0]
+
+			if (not values.from_range < args[d] < values.to_range) or ((args[d] - values.from_range) % values.increment != 0):
+				frappe.throw(_("Attribute value {0} for attribute {1} must be within range of {2} to {3} and in increments of {4}")
+					.format(args[d], d, values.from_range, values.to_range, values.increment))
+		else:
+			if args[d] not in attributes.get(d):
+				frappe.throw(_("Attribute value {0} for attribute {1} does not exist \
+					in Item Attribute Master.").format(args[d], d))
+
+	conds=""
+	attributes = ""
+	for d in args:
+		if conds:
+			conds+= " and "
+			attributes+= ", "
+		
+		conds += """ exists(select iv.name from `tabVariant Attribute` iv where iv.parent = i.name and
+			 iv.attribute= "{0}" and iv.attribute_value= "{1}")""".format(d, args[d])
+		attributes += "'{0}'".format(d)
+
+	conds += """and not exists (select iv.name from `tabVariant Attribute` iv where iv.parent = i.name and 
+		iv.attribute not in ({0}))""".format(attributes)
+
+	variant=  frappe.db.sql("""select i.name from tabItem i where {0}""".format(conds))
+	return variant
+	
+@frappe.whitelist()
+def create_variant(item, param):
+	from erpnext.stock.doctype.manage_variants.manage_variants import copy_attributes_to_variant
+	args = json.loads(param)
+	variant = frappe.new_doc("Item")
+	variant.item_code = item
+	variant_attributes = []
+	for d in args:
+		variant_attributes.append({
+			"attribute": d,
+			"attribute_value": args[d]
+		})
+	variant.set("attributes", variant_attributes)
+	copy_attributes_to_variant(item, variant)
+	return variant
