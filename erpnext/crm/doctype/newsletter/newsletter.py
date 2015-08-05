@@ -138,8 +138,6 @@ def subscribe(email):
 		_("Click here to verify")
 	)
 
-	print url
-
 	content = """
 	<p>{0}. {1}.</p>
 	<p><a href="{2}">{3}</a></p>
