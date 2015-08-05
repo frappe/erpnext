@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cstr
+from frappe.utils import cstr, flt
 import copy
 import json
 
@@ -70,12 +70,26 @@ class ManageVariants(Document):
 
 	def validate_attribute_values(self):
 		attributes = {}
+		numeric_attributes = []
 		for t in frappe.db.get_all("Item Attribute Value", fields=["parent", "attribute_value"]):
 			attributes.setdefault(t.parent, []).append(t.attribute_value)
-		
+	
+		for t in frappe.get_list("Item Attribute", filters={"numeric_values":1}):
+			numeric_attributes.append(t.name)
+
 		for d in self.attributes:
-			if d.attribute_value not in attributes.get(d.attribute):
-				frappe.throw(_("Attribute value {0} does not exist in Item Attribute Master.").format(d.attribute_value))
+			if d.attribute in numeric_attributes:
+				values = frappe.db.sql("""select from_range, to_range, increment from `tabItem Template Attribute` \
+					where parent = %s and attribute = %s""", (self.item_code, d.attribute), as_dict=1)[0]
+
+				if (not values.from_range < flt(d.attribute_value) < values.to_range) \
+					or ((flt(d.attribute_value) - values.from_range) % values.increment != 0):
+					frappe.throw(_("Attribute value {0} for attribute {1} must be within range of {2} to {3} and in increments of {4}")
+						.format(d.attribute_value, d.attribute, values.from_range, values.to_range, values.increment))
+			else:
+				if d.attribute_value not in attributes.get(d.attribute):
+					frappe.throw(_("Attribute value {0} for attribute {1} does not exist \
+						in Item Attribute Master.").format(d.attribute_value, d.attribute))
 
 	def validate_attributes_are_unique(self):
 		attributes = []
