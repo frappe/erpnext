@@ -92,13 +92,13 @@ def get_charts_for_country(country):
 				with open(os.path.join(path, fname), "r") as f:
 					_get_chart_name(f.read())
 
-	countries_use_OHADA_system = ["Benin", "Burkina Faso", "Cameroon", "Central African Republic", "Comoros",
-		"Congo", "Ivory Coast", "Gabon", "Guinea", "Guinea Bissau", "Equatorial Guinea", "Mali", "Niger",
-		"Replica of Democratic Congo", "Senegal", "Chad", "Togo"]
-
-	if country in countries_use_OHADA_system:
-		with open(os.path.join(os.path.dirname(__file__), "syscohada_syscohada_chart_template.json"), "r") as f:
-			_get_chart_name(f.read())
+	# countries_use_OHADA_system = ["Benin", "Burkina Faso", "Cameroon", "Central African Republic", "Comoros",
+	# 	"Congo", "Ivory Coast", "Gabon", "Guinea", "Guinea Bissau", "Equatorial Guinea", "Mali", "Niger",
+	# 	"Replica of Democratic Congo", "Senegal", "Chad", "Togo"]
+	#
+	# if country in countries_use_OHADA_system:
+	# 	with open(os.path.join(os.path.dirname(__file__), "syscohada_syscohada_chart_template.json"), "r") as f:
+	# 		_get_chart_name(f.read())
 
 	if len(charts) != 1:
 		charts.append("Standard")
