@@ -224,7 +224,7 @@ $.extend(erpnext.item, {
 				method:"erpnext.stock.doctype.item.item.get_variant",
 				args: {
 					"item": cur_frm.doc.name,
-					"param": d.get_values()
+					"args": d.get_values()
 				},
 				callback: function(r) {
 					if (r.message) {

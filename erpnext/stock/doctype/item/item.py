@@ -65,6 +65,7 @@ class Item(WebsiteGenerator):
 		self.validate_has_variants()
 		self.validate_stock_for_template_must_be_zero()
 		self.validate_template_attributes()
+		self.validate_variant_attributes()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -337,6 +338,16 @@ class Item(WebsiteGenerator):
 					frappe.throw(_("Attribute {0} selected multiple times in Attributes Table".format(d.attribute)))
 				else:
 					attributes.append(d.attribute)
+					
+	def validate_variant_attributes(self):
+		if self.variant_of:
+			args = {}
+			for d in self.attributes:
+				args[d.attribute] = d.attribute_value
+				
+			variant = get_variant(self.variant_of, args)
+			if variant and not variant[0][0] == self.name:
+				frappe.throw(_("Item variant {0} exists with same attributes".format(variant[0][0])	))
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
@@ -471,8 +482,9 @@ def check_stock_uom_with_bin(item, stock_uom):
 			use 'UOM Replace Utility' tool under Stock module.").format(item))
 
 @frappe.whitelist()
-def get_variant(item, param):
-	args = json.loads(param)
+def get_variant(item, args):
+	if not type(args) == dict:
+		args = json.loads(args)
 	attributes = {}
 	numeric_attributes = []
 	for t in frappe.db.get_all("Item Attribute Value", fields=["parent", "attribute_value"]):
@@ -486,7 +498,7 @@ def get_variant(item, param):
 			values = frappe.db.sql("""select from_range, to_range, increment from `tabItem Template Attribute` \
 				where parent = %s and attribute = %s""", (item, d), as_dict=1)[0]
 
-			if (not values.from_range < args[d] < values.to_range) or ((args[d] - values.from_range) % values.increment != 0):
+			if (not values.from_range < cint(args[d]) < values.to_range) or ((cint(args[d]) - values.from_range) % values.increment != 0):
 				frappe.throw(_("Attribute value {0} for attribute {1} must be within range of {2} to {3} and in increments of {4}")
 					.format(args[d], d, values.from_range, values.to_range, values.increment))
 		else:
