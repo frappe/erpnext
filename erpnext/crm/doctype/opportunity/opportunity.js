@@ -80,9 +80,23 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 		if(doc.status!=="Quotation")
 			cur_frm.add_custom_button(__('Opportunity Lost'),
 				cur_frm.cscript['Declare Opportunity Lost'], "icon-remove", "btn-default");
-
-
 	}
+
+	var frm = cur_frm;
+	if(frm.perm[0].write && doc.docstatus==0) {
+		if(frm.doc.status==="Open") {
+			frm.add_custom_button("Close", function() {
+				frm.set_value("status", "Closed");
+				frm.save();
+			});
+		} else {
+			frm.add_custom_button("Reopen", function() {
+				frm.set_value("status", "Open");
+				frm.save();
+			});
+		}
+	}
+
 }
 
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
