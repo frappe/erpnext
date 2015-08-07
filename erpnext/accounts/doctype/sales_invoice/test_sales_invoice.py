@@ -746,7 +746,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_return_sales_invoice(self):
 		set_perpetual_inventory()
 		
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, incoming_rate=100)
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 		
 		actual_qty_0 = get_qty_after_transaction()
 		

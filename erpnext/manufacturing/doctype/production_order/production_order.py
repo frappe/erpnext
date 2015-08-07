@@ -10,15 +10,15 @@ from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
 from dateutil.relativedelta import relativedelta
 from erpnext.stock.doctype.item.item import validate_end_of_life
+from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError, NotInWorkingHoursError
+from erpnext.projects.doctype.time_log.time_log import OverlapError
+from erpnext.stock.doctype.stock_entry.stock_entry import get_additional_costs
 
 class OverProductionError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
 class OperationTooLongError(frappe.ValidationError): pass
 class ProductionNotApplicableError(frappe.ValidationError): pass
 class ItemHasVariantError(frappe.ValidationError): pass
-
-from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError, NotInWorkingHoursError
-from erpnext.projects.doctype.time_log.time_log import OverlapError
 
 form_grid_templates = {
 	"operations": "templates/form_grid/production_order_grid.html"
@@ -356,7 +356,6 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 	stock_entry.company = production_order.company
 	stock_entry.from_bom = 1
 	stock_entry.bom_no = production_order.bom_no
-	stock_entry.additional_operating_cost = production_order.additional_operating_cost
 	stock_entry.use_multi_level_bom = production_order.use_multi_level_bom
 	stock_entry.fg_completed_qty = qty or (flt(production_order.qty) - flt(production_order.produced_qty))
 
@@ -365,6 +364,8 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 	else:
 		stock_entry.from_warehouse = production_order.wip_warehouse
 		stock_entry.to_warehouse = production_order.fg_warehouse
+		additional_costs = get_additional_costs(production_order, fg_qty=stock_entry.fg_completed_qty)
+		stock_entry.set("additional_costs", additional_costs)
 
 	stock_entry.get_items()
 	return stock_entry.as_dict()

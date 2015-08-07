@@ -37,7 +37,7 @@ class TestDeliveryNote(unittest.TestCase):
 		set_perpetual_inventory(0)
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 0)
 
-		make_stock_entry(target="_Test Warehouse - _TC", qty=5, incoming_rate=100)
+		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 
 		stock_queue = json.loads(get_previous_sle({
 			"item_code": "_Test Item",
@@ -59,7 +59,7 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
 		frappe.db.set_value("Item", "_Test Item", "valuation_method", "FIFO")
 
-		make_stock_entry(target="_Test Warehouse - _TC", qty=5, incoming_rate=100)
+		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"warehouse": "_Test Warehouse - _TC"})
 		prev_bal = get_balance_on(stock_in_hand_account)
@@ -85,7 +85,7 @@ class TestDeliveryNote(unittest.TestCase):
 
 		# back dated incoming entry
 		make_stock_entry(posting_date=add_days(nowdate(), -2), target="_Test Warehouse - _TC",
-			qty=5, incoming_rate=100)
+			qty=5, basic_rate=100)
 
 		gl_entries = get_gl_entries("Delivery Note", dn.name)
 		self.assertTrue(gl_entries)
@@ -107,9 +107,9 @@ class TestDeliveryNote(unittest.TestCase):
 	def test_delivery_note_gl_entry_packing_item(self):
 		set_perpetual_inventory()
 
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, incoming_rate=100)
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		make_stock_entry(item_code="_Test Item Home Desktop 100",
-			target="_Test Warehouse - _TC", qty=10, incoming_rate=100)
+			target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"warehouse": "_Test Warehouse - _TC"})
 		prev_bal = get_balance_on(stock_in_hand_account)
@@ -184,7 +184,7 @@ class TestDeliveryNote(unittest.TestCase):
 	def test_sales_return_for_non_bundled_items(self):
 		set_perpetual_inventory()
 		
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, incoming_rate=100)
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 		
 		actual_qty_0 = get_qty_after_transaction()
 		

@@ -237,7 +237,7 @@ def repost_all_stock_vouchers():
 
 			doc = frappe.get_doc(voucher_type, voucher_no)
 			if voucher_type=="Stock Entry" and doc.purpose in ["Manufacture", "Repack"]:
-				doc.get_stock_and_rate(force=1)
+				doc.calculate_rate_and_amount(force=1)
 			elif voucher_type=="Purchase Receipt" and doc.is_subcontracted == "Yes":
 				doc.validate()
 
