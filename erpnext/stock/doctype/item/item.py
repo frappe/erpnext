@@ -48,7 +48,7 @@ class Item(WebsiteGenerator):
 			self.website_image = self.image
 
 		self.check_warehouse_is_set_for_stock_item()
-		self.check_stock_uom_with_bin()
+		self.validate_uom()
 		self.add_default_uom_in_conversion_factor_table()
 		self.validate_conversion_factor()
 		self.validate_item_type()
@@ -104,35 +104,6 @@ class Item(WebsiteGenerator):
 				to_remove.append(d)
 
 		[self.remove(d) for d in to_remove]
-
-
-	def check_stock_uom_with_bin(self):
-		if not self.get("__islocal"):
-			if self.stock_uom == frappe.db.get_value("Item", self.name, "stock_uom"):
-				return
-
-			matched=True
-			ref_uom = frappe.db.get_value("Stock Ledger Entry",
-				{"item_code": self.name}, "stock_uom")
-
-			if ref_uom:
-				if cstr(ref_uom) != cstr(self.stock_uom):
-					matched = False
-			else:
-				bin_list = frappe.db.sql("select * from tabBin where item_code=%s",
-					self.item_code, as_dict=1)
-				for bin in bin_list:
-					if (bin.reserved_qty > 0 or bin.ordered_qty > 0 or bin.indented_qty > 0 \
-						or bin.planned_qty > 0) and cstr(bin.stock_uom) != cstr(self.stock_uom):
-							matched = False
-							break
-
-				if matched and bin_list:
-					frappe.db.sql("""update tabBin set stock_uom=%s where item_code=%s""",
-						(self.stock_uom, self.name))
-
-			if not matched:
-				frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. To change default UOM, use 'UOM Replace Utility' tool under Stock module.").format(self.name))
 
 	def update_template_tables(self):
 		template = frappe.get_doc("Item", self.variant_of)
@@ -344,6 +315,17 @@ class Item(WebsiteGenerator):
 				or ifnull(reserved_qty, 0) > 0 or ifnull(indented_qty, 0) > 0 or ifnull(planned_qty, 0) > 0)""", self.name)
 			if stock_in:
 				frappe.throw(_("Item Template cannot have stock or Open Sales/Purchase/Production Orders."), ItemTemplateCannotHaveStock)
+				
+	def validate_uom(self):
+		if not self.get("__islocal"):
+			check_stock_uom_with_bin(self.name, self.stock_uom)
+		if self.has_variants:
+			for d in frappe.db.get_all("Item", filters= {"variant_of": self.name}):
+				check_stock_uom_with_bin(d.name, self.stock_uom)
+		if self.variant_of:
+			template_uom = frappe.db.get_value("Item", self.variant_of, "stock_uom")
+			if template_uom != self.stock_uom:
+				frappe.throw(_("Default Unit of Measure for Variant must be same as Template"))
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
@@ -449,3 +431,30 @@ def invalidate_cache_for_item(doc):
 
 	if doc.get("old_item_group") and doc.get("old_item_group") != doc.item_group:
 		invalidate_cache_for(doc, doc.old_item_group)
+
+def check_stock_uom_with_bin(item, stock_uom):
+	if stock_uom == frappe.db.get_value("Item", item, "stock_uom"):
+		return
+
+	matched=True
+	ref_uom = frappe.db.get_value("Stock Ledger Entry",
+		{"item_code": item}, "stock_uom")
+
+	if ref_uom:
+		if cstr(ref_uom) != cstr(stock_uom):
+			matched = False
+	else:
+		bin_list = frappe.db.sql("select * from tabBin where item_code=%s", item, as_dict=1)
+		for bin in bin_list:
+			if (bin.reserved_qty > 0 or bin.ordered_qty > 0 or bin.indented_qty > 0 \
+				or bin.planned_qty > 0) and cstr(bin.stock_uom) != cstr(stock_uom):
+					matched = False
+					break
+
+		if matched and bin_list:
+			frappe.db.sql("""update tabBin set stock_uom=%s where item_code=%s""", (stock_uom, item))
+
+	if not matched:
+		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because \
+			you have already made some transaction(s) with another UOM. To change default UOM, \
+			use 'UOM Replace Utility' tool under Stock module.").format(item))
