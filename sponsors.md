@@ -29,5 +29,13 @@
 				For Sales / Purchase Return Enhancement <a href="https://github.com/frappe/erpnext/issues/3582">#3582</a>
 			</td>
 		</tr>
+		<tr>
+			<td style="width: 30%">
+				PT. Ridho Sribumi Sejahtera
+			</td>
+			<td>
+				For Additional Costs in Stock Entry <a href="https://github.com/frappe/erpnext/issues/3613">#3613</a>
+			</td>
+		</tr>
 	</tbody>
 </table>

@@ -1,0 +1,2 @@
+- Additional Costs in Stock Entry **[Sponsored by PT. Ridho Sribumi Sejahtera]**
+	- Now additional costs like shipping charges, operating costs etc can be added in Stock Entry in item valuation
