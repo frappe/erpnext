@@ -101,7 +101,7 @@
    "fieldtype": "Data", 
    "label": "Phone", 
    "permlevel": 0, 
-   "reqd": 1
+   "reqd": 0
   }, 
   {
    "fieldname": "fax", 
@@ -199,7 +199,7 @@
  "icon": "icon-map-marker", 
  "idx": 1, 
  "in_dialog": 0, 
- "modified": "2015-06-01 06:42:18.331818", 
+ "modified": "2015-08-10 19:42:18.331818", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Address", 
