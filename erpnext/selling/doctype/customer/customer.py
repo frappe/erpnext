@@ -119,7 +119,8 @@ def get_dashboard_info(customer):
 		frappe.msgprint(_("Not permitted"), raise_exception=True)
 
 	out = {}
-	for doctype in ["Opportunity", "Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+	for doctype in ["Opportunity", "Quotation", "Sales Order", "Delivery Note",
+		"Sales Invoice", "Project"]:
 		out[doctype] = frappe.db.get_value(doctype,
 			{"customer": customer, "docstatus": ["!=", 2] }, "count(*)")
 
