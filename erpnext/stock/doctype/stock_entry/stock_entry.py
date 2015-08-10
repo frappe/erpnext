@@ -551,6 +551,12 @@ class StockEntry(StockController):
 					if self.to_warehouse and self.pro_doc:
 						for item in item_dict.values():
 							item["to_warehouse"] = self.pro_doc.wip_warehouse
+					self.add_to_stock_entry_detail(item_dict)
+					
+				elif self.production_order and self.purpose == "Manufacture" and \
+					frappe.db.get_single_value("Manufacturing Settings", "backflush_raw_materials_based_on")== "Material Transferred for Manufacture":
+					self.get_transfered_raw_materials()
+
 				else:
 					if not self.fg_completed_qty:
 						frappe.throw(_("Manufacturing Quantity is mandatory"))
@@ -561,9 +567,7 @@ class StockEntry(StockController):
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
 
 						item["to_warehouse"] = self.to_warehouse if self.purpose=="Subcontract" else ""
-
-				# add raw materials to Stock Entry Detail table
-				self.add_to_stock_entry_detail(item_dict)
+					self.add_to_stock_entry_detail(item_dict)
 
 			# add finished goods item
 			if self.purpose in ("Manufacture", "Repack"):
@@ -604,8 +608,54 @@ class StockEntry(StockController):
 
 		for item in item_dict.values():
 			item.from_warehouse = self.from_warehouse or item.default_warehouse
-
 		return item_dict
+		
+	def get_transfered_raw_materials(self):
+		raw_materials = frappe.db.sql("""select item_name, item_code, sum(qty) as qty, sed.t_warehouse as warehouse, 
+			description, stock_uom, expense_account, cost_center from `tabStock Entry` se,`tabStock Entry Detail` sed 
+			where se.name = sed.parent and se.docstatus=1 and se.purpose='Material Transfer for Manufacture' and 
+			se.production_order= %s and ifnull(sed.t_warehouse, '') != '' group by sed.item_code, sed.t_warehouse""", 
+			self.production_order, as_dict=1)
+		
+		transfered_materials = frappe.db.sql("""select item_code, sed.s_warehouse as warehouse, sum(qty) as qty from `tabStock Entry` se,
+			`tabStock Entry Detail` sed where se.name = sed.parent and se.docstatus=1 and 
+			se.purpose='Manufacture' and se.production_order= %s and ifnull(sed.s_warehouse, '') != '' 
+			group by sed.item_code, sed.s_warehouse""", self.production_order, as_dict=1)
+		
+		transfered_qty= {}
+		for d in transfered_materials:
+			transfered_qty.setdefault(d.item_code,[]).append({d.warehouse: d.qty})
+		
+		po_qty = frappe.db.sql("""select qty, produced_qty, material_transferred_for_manufacturing from
+			`tabProduction Order` where name=%s""", self.production_order, as_dict=1)[0]
+		manufacturing_qty = flt(po_qty.qty)
+		produced_qty = flt(po_qty.produced_qty)
+		trans_qty = flt(po_qty.material_transferred_for_manufacturing)
+		
+		for item in raw_materials:
+			qty= item.qty
+			
+			if manufacturing_qty > (produced_qty + flt(self.fg_completed_qty)):
+				qty = (qty/trans_qty) * flt(self.fg_completed_qty)
+			
+			elif transfered_qty.get(item.item_code):
+				for d in transfered_qty.get(item.item_code):
+					if d.get(item.warehouse):
+						qty-= d.get(item.warehouse)
+				
+			if qty > 0:
+				self.add_to_stock_entry_detail({
+					item.item_code: {
+						"from_warehouse": item.warehouse,
+						"to_warehouse": "",
+						"qty": qty,
+						"item_name": item.item_name,
+						"description": item.description,
+						"stock_uom": item.stock_uom,
+						"expense_account": item.expense_account,
+						"cost_center": item.buying_cost_center,
+					}
+				})
 
 	def get_pending_raw_materials(self):
 		"""
@@ -671,7 +721,7 @@ class StockEntry(StockController):
 				se_child.s_warehouse = self.from_warehouse
 			if se_child.t_warehouse==None:
 				se_child.t_warehouse = self.to_warehouse
-
+				
 			# in stock uom
 			se_child.transfer_qty = flt(item_dict[d]["qty"])
 			se_child.conversion_factor = 1.00
