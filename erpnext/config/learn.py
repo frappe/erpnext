@@ -87,6 +87,11 @@ def get_data():
 					"label": _("Lead to Quotation"),
 					"youtube_id": "TxYX4r4JAKA"
 				},
+				{
+					"type": "help",
+					"label": _("Newsletters"),
+					"youtube_id": "muLKsCrrDRo"
+				},
 			]
 		},
 		{
@@ -122,6 +127,26 @@ def get_data():
 					"label": _("Opening Stock Balance"),
 					"youtube_id": "0yPgrtfeCTs"
 				},
+				{
+					"type": "help",
+					"label": _("Making Stock Entries"),
+					"youtube_id": "Njt107hlY3I"
+				},
+				{
+					"type": "help",
+					"label": _("Serialized Inventory"),
+					"youtube_id": "gvOVlEwFDAk"
+				},
+				{
+					"type": "help",
+					"label": _("Batch Inventory"),
+					"youtube_id": "J0QKl7ABPKM"
+				},
+				{
+					"type": "help",
+					"label": _("Managing Subcontracting"),
+					"youtube_id": "ThiMCC2DtKo"
+				},
 			]
 		},
 		{
@@ -137,7 +162,16 @@ def get_data():
 					"label": _("Material Request to Purchase Order"),
 					"youtube_id": "4TN9kPyfIqM"
 				},
-
+				{
+					"type": "help",
+					"label": _("Purchase Order to Payment"),
+					"youtube_id": "EK65tLdVUDk"
+				},
+				{
+					"type": "help",
+					"label": _("Managing Subcontracting"),
+					"youtube_id": "ThiMCC2DtKo"
+				},
 			]
 		},
 		{
@@ -178,6 +212,11 @@ def get_data():
 					"type": "help",
 					"label": _("Expense Claims"),
 					"youtube_id": "5SZHJF--ZFY"
+				},
+				{
+					"type": "help",
+					"label": _("Processing Payroll"),
+					"youtube_id": "apgE-f25Rm0"
 				},
 			]
 		},
