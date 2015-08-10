@@ -72,7 +72,7 @@ class TestMaterialRequest(unittest.TestCase):
 						"doctype": "Stock Entry Detail",
 						"item_code": "_Test Item Home Desktop 100",
 						"parentfield": "items",
-						"incoming_rate": 100,
+						"basic_rate": 100,
 						"qty": qty1,
 						"stock_uom": "_Test UOM 1",
 						"transfer_qty": qty1,
@@ -84,7 +84,7 @@ class TestMaterialRequest(unittest.TestCase):
 						"doctype": "Stock Entry Detail",
 						"item_code": "_Test Item Home Desktop 200",
 						"parentfield": "items",
-						"incoming_rate": 100,
+						"basic_rate": 100,
 						"qty": qty2,
 						"stock_uom": "_Test UOM 1",
 						"transfer_qty": qty2,
@@ -196,13 +196,13 @@ class TestMaterialRequest(unittest.TestCase):
 			"qty": 27.0,
 			"transfer_qty": 27.0,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
-			"incoming_rate": 1.0
+			"basic_rate": 1.0
 		})
 		se_doc.get("items")[1].update({
 			"qty": 1.5,
 			"transfer_qty": 1.5,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
-			"incoming_rate": 1.0
+			"basic_rate": 1.0
 		})
 
 		# make available the qty in _Test Warehouse 1 before transfer
@@ -279,13 +279,13 @@ class TestMaterialRequest(unittest.TestCase):
 			"qty": 60.0,
 			"transfer_qty": 60.0,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
-			"incoming_rate": 1.0
+			"basic_rate": 1.0
 		})
 		se_doc.get("items")[1].update({
 			"qty": 3.0,
 			"transfer_qty": 3.0,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
-			"incoming_rate": 1.0
+			"basic_rate": 1.0
 		})
 
 		# make available the qty in _Test Warehouse 1 before transfer
@@ -350,13 +350,13 @@ class TestMaterialRequest(unittest.TestCase):
 			"transfer_qty": 60.0,
 			"s_warehouse": "_Test Warehouse - _TC",
 			"t_warehouse": "_Test Warehouse 1 - _TC",
-			"incoming_rate": 1.0
+			"basic_rate": 1.0
 		})
 		se_doc.get("items")[1].update({
 			"qty": 3.0,
 			"transfer_qty": 3.0,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
-			"incoming_rate": 1.0
+			"basic_rate": 1.0
 		})
 
 		# check for stopped status of Material Request

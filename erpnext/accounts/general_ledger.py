@@ -11,8 +11,7 @@ from erpnext.accounts.utils import validate_expense_against_budget
 
 class StockAccountInvalidTransaction(frappe.ValidationError): pass
 
-def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True,
-		update_outstanding='Yes'):
+def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, update_outstanding='Yes'):
 	if gl_map:
 		if not cancel:
 			gl_map = process_gl_map(gl_map, merge_entries)

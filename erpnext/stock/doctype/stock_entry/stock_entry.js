@@ -10,7 +10,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 		this.frm.fields_dict.bom_no.get_query = function() {
 			return {
-				filters:{ 'docstatus': 1 }
+				filters:{
+					"docstatus": 1,
+					"is_active": 1
+				}
 			};
 		};
 
@@ -22,7 +25,8 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			return {
 				"filters": {
 					"docstatus": 1,
-					"is_subcontracted": "Yes"
+					"is_subcontracted": "Yes",
+					"company": me.frm.doc.company
 				}
 			};
 		});
@@ -38,6 +42,14 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 					}
 				}
 			}
+			this.frm.set_query("difference_account", function() {
+				return {
+					"filters": {
+						"company": me.frm.doc.company,
+						"is_group": 0
+					}
+				};
+			});
 		}
 	},
 
@@ -122,11 +134,6 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		var d = locals[cdt][cdn];
 		d.transfer_qty = flt(d.qty) * flt(d.conversion_factor);
 		refresh_field('items');
-		calculate_total(doc, cdt, cdn);
-	},
-
-	incoming_rate: function(doc, cdt, cdn) {
-		calculate_total(doc, cdt, cdn);
 	},
 
 	production_order: function() {
@@ -135,13 +142,29 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 		return frappe.call({
 			method: "erpnext.stock.doctype.stock_entry.stock_entry.get_production_order_details",
-			args: {production_order: this.frm.doc.production_order},
+			args: {production_order: me.frm.doc.production_order},
 			callback: function(r) {
 				if (!r.exc) {
-					me.frm.set_value(r.message);
+					$.each(["from_bom", "bom_no", "fg_completed_qty", "use_multi_level_bom"], function(i, field) {
+						me.frm.set_value(field, r.message[field]);
+					})
+					
 					if (me.frm.doc.purpose == "Material Transfer for Manufacture" && !me.frm.doc.to_warehouse)
 						me.frm.set_value("to_warehouse", r.message["wip_warehouse"]);
-					me.frm.set_value("from_bom", 1);
+					
+					
+					if (me.frm.doc.purpose == "Manufacture") {
+						if(r.message["additional_costs"].length) {
+							$.each(r.message["additional_costs"], function(i, row) {
+								me.frm.add_child("additional_costs", row);
+							})
+							refresh_field("additional_costs");
+						}
+						
+						if (!me.frm.doc.from_warehouse) me.frm.set_value("from_warehouse", r.message["wip_warehouse"]);
+						if (!me.frm.doc.to_warehouse) me.frm.set_value("to_warehouse", r.message["fg_warehouse"]);
+					}
+					me.get_items()
 				}
 			}
 		});
@@ -229,13 +252,20 @@ cur_frm.cscript.toggle_related_fields = function(doc) {
 	if(doc.purpose == "Material Receipt") {
 		cur_frm.set_value("from_bom", 0);
 	}
+	
+	// Addition costs based on purpose
+	cur_frm.toggle_display(["additional_costs", "total_additional_costs", "additional_costs_section"], 
+		doc.purpose!='Material Issue');
+	
+	cur_frm.fields_dict["items"].grid.set_column_disp("additional_cost", doc.purpose!='Material Issue');
 }
 
 cur_frm.fields_dict['production_order'].get_query = function(doc) {
 	return {
 		filters: [
 			['Production Order', 'docstatus', '=', 1],
-			['Production Order', 'qty', '>','`tabProduction Order`.produced_qty']
+			['Production Order', 'qty', '>','`tabProduction Order`.produced_qty'],
+			['Production Order', 'company', '=', cur_frm.doc.company]
 		]
 	}
 }
@@ -375,17 +405,4 @@ cur_frm.cscript.company = function(doc, cdt, cdn) {
 
 cur_frm.cscript.posting_date = function(doc, cdt, cdn){
 	erpnext.get_fiscal_year(doc.company, doc.posting_date);
-}
-
-var calculate_total = function(doc, cdt, cdn){
-	var d = locals[cdt][cdn];
-	amount = flt(d.incoming_rate) * flt(d.transfer_qty)
-	frappe.model.set_value(cdt, cdn, 'amount', amount);
-	var total_amount = 0.0;
-	var items = doc.items || [];
-	for(var i=0;i<items.length;i++) {
-		total_amount += flt(items[i].amount);
-	}
-	doc.total_amount = total_amount;
-	refresh_field("total_amount");
 }

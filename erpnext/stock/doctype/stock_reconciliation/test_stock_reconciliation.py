@@ -82,13 +82,13 @@ class TestStockReconciliation(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		make_stock_entry(posting_date="2012-12-15", posting_time="02:00", item_code="_Test Item",
-			target="_Test Warehouse - _TC", qty=10, incoming_rate=700)
+			target="_Test Warehouse - _TC", qty=10, basic_rate=700)
 
 		make_stock_entry(posting_date="2012-12-25", posting_time="03:00", item_code="_Test Item",
 			source="_Test Warehouse - _TC", qty=15)
 
 		make_stock_entry(posting_date="2013-01-05", posting_time="07:00", item_code="_Test Item",
-			target="_Test Warehouse - _TC", qty=15, incoming_rate=1200)
+			target="_Test Warehouse - _TC", qty=15, basic_rate=1200)
 
 def create_stock_reconciliation(**args):
 	args = frappe._dict(args)
