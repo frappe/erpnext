@@ -68,22 +68,6 @@ class TestStockEntry(unittest.TestCase):
 	def test_auto_material_request(self):
 		self._test_auto_material_request("_Test Item")
 
-	def test_auto_material_request_for_variant(self):
-		manage_variant = frappe.new_doc("Manage Variants")
-		
-		manage_variant.update({
-			"item_code": "_Test Variant Item",
-			"attributes": [
-				{
-					"attribute": "Test Size",
-					"attribute_value": "Small"
-				}
-			]
-		})
-		manage_variant.generate_combinations()
-		manage_variant.create_variants()
-		self._test_auto_material_request("_Test Variant Item-S")
-
 	def _test_auto_material_request(self, item_code):
 		item = frappe.get_doc("Item", item_code)
 

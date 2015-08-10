@@ -6,6 +6,10 @@ frappe.provide("erpnext.item");
 frappe.ui.form.on("Item", {
 	onload: function(frm) {
 		erpnext.item.setup_queries(frm);
+		if (frm.doc.variant_of){
+			frm.fields_dict["attributes"].grid.set_column_disp("attribute_value", true);
+		}
+		
 	},
 
 	refresh: function(frm) {
@@ -31,8 +35,8 @@ frappe.ui.form.on("Item", {
 				frappe.set_route("List", "Item", {"variant_of": frm.doc.name});
 			}, "icon-list", "btn-default");
 			
-			frm.add_custom_button(__("Search Variant"), function() {
-				erpnext.item.search_variant()
+			frm.add_custom_button(__("Make Variant"), function() {
+				erpnext.item.make_variant()
 			}, "icon-list", "btn-default");
 		}
 		if (frm.doc.variant_of) {
@@ -53,6 +57,8 @@ frappe.ui.form.on("Item", {
 		}
 
 		erpnext.item.toggle_reqd(frm);
+		
+		erpnext.item.toggle_attributes(frm);
 	},
 
 	validate: function(frm){
@@ -86,6 +92,10 @@ frappe.ui.form.on("Item", {
 
 	is_stock_item: function(frm) {
 		erpnext.item.toggle_reqd(frm);
+	},
+	
+	has_variants: function(frm) {
+		erpnext.item.toggle_attributes(frm);
 	}
 });
 
@@ -184,12 +194,12 @@ $.extend(erpnext.item, {
 		}
 	},
 	
-	search_variant: function(doc) {
+	make_variant: function(doc) {
 		var fields = []
 		
-		for(var i=0;i< cur_frm.doc.valid_attributes.length;i++){
+		for(var i=0;i< cur_frm.doc.attributes.length;i++){
 			var fieldtype, desc;
-			var row = cur_frm.doc.valid_attributes[i];
+			var row = cur_frm.doc.attributes[i];
 			if (row.numeric_values){
 				fieldtype = "Float";
 				desc = "Min Value: "+ row.from_range +" , Max Value: "+ row.to_range +", in Increments of: "+ row.increment
@@ -206,18 +216,13 @@ $.extend(erpnext.item, {
 				"description": desc
 			})
 		}
-		fields = fields.concat({
-			"label": "Result",
-			"fieldname": "result",
-			"fieldtype": "HTML"
-		})
 
 		var d = new frappe.ui.Dialog({
-			title: __("Search Variant"),
+			title: __("Make Variant"),
 			fields: fields
 		});
 		
-		d.set_primary_action(__("Search"), function() {	
+		d.set_primary_action(__("Make"), function() {	
 			args = d.get_values();
 			if(!args) return;
 			frappe.call({
@@ -227,28 +232,32 @@ $.extend(erpnext.item, {
 					"args": d.get_values()
 				},
 				callback: function(r) {
+					// returns variant item
 					if (r.message) {
-						d.get_field("result").set_value($('<a class="btn btn-default btn-sm">'+__("View {0}", [r.message[0]])+'</a>')
-							.on("click", function() {
-								d.hide();
-								frappe.set_route("Form", "Item", r.message[0]);
-							}));
+						var variant = r.message[0];
+						var msgprint_dialog = frappe.msgprint(__("Item Variant {0} already exists with same attributes", 
+							[repl('<a href="#Form/Item/%(item_encoded)s" class="strong variant-click">%(item)s</a>', {
+								item_encoded: encodeURIComponent(variant),
+								item: variant
+							})]
+						));
+						msgprint_dialog.hide_on_page_refresh = true;
+						msgprint_dialog.$wrapper.find(".variant-click").on("click", function() {
+							d.hide();
+						});
 					} else {
-						d.get_field("result").set_value($('<a class="btn btn-default btn-sm">'	
-							+__("Variant Not Found - Create New"+'</a>')).on("click", function() {
-								d.hide();
-								frappe.call({
-									method:"erpnext.stock.doctype.item.item.create_variant",
-									args: {
-										"item": cur_frm.doc.name,
-										"param": d.get_values()
-									},
-									callback: function(r) {
-										var doclist = frappe.model.sync(r.message);
-										frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-									}
-								});
-						}));
+						d.hide();
+						frappe.call({
+							method:"erpnext.stock.doctype.item.item.create_variant",
+							args: {
+								"item": cur_frm.doc.name,
+								"param": d.get_values()
+							},
+							callback: function(r) {
+								var doclist = frappe.model.sync(r.message);
+								frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+							}
+						});
 					}
 				}
 			});
@@ -280,7 +289,6 @@ $.extend(erpnext.item, {
 							fields: ["attribute_value"]
 						},
 						callback: function(r) {
-							d.get_field("result").set_value("")
 							if (r.message) {
 								response($.map(r.message, function(d) { return d.attribute_value; }));
 							}
@@ -299,6 +307,10 @@ $.extend(erpnext.item, {
 				}, 500);
 			});
 		});
+	},
+	toggle_attributes: function(frm) {
+		frm.toggle_display("attributes", frm.doc.has_variants || frm.doc.variant_of);
+		frm.fields_dict.attributes.grid.toggle_reqd("attribute_value", frm.doc.variant_of ? 1 : 0);
 	}
 });
 

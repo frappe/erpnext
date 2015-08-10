@@ -10,7 +10,6 @@ from frappe.website.website_generator import WebsiteGenerator
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
-from erpnext.stock.doctype.manage_variants.manage_variants import update_variant
 
 class WarehouseNotSet(frappe.ValidationError): pass
 class ItemTemplateCannotHaveStock(frappe.ValidationError): pass
@@ -301,7 +300,9 @@ class Item(WebsiteGenerator):
 			updated = []
 			variants = frappe.db.get_all("Item", fields=["item_code"], filters={"variant_of": self.name })
 			for d in variants:
-				update_variant(self.name, d)
+				variant = frappe.get_doc("Item", d)
+				copy_attributes_to_variant(self, variant)
+				variant.save()
 				updated.append(d.item_code)
 			if updated:
 				frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
@@ -333,7 +334,9 @@ class Item(WebsiteGenerator):
 	def validate_template_attributes(self):
 		if self.has_variants:
 			attributes = []
-			for d in self.valid_attributes:
+			if not self.attributes:
+				frappe.throw(_("Attribute is mandatory for Item Template"))
+			for d in self.attributes:
 				if d.attribute in attributes:
 					frappe.throw(_("Attribute {0} selected multiple times in Attributes Table".format(d.attribute)))
 				else:
@@ -343,6 +346,8 @@ class Item(WebsiteGenerator):
 		if self.variant_of:
 			args = {}
 			for d in self.attributes:
+				if not d.attribute_value:
+					frappe.throw(_("Please specify Attribute Value for attribute {0}").format(d.attribute))
 				args[d.attribute] = d.attribute_value
 				
 			variant = get_variant(self.variant_of, args)
@@ -495,7 +500,7 @@ def get_variant(item, args):
 
 	for d in args:
 		if d in numeric_attributes:
-			values = frappe.db.sql("""select from_range, to_range, increment from `tabItem Template Attribute` \
+			values = frappe.db.sql("""select from_range, to_range, increment from `tabVariant Attribute` \
 				where parent = %s and attribute = %s""", (item, d), as_dict=1)[0]
 
 			if (not values.from_range < cint(args[d]) < values.to_range) or ((cint(args[d]) - values.from_range) % values.increment != 0):
@@ -525,10 +530,8 @@ def get_variant(item, args):
 	
 @frappe.whitelist()
 def create_variant(item, param):
-	from erpnext.stock.doctype.manage_variants.manage_variants import copy_attributes_to_variant
 	args = json.loads(param)
 	variant = frappe.new_doc("Item")
-	variant.item_code = item
 	variant_attributes = []
 	for d in args:
 		variant_attributes.append({
@@ -538,3 +541,18 @@ def create_variant(item, param):
 	variant.set("attributes", variant_attributes)
 	copy_attributes_to_variant(item, variant)
 	return variant
+	
+def copy_attributes_to_variant(item, variant):
+	from frappe.model import no_value_fields
+	for field in item.meta.fields:
+		if field.fieldtype not in no_value_fields and (not field.no_copy)\
+			and field.fieldname not in ("item_code", "item_name"):
+			if variant.get(field.fieldname) != item.get(field.fieldname):
+				variant.set(field.fieldname, item.get(field.fieldname))
+	variant.variant_of = item.name
+	variant.has_variants = 0
+	variant.show_in_website = 0
+	if variant.attributes:
+		variant.description += "\n"
+		for d in variant.attributes:
+			variant.description += "<p>" + d.attribute + ": " + cstr(d.attribute_value) + "</p>"

@@ -12,5 +12,8 @@ def execute():
 	
 	for item, attributes in item_attribute.items():
 		template = frappe.get_doc("Item", item)
-		template.set('valid_attributes', attributes)
+		template.set('attributes', attributes)
 		template.save()
+		
+	frappe.delete_doc("DocType", "Manage Variants")
+	frappe.delete_doc("DocType", "Manage Variants Item")
