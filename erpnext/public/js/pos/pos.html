@@ -14,6 +14,14 @@
                     <div class="items"></div>
     			</div>
     			<div class="totals-area">
+		    <div class="row pos-bill-row base-total-area">
+                        <div class="col-xs-6"><h6 class="text-muted">{%= __("Base Total") %}</h6></div>
+                        <div class="col-xs-6"><h6 class="base-total text-right"></h6></div>
+                    </div>
+                    <div class="row pos-bill-row discount-amount-area">
+                        <div class="col-xs-6"><h6 class="text-muted">{%= __("Discount Amount") %}</h6></div>
+                        <div class="col-xs-6"><input type="text" class="form-control discount-amount text-right"></div>
+                    </div>
                     <div class="row pos-bill-row net-total-area">
                         <div class="col-xs-6"><h6 class="text-muted">{%= __("Net Total") %}</h6></div>
                         <div class="col-xs-6"><h6 class="net-total text-right"></h6></div>
@@ -24,10 +32,7 @@
 							<div class="tax-table small"></div>
 						</div>
                     </div>
-                    <div class="row pos-bill-row discount-amount-area">
-                        <div class="col-xs-6"><h6 class="text-muted">{%= __("Discount Amount") %}</h6></div>
-                        <div class="col-xs-6"><input type="text" class="form-control discount-amount text-right"></div>
-                    </div>
+
                     <div class="row pos-bill-row grand-total-area">
                         <div class="col-xs-6"><h6>{%= __("Grand Total") %}</h6></div>
                         <div class="col-xs-6"><h6 class="grand-total text-right"></h6></div>
