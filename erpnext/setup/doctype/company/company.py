@@ -32,7 +32,7 @@ class Company(Document):
 			frappe.throw(_("Abbreviation cannot have more than 5 characters"))
 
 		if not self.abbr.strip():
-			frappe.throw(_("Abbr can not be blank or space"))
+			frappe.throw(_("Abbreviation is mandatory"))
 
 		self.previous_default_currency = frappe.db.get_value("Company", self.name, "default_currency")
 		if self.default_currency and self.previous_default_currency and \
