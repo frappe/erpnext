@@ -192,8 +192,9 @@ class JournalEntry(AccountsController):
 
 				if against_field in ["against_invoice", "against_voucher"]:
 					if (against_voucher[0] !=d.party or against_voucher[1] != d.account):
-						frappe.throw(_("Row {0}: Party / Account does not match with \
-							Customer / Debit To in {1}").format(d.idx, doctype))
+						frappe.throw(_("Row {0}: Party / Account does not match with {1} / {2} in {3} {4}")
+							.format(d.idx, field_dict.get(doctype)[0], field_dict.get(doctype)[1], 
+								doctype, d.get(against_field)))
 					else:
 						payment_against_voucher.setdefault(d.get(against_field), []).append(flt(d.get(dr_or_cr)))
 
