@@ -24,13 +24,15 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 					var d1 = frappe.model.add_child(jv, 'Journal Entry Account', 'accounts');
 					d1.debit = expense[i].sanctioned_amount;
 					d1.account = expense[i].default_account;
-					d1.against_expense_claim = cur_frm.doc.name;
+					d1.reference_type = cur_frm.doc.doctype;
+					d1.reference_name = cur_frm.doc.name;
 				}
 
 				// credit to bank
 				var d1 = frappe.model.add_child(jv, 'Journal Entry Account', 'accounts');
 				d1.credit = cur_frm.doc.total_sanctioned_amount;
-				d1.against_expense_claim = cur_frm.doc.name;
+				d1.reference_type = cur_frm.doc.doctype;
+				d1.reference_name = cur_frm.doc.name;
 				if(r.message) {
 					d1.account = r.message.account;
 					d1.balance = r.message.balance;
@@ -179,5 +181,5 @@ cur_frm.fields_dict['task'].get_query = function(doc) {
 		filters:{
 			'project': doc.project
 		}
-	}	
+	}
 }

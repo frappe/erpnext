@@ -211,29 +211,32 @@ class AccountsController(TransactionBase):
 			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
 	def get_advances(self, account_head, party_type, party, child_doctype, parentfield, dr_or_cr, against_order_field):
-		so_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
-		cond = ""
-		if so_list:
-			cond = "or (ifnull(t2.%s, '')  in (%s))" % ("against_" + against_order_field, ', '.join(['%s']*len(so_list)))
+		"""Returns list of advances against Account, Party, Reference"""
+		order_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
+
+		if not order_list:
+			return
+
+		in_placeholder = ', '.join(['%s'] * len(order_list))
+
+		# conver sales_order to "Sales Order"
+		reference_type = against_order_field.replace("_", " ").title()
 
 		res = frappe.db.sql("""
 			select
-				t1.name as jv_no, t1.remark, t2.{0} as amount, t2.name as jv_detail_no, `against_{1}` as against_order
+				t1.name as jv_no, t1.remark, t2.{0} as amount, t2.name as jv_detail_no,
+				reference_name as against_order
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
 				t1.name = t2.parent and t2.account = %s
-				and t2.party_type=%s and t2.party=%s
+				and t2.party_type = %s and t2.party = %s
 				and t2.is_advance = 'Yes' and t1.docstatus = 1
-				and ((
-						ifnull(t2.against_voucher, '')  = ''
-						and ifnull(t2.against_invoice, '')  = ''
-						and ifnull(t2.against_jv, '')  = ''
-						and ifnull(t2.against_sales_order, '')  = ''
-						and ifnull(t2.against_purchase_order, '')  = ''
-				) {2})
-			order by t1.posting_date""".format(dr_or_cr, against_order_field, cond),
-			[account_head, party_type, party] + so_list, as_dict=1)
+				and (
+					ifnull(t2.reference_type, '')=''
+					or (t2.reference_type = %s and ifnull(t2.reference_name, '') in ({1})))
+			order by t1.posting_date""".format(dr_or_cr, in_placeholder),
+			[account_head, party_type, party, reference_type] + order_list, as_dict=1)
 
 		self.set(parentfield, [])
 		for d in res:
@@ -246,25 +249,26 @@ class AccountsController(TransactionBase):
 				"allocated_amount": flt(d.amount) if d.against_order else 0
 			})
 
-	def validate_advance_jv(self, advance_table_fieldname, against_order_field):
+	def validate_advance_jv(self, reference_type):
+		against_order_field = frappe.scrub(reference_type)
 		order_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
 		if order_list:
 			account = self.get("debit_to" if self.doctype=="Sales Invoice" else "credit_to")
 
-			jv_against_order = frappe.db.sql("""select parent, %s as against_order
+			jv_against_order = frappe.db.sql("""select parent, reference_name as against_order
 				from `tabJournal Entry Account`
 				where docstatus=1 and account=%s and ifnull(is_advance, 'No') = 'Yes'
-				and ifnull(against_sales_order, '') in (%s)
-				group by parent, against_sales_order""" %
-				("against_" + against_order_field, '%s', ', '.join(['%s']*len(order_list))),
-				tuple([account] + order_list), as_dict=1)
+				and reference_type=%s
+				and ifnull(reference_name, '') in ({0})
+				group by parent, reference_name""".format(', '.join(['%s']*len(order_list))),
+					tuple([account, reference_type] + order_list), as_dict=1)
 
 			if jv_against_order:
 				order_jv_map = {}
 				for d in jv_against_order:
 					order_jv_map.setdefault(d.against_order, []).append(d.parent)
 
-				advance_jv_against_si = [d.journal_entry for d in self.get(advance_table_fieldname)]
+				advance_jv_against_si = [d.journal_entry for d in self.get("advances")]
 
 				for order, jv_list in order_jv_map.items():
 					for jv in jv_list:
@@ -318,10 +322,8 @@ class AccountsController(TransactionBase):
 	def set_total_advance_paid(self):
 		if self.doctype == "Sales Order":
 			dr_or_cr = "credit"
-			against_field = "against_sales_order"
 		else:
 			dr_or_cr = "debit"
-			against_field = "against_purchase_order"
 
 		advance_paid = frappe.db.sql("""
 			select
@@ -329,8 +331,10 @@ class AccountsController(TransactionBase):
 			from
 				`tabJournal Entry Account`
 			where
-				{against_field} = %s and docstatus = 1 and is_advance = "Yes" """.format(dr_or_cr=dr_or_cr, \
-					against_field=against_field), self.name)
+				reference_type = %s and
+				reference_name = %s and
+				docstatus = 1 and is_advance = "Yes" """.format(dr_or_cr=dr_or_cr),
+					(self.doctype, self.name))
 
 		if advance_paid:
 			advance_paid = flt(advance_paid[0][0], self.precision("advance_paid"))

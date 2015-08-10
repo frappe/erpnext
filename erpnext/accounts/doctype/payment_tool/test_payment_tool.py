@@ -23,10 +23,11 @@ class TestPaymentTool(unittest.TestCase):
 
 		# Create SO with partial outstanding
 		so1 = make_sales_order(customer="_Test Customer 3", qty=10, rate=100)
-		
+
 		self.create_against_jv(jv_test_records[0], {
 			"party": "_Test Customer 3",
-			"against_sales_order": so1.name,
+			"reference_type": "Sales Order",
+			"reference_name": so1.name,
 			"is_advance": "Yes"
 		})
 
@@ -36,7 +37,8 @@ class TestPaymentTool(unittest.TestCase):
 
 		self.create_against_jv(jv_test_records[0], {
 			"party": "_Test Customer 3",
-			"against_sales_order": so2.name,
+			"reference_type": "Sales Order",
+			"reference_name": so2.name,
 			"credit": 1000,
 			"is_advance": "Yes"
 		})
@@ -52,7 +54,8 @@ class TestPaymentTool(unittest.TestCase):
 
 		self.create_against_jv(jv_test_records[0], {
 			"party": "_Test Customer 3",
-			"against_invoice": si1.name
+			"reference_type": si1.doctype,
+			"reference_name": si1.name
 		})
 		#Create SI with no outstanding
 		si2 = self.create_voucher(si_test_records[0], {
@@ -62,7 +65,8 @@ class TestPaymentTool(unittest.TestCase):
 
 		self.create_against_jv(jv_test_records[0], {
 			"party": "_Test Customer 3",
-			"against_invoice": si2.name,
+			"reference_type": si2.doctype,
+			"reference_name": si2.name,
 			"credit": 561.80
 		})
 
@@ -125,7 +129,7 @@ class TestPaymentTool(unittest.TestCase):
 	def make_voucher_for_party(self, args, expected_outstanding):
 		#Make Journal Entry for Party
 		payment_tool_doc = frappe.new_doc("Payment Tool")
-		
+
 		for k, v in args.items():
 			payment_tool_doc.set(k, v)
 
@@ -153,29 +157,12 @@ class TestPaymentTool(unittest.TestCase):
 
 		new_jv = paytool.make_journal_entry()
 
-		#Create a list of expected values as [party account, payment against, against_jv, against_invoice,
-		#against_voucher, against_sales_order, against_purchase_order]
-		expected_values = [
-			[paytool.party_account, paytool.party, 100.00, expected_outstanding.get("Journal Entry")[0], None, None, None, None],
-			[paytool.party_account, paytool.party, 100.00, None, expected_outstanding.get("Sales Invoice")[0], None, None, None],
-			[paytool.party_account, paytool.party, 100.00, None, None, expected_outstanding.get("Purchase Invoice")[0], None, None],
-			[paytool.party_account, paytool.party, 100.00, None, None, None, expected_outstanding.get("Sales Order")[0], None],
-			[paytool.party_account, paytool.party, 100.00, None, None, None, None, expected_outstanding.get("Purchase Order")[0]]
-		]
-
 		for jv_entry in new_jv.get("accounts"):
 			if paytool.party_account == jv_entry.get("account") and paytool.party == jv_entry.get("party"):
-				row = [
-					jv_entry.get("account"),
-					jv_entry.get("party"),
-					jv_entry.get("debit" if paytool.party_type=="Supplier" else "credit"),
-					jv_entry.get("against_jv"),
-					jv_entry.get("against_invoice"),
-					jv_entry.get("against_voucher"),
-					jv_entry.get("against_sales_order"),
-					jv_entry.get("against_purchase_order"),
-				]
-				self.assertTrue(row in expected_values)
+				self.assertEquals(100.00,
+					jv_entry.get("debit" if paytool.party_type=="Supplier" else "credit"))
+				self.assertEquals(jv_entry.reference_name,
+					expected_outstanding[jv_entry.reference_type][0])
 
 		self.assertEquals(new_jv.get("cheque_no"), paytool.reference_no)
 		self.assertEquals(new_jv.get("cheque_date"), paytool.reference_date)

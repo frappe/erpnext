@@ -15,21 +15,19 @@ def execute(filters=None):
 	entries = get_entries(filters)
 	invoice_posting_date_map = get_invoice_posting_date_map(filters)
 	against_date = ""
-	outstanding_amount = 0.0
 
 	data = []
 	for d in entries:
-		if d.against_voucher:
-			against_date = d.against_voucher and invoice_posting_date_map[d.against_voucher] or ""
+		against_date = invoice_posting_date_map[d.reference_name] or ""
+		if d.reference_type=="Purchase Invoice":
 			payment_amount = flt(d.debit) or -1 * flt(d.credit)
 		else:
-			against_date = d.against_invoice and invoice_posting_date_map[d.against_invoice] or ""
 			payment_amount = flt(d.credit) or -1 * flt(d.debit)
 
-		row = [d.name, d.party_type, d.party, d.posting_date, d.against_voucher or d.against_invoice,
+		row = [d.name, d.party_type, d.party, d.posting_date, d.reference_name,
 			against_date, d.debit, d.credit, d.cheque_no, d.cheque_date, d.remark]
 
-		if d.against_voucher or d.against_invoice:
+		if d.reference_name:
 			row += get_ageing_data(30, 60, 90, d.posting_date, against_date, payment_amount)
 		else:
 			row += ["", "", "", "", ""]
@@ -82,7 +80,7 @@ def get_conditions(filters):
 def get_entries(filters):
 	conditions = get_conditions(filters)
 	entries =  frappe.db.sql("""select jv.name, jvd.party_type, jvd.party, jv.posting_date,
-		jvd.against_voucher, jvd.against_invoice, jvd.debit, jvd.credit,
+		jvd.reference_type, jvd.reference_name, jvd.debit, jvd.credit,
 		jv.cheque_no, jv.cheque_date, jv.remark
 		from `tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		where jvd.parent = jv.name and jv.docstatus=1 %s order by jv.name DESC""" %
