@@ -167,6 +167,16 @@ def get_data():
 					"name": "SMS Settings",
 					"description": _("Setup SMS gateway settings")
 				},
+				{
+					"type": "doctype",
+					"name": "Shipping Term",
+					"description": _("Shipping Terms for Customer Addresses")
+				},
+				{
+					"type": "doctype",
+					"name": "Shipping Courier",
+					"description": _("Shipping Couriers for Shipping Terms")
+				},
 			]
 		},
 		{
