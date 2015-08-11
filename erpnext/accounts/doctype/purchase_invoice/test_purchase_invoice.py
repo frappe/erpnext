@@ -218,23 +218,20 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.load_from_db()
 
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
-			where against_voucher=%s""", pi.name))
-
-		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
-			where against_voucher=%s and debit=300""", pi.name))
+			where reference_type='Purchase Invoice' and reference_name=%s and debit=300""", pi.name))
 
 		self.assertEqual(pi.outstanding_amount, 1212.30)
 
 		pi.cancel()
 
-		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
-			where against_voucher=%s""", pi.name))
+		self.assertFalse(frappe.db.sql("""select name from `tabJournal Entry Account`
+			where reference_type='Purchase Invoice' and reference_name=%s""", pi.name))
 
 	def test_recurring_invoice(self):
 		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
 		test_recurring_document(self, test_records)
-		
-	def test_total_purchase_cost_for_project(self):		
+
+	def test_total_purchase_cost_for_project(self):
 		purchase_invoice = frappe.new_doc('Purchase Invoice')
 		purchase_invoice.update({
 			"credit_to": "_Test Payable - _TC",
@@ -260,29 +257,29 @@ class TestPurchaseInvoice(unittest.TestCase):
 			]
 		})
 		purchase_invoice.save()
-		purchase_invoice.submit()		
+		purchase_invoice.submit()
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 2000)
-		
+
 		purchase_invoice1 = frappe.copy_doc(purchase_invoice)
 		purchase_invoice1.save()
 		purchase_invoice1.submit()
-		
+
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 4000)
-		
-		purchase_invoice1.cancel()		
+
+		purchase_invoice1.cancel()
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 2000)
-		
-		purchase_invoice.cancel()		
+
+		purchase_invoice.cancel()
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 0)
-		
+
 	def test_return_purchase_invoice(self):
 		set_perpetual_inventory()
-		
+
 		pi = make_purchase_invoice()
-		
+
 		return_pi = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2)
-		
-		
+
+
 		# check gl entries for return
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type=%s and voucher_no=%s
@@ -298,9 +295,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 		for gle in gl_entries:
 			self.assertEquals(expected_values[gle.account][0], gle.debit)
 			self.assertEquals(expected_values[gle.account][1], gle.credit)
-		
+
 		set_perpetual_inventory(0)
-		
+
 def make_purchase_invoice(**args):
 	pi = frappe.new_doc("Purchase Invoice")
 	args = frappe._dict(args)
@@ -313,7 +310,7 @@ def make_purchase_invoice(**args):
 	pi.currency = args.currency or "INR"
 	pi.is_return = args.is_return
 	pi.return_against = args.return_against
-	
+
 	pi.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",

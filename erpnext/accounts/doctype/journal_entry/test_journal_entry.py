@@ -69,8 +69,8 @@ class TestJournalEntry(unittest.TestCase):
 		if test_voucher.doctype == "Journal Entry":
 			# if test_voucher is a Journal Entry, test cancellation of test_voucher
 			test_voucher.cancel()
-			self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
-				where against_jv=%s""", test_voucher.name))
+			self.assertFalse(frappe.db.sql("""select name from `tabJournal Entry Account`
+				where reference_type='Journal Entry' and reference_name=%s""", test_voucher.name))
 
 		elif test_voucher.doctype in ["Sales Order", "Purchase Order"]:
 			# if test_voucher is a Sales Order/Purchase Order, test error on cancellation of test_voucher
