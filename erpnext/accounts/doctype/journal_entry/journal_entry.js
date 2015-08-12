@@ -77,13 +77,21 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 			frappe.model.validate_missing(jvd, "party_type");
 			frappe.model.validate_missing(jvd, "party");
-			return {
+
+			var out = {
 				filters: [
-					[jvd.reference_type, jvd.reference_type.indexOf("Sales")==1 ? "customer" : "supplier", "=", jvd.party],
+					[jvd.reference_type, jvd.reference_type.indexOf("Sales")===0 ? "customer" : "supplier", "=", jvd.party],
 					[jvd.reference_type, "docstatus", "=", 1],
-					[jvd.reference_type, "outstanding_amount", "!=", 0]
 				]
 			};
+
+			if(in_list(["Sales Invoice", "Purchase Invoice"], jvd.reference_type)) {
+				out.filters.push([jvd.reference_type, "outstanding_amount", "!=", 0]);
+			} else {
+				out.filters.push([jvd.reference_type, "per_billed", "<", 100]);
+			}
+
+			return out;
 		});
 
 

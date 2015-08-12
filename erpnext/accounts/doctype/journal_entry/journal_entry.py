@@ -118,7 +118,7 @@ class JournalEntry(AccountsController):
 
 	def validate_against_jv(self):
 		for d in self.get('accounts'):
-			if d.reference_type=="Journal Voucher":
+			if d.reference_type=="Journal Entry":
 				account_root_type = frappe.db.get_value("Account", d.account, "root_type")
 				if account_root_type == "Asset" and flt(d.debit) > 0:
 					frappe.throw(_("For {0}, only credit accounts can be linked against another debit entry")
@@ -132,7 +132,7 @@ class JournalEntry(AccountsController):
 
 				against_entries = frappe.db.sql("""select * from `tabJournal Entry Account`
 					where account = %s and docstatus = 1 and parent = %s
-					and ifnull(reference_type, '') = '' and ifnull(reference_name, '') = ''
+					and ifnull(reference_type, '') in ("", "Sales Order", "Purchase Order")
 					""", (d.account, d.reference_name), as_dict=True)
 
 				if not against_entries:
@@ -163,8 +163,8 @@ class JournalEntry(AccountsController):
 		for d in self.get("accounts"):
 			if not d.reference_type:
 				d.reference_name = None
-			if not d.reference_type:
-				d.reference_name = None
+			if not d.reference_name:
+				d.reference_type = None
 			if d.reference_type and d.reference_name and (d.reference_type in field_dict.keys()):
 				dr_or_cr = "credit" if d.reference_type in ("Sales Order", "Sales Invoice") \
 					else "debit"
