@@ -153,9 +153,10 @@ class AccountsController(TransactionBase):
 								item.set(fieldname, value)
 
 					if ret.get("pricing_rule"):
-						for field in ["base_price_list_rate", "price_list_rate",
-							"discount_percentage", "base_rate", "rate"]:
-								item.set(field, ret.get(field))
+						item.set("discount_percentage", ret.get("discount_percentage"))
+						if ret.get("pricing_rule_for") == "Price":
+							item.set("pricing_list_rate", ret.get("pricing_list_rate"))
+							
 
 	def set_taxes(self):
 		if not self.meta.get_field("taxes"):

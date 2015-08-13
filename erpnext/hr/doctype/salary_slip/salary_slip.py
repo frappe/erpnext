@@ -152,8 +152,8 @@ class SalarySlip(TransactionBase):
 		self.gross_pay = flt(self.arrear_amount) + flt(self.leave_encashment_amount)
 		for d in self.get("earnings"):
 			if cint(d.e_depends_on_lwp) == 1:
-				d.e_modified_amount = rounded(flt(d.e_amount) * flt(self.payment_days)
-					/ cint(self.total_days_in_month), 2)
+				d.e_modified_amount = rounded((flt(d.e_amount) * flt(self.payment_days)
+					/ cint(self.total_days_in_month)), self.precision("e_modified_amount", "earnings"))
 			elif not self.payment_days:
 				d.e_modified_amount = 0
 			elif not d.e_modified_amount:
@@ -164,8 +164,8 @@ class SalarySlip(TransactionBase):
 		self.total_deduction = 0
 		for d in self.get('deductions'):
 			if cint(d.d_depends_on_lwp) == 1:
-				d.d_modified_amount = rounded(flt(d.d_amount) * flt(self.payment_days)
-					/ cint(self.total_days_in_month), 2)
+				d.d_modified_amount = rounded((flt(d.d_amount) * flt(self.payment_days)
+					/ cint(self.total_days_in_month)), self.precision("d_modified_amount", "deductions"))
 			elif not self.payment_days:
 				d.d_modified_amount = 0
 			elif not d.d_modified_amount:
@@ -174,10 +174,13 @@ class SalarySlip(TransactionBase):
 			self.total_deduction += flt(d.d_modified_amount)
 
 	def calculate_net_pay(self):
+		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
+
 		self.calculate_earning_total()
 		self.calculate_ded_total()
 		self.net_pay = flt(self.gross_pay) - flt(self.total_deduction)
-		self.rounded_total = rounded(self.net_pay)
+		self.rounded_total = rounded(self.net_pay,
+			self.precision("net_pay") if disable_rounded_total else 0)
 
 	def on_submit(self):
 		if(self.email_check == 1):
