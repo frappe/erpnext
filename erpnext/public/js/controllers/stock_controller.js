@@ -12,7 +12,8 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 	},
 
 	setup_warehouse_query: function() {
-		erpnext.queries.setup_queries(me.frm, "Warehouse", function() {
+		var me = this;
+		erpnext.queries.setup_queries(this.frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(me.frm.doc);
 		});
 	},
