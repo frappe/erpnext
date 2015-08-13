@@ -46,7 +46,7 @@ class SalesInvoice(SellingController):
 		self.validate_debit_to_acc()
 		self.validate_fixed_asset_account()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
-		self.validate_advance_jv("advances", "sales_order")
+		self.validate_advance_jv("Sales Order")
 		self.add_remarks()
 		self.validate_write_off_account()
 
@@ -105,7 +105,7 @@ class SalesInvoice(SellingController):
 		self.check_stop_sales_order("sales_order")
 
 		from erpnext.accounts.utils import remove_against_link_from_jv
-		remove_against_link_from_jv(self.doctype, self.name, "against_invoice")
+		remove_against_link_from_jv(self.doctype, self.name)
 
 		if not self.is_return:
 			self.update_status_updater_args()
@@ -420,7 +420,7 @@ class SalesInvoice(SellingController):
 		for d in self.get_item_list():
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 and d.warehouse and flt(d['qty']):
 				self.update_reserved_qty(d)
-				
+
 				incoming_rate = 0
 				if cint(self.is_return) and self.return_against and self.docstatus==1:
 					incoming_rate = self.get_incoming_rate_for_sales_return(d.item_code,
@@ -447,7 +447,7 @@ class SalesInvoice(SellingController):
 
 			if update_outstanding == "No":
 				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
-				update_outstanding_amt(self.debit_to, "Customer", self.customer, 
+				update_outstanding_amt(self.debit_to, "Customer", self.customer,
 					self.doctype, self.return_against if cint(self.is_return) else self.name)
 
 			if repost_future_gle and cint(self.update_stock) \

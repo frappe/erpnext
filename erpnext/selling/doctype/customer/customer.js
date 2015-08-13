@@ -46,6 +46,7 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 	cur_frm.dashboard.add_doctype_badge("Sales Order", "customer");
 	cur_frm.dashboard.add_doctype_badge("Delivery Note", "customer");
 	cur_frm.dashboard.add_doctype_badge("Sales Invoice", "customer");
+	cur_frm.dashboard.add_doctype_badge("Project", "customer");
 
 	return frappe.call({
 		type: "GET",
@@ -62,6 +63,8 @@ cur_frm.cscript.setup_dashboard = function(doc) {
 						+ '</b> / <span class="text-muted">' + __("Unpaid") + ": <b>"
 						+ format_currency(r.message.total_unpaid, r.message["company_currency"][0])
 						+ '</b></span>');
+				} else {
+					cur_frm.dashboard.set_headline("");
 				}
 			}
 			cur_frm.dashboard.set_badge_count(r.message);

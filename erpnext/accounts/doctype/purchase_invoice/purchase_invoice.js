@@ -21,16 +21,15 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 		// Show / Hide button
 		this.show_general_ledger();
-		
+
 		if(!doc.is_return) {
 			if(doc.docstatus==1) {
 				if(doc.outstanding_amount > 0) {
-					this.frm.add_custom_button(__('Make Payment Entry'), this.make_bank_entry);
+					this.frm.add_custom_button(__('Payment'), this.make_bank_entry).addClass("btn-primary");
 				}
-				
-				cur_frm.add_custom_button(__('Make Debit Note'), this.make_debit_note);
+				cur_frm.add_custom_button(__('Debit Note'), this.make_debit_note);
 			}
-			
+
 			if(doc.docstatus===0) {
 				cur_frm.add_custom_button(__('From Purchase Order'), function() {
 					frappe.model.map_current_doc({
@@ -102,7 +101,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			if(row.purchase_receipt) frappe.model.clear_doc("Purchase Receipt", row.purchase_receipt)
 		})
 	},
-	
+
 	make_debit_note: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_debit_note",

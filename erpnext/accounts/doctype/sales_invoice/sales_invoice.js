@@ -40,14 +40,17 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this._super();
 
 		cur_frm.dashboard.reset();
-		
+
 		this.frm.toggle_reqd("due_date", !this.frm.doc.is_return);
-		
+
 		this.show_general_ledger();
-		
+
 		if(doc.update_stock) this.show_stock_ledger();
-		
+
 		if(doc.docstatus==1 && !doc.is_return) {
+			cur_frm.add_custom_button(doc.update_stock ? __('Sales Return') : __('Credit Note'),
+				this.make_sales_return);
+
 			if(cint(doc.update_stock)!=1) {
 				// show Make Delivery Note button only if Sales Invoice is not created from Delivery Note
 				var from_delivery_note = false;
@@ -57,16 +60,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					});
 
 				if(!from_delivery_note) {
-					cur_frm.add_custom_button(__('Make Delivery'), cur_frm.cscript['Make Delivery Note'])
+					cur_frm.add_custom_button(__('Delivery'), cur_frm.cscript['Make Delivery Note']).addClass("btn-primary");
 				}
 			}
 
 			if(doc.outstanding_amount!=0 && !cint(doc.is_return)) {
-				cur_frm.add_custom_button(__('Make Payment Entry'), cur_frm.cscript.make_bank_entry);
+				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry).addClass("btn-primary");
 			}
-			
-			cur_frm.add_custom_button(doc.update_stock ? __('Make Sales Return') : __('Make Credit Note'), 
-				this.make_sales_return);
 		}
 
 		// Show buttons only when pos view is active
@@ -201,7 +201,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	items_on_form_rendered: function() {
 		erpnext.setup_serial_no();
 	},
-	
+
 	make_sales_return: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.make_sales_return",

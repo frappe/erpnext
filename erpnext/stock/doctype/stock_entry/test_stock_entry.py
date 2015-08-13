@@ -36,12 +36,12 @@ class TestStockEntry(unittest.TestCase):
 		create_stock_reconciliation(item_code="_Test Item 2", warehouse="_Test Warehouse - _TC",
 			qty=0, rate=100)
 
-		make_stock_entry(item_code=item_code, target=warehouse, qty=1, incoming_rate=10)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=1, basic_rate=10)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 		self.assertEqual([[1, 10]], eval(sle.stock_queue))
 
 		# negative qty
-		make_stock_entry(item_code=item_code, source=warehouse, qty=2, incoming_rate=10)
+		make_stock_entry(item_code=item_code, source=warehouse, qty=2, basic_rate=10)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 
 		self.assertEqual([[-1, 10]], eval(sle.stock_queue))
@@ -53,12 +53,12 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual([[-2, 10]], eval(sle.stock_queue))
 
 		# move stock to positive
-		make_stock_entry(item_code=item_code, target=warehouse, qty=3, incoming_rate=20)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=3, basic_rate=20)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 		self.assertEqual([[1, 20]], eval(sle.stock_queue))
 
 		# incoming entry with diff rate
-		make_stock_entry(item_code=item_code, target=warehouse, qty=1, incoming_rate=30)
+		make_stock_entry(item_code=item_code, target=warehouse, qty=1, basic_rate=30)
 		sle = get_sle(item_code = item_code, warehouse = warehouse)[0]
 
 		self.assertEqual([[1, 20],[1, 30]], eval(sle.stock_queue))
@@ -125,7 +125,7 @@ class TestStockEntry(unittest.TestCase):
 		set_perpetual_inventory()
 
 		mr = make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=50, incoming_rate=100)
+			qty=50, basic_rate=100)
 
 		stock_in_hand_account = frappe.db.get_value("Account", {"account_type": "Warehouse",
 			"warehouse": mr.get("items")[0].t_warehouse})
@@ -152,7 +152,7 @@ class TestStockEntry(unittest.TestCase):
 		set_perpetual_inventory()
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=50, incoming_rate=100)
+			qty=50, basic_rate=100)
 
 		mi = make_stock_entry(item_code="_Test Item", source="_Test Warehouse - _TC", qty=40)
 
@@ -217,9 +217,9 @@ class TestStockEntry(unittest.TestCase):
 	def test_repack_no_change_in_valuation(self):
 		set_perpetual_inventory(0)
 
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, incoming_rate=100)
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC",
-			qty=50, incoming_rate=100)
+			qty=50, basic_rate=100)
 
 		repack = frappe.copy_doc(test_records[3])
 		repack.posting_date = nowdate()
@@ -238,15 +238,24 @@ class TestStockEntry(unittest.TestCase):
 
 		set_perpetual_inventory(0)
 
-	def test_repack_with_change_in_valuation(self):
+	def test_repack_with_additional_costs(self):
 		set_perpetual_inventory()
 
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, incoming_rate=100)
-
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 		repack = frappe.copy_doc(test_records[3])
 		repack.posting_date = nowdate()
 		repack.posting_time = nowtime()
-		repack.additional_operating_cost = 1000.0
+		
+		repack.set("additional_costs", [
+			{
+				"description": "Actual Oerating Cost",
+				"amount": 1000
+			},
+			{
+				"description": "additional operating costs",
+				"amount": 200
+			},
+		])
 		repack.insert()
 		repack.submit()
 
@@ -260,11 +269,13 @@ class TestStockEntry(unittest.TestCase):
 			"voucher_no": repack.name, "item_code": "_Test Item Home Desktop 100"}, "stock_value_difference"))
 
 		stock_value_diff = flt(fg_stock_value_diff - rm_stock_value_diff, 2)
+		
+		self.assertEqual(stock_value_diff, 1200)
 
 		self.check_gl_entries("Stock Entry", repack.name,
 			sorted([
-				[stock_in_hand_account, stock_value_diff, 0.0],
-				["Stock Adjustment - _TC", 0.0, stock_value_diff],
+				[stock_in_hand_account, 1200, 0.0],
+				["Expenses Included In Valuation - _TC", 0.0, 1200.0]
 			])
 		)
 		set_perpetual_inventory(0)
@@ -291,10 +302,9 @@ class TestStockEntry(unittest.TestCase):
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type=%s and voucher_no=%s
 			order by account asc, debit asc""", (voucher_type, voucher_no), as_list=1)
-
+		
 		self.assertTrue(gl_entries)
 		gl_entries.sort(key=lambda x: x[0])
-
 		for i, gle in enumerate(gl_entries):
 			self.assertEquals(expected_gl_entries[i][0], gle[0])
 			self.assertEquals(expected_gl_entries[i][1], gle[1])
@@ -503,6 +513,8 @@ class TestStockEntry(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 0)
 
 	def test_production_order(self):
+		from erpnext.manufacturing.doctype.production_order.production_order \
+			import make_stock_entry as _make_stock_entry
 		bom_no, bom_operation_cost = frappe.db.get_value("BOM", {"item": "_Test FG Item 2",
 			"is_default": 1, "docstatus": 1}, ["name", "operating_cost"])
 
@@ -514,22 +526,15 @@ class TestStockEntry(unittest.TestCase):
 			"bom_no": bom_no,
 			"qty": 1.0,
 			"stock_uom": "_Test UOM",
-			"wip_warehouse": "_Test Warehouse - _TC"
+			"wip_warehouse": "_Test Warehouse - _TC",
+			"additional_operating_cost": 1000
 		})
 		production_order.insert()
 		production_order.submit()
 
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, incoming_rate=100)
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 
-		stock_entry = frappe.new_doc("Stock Entry")
-		stock_entry.update({
-			"purpose": "Manufacture",
-			"production_order": production_order.name,
-			"bom_no": bom_no,
-			"fg_completed_qty": "1",
-			"additional_operating_cost": 1000
-		})
-		stock_entry.get_items()
+		stock_entry = _make_stock_entry(production_order.name, "Manufacture", 1)
 
 		rm_cost = 0
 		for d in stock_entry.get("items"):
@@ -538,7 +543,7 @@ class TestStockEntry(unittest.TestCase):
 
 		fg_cost = filter(lambda x: x.item_code=="_Test FG Item 2", stock_entry.get("items"))[0].amount
 		self.assertEqual(fg_cost, 
-			flt(rm_cost + bom_operation_cost + stock_entry.additional_operating_cost, 2))
+			flt(rm_cost + bom_operation_cost + production_order.additional_operating_cost, 2))
 
 
 	def test_variant_production_order(self):
@@ -610,7 +615,7 @@ def make_stock_entry(**args):
 		"s_warehouse": args.from_warehouse or args.source,
 		"t_warehouse": args.to_warehouse or args.target,
 		"qty": args.qty,
-		"incoming_rate": args.incoming_rate,
+		"basic_rate": args.basic_rate,
 		"expense_account": args.expense_account or "Stock Adjustment - _TC",
 		"conversion_factor": 1.0,
 		"cost_center": "_Test Cost Center - _TC"

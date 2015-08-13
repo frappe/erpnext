@@ -147,6 +147,7 @@ def get_pricing_rule_for_item(args):
 
 	if pricing_rule:
 		item_details.pricing_rule = pricing_rule.name
+		item_details.pricing_rule_for = pricing_rule.price_or_discount
 		if pricing_rule.price_or_discount == "Price":
 			item_details.update({
 				"price_list_rate": pricing_rule.price/flt(args.conversion_rate) \

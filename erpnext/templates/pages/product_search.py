@@ -33,7 +33,7 @@ def get_product_list(search=None, start=0, limit=10):
 
 	for d in data:
 		d.route = ((d.parent_website_route + "/") if d.parent_website_route else "") \
-			+ d.page_name
+			+ (d.page_name or "")
 
 	return [get_item_for_list_in_html(r) for r in data]
 

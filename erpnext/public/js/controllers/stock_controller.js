@@ -13,30 +13,8 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 
 	setup_warehouse_query: function() {
 		var me = this;
-		var warehouse_query_method = function() {
+		erpnext.queries.setup_queries(this.frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(me.frm.doc);
-		};
-
-		var _set_warehouse_query = function(doctype, parentfield) {
-			var warehouse_link_fields = frappe.meta.get_docfields(doctype, me.frm.doc.name,
-				{"fieldtype": "Link", "options": "Warehouse"});
-			$.each(warehouse_link_fields, function(i, df) {
-				if(parentfield) {
-					me.frm.set_query(df.fieldname, parentfield, warehouse_query_method);
-				} else {
-					me.frm.set_query(df.fieldname, warehouse_query_method);
-				}
-			});
-		};
-
-		_set_warehouse_query(me.frm.doc.doctype);
-
-		// warehouse field in tables
-		var table_fields = frappe.meta.get_docfields(me.frm.doc.doctype, me.frm.doc.name,
-			{"fieldtype": "Table"});
-
-		$.each(table_fields, function(i, df) {
-			_set_warehouse_query(df.options, df.fieldname);
 		});
 	},
 

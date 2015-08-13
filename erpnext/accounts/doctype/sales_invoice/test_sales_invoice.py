@@ -391,7 +391,8 @@ class TestSalesInvoice(unittest.TestCase):
 			import test_records as jv_test_records
 
 		jv = frappe.get_doc(frappe.copy_doc(jv_test_records[0]))
-		jv.get("accounts")[0].against_invoice = w.name
+		jv.get("accounts")[0].reference_type = w.doctype
+		jv.get("accounts")[0].reference_name = w.name
 		jv.insert()
 		jv.submit()
 
@@ -656,17 +657,17 @@ class TestSalesInvoice(unittest.TestCase):
 		si.load_from_db()
 
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
-			where against_invoice=%s""", si.name))
+			where reference_name=%s""", si.name))
 
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
-			where against_invoice=%s and credit=300""", si.name))
+			where reference_name=%s and credit=300""", si.name))
 
 		self.assertEqual(si.outstanding_amount, 261.8)
 
 		si.cancel()
 
 		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
-			where against_invoice=%s""", si.name))
+			where reference_name=%s""", si.name))
 
 	def test_recurring_invoice(self):
 		from erpnext.controllers.tests.test_recurring_document import test_recurring_document
@@ -728,68 +729,67 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# hack! because stock ledger entires are already inserted and are not rolled back!
 		self.assertRaises(SerialNoDuplicateError, si.cancel)
-		
+
 	def test_invoice_due_date_against_customers_credit_days(self):
 		# set customer's credit days
 		frappe.db.set_value("Customer", "_Test Customer", "credit_days_based_on", "Fixed Days")
 		frappe.db.set_value("Customer", "_Test Customer", "credit_days", 10)
-		
+
 		si = create_sales_invoice()
 		self.assertEqual(si.due_date, add_days(nowdate(), 10))
-		
+
 		# set customer's credit days is last day of the next month
 		frappe.db.set_value("Customer", "_Test Customer", "credit_days_based_on", "Last Day of the Next Month")
-		
-		si1 = create_sales_invoice(posting_date="2015-07-05")		
+
+		si1 = create_sales_invoice(posting_date="2015-07-05")
 		self.assertEqual(si1.due_date, "2015-08-31")
-		
+
 	def test_return_sales_invoice(self):
 		set_perpetual_inventory()
-		
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, incoming_rate=100)
-		
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
+
 		actual_qty_0 = get_qty_after_transaction()
-		
+
 		si = create_sales_invoice(qty=5, rate=500, update_stock=1)
 
 		actual_qty_1 = get_qty_after_transaction()
 		self.assertEquals(actual_qty_0 - 5, actual_qty_1)
-		
+
 		# outgoing_rate
-		outgoing_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Sales Invoice", 
+		outgoing_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Sales Invoice",
 			"voucher_no": si.name}, "stock_value_difference") / 5
-		
+
 		# return entry
 		si1 = create_sales_invoice(is_return=1, return_against=si.name, qty=-2, rate=500, update_stock=1)
 
 		actual_qty_2 = get_qty_after_transaction()
-			
+
 		self.assertEquals(actual_qty_1 + 2, actual_qty_2)
-		
-		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry", 
-			{"voucher_type": "Sales Invoice", "voucher_no": si1.name}, 
+
+		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
+			{"voucher_type": "Sales Invoice", "voucher_no": si1.name},
 			["incoming_rate", "stock_value_difference"])
-			
+
 		self.assertEquals(flt(incoming_rate, 3), abs(flt(outgoing_rate, 3)))
-		
-		
+
+
 		# Check gl entry
-		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice", 
+		gle_warehouse_amount = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice",
 			"voucher_no": si1.name, "account": "_Test Warehouse - _TC"}, "debit")
-			
+
 		self.assertEquals(gle_warehouse_amount, stock_value_difference)
-		
-		party_credited = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice", 
+
+		party_credited = frappe.db.get_value("GL Entry", {"voucher_type": "Sales Invoice",
 			"voucher_no": si1.name, "account": "Debtors - _TC", "party": "_Test Customer"}, "credit")
-			
+
 		self.assertEqual(party_credited, 1000)
-		
+
 		# Check outstanding amount
 		self.assertFalse(si1.outstanding_amount)
 		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 1500)
-		
+
 		set_perpetual_inventory(0)
-		
+
 	def test_discount_on_net_total(self):
 		si = frappe.copy_doc(test_records[2])
 		si.apply_discount_on = "Net Total"
@@ -798,7 +798,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		expected_values = {
 			"keys": ["price_list_rate", "discount_percentage", "rate", "amount",
-				"base_price_list_rate", "base_rate", "base_amount", 
+				"base_price_list_rate", "base_rate", "base_amount",
 				"net_rate", "base_net_rate", "net_amount", "base_net_amount"],
 			"_Test Item Home Desktop 100": [50, 0, 50, 500, 50, 50, 500, 25, 25, 250, 250],
 			"_Test Item Home Desktop 200": [150, 0, 150, 750, 150, 150, 750, 75, 75, 375, 375],
@@ -821,7 +821,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		# check tax calculation
 		expected_values = {
-			"keys": ["tax_amount", "tax_amount_after_discount_amount", 
+			"keys": ["tax_amount", "tax_amount_after_discount_amount",
 				"base_tax_amount_after_discount_amount"],
 			"_Test Account Shipping Charges - _TC": [100, 100, 100],
 			"_Test Account Customs Duty - _TC": [62.5, 62.5, 62.5],
@@ -836,12 +836,12 @@ class TestSalesInvoice(unittest.TestCase):
 		for d in si.get("taxes"):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEquals(d.get(k), expected_values[d.account_head][i])
-				
-		
+
+
 		self.assertEquals(si.total_taxes_and_charges, 234.44)
 		self.assertEquals(si.base_grand_total, 859.44)
 		self.assertEquals(si.grand_total, 859.44)
-		
+
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
