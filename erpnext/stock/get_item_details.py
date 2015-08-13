@@ -401,7 +401,6 @@ def apply_price_list_on_item(args):
 	item_details = frappe._dict()
 	item_doc = frappe.get_doc("Item", args.item_code)
 	get_price_list_rate(args, item_doc, item_details)
-	item_details.discount_percentage = 0.0
 	item_details.update(get_pricing_rule_for_item(args))
 	return item_details
 
