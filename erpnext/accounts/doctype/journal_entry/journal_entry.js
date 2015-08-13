@@ -50,32 +50,51 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 		$.each([["against_voucher", "Purchase Invoice", "supplier"],
 			["against_invoice", "Sales Invoice", "customer"]], function(i, opts) {
-				me.frm.set_query(opts[0], "accounts", function(doc, cdt, cdn) {
-					var jvd = frappe.get_doc(cdt, cdn);
-					frappe.model.validate_missing(jvd, "party_type");
-					frappe.model.validate_missing(jvd, "party");
-					return {
-						filters: [
-							[opts[1], opts[2], "=", jvd.party],
-							[opts[1], "docstatus", "=", 1],
-							[opts[1], "outstanding_amount", "!=", 0]
-						]
-					};
-				});
 		});
 
-		this.frm.set_query("against_jv", "accounts", function(doc, cdt, cdn) {
+		me.frm.set_query("reference_name", "accounts", function(doc, cdt, cdn) {
 			var jvd = frappe.get_doc(cdt, cdn);
-			frappe.model.validate_missing(jvd, "account");
 
-			return {
-				query: "erpnext.accounts.doctype.journal_entry.journal_entry.get_against_jv",
-				filters: {
-					account: jvd.account,
-					party: jvd.party
-				}
+			// expense claim
+			if(jvd.reference_type==="Expense Claim") {
+				return {};
+			}
+
+			// journal entry
+			if(jvd.reference_type==="Journal Entry") {
+				frappe.model.validate_missing(jvd, "account");
+
+				return {
+					query: "erpnext.accounts.doctype.journal_entry.journal_entry.get_against_jv",
+					filters: {
+						account: jvd.account,
+						party: jvd.party
+					}
+				};
+			}
+
+			// against party
+
+			frappe.model.validate_missing(jvd, "party_type");
+			frappe.model.validate_missing(jvd, "party");
+
+			var out = {
+				filters: [
+					[jvd.reference_type, jvd.reference_type.indexOf("Sales")===0 ? "customer" : "supplier", "=", jvd.party],
+					[jvd.reference_type, "docstatus", "=", 1],
+				]
 			};
+
+			if(in_list(["Sales Invoice", "Purchase Invoice"], jvd.reference_type)) {
+				out.filters.push([jvd.reference_type, "outstanding_amount", "!=", 0]);
+			} else {
+				out.filters.push([jvd.reference_type, "per_billed", "<", 100]);
+			}
+
+			return out;
 		});
+
+
 	},
 
 	setup_balance_formatter: function() {
@@ -93,24 +112,16 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		})
 	},
 
-	against_voucher: function(doc, cdt, cdn) {
+	reference_name: function(doc, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
-		if (d.against_voucher && !flt(d.debit)) {
-			this.get_outstanding('Purchase Invoice', d.against_voucher, d);
+		if (d.reference_type==="Purchase Invoice" && !flt(d.debit)) {
+			this.get_outstanding('Purchase Invoice', d.reference_name, d);
 		}
-	},
-
-	against_invoice: function(doc, cdt, cdn) {
-		var d = frappe.get_doc(cdt, cdn);
-		if (d.against_invoice && !flt(d.credit)) {
-			this.get_outstanding('Sales Invoice', d.against_invoice, d);
+		if (d.reference_type==="Sales Invoice" && !flt(d.credit)) {
+			this.get_outstanding('Sales Invoice', d.reference_name, d);
 		}
-	},
-
-	against_jv: function(doc, cdt, cdn) {
-		var d = frappe.get_doc(cdt, cdn);
-		if (d.against_jv && !flt(d.credit) && !flt(d.debit)) {
-			this.get_outstanding('Journal Entry', d.against_jv, d);
+		if (d.reference_type==="Journal Entry" && !flt(d.credit) && !flt(d.debit)) {
+			this.get_outstanding('Journal Entry', d.reference_name, d);
 		}
 	},
 
@@ -214,11 +225,12 @@ cur_frm.cscript.account = function(doc,dt,dn) {
 	var d = locals[dt][dn];
 	if(d.account) {
 		return frappe.call({
-			method: "erpnext.accounts.utils.get_balance_on",
+			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_account_balance_and_party_type",
 			args: {account: d.account, date: doc.posting_date},
 			callback: function(r) {
-				d.balance = r.message;
+				$.extend(d, r.message);
 				refresh_field('balance', d.name, 'accounts');
+				refresh_field('party_type', d.name, 'accounts');
 			}
 		});
 	}

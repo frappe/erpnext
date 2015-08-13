@@ -202,7 +202,7 @@ erpnext.AccountsChart = Class.extend({
 			title:__('New Account'),
 			fields: [
 				{fieldtype:'Data', fieldname:'account_name', label:__('New Account Name'), reqd:true,
-					description: __("Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master")},
+					description: __("Name of new Account. Note: Please don't create accounts for Customers and Suppliers")},
 				{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
 					description: __('Further accounts can be made under Groups, but entries can be made against non-Groups')},
 				{fieldtype:'Select', fieldname:'account_type', label:__('Account Type'),
