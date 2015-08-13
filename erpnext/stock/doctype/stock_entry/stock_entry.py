@@ -98,7 +98,7 @@ class StockEntry(StockController):
 					if f in ["stock_uom", "conversion_factor"] or not item.get(f):
 						item.set(f, item_details.get(f))
 
-			if self.difference_account:
+			if self.difference_account and item.expense_account=="":
 				item.expense_account = self.difference_account
 
 			if not item.transfer_qty:
