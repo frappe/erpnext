@@ -34,7 +34,7 @@ class PaymentReconciliation(Document):
 				t1.name = t2.parent and t1.docstatus = 1 and t2.docstatus = 1
 				and t2.party_type = %(party_type)s and t2.party = %(party)s
 				and t2.account = %(account)s and {dr_or_cr} > 0
-				and ifnull(t2.reference_type, '')=''
+				and ifnull(t2.reference_type, '') in ('', 'Sales Order', 'Purchase Order')
 				{cond}
 				and (CASE
 					WHEN t1.voucher_type in ('Debit Note', 'Credit Note')

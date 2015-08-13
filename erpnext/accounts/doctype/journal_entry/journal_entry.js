@@ -225,11 +225,12 @@ cur_frm.cscript.account = function(doc,dt,dn) {
 	var d = locals[dt][dn];
 	if(d.account) {
 		return frappe.call({
-			method: "erpnext.accounts.utils.get_balance_on",
+			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_account_balance_and_party_type",
 			args: {account: d.account, date: doc.posting_date},
 			callback: function(r) {
-				d.balance = r.message;
+				$.extend(d, r.message);
 				refresh_field('balance', d.name, 'accounts');
+				refresh_field('party_type', d.name, 'accounts');
 			}
 		});
 	}

@@ -611,6 +611,8 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def get_outstanding(args):
+	if not frappe.has_permission("Account"):
+		frappe.msgprint(_("No Permission"), raise_exception=1)
 	args = eval(args)
 	if args.get("doctype") == "Journal Entry":
 		condition = " and party=%(party)s" if args.get("party") else ""
@@ -637,6 +639,9 @@ def get_outstanding(args):
 
 @frappe.whitelist()
 def get_party_account_and_balance(company, party_type, party):
+	if not frappe.has_permission("Account"):
+		frappe.msgprint(_("No Permission"), raise_exception=1)
+
 	from erpnext.accounts.party import get_party_account
 	account = get_party_account(company, party, party_type)
 
@@ -648,3 +653,16 @@ def get_party_account_and_balance(company, party_type, party):
 		"balance": account_balance,
 		"party_balance": party_balance
 	}
+
+@frappe.whitelist()
+def get_account_balance_and_party_type(account, date):
+	"""Returns dict of account balance and party type to be set in Journal Entry on selection of account."""
+	if not frappe.has_permission("Account"):
+		frappe.msgprint(_("No Permission"), raise_exception=1)
+
+	account_type = frappe.db.get_value("Account", account, "account_type")
+	return {
+		"balance": get_balance_on(account, date),
+		"party_type": {"Receivable":"Customer", "Payable":"Supplier"}.get(account_type, "")
+	}
+
