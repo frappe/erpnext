@@ -142,13 +142,6 @@ def reconcile_against_document(args):
 	for d in args:
 		check_if_jv_modified(d)
 		validate_allocated_amount(d)
-		against_fld = {
-			'Journal Entry' : 'against_jv',
-			'Sales Invoice' : 'against_invoice',
-			'Purchase Invoice' : 'against_voucher'
-		}
-
-		d['against_fld'] = against_fld[d['against_voucher_type']]
 
 		# cancel JV
 		jv_obj = frappe.get_doc('Journal Entry', d['voucher_no'])
@@ -173,8 +166,7 @@ def check_if_jv_modified(args):
 		select t2.{dr_or_cr} from `tabJournal Entry` t1, `tabJournal Entry Account` t2
 		where t1.name = t2.parent and t2.account = %(account)s
 		and t2.party_type = %(party_type)s and t2.party = %(party)s
-		and ifnull(t2.against_voucher, '')=''
-		and ifnull(t2.against_invoice, '')='' and ifnull(t2.against_jv, '')=''
+		and ifnull(t2.reference_type, '') in ("", "Sales Order", "Purchase Order")
 		and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
 		and t1.docstatus=1 """.format(dr_or_cr = args.get("dr_or_cr")), args)
 
@@ -193,7 +185,12 @@ def update_against_doc(d, jv_obj):
 	"""
 	jv_detail = jv_obj.get("accounts", {"name": d["voucher_detail_no"]})[0]
 	jv_detail.set(d["dr_or_cr"], d["allocated_amt"])
-	jv_detail.set(d["against_fld"], d["against_voucher"])
+
+	original_reference_type = jv_detail.reference_type
+	original_reference_name = jv_detail.reference_name
+
+	jv_detail.set("reference_type", d["against_voucher_type"])
+	jv_detail.set("reference_name", d["against_voucher"])
 
 	if d['allocated_amt'] < d['unadjusted_amt']:
 		jvd = frappe.db.sql("""select cost_center, balance, against_account, is_advance
@@ -208,6 +205,8 @@ def update_against_doc(d, jv_obj):
 		ch.set(d['dr_or_cr'], flt(d['unadjusted_amt']) - flt(d['allocated_amt']))
 		ch.set(d['dr_or_cr']== 'debit' and 'credit' or 'debit', 0)
 		ch.against_account = cstr(jvd[0][2])
+		ch.reference_type = original_reference_type
+		ch.reference_name = original_reference_name
 		ch.is_advance = cstr(jvd[0][3])
 		ch.docstatus = 1
 
@@ -215,15 +214,16 @@ def update_against_doc(d, jv_obj):
 	jv_obj.flags.ignore_validate_update_after_submit = True
 	jv_obj.save()
 
-def remove_against_link_from_jv(ref_type, ref_no, against_field):
+def remove_against_link_from_jv(ref_type, ref_no):
 	linked_jv = frappe.db.sql_list("""select parent from `tabJournal Entry Account`
-		where `%s`=%s and docstatus < 2""" % (against_field, "%s"), (ref_no))
+		where reference_type=%s and reference_name=%s and docstatus < 2""", (ref_type, ref_no))
 
 	if linked_jv:
-		frappe.db.sql("""update `tabJournal Entry Account` set `%s`=null,
+		frappe.db.sql("""update `tabJournal Entry Account`
+			set reference_type=null, reference_name = null,
 			modified=%s, modified_by=%s
-			where `%s`=%s and docstatus < 2""" % (against_field, "%s", "%s", against_field, "%s"),
-			(now(), frappe.session.user, ref_no))
+			where reference_type=%s and reference_name=%s
+			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
 
 		frappe.db.sql("""update `tabGL Entry`
 			set against_voucher_type=null, against_voucher=null,

@@ -1,0 +1,1 @@
+- For referencing a line in **Journal Entry**, now you can reference by the **Reference Type** and **Reference Name** columns, instead of "Against Sales Invoice", "Against Purchase Invoice", etc.

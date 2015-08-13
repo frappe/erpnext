@@ -5,6 +5,14 @@ frappe.provide("erpnext.buying");
 
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
 
+frappe.ui.form.on("Purchase Order", {
+	onload: function(frm) {
+		erpnext.queries.setup_queries(frm, "Warehouse", function() {
+			return erpnext.queries.warehouse(frm.doc);
+		});
+	}
+});
+
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
 	refresh: function(doc, cdt, cdn) {
 		var me = this;
@@ -12,31 +20,38 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		// this.frm.dashboard.reset();
 
 		if(doc.docstatus == 1 && doc.status != 'Stopped') {
+
+			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100)
+				cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Purchase Order']);
+
+			if(flt(doc.per_billed)==0) {
+				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry);
+			}
+
 			if(flt(doc.per_received, 2) < 100) {
-				cur_frm.add_custom_button(__('Make Purchase Receipt'), this.make_purchase_receipt);
-				
+				cur_frm.add_custom_button(__('Receive'), this.make_purchase_receipt).addClass("btn-primary");
+
 				if(doc.is_subcontracted==="Yes") {
 					cur_frm.add_custom_button(__('Transfer Material to Supplier'), this.make_stock_entry);
 				}
 			}
+
 			if(flt(doc.per_billed, 2) < 100)
-				cur_frm.add_custom_button(__('Make Invoice'), this.make_purchase_invoice);
-			
-			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100)
-				cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Purchase Order']);
+				cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice);
+
 
 		} else if(doc.docstatus===0) {
 			cur_frm.cscript.add_from_mappers();
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
-			cur_frm.add_custom_button(__('Unstop Purchase Order'), cur_frm.cscript['Unstop Purchase Order']);
+			cur_frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Purchase Order']);
 	},
 
 	make_stock_entry: function() {
 		var items = $.map(cur_frm.doc.items, function(d) { return d.bom ? d.item_code : false; });
 		var me = this;
-		
+
 		if(items.length===1) {
 			me._make_stock_entry(items[0]);
 			return;
@@ -126,7 +141,21 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	items_add: function(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
+	},
+
+	make_bank_entry: function() {
+		return frappe.call({
+			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_from_purchase_order",
+			args: {
+				"purchase_order": cur_frm.doc.name
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
 	}
+
 });
 
 // for backward compatibility: combine new and previous states

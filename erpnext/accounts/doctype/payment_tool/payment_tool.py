@@ -12,13 +12,6 @@ class PaymentTool(Document):
 	def make_journal_entry(self):
 		from erpnext.accounts.utils import get_balance_on
 		total_payment_amount = 0.00
-		invoice_voucher_type = {
-			'Sales Invoice': 'against_invoice',
-			'Purchase Invoice': 'against_voucher',
-			'Journal Entry': 'against_jv',
-			'Sales Order': 'against_sales_order',
-			'Purchase Order': 'against_purchase_order',
-		}
 
 		jv = frappe.new_doc('Journal Entry')
 		jv.voucher_type = 'Journal Entry'
@@ -41,7 +34,8 @@ class PaymentTool(Document):
 				d1.party = self.party
 				d1.balance = get_balance_on(self.party_account)
 				d1.set("debit" if self.received_or_paid=="Paid" else "credit", flt(v.payment_amount))
-				d1.set(invoice_voucher_type.get(v.against_voucher_type), v.against_voucher_no)
+				d1.set("reference_type", v.against_voucher_type)
+				d1.set("reference_name", v.against_voucher_no)
 				d1.set('is_advance', 'Yes' if v.against_voucher_type in ['Sales Order', 'Purchase Order'] else 'No')
 				total_payment_amount = flt(total_payment_amount) + flt(d1.debit) - flt(d1.credit)
 
