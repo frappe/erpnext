@@ -1,6 +1,7 @@
 import frappe
 
 def execute():
+	frappe.reload_doctype("Journal Entry")
 	for doctype, fieldname in (
 		("Sales Order", "against_sales_order"),
 		("Purchase Order", "against_purchase_order"),
