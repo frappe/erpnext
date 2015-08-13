@@ -6,7 +6,7 @@ import unittest
 import frappe
 
 from frappe.test_runner import make_test_records
-from erpnext.stock.doctype.item.item import WarehouseNotSet, ItemTemplateCannotHaveStock
+from erpnext.stock.doctype.item.item import WarehouseNotSet, ItemTemplateCannotHaveStock, create_variant
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 test_ignore = ["BOM"]
@@ -98,5 +98,12 @@ class TestItem(unittest.TestCase):
 
 		for key, value in to_check.iteritems():
 			self.assertEquals(value, details.get(key))
+		
+	def test_make_item_variant(self):
+		if not frappe.db.exists("Item", "_Test Variant Item-S"):
+			variant = create_variant("_Test Variant Item", """{"Test Size": "Small"}""")
+			variant.item_code = "_Test Variant Item-S"
+			variant.item_name = "_Test Variant Item-S"
+			variant.save()
 
 test_records = frappe.get_test_records('Item')

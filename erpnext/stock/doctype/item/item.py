@@ -539,7 +539,8 @@ def create_variant(item, param):
 			"attribute_value": args[d]
 		})
 	variant.set("attributes", variant_attributes)
-	copy_attributes_to_variant(item, variant)
+	template = frappe.get_doc("Item", item)
+	copy_attributes_to_variant(template, variant)
 	return variant
 	
 def copy_attributes_to_variant(item, variant):
