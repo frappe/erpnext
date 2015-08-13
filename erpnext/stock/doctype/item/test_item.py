@@ -106,4 +106,11 @@ class TestItem(unittest.TestCase):
 			variant.item_name = "_Test Variant Item-S"
 			variant.save()
 
+def make_item_variant():
+	if not frappe.db.exists("Item", "_Test Variant Item-S"):
+		variant = create_variant("_Test Variant Item", """{"Test Size": "Small"}""")
+		variant.item_code = "_Test Variant Item-S"
+		variant.item_name = "_Test Variant Item-S"
+		variant.save()
+
 test_records = frappe.get_test_records('Item')

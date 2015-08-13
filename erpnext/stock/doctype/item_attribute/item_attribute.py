@@ -42,6 +42,6 @@ class ItemAttribute(Document):
 		variant_attributes = frappe.db.sql("select DISTINCT attribute_value from `tabVariant Attribute` where attribute=%s", self.name)
 		if variant_attributes:
 			for d in variant_attributes:
-				if d[0] not in attribute_values:
+				if d[0] and d[0] not in attribute_values:
 					frappe.throw(_("Attribute Value {0} cannot be removed from {1} as Item Variants \
 						exist with this Attribute.").format(d[0], self.name))

@@ -64,8 +64,10 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual([[1, 20],[1, 30]], eval(sle.stock_queue))
 
 		frappe.db.set_default("allow_negative_stock", 0)
-
+	
 	def test_auto_material_request(self):
+		from erpnext.stock.doctype.item.test_item import make_item_variant
+		make_item_variant()
 		self._test_auto_material_request("_Test Item")
 		
 	def test_auto_material_request_for_variant(self):
