@@ -9,6 +9,6 @@ def execute():
 		("Journal Entry", "against_jv"),
 		("Expense Claim", "against_expense_claim"),
 	):
-		frappe.db.update("""update `tabJournal Entry Detail`
+		frappe.db.sql("""update `tabJournal Entry Detail`
 			set reference_type=%s and reference_name={0} where ifnull({0}, '') != ''
 		""".format(fieldname), doctype)
