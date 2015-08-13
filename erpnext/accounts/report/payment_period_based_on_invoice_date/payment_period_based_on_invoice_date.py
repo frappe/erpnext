@@ -18,7 +18,7 @@ def execute(filters=None):
 
 	data = []
 	for d in entries:
-		against_date = invoice_posting_date_map[d.reference_name] or ""
+		against_date = invoice_posting_date_map.get(d.reference_name) or ""
 		if d.reference_type=="Purchase Invoice":
 			payment_amount = flt(d.debit) or -1 * flt(d.credit)
 		else:
