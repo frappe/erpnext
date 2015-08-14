@@ -11,5 +11,5 @@ def execute():
 		("Expense Claim", "against_expense_claim"),
 	):
 		frappe.db.sql("""update `tabJournal Entry Account`
-			set reference_type=%s and reference_name={0} where ifnull({0}, '') != ''
+			set reference_type=%s, reference_name={0} where ifnull({0}, '') != ''
 		""".format(fieldname), doctype)
