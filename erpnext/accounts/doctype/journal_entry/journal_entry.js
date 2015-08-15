@@ -48,10 +48,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			}
 		});
 
-		$.each([["against_voucher", "Purchase Invoice", "supplier"],
-			["against_invoice", "Sales Invoice", "customer"]], function(i, opts) {
-		});
-
 		me.frm.set_query("reference_name", "accounts", function(doc, cdt, cdn) {
 			var jvd = frappe.get_doc(cdt, cdn);
 
