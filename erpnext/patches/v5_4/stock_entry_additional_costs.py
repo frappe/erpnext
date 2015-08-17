@@ -16,15 +16,24 @@ def execute():
 		and (se.purpose not in ('Manufacture', 'Repack') or ifnull(additional_operating_cost, 0)=0)
 	""")
 
+	stock_entry_db_columns = frappe.db.get_table_columns("Stock Entry")
+	if "additional_operating_cost" in stock_entry_db_columns:
+		operating_cost_fieldname = "additional_operating_cost"
+	elif "total_fixed_cost" in stock_entry_db_columns:
+		operating_cost_fieldname = "total_fixed_cost"
+	else:
+		return
+		
+
 	stock_entries = frappe.db.sql_list("""select name from `tabStock Entry`
-		where purpose in ('Manufacture', 'Repack') and ifnull(additional_operating_cost, 0)!=0
-		and docstatus < 2""")
+		where purpose in ('Manufacture', 'Repack') and ifnull({0}, 0)!=0
+		and docstatus < 2""".format(operating_cost_fieldname))
 
 	for d in stock_entries:
 		stock_entry = frappe.get_doc("Stock Entry", d)
 		stock_entry.append("additional_costs", {
 			"description": "Additional Operating Cost",
-			"amount": stock_entry.additional_operating_cost
+			"amount": stock_entry.get(operating_cost_fieldname)
 		})
 
 		number_of_fg_items = len([t.t_warehouse for t in stock_entry.get("items") if t.t_warehouse])
@@ -33,7 +42,7 @@ def execute():
 			d.valuation_rate = d.incoming_rate
 
 			if d.bom_no or (d.t_warehouse and number_of_fg_items == 1):
-				d.additional_cost = stock_entry.additional_operating_cost
+				d.additional_cost = stock_entry.get(operating_cost_fieldname)
 
 			d.basic_rate = flt(d.valuation_rate) - flt(d.additional_cost)
 			d.basic_amount = flt(flt(d.basic_rate) *flt(d.transfer_qty), d.precision("basic_amount"))
