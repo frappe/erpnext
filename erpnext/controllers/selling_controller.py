@@ -188,7 +188,7 @@ class SellingController(StockController):
 					reserved_qty_for_main_item = -(so_qty - already_delivered_qty)
 				else:
 					reserved_qty_for_main_item = -flt(d.qty)
-
+					
 			if self.has_product_bundle(d.item_code):
 				for p in self.get("packed_items"):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
@@ -229,10 +229,12 @@ class SellingController(StockController):
 			and against_sales_order = %s
 			and parent != %s""", (so_detail, so, current_docname))
 			
-		delivered_via_si = frappe.db.sql("""select sum(qty) from `tabSales Invoice Item`
-			where so_detail = %s and docstatus = 1
-			and sales_order = %s
-			and parent != %s""", (so_detail, so, current_docname))
+		delivered_via_si = frappe.db.sql("""select sum(si_item.qty) 
+			from `tabSales Invoice Item` si_item, `tabSales Invoice` si
+			where si_item.parent = si.name and ifnull(si.update_stock, 0) = 1
+			and si_item.so_detail = %s and si.docstatus = 1 
+			and si_item.sales_order = %s
+			and si.name != %s""", (so_detail, so, current_docname))
 			
 		total_delivered_qty = (flt(delivered_via_dn[0][0]) if delivered_via_dn else 0) \
 			+ (flt(delivered_via_si[0][0]) if delivered_via_si else 0)
