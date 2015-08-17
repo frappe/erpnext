@@ -231,6 +231,10 @@ class StockEntry(StockController):
 				frappe.throw(_("""Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
 					Available Qty: {4}, Transfer Qty: {5}""").format(d.idx, d.s_warehouse,
 					self.posting_date, self.posting_time, d.actual_qty, d.transfer_qty), NegativeStockError)
+					
+	def get_stock_and_rate(self):
+		self.set_actual_qty()
+		self.calculate_rate_and_amount()
 
 	def calculate_rate_and_amount(self, force=False):
 		self.set_basic_rate(force)
