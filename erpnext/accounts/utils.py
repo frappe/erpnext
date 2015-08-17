@@ -100,14 +100,15 @@ def get_balance_on(account=None, date=None, party_type=None, party=None):
 	if party_type and party:
 		cond.append("""gle.party_type = "%s" and gle.party = "%s" """ %
 			(party_type.replace('"', '\\"'), party.replace('"', '\\"')))
+			
+	if account or (party_type and party):
+		bal = frappe.db.sql("""
+			SELECT sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+			FROM `tabGL Entry` gle
+			WHERE %s""" % " and ".join(cond))[0][0]
 
-	bal = frappe.db.sql("""
-		SELECT sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
-		FROM `tabGL Entry` gle
-		WHERE %s""" % " and ".join(cond))[0][0]
-
-	# if bal is None, return 0
-	return flt(bal)
+		# if bal is None, return 0
+		return flt(bal)
 
 @frappe.whitelist()
 def add_ac(args=None):
