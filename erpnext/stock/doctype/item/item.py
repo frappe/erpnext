@@ -13,6 +13,7 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 
 class WarehouseNotSet(frappe.ValidationError): pass
 class ItemTemplateCannotHaveStock(frappe.ValidationError): pass
+class ItemVariantExistsError(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
 	website = frappe._dict(
@@ -63,7 +64,7 @@ class Item(WebsiteGenerator):
 		self.synced_with_hub = 0
 		self.validate_has_variants()
 		self.validate_stock_for_template_must_be_zero()
-		self.validate_template_attributes()
+		self.validate_attributes()
 		self.validate_variant_attributes()
 
 		if not self.get("__islocal"):
@@ -331,11 +332,11 @@ class Item(WebsiteGenerator):
 			if template_uom != self.stock_uom:
 				frappe.throw(_("Default Unit of Measure for Variant must be same as Template"))
 
-	def validate_template_attributes(self):
-		if self.has_variants:
+	def validate_attributes(self):
+		if self.has_variants or self.variant_of:
 			attributes = []
 			if not self.attributes:
-				frappe.throw(_("Attribute is mandatory for Item Template"))
+				frappe.throw(_("Attribute table is mandatory"))
 			for d in self.attributes:
 				if d.attribute in attributes:
 					frappe.throw(_("Attribute {0} selected multiple times in Attributes Table".format(d.attribute)))
@@ -351,8 +352,8 @@ class Item(WebsiteGenerator):
 				args[d.attribute] = d.attribute_value
 
 			variant = get_variant(self.variant_of, args)
-			if variant and not variant[0][0] == self.name:
-				frappe.throw(_("Item variant {0} exists with same attributes".format(variant[0][0])	))
+			if variant and variant[0][0] != self.name:
+				frappe.throw(_("Item variant {0} exists with same attributes").format(variant[0][0]), ItemVariantExistsError)
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
@@ -488,45 +489,87 @@ def check_stock_uom_with_bin(item, stock_uom):
 
 @frappe.whitelist()
 def get_variant(item, args):
-	if not type(args) == dict:
+	"""Validates Attributes and their Values, then looks for an exactly matching Item Variant
+
+		:param item: Template Item
+		:param args: A dictionary with "Attribute" as key and "Attribute Value" as value
+	"""
+	if isinstance(args, basestring):
 		args = json.loads(args)
-	attributes = {}
-	numeric_attributes = []
-	for t in frappe.db.get_all("Item Attribute Value", fields=["parent", "attribute_value"]):
-		attributes.setdefault(t.parent, []).append(t.attribute_value)
 
-	for t in frappe.get_list("Item Attribute", filters={"numeric_values":1}):
-		numeric_attributes.append(t.name)
+	if not args:
+		frappe.throw(_("Please specify at least one attribute in the Attributes table"))
 
-	for d in args:
-		if d in numeric_attributes:
-			values = frappe.db.sql("""select from_range, to_range, increment from `tabItem Variant Attribute` \
-				where parent = %s and attribute = %s""", (item, d), as_dict=1)[0]
+	validate_item_variant_attributes(item, args)
 
-			if (not values.from_range < cint(args[d]) < values.to_range) or ((cint(args[d]) - values.from_range) % values.increment != 0):
-				frappe.throw(_("Attribute value {0} for attribute {1} must be within range of {2} to {3} and in increments of {4}")
-					.format(args[d], d, values.from_range, values.to_range, values.increment))
-		else:
-			if args[d] not in attributes.get(d):
-				frappe.throw(_("Attribute value {0} for attribute {1} does not exist \
-					in Item Attribute Master.").format(args[d], d))
+	return find_variant(item, args)
 
-	conds=""
-	attributes = ""
-	for d in args:
-		if conds:
-			conds+= " and "
-			attributes+= ", "
+def validate_item_variant_attributes(item, args):
+	attribute_values = {}
+	for t in frappe.get_all("Item Attribute Value", fields=["parent", "attribute_value"],
+		filters={"parent": ["in", args.keys()]}):
+		(attribute_values.setdefault(t.parent, [])).append(t.attribute_value)
 
-		conds += """ exists(select iv.name from `tabItem Variant Attribute` iv where iv.parent = i.name and
-			 iv.attribute= "{0}" and iv.attribute_value= "{1}")""".format(d, args[d])
-		attributes += "'{0}'".format(d)
+	numeric_attributes = [t.name for t in frappe.get_list("Item Attribute", filters={"numeric_values":1,
+		"parent": ["in", args.keys()]})]
 
-	conds += """and not exists (select iv.name from `tabItem Variant Attribute` iv where iv.parent = i.name and
-		iv.attribute not in ({0}))""".format(attributes)
+	template_item = frappe.get_doc("Item", item)
+	template_item_attributes = frappe._dict((d.attribute, d) for d in template_item.attributes)
 
-	variant=  frappe.db.sql("""select i.name from tabItem i where {0}""".format(conds))
-	return variant
+	for attribute, value in args.items():
+
+		if attribute in numeric_attributes:
+			template_attribute = template_item_attributes[attribute]
+
+			if template_attribute.increment == 0:
+				# defensive validation to prevent ZeroDivisionError
+				frappe.throw(_("Increment for Attribute {0} cannot be 0").format(attribute))
+
+			from_range = template_attribute.from_range
+			to_range = template_attribute.to_range
+			increment = template_attribute.increment
+
+			if not ( (from_range <= flt(value) <= to_range) and (flt(value) - from_range) % increment == 0 ):
+				frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3}").format(attribute, from_range, to_range, increment))
+
+		elif value not in attribute_values[attribute]:
+			frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values").format(
+				value, attribute))
+
+def find_variant(item, args):
+	conditions = ["""(iv_attribute.attribute="{0}" and iv_attribute.attribute_value="{1}")"""\
+		.format(frappe.db.escape(key), frappe.db.escape(value)) for key, value in args.items()]
+
+	conditions = " or ".join(conditions)
+
+	# use approximate match and shortlist possible variant matches
+	# it is approximate because we are matching using OR condition
+	# and it need not be exact match at this stage
+	# this uses a simpler query instead of using multiple exists conditions
+	possible_variants = frappe.db.sql_list("""select name from `tabItem` item
+		where variant_of=%s and exists (
+			select name from `tabItem Variant Attribute` iv_attribute
+				where iv_attribute.parent=item.name
+				and ({conditions})
+		)""".format(conditions=conditions), item)
+
+	for variant in possible_variants:
+		variant = frappe.get_doc("Item", variant)
+
+		if len(args.keys()) == len(variant.get("attributes")):
+			# has the same number of attributes and values
+			# assuming no duplication as per the validation in Item
+			match_count = 0
+
+			for attribute, value in args.items():
+				for row in variant.attributes:
+					if row.attribute==attribute and row.attribute_value==value:
+						# this row matches
+						match_count += 1
+						break
+
+			if match_count == len(args.keys()):
+				return variant.name
 
 @frappe.whitelist()
 def create_variant(item, param):

@@ -16,9 +16,13 @@ class ItemAttribute(Document):
 		if self.numeric_values:
 			self.set("item_attribute_values", [])
 			if not self.from_range or not self.to_range:
-				frappe.throw(_("Please specify from/to Range"))
+				frappe.throw(_("Please specify from/to range"))
+
 			elif self.from_range > self.to_range:
 				frappe.throw(_("From Range cannot be greater than to Range"))
+
+			if not self.increment:
+				frappe.throw(_("Increment cannot be 0"))
 		else:
 			self.from_range = self.to_range = self.increment = 0
 
