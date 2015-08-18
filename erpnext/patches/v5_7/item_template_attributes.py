@@ -45,8 +45,9 @@ def rename_and_reload_doctypes():
 
 def migrate_manage_variants():
 	item_attribute = {}
-	for d in  frappe.db.sql("""select DISTINCT va.attribute, i.variant_of from `tabItem Variant Attribute` va, `tabItem` i \
-		where va.parent = i.name""", as_dict=1):
+	for d in  frappe.db.sql("""select DISTINCT va.attribute, i.variant_of
+		from `tabItem Variant Attribute` va, `tabItem` i
+		where va.parent = i.name and ifnull(i.variant_of, '')!=''""", as_dict=1):
 		item_attribute.setdefault(d.variant_of, []).append({"attribute": d.attribute})
 
 	for item, attributes in item_attribute.items():
