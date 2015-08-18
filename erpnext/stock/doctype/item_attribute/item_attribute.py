@@ -33,13 +33,13 @@ class ItemAttribute(Document):
 			if d.abbr in abbrs:
 				frappe.throw(_("{0} must appear only once").format(d.abbr))
 			abbrs.append(d.abbr)
-			
+
 	def validate_attribute_values(self):
 		attribute_values = []
 		for d in self.item_attribute_values:
 			attribute_values.append(d.attribute_value)
-		
-		variant_attributes = frappe.db.sql("select DISTINCT attribute_value from `tabVariant Attribute` where attribute=%s", self.name)
+
+		variant_attributes = frappe.db.sql("select DISTINCT attribute_value from `tabItem Variant Attribute` where attribute=%s", self.name)
 		if variant_attributes:
 			for d in variant_attributes:
 				if d[0] and d[0] not in attribute_values:

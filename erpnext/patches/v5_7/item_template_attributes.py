@@ -8,12 +8,11 @@ import MySQLdb
 def execute():
 	"""
 		Structure History:
-			1. Item and Item Attribute
+			1. Item and Item Variant
 			2. Item, Variant Attribute, Manage Variants and Manage Variant Items
-			3. Item, Variant Attribute (latest)
+			3. Item, Item Variant Attribute, Item Attribute and Item Attribute Type (latest)
 	"""
-	frappe.db.reload_doctype("Item")
-	frappe.db.reload_doctype("Variant Attribute")
+	rename_and_reload_doctypes()
 
 	variant_templates = frappe.get_all("Item", filters={"has_variants": 1}, limit_page_length=1)
 	if not variant_templates:
@@ -21,7 +20,7 @@ def execute():
 		# so no point in running the patch
 		return
 
-	variant_attributes = frappe.get_all("Variant Attribute", fields=["*"], limit_page_length=1)
+	variant_attributes = frappe.get_all("Item Variant Attribute", fields=["*"], limit_page_length=1)
 
 	if variant_attributes:
 		# manage variant patch is already applied
@@ -35,9 +34,18 @@ def execute():
 		except MySQLdb.ProgrammingError:
 			print "`tabItem Variant` not found"
 
+def rename_and_reload_doctypes():
+	if "tabVariant Attribute" in frappe.db.get_tables():
+		frappe.rename_doc("DocType", "Variant Attribute", "Item Variant Attribute")
+
+	frappe.reload_doctype("Item")
+	frappe.reload_doctype("Item Variant Attribute")
+	frappe.reload_doctype("Item Attribute Value")
+	frappe.reload_doctype("Item Attribute")
+
 def migrate_manage_variants():
 	item_attribute = {}
-	for d in  frappe.db.sql("""select DISTINCT va.attribute, i.variant_of from `tabVariant Attribute` va, `tabItem` i \
+	for d in  frappe.db.sql("""select DISTINCT va.attribute, i.variant_of from `tabItem Variant Attribute` va, `tabItem` i \
 		where va.parent = i.name""", as_dict=1):
 		item_attribute.setdefault(d.variant_of, []).append({"attribute": d.attribute})
 
@@ -54,7 +62,7 @@ def migrate_item_variants():
 	for item in frappe.get_all("Item", filters={"has_variants": 1}):
 		all_variants = frappe.get_all("Item", filters={"variant_of": item.name}, fields=["name", "description"])
 		item_attributes = frappe.db.sql("""select distinct item_attribute, item_attribute_value
-			from `tabItem Attribute` where parent=%s""", item.name)
+			from `tabItem Variant` where parent=%s""", item.name)
 
 		attribute_value_options = {}
 		for attribute, value in item_attributes:
@@ -77,10 +85,10 @@ def migrate_item_variants():
 					save_attributes_in_variant(variant, combination)
 					break
 
-	frappe.delete_doc("DocType", "Item Attribute")
+	frappe.delete_doc("DocType", "Item Variant")
 
 def save_attributes_in_template(item, attribute_value_options):
-	# store attribute in Variant Attribute table for template
+	# store attribute in Item Variant Attribute table for template
 	template = frappe.get_doc("Item", item)
 	template.set("attributes", [{"attribute": attribute} for attribute in attribute_value_options.keys()])
 	template.save()

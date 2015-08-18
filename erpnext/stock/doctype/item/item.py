@@ -341,7 +341,7 @@ class Item(WebsiteGenerator):
 					frappe.throw(_("Attribute {0} selected multiple times in Attributes Table".format(d.attribute)))
 				else:
 					attributes.append(d.attribute)
-					
+
 	def validate_variant_attributes(self):
 		if self.variant_of:
 			args = {}
@@ -349,7 +349,7 @@ class Item(WebsiteGenerator):
 				if not d.attribute_value:
 					frappe.throw(_("Please specify Attribute Value for attribute {0}").format(d.attribute))
 				args[d.attribute] = d.attribute_value
-				
+
 			variant = get_variant(self.variant_of, args)
 			if variant and not variant[0][0] == self.name:
 				frappe.throw(_("Item variant {0} exists with same attributes".format(variant[0][0])	))
@@ -494,13 +494,13 @@ def get_variant(item, args):
 	numeric_attributes = []
 	for t in frappe.db.get_all("Item Attribute Value", fields=["parent", "attribute_value"]):
 		attributes.setdefault(t.parent, []).append(t.attribute_value)
-	
+
 	for t in frappe.get_list("Item Attribute", filters={"numeric_values":1}):
 		numeric_attributes.append(t.name)
 
 	for d in args:
 		if d in numeric_attributes:
-			values = frappe.db.sql("""select from_range, to_range, increment from `tabVariant Attribute` \
+			values = frappe.db.sql("""select from_range, to_range, increment from `tabItem Variant Attribute` \
 				where parent = %s and attribute = %s""", (item, d), as_dict=1)[0]
 
 			if (not values.from_range < cint(args[d]) < values.to_range) or ((cint(args[d]) - values.from_range) % values.increment != 0):
@@ -517,17 +517,17 @@ def get_variant(item, args):
 		if conds:
 			conds+= " and "
 			attributes+= ", "
-		
-		conds += """ exists(select iv.name from `tabVariant Attribute` iv where iv.parent = i.name and
+
+		conds += """ exists(select iv.name from `tabItem Variant Attribute` iv where iv.parent = i.name and
 			 iv.attribute= "{0}" and iv.attribute_value= "{1}")""".format(d, args[d])
 		attributes += "'{0}'".format(d)
 
-	conds += """and not exists (select iv.name from `tabVariant Attribute` iv where iv.parent = i.name and 
+	conds += """and not exists (select iv.name from `tabItem Variant Attribute` iv where iv.parent = i.name and
 		iv.attribute not in ({0}))""".format(attributes)
 
 	variant=  frappe.db.sql("""select i.name from tabItem i where {0}""".format(conds))
 	return variant
-	
+
 @frappe.whitelist()
 def create_variant(item, param):
 	args = json.loads(param)
@@ -542,7 +542,7 @@ def create_variant(item, param):
 	template = frappe.get_doc("Item", item)
 	copy_attributes_to_variant(template, variant)
 	return variant
-	
+
 def copy_attributes_to_variant(item, variant):
 	from frappe.model import no_value_fields
 	for field in item.meta.fields:
