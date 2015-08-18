@@ -139,7 +139,7 @@ class SalesInvoice(SellingController):
 			})
 
 	def set_missing_values(self, for_validate=False):
-		self.set_pos_fields(for_validate)
+		pos = self.set_pos_fields(for_validate)
 
 		if not self.debit_to:
 			self.debit_to = get_party_account(self.company, self.customer, "Customer")
@@ -147,6 +147,9 @@ class SalesInvoice(SellingController):
 			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
 
 		super(SalesInvoice, self).set_missing_values(for_validate)
+
+		if pos:
+			return {"print_format": pos.get("print_format") }
 
 	def update_time_log_batch(self, sales_invoice):
 		for d in self.get("items"):
@@ -168,8 +171,8 @@ class SalesInvoice(SellingController):
 		if cint(self.is_pos) != 1:
 			return
 
-		from erpnext.stock.get_item_details import get_pos_profiles_item_details, get_pos_profiles
-		pos = get_pos_profiles(self.company)
+		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
+		pos = get_pos_profile(self.company)
 
 		if pos:
 			if not for_validate and not self.customer:
@@ -189,7 +192,7 @@ class SalesInvoice(SellingController):
 			# set pos values in items
 			for item in self.get("items"):
 				if item.get('item_code'):
-					for fname, val in get_pos_profiles_item_details(pos,
+					for fname, val in get_pos_profile_item_details(pos,
 						frappe._dict(item.as_dict()), pos).items():
 
 						if (not for_validate) or (for_validate and not item.get(fname)):
@@ -202,6 +205,8 @@ class SalesInvoice(SellingController):
 			# fetch charges
 			if self.taxes_and_charges and not len(self.get("taxes")):
 				self.set_taxes()
+
+		return pos
 
 	def get_advances(self):
 		if not self.is_return:
