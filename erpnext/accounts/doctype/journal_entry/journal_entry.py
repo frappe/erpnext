@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, date_diff
 from frappe import msgprint, _, scrub
-from erpnext.setup.utils import get_company_currency
+from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on
 
@@ -27,8 +27,8 @@ class JournalEntry(AccountsController):
 		self.validate_party()
 		self.validate_cheque_info()
 		self.validate_entries_for_advance()
-		self.validate_debit_and_credit()
 		self.validate_multi_currency()
+		self.validate_debit_and_credit()
 		self.validate_against_jv()
 		self.validate_reference_doc()
 		self.set_against_account()
@@ -259,8 +259,8 @@ class JournalEntry(AccountsController):
 			if d.debit and d.credit:
 				frappe.throw(_("You cannot credit and debit same account at the same time"))
 
-			self.total_debit = flt(self.total_debit) + flt(d.debit, self.precision("debit", "accounts"))
-			self.total_credit = flt(self.total_credit) + flt(d.credit, self.precision("credit", "accounts"))
+			self.total_debit = flt(self.total_debit) + flt(d.debit, d.precision("debit"))
+			self.total_credit = flt(self.total_credit) + flt(d.credit, d.precision("credit"))
 
 		self.difference = flt(self.total_debit, self.precision("total_debit")) - \
 			flt(self.total_credit, self.precision("total_credit"))
@@ -285,12 +285,10 @@ class JournalEntry(AccountsController):
 			if not d.currency:
 				d.currency = frappe.db.get_value("Account", d.account, "currency") or self.company_currency
 				
-			exchange_rate = self.exchange_rate
-			if d.currency != self.company_currency:
-				exchange_rate = 1
+			exchange_rate = self.exchange_rate if d.currency != self.company_currency else 1
 			
-			d.debit_in_account_currency = flt(flt(d.debit)*exchange_rate, d.precision("debit_in_account_currency"))
-			d.credit_in_account_currency = flt(flt(d.credit)*exchange_rate, d.precision("credit_in_account_currency"))
+			d.debit = flt(flt(d.debit_in_account_currency)*exchange_rate, d.precision("debit"))
+			d.credit = flt(flt(d.credit_in_account_currency)*exchange_rate, d.precision("credit"))
 		
 
 	def create_remarks(self):
@@ -681,14 +679,28 @@ def get_party_account_and_balance(company, party_type, party):
 	}
 
 @frappe.whitelist()
-def get_account_balance_and_party_type(account, date):
+def get_account_balance_and_party_type(account, date, company):
 	"""Returns dict of account balance and party type to be set in Journal Entry on selection of account."""
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
-	account_type = frappe.db.get_value("Account", account, "account_type")
-	return {
+	company_currency = get_company_currency(company)
+	account_details = frappe.db.get_value("Account", account, ["account_type", "currency"], as_dict=1)
+	
+	if account_details.account_type == "Receivable":
+		party_type = "Customer"
+	elif account_details.account_type == "Payable":
+		party_type = "Supplier"
+	else:
+		party_type = ""
+		
+	exchange_rate = None
+	if account_details.currency != company_currency:
+		exchange_rate = get_exchange_rate(account_details.currency, company_currency)
+		
+	grid_values = {
 		"balance": get_balance_on(account, date),
-		"party_type": {"Receivable":"Customer", "Payable":"Supplier"}.get(account_type, "")
+		"party_type": party_type,
+		"currency": account_details.currency or company_currency,
 	}
-
+	return grid_values, exchange_rate

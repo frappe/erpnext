@@ -5,8 +5,6 @@ frappe.provide("erpnext.accounts");
 frappe.provide("erpnext.journal_entry");
 frappe.require("assets/erpnext/js/utils.js");
 
-cur_frm.add_fetch("account", "currency", "currency");
-
 frappe.ui.form.on("Journal Entry", {
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
@@ -189,8 +187,10 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		// set difference
 		if(doc.difference) {
 			if(doc.difference > 0) {
+				row.credit_in_account_currency = doc.difference;
 				row.credit = doc.difference;
 			} else {
+				row.debit_in_account_currency = -doc.difference;
 				row.debit = -doc.difference;
 			}
 		}
@@ -211,10 +211,10 @@ cur_frm.cscript.posting_date = function(doc, cdt, cdn){
 
 cur_frm.cscript.update_totals = function(doc) {
 	var td=0.0; var tc =0.0;
-	var el = doc.accounts || [];
-	for(var i in el) {
-		td += flt(el[i].debit, precision("debit", el[i]));
-		tc += flt(el[i].credit, precision("credit", el[i]));
+	var accounts = doc.accounts || [];
+	for(var i in accounts) {
+		td += flt(accounts[i].debit, precision("debit", accounts[i]));
+		tc += flt(accounts[i].credit, precision("credit", accounts[i]));
 	}
 	var doc = locals[doc.doctype][doc.name];
 	doc.total_debit = td;
@@ -223,31 +223,11 @@ cur_frm.cscript.update_totals = function(doc) {
 	refresh_many(['total_debit','total_credit','difference']);
 }
 
-cur_frm.cscript.debit = function(doc,dt,dn) { cur_frm.cscript.update_totals(doc); }
-cur_frm.cscript.credit = function(doc,dt,dn) { cur_frm.cscript.update_totals(doc); }
-
 cur_frm.cscript.get_balance = function(doc,dt,dn) {
 	cur_frm.cscript.update_totals(doc);
 	return $c_obj(cur_frm.doc, 'get_balance', '', function(r, rt){
 	cur_frm.refresh();
 	});
-}
-// Get balance
-// -----------
-
-cur_frm.cscript.account = function(doc,dt,dn) {
-	var d = locals[dt][dn];
-	if(d.account) {
-		return frappe.call({
-			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_account_balance_and_party_type",
-			args: {account: d.account, date: doc.posting_date},
-			callback: function(r) {
-				$.extend(d, r.message);
-				refresh_field('balance', d.name, 'accounts');
-				refresh_field('party_type', d.name, 'accounts');
-			}
-		});
-	}
 }
 
 cur_frm.cscript.validate = function(doc,cdt,cdn) {
@@ -313,22 +293,77 @@ cur_frm.cscript.voucher_type = function(doc, cdt, cdn) {
 	}
 }
 
-frappe.ui.form.on("Journal Entry Account", "party", function(frm, cdt, cdn) {
-	var d = frappe.get_doc(cdt, cdn);
-	if(!d.account && d.party_type && d.party) {
-		return frm.call({
-			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_party_account_and_balance",
-			child: d,
-			args: {
-				company: frm.doc.company,
-				party_type: d.party_type,
-				party: d.party
-			}
-		});
+frappe.ui.form.on("Journal Entry Account", {
+	party: function(frm, cdt, cdn) {
+		var d = frappe.get_doc(cdt, cdn);
+		if(!d.account && d.party_type && d.party) {
+			return frm.call({
+				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_party_account_and_balance",
+				child: d,
+				args: {
+					company: frm.doc.company,
+					party_type: d.party_type,
+					party: d.party
+				}
+			});
+		}
+	},
+	
+	account: function(frm, dt, dn) {
+		var d = locals[dt][dn];
+		if(d.account) {
+			return frappe.call({
+				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_account_balance_and_party_type",
+				args: {
+					account: d.account, 
+					date: frm.doc.posting_date,
+					company: frm.doc.company
+				},
+				callback: function(r) {
+					if(r.message) {
+						$.extend(d, r.message[0]);
+						refresh_field('balance', d.name, 'accounts');
+						refresh_field('party_type', d.name, 'accounts');
+						refresh_field('currency', d.name, 'accounts');
+						
+						if(r.message[1] && (!frm.doc.exchange_rate || frm.doc.exchange_rate == 1.0)) {
+							frm.set_value("exchange_rate", r.message[1])
+						}
+					}
+				}
+			});
+		}
+	},
+	
+	debit_in_account_currency: function(frm, dt, dn) {
+		var company_currency = erpnext.get_currency(frm.doc.company);
+		var row = locals[dt][dn];
+		
+		var exchange_rate = (row.currency==company_currency) ? 1 : frm.doc.exchange_rate;
+		
+		frappe.model.set_value(dt, dn, "debit", 
+			flt(flt(row.debit_in_account_currency)*exchange_rate), precision("debit", row));
+	},
+	
+	credit_in_account_currency: function(frm, dt, dn) {
+		var company_currency = erpnext.get_currency(frm.doc.company);
+		var row = locals[dt][dn];
+		
+		var exchange_rate = (row.currency==company_currency) ? 1 : frm.doc.exchange_rate;
+		
+		frappe.model.set_value(dt, dn, "credit", 
+			flt(flt(row.credit_in_account_currency)*exchange_rate), precision("credit", row));
+	},
+	
+	debit: function(frm, dt, dn) {
+		cur_frm.cscript.update_totals(frm.doc);
+	},
+	
+	credit: function(frm, dt, dn) {
+		cur_frm.cscript.update_totals(frm.doc);
 	}
 })
 
 frappe.ui.form.on("Journal Entry Account", "accounts_remove", function(frm) {
 	cur_frm.cscript.update_totals(frm.doc);
 });
-
