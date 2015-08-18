@@ -2,7 +2,43 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.accounts");
+frappe.provide("erpnext.journal_entry");
 frappe.require("assets/erpnext/js/utils.js");
+
+cur_frm.add_fetch("account", "currency", "currency");
+
+frappe.ui.form.on("Journal Entry", {
+	refresh: function(frm) {
+		erpnext.toggle_naming_series();
+		cur_frm.cscript.voucher_type(frm.doc);
+
+		if(frm.doc.docstatus==1) {
+			cur_frm.add_custom_button(__('View Ledger'), function() {
+				frappe.route_options = {
+					"voucher_no": frm.doc.name,
+					"from_date": frm.doc.posting_date,
+					"to_date": frm.doc.posting_date,
+					"company": frm.doc.company,
+					group_by_voucher: 0
+				};
+				frappe.set_route("query-report", "General Ledger");
+			}, "icon-table");
+		}
+		
+		// hide /unhide fields based on currency
+		erpnext.journal_entry.toggle_fields_based_on_currency(frm);
+	}
+})
+
+erpnext.journal_entry.toggle_fields_based_on_currency = function(frm) {
+	var fields = ["balance_in_account_currency", "party_balance_in_account_currency", 
+		"debit_in_account_currency", "credit_in_account_currency"];
+		
+	var company_currency = erpnext.get_currency(frm.doc.company);
+		
+	var grid = frm.get_field("accounts").grid;
+	grid.set_column_disp(fields, grid.currency!=company_currency);
+}
 
 erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 	onload: function() {
@@ -163,24 +199,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 });
 
 cur_frm.script_manager.make(erpnext.accounts.JournalEntry);
-
-cur_frm.cscript.refresh = function(doc) {
-	erpnext.toggle_naming_series();
-	cur_frm.cscript.voucher_type(doc);
-
-	if(doc.docstatus==1) {
-		cur_frm.add_custom_button(__('View Ledger'), function() {
-			frappe.route_options = {
-				"voucher_no": doc.name,
-				"from_date": doc.posting_date,
-				"to_date": doc.posting_date,
-				"company": doc.company,
-				group_by_voucher: 0
-			};
-			frappe.set_route("query-report", "General Ledger");
-		}, "icon-table");
-	}
-}
 
 cur_frm.cscript.company = function(doc, cdt, cdn) {
 	cur_frm.refresh_fields();
