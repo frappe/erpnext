@@ -47,6 +47,7 @@ erpnext.patches.v4_0.update_account_root_type
 execute:frappe.delete_doc("Report", "Purchase In Transit")
 erpnext.patches.v4_0.new_address_template
 execute:frappe.delete_doc("DocType", "SMS Control")
+execute:frappe.delete_doc_if_exists("DocType", "Bulk SMS") #2015-08-18
 erpnext.patches.v4_0.fix_case_of_hr_module_def
 erpnext.patches.v4_0.fix_address_template
 
@@ -190,4 +191,4 @@ erpnext.patches.v5_4.fix_missing_item_images
 erpnext.patches.v5_4.stock_entry_additional_costs
 erpnext.patches.v5_4.cleanup_journal_entry #2015-08-14
 execute:frappe.db.sql("update `tabProduction Order` pro set description = (select description from tabItem where name=pro.production_item) where ifnull(description, '') = ''")
-erpnext.patches.v5_7.item_template_attribtues
+erpnext.patches.v5_7.item_template_attributes
