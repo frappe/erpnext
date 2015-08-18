@@ -182,6 +182,9 @@ erpnext.pos.PointOfSale = Class.extend({
 			child.serial_no = serial_no;
 
 		this.frm.script_manager.trigger("item_code", child.doctype, child.name);
+		frappe.after_ajax(function() {
+			me.frm.script_manager.trigger("qty", child.doctype, child.name);
+		})
 	},
 	refresh_search_box: function() {
 		var me = this;
@@ -432,7 +435,7 @@ erpnext.pos.PointOfSale = Class.extend({
 							}
 						},
 						{fieldtype:'Currency', fieldname:'write_off_amount',
-							label: __('Write Off'), default: 0.0, hidden: 1},
+							label: __('Write Off'), "default": 0.0, hidden: 1},
 					]
 				});
 				me.dialog = dialog;
@@ -470,6 +473,8 @@ erpnext.pos.PointOfSale = Class.extend({
 			}
 			me.frm.set_value("mode_of_payment", values.mode_of_payment);
 
+			//me.frm.cscript.calculate_taxes_and_totals();
+
 			var paid_amount = flt((flt(values.paid_amount) - flt(values.change)) / me.frm.doc.conversion_rate, precision("paid_amount"));
 			me.frm.set_value("paid_amount", paid_amount);
 
@@ -479,7 +484,6 @@ erpnext.pos.PointOfSale = Class.extend({
 
 			me.frm.savesubmit(this);
 			dialog.hide();
-			me.refresh();
 		})
 
 	}

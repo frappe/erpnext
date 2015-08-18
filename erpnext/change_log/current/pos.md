@@ -1,0 +1,2 @@
+- Set default Print Format for Point-of-Sale (POS) via **POS Profile**
+- Option to automatically print after submitting POS **Sales Invoice**

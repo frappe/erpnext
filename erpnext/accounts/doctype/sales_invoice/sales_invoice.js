@@ -28,12 +28,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			}
 		}
 
-		// if document is POS then change default print format to "POS Invoice" if no default is specified
-		if(cur_frm.doc.is_pos && cur_frm.doc.docstatus===1 && cint(frappe.defaults.get_user_defaults("fs_pos_view"))===1
-			&& !locals.DocType[cur_frm.doctype].default_print_format) {
-			locals.DocType[cur_frm.doctype].default_print_format = "POS Invoice";
-			cur_frm.setup_print_layout();
-		}
+		erpnext.queries.setup_queries(this.frm, "Warehouse", function() {
+			return erpnext.queries.warehouse(me.frm.doc);
+		});
 	},
 
 	refresh: function(doc, dt, dn) {
@@ -73,6 +70,23 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		if (cint(doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !doc.is_return) {
 			cur_frm.cscript.sales_order_btn();
 			cur_frm.cscript.delivery_note_btn();
+		}
+
+		this.set_default_print_format();
+	},
+
+	set_default_print_format: function() {
+		// set default print format to POS type
+		if(cur_frm.doc.is_pos) {
+			if(cur_frm.pos_print_format) {
+				cur_frm.meta._default_print_format = cur_frm.meta.default_print_format;
+				cur_frm.meta.default_print_format = cur_frm.pos_print_format;
+			}
+		} else {
+			if(cur_frm.meta.cur_frm.meta._default_print_format) {
+				cur_frm.meta.default_print_format = cur_frm.meta._default_print_format;
+				cur_frm.meta._default_print_format = null;
+			}
 		}
 	},
 
@@ -118,6 +132,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	is_pos: function(doc, dt, dn, callback_fn) {
+		if(cur_frm.doc.__missing_values_set) return;
 		cur_frm.cscript.hide_fields(this.frm.doc);
 		if(cint(this.frm.doc.is_pos)) {
 			if(!this.frm.doc.company) {
@@ -130,6 +145,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					method: "set_missing_values",
 					callback: function(r) {
 						if(!r.exc) {
+							cur_frm.pos_print_format = r.message.print_format;
+							cur_frm.doc.__missing_values_set = true;
 							me.frm.script_manager.trigger("update_stock");
 							frappe.model.set_default_values(me.frm.doc);
 							me.set_dynamic_labels();
@@ -376,10 +393,13 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 		if(row.delivery_note) frappe.model.clear_doc("Delivery Note", row.delivery_note)
 	})
 
-	if(cint(frappe.boot.notification_settings.sales_invoice)) {
+	if(cur_frm.doc.is_pos) {
+		frappe.msgprint('<a class="btn btn-primary" \
+			onclick="cur_frm.print_preview.printit(true)" style="margin-right: 5px;">Print</a>\
+			<a class="btn btn-default" href="#Form/Sales Invoice/New">New</a>');
+
+	} else if(cint(frappe.boot.notification_settings.sales_invoice)) {
 		cur_frm.email_doc(frappe.boot.notification_settings.sales_invoice_message);
-	} else if(cur_frm.doc.is_pos) {
-		new_doc("Sales Invoice");
 	}
 }
 
