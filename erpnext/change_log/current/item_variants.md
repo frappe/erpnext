@@ -1,0 +1,6 @@
+- Make Variants added to Item Master
+- Added ability to specify Range of Numeric Values in Attribute Master 
+- Fixed an issue in filtering Templates in Item List View
+- Added Patch to fetch Item Template Attributes
+- Allow Editing variant attribute in Variant. Add validation to check duplication.
+- Removed Manage Variants

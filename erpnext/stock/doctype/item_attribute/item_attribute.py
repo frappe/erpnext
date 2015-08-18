@@ -8,10 +8,20 @@ from frappe import _
 
 class ItemAttribute(Document):
 	def validate(self):
+		self.validate_numeric()
 		self.validate_duplication()
 		self.validate_attribute_values()
 
-	
+	def validate_numeric(self):
+		if self.numeric_values:
+			self.set("item_attribute_values", [])
+			if not self.from_range or not self.to_range:
+				frappe.throw(_("Please specify from/to Range"))
+			elif self.from_range > self.to_range:
+				frappe.throw(_("From Range cannot be greater than to Range"))
+		else:
+			self.from_range = self.to_range = self.increment = 0
+
 	def validate_duplication(self):
 		values, abbrs = [], []
 		for d in self.item_attribute_values:
@@ -32,5 +42,6 @@ class ItemAttribute(Document):
 		variant_attributes = frappe.db.sql("select DISTINCT attribute_value from `tabVariant Attribute` where attribute=%s", self.name)
 		if variant_attributes:
 			for d in variant_attributes:
-				if d[0] not in attribute_values:
-					frappe.throw(_("Attribute Value {0} cannot be removed from {1} as Item Variants exist with this Attribute.").format(d[0], self.name))
+				if d[0] and d[0] not in attribute_values:
+					frappe.throw(_("Attribute Value {0} cannot be removed from {1} as Item Variants \
+						exist with this Attribute.").format(d[0], self.name))

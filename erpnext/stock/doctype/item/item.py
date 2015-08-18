@@ -3,13 +3,13 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.setup.doctype.item_group.item_group import invalidate_cache_for, get_parent_item_groups
 from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
-from erpnext.stock.doctype.manage_variants.manage_variants import update_variant
 
 class WarehouseNotSet(frappe.ValidationError): pass
 class ItemTemplateCannotHaveStock(frappe.ValidationError): pass
@@ -63,6 +63,8 @@ class Item(WebsiteGenerator):
 		self.synced_with_hub = 0
 		self.validate_has_variants()
 		self.validate_stock_for_template_must_be_zero()
+		self.validate_template_attributes()
+		self.validate_variant_attributes()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -298,7 +300,9 @@ class Item(WebsiteGenerator):
 			updated = []
 			variants = frappe.db.get_all("Item", fields=["item_code"], filters={"variant_of": self.name })
 			for d in variants:
-				update_variant(self.name, d)
+				variant = frappe.get_doc("Item", d)
+				copy_attributes_to_variant(self, variant)
+				variant.save()
 				updated.append(d.item_code)
 			if updated:
 				frappe.msgprint(_("Item Variants {0} updated").format(", ".join(updated)))
@@ -315,7 +319,7 @@ class Item(WebsiteGenerator):
 				or ifnull(reserved_qty, 0) > 0 or ifnull(indented_qty, 0) > 0 or ifnull(planned_qty, 0) > 0)""", self.name)
 			if stock_in:
 				frappe.throw(_("Item Template cannot have stock or Open Sales/Purchase/Production Orders."), ItemTemplateCannotHaveStock)
-				
+
 	def validate_uom(self):
 		if not self.get("__islocal"):
 			check_stock_uom_with_bin(self.name, self.stock_uom)
@@ -326,6 +330,29 @@ class Item(WebsiteGenerator):
 			template_uom = frappe.db.get_value("Item", self.variant_of, "stock_uom")
 			if template_uom != self.stock_uom:
 				frappe.throw(_("Default Unit of Measure for Variant must be same as Template"))
+
+	def validate_template_attributes(self):
+		if self.has_variants:
+			attributes = []
+			if not self.attributes:
+				frappe.throw(_("Attribute is mandatory for Item Template"))
+			for d in self.attributes:
+				if d.attribute in attributes:
+					frappe.throw(_("Attribute {0} selected multiple times in Attributes Table".format(d.attribute)))
+				else:
+					attributes.append(d.attribute)
+					
+	def validate_variant_attributes(self):
+		if self.variant_of:
+			args = {}
+			for d in self.attributes:
+				if not d.attribute_value:
+					frappe.throw(_("Please specify Attribute Value for attribute {0}").format(d.attribute))
+				args[d.attribute] = d.attribute_value
+				
+			variant = get_variant(self.variant_of, args)
+			if variant and not variant[0][0] == self.name:
+				frappe.throw(_("Item variant {0} exists with same attributes".format(variant[0][0])	))
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
@@ -458,3 +485,75 @@ def check_stock_uom_with_bin(item, stock_uom):
 		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because \
 			you have already made some transaction(s) with another UOM. To change default UOM, \
 			use 'UOM Replace Utility' tool under Stock module.").format(item))
+
+@frappe.whitelist()
+def get_variant(item, args):
+	if not type(args) == dict:
+		args = json.loads(args)
+	attributes = {}
+	numeric_attributes = []
+	for t in frappe.db.get_all("Item Attribute Value", fields=["parent", "attribute_value"]):
+		attributes.setdefault(t.parent, []).append(t.attribute_value)
+	
+	for t in frappe.get_list("Item Attribute", filters={"numeric_values":1}):
+		numeric_attributes.append(t.name)
+
+	for d in args:
+		if d in numeric_attributes:
+			values = frappe.db.sql("""select from_range, to_range, increment from `tabVariant Attribute` \
+				where parent = %s and attribute = %s""", (item, d), as_dict=1)[0]
+
+			if (not values.from_range < cint(args[d]) < values.to_range) or ((cint(args[d]) - values.from_range) % values.increment != 0):
+				frappe.throw(_("Attribute value {0} for attribute {1} must be within range of {2} to {3} and in increments of {4}")
+					.format(args[d], d, values.from_range, values.to_range, values.increment))
+		else:
+			if args[d] not in attributes.get(d):
+				frappe.throw(_("Attribute value {0} for attribute {1} does not exist \
+					in Item Attribute Master.").format(args[d], d))
+
+	conds=""
+	attributes = ""
+	for d in args:
+		if conds:
+			conds+= " and "
+			attributes+= ", "
+		
+		conds += """ exists(select iv.name from `tabVariant Attribute` iv where iv.parent = i.name and
+			 iv.attribute= "{0}" and iv.attribute_value= "{1}")""".format(d, args[d])
+		attributes += "'{0}'".format(d)
+
+	conds += """and not exists (select iv.name from `tabVariant Attribute` iv where iv.parent = i.name and 
+		iv.attribute not in ({0}))""".format(attributes)
+
+	variant=  frappe.db.sql("""select i.name from tabItem i where {0}""".format(conds))
+	return variant
+	
+@frappe.whitelist()
+def create_variant(item, param):
+	args = json.loads(param)
+	variant = frappe.new_doc("Item")
+	variant_attributes = []
+	for d in args:
+		variant_attributes.append({
+			"attribute": d,
+			"attribute_value": args[d]
+		})
+	variant.set("attributes", variant_attributes)
+	template = frappe.get_doc("Item", item)
+	copy_attributes_to_variant(template, variant)
+	return variant
+	
+def copy_attributes_to_variant(item, variant):
+	from frappe.model import no_value_fields
+	for field in item.meta.fields:
+		if field.fieldtype not in no_value_fields and (not field.no_copy)\
+			and field.fieldname not in ("item_code", "item_name"):
+			if variant.get(field.fieldname) != item.get(field.fieldname):
+				variant.set(field.fieldname, item.get(field.fieldname))
+	variant.variant_of = item.name
+	variant.has_variants = 0
+	variant.show_in_website = 0
+	if variant.attributes:
+		variant.description += "\n"
+		for d in variant.attributes:
+			variant.description += "<p>" + d.attribute + ": " + cstr(d.attribute_value) + "</p>"
