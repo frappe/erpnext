@@ -13,6 +13,7 @@ from erpnext.accounts.utils import get_balance_on
 class JournalEntry(AccountsController):
 	def __init__(self, arg1, arg2=None):
 		super(JournalEntry, self).__init__(arg1, arg2)
+		self.company_currency = get_company_currency(self.company)
 
 	def get_feed(self):
 		return self.voucher_type
@@ -27,6 +28,7 @@ class JournalEntry(AccountsController):
 		self.validate_cheque_info()
 		self.validate_entries_for_advance()
 		self.validate_debit_and_credit()
+		self.validate_multi_currency()
 		self.validate_against_jv()
 		self.validate_reference_doc()
 		self.set_against_account()
@@ -266,6 +268,30 @@ class JournalEntry(AccountsController):
 		if self.difference:
 			frappe.throw(_("Total Debit must be equal to Total Credit. The difference is {0}")
 				.format(self.difference))
+				
+	def validate_multi_currency(self):
+		alternate_currency = [d.currency for d in self.get("accounts") if d.currency!=self.company_currency]
+			
+		if alternate_currency:
+			if not self.exchange_rate:
+				frappe.throw(_("Exchange Rate is mandatory in multi-currency Journal Entry"))
+				
+			if len(alternate_currency) > 1:
+				frappe.throw(_("Only one alternate currency can be used in a single Journal Entry"))
+		else:
+			self.exchange_rate = 1.0
+			
+		for d in self.get("accounts"):
+			if not d.currency:
+				d.currency = frappe.db.get_value("Account", d.account, "currency") or self.company_currency
+				
+			exchange_rate = self.exchange_rate
+			if d.currency != self.company_currency:
+				exchange_rate = 1
+			
+			d.debit_in_account_currency = flt(flt(d.debit)*exchange_rate, d.precision("debit_in_account_currency"))
+			d.credit_in_account_currency = flt(flt(d.credit)*exchange_rate, d.precision("credit_in_account_currency"))
+		
 
 	def create_remarks(self):
 		r = []
@@ -275,15 +301,13 @@ class JournalEntry(AccountsController):
 			else:
 				msgprint(_("Please enter Reference date"), raise_exception=frappe.MandatoryError)
 
-		company_currency = get_company_currency(self.company)
-
 		for d in self.get('accounts'):
 			if d.reference_type=="Sales Invoice" and d.credit:
-				r.append(_("{0} against Sales Invoice {1}").format(fmt_money(flt(d.credit), currency = company_currency), \
+				r.append(_("{0} against Sales Invoice {1}").format(fmt_money(flt(d.credit), currency = self.company_currency), \
 					d.reference_name))
 
 			if d.reference_type=="Sales Order" and d.credit:
-				r.append(_("{0} against Sales Order {1}").format(fmt_money(flt(d.credit), currency = company_currency), \
+				r.append(_("{0} against Sales Order {1}").format(fmt_money(flt(d.credit), currency = self.company_currency), \
 					d.reference_name))
 
 			if d.reference_type == "Purchase Invoice" and d.debit:
@@ -291,11 +315,11 @@ class JournalEntry(AccountsController):
 					from `tabPurchase Invoice` where name=%s""", d.reference_name)
 				if bill_no and bill_no[0][0] and bill_no[0][0].lower().strip() \
 						not in ['na', 'not applicable', 'none']:
-					r.append(_('{0} against Bill {1} dated {2}').format(fmt_money(flt(d.debit), currency=company_currency), bill_no[0][0],
+					r.append(_('{0} against Bill {1} dated {2}').format(fmt_money(flt(d.debit), currency=self.company_currency), bill_no[0][0],
 						bill_no[0][1] and formatdate(bill_no[0][1].strftime('%Y-%m-%d'))))
 
 			if d.reference_type == "Purchase Order" and d.debit:
-				r.append(_("{0} against Purchase Order {1}").format(fmt_money(flt(d.credit), currency = company_currency), \
+				r.append(_("{0} against Purchase Order {1}").format(fmt_money(flt(d.credit), currency = self.company_currency), \
 					d.reference_name))
 
 		if self.user_remark:
@@ -316,10 +340,9 @@ class JournalEntry(AccountsController):
 				self.set_total_amount(d.debit or d.credit)
 
 	def set_total_amount(self, amt):
-		company_currency = get_company_currency(self.company)
 		self.total_amount = amt
 		from frappe.utils import money_in_words
-		self.total_amount_in_words = money_in_words(amt, company_currency)
+		self.total_amount_in_words = money_in_words(amt, self.company_currency)
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
@@ -333,8 +356,11 @@ class JournalEntry(AccountsController):
 						"party_type": d.party_type,
 						"party": d.party,
 						"against": d.against_account,
-						"debit": flt(d.debit, self.precision("debit", "accounts")),
-						"credit": flt(d.credit, self.precision("credit", "accounts")),
+						"debit": flt(d.debit, d.precision("debit")),
+						"credit": flt(d.credit, d.precision("credit")),
+						"currency": d.currency,
+						"debit_in_account_currency": flt(d.debit_in_account_currency, d.precision("debit_in_account_currency")),
+						"credit_in_account_currency": flt(d.credit_in_account_currency, d.precision("credit_in_account_currency")),
 						"against_voucher_type": d.reference_type,
 						"against_voucher": d.reference_name,
 						"remarks": self.remark,
