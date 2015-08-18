@@ -20,6 +20,7 @@ class GLEntry(Document):
 		self.check_pl_account()
 		self.validate_cost_center()
 		self.validate_party()
+		self.validate_currency()
 
 	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes'):
 		self.validate_account_details(adv_adj)
@@ -98,6 +99,31 @@ class GLEntry(Document):
 			if not frozen_accounts_modifier in frappe.get_roles():
 				if frappe.db.get_value(self.party_type, self.party, "is_frozen"):
 					frappe.throw("{0} {1} is frozen".format(self.party_type, self.party), CustomerFrozen)
+					
+	def validate_currency(self):
+		company_currency = frappe.db.get_value("Company", self.company, "default_currency")
+		account_currency = frappe.db.get_value("Account", self.account, "currency") or company_currency
+
+		if not self.currency:
+			self.currency = company_currency
+
+		if account_currency != self.currency:
+			frappe.throw(_("Accounting Entry for {0} can only be made in currency: {1}")
+				.format(self.account, (account_currency or company_currency)))
+				
+		if self.party_type and self.party:
+			existing_gle = frappe.db.get_value("GL Entry", 
+				{"party_type": self.party_type, "party": self.party}, ["name", "currency"])
+			if not existing_gle:
+				party_currency = frappe.db.get_value(self.party_type, self.party, "currency") or company_currency
+				if party_currency != account_currency:
+					frappe.throw(_("Invalid Account {0}. Account Currency must be {1}, same as {2}: {3}")
+						.format(self.account, party_currency, self.party_type, self.party))
+			else:
+				currency_in_existing_entries = existing_gle.currency or company_currency
+				if currency_in_existing_entries != self.currency:
+					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
+						.format(self.party_type, self.party, currency_in_existing_entries))
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:

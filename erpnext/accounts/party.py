@@ -7,7 +7,7 @@ import frappe
 import datetime
 from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
-from frappe.utils import add_days, getdate, formatdate, flt, get_first_day, date_diff, nowdate
+from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.utilities.doctype.contact.contact import get_contact_details
 
@@ -141,7 +141,16 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 		"due_date": get_due_date(posting_date, party_type, party, company)
 	}
 	return out
-
+	
+def validate_party_account(party):
+	party_account_defined_for_companies = [d.company for d in party.get("party_accounts")]
+	
+	for company, company_currency in frappe.db.sql("select name, default_currency from `tabCompany`"):
+		if party.currency and party.currency != company_currency \
+			and company not in party_account_defined_for_companies:
+			frappe.throw(_("Please mention Party Account for company {0}, as party currency is different than company's default currency")
+				.format(company))
+				
 @frappe.whitelist()
 def get_party_account(company, party, party_type):
 	"""Returns the account for the given `party`.
