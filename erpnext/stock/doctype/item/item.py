@@ -14,6 +14,7 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 class WarehouseNotSet(frappe.ValidationError): pass
 class ItemTemplateCannotHaveStock(frappe.ValidationError): pass
 class ItemVariantExistsError(frappe.ValidationError): pass
+class InvalidItemAttributeValueError(frappe.ValidationError): pass
 
 class Item(WebsiteGenerator):
 	website = frappe._dict(
@@ -351,9 +352,11 @@ class Item(WebsiteGenerator):
 					frappe.throw(_("Please specify Attribute Value for attribute {0}").format(d.attribute))
 				args[d.attribute] = d.attribute_value
 
-			variant = get_variant(self.variant_of, args)
-			if variant and variant != self.name:
-				frappe.throw(_("Item variant {0} exists with same attributes").format(variant), ItemVariantExistsError)
+			if self.get("__islocal"):
+				# test this during insert because naming is based on item_code and we cannot use condition like self.name != variant
+				variant = get_variant(self.variant_of, args)
+				if variant:
+					frappe.throw(_("Item variant {0} exists with same attributes").format(variant), ItemVariantExistsError)
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
@@ -510,8 +513,8 @@ def validate_item_variant_attributes(item, args):
 		filters={"parent": ["in", args.keys()]}):
 		(attribute_values.setdefault(t.parent, [])).append(t.attribute_value)
 
-	numeric_attributes = [t.name for t in frappe.get_list("Item Attribute", filters={"numeric_values":1,
-		"parent": ["in", args.keys()]})]
+	numeric_attributes = frappe._dict((t.name, t) for t in frappe.get_list("Item Attribute", filters={"numeric_values":1,
+		"name": ["in", args.keys()]}, fields=["name", "from_range", "to_range", "increment"]))
 
 	template_item = frappe.get_doc("Item", item)
 	template_item_attributes = frappe._dict((d.attribute, d) for d in template_item.attributes)
@@ -519,18 +522,19 @@ def validate_item_variant_attributes(item, args):
 	for attribute, value in args.items():
 
 		if attribute in numeric_attributes:
-			template_attribute = template_item_attributes[attribute]
+			numeric_attribute = numeric_attributes[attribute]
 
-			if template_attribute.increment == 0:
+			from_range = numeric_attribute.from_range
+			to_range = numeric_attribute.to_range
+			increment = numeric_attribute.increment
+
+			if increment == 0:
 				# defensive validation to prevent ZeroDivisionError
 				frappe.throw(_("Increment for Attribute {0} cannot be 0").format(attribute))
 
-			from_range = template_attribute.from_range
-			to_range = template_attribute.to_range
-			increment = template_attribute.increment
 
 			if not ( (from_range <= flt(value) <= to_range) and (flt(value) - from_range) % increment == 0 ):
-				frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3}").format(attribute, from_range, to_range, increment))
+				frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3}").format(attribute, from_range, to_range, increment), InvalidItemAttributeValueError)
 
 		elif value not in attribute_values[attribute]:
 			frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values").format(
@@ -538,7 +542,7 @@ def validate_item_variant_attributes(item, args):
 
 def find_variant(item, args):
 	conditions = ["""(iv_attribute.attribute="{0}" and iv_attribute.attribute_value="{1}")"""\
-		.format(frappe.db.escape(key), frappe.db.escape(value)) for key, value in args.items()]
+		.format(frappe.db.escape(key), frappe.db.escape(cstr(value))) for key, value in args.items()]
 
 	conditions = " or ".join(conditions)
 

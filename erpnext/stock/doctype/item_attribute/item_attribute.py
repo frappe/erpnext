@@ -6,6 +6,8 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 
+class ItemAttributeIncrementError(frappe.ValidationError): pass
+
 class ItemAttribute(Document):
 	def validate(self):
 		self.validate_numeric()
@@ -15,14 +17,14 @@ class ItemAttribute(Document):
 	def validate_numeric(self):
 		if self.numeric_values:
 			self.set("item_attribute_values", [])
-			if not self.from_range or not self.to_range:
+			if self.from_range is None or self.to_range is None:
 				frappe.throw(_("Please specify from/to range"))
 
-			elif self.from_range > self.to_range:
-				frappe.throw(_("From Range cannot be greater than to Range"))
+			elif self.from_range >= self.to_range:
+				frappe.throw(_("From Range has to be less than To Range"))
 
 			if not self.increment:
-				frappe.throw(_("Increment cannot be 0"))
+				frappe.throw(_("Increment cannot be 0"), ItemAttributeIncrementError)
 		else:
 			self.from_range = self.to_range = self.increment = 0
 
