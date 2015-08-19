@@ -9,7 +9,7 @@ frappe.ui.form.on("Item", {
 		if (frm.doc.variant_of){
 			frm.fields_dict["attributes"].grid.set_column_disp("attribute_value", true);
 		}
-		
+
 	},
 
 	refresh: function(frm) {
@@ -34,7 +34,7 @@ frappe.ui.form.on("Item", {
 			frm.add_custom_button(__("Show Variants"), function() {
 				frappe.set_route("List", "Item", {"variant_of": frm.doc.name});
 			}, "icon-list", "btn-default");
-			
+
 			frm.add_custom_button(__("Make Variant"), function() {
 				erpnext.item.make_variant()
 			}, "icon-list", "btn-default");
@@ -57,7 +57,7 @@ frappe.ui.form.on("Item", {
 		}
 
 		erpnext.item.toggle_reqd(frm);
-		
+
 		erpnext.item.toggle_attributes(frm);
 	},
 
@@ -93,7 +93,7 @@ frappe.ui.form.on("Item", {
 	is_stock_item: function(frm) {
 		erpnext.item.toggle_reqd(frm);
 	},
-	
+
 	has_variants: function(frm) {
 		erpnext.item.toggle_attributes(frm);
 	}
@@ -193,10 +193,10 @@ $.extend(erpnext.item, {
 			validated = 0;
 		}
 	},
-	
+
 	make_variant: function(doc) {
 		var fields = []
-		
+
 		for(var i=0;i< cur_frm.doc.attributes.length;i++){
 			var fieldtype, desc;
 			var row = cur_frm.doc.attributes[i];
@@ -221,8 +221,8 @@ $.extend(erpnext.item, {
 			title: __("Make Variant"),
 			fields: fields
 		});
-		
-		d.set_primary_action(__("Make"), function() {	
+
+		d.set_primary_action(__("Make"), function() {
 			args = d.get_values();
 			if(!args) return;
 			frappe.call({
@@ -234,8 +234,8 @@ $.extend(erpnext.item, {
 				callback: function(r) {
 					// returns variant item
 					if (r.message) {
-						var variant = r.message[0];
-						var msgprint_dialog = frappe.msgprint(__("Item Variant {0} already exists with same attributes", 
+						var variant = r.message;
+						var msgprint_dialog = frappe.msgprint(__("Item Variant {0} already exists with same attributes",
 							[repl('<a href="#Form/Item/%(item_encoded)s" class="strong variant-click">%(item)s</a>', {
 								item_encoded: encodeURIComponent(variant),
 								item: variant
@@ -251,7 +251,7 @@ $.extend(erpnext.item, {
 							method:"erpnext.stock.doctype.item.item.create_variant",
 							args: {
 								"item": cur_frm.doc.name,
-								"param": d.get_values()
+								"args": d.get_values()
 							},
 							callback: function(r) {
 								var doclist = frappe.model.sync(r.message);
@@ -262,17 +262,17 @@ $.extend(erpnext.item, {
 				}
 			});
 		});
-				
+
 		d.show();
 
 		$.each(d.fields_dict, function(i, field) {
-			
+
 			if(field.df.fieldtype !== "Data") {
 				return;
 			}
 
 			$(field.input_area).addClass("ui-front");
-			
+
 			field.$input.autocomplete({
 				minLength: 0,
 				minChars: 0,

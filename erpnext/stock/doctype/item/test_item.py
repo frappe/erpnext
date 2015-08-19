@@ -6,7 +6,7 @@ import unittest
 import frappe
 
 from frappe.test_runner import make_test_records
-from erpnext.stock.doctype.item.item import WarehouseNotSet, ItemTemplateCannotHaveStock, create_variant
+from erpnext.stock.doctype.item.item import WarehouseNotSet, ItemTemplateCannotHaveStock, create_variant, ItemVariantExistsError
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 test_ignore = ["BOM"]
@@ -98,13 +98,22 @@ class TestItem(unittest.TestCase):
 
 		for key, value in to_check.iteritems():
 			self.assertEquals(value, details.get(key))
-		
+
 	def test_make_item_variant(self):
-		if not frappe.db.exists("Item", "_Test Variant Item-S"):
-			variant = create_variant("_Test Variant Item", """{"Test Size": "Small"}""")
-			variant.item_code = "_Test Variant Item-S"
-			variant.item_name = "_Test Variant Item-S"
-			variant.save()
+		if frappe.db.exists("Item", "_Test Variant Item-L"):
+			frappe.delete_doc("Item", "_Test Variant Item-L")
+			frappe.delete_doc("Item", "_Test Variant Item-L2")
+
+		variant = create_variant("_Test Variant Item", """{"Test Size": "Large"}""")
+		variant.item_code = "_Test Variant Item-L"
+		variant.item_name = "_Test Variant Item-L"
+		variant.save()
+
+		# doing it again should raise error
+		variant = create_variant("_Test Variant Item", """{"Test Size": "Large"}""")
+		variant.item_code = "_Test Variant Item-L2"
+		variant.item_name = "_Test Variant Item-L2"
+		self.assertRaises(ItemVariantExistsError, variant.save)
 
 def make_item_variant():
 	if not frappe.db.exists("Item", "_Test Variant Item-S"):
