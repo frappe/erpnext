@@ -83,7 +83,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				cur_frm.meta.default_print_format = cur_frm.pos_print_format;
 			}
 		} else {
-			if(cur_frm.meta.cur_frm.meta._default_print_format) {
+			if(cur_frm.meta._default_print_format) {
 				cur_frm.meta.default_print_format = cur_frm.meta._default_print_format;
 				cur_frm.meta._default_print_format = null;
 			}
