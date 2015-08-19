@@ -13,7 +13,6 @@ from erpnext.accounts.utils import get_balance_on
 class JournalEntry(AccountsController):
 	def __init__(self, arg1, arg2=None):
 		super(JournalEntry, self).__init__(arg1, arg2)
-		self.company_currency = get_company_currency(self.company)
 
 	def get_feed(self):
 		return self.voucher_type

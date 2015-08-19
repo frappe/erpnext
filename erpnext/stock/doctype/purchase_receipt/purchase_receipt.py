@@ -293,23 +293,28 @@ class PurchaseReceipt(BuyingController):
 					val_rate_db_precision = 6 if cint(d.precision("valuation_rate")) <= 6 else 9
 
 					# warehouse account
+					stock_value_diff = flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty) 
+						* flt(d.conversion_factor),	d.precision("base_net_amount"))
+						
 					gl_entries.append(self.get_gl_dict({
-						"account": warehouse_account[d.warehouse],
+						"account": warehouse_account[d.warehouse]["name"],
 						"against": stock_rbnb,
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-						"debit": flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty) * flt(d.conversion_factor),
-							self.precision("base_net_amount", d))
-					}))
+						"debit": stock_value_diff
+					}, warehouse_account[d.warehouse]["currency"]))
 
 					# stock received but not billed
+					stock_rbnb_currency = frappe.db.get_value("Account", stock_rbnb, "currency")
 					gl_entries.append(self.get_gl_dict({
 						"account": stock_rbnb,
-						"against": warehouse_account[d.warehouse],
+						"against": warehouse_account[d.warehouse]["name"],
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-						"credit": flt(d.base_net_amount, self.precision("base_net_amount", d))
-					}))
+						"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
+						"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
+							if stock_rbnb_currency==self.currency else flt(d.net_amount, d.precision("net_amount"))
+					}, stock_rbnb_currency))
 
 					negative_expense_to_be_booked += flt(d.item_tax_amount)
 
@@ -317,7 +322,7 @@ class PurchaseReceipt(BuyingController):
 					if flt(d.landed_cost_voucher_amount):
 						gl_entries.append(self.get_gl_dict({
 							"account": expenses_included_in_valuation,
-							"against": warehouse_account[d.warehouse],
+							"against": warehouse_account[d.warehouse]["name"],
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.landed_cost_voucher_amount)
@@ -326,12 +331,12 @@ class PurchaseReceipt(BuyingController):
 					# sub-contracting warehouse
 					if flt(d.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
 						gl_entries.append(self.get_gl_dict({
-							"account": warehouse_account[self.supplier_warehouse],
-							"against": warehouse_account[d.warehouse],
+							"account": warehouse_account[self.supplier_warehouse]["name"],
+							"against": warehouse_account[d.warehouse]["name"],
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.rm_supp_cost)
-						}))
+						}, warehouse_account[self.supplier_warehouse]["currency"]))
 
 					# divisional loss adjustment
 					if not self.get("taxes"):
@@ -345,11 +350,11 @@ class PurchaseReceipt(BuyingController):
 						if divisional_loss:
 							gl_entries.append(self.get_gl_dict({
 								"account": stock_rbnb,
-								"against": warehouse_account[d.warehouse],
+								"against": warehouse_account[d.warehouse]["name"],
 								"cost_center": d.cost_center,
 								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 								"debit": divisional_loss
-							}))
+							}, stock_rbnb_currency))
 
 				elif d.warehouse not in warehouse_with_no_account or \
 					d.rejected_warehouse not in warehouse_with_no_account:

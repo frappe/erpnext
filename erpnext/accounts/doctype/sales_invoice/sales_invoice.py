@@ -468,8 +468,10 @@ class SalesInvoice(SellingController):
 		from erpnext.accounts.general_ledger import merge_similar_entries
 
 		gl_entries = []
+		
+		customer_account_currency = frappe.db.get_value("Account", self.debit_to, "currency")
 
-		self.make_customer_gl_entry(gl_entries)
+		self.make_customer_gl_entry(gl_entries, customer_account_currency)
 
 		self.make_tax_gl_entries(gl_entries)
 
@@ -478,14 +480,14 @@ class SalesInvoice(SellingController):
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
 
-		self.make_pos_gl_entries(gl_entries)
+		self.make_pos_gl_entries(gl_entries, customer_account_currency)
 
-		self.make_write_off_gl_entry(gl_entries)
+		self.make_write_off_gl_entry(gl_entries, customer_account_currency)
 
 		return gl_entries
 
-	def make_customer_gl_entry(self, gl_entries):
-		if self.base_grand_total:
+	def make_customer_gl_entry(self, gl_entries, customer_account_currency):
+		if self.grand_total:
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
@@ -493,37 +495,42 @@ class SalesInvoice(SellingController):
 					"party": self.customer,
 					"against": self.against_income_account,
 					"debit": self.base_grand_total,
-					"remarks": self.remarks,
+					"debit_in_account_currency": self.base_grand_total \
+						if customer_account_currency==self.company_currency else self.grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype
-				})
+				}, customer_account_currency)
 			)
 
 	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.get("taxes"):
 			if flt(tax.base_tax_amount_after_discount_amount):
+				account_currency = frappe.db.get_value("Account", tax.account_head, "currency")
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.customer,
 						"credit": flt(tax.base_tax_amount_after_discount_amount),
-						"remarks": self.remarks,
+						"credit_in_account_currency": flt(tax.base_tax_amount_after_discount_amount) \
+							if account_currency==self.company_currency else flt(tax.tax_amount_after_discount_amount),
 						"cost_center": tax.cost_center
-					})
+					}, account_currency)
 				)
 
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
+				account_currency = frappe.db.get_value("Account", item.income_account, "currency")
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.income_account,
 						"against": self.customer,
 						"credit": item.base_net_amount,
-						"remarks": self.remarks,
+						"credit_in_account_currency": item.base_net_amount \
+							if account_currency==self.company_currency else item.net_amount,
 						"cost_center": item.cost_center
-					})
+					}, account_currency)
 				)
 
 		# expense account gl entries
@@ -531,8 +538,11 @@ class SalesInvoice(SellingController):
 				and cint(self.update_stock):
 			gl_entries += super(SalesInvoice, self).get_gl_entries()
 
-	def make_pos_gl_entries(self, gl_entries):
+	def make_pos_gl_entries(self, gl_entries, customer_account_currency):
 		if cint(self.is_pos) and self.cash_bank_account and self.paid_amount:
+			bank_account_currency = frappe.db.get_value("Account", self.cash_bank_account, "currency")
+			paid_amount_in_account_currency = self.paid_amount if bank_account_currency==self.company_currency \
+				else flt(self.paid_amount/self.conversion_rate, self.precision("paid_amount"))
 			# POS, make payment entries
 			gl_entries.append(
 				self.get_gl_dict({
@@ -541,23 +551,28 @@ class SalesInvoice(SellingController):
 					"party": self.customer,
 					"against": self.cash_bank_account,
 					"credit": self.paid_amount,
-					"remarks": self.remarks,
+					"credit_in_account_currency": paid_amount_in_account_currency,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
-				})
+				}, customer_account_currency)
 			)
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.cash_bank_account,
 					"against": self.customer,
 					"debit": self.paid_amount,
-					"remarks": self.remarks,
-				})
+					"debit_in_account_currency": paid_amount_in_account_currency
+				}, bank_account_currency)
 			)
 
-	def make_write_off_gl_entry(self, gl_entries):
+	def make_write_off_gl_entry(self, gl_entries, customer_account_currency):
 		# write off entries, applicable if only pos
 		if self.write_off_account and self.write_off_amount:
+			write_off_account_currency = frappe.db.get_value("Account", self.write_off_account, "currency")
+			write_off_amount_in_account_currency = self.write_off_amount \
+				if write_off_account_currency==self.company_currency \
+				else flt(self.write_off_amount/self.conversion_rate, self.precision("write_off_amount"))
+			
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,
@@ -565,19 +580,19 @@ class SalesInvoice(SellingController):
 					"party": self.customer,
 					"against": self.write_off_account,
 					"credit": self.write_off_amount,
-					"remarks": self.remarks,
+					"credit_in_account_currency": write_off_amount_in_account_currency,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
-					"against_voucher_type": self.doctype,
-				})
+					"against_voucher_type": self.doctype
+				}, customer_account_currency)
 			)
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.write_off_account,
 					"against": self.customer,
 					"debit": self.write_off_amount,
-					"remarks": self.remarks,
+					"debit_in_account_currency": write_off_amount_in_account_currency,
 					"cost_center": self.write_off_cost_center
-				})
+				}, write_off_account_currency)
 			)
 
 def get_list_context(context=None):

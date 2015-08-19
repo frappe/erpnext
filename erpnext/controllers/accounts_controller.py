@@ -16,6 +16,11 @@ force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
 class CustomerFrozen(frappe.ValidationError): pass
 
 class AccountsController(TransactionBase):
+	def __init__(self, arg1, arg2=None):
+		super(AccountsController, self).__init__(arg1, arg2)
+		
+		self.company_currency = get_company_currency(self.company)
+		
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
@@ -187,7 +192,7 @@ class AccountsController(TransactionBase):
 		if frappe.db.get_value(taxes_and_charges_doctype, self.taxes_and_charges, "disabled"):
 			frappe.throw(_("{0} '{1}' is disabled").format(taxes_and_charges_doctype, self.taxes_and_charges))
 
-	def get_gl_dict(self, args):
+	def get_gl_dict(self, args, account_currency=None):
 		"""this method populates the common properties of a gl entry record"""
 		gl_dict = frappe._dict({
 			'company': self.company,
@@ -198,11 +203,28 @@ class AccountsController(TransactionBase):
 			'fiscal_year': self.fiscal_year,
 			'debit': 0,
 			'credit': 0,
+			'debit_in_account_currency': 0,
+			'credit_in_account_currency': 0,
 			'is_opening': self.get("is_opening") or "No",
 			'party_type': None,
 			'party': None
 		})
 		gl_dict.update(args)
+		
+		if not account_currency:
+			account_currency = frappe.db.get_value("Account", gl_dict.account, "currency")
+			
+		gl_dict["currency"] = self.company_currency if account_currency==self.company_currency else self.currency
+		
+		# set debit/credit in account currency if not provided
+		if flt(gl_dict.debit) and not flt(gl_dict.debit_in_account_currency):
+			gl_dict.debit_in_account_currency = gl_dict.debit if account_currency==self.company_currency \
+				else flt(gl_dict.debit / (self.get("conversion_rate") or 1), 2)
+			
+		if flt(gl_dict.credit) and not flt(gl_dict.credit_in_account_currency):
+			gl_dict.credit_in_account_currency = gl_dict.credit if account_currency==self.company_currency \
+				else flt(gl_dict.credit / (self.get("conversion_rate") or 1), 2)
+		
 		return gl_dict
 
 	def clear_unallocated_advances(self, childtype, parentfield):

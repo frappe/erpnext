@@ -254,7 +254,6 @@ class PurchaseInvoice(BuyingController):
 					"party": self.supplier,
 					"against": self.against_expense_account,
 					"credit": self.total_amount_to_pay,
-					"remarks": self.remarks,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 				})
@@ -264,15 +263,20 @@ class PurchaseInvoice(BuyingController):
 		valuation_tax = {}
 		for tax in self.get("taxes"):
 			if tax.category in ("Total", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
+				account_currency = frappe.db.get_value("Account", tax.account_head, "currency")
+				
+				dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
+				
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.supplier,
-						"debit": tax.add_deduct_tax == "Add" and tax.base_tax_amount_after_discount_amount or 0,
-						"credit": tax.add_deduct_tax == "Deduct" and tax.base_tax_amount_after_discount_amount or 0,
-						"remarks": self.remarks,
+						dr_or_cr: tax.base_tax_amount_after_discount_amount,
+						dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount \
+							if account_currency==self.company_currency \
+							else tax.tax_amount_after_discount_amount,
 						"cost_center": tax.cost_center
-					})
+					}, account_currency)
 				)
 
 			# accumulate valuation tax
@@ -288,14 +292,15 @@ class PurchaseInvoice(BuyingController):
 		stock_items = self.get_stock_items()
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
+				account_currency = frappe.db.get_value("Account", item.expense_account, "currency")
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.expense_account,
 						"against": self.supplier,
 						"debit": item.base_net_amount,
-						"remarks": self.remarks,
+						"debit_in_account_currency": item.net_amount,
 						"cost_center": item.cost_center
-					})
+					}, account_currency)
 				)
 
 			if auto_accounting_for_stock and self.is_opening == "No" and \
@@ -353,7 +358,6 @@ class PurchaseInvoice(BuyingController):
 					"account": self.write_off_account,
 					"against": self.supplier,
 					"credit": flt(self.write_off_amount),
-					"remarks": self.remarks,
 					"cost_center": self.write_off_cost_center
 				})
 			)

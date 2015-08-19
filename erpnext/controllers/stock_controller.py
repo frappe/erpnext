@@ -48,22 +48,22 @@ class StockController(AccountsController):
 						# from warehouse account
 
 						self.check_expense_account(detail)
-
+						
 						gl_list.append(self.get_gl_dict({
-							"account": warehouse_account[sle.warehouse],
+							"account": warehouse_account[sle.warehouse]["name"],
 							"against": detail.expense_account,
 							"cost_center": detail.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"debit": flt(sle.stock_value_difference, 2)
-						}))
+							"debit": flt(sle.stock_value_difference, 2),
+						}, warehouse_account[sle.warehouse]["currency"]))
 
-						# to target warehouse / expense account
+						# to target warehouse / expense account						
 						gl_list.append(self.get_gl_dict({
 							"account": detail.expense_account,
-							"against": warehouse_account[sle.warehouse],
+							"against": warehouse_account[sle.warehouse]["name"],
 							"cost_center": detail.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"credit": flt(sle.stock_value_difference, 2)
+							"credit": flt(sle.stock_value_difference, 2),
 						}))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
@@ -316,6 +316,9 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 	return gl_entries
 
 def get_warehouse_account():
-	warehouse_account = dict(frappe.db.sql("""select warehouse, name from tabAccount
-		where account_type = 'Warehouse' and ifnull(warehouse, '') != ''"""))
+	warehouse_account = frappe._dict()
+	
+	for d in frappe.db.sql("""select warehouse, name, currency from tabAccount
+		where account_type = 'Warehouse' and ifnull(warehouse, '') != ''""", as_dict=1):
+			warehouse_account.setdefault(d.warehouse, d)
 	return warehouse_account
