@@ -352,8 +352,8 @@ class Item(WebsiteGenerator):
 				args[d.attribute] = d.attribute_value
 
 			variant = get_variant(self.variant_of, args)
-			if variant and variant[0][0] != self.name:
-				frappe.throw(_("Item variant {0} exists with same attributes").format(variant[0][0]), ItemVariantExistsError)
+			if variant and variant != self.name:
+				frappe.throw(_("Item variant {0} exists with same attributes").format(variant), ItemVariantExistsError)
 
 def validate_end_of_life(item_code, end_of_life=None, verbose=1):
 	if not end_of_life:
@@ -572,8 +572,10 @@ def find_variant(item, args):
 				return variant.name
 
 @frappe.whitelist()
-def create_variant(item, param):
-	args = json.loads(param)
+def create_variant(item, args):
+	if isinstance(args, basestring):
+		args = json.loads(args)
+
 	variant = frappe.new_doc("Item")
 	variant_attributes = []
 	for d in args:
@@ -581,9 +583,12 @@ def create_variant(item, param):
 			"attribute": d,
 			"attribute_value": args[d]
 		})
+
 	variant.set("attributes", variant_attributes)
 	template = frappe.get_doc("Item", item)
 	copy_attributes_to_variant(template, variant)
+	make_variant_item_code(template, variant)
+
 	return variant
 
 def copy_attributes_to_variant(item, variant):
@@ -600,3 +605,34 @@ def copy_attributes_to_variant(item, variant):
 		variant.description += "\n"
 		for d in variant.attributes:
 			variant.description += "<p>" + d.attribute + ": " + cstr(d.attribute_value) + "</p>"
+
+def make_variant_item_code(template, variant):
+	"""Uses template's item code and abbreviations to make variant's item code"""
+	if variant.item_code:
+		return
+
+	abbreviations = []
+	for attr in variant.attributes:
+		item_attribute = frappe.db.sql("""select i.numeric_values, v.abbr
+			from `tabItem Attribute` i left join `tabItem Attribute Value` v
+				on (i.name=v.parent)
+			where i.name=%(attribute)s and v.attribute_value=%(attribute_value)s""", {
+				"attribute": attr.attribute,
+				"attribute_value": attr.attribute_value
+			}, as_dict=True)
+
+		if not item_attribute:
+			# somehow an invalid item attribute got used
+			return
+
+		if item_attribute[0].numeric_values:
+			# don't generate item code if one of the attributes is numeric
+			return
+
+		abbreviations.append(item_attribute[0].abbr)
+
+	if abbreviations:
+		variant.item_code = "{0}-{1}".format(template.item_code, "-".join(abbreviations))
+
+	if variant.item_code:
+		variant.item_name = variant.item_code
