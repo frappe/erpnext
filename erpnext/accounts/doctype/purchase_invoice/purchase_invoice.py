@@ -298,7 +298,8 @@ class PurchaseInvoice(BuyingController):
 						"account": item.expense_account,
 						"against": self.supplier,
 						"debit": item.base_net_amount,
-						"debit_in_account_currency": item.net_amount,
+						"debit_in_account_currency": item.base_net_amount \
+							if account_currency==self.company_currency else item.net_amount,
 						"cost_center": item.cost_center
 					}, account_currency)
 				)

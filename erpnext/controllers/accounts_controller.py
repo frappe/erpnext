@@ -18,8 +18,8 @@ class CustomerFrozen(frappe.ValidationError): pass
 class AccountsController(TransactionBase):
 	def __init__(self, arg1, arg2=None):
 		super(AccountsController, self).__init__(arg1, arg2)
-		
-		self.company_currency = get_company_currency(self.company)
+		if self.get("company"):
+			self.company_currency = get_company_currency(self.company)
 		
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
@@ -211,20 +211,30 @@ class AccountsController(TransactionBase):
 		})
 		gl_dict.update(args)
 		
+		gl_dict = self.set_balance_in_account_currency(gl_dict, account_currency)
+						
+		return gl_dict
+		
+	def set_balance_in_account_currency(self, gl_dict, account_currency=None):
 		if not account_currency:
 			account_currency = frappe.db.get_value("Account", gl_dict.account, "currency")
 			
-		gl_dict["currency"] = self.company_currency if account_currency==self.company_currency else self.currency
+		if not self.get("conversion_rate") and account_currency!=self.company_currency:
+			frappe.throw(_("Account: {0} with currency: {1} can not be selected")
+				.format(gl_dict.account, account_currency))
+			
+		gl_dict["currency"] = self.company_currency if account_currency==self.company_currency \
+			else account_currency
 		
 		# set debit/credit in account currency if not provided
 		if flt(gl_dict.debit) and not flt(gl_dict.debit_in_account_currency):
 			gl_dict.debit_in_account_currency = gl_dict.debit if account_currency==self.company_currency \
-				else flt(gl_dict.debit / (self.get("conversion_rate") or 1), 2)
-			
+				else flt(gl_dict.debit / (self.get("conversion_rate")), 2)
+							
 		if flt(gl_dict.credit) and not flt(gl_dict.credit_in_account_currency):
 			gl_dict.credit_in_account_currency = gl_dict.credit if account_currency==self.company_currency \
-				else flt(gl_dict.credit / (self.get("conversion_rate") or 1), 2)
-		
+				else flt(gl_dict.credit / (self.get("conversion_rate")), 2)
+				
 		return gl_dict
 
 	def clear_unallocated_advances(self, childtype, parentfield):

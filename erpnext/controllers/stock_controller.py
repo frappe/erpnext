@@ -71,7 +71,7 @@ class StockController(AccountsController):
 		if warehouse_with_no_account:
 			msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
-
+		
 		return process_gl_map(gl_list)
 
 	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):

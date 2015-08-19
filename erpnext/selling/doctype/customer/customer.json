@@ -299,7 +299,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "depends_on": "eval:!doc.__islocal", 
+   "depends_on": "", 
    "description": "Mention if non-standard receivable account applicable", 
    "fieldname": "accounts", 
    "fieldtype": "Table", 
@@ -739,7 +739,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-08-13 16:41:28.805471", 
+ "modified": "2015-08-19 16:01:33.347348", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Customer", 

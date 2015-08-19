@@ -106,16 +106,15 @@ class GLEntry(Document):
 
 		if not self.currency:
 			self.currency = company_currency
-
 		if account_currency != self.currency:
 			frappe.throw(_("Accounting Entry for {0} can only be made in currency: {1}")
 				.format(self.account, (account_currency or company_currency)))
 				
 		if self.party_type and self.party:
-			existing_gle = frappe.db.get_value("GL Entry", 
-				{"party_type": self.party_type, "party": self.party}, ["name", "currency"])
+			existing_gle = frappe.db.get_value("GL Entry", {"party_type": self.party_type, 
+				"party": self.party, "company": self.company}, ["name", "currency"], as_dict=1)
 			if not existing_gle:
-				party_currency = frappe.db.get_value(self.party_type, self.party, "currency") or company_currency
+				party_currency = frappe.db.get_value(self.party_type, self.party, "default_currency") or company_currency
 				if party_currency != account_currency:
 					frappe.throw(_("Invalid Account {0}. Account Currency must be {1}, same as {2}: {3}")
 						.format(self.account, party_currency, self.party_type, self.party))

@@ -143,13 +143,16 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 	return out
 	
 def validate_party_account(party):
-	party_account_defined_for_companies = [d.company for d in party.get("party_accounts")]
-	
+	party_account_defined_for_companies = [d.company for d in party.get("accounts")]
+	party_account_required_for_companies = []
 	for company, company_currency in frappe.db.sql("select name, default_currency from `tabCompany`"):
-		if party.currency and party.currency != company_currency \
+		if party.default_currency and party.default_currency != company_currency \
 			and company not in party_account_defined_for_companies:
-			frappe.throw(_("Please mention Party Account for company {0}, as party currency is different than company's default currency")
-				.format(company))
+				party_account_required_for_companies.append(company)
+				
+	if party_account_required_for_companies:
+		frappe.msgprint(_("Please mention Party Account for the following companies, as party currency is different from company's default currency: {0}")
+			.format("\n" + "\n".join(party_account_required_for_companies)))
 				
 @frappe.whitelist()
 def get_party_account(company, party, party_type):
