@@ -216,6 +216,7 @@ class SalesOrder(SellingController):
 		self.update_stock_ledger(-1)
 		frappe.db.set(self, 'status', 'Stopped')
 		frappe.msgprint(_("{0} {1} status is Stopped").format(self.doctype, self.name))
+		self.notify_modified()
 
 	def unstop_sales_order(self):
 		self.check_modified_date()

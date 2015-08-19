@@ -32,6 +32,8 @@ def setup_account(args=None):
 		if args.language and args.language != "english":
 			set_default_language(args.language)
 
+		frappe.clear_cache()
+
 		install_fixtures.install(args.get("country"))
 
 		update_user_name(args)

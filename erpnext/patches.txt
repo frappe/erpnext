@@ -47,6 +47,7 @@ erpnext.patches.v4_0.update_account_root_type
 execute:frappe.delete_doc("Report", "Purchase In Transit")
 erpnext.patches.v4_0.new_address_template
 execute:frappe.delete_doc("DocType", "SMS Control")
+execute:frappe.delete_doc_if_exists("DocType", "Bulk SMS") #2015-08-18
 erpnext.patches.v4_0.fix_case_of_hr_module_def
 erpnext.patches.v4_0.fix_address_template
 
@@ -136,7 +137,6 @@ erpnext.patches.v5_0.update_account_types
 erpnext.patches.v5_0.update_sms_sender
 erpnext.patches.v5_0.set_appraisal_remarks
 erpnext.patches.v5_0.update_time_log_title
-erpnext.patches.v4_2.repost_reserved_qty
 erpnext.patches.v4_2.repost_sle_for_si_with_no_warehouse
 erpnext.patches.v5_0.newsletter
 execute:frappe.delete_doc("DocType", "Chart of Accounts")
@@ -171,7 +171,6 @@ execute:frappe.delete_doc("Page", "users")
 erpnext.patches.v5_0.update_material_transferred_for_manufacturing_again
 erpnext.patches.v5_0.index_on_account_and_gl_entry
 execute:frappe.db.sql("""delete from `tabProject Task`""")
-erpnext.patches.v5_0.item_variants
 erpnext.patches.v5_0.update_item_desc_in_invoice
 erpnext.patches.v5_1.fix_against_account
 erpnext.patches.v5_1.fix_credit_days_based_on
@@ -191,3 +190,6 @@ erpnext.patches.v5_4.fix_missing_item_images
 erpnext.patches.v5_4.stock_entry_additional_costs
 erpnext.patches.v5_4.cleanup_journal_entry #2015-08-14
 execute:frappe.db.sql("update `tabProduction Order` pro set description = (select description from tabItem where name=pro.production_item) where ifnull(description, '') = ''")
+erpnext.patches.v5_7.item_template_attributes
+erpnext.patches.v4_2.repost_reserved_qty #2015-08-17
+erpnext.patches.v5_4.update_purchase_cost_against_project
