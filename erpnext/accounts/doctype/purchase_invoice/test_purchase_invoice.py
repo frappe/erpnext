@@ -232,45 +232,24 @@ class TestPurchaseInvoice(unittest.TestCase):
 		test_recurring_document(self, test_records)
 
 	def test_total_purchase_cost_for_project(self):
-		purchase_invoice = frappe.new_doc('Purchase Invoice')
-		purchase_invoice.update({
-			"credit_to": "_Test Payable - _TC",
-			"supplier": "_Test Supplier",
-			"company": "_Test Company",
-			"items": [
-				{
-					"rate": 500,
-					"qty": 1,
-					"project_name": "_Test Project",
-					"item_code": "_Test Item Home Desktop 100",
-					"expense_account": "_Test Account Cost for Goods Sold - _TC",
-					"cost_center": "_Test Cost Center - _TC"
-				},
-				{
-					"rate": 1500,
-					"qty": 1,
-					"project_name": "_Test Project",
-					"item_code": "_Test Item Home Desktop 200",
-					"expense_account": "_Test Account Cost for Goods Sold - _TC",
-					"cost_center": "_Test Cost Center - _TC"
-				}
-			]
-		})
-		purchase_invoice.save()
-		purchase_invoice.submit()
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 2000)
+		existing_purchase_cost = frappe.db.sql("""select sum(ifnull(base_net_amount, 0))
+			from `tabPurchase Invoice Item` where project_name = '_Test Project' and docstatus=1""")
+		existing_purchase_cost = existing_purchase_cost and existing_purchase_cost[0][0] or 0
+		
+		pi = make_purchase_invoice(currency="USD", conversion_rate=60, project_name="_Test Project")
+		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 
+			existing_purchase_cost + 15000)
 
-		purchase_invoice1 = frappe.copy_doc(purchase_invoice)
-		purchase_invoice1.save()
-		purchase_invoice1.submit()
+		pi1 = make_purchase_invoice(qty=10, project_name="_Test Project")
+		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 
+			existing_purchase_cost + 15500)
 
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 4000)
+		pi1.cancel()
+		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 
+			existing_purchase_cost + 15000)
 
-		purchase_invoice1.cancel()
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 2000)
-
-		purchase_invoice.cancel()
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), 0)
+		pi.cancel()
+		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), existing_purchase_cost)
 
 	def test_return_purchase_invoice(self):
 		set_perpetual_inventory()
@@ -308,6 +287,7 @@ def make_purchase_invoice(**args):
 	pi.company = args.company or "_Test Company"
 	pi.supplier = args.supplier or "_Test Supplier"
 	pi.currency = args.currency or "INR"
+	pi.conversion_rate = args.conversion_rate or 1
 	pi.is_return = args.is_return
 	pi.return_against = args.return_against
 
@@ -318,7 +298,9 @@ def make_purchase_invoice(**args):
 		"rate": args.rate or 50,
 		"conversion_factor": 1.0,
 		"serial_no": args.serial_no,
-		"stock_uom": "_Test UOM"
+		"stock_uom": "_Test UOM",
+		"cost_center": "_Test Cost Center - _TC",
+		"project_name": args.project_name
 	})
 	if not args.do_not_save:
 		pi.insert()
