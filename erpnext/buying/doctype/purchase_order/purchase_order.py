@@ -248,6 +248,8 @@ def stop_or_unstop_purchase_orders(names, status):
 				if po.status == "Stopped":
 					po.update_status("Submitted")
 
+			po.notify_modified()
+
 	frappe.local.message_log = []
 
 
