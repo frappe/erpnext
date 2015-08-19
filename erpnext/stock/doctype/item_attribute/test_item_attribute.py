@@ -6,7 +6,7 @@ import unittest
 
 test_records = frappe.get_test_records('Item Attribute')
 
-from .item_attribute import ItemAttributeIncrementError
+from erpnext.stock.doctype.item_attribute.item_attribute import ItemAttributeIncrementError
 
 class TestItemAttribute(unittest.TestCase):
 	def setUp(self):
