@@ -54,7 +54,7 @@
   {
    "allow_on_submit": 0, 
    "fieldname": "description", 
-   "fieldtype": "Text", 
+   "fieldtype": "Text Editor", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "in_filter": 0, 
@@ -164,7 +164,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-08-12 08:52:43.922881", 
+ "modified": "2015-08-19 12:45:52.168801", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "BOM Operation", 
