@@ -46,11 +46,11 @@ class TestItem(unittest.TestCase):
 			item = frappe.get_doc("Item", item_code)
 		return item
 
-	def test_template_cannot_have_stock(self):
-			item = self.get_item(10)
-			make_stock_entry(item_code=item.name, target="Stores - _TC", qty=1, basic_rate=1)
-			item.has_variants = 1
-			self.assertRaises(ItemTemplateCannotHaveStock, item.save)
+	# def test_template_cannot_have_stock(self):
+	# 		item = self.get_item(10)
+	# 		make_stock_entry(item_code=item.name, target="Stores - _TC", qty=1, basic_rate=1)
+	# 		item.has_variants = 1
+	# 		self.assertRaises(ItemTemplateCannotHaveStock, item.save)
 
 	def test_default_warehouse(self):
 		item = frappe.copy_doc(test_records[0])
