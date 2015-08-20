@@ -64,7 +64,7 @@ class Item(WebsiteGenerator):
 		self.update_item_desc()
 		self.synced_with_hub = 0
 		self.validate_has_variants()
-		self.validate_stock_for_template_must_be_zero()
+		# self.validate_stock_for_template_must_be_zero()
 		self.validate_attributes()
 		self.validate_variant_attributes()
 
