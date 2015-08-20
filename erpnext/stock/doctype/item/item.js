@@ -311,6 +311,7 @@ $.extend(erpnext.item, {
 	toggle_attributes: function(frm) {
 		frm.toggle_display("attributes", frm.doc.has_variants || frm.doc.variant_of);
 		frm.fields_dict.attributes.grid.toggle_reqd("attribute_value", frm.doc.variant_of ? 1 : 0);
+		frm.fields_dict.attributes.grid.set_column_disp("attribute_value", frm.doc.variant_of ? 1 : 0);
 	}
 });
 
