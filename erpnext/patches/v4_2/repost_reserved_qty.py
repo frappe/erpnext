@@ -27,3 +27,9 @@ def execute():
 			update_bin_qty(item_code, warehouse, {
 				"reserved_qty": get_reserved_qty(item_code, warehouse)
 			})
+			
+	frappe.db.sql("""delete from tabBin 
+		where exists(
+			select name from tabItem where name=tabBin.item_code and ifnull(is_stock_item, 0) = 0
+		)
+	""")
