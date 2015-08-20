@@ -65,6 +65,12 @@ def migrate_item_variants():
 		item_attributes = frappe.db.sql("""select distinct item_attribute, item_attribute_value
 			from `tabItem Variant` where parent=%s""", item.name)
 
+		if not item_attributes and not all_variants:
+			item = frappe.get_doc("Item", item.name)
+			item.has_variants = 0
+			item.save()
+			continue
+
 		attribute_value_options = {}
 		for attribute, value in item_attributes:
 			attribute_value_options.setdefault(attribute, []).append(value)
