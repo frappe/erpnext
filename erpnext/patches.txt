@@ -191,5 +191,5 @@ erpnext.patches.v5_4.stock_entry_additional_costs
 erpnext.patches.v5_4.cleanup_journal_entry #2015-08-14
 execute:frappe.db.sql("update `tabProduction Order` pro set description = (select description from tabItem where name=pro.production_item) where ifnull(description, '') = ''")
 erpnext.patches.v5_7.item_template_attributes
-erpnext.patches.v4_2.repost_reserved_qty #2015-08-17
+erpnext.patches.v4_2.repost_reserved_qty #2015-08-20
 erpnext.patches.v5_4.update_purchase_cost_against_project
