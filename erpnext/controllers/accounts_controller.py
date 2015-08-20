@@ -44,6 +44,7 @@ class AccountsController(TransactionBase):
 			self.validate_enabled_taxes_and_charges()
 
 		self.validate_party()
+		self.validate_currency()
 
 	def on_submit(self):
 		if self.meta.get_field("is_recurring"):
@@ -211,14 +212,21 @@ class AccountsController(TransactionBase):
 		})
 		gl_dict.update(args)
 		
+		if not account_currency:
+			account_currency = frappe.db.get_value("Account", gl_dict.account, "currency")
+			
+		self.validate_account_currency(gl_dict.account, account_currency)
 		gl_dict = self.set_balance_in_account_currency(gl_dict, account_currency)
 						
 		return gl_dict
 		
-	def set_balance_in_account_currency(self, gl_dict, account_currency=None):
-		if not account_currency:
-			account_currency = frappe.db.get_value("Account", gl_dict.account, "currency")
-			
+	def validate_account_currency(self, account, account_currency=None):
+		valid_currency = list(set(self.currency, self.company_currency))
+		if account_currency not in valid_currency:
+			frappe.throw(_("Invalid Account {0}. Account Currency must be {1}")
+				.format(account, "or".join(valid_currency)))
+		
+	def set_balance_in_account_currency(self, gl_dict, account_currency=None):			
 		if not self.get("conversion_rate") and account_currency!=self.company_currency:
 			frappe.throw(_("Account: {0} with currency: {1} can not be selected")
 				.format(gl_dict.account, account_currency))
@@ -398,9 +406,27 @@ class AccountsController(TransactionBase):
 
 		if party_type:
 			party = self.get(party_type.lower())
-			if frappe.db.get_value(party_type, party, "is_frozen"):
+			if frappe.db.get_value(party_type, party, "is_frozen"): 
 				frappe.throw("{0} {1} is frozen".format(party_type, party), CustomerFrozen)
-
+				
+		self.validate_currency(party_type, party)
+				
+	def validate_currency(self, party_type, party):
+		if self.get("currency") and self.currency != self.company_currency:
+			existing_gle = frappe.db.get_value("GL Entry", {"party_type": party_type, 
+				"party": party, "company": self.company}, ["name", "currency"], as_dict=1)
+			currency_in_existing_entries = existing_gle.currency or self.company_currency
+			
+			if existing_gle:
+				if currency_in_existing_entries != self.company_currency \
+					and currency_in_existing_entries != self.currency:
+						frappe.throw(_("Currency must be {0}").format(currency_in_existing_entries))
+			else:
+				party_currency = frappe.db.get_value(party_type, party, "default_currency")
+				if party_currency != self.company_currency and self.currency != party_currency:
+					frappe.throw(_("Currency must be same as {0} currency {1}")
+						.format(party_type, party_currency))
+				
 @frappe.whitelist()
 def get_tax_rate(account_head):
 	return frappe.db.get_value("Account", account_head, "tax_rate")
