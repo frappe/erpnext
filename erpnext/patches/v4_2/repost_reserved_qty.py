@@ -18,10 +18,18 @@ def execute():
 					select distinct item_code, warehouse 
 					from `tabPacked Item` where docstatus=1 and parenttype='Sales Order'
 				)
-			) items
+			) so_item
+		where
+			exists(select name from tabItem where name=so_item.item_code and ifnull(is_stock_item, 0)=1)
 	""")
-	
+
 	for item_code, warehouse in repost_for:
 			update_bin_qty(item_code, warehouse, {
 				"reserved_qty": get_reserved_qty(item_code, warehouse)
 			})
+			
+	frappe.db.sql("""delete from tabBin 
+		where exists(
+			select name from tabItem where name=tabBin.item_code and ifnull(is_stock_item, 0) = 0
+		)
+	""")
