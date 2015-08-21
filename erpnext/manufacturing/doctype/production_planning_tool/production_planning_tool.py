@@ -200,14 +200,16 @@ class ProductionPlanningTool(Document):
 
 	def create_production_order(self, items):
 		"""Create production order. Called from Production Planning Tool"""
-		from erpnext.manufacturing.doctype.production_order.production_order import OverProductionError
-
+		from erpnext.manufacturing.doctype.production_order.production_order import OverProductionError, get_default_warehouse
+		warehouse = get_default_warehouse()
 		pro_list = []
 		for key in items:
 			pro = frappe.new_doc("Production Order")
 			pro.update(items[key])
 			pro.set_production_order_operations()
-
+			if warehouse:
+				pro.wip_warehouse = warehouse[0]
+				pro.fg_warehouse = warehouse[1]
 			frappe.flags.mute_messages = True
 			try:
 				pro.insert()
