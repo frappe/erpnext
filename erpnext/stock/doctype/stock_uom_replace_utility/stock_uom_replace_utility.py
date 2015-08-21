@@ -93,7 +93,7 @@ def update_stock_ledger_entry(item_code, new_stock_uom, conversion_factor):
 				actual_qty = ifnull(actual_qty,0) * %s,
 				qty_after_transaction = ifnull(qty_after_transaction, 0) * %s
 			where item_code = %s""",
-			(new_stock_uom, conversion_factor, item_code))
+			(new_stock_uom, conversion_factor, conversion_factor, item_code))
 	else:
 		frappe.db.sql("""update `tabStock Ledger Entry` set stock_uom=%s
 			where item_code=%s""", (new_stock_uom, item_code))
