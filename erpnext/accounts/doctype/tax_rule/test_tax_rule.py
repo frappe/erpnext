@@ -19,7 +19,7 @@ class TestTaxRule(unittest.TestCase):
 		self.assertRaises(IncorrectCustomerGroup, tax_rule.save)
 		
 	def test_supplier_type(self):
-		tax_rule = make_tax_rule(supplier= "_Test Supplier", supplier_type= "_Test Supplier Type 1",
+		tax_rule = make_tax_rule(tax_type= "Purchase", supplier= "_Test Supplier", supplier_type= "_Test Supplier Type 1",
 			purchase_tax_template = "_Test Purchase Taxes and Charges Template")
 		self.assertRaises(IncorrectSupplierType, tax_rule.save)
 		
