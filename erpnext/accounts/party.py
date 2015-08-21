@@ -7,7 +7,7 @@ import frappe
 import datetime
 from frappe import _, msgprint, scrub
 from frappe.defaults import get_user_permissions
-from frappe.utils import add_days, getdate, formatdate, flt, get_first_day, date_diff, nowdate
+from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.utilities.doctype.contact.contact import get_contact_details
 
@@ -40,6 +40,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	set_contact_details(out, party, party_type)
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, party_type, price_list)
+	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out)
 
 	if not out.get("currency"):
 		out["currency"] = currency
@@ -96,7 +97,7 @@ def set_other_values(out, party, party_type):
 		out[f] = party.get(f)
 
 	# fields prepended with default in Customer doctype
-	for f in ['currency', 'taxes_and_charges'] \
+	for f in ['currency'] \
 		+ (['sales_partner', 'commission_rate'] if party_type=="Customer" else []):
 		if party.get("default_" + f):
 			out[f] = party.get("default_" + f)
@@ -218,3 +219,20 @@ def validate_due_date(posting_date, due_date, party_type, party, company):
 					.format(date_diff(due_date, default_due_date)))
 			else:
 				frappe.throw(_("Due / Reference Date cannot be after {0}").format(formatdate(default_due_date)))
+				
+def set_taxes(party, party_type, posting_date, company, out):
+	print "posting_date", posting_date
+	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
+	args = {
+		party_type: 		party,
+		"customer_group":	out.customer_group,
+		"supplier_type":	out.supplier_type,
+		"company":			company
+	}
+	args.update(get_party_details(party, party_type))
+	if party_type=="Customer":
+		args.update({"tax_type": "Sales"})
+	else:
+		args.update({"tax_type": "Purchase"})
+		
+	return get_tax_template(posting_date, args)

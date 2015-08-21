@@ -20,6 +20,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 				price_list: frm.doc.buying_price_list
 			};
 		}
+		args.posting_date = frm.doc.transaction_date;
 	}
 	if(!args) return;
 
