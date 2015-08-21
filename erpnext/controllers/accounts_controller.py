@@ -215,14 +215,15 @@ class AccountsController(TransactionBase):
 		"""Returns list of advances against Account, Party, Reference"""
 		order_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
 
-		if not order_list:
-			return
-
-		in_placeholder = ', '.join(['%s'] * len(order_list))
-
 		# conver sales_order to "Sales Order"
 		reference_type = against_order_field.replace("_", " ").title()
-
+		
+		condition = ""
+		if order_list:
+			in_placeholder = ', '.join(['%s'] * len(order_list))
+			condition = "or (t2.reference_type = '{0}' and ifnull(t2.reference_name, '') in ({1}))"\
+				.format(reference_type, in_placeholder)
+				
 		res = frappe.db.sql("""
 			select
 				t1.name as jv_no, t1.remark, t2.{0} as amount, t2.name as jv_detail_no,
@@ -233,11 +234,9 @@ class AccountsController(TransactionBase):
 				t1.name = t2.parent and t2.account = %s
 				and t2.party_type = %s and t2.party = %s
 				and t2.is_advance = 'Yes' and t1.docstatus = 1
-				and (
-					ifnull(t2.reference_type, '')=''
-					or (t2.reference_type = %s and ifnull(t2.reference_name, '') in ({1})))
-			order by t1.posting_date""".format(dr_or_cr, in_placeholder),
-			[account_head, party_type, party, reference_type] + order_list, as_dict=1)
+				and (ifnull(t2.reference_type, '')='' {1})
+			order by t1.posting_date""".format(dr_or_cr, condition),
+			[account_head, party_type, party] + order_list, as_dict=1)
 
 		self.set(parentfield, [])
 		for d in res:
