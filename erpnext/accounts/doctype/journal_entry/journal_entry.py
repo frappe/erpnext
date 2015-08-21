@@ -236,7 +236,7 @@ class JournalEntry(AccountsController):
 				if voucher_properties[0] != 1:
 					frappe.throw(_("{0} {1} is not submitted").format(reference_type, reference_name))
 
-				if flt(voucher_properties[1]) < total:
+				if total and flt(voucher_properties[1]) < total:
 					frappe.throw(_("Payment against {0} {1} cannot be greater \
 						than Outstanding Amount {2}").format(reference_type, reference_name, voucher_properties[1]))
 
