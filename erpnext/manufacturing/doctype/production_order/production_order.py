@@ -422,3 +422,9 @@ def make_time_log(name, operation, from_time=None, to_time=None, qty=None,  proj
 	if from_time and to_time :
 		time_log.calculate_total_hours()
 	return time_log
+
+@frappe.whitelist()
+def get_default_warehouse():
+	wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
+	fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
+	return wip_warehouse, fg_warehouse

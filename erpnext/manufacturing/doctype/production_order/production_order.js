@@ -17,6 +17,7 @@ frappe.ui.form.on("Production Order", "onload", function(frm) {
 	erpnext.production_order.set_custom_buttons(frm);
 	erpnext.production_order.setup_company_filter(frm);
 	erpnext.production_order.setup_bom_filter(frm);
+	erpnext.production_order.set_default_warehouse(frm);
 });
 
 frappe.ui.form.on("Production Order", "refresh", function(frm) {
@@ -138,9 +139,21 @@ erpnext.production_order = {
 				}
 			} else msgprint(__("Please enter Production Item first"));
 		});
+	},
+	
+	set_default_warehouse: function(frm) {
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.production_order.production_order.get_default_warehouse",
+
+			callback: function(r) {
+				if(!r.exe) {
+					frm.set_value("wip_warehouse", r.message[0]);
+					frm.set_value("fg_warehouse", r.message[1])
+				}
+			}
+		});
 	}
 }
-
 
 $.extend(cur_frm.cscript, {
 	before_submit: function() {
