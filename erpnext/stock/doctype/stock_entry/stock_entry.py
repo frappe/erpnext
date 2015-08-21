@@ -80,7 +80,8 @@ class StockEntry(StockController):
 		for item in self.get("items"):
 			if not flt(item.qty):
 				frappe.throw(_("Row {0}: Qty is mandatory").format(item.idx))
-
+			if not flt(item.conversion_factor):
+				frappe.throw(_("Row {0}: UOM Conversion Factor is mandatory").format(item.idx))
 			item.transfer_qty = flt(item.qty * item.conversion_factor, self.precision("transfer_qty", item))
 
 	def validate_item(self):
