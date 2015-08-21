@@ -291,7 +291,7 @@ class PurchaseReceipt(BuyingController):
 				if warehouse_account.get(d.warehouse):
 
 					val_rate_db_precision = 6 if cint(d.precision("valuation_rate")) <= 6 else 9
-
+					
 					# warehouse account
 					gl_entries.append(self.get_gl_dict({
 						"account": warehouse_account[d.warehouse],
@@ -334,22 +334,21 @@ class PurchaseReceipt(BuyingController):
 						}))
 
 					# divisional loss adjustment
-					if not self.get("taxes"):
-						sle_valuation_amount = flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty) * flt(d.conversion_factor),
-								self.precision("base_net_amount", d))
+					sle_valuation_amount = flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty) * flt(d.conversion_factor),
+							self.precision("base_net_amount", d))
 
-						distributed_amount = flt(flt(d.base_net_amount, self.precision("base_net_amount", d))) + \
-							flt(d.landed_cost_voucher_amount) + flt(d.rm_supp_cost)
+					distributed_amount = flt(flt(d.base_net_amount, self.precision("base_net_amount", d))) + \
+						flt(d.landed_cost_voucher_amount) + flt(d.rm_supp_cost) + flt(d.item_tax_amount)
 
-						divisional_loss = flt(distributed_amount - sle_valuation_amount, self.precision("base_net_amount", d))
-						if divisional_loss:
-							gl_entries.append(self.get_gl_dict({
-								"account": stock_rbnb,
-								"against": warehouse_account[d.warehouse],
-								"cost_center": d.cost_center,
-								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-								"debit": divisional_loss
-							}))
+					divisional_loss = flt(distributed_amount - sle_valuation_amount, self.precision("base_net_amount", d))
+					if divisional_loss:
+						gl_entries.append(self.get_gl_dict({
+							"account": stock_rbnb,
+							"against": warehouse_account[d.warehouse],
+							"cost_center": d.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"debit": divisional_loss
+						}))
 
 				elif d.warehouse not in warehouse_with_no_account or \
 					d.rejected_warehouse not in warehouse_with_no_account:
