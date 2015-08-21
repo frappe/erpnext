@@ -153,5 +153,65 @@
     "territory": "_Test Territory Rest Of The World"
    }
   ]
+ },
+ {
+  "company": "_Test Company",
+  "doctype": "Sales Taxes and Charges Template",
+  "taxes": [
+   {
+    "account_head": "_Test Account VAT - _TC",
+    "charge_type": "On Net Total",
+    "description": "VAT",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": 12
+   },
+   {
+    "account_head": "_Test Account Service Tax - _TC",
+    "charge_type": "On Net Total",
+    "description": "Service Tax",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": 4
+   }
+  ],
+  "title": "_Test Sales Taxes and Charges Template 1",
+  "territories": [
+   {
+    "doctype": "Applicable Territory",
+    "parentfield": "territories",
+    "territory": "_Test Territory Rest Of The World"
+   }
+  ]
+ },
+ {
+  "company": "_Test Company",
+  "doctype": "Sales Taxes and Charges Template",
+  "taxes": [
+   {
+    "account_head": "_Test Account VAT - _TC",
+    "charge_type": "On Net Total",
+    "description": "VAT",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": 12
+   },
+   {
+    "account_head": "_Test Account Service Tax - _TC",
+    "charge_type": "On Net Total",
+    "description": "Service Tax",
+    "doctype": "Sales Taxes and Charges",
+    "parentfield": "taxes",
+    "rate": 4
+   }
+  ],
+  "title": "_Test Sales Taxes and Charges Template 2",
+  "territories": [
+   {
+    "doctype": "Applicable Territory",
+    "parentfield": "territories",
+    "territory": "_Test Territory Rest Of The World"
+   }
+  ]
  }
 ]
