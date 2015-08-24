@@ -6,9 +6,8 @@ import unittest
 import frappe
 
 from frappe.test_runner import make_test_records
-from erpnext.stock.doctype.item.item import (WarehouseNotSet, ItemTemplateCannotHaveStock, create_variant,
+from erpnext.stock.doctype.item.item import (WarehouseNotSet, create_variant,
 	ItemVariantExistsError, InvalidItemAttributeValueError)
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
@@ -129,8 +128,16 @@ class TestItem(unittest.TestCase):
 		# make template item
 		make_item("_Test Numeric Template Item", {
 			"attributes": [
-				{"attribute": "Test Size"},
-				{"attribute": "Test Item Length"}
+				{
+					"attribute": "Test Size"
+				},
+				{
+					"attribute": "Test Item Length", 
+					"numeric_values": 1,
+					"from_range": 0.0,
+					"to_range": 100.0,
+					"increment": 0.5
+				}
 			],
 			"default_warehouse": "_Test Warehouse - _TC"
 		})
