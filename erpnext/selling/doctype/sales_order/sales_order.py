@@ -214,15 +214,15 @@ class SalesOrder(SellingController):
 
 	def stop_sales_order(self):
 		self.check_modified_date()
-		self.update_reserved_qty()
 		frappe.db.set(self, 'status', 'Stopped')
+		self.update_reserved_qty()
 		frappe.msgprint(_("{0} {1} status is Stopped").format(self.doctype, self.name))
 		self.notify_modified()
 
 	def unstop_sales_order(self):
 		self.check_modified_date()
-		self.update_reserved_qty()
 		frappe.db.set(self, 'status', 'Submitted')
+		self.update_reserved_qty()
 		frappe.msgprint(_("{0} {1} status is Unstopped").format(self.doctype, self.name))
 				
 	def update_reserved_qty(self, so_item_rows=None):
