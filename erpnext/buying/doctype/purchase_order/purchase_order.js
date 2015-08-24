@@ -32,7 +32,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				cur_frm.add_custom_button(__('Receive'), this.make_purchase_receipt).addClass("btn-primary");
 
 				if(doc.is_subcontracted==="Yes") {
-					cur_frm.add_custom_button(__('Transfer Material to Supplier'), this.make_stock_entry);
+					cur_frm.add_custom_button(__('Transfer Material to Supplier'),
+						function() { me.make_stock_entry(); });
 				}
 			}
 
