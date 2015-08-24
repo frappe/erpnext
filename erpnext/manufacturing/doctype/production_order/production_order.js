@@ -12,12 +12,12 @@ frappe.ui.form.on("Production Order", "onload", function(frm) {
 			"actual_start_date": "",
 			"actual_end_date": ""
 		});
+		erpnext.production_order.set_default_warehouse(frm);
 	}
 
 	erpnext.production_order.set_custom_buttons(frm);
 	erpnext.production_order.setup_company_filter(frm);
 	erpnext.production_order.setup_bom_filter(frm);
-	erpnext.production_order.set_default_warehouse(frm);
 });
 
 frappe.ui.form.on("Production Order", "refresh", function(frm) {
@@ -147,8 +147,8 @@ erpnext.production_order = {
 
 			callback: function(r) {
 				if(!r.exe) {
-					frm.set_value("wip_warehouse", r.message[0]);
-					frm.set_value("fg_warehouse", r.message[1])
+					frm.set_value("wip_warehouse", r.message.wip_warehouse);
+					frm.set_value("fg_warehouse", r.message.fg_warehouse)
 				}
 			}
 		});

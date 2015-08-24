@@ -208,9 +208,11 @@ class ProductionPlanningTool(Document):
 			pro.update(items[key])
 			pro.set_production_order_operations()
 			if warehouse:
-				pro.wip_warehouse = warehouse[0]
-				pro.fg_warehouse = warehouse[1]
+				pro.wip_warehouse = warehouse.get('wip_warehouse')
+				if not pro.fg_warehouse:
+					pro.fg_warehouse = warehouse.get('fg_warehouse')
 			frappe.flags.mute_messages = True
+
 			try:
 				pro.insert()
 				pro_list.append(pro.name)
@@ -218,7 +220,6 @@ class ProductionPlanningTool(Document):
 				pass
 
 			frappe.flags.mute_messages = False
-
 		return pro_list
 
 	def download_raw_materials(self):

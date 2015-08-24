@@ -427,4 +427,4 @@ def make_time_log(name, operation, from_time=None, to_time=None, qty=None,  proj
 def get_default_warehouse():
 	wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 	fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
-	return wip_warehouse, fg_warehouse
+	return {"wip_warehouse": wip_warehouse, "fg_warehouse": fg_warehouse}
