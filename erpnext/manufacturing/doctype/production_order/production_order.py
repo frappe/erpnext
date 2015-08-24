@@ -42,6 +42,8 @@ class ProductionOrder(Document):
 		self.validate_warehouse()
 		self.calculate_operating_cost()
 		self.validate_delivery_date()
+		self.validate_qty()
+		self.validate_operation_time()
 
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self, "stock_uom", ["qty", "produced_qty"])
@@ -327,6 +329,15 @@ class ProductionOrder(Document):
 			frappe.throw(_("Production Order cannot be raised against a Item Template"), ItemHasVariantError)
 
 		validate_end_of_life(self.production_item)
+		
+	def validate_qty(self):
+		if not self.qty > 0:
+			frappe.throw(_("Quantity to Manufacture must be greater than 0."))
+			
+	def validate_operation_time(self):
+		for d in self.operations:
+			if not d.time_in_mins > 0:
+				frappe.throw(_("Operation Time must be greater than 0 for Operation {0}".format(d.operation))) 
 
 @frappe.whitelist()
 def get_item_details(item):
