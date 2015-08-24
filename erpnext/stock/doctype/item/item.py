@@ -516,9 +516,6 @@ def validate_item_variant_attributes(item, args):
 	numeric_attributes = frappe._dict((t.name, t) for t in frappe.get_list("Item Attribute", filters={"numeric_values":1,
 		"name": ["in", args.keys()]}, fields=["name", "from_range", "to_range", "increment"]))
 
-	template_item = frappe.get_doc("Item", item)
-	template_item_attributes = frappe._dict((d.attribute, d) for d in template_item.attributes)
-
 	for attribute, value in args.items():
 
 		if attribute in numeric_attributes:
@@ -531,10 +528,17 @@ def validate_item_variant_attributes(item, args):
 			if increment == 0:
 				# defensive validation to prevent ZeroDivisionError
 				frappe.throw(_("Increment for Attribute {0} cannot be 0").format(attribute))
+			
+			is_in_range = from_range <= flt(value) <= to_range
+			precision = len(cstr(increment).split(".")[-1].rstrip("0"))
+			#avoid precision error by rounding the remainder
+			remainder = flt((flt(value) - from_range) % increment, precision)
 
+			is_incremental = remainder==0 or remainder==0 or remainder==increment
 
-			if not ( (from_range <= flt(value) <= to_range) and (flt(value) - from_range) % increment == 0 ):
-				frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3}").format(attribute, from_range, to_range, increment), InvalidItemAttributeValueError)
+			if not (is_in_range and is_incremental):
+				frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3}")\
+					.format(attribute, from_range, to_range, increment), InvalidItemAttributeValueError)
 
 		elif value not in attribute_values[attribute]:
 			frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values").format(
