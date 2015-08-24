@@ -8,7 +8,7 @@ import frappe.utils
 from frappe.utils import cstr, flt, getdate, comma_and
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from erpnext.utilities.repost_stock import update_bin_qty, get_reserved_qty
+from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 
 from erpnext.controllers.selling_controller import SellingController
 
