@@ -10,12 +10,6 @@ def execute():
 	frappe.reload_doctype("Stock Entry Detail")
 	frappe.reload_doctype("Landed Cost Taxes and Charges")
 
-	frappe.db.sql("""update `tabStock Entry Detail` sed, `tabStock Entry` se
-		set sed.valuation_rate=sed.incoming_rate, sed.basic_rate=sed.incoming_rate, sed.basic_amount=sed.amount
-		where sed.parent = se.name
-		and (se.purpose not in ('Manufacture', 'Repack') or ifnull(additional_operating_cost, 0)=0)
-	""")
-
 	stock_entry_db_columns = frappe.db.get_table_columns("Stock Entry")
 	if "additional_operating_cost" in stock_entry_db_columns:
 		operating_cost_fieldname = "additional_operating_cost"
@@ -23,6 +17,13 @@ def execute():
 		operating_cost_fieldname = "total_fixed_cost"
 	else:
 		return
+		
+
+	frappe.db.sql("""update `tabStock Entry Detail` sed, `tabStock Entry` se
+		set sed.valuation_rate=sed.incoming_rate, sed.basic_rate=sed.incoming_rate, sed.basic_amount=sed.amount
+		where sed.parent = se.name
+		and (se.purpose not in ('Manufacture', 'Repack') or ifnull({0}, 0)=0)
+	""".format(operating_cost_fieldname))
 		
 
 	stock_entries = frappe.db.sql_list("""select name from `tabStock Entry`
