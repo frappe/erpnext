@@ -117,7 +117,7 @@ class PurchaseReceipt(BuyingController):
 			self.validate_rate_with_reference_doc([["Purchase Order", "prevdoc_docname", "prevdoc_detail_docname"]])
 
 	def po_required(self):
-		if not self.is_return and frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
+		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
 			 for d in self.get('items'):
 				 if not d.prevdoc_docname:
 					 frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
@@ -221,9 +221,10 @@ class PurchaseReceipt(BuyingController):
 		# Set status as Submitted
 		frappe.db.set(self, 'status', 'Submitted')
 
+		self.update_prevdoc_status()
+		self.update_ordered_qty()
+		
 		if not self.is_return:
-			self.update_prevdoc_status()
-			self.update_ordered_qty()
 			purchase_controller.update_last_purchase_rate(self, 1)
 
 		self.update_stock_ledger()
@@ -257,12 +258,11 @@ class PurchaseReceipt(BuyingController):
 
 		self.update_stock_ledger()
 
+		self.update_prevdoc_status()
+		# Must be called after updating received qty in PO
+		self.update_ordered_qty()
+		
 		if not self.is_return:
-			self.update_prevdoc_status()
-
-			# Must be called after updating received qty in PO
-			self.update_ordered_qty()
-
 			pc_obj.update_last_purchase_rate(self, 0)
 
 		self.make_gl_entries_on_cancel()
