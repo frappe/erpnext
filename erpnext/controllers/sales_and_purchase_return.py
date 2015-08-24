@@ -83,9 +83,10 @@ def validate_returned_items(doc):
 				elif abs(d.qty) > max_return_qty:
 					frappe.throw(_("Row # {0}: Cannot return more than {1} for Item {2}")
 						.format(d.idx, ref.qty, d.item_code), StockOverReturnError)
-				elif ref.rate and flt(d.rate) != ref.rate:
-					frappe.throw(_("Row # {0}: Rate must be same as {1} {2}")
-						.format(d.idx, doc.doctype, doc.return_against))
+				elif ref.rate and (doc.doctype in ("Delivery Note", "Purchase Receipt") \
+					or (doc.doctype=="Sales Invoice" and doc.update_stock==1)) and flt(d.rate) > ref.rate:
+						frappe.throw(_("Row # {0}: Rate cannot be greater than {1} {2}")
+							.format(d.idx, doc.doctype, doc.return_against))
 				elif ref.batch_no and d.batch_no != ref.batch_no:
 					frappe.throw(_("Row # {0}: Batch No must be same as {1} {2}")
 						.format(d.idx, doc.doctype, doc.return_against))
