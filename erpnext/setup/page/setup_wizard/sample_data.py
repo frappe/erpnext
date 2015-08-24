@@ -12,7 +12,7 @@ def make_sample_data():
 	to help the user get started"""
 
 	selling_items = frappe.get_all("Item", filters = {"is_sales_item": 1})
-	buying_items = frappe.get_all("Item", filters = {"is_sales_item": 0})
+	buying_items = frappe.get_all("Item", filters = {"is_purchase_item": 1})
 
 	if selling_items:
 		for i in range(3):
