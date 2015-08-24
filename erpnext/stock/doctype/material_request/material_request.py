@@ -10,7 +10,7 @@ import frappe
 from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from erpnext.utilities.repost_stock import update_bin_qty, get_indented_qty
+from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 
 from erpnext.controllers.buying_controller import BuyingController
 
