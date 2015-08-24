@@ -137,9 +137,24 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		target_doc.qty = -1* source_doc.qty
 		if doctype == "Purchase Receipt":
 			target_doc.received_qty = -1* source_doc.qty
+			target_doc.prevdoc_doctype = source_doc.prevdoc_doctype
+			target_doc.prevdoc_docname = source_doc.prevdoc_docname
+			target_doc.prevdoc_detail_docname = source_doc.prevdoc_detail_docname
 		elif doctype == "Purchase Invoice":
+			target_doc.purchase_order = source_doc.purchase_order
 			target_doc.purchase_receipt = source_doc.purchase_receipt
+			target_doc.po_detail = source_doc.po_detail
 			target_doc.pr_detail = source_doc.pr_detail
+		elif doctype == "Delivery Note":
+			target_doc.against_sales_order = source_doc.against_sales_order
+			target_doc.against_sales_invoice = source_doc.against_sales_invoice
+			target_doc.so_detail = source_doc.so_detail
+			target_doc.si_detail = source_doc.si_detail
+		elif doctype == "Sales Invoice":
+			target_doc.sales_order = source_doc.sales_order
+			target_doc.delivery_note = source_doc.delivery_note
+			target_doc.so_detail = source_doc.so_detail
+			target_doc.dn_detail = source_doc.dn_detail
 
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {
@@ -152,8 +167,6 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		doctype +" Item": {
 			"doctype": doctype + " Item",
 			"field_map": {
-				"purchase_order": "purchase_order",
-				"purchase_receipt": "purchase_receipt",
 				"serial_no": "serial_no",
 				"batch_no": "batch_no"
 			},

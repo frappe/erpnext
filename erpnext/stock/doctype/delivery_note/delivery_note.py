@@ -83,7 +83,7 @@ class DeliveryNote(SellingController):
 
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
-		if not self.is_return and frappe.db.get_value("Selling Settings", None, 'so_required') == 'Yes':
+		if frappe.db.get_value("Selling Settings", None, 'so_required') == 'Yes':
 			 for d in self.get('items'):
 				 if not d.against_sales_order:
 					 frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
@@ -174,10 +174,10 @@ class DeliveryNote(SellingController):
 		# Check for Approving Authority
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.base_grand_total, self)
 
+		# update delivered qty in sales order
+		self.update_prevdoc_status()
+		
 		if not self.is_return:
-			# update delivered qty in sales order
-			self.update_prevdoc_status()
-
 			self.check_credit_limit()
 
 		self.update_stock_ledger()
@@ -190,8 +190,7 @@ class DeliveryNote(SellingController):
 		self.check_stop_sales_order("against_sales_order")
 		self.check_next_docstatus()
 
-		if not self.is_return:
-			self.update_prevdoc_status()
+		self.update_prevdoc_status()
 
 		self.update_stock_ledger()
 
@@ -241,25 +240,6 @@ class DeliveryNote(SellingController):
 				ps = frappe.get_doc('Packing Slip', r[0])
 				ps.cancel()
 			frappe.msgprint(_("Packing Slip(s) cancelled"))
-
-
-	def update_stock_ledger(self):
-		sl_entries = []
-		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 \
-					and d.warehouse and flt(d['qty']):
-				self.update_reserved_qty(d)
-				
-				incoming_rate = 0
-				if cint(self.is_return) and self.return_against and self.docstatus==1:
-					incoming_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
-					
-				sl_entries.append(self.get_sl_entries(d, {
-					"actual_qty": -1*flt(d['qty']),
-					"incoming_rate": incoming_rate
-				}))
-
-		self.make_sl_entries(sl_entries)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

@@ -8,6 +8,7 @@ import frappe.utils
 from frappe.utils import cstr, flt, getdate, comma_and
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
+from erpnext.utilities.repost_stock import update_bin_qty, get_reserved_qty
 
 from erpnext.controllers.selling_controller import SellingController
 
@@ -151,7 +152,7 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).on_submit()
 
 		self.check_credit_limit()
-		self.update_stock_ledger(update_stock = 1)
+		self.update_reserved_qty()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.base_grand_total, self)
 
@@ -164,7 +165,7 @@ class SalesOrder(SellingController):
 			frappe.throw(_("Stopped order cannot be cancelled. Unstop to cancel."))
 
 		self.check_nextdoc_docstatus()
-		self.update_stock_ledger(update_stock = -1)
+		self.update_reserved_qty()
 
 		self.update_prevdoc_status('cancel')
 
@@ -213,32 +214,38 @@ class SalesOrder(SellingController):
 
 	def stop_sales_order(self):
 		self.check_modified_date()
-		self.update_stock_ledger(-1)
+		self.update_reserved_qty()
 		frappe.db.set(self, 'status', 'Stopped')
 		frappe.msgprint(_("{0} {1} status is Stopped").format(self.doctype, self.name))
 		self.notify_modified()
 
 	def unstop_sales_order(self):
 		self.check_modified_date()
-		self.update_stock_ledger(1)
+		self.update_reserved_qty()
 		frappe.db.set(self, 'status', 'Submitted')
 		frappe.msgprint(_("{0} {1} status is Unstopped").format(self.doctype, self.name))
+				
+	def update_reserved_qty(self, so_item_rows=None):
+		"""update requested qty (before ordered_qty is updated)"""
+		item_wh_list = []
+		def _valid_for_reserve(item_code, warehouse):
+			if item_code and warehouse and [item_code, warehouse] not in item_wh_list \
+				and frappe.db.get_value("Item", item_code, "is_stock_item"):
+					item_wh_list.append([item_code, warehouse])
+		
+		for d in self.get("items"):
+			if (not so_item_rows or d.name in so_item_rows):
+				_valid_for_reserve(d.item_code, d.warehouse)
+						
+				if self.has_product_bundle(d.item_code):
+					for p in self.get("packed_items"):
+						if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
+							_valid_for_reserve(p.item_code, p.warehouse)
 
-
-	def update_stock_ledger(self, update_stock):
-		from erpnext.stock.utils import update_bin
-		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d['item_code'], "is_stock_item")==1:
-				args = {
-					"item_code": d['item_code'],
-					"warehouse": d['reserved_warehouse'],
-					"reserved_qty": flt(update_stock) * flt(d['reserved_qty']),
-					"posting_date": self.transaction_date,
-					"voucher_type": self.doctype,
-					"voucher_no": self.name,
-					"is_amended": self.amended_from and 'Yes' or 'No'
-				}
-				update_bin(args)
+		for item_code, warehouse in item_wh_list:
+			update_bin_qty(item_code, warehouse, {
+				"reserved_qty": get_reserved_qty(item_code, warehouse)
+			})
 
 	def on_update(self):
 		pass

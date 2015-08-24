@@ -9,6 +9,7 @@ from frappe import msgprint, _, throw
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.item.item import get_last_purchase_details
+from erpnext.utilities.repost_stock import update_bin_qty, get_ordered_qty
 
 
 form_grid_templates = {
@@ -136,20 +137,6 @@ class PurchaseOrder(BuyingController):
 
 	def update_ordered_qty(self, po_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
-		from erpnext.stock.utils import get_bin
-
-		def _update_ordered_qty(item_code, warehouse):
-			ordered_qty = frappe.db.sql("""
-				select sum((po_item.qty - ifnull(po_item.received_qty, 0))*po_item.conversion_factor)
-				from `tabPurchase Order Item` po_item, `tabPurchase Order` po
-				where po_item.item_code=%s and po_item.warehouse=%s
-				and po_item.qty > ifnull(po_item.received_qty, 0) and po_item.parent=po.name
-				and po.status!='Stopped' and po.docstatus=1""", (item_code, warehouse))
-
-			bin_doc = get_bin(item_code, warehouse)
-			bin_doc.ordered_qty = flt(ordered_qty[0][0]) if ordered_qty else 0
-			bin_doc.save()
-
 		item_wh_list = []
 		for d in self.get("items"):
 			if (not po_item_rows or d.name in po_item_rows) and [d.item_code, d.warehouse] not in item_wh_list \
@@ -157,7 +144,9 @@ class PurchaseOrder(BuyingController):
 				item_wh_list.append([d.item_code, d.warehouse])
 
 		for item_code, warehouse in item_wh_list:
-			_update_ordered_qty(item_code, warehouse)
+			update_bin_qty(item_code, warehouse, {
+				"ordered_qty": get_ordered_qty(item_code, warehouse)
+			})
 
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("select modified from `tabPurchase Order` where name = %s",
