@@ -513,9 +513,10 @@ def validate_item_variant_attributes(item, args):
 		filters={"parent": ["in", args.keys()]}):
 		(attribute_values.setdefault(t.parent, [])).append(t.attribute_value)
 
-	numeric_attributes = frappe._dict((t.name, t) for t in frappe.get_list("Item Attribute", filters={"numeric_values":1,
-		"name": ["in", args.keys()]}, fields=["name", "from_range", "to_range", "increment"]))
-
+	numeric_attributes = frappe._dict((t.attribute, t) for t in \
+		frappe.db.sql("""select attribute, from_range, to_range, increment from `tabItem Variant Attribute` 
+		where parent = %s and numeric_values=1""", (item), as_dict=1))
+		
 	for attribute, value in args.items():
 
 		if attribute in numeric_attributes:
