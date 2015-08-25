@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, cstr
+from frappe.utils import flt, cstr, cint
 from frappe import _
 
 from erpnext.stock.doctype.item.item import get_last_purchase_details
@@ -72,7 +72,8 @@ class PurchaseCommon(BuyingController):
 					frappe.throw(_("{0} must be a Purchased or Sub-Contracted Item in row {1}").format(d.item_code, d.idx))
 
 			items.append(cstr(d.item_code))
-		if items and len(items) != len(set(items)):
+		if items and len(items) != len(set(items)) and \
+			not cint(frappe.db.get_single_value("Buying Settings", "allow_multiple_items") or 0):
 			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
 
 
