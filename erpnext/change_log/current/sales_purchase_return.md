@@ -1,0 +1,3 @@
+- Fixes in Sales and Purchase Return
+	- Update Delivered, Ordered and Returned Quantity based on Return transaction
+	- Allow different Rate in Return transaction

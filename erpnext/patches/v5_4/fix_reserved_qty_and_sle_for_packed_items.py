@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from erpnext.utilities.repost_stock import repost_actual_qty
+from erpnext.stock.stock_balance import repost_actual_qty
 
 def execute():
 	cancelled_invoices = frappe.db.sql_list("""select name from `tabSales Invoice` 

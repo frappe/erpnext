@@ -163,42 +163,17 @@ class SellingController(StockController):
 	def get_item_list(self):
 		il = []
 		for d in self.get("items"):
-			reserved_warehouse = ""
-			reserved_qty_for_main_item = 0
-
 			if d.qty is None:
 				frappe.throw(_("Row {0}: Qty is mandatory").format(d.idx))
-
-			if self.doctype == "Sales Order":
-				reserved_warehouse = d.warehouse
-				if flt(d.qty) > flt(d.delivered_qty):
-					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
-
-			elif (((self.doctype == "Delivery Note" and d.against_sales_order) 
-					or (self.doctype == "Sales Invoice" and d.sales_order and self.update_stock)) 
-					and not self.is_return):
-				# if SO qty is 10 and there is tolerance of 20%, then it will allow DN of 12.
-				# But in this case reserved qty should only be reduced by 10 and not 12
-
-				already_delivered_qty = self.get_already_delivered_qty(self.name,
-					d.against_sales_order if self.doctype=="Delivery Note" else d.sales_order, d.so_detail)
-				so_qty, reserved_warehouse = self.get_so_qty_and_warehouse(d.so_detail)
-
-				if already_delivered_qty + d.qty > so_qty:
-					reserved_qty_for_main_item = -(so_qty - already_delivered_qty)
-				else:
-					reserved_qty_for_main_item = -flt(d.qty)
-					
+														
 			if self.has_product_bundle(d.item_code):
 				for p in self.get("packed_items"):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 						# the packing details table's qty is already multiplied with parent's qty
 						il.append(frappe._dict({
 							'warehouse': p.warehouse,
-							'reserved_warehouse': reserved_warehouse,
 							'item_code': p.item_code,
 							'qty': flt(p.qty),
-							'reserved_qty': (flt(p.qty)/flt(d.qty)) * reserved_qty_for_main_item,
 							'uom': p.uom,
 							'batch_no': cstr(p.batch_no).strip(),
 							'serial_no': cstr(p.serial_no).strip(),
@@ -207,10 +182,8 @@ class SellingController(StockController):
 			else:
 				il.append(frappe._dict({
 					'warehouse': d.warehouse,
-					'reserved_warehouse': reserved_warehouse,
 					'item_code': d.item_code,
 					'qty': d.qty,
-					'reserved_qty': reserved_qty_for_main_item,
 					'uom': d.stock_uom,
 					'stock_uom': d.stock_uom,
 					'batch_no': cstr(d.get("batch_no")).strip(),
