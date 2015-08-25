@@ -83,9 +83,10 @@ def validate_returned_items(doc):
 				elif abs(d.qty) > max_return_qty:
 					frappe.throw(_("Row # {0}: Cannot return more than {1} for Item {2}")
 						.format(d.idx, ref.qty, d.item_code), StockOverReturnError)
-				elif ref.rate and flt(d.rate) != ref.rate:
-					frappe.throw(_("Row # {0}: Rate must be same as {1} {2}")
-						.format(d.idx, doc.doctype, doc.return_against))
+				elif ref.rate and (doc.doctype in ("Delivery Note", "Purchase Receipt") \
+					or (doc.doctype=="Sales Invoice" and doc.update_stock==1)) and flt(d.rate) > ref.rate:
+						frappe.throw(_("Row # {0}: Rate cannot be greater than {1} {2}")
+							.format(d.idx, doc.doctype, doc.return_against))
 				elif ref.batch_no and d.batch_no != ref.batch_no:
 					frappe.throw(_("Row # {0}: Batch No must be same as {1} {2}")
 						.format(d.idx, doc.doctype, doc.return_against))
@@ -137,9 +138,24 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		target_doc.qty = -1* source_doc.qty
 		if doctype == "Purchase Receipt":
 			target_doc.received_qty = -1* source_doc.qty
+			target_doc.prevdoc_doctype = source_doc.prevdoc_doctype
+			target_doc.prevdoc_docname = source_doc.prevdoc_docname
+			target_doc.prevdoc_detail_docname = source_doc.prevdoc_detail_docname
 		elif doctype == "Purchase Invoice":
+			target_doc.purchase_order = source_doc.purchase_order
 			target_doc.purchase_receipt = source_doc.purchase_receipt
+			target_doc.po_detail = source_doc.po_detail
 			target_doc.pr_detail = source_doc.pr_detail
+		elif doctype == "Delivery Note":
+			target_doc.against_sales_order = source_doc.against_sales_order
+			target_doc.against_sales_invoice = source_doc.against_sales_invoice
+			target_doc.so_detail = source_doc.so_detail
+			target_doc.si_detail = source_doc.si_detail
+		elif doctype == "Sales Invoice":
+			target_doc.sales_order = source_doc.sales_order
+			target_doc.delivery_note = source_doc.delivery_note
+			target_doc.so_detail = source_doc.so_detail
+			target_doc.dn_detail = source_doc.dn_detail
 
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {
@@ -152,8 +168,6 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		doctype +" Item": {
 			"doctype": doctype + " Item",
 			"field_map": {
-				"purchase_order": "purchase_order",
-				"purchase_receipt": "purchase_receipt",
 				"serial_no": "serial_no",
 				"batch_no": "batch_no"
 			},

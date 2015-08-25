@@ -10,8 +10,10 @@ import frappe
 from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
+from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 
 from erpnext.controllers.buying_controller import BuyingController
+
 
 form_grid_templates = {
 	"items": "templates/form_grid/material_request_grid.html"
@@ -136,19 +138,6 @@ class MaterialRequest(BuyingController):
 
 	def update_requested_qty(self, mr_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
-		from erpnext.stock.utils import get_bin
-
-		def _update_requested_qty(item_code, warehouse):
-			requested_qty = frappe.db.sql("""select sum(mr_item.qty - ifnull(mr_item.ordered_qty, 0))
-				from `tabMaterial Request Item` mr_item, `tabMaterial Request` mr
-				where mr_item.item_code=%s and mr_item.warehouse=%s
-				and mr_item.qty > ifnull(mr_item.ordered_qty, 0) and mr_item.parent=mr.name
-				and mr.status!='Stopped' and mr.docstatus=1""", (item_code, warehouse))
-
-			bin_doc = get_bin(item_code, warehouse)
-			bin_doc.indented_qty = flt(requested_qty[0][0]) if requested_qty else 0
-			bin_doc.save()
-
 		item_wh_list = []
 		for d in self.get("items"):
 			if (not mr_item_rows or d.name in mr_item_rows) and [d.item_code, d.warehouse] not in item_wh_list \
@@ -156,7 +145,9 @@ class MaterialRequest(BuyingController):
 				item_wh_list.append([d.item_code, d.warehouse])
 
 		for item_code, warehouse in item_wh_list:
-			_update_requested_qty(item_code, warehouse)
+			update_bin_qty(item_code, warehouse, {
+				"indented_qty": get_indented_qty(item_code, warehouse)
+			})
 
 def update_completed_and_requested_qty(stock_entry, method):
 	if stock_entry.doctype == "Stock Entry":

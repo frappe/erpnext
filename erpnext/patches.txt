@@ -193,3 +193,4 @@ execute:frappe.db.sql("update `tabProduction Order` pro set description = (selec
 erpnext.patches.v5_7.item_template_attributes
 erpnext.patches.v4_2.repost_reserved_qty #2015-08-20
 erpnext.patches.v5_4.update_purchase_cost_against_project
+erpnext.patches.v5_7.update_order_reference_in_return_entries
