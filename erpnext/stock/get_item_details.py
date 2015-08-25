@@ -257,6 +257,10 @@ def validate_price_list(args):
 def validate_conversion_rate(args, meta):
 	from erpnext.controllers.accounts_controller import validate_conversion_rate
 
+	if (not args.conversion_rate
+		and args.currency==frappe.db.get_value("Company", args.company, "default_currency")):
+		args.conversion_rate = 1.0
+
 	# validate currency conversion rate
 	validate_conversion_rate(args.currency, args.conversion_rate,
 		meta.get_label("conversion_rate"), args.company)

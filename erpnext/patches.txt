@@ -191,6 +191,10 @@ erpnext.patches.v5_4.stock_entry_additional_costs
 erpnext.patches.v5_4.cleanup_journal_entry #2015-08-14
 execute:frappe.db.sql("update `tabProduction Order` pro set description = (select description from tabItem where name=pro.production_item) where ifnull(description, '') = ''")
 erpnext.patches.v5_7.item_template_attributes
+execute:frappe.delete_doc_if_exists("DocType", "Manage Variants")
+execute:frappe.delete_doc_if_exists("DocType", "Manage Variants Item")
 erpnext.patches.v4_2.repost_reserved_qty #2015-08-20
 erpnext.patches.v5_4.update_purchase_cost_against_project
-erpnext.patches.v5_7.update_order_reference_in_return_entries
+erpnext.patches.v5_8.update_order_reference_in_return_entries
+erpnext.patches.v5_8.add_credit_note_print_heading
+execute:frappe.delete_doc_if_exists("Print Format", "Credit Note - Negative Invoice")

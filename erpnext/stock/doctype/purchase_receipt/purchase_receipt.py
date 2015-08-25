@@ -29,6 +29,19 @@ class PurchaseReceipt(BuyingController):
 			'source_field': 'qty',
 			'percent_join_field': 'prevdoc_docname',
 			'overflow_type': 'receipt'
+		},
+		{
+			'source_dt': 'Purchase Receipt Item',
+			'target_dt': 'Purchase Order Item',
+			'join_field': 'prevdoc_detail_docname',
+			'target_field': 'returned_qty',
+			'target_parent_dt': 'Purchase Order',
+			# 'target_parent_field': 'per_received',
+			# 'target_ref_field': 'qty',
+			'source_field': '-1 * qty',
+			# 'percent_join_field': 'prevdoc_docname',
+			# 'overflow_type': 'receipt',
+			'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
 		}]
 
 	def onload(self):
@@ -68,12 +81,12 @@ class PurchaseReceipt(BuyingController):
 				from `tabLanded Cost Item`
 				where docstatus = 1 and purchase_receipt_item = %s""", d.name)
 			d.landed_cost_voucher_amount = lc_voucher_amount[0][0] if lc_voucher_amount else 0.0
-			
+
 	def validate_purchase_return(self):
 		for d in self.get("items"):
 			if self.is_return and flt(d.rejected_qty) != 0:
 				frappe.throw(_("Row #{0}: Rejected Qty can not be entered in Purchase Return").format(d.idx))
-				
+
 			# validate rate with ref PR
 
 	def validate_rejected_warehouse(self):
@@ -113,7 +126,7 @@ class PurchaseReceipt(BuyingController):
 			}
 		})
 
-		if cint(frappe.db.get_single_value('Buying Settings', 'maintain_same_rate')):
+		if cint(frappe.db.get_single_value('Buying Settings', 'maintain_same_rate')) and not self.is_return:
 			self.validate_rate_with_reference_doc([["Purchase Order", "prevdoc_docname", "prevdoc_detail_docname"]])
 
 	def po_required(self):
@@ -223,7 +236,7 @@ class PurchaseReceipt(BuyingController):
 
 		self.update_prevdoc_status()
 		self.update_ordered_qty()
-		
+
 		if not self.is_return:
 			purchase_controller.update_last_purchase_rate(self, 1)
 
@@ -261,7 +274,7 @@ class PurchaseReceipt(BuyingController):
 		self.update_prevdoc_status()
 		# Must be called after updating received qty in PO
 		self.update_ordered_qty()
-		
+
 		if not self.is_return:
 			pc_obj.update_last_purchase_rate(self, 0)
 
@@ -291,7 +304,7 @@ class PurchaseReceipt(BuyingController):
 				if warehouse_account.get(d.warehouse):
 
 					val_rate_db_precision = 6 if cint(d.precision("valuation_rate")) <= 6 else 9
-					
+
 					# warehouse account
 					gl_entries.append(self.get_gl_dict({
 						"account": warehouse_account[d.warehouse],

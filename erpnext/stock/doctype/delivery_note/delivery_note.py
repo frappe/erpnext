@@ -47,6 +47,19 @@ class DeliveryNote(SellingController):
 			'source_field': 'qty',
 			'percent_join_field': 'against_sales_invoice',
 			'overflow_type': 'delivery'
+		},
+		{
+			'source_dt': 'Delivery Note Item',
+			'target_dt': 'Sales Order Item',
+			'join_field': 'so_detail',
+			'target_field': 'returned_qty',
+			'target_parent_dt': 'Sales Order',
+			# 'target_parent_field': 'per_delivered',
+			# 'target_ref_field': 'qty',
+			'source_field': '-1 * qty',
+			# 'percent_join_field': 'against_sales_order',
+			# 'overflow_type': 'delivery',
+			'extra_cond': """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)"""
 		}]
 
 	def onload(self):
@@ -118,7 +131,7 @@ class DeliveryNote(SellingController):
 					},
 				})
 
-		if cint(frappe.db.get_single_value('Selling Settings', 'maintain_same_sales_rate')):
+		if cint(frappe.db.get_single_value('Selling Settings', 'maintain_same_sales_rate')) and not self.is_return:
 			self.validate_rate_with_reference_doc([["Sales Order", "sales_order", "so_detail"],
 				["Sales Invoice", "sales_invoice", "si_detail"]])
 
@@ -176,7 +189,7 @@ class DeliveryNote(SellingController):
 
 		# update delivered qty in sales order
 		self.update_prevdoc_status()
-		
+
 		if not self.is_return:
 			self.check_credit_limit()
 
@@ -354,7 +367,7 @@ def make_packing_slip(source_name, target_doc=None):
 
 	return doclist
 
-	
+
 @frappe.whitelist()
 def make_sales_return(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc

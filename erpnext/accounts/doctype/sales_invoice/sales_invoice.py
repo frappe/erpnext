@@ -82,11 +82,12 @@ class SalesInvoice(SellingController):
 		self.check_prev_docstatus()
 
 		if self.is_return:
+			# NOTE status updating bypassed for is_return
 			self.status_updater = []
-					
+
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
-			
+
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.check_credit_limit()
@@ -112,11 +113,12 @@ class SalesInvoice(SellingController):
 		remove_against_link_from_jv(self.doctype, self.name)
 
 		if self.is_return:
+			# NOTE status updating bypassed for is_return
 			self.status_updater = []
-			
+
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
-		
+
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 
@@ -126,7 +128,7 @@ class SalesInvoice(SellingController):
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
-			self.status_updater.append({
+			self.status_updater.extend([{
 				'source_dt':'Sales Invoice Item',
 				'target_dt':'Sales Order Item',
 				'target_parent_dt':'Sales Order',
@@ -144,7 +146,21 @@ class SalesInvoice(SellingController):
 				'overflow_type': 'delivery',
 				'extra_cond': """ and exists(select name from `tabSales Invoice`
 					where name=`tabSales Invoice Item`.parent and ifnull(update_stock, 0) = 1)"""
-			})
+			},
+			{
+				'source_dt': 'Sales Invoice Item',
+				'target_dt': 'Sales Order Item',
+				'join_field': 'so_detail',
+				'target_field': 'returned_qty',
+				'target_parent_dt': 'Sales Order',
+				# 'target_parent_field': 'per_delivered',
+				# 'target_ref_field': 'qty',
+				'source_field': '-1 * qty',
+				# 'percent_join_field': 'sales_order',
+				# 'overflow_type': 'delivery',
+				'extra_cond': """ and exists (select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent and update_stock=1 and is_return=1)"""
+			}
+		])
 
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)
@@ -281,7 +297,7 @@ class SalesInvoice(SellingController):
 			},
 		})
 
-		if cint(frappe.db.get_single_value('Selling Settings', 'maintain_same_sales_rate')):
+		if cint(frappe.db.get_single_value('Selling Settings', 'maintain_same_sales_rate')) and not self.is_return:
 			self.validate_rate_with_reference_doc([
 				["Sales Order", "sales_order", "so_detail"],
 				["Delivery Note", "delivery_note", "dn_detail"]

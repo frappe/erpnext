@@ -3,7 +3,7 @@ frappe.listview_settings['Delivery Note'] = {
 		"transporter_name", "grand_total", "is_return"],
 	get_indicator: function(doc) {
 		if(cint(doc.is_return)==1) {
-			return [__("Return"), "darkgrey", "is_return,=,1"];
+			return [__("Return"), "darkgrey", "is_return,=,Yes"];
 		}
 	}
 };
