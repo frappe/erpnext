@@ -5,6 +5,9 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	frappe.reload_doctype("Sales Order Item")
+	frappe.reload_doctype("Purchase Order Item")
+
 	# sales return
 	return_entries = list(frappe.db.sql("""
 		select dn.name as name, dn_item.name as row_id, dn.return_against,
