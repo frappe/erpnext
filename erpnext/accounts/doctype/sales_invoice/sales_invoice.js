@@ -405,10 +405,22 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 }
 
 cur_frm.set_query("debit_to", function(doc) {
-	return{
-		filters: [
-			['Account', 'root_type', '=', 'Asset'],
-			['Account', 'account_type', '=', 'Receivable']
-		]
+	// filter on Account
+	if (doc.customer) {
+		return {
+			filters: {
+				'account_type': 'Receivable',
+				'is_group': 0,
+				'company': doc.company
+			}
+		}
+	} else {
+		return {
+			filters: {
+				'report_type': 'Balance Sheet',
+				'is_group': 0,
+				'company': doc.company
+			}
+		}
 	}
 });
