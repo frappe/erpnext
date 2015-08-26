@@ -227,7 +227,7 @@ class StockController(AccountsController):
 			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
 
 		return incoming_rate
-			
+
 	def update_reserved_qty(self):
 		so_map = {}
 		for d in self.get("items"):
@@ -242,22 +242,23 @@ class StockController(AccountsController):
 				sales_order = frappe.get_doc("Sales Order", so)
 
 				if sales_order.status in ["Stopped", "Cancelled"]:
-					frappe.throw(_("Sales Order {0} is cancelled or stopped").format(so), frappe.InvalidStatusError)
-				
+					frappe.throw(_("{0} {1} is cancelled or stopped").format(_("Sales Order"), so),
+						frappe.InvalidStatusError)
+
 				sales_order.update_reserved_qty(so_item_rows)
-				
+
 	def update_stock_ledger(self):
 		self.update_reserved_qty()
-		
+
 		sl_entries = []
 		for d in self.get_item_list():
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 \
 					and d.warehouse and flt(d['qty']):
-				
+
 				incoming_rate = 0
 				if cint(self.is_return) and self.return_against and self.docstatus==1:
 					incoming_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
-					
+
 				sl_entries.append(self.get_sl_entries(d, {
 					"actual_qty": -1*flt(d['qty']),
 					"stock_uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
