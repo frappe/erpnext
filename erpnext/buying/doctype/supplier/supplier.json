@@ -12,6 +12,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "basic_info", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -33,6 +35,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -55,6 +59,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "supplier_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -76,6 +82,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break0", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -95,6 +103,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "supplier_type", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -117,6 +127,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "is_frozen", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -137,6 +149,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "address_contacts", 
    "fieldtype": "Section Break", 
@@ -159,6 +173,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "address_html", 
    "fieldtype": "HTML", 
    "hidden": 0, 
@@ -178,6 +194,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -197,6 +215,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "contact_html", 
    "fieldtype": "HTML", 
    "hidden": 0, 
@@ -216,6 +236,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "default_payable_accounts", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -235,6 +257,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:!doc.__islocal", 
    "description": "Mention if non-standard receivable account applicable", 
    "fieldname": "accounts", 
@@ -257,6 +281,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "more_info", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -278,6 +304,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "default_currency", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -298,6 +326,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "default_price_list", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -318,6 +348,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "credit_days", 
    "fieldtype": "Int", 
    "hidden": 0, 
@@ -337,6 +369,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break2", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -356,6 +390,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "website", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -377,6 +413,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "Statutory info and other general information about your Supplier", 
    "fieldname": "supplier_details", 
    "fieldtype": "Text", 
@@ -399,6 +437,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "communications", 
    "fieldtype": "Table", 
    "hidden": 1, 
@@ -427,7 +467,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-08-21 05:25:15.088525", 
+ "modified": "2015-08-28 02:55:33.897744", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier", 

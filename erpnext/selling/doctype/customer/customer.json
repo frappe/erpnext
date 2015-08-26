@@ -12,6 +12,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "basic_info", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -33,6 +35,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -53,6 +57,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "customer_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -74,6 +80,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "customer_type", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -96,6 +104,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "lead_name", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -118,6 +128,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break0", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -137,6 +149,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "", 
    "fieldname": "customer_group", 
    "fieldtype": "Link", 
@@ -160,6 +174,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "", 
    "fieldname": "territory", 
    "fieldtype": "Link", 
@@ -183,6 +199,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "tax_id", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -203,6 +221,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "is_frozen", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -223,6 +243,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "address_contacts", 
    "fieldtype": "Section Break", 
@@ -244,6 +266,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "address_html", 
    "fieldtype": "HTML", 
    "hidden": 0, 
@@ -263,6 +287,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -282,6 +308,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "contact_html", 
    "fieldtype": "HTML", 
    "hidden": 0, 
@@ -302,6 +330,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "default_receivable_accounts", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -321,6 +351,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:!doc.__islocal", 
    "description": "Mention if non-standard receivable account applicable", 
    "fieldname": "accounts", 
@@ -343,6 +375,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "more_info", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -364,6 +398,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break2", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -383,6 +419,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "Additional information regarding the customer.", 
    "fieldname": "customer_details", 
    "fieldtype": "Text", 
@@ -405,6 +443,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break3", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -424,6 +464,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "default_currency", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -444,6 +486,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "default_price_list", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -464,6 +508,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "credit_days_based_on", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -485,6 +531,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:doc.credit_days_based_on=='Fixed Days'", 
    "fieldname": "credit_days", 
    "fieldtype": "Int", 
@@ -507,6 +555,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "credit_limit", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -529,6 +579,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "website", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -548,6 +600,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "sales_team_section_break", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -569,6 +623,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "default_sales_partner", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -591,6 +647,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "default_commission_rate", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -612,6 +670,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "sales_team", 
    "fieldtype": "Table", 
    "hidden": 0, 
@@ -634,6 +694,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "communications", 
    "fieldtype": "Table", 
    "hidden": 1, 
@@ -662,7 +724,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-08-21 05:23:41.494415", 
+ "modified": "2015-08-28 02:56:02.579220", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Customer", 
