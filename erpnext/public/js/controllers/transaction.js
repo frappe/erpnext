@@ -88,6 +88,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.set_dynamic_labels();
 		erpnext.pos.make_pos_btn(this.frm);
 		this.setup_sms();
+		this.make_show_payments_btn();
 	},
 
 	apply_default_taxes: function() {
@@ -121,6 +122,22 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	send_sms: function() {
 		frappe.require("assets/erpnext/js/sms_manager.js");
 		var sms_man = new SMSManager(this.frm.doc);
+	},
+
+	make_show_payments_btn: function() {
+		var me = this;
+		if (in_list(["Purchase Invoice", "Sales Invoice"], this.frm.doctype)) {
+			if(this.frm.doc.outstanding_amount !== this.frm.doc.base_grand_total) {
+				this.frm.add_custom_button(__("Show Payments"), function() {
+					frappe.route_options = {
+						"Journal Entry Account.reference_type": me.frm.doc.doctype,
+						"Journal Entry Account.reference_name": me.frm.doc.name
+					};
+
+					frappe.set_route("List", "Journal Entry");
+				});
+			}
+		}
 	},
 
 	hide_currency_and_price_list: function() {

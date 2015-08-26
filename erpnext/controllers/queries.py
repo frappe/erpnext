@@ -205,10 +205,10 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 
 	return frappe.db.sql("""select `tabProject`.name from `tabProject`
 		where `tabProject`.status not in ("Completed", "Cancelled")
-			and %(cond)s `tabProject`.name like "%(txt)s" %(mcond)s
+			and {cond} `tabProject`.name like %s {match_cond}
 		order by `tabProject`.name asc
-		limit %(start)s, %(page_len)s """ % {'cond': cond,'txt': "%%%s%%" % frappe.db.escape(txt),
-		'mcond':get_match_cond(doctype),'start': start, 'page_len': page_len})
+		limit {start}, {page_len}""".format(cond=cond, match_cond=get_match_cond(doctype),
+			start=start, page_len=page_len), "%{0}%".format(txt))
 
 def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select `tabDelivery Note`.name, `tabDelivery Note`.customer_name
@@ -232,7 +232,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	cond = ""
 	if filters.get("posting_date"):
 		cond = "and (ifnull(batch.expiry_date, '')='' or batch.expiry_date >= %(posting_date)s)"
-	
+
 	batch_nos = None
 	args = {
 		'item_code': filters.get("item_code"),

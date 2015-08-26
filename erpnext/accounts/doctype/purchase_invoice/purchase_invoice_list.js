@@ -7,7 +7,7 @@ frappe.listview_settings['Purchase Invoice'] = {
 		"currency", "is_return"],
 	get_indicator: function(doc) {
 		if(cint(doc.is_return)==1) {
-			return [__("Return"), "darkgrey", "is_return,=,1"];
+			return [__("Return"), "darkgrey", "is_return,=,Yes"];
 		} else if(flt(doc.outstanding_amount) > 0 && doc.docstatus==1) {
 			if(frappe.datetime.get_diff(doc.due_date) < 0) {
 				return [__("Overdue"), "red", "outstanding_amount,>,0|due_date,<,Today"];

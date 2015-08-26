@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from erpnext.utilities.repost_stock import update_bin_qty, get_reserved_qty
+from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 
 def execute():
 	repost_for = frappe.db.sql("""

@@ -269,7 +269,7 @@ class Item(WebsiteGenerator):
 		frappe.db.set_value("Item", newdn, "last_purchase_rate", last_purchase_rate)
 
 	def recalculate_bin_qty(self, newdn):
-		from erpnext.utilities.repost_stock import repost_stock
+		from erpnext.stock.stock_balance import repost_stock
 		frappe.db.auto_commit_on_many_writes = 1
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
@@ -513,12 +513,10 @@ def validate_item_variant_attributes(item, args):
 		filters={"parent": ["in", args.keys()]}):
 		(attribute_values.setdefault(t.parent, [])).append(t.attribute_value)
 
-	numeric_attributes = frappe._dict((t.name, t) for t in frappe.get_list("Item Attribute", filters={"numeric_values":1,
-		"name": ["in", args.keys()]}, fields=["name", "from_range", "to_range", "increment"]))
-
-	template_item = frappe.get_doc("Item", item)
-	template_item_attributes = frappe._dict((d.attribute, d) for d in template_item.attributes)
-
+	numeric_attributes = frappe._dict((t.attribute, t) for t in \
+		frappe.db.sql("""select attribute, from_range, to_range, increment from `tabItem Variant Attribute` 
+		where parent = %s and numeric_values=1""", (item), as_dict=1))
+		
 	for attribute, value in args.items():
 
 		if attribute in numeric_attributes:
@@ -531,10 +529,17 @@ def validate_item_variant_attributes(item, args):
 			if increment == 0:
 				# defensive validation to prevent ZeroDivisionError
 				frappe.throw(_("Increment for Attribute {0} cannot be 0").format(attribute))
+			
+			is_in_range = from_range <= flt(value) <= to_range
+			precision = len(cstr(increment).split(".")[-1].rstrip("0"))
+			#avoid precision error by rounding the remainder
+			remainder = flt((flt(value) - from_range) % increment, precision)
 
+			is_incremental = remainder==0 or remainder==0 or remainder==increment
 
-			if not ( (from_range <= flt(value) <= to_range) and (flt(value) - from_range) % increment == 0 ):
-				frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3}").format(attribute, from_range, to_range, increment), InvalidItemAttributeValueError)
+			if not (is_in_range and is_incremental):
+				frappe.throw(_("Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3}")\
+					.format(attribute, from_range, to_range, increment), InvalidItemAttributeValueError)
 
 		elif value not in attribute_values[attribute]:
 			frappe.throw(_("Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values").format(
@@ -567,7 +572,7 @@ def find_variant(item, args):
 
 			for attribute, value in args.items():
 				for row in variant.attributes:
-					if row.attribute==attribute and row.attribute_value==value:
+					if row.attribute==attribute and row.attribute_value== cstr(value):
 						# this row matches
 						match_count += 1
 						break

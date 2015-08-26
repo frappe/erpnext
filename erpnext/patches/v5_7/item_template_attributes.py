@@ -55,9 +55,6 @@ def migrate_manage_variants():
 		template.set('attributes', attributes)
 		template.save()
 
-	frappe.delete_doc("DocType", "Manage Variants")
-	frappe.delete_doc("DocType", "Manage Variants Item")
-
 # patch old style
 def migrate_item_variants():
 	for item in frappe.get_all("Item", filters={"has_variants": 1}):

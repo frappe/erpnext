@@ -61,7 +61,7 @@ def get_result(filters, account_details):
 	return result
 
 def get_gl_entries(filters):
-	group_by_condition = "group by voucher_type, voucher_no, account" \
+	group_by_condition = "group by voucher_type, voucher_no, account, cost_center" \
 		if filters.get("group_by_voucher") else "group by name"
 
 	gl_entries = frappe.db.sql("""select posting_date, account, party_type, party,

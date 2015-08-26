@@ -6,11 +6,9 @@ import frappe
 from frappe.utils import cint, flt, cstr
 from frappe import msgprint, _
 import frappe.defaults
+from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
 
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
-from erpnext.stock.utils import update_bin
-
 
 class StockController(AccountsController):
 	def make_gl_entries(self, repost_future_gle=True):
@@ -229,23 +227,44 @@ class StockController(AccountsController):
 			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
 
 		return incoming_rate
+			
+	def update_reserved_qty(self):
+		so_map = {}
+		for d in self.get("items"):
+			if d.so_detail:
+				if self.doctype == "Delivery Note" and d.against_sales_order:
+					so_map.setdefault(d.against_sales_order, []).append(d.so_detail)
+				elif self.doctype == "Sales Invoice" and d.sales_order and self.update_stock:
+					so_map.setdefault(d.sales_order, []).append(d.so_detail)
 
-	def update_reserved_qty(self, d):
-		if d['reserved_qty'] < 0 :
-			# Reduce reserved qty from reserved warehouse mentioned in so
-			if not d["reserved_warehouse"]:
-				frappe.throw(_("Delivery Warehouse is missing in Sales Order"))
+		for so, so_item_rows in so_map.items():
+			if so and so_item_rows:
+				sales_order = frappe.get_doc("Sales Order", so)
 
-			args = {
-				"item_code": d['item_code'],
-				"warehouse": d["reserved_warehouse"],
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"reserved_qty": (self.docstatus==1 and 1 or -1)*flt(d['reserved_qty']),
-				"posting_date": self.posting_date,
-				"is_amended": self.amended_from and 'Yes' or 'No'
-			}
-			update_bin(args)
+				if sales_order.status in ["Stopped", "Cancelled"]:
+					frappe.throw(_("Sales Order {0} is cancelled or stopped").format(so), frappe.InvalidStatusError)
+				
+				sales_order.update_reserved_qty(so_item_rows)
+				
+	def update_stock_ledger(self):
+		self.update_reserved_qty()
+		
+		sl_entries = []
+		for d in self.get_item_list():
+			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 \
+					and d.warehouse and flt(d['qty']):
+				
+				incoming_rate = 0
+				if cint(self.is_return) and self.return_against and self.docstatus==1:
+					incoming_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
+					
+				sl_entries.append(self.get_sl_entries(d, {
+					"actual_qty": -1*flt(d['qty']),
+					"stock_uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
+					"incoming_rate": incoming_rate
+				}))
+
+		self.make_sl_entries(sl_entries)
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):
