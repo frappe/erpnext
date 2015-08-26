@@ -85,13 +85,22 @@ class TaxRule(Document):
 				frappe.throw(_("Tax Rule Conflicts with {0}".format(tax_rule[0].name)), ConflictingTaxRule)
 
 @frappe.whitelist()
-def get_party_details(party, party_type):
+def get_party_details(party, party_type, args=None):
 	out = {}
-	billing_address = frappe.get_list("Address", fields=["city", "country"], filters={party_type: party, "is_primary_address": 1})
-	shipping_address = frappe.get_list("Address", fields=["city", "country"], filters={party_type:party, "is_shipping_address": 1})
+	if args:
+		billing_filters=	{"name": args.get("billing_address")}
+		shipping_filters=	{"name": args.get("shipping_address")}
+	else:
+		billing_filters=	{party_type: party, "is_primary_address": 1}
+		shipping_filters=	{party_type:party, "is_shipping_address": 1}
+		
+	billing_address=	frappe.get_all("Address", fields=["city", "country"], filters= billing_filters)
+	shipping_address=	frappe.get_all("Address", fields=["city", "country"], filters= shipping_filters)
+	
 	if billing_address:
 		out["billing_city"]= billing_address[0].city
 		out["billing_country"]= billing_address[0].country
+
 	if shipping_address:
 		out["shipping_city"]= shipping_address[0].city
 		out["shipping_country"]= shipping_address[0].country
