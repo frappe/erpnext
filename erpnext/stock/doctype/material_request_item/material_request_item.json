@@ -10,6 +10,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 1, 
+   "collapsible": 0, 
    "fieldname": "item_code", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -34,6 +36,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -52,6 +56,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "item_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -75,12 +81,15 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 1, 
    "fieldname": "section_break_4", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "in_filter": 0, 
    "in_list_view": 0, 
+   "label": "Description", 
    "no_copy": 0, 
    "permlevel": 0, 
    "precision": "", 
@@ -94,6 +103,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "description", 
    "fieldtype": "Text Editor", 
    "hidden": 0, 
@@ -117,6 +128,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_6", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -136,6 +149,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "image", 
    "fieldtype": "Attach", 
    "hidden": 1, 
@@ -156,6 +171,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "image_view", 
    "fieldtype": "Image", 
    "hidden": 0, 
@@ -177,6 +194,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "quantity_and_warehouse", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -196,6 +215,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "qty", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -219,6 +240,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "uom", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -243,6 +266,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "warehouse", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -267,6 +292,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break2", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -285,6 +312,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 1, 
+   "collapsible": 0, 
    "fieldname": "schedule_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -308,6 +337,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "more_info", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -327,6 +358,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
@@ -350,6 +383,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "brand", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -374,6 +409,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "lead_time_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -395,6 +432,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "sales_order_no", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -415,6 +454,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break3", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -433,6 +474,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "min_order_qty", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -456,6 +499,8 @@
   }, 
   {
    "allow_on_submit": 1, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "projected_qty", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -479,6 +524,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "ordered_qty", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -500,6 +547,8 @@
   }, 
   {
    "allow_on_submit": 1, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "page_break", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -528,7 +577,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-08-19 12:45:53.311363", 
+ "modified": "2015-08-26 11:43:34.780774", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Material Request Item", 
