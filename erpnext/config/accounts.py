@@ -108,6 +108,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Tax Rule",
+					"description": _("Tax Rule for transactions.")
+				},
+				{
+					"type": "doctype",
 					"name": "Sales Taxes and Charges Template",
 					"description": _("Tax template for selling transactions.")
 				},

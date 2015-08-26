@@ -1609,6 +1609,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
+<<<<<<< HEAD
    "collapsible": 1, 
    "fieldname": "column_break5", 
    "fieldtype": "Section Break", 

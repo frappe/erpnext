@@ -11,6 +11,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "Sales", 
    "fieldname": "tax_type", 
    "fieldtype": "Select", 
@@ -33,6 +35,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -52,6 +56,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:doc.tax_type==\"Sales\"", 
    "fieldname": "sales_tax_template", 
    "fieldtype": "Link", 
@@ -74,6 +80,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:doc.tax_type==\"Purchase\"", 
    "fieldname": "purchase_tax_template", 
    "fieldtype": "Link", 
@@ -96,6 +104,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "filters", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -116,6 +126,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:doc.tax_type==\"Sales\"", 
    "fieldname": "customer", 
    "fieldtype": "Link", 
@@ -138,6 +150,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:doc.tax_type==\"Purchase\"", 
    "fieldname": "supplier", 
    "fieldtype": "Link", 
@@ -160,6 +174,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "billing_city", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -180,6 +196,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "billing_country", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -201,6 +219,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_2", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -220,6 +240,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:doc.tax_type==\"Sales\"", 
    "fieldname": "customer_group", 
    "fieldtype": "Link", 
@@ -242,6 +264,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:doc.tax_type==\"Purchase\"", 
    "fieldname": "supplier_type", 
    "fieldtype": "Link", 
@@ -264,6 +288,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "shipping_city", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -284,6 +310,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "shipping_country", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -305,6 +333,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_4", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -325,6 +355,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "from_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -345,6 +377,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_7", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -364,6 +398,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "to_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -384,6 +420,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_6", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -403,6 +441,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "1", 
    "fieldname": "priority", 
    "fieldtype": "Int", 
@@ -424,6 +464,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_20", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -443,6 +485,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "company", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -470,7 +514,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-08-21 03:27:43.564183", 
+ "modified": "2015-08-28 02:56:51.283291", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Tax Rule", 
