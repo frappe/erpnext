@@ -43,6 +43,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 
 erpnext.utils.get_address_display = function(frm, address_field, display_field) {
 	if(frm.updating_party_details) return;
+	
 	if(!address_field) {
 		if(frm.doc.customer) {
 			address_field = "customer_address";
@@ -50,14 +51,32 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field) 
 			address_field = "supplier_address";
 		} else return;
 	}
+ 
 	if(!display_field) display_field = "address_display";
 	if(frm.doc[address_field]) {
 		frappe.call({
 			method: "erpnext.utilities.doctype.address.address.get_address_display",
 			args: {"address_dict": frm.doc[address_field] },
 			callback: function(r) {
-				if(r.message)
+				if(r.message){
 					frm.set_value(display_field, r.message)
+				}
+				frappe.call({
+					method: "erpnext.accounts.party.set_taxes",
+					args: {
+						"party": frm.doc.customer || frm.doc.supplier,
+						"party_type": (frm.doc.customer ? "Customer" : "Supplier"),
+						"posting_date": frm.doc.posting_date || frm.doc.transaction_date,
+						"company": frm.doc.company,
+						"billing_address": ((frm.doc.customer) ? (frm.doc.customer_address) : (frm.doc.supplier_address)),
+						"shipping_address": frm.doc.shipping_address_name
+					},
+					callback: function(r) {
+						if(r.message){
+							frm.set_value("taxes_and_charges", r.message)
+						}
+					}
+				});
 			}
 		})
 	}
