@@ -27,3 +27,6 @@ def execute():
 
 	frappe.reload_doctype("Stock Entry")
 	frappe.db.sql("""update `tabStock Entry` set title = purpose""")
+
+	frappe.reload_doctype("Sales Invoice")
+	frappe.db.sql("""update `tabSales Invoice` set title = customer_name""")
