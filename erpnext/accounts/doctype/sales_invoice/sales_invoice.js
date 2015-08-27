@@ -174,6 +174,26 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			me.apply_pricing_rule();
 		})
 	},
+	
+	debit_to: function() {
+		var me = this;
+		if(this.frm.doc.debit_to) {
+			me.frm.call({
+				method: "frappe.client.get_value",
+				args: {
+					doctype: "Account",
+					fieldname: "currency",
+					filters: { name: me.frm.doc.debit_to },
+				},
+				callback: function(r, rt) {
+					if(r.message) {
+						me.frm.set_value("party_account_currency", r.message.currency);
+						me.set_dynamic_labels();
+					}
+				}
+			});
+		}		
+	},
 
 	allocated_amount: function() {
 		this.calculate_total_advance();
@@ -182,10 +202,10 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 	write_off_outstanding_amount_automatically: function() {
 		if(cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
-			frappe.model.round_floats_in(this.frm.doc, ["base_grand_total", "paid_amount"]);
+			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
 			// this will make outstanding amount 0
 			this.frm.set_value("write_off_amount",
-				flt(this.frm.doc.base_grand_total - this.frm.doc.paid_amount - this.frm.doc.total_advance, precision("write_off_amount"))
+				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount - this.frm.doc.total_advance, precision("write_off_amount"))
 			);
 			this.frm.toggle_enable("write_off_amount", false);
 
@@ -198,10 +218,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	write_off_amount: function() {
+		this.set_in_company_currency(this.frm.doc, ["write_off_amount"]);
 		this.write_off_outstanding_amount_automatically();
 	},
 
 	paid_amount: function() {
+		this.set_in_company_currency(this.frm.doc, ["paid_amount"]);
 		this.write_off_outstanding_amount_automatically();
 	},
 

@@ -244,7 +244,7 @@ class PurchaseInvoice(BuyingController):
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		gl_entries = []
-
+		
 		# parent's gl entry
 		if self.base_grand_total:
 			gl_entries.append(
@@ -253,10 +253,12 @@ class PurchaseInvoice(BuyingController):
 					"party_type": "Supplier",
 					"party": self.supplier,
 					"against": self.against_expense_account,
-					"credit": self.total_amount_to_pay,
+					"credit": self.base_grand_total,
+					"credit_in_account_currency": self.base_grand_total \
+						if self.party_account_currency==self.company_currency else self.grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
-				})
+				}, self.party_account_currency)
 			)
 
 		# tax table gl entries
@@ -354,11 +356,28 @@ class PurchaseInvoice(BuyingController):
 		# writeoff account includes petty difference in the invoice amount
 		# and the amount that is paid
 		if self.write_off_account and flt(self.write_off_amount):
+			write_off_account_currency = frappe.db.get_value("Account", self.write_off_account, "currency")
+			
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.credit_to,
+					"party_type": "Supplier",
+					"party": self.supplier,
+					"against": self.write_off_account,
+					"debit": self.base_write_off_amount,
+					"debit_in_account_currency": self.base_write_off_amount \
+						if self.party_account_currency==self.company_currency else self.write_off_amount,
+					"against_voucher": self.return_against if cint(self.is_return) else self.name,
+					"against_voucher_type": self.doctype,
+				}, self.party_account_currency)
+			)
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.write_off_account,
 					"against": self.supplier,
-					"credit": flt(self.write_off_amount),
+					"credit": flt(self.base_write_off_amount),
+					"credit_in_account_currency": self.base_write_off_amount \
+						if write_off_account_currency==self.company_currency else self.write_off_amount,
 					"cost_center": self.write_off_cost_center
 				})
 			)
