@@ -9,6 +9,7 @@ from frappe.utils import cstr, flt, getdate, comma_and, cint
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
+from frappe.desk.notifications import clear_doctype_notifications
 
 from erpnext.controllers.selling_controller import SellingController
 
@@ -222,12 +223,14 @@ class SalesOrder(SellingController):
 		self.update_reserved_qty()
 		frappe.msgprint(_("{0} {1} status is Stopped").format(self.doctype, self.name))
 		self.notify_modified()
+		clear_doctype_notifications(self)
 
 	def unstop_sales_order(self):
 		self.check_modified_date()
 		frappe.db.set(self, 'status', 'Submitted')
 		self.update_reserved_qty()
 		frappe.msgprint(_("{0} {1} status is Unstopped").format(self.doctype, self.name))
+		clear_doctype_notifications(self)
 
 	def update_reserved_qty(self, so_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
