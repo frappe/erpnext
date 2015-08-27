@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, comma_and
+from frappe.utils import cstr, flt, getdate, comma_and, cint
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
@@ -34,7 +34,8 @@ class SalesOrder(SellingController):
 			so = frappe.db.sql("select name from `tabSales Order` \
 				where ifnull(po_no, '') = %s and name != %s and docstatus < 2\
 				and customer = %s", (self.po_no, self.name, self.customer))
-			if so and so[0][0]:
+			if so and so[0][0] and not \
+				cint(frappe.db.get_single_value("Selling Settings", "allow_against_multiple_purchase_orders")):
 				frappe.msgprint(_("Warning: Sales Order {0} already exists against same Purchase Order number").format(so[0][0]))
 
 	def validate_for_items(self):
@@ -54,8 +55,11 @@ class SalesOrder(SellingController):
 			tot_avail_qty = frappe.db.sql("select projected_qty from `tabBin` \
 				where item_code = %s and warehouse = %s", (d.item_code,d.warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
+
+		# check for same entry multiple times
 		unique_chk_list = set(check_list)
-		if len(unique_chk_list) != len(check_list):
+		if len(unique_chk_list) != len(check_list) and \
+			not cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
 			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
 
 	def product_bundle_has_stock_item(self, product_bundle):
