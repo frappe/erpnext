@@ -491,5 +491,45 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 		this.frm.doc.total_advance = flt(total_allocated_amount, precision("total_advance"));
 
 		this.calculate_outstanding_amount(update_paid_amount);
+	},
+	
+	calculate_outstanding_amount: function(update_paid_amount) {
+		// NOTE:
+		// paid_amount and write_off_amount is only for POS Invoice
+		// total_advance is only for non POS Invoice
+		if(this.frm.doc.is_return || this.frm.doc.docstatus > 0) return;
+		
+		frappe.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount"]);
+		
+		var total_amount_to_pay = flt((this.frm.doc.grand_total - this.frm.doc.total_advance 
+			- this.frm.doc.write_off_amount), precision("grand_total"));
+		
+		if(this.frm.doc.doctype == "Sales Invoice") {
+			frappe.model.round_floats_in(this.frm.doc, ["paid_amount"]);
+			
+			if(this.frm.doc.is_pos) {
+				if(!this.frm.doc.paid_amount || update_paid_amount===undefined || update_paid_amount) {
+					this.frm.doc.paid_amount = flt(total_amount_to_pay);
+				}
+			} else {
+				this.frm.doc.paid_amount = 0
+			}
+			this.set_in_company_currency(this.frm.doc, ["paid_amount"]);
+			this.frm.refresh_field("paid_amount");
+			this.frm.refresh_field("base_paid_amount");
+			
+			var outstanding_amount =  flt(total_amount_to_pay - this.frm.doc.paid_amount, 
+				precision("outstanding_amount"));
+				
+		} else if(this.frm.doc.doctype == "Purchase Invoice") {
+			var outstanding_amount = flt(total_amount_to_pay, precision("outstanding_amount"));
+		}
+		
+		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {			
+			this.frm.set_value("outstanding_amount", outstanding_amount);
+		} else {
+			this.frm.set_value("outstanding_amount", 
+				flt(outstanding_amount * this.frm.doc.conversion_rate, precision("outstanding_amount")));
+		}
 	}
 })

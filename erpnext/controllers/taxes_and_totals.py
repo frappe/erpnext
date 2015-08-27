@@ -394,17 +394,21 @@ class calculate_taxes_and_totals(object):
 		# NOTE:
 		# write_off_amount is only for POS Invoice
 		# total_advance is only for non POS Invoice
-
+		if self.doc.is_return:
+			return
+		
+		self.doc.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount"])
+		total_amount_to_pay = flt(self.doc.grand_total  - self.doc.total_advance - self.doc.write_off_amount,
+			self.doc.precision("grand_total"))
+			
 		if self.doc.doctype == "Sales Invoice":
-			if not self.doc.is_return:
-				self.doc.round_floats_in(self.doc, ["base_grand_total", "total_advance", "write_off_amount", "paid_amount"])
-				total_amount_to_pay = self.doc.base_grand_total - self.doc.write_off_amount
-				self.doc.outstanding_amount = flt(total_amount_to_pay - self.doc.total_advance - self.doc.paid_amount,
-					self.doc.precision("outstanding_amount"))
+			self.doc.round_floats_in(self.doc, ["paid_amount"])
+			outstanding_amount = flt(total_amount_to_pay - self.doc.paid_amount, self.doc.precision("outstanding_amount"))
+		elif self.doc.doctype == "Purchase Invoice":
+			outstanding_amount = flt(total_amount_to_pay, self.doc.precision("outstanding_amount"))
+		
+		if self.doc.party_account_currency == self.doc.currency:
+			self.doc.outstanding_amount = outstanding_amount
 		else:
-			self.doc.round_floats_in(self.doc, ["total_advance", "write_off_amount"])
-			self.doc.total_amount_to_pay = flt(self.doc.base_grand_total - self.doc.write_off_amount,
-				self.doc.precision("total_amount_to_pay"))
-			if not self.doc.is_return:
-				self.doc.outstanding_amount = flt(self.doc.total_amount_to_pay - self.doc.total_advance,
-					self.doc.precision("outstanding_amount"))
+			self.doc.outstanding_amount = flt(outstanding_amount * self.doc.conversion_rate, 
+				self.doc.precision("outstanding_amount"))

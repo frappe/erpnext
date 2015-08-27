@@ -18,8 +18,13 @@ class CustomerFrozen(frappe.ValidationError): pass
 class AccountsController(TransactionBase):
 	def __init__(self, arg1, arg2=None):
 		super(AccountsController, self).__init__(arg1, arg2)
-		if self.get("company"):
-			self.company_currency = get_company_currency(self.company)
+		
+	@property
+	def company_currency(self):
+		if not hasattr(self, "__company_currency"):
+			self.__company_currency = get_company_currency(self.company)
+			
+		return self.__company_currency
 		
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
@@ -221,10 +226,10 @@ class AccountsController(TransactionBase):
 		return gl_dict
 		
 	def validate_account_currency(self, account, account_currency=None):
-		valid_currency = list(set(self.currency, self.company_currency))
+		valid_currency = list(set([self.currency, self.company_currency]))
 		if account_currency not in valid_currency:
-			frappe.throw(_("Invalid Account {0}. Account Currency must be {1}")
-				.format(account, "or".join(valid_currency)))
+			frappe.throw(_("Account {0} is invalid. Account Currency must be {1}")
+				.format(account, " or ".join(valid_currency)))
 		
 	def set_balance_in_account_currency(self, gl_dict, account_currency=None):			
 		if not self.get("conversion_rate") and account_currency!=self.company_currency:
@@ -397,22 +402,28 @@ class AccountsController(TransactionBase):
 		if frozen_accounts_modifier in frappe.get_roles():
 			return
 
+		party_type, party = self.get_party()
+
+		if party_type:
+			if frappe.db.get_value(party_type, party, "is_frozen"): 
+				frappe.throw("{0} {1} is frozen".format(party_type, party), CustomerFrozen)
+				
+	def get_party(self):
 		party_type = None
 		if self.meta.get_field("customer"):
 			party_type = 'Customer'
 
 		elif self.meta.get_field("supplier"):
 			party_type = 'Supplier'
-
-		if party_type:
-			party = self.get(party_type.lower())
-			if frappe.db.get_value(party_type, party, "is_frozen"): 
-				frappe.throw("{0} {1} is frozen".format(party_type, party), CustomerFrozen)
-				
-		self.validate_currency(party_type, party)
-				
-	def validate_currency(self, party_type, party):
+			
+		party = self.get(party_type.lower()) if party_type else None
+		
+		return party_type, party
+								
+	def validate_currency(self):
 		if self.get("currency") and self.currency != self.company_currency:
+			party_type, party = self.get_party()
+			
 			existing_gle = frappe.db.get_value("GL Entry", {"party_type": party_type, 
 				"party": party, "company": self.company}, ["name", "currency"], as_dict=1)
 			currency_in_existing_entries = existing_gle.currency or self.company_currency
@@ -420,7 +431,8 @@ class AccountsController(TransactionBase):
 			if existing_gle:
 				if currency_in_existing_entries != self.company_currency \
 					and currency_in_existing_entries != self.currency:
-						frappe.throw(_("Currency must be {0}").format(currency_in_existing_entries))
+						frappe.throw(_("Currency must be {0} for {1} {2}")
+							.format(currency_in_existing_entries, party_type, party))
 			else:
 				party_currency = frappe.db.get_value(party_type, party, "default_currency")
 				if party_currency != self.company_currency and self.currency != party_currency:
