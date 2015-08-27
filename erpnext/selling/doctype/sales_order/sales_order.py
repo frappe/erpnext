@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, comma_and
+from frappe.utils import cstr, flt, getdate, comma_and, cint
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
@@ -34,8 +34,9 @@ class SalesOrder(SellingController):
 			so = frappe.db.sql("select name from `tabSales Order` \
 				where ifnull(po_no, '') = %s and name != %s and docstatus < 2\
 				and customer = %s", (self.po_no, self.name, self.customer))
-			if so and so[0][0]:
-				frappe.msgprint(_("Warning: Sales Order {0} already exists against same Purchase Order number").format(so[0][0]))
+			if so and so[0][0] and not \
+				cint(frappe.db.get_single_value("Selling Settings", "allow_against_multiple_purchase_orders")):
+				frappe.msgprint(_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(so[0][0], self.po_no))
 
 	def validate_for_items(self):
 		check_list = []
@@ -54,8 +55,11 @@ class SalesOrder(SellingController):
 			tot_avail_qty = frappe.db.sql("select projected_qty from `tabBin` \
 				where item_code = %s and warehouse = %s", (d.item_code,d.warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
+
+		# check for same entry multiple times
 		unique_chk_list = set(check_list)
-		if len(unique_chk_list) != len(check_list):
+		if len(unique_chk_list) != len(check_list) and \
+			not cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
 			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
 
 	def product_bundle_has_stock_item(self, product_bundle):
@@ -224,7 +228,7 @@ class SalesOrder(SellingController):
 		frappe.db.set(self, 'status', 'Submitted')
 		self.update_reserved_qty()
 		frappe.msgprint(_("{0} {1} status is Unstopped").format(self.doctype, self.name))
-				
+
 	def update_reserved_qty(self, so_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
 		item_wh_list = []
@@ -232,11 +236,11 @@ class SalesOrder(SellingController):
 			if item_code and warehouse and [item_code, warehouse] not in item_wh_list \
 				and frappe.db.get_value("Item", item_code, "is_stock_item"):
 					item_wh_list.append([item_code, warehouse])
-		
+
 		for d in self.get("items"):
 			if (not so_item_rows or d.name in so_item_rows):
 				_valid_for_reserve(d.item_code, d.warehouse)
-						
+
 				if self.has_product_bundle(d.item_code):
 					for p in self.get("packed_items"):
 						if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
