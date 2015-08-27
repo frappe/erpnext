@@ -10,6 +10,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "details", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -30,6 +32,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "operation", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -53,6 +57,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "description", 
    "fieldtype": "Text Editor", 
    "hidden": 0, 
@@ -75,6 +81,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -94,6 +102,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "Operation completed for how many finished goods?", 
    "fieldname": "completed_qty", 
    "fieldtype": "Float", 
@@ -115,6 +125,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "Pending", 
    "fieldname": "status", 
    "fieldtype": "Select", 
@@ -137,6 +149,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "workstation", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -160,6 +174,8 @@
   }, 
   {
    "allow_on_submit": 1, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:(doc.docstatus==1)", 
    "fieldname": "show_time_logs", 
    "fieldtype": "Button", 
@@ -181,6 +197,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "estimated_time_and_cost", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -201,6 +219,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "planned_start_time", 
    "fieldtype": "Datetime", 
    "hidden": 0, 
@@ -221,6 +241,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "planned_end_time", 
    "fieldtype": "Datetime", 
    "hidden": 0, 
@@ -241,6 +263,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_10", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -260,6 +284,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "in Minutes", 
    "fieldname": "time_in_mins", 
    "fieldtype": "Float", 
@@ -283,6 +309,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "hour_rate", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -305,6 +333,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "planned_operating_cost", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -326,6 +356,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_9", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -346,6 +378,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "actual_start_time", 
    "fieldtype": "Datetime", 
    "hidden": 0, 
@@ -366,6 +400,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "Updated via 'Time Log'", 
    "fieldname": "actual_end_time", 
    "fieldtype": "Datetime", 
@@ -387,6 +423,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_11", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -406,6 +444,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "in Minutes\nUpdated via 'Time Log'", 
    "fieldname": "actual_operation_time", 
    "fieldtype": "Float", 
@@ -427,6 +467,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "(Hour Rate / 60) * Actual Operation Time", 
    "fieldname": "actual_operating_cost", 
    "fieldtype": "Currency", 
@@ -449,6 +491,8 @@
   }, 
   {
    "allow_on_submit": 1, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:(doc.docstatus==1 && doc.status!=\"Completed\")", 
    "fieldname": "make_time_log", 
    "fieldtype": "Button", 

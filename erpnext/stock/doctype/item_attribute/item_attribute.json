@@ -11,6 +11,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "attribute_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -31,6 +33,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "0", 
    "fieldname": "numeric_values", 
    "fieldtype": "Check", 
@@ -52,6 +56,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "numeric_values", 
    "fieldname": "section_break_4", 
    "fieldtype": "Section Break", 
@@ -72,6 +78,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "", 
    "fieldname": "from_range", 
    "fieldtype": "Float", 
@@ -93,6 +101,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "", 
    "fieldname": "increment", 
    "fieldtype": "Float", 
@@ -114,6 +124,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_8", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -133,6 +145,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "", 
    "fieldname": "to_range", 
    "fieldtype": "Float", 
@@ -154,6 +168,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval: !doc.numeric_values", 
    "fieldname": "section_break_5", 
    "fieldtype": "Section Break", 
@@ -174,6 +190,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "", 
    "fieldname": "item_attribute_values", 
    "fieldtype": "Table", 

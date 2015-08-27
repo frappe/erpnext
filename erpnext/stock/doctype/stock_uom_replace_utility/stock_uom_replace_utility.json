@@ -9,6 +9,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "item_code", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -29,6 +31,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "current_stock_uom", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -49,6 +53,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "new_stock_uom", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -69,6 +75,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "conversion_factor", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -88,6 +96,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "update", 
    "fieldtype": "Button", 
    "hidden": 0, 

@@ -9,6 +9,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "main_item_code", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -30,6 +32,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "rm_item_code", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -51,6 +55,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "description", 
    "fieldtype": "Text Editor", 
    "hidden": 0, 
@@ -74,6 +80,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "batch_no", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -94,6 +102,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "serial_no", 
    "fieldtype": "Text", 
    "hidden": 0, 
@@ -113,6 +123,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -131,6 +143,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "required_qty", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -152,6 +166,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "consumed_qty", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -173,6 +189,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "stock_uom", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -195,6 +213,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "rate", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -217,6 +237,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -239,6 +261,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "conversion_factor", 
    "fieldtype": "Float", 
    "hidden": 1, 
@@ -260,6 +284,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "current_stock", 
    "fieldtype": "Float", 
    "hidden": 1, 
@@ -281,6 +307,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "reference_name", 
    "fieldtype": "Data", 
    "hidden": 1, 
@@ -302,6 +330,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "bom_detail_no", 
    "fieldtype": "Data", 
    "hidden": 1, 

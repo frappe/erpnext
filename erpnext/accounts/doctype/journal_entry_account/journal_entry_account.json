@@ -10,6 +10,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -34,6 +36,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "balance", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -56,6 +60,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": ":Company", 
    "description": "If Income or Expense", 
    "fieldname": "cost_center", 
@@ -82,6 +88,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -100,6 +108,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "party_type", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -120,6 +130,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "party", 
    "fieldtype": "Dynamic Link", 
    "hidden": 0, 
@@ -140,6 +152,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "party_balance", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -161,6 +175,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "sec_break1", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -180,6 +196,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "debit", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -202,6 +220,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break2", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -220,6 +240,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "credit", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -242,6 +264,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "reference", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -261,6 +285,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "reference_type", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -282,6 +308,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "reference_name", 
    "fieldtype": "Dynamic Link", 
    "hidden": 0, 
@@ -303,6 +331,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break3", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -321,6 +351,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "is_advance", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -343,6 +375,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "against_account", 
    "fieldtype": "Text", 
    "hidden": 1, 

@@ -10,6 +10,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "company", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -26,10 +28,13 @@
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0, 
-   "set_only_once": 0
+   "set_only_once": 0, 
+   "unique": 0
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.", 
    "fieldname": "default_account", 
    "fieldtype": "Link", 
@@ -47,7 +52,8 @@
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0, 
-   "set_only_once": 0
+   "set_only_once": 0, 
+   "unique": 0
   }
  ], 
  "hide_heading": 0, 
