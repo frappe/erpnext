@@ -10,6 +10,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "Item Code", 
    "fieldname": "item_naming_by", 
    "fieldtype": "Select", 
@@ -31,6 +33,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
@@ -52,6 +56,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "stock_uom", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -72,6 +78,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "auto_insert_price_list_rate_if_missing", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -92,6 +100,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_4", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -110,6 +120,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "valuation_method", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -130,6 +142,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.", 
    "fieldname": "tolerance", 
    "fieldtype": "Float", 
@@ -150,6 +164,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "allow_negative_stock", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -169,6 +185,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "auto_material_request", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -188,6 +206,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "auto_indent", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -207,6 +227,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "reorder_email_notify", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -226,6 +248,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "freeze_stock_entries", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -245,6 +269,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "stock_frozen_upto", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -264,6 +290,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "stock_frozen_upto_days", 
    "fieldtype": "Int", 
    "hidden": 0, 
@@ -283,6 +311,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "stock_auth_role", 
    "fieldtype": "Link", 
    "hidden": 0, 

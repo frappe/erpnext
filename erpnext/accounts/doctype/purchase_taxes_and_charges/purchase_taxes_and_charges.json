@@ -10,6 +10,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "Valuation and Total", 
    "fieldname": "category", 
    "fieldtype": "Select", 
@@ -33,6 +35,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "Add", 
    "fieldname": "add_deduct_tax", 
    "fieldtype": "Select", 
@@ -56,6 +60,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "charge_type", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -78,6 +84,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:[\"On Previous Row Amount\", \"On Previous Row Total\"].indexOf(doc.charge_type)!==-1", 
    "fieldname": "row_id", 
    "fieldtype": "Data", 
@@ -100,6 +108,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount", 
    "fieldname": "included_in_print_rate", 
    "fieldtype": "Check", 
@@ -121,6 +131,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -139,6 +151,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "account_head", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -161,6 +175,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": ":Company", 
    "fieldname": "cost_center", 
    "fieldtype": "Link", 
@@ -184,6 +200,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "description", 
    "fieldtype": "Text Editor", 
    "hidden": 0, 
@@ -207,6 +225,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_10", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -226,6 +246,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "rate", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -247,6 +269,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_9", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -266,6 +290,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "tax_amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -288,6 +314,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "tax_amount_after_discount_amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -309,6 +337,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "total", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -331,6 +361,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_14", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -350,6 +382,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "base_tax_amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -371,6 +405,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "base_total", 
    "fieldtype": "Currency", 
    "hidden": 1, 
@@ -392,6 +428,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "base_tax_amount_after_discount_amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -413,6 +451,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "item_wise_tax_detail", 
    "fieldtype": "Small Text", 
    "hidden": 1, 
@@ -434,6 +474,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "parenttype", 
    "fieldtype": "Data", 
    "hidden": 1, 

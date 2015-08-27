@@ -9,6 +9,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "expense_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -32,6 +34,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_2", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -51,6 +55,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "expense_type", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -75,6 +81,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "expense_type", 
    "fieldname": "default_account", 
    "fieldtype": "Link", 
@@ -97,6 +105,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_4", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -116,6 +126,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "description", 
    "fieldtype": "Text Editor", 
    "hidden": 0, 
@@ -139,6 +151,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_6", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -158,6 +172,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "claim_amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -182,6 +198,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_8", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -201,6 +219,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "sanctioned_amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 

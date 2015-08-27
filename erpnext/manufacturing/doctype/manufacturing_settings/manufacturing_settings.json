@@ -10,6 +10,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "capacity_planning", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -30,6 +32,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "Disables creation of time logs against Production Orders.\nOperations shall not be tracked against Production Order", 
    "fieldname": "disable_capacity_planning", 
    "fieldtype": "Check", 
@@ -51,6 +55,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "Plan time logs outside Workstation Working Hours.", 
    "fieldname": "allow_overtime", 
    "fieldtype": "Check", 
@@ -72,6 +78,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "", 
    "fieldname": "allow_production_on_holidays", 
    "fieldtype": "Check", 
@@ -94,6 +102,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_3", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -113,6 +123,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "30", 
    "description": "Try planning operations for X days in advance.", 
    "fieldname": "capacity_planning_for_days", 
@@ -135,6 +147,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "Default 10 mins", 
    "fieldname": "mins_between_operations", 
    "fieldtype": "Int", 
@@ -156,6 +170,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_6", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -175,6 +191,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "over_production_allowance_percentage", 
    "fieldtype": "Percent", 
    "hidden": 0, 
@@ -195,6 +213,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "BOM", 
    "fieldname": "backflush_raw_materials_based_on", 
    "fieldtype": "Select", 
@@ -217,6 +237,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_11", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -236,6 +258,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "default_wip_warehouse", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -257,6 +281,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "default_fg_warehouse", 
    "fieldtype": "Link", 
    "hidden": 0, 

@@ -9,6 +9,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "item_code", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -31,6 +33,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "item_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -51,6 +55,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_3", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -70,6 +76,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "bom_no", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -94,6 +102,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_5", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -113,6 +123,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "description", 
    "fieldtype": "Text Editor", 
    "hidden": 0, 
@@ -136,6 +148,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -154,6 +168,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "image", 
    "fieldtype": "Attach", 
    "hidden": 1, 
@@ -174,6 +190,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "image_view", 
    "fieldtype": "Image", 
    "hidden": 0, 
@@ -195,6 +213,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "quantity_and_rate", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -214,6 +234,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "qty", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -235,6 +257,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "See \"Rate Of Materials Based On\" in Costing Section", 
    "fieldname": "rate", 
    "fieldtype": "Currency", 
@@ -256,6 +280,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break2", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -274,6 +300,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "stock_uom", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -296,6 +324,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -320,6 +350,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "scrap", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -341,6 +373,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "qty_consumed_per_unit", 
    "fieldtype": "Float", 
    "hidden": 1, 
