@@ -10,6 +10,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "item", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -30,6 +32,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "PRO-", 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
@@ -51,6 +55,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "Draft", 
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "status", 
@@ -75,6 +81,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "production_item", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -97,6 +105,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "", 
    "description": "", 
    "fieldname": "bom_no", 
@@ -121,6 +131,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "1", 
    "description": "Plan material for sub-assemblies", 
    "fieldname": "use_multi_level_bom", 
@@ -142,6 +154,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -162,6 +176,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "", 
    "fieldname": "qty", 
    "fieldtype": "Float", 
@@ -184,6 +200,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "0", 
    "depends_on": "eval:doc.docstatus==1", 
    "description": "", 
@@ -207,6 +225,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "0", 
    "depends_on": "eval:doc.docstatus==1", 
    "description": "", 
@@ -231,6 +251,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "warehouses", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -251,6 +273,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "wip_warehouse", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -271,6 +295,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_12", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -289,6 +315,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "", 
    "description": "", 
    "fieldname": "fg_warehouse", 
@@ -311,6 +339,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "time", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -332,6 +362,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "", 
    "fieldname": "expected_delivery_date", 
    "fieldtype": "Date", 
@@ -352,6 +384,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "now", 
    "fieldname": "planned_start_date", 
    "fieldtype": "Datetime", 
@@ -373,6 +407,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "planned_end_date", 
    "fieldtype": "Datetime", 
    "hidden": 0, 
@@ -393,6 +429,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_13", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -412,6 +450,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "actual_start_date", 
    "fieldtype": "Datetime", 
    "hidden": 0, 
@@ -432,6 +472,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "actual_end_date", 
    "fieldtype": "Datetime", 
    "hidden": 0, 
@@ -452,6 +494,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "", 
    "fieldname": "operations_section", 
    "fieldtype": "Section Break", 
@@ -474,6 +518,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "", 
    "fieldname": "operations", 
    "fieldtype": "Table", 
@@ -496,6 +542,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "operations", 
    "fieldname": "section_break_22", 
    "fieldtype": "Section Break", 
@@ -518,6 +566,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "planned_operating_cost", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -539,6 +589,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "actual_operating_cost", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -560,6 +612,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "additional_operating_cost", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -581,6 +635,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_24", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -600,6 +656,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "total_operating_cost", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -621,13 +679,15 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "more_info", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "in_filter": 0, 
    "in_list_view": 0, 
-   "label": "More Info", 
+   "label": "More Information", 
    "no_copy": 0, 
    "options": "icon-file-text", 
    "permlevel": 0, 
@@ -641,6 +701,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "description", 
    "fieldtype": "Small Text", 
    "hidden": 0, 
@@ -660,6 +722,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "", 
    "fieldname": "stock_uom", 
    "fieldtype": "Link", 
@@ -683,6 +747,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break2", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -702,6 +768,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "project_name", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -724,6 +792,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "Manufacture against Sales Order", 
    "fieldname": "sales_order", 
    "fieldtype": "Link", 
@@ -745,6 +815,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "company", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -767,6 +839,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "amended_from", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -797,7 +871,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-08-12 08:50:32.803526", 
+ "modified": "2015-08-27 03:27:08.064900", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Production Order", 
