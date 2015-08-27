@@ -258,11 +258,12 @@ class DeliveryNote(SellingController):
 			frappe.msgprint(_("Packing Slip(s) cancelled"))
 
 	def update_stock_ledger(self):
+		self.update_reserved_qty()
+
 		sl_entries = []
 		for d in self.get_item_list():
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 \
 					and d.warehouse and flt(d['qty']):
-				self.update_reserved_qty(d)
 
 				incoming_rate = 0
 				if cint(self.is_return) and self.return_against and self.docstatus==1:
