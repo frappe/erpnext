@@ -59,6 +59,10 @@ frappe.ui.form.on("Item", {
 		erpnext.item.toggle_reqd(frm);
 
 		erpnext.item.toggle_attributes(frm);
+
+		if (frm.is_new() && frm.doc.is_stock_item) {
+			frm.fields_dict.inventory.collapse(false);
+		}
 	},
 
 	validate: function(frm){
@@ -91,6 +95,7 @@ frappe.ui.form.on("Item", {
 	},
 
 	is_stock_item: function(frm) {
+		frm.is_new() && frm.fields_dict.inventory.collapse(!frm.doc.is_stock_item);
 		erpnext.item.toggle_reqd(frm);
 	},
 
