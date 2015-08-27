@@ -11,6 +11,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "Customer Name", 
    "fieldname": "cust_master_name", 
    "fieldtype": "Select", 
@@ -32,6 +34,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "campaign_naming_by", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -52,6 +56,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "", 
    "fieldname": "customer_group", 
    "fieldtype": "Link", 
@@ -73,6 +79,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "", 
    "fieldname": "territory", 
    "fieldtype": "Link", 
@@ -94,6 +102,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "selling_price_list", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -114,6 +124,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_5", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -132,6 +144,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "so_required", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -152,6 +166,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "dn_required", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -172,6 +188,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "maintain_same_sales_rate", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -191,6 +209,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "editable_price_list_rate", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -210,6 +230,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "allow_multiple_items", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -230,13 +252,15 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "allow_against_multiple_purchase_orders", 
    "fieldtype": "Check", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "in_filter": 0, 
    "in_list_view": 0, 
-   "label": "Allow multiple Sales Orders against a Supplier Purchase Order", 
+   "label": "Allow multiple Sales Orders against a Customer's Purchase Order", 
    "no_copy": 0, 
    "permlevel": 0, 
    "precision": "", 
@@ -258,7 +282,7 @@
  "is_submittable": 0, 
  "issingle": 1, 
  "istable": 0, 
- "modified": "2015-08-25 04:52:06.879614", 
+ "modified": "2015-08-27 02:42:56.512460", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Selling Settings", 
