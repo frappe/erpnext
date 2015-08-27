@@ -33,7 +33,6 @@ class JournalEntry(AccountsController):
 		self.set_against_account()
 		self.create_remarks()
 		self.set_print_format_fields()
-		self.check_due_date()
 		self.validate_expense_claim()
 		self.validate_credit_debit_note()
 		self.validate_empty_accounts_table()
@@ -83,20 +82,6 @@ class JournalEntry(AccountsController):
 			from erpnext.selling.doctype.customer.customer import check_credit_limit
 			for customer in customers:
 				check_credit_limit(customer, self.company)
-
-	def check_due_date(self):
-		if self.cheque_date:
-			for d in self.get("accounts"):
-				if d.party_type and d.party and d.get("credit" if d.party_type=="Customer" else "debit") > 0:
-					due_date = None
-					if d.reference_type in ("Sales Invoice", "Purchase Invoice"):
-						due_date = frappe.db.get_value(d.reference_type, d.reference_name, "due_date")
-
-					if due_date and getdate(self.cheque_date) > getdate(due_date):
-						diff = date_diff(self.cheque_date, due_date)
-						if  diff > 0:
-							msgprint(_("Note: Reference Date exceeds invoice due date by {0} days for {1} {2}")
-								.format(diff, d.party_type, d.party))
 
 	def validate_cheque_info(self):
 		if self.voucher_type in ['Bank Entry']:

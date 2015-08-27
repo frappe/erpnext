@@ -21,3 +21,5 @@ def send_message(subject="Website Query", message="", sender="", status="Open"):
 		"sent_or_received": "Received"
 	})
 	comm.insert(ignore_permissions=True)
+
+	return "okay"

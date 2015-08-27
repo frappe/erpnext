@@ -64,6 +64,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			if(doc.outstanding_amount!=0 && !cint(doc.is_return)) {
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry).addClass("btn-primary");
 			}
+
 		}
 
 		// Show buttons only when pos view is active
@@ -132,8 +133,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	is_pos: function(doc, dt, dn, callback_fn) {
-		if(cur_frm.doc.__missing_values_set) return;
 		cur_frm.cscript.hide_fields(this.frm.doc);
+		if(cur_frm.doc.__missing_values_set) return;
 		if(cint(this.frm.doc.is_pos)) {
 			if(!this.frm.doc.company) {
 				this.frm.set_value("is_pos", 0);
@@ -426,10 +427,22 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 }
 
 cur_frm.set_query("debit_to", function(doc) {
-	return{
-		filters: [
-			['Account', 'root_type', '=', 'Asset'],
-			['Account', 'account_type', '=', 'Receivable']
-		]
+	// filter on Account
+	if (doc.customer) {
+		return {
+			filters: {
+				'account_type': 'Receivable',
+				'is_group': 0,
+				'company': doc.company
+			}
+		}
+	} else {
+		return {
+			filters: {
+				'report_type': 'Balance Sheet',
+				'is_group': 0,
+				'company': doc.company
+			}
+		}
 	}
 });

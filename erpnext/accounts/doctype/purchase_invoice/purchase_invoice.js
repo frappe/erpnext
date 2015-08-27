@@ -169,12 +169,22 @@ cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(do
 }
 
 cur_frm.fields_dict['credit_to'].get_query = function(doc) {
-	return{
-		filters:{
-			'account_type': 'Payable',
-			'root_type': 'Liability',
-			'is_group': 0,
-			'company': doc.company
+	// filter on Account
+	if (doc.supplier) {
+		return {
+			filters: {
+				'account_type': 'Payable',
+				'is_group': 0,
+				'company': doc.company
+			}
+		}
+	} else {
+		return {
+			filters: {
+				'report_type': 'Balance Sheet',
+				'is_group': 0,
+				'company': doc.company
+			}
 		}
 	}
 }

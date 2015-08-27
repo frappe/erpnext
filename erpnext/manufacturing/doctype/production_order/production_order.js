@@ -12,6 +12,7 @@ frappe.ui.form.on("Production Order", "onload", function(frm) {
 			"actual_start_date": "",
 			"actual_end_date": ""
 		});
+		erpnext.production_order.set_default_warehouse(frm);
 	}
 
 	erpnext.production_order.set_custom_buttons(frm);
@@ -138,9 +139,21 @@ erpnext.production_order = {
 				}
 			} else msgprint(__("Please enter Production Item first"));
 		});
+	},
+	
+	set_default_warehouse: function(frm) {
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.production_order.production_order.get_default_warehouse",
+
+			callback: function(r) {
+				if(!r.exe) {
+					frm.set_value("wip_warehouse", r.message.wip_warehouse);
+					frm.set_value("fg_warehouse", r.message.fg_warehouse)
+				}
+			}
+		});
 	}
 }
-
 
 $.extend(cur_frm.cscript, {
 	before_submit: function() {

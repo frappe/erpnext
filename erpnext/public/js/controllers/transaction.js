@@ -83,11 +83,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	refresh: function() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
-		this.hide_currency_and_price_list()
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
 		erpnext.pos.make_pos_btn(this.frm);
 		this.setup_sms();
+		this.make_show_payments_btn();
 	},
 
 	apply_default_taxes: function() {
@@ -123,11 +123,19 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var sms_man = new SMSManager(this.frm.doc);
 	},
 
-	hide_currency_and_price_list: function() {
-		if(this.frm.doc.conversion_rate == 1 && this.frm.doc.docstatus > 0) {
-			hide_field("currency_and_price_list");
-		} else {
-			unhide_field("currency_and_price_list");
+	make_show_payments_btn: function() {
+		var me = this;
+		if (in_list(["Purchase Invoice", "Sales Invoice"], this.frm.doctype)) {
+			if(this.frm.doc.outstanding_amount !== this.frm.doc.base_grand_total) {
+				this.frm.add_custom_button(__("Show Payments"), function() {
+					frappe.route_options = {
+						"Journal Entry Account.reference_type": me.frm.doc.doctype,
+						"Journal Entry Account.reference_name": me.frm.doc.name
+					};
+
+					frappe.set_route("List", "Journal Entry");
+				});
+			}
 		}
 	},
 
@@ -701,7 +709,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}).join("\n");
 
 		if(!rows) return "";
-		return '<p><a href="#" onclick="$(\'.tax-break-up\').toggleClass(\'hide\'); return false;">Show / Hide tax break-up</a><br><br></p>\
+		return '<p><a class="h6 text-muted" href="#" onclick="$(\'.tax-break-up\').toggleClass(\'hide\'); return false;">'
+			+ __("Show tax break-up") + '</a><br><br></p>\
 		<div class="tax-break-up hide" style="overflow-x: auto;"><table class="table table-bordered table-hover">\
 			<thead><tr>' + headings + '</tr></thead> \
 			<tbody>' + rows + '</tbody> \

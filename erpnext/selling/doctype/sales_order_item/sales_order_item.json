@@ -10,6 +10,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 1, 
+   "collapsible": 0, 
    "fieldname": "item_code", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -34,6 +36,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "customer_item_code", 
    "fieldtype": "Data", 
    "hidden": 1, 
@@ -53,6 +57,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -71,6 +77,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "item_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -94,12 +102,15 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 1, 
    "fieldname": "section_break_5", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "in_filter": 0, 
    "in_list_view": 0, 
+   "label": "Description", 
    "no_copy": 0, 
    "permlevel": 0, 
    "precision": "", 
@@ -113,6 +124,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "description", 
    "fieldtype": "Text Editor", 
    "hidden": 0, 
@@ -136,6 +149,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_7", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -155,6 +170,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "image", 
    "fieldtype": "Attach", 
    "hidden": 1, 
@@ -175,6 +192,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "image_view", 
    "fieldtype": "Image", 
    "hidden": 0, 
@@ -196,6 +215,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "quantity_and_rate", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -215,6 +236,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "qty", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -238,6 +261,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "price_list_rate", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -262,6 +287,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "price_list_rate", 
    "fieldname": "discount_percentage", 
    "fieldtype": "Percent", 
@@ -286,6 +313,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break2", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -304,6 +333,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "stock_uom", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -328,6 +359,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "base_price_list_rate", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -352,6 +385,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_simple1", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -370,6 +405,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "rate", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -394,6 +431,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -418,6 +457,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break3", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -436,6 +477,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "base_rate", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -460,6 +503,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "base_amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -484,6 +529,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "pricing_rule", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -504,6 +551,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_24", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -523,6 +572,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "net_rate", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -544,6 +595,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "net_amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -565,6 +618,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_27", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -584,6 +639,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "base_net_rate", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -605,6 +662,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "base_net_amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -626,6 +685,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "warehouse_and_reference", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -645,6 +706,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "warehouse", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -669,6 +732,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "prevdoc_docname", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -691,6 +756,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "brand", 
    "fieldtype": "Link", 
    "hidden": 1, 
@@ -713,6 +780,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "", 
    "fieldname": "item_group", 
    "fieldtype": "Link", 
@@ -736,6 +805,8 @@
   }, 
   {
    "allow_on_submit": 1, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "page_break", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -757,6 +828,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break4", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -775,6 +848,8 @@
   }, 
   {
    "allow_on_submit": 1, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "projected_qty", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -798,6 +873,8 @@
   }, 
   {
    "allow_on_submit": 1, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "actual_qty", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -819,6 +896,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "delivered_qty", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -842,6 +921,31 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
+   "depends_on": "returned_qty", 
+   "fieldname": "returned_qty", 
+   "fieldtype": "Float", 
+   "hidden": 0, 
+   "ignore_user_permissions": 0, 
+   "in_filter": 0, 
+   "in_list_view": 0, 
+   "label": "Returned Qty", 
+   "no_copy": 1, 
+   "permlevel": 0, 
+   "precision": "", 
+   "print_hide": 1, 
+   "read_only": 1, 
+   "report_hide": 0, 
+   "reqd": 0, 
+   "search_index": 0, 
+   "set_only_once": 0, 
+   "unique": 0
+  }, 
+  {
+   "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "billed_amt", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -862,6 +966,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "For Production", 
    "fieldname": "planned_qty", 
    "fieldtype": "Float", 
@@ -886,6 +992,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "For Production", 
    "fieldname": "produced_qty", 
    "fieldtype": "Float", 
@@ -910,6 +1018,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "item_tax_rate", 
    "fieldtype": "Small Text", 
    "hidden": 1, 
@@ -931,6 +1041,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "Used for Production Plan", 
    "fieldname": "transaction_date", 
    "fieldtype": "Date", 
@@ -960,7 +1072,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-08-19 12:46:32.930498", 
+ "modified": "2015-08-27 02:29:20.603580", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order Item", 

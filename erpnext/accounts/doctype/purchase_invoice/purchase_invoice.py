@@ -91,8 +91,12 @@ class PurchaseInvoice(BuyingController):
 			throw(_("Conversion rate cannot be 0 or 1"))
 
 	def validate_credit_to_acc(self):
-		account_type = frappe.db.get_value("Account", self.credit_to, "account_type")
-		if account_type != "Payable":
+		account = frappe.db.get_value("Account", self.credit_to, ["account_type", "report_type"], as_dict=True)
+
+		if account.report_type != "Balance Sheet":
+			frappe.throw(_("Credit To account must be a Balance Sheet account"))
+
+		if self.supplier and account.account_type != "Payable":
 			frappe.throw(_("Credit To account must be a Payable account"))
 
 	def check_for_stopped_status(self):
@@ -127,7 +131,7 @@ class PurchaseInvoice(BuyingController):
 			}
 		})
 
-		if cint(frappe.db.get_single_value('Buying Settings', 'maintain_same_rate')):
+		if cint(frappe.db.get_single_value('Buying Settings', 'maintain_same_rate')) and not self.is_return:
 			self.validate_rate_with_reference_doc([
 				["Purchase Order", "purchase_order", "po_detail"],
 				["Purchase Receipt", "purchase_receipt", "pr_detail"]
