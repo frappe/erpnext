@@ -49,7 +49,8 @@
             {% } %}
 
 			{% if(doc.item_name != doc.item_code && in_list(visible_column_fieldnames, "item_name")) { %}
-				<br>{%= doc.item_name %}{% } %}
+				{% if (doc.item_code) { %}<br>{% } %}
+                {%= doc.item_name %}{% } %}
 
 			{% include "templates/form_grid/includes/visible_cols.html" %}
 		</div>

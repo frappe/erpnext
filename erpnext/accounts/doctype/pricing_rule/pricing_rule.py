@@ -130,7 +130,11 @@ def get_pricing_rule_for_item(args):
 		return item_details
 
 	if not (args.item_group and args.brand):
-		args.item_group, args.brand = frappe.db.get_value("Item", args.item_code, ["item_group", "brand"])
+		try:
+			args.item_group, args.brand = frappe.db.get_value("Item", args.item_code, ["item_group", "brand"])
+		except TypeError:
+			# invalid item_code
+			return item_details
 		if not args.item_group:
 			frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
 
