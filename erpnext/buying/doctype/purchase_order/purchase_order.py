@@ -165,6 +165,7 @@ class PurchaseOrder(BuyingController):
 		self.update_ordered_qty()
 
 		msgprint(_("Status of {0} {1} is now {2}").format(self.doctype, self.name, status))
+		self.notify_modified()
 
 	def on_submit(self):
 		super(PurchaseOrder, self).on_submit()
@@ -236,8 +237,6 @@ def stop_or_unstop_purchase_orders(names, status):
 			else:
 				if po.status == "Stopped":
 					po.update_status("Submitted")
-
-			po.notify_modified()
 
 	frappe.local.message_log = []
 

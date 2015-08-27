@@ -83,7 +83,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	refresh: function() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
-		this.hide_currency_and_price_list()
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
 		erpnext.pos.make_pos_btn(this.frm);
@@ -137,14 +136,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					frappe.set_route("List", "Journal Entry");
 				});
 			}
-		}
-	},
-
-	hide_currency_and_price_list: function() {
-		if(this.frm.doc.conversion_rate == 1 && this.frm.doc.docstatus > 0) {
-			hide_field("currency_and_price_list");
-		} else {
-			unhide_field("currency_and_price_list");
 		}
 	},
 
