@@ -13,8 +13,8 @@ def execute():
 	for company in frappe.get_all("Company", fields=["name", "default_currency", "default_receivable_account"]):
 		
 		# update currency in account and gl entry as per company currency
-		frappe.db.sql("""update `tabAccount` set currency = %s 
-			where ifnull(currency, '') = '' and company=%s""", (company.default_currency, company.name))
+		frappe.db.sql("""update `tabAccount` set account_currency = %s 
+			where ifnull(account_currency, '') = '' and company=%s""", (company.default_currency, company.name))
 		
 		# update newly introduced field's value in sales / purchase invoice
 		frappe.db.sql("""
@@ -45,7 +45,7 @@ def execute():
 			set 
 				debit_in_account_currency=debit,
 				credit_in_account_currency=credit,
-				currency=%s
+				account_currency=%s
 			where
 				jea.parent = je.name
 				and je.company=%s
@@ -58,7 +58,7 @@ def execute():
 			set 
 				debit_in_account_currency=debit,
 				credit_in_account_currency=credit,
-				currency=%s
+				account_currency=%s
 			where
 				company=%s
 		""", (company.default_currency, company.name))
