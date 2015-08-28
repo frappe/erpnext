@@ -5,6 +5,9 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	frappe.reload_doctype("Delivery Note")
+	frappe.reload_doctype("Sales Invoice")
+	frappe.reload_doctype("Purchase Receipt")
 	frappe.reload_doctype("Sales Order Item")
 	frappe.reload_doctype("Purchase Order Item")
 
