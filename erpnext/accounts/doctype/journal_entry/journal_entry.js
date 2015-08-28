@@ -35,7 +35,7 @@ erpnext.journal_entry.toggle_fields_based_on_currency = function(frm) {
 	var company_currency = erpnext.get_currency(frm.doc.company);
 		
 	var grid = frm.get_field("accounts").grid;
-	grid.set_column_disp(fields, grid.currency!=company_currency);
+	grid.set_column_disp(fields, grid.account_currency!=company_currency);
 }
 
 erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
@@ -324,7 +324,7 @@ frappe.ui.form.on("Journal Entry Account", {
 						$.extend(d, r.message[0]);
 						refresh_field('balance', d.name, 'accounts');
 						refresh_field('party_type', d.name, 'accounts');
-						refresh_field('currency', d.name, 'accounts');
+						refresh_field('account_currency', d.name, 'accounts');
 						
 						if(r.message[1] && (!frm.doc.exchange_rate || frm.doc.exchange_rate == 1.0)) {
 							frm.set_value("exchange_rate", r.message[1])
@@ -339,7 +339,7 @@ frappe.ui.form.on("Journal Entry Account", {
 		var company_currency = erpnext.get_currency(frm.doc.company);
 		var row = locals[dt][dn];
 		
-		var exchange_rate = (row.currency==company_currency) ? 1 : frm.doc.exchange_rate;
+		var exchange_rate = (row.account_currency==company_currency) ? 1 : frm.doc.exchange_rate;
 		
 		frappe.model.set_value(dt, dn, "debit", 
 			flt(flt(row.debit_in_account_currency)*exchange_rate), precision("debit", row));
@@ -349,7 +349,7 @@ frappe.ui.form.on("Journal Entry Account", {
 		var company_currency = erpnext.get_currency(frm.doc.company);
 		var row = locals[dt][dn];
 		
-		var exchange_rate = (row.currency==company_currency) ? 1 : frm.doc.exchange_rate;
+		var exchange_rate = (row.account_currency==company_currency) ? 1 : frm.doc.exchange_rate;
 		
 		frappe.model.set_value(dt, dn, "credit", 
 			flt(flt(row.credit_in_account_currency)*exchange_rate), precision("credit", row));

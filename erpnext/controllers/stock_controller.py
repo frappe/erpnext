@@ -53,7 +53,7 @@ class StockController(AccountsController):
 							"cost_center": detail.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, 2),
-						}, warehouse_account[sle.warehouse]["currency"]))
+						}, warehouse_account[sle.warehouse]["account_currency"]))
 
 						# to target warehouse / expense account						
 						gl_list.append(self.get_gl_dict({
@@ -338,7 +338,7 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 def get_warehouse_account():
 	warehouse_account = frappe._dict()
 	
-	for d in frappe.db.sql("""select warehouse, name, currency from tabAccount
+	for d in frappe.db.sql("""select warehouse, name, account_currency from tabAccount
 		where account_type = 'Warehouse' and ifnull(warehouse, '') != ''""", as_dict=1):
 			warehouse_account.setdefault(d.warehouse, d)
 	return warehouse_account

@@ -269,7 +269,7 @@ class PurchaseInvoice(BuyingController):
 		valuation_tax = {}
 		for tax in self.get("taxes"):
 			if tax.category in ("Total", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
-				account_currency = frappe.db.get_value("Account", tax.account_head, "currency")
+				account_currency = frappe.db.get_value("Account", tax.account_head, "account_currency")
 				
 				dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
 				
@@ -298,7 +298,7 @@ class PurchaseInvoice(BuyingController):
 		stock_items = self.get_stock_items()
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
-				account_currency = frappe.db.get_value("Account", item.expense_account, "currency")
+				account_currency = frappe.db.get_value("Account", item.expense_account, "account_currency")
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.expense_account,
@@ -360,7 +360,7 @@ class PurchaseInvoice(BuyingController):
 		# writeoff account includes petty difference in the invoice amount
 		# and the amount that is paid
 		if self.write_off_account and flt(self.write_off_amount):
-			write_off_account_currency = frappe.db.get_value("Account", self.write_off_account, "currency")
+			write_off_account_currency = frappe.db.get_value("Account", self.write_off_account, "account_currency")
 			
 			gl_entries.append(
 				self.get_gl_dict({

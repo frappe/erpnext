@@ -7,6 +7,8 @@ import unittest, copy
 from frappe.utils import nowdate, add_days, flt
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
+from erpnext.controllers.accounts_controller import InvalidCurrency
+from erpnext.accounts.doctype.gl_entry.gl_entry import InvalidAccountCurrency
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -401,7 +403,7 @@ class TestSalesInvoice(unittest.TestCase):
 		jv.cancel()
 		self.assertEquals(frappe.db.get_value("Sales Invoice", w.name, "outstanding_amount"), 561.8)
 
-	def test_sales_invoice_gl_entry_without_aii(self):
+	def test_sales_invoice_gl_entry_without_perpetual_inventory(self):
 		set_perpetual_inventory(0)
 		si = frappe.copy_doc(test_records[1])
 		si.insert()
@@ -433,7 +435,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertFalse(gle)
 
-	def test_pos_gl_entry_with_aii(self):
+	def test_pos_gl_entry_with_perpetual_inventory(self):
 		set_perpetual_inventory()
 		self.make_pos_profile()
 
@@ -442,8 +444,7 @@ class TestSalesInvoice(unittest.TestCase):
 		pos = copy.deepcopy(test_records[1])
 		pos["is_pos"] = 1
 		pos["update_stock"] = 1
-		# pos["posting_time"] = "12:05"
-		pos["cash_bank_account"] = "_Test Account Bank Account - _TC"
+		pos["cash_bank_account"] = "_Test Bank - _TC"
 		pos["paid_amount"] = 600.0
 
 		si = frappe.copy_doc(pos)
@@ -474,7 +475,7 @@ class TestSalesInvoice(unittest.TestCase):
 			[stock_in_hand, 0.0, abs(sle.stock_value_difference)],
 			[pos["items"][0]["expense_account"], abs(sle.stock_value_difference), 0.0],
 			[si.debit_to, 0.0, 600.0],
-			["_Test Account Bank Account - _TC", 600.0, 0.0]
+			["_Test Bank - _TC", 600.0, 0.0]
 		])
 
 		for i, gle in enumerate(sorted(gl_entries, key=lambda gle: gle.account)):
@@ -494,7 +495,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def make_pos_profile(self):
 		pos_profile = frappe.get_doc({
-			"cash_bank_account": "_Test Account Bank Account - _TC",
+			"cash_bank_account": "_Test Bank - _TC",
 			"company": "_Test Company",
 			"cost_center": "_Test Cost Center - _TC",
 			"currency": "INR",
@@ -513,7 +514,7 @@ class TestSalesInvoice(unittest.TestCase):
 		if not frappe.db.exists("POS Profile", "_Test POS Profile"):
 			pos_profile.insert()
 
-	def test_si_gl_entry_with_aii_and_update_stock_with_warehouse_but_no_account(self):
+	def test_si_gl_entry_with_perpetual_inventory_and_update_stock_with_warehouse_but_no_account(self):
 		set_perpetual_inventory()
 		frappe.delete_doc("Account", "_Test Warehouse No Account - _TC")
 
@@ -567,7 +568,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(gle)
 		set_perpetual_inventory(0)
 
-	def test_sales_invoice_gl_entry_with_aii_no_item_code(self):
+	def test_sales_invoice_gl_entry_with_perpetual_inventory_no_item_code(self):
 		set_perpetual_inventory()
 
 		si = frappe.get_doc(test_records[1])
@@ -593,7 +594,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		set_perpetual_inventory(0)
 
-	def test_sales_invoice_gl_entry_with_aii_non_stock_item(self):
+	def test_sales_invoice_gl_entry_with_perpetual_inventory_non_stock_item(self):
 		set_perpetual_inventory()
 		si = frappe.get_doc(test_records[1])
 		si.get("items")[0].item_code = "_Test Non Stock Item"
@@ -841,7 +842,80 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(si.total_taxes_and_charges, 234.44)
 		self.assertEquals(si.base_grand_total, 859.44)
 		self.assertEquals(si.grand_total, 859.44)
+		
+	def test_multi_currency_gle(self):
+		set_perpetual_inventory(0)
+		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC", 
+			currency="USD", conversion_rate=50)
 
+		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit, 
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", si.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		expected_values = {
+			"_Test Receivable USD - _TC": {
+				"account_currency": "USD",
+				"debit": 5000,
+				"debit_in_account_currency": 100,
+				"credit": 0,
+				"credit_in_account_currency": 0
+			},
+			"Sales - _TC": {
+				"account_currency": "INR",
+				"debit": 0,
+				"debit_in_account_currency": 0,
+				"credit": 5000,
+				"credit_in_account_currency": 5000
+			}
+		}
+		
+		for field in ("account_currency", "debit", "debit_in_account_currency", "credit", "credit_in_account_currency"):
+			for i, gle in enumerate(gl_entries):
+				self.assertEquals(expected_values[gle.account][field], gle[field])
+
+		# cancel
+		si.cancel()
+
+		gle = frappe.db.sql("""select name from `tabGL Entry`
+			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
+
+		self.assertFalse(gle)
+		
+	def test_invalid_currency(self):
+		# Customer currency = USD
+		
+		# Transaction currency cannot be INR
+		si1 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC", 
+			do_not_save=True)
+		
+		self.assertRaises(InvalidCurrency, si1.save)
+			
+		# Transaction currency cannot be EUR
+		si2 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC", 
+			currency="EUR", conversion_rate=80, do_not_save=True)
+			
+		self.assertRaises(InvalidCurrency, si2.save)
+		
+		# Transaction currency only allowed in USD
+		si3 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC", 
+			currency="USD", conversion_rate=50)
+			
+		# Party Account currency must be in USD, as there is existing GLE with USD
+		si4 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable - _TC", 
+			currency="USD", conversion_rate=50, do_not_submit=True)
+			
+		self.assertRaises(InvalidAccountCurrency, si4.submit)
+		
+		# Party Account currency must be in USD, force customer currency as there is no GLE
+		
+		si3.cancel()
+		si5 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable - _TC", 
+			currency="USD", conversion_rate=50, do_not_submit=True)
+			
+		self.assertRaises(InvalidAccountCurrency, si5.submit)
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
@@ -856,14 +930,15 @@ def create_sales_invoice(**args):
 	si.is_pos = args.is_pos
 	si.is_return = args.is_return
 	si.return_against = args.return_against
-	si.currency="INR"
-	si.conversion_rate = 1
+	si.currency=args.currency or "INR"
+	si.conversion_rate = args.conversion_rate or 1
 
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": args.qty or 1,
 		"rate": args.rate or 100,
+		"income_account": "Sales - _TC",
 		"expense_account": "Cost of Goods Sold - _TC",
 		"cost_center": "_Test Cost Center - _TC",
 		"serial_no": args.serial_no

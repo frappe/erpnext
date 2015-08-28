@@ -10,6 +10,7 @@ from frappe.utils import cint
 import frappe.defaults
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory, \
 	test_records as pr_test_records
+from erpnext.controllers.accounts_controller import InvalidCurrency
 
 test_dependencies = ["Item", "Cost Center"]
 test_ignore = ["Serial No"]
@@ -276,6 +277,55 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][1], gle.credit)
 
 		set_perpetual_inventory(0)
+		
+	def test_multi_currency_gle(self):
+		set_perpetual_inventory(0)
+			
+		pi = make_purchase_invoice(supplier="_Test Supplier USD", credit_to="_Test Payable USD - _TC", 
+			currency="USD", conversion_rate=50)
+
+		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit, 
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc""", pi.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		expected_values = {
+			"_Test Payable USD - _TC": {
+				"account_currency": "USD",
+				"debit": 0,
+				"debit_in_account_currency": 0,
+				"credit": 12500,
+				"credit_in_account_currency": 250
+			},
+			"_Test Account Cost for Goods Sold - _TC": {
+				"account_currency": "INR",
+				"debit": 12500,
+				"debit_in_account_currency": 12500,
+				"credit": 0,
+				"credit_in_account_currency": 0
+			}
+		}
+		
+		for field in ("account_currency", "debit", "debit_in_account_currency", "credit", "credit_in_account_currency"):
+			for i, gle in enumerate(gl_entries):
+				self.assertEquals(expected_values[gle.account][field], gle[field])
+				
+				
+		# Check for valid currency
+		pi1 = make_purchase_invoice(supplier="_Test Supplier USD", credit_to="_Test Payable USD - _TC",
+			do_not_save=True)
+		
+		self.assertRaises(InvalidCurrency, pi1.save)
+
+		# cancel
+		pi.cancel()
+
+		gle = frappe.db.sql("""select name from `tabGL Entry`
+			where voucher_type='Sales Invoice' and voucher_no=%s""", pi.name)
+
+		self.assertFalse(gle)
 
 def make_purchase_invoice(**args):
 	pi = frappe.new_doc("Purchase Invoice")

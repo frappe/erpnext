@@ -33,7 +33,8 @@ class PaymentTool(Document):
 				d1.party_type = self.party_type
 				d1.party = self.party
 				d1.balance = get_balance_on(self.party_account)
-				d1.set("debit" if self.received_or_paid=="Paid" else "credit", flt(v.payment_amount))
+				d1.set("debit_in_account_currency" if self.received_or_paid=="Paid" \
+					else "credit_in_account_currency", flt(v.payment_amount))
 				d1.set("reference_type", v.against_voucher_type)
 				d1.set("reference_name", v.against_voucher_no)
 				d1.set('is_advance', 'Yes' if v.against_voucher_type in ['Sales Order', 'Purchase Order'] else 'No')
@@ -41,7 +42,8 @@ class PaymentTool(Document):
 
 		d2 = jv.append("accounts")
 		d2.account = self.payment_account
-		d2.set('debit' if total_payment_amount < 0 else 'credit', abs(total_payment_amount))
+		d2.set('debit_in_account_currency' if total_payment_amount < 0 \
+			else 'credit_in_account_currency', abs(total_payment_amount))
 		if self.payment_account:
 			d2.balance = get_balance_on(self.payment_account)
 

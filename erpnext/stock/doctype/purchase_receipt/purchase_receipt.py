@@ -316,10 +316,10 @@ class PurchaseReceipt(BuyingController):
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 						"debit": stock_value_diff
-					}, warehouse_account[d.warehouse]["currency"]))
+					}, warehouse_account[d.warehouse]["account_currency"]))
 
 					# stock received but not billed
-					stock_rbnb_currency = frappe.db.get_value("Account", stock_rbnb, "currency")
+					stock_rbnb_currency = frappe.db.get_value("Account", stock_rbnb, "account_currency")
 					gl_entries.append(self.get_gl_dict({
 						"account": stock_rbnb,
 						"against": warehouse_account[d.warehouse]["name"],
@@ -350,14 +350,14 @@ class PurchaseReceipt(BuyingController):
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.rm_supp_cost)
-						}, warehouse_account[self.supplier_warehouse]["currency"]))
+						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
 
 					# divisional loss adjustment
 					sle_valuation_amount = flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty) * flt(d.conversion_factor),
 							self.precision("base_net_amount", d))
 
 					distributed_amount = flt(flt(d.base_net_amount, self.precision("base_net_amount", d))) + \
-						flt(d.landed_cost_voucher_amount) + flt(d.rm_supp_cost)
+						flt(d.landed_cost_voucher_amount) + flt(d.rm_supp_cost) + flt(d.item_tax_amount)
 
 					divisional_loss = flt(distributed_amount - sle_valuation_amount, self.precision("base_net_amount", d))
 					if divisional_loss:

@@ -89,10 +89,10 @@ class Account(Document):
 				frappe.throw(_("Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"))
 				
 	def validate_account_currency(self):
-		if not self.currency:
-			self.currency = frappe.db.get_value("Company", self.company, "default_currency")
+		if not self.account_currency:
+			self.account_currency = frappe.db.get_value("Company", self.company, "default_currency")
 			
-		elif self.currency != frappe.db.get_value("Account", self.name, "currency"):
+		elif self.account_currency != frappe.db.get_value("Account", self.name, "account_currency"):
 			if frappe.db.get_value("GL Entry", {"account": self.name}):
 				frappe.throw(_("Currency can not be changed after making entries using some other currency"))
 

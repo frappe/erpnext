@@ -77,7 +77,7 @@ def execute():
 					
 				party_account = party_gle.account or company.default_receivable_account
 				
-				party.append("party_accounts", {
+				party.append("accounts", {
 					"company": company.name,
 					"account": party_account
 				})

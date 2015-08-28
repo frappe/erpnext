@@ -423,22 +423,18 @@ class SalesInvoice(SellingController):
 		if cint(self.is_pos) == 1:
 			if flt(self.paid_amount) == 0:
 				if self.cash_bank_account:
-					paid_amount = flt(flt(self.grand_total) - flt(self.write_off_amount), 
-						self.precision("paid_amount"))
-					base_paid_amount = flt(paid_amount*self.conversion_rate, self.precision("base_paid_amount"))
-					
-					frappe.db.set(self, 'paid_amount', paid_amount)
-					frappe.db.set(self, 'base_paid_amount', base_paid_amount)
-					
+					frappe.db.set(self, 'paid_amount', 
+						flt(flt(self.grand_total) - flt(self.write_off_amount), self.precision("paid_amount")))					
 				else:
 					# show message that the amount is not paid
 					frappe.db.set(self,'paid_amount',0)
-					frappe.db.set(self,'base_paid_amount',0)
 					frappe.msgprint(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
 		else:
 			frappe.db.set(self,'paid_amount',0)
-			frappe.db.set(self,'base_paid_amount',0)
-
+		
+		frappe.db.set(self, 'base_paid_amount', 
+			flt(self.paid_amount*self.conversion_rate, self.precision("base_paid_amount")))
+		
 	def check_prev_docstatus(self):
 		for d in self.get('items'):
 			if d.sales_order and frappe.db.get_value("Sales Order", d.sales_order, "docstatus") != 1:
@@ -512,7 +508,7 @@ class SalesInvoice(SellingController):
 	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.get("taxes"):
 			if flt(tax.base_tax_amount_after_discount_amount):
-				account_currency = frappe.db.get_value("Account", tax.account_head, "currency")
+				account_currency = frappe.db.get_value("Account", tax.account_head, "account_currency")
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
@@ -528,7 +524,7 @@ class SalesInvoice(SellingController):
 		# income account gl entries
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
-				account_currency = frappe.db.get_value("Account", item.income_account, "currency")
+				account_currency = frappe.db.get_value("Account", item.income_account, "account_currency")
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.income_account,
@@ -547,7 +543,7 @@ class SalesInvoice(SellingController):
 
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos) and self.cash_bank_account and self.paid_amount:
-			bank_account_currency = frappe.db.get_value("Account", self.cash_bank_account, "currency")
+			bank_account_currency = frappe.db.get_value("Account", self.cash_bank_account, "account_currency")
 			# POS, make payment entries
 			gl_entries.append(
 				self.get_gl_dict({
@@ -575,7 +571,7 @@ class SalesInvoice(SellingController):
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos
 		if self.write_off_account and self.write_off_amount:
-			write_off_account_currency = frappe.db.get_value("Account", self.write_off_account, "currency")
+			write_off_account_currency = frappe.db.get_value("Account", self.write_off_account, "account_currency")
 			
 			gl_entries.append(
 				self.get_gl_dict({

@@ -11,6 +11,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "properties", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -31,6 +33,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break0", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -50,6 +54,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "account_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -71,6 +77,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "0", 
    "fieldname": "is_group", 
    "fieldtype": "Check", 
@@ -92,6 +100,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "company", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -114,6 +124,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "root_type", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -134,6 +146,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "report_type", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -154,7 +168,10 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "fieldname": "currency", 
+   "bold": 0, 
+   "collapsible": 0, 
+   "depends_on": "eval:doc.is_group==0", 
+   "fieldname": "account_currency", 
    "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
@@ -175,6 +192,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -194,6 +213,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "parent_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -216,6 +237,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "", 
    "fieldname": "account_type", 
    "fieldtype": "Select", 
@@ -239,6 +262,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "Rate at which this tax is applied", 
    "fieldname": "tax_rate", 
    "fieldtype": "Float", 
@@ -261,6 +286,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "If the account is frozen, entries are allowed to restricted users.", 
    "fieldname": "freeze_account", 
    "fieldtype": "Select", 
@@ -284,6 +311,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "warehouse", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -304,6 +333,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "balance_must_be", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -324,6 +355,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "lft", 
    "fieldtype": "Int", 
    "hidden": 1, 
@@ -343,6 +376,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "rgt", 
    "fieldtype": "Int", 
    "hidden": 1, 
@@ -362,6 +397,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "old_parent", 
    "fieldtype": "Data", 
    "hidden": 1, 
@@ -389,7 +426,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-08-13 16:43:10.645538", 
+ "modified": "2015-08-28 17:17:20.899845", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Account", 

@@ -10,6 +10,8 @@ from frappe import _
 from frappe.model.document import Document
 
 class CustomerFrozen(frappe.ValidationError): pass
+class InvalidCurrency(frappe.ValidationError): pass
+class InvalidAccountCurrency(frappe.ValidationError): pass
 
 class GLEntry(Document):
 	def validate(self):
@@ -102,27 +104,31 @@ class GLEntry(Document):
 					
 	def validate_currency(self):
 		company_currency = frappe.db.get_value("Company", self.company, "default_currency")
-		account_currency = frappe.db.get_value("Account", self.account, "currency") or company_currency
+		account_currency = frappe.db.get_value("Account", self.account, "account_currency") or company_currency
 
-		if not self.currency:
-			self.currency = company_currency
-		if account_currency != self.currency:
+		if not self.account_currency:
+			self.account_currency = company_currency
+		if account_currency != self.account_currency:
 			frappe.throw(_("Accounting Entry for {0} can only be made in currency: {1}")
-				.format(self.account, (account_currency or company_currency)))
+				.format(self.account, (account_currency or company_currency)), InvalidAccountCurrency)
 				
+		
 		if self.party_type and self.party:
 			existing_gle = frappe.db.get_value("GL Entry", {"party_type": self.party_type, 
-				"party": self.party, "company": self.company}, ["name", "currency"], as_dict=1)
+				"party": self.party, "company": self.company}, ["name", "account_currency"], as_dict=1)
 			if not existing_gle:
-				party_currency = frappe.db.get_value(self.party_type, self.party, "default_currency") or company_currency
+				party_currency = frappe.db.get_value(self.party_type, self.party, "default_currency")\
+					 or company_currency
 				if party_currency != account_currency:
 					frappe.throw(_("Invalid Account {0}. Account Currency must be {1}, same as {2}: {3}")
-						.format(self.account, party_currency, self.party_type, self.party))
+						.format(self.account, party_currency, self.party_type, self.party), 
+							InvalidAccountCurrency)
 			else:
-				currency_in_existing_entries = existing_gle.currency or company_currency
-				if currency_in_existing_entries != self.currency:
+				currency_in_existing_entries = existing_gle.account_currency or company_currency
+				if currency_in_existing_entries != self.account_currency:
 					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
-						.format(self.party_type, self.party, currency_in_existing_entries))
+						.format(self.party_type, self.party, currency_in_existing_entries), 
+							InvalidAccountCurrency)
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:

@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, date_diff
+from frappe.utils import cstr, flt, fmt_money, formatdate
 from frappe import msgprint, _, scrub
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.controllers.accounts_controller import AccountsController
@@ -248,13 +248,18 @@ class JournalEntry(AccountsController):
 
 		self.difference = flt(self.total_debit, self.precision("total_debit")) - \
 			flt(self.total_credit, self.precision("total_credit"))
-		print self.difference
+
 		if self.difference:
 			frappe.throw(_("Total Debit must be equal to Total Credit. The difference is {0}")
 				.format(self.difference))
 				
 	def validate_multi_currency(self):
-		alternate_currency = [d.currency for d in self.get("accounts") if d.currency!=self.company_currency]
+		alternate_currency = []
+		for d in self.get("accounts"):
+			d.account_currency = frappe.db.get_value("Account", d.account, "account_currency") or self.company_currency
+				
+			if d.account_currency!=self.company_currency:
+				alternate_currency.append(d.account_currency)
 			
 		if alternate_currency:
 			if not self.exchange_rate:
@@ -266,10 +271,7 @@ class JournalEntry(AccountsController):
 			self.exchange_rate = 1.0
 			
 		for d in self.get("accounts"):
-			if not d.currency:
-				d.currency = frappe.db.get_value("Account", d.account, "currency") or self.company_currency
-				
-			exchange_rate = self.exchange_rate if d.currency != self.company_currency else 1
+			exchange_rate = self.exchange_rate if d.account_currency != self.company_currency else 1
 			
 			d.debit = flt(flt(d.debit_in_account_currency)*exchange_rate, d.precision("debit"))
 			d.credit = flt(flt(d.credit_in_account_currency)*exchange_rate, d.precision("credit"))
@@ -340,7 +342,7 @@ class JournalEntry(AccountsController):
 						"against": d.against_account,
 						"debit": flt(d.debit, d.precision("debit")),
 						"credit": flt(d.credit, d.precision("credit")),
-						"currency": d.currency,
+						"account_currency": d.account_currency,
 						"debit_in_account_currency": flt(d.debit_in_account_currency, d.precision("debit_in_account_currency")),
 						"credit_in_account_currency": flt(d.credit_in_account_currency, d.precision("credit_in_account_currency")),
 						"against_voucher_type": d.reference_type,
@@ -488,12 +490,12 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 	jv.get("accounts")[0].party = si.customer
 	jv.get("accounts")[0].balance = get_balance_on(si.debit_to)
 	jv.get("accounts")[0].party_balance = get_balance_on(party=si.customer, party_type="Customer")
-	jv.get("accounts")[0].credit = si.outstanding_amount
+	jv.get("accounts")[0].credit_in_account_currency = si.outstanding_amount
 	jv.get("accounts")[0].reference_type = si.doctype
 	jv.get("accounts")[0].reference_name = si.name
 
 	# debit bank
-	jv.get("accounts")[1].debit = si.outstanding_amount
+	jv.get("accounts")[1].debit_in_account_currency = si.outstanding_amount
 
 	return jv.as_dict()
 
@@ -510,12 +512,12 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	jv.get("accounts")[0].party = pi.supplier
 	jv.get("accounts")[0].balance = get_balance_on(pi.credit_to)
 	jv.get("accounts")[0].party_balance = get_balance_on(party=pi.supplier, party_type="Supplier")
-	jv.get("accounts")[0].debit = pi.outstanding_amount
+	jv.get("accounts")[0].debit_in_account_currency = pi.outstanding_amount
 	jv.get("accounts")[0].reference_type = pi.doctype
 	jv.get("accounts")[0].reference_name = pi.name
 
 	# credit bank
-	jv.get("accounts")[1].credit = pi.outstanding_amount
+	jv.get("accounts")[1].credit_in_account_currency = pi.outstanding_amount
 
 	return jv.as_dict()
 
@@ -524,6 +526,7 @@ def get_payment_entry_from_sales_order(sales_order):
 	"""Returns new Journal Entry document as dict for given Sales Order"""
 	from erpnext.accounts.utils import get_balance_on
 	from erpnext.accounts.party import get_party_account
+	
 	so = frappe.get_doc("Sales Order", sales_order)
 
 	if flt(so.per_billed, 2) != 0.0:
@@ -531,9 +534,15 @@ def get_payment_entry_from_sales_order(sales_order):
 
 	jv = get_payment_entry(so)
 	jv.remark = 'Advance payment received against Sales Order {0}.'.format(so.name)
+	
 	party_account = get_party_account(so.company, so.customer, "Customer")
-
-	amount = flt(so.base_grand_total) - flt(so.advance_paid)
+	party_account_currency = frappe.db.get_value("Account", party_account, "account_currency")
+	company_currency = get_company_currency(so.company)
+	
+	if party_account_currency == company_currency:
+		amount = flt(so.base_grand_total) - flt(so.advance_paid)
+	else:
+		amount = flt(so.grand_total) - flt(so.advance_paid)
 
 	# credit customer
 	jv.get("accounts")[0].account = party_account
@@ -541,13 +550,13 @@ def get_payment_entry_from_sales_order(sales_order):
 	jv.get("accounts")[0].party = so.customer
 	jv.get("accounts")[0].balance = get_balance_on(party_account)
 	jv.get("accounts")[0].party_balance = get_balance_on(party=so.customer, party_type="Customer")
-	jv.get("accounts")[0].credit = amount
+	jv.get("accounts")[0].credit_in_account_currency = amount
 	jv.get("accounts")[0].reference_type = so.doctype
 	jv.get("accounts")[0].reference_name = so.name
 	jv.get("accounts")[0].is_advance = "Yes"
 
 	# debit bank
-	jv.get("accounts")[1].debit = amount
+	jv.get("accounts")[1].debit_in_account_currency = amount
 
 	return jv.as_dict()
 
@@ -563,9 +572,15 @@ def get_payment_entry_from_purchase_order(purchase_order):
 
 	jv = get_payment_entry(po)
 	jv.remark = 'Advance payment made against Purchase Order {0}.'.format(po.name)
+	
 	party_account = get_party_account(po.company, po.supplier, "Supplier")
-
-	amount = flt(po.base_grand_total) - flt(po.advance_paid)
+	party_account_currency = frappe.db.get_value("Account", party_account, "account_currency")
+	company_currency = get_company_currency(po.company)
+	
+	if party_account_currency == company_currency:
+		amount = flt(po.base_grand_total) - flt(po.advance_paid)
+	else:
+		amount = flt(po.grand_total) - flt(po.advance_paid)
 
 	# credit customer
 	jv.get("accounts")[0].account = party_account
@@ -573,13 +588,13 @@ def get_payment_entry_from_purchase_order(purchase_order):
 	jv.get("accounts")[0].party = po.supplier
 	jv.get("accounts")[0].balance = get_balance_on(party_account)
 	jv.get("accounts")[0].party_balance = get_balance_on(party=po.supplier, party_type="Supplier")
-	jv.get("accounts")[0].debit = amount
+	jv.get("accounts")[0].debit_in_account_currency = amount
 	jv.get("accounts")[0].reference_type = po.doctype
 	jv.get("accounts")[0].reference_name = po.name
 	jv.get("accounts")[0].is_advance = "Yes"
 
 	# debit bank
-	jv.get("accounts")[1].credit = amount
+	jv.get("accounts")[1].credit_in_account_currency = amount
 
 	return jv.as_dict()
 
@@ -669,7 +684,7 @@ def get_account_balance_and_party_type(account, date, company):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
 	company_currency = get_company_currency(company)
-	account_details = frappe.db.get_value("Account", account, ["account_type", "currency"], as_dict=1)
+	account_details = frappe.db.get_value("Account", account, ["account_type", "account_currency"], as_dict=1)
 	
 	if account_details.account_type == "Receivable":
 		party_type = "Customer"
@@ -679,12 +694,12 @@ def get_account_balance_and_party_type(account, date, company):
 		party_type = ""
 		
 	exchange_rate = None
-	if account_details.currency != company_currency:
-		exchange_rate = get_exchange_rate(account_details.currency, company_currency)
+	if account_details.account_currency != company_currency:
+		exchange_rate = get_exchange_rate(account_details.account_currency, company_currency)
 		
 	grid_values = {
 		"balance": get_balance_on(account, date),
 		"party_type": party_type,
-		"currency": account_details.currency or company_currency,
+		"account_currency": account_details.account_currency or company_currency,
 	}
 	return grid_values, exchange_rate
