@@ -271,13 +271,16 @@ class SalesInvoice(SellingController):
 			reconcile_against_document(lst)
 
 	def validate_debit_to_acc(self):
-		account = frappe.db.get_value("Account", self.debit_to, ["account_type", "report_type"], as_dict=True)
+		account = frappe.db.get_value("Account", self.debit_to, 
+			["account_type", "report_type", "account_currency"], as_dict=True)
 
 		if account.report_type != "Balance Sheet":
 			frappe.throw(_("Debit To account must be a Balance Sheet account"))
 
 		if self.customer and account.account_type != "Receivable":
 			frappe.throw(_("Debit To account must be a Receivable account"))
+			
+		self.party_account_currency = account.account_currency
 
 	def validate_fixed_asset_account(self):
 		"""Validate Fixed Asset and whether Income Account Entered Exists"""

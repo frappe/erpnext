@@ -91,13 +91,16 @@ class PurchaseInvoice(BuyingController):
 			throw(_("Conversion rate cannot be 0 or 1"))
 
 	def validate_credit_to_acc(self):
-		account = frappe.db.get_value("Account", self.credit_to, ["account_type", "report_type"], as_dict=True)
+		account = frappe.db.get_value("Account", self.credit_to, 
+			["account_type", "report_type", "account_currency"], as_dict=True)
 
 		if account.report_type != "Balance Sheet":
 			frappe.throw(_("Credit To account must be a Balance Sheet account"))
 
 		if self.supplier and account.account_type != "Payable":
 			frappe.throw(_("Credit To account must be a Payable account"))
+			
+		self.party_account_currency = account.account_currency
 
 	def check_for_stopped_status(self):
 		check_list = []

@@ -183,12 +183,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				method: "frappe.client.get_value",
 				args: {
 					doctype: "Account",
-					fieldname: "currency",
+					fieldname: "account_currency",
 					filters: { name: me.frm.doc.debit_to },
 				},
 				callback: function(r, rt) {
 					if(r.message) {
-						me.frm.set_value("party_account_currency", r.message.currency);
+						me.frm.set_value("party_account_currency", r.message.account_currency);
 						me.set_dynamic_labels();
 					}
 				}

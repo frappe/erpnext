@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
+from frappe import _, scrub
 from frappe.utils import flt
 from frappe.model.document import Document
 import json
@@ -38,7 +38,8 @@ class PaymentTool(Document):
 				d1.set("reference_type", v.against_voucher_type)
 				d1.set("reference_name", v.against_voucher_no)
 				d1.set('is_advance', 'Yes' if v.against_voucher_type in ['Sales Order', 'Purchase Order'] else 'No')
-				total_payment_amount = flt(total_payment_amount) + flt(d1.debit) - flt(d1.credit)
+				total_payment_amount = flt(total_payment_amount) + \
+					flt(d1.debit_in_account_currency) - flt(d1.credit_in_account_currency)
 
 		d2 = jv.append("accounts")
 		d2.account = self.payment_account
@@ -57,11 +58,14 @@ def get_outstanding_vouchers(args):
 		frappe.throw(_("No permission to use Payment Tool"), frappe.PermissionError)
 
 	args = json.loads(args)
+	
+	party_account_currency = frappe.db.get_value("Account", args.get("party_account"), "account_currency")
+	company_currency = frappe.db.get_value("Company", args.get("company"), "default_currency")
 
 	if args.get("party_type") == "Customer" and args.get("received_or_paid") == "Received":
-		amount_query = "ifnull(debit, 0) - ifnull(credit, 0)"
+		amount_query = "ifnull(debit_in_account_currency, 0) - ifnull(credit_in_account_currency, 0)"
 	elif args.get("party_type") == "Supplier" and args.get("received_or_paid") == "Paid":
-		amount_query = "ifnull(credit, 0) - ifnull(debit, 0)"
+		amount_query = "ifnull(credit_in_account_currency, 0) - ifnull(debit_in_account_currency, 0)"
 	else:
 		frappe.throw(_("Please enter the Against Vouchers manually"))
 
@@ -70,27 +74,34 @@ def get_outstanding_vouchers(args):
 		args.get("party_type"), args.get("party"))
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
-	orders_to_be_billed = get_orders_to_be_billed(args.get("party_type"), args.get("party"))
+	orders_to_be_billed = get_orders_to_be_billed(args.get("party_type"), args.get("party"), 
+		party_account_currency, company_currency)
 	return outstanding_invoices + orders_to_be_billed
 
-def get_orders_to_be_billed(party_type, party):
+def get_orders_to_be_billed(party_type, party, party_account_currency, company_currency):
 	voucher_type = 'Sales Order' if party_type == "Customer" else 'Purchase Order'
+	
+	ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
+	
 	orders = frappe.db.sql("""
 		select
 			name as voucher_no,
-			ifnull(base_grand_total, 0) as invoice_amount,
-			(ifnull(base_grand_total, 0) - ifnull(advance_paid, 0)) as outstanding_amount,
+			ifnull({ref_field}, 0) as invoice_amount,
+			(ifnull({ref_field}, 0) - ifnull(advance_paid, 0)) as outstanding_amount,
 			transaction_date as posting_date
 		from
-			`tab%s`
+			`tab{voucher_type}`
 		where
-			%s = %s
+			{party_type} = %s
 			and docstatus = 1
 			and ifnull(status, "") != "Stopped"
-			and ifnull(base_grand_total, 0) > ifnull(advance_paid, 0)
+			and ifnull({ref_field}, 0) > ifnull(advance_paid, 0)
 			and abs(100 - ifnull(per_billed, 0)) > 0.01
-		""" % (voucher_type, 'customer' if party_type == "Customer" else 'supplier', '%s'),
-			party, as_dict = True)
+		""".format(**{
+			"ref_field": ref_field,
+			"voucher_type": voucher_type,
+			"party_type": scrub(party_type)
+		}), party, as_dict = True)
 
 	order_list = []
 	for d in orders:
@@ -100,13 +111,19 @@ def get_orders_to_be_billed(party_type, party):
 	return order_list
 
 @frappe.whitelist()
-def get_against_voucher_amount(against_voucher_type, against_voucher_no):
+def get_against_voucher_amount(against_voucher_type, against_voucher_no, party_account, company):
+	party_account_currency = frappe.db.get_value("Account", party_account, "account_currency")
+	company_currency = frappe.db.get_value("Company", company, "default_currency")
+	ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
+	
 	if against_voucher_type in ["Sales Order", "Purchase Order"]:
-		select_cond = "base_grand_total as total_amount, ifnull(base_grand_total, 0) - ifnull(advance_paid, 0) as outstanding_amount"
+		select_cond = "{0} as total_amount, ifnull({0}, 0) - ifnull(advance_paid, 0) as outstanding_amount"\
+			.format(ref_field)
 	elif against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
-		select_cond = "base_grand_total as total_amount, outstanding_amount"
+		select_cond = "{0} as total_amount, outstanding_amount".format(ref_field)
 	elif against_voucher_type == "Journal Entry":
-		select_cond = "total_debit as total_amount"
+		ref_field = "total_debit" if party_account_currency == company_currency else "total_debit/exchange_rate"
+		select_cond = "{0} as total_amount".format(ref_field)
 
 	details = frappe.db.sql("""select {0} from `tab{1}` where name = %s"""
 		.format(select_cond, against_voucher_type), against_voucher_no, as_dict=1)

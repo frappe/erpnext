@@ -525,7 +525,7 @@ erpnext.taxes_and_totals = erpnext.stock.StockController.extend({
 			var outstanding_amount = flt(total_amount_to_pay, precision("outstanding_amount"));
 		}
 		
-		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {			
+		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {	
 			this.frm.set_value("outstanding_amount", outstanding_amount);
 		} else {
 			this.frm.set_value("outstanding_amount", 
