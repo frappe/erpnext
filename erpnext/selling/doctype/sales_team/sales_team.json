@@ -9,6 +9,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "sales_person", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -33,6 +35,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "contact_no", 
    "fieldtype": "Data", 
    "hidden": 1, 
@@ -56,6 +60,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -74,6 +80,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "allocated_percentage", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -97,6 +105,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "allocated_amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -121,6 +131,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "incentives", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -143,6 +155,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "parenttype", 
    "fieldtype": "Data", 
    "hidden": 1, 

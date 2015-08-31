@@ -11,6 +11,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "Supplier Name", 
    "fieldname": "supp_master_name", 
    "fieldtype": "Select", 
@@ -32,6 +34,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "supplier_type", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -52,6 +56,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "buying_price_list", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -72,6 +78,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_3", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -90,6 +98,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "po_required", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -110,6 +120,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "pr_required", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -130,6 +142,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "maintain_same_rate", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -149,6 +163,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "allow_multiple_items", 
    "fieldtype": "Check", 
    "hidden": 0, 

@@ -10,6 +10,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "user", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -32,6 +34,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "naming_series", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -54,6 +58,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "warehouse", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -76,6 +82,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "1", 
    "description": "", 
    "fieldname": "update_stock", 
@@ -97,6 +105,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_4", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -116,6 +126,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "customer", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -138,6 +150,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "company", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -160,6 +174,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "currency", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -182,6 +198,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "mode_of_payment", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -203,6 +221,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_16", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -222,6 +242,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "print_format", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -243,6 +265,8 @@
   }, 
   {
    "allow_on_submit": 1, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "letter_head", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -265,6 +289,8 @@
   }, 
   {
    "allow_on_submit": 1, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "select_print_heading", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -287,6 +313,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "tc_name", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -309,6 +337,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break0", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -328,6 +358,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "", 
    "fieldname": "territory", 
    "fieldtype": "Link", 
@@ -351,6 +383,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "selling_price_list", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -373,6 +407,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_19", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -392,6 +428,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "write_off_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -413,6 +451,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "write_off_cost_center", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -434,6 +474,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "taxes_and_charges", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -456,6 +498,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_23", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -475,6 +519,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "cash_bank_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -497,6 +543,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "income_account", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -519,6 +567,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:cint(sys_defaults.auto_accounting_for_stock)", 
    "fieldname": "expense_account", 
    "fieldtype": "Link", 
@@ -540,6 +590,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "cost_center", 
    "fieldtype": "Link", 
    "hidden": 0, 

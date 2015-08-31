@@ -10,6 +10,7 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
+from frappe.desk.notifications import clear_doctype_notifications
 
 
 form_grid_templates = {
@@ -166,6 +167,7 @@ class PurchaseOrder(BuyingController):
 
 		msgprint(_("Status of {0} {1} is now {2}").format(self.doctype, self.name, status))
 		self.notify_modified()
+		clear_doctype_notifications(self)
 
 	def on_submit(self):
 		super(PurchaseOrder, self).on_submit()

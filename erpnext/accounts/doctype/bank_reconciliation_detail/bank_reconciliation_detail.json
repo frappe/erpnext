@@ -9,6 +9,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "voucher_id", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -31,6 +33,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "clearance_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -52,6 +56,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "against_account", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -73,6 +79,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "cheque_number", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -94,6 +102,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "debit", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -116,6 +126,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "credit", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -138,6 +150,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "reference_type", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -159,6 +173,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "reference_name", 
    "fieldtype": "Dynamic Link", 
    "hidden": 0, 
@@ -180,6 +196,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "posting_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -201,6 +219,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "cheque_date", 
    "fieldtype": "Date", 
    "hidden": 0, 

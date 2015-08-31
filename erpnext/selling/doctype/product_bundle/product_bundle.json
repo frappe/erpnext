@@ -11,6 +11,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "basic_section", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -30,6 +32,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "", 
    "fieldname": "new_item_code", 
    "fieldtype": "Link", 
@@ -53,6 +57,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "List items that form the package.", 
    "fieldname": "item_section", 
    "fieldtype": "Section Break", 
@@ -73,6 +79,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "items", 
    "fieldtype": "Table", 
    "hidden": 0, 

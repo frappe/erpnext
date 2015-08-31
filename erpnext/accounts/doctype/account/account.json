@@ -239,7 +239,7 @@
    "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
-   "description": "", 
+   "description": "Setting Account Type helps in selecting this Account in transactions.", 
    "fieldname": "account_type", 
    "fieldtype": "Select", 
    "hidden": 0, 

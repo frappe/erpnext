@@ -10,6 +10,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "item_code", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -32,6 +34,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "item_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -53,6 +57,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "serial_no", 
    "fieldtype": "Small Text", 
    "hidden": 0, 
@@ -74,6 +80,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "description", 
    "fieldtype": "Text Editor", 
    "hidden": 0, 
@@ -97,6 +105,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "work_details", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -116,6 +126,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "service_person", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -138,6 +150,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "work_done", 
    "fieldtype": "Small Text", 
    "hidden": 0, 
@@ -159,6 +173,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "prevdoc_doctype", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -183,6 +199,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "prevdoc_docname", 
    "fieldtype": "Dynamic Link", 
    "hidden": 0, 
@@ -207,6 +225,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "prevdoc_detail_docname", 
    "fieldtype": "Data", 
    "hidden": 1, 

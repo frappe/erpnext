@@ -9,6 +9,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "journal_entry", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -33,6 +35,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "remarks", 
    "fieldtype": "Small Text", 
    "hidden": 0, 
@@ -56,6 +60,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "jv_detail_no", 
    "fieldtype": "Data", 
    "hidden": 1, 
@@ -79,6 +85,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -97,6 +105,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "advance_amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -121,6 +131,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "allocated_amount", 
    "fieldtype": "Currency", 
    "hidden": 0, 
