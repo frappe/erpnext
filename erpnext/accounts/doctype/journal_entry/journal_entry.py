@@ -258,7 +258,7 @@ class JournalEntry(AccountsController):
 		for d in self.get("accounts"):
 			d.account_currency = frappe.db.get_value("Account", d.account, "account_currency") or self.company_currency
 				
-			if d.account_currency!=self.company_currency:
+			if d.account_currency!=self.company_currency and d.account_currency not in alternate_currency:
 				alternate_currency.append(d.account_currency)
 			
 		if alternate_currency:
