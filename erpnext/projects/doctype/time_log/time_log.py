@@ -26,16 +26,16 @@ class TimeLog(Document):
 		self.check_workstation_timings()
 		self.validate_production_order()
 		self.validate_manufacturing()
-		self.validate_task()
+		self.set_project_if_missing()
 		self.update_cost()
 
 	def on_submit(self):
 		self.update_production_order()
-		self.update_task()
+		self.update_task_and_project()
 
 	def on_cancel(self):
 		self.update_production_order()
-		self.update_task()
+		self.update_task_and_project()
 
 	def before_update_after_submit(self):
 		self.set_status()
@@ -57,14 +57,17 @@ class TimeLog(Document):
 			self.status="Billed"
 
 	def set_title(self):
+		"""Set default title for the Time Log"""
+		if self.title:
+			return
+
+		from frappe.utils import get_fullname
 		if self.production_order:
 			self.title = _("{0} for {1}").format(self.operation, self.production_order)
-		elif self.task:
-			self.title = _("{0} for {1}").format(self.activity_type, self.task)
-		elif self.project:
-			self.title = _("{0} for {1}").format(self.activity_type, self.project)
+		elif self.activity_type and (self.task or self.project):
+			self.title = _("{0} for {1}").format(self.activity_type, self.task or self.project)
 		else:
-			self.title = self.activity_type
+			self.title = self.task or self.project or get_fullname(frappe.session.user)
 
 	def validate_overlap(self):
 		"""Checks if 'Time Log' entries overlap for a user, workstation. """
@@ -110,6 +113,11 @@ class TimeLog(Document):
 		if self.to_time and self.from_time:
 			from frappe.utils import time_diff_in_seconds
 			self.hours = flt(time_diff_in_seconds(self.to_time, self.from_time)) / 3600
+
+	def set_project_if_missing(self):
+		"""Set project if task is set"""
+		if self.task and not self.project:
+			self.project = frappe.db.get_value("Task", self.task, "project")
 
 	def validate_time_log_for(self):
 		if not self.for_manufacturing:
@@ -221,24 +229,25 @@ class TimeLog(Document):
 	def update_cost(self):
 		rate = get_activity_cost(self.employee, self.activity_type)
 		if rate:
-			self.costing_rate = rate.get('costing_rate')
-			self.billing_rate = rate.get('billing_rate')
+			self.costing_rate = flt(rate.get('costing_rate'))
+			self.billing_rate = flt(rate.get('billing_rate'))
 			self.costing_amount = self.costing_rate * self.hours
 			if self.billable:
 				self.billing_amount = self.billing_rate * self.hours
 			else:
 				self.billing_amount = 0
 
-	def validate_task(self):
-		# if a time log is being created against a project without production order
-		if (self.project and not self.production_order) and not self.task:
-			frappe.throw(_("Task is Mandatory if Time Log is against a project"))
+	def update_task_and_project(self):
+		"""Update costing rate in Task or Project if either is set"""
 
-	def update_task(self):
-		if self.task and frappe.db.exists("Task", self.task):
+		if self.task:
 			task = frappe.get_doc("Task", self.task)
 			task.update_time_and_costing()
 			task.save()
+
+		elif self.project:
+			frappe.get_doc("Project", self.project).update_project()
+
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
@@ -270,9 +279,10 @@ def get_events(start, end, filters=None):
 
 @frappe.whitelist()
 def get_activity_cost(employee=None, activity_type=None):
-	rate = frappe.db.sql("""select costing_rate, billing_rate from `tabActivity Cost` where employee= %s
-		and activity_type= %s""", (employee, activity_type), as_dict=1)
+	rate = frappe.db.get_values("Activity Cost", {"employee": employee,
+		"activity_type": activity_type}, ["costing_rate", "billing_rate"], as_dict=True)
 	if not rate:
-		rate = frappe.db.sql("""select costing_rate, billing_rate from `tabActivity Cost` where ifnull(employee, '')=''
-			and activity_type= %s""", (activity_type), as_dict=1)
+		rate = frappe.db.get_values("Activity Type", {"activity_type": activity_type},
+			["costing_rate", "billing_rate"], as_dict=True)
+
 	return rate[0] if rate else {}

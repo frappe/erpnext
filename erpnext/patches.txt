@@ -201,3 +201,4 @@ execute:frappe.delete_doc_if_exists("Print Format", "Credit Note - Negative Invo
 
 # V6.0
 erpnext.patches.v6_0.set_default_title # 2015-09-03
+erpnext.patches.v6_0.default_activity_rate

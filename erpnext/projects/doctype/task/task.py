@@ -57,7 +57,7 @@ class Task(Document):
 
 	def update_time_and_costing(self):
 		tl = frappe.db.sql("""select min(from_time) as start_date, max(to_time) as end_date,
-			 sum(billing_amount) as total_billing_amount, sum(costing_amount) as total_costing_amount,
+			sum(billing_amount) as total_billing_amount, sum(costing_amount) as total_costing_amount,
 			sum(hours) as time from `tabTime Log` where task = %s and docstatus=1"""
 			,self.name, as_dict=1)[0]
 		if self.status == "Open":
@@ -70,10 +70,7 @@ class Task(Document):
 
 	def update_project(self):
 		if self.project and not self.flags.from_project:
-			project = frappe.get_doc("Project", self.project)
-			project.flags.dont_sync_tasks = True
-			project.update_project()
-			project.save()
+			frappe.get_doc("Project", self.project).update_project()
 
 	def check_recursion(self):
 		if self.flags.ignore_recursion_check: return
