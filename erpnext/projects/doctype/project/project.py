@@ -46,8 +46,6 @@ class Project(Document):
 		"""sync tasks and remove table"""
 		if self.flags.dont_sync_tasks: return
 
-
-		task_added_or_deleted = False
 		task_names = []
 		for t in self.tasks:
 			if t.task_id:
@@ -55,7 +53,6 @@ class Project(Document):
 			else:
 				task = frappe.new_doc("Task")
 				task.project = self.name
-				task_added_or_deleted = True
 
 			task.update({
 				"subject": t.title,
@@ -73,14 +70,15 @@ class Project(Document):
 		# delete
 		for t in frappe.get_all("Task", ["name"], {"project": self.name, "name": ("not in", task_names)}):
 			frappe.delete_doc("Task", t.name)
-			task_added_or_deleted = True
 
-		if task_added_or_deleted:
-			self.update_project()
+		self.update_percent_complete()
+		self.update_costing()
 
 	def update_project(self):
 		self.update_percent_complete()
 		self.update_costing()
+		self.flags.dont_sync_tasks = True
+		self.save()
 
 	def update_percent_complete(self):
 		total = frappe.db.sql("""select count(*) from tabTask where project=%s""", self.name)[0][0]
@@ -91,18 +89,28 @@ class Project(Document):
 			self.percent_complete = flt(completed) / total * 100
 
 	def update_costing(self):
-		total_cost = frappe.db.sql("""select sum(ifnull(total_costing_amount, 0)) as costing_amount,
-			sum(ifnull(total_billing_amount, 0)) as billing_amount, sum(ifnull(total_expense_claim, 0)) as expense_claim,
-			min(act_start_date) as start_date, max(act_end_date) as end_date, sum(actual_time) as time
-			from `tabTask` where project = %s""", self.name, as_dict=1)[0]
+		from_time_log = frappe.db.sql("""select
+			sum(ifnull(costing_amount, 0)) as costing_amount,
+			sum(ifnull(billing_amount, 0)) as billing_amount,
+			min(from_time) as start_date,
+			max(to_time) as end_date,
+			sum(hours) as time
+			from `tabTime Log` where project = %s and docstatus = 1""", self.name, as_dict=1)[0]
 
-		self.total_costing_amount = total_cost.costing_amount
-		self.total_billing_amount = total_cost.billing_amount
-		self.total_expense_claim = total_cost.expense_claim
-		self.actual_start_date = total_cost.start_date
-		self.actual_end_date = total_cost.end_date
-		self.actual_time = total_cost.time
-		self.gross_margin = flt(total_cost.billing_amount) - flt(total_cost.costing_amount)
+		from_expense_claim = frappe.db.sql("""select sum(ifnull(total_sanctioned_amount, 0))
+			from `tabExpense Claim` where project = %s""", self.name, as_dict=1)[0]
+
+		self.actual_start_date = from_time_log.start_date
+		self.actual_end_date = from_time_log.end_date
+
+		self.total_costing_amount = from_time_log.costing_amount
+		self.total_billing_amount = from_time_log.billing_amount
+		self.actual_time = from_time_log.time
+
+		self.total_expense_claim = from_expense_claim.total_sanctioned_amount
+
+		self.gross_margin = flt(self.total_billing_amount) - flt(self.total_costing_amount)
+
 		if self.total_billing_amount:
 			self.per_gross_margin = (self.gross_margin / flt(self.total_billing_amount)) *100
 
