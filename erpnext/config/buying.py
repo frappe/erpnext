@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from frappe import _
 
 def get_data():
@@ -74,7 +75,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Purchase Taxes and Charges Master",
+					"name": "Purchase Taxes and Charges Template",
 					"description": _("Tax template for buying transactions.")
 				},
 				{
@@ -153,6 +154,16 @@ def get_data():
 					"name": "Supplier-Wise Sales Analytics",
 					"doctype": "Stock Ledger Entry"
 				}
+			]
+		},
+		{
+			"label": _("Help"),
+			"items": [
+				{
+					"type": "help",
+					"label": _("Customer and Supplier"),
+					"youtube_id": "anoGi_RpQ20"
+				},
 			]
 		},
 	]

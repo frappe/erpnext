@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -10,7 +10,6 @@ class ItemPriceDuplicateItem(frappe.ValidationError): pass
 from frappe.model.document import Document
 
 class ItemPrice(Document):
-
 	def validate(self):
 		self.validate_item()
 		self.validate_price_list()

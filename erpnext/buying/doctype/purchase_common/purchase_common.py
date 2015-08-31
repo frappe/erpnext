@@ -1,24 +1,22 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
-
-from frappe.utils import cstr, flt
+from frappe.utils import flt, cstr, cint
 from frappe import _
 
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.controllers.buying_controller import BuyingController
 
 class PurchaseCommon(BuyingController):
-
 	def update_last_purchase_rate(self, obj, is_submit):
 		"""updates last_purchase_rate in item table for each item"""
 
 		import frappe.utils
 		this_purchase_date = frappe.utils.getdate(obj.get('posting_date') or obj.get('transaction_date'))
 
-		for d in obj.get(obj.fname):
+		for d in obj.get("items"):
 			# get last purchase details
 			last_purchase_details = get_last_purchase_details(d.item_code, obj.name)
 
@@ -40,36 +38,10 @@ class PurchaseCommon(BuyingController):
 				frappe.db.sql("""update `tabItem` set last_purchase_rate = %s where name = %s""",
 					(flt(last_purchase_rate), d.item_code))
 
-	def get_last_purchase_rate(self, obj):
-		"""get last purchase rates for all items"""
-		doc_name = obj.name
-		conversion_rate = flt(obj.get('conversion_rate')) or 1.0
-
-		for d in obj.get(obj.fname):
-			if d.item_code:
-				last_purchase_details = get_last_purchase_details(d.item_code, doc_name)
-
-				if last_purchase_details:
-					d.base_price_list_rate = last_purchase_details['base_price_list_rate'] * (flt(d.conversion_factor) or 1.0)
-					d.discount_percentage = last_purchase_details['discount_percentage']
-					d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
-					d.price_list_rate = d.base_price_list_rate / conversion_rate
-					d.rate = d.base_rate / conversion_rate
-				else:
-					# if no last purchase found, reset all values to 0
-					d.base_price_list_rate = d.base_rate = d.price_list_rate = d.rate = d.discount_percentage = 0
-
-					item_last_purchase_rate = frappe.db.get_value("Item",
-						d.item_code, "last_purchase_rate")
-					if item_last_purchase_rate:
-						d.base_price_list_rate = d.base_rate = d.price_list_rate \
-							= d.rate = item_last_purchase_rate
-
 	def validate_for_items(self, obj):
-		check_list, chk_dupl_itm=[],[]
-		for d in obj.get(obj.fname):
-			# validation for valid qty
-			if flt(d.qty) < 0 or (d.parenttype != 'Purchase Receipt' and not flt(d.qty)):
+		items = []
+		for d in obj.get("items"):
+			if not d.qty:
 				frappe.throw(_("Please enter quantity for Item {0}").format(d.item_code))
 
 			# udpate with latest quantities
@@ -84,65 +56,26 @@ class PurchaseCommon(BuyingController):
 					d.set(x, f_lst[x])
 
 			item = frappe.db.sql("""select is_stock_item, is_purchase_item,
-				is_sub_contracted_item, end_of_life from `tabItem` where name=%s""", d.item_code)
+				is_sub_contracted_item, end_of_life from `tabItem` where name=%s""",
+				d.item_code, as_dict=1)[0]
 
 			from erpnext.stock.doctype.item.item import validate_end_of_life
-			validate_end_of_life(d.item_code, item[0][3])
+			validate_end_of_life(d.item_code, item.end_of_life)
 
 			# validate stock item
-			if item[0][0]=='Yes' and d.qty and not d.warehouse:
+			if item.is_stock_item==1 and d.qty and not d.warehouse:
 				frappe.throw(_("Warehouse is mandatory for stock Item {0} in row {1}").format(d.item_code, d.idx))
 
 			# validate purchase item
-			if not (obj.doctype=="Material Request" and getattr(obj, "material_request_type", None)=="Transfer"):
-				if item[0][1] != 'Yes' and item[0][2] != 'Yes':
+			if not (obj.doctype=="Material Request" and getattr(obj, "material_request_type", None)=="Material Transfer"):
+				if item.is_purchase_item != 1 and item.is_sub_contracted_item != 1:
 					frappe.throw(_("{0} must be a Purchased or Sub-Contracted Item in row {1}").format(d.item_code, d.idx))
 
-			# list criteria that should not repeat if item is stock item
-			e = [getattr(d, "schedule_date", None), d.item_code, d.description, d.warehouse, d.uom,
-				d.meta.get_field('prevdoc_docname') and d.prevdoc_docname or d.meta.get_field('sales_order_no') and d.sales_order_no or '',
-				d.meta.get_field('prevdoc_detail_docname') and d.prevdoc_detail_docname or '',
-				d.meta.get_field('batch_no') and d.batch_no or '']
+			items.append(cstr(d.item_code))
+		if items and len(items) != len(set(items)) and \
+			not cint(frappe.db.get_single_value("Buying Settings", "allow_multiple_items") or 0):
+			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
 
-			# if is not stock item
-			f = [getattr(d, "schedule_date", None), d.item_code, d.description]
-
-			ch = frappe.db.sql("""select is_stock_item from `tabItem` where name = %s""", d.item_code)
-
-			if ch and ch[0][0] == 'Yes':
-				# check for same items
-				if e in check_list:
-					frappe.throw(_("Item {0} has been entered multiple times with same description or date or warehouse").format(d.item_code))
-				else:
-					check_list.append(e)
-
-			elif ch and ch[0][0] == 'No':
-				# check for same items
-				if f in chk_dupl_itm:
-					frappe.throw(_("Item {0} has been entered multiple times with same description or date").format(d.item_code))
-				else:
-					chk_dupl_itm.append(f)
-
-	def get_qty(self, curr_doctype, ref_tab_fname, ref_tab_dn, ref_doc_tname, transaction, curr_parent_name):
-		# Get total Quantities of current doctype (eg. PR) except for qty of this transaction
-		#------------------------------
-		# please check as UOM changes from Material Request - Purchase Order ,so doing following else uom should be same .
-		# i.e. in PO uom is NOS then in PR uom should be NOS
-		# but if in Material Request uom KG it can change in PO
-
-		get_qty = (transaction == 'Material Request - Purchase Order') and 'qty * conversion_factor' or 'qty'
-		qty = frappe.db.sql("""select sum(%s) from `tab%s` where %s = %s and
-			docstatus = 1 and parent != %s""" % (get_qty, curr_doctype, ref_tab_fname, '%s', '%s'),
-			(ref_tab_dn, curr_parent_name))
-		qty = qty and flt(qty[0][0]) or 0
-
-		# get total qty of ref doctype
-		#--------------------
-		max_qty = frappe.db.sql("""select qty from `tab%s` where name = %s
-			and docstatus = 1""" % (ref_doc_tname, '%s'), ref_tab_dn)
-		max_qty = max_qty and flt(max_qty[0][0]) or 0
-
-		return cstr(qty)+'~~~'+cstr(max_qty)
 
 	def check_for_stopped_status(self, doctype, docname):
 		stopped = frappe.db.sql("""select name from `tab%s` where name = %s and

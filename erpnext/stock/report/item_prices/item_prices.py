@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -115,7 +115,7 @@ def get_item_bom_rate():
 
 	item_bom_map = {}
 
-	for b in frappe.db.sql("""select item, (total_variable_cost/quantity) as bom_rate
+	for b in frappe.db.sql("""select item, (total_cost/quantity) as bom_rate
 		from `tabBOM` where is_active=1 and is_default=1""", as_dict=1):
 			item_bom_map.setdefault(b.item, flt(b.bom_rate))
 

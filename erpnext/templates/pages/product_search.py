@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -33,7 +33,7 @@ def get_product_list(search=None, start=0, limit=10):
 
 	for d in data:
 		d.route = ((d.parent_website_route + "/") if d.parent_website_route else "") \
-			+ d.page_name
+			+ (d.page_name or "")
 
 	return [get_item_for_list_in_html(r) for r in data]
 

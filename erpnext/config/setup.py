@@ -1,5 +1,6 @@
+from __future__ import unicode_literals
 from frappe import _
-from frappe.widgets.moduleview import add_setup_section
+from frappe.desk.moduleview import add_setup_section
 
 def get_data():
 	data = [
@@ -17,7 +18,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Printing and Branding"),
+			"label": _("Printing"),
 			"icon": "icon-print",
 			"items": [
 				{
@@ -39,6 +40,36 @@ def get_data():
 					"type": "doctype",
 					"name": "Terms and Conditions",
 					"description": _("Standard contract terms for Sales or Purchase.")
+				},
+			]
+		},
+		{
+			"label": _("Help"),
+			"items": [
+				{
+					"type": "help",
+					"name": _("Data Import and Export"),
+					"youtube_id": "6wiriRKPhmg"
+				},
+				{
+					"type": "help",
+					"label": _("Setting up Email"),
+					"youtube_id": "YFYe0DrB95o"
+				},
+				{
+					"type": "help",
+					"label": _("Printing and Branding"),
+					"youtube_id": "cKZHcx1znMc"
+				},
+				{
+					"type": "help",
+					"label": _("Users and Permissions"),
+					"youtube_id": "fnBoRhBrwR4"
+				},
+				{
+					"type": "help",
+					"label": _("Workflow"),
+					"youtube_id": "yObJUg9FxFs"
 				},
 			]
 		},
@@ -75,62 +106,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Support Email Settings",
-					"description": _("Setup incoming server for support email id. (e.g. support@example.com)")
-				},
-				{
-					"type": "doctype",
-					"name": "Sales Email Settings",
-					"description": _("Setup incoming server for sales email id. (e.g. sales@example.com)")
-				},
-				{
-					"type": "doctype",
-					"name": "Jobs Email Settings",
-					"description": _("Setup incoming server for jobs email id. (e.g. jobs@example.com)")
-				},
-				{
-					"type": "doctype",
 					"name": "SMS Settings",
 					"description": _("Setup SMS gateway settings")
 				},
 			]
-		},
-		{
-			"label": _("Masters"),
-			"icon": "icon-star",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Company",
-					"description": _("Company (not Customer or Supplier) master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Item",
-					"description": _("Item master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Customer",
-					"description": _("Customer master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Supplier",
-					"description": _("Supplier master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Contact",
-					"description": _("Contact master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Address",
-					"description": _("Address master.")
-				},
-			]
-		},
+		}
 	]
 
 	for module, label, icon in (

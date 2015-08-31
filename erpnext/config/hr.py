@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from frappe import _
 
 def get_data():
@@ -46,6 +47,11 @@ def get_data():
 					"name": "Job Opening",
 					"description": _("Opening for a Job."),
 				},
+				{
+					"type": "doctype",
+					"name": "Offer Letter",
+					"description": _("Offer candidate a Job."),
+				},
 			]
 		},
 		{
@@ -54,7 +60,7 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Salary Manager",
+					"name": "Process Payroll",
 					"label": _("Process Payroll"),
 					"description":_("Generate Salary Slips"),
 					"hide_count": True
@@ -82,11 +88,6 @@ def get_data():
 					"type": "doctype",
 					"name": "HR Settings",
 					"description": _("Settings for HR Module")
-				},
-				{
-					"type": "doctype",
-					"name": "Employee",
-					"description": _("Employee master.")
 				},
 				{
 					"type": "doctype",
@@ -155,7 +156,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Jobs Email Settings",
+					"name": "Email Account",
 					"description": _("Setup incoming server for jobs email id. (e.g. jobs@example.com)")
 				},
 			]

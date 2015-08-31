@@ -1,7 +1,11 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch('employee','employee_name','employee_name');
+
+frappe.ui.form.on("Leave Application", "leave_approver", function(frm) {
+	frm.set_value("leave_approver_name", frappe.user.full_name(frm.doc.leave_approver));
+});
 
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.posting_date)
@@ -13,7 +17,10 @@ cur_frm.cscript.onload = function(doc, dt, dn) {
 
 	cur_frm.set_query("leave_approver", function() {
 		return {
-			filters: [["UserRole", "role", "=", "Leave Approver"]]
+			query: "erpnext.hr.doctype.leave_application.leave_application.get_approvers",
+			filters: {
+				employee: cur_frm.doc.employee
+			}
 		};
 	});
 
@@ -33,20 +40,8 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 				cur_frm.set_intro(__("You are the Leave Approver for this record. Please Update the 'Status' and Save"));
 				cur_frm.toggle_enable("status", true);
 			} else {
-				cur_frm.set_intro(__("This Leave Application is pending approval. Only the Leave Apporver can update status."))
+				cur_frm.set_intro(__("This Leave Application is pending approval. Only the Leave Approver can update status."))
 				cur_frm.toggle_enable("status", false);
-				if(!doc.__islocal) {
-						cur_frm.frm_head.appframe.set_title_right("");
-				}
-			}
-		} else {
- 			if(doc.status=="Approved") {
-				cur_frm.set_intro(__("Leave application has been approved."));
-				if(cur_frm.doc.docstatus==0) {
-					cur_frm.set_intro(__("Please submit to update Leave Balance."));
-				}
-			} else if(doc.status=="Rejected") {
-				cur_frm.set_intro(__("Leave application has been rejected."));
 			}
 		}
 	}
@@ -104,7 +99,15 @@ cur_frm.cscript.calculate_total_days = function(doc, dt, dn) {
 		if(cint(doc.half_day) == 1) set_multiple(dt,dn,{total_leave_days:0.5});
 		else{
 			// server call is done to include holidays in leave days calculations
-			return get_server_fields('get_total_leave_days', '', '', doc, dt, dn, 1);
+			return frappe.call({
+				method: 'erpnext.hr.doctype.leave_application.leave_application.get_total_leave_days',
+				args: {leave_app: doc},
+				callback: function(response) {
+					if (response && response.message) {
+						cur_frm.set_value('total_leave_days', response.message.total_leave_days);
+					}
+				}
+			});
 		}
 	}
 }

@@ -1,1 +1,0 @@
-Standard settings for Point of Sales (POS) type of Sales Invoice.

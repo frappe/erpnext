@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 from __future__ import unicode_literals
@@ -31,9 +31,9 @@ def execute():
 
 		system_settings.language = lang
 
-	system_settings.ignore_mandatory = True
+	system_settings.flags.ignore_mandatory = True
 	system_settings.save()
 
 	global_defaults = frappe.get_doc("Global Defaults")
-	global_defaults.ignore_mandatory = True
+	global_defaults.flags.ignore_mandatory = True
 	global_defaults.save()

@@ -1,0 +1,2 @@
+- Most transaction forms will now have collapsibe sections so that forms appear to be more organized and you can easily locate parts to be edited.
+- The document title on most transactions can be edited so that you can set meaningful titles to all transactions like Sales Invoice and also edit it to denote status.

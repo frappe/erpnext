@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -16,7 +16,7 @@ def execute(filters=None):
 		data.append([
 			d.name, d.customer, d.territory, d.posting_date, d.item_code,
 			item_details.get(d.item_code, {}).get("item_group"), item_details.get(d.item_code, {}).get("brand"),
-			d.qty, d.base_amount, d.sales_person, d.allocated_percentage, d.contribution_amt
+			d.qty, d.base_net_amount, d.sales_person, d.allocated_percentage, d.contribution_amt
 		])
 
 	return columns, data
@@ -34,39 +34,45 @@ def get_columns(filters):
 
 def get_entries(filters):
 	date_field = filters["doc_type"] == "Sales Order" and "transaction_date" or "posting_date"
-	conditions, items = get_conditions(filters, date_field)
+	conditions, values = get_conditions(filters, date_field)
 	entries = frappe.db.sql("""select dt.name, dt.customer, dt.territory, dt.%s as posting_date,
-		dt_item.item_code, dt_item.qty, dt_item.base_amount, st.sales_person,
-		st.allocated_percentage, dt_item.base_amount*st.allocated_percentage/100 as contribution_amt
+		dt_item.item_code, dt_item.qty, dt_item.base_net_amount, st.sales_person,
+		st.allocated_percentage, dt_item.base_net_amount*st.allocated_percentage/100 as contribution_amt
 		from `tab%s` dt, `tab%s Item` dt_item, `tabSales Team` st
 		where st.parent = dt.name and dt.name = dt_item.parent and st.parenttype = %s
 		and dt.docstatus = 1 %s order by st.sales_person, dt.name desc""" %
 		(date_field, filters["doc_type"], filters["doc_type"], '%s', conditions),
-		tuple([filters["doc_type"]] + items), as_dict=1)
+		tuple([filters["doc_type"]] + values), as_dict=1)
 
 	return entries
 
 def get_conditions(filters, date_field):
-	conditions = ""
-	if filters.get("company"): conditions += " and dt.company = '%s'" % \
-		filters["company"].replace("'", "\'")
-	if filters.get("customer"): conditions += " and dt.customer = '%s'" % \
-		filters["customer"].replace("'", "\'")
-	if filters.get("territory"): conditions += " and dt.territory = '%s'" % \
-		filters["territory"].replace("'", "\'")
-
-	if filters.get("from_date"): conditions += " and dt.%s >= '%s'" % \
-		(date_field, filters["from_date"])
-	if filters.get("to_date"): conditions += " and dt.%s <= '%s'" % (date_field, filters["to_date"])
-
-	if filters.get("sales_person"): conditions += " and st.sales_person = '%s'" % \
-	 	filters["sales_person"].replace("'", "\'")
+	conditions = [""]
+	values = []
+	
+	for field in ["company", "customer", "territory"]:
+		if filters.get(field):
+			conditions.append("dt.{0}=%s".format(field))
+			values.append(filters[field])
+			
+	if filters.get("sales_person"):
+		conditions.append("st.sales_person=%s")
+		values.append(filters["sales_person"])
+		
+	if filters.get("from_date"):
+		conditions.append("dt.{0}>=%s".format(date_field))
+		values.append(filters["from_date"])
+		
+	if filters.get("to_date"):
+		conditions.append("dt.{0}<=%s".format(date_field))
+		values.append(filters["to_date"])
 
 	items = get_items(filters)
 	if items:
-		conditions += " and dt_item.item_code in (%s)" % ', '.join(['%s']*len(items))
+		conditions.append("dt_item.item_code in (%s)" % ', '.join(['%s']*len(items)))
+		values += items
 
-	return conditions, items
+	return " and ".join(conditions), values
 
 def get_items(filters):
 	if filters.get("item_group"): key = "item_group"

@@ -10,13 +10,13 @@
   "delivery_date": "2013-02-23", 
   "doctype": "Sales Order", 
   "fiscal_year": "_Test Fiscal Year 2013", 
+  "base_grand_total": 1000.0, 
   "grand_total": 1000.0, 
-  "grand_total_export": 1000.0, 
   "naming_series": "_T-Sales Order-", 
   "order_type": "Sales", 
   "plc_conversion_rate": 1.0, 
   "price_list_currency": "INR", 
-  "sales_order_details": [
+  "items": [
    {
     "base_amount": 1000.0, 
     "base_rate": 100.0, 
@@ -24,7 +24,7 @@
     "doctype": "Sales Order Item", 
     "item_code": "_Test Item Home Desktop 100", 
     "item_name": "CPU", 
-    "parentfield": "sales_order_details", 
+    "parentfield": "items", 
     "qty": 10.0, 
     "rate": 100.0, 
     "warehouse": "_Test Warehouse - _TC"

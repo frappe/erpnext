@@ -11,7 +11,7 @@
  "module": "Accounts", 
  "name": "Bank Reconciliation Statement", 
  "owner": "Administrator", 
- "ref_doctype": "Journal Voucher", 
+ "ref_doctype": "Journal Entry", 
  "report_name": "Bank Reconciliation Statement", 
  "report_type": "Script Report"
 }

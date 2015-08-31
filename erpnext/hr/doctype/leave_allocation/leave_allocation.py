@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -22,9 +22,6 @@ class LeaveAllocation(Document):
 
 	def on_update(self):
 		self.get_total_allocated_leaves()
-
-	def on_cancel(self):
-		self.check_for_leave_application()
 
 	def validate_new_leaves_allocated_value(self):
 		"""validate that leave allocation is in multiples of 0.5"""
@@ -88,13 +85,4 @@ class LeaveAllocation(Document):
 		leave_det = self.get_carry_forwarded_leaves()
 		frappe.db.set(self,'carry_forwarded_leaves',flt(leave_det['carry_forwarded_leaves']))
 		frappe.db.set(self,'total_leaves_allocated',flt(leave_det['total_leaves_allocated']))
-
-	def check_for_leave_application(self):
-		exists = frappe.db.sql("""select name from `tabLeave Application`
-			where employee=%s and leave_type=%s and fiscal_year=%s and docstatus=1""",
-			(self.employee, self.leave_type, self.fiscal_year))
-		if exists:
-			frappe.msgprint(_("Cannot cancel because Employee {0} is already approved for {1}").format(self.employee,
-				self.leave_type))
-			frappe.throw('<a href="#Form/Leave Application/{0}">{0}</a>'.format(exists[0][0]))
 

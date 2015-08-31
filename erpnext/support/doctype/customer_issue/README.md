@@ -1,1 +1,0 @@
-Issue raised by Customer, can be tagged against Invoice, Serial Number to verify warranty, service contract.

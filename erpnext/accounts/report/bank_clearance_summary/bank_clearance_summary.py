@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -14,7 +14,7 @@ def execute(filters=None):
 	return columns, data
 	
 def get_columns():
-	return [_("Journal Voucher") + ":Link/Journal Voucher:140", _("Account") + ":Link/Account:140", 
+	return [_("Journal Entry") + ":Link/Journal Entry:140", _("Account") + ":Link/Account:140", 
 		_("Posting Date") + ":Date:100", _("Clearance Date") + ":Date:110", _("Against Account") + ":Link/Account:200", 
 		_("Debit") + ":Currency:120", _("Credit") + ":Currency:120"
 	]
@@ -35,7 +35,7 @@ def get_entries(filters):
 	conditions = get_conditions(filters)
 	entries =  frappe.db.sql("""select jv.name, jvd.account, jv.posting_date, 
 		jv.clearance_date, jvd.against_account, jvd.debit, jvd.credit
-		from `tabJournal Voucher Detail` jvd, `tabJournal Voucher` jv 
+		from `tabJournal Entry Account` jvd, `tabJournal Entry` jv 
 		where jvd.parent = jv.name and jv.docstatus=1 %s
 		order by jv.name DESC""" % conditions, filters, as_list=1)
 	return entries

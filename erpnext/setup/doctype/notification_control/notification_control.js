@@ -1,13 +1,19 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.select_transaction = function(doc, cdt, cdn) {
-  if(doc.select_transaction) {
-    var callback = function(r,rt) {
-      var doc = locals[cdt][cdn];
-      doc.custom_message = r.message;
-      refresh_field('custom_message');
-    }
-    return $c_obj(doc,'get_message',doc.select_transaction, callback)
-  }
-}
+frappe.ui.form.on("Notification Control", {
+	select_transaction: function(frm) {
+		frm.set_value("custom_message", frm.events.get_fieldname(frm));
+	},
+	set_message: function(frm) {
+		frm.set_value(frm.events.get_fieldname(frm), frm.doc.custom_message);
+		frm.save();
+	},
+	get_fieldname: function(frm) {
+		return frm.doc.select_transaction.replace(" ", "_").toLowerCase() + "_message";
+	},
+	after_save: function(frm) {
+		// update notification settings in current session
+		frappe.boot.notification_settings = frm.doc;
+	}
+});

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -83,7 +83,7 @@ def get_data(company, root_type, balance_must_be, period_list, ignore_closing_en
 	gl_entries_by_account = get_gl_entries(company, period_list[0]["from_date"], period_list[-1]["to_date"],
 		accounts[0].lft, accounts[0].rgt, ignore_closing_entries=ignore_closing_entries)
 
-	calculate_values(accounts, gl_entries_by_account, period_list)
+	calculate_values(accounts_by_name, gl_entries_by_account, period_list)
 	accumulate_values_into_parents(accounts, accounts_by_name, period_list)
 	out = prepare_data(accounts, balance_must_be, period_list)
 
@@ -92,16 +92,14 @@ def get_data(company, root_type, balance_must_be, period_list, ignore_closing_en
 
 	return out
 
-def calculate_values(accounts, gl_entries_by_account, period_list):
-	for d in accounts:
-		for name in ([d.name] + (d.collapsed_children or [])):
-			for entry in gl_entries_by_account.get(name, []):
-				for period in period_list:
-					entry.posting_date = getdate(entry.posting_date)
-
-					# check if posting date is within the period
-					if entry.posting_date <= period.to_date:
-						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
+def calculate_values(accounts_by_name, gl_entries_by_account, period_list):
+	for entries in gl_entries_by_account.values():
+		for entry in entries:
+			d = accounts_by_name.get(entry.account)
+			for period in period_list:
+				# check if posting date is within the period
+				if entry.posting_date <= period.to_date:
+					d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
 
 
 def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
@@ -146,7 +144,7 @@ def prepare_data(accounts, balance_must_be, period_list):
 
 def add_total_row(out, balance_must_be, period_list):
 	row = {
-		"account_name": _("Total ({0})").format(balance_must_be),
+		"account_name": "'" + _("Total ({0})").format(balance_must_be) + "'",
 		"account": None
 	}
 	for period in period_list:
@@ -159,21 +157,8 @@ def add_total_row(out, balance_must_be, period_list):
 	out.append({})
 
 def get_accounts(company, root_type):
-	# root lft, rgt
-	root_account = frappe.db.sql("""select lft, rgt from `tabAccount`
-		where company=%s and root_type=%s order by lft limit 1""",
-		(company, root_type), as_dict=True)
-
-	if not root_account:
-		return None
-
-	lft, rgt = root_account[0].lft, root_account[0].rgt
-
-	accounts = frappe.db.sql("""select * from `tabAccount`
-		where company=%(company)s and lft >= %(lft)s and rgt <= %(rgt)s order by lft""",
-		{ "company": company, "lft": lft, "rgt": rgt }, as_dict=True)
-
-	return accounts
+	return frappe.db.sql("""select name, parent_account, lft, rgt, root_type, report_type, account_name from `tabAccount`
+		where company=%s and root_type=%s order by lft""", (company, root_type), as_dict=True)
 
 def filter_accounts(accounts, depth=10):
 	parent_children_map = {}
@@ -183,24 +168,37 @@ def filter_accounts(accounts, depth=10):
 		parent_children_map.setdefault(d.parent_account or None, []).append(d)
 
 	filtered_accounts = []
+
 	def add_to_list(parent, level):
 		if level < depth:
-			for child in (parent_children_map.get(parent) or []):
+			children = parent_children_map.get(parent) or []
+			if parent == None:
+				sort_root_accounts(children)
+
+			for child in children:
 				child.indent = level
 				filtered_accounts.append(child)
 				add_to_list(child.name, level + 1)
 
-		else:
-			# include all children at level lower than the depth
-			parent_account = accounts_by_name[parent]
-			parent_account["collapsed_children"] = []
-			for d in accounts:
-				if d.lft > parent_account.lft and d.rgt < parent_account.rgt:
-					parent_account["collapsed_children"].append(d.name)
-
 	add_to_list(None, 0)
 
 	return filtered_accounts, accounts_by_name
+
+def sort_root_accounts(roots):
+	"""Sort root types as Asset, Liability, Equity, Income, Expense"""
+
+	def compare_roots(a, b):
+		if a.report_type != b.report_type and a.report_type == "Balance Sheet":
+			return -1
+		if a.root_type != b.root_type and a.root_type == "Asset":
+			return -1
+		if a.root_type == "Liability" and b.root_type == "Equity":
+			return -1
+		if a.root_type == "Income" and b.root_type == "Expense":
+			return -1
+		return 1
+
+	roots.sort(compare_roots)
 
 def get_gl_entries(company, from_date, to_date, root_lft, root_rgt, ignore_closing_entries=False):
 	"""Returns a dict like { "account": [gl entries], ... }"""
@@ -212,7 +210,7 @@ def get_gl_entries(company, from_date, to_date, root_lft, root_rgt, ignore_closi
 	if from_date:
 		additional_conditions.append("and posting_date >= %(from_date)s")
 
-	gl_entries = frappe.db.sql("""select * from `tabGL Entry`
+	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening from `tabGL Entry`
 		where company=%(company)s
 		{additional_conditions}
 		and posting_date <= %(to_date)s

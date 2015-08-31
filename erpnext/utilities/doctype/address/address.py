@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -21,6 +21,8 @@ class Address(Document):
 			throw(_("Address Title is mandatory."))
 
 	def validate(self):
+		self.link_fields = ("customer", "supplier", "sales_partner", "lead")
+		self.link_address()
 		self.validate_primary_address()
 		self.validate_shipping_address()
 
@@ -30,13 +32,31 @@ class Address(Document):
 			self._unset_other("is_primary_address")
 
 		elif self.is_shipping_address != 1:
-			for fieldname in ["customer", "supplier", "sales_partner", "lead"]:
+			for fieldname in self.link_fields:
 				if self.get(fieldname):
 					if not frappe.db.sql("""select name from `tabAddress` where is_primary_address=1
 						and `%s`=%s and name!=%s""" % (fieldname, "%s", "%s"),
 						(self.get(fieldname), self.name)):
 							self.is_primary_address = 1
 					break
+
+	def link_address(self):
+		"""Link address based on owner"""
+		linked = False
+		for fieldname in self.link_fields:
+			if self.get(fieldname):
+				linked = True
+				break
+
+		if not linked:
+			contact = frappe.db.get_value("Contact", {"email_id": self.owner},
+				("name", "customer", "supplier"), as_dict = True)
+			if contact:
+				self.customer = contact.customer
+				self.supplier = contact.supplier
+
+			self.lead = frappe.db.get_value("Lead", {"email_id": self.owner})
+
 
 	def validate_shipping_address(self):
 		"""Validate that there can only be one shipping address for particular customer, supplier"""
@@ -52,6 +72,8 @@ class Address(Document):
 
 @frappe.whitelist()
 def get_address_display(address_dict):
+	if not address_dict:
+		return
 	if not isinstance(address_dict, dict):
 		address_dict = frappe.db.get_value("Address", address_dict, "*", as_dict=True) or {}
 
@@ -82,5 +104,22 @@ def get_territory_from_address(address):
 
 	return territory
 
+def get_list_context(context=None):
+	from erpnext.shopping_cart.cart import get_address_docs
+	return {
+		"title": _("My Addresses"),
+		"get_list": get_address_docs,
+		"row_template": "templates/includes/address_row.html",
+	}
 
+def has_website_permission(doc, ptype, user, verbose=False):
+	"""Returns true if customer or lead matches with user"""
+	customer = frappe.db.get_value("Contact", {"email_id": frappe.session.user}, "customer")
+	if customer:
+		return doc.customer == customer
+	else:
+		lead = frappe.db.get_value("Lead", {"email_id": frappe.session.user})
+		if lead:
+			return doc.lead == lead
 
+	return False

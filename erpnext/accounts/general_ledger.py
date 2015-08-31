@@ -1,17 +1,17 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, cstr
+from frappe.utils import flt, cstr, cint
 from frappe import _
+from frappe.model.meta import get_field_precision
 from erpnext.accounts.utils import validate_expense_against_budget
 
 
 class StockAccountInvalidTransaction(frappe.ValidationError): pass
 
-def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True,
-		update_outstanding='Yes'):
+def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, update_outstanding='Yes'):
 	if gl_map:
 		if not cancel:
 			gl_map = process_gl_map(gl_map, merge_entries)
@@ -50,55 +50,92 @@ def merge_similar_entries(gl_map):
 			merged_gl_map.append(entry)
 
 	# filter zero debit and credit entries
-	merged_gl_map = filter(lambda x: flt(x.debit)!=0 or flt(x.credit)!=0, merged_gl_map)
+	merged_gl_map = filter(lambda x: flt(x.debit, 9)!=0 or flt(x.credit, 9)!=0, merged_gl_map)
 	return merged_gl_map
 
 def check_if_in_list(gle, gl_map):
 	for e in gl_map:
-		if e.account == gle.account and \
-				cstr(e.get('against_voucher'))==cstr(gle.get('against_voucher')) \
-				and cstr(e.get('against_voucher_type')) == \
-					cstr(gle.get('against_voucher_type')) \
-				and cstr(e.get('cost_center')) == cstr(gle.get('cost_center')):
-			return e
+		if e.account == gle.account \
+			and cstr(e.get('party_type'))==cstr(gle.get('party_type')) \
+			and cstr(e.get('party'))==cstr(gle.get('party')) \
+			and cstr(e.get('against_voucher'))==cstr(gle.get('against_voucher')) \
+			and cstr(e.get('against_voucher_type')) == cstr(gle.get('against_voucher_type')) \
+			and cstr(e.get('cost_center')) == cstr(gle.get('cost_center')):
+				return e
 
 def save_entries(gl_map, adv_adj, update_outstanding):
 	validate_account_for_auto_accounting_for_stock(gl_map)
-
-	total_debit = total_credit = 0.0
+	round_off_debit_credit(gl_map)
+	
 	for entry in gl_map:
 		make_entry(entry, adv_adj, update_outstanding)
 		# check against budget
 		validate_expense_against_budget(entry)
 
-
-		# update total debit / credit
-		total_debit += flt(entry.debit)
-		total_credit += flt(entry.credit)
-
-	validate_total_debit_credit(total_debit, total_credit)
-
 def make_entry(args, adv_adj, update_outstanding):
 	args.update({"doctype": "GL Entry"})
 	gle = frappe.get_doc(args)
-	gle.ignore_permissions = 1
+	gle.flags.ignore_permissions = 1
 	gle.insert()
 	gle.run_method("on_update_with_args", adv_adj, update_outstanding)
 	gle.submit()
 
-def validate_total_debit_credit(total_debit, total_credit):
-	if abs(total_debit - total_credit) > 0.005:
-		frappe.throw(_("Debit and Credit not equal for this voucher. Difference is {0}.").format(total_debit - total_credit))
-
 def validate_account_for_auto_accounting_for_stock(gl_map):
-	if gl_map[0].voucher_type=="Journal Voucher":
-		aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
-			where account_type = 'Warehouse' and ifnull(master_name, '')!=''""")]
+	if cint(frappe.db.get_single_value("Accounts Settings", "auto_accounting_for_stock")) \
+		and gl_map[0].voucher_type=="Journal Entry":
+			aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
+				where account_type = 'Warehouse' and ifnull(warehouse, '')!=''""")]
 
-		for entry in gl_map:
-			if entry.account in aii_accounts:
-				frappe.throw(_("Account: {0} can only be updated via \
-					Stock Transactions").format(entry.account), StockAccountInvalidTransaction)
+			for entry in gl_map:
+				if entry.account in aii_accounts:
+					frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
+						.format(entry.account), StockAccountInvalidTransaction)
+
+def round_off_debit_credit(gl_map):
+	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
+		currency=frappe.db.get_value("Company", gl_map[0].company, "default_currency", cache=True))
+	
+	debit_credit_diff = 0.0
+	for entry in gl_map:
+		entry.debit = flt(entry.debit, precision)
+		entry.credit = flt(entry.credit, precision)
+		debit_credit_diff += entry.debit - entry.credit
+	
+	debit_credit_diff = flt(debit_credit_diff, precision)
+	if abs(debit_credit_diff) >= (5.0 / (10**precision)):
+		frappe.throw(_("Debit and Credit not equal for {0} #{1}. Difference is {2}.")
+			.format(gl_map[0].voucher_type, gl_map[0].voucher_no, debit_credit_diff))
+		
+	elif abs(debit_credit_diff) >= (1.0 / (10**precision)):
+		make_round_off_gle(gl_map, debit_credit_diff)
+		
+def make_round_off_gle(gl_map, debit_credit_diff):
+	round_off_account, round_off_cost_center = frappe.db.get_value("Company", gl_map[0].company, 
+		["round_off_account", "round_off_cost_center"]) or [None, None]
+	if not round_off_account:
+		frappe.throw(_("Please mention Round Off Account in Company"))
+		
+	if not round_off_cost_center:
+		frappe.throw(_("Please mention Round Off Cost Center in Company"))
+		
+	
+	round_off_gle = frappe._dict()
+	for k in ["voucher_type", "voucher_no", "company", 
+		"posting_date", "remarks", "fiscal_year", "is_opening"]:
+			round_off_gle[k] = gl_map[0][k]
+	
+	round_off_gle.update({
+		"account": round_off_account,
+		"debit": abs(debit_credit_diff) if debit_credit_diff < 0 else 0,
+		"credit": debit_credit_diff if debit_credit_diff > 0 else 0,
+		"cost_center": round_off_cost_center,
+		"party_type": None,
+		"party": None,
+		"against_voucher_type": None,
+		"against_voucher": None
+	})
+	
+	gl_map.append(round_off_gle)
 
 
 def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
@@ -122,5 +159,5 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		validate_expense_against_budget(entry)
 
 		if entry.get("against_voucher") and update_outstanding == 'Yes':
-			update_outstanding_amt(entry["account"], entry.get("against_voucher_type"),
+			update_outstanding_amt(entry["account"], entry.get("party_type"), entry.get("party"), entry.get("against_voucher_type"),
 				entry.get("against_voucher"), on_cancel=True)

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -9,21 +9,23 @@ def execute(filters=None):
 	columns = get_columns()
 	sl_entries = get_stock_ledger_entries(filters)
 	item_details = get_item_details(filters)
-
+	opening_row = get_opening_balance(filters, columns)
+	
 	data = []
+	
+	if opening_row:
+		data.append(opening_row)
+
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
-		voucher_link_icon = """<a href="%s"><i class="icon icon-share"
-			style="cursor: pointer;"></i></a>""" \
-			% ("/".join(["#Form", sle.voucher_type, sle.voucher_no]),)
 
 		data.append([sle.date, sle.item_code, item_detail.item_name, item_detail.item_group,
 			item_detail.brand, item_detail.description, sle.warehouse,
 			item_detail.stock_uom, sle.actual_qty, sle.qty_after_transaction,
 			(sle.incoming_rate if sle.actual_qty > 0 else 0.0),
 			sle.valuation_rate, sle.stock_value, sle.voucher_type, sle.voucher_no,
-			voucher_link_icon, sle.batch_no, sle.serial_no, sle.company])
-
+			sle.batch_no, sle.serial_no, sle.company])
+			
 	return columns, data
 
 def get_columns():
@@ -31,8 +33,9 @@ def get_columns():
 		_("Brand") + ":Link/Brand:100", _("Description") + "::200", _("Warehouse") + ":Link/Warehouse:100",
 		_("Stock UOM") + ":Link/UOM:100", _("Qty") + ":Float:50", _("Balance Qty") + ":Float:100",
 		_("Incoming Rate") + ":Currency:110", _("Valuation Rate") + ":Currency:110", _("Balance Value") + ":Currency:110",
-		_("Voucher Type") + "::110", _("Voucher #") + "::100", _("Link") + "::30", _("Batch") + ":Link/Batch:100",
-		_("Serial #") + ":Link/Serial No:100", _("Company") + ":Link/Company:100"]
+		_("Voucher Type") + "::110", _("Voucher #") + ":Dynamic Link/Voucher Type:100", _("Batch") + ":Link/Batch:100",
+		_("Serial #") + ":Link/Serial No:100", _("Company") + ":Link/Company:100"
+	]
 
 def get_stock_ledger_entries(filters):
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
@@ -42,7 +45,7 @@ def get_stock_ledger_entries(filters):
 		where company = %(company)s and
 			posting_date between %(from_date)s and %(to_date)s
 			{sle_conditions}
-			order by posting_date desc, posting_time desc, name desc"""\
+			order by posting_date asc, posting_time asc, name asc"""\
 		.format(sle_conditions=get_sle_conditions(filters)), filters, as_dict=1)
 
 def get_item_details(filters):
@@ -75,3 +78,22 @@ def get_sle_conditions(filters):
 		conditions.append("voucher_no=%(voucher_no)s")
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
+
+def get_opening_balance(filters, columns):
+	if not (filters.item_code and filters.warehouse and filters.from_date):
+		return
+
+	from erpnext.stock.stock_ledger import get_previous_sle
+	last_entry = get_previous_sle({
+		"item_code": filters.item_code,
+		"warehouse": filters.warehouse,
+		"posting_date": filters.from_date,
+		"posting_time": "00:00:00"
+	})
+	
+	row = [""]*len(columns)
+	row[1] = _("'Opening'")
+	for i, v in ((9, 'qty_after_transaction'), (11, 'valuation_rate'), (12, 'stock_value')):
+			row[i] = last_entry.get(v, 0)
+		
+	return row

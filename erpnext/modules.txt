@@ -1,12 +1,13 @@
 Accounts
+CRM
 Buying
-Home
-HR
-Manufacturing
 Projects
 Selling
 Setup
+HR
+Manufacturing
 Stock
 Support
 Utilities
-Contacts
+Shopping Cart
+Hub Node

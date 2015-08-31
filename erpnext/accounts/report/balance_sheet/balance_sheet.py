@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -29,7 +29,7 @@ def execute(filters=None):
 def get_provisional_profit_loss(asset, liability, equity, period_list):
 	if asset and (liability or equity):
 		provisional_profit_loss = {
-			"account_name": _("Provisional Profit / Loss (Credit)"),
+			"account_name": "'" + _("Provisional Profit / Loss (Credit)") + "'",
 			"account": None,
 			"warn_if_negative": True
 		}

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -9,7 +9,6 @@ from frappe.utils import fmt_money, formatdate, now_datetime, cstr, esc, \
 from frappe.utils.dateutils import datetime_in_user_format
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
-from frappe.utils.email_lib import sendmail
 from frappe.core.doctype.user.user import STANDARD_USERS
 
 content_sequence = [
@@ -18,7 +17,8 @@ content_sequence = [
 		"invoiced_amount", "payables"]],
 	["Bank Balance", ["bank_balance"]],
 	["Buying", ["new_purchase_requests", "new_supplier_quotations", "new_purchase_orders"]],
-	["Selling", ["new_leads", "new_enquiries", "new_quotations", "new_sales_orders"]],
+	["CRM", ["new_leads", "new_enquiries"]],
+	["Selling", ["new_quotations", "new_sales_orders"]],
 	["Stock", ["new_delivery_notes",  "new_purchase_receipts", "new_stock_entries"]],
 	["Support", ["new_communications", "new_support_tickets", "open_tickets"]],
 	["Projects", ["new_projects"]],
@@ -83,10 +83,10 @@ class EmailDigest(Document):
 				msg_for_this_receipient = self.get_msg_html(self.get_user_specific_content(user_id) + \
 					common_msg)
 				if msg_for_this_receipient:
-					sendmail(recipients=user_id,
+					frappe.sendmail(recipients=user_id,
 						subject="[ERPNext] [{frequency} Digest] {name}".format(
 							frequency=self.frequency, name=self.name),
-						msg=msg_for_this_receipient)
+						message=msg_for_this_receipient, bulk=True)
 
 	def get_digest_msg(self):
 		return self.get_msg_html(self.get_user_specific_content(frappe.session.user) + \
@@ -205,9 +205,7 @@ class EmailDigest(Document):
 
 	def get_party_total(self, party_type, gle_field, label):
 		import re
-		# account is of master_type Customer or Supplier
-		accounts = [a["name"] for a in self.get_accounts()
-			if a["master_type"]==party_type]
+		party_list = frappe.db.sql_list("select name from `tab{0}`".format(party_type))
 
 		# account is "Bank" or "Cash"
 		bc_accounts = [esc(a["name"], "()|") for a in self.get_accounts()
@@ -217,7 +215,7 @@ class EmailDigest(Document):
 		total = 0
 		for gle in self.get_gl_entries(self.from_date, self.to_date):
 			# check that its made against a bank or cash account
-			if gle["account"] in accounts and gle["against"] and \
+			if gle["party_type"]==party_type and gle["party"] in party_list and gle["against"] and \
 					bc_regex.findall(gle["against"]):
 				val = gle["debit"] - gle["credit"]
 				total += (gle_field=="debit" and 1 or -1) * val
@@ -232,13 +230,11 @@ class EmailDigest(Document):
 		return self.get_booked_total("Supplier", "credit", self.meta.get_label("payables"))
 
 	def get_booked_total(self, party_type, gle_field, label):
-		# account is of master_type Customer or Supplier
-		accounts = [a["name"] for a in self.get_accounts()
-			if a["master_type"]==party_type]
+		party_list = frappe.db.sql_list("select name from `tab{0}`".format(party_type))
 
 		total = 0
 		for gle in self.get_gl_entries(self.from_date, self.to_date):
-			if gle["account"] in accounts:
+			if gle["party_type"]==party_type and gle["party"] in party_list:
 				total += gle[gle_field]
 
 		return total, self.get_html(label, self.currency, fmt_money(total))
@@ -251,15 +247,15 @@ class EmailDigest(Document):
 			date_field="transaction_date")
 
 	def get_new_quotations(self):
-		return self.get_new_sum("Quotation", self.meta.get_label("new_quotations"), "grand_total",
+		return self.get_new_sum("Quotation", self.meta.get_label("new_quotations"), "base_grand_total",
 			date_field="transaction_date")
 
 	def get_new_sales_orders(self):
-		return self.get_new_sum("Sales Order", self.meta.get_label("new_sales_orders"), "grand_total",
+		return self.get_new_sum("Sales Order", self.meta.get_label("new_sales_orders"), "base_grand_total",
 			date_field="transaction_date")
 
 	def get_new_delivery_notes(self):
-		return self.get_new_sum("Delivery Note", self.meta.get_label("new_delivery_notes"), "grand_total",
+		return self.get_new_sum("Delivery Note", self.meta.get_label("new_delivery_notes"), "base_grand_total",
 			date_field="posting_date")
 
 	def get_new_purchase_requests(self):
@@ -268,22 +264,22 @@ class EmailDigest(Document):
 
 	def get_new_supplier_quotations(self):
 		return self.get_new_sum("Supplier Quotation", self.meta.get_label("new_supplier_quotations"),
-			"grand_total", date_field="transaction_date")
+			"base_grand_total", date_field="transaction_date")
 
 	def get_new_purchase_orders(self):
 		return self.get_new_sum("Purchase Order", self.meta.get_label("new_purchase_orders"),
-			"grand_total", date_field="transaction_date")
+			"base_grand_total", date_field="transaction_date")
 
 	def get_new_purchase_receipts(self):
 		return self.get_new_sum("Purchase Receipt", self.meta.get_label("new_purchase_receipts"),
-			"grand_total", date_field="posting_date")
+			"base_grand_total", date_field="posting_date")
 
 	def get_new_stock_entries(self):
 		return self.get_new_sum("Stock Entry", self.meta.get_label("new_stock_entries"), "total_amount",
 			date_field="posting_date")
 
 	def get_new_support_tickets(self):
-		return self.get_new_count("Support Ticket", self.meta.get_label("new_support_tickets"),
+		return self.get_new_count("Issue", self.meta.get_label("new_support_tickets"),
 			filter_by_company=False)
 
 	def get_new_communications(self):
@@ -295,7 +291,7 @@ class EmailDigest(Document):
 			filter_by_company=False)
 
 	def get_calendar_events(self, user_id):
-		from frappe.core.doctype.event.event import get_events
+		from frappe.desk.doctype.event.event import get_events
 		events = get_events(self.future_from_date.strftime("%Y-%m-%d"), self.future_to_date.strftime("%Y-%m-%d"))
 
 		html = ""
@@ -380,7 +376,7 @@ class EmailDigest(Document):
 				hasattr(self, "gl_entries"):
 			return self.gl_entries
 
-		gl_entries = frappe.db.sql("""select `account`,
+		gl_entries = frappe.db.sql("""select `account`, `party_type`, `party`,
 			ifnull(credit, 0) as credit, ifnull(debit, 0) as debit, `against`
 			from `tabGL Entry`
 			where company=%s
@@ -396,9 +392,9 @@ class EmailDigest(Document):
 
 	def get_accounts(self):
 		if not hasattr(self, "accounts"):
-			self.accounts = frappe.db.sql("""select name, account_type, account_name, master_type, root_type
+			self.accounts = frappe.db.sql("""select name, account_type, account_name, root_type
 				from `tabAccount` where company=%s and docstatus < 2
-				and group_or_ledger = "Ledger" order by lft""",
+				and is_group = 0 order by lft""",
 				(self.company,), as_dict=1)
 		return self.accounts
 
@@ -459,7 +455,7 @@ class EmailDigest(Document):
 
 	def get_open_tickets(self):
 		open_tickets = frappe.db.sql("""select name, subject, modified, raised_by
-			from `tabSupport Ticket` where status='Open'
+			from `tabIssue` where status='Open'
 			order by modified desc limit 10""", as_dict=True)
 
 		if open_tickets:

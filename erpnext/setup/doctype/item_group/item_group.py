@@ -1,9 +1,9 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
-
+import urllib
 from frappe.utils.nestedset import NestedSet
 from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.render import clear_cache
@@ -12,9 +12,11 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
-	condition_field = "show_in_website"
-	template = "templates/generators/item_group.html"
-	parent_website_route_field = "parent_item_group"
+	website = frappe._dict(
+		condition_field = "show_in_website",
+		template = "templates/generators/item_group.html",
+		parent_website_route_field = "parent_item_group"
+	)
 
 	def autoname(self):
 		self.name = self.item_group_name
@@ -33,6 +35,16 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 	def on_trash(self):
 		NestedSet.on_trash(self)
 		WebsiteGenerator.on_trash(self)
+
+	def set_parent_website_route(self):
+		"""Overwrite `parent_website_route` from `WebsiteGenerator`.
+			Only set `parent_website_route` if parent is visble.
+
+			e.g. If `show_in_website` is set for Products then url should be `/products`"""
+		if self.parent_item_group and frappe.db.get_value("Item Group", self.parent_item_group, "show_in_website"):
+			WebsiteGenerator.set_parent_website_route(self)
+		else:
+			self.parent_website_route = ""
 
 	def validate_name_with_item(self):
 		if frappe.db.exists("Item", self.name):
@@ -79,7 +91,7 @@ def get_item_for_list_in_html(context):
 	# add missing absolute link in files
 	# user may forget it during upload
 	if (context.get("website_image") or "").startswith("files/"):
-		context["website_image"] = "/" + context["website_image"]
+		context["website_image"] = "/" + urllib.quote(context["website_image"])
 	return frappe.get_template("templates/includes/product_in_grid.html").render(context)
 
 def get_group_item_count(item_group):

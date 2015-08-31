@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -6,15 +6,54 @@ import unittest
 import frappe
 
 from frappe.test_runner import make_test_records
+from erpnext.stock.doctype.item.item import (WarehouseNotSet, create_variant,
+	ItemVariantExistsError, InvalidItemAttributeValueError)
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
 
+def make_item(item_code, properties=None):
+	if frappe.db.exists("Item", item_code):
+		return frappe.get_doc("Item", item_code)
+
+	item = frappe.get_doc({
+		"doctype": "Item",
+		"item_code": item_code,
+		"item_name": item_code,
+		"description": item_code,
+		"item_group": "Products"
+	})
+
+	if properties:
+		item.update(properties)
+
+
+	if item.is_stock_item and not item.default_warehouse:
+		item.default_warehouse = "_Test Warehouse - _TC"
+
+	item.insert()
+
+	return item
+
 class TestItem(unittest.TestCase):
+	def get_item(self, idx):
+		item_code = test_records[idx].get("item_code")
+		if not frappe.db.exists("Item", item_code):
+			item = frappe.copy_doc(test_records[idx])
+			item.insert()
+		else:
+			item = frappe.get_doc("Item", item_code)
+		return item
+
+	# def test_template_cannot_have_stock(self):
+	# 		item = self.get_item(10)
+	# 		make_stock_entry(item_code=item.name, target="Stores - _TC", qty=1, basic_rate=1)
+	# 		item.has_variants = 1
+	# 		self.assertRaises(ItemTemplateCannotHaveStock, item.save)
+
 	def test_default_warehouse(self):
-		from erpnext.stock.doctype.item.item import WarehouseNotSet
 		item = frappe.copy_doc(test_records[0])
-		item.is_stock_item = "Yes"
+		item.is_stock_item = 1
 		item.default_warehouse = None
 		self.assertRaises(WarehouseNotSet, item.insert)
 
@@ -23,7 +62,7 @@ class TestItem(unittest.TestCase):
 		to_check = {
 			"item_code": "_Test Item",
 			"item_name": "_Test Item",
-			"description": "_Test Item",
+			"description": "_Test Item 1",
 			"warehouse": "_Test Warehouse - _TC",
 			"income_account": "Sales - _TC",
 			"expense_account": "_Test Account Cost for Goods Sold - _TC",
@@ -59,5 +98,67 @@ class TestItem(unittest.TestCase):
 
 		for key, value in to_check.iteritems():
 			self.assertEquals(value, details.get(key))
+
+	def test_make_item_variant(self):
+		frappe.delete_doc_if_exists("Item", "_Test Variant Item-L")
+
+		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
+		variant.save()
+
+		# doing it again should raise error
+		variant = create_variant("_Test Variant Item", {"Test Size": "Large"})
+		self.assertRaises(ItemVariantExistsError, variant.save)
+
+	def test_make_item_variant_with_numeric_values(self):
+		# cleanup
+		frappe.delete_doc_if_exists("Item", "_Test Numeric Template Item")
+		frappe.delete_doc_if_exists("Item", "_Test Numeric Variant-L-1.5")
+		frappe.delete_doc_if_exists("Item Attribute", "Test Item Length")
+
+		# make item attribute
+		frappe.get_doc({
+			"doctype": "Item Attribute",
+			"attribute_name": "Test Item Length",
+			"numeric_values": 1,
+			"from_range": 0.0,
+			"to_range": 100.0,
+			"increment": 0.5
+		}).insert()
+
+		# make template item
+		make_item("_Test Numeric Template Item", {
+			"attributes": [
+				{
+					"attribute": "Test Size"
+				},
+				{
+					"attribute": "Test Item Length", 
+					"numeric_values": 1,
+					"from_range": 0.0,
+					"to_range": 100.0,
+					"increment": 0.5
+				}
+			],
+			"default_warehouse": "_Test Warehouse - _TC"
+		})
+
+		variant = create_variant("_Test Numeric Template Item", {"Test Size": "Large", "Test Item Length": 1.1})
+		self.assertEquals(variant.item_code, None)
+		variant.item_code = "_Test Numeric Variant-L-1.1"
+		variant.item_name = "_Test Numeric Variant Large 1.1m"
+		self.assertRaises(InvalidItemAttributeValueError, variant.save)
+
+		variant = create_variant("_Test Numeric Template Item", {"Test Size": "Large", "Test Item Length": 1.5})
+		self.assertEquals(variant.item_code, None)
+		variant.item_code = "_Test Numeric Variant-L-1.5"
+		variant.item_name = "_Test Numeric Variant Large 1.5m"
+		variant.save()
+
+def make_item_variant():
+	if not frappe.db.exists("Item", "_Test Variant Item-S"):
+		variant = create_variant("_Test Variant Item", """{"Test Size": "Small"}""")
+		variant.item_code = "_Test Variant Item-S"
+		variant.item_name = "_Test Variant Item-S"
+		variant.save()
 
 test_records = frappe.get_test_records('Item')

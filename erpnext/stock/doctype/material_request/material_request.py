@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 # ERPNext - web based ERP (http://erpnext.com)
@@ -7,26 +7,28 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cstr, flt
+from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
+from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 
 from erpnext.controllers.buying_controller import BuyingController
 
+
 form_grid_templates = {
-	"indent_details": "templates/form_grid/material_request_grid.html"
+	"items": "templates/form_grid/material_request_grid.html"
 }
 
 class MaterialRequest(BuyingController):
-	tname = 'Material Request Item'
-	fname = 'indent_details'
+	def get_feed(self):
+		return _("{0}: {1}").format(self.status, self.material_request_type)
 
 	def check_if_already_pulled(self):
-		pass#if self.[d.sales_order_no for d in self.get('indent_details')]
+		pass#if self.[d.sales_order_no for d in self.get('items')]
 
 	def validate_qty_against_so(self):
 		so_items = {} # Format --> {'SO/00001': {'Item/001': 120, 'Item/002': 24}}
-		for d in self.get('indent_details'):
+		for d in self.get('items'):
 			if d.sales_order_no:
 				if not so_items.has_key(d.sales_order_no):
 					so_items[d.sales_order_no] = {d.item_code: flt(d.qty)}
@@ -52,8 +54,8 @@ class MaterialRequest(BuyingController):
 					frappe.throw(_("Material Request of maximum {0} can be made for Item {1} against Sales Order {2}").format(actual_so_qty - already_indented, item, so_no))
 
 	def validate_schedule_date(self):
-		for d in self.get('indent_details'):
-			if d.schedule_date and d.schedule_date < self.transaction_date:
+		for d in self.get('items'):
+			if d.schedule_date and getdate(d.schedule_date) < getdate(self.transaction_date):
 				frappe.throw(_("Expected Date cannot be before Material Request Date"))
 
 	# Validate
@@ -67,10 +69,10 @@ class MaterialRequest(BuyingController):
 		if not self.status:
 			self.status = "Draft"
 
-		from erpnext.utilities import validate_status
+		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
 
-		self.validate_value("material_request_type", "in", ["Purchase", "Transfer"])
+		self.validate_value("material_request_type", "in", ["Purchase", "Material Transfer", "Material Issue"])
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
@@ -79,30 +81,9 @@ class MaterialRequest(BuyingController):
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
 
-	def update_bin(self, is_submit, is_stopped):
-		""" Update Quantity Requested for Purchase in Bin for Material Request of type 'Purchase'"""
-
-		from erpnext.stock.utils import update_bin
-		for d in self.get('indent_details'):
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes":
-				if not d.warehouse:
-					frappe.throw(_("Warehouse required for stock Item {0}").format(d.item_code))
-
-				qty =flt(d.qty)
-				if is_stopped:
-					qty = (d.qty > d.ordered_qty) and flt(flt(d.qty) - flt(d.ordered_qty)) or 0
-
-				args = {
-					"item_code": d.item_code,
-					"warehouse": d.warehouse,
-					"indented_qty": (is_submit and 1 or -1) * flt(qty),
-					"posting_date": self.transaction_date
-				}
-				update_bin(args)
-
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')
-		self.update_bin(is_submit = 1, is_stopped = 0)
+		self.update_requested_qty()
 
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("""select modified from `tabMaterial Request` where name = %s""",
@@ -115,36 +96,29 @@ class MaterialRequest(BuyingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
-		self.update_bin(is_submit = (status == 'Submitted') and 1 or 0, is_stopped = 1)
 		frappe.db.set(self, 'status', cstr(status))
+		self.update_requested_qty()
 		frappe.msgprint(_("Status updated to {0}").format(_(status)))
 
 	def on_cancel(self):
-		# Step 1:=> Get Purchase Common Obj
 		pc_obj = frappe.get_doc('Purchase Common')
 
-		# Step 2:=> Check for stopped status
 		pc_obj.check_for_stopped_status(self.doctype, self.name)
-
-		# Step 3:=> Check if Purchase Order has been submitted against current Material Request
 		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Order', docname = self.name, detail_doctype = 'Purchase Order Item')
-		# Step 4:=> Update Bin
-		self.update_bin(is_submit = 0, is_stopped = (cstr(self.status) == 'Stopped') and 1 or 0)
 
-		# Step 5:=> Set Status
+		self.update_requested_qty()
+
 		frappe.db.set(self,'status','Cancelled')
 
 	def update_completed_qty(self, mr_items=None):
-		if self.material_request_type != "Transfer":
+		if self.material_request_type == "Purchase":
 			return
 
-		item_doclist = self.get("indent_details")
-
 		if not mr_items:
-			mr_items = [d.name for d in item_doclist]
+			mr_items = [d.name for d in self.get("items")]
 
 		per_ordered = 0.0
-		for d in item_doclist:
+		for d in self.get("items"):
 			if d.name in mr_items:
 				d.ordered_qty =  flt(frappe.db.sql("""select sum(transfer_qty)
 					from `tabStock Entry Detail` where material_request = %s
@@ -152,66 +126,47 @@ class MaterialRequest(BuyingController):
 					(self.name, d.name))[0][0])
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
-			# note: if qty is 0, its row is still counted in len(item_doclist)
+			# note: if qty is 0, its row is still counted in len(self.get("items"))
 			# hence adding 1 to per_ordered
 			if (d.ordered_qty > d.qty) or not d.qty:
 				per_ordered += 1.0
 			elif d.qty > 0:
 				per_ordered += flt(d.ordered_qty / flt(d.qty))
 
-		self.per_ordered = flt((per_ordered / flt(len(item_doclist))) * 100.0, 2)
+		self.per_ordered = flt((per_ordered / flt(len(self.get("items")))) * 100.0, 2)
 		frappe.db.set_value(self.doctype, self.name, "per_ordered", self.per_ordered)
 
-def update_completed_qty(doc, method):
-	if doc.doctype == "Stock Entry":
+	def update_requested_qty(self, mr_item_rows=None):
+		"""update requested qty (before ordered_qty is updated)"""
+		item_wh_list = []
+		for d in self.get("items"):
+			if (not mr_item_rows or d.name in mr_item_rows) and [d.item_code, d.warehouse] not in item_wh_list \
+					and frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 and d.warehouse:
+				item_wh_list.append([d.item_code, d.warehouse])
+
+		for item_code, warehouse in item_wh_list:
+			update_bin_qty(item_code, warehouse, {
+				"indented_qty": get_indented_qty(item_code, warehouse)
+			})
+
+def update_completed_and_requested_qty(stock_entry, method):
+	if stock_entry.doctype == "Stock Entry":
 		material_request_map = {}
 
-		for d in doc.get("mtn_details"):
+		for d in stock_entry.get("items"):
 			if d.material_request:
 				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
 
-		for mr_name, mr_items in material_request_map.items():
-			mr_obj = frappe.get_doc("Material Request", mr_name)
+		for mr, mr_item_rows in material_request_map.items():
+			if mr and mr_item_rows:
+				mr_obj = frappe.get_doc("Material Request", mr)
 
-			if mr_obj.status in ["Stopped", "Cancelled"]:
-				frappe.throw(_("Material Request {0} is cancelled or stopped").format(mr_obj.name),
-					frappe.InvalidStatusError)
+				if mr_obj.status in ["Stopped", "Cancelled"]:
+					frappe.throw(_("{0} {1} is cancelled or stopped").format(_("Material Request"), mr),
+						frappe.InvalidStatusError)
 
-			_update_requested_qty(doc, mr_obj, mr_items)
-
-			# update ordered percentage and qty
-			mr_obj.update_completed_qty(mr_items)
-
-def _update_requested_qty(doc, mr_obj, mr_items):
-	"""update requested qty (before ordered_qty is updated)"""
-	from erpnext.stock.utils import update_bin
-	for mr_item_name in mr_items:
-		mr_item = mr_obj.get("indent_details", {"name": mr_item_name})
-		se_detail = doc.get("mtn_details", {"material_request": mr_obj.name,
-			"material_request_item": mr_item_name})
-
-		if mr_item and se_detail:
-			mr_item = mr_item[0]
-			se_detail = se_detail[0]
-			mr_item.ordered_qty = flt(mr_item.ordered_qty)
-			mr_item.qty = flt(mr_item.qty)
-			se_detail.transfer_qty = flt(se_detail.transfer_qty)
-
-			if se_detail.docstatus == 2 and mr_item.ordered_qty > mr_item.qty \
-					and se_detail.transfer_qty == mr_item.ordered_qty:
-				add_indented_qty = mr_item.qty
-			elif se_detail.docstatus == 1 and \
-					mr_item.ordered_qty + se_detail.transfer_qty > mr_item.qty:
-				add_indented_qty = mr_item.qty - mr_item.ordered_qty
-			else:
-				add_indented_qty = se_detail.transfer_qty
-
-			update_bin({
-				"item_code": se_detail.item_code,
-				"warehouse": se_detail.t_warehouse,
-				"indented_qty": (se_detail.docstatus==2 and 1 or -1) * add_indented_qty,
-				"posting_date": doc.posting_date,
-			})
+				mr_obj.update_completed_qty(mr_item_rows)
+				mr_obj.update_requested_qty(mr_item_rows)
 
 def set_missing_values(source, target_doc):
 	target_doc.run_method("set_missing_values")
@@ -220,6 +175,7 @@ def set_missing_values(source, target_doc):
 def update_item(obj, target, source_parent):
 	target.conversion_factor = 1
 	target.qty = flt(obj.qty) - flt(obj.ordered_qty)
+	target.stock_qty = target.qty
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
@@ -240,7 +196,8 @@ def make_purchase_order(source_name, target_doc=None):
 				["uom", "stock_uom"],
 				["uom", "uom"]
 			],
-			"postprocess": update_item
+			"postprocess": update_item,
+			"condition": lambda doc: doc.ordered_qty < doc.qty
 		}
 	}, target_doc, set_missing_values)
 
@@ -252,14 +209,14 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 		if isinstance(target_doc, basestring):
 			import json
 			target_doc = frappe.get_doc(json.loads(target_doc))
-		target_doc.set("po_details", [])
+		target_doc.set("items", [])
 
 	material_requests, supplier_items = get_material_requests_based_on_supplier(source_name)
 
 	def postprocess(source, target_doc):
 		target_doc.supplier = source_name
 		set_missing_values(source, target_doc)
-		target_doc.set("po_details", [d for d in target_doc.get("po_details")
+		target_doc.set("items", [d for d in target_doc.get("items")
 			if d.get("item_code") in supplier_items and d.get("qty") > 0])
 
 		return target_doc
@@ -278,7 +235,8 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None):
 					["uom", "stock_uom"],
 					["uom", "uom"]
 				],
-				"postprocess": update_item
+				"postprocess": update_item,
+				"condition": lambda doc: doc.ordered_qty < doc.qty
 			}
 		}, target_doc, postprocess)
 
@@ -326,20 +284,27 @@ def make_supplier_quotation(source_name, target_doc=None):
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
+		qty = flt(obj.qty) - flt(obj.ordered_qty) \
+			if flt(obj.qty) > flt(obj.ordered_qty) else 0
+		target.qty = qty
+		target.transfer_qty = qty
 		target.conversion_factor = 1
-		target.qty = flt(obj.qty) - flt(obj.ordered_qty)
-		target.transfer_qty = flt(obj.qty) - flt(obj.ordered_qty)
+
+		if source_parent.material_request_type == "Material Transfer":
+			target.t_warehouse = obj.warehouse
+		else:
+			target.s_warehouse = obj.warehouse
 
 	def set_missing_values(source, target):
-		target.purpose = "Material Transfer"
-		target.run_method("get_stock_and_rate")
+		target.purpose = source.material_request_type
+		target.run_method("calculate_rate_and_amount")
 
 	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {
 			"doctype": "Stock Entry",
 			"validation": {
 				"docstatus": ["=", 1],
-				"material_request_type": ["=", "Transfer"]
+				"material_request_type": ["in", ["Material Transfer", "Material Issue"]]
 			}
 		},
 		"Material Request Item": {
@@ -348,9 +313,9 @@ def make_stock_entry(source_name, target_doc=None):
 				"name": "material_request_item",
 				"parent": "material_request",
 				"uom": "stock_uom",
-				"warehouse": "t_warehouse"
 			},
-			"postprocess": update_item
+			"postprocess": update_item,
+			"condition": lambda doc: doc.ordered_qty < doc.qty
 		}
 	}, target_doc, set_missing_values)
 

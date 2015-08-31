@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 // This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 			title: title,
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
-			appframe: wrapper.appframe,
+			page: wrapper.page,
 			doctypes: ["Company", "Fiscal Year", "Account", "GL Entry", "Cost Center"],
 			tree_grid: {
 				show: true,
@@ -67,10 +67,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 			default_value: __("Select Fiscal Year...")},
 		{fieldtype: "Date", label: __("From Date"), fieldname: "from_date"},
 		{fieldtype: "Label", label: __("To")},
-		{fieldtype: "Date", label: __("To Date"), fieldname: "to_date"},
-		{fieldtype: "Button", label: __("Refresh"), icon:"icon-refresh icon-white",
-		 	cssClass:"btn-info"},
-		{fieldtype: "Button", label: __("Reset Filters"), icon: "icon-filter"},
+		{fieldtype: "Date", label: __("To Date"), fieldname: "to_date"}
 	],
 	setup_filters: function() {
 		this._super();
@@ -181,7 +178,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 		var me= this;
 		$.each(this.data, function(i, account) {
 			// update groups
-			if((account.group_or_ledger == "Ledger") || (account.rgt - account.lft == 1)) {
+			if((account.is_group == 0) || (account.rgt - account.lft == 1)) {
 				var parent = me.parent_map[account.name];
 				while(parent) {
 					var parent_account = me.item_by_name[parent];

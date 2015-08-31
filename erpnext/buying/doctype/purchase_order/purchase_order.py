@@ -1,21 +1,23 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe.utils import cstr, flt
 from frappe import msgprint, _, throw
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.stock.doctype.item.item import get_last_purchase_details
+from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
+from frappe.desk.notifications import clear_doctype_notifications
+
 
 form_grid_templates = {
-	"po_details": "templates/form_grid/item_grid.html"
+	"items": "templates/form_grid/item_grid.html"
 }
 
 class PurchaseOrder(BuyingController):
-	tname = 'Purchase Order Item'
-	fname = 'po_details'
-
 	def __init__(self, arg1, arg2=None):
 		super(PurchaseOrder, self).__init__(arg1, arg2)
 		self.status_updater = [{
@@ -26,7 +28,7 @@ class PurchaseOrder(BuyingController):
 			'target_parent_dt': 'Material Request',
 			'target_parent_field': 'per_ordered',
 			'target_ref_field': 'qty',
-			'source_field': 'qty',
+			'source_field': 'stock_qty',
 			'percent_join_field': 'prevdoc_docname',
 			'overflow_type': 'order'
 		}]
@@ -37,7 +39,7 @@ class PurchaseOrder(BuyingController):
 		if not self.status:
 			self.status = "Draft"
 
-		from erpnext.utilities import validate_status
+		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Draft", "Submitted", "Stopped",
 			"Cancelled"])
 
@@ -51,95 +53,101 @@ class PurchaseOrder(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_for_subcontracting()
 		self.validate_minimum_order_qty()
-		self.create_raw_materials_supplied("po_raw_material_details")
+		self.create_raw_materials_supplied("supplied_items")
 
 	def validate_with_previous_doc(self):
-		super(PurchaseOrder, self).validate_with_previous_doc(self.tname, {
+		super(PurchaseOrder, self).validate_with_previous_doc({
 			"Supplier Quotation": {
 				"ref_dn_field": "supplier_quotation",
 				"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
 			},
 			"Supplier Quotation Item": {
 				"ref_dn_field": "supplier_quotation_item",
-				"compare_fields": [["rate", "="], ["project_name", "="], ["item_code", "="],
-					["uom", "="]],
+				"compare_fields": [["rate", "="], ["project_name", "="], ["item_code", "="]],
 				"is_child_table": True
 			}
 		})
 
 	def validate_minimum_order_qty(self):
-		itemwise_min_order_qty = frappe._dict(frappe.db.sql("select name, min_order_qty from tabItem"))
+		items = list(set([d.item_code for d in self.get("items")]))
+
+		itemwise_min_order_qty = frappe._dict(frappe.db.sql("""select name, min_order_qty
+			from tabItem where name in ({0})""".format(", ".join(["%s"] * len(items))), items))
 
 		itemwise_qty = frappe._dict()
-		for d in self.get("po_details"):
+		for d in self.get("items"):
 			itemwise_qty.setdefault(d.item_code, 0)
 			itemwise_qty[d.item_code] += flt(d.stock_qty)
 
 		for item_code, qty in itemwise_qty.items():
 			if flt(qty) < flt(itemwise_min_order_qty.get(item_code)):
-				frappe.throw(_("Item #{0}: Ordered qty can not less than item's minimum order qty (defined in item master).").format(item_code))
+				frappe.throw(_("Item {0}: Ordered qty {1} cannot be less than minimum order qty {2} (defined in Item).").format(item_code,
+					qty, itemwise_min_order_qty.get(item_code)))
 
 	def get_schedule_dates(self):
-		for d in self.get('po_details'):
+		for d in self.get('items'):
 			if d.prevdoc_detail_docname and not d.schedule_date:
 				d.schedule_date = frappe.db.get_value("Material Request Item",
 						d.prevdoc_detail_docname, "schedule_date")
 
 	def get_last_purchase_rate(self):
-		frappe.get_doc('Purchase Common').get_last_purchase_rate(self)
+		"""get last purchase rates for all items"""
+		conversion_rate = flt(self.get('conversion_rate')) or 1.0
+
+		for d in self.get("items"):
+			if d.item_code:
+				last_purchase_details = get_last_purchase_details(d.item_code, self.name)
+
+				if last_purchase_details:
+					d.base_price_list_rate = last_purchase_details['base_price_list_rate'] * (flt(d.conversion_factor) or 1.0)
+					d.discount_percentage = last_purchase_details['discount_percentage']
+					d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
+					d.price_list_rate = d.base_price_list_rate / conversion_rate
+					d.rate = d.base_rate / conversion_rate
+				else:
+					# if no last purchase found, reset all values to 0
+					d.base_price_list_rate = d.base_rate = d.price_list_rate = d.rate = d.discount_percentage = 0
+
+					item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
+					if item_last_purchase_rate:
+						d.base_price_list_rate = d.base_rate = d.price_list_rate \
+							= d.rate = item_last_purchase_rate
 
 	# Check for Stopped status
 	def check_for_stopped_status(self, pc_obj):
 		check_list =[]
-		for d in self.get('po_details'):
+		for d in self.get('items'):
 			if d.meta.get_field('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
 				check_list.append(d.prevdoc_docname)
 				pc_obj.check_for_stopped_status( d.prevdoc_doctype, d.prevdoc_docname)
 
+	def update_requested_qty(self):
+		material_request_map = {}
+		for d in self.get("items"):
+			if d.prevdoc_doctype and d.prevdoc_doctype == "Material Request" and d.prevdoc_detail_docname:
+				material_request_map.setdefault(d.prevdoc_docname, []).append(d.prevdoc_detail_docname)
 
-	def update_bin(self, is_submit, is_stopped = 0):
-		from erpnext.stock.utils import update_bin
-		pc_obj = frappe.get_doc('Purchase Common')
-		for d in self.get('po_details'):
-			#1. Check if is_stock_item == 'Yes'
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes":
-				# this happens when item is changed from non-stock to stock item
-				if not d.warehouse:
-					continue
+		for mr, mr_item_rows in material_request_map.items():
+			if mr and mr_item_rows:
+				mr_obj = frappe.get_doc("Material Request", mr)
 
-				ind_qty, po_qty = 0, flt(d.qty) * flt(d.conversion_factor)
-				if is_stopped:
-					po_qty = flt(d.qty) > flt(d.received_qty) and \
-						flt( flt(flt(d.qty) - flt(d.received_qty))*flt(d.conversion_factor)) or 0
+				if mr_obj.status in ["Stopped", "Cancelled"]:
+					frappe.throw(_("Material Request {0} is cancelled or stopped").format(mr), frappe.InvalidStatusError)
 
-				# No updates in Material Request on Stop / Unstop
-				if cstr(d.prevdoc_doctype) == 'Material Request' and not is_stopped:
-					# get qty and pending_qty of prevdoc
-					curr_ref_qty = pc_obj.get_qty(d.doctype, 'prevdoc_detail_docname',
-					 	d.prevdoc_detail_docname, 'Material Request Item',
-						'Material Request - Purchase Order', self.name)
-					max_qty, qty, curr_qty = flt(curr_ref_qty.split('~~~')[1]), \
-					 	flt(curr_ref_qty.split('~~~')[0]), 0
+				mr_obj.update_requested_qty(mr_item_rows)
 
-					if flt(qty) + flt(po_qty) > flt(max_qty):
-						curr_qty = flt(max_qty) - flt(qty)
-						# special case as there is no restriction
-						# for Material Request - Purchase Order
-						curr_qty = curr_qty > 0 and curr_qty or 0
-					else:
-						curr_qty = flt(po_qty)
+	def update_ordered_qty(self, po_item_rows=None):
+		"""update requested qty (before ordered_qty is updated)"""
+		item_wh_list = []
+		for d in self.get("items"):
+			if (not po_item_rows or d.name in po_item_rows) and [d.item_code, d.warehouse] not in item_wh_list \
+					and frappe.db.get_value("Item", d.item_code, "is_stock_item") and d.warehouse:
+				item_wh_list.append([d.item_code, d.warehouse])
 
-					ind_qty = -flt(curr_qty)
-
-				# Update ordered_qty and indented_qty in bin
-				args = {
-					"item_code": d.item_code,
-					"warehouse": d.warehouse,
-					"ordered_qty": (is_submit and 1 or -1) * flt(po_qty),
-					"indented_qty": (is_submit and 1 or -1) * flt(ind_qty),
-					"posting_date": self.transaction_date
-				}
-				update_bin(args)
+		for item_code, warehouse in item_wh_list:
+			update_bin_qty(item_code, warehouse, {
+				"ordered_qty": get_ordered_qty(item_code, warehouse)
+			})
 
 	def check_modified_date(self):
 		mod_db = frappe.db.sql("select modified from `tabPurchase Order` where name = %s",
@@ -152,14 +160,14 @@ class PurchaseOrder(BuyingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
-		# step 1:=> Set Status
 		frappe.db.set(self,'status',cstr(status))
 
-		# step 2:=> Update Bin
-		self.update_bin(is_submit = (status == 'Submitted') and 1 or 0, is_stopped = 1)
+		self.update_requested_qty()
+		self.update_ordered_qty()
 
-		# step 3:=> Acknowledge user
 		msgprint(_("Status of {0} {1} is now {2}").format(self.doctype, self.name, status))
+		self.notify_modified()
+		clear_doctype_notifications(self)
 
 	def on_submit(self):
 		super(PurchaseOrder, self).on_submit()
@@ -167,10 +175,11 @@ class PurchaseOrder(BuyingController):
 		purchase_controller = frappe.get_doc("Purchase Common")
 
 		self.update_prevdoc_status()
-		self.update_bin(is_submit = 1, is_stopped = 0)
+		self.update_requested_qty()
+		self.update_ordered_qty()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
-			self.company, self.grand_total)
+			self.company, self.base_grand_total)
 
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 
@@ -192,12 +201,47 @@ class PurchaseOrder(BuyingController):
 			throw(_("Purchase Invoice {0} is already submitted").format(", ".join(submitted)))
 
 		frappe.db.set(self,'status','Cancelled')
+
 		self.update_prevdoc_status()
-		self.update_bin( is_submit = 0, is_stopped = 0)
+
+		# Must be called after updating ordered qty in Material Request
+		self.update_requested_qty()
+		self.update_ordered_qty()
+
 		pc_obj.update_last_purchase_rate(self, is_submit = 0)
 
 	def on_update(self):
 		pass
+
+	def before_recurring(self):
+		super(PurchaseOrder, self).before_recurring()
+
+		for field in ("per_received", "per_billed"):
+			self.set(field, None)
+
+		for d in self.get("items"):
+			for field in ("received_qty", "billed_amt", "prevdoc_doctype", "prevdoc_docname",
+				"prevdoc_detail_docname", "supplier_quotation", "supplier_quotation_item"):
+					d.set(field, None)
+
+@frappe.whitelist()
+def stop_or_unstop_purchase_orders(names, status):
+	if not frappe.has_permission("Purchase Order", "write"):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+	names = json.loads(names)
+	for name in names:
+		po = frappe.get_doc("Purchase Order", name)
+		if po.docstatus == 1:
+			if status=="Stopped":
+				if po.status not in ("Stopped", "Cancelled") and (po.per_received < 100 or po.per_billed < 100):
+					po.update_status("Stopped")
+			else:
+				if po.status == "Stopped":
+					po.update_status("Submitted")
+
+	frappe.local.message_log = []
+
 
 def set_missing_values(source, target):
 	target.ignore_pricing_rule = 1
@@ -242,13 +286,13 @@ def make_purchase_receipt(source_name, target_doc=None):
 def make_purchase_invoice(source_name, target_doc=None):
 	def postprocess(source, target):
 		set_missing_values(source, target)
-		#Get the advance paid Journal Vouchers in Purchase Invoice Advance
+		#Get the advance paid Journal Entries in Purchase Invoice Advance
 		target.get_advances()
 
 	def update_item(obj, target, source_parent):
 		target.amount = flt(obj.amount) - flt(obj.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
-		target.qty = target.amount / flt(obj.rate) if flt(obj.rate) else flt(obj.qty)
+		target.qty = target.amount / flt(obj.rate) if (flt(obj.rate) and flt(obj.billed_amt)) else flt(obj.qty)
 
 	doc = get_mapped_doc("Purchase Order", source_name,	{
 		"Purchase Order": {
@@ -273,3 +317,21 @@ def make_purchase_invoice(source_name, target_doc=None):
 	}, target_doc, postprocess)
 
 	return doc
+
+@frappe.whitelist()
+def make_stock_entry(purchase_order, item_code):
+	purchase_order = frappe.get_doc("Purchase Order", purchase_order)
+
+	stock_entry = frappe.new_doc("Stock Entry")
+	stock_entry.purpose = "Subcontract"
+	stock_entry.purchase_order = purchase_order.name
+	stock_entry.supplier = purchase_order.supplier
+	stock_entry.supplier_name = purchase_order.supplier_name
+	stock_entry.supplier_address = purchase_order.address_display
+	stock_entry.company = purchase_order.company
+	stock_entry.from_bom = 1
+	po_item = [d for d in purchase_order.items if d.item_code == item_code][0]
+	stock_entry.fg_completed_qty = po_item.qty
+	stock_entry.bom_no = po_item.bom
+	stock_entry.get_items()
+	return stock_entry.as_dict()

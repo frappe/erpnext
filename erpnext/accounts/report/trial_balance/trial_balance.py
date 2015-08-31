@@ -1,15 +1,15 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, getdate, formatdate
+from frappe.utils import cint, flt, getdate, formatdate, cstr
 from erpnext.accounts.report.financial_statements import filter_accounts, get_gl_entries
 
 value_fields = ("opening_debit", "opening_credit", "debit", "credit", "closing_debit", "closing_credit")
 
-def execute(filters):
+def execute(filters=None):
 	validate_filters(filters)
 	data = get_data(filters)
 	columns = get_columns()
@@ -45,8 +45,8 @@ def validate_filters(filters):
 		filters.to_date = filters.year_end_date
 
 def get_data(filters):
-	accounts = frappe.db.sql("""select * from `tabAccount` where company=%s order by lft""",
-		filters.company, as_dict=True)
+	accounts = frappe.db.sql("""select name, parent_account, account_name, root_type, report_type, lft, rgt 
+		from `tabAccount` where company=%s order by lft""", filters.company, as_dict=True)
 
 	if not accounts:
 		return None
@@ -56,17 +56,58 @@ def get_data(filters):
 	min_lft, max_rgt = frappe.db.sql("""select min(lft), max(rgt) from `tabAccount`
 		where company=%s""", (filters.company,))[0]
 
-	gl_entries_by_account = get_gl_entries(filters.company, None, filters.to_date, min_lft, max_rgt,
+	gl_entries_by_account = get_gl_entries(filters.company, filters.from_date, filters.to_date, min_lft, max_rgt,
 		ignore_closing_entries=not flt(filters.with_period_closing_entry))
 
-	total_row = calculate_values(accounts, gl_entries_by_account, filters)
+	opening_balances = get_opening_balances(filters)
+
+	total_row = calculate_values(accounts, gl_entries_by_account, opening_balances, filters)
 	accumulate_values_into_parents(accounts, accounts_by_name)
 
 	data = prepare_data(accounts, filters, total_row)
 
 	return data
+	
+def get_opening_balances(filters):
+	balance_sheet_opening = get_rootwise_opening_balances(filters, "Balance Sheet")
+	pl_opening = get_rootwise_opening_balances(filters, "Profit and Loss")
+	
+	balance_sheet_opening.update(pl_opening)
+	return balance_sheet_opening
+	
+	
+def get_rootwise_opening_balances(filters, report_type):
+	additional_conditions = " and posting_date >= %(year_start_date)s" \
+		if report_type == "Profit and Loss" else ""
+		
+	if not flt(filters.with_period_closing_entry):
+		additional_conditions += " and ifnull(voucher_type, '')!='Period Closing Voucher'"
+		
+	gle = frappe.db.sql("""
+		select 
+			account, sum(ifnull(debit, 0)) as opening_debit, sum(ifnull(credit, 0)) as opening_credit 
+		from `tabGL Entry`
+		where 
+			company=%(company)s
+			{additional_conditions}
+			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
+			and account in (select name from `tabAccount` where report_type=%(report_type)s)
+		group by account""".format(additional_conditions=additional_conditions),
+		{
+			"company": filters.company,
+			"from_date": filters.from_date,
+			"report_type": report_type,
+			"year_start_date": filters.year_start_date
+		},
+		as_dict=True)
+		
+	opening = frappe._dict()
+	for d in gle:
+		opening.setdefault(d.account, d)
+		
+	return opening
 
-def calculate_values(accounts, gl_entries_by_account, filters):
+def calculate_values(accounts, gl_entries_by_account, opening_balances, filters):
 	init = {
 		"opening_debit": 0.0,
 		"opening_credit": 0.0,
@@ -87,30 +128,18 @@ def calculate_values(accounts, gl_entries_by_account, filters):
 	for d in accounts:
 		d.update(init.copy())
 
+		# add opening
+		d["opening_debit"] = opening_balances.get(d.name, {}).get("opening_debit", 0)
+		d["opening_credit"] = opening_balances.get(d.name, {}).get("opening_credit", 0)
+
 		for entry in gl_entries_by_account.get(d.name, []):
-			posting_date = getdate(entry.posting_date)
-
-			# opening
-			if posting_date < filters.from_date:
-				is_valid_opening = (d.root_type in ("Asset", "Liability", "Equity") or
-					(filters.year_start_date <= posting_date < filters.from_date))
-
-				if is_valid_opening:
-					d["opening_debit"] += flt(entry.debit)
-					d["opening_credit"] += flt(entry.credit)
-
-			elif posting_date <= filters.to_date:
-
-				if entry.is_opening == "Yes" and d.root_type in ("Asset", "Liability", "Equity"):
-					d["opening_debit"] += flt(entry.debit)
-					d["opening_credit"] += flt(entry.credit)
-
-				else:
-					d["debit"] += flt(entry.debit)
-					d["credit"] += flt(entry.credit)
+			if cstr(entry.is_opening) != "Yes":
+				d["debit"] += flt(entry.debit)
+				d["credit"] += flt(entry.credit)
 
 		total_row["debit"] += d["debit"]
 		total_row["credit"] += d["credit"]
+		
 
 	return total_row
 
@@ -123,7 +152,8 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 def prepare_data(accounts, filters, total_row):
 	show_zero_values = cint(filters.show_zero_values)
 	data = []
-	for i, d in enumerate(accounts):
+	accounts_with_zero_value = []
+	for d in accounts:
 		has_value = False
 		row = {
 			"account_name": d.account_name,
@@ -141,8 +171,13 @@ def prepare_data(accounts, filters, total_row):
 			if row[key]:
 				has_value = True
 
-		if has_value or show_zero_values:
+		if show_zero_values:
 			data.append(row)
+		else:
+			if not has_value:
+				accounts_with_zero_value.append(d.name)
+			elif d.parent_account not in accounts_with_zero_value:
+				data.append(row)
 
 	data.extend([{},total_row])
 

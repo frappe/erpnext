@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 // searches for enabled users
@@ -75,3 +75,26 @@ $.extend(erpnext.queries, {
 		}
 	}
 });
+
+erpnext.queries.setup_queries = function(frm, options, query_fn) {
+	var me = this;
+	var set_query = function(doctype, parentfield) {
+		var link_fields = frappe.meta.get_docfields(doctype, frm.doc.name,
+			{"fieldtype": "Link", "options": options});
+		$.each(link_fields, function(i, df) {
+			if(parentfield) {
+				frm.set_query(df.fieldname, parentfield, query_fn);
+			} else {
+				frm.set_query(df.fieldname, query_fn);
+			}
+		});
+	};
+
+	set_query(frm.doc.doctype);
+
+	// warehouse field in tables
+	$.each(frappe.meta.get_docfields(frm.doc.doctype, frm.doc.name, {"fieldtype": "Table"}),
+		function(i, df) {
+			set_query(df.options, df.fieldname);
+		});
+}

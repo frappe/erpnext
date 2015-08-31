@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 if(!window.erpnext) window.erpnext = {};
@@ -14,6 +14,16 @@ frappe.send_message = function(opts, btn) {
 		callback: opts.callback
 	});
 };
+
+erpnext.subscribe_to_newsletter = function(opts, btn) {
+	return frappe.call({
+		type: "POST",
+		method: "erpnext.crm.doctype.newsletter.newsletter.subscribe",
+		btn: btn,
+		args: {"email": opts.email},
+		callback: opts.callback
+	});
+}
 
 // for backward compatibility
 erpnext.send_message = frappe.send_message;

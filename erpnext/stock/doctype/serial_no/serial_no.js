@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch("customer", "customer_name", "customer_name")
@@ -11,7 +11,7 @@ cur_frm.add_fetch("item_code", "brand", "brand")
 
 cur_frm.cscript.onload = function() {
 	cur_frm.set_query("item_code", function() {
-		return erpnext.queries.item({"is_stock_item": "Yes", "has_serial_no": "Yes"})
+		return erpnext.queries.item({"is_stock_item": 1, "has_serial_no": 1})
 	});
 };
 

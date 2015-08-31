@@ -1,16 +1,15 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// Module CRM
-
-cur_frm.cscript.tname = "Sales Order Item";
-cur_frm.cscript.fname = "sales_order_details";
-cur_frm.cscript.other_fname = "other_charges";
-cur_frm.cscript.sales_team_fname = "sales_team";
-
 {% include 'selling/sales_common.js' %}
-{% include 'accounts/doctype/sales_taxes_and_charges_master/sales_taxes_and_charges_master.js' %}
-{% include 'accounts/doctype/sales_invoice/pos.js' %}
+
+frappe.ui.form.on("Sales Order", {
+	onload: function(frm) {
+		erpnext.queries.setup_queries(frm, "Warehouse", function() {
+			return erpnext.queries.warehouse(frm.doc);
+		});
+	}
+});
 
 erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend({
 	refresh: function(doc, dt, dn) {
@@ -20,45 +19,41 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		if(doc.docstatus==1) {
 			if(doc.status != 'Stopped') {
 
-				cur_frm.dashboard.add_progress(cint(doc.per_delivered) + __("% Delivered"),
-					doc.per_delivered);
-				cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
-					doc.per_billed);
-
-				// delivery note
-				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1)
-					cur_frm.add_custom_button(__('Make Delivery'), this.make_delivery_note, "icon-truck");
+				// cur_frm.dashboard.add_progress(cint(doc.per_delivered) + __("% Delivered"),
+				// 	doc.per_delivered);
+				// cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
+				// 	doc.per_billed);
 
 				// indent
 				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1)
-					cur_frm.add_custom_button(__('Make ') + __('Material Request'),
-						this.make_material_request, "icon-ticket");
+					cur_frm.add_custom_button(__('Material Request'), this.make_material_request);
 
-				// sales invoice
-				if(flt(doc.per_billed, 2) < 100) {
-					cur_frm.add_custom_button(__('Make Invoice'), this.make_sales_invoice,
-						frappe.boot.doctype_icons["Sales Invoice"]);
+				if(flt(doc.per_billed)==0) {
+					cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry);
 				}
 
 				// stop
 				if(flt(doc.per_delivered, 2) < 100 || doc.per_billed < 100)
-					cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Sales Order'],
-						"icon-exclamation", "btn-default")
+					cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Sales Order'])
 
-						// maintenance
-						if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
-							cur_frm.add_custom_button(__('Make Maint. Visit'),
-								this.make_maintenance_visit, null, "btn-default");
-							cur_frm.add_custom_button(__('Make Maint. Schedule'),
-								this.make_maintenance_schedule, null, "btn-default");
-						}
+					// maintenance
+					if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
+						cur_frm.add_custom_button(__('Maint. Visit'), this.make_maintenance_visit);
+						cur_frm.add_custom_button(__('Maint. Schedule'), this.make_maintenance_schedule);
+					}
 
-				cur_frm.add_custom_button(__('Send SMS'), cur_frm.cscript.send_sms, "icon-mobile-phone", true);
+					// delivery note
+					if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1)
+						cur_frm.add_custom_button(__('Delivery'), this.make_delivery_note).addClass("btn-primary");
+
+					// sales invoice
+					if(flt(doc.per_billed, 2) < 100) {
+						cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice).addClass("btn-primary");
+					}
 
 			} else {
 				// un-stop
-				cur_frm.dashboard.set_headline_alert(__("Stopped"), "alert-danger", "icon-stop");
-				cur_frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Sales Order'], "icon-check");
+				cur_frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Sales Order']);
 			}
 		}
 
@@ -76,7 +71,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							company: cur_frm.doc.company
 						}
 					})
-				}, "icon-download", "btn-default");
+				});
 		}
 
 		this.order_type(doc);
@@ -138,6 +133,20 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			frm: cur_frm
 		})
 	},
+
+	make_bank_entry: function() {
+		return frappe.call({
+			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_from_sales_order",
+			args: {
+				"sales_order": cur_frm.doc.name
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
+	}
+
 });
 
 // for backward compatibility: combine new and previous states
@@ -193,9 +202,4 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	if(cint(frappe.boot.notification_settings.sales_order)) {
 		cur_frm.email_doc(frappe.boot.notification_settings.sales_order_message);
 	}
-};
-
-cur_frm.cscript.send_sms = function() {
-	frappe.require("assets/erpnext/js/sms_manager.js");
-	var sms_man = new SMSManager(cur_frm.doc);
 };

@@ -1,16 +1,21 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.widgets.reportview import execute as runreport
+from frappe.desk.reportview import execute as runreport
 
 def execute(filters=None):
 	if not filters: filters = {}
 
-	employee_filters = filters.get("company") and \
-		[["Employee", "company", "=", filters.get("company")]] or None
+	employee_filters = {
+		"status": "Active"
+	}
+	
+	if filters.get("company"):
+		filters["company"] = filters.company
+
 	employees = runreport(doctype="Employee", fields=["name", "employee_name", "department"],
 		filters=employee_filters, limit_page_length=None)
 

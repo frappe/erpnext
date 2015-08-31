@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from frappe import _
 
 def get_data():
@@ -30,6 +31,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Activity Type",
 					"description": _("Types of activities for Time Sheets"),
+				},
+				{
+					"type": "doctype",
+					"name": "Activity Cost",
+					"description": _("Cost of various activities"),
 				},
 			]
 		},

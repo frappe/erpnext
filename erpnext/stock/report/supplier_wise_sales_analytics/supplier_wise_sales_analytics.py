@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -18,7 +18,7 @@ def execute(filters=None):
 		total_qty = total_amount = 0.0
 		if consumed_details.get(item_code):
 			for cd in consumed_details.get(item_code):
-				
+
 				if (cd.voucher_no not in material_transfer_vouchers):
 					if cd.voucher_type=="Delivery Note":
 						delivered_qty += abs(flt(cd.actual_qty))
@@ -40,7 +40,7 @@ def execute(filters=None):
 
 def get_columns(filters):
 	"""return columns based on filters"""
-	
+
 	columns = [_("Item") + ":Link/Item:100"] + [_("Item Name") + "::100"] + \
 	[_("Description") + "::150"] + [_("UOM") + ":Link/UOM:90"] + \
 	[_("Consumed Qty") + ":Float:110"] + [_("Consumed Amount") + ":Currency:130"] + \
@@ -64,10 +64,10 @@ def get_consumed_details(filters):
 	conditions, values = get_conditions(filters)
 	consumed_details = {}
 
-	for d in frappe.db.sql("""select sle.item_code, i.item_name, i.description, 
-		i.stock_uom, sle.actual_qty, sle.stock_value_difference, 
+	for d in frappe.db.sql("""select sle.item_code, i.item_name, i.description,
+		i.stock_uom, sle.actual_qty, sle.stock_value_difference,
 		sle.voucher_no, sle.voucher_type
-		from `tabStock Ledger Entry` sle, `tabItem` i 
+		from `tabStock Ledger Entry` sle, `tabItem` i
 		where sle.item_code=i.name and sle.actual_qty < 0 %s""" % conditions, values, as_dict=1):
 			consumed_details.setdefault(d.item_code, []).append(d)
 
@@ -77,20 +77,20 @@ def get_suppliers_details(filters):
 	item_supplier_map = {}
 	supplier = filters.get('supplier')
 
-	for d in frappe.db.sql("""select pr.supplier, pri.item_code from 
-		`tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri 
-		where pr.name=pri.parent and pr.docstatus=1 and 
-		pri.item_code=(select name from `tabItem` where 
-			ifnull(is_stock_item, 'Yes')='Yes' and name=pri.item_code)""", as_dict=1):
+	for d in frappe.db.sql("""select pr.supplier, pri.item_code from
+		`tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri
+		where pr.name=pri.parent and pr.docstatus=1 and
+		pri.item_code=(select name from `tabItem` where
+			is_stock_item=1 and name=pri.item_code)""", as_dict=1):
 			item_supplier_map.setdefault(d.item_code, []).append(d.supplier)
-	
+
 	if supplier:
 		for item_code, suppliers in item_supplier_map.items():
 			if supplier not in suppliers:
 				del item_supplier_map[item_code]
-	
+
 	return item_supplier_map
 
 def get_material_transfer_vouchers():
-	return frappe.db.sql_list("""select name from `tabStock Entry` where 
+	return frappe.db.sql_list("""select name from `tabStock Entry` where
 		purpose='Material Transfer' and docstatus=1""")

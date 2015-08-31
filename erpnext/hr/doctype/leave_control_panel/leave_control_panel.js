@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.onload = function(doc, dt, dn){
@@ -25,3 +25,7 @@ cur_frm.cscript.allocation_type = function (doc, cdt, cdn){
 	doc.no_of_days = '';
 	refresh_field('no_of_days');
 }
+
+frappe.ui.form.on("Leave Control Panel", "refresh", function(frm) {
+	frm.disable_save();
+});

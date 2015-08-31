@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 frappe.query_reports["Bank Clearance Summary"] = {
@@ -21,12 +21,13 @@ frappe.query_reports["Bank Clearance Summary"] = {
 			"label": __("Bank Account"),
 			"fieldtype": "Link",
 			"options": "Account",
+			"reqd": 1,
 			"get_query": function() {
 				return {
-					"query": "erpnext.controllers.queries.get_account_list", 
+					"query": "erpnext.controllers.queries.get_account_list",
 					"filters": [
 						['Account', 'account_type', 'in', 'Bank, Cash'],
-						['Account', 'group_or_ledger', '=', 'Ledger'],
+						['Account', 'is_group', '=', 0],
 					]
 				}
 			}

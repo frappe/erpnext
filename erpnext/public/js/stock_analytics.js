@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 frappe.require("assets/erpnext/js/stock_grid_report.js");
@@ -9,7 +9,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 			title: __("Stock Analytics"),
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
-			appframe: wrapper.appframe,
+			page: wrapper.page,
 			doctypes: ["Item", "Item Group", "Warehouse", "Stock Ledger Entry", "Brand",
 				"Fiscal Year", "Serial No"],
 			tree_grid: {
@@ -36,7 +36,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 	},
 	setup_columns: function() {
 		var std_columns = [
-			{id: "check", name: __("Plot"), field: "check", width: 30,
+			{id: "_check", name: __("Plot"), field: "_check", width: 30,
 				formatter: this.check_formatter},
 			{id: "name", name: __("Item"), field: "name", width: 300,
 				formatter: this.tree_formatter},
@@ -62,12 +62,9 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 		{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", fieldname: "warehouse",
 			default_value: __("Select Warehouse...")},
 		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
-		{fieldtype:"Label", label: __("To")},
 		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
 		{fieldtype:"Select", label: __("Range"), fieldname: "range",
-			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]},
-		{fieldtype:"Button", label: __("Refresh"), icon:"icon-refresh icon-white"},
-		{fieldtype:"Button", label: __("Reset Filters"), icon: "icon-filter"}
+			options:["Daily", "Weekly", "Monthly", "Quarterly", "Yearly"]}
 	],
 	setup_filters: function() {
 		var me = this;
@@ -108,6 +105,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 			// otherwise, only reset values
 			$.each(this.data, function(i, d) {
 				me.reset_item_values(d);
+				d["closing_qty_value"] = 0;
 			});
 		}
 
@@ -131,6 +129,7 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 
 			if(me.is_default("warehouse") ? true : me.warehouse == sl.warehouse) {
 				var item = me.item_by_name[sl.item_code];
+				if(item.closing_qty_value==undefined) item.closing_qty_value = 0;
 
 				if(me.value_or_qty!="Quantity") {
 					var wh = me.get_item_warehouse(sl.warehouse, sl.item_code);
@@ -138,9 +137,20 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 						item.valuation_method : sys_defaults.valuation_method;
 					var is_fifo = valuation_method == "FIFO";
 
-					var diff = me.get_value_diff(wh, sl, is_fifo);
+					if(sl.voucher_type=="Stock Reconciliation") {
+						var diff = (sl.qty_after_transaction * sl.valuation_rate) - item.closing_qty_value;
+						wh.fifo_stack = [[sl.qty_after_transaction, sl.valuation_rate, sl.posting_date]];
+						wh.balance_qty = sl.qty_after_transaction;
+						wh.balance_value = sl.valuation_rate * sl.qty_after_transaction;
+					} else {
+						var diff = me.get_value_diff(wh, sl, is_fifo);
+					}
 				} else {
-					var diff = sl.qty;
+					if(sl.voucher_type=="Stock Reconciliation") {
+						var diff = sl.qty_after_transaction - item.closing_qty_value;
+					} else {
+						var diff = sl.qty;
+					}
 				}
 
 				if(posting_datetime < from_date) {
@@ -150,12 +160,13 @@ erpnext.StockAnalytics = erpnext.StockGridReport.extend({
 				} else {
 					break;
 				}
+
+				item.closing_qty_value += diff;
 			}
 		}
 	},
 	update_groups: function() {
 		var me = this;
-
 		$.each(this.data, function(i, item) {
 			// update groups
 			if(!item.is_group && me.apply_filter(item, "brand")) {

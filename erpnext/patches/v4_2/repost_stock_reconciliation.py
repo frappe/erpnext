@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -6,8 +6,8 @@ import frappe
 import json
 
 def execute():
-	existing_allow_negative_stock = frappe.db.get_default("allow_negative_stock")
-	frappe.db.set_default("allow_negative_stock", 1)
+	existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
+	frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 	head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
 	stock_reco_to_be_reposted = []
@@ -28,4 +28,4 @@ def execute():
 		reco.validate()
 		reco.on_submit()
 
-	frappe.db.set_default("allow_negative_stock", existing_allow_negative_stock)
+	frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)

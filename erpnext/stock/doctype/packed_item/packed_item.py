@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # MIT License. See license.txt
 
 # For license information, please see license.txt
@@ -13,9 +13,9 @@ from frappe.model.document import Document
 class PackedItem(Document):
 	pass
 
-def get_sales_bom_items(item_code):
+def get_product_bundle_items(item_code):
 	return frappe.db.sql("""select t1.item_code, t1.qty, t1.uom
-		from `tabSales BOM Item` t1, `tabSales BOM` t2
+		from `tabProduct Bundle Item` t1, `tabProduct Bundle` t2
 		where t2.new_item_code=%s and t1.parent = t2.name""", item_code, as_dict=1)
 
 def get_packing_item_details(item):
@@ -27,19 +27,19 @@ def get_bin_qty(item, warehouse):
 		where item_code = %s and warehouse = %s""", (item, warehouse), as_dict = 1)
 	return det and det[0] or ''
 
-def update_packing_list_item(obj, packing_item_code, qty, warehouse, line, packing_list_idx):
+def update_packing_list_item(obj, packing_item_code, qty, warehouse, line):
 	bin = get_bin_qty(packing_item_code, warehouse)
 	item = get_packing_item_details(packing_item_code)
 
 	# check if exists
 	exists = 0
-	for d in obj.get("packing_details"):
+	for d in obj.get("packed_items"):
 		if d.parent_item == line.item_code and d.item_code == packing_item_code and d.parent_detail_docname == line.name:
 			pi, exists = d, 1
 			break
 
 	if not exists:
-		pi = obj.append('packing_details', {})
+		pi = obj.append('packed_items', {})
 
 	pi.parent_item = line.item_code
 	pi.item_code = packing_item_code
@@ -54,23 +54,19 @@ def update_packing_list_item(obj, packing_item_code, qty, warehouse, line, packi
 		pi.warehouse = warehouse
 	if not pi.batch_no:
 		pi.batch_no = cstr(line.get("batch_no"))
-	pi.idx = packing_list_idx
 
-	packing_list_idx += 1
 
 
 def make_packing_list(obj, item_table_fieldname):
-	"""make packing list for sales bom item"""
+	"""make packing list for Product Bundle item"""
 
 	if obj.get("_action") and obj._action == "update_after_submit": return
 
-	packing_list_idx = 0
 	parent_items = []
 	for d in obj.get(item_table_fieldname):
-		if frappe.db.get_value("Sales BOM", {"new_item_code": d.item_code}):
-			for i in get_sales_bom_items(d.item_code):
-				update_packing_list_item(obj, i['item_code'], flt(i['qty'])*flt(d.qty),
-					d.warehouse, d, packing_list_idx)
+		if frappe.db.get_value("Product Bundle", {"new_item_code": d.item_code}):
+			for i in get_product_bundle_items(d.item_code):
+				update_packing_list_item(obj, i['item_code'], flt(i['qty'])*flt(d.qty), d.warehouse, d)
 
 			if [d.item_code, d.name] not in parent_items:
 				parent_items.append([d.item_code, d.name])
@@ -80,7 +76,7 @@ def make_packing_list(obj, item_table_fieldname):
 def cleanup_packing_list(obj, parent_items):
 	"""Remove all those child items which are no longer present in main item table"""
 	delete_list = []
-	for d in obj.get("packing_details"):
+	for d in obj.get("packed_items"):
 		if [d.parent_item, d.parent_detail_docname] not in parent_items:
 			# mark for deletion from doclist
 			delete_list.append(d)
@@ -88,8 +84,8 @@ def cleanup_packing_list(obj, parent_items):
 	if not delete_list:
 		return obj
 
-	packing_details = obj.get("packing_details")
-	obj.set("packing_details", [])
-	for d in packing_details:
+	packed_items = obj.get("packed_items")
+	obj.set("packed_items", [])
+	for d in packed_items:
 		if d not in delete_list:
-			obj.append("packing_details", d)
+			obj.append("packed_items", d)

@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -41,11 +41,16 @@ def install(country=None):
 		{'doctype': 'Expense Claim Type', 'name': _('Travel'), 'expense_type': _('Travel')},
 
 		# leave type
-		{'doctype': 'Leave Type', 'leave_type_name': _('Casual Leave'), 'name': _('Casual Leave'), 'is_encash': 1, 'is_carry_forward': 1, 'max_days_allowed': '3', },
-		{'doctype': 'Leave Type', 'leave_type_name': _('Compensatory Off'), 'name': _('Compensatory Off'), 'is_encash': 0, 'is_carry_forward': 0, },
-		{'doctype': 'Leave Type', 'leave_type_name': _('Sick Leave'), 'name': _('Sick Leave'), 'is_encash': 0, 'is_carry_forward': 0, },
-		{'doctype': 'Leave Type', 'leave_type_name': _('Privilege Leave'), 'name': _('Privilege Leave'), 'is_encash': 0, 'is_carry_forward': 0, },
-		{'doctype': 'Leave Type', 'leave_type_name': _('Leave Without Pay'), 'name': _('Leave Without Pay'), 'is_encash': 0, 'is_carry_forward': 0, 'is_lwp':1},
+		{'doctype': 'Leave Type', 'leave_type_name': _('Casual Leave'), 'name': _('Casual Leave'),
+			'is_encash': 1, 'is_carry_forward': 1, 'max_days_allowed': '3', 'include_holiday': 1},
+		{'doctype': 'Leave Type', 'leave_type_name': _('Compensatory Off'), 'name': _('Compensatory Off'),
+			'is_encash': 0, 'is_carry_forward': 0, 'include_holiday': 1},
+		{'doctype': 'Leave Type', 'leave_type_name': _('Sick Leave'), 'name': _('Sick Leave'),
+			'is_encash': 0, 'is_carry_forward': 0, 'include_holiday': 1},
+		{'doctype': 'Leave Type', 'leave_type_name': _('Privilege Leave'), 'name': _('Privilege Leave'),
+			'is_encash': 0, 'is_carry_forward': 0, 'include_holiday': 1},
+		{'doctype': 'Leave Type', 'leave_type_name': _('Leave Without Pay'), 'name': _('Leave Without Pay'),
+			'is_encash': 0, 'is_carry_forward': 0, 'is_lwp':1, 'include_holiday': 1},
 
 		# Employment Type
 		{'doctype': 'Employment Type', 'employee_type_name': _('Full-time')},
@@ -87,7 +92,6 @@ def install(country=None):
 		{'doctype': 'Designation', 'designation_name': _('Head of Marketing and Sales')},
 		{'doctype': 'Designation', 'designation_name': _('Software Developer')},
 		{'doctype': 'Designation', 'designation_name': _('Designer')},
-		{'doctype': 'Designation', 'designation_name': _('Assistant')},
 		{'doctype': 'Designation', 'designation_name': _('Researcher')},
 
 		# territory
@@ -136,59 +140,46 @@ def install(country=None):
 		{'doctype': 'Activity Type', 'activity_type': _('Execution')},
 		{'doctype': 'Activity Type', 'activity_type': _('Communication')},
 
-		# Industry Type
-		{'doctype': 'Industry Type', 'industry': _('Accounting')},
-		{'doctype': 'Industry Type', 'industry': _('Advertising')},
-		{'doctype': 'Industry Type', 'industry': _('Aerospace')},
-		{'doctype': 'Industry Type', 'industry': _('Agriculture')},
-		{'doctype': 'Industry Type', 'industry': _('Airline')},
-		{'doctype': 'Industry Type', 'industry': _('Apparel & Accessories')},
-		{'doctype': 'Industry Type', 'industry': _('Automotive')},
-		{'doctype': 'Industry Type', 'industry': _('Banking')},
-		{'doctype': 'Industry Type', 'industry': _('Biotechnology')},
-		{'doctype': 'Industry Type', 'industry': _('Broadcasting')},
-		{'doctype': 'Industry Type', 'industry': _('Brokerage')},
-		{'doctype': 'Industry Type', 'industry': _('Chemical')},
-		{'doctype': 'Industry Type', 'industry': _('Computer')},
-		{'doctype': 'Industry Type', 'industry': _('Consulting')},
-		{'doctype': 'Industry Type', 'industry': _('Consumer Products')},
-		{'doctype': 'Industry Type', 'industry': _('Cosmetics')},
-		{'doctype': 'Industry Type', 'industry': _('Defense')},
-		{'doctype': 'Industry Type', 'industry': _('Department Stores')},
-		{'doctype': 'Industry Type', 'industry': _('Education')},
-		{'doctype': 'Industry Type', 'industry': _('Electronics')},
-		{'doctype': 'Industry Type', 'industry': _('Energy')},
-		{'doctype': 'Industry Type', 'industry': _('Entertainment & Leisure')},
-		{'doctype': 'Industry Type', 'industry': _('Executive Search')},
-		{'doctype': 'Industry Type', 'industry': _('Financial Services')},
-		{'doctype': 'Industry Type', 'industry': _('Food, Beverage & Tobacco')},
-		{'doctype': 'Industry Type', 'industry': _('Grocery')},
-		{'doctype': 'Industry Type', 'industry': _('Health Care')},
-		{'doctype': 'Industry Type', 'industry': _('Internet Publishing')},
-		{'doctype': 'Industry Type', 'industry': _('Investment Banking')},
-		{'doctype': 'Industry Type', 'industry': _('Legal')},
-		{'doctype': 'Industry Type', 'industry': _('Manufacturing')},
-		{'doctype': 'Industry Type', 'industry': _('Motion Picture & Video')},
-		{'doctype': 'Industry Type', 'industry': _('Music')},
-		{'doctype': 'Industry Type', 'industry': _('Newspaper Publishers')},
-		{'doctype': 'Industry Type', 'industry': _('Online Auctions')},
-		{'doctype': 'Industry Type', 'industry': _('Pension Funds')},
-		{'doctype': 'Industry Type', 'industry': _('Pharmaceuticals')},
-		{'doctype': 'Industry Type', 'industry': _('Private Equity')},
-		{'doctype': 'Industry Type', 'industry': _('Publishing')},
-		{'doctype': 'Industry Type', 'industry': _('Real Estate')},
-		{'doctype': 'Industry Type', 'industry': _('Retail & Wholesale')},
-		{'doctype': 'Industry Type', 'industry': _('Securities & Commodity Exchanges')},
-		{'doctype': 'Industry Type', 'industry': _('Service')},
-		{'doctype': 'Industry Type', 'industry': _('Soap & Detergent')},
-		{'doctype': 'Industry Type', 'industry': _('Software')},
-		{'doctype': 'Industry Type', 'industry': _('Sports')},
-		{'doctype': 'Industry Type', 'industry': _('Technology')},
-		{'doctype': 'Industry Type', 'industry': _('Telecommunications')},
-		{'doctype': 'Industry Type', 'industry': _('Television')},
-		{'doctype': 'Industry Type', 'industry': _('Transportation')},
-		{'doctype': 'Industry Type', 'industry': _('Venture Capital')}
+		{'doctype': "Item Attribute", "attribute_name": _("Size"), "item_attribute_values": [
+			{"attribute_value": _("Extra Small"), "abbr": "XS"},
+			{"attribute_value": _("Small"), "abbr": "S"},
+			{"attribute_value": _("Medium"), "abbr": "M"},
+			{"attribute_value": _("Large"), "abbr": "L"},
+			{"attribute_value": _("Extra Large"), "abbr": "XL"}
+		]},
+
+		{'doctype': "Item Attribute", "attribute_name": _("Colour"), "item_attribute_values": [
+			{"attribute_value": _("Red"), "abbr": "RED"},
+			{"attribute_value": _("Green"), "abbr": "GRE"},
+			{"attribute_value": _("Blue"), "abbr": "BLU"},
+			{"attribute_value": _("Black"), "abbr": "BLA"},
+			{"attribute_value": _("White"), "abbr": "WHI"}
+		]},
+
+		{'doctype': "Email Account", "email_id": "sales@example.com", "append_to": "Opportunity"},
+		{'doctype': "Email Account", "email_id": "support@example.com", "append_to": "Issue"},
+		{'doctype': "Email Account", "email_id": "jobs@example.com", "append_to": "Job Applicant"},
+
+		{"doctype": "Offer Term", "offer_term": _("Date of Joining")},
+		{"doctype": "Offer Term", "offer_term": _("Annual Salary")},
+		{"doctype": "Offer Term", "offer_term": _("Probationary Period")},
+		{"doctype": "Offer Term", "offer_term": _("Employee Benefits")},
+		{"doctype": "Offer Term", "offer_term": _("Working Hours")},
+		{"doctype": "Offer Term", "offer_term": _("Stock Options")},
+		{"doctype": "Offer Term", "offer_term": _("Department")},
+		{"doctype": "Offer Term", "offer_term": _("Job Description")},
+		{"doctype": "Offer Term", "offer_term": _("Responsibilities")},
+		{"doctype": "Offer Term", "offer_term": _("Leaves per Year")},
+		{"doctype": "Offer Term", "offer_term": _("Notice Period")},
+		{"doctype": "Offer Term", "offer_term": _("Incentives")},
+
+		{'doctype': "Print Heading", 'print_heading': _("Credit Note")},
+		{'doctype': "Print Heading", 'print_heading': _("Debit Note")}
 	]
+
+	from erpnext.setup.page.setup_wizard.fixtures import industry_type
+	records += [{"doctype":"Industry Type", "industry": d} for d in industry_type.items]
+	# records += [{"doctype":"Operation", "operation": d} for d in operations.items]
 
 	from frappe.modules import scrub
 	for r in records:
@@ -198,6 +189,5 @@ def install(country=None):
 		# ignore mandatory for root
 		parent_link_field = ("parent_" + scrub(doc.doctype))
 		if doc.meta.get_field(parent_link_field) and not doc.get(parent_link_field):
-			doc.ignore_mandatory = True
-
-		doc.insert()
+			doc.flags.ignore_mandatory = True
+		doc.insert(ignore_permissions=True)

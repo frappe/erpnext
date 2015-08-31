@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 # For license information, please see license.txt
@@ -9,7 +9,6 @@ from frappe import _
 from frappe.model.document import Document
 
 class CurrencyExchange(Document):
-
 	def autoname(self):
 		self.name = self.from_currency + "-" + self.to_currency
 

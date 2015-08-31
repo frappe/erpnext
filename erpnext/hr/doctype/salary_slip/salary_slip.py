@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -45,11 +45,11 @@ class SalarySlip(TransactionBase):
 
 	def get_leave_details(self, lwp=None):
 		if not self.fiscal_year:
-			self.fiscal_year = frappe.get_default("fiscal_year")
+			self.fiscal_year = frappe.db.get_default("fiscal_year")
 		if not self.month:
 			self.month = "%02d" % getdate(nowdate()).month
 
-		m = frappe.get_doc('Salary Manager').get_month_details(self.fiscal_year, self.month)
+		m = frappe.get_doc('Process Payroll').get_month_details(self.fiscal_year, self.month)
 		holidays = self.get_holidays_for_employee(m)
 
 		if not cint(frappe.db.get_value("HR Settings", "HR Settings",
@@ -134,8 +134,8 @@ class SalarySlip(TransactionBase):
 		from frappe.utils import money_in_words
 		self.check_existing()
 
-		if not (len(self.get("earning_details")) or
-			len(self.get("deduction_details"))):
+		if not (len(self.get("earnings")) or
+			len(self.get("deductions"))):
 				self.get_emp_and_leave_details()
 		else:
 			self.get_leave_details(self.leave_without_pay)
@@ -150,34 +150,37 @@ class SalarySlip(TransactionBase):
 
 	def calculate_earning_total(self):
 		self.gross_pay = flt(self.arrear_amount) + flt(self.leave_encashment_amount)
-		for d in self.get("earning_details"):
+		for d in self.get("earnings"):
 			if cint(d.e_depends_on_lwp) == 1:
-				d.e_modified_amount = rounded(flt(d.e_amount) * flt(self.payment_days)
-					/ cint(self.total_days_in_month), 2)
+				d.e_modified_amount = rounded((flt(d.e_amount) * flt(self.payment_days)
+					/ cint(self.total_days_in_month)), self.precision("e_modified_amount", "earnings"))
 			elif not self.payment_days:
 				d.e_modified_amount = 0
-			else:
+			elif not d.e_modified_amount:
 				d.e_modified_amount = d.e_amount
 			self.gross_pay += flt(d.e_modified_amount)
 
 	def calculate_ded_total(self):
 		self.total_deduction = 0
-		for d in self.get('deduction_details'):
+		for d in self.get('deductions'):
 			if cint(d.d_depends_on_lwp) == 1:
-				d.d_modified_amount = rounded(flt(d.d_amount) * flt(self.payment_days)
-					/ cint(self.total_days_in_month), 2)
+				d.d_modified_amount = rounded((flt(d.d_amount) * flt(self.payment_days)
+					/ cint(self.total_days_in_month)), self.precision("d_modified_amount", "deductions"))
 			elif not self.payment_days:
 				d.d_modified_amount = 0
-			else:
+			elif not d.d_modified_amount:
 				d.d_modified_amount = d.d_amount
 
 			self.total_deduction += flt(d.d_modified_amount)
 
 	def calculate_net_pay(self):
+		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
+
 		self.calculate_earning_total()
 		self.calculate_ded_total()
 		self.net_pay = flt(self.gross_pay) - flt(self.total_deduction)
-		self.rounded_total = rounded(self.net_pay)
+		self.rounded_total = rounded(self.net_pay,
+			self.precision("net_pay") if disable_rounded_total else 0)
 
 	def on_submit(self):
 		if(self.email_check == 1):
@@ -185,15 +188,10 @@ class SalarySlip(TransactionBase):
 
 
 	def send_mail_funct(self):
-		from frappe.utils.email_lib import sendmail
-
 		receiver = frappe.db.get_value("Employee", self.employee, "company_email")
 		if receiver:
 			subj = 'Salary Slip - ' + cstr(self.month) +'/'+cstr(self.fiscal_year)
-			sendmail([receiver], subject=subj, msg = _("Please see attachment"),
-				attachments=[{
-					"fname": self.name + ".pdf",
-					"fcontent": frappe.get_print_format(self.doctype, self.name, as_pdf = True)
-				}])
+			frappe.sendmail([receiver], subject=subj, message = _("Please see attachment"),
+				attachments=[frappe.attach_print(self.doctype, self.name, file_name=self.name)])
 		else:
 			msgprint(_("Company Email ID not found, hence mail not sent"))

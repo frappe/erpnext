@@ -1,7 +1,10 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+
 cur_frm.cscript.onload_post_render = function(doc, cdt, cdn) {
+	cur_frm.disable_save();
+	cur_frm.toolbar.print_icon.addClass("hide");
 	return cur_frm.call({
 		doc: cur_frm.doc,
 		method: 'get_transactions',
@@ -18,7 +21,7 @@ cur_frm.cscript.update_selects = function(r) {
 }
 
 cur_frm.cscript.select_doc_for_series = function(doc, cdt, cdn) {
-	cur_frm.toggle_display(['help_html','set_options', 'user_must_always_select', 'update'], 
+	cur_frm.toggle_display(['help_html','set_options', 'user_must_always_select', 'update'],
 		doc.select_doc_for_series);
 
 	var callback = function(r, rt){

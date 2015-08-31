@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 
@@ -15,6 +15,7 @@ class TestPricingRule(unittest.TestCase):
 
 		test_record = {
 			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule",
 			"apply_on": "Item Code",
 			"item_code": "_Test Item",
 			"selling": 1,

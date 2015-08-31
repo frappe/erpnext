@@ -1,0 +1,30 @@
+<table class="table table-striped" style="max-width: 600px;">
+    <thead>
+        <tr>
+            <th style="width: 30%;">
+                {{ __("Date") }}
+            </th>
+            <th style="width: 50%;">
+                {{ __("File") }}
+            </th>
+            <th>
+                {{ __("Size") }}
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for (var i=0; i < files.length; i++) { %}
+        <tr>
+            <td>
+                {{ files[i][1] }}
+            </td>
+            <td>
+                <a href="{{ files[i][0] }}" target="_blank">{{ files[i][0] }}</a>
+            </td>
+            <td>
+                {{ files[i][2] }}
+            </td>
+        </tr>
+        {% } %}
+    </tbody>
+</table>

@@ -1,15 +1,15 @@
 [
  {
-  "doctype": "Holiday List", 
+  "doctype": "Holiday List",
   "fiscal_year": "_Test Fiscal Year 2013", 
-  "holiday_list_details": [
+  "holidays": [
    {
     "description": "New Year", 
-    "doctype": "Holiday", 
-    "holiday_date": "2013-01-01", 
-    "parent": "_Test Holiday List", 
-    "parentfield": "holiday_list_details", 
-    "parenttype": "Holiday List"
+    "holiday_date": "2013-01-01"
+   },
+   {
+    "description": "Test Holiday", 
+    "holiday_date": "2013-02-01"
    }
   ], 
   "holiday_list_name": "_Test Holiday List", 

@@ -1,50 +1,30 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-cur_frm.cscript.refresh = function(doc) {
-	return frappe.call({
-		method: "erpnext.utilities.doctype.rename_tool.rename_tool.get_doctypes",
-		callback: function(r) {
-			cur_frm.set_df_property("select_doctype", "options", r.message);
-			cur_frm.cscript.setup_upload();
-		}
-	});
-}
 
-cur_frm.cscript.select_doctype = function() {
-	cur_frm.cscript.setup_upload();
-}
-
-cur_frm.cscript.setup_upload = function() {
-	var me = this;
-	var $wrapper = $(cur_frm.fields_dict.upload_html.wrapper).empty()
-		.html("<hr><div class='alert alert-warning'>" +
-			__("Upload a .csv file with two columns: the old name and the new name. Max 500 rows.")
-			+ "</div>");
-	var $log = $(cur_frm.fields_dict.rename_log.wrapper).empty();
-
-	// upload
-	frappe.upload.make({
-		parent: $wrapper,
-		args: {
-			method: 'erpnext.utilities.doctype.rename_tool.rename_tool.upload',
-			select_doctype: cur_frm.doc.select_doctype
-		},
-		sample_url: "e.g. http://example.com/somefile.csv",
-		callback: function(attachment, r) {
-			$log.empty().html("<hr>");
-			$.each(r.message, function(i, v) {
-				$("<div>" + v + "</div>").appendTo($log);
+frappe.ui.form.on("Rename Tool", {
+	onload: function(frm) {
+		return frappe.call({
+			method: "erpnext.utilities.doctype.rename_tool.rename_tool.get_doctypes",
+			callback: function(r) {
+				frm.set_df_property("select_doctype", "options", r.message);
+				frm.cscript.setup_upload();
+			}
+		});
+	},
+	refresh: function(frm) {
+		frm.disable_save();
+		frm.page.set_primary_action(__("Rename"), function() {
+			frm.get_field("rename_log").$wrapper.html("<p>Renaming...</p>");
+			frappe.call({
+				method: "erpnext.utilities.doctype.rename_tool.rename_tool.upload",
+				args: {
+					select_doctype: frm.doc.select_doctype
+				},
+				callback: function(r) {
+					frm.get_field("rename_log").$wrapper.html(r.message);
+				}
 			});
-		}
-	});
-
-	// rename button
-	$wrapper.find('form input[type="submit"]')
-		.click(function() {
-			$log.html("Working...");
-		})
-		.addClass("btn-info")
-		.attr('value', 'Upload and Rename')
-
-}
+		});
+	}
+})

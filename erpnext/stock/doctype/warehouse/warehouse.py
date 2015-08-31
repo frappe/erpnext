@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -9,27 +9,25 @@ from frappe import throw, msgprint, _
 from frappe.model.document import Document
 
 class Warehouse(Document):
-
 	def autoname(self):
 		suffix = " - " + frappe.db.get_value("Company", self.company, "abbr")
 		if not self.warehouse_name.endswith(suffix):
 			self.name = self.warehouse_name + suffix
 
 	def validate(self):
-		if self.email_id and not validate_email_add(self.email_id):
-				throw(_("Please enter valid Email Id"))
+		if self.email_id:
+			validate_email_add(self.email_id, True)
 
 		self.update_parent_account()
 
 	def update_parent_account(self):
-
 		if not getattr(self, "__islocal", None) \
 			and (self.create_account_under != frappe.db.get_value("Warehouse", self.name, "create_account_under")):
 
 				self.validate_parent_account()
 
 				warehouse_account = frappe.db.get_value("Account",
-					{"account_type": "Warehouse", "company": self.company, "master_name": self.name},
+					{"account_type": "Warehouse", "company": self.company, "warehouse": self.name},
 					["name", "parent_account"])
 
 				if warehouse_account and warehouse_account[1] != self.create_account_under:
@@ -42,8 +40,7 @@ class Warehouse(Document):
 
 	def create_account_head(self):
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
-			if not frappe.db.get_value("Account", {"account_type": "Warehouse",
-					"master_name": self.name}):
+			if not self.get_account(self.name):
 				if self.get("__islocal") or not frappe.db.get_value(
 						"Stock Ledger Entry", {"warehouse": self.name}):
 					self.validate_parent_account()
@@ -51,13 +48,13 @@ class Warehouse(Document):
 						"doctype": "Account",
 						'account_name': self.warehouse_name,
 						'parent_account': self.create_account_under,
-						'group_or_ledger':'Ledger',
+						'is_group':0,
 						'company':self.company,
 						"account_type": "Warehouse",
-						"master_name": self.name,
+						"warehouse": self.name,
 						"freeze_account": "No"
 					})
-					ac_doc.ignore_permissions = True
+					ac_doc.flags.ignore_permissions = True
 					ac_doc.insert()
 					msgprint(_("Account head {0} created").format(ac_doc.name))
 
@@ -89,8 +86,7 @@ class Warehouse(Document):
 			else:
 				frappe.db.sql("delete from `tabBin` where name = %s", d['name'])
 
-		warehouse_account = frappe.db.get_value("Account",
-			{"account_type": "Warehouse", "master_name": self.name})
+		warehouse_account = self.get_account(self.name)
 		if warehouse_account:
 			frappe.delete_doc("Account", warehouse_account)
 
@@ -112,26 +108,48 @@ class Warehouse(Document):
 
 			frappe.db.sql("delete from `tabBin` where warehouse=%s", olddn)
 
-		from erpnext.accounts.utils import rename_account_for
-		rename_account_for("Warehouse", olddn, newdn, merge, self.company)
+		self.rename_account_for(olddn, newdn, merge)
 
 		return new_warehouse
+
+	def rename_account_for(self, olddn, newdn, merge):
+		old_account = self.get_account(olddn)
+
+		if old_account:
+			new_account = None
+			if not merge:
+				if old_account == self.add_abbr_if_missing(olddn):
+					new_account = frappe.rename_doc("Account", old_account, newdn)
+			else:
+				existing_new_account = self.get_account(newdn)
+				new_account = frappe.rename_doc("Account", old_account,
+					existing_new_account or newdn, merge=True if existing_new_account else False)
+
+			frappe.db.set_value("Account", new_account or old_account, "warehouse", newdn)
+
+	def add_abbr_if_missing(self, dn):
+		from erpnext.setup.doctype.company.company import get_name_with_abbr
+		return get_name_with_abbr(dn, self.company)
+
+	def get_account(self, warehouse):
+		return frappe.db.get_value("Account", {"account_type": "Warehouse",
+			"warehouse": warehouse, "company": self.company})
 
 	def after_rename(self, olddn, newdn, merge=False):
 		if merge:
 			self.recalculate_bin_qty(newdn)
 
 	def recalculate_bin_qty(self, newdn):
-		from erpnext.utilities.repost_stock import repost_stock
+		from erpnext.stock.stock_balance import repost_stock
 		frappe.db.auto_commit_on_many_writes = 1
-		frappe.db.set_default("allow_negative_stock", 1)
+		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		for item in frappe.db.sql("""select distinct item_code from (
-			select name as item_code from `tabItem` where ifnull(is_stock_item, 'Yes')='Yes'
+			select name as item_code from `tabItem` where is_stock_item=1
 			union
 			select distinct item_code from tabBin) a"""):
 				repost_stock(item[0], newdn)
 
-		frappe.db.set_default("allow_negative_stock",
-			frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 		frappe.db.auto_commit_on_many_writes = 0

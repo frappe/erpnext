@@ -1,46 +1,80 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.buying");
 
-cur_frm.cscript.tname = "Purchase Order Item";
-cur_frm.cscript.fname = "po_details";
-cur_frm.cscript.other_fname = "other_charges";
-
 {% include 'buying/doctype/purchase_common/purchase_common.js' %};
-{% include 'accounts/doctype/purchase_taxes_and_charges_master/purchase_taxes_and_charges_master.js' %}
-{% include 'accounts/doctype/sales_invoice/pos.js' %}
+
+frappe.ui.form.on("Purchase Order", {
+	onload: function(frm) {
+		erpnext.queries.setup_queries(frm, "Warehouse", function() {
+			return erpnext.queries.warehouse(frm.doc);
+		});
+	}
+});
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
 	refresh: function(doc, cdt, cdn) {
+		var me = this;
 		this._super();
-		this.frm.dashboard.reset();
+		// this.frm.dashboard.reset();
 
-		if(doc.docstatus == 1 && doc.status != 'Stopped'){
-			cur_frm.dashboard.add_progress(cint(doc.per_received) + __("% Received"),
-				doc.per_received);
-			cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
-				doc.per_billed);
+		if(doc.docstatus == 1 && doc.status != 'Stopped') {
 
-			if(flt(doc.per_received, 2) < 100)
-				cur_frm.add_custom_button(__('Make Purchase Receipt'),
-					this.make_purchase_receipt, frappe.boot.doctype_icons["Purchase Receipt"]);
-			if(flt(doc.per_billed, 2) < 100)
-				cur_frm.add_custom_button(__('Make Invoice'), this.make_purchase_invoice,
-					frappe.boot.doctype_icons["Purchase Invoice"]);
 			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100)
-				cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Purchase Order'],
-					"icon-exclamation", "btn-default");
+				cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Purchase Order']);
 
-			cur_frm.add_custom_button('Send SMS', cur_frm.cscript.send_sms, "icon-mobile-phone", true);
+			if(flt(doc.per_billed)==0) {
+				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry);
+			}
+
+			if(flt(doc.per_received, 2) < 100) {
+				cur_frm.add_custom_button(__('Receive'), this.make_purchase_receipt).addClass("btn-primary");
+
+				if(doc.is_subcontracted==="Yes") {
+					cur_frm.add_custom_button(__('Transfer Material to Supplier'),
+						function() { me.make_stock_entry(); });
+				}
+			}
+
+			if(flt(doc.per_billed, 2) < 100)
+				cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice);
+
 
 		} else if(doc.docstatus===0) {
 			cur_frm.cscript.add_from_mappers();
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
-			cur_frm.add_custom_button(__('Unstop Purchase Order'),
-				cur_frm.cscript['Unstop Purchase Order'], "icon-check");
+			cur_frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Purchase Order']);
+	},
+
+	make_stock_entry: function() {
+		var items = $.map(cur_frm.doc.items, function(d) { return d.bom ? d.item_code : false; });
+		var me = this;
+
+		if(items.length===1) {
+			me._make_stock_entry(items[0]);
+			return;
+		}
+		frappe.prompt({fieldname:"item", options: items, fieldtype:"Select",
+			label: __("Select Item for Transfer"), reqd: 1}, function(data) {
+			me._make_stock_entry(data.item);
+		}, __("Select Item"), __("Make"));
+	},
+
+	_make_stock_entry: function(item) {
+		frappe.call({
+			method:"erpnext.buying.doctype.purchase_order.purchase_order.make_stock_entry",
+			args: {
+				purchase_order: cur_frm.doc.name,
+				item_code: item
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
 	},
 
 	make_purchase_receipt: function() {
@@ -71,7 +105,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						company: cur_frm.doc.company
 					}
 				})
-			}, "icon-download", "btn-default"
+			}
 		);
 
 		cur_frm.add_custom_button(__('From Supplier Quotation'),
@@ -85,7 +119,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						company: cur_frm.doc.company
 					}
 				})
-			}, "icon-download", "btn-default"
+			}
 		);
 
 		cur_frm.add_custom_button(__('For Supplier'),
@@ -97,13 +131,31 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						docstatus: ["!=", 2],
 					}
 				})
-			}, "icon-download", "btn-default"
+			}
 		);
 	},
 
 	tc_name: function() {
 		this.get_terms();
 	},
+
+	items_add: function(doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		this.frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
+	},
+
+	make_bank_entry: function() {
+		return frappe.call({
+			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_from_purchase_order",
+			args: {
+				"purchase_order": cur_frm.doc.name
+			},
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
+	}
 
 });
 
@@ -122,7 +174,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.fields_dict['po_details'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['items'].grid.get_field('project_name').get_query = function(doc, cdt, cdn) {
 	return {
 		filters:[
 			['Project', 'status', 'not in', 'Completed, Cancelled']
@@ -130,9 +182,20 @@ cur_frm.fields_dict['po_details'].grid.get_field('project_name').get_query = fun
 	}
 }
 
+cur_frm.fields_dict['items'].grid.get_field('bom').get_query = function(doc, cdt, cdn) {
+	var d = locals[cdt][cdn]
+	return {
+		filters: [
+			['BOM', 'item', '=', d.item_code],
+			['BOM', 'is_active', '=', '1'],
+			['BOM', 'docstatus', '=', '1']
+		]
+	}
+}
+
 cur_frm.cscript.get_last_purchase_rate = function(doc, cdt, cdn){
 	return $c_obj(doc, 'get_last_purchase_rate', '', function(r, rt) {
-		refresh_field(cur_frm.cscript.fname);
+		refresh_field("items");
 		var doc = locals[cdt][cdn];
 		cur_frm.cscript.calc_amount( doc, 2);
 	});
@@ -173,7 +236,7 @@ cur_frm.pformat.indent_no = function(doc, cdt, cdn){
 
 	out ='';
 
-	var cl = doc.po_details || [];
+	var cl = doc.items || [];
 
 	// outer table
 	var out='<div><table class="noborder" style="width:100%"><tr><td style="width: 50%"></td><td>';
@@ -206,8 +269,16 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.cscript.send_sms = function() {
-	frappe.require("assets/erpnext/js/sms_manager.js");
-	var sms_man = new SMSManager(cur_frm.doc);
+
+
+cur_frm.cscript.schedule_date = function(doc, cdt, cdn) {
+	erpnext.utils.copy_value_in_all_row(doc, cdt, cdn, "items", "schedule_date");
 }
 
+frappe.provide("erpnext.buying");
+
+frappe.ui.form.on("Purchase Order", "is_subcontracted", function(frm) {
+	if (frm.doc.is_subcontracted === "Yes") {
+		erpnext.buying.get_default_bom(frm);
+	}
+});

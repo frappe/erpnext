@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide('erpnext');
@@ -7,14 +7,33 @@ frappe.provide('erpnext');
 $(document).bind('toolbar_setup', function() {
 	frappe.app.name = "ERPNext";
 
-	$('.navbar-brand').html('<i class="icon-home"></i>')
-	.attr("title", "Home")
-	.addClass("navbar-icon-home")
-	.css({
-		"max-width": "200px",
-		"text-overflow": "ellipsis",
-		"white-space": "nowrap"
-	});
+	frappe.help_feedback_link = '<p><a class="text-muted" \
+		href="https://discuss.erpnext.com">Feedback</a></p>'
 
-	$('[data-link="docs"]').attr("href", "https://erpnext.com/user-guide")
+
+	$('.navbar-home').html('<img class="erpnext-icon" src="'+
+			frappe.urllib.get_base_url()+'/assets/erpnext/images/erp-icon.svg" />');
+
+	$('[data-link="docs"]').attr("href", "https://manual.erpnext.com")
+});
+
+// doctypes created via tree
+$.extend(frappe.create_routes, {
+	"Customer Group": "Sales Browser/Customer Group",
+	"Territory": "Sales Browser/Territory",
+	"Item Group": "Sales Browser/Item Group",
+	"Sales Person": "Sales Browser/Sales Person",
+	"Account": "Accounts Browser/Account",
+	"Cost Center": "Accounts Browser/Cost Center"
+});
+
+// preferred modules for breadcrumbs
+$.extend(frappe.breadcrumbs.preferred, {
+	"Item Group": "Stock",
+	"Customer Group": "Selling",
+	"Supplier Type": "Buying",
+	"Territory": "Selling",
+	"Sales Person": "Selling",
+	"Sales Partner": "Selling",
+	"Brand": "Selling"
 });

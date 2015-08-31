@@ -1,0 +1,184 @@
+{
+    "country_code": "in",
+    "name": "Chart of Accounts - India",
+	"is_active": "Yes",
+    "tree": {
+	    "Application of Funds (Assets)": {
+	        "Current Assets": {
+	            "Accounts Receivable": {
+	                "Debtors": {
+	                    "account_type": "Receivable"
+	                }
+	            },
+	            "Bank Accounts": {
+	                "account_type": "Bank",
+					"is_group": 1
+	            },
+	            "Cash In Hand": {
+	                "Cash": {
+	                    "account_type": "Cash"
+	                },
+	                "account_type": "Cash"
+	            },
+	            "Loans and Advances (Assets)": {
+	            	"is_group": 1
+	            },
+	            "Securities and Deposits": {
+	                "Earnest Money": {}
+	            },
+	            "Stock Assets": {
+	                "account_type": "Stock",
+					"is_group": 1
+	            },
+	            "Tax Assets": {
+					"is_group": 1
+				}
+	        },
+	        "Fixed Assets": {
+	            "Capital Equipments": {
+	                "account_type": "Fixed Asset"
+	            },
+	            "Computers": {
+	                "account_type": "Fixed Asset"
+	            },
+	            "Furniture and Fixture": {
+	                "account_type": "Fixed Asset"
+	            },
+	            "Office Equipments": {
+	                "account_type": "Fixed Asset"
+	            },
+	            "Plant and Machinery": {
+	                "account_type": "Fixed Asset"
+	            }
+	        },
+	        "Investments": {
+	        	"is_group": 1
+	        },
+	        "Temporary Accounts": {
+	            "Temporary Opening": {
+	            	"account_type": "Temporary"
+	            }
+	        },
+			"root_type": "Asset"
+	    },
+	    "Expenses": {
+	        "Direct Expenses": {
+	            "Stock Expenses": {
+	                "Cost of Goods Sold": {
+	                    "account_type": "Cost of Goods Sold"
+	                },
+	                "Expenses Included In Valuation": {
+	                    "account_type": "Expenses Included In Valuation"
+	                },
+	                "Stock Adjustment": {
+	                    "account_type": "Stock Adjustment"
+	                },
+	                "account_type": "Expense Account"
+	            },
+	            "account_type": "Expense Account"
+	        },
+	        "Indirect Expenses": {
+	            "Administrative Expenses": {
+	                "account_type": "Expense Account"
+	            },
+	            "Commission on Sales": {
+	                "account_type": "Expense Account"
+	            },
+	            "Depreciation": {
+	                "account_type": "Expense Account"
+	            },
+	            "Entertainment Expenses": {
+	                "account_type": "Expense Account"
+	            },
+	            "Freight and Forwarding Charges": {
+	                "account_type": "Chargeable"
+	            },
+	            "Legal Expenses": {
+	                "account_type": "Expense Account"
+	            },
+	            "Marketing Expenses": {
+	                "account_type": "Chargeable"
+	            },
+	            "Miscellaneous Expenses": {
+	                "account_type": "Chargeable"
+	            },
+	            "Office Maintenance Expenses": {
+	                "account_type": "Expense Account"
+	            },
+	            "Office Rent": {
+	                "account_type": "Expense Account"
+	            },
+	            "Postal Expenses": {
+	                "account_type": "Expense Account"
+	            },
+	            "Print and Stationary": {
+	                "account_type": "Expense Account"
+	            },
+	            "Rounded Off": {
+	                "account_type": "Expense Account"
+	            },
+	            "Salary": {
+	                "account_type": "Expense Account"
+	            },
+	            "Sales Expenses": {
+	                "account_type": "Expense Account"
+	            },
+	            "Telephone Expenses": {
+	                "account_type": "Expense Account"
+	            },
+	            "Travel Expenses": {
+	                "account_type": "Expense Account"
+	            },
+	            "Utility Expenses": {
+	                "account_type": "Expense Account"
+	            },
+	            "account_type": "Expense Account"
+	        },
+			"root_type": "Expense"
+	    },
+	    "Income": {
+	        "Direct Income": {
+	            "Sales": {
+	                "account_type": "Income Account"
+	            },
+	            "Service": {
+	                "account_type": "Income Account"
+	            },
+	            "account_type": "Income Account"
+	        },
+	        "Indirect Income": {
+	            "account_type": "Income Account",
+				"is_group": 1
+	        },
+			"root_type": "Income"
+	    },
+	    "Source of Funds (Liabilities)": {
+	        "Capital Account": {
+	            "Reserves and Surplus": {},
+	            "Shareholders Funds": {}
+	        },
+	        "Current Liabilities": {
+			    "Accounts Payable": {
+			        "Creditors": {
+			            "account_type": "Payable"
+			        }
+			    },
+			    "Stock Liabilities": {
+				    "Stock Received But Not Billed": {
+				        "account_type": "Stock Received But Not Billed"
+				    }
+			    },
+				"Duties and Taxes": {
+					"account_type": "Tax",
+					"is_group": 1
+				},
+				"Loans (Liabilities)": {
+					"Secured Loans": {},
+					"Unsecured Loans": {},
+					"Bank Overdraft Account": {}
+				}
+	        },
+			"root_type": "Liability"
+		}
+	}
+}

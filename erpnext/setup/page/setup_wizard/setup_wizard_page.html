@@ -1,0 +1,21 @@
+<div class="container setup-wizard-slide {%= css_class %}" data-slide-name="{%= name %}">
+	<div class="text-center setup-wizard-progress text-extra-muted">
+		{% for (var i=0; i < slides_count; i++) { %}
+		<i class="icon-fixed-width {% if (i+1==step) { %} icon-circle {% } else { %} icon-circle-blank {% } %}"></i>
+		{% } %}
+	</div>
+    <p class="text-center lead">{%= title %}</p>
+	<div class="row">
+		<div class="col-sm-12">
+			{% if (help) { %} <p class="text-center">{%= help %}</p> {% } %}
+			<div class="form"></div>
+		</div>
+	</div>
+	<div class="footer text-center">
+		<div>
+            <a class="prev-btn hide grey small">{%= __("Previous") %}</a>
+			<a class="next-btn hide btn btn-primary btn-sm">{%= __("Next") %}</a>
+			<a class="complete-btn hide btn btn-primary btn-sm"><b>{%= __("Complete Setup") %}</b></a>
+		</div>
+	</div>
+</div>

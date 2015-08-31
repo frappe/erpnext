@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -28,7 +28,7 @@ def create_price_list(pl_name, buying=0, selling=0):
 		"buying": buying,
 		"selling": selling,
 		"currency": frappe.db.get_default("currency"),
-		"valid_for_territories": [{
+		"territories": [{
 			"territory": get_root_of("Territory")
 		}]
 	})

@@ -1,4 +1,4 @@
-// Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+// Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
 
@@ -15,7 +15,7 @@ cur_frm.fields_dict['closing_account_head'].get_query = function(doc, cdt, cdn) 
 			"company": doc.company,
 			"report_type": "Balance Sheet",
 			"freeze_account": "No",
-			"group_or_ledger": "Ledger"
+			"is_group": 0
 		}
-	}	
+	}
 }

@@ -1,34 +1,34 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
 import frappe
-from frappe import msgprint, _
+from frappe import _
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import get_ageing_data
+from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
+	validate_filters(filters)
 
-	columns = get_columns()
+	columns = get_columns(filters)
 	entries = get_entries(filters)
 	invoice_posting_date_map = get_invoice_posting_date_map(filters)
 	against_date = ""
-	outstanding_amount = 0.0
 
 	data = []
 	for d in entries:
-		if d.against_voucher:
-			against_date = d.against_voucher and invoice_posting_date_map[d.against_voucher] or ""
-			outstanding_amount = d.debit or -1*d.credit
+		against_date = invoice_posting_date_map.get(d.reference_name) or ""
+		if d.reference_type=="Purchase Invoice":
+			payment_amount = flt(d.debit) or -1 * flt(d.credit)
 		else:
-			against_date = d.against_invoice and invoice_posting_date_map[d.against_invoice] or ""
-			outstanding_amount = d.credit or -1*d.debit
+			payment_amount = flt(d.credit) or -1 * flt(d.debit)
 
-		row = [d.name, d.account, d.posting_date, d.against_voucher or d.against_invoice,
+		row = [d.name, d.party_type, d.party, d.posting_date, d.reference_name,
 			against_date, d.debit, d.credit, d.cheque_no, d.cheque_date, d.remark]
 
-		if d.against_voucher or d.against_invoice:
-			row += get_ageing_data(d.posting_date, against_date, outstanding_amount)
+		if d.reference_name:
+			row += get_ageing_data(30, 60, 90, d.posting_date, against_date, payment_amount)
 		else:
 			row += ["", "", "", "", ""]
 
@@ -36,50 +36,55 @@ def execute(filters=None):
 
 	return columns, data
 
-def get_columns():
-	return [_("Journal Voucher") + ":Link/Journal Voucher:140", _("Account") + ":Link/Account:140",
-		_("Posting Date") + ":Date:100", _("Against Invoice") + ":Link/Purchase Invoice:130",
+def validate_filters(filters):
+	if (filters.get("payment_type") == "Incoming" and filters.get("party_type") == "Supplier") or \
+		(filters.get("payment_type") == "Outgoing" and filters.get("party_type") == "Customer"):
+			frappe.throw(_("{0} payment entries can not be filtered by {1}")\
+				.format(filters.payment_type, filters.party_type))
+
+def get_columns(filters):
+	return [_("Journal Entry") + ":Link/Journal Entry:140",
+		_("Party Type") + "::100", _("Party") + ":Dynamic Link/Party Type:140",
+		_("Posting Date") + ":Date:100",
+		_("Against Invoice") + (":Link/Purchase Invoice:130" if filters.get("payment_type") == "Outgoing" else ":Link/Sales Invoice:130"),
 		_("Against Invoice Posting Date") + ":Date:130", _("Debit") + ":Currency:120", _("Credit") + ":Currency:120",
 		_("Reference No") + "::100", _("Reference Date") + ":Date:100", _("Remarks") + "::150", _("Age") +":Int:40",
 		"0-30:Currency:100", "30-60:Currency:100", "60-90:Currency:100", _("90-Above") + ":Currency:100"
 	]
 
 def get_conditions(filters):
-	conditions = ""
-	party_accounts = []
+	conditions = []
 
-	if filters.get("account"):
-		party_accounts = [filters["account"]]
-	else:
-		cond = filters.get("company") and (" and company = '%s'" %
-			filters["company"].replace("'", "\'")) or ""
-
-		if filters.get("payment_type") == "Incoming":
-			cond += " and master_type = 'Customer'"
+	if not filters.get("party_type"):
+		if filters.get("payment_type") == "Outgoing":
+			filters["party_type"] = "Supplier"
 		else:
-			cond += " and master_type = 'Supplier'"
+			filters["party_type"] = "Customer"
 
-		party_accounts = frappe.db.sql_list("""select name from `tabAccount`
-			where ifnull(master_name, '')!='' and docstatus < 2 %s""" % cond)
+	if filters.get("party_type"):
+		conditions.append("jvd.party_type=%(party_type)s")
 
-	if party_accounts:
-		conditions += " and jvd.account in (%s)" % (", ".join(['%s']*len(party_accounts)))
-	else:
-		msgprint(_("No Customer or Supplier Accounts found"), raise_exception=1)
+	if filters.get("party"):
+		conditions.append("jvd.party=%(party)s")
 
-	if filters.get("from_date"): conditions += " and jv.posting_date >= '%s'" % filters["from_date"]
-	if filters.get("to_date"): conditions += " and jv.posting_date <= '%s'" % filters["to_date"]
+	if filters.get("company"):
+		conditions.append("jv.company=%(company)s")
 
-	return conditions, party_accounts
+	if filters.get("from_date"):
+		conditions.append("jv.posting_date >= %(from_date)s")
+	if filters.get("to_date"):
+		conditions.append("jv.posting_date <= %(to_date)s")
+
+	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 def get_entries(filters):
-	conditions, party_accounts = get_conditions(filters)
-	entries =  frappe.db.sql("""select jv.name, jvd.account, jv.posting_date,
-		jvd.against_voucher, jvd.against_invoice, jvd.debit, jvd.credit,
+	conditions = get_conditions(filters)
+	entries =  frappe.db.sql("""select jv.name, jvd.party_type, jvd.party, jv.posting_date,
+		jvd.reference_type, jvd.reference_name, jvd.debit, jvd.credit,
 		jv.cheque_no, jv.cheque_date, jv.remark
-		from `tabJournal Voucher Detail` jvd, `tabJournal Voucher` jv
+		from `tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		where jvd.parent = jv.name and jv.docstatus=1 %s order by jv.name DESC""" %
-		(conditions), tuple(party_accounts), as_dict=1)
+		conditions, filters, as_dict=1)
 
 	return entries
 

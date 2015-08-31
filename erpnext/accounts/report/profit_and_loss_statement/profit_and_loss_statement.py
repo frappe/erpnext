@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -27,7 +27,7 @@ def execute(filters=None):
 def get_net_profit_loss(income, expense, period_list):
 	if income and expense:
 		net_profit_loss = {
-			"account_name": _("Net Profit / Loss"),
+			"account_name": "'" + _("Net Profit / Loss") + "'",
 			"account": None,
 			"warn_if_negative": True
 		}

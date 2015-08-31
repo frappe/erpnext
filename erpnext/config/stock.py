@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 from frappe import _
 
 def get_data():
@@ -81,7 +82,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Stock UOM Replace Utility",
 					"description": _("Change UOM for an Item."),
-				},
+				}
 			]
 		},
 		{
@@ -129,6 +130,11 @@ def get_data():
 					"description": _("Multiple Item prices."),
 					"route": "Report/Item Price"
 				},
+				{
+					"type": "doctype",
+					"name": "Item Attribute",
+					"description": _("Attributes for Item Variants. e.g Size, Color etc."),
+				},
 			]
 		},
 		{
@@ -139,13 +145,13 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Ledger",
-					"doctype": "Item",
+					"doctype": "Stock Ledger Entry",
 				},
 				{
-					"type": "page",
-					"name": "stock-balance",
-					"label": _("Stock Balance"),
-					"icon": "icon-table",
+					"type": "report",
+					"is_query_report": True,
+					"name": "Stock Balance",
+					"doctype": "Stock Ledger Entry"
 				},
 				{
 					"type": "report",
@@ -170,13 +176,7 @@ def get_data():
 					"name": "stock-analytics",
 					"label": _("Stock Analytics"),
 					"icon": "icon-bar-chart"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Warehouse-Wise Stock Balance",
-					"doctype": "Warehouse"
-				},
+				}
 			]
 		},
 		{
@@ -254,4 +254,25 @@ def get_data():
 				},
 			]
 		},
+		{
+			"label": _("Help"),
+			"icon": "icon-facetime-video",
+			"items": [
+				{
+					"type": "help",
+					"label": _("Items and Pricing"),
+					"youtube_id": "qXaEwld4_Ps"
+				},
+				{
+					"type": "help",
+					"label": _("Opening Stock Balance"),
+					"youtube_id": "0yPgrtfeCTs"
+				},
+				{
+					"type": "help",
+					"label": _("Item Variants"),
+					"youtube_id": "OGBETlCzU5o"
+				},
+			]
+		}
 	]

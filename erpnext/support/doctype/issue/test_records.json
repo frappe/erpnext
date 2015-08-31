@@ -1,0 +1,8 @@
+[
+	{
+		"doctype": "Issue",
+		"name": "_Test Issue 1",
+		"subject": "Test Support",
+		"raised_by": "test@example.com"
+	}
+]
