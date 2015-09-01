@@ -4,7 +4,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from frappe.utils import get_site_path
+from frappe.utils import get_site_path, cint
 from frappe.utils.data import convert_utc_to_user_timezone
 import os
 import datetime
@@ -42,7 +42,7 @@ def take_backups_weekly():
 	take_backups_if("Weekly")
 
 def take_backups_if(freq):
-	if frappe.db.get_value("Backup Manager", None, "send_backups_to_dropbox"):
+	if cint(frappe.db.get_value("Backup Manager", None, "send_backups_to_dropbox")):
 		if frappe.db.get_value("Backup Manager", None, "upload_backups_to_dropbox")==freq:
 			take_backups_dropbox()
 
