@@ -97,8 +97,11 @@ class Project(Document):
 			sum(hours) as time
 			from `tabTime Log` where project = %s and docstatus = 1""", self.name, as_dict=1)[0]
 
-		from_expense_claim = frappe.db.sql("""select sum(ifnull(total_sanctioned_amount, 0))
-			from `tabExpense Claim` where project = %s""", self.name, as_dict=1)[0]
+		from_expense_claim = frappe.db.sql("""select
+			sum(ifnull(total_sanctioned_amount, 0)) as total_sanctioned_amount
+			from `tabExpense Claim` where project = %s and approval_status='Approved'
+			and docstatus = 1""",
+			self.name, as_dict=1)[0]
 
 		self.actual_start_date = from_time_log.start_date
 		self.actual_end_date = from_time_log.end_date

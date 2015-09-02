@@ -22,6 +22,8 @@ class ExpenseClaim(Document):
 		self.validate_expense_approver()
 		self.calculate_total_amount()
 		set_employee_name(self)
+		if self.task and not self.project:
+			self.project = frappe.db.get_value("Task", self.task, "project")
 
 	def on_submit(self):
 		if self.approval_status=="Draft":
