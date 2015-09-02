@@ -41,6 +41,10 @@ class ItemAttribute(Document):
 			abbrs.append(d.abbr)
 
 	def validate_attribute_values(self):
+		# don't validate numeric values
+		if self.numeric_values:
+			return
+
 		attribute_values = []
 		for d in self.item_attribute_values:
 			attribute_values.append(d.attribute_value)

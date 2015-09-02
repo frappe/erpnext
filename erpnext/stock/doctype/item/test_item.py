@@ -6,8 +6,8 @@ import unittest
 import frappe
 
 from frappe.test_runner import make_test_records
-from erpnext.stock.doctype.item.item import (WarehouseNotSet, create_variant,
-	ItemVariantExistsError, InvalidItemAttributeValueError)
+from erpnext.stock.doctype.item.item import WarehouseNotSet
+from erpnext.controllers.item_variant import create_variant, ItemVariantExistsError, InvalidItemAttributeValueError
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse"]
@@ -132,7 +132,7 @@ class TestItem(unittest.TestCase):
 					"attribute": "Test Size"
 				},
 				{
-					"attribute": "Test Item Length", 
+					"attribute": "Test Item Length",
 					"numeric_values": 1,
 					"from_range": 0.0,
 					"to_range": 100.0,
