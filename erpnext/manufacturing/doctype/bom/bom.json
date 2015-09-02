@@ -10,6 +10,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "Item to be manufactured or repacked", 
    "fieldname": "item", 
    "fieldtype": "Link", 
@@ -33,6 +35,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "item_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -53,6 +57,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "rm_cost_as_per", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -73,6 +79,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:doc.rm_cost_as_per===\"Price List\"", 
    "fieldname": "buying_price_list", 
    "fieldtype": "Link", 
@@ -94,6 +102,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "cb0", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -112,6 +122,8 @@
   }, 
   {
    "allow_on_submit": 1, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "1", 
    "fieldname": "is_active", 
    "fieldtype": "Check", 
@@ -134,6 +146,8 @@
   }, 
   {
    "allow_on_submit": 1, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "1", 
    "fieldname": "is_default", 
    "fieldtype": "Check", 
@@ -156,6 +170,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "Manage cost of operations", 
    "fieldname": "with_operations", 
    "fieldtype": "Check", 
@@ -176,6 +192,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "", 
    "description": "Specify the operations, operating cost and give a unique Operation no to your operations.", 
    "fieldname": "operations_section", 
@@ -198,6 +216,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "operations", 
    "fieldtype": "Table", 
    "hidden": 0, 
@@ -220,6 +240,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "materials_section", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -240,6 +262,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "items", 
    "fieldtype": "Table", 
    "hidden": 0, 
@@ -262,6 +286,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "1", 
    "description": "Quantity of item obtained after manufacturing / repacking from given quantities of raw materials", 
    "fieldname": "quantity", 
@@ -285,6 +311,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "costing", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -305,6 +333,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "operating_cost", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -325,6 +355,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "raw_material_cost", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -345,6 +377,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "cb1", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -363,6 +397,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "total_cost", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -383,6 +419,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "more_info_section", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -402,6 +440,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "project_name", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -424,6 +464,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "company", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -445,6 +487,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "amended_from", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -465,6 +509,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "col_break23", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -483,6 +529,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "uom", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -503,6 +551,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_25", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -522,6 +572,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "description", 
    "fieldtype": "Small Text", 
    "hidden": 0, 
@@ -541,6 +593,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_27", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -560,6 +614,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "image", 
    "fieldtype": "Attach", 
    "hidden": 0, 
@@ -580,6 +636,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "image_view", 
    "fieldtype": "Image", 
    "hidden": 0, 
@@ -601,6 +659,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "depends_on": "eval:!doc.__islocal", 
    "fieldname": "section_break0", 
    "fieldtype": "Section Break", 
@@ -621,6 +681,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "exploded_items", 
    "fieldtype": "Table", 
    "hidden": 0, 

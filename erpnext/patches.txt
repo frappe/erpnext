@@ -198,3 +198,6 @@ erpnext.patches.v5_4.update_purchase_cost_against_project
 erpnext.patches.v5_8.update_order_reference_in_return_entries
 erpnext.patches.v5_8.add_credit_note_print_heading
 execute:frappe.delete_doc_if_exists("Print Format", "Credit Note - Negative Invoice")
+
+# V6.0
+erpnext.patches.v6_0.set_default_title

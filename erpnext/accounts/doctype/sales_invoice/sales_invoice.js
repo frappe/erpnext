@@ -133,8 +133,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	is_pos: function(doc, dt, dn, callback_fn) {
-		if(cur_frm.doc.__missing_values_set) return;
 		cur_frm.cscript.hide_fields(this.frm.doc);
+		if(cur_frm.doc.__missing_values_set) return;
 		if(cint(this.frm.doc.is_pos)) {
 			if(!this.frm.doc.company) {
 				this.frm.set_value("is_pos", 0);

@@ -162,7 +162,8 @@ def update_completed_and_requested_qty(stock_entry, method):
 				mr_obj = frappe.get_doc("Material Request", mr)
 
 				if mr_obj.status in ["Stopped", "Cancelled"]:
-					frappe.throw(_("Material Request {0} is cancelled or stopped").format(mr), frappe.InvalidStatusError)
+					frappe.throw(_("{0} {1} is cancelled or stopped").format(_("Material Request"), mr),
+						frappe.InvalidStatusError)
 
 				mr_obj.update_completed_qty(mr_item_rows)
 				mr_obj.update_requested_qty(mr_item_rows)

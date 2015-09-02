@@ -146,6 +146,9 @@ class DeliveryNote(SellingController):
 
 	def validate_for_items(self):
 		check_list, chk_dupl_itm = [], []
+		if cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
+			return
+
 		for d in self.get('items'):
 			e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
 			f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]

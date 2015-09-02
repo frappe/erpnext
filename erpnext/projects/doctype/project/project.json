@@ -11,6 +11,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "", 
    "fieldname": "project_name", 
    "fieldtype": "Data", 
@@ -33,6 +35,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "Open", 
    "fieldname": "status", 
    "fieldtype": "Select", 
@@ -56,6 +60,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "project_type", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -78,6 +84,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_5", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -97,6 +105,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "is_active", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -119,6 +129,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "priority", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -141,6 +153,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_12", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -160,6 +174,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "expected_start_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -181,6 +197,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_11", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -200,6 +218,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "expected_end_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -221,6 +241,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "customer_details", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -242,6 +264,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "customer", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -264,6 +288,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_14", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -283,6 +309,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "sales_order", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -304,6 +332,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "sb_milestones", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -325,6 +355,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "tasks", 
    "fieldtype": "Table", 
    "hidden": 0, 
@@ -346,6 +378,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "percent_complete", 
    "fieldtype": "Percent", 
    "hidden": 0, 
@@ -365,6 +399,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break0", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -386,6 +422,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "notes", 
    "fieldtype": "Text Editor", 
    "hidden": 0, 
@@ -407,6 +445,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_18", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -426,6 +466,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "actual_start_date", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -446,6 +488,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "actual_time", 
    "fieldtype": "Float", 
    "hidden": 0, 
@@ -466,6 +510,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_20", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -485,6 +531,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "actual_end_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -506,6 +554,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "section_break_26", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -525,6 +575,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "estimated_costing", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -547,6 +599,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_22", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -566,6 +620,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "company", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -586,6 +642,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "cost_center", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -606,6 +664,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "project_details", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -627,6 +687,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "", 
    "fieldname": "total_costing_amount", 
    "fieldtype": "Currency", 
@@ -648,6 +710,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "", 
    "fieldname": "total_expense_claim", 
    "fieldtype": "Currency", 
@@ -669,6 +733,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_28", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -688,6 +754,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "", 
    "fieldname": "total_billing_amount", 
    "fieldtype": "Currency", 
@@ -709,6 +777,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "total_purchase_cost", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -729,6 +799,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "margin", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -750,6 +822,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "gross_margin", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -772,6 +846,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_37", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -791,6 +867,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "per_gross_margin", 
    "fieldtype": "Percent", 
    "hidden": 0, 

@@ -183,7 +183,8 @@ class PurchaseReceipt(BuyingController):
 				po_obj = frappe.get_doc("Purchase Order", po)
 
 				if po_obj.status in ["Stopped", "Cancelled"]:
-					frappe.throw(_("Material Request {0} is cancelled or stopped").format(po), frappe.InvalidStatusError)
+					frappe.throw(_("{0} {1} is cancelled or stopped").format(_("Purchase Order"), po),
+						frappe.InvalidStatusError)
 
 				po_obj.update_ordered_qty(po_item_rows)
 
