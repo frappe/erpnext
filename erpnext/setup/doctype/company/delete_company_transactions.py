@@ -6,6 +6,7 @@ import frappe
 
 from frappe.utils import cint
 from frappe import _
+from frappe.desk.notifications import clear_notifications
 
 @frappe.whitelist()
 def delete_company_transactions(company_name):
@@ -23,6 +24,9 @@ def delete_company_transactions(company_name):
 		tabDocField where fieldtype='Link' and options='Company'"""):
 		if doctype not in ("Account", "Cost Center", "Warehouse", "Budget Detail", "Party Account"):
 			delete_for_doctype(doctype, company_name)
+			
+	# Clear notification counts
+	clear_notifications()
 
 def delete_for_doctype(doctype, company_name):
 	meta = frappe.get_meta(doctype)
