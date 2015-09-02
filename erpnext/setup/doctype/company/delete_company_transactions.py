@@ -16,6 +16,8 @@ def delete_company_transactions(company_name):
 		frappe.throw(_("Transactions can only be deleted by the creator of the Company"), frappe.PermissionError)
 
 	delete_bins(company_name)
+	
+	delete_time_logs(company_name)
 
 	for doctype in frappe.db.sql_list("""select parent from
 		tabDocField where fieldtype='Link' and options='Company'"""):
@@ -60,3 +62,20 @@ def delete_for_doctype(doctype, company_name):
 def delete_bins(company_name):
 	frappe.db.sql("""delete from tabBin where warehouse in
 			(select name from tabWarehouse where company=%s)""", company_name)
+
+def delete_time_logs(company_name):
+	# Delete Time Logs as it is linked to Production Order / Project / Task, which are linked to company
+	frappe.db.sql("""
+		delete from `tabTime Log`
+		where 
+			(ifnull(project, '') != '' 
+				and exists(select name from `tabProject` where name=`tabTime Log`.project and company=%(company)s))
+			or (ifnull(task, '') != '' 
+				and exists(select name from `tabTask` where name=`tabTime Log`.task and company=%(company)s))
+			or (ifnull(production_order, '') != '' 
+				and exists(select name from `tabProduction Order` 
+					where name=`tabTime Log`.production_order and company=%(company)s))
+			or (ifnull(sales_invoice, '') != '' 
+				and exists(select name from `tabSales Invoice` 
+					where name=`tabTime Log`.sales_invoice and company=%(company)s))
+	""", {"company": company_name})
