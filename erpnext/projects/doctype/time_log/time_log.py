@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+import frappe
 from frappe import _
 from frappe.utils import cstr, flt, get_datetime, get_time, getdate
 from dateutil.relativedelta import relativedelta
@@ -248,17 +248,8 @@ def get_events(start, end, filters=None):
 	:param end: End date-time.
 	:param filters: Filters like workstation, project etc.
 	"""
-	from frappe.desk.reportview import build_match_conditions
-	if not frappe.has_permission("Time Log"):
-		frappe.msgprint(_("No Permission"), raise_exception=1)
-
-	conditions = build_match_conditions("Time Log")
-	conditions = conditions and (" and " + conditions) or ""
-	if filters:
-		filters = json.loads(filters)
-		for key in filters:
-			if filters[key]:
-				conditions += " and " + key + ' = "' + filters[key].replace('"', '\"') + '"'
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Time Log", filters)
 
 	data = frappe.db.sql("""select name, from_time, to_time,
 		activity_type, task, project, production_order, workstation from `tabTime Log`

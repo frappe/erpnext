@@ -329,15 +329,15 @@ class ProductionOrder(Document):
 			frappe.throw(_("Production Order cannot be raised against a Item Template"), ItemHasVariantError)
 
 		validate_end_of_life(self.production_item)
-		
+
 	def validate_qty(self):
 		if not self.qty > 0:
 			frappe.throw(_("Quantity to Manufacture must be greater than 0."))
-			
+
 	def validate_operation_time(self):
 		for d in self.operations:
 			if not d.time_in_mins > 0:
-				frappe.throw(_("Operation Time must be greater than 0 for Operation {0}".format(d.operation))) 
+				frappe.throw(_("Operation Time must be greater than 0 for Operation {0}".format(d.operation)))
 
 @frappe.whitelist()
 def get_item_details(item):
@@ -381,19 +381,17 @@ def make_stock_entry(production_order_id, purpose, qty=None):
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
-	from frappe.desk.reportview import build_match_conditions
-	if not frappe.has_permission("Production Order"):
-		frappe.msgprint(_("No Permission"), raise_exception=1)
+	"""Returns events for Gantt / Calendar view rendering.
 
-	conditions = build_match_conditions("Production Order")
-	conditions = conditions and (" and " + conditions) or ""
-	if filters:
-		filters = json.loads(filters)
-		for key in filters:
-			if filters[key]:
-				conditions += " and " + key + ' = "' + filters[key].replace('"', '\"') + '"'
+	:param start: Start date-time.
+	:param end: End date-time.
+	:param filters: Filters (JSON).
+	"""
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Production Order", filters)
 
-	data = frappe.db.sql("""select name, production_item, planned_start_date, planned_end_date
+	data = frappe.db.sql("""select name, production_item, planned_start_date,
+		planned_end_date, status
 		from `tabProduction Order`
 		where ((ifnull(planned_start_date, '0000-00-00')!= '0000-00-00') \
 				and (planned_start_date between %(start)s and %(end)s) \
