@@ -37,7 +37,7 @@ def fix_files_for_item(files_path, unlinked_files):
 			frappe.db.set_value(row.doctype, row.name, "image", new_file_url, update_modified=False)
 
 		# set it as attachment of this item code
-		file_data = frappe.get_doc("File Data", unlinked_files[file_url]["file"])
+		file_data = frappe.get_doc("File", unlinked_files[file_url]["file"])
 		file_data.attached_to_doctype = "Item"
 		file_data.attached_to_name = item_code
 		file_data.save()
@@ -65,20 +65,20 @@ def rename_and_set_content_hash(files_path, unlinked_files, file_url):
 
 	# set content hash if missing
 	file_data_name = unlinked_files[file_url]["file"]
-	if not frappe.db.get_value("File Data", file_data_name, "content_hash"):
+	if not frappe.db.get_value("File", file_data_name, "content_hash"):
 		with open(new_filename, "r") as f:
 			content_hash = get_content_hash(f.read())
-			frappe.db.set_value("File Data", file_data_name, "content_hash", content_hash)
+			frappe.db.set_value("File", file_data_name, "content_hash", content_hash)
 
 def get_unlinked_files(files_path):
-	# find files that have the same name as a File Data doc
-	# and the file_name mentioned in that File Data doc doesn't exist
+	# find files that have the same name as a File doc
+	# and the file_name mentioned in that File doc doesn't exist
 	# and it isn't already attached to a doc
 	unlinked_files = {}
 	files = os.listdir(files_path)
 	for file in files:
-		if not frappe.db.exists("File Data", {"file_name": file}):
-			file_data = frappe.db.get_value("File Data", {"name": file},
+		if not frappe.db.exists("File", {"file_name": file}):
+			file_data = frappe.db.get_value("File", {"name": file},
 				["file_name", "attached_to_doctype", "attached_to_name"], as_dict=True)
 
 			if (file_data
