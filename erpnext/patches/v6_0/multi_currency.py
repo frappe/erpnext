@@ -65,7 +65,7 @@ def execute():
 		
 		# Set party account if default currency of party other than company's default currency
 		for dt in ("Customer", "Supplier"):
-			parties = frappe.get_all(dt, ["name", "default_currency"])
+			parties = frappe.get_all(dt)
 			for p in parties:
 				# Get party GL Entries
 				party_gle = frappe.db.get_value("GL Entry", {"party_type": dt, "party": p.name, 
@@ -73,15 +73,13 @@ def execute():
 					
 				party = frappe.get_doc(dt, p.name)
 				
-				# set default currency and party account currency
-				if not party.default_currency:
-					party.default_currency = company.default_currency
-					
-				party.party_account_currency = company.default_currency if party_gle else party.default_currency
+				# set party account currency
+				if party_gle or not party.party_account_currency:
+					party.party_account_currency = company.default_currency
 
 				# Add default receivable /payable account if not exists 
 				# and currency is other than company currency
-				if party.default_currency != company.default_currency:
+				if party.party_account_currency and party.party_account_currency != company.default_currency:
 					party_account_exists = False
 					for d in party.get("accounts"):
 						if d.company == company.name:

@@ -178,7 +178,7 @@ def validate_party_account(party):
 		for d in party.get("accounts"):
 			if d.company in companies_with_different_currency:
 				companies_with_different_currency.remove(d.company)
-				
+			
 			selected_account_currency = frappe.db.get_value("Account", d.account, "account_currency")
 			if selected_account_currency != party.party_account_currency:
 				frappe.throw(_("Account {0} is invalid, account currency must be {1}")
