@@ -86,23 +86,23 @@ class GrossProfitGenerator(object):
 		self.filters = frappe._dict(filters)
 		self.load_invoice_items()
 		self.load_stock_ledger_entries()
-		self.load_sales_bom()
+		self.load_product_bundle()
 		self.load_non_stock_items()
 		self.process()
 
 	def process(self):
 		self.grouped = {}
 		for row in self.si_list:
-			if self.skip_row(row, self.sales_boms):
+			if self.skip_row(row, self.product_bundles):
 				continue
 
 			row.base_amount = flt(row.base_net_amount)
 
-			sales_boms = self.sales_boms.get(row.parenttype, {}).get(row.parent, frappe._dict())
+			product_bundles = self.product_bundles.get(row.parenttype, {}).get(row.parent, frappe._dict())
 
 			# get buying amount
-			if row.item_code in sales_boms:
-				row.buying_amount = self.get_buying_amount_from_sales_bom(row, sales_boms[row.item_code])
+			if row.item_code in product_bundles:
+				row.buying_amount = self.get_buying_amount_from_product_bundle(row, product_bundles[row.item_code])
 			else:
 				row.buying_amount = self.get_buying_amount(row, row.item_code)
 
@@ -152,13 +152,13 @@ class GrossProfitGenerator(object):
 
 			self.grouped_data.append(new_row)
 
-	def skip_row(self, row, sales_boms):
+	def skip_row(self, row, product_bundles):
 		if self.filters.get("group_by") != "Invoice" and not row.get(scrub(self.filters.get("group_by"))):
 			return True
 
-	def get_buying_amount_from_sales_bom(self, row, sales_bom):
+	def get_buying_amount_from_product_bundle(self, row, product_bundle):
 		buying_amount = 0.0
-		for bom_item in sales_bom:
+		for bom_item in product_bundle:
 			if bom_item.get("parent_detail_docname")==row.item_row:
 				buying_amount += self.get_buying_amount(row, bom_item.item_code)
 
@@ -174,12 +174,12 @@ class GrossProfitGenerator(object):
 			return flt(row.qty) * item_rate
 
 		else:
-			if row.update_stock or row.dn_detail:
+			my_sle = self.sle.get((item_code, row.warehouse))
+			if (row.update_stock or row.dn_detail) and my_sle:
 				parenttype, parent, item_row = row.parenttype, row.parent, row.item_row
 				if row.dn_detail:
 					parenttype, parent, item_row = "Delivery Note", row.delivery_note, row.dn_detail
-
-				my_sle = self.sle.get((item_code, row.warehouse))
+				
 				for i, sle in enumerate(my_sle):
 					# find the stock valution rate from stock ledger entry
 					if sle.voucher_type == parenttype and parent == sle.voucher_no and \
@@ -215,14 +215,13 @@ class GrossProfitGenerator(object):
 		if self.filters.to_date:
 			conditions += " and posting_date <= %(to_date)s"
 
-		self.si_list = frappe.db.sql("""select item.parenttype, item.parent, 
+		self.si_list = frappe.db.sql("""select item.parenttype, item.parent,
 				si.posting_date, si.posting_time, si.project_name, si.update_stock,
 				si.customer, si.customer_group, si.territory,
 				item.item_code, item.item_name, item.description, item.warehouse,
 				item.item_group, item.brand, item.dn_detail, item.delivery_note,
 				item.qty, item.base_net_rate, item.base_net_amount, item.name as "item_row",
-				sales.sales_person, sales.sales_designation, sales.allocated_amount,
-				sales.incentives
+				sales.sales_person, sales.allocated_amount, sales.incentives
 			from `tabSales Invoice` si
 			inner join `tabSales Invoice Item` item on item.parent = si.name
 			left join `tabSales Team` sales on sales.parent = si.name
@@ -246,15 +245,15 @@ class GrossProfitGenerator(object):
 
 			self.sle[(r.item_code, r.warehouse)].append(r)
 
-	def load_sales_bom(self):
-		self.sales_boms = {}
+	def load_product_bundle(self):
+		self.product_bundles = {}
 
 		for d in frappe.db.sql("""select parenttype, parent, parent_item,
 			item_code, warehouse, -1*qty as total_qty, parent_detail_docname
 			from `tabPacked Item` where docstatus=1""", as_dict=True):
-			self.sales_boms.setdefault(d.parenttype, frappe._dict()).setdefault(d.parent,
+			self.product_bundles.setdefault(d.parenttype, frappe._dict()).setdefault(d.parent,
 				frappe._dict()).setdefault(d.parent_item, []).append(d)
 
 	def load_non_stock_items(self):
 		self.non_stock_items = frappe.db.sql_list("""select name from tabItem
-			where ifnull(is_stock_item, 'No')='No'""")
+			where is_stock_item=0""")

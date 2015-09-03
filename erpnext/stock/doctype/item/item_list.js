@@ -6,7 +6,7 @@ frappe.listview_settings['Item'] = {
 		if(doc.end_of_life && doc.end_of_life < frappe.datetime.get_today()) {
 			return [__("Expired"), "grey", "end_of_life,<,Today"]
 		} else if(doc.has_variants) {
-			return [__("Template"), "blue", "has_variant,=,1"]
+			return [__("Template"), "blue", "has_variants,=,Yes"]
 		} else if(doc.variant_of) {
 			return [__("Variant"), "green", "variant_of,=," + doc.variant_of]
 		} else {

@@ -10,8 +10,10 @@ import frappe
 from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
+from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 
 from erpnext.controllers.buying_controller import BuyingController
+
 
 form_grid_templates = {
 	"items": "templates/form_grid/material_request_grid.html"
@@ -136,27 +138,16 @@ class MaterialRequest(BuyingController):
 
 	def update_requested_qty(self, mr_item_rows=None):
 		"""update requested qty (before ordered_qty is updated)"""
-		from erpnext.stock.utils import get_bin
-
-		def _update_requested_qty(item_code, warehouse):
-			requested_qty = frappe.db.sql("""select sum(mr_item.qty - ifnull(mr_item.ordered_qty, 0))
-				from `tabMaterial Request Item` mr_item, `tabMaterial Request` mr
-				where mr_item.item_code=%s and mr_item.warehouse=%s
-				and mr_item.qty > ifnull(mr_item.ordered_qty, 0) and mr_item.parent=mr.name
-				and mr.status!='Stopped' and mr.docstatus=1""", (item_code, warehouse))
-
-			bin_doc = get_bin(item_code, warehouse)
-			bin_doc.indented_qty = flt(requested_qty[0][0]) if requested_qty else 0
-			bin_doc.save()
-
 		item_wh_list = []
 		for d in self.get("items"):
 			if (not mr_item_rows or d.name in mr_item_rows) and [d.item_code, d.warehouse] not in item_wh_list \
-					and frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" and d.warehouse:
+					and frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 and d.warehouse:
 				item_wh_list.append([d.item_code, d.warehouse])
 
 		for item_code, warehouse in item_wh_list:
-			_update_requested_qty(item_code, warehouse)
+			update_bin_qty(item_code, warehouse, {
+				"indented_qty": get_indented_qty(item_code, warehouse)
+			})
 
 def update_completed_and_requested_qty(stock_entry, method):
 	if stock_entry.doctype == "Stock Entry":
@@ -171,7 +162,8 @@ def update_completed_and_requested_qty(stock_entry, method):
 				mr_obj = frappe.get_doc("Material Request", mr)
 
 				if mr_obj.status in ["Stopped", "Cancelled"]:
-					frappe.throw(_("Material Request {0} is cancelled or stopped").format(mr), frappe.InvalidStatusError)
+					frappe.throw(_("{0} {1} is cancelled or stopped").format(_("Material Request"), mr),
+						frappe.InvalidStatusError)
 
 				mr_obj.update_completed_qty(mr_item_rows)
 				mr_obj.update_requested_qty(mr_item_rows)
@@ -305,7 +297,7 @@ def make_stock_entry(source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.purpose = source.material_request_type
-		target.run_method("get_stock_and_rate")
+		target.run_method("calculate_rate_and_amount")
 
 	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {

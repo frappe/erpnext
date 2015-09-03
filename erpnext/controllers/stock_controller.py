@@ -6,9 +6,9 @@ import frappe
 from frappe.utils import cint, flt, cstr
 from frappe import msgprint, _
 import frappe.defaults
+from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
 
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
 
 class StockController(AccountsController):
 	def make_gl_entries(self, repost_future_gle=True):
@@ -212,10 +212,60 @@ class StockController(AccountsController):
 		item_codes = list(set([d.item_code for d in self.get("items")]))
 		if item_codes:
 			serialized_items = frappe.db.sql_list("""select name from `tabItem`
-				where has_serial_no='Yes' and name in ({})""".format(", ".join(["%s"]*len(item_codes))),
+				where has_serial_no=1 and name in ({})""".format(", ".join(["%s"]*len(item_codes))),
 				tuple(item_codes))
 
 		return serialized_items
+
+	def get_incoming_rate_for_sales_return(self, item_code, against_document):
+		incoming_rate = 0.0
+		if against_document and item_code:
+			incoming_rate = frappe.db.sql("""select abs(ifnull(stock_value_difference, 0) / actual_qty)
+				from `tabStock Ledger Entry`
+				where voucher_type = %s and voucher_no = %s and item_code = %s limit 1""",
+				(self.doctype, against_document, item_code))
+			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
+
+		return incoming_rate
+
+	def update_reserved_qty(self):
+		so_map = {}
+		for d in self.get("items"):
+			if d.so_detail:
+				if self.doctype == "Delivery Note" and d.against_sales_order:
+					so_map.setdefault(d.against_sales_order, []).append(d.so_detail)
+				elif self.doctype == "Sales Invoice" and d.sales_order and self.update_stock:
+					so_map.setdefault(d.sales_order, []).append(d.so_detail)
+
+		for so, so_item_rows in so_map.items():
+			if so and so_item_rows:
+				sales_order = frappe.get_doc("Sales Order", so)
+
+				if sales_order.status in ["Stopped", "Cancelled"]:
+					frappe.throw(_("{0} {1} is cancelled or stopped").format(_("Sales Order"), so),
+						frappe.InvalidStatusError)
+
+				sales_order.update_reserved_qty(so_item_rows)
+
+	def update_stock_ledger(self):
+		self.update_reserved_qty()
+
+		sl_entries = []
+		for d in self.get_item_list():
+			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 \
+					and d.warehouse and flt(d['qty']):
+
+				incoming_rate = 0
+				if cint(self.is_return) and self.return_against and self.docstatus==1:
+					incoming_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
+
+				sl_entries.append(self.get_sl_entries(d, {
+					"actual_qty": -1*flt(d['qty']),
+					"stock_uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
+					"incoming_rate": incoming_rate
+				}))
+
+		self.make_sl_entries(sl_entries)
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):

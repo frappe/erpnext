@@ -31,6 +31,11 @@ def get_data():
 					"name": "Newsletter",
 					"description": _("Newsletters to contacts, leads."),
 				},
+				{
+					"type": "doctype",
+					"name": "Communication",
+					"description": _("Record of all communications of type email, phone, chat, visit, etc."),
+				},
 			]
 		},
 		{
@@ -42,6 +47,11 @@ def get_data():
 					"name": "SMS Center",
 					"description":_("Send mass SMS to your contacts"),
 				},
+				{
+					"type": "doctype",
+					"name": "SMS Log",
+					"description":_("Logs for maintaining sms delivery status"),
+				}
 			]
 		},
 		{

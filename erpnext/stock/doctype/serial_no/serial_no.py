@@ -34,9 +34,6 @@ class SerialNo(StockController):
 		self.validate_item()
 		self.on_stock_ledger_entry()
 
-		valid_purchase_document_type = ("Purchase Receipt", "Stock Entry", "Serial No")
-		self.validate_value("purchase_document_type", "in", valid_purchase_document_type)
-
 	def set_maintenance_status(self):
 		if not self.warranty_expiry_date and not self.amc_expiry_date:
 			self.maintenance_status = None
@@ -69,7 +66,7 @@ class SerialNo(StockController):
 			Validate whether serial no is required for this item
 		"""
 		item = frappe.get_doc("Item", self.item_code)
-		if item.has_serial_no!="Yes":
+		if item.has_serial_no!=1:
 			frappe.throw(_("Item {0} is not setup for Serial Nos. Check Item master").format(self.item_code))
 
 		self.item_group = item.item_group
@@ -81,20 +78,19 @@ class SerialNo(StockController):
 	def set_status(self, last_sle):
 		if last_sle:
 			if last_sle.voucher_type == "Stock Entry":
-				document_type = frappe.db.get_value("Stock Entry", last_sle.voucher_no,
-					"purpose")
+				document_type = frappe.db.get_value("Stock Entry", last_sle.voucher_no, "purpose")
 			else:
 				document_type = last_sle.voucher_type
 
 			if last_sle.actual_qty > 0:
-				if document_type == "Sales Return":
+				if document_type in ("Delivery Note", "Sales Invoice", "Sales Return"):
 					self.status = "Sales Returned"
 				else:
 					self.status = "Available"
 			else:
-				if document_type == "Purchase Return":
+				if document_type in ("Purchase Receipt", "Purchase Invoice", "Purchase Return"):
 					self.status = "Purchase Returned"
-				elif last_sle.voucher_type in ("Delivery Note", "Sales Invoice"):
+				elif document_type in ("Delivery Note", "Sales Invoice"):
 					self.status = "Delivered"
 				else:
 					self.status = "Not Available"
@@ -123,9 +119,10 @@ class SerialNo(StockController):
 			self.delivery_document_no = delivery_sle.voucher_no
 			self.delivery_date = delivery_sle.posting_date
 			self.delivery_time = delivery_sle.posting_time
-			self.customer, self.customer_name = \
-				frappe.db.get_value(delivery_sle.voucher_type, delivery_sle.voucher_no,
-					["customer", "customer_name"])
+			if delivery_sle.voucher_type  in ("Delivery Note", "Sales Invoice"):
+				self.customer, self.customer_name = \
+					frappe.db.get_value(delivery_sle.voucher_type, delivery_sle.voucher_no,
+						["customer", "customer_name"])
 			if self.warranty_period:
 				self.warranty_expiry_date	= add_days(cstr(delivery_sle.posting_date),
 					cint(self.warranty_period))
@@ -201,7 +198,7 @@ def process_serial_no(sle):
 	update_serial_nos(sle, item_det)
 
 def validate_serial_no(sle, item_det):
-	if item_det.has_serial_no=="No":
+	if item_det.has_serial_no==0:
 		if sle.serial_no:
 			frappe.throw(_("Item {0} is not setup for Serial Nos. Column must be blank").format(sle.item_code),
 				SerialNoNotRequiredError)
@@ -212,7 +209,7 @@ def validate_serial_no(sle, item_det):
 				frappe.throw(_("Serial No {0} quantity {1} cannot be a fraction").format(sle.item_code, sle.actual_qty))
 
 			if len(serial_nos) and len(serial_nos) != abs(cint(sle.actual_qty)):
-				frappe.throw(_("{0} Serial Numbers required for Item {0}. Only {0} provided.").format(sle.actual_qty, sle.item_code, len(serial_nos)),
+				frappe.throw(_("{0} Serial Numbers required for Item {1}. You have provided {2}.").format(sle.actual_qty, sle.item_code, len(serial_nos)),
 					SerialNoQtyError)
 
 			if len(serial_nos) != len(set(serial_nos)):
@@ -235,10 +232,10 @@ def validate_serial_no(sle, item_det):
 							frappe.throw(_("Serial No {0} does not belong to Warehouse {1}").format(serial_no,
 								sle.warehouse), SerialNoWarehouseError)
 
-						if sle.voucher_type in ("Delivery Note", "Sales Invoice") \
+						if sle.voucher_type in ("Delivery Note", "Sales Invoice") and sle.is_cancelled=="No" \
 							and sr.status != "Available":
-							frappe.throw(_("Serial No {0} status must be 'Available' to Deliver").format(serial_no),
-								SerialNoStatusError)
+								frappe.throw(_("Serial No {0} status must be 'Available' to Deliver").format(serial_no),
+									SerialNoStatusError)
 
 				elif sle.actual_qty < 0:
 					# transfer out
@@ -249,7 +246,7 @@ def validate_serial_no(sle, item_det):
 
 def update_serial_nos(sle, item_det):
 	if sle.is_cancelled == "No" and not sle.serial_no and sle.actual_qty > 0 \
-			and item_det.has_serial_no == "Yes" and item_det.serial_no_series:
+			and item_det.has_serial_no == 1 and item_det.serial_no_series:
 		from frappe.model.naming import make_autoname
 		serial_nos = []
 		for i in xrange(cint(sle.actual_qty)):

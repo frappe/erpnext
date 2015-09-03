@@ -15,6 +15,8 @@ class TimeLogBatch(Document):
 
 	def validate(self):
 		self.set_status()
+		self.total_hours = 0.0
+		self.total_billing_amount = 0.0
 		for d in self.get("time_logs"):
 			tl = frappe.get_doc("Time Log", d.time_log)
 			self.update_time_log_values(d, tl)

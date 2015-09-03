@@ -41,11 +41,16 @@ def install(country=None):
 		{'doctype': 'Expense Claim Type', 'name': _('Travel'), 'expense_type': _('Travel')},
 
 		# leave type
-		{'doctype': 'Leave Type', 'leave_type_name': _('Casual Leave'), 'name': _('Casual Leave'), 'is_encash': 1, 'is_carry_forward': 1, 'max_days_allowed': '3', },
-		{'doctype': 'Leave Type', 'leave_type_name': _('Compensatory Off'), 'name': _('Compensatory Off'), 'is_encash': 0, 'is_carry_forward': 0, },
-		{'doctype': 'Leave Type', 'leave_type_name': _('Sick Leave'), 'name': _('Sick Leave'), 'is_encash': 0, 'is_carry_forward': 0, },
-		{'doctype': 'Leave Type', 'leave_type_name': _('Privilege Leave'), 'name': _('Privilege Leave'), 'is_encash': 0, 'is_carry_forward': 0, },
-		{'doctype': 'Leave Type', 'leave_type_name': _('Leave Without Pay'), 'name': _('Leave Without Pay'), 'is_encash': 0, 'is_carry_forward': 0, 'is_lwp':1},
+		{'doctype': 'Leave Type', 'leave_type_name': _('Casual Leave'), 'name': _('Casual Leave'),
+			'is_encash': 1, 'is_carry_forward': 1, 'max_days_allowed': '3', 'include_holiday': 1},
+		{'doctype': 'Leave Type', 'leave_type_name': _('Compensatory Off'), 'name': _('Compensatory Off'),
+			'is_encash': 0, 'is_carry_forward': 0, 'include_holiday': 1},
+		{'doctype': 'Leave Type', 'leave_type_name': _('Sick Leave'), 'name': _('Sick Leave'),
+			'is_encash': 0, 'is_carry_forward': 0, 'include_holiday': 1},
+		{'doctype': 'Leave Type', 'leave_type_name': _('Privilege Leave'), 'name': _('Privilege Leave'),
+			'is_encash': 0, 'is_carry_forward': 0, 'include_holiday': 1},
+		{'doctype': 'Leave Type', 'leave_type_name': _('Leave Without Pay'), 'name': _('Leave Without Pay'),
+			'is_encash': 0, 'is_carry_forward': 0, 'is_lwp':1, 'include_holiday': 1},
 
 		# Employment Type
 		{'doctype': 'Employment Type', 'employee_type_name': _('Full-time')},
@@ -168,6 +173,8 @@ def install(country=None):
 		{"doctype": "Offer Term", "offer_term": _("Notice Period")},
 		{"doctype": "Offer Term", "offer_term": _("Incentives")},
 
+		{'doctype': "Print Heading", 'print_heading': _("Credit Note")},
+		{'doctype': "Print Heading", 'print_heading': _("Debit Note")}
 	]
 
 	from erpnext.setup.page.setup_wizard.fixtures import industry_type
@@ -183,4 +190,4 @@ def install(country=None):
 		parent_link_field = ("parent_" + scrub(doc.doctype))
 		if doc.meta.get_field(parent_link_field) and not doc.get(parent_link_field):
 			doc.flags.ignore_mandatory = True
-		doc.insert()
+		doc.insert(ignore_permissions=True)

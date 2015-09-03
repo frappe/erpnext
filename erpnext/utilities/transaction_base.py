@@ -3,12 +3,12 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
-from frappe.utils import cstr, now_datetime, cint
 import frappe.share
-
+from frappe import _
+from frappe.utils import cstr, now_datetime, cint, flt
 from erpnext.controllers.status_updater import StatusUpdater
 
+class UOMMustBeIntegerError(frappe.ValidationError): pass
 
 class TransactionBase(StatusUpdater):
 	def load_notification_message(self):
@@ -34,7 +34,7 @@ class TransactionBase(StatusUpdater):
 		if events:
 			frappe.db.sql("delete from `tabEvent` where name in (%s)"
 				.format(", ".join(['%s']*len(events))), tuple(events))
-				
+
 			frappe.db.sql("delete from `tabEvent Role` where parent in (%s)"
 				.format(", ".join(['%s']*len(events))), tuple(events))
 
@@ -47,7 +47,7 @@ class TransactionBase(StatusUpdater):
 				"owner": opts.owner or self.owner,
 				"subject": opts.subject,
 				"description": opts.description,
-				"starts_on": self.contact_date + " 10:00:00",
+				"starts_on":  self.contact_date,
 				"event_type": "Private",
 				"ref_type": self.doctype,
 				"ref_name": self.name
@@ -56,7 +56,7 @@ class TransactionBase(StatusUpdater):
 			event.insert(ignore_permissions=True)
 
 			if frappe.db.exists("User", self.contact_by):
-				frappe.share.add("Event", event.name, self.contact_by, 
+				frappe.share.add("Event", event.name, self.contact_by,
 					flags={"ignore_share_permission": True})
 
 	def validate_uom_is_integer(self, uom_field, qty_fields):
@@ -94,11 +94,20 @@ class TransactionBase(StatusUpdater):
 						self.validate_value(field, condition, prevdoc_values[field], doc)
 
 
+	def validate_rate_with_reference_doc(self, ref_details):
+		for ref_dt, ref_dn_field, ref_link_field in ref_details:
+			for d in self.get("items"):
+				if d.get(ref_link_field):
+					ref_rate = frappe.db.get_value(ref_dt + " Item", d.get(ref_link_field), "rate")
+
+					if abs(flt(d.rate - ref_rate, d.precision("rate"))) >= .01:
+						frappe.throw(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ")
+							.format(d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate))
+
+
 def delete_events(ref_type, ref_name):
 	frappe.delete_doc("Event", frappe.db.sql_list("""select name from `tabEvent`
 		where ref_type=%s and ref_name=%s""", (ref_type, ref_name)), for_reload=True)
-
-class UOMMustBeIntegerError(frappe.ValidationError): pass
 
 def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 	if isinstance(qty_fields, basestring):

@@ -12,6 +12,7 @@ frappe.ui.form.on("Production Order", "onload", function(frm) {
 			"actual_start_date": "",
 			"actual_end_date": ""
 		});
+		erpnext.production_order.set_default_warehouse(frm);
 	}
 
 	erpnext.production_order.set_custom_buttons(frm);
@@ -138,9 +139,21 @@ erpnext.production_order = {
 				}
 			} else msgprint(__("Please enter Production Item first"));
 		});
+	},
+	
+	set_default_warehouse: function(frm) {
+		frappe.call({
+			method: "erpnext.manufacturing.doctype.production_order.production_order.get_default_warehouse",
+
+			callback: function(r) {
+				if(!r.exe) {
+					frm.set_value("wip_warehouse", r.message.wip_warehouse);
+					frm.set_value("fg_warehouse", r.message.fg_warehouse)
+				}
+			}
+		});
 	}
 }
-
 
 $.extend(cur_frm.cscript, {
 	before_submit: function() {
@@ -152,7 +165,9 @@ $.extend(cur_frm.cscript, {
 			method: "erpnext.manufacturing.doctype.production_order.production_order.get_item_details",
 			args: { item: doc.production_item },
 			callback: function(r) {
-				cur_frm.set_value(r.message);
+				$.each(["description", "stock_uom", "bom_no"], function(i, field) {
+					cur_frm.set_value(field, r.message[field]);
+				});
 			}
 		});
 	},
@@ -160,7 +175,7 @@ $.extend(cur_frm.cscript, {
 	make_se: function(purpose) {
 		var me = this;
 		var max = (purpose === "Manufacture") ?
-			flt(this.frm.doc.qty) - flt(this.frm.doc.produced_qty) :
+			flt(this.frm.doc.material_transferred_for_manufacturing) - flt(this.frm.doc.produced_qty) :
 			flt(this.frm.doc.qty) - flt(this.frm.doc.material_transferred_for_manufacturing);
 
 		frappe.prompt({fieldtype:"Int", label: __("Qty for {0}", [purpose]), fieldname:"qty",
@@ -191,11 +206,10 @@ $.extend(cur_frm.cscript, {
 			method: "set_production_order_operations"
 		});
 	},
-	
+
 	qty: function() {
 		frappe.ui.form.trigger("Production Order", 'bom_no')
 	},
-
 	show_time_logs: function(doc, cdt, cdn) {
 		var child = locals[cdt][cdn]
 		frappe.route_options = {"operation_id": child.name};
@@ -250,7 +264,9 @@ cur_frm.cscript['Update Finished Goods'] = function() {
 cur_frm.fields_dict['production_item'].get_query = function(doc) {
 	return {
 		filters:[
-			['Item', 'is_pro_applicable', '=', 'Yes']
+			['Item', 'is_pro_applicable', '=', 1],
+			['Item', 'has_variants', '=', 0],
+			['Item', 'end_of_life', '>=', frappe.datetime.nowdate()]
 		]
 	}
 }
@@ -262,7 +278,3 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
 		]
 	}
 }
-
-
-
-

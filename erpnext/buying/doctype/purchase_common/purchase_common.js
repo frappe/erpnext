@@ -44,12 +44,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			if(me.frm.doc.is_subcontracted == "Yes") {
 				 return{
 					query: "erpnext.controllers.queries.item_query",
-					filters:{ 'is_sub_contracted_item': 'Yes' }
+					filters:{ 'is_sub_contracted_item': 1 }
 				}
 			} else {
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters: { 'is_purchase_item': 'Yes' }
+					filters: { 'is_purchase_item': 1 }
 				}
 			}
 		});
@@ -68,10 +68,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	supplier_address: function() {
 		erpnext.utils.get_address_display(this.frm);
-	},
-
-	contact_person: function() {
-		erpnext.utils.get_contact_details(this.frm);
 	},
 
 	buying_price_list: function() {
@@ -168,8 +164,10 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			frappe.model.round_floats_in(this.frm.doc, ["base_grand_total", "total_advance", "write_off_amount"]);
 			this.frm.doc.total_amount_to_pay = flt(this.frm.doc.base_grand_total - this.frm.doc.write_off_amount,
 				precision("total_amount_to_pay"));
-			this.frm.doc.outstanding_amount = flt(this.frm.doc.total_amount_to_pay - this.frm.doc.total_advance,
-				precision("outstanding_amount"));
+			if (!this.frm.doc.is_return) {
+				this.frm.doc.outstanding_amount = flt(this.frm.doc.total_amount_to_pay - this.frm.doc.total_advance,
+					precision("outstanding_amount"));
+			}
 		}
 	}
 });

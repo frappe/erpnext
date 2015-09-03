@@ -10,6 +10,15 @@ frappe.views.calendar["Production Order"] = {
 		"allDay": "allDay"
 	},
 	gantt: true,
+	get_css_class: function(data) {
+		if(data.status==="Completed") {
+			return "success";
+		} else if(data.status==="In Process") {
+			return "warning";
+		} else {
+			return "danger";
+		}
+	},
 	filters: [
 		{
 			"fieldtype": "Link",

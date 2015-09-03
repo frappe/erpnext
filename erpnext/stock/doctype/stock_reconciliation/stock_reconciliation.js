@@ -83,7 +83,9 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	refresh: function() {
 		if(this.frm.doc.docstatus==1) {
 			this.show_stock_ledger();
-			this.show_general_ledger();
+			if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
+				this.show_general_ledger();
+			}
 		}
 	},
 
@@ -97,4 +99,12 @@ cur_frm.cscript.company = function(doc, cdt, cdn) {
 
 cur_frm.cscript.posting_date = function(doc, cdt, cdn){
 	erpnext.get_fiscal_year(doc.company, doc.posting_date);
+}
+
+cur_frm.fields_dict.items.grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
+	return {
+		filters:[
+			['Item', 'end_of_life', '>=', frappe.datetime.nowdate()]
+		]
+	}
 }

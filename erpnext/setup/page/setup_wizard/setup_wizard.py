@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+import frappe, json, copy
 
 from frappe.utils import cstr, flt, getdate
 from frappe import _
@@ -13,7 +13,8 @@ from frappe.geo.country_info import get_country_info
 from frappe.utils.nestedset import get_root_of
 from .default_website import website_maker
 import install_fixtures
-from .welcome_emails import setup_welcome_emails
+from .sample_data import make_sample_data
+from erpnext.accounts.utils import FiscalYearError
 
 @frappe.whitelist()
 def setup_account(args=None):
@@ -31,12 +32,17 @@ def setup_account(args=None):
 		if args.language and args.language != "english":
 			set_default_language(args.language)
 
+		frappe.clear_cache()
+
 		install_fixtures.install(args.get("country"))
 
 		update_user_name(args)
 		frappe.local.message_log = []
 
 		create_fiscal_year_and_company(args)
+		frappe.local.message_log = []
+
+		create_users(args)
 		frappe.local.message_log = []
 
 		set_defaults(args)
@@ -78,12 +84,15 @@ def setup_account(args=None):
 
 		login_as_first_user(args)
 
-		setup_welcome_emails()
-
 		frappe.db.commit()
 
 		frappe.clear_cache()
 
+		if args.get("add_sample_data"):
+			try:
+				make_sample_data()
+			except FiscalYearError:
+				pass
 	except:
 		if args:
 			traceback = frappe.get_traceback()
@@ -213,6 +222,7 @@ def set_defaults(args):
 	stock_settings.valuation_method = "FIFO"
 	stock_settings.stock_uom = _("Nos")
 	stock_settings.auto_indent = 1
+	stock_settings.auto_insert_price_list_rate_if_missing = 1
 	stock_settings.save()
 
 	selling_settings = frappe.get_doc("Selling Settings")
@@ -300,21 +310,45 @@ def create_taxes(args):
 				tax_group = frappe.db.get_value("Account", {"company": args.get("company_name"),
 					"is_group": 1, "account_type": "Tax", "root_type": "Liability"})
 				if tax_group:
-					frappe.get_doc({
-						"doctype":"Account",
-						"company": args.get("company_name").strip(),
-						"parent_account": tax_group,
-						"account_name": args.get("tax_" + str(i)),
-						"is_group": 0,
-						"report_type": "Balance Sheet",
-						"account_type": "Tax",
-						"tax_rate": flt(tax_rate) if tax_rate else None
-					}).insert()
+					account = make_tax_head(args, i, tax_group, tax_rate)
+					make_sales_and_purchase_tax_templates(account)
+
 			except frappe.NameError, e:
 				if e.args[2][0]==1062:
 					pass
 				else:
 					raise
+def make_tax_head(args, i, tax_group, tax_rate):
+	return frappe.get_doc({
+		"doctype":"Account",
+		"company": args.get("company_name").strip(),
+		"parent_account": tax_group,
+		"account_name": args.get("tax_" + str(i)),
+		"is_group": 0,
+		"report_type": "Balance Sheet",
+		"account_type": "Tax",
+		"tax_rate": flt(tax_rate) if tax_rate else None
+	}).insert(ignore_permissions=True)
+
+def make_sales_and_purchase_tax_templates(account):
+	doc = {
+		"doctype": "Sales Taxes and Charges Template",
+		"title": account.name,
+		"taxes": [{
+		    "category": "Valuation and Total",
+		    "charge_type": "On Net Total",
+			"account_head": account.name,
+			"description": "{0} @ {1}".format(account.account_name, account.tax_rate),
+			"rate": account.tax_rate
+		}]
+	}
+
+	# Sales
+	frappe.get_doc(copy.deepcopy(doc)).insert()
+
+	# Purchase
+	doc["doctype"] = "Purchase Taxes and Charges Template"
+	frappe.get_doc(copy.deepcopy(doc)).insert()
 
 def create_items(args):
 	for i in xrange(1,6):
@@ -337,10 +371,10 @@ def create_items(args):
 					"item_code": item,
 					"item_name": item,
 					"description": item,
-					"is_sales_item": "Yes" if is_sales_item else "No",
-					"is_purchase_item": "Yes" if is_purchase_item else "No",
+					"is_sales_item": 1 if is_sales_item else 0,
+					"is_purchase_item": 1 if is_purchase_item else 0,
 					"show_in_website": 1,
-					"is_stock_item": is_stock_item and "Yes" or "No",
+					"is_stock_item": is_stock_item and 1 or 0,
 					"item_group": item_group,
 					"stock_uom": args.get("item_uom_" + str(i)),
 					"default_warehouse": default_warehouse
@@ -352,8 +386,29 @@ def create_items(args):
 						filename, filetype, content = item_image
 						fileurl = save_file(filename, content, "Item", item, decode=True).file_url
 						frappe.db.set_value("Item", item, "image", fileurl)
+
+				if args.get("item_price_" + str(i)):
+					item_price = flt(args.get("item_price_" + str(i)))
+
+					if is_sales_item:
+						price_list_name = frappe.db.get_value("Price List", {"selling": 1})
+						make_item_price(item, price_list_name, item_price)
+
+					if is_purchase_item:
+						price_list_name = frappe.db.get_value("Price List", {"buying": 1})
+						make_item_price(item, price_list_name, item_price)
+
 			except frappe.NameError:
 				pass
+
+def make_item_price(item, price_list_name, item_price):
+	frappe.get_doc({
+		"doctype": "Item Price",
+		"price_list": price_list_name,
+		"item_code": item,
+		"price_list_rate": item_price
+	}).insert()
+
 
 def create_customers(args):
 	for i in xrange(1,6):
@@ -370,13 +425,8 @@ def create_customers(args):
 				}).insert()
 
 				if args.get("customer_contact_" + str(i)):
-					contact = args.get("customer_contact_" + str(i)).split(" ")
-					frappe.get_doc({
-						"doctype":"Contact",
-						"customer": customer,
-						"first_name":contact[0],
-						"last_name": len(contact) > 1 and contact[1] or ""
-					}).insert()
+					create_contact(args.get("customer_contact_" + str(i)),
+						"customer", customer)
 			except frappe.NameError:
 				pass
 
@@ -393,16 +443,21 @@ def create_suppliers(args):
 				}).insert()
 
 				if args.get("supplier_contact_" + str(i)):
-					contact = args.get("supplier_contact_" + str(i)).split(" ")
-					frappe.get_doc({
-						"doctype":"Contact",
-						"supplier": supplier,
-						"first_name":contact[0],
-						"last_name": len(contact) > 1 and contact[1] or ""
-					}).insert()
+					create_contact(args.get("supplier_contact_" + str(i)),
+						"supplier", supplier)
 			except frappe.NameError:
 				pass
 
+def create_contact(contact, party_type, party):
+	"""Create contact based on given contact name"""
+	contact = contact.strip().split(" ")
+
+	frappe.get_doc({
+		"doctype":"Contact",
+		party_type: party,
+		"first_name":contact[0],
+		"last_name": len(contact) > 1 and contact[1] or ""
+	}).insert()
 
 def create_letter_head(args):
 	if args.get("attach_letterhead"):
@@ -453,6 +508,62 @@ def create_territories():
 def login_as_first_user(args):
 	if args.get("email") and hasattr(frappe.local, "login_manager"):
 		frappe.local.login_manager.login_as(args.get("email"))
+
+def create_users(args):
+	# create employee for self
+	emp = frappe.get_doc({
+		"doctype": "Employee",
+		"full_name": " ".join(filter(None, [args.get("first_name"), args.get("last_name")])),
+		"user_id": frappe.session.user,
+		"status": "Active",
+		"company": args.get("company_name")
+	})
+	emp.flags.ignore_mandatory = True
+	emp.insert(ignore_permissions = True)
+
+	for i in xrange(1,5):
+		email = args.get("user_email_" + str(i))
+		fullname = args.get("user_fullname_" + str(i))
+		if email:
+			if not fullname:
+				fullname = email.split("@")[0]
+
+			parts = fullname.split(" ", 1)
+
+			user = frappe.get_doc({
+				"doctype": "User",
+				"email": email,
+				"first_name": parts[0],
+				"last_name": parts[1] if len(parts) > 1 else "",
+				"enabled": 1,
+				"user_type": "System User"
+			})
+
+			# default roles
+			user.append_roles("Projects User", "Stock User", "Support Team")
+
+			if args.get("user_sales_" + str(i)):
+				user.append_roles("Sales User", "Sales Manager", "Accounts User")
+			if args.get("user_purchaser_" + str(i)):
+				user.append_roles("Purchase User", "Purchase Manager", "Accounts User")
+			if args.get("user_accountant_" + str(i)):
+				user.append_roles("Accounts Manager", "Accounts User")
+
+			user.flags.delay_emails = True
+
+			if not frappe.db.get_value("User", email):
+				user.insert(ignore_permissions=True)
+
+				# create employee
+				emp = frappe.get_doc({
+					"doctype": "Employee",
+					"full_name": fullname,
+					"user_id": email,
+					"status": "Active",
+					"company": args.get("company_name")
+				})
+				emp.flags.ignore_mandatory = True
+				emp.insert(ignore_permissions = True)
 
 @frappe.whitelist()
 def load_messages(language):

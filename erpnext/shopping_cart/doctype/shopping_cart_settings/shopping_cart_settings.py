@@ -23,10 +23,6 @@ class ShoppingCartSettings(Document):
 			self.validate_tax_masters()
 			self.validate_exchange_rates_exist()
 
-	def on_update(self):
-		frappe.db.set_default("shopping_cart_enabled", self.get("enabled") or 0)
-		frappe.db.set_default("shopping_cart_quotation_series", self.get("quotation_series"))
-
 	def validate_overlapping_territories(self, parentfield, fieldname):
 		# for displaying message
 		doctype = self.meta.get_field(parentfield).options

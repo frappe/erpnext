@@ -9,6 +9,8 @@ from frappe import _
 
 from frappe.model.document import Document
 
+class CustomerFrozen(frappe.ValidationError): pass
+
 class GLEntry(Document):
 	def validate(self):
 		self.flags.ignore_submit_comment = True
@@ -17,6 +19,7 @@ class GLEntry(Document):
 		self.validate_posting_date()
 		self.check_pl_account()
 		self.validate_cost_center()
+		self.validate_party()
 
 	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes'):
 		self.validate_account_details(adv_adj)
@@ -88,6 +91,13 @@ class GLEntry(Document):
 
 		if self.cost_center and _get_cost_center_company() != self.company:
 			frappe.throw(_("Cost Center {0} does not belong to Company {1}").format(self.cost_center, self.company))
+			
+	def validate_party(self):
+		if self.party_type and self.party:
+			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
+			if not frozen_accounts_modifier in frappe.get_roles():
+				if frappe.db.get_value(self.party_type, self.party, "is_frozen"):
+					frappe.throw("{0} {1} is frozen".format(self.party_type, self.party), CustomerFrozen)
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
@@ -139,9 +149,9 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 		if against_voucher_amount < 0:
 			bal = -bal
 
-	# Validation : Outstanding can not be negative
-	if bal < 0 and not on_cancel:
-		frappe.throw(_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal)))
+		# Validation : Outstanding can not be negative for JV
+		if bal < 0 and not on_cancel:
+			frappe.throw(_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal)))
 
 	# Update outstanding amt on against voucher
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:

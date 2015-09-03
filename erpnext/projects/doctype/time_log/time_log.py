@@ -2,14 +2,16 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+import frappe
 from frappe import _
 from frappe.utils import cstr, flt, get_datetime, get_time, getdate
 from dateutil.relativedelta import relativedelta
+from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 
 class OverlapError(frappe.ValidationError): pass
 class OverProductionLoggedError(frappe.ValidationError): pass
 class NotSubmittedError(frappe.ValidationError): pass
+class NegativeHoursError(frappe.ValidationError): pass
 
 from frappe.model.document import Document
 
@@ -73,18 +75,20 @@ class TimeLog(Document):
 	def validate_overlap_for(self, fieldname):
 		existing = self.get_overlap_for(fieldname)
 		if existing:
-			frappe.throw(_("This Time Log conflicts with {0} for {1}").format(existing.name,
-				self.meta.get_label(fieldname)), OverlapError)
+			frappe.throw(_("This Time Log conflicts with {0} for {1} {2}").format(existing.name,
+				self.meta.get_label(fieldname), self.get(fieldname)), OverlapError)
 
 	def get_overlap_for(self, fieldname):
 		if not self.get(fieldname):
 			return
 
-		existing = frappe.db.sql("""select name, from_time, to_time from `tabTime Log` where `{0}`=%(val)s and
+		existing = frappe.db.sql("""select name, from_time, to_time from `tabTime Log`
+			where `{0}`=%(val)s and
 			(
-				(from_time between %(from_time)s and %(to_time)s) or
-				(to_time between %(from_time)s and %(to_time)s) or
-				(%(from_time)s between from_time and to_time))
+				(from_time > %(from_time)s and from_time < %(to_time)s) or
+				(to_time > %(from_time)s and to_time < %(to_time)s) or
+				(%(from_time)s > from_time and %(from_time)s < to_time) or
+				(%(from_time)s = from_time and %(to_time)s = to_time))
 			and name!=%(name)s
 			and ifnull(task, "")=%(task)s
 			and docstatus < 2""".format(fieldname),
@@ -99,8 +103,8 @@ class TimeLog(Document):
 		return existing[0] if existing else None
 
 	def validate_timings(self):
-		if self.to_time and self.from_time and get_datetime(self.to_time) < get_datetime(self.from_time):
-			frappe.throw(_("From Time cannot be greater than To Time"))
+		if self.to_time and self.from_time and get_datetime(self.to_time) <= get_datetime(self.from_time):
+			frappe.throw(_("To Time must be greater than From Time"), NegativeHoursError)
 
 	def calculate_total_hours(self):
 		if self.to_time and self.from_time:
@@ -179,9 +183,14 @@ class TimeLog(Document):
 
 	def move_to_next_non_overlapping_slot(self):
 		"""If in overlap, set start as the end point of the overlapping time log"""
-		overlapping = self.get_overlap_for("workstation")
-		if overlapping:
-			self.from_time = get_datetime(overlapping.to_time) + relativedelta(minutes=10)
+		overlapping = self.get_overlap_for("workstation") \
+			or self.get_overlap_for("employee") \
+			or self.get_overlap_for("user")
+
+		if not overlapping:
+			frappe.throw("Logical error: Must find overlapping")
+
+		self.from_time = get_datetime(overlapping.to_time) + get_mins_between_operations()
 
 	def get_time_log_summary(self):
 		"""Returns 'Actual Operating Time'. """
@@ -239,17 +248,8 @@ def get_events(start, end, filters=None):
 	:param end: End date-time.
 	:param filters: Filters like workstation, project etc.
 	"""
-	from frappe.desk.reportview import build_match_conditions
-	if not frappe.has_permission("Time Log"):
-		frappe.msgprint(_("No Permission"), raise_exception=1)
-
-	conditions = build_match_conditions("Time Log")
-	conditions = conditions and (" and " + conditions) or ""
-	if filters:
-		filters = json.loads(filters)
-		for key in filters:
-			if filters[key]:
-				conditions += " and " + key + ' = "' + filters[key].replace('"', '\"') + '"'
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Time Log", filters)
 
 	data = frappe.db.sql("""select name, from_time, to_time,
 		activity_type, task, project, production_order, workstation from `tabTime Log`

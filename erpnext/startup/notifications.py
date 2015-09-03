@@ -10,6 +10,7 @@ def get_notification_config():
 			"Issue": {"status": "Open"},
 			"Warranty Claim": {"status": "Open"},
 			"Task": {"status": "Open"},
+			"Project": {"status": "Open"},
 			"Lead": {"status": "Open"},
 			"Contact": {"status": "Open"},
 			"Opportunity": {"status": "Open"},
@@ -30,6 +31,6 @@ def get_notification_config():
 			"BOM": {"docstatus": 0},
 			"Timesheet": {"docstatus": 0},
 			"Time Log": {"status": "Draft"},
-			"Time Log Batch": {"status": "Draft"},
+			"Time Log Batch": {"status": "Draft"}
 		}
 	}

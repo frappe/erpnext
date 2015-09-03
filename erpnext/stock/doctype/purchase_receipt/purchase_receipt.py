@@ -29,6 +29,19 @@ class PurchaseReceipt(BuyingController):
 			'source_field': 'qty',
 			'percent_join_field': 'prevdoc_docname',
 			'overflow_type': 'receipt'
+		},
+		{
+			'source_dt': 'Purchase Receipt Item',
+			'target_dt': 'Purchase Order Item',
+			'join_field': 'prevdoc_detail_docname',
+			'target_field': 'returned_qty',
+			'target_parent_dt': 'Purchase Order',
+			# 'target_parent_field': 'per_received',
+			# 'target_ref_field': 'qty',
+			'source_field': '-1 * qty',
+			# 'percent_join_field': 'prevdoc_docname',
+			# 'overflow_type': 'receipt',
+			'extra_cond': """ and exists (select name from `tabPurchase Receipt` where name=`tabPurchase Receipt Item`.parent and is_return=1)"""
 		}]
 
 	def onload(self):
@@ -44,6 +57,7 @@ class PurchaseReceipt(BuyingController):
 		self.set_status()
 		self.po_required()
 		self.validate_with_previous_doc()
+		self.validate_purchase_return()
 		self.validate_rejected_warehouse()
 		self.validate_accepted_rejected_qty()
 		self.validate_inspection()
@@ -60,12 +74,20 @@ class PurchaseReceipt(BuyingController):
 		self.set_landed_cost_voucher_amount()
 		self.update_valuation_rate("items")
 
+
 	def set_landed_cost_voucher_amount(self):
 		for d in self.get("items"):
 			lc_voucher_amount = frappe.db.sql("""select sum(ifnull(applicable_charges, 0))
 				from `tabLanded Cost Item`
 				where docstatus = 1 and purchase_receipt_item = %s""", d.name)
 			d.landed_cost_voucher_amount = lc_voucher_amount[0][0] if lc_voucher_amount else 0.0
+
+	def validate_purchase_return(self):
+		for d in self.get("items"):
+			if self.is_return and flt(d.rejected_qty) != 0:
+				frappe.throw(_("Row #{0}: Rejected Qty can not be entered in Purchase Return").format(d.idx))
+
+			# validate rate with ref PR
 
 	def validate_rejected_warehouse(self):
 		for d in self.get("items"):
@@ -104,15 +126,8 @@ class PurchaseReceipt(BuyingController):
 			}
 		})
 
-		if cint(frappe.defaults.get_global_default('maintain_same_rate')):
-			super(PurchaseReceipt, self).validate_with_previous_doc({
-				"Purchase Order Item": {
-					"ref_dn_field": "prevdoc_detail_docname",
-					"compare_fields": [["rate", "="]],
-					"is_child_table": True
-				}
-			})
-
+		if cint(frappe.db.get_single_value('Buying Settings', 'maintain_same_rate')) and not self.is_return:
+			self.validate_rate_with_reference_doc([["Purchase Order", "prevdoc_docname", "prevdoc_detail_docname"]])
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
@@ -130,11 +145,20 @@ class PurchaseReceipt(BuyingController):
 
 				if pr_qty:
 					val_rate_db_precision = 6 if cint(self.precision("valuation_rate", d)) <= 6 else 9
-					sl_entries.append(self.get_sl_entries(d, {
+					rate = flt(d.valuation_rate, val_rate_db_precision)
+					sle = self.get_sl_entries(d, {
 						"actual_qty": flt(pr_qty),
-						"serial_no": cstr(d.serial_no).strip(),
-						"incoming_rate": flt(d.valuation_rate, val_rate_db_precision)
-					}))
+						"serial_no": cstr(d.serial_no).strip()
+					})
+					if self.is_return:
+						sle.update({
+							"outgoing_rate": rate
+						})
+					else:
+						sle.update({
+							"incoming_rate": rate
+						})
+					sl_entries.append(sle)
 
 				if flt(d.rejected_qty) > 0:
 					sl_entries.append(self.get_sl_entries(d, {
@@ -159,7 +183,8 @@ class PurchaseReceipt(BuyingController):
 				po_obj = frappe.get_doc("Purchase Order", po)
 
 				if po_obj.status in ["Stopped", "Cancelled"]:
-					frappe.throw(_("Material Request {0} is cancelled or stopped").format(po), frappe.InvalidStatusError)
+					frappe.throw(_("{0} {1} is cancelled or stopped").format(_("Purchase Order"), po),
+						frappe.InvalidStatusError)
 
 				po_obj.update_ordered_qty(po_item_rows)
 
@@ -183,15 +208,11 @@ class PurchaseReceipt(BuyingController):
 				"item_code": d.rm_item_code,
 				"warehouse": self.supplier_warehouse,
 				"actual_qty": -1*flt(d.consumed_qty),
-				"incoming_rate": 0
 			}))
 
 	def validate_inspection(self):
 		for d in self.get('items'):		 #Enter inspection date for all items that require inspection
-			ins_reqd = frappe.db.sql("select inspection_required from `tabItem` where name = %s",
-				(d.item_code,), as_dict = 1)
-			ins_reqd = ins_reqd and ins_reqd[0]['inspection_required'] or 'No'
-			if ins_reqd == 'Yes' and not d.qa_no:
+			if frappe.db.get_value("Item", d.item_code, "inspection_required") and not d.qa_no:
 				frappe.msgprint(_("Quality Inspection required for Item {0}").format(d.item_code))
 				if self.docstatus==1:
 					raise frappe.ValidationError
@@ -215,15 +236,15 @@ class PurchaseReceipt(BuyingController):
 		frappe.db.set(self, 'status', 'Submitted')
 
 		self.update_prevdoc_status()
-
 		self.update_ordered_qty()
+
+		if not self.is_return:
+			purchase_controller.update_last_purchase_rate(self, 1)
 
 		self.update_stock_ledger()
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "items")
-
-		purchase_controller.update_last_purchase_rate(self, 1)
 
 		self.make_gl_entries()
 
@@ -252,11 +273,11 @@ class PurchaseReceipt(BuyingController):
 		self.update_stock_ledger()
 
 		self.update_prevdoc_status()
-
 		# Must be called after updating received qty in PO
 		self.update_ordered_qty()
 
-		pc_obj.update_last_purchase_rate(self, 0)
+		if not self.is_return:
+			pc_obj.update_last_purchase_rate(self, 0)
 
 		self.make_gl_entries_on_cancel()
 
@@ -327,22 +348,21 @@ class PurchaseReceipt(BuyingController):
 						}))
 
 					# divisional loss adjustment
-					if not self.get("taxes"):
-						sle_valuation_amount = flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty) * flt(d.conversion_factor),
-								self.precision("base_net_amount", d))
+					sle_valuation_amount = flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty) * flt(d.conversion_factor),
+							self.precision("base_net_amount", d))
 
-						distributed_amount = flt(flt(d.base_net_amount, self.precision("base_net_amount", d))) + \
-							flt(d.landed_cost_voucher_amount) + flt(d.rm_supp_cost)
+					distributed_amount = flt(flt(d.base_net_amount, self.precision("base_net_amount", d))) + \
+						flt(d.landed_cost_voucher_amount) + flt(d.rm_supp_cost) + flt(d.item_tax_amount)
 
-						divisional_loss = flt(distributed_amount - sle_valuation_amount, self.precision("base_net_amount", d))
-						if divisional_loss:
-							gl_entries.append(self.get_gl_dict({
-								"account": stock_rbnb,
-								"against": warehouse_account[d.warehouse],
-								"cost_center": d.cost_center,
-								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-								"debit": divisional_loss
-							}))
+					divisional_loss = flt(distributed_amount - sle_valuation_amount, self.precision("base_net_amount", d))
+					if divisional_loss:
+						gl_entries.append(self.get_gl_dict({
+							"account": stock_rbnb,
+							"against": warehouse_account[d.warehouse],
+							"cost_center": d.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"debit": divisional_loss
+						}))
 
 				elif d.warehouse not in warehouse_with_no_account or \
 					d.rejected_warehouse not in warehouse_with_no_account:
@@ -424,7 +444,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 			"doctype": "Purchase Invoice",
 			"validation": {
 				"docstatus": ["=", 1],
-			}
+			},
 		},
 		"Purchase Receipt Item": {
 			"doctype": "Purchase Invoice Item",
@@ -456,3 +476,8 @@ def get_invoiced_qty_map(purchase_receipt):
 			invoiced_qty_map[pr_detail] += qty
 
 	return invoiced_qty_map
+
+@frappe.whitelist()
+def make_purchase_return(source_name, target_doc=None):
+	from erpnext.controllers.sales_and_purchase_return import make_return_doc
+	return make_return_doc("Purchase Receipt", source_name, target_doc)

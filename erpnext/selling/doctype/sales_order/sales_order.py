@@ -5,15 +5,19 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, comma_and
+from frappe.utils import cstr, flt, getdate, comma_and, cint
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
+from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
+from frappe.desk.notifications import clear_doctype_notifications
 
 from erpnext.controllers.selling_controller import SellingController
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
 }
+
+class WarehouseRequired(frappe.ValidationError): pass
 
 class SalesOrder(SellingController):
 	def validate_mandatory(self):
@@ -31,17 +35,20 @@ class SalesOrder(SellingController):
 			so = frappe.db.sql("select name from `tabSales Order` \
 				where ifnull(po_no, '') = %s and name != %s and docstatus < 2\
 				and customer = %s", (self.po_no, self.name, self.customer))
-			if so and so[0][0]:
-				frappe.msgprint(_("Warning: Sales Order {0} already exists against same Purchase Order number").format(so[0][0]))
+			if so and so[0][0] and not \
+				cint(frappe.db.get_single_value("Selling Settings", "allow_against_multiple_purchase_orders")):
+				frappe.msgprint(_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(so[0][0], self.po_no))
 
 	def validate_for_items(self):
 		check_list = []
 		for d in self.get('items'):
 			check_list.append(cstr(d.item_code))
 
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes':
-				if not d.warehouse:
-					frappe.throw(_("Reserved warehouse required for stock item {0}").format(d.item_code))
+			if (frappe.db.get_value("Item", d.item_code, "is_stock_item")==1 or
+				(self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
+				and not d.warehouse:
+				frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code),
+					WarehouseRequired)
 
 			# used for production plan
 			d.transaction_date = self.transaction_date
@@ -49,9 +56,18 @@ class SalesOrder(SellingController):
 			tot_avail_qty = frappe.db.sql("select projected_qty from `tabBin` \
 				where item_code = %s and warehouse = %s", (d.item_code,d.warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
+
+		# check for same entry multiple times
 		unique_chk_list = set(check_list)
-		if len(unique_chk_list) != len(check_list):
+		if len(unique_chk_list) != len(check_list) and \
+			not cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
 			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
+
+	def product_bundle_has_stock_item(self, product_bundle):
+		"""Returns true if product bundle has stock item"""
+		ret = len(frappe.db.sql("""select i.name from tabItem i, `tabProduct Bundle Item` pbi
+			where pbi.parent = %s and pbi.item_code = i.name and i.is_stock_item = 1""", product_bundle))
+		return ret
 
 	def validate_sales_mntc_quotation(self):
 		for d in self.get('items'):
@@ -141,7 +157,7 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).on_submit()
 
 		self.check_credit_limit()
-		self.update_stock_ledger(update_stock = 1)
+		self.update_reserved_qty()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.base_grand_total, self)
 
@@ -154,7 +170,7 @@ class SalesOrder(SellingController):
 			frappe.throw(_("Stopped order cannot be cancelled. Unstop to cancel."))
 
 		self.check_nextdoc_docstatus()
-		self.update_stock_ledger(update_stock = -1)
+		self.update_reserved_qty()
 
 		self.update_prevdoc_status('cancel')
 
@@ -203,31 +219,40 @@ class SalesOrder(SellingController):
 
 	def stop_sales_order(self):
 		self.check_modified_date()
-		self.update_stock_ledger(-1)
 		frappe.db.set(self, 'status', 'Stopped')
+		self.update_reserved_qty()
 		frappe.msgprint(_("{0} {1} status is Stopped").format(self.doctype, self.name))
+		self.notify_modified()
+		clear_doctype_notifications(self)
 
 	def unstop_sales_order(self):
 		self.check_modified_date()
-		self.update_stock_ledger(1)
 		frappe.db.set(self, 'status', 'Submitted')
+		self.update_reserved_qty()
 		frappe.msgprint(_("{0} {1} status is Unstopped").format(self.doctype, self.name))
+		clear_doctype_notifications(self)
 
+	def update_reserved_qty(self, so_item_rows=None):
+		"""update requested qty (before ordered_qty is updated)"""
+		item_wh_list = []
+		def _valid_for_reserve(item_code, warehouse):
+			if item_code and warehouse and [item_code, warehouse] not in item_wh_list \
+				and frappe.db.get_value("Item", item_code, "is_stock_item"):
+					item_wh_list.append([item_code, warehouse])
 
-	def update_stock_ledger(self, update_stock):
-		from erpnext.stock.utils import update_bin
-		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
-				args = {
-					"item_code": d['item_code'],
-					"warehouse": d['reserved_warehouse'],
-					"reserved_qty": flt(update_stock) * flt(d['reserved_qty']),
-					"posting_date": self.transaction_date,
-					"voucher_type": self.doctype,
-					"voucher_no": self.name,
-					"is_amended": self.amended_from and 'Yes' or 'No'
-				}
-				update_bin(args)
+		for d in self.get("items"):
+			if (not so_item_rows or d.name in so_item_rows):
+				_valid_for_reserve(d.item_code, d.warehouse)
+
+				if self.has_product_bundle(d.item_code):
+					for p in self.get("packed_items"):
+						if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
+							_valid_for_reserve(p.item_code, p.warehouse)
+
+		for item_code, warehouse in item_wh_list:
+			update_bin_qty(item_code, warehouse, {
+				"reserved_qty": get_reserved_qty(item_code, warehouse)
+			})
 
 	def on_update(self):
 		pass
@@ -258,19 +283,23 @@ def stop_or_unstop_sales_orders(names, status):
 
 	def before_recurring(self):
 		super(SalesOrder, self).before_recurring()
-		
+
 		for field in ("delivery_status", "per_delivered", "billing_status", "per_billed"):
 			self.set(field, None)
 
 		for d in self.get("items"):
 			for field in ("delivered_qty", "billed_amt", "planned_qty", "prevdoc_docname"):
 				d.set(field, None)
-			
+
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
 	def postprocess(source, doc):
 		doc.material_request_type = "Purchase"
+
+	so = frappe.get_doc("Sales Order", source_name)
+
+	item_table = "Packed Item" if so.packed_items else "Sales Order Item"
 
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -279,7 +308,7 @@ def make_material_request(source_name, target_doc=None):
 				"docstatus": ["=", 1]
 			}
 		},
-		"Sales Order Item": {
+		item_table: {
 			"doctype": "Material Request Item",
 			"field_map": {
 				"parent": "sales_order_no",
@@ -442,3 +471,24 @@ def make_maintenance_visit(source_name, target_doc=None):
 		}, target_doc)
 
 		return doclist
+
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	"""Returns events for Gantt / Calendar view rendering.
+
+	:param start: Start date-time.
+	:param end: End date-time.
+	:param filters: Filters (JSON).
+	"""
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Sales Order", filters)
+
+	data = frappe.db.sql("""select name, customer_name, delivery_status, billing_status, delivery_date
+		from `tabSales Order`
+		where (ifnull(delivery_date, '0000-00-00')!= '0000-00-00') \
+				and (delivery_date between %(start)s and %(end)s) {conditions}
+		""".format(conditions=conditions), {
+			"start": start,
+			"end": end
+		}, as_dict=True, update={"allDay": 0})
+	return data

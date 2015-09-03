@@ -13,9 +13,9 @@ from frappe.model.document import Document
 class PackedItem(Document):
 	pass
 
-def get_sales_bom_items(item_code):
+def get_product_bundle_items(item_code):
 	return frappe.db.sql("""select t1.item_code, t1.qty, t1.uom
-		from `tabSales BOM Item` t1, `tabSales BOM` t2
+		from `tabProduct Bundle Item` t1, `tabProduct Bundle` t2
 		where t2.new_item_code=%s and t1.parent = t2.name""", item_code, as_dict=1)
 
 def get_packing_item_details(item):
@@ -58,14 +58,14 @@ def update_packing_list_item(obj, packing_item_code, qty, warehouse, line):
 
 
 def make_packing_list(obj, item_table_fieldname):
-	"""make packing list for sales bom item"""
+	"""make packing list for Product Bundle item"""
 
 	if obj.get("_action") and obj._action == "update_after_submit": return
 
 	parent_items = []
 	for d in obj.get(item_table_fieldname):
-		if frappe.db.get_value("Sales BOM", {"new_item_code": d.item_code}):
-			for i in get_sales_bom_items(d.item_code):
+		if frappe.db.get_value("Product Bundle", {"new_item_code": d.item_code}):
+			for i in get_product_bundle_items(d.item_code):
 				update_packing_list_item(obj, i['item_code'], flt(i['qty'])*flt(d.qty), d.warehouse, d)
 
 			if [d.item_code, d.name] not in parent_items:

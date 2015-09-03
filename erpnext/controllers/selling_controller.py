@@ -110,15 +110,14 @@ class SellingController(StockController):
 		from frappe.utils import money_in_words
 		company_currency = get_company_currency(self.company)
 
-		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None,
-			"disable_rounded_total"))
+		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 
 		if self.meta.get_field("base_in_words"):
 			self.base_in_words = money_in_words(disable_rounded_total and
-				self.base_grand_total or self.base_rounded_total, company_currency)
+				abs(self.base_grand_total) or abs(self.base_rounded_total), company_currency)
 		if self.meta.get_field("in_words"):
 			self.in_words = money_in_words(disable_rounded_total and
-				self.grand_total or self.rounded_total, self.currency)
+				abs(self.grand_total) or abs(self.rounded_total), self.currency)
 
 	def calculate_commission(self):
 		if self.meta.get_field("commission_rate"):
@@ -164,43 +163,17 @@ class SellingController(StockController):
 	def get_item_list(self):
 		il = []
 		for d in self.get("items"):
-			reserved_warehouse = ""
-			reserved_qty_for_main_item = 0
-
 			if d.qty is None:
 				frappe.throw(_("Row {0}: Qty is mandatory").format(d.idx))
-
-			if self.doctype == "Sales Order":
-				if (frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes' or
-					self.has_sales_bom(d.item_code)) and not d.warehouse:
-						frappe.throw(_("Reserved Warehouse required for stock Item {0} in row {1}").format(d.item_code, d.idx))
-				reserved_warehouse = d.warehouse
-				if flt(d.qty) > flt(d.delivered_qty):
-					reserved_qty_for_main_item = flt(d.qty) - flt(d.delivered_qty)
-
-			elif self.doctype == "Delivery Note" and d.against_sales_order:
-				# if SO qty is 10 and there is tolerance of 20%, then it will allow DN of 12.
-				# But in this case reserved qty should only be reduced by 10 and not 12
-
-				already_delivered_qty = self.get_already_delivered_qty(self.name,
-					d.against_sales_order, d.so_detail)
-				so_qty, reserved_warehouse = self.get_so_qty_and_warehouse(d.so_detail)
-
-				if already_delivered_qty + d.qty > so_qty:
-					reserved_qty_for_main_item = -(so_qty - already_delivered_qty)
-				else:
-					reserved_qty_for_main_item = -flt(d.qty)
-
-			if self.has_sales_bom(d.item_code):
+														
+			if self.has_product_bundle(d.item_code):
 				for p in self.get("packed_items"):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 						# the packing details table's qty is already multiplied with parent's qty
 						il.append(frappe._dict({
 							'warehouse': p.warehouse,
-							'reserved_warehouse': reserved_warehouse,
 							'item_code': p.item_code,
 							'qty': flt(p.qty),
-							'reserved_qty': (flt(p.qty)/flt(d.qty)) * reserved_qty_for_main_item,
 							'uom': p.uom,
 							'batch_no': cstr(p.batch_no).strip(),
 							'serial_no': cstr(p.serial_no).strip(),
@@ -209,28 +182,37 @@ class SellingController(StockController):
 			else:
 				il.append(frappe._dict({
 					'warehouse': d.warehouse,
-					'reserved_warehouse': reserved_warehouse,
 					'item_code': d.item_code,
 					'qty': d.qty,
-					'reserved_qty': reserved_qty_for_main_item,
 					'uom': d.stock_uom,
-                                        'stock_uom': d.stock_uom,
+					'stock_uom': d.stock_uom,
 					'batch_no': cstr(d.get("batch_no")).strip(),
 					'serial_no': cstr(d.get("serial_no")).strip(),
 					'name': d.name
 				}))
 		return il
 
-	def has_sales_bom(self, item_code):
-		return frappe.db.sql("""select name from `tabSales BOM`
+	def has_product_bundle(self, item_code):
+		return frappe.db.sql("""select name from `tabProduct Bundle`
 			where new_item_code=%s and docstatus != 2""", item_code)
 
-	def get_already_delivered_qty(self, dn, so, so_detail):
-		qty = frappe.db.sql("""select sum(qty) from `tabDelivery Note Item`
+	def get_already_delivered_qty(self, current_docname, so, so_detail):
+		delivered_via_dn = frappe.db.sql("""select sum(qty) from `tabDelivery Note Item`
 			where so_detail = %s and docstatus = 1
 			and against_sales_order = %s
-			and parent != %s""", (so_detail, so, dn))
-		return qty and flt(qty[0][0]) or 0.0
+			and parent != %s""", (so_detail, so, current_docname))
+			
+		delivered_via_si = frappe.db.sql("""select sum(si_item.qty) 
+			from `tabSales Invoice Item` si_item, `tabSales Invoice` si
+			where si_item.parent = si.name and ifnull(si.update_stock, 0) = 1
+			and si_item.so_detail = %s and si.docstatus = 1 
+			and si_item.sales_order = %s
+			and si.name != %s""", (so_detail, so, current_docname))
+			
+		total_delivered_qty = (flt(delivered_via_dn[0][0]) if delivered_via_dn else 0) \
+			+ (flt(delivered_via_si[0][0]) if delivered_via_si else 0)
+		
+		return total_delivered_qty
 
 	def get_so_qty_and_warehouse(self, so_detail):
 		so_item = frappe.db.sql("""select qty, warehouse from `tabSales Order Item`
@@ -252,7 +234,7 @@ def check_active_sales_items(obj):
 			item = frappe.db.sql("""select docstatus, is_sales_item,
 				is_service_item, income_account from tabItem where name = %s""",
 				d.item_code, as_dict=True)[0]
-			if item.is_sales_item == 'No' and item.is_service_item == 'No':
+			if item.is_sales_item == 0 and item.is_service_item == 0:
 				frappe.throw(_("Item {0} must be Sales or Service Item in {1}").format(d.item_code, d.idx))
 			if getattr(d, "income_account", None) and not item.income_account:
 				frappe.db.set_value("Item", d.item_code, "income_account",

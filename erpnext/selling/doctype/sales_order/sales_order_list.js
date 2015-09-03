@@ -5,12 +5,30 @@ frappe.listview_settings['Sales Order'] = {
         if(doc.status==="Stopped") {
 			return [__("Stopped"), "darkgrey", "status,=,Stopped"];
         } else if(flt(doc.per_delivered) < 100 && frappe.datetime.get_diff(doc.delivery_date) < 0) {
+			// to bill & overdue
 			return [__("Overdue"), "red", "per_delivered,<,100|delivery_date,<,Today|status,!=,Stopped"];
+
 		} else if(flt(doc.per_delivered) < 100 && doc.status!=="Stopped") {
-			return [__("Not Delivered"), "orange", "per_delivered,<,100|status,!=,Stopped"];
+			// not delivered
+
+			if(flt(doc.per_billed) < 100) {
+				// not delivered & not billed
+
+				return [__("To Deliver and Bill"), "orange",
+					"per_delivered,<,100|per_billed,<,100|status,!=,Stopped"];
+			} else {
+				// not billed
+
+				return [__("To Deliver"), "orange",
+					"per_delivered,<,100|per_billed,=,100|status,!=,Stopped"];
+			}
+
 		} else if(flt(doc.per_delivered) == 100 && flt(doc.per_billed) < 100 && doc.status!=="Stopped") {
+			// to bill
 			return [__("To Bill"), "orange", "per_delivered,=,100|per_billed,<,100|status,!=,Stopped"];
+
 		} else if(flt(doc.per_delivered) == 100 && flt(doc.per_billed) == 100 && doc.status!=="Stopped") {
+
 			return [__("Completed"), "green", "per_delivered,=,100|per_billed,=,100|status,!=,Stopped"];
 		}
 	},

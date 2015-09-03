@@ -9,7 +9,6 @@ from frappe.utils import flt, cint
 from frappe import msgprint, _
 import frappe.defaults
 from frappe.model.mapper import get_mapped_doc
-from erpnext.stock.utils import update_bin
 from erpnext.controllers.selling_controller import SellingController
 
 form_grid_templates = {
@@ -48,6 +47,19 @@ class DeliveryNote(SellingController):
 			'source_field': 'qty',
 			'percent_join_field': 'against_sales_invoice',
 			'overflow_type': 'delivery'
+		},
+		{
+			'source_dt': 'Delivery Note Item',
+			'target_dt': 'Sales Order Item',
+			'join_field': 'so_detail',
+			'target_field': 'returned_qty',
+			'target_parent_dt': 'Sales Order',
+			# 'target_parent_field': 'per_delivered',
+			# 'target_ref_field': 'qty',
+			'source_field': '-1 * qty',
+			# 'percent_join_field': 'against_sales_order',
+			# 'overflow_type': 'delivery',
+			'extra_cond': """ and exists (select name from `tabDelivery Note` where name=`tabDelivery Note Item`.parent and is_return=1)"""
 		}]
 
 	def onload(self):
@@ -67,7 +79,7 @@ class DeliveryNote(SellingController):
 
 		item_meta = frappe.get_meta("Delivery Note Item")
 		print_hide_fields = {
-			"parent": ["grand_total", "rounded_total", "in_words", "currency", "net_total"],
+			"parent": ["grand_total", "rounded_total", "in_words", "currency", "total", "taxes"],
 			"items": ["rate", "amount", "price_list_rate", "discount_percentage"]
 		}
 
@@ -108,11 +120,9 @@ class DeliveryNote(SellingController):
 		if not self.installation_status: self.installation_status = 'Not Installed'
 
 	def validate_with_previous_doc(self):
-		items = self.get("items")
-
-		for fn in (("Sales Order", "against_sales_order", "so_detail"), 
+		for fn in (("Sales Order", "against_sales_order", "so_detail"),
 				("Sales Invoice", "against_sales_invoice", "si_detail")):
-			if filter(None, [getattr(d, fn[1], None) for d in items]):
+			if filter(None, [getattr(d, fn[1], None) for d in self.get("items")]):
 				super(DeliveryNote, self).validate_with_previous_doc({
 					fn[0]: {
 						"ref_dn_field": fn[1],
@@ -121,14 +131,9 @@ class DeliveryNote(SellingController):
 					},
 				})
 
-				if cint(frappe.defaults.get_global_default('maintain_same_sales_rate')):
-					super(DeliveryNote, self).validate_with_previous_doc({
-						fn[0] + " Item": {
-							"ref_dn_field": fn[2],
-							"compare_fields": [["rate", "="]],
-							"is_child_table": True
-						}
-					})
+		if cint(frappe.db.get_single_value('Selling Settings', 'maintain_same_sales_rate')) and not self.is_return:
+			self.validate_rate_with_reference_doc([["Sales Order", "sales_order", "so_detail"],
+				["Sales Invoice", "sales_invoice", "si_detail"]])
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
@@ -141,11 +146,14 @@ class DeliveryNote(SellingController):
 
 	def validate_for_items(self):
 		check_list, chk_dupl_itm = [], []
+		if cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
+			return
+
 		for d in self.get('items'):
 			e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
 			f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
 
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 'Yes':
+			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
 				if e in check_list:
 					msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
@@ -158,7 +166,7 @@ class DeliveryNote(SellingController):
 
 	def validate_warehouse(self):
 		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d['item_code'], "is_stock_item") == "Yes":
+			if frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
 				if not d['warehouse']:
 					frappe.throw(_("Warehouse required for stock Item {0}").format(d["item_code"]))
 
@@ -185,14 +193,12 @@ class DeliveryNote(SellingController):
 		# update delivered qty in sales order
 		self.update_prevdoc_status()
 
-		self.check_credit_limit()
+		if not self.is_return:
+			self.check_credit_limit()
 
-		# create stock ledger entry
 		self.update_stock_ledger()
-
 		self.make_gl_entries()
 
-		# set DN status
 		frappe.db.set(self, 'status', 'Submitted')
 
 
@@ -250,37 +256,6 @@ class DeliveryNote(SellingController):
 				ps = frappe.get_doc('Packing Slip', r[0])
 				ps.cancel()
 			frappe.msgprint(_("Packing Slip(s) cancelled"))
-
-
-	def update_stock_ledger(self):
-		sl_entries = []
-		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == "Yes" \
-					and d.warehouse and flt(d['qty']):
-				self.update_reserved_qty(d)
-
-				sl_entries.append(self.get_sl_entries(d, {
-					"actual_qty": -1*flt(d['qty']),
-				}))
-
-		self.make_sl_entries(sl_entries)
-
-	def update_reserved_qty(self, d):
-		if d['reserved_qty'] < 0 :
-			# Reduce reserved qty from reserved warehouse mentioned in so
-			if not d["reserved_warehouse"]:
-				frappe.throw(_("Reserved Warehouse is missing in Sales Order"))
-
-			args = {
-				"item_code": d['item_code'],
-				"warehouse": d["reserved_warehouse"],
-				"voucher_type": self.doctype,
-				"voucher_no": self.name,
-				"reserved_qty": (self.docstatus==1 and 1 or -1)*flt(d['reserved_qty']),
-				"posting_date": self.posting_date,
-				"is_amended": self.amended_from and 'Yes' or 'No'
-			}
-			update_bin(args)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -394,3 +369,9 @@ def make_packing_slip(source_name, target_doc=None):
 	}, target_doc)
 
 	return doclist
+
+
+@frappe.whitelist()
+def make_sales_return(source_name, target_doc=None):
+	from erpnext.controllers.sales_and_purchase_return import make_return_doc
+	return make_return_doc("Delivery Note", source_name, target_doc)

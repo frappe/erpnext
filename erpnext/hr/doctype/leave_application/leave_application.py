@@ -238,10 +238,16 @@ def get_total_leave_days(leave_app):
 	ret = {'total_leave_days' : 0.5}
 	if not leave_app.half_day:
 		tot_days = date_diff(leave_app.to_date, leave_app.from_date) + 1
-		holidays = leave_app.get_holidays()
-		ret = {
-			'total_leave_days' : flt(tot_days)-flt(holidays)
-		}
+		if frappe.db.get_value("Leave Type", leave_app.leave_type, "include_holiday"):
+			ret = {
+				'total_leave_days' : flt(tot_days)
+			}
+		else:
+			holidays = leave_app.get_holidays()
+			ret = {
+				'total_leave_days' : flt(tot_days)-flt(holidays)
+			}
+
 	return ret
 
 @frappe.whitelist()

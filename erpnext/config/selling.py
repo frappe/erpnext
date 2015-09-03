@@ -50,6 +50,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "SMS Log",
+					"description":_("Logs for maintaining sms delivery status"),
+				},
+				{
+					"type": "doctype",
 					"name": "Newsletter",
 					"description": _("Newsletters to contacts, leads."),
 				},
@@ -144,7 +149,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Sales BOM",
+					"name": "Product Bundle",
 					"description": _("Bundle items at time of sale."),
 				},
 				{

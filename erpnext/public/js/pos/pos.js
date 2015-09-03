@@ -182,6 +182,9 @@ erpnext.pos.PointOfSale = Class.extend({
 			child.serial_no = serial_no;
 
 		this.frm.script_manager.trigger("item_code", child.doctype, child.name);
+		frappe.after_ajax(function() {
+			me.frm.script_manager.trigger("qty", child.doctype, child.name);
+		})
 	},
 	refresh_search_box: function() {
 		var me = this;
@@ -401,7 +404,8 @@ erpnext.pos.PointOfSale = Class.extend({
 
 			this.with_modes_of_payment(function() {
 				// prefer cash payment!
-				var default_mode = me.modes_of_payment.indexOf(__("Cash"))!==-1 ? __("Cash") : undefined;
+				var default_mode = me.frm.doc.mode_of_payment ? me.frm.doc.mode_of_payment :
+					me.modes_of_payment.indexOf(__("Cash"))!==-1 ? __("Cash") : undefined;
 
 				// show payment wizard
 				var dialog = new frappe.ui.Dialog({
@@ -431,7 +435,7 @@ erpnext.pos.PointOfSale = Class.extend({
 							}
 						},
 						{fieldtype:'Currency', fieldname:'write_off_amount',
-							label: __('Write Off'), default: 0.0, hidden: 1},
+							label: __('Write Off'), "default": 0.0, hidden: 1},
 					]
 				});
 				me.dialog = dialog;
@@ -449,8 +453,7 @@ erpnext.pos.PointOfSale = Class.extend({
 
 					if (is_cash && !dialog.get_value("change")) {
 						// set to nearest 5
-						var paid_amount = 5 * Math.ceil(dialog.get_value("total_amount") / 5);
-						dialog.set_value("paid_amount", paid_amount);
+						dialog.set_value("paid_amount", dialog.get_value("total_amount"));
 						dialog.get_input("paid_amount").trigger("change");
 					}
 				}).trigger("change");
@@ -470,6 +473,8 @@ erpnext.pos.PointOfSale = Class.extend({
 			}
 			me.frm.set_value("mode_of_payment", values.mode_of_payment);
 
+			//me.frm.cscript.calculate_taxes_and_totals();
+
 			var paid_amount = flt((flt(values.paid_amount) - flt(values.change)) / me.frm.doc.conversion_rate, precision("paid_amount"));
 			me.frm.set_value("paid_amount", paid_amount);
 
@@ -479,13 +484,18 @@ erpnext.pos.PointOfSale = Class.extend({
 
 			me.frm.savesubmit(this);
 			dialog.hide();
-			me.refresh();
 		})
 
 	}
 });
 
 erpnext.pos.make_pos_btn = function(frm) {
+	frm.page.add_menu_item(__("{0} View", [frm.page.current_view_name === "pos" ? "Form" : "Point-of-Sale"]), function() {
+		erpnext.pos.toggle(frm);
+	});
+
+	if(frm.pos_btn) return;
+
 	// Show POS button only if it is enabled from features setup
 	if (cint(sys_defaults.fs_pos_view)!==1 || frm.doctype==="Material Request") {
 		return;
@@ -493,7 +503,8 @@ erpnext.pos.make_pos_btn = function(frm) {
 
 	if(!frm.pos_btn) {
 		frm.pos_btn = frm.page.add_action_icon("icon-th", function() {
-			erpnext.pos.toggle(frm) });
+			erpnext.pos.toggle(frm);
+		});
 	}
 
 	if(erpnext.open_as_pos && frm.page.current_view_name !== "pos") {

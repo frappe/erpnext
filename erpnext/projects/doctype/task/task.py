@@ -28,10 +28,7 @@ class Task(Document):
 
 	def validate(self):
 		self.validate_dates()
-
-		if self.status!=self.get_db_value("status") and self.status == "Closed":
-			from frappe.desk.form.assign_to import clear
-			clear(self.doctype, self.name)
+		self.validate_status()
 
 	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
@@ -39,6 +36,15 @@ class Task(Document):
 
 		if self.act_start_date and self.act_end_date and getdate(self.act_start_date) > getdate(self.act_end_date):
 			frappe.throw(_("'Actual Start Date' can not be greater than 'Actual End Date'"))
+
+	def validate_status(self):
+		if self.status!=self.get_db_value("status") and self.status == "Closed":
+			for d in self.depends_on:
+				if frappe.db.get_value("Task", d.task, "status") != "Closed":
+					frappe.throw(_("Cannot close task as its dependant task {0} is not closed.").format(d.task))
+
+			from frappe.desk.form.assign_to import clear
+			clear(self.doctype, self.name)
 
 	def on_update(self):
 		self.check_recursion()
@@ -101,18 +107,14 @@ class Task(Document):
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
-	from frappe.desk.reportview import build_match_conditions
-	if not frappe.has_permission("Task"):
-		frappe.msgprint(_("No Permission"), raise_exception=1)
+	"""Returns events for Gantt / Calendar view rendering.
 
-	conditions = build_match_conditions("Task")
-	conditions = conditions and (" and " + conditions) or ""
-
-	if filters:
-		filters = json.loads(filters)
-		for key in filters:
-			if filters[key]:
-				conditions += " and " + key + ' = "' + filters[key].replace('"', '\"') + '"'
+	:param start: Start date-time.
+	:param end: End date-time.
+	:param filters: Filters (JSON).
+	"""
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Task", filters)
 
 	data = frappe.db.sql("""select name, exp_start_date, exp_end_date,
 		subject, status, project from `tabTask`

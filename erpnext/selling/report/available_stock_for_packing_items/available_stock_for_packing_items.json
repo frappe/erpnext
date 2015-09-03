@@ -5,12 +5,12 @@
  "doctype": "Report", 
  "idx": 1, 
  "is_standard": "Yes", 
- "modified": "2014-06-03 07:18:16.914298", 
+ "modified": "2015-07-06 06:11:10.534423", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Available Stock for Packing Items", 
  "owner": "Administrator", 
- "ref_doctype": "Sales BOM", 
+ "ref_doctype": "Product Bundle", 
  "report_name": "Available Stock for Packing Items", 
  "report_type": "Script Report"
 }

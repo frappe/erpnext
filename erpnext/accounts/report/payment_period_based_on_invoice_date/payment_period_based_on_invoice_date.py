@@ -10,26 +10,24 @@ from frappe.utils import flt
 def execute(filters=None):
 	if not filters: filters = {}
 	validate_filters(filters)
-			
+
 	columns = get_columns(filters)
 	entries = get_entries(filters)
 	invoice_posting_date_map = get_invoice_posting_date_map(filters)
 	against_date = ""
-	outstanding_amount = 0.0
 
 	data = []
 	for d in entries:
-		if d.against_voucher:
-			against_date = d.against_voucher and invoice_posting_date_map[d.against_voucher] or ""
+		against_date = invoice_posting_date_map.get(d.reference_name) or ""
+		if d.reference_type=="Purchase Invoice":
 			payment_amount = flt(d.debit) or -1 * flt(d.credit)
 		else:
-			against_date = d.against_invoice and invoice_posting_date_map[d.against_invoice] or ""
 			payment_amount = flt(d.credit) or -1 * flt(d.debit)
 
-		row = [d.name, d.party_type, d.party, d.posting_date, d.against_voucher or d.against_invoice,
+		row = [d.name, d.party_type, d.party, d.posting_date, d.reference_name,
 			against_date, d.debit, d.credit, d.cheque_no, d.cheque_date, d.remark]
 
-		if d.against_voucher or d.against_invoice:
+		if d.reference_name:
 			row += get_ageing_data(30, 60, 90, d.posting_date, against_date, payment_amount)
 		else:
 			row += ["", "", "", "", ""]
@@ -37,7 +35,7 @@ def execute(filters=None):
 		data.append(row)
 
 	return columns, data
-	
+
 def validate_filters(filters):
 	if (filters.get("payment_type") == "Incoming" and filters.get("party_type") == "Supplier") or \
 		(filters.get("payment_type") == "Outgoing" and filters.get("party_type") == "Customer"):
@@ -45,9 +43,9 @@ def validate_filters(filters):
 				.format(filters.payment_type, filters.party_type))
 
 def get_columns(filters):
-	return [_("Journal Entry") + ":Link/Journal Entry:140", 
-		_("Party Type") + ":Link/DocType:100", _("Party") + ":Dynamic Link/Party Type:140",
-		_("Posting Date") + ":Date:100", 
+	return [_("Journal Entry") + ":Link/Journal Entry:140",
+		_("Party Type") + "::100", _("Party") + ":Dynamic Link/Party Type:140",
+		_("Posting Date") + ":Date:100",
 		_("Against Invoice") + (":Link/Purchase Invoice:130" if filters.get("payment_type") == "Outgoing" else ":Link/Sales Invoice:130"),
 		_("Against Invoice Posting Date") + ":Date:130", _("Debit") + ":Currency:120", _("Credit") + ":Currency:120",
 		_("Reference No") + "::100", _("Reference Date") + ":Date:100", _("Remarks") + "::150", _("Age") +":Int:40",
@@ -62,7 +60,7 @@ def get_conditions(filters):
 			filters["party_type"] = "Supplier"
 		else:
 			filters["party_type"] = "Customer"
-	
+
 	if filters.get("party_type"):
 		conditions.append("jvd.party_type=%(party_type)s")
 
@@ -82,7 +80,7 @@ def get_conditions(filters):
 def get_entries(filters):
 	conditions = get_conditions(filters)
 	entries =  frappe.db.sql("""select jv.name, jvd.party_type, jvd.party, jv.posting_date,
-		jvd.against_voucher, jvd.against_invoice, jvd.debit, jvd.credit,
+		jvd.reference_type, jvd.reference_name, jvd.debit, jvd.credit,
 		jv.cheque_no, jv.cheque_date, jv.remark
 		from `tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		where jvd.parent = jv.name and jv.docstatus=1 %s order by jv.name DESC""" %

@@ -46,6 +46,8 @@ cur_frm.cscript.make_dashboard = function(doc) {
 						+ '</b> / <span class="text-muted">' + __("Total Unpaid") + ": <b>"
 						+ format_currency(r.message.total_unpaid, r.message.company_currency[0])
 						+ '</b></span>');
+				} else {
+					cur_frm.dashboard.set_headline("");
 				}
 			}
 			cur_frm.dashboard.set_badge_count(r.message);

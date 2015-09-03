@@ -11,9 +11,9 @@ def get_items(price_list, sales_or_purchase, item=None):
 	args = {"price_list": price_list}
 
 	if sales_or_purchase == "Sales":
-		condition = "i.is_sales_item='Yes'"
+		condition = "i.is_sales_item=1"
 	else:
-		condition = "i.is_purchase_item='Yes'"
+		condition = "i.is_purchase_item=1"
 
 	if item:
 		# search serial no

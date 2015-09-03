@@ -5,7 +5,13 @@ frappe.listview_settings['Purchase Order'] = {
         if(doc.status==="Stopped") {
 			return [__("Stopped"), "darkgrey", "status,=,Stopped"];
 		} else if(flt(doc.per_received) < 100 && doc.status!=="Stopped") {
-			return [__("Not Received"), "orange", "per_received,<,100|status,!=,Stopped"];
+			if(flt(doc.per_billed) < 100) {
+				return [__("To Receive and Bill"), "orange",
+					"per_received,<,100|per_billed,<,100|status,!=,Stopped"];
+			} else {
+				return [__("To Receive"), "orange",
+					"per_received,<,100|per_billed,=,100|status,!=,Stopped"];
+			}
 		} else if(flt(doc.per_received) == 100 && flt(doc.per_billed) < 100 && doc.status!=="Stopped") {
 			return [__("To Bill"), "orange", "per_received,=,100|per_billed,<,100|status,!=,Stopped"];
 		} else if(flt(doc.per_received) == 100 && flt(doc.per_billed) == 100 && doc.status!=="Stopped") {

@@ -140,13 +140,13 @@ class Warehouse(Document):
 			self.recalculate_bin_qty(newdn)
 
 	def recalculate_bin_qty(self, newdn):
-		from erpnext.utilities.repost_stock import repost_stock
+		from erpnext.stock.stock_balance import repost_stock
 		frappe.db.auto_commit_on_many_writes = 1
 		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		for item in frappe.db.sql("""select distinct item_code from (
-			select name as item_code from `tabItem` where ifnull(is_stock_item, 'Yes')='Yes'
+			select name as item_code from `tabItem` where is_stock_item=1
 			union
 			select distinct item_code from tabBin) a"""):
 				repost_stock(item[0], newdn)

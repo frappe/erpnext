@@ -8,7 +8,7 @@ from frappe import _
 from frappe.utils import flt, getdate, add_days, formatdate
 from frappe.model.document import Document
 from datetime import date
-from erpnext.stock.doctype.item.item import ItemTemplateCannotHaveStock
+from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
 
 class StockFreezeError(frappe.ValidationError): pass
 
@@ -18,6 +18,7 @@ class StockLedgerEntry(Document):
 		from erpnext.stock.utils import validate_warehouse_company
 		self.validate_mandatory()
 		self.validate_item()
+		self.validate_batch()
 		validate_warehouse_company(self.warehouse, self.company)
 		self.scrub_posting_time()
 
@@ -56,28 +57,32 @@ class StockLedgerEntry(Document):
 	def validate_item(self):
 		item_det = frappe.db.sql("""select name, has_batch_no, docstatus,
 			is_stock_item, has_variants, stock_uom
-			from tabItem where name=%s""", self.item_code, as_dict=True)[0]
+			from tabItem where name=%s""", self.item_code, as_dict=True)
 
-		if item_det.is_stock_item != 'Yes':
+		if not item_det:
+			frappe.throw(_("Item {0} not found").format(self.item_code))
+
+		item_det = item_det[0]
+
+		if item_det.is_stock_item != 1:
 			frappe.throw(_("Item {0} must be a stock Item").format(self.item_code))
 
 		# check if batch number is required
 		if self.voucher_type != 'Stock Reconciliation':
-			if item_det.has_batch_no =='Yes':
+			if item_det.has_batch_no ==1:
 				if not self.batch_no:
 					frappe.throw(_("Batch number is mandatory for Item {0}").format(self.item_code))
 				elif not frappe.db.get_value("Batch",{"item": self.item_code, "name": self.batch_no}):
 						frappe.throw(_("{0} is not a valid Batch Number for Item {1}").format(self.batch_no, self.item_code))
 
-			elif item_det.has_batch_no =='No' and self.batch_no:
+			elif item_det.has_batch_no ==0 and self.batch_no:
 					frappe.throw(_("The Item {0} cannot have Batch").format(self.item_code))
 
 		if item_det.has_variants:
 			frappe.throw(_("Stock cannot exist for Item {0} since has variants").format(self.item_code),
 				ItemTemplateCannotHaveStock)
 
-		if not self.stock_uom:
-			self.stock_uom = item_det.stock_uom
+		self.stock_uom = item_det.stock_uom
 
 	def check_stock_frozen_date(self):
 		stock_frozen_upto = frappe.db.get_value('Stock Settings', None, 'stock_frozen_upto') or ''
@@ -96,6 +101,13 @@ class StockLedgerEntry(Document):
 	def scrub_posting_time(self):
 		if not self.posting_time or self.posting_time == '00:0':
 			self.posting_time = '00:00'
+
+	def validate_batch(self):
+		if self.batch_no and self.voucher_type != "Stock Entry":
+			expiry_date = frappe.db.get_value("Batch", self.batch_no, "expiry_date")
+			if expiry_date:
+				if getdate(self.posting_date) > getdate(expiry_date):
+					frappe.throw(_("Batch {0} of Item {1} has expired.").format(self.batch_no, self.item_code))
 
 def on_doctype_update():
 	if not frappe.db.sql("""show index from `tabStock Ledger Entry`

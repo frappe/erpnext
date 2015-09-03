@@ -115,7 +115,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		d.get_input("fetch").on("click", function() {
 			var values = d.get_values();
 			if(!values) return;
-
+			values["company"] = cur_frm.doc.company;
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.bom.bom.get_bom_items",
 				args: values,

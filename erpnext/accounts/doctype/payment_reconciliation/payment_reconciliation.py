@@ -34,8 +34,8 @@ class PaymentReconciliation(Document):
 				t1.name = t2.parent and t1.docstatus = 1 and t2.docstatus = 1
 				and t2.party_type = %(party_type)s and t2.party = %(party)s
 				and t2.account = %(account)s and {dr_or_cr} > 0
-				and ifnull(t2.against_voucher, '')='' and ifnull(t2.against_invoice, '')=''
-				and ifnull(t2.against_jv, '')='' {cond}
+				and ifnull(t2.reference_type, '') in ('', 'Sales Order', 'Purchase Order')
+				{cond}
 				and (CASE
 					WHEN t1.voucher_type in ('Debit Note', 'Credit Note')
 					THEN 1=1
@@ -191,9 +191,10 @@ class PaymentReconciliation(Document):
 					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equals to JV amount {2}")
 						.format(p.idx, p.allocated_amount, p.amount))
 
-				if flt(p.allocated_amount) > unreconciled_invoices.get(p.invoice_type, {}).get(p.invoice_number):
+				invoice_outstanding = unreconciled_invoices.get(p.invoice_type, {}).get(p.invoice_number)
+				if flt(p.allocated_amount) - invoice_outstanding > 0.009:
 					frappe.throw(_("Row {0}: Allocated amount {1} must be less than or equals to invoice outstanding amount {2}")
-						.format(p.idx, p.allocated_amount, unreconciled_invoices.get(p.invoice_type, {}).get(p.invoice_number)))
+						.format(p.idx, p.allocated_amount, invoice_outstanding))
 
 		if not invoices_to_reconcile:
 			frappe.throw(_("Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row"))

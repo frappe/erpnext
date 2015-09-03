@@ -64,7 +64,7 @@ def get_data():
 			"type": "module"
 		},
 		"Learn": {
-			"color": "#7272FF",
+			"color": "#FCB868",
 			"force_show": True,
 			"icon": "icon-facetime-video",
 			"type": "module",

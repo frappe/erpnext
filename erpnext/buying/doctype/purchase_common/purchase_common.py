@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt, cstr
+from frappe.utils import flt, cstr, cint
 from frappe import _
 
 from erpnext.stock.doctype.item.item import get_last_purchase_details
@@ -41,8 +41,7 @@ class PurchaseCommon(BuyingController):
 	def validate_for_items(self, obj):
 		items = []
 		for d in obj.get("items"):
-			# validation for valid qty
-			if flt(d.qty) < 0 or (d.parenttype != 'Purchase Receipt' and not flt(d.qty)):
+			if not d.qty:
 				frappe.throw(_("Please enter quantity for Item {0}").format(d.item_code))
 
 			# udpate with latest quantities
@@ -57,24 +56,26 @@ class PurchaseCommon(BuyingController):
 					d.set(x, f_lst[x])
 
 			item = frappe.db.sql("""select is_stock_item, is_purchase_item,
-				is_sub_contracted_item, end_of_life from `tabItem` where name=%s""", d.item_code)
+				is_sub_contracted_item, end_of_life from `tabItem` where name=%s""",
+				d.item_code, as_dict=1)[0]
 
 			from erpnext.stock.doctype.item.item import validate_end_of_life
-			validate_end_of_life(d.item_code, item[0][3])
+			validate_end_of_life(d.item_code, item.end_of_life)
 
 			# validate stock item
-			if item[0][0]=='Yes' and d.qty and not d.warehouse:
+			if item.is_stock_item==1 and d.qty and not d.warehouse:
 				frappe.throw(_("Warehouse is mandatory for stock Item {0} in row {1}").format(d.item_code, d.idx))
 
 			# validate purchase item
 			if not (obj.doctype=="Material Request" and getattr(obj, "material_request_type", None)=="Material Transfer"):
-				if item[0][1] != 'Yes' and item[0][2] != 'Yes':
+				if item.is_purchase_item != 1 and item.is_sub_contracted_item != 1:
 					frappe.throw(_("{0} must be a Purchased or Sub-Contracted Item in row {1}").format(d.item_code, d.idx))
 
 			items.append(cstr(d.item_code))
-		if items and len(items) != len(set(items)):
+		if items and len(items) != len(set(items)) and \
+			not cint(frappe.db.get_single_value("Buying Settings", "allow_multiple_items") or 0):
 			frappe.msgprint(_("Warning: Same item has been entered multiple times."))
-			
+
 
 	def check_for_stopped_status(self, doctype, docname):
 		stopped = frappe.db.sql("""select name from `tab%s` where name = %s and

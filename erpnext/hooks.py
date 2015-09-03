@@ -1,11 +1,34 @@
 from __future__ import unicode_literals
 app_name = "erpnext"
 app_title = "ERPNext"
-app_publisher = "Frappe Technologies Pvt. Ltd. and Contributors"
-app_description = "Open Source Enterprise Resource Planning for Small and Midsized Organizations"
+app_publisher = "Frappe Technologies Pvt. Ltd."
+app_description = """## ERPNext
+
+ERPNext is a fully featured ERP system designed for Small and Medium Sized
+business. ERPNext covers a wide range of features including Accounting, CRM,
+Inventory management, Selling, Purchasing, Manufacturing, Projects, HR &
+Payroll, Website, E-Commerce and much more.
+
+ERPNext is based on the Frappe Framework is highly customizable and extendable.
+You can create Custom Form, Fields, Scripts and can also create your own Apps
+to extend ERPNext functionality.
+
+ERPNext is Open Source under the GNU General Public Licence v3 and has been
+listed as one of the Best Open Source Softwares in the world by my online
+blogs.
+
+### Links
+
+- Website: [https://erpnext.com](https://erpnext.com)
+- GitHub: [https://github.com/frappe/erpnext](https://github.com/frappe/erpnext)
+- Forum: [https://discuss.erpnext.com](https://discuss.erpnext.com)
+- Frappe Framework: [https://frappe.io](https://frappe.io)
+
+"""
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "5.1.3"
+app_version = "6.0.1"
+github_link = "https://github.com/frappe/erpnext"
 
 error_report_email = "support@erpnext.com"
 
@@ -25,7 +48,12 @@ on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
 # website
 update_website_context = "erpnext.shopping_cart.utils.update_website_context"
 my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
+
 email_append_to = ["Job Applicant", "Opportunity", "Issue"]
+
+calendars = ["Task", "Production Order", "Time Log", "Leave Application", "Sales Order"]
+
+website_generators = ["Item Group", "Item", "Sales Partner"]
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/favicon.png",
@@ -52,13 +80,9 @@ dump_report_map = "erpnext.startup.report_data_map.data_map"
 
 before_tests = "erpnext.setup.utils.before_tests"
 
-website_generators = ["Item Group", "Item", "Sales Partner"]
-
 standard_queries = {
 	"Customer": "erpnext.selling.doctype.customer.customer.get_customer_list"
 }
-
-communication_covert_to = ["Lead", "Issue", "Job Application"]
 
 doc_events = {
 	"Stock Entry": {
@@ -106,4 +130,3 @@ get_translated_dict = {
 	("page", "setup-wizard"): "frappe.geo.country_info.get_translated_dict",
 	("doctype", "Global Defaults"): "frappe.geo.country_info.get_translated_dict"
 }
-

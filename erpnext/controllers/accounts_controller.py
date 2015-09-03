@@ -9,24 +9,36 @@ from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
+from erpnext.controllers.sales_and_purchase_return import validate_return
+
+force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
+
+class CustomerFrozen(frappe.ValidationError): pass
 
 class AccountsController(TransactionBase):
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 		self.validate_date_with_fiscal_year()
+
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
-			self.validate_value("base_grand_total", ">=", 0)
+			if not self.meta.get_field("is_return") or not self.is_return:
+				self.validate_value("base_grand_total", ">=", 0)
+
+			validate_return(self)
 			self.set_total_in_words()
 
-		self.validate_due_date()
+		if self.doctype in ("Sales Invoice", "Purchase Invoice") and not self.is_return:
+			self.validate_due_date()
 
 		if self.meta.get_field("is_recurring"):
 			validate_recurring_document(self)
 
 		if self.meta.get_field("taxes_and_charges"):
 			self.validate_enabled_taxes_and_charges()
+
+		self.validate_party()
 
 	def on_submit(self):
 		if self.meta.get_field("is_recurring"):
@@ -74,6 +86,9 @@ class AccountsController(TransactionBase):
 	def validate_due_date(self):
 		from erpnext.accounts.party import validate_due_date
 		if self.doctype == "Sales Invoice":
+			if not self.due_date:
+				frappe.throw(_("Due Date is mandatory"))
+
 			validate_due_date(self.posting_date, self.due_date, "Customer", self.customer, self.company)
 		elif self.doctype == "Purchase Invoice":
 			validate_due_date(self.posting_date, self.due_date, "Supplier", self.supplier, self.company)
@@ -129,7 +144,8 @@ class AccountsController(TransactionBase):
 
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and \
-							item.get(fieldname) is None and value is not None:
+							(item.get(fieldname) is None or fieldname in force_item_fields) \
+								and value is not None:
 								item.set(fieldname, value)
 
 						if fieldname == "cost_center" and item.meta.get_field("cost_center") \
@@ -137,9 +153,10 @@ class AccountsController(TransactionBase):
 								item.set(fieldname, value)
 
 					if ret.get("pricing_rule"):
-						for field in ["base_price_list_rate", "price_list_rate",
-							"discount_percentage", "base_rate", "rate"]:
-								item.set(field, ret.get(field))
+						item.set("discount_percentage", ret.get("discount_percentage"))
+						if ret.get("pricing_rule_for") == "Price":
+							item.set("pricing_list_rate", ret.get("pricing_list_rate"))
+							
 
 	def set_taxes(self):
 		if not self.meta.get_field("taxes"):
@@ -195,29 +212,31 @@ class AccountsController(TransactionBase):
 			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
 	def get_advances(self, account_head, party_type, party, child_doctype, parentfield, dr_or_cr, against_order_field):
-		so_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
-		cond = ""
-		if so_list:
-			cond = "or (ifnull(t2.%s, '')  in (%s))" % ("against_" + against_order_field, ', '.join(['%s']*len(so_list)))
+		"""Returns list of advances against Account, Party, Reference"""
+		order_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
 
+		# conver sales_order to "Sales Order"
+		reference_type = against_order_field.replace("_", " ").title()
+		
+		condition = ""
+		if order_list:
+			in_placeholder = ', '.join(['%s'] * len(order_list))
+			condition = "or (t2.reference_type = '{0}' and ifnull(t2.reference_name, '') in ({1}))"\
+				.format(reference_type, in_placeholder)
+				
 		res = frappe.db.sql("""
 			select
-				t1.name as jv_no, t1.remark, t2.{0} as amount, t2.name as jv_detail_no, `against_{1}` as against_order
+				t1.name as jv_no, t1.remark, t2.{0} as amount, t2.name as jv_detail_no,
+				reference_name as against_order
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
 				t1.name = t2.parent and t2.account = %s
-				and t2.party_type=%s and t2.party=%s
+				and t2.party_type = %s and t2.party = %s
 				and t2.is_advance = 'Yes' and t1.docstatus = 1
-				and ((
-						ifnull(t2.against_voucher, '')  = ''
-						and ifnull(t2.against_invoice, '')  = ''
-						and ifnull(t2.against_jv, '')  = ''
-						and ifnull(t2.against_sales_order, '')  = ''
-						and ifnull(t2.against_purchase_order, '')  = ''
-				) {2})
-			order by t1.posting_date""".format(dr_or_cr, against_order_field, cond),
-			[account_head, party_type, party] + so_list, as_dict=1)
+				and (ifnull(t2.reference_type, '')='' {1})
+			order by t1.posting_date""".format(dr_or_cr, condition),
+			[account_head, party_type, party] + order_list, as_dict=1)
 
 		self.set(parentfield, [])
 		for d in res:
@@ -230,25 +249,26 @@ class AccountsController(TransactionBase):
 				"allocated_amount": flt(d.amount) if d.against_order else 0
 			})
 
-	def validate_advance_jv(self, advance_table_fieldname, against_order_field):
+	def validate_advance_jv(self, reference_type):
+		against_order_field = frappe.scrub(reference_type)
 		order_list = list(set([d.get(against_order_field) for d in self.get("items") if d.get(against_order_field)]))
 		if order_list:
 			account = self.get("debit_to" if self.doctype=="Sales Invoice" else "credit_to")
 
-			jv_against_order = frappe.db.sql("""select parent, %s as against_order
+			jv_against_order = frappe.db.sql("""select parent, reference_name as against_order
 				from `tabJournal Entry Account`
 				where docstatus=1 and account=%s and ifnull(is_advance, 'No') = 'Yes'
-				and ifnull(against_sales_order, '') in (%s)
-				group by parent, against_sales_order""" %
-				("against_" + against_order_field, '%s', ', '.join(['%s']*len(order_list))),
-				tuple([account] + order_list), as_dict=1)
+				and reference_type=%s
+				and ifnull(reference_name, '') in ({0})
+				group by parent, reference_name""".format(', '.join(['%s']*len(order_list))),
+					tuple([account, reference_type] + order_list), as_dict=1)
 
 			if jv_against_order:
 				order_jv_map = {}
 				for d in jv_against_order:
 					order_jv_map.setdefault(d.against_order, []).append(d.parent)
 
-				advance_jv_against_si = [d.journal_entry for d in self.get(advance_table_fieldname)]
+				advance_jv_against_si = [d.journal_entry for d in self.get("advances")]
 
 				for order, jv_list in order_jv_map.items():
 					for jv in jv_list:
@@ -294,7 +314,7 @@ class AccountsController(TransactionBase):
 		item_codes = list(set(item.item_code for item in self.get("items")))
 		if item_codes:
 			stock_items = [r[0] for r in frappe.db.sql("""select name
-				from `tabItem` where name in (%s) and is_stock_item='Yes'""" % \
+				from `tabItem` where name in (%s) and is_stock_item=1""" % \
 				(", ".join((["%s"]*len(item_codes))),), item_codes)]
 
 		return stock_items
@@ -302,10 +322,8 @@ class AccountsController(TransactionBase):
 	def set_total_advance_paid(self):
 		if self.doctype == "Sales Order":
 			dr_or_cr = "credit"
-			against_field = "against_sales_order"
 		else:
 			dr_or_cr = "debit"
-			against_field = "against_purchase_order"
 
 		advance_paid = frappe.db.sql("""
 			select
@@ -313,8 +331,10 @@ class AccountsController(TransactionBase):
 			from
 				`tabJournal Entry Account`
 			where
-				{against_field} = %s and docstatus = 1 and is_advance = "Yes" """.format(dr_or_cr=dr_or_cr, \
-					against_field=against_field), self.name)
+				reference_type = %s and
+				reference_name = %s and
+				docstatus = 1 and is_advance = "Yes" """.format(dr_or_cr=dr_or_cr),
+					(self.doctype, self.name))
 
 		if advance_paid:
 			advance_paid = flt(advance_paid[0][0], self.precision("advance_paid"))
@@ -331,6 +351,23 @@ class AccountsController(TransactionBase):
 			self._abbr = frappe.db.get_value("Company", self.company, "abbr")
 
 		return self._abbr
+
+	def validate_party(self):
+		frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
+		if frozen_accounts_modifier in frappe.get_roles():
+			return
+
+		party_type = None
+		if self.meta.get_field("customer"):
+			party_type = 'Customer'
+
+		elif self.meta.get_field("supplier"):
+			party_type = 'Supplier'
+
+		if party_type:
+			party = self.get(party_type.lower())
+			if frappe.db.get_value(party_type, party, "is_frozen"):
+				frappe.throw("{0} {1} is frozen".format(party_type, party), CustomerFrozen)
 
 @frappe.whitelist()
 def get_tax_rate(account_head):
