@@ -42,7 +42,7 @@ class Task(Document):
 			for d in self.depends_on:
 				if frappe.db.get_value("Task", d.task, "status") != "Closed":
 					frappe.throw(_("Cannot close task as its dependant task {0} is not closed.").format(d.task))
-			
+
 			from frappe.desk.form.assign_to import clear
 			clear(self.doctype, self.name)
 
@@ -107,18 +107,14 @@ class Task(Document):
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
-	from frappe.desk.reportview import build_match_conditions
-	if not frappe.has_permission("Task"):
-		frappe.msgprint(_("No Permission"), raise_exception=1)
+	"""Returns events for Gantt / Calendar view rendering.
 
-	conditions = build_match_conditions("Task")
-	conditions = conditions and (" and " + conditions) or ""
-
-	if filters:
-		filters = json.loads(filters)
-		for key in filters:
-			if filters[key]:
-				conditions += " and " + key + ' = "' + filters[key].replace('"', '\"') + '"'
+	:param start: Start date-time.
+	:param end: End date-time.
+	:param filters: Filters (JSON).
+	"""
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Task", filters)
 
 	data = frappe.db.sql("""select name, exp_start_date, exp_end_date,
 		subject, status, project from `tabTask`

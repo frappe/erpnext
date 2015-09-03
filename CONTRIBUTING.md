@@ -49,6 +49,20 @@ DocTypes are easy to create but hard to maintain. If you find that there is a an
 
 Tabs!
 
+#### Release Checklist
+
+- Describe, in detail, what is in the pull request
+- How to use the new feature?
+- Test cases
+- Change log
+- Manual Pull Request Link
+- Screencast. Should include:
+	- New Forms
+	- Linked Forms
+	- Linked Reports
+	- Print Views
+
 ### Copyright
 
 Please see README.md
+

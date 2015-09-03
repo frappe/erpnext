@@ -471,3 +471,24 @@ def make_maintenance_visit(source_name, target_doc=None):
 		}, target_doc)
 
 		return doclist
+
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	"""Returns events for Gantt / Calendar view rendering.
+
+	:param start: Start date-time.
+	:param end: End date-time.
+	:param filters: Filters (JSON).
+	"""
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Sales Order", filters)
+
+	data = frappe.db.sql("""select name, customer_name, delivery_status, billing_status, delivery_date
+		from `tabSales Order`
+		where (ifnull(delivery_date, '0000-00-00')!= '0000-00-00') \
+				and (delivery_date between %(start)s and %(end)s) {conditions}
+		""".format(conditions=conditions), {
+			"start": start,
+			"end": end
+		}, as_dict=True, update={"allDay": 0})
+	return data
