@@ -428,20 +428,12 @@ class AccountsController(TransactionBase):
 		if self.get("currency"):
 			party_type, party = self.get_party()
 			if party_type and party:
-				existing_gle = frappe.db.get_value("GL Entry", {"party_type": party_type, 
-					"party": party, "company": self.company}, ["name", "account_currency"], as_dict=1)
-				if existing_gle:
-					currency_in_existing_entries = existing_gle.account_currency or self.company_currency
-					if currency_in_existing_entries != self.company_currency \
-						and currency_in_existing_entries != self.currency:
-							frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
-								.format(party_type, party, currency_in_existing_entries), InvalidCurrency)
-				else:
-					party_currency = frappe.db.get_value(party_type, party, "default_currency") \
-						or self.company_currency
-					if party_currency != self.company_currency and self.currency != party_currency:
-						frappe.throw(_("Currency must be same as {0} currency {1}")
-							.format(party_type, party_currency), InvalidCurrency)
+				party_account_currency = frappe.db.get_value(party_type, party, "party_account_currency") \
+					or self.company_currency
+				
+				if party_account_currency != self.company_currency and self.currency != party_account_currency:
+					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
+						.format(party_type, party, party_account_currency), InvalidCurrency)
 				
 @frappe.whitelist()
 def get_tax_rate(account_head):

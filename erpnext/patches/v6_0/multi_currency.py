@@ -7,7 +7,7 @@ import frappe
 def execute():
 	# Reload doctype
 	for dt in ("Account", "GL Entry", "Journal Entry", 
-		"Journal Entry Account", "Sales Invoice", "Purchase Invoice"):
+		"Journal Entry Account", "Sales Invoice", "Purchase Invoice", "Customer", "Supplier"):
 			frappe.reload_doctype(dt)
 			
 	for company in frappe.get_all("Company", fields=["name", "default_currency", "default_receivable_account"]):
@@ -65,21 +65,36 @@ def execute():
 		
 		# Set party account if default currency of party other than company's default currency
 		for dt in ("Customer", "Supplier"):
-			parties = frappe.db.sql("""select name from `tab{0}` p
-				where ifnull(default_currency, '') != '' and default_currency != %s 
-				and not exists(select name from `tabParty Account` where parent=p.name and company=%s)"""
-				.format(dt), (company.default_currency, company.name))
-			
+			parties = frappe.get_all(dt, ["name", "default_currency"])
 			for p in parties:
-				party = frappe.get_doc(dt, p[0])
-				party_gle = frappe.db.get_value("GL Entry", {"party_type": dt, "party": p[0], 
-					"company": company.name}, ["account"], as_dict=True)
+				# Get party GL Entries
+				party_gle = frappe.db.get_value("GL Entry", {"party_type": dt, "party": p.name, 
+					"company": company.name}, ["account", "account_currency"], as_dict=True)
 					
-				party_account = party_gle.account or company.default_receivable_account
+				party = frappe.get_doc(dt, p.name)
 				
-				party.append("accounts", {
-					"company": company.name,
-					"account": party_account
-				})
-				party.ignore_mandatory()
+				# set default currency and party account currency
+				if not party.default_currency:
+					party.default_currency = company.default_currency
+					
+				party.party_account_currency = company.default_currency if party_gle else party.default_currency
+
+				# Add default receivable /payable account if not exists 
+				# and currency is other than company currency
+				if party.default_currency != company.default_currency:
+					party_account_exists = False
+					for d in party.get("accounts"):
+						if d.company == company.name:
+							party_account_exists = True
+							break
+					
+					if not party_account_exists:
+						party_account = party_gle.account if party_gle else company.default_receivable_account
+						if party_account:
+							party.append("accounts", {
+								"company": company.name,
+								"account": party_account
+							})
+				
+				party.flags.ignore_mandatory = True
 				party.save()

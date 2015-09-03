@@ -114,21 +114,12 @@ class GLEntry(Document):
 				
 		
 		if self.party_type and self.party:
-			existing_gle = frappe.db.get_value("GL Entry", {"party_type": self.party_type, 
-				"party": self.party, "company": self.company}, ["name", "account_currency"], as_dict=1)
-			if not existing_gle:
-				party_currency = frappe.db.get_value(self.party_type, self.party, "default_currency")\
-					 or company_currency
-				if party_currency != account_currency:
-					frappe.throw(_("Invalid Account {0}. Account Currency must be {1}, same as {2}: {3}")
-						.format(self.account, party_currency, self.party_type, self.party), 
-							InvalidAccountCurrency)
-			else:
-				currency_in_existing_entries = existing_gle.account_currency or company_currency
-				if currency_in_existing_entries != self.account_currency:
-					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
-						.format(self.party_type, self.party, currency_in_existing_entries), 
-							InvalidAccountCurrency)
+			party_account_currency = frappe.db.get_value(self.party_type, self.party, "party_account_currency") \
+				or company_currency
+				
+			if party_account_currency != self.account_currency:
+				frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
+					.format(self.party_type, self.party, party_account_currency), InvalidAccountCurrency)					
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:

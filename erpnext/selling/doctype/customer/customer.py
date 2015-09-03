@@ -10,7 +10,7 @@ from frappe.utils import flt
 
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.utilities.address_and_contact import load_address_and_contact
-from erpnext.accounts.party import validate_party_account
+from erpnext.accounts.party import validate_accounting_currency, validate_party_account
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -33,6 +33,7 @@ class Customer(TransactionBase):
 			
 	def validate(self):
 		self.validate_mandatory()
+		validate_accounting_currency(self)
 		validate_party_account(self)
 
 	def update_lead_status(self):

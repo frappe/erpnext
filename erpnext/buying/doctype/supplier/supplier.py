@@ -8,7 +8,7 @@ from frappe import msgprint, _
 from frappe.model.naming import make_autoname
 from erpnext.utilities.address_and_contact import load_address_and_contact
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import validate_party_account
+from erpnext.accounts.party import validate_accounting_currency, validate_party_account
 
 class Supplier(TransactionBase):
 	def get_feed(self):
@@ -46,6 +46,7 @@ class Supplier(TransactionBase):
 			if not self.naming_series:
 				msgprint(_("Series is mandatory"), raise_exception=1)
 				
+		validate_accounting_currency(self)
 		validate_party_account(self)
 
 	def get_contacts(self,nm):

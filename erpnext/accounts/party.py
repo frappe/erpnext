@@ -142,17 +142,43 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 	}
 	return out
 	
+def validate_accounting_currency(party):
+	company_currency = get_company_currency()
+	
+	# set party account currency
+	if not party.party_account_currency:
+		if party.default_currency:
+			party.party_account_currency = party.default_currency
+		else:
+			party.party_account_currency = company_currency
+			
+	party_account_currency_in_db = frappe.db.get_value(party.doctype, party.name, "party_account_currency")
+	if party_account_currency_in_db and party_account_currency_in_db != party.party_account_currency:
+		existing_gle = frappe.db.get_value("GL Entry", {"party_type": party.doctype, 
+			"party": party.name}, ["name", "account_currency"], as_dict=1)
+		if existing_gle:
+			frappe.throw(_("Accounting Currency cannot be changed, as GL Entry exists for this {0}")
+				.format(party.doctype))
+		
+		
 def validate_party_account(party):
-	party_account_defined_for_companies = [d.company for d in party.get("accounts")]
-	party_account_required_for_companies = []
-	for company, company_currency in frappe.db.sql("select name, default_currency from `tabCompany`"):
-		if party.default_currency and party.default_currency != company_currency \
-			and company not in party_account_defined_for_companies:
-				party_account_required_for_companies.append(company)
+	company_currency = get_company_currency()
+	
+	if party.party_account_currency != company_currency:
+		party_account_defined_for_companies = [d.company for d in party.get("accounts")]
+		all_companies = [d.name for d in frappe.get_list("Company")]
+		party_account_required_for_companies = list(set(all_companies) - set(party_account_defined_for_companies))
 				
-	if party_account_required_for_companies:
-		frappe.msgprint(_("Please mention Party Account for the following companies, as party currency is different from company's default currency: {0}")
-			.format("\n" + "\n".join(party_account_required_for_companies)))
+		if party_account_required_for_companies:
+			frappe.msgprint(_("Please mention Default {0} Account for the following companies, as accounting currency is different from company's default currency: {1}")
+				.format(
+					"Receivable" if party.doctype=="Customer" else "Payable", 
+					"\n" + "\n".join(party_account_required_for_companies)
+				)
+			)
+			
+def get_company_currency():
+	return frappe.db.sql("select default_currency from tabCompany limit 1")[0][0]
 				
 @frappe.whitelist()
 def get_party_account(company, party, party_type):
