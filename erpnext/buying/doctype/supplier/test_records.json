@@ -13,7 +13,7 @@
   "doctype": "Supplier", 
   "supplier_name": "_Test Supplier USD", 
   "supplier_type": "_Test Supplier Type",
-  "default_currency": "USD",
+  "party_account_currency": "USD",
   "accounts": [{
     "company": "_Test Company",
     "account": "_Test Payable USD - _TC"

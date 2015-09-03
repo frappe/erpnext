@@ -52,15 +52,7 @@ class Company(Document):
 		if self.default_currency and self.previous_default_currency and \
 			self.default_currency != self.previous_default_currency and \
 			self.check_if_transactions_exist():
-				frappe.throw(_("Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."))
-				
-		if self.default_currency:
-			currency_in_other_companies = frappe.db.sql("""select default_currency from tabCompany 
-				where name!=%s limit 1""", self.name)
-
-			if currency_in_other_companies and self.default_currency != currency_in_other_companies[0][0]:
-				frappe.throw(_("Currency must be same for all Companies"))
-			
+				frappe.throw(_("Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."))			
 
 	def on_update(self):
 		if not frappe.db.sql("""select name from tabAccount
