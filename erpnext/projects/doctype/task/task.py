@@ -72,7 +72,8 @@ class Task(Document):
 		if self.project and not self.flags.from_project:
 			project = frappe.get_doc("Project", self.project)
 			project.flags.dont_sync_tasks = True
-			project.update_project()
+			project.update_percent_complete()
+			project.update_costing()
 			project.save()
 
 	def check_recursion(self):
