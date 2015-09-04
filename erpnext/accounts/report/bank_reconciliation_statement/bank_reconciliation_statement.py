@@ -23,7 +23,8 @@ def execute(filters=None):
 		total_debit += flt(d[2])
 		total_credit += flt(d[3])
 
-	amounts_not_reflected_in_system = frappe.db.sql("""select sum(ifnull(jvd.debit, 0) - ifnull(jvd.credit, 0))
+	amounts_not_reflected_in_system = frappe.db.sql("""
+		select sum(ifnull(jvd.debit_in_account_currency, 0) - ifnull(jvd.credit_in_account_currency, 0))
 		from `tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		where jvd.parent = jv.name and jv.docstatus=1 and jvd.account=%s
 		and jv.posting_date > %s and jv.clearance_date <= %s and ifnull(jv.is_opening, 'No') = 'No'
@@ -38,7 +39,7 @@ def execute(filters=None):
 	data += [
 		get_balance_row(_("System Balance"), balance_as_per_system),
 		[""]*len(columns),
-		["", '"' + _("Amounts not reflected in bank") + '"', total_debit, total_credit, "", "", "", ""],
+		["", '"' + _("Amounts not reflected in bank") + '"', total_debit, total_credit, "", "", "", "", ""],
 		get_balance_row(_("Amounts not reflected in system"), amounts_not_reflected_in_system),
 		[""]*len(columns),
 		get_balance_row(_("Expected balance as per bank"), bank_bal)
@@ -49,13 +50,14 @@ def execute(filters=None):
 def get_columns():
 	return [_("Posting Date") + ":Date:100", _("Journal Entry") + ":Link/Journal Entry:220",
 		_("Debit") + ":Currency:120", _("Credit") + ":Currency:120",
-		_("Against Account") + ":Link/Account:200", _("Reference") + "::100", _("Ref Date") + ":Date:110", _("Clearance Date") + ":Date:110"
+		_("Against Account") + ":Link/Account:200", _("Reference") + "::100", 
+		_("Ref Date") + ":Date:110", _("Clearance Date") + ":Date:110", _("Currency") + ":Link/Currency:70"
 	]
 
 def get_entries(filters):
 	entries = frappe.db.sql("""select
-			jv.posting_date, jv.name, jvd.debit, jvd.credit,
-			jvd.against_account, jv.cheque_no, jv.cheque_date, jv.clearance_date
+			jv.posting_date, jv.name, jvd.debit_in_account_currency, jvd.credit_in_account_currency,
+			jvd.against_account, jv.cheque_no, jv.cheque_date, jv.clearance_date, jvd.account_currency
 		from
 			`tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		where jvd.parent = jv.name and jv.docstatus=1
@@ -68,6 +70,6 @@ def get_entries(filters):
 
 def get_balance_row(label, amount):
 	if amount > 0:
-		return ["", '"' + label + '"', amount, 0, "", "", "", ""]
+		return ["", '"' + label + '"', amount, 0, "", "", "", "", ""]
 	else:
-		return ["", '"' + label + '"', 0, abs(amount), "", "", "", ""]
+		return ["", '"' + label + '"', 0, abs(amount), "", "", "", "", ""]
