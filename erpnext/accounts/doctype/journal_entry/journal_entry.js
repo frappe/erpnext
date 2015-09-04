@@ -29,8 +29,7 @@ frappe.ui.form.on("Journal Entry", {
 })
 
 erpnext.journal_entry.toggle_fields_based_on_currency = function(frm) {
-	var fields = ["balance_in_account_currency", "party_balance_in_account_currency", 
-		"debit_in_account_currency", "credit_in_account_currency"];
+	var fields = ["debit_in_account_currency", "credit_in_account_currency"];
 		
 	var company_currency = erpnext.get_currency(frm.doc.company);
 		
