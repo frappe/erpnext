@@ -40,8 +40,8 @@ def rename_and_reload_doctypes():
 
 	frappe.reload_doctype("Item")
 	frappe.reload_doc("Stock", "DocType", "Item Variant Attribute")
-	frappe.reload_doctype("Item Attribute Value")
-	frappe.reload_doctype("Item Attribute")
+	frappe.reload_doc("Stock", "DocType", "Item Attribute Value")
+	frappe.reload_doc("Stock", "DocType", "Item Attribute")
 
 def migrate_manage_variants():
 	item_attribute = {}
