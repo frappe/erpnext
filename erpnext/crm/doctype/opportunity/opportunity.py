@@ -6,6 +6,7 @@ import frappe, json
 from frappe.utils import cstr, cint
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
+from erpnext.setup.utils import get_exchange_rate
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -179,7 +180,17 @@ def get_item_details(item_code):
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		quotation = frappe.get_doc(target)
-		quotation.currency = None # set it as default from customer
+		
+		company_currency = frappe.db.get_value("Company", quotation.company, "default_currency")
+		party_account_currency = frappe.db.get_value("Customer", quotation.customer, "party_account_currency")
+		if company_currency == party_account_currency:
+			exchange_rate = 1
+		else:
+			exchange_rate = get_exchange_rate(party_account_currency, company_currency)
+
+		quotation.currency = party_account_currency or company_currency
+		quotation.conversion_rate = exchange_rate
+		
 		quotation.run_method("set_missing_values")
 		quotation.run_method("calculate_taxes_and_totals")
 
