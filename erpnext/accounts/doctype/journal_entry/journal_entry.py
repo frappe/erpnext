@@ -36,6 +36,7 @@ class JournalEntry(AccountsController):
 		self.validate_expense_claim()
 		self.validate_credit_debit_note()
 		self.validate_empty_accounts_table()
+		self.set_account_and_party_balance()
 		self.set_title()
 
 	def on_submit(self):
@@ -451,6 +452,11 @@ class JournalEntry(AccountsController):
 	def validate_empty_accounts_table(self):
 		if not self.get('accounts'):
 			frappe.throw("Accounts table cannot be blank.")
+	
+	def set_account_and_party_balance(self):
+		for d in self.get("accounts"):
+			d.account_balance = get_balance_on(account=d.account, date=self.posting_date)
+			d.party_balance = get_balance_on(party_type=d.party_type, party=d.party, date=self.posting_date)
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
