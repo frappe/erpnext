@@ -34,7 +34,7 @@ DocType: C-Form,Customer,ลูกค้า
 DocType: Purchase Receipt Item,Required By,ที่จำเป็นโดย
 DocType: Delivery Note,Return Against Delivery Note,กลับไปกับใบส่งมอบ
 DocType: Department,Department,แผนก
-DocType: Purchase Order,% Billed,% ที่เรียกเก็บ
+DocType: Purchase Order,% Billed,% เรียกเก็บแล้ว
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +44,Exchange Rate must be same as {0} {1} ({2}),อัตราแลกเปลี่ยนจะต้องเป็นเช่นเดียวกับ {0} {1} ({2})
 DocType: Sales Invoice,Customer Name,ชื่อลูกค้า
 DocType: Features Setup,"All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","เขตข้อมูล ทั้งหมดที่เกี่ยวข้องกับ การส่งออก เช่นเดียวกับ สกุลเงิน อัตราการแปลง รวม การส่งออก ส่งออก อื่น ๆ รวมใหญ่ ที่มีอยู่ใน หมายเหตุ การจัดส่ง POS , ใบเสนอราคา , ขายใบแจ้งหนี้ การขายสินค้า อื่น ๆ"
@@ -775,7 +775,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +15,Permanen
 DocType: Sales Order Item,Projected Qty,จำนวนที่คาดการณ์ไว้
 DocType: Sales Invoice,Payment Due Date,วันที่ครบกำหนด ชำระเงิน
 DocType: Newsletter,Newsletter Manager,ผู้จัดการจดหมายข่าว
-apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +95,'Opening',&#39;เปิด&#39;
+apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +95,'Opening','กำลังเปิด'
 DocType: Notification Control,Delivery Note Message,ข้อความหมายเหตุจัดส่งสินค้า
 DocType: Expense Claim,Expenses,รายจ่าย
 ,Purchase Receipt Trends,ซื้อแนวโน้มใบเสร็จรับเงิน
@@ -914,7 +914,7 @@ DocType: POS Profile,Cash/Bank Account,เงินสด / บัญชีธ�
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +63,Removed items with no change in quantity or value.,รายการที่ลบออกด้วยการเปลี่ยนแปลงในปริมาณหรือไม่มีค่า
 DocType: Delivery Note,Delivery To,เพื่อจัดส่งสินค้า
 DocType: Production Planning Tool,Get Sales Orders,รับการสั่งซื้อการขาย
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +64,{0} can not be negative,{0} ไม่สามารถลบ
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +64,{0} can not be negative,{0} ไม่สามารถเป็นจำนวนลบได้
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +197,"Row {0}: Party / Account does not match with \
 							Customer / Debit To in {1}","แถว {0}: พรรค / บัญชีไม่ตรงกับ \
  ลูกค้า / เดบิตในการ {1}"
@@ -1937,7 +1937,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +354,Quantity in r
 DocType: Appraisal,Employee,ลูกจ้าง
 apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.js +10,Import Email From,นำเข้าจากอีเมล์
 DocType: Features Setup,After Sale Installations,หลังจากการติดตั้งขาย
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +232,{0} {1} is fully billed,{0} {1} การเรียกเก็บเงินอย่างเต็มที่
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +232,{0} {1} is fully billed,{0} {1} เรียกเก็บเงินเต็มจำนวน
 DocType: Workstation Working Hour,End Time,เวลาสิ้นสุด
 apps/erpnext/erpnext/config/setup.py +42,Standard contract terms for Sales or Purchase.,ข้อสัญญา มาตรฐานสำหรับ การขายหรือการ ซื้อ
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +75,Group by Voucher,กลุ่ม โดย คูปอง
@@ -1989,7 +1989,7 @@ apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +92,You can not change rat
 DocType: Employee,Previous Work Experience,ประสบการณ์การทำงานก่อนหน้า
 DocType: Stock Entry,For Quantity,สำหรับจำนวน
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +153,Please enter Planned Qty for Item {0} at row {1},กรุณากรอก จำนวน การ วางแผน รายการ {0} ที่ แถว {1}
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +217,{0} {1} is not submitted,{0} {1} ไม่ได้ ส่ง
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +217,{0} {1} is not submitted,{0} {1} ยังไม่ได้ส่ง
 apps/erpnext/erpnext/config/stock.py +13,Requests for items.,ขอรายการ
 DocType: Production Planning Tool,Separate production order will be created for each finished good item.,เพื่อผลิตแยกจะถูกสร้างขึ้นสำหรับรายการที่ดีในแต่ละสำเร็จรูป
 DocType: Email Digest,New Communications,การสื่อสารใหม่
@@ -3141,7 +3141,7 @@ DocType: Purchase Taxes and Charges,Item Wise Tax Detail,รายการ ฉ�
 DocType: Purchase Order Item,Supplier Quotation,ใบเสนอราคาของผู้ผลิต
 DocType: Quotation,In Words will be visible once you save the Quotation.,ในคำพูดของจะสามารถมองเห็นได้เมื่อคุณบันทึกใบเสนอราคา
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +67,Ironing,รีดผ้า
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +235,{0} {1} is stopped,{0} {1} คือหยุด
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +235,{0} {1} is stopped,{0} {1} หยุดทำงาน
 apps/erpnext/erpnext/stock/doctype/item/item.py +204,Barcode {0} already used in Item {1},บาร์โค้ด {0} ใช้แล้ว ใน รายการ {1}
 DocType: Lead,Add to calendar on this date,เพิ่มไปยังปฏิทินของวันนี้
 apps/erpnext/erpnext/config/selling.py +132,Rules for adding shipping costs.,กฎระเบียบ สำหรับการเพิ่ม ค่าใช้จ่ายใน การจัดส่งสินค้า

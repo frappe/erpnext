@@ -3257,7 +3257,7 @@ DocType: DocField,Currency,通貨
 DocType: Opportunity,Opportunity Date,機会日付
 DocType: Purchase Receipt,Return Against Purchase Receipt,購入時の領収書に反し戻ります
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order_list.js +16,To Bill,請求先
-apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +61,Piecework,歩合
+apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +61,Piecework,出来高制
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +64,Avg. Buying Rate,平均購入レート
 DocType: Task,Actual Time (in Hours),実際の時間（時）
 DocType: Employee,History In Company,会社での履歴
