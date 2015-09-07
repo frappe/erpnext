@@ -125,7 +125,7 @@ apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +124,You are not auth
 apps/erpnext/erpnext/selling/doctype/product_bundle/product_bundle.py +25,Parent Item {0} must be not Stock Item and must be a Sales Item,Bovenliggend Artikel {0} mag geen Voorraadartikel zijn en moet een Verkoopartikel zijn
 DocType: Item,Item Image (if not slideshow),Artikel Afbeelding (indien niet diashow)
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.py +20,An Customer exists with same name,Een klant bestaat met dezelfde naam
-DocType: Production Order Operation,(Hour Rate / 60) * Actual Operation Time,(Uurtarief / 60) * De werkelijke Operation Time
+DocType: Production Order Operation,(Hour Rate / 60) * Actual Operation Time,(Uurtarief/60) * De werkelijke Operation Time
 DocType: SMS Log,SMS Log,SMS Log
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +27,Cost of Delivered Items,Kosten van geleverde zaken
 DocType: Blog Post,Guest,Gast
@@ -736,7 +736,7 @@ DocType: Process Payroll,Send Email,E-mail verzenden
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +85,No Permission,Geen toestemming
 DocType: Company,Default Bank Account,Standaard bankrekening
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +43,"To filter based on Party, select Party Type first","Om te filteren op basis van Party, selecteer Party Typ eerst"
-apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +49,'Update Stock' can not be checked because items are not delivered via {0},"&#39;Bijwerken Stock&#39; kan niet worden gecontroleerd, omdat items niet worden geleverd via {0}"
+apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +49,'Update Stock' can not be checked because items are not delivered via {0},"'Bijwerken voorraad' kan niet worden gecontroleerd, omdat items niet worden geleverd via {0}"
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +626,Nos,Nrs
 DocType: Item,Items with higher weightage will be shown higher,Items met een hogere weightage hoger zal worden getoond
 DocType: Bank Reconciliation Detail,Bank Reconciliation Detail,Bank Aflettering Detail
@@ -2033,7 +2033,7 @@ DocType: Sales Partner,A third party distributor / dealer / commission agent / a
 DocType: Customer Group,Has Child Node,Heeft onderliggende node
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +296,{0} against Purchase Order {1},{0} tegen Inkooporder {1}
 DocType: SMS Settings,"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)","Voer statische url parameters hier in (bijv. afzender=ERPNext, username = ERPNext, wachtwoord = 1234 enz.)"
-apps/erpnext/erpnext/accounts/utils.py +39,{0} {1} not in any active Fiscal Year. For more details check {2}.,{0} {1} in geen actieve fiscale jaar. Voor meer informatie kijk {2}.
+apps/erpnext/erpnext/accounts/utils.py +39,{0} {1} not in any active Fiscal Year. For more details check {2}.,{0} {1} is niet in het actieve fiscale jaar. Voor meer informatie kijk {2}.
 apps/erpnext/erpnext/setup/page/setup_wizard/default_website.py +26,This is an example website auto-generated from ERPNext,"Dit is een voorbeeld website, automatisch gegenereerd door ERPNext"
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +37,Ageing Range 1,Vergrijzing Range 1
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +109,Photochemical machining,Fotochemische verspanen
@@ -3487,7 +3487,7 @@ DocType: Salary Slip Deduction,Default Amount,Standaard Bedrag
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +89,Warehouse not found in the system,Magazijn niet gevonden in het systeem
 DocType: Quality Inspection Reading,Quality Inspection Reading,Kwaliteitscontrole Meting
 DocType: Party Account,col_break1,col_break1
-apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,`Bevries Voorraden Ouder dan` moet beneden de %d dagen zijn.
+apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,'Bevries Voorraden Ouder dan' moet minder dan %d dagen zijn.
 ,Project wise Stock Tracking,Projectgebaseerde Aandelenhandel
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +176,Maintenance Schedule {0} exists against {0},Onderhoudsschema {0} bestaat tegen {0}
 DocType: Stock Entry Detail,Actual Qty (at source/target),Werkelijke Aantal (bij de bron / doel)
