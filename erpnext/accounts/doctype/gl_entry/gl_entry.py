@@ -129,7 +129,7 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 		from `tabGL Entry`
 		where against_voucher_type=%s and against_voucher=%s
 		and account = %s and ifnull(party_type, '')=%s and ifnull(party, '')=%s""",
-		(against_voucher_type, against_voucher, account, party_type, party))[0][0] or 0.0)
+		(against_voucher_type, against_voucher, account, cstr(party_type), cstr(party)))[0][0] or 0.0)
 
 	if against_voucher_type == 'Purchase Invoice':
 		bal = -bal
