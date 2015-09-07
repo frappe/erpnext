@@ -177,9 +177,9 @@ def install(country=None):
 		{'doctype': "Print Heading", 'print_heading': _("Debit Note")}
 	]
 
-	from erpnext.setup.page.setup_wizard.fixtures import industry_type
-	records += [{"doctype":"Industry Type", "industry": d} for d in industry_type.items]
-	# records += [{"doctype":"Operation", "operation": d} for d in operations.items]
+	from erpnext.setup.page.setup_wizard.fixtures.industry_type import get_industry_types
+	records += [{"doctype":"Industry Type", "industry": d} for d in get_industry_types()]
+	# records += [{"doctype":"Operation", "operation": d} for d in get_operations()]
 
 	from frappe.modules import scrub
 	for r in records:
