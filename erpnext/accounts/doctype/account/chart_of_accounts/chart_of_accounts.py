@@ -36,7 +36,8 @@ def create_charts(chart_name, company):
 						"is_group": is_group,
 						"root_type": root_type,
 						"report_type": report_type,
-						"account_type": child.get("account_type")
+						"account_type": child.get("account_type"),
+						"account_currency": frappe.db.get_value("Company", company, "default_currency")
 					})
 
 					if root_account:

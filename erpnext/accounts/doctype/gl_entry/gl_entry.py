@@ -116,7 +116,7 @@ class GLEntry(Document):
 		if self.party_type and self.party:
 			party_account_currency = frappe.db.get_value(self.party_type, self.party, "party_account_currency") \
 				or company_currency
-				
+
 			if party_account_currency != self.account_currency:
 				frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
 					.format(self.party_type, self.party, party_account_currency), InvalidAccountCurrency)					

@@ -146,6 +146,7 @@ class JournalEntry(AccountsController):
 
 		self.reference_totals = {}
 		self.reference_types = {}
+		self.reference_parties = {}
 
 		for d in self.get("accounts"):
 			if not d.reference_type:
@@ -153,8 +154,8 @@ class JournalEntry(AccountsController):
 			if not d.reference_name:
 				d.reference_type = None
 			if d.reference_type and d.reference_name and (d.reference_type in field_dict.keys()):
-				dr_or_cr = "credit" if d.reference_type in ("Sales Order", "Sales Invoice") \
-					else "debit"
+				dr_or_cr = "credit_in_account_currency" \
+					if d.reference_type in ("Sales Order", "Sales Invoice") else "debit_in_account_currency"
 
 				# check debit or credit type Sales / Purchase Order
 				if d.reference_type=="Sales Order" and flt(d.debit) > 0:
@@ -168,6 +169,8 @@ class JournalEntry(AccountsController):
 					self.reference_totals[d.reference_name] = 0.0
 				self.reference_totals[d.reference_name] += flt(d.get(dr_or_cr))
 				self.reference_types[d.reference_name] = d.reference_type
+				if d.party_type and d.party:
+					self.reference_parties[d.reference_name] = [d.party_type, d.party]
 
 				against_voucher = frappe.db.get_value(d.reference_type, d.reference_name,
 					[scrub(dt) for dt in field_dict.get(d.reference_type)])
@@ -193,23 +196,31 @@ class JournalEntry(AccountsController):
 		"""Validate totals, stopped and docstatus for orders"""
 		for reference_name, total in self.reference_totals.iteritems():
 			reference_type = self.reference_types[reference_name]
+			party_type, party = self.reference_parties.get(reference_name)
 
 			if reference_type in ("Sales Order", "Purchase Order"):
-				voucher_properties = frappe.db.get_value(reference_type, reference_name,
-					["docstatus", "per_billed", "status", "advance_paid", "base_grand_total"])
+				voucher_properties = frappe.db.get_value(reference_type, reference_name, 
+					["docstatus", "per_billed", "status", "advance_paid", 
+						"base_grand_total", "grand_total", "currency"], as_dict=1)
 
-				if voucher_properties[0] != 1:
+				if voucher_properties.docstatus != 1:
 					frappe.throw(_("{0} {1} is not submitted").format(reference_type, reference_name))
 
-				if flt(voucher_properties[1]) >= 100:
+				if flt(voucher_properties.per_billed) >= 100:
 					frappe.throw(_("{0} {1} is fully billed").format(reference_type, reference_name))
 
-				if cstr(voucher_properties[2]) == "Stopped":
+				if cstr(voucher_properties.status) == "Stopped":
 					frappe.throw(_("{0} {1} is stopped").format(reference_type, reference_name))
-
-				if flt(voucher_properties[4]) < (flt(voucher_properties[3]) + total):
+					
+				party_account_currency = frappe.db.get_value(party_type, party, "party_account_currency")
+				if party_account_currency == self.company_currency:
+					voucher_total = voucher_properties.base_grand_total
+				else:
+					voucher_total = voucher_properties.grand_total
+					
+				if flt(voucher_total) < (flt(voucher_properties.advance_paid) + total):
 					frappe.throw(_("Advance paid against {0} {1} cannot be greater \
-						than Grand Total {2}").format(reference_type, reference_name, voucher_properties[4]))
+						than Grand Total {2}").format(reference_type, reference_name, voucher_total))
 
 	def validate_invoices(self):
 		"""Validate totals and docstatus for invoices"""
@@ -218,14 +229,14 @@ class JournalEntry(AccountsController):
 
 			if reference_type in ("Sales Invoice", "Purchase Invoice"):
 				voucher_properties = frappe.db.get_value(reference_type, reference_name,
-					["docstatus", "outstanding_amount"])
+					["docstatus", "outstanding_amount"], as_dict=1)
 
-				if voucher_properties[0] != 1:
+				if voucher_properties.docstatus != 1:
 					frappe.throw(_("{0} {1} is not submitted").format(reference_type, reference_name))
 
-				if total and flt(voucher_properties[1]) < total:
-					frappe.throw(_("Payment against {0} {1} cannot be greater \
-						than Outstanding Amount {2}").format(reference_type, reference_name, voucher_properties[1]))
+				if total and flt(voucher_properties.outstanding_amount) < total:
+					frappe.throw(_("Payment against {0} {1} cannot be greater than Outstanding Amount {2}")
+						.format(reference_type, reference_name, voucher_properties.outstanding_amount))
 
 	def set_against_account(self):
 		accounts_debited, accounts_credited = [], []
@@ -239,7 +250,6 @@ class JournalEntry(AccountsController):
 
 	def validate_debit_and_credit(self):
 		self.total_debit, self.total_credit, self.difference = 0, 0, 0
-
 		for d in self.get("accounts"):
 			if d.debit and d.credit:
 				frappe.throw(_("You cannot credit and debit same account at the same time"))
@@ -262,12 +272,16 @@ class JournalEntry(AccountsController):
 			if d.account_currency!=self.company_currency and d.account_currency not in alternate_currency:
 				alternate_currency.append(d.account_currency)
 			
-		if alternate_currency:
-			if not self.exchange_rate:
-				frappe.throw(_("Exchange Rate is mandatory in multi-currency Journal Entry"))
-				
+		if alternate_currency:				
 			if len(alternate_currency) > 1:
 				frappe.throw(_("Only one alternate currency can be used in a single Journal Entry"))
+			
+			if not self.exchange_rate:
+				self.exchange_rate = get_exchange_rate(alternate_currency[0], self.company_currency)
+				
+			if not self.exchange_rate:
+				frappe.throw(_("Exchange Rate is mandatory in multi-currency Journal Entry"))
+			
 		else:
 			self.exchange_rate = 1.0
 			
@@ -479,7 +493,8 @@ def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
 	if account:
 		return {
 			"account": account,
-			"balance": get_balance_on(account)
+			"balance": get_balance_on(account),
+			"account_currency": frappe.db.get_value("Account", account, "account_currency")
 		}
 
 @frappe.whitelist()
@@ -487,11 +502,20 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 	"""Returns new Journal Entry document as dict for given Sales Invoice"""
 	from erpnext.accounts.utils import get_balance_on
 	si = frappe.get_doc("Sales Invoice", sales_invoice)
+	
+	# exchange rate
+	if si.company_currency == si.party_account_currency:
+		exchange_rate = 1
+	else:
+		exchange_rate = get_exchange_rate(si.party_account_currency, si.company_currency)
+	
 	jv = get_payment_entry(si)
 	jv.remark = 'Payment received against Sales Invoice {0}. {1}'.format(si.name, si.remarks)
-
+	jv.exchange_rate = exchange_rate
+	
 	# credit customer
 	jv.get("accounts")[0].account = si.debit_to
+	jv.get("accounts")[0].account_currency = si.party_account_currency
 	jv.get("accounts")[0].party_type = "Customer"
 	jv.get("accounts")[0].party = si.customer
 	jv.get("accounts")[0].balance = get_balance_on(si.debit_to)
@@ -501,7 +525,10 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 	jv.get("accounts")[0].reference_name = si.name
 
 	# debit bank
-	jv.get("accounts")[1].debit_in_account_currency = si.outstanding_amount
+	if jv.get("accounts")[1].account_currency == si.party_account_currency:
+		jv.get("accounts")[1].debit_in_account_currency = si.outstanding_amount
+	else:
+		jv.get("accounts")[1].debit_in_account_currency = si.outstanding_amount * exchange_rate
 
 	return jv.as_dict()
 
@@ -509,11 +536,19 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	"""Returns new Journal Entry document as dict for given Purchase Invoice"""
 	pi = frappe.get_doc("Purchase Invoice", purchase_invoice)
+	
+	if pi.company_currency == pi.party_account_currency:
+		exchange_rate = 1
+	else:
+		exchange_rate = get_exchange_rate(pi.party_account_currency, pi.company_currency)
+	
 	jv = get_payment_entry(pi)
 	jv.remark = 'Payment against Purchase Invoice {0}. {1}'.format(pi.name, pi.remarks)
-
+	jv.exchange_rate = exchange_rate
+	
 	# credit supplier
 	jv.get("accounts")[0].account = pi.credit_to
+	jv.get("accounts")[0].account_currency = pi.party_account_currency
 	jv.get("accounts")[0].party_type = "Supplier"
 	jv.get("accounts")[0].party = pi.supplier
 	jv.get("accounts")[0].balance = get_balance_on(pi.credit_to)
@@ -523,7 +558,10 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	jv.get("accounts")[0].reference_name = pi.name
 
 	# credit bank
-	jv.get("accounts")[1].credit_in_account_currency = pi.outstanding_amount
+	if jv.get("accounts")[1].account_currency == pi.party_account_currency:
+		jv.get("accounts")[1].credit_in_account_currency = pi.outstanding_amount
+	else:
+		jv.get("accounts")[1].credit_in_account_currency = pi.outstanding_amount * exchange_rate
 
 	return jv.as_dict()
 
@@ -618,6 +656,7 @@ def get_payment_entry(doc):
 	if bank_account:
 		d2.account = bank_account["account"]
 		d2.balance = bank_account["balance"]
+		d2.account_currency = bank_account["account_currency"]
 
 	return jv
 
