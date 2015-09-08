@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import flt, fmt_money, getdate, formatdate, cstr
+from frappe.utils import flt, fmt_money, getdate, formatdate
 from frappe import _
 
 from frappe.model.document import Document
@@ -124,12 +124,18 @@ def check_freezing_date(posting_date, adv_adj=False):
 				frappe.throw(_("You are not authorized to add or update entries before {0}").format(formatdate(acc_frozen_upto)))
 
 def update_outstanding_amt(account, party_type, party, against_voucher_type, against_voucher, on_cancel=False):
+	if party_type and party:
+		party_condition = " and ifnull(party_type, '')='{0}' and ifnull(party, '')='{1}'"\
+			.format(frappe.db.escape(party_type), frappe.db.escape(party))
+	else:
+		party_condition = ""
+		
 	# get final outstanding amt
 	bal = flt(frappe.db.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 		from `tabGL Entry`
 		where against_voucher_type=%s and against_voucher=%s
-		and account = %s and ifnull(party_type, '')=%s and ifnull(party, '')=%s""",
-		(against_voucher_type, against_voucher, account, party_type, party))[0][0] or 0.0)
+		and account = %s {0}""".format(party_condition),
+		(against_voucher_type, against_voucher, account))[0][0] or 0.0)
 
 	if against_voucher_type == 'Purchase Invoice':
 		bal = -bal
@@ -137,9 +143,8 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 		against_voucher_amount = flt(frappe.db.sql("""
 			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
 			from `tabGL Entry` where voucher_type = 'Journal Entry' and voucher_no = %s
-			and account = %s and ifnull(party_type, '')=%s and ifnull(party, '')=%s
-			and ifnull(against_voucher, '') = ''""",
-			(against_voucher, account, cstr(party_type), cstr(party)))[0][0])
+			and account = %s and ifnull(against_voucher, '') = '' {0}"""
+			.format(party_condition), (against_voucher, account))[0][0])
 
 		if not against_voucher_amount:
 			frappe.throw(_("Against Journal Entry {0} is already adjusted against some other voucher")
