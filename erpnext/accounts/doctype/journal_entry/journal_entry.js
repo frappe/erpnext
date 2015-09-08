@@ -92,7 +92,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			// journal entry
 			if(jvd.reference_type==="Journal Entry") {
 				frappe.model.validate_missing(jvd, "account");
-
 				return {
 					query: "erpnext.accounts.doctype.journal_entry.journal_entry.get_against_jv",
 					filters: {
@@ -102,22 +101,31 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				};
 			}
 
-			// against party
-
-			frappe.model.validate_missing(jvd, "party_type");
-			frappe.model.validate_missing(jvd, "party");
-
 			var out = {
 				filters: [
-					[jvd.reference_type, jvd.reference_type.indexOf("Sales")===0 ? "customer" : "supplier", "=", jvd.party],
-					[jvd.reference_type, "docstatus", "=", 1],
+					[jvd.reference_type, "docstatus", "=", 1]
 				]
 			};
 
 			if(in_list(["Sales Invoice", "Purchase Invoice"], jvd.reference_type)) {
 				out.filters.push([jvd.reference_type, "outstanding_amount", "!=", 0]);
+				
+				// account filter
+				frappe.model.validate_missing(jvd, "account");
+				
+				party_account_field = jvd.reference_type==="Sales Invoice" ? "debit_to": "credit_to";
+				out.filters.push([jvd.reference_type, party_account_field, "=", jvd.account]);
 			} else {
+				// party_type and party mandatory
+				frappe.model.validate_missing(jvd, "party_type");
+				frappe.model.validate_missing(jvd, "party");
+				
 				out.filters.push([jvd.reference_type, "per_billed", "<", 100]);
+			}
+			
+			if(jvd.party_type && jvd.party) {
+				out.filters.push([jvd.reference_type, 
+					(jvd.reference_type.indexOf("Sales")===0 ? "customer" : "supplier"), "=", jvd.party]);
 			}
 
 			return out;

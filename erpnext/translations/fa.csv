@@ -1200,7 +1200,7 @@ apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +66,Buying Amo
 DocType: Sales Invoice,Shipping Address Name,حمل و نقل آدرس
 apps/erpnext/erpnext/accounts/doctype/account/account.js +50,Chart of Accounts,ساختار حسابها
 DocType: Material Request,Terms and Conditions Content,شرایط و ضوابط محتوا
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +498,cannot be greater than 100,نمی تواند بیشتر از 100
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +498,cannot be greater than 100,نمی تواند بیشتر از ۱۰۰ باشد
 apps/erpnext/erpnext/stock/doctype/item/item.py +357,Item {0} is not a stock Item,مورد {0} است مورد سهام نمی
 DocType: Maintenance Visit,Unscheduled,برنامه ریزی
 DocType: Employee,Owned,متعلق به
@@ -2183,7 +2183,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +111,Electro
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.js +14,This is a root customer group and cannot be edited.,این یک گروه مشتری ریشه است و نمی تواند ویرایش شود.
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +39,Please setup your chart of accounts before you start Accounting Entries,لطفا راه اندازی نمودار خود را از حساب شما قبل از شروع مطالب حسابداری
 DocType: Purchase Invoice,Ignore Pricing Rule,نادیده گرفتن قانون قیمت گذاری
-sites/assets/js/list.min.js +24,Cancelled,لغو
+sites/assets/js/list.min.js +24,Cancelled,لغو شد
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +91,From Date in Salary Structure cannot be lesser than Employee Joining Date.,از تاریخ در ساختار حقوق و دستمزد نمی تواند کمتر از کارمند پیوستن به تاریخ.
 DocType: Employee Education,Graduate,فارغ التحصیل
 DocType: Leave Block List,Block Days,بلوک روز

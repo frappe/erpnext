@@ -109,7 +109,7 @@ DocType: Time Log,Time Log,Günlük
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +530,Accountant,Muhasebeci
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +530,Accountant,Muhasebeci
 DocType: Cost Center,Stock User,Hisse Senedi Kullanıcı
-DocType: Company,Phone No,Telefon Yok
+DocType: Company,Phone No,Telefon No
 DocType: Time Log,"Log of Activities performed by users against Tasks that can be used for tracking time, billing.","Etkinlikler Günlüğü, fatura zamanlı izleme için kullanılabilir Görevler karşı kullanıcılar tarafından seslendirdi."
 apps/erpnext/erpnext/controllers/recurring_document.py +127,New {0}: #{1},Yeni {0}: # {1}
 ,Sales Partners Commission,Satış Ortakları Komisyonu
@@ -514,7 +514,7 @@ apps/erpnext/erpnext/stock/doctype/manage_variants/manage_variants.py +61,Enter 
 DocType: Accounts Settings,Check Supplier Invoice Number Uniqueness,Kontrol Tedarikçi Fatura Numarası Teklik
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +30,Thermoforming,Termoform
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +65,Slitting,Dilme
-apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +57,'To Case No.' cannot be less than 'From Case No.','Ambalaj No' ya Kadar 'Ambalaj Nodan İtibaren'den az olamaz
+apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +57,'To Case No.' cannot be less than 'From Case No.','Son Olay No' 'İlk Olay No'  dan küçük olamaz.
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +104,Non Profit,Kar Yok
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order_list.js +7,Not Started,Başlatan Değil
 DocType: Lead,Channel Partner,Kanal Ortağı
@@ -923,7 +923,7 @@ apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +85,No Permission,İzin
 DocType: Company,Default Bank Account,Varsayılan Banka Hesabı
 DocType: Company,Default Bank Account,Varsayılan Banka Hesabı
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +43,"To filter based on Party, select Party Type first",Parti dayalı filtrelemek için seçin Parti ilk yazınız
-apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +49,'Update Stock' can not be checked because items are not delivered via {0},"Öğeleri ile teslim edilmez, çünkü &#39;Güncelle Stok&#39; kontrol edilemez {0}"
+apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +49,'Update Stock' can not be checked because items are not delivered via {0}, 'Stok Güncelle' seçilemez çünkü ürünler {0} ile teslim edilmemiş.
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +626,Nos,Numaralar
 DocType: Item,Items with higher weightage will be shown higher,Yüksek weightage Öğeler yüksek gösterilir
 DocType: Bank Reconciliation Detail,Bank Reconciliation Detail,Banka Uzlaşma Detay
@@ -2179,7 +2179,7 @@ apps/erpnext/erpnext/controllers/stock_controller.py +167,Expense or Difference 
 apps/erpnext/erpnext/controllers/accounts_controller.py +299,"Cannot overbill for Item {0} in row {1} more than {2}. To allow overbilling, please set in Stock Settings","Arka arkaya Ürün {0} için Overbill olamaz {1} daha {2}. Overbilling, Stok Ayarları ayarlamak lütfen izin vermek için"
 DocType: Employee,Bank Name,Banka Adı
 DocType: Employee,Bank Name,Banka Adı
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +38,-Above,Metin -her şeyden önce-
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +38,-Above,-Üstte
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +135,User {0} is disabled,Kullanıcı {0} devre dışı
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +135,User {0} is disabled,Kullanıcı {0} devre dışı
 DocType: Leave Application,Total Leave Days,Toplam bırak Günler
@@ -4267,7 +4267,7 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py 
 DocType: Quality Inspection Reading,Quality Inspection Reading,Kalite Kontrol Okuma
 DocType: Quality Inspection Reading,Quality Inspection Reading,Kalite Kontrol Okuma
 DocType: Party Account,col_break1,col_break1
-apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,'Şundan eski stokları dondur' %d günden daha küçük olmalıdır
+apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,`Freeze Stocks Older Than` %d günden daha kısa olmalıdır.
 ,Project wise Stock Tracking,Proje bilgisi Stok Takibi
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +176,Maintenance Schedule {0} exists against {0},Bakım Programı {0} {0} karşılığında mevcuttur
 DocType: Stock Entry Detail,Actual Qty (at source/target),Fiili Miktar (kaynak / hedef)
@@ -4422,7 +4422,7 @@ DocType: Delivery Note,To Warehouse,Depoya
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +45,Account {0} has been entered more than once for fiscal year {1},Hesap {0} bir mali yıl içerisinde birden fazla girildi {1}
 ,Average Commission Rate,Ortalama Komisyon Oranı
 ,Average Commission Rate,Ortalama Komisyon Oranı
-apps/erpnext/erpnext/stock/doctype/item/item.py +165,'Has Serial No' can not be 'Yes' for non-stock item,'Seri No' Stok malzemesi olmayan Malzeme için 'Evet' olamaz
+apps/erpnext/erpnext/stock/doctype/item/item.py +165,'Has Serial No' can not be 'Yes' for non-stock item,Stokta olmayan ürünün 'Seri Nosu Var' 'Evet' olamaz
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +34,Attendance can not be marked for future dates,İlerideki tarihler için katılım işaretlenemez
 DocType: Pricing Rule,Pricing Rule Help,Fiyatlandırma Kuralı Yardım
 DocType: Purchase Taxes and Charges,Account Head,Hesap Başlığı
@@ -4611,7 +4611,7 @@ DocType: DocPerm,Level,Seviye
 DocType: Purchase Taxes and Charges,On Net Total,Net toplam
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +161,Target warehouse in row {0} must be same as Production Order,Satır {0} daki hedef depo Üretim Emrindekiyle aynı olmalıdır
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.py +61,No permission to use Payment Tool,Hiçbir izin Ödeme Aracı kullanmak için
-apps/erpnext/erpnext/controllers/recurring_document.py +193,'Notification Email Addresses' not specified for recurring %s,% S yinelenen için belirtilen değil 'Bildirim E-posta Adresleri'
+apps/erpnext/erpnext/controllers/recurring_document.py +193,'Notification Email Addresses' not specified for recurring %s,Yinelenen %s için 'Bildirim E-posta Adresleri' belirtilmemmiş.
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +85,Milling,Değirmencilik
 DocType: Company,Round Off Account,Hesap Off Yuvarlak
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +59,Nibbling,Nibbling

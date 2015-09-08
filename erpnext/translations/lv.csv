@@ -1738,7 +1738,7 @@ DocType: Global Defaults,Default Company,Default Company
 apps/erpnext/erpnext/controllers/stock_controller.py +167,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,"Izdevumu vai Atšķirība konts ir obligāta postenī {0}, kā tā ietekmē vispārējo akciju vērtības"
 apps/erpnext/erpnext/controllers/accounts_controller.py +299,"Cannot overbill for Item {0} in row {1} more than {2}. To allow overbilling, please set in Stock Settings","Nevar overbill postenī {0} rindā {1} vairāk nekā {2}. Lai atļautu pārāk augstu maksu, lūdzu, noteikts akciju Settings"
 DocType: Employee,Bank Name,Bankas nosaukums
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +38,-Above,-Above
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +38,-Above,-Virs
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +135,User {0} is disabled,Lietotāja {0} ir invalīds
 DocType: Leave Application,Total Leave Days,Kopā atvaļinājuma dienām
 DocType: Email Digest,Note: Email will not be sent to disabled users,Piezīme: e-pasts netiks nosūtīts invalīdiem
@@ -2695,7 +2695,7 @@ DocType: Hub Settings,Publish Availability,Publicēt Availability
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +105,Date of Birth cannot be greater than today.,Dzimšanas datums nevar būt lielāks nekā šodien.
 ,Stock Ageing,Stock Novecošana
 DocType: Purchase Receipt,Automatically updated from BOM table,Automātiski atjaunināt no BOM tabulas
-apps/erpnext/erpnext/controllers/accounts_controller.py +184,{0} '{1}' is disabled,{0} '{1}' ir invalīds
+apps/erpnext/erpnext/controllers/accounts_controller.py +184,{0} '{1}' is disabled,{0} '{1}' ir neaktīvs
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity_list.js +13,Set as Open,Uzstādīt kā Atvērt
 DocType: Notification Control,Send automatic emails to Contacts on Submitting transactions.,Nosūtīt automātisko e-pastus kontaktiem Iesniedzot darījumiem.
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +270,"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
@@ -3412,7 +3412,7 @@ DocType: Salary Slip Deduction,Default Amount,Default Summa
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +89,Warehouse not found in the system,Noliktava nav atrasts sistēmā
 DocType: Quality Inspection Reading,Quality Inspection Reading,Kvalitātes pārbaudes Reading
 DocType: Party Account,col_break1,col_break1
-apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,`Freeze Krājumi Older Than` jābūt mazākam nekā% d dienas.
+apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,`IesaldētKrājumus vecākus par` jābūt mazākam par % dienām.
 ,Project wise Stock Tracking,Projekts gudrs Stock izsekošana
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +176,Maintenance Schedule {0} exists against {0},Uzturēšana Kalendārs {0} nepastāv pret {0}
 DocType: Stock Entry Detail,Actual Qty (at source/target),Faktiskā Daudz (pie avota / mērķa)

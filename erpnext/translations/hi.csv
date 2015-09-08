@@ -1,4 +1,4 @@
-DocType: Employee,Salary Mode,वेतन मोड
+DocType: Employee,Salary Mode,वेतन साधन
 DocType: Cost Center,"Select Monthly Distribution, if you want to track based on seasonality.","आप मौसम के आधार पर नज़र रखने के लिए चाहते हैं, तो मासिक वितरण चुनें।"
 DocType: Employee,Divorced,तलाकशुदा
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +54,Warning: Same item has been entered multiple times.,चेतावनी: एक ही मद कई बार दर्ज किया गया है।
@@ -55,7 +55,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js 
 apps/erpnext/erpnext/utilities/transaction_base.py +104,Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ,पंक्ति # {0}: दर के रूप में ही किया जाना चाहिए {1}: {2} ({3} / {4})
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +190,New Leave Application,नई छुट्टी के लिए अर्जी
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +134,Bank Draft,बैंक ड्राफ्ट
-DocType: Features Setup,1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. इस विकल्प का उपयोग ग्राहक बुद्धिमान आइटम कोड को बनाए रखने और अपने कोड के आधार पर बनाने के लिए उन्हें खोजा
+DocType: Features Setup,1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. इस विकल्प का उपयोग ग्राहक वार आइटम कोड को बनाए रखने और कोड के आधार पर विकल्प खोज के लिए करे
 DocType: Mode of Payment Account,Mode of Payment Account,भुगतान खाता का तरीका
 apps/erpnext/erpnext/stock/doctype/item/item.js +30,Show Variants,दिखाएँ वेरिएंट
 DocType: Sales Invoice Item,Quantity,मात्रा
@@ -893,7 +893,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +362,Attach Your Pi
 DocType: Journal Entry,Total Amount in Words,शब्दों में कुल राशि
 DocType: Workflow State,Stop,रोक
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +7,There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,कोई त्रुटि हुई थी . एक संभावित कारण यह है कि आप प्रपत्र को बचाया नहीं किया है कि हो सकता है. यदि समस्या बनी रहती support@erpnext.com से संपर्क करें.
-DocType: Purchase Order,% of materials billed against this Purchase Order.,% सामग्री को इस खरीद आदेश के साथ बिल किया गया है
+DocType: Purchase Order,% of materials billed against this Purchase Order.,% सामग्री को इस खरीद आदेश के सहारे बिल किया गया है
 apps/erpnext/erpnext/controllers/selling_controller.py +154,Order Type must be one of {0},आदेश प्रकार का होना चाहिए {0}
 DocType: Lead,Next Contact Date,अगले संपर्क तिथि
 apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py +35,Opening Qty,खुलने मात्रा
@@ -1722,7 +1722,7 @@ DocType: Salary Slip,Deduction,कटौती
 DocType: Address Template,Address Template,पता खाका
 apps/erpnext/erpnext/selling/page/sales_browser/sales_browser.js +125,Please enter Employee Id of this sales person,इस व्यक्ति की बिक्री के कर्मचारी आईडी दर्ज करें
 DocType: Territory,Classification of Customers by region,क्षेत्र द्वारा ग्राहकों का वर्गीकरण
-DocType: Project,% Tasks Completed,% कार्य पूरा
+DocType: Project,% Tasks Completed,% कार्य संपन्न
 DocType: Project,Gross Margin,सकल मुनाफा
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +139,Please enter Production Item first,पहली उत्पादन मद दर्ज करें
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +76,disabled user,विकलांग उपयोगकर्ता
@@ -2225,7 +2225,7 @@ apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +29,Employee {0} was on
 DocType: Sales Partner,Targets,लक्ष्य
 DocType: Price List,Price List Master,मूल्य सूची मास्टर
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,आप सेट और लक्ष्यों की निगरानी कर सकते हैं ताकि सभी बिक्री लेनदेन कई ** बिक्री व्यक्तियों ** खिलाफ टैग किया जा सकता है।
-,S.O. No.,S.O. नहीं.
+,S.O. No.,बिक्री आदेश संख्या
 DocType: Production Order Operation,Make Time Log,समय लॉग बनाओ
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +156,Please create Customer from Lead {0},लीड से ग्राहक बनाने कृपया {0}
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +44,Computers,कंप्यूटर्स
@@ -2433,7 +2433,7 @@ DocType: Expense Claim,"A user with ""Expense Approver"" role","""व्यय �
 DocType: Pricing Rule,Purchase Manager,खरीद प्रबंधक
 DocType: Payment Tool,Payment Tool,भुगतान टूल
 DocType: Target Detail,Target Detail,लक्ष्य विस्तार
-DocType: Sales Order,% of materials billed against this Sales Order,% सामग्री को इस बिक्री आदेश के साथ बिल किया गया है
+DocType: Sales Order,% of materials billed against this Sales Order,% सामग्री को इस बिक्री आदेश के सहारे​ बिल किया गया है
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +50,Period Closing Entry,अवधि समापन एंट्री
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +62,Cost Center with existing transactions can not be converted to group,मौजूदा लेनदेन के साथ लागत केंद्र समूह परिवर्तित नहीं किया जा सकता है
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +90,Depreciation,ह्रास
@@ -2509,7 +2509,7 @@ apps/erpnext/erpnext/accounts/utils.py +311,{0} budget for Account {1} against C
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +236,"Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry","यह स्टॉक सुलह एक खोलने एंट्री के बाद से अंतर खाते, एक एसेट / दायित्व प्रकार खाता होना चाहिए"
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +123,Purchase Order number required for Item {0},क्रय आदेश संख्या मद के लिए आवश्यक {0}
 DocType: Leave Allocation,Carry Forwarded Leaves,कैर्री अग्रेषित पत्तियां
-apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +18,'From Date' must be after 'To Date','तिथि से' 'तिथि तक' के बाद होना चाहिए
+apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +18,'From Date' must be after 'To Date','तिथि तक' 'तिथि से'  के बाद होनी चाहिए
 ,Stock Projected Qty,शेयर मात्रा अनुमानित
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +132,Customer {0} does not belong to project {1},ग्राहक {0} परियोजना से संबंधित नहीं है {1}
 DocType: Warranty Claim,From Company,कंपनी से
@@ -2858,7 +2858,7 @@ DocType: Journal Entry,Print Heading,शीर्षक प्रिंट
 DocType: Quotation,Maintenance Manager,रखरखाव प्रबंधक
 DocType: Workflow State,Search,खोजें
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +54,Total cannot be zero,कुल शून्य नहीं हो सकते
-apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/customers_not_buying_since_long_time.py +16,'Days Since Last Order' must be greater than or equal to zero,' पिछले आदेश के बाद दिन ' से अधिक है या शून्य के बराबर होना चाहिए
+apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/customers_not_buying_since_long_time.py +16,'Days Since Last Order' must be greater than or equal to zero,'आखिरी बिक्री आदेश को कितने दिन हुए' शून्य या उससे अधिक होना चाहिए 
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +141,Brazing,टांकना
 DocType: C-Form,Amended From,से संशोधित
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +623,Raw Material,कच्चे माल
@@ -3274,7 +3274,7 @@ DocType: Purchase Invoice,Exchange Rate,विनिमय दर
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +410,Sales Order {0} is not submitted,बिक्री आदेश {0} प्रस्तुत नहीं किया गया है
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +74,Warehouse {0}: Parent account {1} does not bolong to the company {2},वेयरहाउस {0}: माता पिता के खाते {1} कंपनी को Bolong नहीं है {2}
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +123,Spindle finishing,तकला परिष्करण
-DocType: Material Request,% of materials ordered against this Material Request,% सामग्री को​ इस सामग्री याचिका के साथ​ आदिष्ट किया गया है
+DocType: Material Request,% of materials ordered against this Material Request,% सामग्री को​ इस सामग्री निवेदन के सहारे​​ प्रबन्ध किया गया है
 DocType: BOM,Last Purchase Rate,पिछले खरीद दर
 DocType: Account,Asset,संपत्ति
 DocType: Project Task,Task ID,टास्क आईडी
@@ -3286,7 +3286,7 @@ apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +104,Warehouse {0} doe
 apps/erpnext/erpnext/hub_node/page/hub/register_in_hub.html +2,Register For ERPNext Hub,ERPNext हब के लिए रजिस्टर
 DocType: Monthly Distribution,Monthly Distribution Percentages,मासिक वितरण प्रतिशत
 apps/erpnext/erpnext/stock/doctype/batch/batch.py +16,The selected item cannot have Batch,चयनित आइटम बैच नहीं हो सकता
-DocType: Delivery Note,% of materials delivered against this Delivery Note,% सामग्री को​ इस डिलिवरी नोट के साथ​ प्रसूत किया गया है
+DocType: Delivery Note,% of materials delivered against this Delivery Note,% सामग्री को​ इस डिलिवरी नोट के सहारे​​ सुपुर्द किया गया है
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +150,Stapling,स्टैपल
 DocType: Customer,Customer Details,ग्राहक विवरण
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +104,Shaping,आकार देने
@@ -3713,7 +3713,7 @@ apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +38,Search Sub Assemb
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +324,Item Code required at Row No {0},रो नहीं पर आवश्यक मद कोड {0}
 DocType: Sales Partner,Partner Type,साथी के प्रकार
 DocType: Purchase Taxes and Charges,Actual,वास्तविक
-DocType: Purchase Order,% of materials received against this Purchase Order,% सामग्री को इस खरीद आदेश के साथ स्वीकार किया गया है
+DocType: Purchase Order,% of materials received against this Purchase Order,% सामग्री को इस खरीद आदेश के सहारे​ प्राप्त किया गया है
 DocType: Authorization Rule,Customerwise Discount,Customerwise डिस्काउंट
 DocType: Purchase Invoice,Against Expense Account,व्यय खाते के खिलाफ
 DocType: Production Order,Production Order,उत्पादन का आदेश
@@ -3892,7 +3892,7 @@ DocType: Purchase Invoice,Net Total (Company Currency),नेट कुल (क�
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +81,Row {0}: Party Type and Party is only applicable against Receivable / Payable account,पंक्ति {0}: पार्टी के प्रकार और पार्टी प्राप्य / देय खाते के विरुद्ध ही लागू है
 DocType: Notification Control,Purchase Receipt Message,खरीद रसीद संदेश
 DocType: Production Order,Actual Start Date,वास्तविक प्रारंभ दिनांक
-DocType: Sales Order,% of materials delivered against this Sales Order,% सामग्री को​ इस बिक्री आदेश के साथ​ प्रसूत किया गया है
+DocType: Sales Order,% of materials delivered against this Sales Order,% सामग्री को​ इस बिक्री आदेश के सहारे​ सुपुर्द किया गया है
 apps/erpnext/erpnext/config/stock.py +18,Record item movement.,आइटम आंदोलन रिकार्ड.
 DocType: Newsletter List Subscriber,Newsletter List Subscriber,न्यूज़लेटर सूची सब्सक्राइबर
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +163,Morticing,Morticing
