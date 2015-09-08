@@ -587,11 +587,18 @@ def get_payment_entry_from_sales_order(sales_order):
 
 	jv = get_payment_entry(so)
 	jv.remark = 'Advance payment received against Sales Order {0}.'.format(so.name)
-	
+
 	party_account = get_party_account(so.company, so.customer, "Customer")
 	party_account_currency = frappe.db.get_value("Account", party_account, "account_currency")
 	company_currency = get_company_currency(so.company)
 	
+	if so.company_currency == party_account_currency:
+		exchange_rate = 1
+	else:
+		exchange_rate = get_exchange_rate(party_account_currency, so.company_currency)
+		
+	jv.exchange_rate = exchange_rate
+		
 	if party_account_currency == company_currency:
 		amount = flt(so.base_grand_total) - flt(so.advance_paid)
 	else:
@@ -599,6 +606,7 @@ def get_payment_entry_from_sales_order(sales_order):
 
 	# credit customer
 	jv.get("accounts")[0].account = party_account
+	jv.get("accounts")[0].account_currency = party_account_currency
 	jv.get("accounts")[0].party_type = "Customer"
 	jv.get("accounts")[0].party = so.customer
 	jv.get("accounts")[0].balance = get_balance_on(party_account)
@@ -609,7 +617,10 @@ def get_payment_entry_from_sales_order(sales_order):
 	jv.get("accounts")[0].is_advance = "Yes"
 
 	# debit bank
-	jv.get("accounts")[1].debit_in_account_currency = amount
+	if jv.get("accounts")[1].account_currency == party_account_currency:
+		jv.get("accounts")[1].debit_in_account_currency = amount
+	else:
+		jv.get("accounts")[1].debit_in_account_currency = amount * exchange_rate
 
 	return jv.as_dict()
 
@@ -630,6 +641,13 @@ def get_payment_entry_from_purchase_order(purchase_order):
 	party_account_currency = frappe.db.get_value("Account", party_account, "account_currency")
 	company_currency = get_company_currency(po.company)
 	
+	if po.company_currency == party_account_currency:
+		exchange_rate = 1
+	else:
+		exchange_rate = get_exchange_rate(party_account_currency, po.company_currency)
+		
+	jv.exchange_rate = exchange_rate
+	
 	if party_account_currency == company_currency:
 		amount = flt(po.base_grand_total) - flt(po.advance_paid)
 	else:
@@ -647,7 +665,10 @@ def get_payment_entry_from_purchase_order(purchase_order):
 	jv.get("accounts")[0].is_advance = "Yes"
 
 	# debit bank
-	jv.get("accounts")[1].credit_in_account_currency = amount
+	if jv.get("accounts")[1].account_currency == party_account_currency:
+		jv.get("accounts")[1].credit_in_account_currency = amount
+	else:
+		jv.get("accounts")[1].credit_in_account_currency = amount * exchange_rate
 
 	return jv.as_dict()
 
