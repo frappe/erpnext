@@ -86,7 +86,7 @@ class Project(Document):
 			completed = frappe.db.sql("""select count(*) from tabTask where
 				project=%s and status in ('Closed', 'Cancelled')""", self.name)[0][0]
 
-			self.percent_complete = flt(completed) / total * 100
+			self.percent_complete = flt(flt(completed) / total * 100, 2)
 
 	def update_costing(self):
 		from_time_log = frappe.db.sql("""select
