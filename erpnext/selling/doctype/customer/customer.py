@@ -11,6 +11,7 @@ from frappe.utils import flt
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.utilities.address_and_contact import load_address_and_contact
 from erpnext.accounts.party import validate_accounting_currency, validate_party_account
+from frappe.desk.reportview import build_match_conditions
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -149,11 +150,16 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters):
 	else:
 		fields = ["name", "customer_name", "customer_group", "territory"]
 
+	match_conditions = build_match_conditions("Customer")
+	match_conditions = "and {}".format(match_conditions) if match_conditions else ""
+
 	return frappe.db.sql("""select %s from `tabCustomer` where docstatus < 2
-		and (%s like %s or customer_name like %s) order by
+		and (%s like %s or customer_name like %s)
+		{match_conditions}
+		order by
 		case when name like %s then 0 else 1 end,
 		case when customer_name like %s then 0 else 1 end,
-		name, customer_name limit %s, %s""" %
+		name, customer_name limit %s, %s""".format(match_conditions=match_conditions) %
 		(", ".join(fields), searchfield, "%s", "%s", "%s", "%s", "%s", "%s"),
 		("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))
 
