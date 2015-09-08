@@ -17,6 +17,8 @@ frappe.ui.form.on("Time Log", "refresh", function(frm) {
 	if (frm.doc.__islocal && !frm.doc.user) {
 		frm.set_value("user", user);
 	}
+
+	frm.toggle_reqd("activity_type", !frm.doc.for_manufacturing);
 });
 
 
