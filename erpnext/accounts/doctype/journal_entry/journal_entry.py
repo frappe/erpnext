@@ -276,12 +276,10 @@ class JournalEntry(AccountsController):
 			if len(alternate_currency) > 1:
 				frappe.throw(_("Only one alternate currency can be used in a single Journal Entry"))
 			
-			if not self.exchange_rate:
-				self.exchange_rate = get_exchange_rate(alternate_currency[0], self.company_currency)
-				
+			self.set_exchange_rate()
+			
 			if not self.exchange_rate:
 				frappe.throw(_("Exchange Rate is mandatory in multi-currency Journal Entry"))
-			
 		else:
 			self.exchange_rate = 1.0
 			
@@ -290,7 +288,18 @@ class JournalEntry(AccountsController):
 			
 			d.debit = flt(flt(d.debit_in_account_currency)*exchange_rate, d.precision("debit"))
 			d.credit = flt(flt(d.credit_in_account_currency)*exchange_rate, d.precision("credit"))
-		
+			
+	def set_exchange_rate(self):
+		for d in self.get("accounts"):
+			if d.account_currency != self.company_currency:
+				account_type = frappe.db.get_value("Account", d.account, "account_type")
+				if account_type == "Bank" and flt(d.credit_in_account_currency) > 0:
+					self.exchange_rate = get_average_exchange_rate(d.account)
+					break
+				if not self.exchange_rate:
+					self.exchange_rate = get_exchange_rate(d.account_currency, self.company_currency)
+					
+					
 
 	def create_remarks(self):
 		r = []
@@ -723,7 +732,7 @@ def get_party_account_and_balance(company, party_type, party):
 	}
 
 @frappe.whitelist()
-def get_account_balance_and_party_type(account, date, company):
+def get_account_balance_and_party_type(account, date, company, credited=False):
 	"""Returns dict of account balance and party type to be set in Journal Entry on selection of account."""
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
@@ -740,11 +749,24 @@ def get_account_balance_and_party_type(account, date, company):
 		
 	exchange_rate = None
 	if account_details.account_currency != company_currency:
-		exchange_rate = get_exchange_rate(account_details.account_currency, company_currency)
-		
+		if account_details.account_type == "Bank" and credited:
+			exchange_rate = get_average_exchange_rate(account)
+		else:
+			exchange_rate = get_exchange_rate(account_details.account_currency, company_currency)
+
 	grid_values = {
 		"balance": get_balance_on(account, date),
 		"party_type": party_type,
 		"account_currency": account_details.account_currency or company_currency,
 	}
 	return grid_values, exchange_rate
+	
+def get_average_exchange_rate(account):
+	exchange_rate = 0
+	bank_balance_in_account_currency = get_balance_on(account)
+	if bank_balance_in_account_currency:
+		bank_balance_in_company_currency = get_balance_on(account, in_account_currency=False)
+		exchange_rate = bank_balance_in_company_currency / bank_balance_in_account_currency
+		
+	return exchange_rate
+	

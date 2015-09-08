@@ -316,7 +316,8 @@ frappe.ui.form.on("Journal Entry Account", {
 				args: {
 					account: d.account, 
 					date: frm.doc.posting_date,
-					company: frm.doc.company
+					company: frm.doc.company,
+					credited: flt(d.credit_in_account_currency) > 0 ? true : false
 				},
 				callback: function(r) {
 					if(r.message) {
