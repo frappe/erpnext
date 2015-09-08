@@ -37,6 +37,7 @@ class Warehouse(Document):
 
 	def on_update(self):
 		self.create_account_head()
+		self.update_nsm_model()
 
 	def create_account_head(self):
 		if cint(frappe.defaults.get_global_default("auto_accounting_for_stock")):
@@ -93,7 +94,7 @@ class Warehouse(Document):
 		if frappe.db.sql("""select name from `tabStock Ledger Entry`
 				where warehouse = %s""", self.name):
 			throw(_("Warehouse can not be deleted as stock ledger entry exists for this warehouse."))
-
+		self.update_nsm_model()
 	def before_rename(self, olddn, newdn, merge=False):
 		# Add company abbr if not provided
 		from erpnext.setup.doctype.company.company import get_name_with_abbr
