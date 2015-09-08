@@ -385,7 +385,7 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +57,"If multi
 ,Purchase Register,Pembelian Register
 DocType: Landed Cost Item,Applicable Charges,Biaya yang berlaku
 DocType: Workstation,Consumable Cost,Biaya Consumable
-apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +153,{0} ({1}) must have role 'Leave Approver',{0} ({1}) harus memiliki peran 'Pemberi Ijin Cuti'
+apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +153,{0} ({1}) must have role 'Leave Approver',{0} ({1}) harus memiliki akses sebagai 'Pemberi Izin Cuti'
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +39,Medical,Medis
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +124,Reason for losing,Alasan untuk kehilangan
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +35,Tube beading,Tabung manik-manik
@@ -737,7 +737,7 @@ DocType: Process Payroll,Send Email,Kirim Email
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +85,No Permission,Tidak ada Izin
 DocType: Company,Default Bank Account,Standar Rekening Bank
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +43,"To filter based on Party, select Party Type first","Untuk menyaring berdasarkan Party, pilih Partai Ketik pertama"
-apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +49,'Update Stock' can not be checked because items are not delivered via {0},&#39;Update Stock&#39; tidak dapat diperiksa karena item tidak disampaikan melalui {0}
+apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +49,'Update Stock' can not be checked because items are not delivered via {0},'Update Stock' tidak dapat diperiksa karena item tidak dikirim melalui {0}
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +626,Nos,Nos
 DocType: Item,Items with higher weightage will be shown higher,Item dengan weightage lebih tinggi akan ditampilkan lebih tinggi
 DocType: Bank Reconciliation Detail,Bank Reconciliation Detail,Rincian Rekonsiliasi Bank
@@ -1654,7 +1654,7 @@ apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +137,N
 DocType: Communication,Date,Tanggal
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +61,Repeat Customer Revenue,Ulangi Pendapatan Pelanggan
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +651,Sit tight while your system is being setup. This may take a few moments.,Duduk diam sementara sistem anda sedang setup. Ini mungkin memerlukan beberapa saat.
-apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +46,{0} ({1}) must have role 'Expense Approver',{0} ({1}) harus memiliki peran 'Penerima Pengeluaran'
+apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +46,{0} ({1}) must have role 'Expense Approver',{0} ({1}) harus memiliki akses sebagai 'Pemberi Izin Pengeluaran'
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +626,Pair,Pasangkan
 DocType: Bank Reconciliation Detail,Against Account,Terhadap Akun
 DocType: Maintenance Schedule Detail,Actual Date,Tanggal Aktual
@@ -2510,7 +2510,7 @@ apps/erpnext/erpnext/accounts/utils.py +311,{0} budget for Account {1} against C
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +236,"Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry","Perbedaan Akun harus rekening Jenis Aset / Kewajiban, karena ini Bursa Rekonsiliasi adalah Masuk Pembukaan"
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +123,Purchase Order number required for Item {0},Nomor Purchase Order yang diperlukan untuk Item {0}
 DocType: Leave Allocation,Carry Forwarded Leaves,Carry Leaves Diteruskan
-apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +18,'From Date' must be after 'To Date','Tanggal Mulai' harus setelah 'Untuk Tanggal'
+apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +18,'From Date' must be after 'To Date','Tanggal Mulai' harus sebelum 'Tanggal Akhir'
 ,Stock Projected Qty,Stock Proyeksi Jumlah
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +132,Customer {0} does not belong to project {1},Pelanggan {0} bukan milik proyek {1}
 DocType: Warranty Claim,From Company,Dari Perusahaan

@@ -1894,7 +1894,7 @@ DocType: Company,For Reference Only.,Només de referència.
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +30,Invalid {0}: {1},No vàlida {0}: {1}
 DocType: Sales Invoice Advance,Advance Amount,Quantitat Anticipada
 DocType: Manufacturing Settings,Capacity Planning,Planificació de la capacitat
-apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +49,'From Date' is required,"'Des de la data ""es requereix"
+apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +49,'From Date' is required,'Des de la data' és obligatori
 DocType: Journal Entry,Reference Number,Número de referència
 DocType: Employee,Employment Details,Detalls d'Ocupació
 DocType: Employee,New Workplace,Nou lloc de treball

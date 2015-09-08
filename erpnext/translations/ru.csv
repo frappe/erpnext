@@ -811,7 +811,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +410,The name of yo
 DocType: HR Settings,Include holidays in Total no. of Working Days,Включите праздники в общей сложности не. рабочих дней
 DocType: Job Applicant,Hold,Удержание
 DocType: Employee,Date of Joining,Дата вступления
-DocType: Naming Series,Update Series,Серия обновление
+DocType: Naming Series,Update Series,Обновление серий
 DocType: Supplier Quotation,Is Subcontracted,Является субподряду
 DocType: Item Attribute,Item Attribute Values,Пункт значений атрибутов
 apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.js +3,View Subscribers,Посмотреть Подписчики
@@ -1598,7 +1598,7 @@ DocType: Maintenance Visit,Maintenance Time,Техническое обслуж�
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +620,A Product or Service,Продукт или сервис
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +139,There were errors.,Были ошибки.
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +100,Tapping,Нажатие
-DocType: Naming Series,Current Value,Текущая стоимость
+DocType: Naming Series,Current Value,Текущее значение
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +167,{0} created,{0} создан
 DocType: Journal Entry Account,Against Sales Order,Против заказ клиента
 ,Serial No Status,Серийный номер статус
