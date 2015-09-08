@@ -75,12 +75,9 @@ class Project(Document):
 			frappe.delete_doc("Task", t.name)
 			task_added_or_deleted = True
 
-		if task_added_or_deleted:
-			self.update_project()
-
-	def update_project(self):
 		self.update_percent_complete()
-		self.update_costing()
+		if task_added_or_deleted:
+			self.update_costing()
 
 	def update_percent_complete(self):
 		total = frappe.db.sql("""select count(*) from tabTask where project=%s""", self.name)[0][0]
@@ -88,7 +85,7 @@ class Project(Document):
 			completed = frappe.db.sql("""select count(*) from tabTask where
 				project=%s and status in ('Closed', 'Cancelled')""", self.name)[0][0]
 
-			self.percent_complete = flt(completed) / total * 100
+			self.percent_complete = flt(flt(completed) / total * 100, 2)
 
 	def update_costing(self):
 		total_cost = frappe.db.sql("""select sum(ifnull(total_costing_amount, 0)) as costing_amount,
