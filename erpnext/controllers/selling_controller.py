@@ -32,10 +32,6 @@ class SellingController(StockController):
 		self.validate_max_discount()
 		check_active_sales_items(self)
 
-	def check_credit_limit(self):
-		from erpnext.selling.doctype.customer.customer import check_credit_limit
-		check_credit_limit(self.customer, self.company)
-
 	def set_missing_values(self, for_validate=False):
 		super(SellingController, self).set_missing_values(for_validate)
 

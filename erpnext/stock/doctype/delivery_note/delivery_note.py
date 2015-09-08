@@ -214,6 +214,17 @@ class DeliveryNote(SellingController):
 		self.cancel_packing_slips()
 
 		self.make_gl_entries_on_cancel()
+		
+	def check_credit_limit(self):
+		from erpnext.selling.doctype.customer.customer import check_credit_limit
+		
+		validate_against_credit_limit = False
+		for d in self.get("items"):
+			if not (d.against_sales_order or d.against_sales_invoice):
+				validate_against_credit_limit = True
+				break
+		if validate_against_credit_limit:
+			check_credit_limit(self.customer, self.company)
 
 	def validate_packed_qty(self):
 		"""
