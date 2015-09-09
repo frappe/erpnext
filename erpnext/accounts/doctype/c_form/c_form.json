@@ -344,7 +344,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 3, 
- "modified": "2015-02-05 05:11:35.427357", 
+ "modified": "2015-09-07 15:51:26", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "C-Form", 
@@ -352,7 +352,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 1, 
    "delete": 0, 

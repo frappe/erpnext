@@ -441,16 +441,7 @@ class StockEntry(StockController):
 			if self.fg_completed_qty:
 				pro_doc.run_method("update_production_order_qty")
 				if self.purpose == "Manufacture":
-					self.update_planned_qty(pro_doc)
-
-	def update_planned_qty(self, pro_doc):
-		from erpnext.stock.utils import update_bin
-		update_bin({
-			"item_code": pro_doc.production_item,
-			"warehouse": pro_doc.fg_warehouse,
-			"posting_date": self.posting_date,
-			"planned_qty": (self.docstatus==1 and -1 or 1 ) * flt(self.fg_completed_qty)
-		})
+					pro_doc.run_method("update_planned_qty")
 
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select stock_uom, description, image, item_name,

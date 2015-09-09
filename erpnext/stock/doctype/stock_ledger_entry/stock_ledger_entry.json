@@ -557,7 +557,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-07-16 16:37:54.452944", 
+ "modified": "2015-09-07 15:51:26", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Stock Ledger Entry", 
@@ -565,7 +565,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 1, 
+   "apply_user_permissions": 0, 
    "cancel": 0, 
    "create": 0, 
    "delete": 0, 

@@ -88,12 +88,12 @@ class SalesInvoice(SellingController):
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 
+		# this sequence because outstanding may get -ve
+		self.make_gl_entries()
+		
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.check_credit_limit()
-
-		# this sequence because outstanding may get -ve
-		self.make_gl_entries()
 
 		if not cint(self.is_pos) == 1 and not self.is_return:
 			self.update_against_document_in_jv()
@@ -161,6 +161,17 @@ class SalesInvoice(SellingController):
 				'extra_cond': """ and exists (select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent and update_stock=1 and is_return=1)"""
 			}
 		])
+		
+	def check_credit_limit(self):
+		from erpnext.selling.doctype.customer.customer import check_credit_limit
+		
+		validate_against_credit_limit = False
+		for d in self.get("items"):
+			if not (d.sales_order or d.delivery_note):
+				validate_against_credit_limit = True
+				break
+		if validate_against_credit_limit:
+			check_credit_limit(self.customer, self.company)
 
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)

@@ -175,6 +175,10 @@ class SalesOrder(SellingController):
 		self.update_prevdoc_status('cancel')
 
 		frappe.db.set(self, 'status', 'Cancelled')
+		
+	def check_credit_limit(self):
+		from erpnext.selling.doctype.customer.customer import check_credit_limit
+		check_credit_limit(self.customer, self.company)
 
 	def check_nextdoc_docstatus(self):
 		# Checks Delivery Note
