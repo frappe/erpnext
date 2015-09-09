@@ -218,19 +218,20 @@ def make_journal_entry(account1, account2, amount, cost_center=None, exchange_ra
 	jv.company = "_Test Company"
 	jv.fiscal_year = "_Test Fiscal Year 2013"
 	jv.user_remark = "test"
-	jv.exchange_rate = exchange_rate
-
+	jv.multi_currency = 1
 	jv.set("accounts", [
 		{
 			"account": account1,
 			"cost_center": cost_center,
 			"debit_in_account_currency": amount if amount > 0 else 0,
 			"credit_in_account_currency": abs(amount) if amount < 0 else 0,
+			"exchange_rate": exchange_rate
 		}, {
 			"account": account2,
 			"cost_center": cost_center,
 			"credit_in_account_currency": amount if amount > 0 else 0,
 			"debit_in_account_currency": abs(amount) if amount < 0 else 0,
+			exchange_rate: exchange_rate
 		}
 	])
 	if save or submit:

@@ -661,7 +661,7 @@ class TestSalesInvoice(unittest.TestCase):
 			where reference_name=%s""", si.name))
 
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
-			where reference_name=%s and credit=300""", si.name))
+			where reference_name=%s and credit_in_account_currency=300""", si.name))
 
 		self.assertEqual(si.outstanding_amount, 261.8)
 

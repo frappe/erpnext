@@ -198,21 +198,26 @@ def update_against_doc(d, jv_obj):
 	jv_detail.set("reference_name", d["against_voucher"])
 
 	if d['allocated_amt'] < d['unadjusted_amt']:
-		jvd = frappe.db.sql("""select cost_center, balance, against_account, is_advance
-			from `tabJournal Entry Account` where name = %s""", d['voucher_detail_no'])
+		jvd = frappe.db.sql("""
+			select cost_center, balance, against_account, is_advance, account_type, exchange_rate
+			from `tabJournal Entry Account` where name = %s
+		""", d['voucher_detail_no'], as_dict=True)
+		
 		# new entry with balance amount
 		ch = jv_obj.append("accounts")
 		ch.account = d['account']
+		ch.account_type = jvd[0]['account_type']
+		ch.exchange_rate = jvd[0]['exchange_rate']
 		ch.party_type = d["party_type"]
 		ch.party = d["party"]
-		ch.cost_center = cstr(jvd[0][0])
-		ch.balance = flt(jvd[0][1])
+		ch.cost_center = cstr(jvd[0]["cost_center"])
+		ch.balance = flt(jvd[0]["balance"])
 		ch.set(d['dr_or_cr'], flt(d['unadjusted_amt']) - flt(d['allocated_amt']))
 		ch.set(d['dr_or_cr']== 'debit' and 'credit' or 'debit', 0)
-		ch.against_account = cstr(jvd[0][2])
+		ch.against_account = cstr(jvd[0]["against_account"])
 		ch.reference_type = original_reference_type
 		ch.reference_name = original_reference_name
-		ch.is_advance = cstr(jvd[0][3])
+		ch.is_advance = cstr(jvd[0]["is_advance"])
 		ch.docstatus = 1
 
 	# will work as update after submit

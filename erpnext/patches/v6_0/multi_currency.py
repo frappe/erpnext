@@ -37,18 +37,18 @@ def execute():
 		""", (company.default_currency, company.name))
 		
 		# update exchange rate, debit/credit in account currency in Journal Entry
-		frappe.db.sql("""update `tabJournal Entry` set exchange_rate=1""")
-	
 		frappe.db.sql("""
-			update
-				`tabJournal Entry Account` jea, `tabJournal Entry` je
-			set 
+			update `tabJournal Entry Account` jea
+			set exchange_rate=1, 
 				debit_in_account_currency=debit,
 				credit_in_account_currency=credit,
-				account_currency=%s
-			where
-				jea.parent = je.name
-				and je.company=%s
+				account_type=(select account_type from `tabAccount` where name=jea.account)
+		""")
+	
+		frappe.db.sql("""
+			update `tabJournal Entry Account` jea, `tabJournal Entry` je
+			set account_currency=%s
+			where jea.parent = je.name and je.company=%s
 		""", (company.default_currency, company.name))
 	
 		# update debit/credit in account currency in GL Entry
@@ -87,7 +87,15 @@ def execute():
 							break
 					
 					if not party_account_exists:
-						party_account = party_gle.account if party_gle else company.default_receivable_account
+						party_account = None
+						if party_gle:
+							party_account = party_gle.account
+						else:
+							default_receivable_account_currency = frappe.db.get_value("Account", 
+								company.default_receivable_account, "account_currency")
+							if default_receivable_account_currency != company.default_currency:
+								party_account = company.default_receivable_account
+							
 						if party_account:
 							party.append("accounts", {
 								"company": company.name,

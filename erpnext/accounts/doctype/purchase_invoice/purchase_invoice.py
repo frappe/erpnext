@@ -216,7 +216,7 @@ class PurchaseInvoice(BuyingController):
 					'party_type': 'Supplier',
 					'party': self.supplier,
 					'is_advance' : 'Yes',
-					'dr_or_cr' : 'debit',
+					'dr_or_cr' : 'debit_in_account_currency',
 					'unadjusted_amt' : flt(d.advance_amount),
 					'allocated_amt' : flt(d.allocated_amount)
 				}

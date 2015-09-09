@@ -5,9 +5,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, flt, fmt_money, formatdate
 from frappe import msgprint, _, scrub
-from erpnext.setup.utils import get_company_currency, get_exchange_rate
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on
+from erpnext.setup.utils import get_company_currency
 
 
 class JournalEntry(AccountsController):
@@ -267,39 +267,37 @@ class JournalEntry(AccountsController):
 	def validate_multi_currency(self):
 		alternate_currency = []
 		for d in self.get("accounts"):
-			d.account_currency = frappe.db.get_value("Account", d.account, "account_currency") or self.company_currency
+			account = frappe.db.get_value("Account", d.account, ["account_currency", "account_type"], as_dict=1)
+			d.account_currency = account.account_currency or self.company_currency
+			d.account_type = account.account_type
 				
 			if d.account_currency!=self.company_currency and d.account_currency not in alternate_currency:
 				alternate_currency.append(d.account_currency)
 			
-		if alternate_currency:				
+		if alternate_currency:
+			if not self.multi_currency:
+				frappe.throw(_("Please check Multi Currency option to allow accounts with other currency"))
+				
 			if len(alternate_currency) > 1:
 				frappe.throw(_("Only one alternate currency can be used in a single Journal Entry"))
-			
-			self.set_exchange_rate()
-			
-			if not self.exchange_rate:
-				frappe.throw(_("Exchange Rate is mandatory in multi-currency Journal Entry"))
-		else:
-			self.exchange_rate = 1.0
-			
+
+		self.set_exchange_rate()
+
 		for d in self.get("accounts"):
-			exchange_rate = self.exchange_rate if d.account_currency != self.company_currency else 1
-			
-			d.debit = flt(flt(d.debit_in_account_currency)*exchange_rate, d.precision("debit"))
-			d.credit = flt(flt(d.credit_in_account_currency)*exchange_rate, d.precision("credit"))
-			
+			d.debit = flt(flt(d.debit_in_account_currency)*flt(d.exchange_rate), d.precision("debit"))
+			d.credit = flt(flt(d.credit_in_account_currency)*flt(d.exchange_rate), d.precision("credit"))
+						
 	def set_exchange_rate(self):
 		for d in self.get("accounts"):
-			if d.account_currency != self.company_currency:
-				account_type = frappe.db.get_value("Account", d.account, "account_type")
-				if account_type == "Bank" and flt(d.credit_in_account_currency) > 0:
-					self.exchange_rate = get_average_exchange_rate(d.account)
-					break
-				if not self.exchange_rate:
-					self.exchange_rate = get_exchange_rate(d.account_currency, self.company_currency)
-					
-					
+			if d.account_currency == self.company_currency:
+				d.exchange_rate = 1
+			elif not d.exchange_rate or d.account_type=="Bank" or \
+				(d.reference_type in ("Sales Invoice", "Purchase Invoice") and d.reference_name):
+					d.exchange_rate = get_exchange_rate(d.account, d.account_currency, self.company, 
+						d.reference_type, d.reference_name, d.debit, d.credit, d.exchange_rate)
+
+			if not d.exchange_rate:
+				frappe.throw(_("Row {0}: Exchange Rate is mandatory").format(d.idx))
 
 	def create_remarks(self):
 		r = []
@@ -387,21 +385,21 @@ class JournalEntry(AccountsController):
 			diff = flt(self.difference, self.precision("difference"))
 
 			# If any row without amount, set the diff on that row
-			for d in self.get('accounts'):
-				if not d.credit and not d.debit and diff != 0:
-					if diff>0:
-						d.credit = diff
-					elif diff<0:
-						d.debit = diff
-					flag = 1
-
-			# Set the diff in a new row
-			if flag == 0 and diff != 0:
-				jd = self.append('accounts', {})
+			if diff:
+				for d in self.get('accounts'):
+					if not d.credit_in_account_currency and not d.debit_in_account_currency and diff != 0:
+						blank_row = d
+						
+				if not blank_row:
+					blank_row = self.append('accounts', {})
+					
+				blank_row.exchange_rate = 1
 				if diff>0:
-					jd.credit = abs(diff)
+					blank_row.credit_in_account_currency = diff
+					blank_row.credit = diff
 				elif diff<0:
-					jd.debit = abs(diff)
+					blank_row.debit_in_account_currency = abs(diff)
+					blank_row.debit = abs(diff)
 
 			self.validate_debit_and_credit()
 
@@ -500,10 +498,12 @@ def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
 			account = frappe.db.get_value("Account", {"company": company, "account_type": "Cash", "is_group": 0})
 
 	if account:
+		account_details = frappe.db.get_value("Account", account, ["account_currency", "account_type"], as_dict=1)
 		return {
 			"account": account,
 			"balance": get_balance_on(account),
-			"account_currency": frappe.db.get_value("Account", account, "account_currency")
+			"account_currency": account_details.account_currency,
+			"account_type": account_details.account_type
 		}
 
 @frappe.whitelist()
@@ -513,31 +513,36 @@ def get_payment_entry_from_sales_invoice(sales_invoice):
 	si = frappe.get_doc("Sales Invoice", sales_invoice)
 	
 	# exchange rate
-	if si.company_currency == si.party_account_currency:
-		exchange_rate = 1
-	else:
-		exchange_rate = get_exchange_rate(si.party_account_currency, si.company_currency)
+	exchange_rate = get_exchange_rate(si.debit_to, si.party_account_currency, si.company, 
+		si.doctype, si.name)
 	
 	jv = get_payment_entry(si)
 	jv.remark = 'Payment received against Sales Invoice {0}. {1}'.format(si.name, si.remarks)
-	jv.exchange_rate = exchange_rate
 	
 	# credit customer
-	jv.get("accounts")[0].account = si.debit_to
-	jv.get("accounts")[0].account_currency = si.party_account_currency
-	jv.get("accounts")[0].party_type = "Customer"
-	jv.get("accounts")[0].party = si.customer
-	jv.get("accounts")[0].balance = get_balance_on(si.debit_to)
-	jv.get("accounts")[0].party_balance = get_balance_on(party=si.customer, party_type="Customer")
-	jv.get("accounts")[0].credit_in_account_currency = si.outstanding_amount
-	jv.get("accounts")[0].reference_type = si.doctype
-	jv.get("accounts")[0].reference_name = si.name
+	row1 = jv.get("accounts")[0]
+	row1.account = si.debit_to
+	row1.account_currency = si.party_account_currency
+	row1.party_type = "Customer"
+	row1.party = si.customer
+	row1.balance = get_balance_on(si.debit_to)
+	row1.party_balance = get_balance_on(party=si.customer, party_type="Customer")
+	row1.credit_in_account_currency = si.outstanding_amount
+	row1.reference_type = si.doctype
+	row1.reference_name = si.name
+	row1.exchange_rate = exchange_rate
+	row1.account_type = "Receivable" if si.customer else ""
 
 	# debit bank
-	if jv.get("accounts")[1].account_currency == si.party_account_currency:
-		jv.get("accounts")[1].debit_in_account_currency = si.outstanding_amount
+	row2 = jv.get("accounts")[1]
+	if row2.account_currency == si.party_account_currency:
+		row2.debit_in_account_currency = si.outstanding_amount
 	else:
-		jv.get("accounts")[1].debit_in_account_currency = si.outstanding_amount * exchange_rate
+		row2.debit_in_account_currency = si.outstanding_amount * exchange_rate
+		
+	# set multi currency check
+	if row1.account_currency != si.company_currency or row2.account_currency != si.company_currency:
+		jv.multi_currency = 1
 
 	return jv.as_dict()
 
@@ -546,31 +551,37 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	"""Returns new Journal Entry document as dict for given Purchase Invoice"""
 	pi = frappe.get_doc("Purchase Invoice", purchase_invoice)
 	
-	if pi.company_currency == pi.party_account_currency:
-		exchange_rate = 1
-	else:
-		exchange_rate = get_exchange_rate(pi.party_account_currency, pi.company_currency)
+	exchange_rate = get_exchange_rate(pi.debit_to, pi.party_account_currency, pi.company, 
+		pi.doctype, pi.name)
 	
 	jv = get_payment_entry(pi)
 	jv.remark = 'Payment against Purchase Invoice {0}. {1}'.format(pi.name, pi.remarks)
 	jv.exchange_rate = exchange_rate
 	
 	# credit supplier
-	jv.get("accounts")[0].account = pi.credit_to
-	jv.get("accounts")[0].account_currency = pi.party_account_currency
-	jv.get("accounts")[0].party_type = "Supplier"
-	jv.get("accounts")[0].party = pi.supplier
-	jv.get("accounts")[0].balance = get_balance_on(pi.credit_to)
-	jv.get("accounts")[0].party_balance = get_balance_on(party=pi.supplier, party_type="Supplier")
-	jv.get("accounts")[0].debit_in_account_currency = pi.outstanding_amount
-	jv.get("accounts")[0].reference_type = pi.doctype
-	jv.get("accounts")[0].reference_name = pi.name
+	row1 = jv.get("accounts")[0]
+	row1.account = pi.credit_to
+	row1.account_currency = pi.party_account_currency
+	row1.party_type = "Supplier"
+	row1.party = pi.supplier
+	row1.balance = get_balance_on(pi.credit_to)
+	row1.party_balance = get_balance_on(party=pi.supplier, party_type="Supplier")
+	row1.debit_in_account_currency = pi.outstanding_amount
+	row1.reference_type = pi.doctype
+	row1.reference_name = pi.name
+	row1.exchange_rate = exchange_rate
+	row1.account_type = "Payable" if pi.supplier else ""
 
 	# credit bank
-	if jv.get("accounts")[1].account_currency == pi.party_account_currency:
-		jv.get("accounts")[1].credit_in_account_currency = pi.outstanding_amount
+	row2 = jv.get("accounts")[1]
+	if row2.account_currency == pi.party_account_currency:
+		row2.credit_in_account_currency = pi.outstanding_amount
 	else:
-		jv.get("accounts")[1].credit_in_account_currency = pi.outstanding_amount * exchange_rate
+		row2.credit_in_account_currency = pi.outstanding_amount * exchange_rate
+		
+	# set multi currency check
+	if row1.account_currency != pi.company_currency or row2.account_currency != pi.company_currency:
+		jv.multi_currency = 1
 
 	return jv.as_dict()
 
@@ -590,37 +601,39 @@ def get_payment_entry_from_sales_order(sales_order):
 
 	party_account = get_party_account(so.company, so.customer, "Customer")
 	party_account_currency = frappe.db.get_value("Account", party_account, "account_currency")
-	company_currency = get_company_currency(so.company)
 	
-	if so.company_currency == party_account_currency:
-		exchange_rate = 1
-	else:
-		exchange_rate = get_exchange_rate(party_account_currency, so.company_currency)
-		
-	jv.exchange_rate = exchange_rate
-		
-	if party_account_currency == company_currency:
+	exchange_rate = get_exchange_rate(party_account, party_account_currency, so.company)
+				
+	if party_account_currency == so.company_currency:
 		amount = flt(so.base_grand_total) - flt(so.advance_paid)
 	else:
 		amount = flt(so.grand_total) - flt(so.advance_paid)
 
 	# credit customer
-	jv.get("accounts")[0].account = party_account
-	jv.get("accounts")[0].account_currency = party_account_currency
-	jv.get("accounts")[0].party_type = "Customer"
-	jv.get("accounts")[0].party = so.customer
-	jv.get("accounts")[0].balance = get_balance_on(party_account)
-	jv.get("accounts")[0].party_balance = get_balance_on(party=so.customer, party_type="Customer")
-	jv.get("accounts")[0].credit_in_account_currency = amount
-	jv.get("accounts")[0].reference_type = so.doctype
-	jv.get("accounts")[0].reference_name = so.name
-	jv.get("accounts")[0].is_advance = "Yes"
+	row1 = jv.get("accounts")[0]
+	row1.account = party_account
+	row1.account_currency = party_account_currency
+	row1.party_type = "Customer"
+	row1.party = so.customer
+	row1.balance = get_balance_on(party_account)
+	row1.party_balance = get_balance_on(party=so.customer, party_type="Customer")
+	row1.credit_in_account_currency = amount
+	row1.reference_type = so.doctype
+	row1.reference_name = so.name
+	row1.is_advance = "Yes"
+	row1.exchange_rate = exchange_rate
+	row1.account_type = "Receivable"
 
 	# debit bank
-	if jv.get("accounts")[1].account_currency == party_account_currency:
-		jv.get("accounts")[1].debit_in_account_currency = amount
+	row2 = jv.get("accounts")[1]
+	if row2.account_currency == party_account_currency:
+		row2.debit_in_account_currency = amount
 	else:
-		jv.get("accounts")[1].debit_in_account_currency = amount * exchange_rate
+		row2.debit_in_account_currency = amount * exchange_rate
+		
+	# set multi currency check
+	if row1.account_currency != so.company_currency or row2.account_currency != so.company_currency:
+		jv.multi_currency = 1
 
 	return jv.as_dict()
 
@@ -639,36 +652,38 @@ def get_payment_entry_from_purchase_order(purchase_order):
 	
 	party_account = get_party_account(po.company, po.supplier, "Supplier")
 	party_account_currency = frappe.db.get_value("Account", party_account, "account_currency")
-	company_currency = get_company_currency(po.company)
 	
-	if po.company_currency == party_account_currency:
-		exchange_rate = 1
-	else:
-		exchange_rate = get_exchange_rate(party_account_currency, po.company_currency)
+	exchange_rate = get_exchange_rate(party_account, party_account_currency, po.company)
 		
-	jv.exchange_rate = exchange_rate
-	
-	if party_account_currency == company_currency:
+	if party_account_currency == po.company_currency:
 		amount = flt(po.base_grand_total) - flt(po.advance_paid)
 	else:
 		amount = flt(po.grand_total) - flt(po.advance_paid)
 
 	# credit customer
-	jv.get("accounts")[0].account = party_account
-	jv.get("accounts")[0].party_type = "Supplier"
-	jv.get("accounts")[0].party = po.supplier
-	jv.get("accounts")[0].balance = get_balance_on(party_account)
-	jv.get("accounts")[0].party_balance = get_balance_on(party=po.supplier, party_type="Supplier")
-	jv.get("accounts")[0].debit_in_account_currency = amount
-	jv.get("accounts")[0].reference_type = po.doctype
-	jv.get("accounts")[0].reference_name = po.name
-	jv.get("accounts")[0].is_advance = "Yes"
+	row1 = jv.get("accounts")[0]
+	row1.account = party_account
+	row1.party_type = "Supplier"
+	row1.party = po.supplier
+	row1.balance = get_balance_on(party_account)
+	row1.party_balance = get_balance_on(party=po.supplier, party_type="Supplier")
+	row1.debit_in_account_currency = amount
+	row1.reference_type = po.doctype
+	row1.reference_name = po.name
+	row1.is_advance = "Yes"
+	row1.exchange_rate = exchange_rate
+	row1.account_type = "Payable"
 
 	# debit bank
-	if jv.get("accounts")[1].account_currency == party_account_currency:
-		jv.get("accounts")[1].credit_in_account_currency = amount
+	row2 = jv.get("accounts")[1]
+	if row2.account_currency == party_account_currency:
+		row2.credit_in_account_currency = amount
 	else:
-		jv.get("accounts")[1].credit_in_account_currency = amount * exchange_rate
+		row2.credit_in_account_currency = amount * exchange_rate
+		
+	# set multi currency check
+	if row1.account_currency != po.company_currency or row2.account_currency != po.company_currency:
+		jv.multi_currency = 1
 
 	return jv.as_dict()
 
@@ -687,6 +702,9 @@ def get_payment_entry(doc):
 		d2.account = bank_account["account"]
 		d2.balance = bank_account["balance"]
 		d2.account_currency = bank_account["account_currency"]
+		d2.account_type = bank_account["account_type"]
+		d2.exchange_rate = get_exchange_rate(bank_account["account"], 
+			bank_account["account_currency"], doc.company)
 
 	return jv
 
@@ -712,27 +730,37 @@ def get_outstanding(args):
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 	args = eval(args)
+	company_currency = get_company_currency(args.get("company"))
+	
 	if args.get("doctype") == "Journal Entry":
 		condition = " and party=%(party)s" if args.get("party") else ""
 
 		against_jv_amount = frappe.db.sql("""
-			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+			select sum(ifnull(debit_in_account_currency, 0)) - sum(ifnull(credit_in_account_currency, 0))
 			from `tabJournal Entry Account` where parent=%(docname)s and account=%(account)s {0}
 			and ifnull(reference_type, '')=''""".format(condition), args)
 
 		against_jv_amount = flt(against_jv_amount[0][0]) if against_jv_amount else 0
+		amount_field = "credit_in_account_currency" if against_jv_amount > 0 else "debit_in_account_currency"
 		return {
-			("credit" if against_jv_amount > 0 else "debit"): abs(against_jv_amount)
+			amount_field: abs(against_jv_amount)
 		}
-	elif args.get("doctype") == "Sales Invoice":
-		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", args["docname"], "outstanding_amount"))
+	elif args.get("doctype") in ("Sales Invoice", "Purchase Invoice"):
+		invoice = frappe.db.get_value(args["doctype"], args["docname"], 
+			["outstanding_amount", "conversion_rate"], as_dict=1)
+
+		exchange_rate = invoice.conversion_rate if (args.get("account_currency") != company_currency) else 1
+		
+		if args["doctype"] == "Sales Invoice":
+			amount_field = "credit_in_account_currency" \
+				if flt(invoice.outstanding_amount) > 0 else "debit_in_account_currency"
+		else:
+			amount_field = "debit_in_account_currency" \
+				if flt(invoice.outstanding_amount) > 0 else "credit_in_account_currency"
+				
 		return {
-			("credit" if outstanding_amount > 0 else "debit"): abs(outstanding_amount)
-		}
-	elif args.get("doctype") == "Purchase Invoice":
-		outstanding_amount = flt(frappe.db.get_value("Purchase Invoice", args["docname"], "outstanding_amount"))
-		return {
-			("debit" if outstanding_amount > 0 else "credit"): abs(outstanding_amount)
+			amount_field: abs(flt(invoice.outstanding_amount)),
+			"exchange_rate": exchange_rate
 		}
 
 @frappe.whitelist()
@@ -753,7 +781,7 @@ def get_party_account_and_balance(company, party_type, party):
 	}
 
 @frappe.whitelist()
-def get_account_balance_and_party_type(account, date, company, credited=False):
+def get_account_balance_and_party_type(account, date, company, debit=None, credit=None, exchange_rate=None):
 	"""Returns dict of account balance and party type to be set in Journal Entry on selection of account."""
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
@@ -768,19 +796,37 @@ def get_account_balance_and_party_type(account, date, company, credited=False):
 	else:
 		party_type = ""
 		
-	exchange_rate = None
-	if account_details.account_currency != company_currency:
-		if account_details.account_type == "Bank" and credited:
-			exchange_rate = get_average_exchange_rate(account)
-		else:
-			exchange_rate = get_exchange_rate(account_details.account_currency, company_currency)
-
 	grid_values = {
 		"balance": get_balance_on(account, date),
 		"party_type": party_type,
+		"account_type": account_details.account_type,
 		"account_currency": account_details.account_currency or company_currency,
+		"exchange_rate": get_exchange_rate(account, account_details.account_currency, 
+			company, debit=debit, credit=credit, exchange_rate=exchange_rate)
 	}
-	return grid_values, exchange_rate
+	return grid_values
+	
+@frappe.whitelist()
+def get_exchange_rate(account, account_currency, company, 
+		reference_type=None, reference_name=None, debit=None, credit=None, exchange_rate=None):
+	from erpnext.setup.utils import get_exchange_rate
+	company_currency = get_company_currency(company)
+	account_details = frappe.db.get_value("Account", account, ["account_type", "root_type"], as_dict=1)
+		
+	if account_currency != company_currency:
+		if reference_type in ("Sales Invoice", "Purchase Invoice") and reference_name:
+			exchange_rate = frappe.db.get_value(reference_type, reference_name, "conversion_rate")
+		elif account_details.account_type == "Bank" and \
+			((account_details.root_type == "Asset" and flt(credit) > 0) or 
+				(account_details.root_type == "Liability" and debit)):
+			exchange_rate = get_average_exchange_rate(account)
+		
+		if not exchange_rate:
+			exchange_rate = get_exchange_rate(account_currency, company_currency)
+	else:
+		exchange_rate = 1
+	
+	return exchange_rate
 	
 def get_average_exchange_rate(account):
 	exchange_rate = 0

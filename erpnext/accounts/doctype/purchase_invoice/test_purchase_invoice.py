@@ -219,7 +219,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.load_from_db()
 
 		self.assertTrue(frappe.db.sql("""select name from `tabJournal Entry Account`
-			where reference_type='Purchase Invoice' and reference_name=%s and debit=300""", pi.name))
+			where reference_type='Purchase Invoice' 
+			and reference_name=%s and debit_in_account_currency=300""", pi.name))
 
 		self.assertEqual(pi.outstanding_amount, 1212.30)
 

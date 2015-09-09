@@ -260,7 +260,7 @@ class SalesInvoice(SellingController):
 					'party_type': 'Customer',
 					'party': self.customer,
 					'is_advance' : 'Yes',
-					'dr_or_cr' : 'credit',
+					'dr_or_cr' : 'credit_in_account_currency',
 					'unadjusted_amt' : flt(d.advance_amount),
 					'allocated_amt' : flt(d.allocated_amount)
 				}

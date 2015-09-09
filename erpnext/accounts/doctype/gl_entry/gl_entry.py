@@ -153,17 +153,18 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 		party_condition = ""
 
 	# get final outstanding amt
-	bal = flt(frappe.db.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+	bal = flt(frappe.db.sql("""
+		select sum(ifnull(debit_in_account_currency, 0)) - sum(ifnull(credit_in_account_currency, 0))
 		from `tabGL Entry`
 		where against_voucher_type=%s and against_voucher=%s
 		and account = %s {0}""".format(party_condition),
 		(against_voucher_type, against_voucher, account))[0][0] or 0.0)
-
+		
 	if against_voucher_type == 'Purchase Invoice':
 		bal = -bal
 	elif against_voucher_type == "Journal Entry":
 		against_voucher_amount = flt(frappe.db.sql("""
-			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+			select sum(ifnull(debit_in_account_currency, 0)) - sum(ifnull(credit_in_account_currency, 0))
 			from `tabGL Entry` where voucher_type = 'Journal Entry' and voucher_no = %s
 			and account = %s and ifnull(against_voucher, '') = '' {0}"""
 			.format(party_condition), (against_voucher, account))[0][0])
