@@ -1,2 +1,0 @@
-- Set default costing rate and billing rate in **Activity Type**
-- Task not mandatory in **Time Log** and **Expense Claim**
