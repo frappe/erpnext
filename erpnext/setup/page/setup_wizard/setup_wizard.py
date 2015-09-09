@@ -109,7 +109,8 @@ def setup_account(args=None):
 def update_user_name(args):
 	if args.get("email"):
 		args['name'] = args.get("email")
-		frappe.flags.mute_emails = True
+
+		_mute_emails, frappe.flags.mute_emails = frappe.flags.mute_emails, True
 		doc = frappe.get_doc({
 			"doctype":"User",
 			"email": args.get("email"),
@@ -118,7 +119,7 @@ def update_user_name(args):
 		})
 		doc.flags.no_welcome_mail = True
 		doc.insert()
-		frappe.flags.mute_emails = False
+		frappe.flags.mute_emails = _mute_emails
 		from frappe.auth import _update_password
 		_update_password(args.get("email"), args.get("password"))
 
