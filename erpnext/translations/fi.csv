@@ -334,7 +334,7 @@ DocType: Workstation,Rent Cost,Rent Kustannukset
 DocType: Manage Variants Item,Variant Attributes,Variant Ominaisuudet
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,Ole hyvä ja valitse kuukausi ja vuosi
 DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Anna email id pilkulla erotettuna, lasku lähetetään automaattisesti tiettynä päivämääränä"
-DocType: Employee,Company Email,Yritys Sähköposti
+DocType: Employee,Company Email,Yrityksen sähköposti
 DocType: Workflow State,Refresh,Virkistää
 DocType: Features Setup,"All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Kaikki tuonti liittyvillä aloilla, kuten valuutan, muuntokurssi, tuonti yhteensä, tuonti loppusumma jne ovat saatavilla ostokuitti, toimittaja sitaatti Ostolasku, Ostotilaus jne"
 apps/erpnext/erpnext/stock/doctype/item/item.js +29,This Item is a Template and cannot be used in transactions. Item attributes will be copied over into the variants unless 'No Copy' is set,"Tämä Kohta on malli, eikä sitä saa käyttää liiketoimiin. Kohta määritteet kopioidaan yli osaksi vaihtoehdot ellei &quot;Ei Copy&quot; on asetettu"
@@ -1360,7 +1360,7 @@ apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +34,From Dat
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +209,Serial No {0} quantity {1} cannot be a fraction,Sarjanumero {0} määrä {1} ei voi olla murto-osa
 apps/erpnext/erpnext/config/buying.py +59,Supplier Type master.,Toimittaja Type mestari.
 DocType: Purchase Order Item,Supplier Part Number,Toimittaja Part Number
-apps/frappe/frappe/core/page/permission_manager/permission_manager.js +379,Add,Lisätä
+apps/frappe/frappe/core/page/permission_manager/permission_manager.js +379,Add,Lisää
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +91,Conversion rate cannot be 0 or 1,Tulosprosentti voi olla 0 tai 1
 DocType: Accounts Settings,Credit Controller,Luotto Controller
 DocType: Delivery Note,Vehicle Dispatch Date,Ajoneuvo Dispatch Date
@@ -3038,7 +3038,7 @@ DocType: Production Order,Total Operating Cost,Total käyttökustannukset
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +142,Note: Item {0} entered multiple times,Huomautus: Kohta {0} tullut useita kertoja
 apps/erpnext/erpnext/config/crm.py +27,All Contacts.,Kaikki yhteystiedot.
 DocType: Newsletter,Test Email Id,Testi Email Id
-apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +394,Company Abbreviation,Yritys Lyhenne
+apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +394,Company Abbreviation,Yrityksen lyhenne
 DocType: Features Setup,If you follow Quality Inspection. Enables Item QA Required and QA No in Purchase Receipt,Jos seuraat laadun valvonta. Mahdollistaa Kohta QA Pakollinen ja QA Ei in ostokuitti
 DocType: GL Entry,Party Type,Party Tyyppi
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +68,Raw material cannot be same as main Item,Raaka-aine voi olla sama kuin tärkein Tuote
@@ -3050,7 +3050,7 @@ DocType: Leave Type,Max Days Leave Allowed,Max Days Jätä sallittu
 DocType: Payment Tool,Set Matching Amounts,Aseta Vastaavat määrät
 DocType: Purchase Invoice,Taxes and Charges Added,Verot ja maksut Lisätty
 ,Sales Funnel,Myynti Funnel
-apps/erpnext/erpnext/shopping_cart/utils.py +33,Cart,Cart
+apps/erpnext/erpnext/shopping_cart/utils.py +33,Cart,Ostoskori
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +135,Thank you for your interest in subscribing to our updates,Kiitos kiinnostunut tilaamalla päivitykset
 ,Qty to Transfer,Määrä siirrän
 apps/erpnext/erpnext/config/selling.py +18,Quotes to Leads or Customers.,Lainausmerkkejä johtaa tai asiakkaille.
@@ -3432,7 +3432,7 @@ DocType: Warranty Claim,Resolved By,Ratkaista
 DocType: Appraisal,Start Date,Aloituspäivä
 sites/assets/js/desk.min.js +598,Value,Arvo
 apps/erpnext/erpnext/config/hr.py +130,Allocate leaves for a period.,Allocate lähtee ajaksi.
-apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +138,Click here to verify,Klikkaa tästä tarkistaa
+apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +138,Click here to verify,Klikkaa tästä vahvistaaksesi
 apps/erpnext/erpnext/accounts/doctype/account/account.py +39,Account {0}: You can not assign itself as parent account,Tilin {0}: Et voi määrittää itseään vanhemman tilin
 DocType: Purchase Invoice Item,Price List Rate,Hinnasto Hinta
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +166,Delivered Serial No {0} cannot be deleted,Toimitetaan Sarjanumero {0} ei voi poistaa
@@ -3565,7 +3565,7 @@ DocType: Authorization Rule,Based On,Perustuu
 DocType: Stock Settings,Stock Frozen Upto,Stock Frozen Jopa
 apps/erpnext/erpnext/config/projects.py +13,Project activity / task.,Hanketoimintaa / tehtävä.
 apps/erpnext/erpnext/config/hr.py +65,Generate Salary Slips,Luo palkkakuitit
-apps/frappe/frappe/utils/__init__.py +87,{0} is not a valid email id,{0} ei ole kelvollinen email id
+apps/frappe/frappe/utils/__init__.py +87,{0} is not a valid email id,{0} ei ole kelvollinen email
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +41,"Buying must be checked, if Applicable For is selected as {0}","Ostaminen on tarkistettava, jos tarpeen on valittu {0}"
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +40,Discount must be less than 100,Alennus on oltava alle 100
 DocType: ToDo,Low,Alhainen

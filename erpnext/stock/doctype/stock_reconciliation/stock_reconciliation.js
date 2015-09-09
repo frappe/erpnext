@@ -36,20 +36,21 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 
 	set_default_expense_account: function() {
 		var me = this;
-
-		if (sys_defaults.auto_accounting_for_stock && !this.frm.doc.expense_account) {
-			return this.frm.call({
-				method: "erpnext.accounts.utils.get_company_default",
-				args: {
-					"fieldname": "stock_adjustment_account",
-					"company": this.frm.doc.company
-				},
-				callback: function(r) {
-					if (!r.exc) {
-						me.frm.set_value("expense_account", r.message);
+		if(this.frm.doc.company) {
+			if (sys_defaults.auto_accounting_for_stock && !this.frm.doc.expense_account) {
+				return this.frm.call({
+					method: "erpnext.accounts.utils.get_company_default",
+					args: {
+						"fieldname": "stock_adjustment_account",
+						"company": this.frm.doc.company
+					},
+					callback: function(r) {
+						if (!r.exc) {
+							me.frm.set_value("expense_account", r.message);
+						}
 					}
-				}
-			});
+				});
+			}
 		}
 	},
 

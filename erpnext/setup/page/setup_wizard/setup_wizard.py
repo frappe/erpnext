@@ -109,7 +109,8 @@ def setup_account(args=None):
 def update_user_name(args):
 	if args.get("email"):
 		args['name'] = args.get("email")
-		frappe.flags.mute_emails = True
+
+		_mute_emails, frappe.flags.mute_emails = frappe.flags.mute_emails, True
 		doc = frappe.get_doc({
 			"doctype":"User",
 			"email": args.get("email"),
@@ -118,7 +119,7 @@ def update_user_name(args):
 		})
 		doc.flags.no_welcome_mail = True
 		doc.insert()
-		frappe.flags.mute_emails = False
+		frappe.flags.mute_emails = _mute_emails
 		from frappe.auth import _update_password
 		_update_password(args.get("email"), args.get("password"))
 
@@ -223,6 +224,7 @@ def set_defaults(args):
 	stock_settings.stock_uom = _("Nos")
 	stock_settings.auto_indent = 1
 	stock_settings.auto_insert_price_list_rate_if_missing = 1
+	stock_settings.automatically_set_serial_nos_based_on_fifo = 1
 	stock_settings.save()
 
 	selling_settings = frappe.get_doc("Selling Settings")

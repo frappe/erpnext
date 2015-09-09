@@ -735,7 +735,7 @@ DocType: Process Payroll,Send Email,Pošaljite e-poštu
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +85,No Permission,Nemate dopuštenje
 DocType: Company,Default Bank Account,Zadani bankovni račun
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +43,"To filter based on Party, select Party Type first","Za filtriranje se temelji na stranke, odaberite stranka Upišite prvi"
-apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +49,'Update Stock' can not be checked because items are not delivered via {0},&#39;Ažuriranje kataloški&#39; nije moguće provjeriti jer stvari nisu dostavljene putem {0}
+apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +49,'Update Stock' can not be checked because items are not delivered via {0},Opcija 'Ažuriraj zalihe' nije dostupna jer stavke nisu dostavljene putem {0}
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +626,Nos,Kom
 DocType: Item,Items with higher weightage will be shown higher,Stavke sa višim weightage će se prikazati više
 DocType: Bank Reconciliation Detail,Bank Reconciliation Detail,Banka Pomirenje Detalj
@@ -1211,7 +1211,7 @@ apps/erpnext/erpnext/projects/doctype/task/task.py +35,'Expected Start Date' can
 DocType: Holiday List,Holidays,Praznici
 DocType: Sales Order Item,Planned Quantity,Planirana količina
 DocType: Purchase Invoice Item,Item Tax Amount,Iznos poreza proizvoda
-DocType: Item,Maintain Stock,Održavati Stock
+DocType: Item,Maintain Stock,Upravljanje zalihama
 DocType: Supplier Quotation,Get Terms and Conditions,Kreiraj uvjete i pravila
 DocType: Leave Control Panel,Leave blank if considered for all designations,Ostavite prazno ako se odnosi na sve oznake
 apps/erpnext/erpnext/controllers/accounts_controller.py +424,Charge of type 'Actual' in row {0} cannot be included in Item Rate,Punjenje tipa ' Stvarni ' u redu {0} ne mogu biti uključeni u točki Rate
@@ -2098,7 +2098,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +104,Note: 
 DocType: Stock Entry,Manufacture,Proizvodnja
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +13,Please Delivery Note first,Molimo Isporuka Napomena prvo
 DocType: Shopping Cart Taxes and Charges Master,Tax Master,Porezna Master
-DocType: Opportunity,Customer / Lead Name,Kupac / Potencijalni kupac
+DocType: Opportunity,Customer / Lead Name,Potencijalni kupac
 apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py +62,Clearance Date not mentioned,Razmak Datum nije spomenuo
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +71,Production,Proizvodnja
 DocType: Item,Allow Production Order,Dopustite proizvodni nalog
@@ -2676,7 +2676,7 @@ DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Narudžbenica
 apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Zaglavlja za ispis predložaka.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,"Naslovi za ispis predložaka, na primjer predračuna."
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +140,Valuation type charges can not marked as Inclusive,Troškovi tipa Vrednovanje se ne može označiti kao Inclusive
-DocType: POS Profile,Update Stock,Ažuriraj skladište
+DocType: POS Profile,Update Stock,Ažuriraj zalihe
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +127,Superfinishing,Superfinishing
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +100,Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,Različite mjerne jedinice proizvoda će dovesti do ukupne pogrešne neto težine. Budite sigurni da je neto težina svakog proizvoda u istoj mjernoj jedinici.
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +39,BOM Rate,BOM stopa

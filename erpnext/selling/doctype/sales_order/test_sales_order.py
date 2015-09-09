@@ -8,9 +8,15 @@ import unittest
 from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
 
+from frappe.tests.test_permissions import set_user_permission_doctypes
+
 class TestSalesOrder(unittest.TestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
+
+		for role in ("Stock User", "Sales User"):
+			set_user_permission_doctypes(doctype="Sales Order", role=role,
+				apply_user_permissions=0, user_permission_doctypes=None)
 
 	def test_make_material_request(self):
 		so = make_sales_order(do_not_submit=True)
@@ -187,6 +193,10 @@ class TestSalesOrder(unittest.TestCase):
 			existing_reserved_qty_item2 + 20)
 
 	def test_warehouse_user(self):
+		for role in ("Stock User", "Sales User"):
+			set_user_permission_doctypes(doctype="Sales Order", role=role,
+				apply_user_permissions=1, user_permission_doctypes=["Warehouse"])
+
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
 		frappe.permissions.add_user_permission("Company", "_Test Company 1", "test2@example.com")

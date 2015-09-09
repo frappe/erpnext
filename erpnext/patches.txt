@@ -200,4 +200,9 @@ erpnext.patches.v5_8.add_credit_note_print_heading
 execute:frappe.delete_doc_if_exists("Print Format", "Credit Note - Negative Invoice")
 
 # V6.0
-erpnext.patches.v6_0.set_default_title
+erpnext.patches.v6_0.set_default_title # 2015-09-03
+erpnext.patches.v6_0.default_activity_rate
+execute:frappe.db.set_value("Stock Settings", None, "automatically_set_serial_nos_based_on_fifo", 1)
+execute:frappe.db.sql("""update `tabProject` set percent_complete=round(percent_complete, 2) where percent_complete is not null""")
+erpnext.patches.v6_0.fix_outstanding_amount
+erpnext.patches.v6_0.fix_planned_qty

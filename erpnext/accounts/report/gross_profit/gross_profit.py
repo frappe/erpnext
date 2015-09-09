@@ -226,7 +226,7 @@ class GrossProfitGenerator(object):
 			inner join `tabSales Invoice Item` item on item.parent = si.name
 			left join `tabSales Team` sales on sales.parent = si.name
 			where
-				si.docstatus = 1 %s
+				si.docstatus = 1 and si.is_return != 1 %s
 			order by
 				si.posting_date desc, si.posting_time desc""" % (conditions,), self.filters, as_dict=1)
 
