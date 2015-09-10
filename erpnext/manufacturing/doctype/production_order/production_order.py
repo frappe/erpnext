@@ -109,7 +109,7 @@ class ProductionOrder(Document):
 		self.update_status(status)
 		self.update_planned_qty()
 		frappe.msgprint(_("Production Order status is {0}").format(status))
-		self.notify_modified()
+		self.notify_update()
 
 
 	def update_status(self, status=None):
