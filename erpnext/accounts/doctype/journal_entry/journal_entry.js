@@ -75,7 +75,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 	setup_queries: function() {
 		var me = this;
-		var company_currency = erpnext.get_currency(me.frm.doc.company);
 		
 		me.frm.set_query("account", "accounts", function(doc, cdt, cdn) {
 			var filters = {
@@ -83,7 +82,9 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				is_group: 0
 			};
 			if(!doc.multi_currency) {
-				$.extend(filters, {currency: company_currency});
+				$.extend(filters, {
+					account_currency: frappe.get_doc(":Company", me.frm.doc.company).default_currency
+				});
 			}
 			return { filters: filters };
 		});
@@ -230,6 +231,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				row.debit = -doc.difference;
 			}
 		}
+		cur_frm.cscript.update_totals(doc);
 	},
 
 });
@@ -405,7 +407,7 @@ erpnext.journal_entry.set_debit_credit_in_company_currency = function(frm, cdt, 
 }
 
 erpnext.journal_entry.set_exchange_rate = function(frm, cdt, cdn) {
-	var company_currency = erpnext.get_currency(frm.doc.company);
+	var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 	var row = locals[cdt][cdn];
 	
 	if(row.account_currency == company_currency || !frm.doc.multi_currency) {
@@ -417,8 +419,8 @@ erpnext.journal_entry.set_exchange_rate = function(frm, cdt, cdn) {
 				account: row.account, 
 				account_currency: row.account_currency,
 				company: frm.doc.company,
-				reference_type: row.reference_type,
-				reference_name: row.reference_name,
+				reference_type: cstr(row.reference_type),
+				reference_name: cstr(row.reference_name),
 				debit: flt(row.debit_in_account_currency),
 				credit: flt(row.credit_in_account_currency),
 				exchange_rate: row.exchange_rate
