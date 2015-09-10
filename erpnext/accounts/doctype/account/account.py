@@ -7,6 +7,8 @@ from frappe.utils import cstr, cint
 from frappe import throw, _
 from frappe.model.document import Document
 
+class RootNotEditable(frappe.ValidationError): pass
+
 class Account(Document):
 	nsm_parent_field = 'parent_account'
 
@@ -68,7 +70,7 @@ class Account(Document):
 		# does not exists parent
 		if frappe.db.exists("Account", self.name):
 			if not frappe.db.get_value("Account", self.name, "parent_account"):
-				throw(_("Root cannot be edited."))
+				throw(_("Root cannot be edited."), RootNotEditable)
 
 	def validate_frozen_accounts_modifier(self):
 		old_value = frappe.db.get_value("Account", self.name, "freeze_account")

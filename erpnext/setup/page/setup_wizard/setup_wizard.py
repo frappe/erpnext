@@ -15,6 +15,7 @@ from .default_website import website_maker
 import install_fixtures
 from .sample_data import make_sample_data
 from erpnext.accounts.utils import FiscalYearError
+from erpnext.accounts.doctype.account.account import RootNotEditable
 
 @frappe.whitelist()
 def setup_account(args=None):
@@ -303,6 +304,7 @@ def get_fy_details(fy_start_date, fy_end_date):
 	return fy
 
 def create_taxes(args):
+	
 	for i in xrange(1,6):
 		if args.get("tax_" + str(i)):
 			# replace % in case someone also enters the % symbol
@@ -320,6 +322,9 @@ def create_taxes(args):
 					pass
 				else:
 					raise
+			except RootNotEditable, e:
+				pass
+				
 def make_tax_head(args, i, tax_group, tax_rate):
 	return frappe.get_doc({
 		"doctype":"Account",
