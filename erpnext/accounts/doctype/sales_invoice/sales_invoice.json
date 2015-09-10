@@ -2902,11 +2902,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
-<<<<<<< HEAD
  "modified": "2015-09-07 15:51:26", 
-=======
- "modified": "2015-08-28 02:56:24.585304", 
->>>>>>> f14b50975c03469963a3dfad55a73f1c59c2e35b
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 
