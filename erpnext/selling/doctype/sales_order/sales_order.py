@@ -222,7 +222,7 @@ class SalesOrder(SellingController):
 		frappe.db.set(self, 'status', 'Stopped')
 		self.update_reserved_qty()
 		frappe.msgprint(_("{0} {1} status is Stopped").format(self.doctype, self.name))
-		self.notify_modified()
+		self.notify_update()
 		clear_doctype_notifications(self)
 
 	def unstop_sales_order(self):

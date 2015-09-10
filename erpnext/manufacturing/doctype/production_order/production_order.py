@@ -109,7 +109,7 @@ class ProductionOrder(Document):
 		qty = (flt(self.qty)-flt(self.produced_qty)) * ((status == 'Stopped') and -1 or 1)
 		self.update_planned_qty(qty)
 		frappe.msgprint(_("Production Order status is {0}").format(status))
-		self.notify_modified()
+		self.notify_update()
 
 
 	def update_status(self, status=None):
