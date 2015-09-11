@@ -222,7 +222,7 @@ class StatusUpdater(Document):
 					where name='%(name)s'""" % args)
 
 			if args.get("set_modified"):
-				frappe.get_doc(args["target_parent_dt"], name).notify_modified()
+				frappe.get_doc(args["target_parent_dt"], name).notify_update()
 
 	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):
 		ref_fieldname = ref_dt.lower().replace(" ", "_")
