@@ -34,13 +34,8 @@ class Company(Document):
 		if not self.abbr.strip():
 			frappe.throw(_("Abbreviation is mandatory"))
 
-		self.previous_default_currency = frappe.db.get_value("Company", self.name, "default_currency")
-		if self.default_currency and self.previous_default_currency and \
-			self.default_currency != self.previous_default_currency and \
-			self.check_if_transactions_exist():
-				frappe.throw(_("Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."))
-
 		self.validate_default_accounts()
+		self.validate_currency()
 
 	def validate_default_accounts(self):
 		for field in ["default_bank_account", "default_cash_account", "default_receivable_account", "default_payable_account",
@@ -51,6 +46,13 @@ class Company(Document):
 					if for_company != self.name:
 						frappe.throw(_("Account {0} does not belong to company: {1}")
 							.format(self.get(field), self.name))
+							
+	def validate_currency(self):
+		self.previous_default_currency = frappe.db.get_value("Company", self.name, "default_currency")
+		if self.default_currency and self.previous_default_currency and \
+			self.default_currency != self.previous_default_currency and \
+			self.check_if_transactions_exist():
+				frappe.throw(_("Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."))			
 
 	def on_update(self):
 		if not frappe.db.sql("""select name from tabAccount

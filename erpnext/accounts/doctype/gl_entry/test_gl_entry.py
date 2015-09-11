@@ -11,7 +11,7 @@ class TestGLEntry(unittest.TestCase):
 		frappe.db.set_value("Company", "_Test Company", "round_off_cost_center", "_Test Cost Center - _TC")
 		
 		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
-			"_Test Account Bank Account - _TC", 100, "_Test Cost Center - _TC", submit=False)
+			"_Test Bank - _TC", 100, "_Test Cost Center - _TC", submit=False)
 			
 		jv.get("accounts")[0].debit = 100.01
 		jv.flags.ignore_validate = True

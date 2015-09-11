@@ -10,11 +10,11 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 
 class TestPeriodClosingVoucher(unittest.TestCase):
 	def test_closing_entry(self):
-		make_journal_entry("_Test Account Bank Account - _TC", "Sales - _TC", 400, 
+		make_journal_entry("_Test Bank - _TC", "Sales - _TC", 400, 
 			"_Test Cost Center - _TC", submit=True)
 		
 		make_journal_entry("_Test Account Cost for Goods Sold - _TC", 
-			"_Test Account Bank Account - _TC", 600, "_Test Cost Center - _TC", submit=True)
+			"_Test Bank - _TC", 600, "_Test Cost Center - _TC", submit=True)
 			
 		profit_or_loss = frappe.db.sql("""select sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) as balance
 			from `tabGL Entry` t1, `tabAccount` t2

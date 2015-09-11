@@ -8,6 +8,8 @@ import unittest
 
 from frappe.test_runner import make_test_records
 from erpnext.controllers.accounts_controller import CustomerFrozen
+from erpnext.accounts.party import InvalidCurrency
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 test_ignore = ["Price List"]
 
@@ -78,3 +80,13 @@ class TestCustomer(unittest.TestCase):
 		frappe.db.set_value("Customer", "_Test Customer", "is_frozen", 0)
 		
 		so.save()
+		
+	def test_multi_currency(self):
+		customer = frappe.get_doc("Customer", "_Test Customer USD")
+		
+		create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC", 
+			currency="USD", conversion_rate=50)
+		
+		customer.party_account_currency = "EUR"
+		self.assertRaises(InvalidCurrency, customer.save)
+		

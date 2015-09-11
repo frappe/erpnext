@@ -55,15 +55,30 @@ frappe.ui.form.on("Payment Tool", "party", function(frm) {
 	}
 })
 
+frappe.ui.form.on("Payment Tool", "party_account", function(frm) {
+	if(frm.doc.party_account) {
+		frm.call({
+			method: "frappe.client.get_value",
+			args: {
+				doctype: "Account",
+				fieldname: "account_currency",
+				filters: { name: frm.doc.party_account },
+			},
+			callback: function(r, rt) {
+				if(r.message) {
+					frm.set_value("party_account_currency", r.message.account_currency);
+					erpnext.payment_tool.check_mandatory_to_set_button(frm);
+				}
+			}
+		});
+	}
+})
+
 frappe.ui.form.on("Payment Tool", "company", function(frm) {
 	erpnext.payment_tool.check_mandatory_to_set_button(frm);
 });
 
 frappe.ui.form.on("Payment Tool", "received_or_paid", function(frm) {
-	erpnext.payment_tool.check_mandatory_to_set_button(frm);
-});
-
-frappe.ui.form.on("Payment Tool", "party", function(frm) {
 	erpnext.payment_tool.check_mandatory_to_set_button(frm);
 });
 
@@ -158,7 +173,9 @@ frappe.ui.form.on("Payment Tool Detail", "against_voucher_no", function(frm, cdt
 		method: 'erpnext.accounts.doctype.payment_tool.payment_tool.get_against_voucher_amount',
 		args: {
 			"against_voucher_type": row.against_voucher_type,
-			"against_voucher_no": row.against_voucher_no
+			"against_voucher_no": row.against_voucher_no,
+			"party_account": self.party_account,
+			"company": self.company
 		},
 		callback: function(r) {
 			if(!r.exc) {

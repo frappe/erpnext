@@ -10,17 +10,6 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		this._super();
 
 		if (!doc.is_return) {
-			if(doc.__onload && !doc.__onload.billing_complete && doc.docstatus==1) {
-				// show Make Invoice button only if Delivery Note is not created from Sales Invoice
-				var from_sales_invoice = false;
-				from_sales_invoice = cur_frm.doc.items.some(function(item) {
-					return item.against_sales_invoice ? true : false;
-				});
-
-				if(!from_sales_invoice)
-					cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice).addClass("btn-primary");
-			}
-
 			if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1)
 				cur_frm.add_custom_button(__('Installation Note'), this.make_installation_note);
 
@@ -59,7 +48,16 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			}
 		}
 
+		if(doc.__onload && !doc.__onload.billing_complete && doc.docstatus==1 && !doc.is_return) {
+			// show Make Invoice button only if Delivery Note is not created from Sales Invoice
+			var from_sales_invoice = false;
+			from_sales_invoice = cur_frm.doc.items.some(function(item) {
+				return item.against_sales_invoice ? true : false;
+			});
 
+			if(!from_sales_invoice)
+				cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice).addClass("btn-primary");
+		}
 
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
 
