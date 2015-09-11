@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+from frappe import _
+
 app_name = "erpnext"
 app_title = "ERPNext"
 app_publisher = "Frappe Technologies Pvt. Ltd."
@@ -62,11 +64,26 @@ website_context = {
 
 website_route_rules = [
 	{"from_route": "/orders", "to_route": "Sales Order"},
-	{"from_route": "/orders/<path:name>", "to_route": "print", "defaults": {"doctype": "Sales Order"}},
+	{"from_route": "/orders/<path:name>", "to_route": "order",
+		"defaults": {
+			"doctype": "Sales Order",
+			"parents": [{"title": _("Orders"), "name": "orders"}]
+		}
+	},
 	{"from_route": "/invoices", "to_route": "Sales Invoice"},
-	{"from_route": "/invoices/<path:name>", "to_route": "print", "defaults": {"doctype": "Sales Invoice"}},
+	{"from_route": "/invoices/<path:name>", "to_route": "order",
+		"defaults": {
+			"doctype": "Sales Invoice",
+			"parents": [{"title": _("Invoices"), "name": "invoices"}]
+		}
+	},
 	{"from_route": "/shipments", "to_route": "Delivery Note"},
-	{"from_route": "/shipments/<path:name>", "to_route": "print", "defaults": {"doctype": "Delivery Note"}}
+	{"from_route": "/shipments/<path:name>", "to_route": "order",
+		"defaults": {
+			"doctype": "Delivery Notes",
+			"parents": [{"title": _("Shipments"), "name": "shipments"}]
+		}
+	}
 ]
 
 has_website_permission = {

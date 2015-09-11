@@ -92,12 +92,12 @@ $.extend(shopping_cart, {
 			$('<hr>').appendTo($cart_taxes);
 
 		shopping_cart.render_tax_row($cart_totals, {
-			description: "<strong>Total</strong>",
-			formatted_tax_amount: "<strong>" + doc.formatted_grand_total_export + "</strong>"
+			description: "",
+			formatted_tax_amount: __("Total") + ": <strong>" + doc.formatted_grand_total_export + "</strong>"
 		});
 
 		if(!(addresses && addresses.length)) {
-			$cart_shipping_address.html('<div class="msg-box">'+frappe._("Hey! Go ahead and add an address")+'</div>');
+			$cart_shipping_address.html('<p>'+frappe._("Please add a new address")+'</p>');
 		} else {
 			shopping_cart.render_address($cart_shipping_address, addresses, doc.shipping_address_name);
 			shopping_cart.render_address($cart_billing_address, addresses, doc.customer_address);
@@ -113,9 +113,9 @@ $.extend(shopping_cart, {
 		$(repl('<div class="row">\
 			<div class="col-md-9 col-sm-9">\
 				<div class="row">\
-					<div class="col-md-3">%(image_html)s</div>\
-					<div class="col-md-9">\
-						<h4><a href="%(page_name)s">%(item_name)s</a></h4>\
+					<div class="col-md-2">%(image_html)s</div>\
+					<div class="col-md-10">\
+						<h5><a href="%(page_name)s">%(item_name)s</a></h5>\
 						<p>%(description)s</p>\
 					</div>\
 				</div>\
@@ -129,8 +129,8 @@ $.extend(shopping_cart, {
 							<i class="icon-ok"></i></button>\
 					</div>\
 				</div>\
-				<p style="margin-top: 10px;">at %(formatted_rate)s</p>\
-				<small class="text-muted" style="margin-top: 10px;">= %(formatted_amount)s</small>\
+				<p class="text-muted small" style="margin-top: 10px;">' + __("Rate") + ': %(formatted_rate)s</p>\
+				<small style="margin-top: 10px;">%(formatted_amount)s</small>\
 			</div>\
 		</div><hr>', doc)).appendTo($cart_items);
 	},
@@ -189,12 +189,12 @@ $.extend(shopping_cart, {
 					<div class="row"> \
 						<div class="col-md-10 address-title" \
 							data-address-name="%(name)s"><strong>%(name)s</strong></div> \
-						<div class="col-md-2"><input type="checkbox" \
+						<div class="col-md-2 text-right"><input type="checkbox" \
 							data-address-name="%(name)s"></div> \
 					</div> \
 				</div> \
 				<div class="panel-collapse collapse" data-address-name="%(name)s"> \
-					<div class="panel-body">%(display)s</div> \
+					<div class="panel-body text-muted small">%(display)s</div> \
 				</div> \
 			</div>', address))
 				.css({"margin": "10px auto"})
@@ -274,24 +274,24 @@ $.extend(shopping_cart, {
 
 $(document).ready(function() {
 	shopping_cart.bind_events();
-	return frappe.call({
-		type: "POST",
-		method: "erpnext.shopping_cart.cart.get_cart_quotation",
-		callback: function(r) {
-			$("#cart-container").removeClass("hide");
-			$(".progress").remove();
-			if(r.exc) {
-				if(r.exc.indexOf("WebsitePriceListMissingError")!==-1) {
-					shopping_cart.show_error("Configuration Error", frappe._("Price List not configured."));
-				} else if(r["403"]) {
-					shopping_cart.show_error("Not Allowed", frappe._("You need to be logged in to view your cart."));
-				} else {
-					shopping_cart.show_error("Error", frappe._("Something went wrong."));
-				}
-			} else {
-				shopping_cart.set_cart_count();
-				shopping_cart.render(r.message);
-			}
-		}
-	});
+	// return frappe.call({
+	// 	type: "POST",
+	// 	method: "erpnext.shopping_cart.cart.get_cart_quotation",
+	// 	callback: function(r) {
+	// 		$("#cart-container").removeClass("hide");
+	// 		$(".loading").remove();
+	// 		if(r.exc) {
+	// 			if(r.exc.indexOf("WebsitePriceListMissingError")!==-1) {
+	// 				shopping_cart.show_error("Configuration Error", frappe._("Price List not configured."));
+	// 			} else if(r["403"]) {
+	// 				shopping_cart.show_error("Not Allowed", frappe._("You need to be logged in to view your cart."));
+	// 			} else {
+	// 				shopping_cart.show_error("Error", frappe._("Something went wrong."));
+	// 			}
+	// 		} else {
+	// 			shopping_cart.set_cart_count();
+	// 			shopping_cart.render(r.message);
+	// 		}
+	// 	}
+	// });
 });

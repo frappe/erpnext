@@ -6,11 +6,25 @@
 {% endmacro %}
 
 {% macro product_image(website_image, css_class="") %}
-<div class="product-image {% if not website_image -%} missing-image {%- endif %} {{ css_class }}">
-	{% if website_image -%}
-		<img src="{{ frappe.utils.quoted(website_image) | abs_url }}" class="img-responsive">
-	{%- else -%}
-		<i class="centered octicon octicon-device-camera"></i>
-	{%- endif %}
-</div>
+    <div class="product-image {% if not website_image -%} missing-image {%- endif %} {{ css_class }}">
+    	{% if website_image -%}
+    		<img src="{{ frappe.utils.quoted(website_image) | abs_url }}" class="img-responsive">
+    	{%- else -%}
+    		<i class="centered octicon octicon-device-camera"></i>
+    	{%- endif %}
+    </div>
+{% endmacro %}
+
+{% macro item_name_and_description(d) %}
+    <div class="row">
+        <div class="col-xs-4 col-sm-2 order-image-col">
+            <div class="order-image">
+                {{ product_image_square(d.image) }}
+            </div>
+        </div>
+        <div class="col-xs-8 col-sm-10">
+            {{ d.item_code }}
+            <p class="text-muted small">{{ d.description }}</p>
+        </div>
+    </div>
 {% endmacro %}

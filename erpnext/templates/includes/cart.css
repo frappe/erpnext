@@ -1,0 +1,7 @@
+.cart-content {
+	min-height: 400px;
+}
+
+.cart-header, .cart-footer {
+	margin-bottom: 40px;
+}

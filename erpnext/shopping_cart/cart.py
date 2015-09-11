@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import throw, _
 import frappe.defaults
-from frappe.utils import cint, flt, get_fullname, fmt_money, cstr
+from frappe.utils import cint, flt, get_fullname, cstr
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
 from frappe.utils.nestedset import get_root_of
@@ -134,20 +134,10 @@ def guess_territory():
 		frappe.db.get_value("Shopping Cart Settings", None, "territory") or \
 			get_root_of("Territory")
 
-def decorate_quotation_doc(quotation_doc):
-	doc = frappe._dict(quotation_doc.as_dict())
+def decorate_quotation_doc(doc):
 	for d in doc.get("items", []):
-		d.update(frappe.db.get_value("Item", d["item_code"],
+		d.update(frappe.db.get_value("Item", d.item_code,
 			["website_image", "description", "page_name"], as_dict=True))
-		d["formatted_rate"] = fmt_money(d.get("rate"), currency=doc.currency)
-		d["formatted_amount"] = fmt_money(d.get("amount"), currency=doc.currency)
-
-	for d in doc.get("taxes", []):
-		d["formatted_tax_amount"] = fmt_money(flt(d.get("tax_amount_after_discount_amount")),
-			currency=doc.currency)
-
-	doc.formatted_grand_total_export = fmt_money(doc.grand_total,
-		currency=doc.currency)
 
 	return doc
 
@@ -314,7 +304,6 @@ def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_
 
 	for address in address_docs:
 		address.display = get_address_display(address)
-		address.display = (address.display).replace("\n", "<br>\n")
 
 	return address_docs
 
