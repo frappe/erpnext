@@ -43,28 +43,6 @@ class TestShoppingCartSettings(unittest.TestCase):
 			
 		return cart_settings
 		
-	def test_taxes_territory_overlap(self):
-		cart_settings = self.get_cart_settings()
-		
-		def _add_tax_master(tax_master):
-			cart_settings.append("sales_taxes_and_charges_masters", {
-				"doctype": "Shopping Cart Taxes and Charges Master",
-				"sales_taxes_and_charges_master": tax_master
-			})
-		
-		for tax_master in ("_Test Sales Taxes and Charges Template", "_Test India Tax Master"):
-			_add_tax_master(tax_master)
-			
-		controller = cart_settings
-		controller.validate_overlapping_territories("sales_taxes_and_charges_masters",
-			"sales_taxes_and_charges_master")
-			
-		_add_tax_master("_Test Sales Taxes and Charges Template - Rest of the World")
-		
-		controller = cart_settings
-		self.assertRaises(ShoppingCartSetupError, controller.validate_overlapping_territories,
-			"sales_taxes_and_charges_masters", "sales_taxes_and_charges_master")
-		
 	def test_exchange_rate_exists(self):
 		frappe.db.sql("""delete from `tabCurrency Exchange`""")
 		
@@ -77,3 +55,13 @@ class TestShoppingCartSettings(unittest.TestCase):
 		frappe.get_doc(currency_exchange_records[0]).insert()
 		controller.validate_exchange_rates_exist()
 		
+	def test_tax_rule_validation(self):
+		frappe.db.sql("update `tabTax Rule` set use_for_shopping_cart = 0")
+		frappe.db.commit()
+		
+		cart_settings = self.get_cart_settings()
+		cart_settings.enabled = 1 
+		if not frappe.db.get_value("Tax Rule", {"use_for_shopping_cart": 1}, "name"):
+			print "here"
+			self.assertRaises(ShoppingCartSetupError, cart_settings.validate_tax_rule)
+			

@@ -109,6 +109,54 @@ class TestShoppingCart(unittest.TestCase):
 		quotation = self.test_get_cart_lead()
 		self.assertEquals(quotation.net_total, 0)
 		self.assertEquals(len(quotation.get("items")), 0)
+		
+	def test_taxe_rule(self):		
+		frappe.set_user("Administrator")
+		self.create_tax_rule()
+		quotation = self.test_get_cart_customer()
+		set_item_in_cart("_Test Item", 1)
+		
+		from erpnext.accounts.party import set_taxes
+		
+		tax_rule_master = set_taxes(quotation.customer, "Customer", \
+			quotation.transaction_date, quotation.company, None, None, \
+			quotation.customer_address, quotation.shipping_address_name, 1)
+		
+		self.assertEquals(quotation.taxes_and_charges, tax_rule_master)
+		self.assertEquals(quotation.total_taxes_and_charges, "1000")
+		
+	def create_tax_rule(self):
+		for tax_rule_setting in [{"priority": 1, "use_for_shopping_cart": 1}, {"priority": 2, "use_for_shopping_cart": 0}]:
+			tax_template = self.get_tax_template(tax_rule_setting['priority']).name
+			print tax_template
+			tax_rule = frappe.get_doc({
+				"doctype": "Tax Rule",
+				"tax_type" : "Sales",
+				"sales_tax_template": tax_template,
+				"use_for_shopping_cart": tax_rule_setting["use_for_shopping_cart"],
+				"billing_city": "_Test City",
+				"billing_country": "India",
+				"shipping_city": "_Test City",
+				"shipping_country": "India",
+				"priority": tax_rule_setting['priority']
+			}).insert()
+		
+	def get_tax_template(self, priority):
+		return frappe.get_doc({
+			"doctype" : "Sales Taxes and Charges Template",
+			"title": "_Test Tax %s"%priority,
+			"company": "_Test Company",
+			"taxes":[{
+				"charge_type": "Actual",
+				"account_head": "Sales Expenses - _TC",
+				"cost_center": "Main - _TC",
+				"description": "Test Shopping cart taxes with Tax Rule",
+				"tax_amount": 1000*priority
+			}],
+			"territories":[{
+				"territory" : "All Territories"
+			}]
+		}).insert()
 
 	# helper functions
 	def enable_shopping_cart(self):
@@ -130,13 +178,6 @@ class TestShoppingCart(unittest.TestCase):
 					"selling_price_list": "_Test Price List India"},
 				{"doctype": "Shopping Cart Price List", "parentfield": "price_lists",
 					"selling_price_list": "_Test Price List Rest of the World"}
-			])
-			settings.set("sales_taxes_and_charges_masters", [
-				# tax masters
-				{"doctype": "Shopping Cart Taxes and Charges Master", "parentfield": "sales_taxes_and_charges_masters",
-					"sales_taxes_and_charges_master": "_Test India Tax Master"},
-				{"doctype": "Shopping Cart Taxes and Charges Master", "parentfield": "sales_taxes_and_charges_masters",
-					"sales_taxes_and_charges_master": "_Test Sales Taxes and Charges Template - Rest of the World"},
 			])
 			settings.set("shipping_rules", {"doctype": "Shopping Cart Shipping Rule", "parentfield": "shipping_rules",
 					"shipping_rule": "_Test Shipping Rule - India"})
