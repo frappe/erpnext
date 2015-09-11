@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
-from frappe.utils import getdate, nowdate, flt, cint, cstr
+from frappe.utils import getdate, nowdate, flt, cint
 
 class ReceivablePayableReport(object):
 	def __init__(self, filters=None):
@@ -37,13 +37,13 @@ class ReceivablePayableReport(object):
 				"options": "currency",
 				"width": 120
 			})
-			
+
 		columns += [_("Age (Days)") + "::80"]
-			
-		for label in ("0-" + cstr(self.filters.range1), 
-			cstr(self.filters.range1) + "-" + cstr(self.filters.range2),
-			cstr(self.filters.range2) + "-" +cstr(self.filters.range3),
-			cstr(self.filters.range3) + _("-Above")):
+
+		for label in ("0-{range1}".format(**self.filters),
+			"{range1}-{range2}".format(**self.filters),
+			"{range2}-{range3}".format(**self.filters),
+			"{range3}-{above}".format(range3=self.filters.range3, above=_("Above"))):
 				columns.append({
 					"label": label,
 					"fieldtype": "Currency",
@@ -55,12 +55,15 @@ class ReceivablePayableReport(object):
 			columns += [_("Territory") + ":Link/Territory:80"]
 		if args.get("party_type") == "Supplier":
 			columns += [_("Supplier Type") + ":Link/Supplier Type:80"]
-		columns += [{
-					"fieldname": "currency",
-					"label": _("Currency"),
-					"fieldtype": "Data",
-					"width": 100,
-				}, _("Remarks") + "::200"]
+		columns += [
+			{
+				"fieldname": "currency",
+				"label": _("Currency"),
+				"fieldtype": "Data",
+				"width": 100,
+			},
+			_("Remarks") + "::200"
+		]
 
 		return columns
 
@@ -174,7 +177,7 @@ class ReceivablePayableReport(object):
 
 	def get_voucher_details(self, party_type):
 		voucher_details = frappe._dict()
-		
+
 		if party_type == "Customer":
 			for si in frappe.db.sql("""select name, due_date
 				from `tabSales Invoice` where docstatus=1""", as_dict=1):
@@ -190,14 +193,14 @@ class ReceivablePayableReport(object):
 	def get_gl_entries(self, party_type):
 		if not hasattr(self, "gl_entries"):
 			conditions, values = self.prepare_conditions(party_type)
-			
+
 			if self.filters.get(scrub(party_type)):
-				select_fields = ", debit_in_account_currency as debit, credit_in_account_currency as credit"
+				select_fields = "debit_in_account_currency as debit, credit_in_account_currency as credit"
 			else:
-				select_fields = ", debit, credit"
-			
+				select_fields = "debit, credit"
+
 			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party,
-				voucher_type, voucher_no, against_voucher_type, against_voucher, account_currency, remarks {0}
+				voucher_type, voucher_no, against_voucher_type, against_voucher, account_currency, remarks, {0}
 				from `tabGL Entry`
 				where docstatus < 2 and party_type=%s {1} order by posting_date, party"""
 				.format(select_fields, conditions), values, as_dict=True)
@@ -207,7 +210,7 @@ class ReceivablePayableReport(object):
 	def prepare_conditions(self, party_type):
 		conditions = [""]
 		values = [party_type]
-		
+
 		party_type_field = scrub(party_type)
 
 		if self.filters.company:
@@ -216,7 +219,7 @@ class ReceivablePayableReport(object):
 
 		if self.filters.get(party_type_field):
 			conditions.append("party=%s")
-			values.append(self.filters.get(party_type_field))		
+			values.append(self.filters.get(party_type_field))
 
 		return " and ".join(conditions), values
 

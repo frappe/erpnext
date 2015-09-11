@@ -19,14 +19,14 @@ class InvalidCurrency(frappe.ValidationError): pass
 class AccountsController(TransactionBase):
 	def __init__(self, arg1, arg2=None):
 		super(AccountsController, self).__init__(arg1, arg2)
-		
+
 	@property
 	def company_currency(self):
 		if not hasattr(self, "__company_currency"):
 			self.__company_currency = get_company_currency(self.company)
-			
+
 		return self.__company_currency
-		
+
 	def validate(self):
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
@@ -166,7 +166,7 @@ class AccountsController(TransactionBase):
 						item.set("discount_percentage", ret.get("discount_percentage"))
 						if ret.get("pricing_rule_for") == "Price":
 							item.set("pricing_list_rate", ret.get("pricing_list_rate"))
-							
+
 
 	def set_taxes(self):
 		if not self.meta.get_field("taxes"):
@@ -215,15 +215,15 @@ class AccountsController(TransactionBase):
 			'party': None
 		})
 		gl_dict.update(args)
-		
+
 		if not account_currency:
 			account_currency = frappe.db.get_value("Account", gl_dict.account, "account_currency")
-			
+
 		self.validate_account_currency(gl_dict.account, account_currency)
 		gl_dict = self.set_balance_in_account_currency(gl_dict, account_currency)
-						
+
 		return gl_dict
-		
+
 	def validate_account_currency(self, account, account_currency=None):
 		if self.doctype == "Journal Entry":
 			return
@@ -233,26 +233,26 @@ class AccountsController(TransactionBase):
 
 		if account_currency not in valid_currency:
 			frappe.throw(_("Account {0} is invalid. Account Currency must be {1}")
-				.format(account, " or ".join(valid_currency)))
-		
-	def set_balance_in_account_currency(self, gl_dict, account_currency=None):			
-		if (not self.get("conversion_rate") and self.doctype!="Journal Entry" 
+				.format(account, _(" or ").join(valid_currency)))
+
+	def set_balance_in_account_currency(self, gl_dict, account_currency=None):
+		if (not self.get("conversion_rate") and self.doctype!="Journal Entry"
 			and account_currency!=self.company_currency):
 				frappe.throw(_("Account: {0} with currency: {1} can not be selected")
 					.format(gl_dict.account, account_currency))
-			
+
 		gl_dict["account_currency"] = self.company_currency if account_currency==self.company_currency \
 			else account_currency
-		
+
 		# set debit/credit in account currency if not provided
 		if flt(gl_dict.debit) and not flt(gl_dict.debit_in_account_currency):
 			gl_dict.debit_in_account_currency = gl_dict.debit if account_currency==self.company_currency \
 				else flt(gl_dict.debit / (self.get("conversion_rate")), 2)
-							
+
 		if flt(gl_dict.credit) and not flt(gl_dict.credit_in_account_currency):
 			gl_dict.credit_in_account_currency = gl_dict.credit if account_currency==self.company_currency \
 				else flt(gl_dict.credit / (self.get("conversion_rate")), 2)
-				
+
 		return gl_dict
 
 	def clear_unallocated_advances(self, childtype, parentfield):
@@ -267,13 +267,13 @@ class AccountsController(TransactionBase):
 
 		# conver sales_order to "Sales Order"
 		reference_type = against_order_field.replace("_", " ").title()
-		
+
 		condition = ""
 		if order_list:
 			in_placeholder = ', '.join(['%s'] * len(order_list))
 			condition = "or (t2.reference_type = '{0}' and ifnull(t2.reference_name, '') in ({1}))"\
 				.format(reference_type, in_placeholder)
-				
+
 		res = frappe.db.sql("""
 			select
 				t1.name as jv_no, t1.remark, t2.{0} as amount, t2.name as jv_detail_no,
@@ -381,7 +381,7 @@ class AccountsController(TransactionBase):
 			from
 				`tabJournal Entry Account`
 			where
-				reference_type = %s and reference_name = %s 
+				reference_type = %s and reference_name = %s
 				and docstatus = 1 and is_advance = "Yes"
 		""".format(dr_or_cr=dr_or_cr), (self.doctype, self.name))
 
@@ -409,9 +409,9 @@ class AccountsController(TransactionBase):
 		party_type, party = self.get_party()
 
 		if party_type:
-			if frappe.db.get_value(party_type, party, "is_frozen"): 
+			if frappe.db.get_value(party_type, party, "is_frozen"):
 				frappe.throw("{0} {1} is frozen".format(party_type, party), CustomerFrozen)
-				
+
 	def get_party(self):
 		party_type = None
 		if self.meta.get_field("customer"):
@@ -419,22 +419,22 @@ class AccountsController(TransactionBase):
 
 		elif self.meta.get_field("supplier"):
 			party_type = 'Supplier'
-			
+
 		party = self.get(party_type.lower()) if party_type else None
-		
+
 		return party_type, party
-								
+
 	def validate_currency(self):
 		if self.get("currency"):
 			party_type, party = self.get_party()
 			if party_type and party:
 				party_account_currency = frappe.db.get_value(party_type, party, "party_account_currency") \
 					or self.company_currency
-				
+
 				if party_account_currency != self.company_currency and self.currency != party_account_currency:
 					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
 						.format(party_type, party, party_account_currency), InvalidCurrency)
-				
+
 @frappe.whitelist()
 def get_tax_rate(account_head):
 	return frappe.db.get_value("Account", account_head, "tax_rate")
