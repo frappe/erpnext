@@ -221,7 +221,7 @@ def validate_due_date(posting_date, due_date, party_type, party, company):
 				frappe.throw(_("Due / Reference Date cannot be after {0}").format(formatdate(default_due_date)))
 				
 @frappe.whitelist()
-def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_type=None, billing_address=None, shipping_address=None):
+def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_type=None, billing_address=None, shipping_address=None, for_shopping_cart=None):
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
 		party_type: 		party,
@@ -239,4 +239,8 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 		args.update({"tax_type": "Sales"})
 	else:
 		args.update({"tax_type": "Purchase"})
+		
+	if for_shopping_cart:
+		args.update({"use_for_shopping_cart": for_shopping_cart})
+		
 	return get_tax_template(posting_date, args)
