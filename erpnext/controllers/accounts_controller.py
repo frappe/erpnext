@@ -182,7 +182,6 @@ class AccountsController(TransactionBase):
 			self.append_taxes_from_master(tax_master_doctype)
 
 	def append_taxes_from_master(self, tax_master_doctype=None):
-		print "append_taxes_from_master"
 		if self.get("taxes_and_charges"):
 			if not tax_master_doctype:
 				tax_master_doctype = self.meta.get_field("taxes_and_charges").options
