@@ -35,6 +35,7 @@ def get_quotation(user=None):
 		quotation = frappe.new_doc("Quotation")
 		quotation.update(values)
 		if party.doctype == "Customer":
+			print "create quoation for cutomer"
 			quotation.contact_person = frappe.db.get_value("Contact", {"customer": party.name, "email_id": user})
 		quotation.insert(ignore_permissions=True)
 

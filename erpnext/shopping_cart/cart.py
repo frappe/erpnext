@@ -267,9 +267,11 @@ def _set_price_list(quotation, cart_settings, billing_territory):
 def set_taxes(quotation, cart_settings, billing_territory):
 	"""set taxes based on billing territory"""
 	from erpnext.accounts.party import set_taxes
-		
+	
+	customer_group = frappe.db.get_value("Customer", quotation.customer, "customer_group")
+	
 	quotation.taxes_and_charges = set_taxes(quotation.customer, "Customer", \
-		quotation.transaction_date, quotation.company, None, None, \
+		quotation.transaction_date, quotation.company, customer_group, None, \
 		quotation.customer_address, quotation.shipping_address_name, 1)
 #
 # 	# clear table
@@ -360,7 +362,6 @@ def get_shipping_rules(party=None, quotation=None, cart_settings=None):
 	# set shipping rule based on shipping territory
 	shipping_territory = get_address_territory(quotation.shipping_address_name) or \
 		party.territory
-
 
 	shipping_rules = cart_settings.get_shipping_rules(shipping_territory)
 

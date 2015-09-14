@@ -62,6 +62,5 @@ class TestShoppingCartSettings(unittest.TestCase):
 		cart_settings = self.get_cart_settings()
 		cart_settings.enabled = 1 
 		if not frappe.db.get_value("Tax Rule", {"use_for_shopping_cart": 1}, "name"):
-			print "here"
 			self.assertRaises(ShoppingCartSetupError, cart_settings.validate_tax_rule)
 			

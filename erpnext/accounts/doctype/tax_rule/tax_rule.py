@@ -115,7 +115,7 @@ def get_tax_template(posting_date, args):
 		conditions.append("ifnull({0}, '') in ('', '{1}')".format(key, frappe.db.escape(cstr(value))))
 
 	matching = frappe.db.sql("""select * from `tabTax Rule`
-		where {0}""".format(" and ".join(conditions)), as_dict = True, debug=True)
+		where {0}""".format(" and ".join(conditions)), as_dict = True)
 		
 	if not matching:
 		return None
