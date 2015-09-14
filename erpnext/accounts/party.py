@@ -301,7 +301,6 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 		args.update({"tax_type": "Purchase"})
 		
 	if use_for_shopping_cart:
-		print "use_for_shopping_cart", use_for_shopping_cart
 		args.update({"use_for_shopping_cart": use_for_shopping_cart})
 		
 	return get_tax_template(posting_date, args)

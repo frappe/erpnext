@@ -28,7 +28,7 @@ class ShoppingCartSettings(Document):
 		doctype = self.meta.get_field(parentfield).options
 
 		# specify atleast one entry in the table
-		# self.validate_table_has_rows(parentfield, raise_exception=ShoppingCartSetupError)
+		self.validate_table_has_rows(parentfield, raise_exception=ShoppingCartSetupError)
 
 		territory_name_map = self.get_territory_name_map(parentfield, fieldname)
 		for territory, names in territory_name_map.items():
@@ -105,7 +105,6 @@ class ShoppingCartSettings(Document):
 	def get_name_from_territory(self, territory, parentfield, fieldname):
 		name = None
 		territory_name_map = self.get_territory_name_map(parentfield, fieldname)
-
 		if territory_name_map.get(territory):
 			name = territory_name_map.get(territory)
 		else:
@@ -164,55 +163,4 @@ def get_default_territory():
 def check_shopping_cart_enabled():
 	if not get_shopping_cart_settings().enabled:
 		frappe.throw(_("You need to enable Shopping Cart"), ShoppingCartSetupError)
-
-def apply_shopping_cart_settings(quotation, method):
-	"""Called via a validate hook on Quotation"""
-	
-	"""no hooks call added yet. same functionality is in cart.py, which will get triggered by cart.js"""
-	
-	from erpnext.shopping_cart import get_party
-	if quotation.order_type != "Shopping Cart":
-		return
-
-	quotation.billing_territory = (get_territory_from_address(quotation.customer_address)
-		or get_party(quotation.contact_email).territory or get_default_territory())
-	quotation.shipping_territory = (get_territory_from_address(quotation.shipping_address_name)
-		or get_party(quotation.contact_email).territory or get_default_territory())
-
-	set_price_list(quotation)
-	set_taxes_and_charges(quotation)
-	quotation.calculate_taxes_and_totals()
-	set_shipping_rule(quotation)
-
-def set_price_list(quotation):
-	previous_selling_price_list = quotation.selling_price_list
-	quotation.selling_price_list = get_shopping_cart_settings().get_price_list(quotation.billing_territory)
-
-	if not quotation.selling_price_list:
-		quotation.selling_price_list = get_shopping_cart_settings().get_price_list(get_default_territory())
-
-	if previous_selling_price_list != quotation.selling_price_list:
-		quotation.price_list_currency = quotation.currency = quotation.plc_conversion_rate = quotation.conversion_rate = None
-		for d in quotation.get("items"):
-			d.price_list_rate = d.discount_percentage = d.rate = d.amount = None
-
-	quotation.set_price_list_and_item_details()
-
-def set_taxes_and_charges(quotation):
-	previous_taxes_and_charges = quotation.taxes_and_charges
-	quotation.taxes_and_charges = get_shopping_cart_settings().get_tax_master(quotation.billing_territory)
-
-	if previous_taxes_and_charges != quotation.taxes_and_charges:
-		quotation.set_other_charges()
-
-def set_shipping_rule(quotation):
-	shipping_rules = get_shopping_cart_settings().get_shipping_rules(quotation.shipping_territory)
-	if not shipping_rules:
-		quotation.remove_shipping_charge()
-		return
-
-	if quotation.shipping_rule not in shipping_rules:
-		quotation.remove_shipping_charge()
-		quotation.shipping_rule = shipping_rules[0]
-
-	quotation.apply_shipping_rule()
+		
