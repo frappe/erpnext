@@ -7,7 +7,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
- "document_type": "Master", 
+ "document_type": "Setup", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -66,7 +66,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-09-07 15:51:26", 
+ "modified": "2015-09-14 02:55:55.558890", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Earning Type", 

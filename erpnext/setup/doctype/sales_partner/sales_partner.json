@@ -8,7 +8,7 @@
  "description": "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission.", 
  "docstatus": 0, 
  "doctype": "DocType", 
- "document_type": "Master", 
+ "document_type": "Setup", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -568,7 +568,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-09-07 15:51:26", 
+ "modified": "2015-09-14 02:55:59.678007", 
  "modified_by": "Administrator", 
  "module": "Setup", 
  "name": "Sales Partner", 

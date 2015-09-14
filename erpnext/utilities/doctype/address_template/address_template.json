@@ -7,7 +7,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
- "document_type": "Master", 
+ "document_type": "Setup", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -85,7 +85,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-02-05 05:11:34.356413", 
+ "modified": "2015-09-14 02:55:53.732649", 
  "modified_by": "Administrator", 
  "module": "Utilities", 
  "name": "Address Template", 
