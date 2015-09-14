@@ -213,5 +213,35 @@
     "territory": "_Test Territory Rest Of The World"
    }
   ]
+ },
+ {
+	"doctype" : "Sales Taxes and Charges Template",
+	"title": "_Test Tax 1",
+	"company": "_Test Company",
+	"taxes":[{
+		"charge_type": "Actual",
+		"account_head": "Sales Expenses - _TC",
+		"cost_center": "Main - _TC",
+		"description": "Test Shopping cart taxes with Tax Rule",
+		"tax_amount": 1000
+	}],
+	"territories":[{
+		"territory" : "All Territories"
+	}]
+ },
+ {
+	"doctype" : "Sales Taxes and Charges Template",
+	"title": "_Test Tax 2",
+	"company": "_Test Company",
+	"taxes":[{
+		"charge_type": "Actual",
+		"account_head": "Sales Expenses - _TC",
+		"cost_center": "Main - _TC",
+		"description": "Test Shopping cart taxes with Tax Rule",
+		"tax_amount": 200
+	}],
+	"territories":[{
+		"territory" : "All Territories"
+	}]
  }
 ]

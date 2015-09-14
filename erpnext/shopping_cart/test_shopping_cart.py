@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 from erpnext.shopping_cart import get_quotation, set_item_in_cart, get_party
-import random
 
 class TestShoppingCart(unittest.TestCase):
 	"""
@@ -113,10 +112,9 @@ class TestShoppingCart(unittest.TestCase):
 		
 		
 	def test_taxe_rule(self):	
-		self.create_tax_rule()
 		self.login_as_customer()
 		quotation = self.create_quotation()
-
+		
 		from erpnext.accounts.party import set_taxes
 
 		tax_rule_master = set_taxes(quotation.customer, "Customer", \
@@ -126,38 +124,7 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEquals(quotation.taxes_and_charges, tax_rule_master)
 		self.assertEquals(quotation.total_taxes_and_charges, 1000.0)
 		
-	def create_tax_rule(self):
-		for tax_rule_setting in [{"priority": 1, "use_for_shopping_cart": 1}, {"priority": 2, "use_for_shopping_cart": 0}]:
-			tax_template = self.get_tax_template(tax_rule_setting['priority']).name
-			tax_rule = frappe.get_doc({
-						"doctype": "Tax Rule",
-						"tax_type" : "Sales",
-						"sales_tax_template": tax_template,
-						"use_for_shopping_cart": tax_rule_setting["use_for_shopping_cart"],
-						"billing_city": "_Test City",
-						"billing_country": "India",
-						"shipping_city": "_Test City",
-						"shipping_country": "India",
-						"priority": tax_rule_setting['priority'],
-						"company": frappe.get_value("Global Defaults", "Global Defaults", "default_company")
-			}).insert()
-		
-	def get_tax_template(self, priority):
-		return frappe.get_doc({
-			"doctype" : "Sales Taxes and Charges Template",
-			"title": "_Test Tax %s"%priority,
-			"company": frappe.get_value("Global Defaults", "Global Defaults", "default_company"),
-			"taxes":[{
-				"charge_type": "Actual",
-				"account_head": "Sales Expenses - _TC",
-				"cost_center": "Main - _TC",
-				"description": "Test Shopping cart taxes with Tax Rule",
-				"tax_amount": 1000*priority
-			}],
-			"territories":[{
-				"territory" : "All Territories"
-			}]
-		}).insert()
+		self.remove_test_quotation(quotation)
 	
 	def create_quotation(self):
 		quotation = frappe.new_doc("Quotation")
@@ -176,16 +143,19 @@ class TestShoppingCart(unittest.TestCase):
 				"item_code": "_Test Item",
 				"qty": 1
 			}],
-			"taxes": frappe.get_doc("Sales Taxes and Charges Template", "_Test Tax 1").taxes
+			"taxes": frappe.get_doc("Sales Taxes and Charges Template", "_Test Tax 1").taxes,
+			"company": "_Test Company"
 		}
 		
 		quotation.update(values)
 		
 		quotation.insert(ignore_permissions=True)
 		
-		frappe.reload_doc("selling", "Quotation", quotation.name)
-		
 		return quotation
+	
+	def remove_test_quotation(self, quotation):
+		frappe.set_user("Administrator")
+		quotation.delete()
 
 	# helper functions
 	def enable_shopping_cart(self):
@@ -210,6 +180,7 @@ class TestShoppingCart(unittest.TestCase):
 			])
 			settings.set("shipping_rules", {"doctype": "Shopping Cart Shipping Rule", "parentfield": "shipping_rules",
 					"shipping_rule": "_Test Shipping Rule - India"})
+					
 
 		settings.save()
 		frappe.local.shopping_cart_settings = None
@@ -273,7 +244,6 @@ class TestShoppingCart(unittest.TestCase):
 		quotation = get_quotation()
 		quotation.set("items", [])
 		quotation.save(ignore_permissions=True)
-
-
+		
 test_dependencies = ["Sales Taxes and Charges Template", "Price List", "Item Price", "Shipping Rule", "Currency Exchange",
-	"Customer Group", "Lead", "Customer", "Contact", "Address", "Item"]
+	"Customer Group", "Lead", "Customer", "Contact", "Address", "Item", "Tax Rule"]
