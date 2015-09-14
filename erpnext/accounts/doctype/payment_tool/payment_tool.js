@@ -90,7 +90,7 @@ frappe.ui.form.on("Payment Tool", "payment_mode", function(frm) {
 				"mode_of_payment": frm.doc.payment_mode,
 				"company": frm.doc.company
 		},
-		callback: function(r, rt) {			
+		callback: function(r, rt) {
 			if(r.message) {
 				cur_frm.set_value("payment_account", r.message['account']);
 			}
@@ -169,6 +169,10 @@ erpnext.payment_tool.validate_against_voucher = function(frm) {
 // validate against_voucher_type
 frappe.ui.form.on("Payment Tool Detail", "against_voucher_no", function(frm, cdt, cdn) {
 	var row = locals[cdt][cdn];
+	if (!row.against_voucher_no) {
+		return;
+	}
+
 	frappe.call({
 		method: 'erpnext.accounts.doctype.payment_tool.payment_tool.get_against_voucher_amount',
 		args: {
