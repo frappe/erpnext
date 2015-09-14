@@ -8,7 +8,7 @@
  "description": "**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.", 
  "docstatus": 0, 
  "doctype": "DocType", 
- "document_type": "Master", 
+ "document_type": "Setup", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -133,7 +133,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-09-07 15:51:26", 
+ "modified": "2015-09-14 02:55:56.280252", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Fiscal Year", 

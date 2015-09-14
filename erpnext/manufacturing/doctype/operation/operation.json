@@ -7,7 +7,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
- "document_type": "Master", 
+ "document_type": "Setup", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -127,7 +127,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-02-22 10:24:26.834166", 
+ "modified": "2015-09-14 02:55:58.575636", 
  "modified_by": "Administrator", 
  "module": "Manufacturing", 
  "name": "Operation", 

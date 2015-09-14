@@ -7,7 +7,7 @@
  "description": "A logical Warehouse against which stock entries are made.", 
  "docstatus": 0, 
  "doctype": "DocType", 
- "document_type": "Master", 
+ "document_type": "Setup", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -362,7 +362,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-09-07 15:51:26", 
+ "modified": "2015-09-14 02:56:00.946305", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Warehouse", 

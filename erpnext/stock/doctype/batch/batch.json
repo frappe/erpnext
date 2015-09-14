@@ -7,7 +7,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
- "document_type": "Master", 
+ "document_type": "Setup", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -156,7 +156,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 5, 
- "modified": "2015-07-13 05:28:24.973774", 
+ "modified": "2015-09-14 02:55:54.101825", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Batch", 
