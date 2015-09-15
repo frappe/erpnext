@@ -280,7 +280,6 @@ def validate_due_date(posting_date, due_date, party_type, party, company):
 @frappe.whitelist()
 def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_type=None, 
 	billing_address=None, shipping_address=None, use_for_shopping_cart=None):
-	
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
 		party_type: 		party,

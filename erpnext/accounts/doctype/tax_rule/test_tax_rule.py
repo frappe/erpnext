@@ -73,13 +73,23 @@ class TestTaxRule(unittest.TestCase):
 			"_Test Sales Taxes and Charges Template 2")
 
 	def test_select_tax_rule_based_on_better_match(self):
-		make_tax_rule(customer= "_Test Customer", billing_city = "Test City",
+		make_tax_rule(customer= "_Test Customer", billing_city = "Test City", billing_state = "Test State",
 			sales_tax_template = "_Test Sales Taxes and Charges Template", save=1)
 
-		make_tax_rule(customer= "_Test Customer",
+		make_tax_rule(customer= "_Test Customer",  billing_city = "Test City1", billing_state = "Test State",
 			sales_tax_template = "_Test Sales Taxes and Charges Template 1", save=1)
 			
-		self.assertEquals(get_tax_template("2015-01-01", {"customer":"_Test Customer", "billing_city": "Test City"}), 
+		self.assertEquals(get_tax_template("2015-01-01", {"customer":"_Test Customer", "billing_city": "Test City", "billing_state": "Test State"}), 
+			"_Test Sales Taxes and Charges Template")
+		
+	def test_select_tax_rule_based_on_state_match(self):
+		make_tax_rule(customer= "_Test Customer", shipping_state = "Test State", 
+			sales_tax_template = "_Test Sales Taxes and Charges Template", save=1)
+
+		make_tax_rule(customer= "_Test Customer", shipping_state = "Test State12", 
+			sales_tax_template = "_Test Sales Taxes and Charges Template 1", priority=2, save=1)
+		
+		self.assertEquals(get_tax_template("2015-01-01", {"customer":"_Test Customer", "shipping_state": "Test State"}), 
 			"_Test Sales Taxes and Charges Template")
 
 	def test_select_tax_rule_based_on_better_priority(self):
@@ -93,7 +103,7 @@ class TestTaxRule(unittest.TestCase):
 			"_Test Sales Taxes and Charges Template 1")
 
 	def test_select_tax_rule_based_cross_matching_keys(self):
-		make_tax_rule(customer= "_Test Customer", billing_city = "Test City",
+		make_tax_rule(customer= "_Test Customer", billing_city = "Test City", 
 			sales_tax_template = "_Test Sales Taxes and Charges Template", save=1)
 
 		make_tax_rule(customer= "_Test Customer 1", billing_city = "Test City 1",
