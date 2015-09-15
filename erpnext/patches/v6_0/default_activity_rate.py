@@ -1,6 +1,8 @@
 import frappe
 
 def execute():
+	frappe.reload_doc("projects", "doctype", "activity_cost")
+
 	for cost in frappe.db.get_list("Activity Cost", filters = {"employee": ""},
 		fields = ("name", "activity_type", "costing_rate", "billing_rate")):
 		activity_type = frappe.get_doc("Activity Type", cost.activity_type)
