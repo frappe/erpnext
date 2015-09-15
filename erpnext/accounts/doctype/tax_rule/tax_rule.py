@@ -53,8 +53,10 @@ class TaxRule(Document):
 			"supplier":			self.supplier,
 			"supplier_type":	self.supplier_type,
 			"billing_city":		self.billing_city,
+			"billing_state": 	self.billing_state,
 			"billing_country":	self.billing_country,
 			"shipping_city":	self.shipping_city,
+			"shipping_state":	self.shipping_state,
 			"shipping_country":	self.shipping_country,
 			"company":			self.company
 		}

@@ -7,11 +7,11 @@ import frappe
 import unittest
 from erpnext.accounts.doctype.tax_rule.tax_rule import IncorrectCustomerGroup, IncorrectSupplierType, ConflictingTaxRule, get_tax_template
 
-# test_records = frappe.get_test_records('Tax Rule')
+test_records = frappe.get_test_records('Tax Rule')
 
 class TestTaxRule(unittest.TestCase):
 	def setUp(self):
-		frappe.db.sql("delete from `tabTax Rule`")
+		frappe.db.sql("delete from `tabTax Rule` where use_for_shopping_cart <> 1")
 		
 	def test_customer_group(self):
 		tax_rule = make_tax_rule(customer= "_Test Customer", customer_group= "_Test Customer Group 1",
