@@ -171,7 +171,7 @@ class StockReconciliation(StockController):
 			if row.qty and not row.valuation_rate:
 				frappe.throw(_("Valuation Rate required for Item {0}").format(row.item_code))
 
-			if ((previous_sle and row.qty == previous_sle.get("qty_after_transaction") 
+			if ((previous_sle and row.qty == previous_sle.get("qty_after_transaction")
 				and row.valuation_rate == previous_sle.get("valuation_rate"))
 				or (not previous_sle and not row.qty)):
 					continue
@@ -243,7 +243,7 @@ class StockReconciliation(StockController):
 @frappe.whitelist()
 def get_items(warehouse, posting_date, posting_time):
 	items = frappe.get_list("Item", fields=["name"], filters=
-		{"is_stock_item": 1, "has_serial_no": 0, "has_batch_no": 0})
+		{"is_stock_item": 1, "has_serial_no": 0, "has_batch_no": 0, "has_variants": 0})
 	for item in items:
 		item.item_code = item.name
 		item.warehouse = warehouse
