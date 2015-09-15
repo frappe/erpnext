@@ -61,6 +61,10 @@ $.extend(cur_frm.cscript, new erpnext.support.MaintenanceVisit({frm: cur_frm}));
 cur_frm.cscript.onload = function(doc, dt, dn) {
 	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
 	if(doc.__islocal) set_multiple(dt,dn,{mntc_date:get_today()});
+
+	// set add fetch for item_code's item_name and description
+	cur_frm.add_fetch('item_code', 'item_name', 'item_name');
+	cur_frm.add_fetch('item_code', 'description', 'description');
 }
 
 cur_frm.fields_dict['customer_address'].get_query = function(doc, cdt, cdn) {
@@ -80,14 +84,6 @@ cur_frm.fields_dict['purposes'].grid.get_field('item_code').get_query = function
     	filters:{ 'is_service_item': 1}
   	}
 }
-
-cur_frm.cscript.item_code = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	if (d.item_code) {
-		return get_server_fields('get_item_details',d.item_code, 'purposes',doc,cdt,cdn,1);
-	}
-}
-
 
 cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
 	return {query: "erpnext.controllers.queries.customer_query" }

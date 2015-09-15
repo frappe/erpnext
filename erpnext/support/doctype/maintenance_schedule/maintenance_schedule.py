@@ -11,16 +11,6 @@ from erpnext.utilities.transaction_base import TransactionBase, delete_events
 from erpnext.stock.utils import get_valid_serial_nos
 
 class MaintenanceSchedule(TransactionBase):
-
-	def get_item_details(self, item_code):
-		item = frappe.db.sql("""select item_name, description from `tabItem`
-			where name=%s""", (item_code), as_dict=1)
-		ret = {
-			'item_name': item and item[0]['item_name'] or '',
-			'description' : item and item[0]['description'] or ''
-		}
-		return ret
-
 	def generate_schedule(self):
 		self.set('schedules', [])
 		frappe.db.sql("""delete from `tabMaintenance Schedule Detail`
