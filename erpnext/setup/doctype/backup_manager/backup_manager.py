@@ -4,7 +4,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from frappe.utils import get_site_path, cint
+from frappe.utils import get_site_path, cint, split_emails
 from frappe.utils.data import convert_utc_to_user_timezone
 import os
 import datetime
@@ -98,5 +98,5 @@ def send_email(success, service_name, error_status=None):
 	if not frappe.db:
 		frappe.connect()
 
-	recipients = frappe.db.get_value("Backup Manager", None, "send_notifications_to").split(",")
+	recipients = split_emails(frappe.db.get_value("Backup Manager", None, "send_notifications_to"))
 	frappe.sendmail(recipients=recipients, subject=subject, message=message)
