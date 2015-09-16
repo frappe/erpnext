@@ -10,5 +10,3 @@ from erpnext.shopping_cart.cart import get_cart_quotation
 
 def get_context(context):
 	context.update(get_cart_quotation())
-
-	print context

@@ -5,81 +5,62 @@
 {% block script %}{% include "templates/includes/cart.js" %}{% endblock %}
 {% block style %}{% include "templates/includes/cart.css" %}{% endblock %}
 
+
+{% block header_actions %}
+{% if doc.items %}
+<button class="btn btn-primary btn-place-order btn-sm"
+    type="button">
+    {{ _("Place Order") }}</button>
+{% endif %}
+{% endblock %}
+
 {% block content %}
 
-{% from "erpnext/templates/includes/macros.html" import item_name_and_description %}
+{% from "templates/includes/macros.html" import item_name_and_description %}
 
 <div class="cart-content">
-	<p class="text-muted loading">{{ _("Loading") }}...</p>
 	<div id="cart-container">
-        <div class="cart-header">
-    		<p class="pull-right"><button class="btn btn-primary btn-place-order btn-sm" type="button">
-    			{{ _("Place Order") }}</button></p>
-    		<div class="clearfix"></div>
-        </div>
-		<div id="cart-error" class="alert alert-danger" style="display: none;"></div>
+		<div id="cart-error" class="alert alert-danger"
+            style="display: none;"></div>
     	<div id="cart-items">
+            <div class="row cart-item-header">
+                <div class="col-sm-8 col-xs-6">
+                    Items
+                </div>
+                <div class="col-sm-2 col-xs-3 text-right">
+                    Qty
+            	</div>
+                <div class="col-sm-2 col-xs-3 text-right">
+                    Amount
+            	</div>
+            </div>
             {% if doc.items %}
             {% for d in doc.items %}
             <div class="cart-item">
-                <div class="row">
-                    <div class="col-sm-8 col-xs-6">
-                        {{ item_name_and_description(d) }}
-                    </div>
-                    <div class="col-sm-4 col-xs-6 text-right">
-        				<div class="item-update-cart">
-        					<div class="clearfix">
-                                <input type="text" placeholder="Qty"
-                                style="max-width: 60px"
-                                value="{{ d.qty }}"
-        						data-item-code="{{ d.item_code }}"
-                                class="text-right form-control pull-right">
-                            </div>
-        					<div class="text-right">
-        						<button class="btn btn-default btn-sm"
-                                    data-item-code="{{ d.item_code }}">
-                                </button>
-        					</div>
-        				</div>
-        				<p class="text-muted small" style="margin-top: 10px;">
-                            {{ _("Rate") + ': ' + d.get_formatted("rate") }}
-                        </p>
-        				<small style="margin-top: 10px;">
-                            {{ d.get_formatted("amount") }}</small>
-        			</div>
-                </div>
+                {% include "templates/includes/cart/cart_item_line.html" %}
             </div>
             {% endfor %}
             {% else %}
             <p>{{ _("Cart is Empty") }}</p>
             {% endif %}
     	</div>
-    	<div id="cart-taxes">
-    	</div>
+        {% if doc.items %}
+        <!-- taxes -->
+        <div class="cart-taxes row small">
+            <div class="col-sm-8"><!-- empty --></div>
+            <div class="col-sm-4">
+                {% include "templates/includes/order/order_taxes.html" %}
+            </div>
+        </div>
     	<div id="cart-totals">
     	</div>
-    	<div id="cart-addresses">
-    		<div class="row">
-    			<div class="col-md-6">
-    				<h4>{{ _("Shipping Address") }}</h4>
-    				<div id="cart-shipping-address" class="panel-group"
-    					data-fieldname="shipping_address_name"></div>
-    				<button class="btn btn-default btn-sm" type="button" id="cart-add-shipping-address">
-    					{{ _("Manage Addresses") }}</button>
-    			</div>
-    			<div class="col-md-6">
-    				<h4>Billing Address</h4>
-    				<div id="cart-billing-address" class="panel-group"
-    					data-fieldname="customer_address"></div>
-    				<button class="btn btn-default btn-sm" type="button" id="cart-add-billing-address">
-    					{{ _("Manage Addresses") }}</button>
-    			</div>
-    		</div>
+    	<div class="cart-addresses">
+            {% include "templates/includes/cart/cart_address.html" %}
     	</div>
     	<p class="cart-footer text-right">
             <button class="btn btn-primary btn-place-order btn-sm" type="button">
     		{{ _("Place Order") }}</button></p>
-    	</div>
+        {% endif %}
     </div>
 </div>
 

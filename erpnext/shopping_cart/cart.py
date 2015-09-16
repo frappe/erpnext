@@ -122,7 +122,8 @@ def update_cart_address(address_fieldname, address_name):
 	quotation.flags.ignore_permissions = True
 	quotation.save()
 
-	return get_cart_quotation(quotation)
+	return frappe.render_template("templates/includes/cart/cart_address.html",
+		get_cart_quotation(quotation))
 
 def guess_territory():
 	territory = None

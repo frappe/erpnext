@@ -13,6 +13,8 @@ $.extend(shopping_cart, {
 	},
 
 	bind_events: function() {
+		shopping_cart.bind_address_select();
+
 		// bind update button
 		$(document).on("click", ".item-update-cart button", function() {
 			var item_code = $(this).attr("data-item-code");
@@ -31,17 +33,34 @@ $.extend(shopping_cart, {
 			});
 		});
 
-		$("#cart-add-shipping-address").on("click", function() {
-			window.location.href = "addresses";
-		});
-
-		$("#cart-add-billing-address").on("click", function() {
-			window.location.href = "address";
-		});
-
 		$(".btn-place-order").on("click", function() {
 			shopping_cart.place_order(this);
 		});
+	},
+
+	bind_address_select: function() {
+		$(".cart-addresses").find('input[data-address-name]').on("click", function() {
+			if($(this).prop("checked")) {
+				var me = this;
+
+				return frappe.call({
+					type: "POST",
+					method: "erpnext.shopping_cart.cart.update_cart_address",
+					args: {
+						address_fieldname: $(this).attr("data-fieldname"),
+						address_name: $(this).attr("data-address-name")
+					},
+					callback: function(r) {
+						if(!r.exc) {
+							$('.cart-addresses').html(r.message);
+						}
+					}
+				});
+			} else {
+				return false;
+			}
+		});
+
 	},
 
 	render: function(out) {
@@ -209,32 +228,6 @@ $.extend(shopping_cart, {
 						+$(this).attr("data-address-name")+'"]').collapse("toggle");
 				});
 
-		$address_wrapper.find('input[type="checkbox"]').on("click", function() {
-			if($(this).prop("checked")) {
-				var me = this;
-				$address_wrapper.find('input[type="checkbox"]').each(function(i, chk) {
-					if($(chk).attr("data-address-name")!=$(me).attr("data-address-name")) {
-						$(chk).prop("checked", false);
-					}
-				});
-
-				return frappe.call({
-					type: "POST",
-					method: "erpnext.shopping_cart.cart.update_cart_address",
-					args: {
-						address_fieldname: $address_wrapper.attr("data-fieldname"),
-						address_name: $(this).attr("data-address-name")
-					},
-					callback: function(r) {
-						if(!r.exc) {
-							shopping_cart.render(r.message);
-						}
-					}
-				});
-			} else {
-				return false;
-			}
-		});
 
 		$address_wrapper.find('input[type="checkbox"][data-address-name="'+ address_name +'"]')
 			.prop("checked", true);

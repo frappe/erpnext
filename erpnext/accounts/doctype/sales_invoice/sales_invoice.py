@@ -35,6 +35,15 @@ class SalesInvoice(SellingController):
 			'overflow_type': 'billing'
 		}]
 
+	def set_indicator(self):
+		"""Set indicator for portal"""
+		if self.outstanding_amount > 0:
+			self.indicator_color = "orange"
+			self.indicator_title = _("Unpaid")
+		else:
+			self.indicator_color = "green"
+			self.indicator_title = _("Paid")
+
 	def validate(self):
 		super(SalesInvoice, self).validate()
 		self.validate_posting_time()
@@ -90,7 +99,7 @@ class SalesInvoice(SellingController):
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
-		
+
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
 			self.check_credit_limit()
@@ -161,10 +170,10 @@ class SalesInvoice(SellingController):
 				'extra_cond': """ and exists (select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent and update_stock=1 and is_return=1)"""
 			}
 		])
-		
+
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
-		
+
 		validate_against_credit_limit = False
 		for d in self.get("items"):
 			if not (d.sales_order or d.delivery_note):
@@ -282,7 +291,7 @@ class SalesInvoice(SellingController):
 			reconcile_against_document(lst)
 
 	def validate_debit_to_acc(self):
-		account = frappe.db.get_value("Account", self.debit_to, 
+		account = frappe.db.get_value("Account", self.debit_to,
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
 		if account.report_type != "Balance Sheet":
@@ -290,7 +299,7 @@ class SalesInvoice(SellingController):
 
 		if self.customer and account.account_type != "Receivable":
 			frappe.throw(_("Debit To account must be a Receivable account"))
-			
+
 		self.party_account_currency = account.account_currency
 
 	def validate_fixed_asset_account(self):
@@ -437,18 +446,18 @@ class SalesInvoice(SellingController):
 		if cint(self.is_pos) == 1:
 			if flt(self.paid_amount) == 0:
 				if self.cash_bank_account:
-					frappe.db.set(self, 'paid_amount', 
-						flt(flt(self.grand_total) - flt(self.write_off_amount), self.precision("paid_amount")))					
+					frappe.db.set(self, 'paid_amount',
+						flt(flt(self.grand_total) - flt(self.write_off_amount), self.precision("paid_amount")))
 				else:
 					# show message that the amount is not paid
 					frappe.db.set(self,'paid_amount',0)
 					frappe.msgprint(_("Note: Payment Entry will not be created since 'Cash or Bank Account' was not specified"))
 		else:
 			frappe.db.set(self,'paid_amount',0)
-		
-		frappe.db.set(self, 'base_paid_amount', 
+
+		frappe.db.set(self, 'base_paid_amount',
 			flt(self.paid_amount*self.conversion_rate, self.precision("base_paid_amount")))
-		
+
 	def check_prev_docstatus(self):
 		for d in self.get('items'):
 			if d.sales_order and frappe.db.get_value("Sales Order", d.sales_order, "docstatus") != 1:
@@ -487,7 +496,7 @@ class SalesInvoice(SellingController):
 		from erpnext.accounts.general_ledger import merge_similar_entries
 
 		gl_entries = []
-		
+
 		self.make_customer_gl_entry(gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
@@ -586,7 +595,7 @@ class SalesInvoice(SellingController):
 		# write off entries, applicable if only pos
 		if self.write_off_account and self.write_off_amount:
 			write_off_account_currency = frappe.db.get_value("Account", self.write_off_account, "account_currency")
-			
+
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.debit_to,

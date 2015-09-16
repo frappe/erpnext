@@ -3,11 +3,11 @@
 <!-- <h6 class="text-muted">{{ doc._title or doc.doctype }}</h6> -->
 {% endblock %}
 
-{% block style %}{% include "templates/includes/order.css" %}{% endblock %}
+{% block style %}{% include "templates/includes/order/order.css" %}{% endblock %}
 
 {% block content %}
 
-{% from "erpnext/templates/includes/macros.html" import item_name_and_description %}
+{% from "erpnext/templates/includes/order/order_macros.html" import item_name_and_description %}
 
 <div class="row">
     <div class="col-xs-6">
@@ -64,25 +64,7 @@
     <div class="order-taxes row small">
         <div class="col-sm-8"><!-- empty --></div>
         <div class="col-sm-4">
-            {% if doc.taxes %}
-            <div class="row">
-                <div class="col-xs-6 text-right">{{ _("Net Total") }}</div>
-                <div class="col-xs-6 text-right">
-                    {{ doc.get_formatted("net_total") }}</div>
-            </div>
-            {% endif %}
-            {% for d in doc.taxes %}
-            <div class="row">
-                <div class="col-xs-6 text-right">{{ d.description }}</div>
-                <div class="col-xs-6 text-right">
-                    {{ d.get_formatted("total") }}</div>
-            </div>
-            {% endfor %}
-            <div class="row">
-                <div class="col-xs-6 text-right">{{ _("Grand Total") }}</div>
-                <div class="col-xs-6 text-right">
-                    {{ doc.get_formatted("grand_total") }}</div>
-            </div>
+            {% include "erpnext/templates/includes/order/order_taxes.html" %}
         </div>
     </div>
 </div>

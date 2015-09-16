@@ -66,6 +66,9 @@ def post_process(doctype, data):
 			doc.status_percent += flt(doc.per_delivered)
 			doc.status_display.append(_("Delivered") if doc.per_delivered==100 else _("{0}% Delivered").format(doc.per_delivered))
 
+		if hasattr(doc, "set_indicator"):
+			doc.set_indicator()
+
 		doc.status_display = ", ".join(doc.status_display)
 		doc.items_preview = ", ".join([d.item_name for d in doc.items])
 		result.append(doc)

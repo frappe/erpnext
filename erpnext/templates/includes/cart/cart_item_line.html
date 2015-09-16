@@ -1,0 +1,16 @@
+{% from "erpnext/templates/includes/order/order_macros.html" import item_name_and_description %}
+
+<div class="row">
+    <div class="col-sm-8 col-xs-6" style="margin-bottom: 10px;">
+        {{ item_name_and_description(d) }}
+    </div>
+    <div class="col-sm-2 col-xs-3 text-right">
+        <div>{{ d.get_formatted('qty') }}</div>
+		<p class="text-muted small" style="margin-top: 10px;">
+            {{ _("Rate") + ': ' + d.get_formatted("rate") }}
+        </p>
+	</div>
+    <div class="col-sm-2 col-xs-3 text-right">
+        {{ d.get_formatted("amount") }}
+    </div>
+</div>
