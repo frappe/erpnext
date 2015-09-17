@@ -236,8 +236,10 @@ class AccountsController(TransactionBase):
 				.format(account, _(" or ").join(valid_currency)))
 
 	def set_balance_in_account_currency(self, gl_dict, account_currency=None):
-		if (not self.get("conversion_rate") and self.doctype!="Journal Entry"
-			and account_currency!=self.company_currency):
+		if self.doctype=="Journal Entry":
+			return
+
+		if (not self.get("conversion_rate") and account_currency!=self.company_currency):
 				frappe.throw(_("Account: {0} with currency: {1} can not be selected")
 					.format(gl_dict.account, account_currency))
 
