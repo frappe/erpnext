@@ -386,6 +386,7 @@ class JournalEntry(AccountsController):
 
 			# If any row without amount, set the diff on that row
 			if diff:
+				blank_row = None
 				for d in self.get('accounts'):
 					if not d.credit_in_account_currency and not d.debit_in_account_currency and diff != 0:
 						blank_row = d
