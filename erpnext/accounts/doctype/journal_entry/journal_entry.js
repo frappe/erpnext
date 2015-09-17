@@ -350,6 +350,9 @@ frappe.ui.form.on("Journal Entry Account", {
 	account: function(frm, dt, dn) {
 		var d = locals[dt][dn];
 		if(d.account) {
+			if(!frm.doc.company) frappe.throw(__("Please select Company first"));
+			if(!frm.doc.posting_date) frappe.throw(__("Please select Posting Date first"));
+			
 			return frappe.call({
 				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_account_balance_and_party_type",
 				args: {
