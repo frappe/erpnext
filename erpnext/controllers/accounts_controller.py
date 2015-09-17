@@ -219,14 +219,13 @@ class AccountsController(TransactionBase):
 		if not account_currency:
 			account_currency = frappe.db.get_value("Account", gl_dict.account, "account_currency")
 
-		self.validate_account_currency(gl_dict.account, account_currency)
-		gl_dict = self.set_balance_in_account_currency(gl_dict, account_currency)
+		if self.doctype != "Journal Entry":
+			self.validate_account_currency(gl_dict.account, account_currency)
+			self.set_balance_in_account_currency(gl_dict, account_currency)
 
 		return gl_dict
 
 	def validate_account_currency(self, account, account_currency=None):
-		if self.doctype == "Journal Entry":
-			return
 		valid_currency = [self.company_currency]
 		if self.get("currency") and self.currency != self.company_currency:
 			valid_currency.append(self.currency)
@@ -236,8 +235,7 @@ class AccountsController(TransactionBase):
 				.format(account, _(" or ").join(valid_currency)))
 
 	def set_balance_in_account_currency(self, gl_dict, account_currency=None):
-		if (not self.get("conversion_rate") and self.doctype!="Journal Entry"
-			and account_currency!=self.company_currency):
+		if (not self.get("conversion_rate") and account_currency!=self.company_currency):
 				frappe.throw(_("Account: {0} with currency: {1} can not be selected")
 					.format(gl_dict.account, account_currency))
 
@@ -252,8 +250,6 @@ class AccountsController(TransactionBase):
 		if flt(gl_dict.credit) and not flt(gl_dict.credit_in_account_currency):
 			gl_dict.credit_in_account_currency = gl_dict.credit if account_currency==self.company_currency \
 				else flt(gl_dict.credit / (self.get("conversion_rate")), 2)
-
-		return gl_dict
 
 	def clear_unallocated_advances(self, childtype, parentfield):
 		self.set(parentfield, self.get(parentfield, {"allocated_amount": ["not in", [0, None, ""]]}))
