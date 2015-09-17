@@ -94,6 +94,11 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 				select name from `tabAccount` ac where ac.name = gle.account
 				and ac.lft >= %s and ac.rgt <= %s
 			)""" % (acc.lft, acc.rgt))
+			
+			# If group and currency same as company, 
+			# always return balance based on debit and credit in company currency
+			if acc.account_currency == frappe.db.get_value("Company", acc.company, "default_currency"):
+				in_account_currency = False
 		else:
 			cond.append("""gle.account = "%s" """ % (account.replace('"', '\\"'), ))
 

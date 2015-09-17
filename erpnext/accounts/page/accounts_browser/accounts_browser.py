@@ -21,8 +21,7 @@ def get_children():
 
 	# root
 	if args['parent'] in ("Accounts", "Cost Centers"):
-		select_cond = ", root_type, report_type" if args["parent"]=="Accounts" else ""
-
+		select_cond = ", root_type, report_type, account_currency" if ctype=="Account" else ""
 		acc = frappe.db.sql(""" select
 			name as value, is_group as expandable %s
 			from `tab%s`
@@ -35,19 +34,17 @@ def get_children():
 			sort_root_accounts(acc)
 	else:
 		# other
+		select_cond = ", account_currency" if ctype=="Account" else ""
 		acc = frappe.db.sql("""select
-			name as value, is_group as expandable
+			name as value, is_group as expandable %s
 	 		from `tab%s`
 			where ifnull(parent_%s,'') = %s
 			and docstatus<2
-			order by name""" % (ctype, ctype.lower().replace(' ','_'), '%s'),
+			order by name""" % (select_cond, ctype, ctype.lower().replace(' ','_'), '%s'),
 				args['parent'], as_dict=1)
 
 	if ctype == 'Account':
-		currency = frappe.db.sql("select default_currency from `tabCompany` where name = %s", company)[0][0]
 		for each in acc:
-			bal = get_balance_on(each.get("value"))
-			each["currency"] = currency
-			each["balance"] = flt(bal)
+			each["balance"] = flt(get_balance_on(each.get("value")))
 
 	return acc

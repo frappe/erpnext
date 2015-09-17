@@ -166,7 +166,7 @@ erpnext.AccountsChart = Class.extend({
 				var dr_or_cr = node.data.balance < 0 ? "Cr" : "Dr";
 				if (me.ctype == 'Account' && node.data && node.data.balance!==undefined) {
 					$('<span class="balance-area pull-right text-muted small">'
-						+ format_currency(Math.abs(node.data.balance), node.data.currency)
+						+ format_currency(Math.abs(node.data.balance), node.data.account_currency)
 						+ " " + dr_or_cr
 						+ '</span>').insertBefore(node.$ul);
 				}
