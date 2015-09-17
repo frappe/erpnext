@@ -93,9 +93,11 @@ def get_dashboard_info(supplier):
 		out[doctype] = frappe.db.get_value(doctype,
 			{"supplier": supplier, "docstatus": ["!=", 2] }, "count(*)")
 
-	billing_this_year = frappe.db.sql("""select sum(base_grand_total)
-		from `tabPurchase Invoice`
-		where supplier=%s and docstatus = 1 and fiscal_year = %s""", 
+	billing_this_year = frappe.db.sql("""
+		select sum(ifnull(credit_in_account_currency, 0)) - sum(ifnull(debit_in_account_currency, 0))
+		from `tabGL Entry`
+		where voucher_type='Purchase Invoice' and party_type = 'Supplier' 
+			and party=%s and fiscal_year = %s""", 
 		(supplier, frappe.db.get_default("fiscal_year")))
 			
 	total_unpaid = frappe.db.sql("""select sum(outstanding_amount)
