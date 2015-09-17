@@ -26,15 +26,13 @@ class Customer(TransactionBase):
 		if cust_master_name == 'Customer Name':
 			self.name = self.customer_name
 		else:
-			self.name = make_autoname(self.naming_series+'.#####')
+			if not self.naming_series:
+				frappe.throw(_("Series is mandatory"), frappe.MandatoryError)
 
-	def validate_mandatory(self):
-		if frappe.defaults.get_global_default('cust_master_name') == 'Naming Series' and not self.naming_series:
-			frappe.throw(_("Series is mandatory"), frappe.MandatoryError)
+			self.name = make_autoname(self.naming_series+'.#####')
 
 	def validate(self):
 		self.flags.is_new_doc = self.is_new()
-		self.validate_mandatory()
 		validate_accounting_currency(self)
 		validate_party_account(self)
 
