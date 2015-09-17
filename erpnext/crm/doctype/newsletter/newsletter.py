@@ -20,7 +20,7 @@ class Newsletter(Document):
 				group by status""", (self.doctype, self.name))) or None
 
 	def test_send(self, doctype="Lead"):
-		self.recipients = self.test_email_id.split(",")
+		self.recipients = frappe.utils.split_emails(self.test_email_id)
 		self.send_bulk()
 		frappe.msgprint(_("Scheduled to send to {0}").format(self.test_email_id))
 
