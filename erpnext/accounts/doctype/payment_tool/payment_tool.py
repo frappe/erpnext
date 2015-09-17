@@ -58,7 +58,7 @@ def get_outstanding_vouchers(args):
 		frappe.throw(_("No permission to use Payment Tool"), frappe.PermissionError)
 
 	args = json.loads(args)
-	
+
 	party_account_currency = frappe.db.get_value("Account", args.get("party_account"), "account_currency")
 	company_currency = frappe.db.get_value("Company", args.get("company"), "default_currency")
 
@@ -71,18 +71,18 @@ def get_outstanding_vouchers(args):
 
 	# Get all outstanding sales /purchase invoices
 	outstanding_invoices = get_outstanding_invoices(amount_query, args.get("party_account"),
-		args.get("party_type"), args.get("party"))
+		args.get("party_type"), args.get("party"), with_journal_entry=False)
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
-	orders_to_be_billed = get_orders_to_be_billed(args.get("party_type"), args.get("party"), 
+	orders_to_be_billed = get_orders_to_be_billed(args.get("party_type"), args.get("party"),
 		party_account_currency, company_currency)
 	return outstanding_invoices + orders_to_be_billed
 
 def get_orders_to_be_billed(party_type, party, party_account_currency, company_currency):
 	voucher_type = 'Sales Order' if party_type == "Customer" else 'Purchase Order'
-	
+
 	ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
-	
+
 	orders = frappe.db.sql("""
 		select
 			name as voucher_no,
@@ -115,7 +115,7 @@ def get_against_voucher_amount(against_voucher_type, against_voucher_no, party_a
 	party_account_currency = frappe.db.get_value("Account", party_account, "account_currency")
 	company_currency = frappe.db.get_value("Company", company, "default_currency")
 	ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
-	
+
 	if against_voucher_type in ["Sales Order", "Purchase Order"]:
 		select_cond = "{0} as total_amount, ifnull({0}, 0) - ifnull(advance_paid, 0) as outstanding_amount"\
 			.format(ref_field)

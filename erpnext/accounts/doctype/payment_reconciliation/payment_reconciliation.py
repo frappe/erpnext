@@ -79,6 +79,7 @@ class PaymentReconciliation(Document):
 				`tabGL Entry`
 			where
 				party_type = %(party_type)s and party = %(party)s
+				and voucher_type != "Journal Entry"
 				and account = %(account)s and {dr_or_cr} > 0 {cond}
 			group by voucher_type, voucher_no
 		""".format(**{

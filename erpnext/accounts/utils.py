@@ -100,7 +100,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 	if party_type and party:
 		cond.append("""gle.party_type = "%s" and gle.party = "%s" """ %
 			(party_type.replace('"', '\\"'), party.replace('"', '\\"')))
-			
+
 	if account or (party_type and party):
 		if in_account_currency:
 			select_field = "sum(ifnull(debit_in_account_currency, 0)) - sum(ifnull(credit_in_account_currency, 0))"
@@ -202,7 +202,7 @@ def update_against_doc(d, jv_obj):
 			select cost_center, balance, against_account, is_advance, account_type, exchange_rate
 			from `tabJournal Entry Account` where name = %s
 		""", d['voucher_detail_no'], as_dict=True)
-		
+
 		# new entry with balance amount
 		ch = jv_obj.append("accounts")
 		ch.account = d['account']
@@ -392,7 +392,7 @@ def get_stock_rbnb_difference(posting_date, company):
 	# Amount should be credited
 	return flt(stock_rbnb) + flt(sys_bal)
 
-def get_outstanding_invoices(amount_query, account, party_type, party):
+def get_outstanding_invoices(amount_query, account, party_type, party, with_journal_entry=True):
 	all_outstanding_vouchers = []
 	outstanding_voucher_list = frappe.db.sql("""
 		select
@@ -419,6 +419,9 @@ def get_outstanding_invoices(amount_query, account, party_type, party):
 
 		payment_amount = -1*payment_amount[0][0] if payment_amount else 0
 		precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
+
+		if not with_journal_entry and d.voucher_type=="Journal Entry":
+			continue
 
 		if d.invoice_amount > payment_amount:
 
