@@ -7,6 +7,8 @@ from frappe.utils import cstr, cint
 from frappe import throw, _
 from frappe.model.document import Document
 
+class RootNotEditable(frappe.ValidationError): pass
+
 class Account(Document):
 	nsm_parent_field = 'parent_account'
 
@@ -28,6 +30,7 @@ class Account(Document):
 		self.validate_warehouse_account()
 		self.validate_frozen_accounts_modifier()
 		self.validate_balance_must_be_debit_or_credit()
+		self.validate_account_currency()
 
 	def validate_parent(self):
 		"""Fetch Parent Details and validate parent account"""
@@ -67,7 +70,7 @@ class Account(Document):
 		# does not exists parent
 		if frappe.db.exists("Account", self.name):
 			if not frappe.db.get_value("Account", self.name, "parent_account"):
-				throw(_("Root cannot be edited."))
+				throw(_("Root cannot be edited."), RootNotEditable)
 
 	def validate_frozen_accounts_modifier(self):
 		old_value = frappe.db.get_value("Account", self.name, "freeze_account")
@@ -86,6 +89,14 @@ class Account(Document):
 				frappe.throw(_("Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'"))
 			elif account_balance < 0 and self.balance_must_be == "Debit":
 				frappe.throw(_("Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"))
+				
+	def validate_account_currency(self):
+		if not self.account_currency:
+			self.account_currency = frappe.db.get_value("Company", self.company, "default_currency")
+			
+		elif self.account_currency != frappe.db.get_value("Account", self.name, "account_currency"):
+			if frappe.db.get_value("GL Entry", {"account": self.name}):
+				frappe.throw(_("Currency can not be changed after making entries using some other currency"))
 
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():

@@ -409,7 +409,7 @@ apps/erpnext/erpnext/stock/doctype/manage_variants/manage_variants.py +61,Enter 
 DocType: Accounts Settings,Check Supplier Invoice Number Uniqueness,بررسی تولید کننده فاکتور شماره منحصر به فرد
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +30,Thermoforming,ترمو
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +65,Slitting,اتاق های برش
-apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +57,'To Case No.' cannot be less than 'From Case No.',&#39;به پرونده شماره&#39; نمی تواند کمتر از &#39;از شماره مورد&#39;
+apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +57,'To Case No.' cannot be less than 'From Case No.','به شماره پرونده' نمی تواند کمتر از 'از شماره پرونده' باشد
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +104,Non Profit,غیر انتفاعی
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order_list.js +7,Not Started,شروع نشده
 DocType: Lead,Channel Partner,کانال شریک
@@ -2695,7 +2695,7 @@ DocType: Hub Settings,Publish Availability,در دسترس انتشار
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +105,Date of Birth cannot be greater than today.,تاریخ تولد نمی تواند بیشتر از امروز.
 ,Stock Ageing,سهام سالمندی
 DocType: Purchase Receipt,Automatically updated from BOM table,به صورت خودکار از جدول BOM به روز شده
-apps/erpnext/erpnext/controllers/accounts_controller.py +184,{0} '{1}' is disabled,{0} &#39;{1}&#39; غیر فعال است
+apps/erpnext/erpnext/controllers/accounts_controller.py +184,{0} '{1}' is disabled,{0} '{1}'  غیر فعال است
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity_list.js +13,Set as Open,تنظیم به عنوان گسترش
 DocType: Notification Control,Send automatic emails to Contacts on Submitting transactions.,ارسال ایمیل خودکار به تماس در معاملات ارائه.
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +270,"Row {0}: Qty not avalable in warehouse {1} on {2} {3}.
@@ -2961,7 +2961,7 @@ DocType: GL Entry,Is Advance,آیا پیشرفته
 apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.js +21,Attendance From Date and Attendance To Date is mandatory,حضور و غیاب حضور و غیاب از تاریخ و به روز الزامی است
 apps/erpnext/erpnext/controllers/buying_controller.py +131,Please enter 'Is Subcontracted' as Yes or No,لطفا وارد است واگذار شده به عنوان بله یا نه
 DocType: Sales Team,Contact No.,تماس با شماره
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +64,'Profit and Loss' type account {0} not allowed in Opening Entry,&#39;سود و زیان &quot;نوع حساب {0} در افتتاحیه ورودی مجاز نیست
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +64,'Profit and Loss' type account {0} not allowed in Opening Entry,'سود و زیان' نوع حساب {0} در افتتاح ورودی مجاز نیست
 DocType: Workflow State,Time,زمان
 DocType: Features Setup,Sales Discounts,تخفیف فروش
 DocType: Hub Settings,Seller Country,فروشنده کشور
@@ -3334,7 +3334,7 @@ apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py +35
 DocType: Salary Slip,Salary Slip,لغزش حقوق و دستمزد
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +115,Burnishing,چکش
 DocType: Features Setup,To enable <b>Point of Sale</b> view,برای فعال کردن <b>نقطه نظر فروش</b>
-apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +54,'To Date' is required,'تا روز' مورد نیاز است
+apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +54,'To Date' is required,'تا تاریخ' مورد نیاز است
 DocType: Packing Slip,"Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.",تولید بسته بندی ورقه برای بسته تحویل داده می شود. مورد استفاده به اطلاع تعداد بسته، محتویات بسته و وزن آن است.
 DocType: Sales Invoice Item,Sales Order Item,سفارش فروش مورد
 DocType: Salary Slip,Payment Days,روز پرداخت
@@ -3680,7 +3680,7 @@ DocType: DocPerm,Level,سطح
 DocType: Purchase Taxes and Charges,On Net Total,در مجموع خالص
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +161,Target warehouse in row {0} must be same as Production Order,انبار هدف در ردیف {0} باید به همان ترتیب تولید می شود
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.py +61,No permission to use Payment Tool,بدون اجازه به استفاده از ابزار پرداخت
-apps/erpnext/erpnext/controllers/recurring_document.py +193,'Notification Email Addresses' not specified for recurring %s,&#39;هشدار از طریق آدرس ایمیل برای دوره ای در محدوده٪ s را مشخص نشده
+apps/erpnext/erpnext/controllers/recurring_document.py +193,'Notification Email Addresses' not specified for recurring %s,'هشدار از طریق آدرس ایمیل' برای دوره ی زمانی محدود %s مشخص نشده است
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +85,Milling,فرز
 DocType: Company,Round Off Account,دور کردن حساب
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +59,Nibbling,پر وعده

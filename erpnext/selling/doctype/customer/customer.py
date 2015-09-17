@@ -10,6 +10,7 @@ from frappe.utils import flt
 
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.utilities.address_and_contact import load_address_and_contact
+from erpnext.accounts.party import validate_accounting_currency, validate_party_account
 from frappe.desk.reportview import build_match_conditions
 
 class Customer(TransactionBase):
@@ -27,12 +28,14 @@ class Customer(TransactionBase):
 		else:
 			self.name = make_autoname(self.naming_series+'.#####')
 
-	def validate_values(self):
+	def validate_mandatory(self):
 		if frappe.defaults.get_global_default('cust_master_name') == 'Naming Series' and not self.naming_series:
 			frappe.throw(_("Series is mandatory"), frappe.MandatoryError)
-
+			
 	def validate(self):
-		self.validate_values()
+		self.validate_mandatory()
+		validate_accounting_currency(self)
+		validate_party_account(self)
 
 	def update_lead_status(self):
 		if self.lead_name:
@@ -125,9 +128,11 @@ def get_dashboard_info(customer):
 		out[doctype] = frappe.db.get_value(doctype,
 			{"customer": customer, "docstatus": ["!=", 2] }, "count(*)")
 
-	billing_this_year = frappe.db.sql("""select sum(base_grand_total)
-		from `tabSales Invoice`
-		where customer=%s and docstatus = 1 and fiscal_year = %s""",
+	billing_this_year = frappe.db.sql("""
+		select sum(ifnull(debit_in_account_currency, 0)) - sum(ifnull(credit_in_account_currency, 0))
+		from `tabGL Entry`
+		where voucher_type='Sales Invoice' and party_type = 'Customer' 
+			and party=%s and fiscal_year = %s""",
 		(customer, frappe.db.get_default("fiscal_year")))
 
 	total_unpaid = frappe.db.sql("""select sum(outstanding_amount)
@@ -136,7 +141,6 @@ def get_dashboard_info(customer):
 
 	out["billing_this_year"] = billing_this_year[0][0] if billing_this_year else 0
 	out["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
-	out["company_currency"] = frappe.db.sql_list("select distinct default_currency from tabCompany")
 
 	return out
 

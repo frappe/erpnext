@@ -8,7 +8,7 @@
  "description": "Multiple Item prices.", 
  "docstatus": 0, 
  "doctype": "DocType", 
- "document_type": "Master", 
+ "document_type": "Setup", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -303,7 +303,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-07-29 14:53:58.851413", 
+ "modified": "2015-09-14 02:55:56.958679", 
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item Price", 

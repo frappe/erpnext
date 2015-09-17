@@ -166,7 +166,7 @@ class PurchaseOrder(BuyingController):
 		self.update_ordered_qty()
 
 		msgprint(_("Status of {0} {1} is now {2}").format(self.doctype, self.name, status))
-		self.notify_modified()
+		self.notify_update()
 		clear_doctype_notifications(self)
 
 	def on_submit(self):

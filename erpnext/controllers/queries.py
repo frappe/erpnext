@@ -9,6 +9,7 @@ from frappe.utils import nowdate
 
 def get_filters_cond(doctype, filters, conditions):
 	if filters:
+		flt = filters
 		if isinstance(filters, dict):
 			filters = filters.items()
 			flt = []

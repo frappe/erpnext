@@ -10,6 +10,8 @@ from frappe import _
 from frappe.model.document import Document
 
 class CustomerFrozen(frappe.ValidationError): pass
+class InvalidCurrency(frappe.ValidationError): pass
+class InvalidAccountCurrency(frappe.ValidationError): pass
 
 class GLEntry(Document):
 	def validate(self):
@@ -20,6 +22,7 @@ class GLEntry(Document):
 		self.check_pl_account()
 		self.validate_cost_center()
 		self.validate_party()
+		self.validate_currency()
 
 	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes'):
 		self.validate_account_details(adv_adj)
@@ -98,6 +101,25 @@ class GLEntry(Document):
 			if not frozen_accounts_modifier in frappe.get_roles():
 				if frappe.db.get_value(self.party_type, self.party, "is_frozen"):
 					frappe.throw("{0} {1} is frozen".format(self.party_type, self.party), CustomerFrozen)
+					
+	def validate_currency(self):
+		company_currency = frappe.db.get_value("Company", self.company, "default_currency")
+		account_currency = frappe.db.get_value("Account", self.account, "account_currency") or company_currency
+
+		if not self.account_currency:
+			self.account_currency = company_currency
+		if account_currency != self.account_currency:
+			frappe.throw(_("Accounting Entry for {0} can only be made in currency: {1}")
+				.format(self.account, (account_currency or company_currency)), InvalidAccountCurrency)
+				
+		
+		if self.party_type and self.party:
+			party_account_currency = frappe.db.get_value(self.party_type, self.party, "party_account_currency") \
+				or company_currency
+
+			if party_account_currency != self.account_currency:
+				frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
+					.format(self.party_type, self.party, party_account_currency), InvalidAccountCurrency)					
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
@@ -131,17 +153,18 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 		party_condition = ""
 
 	# get final outstanding amt
-	bal = flt(frappe.db.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+	bal = flt(frappe.db.sql("""
+		select sum(ifnull(debit_in_account_currency, 0)) - sum(ifnull(credit_in_account_currency, 0))
 		from `tabGL Entry`
 		where against_voucher_type=%s and against_voucher=%s
 		and account = %s {0}""".format(party_condition),
 		(against_voucher_type, against_voucher, account))[0][0] or 0.0)
-
+		
 	if against_voucher_type == 'Purchase Invoice':
 		bal = -bal
 	elif against_voucher_type == "Journal Entry":
 		against_voucher_amount = flt(frappe.db.sql("""
-			select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+			select sum(ifnull(debit_in_account_currency, 0)) - sum(ifnull(credit_in_account_currency, 0))
 			from `tabGL Entry` where voucher_type = 'Journal Entry' and voucher_no = %s
 			and account = %s and ifnull(against_voucher, '') = '' {0}"""
 			.format(party_condition), (against_voucher, account))[0][0])

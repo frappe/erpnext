@@ -206,3 +206,4 @@ execute:frappe.db.set_value("Stock Settings", None, "automatically_set_serial_no
 execute:frappe.db.sql("""update `tabProject` set percent_complete=round(percent_complete, 2) where percent_complete is not null""")
 erpnext.patches.v6_0.fix_outstanding_amount
 erpnext.patches.v6_0.fix_planned_qty
+erpnext.patches.v6_0.multi_currency

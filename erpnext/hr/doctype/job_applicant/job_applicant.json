@@ -8,7 +8,7 @@
  "description": "Applicant for a Job", 
  "docstatus": 0, 
  "doctype": "DocType", 
- "document_type": "Transaction", 
+ "document_type": "Document", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -191,7 +191,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-09-07 15:51:26", 
+ "modified": "2015-09-14 02:55:57.100488", 
  "modified_by": "Administrator", 
  "module": "HR", 
  "name": "Job Applicant", 

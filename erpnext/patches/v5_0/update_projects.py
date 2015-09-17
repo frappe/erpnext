@@ -6,6 +6,7 @@ def execute():
 	frappe.reload_doc("projects", "doctype", "project_task")
 	frappe.reload_doctype("Task")
 	frappe.reload_doc("projects", "doctype", "task_depends_on")
+	frappe.reload_doc("projects", "doctype", "time_log")
 
 	for m in frappe.get_all("Project Milestone", "*"):
 		if (m.milestone and m.milestone_date

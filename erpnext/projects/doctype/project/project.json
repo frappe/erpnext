@@ -7,7 +7,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
- "document_type": "Master", 
+ "document_type": "Setup", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -900,7 +900,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 4, 
- "modified": "2015-09-07 15:51:26", 
+ "modified": "2015-09-14 02:55:59.157775", 
  "modified_by": "Administrator", 
  "module": "Projects", 
  "name": "Project", 

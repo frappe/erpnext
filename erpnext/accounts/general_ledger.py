@@ -27,14 +27,25 @@ def process_gl_map(gl_map, merge_entries=True):
 		gl_map = merge_similar_entries(gl_map)
 
 	for entry in gl_map:
-		# toggle debit, credit if negative entry
+		# toggle debit, credit if negative entry		
 		if flt(entry.debit) < 0:
 			entry.credit = flt(entry.credit) - flt(entry.debit)
 			entry.debit = 0.0
+			
+		if flt(entry.debit_in_account_currency) < 0:
+			entry.credit_in_account_currency = \
+				flt(entry.credit_in_account_currency) - flt(entry.debit_in_account_currency)
+			entry.debit_in_account_currency = 0.0
+		
 		if flt(entry.credit) < 0:
 			entry.debit = flt(entry.debit) - flt(entry.credit)
 			entry.credit = 0.0
-
+			
+		if flt(entry.credit_in_account_currency) < 0:
+			entry.debit_in_account_currency = \
+				flt(entry.debit_in_account_currency) - flt(entry.credit_in_account_currency)
+			entry.credit_in_account_currency = 0.0
+			
 	return gl_map
 
 def merge_similar_entries(gl_map):
@@ -45,7 +56,11 @@ def merge_similar_entries(gl_map):
 		same_head = check_if_in_list(entry, merged_gl_map)
 		if same_head:
 			same_head.debit	= flt(same_head.debit) + flt(entry.debit)
+			same_head.debit_in_account_currency	= \
+				flt(same_head.debit_in_account_currency) + flt(entry.debit_in_account_currency)
 			same_head.credit = flt(same_head.credit) + flt(entry.credit)
+			same_head.credit_in_account_currency = \
+				flt(same_head.credit_in_account_currency) + flt(entry.credit_in_account_currency)
 		else:
 			merged_gl_map.append(entry)
 

@@ -7,7 +7,7 @@
  "custom": 0, 
  "docstatus": 0, 
  "doctype": "DocType", 
- "document_type": "Transaction", 
+ "document_type": "Document", 
  "fields": [
   {
    "allow_on_submit": 0, 
@@ -84,7 +84,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-03-23 04:47:36.505462", 
+ "modified": "2015-09-14 02:55:58.113810", 
  "modified_by": "Administrator", 
  "module": "CRM", 
  "name": "Newsletter List Subscriber", 

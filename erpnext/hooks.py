@@ -27,7 +27,7 @@ blogs.
 """
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "6.1.1"
+app_version = "6.2.0"
 github_link = "https://github.com/frappe/erpnext"
 
 error_report_email = "support@erpnext.com"
@@ -120,7 +120,7 @@ scheduler_events = {
 	]
 }
 
-default_mail_footer = """<div style="padding: 15px; text-align: center;">
+default_mail_footer = """<div style="text-align: center;">
 	<a href="https://erpnext.com?source=via_email_footer" target="_blank" style="color: #8d99a6;">
 		Sent via ERPNext
 	</a>

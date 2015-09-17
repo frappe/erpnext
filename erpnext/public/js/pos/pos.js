@@ -473,13 +473,11 @@ erpnext.pos.PointOfSale = Class.extend({
 			}
 			me.frm.set_value("mode_of_payment", values.mode_of_payment);
 
-			//me.frm.cscript.calculate_taxes_and_totals();
-
-			var paid_amount = flt((flt(values.paid_amount) - flt(values.change)) / me.frm.doc.conversion_rate, precision("paid_amount"));
+			var paid_amount = flt((flt(values.paid_amount) - flt(values.change)), precision("paid_amount"));
 			me.frm.set_value("paid_amount", paid_amount);
-
+			
 			// specifying writeoff amount here itself, so as to avoid recursion issue
-			me.frm.set_value("write_off_amount", me.frm.doc.base_grand_total - paid_amount);
+			me.frm.set_value("write_off_amount", me.frm.doc.grand_total - paid_amount);
 			me.frm.set_value("outstanding_amount", 0);
 
 			me.frm.savesubmit(this);
