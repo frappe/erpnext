@@ -2,13 +2,13 @@
     <a class="no-decoration" href="/issues?name={{ doc.name }}" no-pjax>
     <div class="row">
         <div class="col-xs-8">
-            <span class="indicator {{ "red" if doc.status=="Open" else "blue"   }}">
+            <span class="indicator {{ "red" if doc.status=="Open" else "darkgrey"   }}">
                 {{ doc.name }}</span>
                 <span style="margin-left: 15px;">
                     {{ doc.subject }}</span>
         </div>
-        <div class="col-xs-4 text-right small">
-            {{ frappe.format_date(doc.creation) }}
+        <div class="col-xs-4 text-right small text-muted">
+            {{ frappe.format_date(doc.modified) }}
         </div>
     </div>
     </a>

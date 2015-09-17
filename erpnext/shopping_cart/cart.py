@@ -28,6 +28,8 @@ def get_cart_quotation(doc=None):
 		doc = quotation
 		set_cart_count(quotation)
 
+	print get_applicable_shipping_rules(party)
+
 	return {
 		"doc": decorate_quotation_doc(doc),
 		"addresses": [{"name": address.name, "display": address.display}
@@ -63,7 +65,7 @@ def place_order():
 	return sales_order.name
 
 @frappe.whitelist()
-def update_cart(item_code, qty, with_doc):
+def update_cart(item_code, qty, with_items=False):
 	quotation = _get_cart_quotation()
 
 	qty = flt(qty)
@@ -95,8 +97,15 @@ def update_cart(item_code, qty, with_doc):
 
 	set_cart_count(quotation)
 
-	if with_doc:
-		return get_cart_quotation(quotation)
+
+	if with_items:
+		context = get_cart_quotation(quotation)
+		return {
+			"items": frappe.render_template("templates/includes/cart/cart_items.html",
+				context),
+			"taxes": frappe.render_template("templates/includes/order/order_taxes.html",
+				context),
+		}
 	else:
 		return quotation.name
 

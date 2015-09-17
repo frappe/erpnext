@@ -35,11 +35,9 @@
             	</div>
             </div>
             {% if doc.items %}
-            {% for d in doc.items %}
-            <div class="cart-item">
-                {% include "templates/includes/cart/cart_item_line.html" %}
+            <div class="cart-items">
+            {% include "templates/includes/cart/cart_items.html" %}
             </div>
-            {% endfor %}
             {% else %}
             <p>{{ _("Cart is Empty") }}</p>
             {% endif %}
@@ -48,7 +46,7 @@
         <!-- taxes -->
         <div class="cart-taxes row small">
             <div class="col-sm-8"><!-- empty --></div>
-            <div class="col-sm-4">
+            <div class="col-sm-4 cart-tax-items">
                 {% include "templates/includes/order/order_taxes.html" %}
             </div>
         </div>
