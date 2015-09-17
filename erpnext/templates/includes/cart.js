@@ -33,7 +33,7 @@ $.extend(shopping_cart, {
 					},
 					callback: function(r) {
 						if(!r.exc) {
-							$('.cart-addresses').html(r.message);
+							$(".cart-tax-items").html(r.message.taxes);
 						}
 					}
 				});
@@ -54,12 +54,14 @@ $.extend(shopping_cart, {
 		// bind update button
 		$(".cart-items").on("change", ".cart-qty", function() {
 			var item_code = $(this).attr("data-item-code");
+			frappe.freeze();
 			shopping_cart.update_cart({
 				item_code: item_code,
 				qty: $(this).val(),
 				with_items: 1,
 				btn: this,
 				callback: function(r) {
+					frappe.unfreeze();
 					if(!r.exc) {
 						$(".cart-items").html(r.message.items);
 						$(".cart-tax-items").html(r.message.taxes);

@@ -131,8 +131,11 @@ def update_cart_address(address_fieldname, address_name):
 	quotation.flags.ignore_permissions = True
 	quotation.save()
 
-	return frappe.render_template("templates/includes/cart/cart_address.html",
-		get_cart_quotation(quotation))
+	context = get_cart_quotation(quotation)
+	return {
+		"taxes": frappe.render_template("templates/includes/order/order_taxes.html",
+			context),
+		}
 
 def guess_territory():
 	territory = None
@@ -224,21 +227,19 @@ def apply_cart_settings(party=None, quotation=None):
 		quotation = _get_cart_quotation(party)
 
 	cart_settings = frappe.get_doc("Shopping Cart Settings")
-	billing_territory = get_address_territory(quotation.customer_address) or \
-		party.territory or get_root_of("Territory")
 
-	set_price_list_and_rate(quotation, cart_settings, billing_territory)
+	set_price_list_and_rate(quotation, cart_settings)
 
 	quotation.run_method("calculate_taxes_and_totals")
 
-	set_taxes(quotation, cart_settings, billing_territory)
+	set_taxes(quotation, cart_settings)
 
 	_apply_shipping_rule(party, quotation, cart_settings)
 
-def set_price_list_and_rate(quotation, cart_settings, billing_territory):
+def set_price_list_and_rate(quotation, cart_settings):
 	"""set price list based on billing territory"""
 
-	_set_price_list(quotation, cart_settings, billing_territory)
+	_set_price_list(quotation, cart_settings)
 
 	# reset values
 	quotation.price_list_currency = quotation.currency = \
@@ -252,24 +253,29 @@ def set_price_list_and_rate(quotation, cart_settings, billing_territory):
 	# set it in cookies for using in product page
 	frappe.local.cookie_manager.set_cookie("selling_price_list", quotation.selling_price_list)
 
-def _set_price_list(quotation, cart_settings, billing_territory):
+def _set_price_list(quotation, cart_settings):
+	"""Set price list based on customer or shopping cart default"""
+	if quotation.selling_price_list:
+		return
+
 	# check if customer price list exists
 	selling_price_list = None
 	if quotation.customer:
-		selling_price_list = frappe.db.get_value("Customer", quotation.customer, "default_price_list")
+		from erpnext.accounts.party import get_default_price_list
+		selling_price_list = get_default_price_list(frappe.get_doc("Customer", quotation.customer))
 
 	# else check for territory based price list
 	if not selling_price_list:
-		selling_price_list = cart_settings.get_price_list(billing_territory)
+		selling_price_list = cart_settings.price_list
 
 	quotation.selling_price_list = selling_price_list
 
-def set_taxes(quotation, cart_settings, billing_territory):
+def set_taxes(quotation, cart_settings):
 	"""set taxes based on billing territory"""
 	from erpnext.accounts.party import set_taxes
-	
+
 	customer_group = frappe.db.get_value("Customer", quotation.customer, "customer_group")
-	
+
 	quotation.taxes_and_charges = set_taxes(quotation.customer, "Customer", \
 		quotation.transaction_date, quotation.company, customer_group, None, \
 		quotation.customer_address, quotation.shipping_address_name, 1)
@@ -331,38 +337,39 @@ def apply_shipping_rule(shipping_rule):
 	return get_cart_quotation(quotation)
 
 def _apply_shipping_rule(party=None, quotation=None, cart_settings=None):
-	shipping_rules = get_shipping_rules(party, quotation, cart_settings)
+	if not quotation.shipping_rule:
+		shipping_rules = get_shipping_rules(quotation, cart_settings)
 
-	if not shipping_rules:
-		return
+		if not shipping_rules:
+			return
 
-	elif quotation.shipping_rule not in shipping_rules:
-		quotation.shipping_rule = shipping_rules[0]
+		elif quotation.shipping_rule not in shipping_rules:
+			quotation.shipping_rule = shipping_rules[0]
 
-	quotation.run_method("apply_shipping_rule")
-	quotation.run_method("calculate_taxes_and_totals")
+	if quotation.shipping_rule:
+		quotation.run_method("apply_shipping_rule")
+		quotation.run_method("calculate_taxes_and_totals")
 
 def get_applicable_shipping_rules(party=None, quotation=None):
-	shipping_rules = get_shipping_rules(party, quotation)
+	shipping_rules = get_shipping_rules(quotation)
 
 	if shipping_rules:
 		rule_label_map = frappe.db.get_values("Shipping Rule", shipping_rules, "label")
 		# we need this in sorted order as per the position of the rule in the settings page
 		return [[rule, rule_label_map.get(rule)] for rule in shipping_rules]
 
-def get_shipping_rules(party=None, quotation=None, cart_settings=None):
-	if not party:
-		party = get_lead_or_customer()
+def get_shipping_rules(quotation=None, cart_settings=None):
 	if not quotation:
 		quotation = _get_cart_quotation()
-	if not cart_settings:
-		cart_settings = frappe.get_doc("Shopping Cart Settings")
 
-	# set shipping rule based on shipping territory
-	shipping_territory = get_address_territory(quotation.shipping_address_name) or \
-		party.territory
-
-	shipping_rules = cart_settings.get_shipping_rules(shipping_territory)
+	shipping_rules = []
+	if quotation.shipping_address_name:
+		country = frappe.db.get_value("Address", quotation.shipping_address_name, "country")
+		if country:
+			shipping_rules = frappe.db.sql_list("""select distinct sr.name
+				from `tabShipping Rule Country` src, `tabShipping Rule` sr
+				where src.country = %s and
+				sr.disabled != 1 and sr.name = src.parent""", country)
 
 	return shipping_rules
 

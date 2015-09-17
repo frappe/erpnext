@@ -18,7 +18,6 @@ class ShoppingCartSettings(Document):
 
 	def validate(self):
 		if self.enabled:
-			self.validate_tax_masters()
 			self.validate_exchange_rates_exist()
 
 	def validate_exchange_rates_exist(self):
@@ -29,7 +28,7 @@ class ShoppingCartSettings(Document):
 				raise_exception=ShoppingCartSetupError)
 
 		price_list_currency_map = frappe.db.get_values("Price List",
-			[d.selling_price_list for d in self.get("price_lists")],
+			[self.price_list],
 			"currency")
 
 		# check if all price lists have a currency
@@ -51,14 +50,6 @@ class ShoppingCartSettings(Document):
 			if missing:
 				msgprint(_("Missing Currency Exchange Rates for {0}").format(comma_and(missing)),
 					raise_exception=ShoppingCartSetupError)
-
-	def get_price_list(self, billing_territory):
-		price_list = self.get_name_from_territory(billing_territory, "price_lists", "selling_price_list")
-		if not (price_list and price_list[0]):
-			price_list = self.get_name_from_territory(self.default_territory or get_root_of("Territory"),
-				"price_lists", "selling_price_list")
-
-		return price_list and price_list[0] or None
 
 	def validate_tax_rule(self):
 		if not frappe.db.get_value("Tax Rule", {"use_for_shopping_cart" : 1}, "name"):

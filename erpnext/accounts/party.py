@@ -103,6 +103,19 @@ def set_other_values(out, party, party_type):
 		if party.get("default_" + f):
 			out[f] = party.get("default_" + f)
 
+def get_default_price_list(party):
+	"""Return default price list for party (Document object)"""
+	if party.default_price_list:
+		return party.default_price_list
+
+	if party.doctype == "Customer":
+		price_list =  frappe.db.get_value("Customer Group",
+			party.customer_group, "default_price_list")
+		if price_list:
+			return price_list
+
+	return None
+
 def set_price_list(out, party, party_type, given_price_list):
 	# price list
 	price_list = filter(None, get_user_permissions().get("Price List", []))
@@ -110,11 +123,7 @@ def set_price_list(out, party, party_type, given_price_list):
 		price_list = price_list[0] if len(price_list)==1 else None
 
 	if not price_list:
-		price_list = party.default_price_list
-
-	if not price_list and party_type=="Customer":
-		price_list =  frappe.db.get_value("Customer Group",
-			party.customer_group, "default_price_list")
+		price_list = get_default_price_list(party)
 
 	if not price_list:
 		price_list = given_price_list

@@ -25,7 +25,7 @@ class TestShoppingCart(unittest.TestCase):
 		# test if lead is created and quotation with new lead is fetched
 		quotation = get_quotation()
 		self.assertEquals(quotation.quotation_to, "Lead")
-		self.assertEquals(frappe.db.get_value("Lead", quotation.lead, "email_id"), 
+		self.assertEquals(frappe.db.get_value("Lead", quotation.lead, "email_id"),
 			"test_cart_user@example.com")
 		self.assertEquals(quotation.customer, None)
 		self.assertEquals(quotation.contact_email, frappe.session.user)
@@ -61,7 +61,7 @@ class TestShoppingCart(unittest.TestCase):
 
 		# remove from cart
 		self.remove_all_items_from_cart()
-		
+
 		# add first item
 		set_item_in_cart("_Test Item", 1)
 		quotation = self.test_get_cart_lead()
@@ -109,12 +109,12 @@ class TestShoppingCart(unittest.TestCase):
 		quotation = self.test_get_cart_lead()
 		self.assertEquals(quotation.net_total, 0)
 		self.assertEquals(len(quotation.get("items")), 0)
-		
-		
-	def test_taxe_rule(self):	
+
+
+	def test_tax_rule(self):
 		self.login_as_customer()
 		quotation = self.create_quotation()
-		
+
 		from erpnext.accounts.party import set_taxes
 
 		tax_rule_master = set_taxes(quotation.customer, "Customer", \
@@ -123,12 +123,12 @@ class TestShoppingCart(unittest.TestCase):
 
 		self.assertEquals(quotation.taxes_and_charges, tax_rule_master)
 		self.assertEquals(quotation.total_taxes_and_charges, 1000.0)
-		
+
 		self.remove_test_quotation(quotation)
-	
+
 	def create_quotation(self):
 		quotation = frappe.new_doc("Quotation")
-		
+
 		values = {
 			"doctype": "Quotation",
 			"quotation_to": "Customer",
@@ -146,13 +146,13 @@ class TestShoppingCart(unittest.TestCase):
 			"taxes": frappe.get_doc("Sales Taxes and Charges Template", "_Test Tax 1").taxes,
 			"company": "_Test Company"
 		}
-		
+
 		quotation.update(values)
-		
+
 		quotation.insert(ignore_permissions=True)
-		
+
 		return quotation
-	
+
 	def remove_test_quotation(self, quotation):
 		frappe.set_user("Administrator")
 		quotation.delete()
@@ -180,7 +180,7 @@ class TestShoppingCart(unittest.TestCase):
 			])
 			settings.set("shipping_rules", {"doctype": "Shopping Cart Shipping Rule", "parentfield": "shipping_rules",
 					"shipping_rule": "_Test Shipping Rule - India"})
-					
+
 
 		settings.save()
 		frappe.local.shopping_cart_settings = None
@@ -239,11 +239,11 @@ class TestShoppingCart(unittest.TestCase):
 			"lead_name": "_Test Website Lead",
 			"phone": "+91 0000000000"
 		}).insert(ignore_permissions=True)
-		
+
 	def remove_all_items_from_cart(self):
 		quotation = get_quotation()
 		quotation.set("items", [])
 		quotation.save(ignore_permissions=True)
-		
+
 test_dependencies = ["Sales Taxes and Charges Template", "Price List", "Item Price", "Shipping Rule", "Currency Exchange",
 	"Customer Group", "Lead", "Customer", "Contact", "Address", "Item", "Tax Rule"]

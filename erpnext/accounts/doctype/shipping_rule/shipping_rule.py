@@ -22,6 +22,9 @@ class ShippingRule(Document):
 		self.sort_shipping_rule_conditions()
 		self.validate_overlapping_shipping_rule_conditions()
 
+		if self.worldwide_shipping:
+			self.countries = []
+
 	def validate_from_to_values(self):
 		zero_to_values = []
 
