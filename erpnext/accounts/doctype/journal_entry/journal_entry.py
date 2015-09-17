@@ -551,7 +551,7 @@ def get_payment_entry_from_purchase_invoice(purchase_invoice):
 	"""Returns new Journal Entry document as dict for given Purchase Invoice"""
 	pi = frappe.get_doc("Purchase Invoice", purchase_invoice)
 
-	exchange_rate = get_exchange_rate(pi.debit_to, pi.party_account_currency, pi.company,
+	exchange_rate = get_exchange_rate(pi.credit_to, pi.party_account_currency, pi.company,
 		pi.doctype, pi.name)
 
 	jv = get_payment_entry(pi)
