@@ -66,7 +66,7 @@ def execute():
 
 	# Set party account if default currency of party other than company's default currency
 	for dt in ("Customer", "Supplier"):
-		parties = frappe.get_all(dt)
+		parties = frappe.get_all(dt, filters={"docstatus": 0})
 		for p in parties:
 			party = frappe.get_doc(dt, p.name)
 			party_accounts = []
