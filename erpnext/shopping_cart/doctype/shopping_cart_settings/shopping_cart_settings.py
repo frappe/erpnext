@@ -20,9 +20,9 @@ class ShoppingCartSettings(Document):
 	def validate(self):
 		if self.enabled:
 			self.validate_price_lists()
-			self.validate_tax_masters()
 			self.validate_exchange_rates_exist()
-
+			self.validate_tax_rule()
+			
 	def validate_overlapping_territories(self, parentfield, fieldname):
 		# for displaying message
 		doctype = self.meta.get_field(parentfield).options
@@ -48,20 +48,14 @@ class ShoppingCartSettings(Document):
 			msgprint(_("Please specify a Price List which is valid for Territory") +
 				": " + self.default_territory, raise_exception=ShoppingCartSetupError)
 
-	def validate_tax_masters(self):
-		self.validate_overlapping_territories("sales_taxes_and_charges_masters",
-			"sales_taxes_and_charges_master")
-
 	def get_territory_name_map(self, parentfield, fieldname):
 		territory_name_map = {}
 
 		# entries in table
 		names = [doc.get(fieldname) for doc in self.get(parentfield)]
-
 		if names:
 			# for condition in territory check
 			parenttype = frappe.get_meta(self.meta.get_options(parentfield)).get_options(fieldname)
-
 			# to validate territory overlap
 			# make a map of territory: [list of names]
 			# if list against each territory has more than one element, raise exception
@@ -75,7 +69,6 @@ class ShoppingCartSettings(Document):
 
 				if len(territory_name_map[territory]) > 1:
 					territory_name_map[territory].sort(key=lambda val: names.index(val))
-
 		return territory_name_map
 
 	def validate_exchange_rates_exist(self):
@@ -112,7 +105,6 @@ class ShoppingCartSettings(Document):
 	def get_name_from_territory(self, territory, parentfield, fieldname):
 		name = None
 		territory_name_map = self.get_territory_name_map(parentfield, fieldname)
-
 		if territory_name_map.get(territory):
 			name = territory_name_map.get(territory)
 		else:
@@ -131,7 +123,11 @@ class ShoppingCartSettings(Document):
 				"price_lists", "selling_price_list")
 
 		return price_list and price_list[0] or None
-
+		
+	def validate_tax_rule(self):
+		if not frappe.db.get_value("Tax Rule", {"use_for_shopping_cart" : 1}, "name"):
+			frappe.throw(frappe._("Set Tax Rule for shopping cart"), ShoppingCartSetupError)
+			
 	def get_tax_master(self, billing_territory):
 		tax_master = self.get_name_from_territory(billing_territory, "sales_taxes_and_charges_masters",
 			"sales_taxes_and_charges_master")
@@ -167,52 +163,4 @@ def get_default_territory():
 def check_shopping_cart_enabled():
 	if not get_shopping_cart_settings().enabled:
 		frappe.throw(_("You need to enable Shopping Cart"), ShoppingCartSetupError)
-
-def apply_shopping_cart_settings(quotation, method):
-	"""Called via a validate hook on Quotation"""
-	from erpnext.shopping_cart import get_party
-	if quotation.order_type != "Shopping Cart":
-		return
-
-	quotation.billing_territory = (get_territory_from_address(quotation.customer_address)
-		or get_party(quotation.contact_email).territory or get_default_territory())
-	quotation.shipping_territory = (get_territory_from_address(quotation.shipping_address_name)
-		or get_party(quotation.contact_email).territory or get_default_territory())
-
-	set_price_list(quotation)
-	set_taxes_and_charges(quotation)
-	quotation.calculate_taxes_and_totals()
-	set_shipping_rule(quotation)
-
-def set_price_list(quotation):
-	previous_selling_price_list = quotation.selling_price_list
-	quotation.selling_price_list = get_shopping_cart_settings().get_price_list(quotation.billing_territory)
-
-	if not quotation.selling_price_list:
-		quotation.selling_price_list = get_shopping_cart_settings().get_price_list(get_default_territory())
-
-	if previous_selling_price_list != quotation.selling_price_list:
-		quotation.price_list_currency = quotation.currency = quotation.plc_conversion_rate = quotation.conversion_rate = None
-		for d in quotation.get("items"):
-			d.price_list_rate = d.discount_percentage = d.rate = d.amount = None
-
-	quotation.set_price_list_and_item_details()
-
-def set_taxes_and_charges(quotation):
-	previous_taxes_and_charges = quotation.taxes_and_charges
-	quotation.taxes_and_charges = get_shopping_cart_settings().get_tax_master(quotation.billing_territory)
-
-	if previous_taxes_and_charges != quotation.taxes_and_charges:
-		quotation.set_other_charges()
-
-def set_shipping_rule(quotation):
-	shipping_rules = get_shopping_cart_settings().get_shipping_rules(quotation.shipping_territory)
-	if not shipping_rules:
-		quotation.remove_shipping_charge()
-		return
-
-	if quotation.shipping_rule not in shipping_rules:
-		quotation.remove_shipping_charge()
-		quotation.shipping_rule = shipping_rules[0]
-
-	quotation.apply_shipping_rule()
+		

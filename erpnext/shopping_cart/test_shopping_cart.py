@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from erpnext.shopping_cart import get_quotation, set_item_in_cart
+from erpnext.shopping_cart import get_quotation, set_item_in_cart, get_party
 
 class TestShoppingCart(unittest.TestCase):
 	"""
@@ -109,6 +109,53 @@ class TestShoppingCart(unittest.TestCase):
 		quotation = self.test_get_cart_lead()
 		self.assertEquals(quotation.net_total, 0)
 		self.assertEquals(len(quotation.get("items")), 0)
+		
+		
+	def test_taxe_rule(self):	
+		self.login_as_customer()
+		quotation = self.create_quotation()
+		
+		from erpnext.accounts.party import set_taxes
+
+		tax_rule_master = set_taxes(quotation.customer, "Customer", \
+			quotation.transaction_date, quotation.company, None, None, \
+			quotation.customer_address, quotation.shipping_address_name, 1)
+
+		self.assertEquals(quotation.taxes_and_charges, tax_rule_master)
+		self.assertEquals(quotation.total_taxes_and_charges, 1000.0)
+		
+		self.remove_test_quotation(quotation)
+	
+	def create_quotation(self):
+		quotation = frappe.new_doc("Quotation")
+		
+		values = {
+			"doctype": "Quotation",
+			"quotation_to": "Customer",
+			"order_type": "Shopping Cart",
+			"customer": get_party(frappe.session.user).name,
+			"docstatus": 0,
+			"contact_email": frappe.session.user,
+			"selling_price_list": "_Test Price List Rest of the World",
+			"currency": "USD",
+			"taxes_and_charges" : "_Test Tax 1",
+			"items": [{
+				"item_code": "_Test Item",
+				"qty": 1
+			}],
+			"taxes": frappe.get_doc("Sales Taxes and Charges Template", "_Test Tax 1").taxes,
+			"company": "_Test Company"
+		}
+		
+		quotation.update(values)
+		
+		quotation.insert(ignore_permissions=True)
+		
+		return quotation
+	
+	def remove_test_quotation(self, quotation):
+		frappe.set_user("Administrator")
+		quotation.delete()
 
 	# helper functions
 	def enable_shopping_cart(self):
@@ -131,15 +178,9 @@ class TestShoppingCart(unittest.TestCase):
 				{"doctype": "Shopping Cart Price List", "parentfield": "price_lists",
 					"selling_price_list": "_Test Price List Rest of the World"}
 			])
-			settings.set("sales_taxes_and_charges_masters", [
-				# tax masters
-				{"doctype": "Shopping Cart Taxes and Charges Master", "parentfield": "sales_taxes_and_charges_masters",
-					"sales_taxes_and_charges_master": "_Test India Tax Master"},
-				{"doctype": "Shopping Cart Taxes and Charges Master", "parentfield": "sales_taxes_and_charges_masters",
-					"sales_taxes_and_charges_master": "_Test Sales Taxes and Charges Template - Rest of the World"},
-			])
 			settings.set("shipping_rules", {"doctype": "Shopping Cart Shipping Rule", "parentfield": "shipping_rules",
 					"shipping_rule": "_Test Shipping Rule - India"})
+					
 
 		settings.save()
 		frappe.local.shopping_cart_settings = None
@@ -203,7 +244,6 @@ class TestShoppingCart(unittest.TestCase):
 		quotation = get_quotation()
 		quotation.set("items", [])
 		quotation.save(ignore_permissions=True)
-
-
+		
 test_dependencies = ["Sales Taxes and Charges Template", "Price List", "Item Price", "Shipping Rule", "Currency Exchange",
-	"Customer Group", "Lead", "Customer", "Contact", "Address", "Item"]
+	"Customer Group", "Lead", "Customer", "Contact", "Address", "Item", "Tax Rule"]
