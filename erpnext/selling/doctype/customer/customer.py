@@ -31,8 +31,9 @@ class Customer(TransactionBase):
 	def validate_mandatory(self):
 		if frappe.defaults.get_global_default('cust_master_name') == 'Naming Series' and not self.naming_series:
 			frappe.throw(_("Series is mandatory"), frappe.MandatoryError)
-			
+
 	def validate(self):
+		self.flags.is_new_doc = self.is_new()
 		self.validate_mandatory()
 		validate_accounting_currency(self)
 		validate_party_account(self)
@@ -76,7 +77,9 @@ class Customer(TransactionBase):
 		self.update_lead_status()
 		self.update_address()
 		self.update_contact()
-		self.create_lead_address_contact()
+
+		if self.flags.is_new_doc:
+			self.create_lead_address_contact()
 
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):
@@ -131,7 +134,7 @@ def get_dashboard_info(customer):
 	billing_this_year = frappe.db.sql("""
 		select sum(ifnull(debit_in_account_currency, 0)) - sum(ifnull(credit_in_account_currency, 0))
 		from `tabGL Entry`
-		where voucher_type='Sales Invoice' and party_type = 'Customer' 
+		where voucher_type='Sales Invoice' and party_type = 'Customer'
 			and party=%s and fiscal_year = %s""",
 		(customer, frappe.db.get_default("fiscal_year")))
 
