@@ -75,7 +75,9 @@ class ReceivablePayableReport(object):
 		voucher_details = self.get_voucher_details(args.get("party_type"))
 
 		future_vouchers = self.get_entries_after(self.filters.report_date, args.get("party_type"))
-
+		
+		company_currency = frappe.db.get_value("Company", self.filters.get("company"), "default_currency")
+		
 		data = []
 		for gle in self.get_entries_till(self.filters.report_date, args.get("party_type")):
 			if self.is_receivable_or_payable(gle, dr_or_cr, future_vouchers):
@@ -115,8 +117,13 @@ class ReceivablePayableReport(object):
 						row += [self.get_territory(gle.party)]
 					if args.get("party_type") == "Supplier":
 						row += [self.get_supplier_type(gle.party)]
+						
+					if self.filters.get(scrub(args.get("party_type"))):
+						row.append(gle.account_currency)
+					else:
+						row.append(company_currency)
 
-					row += [gle.account_currency, gle.remarks]
+					row.append(gle.remarks)
 					data.append(row)
 
 		return data
