@@ -207,12 +207,14 @@ class Company(Document):
 		frappe.defaults.clear_default("company", value=self.name)
 
 		# clear default accounts, warehouses from item
-		for f in ["default_warehouse", "website_warehouse"]:
-			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
-				% (f, f, ', '.join(['%s']*len(warehouses))), tuple(warehouses))
+		if warehouses:
+			
+			for f in ["default_warehouse", "website_warehouse"]:
+				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
+					% (f, f, ', '.join(['%s']*len(warehouses))), tuple(warehouses))
 
-		frappe.db.sql("""delete from `tabItem Reorder` where warehouse in (%s)"""
-			% ', '.join(['%s']*len(warehouses)), tuple(warehouses))
+			frappe.db.sql("""delete from `tabItem Reorder` where warehouse in (%s)"""
+				% ', '.join(['%s']*len(warehouses)), tuple(warehouses))
 
 		for f in ["income_account", "expense_account"]:
 			frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
