@@ -516,7 +516,7 @@ apps/erpnext/erpnext/config/accounts.py +84,Financial / accounting year.,Exercí
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +172,"Sorry, Serial Nos cannot be merged","Desculpe, os números de ordem não podem ser mescladas"
 DocType: Email Digest,New Supplier Quotations,Novas cotações de fornecedores
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +608,Make Sales Order,Criar ordem de vendas
-DocType: Project Task,Project Task,Projeto Tarefa
+DocType: Project Task,Project Task,Tarefa do Projeto
 ,Lead Id,chumbo Id
 DocType: C-Form Invoice Detail,Grand Total,Total Geral
 DocType: About Us Settings,Website Manager,Administrador do site
@@ -636,7 +636,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +138,Biomach
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +6,Aerospace,Aeroespacial
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +19,Welcome,Bem vindo
 DocType: Journal Entry,Credit Card Entry,Registro de cartão de crédito
-apps/erpnext/erpnext/projects/report/daily_time_log_summary/daily_time_log_summary.py +18,Task Subject,Tarefa Assunto
+apps/erpnext/erpnext/projects/report/daily_time_log_summary/daily_time_log_summary.py +18,Task Subject,Assunto da Tarefa
 apps/erpnext/erpnext/config/stock.py +28,Goods received from Suppliers.,Mercadorias recebidas de fornecedores.
 DocType: Communication,Open,Abrir
 DocType: Lead,Campaign Name,Nome da Campanha
@@ -1311,7 +1311,7 @@ DocType: Maintenance Visit,Maintenance Visit,Visita de manutenção
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +49,Customer > Customer Group > Territory,Cliente> Grupo Cliente> Território
 DocType: Sales Invoice Item,Available Batch Qty at Warehouse,Lote disponível Qtde no Warehouse
 DocType: Time Log Batch Detail,Time Log Batch Detail,Tempo Log Detail Batch
-DocType: Workflow State,Tasks,tarefas
+DocType: Workflow State,Tasks,Tarefas
 DocType: Landed Cost Voucher,Landed Cost Help,Landed Cost Ajuda
 DocType: Event,Tuesday,Terça-feira
 DocType: Leave Block List,Block Holidays on important days.,Bloco Feriados em dias importantes.
@@ -1354,7 +1354,7 @@ apps/erpnext/erpnext/config/hr.py +23,Claims for company expense.,Os pedidos de 
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +7,Centrifugal casting,Fundição centrífuga
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +118,Magnetic field-assisted finishing,Magnetic acabamento assistida-campo
 DocType: Company,Default Holiday List,Lista Padrão de Feriados
-apps/erpnext/erpnext/projects/doctype/time_log/time_log.py +229,Task is Mandatory if Time Log is against a project,Tarefa é obrigatória se o Time Log é contra um projeto
+apps/erpnext/erpnext/projects/doctype/time_log/time_log.py +229,Task is Mandatory if Time Log is against a project,Tarefa é obrigatória se o registro de atividade é contra um projeto
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +165,Stock Liabilities,Passivo estoque
 DocType: Purchase Receipt,Supplier Warehouse,Almoxarifado do Fornecedor
 DocType: Opportunity,Contact Mobile No,Celular do Contato
@@ -1388,7 +1388,7 @@ apps/frappe/frappe/core/page/permission_manager/permission_manager.js +379,Add,A
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +91,Conversion rate cannot be 0 or 1,A taxa de conversão não pode ser 0 ou 1
 DocType: Accounts Settings,Credit Controller,Controlador de crédito
 DocType: Delivery Note,Vehicle Dispatch Date,Veículo Despacho Data
-apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +56,Task is mandatory if Expense Claim is against a Project,Tarefa é obrigatória se Despesa reivindicação é contra um projeto
+apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +56,Task is mandatory if Expense Claim is against a Project,Tarefa é obrigatória se a Reinvindicação de Despesa é contra um projeto
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +189,Purchase Receipt {0} is not submitted,Recibo de compra {0} não é submetido
 DocType: Company,Default Payable Account,Conta a Pagar Padrão
 apps/erpnext/erpnext/config/website.py +13,"Settings for online shopping cart such as shipping rules, price list etc.","Definições para carrinho de compras on-line, tais como regras de navegação, lista de preços etc."
@@ -3275,7 +3275,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +123,Spindle
 DocType: Material Request,% of materials ordered against this Material Request,% do material encomendado contra esta Requisição de Material
 DocType: BOM,Last Purchase Rate,Valor da última compra
 DocType: Account,Asset,Ativo
-DocType: Project Task,Task ID,Task ID
+DocType: Project Task,Task ID,ID Tarefa
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +395,"e.g. ""MC""","por exemplo "" MC """
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +82,Stock cannot exist for Item {0} since has variants,Stock não pode existir por item {0} já que tem variantes
 ,Sales Person-wise Transaction Summary,Resumo da transação Pessoa-wise vendas
@@ -3386,7 +3386,7 @@ apps/erpnext/erpnext/hr/doctype/employee/employee.py +208,Today is {0}'s birthda
 DocType: Production Planning Tool,Material Request For Warehouse,Pedido de material para Armazém
 DocType: Sales Order Item,For Production,Para Produção
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +99,Please enter sales order in the above table,Por favor entre pedidos de vendas na tabela acima
-DocType: Project Task,View Task,Ver Task
+DocType: Project Task,View Task,Ver Tarefa
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +406,Your financial year begins on,O ano financeiro inicia em
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +46,Please enter Purchase Receipts,Digite recibos de compra
 DocType: Sales Invoice,Get Advances Received,Obter adiantamentos recebidos

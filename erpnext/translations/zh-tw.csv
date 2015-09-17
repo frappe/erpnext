@@ -260,7 +260,7 @@ DocType: Payment Tool,Reference No,參考編號
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +349,Leave Blocked,禁假的
 apps/erpnext/erpnext/stock/doctype/item/item.py +349,Item {0} has reached its end of life on {1},項{0}已達到其壽命結束於{1}
 apps/erpnext/erpnext/accounts/utils.py +306,Annual,全年
-DocType: Stock Reconciliation Item,Stock Reconciliation Item,股票和解項目
+DocType: Stock Reconciliation Item,Stock Reconciliation Item,庫存調整項目
 DocType: Purchase Invoice,In Words will be visible once you save the Purchase Invoice.,購買發票一被儲存，就會顯示出來。
 DocType: Stock Entry,Sales Invoice No,銷售發票號碼
 DocType: Material Request Item,Min Order Qty,最小訂貨量
@@ -349,7 +349,7 @@ apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +504,Select
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,{0} {1} status is Stopped,{0} {1}狀態為停止
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +143,"Item: {0} managed batch-wise, can not be reconciled using \
 					Stock Reconciliation, instead use Stock Entry","項目：{0}管理分批，不能使用\
-股票和解，而是使用股票輸入不甘心"
+庫存調整，而是使用庫存分錄。"
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +242,Purchase Invoice {0} is already submitted,採購發票{0}已經提交
 apps/erpnext/erpnext/accounts/doctype/account/account.js +54,Convert to non-Group,轉換為非集團
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +55,Purchase Receipt must be submitted,購買收據必須提交
@@ -1503,7 +1503,7 @@ DocType: SMS Center,Send To,發送到
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +111,There is not enough leave balance for Leave Type {0},沒有足夠的餘額休假請假類型{0}
 DocType: Sales Team,Contribution to Net Total,貢獻合計淨
 DocType: Sales Invoice Item,Customer's Item Code,客戶的產品編號
-DocType: Stock Reconciliation,Stock Reconciliation,存貨對帳
+DocType: Stock Reconciliation,Stock Reconciliation,庫存調整
 DocType: Territory,Territory Name,地區名稱
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +148,Work-in-Progress Warehouse is required before Submit,工作在進展倉庫提交之前，需要
 apps/erpnext/erpnext/config/hr.py +43,Applicant for a Job.,申請職位
@@ -2094,7 +2094,7 @@ apps/erpnext/erpnext/projects/doctype/time_log/time_log.py +207,Completed Qty ca
 DocType: Features Setup,Quality,品質
 DocType: Contact Us Settings,Introduction,介紹
 DocType: Warranty Claim,Service Address,服務地址
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +76,Max 100 rows for Stock Reconciliation.,最大100行的股票和解。
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +76,Max 100 rows for Stock Reconciliation.,庫存調整最多100行。
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +104,Note: Reference Date exceeds invoice due date by {0} days for {1} {2},注：參考日期超過發票到期日期{0}天{1} {2}
 DocType: Stock Entry,Manufacture,製造
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +13,Please Delivery Note first,請送貨單第一
@@ -2505,7 +2505,7 @@ apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +23,Quic
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +169,Source and target warehouse cannot be same for row {0},列{0}的來源和目標倉庫不可相同
 DocType: Features Setup,Sales Extras,額外銷售
 apps/erpnext/erpnext/accounts/utils.py +311,{0} budget for Account {1} against Cost Center {2} will exceed by {3},{0}預算帳戶{1}對成本中心{2}將超過{3}
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +236,"Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry",差異帳戶必須是資產/負債類型的帳戶，因為此股票和解是一個進入開幕
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +236,"Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry",差異帳戶必須是資產/負債類型的帳戶，因為此庫存調整是一個開始分錄
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +123,Purchase Order number required for Item {0},所需物品{0}的採購訂單號
 DocType: Leave Allocation,Carry Forwarded Leaves,進行轉發葉
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +18,'From Date' must be after 'To Date',“起始日期”必須經過'終止日期'
@@ -2774,7 +2774,7 @@ apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py +54,Please enter atleast 
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +511,Add Users,添加用戶
 DocType: Pricing Rule,Item Group,項目群組
 DocType: Task,Actual Start Date (via Time Logs),實際開始日期（通過時間日誌）
-DocType: Stock Reconciliation Item,Before reconciliation,對帳前
+DocType: Stock Reconciliation Item,Before reconciliation,調整前
 apps/erpnext/erpnext/support/doctype/maintenance_visit/maintenance_visit.py +12,To {0},{0}
 DocType: Purchase Invoice,Taxes and Charges Added (Company Currency),稅收和收費上架（公司貨幣）
 apps/erpnext/erpnext/stock/doctype/item/item.py +192,Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,商品稅行{0}必須有帳戶類型稅或收入或支出或課稅的
@@ -2894,7 +2894,7 @@ apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +627,Hour,小時
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +138,"Serialized Item {0} cannot be updated \
 					using Stock Reconciliation","系列化項目{0}不能被更新\
-使用存貨對帳"
+使用庫存調整"
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +476,Transfer Material to Supplier,轉印材料供應商
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +30,New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,新的序列號不能有倉庫。倉庫必須由存貨分錄或採購入庫單進行設定
 DocType: Lead,Lead Type,引線型

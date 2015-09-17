@@ -1003,7 +1003,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +364,Finished Item
 apps/erpnext/erpnext/config/learn.py +77,Opening Accounting Balance,개시 잔고
 DocType: Sales Invoice Advance,Sales Invoice Advance,선행 견적서
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +391,Nothing to request,요청하지 마
-apps/erpnext/erpnext/projects/doctype/task/task.py +38,'Actual Start Date' can not be greater than 'Actual End Date','실제 시작 날짜는'실제 종료 날짜 '보다 클 수 없습니다
+apps/erpnext/erpnext/projects/doctype/task/task.py +38,'Actual Start Date' can not be greater than 'Actual End Date','시작 날짜가' '종료 날짜 '보다 클 수 없습니다
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +75,Management,관리
 apps/erpnext/erpnext/config/projects.py +33,Types of activities for Time Sheets,시간 시트를위한 활동의 종류
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +13,Investment casting,투자 주조
@@ -1766,7 +1766,7 @@ DocType: Global Defaults,Default Company,기본 회사
 apps/erpnext/erpnext/controllers/stock_controller.py +167,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,비용이나 차이 계정은 필수 항목에 대한 {0}에 영향을 미치기 전체 재고 가치로
 apps/erpnext/erpnext/controllers/accounts_controller.py +299,"Cannot overbill for Item {0} in row {1} more than {2}. To allow overbilling, please set in Stock Settings",행의 항목 {0}에 대한 청구 되요 수 없습니다 {1}보다 {2}.과다 청구가 재고 설정에서 설정하시기 바랍니다 허용하려면
 DocType: Employee,Bank Name,은행 이름
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +38,-Above,-Above
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +38,-Above,-위
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +135,User {0} is disabled,{0} 사용자가 비활성화되어 있습니다
 DocType: Leave Application,Total Leave Days,총 허가 일
 DocType: Email Digest,Note: Email will not be sent to disabled users,참고 : 전자 메일을 사용할 사용자에게 전송되지 않습니다
@@ -2509,7 +2509,7 @@ apps/erpnext/erpnext/accounts/utils.py +311,{0} budget for Account {1} against C
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +236,"Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry","콘텐츠 화해는 열기 항목이기 때문에 차이 계정, 자산 / 부채 형 계정이어야합니다"
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +123,Purchase Order number required for Item {0},구매 주문 번호 항목에 필요한 {0}
 DocType: Leave Allocation,Carry Forwarded Leaves,전달 잎을 운반
-apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +18,'From Date' must be after 'To Date','시작일자'는  '마감일자'이후 여야합니다
+apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +18,'From Date' must be after 'To Date','시작일자'는  '마감일자'이후이 여야합니다
 ,Stock Projected Qty,재고 수량을 예상
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +132,Customer {0} does not belong to project {1},고객 {0} 프로젝트에 속하지 않는 {1}
 DocType: Warranty Claim,From Company,회사에서
