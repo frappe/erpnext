@@ -51,9 +51,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	# sales team
 	if party_type=="Customer":
 		out["sales_team"] = [{
-			"sales_person": d.sales_person,
-			"sales_designation": d.sales_designation,
-			"allocated_percentage": d.allocated_percentage
+			"sales_person": d.sales_person
 		} for d in party.get("sales_team")]
 
 	return out
