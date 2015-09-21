@@ -476,9 +476,18 @@ class JournalEntry(AccountsController):
 			frappe.throw("Accounts table cannot be blank.")
 
 	def set_account_and_party_balance(self):
+		account_balance = {}
+		party_balance = {}
 		for d in self.get("accounts"):
-			d.account_balance = get_balance_on(account=d.account, date=self.posting_date)
-			d.party_balance = get_balance_on(party_type=d.party_type, party=d.party, date=self.posting_date)
+			if d.account not in account_balance:
+				account_balance[d.account] = get_balance_on(account=d.account, date=self.posting_date)
+
+			if (d.party_type, d.party) not in party_balance:
+				party_balance[(d.party_type, d.party)] = get_balance_on(party_type=d.party_type,
+					party=d.party, date=self.posting_date)
+
+			d.account_balance = account_balance[d.account]
+			d.party_balance = party_balance[(d.party_type, d.party)]
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, voucher_type, mode_of_payment=None):
