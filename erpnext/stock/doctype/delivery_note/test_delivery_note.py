@@ -15,7 +15,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.doctype.stock_entry.test_stock_entry \
 	import make_stock_entry, make_serialized_item, get_qty_after_transaction
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, SerialNoStatusError
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, SerialNoWarehouseError
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 
 class TestDeliveryNote(unittest.TestCase):
@@ -152,7 +152,6 @@ class TestDeliveryNote(unittest.TestCase):
 		dn = create_delivery_note(item_code="_Test Serialized Item With Series", serial_no=serial_no)
 
 		self.check_serial_no_values(serial_no, {
-			"status": "Delivered",
 			"warehouse": "",
 			"delivery_document_no": dn.name
 		})
@@ -160,7 +159,6 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.cancel()
 
 		self.check_serial_no_values(serial_no, {
-			"status": "Available",
 			"warehouse": "_Test Warehouse - _TC",
 			"delivery_document_no": ""
 		})
@@ -169,12 +167,10 @@ class TestDeliveryNote(unittest.TestCase):
 		se = make_serialized_item()
 		serial_no = get_serial_nos(se.get("items")[0].serial_no)[0]
 
-		frappe.db.set_value("Serial No", serial_no, "status", "Not Available")
-
 		dn = create_delivery_note(item_code="_Test Serialized Item With Series",
 			serial_no=serial_no, do_not_submit=True)
 
-		self.assertRaises(SerialNoStatusError, dn.submit)
+		self.assertRaises(SerialNoWarehouseError, dn.submit)
 
 	def check_serial_no_values(self, serial_no, field_values):
 		serial_no = frappe.get_doc("Serial No", serial_no)
@@ -295,7 +291,6 @@ class TestDeliveryNote(unittest.TestCase):
 		dn = create_delivery_note(item_code="_Test Serialized Item With Series", rate=500, serial_no=serial_no)
 
 		self.check_serial_no_values(serial_no, {
-			"status": "Delivered",
 			"warehouse": "",
 			"delivery_document_no": dn.name
 		})
@@ -305,7 +300,6 @@ class TestDeliveryNote(unittest.TestCase):
 			is_return=1, return_against=dn.name, qty=-1, rate=500, serial_no=serial_no)
 
 		self.check_serial_no_values(serial_no, {
-			"status": "Sales Returned",
 			"warehouse": "_Test Warehouse - _TC",
 			"delivery_document_no": ""
 		})
@@ -313,7 +307,6 @@ class TestDeliveryNote(unittest.TestCase):
 		dn1.cancel()
 		
 		self.check_serial_no_values(serial_no, {
-			"status": "Delivered",
 			"warehouse": "",
 			"delivery_document_no": dn.name
 		})
@@ -321,7 +314,6 @@ class TestDeliveryNote(unittest.TestCase):
 		dn.cancel()
 		
 		self.check_serial_no_values(serial_no, {
-			"status": "Available",
 			"warehouse": "_Test Warehouse - _TC",
 			"delivery_document_no": "",
 			"purchase_document_no": se.name

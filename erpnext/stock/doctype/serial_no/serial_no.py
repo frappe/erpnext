@@ -16,7 +16,6 @@ class SerialNoRequiredError(ValidationError): pass
 class SerialNoQtyError(ValidationError): pass
 class SerialNoItemError(ValidationError): pass
 class SerialNoWarehouseError(ValidationError): pass
-class SerialNoStatusError(ValidationError): pass
 class SerialNoNotExistsError(ValidationError): pass
 class SerialNoDuplicateError(ValidationError): pass
 
@@ -74,28 +73,6 @@ class SerialNo(StockController):
 		self.item_name = item.item_name
 		self.brand = item.brand
 		self.warranty_period = item.warranty_period
-
-	def set_status(self, last_sle):
-		if last_sle:
-			if last_sle.voucher_type == "Stock Entry":
-				document_type = frappe.db.get_value("Stock Entry", last_sle.voucher_no, "purpose")
-			else:
-				document_type = last_sle.voucher_type
-
-			if last_sle.actual_qty > 0:
-				if document_type in ("Delivery Note", "Sales Invoice", "Sales Return"):
-					self.status = "Sales Returned"
-				else:
-					self.status = "Available"
-			else:
-				if document_type in ("Purchase Receipt", "Purchase Invoice", "Purchase Return"):
-					self.status = "Purchase Returned"
-				elif document_type in ("Delivery Note", "Sales Invoice"):
-					self.status = "Delivered"
-				else:
-					self.status = "Not Available"
-		else:
-			self.status = "Not Available"
 
 	def set_purchase_details(self, purchase_sle):
 		if purchase_sle:
@@ -162,10 +139,10 @@ class SerialNo(StockController):
 		return sle_dict
 
 	def on_trash(self):
-		if self.status == 'Delivered':
-			frappe.throw(_("Delivered Serial No {0} cannot be deleted").format(self.name))
 		if self.warehouse:
 			frappe.throw(_("Cannot delete Serial No {0} in stock. First remove from stock, then delete.").format(self.name))
+		elif self.delivery_document_no:
+			frappe.throw(_("Delivered Serial No {0} cannot be deleted").format(self.name))
 
 	def before_rename(self, old, new, merge=False):
 		if merge:
@@ -187,7 +164,6 @@ class SerialNo(StockController):
 	def on_stock_ledger_entry(self):
 		if self.via_stock_ledger and not self.get("__islocal"):
 			last_sle = self.get_last_sle()
-			self.set_status(last_sle.get("last_sle"))
 			self.set_purchase_details(last_sle.get("purchase_sle"))
 			self.set_sales_details(last_sle.get("delivery_sle"))
 			self.set_maintenance_status()
@@ -232,10 +208,10 @@ def validate_serial_no(sle, item_det):
 							frappe.throw(_("Serial No {0} does not belong to Warehouse {1}").format(serial_no,
 								sle.warehouse), SerialNoWarehouseError)
 
-						if sle.voucher_type in ("Delivery Note", "Sales Invoice") and sle.is_cancelled=="No" \
-							and sr.status != "Available":
-								frappe.throw(_("Serial No {0} status must be 'Available' to Deliver").format(serial_no),
-									SerialNoStatusError)
+						if sle.voucher_type in ("Delivery Note", "Sales Invoice") \
+							and sle.is_cancelled=="No" and not sr.warehouse:
+								frappe.throw(_("Serial No {0} does not belong to any Warehouse")
+									.format(serial_no), SerialNoWarehouseError)
 
 				elif sle.actual_qty < 0:
 					# transfer out
@@ -287,7 +263,6 @@ def make_serial_no(serial_no, sle):
 	sr.insert()
 
 	sr.warehouse = sle.warehouse
-	sr.status = "Available"
 	sr.save()
 	frappe.msgprint(_("Serial No {0} created").format(sr.name))
 	return sr.name

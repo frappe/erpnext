@@ -688,7 +688,6 @@ class TestSalesInvoice(unittest.TestCase):
 		si.insert()
 		si.submit()
 
-		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Delivered")
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"))
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0],
 			"delivery_document_no"), si.name)
@@ -702,20 +701,18 @@ class TestSalesInvoice(unittest.TestCase):
 
 		serial_nos = get_serial_nos(si.get("items")[0].serial_no)
 
-		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Available")
 		self.assertEquals(frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC")
 		self.assertFalse(frappe.db.get_value("Serial No", serial_nos[0],
 			"delivery_document_no"))
 
 	def test_serialize_status(self):
-		from erpnext.stock.doctype.serial_no.serial_no import SerialNoStatusError, get_serial_nos, SerialNoDuplicateError
+		from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError, get_serial_nos, SerialNoDuplicateError
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item()
 		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
 
 		sr = frappe.get_doc("Serial No", serial_nos[0])
-		sr.status = "Not Available"
 		sr.save()
 
 		si = frappe.copy_doc(test_records[0])
@@ -725,7 +722,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.get("items")[0].serial_no = serial_nos[0]
 		si.insert()
 
-		self.assertRaises(SerialNoStatusError, si.submit)
+		self.assertRaises(SerialNoWarehouseError, si.submit)
 
 		# hack! because stock ledger entires are already inserted and are not rolled back!
 		self.assertRaises(SerialNoDuplicateError, si.cancel)

@@ -173,7 +173,8 @@ class SellingController(StockController):
 							'uom': p.uom,
 							'batch_no': cstr(p.batch_no).strip(),
 							'serial_no': cstr(p.serial_no).strip(),
-							'name': d.name
+							'name': d.name,
+							'target_warehouse': p.target_warehouse
 						}))
 			else:
 				il.append(frappe._dict({
@@ -184,7 +185,8 @@ class SellingController(StockController):
 					'stock_uom': d.stock_uom,
 					'batch_no': cstr(d.get("batch_no")).strip(),
 					'serial_no': cstr(d.get("serial_no")).strip(),
-					'name': d.name
+					'name': d.name,
+					'target_warehouse': p.target_warehouse
 				}))
 		return il
 
