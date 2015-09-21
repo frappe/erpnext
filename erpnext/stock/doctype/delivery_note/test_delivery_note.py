@@ -164,11 +164,16 @@ class TestDeliveryNote(unittest.TestCase):
 		})
 
 	def test_serialize_status(self):
-		se = make_serialized_item()
-		serial_no = get_serial_nos(se.get("items")[0].serial_no)[0]
+		from frappe.model.naming import make_autoname
+		serial_no = frappe.get_doc({
+			"doctype": "Serial No",
+			"item_code": "_Test Serialized Item With Series",
+			"serial_no": make_autoname("SR", "Serial No")
+		})
+		serial_no.save()
 
 		dn = create_delivery_note(item_code="_Test Serialized Item With Series",
-			serial_no=serial_no, do_not_submit=True)
+			serial_no=serial_no.name, do_not_submit=True)
 
 		self.assertRaises(SerialNoWarehouseError, dn.submit)
 
@@ -318,7 +323,54 @@ class TestDeliveryNote(unittest.TestCase):
 			"delivery_document_no": "",
 			"purchase_document_no": se.name
 		})
+		
+	def test_delivery_of_bundled_items_to_target_warehouse(self):
+		set_perpetual_inventory()
+		
+		create_stock_reconciliation(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, rate=100)
+		create_stock_reconciliation(item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC", 
+			qty=50, rate=100)
+			
+		opening_qty_test_warehouse_1 = get_qty_after_transaction(warehouse="_Test Warehouse 1 - _TC")
+	
+		dn = create_delivery_note(item_code="_Test Product Bundle Item", 
+			qty=5, rate=500, target_warehouse="_Test Warehouse 1 - _TC")
+	
+		# qty after delivery
+		actual_qty = get_qty_after_transaction(warehouse="_Test Warehouse - _TC")
+		self.assertEquals(actual_qty, 25)
+		
+		actual_qty = get_qty_after_transaction(warehouse="_Test Warehouse 1 - _TC")
+		self.assertEquals(actual_qty, opening_qty_test_warehouse_1 + 25)
+	
+		# stock value diff for source warehouse
+		stock_value_difference = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note", 
+			"voucher_no": dn.name, "item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}, 
+			"stock_value_difference")
+			
+		# stock value diff for target warehouse
+		stock_value_difference1 = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note", 
+			"voucher_no": dn.name, "item_code": "_Test Item", "warehouse": "_Test Warehouse 1 - _TC"}, 
+			"stock_value_difference")
+		self.assertEquals(abs(stock_value_difference), stock_value_difference1)
 
+		# Check gl entries
+		gl_entries = get_gl_entries("Delivery Note", dn.name)
+		self.assertTrue(gl_entries)
+
+		stock_value_difference = abs(frappe.db.sql("""select sum(stock_value_difference) 
+			from `tabStock Ledger Entry` where voucher_type='Delivery Note' and voucher_no=%s 
+			and warehouse='_Test Warehouse - _TC'""", dn.name)[0][0])
+
+		expected_values = {
+			"_Test Warehouse - _TC": [0.0, stock_value_difference],
+			"_Test Warehouse 1 - _TC": [stock_value_difference, 0.0]
+		}
+		for i, gle in enumerate(gl_entries):
+			self.assertEquals([gle.debit, gle.credit], expected_values.get(gle.account))
+		
+		set_perpetual_inventory(0)
+	
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
 	args = frappe._dict(args)
@@ -341,7 +393,8 @@ def create_delivery_note(**args):
 		"conversion_factor": 1.0,
 		"expense_account": "Cost of Goods Sold - _TC",
 		"cost_center": "_Test Cost Center - _TC",
-		"serial_no": args.serial_no
+		"serial_no": args.serial_no,
+		"target_warehouse": args.target_warehouse
 	})
 
 	if not args.do_not_save:

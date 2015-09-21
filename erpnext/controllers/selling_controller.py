@@ -186,7 +186,7 @@ class SellingController(StockController):
 					'batch_no': cstr(d.get("batch_no")).strip(),
 					'serial_no': cstr(d.get("serial_no")).strip(),
 					'name': d.name,
-					'target_warehouse': p.target_warehouse
+					'target_warehouse': d.target_warehouse
 				}))
 		return il
 

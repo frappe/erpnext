@@ -8,6 +8,8 @@ from frappe.utils import nowdate, add_days, flt
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
+from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
+from frappe.model.naming import make_autoname
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -706,26 +708,21 @@ class TestSalesInvoice(unittest.TestCase):
 			"delivery_document_no"))
 
 	def test_serialize_status(self):
-		from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError, get_serial_nos, SerialNoDuplicateError
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
-
-		se = make_serialized_item()
-		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
-
-		sr = frappe.get_doc("Serial No", serial_nos[0])
-		sr.save()
+		serial_no = frappe.get_doc({
+			"doctype": "Serial No",
+			"item_code": "_Test Serialized Item With Series",
+			"serial_no": make_autoname("SR", "Serial No")
+		})
+		serial_no.save()
 
 		si = frappe.copy_doc(test_records[0])
 		si.update_stock = 1
 		si.get("items")[0].item_code = "_Test Serialized Item With Series"
 		si.get("items")[0].qty = 1
-		si.get("items")[0].serial_no = serial_nos[0]
+		si.get("items")[0].serial_no = serial_no.name
 		si.insert()
 
 		self.assertRaises(SerialNoWarehouseError, si.submit)
-
-		# hack! because stock ledger entires are already inserted and are not rolled back!
-		self.assertRaises(SerialNoDuplicateError, si.cancel)
 
 	def test_invoice_due_date_against_customers_credit_days(self):
 		# set customer's credit days
