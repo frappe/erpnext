@@ -70,7 +70,7 @@ class PaymentReconciliation(Document):
 		non_reconciled_invoices = []
 		dr_or_cr = "debit" if self.party_type == "Customer" else "credit"
 		cond = self.check_condition(dr_or_cr)
-
+		
 		invoice_list = frappe.db.sql("""
 			select
 				voucher_no, voucher_type, posting_date,
@@ -79,8 +79,12 @@ class PaymentReconciliation(Document):
 				`tabGL Entry`
 			where
 				party_type = %(party_type)s and party = %(party)s
-				and voucher_type != "Journal Entry"
 				and account = %(account)s and {dr_or_cr} > 0 {cond}
+				and (CASE
+					WHEN voucher_type = 'Journal Entry'
+					THEN ifnull(against_voucher, '') = ''
+					ELSE 1=1
+				END)
 			group by voucher_type, voucher_no
 		""".format(**{
 			"cond": cond,
