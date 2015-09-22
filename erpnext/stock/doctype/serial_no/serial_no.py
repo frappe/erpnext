@@ -139,10 +139,19 @@ class SerialNo(StockController):
 		return sle_dict
 
 	def on_trash(self):
-		if self.warehouse:
-			frappe.throw(_("Cannot delete Serial No {0} in stock. First remove from stock, then delete.").format(self.name))
-		elif self.delivery_document_no:
-			frappe.throw(_("Delivered Serial No {0} cannot be deleted").format(self.name))
+		sl_entries = frappe.db.sql("""select serial_no from `tabStock Ledger Entry` 
+			where serial_no like %s and item_code=%s and ifnull(is_cancelled, 'No')='No'""", 
+			("%%%s%%" % self.name, self.item_code), as_dict=True)
+
+		# Find the exact match
+		sle_exists = False
+		for d in sl_entries:
+			if self.name.upper() in get_serial_nos(d.serial_no):
+				sle_exists = True
+				break
+			
+		if sle_exists:
+			frappe.throw(_("Cannot delete Serial No {0}, as it is used in stock transactions").format(self.name))
 
 	def before_rename(self, old, new, merge=False):
 		if merge:
