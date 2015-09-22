@@ -71,7 +71,7 @@ def get_outstanding_vouchers(args):
 
 	# Get all outstanding sales /purchase invoices
 	outstanding_invoices = get_outstanding_invoices(amount_query, args.get("party_account"),
-		args.get("party_type"), args.get("party"), with_journal_entry=False)
+		args.get("party_type"), args.get("party"))
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
 	orders_to_be_billed = get_orders_to_be_billed(args.get("party_type"), args.get("party"),
