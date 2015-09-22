@@ -397,7 +397,7 @@ def get_stock_rbnb_difference(posting_date, company):
 	# Amount should be credited
 	return flt(stock_rbnb) + flt(sys_bal)
 
-def get_outstanding_invoices(amount_query, account, party_type, party, with_journal_entry=True):
+def get_outstanding_invoices(amount_query, account, party_type, party):
 	all_outstanding_vouchers = []
 	outstanding_voucher_list = frappe.db.sql("""
 		select
@@ -407,6 +407,11 @@ def get_outstanding_invoices(amount_query, account, party_type, party, with_jour
 			`tabGL Entry`
 		where
 			account = %s and party_type=%s and party=%s and {amount_query} > 0
+			and (CASE
+					WHEN voucher_type = 'Journal Entry'
+					THEN ifnull(against_voucher, '') = ''
+					ELSE 1=1
+				END)
 		group by voucher_type, voucher_no
 		""".format(amount_query = amount_query), (account, party_type, party), as_dict = True)
 
@@ -424,9 +429,6 @@ def get_outstanding_invoices(amount_query, account, party_type, party, with_jour
 
 		payment_amount = -1*payment_amount[0][0] if payment_amount else 0
 		precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
-
-		if not with_journal_entry and d.voucher_type=="Journal Entry":
-			continue
 
 		if d.invoice_amount > payment_amount:
 
