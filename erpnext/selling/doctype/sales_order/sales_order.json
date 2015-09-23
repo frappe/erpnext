@@ -2245,7 +2245,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "fieldname": "sales_team", 
@@ -2553,7 +2553,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-09-11 12:19:42.436344", 
+ "modified": "2015-09-23 09:19:38.778717", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Order", 
