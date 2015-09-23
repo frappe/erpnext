@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.model import default_fields
 from frappe.model.document import Document
 from frappe.utils import cstr
 
@@ -121,7 +120,10 @@ def get_tax_template(posting_date, args):
 	conditions = []
 
 	for key, value in args.iteritems():
-		conditions.append("ifnull({0}, '') in ('', '{1}')".format(key, frappe.db.escape(cstr(value))))
+		if key in "use_for_shopping_cart":
+			conditions.append("use_for_shopping_cart = {0}".format(1 if value else 0))
+		else:
+			conditions.append("ifnull({0}, '') in ('', '{1}')".format(key, frappe.db.escape(cstr(value))))
 
 	matching = frappe.db.sql("""select * from `tabTax Rule`
 		where {0}""".format(" and ".join(conditions)), as_dict = True)

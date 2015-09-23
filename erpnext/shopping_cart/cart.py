@@ -73,10 +73,6 @@ def update_cart(item_code, qty, with_items=False):
 	qty = flt(qty)
 	if qty == 0:
 		quotation.set("items", quotation.get("items", {"item_code": ["!=", item_code]}))
-		if not quotation.get("items") and \
-			not quotation.get("__islocal"):
-				quotation.__delete = True
-
 	else:
 		quotation_items = quotation.get("items", {"item_code": item_code})
 		if not quotation_items:
@@ -90,15 +86,10 @@ def update_cart(item_code, qty, with_items=False):
 
 	apply_cart_settings(quotation=quotation)
 
-	if hasattr(quotation, "__delete"):
-		frappe.delete_doc("Quotation", quotation.name, ignore_permissions=True)
-		quotation = _get_cart_quotation()
-	else:
-		quotation.flags.ignore_permissions = True
-		quotation.save()
+	quotation.flags.ignore_permissions = True
+	quotation.save()
 
 	set_cart_count(quotation)
-
 
 	if with_items:
 		context = get_cart_quotation(quotation)
@@ -160,11 +151,12 @@ def _get_cart_quotation(party=None):
 	if not party:
 		party = get_customer()
 
-	quotation = frappe.db.get_value("Quotation",
-		{party.doctype.lower(): party.name, "order_type": "Shopping Cart", "docstatus": 0})
+	quotation = frappe.get_all("Quotation", fields=["name"], filters=
+		{party.doctype.lower(): party.name, "order_type": "Shopping Cart", "docstatus": 0},
+		order_by="modified desc", limit_page_length=1)
 
 	if quotation:
-		qdoc = frappe.get_doc("Quotation", quotation)
+		qdoc = frappe.get_doc("Quotation", quotation[0].name)
 	else:
 		qdoc = frappe.get_doc({
 			"doctype": "Quotation",

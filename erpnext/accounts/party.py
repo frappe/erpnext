@@ -280,7 +280,7 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 	billing_address=None, shipping_address=None, use_for_shopping_cart=None):
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
-		party_type: 		party,
+		party_type.lower(): party,
 		"customer_group":	customer_group,
 		"supplier_type":	supplier_type,
 		"company":			company

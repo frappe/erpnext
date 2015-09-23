@@ -52,10 +52,13 @@ class TestShoppingCart(unittest.TestCase):
 
 		# add first item
 		update_cart("_Test Item", 1)
+
 		quotation = self.test_get_cart_customer()
+
 		self.assertEquals(quotation.get("items")[0].item_code, "_Test Item")
 		self.assertEquals(quotation.get("items")[0].qty, 1)
 		self.assertEquals(quotation.get("items")[0].amount, 10)
+
 
 		# add second item
 		update_cart("_Test Item 2", 1)
@@ -86,6 +89,7 @@ class TestShoppingCart(unittest.TestCase):
 		# remove first item
 		update_cart("_Test Item", 0)
 		quotation = self.test_get_cart_customer()
+
 		self.assertEquals(quotation.get("items")[0].item_code, "_Test Item 2")
 		self.assertEquals(quotation.get("items")[0].qty, 1)
 		self.assertEquals(quotation.get("items")[0].amount, 20)
@@ -149,16 +153,29 @@ class TestShoppingCart(unittest.TestCase):
 	def enable_shopping_cart(self):
 		settings = frappe.get_doc("Shopping Cart Settings", "Shopping Cart Settings")
 
-		if settings.get("price_lists"):
-			settings.enabled = 1
-		else:
-			settings.update({
-				"enabled": 1,
-				"company": "_Test Company",
-				"default_customer_group": "_Test Customer Group",
-				"quotation_series": "_T-Quotation-",
-				"price_list": "_Test Price List India"
-			})
+		settings.update({
+			"enabled": 1,
+			"company": "_Test Company",
+			"default_customer_group": "_Test Customer Group",
+			"quotation_series": "_T-Quotation-",
+			"price_list": "_Test Price List India"
+		})
+
+		# insert item price
+		if not frappe.db.get_value("Item Price", {"price_list":  "_Test Price List India",
+			"item_code": "_Test Item"}):
+			frappe.get_doc({
+				"doctype": "Item Price",
+				"price_list": "_Test Price List India",
+				"item_code": "_Test Item",
+				"price_list_rate": 10
+			}).insert()
+			frappe.get_doc({
+				"doctype": "Item Price",
+				"price_list": "_Test Price List India",
+				"item_code": "_Test Item 2",
+				"price_list_rate": 20
+			}).insert()
 
 		settings.save()
 		frappe.local.shopping_cart_settings = None
