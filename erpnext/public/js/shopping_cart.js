@@ -30,7 +30,7 @@ $.extend(shopping_cart, {
 				args: {
 					item_code: opts.item_code,
 					qty: opts.qty,
-					with_doc: opts.with_doc || 0
+					with_items: opts.with_items || 0
 				},
 				btn: opts.btn,
 				callback: function(r) {

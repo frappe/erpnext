@@ -1,0 +1,24 @@
+{% from "erpnext/templates/includes/cart/cart_macros.html"
+    import show_address %}
+<div class="row">
+	<div class="col-sm-6">
+		<h4>{{ _("Shipping Address") }}</h4>
+		<div id="cart-shipping-address" class="panel-group"
+			data-fieldname="shipping_address_name">
+            {% for address in addresses %}
+                {{ show_address(address, doc, "shipping_address_name") }}
+            {% endfor %}
+        </div>
+		<a class="btn btn-default btn-sm" href="/addresses">
+			{{ _("Manage Addresses") }}</a>
+	</div>
+	<div class="col-sm-6">
+		<h4>Billing Address</h4>
+		<div id="cart-billing-address" class="panel-group"
+			data-fieldname="customer_address">
+            {% for address in addresses %}
+                {{ show_address(address, doc, "customer_address") }}
+            {% endfor %}
+        </div>
+	</div>
+</div>

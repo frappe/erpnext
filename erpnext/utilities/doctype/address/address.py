@@ -70,6 +70,9 @@ class Address(Document):
 					(is_address_type, fieldname, "%s", "%s"), (self.get(fieldname), self.name))
 				break
 
+	def get_display(self):
+		return get_address_display(self.as_dict())
+
 @frappe.whitelist()
 def get_address_display(address_dict):
 	if not address_dict:

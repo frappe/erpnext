@@ -27,22 +27,31 @@
 					{{ _("Item Code") }}: <span itemprop="productID">{{ name }}</span></p>
 				<br>
 				<div style="min-height: 100px; margin: 10px 0;">
-					<div class="item-price-info" style="display: none;">
-						<h4 class="item-price" itemprop="price"></h4>
-						<div class="item-stock" itemprop="availablity"></div>
-						<div id="item-add-to-cart">
-							<button class="btn btn-primary">
-								<i class="icon-shopping-cart"></i> + {{ _("Add to Cart") }}</button>
-						</div>
-						<div id="item-update-cart" class="input-group col-md-4" style="display: none;
-							padding-left: 0px; padding-right: 0px;">
-							<input class="form-control" type="text">
-							<div class="input-group-btn">
-								<button class="btn btn-primary">
-									<i class="icon-ok"></i></button>
-							</div>
-						</div>
-					</div>
+					<h4 class="item-price" itemprop="price"></h4>
+					<div class="item-stock" itemprop="availablity"></div>
+                    <div class="item-cart hide">
+    					<div id="item-add-to-cart">
+    						<button class="btn btn-primary btn-sm">
+    							{{ _("Add to Cart") }}</button>
+    					</div>
+    					<div id="item-update-cart"
+                            style="display: none;
+    						padding-left: 0px; padding-right: 0px;
+                            padding-top: 10px;">
+    						<div>
+                                <input class="form-control"
+                                    type="text" style="max-width: 140px;">
+                            </div>
+    						<div style="margin-top: 10px;">
+    							<button class="btn btn-default btn-sm">
+                                {{ _("Update") }}</button>
+    						</div>
+                            <div style="margin-top: 5px;">
+                                <a href="/cart" class="text-muted small">
+                                    {{ _("View Cart") }}</a>
+                            </div>
+    					</div>
+                    </div>
 				</div>
 			</div>
 		</div>

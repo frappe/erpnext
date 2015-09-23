@@ -1,10 +1,10 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-$(document).ready(function() {
+frappe.ready(function() {
 	var item_code = $('[itemscope] [itemprop="productID"]').text().trim();
 	var qty = 0;
-	
+
 	frappe.call({
 		type: "POST",
 		method: "erpnext.shopping_cart.product.get_product_info",
@@ -12,10 +12,12 @@ $(document).ready(function() {
 			item_code: "{{ name }}"
 		},
 		callback: function(r) {
+			console.log(r.message);
+			$(".item-cart").toggleClass("hide", !!!r.message.price);
 			if(r.message && r.message.price) {
 				$(".item-price")
 					.html(r.message.price.formatted_price + " per " + r.message.uom);
-				
+
 				if(r.message.stock==0) {
 					$(".item-stock").html("<div class='help'>Not in stock</div>");
 				}
@@ -23,18 +25,17 @@ $(document).ready(function() {
 					$(".item-stock").html("<div style='color: green'>\
 						<i class='icon-check'></i> Available (in stock)</div>");
 				}
-				
-				$(".item-price-info").toggle(true);
-				
+
 				if(r.message.qty) {
 					qty = r.message.qty;
-					toggle_update_cart(qty);
-					$("#item-update-cart input").val(qty);
+					toggle_update_cart(r.message.qty);
+				} else {
+					toggle_update_cart(0);
 				}
 			}
 		}
 	})
-	
+
 	$("#item-add-to-cart button").on("click", function() {
 		shopping_cart.update_cart({
 			item_code: item_code,
@@ -45,10 +46,10 @@ $(document).ready(function() {
 					qty = 1;
 				}
 			},
-			btn: this, 
+			btn: this,
 		});
 	});
-	
+
 	$("#item-update-cart button").on("click", function() {
 		shopping_cart.update_cart({
 			item_code: item_code,
@@ -63,7 +64,7 @@ $(document).ready(function() {
 			},
 		});
 	});
-	
+
 	if(localStorage && localStorage.getItem("pending_add_to_cart") && full_name) {
 		localStorage.removeItem("pending_add_to_cart");
 		$("#item-add-to-cart button").trigger("click");
