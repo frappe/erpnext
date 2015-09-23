@@ -1,17 +1,17 @@
 DocType: Employee,Salary Mode,Gehaltsmodus
 DocType: Cost Center,"Select Monthly Distribution, if you want to track based on seasonality.","Wählen Sie mit monatlicher Ausschüttung, wenn Sie basierend auf Saisonalität verfolgen möchten."
 DocType: Employee,Divorced,Geschieden
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +54,Warning: Same item has been entered multiple times.,Warnung: Same Artikel wurde mehrfach eingetragen.
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +54,Warning: Same item has been entered multiple times.,Warnung:Der gleiche Artikel wurde mehrfach eingetragen.
 apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.py +96,Items already synced,Artikel bereits synchronisiert
 DocType: Purchase Order,"If you have created a standard template in Purchase Taxes and Charges Template, select one and click on the button below.","Wenn Sie eine Standardvorlage in Kauf Steuern und Abgaben Template erstellt haben, wählen Sie eine aus und klicken Sie auf die Schaltfläche unten."
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +33,Cancel Material Visit {0} before cancelling this Warranty Claim,Abbrechen Werkstoff Besuch {0} vor Streichung dieses Garantieantrag
-apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +18,Consumer Products,Consumer Products
+apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +18,Consumer Products,Konsumgüter
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +68,Please select Party Type first,Bitte wählen Sie Partei Type zuerst
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +89,Annealing,Glühen
 DocType: Item,Customer Items,Kunden Artikel
 apps/erpnext/erpnext/accounts/doctype/account/account.py +41,Account {0}: Parent account {1} can not be a ledger,Konto {0}: Eltern-Konto {1} kann kein Kontenblatt sein
 DocType: Item,Publish Item to hub.erpnext.com,Veröffentlichen Sie Artikel zur hub.erpnext.com
-apps/erpnext/erpnext/config/setup.py +93,Email Notifications,E-Mail- Benachrichtigungen
+apps/erpnext/erpnext/config/setup.py +93,Email Notifications,E-Mail Benachrichtigungen
 DocType: Item,Default Unit of Measure,Standardmaßeinheit
 DocType: SMS Center,All Sales Partner Contact,Alle Vertriebspartnerkontakte
 DocType: Employee,Leave Approvers,Urlaubsgenehmiger
@@ -54,7 +54,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py +43,Expected End Date c
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +236,Do really want to unstop production order:,"Sie wirklich wollen, um Fertigungsauftrag aufmachen:"
 apps/erpnext/erpnext/utilities/transaction_base.py +104,Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ,"Row # {0}: Rate muss dieselbe sein, wie {1}: {2} ({3} / {4})"
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +190,New Leave Application,Neuer Urlaubsantrag
-apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +134,Bank Draft,Bankwechsel
+apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +134,Bank Draft,Banküberweisung
 DocType: Features Setup,1. To maintain the customer wise item code and to make them searchable based on their code use this option,"1. Um die kundenspezifische Artikel-Nr zu erhalten und sie auffindbar zu machen, verwenden Sie diese Option"
 DocType: Mode of Payment Account,Mode of Payment Account,Zahlungsweise Konto
 apps/erpnext/erpnext/stock/doctype/item/item.js +30,Show Variants,Varianten anzeigen
