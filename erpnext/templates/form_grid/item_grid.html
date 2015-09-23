@@ -40,10 +40,10 @@
 			{% if(in_list(["Sales Order Item", "Purchase Order Item"],
 				doc.doctype) && frm.doc.docstatus===1) {
 				var delivered = doc.doctype==="Sales Order Item" ?
-						doc.delivered_qty : doc.received_qty,
-					pending = flt(doc.qty) - flt(delivered);
-				%}
-                <span class="indicator {%= pending ? "orange" : "green" %}">{%= doc.item_code %}</span>
+                                                doc.delivered_qty : doc.received_qty;
+                                var pending = flt(doc.qty) - flt(delivered);
+                                %}
+                <span class="indicator {%= pending>0 ? "orange" : "green" %}">{%= doc.item_code %}</span>
 			{% } else { %}
                 <strong>{%= doc.item_code %}</strong>
             {% } %}
