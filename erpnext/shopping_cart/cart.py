@@ -266,12 +266,18 @@ def _set_price_list(quotation, cart_settings, billing_territory):
 
 def set_taxes(quotation, cart_settings, billing_territory):
 	"""set taxes based on billing territory"""
-	quotation.taxes_and_charges = cart_settings.get_tax_master(billing_territory)
-
-	# clear table
+	from erpnext.accounts.party import set_taxes
+	
+	customer_group = frappe.db.get_value("Customer", quotation.customer, "customer_group")
+	
+	quotation.taxes_and_charges = set_taxes(quotation.customer, "Customer", \
+		quotation.transaction_date, quotation.company, customer_group, None, \
+		quotation.customer_address, quotation.shipping_address_name, 1)
+#
+# 	# clear table
 	quotation.set("taxes", [])
-
-	# append taxes
+#
+# 	# append taxes
 	quotation.append_taxes_from_master()
 
 def get_lead_or_customer():
