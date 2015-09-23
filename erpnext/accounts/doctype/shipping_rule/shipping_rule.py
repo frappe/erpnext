@@ -25,6 +25,9 @@ class ShippingRule(Document):
 		if self.worldwide_shipping:
 			self.countries = []
 
+		elif not len([d.country for d in self.countries if d.country]):
+			frappe.throw(_("Please specify a country for this Shipping Rule or check Worldwide Shipping"))
+
 	def validate_from_to_values(self):
 		zero_to_values = []
 

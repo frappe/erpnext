@@ -8,7 +8,6 @@ import frappe
 from frappe import _, msgprint
 from frappe.utils import comma_and
 from frappe.model.document import Document
-from frappe.utils.nestedset import get_root_of
 
 class ShoppingCartSetupError(frappe.ValidationError): pass
 
@@ -74,9 +73,6 @@ def get_shopping_cart_settings():
 
 def is_cart_enabled():
 	return get_shopping_cart_settings().enabled
-
-def get_default_territory():
-	return get_shopping_cart_settings().default_territory or get_root_of("Territory")
 
 def check_shopping_cart_enabled():
 	if not get_shopping_cart_settings().enabled:

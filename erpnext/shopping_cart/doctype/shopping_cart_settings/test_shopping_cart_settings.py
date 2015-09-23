@@ -19,14 +19,14 @@ class TestShoppingCartSettings(unittest.TestCase):
 	def test_exchange_rate_exists(self):
 		frappe.db.sql("""delete from `tabCurrency Exchange`""")
 
-		cart_settings = self.test_price_list_territory_overlap()
-		controller = cart_settings
-		self.assertRaises(ShoppingCartSetupError, controller.validate_exchange_rates_exist)
+		cart_settings = self.get_cart_settings()
+		cart_settings.price_list = "_Test Price List Rest of the World"
+		self.assertRaises(ShoppingCartSetupError, cart_settings.validate_exchange_rates_exist)
 
 		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import test_records as \
 			currency_exchange_records
 		frappe.get_doc(currency_exchange_records[0]).insert()
-		controller.validate_exchange_rates_exist()
+		cart_settings.validate_exchange_rates_exist()
 
 	def test_tax_rule_validation(self):
 		frappe.db.sql("update `tabTax Rule` set use_for_shopping_cart = 0")

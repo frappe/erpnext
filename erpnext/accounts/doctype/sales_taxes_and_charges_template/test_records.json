@@ -20,19 +20,7 @@
     "rate": 6.36
    }
   ],
-  "title": "_Test Sales Taxes and Charges Template",
-  "territories": [
-   {
-    "doctype": "Applicable Territory",
-    "parentfield": "territories",
-    "territory": "All Territories"
-   },
-   {
-    "doctype": "Applicable Territory",
-    "parentfield": "territories",
-    "territory": "_Test Territory Rest Of The World"
-   }
-  ]
+  "title": "_Test Sales Taxes and Charges Template"
  },
  {
   "company": "_Test Company",
@@ -115,14 +103,7 @@
     "row_id": 7
    }
   ],
-  "title": "_Test India Tax Master",
-  "territories": [
-   {
-    "doctype": "Applicable Territory",
-    "parentfield": "territories",
-    "territory": "_Test Territory India"
-   }
-  ]
+  "title": "_Test India Tax Master"
  },
  {
   "company": "_Test Company",
@@ -145,14 +126,7 @@
     "rate": 4
    }
   ],
-  "title": "_Test Sales Taxes and Charges Template - Rest of the World",
-  "territories": [
-   {
-    "doctype": "Applicable Territory",
-    "parentfield": "territories",
-    "territory": "_Test Territory Rest Of The World"
-   }
-  ]
+  "title": "_Test Sales Taxes and Charges Template - Rest of the World"
  },
  {
   "company": "_Test Company",
@@ -175,14 +149,7 @@
     "rate": 4
    }
   ],
-  "title": "_Test Sales Taxes and Charges Template 1",
-  "territories": [
-   {
-    "doctype": "Applicable Territory",
-    "parentfield": "territories",
-    "territory": "_Test Territory Rest Of The World"
-   }
-  ]
+  "title": "_Test Sales Taxes and Charges Template 1"
  },
  {
   "company": "_Test Company",
@@ -205,14 +172,7 @@
     "rate": 4
    }
   ],
-  "title": "_Test Sales Taxes and Charges Template 2",
-  "territories": [
-   {
-    "doctype": "Applicable Territory",
-    "parentfield": "territories",
-    "territory": "_Test Territory Rest Of The World"
-   }
-  ]
+  "title": "_Test Sales Taxes and Charges Template 2"
  },
  {
 	"doctype" : "Sales Taxes and Charges Template",
@@ -224,9 +184,6 @@
 		"cost_center": "Main - _TC",
 		"description": "Test Shopping cart taxes with Tax Rule",
 		"tax_amount": 1000
-	}],
-	"territories":[{
-		"territory" : "All Territories"
 	}]
  },
  {
@@ -239,9 +196,6 @@
 		"cost_center": "Main - _TC",
 		"description": "Test Shopping cart taxes with Tax Rule",
 		"tax_amount": 200
-	}],
-	"territories":[{
-		"territory" : "All Territories"
 	}]
  }
 ]

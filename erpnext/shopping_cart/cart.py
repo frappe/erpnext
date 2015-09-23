@@ -17,18 +17,18 @@ def set_cart_count(quotation=None):
 		if not quotation:
 			quotation = _get_cart_quotation()
 		cart_count = cstr(len(quotation.get("items")))
-		frappe.local.cookie_manager.set_cookie("cart_count", cart_count)
+
+		if hasattr(frappe.local, "cookie_manager"):
+			frappe.local.cookie_manager.set_cookie("cart_count", cart_count)
 
 @frappe.whitelist()
 def get_cart_quotation(doc=None):
-	party = get_lead_or_customer()
+	party = get_customer()
 
 	if not doc:
 		quotation = _get_cart_quotation(party)
 		doc = quotation
 		set_cart_count(quotation)
-
-	print get_applicable_shipping_rules(party)
 
 	return {
 		"doc": decorate_quotation_doc(doc),
@@ -60,7 +60,9 @@ def place_order():
 	sales_order.flags.ignore_permissions = True
 	sales_order.insert()
 	sales_order.submit()
-	frappe.local.cookie_manager.delete_cookie("cart_count")
+
+	if hasattr(frappe.local, "cookie_manager"):
+		frappe.local.cookie_manager.delete_cookie("cart_count")
 
 	return sales_order.name
 
@@ -156,7 +158,7 @@ def decorate_quotation_doc(doc):
 
 def _get_cart_quotation(party=None):
 	if not party:
-		party = get_lead_or_customer()
+		party = get_customer()
 
 	quotation = frappe.db.get_value("Quotation",
 		{party.doctype.lower(): party.name, "order_type": "Shopping Cart", "docstatus": 0})
@@ -176,9 +178,9 @@ def _get_cart_quotation(party=None):
 			(party.doctype.lower()): party.name
 		})
 
-		if party.doctype == "Customer":
-			qdoc.contact_person = frappe.db.get_value("Contact", {"email_id": frappe.session.user,
-				"customer": party.name})
+		qdoc.contact_person = frappe.db.get_value("Contact", {"email_id": frappe.session.user,
+			"customer": party.name})
+		qdoc.contact_email = frappe.session.user
 
 		qdoc.flags.ignore_permissions = True
 		qdoc.run_method("set_missing_values")
@@ -187,27 +189,21 @@ def _get_cart_quotation(party=None):
 	return qdoc
 
 def update_party(fullname, company_name=None, mobile_no=None, phone=None):
-	party = get_lead_or_customer()
+	party = get_customer()
 
-	if party.doctype == "Lead":
-		party.company_name = company_name
-		party.lead_name = fullname
-		party.mobile_no = mobile_no
-		party.phone = phone
-	else:
-		party.customer_name = company_name or fullname
-		party.customer_type == "Company" if company_name else "Individual"
+	party.customer_name = company_name or fullname
+	party.customer_type == "Company" if company_name else "Individual"
 
-		contact_name = frappe.db.get_value("Contact", {"email_id": frappe.session.user,
-			"customer": party.name})
-		contact = frappe.get_doc("Contact", contact_name)
-		contact.first_name = fullname
-		contact.last_name = None
-		contact.customer_name = party.customer_name
-		contact.mobile_no = mobile_no
-		contact.phone = phone
-		contact.flags.ignore_permissions = True
-		contact.save()
+	contact_name = frappe.db.get_value("Contact", {"email_id": frappe.session.user,
+		"customer": party.name})
+	contact = frappe.get_doc("Contact", contact_name)
+	contact.first_name = fullname
+	contact.last_name = None
+	contact.customer_name = party.customer_name
+	contact.mobile_no = mobile_no
+	contact.phone = phone
+	contact.flags.ignore_permissions = True
+	contact.save()
 
 	party_doc = frappe.get_doc(party.as_dict())
 	party_doc.flags.ignore_permissions = True
@@ -222,7 +218,7 @@ def update_party(fullname, company_name=None, mobile_no=None, phone=None):
 
 def apply_cart_settings(party=None, quotation=None):
 	if not party:
-		party = get_lead_or_customer()
+		party = get_customer()
 	if not quotation:
 		quotation = _get_cart_quotation(party)
 
@@ -250,8 +246,9 @@ def set_price_list_and_rate(quotation, cart_settings):
 	# refetch values
 	quotation.run_method("set_price_list_and_item_details")
 
-	# set it in cookies for using in product page
-	frappe.local.cookie_manager.set_cookie("selling_price_list", quotation.selling_price_list)
+	if hasattr(frappe.local, "cookie_manager"):
+		# set it in cookies for using in product page
+		frappe.local.cookie_manager.set_cookie("selling_price_list", quotation.selling_price_list)
 
 def _set_price_list(quotation, cart_settings):
 	"""Set price list based on customer or shopping cart default"""
@@ -286,32 +283,38 @@ def set_taxes(quotation, cart_settings):
 # 	# append taxes
 	quotation.append_taxes_from_master()
 
-def get_lead_or_customer():
-	customer = frappe.db.get_value("Contact", {"email_id": frappe.session.user}, "customer")
+def get_customer(user=None):
+	if not user:
+		user = frappe.session.user
+
+	customer = frappe.db.get_value("Contact", {"email_id": user}, "customer")
 	if customer:
 		return frappe.get_doc("Customer", customer)
 
-	lead = frappe.db.get_value("Lead", {"email_id": frappe.session.user})
-	if lead:
-		return frappe.get_doc("Lead", lead)
 	else:
-		lead_doc = frappe.get_doc({
-			"doctype": "Lead",
-			"email_id": frappe.session.user,
-			"lead_name": get_fullname(frappe.session.user),
-			"territory": guess_territory(),
-			"status": "Open" # TODO: set something better???
+		customer = frappe.new_doc("Customer")
+		fullname = get_fullname(user)
+		customer.update({
+			"customer_name": fullname,
+			"customer_type": "Individual",
+			"customer_group": get_shopping_cart_settings().default_customer_group,
+			"territory": get_root_of("Territory")
 		})
+		customer.insert(ignore_permissions=True)
 
-		if frappe.session.user not in ("Guest", "Administrator"):
-			lead_doc.flags.ignore_permissions = True
-			lead_doc.insert()
+		contact = frappe.new_doc("Contact")
+		contact.update({
+			"customer": customer.name,
+			"first_name": fullname,
+			"email_id": user
+		})
+		contact.insert(ignore_permissions=True)
 
-		return lead_doc
+		return customer
 
 def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_page_length=20, party=None):
 	if not party:
-		party = get_lead_or_customer()
+		party = get_customer()
 
 	address_docs = frappe.db.sql("""select * from `tabAddress`
 		where `{0}`=%s order by name limit {1}, {2}""".format(party.doctype.lower(),
