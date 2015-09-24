@@ -1,12 +1,14 @@
 import frappe
 
 def execute():
+	frappe.reload_doctype("Price List Country")
+	frappe.reload_doctype("Price List")
+	frappe.reload_doctype("Shipping Rule")
+
 	# for price list
 	countries = frappe.db.sql_list("select name from tabCountry")
 
 	for doctype in ("Price List", "Shipping Rule"):
-		frappe.reload_doctype(doctype)
-
 		for at in frappe.db.sql("""select name, parent, territory from `tabApplicable Territory` where
 			parenttype = %s """, doctype, as_dict=True):
 			if at.territory in countries:
