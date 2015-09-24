@@ -5,6 +5,7 @@ def execute():
 	frappe.reload_doc("accounts", "doctype", "shipping_rule_country")
 	frappe.reload_doctype("Price List")
 	frappe.reload_doctype("Shipping Rule")
+	frappe.reload_doctype("Shopping Cart Settings")
 
 	# for price list
 	countries = frappe.db.sql_list("select name from tabCountry")
