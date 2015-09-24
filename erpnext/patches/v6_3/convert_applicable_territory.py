@@ -1,7 +1,7 @@
 import frappe
 
 def execute():
-	frappe.reload_doctype("Price List Country")
+	frappe.reload_doc("stock", "doctype", "price_list_country")
 	frappe.reload_doctype("Price List")
 	frappe.reload_doctype("Shipping Rule")
 
