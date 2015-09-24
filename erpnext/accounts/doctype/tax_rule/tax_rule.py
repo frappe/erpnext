@@ -18,31 +18,23 @@ class TaxRule(Document):
 
 	def validate(self):
 		self.validate_tax_template()
-		self.validate_customer_group()
-		self.validate_supplier_type()
 		self.validate_date()
 		self.validate_filters()
 
 	def validate_tax_template(self):
 		if self.tax_type== "Sales":
 			self.purchase_tax_template = self.supplier = self.supplier_type= None
+			if self.customer:
+				self.customer_group = None
+
 		else:
 			self.sales_tax_template= self.customer = self.customer_group= None
 
+			if self.supplier:
+				self.supplier_type = None
+
 		if not (self.sales_tax_template or self.purchase_tax_template):
 			frappe.throw(_("Tax Template is mandatory."))
-
-	def validate_customer_group(self):
-		if self.customer and self.customer_group:
-			if not frappe.db.get_value("Customer", self.customer, "customer_group") == self.customer_group:
-				frappe.throw(_("Customer {0} does not belong to customer group {1}"). \
-					format(self.customer, self.customer_group), IncorrectCustomerGroup)
-
-	def validate_supplier_type(self):
-		if self.supplier and self.supplier_type:
-			if not frappe.db.get_value("Supplier", self.supplier, "supplier_type") == self.supplier_type:
-				frappe.throw(_("Supplier {0} does not belong to Supplier Type {1}"). \
-					format(self.supplier, self.supplier_type), IncorrectSupplierType)
 
 	def validate_date(self):
 		if self.from_date and self.to_date and self.from_date > self.to_date:
