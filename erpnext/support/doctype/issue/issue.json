@@ -597,7 +597,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-09-07 15:51:26", 
+ "modified": "2015-09-24 06:54:33.383186", 
  "modified_by": "Administrator", 
  "module": "Support", 
  "name": "Issue", 
@@ -605,7 +605,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 0, 
