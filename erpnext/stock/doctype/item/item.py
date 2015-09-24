@@ -19,6 +19,7 @@ class Item(WebsiteGenerator):
 		condition_field = "show_in_website",
 		template = "templates/generators/item.html",
 		parent_website_route_field = "item_group",
+		no_cache = 1
 	)
 
 	def onload(self):

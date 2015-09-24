@@ -147,7 +147,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, dt, dn) {
 cur_frm.fields_dict['items'].grid.get_field('item_code').get_query = function(doc) {
 	return{
 		query: "erpnext.controllers.queries.item_query",
-		filters: [["Item", "name", "!=", doc.item]]
+		filters: [["Item", "name", "!=", cur_frm.doc.item]]
 	}
 }
 

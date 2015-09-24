@@ -36,6 +36,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	refresh: function(doc, dt, dn) {
 		this._super();
 
+		if(cur_frm.msgbox && cur_frm.msgbox.$wrapper.is(":visible")) {
+			// hide new msgbox
+			cur_frm.msgbox.hide();
+		}
+
 		cur_frm.dashboard.reset();
 
 		this.frm.toggle_reqd("due_date", !this.frm.doc.is_return);
@@ -146,7 +151,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					method: "set_missing_values",
 					callback: function(r) {
 						if(!r.exc) {
-							cur_frm.pos_print_format = r.message.print_format;
+							if(r.message && r.message.print_format) {
+								cur_frm.pos_print_format = r.message.print_format;
+							}
 							cur_frm.doc.__missing_values_set = true;
 							me.frm.script_manager.trigger("update_stock");
 							frappe.model.set_default_values(me.frm.doc);
@@ -175,7 +182,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			me.apply_pricing_rule();
 		})
 	},
-	
+
 	debit_to: function() {
 		var me = this;
 		if(this.frm.doc.debit_to) {
@@ -193,7 +200,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					}
 				}
 			});
-		}		
+		}
 	},
 
 	allocated_amount: function() {
@@ -417,9 +424,9 @@ cur_frm.cscript.on_submit = function(doc, cdt, cdn) {
 	})
 
 	if(cur_frm.doc.is_pos) {
-		frappe.msgprint('<a class="btn btn-primary" \
+		cur_frm.msgbox = frappe.msgprint('<a class="btn btn-primary" \
 			onclick="cur_frm.print_preview.printit(true)" style="margin-right: 5px;">Print</a>\
-			<a class="btn btn-default" href="#Form/Sales Invoice/New">New</a>');
+			<a class="btn btn-default" href="#Form/Sales Invoice/New Sales Invoice">New</a>');
 
 	} else if(cint(frappe.boot.notification_settings.sales_invoice)) {
 		cur_frm.email_doc(frappe.boot.notification_settings.sales_invoice_message);

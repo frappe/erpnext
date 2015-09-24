@@ -44,7 +44,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 			}
 		});
 	},
-	
+
 	refresh: function() {
 		this.frm.disable_save();
 	},
@@ -77,8 +77,8 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 				var invoices = [];
 
 				$.each(me.frm.doc.invoices || [], function(i, row) {
-						if (row.invoice_number && !inList(invoices, row.invoice_number))
-							invoices.push(row.invoice_number);
+					if (row.invoice_number && !inList(invoices, row.invoice_number))
+						invoices.push(row.invoice_type + " | " + row.invoice_number);
 				});
 
 				frappe.meta.get_docfield("Payment Reconciliation Payment", "invoice_number",

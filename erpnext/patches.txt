@@ -209,3 +209,5 @@ erpnext.patches.v6_0.fix_planned_qty
 erpnext.patches.v6_0.multi_currency
 erpnext.patches.v6_2.remove_newsletter_duplicates
 erpnext.patches.v6_2.fix_missing_default_taxes_and_lead
+erpnext.patches.v5_8.tax_rule
+erpnext.patches.v6_3.convert_applicable_territory

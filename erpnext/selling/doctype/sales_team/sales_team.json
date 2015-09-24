@@ -8,7 +8,7 @@
  "doctype": "DocType", 
  "fields": [
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "fieldname": "sales_person", 
@@ -34,7 +34,7 @@
    "width": "200px"
   }, 
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "fieldname": "contact_no", 
@@ -79,7 +79,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "fieldname": "allocated_percentage", 
@@ -104,7 +104,7 @@
    "width": "100px"
   }, 
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "fieldname": "allocated_amount", 
@@ -130,7 +130,7 @@
    "width": "120px"
   }, 
   {
-   "allow_on_submit": 0, 
+   "allow_on_submit": 1, 
    "bold": 0, 
    "collapsible": 0, 
    "fieldname": "incentives", 
@@ -185,7 +185,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-08-13 16:30:24.146848", 
+ "modified": "2015-09-23 09:50:26.923187", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Sales Team", 

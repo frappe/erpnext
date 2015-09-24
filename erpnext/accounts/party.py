@@ -20,7 +20,7 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 
 	if not party:
 		return {}
-		
+
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 
@@ -29,7 +29,7 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 
 def _get_party_details(party=None, account=None, party_type="Customer", company=None,
 	posting_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False):
-	
+
 	out = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, doctype))
 
 	party = out[party_type.lower()]
@@ -43,6 +43,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	set_contact_details(out, party, party_type)
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, party_type, price_list)
+	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_type)
 
 	if not out.get("currency"):
 		out["currency"] = currency
@@ -50,9 +51,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	# sales team
 	if party_type=="Customer":
 		out["sales_team"] = [{
-			"sales_person": d.sales_person,
-			"sales_designation": d.sales_designation,
-			"allocated_percentage": d.allocated_percentage
+			"sales_person": d.sales_person
 		} for d in party.get("sales_team")]
 
 	return out
@@ -99,10 +98,23 @@ def set_other_values(out, party, party_type):
 		out[f] = party.get(f)
 
 	# fields prepended with default in Customer doctype
-	for f in ['currency', 'taxes_and_charges'] \
+	for f in ['currency'] \
 		+ (['sales_partner', 'commission_rate'] if party_type=="Customer" else []):
 		if party.get("default_" + f):
 			out[f] = party.get("default_" + f)
+
+def get_default_price_list(party):
+	"""Return default price list for party (Document object)"""
+	if party.default_price_list:
+		return party.default_price_list
+
+	if party.doctype == "Customer":
+		price_list =  frappe.db.get_value("Customer Group",
+			party.customer_group, "default_price_list")
+		if price_list:
+			return price_list
+
+	return None
 
 def set_price_list(out, party, party_type, given_price_list):
 	# price list
@@ -111,11 +123,7 @@ def set_price_list(out, party, party_type, given_price_list):
 		price_list = price_list[0] if len(price_list)==1 else None
 
 	if not price_list:
-		price_list = party.default_price_list
-
-	if not price_list and party_type=="Customer":
-		price_list =  frappe.db.get_value("Customer Group",
-			party.customer_group, "default_price_list")
+		price_list = get_default_price_list(party)
 
 	if not price_list:
 		price_list = given_price_list
@@ -144,20 +152,11 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 		"due_date": get_due_date(posting_date, party_type, party, company)
 	}
 	return out
-	
+
 def validate_accounting_currency(party):
-	company_currency = get_company_currency()
-	
-	# set party account currency
-	if not party.party_account_currency:
-		if party.default_currency:
-			party.party_account_currency = party.default_currency
-		elif len(set(company_currency.values())) == 1:
-				party.party_account_currency = company_currency.values()[0]
-			
 	party_account_currency_in_db = frappe.db.get_value(party.doctype, party.name, "party_account_currency")
 	if party_account_currency_in_db != party.party_account_currency:
-		existing_gle = frappe.db.get_value("GL Entry", {"party_type": party.doctype, 
+		existing_gle = frappe.db.get_value("GL Entry", {"party_type": party.doctype,
 			"party": party.name}, ["name", "account_currency"], as_dict=1)
 		if existing_gle:
 			if party_account_currency_in_db:
@@ -165,8 +164,8 @@ def validate_accounting_currency(party):
 					.format(party.doctype), InvalidCurrency)
 			else:
 				party.party_account_currency = existing_gle.account_currency
-		
-		
+
+
 def validate_party_account(party):
 	company_currency = get_company_currency()
 	if party.party_account_currency:
@@ -174,31 +173,31 @@ def validate_party_account(party):
 		for company, currency in company_currency.items():
 			if currency != party.party_account_currency:
 				companies_with_different_currency.append(company)
-				
+
 		for d in party.get("accounts"):
 			if d.company in companies_with_different_currency:
 				companies_with_different_currency.remove(d.company)
-			
+
 			selected_account_currency = frappe.db.get_value("Account", d.account, "account_currency")
 			if selected_account_currency != party.party_account_currency:
 				frappe.throw(_("Account {0} is invalid, account currency must be {1}")
 					.format(d.account, selected_account_currency), InvalidAccountCurrency)
-				
+
 		if companies_with_different_currency:
 			frappe.msgprint(_("Please mention Default {0} Account for the following companies, as accounting currency is different from company's default currency: {1}")
 				.format(
-					"Receivable" if party.doctype=="Customer" else "Payable", 
+					"Receivable" if party.doctype=="Customer" else "Payable",
 					"\n" + "\n".join(companies_with_different_currency)
 				)
 			)
-			
+
 def get_company_currency():
 	company_currency = frappe._dict()
 	for d in frappe.get_all("Company", fields=["name", "default_currency"]):
 		company_currency.setdefault(d.name, d.default_currency)
-		
+
 	return company_currency
-				
+
 @frappe.whitelist()
 def get_party_account(company, party, party_type):
 	"""Returns the account for the given `party`.
@@ -240,7 +239,7 @@ def get_due_date(posting_date, party_type, party, company):
 			credit_days = get_credit_days(party_type, party, company)
 			if credit_days:
 				due_date = add_days(posting_date, credit_days)
-				
+
 	return due_date
 
 def get_credit_days(party_type, party, company):
@@ -248,21 +247,21 @@ def get_credit_days(party_type, party, company):
 		if party_type == "Customer":
 			credit_days_based_on, credit_days, customer_group = \
 				frappe.db.get_value(party_type, party, ["credit_days_based_on", "credit_days", "customer_group"])
-			
+
 			if not credit_days_based_on:
 				credit_days_based_on, credit_days = \
 					frappe.db.get_value("Customer Group", customer_group, ["credit_days_based_on", "credit_days"]) \
 					or frappe.db.get_value("Company", company, ["credit_days_based_on", "credit_days"])
-				
+
 			return credit_days_based_on, credit_days
 		else:
 			credit_days, supplier_type = frappe.db.get_value(party_type, party, ["credit_days", "supplier_type"])
 			if not credit_days:
 				credit_days = frappe.db.get_value("Supplier Type", supplier_type, "credit_days") \
 					or frappe.db.get_value("Company", company, "credit_days")
-					
+
 			return credit_days
-			
+
 def validate_due_date(posting_date, due_date, party_type, party, company):
 	if getdate(due_date) < getdate(posting_date):
 		frappe.throw(_("Due Date cannot be before Posting Date"))
@@ -275,3 +274,30 @@ def validate_due_date(posting_date, due_date, party_type, party, company):
 					.format(date_diff(due_date, default_due_date)))
 			else:
 				frappe.throw(_("Due / Reference Date cannot be after {0}").format(formatdate(default_due_date)))
+
+@frappe.whitelist()
+def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_type=None,
+	billing_address=None, shipping_address=None, use_for_shopping_cart=None):
+	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
+	args = {
+		party_type.lower(): party,
+		"customer_group":	customer_group,
+		"supplier_type":	supplier_type,
+		"company":			company
+	}
+
+	if billing_address or shipping_address:
+		args.update(get_party_details(party, party_type, {"billing_address": billing_address, \
+			"shipping_address": shipping_address }))
+	else:
+		args.update(get_party_details(party, party_type))
+
+	if party_type=="Customer":
+		args.update({"tax_type": "Sales"})
+	else:
+		args.update({"tax_type": "Purchase"})
+
+	if use_for_shopping_cart:
+		args.update({"use_for_shopping_cart": use_for_shopping_cart})
+
+	return get_tax_template(posting_date, args)
