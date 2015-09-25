@@ -209,7 +209,8 @@ class ReceivablePayableReport(object):
 			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party,
 				voucher_type, voucher_no, against_voucher_type, against_voucher, account_currency, remarks, {0}
 				from `tabGL Entry`
-				where docstatus < 2 and party_type=%s {1} order by posting_date, party"""
+				where docstatus < 2 and party_type=%s and ifnull(party, '') != '' {1} 
+				order by posting_date, party"""
 				.format(select_fields, conditions), values, as_dict=True)
 
 		return self.gl_entries
