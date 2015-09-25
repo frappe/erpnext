@@ -10,6 +10,7 @@ from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 from erpnext.controllers.sales_and_purchase_return import validate_return
+from erpnext.accounts.party import get_party_account_currency
 
 force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
 
@@ -427,8 +428,7 @@ class AccountsController(TransactionBase):
 		if self.get("currency"):
 			party_type, party = self.get_party()
 			if party_type and party:
-				party_account_currency = frappe.db.get_value(party_type, party, "party_account_currency") \
-					or self.company_currency
+				party_account_currency = get_party_account_currency(party_type, party, self.company)
 
 				if party_account_currency != self.company_currency and self.currency != party_account_currency:
 					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")

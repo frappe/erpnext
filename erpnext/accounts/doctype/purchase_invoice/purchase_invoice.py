@@ -66,7 +66,7 @@ class PurchaseInvoice(BuyingController):
 
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
-			self.credit_to = get_party_account(self.company, self.supplier, "Supplier")
+			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
 		if not self.due_date:
 			self.due_date = get_due_date(self.posting_date, "Supplier", self.supplier, self.company)
 
@@ -91,7 +91,7 @@ class PurchaseInvoice(BuyingController):
 			throw(_("Conversion rate cannot be 0 or 1"))
 
 	def validate_credit_to_acc(self):
-		account = frappe.db.get_value("Account", self.credit_to, 
+		account = frappe.db.get_value("Account", self.credit_to,
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
 		if account.report_type != "Balance Sheet":
@@ -99,7 +99,7 @@ class PurchaseInvoice(BuyingController):
 
 		if self.supplier and account.account_type != "Payable":
 			frappe.throw(_("Credit To account must be a Payable account"))
-			
+
 		self.party_account_currency = account.account_currency
 
 	def check_for_stopped_status(self):
@@ -251,7 +251,7 @@ class PurchaseInvoice(BuyingController):
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		gl_entries = []
-		
+
 		# parent's gl entry
 		if self.base_grand_total:
 			gl_entries.append(
@@ -273,9 +273,9 @@ class PurchaseInvoice(BuyingController):
 		for tax in self.get("taxes"):
 			if tax.category in ("Total", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
 				account_currency = frappe.db.get_value("Account", tax.account_head, "account_currency")
-				
+
 				dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
-				
+
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
@@ -364,7 +364,7 @@ class PurchaseInvoice(BuyingController):
 		# and the amount that is paid
 		if self.write_off_account and flt(self.write_off_amount):
 			write_off_account_currency = frappe.db.get_value("Account", self.write_off_account, "account_currency")
-			
+
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": self.credit_to,

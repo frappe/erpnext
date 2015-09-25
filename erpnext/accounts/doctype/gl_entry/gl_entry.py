@@ -3,11 +3,10 @@
 
 from __future__ import unicode_literals
 import frappe
-
-from frappe.utils import flt, fmt_money, getdate, formatdate
 from frappe import _
-
+from frappe.utils import flt, fmt_money, getdate, formatdate
 from frappe.model.document import Document
+from erpnext.accounts.party import get_party_account_currency
 
 class CustomerFrozen(frappe.ValidationError): pass
 class InvalidCurrency(frappe.ValidationError): pass
@@ -101,7 +100,7 @@ class GLEntry(Document):
 			if not frozen_accounts_modifier in frappe.get_roles():
 				if frappe.db.get_value(self.party_type, self.party, "is_frozen"):
 					frappe.throw("{0} {1} is frozen".format(self.party_type, self.party), CustomerFrozen)
-					
+
 	def validate_currency(self):
 		company_currency = frappe.db.get_value("Company", self.company, "default_currency")
 		account_currency = frappe.db.get_value("Account", self.account, "account_currency") or company_currency
@@ -111,15 +110,14 @@ class GLEntry(Document):
 		if account_currency != self.account_currency:
 			frappe.throw(_("Accounting Entry for {0} can only be made in currency: {1}")
 				.format(self.account, (account_currency or company_currency)), InvalidAccountCurrency)
-				
-		
+
+
 		if self.party_type and self.party:
-			party_account_currency = frappe.db.get_value(self.party_type, self.party, "party_account_currency") \
-				or company_currency
+			party_account_currency = get_party_account_currency(self.party_type, self.party, self.company)
 
 			if party_account_currency != self.account_currency:
 				frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
-					.format(self.party_type, self.party, party_account_currency), InvalidAccountCurrency)					
+					.format(self.party_type, self.party, party_account_currency), InvalidAccountCurrency)
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
@@ -159,7 +157,7 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 		where against_voucher_type=%s and against_voucher=%s
 		and account = %s {0}""".format(party_condition),
 		(against_voucher_type, against_voucher, account))[0][0] or 0.0)
-		
+
 	if against_voucher_type == 'Purchase Invoice':
 		bal = -bal
 	elif against_voucher_type == "Journal Entry":

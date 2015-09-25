@@ -186,7 +186,7 @@ class SalesInvoice(SellingController):
 		pos = self.set_pos_fields(for_validate)
 
 		if not self.debit_to:
-			self.debit_to = get_party_account(self.company, self.customer, "Customer")
+			self.debit_to = get_party_account("Customer", self.customer, self.company)
 		if not self.due_date and self.customer:
 			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
 

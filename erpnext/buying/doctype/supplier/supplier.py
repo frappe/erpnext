@@ -8,7 +8,6 @@ from frappe import msgprint, _
 from frappe.model.naming import make_autoname
 from erpnext.utilities.address_and_contact import load_address_and_contact
 from erpnext.utilities.transaction_base import TransactionBase
-from erpnext.accounts.party import validate_accounting_currency, validate_party_account
 
 class Supplier(TransactionBase):
 	def get_feed(self):
@@ -45,9 +44,6 @@ class Supplier(TransactionBase):
 		if frappe.defaults.get_global_default('supp_master_name') == 'Naming Series':
 			if not self.naming_series:
 				msgprint(_("Series is mandatory"), raise_exception=1)
-				
-		validate_accounting_currency(self)
-		validate_party_account(self)
 
 	def get_contacts(self,nm):
 		if nm:
@@ -96,14 +92,14 @@ def get_dashboard_info(supplier):
 	billing_this_year = frappe.db.sql("""
 		select sum(ifnull(credit_in_account_currency, 0)) - sum(ifnull(debit_in_account_currency, 0))
 		from `tabGL Entry`
-		where voucher_type='Purchase Invoice' and party_type = 'Supplier' 
-			and party=%s and fiscal_year = %s""", 
+		where voucher_type='Purchase Invoice' and party_type = 'Supplier'
+			and party=%s and fiscal_year = %s""",
 		(supplier, frappe.db.get_default("fiscal_year")))
-			
+
 	total_unpaid = frappe.db.sql("""select sum(outstanding_amount)
 		from `tabPurchase Invoice`
 		where supplier=%s and docstatus = 1""", supplier)
-	
+
 
 	out["billing_this_year"] = billing_this_year[0][0] if billing_this_year else 0
 	out["total_unpaid"] = total_unpaid[0][0] if total_unpaid else 0
