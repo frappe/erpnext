@@ -211,3 +211,4 @@ erpnext.patches.v6_2.remove_newsletter_duplicates
 erpnext.patches.v6_2.fix_missing_default_taxes_and_lead
 erpnext.patches.v5_8.tax_rule
 erpnext.patches.v6_3.convert_applicable_territory
+erpnext.patches.v6_4.round_status_updater_percentages
