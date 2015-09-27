@@ -21,37 +21,57 @@ def get_list_context(context=None):
 def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_page_length=20):
 	from frappe.templates.pages.list import get_list
 	user = frappe.session.user
+	key = None
+
+	if not filters: filters = []
+
+	filters.append((doctype, "docstatus", "=", 1))
 
 	if user != "Guest" and is_website_user():
 		# find party for this contact
 		customers, suppliers = get_customers_suppliers(doctype, user)
+
 		if customers:
-			return post_process(get_list(doctype, txt, filters=[(doctype, "customer", "in", customers)],
-				limit_start=limit_start, limit_page_length=limit_page_length, ignore_permissions=True))
-
+			key, parties = "customer", customers
 		elif suppliers:
-			return post_process(get_list(doctype, txt, filters=[(doctype, "supplier", "in", suppliers)],
-				limit_start=limit_start, limit_page_length=limit_page_length, ignore_permissions=True))
+			key, parties = "supplier", suppliers
 
+		filters.append((doctype, key, "in", parties))
+
+		if key:
+			return post_process(doctype, get_list(doctype, txt,
+				filters=filters, fields = "name",
+				limit_start=limit_start, limit_page_length=limit_page_length,
+				ignore_permissions=True,
+				order_by = "modified desc"))
 		else:
 			return []
 
-	return post_process(get_list(doctype, txt, filters, limit_start, limit_page_length))
+	return post_process(doctype, get_list(doctype, txt, filters, limit_start, limit_page_length,
+		fields="name", order_by = "modified desc"))
 
-def post_process(result):
-	for r in result:
-		r.status_percent = 0
-		r.status_display = []
+def post_process(doctype, data):
+	result = []
+	for d in data:
+		doc = frappe.get_doc(doctype, d.name)
 
-		if r.get("per_billed"):
-			r.status_percent += flt(r.per_billed)
-			r.status_display.append(_("Billed") if r.per_billed==100 else _("{0}% Billed").format(r.per_billed))
+		doc.status_percent = 0
+		doc.status_display = []
 
-		if r.get("per_delivered"):
-			r.status_percent += flt(r.per_delivered)
-			r.status_display.append(_("Delivered") if r.per_delivered==100 else _("{0}% Delivered").format(r.per_delivered))
+		if doc.get("per_billed"):
+			doc.status_percent += flt(doc.per_billed)
+			doc.status_display.append(_("Billed") if doc.per_billed==100 else _("{0}% Billed").format(doc.per_billed))
 
-		r.status_display = ", ".join(r.status_display)
+		if doc.get("per_delivered"):
+			doc.status_percent += flt(doc.per_delivered)
+			doc.status_display.append(_("Delivered") if doc.per_delivered==100 else _("{0}% Delivered").format(doc.per_delivered))
+
+		if hasattr(doc, "set_indicator"):
+			doc.set_indicator()
+
+		doc.status_display = ", ".join(doc.status_display)
+		doc.items_preview = ", ".join([d.item_name for d in doc.items])
+		result.append(doc)
 
 	return result
 

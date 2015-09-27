@@ -1,0 +1,25 @@
+.cart-content {
+	min-height: 400px;
+	margin-top: 60px;
+}
+
+.cart-header, .cart-footer {
+	margin-bottom: 60px;
+}
+
+.cart-item-header {
+	padding-bottom: 10px;
+	margin-bottom: 10px;
+	border-bottom: 1px solid #d1d8dd;
+}
+
+.tax-grand-total-row {
+	font-size: 14px;
+	margin-top: 30px;
+	font-weight: bold;
+}
+
+.cart-addresses {
+	margin-top: 80px;
+	margin-bottom: 60px;
+}

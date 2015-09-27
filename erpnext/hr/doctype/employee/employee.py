@@ -89,7 +89,7 @@ class Employee(Document):
 				user.user_image = self.image
 				try:
 					frappe.get_doc({
-						"doctype": "File Data",
+						"doctype": "File",
 						"file_name": self.image,
 						"attached_to_doctype": "User",
 						"attached_to_name": self.user_id

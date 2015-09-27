@@ -4,17 +4,17 @@ frappe.listview_settings['Purchase Order'] = {
 	get_indicator: function(doc) {
         if(doc.status==="Stopped") {
 			return [__("Stopped"), "darkgrey", "status,=,Stopped"];
-		} else if(flt(doc.per_received) < 100 && doc.status!=="Stopped") {
-			if(flt(doc.per_billed) < 100) {
+		} else if(flt(doc.per_received, 2) < 100 && doc.status!=="Stopped") {
+			if(flt(doc.per_billed, 2) < 100) {
 				return [__("To Receive and Bill"), "orange",
 					"per_received,<,100|per_billed,<,100|status,!=,Stopped"];
 			} else {
 				return [__("To Receive"), "orange",
 					"per_received,<,100|per_billed,=,100|status,!=,Stopped"];
 			}
-		} else if(flt(doc.per_received) == 100 && flt(doc.per_billed) < 100 && doc.status!=="Stopped") {
+		} else if(flt(doc.per_received, 2) == 100 && flt(doc.per_billed, 2) < 100 && doc.status!=="Stopped") {
 			return [__("To Bill"), "orange", "per_received,=,100|per_billed,<,100|status,!=,Stopped"];
-		} else if(flt(doc.per_received) == 100 && flt(doc.per_billed) == 100 && doc.status!=="Stopped") {
+		} else if(flt(doc.per_received, 2) == 100 && flt(doc.per_billed, 2) == 100 && doc.status!=="Stopped") {
 			return [__("Completed"), "green", "per_received,=,100|per_billed,=,100|status,!=,Stopped"];
 		}
 	},
