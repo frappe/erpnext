@@ -169,7 +169,7 @@ class AccountsController(TransactionBase):
 
 						if item.price_list_rate:
 							item.rate = flt(item.price_list_rate *
-								(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
+								(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
 
 	def set_taxes(self):
 		if not self.meta.get_field("taxes"):
