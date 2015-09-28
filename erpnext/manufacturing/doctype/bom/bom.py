@@ -391,8 +391,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1):
 
 	if fetch_exploded:
 		query = query.format(table="BOM Explosion Item",
-			conditions="""and item.is_pro_applicable = 0
-				and item.is_sub_contracted_item = 0 """)
+			conditions="""and item.is_sub_contracted_item = 0""")
 		items = frappe.db.sql(query, { "qty": qty,	"bom": bom }, as_dict=True)
 	else:
 		query = query.format(table="BOM Item", conditions="")
