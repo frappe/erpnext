@@ -7,10 +7,10 @@ from frappe.model.naming import make_autoname
 from frappe import _, msgprint, throw
 import frappe.defaults
 from frappe.utils import flt
-
+from frappe.desk.reportview import build_match_conditions
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.utilities.address_and_contact import load_address_and_contact
-from frappe.desk.reportview import build_match_conditions
+from erpnext.accounts.party import validate_party_accounts
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -32,6 +32,7 @@ class Customer(TransactionBase):
 
 	def validate(self):
 		self.flags.is_new_doc = self.is_new()
+		validate_party_accounts(self)
 
 	def update_lead_status(self):
 		if self.lead_name:

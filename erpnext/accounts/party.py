@@ -192,6 +192,15 @@ def get_party_account_currency(party_type, party, company):
 
 	return frappe.local_cache("party_account_currency", (party_type, party, company), generator)
 
+def validate_party_accounts(doc):
+	companies = []
+
+	for account in doc.get("accounts"):
+		if account.company in companies:
+			frappe.throw(_("There can only be 1 Account per Company in {0} {1}").format(doc.doctype, doc.name))
+		else:
+			companies.append(account.company)
+
 @frappe.whitelist()
 def get_due_date(posting_date, party_type, party, company):
 	"""Set Due Date = Posting Date + Credit Days"""
