@@ -14,5 +14,5 @@ def get_context(context):
 
 	context.parents = frappe.form_dict.parents
 
-	if not context.doc.has_permission("read"):
+	if not context.doc.has_website_permission("read"):
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
