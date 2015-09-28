@@ -2,7 +2,7 @@ frappe.provide("erpnext.wiz");
 
 frappe.pages['setup-wizard'].on_page_load = function(wrapper) {
 	if(sys_defaults.company) {
-		frappe.set_route("desktop");
+		frappe.set_route("desk-home");
 		return;
 	}
 	$(".navbar:first").toggle(false);
