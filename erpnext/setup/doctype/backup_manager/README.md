@@ -1,1 +1,0 @@
-Settings to manage automated backups to third party tools like Dropbox and Google Drive.
