@@ -11,8 +11,7 @@ from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.utilities.doctype.contact.contact import get_contact_details
 
-class InvalidCurrency(frappe.ValidationError): pass
-class InvalidAccountCurrency(frappe.ValidationError): pass
+class DuplicatePartyAccountError(frappe.ValidationError): pass
 
 @frappe.whitelist()
 def get_party_details(party=None, account=None, party_type="Customer", company=None,
@@ -197,7 +196,8 @@ def validate_party_accounts(doc):
 
 	for account in doc.get("accounts"):
 		if account.company in companies:
-			frappe.throw(_("There can only be 1 Account per Company in {0} {1}").format(doc.doctype, doc.name))
+			frappe.throw(_("There can only be 1 Account per Company in {0} {1}").format(doc.doctype, doc.name),
+				DuplicatePartyAccountError)
 		else:
 			companies.append(account.company)
 
