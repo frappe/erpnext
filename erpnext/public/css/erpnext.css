@@ -1,3 +1,7 @@
+
+/*
+ *	/home/syskleister/frappe-bench/apps/erpnext/erpnext/public/css/erpnext.css
+ */
 .erpnext-footer {
   margin: 11px auto;
   text-align: center;
@@ -100,4 +104,283 @@
   width: 24px;
   margin-right: 0px;
   margin-top: -3px;
+}
+
+
+
+
+
+
+
+
+
+
+.navbar-default {
+
+   background-color: #2c3e50 !important;
+   border-color: none;
+}
+
+.nav-pills > li.active > a, .nav-pills > li.active > a:hover, .nav-pills > li.active > a:focus {
+
+background-color: #1abc9c;
+color: white;
+}
+
+.nav-pills > li > a {
+
+border-radius: 0px;
+}
+.navbar-default .navbar-nav > li > a {
+color: white;
+}
+
+.navbar-new-comments {
+background-color: #e74c3c;
+}
+
+.open-notification {
+background-color: #e74c3c;
+}
+
+.layout-main-section {
+border: none;
+padding-top: 15px;
+}
+.nav > li > a:hover {
+background-color: #ecf0f1;
+}
+.nav > li > a {
+    font-size: 13px;
+font-weight: 400;
+padding: 15px 15px;
+}
+
+#module-item {
+border-button: none;
+}
+
+.module-item:hover,
+.module-item:focus {
+
+    background-color: #F5F5F6;
+}
+
+.module-item {
+background-color: white;
+}
+
+.btn-primary {
+background-color: #2c3e50;
+border: none;
+padding: 10px;
+padding: 10px 20px;
+}
+
+.btn-primary:hover {
+opacity: 0.8;
+background-color: #2c3e50;
+border: none;
+}
+
+.btn-default {
+background-color: #1abc9c;
+border: none;
+color: white;
+padding: 10px 20px;
+}
+
+.btn-default:hover {
+background-color: #1abc9c;
+border: none;
+opacity: 0.8;
+color:white;
+}
+
+.btn-default:hover, .btn-default:focus, .btn-default.focus, .btn-default:active, .btn-default.active, .open > .dropdown-toggle.btn-default {
+background-color: #1abc9c;
+border: none;
+opacity: 0.8;
+color:white;
+
+}
+
+.btn-danger{
+padding: 10px 20px;
+}
+
+.btn-success{
+padding: 10px 20px;
+}
+
+.navbar-default .navbar-nav > li > a:hover {
+color: white;
+}
+
+.page-head {
+background-color: white;
+    -webkit-box-shadow: 0px 0px 5px 0px rgb(175, 177, 177);
+    -moz-box-shadow: 0px 0px 5px 0px rgb(175, 177, 177);
+    box-shadow: 0px 0px 5px 0px rgb(175, 177, 177);
+}
+
+body {
+    background-color: #ecf0f1;
+    font-family: "open sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+@font-family-serif:       Georgia, "Times New Roman", Times, serif;
+
+
+h1 {
+font-weight: 100;
+}
+
+h3, h4 {
+    font-weight: 500;
+    color: black;
+}
+
+.result-area {
+
+background-color: white;
+}
+
+
+
+#navbar-search {
+    background-color: white;
+
+}
+
+.dropdown-menu > li > a:hover {
+font-weight: 500;
+
+
+}
+
+.dropdown-menu {
+min-width: 220px;
+}
+
+.form-control {
+    height: 40px
+
+}
+
+
+.set-filters .btn-group .btn-default {
+    background-color: white;
+
+}
+
+.text-muted {
+
+
+}
+
+.new-filter .text-muted {
+color: white !important;
+
+}
+
+.list-row .list-id,
+.list-row .indicator, .list-row .indicator-right {
+ font-weight: 500 !important;
+
+}
+
+
+
+.list-row-head{
+    padding: 14px 15px 7px;
+    min-height: 48px;
+background-color: white;
+
+}
+
+.list-row-head .h6{
+   font-weight: bold !important;
+}
+
+
+.form-inner-toolbar {
+    background-color: #fffdf4;
+margin-bottom: 5px;
+}
+
+#page-desktop {
+    background-color: #ecf0f1 !important;
+}
+
+.app-icon {
+    border-radius: 0px;
+    background-color: #FFF !important;
+    box-shadow: 0px 3px 2px rgba(0, 0, 0, 0.15);
+    min-width: 90px;
+}
+.app-icon i {
+    color: #1abc9c;
+    text-shadow: none;
+    font-size: 45px;
+}
+.app-icon:hover i{
+color: white;
+
+}
+
+.app-icon:hover {
+ background-color: #1abc9c !important;
+opacity: 0.8;
+}    
+
+.case-label {
+color: #2c3e50;
+text-shadow: none;
+}
+.form-layout {
+ background-color: white;
+    -webkit-box-shadow: 0px 0px 2px 0px rgb(175, 177, 177);
+    -moz-box-shadow: 0px 0px 2px 0px rgb(175, 177, 177);
+    box-shadow: 0px 0px 2px 0px rgb(175, 177, 177);
+
+}
+
+.shaded-section, .timeline-item:nth-child(even) {
+background-color: #F5F5F6;
+
+}
+
+.result {
+padding: 20px;
+    background-color: white;
+}
+
+.show_filters {
+
+padding: 0;
+}
+
+.list-row:hover {
+
+background-color: #f9f9f9;
+}
+
+.list-value{
+    color: #676a6c;
+}
+
+
+.fc table {
+background-color: white;
+
+}
+
+.fc-head th {
+background-color: #f9f9f9;
+}
+
+.grid-heading-row {
+background-color: #f9f9f9;
+
 }
