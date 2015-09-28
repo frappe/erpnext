@@ -10,6 +10,7 @@ from frappe import _
 import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
+from erpnext.accounts.utils import get_account_currency
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -307,9 +308,9 @@ class PurchaseReceipt(BuyingController):
 					val_rate_db_precision = 6 if cint(d.precision("valuation_rate")) <= 6 else 9
 
 					# warehouse account
-					stock_value_diff = flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty) 
+					stock_value_diff = flt(flt(d.valuation_rate, val_rate_db_precision) * flt(d.qty)
 						* flt(d.conversion_factor),	d.precision("base_net_amount"))
-						
+
 					gl_entries.append(self.get_gl_dict({
 						"account": warehouse_account[d.warehouse]["name"],
 						"against": stock_rbnb,
@@ -319,7 +320,7 @@ class PurchaseReceipt(BuyingController):
 					}, warehouse_account[d.warehouse]["account_currency"]))
 
 					# stock received but not billed
-					stock_rbnb_currency = frappe.db.get_value("Account", stock_rbnb, "account_currency")
+					stock_rbnb_currency = get_account_currency(stock_rbnb)
 					gl_entries.append(self.get_gl_dict({
 						"account": stock_rbnb,
 						"against": warehouse_account[d.warehouse]["name"],

@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import cstr, flt, fmt_money, formatdate
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.utils import get_balance_on
+from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.accounts.party import get_party_account_currency
 from erpnext.setup.utils import get_company_currency
 
@@ -147,7 +147,7 @@ class JournalEntry(AccountsController):
 
 		self.reference_totals = {}
 		self.reference_types = {}
-		self.reference_parties = {}
+		self.reference_accounts = {}
 
 		for d in self.get("accounts"):
 			if not d.reference_type:
@@ -170,8 +170,7 @@ class JournalEntry(AccountsController):
 					self.reference_totals[d.reference_name] = 0.0
 				self.reference_totals[d.reference_name] += flt(d.get(dr_or_cr))
 				self.reference_types[d.reference_name] = d.reference_type
-				if d.party_type and d.party:
-					self.reference_parties[d.reference_name] = [d.party_type, d.party]
+				self.reference_accounts[d.reference_name] = d.account
 
 				against_voucher = frappe.db.get_value(d.reference_type, d.reference_name,
 					[scrub(dt) for dt in field_dict.get(d.reference_type)])
@@ -197,7 +196,7 @@ class JournalEntry(AccountsController):
 		"""Validate totals, stopped and docstatus for orders"""
 		for reference_name, total in self.reference_totals.iteritems():
 			reference_type = self.reference_types[reference_name]
-			party_type, party = self.reference_parties.get(reference_name)
+			account = self.reference_accounts[reference_name]
 
 			if reference_type in ("Sales Order", "Purchase Order"):
 				order = frappe.db.get_value(reference_type, reference_name,
@@ -213,8 +212,8 @@ class JournalEntry(AccountsController):
 				if cstr(order.status) == "Stopped":
 					frappe.throw(_("{0} {1} is stopped").format(reference_type, reference_name))
 
-				party_account_currency = get_party_account_currency(party_type, party, self.company)
-				if party_account_currency == self.company_currency:
+				account_currency = get_account_currency(account)
+				if account_currency == self.company_currency:
 					voucher_total = order.base_grand_total
 				else:
 					voucher_total = order.grand_total
@@ -611,7 +610,7 @@ def get_payment_entry_from_sales_order(sales_order):
 	jv.remark = 'Advance payment received against Sales Order {0}.'.format(so.name)
 
 	party_account = get_party_account("Customer", so.customer, so.company)
-	party_account_currency = frappe.db.get_value("Account", party_account, "account_currency")
+	party_account_currency = get_account_currency(party_account)
 
 	exchange_rate = get_exchange_rate(party_account, party_account_currency, so.company)
 
@@ -662,7 +661,7 @@ def get_payment_entry_from_purchase_order(purchase_order):
 	jv.remark = 'Advance payment made against Purchase Order {0}.'.format(po.name)
 
 	party_account = get_party_account("Supplier", po.supplier, po.company)
-	party_account_currency = frappe.db.get_value("Account", party_account, "account_currency")
+	party_account_currency = get_account_currency(party_account)
 
 	exchange_rate = get_exchange_rate(party_account, party_account_currency, po.company)
 

@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import flt, fmt_money, getdate, formatdate
 from frappe.model.document import Document
 from erpnext.accounts.party import get_party_account_currency
+from erpnext.accounts.utils import get_account_currency
 
 class CustomerFrozen(frappe.ValidationError): pass
 class InvalidCurrency(frappe.ValidationError): pass
@@ -103,7 +104,7 @@ class GLEntry(Document):
 
 	def validate_currency(self):
 		company_currency = frappe.db.get_value("Company", self.company, "default_currency")
-		account_currency = frappe.db.get_value("Account", self.account, "account_currency") or company_currency
+		account_currency = get_account_currency(self.account)
 
 		if not self.account_currency:
 			self.account_currency = company_currency

@@ -7,6 +7,7 @@ from frappe import _, scrub
 from frappe.utils import flt
 from frappe.model.document import Document
 import json
+from erpnext.accounts.utils import get_account_currency
 
 class PaymentTool(Document):
 	def make_journal_entry(self):
@@ -59,7 +60,7 @@ def get_outstanding_vouchers(args):
 
 	args = json.loads(args)
 
-	party_account_currency = frappe.db.get_value("Account", args.get("party_account"), "account_currency")
+	party_account_currency = get_account_currency(args.get("party_account"))
 	company_currency = frappe.db.get_value("Company", args.get("company"), "default_currency")
 
 	if args.get("party_type") == "Customer" and args.get("received_or_paid") == "Received":
@@ -112,7 +113,7 @@ def get_orders_to_be_billed(party_type, party, party_account_currency, company_c
 
 @frappe.whitelist()
 def get_against_voucher_amount(against_voucher_type, against_voucher_no, party_account, company):
-	party_account_currency = frappe.db.get_value("Account", party_account, "account_currency")
+	party_account_currency = get_account_currency(party_account)
 	company_currency = frappe.db.get_value("Company", company, "default_currency")
 	ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
 

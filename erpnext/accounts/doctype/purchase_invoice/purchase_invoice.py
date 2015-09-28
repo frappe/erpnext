@@ -10,6 +10,7 @@ import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.party import get_party_account, get_due_date
+from erpnext.accounts.utils import get_account_currency
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -272,7 +273,7 @@ class PurchaseInvoice(BuyingController):
 		valuation_tax = {}
 		for tax in self.get("taxes"):
 			if tax.category in ("Total", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
-				account_currency = frappe.db.get_value("Account", tax.account_head, "account_currency")
+				account_currency = get_account_currency(tax.account_head)
 
 				dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
 
@@ -301,7 +302,7 @@ class PurchaseInvoice(BuyingController):
 		stock_items = self.get_stock_items()
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
-				account_currency = frappe.db.get_value("Account", item.expense_account, "account_currency")
+				account_currency = get_account_currency(item.expense_account)
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.expense_account,
@@ -363,7 +364,7 @@ class PurchaseInvoice(BuyingController):
 		# writeoff account includes petty difference in the invoice amount
 		# and the amount that is paid
 		if self.write_off_account and flt(self.write_off_amount):
-			write_off_account_currency = frappe.db.get_value("Account", self.write_off_account, "account_currency")
+			write_off_account_currency = get_account_currency(self.write_off_account)
 
 			gl_entries.append(
 				self.get_gl_dict({

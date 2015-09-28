@@ -11,6 +11,7 @@ from erpnext.controllers.stock_controller import update_gl_entries_after
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.accounts.utils import get_account_currency
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -531,7 +532,7 @@ class SalesInvoice(SellingController):
 	def make_tax_gl_entries(self, gl_entries):
 		for tax in self.get("taxes"):
 			if flt(tax.base_tax_amount_after_discount_amount):
-				account_currency = frappe.db.get_value("Account", tax.account_head, "account_currency")
+				account_currency = get_account_currency(tax.account_head)
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
@@ -547,7 +548,7 @@ class SalesInvoice(SellingController):
 		# income account gl entries
 		for item in self.get("items"):
 			if flt(item.base_net_amount):
-				account_currency = frappe.db.get_value("Account", item.income_account, "account_currency")
+				account_currency = get_account_currency(item.income_account)
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": item.income_account,
@@ -566,7 +567,7 @@ class SalesInvoice(SellingController):
 
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos) and self.cash_bank_account and self.paid_amount:
-			bank_account_currency = frappe.db.get_value("Account", self.cash_bank_account, "account_currency")
+			bank_account_currency = get_account_currency(self.cash_bank_account)
 			# POS, make payment entries
 			gl_entries.append(
 				self.get_gl_dict({
@@ -594,7 +595,7 @@ class SalesInvoice(SellingController):
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos
 		if self.write_off_account and self.write_off_amount:
-			write_off_account_currency = frappe.db.get_value("Account", self.write_off_account, "account_currency")
+			write_off_account_currency = get_account_currency(self.write_off_account)
 
 			gl_entries.append(
 				self.get_gl_dict({

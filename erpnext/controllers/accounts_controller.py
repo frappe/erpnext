@@ -6,7 +6,7 @@ import frappe
 from frappe import _, throw
 from frappe.utils import today, flt, cint
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
-from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
+from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 from erpnext.controllers.sales_and_purchase_return import validate_return
@@ -221,7 +221,7 @@ class AccountsController(TransactionBase):
 		gl_dict.update(args)
 
 		if not account_currency:
-			account_currency = frappe.db.get_value("Account", gl_dict.account, "account_currency")
+			account_currency = get_account_currency(gl_dict.account)
 
 		if self.doctype != "Journal Entry":
 			self.validate_account_currency(gl_dict.account, account_currency)

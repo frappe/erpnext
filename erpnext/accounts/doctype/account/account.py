@@ -50,20 +50,20 @@ class Account(Document):
 	def set_root_and_report_type(self):
 		if self.parent_account:
 			par = frappe.db.get_value("Account", self.parent_account, ["report_type", "root_type"], as_dict=1)
-			
+
 			if par.report_type:
 				self.report_type = par.report_type
 			if par.root_type:
 				self.root_type = par.root_type
-			
+
 		if self.is_group:
 			db_value = frappe.db.get_value("Account", self.name, ["report_type", "root_type"], as_dict=1)
 			if db_value:
 				if self.report_type != db_value.report_type:
-					frappe.db.sql("update `tabAccount` set report_type=%s where lft > %s and rgt < %s", 
+					frappe.db.sql("update `tabAccount` set report_type=%s where lft > %s and rgt < %s",
 						(self.report_type, self.lft, self.rgt))
 				if self.root_type != db_value.root_type:
-					frappe.db.sql("update `tabAccount` set root_type=%s where lft > %s and rgt < %s", 
+					frappe.db.sql("update `tabAccount` set root_type=%s where lft > %s and rgt < %s",
 						(self.root_type, self.lft, self.rgt))
 
 	def validate_root_details(self):
@@ -89,11 +89,11 @@ class Account(Document):
 				frappe.throw(_("Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'"))
 			elif account_balance < 0 and self.balance_must_be == "Debit":
 				frappe.throw(_("Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"))
-				
+
 	def validate_account_currency(self):
 		if not self.account_currency:
 			self.account_currency = frappe.db.get_value("Company", self.company, "default_currency")
-			
+
 		elif self.account_currency != frappe.db.get_value("Account", self.name, "account_currency"):
 			if frappe.db.get_value("GL Entry", {"account": self.name}):
 				frappe.throw(_("Currency can not be changed after making entries using some other currency"))
@@ -207,3 +207,14 @@ def get_parent_account(doctype, txt, searchfield, start, page_len, filters):
 		and %s like %s order by name limit %s, %s""" %
 		("%s", searchfield, "%s", "%s", "%s"),
 		(filters["company"], "%%%s%%" % txt, start, page_len), as_list=1)
+
+def get_account_currency(account):
+	"""Helper function to get account currency"""
+	def generator():
+		account_currency, company = frappe.db.get_value("Account", account, ["account_currency", "company"])
+		if not account_currency:
+			account_currency = frappe.db.get_value("Company", company, "default_currency")
+
+		return account_currency
+
+	return frappe.local_cache("account_currency", account, generator)
