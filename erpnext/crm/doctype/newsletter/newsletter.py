@@ -62,7 +62,8 @@ class Newsletter(Document):
 			subject = self.subject, message = self.message,
 			reference_doctype = self.doctype, reference_name = self.name,
 			unsubscribe_method = "/api/method/erpnext.crm.doctype.newsletter.newsletter.unsubscribe",
-			unsubscribe_params = {"name": self.newsletter_list})
+			unsubscribe_params = {"name": self.newsletter_list},
+			bulk_priority = 1)
 
 		if not frappe.flags.in_test:
 			frappe.db.auto_commit_on_many_writes = False
