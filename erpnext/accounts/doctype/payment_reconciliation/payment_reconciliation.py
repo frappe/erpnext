@@ -141,10 +141,7 @@ class PaymentReconciliation(Document):
 
 	def reconcile(self, args):
 		for e in self.get('payments'):
-			if not e.invoice_number:
-				frappe.throw(_("Row {0}: Please select Invoice Number for reconcilation").format(e.idx))
-
-			if " | " in e.invoice_number:
+			if e.invoice_number and " | " in e.invoice_number:
 				e.invoice_type, e.invoice_number = e.invoice_number.split(" | ")
 
 		self.get_invoice_entries()
