@@ -7,8 +7,7 @@ import unittest, copy
 from frappe.utils import nowdate, add_days, flt
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
-from erpnext.controllers.accounts_controller import InvalidCurrency
-from erpnext.accounts.doctype.gl_entry.gl_entry import InvalidAccountCurrency
+from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -842,13 +841,13 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEquals(si.total_taxes_and_charges, 234.44)
 		self.assertEquals(si.base_grand_total, 859.44)
 		self.assertEquals(si.grand_total, 859.44)
-		
+
 	def test_multi_currency_gle(self):
 		set_perpetual_inventory(0)
-		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC", 
+		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
 			currency="USD", conversion_rate=50)
 
-		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit, 
+		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit,
 			debit_in_account_currency, credit_in_account_currency
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc""", si.name, as_dict=1)
@@ -871,7 +870,7 @@ class TestSalesInvoice(unittest.TestCase):
 				"credit_in_account_currency": 5000
 			}
 		}
-		
+
 		for field in ("account_currency", "debit", "debit_in_account_currency", "credit", "credit_in_account_currency"):
 			for i, gle in enumerate(gl_entries):
 				self.assertEquals(expected_values[gle.account][field], gle[field])
@@ -883,38 +882,38 @@ class TestSalesInvoice(unittest.TestCase):
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
 		self.assertFalse(gle)
-		
+
 	def test_invalid_currency(self):
 		# Customer currency = USD
-		
+
 		# Transaction currency cannot be INR
-		si1 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC", 
+		si1 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
 			do_not_save=True)
-		
+
 		self.assertRaises(InvalidCurrency, si1.save)
-			
+
 		# Transaction currency cannot be EUR
-		si2 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC", 
+		si2 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
 			currency="EUR", conversion_rate=80, do_not_save=True)
-			
+
 		self.assertRaises(InvalidCurrency, si2.save)
-		
+
 		# Transaction currency only allowed in USD
-		si3 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC", 
+		si3 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
 			currency="USD", conversion_rate=50)
-			
+
 		# Party Account currency must be in USD, as there is existing GLE with USD
-		si4 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable - _TC", 
+		si4 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable - _TC",
 			currency="USD", conversion_rate=50, do_not_submit=True)
-			
+
 		self.assertRaises(InvalidAccountCurrency, si4.submit)
-		
+
 		# Party Account currency must be in USD, force customer currency as there is no GLE
-		
+
 		si3.cancel()
-		si5 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable - _TC", 
+		si5 = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable - _TC",
 			currency="USD", conversion_rate=50, do_not_submit=True)
-			
+
 		self.assertRaises(InvalidAccountCurrency, si5.submit)
 
 def create_sales_invoice(**args):

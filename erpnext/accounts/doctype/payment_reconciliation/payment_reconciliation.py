@@ -70,7 +70,7 @@ class PaymentReconciliation(Document):
 		non_reconciled_invoices = []
 		dr_or_cr = "debit" if self.party_type == "Customer" else "credit"
 		cond = self.check_condition(dr_or_cr)
-		
+
 		invoice_list = frappe.db.sql("""
 			select
 				voucher_no, voucher_type, posting_date,
@@ -141,7 +141,7 @@ class PaymentReconciliation(Document):
 
 	def reconcile(self, args):
 		for e in self.get('payments'):
-			if " | " in e.invoice_number:
+			if e.invoice_number and " | " in e.invoice_number:
 				e.invoice_type, e.invoice_number = e.invoice_number.split(" | ")
 
 		self.get_invoice_entries()

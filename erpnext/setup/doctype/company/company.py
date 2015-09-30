@@ -46,13 +46,13 @@ class Company(Document):
 					if for_company != self.name:
 						frappe.throw(_("Account {0} does not belong to company: {1}")
 							.format(self.get(field), self.name))
-							
+
 	def validate_currency(self):
 		self.previous_default_currency = frappe.db.get_value("Company", self.name, "default_currency")
 		if self.default_currency and self.previous_default_currency and \
 			self.default_currency != self.previous_default_currency and \
 			self.check_if_transactions_exist():
-				frappe.throw(_("Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."))			
+				frappe.throw(_("Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."))
 
 	def on_update(self):
 		if not frappe.db.sql("""select name from tabAccount
@@ -208,7 +208,7 @@ class Company(Document):
 
 		# clear default accounts, warehouses from item
 		if warehouses:
-			
+
 			for f in ["default_warehouse", "website_warehouse"]:
 				frappe.db.sql("""update tabItem set %s=NULL where %s in (%s)"""
 					% (f, f, ', '.join(['%s']*len(warehouses))), tuple(warehouses))
@@ -257,3 +257,7 @@ def get_name_with_abbr(name, company):
 		parts.append(company_abbr)
 
 	return " - ".join(parts)
+
+def get_company_currency(company):
+	return frappe.local_cache("company_currency", company,
+		lambda: frappe.db.get_value("Company", company, "default_currency"))

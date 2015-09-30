@@ -3938,7 +3938,7 @@ DocType: Hub Settings,Seller Name,賣家名稱
 DocType: Purchase Invoice,Taxes and Charges Deducted (Company Currency),稅收和扣除（公司貨幣）
 DocType: Item Group,General Settings,一般設定
 apps/erpnext/erpnext/setup/doctype/currency_exchange/currency_exchange.py +19,From Currency and To Currency cannot be same,原始貨幣和目標貨幣不能相同
-DocType: Stock Entry,Repack,改裝
+DocType: Stock Entry,Repack,重新包裝
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +6,You must Save the form before proceeding,在繼續之前，您必須儲存表單
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +500,Attach Logo,附加標誌
 DocType: Customer,Commission Rate,佣金率

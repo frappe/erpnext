@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import unittest, frappe
 from frappe.utils import flt
 from erpnext.accounts.utils import get_actual_expense, BudgetError, get_fiscal_year
+from erpnext.exceptions import InvalidAccountCurrency
 
 
 class TestJournalEntry(unittest.TestCase):
@@ -166,15 +167,15 @@ class TestJournalEntry(unittest.TestCase):
 		existing_expense = self.get_actual_expense(posting_date)
 		make_journal_entry("_Test Account Cost for Goods Sold - _TC",
 			"_Test Bank - _TC", -existing_expense, "_Test Cost Center - _TC", submit=True)
-			
+
 	def test_multi_currency(self):
 		jv = make_journal_entry("_Test Bank USD - _TC",
 			"_Test Bank - _TC", 100, exchange_rate=50, save=False)
-			
+
 		jv.get("accounts")[1].credit_in_account_currency = 5000
 		jv.submit()
-			
-		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit, 
+
+		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit,
 			debit_in_account_currency, credit_in_account_currency
 			from `tabGL Entry` where voucher_type='Journal Entry' and voucher_no=%s
 			order by account asc""", jv.name, as_dict=1)
@@ -197,12 +198,10 @@ class TestJournalEntry(unittest.TestCase):
 				"credit_in_account_currency": 5000
 			}
 		}
-		
+
 		for field in ("account_currency", "debit", "debit_in_account_currency", "credit", "credit_in_account_currency"):
 			for i, gle in enumerate(gl_entries):
 				self.assertEquals(expected_values[gle.account][field], gle[field])
-		
-		
 
 		# cancel
 		jv.cancel()
@@ -211,6 +210,40 @@ class TestJournalEntry(unittest.TestCase):
 			where voucher_type='Sales Invoice' and voucher_no=%s""", jv.name)
 
 		self.assertFalse(gle)
+
+	def test_disallow_change_in_account_currency_for_a_party(self):
+		# create jv in USD
+		jv = make_journal_entry("_Test Bank USD - _TC",
+			"_Test Receivable USD - _TC", 100, save=False)
+
+		jv.accounts[1].update({
+			"party_type": "Customer",
+			"party": "_Test Customer USD"
+		})
+
+		jv.submit()
+
+		# create jv in USD, but account currency in INR
+		jv = make_journal_entry("_Test Bank - _TC",
+			"_Test Receivable - _TC", 100, save=False)
+
+		jv.accounts[1].update({
+			"party_type": "Customer",
+			"party": "_Test Customer USD"
+		})
+
+		self.assertRaises(InvalidAccountCurrency, jv.submit)
+
+		# back in USD
+		jv = make_journal_entry("_Test Bank USD - _TC",
+			"_Test Receivable USD - _TC", 100, save=False)
+
+		jv.accounts[1].update({
+			"party_type": "Customer",
+			"party": "_Test Customer USD"
+		})
+
+		jv.submit()
 
 def make_journal_entry(account1, account2, amount, cost_center=None, exchange_rate=1, save=True, submit=False):
 	jv = frappe.new_doc("Journal Entry")
@@ -231,7 +264,7 @@ def make_journal_entry(account1, account2, amount, cost_center=None, exchange_ra
 			"cost_center": cost_center,
 			"credit_in_account_currency": amount if amount > 0 else 0,
 			"debit_in_account_currency": abs(amount) if amount < 0 else 0,
-			exchange_rate: exchange_rate
+			"exchange_rate": exchange_rate
 		}
 	])
 	if save or submit:

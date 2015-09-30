@@ -9,6 +9,9 @@ from frappe import throw, _
 from frappe.utils import formatdate
 import frappe.desk.reportview
 
+# imported to enable erpnext.accounts.utils.get_account_currency
+from erpnext.accounts.doctype.account.account import get_account_currency
+
 class FiscalYearError(frappe.ValidationError): pass
 class BudgetError(frappe.ValidationError): pass
 
@@ -94,8 +97,8 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 				select name from `tabAccount` ac where ac.name = gle.account
 				and ac.lft >= %s and ac.rgt <= %s
 			)""" % (acc.lft, acc.rgt))
-			
-			# If group and currency same as company, 
+
+			# If group and currency same as company,
 			# always return balance based on debit and credit in company currency
 			if acc.account_currency == frappe.db.get_value("Company", acc.company, "default_currency"):
 				in_account_currency = False

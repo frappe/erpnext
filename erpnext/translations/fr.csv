@@ -37,7 +37,7 @@ DocType: Department,Department,Département
 DocType: Purchase Order,% Billed,Facturé%
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +44,Exchange Rate must be same as {0} {1} ({2}),Taux de change doit être le même que {0} {1} ({2})
 DocType: Sales Invoice,Customer Name,Nom du client
-DocType: Features Setup,"All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Tous les champs liés à l'exportation comme monnaie , taux de conversion , l'exportation totale , l'exportation totale grandiose etc sont disponibles dans la note de livraison , POS , offre , facture de vente , Sales Order etc"
+DocType: Features Setup,"All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.","Tous les champs liés à l'exportation comme monnaie , taux de conversion , l'exportation totale , l'exportation totale grandiose etc sont disponibles dans Bon de livraison , Point de Vente , Devis, Factures, Bons de commandes etc"
 DocType: Account,Heads (or groups) against which Accounting Entries are made and balances are maintained.,Chefs (ou groupes) contre lequel les entrées comptables sont faites et les soldes sont maintenus.
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +154,Outstanding for {0} cannot be less than zero ({1}),Participation pour les employés {0} est déjà marqué
 DocType: Manufacturing Settings,Default 10 mins,Par défaut 10 minutes
@@ -337,7 +337,7 @@ apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet
 DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date","Entrez Identifiant courriels séparé par des virgules, la facture sera envoyée automatiquement à la date particulière"
 DocType: Employee,Company Email,E-mail entreprise
 DocType: Workflow State,Refresh,Rafraîchir
-DocType: Features Setup,"All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Tous les champs importation connexes comme monnaie , taux de conversion , totale d'importation , importation grande etc totale sont disponibles en Achat réception , Fournisseur d'offre , facture d'achat , bon de commande , etc"
+DocType: Features Setup,"All import related fields like currency, conversion rate, import total, import grand total etc are available in Purchase Receipt, Supplier Quotation, Purchase Invoice, Purchase Order etc.","Tous les champs importation connexes comme monnaie , taux de conversion , total d'importation , importation grande etc totale sont disponibles en Achat réception , Devis fournisseur , Facture d'achat , bon de commande , etc"
 apps/erpnext/erpnext/stock/doctype/item/item.js +29,This Item is a Template and cannot be used in transactions. Item attributes will be copied over into the variants unless 'No Copy' is set,Cet article est un modèle et ne peut être utilisé dans les transactions. Attributs d'élément seront copiés dans les variantes moins 'No Copy »est réglé
 apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/customers_not_buying_since_long_time.py +69,Total Order Considered,Total de la commande Considéré
 apps/erpnext/erpnext/config/hr.py +110,"Employee designation (e.g. CEO, Director etc.).",Vous devez enregistrer le formulaire avant de procéder
@@ -392,7 +392,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +35,Tube bea
 apps/erpnext/erpnext/manufacturing/doctype/workstation/workstation.py +79,Workstation is closed on the following dates as per Holiday List: {0},Workstation est fermé aux dates suivantes selon la liste de vacances: {0}
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +627,Make Maint. Schedule,Assurez- Maint . calendrier
 DocType: Employee,Single,Unique
-DocType: Issue,Attachment,Attachement
+DocType: Issue,Attachment,Pièce jointe
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +29,Budget cannot be set for Group Cost Center,Budget ne peut pas être réglé pour le centre de coûts du Groupe
 DocType: Account,Cost of Goods Sold,Montant payé + Write Off montant ne peut être supérieur à Total
 DocType: Purchase Invoice,Yearly,Annuel
@@ -1901,7 +1901,7 @@ apps/erpnext/erpnext/stock/get_item_details.py +103,No Item with Barcode {0},Bon
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +51,Case No. cannot be 0,Cas n ° ne peut pas être 0
 DocType: Features Setup,If you have Sales Team and Sale Partners (Channel Partners)  they can be tagged and maintain their contribution in the sales activity,"Si vous avez équipe de vente et Partenaires Vente (Channel Partners), ils peuvent être marqués et maintenir leur contribution à l&#39;activité commerciale"
 DocType: Item,Show a slideshow at the top of the page,Afficher un diaporama en haut de la page
-DocType: Item,"Allow in Sales Order of type ""Service""",Permettre à la commande client de type &quot;service&quot;
+DocType: Item,"Allow in Sales Order of type ""Service""","Autoriser dans les bon de commandes de type ""Service"""
 apps/erpnext/erpnext/setup/doctype/company/company.py +77,Stores,Magasins
 DocType: Time Log,Projects Manager,Gestionnaire de projets
 DocType: Serial No,Delivery Time,L'heure de la livraison
@@ -2427,7 +2427,7 @@ apps/erpnext/erpnext/shopping_cart/utils.py +43,Orders,Commandes
 DocType: Leave Control Panel,Employee Type,Type de contrat
 DocType: Employee Leave Approver,Leave Approver,Laisser approbateur
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +69,Swaging,Emboutissage
-DocType: Expense Claim,"A user with ""Expense Approver"" role","Un utilisateur avec le rôle ""frais approbateur"""
+DocType: Expense Claim,"A user with ""Expense Approver"" role","Un utilisateur avec le rôle ""Autorise les dépenses"""
 ,Issued Items Against Production Order,Articles émis contre un ordre de fabrication
 DocType: Pricing Rule,Purchase Manager,Directeur des achats
 DocType: Payment Tool,Payment Tool,Paiement Outil
@@ -3917,7 +3917,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +528,Purchaser,Ache
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +81,Net pay cannot be negative,Landed Cost correctement mis à jour
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.py +70,Please enter the Against Vouchers manually,Se il vous plaît entrer le contre Chèques manuellement
 DocType: SMS Settings,Static Parameters,Paramètres statiques
-DocType: Purchase Order,Advance Paid,Payé Advance
+DocType: Purchase Order,Advance Paid,Acompte payée
 DocType: Item,Item Tax,Taxe sur l'Article
 DocType: Expense Claim,Employees Email Id,Identifiants email des employés
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +159,Current Liabilities,Le solde doit être

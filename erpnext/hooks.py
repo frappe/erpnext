@@ -29,7 +29,7 @@ blogs.
 """
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "6.3.2"
+app_version = "6.4.0"
 github_link = "https://github.com/frappe/erpnext"
 
 error_report_email = "support@erpnext.com"
@@ -93,6 +93,16 @@ has_website_permission = {
 	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission"
 }
 
+permission_query_conditions = {
+	"Contact": "erpnext.utilities.address_and_contact.get_permission_query_conditions_for_contact",
+	"Address": "erpnext.utilities.address_and_contact.get_permission_query_conditions_for_address"
+}
+
+has_permission = {
+	"Contact": "erpnext.utilities.address_and_contact.has_permission",
+	"Address": "erpnext.utilities.address_and_contact.has_permission"
+}
+
 dump_report_map = "erpnext.startup.report_data_map.data_map"
 
 before_tests = "erpnext.setup.utils.before_tests"
@@ -128,12 +138,6 @@ scheduler_events = {
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
 		"erpnext.hr.doctype.employee.employee.send_birthday_reminders"
-	],
-	"daily_long": [
-		"erpnext.setup.doctype.backup_manager.backup_manager.take_backups_daily"
-	],
-	"weekly_long": [
-		"erpnext.setup.doctype.backup_manager.backup_manager.take_backups_weekly"
 	]
 }
 

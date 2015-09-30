@@ -92,8 +92,10 @@ def setup_account(args=None):
 		if args.get("add_sample_data"):
 			try:
 				make_sample_data()
+				frappe.clear_cache()
 			except FiscalYearError:
 				pass
+
 	except:
 		if args:
 			traceback = frappe.get_traceback()

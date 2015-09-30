@@ -7,11 +7,10 @@ from frappe.model.naming import make_autoname
 from frappe import _, msgprint, throw
 import frappe.defaults
 from frappe.utils import flt
-
+from frappe.desk.reportview import build_match_conditions
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.utilities.address_and_contact import load_address_and_contact
-from erpnext.accounts.party import validate_accounting_currency, validate_party_account
-from frappe.desk.reportview import build_match_conditions
+from erpnext.accounts.party import validate_party_accounts
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -33,8 +32,7 @@ class Customer(TransactionBase):
 
 	def validate(self):
 		self.flags.is_new_doc = self.is_new()
-		validate_accounting_currency(self)
-		validate_party_account(self)
+		validate_party_accounts(self)
 
 	def update_lead_status(self):
 		if self.lead_name:
@@ -197,27 +195,26 @@ def get_customer_outstanding(customer, company):
 	outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0.0
 
 	# Outstanding based on Delivery Note
-	outstanding_based_on_dn = frappe.db.sql("""
-		select
-			sum(
-				(
-					(ifnull(dn_item.amount, 0) - ifnull((select sum(ifnull(amount, 0))
-						from `tabSales Invoice Item`
-						where ifnull(dn_detail, '') = dn_item.name and docstatus = 1), 0)
-					)/dn.base_net_total
-				)*dn.base_grand_total
-			)
+	unmarked_delivery_note_items = frappe.db.sql("""select
+			dn_item.name, dn_item.amount, dn.base_net_total, dn.base_grand_total
 		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
 		where
-			dn.name = dn_item.parent and dn.customer=%s and dn.company=%s
+			dn.name = dn_item.parent
+			and dn.customer=%s and dn.company=%s
 			and dn.docstatus = 1 and dn.status != 'Stopped'
 			and ifnull(dn_item.against_sales_order, '') = ''
-			and ifnull(dn_item.against_sales_invoice, '') = ''
-			and ifnull(dn_item.amount, 0) > ifnull((select sum(ifnull(amount, 0))
-				from `tabSales Invoice Item`
-				where ifnull(dn_detail, '') = dn_item.name and docstatus = 1), 0)""", (customer, company))
+			and ifnull(dn_item.against_sales_invoice, '') = ''""", (customer, company), as_dict=True)
 
-	outstanding_based_on_dn = flt(outstanding_based_on_dn[0][0]) if outstanding_based_on_dn else 0.0
+	outstanding_based_on_dn = 0.0
+
+	for dn_item in unmarked_delivery_note_items:
+		si_amount = frappe.db.sql("""select sum(ifnull(amount, 0))
+			from `tabSales Invoice Item`
+			where dn_detail = %s and docstatus = 1""", dn_item.name)[0][0]
+
+		if flt(dn_item.amount) > flt(si_amount):
+			outstanding_based_on_dn += ((flt(dn_item.amount) - flt(si_amount)) \
+				/ dn_item.base_net_total) * dn_item.base_grand_total
 
 	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn
 

@@ -7,8 +7,8 @@ from frappe.utils import cstr, cint
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.setup.utils import get_exchange_rate
-
 from erpnext.utilities.transaction_base import TransactionBase
+from erpnext.accounts.party import get_party_account_currency
 
 subject_field = "title"
 sender_field = "contact_email"
@@ -180,9 +180,10 @@ def get_item_details(item_code):
 def make_quotation(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		quotation = frappe.get_doc(target)
-		
+
 		company_currency = frappe.db.get_value("Company", quotation.company, "default_currency")
-		party_account_currency = frappe.db.get_value("Customer", quotation.customer, "party_account_currency")
+		party_account_currency = get_party_account_currency("Customer", quotation.customer, quotation.company)
+
 		if company_currency == party_account_currency:
 			exchange_rate = 1
 		else:
@@ -190,7 +191,7 @@ def make_quotation(source_name, target_doc=None):
 
 		quotation.currency = party_account_currency or company_currency
 		quotation.conversion_rate = exchange_rate
-		
+
 		quotation.run_method("set_missing_values")
 		quotation.run_method("calculate_taxes_and_totals")
 

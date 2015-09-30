@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt, getdate, cstr
 from frappe import _
+from erpnext.accounts.utils import get_account_currency
 
 def execute(filters=None):
 	account_details = {}
@@ -55,7 +56,7 @@ def set_account_currency(filters):
 		account_currency = None
 
 		if filters.get("account"):
-			account_currency = frappe.db.get_value("Account", filters.account, "account_currency")
+			account_currency = get_account_currency(filters.account)
 		elif filters.get("party"):
 			gle_currency = frappe.db.get_value("GL Entry", {"party_type": filters.party_type,
 				"party": filters.party, "company": filters.company}, "account_currency")

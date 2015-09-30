@@ -189,6 +189,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Trial Balance for Party",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
 					"name": "Gross Profit",
 					"doctype": "Sales Invoice",
 					"is_query_report": True

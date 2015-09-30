@@ -6,15 +6,14 @@ import frappe
 from frappe import _, throw
 from frappe.utils import today, flt, cint
 from erpnext.setup.utils import get_company_currency, get_exchange_rate
-from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
+from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year, get_account_currency
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 from erpnext.controllers.sales_and_purchase_return import validate_return
+from erpnext.accounts.party import get_party_account_currency, validate_party_gle_currency
+from erpnext.exceptions import CustomerFrozen, InvalidCurrency
 
 force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
-
-class CustomerFrozen(frappe.ValidationError): pass
-class InvalidCurrency(frappe.ValidationError): pass
 
 class AccountsController(TransactionBase):
 	def __init__(self, arg1, arg2=None):
@@ -169,7 +168,7 @@ class AccountsController(TransactionBase):
 
 						if item.price_list_rate:
 							item.rate = flt(item.price_list_rate *
-								(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
+								(1.0 - (flt(item.discount_percentage) / 100.0)), item.precision("rate"))
 
 	def set_taxes(self):
 		if not self.meta.get_field("taxes"):
@@ -220,7 +219,7 @@ class AccountsController(TransactionBase):
 		gl_dict.update(args)
 
 		if not account_currency:
-			account_currency = frappe.db.get_value("Account", gl_dict.account, "account_currency")
+			account_currency = get_account_currency(gl_dict.account)
 
 		if self.doctype != "Journal Entry":
 			self.validate_account_currency(gl_dict.account, account_currency)
@@ -427,8 +426,7 @@ class AccountsController(TransactionBase):
 		if self.get("currency"):
 			party_type, party = self.get_party()
 			if party_type and party:
-				party_account_currency = frappe.db.get_value(party_type, party, "party_account_currency") \
-					or self.company_currency
+				party_account_currency = get_party_account_currency(party_type, party, self.company)
 
 				if party_account_currency != self.company_currency and self.currency != party_account_currency:
 					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
