@@ -10,6 +10,7 @@ from frappe.defaults import get_user_permissions
 from frappe.utils import add_days, getdate, formatdate, get_first_day, date_diff
 from erpnext.utilities.doctype.address.address import get_address_display
 from erpnext.utilities.doctype.contact.contact import get_contact_details
+from erpnext.exceptions import InvalidAccountCurrency
 
 class DuplicatePartyAccountError(frappe.ValidationError): pass
 
@@ -190,6 +191,25 @@ def get_party_account_currency(party_type, party, company):
 		return frappe.db.get_value("Account", party_account, "account_currency")
 
 	return frappe.local_cache("party_account_currency", (party_type, party, company), generator)
+
+def get_party_gle_currency(party_type, party, company):
+	def generator():
+		existing_gle_currency = frappe.db.sql("""select account_currency from `tabGL Entry`
+			where docstatus=1 and company=%(company)s and party_type=%(party_type)s and party=%(party)s
+			limit 1""", { "company": company, "party_type": party_type, "party": party })
+
+		return existing_gle_currency[0][0] if existing_gle_currency else None
+
+	return frappe.local_cache("party_gle_currency", (party_type, party, company), generator)
+
+def validate_party_gle_currency(party_type, party, company):
+	"""Validate party account currency with existing GL Entry's currency"""
+	party_account_currency = get_party_account_currency(party_type, party, company)
+	existing_gle_currency = get_party_gle_currency(party_type, party, company)
+
+	if existing_gle_currency and party_account_currency != existing_gle_currency:
+		frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
+			.format(party_type, party, existing_gle_currency), InvalidAccountCurrency)
 
 def validate_party_accounts(doc):
 	companies = []

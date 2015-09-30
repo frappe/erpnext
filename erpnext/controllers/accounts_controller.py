@@ -10,12 +10,10 @@ from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year, get_ac
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.controllers.recurring_document import convert_to_recurring, validate_recurring_document
 from erpnext.controllers.sales_and_purchase_return import validate_return
-from erpnext.accounts.party import get_party_account_currency
+from erpnext.accounts.party import get_party_account_currency, validate_party_gle_currency
+from erpnext.exceptions import CustomerFrozen, InvalidCurrency
 
 force_item_fields = ("item_group", "barcode", "brand", "stock_uom")
-
-class CustomerFrozen(frappe.ValidationError): pass
-class InvalidCurrency(frappe.ValidationError): pass
 
 class AccountsController(TransactionBase):
 	def __init__(self, arg1, arg2=None):

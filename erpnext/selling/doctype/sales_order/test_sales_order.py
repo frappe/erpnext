@@ -7,6 +7,8 @@ import frappe.permissions
 import unittest
 from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
+from erpnext.accounts.doctype.journal_entry.test_journal_entry \
+	import make_journal_entry
 
 from frappe.tests.test_permissions import set_user_permission_doctypes
 

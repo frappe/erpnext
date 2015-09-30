@@ -7,7 +7,7 @@ import frappe
 import unittest
 
 from frappe.test_runner import make_test_records
-from erpnext.controllers.accounts_controller import CustomerFrozen
+from erpnext.exceptions import CustomerFrozen
 
 test_ignore = ["Price List"]
 
