@@ -241,7 +241,6 @@ class StockEntry(StockController):
 		self.set_basic_rate(force)
 		self.distribute_additional_costs()
 		self.update_valuation_rate()
-		self.validate_valuation_rate()
 		self.set_total_incoming_outgoing_value()
 		self.set_total_amount()
 
@@ -298,19 +297,6 @@ class StockEntry(StockController):
 			d.amount = flt(d.basic_amount + flt(d.additional_cost), d.precision("amount"))
 			d.valuation_rate = flt(flt(d.basic_rate) + flt(d.additional_cost) / flt(d.transfer_qty),
 				d.precision("valuation_rate"))
-
-	def validate_valuation_rate(self):
-		if self.purpose in ["Manufacture", "Repack"]:
-			valuation_at_source, valuation_at_target = 0, 0
-			for d in self.get("items"):
-				if d.s_warehouse and not d.t_warehouse:
-					valuation_at_source += flt(d.amount)
-				if d.t_warehouse and not d.s_warehouse:
-					valuation_at_target += flt(d.amount)
-
-			if valuation_at_target + 0.001 < valuation_at_source:
-				frappe.throw(_("Total valuation ({0}) for manufactured or repacked item(s) can not be less than total valuation of raw materials ({1})")
-					.format(valuation_at_target, valuation_at_source))
 
 	def set_total_incoming_outgoing_value(self):
 		self.total_incoming_value = self.total_outgoing_value = 0.0
