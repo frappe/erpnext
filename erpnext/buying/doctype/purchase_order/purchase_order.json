@@ -528,7 +528,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 1, 
+   "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "fieldname": "items", 
@@ -1704,7 +1704,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 1, 
+   "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "fieldname": "supplied_items", 
@@ -2032,7 +2032,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-09-11 12:19:55.502661", 
+ "modified": "2015-09-30 08:52:56.137185", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Purchase Order", 

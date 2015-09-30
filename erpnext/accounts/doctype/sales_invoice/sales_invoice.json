@@ -671,7 +671,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 1, 
+   "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "fieldname": "items", 
@@ -1002,7 +1002,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 1, 
+   "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "fieldname": "taxes", 
@@ -2951,7 +2951,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-09-23 09:52:09.675668", 
+ "modified": "2015-09-30 08:52:53.679566", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Sales Invoice", 
