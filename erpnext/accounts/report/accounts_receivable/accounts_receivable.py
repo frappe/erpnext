@@ -40,6 +40,13 @@ class ReceivablePayableReport(object):
 
 		columns += [_("Age (Days)") + "::80"]
 
+		if not "range1" in self.filters:
+			self.filters["range1"] = "30"
+		if not "range2" in self.filters:
+			self.filters["range2"] = "60"
+		if not "range3" in self.filters:
+			self.filters["range3"] = "90"
+
 		for label in ("0-{range1}".format(**self.filters),
 			"{range1}-{range2}".format(**self.filters),
 			"{range2}-{range3}".format(**self.filters),
@@ -75,9 +82,9 @@ class ReceivablePayableReport(object):
 		voucher_details = self.get_voucher_details(args.get("party_type"))
 
 		future_vouchers = self.get_entries_after(self.filters.report_date, args.get("party_type"))
-		
+
 		company_currency = frappe.db.get_value("Company", self.filters.get("company"), "default_currency")
-		
+
 		data = []
 		for gle in self.get_entries_till(self.filters.report_date, args.get("party_type")):
 			if self.is_receivable_or_payable(gle, dr_or_cr, future_vouchers):
@@ -117,7 +124,7 @@ class ReceivablePayableReport(object):
 						row += [self.get_territory(gle.party)]
 					if args.get("party_type") == "Supplier":
 						row += [self.get_supplier_type(gle.party)]
-						
+
 					if self.filters.get(scrub(args.get("party_type"))):
 						row.append(gle.account_currency)
 					else:
@@ -209,7 +216,7 @@ class ReceivablePayableReport(object):
 			self.gl_entries = frappe.db.sql("""select name, posting_date, account, party_type, party,
 				voucher_type, voucher_no, against_voucher_type, against_voucher, account_currency, remarks, {0}
 				from `tabGL Entry`
-				where docstatus < 2 and party_type=%s and ifnull(party, '') != '' {1} 
+				where docstatus < 2 and party_type=%s and ifnull(party, '') != '' {1}
 				order by posting_date, party"""
 				.format(select_fields, conditions), values, as_dict=True)
 
