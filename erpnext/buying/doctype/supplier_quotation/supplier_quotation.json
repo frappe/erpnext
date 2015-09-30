@@ -509,7 +509,7 @@
    "unique": 0
   }, 
   {
-   "allow_on_submit": 1, 
+   "allow_on_submit": 0, 
    "bold": 0, 
    "collapsible": 0, 
    "fieldname": "items", 
@@ -1554,7 +1554,7 @@
  "is_submittable": 1, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-09-11 12:20:10.684388", 
+ "modified": "2015-09-30 08:52:51.539634", 
  "modified_by": "Administrator", 
  "module": "Buying", 
  "name": "Supplier Quotation", 

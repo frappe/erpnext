@@ -335,6 +335,7 @@ frappe.ui.form.on("Journal Entry Account", {
 	party: function(frm, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
 		if(!d.account && d.party_type && d.party) {
+			if(!frm.doc.company) frappe.throw(__("Please select Company"));
 			return frm.call({
 				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_party_account_and_balance",
 				child: d,
