@@ -330,7 +330,7 @@ DocType: Backup Manager,Allow Dropbox Access,Разрешить Dropbox Access
 apps/erpnext/erpnext/config/learn.py +72,Setting up Taxes,Настройка Налоги
 DocType: Communication,Support Manager,Поддержка менеджер
 apps/erpnext/erpnext/accounts/utils.py +182,Payment Entry has been modified after you pulled it. Please pull it again.,"Оплата запись была изменена после того, как вытащил его. Пожалуйста, вытащить его снова."
-apps/erpnext/erpnext/stock/doctype/item/item.py +195,{0} entered twice in Item Tax,{0} вводится дважды в пункт налоге
+apps/erpnext/erpnext/stock/doctype/item/item.py +195,{0} entered twice in Item Tax,{0} вводится дважды в пункт налог
 DocType: Workstation,Rent Cost,Стоимость аренды
 DocType: Manage Variants Item,Variant Attributes,Вариант Атрибуты
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +73,Please select month and year,"Пожалуйста, выберите месяц и год"
@@ -346,7 +346,7 @@ DocType: Sales Invoice,Rate at which Customer Currency is converted to customer'
 DocType: Features Setup,"Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","Доступный в спецификации, накладной, счете-фактуре, производственного заказа, заказа на поставку, покупка получение, счет-фактура, заказ клиента, фондовой въезда, расписания"
 DocType: Item Tax,Tax Rate,Размер налога
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +504,Select Item,Выбрать пункт
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,{0} {1} status is Stopped,{0} {1} положение остановлен
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +208,{0} {1} status is Stopped,{0} {1} статус остановлен
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +143,"Item: {0} managed batch-wise, can not be reconciled using \
 					Stock Reconciliation, instead use Stock Entry","Пункт: {0} удалось порционно, не могут быть согласованы с помощью \
  со примирения, вместо этого использовать со запись"
@@ -385,7 +385,7 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +57,"If multi
 ,Purchase Register,Покупка Становиться на учет
 DocType: Landed Cost Item,Applicable Charges,Взимаемых платежах
 DocType: Workstation,Consumable Cost,Расходные Стоимость
-apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +153,{0} ({1}) must have role 'Leave Approver',"{0} ({1}) должен иметь роль ""Утверждающего Убытки"""
+apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +153,{0} ({1}) must have role 'Leave Approver',"{0} ({1}) должен иметь роль ""Подтверждающего Отсутствие"""
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +39,Medical,Медицинский
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +124,Reason for losing,Причина потери
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +35,Tube beading,Труба бисером
@@ -461,7 +461,7 @@ sites/assets/js/erpnext.min.js +54,Please select Company,"Пожалуйста, 
 DocType: Stock Entry,Difference Account,Счет разницы
 apps/erpnext/erpnext/projects/doctype/task/task.py +44,Cannot close task as its dependant task {0} is not closed.,"Невозможно закрыть задача, как ее зависит задача {0} не закрыт."
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +298,Please enter Warehouse for which Material Request will be raised,"Пожалуйста, введите Склад для которых Материал Запрос будет поднят"
-DocType: Production Order,Additional Operating Cost,Дополнительная Эксплуатационные расходы
+DocType: Production Order,Additional Operating Cost,Дополнительные Эксплуатационные расходы
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +19,Cosmetics,Косметика
 DocType: DocField,Type,Тип
 apps/erpnext/erpnext/stock/doctype/item/item.py +272,"To merge, following properties must be same for both items","Чтобы объединить, следующие свойства должны быть одинаковыми для обоих пунктов"
@@ -490,8 +490,8 @@ DocType: Variant Attribute,Variant Attribute,Вариант Атрибут
 DocType: Company,Delete Company Transactions,Удалить Сделки Компания
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +84,Item {0} is not Purchase Item,Пункт {0} не Приобретите товар
 apps/erpnext/erpnext/controllers/recurring_document.py +189,"{0} is an invalid email address in 'Notification \
-					Email Address'","{0} неправильный адрес электронной почты в ""\
- Уведомление адресом электронной почты"""
+					Email Address'","{0} неправильный адрес электронной почты в ""
+ Уведомление \ адрес электронной почты"""
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +44,Total Billing This Year:,Всего счетов в этом году:
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Добавить / Изменить Налоги и сборы
 DocType: Purchase Invoice,Supplier Invoice No,Поставщик Счет Нет
@@ -542,7 +542,7 @@ apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +5
 apps/erpnext/erpnext/accounts/utils.py +186,Allocated amount can not be negative,Выделенные сумма не может быть отрицательным
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +122,Tumbling,Акробатика
 DocType: Purchase Order Item,Billed Amt,Счетов выдано кол-во
-DocType: Warehouse,A logical Warehouse against which stock entries are made.,"Логично Склад, на котором фондовые записи сделаны."
+DocType: Warehouse,A logical Warehouse against which stock entries are made.,"Логика Склада,по которому сделаны складские записи"
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +110,Reference No & Reference Date is required for {0},Ссылка № & Ссылка Дата необходим для {0}
 DocType: Event,Wednesday,Среда
 DocType: Sales Invoice,Customer's Vendor,Производитель Клиентам
@@ -593,7 +593,7 @@ apps/erpnext/erpnext/config/buying.py +28,Purchase Orders given to Suppliers.,"�
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +42,Publishing,Публикация
 DocType: Activity Cost,Projects User,Проекты Пользователь
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +41,Consumed,Потребляемая
-apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +187,{0}: {1} not found in Invoice Details table,{0} {1} не найден в счете-фактуре таблице
+apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +187,{0}: {1} not found in Invoice Details table,{0} {1} не найден в  таблице счета
 DocType: Company,Round Off Cost Center,Округление Стоимость центр
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +189,Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Техническое обслуживание Посетить {0} должно быть отменено до отмены этого заказ клиента
 DocType: Material Request,Material Transfer,О передаче материала
@@ -737,7 +737,7 @@ DocType: Process Payroll,Send Email,Отправить e-mail
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +85,No Permission,Нет разрешения
 DocType: Company,Default Bank Account,По умолчанию Банковский счет
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +43,"To filter based on Party, select Party Type first","Чтобы отфильтровать на основе партии, выберите партия первого типа"
-apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +49,'Update Stock' can not be checked because items are not delivered via {0},"&quot;Обновление со&quot; не могут быть проверены, так как элементы не поставляется через {0}"
+apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +49,'Update Stock' can not be checked because items are not delivered via {0},"""Обновления Склада"" не могут быть проверены, так как позиция не поставляется через {0}"
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +626,Nos,кол-во
 DocType: Item,Items with higher weightage will be shown higher,"Элементы с более высокой weightage будет показано выше,"
 DocType: Bank Reconciliation Detail,Bank Reconciliation Detail,Банковская сверка подробно
@@ -759,7 +759,7 @@ DocType: Email Digest,Email Digest Settings,Email Дайджест Настро�
 apps/erpnext/erpnext/config/support.py +13,Support queries from customers.,Поддержка запросов от клиентов.
 DocType: Bin,Moving Average Rate,Moving Average Rate
 DocType: Production Planning Tool,Select Items,Выберите товары
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +292,{0} against Bill {1} dated {2},{0} против Счета {1} от {2}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +292,{0} against Bill {1} dated {2},{0} по Счету {1} от {2}
 DocType: Comment,Reference Name,Ссылка Имя
 DocType: Maintenance Visit,Completion Status,Статус завершения
 DocType: Production Order,Target Warehouse,Целевая Склад
@@ -1372,7 +1372,7 @@ DocType: HR Settings,Stop Birthday Reminders,Стоп День рождения 
 DocType: SMS Center,Receiver List,Приемник Список
 DocType: Payment Tool Detail,Payment Amount,Сумма платежа
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py +46,Consumed Amount,Израсходованное количество
-sites/assets/js/erpnext.min.js +49,{0} View,{0} Посмотреть
+sites/assets/js/erpnext.min.js +49,{0} View,{0} Просмотр
 DocType: Salary Structure Deduction,Salary Structure Deduction,Зарплата Структура Вычет
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +157,Selective laser sintering,Селективный лазерного спекания
 apps/erpnext/erpnext/stock/doctype/item/item.py +153,Unit of Measure {0} has been entered more than once in Conversion Factor Table,Единица измерения {0} был введен более чем один раз в таблицу преобразования Factor
@@ -1515,7 +1515,7 @@ apps/erpnext/erpnext/shopping_cart/utils.py +47,Addresses,Адреса
 DocType: Communication,Received,Получено
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +155,Against Journal Entry {0} does not have any unmatched {1} entry,Против Запись в журнале {0} не имеет никакого непревзойденную {1} запись
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +216,Duplicate Serial No entered for Item {0},Дубликат Серийный номер вводится для Пункт {0}
-DocType: Shipping Rule Condition,A condition for a Shipping Rule,Состояние для правила судоходства
+DocType: Shipping Rule Condition,A condition for a Shipping Rule,Условия для правил перевозки
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +326,Item is not allowed to have Production Order.,Деталь не разрешается иметь производственного заказа.
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +205,"Name of new Account. Note: Please don't create accounts for Customers and Suppliers, they are created automatically from the Customer and Supplier master","Имя нового счета. Примечание: Пожалуйста, не создавать учетные записи для клиентов и поставщиков, они создаются автоматически от Заказчика и поставщика оригиналов"
 DocType: DocField,Attach Image,Прикрепить изображение
@@ -1989,7 +1989,7 @@ apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +92,You can not change rat
 DocType: Employee,Previous Work Experience,Предыдущий опыт работы
 DocType: Stock Entry,For Quantity,Для Количество
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +153,Please enter Planned Qty for Item {0} at row {1},"Пожалуйста, введите Запланированное Количество по пункту {0} в строке {1}"
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +217,{0} {1} is not submitted,{0} {1} не отправлен
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +217,{0} {1} is not submitted,{0} {1} не проведен
 apps/erpnext/erpnext/config/stock.py +13,Requests for items.,Запросы на предметы.
 DocType: Production Planning Tool,Separate production order will be created for each finished good item.,Отдельный производственный заказ будет создан для каждого готового хорошего пункта.
 DocType: Email Digest,New Communications,Новые Коммуникации
@@ -2034,7 +2034,7 @@ DocType: Sales Partner,A third party distributor / dealer / commission agent / a
 DocType: Customer Group,Has Child Node,Имеет дочерний узел
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +296,{0} against Purchase Order {1},{0} против Заказа {1}
 DocType: SMS Settings,"Enter static url parameters here (Eg. sender=ERPNext, username=ERPNext, password=1234 etc.)","Введите статические параметры адрес здесь (Например отправитель = ERPNext, имя пользователя = ERPNext, пароль = 1234 и т.д.)"
-apps/erpnext/erpnext/accounts/utils.py +39,{0} {1} not in any active Fiscal Year. For more details check {2}.,"{0} {1}, не в какой-либо активной финансовый год. Для более подробной информации проверить {2}."
+apps/erpnext/erpnext/accounts/utils.py +39,{0} {1} not in any active Fiscal Year. For more details check {2}.,"{0} {1}, ни в каком-либо активном финансовом году. Для более подробной информации проверить {2}."
 apps/erpnext/erpnext/setup/page/setup_wizard/default_website.py +26,This is an example website auto-generated from ERPNext,Это пример сайт автоматически сгенерированный из ERPNext
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +37,Ageing Range 1,Старение Диапазон 1
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +109,Photochemical machining,Фотохимические обработки
@@ -2505,7 +2505,7 @@ DocType: Payment Tool,Against Vouchers,На ваучеры
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +23,Quick Help,Быстрая помощь
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +169,Source and target warehouse cannot be same for row {0},Источник и цель склад не может быть одинаковым для ряда {0}
 DocType: Features Setup,Sales Extras,Продажи Дополнительно
-apps/erpnext/erpnext/accounts/utils.py +311,{0} budget for Account {1} against Cost Center {2} will exceed by {3},{0} бюджет на счет {1} против МВЗ {2} будет превышать {3}
+apps/erpnext/erpnext/accounts/utils.py +311,{0} budget for Account {1} against Cost Center {2} will exceed by {3},{0} бюджет на счет {1} к МВЗ {2} будет превышать {3}
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +236,"Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry","Разница аккаунт должен быть тип счета активов / пассивов, так как это со Примирение запись Открытие"
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +123,Purchase Order number required for Item {0},Число Заказ требуется для Пункт {0}
 DocType: Leave Allocation,Carry Forwarded Leaves,Carry направляются листья
@@ -2796,7 +2796,7 @@ DocType: Notification Control,Custom Message,Текст сообщения
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +32,Investment Banking,Инвестиционно-банковская деятельность
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +261,"Select your Country, Time Zone and Currency","Выберите страну, часовой пояс и валюта"
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +314,Cash or Bank Account is mandatory for making payment entry,Наличными или банковский счет является обязательным для внесения записи платежей
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +214,{0} {1} status is Unstopped,{0} {1} статус отверзутся
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +214,{0} {1} status is Unstopped,{0} {1} статус активирован
 DocType: Purchase Invoice,Price List Exchange Rate,Прайс-лист валютный курс
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +90,Pickling,Маринование
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +17,Sand casting,Литье в песчаные
@@ -3063,7 +3063,7 @@ DocType: Sales Invoice,Posting Time,Средняя Время
 DocType: Sales Order,% Amount Billed,% Сумма счета
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +129,Telephone Expenses,Телефон Расходы
 DocType: Sales Partner,Logo,Логотип
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +212,{0} Serial Numbers required for Item {0}. Only {0} provided.,"{0} Серийные номера, необходимые для Пункт {0}. Только {0} предусмотрено."
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +212,{0} Serial Numbers required for Item {0}. Only {0} provided.,"{0} Серийные номера, обязательные для позиции {0}. Только {0} предусмотрено."
 DocType: Naming Series,Check this if you want to force the user to select a series before saving. There will be no default if you check this.,"Проверьте это, если вы хотите, чтобы заставить пользователя выбрать серию перед сохранением. Там не будет по умолчанию, если вы проверить это."
 apps/erpnext/erpnext/stock/get_item_details.py +107,No Item with Serial No {0},Нет товара с серийным № {0}
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +68,Direct Expenses,Прямые расходы
@@ -3122,7 +3122,7 @@ apps/erpnext/erpnext/config/selling.py +18,Quotes to Leads or Customers.,Кот�
 DocType: Stock Settings,Role Allowed to edit frozen stock,Роль разрешено редактировать Замороженный исходный
 ,Territory Target Variance Item Group-Wise,Территория Целевая Разница Пункт Группа Мудрого
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +101,All Customer Groups,Все Группы клиентов
-apps/erpnext/erpnext/controllers/accounts_controller.py +399,{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,"{0} является обязательным. Может быть, Обмен валюты запись не создана для {1} по {2}."
+apps/erpnext/erpnext/controllers/accounts_controller.py +399,{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.,"{0} является обязательным. Может быть, запись Обмен валюты не создана для {1} по {2}."
 apps/erpnext/erpnext/accounts/doctype/account/account.py +37,Account {0}: Parent account {1} does not exist,Счет {0}: Родитель счета {1} не существует
 DocType: Purchase Invoice Item,Price List Rate (Company Currency),Прайс-лист Тариф (Компания Валюта)
 apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +83,{0} {1} status is 'Stopped',"{0} {1} статус ""Остановлен"""
@@ -3147,7 +3147,7 @@ DocType: Lead,Add to calendar on this date,Добавить в календар�
 apps/erpnext/erpnext/config/selling.py +132,Rules for adding shipping costs.,Правила для добавления стоимости доставки.
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +20,Customer is required,Требуется клиентов
 DocType: Letter Head,Letter Head,Заголовок письма
-apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +21,{0} is mandatory for Return,{0} является обязательным для возвращения
+apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +21,{0} is mandatory for Return,{0} является обязательным для возврата
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order_list.js +12,To Receive,Получить
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +32,Shrink fitting,Термоусадочная Место
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +522,user@example.com,user@example.com
@@ -3232,7 +3232,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +44,Casual Leav
 DocType: Batch,Batch ID,ID партии
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +300,Note: {0},Примечание: {0}
 ,Delivery Note Trends,Доставка Примечание тенденции
-apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +72,{0} must be a Purchased or Sub-Contracted Item in row {1},{0} должен быть куплены или субподрядчиком Пункт в строке {1}
+apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +72,{0} must be a Purchased or Sub-Contracted Item in row {1},{0} позиция должна быть куплена или получена на основе субподряда в строке {1}
 apps/erpnext/erpnext/accounts/general_ledger.py +92,Account: {0} can only be updated via Stock Transactions,Счет: {0} можно обновить только с помощью биржевых операций
 DocType: GL Entry,Party,Сторона
 DocType: Sales Order,Delivery Date,Дата поставки
@@ -3530,7 +3530,7 @@ apps/erpnext/erpnext/projects/doctype/project/project_list.js +6,{0}% Complete,{
 DocType: Employee,Educational Qualification,Образовательный ценз
 DocType: Workstation,Operating Costs,Операционные расходы
 DocType: Employee Leave Approver,Employee Leave Approver,Сотрудник Оставить утверждающий
-apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +167,{0} has been successfully added to our Newsletter list.,{0} был успешно добавлен в список наших новости.
+apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +167,{0} has been successfully added to our Newsletter list.,{0} был успешно добавлен в список наших новостей.
 apps/erpnext/erpnext/stock/doctype/item/item.py +235,Row {0}: An Reorder entry already exists for this warehouse {1},Ряд {0}: запись Изменить порядок уже существует для этого склада {1}
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +66,"Cannot declare as lost, because Quotation has been made.","Не можете объявить как потерял, потому что цитаты было сделано."
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +132,Electron beam machining,Электронно-лучевая обработка
@@ -3822,7 +3822,7 @@ DocType: Customer,Credit Days Based On,Кредитные дней основа�
 apps/erpnext/erpnext/stock/doctype/stock_uom_replace_utility/stock_uom_replace_utility.py +57,Stock balances updated,Акции остатки обновляются
 DocType: Selling Settings,Maintain Same Rate Throughout Sales Cycle,Поддержание же скоростью протяжении цикла продаж
 DocType: Manufacturing Settings,Plan time logs outside Workstation Working Hours.,Планировать время журналы за пределами рабочего времени рабочих станций.
-apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +91,{0} {1} has already been submitted,{0} {1} уже отправлен
+apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +91,{0} {1} has already been submitted,{0} {1} уже проведен
 ,Items To Be Requested,"Предметы, будет предложено"
 DocType: Purchase Order,Get Last Purchase Rate,Получить последнюю покупку Оценить
 DocType: Company,Company Info,Информация о компании
@@ -3849,7 +3849,7 @@ apps/erpnext/erpnext/config/accounts.py +18,Bills raised to Customers.,"Зако
 DocType: DocField,Default,По умолчанию
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +26,Project Id,Проект Id
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +431,Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2},"Ряд Нет {0}: Сумма не может быть больше, чем ожидании Сумма против Расход претензии {1}. В ожидании сумма {2}"
-apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.py +42,{0} subscribers added,{0} добавил абоненты
+apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.py +42,{0} subscribers added,{0} подписчики добавлены
 DocType: Maintenance Schedule,Schedule,Расписание
 DocType: Account,Parent Account,Родитель счета
 DocType: Serial No,Available,имеется

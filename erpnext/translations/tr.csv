@@ -3334,7 +3334,7 @@ apps/frappe/frappe/core/doctype/user/user.js +134,Loading,Yükleme
 DocType: BOM Replace Tool,BOM Replace Tool,BOM Aracı değiştirin
 apps/erpnext/erpnext/config/setup.py +37,Country wise default Address Templates,Ülke bilgisi varsayılan adres şablonları
 apps/erpnext/erpnext/accounts/party.py +220,Due / Reference Date cannot be after {0},Due / Referans Tarihi sonra olamaz {0}
-apps/erpnext/erpnext/config/setup.py +51,Data Import and Export,Veri İthalat ve İhracat
+apps/erpnext/erpnext/config/setup.py +51,Data Import and Export,İçeri/Dışarı Aktar
 DocType: Features Setup,If you involve in manufacturing activity. Enables Item 'Is Manufactured',Üretim faaliyetlerinde bulunuyorsanız Ürünlerin 'Üretilmiş' olmasını sağlar
 DocType: Sales Invoice,Rounded Total,Yuvarlanmış Toplam
 DocType: Product Bundle,List items that form the package.,Ambalajı oluşturan Ürünleri listeleyin

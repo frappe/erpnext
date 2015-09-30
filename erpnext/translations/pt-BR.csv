@@ -772,7 +772,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +15,Permanen
 DocType: Sales Order Item,Projected Qty,Qtde. Projetada
 DocType: Sales Invoice,Payment Due Date,Data de Vencimento
 DocType: Newsletter,Newsletter Manager,Boletim Gerente
-apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +95,'Opening','Aberto'
+apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +95,'Opening','Abrindo'
 DocType: Notification Control,Delivery Note Message,Mensagem da Guia de Remessa
 DocType: Expense Claim,Expenses,Despesas
 ,Purchase Receipt Trends,Compra Trends Recibo
@@ -1370,7 +1370,7 @@ DocType: HR Settings,Stop Birthday Reminders,Parar Aniversário Lembretes
 DocType: SMS Center,Receiver List,Lista de recebedores
 DocType: Payment Tool Detail,Payment Amount,Valor do Pagamento
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py +46,Consumed Amount,Quantidade consumida
-sites/assets/js/erpnext.min.js +49,{0} View,{0} Vista
+sites/assets/js/erpnext.min.js +49,{0} View,{0} Visão
 DocType: Salary Structure Deduction,Salary Structure Deduction,Dedução da Estrutura Salarial
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +157,Selective laser sintering,Seletiva sinterização a laser
 apps/erpnext/erpnext/stock/doctype/item/item.py +153,Unit of Measure {0} has been entered more than once in Conversion Factor Table,Unidade de Medida {0} foi inserida mais de uma vez na Tabela de Conversão de Fator
@@ -2152,7 +2152,7 @@ DocType: Landed Cost Voucher,Purchase Receipt Items,Itens do Recibo de Compra
 apps/erpnext/erpnext/config/learn.py +21,Customizing Forms,Formas de personalização
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +61,Cutting,Corte
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +68,Flattening,Achatamento
-DocType: Account,Income Account,Conta de Renda
+DocType: Account,Income Account,Conta de Receitas
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +21,Molding,Modelagem
 DocType: Stock Reconciliation Item,Current Qty,Qtde atual
 DocType: BOM Item,"See ""Rate Of Materials Based On"" in Costing Section",Consulte &quot;taxa de materiais baseados em&quot; no Custeio Seção
@@ -3548,7 +3548,7 @@ DocType: Time Log,For Manufacturing,Para Manufacturing
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +124,Totals,Totais
 DocType: BOM,Manufacturing,Fabricação
 ,Ordered Items To Be Delivered,Itens encomendados a serem entregues
-DocType: Account,Income,renda
+DocType: Account,Income,Receitas
 ,Setup Wizard,Assistente de Configuração
 DocType: Industry Type,Industry Type,Tipo de indústria
 apps/erpnext/erpnext/templates/includes/cart.js +265,Something went wrong!,Algo deu errado!
