@@ -826,17 +826,20 @@ def get_exchange_rate(account, account_currency, company,
 	if account_currency != company_currency:
 		if reference_type in ("Sales Invoice", "Purchase Invoice") and reference_name:
 			exchange_rate = frappe.db.get_value(reference_type, reference_name, "conversion_rate")
-		elif account_details.account_type == "Bank" and \
+
+		elif account_details and account_details.account_type == "Bank" and \
 			((account_details.root_type == "Asset" and flt(credit) > 0) or
 				(account_details.root_type == "Liability" and debit)):
 			exchange_rate = get_average_exchange_rate(account)
 
-		if not exchange_rate:
+		if not exchange_rate and account_currency:
 			exchange_rate = get_exchange_rate(account_currency, company_currency)
+
 	else:
 		exchange_rate = 1
 
-	return exchange_rate
+	# don't return None or 0 as it is multipled with a value and that value could be lost
+	return exchange_rate or 1
 
 def get_average_exchange_rate(account):
 	exchange_rate = 0
