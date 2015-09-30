@@ -1,1 +1,0 @@
-- Trial Balance for Customer and Supplier
