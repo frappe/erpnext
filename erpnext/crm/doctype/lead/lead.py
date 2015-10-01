@@ -58,12 +58,12 @@ class Lead(SellingController):
 	def check_email_id_is_unique(self):
 		if self.email_id:
 			# validate email is unique
-			email_list = frappe.db.sql("""select name from tabLead where email_id=%s""",
-				self.email_id)
-			email_list = [e[0] for e in email_list if e[0]!=self.name]
-			if len(email_list) > 1:
-				frappe.throw(_("Email id must be unique, already exists for {0}").format(comma_and(email_list)),
-					frappe.DuplicateEntryError)
+			duplicate_leads = frappe.db.sql_list("""select name from tabLead 
+				where email_id=%s and name!=%s""", (self.email_id, self.name))
+
+			if duplicate_leads:
+				frappe.throw(_("Email id must be unique, already exists for {0}")
+					.format(comma_and(duplicate_leads)), frappe.DuplicateEntryError)
 
 	def on_trash(self):
 		frappe.db.sql("""update `tabIssue` set lead='' where lead=%s""",
