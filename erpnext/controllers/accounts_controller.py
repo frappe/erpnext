@@ -428,7 +428,10 @@ class AccountsController(TransactionBase):
 			if party_type and party:
 				party_account_currency = get_party_account_currency(party_type, party, self.company)
 
-				if party_account_currency != self.company_currency and self.currency != party_account_currency:
+				if (party_account_currency
+					and party_account_currency != self.company_currency
+					and self.currency != party_account_currency):
+
 					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
 						.format(party_type, party, party_account_currency), InvalidCurrency)
 
