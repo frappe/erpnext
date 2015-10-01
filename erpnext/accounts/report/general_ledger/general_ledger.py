@@ -161,40 +161,26 @@ def get_data_with_opening_closing(filters, account_details, gl_entries):
 		for acc, acc_dict in gle_map.items():
 			if acc_dict.entries:
 				# Opening for individual ledger, if grouped by account
-				if filters.get("group_by_account"):
-					data.append(get_balance_row(_("Opening"), acc_dict.opening,
-						acc_dict.opening_in_account_currency))
+				data.append(get_balance_row(_("Opening"), acc_dict.opening,
+					acc_dict.opening_in_account_currency))
 
 				data += acc_dict.entries
 
 				# Totals and closing for individual ledger, if grouped by account
-				if filters.get("group_by_account"):
-					account_closing = acc_dict.opening + acc_dict.total_debit - acc_dict.total_credit
-					account_closing_in_account_currency = acc_dict.opening_in_account_currency \
-						+ acc_dict.total_debit_in_account_currency - acc_dict.total_credit_in_account_currency
+				account_closing = acc_dict.opening + acc_dict.total_debit - acc_dict.total_credit
+				account_closing_in_account_currency = acc_dict.opening_in_account_currency \
+					+ acc_dict.total_debit_in_account_currency - acc_dict.total_credit_in_account_currency
 
-					data += [{"account": "'" + _("Totals") + "'", "debit": acc_dict.total_debit,
-						"credit": acc_dict.total_credit},
-						get_balance_row(_("Closing (Opening + Totals)"),
-							account_closing, account_closing_in_account_currency), {}]
+				data += [{"account": "'" + _("Totals") + "'", "debit": acc_dict.total_debit,
+					"credit": acc_dict.total_credit},
+					get_balance_row(_("Closing (Opening + Totals)"),
+						account_closing, account_closing_in_account_currency), {}]
 
 	else:
-		from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
-		opening_debit = opening_credit = 0.0
-
 		for gl in gl_entries:
-			if gl.posting_date < from_date:
-				opening_debit += flt(gl.debit, 3)
-				opening_credit += flt(gl.credit, 3)
-			else:
+			if gl.posting_date >= getdate(filters.from_date) and gl.posting_date <= getdate(filters.to_date):
 				data.append(gl)
 
-	if not (filters.get("account") or filters.get("party")):
-		data = [{
-			"account": "'" + _("Opening") + "'",
-			"debit": opening_debit,
-			"credit": opening_credit
-		}] + data
 
 	# Total debit and credit between from and to date
 	if total_debit or total_credit:
