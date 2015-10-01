@@ -17,7 +17,6 @@ frappe.ui.form.on("Customer", "refresh", function(frm) {
 	}
 
 	var grid = cur_frm.get_field("sales_team").grid;
-	grid.set_column_disp("allocated_percentage", false);
 	grid.set_column_disp("allocated_amount", false);
 	grid.set_column_disp("incentives", false);
 
@@ -101,11 +100,11 @@ cur_frm.fields_dict['accounts'].grid.get_field('account').get_query = function(d
 		'company': d.company,
 		"is_group": 0
 	};
-	
+
 	if(doc.party_account_currency) {
 		$.extend(filters, {"account_currency": doc.party_account_currency});
 	}
-		
+
 	return {
 		filters: filters
 	}

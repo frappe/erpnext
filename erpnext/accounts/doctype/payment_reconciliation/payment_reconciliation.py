@@ -141,6 +141,7 @@ class PaymentReconciliation(Document):
 
 	def reconcile(self, args):
 		for e in self.get('payments'):
+			e.invoice_type = None
 			if e.invoice_number and " | " in e.invoice_number:
 				e.invoice_type, e.invoice_number = e.invoice_number.split(" | ")
 

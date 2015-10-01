@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, cint
 from frappe import msgprint, _
+from calendar import monthrange
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -73,23 +74,17 @@ def get_conditions(filters):
 		msgprint(_("Please select month and year"), raise_exception=1)
 
 	filters["month"] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
-		"Dec"].index(filters["month"]) + 1
+		"Dec"].index(filters.month) + 1
 
-	from frappe.model.document import Document
-	fiscal_years = frappe.get_doc("Fiscal Year",filters["fiscal_year"])
-	import datetime
-	year_start = fiscal_years.year_start_date.strftime("%Y")
-	year_end = fiscal_years.year_end_date.strftime("%Y")
-	dt_test = datetime.datetime.strptime(year_end + "-" + str(100+int(filters["month"]))[2:3] + "-01", "%Y-%m-%d")
-	date_test = datetime.date(dt_test.year, dt_test.month, dt_test.day)
-	if date_test > fiscal_years.year_end_date:
-		year_target = year_start
+	year_start_date, year_end_date = frappe.db.get_value("Fiscal Year", filters.fiscal_year, 
+		["year_start_date", "year_end_date"])
+		
+	if filters.month >= year_start_date.strftime("%m"):
+		year = year_start_date.strftime("%Y")
 	else:
-		year_target = year_end
-
-	from calendar import monthrange
-	filters["total_days_in_month"] = monthrange(cint(year_target),
-		filters["month"])[1]
+		year = year_end_date.strftime("%Y")
+	
+	filters["total_days_in_month"] = monthrange(cint(year), filters.month)[1]
 
 	conditions = " and month(att_date) = %(month)s and fiscal_year = %(fiscal_year)s"
 
