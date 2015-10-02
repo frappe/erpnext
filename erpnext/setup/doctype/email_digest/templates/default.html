@@ -88,10 +88,9 @@
 
 <!-- notifications -->
 {% if notifications %}
-<h4 style="{{ section_head }}">{{ _("Pending Activities") }}</h4>
+<h4 style="{{ section_head }}">{{ _("Open Notifications") }}</h4>
 <div>
 {% for n in notifications %}
-    {% if n.value %}
     <div style="{{ line_item }}">
         <table style="width: 100%;">
             <tr>
@@ -106,7 +105,6 @@
             </tr>
         </table>
     </div>
-    {% endif %}
 {% endfor %}
 </div>
 {% endif %}

@@ -56,9 +56,14 @@ class EmailDigest(Document):
 				frappe.set_user(user_id)
 				msg_for_this_receipient = self.get_msg_html()
 				if msg_for_this_receipient:
-					frappe.sendmail(recipients=user_id,
+					frappe.sendmail(
+						recipients=user_id,
 						subject="{frequency} Digest".format(frequency=self.frequency),
-						message=msg_for_this_receipient, bulk=True)
+						message=msg_for_this_receipient,
+						bulk=True,
+						reference_doctype = self.doctype,
+						reference_name = self.name,
+						unsubscribe_message = _("Unsubscribe from this Email Digest"))
 
 		frappe.set_user(original_user)
 
@@ -75,6 +80,9 @@ class EmailDigest(Document):
 		context.events = self.get_calendar_events()
 		context.todo_list = self.get_todo_list()
 		context.notifications = self.get_notifications()
+
+		if not (context.events or context.todo_list or context.notifications or context.cards):
+			return None
 
 		# style
 		return frappe.render_template("erpnext/setup/doctype/email_digest/templates/default.html",
@@ -110,7 +118,7 @@ class EmailDigest(Document):
 			lambda a, b: 1 if a[1] < b[1] else -1)
 
 		notifications = [{"key": n[0], "value": n[1],
-			"link": get_url_to_list(n[0])} for n in notifications]
+			"link": get_url_to_list(n[0])} for n in notifications if n[1]]
 
 		return notifications
 
