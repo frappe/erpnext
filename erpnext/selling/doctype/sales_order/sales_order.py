@@ -20,6 +20,27 @@ form_grid_templates = {
 class WarehouseRequired(frappe.ValidationError): pass
 
 class SalesOrder(SellingController):
+	def validate(self):
+		super(SalesOrder, self).validate()
+
+		self.validate_order_type()
+		self.validate_delivery_date()
+		self.validate_mandatory()
+		self.validate_proj_cust()
+		self.validate_po()
+		self.validate_uom_is_integer("stock_uom", "qty")
+		self.validate_for_items()
+		self.validate_warehouse()
+
+		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+		make_packing_list(self,'items')
+
+		self.validate_with_previous_doc()
+		self.set_status()
+
+		if not self.billing_status: self.billing_status = 'Not Billed'
+		if not self.delivery_status: self.delivery_status = 'Not Delivered'
+
 	def validate_mandatory(self):
 		# validate transaction date v/s delivery date
 		if self.delivery_date:
@@ -93,33 +114,6 @@ class SalesOrder(SellingController):
 			if not res:
 				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project_name))
 
-	def validate(self):
-		super(SalesOrder, self).validate()
-
-		self.validate_order_type()
-		self.validate_delivery_date()
-		self.validate_mandatory()
-		self.validate_proj_cust()
-		self.validate_po()
-		self.validate_uom_is_integer("stock_uom", "qty")
-		self.validate_for_items()
-		self.validate_warehouse()
-
-		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		make_packing_list(self,'items')
-
-		self.validate_with_previous_doc()
-
-		if not self.status:
-			self.status = "Draft"
-
-		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Draft", "Submitted", "Stopped",
-			"Cancelled"])
-
-		if not self.billing_status: self.billing_status = 'Not Billed'
-		if not self.delivery_status: self.delivery_status = 'Not Delivered'
-
 	def validate_warehouse(self):
 		from erpnext.stock.utils import validate_warehouse_company
 
@@ -162,7 +156,6 @@ class SalesOrder(SellingController):
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.base_grand_total, self)
 
 		self.update_prevdoc_status('submit')
-		frappe.db.set(self, 'status', 'Submitted')
 
 	def on_cancel(self):
 		# Cannot cancel stopped SO
@@ -175,7 +168,7 @@ class SalesOrder(SellingController):
 		self.update_prevdoc_status('cancel')
 
 		frappe.db.set(self, 'status', 'Cancelled')
-		
+
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
 		check_credit_limit(self.customer, self.company)
@@ -223,17 +216,16 @@ class SalesOrder(SellingController):
 
 	def stop_sales_order(self):
 		self.check_modified_date()
-		frappe.db.set(self, 'status', 'Stopped')
+		self.db_set('status', 'Stopped')
 		self.update_reserved_qty()
-		frappe.msgprint(_("{0} {1} status is Stopped").format(self.doctype, self.name))
 		self.notify_update()
 		clear_doctype_notifications(self)
 
 	def unstop_sales_order(self):
 		self.check_modified_date()
-		frappe.db.set(self, 'status', 'Submitted')
+		self.db_set('status', 'Draft')
+		self.set_status(update=True)
 		self.update_reserved_qty()
-		frappe.msgprint(_("{0} {1} status is Unstopped").format(self.doctype, self.name))
 		clear_doctype_notifications(self)
 
 	def update_reserved_qty(self, so_item_rows=None):

@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
 
 def get_notification_config():
 	return { "for_doctype":
@@ -15,7 +14,11 @@ def get_notification_config():
 			"Contact": {"status": "Open"},
 			"Opportunity": {"status": "Open"},
 			"Quotation": {"docstatus": 0},
-			"Sales Order": { "per_billed": ("<", 100), "status": ("!=", "Stopped"), "docstatus": ("<", 2) },
+			"Sales Order": {
+				"status": ("!=", "Stopped"),
+				"status": ("!=", "Completed"),
+				"docstatus": ("<", 2)
+			},
 			"Journal Entry": {"docstatus": 0},
 			"Sales Invoice": { "outstanding_amount": (">", 0), "docstatus": ("<", 2) },
 			"Purchase Invoice": {"docstatus": 0},
@@ -26,7 +29,11 @@ def get_notification_config():
 			"Delivery Note": {"docstatus": 0},
 			"Stock Entry": {"docstatus": 0},
 			"Material Request": {"docstatus": 0},
-			"Purchase Order": { "per_billed": ("<", 100), "status": ("!=", "Stopped"), "docstatus": ("<", 2) },
+			"Purchase Order": {
+				"status": ("!=", "Completed"),
+				"status": ("!=", "Stopped"),
+				"docstatus": ("<", 2)
+			},
 			"Production Order": { "status": "In Process" },
 			"BOM": {"docstatus": 0},
 			"Timesheet": {"docstatus": 0},

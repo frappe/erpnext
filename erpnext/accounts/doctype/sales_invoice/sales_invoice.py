@@ -207,8 +207,8 @@ class SalesInvoice(SellingController):
 	def validate_time_logs_are_submitted(self):
 		for d in self.get("items"):
 			if d.time_log_batch:
-				status = frappe.db.get_value("Time Log Batch", d.time_log_batch, "status")
-				if status!="Submitted":
+				docstatus = frappe.db.get_value("Time Log Batch", d.time_log_batch, "docstatus")
+				if docstatus!=1:
 					frappe.throw(_("Time Log Batch {0} must be 'Submitted'").format(d.time_log_batch))
 
 	def set_pos_fields(self, for_validate=False):
