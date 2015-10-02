@@ -219,3 +219,8 @@ erpnext.patches.v6_4.fix_modified_in_sales_order_and_purchase_order
 erpnext.patches.v6_4.fix_duplicate_bins
 erpnext.patches.v6_4.fix_sales_order_maintenance_status
 erpnext.patches.v6_4.email_digest_update
+
+# delete shopping cart doctypes
+execute:frappe.delete_doc_if_exists("DocType", "Applicable Territory")
+execute:frappe.delete_doc_if_exists("DocType", "Shopping Cart Price List")
+execute:frappe.delete_doc_if_exists("DocType", "Shopping Cart Taxes and Charges Master")
