@@ -181,6 +181,9 @@ def get_default_naming_series(doctype):
 	naming_series = frappe.get_meta(doctype).get_field("naming_series").options or ""
 	naming_series = naming_series.split("\n")
 	out = naming_series[0] or (naming_series[1] if len(naming_series) > 1 else None)
-	if out:
+
+	if not out:
 		frappe.throw(_("Please set Naming Series for {0} via Setup > Settings > Naming Series").format(doctype),
 			NamingSeriesNotSetError)
+	else:
+		return out
