@@ -3,11 +3,8 @@
 
 from __future__ import unicode_literals
 import frappe
-
 from frappe.utils import flt
-
 from frappe import msgprint, _
-
 from frappe.model.document import Document
 
 class PaymentReconciliation(Document):
@@ -17,7 +14,8 @@ class PaymentReconciliation(Document):
 
 	def get_jv_entries(self):
 		self.check_mandatory_to_fetch()
-		dr_or_cr = "credit" if self.party_type == "Customer" else "debit"
+		dr_or_cr = "credit_in_account_currency" if self.party_type == "Customer" \
+			else "debit_in_account_currency"
 
 		cond = self.check_condition(dr_or_cr)
 
@@ -68,7 +66,7 @@ class PaymentReconciliation(Document):
 	def get_invoice_entries(self):
 		#Fetch JVs, Sales and Purchase Invoices for 'invoices' to reconcile against
 		non_reconciled_invoices = []
-		dr_or_cr = "debit" if self.party_type == "Customer" else "credit"
+		dr_or_cr = "debit_in_account_currency" if self.party_type == "Customer" else "credit_in_account_currency"
 		cond = self.check_condition(dr_or_cr)
 
 		invoice_list = frappe.db.sql("""
@@ -106,13 +104,15 @@ class PaymentReconciliation(Document):
 					and account = %(account)s and {0} > 0
 					and against_voucher_type = %(against_voucher_type)s
 					and ifnull(against_voucher, '') = %(against_voucher)s
-			""".format("credit" if self.party_type == "Customer" else "debit"), {
-				"party_type": self.party_type,
-				"party": self.party,
-				"account": self.receivable_payable_account,
-				"against_voucher_type": d.voucher_type,
-				"against_voucher": d.voucher_no
-			})
+			""".format("credit_in_account_currency" if self.party_type == "Customer" 
+				else "debit_in_account_currency"), {
+					"party_type": self.party_type,
+					"party": self.party,
+					"account": self.receivable_payable_account,
+					"against_voucher_type": d.voucher_type,
+					"against_voucher": d.voucher_no
+				}
+			)
 
 			payment_amount = payment_amount[0][0] if payment_amount else 0
 
@@ -147,7 +147,8 @@ class PaymentReconciliation(Document):
 
 		self.get_invoice_entries()
 		self.validate_invoice()
-		dr_or_cr = "credit" if self.party_type == "Customer" else "debit"
+		dr_or_cr = "credit_in_account_currency" if self.party_type == "Customer" \
+			else "debit_in_account_currency"
 		lst = []
 		for e in self.get('payments'):
 			if e.invoice_number and e.allocated_amount:
