@@ -213,3 +213,4 @@ erpnext.patches.v5_8.tax_rule
 erpnext.patches.v6_3.convert_applicable_territory
 erpnext.patches.v6_4.round_status_updater_percentages
 erpnext.patches.v6_4.repost_gle_for_journal_entries_where_reference_name_missing
+erpnext.patches.v6_4.fix_journal_entries_due_to_reconciliation
