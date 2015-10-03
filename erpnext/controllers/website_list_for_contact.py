@@ -35,6 +35,8 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 			key, parties = "customer", customers
 		elif suppliers:
 			key, parties = "supplier", suppliers
+		else:
+			key, parties = "customer", []
 
 		filters.append((doctype, key, "in", parties))
 
