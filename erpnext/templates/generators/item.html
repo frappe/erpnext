@@ -30,6 +30,22 @@
 					<h4 class="item-price" itemprop="price"></h4>
 					<div class="item-stock" itemprop="availablity"></div>
                     <div class="item-cart hide">
+                        {% if has_variants %}
+                        {% for d in attributes %}
+                        <div class="item-view-attribute"
+                                style="margin-bottom: 10px;">
+                            <h6 class="text-muted">{{ _(d.attribute) }}</h6>
+                            <select class="form-control"
+                                style="max-width: 140px"
+                                data-attribute="{{ d.attribute }}">
+                            {% for value in attribute_values[d.attribute] %}
+                            <option value="{{ value }}">{{ _(value) }}</option>
+                            {% endfor %}
+                            </select>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+                        </select>
     					<div id="item-add-to-cart">
     						<button class="btn btn-primary btn-sm">
     							{{ _("Add to Cart") }}</button>
@@ -76,13 +92,8 @@
 <script>
 	{% include "templates/includes/product_page.js" %}
 
-	$(function() {
-		if(window.logged_in && getCookie("system_user")==="yes") {
-			frappe.has_permission("Item", "{{ name }}", "write", function(r) {
-				frappe.require("/assets/frappe/js/frappe/website/editable.js");
-				frappe.make_editable($('[itemprop="description"]'), "Item", "{{ name }}", "web_long_description");
-			});
-		}
-	});
+    {% if variant_info %}
+    window.variant_info = {{ variant_info }};
+    {% endif %}
 </script>
 {% endblock %}

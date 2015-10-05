@@ -71,6 +71,7 @@ def get_product_list_for_group(product_group=None, start=0, limit=10):
 			concat(parent_website_route, "/", page_name) as route
 		from `tabItem`
 		where show_in_website = 1
+			and (variant_of = '' or variant_of is null)
 			and (item_group in (%s)
 			or name in (select parent from `tabWebsite Item Group` where item_group in (%s)))
 			""" % (child_groups, child_groups)

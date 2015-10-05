@@ -14,7 +14,7 @@ def get_product_list(search=None, start=0, limit=10):
 	# base query
 	query = """select name, item_name, page_name, website_image, item_group,
 			web_long_description as website_description, parent_website_route
-		from `tabItem` where show_in_website = 1"""
+		from `tabItem` where show_in_website = 1 and (variant_of is null or variant_of = '')"""
 
 	# search term condition
 	if search:
