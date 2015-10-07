@@ -212,7 +212,7 @@ def get_customer_outstanding(customer, company):
 			from `tabSales Invoice Item`
 			where dn_detail = %s and docstatus = 1""", dn_item.name)[0][0]
 
-		if flt(dn_item.amount) > flt(si_amount):
+		if flt(dn_item.amount) > flt(si_amount) and dn_item.base_net_total:
 			outstanding_based_on_dn += ((flt(dn_item.amount) - flt(si_amount)) \
 				/ dn_item.base_net_total) * dn_item.base_grand_total
 
