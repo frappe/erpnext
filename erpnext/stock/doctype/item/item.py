@@ -66,6 +66,7 @@ class Item(WebsiteGenerator):
 		self.validate_has_variants()
 		self.validate_attributes()
 		self.validate_variant_attributes()
+		self.make_thumbnail()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -78,6 +79,26 @@ class Item(WebsiteGenerator):
 		self.validate_name_with_item_group()
 		self.update_item_price()
 		self.update_variants()
+
+	def make_thumbnail(self):
+		"""Make a thumbnail of `website_image`"""
+		if self.website_image and not self.thumbnail:
+			file_doc = frappe.get_doc("File", {
+				"file_url": self.website_image,
+				"attached_to_doctype": "Item",
+				"attached_to_name": self.name
+			})
+
+			if not file_doc:
+				file_doc = frappe.get_doc({
+					"doctype": "File",
+					"file_url": self.website_image,
+					"attached_to_doctype": "Item",
+					"attached_to_name": self.name
+				}).insert()
+
+			if file_doc:
+				self.thumbnail = file_doc.make_thumbnail()
 
 	def get_context(self, context):
 		context.parent_groups = get_parent_item_groups(self.item_group) + \

@@ -94,6 +94,8 @@
 
     {% if variant_info %}
     window.variant_info = {{ variant_info }};
+    {% else %}
+    window.variant_info = null;
     {% endif %}
 </script>
 {% endblock %}

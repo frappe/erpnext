@@ -66,7 +66,7 @@ def get_product_list_for_group(product_group=None, start=0, limit=10):
 	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(product_group)])
 
 	# base query
-	query = """select name, item_name, page_name, website_image, item_group,
+	query = """select name, item_name, page_name, website_image, thumbnail, item_group,
 			web_long_description as website_description,
 			concat(parent_website_route, "/", page_name) as route
 		from `tabItem`
