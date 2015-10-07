@@ -215,3 +215,4 @@ erpnext.patches.v6_4.round_status_updater_percentages
 erpnext.patches.v6_4.repost_gle_for_journal_entries_where_reference_name_missing
 erpnext.patches.v6_4.fix_journal_entries_due_to_reconciliation
 erpnext.patches.v6_4.fix_status_in_sales_and_purchase_order
+erpnext.patches.v6_4.fix_modified_in_sales_order_and_purchase_order
