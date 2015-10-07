@@ -346,8 +346,7 @@ def get_conversion_factor(item_code, uom):
 	variant_of = frappe.db.get_value("Item", item_code, "variant_of")
 	filters = {"parent": item_code, "uom": uom}
 	if variant_of:
-		filters = {"parent": ("in", (item_code, variant_of))}
-
+		filters["parent"] = ("in", (item_code, variant_of))
 	return {"conversion_factor": frappe.db.get_value("UOM Conversion Detail",
 		filters, "conversion_factor")}
 

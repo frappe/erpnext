@@ -34,7 +34,7 @@ class TimeLogBatch(Document):
 	def validate_time_log_is_submitted(self, tl):
 		if tl.status == "Batched for Billing":
 			frappe.throw(_("Time Log {0} already billed").format(tl.name))
-		elif tl.status != "Submitted":
+		elif tl.docstatus != 1:
 			frappe.throw(_("Time Log {0} must be 'Submitted'").format(tl.name))
 
 	def set_status(self):

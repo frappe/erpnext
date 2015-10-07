@@ -7,7 +7,6 @@ from frappe.utils import cstr, flt, fmt_money, formatdate
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
-from erpnext.accounts.party import get_party_account_currency
 from erpnext.setup.utils import get_company_currency
 
 
@@ -277,9 +276,6 @@ class JournalEntry(AccountsController):
 		if alternate_currency:
 			if not self.multi_currency:
 				frappe.throw(_("Please check Multi Currency option to allow accounts with other currency"))
-
-			if len(alternate_currency) > 1:
-				frappe.throw(_("Only one alternate currency can be used in a single Journal Entry"))
 
 		self.set_exchange_rate()
 

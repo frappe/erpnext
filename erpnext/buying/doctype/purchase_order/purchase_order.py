@@ -36,13 +36,7 @@ class PurchaseOrder(BuyingController):
 	def validate(self):
 		super(PurchaseOrder, self).validate()
 
-		if not self.status:
-			self.status = "Draft"
-
-		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Draft", "Submitted", "Stopped",
-			"Cancelled"])
-
+		self.set_status()
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
 		self.check_for_stopped_status(pc_obj)
@@ -160,12 +154,10 @@ class PurchaseOrder(BuyingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
-		frappe.db.set(self,'status',cstr(status))
-
+		self.db_set('status', status)
+		self.set_status(update=True)
 		self.update_requested_qty()
 		self.update_ordered_qty()
-
-		msgprint(_("Status of {0} {1} is now {2}").format(self.doctype, self.name, status))
 		self.notify_update()
 		clear_doctype_notifications(self)
 
@@ -182,8 +174,6 @@ class PurchaseOrder(BuyingController):
 			self.company, self.base_grand_total)
 
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
-
-		frappe.db.set(self,'status','Submitted')
 
 	def on_cancel(self):
 		pc_obj = frappe.get_doc('Purchase Common')
@@ -238,7 +228,7 @@ def stop_or_unstop_purchase_orders(names, status):
 					po.update_status("Stopped")
 			else:
 				if po.status == "Stopped":
-					po.update_status("Submitted")
+					po.update_status("Draft")
 
 	frappe.local.message_log = []
 

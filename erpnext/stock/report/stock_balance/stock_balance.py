@@ -93,14 +93,14 @@ def get_item_warehouse_map(filters):
 			qty_dict.opening_qty += qty_diff
 			qty_dict.opening_val += value_diff
 		elif d.posting_date >= getdate(filters["from_date"]) and d.posting_date <= getdate(filters["to_date"]):
-			qty_dict.val_rate = d.valuation_rate
 			if qty_diff > 0:
 				qty_dict.in_qty += qty_diff
 				qty_dict.in_val += value_diff
 			else:
 				qty_dict.out_qty += abs(qty_diff)
 				qty_dict.out_val += abs(value_diff)
-
+				
+		qty_dict.val_rate = d.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
 
