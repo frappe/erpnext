@@ -77,6 +77,9 @@ def get_events(start, end, filters=None):
 	fiscal_year = None
 	if filters:
 		fiscal_year = json.loads(filters).get("fiscal_year")
+		
+	if not fiscal_year:
+		fiscal_year = frappe.get_doc("Global Defaults").current_fiscal_year
 	
 	yr_start_date, yr_end_date = get_fy_start_end_dates(fiscal_year)
 
@@ -93,9 +96,6 @@ def get_events(start, end, filters=None):
 	return data
 
 
-def get_fy_start_end_dates(fiscal_year=None):
-	if not fiscal_year:
-		fiscal_year = frappe.get_doc("Global Defaults").current_fiscal_year
-		
+def get_fy_start_end_dates(fiscal_year):	
 	return frappe.db.sql("""select year_start_date, year_end_date
 		from `tabFiscal Year` where name=%s""", (fiscal_year,))[0]
