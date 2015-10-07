@@ -4,8 +4,9 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils.make_random import add_random_children, get_random
+from frappe.utils.make_random import add_random_children
 import frappe.utils
+import random
 
 def make_sample_data():
 	"""Create a few opportunities, quotes, material requests, issues, todos, projects
@@ -13,11 +14,13 @@ def make_sample_data():
 
 	selling_items = frappe.get_all("Item", filters = {"is_sales_item": 1})
 	buying_items = frappe.get_all("Item", filters = {"is_purchase_item": 1})
-
-	if selling_items:
+	customers = frappe.get_all("Customer")
+	
+	if selling_items and customers:
 		for i in range(3):
-			make_opportunity(selling_items)
-			make_quote(selling_items)
+			customer = random.choice(customers).name
+			make_opportunity(selling_items, customer)
+			make_quote(selling_items, customer)
 
 	make_projects()
 
@@ -26,11 +29,11 @@ def make_sample_data():
 
 	frappe.db.commit()
 
-def make_opportunity(selling_items):
+def make_opportunity(selling_items, customer):
 	b = frappe.get_doc({
 		"doctype": "Opportunity",
 		"enquiry_from": "Customer",
-		"customer": get_random("Customer"),
+		"customer": customer,
 		"enquiry_type": "Sales",
 		"with_items": 1
 	})
@@ -44,11 +47,11 @@ def make_opportunity(selling_items):
 
 	b.add_comment("This is a dummy record")
 
-def make_quote(selling_items):
+def make_quote(selling_items, customer):
 	qtn = frappe.get_doc({
 		"doctype": "Quotation",
 		"quotation_to": "Customer",
-		"customer": get_random("Customer"),
+		"customer": customer,
 		"order_type": "Sales"
 	})
 
