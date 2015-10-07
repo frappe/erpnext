@@ -30,7 +30,19 @@ status_map = {
 	],
 	"Sales Order": [
 		["Draft", None],
-		["Submitted", "eval:self.docstatus==1"],
+		["To Deliver and Bill", "eval:self.per_delivered < 100 and self.per_billed < 100 and self.docstatus == 1"],
+		["To Bill", "eval:self.per_delivered == 100 and self.per_billed < 100 and self.docstatus == 1"],
+		["To Deliver", "eval:self.per_delivered < 100 and self.per_billed == 100 and self.docstatus == 1"],
+		["Completed", "eval:self.per_delivered == 100 and self.per_billed == 100 and self.docstatus == 1"],
+		["Stopped", "eval:self.status=='Stopped'"],
+		["Cancelled", "eval:self.docstatus==2"],
+	],
+	"Purchase Order": [
+		["Draft", None],
+		["To Receive and Bill", "eval:self.per_received < 100 and self.per_billed < 100 and self.docstatus == 1"],
+		["To Bill", "eval:self.per_received == 100 and self.per_billed < 100 and self.docstatus == 1"],
+		["To Receive", "eval:self.per_received < 100 and self.per_billed == 100 and self.docstatus == 1"],
+		["Completed", "eval:self.per_received == 100 and self.per_billed == 100 and self.docstatus == 1"],
 		["Stopped", "eval:self.status=='Stopped'"],
 		["Cancelled", "eval:self.docstatus==2"],
 	],
@@ -222,7 +234,9 @@ class StatusUpdater(Document):
 					where name='%(name)s'""" % args)
 
 			if args.get("set_modified"):
-				frappe.get_doc(args["target_parent_dt"], name).notify_update()
+				target = frappe.get_doc(args["target_parent_dt"], name)
+				target.set_status(update=True)
+				target.notify_update()
 
 	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):
 		ref_fieldname = ref_dt.lower().replace(" ", "_")
