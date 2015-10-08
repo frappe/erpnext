@@ -15,8 +15,7 @@ def get_notification_config():
 			"Opportunity": {"status": "Open"},
 			"Quotation": {"docstatus": 0},
 			"Sales Order": {
-				"status": ("!=", "Stopped"),
-				"status": ("!=", "Completed"),
+				"status": ("not in", ("Stopped", "Completed")),
 				"docstatus": ("<", 2)
 			},
 			"Journal Entry": {"docstatus": 0},
@@ -30,8 +29,7 @@ def get_notification_config():
 			"Stock Entry": {"docstatus": 0},
 			"Material Request": {"docstatus": 0},
 			"Purchase Order": {
-				"status": ("!=", "Completed"),
-				"status": ("!=", "Stopped"),
+				"status": ("not in", ("Stopped", "Completed")),
 				"docstatus": ("<", 2)
 			},
 			"Production Order": { "status": "In Process" },
