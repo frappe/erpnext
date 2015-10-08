@@ -4,6 +4,7 @@
 cur_frm.add_fetch("time_log", "activity_type", "activity_type");
 cur_frm.add_fetch("time_log", "billing_amount", "billing_amount");
 cur_frm.add_fetch("time_log", "hours", "hours");
+cur_frm.add_fetch("time_log", "note", "note");
 
 cur_frm.set_query("time_log", "time_logs", function(doc) {
 	return {
