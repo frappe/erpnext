@@ -39,6 +39,7 @@ frappe.listview_settings['Time Log'] = {
 						"activity_type": d.activity_type,
 						"billing_amount": d.billing_amount,
 						"hours": d.hours
+						"note": d.note
 					});
 				})
 				frappe.set_route("Form", "Time Log Batch", tlb.name);
