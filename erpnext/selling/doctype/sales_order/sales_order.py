@@ -396,7 +396,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				"parent": "sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.base_amount==0 or doc.billed_amt < doc.amount
+			"condition": lambda doc: doc.qty and (doc.base_amount==0 or doc.billed_amt < doc.amount)
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
