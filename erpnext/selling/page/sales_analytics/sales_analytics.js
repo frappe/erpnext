@@ -34,14 +34,14 @@ erpnext.SalesAnalytics = frappe.views.TreeGridReport.extend({
 				show: true,
 				item_key: "customer",
 				parent_field: "parent_customer_group",
-				formatter: function(item) { return item.name; }
+				formatter: function(item) { return item.customer_name || item.name; }
 			},
 			"Customer": {
 				label: __("Customer"),
 				show: false,
 				item_key: "customer",
 				formatter: function(item) {
-					return item.name;
+					return item.customer_name || item.name;
 				}
 			},
 			"Item Group": {
