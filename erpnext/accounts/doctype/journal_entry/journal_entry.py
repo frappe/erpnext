@@ -37,7 +37,8 @@ class JournalEntry(AccountsController):
 		self.validate_credit_debit_note()
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
-		self.set_title()
+		if not self.title:
+			self.title = self.get_title()
 
 	def on_submit(self):
 		self.check_credit_limit()
@@ -45,8 +46,8 @@ class JournalEntry(AccountsController):
 		self.update_advance_paid()
 		self.update_expense_claim()
 
-	def set_title(self):
-		self.title = self.pay_to_recd_from or self.accounts[0].account
+	def get_title(self):
+		return self.pay_to_recd_from or self.accounts[0].account
 
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
