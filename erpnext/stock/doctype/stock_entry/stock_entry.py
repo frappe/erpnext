@@ -102,7 +102,7 @@ class StockEntry(StockController):
 			if self.difference_account and not item.expense_account:
 				item.expense_account = self.difference_account
 
-			if not item.transfer_qty:
+			if not item.transfer_qty and item.qty:
 				item.transfer_qty = item.qty * item.conversion_factor
 
 			if (self.purpose in ("Material Transfer", "Material Transfer for Manufacture")
