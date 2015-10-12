@@ -38,7 +38,7 @@ class ReceivablePayableReport(object):
 				"width": 120
 			})
 
-		columns += [_("Age (Days)") + "::80"]
+		columns += [_("Age (Days)") + ":Int:80"]
 
 		if not "range1" in self.filters:
 			self.filters["range1"] = "30"
