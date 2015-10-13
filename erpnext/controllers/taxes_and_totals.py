@@ -355,7 +355,7 @@ class calculate_taxes_and_totals(object):
 							item.net_amount = flt(item.net_amount + discount_amount_loss,
 								item.precision("net_amount"))
 
-					item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
+					item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate")) if item.qty else 0
 
 					self._set_in_company_currency(item, ["net_rate", "net_amount"])
 
