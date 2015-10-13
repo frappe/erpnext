@@ -53,7 +53,7 @@ class SerialNo(StockController):
 		if not self.get("__islocal"):
 			item_code, warehouse = frappe.db.get_value("Serial No",
 				self.name, ["item_code", "warehouse"])
-			if item_code != self.item_code:
+			if not self.via_stock_ledger and item_code != self.item_code:
 				frappe.throw(_("Item Code cannot be changed for Serial No."),
 					SerialNoCannotCannotChangeError)
 			if not self.via_stock_ledger and warehouse != self.warehouse:
@@ -205,9 +205,10 @@ def validate_serial_no(sle, item_det):
 					sr = frappe.get_doc("Serial No", serial_no)
 
 					if sr.item_code!=sle.item_code:
-						frappe.throw(_("Serial No {0} does not belong to Item {1}").format(serial_no,
-							sle.item_code), SerialNoItemError)
-
+						if not allow_serial_nos_with_different_item(serial_no, sle):
+							frappe.throw(_("Serial No {0} does not belong to Item {1}").format(serial_no,
+								sle.item_code), SerialNoItemError)
+								
 					if sr.warehouse and sle.actual_qty > 0:
 						frappe.throw(_("Serial No {0} has already been received").format(sr.name),
 							SerialNoDuplicateError)
@@ -228,7 +229,24 @@ def validate_serial_no(sle, item_det):
 		elif sle.actual_qty < 0 or not item_det.serial_no_series:
 			frappe.throw(_("Serial Nos Required for Serialized Item {0}").format(sle.item_code),
 				SerialNoRequiredError)
-
+				
+def allow_serial_nos_with_different_item(sle_serial_no, sle):
+	"""
+		Allows same serial nos for raw materials and finished goods 
+		in Manufacture / Repack type Stock Entry
+	"""
+	allow_serial_nos = False
+	if sle.voucher_type=="Stock Entry" and sle.actual_qty > 0:
+		stock_entry = frappe.get_doc("Stock Entry", sle.voucher_no)
+		if stock_entry.purpose in ("Repack", "Manufacture"):
+			for d in stock_entry.get("items"):
+				if d.serial_no and (d.s_warehouse if sle.is_cancelled=="No" else d.t_warehouse):
+					serial_nos = get_serial_nos(d.serial_no)
+					if sle_serial_no in serial_nos:
+						allow_serial_nos = True
+	
+	return allow_serial_nos
+			
 def update_serial_nos(sle, item_det):
 	if sle.is_cancelled == "No" and not sle.serial_no and sle.actual_qty > 0 \
 			and item_det.has_serial_no == 1 and item_det.serial_no_series:
@@ -245,6 +263,7 @@ def update_serial_nos(sle, item_det):
 			if frappe.db.exists("Serial No", serial_no):
 				sr = frappe.get_doc("Serial No", serial_no)
 				sr.via_stock_ledger = True
+				sr.item_code = sle.item_code
 				sr.warehouse = sle.warehouse if sle.actual_qty > 0 else None
 				sr.save(ignore_permissions=True)
 			elif sle.actual_qty > 0:
