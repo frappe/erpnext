@@ -201,7 +201,7 @@ class Item(WebsiteGenerator):
 
 		if self.re_order_level or len(self.get("reorder_levels", {"material_request_type": "Purchase"})):
 			if not (self.is_purchase_item or self.is_pro_applicable):
-				frappe.throw(_("""To set reorder level, item must be a Purchase Item or Prodcution Item"""))
+				frappe.throw(_("""To set reorder level, item must be a Purchase Item or Manufacturing Item"""))
 
 	def validate_warehouse_for_reorder(self):
 		warehouse = []
