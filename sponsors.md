@@ -5,8 +5,8 @@
 
 - [CWT (Connector & Wire Technology GmbH)](http://www.cwt-assembly.com/) (2013)
 - [Pinnacle GIS](http://pinnaclegis.com.au/) (2014)
-- [Rohit Industries](www.rigpl.com) (2014)
-
+- [Rohit Industries](http://www.rigpl.com) (2014)
+- [ESO Electronic](https://www.eso-electronic.com) (2015)
 
 #### Features
 
