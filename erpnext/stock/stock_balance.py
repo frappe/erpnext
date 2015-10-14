@@ -35,7 +35,7 @@ def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False,
 
 def repost_stock(item_code, warehouse, allow_zero_rate=False, only_actual=False, only_bin=False):
 	if not only_bin:
-		repost_actual_qty(item_code, warehouse, allow_zero_rate, only_bin)
+		repost_actual_qty(item_code, warehouse, allow_zero_rate)
 
 	if item_code and warehouse and not only_actual:
 		qty_dict = {
@@ -48,7 +48,7 @@ def repost_stock(item_code, warehouse, allow_zero_rate=False, only_actual=False,
 			qty_dict.update({
 				"actual_qty": get_balance_qty_from_sle(item_code, warehouse)
 			})
-			
+
 		update_bin_qty(item_code, warehouse, qty_dict)
 
 def repost_actual_qty(item_code, warehouse, allow_zero_rate=False):
@@ -56,13 +56,13 @@ def repost_actual_qty(item_code, warehouse, allow_zero_rate=False):
 		update_entries_after({ "item_code": item_code, "warehouse": warehouse }, allow_zero_rate)
 	except:
 		pass
-		
+
 def get_balance_qty_from_sle(item_code, warehouse):
 	balance_qty = frappe.db.sql("""select qty_after_transaction from `tabStock Ledger Entry`
 		where item_code=%s and warehouse=%s and is_cancelled='No'
 		order by posting_date desc, posting_time desc, name desc
 		limit 1""", (item_code, warehouse))
-		
+
 	return flt(balance_qty[0][0]) if balance_qty else 0.0
 
 def get_reserved_qty(item_code, warehouse):
