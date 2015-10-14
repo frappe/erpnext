@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate
 from frappe.website.website_generator import WebsiteGenerator
@@ -65,6 +66,7 @@ class Item(WebsiteGenerator):
 		self.validate_has_variants()
 		self.validate_attributes()
 		self.validate_variant_attributes()
+		self.make_thumbnail()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -78,13 +80,64 @@ class Item(WebsiteGenerator):
 		self.update_item_price()
 		self.update_variants()
 
+	def make_thumbnail(self):
+		"""Make a thumbnail of `website_image`"""
+		if self.website_image and not self.thumbnail:
+			file_doc = frappe.get_doc("File", {
+				"file_url": self.website_image,
+				"attached_to_doctype": "Item",
+				"attached_to_name": self.name
+			})
+
+			if not file_doc:
+				file_doc = frappe.get_doc({
+					"doctype": "File",
+					"file_url": self.website_image,
+					"attached_to_doctype": "Item",
+					"attached_to_name": self.name
+				}).insert()
+
+			if file_doc:
+				self.thumbnail = file_doc.make_thumbnail()
+
 	def get_context(self, context):
-		context["parent_groups"] = get_parent_item_groups(self.item_group) + \
+		context.parent_groups = get_parent_item_groups(self.item_group) + \
 			[{"name": self.name}]
 		if self.slideshow:
 			context.update(get_slideshow(self))
 
-		context["parents"] = self.get_parents(context)
+		if self.has_variants:
+			attribute_values_available = {}
+			context.attribute_values = {}
+
+			# load variants
+			context.variants = frappe.get_all("Item",
+				filters={"variant_of": self.name, "show_in_website": 1})
+
+			# load attributes
+			for v in context.variants:
+				v.attributes = frappe.get_all("Item Variant Attribute",
+					fields=["attribute", "attribute_value"], filters={"parent": v.name})
+
+				for attr in v.attributes:
+					values = attribute_values_available.setdefault(attr.attribute, [])
+					if attr.attribute_value not in values:
+						values.append(attr.attribute_value)
+
+			# filter attributes, order based on attribute table
+			for attr in self.attributes:
+				values = context.attribute_values.setdefault(attr.attribute, [])
+
+				# get list of values defined (for sequence)
+				for attr_value in frappe.db.get_all("Item Attribute Value",
+					fields=["attribute_value"], filters={"parent": attr.attribute}, order_by="idx asc"):
+
+					if attr_value.attribute_value in attribute_values_available.get(attr.attribute, []):
+						values.append(attr_value.attribute_value)
+
+			context.variant_info = json.dumps(context.variants)
+
+		context.parents = self.get_parents(context)
 
 		return context
 
