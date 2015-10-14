@@ -11,6 +11,8 @@ from erpnext.accounts.utils import get_account_currency
 from erpnext.setup.doctype.company.company import get_company_currency
 from erpnext.exceptions import InvalidAccountCurrency, CustomerFrozen
 
+exclude_from_linked_with = True
+
 class GLEntry(Document):
 	def validate(self):
 		self.flags.ignore_submit_comment = True
