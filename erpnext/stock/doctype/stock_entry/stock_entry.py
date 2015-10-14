@@ -359,14 +359,17 @@ class StockEntry(StockController):
 
 	def update_stock_ledger(self):
 		sl_entries = []
+		
+		# make sl entries for source warehouse first, then do for target warehouse
 		for d in self.get('items'):
-			if cstr(d.s_warehouse) and self.docstatus == 1:
+			if cstr(d.s_warehouse):
 				sl_entries.append(self.get_sl_entries(d, {
 					"warehouse": cstr(d.s_warehouse),
 					"actual_qty": -flt(d.transfer_qty),
 					"incoming_rate": 0
 				}))
-
+				
+		for d in self.get('items'):
 			if cstr(d.t_warehouse):
 				sl_entries.append(self.get_sl_entries(d, {
 					"warehouse": cstr(d.t_warehouse),
@@ -374,15 +377,18 @@ class StockEntry(StockController):
 					"incoming_rate": flt(d.valuation_rate)
 				}))
 
-			# On cancellation, make stock ledger entry for
-			# target warehouse first, to update serial no values properly
+		# On cancellation, make stock ledger entry for
+		# target warehouse first, to update serial no values properly
 
-			if cstr(d.s_warehouse) and self.docstatus == 2:
-				sl_entries.append(self.get_sl_entries(d, {
-					"warehouse": cstr(d.s_warehouse),
-					"actual_qty": -flt(d.transfer_qty),
-					"incoming_rate": 0
-				}))
+			# if cstr(d.s_warehouse) and self.docstatus == 2:
+			# 	sl_entries.append(self.get_sl_entries(d, {
+			# 		"warehouse": cstr(d.s_warehouse),
+			# 		"actual_qty": -flt(d.transfer_qty),
+			# 		"incoming_rate": 0
+			# 	}))
+
+		if self.docstatus == 2:
+			sl_entries.reverse()
 
 		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No')
 

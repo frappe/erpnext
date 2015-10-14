@@ -65,9 +65,8 @@ class TestLandedCostVoucher(unittest.TestCase):
 		self.submit_landed_cost_voucher(pr)
 
 		serial_no = frappe.db.get_value("Serial No", "SN001",
-			["status", "warehouse", "purchase_rate"], as_dict=1)
+			["warehouse", "purchase_rate"], as_dict=1)
 
-		self.assertEquals(serial_no.status, "Available")
 		self.assertEquals(serial_no.purchase_rate - serial_no_rate, 5.0)
 		self.assertEquals(serial_no.warehouse, "_Test Warehouse - _TC")
 

@@ -1,0 +1,2 @@
+- Delivery to Target Warehouse: Now you can deliver items to customer's warehouse or rented warehouse. Sponsored by: **[Startrack](http://www.gps.gt/)**
+- Serial No **Status** deprecated

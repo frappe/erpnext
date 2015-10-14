@@ -45,5 +45,13 @@
 				For Mandrill Integration <a href="https://github.com/frappe/erpnext/issues/3546">#3546</a>
 			</td>
 		</tr>
+		<tr>
+			<td style="width: 30%">
+				<a href="http://www.gps.gt">Startrack</a>
+			</td>
+			<td>
+				For Delivery to Target Warehouse <a href="https://github.com/frappe/erpnext/issues/3970">#3546</a>
+			</td>
+		</tr>
 	</tbody>
 </table>
