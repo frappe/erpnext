@@ -9,6 +9,6 @@ def execute():
 			try:
 				item_doc.make_thumbnail()
 				if item_doc.thumbnail:
-					item_doc.db_set("thumbnail", item_doc.thumbnail)
+					item_doc.db_set("thumbnail", item_doc.thumbnail, update_modified=False)
 			except Exception:
 				print "Unable to make thumbnail for {0}".format(item.website_image)
