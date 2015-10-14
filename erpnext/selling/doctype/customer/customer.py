@@ -6,7 +6,7 @@ import frappe
 from frappe.model.naming import make_autoname
 from frappe import _, msgprint, throw
 import frappe.defaults
-from frappe.utils import flt, cint,
+from frappe.utils import flt, cint, cstr
 from frappe.desk.reportview import build_match_conditions
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.utilities.address_and_contact import load_address_and_contact
