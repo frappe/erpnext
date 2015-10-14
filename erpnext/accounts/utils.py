@@ -310,7 +310,7 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 
 def validate_expense_against_budget(args):
 	args = frappe._dict(args)
-	if frappe.db.get_value("Account", {"name": args.account, "report_type": "Profit and Loss"}):
+	if frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"}):
 			budget = frappe.db.sql("""
 				select bd.budget_allocated, cc.distribution_id
 				from `tabCost Center` cc, `tabBudget Detail` bd
