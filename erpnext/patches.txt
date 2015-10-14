@@ -218,3 +218,4 @@ erpnext.patches.v6_4.fix_status_in_sales_and_purchase_order
 erpnext.patches.v6_4.fix_modified_in_sales_order_and_purchase_order
 erpnext.patches.v6_4.fix_duplicate_bins
 erpnext.patches.v6_4.fix_sales_order_maintenance_status
+erpnext.patches.v6_4.email_digest_update
