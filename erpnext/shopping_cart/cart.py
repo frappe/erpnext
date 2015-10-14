@@ -303,6 +303,7 @@ def get_customer(user=None):
 		contact.insert(ignore_permissions=True)
 
 		return customer
+
 def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_page_length=20, party=None):
 	if not party:
 		party = get_customer()
