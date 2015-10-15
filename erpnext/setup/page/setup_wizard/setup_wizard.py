@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, json, copy
 
-from frappe.utils import cstr, flt, getdate
+from frappe.utils import cstr, flt, getdate, strip
 from frappe import _
 from frappe.utils.file_manager import save_file
 from frappe.translate import (set_default_language, get_dict,
@@ -23,12 +23,7 @@ def setup_account(args=None):
 		if frappe.db.sql("select name from tabCompany"):
 			frappe.throw(_("Setup Already Complete!!"))
 
-		if not args:
-			args = frappe.local.form_dict
-		if isinstance(args, basestring):
-			args = json.loads(args)
-
-		args = frappe._dict(args)
+		args = process_args(args)
 
 		if args.language and args.language != "english":
 			set_default_language(args.language)
@@ -108,6 +103,21 @@ def setup_account(args=None):
 		for hook in frappe.get_hooks("setup_wizard_success"):
 			frappe.get_attr(hook)(args)
 
+
+def process_args(args):
+	if not args:
+		args = frappe.local.form_dict
+	if isinstance(args, basestring):
+		args = json.loads(args)
+
+	args = frappe._dict(args)
+
+	# strip the whitespace
+	for key, value in args.items():
+		if isinstance(value, basestring):
+			args[key] = strip(value)
+
+	return args
 
 def update_user_name(args):
 	if args.get("email"):
