@@ -23,22 +23,24 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 		});
 	}, "icon-eye-open", "btn-default");
 
-	cur_frm.add_custom_button(__('Send Now'), function() {
-		doc = locals[dt][dn];
-		if(doc.__unsaved != 1) {
-			return $c_obj(doc, 'send', '', function(r, rt) {
-				if(r.exc) {
-					msgprint(err_msg);
-					console.log(r.exc);
-				} else {
-					//console.log(arguments);
-					msgprint(__('Message Sent'));
-				}
-			});
-		} else {
-			msgprint(save_msg);
-		}
-	}, "icon-envelope", "btn-default");
+	if(user==="Administrator") {
+		cur_frm.add_custom_button(__('Send Now'), function() {
+			doc = locals[dt][dn];
+			if(doc.__unsaved != 1) {
+				return $c_obj(doc, 'send', '', function(r, rt) {
+					if(r.exc) {
+						msgprint(err_msg);
+						console.log(r.exc);
+					} else {
+						//console.log(arguments);
+						msgprint(__('Message Sent'));
+					}
+				});
+			} else {
+				msgprint(save_msg);
+			}
+		}, "icon-envelope", "btn-default");
+	}
 }
 
 cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {

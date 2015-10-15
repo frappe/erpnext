@@ -69,6 +69,8 @@ class EmailDigest(Document):
 
 	def get_msg_html(self):
 		"""Build email digest content"""
+		frappe.flags.ignore_account_permission = True
+
 		context = frappe._dict()
 		context.update(self.__dict__)
 
@@ -83,6 +85,8 @@ class EmailDigest(Document):
 
 		if not (context.events or context.todo_list or context.notifications or context.cards):
 			return None
+
+		frappe.flags.ignore_account_permission = False
 
 		# style
 		return frappe.render_template("erpnext/setup/doctype/email_digest/templates/default.html",
@@ -103,11 +107,13 @@ class EmailDigest(Document):
 	def set_style(self, context):
 		"""Set standard digest style"""
 		context.text_muted = '#8D99A6'
-		context.h1 = 'margin-bottom: 30px; margin-bottom: 0'
+		context.text_color = '#36414C'
+		context.h1 = 'margin-bottom: 30px; margin-bottom: 0; margin-top: 40px; font-weight: 400;'
 		context.label_css = '''display: inline-block; color: {text_muted};
 			padding: 3px 7px; margin-right: 7px;'''.format(text_muted = context.text_muted)
-		context.section_head = 'margin-top: 60px;'
-		context.line_item  = 'padding: 7px 0px; margin: 0; border-bottom: 1px solid #d1d8dd;'
+		context.section_head = 'margin-top: 60px; font-size: 16px;'
+		context.line_item  = 'padding: 5px 0px; margin: 0; border-bottom: 1px solid #d1d8dd;'
+		context.link_css = 'color: {text_color}; text-decoration: none;'.format(text_color = context.text_color)
 
 
 	def get_notifications(self):
@@ -154,25 +160,35 @@ class EmailDigest(Document):
 	def set_accounting_cards(self, context):
 		"""Create accounting cards if checked"""
 
+		cache = frappe.cache()
 		context.cards = []
 		for key in ("income", "expenses_booked", "income_year_to_date", "expense_year_to_date",
 			"invoiced_amount", "payables", "bank_balance"):
 			if self.get(key):
-				card = frappe._dict(getattr(self, "get_" + key)())
+				cache_key = "email_digest:card:" + key
+				card = cache.get(cache_key)
 
-				# format values
-				if card.last_value:
-					card.diff = int(flt(card.value - card.last_value) / card.last_value * 100)
-					if card.diff < 0:
-						card.diff = str(card.diff)
-						card.gain = False
-					else:
-						card.diff = "+" + str(card.diff)
-						card.gain = True
+				if card:
+					card = eval(card)
 
-					card.last_value = self.fmt_money(card.last_value)
+				else:
+					card = frappe._dict(getattr(self, "get_" + key)())
 
-				card.value = self.fmt_money(card.value)
+					# format values
+					if card.last_value:
+						card.diff = int(flt(card.value - card.last_value) / card.last_value * 100)
+						if card.diff < 0:
+							card.diff = str(card.diff)
+							card.gain = False
+						else:
+							card.diff = "+" + str(card.diff)
+							card.gain = True
+
+						card.last_value = self.fmt_money(card.last_value)
+
+					card.value = self.fmt_money(card.value)
+
+					cache.setex(cache_key, card, 24 * 60 * 60)
 
 				context.cards.append(card)
 

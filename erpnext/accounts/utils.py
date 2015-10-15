@@ -84,7 +84,9 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 
 	if account:
 		acc = frappe.get_doc("Account", account)
-		acc.check_permission("read")
+
+		if not frappe.flags.ignore_account_permission:
+			acc.check_permission("read")
 
 		# for pl accounts, get balance within a fiscal year
 		if acc.report_type == 'Profit and Loss':
@@ -198,7 +200,7 @@ def update_against_doc(d, jv_obj):
 	"""
 	jv_detail = jv_obj.get("accounts", {"name": d["voucher_detail_no"]})[0]
 	jv_detail.set(d["dr_or_cr"], d["allocated_amt"])
-	jv_detail.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit', 
+	jv_detail.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit',
 		d["allocated_amt"]*flt(jv_detail.exchange_rate))
 
 	original_reference_type = jv_detail.reference_type
@@ -212,7 +214,7 @@ def update_against_doc(d, jv_obj):
 			select cost_center, balance, against_account, is_advance, account_type, exchange_rate
 			from `tabJournal Entry Account` where name = %s
 		""", d['voucher_detail_no'], as_dict=True)
-		
+
 		amount_in_account_currency = flt(d['unadjusted_amt']) - flt(d['allocated_amt'])
 		amount_in_company_currency = amount_in_account_currency * flt(jvd[0]['exchange_rate'])
 
@@ -225,14 +227,14 @@ def update_against_doc(d, jv_obj):
 		ch.party = d["party"]
 		ch.cost_center = cstr(jvd[0]["cost_center"])
 		ch.balance = flt(jvd[0]["balance"])
-		
+
 		ch.set(d['dr_or_cr'], amount_in_account_currency)
 		ch.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit', amount_in_company_currency)
-		
-		ch.set('credit_in_account_currency' if d['dr_or_cr']== 'debit_in_account_currency' 
+
+		ch.set('credit_in_account_currency' if d['dr_or_cr']== 'debit_in_account_currency'
 			else 'debit_in_account_currency', 0)
 		ch.set('credit' if d['dr_or_cr']== 'debit_in_account_currency' else 'debit', 0)
-		
+
 		ch.against_account = cstr(jvd[0]["against_account"])
 		ch.reference_type = original_reference_type
 		ch.reference_name = original_reference_name

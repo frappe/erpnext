@@ -1,9 +1,9 @@
 {% macro show_card(card) %}
-<div style="width: 50%; float:left; min-height: 120px; padding-top: 20px;">
-    <h6 style="color: {{ text_muted }}">{{ card.label }}</h6>
-    <h4>{{ card.value }}</h4>
+<div style="width: 50%; float:left; min-height: 80px; padding-top: 20px;">
+    <h6 style="color: {{ text_muted }}; font-size: 12px; margin-bottom: 0px; margin-top: 0px;">{{ card.label }}</h6>
+    <h4 style="margin-top: 7px; font-size: 16px;">{{ card.value }}</h4>
     {% if card.diff %}
-    <p style="color: {{ text_muted }}">{{ card.diff }}%</p>
+    <p style="color: {{ text_muted }}; font-size: 12px;">{{ card.diff }}%</p>
     {% endif %}
 </div>
 {% endmacro %}
@@ -12,7 +12,7 @@
 
 {% if cards %}
 <h1 style="{{ h1 }}">{{ title }}</h1>
-<h4 style="font-weight: normal; color: {{ text_muted }}; margin-top: 7px">
+<h4 style="font-weight: normal; color: {{ text_muted }}; margin-top: 7px; font-size: 16px; margin-top: 7px;">
     <p>{% if frequency == "Daily "%}
         {{ frappe.format_date(future_from_date) }}
     {% else %}
@@ -31,6 +31,7 @@
 {% endif %}
 
 
+{% if events or todo_list or notifications %}
 <h1 style="{{ h1 }}">{{ _("Pending Activities") }}</h1>
 
 <!-- events -->
@@ -45,7 +46,7 @@
         <table style="width: 100%;">
             <tr>
                 <td>
-                    <a href="{{ e.link }}">{{ e.subject }}</a>
+                    <a style="{{ link_css }}" href="{{ e.link }}">{{ e.subject }}</a>
                 </td>
                 <td style="width: 40%; text-align: right">
                     <span style="{{ label_css }}">
@@ -72,7 +73,7 @@
         <table style="width: 100%;">
             <tr>
                 <td>
-                    <a href="{{ t.link }}">{{ t.description }}</a>
+                    <a style="{{ link_css }}" href="{{ t.link }}">{{ t.description }}</a>
                 </td>
                 <td style="width: 25%; text-align: right">
                     <span style="{{ label_css }}">
@@ -95,7 +96,7 @@
         <table style="width: 100%;">
             <tr>
                 <td>
-                    <a href="n.link">{{ n.key }}</a>
+                    <a style="{{ link_css }}" href="{{ n.link }}">{{ n.key }}</a>
                 </td>
                 <td style="width: 25%; text-align: right">
                     <span style="{{ label_css }}">
@@ -109,3 +110,5 @@
 </div>
 {% endif %}
 </div>
+
+{% endif %}
