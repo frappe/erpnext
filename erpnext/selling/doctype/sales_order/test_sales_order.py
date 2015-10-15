@@ -295,12 +295,29 @@ class TestSalesOrder(unittest.TestCase):
 			{"price_list": "_Test Price List", "item_code": "_Test Item for Auto Price List"}, "price_list_rate"), None)
 
 		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
+	
+	def test_drop_shipping(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_drop_shipment
+		from erpnext.stock.doctype.item.test_item import make_item
+		
+		item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 0, "is_sales_item": 1, 
+			"is_purchase_item": 1})
+		
+		so = make_sales_order(drop_ship=1, item_code=item.item_code)
+		po = make_drop_shipment(so.name)
+		
+		self.assertEquals(so.customer, po.customer)
+		self.assertEquals(po.items[0].prevdoc_doctype, "Sales Order")
+		self.assertEquals(po.items[0].prevdoc_docname, so.name)
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
 	args = frappe._dict(args)
 	if args.transaction_date:
 		so.transaction_date = args.transaction_date
+		
+	if args.drop_ship:
+		so.drop_ship = 1
 
 	so.company = args.company or "_Test Company"
 	so.customer = args.customer or "_Test Customer"
