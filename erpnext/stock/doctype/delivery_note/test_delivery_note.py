@@ -326,20 +326,18 @@ class TestDeliveryNote(unittest.TestCase):
 
 	def test_delivery_of_bundled_items_to_target_warehouse(self):
 		set_perpetual_inventory()
+		frappe.db.set_value("Item", "_Test Item", "valuation_method", "FIFO")
 
-		create_stock_reconciliation(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=50, rate=100)
-		create_stock_reconciliation(item_code="_Test Item Home Desktop 100",
-			target="_Test Warehouse - _TC",
-			qty=50, rate=100)
+		for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"):
+			create_stock_reconciliation(item_code="_Test Item", target=warehouse,
+				qty=50, rate=100)
+			create_stock_reconciliation(item_code="_Test Item Home Desktop 100",
+				target=warehouse, qty=50, rate=100)
 
 		opening_qty_test_warehouse_1 = get_qty_after_transaction(warehouse="_Test Warehouse 1 - _TC")
 
 		dn = create_delivery_note(item_code="_Test Product Bundle Item",
 			qty=5, rate=500, target_warehouse="_Test Warehouse 1 - _TC", do_not_submit=True)
-
-		frappe.db.sql("""delete from `tabStock Ledger Entry`
-			where voucher_type=%s and voucher_no=%s""", (dn.doctype, dn.name))
 
 		dn.submit()
 
@@ -365,8 +363,6 @@ class TestDeliveryNote(unittest.TestCase):
 		# Check gl entries
 		gl_entries = get_gl_entries("Delivery Note", dn.name)
 		self.assertTrue(gl_entries)
-
-		print frappe.as_json(gl_entries)
 
 		stock_value_difference = abs(frappe.db.sql("""select sum(stock_value_difference)
 			from `tabStock Ledger Entry` where voucher_type='Delivery Note' and voucher_no=%s
