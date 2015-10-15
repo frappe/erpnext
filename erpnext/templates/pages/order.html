@@ -53,8 +53,10 @@
             </div>
             <div class="col-sm-2 col-xs-3 text-right">
                 {{ d.get_formatted("amount") }}
+				<!-- output of get_formatted("rate") is unicode, to replace unicode use 
+					_("text {0}").decode("utf8").format(val) -->
                 <p class="text-muted small">{{
-                    _("Rate: {0}").format(d.get_formatted("rate")) }}</p>
+                    _("Rate: {0}").decode("utf8").format(d.get_formatted("rate")) }}</p>
             </div>
         </div>
         {% endfor %}
