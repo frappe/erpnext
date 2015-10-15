@@ -499,6 +499,7 @@ def make_drop_shipment(source_name, target_doc=None):
 		target.contact_display = ""
 		target.contact_mobile = ""
 		target.contact_email = ""
+		target.contact_person = ""
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
