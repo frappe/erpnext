@@ -366,6 +366,8 @@ class TestDeliveryNote(unittest.TestCase):
 		gl_entries = get_gl_entries("Delivery Note", dn.name)
 		self.assertTrue(gl_entries)
 
+		print frappe.as_json(gl_entries)
+
 		stock_value_difference = abs(frappe.db.sql("""select sum(stock_value_difference)
 			from `tabStock Ledger Entry` where voucher_type='Delivery Note' and voucher_no=%s
 			and warehouse='_Test Warehouse - _TC'""", dn.name)[0][0])
