@@ -53,7 +53,7 @@ frappe.listview_settings['Sales Order'] = {
 			} else {
 				// not ordered
 
-				return [__("To Deliver"), "orange",
+				return [__("To Order"), "orange",
 					"per_ordered,<,100|per_billed,=,100|status,!=,Stopped"];
 			}
 
