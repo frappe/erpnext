@@ -109,7 +109,7 @@ class update_entries_after(object):
 	def build(self):
 		# includes current entry!
 		entries_to_fix = self.get_sle_after_datetime()
-		
+
 		for sle in entries_to_fix:
 			self.process_sle(sle)
 
@@ -231,10 +231,10 @@ class update_entries_after(object):
 
 	def get_moving_average_values(self, sle):
 		actual_qty = flt(sle.actual_qty)
-		
+
 		if actual_qty > 0 or flt(sle.outgoing_rate) > 0:
 			rate = flt(sle.incoming_rate) if actual_qty > 0 else flt(sle.outgoing_rate)
-			
+
 			if self.qty_after_transaction < 0 and not self.valuation_rate:
 				# if negative stock, take current valuation rate as incoming rate
 				self.valuation_rate = rate
@@ -244,11 +244,11 @@ class update_entries_after(object):
 
 			if new_stock_qty:
 				self.valuation_rate = new_stock_value / flt(new_stock_qty)
-							
+
 		elif not self.valuation_rate and self.qty_after_transaction <= 0:
 			self.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse, self.allow_zero_rate)
 
-		return abs(flt(self.valuation_rate))
+		self.valuation_rate = abs(flt(self.valuation_rate))
 
 	def get_fifo_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
@@ -288,7 +288,7 @@ class update_entries_after(object):
 						if v[1] == outgoing_rate:
 							index = i
 							break
-							
+
 					# If no entry found with outgoing rate, collapse stack
 					if index == None:
 						new_stock_value = sum((d[0]*d[1] for d in self.stock_queue)) - qty_to_pop*outgoing_rate

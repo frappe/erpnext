@@ -352,12 +352,12 @@ class TestDeliveryNote(unittest.TestCase):
 
 		# stock value diff for source warehouse
 		stock_value_difference = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note",
-			"voucher_no": dn.name, "item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
+			"voucher_no": dn.name, "item_code": "_Test Item Home Desktop 100", "warehouse": "_Test Warehouse - _TC"},
 			"stock_value_difference")
 
 		# stock value diff for target warehouse
 		stock_value_difference1 = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note",
-			"voucher_no": dn.name, "item_code": "_Test Item", "warehouse": "_Test Warehouse 1 - _TC"},
+			"voucher_no": dn.name, "item_code": "_Test Item Home Desktop 100", "warehouse": "_Test Warehouse 1 - _TC"},
 			"stock_value_difference")
 
 		self.assertEquals(abs(stock_value_difference), stock_value_difference1)
