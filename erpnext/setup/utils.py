@@ -71,6 +71,9 @@ def get_exchange_rate(from_currency, to_currency):
 			cache = frappe.cache()
 			key = "currency_exchange_rate:{0}:{1}".format(from_currency, to_currency)
 			value = cache.get(key)
+
+			print value
+
 			if not value:
 				import requests
 				response = requests.get("http://api.fixer.io/latest", params={
@@ -86,4 +89,4 @@ def get_exchange_rate(from_currency, to_currency):
 			frappe.msgprint(_("Unable to find exchange rate"))
 			return 0.0
 	else:
-		return 0.0
+		return value
