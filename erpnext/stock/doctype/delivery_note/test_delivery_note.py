@@ -336,7 +336,12 @@ class TestDeliveryNote(unittest.TestCase):
 		opening_qty_test_warehouse_1 = get_qty_after_transaction(warehouse="_Test Warehouse 1 - _TC")
 
 		dn = create_delivery_note(item_code="_Test Product Bundle Item",
-			qty=5, rate=500, target_warehouse="_Test Warehouse 1 - _TC")
+			qty=5, rate=500, target_warehouse="_Test Warehouse 1 - _TC", do_not_submit=True)
+
+		frappe.db.sql("""delete from `tabStock Ledger Entry`
+			where voucher_type=%s and voucher_no=%s""", (dn.doctype, dn.name))
+
+		dn.submit()
 
 		# qty after delivery
 		actual_qty = get_qty_after_transaction(warehouse="_Test Warehouse - _TC")
