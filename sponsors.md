@@ -1,13 +1,5 @@
 ## Sponsors
 
-
-#### General
-
-- [CWT (Connector & Wire Technology GmbH)](http://www.cwt-assembly.com/) (2013)
-- [Pinnacle GIS](http://pinnaclegis.com.au/) (2014)
-- [Rohit Industries](www.rigpl.com) (2014)
-
-
 #### Features
 
 <table style="width: 100%">
