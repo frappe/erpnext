@@ -566,14 +566,14 @@ class TestStockEntry(unittest.TestCase):
 		stock_entry = frappe.get_doc(make_stock_entry(production_order.name, "Manufacture", 1))
 		stock_entry.insert()
 		self.assertTrue("_Test Variant Item-S" in [d.item_code for d in stock_entry.items])
-		
+
 	def test_same_serial_nos_in_repack_or_manufacture_entries(self):
 		s1 = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
 		serial_nos = s1.get("items")[0].serial_no
-		
-		s2 = make_stock_entry(item_code="_Test Serialized Item With Series", source="_Test Warehouse - _TC", 
+
+		s2 = make_stock_entry(item_code="_Test Serialized Item With Series", source="_Test Warehouse - _TC",
 			qty=2, basic_rate=100, purpose="Repack", serial_no=serial_nos, do_not_save=True)
-			
+
 		s2.append("items", {
 			"item_code": "_Test Serialized Item",
 			"t_warehouse": "_Test Warehouse - _TC",
@@ -584,7 +584,7 @@ class TestStockEntry(unittest.TestCase):
 			"cost_center": "_Test Cost Center - _TC",
 			"serial_no": serial_nos
 		})
-		
+
 		s2.submit()
 		s2.cancel()
 
