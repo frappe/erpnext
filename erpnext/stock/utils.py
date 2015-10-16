@@ -98,6 +98,8 @@ def get_incoming_rate(args):
 	else:
 		valuation_method = get_valuation_method(args.get("item_code"))
 		previous_sle = get_previous_sle(args)
+		print "previous_sle"
+		print previous_sle.get("name"), previous_sle.get("posting_date"), previous_sle.get("posting_time")
 		if valuation_method == 'FIFO':
 			if not previous_sle:
 				return 0.0

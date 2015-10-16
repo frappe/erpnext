@@ -106,3 +106,5 @@ class TestCustomer(unittest.TestCase):
 		self.assertEquals("_Test Customer 1", test_customer_1.name)
 		self.assertEquals("_Test Customer 1 - 1", duplicate_customer.name)
 		self.assertEquals(test_customer_1.customer_name, duplicate_customer.customer_name)
+		
+		frappe.delete_doc("Customer", duplicate_customer.name)

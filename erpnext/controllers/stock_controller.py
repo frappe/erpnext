@@ -286,6 +286,7 @@ class StockController(AccountsController):
 								"qty": -1*flt(d.qty),
 								"serial_no": d.serial_no
 							})
+							print args
 							target_warehouse_sle.update({
 								"incoming_rate": get_incoming_rate(args)
 							})
