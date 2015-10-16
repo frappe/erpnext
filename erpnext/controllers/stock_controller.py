@@ -308,7 +308,7 @@ class StockController(AccountsController):
 		print frappe.db.get_value("Stock Ledger Entry", 
 			{"voucher_type": "Delivery Note", "voucher_no": self.name, 
 				"item_code": "_Test Item", "warehouse": "_Test Warehouse 1 - _TC"},
-			["incoming_rate", "qty", "stock_value_difference"])
+			["incoming_rate", "actual_qty", "stock_value_difference"])
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):
