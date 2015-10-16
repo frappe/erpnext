@@ -495,7 +495,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		if(this.frm.fields_dict["advances"]) {
-			setup_field_label_map(["advance_amount", "allocated_amount"], company_currency, "advances");
+			setup_field_label_map(["advance_amount", "allocated_amount"], 
+				this.frm.doc.party_account_currency, "advances");
 		}
 
 		// toggle columns

@@ -211,7 +211,8 @@ def update_against_doc(d, jv_obj):
 
 	if d['allocated_amt'] < d['unadjusted_amt']:
 		jvd = frappe.db.sql("""
-			select cost_center, balance, against_account, is_advance, account_type, exchange_rate
+			select cost_center, balance, against_account, is_advance, 
+				account_type, exchange_rate, account_currency
 			from `tabJournal Entry Account` where name = %s
 		""", d['voucher_detail_no'], as_dict=True)
 
@@ -222,6 +223,7 @@ def update_against_doc(d, jv_obj):
 		ch = jv_obj.append("accounts")
 		ch.account = d['account']
 		ch.account_type = jvd[0]['account_type']
+		ch.account_currency = jvd[0]['account_currency']
 		ch.exchange_rate = jvd[0]['exchange_rate']
 		ch.party_type = d["party_type"]
 		ch.party = d["party"]

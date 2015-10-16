@@ -256,7 +256,7 @@ class SalesInvoice(SellingController):
 	def get_advances(self):
 		if not self.is_return:
 			super(SalesInvoice, self).get_advances(self.debit_to, "Customer", self.customer,
-				"Sales Invoice Advance", "advances", "credit", "sales_order")
+				"Sales Invoice Advance", "advances", "credit_in_account_currency", "sales_order")
 
 	def get_company_abbr(self):
 		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
