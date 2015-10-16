@@ -92,7 +92,7 @@ class update_entries_after(object):
 
 		self.previous_sle = self.get_sle_before_datetime()
 		self.previous_sle = self.previous_sle[0] if self.previous_sle else frappe._dict()
-		print self.previous_sle
+		print "previous_sle", self.previous_sle
 		for key in ("qty_after_transaction", "valuation_rate", "stock_value"):
 			setattr(self, key, flt(self.previous_sle.get(key)))
 
@@ -108,6 +108,7 @@ class update_entries_after(object):
 
 	def build(self):
 		# includes current entry!
+		print "entries_to_fix"
 		entries_to_fix = self.get_sle_after_datetime()
 
 		for sle in entries_to_fix:
