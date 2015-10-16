@@ -76,7 +76,7 @@ class update_entries_after(object):
 	"""
 	def __init__(self, args, allow_zero_rate=False, allow_negative_stock=None, via_landed_cost_voucher=False, verbose=1):
 		from frappe.model.meta import get_field_precision
-
+		print "update_entries_after"
 		self.exceptions = []
 		self.verbose = verbose
 		self.allow_zero_rate = allow_zero_rate
@@ -92,7 +92,7 @@ class update_entries_after(object):
 
 		self.previous_sle = self.get_sle_before_datetime()
 		self.previous_sle = self.previous_sle[0] if self.previous_sle else frappe._dict()
-
+		print self.previous_sle
 		for key in ("qty_after_transaction", "valuation_rate", "stock_value"):
 			setattr(self, key, flt(self.previous_sle.get(key)))
 
@@ -111,6 +111,7 @@ class update_entries_after(object):
 		entries_to_fix = self.get_sle_after_datetime()
 
 		for sle in entries_to_fix:
+			print sle
 			self.process_sle(sle)
 
 		if self.exceptions:
