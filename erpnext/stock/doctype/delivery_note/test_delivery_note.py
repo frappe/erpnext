@@ -328,13 +328,11 @@ class TestDeliveryNote(unittest.TestCase):
 		print "*"*80
 		print "test_delivery_of_bundled_items_to_target_warehouse"
 		set_perpetual_inventory()
-		frappe.db.set_value("Item", "_Test Item", "valuation_method", "FIFO")
-
-		sr1 = create_stock_reconciliation(item_code="_Test Item", target="_Test Warehouse - _TC",
-			qty=50, rate=100)
-		sr2 = create_stock_reconciliation(item_code="_Test Item Home Desktop 100",
-			target="_Test Warehouse - _TC", qty=50, rate=100)
-			
+		for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"):
+			sr1 = create_stock_reconciliation(item_code="_Test Item", target=warehouse, qty=50, rate=100)
+			sr2 = create_stock_reconciliation(item_code="_Test Item Home Desktop 100",
+				target=warehouse, qty=50, rate=100)
+		
 		print frappe.db.sql("select name, voucher_no, posting_date, posting_time from `tabStock Ledger Entry` where voucher_no in (%s, %s)", (sr1.name, sr2.name))
 
 		opening_qty_test_warehouse_1 = get_qty_after_transaction(warehouse="_Test Warehouse 1 - _TC")
@@ -343,7 +341,7 @@ class TestDeliveryNote(unittest.TestCase):
 			qty=5, rate=500, target_warehouse="_Test Warehouse 1 - _TC", do_not_submit=True)
 		print "submitting DN..."
 		dn.submit()
-
+		print "*"*80
 		# qty after delivery
 		actual_qty = get_qty_after_transaction(warehouse="_Test Warehouse - _TC")
 		self.assertEquals(actual_qty, 25)
@@ -396,7 +394,6 @@ class TestDeliveryNote(unittest.TestCase):
 			self.assertEquals([gle.debit, gle.credit], expected_values.get(gle.account))
 
 		set_perpetual_inventory(0)
-		print "*"*80
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

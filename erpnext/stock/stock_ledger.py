@@ -165,17 +165,20 @@ class update_entries_after(object):
 				self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 			else:
 				if self.valuation_method == "Moving Average":
+					print "moving average"
 					self.get_moving_average_values(sle)
 					self.qty_after_transaction += flt(sle.actual_qty)
 					self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 				else:
+					print "fifo"
 					self.get_fifo_values(sle)
 					self.qty_after_transaction += flt(sle.actual_qty)
 					self.stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.stock_queue))
 
 		# rounding as per precision
 		self.stock_value = flt(self.stock_value, self.precision)
-
+		print self.stock_queue
+		print self.prev_stock_value, self.stock_value
 		stock_value_difference = self.stock_value - self.prev_stock_value
 		self.prev_stock_value = self.stock_value
 
