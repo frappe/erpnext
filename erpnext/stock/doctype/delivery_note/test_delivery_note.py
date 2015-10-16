@@ -16,7 +16,8 @@ from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.doctype.stock_entry.test_stock_entry \
 	import make_stock_entry, make_serialized_item, get_qty_after_transaction
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, SerialNoWarehouseError
-from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
+from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation \
+	import create_stock_reconciliation, set_valuation_method
 
 class TestDeliveryNote(unittest.TestCase):
 	def test_over_billing_against_dn(self):
@@ -57,7 +58,7 @@ class TestDeliveryNote(unittest.TestCase):
 	def test_delivery_note_gl_entry(self):
 		set_perpetual_inventory()
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
-		frappe.db.set_value("Item", "_Test Item", "valuation_method", "FIFO")
+		set_valuation_method("_Test Item", "FIFO")
 
 		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 
@@ -344,7 +345,7 @@ class TestDeliveryNote(unittest.TestCase):
 		print "*"*80
 		# qty after delivery
 		actual_qty = get_qty_after_transaction(warehouse="_Test Warehouse - _TC")
-		self.assertEquals(actual_qty, 25)
+		self.assertEquals(actual_qty, 75)
 
 		actual_qty = get_qty_after_transaction(warehouse="_Test Warehouse 1 - _TC")
 		self.assertEquals(actual_qty, opening_qty_test_warehouse_1 + 25)
