@@ -16,7 +16,8 @@ from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.doctype.stock_entry.test_stock_entry \
 	import make_stock_entry, make_serialized_item, get_qty_after_transaction
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, SerialNoWarehouseError
-from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
+from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation \
+	import create_stock_reconciliation, set_valuation_method
 
 class TestDeliveryNote(unittest.TestCase):
 	def test_over_billing_against_dn(self):
@@ -57,7 +58,7 @@ class TestDeliveryNote(unittest.TestCase):
 	def test_delivery_note_gl_entry(self):
 		set_perpetual_inventory()
 		self.assertEqual(cint(frappe.defaults.get_global_default("auto_accounting_for_stock")), 1)
-		frappe.db.set_value("Item", "_Test Item", "valuation_method", "FIFO")
+		set_valuation_method("_Test Item", "FIFO")
 
 		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 
@@ -325,37 +326,55 @@ class TestDeliveryNote(unittest.TestCase):
 		})
 
 	def test_delivery_of_bundled_items_to_target_warehouse(self):
+		print "*"*80
+		print "test_delivery_of_bundled_items_to_target_warehouse"
 		set_perpetual_inventory()
-		frappe.db.set_value("Item", "_Test Item", "valuation_method", "FIFO")
-
 		for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"):
-			create_stock_reconciliation(item_code="_Test Item", target=warehouse,
-				qty=50, rate=100)
-			create_stock_reconciliation(item_code="_Test Item Home Desktop 100",
-				target=warehouse, qty=50, rate=100)
+			sr1 = create_stock_reconciliation(item_code="_Test Item", target=warehouse, qty=100, rate=100)
+			sr2 = create_stock_reconciliation(item_code="_Test Item Home Desktop 100",
+				target=warehouse, qty=100, rate=100)
+		
+		print frappe.db.sql("select name, voucher_no, posting_date, posting_time from `tabStock Ledger Entry` where voucher_no in (%s, %s)", (sr1.name, sr2.name))
 
 		opening_qty_test_warehouse_1 = get_qty_after_transaction(warehouse="_Test Warehouse 1 - _TC")
 
 		dn = create_delivery_note(item_code="_Test Product Bundle Item",
 			qty=5, rate=500, target_warehouse="_Test Warehouse 1 - _TC", do_not_submit=True)
-
+		print "submitting DN..."
 		dn.submit()
-
+		print "*"*80
 		# qty after delivery
 		actual_qty = get_qty_after_transaction(warehouse="_Test Warehouse - _TC")
-		self.assertEquals(actual_qty, 25)
+		self.assertEquals(actual_qty, 75)
 
 		actual_qty = get_qty_after_transaction(warehouse="_Test Warehouse 1 - _TC")
 		self.assertEquals(actual_qty, opening_qty_test_warehouse_1 + 25)
 
 		# stock value diff for source warehouse
-		stock_value_difference = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note",
-			"voucher_no": dn.name, "item_code": "_Test Item Home Desktop 100", "warehouse": "_Test Warehouse - _TC"},
+		# for "_Test Item"
+		stock_value_difference = frappe.db.get_value("Stock Ledger Entry", 
+			{"voucher_type": "Delivery Note", "voucher_no": dn.name, 
+				"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
 			"stock_value_difference")
 
 		# stock value diff for target warehouse
-		stock_value_difference1 = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note",
-			"voucher_no": dn.name, "item_code": "_Test Item Home Desktop 100", "warehouse": "_Test Warehouse 1 - _TC"},
+		stock_value_difference1 = frappe.db.get_value("Stock Ledger Entry", 
+			{"voucher_type": "Delivery Note", "voucher_no": dn.name, 
+				"item_code": "_Test Item", "warehouse": "_Test Warehouse 1 - _TC"},
+			"stock_value_difference")
+
+		self.assertEquals(abs(stock_value_difference), stock_value_difference1)
+		
+		# for "_Test Item Home Desktop 100"
+		stock_value_difference = frappe.db.get_value("Stock Ledger Entry", 
+			{"voucher_type": "Delivery Note", "voucher_no": dn.name, 
+				"item_code": "_Test Item Home Desktop 100", "warehouse": "_Test Warehouse - _TC"},
+			"stock_value_difference")
+
+		# stock value diff for target warehouse
+		stock_value_difference1 = frappe.db.get_value("Stock Ledger Entry", 
+			{"voucher_type": "Delivery Note", "voucher_no": dn.name, 
+				"item_code": "_Test Item Home Desktop 100", "warehouse": "_Test Warehouse 1 - _TC"},
 			"stock_value_difference")
 
 		self.assertEquals(abs(stock_value_difference), stock_value_difference1)

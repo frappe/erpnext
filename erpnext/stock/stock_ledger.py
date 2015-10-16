@@ -76,7 +76,7 @@ class update_entries_after(object):
 	"""
 	def __init__(self, args, allow_zero_rate=False, allow_negative_stock=None, via_landed_cost_voucher=False, verbose=1):
 		from frappe.model.meta import get_field_precision
-
+		print "update_entries_after"
 		self.exceptions = []
 		self.verbose = verbose
 		self.allow_zero_rate = allow_zero_rate
@@ -92,7 +92,7 @@ class update_entries_after(object):
 
 		self.previous_sle = self.get_sle_before_datetime()
 		self.previous_sle = self.previous_sle[0] if self.previous_sle else frappe._dict()
-
+		print "previous_sle", self.previous_sle
 		for key in ("qty_after_transaction", "valuation_rate", "stock_value"):
 			setattr(self, key, flt(self.previous_sle.get(key)))
 
@@ -108,9 +108,11 @@ class update_entries_after(object):
 
 	def build(self):
 		# includes current entry!
+		print "entries_to_fix"
 		entries_to_fix = self.get_sle_after_datetime()
 
 		for sle in entries_to_fix:
+			print sle
 			self.process_sle(sle)
 
 		if self.exceptions:
@@ -163,17 +165,20 @@ class update_entries_after(object):
 				self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 			else:
 				if self.valuation_method == "Moving Average":
+					print "moving average"
 					self.get_moving_average_values(sle)
 					self.qty_after_transaction += flt(sle.actual_qty)
 					self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 				else:
+					print "fifo"
 					self.get_fifo_values(sle)
 					self.qty_after_transaction += flt(sle.actual_qty)
 					self.stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.stock_queue))
 
 		# rounding as per precision
 		self.stock_value = flt(self.stock_value, self.precision)
-
+		print self.stock_queue
+		print self.prev_stock_value, self.stock_value
 		stock_value_difference = self.stock_value - self.prev_stock_value
 		self.prev_stock_value = self.stock_value
 
