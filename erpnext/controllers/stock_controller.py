@@ -294,6 +294,7 @@ class StockController(AccountsController):
 							target_warehouse_sle.update({
 								"outgoing_rate": return_rate
 							})
+					print "target_warehouse_sle", target_warehouse_sle
 					sl_entries.append(target_warehouse_sle)
 
 				if d.warehouse and ((not cint(self.is_return) and self.docstatus==2)
@@ -304,6 +305,10 @@ class StockController(AccountsController):
 						}))
 
 		self.make_sl_entries(sl_entries)
+		print frappe.db.get_value("Stock Ledger Entry", 
+			{"voucher_type": "Delivery Note", "voucher_no": self.name, 
+				"item_code": "_Test Item", "warehouse": "_Test Warehouse 1 - _TC"},
+			["incoming_rate", "qty", "stock_value_difference"])
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):
