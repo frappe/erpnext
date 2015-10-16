@@ -329,9 +329,9 @@ class TestDeliveryNote(unittest.TestCase):
 		print "test_delivery_of_bundled_items_to_target_warehouse"
 		set_perpetual_inventory()
 		for warehouse in ("_Test Warehouse - _TC", "_Test Warehouse 1 - _TC"):
-			sr1 = create_stock_reconciliation(item_code="_Test Item", target=warehouse, qty=50, rate=100)
+			sr1 = create_stock_reconciliation(item_code="_Test Item", target=warehouse, qty=100, rate=100)
 			sr2 = create_stock_reconciliation(item_code="_Test Item Home Desktop 100",
-				target=warehouse, qty=50, rate=100)
+				target=warehouse, qty=100, rate=100)
 		
 		print frappe.db.sql("select name, voucher_no, posting_date, posting_time from `tabStock Ledger Entry` where voucher_no in (%s, %s)", (sr1.name, sr2.name))
 
