@@ -217,10 +217,18 @@ def validate_party_accounts(doc):
 
 	for account in doc.get("accounts"):
 		if account.company in companies:
-			frappe.throw(_("There can only be 1 Account per Company in {0} {1}").format(doc.doctype, doc.name),
-				DuplicatePartyAccountError)
+			frappe.throw(_("There can only be 1 Account per Company in {0} {1}")
+				.format(doc.doctype, doc.name), DuplicatePartyAccountError)
 		else:
 			companies.append(account.company)
+		
+		party_account_currency = frappe.db.get_value("Account", account.account, "account_currency")
+		existing_gle_currency = get_party_gle_currency(doc.doctype, doc.name, account.company)
+		
+		if party_account_currency != existing_gle_currency:
+			frappe.throw(_("Accounting Entry against company: {0} can only be made in currency: {1}, please check default {2} account")
+				.format(account.company, existing_gle_currency, 
+					"receivable" if doc.doctype=="Customer" else "payable"))
 
 @frappe.whitelist()
 def get_due_date(posting_date, party_type, party, company):
