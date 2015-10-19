@@ -76,7 +76,7 @@ class PurchaseInvoice(BuyingController):
 	def get_advances(self):
 		if not self.is_return:
 			super(PurchaseInvoice, self).get_advances(self.credit_to, "Supplier", self.supplier,
-				"Purchase Invoice Advance", "advances", "debit", "purchase_order")
+				"Purchase Invoice Advance", "advances", "debit_in_account_currency", "purchase_order")
 
 	def check_active_purchase_items(self):
 		for d in self.get('items'):
