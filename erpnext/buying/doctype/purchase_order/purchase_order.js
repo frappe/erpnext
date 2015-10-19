@@ -19,10 +19,12 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		this._super();
 		// this.frm.dashboard.reset();
 
-		if(doc.docstatus == 1 && doc.status != 'Stopped') {
+		if(doc.docstatus == 1 && doc.status != 'Stopped' && doc.status != 'Closed') {
 
 			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100)
 				cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Purchase Order']);
+
+			cur_frm.add_custom_button(__('Close'), cur_frm.cscript['Close Purchase Order']);
 
 			if(flt(doc.per_billed)==0) {
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry);
@@ -222,6 +224,18 @@ cur_frm.cscript['Unstop Purchase Order'] = function() {
 		});
 	}
 }
+
+cur_frm.cscript['Close Purchase Order'] = function() {
+	var doc = cur_frm.doc;
+	var check = confirm(__("Do you really want to Close ") + doc.name);
+
+	if (check) {
+		return $c('runserverobj', args={'method':'update_status', 'arg': 'Closed', 'docs':doc}, function(r,rt) {
+			cur_frm.refresh();
+		});
+	}
+}
+
 
 cur_frm.pformat.indent_no = function(doc, cdt, cdn){
 	//function to make row of table

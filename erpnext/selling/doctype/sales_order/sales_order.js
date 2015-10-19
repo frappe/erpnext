@@ -236,6 +236,21 @@ cur_frm.cscript['Stop Sales Order'] = function() {
 	}
 }
 
+cur_frm.cscript['Unstop Sales Order'] = function() {
+	var doc = cur_frm.doc;
+
+	var check = confirm(__("Are you sure you want to UNSTOP ") + doc.name);
+
+	if (check) {
+		return $c('runserverobj', {
+			'method':'unstop_sales_order',
+			'docs': doc
+		}, function(r,rt) {
+			cur_frm.refresh();
+		});
+	}
+}
+
 cur_frm.cscript['Close Sales Order'] = function(){
 	var doc = cur_frm.doc;
 
@@ -247,21 +262,6 @@ cur_frm.cscript['Close Sales Order'] = function(){
 			'docs': doc,
 			'arg': "Closed"
 			}, function(r,rt) {
-			cur_frm.refresh();
-		});
-	}
-}
-
-cur_frm.cscript['Unstop Sales Order'] = function() {
-	var doc = cur_frm.doc;
-
-	var check = confirm(__("Are you sure you want to UNSTOP ") + doc.name);
-
-	if (check) {
-		return $c('runserverobj', {
-			'method':'unstop_sales_order',
-			'docs': doc
-		}, function(r,rt) {
 			cur_frm.refresh();
 		});
 	}

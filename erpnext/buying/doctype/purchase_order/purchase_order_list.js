@@ -4,6 +4,8 @@ frappe.listview_settings['Purchase Order'] = {
 	get_indicator: function(doc) {
         if(doc.status==="Stopped") {
 			return [__("Stopped"), "darkgrey", "status,=,Stopped"];
+		} else if(doc.status==="Closed"){
+			return [__("Closed"), "green", "status,=,Closed"];
 		} else if(flt(doc.per_received, 2) < 100 && doc.status!=="Stopped") {
 			if(flt(doc.per_billed, 2) < 100) {
 				return [__("To Receive and Bill"), "orange",

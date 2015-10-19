@@ -47,6 +47,7 @@ status_map = {
 		["Completed", "eval:self.per_received == 100 and self.per_billed == 100 and self.docstatus == 1"],
 		["Stopped", "eval:self.status=='Stopped'"],
 		["Cancelled", "eval:self.docstatus==2"],
+		["Closed", "eval:self.status=='Closed'"],
 	],
 	"Delivery Note": [
 		["Draft", None],
