@@ -116,11 +116,7 @@ $.extend(erpnext.item, {
 		// --------------------------------
 		frm.fields_dict['income_account'].get_query = function(doc) {
 			return {
-				filters: {
-					"report_type": "Profit and Loss",
-					"is_group": 0,
-					'account_type': "Income Account"
-				}
+				query: "erpnext.controllers.queries.get_income_account"
 			}
 		}
 

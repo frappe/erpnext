@@ -10,6 +10,7 @@ from frappe.utils import flt, nowdate, nowtime
 from erpnext.accounts.utils import get_fiscal_year, get_stock_and_account_difference
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import EmptyStockReconciliationItemsError
 
 class TestStockReconciliation(unittest.TestCase):
 	def setUp(self):
@@ -107,7 +108,10 @@ def create_stock_reconciliation(**args):
 		"valuation_rate": args.rate
 	})
 
-	sr.submit()
+	try:
+		sr.submit()
+	except EmptyStockReconciliationItemsError:
+		pass
 	return sr
 
 def repost_stock_as_per_valuation_method(valuation_method):

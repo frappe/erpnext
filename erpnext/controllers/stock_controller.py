@@ -7,6 +7,7 @@ from frappe.utils import cint, flt, cstr
 from frappe import msgprint, _
 import frappe.defaults
 from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, process_gl_map
+from erpnext.stock.utils import get_incoming_rate
 
 from erpnext.controllers.accounts_controller import AccountsController
 
@@ -46,7 +47,7 @@ class StockController(AccountsController):
 						# from warehouse account
 
 						self.check_expense_account(detail)
-						
+
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse]["name"],
 							"against": detail.expense_account,
@@ -55,7 +56,7 @@ class StockController(AccountsController):
 							"debit": flt(sle.stock_value_difference, 2),
 						}, warehouse_account[sle.warehouse]["account_currency"]))
 
-						# to target warehouse / expense account						
+						# to target warehouse / expense account
 						gl_list.append(self.get_gl_dict({
 							"account": detail.expense_account,
 							"against": warehouse_account[sle.warehouse]["name"],
@@ -69,7 +70,7 @@ class StockController(AccountsController):
 		if warehouse_with_no_account:
 			msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
-		
+
 		return process_gl_map(gl_list)
 
 	def get_voucher_details(self, default_expense_account, default_cost_center, sle_map):
@@ -184,7 +185,7 @@ class StockController(AccountsController):
 			"voucher_no": self.name,
 			"voucher_detail_no": d.name,
 			"actual_qty": (self.docstatus==1 and 1 or -1)*flt(d.get("stock_qty")),
-			"stock_uom": d.get("stock_uom"),
+			"stock_uom": frappe.db.get_value("Item", args.get("item_code") or d.get("item_code"), "stock_uom"),
 			"incoming_rate": 0,
 			"company": self.company,
 			"fiscal_year": self.fiscal_year,
@@ -217,13 +218,14 @@ class StockController(AccountsController):
 
 		return serialized_items
 
-	def get_incoming_rate_for_sales_return(self, item_code, against_document):
+	def get_incoming_rate_for_sales_return(self, item_code, warehouse, against_document):
 		incoming_rate = 0.0
 		if against_document and item_code:
 			incoming_rate = frappe.db.sql("""select abs(ifnull(stock_value_difference, 0) / actual_qty)
 				from `tabStock Ledger Entry`
-				where voucher_type = %s and voucher_no = %s and item_code = %s limit 1""",
-				(self.doctype, against_document, item_code))
+				where voucher_type = %s and voucher_no = %s
+					and item_code = %s and warehouse=%s limit 1""",
+				(self.doctype, against_document, item_code, warehouse))
 			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
 
 		return incoming_rate
@@ -252,18 +254,53 @@ class StockController(AccountsController):
 
 		sl_entries = []
 		for d in self.get_item_list():
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 \
-					and d.warehouse and flt(d['qty']):
-
-				incoming_rate = 0
+			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1 and flt(d.qty):
+				return_rate = 0
 				if cint(self.is_return) and self.return_against and self.docstatus==1:
-					incoming_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
+					return_rate = self.get_incoming_rate_for_sales_return(d.item_code,
+						d.warehouse, self.return_against)
 
-				sl_entries.append(self.get_sl_entries(d, {
-					"actual_qty": -1*flt(d['qty']),
-					"stock_uom": frappe.db.get_value("Item", d.item_code, "stock_uom"),
-					"incoming_rate": incoming_rate
-				}))
+				# On cancellation or if return entry submission, make stock ledger entry for
+				# target warehouse first, to update serial no values properly
+
+				if d.warehouse and ((not cint(self.is_return) and self.docstatus==1)
+					or (cint(self.is_return) and self.docstatus==2)):
+						sl_entries.append(self.get_sl_entries(d, {
+							"actual_qty": -1*flt(d.qty),
+							"incoming_rate": return_rate
+						}))
+
+				if d.target_warehouse:
+					target_warehouse_sle = self.get_sl_entries(d, {
+						"actual_qty": flt(d.qty),
+						"warehouse": d.target_warehouse
+					})
+
+					if self.docstatus == 1:
+						if not cint(self.is_return):
+							args = frappe._dict({
+								"item_code": d.item_code,
+								"warehouse": d.warehouse,
+								"posting_date": self.posting_date,
+								"posting_time": self.posting_time,
+								"qty": -1*flt(d.qty),
+								"serial_no": d.serial_no
+							})
+							target_warehouse_sle.update({
+								"incoming_rate": get_incoming_rate(args)
+							})
+						else:
+							target_warehouse_sle.update({
+								"outgoing_rate": return_rate
+							})
+					sl_entries.append(target_warehouse_sle)
+
+				if d.warehouse and ((not cint(self.is_return) and self.docstatus==2)
+					or (cint(self.is_return) and self.docstatus==1)):
+						sl_entries.append(self.get_sl_entries(d, {
+							"actual_qty": -1*flt(d.qty),
+							"incoming_rate": return_rate
+						}))
 
 		self.make_sl_entries(sl_entries)
 
@@ -337,7 +374,7 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 
 def get_warehouse_account():
 	warehouse_account = frappe._dict()
-	
+
 	for d in frappe.db.sql("""select warehouse, name, account_currency from tabAccount
 		where account_type = 'Warehouse' and ifnull(warehouse, '') != ''""", as_dict=1):
 			warehouse_account.setdefault(d.warehouse, d)

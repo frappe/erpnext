@@ -31,11 +31,11 @@ class HolidayList(Document):
 			throw(_("Please select Fiscal Year"))
 		if not self.weekly_off:
 			throw(_("Please select weekly off day"))
-	
+
 	def validate_days(self):
 		for day in self.get("holidays"):
-			if (self.weekly_off).upper() == (day.description).upper():
-				frappe.throw("Records alredy exist for mentioned weekly off")
+			if (self.weekly_off or "").upper() == (day.description or "").upper():
+				frappe.throw("Records already exist for mentioned weekly off")
 
 	def get_weekly_off_date_list(self, year_start_date, year_end_date):
 		from frappe.utils import getdate
@@ -73,20 +73,20 @@ def get_events(start, end, filters=None):
 	"""
 	from frappe.desk.calendar import get_event_conditions
 	conditions = get_event_conditions("Holiday List", filters)
-	
+
 	fiscal_year = None
 	if filters:
 		fiscal_year = json.loads(filters).get("fiscal_year")
-		
+
 	if not fiscal_year:
 		fiscal_year = frappe.db.get_value("Global Defaults", None, "current_fiscal_year")
-	
+
 	yr_start_date, yr_end_date = get_fy_start_end_dates(fiscal_year)
 
-	data = frappe.db.sql("""select hl.name, hld.holiday_date, hld.description 
-		from `tabHoliday List` hl, tabHoliday hld 
-		where hld.parent = hl.name 
-		and (ifnull(hld.holiday_date, "0000-00-00") != "0000-00-00" 
+	data = frappe.db.sql("""select hl.name, hld.holiday_date, hld.description
+		from `tabHoliday List` hl, tabHoliday hld
+		where hld.parent = hl.name
+		and (ifnull(hld.holiday_date, "0000-00-00") != "0000-00-00"
 			and hld.holiday_date between %(start)s and %(end)s)
 		{conditions}""".format(conditions=conditions), {
 			"start": yr_start_date,
@@ -95,5 +95,5 @@ def get_events(start, end, filters=None):
 
 	return data
 
-def get_fy_start_end_dates(fiscal_year):	
+def get_fy_start_end_dates(fiscal_year):
 	return frappe.db.get_value("Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"])

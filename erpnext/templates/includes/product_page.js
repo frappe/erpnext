@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.ready(function() {
-	var item_code = $('[itemscope] [itemprop="productID"]').text().trim();
+	window.item_code = $('[itemscope] [itemprop="productID"]').text().trim();
 	var qty = 0;
 
 	frappe.call({
@@ -12,7 +12,6 @@ frappe.ready(function() {
 			item_code: "{{ name }}"
 		},
 		callback: function(r) {
-			console.log(r.message);
 			$(".item-cart").toggleClass("hide", !!!r.message.price);
 			if(r.message && r.message.price) {
 				$(".item-price")
@@ -38,7 +37,7 @@ frappe.ready(function() {
 
 	$("#item-add-to-cart button").on("click", function() {
 		shopping_cart.update_cart({
-			item_code: item_code,
+			item_code: get_item_code(),
 			qty: 1,
 			callback: function(r) {
 				if(!r.exc) {
@@ -52,7 +51,7 @@ frappe.ready(function() {
 
 	$("#item-update-cart button").on("click", function() {
 		shopping_cart.update_cart({
-			item_code: item_code,
+			item_code: get_item_code(),
 			qty: $("#item-update-cart input").val(),
 			btn: this,
 			callback: function(r) {
@@ -64,11 +63,6 @@ frappe.ready(function() {
 			},
 		});
 	});
-
-	if(localStorage && localStorage.getItem("pending_add_to_cart") && full_name) {
-		localStorage.removeItem("pending_add_to_cart");
-		$("#item-add-to-cart button").trigger("click");
-	}
 });
 
 var toggle_update_cart = function(qty) {
@@ -76,4 +70,30 @@ var toggle_update_cart = function(qty) {
 	$("#item-update-cart")
 		.toggle(qty ? true : false)
 		.find("input").val(qty);
+}
+
+function get_item_code() {
+	if(window.variant_info) {
+		attributes = {};
+		$('[itemscope]').find(".item-view-attribute select").each(function() {
+			attributes[$(this).attr('data-attribute')] = $(this).val();
+		});
+		for(var i in variant_info) {
+			var variant = variant_info[i];
+			var match = true;
+			for(var j in variant.attributes) {
+				if(attributes[variant.attributes[j].attribute]
+					!= variant.attributes[j].attribute_value) {
+						match = false;
+						break;
+				}
+			}
+			if(match) {
+				return variant.name;
+			}
+		}
+		throw "Unable to match variant";
+	} else {
+		return item_code;
+	}
 }

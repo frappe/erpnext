@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, extract_email_id
+from frappe.utils import cstr
 
 from erpnext.controllers.status_updater import StatusUpdater
 
@@ -22,6 +22,11 @@ class Contact(StatusUpdater):
 	def validate(self):
 		self.set_status()
 		self.validate_primary_contact()
+		self.set_user()
+
+	def set_user(self):
+		if not self.user and self.email_id:
+			self.user = frappe.db.get_value("User", {"email": self.email_id})
 
 	def validate_primary_contact(self):
 		if self.is_primary_contact == 1:
@@ -52,6 +57,21 @@ class Contact(StatusUpdater):
 	def on_trash(self):
 		frappe.db.sql("""update `tabIssue` set contact='' where contact=%s""",
 			self.name)
+
+@frappe.whitelist()
+def invite_user(contact):
+	contact = frappe.get_doc("Contact", contact)
+	if contact.has_permission("write"):
+		user = frappe.get_doc({
+			"doctype": "User",
+			"first_name": contact.first_name,
+			"last_name": contact.last_name,
+			"email": contact.email_id,
+			"user_type": "Website User",
+			"send_welcome_email": 1
+		}).insert(ignore_permissions = True)
+
+		return user.name
 
 @frappe.whitelist()
 def get_contact_details(contact):

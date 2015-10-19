@@ -7,44 +7,40 @@ cur_frm.cscript.refresh = function(doc, dt, dn) {
 	var err_msg = __("There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.")
 
 	cur_frm.add_custom_button(__('View Now'), function() {
-		doc = locals[dt][dn];
-		if(doc.__unsaved != 1) {
-			return $c_obj(doc, 'get_digest_msg', '', function(r, rt) {
-				if(r.exc) {
-					msgprint(err_msg);
-					console.log(r.exc);
-				} else {
-					//console.log(arguments);
-					var d = new frappe.ui.Dialog({
-						title: __('Email Digest: ') + dn,
-						width: 800
-					});
-
-					$a(d.body, 'div', '', '', r['message']);
-
-					d.show();
-				}
-			});
-		} else {
-			msgprint(save_msg);
-		}
+		frappe.call({
+			method: 'erpnext.setup.doctype.email_digest.email_digest.get_digest_msg',
+			args: {
+				name: doc.name
+			},
+			callback: function(r) {
+				var d = new frappe.ui.Dialog({
+					title: __('Email Digest: ') + dn,
+					width: 800
+				});
+				$(d.body).html(r.message);
+				d.show();
+			}
+		});
 	}, "icon-eye-open", "btn-default");
-	cur_frm.add_custom_button(__('Send Now'), function() {
-		doc = locals[dt][dn];
-		if(doc.__unsaved != 1) {
-			return $c_obj(doc, 'send', '', function(r, rt) {
-				if(r.exc) {
-					msgprint(err_msg);
-					console.log(r.exc);
-				} else {
-					//console.log(arguments);
-					msgprint(__('Message Sent'));
-				}
-			});
-		} else {
-			msgprint(save_msg);
-		}
-	}, "icon-envelope", "btn-default");
+
+	if(user==="Administrator") {
+		cur_frm.add_custom_button(__('Send Now'), function() {
+			doc = locals[dt][dn];
+			if(doc.__unsaved != 1) {
+				return $c_obj(doc, 'send', '', function(r, rt) {
+					if(r.exc) {
+						msgprint(err_msg);
+						console.log(r.exc);
+					} else {
+						//console.log(arguments);
+						msgprint(__('Message Sent'));
+					}
+				});
+			} else {
+				msgprint(save_msg);
+			}
+		}, "icon-envelope", "btn-default");
+	}
 }
 
 cur_frm.cscript.addremove_recipients = function(doc, dt, dn) {

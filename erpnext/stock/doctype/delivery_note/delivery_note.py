@@ -113,7 +113,7 @@ class DeliveryNote(SellingController):
 		self.validate_with_previous_doc()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-		make_packing_list(self, 'items')
+		make_packing_list(self)
 
 		self.update_current_stock()
 

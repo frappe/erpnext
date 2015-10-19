@@ -84,7 +84,9 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 
 	if account:
 		acc = frappe.get_doc("Account", account)
-		acc.check_permission("read")
+
+		if not frappe.flags.ignore_account_permission:
+			acc.check_permission("read")
 
 		# for pl accounts, get balance within a fiscal year
 		if acc.report_type == 'Profit and Loss':
@@ -198,7 +200,7 @@ def update_against_doc(d, jv_obj):
 	"""
 	jv_detail = jv_obj.get("accounts", {"name": d["voucher_detail_no"]})[0]
 	jv_detail.set(d["dr_or_cr"], d["allocated_amt"])
-	jv_detail.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit', 
+	jv_detail.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit',
 		d["allocated_amt"]*flt(jv_detail.exchange_rate))
 
 	original_reference_type = jv_detail.reference_type
@@ -209,10 +211,11 @@ def update_against_doc(d, jv_obj):
 
 	if d['allocated_amt'] < d['unadjusted_amt']:
 		jvd = frappe.db.sql("""
-			select cost_center, balance, against_account, is_advance, account_type, exchange_rate
+			select cost_center, balance, against_account, is_advance, 
+				account_type, exchange_rate, account_currency
 			from `tabJournal Entry Account` where name = %s
 		""", d['voucher_detail_no'], as_dict=True)
-		
+
 		amount_in_account_currency = flt(d['unadjusted_amt']) - flt(d['allocated_amt'])
 		amount_in_company_currency = amount_in_account_currency * flt(jvd[0]['exchange_rate'])
 
@@ -220,19 +223,20 @@ def update_against_doc(d, jv_obj):
 		ch = jv_obj.append("accounts")
 		ch.account = d['account']
 		ch.account_type = jvd[0]['account_type']
+		ch.account_currency = jvd[0]['account_currency']
 		ch.exchange_rate = jvd[0]['exchange_rate']
 		ch.party_type = d["party_type"]
 		ch.party = d["party"]
 		ch.cost_center = cstr(jvd[0]["cost_center"])
 		ch.balance = flt(jvd[0]["balance"])
-		
+
 		ch.set(d['dr_or_cr'], amount_in_account_currency)
 		ch.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit', amount_in_company_currency)
-		
-		ch.set('credit_in_account_currency' if d['dr_or_cr']== 'debit_in_account_currency' 
+
+		ch.set('credit_in_account_currency' if d['dr_or_cr']== 'debit_in_account_currency'
 			else 'debit_in_account_currency', 0)
 		ch.set('credit' if d['dr_or_cr']== 'debit_in_account_currency' else 'debit', 0)
-		
+
 		ch.against_account = cstr(jvd[0]["against_account"])
 		ch.reference_type = original_reference_type
 		ch.reference_name = original_reference_name
@@ -310,7 +314,7 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 
 def validate_expense_against_budget(args):
 	args = frappe._dict(args)
-	if frappe.db.get_value("Account", {"name": args.account, "report_type": "Profit and Loss"}):
+	if frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"}):
 			budget = frappe.db.sql("""
 				select bd.budget_allocated, cc.distribution_id
 				from `tabCost Center` cc, `tabBudget Detail` bd

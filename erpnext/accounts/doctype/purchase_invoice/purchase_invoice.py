@@ -76,7 +76,7 @@ class PurchaseInvoice(BuyingController):
 	def get_advances(self):
 		if not self.is_return:
 			super(PurchaseInvoice, self).get_advances(self.credit_to, "Supplier", self.supplier,
-				"Purchase Invoice Advance", "advances", "debit", "purchase_order")
+				"Purchase Invoice Advance", "advances", "debit_in_account_currency", "purchase_order")
 
 	def check_active_purchase_items(self):
 		for d in self.get('items'):
@@ -421,7 +421,7 @@ class PurchaseInvoice(BuyingController):
 		if self.bill_no:
 			if cint(frappe.db.get_single_value("Accounts Settings", "check_supplier_invoice_uniqueness")):
 				pi = frappe.db.exists("Purchase Invoice", {"bill_no": self.bill_no,
-					"fiscal_year": self.fiscal_year, "name": ("!=", self.name)})
+					"fiscal_year": self.fiscal_year, "name": ("!=", self.name), "docstatus": ("<", 2)})
 				if pi:
 					frappe.throw("Supplier Invoice No exists in Purchase Invoice {0}".format(pi))
 
