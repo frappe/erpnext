@@ -97,7 +97,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		# stop so
 		so.load_from_db()
-		so.stop_sales_order()
+		so.stop_sales_order("Stopped")
 		self.assertEqual(get_reserved_qty(), existing_reserved_qty)
 
 		# unstop so
@@ -147,7 +147,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		# stop so
 		so.load_from_db()
-		so.stop_sales_order()
+		so.stop_sales_order("Stopped")
 
 		self.assertEqual(get_reserved_qty("_Test Item"), existing_reserved_qty_item1)
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"), existing_reserved_qty_item2)
@@ -296,44 +296,44 @@ class TestSalesOrder(unittest.TestCase):
 
 		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
 	
-	# def test_drop_shipping(self):
-	# 	from erpnext.selling.doctype.sales_order.sales_order import make_drop_shipment, make_delivery_note
-	# 	from erpnext.stock.doctype.item.test_item import make_item
-	#
-	# 	po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 0, "is_sales_item": 1,
-	# 		"is_purchase_item": 1, "is_drop_ship": 1, 'default_supplier': '_Test Supplier'})
-	#
-	# 	dn_item = make_item("_Test Regular Item", {"is_stock_item": 0, "is_sales_item": 1,
-	# 		"is_purchase_item": 1})
-	#
-	# 	so_items = [
-	# 		{
-	# 			"item_code": po_item.item_code,
-	# 			"warehouse": "_Test Warehouse - _TC",
-	# 			"qty": 1,
-	# 			"rate": 400,
-	# 			"conversion_factor": 1.0,
-	# 			"is_drop_ship": 1,
-	# 			"supplier": '_Test Supplier'
-	# 		},
-	# 		{
-	# 			"item_code": dn_item.item_code,
-	# 			"warehouse": "_Test Warehouse - _TC",
-	# 			"qty": 1,
-	# 			"rate": 300,
-	# 			"conversion_factor": 1.0
-	# 		}
-	# 	]
-	#
-	# 	so = make_sales_order(items=so_items)
-	# 	po = make_drop_shipment(so.name, '_Test Supplier')
-	# 	dn = make_delivery_note(so.name)
-	#
-	# 	self.assertEquals(so.customer, po.customer)
-	# 	self.assertEquals(po.items[0].prevdoc_doctype, "Sales Order")
-	# 	self.assertEquals(po.items[0].prevdoc_docname, so.name)
-	# 	self.assertEquals(po.items[0].item_code, po_item.item_code)
-	# 	self.assertEquals(dn.items[0].item_code, dn.item_code)
+	def test_drop_shipping(self):
+		from erpnext.selling.doctype.sales_order.sales_order import make_drop_shipment, make_delivery_note
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 0, "is_sales_item": 1,
+			"is_purchase_item": 1, "is_drop_ship": 1, 'default_supplier': '_Test Supplier'})
+
+		dn_item = make_item("_Test Regular Item", {"is_stock_item": 0, "is_sales_item": 1,
+			"is_purchase_item": 1})
+
+		so_items = [
+			{
+				"item_code": po_item.item_code,
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": 400,
+				"conversion_factor": 1.0,
+				"is_drop_ship": 1,
+				"supplier": '_Test Supplier'
+			},
+			{
+				"item_code": dn_item.item_code,
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": 1,
+				"rate": 300,
+				"conversion_factor": 1.0
+			}
+		]
+
+		so = make_sales_order(item_list=so_items)
+		po = make_drop_shipment(so.name, '_Test Supplier')
+		dn = make_delivery_note(so.name)
+
+		self.assertEquals(so.customer, po.customer)
+		self.assertEquals(po.items[0].prevdoc_doctype, "Sales Order")
+		self.assertEquals(po.items[0].prevdoc_docname, so.name)
+		self.assertEquals(po.items[0].item_code, po_item.item_code)
+		self.assertEquals(dn.items[0].item_code, dn_item.item_code)
 
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
@@ -351,8 +351,9 @@ def make_sales_order(**args):
 	if "warehouse" not in args:
 		args.warehouse = "_Test Warehouse - _TC"
 		
-	if args.items:
-		so.items = args.items
+	if args.item_list:
+		for item in args.item_list:
+			so.append("items", item)
 		
 	else:
 		so.append("items", {
