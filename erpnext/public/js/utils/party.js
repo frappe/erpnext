@@ -7,7 +7,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 		method = "erpnext.accounts.party.get_party_details";
 	}
 	if(!args) {
-		if(frm.doc.customer) {
+		if(frm.doctype != "Purchase Order" && frm.doc.customer) {
 			args = {
 				party: frm.doc.customer,
 				party_type: "Customer",

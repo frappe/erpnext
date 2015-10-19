@@ -25,7 +25,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				// 	doc.per_billed);
 
 				// indent
-				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1)
+				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && doc.drop_ship!=1)
 					cur_frm.add_custom_button(__('Material Request'), this.make_material_request);
 
 				if(flt(doc.per_billed)==0) {
@@ -37,19 +37,22 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Sales Order'])
 
 					// maintenance
-					if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
+					if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1 && doc.drop_ship!=1) {
 						cur_frm.add_custom_button(__('Maint. Visit'), this.make_maintenance_visit);
 						cur_frm.add_custom_button(__('Maint. Schedule'), this.make_maintenance_schedule);
 					}
 
 					// delivery note
-					if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1)
+					if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && doc.drop_ship!=1)
 						cur_frm.add_custom_button(__('Delivery'), this.make_delivery_note).addClass("btn-primary");
 
 					// sales invoice
 					if(flt(doc.per_billed, 2) < 100) {
 						cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice).addClass("btn-primary");
 					}
+					
+					if(doc.drop_ship==1 && flt(doc.per_ordered, 2) < 100)
+						cur_frm.add_custom_button(__('Make Shipment'), cur_frm.cscript.make_drop_shipment);
 
 			} else {
 				// un-stop
@@ -145,6 +148,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
+	},
+	make_drop_shipment: function(){
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.make_drop_shipment",
+			frm: cur_frm
+		})
 	}
 
 });

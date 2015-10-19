@@ -488,3 +488,57 @@ def get_events(start, end, filters=None):
 			"end": end
 		}, as_dict=True, update={"allDay": 0})
 	return data
+
+@frappe.whitelist()
+def make_drop_shipment(source_name, target_doc=None):
+	def postprocess(source, target):
+		set_missing_values(source, target)
+		
+	def set_missing_values(source, target):
+		target.address_display = ""
+		target.contact_display = ""
+		target.contact_mobile = ""
+		target.contact_email = ""
+		target.ignore_pricing_rule = 1
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	def update_item(source, target, source_parent):
+		target.base_amount = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.base_rate)
+		target.amount = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.rate)
+		target.qty = flt(source.qty) - flt(source.ordered_qty)
+
+	doclist = get_mapped_doc("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Purchase Order",
+			"field_map": {
+				"address_display": "customer_address_display",
+				"contact_display": "customer_contact_display",
+				"contact_mobile": "customer_contact_mobile",
+				"contact_email": "customer_contact_email",
+				"contact_person": "customer_contact_person"
+			},
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Sales Order Item": {
+			"doctype": "Purchase Order Item",
+			"field_map":  [
+				["name", "prevdoc_detail_docname"],
+				["parent", "prevdoc_docname"],
+				["parenttype", "prevdoc_doctype"],
+				["uom", "stock_uom"]
+			],
+			"postprocess": update_item,
+			"condition": lambda doc: doc.delivered_qty < doc.qty
+		},
+		"Sales Taxes and Charges": {
+			"doctype": "Purchase Taxes and Charges",
+			"add_if_empty": True
+		}
+	}, target_doc, postprocess)
+	
+	
+
+	return doclist
