@@ -82,6 +82,9 @@ class Item(WebsiteGenerator):
 
 	def make_thumbnail(self):
 		"""Make a thumbnail of `website_image`"""
+		if not self.is_new() and self.website_image != frappe.db.get_value(self.doctype, self.name, "website_image"):
+			self.thumbnail = None
+
 		if self.website_image and not self.thumbnail:
 			file_doc = frappe.get_doc("File", {
 				"file_url": self.website_image,
@@ -89,6 +92,7 @@ class Item(WebsiteGenerator):
 				"attached_to_name": self.name
 			})
 
+			# for CSV import
 			if not file_doc:
 				file_doc = frappe.get_doc({
 					"doctype": "File",
@@ -98,7 +102,10 @@ class Item(WebsiteGenerator):
 				}).insert()
 
 			if file_doc:
-				self.thumbnail = file_doc.make_thumbnail()
+				if not file_doc.thumbnail_url:
+					file_doc.make_thumbnail()
+
+				self.thumbnail = file_doc.thumbnail_url
 
 	def get_context(self, context):
 		context.parent_groups = get_parent_item_groups(self.item_group) + \
