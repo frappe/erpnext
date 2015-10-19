@@ -336,7 +336,7 @@ class TestDeliveryNote(unittest.TestCase):
 				qty=100, rate=100)
 			create_stock_reconciliation(item_code="_Test Item Home Desktop 100",
 				target=warehouse, qty=100, rate=100)
-
+				
 		opening_qty_test_warehouse_1 = get_qty_after_transaction(warehouse="_Test Warehouse 1 - _TC")
 
 		dn = create_delivery_note(item_code="_Test Product Bundle Item",
@@ -352,6 +352,21 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEquals(actual_qty, opening_qty_test_warehouse_1 + 25)
 
 		# stock value diff for source warehouse
+		# for "_Test Item"
+		stock_value_difference = frappe.db.get_value("Stock Ledger Entry", 
+			{"voucher_type": "Delivery Note", "voucher_no": dn.name, 
+				"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
+			"stock_value_difference")
+
+		# stock value diff for target warehouse
+		stock_value_difference1 = frappe.db.get_value("Stock Ledger Entry", 
+			{"voucher_type": "Delivery Note", "voucher_no": dn.name, 
+				"item_code": "_Test Item", "warehouse": "_Test Warehouse 1 - _TC"},
+			"stock_value_difference")
+
+		self.assertEquals(abs(stock_value_difference), stock_value_difference1)
+
+		# for "_Test Item Home Desktop 100"
 		stock_value_difference = frappe.db.get_value("Stock Ledger Entry", 
 			{"voucher_type": "Delivery Note", "voucher_no": dn.name, 
 				"item_code": "_Test Item Home Desktop 100", "warehouse": "_Test Warehouse - _TC"},

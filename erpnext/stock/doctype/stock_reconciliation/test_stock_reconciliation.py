@@ -119,8 +119,8 @@ def set_valuation_method(item_code, valuation_method):
 
 	for warehouse in frappe.get_all("Warehouse", filters={"company": "_Test Company"}):
 		update_entries_after({
-				"item_code": item_code,
-				"warehouse": warehouse
+			"item_code": item_code,
+			"warehouse": warehouse.name
 		}, allow_negative_stock=1)
 
 test_dependencies = ["Item", "Warehouse"]
