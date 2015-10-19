@@ -36,8 +36,8 @@ class TestStockReconciliation(unittest.TestCase):
 		]
 
 		for d in input_data:
-			repost_stock_as_per_valuation_method(valuation_method)
-
+			set_valuation_method("_Test Item", valuation_method)
+			
 			last_sle = get_previous_sle({
 				"item_code": "_Test Item",
 				"warehouse": "_Test Warehouse - _TC",
@@ -114,11 +114,13 @@ def create_stock_reconciliation(**args):
 		pass
 	return sr
 
-def repost_stock_as_per_valuation_method(valuation_method):
-	frappe.db.set_value("Item", "_Test Item", "valuation_method", valuation_method)
-	update_entries_after({
-		"item_code": "_Test Item",
-		"warehouse": "_Test Warehouse - _TC",
-	}, allow_negative_stock=1)
+def set_valuation_method(item_code, valuation_method):
+	frappe.db.set_value("Item", item_code, "valuation_method", valuation_method)
+
+	for warehouse in frappe.get_all("Warehouse", filters={"company": "_Test Company"}):
+		update_entries_after({
+			"item_code": item_code,
+			"warehouse": warehouse.name
+		}, allow_negative_stock=1)
 
 test_dependencies = ["Item", "Warehouse"]
