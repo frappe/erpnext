@@ -70,18 +70,21 @@ class EmailDigest(Document):
 	def get_msg_html(self):
 		"""Build email digest content"""
 		frappe.flags.ignore_account_permission = True
+		from erpnext.setup.doctype.email_digest.quotes import get_random_quote
 
 		context = frappe._dict()
 		context.update(self.__dict__)
 
 		self.set_title(context)
 		self.set_style(context)
-
 		self.set_accounting_cards(context)
 
 		context.events = self.get_calendar_events()
 		context.todo_list = self.get_todo_list()
 		context.notifications = self.get_notifications()
+
+		quote = get_random_quote()
+		context.quote = {"text": quote[0], "author": quote[1]}
 
 		if not (context.events or context.todo_list or context.notifications or context.cards):
 			return None

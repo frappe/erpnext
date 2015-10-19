@@ -1,16 +1,15 @@
 {% macro show_card(card) %}
 <div style="width: 50%; float:left; min-height: 80px; padding-top: 20px;">
     <h6 style="color: {{ text_muted }}; font-size: 12px; margin-bottom: 0px; margin-top: 0px;">{{ card.label }}</h6>
-    <h4 style="margin-top: 7px; font-size: 16px;">{{ card.value }}</h4>
+    <h4 style="margin-top: 7px; font-size: 16px; margin-botom: 5px;">{{ card.value }}</h4>
     {% if card.diff %}
-    <p style="color: {{ text_muted }}; font-size: 12px;">{{ card.diff }}%</p>
+    <p style="color: {{ text_muted }}; font-size: 12px; margin-top: 0px;">{{ card.diff }}%</p>
     {% endif %}
 </div>
 {% endmacro %}
 
 <div style="max-width: 500px; margin: auto; padding: 20px 0 40px 0">
 
-{% if cards %}
 <h1 style="{{ h1 }}">{{ title }}</h1>
 <h4 style="font-weight: normal; color: {{ text_muted }}; margin-top: 7px; font-size: 16px; margin-top: 7px;">
     <p>{% if frequency == "Daily "%}
@@ -20,6 +19,7 @@
     {% endif %}</p>
 </h4>
 
+{% if cards %}
 <!-- cards -->
 <div>
 {% for card in cards %}
@@ -109,6 +109,13 @@
 {% endfor %}
 </div>
 {% endif %}
-</div>
 
 {% endif %}
+
+<div style="text-align: center; margin: 50px; line-height: 1.5">
+    {{ quote.text }}<br><i>- {{ quote.author }}</i>
+    <br><br><br>
+    <span style="color: {{ text_muted }}; font-size: 12px;">Have an intersting thought, quote to share? Email it at hello@erpnext.com</span>
+</div>
+
+</div>
