@@ -1,1 +1,0 @@
-- 	Allowed Income account to be added to Cost Center
