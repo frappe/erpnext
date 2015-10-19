@@ -505,6 +505,9 @@ def make_drop_shipment(source_name, for_supplier, target_doc=None):
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
+		target.schedule_date = source_parent.delivery_date
+		target.rate = ''
+		target.price_list_rate = ''
 		target.base_amount = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.base_rate)
 		target.amount = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.rate)
 		target.qty = flt(source.qty) - flt(source.ordered_qty)
