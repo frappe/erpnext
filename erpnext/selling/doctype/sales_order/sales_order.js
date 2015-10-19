@@ -15,9 +15,20 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		this._super();
 		this.frm.dashboard.reset();
-
+		var flag_drop_ship = false;
+		var flag_delivery_note = false;
+		
 		if(doc.docstatus==1) {
-			if(doc.status != 'Stopped') {
+			if(doc.status != 'Stopped' && doc.status != 'Closed') {
+				
+				$.each(cur_frm.doc.items, function(i, item){
+					if(item.is_drop_ship == 1){
+						flag_drop_ship = true;
+					}
+					else{
+						flag_delivery_note = true;
+					}
+				})
 
 				// cur_frm.dashboard.add_progress(cint(doc.per_delivered) + __("% Delivered"),
 				// 	doc.per_delivered);
@@ -25,7 +36,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				// 	doc.per_billed);
 
 				// indent
-				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && doc.drop_ship!=1)
+				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1)
 					cur_frm.add_custom_button(__('Material Request'), this.make_material_request);
 
 				if(flt(doc.per_billed)==0) {
@@ -33,30 +44,36 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 
 				// stop
-				if(flt(doc.per_delivered, 2) < 100 || doc.per_billed < 100)
-					cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Sales Order'])
-
-					// maintenance
-					if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1 && doc.drop_ship!=1) {
-						cur_frm.add_custom_button(__('Maint. Visit'), this.make_maintenance_visit);
-						cur_frm.add_custom_button(__('Maint. Schedule'), this.make_maintenance_schedule);
+				if((flt(doc.per_delivered, 2) < 100 && flag_delivery_note) || doc.per_billed < 100 
+					|| (flt(doc.per_ordered,2) < 100 && flag_drop_ship)){
+						cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Sales Order'])
 					}
+				
+				
+				cur_frm.add_custom_button(__('Close'), cur_frm.cscript['Close Sales Order'])
 
-					// delivery note
-					if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && doc.drop_ship!=1)
-						cur_frm.add_custom_button(__('Delivery'), this.make_delivery_note).addClass("btn-primary");
+				// maintenance
+				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
+					cur_frm.add_custom_button(__('Maint. Visit'), this.make_maintenance_visit);
+					cur_frm.add_custom_button(__('Maint. Schedule'), this.make_maintenance_schedule);
+				}
 
-					// sales invoice
-					if(flt(doc.per_billed, 2) < 100) {
-						cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice).addClass("btn-primary");
-					}
-					
-					if(doc.drop_ship==1 && flt(doc.per_ordered, 2) < 100)
-						cur_frm.add_custom_button(__('Make Shipment'), cur_frm.cscript.make_drop_shipment);
+				// delivery note
+				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && flag_delivery_note)
+					cur_frm.add_custom_button(__('Delivery'), this.make_delivery_note).addClass("btn-primary");
+
+				// sales invoice
+				if(flt(doc.per_billed, 2) < 100) {
+					cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice).addClass("btn-primary");
+				}
+				
+				if(flt(doc.per_ordered, 2) < 100 && flag_drop_ship)
+					cur_frm.add_custom_button(__('Make Shipment'), cur_frm.cscript.make_drop_shipment).addClass("btn-primary");
 
 			} else {
 				// un-stop
-				cur_frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Sales Order']);
+				if( doc.status != 'Closed')
+					cur_frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Sales Order']);
 			}
 		}
 
@@ -150,10 +167,36 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		});
 	},
 	make_drop_shipment: function(){
-		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_drop_shipment",
-			frm: cur_frm
-		})
+		var dialog = new frappe.ui.Dialog({
+			title: __("For Supplier"),
+			fields: [
+				{"fieldtype": "Link", "label": __("Supplier"), "fieldname": "supplier", "options":"Supplier",
+					"reqd": 1 },
+				{"fieldtype": "Button", "label": __("Proceed"), "fieldname": "proceed"},
+			]
+		});
+
+		dialog.fields_dict.proceed.$input.click(function() {
+			args = dialog.get_values();
+			if(!args) return;
+			dialog.hide();
+			return frappe.call({
+				type: "GET",
+				method: "erpnext.selling.doctype.sales_order.sales_order.make_drop_shipment",
+				args: {
+					"source_name": cur_frm.doc.name,
+					"for_supplier": args.supplier
+				},
+				freeze: true,
+				callback: function(r) {
+					if(!r.exc) {
+						var doc = frappe.model.sync(r.message);
+						frappe.set_route("Form", r.message.doctype, r.message.name);
+					}
+				}
+			})
+		});
+		dialog.show();
 	}
 
 });
@@ -185,7 +228,24 @@ cur_frm.cscript['Stop Sales Order'] = function() {
 	if (check) {
 		return $c('runserverobj', {
 			'method':'stop_sales_order',
-			'docs': doc
+			'docs': doc,
+			'arg': "Stopped"
+			}, function(r,rt) {
+			cur_frm.refresh();
+		});
+	}
+}
+
+cur_frm.cscript['Close Sales Order'] = function(){
+	var doc = cur_frm.doc;
+
+	var check = confirm(__("Are you sure you want to CLOSE ") + doc.name);
+
+	if (check) {
+		return $c('runserverobj', {
+			'method':'stop_sales_order',
+			'docs': doc,
+			'arg': "Closed"
 			}, function(r,rt) {
 			cur_frm.refresh();
 		});

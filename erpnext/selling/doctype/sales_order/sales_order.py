@@ -214,9 +214,9 @@ class SalesOrder(SellingController):
 		if date_diff and date_diff[0][0]:
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name))
 
-	def stop_sales_order(self):
+	def stop_sales_order(self, status):
 		self.check_modified_date()
-		self.db_set('status', 'Stopped')
+		self.db_set('status', status)
 		self.update_reserved_qty()
 		self.notify_update()
 		clear_doctype_notifications(self)
@@ -350,7 +350,7 @@ def make_delivery_note(source_name, target_doc=None):
 				"parent": "against_sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.delivered_qty < doc.qty
+			"condition": lambda doc: doc.delivered_qty < doc.qty and doc.is_drop_ship!=1
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
@@ -490,7 +490,7 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_drop_shipment(source_name, target_doc=None):
+def make_drop_shipment(source_name, for_supplier, target_doc=None):
 	def postprocess(source, target):
 		set_missing_values(source, target)
 		
@@ -500,7 +500,7 @@ def make_drop_shipment(source_name, target_doc=None):
 		target.contact_mobile = ""
 		target.contact_email = ""
 		target.contact_person = ""
-		target.ignore_pricing_rule = 1
+		target.drop_ship = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
@@ -529,10 +529,11 @@ def make_drop_shipment(source_name, target_doc=None):
 				["name", "prevdoc_detail_docname"],
 				["parent", "prevdoc_docname"],
 				["parenttype", "prevdoc_doctype"],
-				["uom", "stock_uom"]
+				["uom", "stock_uom"],
+				["delivery_date", "schedule_date"]
 			],
 			"postprocess": update_item,
-			"condition": lambda doc: doc.delivered_qty < doc.qty
+			"condition": lambda doc: doc.ordered_qty < doc.qty and doc.is_drop_ship==1 and doc.supplier == for_supplier
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
