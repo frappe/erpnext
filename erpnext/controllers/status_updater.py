@@ -215,8 +215,8 @@ class StatusUpdater(Document):
 		
 		args["drop_ship_cond"] = ''
 		
-		if getattr(self, "drop_ship", None):
-			if self.drop_ship == 1:
+		if getattr(self, "is_drop_ship", None):
+			if self.is_drop_ship == 1:
 				args["drop_ship_cond"] = " and is_drop_ship=1 "
 			
 		else:

@@ -162,7 +162,7 @@ class PurchaseOrder(BuyingController):
 		clear_doctype_notifications(self)
 
 	def on_submit(self):
-		if self.drop_ship == 1:
+		if self.is_drop_ship == 1:
 			self.status_updater[0].update({
 				"target_parent_dt": "Sales Order",
 				"target_parent_field": "per_ordered",
@@ -184,7 +184,7 @@ class PurchaseOrder(BuyingController):
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 
 	def on_cancel(self):
-		if self.drop_ship == 1:
+		if self.is_drop_ship == 1:
 			self.status_updater[0].update({
 				"target_parent_dt": "Sales Order",
 				"target_parent_field": "per_ordered",

@@ -500,7 +500,7 @@ def make_drop_shipment(source_name, for_supplier, target_doc=None):
 		target.contact_mobile = ""
 		target.contact_email = ""
 		target.contact_person = ""
-		target.drop_ship = 1
+		target.is_drop_ship = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
