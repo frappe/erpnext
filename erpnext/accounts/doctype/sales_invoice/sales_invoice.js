@@ -376,7 +376,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 // --------------------------------
 cur_frm.set_query("income_account", "items", function(doc) {
 	return{
-		query: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_income_account",
+		query: "erpnext.controllers.queries.get_income_account",
 		filters: {'company': doc.company}
 	}
 });
