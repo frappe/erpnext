@@ -221,7 +221,7 @@ class StatusUpdater(Document):
 			
 		else:
 			if self.doctype=="Delivery Note":
-				args["drop_ship_cond"] = " and is_drop_ship!=1 "
+				args["drop_ship_cond"] = " and is_drop_ship!=1 and supplier = '' "
 
 		for name in unique_transactions:
 			if not name:

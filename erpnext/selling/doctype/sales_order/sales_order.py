@@ -31,6 +31,7 @@ class SalesOrder(SellingController):
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_for_items()
 		self.validate_warehouse()
+		self.validate_drop_ship()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
@@ -147,6 +148,11 @@ class SalesOrder(SellingController):
 				doc.set_status(update=True)
 				doc.update_opportunity()
 
+	def validate_drop_ship(self):
+		for d in self.get('items'):
+			if d.is_drop_ship and not d.supplier:
+				frappe.throw(_("#{0} Set Supplier for item {1}").format(d.idx, d.item_code))
+
 	def on_submit(self):
 		super(SalesOrder, self).on_submit()
 
@@ -252,6 +258,9 @@ class SalesOrder(SellingController):
 
 	def on_update(self):
 		pass
+	
+	def before_update_after_submit(self):
+		self.validate_drop_ship()
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -350,7 +359,7 @@ def make_delivery_note(source_name, target_doc=None):
 				"parent": "against_sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.delivered_qty < doc.qty and doc.is_drop_ship!=1
+			"condition": lambda doc: doc.delivered_qty < doc.qty and (doc.is_drop_ship!=1 and not doc.supplier)
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
@@ -378,6 +387,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
+		target.supplier = source.supplier
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty
@@ -538,7 +548,7 @@ def make_drop_shipment(source_name, for_supplier, target_doc=None):
 				["delivery_date", "schedule_date"]
 			],
 			"postprocess": update_item,
-			"condition": lambda doc: doc.ordered_qty < doc.qty and doc.is_drop_ship==1 and doc.supplier == for_supplier
+			"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == for_supplier or (doc.is_drop_ship==1 and doc.supplier == for_supplier)
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
