@@ -495,6 +495,8 @@ def make_drop_shipment(source_name, for_supplier, target_doc=None):
 		set_missing_values(source, target)
 		
 	def set_missing_values(source, target):
+		target.supplier = for_supplier
+		target.buying_price_list = frappe.get_value("Supplier", for_supplier, "default_price_list") or 'Standard Buying'
 		target.address_display = ""
 		target.contact_display = ""
 		target.contact_mobile = ""
@@ -547,3 +549,32 @@ def make_drop_shipment(source_name, for_supplier, target_doc=None):
 	
 
 	return doclist
+
+@frappe.whitelist()
+def get_supplier(doctype, txt, searchfield, start, page_len, filters):
+	supp_master_name = frappe.defaults.get_user_default("supp_master_name")
+	if supp_master_name == "Supplier Name":
+		fields = ["name", "supplier_type"]
+	else:
+		fields = ["name", "supplier_name", "supplier_type"]
+	fields = ", ".join(fields)
+
+	return frappe.db.sql("""select {field} from `tabSupplier`
+		where docstatus < 2
+			and ({key} like %(txt)s
+				or supplier_name like %(txt)s)
+			and name in (select supplier from `tabSales Order Item` where parent = %(parent)s)
+		order by
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			if(locate(%(_txt)s, supplier_name), locate(%(_txt)s, supplier_name), 99999),
+			name, supplier_name
+		limit %(start)s, %(page_len)s """.format(**{
+			'field': fields,
+			'key': searchfield
+		}), {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len,
+			'parent': filters.get('parent')
+		})

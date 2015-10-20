@@ -52,7 +52,7 @@ class SalesInvoice(SellingController):
 		self.validate_proj_cust()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("stock_uom", "qty")
-		self.check_stop_sales_order("sales_order")
+		self.check_stop_or_close_sales_order("sales_order")
 		self.validate_debit_to_acc()
 		self.validate_fixed_asset_account()
 		self.clear_unallocated_advances("Sales Invoice Advance", "advances")
@@ -117,7 +117,7 @@ class SalesInvoice(SellingController):
 		if cint(self.update_stock) == 1:
 			self.update_stock_ledger()
 
-		self.check_stop_sales_order("sales_order")
+		self.check_stop_or_close_sales_order("sales_order")
 
 		from erpnext.accounts.utils import remove_against_link_from_jv
 		remove_against_link_from_jv(self.doctype, self.name)

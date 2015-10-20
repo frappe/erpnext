@@ -106,7 +106,7 @@ class DeliveryNote(SellingController):
 		self.set_status()
 		self.so_required()
 		self.validate_proj_cust()
-		self.check_stop_sales_order("against_sales_order")
+		self.check_stop_or_close_sales_order("against_sales_order")
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "qty")
@@ -203,7 +203,7 @@ class DeliveryNote(SellingController):
 
 
 	def on_cancel(self):
-		self.check_stop_sales_order("against_sales_order")
+		self.check_stop_or_close_sales_order("against_sales_order")
 		self.check_next_docstatus()
 
 		self.update_prevdoc_status()

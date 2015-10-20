@@ -22,7 +22,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			if(doc.status != 'Stopped' && doc.status != 'Closed') {
 				
 				$.each(cur_frm.doc.items, function(i, item){
-					if(item.is_drop_ship == 1){
+					if(item.is_drop_ship == 1 || item.supplier){
 						flag_drop_ship = true;
 					}
 					else{
@@ -68,7 +68,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 				
 				if(flt(doc.per_ordered, 2) < 100 && flag_drop_ship)
-					cur_frm.add_custom_button(__('Make Shipment'), cur_frm.cscript.make_drop_shipment).addClass("btn-primary");
+					cur_frm.add_custom_button(__('Make Purchase Order'), cur_frm.cscript.make_purchase_order).addClass("btn-primary");
 
 			} else {
 				// un-stop
@@ -166,12 +166,17 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			}
 		});
 	},
-	make_drop_shipment: function(){
+	make_purchase_order: function(){
 		var dialog = new frappe.ui.Dialog({
 			title: __("For Supplier"),
 			fields: [
 				{"fieldtype": "Link", "label": __("Supplier"), "fieldname": "supplier", "options":"Supplier",
-					"reqd": 1 },
+					"get_query": function () {
+						return {
+							query:"erpnext.selling.doctype.sales_order.sales_order.get_supplier",
+							filters: {'parent': cur_frm.doc.name}
+						}
+					}, "reqd": 1 },
 				{"fieldtype": "Button", "label": __("Proceed"), "fieldname": "proceed"},
 			]
 		});
