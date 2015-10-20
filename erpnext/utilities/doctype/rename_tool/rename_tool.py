@@ -51,5 +51,6 @@ def upload(select_doctype=None, rows=None):
 				rename_log.append("<span style='color: RED'>" + \
 					_("Failed: ") + row[0] + " -> " + row[1] + "</span>")
 				rename_log.append("<span style='margin-left: 20px;'>" + repr(e) + "</span>")
+				frappe.db.rollback()
 
 	return rename_log
