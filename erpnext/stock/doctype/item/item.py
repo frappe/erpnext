@@ -86,11 +86,16 @@ class Item(WebsiteGenerator):
 			self.thumbnail = None
 
 		if self.website_image and not self.thumbnail:
-			file_doc = frappe.get_doc("File", {
-				"file_url": self.website_image,
-				"attached_to_doctype": "Item",
-				"attached_to_name": self.name
-			})
+			file_doc = None
+
+			try:
+				file_doc = frappe.get_doc("File", {
+					"file_url": self.website_image,
+					"attached_to_doctype": "Item",
+					"attached_to_name": self.name
+				})
+			except frappe.DoesNotExistError:
+				pass
 
 			# for CSV import
 			if not file_doc:
