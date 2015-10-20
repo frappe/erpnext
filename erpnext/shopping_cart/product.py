@@ -14,25 +14,11 @@ def get_product_info(item_code):
 	if not is_cart_enabled():
 		return {}
 
-	cart_quotation = _get_cart_quotation()
-
-	price_list = cart_quotation.selling_price_list
-
-	warehouse = frappe.db.get_value("Item", item_code, "website_warehouse")
-	if warehouse:
-		in_stock = frappe.db.sql("""select actual_qty from tabBin where
-			item_code=%s and warehouse=%s""", (item_code, warehouse))
-		if in_stock:
-			in_stock = in_stock[0][0] > 0 and 1 or 0
-	else:
-		in_stock = -1
-
-	price = price_list and frappe.db.sql("""select price_list_rate, currency from
-		`tabItem Price` where item_code=%s and price_list=%s""",
-		(item_code, price_list), as_dict=1) or []
-
-	price = price and price[0] or None
 	qty = 0
+	cart_quotation = _get_cart_quotation()
+	template_item_code = frappe.db.get_value("Item", item_code, "variant_of")
+	in_stock = get_qty_in_stock(item_code, template_item_code)
+	price = get_price(item_code, template_item_code, cart_quotation.selling_price_list)
 
 	if price:
 		price["formatted_price"] = fmt_money(price["price_list_rate"], currency=price["currency"])
@@ -52,3 +38,31 @@ def get_product_info(item_code):
 		"uom": frappe.db.get_value("Item", item_code, "stock_uom"),
 		"qty": qty
 	}
+
+def get_qty_in_stock(item_code, template_item_code):
+	warehouse = frappe.db.get_value("Item", item_code, "website_warehouse")
+	if not warehouse and template_item_code and template_item_code != item_code:
+		warehouse = frappe.db.get_value("Item", template_item_code, "website_warehouse")
+
+	if warehouse:
+		in_stock = frappe.db.sql("""select actual_qty from tabBin where
+			item_code=%s and warehouse=%s""", (item_code, warehouse))
+		if in_stock:
+			in_stock = in_stock[0][0] > 0 and 1 or 0
+
+	else:
+		in_stock = -1
+
+	return in_stock
+
+def get_price(item_code, template_item_code, price_list):
+	if price_list:
+		price = frappe.get_all("Item Price", fields=["price_list_rate", "currency"],
+			filters={"price_list": price_list, "item_code": item_code})
+
+		if not price:
+			price = frappe.get_all("Item Price", fields=["price_list_rate", "currency"],
+				filters={"price_list": price_list, "item_code": template_item_code})
+
+		if price:
+			return price[0]

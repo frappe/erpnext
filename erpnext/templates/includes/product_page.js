@@ -9,7 +9,7 @@ frappe.ready(function() {
 		type: "POST",
 		method: "erpnext.shopping_cart.product.get_product_info",
 		args: {
-			item_code: "{{ name }}"
+			item_code: get_item_code()
 		},
 		callback: function(r) {
 			$(".item-cart").toggleClass("hide", !!!r.message.price);
@@ -62,6 +62,15 @@ frappe.ready(function() {
 				}
 			},
 		});
+	});
+
+	$("[itemscope] .item-view-attribute select").on("change", function() {
+		var item_code = encodeURIComponent(get_item_code());
+		if (window.location.search.indexOf(item_code)!==-1) {
+			return;
+		}
+
+		frappe.load_via_ajax(window.location.pathname + "?variant=" + item_code);
 	});
 });
 
