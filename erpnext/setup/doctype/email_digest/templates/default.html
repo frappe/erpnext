@@ -12,7 +12,7 @@
 
 <h1 style="{{ h1 }}">{{ title }}</h1>
 <h4 style="font-weight: normal; color: {{ text_muted }}; margin-top: 7px; font-size: 16px; margin-top: 7px;">
-    <p>{% if frequency == "Daily "%}
+    <p>{% if frequency == "Daily" %}
         {{ frappe.format_date(future_from_date) }}
     {% else %}
         {{ frappe.format_date(future_from_date) }} - {{ frappe.format_date(future_to_date) }}
