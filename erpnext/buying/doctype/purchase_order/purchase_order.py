@@ -39,7 +39,7 @@ class PurchaseOrder(BuyingController):
 		self.set_status()
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
-		self.check_for_stopped_status(pc_obj)
+		self.check_for_stopped_or_closed_status(pc_obj)
 
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", ["qty", "required_qty"])
@@ -108,12 +108,12 @@ class PurchaseOrder(BuyingController):
 							= d.rate = item_last_purchase_rate
 
 	# Check for Stopped status
-	def check_for_stopped_status(self, pc_obj):
+	def check_for_stopped_or_closed_status(self, pc_obj):
 		check_list =[]
 		for d in self.get('items'):
 			if d.meta.get_field('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
 				check_list.append(d.prevdoc_docname)
-				pc_obj.check_for_stopped_status( d.prevdoc_doctype, d.prevdoc_docname)
+				pc_obj.check_for_stopped_or_closed_status( d.prevdoc_doctype, d.prevdoc_docname)
 
 	def update_requested_qty(self):
 		material_request_map = {}
@@ -193,7 +193,7 @@ class PurchaseOrder(BuyingController):
 			})
 		
 		pc_obj = frappe.get_doc('Purchase Common')
-		self.check_for_stopped_status(pc_obj)
+		self.check_for_stopped_or_closed_status(pc_obj)
 
 		# Check if Purchase Receipt has been submitted against current Purchase Order
 		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Receipt', docname = self.name, detail_doctype = 'Purchase Receipt Item')

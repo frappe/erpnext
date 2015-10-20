@@ -67,7 +67,7 @@ class PurchaseReceipt(BuyingController):
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
-		self.check_for_stopped_status(pc_obj)
+		self.check_for_stopped_or_closed_status(pc_obj)
 
 		# sub-contracting
 		self.validate_for_subcontracting()
@@ -219,12 +219,12 @@ class PurchaseReceipt(BuyingController):
 					raise frappe.ValidationError
 
 	# Check for Stopped status
-	def check_for_stopped_status(self, pc_obj):
+	def check_for_stopped_or_closed_status(self, pc_obj):
 		check_list =[]
 		for d in self.get('items'):
 			if d.meta.get_field('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
 				check_list.append(d.prevdoc_docname)
-				pc_obj.check_for_stopped_status(d.prevdoc_doctype, d.prevdoc_docname)
+				pc_obj.check_for_stopped_or_closed_status(d.prevdoc_doctype, d.prevdoc_docname)
 
 	# on submit
 	def on_submit(self):
@@ -260,7 +260,7 @@ class PurchaseReceipt(BuyingController):
 	def on_cancel(self):
 		pc_obj = frappe.get_doc('Purchase Common')
 
-		self.check_for_stopped_status(pc_obj)
+		self.check_for_stopped_or_closed_status(pc_obj)
 		# Check if Purchase Invoice has been submitted against current Purchase Order
 		submitted = frappe.db.sql("""select t1.name
 			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
