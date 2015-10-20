@@ -14,7 +14,8 @@ frappe.views.calendar["Holiday List"] = {
 			"fieldtype": "Link",
 			"fieldname": "fiscal_year",
 			"options": "Fiscal Year",
-			"label": __("Fiscal Year")
+			"label": __("Fiscal Year"),
+			"default": frappe.defaults.get_user_default("fiscal_year")
 		}
 	],
 	get_events_method: "erpnext.hr.doctype.holiday_list.holiday_list.get_events"
