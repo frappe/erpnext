@@ -51,7 +51,7 @@ def validate_item_variant_attributes(item, args):
 				frappe.throw(_("Increment for Attribute {0} cannot be 0").format(attribute))
 
 			is_in_range = from_range <= flt(value) <= to_range
-			precision = len(cstr(increment).split(".")[-1].rstrip("0"))
+			precision = max(len(cstr(v).split(".")[-1].rstrip("0")) for v in (value, increment))
 			#avoid precision error by rounding the remainder
 			remainder = flt((flt(value) - from_range) % increment, precision)
 
