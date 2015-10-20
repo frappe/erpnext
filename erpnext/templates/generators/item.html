@@ -38,8 +38,11 @@
                             <select class="form-control"
                                 style="max-width: 140px"
                                 data-attribute="{{ d.attribute }}">
-                            {% for value in attribute_values[d.attribute] %}
-                            <option value="{{ value }}">{{ _(value) }}</option>
+							{% for value in attribute_values[d.attribute] %}
+                            <option value="{{ value }}"
+								{% if selected_attributes and selected_attributes[d.attribute]==value -%} selected {%- endif %}>
+								{{ _(value) }}
+							</option>
                             {% endfor %}
                             </select>
                         </div>
@@ -71,13 +74,13 @@
 				</div>
 			</div>
 		</div>
-		{% if doc.get({"doctype":"Item Website Specification"}) -%}
-		<div class="row" style="margin-top: 20px">
+		{% if website_specifications -%}
+		<div class="row item-website-specification" style="margin-top: 20px">
 			<div class="col-md-12">
 				<h4>{{ _("Specifications") }}</h4>
+
 				<table class="table table-bordered" style="width: 100%">
-				{% for d in doc.get(
-					{"doctype":"Item Website Specification"}) -%}
+				{% for d in website_specifications -%}
 					<tr>
 						<td style="width: 30%;">{{ d.label }}</td>
 						<td>{{ d.description }}</td>

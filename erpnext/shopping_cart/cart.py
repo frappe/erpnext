@@ -292,6 +292,7 @@ def get_customer(user=None):
 			"customer_group": get_shopping_cart_settings().default_customer_group,
 			"territory": get_root_of("Territory")
 		})
+		customer.ignore_mandatory = True
 		customer.insert(ignore_permissions=True)
 
 		contact = frappe.new_doc("Contact")
@@ -300,6 +301,7 @@ def get_customer(user=None):
 			"first_name": fullname,
 			"email_id": user
 		})
+		contact.ignore_mandatory = True
 		contact.insert(ignore_permissions=True)
 
 		return customer
