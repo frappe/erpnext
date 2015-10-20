@@ -300,10 +300,10 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.selling.doctype.sales_order.sales_order import make_drop_shipment, make_delivery_note
 		from erpnext.stock.doctype.item.test_item import make_item
 
-		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 0, "is_sales_item": 1,
+		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "is_sales_item": 1,
 			"is_purchase_item": 1, "is_drop_ship": 1, 'default_supplier': '_Test Supplier'})
 
-		dn_item = make_item("_Test Regular Item", {"is_stock_item": 0, "is_sales_item": 1,
+		dn_item = make_item("_Test Regular Item", {"is_stock_item": 1, "is_sales_item": 1,
 			"is_purchase_item": 1})
 
 		so_items = [
