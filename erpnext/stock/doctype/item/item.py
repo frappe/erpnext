@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import json
+import urllib
 from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate
 from frappe.website.website_generator import WebsiteGenerator
@@ -79,6 +80,7 @@ class Item(WebsiteGenerator):
 		self.validate_name_with_item_group()
 		self.update_item_price()
 		self.update_variants()
+		self.update_template_item()
 
 	def make_thumbnail(self):
 		"""Make a thumbnail of `website_image`"""
@@ -113,18 +115,59 @@ class Item(WebsiteGenerator):
 				self.thumbnail = file_doc.thumbnail_url
 
 	def get_context(self, context):
+		if self.variant_of:
+			# redirect to template page!
+			template_item = frappe.get_doc("Item", self.variant_of)
+			frappe.flags.redirect_location = template_item.get_route() + "?variant=" + urllib.quote(self.name)
+			raise frappe.Redirect
+
 		context.parent_groups = get_parent_item_groups(self.item_group) + \
 			[{"name": self.name}]
-		if self.slideshow:
-			context.update(get_slideshow(self))
 
+		self.set_variant_context(context)
+
+		self.set_attribute_context(context)
+
+		context.parents = self.get_parents(context)
+
+		return context
+
+	def set_variant_context(self, context):
+		if self.has_variants:
+			context.no_cache = True
+
+			# load variants
+			# also used in set_attribute_context
+			context.variants = frappe.get_all("Item",
+				filters={"variant_of": self.name, "show_in_website": 1}, order_by="name asc")
+
+			variant = frappe.form_dict.variant
+			if not variant:
+				# the case when the item is opened for the first time from its list
+				variant = context.variants[0]
+
+			context.variant = frappe.get_doc("Item", variant)
+
+			for fieldname in ("website_image", "web_long_description", "description",
+				"website_specifications"):
+				if context.variant.get(fieldname):
+					value = context.variant.get(fieldname)
+					if isinstance(value, list):
+						value = [d.as_dict() for d in value]
+
+					context[fieldname] = value
+
+		if self.slideshow:
+			if context.variant and context.variant.slideshow:
+				context.update(get_slideshow(context.variant))
+			else:
+				context.update(get_slideshow(self))
+
+	def set_attribute_context(self, context):
 		if self.has_variants:
 			attribute_values_available = {}
 			context.attribute_values = {}
-
-			# load variants
-			context.variants = frappe.get_all("Item",
-				filters={"variant_of": self.name, "show_in_website": 1})
+			context.selected_attributes = {}
 
 			# load attributes
 			for v in context.variants:
@@ -135,6 +178,9 @@ class Item(WebsiteGenerator):
 					values = attribute_values_available.setdefault(attr.attribute, [])
 					if attr.attribute_value not in values:
 						values.append(attr.attribute_value)
+
+					if v.name==context.variant.name:
+						context.selected_attributes[attr.attribute] = attr.attribute_value
 
 			# filter attributes, order based on attribute table
 			for attr in self.attributes:
@@ -148,10 +194,6 @@ class Item(WebsiteGenerator):
 						values.append(attr_value.attribute_value)
 
 			context.variant_info = json.dumps(context.variants)
-
-		context.parents = self.get_parents(context)
-
-		return context
 
 	def check_warehouse_is_set_for_stock_item(self):
 		if self.is_stock_item==1 and not self.default_warehouse and frappe.get_all("Warehouse"):
@@ -359,6 +401,16 @@ class Item(WebsiteGenerator):
 				item_code = %s and docstatus < 2""",(self.description, self.name))
 			frappe.db.sql("""update `tabBOM Explosion Item` set description = %s where
 				item_code = %s and docstatus < 2""",(self.description, self.name))
+
+	def update_template_item(self):
+		"""Set Show in Website for Template Item if True for its Variant"""
+		if self.variant_of and self.show_in_website:
+			template_item = frappe.get_doc("Item", self.variant_of)
+
+			if not template_item.show_in_website:
+				template_item.show_in_website = 1
+				template_item.flags.ignore_permissions = True
+				template_item.save()
 
 	def update_variants(self):
 		if self.has_variants:
