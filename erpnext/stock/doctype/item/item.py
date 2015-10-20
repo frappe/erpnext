@@ -98,6 +98,8 @@ class Item(WebsiteGenerator):
 				})
 			except frappe.DoesNotExistError:
 				pass
+				# cleanup
+				frappe.local.message_log.pop()
 
 			# for CSV import
 			if not file_doc:
