@@ -26,29 +26,31 @@
 				<p class="text-muted">
 					{{ _("Item Code") }}: <span itemprop="productID">{{ name }}</span></p>
 				<br>
+				<div class="item-attribute-selectors">
+                    {% if has_variants %}
+                    {% for d in attributes %}
+                    <div class="item-view-attribute"
+                            style="margin-bottom: 10px;">
+                        <h6 class="text-muted">{{ _(d.attribute) }}</h6>
+                        <select class="form-control"
+                            style="max-width: 140px"
+                            data-attribute="{{ d.attribute }}">
+						{% for value in attribute_values[d.attribute] %}
+                        <option value="{{ value }}"
+							{% if selected_attributes and selected_attributes[d.attribute]==value -%} selected {%- endif %}>
+							{{ _(value) }}
+						</option>
+                        {% endfor %}
+                        </select>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+				</div>
+				<br>
 				<div style="min-height: 100px; margin: 10px 0;">
 					<h4 class="item-price" itemprop="price"></h4>
 					<div class="item-stock" itemprop="availablity"></div>
                     <div class="item-cart hide">
-                        {% if has_variants %}
-                        {% for d in attributes %}
-                        <div class="item-view-attribute"
-                                style="margin-bottom: 10px;">
-                            <h6 class="text-muted">{{ _(d.attribute) }}</h6>
-                            <select class="form-control"
-                                style="max-width: 140px"
-                                data-attribute="{{ d.attribute }}">
-							{% for value in attribute_values[d.attribute] %}
-                            <option value="{{ value }}"
-								{% if selected_attributes and selected_attributes[d.attribute]==value -%} selected {%- endif %}>
-								{{ _(value) }}
-							</option>
-                            {% endfor %}
-                            </select>
-                        </div>
-                        {% endfor %}
-                        {% endif %}
-                        </select>
     					<div id="item-add-to-cart">
     						<button class="btn btn-primary btn-sm">
     							{{ _("Add to Cart") }}</button>
