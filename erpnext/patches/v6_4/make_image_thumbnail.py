@@ -3,8 +3,8 @@ import frappe
 def execute():
 	frappe.reload_doctype("File")
 	frappe.reload_doctype("Item")
-	for item in frappe.get_all("Item", fields=("name", "website_image")):
-		if item.website_image:
+	for item in frappe.get_all("Item", fields=("name", "website_image", "thumbnail")):
+		if item.website_image and not item.thumbnail:
 			item_doc = frappe.get_doc("Item", item.name)
 			try:
 				item_doc.make_thumbnail()
