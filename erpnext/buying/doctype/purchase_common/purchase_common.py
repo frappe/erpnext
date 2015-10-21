@@ -83,11 +83,9 @@ class PurchaseCommon(BuyingController):
 	def check_for_stopped_or_closed_status(self, doctype, docname):
 		status = frappe.db.get_value(doctype, docname, "status")
 		
-		if status == "Stopped":
-			frappe.throw(_("{0} {1} status is Stopped").format(doctype, docname), frappe.InvalidStatusError)
-		if status == "Closed":
-			frappe.throw(_("{0} {1} status is Closed").format(doctype, docname), frappe.InvalidStatusError)
-
+		if status in ("Stopped", "Closed"):
+			frappe.throw(_("{0} {1} status is {2}").format(doctype, docname, status), frappe.InvalidStatusError)
+		
 	def check_docstatus(self, check, doctype, docname, detail_doctype = ''):
 		if check == 'Next':
 			submitted = frappe.db.sql("""select t1.name from `tab%s` t1,`tab%s` t2

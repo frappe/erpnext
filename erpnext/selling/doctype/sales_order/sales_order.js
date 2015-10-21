@@ -15,18 +15,18 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		this._super();
 		this.frm.dashboard.reset();
-		var flag_drop_ship = false;
-		var flag_delivery_note = false;
+		var is_drop_ship = false;
+		var is_delivery_note = false;
 		
 		if(doc.docstatus==1) {
 			if(doc.status != 'Stopped' && doc.status != 'Closed') {
 				
 				$.each(cur_frm.doc.items, function(i, item){
 					if(item.is_drop_ship == 1 || item.supplier){
-						flag_drop_ship = true;
+						is_drop_ship = true;
 					}
 					else{
-						flag_delivery_note = true;
+						is_delivery_note = true;
 					}
 				})
 
@@ -44,13 +44,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 
 				// stop
-				if((flt(doc.per_delivered, 2) < 100 && flag_delivery_note) || doc.per_billed < 100 
-					|| (flt(doc.per_ordered,2) < 100 && flag_drop_ship)){
-						cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Sales Order'])
+				if((flt(doc.per_delivered, 2) < 100 && is_delivery_note) || doc.per_billed < 100 
+					|| (flt(doc.per_ordered,2) < 100 && is_drop_ship)){
+						cur_frm.add_custom_button(__('Stop'), this.stop_sales_order)
 					}
 				
 				
-				cur_frm.add_custom_button(__('Close'), cur_frm.cscript['Close Sales Order'])
+				cur_frm.add_custom_button(__('Close'), this.close_sales_order)
 
 				// maintenance
 				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)===-1) {
@@ -59,7 +59,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 
 				// delivery note
-				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && flag_delivery_note)
+				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && is_delivery_note)
 					cur_frm.add_custom_button(__('Delivery'), this.make_delivery_note).addClass("btn-primary");
 
 				// sales invoice
@@ -67,7 +67,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice).addClass("btn-primary");
 				}
 				
-				if(flt(doc.per_ordered, 2) < 100 && flag_drop_ship)
+				if(flt(doc.per_ordered, 2) < 100 && is_drop_ship)
 					cur_frm.add_custom_button(__('Make Purchase Order'), cur_frm.cscript.make_purchase_order).addClass("btn-primary");
 
 			} else {
@@ -187,7 +187,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			dialog.hide();
 			return frappe.call({
 				type: "GET",
-				method: "erpnext.selling.doctype.sales_order.sales_order.make_drop_shipment",
+				method: "erpnext.selling.doctype.sales_order.sales_order.make_purchase_order_for_drop_shipment",
 				args: {
 					"source_name": cur_frm.doc.name,
 					"for_supplier": args.supplier
@@ -202,6 +202,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			})
 		});
 		dialog.show();
+	},
+	stop_sales_order: function(){
+		cur_frm.cscript.update_status("Stop", "Stopped") 
+	},
+	close_sales_order: function(){
+		cur_frm.cscript.update_status("Close", "Closed") 
 	}
 
 });
@@ -225,19 +231,18 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 	}
 }
 
-cur_frm.cscript['Stop Sales Order'] = function() {
+cur_frm.cscript.update_status = function(label, status){
 	var doc = cur_frm.doc;
-
-	var check = confirm(__("Are you sure you want to STOP ") + doc.name);
-
+	var check = confirm(__("Do you really want to {0} {1}",[label, doc.name]));
+	
 	if (check) {
-		return $c('runserverobj', {
-			'method':'stop_sales_order',
-			'docs': doc,
-			'arg': "Stopped"
-			}, function(r,rt) {
-			cur_frm.refresh();
-		});
+		frappe.call({
+			method: "erpnext.selling.doctype.sales_order.sales_order.update_status",
+			args:{status: status, name: doc.name},
+			callback:function(r){
+				cur_frm.refresh();
+			}
+		})
 	}
 }
 
@@ -251,22 +256,6 @@ cur_frm.cscript['Unstop Sales Order'] = function() {
 			'method':'unstop_sales_order',
 			'docs': doc
 		}, function(r,rt) {
-			cur_frm.refresh();
-		});
-	}
-}
-
-cur_frm.cscript['Close Sales Order'] = function(){
-	var doc = cur_frm.doc;
-
-	var check = confirm(__("Are you sure you want to CLOSE ") + doc.name);
-
-	if (check) {
-		return $c('runserverobj', {
-			'method':'stop_sales_order',
-			'docs': doc,
-			'arg': "Closed"
-			}, function(r,rt) {
 			cur_frm.refresh();
 		});
 	}

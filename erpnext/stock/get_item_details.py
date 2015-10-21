@@ -30,8 +30,7 @@ def get_item_details(args):
 			"is_subcontracted": "Yes" / "No",
 			"transaction_type": "selling",
 			"ignore_pricing_rule": 0/1
-			"project_name": "",
-			"default_supplier":""
+			"project_name": ""
 		}
 	"""
 	args = process_args(args)

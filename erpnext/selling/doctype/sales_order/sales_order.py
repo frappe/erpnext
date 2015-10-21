@@ -151,7 +151,7 @@ class SalesOrder(SellingController):
 	def validate_drop_ship(self):
 		for d in self.get('items'):
 			if d.is_drop_ship and not d.supplier:
-				frappe.throw(_("#{0} Set Supplier for item {1}").format(d.idx, d.item_code))
+				frappe.throw(_("Row #{0}: Set Supplier for item {1}").format(d.idx, d.item_code))
 
 	def on_submit(self):
 		super(SalesOrder, self).on_submit()
@@ -359,7 +359,7 @@ def make_delivery_note(source_name, target_doc=None):
 				"parent": "against_sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.delivered_qty < doc.qty and (doc.is_drop_ship!=1 and not doc.supplier)
+			"condition": lambda doc: doc.delivered_qty < doc.qty and doc.is_drop_ship!=1
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
@@ -387,7 +387,6 @@ def make_sales_invoice(source_name, target_doc=None):
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
-		target.supplier = source.supplier
 		target.amount = flt(source.amount) - flt(source.billed_amt)
 		target.base_amount = target.amount * flt(source_parent.conversion_rate)
 		target.qty = target.amount / flt(source.rate) if (source.rate and source.billed_amt) else source.qty
@@ -500,28 +499,20 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_drop_shipment(source_name, for_supplier, target_doc=None):
-	def postprocess(source, target):
-		set_missing_values(source, target)
-		
+def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=None):	
 	def set_missing_values(source, target):
 		target.supplier = for_supplier
-		target.buying_price_list = frappe.get_value("Supplier", for_supplier, "default_price_list") or 'Standard Buying'
-		target.address_display = ""
-		target.contact_display = ""
-		target.contact_mobile = ""
-		target.contact_email = ""
-		target.contact_person = ""
+		
+		default_price_list = frappe.get_value("Supplier", for_supplier, "default_price_list")
+		if default_price_list:
+			target.buying_price_list = default_price_list
+			
 		target.is_drop_ship = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
 		target.schedule_date = source_parent.delivery_date
-		target.rate = ''
-		target.price_list_rate = ''
-		target.base_amount = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.base_rate)
-		target.amount = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.rate)
 		target.qty = flt(source.qty) - flt(source.ordered_qty)
 
 	doclist = get_mapped_doc("Sales Order", source_name, {
@@ -534,6 +525,13 @@ def make_drop_shipment(source_name, for_supplier, target_doc=None):
 				"contact_email": "customer_contact_email",
 				"contact_person": "customer_contact_person"
 			},
+			"field_no_map": [
+				"address_display", 
+				"contact_display", 
+				"contact_mobile", 
+				"contact_email", 
+				"contact_person"
+			],
 			"validation": {
 				"docstatus": ["=", 1]
 			}
@@ -547,14 +545,18 @@ def make_drop_shipment(source_name, for_supplier, target_doc=None):
 				["uom", "stock_uom"],
 				["delivery_date", "schedule_date"]
 			],
+			"field_no_map": [
+				"rate",
+				"price_list_rate"
+			],
 			"postprocess": update_item,
-			"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == for_supplier or (doc.is_drop_ship==1 and doc.supplier == for_supplier)
+			"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == for_supplier
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
 			"add_if_empty": True
 		}
-	}, target_doc, postprocess)
+	}, target_doc, set_missing_values)
 	
 	
 
@@ -588,3 +590,9 @@ def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 			'page_len': page_len,
 			'parent': filters.get('parent')
 		})
+
+@frappe.whitelist()
+def update_status(status, name):
+	so = frappe.get_doc("Sales Order", name)
+	so.stop_sales_order(status)
+	return

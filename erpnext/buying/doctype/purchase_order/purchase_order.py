@@ -163,12 +163,7 @@ class PurchaseOrder(BuyingController):
 
 	def on_submit(self):
 		if self.is_drop_ship == 1:
-			self.status_updater[0].update({
-				"target_parent_dt": "Sales Order",
-				"target_parent_field": "per_ordered",
-				"target_dt": "Sales Order Item",
-				'target_field': 'ordered_qty'
-			})
+			self.update_status_updater()
 		
 		super(PurchaseOrder, self).on_submit()
 
@@ -185,12 +180,7 @@ class PurchaseOrder(BuyingController):
 
 	def on_cancel(self):
 		if self.is_drop_ship == 1:
-			self.status_updater[0].update({
-				"target_parent_dt": "Sales Order",
-				"target_parent_field": "per_ordered",
-				"target_dt": "Sales Order Item",
-				'target_field': 'ordered_qty'
-			})
+			self.update_status_updater()
 		
 		pc_obj = frappe.get_doc('Purchase Common')
 		self.check_for_stopped_or_closed_status(pc_obj)
@@ -229,6 +219,14 @@ class PurchaseOrder(BuyingController):
 			for field in ("received_qty", "billed_amt", "prevdoc_doctype", "prevdoc_docname",
 				"prevdoc_detail_docname", "supplier_quotation", "supplier_quotation_item"):
 					d.set(field, None)
+					
+	def update_status_updater(self):
+		self.status_updater[0].update({
+			"target_parent_dt": "Sales Order",
+			"target_parent_field": "per_ordered",
+			"target_dt": "Sales Order Item",
+			'target_field': 'ordered_qty'
+		})
 
 @frappe.whitelist()
 def stop_or_unstop_purchase_orders(names, status):
@@ -341,3 +339,9 @@ def make_stock_entry(purchase_order, item_code):
 	stock_entry.bom_no = po_item.bom
 	stock_entry.get_items()
 	return stock_entry.as_dict()
+
+@frappe.whitelist()
+def update_status(status, name):
+	po = frappe.get_doc("Purchase Order", name)
+	po.update_status(status)
+	return 

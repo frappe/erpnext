@@ -51,9 +51,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		if(doc.docstatus==1 && !doc.is_return) {
 			
-			var flag_delivery_note = false;
+			var is_drop_ship = false;
 			
-			flag_delivery_note = cur_frm.doc.items.some(function(item){
+			is_drop_ship = cur_frm.doc.items.some(function(item){
 				return item.is_drop_ship ? true : false;
 			})
 			
@@ -68,7 +68,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						return item.delivery_note ? true : false;
 					});
 
-				if(!from_delivery_note && flag_delivery_note) {
+				if(!from_delivery_note && !is_drop_ship) {
 					cur_frm.add_custom_button(__('Delivery'), cur_frm.cscript['Make Delivery Note']).addClass("btn-primary");
 				}
 			}
