@@ -21,7 +21,7 @@ frappe.ui.form.on("Rename Tool", {
 					select_doctype: frm.doc.select_doctype
 				},
 				callback: function(r) {
-					frm.get_field("rename_log").$wrapper.html(r.message);
+					frm.get_field("rename_log").$wrapper.html(r.message.join("<br>"));
 				}
 			});
 		});
