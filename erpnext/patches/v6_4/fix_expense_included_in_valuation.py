@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Web Notes Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
@@ -6,8 +6,6 @@ import frappe
 from frappe.utils import cstr
 
 def execute():
-	stock_items = [r[0] for r in frappe.db.sql("""select name from `tabItem` where is_stock_item=1""")]
-	
 	for company in frappe.db.sql("select name, expenses_included_in_valuation from tabCompany", as_dict=1):
 		frozen_date = get_frozen_date(company.name, company.expenses_included_in_valuation)
 	
@@ -24,9 +22,9 @@ def execute():
 				and pi.is_opening = 'No'
 				and (pi_item.item_tax_amount is not null and pi_item.item_tax_amount > 0)
 				and (pi_item.purchase_receipt is null or pi_item.purchase_receipt = '')
-				and pi_item.item_code in (%s)
-		""" % ('%s', '%s', ', '.join(['%s']*len(stock_items))), 
-			tuple([company.name, frozen_date] + stock_items), as_dict=1)
+				and (pi_item.item_code is not null and pi_item.item_code != '')
+				and exists(select name from `tabItem` where name=pi_item.item_code and is_stock_item=1)
+		""", (company.name, frozen_date), as_dict=1)
 		
 		for pi in pi_list:
 			# Check whether gle exists for Expenses Included in Valuation account against the PI
