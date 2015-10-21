@@ -412,10 +412,11 @@ class Item(WebsiteGenerator):
 			if not template_item.show_in_website:
 				template_item.show_in_website = 1
 				template_item.flags.ignore_permissions = True
+				template_item.flags.dont_update_variants = True
 				template_item.save()
 
 	def update_variants(self):
-		if self.has_variants:
+		if self.has_variants and not self.flags.dont_update_variants:
 			updated = []
 			variants = frappe.db.get_all("Item", fields=["item_code"], filters={"variant_of": self.name })
 			for d in variants:
