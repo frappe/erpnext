@@ -168,7 +168,7 @@ class EmailDigest(Document):
 		for key in ("income", "expenses_booked", "income_year_to_date", "expense_year_to_date",
 			"invoiced_amount", "payables", "bank_balance"):
 			if self.get(key):
-				cache_key = "email_digest:card:" + key
+				cache_key = "email_digest:card:{0}:{1}".format(self.company, key)
 				card = cache.get(cache_key)
 
 				if card:
