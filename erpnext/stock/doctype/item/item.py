@@ -144,20 +144,21 @@ class Item(WebsiteGenerator):
 				filters={"variant_of": self.name, "show_in_website": 1}, order_by="name asc")
 
 			variant = frappe.form_dict.variant
-			if not variant:
+			if not variant and context.variants:
 				# the case when the item is opened for the first time from its list
 				variant = context.variants[0]
 
-			context.variant = frappe.get_doc("Item", variant)
+			if variant:
+				context.variant = frappe.get_doc("Item", variant)
 
-			for fieldname in ("website_image", "web_long_description", "description",
-				"website_specifications"):
-				if context.variant.get(fieldname):
-					value = context.variant.get(fieldname)
-					if isinstance(value, list):
-						value = [d.as_dict() for d in value]
+				for fieldname in ("website_image", "web_long_description", "description",
+					"website_specifications"):
+					if context.variant.get(fieldname):
+						value = context.variant.get(fieldname)
+						if isinstance(value, list):
+							value = [d.as_dict() for d in value]
 
-					context[fieldname] = value
+						context[fieldname] = value
 
 		if self.slideshow:
 			if context.variant and context.variant.slideshow:
