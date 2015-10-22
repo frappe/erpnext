@@ -13,7 +13,7 @@ cur_frm.fields_dict['closing_account_head'].get_query = function(doc, cdt, cdn) 
 	return{
 		filters:{
 			"company": doc.company,
-			"report_type": "Balance Sheet",
+			"root_type": "Liability",
 			"freeze_account": "No",
 			"is_group": 0
 		}
