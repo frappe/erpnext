@@ -325,7 +325,7 @@ def get_pos_profile(company):
 def get_serial_nos_by_fifo(args, item_doc):
 	if frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo"):
 		return "\n".join(frappe.db.sql_list("""select name from `tabSerial No`
-			where item_code=%(item_code)s and warehouse=%(warehouse)s and status='Available'
+			where item_code=%(item_code)s and warehouse=%(warehouse)s
 			order by timestamp(purchase_date, purchase_time) asc limit %(qty)s""", {
 				"item_code": args.item_code,
 				"warehouse": args.warehouse,

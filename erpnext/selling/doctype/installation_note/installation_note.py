@@ -50,14 +50,6 @@ class InstallationNote(TransactionBase):
 			if not frappe.db.exists("Serial No", x):
 				frappe.throw(_("Serial No {0} does not exist").format(x))
 
-	def is_serial_no_installed(self,cur_s_no,item_code):
-		for x in cur_s_no:
-			status = frappe.db.sql("select status from `tabSerial No` where name = %s", x)
-			status = status and status[0][0] or ''
-
-			if status == 'Installed':
-				frappe.throw(_("Item {0} with Serial No {1} is already installed").format(item_code, x))
-
 	def get_prevdoc_serial_no(self, prevdoc_detail_docname):
 		serial_nos = frappe.db.get_value("Delivery Note Item",
 			prevdoc_detail_docname, "serial_no")
@@ -80,7 +72,6 @@ class InstallationNote(TransactionBase):
 				if prevdoc_s_no:
 					self.is_serial_no_match(sr_list, prevdoc_s_no, d.prevdoc_docname)
 
-				self.is_serial_no_installed(sr_list, d.item_code)
 
 	def validate_installation_date(self):
 		for d in self.get('items'):
@@ -102,11 +93,5 @@ class InstallationNote(TransactionBase):
 		frappe.db.set(self, 'status', 'Submitted')
 
 	def on_cancel(self):
-		for d in self.get('items'):
-			if d.serial_no:
-				d.serial_no = d.serial_no.replace(",", "\n")
-				for sr_no in d.serial_no.split("\n"):
-					frappe.db.set_value("Serial No", sr_no, "status", "Delivered")
-
 		self.update_prevdoc_status()
 		frappe.db.set(self, 'status', 'Cancelled')
