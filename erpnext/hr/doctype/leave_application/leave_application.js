@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.add_fetch('employee','employee_name','employee_name');
+cur_frm.add_fetch('employee','company','company');
 
 frappe.ui.form.on("Leave Application", {
 	onload: function(frm) {
