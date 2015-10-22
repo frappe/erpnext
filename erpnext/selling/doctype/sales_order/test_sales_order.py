@@ -324,17 +324,48 @@ class TestSalesOrder(unittest.TestCase):
 				"conversion_factor": 1.0
 			}
 		]
-
+		
+		existing_ordered_qty, existing_reserved_qty = frappe.db.get_value("Bin", {"item_code": po_item.item_code, 
+			"Warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
+					
 		so = make_sales_order(item_list=so_items)
 		po = make_purchase_order_for_drop_shipment(so.name, '_Test Supplier')
+		po.submit()
+		
 		dn = make_delivery_note(so.name)
+		
 
 		self.assertEquals(so.customer, po.customer)
 		self.assertEquals(po.items[0].prevdoc_doctype, "Sales Order")
 		self.assertEquals(po.items[0].prevdoc_docname, so.name)
 		self.assertEquals(po.items[0].item_code, po_item.item_code)
 		self.assertEquals(dn.items[0].item_code, dn_item.item_code)
-
+		
+		#test ordered_qty and reserved_qty		
+		ordered_qty, reserved_qty = frappe.db.get_value("Bin", {"item_code": po_item.item_code, 
+			"Warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
+					
+		self.assertEquals(abs(ordered_qty), (existing_ordered_qty + so_items[0]['qty']))			
+		self.assertEquals(abs(reserved_qty), (existing_reserved_qty + so_items[0]['qty']))	
+		
+		#test po_item length
+		self.assertEquals(len(po.items), 1)
+		
+	def test_reserved_qty_for_closing_so(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		
+		item = make_item("_Test Close Item", {"is_stock_item": 1, "is_sales_item": 1,
+			"is_purchase_item": 1})
+			
+		so = make_sales_order(item_code=item.item_code, qty=1)
+		
+		self.assertEquals(get_reserved_qty(item_code=item.item_code, warehouse="_Test Warehouse - _TC"), 1)
+		
+		so.stop_sales_order("Closed")
+		
+		self.assertEquals(get_reserved_qty(item_code=item.item_code, warehouse="_Test Warehouse - _TC"), 0)
+		
+		
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
 	args = frappe._dict(args)

@@ -70,6 +70,20 @@ class TestPurchaseOrder(unittest.TestCase):
 		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
 		po = create_purchase_order(qty=3.4, do_not_save=True)
 		self.assertRaises(UOMMustBeIntegerError, po.insert)
+	
+	def test_ordered_qty_for_closing_po(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		
+		item = make_item("_Test Close Item", {"is_stock_item": 1, "is_sales_item": 1,
+			"is_purchase_item": 1})
+			
+		po = create_purchase_order(item_code=item.item_code, qty=1)
+		
+		self.assertEquals(get_ordered_qty(item_code=item.item_code, warehouse="_Test Warehouse - _TC"), 1)
+		
+		po.update_status("Closed")
+		
+		self.assertEquals(get_ordered_qty(item_code=item.item_code, warehouse="_Test Warehouse - _TC"), 0)
 
 def create_purchase_order(**args):
 	po = frappe.new_doc("Purchase Order")
