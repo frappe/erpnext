@@ -50,6 +50,7 @@ class PeriodClosingVoucher(AccountsController):
 		gl_entries = []
 		net_pl_balance = 0
 		pl_accounts = self.get_pl_balances()
+		
 		for acc in pl_accounts:
 			if flt(acc.balance_in_company_currency):
 				gl_entries.append(self.get_gl_dict({
@@ -66,7 +67,7 @@ class PeriodClosingVoucher(AccountsController):
 				}))
 
 				net_pl_balance += flt(acc.balance_in_company_currency)
-
+		
 		if net_pl_balance:
 			gl_entries.append(self.get_gl_dict({
 				"account": self.closing_account_head,
