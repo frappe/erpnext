@@ -38,10 +38,10 @@ apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +43,Exchange Rate 
 DocType: Sales Invoice,Customer Name,客户名称
 DocType: Features Setup,"All export related fields like currency, conversion rate, export total, export grand total etc are available in Delivery Note, POS, Quotation, Sales Invoice, Sales Order etc.",所有和出口相关的字段，例如货币，汇率，出口总额，出口总计等，都可以在送货单，POS，报价单，销售发票，销售订单等系统里面找到。
 DocType: Account,Heads (or groups) against which Accounting Entries are made and balances are maintained.,会计分录和维护余额操作针对的组(头)
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +181,Outstanding for {0} cannot be less than zero ({1}),杰出的{0}不能小于零（ {1} ）
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +183,Outstanding for {0} cannot be less than zero ({1}),杰出的{0}不能小于零（ {1} ）
 DocType: Manufacturing Settings,Default 10 mins,默认为10分钟
 DocType: Leave Type,Leave Type Name,假期类型名称
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +147,Series Updated Successfully,系列已成功更新
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +148,Series Updated Successfully,系列已成功更新
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +150,Stitching,拼接
 DocType: Pricing Rule,Apply On,应用于
 DocType: Item Price,Multiple Item prices.,多个品目的价格。
@@ -78,7 +78,6 @@ DocType: Delivery Note,Vehicle No,车辆编号
 sites/assets/js/erpnext.min.js +55,Please select Price List,请选择价格表
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +162,Woodworking,木工
 DocType: Production Order Operation,Work In Progress,在制品
-DocType: Company,If Monthly Budget Exceeded,如果超出每月预算
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +153,3D printing,3D打印
 DocType: Employee,Holiday List,假期列表
 DocType: Time Log,Time Log,时间日志
@@ -89,7 +88,6 @@ DocType: Time Log,"Log of Activities performed by users against Tasks that can b
 apps/erpnext/erpnext/controllers/recurring_document.py +127,New {0}: #{1},新{0}：#{1}
 ,Sales Partners Commission,销售合作伙伴佣金
 apps/erpnext/erpnext/setup/doctype/company/company.py +32,Abbreviation cannot have more than 5 characters,缩写不能超过5个字符
-DocType: Email Digest,Projects & System,工程及系统
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +56,"Attribute Value {0} cannot be removed from {1} as Item Variants \
 						exist with this Attribute.",属性值{0}无法从{1}作为项目变体\删除存在这个属性。
 DocType: Print Settings,Classic,经典
@@ -119,9 +117,9 @@ DocType: Account,Credit,贷方
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +25,Please setup Employee Naming System in Human Resource > HR Settings,请设置员工命名系统中的人力资源&gt;人力资源设置
 DocType: POS Profile,Write Off Cost Center,核销成本中心
 DocType: Warehouse,Warehouse Detail,仓库详细信息
-apps/erpnext/erpnext/selling/doctype/customer/customer.py +172,Credit limit has been crossed for customer {0} {1}/{2},客户{0} 的信用额度已经越过 {1} / {2}
+apps/erpnext/erpnext/selling/doctype/customer/customer.py +181,Credit limit has been crossed for customer {0} {1}/{2},客户{0} 的信用额度已经越过 {1} / {2}
 DocType: Tax Rule,Tax Type,税收类型
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +145,You are not authorized to add or update entries before {0},你没有权限在{0}前添加或更改分录。
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +147,You are not authorized to add or update entries before {0},你没有权限在{0}前添加或更改分录。
 DocType: Item,Item Image (if not slideshow),品目图片(如果没有指定幻灯片)
 apps/erpnext/erpnext/setup/doctype/customer_group/customer_group.py +20,An Customer exists with same name,同名客户已存在
 DocType: Production Order Operation,(Hour Rate / 60) * Actual Operation Time,（小时率/ 60）*实际操作时间
@@ -146,7 +144,6 @@ DocType: Employee Education,Under Graduate,本科
 apps/erpnext/erpnext/selling/report/sales_person_target_variance_item_group_wise/sales_person_target_variance_item_group_wise.js +22,Target On,目标类型
 DocType: BOM,Total Cost,总成本
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +99,Reaming,扩孔
-DocType: Email Digest,Stub,存根
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.js +9,Activity Log:,活动日志：
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +199,Item {0} does not exist in the system or has expired,品目{0}不存在于系统中或已过期
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +44,Real Estate,房地产
@@ -168,21 +165,19 @@ DocType: Newsletter,Email Sent?,邮件已发送？
 DocType: Journal Entry,Contra Entry,对销分录
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +92,Show Time Logs,显示的时间记录
 DocType: Journal Entry Account,Credit in Company Currency,信用在公司货币
-DocType: Email Digest,Bank/Cash Balance,银行/现金结余
 DocType: Delivery Note,Installation Status,安装状态
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +114,Accepted + Rejected Qty must be equal to Received quantity for Item {0},已接受+已拒绝的数量必须等于品目{0}的接收数量
 DocType: Item,Supply Raw Materials for Purchase,供应原料采购
 apps/erpnext/erpnext/stock/get_item_details.py +133,Item {0} must be a Purchase Item,品目{0}必须是采购品目
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
 All dates and employee combination in the selected period will come in the template, with existing attendance records",下载此模板，填写相应的数据后上传。所有的日期和员工出勤记录将显示在模板里。
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +438,Item {0} is not active or end of life has been reached,品目{0}处于非活动或寿命终止状态
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +444,Item {0} is not active or end of life has been reached,品目{0}处于非活动或寿命终止状态
 DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,销售发票提交后将会更新。
 apps/erpnext/erpnext/controllers/accounts_controller.py +491,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included",要包括税款，行{0}项率，税收行{1}也必须包括在内
 apps/erpnext/erpnext/config/hr.py +90,Settings for HR Module,人力资源模块的设置
 DocType: SMS Center,SMS Center,短信中心
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +78,Straightening,直
 DocType: BOM Replace Tool,New BOM,新建物料清单
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +131,There were no updates in the items selected for this digest.,本摘要的物件没有更新。
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +15,Countergravity casting,反重力铸造
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +30,Newsletter has already been sent,通讯已发送过
 DocType: Lead,Request Type,请求类型
@@ -195,7 +190,7 @@ DocType: Serial No,Maintenance Status,维护状态
 apps/erpnext/erpnext/config/stock.py +263,Items and Pricing,项目和定价
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py +37,From Date should be within the Fiscal Year. Assuming From Date = {0},起始日期应该在财年之内。财年起始日是{0}
 DocType: Appraisal,Select the Employee for whom you are creating the Appraisal.,选择该评估的雇员对象。
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +94,Cost Center {0} does not belong to Company {1},成本中心{0}不属于公司{1}
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +96,Cost Center {0} does not belong to Company {1},成本中心{0}不属于公司{1}
 DocType: Customer,Individual,个人
 apps/erpnext/erpnext/config/support.py +23,Plan for maintenance visits.,规划维护访问。
 DocType: SMS Settings,Enter url parameter for message,请输入消息的URL参数
@@ -204,12 +199,11 @@ apps/erpnext/erpnext/projects/doctype/time_log/time_log.py +81,This Time Log con
 apps/erpnext/erpnext/stock/doctype/price_list/price_list.py +14,Price List must be applicable for Buying or Selling,房产价格必须适用于购买或出售
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +90,Installation date cannot be before delivery date for Item {0},品目{0}的安装日期不能早于交付日期
 DocType: Pricing Rule,Discount on Price List Rate (%),折扣价目表率（％）
-sites/assets/js/form.min.js +277,Start,开始
+sites/assets/js/form.min.js +279,Start,开始
 DocType: User,First Name,姓
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +661,Your setup is complete. Refreshing.,您的设置就完成了。正在刷新。
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +12,Full-mold casting,全模铸造
 DocType: Offer Letter,Select Terms and Conditions,选择条款和条件
-DocType: Email Digest,Payments made during the digest period,在消化期间支付的款项
 DocType: Production Planning Tool,Sales Orders,销售订单
 DocType: Purchase Taxes and Charges,Valuation,估值
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.js +17,Set as Default,设置为默认
@@ -217,15 +211,13 @@ apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.js +17,Set as Defa
 apps/erpnext/erpnext/config/hr.py +78,Allocate leaves for the year.,调配一年的假期。
 DocType: Earning Type,Earning Type,盈余类型
 DocType: Manufacturing Settings,Disable Capacity Planning and Time Tracking,禁用容量规划和时间跟踪
-DocType: Email Digest,New Sales Orders,新建销售订单
 DocType: Bank Reconciliation,Bank Account,银行帐户
 DocType: Leave Type,Allow Negative Balance,允许负余额
-DocType: Email Digest,Receivable / Payable account will be identified based on the field Master Type,应收/应付帐款的帐户将基于字段硕士识别
 DocType: Selling Settings,Default Territory,默认地区
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +53,Television,电视
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +138,Gashing,Gashing
 DocType: Production Order Operation,Updated via 'Time Log',通过“时间日志”更新
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +80,Account {0} does not belong to Company {1},科目{0}不属于公司{1}
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +82,Account {0} does not belong to Company {1},科目{0}不属于公司{1}
 DocType: Naming Series,Series List for this Transaction,此交易的系列列表
 DocType: Sales Invoice,Is Opening Entry,是否期初分录
 DocType: Customer Group,Mention if non-standard receivable account applicable,何况，如果不规范应收账款适用
@@ -240,13 +232,12 @@ DocType: Newsletter List,Total Subscribers,用户总数
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +575,Contact Name,联系人姓名
 DocType: Production Plan Item,SO Pending Qty,销售订单待定数量
 DocType: Process Payroll,Creates salary slip for above mentioned criteria.,依上述条件创建工资单
-apps/erpnext/erpnext/templates/generators/item.html +24,No description given,未提供描述
 apps/erpnext/erpnext/config/buying.py +18,Request for purchase.,请求您的报价。
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +107,Double housing,双人房
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +157,Only the selected Leave Approver can submit this Leave Application,只有选择的休假审批者可以提交此请假
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +114,Relieving Date must be greater than Date of Joining,解除日期必须大于加入的日期
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +172,Leaves per Year,每年叶
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +186,Please set Naming Series for {0} via Setup > Settings > Naming Series,请设置命名序列{0}通过设置&gt;设置&gt;命名系列
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +187,Please set Naming Series for {0} via Setup > Settings > Naming Series,请设置命名序列{0}通过设置&gt;设置&gt;命名系列
 DocType: Time Log,Will be updated when batched.,批处理后将会更新。
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +103,Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.,行{0}：请检查'是推进'对帐户{1}，如果这是一个进步条目。
 apps/erpnext/erpnext/stock/utils.py +174,Warehouse {0} does not belong to company {1},仓库{0}不属于公司{1}
@@ -255,8 +246,8 @@ DocType: Item Website Specification,Item Website Specification,品目网站规�
 DocType: Dropbox Backup,Dropbox Access Key,Dropbox的Key
 DocType: Payment Tool,Reference No,参考编号
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +349,Leave Blocked,已禁止请假
-apps/erpnext/erpnext/stock/doctype/item/item.py +356,Item {0} has reached its end of life on {1},品目{0}已经到达寿命终止日期{1}
-apps/erpnext/erpnext/accounts/utils.py +335,Annual,全年
+apps/erpnext/erpnext/stock/doctype/item/item.py +476,Item {0} has reached its end of life on {1},品目{0}已经到达寿命终止日期{1}
+apps/erpnext/erpnext/accounts/utils.py +339,Annual,全年
 DocType: Stock Reconciliation Item,Stock Reconciliation Item,库存盘点品目
 DocType: Stock Entry,Sales Invoice No,销售发票编号
 DocType: Material Request Item,Min Order Qty,最小订货量
@@ -267,7 +258,7 @@ DocType: Item,Minimum Order Qty,最小起订量
 DocType: Pricing Rule,Supplier Type,供应商类型
 DocType: Item,Publish in Hub,在发布中心
 ,Terretory,区域
-apps/erpnext/erpnext/stock/doctype/item/item.py +373,Item {0} is cancelled,品目{0}已取消
+apps/erpnext/erpnext/stock/doctype/item/item.py +493,Item {0} is cancelled,品目{0}已取消
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +589,Material Request,物料申请
 DocType: Bank Reconciliation,Update Clearance Date,更新清拆日期
 DocType: Item,Purchase Details,购买详情
@@ -293,7 +284,6 @@ DocType: Purchase Invoice Item,Expense Head,总支出
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +86,Please select Charge Type first,预计日期不能前材料申请日期
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +41,Latest,最新
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +395,Max 5 characters,最多5个字符
-DocType: Email Digest,New Quotations,新报价
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +195,Select Your Language,设置你的语言
 DocType: Employee,The first Leave Approver in the list will be set as the default Leave Approver,假期审批人列表的第一个将被设为默认审批人
 DocType: Manufacturing Settings,"Disables creation of time logs against Production Orders.
@@ -303,7 +293,7 @@ apps/erpnext/erpnext/config/crm.py +90,Manage Sales Person Tree.,管理销售人
 DocType: Item,Synced With Hub,与Hub同步
 apps/erpnext/erpnext/setup/doctype/company/company.js +41,Wrong Password,密码错误
 DocType: Item,Variant Of,变体自
-apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +32,Item {0} must be Service Item,品目{0}必须是服务品目
+apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +34,Item {0} must be Service Item,品目{0}必须是服务品目
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +303,Completed Qty can not be greater than 'Qty to Manufacture',完成数量不能大于“生产数量”
 DocType: DocType,Administrator,管理员
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +136,Laser drilling,激光打孔
@@ -326,8 +316,9 @@ DocType: Payment Reconciliation Invoice,Invoice Type,发票类型
 DocType: Sales Invoice Item,Delivery Note,送货单
 DocType: Dropbox Backup,Allow Dropbox Access,允许访问Dropbox
 apps/erpnext/erpnext/config/learn.py +72,Setting up Taxes,建立税
-apps/erpnext/erpnext/accounts/utils.py +187,Payment Entry has been modified after you pulled it. Please pull it again.,付款项被修改，你把它之后。请重新拉。
-apps/erpnext/erpnext/stock/doctype/item/item.py +172,{0} entered twice in Item Tax,{0}输入两次项税
+apps/erpnext/erpnext/accounts/utils.py +189,Payment Entry has been modified after you pulled it. Please pull it again.,付款项被修改，你把它之后。请重新拉。
+apps/erpnext/erpnext/stock/doctype/item/item.py +281,{0} entered twice in Item Tax,{0}输入两次项税
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +105,Summary for this week and pending activities,本周和待活动总结
 DocType: Workstation,Rent Cost,租金成本
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +74,Please select month and year,请选择年份和月份
 DocType: Purchase Invoice,"Enter email id separated by commas, invoice will be mailed automatically on particular date",请输入邮件地址列表，用英文逗号分割。发票在特定的日期会被自动发送。
@@ -356,7 +347,6 @@ DocType: C-Form Invoice Detail,Invoice Date,发票日期
 DocType: GL Entry,Debit Amount,借方金额
 apps/erpnext/erpnext/accounts/party.py +220,There can only be 1 Account per Company in {0} {1},只能有每公司1帐户{0} {1}
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +7,Your email address,您的电子邮件地址
-DocType: Email Digest,Income booked for the digest period,当期的延递收益
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +194,Please see attachment,请参阅附件
 DocType: Purchase Order,% Received,％已收货
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +109,Water jet cutting,水射流切割
@@ -402,7 +392,7 @@ DocType: Purchase Order,Start date of current order's period,当前订单周期�
 apps/erpnext/erpnext/utilities/transaction_base.py +128,Quantity cannot be a fraction in row {0},行{0}中的数量不能为分数
 DocType: Purchase Invoice Item,Quantity and Rate,数量和价格
 DocType: Delivery Note,% Installed,％已安装
-apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +60,Please enter company name first,请先输入公司名称
+apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +59,Please enter company name first,请先输入公司名称
 DocType: BOM,Item Desription,品目说明
 DocType: Purchase Invoice,Supplier Name,供应商名称
 DocType: Account,Is Group,是集团
@@ -420,7 +410,7 @@ DocType: Sales Taxes and Charges Template,Sales Master Manager,销售经理大�
 apps/erpnext/erpnext/config/manufacturing.py +74,Global settings for all manufacturing processes.,所有生产流程的全局设置。
 DocType: Accounts Settings,Accounts Frozen Upto,账户被冻结到...为止
 DocType: SMS Log,Sent On,发送日期
-apps/erpnext/erpnext/stock/doctype/item/item.py +333,Attribute {0} selected multiple times in Attributes Table,属性{0}多次选择在属性表
+apps/erpnext/erpnext/stock/doctype/item/item.py +453,Attribute {0} selected multiple times in Attributes Table,属性{0}多次选择在属性表
 DocType: Sales Order,Not Applicable,不适用
 apps/erpnext/erpnext/config/hr.py +140,Holiday master.,假期大师
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +19,Shell molding,外壳成型
@@ -438,6 +428,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Features Setup,Imports,导入
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +144,Adhesive bonding,粘接
 DocType: Job Opening,Description of a Job Opening,空缺职位的说明
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +102,Pending activities for today,今天待定活动
 apps/erpnext/erpnext/config/hr.py +28,Attendance record.,考勤记录。
 DocType: Bank Reconciliation,Journal Entries,日记帐分录
 DocType: Sales Order Item,Used for Production Plan,用于生产计划
@@ -451,9 +442,7 @@ apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.js +24,Add Subs
 sites/assets/js/erpnext.min.js +5,""" does not exists",“不存在
 DocType: Pricing Rule,Valid Upto,有效期至
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +564,List a few of your customers. They could be organizations or individuals.,列出一些你的客户，他们可以是组织或个人。
-DocType: Email Digest,Open Tickets,开放门票
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +143,Direct Income,直接收益
-DocType: Email Digest,Total amount of invoices received from suppliers during the digest period,的过程中消化期间向供应商收取的发票总金额
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +33,"Can not filter based on Account, if grouped by Account",按科目分类后不能根据科目过滤
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +88,Administrative Officer,行政主任
 DocType: Payment Tool,Received Or Paid,收到或支付
@@ -464,7 +453,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_p
 DocType: Production Order,Additional Operating Cost,额外的运营成本
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +20,Cosmetics,化妆品
 DocType: DocField,Type,类型
-apps/erpnext/erpnext/stock/doctype/item/item.py +249,"To merge, following properties must be same for both items",若要合并，以下属性必须为这两个项目是相同的
+apps/erpnext/erpnext/stock/doctype/item/item.py +358,"To merge, following properties must be same for both items",若要合并，以下属性必须为这两个项目是相同的
 DocType: Communication,Subject,主题
 DocType: Shipping Rule,Net Weight,净重
 DocType: Employee,Emergency Phone,紧急电话
@@ -475,7 +464,6 @@ DocType: Purchase Invoice Item,Item,品目
 DocType: Journal Entry,Difference (Dr - Cr),差异(贷方-借方)
 DocType: Account,Profit and Loss,损益
 apps/erpnext/erpnext/config/learn.py +147,Managing Subcontracting,管理转包
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +309,Upcoming Calendar Events (max 10),近期日历事件（最多10个）
 apps/erpnext/erpnext/stock/doctype/stock_uom_replace_utility/stock_uom_replace_utility.py +58,New UOM must NOT be of type Whole Number,新计量单位的类型不能是整数
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +47,Furniture and Fixture,factory furniture and fixtures
 DocType: Quotation,Rate at which Price list currency is converted to company's base currency,速率价目表货币转换为公司的基础货币
@@ -494,6 +482,7 @@ apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +43,Total Billing This 
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,添加/编辑税金及费用
 DocType: Purchase Invoice,Supplier Invoice No,供应商发票编号
 DocType: Territory,For reference,供参考
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +154,"Cannot delete Serial No {0}, as it is used in stock transactions",无法删除序列号{0}，因为它采用的是现货交易
 apps/erpnext/erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.py +169,Closing (Cr),结算(信用)
 DocType: Serial No,Warranty Period (Days),保修期限（天数）
 DocType: Installation Note Item,Installation Note Item,安装单品目
@@ -512,8 +501,7 @@ To distribute a budget using this distribution, set this **Monthly Distribution*
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +183,No records found in the Invoice table,没有在发票表中找到记录
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.js +20,Please select Company and Party Type first,请选择公司和党的第一型
 apps/erpnext/erpnext/config/accounts.py +84,Financial / accounting year.,财务/会计年度。
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +172,"Sorry, Serial Nos cannot be merged",抱歉，序列号无法合并
-DocType: Email Digest,New Supplier Quotations,新供应商报价
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +158,"Sorry, Serial Nos cannot be merged",抱歉，序列号无法合并
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +581,Make Sales Order,创建销售订单
 DocType: Project Task,Project Task,项目任务
 ,Lead Id,线索ID
@@ -535,7 +523,7 @@ apps/erpnext/erpnext/config/crm.py +17,Customer database.,客户数据库。
 DocType: Quotation,Quotation To,报价对象
 DocType: Lead,Middle Income,中等收入
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +58,Opening (Cr),开幕（CR ）
-apps/erpnext/erpnext/accounts/utils.py +191,Allocated amount can not be negative,调配数量不能为负
+apps/erpnext/erpnext/accounts/utils.py +193,Allocated amount can not be negative,调配数量不能为负
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +123,Tumbling,翻筋斗
 DocType: Purchase Order Item,Billed Amt,已开票金额
 DocType: Warehouse,A logical Warehouse against which stock entries are made.,库存记录针对的逻辑仓库。
@@ -554,7 +542,6 @@ DocType: Delivery Note,Time at which items were delivered from warehouse,时间�
 DocType: Sales Invoice,Sales Taxes and Charges,销售税费
 DocType: Employee,Organization Profile,组织简介
 apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py +90,Please setup numbering series for Attendance via Setup > Numbering Series,通过设置>编号系列请设置编号系列考勤
-DocType: Email Digest,New Enquiries,新询价
 DocType: Employee,Reason for Resignation,原因辞职
 apps/erpnext/erpnext/config/hr.py +150,Template for performance appraisals.,绩效考核模板。
 DocType: Payment Reconciliation,Invoice/Journal Entry Details,发票/日记帐分录详细信息
@@ -573,7 +560,7 @@ apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +219,Same item has been en
 DocType: SMS Settings,Receiver Parameter,接收机参数
 apps/erpnext/erpnext/controllers/trends.py +39,'Based On' and 'Group By' can not be same,“根据”和“分组依据”不能相同
 DocType: Sales Person,Sales Person Targets,销售人员目标
-sites/assets/js/form.min.js +269,To,到
+sites/assets/js/form.min.js +271,To,到
 apps/frappe/frappe/templates/base.html +143,Please enter email address,请输入您的电子邮件地址
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +35,End tube forming,尾管成型
 DocType: Production Order Operation,In minutes,已分钟为单位
@@ -601,7 +588,7 @@ DocType: Production Order Operation,Actual Start Time,实际开始时间
 DocType: BOM Operation,Operation Time,操作时间
 sites/assets/js/list.min.js +5,More,更多
 DocType: Pricing Rule,Sales Manager,销售经理
-sites/assets/js/desk.min.js +7670,Rename,重命名
+sites/assets/js/desk.min.js +7673,Rename,重命名
 DocType: Journal Entry,Write Off Amount,核销金额
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +52,Bending,弯曲
 apps/frappe/frappe/core/page/user_permissions/user_permissions.js +246,Allow User,允许用户
@@ -610,7 +597,7 @@ DocType: Purchase Invoice,Quarterly,季度
 DocType: Selling Settings,Delivery Note Required,送货单是必须项
 DocType: Sales Order Item,Basic Rate (Company Currency),基础税率（公司货币）
 DocType: Manufacturing Settings,Backflush Raw Materials Based On,反吹为原材料的开
-apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +60,Please enter item details,请输入项目细节
+apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +62,Please enter item details,请输入项目细节
 DocType: Purchase Receipt,Other Details,其他详细信息
 DocType: Account,Accounts,会计
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +67,Marketing,市场营销
@@ -623,8 +610,8 @@ DocType: Employee,Provide email id registered in company,提供的电子邮件ID
 DocType: Hub Settings,Seller City,卖家城市
 DocType: Email Digest,Next email will be sent on:,下次邮件发送时间：
 DocType: Offer Letter Term,Offer Letter Term,报价函期限
-apps/erpnext/erpnext/stock/doctype/item/item.py +313,Item has variants.,项目已变种。
-apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +63,Item {0} not found,品目{0}未找到
+apps/erpnext/erpnext/stock/doctype/item/item.py +433,Item has variants.,项目已变种。
+apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +65,Item {0} not found,品目{0}未找到
 DocType: Bin,Stock Value,库存值
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +88,Tree Type,树类型
 DocType: BOM Explosion Item,Qty Consumed Per Unit,每单位消耗数量
@@ -633,6 +620,7 @@ DocType: Material Request Item,Quantity and Warehouse,数量和仓库
 DocType: Sales Invoice,Commission Rate (%),佣金率（％）
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.js +172,"Against Voucher Type must be one of Sales Order, Sales Invoice or Journal Entry",凭证类型必须是销售订单，销售发票或日记帐分录之一
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +139,Biomachining,Biomachining
+apps/erpnext/erpnext/setup/utils.py +89,Unable to find exchange rate,找不到汇率
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +7,Aerospace,航天
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +19,Welcome,欢迎
 DocType: Journal Entry,Credit Card Entry,信用卡分录
@@ -704,9 +692,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. 总计：到这里为止的累计
 8. 输入行： 如果选择了“基于前一行的总计/金额”，你可以选择此税项基于的行数(默认为前一行)。
 9. 基本税率是否包含此税费？：勾选此项则意味着此税项不会显示在品目表下，但会出现在品目主表的标注费率内。如果你需要向客户提供一个统一售价(即包含所有税费)，这个选项会很有用。"
-DocType: Serial No,Purchase Returned,进货退出
 DocType: Employee,Bank A/C No.,银行账号
-DocType: Email Digest,Scheduler Failed Events,计划任务失败记录
 DocType: Expense Claim,Project,项目
 DocType: Quality Inspection Reading,Reading 7,7阅读
 DocType: Address,Personal,个人
@@ -737,7 +723,7 @@ DocType: Item,If subcontracted to a vendor,如果分包给供应商
 apps/erpnext/erpnext/manufacturing/page/bom_browser/bom_browser.js +17,Select BOM to start,选择BOM展开
 DocType: SMS Center,All Customer Contact,所有的客户联系人
 apps/erpnext/erpnext/config/stock.py +64,Upload stock balance via csv.,通过CSV文件上传库存余额
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +32,Send Now,立即发送
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +27,Send Now,立即发送
 ,Support Analytics,客户支持分析
 DocType: Item,Website Warehouse,网站仓库
 DocType: Sales Invoice,"The day of the month on which auto invoice will be generated e.g. 05, 28 etc",每月自动生成发票的日期，例如5号，28号等
@@ -752,7 +738,7 @@ DocType: Production Planning Tool,Select Items,选择品目
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +321,{0} against Bill {1} dated {2},{0}对日期为{2}的账单{1}
 DocType: Comment,Reference Name,参考名称
 DocType: Maintenance Visit,Completion Status,完成状态
-DocType: Production Order,Target Warehouse,目标仓库
+DocType: Sales Invoice Item,Target Warehouse,目标仓库
 DocType: Item,Allow over delivery or receipt upto this percent,允许在交付或接收高达百分之这
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +48,Expected Delivery Date cannot be before Sales Order Date,预计交货日期不能早于销售订单日期
 DocType: Upload Attendance,Import Attendance,导入考勤记录
@@ -766,7 +752,7 @@ apps/erpnext/erpnext/config/learn.py +167,Purchase Order to Payment,采购订单
 DocType: Sales Order Item,Projected Qty,预计数量
 DocType: Sales Invoice,Payment Due Date,付款到期日
 DocType: Newsletter,Newsletter Manager,通讯经理
-apps/erpnext/erpnext/stock/doctype/item/item.js +238,Item Variant {0} already exists with same attributes,项目变种{0}已经具有相同属性的存在
+apps/erpnext/erpnext/stock/doctype/item/item.js +234,Item Variant {0} already exists with same attributes,项目变种{0}已经具有相同属性的存在
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +95,'Opening',“开放”
 DocType: Notification Control,Delivery Note Message,送货单留言
 DocType: Expense Claim,Expenses,开支
@@ -791,7 +777,6 @@ apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py +65,Cannot 
 apps/erpnext/erpnext/accounts/doctype/account/account.py +91,"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'",账户余额已设置为'贷方'，不能设置为'借方'
 DocType: Account,Balance must be,余额必须是
 DocType: Hub Settings,Publish Pricing,发布定价
-DocType: Email Digest,New Purchase Receipts,新建采购收据
 DocType: Notification Control,Expense Claim Rejected Message,报销拒绝消息
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +145,Nailing,钉
 ,Available Qty,可用数量
@@ -815,11 +800,10 @@ apps/erpnext/erpnext/config/accounts.py +148,Currency exchange rate master.,货�
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +253,Unable to find Time Slot in the next {0} days for Operation {1},找不到时隙在未来{0}天操作{1}
 DocType: Production Order,Plan material for sub-assemblies,计划材料为子组件
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +426,BOM {0} must be active,BOM{0}处于非活动状态
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.js +22,Set Status as Available,设置状态为“可用”
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +26,Please select the document type first,请选择文档类型第一
 apps/erpnext/erpnext/support/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,取消此上门保养之前请先取消物料访问{0}
 DocType: Salary Slip,Leave Encashment Amount,假期已使用量
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +223,Serial No {0} does not belong to Item {1},序列号{0}不属于品目{1}
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +209,Serial No {0} does not belong to Item {1},序列号{0}不属于品目{1}
 DocType: Purchase Receipt Item Supplied,Required Qty,所需数量
 DocType: Bank Reconciliation,Total Amount,总金额
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +32,Internet Publishing,互联网出版
@@ -833,7 +817,7 @@ DocType: Purchase Receipt,Range,范围
 DocType: Supplier,Default Payable Accounts,默认应付账户(多个)
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +40,Employee {0} is not active or does not exist,雇员{0}非活动或不存在
 DocType: Features Setup,Item Barcode,品目条码
-apps/erpnext/erpnext/stock/doctype/item/item.py +308,Item Variants {0} updated,品目变种{0}已更新
+apps/erpnext/erpnext/stock/doctype/item/item.py +428,Item Variants {0} updated,品目变种{0}已更新
 DocType: Quality Inspection Reading,Reading 6,6阅读
 DocType: Purchase Invoice Advance,Purchase Invoice Advance,购买发票提前
 DocType: Address,Shop,商店
@@ -843,7 +827,7 @@ DocType: Mode of Payment Account,Default Bank / Cash account will be automatical
 DocType: Employee,Permanent Address Is,永久地址
 DocType: Production Order Operation,Operation completed for how many finished goods?,操作完成多少成品？
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +491,The Brand,你的品牌
-apps/erpnext/erpnext/controllers/status_updater.py +153,Allowance for over-{0} crossed for Item {1}.,品目{1}已经超过允许的超额{0}。
+apps/erpnext/erpnext/controllers/status_updater.py +154,Allowance for over-{0} crossed for Item {1}.,品目{1}已经超过允许的超额{0}。
 DocType: Employee,Exit Interview Details,退出面试细节
 DocType: Item,Is Purchase Item,是否采购品目
 DocType: Journal Entry Account,Purchase Invoice,购买发票
@@ -869,7 +853,7 @@ DocType: Selling Settings,Allow user to edit Price List Rate in transactions,允
 DocType: Pricing Rule,Max Qty,最大数量
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +105,Row {0}: Payment against Sales/Purchase Order should always be marked as advance,行{0}：付款方式对销售/采购订单应始终被标记为提前
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +16,Chemical,化学品
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +685,All items have already been transferred for this Production Order.,所有品目都已经转移到这个生产订单。
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +691,All items have already been transferred for this Production Order.,所有品目都已经转移到这个生产订单。
 DocType: Process Payroll,Select Payroll Year and Month,选择薪资年和月
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +32,"Go to the appropriate group (usually Application of Funds > Current Assets > Bank Accounts and create a new Account (by clicking on Add Child) of type ""Bank""",转到相应的组（通常资金运用&gt;流动资产&gt;银行帐户，并创建一个新帐户（通过点击添加类型的儿童），“银行”
 DocType: Workstation,Electricity Cost,电力成本
@@ -898,7 +882,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js 
 DocType: Leave Application,Leave Application,假期申请
 apps/erpnext/erpnext/config/hr.py +77,Leave Allocation Tool,假期调配工具
 DocType: Leave Block List,Leave Block List Dates,禁离日列表日期
-DocType: Email Digest,Buying & Selling,采购与销售
+DocType: Company,If Monthly Budget Exceeded (for expense account),如果每月超出预算（用于报销）
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +56,Trimming,修剪
 DocType: Workstation,Net Hour Rate,净小时价格
 DocType: Landed Cost Purchase Receipt,Landed Cost Purchase Receipt,到岸成本采购收据
@@ -907,7 +891,7 @@ DocType: Packing Slip Item,Packing Slip Item,装箱单项目
 DocType: POS Profile,Cash/Bank Account,现金/银行账户
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +63,Removed items with no change in quantity or value.,删除的项目在数量或价值没有变化。
 DocType: Delivery Note,Delivery To,交货对象
-apps/erpnext/erpnext/stock/doctype/item/item.py +330,Attribute table is mandatory,属性表是强制性的
+apps/erpnext/erpnext/stock/doctype/item/item.py +450,Attribute table is mandatory,属性表是强制性的
 DocType: Production Planning Tool,Get Sales Orders,获取销售订单
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +64,{0} can not be negative,{0}不能为负
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +103,Filing,备案
@@ -920,7 +904,6 @@ DocType: Task,Urgent,加急
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +97,Please specify a valid Row ID for row {0} in table {1},请指定行{0}在表中的有效行ID {1}
 DocType: Item,Manufacturer,制造商
 DocType: Landed Cost Item,Purchase Receipt Item,采购入库项目
-DocType: Serial No,Sales Returned,销售被退回
 DocType: Production Plan Item,Reserved Warehouse in Sales Order / Finished Goods Warehouse,在销售订单/成品仓库保留仓库
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +65,Selling Amount,销售金额
 apps/erpnext/erpnext/projects/doctype/project/project.js +40,Time Logs,时间日志
@@ -935,7 +918,7 @@ DocType: Lead,Organization Name,组织名称
 DocType: Tax Rule,Shipping State,运输状态
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +61,Item must be added using 'Get Items from Purchase Receipts' button,品目必须要由“从采购收据获取品目”添加
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +126,Sales Expenses,销售费用
-apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.py +172,Standard Buying,标准采购
+apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.py +182,Standard Buying,标准采购
 DocType: GL Entry,Against,针对
 DocType: Item,Default Selling Cost Center,默认销售成本中心
 DocType: Sales Partner,Implementation Partner,实施合作伙伴
@@ -965,6 +948,7 @@ DocType: Journal Entry,Make Difference Entry,创建差异分录
 DocType: Upload Attendance,Attendance From Date,考勤起始日期
 DocType: Appraisal Template Goal,Key Performance Area,关键绩效区
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +54,Transportation,运输
+DocType: Email Digest,Annual Expense,年费用
 DocType: SMS Center,Total Characters,总字符
 apps/erpnext/erpnext/controllers/buying_controller.py +139,Please select BOM in BOM field for Item {0},请BOM字段中选择BOM的项目{0}
 DocType: C-Form Invoice Detail,C-Form Invoice Detail,C-形式发票详细信息
@@ -998,7 +982,7 @@ apps/erpnext/erpnext/projects/doctype/task/task.py +38,'Actual Start Date' can n
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +75,Management,管理人员
 apps/erpnext/erpnext/config/projects.py +33,Types of activities for Time Sheets,活动的考勤表类型
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +14,Investment casting,熔模铸造
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +49,Either debit or credit amount is required for {0},{0}需要指定借方或贷方金额
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +51,Either debit or credit amount is required for {0},{0}需要指定借方或贷方金额
 DocType: Item Attribute Value,"This will be appended to the Item Code of the variant. For example, if your abbreviation is ""SM"", and the item code is ""T-SHIRT"", the item code of the variant will be ""T-SHIRT-SM""",这将追加到变异的项目代码。例如，如果你的英文缩写为“SM”，而该项目的代码是“T-SHIRT”，该变种的项目代码将是“T-SHIRT-SM”
 DocType: Salary Slip,Net Pay (in words) will be visible once you save the Salary Slip.,保存工资单后会显示净支付金额(大写)。
 apps/frappe/frappe/core/doctype/user/user_list.js +12,Active,活动
@@ -1008,7 +992,7 @@ DocType: Price List Country,Price List Country,价目表国家
 apps/erpnext/erpnext/selling/page/sales_browser/sales_browser.js +123,Further nodes can be only created under 'Group' type nodes,只能在“组”节点下新建节点
 DocType: Item,UOMs,计量单位
 apps/erpnext/erpnext/stock/utils.py +167,{0} valid serial nos for Item {1},品目{1}有{0}个有效序列号
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +58,Item Code cannot be changed for Serial No.,品目编号不能因序列号改变
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +57,Item Code cannot be changed for Serial No.,品目编号不能因序列号改变
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py +22,POS Profile {0} already created for user: {1} and company {2},POS简介{0}已经为用户创建：{1}和公司{2}
 DocType: Purchase Order Item,UOM Conversion Factor,计量单位换算系数
 DocType: Stock Settings,Default Item Group,默认品目群组
@@ -1043,20 +1027,20 @@ apps/erpnext/erpnext/utilities/transaction_base.py +78,Duplicate row {0} with sa
 ,Trial Balance,试算表
 apps/erpnext/erpnext/config/learn.py +203,Setting up Employees,建立职工
 sites/assets/js/erpnext.min.js +5,"Grid """,网格“
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +149,Please select prefix first,请选择前缀第一
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +150,Please select prefix first,请选择前缀第一
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +138,Research,研究
 DocType: Maintenance Visit Purpose,Work Done,已完成工作
 apps/erpnext/erpnext/controllers/item_variant.py +25,Please specify at least one attribute in the Attributes table,请指定属性表中的至少一个属性
-DocType: Employee,User ID,用户ID
+DocType: Contact,User ID,用户ID
 DocType: Communication,Sent,已发送
 apps/erpnext/erpnext/accounts/doctype/account/account.js +57,View Ledger,查看总帐
 DocType: File,Lft,Lft
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +41,Earliest,最早
-apps/erpnext/erpnext/stock/doctype/item/item.py +223,"An Item Group exists with same name, please change the item name or rename the item group",同名品目群组已经存在，请更名
+apps/erpnext/erpnext/stock/doctype/item/item.py +332,"An Item Group exists with same name, please change the item name or rename the item group",同名品目群组已经存在，请更名
 DocType: Communication,Delivery Status,交货状态
 DocType: Production Order,Manufacture against Sales Order,按销售订单生产
-apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.py +505,Rest Of The World,世界其他地区
-apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +79,The Item {0} cannot have Batch,物件{0}不能有批次
+apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.py +515,Rest Of The World,世界其他地区
+apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +81,The Item {0} cannot have Batch,物件{0}不能有批次
 ,Budget Variance Report,预算差异报告
 DocType: Salary Slip,Gross Pay,工资总额
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +186,Dividends Paid,股利支付
@@ -1073,18 +1057,17 @@ DocType: Opportunity Item,Opportunity Item,项目的机会
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +61,Temporary Opening,临时开通
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +41,Cryorolling,Cryorolling
 ,Employee Leave Balance,雇员假期余量
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +132,Balance for Account {0} must always be {1},账户{0}的余额必须总是{1}
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +134,Balance for Account {0} must always be {1},账户{0}的余额必须总是{1}
 DocType: Address,Address Type,地址类型
 DocType: Purchase Receipt,Rejected Warehouse,拒绝仓库
 DocType: GL Entry,Against Voucher,对凭证
 DocType: Item,Default Buying Cost Center,默认采购成本中心
-apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +36,Item {0} must be Sales Item,品目{0}必须是销售品目
+apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +38,Item {0} must be Sales Item,品目{0}必须是销售品目
 DocType: Item,Lead Time in days,在天交货期
 ,Accounts Payable Summary,应付帐款摘要
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +197,Not authorized to edit frozen Account {0},无权修改冻结帐户{0}
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +199,Not authorized to edit frozen Account {0},无权修改冻结帐户{0}
 DocType: Journal Entry,Get Outstanding Invoices,获取未清发票
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +63,Sales Order {0} is not valid,销售订单{0}无效
-DocType: Email Digest,New Stock Entries,新建库存记录
 apps/erpnext/erpnext/setup/doctype/company/company.py +172,"Sorry, companies cannot be merged",抱歉，公司不能合并
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +145,Small,小
 DocType: Employee,Employee Number,雇员编号
@@ -1098,7 +1081,7 @@ apps/erpnext/erpnext/selling/report/territory_target_variance_item_group_wise/te
 DocType: Employee,Place of Issue,签发地点
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +59,Contract,合同
 DocType: Report,Disabled,已禁用
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +482,UOM coversion factor required for UOM: {0} in Item: {1},物件{1}的计量单位{0}需要单位换算系数
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +488,UOM coversion factor required for UOM: {0} in Item: {1},物件{1}的计量单位{0}需要单位换算系数
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +83,Indirect Expenses,间接支出
 apps/erpnext/erpnext/controllers/selling_controller.py +163,Row {0}: Qty is mandatory,行{0}：数量是强制性的
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +8,Agriculture,农业
@@ -1110,6 +1093,7 @@ DocType: Warehouse,Warehouse Contact Info,仓库联系方式
 sites/assets/js/form.min.js +190,Name is required,名称是必须项
 DocType: Purchase Invoice,Recurring Type,经常性类型
 DocType: Address,City/Town,市/镇
+DocType: Email Digest,Annual Income,年收入
 DocType: Serial No,Serial No Details,序列号详情
 DocType: Purchase Invoice Item,Item Tax Rate,品目税率
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +112,"For {0}, only credit accounts can be linked against another debit entry",对于{0}，贷方分录只能选择贷方账户
@@ -1129,7 +1113,7 @@ DocType: Purchase Invoice,Grand Total (Company Currency),总计（公司货币�
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +42,Total Outgoing,即将离任的总
 apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py +48,"There can only be one Shipping Rule Condition with 0 or blank value for ""To Value""",“至值”为0或为空的运输规则条件最多只能有一个
 DocType: Authorization Rule,Transaction,交易
-apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +46,Note: This Cost Center is a Group. Cannot make accounting entries against groups.,注：此成本中心是一个组，会计分录不能对组录入。
+apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +45,Note: This Cost Center is a Group. Cannot make accounting entries against groups.,注：此成本中心是一个组，会计分录不能对组录入。
 apps/erpnext/erpnext/config/projects.py +43,Tools,工具
 DocType: Item,Website Item Groups,网站物件组
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +174,Production order number is mandatory for stock entry purpose manufacture,生产订单号码是强制性的股票入门目的制造
@@ -1137,10 +1121,10 @@ DocType: Purchase Invoice,Total (Company Currency),总（公司货币）
 apps/erpnext/erpnext/stock/utils.py +162,Serial number {0} entered more than once,序列号{0}已多次输入
 DocType: Journal Entry,Journal Entry,日记帐分录
 DocType: Workstation,Workstation Name,工作站名称
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +19,Email Digest:,邮件摘要：
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +17,Email Digest:,邮件摘要：
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +432,BOM {0} does not belong to Item {1},BOM{0}不属于品目{1}
 DocType: Sales Partner,Target Distribution,目标分布
-sites/assets/js/desk.min.js +7649,Comments,评论
+sites/assets/js/desk.min.js +7652,Comments,评论
 DocType: Salary Slip,Bank Account No.,银行账号
 DocType: Naming Series,This is the number of the last created transaction with this prefix,这就是以这个前缀的最后一个创建的事务数
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +172,Valuation Rate required for Item {0},物件{0}需要估值率
@@ -1161,8 +1145,9 @@ DocType: Salary Slip,Earning,盈余
 DocType: Payment Tool,Party Account Currency,党的账户币种
 ,BOM Browser,BOM浏览器
 DocType: Purchase Taxes and Charges,Add or Deduct,添加或扣除
+DocType: Company,If Yearly Budget Exceeded (for expense account),如果年度预算超出（用于报销）
 apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py +81,Overlapping conditions found between:,之间存在重叠的条件：
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +172,Against Journal Entry {0} is already adjusted against some other voucher,日记帐分录{0}已经被其他凭证调整
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +174,Against Journal Entry {0} is already adjusted against some other voucher,日记帐分录{0}已经被其他凭证调整
 apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/customers_not_buying_since_long_time.py +68,Total Order Value,总订单价值
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +38,Food,食品
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +51,Ageing Range 3,账龄范围3
@@ -1170,11 +1155,10 @@ apps/erpnext/erpnext/projects/doctype/time_log/time_log.py +139,You can make a t
 DocType: Maintenance Schedule Item,No of Visits,访问数量
 DocType: File,old_parent,old_parent
 apps/erpnext/erpnext/config/support.py +33,"Newsletters to contacts, leads.",发给联系人和潜在客户的通讯
-apps/erpnext/erpnext/stock/doctype/item/item.py +204,"To set reorder level, item must be a Purchase Item or Prodcution Item",要设置订货点水平，项目必须是购买物品或Prodcution项目
 apps/erpnext/erpnext/hr/doctype/appraisal_template/appraisal_template.py +21,Sum of points for all goals should be 100. It is {0},对所有目标点的总和应该是100。{0}
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +365,Operations cannot be left blank.,操作不能留空。
 ,Delivered Items To Be Billed,无开账单的已交付品目
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +61,Warehouse cannot be changed for Serial No.,仓库不能为序​​列号变更
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +60,Warehouse cannot be changed for Serial No.,仓库不能为序​​列号变更
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +101,Status updated to {0},状态已更新为{0}
 DocType: DocField,Description,描述
 DocType: Authorization Rule,Average Discount,平均折扣
@@ -1212,7 +1196,7 @@ DocType: Sales Invoice,Shipping Address Name,送货地址姓名
 apps/erpnext/erpnext/accounts/doctype/account/account.js +50,Chart of Accounts,科目表
 DocType: Material Request,Terms and Conditions Content,条款和条件内容
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +471,cannot be greater than 100,不能大于100
-apps/erpnext/erpnext/stock/doctype/item/item.py +364,Item {0} is not a stock Item,品目{0}不是库存品目
+apps/erpnext/erpnext/stock/doctype/item/item.py +484,Item {0} is not a stock Item,品目{0}不是库存品目
 DocType: Maintenance Visit,Unscheduled,计划外
 DocType: Employee,Owned,资
 DocType: Salary Slip Deduction,Depends on Leave Without Pay,依赖于无薪休假
@@ -1225,7 +1209,7 @@ DocType: Warranty Claim,Warranty / AMC Status,保修/ 年度保养合同状态
 DocType: GL Entry,GL Entry,总账分录
 DocType: HR Settings,Employee Settings,雇员设置
 ,Batch-Wise Balance History,批次余额历史
-DocType: Email Digest,To Do List,待办事项列表
+apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +69,To Do List,待办事项列表
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +63,Apprentice,学徒
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +99,Negative Quantity is not allowed,负数量是不允许的
 DocType: Purchase Invoice Item,"Tax detail table fetched from item master as a string and stored in this field.
@@ -1233,6 +1217,7 @@ Used for Taxes and Charges",从物件大师取得税项详细信息表，嵌入�
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +61,Lancing,采血
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +151,Employee cannot report to himself.,雇员不能向自己报告。
 DocType: Account,"If the account is frozen, entries are allowed to restricted users.",如果科目被冻结，则只有特定用户才能创建分录。
+DocType: Email Digest,Bank Balance,银行存款余额
 apps/erpnext/erpnext/controllers/accounts_controller.py +435,Accounting Entry for {0}: {1} can only be made in currency: {2},会计分录为{0}：{1}只能在货币做：{2}
 DocType: Job Opening,"Job profile, qualifications required etc.",工作概况，要求的学历等。
 DocType: Journal Entry Account,Account Balance,账户余额
@@ -1323,7 +1308,7 @@ DocType: Monthly Distribution,Monthly Distribution,月度分布
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +68,Receiver List is empty. Please create Receiver List,接收器列表为空。请创建接收器列表
 DocType: Production Plan Sales Order,Production Plan Sales Order,生产计划销售订单
 DocType: Sales Partner,Sales Partner Target,销售合作伙伴目标
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +111,Accounting Entry for {0} can only be made in currency: {1},会计分录为{0}只能在货币进行：{1}
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +113,Accounting Entry for {0} can only be made in currency: {1},会计分录为{0}只能在货币进行：{1}
 DocType: Pricing Rule,Pricing Rule,定价规则
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +58,Notching,开槽
 apps/erpnext/erpnext/config/learn.py +162,Material Request to Purchase Order,材料要求采购订单
@@ -1338,7 +1323,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +334,Not allowed t
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py +58,Leaves Allocated Successfully for {0},已成功为{0}调配假期
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +40,No Items to pack,未选择品目
 DocType: Shipping Rule Condition,From Value,起始值
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +544,Manufacturing Quantity is mandatory,生产数量为必须项
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +550,Manufacturing Quantity is mandatory,生产数量为必须项
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +42,Amounts not reflected in bank,银行无记录的数额
 DocType: Quality Inspection Reading,Reading 4,4阅读
 apps/erpnext/erpnext/config/hr.py +23,Claims for company expense.,公司开支报销
@@ -1353,7 +1338,7 @@ DocType: Production Planning Tool,Select Sales Orders,选择销售订单
 DocType: Features Setup,To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,要使用条形码跟踪项目。您将能够通过扫描物品条码，进入交货单和销售发票的项目。
 apps/erpnext/erpnext/crm/doctype/lead/lead.js +34,Make Quotation,请报价
 DocType: Dependent Task,Dependent Task,相关任务
-apps/erpnext/erpnext/stock/doctype/item/item.py +135,Conversion factor for default Unit of Measure must be 1 in row {0},行{0}中默认计量单位的转换系数必须是1
+apps/erpnext/erpnext/stock/doctype/item/item.py +244,Conversion factor for default Unit of Measure must be 1 in row {0},行{0}中默认计量单位的转换系数必须是1
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +142,Leave of type {0} cannot be longer than {1},类型为{0}的假期不能长于{1}天
 DocType: Manufacturing Settings,Try planning operations for X days in advance.,尝试规划X天行动提前。
 DocType: HR Settings,Stop Birthday Reminders,停止生日提醒
@@ -1363,21 +1348,20 @@ apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sa
 sites/assets/js/erpnext.min.js +51,{0} View,{0}查看
 DocType: Salary Structure Deduction,Salary Structure Deduction,薪酬结构扣款
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +158,Selective laser sintering,选择性激光烧结
-apps/erpnext/erpnext/stock/doctype/item/item.py +130,Unit of Measure {0} has been entered more than once in Conversion Factor Table,计量单位{0}已经在换算系数表内
+apps/erpnext/erpnext/stock/doctype/item/item.py +239,Unit of Measure {0} has been entered more than once in Conversion Factor Table,计量单位{0}已经在换算系数表内
 apps/frappe/frappe/core/page/data_import_tool/data_import_tool.js +108,Import Successful!,导入成功！
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +27,Cost of Issued Items,已发料品目成本
-DocType: Email Digest,Expenses Booked,已预约开支
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +185,Quantity must not be more than {0},数量不能超过{0}
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +41,Age (Days),时间（天）
 DocType: Quotation Item,Quotation Item,报价品目
 DocType: Account,Account Name,帐户名称
 apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +41,From Date cannot be greater than To Date,起始日期不能大于结束日期
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +209,Serial No {0} quantity {1} cannot be a fraction,序列号{0}的数量{1}不能是分数
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +194,Serial No {0} quantity {1} cannot be a fraction,序列号{0}的数量{1}不能是分数
 apps/erpnext/erpnext/config/buying.py +59,Supplier Type master.,供应商类型大师。
 DocType: Purchase Order Item,Supplier Part Number,供应商零件编号
 apps/frappe/frappe/core/page/permission_manager/permission_manager.js +379,Add,添加
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +92,Conversion rate cannot be 0 or 1,汇率不能为0或1
-apps/erpnext/erpnext/controllers/stock_controller.py +245,{0} {1} is cancelled or stopped,{0} {1}被取消或停止
+apps/erpnext/erpnext/controllers/stock_controller.py +247,{0} {1} is cancelled or stopped,{0} {1}被取消或停止
 DocType: Accounts Settings,Credit Controller,信用控制人
 DocType: Delivery Note,Vehicle Dispatch Date,车辆调度日期
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +197,Purchase Receipt {0} is not submitted,外购入库单{0}未提交
@@ -1385,7 +1369,7 @@ DocType: Company,Default Payable Account,默认应付账户
 apps/erpnext/erpnext/config/website.py +13,"Settings for online shopping cart such as shipping rules, price list etc.",网上购物车，如配送规则，价格表等的设置
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +660,Setup Complete,安装完成
 apps/erpnext/erpnext/controllers/website_list_for_contact.py +65,{0}% Billed,{0}％帐单
-apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py +33,Reserved Qty,保留数量
+apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py +16,Reserved Qty,保留数量
 DocType: Party Account,Party Account,党的帐户
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +74,Human Resources,人力资源
 DocType: Lead,Upper Income,高收入
@@ -1441,7 +1425,7 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py 
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.js +50,"Company, Month and Fiscal Year is mandatory",公司，月度和财年是必须项
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +102,Marketing Expenses,市场营销开支
 ,Item Shortage Report,品目短缺报告
-apps/erpnext/erpnext/stock/doctype/item/item.js +192,"Weight is mentioned,\nPlease mention ""Weight UOM"" too",重量被提及，\n请注明“重量计量单位”
+apps/erpnext/erpnext/stock/doctype/item/item.js +188,"Weight is mentioned,\nPlease mention ""Weight UOM"" too",重量被提及，\n请注明“重量计量单位”
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,创建此库存记录的物料申请
 apps/erpnext/erpnext/config/support.py +43,Single unit of an Item.,此品目的一件。
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +212,Time Log Batch {0} must be 'Submitted',时间日志批量{0}必须是'提交'
@@ -1451,16 +1435,16 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +384,Wareho
 DocType: Employee,Date Of Retirement,退休日期
 DocType: Upload Attendance,Get Template,获取模板
 DocType: Address,Postal,邮政
-DocType: Email Digest,Total amount of invoices sent to the customer during the digest period,的过程中消化期间发送给客户的发票总金额
 DocType: Item,Weightage,权重
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +159,Mining,矿业
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +17,Resin casting,树脂浇注
-apps/erpnext/erpnext/selling/doctype/customer/customer.py +82,A Customer Group exists with same name please change the Customer name or rename the Customer Group,同名的客户群组已经存在，请更改客户姓名或重命名客户集团
+apps/erpnext/erpnext/selling/doctype/customer/customer.py +91,A Customer Group exists with same name please change the Customer name or rename the Customer Group,同名的客户群组已经存在，请更改客户姓名或重命名客户集团
+apps/erpnext/erpnext/templates/pages/order.html +57,text {0},文字{0}
 DocType: Territory,Parent Territory,家长领地
 DocType: Quality Inspection Reading,Reading 2,阅读2
 DocType: Stock Entry,Material Receipt,物料收据
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +622,Products,产品展示
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +45,Party Type and Party is required for Receivable / Payable account {0},党的类型和党的需要应收/应付帐户{0}
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +47,Party Type and Party is required for Receivable / Payable account {0},党的类型和党的需要应收/应付帐户{0}
 DocType: Item,"If this item has variants, then it cannot be selected in sales orders etc.",如果此项目已变种，那么它不能在销售订单等选择
 DocType: Lead,Next Contact By,下次联络人
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +215,Quantity required for Item {0} in row {1},行{1}中的品目{0}必须指定数量
@@ -1483,10 +1467,10 @@ DocType: Selling Settings,Allow multiple Sales Orders against a Customer's Purch
 apps/erpnext/erpnext/setup/doctype/company/company.py +152,Main,主
 DocType: DocPerm,Delete,删除
 apps/erpnext/erpnext/stock/doctype/item/item_list.js +11,Variant,变体
-sites/assets/js/desk.min.js +7968,New {0},新建{0}
+sites/assets/js/desk.min.js +7971,New {0},新建{0}
 DocType: Naming Series,Set prefix for numbering series on your transactions,为交易设置编号系列的前缀
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +163,Stopped order cannot be cancelled. Unstop to cancel.,已停止的订单无法取消，请先点击“重新开始”
-apps/erpnext/erpnext/stock/doctype/item/item.py +152,Default BOM ({0}) must be active for this item or its template,默认BOM（{0}）必须是活动的这个项目或者其模板
+apps/erpnext/erpnext/stock/doctype/item/item.py +261,Default BOM ({0}) must be active for this item or its template,默认BOM（{0}）必须是活动的这个项目或者其模板
 DocType: Employee,Leave Encashed?,假期已使用？
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +32,Opportunity From field is mandatory,机会从字段是强制性的
 DocType: Item,Variants,变种
@@ -1505,7 +1489,7 @@ DocType: Country,Country,国家
 apps/erpnext/erpnext/shopping_cart/utils.py +47,Addresses,地址
 DocType: Communication,Received,收到
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +136,Against Journal Entry {0} does not have any unmatched {1} entry,日记帐分录{0}没有不符合的{1}分录
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +216,Duplicate Serial No entered for Item {0},品目{0}的序列号重复
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +201,Duplicate Serial No entered for Item {0},品目{0}的序列号重复
 DocType: Shipping Rule Condition,A condition for a Shipping Rule,航运规则的一个条件
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +326,Item is not allowed to have Production Order.,项目是不允许有生产订单。
 DocType: DocField,Attach Image,附加图片
@@ -1574,6 +1558,7 @@ apps/erpnext/erpnext/config/learn.py +228,Managing Projects,项目管理
 DocType: Supplier,Supplier of Goods or Services.,提供商品或服务的供应商。
 DocType: Budget Detail,Fiscal Year,财政年度
 DocType: Cost Center,Budget,预算
+apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +41,"Budget cannot be assigned against {0}, as it's not an Income or Expense account",财政预算案不能对{0}指定的，因为它不是一个收入或支出帐户
 apps/erpnext/erpnext/selling/report/territory_target_variance_item_group_wise/territory_target_variance_item_group_wise.py +50,Achieved,已实现
 apps/erpnext/erpnext/selling/page/sales_analytics/sales_analytics.js +65,Territory / Customer,区域/客户
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +552,e.g. 5,例如5
@@ -1581,7 +1566,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliat
 DocType: Sales Invoice,In Words will be visible once you save the Sales Invoice.,大写金额将在销售发票保存后显示。
 DocType: Item,Is Sales Item,是否销售品目
 apps/erpnext/erpnext/setup/doctype/item_group/item_group.js +21,Item Group Tree,品目群组树
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +70,Item {0} is not setup for Serial Nos. Check Item master,品目{0}没有设置序列号，请进入品目大师中修改
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +69,Item {0} is not setup for Serial Nos. Check Item master,品目{0}没有设置序列号，请进入品目大师中修改
 DocType: Maintenance Visit,Maintenance Time,维护时间
 ,Amount to Deliver,量交付
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +620,A Product or Service,产品或服务
@@ -1598,7 +1583,7 @@ apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.p
 DocType: Pricing Rule,Selling,销售
 DocType: Employee,Salary Information,薪资信息
 DocType: Sales Person,Name and Employee ID,姓名和雇员ID
-apps/erpnext/erpnext/accounts/party.py +266,Due Date cannot be before Posting Date,到期日不能前于过账日期
+apps/erpnext/erpnext/accounts/party.py +272,Due Date cannot be before Posting Date,到期日不能前于过账日期
 DocType: Website Item Group,Website Item Group,网站物件组
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +170,Duties and Taxes,关税与税项
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +305,Please enter Reference date,参考日期请输入
@@ -1622,7 +1607,7 @@ DocType: Issue,Resolution Details,详细解析
 apps/erpnext/erpnext/config/stock.py +84,Change UOM for an Item.,更改品目的UOM(计量单位)。
 DocType: Quality Inspection Reading,Acceptance Criteria,验收标准
 DocType: Item Attribute,Attribute Name,属性名称
-apps/erpnext/erpnext/controllers/selling_controller.py +234,Item {0} must be Sales or Service Item in {1},{1}中的品目{0}必须是销售或服务品目
+apps/erpnext/erpnext/controllers/selling_controller.py +236,Item {0} must be Sales or Service Item in {1},{1}中的品目{0}必须是销售或服务品目
 DocType: Item Group,Show In Website,在网站上显示
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +621,Group,组
 DocType: Task,Expected Time (in hours),预期时间（以小时计）
@@ -1653,13 +1638,13 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +44,Embossin
 ,Quotation Trends,报价趋势
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +139,Item Group not mentioned in item master for item {0},品目{0}的品目群组没有设置
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +302,Debit To account must be a Receivable account,入借帐户必须是应收账科目
-apps/erpnext/erpnext/stock/doctype/item/item.py +139,"As Production Order can be made for this item, it must be a stock item.",此品目必须是库存品目，因为它可以生成生产订单
+apps/erpnext/erpnext/stock/doctype/item/item.py +248,"As Production Order can be made for this item, it must be a stock item.",此品目必须是库存品目，因为它可以生成生产订单
 DocType: Shipping Rule Condition,Shipping Amount,发货数量
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +140,Joining,加盟
 DocType: Authorization Rule,Above Value,上述值
 ,Pending Amount,待审核金额
 DocType: Purchase Invoice Item,Conversion Factor,转换系数
-DocType: Serial No,Delivered,已交付
+apps/erpnext/erpnext/controllers/website_list_for_contact.py +69,Delivered,已交付
 apps/erpnext/erpnext/config/hr.py +160,Setup incoming server for jobs email id. (e.g. jobs@example.com),设置接收简历的电子邮件地址 。 （例如jobs@example.com ）
 DocType: Purchase Receipt,Vehicle Number,车号
 DocType: Purchase Invoice,The date on which recurring invoice will be stop,经常性发票终止日期
@@ -1679,7 +1664,7 @@ apps/frappe/frappe/config/setup.py +130,Printing,印花
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +113,Expense Claim is pending approval. Only the Expense Approver can update status.,报销正在等待批准。只有开支审批人才能更改其状态。
 DocType: Purchase Invoice,Additional Discount Amount,额外的折扣金额
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +99,The day(s) on which you are applying for leave are holiday. You need not apply for leave.,你要申请的假期位于假日内，无需请假。
-sites/assets/js/desk.min.js +7802,and,和
+sites/assets/js/desk.min.js +7805,and,和
 DocType: Leave Block List Allow,Leave Block List Allow,例外用户
 apps/erpnext/erpnext/setup/doctype/company/company.py +236,Abbr can not be blank or space,缩写不能为空或空间
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +50,Sports,体育
@@ -1693,14 +1678,13 @@ apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +408,Your financial
 DocType: POS Profile,Price List,价格表
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.py +20,{0} is now the default Fiscal Year. Please refresh your browser for the change to take effect.,默认财政年度已经更新为{0}。请刷新您的浏览器以使更改生效。
 apps/erpnext/erpnext/projects/doctype/project/project.js +47,Expense Claims,报销
-DocType: Email Digest,Support,支持
+DocType: Issue,Support,支持
 DocType: Authorization Rule,Approving Role,审批者角色
-apps/erpnext/erpnext/templates/generators/item.html +51,View Cart,查看购物车
 ,BOM Search,BOM搜索
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +176,Closing (Opening + Totals),截止（开标+总计）
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +26,Please specify currency in Company,请公司指定的货币
 DocType: Workstation,Wages per hour,时薪
-apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +45,Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3},批次{0}中，仓库{3}中品目{2}的库存余额将变为{1}
+apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +47,Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3},批次{0}中，仓库{3}中品目{2}的库存余额将变为{1}
 apps/erpnext/erpnext/config/setup.py +83,"Show / Hide features like Serial Nos, POS etc.",显示或隐藏如序列号，POS等特性。
 apps/erpnext/erpnext/controllers/accounts_controller.py +236,Account {0} is invalid. Account Currency must be {1},帐户{0}是无效的。帐户货币必须是{1}
 apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +34,UOM Conversion factor is required in row {0},行{0}计量单位换算系数是必须项
@@ -1712,7 +1696,7 @@ DocType: Territory,Classification of Customers by region,客户按区域分类
 DocType: Project,% Tasks Completed,％任务已完成
 DocType: Project,Gross Margin,毛利
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +140,Please enter Production Item first,请先输入生产项目
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +76,disabled user,已禁用用户
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +72,disabled user,已禁用用户
 DocType: Opportunity,Quotation,报价
 DocType: Salary Slip,Total Deduction,扣除总额
 DocType: Quotation,Maintenance User,维护用户
@@ -1727,9 +1711,9 @@ DocType: Authorization Rule,Applicable To (User),适用于(用户)
 DocType: Purchase Taxes and Charges,Deduct,扣款
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +170,Job Description,职位描述
 DocType: Purchase Order Item,Qty as per Stock UOM,按库存计量单位数量
-apps/erpnext/erpnext/utilities/doctype/rename_tool/rename_tool.py +34,Please select a valid csv file with data,请选择与数据的有效csv文件
+apps/frappe/frappe/model/rename_doc.py +343,Please select a valid csv file with data,请选择与数据的有效csv文件
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +92,Coating,涂层
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +125,"Special Characters except ""-"", ""#"", ""."" and ""/"" not allowed in naming series","命名序列中不能输入特殊符号，""-""，""#""，"".""和""/""除外"
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +126,"Special Characters except ""-"", ""#"", ""."" and ""/"" not allowed in naming series","命名序列中不能输入特殊符号，""-""，""#""，"".""和""/""除外"
 DocType: Campaign,"Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment.",追踪销售活动。追踪来自活动的潜在客户，报价，销售订单等，统计投资回报率。
 DocType: Expense Claim,Approver,审批者
 ,SO Qty,销售订单数量
@@ -1741,13 +1725,14 @@ apps/erpnext/erpnext/config/stock.py +69,Split Delivery Note into packages.,分�
 apps/erpnext/erpnext/hooks.py +84,Shipments,发货
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +29,Dip molding,浸成型
 apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +25,Time Log Status must be Submitted.,时间日志状态必须被提交。
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +223,Serial No {0} does not belong to any Warehouse,序列号{0}不属于任何仓库
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +650,Setting Up,正在设置
 DocType: Purchase Invoice,In Words (Company Currency),大写金额（公司货币）
 DocType: Pricing Rule,Supplier,供应商
 DocType: C-Form,Quarter,季
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +105,Miscellaneous Expenses,杂项开支
 DocType: Global Defaults,Default Company,默认公司
-apps/erpnext/erpnext/controllers/stock_controller.py +165,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,品目{0}必须指定开支/差异账户。
+apps/erpnext/erpnext/controllers/stock_controller.py +166,Expense or Difference account is mandatory for Item {0} as it impacts overall stock value,品目{0}必须指定开支/差异账户。
 apps/erpnext/erpnext/controllers/accounts_controller.py +354,"Cannot overbill for Item {0} in row {1} more than {2}. To allow overbilling, please set in Stock Settings",不能为行{1}的{0}开具超过{2}的超额账单。要允许超额账单请更改仓储设置。
 DocType: Employee,Bank Name,银行名称
 apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +27,-Above,-以上
@@ -1786,12 +1771,10 @@ apps/erpnext/erpnext/config/learn.py +137,Serialized Inventory,序列化库存
 DocType: Activity Type,Default Billing Rate,默认计费率
 DocType: Time Log Batch,Total Billing Amount,总结算金额
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,应收账款
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +139,No Updates For,未发现更新：
 ,Stock Balance,库存余额
 apps/erpnext/erpnext/config/learn.py +107,Sales Order to Payment,销售订单到付款
 DocType: Expense Claim Detail,Expense Claim Detail,报销详情
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +271,Time Logs created:,时间日志创建：
-DocType: Company,If Yearly Budget Exceeded,如果超出年度预算
 DocType: Item,Weight UOM,重量计量单位
 DocType: Employee,Blood Group,血型
 DocType: Purchase Invoice Item,Page Break,分页符
@@ -1802,7 +1785,6 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Purchase Invoice Item,Qty,数量
 DocType: Fiscal Year,Companies,企业
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +24,Electronics,电子
-DocType: Email Digest,"Balances of Accounts of type ""Bank"" or ""Cash""",“银行”或“现金”账户的余额
 DocType: Stock Settings,Raise Material Request when stock reaches re-order level,提高材料时，申请股票达到再订购水平
 apps/erpnext/erpnext/support/doctype/maintenance_visit/maintenance_visit.js +18,From Maintenance Schedule,来自保养计划
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +56,Full-time,全职
@@ -1829,9 +1811,8 @@ DocType: Production Order Operation,Completed Qty,已完成数量
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +115,"For {0}, only debit accounts can be linked against another credit entry",对于{0}，借方分录只能选择借方账户
 apps/erpnext/erpnext/stock/get_item_details.py +258,Price List {0} is disabled,价格表{0}被禁用
 DocType: Manufacturing Settings,Allow Overtime,允许加班
-apps/erpnext/erpnext/controllers/selling_controller.py +225,Sales Order {0} is stopped,销售订单{0}的状态为已停止
-DocType: Email Digest,New Leads,新线索
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +212,{0} Serial Numbers required for Item {1}. You have provided {2}.,{0}需要的产品序列号{1}。您所提供{2}。
+apps/erpnext/erpnext/controllers/selling_controller.py +227,Sales Order {0} is stopped,销售订单{0}的状态为已停止
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +197,{0} Serial Numbers required for Item {1}. You have provided {2}.,{0}需要的产品序列号{1}。您所提供{2}。
 DocType: Stock Reconciliation Item,Current Valuation Rate,目前的估值价格
 DocType: Item,Customer Item Codes,客户项目代码
 DocType: Opportunity,Lost Reason,丧失原因
@@ -1916,6 +1897,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +347,Quantity in row {0} ({1}) must be same as manufactured quantity {2},行{0}中的数量({1})必须等于生产数量{2}
 DocType: Appraisal,Employee,雇员
 apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.js +10,Import Email From,导入电子邮件发件人
+apps/erpnext/erpnext/utilities/doctype/contact/contact.js +67,Invite as User,邀请成为用户
 DocType: Features Setup,After Sale Installations,售后安装
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +210,{0} {1} is fully billed,{0} {1}已完全开票
 DocType: Workstation Working Hour,End Time,结束时间
@@ -1928,10 +1910,8 @@ DocType: Rename Tool,File to Rename,文件重命名
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +176,Purchse Order number required for Item {0},要求项目Purchse订单号{0}
 apps/erpnext/erpnext/controllers/buying_controller.py +245,Specified BOM {0} does not exist for Item {1},品目{1}指定的BOM{0}不存在
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +196,Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,取消此销售订单前必须取消维护计划{0}
-DocType: Email Digest,Payments Received,收到付款
 apps/frappe/frappe/desk/page/backups/backups.html +13,Size,尺寸
 DocType: Notification Control,Expense Claim Approved,报销批准
-DocType: Email Digest,Calendar Events,日历事件
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +113,Pharmaceutical,医药
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +26,Cost of Purchased Items,采购品目成本
 DocType: Selling Settings,Sales Order Required,销售订单为必须项
@@ -1962,7 +1942,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py 
 DocType: Shipping Rule,Shipping Rule Label,配送规则标签
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +209,Raw Materials cannot be blank.,原材料不能为空。
 DocType: Newsletter,Test,测试
-apps/erpnext/erpnext/stock/doctype/item/item.py +193,"As there are existing stock transactions for this item, \
+apps/erpnext/erpnext/stock/doctype/item/item.py +302,"As there are existing stock transactions for this item, \
 							you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'",由于有存量交易为这个项目，\你不能改变的值&#39;有序列号&#39;，&#39;有批号&#39;，&#39;是股票项目“和”评估方法“
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +92,You can not change rate if BOM mentioned agianst any item,BOM被引用后你不能更改其税率
 DocType: Employee,Previous Work Experience,以前的工作经验
@@ -1971,7 +1951,6 @@ apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_p
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +207,{0} {1} is not submitted,{0} {1}未提交
 apps/erpnext/erpnext/config/stock.py +13,Requests for items.,请求的项目。
 DocType: Production Planning Tool,Separate production order will be created for each finished good item.,独立的生产订单将每个成品项目被创建。
-DocType: Email Digest,New Communications,新通讯
 DocType: Purchase Invoice,Terms and Conditions1,条款和条件1
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard_page.html +18,Complete Setup,完成安装
 DocType: Accounts Settings,"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.",会计分录冻结截止至此日期，除了以下角色禁止录入/修改。
@@ -1982,7 +1961,7 @@ apps/erpnext/erpnext/config/crm.py +96,Newsletter Mailing List,时事通讯录
 DocType: Delivery Note,Transporter Name,转运名称
 DocType: Contact,Enter department to which this Contact belongs,输入此联系人所属的部门
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +57,Total Absent,共缺席
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +738,Item or Warehouse for row {0} does not match Material Request,行{0}中的品目或仓库与物料申请不符合
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +744,Item or Warehouse for row {0} does not match Material Request,行{0}中的品目或仓库与物料申请不符合
 apps/erpnext/erpnext/config/stock.py +109,Unit of Measure,计量单位
 DocType: Fiscal Year,Year End Date,年度开始日期
 DocType: Task Depends On,Task Depends On,任务取决于
@@ -1990,7 +1969,6 @@ DocType: Lead,Opportunity,机会
 DocType: Salary Structure Earning,Salary Structure Earning,薪酬结构收入
 ,Completed Production Orders,已完成生产订单
 DocType: Operation,Default Workstation,默认工作台
-DocType: Email Digest,Inventory & Support,库存与支持
 DocType: Notification Control,Expense Claim Approved Message,报销批准消息
 DocType: Email Digest,How frequently?,多经常？
 DocType: Purchase Receipt,Get Current Stock,获取当前库存
@@ -2049,7 +2027,6 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 9. 税费应用于：你可以在这个部分指定此税费仅应用于评估(即不影响总计)， 或者仅应用于总计(即不会应用到单个品目)，或者两者。
 10. 添加或扣除： 添加还是扣除此税费。"
 DocType: Note,Note,注
-DocType: Email Digest,New Material Requests,新建物料申请
 DocType: Purchase Receipt Item,Recd Quantity,RECD数量
 DocType: Email Account,Email Ids,电子邮件ID
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +104,Cannot produce more Item {0} than Sales Order quantity {1},不能生产超过销售订单数量{1}的品目{0}
@@ -2069,7 +2046,6 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py 
 DocType: Stock Entry,Manufacture,生产
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +13,Please Delivery Note first,请送货单第一
 DocType: Purchase Invoice,Currency and Price List,货币和价格表
-DocType: Shopping Cart Taxes and Charges Master,Tax Master,税项大师
 DocType: Opportunity,Customer / Lead Name,客户/潜在客户名称
 apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py +63,Clearance Date not mentioned,清拆日期未提及
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +71,Production,生产
@@ -2097,9 +2073,8 @@ apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/paymen
 DocType: Process Payroll,Select Employees,选择雇员
 DocType: Bank Reconciliation,To Date,至今
 DocType: Opportunity,Potential Sales Deal,潜在的销售交易
-sites/assets/js/form.min.js +306,Details,详细信息
+sites/assets/js/form.min.js +308,Details,详细信息
 DocType: Purchase Invoice,Total Taxes and Charges,总营业税金及费用
-DocType: Email Digest,Payments Made,支付的款项
 DocType: Employee,Emergency Contact,紧急联络人
 DocType: Item,Quality Parameters,质量参数
 DocType: Target Detail,Target  Amount,目标金额
@@ -2177,7 +2152,7 @@ DocType: Payment Tool Detail,Payment Tool Detail,支付工具的详细信息
 ,Sales Browser,销售列表
 DocType: Journal Entry,Total Credit,总积分
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +469,Warning: Another {0} # {1} exists against stock entry {2},警告：另一个{0}＃{1}存在对股票入门{2}
-apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.py +447,Local,当地
+apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.py +457,Local,当地
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +26,Loans and Advances (Assets),贷款及垫款（资产）
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +12,Debtors,债务人
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +147,Large,大
@@ -2189,7 +2164,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +127,Polishi
 DocType: Production Order Operation,Planned Start Time,计划开始时间
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +51,Allocated,已调配
 apps/erpnext/erpnext/config/accounts.py +63,Close Balance Sheet and book Profit or Loss.,关闭资产负债表，打开损益表。
-apps/erpnext/erpnext/stock/doctype/item/item.py +479,"Default Unit of Measure for Item {0} cannot be changed directly because \
+apps/erpnext/erpnext/stock/doctype/item/item.py +599,"Default Unit of Measure for Item {0} cannot be changed directly because \
 			you have already made some transaction(s) with another UOM. To change default UOM, \
 			use 'UOM Replace Utility' tool under Stock module.",测度项目的默认单位{0}不能直接改变，因为\你已经做了一些交易（S）与其他计量单位。要更改默认的计量单位，\使用“计量单位更换工具”下的股票模块工具。
 DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,指定货币兑换的汇率
@@ -2201,7 +2176,7 @@ DocType: Price List,Price List Master,价格表大师
 DocType: Sales Person,All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,所有的销售交易都可以标记多个**销售人员**，方便你设置和监控目标。
 ,S.O. No.,销售订单号
 DocType: Production Order Operation,Make Time Log,创建时间日志
-apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +156,Please create Customer from Lead {0},请牵头建立客户{0}
+apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +158,Please create Customer from Lead {0},请牵头建立客户{0}
 DocType: Price List,Applicable for Countries,适用于国家
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +44,Computers,电脑
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +112,Electro-chemical grinding,电化学磨
@@ -2228,12 +2203,12 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.",可以添加至销售或采购的标准条款和条件。例如：1. 报价有效期。 2.付款条件(预付款，赊购，部分预付款)。3.其他，例如安全/使用警告，退货政策，配送条款，争议/赔偿/责任仲裁方式，贵公司的地址和联系方式。
 DocType: Attendance,Leave Type,假期类型
-apps/erpnext/erpnext/controllers/stock_controller.py +171,Expense / Difference account ({0}) must be a 'Profit or Loss' account,开支/差异帐户({0})必须是一个“益损”账户
+apps/erpnext/erpnext/controllers/stock_controller.py +172,Expense / Difference account ({0}) must be a 'Profit or Loss' account,开支/差异帐户({0})必须是一个“益损”账户
 DocType: Account,Accounts User,会计人员
 DocType: Sales Invoice,"Check if recurring invoice, uncheck to stop recurring or put proper End Date",如果是周期性发票的化请勾选，不是周期性或有结束日期的发票请取消选择。
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +18,Attendance for employee {0} is already marked,雇员{0}的考勤已标记
 DocType: Packing Slip,If more than one package of the same type (for print),如果有多个同样类型的打包（用于打印）
-apps/erpnext/erpnext/utilities/doctype/rename_tool/rename_tool.py +38,Maximum {0} rows allowed,仅允许最多{0}行
+apps/frappe/frappe/model/rename_doc.py +348,Maximum {0} rows allowed,仅允许最多{0}行
 DocType: C-Form Invoice Detail,Net Total,总净
 DocType: Bin,FCFS Rate,FCFS率
 apps/erpnext/erpnext/accounts/page/pos/pos.js +15,Billing (Sales Invoice),账单(销售发票)
@@ -2276,10 +2251,10 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +18,Discount 
 DocType: Purchase Invoice,Half-yearly,半年一次
 apps/erpnext/erpnext/accounts/report/financial_statements.py +16,Fiscal Year {0} not found.,财年{0}未找到。
 DocType: Bank Reconciliation,Get Relevant Entries,获取相关条目
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +401,Accounting Entry for Stock,库存的会计分录
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +407,Accounting Entry for Stock,库存的会计分录
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +64,Coining,铸币
 DocType: Sales Invoice,Sales Team1,销售团队1
-apps/erpnext/erpnext/stock/doctype/item/item.py +244,Item {0} does not exist,品目{0}不存在
+apps/erpnext/erpnext/stock/doctype/item/item.py +353,Item {0} does not exist,品目{0}不存在
 DocType: Sales Invoice,Customer Address,客户地址
 apps/frappe/frappe/desk/query_report.py +136,Total,总
 DocType: Purchase Invoice,Apply Additional Discount On,收取额外折扣
@@ -2294,7 +2269,7 @@ DocType: Quality Inspection,Quality Inspection,质量检验
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +144,Extra Small,超小
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +20,Spray forming,喷射成形
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +458,Warning: Material Requested Qty is less than Minimum Order Qty,警告：物料请求的数量低于最低起订量
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +195,Account {0} is frozen,科目{0}已冻结
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +197,Account {0} is frozen,科目{0}已冻结
 DocType: Company,Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,属于本机构的，带独立科目表的法人/附属机构。
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +29,"Food, Beverage & Tobacco",食品，饮料与烟草
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +20,PL or BS,PL或BS
@@ -2337,7 +2312,7 @@ apps/erpnext/erpnext/config/stock.py +74,Incoming quality inspection.,来料质�
 DocType: Purchase Order Item,Returned Qty,返回的数量
 DocType: Employee,Exit,退出
 apps/erpnext/erpnext/accounts/doctype/account/account.py +134,Root Type is mandatory,根类型是强制性的
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +292,Serial No {0} created,序列号{0}已创建
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +295,Serial No {0} created,序列号{0}已创建
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +125,Vibratory finishing,震荡整理
 DocType: Item Customer Detail,"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes",为方便客户，这些代码可以在打印格式(如发票和送货单)中使用
 DocType: Employee,You can enter any date manually,您可以手动输入日期
@@ -2352,11 +2327,11 @@ DocType: SMS Settings,SMS Gateway URL,短信网关的URL
 apps/erpnext/erpnext/config/crm.py +53,Logs for maintaining sms delivery status,日志维护短信发送状态
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +137,Grinding,磨碎
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +34,Shrink wrapping,收缩包装
+apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +35,Pending Activities,待活动
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +166,Confirmed,确认
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +52,Supplier > Supplier Type,供应商 > 供应商类型
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +127,Please enter relieving date.,请输入解除日期。
 apps/erpnext/erpnext/controllers/trends.py +137,Amt,金额
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +237,Serial No {0} status must be 'Available' to Deliver,序列号{0}的状态必须为“可用”，否则不能发货。
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +52,Only Leave Applications with status 'Approved' can be submitted,只留下带有状态的应用“已批准” ，可以提交
 apps/erpnext/erpnext/utilities/doctype/address/address.py +21,Address Title is mandatory.,地址标题是必须项。
 DocType: Opportunity,Enter name of campaign if source of enquiry is campaign,如果询价的来源是活动的话请输入活动名称。
@@ -2399,7 +2374,6 @@ apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +50,Period C
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +62,Cost Center with existing transactions can not be converted to group,有交易的成本中心不能转化为组
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +90,Depreciation,折旧
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py +49,Supplier(s),供应商
-DocType: Email Digest,Payments received during the digest period,在消化期间收到付款
 DocType: Customer,Credit Limit,信用额度
 apps/erpnext/erpnext/accounts/page/pos/pos_page.html +4,Select type of transaction,选择交易类型
 DocType: GL Entry,Voucher No,凭证编号
@@ -2409,7 +2383,7 @@ apps/erpnext/erpnext/config/selling.py +122,Template of terms or contract.,条�
 DocType: Customer,Address and Contact,地址和联系方式
 DocType: Customer,Last Day of the Next Month,下个月的最后一天
 DocType: Employee,Feedback,反馈
-apps/erpnext/erpnext/accounts/party.py +275,Note: Due / Reference Date exceeds allowed customer credit days by {0} day(s),注意：到期日/计入日已超过客户信用日期{0}天。
+apps/erpnext/erpnext/accounts/party.py +281,Note: Due / Reference Date exceeds allowed customer credit days by {0} day(s),注意：到期日/计入日已超过客户信用日期{0}天。
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +602,Maint. Schedule,维护手册。计划
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +108,Abrasive jet machining,磨料喷射加工
 DocType: Stock Settings,Freeze Stock Entries,冻结仓储记录
@@ -2439,7 +2413,7 @@ DocType: Communication,Phone,电话
 DocType: Employee Internal Work History,Employee Internal Work History,雇员内部就职经历
 apps/erpnext/erpnext/accounts/report/trial_balance_for_party/trial_balance_for_party.py +163,Closing (Dr),结算(借记)
 DocType: Contact,Passive,被动
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +242,Serial No {0} not in stock,序列号{0}无库存
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +228,Serial No {0} not in stock,序列号{0}无库存
 apps/erpnext/erpnext/config/selling.py +127,Tax template for selling transactions.,销售业务的税务模板。
 DocType: Sales Invoice,Write Off Outstanding Amount,核销未付金额
 DocType: Features Setup,"Check if you need automatic recurring invoices. After submitting any sales invoice, Recurring section will be visible.",如果需要自动周期性发票的话请勾选，在提交销售发票后，周期部分将可见。
@@ -2465,7 +2439,7 @@ DocType: Payment Tool,Against Vouchers,对凭证
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +23,Quick Help,快速帮助
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +168,Source and target warehouse cannot be same for row {0},行{0}中的源和目标仓库不能相同
 DocType: Features Setup,Sales Extras,销售额外选项
-apps/erpnext/erpnext/accounts/utils.py +340,{0} budget for Account {1} against Cost Center {2} will exceed by {3},{0} 成本中心{2}账户{1}的预算将超过{3}
+apps/erpnext/erpnext/accounts/utils.py +344,{0} budget for Account {1} against Cost Center {2} will exceed by {3},{0} 成本中心{2}账户{1}的预算将超过{3}
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +236,"Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry",差异帐户必须是资产/负债类型的帐户，因为此股票和解是一个进入开幕
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +137,Purchase Order number required for Item {0},所需物品的采购订单号{0}
 DocType: Leave Allocation,Carry Forwarded Leaves,顺延假期
@@ -2484,7 +2458,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +358,You will use i
 DocType: Sales Partner,Retailer,零售商
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +99,Credit To account must be a Balance Sheet account,信用帐户必须是资产负债表科目
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +128,All Supplier Types,所有供应商类型
-apps/erpnext/erpnext/stock/doctype/item/item.py +34,Item Code is mandatory because Item is not automatically numbered,品目编号是必须项，因为品目没有自动编号
+apps/erpnext/erpnext/stock/doctype/item/item.py +36,Item Code is mandatory because Item is not automatically numbered,品目编号是必须项，因为品目没有自动编号
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +98,Quotation {0} not of type {1},报价{0} 不属于{1}类型
 DocType: Maintenance Schedule Item,Maintenance Schedule Item,维护计划品目
 DocType: Sales Order,%  Delivered,％已交付
@@ -2493,7 +2467,6 @@ apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +15,Make Sa
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +495,Unstop,重新开始
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +18,Browse BOM,浏览BOM
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +175,Secured Loans,抵押贷款
-apps/erpnext/erpnext/utilities/doctype/rename_tool/rename_tool.py +49,Ignored:,已忽略：
 apps/erpnext/erpnext/setup/page/setup_wizard/data/sample_home_page.html +3,Awesome Products,优质产品
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +189,Opening Balance Equity,期初余额权益
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +80,Cannot approve leave as you are not authorized to approve leaves on Block Dates,无法批准，你没有在禁离日批准假期的权限
@@ -2508,7 +2481,8 @@ DocType: Workstation Working Hour,Start Time,开始时间
 DocType: Item Price,Bulk Import Help,批量导入帮助
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +200,Select Quantity,选择数量
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +34,Approving Role cannot be same as role the rule is Applicable To,审批与被审批角色不能相同
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +41,Message Sent,消息已发送
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +66,Unsubscribe from this Email Digest,从该电子邮件摘要退订
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +36,Message Sent,消息已发送
 DocType: Production Plan Sales Order,SO Date,销售订单日期
 DocType: Sales Invoice,Rate at which Price list currency is converted to customer's base currency,速率价目表货币转换成客户的基础货币
 DocType: Purchase Invoice Item,Net Amount (Company Currency),净金额（公司货币）
@@ -2523,7 +2497,7 @@ DocType: System Settings,System Settings,系统设置
 DocType: Project,Project Type,项目类型
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.py +16,Either target qty or target amount is mandatory.,需要指定目标数量和金额。
 apps/erpnext/erpnext/config/projects.py +38,Cost of various activities,各种活动的费用
-apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +99,Not allowed to update stock transactions older than {0},不允许对早于{0}的库存交易进行更新
+apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +101,Not allowed to update stock transactions older than {0},不允许对早于{0}的库存交易进行更新
 DocType: Item,Inspection Required,需要检验
 DocType: Purchase Invoice Item,PR Detail,PR详细
 DocType: Sales Order,Fully Billed,完全开票
@@ -2559,13 +2533,12 @@ DocType: Project,Total Costing Amount (via Time Logs),总成本核算金额（�
 DocType: Purchase Order Item Supplied,Stock UOM,库存计量单位
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +193,Purchase Order {0} is not submitted,采购订单{0}未提交
 ,Projected,预计
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +232,Serial No {0} does not belong to Warehouse {1},序列号{0}不属于仓库{1}
-apps/erpnext/erpnext/controllers/status_updater.py +126,Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0,注意：系统将不会为品目{0}检查超额发货或超额预订，因为其数量或金额为0
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +218,Serial No {0} does not belong to Warehouse {1},序列号{0}不属于仓库{1}
+apps/erpnext/erpnext/controllers/status_updater.py +127,Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0,注意：系统将不会为品目{0}检查超额发货或超额预订，因为其数量或金额为0
 DocType: Notification Control,Quotation Message,报价信息
 DocType: Issue,Opening Date,开幕日期
 DocType: Journal Entry,Remark,备注
 DocType: Purchase Receipt Item,Rate and Amount,率及金额
-apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +41,"Budget cannot be assigned against {0}, as it's not an Expense account",财政预算案不能对{0}指定的，因为它不是报销
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +95,Boring,无聊
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +660,From Sales Order,来自销售订单
 DocType: Blog Category,Parent Website Route,父网站路线
@@ -2581,7 +2554,6 @@ DocType: POS Profile,Write Off Account,核销帐户
 sites/assets/js/erpnext.min.js +26,Discount Amount,折扣金额
 DocType: Purchase Invoice,Return Against Purchase Invoice,回到对采购发票
 DocType: Item,Warranty Period (in days),保修期限（天数）
-DocType: Email Digest,Expenses booked for the digest period,摘要期间已预约开支
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +550,e.g. VAT,例如增值税
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +26,Item 4,项目4
 DocType: Journal Entry Account,Journal Entry Account,日记帐分录帐号
@@ -2591,7 +2563,6 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +82,Hot meta
 DocType: Sales Order Item,Sales Order Date,销售订单日期
 DocType: Sales Invoice Item,Delivered Qty,已交付数量
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +63,Warehouse {0}: Company is mandatory,仓库{0}必须指定公司
-DocType: Shopping Cart Taxes and Charges Master,Shopping Cart Taxes and Charges Master,购物车税费大师
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +36,"Go to the appropriate group (usually Source of Funds > Current Liabilities > Taxes and Duties and create a new Account (by clicking on Add Child) of type ""Tax"" and do mention the Tax rate.",转到相应的组（通常基金&gt;流动负债&gt;税和关税的来源，并创建一个新帐户（通过点击输入“税”添加儿童），做提税率。
 ,Payment Period Based On Invoice Date,已经提交。
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +50,Missing Currency Exchange Rates for {0},{0}没有货币汇率
@@ -2640,7 +2611,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +128,Superfi
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +100,Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,不同计量单位的项目会导致不正确的（总）净重值。请确保每个品目的净重使用同一个计量单位。
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +39,BOM Rate,BOM税率
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +94,Please pull items from Delivery Note,请送货单拉项目
-apps/erpnext/erpnext/accounts/utils.py +264,Journal Entries {0} are un-linked,日记帐分录{0}没有关联
+apps/erpnext/erpnext/accounts/utils.py +268,Journal Entries {0} are un-linked,日记帐分录{0}没有关联
 apps/erpnext/erpnext/config/crm.py +37,"Record of all communications of type email, phone, chat, visit, etc.",类型电子邮件，电话，聊天，访问等所有通信记录
 apps/erpnext/erpnext/accounts/general_ledger.py +134,Please mention Round Off Cost Center in Company,请提及公司舍入成本中心
 DocType: Purchase Invoice,Terms,条款
@@ -2653,10 +2624,10 @@ DocType: Sales Invoice Item,Delivery Note Item,送货单品目
 DocType: Expense Claim,Task,任务
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +57,Shaving,刮
 DocType: Purchase Taxes and Charges,Reference Row #,参考行＃
-apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +74,Batch number is mandatory for Item {0},品目{0}必须指定批次号
+apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +76,Batch number is mandatory for Item {0},品目{0}必须指定批次号
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.js +14,This is a root sales person and cannot be edited.,您可以通过选择备份频率启动和\
 ,Stock Ledger,库存总帐
-apps/erpnext/erpnext/templates/pages/order.html +57,Rate: {0},价格：{0}
+apps/erpnext/erpnext/templates/pages/order.html +59,Rate: {0},价格：{0}
 DocType: Salary Slip Deduction,Salary Slip Deduction,工资单扣款
 apps/frappe/frappe/desk/doctype/note/note_list.js +3,Notes,便签
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +199,Select a group node first.,请先选择一个组节点。
@@ -2670,7 +2641,7 @@ DocType: Company,Default Letter Head,默认信头
 DocType: Time Log,Billable,可开票
 DocType: Authorization Rule,This will be used for setting rule in HR module,这将用于在人力资源模块的设置规则
 DocType: Account,Rate at which this tax is applied,速率此税适用
-apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py +34,Reorder Qty,再订购数量
+apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py +17,Reorder Qty,再订购数量
 DocType: Company,Stock Adjustment Account,库存调整账户
 DocType: Journal Entry,Write Off,抹杀
 DocType: Time Log,Operation ID,操作ID
@@ -2684,7 +2655,7 @@ DocType: Report,Report Type,报告类型
 apps/frappe/frappe/core/doctype/user/user.js +134,Loading,载入中
 DocType: BOM Replace Tool,BOM Replace Tool,BOM替换工具
 apps/erpnext/erpnext/config/setup.py +37,Country wise default Address Templates,国家的默认地址模板
-apps/erpnext/erpnext/accounts/party.py +278,Due / Reference Date cannot be after {0},到期/参照日期不能迟于{0}
+apps/erpnext/erpnext/accounts/party.py +284,Due / Reference Date cannot be after {0},到期/参照日期不能迟于{0}
 apps/erpnext/erpnext/config/setup.py +51,Data Import and Export,数据导入和导出
 DocType: Features Setup,If you involve in manufacturing activity. Enables Item 'Is Manufactured',如果贵司涉及生产活动，将启动品目的“是否生产”属性
 DocType: Sales Invoice,Rounded Total,总圆角
@@ -2694,19 +2665,19 @@ DocType: Serial No,Out of AMC,出资产管理公司
 DocType: Purchase Order Item,Material Request Detail No,物料申请详情编号
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +97,Hard turning,硬车削
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.js +33,Make Maintenance Visit,创建维护访问
-apps/erpnext/erpnext/selling/doctype/customer/customer.py +178,Please contact to the user who have Sales Master Manager {0} role,请联系，谁拥有硕士学位的销售经理{0}角色的用户
+apps/erpnext/erpnext/selling/doctype/customer/customer.py +187,Please contact to the user who have Sales Master Manager {0} role,请联系，谁拥有硕士学位的销售经理{0}角色的用户
 DocType: Company,Default Cash Account,默认现金账户
 apps/erpnext/erpnext/config/accounts.py +79,Company (not Customer or Supplier) master.,公司(非客户或供应商)大师。
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +105,Please enter 'Expected Delivery Date',请输入“预产期”
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +181,Delivery Notes {0} must be cancelled before cancelling this Sales Order,取消这个销售订单之前必须取消送货单{0}
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +373,Paid amount + Write Off Amount can not be greater than Grand Total,支付的金额+写的抵销金额不能大于总计
-apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +76,{0} is not a valid Batch Number for Item {1},{0}不是品目{1}的有效批号
+apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +78,{0} is not a valid Batch Number for Item {1},{0}不是品目{1}的有效批号
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +109,Note: There is not enough leave balance for Leave Type {0},注意：假期类型{0}的余量不足
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.js +9,"Note: If payment is not made against any reference, make Journal Entry manually.",注意：如果付款没有任何参考，请手动创建一个日记账分录。
 DocType: Item,Supplier Items,供应商品目
 DocType: Opportunity,Opportunity Type,机会型
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +42,New Company,新建公司
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +54,Cost Center is required for 'Profit and Loss' account {0},成本中心是“损益”科目{0}的必须项
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +56,Cost Center is required for 'Profit and Loss' account {0},成本中心是“损益”科目{0}的必须项
 apps/erpnext/erpnext/setup/doctype/company/delete_company_transactions.py +17,Transactions can only be deleted by the creator of the Company,交易只能由公司的创建者被删除
 apps/erpnext/erpnext/accounts/general_ledger.py +21,Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction.,总帐分录发现错误数字，你可能在交易中选择了错误的科目。
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +31,To create a Bank Account,要创建一个银行帐户
@@ -2733,7 +2704,7 @@ DocType: Task,Actual Start Date (via Time Logs),实际开始日期（通过时�
 DocType: Stock Reconciliation Item,Before reconciliation,前和解
 apps/erpnext/erpnext/support/doctype/maintenance_visit/maintenance_visit.py +12,To {0},{0}
 DocType: Purchase Invoice,Taxes and Charges Added (Company Currency),已添加的税费（公司货币）
-apps/erpnext/erpnext/stock/doctype/item/item.py +169,Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,品目税项的行{0}中必须指定类型为税项/收益/支出/应课的账户。
+apps/erpnext/erpnext/stock/doctype/item/item.py +278,Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,品目税项的行{0}中必须指定类型为税项/收益/支出/应课的账户。
 DocType: Sales Order,Partly Billed,天色帐单
 DocType: Item,Default BOM,默认的BOM
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +79,Decambering,Decambering
@@ -2761,7 +2732,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +62,Intern,实�
 DocType: Newsletter,A Lead with this email id should exist,与此电子邮件关联的潜在客户不存在
 DocType: Stock Entry,From BOM,从BOM
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +34,Basic,基本
-apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +92,Stock transactions before {0} are frozen,早于{0}的库存事务已冻结
+apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +94,Stock transactions before {0} are frozen,早于{0}的库存事务已冻结
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +216,Please click on 'Generate Schedule',请点击“生成表”
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.js +78,To Date should be same as From Date for Half Day leave,日期应该是一样的起始日期为半天假
 apps/erpnext/erpnext/config/stock.py +110,"e.g. Kg, Unit, Nos, m",如公斤，单元，号数，米
@@ -2826,15 +2797,14 @@ DocType: Department,Days for which Holidays are blocked for this department.,此
 ,Produced,生产
 DocType: Item,Item Code for Suppliers,对于供应商产品编号
 DocType: Issue,Raised By (Email),提出（电子邮件）
-DocType: Email Digest,General,一般
+apps/erpnext/erpnext/setup/page/setup_wizard/default_website.py +72,General,一般
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +495,Attach Letterhead,附加信头
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +272,Cannot deduct when category is for 'Valuation' or 'Valuation and Total',分类是“估值”或“估值和总计”的时候不能扣税。
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +542,"List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later.",列出你的头税（如增值税，关税等，它们应该具有唯一的名称）及其标准费率。这将创建一个标准的模板，你可以编辑和多以后添加。
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +244,Serial Nos Required for Serialized Item {0},序列化的品目{0}必须指定序列号
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +230,Serial Nos Required for Serialized Item {0},序列化的品目{0}必须指定序列号
 DocType: Journal Entry,Bank Entry,银行记录
 DocType: Authorization Rule,Applicable To (Designation),适用于(指定)
 DocType: Blog Post,Blog Post,博客文章
-apps/erpnext/erpnext/templates/generators/item.html +35,Add to Cart,加入购物车
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.js +28,Group By,分组基于
 apps/erpnext/erpnext/config/accounts.py +143,Enable / disable currencies.,启用/禁用货币。
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +114,Postal Expenses,邮政费用
@@ -2842,13 +2812,13 @@ apps/erpnext/erpnext/controllers/trends.py +19,Total(Amt),共（AMT）
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +26,Entertainment & Leisure,娱乐休闲
 DocType: Purchase Order,The date on which recurring order will be stop,经常性发票终止日期
 DocType: Quality Inspection,Item Serial No,品目序列号
-apps/erpnext/erpnext/controllers/status_updater.py +132,{0} must be reduced by {1} or you should increase overflow tolerance,{0}必须通过{1}会减少或应增加溢出宽容
+apps/erpnext/erpnext/controllers/status_updater.py +133,{0} must be reduced by {1} or you should increase overflow tolerance,{0}必须通过{1}会减少或应增加溢出宽容
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +57,Total Present,总现
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +627,Hour,小时
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +138,"Serialized Item {0} cannot be updated \
 					using Stock Reconciliation",序列化的品目{0}不能被“库存盘点”更新
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +481,Transfer Material to Supplier,转印材料供应商
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +30,New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,新序列号不能有仓库，仓库只能通过库存记录和采购收据设置。
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +29,New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,新序列号不能有仓库，仓库只能通过库存记录和采购收据设置。
 DocType: Lead,Lead Type,线索类型
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +82,Create Quotation,创建报价
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +299,All these items have already been invoiced,这些品目都已开具发票
@@ -2865,7 +2835,7 @@ DocType: Quality Inspection,Report Date,报告日期
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +130,Routing,路由
 DocType: C-Form,Invoices,发票
 DocType: Job Opening,Job Title,职位
-apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +84,{0} Recipients,{0}个收件人
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +80,{0} Recipients,{0}个收件人
 DocType: Features Setup,Item Groups in Details,详细品目群组
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +335,Quantity to Manufacture must be greater than 0.,量生产必须大于0。
 apps/erpnext/erpnext/accounts/page/pos/pos.js +4,Start Point-of-Sale (POS),起点的销售终端（POS）
@@ -2881,6 +2851,7 @@ DocType: Quotation,Quotation Lost Reason,报价丧失原因
 DocType: Address,Plant,厂
 DocType: DocType,Setup,设置
 apps/erpnext/erpnext/setup/doctype/supplier_type/supplier_type.js +5,There is nothing to edit.,无需编辑。
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +108,Summary for this month and pending activities,本月和待活动总结
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +39,Cold rolling,冷轧
 DocType: Customer Group,Customer Group Name,客户群组名称
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +408,Please remove this Invoice {0} from C-Form {1},请删除此发票{0}从C-表格{1}
@@ -2906,7 +2877,7 @@ DocType: Leave Allocation,New Leaves Allocated,新调配的假期
 apps/erpnext/erpnext/controllers/trends.py +257,Project-wise data is not available for Quotation,项目明智的数据不适用于报价
 DocType: Project,Expected End Date,预计结束日期
 DocType: Appraisal Template,Appraisal Template Title,评估模板标题
-apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.py +428,Commercial,广告
+apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.py +438,Commercial,广告
 apps/erpnext/erpnext/selling/doctype/product_bundle/product_bundle.py +23,Parent Item {0} must not be a Stock Item,父项{0}不能是库存产品
 DocType: Cost Center,Distribution Id,分配标识
 apps/erpnext/erpnext/setup/page/setup_wizard/data/sample_home_page.html +14,Awesome Services,优质服务
@@ -2959,7 +2930,7 @@ DocType: Offer Letter,Awaiting Response,正在等待回应
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +53,Above,以上
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +80,Cold sizing,冷上浆
 DocType: Salary Slip,Earning & Deduction,盈余及扣除
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +74,Account {0} cannot be a Group,科目{0}不能为组
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +76,Account {0} cannot be a Group,科目{0}不能为组
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +259,Region,区域
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +215,Optional. This setting will be used to filter in various transactions.,可选。此设置将被应用于各种交易进行过滤。
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +104,Negative Valuation Rate is not allowed,负评估价格是不允许的
@@ -2968,25 +2939,24 @@ DocType: Fiscal Year,"For e.g. 2012, 2012-13",对例如2012，2012-13
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +32,Provisional Profit / Loss (Credit),临时溢利/（亏损）（信用）
 DocType: Sales Invoice,Return Against Sales Invoice,射向销售发票
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +32,Item 5,项目5
-apps/erpnext/erpnext/accounts/utils.py +272,Please set default value {0} in Company {1},请设置在公司默认值{0} {1}
+apps/erpnext/erpnext/accounts/utils.py +276,Please set default value {0} in Company {1},请设置在公司默认值{0} {1}
 DocType: Serial No,Creation Time,创建时间
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +62,Total Revenue,总收入
 DocType: Sales Invoice,Product Bundle Help,产品包帮助
 ,Monthly Attendance Sheet,每月考勤表
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +16,No record found,未找到记录
-apps/erpnext/erpnext/controllers/stock_controller.py +174,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}：成本中心是品目{2}的必须项
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +77,Account {0} is inactive,科目{0}已停用
+apps/erpnext/erpnext/controllers/stock_controller.py +175,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}：成本中心是品目{2}的必须项
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +79,Account {0} is inactive,科目{0}已停用
 DocType: GL Entry,Is Advance,是否预付款
 apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.js +21,Attendance From Date and Attendance To Date is mandatory,必须指定考勤起始日期和结束日期
 apps/erpnext/erpnext/controllers/buying_controller.py +131,Please enter 'Is Subcontracted' as Yes or No,请输入'转包' YES或NO
 DocType: Sales Team,Contact No.,联络人电话
-apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +65,'Profit and Loss' type account {0} not allowed in Opening Entry,期初分录不允许有“损益”类型{0}的账户
+apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +67,'Profit and Loss' type account {0} not allowed in Opening Entry,期初分录不允许有“损益”类型{0}的账户
 DocType: Workflow State,Time,时间
 DocType: Features Setup,Sales Discounts,销售折扣
 DocType: Hub Settings,Seller Country,卖家国家
 DocType: Authorization Rule,Authorization Rule,授权规则
 DocType: Sales Invoice,Terms and Conditions Details,条款和条件详情
-apps/erpnext/erpnext/templates/generators/item.html +61,Specifications,产品规格
 DocType: Sales Taxes and Charges Template,Sales Taxes and Charges Template,营业税金及费用模板
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +10,Apparel & Accessories,服装及配饰
 apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/customers_not_buying_since_long_time.py +67,Number of Order,订购次数
@@ -3020,6 +2990,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Sales Partner,Logo,Logo
 DocType: Naming Series,Check this if you want to force the user to select a series before saving. There will be no default if you check this.,要用户手动选择序列的话请勾选。勾选此项后将不会选择默认序列。
 apps/erpnext/erpnext/stock/get_item_details.py +107,No Item with Serial No {0},没有序列号为{0}的品目
+apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +92,Open Notifications,打开通知
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +68,Direct Expenses,直接开支
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +635,Do you really want to UNSTOP this Material Request?,确认要重新开始此物料申请吗？
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +60,New Customer Revenue,新客户收入
@@ -3031,9 +3002,8 @@ apps/erpnext/erpnext/accounts/doctype/account/account.py +47,Account {0}: Parent
 apps/erpnext/erpnext/setup/doctype/company/company.js +38,Successfully deleted all transactions related to this company!,成功删除与该公司相关的所有交易！
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +21,As on Date,随着对日
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +111,Honing,珩磨
-DocType: Serial No,"Only Serial Nos with status ""Available"" can be delivered.",只有串行NOS与状态“可用”可交付使用。
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +58,Probation,缓刑
-apps/erpnext/erpnext/stock/doctype/item/item.py +93,Default Warehouse is mandatory for stock Item.,库存品目必须指定默认仓库。
+apps/erpnext/erpnext/stock/doctype/item/item.py +202,Default Warehouse is mandatory for stock Item.,库存品目必须指定默认仓库。
 DocType: Feed,Full Name,全名
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +148,Clinching,铆
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +191,Payment of salary for the month {0} and year {1},支付工资的月{0}和年{1}
@@ -3102,9 +3072,10 @@ DocType: Purchase Order Item,Supplier Quotation,供应商报价
 DocType: Quotation,In Words will be visible once you save the Quotation.,大写金额将在报价单保存后显示。
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +68,Ironing,熨衣服
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +213,{0} {1} is stopped,{0} {1}已停止
-apps/erpnext/erpnext/stock/doctype/item/item.py +181,Barcode {0} already used in Item {1},条码{0}已被品目{1}使用
+apps/erpnext/erpnext/stock/doctype/item/item.py +290,Barcode {0} already used in Item {1},条码{0}已被品目{1}使用
 DocType: Lead,Add to calendar on this date,将此日期添加至日历
 apps/erpnext/erpnext/config/selling.py +132,Rules for adding shipping costs.,规则增加运输成本。
+apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +39,Upcoming Events,即将举行的活动
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +20,Customer is required,客户是必须项
 DocType: Letter Head,Letter Head,信头
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +20,{0} is mandatory for Return,{0}是强制性的回报
@@ -3125,17 +3096,16 @@ apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +4
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +442,POS Profile required to make POS Entry,需要POS资料，使POS进入
 DocType: Hub Settings,Name Token,名称令牌
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +106,Planing,刨
-apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.py +172,Standard Selling,标准销售
+apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.py +182,Standard Selling,标准销售
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +137,Atleast one warehouse is mandatory,必须选择至少一个仓库
 DocType: Serial No,Out of Warranty,超出保修期
 DocType: BOM Replace Tool,Replace,更换
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +309,{0} against Sales Invoice {1},{0}对销售发票{1}
-apps/erpnext/erpnext/stock/doctype/item/item.py +46,Please enter default Unit of Measure,请输入缺省的计量单位
+apps/erpnext/erpnext/stock/doctype/item/item.py +48,Please enter default Unit of Measure,请输入缺省的计量单位
 DocType: Purchase Invoice Item,Project Name,项目名称
 DocType: Supplier,Mention if non-standard receivable account,提到如果不规范应收账款
 DocType: Workflow State,Edit,编辑
 DocType: Journal Entry Account,If Income or Expense,收入或支出
-DocType: Email Digest,New Support Tickets,新支持请求
 DocType: Features Setup,Item Batch Nos,品目批号
 DocType: Stock Ledger Entry,Stock Value Difference,库存值差异
 apps/erpnext/erpnext/config/learn.py +199,Human Resource,人力资源
@@ -3195,6 +3165,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +44,Casual Leav
 DocType: Batch,Batch ID,批次ID
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +329,Note: {0},注： {0}
 ,Delivery Note Trends,送货单趋势
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +104,This Week's Summary,本周的总结
 apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +72,{0} must be a Purchased or Sub-Contracted Item in row {1},行{1}中的{0}必须是“采购”或“转包”类型的品目
 apps/erpnext/erpnext/accounts/general_ledger.py +106,Account: {0} can only be updated via Stock Transactions,科目{0}只能通过库存处理更新
 DocType: GL Entry,Party,一方
@@ -3213,7 +3184,7 @@ DocType: Address,Shipping,送货
 DocType: Stock Ledger Entry,Stock Ledger Entry,存库分类帐分录
 DocType: Department,Leave Block List,禁离日列表
 DocType: Customer,Tax ID,税号
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +203,Item {0} is not setup for Serial Nos. Column must be blank,品目{0}没有设置序列号，序列号必须留空
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +188,Item {0} is not setup for Serial Nos. Column must be blank,品目{0}没有设置序列号，序列号必须留空
 DocType: Accounts Settings,Accounts Settings,账户设置
 DocType: Customer,Sales Partner and Commission,销售合作伙伴及佣金
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +53,Plant and Machinery,厂房及机器
@@ -3227,7 +3198,7 @@ DocType: Account,Auditor,审计员
 DocType: Purchase Order,End date of current order's period,当前订单周期的结束日期
 apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.js +17,Make Offer Letter,使录取通知书
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js +10,Return,回报
-apps/erpnext/erpnext/stock/doctype/item/item.py +324,Default Unit of Measure for Variant must be same as Template,测度变异的默认单位必须与模板
+apps/erpnext/erpnext/stock/doctype/item/item.py +444,Default Unit of Measure for Variant must be same as Template,测度变异的默认单位必须与模板
 DocType: DocField,Fold,折叠
 DocType: Production Order Operation,Production Order Operation,生产订单操作
 DocType: Pricing Rule,Disable,禁用
@@ -3245,7 +3216,7 @@ DocType: BOM,Last Purchase Rate,最后采购价格
 DocType: Account,Asset,资产
 DocType: Project Task,Task ID,任务ID
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +395,"e.g. ""MC""",例如“MC”
-apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +82,Stock cannot exist for Item {0} since has variants,品目{0}不能有库存，因为他存在变体
+apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +84,Stock cannot exist for Item {0} since has variants,品目{0}不能有库存，因为他存在变体
 ,Sales Person-wise Transaction Summary,销售人员特定的交易汇总
 DocType: System Settings,Time Zone,时区
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +104,Warehouse {0} does not exist,仓库{0}不存在
@@ -3304,7 +3275,7 @@ Note: BOM = Bill of Materials",聚合组** **项目到另一个项目** **的。
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +44,Serial No is mandatory for Item {0},序列号是品目{0}的必须项
 DocType: Item Variant Attribute,Attribute,属性
 apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py +21,Please specify from/to range,请从指定/至范围
-sites/assets/js/desk.min.js +7649,Created By,创建人
+sites/assets/js/desk.min.js +7652,Created By,创建人
 DocType: Serial No,Under AMC,在年度保养合同中
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +47,Item valuation rate is recalculated considering landed cost voucher amount,品目的评估价格将基于到岸成本凭证金额重新计算
 apps/erpnext/erpnext/config/selling.py +70,Default settings for selling transactions.,销售业务的默认设置。
@@ -3330,7 +3301,6 @@ DocType: Sales Invoice,Supplier Reference,供应商推荐
 DocType: Production Planning Tool,"If checked, BOM for sub-assembly items will be considered for getting raw materials. Otherwise, all sub-assembly items will be treated as a raw material.",如果勾选，获取原材料时将考虑半成品的BOM。否则会将半成品当作原材料。
 DocType: Material Request,Material Issue,发料
 DocType: Hub Settings,Seller Description,卖家描述
-DocType: Shopping Cart Price List,Shopping Cart Price List,购物车价格表
 DocType: Employee Education,Qualification,学历
 DocType: Item Price,Item Price,品目价格
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +48,Soap & Detergent,肥皂和洗涤剂
@@ -3359,11 +3329,11 @@ apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +406,Your financial
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +46,Please enter Purchase Receipts,请输入购买收据
 DocType: Sales Invoice,Get Advances Received,获取已收预付款
 DocType: Email Digest,Add/Remove Recipients,添加/删除收件人
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +421,Transaction not allowed against stopped Production Order {0},交易不反对停止生产订单允许{0}
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +427,Transaction not allowed against stopped Production Order {0},交易不反对停止生产订单允许{0}
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.js +19,"To set this Fiscal Year as Default, click on 'Set as Default'",要设置这个财政年度为默认值，点击“设为默认”
 apps/erpnext/erpnext/config/support.py +54,Setup incoming server for support email id. (e.g. support@example.com),设置接收支持的电子邮件地址。 （例如support@example.com ）
-apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py +35,Shortage Qty,短缺数量
-apps/erpnext/erpnext/stock/doctype/item/item.py +349,Item variant {0} exists with same attributes,项目变种{0}存在具有相同属性
+apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py +18,Shortage Qty,短缺数量
+apps/erpnext/erpnext/stock/doctype/item/item.py +469,Item variant {0} exists with same attributes,项目变种{0}存在具有相同属性
 DocType: Salary Slip,Salary Slip,工资单
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +116,Burnishing,打磨
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +54,'To Date' is required,“结束日期”必需设置
@@ -3378,7 +3348,7 @@ apps/erpnext/erpnext/config/setup.py +14,Global Settings,全局设置
 DocType: Employee Education,Employee Education,雇员教育
 DocType: Salary Slip,Net Pay,净支付金额
 DocType: Account,Account,账户
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +227,Serial No {0} has already been received,序列号{0}已收到过
+apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +213,Serial No {0} has already been received,序列号{0}已收到过
 ,Requested Items To Be Transferred,要求要传输的项目
 DocType: Purchase Invoice,Recurring Id,经常性标识
 DocType: Customer,Sales Team Details,销售团队详情
@@ -3390,7 +3360,7 @@ DocType: Delivery Note,Billing Address Name,帐单地址名称
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +22,Department Stores,百货
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +40,System Balance,系统余额
 DocType: Workflow,Is Active,是否活动
-apps/erpnext/erpnext/controllers/stock_controller.py +70,No accounting entries for the following warehouses,没有以下仓库的会计分录
+apps/erpnext/erpnext/controllers/stock_controller.py +71,No accounting entries for the following warehouses,没有以下仓库的会计分录
 apps/erpnext/erpnext/projects/doctype/project/project.js +22,Save the document first.,首先保存文档。
 DocType: Account,Chargeable,应课
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +121,Linishing,Linishing
@@ -3407,7 +3377,6 @@ DocType: Appraisal,"Any other remarks, noteworthy effort that should go in the r
 DocType: BOM,Manufacturing User,生产用户
 DocType: Purchase Order,Raw Materials Supplied,提供原料
 DocType: Purchase Invoice,Recurring Print Format,经常打印格式
-DocType: Email Digest,New Projects,新项目
 DocType: Communication,Series,系列
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +53,Expected Delivery Date cannot be before Purchase Order Date,预计交货日期不能早于采购订单日期
 DocType: Appraisal,Appraisal Template,评估模板
@@ -3424,7 +3393,7 @@ apps/erpnext/erpnext/crm/doctype/lead/lead.py +65,"Email id must be unique, alre
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.js +264,Please select {0} first,请选择{0}第一
 DocType: Features Setup,To get Item Group in details table,为了让项目组在详细信息表
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +67,Redrawing,重绘
-apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +110,Batch {0} of Item {1} has expired.,一批项目的{0} {1}已过期。
+apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +112,Batch {0} of Item {1} has expired.,一批项目的{0} {1}已过期。
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +120,Etching,蚀刻
 DocType: Sales Invoice,Commission,佣金
 DocType: Address Template,"<h4>Default Template</h4>
@@ -3452,6 +3421,7 @@ DocType: Address Template,"<h4>Default Template</h4>
  </代码> </ PRE>"
 DocType: Salary Slip Deduction,Default Amount,默认金额
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +89,Warehouse not found in the system,仓库在系统中未找到
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +107,This Month's Summary,本月摘要
 DocType: Quality Inspection Reading,Quality Inspection Reading,质量检验报告
 apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,`冻结老于此天数的库存`应该比％d天小。
 DocType: Tax Rule,Purchase Tax Template,购置税模板
@@ -3463,7 +3433,6 @@ apps/erpnext/erpnext/config/hr.py +13,Employee records.,雇员记录。
 DocType: HR Settings,Payroll Settings,薪资设置
 apps/erpnext/erpnext/config/accounts.py +58,Match non-linked Invoices and Payments.,匹配无链接的发票和付款。
 apps/erpnext/erpnext/templates/pages/cart.html +13,Place Order,下订单
-DocType: Email Digest,New Purchase Orders,新建采购订单
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +25,Root cannot have a parent cost center,根本不能有一个父成本中心
 DocType: Sales Invoice,C-Form Applicable,C-表格适用
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +340,Operation Time must be greater than 0 for Operation {0},运行时间必须大于0的操作{0}
@@ -3475,12 +3444,11 @@ apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +4
 DocType: Payment Tool,Get Outstanding Vouchers,获取未清凭证
 DocType: Warranty Claim,Resolved By,议决
 DocType: Appraisal,Start Date,开始日期
-sites/assets/js/desk.min.js +7626,Value,值
+sites/assets/js/desk.min.js +7629,Value,值
 apps/erpnext/erpnext/config/hr.py +130,Allocate leaves for a period.,调配一段时间假期。
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +139,Click here to verify,点击这里核实
 apps/erpnext/erpnext/accounts/doctype/account/account.py +43,Account {0}: You can not assign itself as parent account,科目{0}不能是自己的上级科目
 DocType: Purchase Invoice Item,Price List Rate,价格列表费率
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +166,Delivered Serial No {0} cannot be deleted,已交付的序列号{0}无法删除
 DocType: Item,"Show ""In Stock"" or ""Not in Stock"" based on stock available in this warehouse.",根据此仓库显示“有库存”或“无库存”状态。
 apps/erpnext/erpnext/config/manufacturing.py +13,Bill of Materials (BOM),材料清单(BOM)
 DocType: Item,Average time taken by the supplier to deliver,采取供应商的平均时间交付
@@ -3488,7 +3456,6 @@ DocType: Time Log,Hours,小时
 DocType: Project,Expected Start Date,预计开始日期
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +38,Rolling,滚动
 DocType: ToDo,Priority,优先
-apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +168,"Cannot delete Serial No {0} in stock. First remove from stock, then delete.",不能删除序列号{0}，请先将序列号从仓库删除。
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +41,Remove item if charges is not applicable to that item,删除项目，如果收费并不适用于该项目
 DocType: Dropbox Backup,Dropbox Access Allowed,Dropbox访问已允许
 DocType: Dropbox Backup,Weekly,每周
@@ -3500,18 +3467,18 @@ DocType: Employee,Educational Qualification,学历
 DocType: Workstation,Operating Costs,运营成本
 DocType: Employee Leave Approver,Employee Leave Approver,雇员假期审批者
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +166,{0} has been successfully added to our Newsletter list.,{0}已成功添加到我们的新闻列表。
-apps/erpnext/erpnext/stock/doctype/item/item.py +212,Row {0}: An Reorder entry already exists for this warehouse {1},行{0}：一个重新排序条目已存在这个仓库{1}
+apps/erpnext/erpnext/stock/doctype/item/item.py +321,Row {0}: An Reorder entry already exists for this warehouse {1},行{0}：一个重新排序条目已存在这个仓库{1}
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +67,"Cannot declare as lost, because Quotation has been made.",不能更改状态为丧失，因为已有报价。
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +133,Electron beam machining,电子束加工
 DocType: Purchase Taxes and Charges Template,Purchase Master Manager,采购经理大师
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +418,Production Order {0} must be submitted,生产订单{0}必须提交
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +424,Production Order {0} must be submitted,生产订单{0}必须提交
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +150,Please select Start Date and End Date for Item {0},请选择开始日期和结束日期的项目{0}
 apps/erpnext/erpnext/config/stock.py +141,Main Reports,主报告
 apps/erpnext/erpnext/stock/doctype/stock_uom_replace_utility/stock_uom_replace_utility.py +102,Stock Ledger entries balances updated,存库分类帐分录的余额已更新
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.js +16,To date cannot be before from date,无效的主名称
 DocType: Purchase Receipt Item,Prevdoc DocType,Prevdoc的DocType
-apps/erpnext/erpnext/stock/doctype/item/item.js +185,Add / Edit Prices,添加/编辑价格
-apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +54,Chart of Cost Centers,成本中心表
+apps/erpnext/erpnext/stock/doctype/item/item.js +181,Add / Edit Prices,添加/编辑价格
+apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +53,Chart of Cost Centers,成本中心表
 ,Requested Items To Be Ordered,要求项目要订购
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +259,My Orders,我的订单
 DocType: Price List,Price List Name,价格列表名称
@@ -3531,7 +3498,6 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +10,Die cast
 DocType: Email Alert,Reference Date,参考日期
 apps/erpnext/erpnext/config/hr.py +105,Organization unit (department) master.,组织单位（部门）的主人。
 apps/erpnext/erpnext/setup/doctype/sms_settings/sms_settings.py +25,Please enter valid mobile nos,请输入有效的手机号
-DocType: Email Digest,User Specific,特定用户
 DocType: Budget Detail,Budget Detail,预算详情
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +75,Please enter message before sending,在发送前，请填写留言
 DocType: Async Task,Status,状态
@@ -3553,10 +3519,10 @@ apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +86,Employe
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +255,You cannot credit and debit same account at the same time,你不能向一个账户同时输入贷方和借方记录。
 DocType: Naming Series,Help HTML,HTML帮助
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +50,Total weightage assigned should be 100%. It is {0},分配的总权重应为100 ％ 。这是{0}
-apps/erpnext/erpnext/controllers/status_updater.py +130,Allowance for over-{0} crossed for Item {1},品目{1}已经超过允许的超额{0}
+apps/erpnext/erpnext/controllers/status_updater.py +131,Allowance for over-{0} crossed for Item {1},品目{1}已经超过允许的超额{0}
 DocType: Address,Name of person or organization that this address belongs to.,此地址所属的人或组织的名称
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +587,Your Suppliers,您的供应商
-apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +56,Cannot set as Lost as Sales Order is made.,不能更改状态为丧失，因为已有销售订单。
+apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +58,Cannot set as Lost as Sales Order is made.,不能更改状态为丧失，因为已有销售订单。
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +65,Another Salary Structure {0} is active for employee {1}. Please make its status 'Inactive' to proceed.,雇员{1}已经有另一套薪金结构{0}，请将原来的薪金结构改为‘已停用’状态.
 DocType: Purchase Invoice,Contact,联系人
 DocType: Features Setup,Exports,导出
@@ -3578,7 +3544,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +396,What does it d
 DocType: Delivery Note,To Warehouse,到仓库
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +45,Account {0} has been entered more than once for fiscal year {1},科目{0}已多次输入财年{1}
 ,Average Commission Rate,平均佣金率
-apps/erpnext/erpnext/stock/doctype/item/item.py +142,'Has Serial No' can not be 'Yes' for non-stock item,非库存项目不能勾选'是否有序列号'
+apps/erpnext/erpnext/stock/doctype/item/item.py +251,'Has Serial No' can not be 'Yes' for non-stock item,非库存项目不能勾选'是否有序列号'
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +34,Attendance can not be marked for future dates,考勤不能标记为未来的日期
 DocType: Pricing Rule,Pricing Rule Help,定价规则说明
 DocType: Purchase Taxes and Charges,Account Head,账户头
@@ -3605,7 +3571,6 @@ DocType: Target Detail,Target Qty,目标数量
 DocType: Attendance,Present,现
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +35,Delivery Note {0} must not be submitted,送货单{0}不能提交
 DocType: Notification Control,Sales Invoice Message,销售发票信息
-DocType: Email Digest,Income Booked,延递收益
 DocType: Authorization Rule,Based On,基于
 ,Ordered Qty,订购数量
 DocType: Stock Settings,Stock Frozen Upto,库存冻结止
@@ -3656,16 +3621,18 @@ DocType: Manufacturing Settings,Manufacturing Settings,生产设置
 apps/erpnext/erpnext/config/setup.py +56,Setting up Email,设置电子邮件
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +90,Please enter default currency in Company Master,请在公司主输入默认货币
 DocType: Stock Entry Detail,Stock Entry Detail,库存记录详情
+apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +101,Daily Reminders,每日提醒
 apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py +82,Tax Rule Conflicts with {0},税收规范冲突{0}
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +207,New Account Name,新建账户名称
 DocType: Purchase Invoice Item,Raw Materials Supplied Cost,原料提供成本
 DocType: Selling Settings,Settings for Selling Module,销售模块的设置
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +73,Customer Service,顾客服务
+DocType: Item,Thumbnail,缩略图
 DocType: Item Customer Detail,Item Customer Detail,品目客户详情
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +147,Confirm Your Email,确认您的电子邮件
 apps/erpnext/erpnext/config/hr.py +53,Offer candidate a Job.,报价候选作业。
 DocType: Notification Control,Prompt for Email on Submission of,提示电子邮件的提交
-apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +68,Item {0} must be a stock Item,品目{0}必须是库存品目
+apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +70,Item {0} must be a stock Item,品目{0}必须是库存品目
 DocType: Manufacturing Settings,Default Work In Progress Warehouse,默认工作正在进行仓库
 apps/erpnext/erpnext/config/accounts.py +107,Default settings for accounting transactions.,业务会计的默认设置。
 apps/frappe/frappe/model/naming.py +40,{0} is required,{0}是必须项
@@ -3700,7 +3667,7 @@ sites/assets/js/list.min.js +174,Gantt Chart,甘特图
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +57,Part-time,兼任
 DocType: Employee,Applicable Holiday List,可申请假期列表
 DocType: Employee,Cheque,支票
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +55,Series Updated,系列已更新
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +56,Series Updated,系列已更新
 apps/erpnext/erpnext/accounts/doctype/account/account.py +131,Report Type is mandatory,报告类型是强制性的
 DocType: Item,Serial Number Series,序列号系列
 apps/erpnext/erpnext/buying/doctype/purchase_common/purchase_common.py +67,Warehouse is mandatory for stock Item {0} in row {1},行{1}中的物件{0}必须指定仓库
@@ -3718,7 +3685,7 @@ DocType: Attendance,Attendance,考勤
 DocType: Page,No,No
 DocType: BOM,Materials,物料
 DocType: Leave Block List,"If not checked, the list will have to be added to each Department where it has to be applied.",如果未选中，此列表将需要手动添加到部门。
-apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +512,Posting date and posting time is mandatory,发布日期和发布时间是必需的
+apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +518,Posting date and posting time is mandatory,发布日期和发布时间是必需的
 apps/erpnext/erpnext/config/buying.py +79,Tax template for buying transactions.,采购业务的税项模板。
 ,Item Prices,品目价格
 DocType: Purchase Order,In Words will be visible once you save the Purchase Order.,大写金额将在采购订单保存后显示。
@@ -3755,7 +3722,7 @@ apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +56,Show zer
 DocType: BOM,Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,原材料被生产/重新打包后得到的品目数量
 DocType: Payment Reconciliation,Receivable / Payable Account,应收/应付账款
 DocType: Delivery Note Item,Against Sales Order Item,对销售订单项目
-apps/erpnext/erpnext/stock/doctype/item/item.py +342,Please specify Attribute Value for attribute {0},请指定属性值的属性{0}
+apps/erpnext/erpnext/stock/doctype/item/item.py +462,Please specify Attribute Value for attribute {0},请指定属性值的属性{0}
 DocType: Item,Default Warehouse,默认仓库
 DocType: Task,Actual End Date (via Time Logs),实际结束日期（通过时间日志）
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +37,Budget cannot be assigned against Group Account {0},财政预算案不能对集团客户分配{0}
@@ -3782,7 +3749,6 @@ DocType: Sales Invoice,Cold Calling,冷推销
 DocType: SMS Parameter,SMS Parameter,短信参数
 DocType: Maintenance Schedule Item,Half Yearly,半年度
 DocType: Lead,Blog Subscriber,博客订阅者
-DocType: Email Digest,Income Year to Date,年度至今收益
 apps/erpnext/erpnext/config/setup.py +88,Create rules to restrict transactions based on values.,创建规则，根据属性值来限制交易。
 DocType: HR Settings,"If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day",如果勾选，工作日总数将包含假期，这将会降低“日工资”的值。
 DocType: Purchase Invoice,Total Advance,总垫款
@@ -3828,7 +3794,6 @@ apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.py +40,{0} subs
 DocType: Maintenance Schedule,Schedule,计划任务
 DocType: Cost Center,"Define Budget for this Cost Center. To set budget action, see ""Company List""",定义预算这个成本中心。要设置预算的行动，请参阅“企业名录”
 DocType: Account,Parent Account,父帐户
-DocType: Serial No,Available,可用的
 DocType: Quality Inspection Reading,Reading 3,阅读3
 ,Hub,Hub
 DocType: GL Entry,Voucher Type,凭证类型
@@ -3859,7 +3824,6 @@ DocType: DocShare,Document Type,文档类型
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +557,From Supplier Quotation,来自供应商报价
 DocType: Deduction Type,Deduction Type,扣款类型
 DocType: Attendance,Half Day,半天
-DocType: Serial No,Not Available,不可用
 DocType: Pricing Rule,Min Qty,最小数量
 DocType: Features Setup,"To track items in sales and purchase documents with batch nos. ""Preferred Industry: Chemicals""",要跟踪与批次号的销售和采购文件的项目。 “首选行业：化工”
 DocType: GL Entry,Transaction Date,交易日期
@@ -3879,13 +3843,13 @@ DocType: Email Account,Service,服务
 DocType: Hub Settings,Hub Settings,Hub设置
 DocType: Project,Gross Margin %,毛利率％
 DocType: BOM,With Operations,带工艺
+apps/erpnext/erpnext/accounts/party.py +229,Accounting entries have already been made in currency {0} for company {1}. Please select a receivable or payable account with currency {0}.,会计分录已取得货币{0}为公司{1}。请选择一个应收或应付账户币种{0}。
 ,Monthly Salary Register,月度工资记录
 apps/frappe/frappe/website/template.py +123,Next,下一个
 DocType: Warranty Claim,If different than customer address,如果客户地址不同的话
 DocType: BOM Operation,BOM Operation,BOM操作
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +118,Electropolishing,电解
 DocType: Purchase Taxes and Charges,On Previous Row Amount,基于前一行的金额
-DocType: Email Digest,New Delivery Notes,新发货单
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.py +24,Please enter Payment Amount in atleast one row,请ATLEAST一行输入付款金额
 DocType: POS Profile,POS Profile,POS简介
 apps/erpnext/erpnext/config/accounts.py +153,"Seasonality for setting budgets, targets etc.",设置季节性的预算，目标等。
@@ -3903,7 +3867,7 @@ DocType: Expense Claim,Employees Email Id,雇员的邮件地址
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +159,Current Liabilities,流动负债
 apps/erpnext/erpnext/config/crm.py +48,Send mass SMS to your contacts,向你的联系人群发短信。
 DocType: Purchase Taxes and Charges,Consider Tax or Charge for,考虑税收或收费
-apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +55,Actual Qty is mandatory,实际数量是必须项
+apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +57,Actual Qty is mandatory,实际数量是必须项
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +42,Cross-rolling,交叉轧制
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +132,Credit Card,信用卡
 DocType: BOM,Item to be manufactured or repacked,要生产或者重新包装的品目
@@ -3927,7 +3891,7 @@ apps/erpnext/erpnext/config/hr.py +145,Block leave applications by department.,�
 apps/erpnext/erpnext/templates/pages/cart.html +42,Cart is Empty,车是空的
 DocType: Production Order,Actual Operating Cost,实际运行成本
 apps/erpnext/erpnext/accounts/doctype/account/account.py +73,Root cannot be edited.,根不能被编辑。
-apps/erpnext/erpnext/accounts/utils.py +193,Allocated amount can not greater than unadusted amount,调配的数量不能超过未调配数量
+apps/erpnext/erpnext/accounts/utils.py +195,Allocated amount can not greater than unadusted amount,调配的数量不能超过未调配数量
 DocType: Manufacturing Settings,Allow Production on Holidays,允许在假日生产
 DocType: Sales Order,Customer's Purchase Order Date,客户的采购订单日期
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +183,Capital Stock,股本
@@ -3942,6 +3906,7 @@ apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +382,Cos
 DocType: Item,Automatically create Material Request if quantity falls below this level,自动创建材料，如果申请数量低于这个水平
 ,Item-wise Purchase Register,品目特定的采购记录
 DocType: Batch,Expiry Date,到期时间
+apps/erpnext/erpnext/stock/doctype/item/item.py +313,"To set reorder level, item must be a Purchase Item or Manufacturing Item",要设置订货点水平，项目必须购买项目或生产项目
 ,Supplier Addresses and Contacts,供应商的地址和联系方式
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +268,Please select Category first,属性是相同的两个记录。
 apps/erpnext/erpnext/config/projects.py +18,Project master.,项目主。

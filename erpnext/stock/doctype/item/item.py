@@ -98,6 +98,8 @@ class Item(WebsiteGenerator):
 				})
 			except frappe.DoesNotExistError:
 				pass
+				# cleanup
+				frappe.local.message_log.pop()
 
 			# for CSV import
 			if not file_doc:
@@ -142,20 +144,21 @@ class Item(WebsiteGenerator):
 				filters={"variant_of": self.name, "show_in_website": 1}, order_by="name asc")
 
 			variant = frappe.form_dict.variant
-			if not variant:
+			if not variant and context.variants:
 				# the case when the item is opened for the first time from its list
 				variant = context.variants[0]
 
-			context.variant = frappe.get_doc("Item", variant)
+			if variant:
+				context.variant = frappe.get_doc("Item", variant)
 
-			for fieldname in ("website_image", "web_long_description", "description",
-				"website_specifications"):
-				if context.variant.get(fieldname):
-					value = context.variant.get(fieldname)
-					if isinstance(value, list):
-						value = [d.as_dict() for d in value]
+				for fieldname in ("website_image", "web_long_description", "description",
+					"website_specifications"):
+					if context.variant.get(fieldname):
+						value = context.variant.get(fieldname)
+						if isinstance(value, list):
+							value = [d.as_dict() for d in value]
 
-					context[fieldname] = value
+						context[fieldname] = value
 
 		if self.slideshow:
 			if context.variant and context.variant.slideshow:
@@ -410,10 +413,11 @@ class Item(WebsiteGenerator):
 			if not template_item.show_in_website:
 				template_item.show_in_website = 1
 				template_item.flags.ignore_permissions = True
+				template_item.flags.dont_update_variants = True
 				template_item.save()
 
 	def update_variants(self):
-		if self.has_variants:
+		if self.has_variants and not self.flags.dont_update_variants:
 			updated = []
 			variants = frappe.db.get_all("Item", fields=["item_code"], filters={"variant_of": self.name })
 			for d in variants:

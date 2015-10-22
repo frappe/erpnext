@@ -49,25 +49,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi = frappe.copy_doc(test_records[1])
 		pi.insert()
 		pi.submit()
-
-		gl_entries = frappe.db.sql("""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
-			order by account asc""", pi.name, as_dict=1)
-		self.assertTrue(gl_entries)
-
-		expected_values = dict((d[0], d) for d in [
-			["_Test Payable - _TC", 0, 720],
-			["Stock Received But Not Billed - _TC", 750.0, 0],
-			["Expenses Included In Valuation - _TC", 0.0, 250.0],
-			["_Test Account Shipping Charges - _TC", 100.0, 0],
-			["_Test Account VAT - _TC", 120.0, 0],
-		])
-
-		for i, gle in enumerate(gl_entries):
-			self.assertEquals(expected_values[gle.account][0], gle.account)
-			self.assertEquals(expected_values[gle.account][1], gle.debit)
-			self.assertEquals(expected_values[gle.account][2], gle.credit)
-
+		
+		self.check_gle_for_pi(pi.name)
+		
 		set_perpetual_inventory(0)
 
 	def test_gl_entries_with_auto_accounting_for_stock_against_pr(self):
@@ -83,9 +67,14 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.insert()
 		pi.submit()
 
+		self.check_gle_for_pi(pi.name)
+
+		set_perpetual_inventory(0)
+
+	def check_gle_for_pi(self, pi):
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
-			order by account asc""", pi.name, as_dict=1)
+			order by account asc""", pi, as_dict=1)
 		self.assertTrue(gl_entries)
 
 		expected_values = dict((d[0], d) for d in [
@@ -99,8 +88,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEquals(expected_values[gle.account][0], gle.account)
 			self.assertEquals(expected_values[gle.account][1], gle.debit)
 			self.assertEquals(expected_values[gle.account][2], gle.credit)
-
-		set_perpetual_inventory(0)
 
 	def test_gl_entries_with_aia_for_non_stock_items(self):
 		set_perpetual_inventory()
