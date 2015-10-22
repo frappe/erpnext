@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, fmt_money, getdate, formatdate
 from frappe.model.document import Document
-from erpnext.accounts.party import validate_party_gle_currency, get_party_account_currency
+from erpnext.accounts.party import validate_party_gle_currency
 from erpnext.accounts.utils import get_account_currency
 from erpnext.setup.doctype.company.company import get_company_currency
 from erpnext.exceptions import InvalidAccountCurrency, CustomerFrozen
@@ -114,13 +114,7 @@ class GLEntry(Document):
 				.format(self.account, (account_currency or company_currency)), InvalidAccountCurrency)
 
 		if self.party_type and self.party:
-			party_account_currency = get_party_account_currency(self.party_type, self.party, self.company)
-
-			if party_account_currency != self.account_currency:
-				frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
-					.format(self.party_type, self.party, party_account_currency), InvalidAccountCurrency)
-
-			validate_party_gle_currency(self.party_type, self.party, self.company)
+			validate_party_gle_currency(self.party_type, self.party, self.company, self.account_currency)
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
