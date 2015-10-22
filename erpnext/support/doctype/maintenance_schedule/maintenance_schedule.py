@@ -182,7 +182,7 @@ class MaintenanceSchedule(TransactionBase):
 	def validate_serial_no(self, serial_nos, amc_start_date):
 		for serial_no in serial_nos:
 			sr_details = frappe.db.get_value("Serial No", serial_no,
-				["warranty_expiry_date", "amc_expiry_date", "status", "delivery_date"], as_dict=1)
+				["warranty_expiry_date", "amc_expiry_date", "warehouse", "delivery_date"], as_dict=1)
 
 			if not sr_details:
 				frappe.throw(_("Serial No {0} not found").format(serial_no))
@@ -193,9 +193,10 @@ class MaintenanceSchedule(TransactionBase):
 			if sr_details.amc_expiry_date and sr_details.amc_expiry_date >= amc_start_date:
 				throw(_("Serial No {0} is under maintenance contract upto {1}").format(serial_no, sr_details.amc_start_date))
 
-			if sr_details.status=="Delivered" and sr_details.delivery_date and \
+			if not sr_details.warehouse and sr_details.delivery_date and \
 				sr_details.delivery_date >= amc_start_date:
-					throw(_("Maintenance start date can not be before delivery date for Serial No {0}").format(serial_no))
+					throw(_("Maintenance start date can not be before delivery date for Serial No {0}")
+						.format(serial_no))
 
 	def validate_schedule(self):
 		item_lst1 =[]

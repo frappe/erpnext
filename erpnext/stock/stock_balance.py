@@ -164,7 +164,7 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 
 	for d in bin:
 		serial_nos = frappe.db.sql("""select count(name) from `tabSerial No`
-			where item_code=%s and warehouse=%s and status = 'Available' and docstatus < 2""", (d[0], d[1]))
+			where item_code=%s and warehouse=%s and docstatus < 2""", (d[0], d[1]))
 
 		if serial_nos and flt(serial_nos[0][0]) != flt(d[2]):
 			print d[0], d[1], d[2], serial_nos[0][0]
