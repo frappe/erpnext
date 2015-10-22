@@ -201,7 +201,8 @@ def get_party_gle_currency(party_type, party, company):
 
 		return existing_gle_currency[0][0] if existing_gle_currency else None
 
-	return frappe.local_cache("party_gle_currency", (party_type, party, company), generator)
+	return frappe.local_cache("party_gle_currency", (party_type, party, company), generator,
+		regenerate_if_none=True)
 
 def validate_party_gle_currency(party_type, party, company, party_account_currency=None):
 	"""Validate party account currency with existing GL Entry's currency"""
