@@ -33,12 +33,22 @@ def execute():
 				(pi.name, company.expenses_included_in_valuation))
 
 			if gle_for_expenses_included_in_valuation:
+				print pi.name
+
 				frappe.db.sql("""delete from `tabGL Entry`
 					where voucher_type='Purchase Invoice' and voucher_no=%s""", pi.name)
 
-				print pi.name
-
 				purchase_invoice = frappe.get_doc("Purchase Invoice", pi.name)
+
+				# some old entries have missing expense accounts
+				if purchase_invoice.against_expense_account:
+					expense_account = purchase_invoice.against_expense_account.split(",")
+					if len(expense_account) == 1:
+						expense_account = expense_account[0]
+						for item in purchase_invoice.items:
+							if not item.expense_account:
+								item.db_set("expense_account", expense_account, update_modified=False)
+
 				purchase_invoice.make_gl_entries()
 
 def get_frozen_date(company, account):
