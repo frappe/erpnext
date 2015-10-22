@@ -326,7 +326,7 @@ class TestSalesOrder(unittest.TestCase):
 		]
 		
 		existing_ordered_qty, existing_reserved_qty = frappe.db.get_value("Bin", {"item_code": po_item.item_code, 
-			"Warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
+			"warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
 					
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
 		so.submit()
@@ -345,7 +345,7 @@ class TestSalesOrder(unittest.TestCase):
 		
 		#test ordered_qty and reserved_qty		
 		ordered_qty, reserved_qty = frappe.db.get_value("Bin", {"item_code": po_item.item_code, 
-			"Warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
+			"warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
 					
 		self.assertEquals(abs(ordered_qty), (existing_ordered_qty + so_items[0]['qty']))			
 		self.assertEquals(abs(reserved_qty), (existing_reserved_qty + so_items[0]['qty']))	
