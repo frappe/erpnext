@@ -328,7 +328,9 @@ class TestSalesOrder(unittest.TestCase):
 		existing_ordered_qty, existing_reserved_qty = frappe.db.get_value("Bin", {"item_code": po_item.item_code, 
 			"Warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
 					
-		so = make_sales_order(item_list=so_items)
+		so = make_sales_order(item_list=so_items, do_not_submit=True)
+		so.submit()
+		
 		po = make_purchase_order_for_drop_shipment(so.name, '_Test Supplier')
 		po.submit()
 		
@@ -350,6 +352,10 @@ class TestSalesOrder(unittest.TestCase):
 		
 		#test po_item length
 		self.assertEquals(len(po.items), 1)
+		
+		#test per_ordered status
+		per_ordered = frappe.db.get_value("Sales Order", so.name, "per_ordered")
+		self.assertEquals(per_ordered, 100.0)
 		
 	def test_reserved_qty_for_closing_so(self):
 		from erpnext.stock.doctype.item.test_item import make_item
