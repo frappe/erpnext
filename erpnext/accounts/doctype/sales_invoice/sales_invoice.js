@@ -160,6 +160,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 							me.set_dynamic_labels();
 							me.calculate_taxes_and_totals();
 							if(callback_fn) callback_fn();
+							frappe.after_ajax(function() {
+								cur_frm.doc.__missing_values_set = false;
+							})
 						}
 					}
 				});
