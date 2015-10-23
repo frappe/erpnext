@@ -109,7 +109,8 @@ def get_party_details(party, party_type, args=None):
 def get_tax_template(posting_date, args):
 	"""Get matching tax rule"""
 	args = frappe._dict(args)
-	conditions = []
+	conditions = ["""(from_date is null  or from_date = '' or from_date <= '{0}') 
+		and (to_date is null  or to_date = '' or to_date >= '{0}')""".format(posting_date)]
 
 	for key, value in args.iteritems():
 		if key in "use_for_shopping_cart":
@@ -117,16 +118,16 @@ def get_tax_template(posting_date, args):
 		else:
 			conditions.append("ifnull({0}, '') in ('', '{1}')".format(key, frappe.db.escape(cstr(value))))
 
-	matching = frappe.db.sql("""select * from `tabTax Rule`
+	tax_rule = frappe.db.sql("""select * from `tabTax Rule`
 		where {0}""".format(" and ".join(conditions)), as_dict = True)
 
-	if not matching:
+	if not tax_rule:
 		return None
 
-	for rule in matching:
+	for rule in tax_rule:
 		rule.no_of_keys_matched = 0
 		for key in args:
 			if rule.get(key): rule.no_of_keys_matched += 1
 
-	rule = sorted(matching, lambda b, a: cmp(a.no_of_keys_matched, b.no_of_keys_matched) or cmp(a.priority, b.priority))[0]
+	rule = sorted(tax_rule, lambda b, a: cmp(a.no_of_keys_matched, b.no_of_keys_matched) or cmp(a.priority, b.priority))[0]
 	return rule.sales_tax_template or rule.purchase_tax_template
