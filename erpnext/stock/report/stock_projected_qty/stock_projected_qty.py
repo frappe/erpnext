@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
@@ -45,7 +46,7 @@ def get_data(filters):
 
 		data.append([item.name, item.item_name, item.description, item.item_group, item.brand, bin.warehouse,
 			item.stock_uom, bin.actual_qty, bin.planned_qty, bin.indented_qty, bin.ordered_qty, bin.reserved_qty,
-			bin.projected_qty, re_order_level, re_order_qty, re_order_level - bin.projected_qty])
+			bin.projected_qty, re_order_level, re_order_qty, re_order_level - flt(bin.projected_qty)])
 
 	return data
 
