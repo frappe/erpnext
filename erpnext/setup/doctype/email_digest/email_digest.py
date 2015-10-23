@@ -346,7 +346,7 @@ class EmailDigest(Document):
 		self.get_next_sending()
 
 	def fmt_money(self, value):
-		return fmt_money(value, currency = self.currency)
+		return fmt_money(abs(value), currency = self.currency)
 
 def send():
 	now_date = now_datetime().date()
