@@ -45,6 +45,7 @@ status_map = {
 		["To Bill", "eval:self.per_received == 100 and self.per_billed < 100 and self.docstatus == 1"],
 		["To Receive", "eval:self.per_received < 100 and self.per_billed == 100 and self.docstatus == 1"],
 		["Completed", "eval:self.per_received == 100 and self.per_billed == 100 and self.docstatus == 1"],
+		["Delivered", "eval:self.status=='Delivered'"],
 		["Stopped", "eval:self.status=='Stopped'"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
@@ -170,11 +171,12 @@ class StatusUpdater(Document):
 			else:
 				args['cond'] = ' and parent!="%s"' % self.name.replace('"', '\"')
 
-			args['set_modified'] = ''
 			if change_modified:
 				args['set_modified'] = ', modified = now(), modified_by = "{0}"'\
 					.format(frappe.db.escape(frappe.session.user))
-
+			
+			args["drop_ship_cond"] = ''
+			
 			self._update_children(args)
 
 			if "percent_join_field" in args:
@@ -212,16 +214,6 @@ class StatusUpdater(Document):
 	def _update_percent_field(self, args):
 		"""Update percent field in parent transaction"""
 		unique_transactions = set([d.get(args['percent_join_field']) for d in self.get_all_children(args['source_dt'])])
-		
-		args["drop_ship_cond"] = ''
-		
-		if getattr(self, "is_drop_ship", None):
-			if self.is_drop_ship == 1:
-				args["drop_ship_cond"] = " and is_drop_ship=1 "
-			
-		else:
-			if self.doctype=="Delivery Note":
-				args["drop_ship_cond"] = " and is_drop_ship!=1 and supplier = '' "
 
 		for name in unique_transactions:
 			if not name:
@@ -235,7 +227,7 @@ class StatusUpdater(Document):
 					set %(target_parent_field)s = round((select sum(if(%(target_ref_field)s >
 						ifnull(%(target_field)s, 0), %(target_field)s,
 						%(target_ref_field)s))/sum(%(target_ref_field)s)*100
-						from `tab%(target_dt)s` where parent="%(name)s" %(drop_ship_cond)s), 2) %(set_modified)s
+						from `tab%(target_dt)s` where parent="%(name)s"), 2) %(set_modified)s
 					where name='%(name)s'""" % args)
 
 			# update field

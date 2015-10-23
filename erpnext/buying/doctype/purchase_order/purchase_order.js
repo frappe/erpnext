@@ -25,7 +25,11 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				cur_frm.add_custom_button(__('Stop'), this.stop_purchase_order);
 
 			cur_frm.add_custom_button(__('Close'), this.close_purchase_order);
-
+			
+			if(doc.is_drop_ship && doc.status!="Delivered"){
+				cur_frm.add_custom_button(__('Delivered By Supplier'), this.delivered_by_supplier);
+			}
+				
 			if(flt(doc.per_billed)==0) {
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry);
 			}
@@ -166,6 +170,18 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	},
 	close_purchase_order: function(){
 		cur_frm.cscript.update_status('Close', 'Closed')
+	},
+	delivered_by_supplier: function(){
+		return frappe.call({
+			method: "erpnext.buying.doctype.purchase_order.purchase_order.delivered_by_supplier",
+			freez: true,
+			args:{
+				purchase_order: cur_frm.doc.name
+			},
+			callback:function(r){
+				cur_frm.refresh();
+			}
+		})
 	}
 
 });
