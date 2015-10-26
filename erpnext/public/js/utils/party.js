@@ -22,7 +22,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 		}
 		
 		if (args) {
-			args.posting_date = frm.doc.transaction_date;
+			args.posting_date = frm.doc.posting_date || frm.doc.transaction_date;
 		}
 	}
 	if(!args) return;
