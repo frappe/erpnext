@@ -209,13 +209,12 @@ erpnext.AccountsChart = Class.extend({
 				{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
 					description: __('Further accounts can be made under Groups, but entries can be made against non-Groups')},
 				{fieldtype:'Select', fieldname:'account_type', label:__('Account Type'),
-					options: ['', 'Bank', 'Cash', 'Warehouse', 'Receivable', 'Payable',
-						'Equity', 'Cost of Goods Sold', 'Fixed Asset', 'Expense Account',
-						'Income Account', 'Tax', 'Chargeable', 'Temporary'].join('\n'),
+					options: ['', 'Bank', 'Cash', 'Warehouse', 'Tax', 'Chargeable'].join('\n'),
 					description: __("Optional. This setting will be used to filter in various transactions.") },
 				{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate')},
 				{fieldtype:'Link', fieldname:'warehouse', label:__('Warehouse'), options:"Warehouse"},
-				{fieldtype:'Link', fieldname:'account_currency', label:__('Currency'), options:"Currency"}
+				{fieldtype:'Link', fieldname:'account_currency', label:__('Currency'), options:"Currency", 
+					description: __("Optional. Sets company's default currency, if not specified.")}
 			]
 		})
 
