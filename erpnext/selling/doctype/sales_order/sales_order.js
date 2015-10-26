@@ -22,11 +22,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			if(doc.status != 'Stopped' && doc.status != 'Closed') {
 				
 				$.each(cur_frm.doc.items, function(i, item){
-					if(item.is_delivered_by_supplier == 1 || item.supplier){
+					if((item.delivered_by_supplier == 1 || item.supplier) && (item.qty > item.ordered_qty)){
 						is_delivered_by_supplier = true;
 					}
 					else{
-						is_delivery_note = true;
+						if(item.qty > item.delivered_qty)
+							is_delivery_note = true;
 					}
 				})
 
@@ -177,11 +178,11 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							filters: {'parent': cur_frm.doc.name}
 						}
 					}, "reqd": 1 },
-				{"fieldtype": "Button", "label": __("Proceed"), "fieldname": "proceed"},
+				{"fieldtype": "Button", "label": __("Make Purchase Order"), "fieldname": "make_purchase_order"},
 			]
 		});
 
-		dialog.fields_dict.proceed.$input.click(function() {
+		dialog.fields_dict.make_purchase_order.$input.click(function() {
 			args = dialog.get_values();
 			if(!args) return;
 			dialog.hide();

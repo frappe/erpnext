@@ -122,7 +122,7 @@ def get_ordered_qty(item_code, warehouse):
 		from `tabPurchase Order Item` po_item, `tabPurchase Order` po
 		where po_item.item_code=%s and po_item.warehouse=%s
 		and po_item.qty > ifnull(po_item.received_qty, 0) and po_item.parent=po.name
-		and po.status not in ('Stopped', 'Closed') and po.docstatus=1""", (item_code, warehouse))
+		and po.status not in ('Stopped', 'Closed', 'Delivered') and po.docstatus=1""", (item_code, warehouse))
 
 	return flt(ordered_qty[0][0]) if ordered_qty else 0
 

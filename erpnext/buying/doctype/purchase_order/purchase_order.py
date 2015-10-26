@@ -224,7 +224,8 @@ class PurchaseOrder(BuyingController):
 		self.status_updater[0].update({
 			"target_parent_dt": "Sales Order",
 			"target_dt": "Sales Order Item",
-			'target_field': 'ordered_qty'
+			'target_field': 'ordered_qty',
+			"target_parent_field": ''
 		})
 		
 @frappe.whitelist()

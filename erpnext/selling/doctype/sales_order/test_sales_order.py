@@ -302,10 +302,14 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.buying.doctype.purchase_order.purchase_order import delivered_by_supplier
 
 		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "is_sales_item": 1,
-			"is_purchase_item": 1, "delivered_by_supplier": 1, 'default_supplier': '_Test Supplier'})
+			"is_purchase_item": 1, "delivered_by_supplier": 1, 'default_supplier': '_Test Supplier', 
+		    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+		    "cost_center": "_Test Cost Center - _TC"
+			})
 
 		dn_item = make_item("_Test Regular Item", {"is_stock_item": 1, "is_sales_item": 1,
-			"is_purchase_item": 1})
+			"is_purchase_item": 1, "expense_account": "_Test Account Cost for Goods Sold - _TC",
+  		  	"cost_center": "_Test Cost Center - _TC"})
 
 		so_items = [
 			{
@@ -326,8 +330,8 @@ class TestSalesOrder(unittest.TestCase):
 			}
 		]
 		
-		existing_ordered_qty, existing_reserved_qty = frappe.db.get_value("Bin",
-		 {"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
+		bin = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"}, 
+			fields=["ordered_qty", "reserved_qty"])
 					
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
 		so.submit()
@@ -335,7 +339,7 @@ class TestSalesOrder(unittest.TestCase):
 		po = make_purchase_order_for_drop_shipment(so.name, '_Test Supplier')
 		po.submit()
 		
-		dn = create_dn_against_so(so, delivered_qty=1)
+		dn = create_dn_against_so(so.name, delivered_qty=1)
 		
 		self.assertEquals(so.customer, po.customer)
 		self.assertEquals(po.items[0].prevdoc_doctype, "Sales Order")
@@ -344,19 +348,29 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(dn.items[0].item_code, dn_item.item_code)
 		
 		#test ordered_qty and reserved_qty		
-		ordered_qty, reserved_qty = frappe.db.get_value("Bin",
-		 {"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
+		ordered_qty, reserved_qty = frappe.db.get_value("Bin", 
+			{"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
+		
+		existing_ordered_qty = bin[0].ordered_qty if bin else 0.0
+		existing_reserved_qty = bin[0].reserved_qty if bin else 0.0	
 					
-		self.assertEquals(abs(ordered_qty), (existing_ordered_qty + so_items[0]['qty']))			
-		self.assertEquals(abs(reserved_qty), (existing_reserved_qty + so_items[0]['qty']))	
+		self.assertEquals(abs(ordered_qty), existing_ordered_qty + so_items[0]['qty'])			
+		self.assertEquals(abs(reserved_qty), existing_reserved_qty + so_items[0]['qty'])	
 		
 		#test po_item length
 		self.assertEquals(len(po.items), 1)
 		
-		#test per_ordered status
+		#test per_delivered status
 		delivered_by_supplier(po.name)
-		per_delivered = frappe.db.get_value("Sales Order", so.name, "per_delivered")
-		self.assertEquals(per_delivered, )
+		per_delivered = frappe.db.sql("""select sum(if(qty > ifnull(delivered_qty, 0), delivered_qty, qty))/sum(qty)*100 as per_delivered 
+			from `tabSales Order Item` where parent="{0}" """.format(so.name))
+
+		self.assertEquals(frappe.db.get_value("Sales Order", so.name, "per_delivered"), per_delivered[0][0])
+		
+		dn = create_dn_against_so(so.name, delivered_qty=1)
+		
+		so.db_set('status', "Closed")
+		so.update_reserved_qty()
 		
 	def test_reserved_qty_for_closing_so(self):
 		from erpnext.stock.doctype.item.test_item import make_item
