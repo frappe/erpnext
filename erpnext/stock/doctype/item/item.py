@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import urllib
+import itertools
 from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint, getdate, now_datetime, formatdate
 from frappe.website.website_generator import WebsiteGenerator
@@ -130,6 +131,8 @@ class Item(WebsiteGenerator):
 
 		self.set_attribute_context(context)
 
+		self.set_disabled_attributes(context)
+
 		context.parents = self.get_parents(context)
 
 		return context
@@ -189,14 +192,62 @@ class Item(WebsiteGenerator):
 			for attr in self.attributes:
 				values = context.attribute_values.setdefault(attr.attribute, [])
 
-				# get list of values defined (for sequence)
-				for attr_value in frappe.db.get_all("Item Attribute Value",
-					fields=["attribute_value"], filters={"parent": attr.attribute}, order_by="idx asc"):
+				if cint(frappe.db.get_value("Item Attribute", attr.attribute, "numeric_values")):
+					for val in sorted(attribute_values_available.get(attr.attribute, []), key=flt):
+						values.append(val)
 
-					if attr_value.attribute_value in attribute_values_available.get(attr.attribute, []):
-						values.append(attr_value.attribute_value)
+				else:
+					# get list of values defined (for sequence)
+					for attr_value in frappe.db.get_all("Item Attribute Value",
+						fields=["attribute_value"], filters={"parent": attr.attribute}, order_by="idx asc"):
+
+						if attr_value.attribute_value in attribute_values_available.get(attr.attribute, []):
+							values.append(attr_value.attribute_value)
 
 			context.variant_info = json.dumps(context.variants)
+
+	def set_disabled_attributes(self, context):
+		"""Disable selection options of attribute combinations that do not result in a variant"""
+		if not self.attributes:
+			return
+
+		context.disabled_attributes = {}
+		attributes = [attr.attribute for attr in self.attributes]
+
+		def find_variant(combination):
+			for variant in context.variants:
+				if len(variant.attributes) < len(attributes):
+					continue
+
+				if "combination" not in variant:
+					ref_combination = []
+
+					for attr in variant.attributes:
+						idx = attributes.index(attr.attribute)
+						ref_combination.insert(idx, attr.attribute_value)
+
+					variant["combination"] = ref_combination
+
+				if not (set(combination) - set(variant["combination"])):
+					# check if the combination is a subset of a variant combination
+					# eg. [Blue, 0.5] is a possible combination if exists [Blue, Large, 0.5]
+					return True
+
+		for i, attr in enumerate(self.attributes):
+			if i==0:
+				continue
+
+			combination_source = []
+
+			# loop through previous attributes
+			for prev_attr in self.attributes[:i]:
+				combination_source.append([context.selected_attributes[prev_attr.attribute]])
+
+			combination_source.append(context.attribute_values[attr.attribute])
+
+			for combination in itertools.product(*combination_source):
+				if not find_variant(combination):
+					context.disabled_attributes.setdefault(attr.attribute, []).append(combination[-1])
 
 	def check_warehouse_is_set_for_stock_item(self):
 		if self.is_stock_item==1 and not self.default_warehouse and frappe.get_all("Warehouse"):
