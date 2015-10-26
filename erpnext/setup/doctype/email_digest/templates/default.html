@@ -52,6 +52,8 @@
                     <span style="{{ label_css }}">
                     {% if e.all_day %}
                         {{ _("All Day") }}
+                    {% elif (not e.ends_on_label or e.starts_on_label == e.ends_on_label)%}
+                        {{ e.starts_on_label }}
                     {% else %}
                         {{ e.starts_on_label }} - {{ e.ends_on_label }}
                     {% endif %}
