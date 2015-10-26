@@ -32,6 +32,9 @@ frappe.listview_settings['Purchase Order'] = {
 		listview.page.add_menu_item(__("Set as Unstopped"), function() {
 			listview.call_for_selected_items(method, {"status": "Submitted"});
 		});
-
+		
+		listview.page.add_menu_item(__("Set as Closed"), function() {
+			listview.call_for_selected_items(method, {"status": "Closed"});
+		});
 	}
 };

@@ -26,7 +26,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 			cur_frm.add_custom_button(__('Close'), this.close_purchase_order);
 			
-			if(doc.is_drop_ship && doc.status!="Delivered"){
+			if(doc.delivered_by_supplier && doc.status!="Delivered"){
 				cur_frm.add_custom_button(__('Delivered By Supplier'), this.delivered_by_supplier);
 			}
 				

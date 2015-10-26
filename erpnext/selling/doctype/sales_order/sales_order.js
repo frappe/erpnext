@@ -15,15 +15,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		this._super();
 		this.frm.dashboard.reset();
-		var is_drop_ship = false;
+		var is_delivered_by_supplier = false;
 		var is_delivery_note = false;
 		
 		if(doc.docstatus==1) {
 			if(doc.status != 'Stopped' && doc.status != 'Closed') {
 				
 				$.each(cur_frm.doc.items, function(i, item){
-					if(item.is_drop_ship == 1 || item.supplier){
-						is_drop_ship = true;
+					if(item.is_delivered_by_supplier == 1 || item.supplier){
+						is_delivered_by_supplier = true;
 					}
 					else{
 						is_delivery_note = true;
@@ -45,7 +45,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				// stop
 				if((flt(doc.per_delivered, 2) < 100 && is_delivery_note) || doc.per_billed < 100 
-					|| (flt(doc.per_ordered,2) < 100 && is_drop_ship)){
+					|| (flt(doc.per_ordered,2) < 100 && is_delivered_by_supplier)){
 						cur_frm.add_custom_button(__('Stop'), this.stop_sales_order)
 					}
 				
@@ -67,7 +67,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice).addClass("btn-primary");
 				}
 				
-				if(flt(doc.per_ordered, 2) < 100 && is_drop_ship)
+				if(flt(doc.per_ordered, 2) < 100 && is_delivered_by_supplier)
 					cur_frm.add_custom_button(__('Make Purchase Order'), cur_frm.cscript.make_purchase_order).addClass("btn-primary");
 
 			} else {

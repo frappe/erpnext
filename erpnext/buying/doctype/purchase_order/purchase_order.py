@@ -162,7 +162,7 @@ class PurchaseOrder(BuyingController):
 		clear_doctype_notifications(self)
 
 	def on_submit(self):
-		if self.is_drop_ship == 1:
+		if self.delivered_by_supplier == 1:
 			self.update_status_updater()
 		
 		super(PurchaseOrder, self).on_submit()
@@ -179,7 +179,7 @@ class PurchaseOrder(BuyingController):
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 
 	def on_cancel(self):
-		if self.is_drop_ship == 1:
+		if self.delivered_by_supplier == 1:
 			self.update_status_updater()
 		
 		pc_obj = frappe.get_doc('Purchase Common')
@@ -236,9 +236,9 @@ def stop_or_unstop_purchase_orders(names, status):
 	for name in names:
 		po = frappe.get_doc("Purchase Order", name)
 		if po.docstatus == 1:
-			if status=="Stopped":
-				if po.status not in ("Stopped", "Cancelled") and (po.per_received < 100 or po.per_billed < 100):
-					po.update_status("Stopped")
+			if status in ("Stopped", "Closed"):
+				if po.status not in ("Stopped", "Cancelled", "Closed") and (po.per_received < 100 or po.per_billed < 100):
+					po.update_status(status)
 			else:
 				if po.status == "Stopped":
 					po.update_status("Draft")

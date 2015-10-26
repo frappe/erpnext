@@ -668,7 +668,7 @@ def make_delivery_note(source_name, target_doc=None):
 				"so_detail": "so_detail"
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.is_drop_ship!=1
+			"condition": lambda doc: doc.delivered_by_supplier!=1
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

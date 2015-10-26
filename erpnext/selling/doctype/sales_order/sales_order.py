@@ -150,7 +150,7 @@ class SalesOrder(SellingController):
 
 	def validate_drop_ship(self):
 		for d in self.get('items'):
-			if d.is_drop_ship and not d.supplier:
+			if d.delivered_by_supplier and not d.supplier:
 				frappe.throw(_("Row #{0}: Set Supplier for item {1}").format(d.idx, d.item_code))
 
 	def on_submit(self):
@@ -277,9 +277,9 @@ def stop_or_unstop_sales_orders(names, status):
 	for name in names:
 		so = frappe.get_doc("Sales Order", name)
 		if so.docstatus == 1:
-			if status=="Stop":
-				if so.status not in ("Stopped", "Cancelled") and (so.per_delivered < 100 or so.per_billed < 100):
-					so.stop_sales_order()
+			if status in ("Stopped", "Closed"):
+				if so.status not in ("Stopped", "Cancelled", "Closed") and (so.per_delivered < 100 or so.per_billed < 100):
+					so.stop_sales_order(status)
 			else:
 				if so.status == "Stopped":
 					so.unstop_sales_order()
@@ -359,7 +359,7 @@ def make_delivery_note(source_name, target_doc=None):
 				"parent": "against_sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.delivered_qty < doc.qty and doc.is_drop_ship!=1
+			"condition": lambda doc: doc.delivered_qty < doc.qty and doc.delivered_by_supplier!=1
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
@@ -507,7 +507,7 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 		if default_price_list:
 			target.buying_price_list = default_price_list
 			
-		target.is_drop_ship = 1
+		target.delivered_by_supplier = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 

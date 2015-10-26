@@ -302,7 +302,7 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.buying.doctype.purchase_order.purchase_order import delivered_by_supplier
 
 		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "is_sales_item": 1,
-			"is_purchase_item": 1, "is_drop_ship": 1, 'default_supplier': '_Test Supplier'})
+			"is_purchase_item": 1, "delivered_by_supplier": 1, 'default_supplier': '_Test Supplier'})
 
 		dn_item = make_item("_Test Regular Item", {"is_stock_item": 1, "is_sales_item": 1,
 			"is_purchase_item": 1})
@@ -314,7 +314,7 @@ class TestSalesOrder(unittest.TestCase):
 				"qty": 2,
 				"rate": 400,
 				"conversion_factor": 1.0,
-				"is_drop_ship": 1,
+				"delivered_by_supplier": 1,
 				"supplier": '_Test Supplier'
 			},
 			{

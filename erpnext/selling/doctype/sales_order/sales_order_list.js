@@ -45,11 +45,15 @@ frappe.listview_settings['Sales Order'] = {
 		var method = "erpnext.selling.doctype.sales_order.sales_order.stop_or_unstop_sales_orders";
 
 		listview.page.add_menu_item(__("Set as Stopped"), function() {
-			listview.call_for_selected_items(method, {"status": "Stop"});
+			listview.call_for_selected_items(method, {"status": "Stoped"});
 		});
 
 		listview.page.add_menu_item(__("Set as Unstopped"), function() {
 			listview.call_for_selected_items(method, {"status": "Unstop"});
+		});
+		
+		listview.page.add_menu_item(__("Set as Closed"), function() {
+			listview.call_for_selected_items(method, {"status": "Closed"});
 		});
 
 	}
