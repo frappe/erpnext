@@ -299,6 +299,7 @@ class TestSalesOrder(unittest.TestCase):
 	def test_drop_shipping(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_drop_shipment, make_delivery_note
 		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.buying.doctype.purchase_order.purchase_order import delivered_by_supplier
 
 		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "is_sales_item": 1,
 			"is_purchase_item": 1, "is_drop_ship": 1, 'default_supplier': '_Test Supplier'})
@@ -310,7 +311,7 @@ class TestSalesOrder(unittest.TestCase):
 			{
 				"item_code": po_item.item_code,
 				"warehouse": "_Test Warehouse - _TC",
-				"qty": 1,
+				"qty": 2,
 				"rate": 400,
 				"conversion_factor": 1.0,
 				"is_drop_ship": 1,
@@ -319,7 +320,7 @@ class TestSalesOrder(unittest.TestCase):
 			{
 				"item_code": dn_item.item_code,
 				"warehouse": "_Test Warehouse - _TC",
-				"qty": 1,
+				"qty": 2,
 				"rate": 300,
 				"conversion_factor": 1.0
 			}
@@ -334,9 +335,8 @@ class TestSalesOrder(unittest.TestCase):
 		po = make_purchase_order_for_drop_shipment(so.name, '_Test Supplier')
 		po.submit()
 		
-		dn = make_delivery_note(so.name)
+		dn = create_dn_against_so(so, delivered_qty=1)
 		
-
 		self.assertEquals(so.customer, po.customer)
 		self.assertEquals(po.items[0].prevdoc_doctype, "Sales Order")
 		self.assertEquals(po.items[0].prevdoc_docname, so.name)
@@ -354,8 +354,9 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(len(po.items), 1)
 		
 		#test per_ordered status
-		per_ordered = frappe.db.get_value("Sales Order", so.name, "per_ordered")
-		self.assertEquals(per_ordered, 100.0)
+		delivered_by_supplier(po.name)
+		per_delivered = frappe.db.get_value("Sales Order", so.name, "per_delivered")
+		self.assertEquals(per_delivered, )
 		
 	def test_reserved_qty_for_closing_so(self):
 		from erpnext.stock.doctype.item.test_item import make_item
