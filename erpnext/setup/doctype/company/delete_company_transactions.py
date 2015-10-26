@@ -22,8 +22,10 @@ def delete_company_transactions(company_name):
 
 	for doctype in frappe.db.sql_list("""select parent from
 		tabDocField where fieldtype='Link' and options='Company'"""):
-		if doctype not in ("Account", "Cost Center", "Warehouse", "Budget Detail", "Party Account", "Employee"):
-			delete_for_doctype(doctype, company_name)
+		if doctype not in ("Account", "Cost Center", "Warehouse", "Budget Detail", 
+			"Party Account", "Employee", "Sales Taxes and Charges Template", 
+			"Purchase Taxes and Charges Template", "POS Profile"):
+				delete_for_doctype(doctype, company_name)
 			
 	# Clear notification counts
 	clear_notifications()
