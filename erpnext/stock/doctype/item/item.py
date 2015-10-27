@@ -104,12 +104,16 @@ class Item(WebsiteGenerator):
 
 			# for CSV import
 			if not file_doc:
-				file_doc = frappe.get_doc({
-					"doctype": "File",
-					"file_url": self.website_image,
-					"attached_to_doctype": "Item",
-					"attached_to_name": self.name
-				}).insert()
+				try:
+					file_doc = frappe.get_doc({
+						"doctype": "File",
+						"file_url": self.website_image,
+						"attached_to_doctype": "Item",
+						"attached_to_name": self.name
+					}).insert()
+
+				except IOError:
+					self.website_image = None
 
 			if file_doc:
 				if not file_doc.thumbnail_url:
