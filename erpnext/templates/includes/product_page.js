@@ -132,8 +132,6 @@ function update_attribute_selectors(selected_attribute, selected_attribute_value
 		var match_score = 0;
 		var has_selected_attribute = false;
 
-		console.log(variant);
-
 		for(var j in variant.attributes) {
 			if(attributes[variant.attributes[j].attribute]===variant.attributes[j].attribute_value) {
 				match_score = match_score + 1;
