@@ -22,11 +22,16 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 		}
 		
 		if (args) {
-			args.posting_date = frm.doc.transaction_date;
+			args.posting_date = frm.doc.posting_date || frm.doc.transaction_date;
 		}
 	}
 	if(!args) return;
-
+	
+	if(frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
+		if(!erpnext.utils.validate_mandatory(frm, "Posting/Transaction Date", 
+			args.posting_date, args.party_type=="Customer" ? "customer": "supplier")) return;
+	}
+	
 	args.currency = frm.doc.currency;
 	args.company = frm.doc.company;
 	args.doctype = frm.doc.doctype;
@@ -64,6 +69,15 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field) 
 				if(r.message){
 					frm.set_value(display_field, r.message)
 				}
+				
+				if(frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
+					if(!erpnext.utils.validate_mandatory(frm, "Customer/Supplier", 
+						frm.doc.customer || frm.doc.supplier, address_field)) return;
+	
+					if(!erpnext.utils.validate_mandatory(frm, "Posting/Transaction Date", 
+						frm.doc.posting_date || frm.doc.transaction_date, address_field)) return;
+				} else return;
+				
 				frappe.call({
 					method: "erpnext.accounts.party.set_taxes",
 					args: {
@@ -98,4 +112,14 @@ erpnext.utils.get_contact_details = function(frm) {
 			}
 		})
 	}
+}
+
+erpnext.utils.validate_mandatory = function(frm, label, value, trigger_on) {
+	if(!value) {
+		frm.doc[trigger_on] = "";
+		refresh_field(trigger_on);
+		frappe.msgprint(__("Please enter {0} first", [label]));
+		return false;
+	}
+	return true;
 }

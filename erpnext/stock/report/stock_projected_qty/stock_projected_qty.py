@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt, today
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
@@ -18,12 +19,19 @@ def get_columns():
 		_("Shortage Qty") + ":Float:100"]
 
 def get_data(filters):
-	item_map = {}
+	bin_list = get_bin_list(filters)
+	item_map = get_item_map(filters.get("item_code"))
 	warehouse_company = {}
 	data = []
 
-	for bin in get_bin_list(filters):
-		item = item_map.setdefault(bin.item_code, frappe.get_doc("Item", bin.item_code))
+	for bin in bin_list:
+		item = item_map.get(bin.item_code)
+
+		if not item:
+			# likely an item that has reached its end of life
+			continue
+
+		# item = item_map.setdefault(bin.item_code, get_item(bin.item_code))
 		company = warehouse_company.setdefault(bin.warehouse, frappe.db.get_value("Warehouse", bin.warehouse, "company"))
 
 		if filters.brand and filters.brand != item.brand:
@@ -45,7 +53,7 @@ def get_data(filters):
 
 		data.append([item.name, item.item_name, item.description, item.item_group, item.brand, bin.warehouse,
 			item.stock_uom, bin.actual_qty, bin.planned_qty, bin.indented_qty, bin.ordered_qty, bin.reserved_qty,
-			bin.projected_qty, re_order_level, re_order_qty, re_order_level - bin.projected_qty])
+			bin.projected_qty, re_order_level, re_order_qty, re_order_level - flt(bin.projected_qty)])
 
 	return data
 
@@ -61,3 +69,35 @@ def get_bin_list(filters):
 		filters=bin_filters, order_by="item_code, warehouse")
 
 	return bin_list
+
+def get_item_map(item_code):
+	"""Optimization: get only the item doc and re_order_levels table"""
+
+	condition = ""
+	if item_code:
+		condition = 'and item_code = "{0}"'.format(frappe.db.escape(item_code))
+
+	items = frappe.db.sql("""select * from `tabItem` item
+		where is_stock_item = 1
+		{condition}
+		and (end_of_life > %(today)s or end_of_life is null or end_of_life='0000-00-00')
+		and exists (select name from `tabBin` bin where bin.item_code=item.name)"""\
+		.format(condition=condition), {"today": today()}, as_dict=True)
+
+	condition = ""
+	if item_code:
+		condition = 'where parent="{0}"'.format(frappe.db.escape(item_code))
+
+	reorder_levels = frappe._dict()
+	for ir in frappe.db.sql("""select * from `tabItem Reorder` {condition}""".format(condition=condition), as_dict=1):
+		if ir.parent not in reorder_levels:
+			reorder_levels[ir.parent] = []
+
+		reorder_levels[ir.parent].append(ir)
+
+	item_map = frappe._dict()
+	for item in items:
+		item["reorder_levels"] = reorder_levels.get(item.name) or []
+		item_map[item.name] = item
+
+	return item_map

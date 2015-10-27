@@ -139,7 +139,7 @@ class EmailDigest(Document):
 
 		for i, e in enumerate(events):
 			e.starts_on_label = format_time(e.starts_on)
-			e.ends_on_label = format_time(e.ends_on)
+			e.ends_on_label = format_time(e.ends_on) if e.ends_on else None
 			e.date = formatdate(e.starts)
 			e.link = get_url_to_form("Event", e.name)
 
@@ -346,7 +346,7 @@ class EmailDigest(Document):
 		self.get_next_sending()
 
 	def fmt_money(self, value):
-		return fmt_money(value, currency = self.currency)
+		return fmt_money(abs(value), currency = self.currency)
 
 def send():
 	now_date = now_datetime().date()
