@@ -260,7 +260,7 @@
    "no_copy": 0, 
    "permlevel": 0, 
    "precision": "", 
-   "print_hide": 0, 
+   "print_hide": 1, 
    "read_only": 0, 
    "report_hide": 0, 
    "reqd": 0, 
@@ -2157,11 +2157,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 1, 
-<<<<<<< ac7a1da680daa876b9f107cec87150cf7a195138
  "modified": "2015-10-29 02:25:26.256373", 
-=======
- "modified": "2015-10-26 17:18:54.615802", 
->>>>>>> [fixes] bulk close facility, rename Drop Ship to Delivered By Supplier
  "modified_by": "Administrator", 
  "module": "Stock", 
  "name": "Item", 

@@ -1,0 +1,1 @@
+- **Drop Ship** You can now implement drop shipping by creating Purchase Order from Sales Order.
