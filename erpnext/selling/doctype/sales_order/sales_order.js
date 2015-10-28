@@ -37,7 +37,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				// 	doc.per_billed);
 
 				// indent
-				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1)
+				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && flt(doc.per_delivered, 2) < 100)
 					cur_frm.add_custom_button(__('Material Request'), this.make_material_request);
 
 				if(flt(doc.per_billed)==0) {
@@ -241,7 +241,7 @@ cur_frm.cscript.update_status = function(label, status){
 			method: "erpnext.selling.doctype.sales_order.sales_order.update_status",
 			args:{status: status, name: doc.name},
 			callback:function(r){
-				cur_frm.refresh();
+				cur_frm.reload_doc();
 			}
 		})
 	}

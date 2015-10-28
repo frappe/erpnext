@@ -53,7 +53,7 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field) 
 	if(frm.updating_party_details) return;
 	
 	if(!address_field) {
-		if(frm.doc.customer) {
+		if(frm.doctype != "Purchase Order" && frm.doc.customer) {
 			address_field = "customer_address";
 		} else if(frm.doc.supplier) {
 			address_field = "supplier_address";

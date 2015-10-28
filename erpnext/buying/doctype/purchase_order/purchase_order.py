@@ -344,14 +344,12 @@ def make_stock_entry(purchase_order, item_code):
 def update_status(status, name):
 	po = frappe.get_doc("Purchase Order", name)
 	po.update_status(status)
-	return 
 	
 @frappe.whitelist()
 def	delivered_by_supplier(purchase_order):
 	po = frappe.get_doc("Purchase Order", purchase_order)
 	update_delivered_qty(po)
 	po.update_status("Delivered")
-	return po.as_dict()
 	
 def update_delivered_qty(purchase_order):
 	sales_order_list = []

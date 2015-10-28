@@ -179,7 +179,9 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				purchase_order: cur_frm.doc.name
 			},
 			callback:function(r){
-				cur_frm.refresh();
+				if(!r.exc) {
+					cur_frm.reload_doc();
+				}
 			}
 		})
 	}
@@ -198,7 +200,8 @@ cur_frm.cscript.update_status= function(label, status){
 			method: "erpnext.buying.doctype.purchase_order.purchase_order.update_status",
 			args:{status: status, name: doc.name},
 			callback:function(r){
-				cur_frm.refresh();
+				cur_frm.set_value("status", status);
+				cur_frm.reload_doc();			
 			}
 		})
 	}
