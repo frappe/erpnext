@@ -294,6 +294,16 @@ def get_data():
 					"label": _("Customer and Supplier"),
 					"youtube_id": "anoGi_RpQ20"
 				},
+				{
+					"type": "help",
+					"label": _("Sales Order to Payment"),
+					"youtube_id": "7AMq4lqkN4A"
+				},
+				{
+					"type": "help",
+					"label": _("Point-of-Sale"),
+					"youtube_id": "4WkelWkbP_c"
+				},
 			]
 		},
 	]
