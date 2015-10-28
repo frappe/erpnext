@@ -76,10 +76,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(this.frm.doc.__islocal && !(this.frm.doc.taxes || []).length
 			&& !(this.frm.doc.__onload ? this.frm.doc.__onload.load_after_mapping : false)) {
 				this.apply_default_taxes();
-		}
-
-		if(this.frm.doc.__islocal && this.frm.doc.company && this.frm.doc["items"] && !this.frm.doc.is_pos) {
-			this.calculate_taxes_and_totals();
+		} else if(this.frm.doc.__islocal && this.frm.doc.company && this.frm.doc["items"] 
+			&& !this.frm.doc.is_pos) {
+				me.calculate_taxes_and_totals();
 		}
 		if(frappe.meta.get_docfield(this.frm.doc.doctype + " Item", "item_code")) {
 			cur_frm.get_field("items").grid.set_multiple_add("item_code", "qty");
@@ -102,7 +101,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			me.frm.doc.name);
 
 		if(taxes_and_charges_field) {
-			frappe.call({
+			return frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_default_taxes_and_charges",
 				args: {
 					"master_doctype": taxes_and_charges_field.options
@@ -110,6 +109,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				callback: function(r) {
 					if(!r.exc) {
 						me.frm.set_value("taxes", r.message);
+						me.calculate_taxes_and_totals();
 					}
 				}
 			});
@@ -362,7 +362,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	get_exchange_rate: function(from_currency, to_currency, callback) {
-		frappe.call({
+		return frappe.call({
 			method: "erpnext.setup.utils.get_exchange_rate",
 			args: {
 				from_currency: from_currency,
