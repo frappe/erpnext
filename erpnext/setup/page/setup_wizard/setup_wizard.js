@@ -658,7 +658,7 @@ $.extend(erpnext.wiz, {
 		return frappe.render_template("setup_wizard_message", {
 			image: "/assets/frappe/images/ui/bubble-tea-happy.svg",
 			title: __('Setup Complete'),
-			message: __('Your setup is complete. Refreshing.') + ".."
+			message: ""
 		});
 	},
 
@@ -670,6 +670,7 @@ $.extend(erpnext.wiz, {
 			args: values,
 			callback: function(r) {
 				wiz.show_complete();
+				localStorage.setItem("session_last_route", "#welcome-to-erpnext");
 				setTimeout(function() {
 					window.location = "/desk";
 				}, 2000);
