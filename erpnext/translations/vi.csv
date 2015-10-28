@@ -674,7 +674,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -685,19 +685,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 6. Amount: Tax amount.
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
-9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Mẫu thuế tiêu chuẩn có thể được áp dụng cho tất cả các giao dịch bán hàng. Mẫu này có thể chứa danh sách của người đứng đầu và thuế cũng khác người đứng đầu chi phí / thu nhập như ""Vận chuyển"", ""bảo hiểm"", ""Xử lý"" vv 
+9. Is this Tax included in Basic Rate?: If you check this, it means that this tax will not be shown below the item table, but will be included in the Basic Rate in your main item table. This is useful where you want give a flat price (inclusive of all taxes) price to customers.","Mẫu thuế tiêu chuẩn có thể được áp dụng cho tất cả các giao dịch bán hàng. Mẫu này có thể chứa danh sách của người đứng đầu và thuế cũng khác người đứng đầu chi phí / thu nhập như ""Vận chuyển"", ""bảo hiểm"", ""Xử lý"" vv
 
- 
+
 
  #### Chú ý Các mức thuế suất bạn xác định đây sẽ là mức thuế suất tiêu chuẩn cho tất cả các mục ** **. Nếu có những mục ** ** mà có mức giá khác nhau, chúng phải được thêm vào trong các mục ** ** Thuế bảng trong mục ** ** master.
 
- #### Mô tả Cột 
+ #### Mô tả Cột
 
- 1. Loại tính: 
+ 1. Loại tính:
  - Điều này có thể được trên Net ** Tổng số ** (đó là tổng số tiền cơ bản).
  - ** Mở Row Previous Total / Số tiền ** (cho các loại thuế, phí tích lũy). Nếu bạn chọn tùy chọn này, thuế sẽ được áp dụng như là một tỷ lệ phần trăm của các dòng trước đó (theo Biểu thuế) hoặc tổng số tiền.
  - ** ** Thực tế (như đã đề cập).
- 2. Tài khoản Head: Các tài khoản sổ cái theo đó thuế này sẽ được đặt 
+ 2. Tài khoản Head: Các tài khoản sổ cái theo đó thuế này sẽ được đặt
  3. Trung tâm chi phí: Nếu thuế / phí là một khoản thu nhập (như vận chuyển) hoặc chi phí nó cần phải được đặt trước một Trung tâm chi phí.
  4. Mô tả: Mô tả về thuế (sẽ được in trên hoá đơn / dấu ngoặc kép).
  5. Rate: Thuế suất.
@@ -2015,7 +2015,7 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 
 #### Description of Columns
 
-1. Calculation Type: 
+1. Calculation Type:
     - This can be on **Net Total** (that is the sum of basic amount).
     - **On Previous Row Total / Amount** (for cumulative taxes or charges). If you select this option, the tax will be applied as a percentage of the previous row (in the tax table) amount or total.
     - **Actual** (as mentioned).
@@ -2027,19 +2027,19 @@ The tax rate you define here will be the standard tax rate for all **Items**. If
 7. Total: Cumulative total to this point.
 8. Enter Row: If based on ""Previous Row Total"" you can select the row number which will be taken as a base for this calculation (default is the previous row).
 9. Consider Tax or Charge for: In this section you can specify if the tax / charge is only for valuation (not a part of total) or only for total (does not add value to the item) or for both.
-10. Add or Deduct: Whether you want to add or deduct the tax.","Mẫu thuế tiêu chuẩn có thể được áp dụng cho tất cả các giao dịch mua hàng. Mẫu này có thể chứa danh sách của người đứng đầu về thuế và cũng đứng đầu chi phí khác như ""Vận chuyển"", ""bảo hiểm"", ""Xử lý"" vv 
+10. Add or Deduct: Whether you want to add or deduct the tax.","Mẫu thuế tiêu chuẩn có thể được áp dụng cho tất cả các giao dịch mua hàng. Mẫu này có thể chứa danh sách của người đứng đầu về thuế và cũng đứng đầu chi phí khác như ""Vận chuyển"", ""bảo hiểm"", ""Xử lý"" vv
 
- 
+
 
  #### Chú ý Các mức thuế bạn xác định ở đây sẽ là mức thuế suất tiêu chuẩn cho tất cả các mục ** **. Nếu có những mục ** ** mà có mức giá khác nhau, chúng phải được thêm vào trong các mục ** ** Thuế bảng trong mục ** ** master.
 
- #### Mô tả Cột 
+ #### Mô tả Cột
 
- 1. Loại tính: 
+ 1. Loại tính:
  - Điều này có thể được trên Net ** Tổng số ** (đó là tổng số tiền cơ bản).
  - ** Mở Row Previous Total / Số tiền ** (cho các loại thuế, phí tích lũy). Nếu bạn chọn tùy chọn này, thuế sẽ được áp dụng như là một tỷ lệ phần trăm của các dòng trước đó (theo Biểu thuế) hoặc tổng số tiền.
  - ** ** Thực tế (như đã đề cập).
- 2. Tài khoản Head: Các tài khoản sổ cái theo đó thuế này sẽ được đặt 
+ 2. Tài khoản Head: Các tài khoản sổ cái theo đó thuế này sẽ được đặt
  3. Trung tâm chi phí: Nếu thuế / phí là một khoản thu nhập (như vận chuyển) hoặc chi phí nó cần phải được đặt trước một Trung tâm chi phí.
  4. Mô tả: Mô tả về thuế (sẽ được in trên hoá đơn / dấu ngoặc kép).
  5. Rate: Thuế suất.
@@ -2225,7 +2225,7 @@ Examples:
 1. Ways of addressing disputes, indemnity, liability, etc.
 1. Address and Contact of your Company.","Điều khoản và Điều kiện có thể được thêm vào để bán hàng và mua tiêu chuẩn.
 
- Ví dụ: 
+ Ví dụ:
 
  1. Hiệu lực của đề nghị.
  1. Điều khoản thanh toán (Trong Advance, On Credit, phần trước vv).
@@ -2234,7 +2234,7 @@ Examples:
  1. Bảo hành nếu có.
  1. Trả Policy.
  1. Điều khoản vận chuyển, nếu áp dụng.
- 1. Cách giải quyết tranh chấp, bồi thường, trách nhiệm pháp lý, vv 
+ 1. Cách giải quyết tranh chấp, bồi thường, trách nhiệm pháp lý, vv
  1. Địa chỉ và liên hệ của công ty của bạn."
 DocType: Attendance,Leave Type,Loại bỏ
 apps/erpnext/erpnext/controllers/stock_controller.py +172,Expense / Difference account ({0}) must be a 'Profit or Loss' account,"Chi phí tài khoản / khác biệt ({0}) phải là một ""lợi nhuận hoặc lỗ 'tài khoản"
@@ -3125,7 +3125,7 @@ DocType: Accounts Settings,"If enabled, the system will post accounting entries 
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +15,Brokerage,Môi giới
 DocType: Address,Postal Code,Mã bưu chính
 DocType: Production Order Operation,"in Minutes
-Updated via 'Time Log'","trong Minutes 
+Updated via 'Time Log'","trong Minutes
  Cập nhật qua 'Giờ'"
 DocType: Customer,From Lead,Từ chì
 apps/erpnext/erpnext/config/manufacturing.py +19,Orders released for production.,Đơn đặt hàng phát hành để sản xuất.
@@ -3302,7 +3302,7 @@ apps/erpnext/erpnext/selling/page/sales_browser/sales_browser.js +121,New {0} Na
 apps/erpnext/erpnext/controllers/recurring_document.py +128,Please find attached {0} #{1},{0} # Xin vui lòng tìm thấy kèm theo {1}
 DocType: Job Applicant,Applicant Name,Tên đơn
 DocType: Authorization Rule,Customer / Item Name,Khách hàng / Item Name
-DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**.
 
 The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
 
@@ -3444,17 +3444,17 @@ DocType: Address Template,"<h4>Default Template</h4>
 {% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%}
 {% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%}
 {% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
-</code></pre>","<H4> Default Template </ h4> 
- <p> Sử dụng <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </a> và tất cả các lĩnh vực của Địa chỉ ( bao gồm Tuỳ chỉnh Fields nếu có) sẽ có sẵn </ p> 
- <pre> <code> {{address_line1}} & lt; br & gt; 
+</code></pre>","<H4> Default Template </ h4>
+ <p> Sử dụng <a href=""http://jinja.pocoo.org/docs/templates/""> Jinja Templating </a> và tất cả các lĩnh vực của Địa chỉ ( bao gồm Tuỳ chỉnh Fields nếu có) sẽ có sẵn </ p>
+ <pre> <code> {{address_line1}} & lt; br & gt;
  {% nếu address_line2%} {{address_line2}} & lt; br & gt; { endif% -%} {{
- thành phố}} & lt; br & gt; 
+ thành phố}} & lt; br & gt;
  {% nếu nhà nước%} {{}} nhà nước & lt; br & gt; {% endif -%} {
-% nếu mã pin%} PIN: {{mã pin}} & lt; br & gt; {% endif -%} 
- {{country}} & lt; br & gt; 
- {% nếu điện thoại%} Điện thoại: {{phone}} & lt; br & gt; { % endif -%} 
- {% nếu fax%} Fax: {{fax}} & lt; br & gt; {% endif -%} 
- {% nếu email_id%} Email: {{email_id}} & lt; br & gt ; {% endif -}% 
+% nếu mã pin%} PIN: {{mã pin}} & lt; br & gt; {% endif -%}
+ {{country}} & lt; br & gt;
+ {% nếu điện thoại%} Điện thoại: {{phone}} & lt; br & gt; { % endif -%}
+ {% nếu fax%} Fax: {{fax}} & lt; br & gt; {% endif -%}
+ {% nếu email_id%} Email: {{email_id}} & lt; br & gt ; {% endif -}%
  </ code> </ pre>"
 DocType: Salary Slip Deduction,Default Amount,Số tiền mặc định
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +89,Warehouse not found in the system,Kho không tìm thấy trong hệ thống
@@ -3645,7 +3645,7 @@ apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.js +40,New News
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +157,Start date should be less than end date for Item {0},Ngày bắt đầu phải nhỏ hơn ngày kết thúc cho hàng {0}
 apps/erpnext/erpnext/stock/doctype/item/item.js +17,Show Balance,Hiện Balance
 DocType: Item,"Example: ABCD.#####
-If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Ví dụ:. ABCD ##### 
+If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.","Ví dụ:. ABCD #####
  Nếu series được thiết lập và Serial No không được đề cập trong các giao dịch, số serial sau đó tự động sẽ được tạo ra dựa trên series này. Nếu bạn luôn muốn đề cập đến một cách rõ ràng nối tiếp Nos cho mặt hàng này. để trống này."
 DocType: Upload Attendance,Upload Attendance,Tải lên tham dự
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +119,BOM and Manufacturing Quantity are required,BOM và Sản xuất Số lượng được yêu cầu
@@ -3776,7 +3776,7 @@ DocType: Batch,Batch,Hàng loạt
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py +53,Balance,Balance
 DocType: Project,Total Expense Claim (via Expense Claims),Tổng số yêu cầu bồi thường chi phí (thông qua Tuyên bố Expense)
 DocType: User,Gender,Giới Tính
-DocType: Journal Entry,Debit Note,"Một lưu ghi nợ là do bên cho mượn, nợ và phục vụ như là một trong hai thông báo về một khoản nợ sẽ sớm nhận được hoá đơn hoặc một lời nhắc nhở đối với khoản nợ mà trước đây được lập hoá đơn và hiện đang nổi bật."
+DocType: Journal Entry,Debit Note,"nợ Ghi"
 DocType: Stock Entry,As per Stock UOM,Theo Cổ UOM
 apps/erpnext/erpnext/stock/doctype/batch/batch_list.js +7,Not Expired,Không hết hạn
 DocType: Journal Entry,Total Debit,Tổng số Nợ

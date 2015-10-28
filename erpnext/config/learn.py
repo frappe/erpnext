@@ -124,6 +124,11 @@ def get_data():
 				},
 				{
 					"type": "help",
+					"label": _("Item Variants"),
+					"youtube_id": "OGBETlCzU5o"
+				},
+				{
+					"type": "help",
 					"label": _("Opening Stock Balance"),
 					"youtube_id": "0yPgrtfeCTs"
 				},
