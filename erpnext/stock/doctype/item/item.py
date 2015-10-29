@@ -245,7 +245,7 @@ class Item(WebsiteGenerator):
 
 			# loop through previous attributes
 			for prev_attr in self.attributes[:i]:
-				combination_source.append([context.selected_attributes[prev_attr.attribute]])
+				combination_source.append([context.selected_attributes.get(prev_attr.attribute)])
 
 			combination_source.append(context.attribute_values[attr.attribute])
 
