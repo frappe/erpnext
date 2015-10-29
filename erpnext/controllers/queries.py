@@ -166,6 +166,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		from tabItem
 		where tabItem.docstatus < 2
 			and ifnull(tabItem.has_variants, 0)=0
+			and tabItem.disabled=0
 			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
 			and (tabItem.`{key}` LIKE %(txt)s
 				or tabItem.item_name LIKE %(txt)s
@@ -303,10 +304,10 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 	# Hence the first condition is an "OR"
 	if not filters: filters = {}
 
-	condition = ""	
+	condition = ""
 	if filters.get("company"):
 		condition += "and tabAccount.company = %(company)s"
-	
+
 	return frappe.db.sql("""select tabAccount.name from `tabAccount`
 			where (tabAccount.report_type = "Profit and Loss"
 					or tabAccount.account_type in ("Income Account", "Temporary"))
@@ -314,6 +315,6 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 				and tabAccount.`{key}` LIKE %(txt)s
 				{condition} {match_condition}"""
 			.format(condition=condition, match_condition=get_match_cond(doctype), key=searchfield), {
-				'txt': "%%%s%%" % frappe.db.escape(txt), 
+				'txt': "%%%s%%" % frappe.db.escape(txt),
 				'company': filters.get("company", "")
 			})

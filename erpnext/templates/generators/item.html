@@ -24,7 +24,7 @@
 				{{ web_long_description or description or _("No description given") }}
 				</div>
 				<p class="text-muted">
-					{{ _("Item Code") }}: <span itemprop="productID">{{ name }}</span></p>
+					{{ _("Item Code") }}: <span itemprop="productID">{{ variant and variant.name or name }}</span></p>
 				<br>
 				<div class="item-attribute-selectors">
                     {% if has_variants %}
