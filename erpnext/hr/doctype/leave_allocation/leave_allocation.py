@@ -22,7 +22,6 @@ class LeaveAllocation(Document):
 		self.validate_new_leaves_allocated_value()
 
 	def on_update(self):
-		pass
 		self.get_total_allocated_leaves()
 	
 	def validate_period(self):
@@ -87,6 +86,11 @@ class LeaveAllocation(Document):
 
 	def get_total_allocated_leaves(self):
 		leave_det = self.get_carry_forwarded_leaves()
+		self.validate_total_leaves_allocated(leave_det)
 		frappe.db.set(self,'carry_forwarded_leaves',flt(leave_det['carry_forwarded_leaves']))
 		frappe.db.set(self,'total_leaves_allocated',flt(leave_det['total_leaves_allocated']))
 
+	def validate_total_leaves_allocated(self, leave_det):
+		if date_diff(self.to_date, self.from_date) <= leave_det['total_leaves_allocated']:
+			frappe.throw(_("Total allocated leaves are more than period"))
+		
