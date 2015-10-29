@@ -353,25 +353,13 @@ def	delivered_by_supplier(purchase_order):
 	
 def update_delivered_qty(purchase_order):
 	sales_order_list = []
+	so_name = ''
 	for item in purchase_order.items:
 		if item.prevdoc_doctype == "Sales Order":
-			frappe.db.sql(""" update `tabSales Order Item` 
-				set delivered_qty = (ifnull(delivered_qty, 0) + %(qty)s)
-				where item_code='%(item_code)s' and parent = '%(name)s' 
-			"""%{"qty": item.qty, "item_code": item.item_code, "name": item.prevdoc_docname})
-		
-			sales_order_list.append(item.prevdoc_docname)
+			so_name = item.prevdoc_docname
 			
-	update_per_delivery(sales_order_list)
-		
-def update_per_delivery(sales_order_list):
-	for so in sales_order_list:
-		frappe.db.sql("""update `tabSales Order`
-			set per_delivered = (select 
-				sum(if(qty > ifnull(delivered_qty, 0), delivered_qty, qty))/ sum(qty)*100 
-				from `tabSales Order Item` where parent="%(name)s") where name = "%(name)s" """%{"name":so})
-	
-		so = frappe.get_doc("Sales Order", so)
-		so.set_status(update=True)
-		so.notify_update()
+	so = frappe.get_doc("Sales Order", so_name)
+	so.update_delivery_status(purchase_order.name)
+	so.set_status(update=True)
+	so.notify_update()
 	

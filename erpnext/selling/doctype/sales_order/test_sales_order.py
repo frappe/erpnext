@@ -317,7 +317,6 @@ class TestSalesOrder(unittest.TestCase):
 				"warehouse": "_Test Warehouse - _TC",
 				"qty": 2,
 				"rate": 400,
-				"conversion_factor": 1.0,
 				"delivered_by_supplier": 1,
 				"supplier": '_Test Supplier'
 			},
@@ -330,9 +329,19 @@ class TestSalesOrder(unittest.TestCase):
 			}
 		]
 		
+		#setuo existing qty from bin
 		bin = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"}, 
 			fields=["ordered_qty", "reserved_qty"])
-					
+			
+		existing_ordered_qty = bin[0].ordered_qty if bin else 0.0
+		existing_reserved_qty = bin[0].reserved_qty if bin else 0.0
+		
+		bin = frappe.get_all("Bin", filters={"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, 
+			fields=["reserved_qty"])
+		
+		existing_reserved_qty_for_dn_item = bin[0].reserved_qty if bin else 0.0
+		
+		#create so, po and partial dn
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
 		so.submit()
 		
@@ -351,40 +360,56 @@ class TestSalesOrder(unittest.TestCase):
 		ordered_qty, reserved_qty = frappe.db.get_value("Bin", 
 			{"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
 		
-		existing_ordered_qty = bin[0].ordered_qty if bin else 0.0
-		existing_reserved_qty = bin[0].reserved_qty if bin else 0.0	
-					
 		self.assertEquals(abs(ordered_qty), existing_ordered_qty + so_items[0]['qty'])			
-		self.assertEquals(abs(reserved_qty), existing_reserved_qty + so_items[0]['qty'])	
+		self.assertEquals(abs(reserved_qty), existing_reserved_qty + so_items[0]['qty'])
+		
+		reserved_qty = frappe.db.get_value("Bin", 
+					{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
+		
+		self.assertEquals(abs(reserved_qty), existing_reserved_qty_for_dn_item + 1)
 		
 		#test po_item length
 		self.assertEquals(len(po.items), 1)
 		
 		#test per_delivered status
 		delivered_by_supplier(po.name)
-		per_delivered = frappe.db.sql("""select sum(if(qty > ifnull(delivered_qty, 0), delivered_qty, qty))/sum(qty)*100 as per_delivered 
-			from `tabSales Order Item` where parent="{0}" """.format(so.name))
-
-		self.assertEquals(frappe.db.get_value("Sales Order", so.name, "per_delivered"), per_delivered[0][0])
+		self.assertEquals(flt(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 2), 75.00)
 		
+		#test reserved qty after complete delivery
 		dn = create_dn_against_so(so.name, delivered_qty=1)
+		reserved_qty = frappe.db.get_value("Bin", 
+			{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
 		
+		self.assertEquals(abs(reserved_qty), existing_reserved_qty_for_dn_item)
+		
+		#test after closing so
 		so.db_set('status', "Closed")
 		so.update_reserved_qty()
 		
+		ordered_qty, reserved_qty = frappe.db.get_value("Bin", 
+			{"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
+		
+		self.assertEquals(abs(ordered_qty), existing_ordered_qty)			
+		self.assertEquals(abs(reserved_qty), existing_reserved_qty)
+		
+		reserved_qty = frappe.db.get_value("Bin", 
+			{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
+		
+		self.assertEquals(abs(reserved_qty), existing_reserved_qty)
+		
 	def test_reserved_qty_for_closing_so(self):
-		from erpnext.stock.doctype.item.test_item import make_item
+		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}, 
+			fields=["reserved_qty"])	
 		
-		item = make_item("_Test Close Item", {"is_stock_item": 1, "is_sales_item": 1,
-			"is_purchase_item": 1})
+		existing_reserved_qty = bin[0].reserved_qty if bin else 0.0
 			
-		so = make_sales_order(item_code=item.item_code, qty=1)
+		so = make_sales_order(item_code="_Test Item", qty=1)
 		
-		self.assertEquals(get_reserved_qty(item_code=item.item_code, warehouse="_Test Warehouse - _TC"), 1)
+		self.assertEquals(get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_reserved_qty+1)
 		
 		so.stop_sales_order("Closed")
 		
-		self.assertEquals(get_reserved_qty(item_code=item.item_code, warehouse="_Test Warehouse - _TC"), 0)
+		self.assertEquals(get_reserved_qty(item_code="_Test Item", warehouse="_Test Warehouse - _TC"), existing_reserved_qty)
 		
 		
 def make_sales_order(**args):

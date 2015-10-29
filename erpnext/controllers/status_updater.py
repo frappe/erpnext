@@ -174,9 +174,7 @@ class StatusUpdater(Document):
 			if change_modified:
 				args['set_modified'] = ', modified = now(), modified_by = "{0}"'\
 					.format(frappe.db.escape(frappe.session.user))
-			
-			args["drop_ship_cond"] = ''
-			
+						
 			self._update_children(args)
 
 			if "percent_join_field" in args:

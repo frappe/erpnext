@@ -22,8 +22,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			if(doc.status != 'Stopped' && doc.status != 'Closed') {
 				
 				$.each(cur_frm.doc.items, function(i, item){
-					if((item.delivered_by_supplier == 1 || item.supplier) && (item.qty > item.ordered_qty)){
-						is_delivered_by_supplier = true;
+					if(item.delivered_by_supplier == 1 || item.supplier){
+						if(item.qty > item.ordered_qty)
+							is_delivered_by_supplier = true;
 					}
 					else{
 						if(item.qty > item.delivered_qty)
@@ -37,7 +38,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				// 	doc.per_billed);
 
 				// indent
-				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && flt(doc.per_delivered, 2) < 100)
+				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && flt(doc.per_delivered, 2) < 100 && !is_delivered_by_supplier)
 					cur_frm.add_custom_button(__('Material Request'), this.make_material_request);
 
 				if(flt(doc.per_billed)==0) {
@@ -45,8 +46,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 
 				// stop
-				if((flt(doc.per_delivered, 2) < 100 && is_delivery_note) || doc.per_billed < 100 
-					|| (flt(doc.per_ordered,2) < 100 && is_delivered_by_supplier)){
+				if(flt(doc.per_delivered, 2) < 100 || flt(doc.per_billed) < 100) {
 						cur_frm.add_custom_button(__('Stop'), this.stop_sales_order)
 					}
 				
@@ -68,7 +68,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice).addClass("btn-primary");
 				}
 				
-				if(flt(doc.per_ordered, 2) < 100 && is_delivered_by_supplier)
+				if(flt(doc.per_delivered, 2) < 100 && is_delivered_by_supplier)
 					cur_frm.add_custom_button(__('Make Purchase Order'), cur_frm.cscript.make_purchase_order).addClass("btn-primary");
 
 			} else {
