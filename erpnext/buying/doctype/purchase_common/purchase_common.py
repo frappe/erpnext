@@ -42,6 +42,8 @@ class PurchaseCommon(BuyingController):
 		items = []
 		for d in obj.get("items"):
 			if not d.qty:
+				if obj.doctype == "Purchase Receipt" and d.rejected_qty:
+					continue
 				frappe.throw(_("Please enter quantity for Item {0}").format(d.item_code))
 
 			# udpate with latest quantities
