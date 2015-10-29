@@ -140,7 +140,7 @@ erpnext.production_order = {
 			} else msgprint(__("Please enter Production Item first"));
 		});
 	},
-	
+
 	set_default_warehouse: function(frm) {
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.production_order.production_order.get_default_warehouse",

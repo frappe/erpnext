@@ -86,7 +86,7 @@ class TestProductionOrder(unittest.TestCase):
 		self.assertEqual(prod_order.name, time_log.production_order)
 		self.assertEqual((prod_order.qty - d.completed_qty), time_log.completed_qty)
 		self.assertEqual(time_diff_in_hours(d.planned_end_time, d.planned_start_time),time_log.hours)
-		
+
 		manufacturing_settings = frappe.get_doc({
 			"doctype": "Manufacturing Settings",
 			"allow_production_on_holidays": 0
@@ -136,6 +136,11 @@ class TestProductionOrder(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, prod_order.save)
 
 		frappe.db.set_value("Item", "_Test FG Item", "end_of_life", None)
+		frappe.db.set_value("Item", "_Test FG Item", "disabled", 1)
+
+		self.assertRaises(frappe.ValidationError, prod_order.save)
+
+		frappe.db.set_value("Item", "_Test FG Item", "disabled", 0)
 
 		prod_order = make_prod_order_test_record(item="_Test Variant Item", qty=1, do_not_save=True)
 		self.assertRaises(ItemHasVariantError, prod_order.save)

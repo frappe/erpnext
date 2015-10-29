@@ -524,13 +524,16 @@ class Item(WebsiteGenerator):
 				if variant and self.get("__islocal"):
 					frappe.throw(_("Item variant {0} exists with same attributes").format(variant), ItemVariantExistsError)
 
-def validate_end_of_life(item_code, end_of_life=None, verbose=1):
-	if not end_of_life:
-		end_of_life = frappe.db.get_value("Item", item_code, "end_of_life")
+def validate_end_of_life(item_code, end_of_life=None, disabled=None, verbose=1):
+	if (not end_of_life) or (disabled is None):
+		end_of_life, disabled = frappe.db.get_value("Item", item_code, ["end_of_life", "disabled"])
 
 	if end_of_life and end_of_life!="0000-00-00" and getdate(end_of_life) <= now_datetime().date():
 		msg = _("Item {0} has reached its end of life on {1}").format(item_code, formatdate(end_of_life))
 		_msgprint(msg, verbose)
+
+	if disabled:
+		_msgprint(_("Item {0} is disabled").format(item_code), verbose)
 
 def validate_is_stock_item(item_code, is_stock_item=None, verbose=1):
 	if not is_stock_item:

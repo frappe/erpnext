@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import flt, get_datetime, getdate, date_diff, cint
+from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate
 from frappe import _
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no
@@ -159,22 +159,22 @@ class ProductionOrder(Document):
 
 	def on_cancel(self):
 		self.validate_cancel()
-		
+
 		frappe.db.set(self,'status', 'Cancelled')
 		self.update_planned_qty()
 		self.delete_time_logs()
-		
+
 	def validate_cancel(self):
 		if self.status == "Stopped":
 			frappe.throw(_("Stopped Production Order cannot be cancelled, Unstop it first to cancel"))
-		
+
 		# Check whether any stock entry exists against this Production Order
 		stock_entry = frappe.db.sql("""select name from `tabStock Entry`
 			where production_order = %s and docstatus = 1""", self.name)
 		if stock_entry:
 			frappe.throw(_("Cannot cancel because submitted Stock Entry {0} exists").format(stock_entry[0][0]))
 
-	def update_planned_qty(self):		
+	def update_planned_qty(self):
 		update_bin_qty(self.production_item, self.fg_warehouse, {
 			"planned_qty": get_planned_qty(self.production_item, self.fg_warehouse)
 		})
@@ -342,8 +342,8 @@ class ProductionOrder(Document):
 @frappe.whitelist()
 def get_item_details(item):
 	res = frappe.db.sql("""select stock_uom, description
-		from `tabItem` where (ifnull(end_of_life, "0000-00-00")="0000-00-00" or end_of_life > now())
-		and name=%s""", item, as_dict=1)
+		from `tabItem` where disabled=0 and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)
+		and name=%s""", (nowdate(), item), as_dict=1)
 	if not res:
 		return {}
 
