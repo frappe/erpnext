@@ -67,16 +67,17 @@ frappe.ready(function() {
 	$("[itemscope] .item-view-attribute .form-control").on("change", function() {
 		try {
 			var item_code = encodeURIComponent(get_item_code());
+
 		} catch(e) {
 			// unable to find variant
 			// then chose the closest available one
 
 			var attribute = $(this).attr("data-attribute");
 			var attribute_value = $(this).val()
-			var item_code = update_attribute_selectors(attribute, attribute_value);
+			var item_code = find_closest_match(attribute, attribute_value);
 
 			if (!item_code) {
-				msgprint(__("Please select some other value for {0}", [attribute]))
+				msgprint(__("Cannot find a matching Item. Please select some other value for {0}.", [attribute]))
 				throw e;
 			}
 		}
@@ -99,9 +100,16 @@ var toggle_update_cart = function(qty) {
 function get_item_code() {
 	if(window.variant_info) {
 		var attributes = get_selected_attributes();
+		var no_of_attributes = Object.keys(attributes).length;
 
 		for(var i in variant_info) {
 			var variant = variant_info[i];
+
+			if (variant.attributes.length < no_of_attributes) {
+				// the case when variant has less attributes than template
+				continue;
+			}
+
 			var match = true;
 			for(var j in variant.attributes) {
 				if(attributes[variant.attributes[j].attribute]
@@ -120,13 +128,15 @@ function get_item_code() {
 	}
 }
 
-function update_attribute_selectors(selected_attribute, selected_attribute_value) {
+function find_closest_match(selected_attribute, selected_attribute_value) {
 	// find the closest match keeping the selected attribute in focus and get the item code
 
 	var attributes = get_selected_attributes();
 
 	var previous_match_score = 0;
+	var previous_no_of_attributes = 0;
 	var matched;
+
 	for(var i in variant_info) {
 		var variant = variant_info[i];
 		var match_score = 0;
@@ -142,9 +152,13 @@ function update_attribute_selectors(selected_attribute, selected_attribute_value
 			}
 		}
 
-		if (has_selected_attribute && (match_score > previous_match_score)) {
+		if (has_selected_attribute
+			&& ((match_score > previous_match_score) || (match_score==previous_match_score && previous_no_of_attributes < variant.attributes.length))) {
 			previous_match_score = match_score;
 			matched = variant;
+			previous_no_of_attributes = variant.attributes.length;
+
+
 		}
 	}
 
