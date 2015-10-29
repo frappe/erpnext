@@ -79,6 +79,7 @@ def get_item_map(item_code):
 
 	items = frappe.db.sql("""select * from `tabItem` item
 		where is_stock_item = 1
+		and disabled=0
 		{condition}
 		and (end_of_life > %(today)s or end_of_life is null or end_of_life='0000-00-00')
 		and exists (select name from `tabBin` bin where bin.item_code=item.name)"""\

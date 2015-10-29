@@ -130,7 +130,7 @@ class StockReconciliation(StockController):
 			item = frappe.get_doc("Item", item_code)
 
 			# end of life and stock item
-			validate_end_of_life(item_code, item.end_of_life, verbose=0)
+			validate_end_of_life(item_code, item.end_of_life, item.disabled, verbose=0)
 			validate_is_stock_item(item_code, item.is_stock_item, verbose=0)
 
 			# item should not be serialized

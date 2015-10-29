@@ -113,7 +113,7 @@ def validate_item_details(args, item):
 		throw(_("Please specify Company"))
 
 	from erpnext.stock.doctype.item.item import validate_end_of_life
-	validate_end_of_life(item.name, item.end_of_life)
+	validate_end_of_life(item.name, item.end_of_life, item.disabled)
 
 	if args.transaction_type == "selling":
 		# validate if sales item or service item

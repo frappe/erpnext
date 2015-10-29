@@ -16,6 +16,7 @@ def get_product_list(search=None, start=0, limit=10):
 			web_long_description as website_description, parent_website_route
 		from `tabItem`
 		where show_in_website = 1
+			and disabled=0
 			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %(today)s)
 			and (variant_of is null or variant_of = '')"""
 

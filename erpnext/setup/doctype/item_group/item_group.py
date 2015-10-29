@@ -72,6 +72,7 @@ def get_product_list_for_group(product_group=None, start=0, limit=10):
 			concat(parent_website_route, "/", page_name) as route
 		from `tabItem`
 		where show_in_website = 1
+			and disabled=0
 			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %(today)s)
 			and (variant_of = '' or variant_of is null)
 			and (item_group in ({child_groups})
