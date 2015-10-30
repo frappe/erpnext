@@ -100,6 +100,11 @@ $.extend(erpnext, {
 
 
 $.extend(erpnext.utils, {
+	clear_address_and_contact: function(frm) {
+		$(frm.fields_dict['address_html'].wrapper).html("");
+		frm.fields_dict['contact_html'] && $(frm.fields_dict['contact_html'].wrapper).html("");
+	},
+	
 	render_address_and_contact: function(frm) {
 		// render address
 		$(frm.fields_dict['address_html'].wrapper)

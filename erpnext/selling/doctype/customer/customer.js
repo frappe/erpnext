@@ -14,6 +14,8 @@ frappe.ui.form.on("Customer", "refresh", function(frm) {
 
 	if(!frm.doc.__islocal) {
 		erpnext.utils.render_address_and_contact(frm);
+	} else {
+		erpnext.utils.clear_address_and_contact(frm);
 	}
 
 	var grid = cur_frm.get_field("sales_team").grid;
