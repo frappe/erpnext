@@ -1,1 +1,2 @@
-- **Drop Ship** You can now implement drop shipping by creating Purchase Order from Sales Order.
+- **Drop Ship**
+ - Make Sales Order with mrked item as **_Delivered By Supplier_** and submit SO and then make a Purchase Order.
