@@ -11,6 +11,7 @@ import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
+from frappe.desk.notifications import clear_doctype_notifications
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -426,7 +427,12 @@ class PurchaseReceipt(BuyingController):
 				"\n".join(warehouse_with_no_account))
 
 		return process_gl_map(gl_entries)
-
+	
+	def update_status(self, status):
+		self.db_set('status', status)
+		self.set_status(update=True)
+		self.notify_update()
+		clear_doctype_notifications(self)
 
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
@@ -487,3 +493,9 @@ def get_invoiced_qty_map(purchase_receipt):
 def make_purchase_return(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Purchase Receipt", source_name, target_doc)
+
+
+@frappe.whitelist()
+def close_purchase_receipt(docname, status):
+	pr = frappe.get_doc("Purchase Receipt", docname)
+	pr.update_status(status)

@@ -54,7 +54,7 @@ erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
 						source_doctype: "Delivery Note",
 						get_query_filters: {
 							docstatus: 1,
-							status: ["!=", "Stopped"],
+							status: ["not in", ["Stopped", "Closed"]],
 							per_installed: ["<", 99.99],
 							customer: cur_frm.doc.customer || undefined,
 							company: cur_frm.doc.company

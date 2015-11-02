@@ -33,7 +33,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
 			this.show_general_ledger();
 		}
-		if(!this.frm.doc.is_return) {
+		if(!this.frm.doc.is_return && this.frm.doc.status!="Closed") {
 			if(this.frm.doc.docstatus==0) {
 				cur_frm.add_custom_button(__('From Purchase Order'),
 					function() {
@@ -51,11 +51,12 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 				});
 			}
 
-			if(this.frm.doc.docstatus == 1) {
+			if(this.frm.doc.docstatus == 1 && this.frm.doc.status!="Closed") {
 				cur_frm.add_custom_button(__('Return'), this.make_purchase_return);
 				if(this.frm.doc.__onload && !this.frm.doc.__onload.billing_complete) {
 					cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice).addClass("btn-primary");
 				}
+				cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt)
 			}
 		}
 
@@ -121,6 +122,17 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	tc_name: function() {
 		this.get_terms();
 	},
+	
+	close_purchase_receipt: function() {
+		frappe.call({
+			method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.close_purchase_receipt",
+			args: {"docname": cur_frm.doc.name, "status":"Closed"},
+			callback: function(r){
+				if(!r.exc)
+					cur_frm.reload_doc();
+			}
+		})
+	}
 
 });
 
