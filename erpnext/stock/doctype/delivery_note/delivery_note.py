@@ -10,6 +10,8 @@ from frappe import msgprint, _
 import frappe.defaults
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
+from frappe.desk.notifications import clear_doctype_notifications
+
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -268,6 +270,12 @@ class DeliveryNote(SellingController):
 				ps.cancel()
 			frappe.msgprint(_("Packing Slip(s) cancelled"))
 
+	def update_status(self, status):
+		self.db_set('status', status)
+		self.set_status(update=True)
+		self.notify_update()
+		clear_doctype_notifications(self)
+		
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
@@ -386,3 +394,9 @@ def make_packing_slip(source_name, target_doc=None):
 def make_sales_return(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Delivery Note", source_name, target_doc)
+
+
+@frappe.whitelist()
+def close_delivery_note(docname, status):
+	dn = frappe.get_doc("Delivery Note", docname)
+	dn.update_status(status)

@@ -51,11 +51,13 @@ status_map = {
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
+		["Closed", "eval:self.status=='Closed'"],
 	],
 	"Purchase Receipt": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
+		["Closed", "eval:self.status=='Closed'"],
 	]
 }
 

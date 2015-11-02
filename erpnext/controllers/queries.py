@@ -216,7 +216,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 	return frappe.db.sql("""select `tabDelivery Note`.name, `tabDelivery Note`.customer_name
 		from `tabDelivery Note`
 		where `tabDelivery Note`.`%(key)s` like %(txt)s and
-			`tabDelivery Note`.docstatus = 1 %(fcond)s and
+			`tabDelivery Note`.docstatus = 1 and status not in ("Stopped", "Closed") %(fcond)s and
 			(ifnull((select sum(qty) from `tabDelivery Note Item` where
 					`tabDelivery Note Item`.parent=`tabDelivery Note`.name), 0) >
 				ifnull((select sum(qty) from `tabSales Invoice Item` where
