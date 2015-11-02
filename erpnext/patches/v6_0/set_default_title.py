@@ -30,3 +30,6 @@ def execute():
 
 	frappe.reload_doctype("Sales Invoice")
 	frappe.db.sql("""update `tabSales Invoice` set title = customer_name""")
+
+	frappe.reload_doctype("Expense Claim")
+	frappe.db.sql("""update `tabExpense Claim` set title = employee_name""")

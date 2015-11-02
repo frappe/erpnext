@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import frappe
 
 def execute():
@@ -11,9 +13,12 @@ def execute():
 	for m in frappe.get_all("Project Milestone", "*"):
 		if (m.milestone and m.milestone_date
 			and frappe.db.exists("Project", m.parent)):
+			subject = (m.milestone[:139] + "…") if (len(m.milestone) > 140) else m.milestone
+			description = m.milestone
 			task = frappe.get_doc({
 				"doctype": "Task",
-				"subject": m.milestone,
+				"subject": subject,
+				"description": description if description!=subject else None,
 				"expected_start_date": m.milestone_date,
 				"status": "Open" if m.status=="Pending" else "Closed",
 				"project": m.parent,
