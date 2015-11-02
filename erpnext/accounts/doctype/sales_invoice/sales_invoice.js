@@ -111,7 +111,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					source_doctype: "Sales Order",
 					get_query_filters: {
 						docstatus: 1,
-						status: ["!=", "Stopped"],
+						status: ["not in", ["Stopped", "Closed"]],
 						per_billed: ["<", 99.99],
 						customer: cur_frm.doc.customer || undefined,
 						company: cur_frm.doc.company
