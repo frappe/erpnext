@@ -283,6 +283,7 @@ erpnext.pos.PointOfSale = Class.extend({
 	},
 	set_totals: function() {
 		var me = this;
+		this.wrapper.find(".total").text(format_currency(me.frm.doc["total"], me.frm.doc.currency));
 		this.wrapper.find(".net-total").text(format_currency(me.frm.doc["net_total"], me.frm.doc.currency));
 		this.wrapper.find(".grand-total").text(format_currency(me.frm.doc.grand_total, me.frm.doc.currency));
 	},
