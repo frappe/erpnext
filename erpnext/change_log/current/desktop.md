@@ -1,0 +1,2 @@
+- **Desktop Reorganization:** To Do, Calendar, Messages, Notes, Activty have been moved into module **Tools**
+- Integrations and Installer has been moved into **Setup**
