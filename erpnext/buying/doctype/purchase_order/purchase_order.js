@@ -154,7 +154,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		return frappe.call({
 			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_order",
 			args: {
-				"dt": "Purchase Order"
+				"dt": "Purchase Order",
 				"dn": cur_frm.doc.name
 			},
 			callback: function(r) {
