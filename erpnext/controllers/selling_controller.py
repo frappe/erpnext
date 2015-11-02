@@ -219,12 +219,12 @@ class SellingController(StockController):
 		so_warehouse = so_item and so_item[0]["warehouse"] or ""
 		return so_qty, so_warehouse
 
-	def check_stop_sales_order(self, ref_fieldname):
+	def check_stop_or_close_sales_order(self, ref_fieldname):
 		for d in self.get("items"):
 			if d.get(ref_fieldname):
 				status = frappe.db.get_value("Sales Order", d.get(ref_fieldname), "status")
-				if status == "Stopped":
-					frappe.throw(_("Sales Order {0} is stopped").format(d.get(ref_fieldname)))
+				if status in ("Stopped", "Closed"):
+					frappe.throw(_("Sales Order {0} is {1}").format(d.get(ref_fieldname), status))
 
 def check_active_sales_items(obj):
 	for d in obj.get("items"):

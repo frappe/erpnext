@@ -4,7 +4,11 @@ frappe.listview_settings['Purchase Order'] = {
 	get_indicator: function(doc) {
         if(doc.status==="Stopped") {
 			return [__("Stopped"), "darkgrey", "status,=,Stopped"];
-		} else if(flt(doc.per_received, 2) < 100 && doc.status!=="Stopped") {
+		} else if(doc.status==="Closed"){
+			return [__("Closed"), "green", "status,=,Closed"];
+		} else if (doc.status==="Delivered") {
+			return [__("Delivered"), "green", "status,=,Closed"];
+		}else if(flt(doc.per_received, 2) < 100 && doc.status!=="Stopped") {
 			if(flt(doc.per_billed, 2) < 100) {
 				return [__("To Receive and Bill"), "orange",
 					"per_received,<,100|per_billed,<,100|status,!=,Stopped"];
@@ -28,6 +32,9 @@ frappe.listview_settings['Purchase Order'] = {
 		listview.page.add_menu_item(__("Set as Unstopped"), function() {
 			listview.call_for_selected_items(method, {"status": "Submitted"});
 		});
-
+		
+		listview.page.add_menu_item(__("Set as Closed"), function() {
+			listview.call_for_selected_items(method, {"status": "Closed"});
+		});
 	}
 };

@@ -39,7 +39,7 @@ class PurchaseOrder(BuyingController):
 		self.set_status()
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
-		self.check_for_stopped_status(pc_obj)
+		self.check_for_stopped_or_closed_status(pc_obj)
 
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", ["qty", "required_qty"])
@@ -108,12 +108,12 @@ class PurchaseOrder(BuyingController):
 							= d.rate = item_last_purchase_rate
 
 	# Check for Stopped status
-	def check_for_stopped_status(self, pc_obj):
+	def check_for_stopped_or_closed_status(self, pc_obj):
 		check_list =[]
 		for d in self.get('items'):
 			if d.meta.get_field('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
 				check_list.append(d.prevdoc_docname)
-				pc_obj.check_for_stopped_status( d.prevdoc_doctype, d.prevdoc_docname)
+				pc_obj.check_for_stopped_or_closed_status( d.prevdoc_doctype, d.prevdoc_docname)
 
 	def update_requested_qty(self):
 		material_request_map = {}
@@ -162,6 +162,9 @@ class PurchaseOrder(BuyingController):
 		clear_doctype_notifications(self)
 
 	def on_submit(self):
+		if self.delivered_by_supplier == 1:
+			self.update_status_updater()
+		
 		super(PurchaseOrder, self).on_submit()
 
 		purchase_controller = frappe.get_doc("Purchase Common")
@@ -176,8 +179,11 @@ class PurchaseOrder(BuyingController):
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 
 	def on_cancel(self):
+		if self.delivered_by_supplier == 1:
+			self.update_status_updater()
+		
 		pc_obj = frappe.get_doc('Purchase Common')
-		self.check_for_stopped_status(pc_obj)
+		self.check_for_stopped_or_closed_status(pc_obj)
 
 		# Check if Purchase Receipt has been submitted against current Purchase Order
 		pc_obj.check_docstatus(check = 'Next', doctype = 'Purchase Receipt', docname = self.name, detail_doctype = 'Purchase Receipt Item')
@@ -213,7 +219,15 @@ class PurchaseOrder(BuyingController):
 			for field in ("received_qty", "billed_amt", "prevdoc_doctype", "prevdoc_docname",
 				"prevdoc_detail_docname", "supplier_quotation", "supplier_quotation_item"):
 					d.set(field, None)
-
+					
+	def update_status_updater(self):
+		self.status_updater[0].update({
+			"target_parent_dt": "Sales Order",
+			"target_dt": "Sales Order Item",
+			'target_field': 'ordered_qty',
+			"target_parent_field": ''
+		})
+		
 @frappe.whitelist()
 def stop_or_unstop_purchase_orders(names, status):
 	if not frappe.has_permission("Purchase Order", "write"):
@@ -223,9 +237,9 @@ def stop_or_unstop_purchase_orders(names, status):
 	for name in names:
 		po = frappe.get_doc("Purchase Order", name)
 		if po.docstatus == 1:
-			if status=="Stopped":
-				if po.status not in ("Stopped", "Cancelled") and (po.per_received < 100 or po.per_billed < 100):
-					po.update_status("Stopped")
+			if status in ("Stopped", "Closed"):
+				if po.status not in ("Stopped", "Cancelled", "Closed") and (po.per_received < 100 or po.per_billed < 100):
+					po.update_status(status)
 			else:
 				if po.status == "Stopped":
 					po.update_status("Draft")
@@ -325,3 +339,27 @@ def make_stock_entry(purchase_order, item_code):
 	stock_entry.bom_no = po_item.bom
 	stock_entry.get_items()
 	return stock_entry.as_dict()
+
+@frappe.whitelist()
+def update_status(status, name):
+	po = frappe.get_doc("Purchase Order", name)
+	po.update_status(status)
+	
+@frappe.whitelist()
+def	delivered_by_supplier(purchase_order):
+	po = frappe.get_doc("Purchase Order", purchase_order)
+	update_delivered_qty(po)
+	po.update_status("Delivered")
+	
+def update_delivered_qty(purchase_order):
+	sales_order_list = []
+	so_name = ''
+	for item in purchase_order.items:
+		if item.prevdoc_doctype == "Sales Order":
+			so_name = item.prevdoc_docname
+			
+	so = frappe.get_doc("Sales Order", so_name)
+	so.update_delivery_status(purchase_order.name)
+	so.set_status(update=True)
+	so.notify_update()
+	

@@ -19,11 +19,17 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		this._super();
 		// this.frm.dashboard.reset();
 
-		if(doc.docstatus == 1 && doc.status != 'Stopped') {
+		if(doc.docstatus == 1 && doc.status != 'Stopped' && doc.status != 'Closed') {
 
 			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100)
-				cur_frm.add_custom_button(__('Stop'), cur_frm.cscript['Stop Purchase Order']);
+				cur_frm.add_custom_button(__('Stop'), this.stop_purchase_order);
 
+			cur_frm.add_custom_button(__('Close'), this.close_purchase_order);
+			
+			if(doc.delivered_by_supplier && doc.status!="Delivered"){
+				cur_frm.add_custom_button(__('Delivered By Supplier'), this.delivered_by_supplier);
+			}
+				
 			if(flt(doc.per_billed)==0) {
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry);
 			}
@@ -46,7 +52,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
-			cur_frm.add_custom_button(__('Unstop'), cur_frm.cscript['Unstop Purchase Order']);
+			cur_frm.add_custom_button(__('Unstop'), this.unstop_purchase_order);
 	},
 
 	make_stock_entry: function() {
@@ -156,12 +162,51 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
+	},
+	stop_purchase_order: function(){
+		cur_frm.cscript.update_status('Stop', 'Stopped')
+	},
+	unstop_purchase_order: function(){
+		cur_frm.cscript.update_status('Resume', 'Submitted')
+	},
+	close_purchase_order: function(){
+		cur_frm.cscript.update_status('Close', 'Closed')
+	},
+	delivered_by_supplier: function(){
+		return frappe.call({
+			method: "erpnext.buying.doctype.purchase_order.purchase_order.delivered_by_supplier",
+			freeze: true,
+			args:{
+				purchase_order: cur_frm.doc.name
+			},
+			callback:function(r){
+				if(!r.exc) {
+					cur_frm.reload_doc();
+				}
+			}
+		})
 	}
 
 });
 
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.buying.PurchaseOrderController({frm: cur_frm}));
+
+cur_frm.cscript.update_status= function(label, status){
+	var doc = cur_frm.doc;
+	var check = confirm(__("Do you really want to {0} {1}",[label, doc.name]));
+	
+	if (check) {
+		frappe.call({
+			method: "erpnext.buying.doctype.purchase_order.purchase_order.update_status",
+			args:{status: status, name: doc.name},
+			callback:function(r){
+				cur_frm.set_value("status", status);
+				cur_frm.reload_doc();			
+			}
+		})
+	}
+}
 
 cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
 	return {
@@ -200,28 +245,6 @@ cur_frm.cscript.get_last_purchase_rate = function(doc, cdt, cdn){
 		var doc = locals[cdt][cdn];
 		cur_frm.cscript.calc_amount( doc, 2);
 	});
-}
-
-cur_frm.cscript['Stop Purchase Order'] = function() {
-	var doc = cur_frm.doc;
-	var check = confirm(__("Do you really want to STOP ") + doc.name);
-
-	if (check) {
-		return $c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs':doc}, function(r,rt) {
-			cur_frm.refresh();
-		});
-	}
-}
-
-cur_frm.cscript['Unstop Purchase Order'] = function() {
-	var doc = cur_frm.doc;
-	var check = confirm(__("Do you really want to UNSTOP ") + doc.name);
-
-	if (check) {
-		return $c('runserverobj', args={'method':'update_status', 'arg': 'Submitted', 'docs':doc}, function(r,rt) {
-			cur_frm.refresh();
-		});
-	}
 }
 
 cur_frm.pformat.indent_no = function(doc, cdt, cdn){

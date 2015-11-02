@@ -38,7 +38,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 						get_query_filters: {
 							supplier: cur_frm.doc.supplier || undefined,
 							docstatus: 1,
-							status: ["!=", "Stopped"],
+							status: ["not in", ["Stopped", "Closed"]],
 							per_billed: ["<", 99.99],
 							company: cur_frm.doc.company
 						}

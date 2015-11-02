@@ -37,6 +37,7 @@ status_map = {
 		["Completed", "eval:self.order_type == 'Maintenance' and self.per_billed == 100 and self.docstatus == 1"],
 		["Stopped", "eval:self.status=='Stopped'"],
 		["Cancelled", "eval:self.docstatus==2"],
+		["Closed", "eval:self.status=='Closed'"],
 	],
 	"Purchase Order": [
 		["Draft", None],
@@ -44,8 +45,10 @@ status_map = {
 		["To Bill", "eval:self.per_received == 100 and self.per_billed < 100 and self.docstatus == 1"],
 		["To Receive", "eval:self.per_received < 100 and self.per_billed == 100 and self.docstatus == 1"],
 		["Completed", "eval:self.per_received == 100 and self.per_billed == 100 and self.docstatus == 1"],
+		["Delivered", "eval:self.status=='Delivered'"],
 		["Stopped", "eval:self.status=='Stopped'"],
 		["Cancelled", "eval:self.docstatus==2"],
+		["Closed", "eval:self.status=='Closed'"],
 	],
 	"Delivery Note": [
 		["Draft", None],
@@ -170,11 +173,10 @@ class StatusUpdater(Document):
 			else:
 				args['cond'] = ' and parent!="%s"' % self.name.replace('"', '\"')
 
-			args['set_modified'] = ''
 			if change_modified:
 				args['set_modified'] = ', modified = now(), modified_by = "{0}"'\
 					.format(frappe.db.escape(frappe.session.user))
-
+						
 			self._update_children(args)
 
 			if "percent_join_field" in args:

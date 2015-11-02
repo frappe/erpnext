@@ -50,6 +50,13 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		if(doc.update_stock) this.show_stock_ledger();
 
 		if(doc.docstatus==1 && !doc.is_return) {
+			
+			var is_delivered_by_supplier = false;
+			
+			is_delivered_by_supplier = cur_frm.doc.items.some(function(item){
+				return item.is_delivered_by_supplier ? true : false;
+			})
+			
 			cur_frm.add_custom_button(doc.update_stock ? __('Sales Return') : __('Credit Note'),
 				this.make_sales_return);
 
@@ -61,7 +68,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						return item.delivery_note ? true : false;
 					});
 
-				if(!from_delivery_note) {
+				if(!from_delivery_note && !is_delivered_by_supplier) {
 					cur_frm.add_custom_button(__('Delivery'), cur_frm.cscript['Make Delivery Note']).addClass("btn-primary");
 				}
 			}
@@ -104,7 +111,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					source_doctype: "Sales Order",
 					get_query_filters: {
 						docstatus: 1,
-						status: ["!=", "Stopped"],
+						status: ["not in", ["Stopped", "Closed"]],
 						per_billed: ["<", 99.99],
 						customer: cur_frm.doc.customer || undefined,
 						company: cur_frm.doc.company
