@@ -135,9 +135,10 @@ cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
 
 cur_frm.cscript.make_bank_entry = function() {
 	return frappe.call({
-		method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_from_purchase_invoice",
+		method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_invoice",
 		args: {
-			"purchase_invoice": cur_frm.doc.name,
+			"dt": "Purchase Invoice",
+			"dn": cur_frm.doc.name
 		},
 		callback: function(r) {
 			var doclist = frappe.model.sync(r.message);
