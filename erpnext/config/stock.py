@@ -9,6 +9,11 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Item",
+					"description": _("All Products or Services."),
+				},
+				{
+					"type": "doctype",
 					"name": "Material Request",
 					"description": _("Requests for items."),
 				},
@@ -31,11 +36,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Installation Note",
 					"description": _("Installation record for a Serial No.")
-				},
-				{
-					"type": "doctype",
-					"name": "Item",
-					"description": _("All Products or Services."),
 				},
 				{
 					"type": "doctype",

@@ -64,9 +64,9 @@ def get_data():
 			"type": "module"
 		},
 		"Learn": {
-			"color": "#FCB868",
+			"color": "#FF888B",
 			"force_show": True,
-			"icon": "icon-facetime-video",
+			"icon": "octicon octicon-device-camera-video",
 			"type": "module",
 			"is_help": True
 		}
