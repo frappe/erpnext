@@ -408,6 +408,8 @@ $.extend(erpnext.journal_entry, {
 
 		frappe.model.set_value(cdt, cdn, "credit",
 			flt(flt(row.credit_in_account_currency)*row.exchange_rate), precision("credit", row));
+			
+		cur_frm.cscript.update_totals(frm.doc);
 	},
 
 	set_exchange_rate: function(frm, cdt, cdn) {

@@ -323,9 +323,10 @@ cur_frm.cscript['Make Delivery Note'] = function() {
 
 cur_frm.cscript.make_bank_entry = function() {
 	return frappe.call({
-		method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_from_sales_invoice",
+		method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_invoice",
 		args: {
-			"sales_invoice": cur_frm.doc.name
+			"dt": "Sales Invoice",
+			"dn": cur_frm.doc.name
 		},
 		callback: function(r) {
 			var doclist = frappe.model.sync(r.message);

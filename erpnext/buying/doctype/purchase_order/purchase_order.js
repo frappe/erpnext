@@ -146,9 +146,10 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 	make_bank_entry: function() {
 		return frappe.call({
-			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_from_purchase_order",
+			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_order",
 			args: {
-				"purchase_order": cur_frm.doc.name
+				"dt": "Purchase Order"
+				"dn": cur_frm.doc.name
 			},
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);

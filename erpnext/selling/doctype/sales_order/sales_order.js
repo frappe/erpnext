@@ -136,9 +136,10 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 	make_bank_entry: function() {
 		return frappe.call({
-			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_from_sales_order",
+			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_order",
 			args: {
-				"sales_order": cur_frm.doc.name
+				"dt": "Sales Order",
+				"dn": cur_frm.doc.name
 			},
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);
