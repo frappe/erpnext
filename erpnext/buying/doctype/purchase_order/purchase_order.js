@@ -166,7 +166,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		cur_frm.cscript.update_status('Stop', 'Stopped')
 	},
 	unstop_purchase_order: function(){
-		cur_frm.cscript.update_status('UNSTOP', 'Submitted')
+		cur_frm.cscript.update_status('Resume', 'Submitted')
 	},
 	close_purchase_order: function(){
 		cur_frm.cscript.update_status('Close', 'Closed')
@@ -174,7 +174,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	delivered_by_supplier: function(){
 		return frappe.call({
 			method: "erpnext.buying.doctype.purchase_order.purchase_order.delivered_by_supplier",
-			freez: true,
+			freeze: true,
 			args:{
 				purchase_order: cur_frm.doc.name
 			},
