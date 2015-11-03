@@ -98,7 +98,6 @@ class MaterialRequest(BuyingController):
 		self.check_modified_date()
 		frappe.db.set(self, 'status', cstr(status))
 		self.update_requested_qty()
-		frappe.msgprint(_("Status updated to {0}").format(_(status)))
 
 	def on_cancel(self):
 		pc_obj = frappe.get_doc('Purchase Common')

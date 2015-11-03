@@ -25,11 +25,11 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				cur_frm.add_custom_button(__('Stop'), this.stop_purchase_order);
 
 			cur_frm.add_custom_button(__('Close'), this.close_purchase_order);
-			
+
 			if(doc.delivered_by_supplier && doc.status!="Delivered"){
 				cur_frm.add_custom_button(__('Delivered By Supplier'), this.delivered_by_supplier);
 			}
-				
+
 			if(flt(doc.per_billed)==0) {
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry);
 			}
@@ -51,8 +51,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			cur_frm.cscript.add_from_mappers();
 		}
 
-		if(doc.docstatus == 1 && doc.status == 'Stopped')
-			cur_frm.add_custom_button(__('Unstop'), this.unstop_purchase_order);
+		if(doc.docstatus == 1 && (doc.status === 'Stopped' || doc.status === "Closed"))
+			cur_frm.add_custom_button(__('Re-open'), this.unstop_purchase_order);
 	},
 
 	make_stock_entry: function() {
@@ -167,7 +167,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		cur_frm.cscript.update_status('Stop', 'Stopped')
 	},
 	unstop_purchase_order: function(){
-		cur_frm.cscript.update_status('Resume', 'Submitted')
+		cur_frm.cscript.update_status('Re-open', 'Submitted')
 	},
 	close_purchase_order: function(){
 		cur_frm.cscript.update_status('Close', 'Closed')
@@ -193,19 +193,18 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 $.extend(cur_frm.cscript, new erpnext.buying.PurchaseOrderController({frm: cur_frm}));
 
 cur_frm.cscript.update_status= function(label, status){
-	var doc = cur_frm.doc;
-	var check = confirm(__("Do you really want to {0} {1}",[label, doc.name]));
-	
-	if (check) {
-		frappe.call({
-			method: "erpnext.buying.doctype.purchase_order.purchase_order.update_status",
-			args:{status: status, name: doc.name},
-			callback:function(r){
-				cur_frm.set_value("status", status);
-				cur_frm.reload_doc();			
-			}
-		})
-	}
+	frappe.ui.form.is_saving = true;
+	frappe.call({
+		method: "erpnext.buying.doctype.purchase_order.purchase_order.update_status",
+		args: {status: status, name: cur_frm.doc.name},
+		callback: function(r) {
+			cur_frm.set_value("status", status);
+			cur_frm.reload_doc();
+		},
+		always: function() {
+			frappe.ui.form.is_saving = false;
+		}
+	})
 }
 
 cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {

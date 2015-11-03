@@ -164,7 +164,7 @@ class PurchaseOrder(BuyingController):
 	def on_submit(self):
 		if self.delivered_by_supplier == 1:
 			self.update_status_updater()
-		
+
 		super(PurchaseOrder, self).on_submit()
 
 		purchase_controller = frappe.get_doc("Purchase Common")
@@ -181,7 +181,7 @@ class PurchaseOrder(BuyingController):
 	def on_cancel(self):
 		if self.delivered_by_supplier == 1:
 			self.update_status_updater()
-		
+
 		pc_obj = frappe.get_doc('Purchase Common')
 		self.check_for_stopped_or_closed_status(pc_obj)
 
@@ -219,7 +219,7 @@ class PurchaseOrder(BuyingController):
 			for field in ("received_qty", "billed_amt", "prevdoc_doctype", "prevdoc_docname",
 				"prevdoc_detail_docname", "supplier_quotation", "supplier_quotation_item"):
 					d.set(field, None)
-					
+
 	def update_status_updater(self):
 		self.status_updater[0].update({
 			"target_parent_dt": "Sales Order",
@@ -227,7 +227,7 @@ class PurchaseOrder(BuyingController):
 			'target_field': 'ordered_qty',
 			"target_parent_field": ''
 		})
-		
+
 @frappe.whitelist()
 def stop_or_unstop_purchase_orders(names, status):
 	if not frappe.has_permission("Purchase Order", "write"):
@@ -241,7 +241,7 @@ def stop_or_unstop_purchase_orders(names, status):
 				if po.status not in ("Stopped", "Cancelled", "Closed") and (po.per_received < 100 or po.per_billed < 100):
 					po.update_status(status)
 			else:
-				if po.status == "Stopped":
+				if po.status in ("Stopped", "Closed"):
 					po.update_status("Draft")
 
 	frappe.local.message_log = []
@@ -344,22 +344,20 @@ def make_stock_entry(purchase_order, item_code):
 def update_status(status, name):
 	po = frappe.get_doc("Purchase Order", name)
 	po.update_status(status)
-	
+
 @frappe.whitelist()
 def	delivered_by_supplier(purchase_order):
 	po = frappe.get_doc("Purchase Order", purchase_order)
 	update_delivered_qty(po)
 	po.update_status("Delivered")
-	
+
 def update_delivered_qty(purchase_order):
-	sales_order_list = []
 	so_name = ''
 	for item in purchase_order.items:
 		if item.prevdoc_doctype == "Sales Order":
 			so_name = item.prevdoc_docname
-			
+
 	so = frappe.get_doc("Sales Order", so_name)
 	so.update_delivery_status(purchase_order.name)
 	so.set_status(update=True)
 	so.notify_update()
-	

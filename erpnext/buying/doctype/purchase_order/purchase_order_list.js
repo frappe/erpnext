@@ -25,16 +25,16 @@ frappe.listview_settings['Purchase Order'] = {
 	onload: function(listview) {
 		var method = "erpnext.buying.doctype.purchase_order.purchase_order.stop_or_unstop_purchase_orders";
 
-		listview.page.add_menu_item(__("Set as Stopped"), function() {
+		listview.page.add_menu_item(__("Close"), function() {
+			listview.call_for_selected_items(method, {"status": "Closed"});
+		});
+
+		listview.page.add_menu_item(__("Stop"), function() {
 			listview.call_for_selected_items(method, {"status": "Stopped"});
 		});
 
-		listview.page.add_menu_item(__("Set as Unstopped"), function() {
+		listview.page.add_menu_item(__("Re-open"), function() {
 			listview.call_for_selected_items(method, {"status": "Submitted"});
-		});
-		
-		listview.page.add_menu_item(__("Set as Closed"), function() {
-			listview.call_for_selected_items(method, {"status": "Closed"});
 		});
 	}
 };

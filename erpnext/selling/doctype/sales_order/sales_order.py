@@ -258,23 +258,23 @@ class SalesOrder(SellingController):
 
 	def on_update(self):
 		pass
-	
+
 	def before_update_after_submit(self):
-		self.validate_drop_ship()	
+		self.validate_drop_ship()
 		self.validate_po()
-		
+
 	def validate_po(self):
 		exc_list = []
-		
+
 		for item in self.items:
-			supplier = frappe.db.get_value("Sales Order Item", {"parent": self.name, "item_code": item.item_code}, 
+			supplier = frappe.db.get_value("Sales Order Item", {"parent": self.name, "item_code": item.item_code},
 				"supplier")
 			if item.ordered_qty > 0.0 and item.supplier != supplier:
 				exc_list.append("Row #{0}: Not allowed to change supplier as Purchase Order already exists".format(item.idx))
-		
-		if exc_list:		
+
+		if exc_list:
 			frappe.throw('\n'.join(exc_list))
-		
+
 	def update_delivery_status(self, po_name):
 		tot_qty, delivered_qty = 0.0, 0.0
 
@@ -282,12 +282,12 @@ class SalesOrder(SellingController):
 			if item.delivered_by_supplier:
 				delivered_qty = frappe.db.get_value("Purchase Order Item", {"parent": po_name, "item_code": item.item_code}, "qty")
 				frappe.db.set_value("Sales Order Item", item.name, "delivered_qty", delivered_qty)
-				
+
 			delivered_qty += item.delivered_qty
 			tot_qty += item.qty
-			
+
 		frappe.db.set_value("Sales Order", self.name, "per_delivered", flt(delivered_qty/tot_qty) * 100)
-		
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
@@ -307,7 +307,7 @@ def stop_or_unstop_sales_orders(names, status):
 				if so.status not in ("Stopped", "Cancelled", "Closed") and (so.per_delivered < 100 or so.per_billed < 100):
 					so.stop_sales_order(status)
 			else:
-				if so.status == "Stopped":
+				if so.status in ("Stopped", "Closed"):
 					so.unstop_sales_order()
 
 	frappe.local.message_log = []
@@ -525,14 +525,14 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=None):	
+def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=None):
 	def set_missing_values(source, target):
 		target.supplier = for_supplier
-		
+
 		default_price_list = frappe.get_value("Supplier", for_supplier, "default_price_list")
 		if default_price_list:
 			target.buying_price_list = default_price_list
-			
+
 		target.delivered_by_supplier = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
@@ -552,10 +552,10 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 				"contact_person": "customer_contact_person"
 			},
 			"field_no_map": [
-				"address_display", 
-				"contact_display", 
-				"contact_mobile", 
-				"contact_email", 
+				"address_display",
+				"contact_display",
+				"contact_mobile",
+				"contact_email",
 				"contact_person"
 			],
 			"validation": {
@@ -579,7 +579,7 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 			"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == for_supplier
 		}
 	}, target_doc, set_missing_values)
-	
+
 	return doclist
 
 @frappe.whitelist()
@@ -615,4 +615,3 @@ def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 def update_status(status, name):
 	so = frappe.get_doc("Sales Order", name)
 	so.stop_sales_order(status)
-	
