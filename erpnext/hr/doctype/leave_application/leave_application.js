@@ -28,21 +28,6 @@ frappe.ui.form.on("Leave Application", {
 			frm.set_value("status", "Open");
 			frm.trigger("calculate_total_days");
 		}
-
-		frm.set_intro("");
-		if (frm.is_new() && !in_list(user_roles, "HR User")) {
-			frm.set_intro(__("Fill the form and save it"));
-		} else {
-			if(frm.doc.docstatus==0 && frm.doc.status=="Open") {
-				if(user==frm.doc.leave_approver) {
-					frm.set_intro(__("You are the Leave Approver for this record. Please Update the 'Status' and Save"));
-					frm.toggle_enable("status", true);
-				} else {
-					frm.set_intro(__("This Leave Application is pending approval. Only the Leave Approver can update status."))
-					frm.toggle_enable("status", false);
-				}
-			}
-		}
 	},
 
 	leave_approver: function(frm) {
