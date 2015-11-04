@@ -276,7 +276,7 @@ class SalesOrder(SellingController):
 
 		for item in self.items:
 			if item.delivered_by_supplier:
-				delivered_qty = frappe.db.sql("""select qty
+				item_delivered_qty  = frappe.db.sql("""select qty
 					from `tabPurchase Order Item` poi, `tabPurchase Order` po
 					where poi.prevdoc_docname = %s
 						and poi.prevdoc_doctype = 'Sales Order'
@@ -284,8 +284,8 @@ class SalesOrder(SellingController):
 						and poi.parent = po.name
 						and po.status = 'Delivered'""", (self.name, item.item_code))
 
-				delivered_qty = delivered_qty[0][0] if delivered_qty else 0
-				item.db_set("delivered_qty", delivered_qty)
+				item_delivered_qty = item_delivered_qty[0][0] if item_delivered_qty else 0
+				item.db_set("delivered_qty", item_delivered_qty)
 
 			delivered_qty += item.delivered_qty
 			tot_qty += item.qty
