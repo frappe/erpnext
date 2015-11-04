@@ -249,13 +249,7 @@ cur_frm.cscript.update_status = function(label, status){
 }
 
 cur_frm.cscript['Unstop Sales Order'] = function() {
-	var doc = cur_frm.doc;
-	return $c('runserverobj', {
-		'method':'unstop_sales_order',
-		'docs': doc
-	}, function(r,rt) {
-		cur_frm.refresh();
-	});
+	cur_frm.cscript.update_status('Re-open', 'Draft')
 }
 
 cur_frm.cscript.on_submit = function(doc, cdt, cdn) {

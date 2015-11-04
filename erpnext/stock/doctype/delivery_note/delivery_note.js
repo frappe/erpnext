@@ -41,12 +41,15 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			}
 		}
 
-		if (doc.docstatus==1 && doc.status!="Closed") {
+		if (doc.docstatus==1) {
 			this.show_stock_ledger();
 			if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
 				this.show_general_ledger();
 			}
-			cur_frm.add_custom_button(__("Close"), this.close_delivery_note)
+
+			if(doc.status !== "Closed") {
+				cur_frm.add_custom_button(__("Close"), this.close_delivery_note)
+			}
 		}
 
 		if(doc.__onload && !doc.__onload.billing_complete && doc.docstatus==1 && !doc.is_return && doc.status!="Closed") {
@@ -98,11 +101,11 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	items_on_form_rendered: function(doc, grid_row) {
 		erpnext.setup_serial_no();
 	},
-	
+
 	close_delivery_note: function(doc){
 		cur_frm.cscript.update_status("Closed")
 	},
-	
+
 	reopen_delivery_note : function() {
 		cur_frm.cscript.update_status("Submitted")
 	}

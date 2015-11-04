@@ -29,10 +29,13 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	refresh: function() {
 		this._super();
 
-		this.show_stock_ledger();
-		if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
-			this.show_general_ledger();
+		if(this.frm.doc.docstatus===1) {
+			this.show_stock_ledger();
+			if (cint(frappe.defaults.get_default("auto_accounting_for_stock"))) {
+				this.show_general_ledger();
+			}
 		}
+
 		if(!this.frm.doc.is_return && this.frm.doc.status!="Closed") {
 			if(this.frm.doc.docstatus==0) {
 				cur_frm.add_custom_button(__('From Purchase Order'),
@@ -59,12 +62,12 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 				cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt)
 			}
 		}
-		
-		
+
+
 		if(this.frm.doc.docstatus==1 && this.frm.doc.status === "Closed") {
 			cur_frm.add_custom_button(__('Re-open'), this.reopen_purchase_receipt)
 		}
-		
+
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
 	},
 
@@ -127,11 +130,11 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	tc_name: function() {
 		this.get_terms();
 	},
-	
+
 	close_purchase_receipt: function() {
 		cur_frm.cscript.update_status("Closed");
 	},
-	
+
 	reopen_purchase_receipt: function() {
 		cur_frm.cscript.update_status("Submitted");
 	}
