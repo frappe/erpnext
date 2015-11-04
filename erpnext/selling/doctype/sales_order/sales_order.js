@@ -23,23 +23,25 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				$.each(cur_frm.doc.items, function(i, item){
 					if(item.delivered_by_supplier == 1 || item.supplier){
-						if(item.qty > item.ordered_qty)
+						if(item.qty > flt(item.ordered_qty))
 							is_delivered_by_supplier = true;
 					}
 					else{
-						if(item.qty > item.delivered_qty)
+						if(item.qty > flt(item.delivered_qty))
 							is_delivery_note = true;
 					}
 				})
 
-				// cur_frm.dashboard.add_progress(cint(doc.per_delivered) + __("% Delivered"),
-				// 	doc.per_delivered);
-				// cur_frm.dashboard.add_progress(cint(doc.per_billed) + __("% Billed"),
-				// 	doc.per_billed);
+				// material request
+				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1
+					&& flt(doc.per_delivered, 2) < 100) {
+						cur_frm.add_custom_button(__('Material Request'), this.make_material_request);
+				}
 
-				// indent
-				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && flt(doc.per_delivered, 2) < 100 && !is_delivered_by_supplier)
-					cur_frm.add_custom_button(__('Material Request'), this.make_material_request);
+				// make purchase order
+				if(flt(doc.per_delivered, 2) < 100 && is_delivered_by_supplier) {
+					cur_frm.add_custom_button(__('Purchase Order'), cur_frm.cscript.make_purchase_order);
+				}
 
 				if(flt(doc.per_billed)==0) {
 					cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry);
@@ -60,16 +62,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 
 				// delivery note
-				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && is_delivery_note)
+				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && is_delivery_note) {
 					cur_frm.add_custom_button(__('Delivery'), this.make_delivery_note).addClass("btn-primary");
+				}
 
 				// sales invoice
 				if(flt(doc.per_billed, 2) < 100) {
 					cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice).addClass("btn-primary");
 				}
 
-				if(flt(doc.per_delivered, 2) < 100 && is_delivered_by_supplier)
-					cur_frm.add_custom_button(__('Make Purchase Order'), cur_frm.cscript.make_purchase_order).addClass("btn-primary");
 
 			} else {
 				// un-stop
@@ -178,7 +179,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							filters: {'parent': cur_frm.doc.name}
 						}
 					}, "reqd": 1 },
-				{"fieldtype": "Button", "label": __("Make Purchase Order"), "fieldname": "make_purchase_order"},
+				{"fieldtype": "Button", "label": __("Make Purchase Order"), "fieldname": "make_purchase_order", "cssClass": "btn-primary"},
 			]
 		});
 

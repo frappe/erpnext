@@ -427,10 +427,9 @@ class PurchaseReceipt(BuyingController):
 				"\n".join(warehouse_with_no_account))
 
 		return process_gl_map(gl_entries)
-	
+
 	def update_status(self, status):
-		self.db_set('status', status)
-		self.set_status(update=True)
+		self.set_status(update=True, status = status)
 		self.notify_update()
 		clear_doctype_notifications(self)
 

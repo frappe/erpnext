@@ -154,8 +154,7 @@ class PurchaseOrder(BuyingController):
 
 	def update_status(self, status):
 		self.check_modified_date()
-		self.db_set('status', status)
-		self.set_status(update=True)
+		self.set_status(update=True, status=status)
 		self.update_requested_qty()
 		self.update_ordered_qty()
 		self.notify_update()
@@ -227,6 +226,20 @@ class PurchaseOrder(BuyingController):
 			'target_field': 'ordered_qty',
 			"target_parent_field": ''
 		})
+
+	def update_delivered_qty_in_sales_order(self):
+		"""Update delivered qty in Sales Order for drop ship"""
+		sales_orders_to_update = []
+		for item in self.items:
+			if item.prevdoc_doctype == "Sales Order":
+				if item.prevdoc_docname not in sales_orders_to_update:
+					sales_orders_to_update.append(item.prevdoc_docname)
+
+		for so_name in sales_orders_to_update:
+			so = frappe.get_doc("Sales Order", so_name)
+			so.update_delivery_status(self.name)
+			so.set_status(update=True)
+			so.notify_update()
 
 @frappe.whitelist()
 def stop_or_unstop_purchase_orders(names, status):
@@ -344,20 +357,5 @@ def make_stock_entry(purchase_order, item_code):
 def update_status(status, name):
 	po = frappe.get_doc("Purchase Order", name)
 	po.update_status(status)
+	po.update_delivered_qty_in_sales_order()
 
-@frappe.whitelist()
-def	delivered_by_supplier(purchase_order):
-	po = frappe.get_doc("Purchase Order", purchase_order)
-	update_delivered_qty(po)
-	po.update_status("Delivered")
-
-def update_delivered_qty(purchase_order):
-	so_name = ''
-	for item in purchase_order.items:
-		if item.prevdoc_doctype == "Sales Order":
-			so_name = item.prevdoc_docname
-
-	so = frappe.get_doc("Sales Order", so_name)
-	so.update_delivery_status(purchase_order.name)
-	so.set_status(update=True)
-	so.notify_update()

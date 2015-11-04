@@ -216,10 +216,10 @@ class DeliveryNote(SellingController):
 		self.cancel_packing_slips()
 
 		self.make_gl_entries_on_cancel()
-		
+
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
-		
+
 		validate_against_credit_limit = False
 		for d in self.get("items"):
 			if not (d.against_sales_order or d.against_sales_invoice):
@@ -271,11 +271,10 @@ class DeliveryNote(SellingController):
 			frappe.msgprint(_("Packing Slip(s) cancelled"))
 
 	def update_status(self, status):
-		self.db_set('status', status)
-		self.set_status(update=True)
+		self.set_status(update=True, status=status)
 		self.notify_update()
 		clear_doctype_notifications(self)
-		
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)

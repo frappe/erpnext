@@ -220,18 +220,11 @@ class SalesOrder(SellingController):
 		if date_diff and date_diff[0][0]:
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name))
 
-	def stop_sales_order(self, status):
+	def update_status(self, status):
 		self.check_modified_date()
-		self.db_set('status', status)
+		self.set_status(update=True, status=status)
 		self.update_reserved_qty()
 		self.notify_update()
-		clear_doctype_notifications(self)
-
-	def unstop_sales_order(self):
-		self.check_modified_date()
-		self.db_set('status', 'Draft')
-		self.set_status(update=True)
-		self.update_reserved_qty()
 		clear_doctype_notifications(self)
 
 	def update_reserved_qty(self, so_item_rows=None):
@@ -261,27 +254,38 @@ class SalesOrder(SellingController):
 
 	def before_update_after_submit(self):
 		self.validate_drop_ship()
-		self.validate_po()
+		self.validate_supplier_after_submit()
 
-	def validate_po(self):
+	def validate_supplier_after_submit(self):
+		"""Check that supplier is the same after submit if PO is already made"""
 		exc_list = []
 
 		for item in self.items:
-			supplier = frappe.db.get_value("Sales Order Item", {"parent": self.name, "item_code": item.item_code},
-				"supplier")
-			if item.ordered_qty > 0.0 and item.supplier != supplier:
-				exc_list.append("Row #{0}: Not allowed to change supplier as Purchase Order already exists".format(item.idx))
+			if item.supplier:
+				supplier = frappe.db.get_value("Sales Order Item", {"parent": self.name, "item_code": item.item_code},
+					"supplier")
+				if item.ordered_qty > 0.0 and item.supplier != supplier:
+					exc_list.append(_("Row #{0}: Not allowed to change Supplier as Purchase Order already exists").format(item.idx))
 
 		if exc_list:
 			frappe.throw('\n'.join(exc_list))
 
 	def update_delivery_status(self, po_name):
+		"""Update delivery status from Purchase Order for drop shipping"""
 		tot_qty, delivered_qty = 0.0, 0.0
 
 		for item in self.items:
 			if item.delivered_by_supplier:
-				delivered_qty = frappe.db.get_value("Purchase Order Item", {"parent": po_name, "item_code": item.item_code}, "qty")
-				frappe.db.set_value("Sales Order Item", item.name, "delivered_qty", delivered_qty)
+				delivered_qty = frappe.db.sql("""select qty
+					from `tabPurchase Order Item` poi, `tabPurchase Order` po
+					where poi.prevdoc_docname = %s
+						and poi.prevdoc_doctype = 'Sales Order'
+						and poi.item_code = %s
+						and poi.parent = po.name
+						and po.status = 'Delivered'""", (self.name, item.item_code))
+
+				delivered_qty = delivered_qty[0][0] if delivered_qty else 0
+				item.db_set("delivered_qty", delivered_qty)
 
 			delivered_qty += item.delivered_qty
 			tot_qty += item.qty
@@ -305,10 +309,10 @@ def stop_or_unstop_sales_orders(names, status):
 		if so.docstatus == 1:
 			if status in ("Stopped", "Closed"):
 				if so.status not in ("Stopped", "Cancelled", "Closed") and (so.per_delivered < 100 or so.per_billed < 100):
-					so.stop_sales_order(status)
+					so.update_status(status)
 			else:
 				if so.status in ("Stopped", "Closed"):
-					so.unstop_sales_order()
+					so.update_status('Draft')
 
 	frappe.local.message_log = []
 
@@ -545,11 +549,12 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 		"Sales Order": {
 			"doctype": "Purchase Order",
 			"field_map": {
+				"customer_address": "customer_address",
+				"contact_person": "customer_contact_person",
 				"address_display": "customer_address_display",
 				"contact_display": "customer_contact_display",
 				"contact_mobile": "customer_contact_mobile",
 				"contact_email": "customer_contact_email",
-				"contact_person": "customer_contact_person"
 			},
 			"field_no_map": [
 				"address_display",
@@ -614,4 +619,4 @@ def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def update_status(status, name):
 	so = frappe.get_doc("Sales Order", name)
-	so.stop_sales_order(status)
+	so.update_status(status)

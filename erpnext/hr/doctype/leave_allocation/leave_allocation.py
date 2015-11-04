@@ -23,11 +23,11 @@ class LeaveAllocation(Document):
 
 	def on_update(self):
 		self.get_total_allocated_leaves()
-	
+
 	def validate_period(self):
 		if date_diff(self.to_date, self.from_date) <= 0:
 			frappe.throw(_("Invalid period"))
-	
+
 	def validate_new_leaves_allocated_value(self):
 		"""validate that leave allocation is in multiples of 0.5"""
 		if flt(self.new_leaves_allocated) % 0.5:
@@ -35,14 +35,14 @@ class LeaveAllocation(Document):
 
 	def check_existing_leave_allocation(self):
 		"""check whether leave for same type is already allocated or not"""
-		leave_allocation = frappe.db.sql("""select name from `tabLeave Allocation` 
+		leave_allocation = frappe.db.sql("""select name from `tabLeave Allocation`
 			where employee='%s' and leave_type='%s' and to_date >= '%s' and from_date <= '%s' and docstatus=1
 		"""%(self.employee, self.leave_type, self.from_date, self.to_date))
 
 		if leave_allocation:
 			frappe.msgprint(_("Leaves for type {0} already allocated for Employee {1} for period {2} - {3}").format(self.leave_type,
 				self.employee, self.from_date, self.to_date))
-			frappe.throw('<a href="#Form/Leave Allocation/{0}">{0}</a>'.format(leave_allocation[0][0]))
+			frappe.throw(_('Reference') + ': <a href="#Form/Leave Allocation/{0}">{0}</a>'.format(leave_allocation[0][0]))
 
 	def get_leave_bal(self):
 		return self.get_leaves_allocated() - self.get_leaves_applied()
@@ -73,11 +73,11 @@ class LeaveAllocation(Document):
 	def get_carry_forwarded_leaves(self):
 		if self.carry_forward:
 			self.allow_carry_forward()
-			
+
 		prev_bal = 0
 		if cint(self.carry_forward) == 1:
 			prev_bal = self.get_leave_bal()
-		
+
 		ret = {
 			'carry_forwarded_leaves': prev_bal,
 			'total_leaves_allocated': flt(prev_bal) + flt(self.new_leaves_allocated)
@@ -93,4 +93,3 @@ class LeaveAllocation(Document):
 	def validate_total_leaves_allocated(self, leave_det):
 		if date_diff(self.to_date, self.from_date) <= leave_det['total_leaves_allocated']:
 			frappe.throw(_("Total allocated leaves are more than period"))
-		
