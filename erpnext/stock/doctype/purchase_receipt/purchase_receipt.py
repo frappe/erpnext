@@ -496,6 +496,6 @@ def make_purchase_return(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def update_purchase_order_status(docname, status):
+def update_purchase_receipt_status(docname, status):
 	pr = frappe.get_doc("Purchase Receipt", docname)
 	pr.update_status(status)
