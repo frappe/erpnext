@@ -297,7 +297,7 @@ class TestSalesOrder(unittest.TestCase):
 	def test_drop_shipping(self):
 		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_drop_shipment
 		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.buying.doctype.purchase_order.purchase_order import delivered_by_supplier
+		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
 		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "is_sales_item": 1,
 			"is_purchase_item": 1, "delivered_by_supplier": 1, 'default_supplier': '_Test Supplier',
@@ -370,7 +370,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEquals(len(po.items), 1)
 
 		#test per_delivered status
-		delivered_by_supplier(po.name)
+		update_status("Delivered", po.name)
 		self.assertEquals(flt(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 2), 75.00)
 
 		#test reserved qty after complete delivery
