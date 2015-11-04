@@ -62,7 +62,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		
 		
 		if(this.frm.doc.docstatus==1 && this.frm.doc.status === "Closed") {
-			cur_frm.add_custom_button(__('Re-open'), this.reopen_delivery_note)
+			cur_frm.add_custom_button(__('Re-open'), this.reopen_purchase_receipt)
 		}
 		
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
@@ -132,7 +132,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 		cur_frm.cscript.update_status("Closed");
 	},
 	
-	reopen_delivery_note: function() {
+	reopen_purchase_receipt: function() {
 		cur_frm.cscript.update_status("Submitted");
 	}
 
