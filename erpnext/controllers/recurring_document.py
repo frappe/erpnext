@@ -163,7 +163,7 @@ def validate_recurring_document(doc):
 			raise_exception=1)
 
 		elif not (doc.from_date and doc.to_date):
-			throw(_("Period From and Period To dates mandatory for recurring %s") % doc.doctype)
+			throw(_("Period From and Period To dates mandatory for recurring {0}").format(doc.doctype))
 
 #
 def convert_to_recurring(doc, posting_date):

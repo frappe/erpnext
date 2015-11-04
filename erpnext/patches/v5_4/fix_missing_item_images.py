@@ -40,7 +40,17 @@ def fix_files_for_item(files_path, unlinked_files):
 		file_data = frappe.get_doc("File", unlinked_files[file_url]["file"])
 		file_data.attached_to_doctype = "Item"
 		file_data.attached_to_name = item_code
-		file_data.save()
+		file_data.flags.ignore_folder_validate = True
+
+		try:
+			file_data.save()
+		except IOError:
+			print "File {0} does not exist".format(new_file_url)
+
+			# marking fix to prevent further errors
+			fixed_files.append(file_url)
+
+			continue
 
 		# set it as image in Item
 		if not frappe.db.get_value("Item", item_code, "image"):

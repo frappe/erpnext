@@ -28,14 +28,6 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 	refresh: function(doc) {
 		this._super();
 
-		// dashboard
-		cur_frm.dashboard.reset();
-		if(doc.docstatus===1) {
-			if(doc.status==="Stopped") {
-				cur_frm.dashboard.set_headline_alert(__("Stopped"), "alert-danger", "octicon octicon-circle-slash")
-			}
-		}
-
 		if(doc.docstatus==0) {
 			cur_frm.add_custom_button(__("Get Items from BOM"),
 				cur_frm.cscript.get_items_from_bom, "icon-sitemap", "btn-default");
@@ -84,7 +76,7 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		}
 
 		if(doc.docstatus == 1 && doc.status == 'Stopped')
-			cur_frm.add_custom_button(__('Unstop Material Request'),
+			cur_frm.add_custom_button(__('Re-open'),
 				cur_frm.cscript['Unstop Material Request'], "icon-check");
 
 	},
@@ -175,24 +167,16 @@ $.extend(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur
 
 cur_frm.cscript['Stop Material Request'] = function() {
 	var doc = cur_frm.doc;
-	var check = confirm(__("Do you really want to STOP this Material Request?"));
-
-	if (check) {
-		return $c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': doc}, function(r,rt) {
-			cur_frm.refresh();
-		});
-	}
+	$c('runserverobj', args={'method':'update_status', 'arg': 'Stopped', 'docs': doc}, function(r,rt) {
+		cur_frm.refresh();
+	});
 };
 
 cur_frm.cscript['Unstop Material Request'] = function(){
 	var doc = cur_frm.doc;
-	var check = confirm(__("Do you really want to UNSTOP this Material Request?"));
-
-	if (check) {
-		return $c('runserverobj', args={'method':'update_status', 'arg': 'Submitted','docs': doc}, function(r,rt) {
-			cur_frm.refresh();
-		});
-	}
+	$c('runserverobj', args={'method':'update_status', 'arg': 'Submitted','docs': doc}, function(r,rt) {
+		cur_frm.refresh();
+	});
 };
 
 

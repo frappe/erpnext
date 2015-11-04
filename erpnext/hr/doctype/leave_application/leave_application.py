@@ -100,7 +100,7 @@ class LeaveApplication(Document):
 
 			if not is_lwp(self.leave_type):
 				self.leave_balance = get_leave_balance(self.employee,
-					self.leave_type, self.fiscal_year)["leave_balance"]
+					self.leave_type, self.from_date, self.to_date)["leave_balance"]
 
 				if self.status != "Rejected" \
 						and self.leave_balance - self.total_leave_days < 0:
@@ -122,9 +122,8 @@ class LeaveApplication(Document):
 			employee = %(employee)s
 			and docstatus < 2
 			and status in ("Open", "Approved")
-			and (from_date between %(from_date)s and %(to_date)s
-				or to_date between %(from_date)s and %(to_date)s
-				or %(from_date)s between from_date and to_date)
+			and to_date >= %(from_date)s 
+			and from_date <= %(to_date)s
 			and name != %(name)s""", {
 				"employee": self.employee,
 				"from_date": self.from_date,
@@ -251,18 +250,18 @@ def get_total_leave_days(leave_app):
 	return ret
 
 @frappe.whitelist()
-def get_leave_balance(employee, leave_type, fiscal_year):
+def get_leave_balance(employee, leave_type, from_date, to_date):
 	leave_all = frappe.db.sql("""select total_leaves_allocated
 		from `tabLeave Allocation` where employee = %s and leave_type = %s
-		and fiscal_year = %s and docstatus = 1""", (employee,
-			leave_type, fiscal_year))
+		and from_date<=%s and to_date>=%s and docstatus = 1""", (employee,
+			leave_type, from_date, to_date))
 
 	leave_all = leave_all and flt(leave_all[0][0]) or 0
 
 	leave_app = frappe.db.sql("""select SUM(total_leave_days)
 		from `tabLeave Application`
-		where employee = %s and leave_type = %s and fiscal_year = %s
-		and status="Approved" and docstatus = 1""", (employee, leave_type, fiscal_year))
+		where employee = %s and leave_type = %s and to_date>=%s and from_date<=%s
+		and status="Approved" and docstatus = 1""", (employee, leave_type, from_date, to_date))
 	leave_app = leave_app and flt(leave_app[0][0]) or 0
 
 	ret = {'leave_balance': leave_all - leave_app}

@@ -48,7 +48,7 @@ class PurchaseInvoice(BuyingController):
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
-		self.check_for_stopped_status()
+		self.check_for_stopped_or_closed_status()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
 		self.set_against_expense_account()
@@ -103,14 +103,14 @@ class PurchaseInvoice(BuyingController):
 
 		self.party_account_currency = account.account_currency
 
-	def check_for_stopped_status(self):
+	def check_for_stopped_or_closed_status(self):
 		check_list = []
+		pc_obj = frappe.get_doc('Purchase Common')
+		
 		for d in self.get('items'):
 			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
 				check_list.append(d.purchase_order)
-				stopped = frappe.db.sql("select name from `tabPurchase Order` where status = 'Stopped' and name = %s", d.purchase_order)
-				if stopped:
-					throw(_("Purchase Order {0} is 'Stopped'").format(d.purchase_order))
+				pc_obj.check_for_stopped_or_closed_status('Purchase Order', d.purchase_order)
 
 	def validate_with_previous_doc(self):
 		super(PurchaseInvoice, self).validate_with_previous_doc({
@@ -394,6 +394,8 @@ class PurchaseInvoice(BuyingController):
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2))
 
 	def on_cancel(self):
+		self.check_for_stopped_or_closed_status()
+		
 		if not self.is_return:
 			from erpnext.accounts.utils import remove_against_link_from_jv
 			remove_against_link_from_jv(self.doctype, self.name)

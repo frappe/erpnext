@@ -37,6 +37,7 @@ status_map = {
 		["Completed", "eval:self.order_type == 'Maintenance' and self.per_billed == 100 and self.docstatus == 1"],
 		["Stopped", "eval:self.status=='Stopped'"],
 		["Cancelled", "eval:self.docstatus==2"],
+		["Closed", "eval:self.status=='Closed'"],
 	],
 	"Purchase Order": [
 		["Draft", None],
@@ -44,18 +45,22 @@ status_map = {
 		["To Bill", "eval:self.per_received == 100 and self.per_billed < 100 and self.docstatus == 1"],
 		["To Receive", "eval:self.per_received < 100 and self.per_billed == 100 and self.docstatus == 1"],
 		["Completed", "eval:self.per_received == 100 and self.per_billed == 100 and self.docstatus == 1"],
+		["Delivered", "eval:self.status=='Delivered'"],
 		["Stopped", "eval:self.status=='Stopped'"],
 		["Cancelled", "eval:self.docstatus==2"],
+		["Closed", "eval:self.status=='Closed'"],
 	],
 	"Delivery Note": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
+		["Closed", "eval:self.status=='Closed'"],
 	],
 	"Purchase Receipt": [
 		["Draft", None],
 		["Submitted", "eval:self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
+		["Closed", "eval:self.status=='Closed'"],
 	]
 }
 
@@ -71,12 +76,16 @@ class StatusUpdater(Document):
 		self.update_qty()
 		self.validate_qty()
 
-	def set_status(self, update=False):
+	def set_status(self, update=False, status=None):
 		if self.is_new():
 			return
 
 		if self.doctype in status_map:
 			_status = self.status
+
+			if status and update:
+				self.db_set("status", status)
+
 			sl = status_map[self.doctype][:]
 			sl.reverse()
 			for s in sl:
@@ -168,7 +177,6 @@ class StatusUpdater(Document):
 			else:
 				args['cond'] = ' and parent!="%s"' % self.name.replace('"', '\"')
 
-			args['set_modified'] = ''
 			if change_modified:
 				args['set_modified'] = ', modified = now(), modified_by = "{0}"'\
 					.format(frappe.db.escape(frappe.session.user))
@@ -252,9 +260,9 @@ class StatusUpdater(Document):
 					zero_amount_refdoc.append(item.get(ref_fieldname))
 
 		if zero_amount_refdoc:
-			self.update_biling_status(zero_amount_refdoc, ref_dt, ref_fieldname)
+			self.update_billing_status(zero_amount_refdoc, ref_dt, ref_fieldname)
 
-	def update_biling_status(self, zero_amount_refdoc, ref_dt, ref_fieldname):
+	def update_billing_status(self, zero_amount_refdoc, ref_dt, ref_fieldname):
 		for ref_dn in zero_amount_refdoc:
 			ref_doc_qty = flt(frappe.db.sql("""select sum(ifnull(qty, 0)) from `tab%s Item`
 				where parent=%s""" % (ref_dt, '%s'), (ref_dn))[0][0])

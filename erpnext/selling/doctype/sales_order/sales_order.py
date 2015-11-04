@@ -31,6 +31,7 @@ class SalesOrder(SellingController):
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_for_items()
 		self.validate_warehouse()
+		self.validate_drop_ship()
 
 		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 		make_packing_list(self)
@@ -67,7 +68,7 @@ class SalesOrder(SellingController):
 
 			if (frappe.db.get_value("Item", d.item_code, "is_stock_item")==1 or
 				(self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
-				and not d.warehouse:
+				and not d.warehouse and not cint(d.delivered_by_supplier):
 				frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code),
 					WarehouseRequired)
 
@@ -147,6 +148,11 @@ class SalesOrder(SellingController):
 				doc.set_status(update=True)
 				doc.update_opportunity()
 
+	def validate_drop_ship(self):
+		for d in self.get('items'):
+			if d.delivered_by_supplier and not d.supplier:
+				frappe.throw(_("Row #{0}: Set Supplier for item {1}").format(d.idx, d.item_code))
+
 	def on_submit(self):
 		super(SalesOrder, self).on_submit()
 
@@ -214,18 +220,11 @@ class SalesOrder(SellingController):
 		if date_diff and date_diff[0][0]:
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name))
 
-	def stop_sales_order(self):
+	def update_status(self, status):
 		self.check_modified_date()
-		self.db_set('status', 'Stopped')
+		self.set_status(update=True, status=status)
 		self.update_reserved_qty()
 		self.notify_update()
-		clear_doctype_notifications(self)
-
-	def unstop_sales_order(self):
-		self.check_modified_date()
-		self.db_set('status', 'Draft')
-		self.set_status(update=True)
-		self.update_reserved_qty()
 		clear_doctype_notifications(self)
 
 	def update_reserved_qty(self, so_item_rows=None):
@@ -253,6 +252,46 @@ class SalesOrder(SellingController):
 	def on_update(self):
 		pass
 
+	def before_update_after_submit(self):
+		self.validate_drop_ship()
+		self.validate_supplier_after_submit()
+
+	def validate_supplier_after_submit(self):
+		"""Check that supplier is the same after submit if PO is already made"""
+		exc_list = []
+
+		for item in self.items:
+			if item.supplier:
+				supplier = frappe.db.get_value("Sales Order Item", {"parent": self.name, "item_code": item.item_code},
+					"supplier")
+				if item.ordered_qty > 0.0 and item.supplier != supplier:
+					exc_list.append(_("Row #{0}: Not allowed to change Supplier as Purchase Order already exists").format(item.idx))
+
+		if exc_list:
+			frappe.throw('\n'.join(exc_list))
+
+	def update_delivery_status(self, po_name):
+		"""Update delivery status from Purchase Order for drop shipping"""
+		tot_qty, delivered_qty = 0.0, 0.0
+
+		for item in self.items:
+			if item.delivered_by_supplier:
+				item_delivered_qty  = frappe.db.sql("""select qty
+					from `tabPurchase Order Item` poi, `tabPurchase Order` po
+					where poi.prevdoc_docname = %s
+						and poi.prevdoc_doctype = 'Sales Order'
+						and poi.item_code = %s
+						and poi.parent = po.name
+						and po.status = 'Delivered'""", (self.name, item.item_code))
+
+				item_delivered_qty = item_delivered_qty[0][0] if item_delivered_qty else 0
+				item.db_set("delivered_qty", item_delivered_qty)
+
+			delivered_qty += item.delivered_qty
+			tot_qty += item.qty
+
+		frappe.db.set_value("Sales Order", self.name, "per_delivered", flt(delivered_qty/tot_qty) * 100)
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
@@ -268,12 +307,12 @@ def stop_or_unstop_sales_orders(names, status):
 	for name in names:
 		so = frappe.get_doc("Sales Order", name)
 		if so.docstatus == 1:
-			if status=="Stop":
-				if so.status not in ("Stopped", "Cancelled") and (so.per_delivered < 100 or so.per_billed < 100):
-					so.stop_sales_order()
+			if status in ("Stopped", "Closed"):
+				if so.status not in ("Stopped", "Cancelled", "Closed") and (so.per_delivered < 100 or so.per_billed < 100):
+					so.update_status(status)
 			else:
-				if so.status == "Stopped":
-					so.unstop_sales_order()
+				if so.status in ("Stopped", "Closed"):
+					so.update_status('Draft')
 
 	frappe.local.message_log = []
 
@@ -350,7 +389,7 @@ def make_delivery_note(source_name, target_doc=None):
 				"parent": "against_sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.delivered_qty < doc.qty
+			"condition": lambda doc: doc.delivered_qty < doc.qty and doc.delivered_by_supplier!=1
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
@@ -488,3 +527,96 @@ def get_events(start, end, filters=None):
 			"end": end
 		}, as_dict=True, update={"allDay": 0})
 	return data
+
+@frappe.whitelist()
+def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=None):
+	def set_missing_values(source, target):
+		target.supplier = for_supplier
+
+		default_price_list = frappe.get_value("Supplier", for_supplier, "default_price_list")
+		if default_price_list:
+			target.buying_price_list = default_price_list
+
+		target.delivered_by_supplier = 1
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	def update_item(source, target, source_parent):
+		target.schedule_date = source_parent.delivery_date
+		target.qty = flt(source.qty) - flt(source.ordered_qty)
+
+	doclist = get_mapped_doc("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Purchase Order",
+			"field_map": {
+				"customer_address": "customer_address",
+				"contact_person": "customer_contact_person",
+				"address_display": "customer_address_display",
+				"contact_display": "customer_contact_display",
+				"contact_mobile": "customer_contact_mobile",
+				"contact_email": "customer_contact_email",
+			},
+			"field_no_map": [
+				"address_display",
+				"contact_display",
+				"contact_mobile",
+				"contact_email",
+				"contact_person"
+			],
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Sales Order Item": {
+			"doctype": "Purchase Order Item",
+			"field_map":  [
+				["name", "prevdoc_detail_docname"],
+				["parent", "prevdoc_docname"],
+				["parenttype", "prevdoc_doctype"],
+				["uom", "stock_uom"],
+				["delivery_date", "schedule_date"]
+			],
+			"field_no_map": [
+				"rate",
+				"price_list_rate"
+			],
+			"postprocess": update_item,
+			"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == for_supplier
+		}
+	}, target_doc, set_missing_values)
+
+	return doclist
+
+@frappe.whitelist()
+def get_supplier(doctype, txt, searchfield, start, page_len, filters):
+	supp_master_name = frappe.defaults.get_user_default("supp_master_name")
+	if supp_master_name == "Supplier Name":
+		fields = ["name", "supplier_type"]
+	else:
+		fields = ["name", "supplier_name", "supplier_type"]
+	fields = ", ".join(fields)
+
+	return frappe.db.sql("""select {field} from `tabSupplier`
+		where docstatus < 2
+			and ({key} like %(txt)s
+				or supplier_name like %(txt)s)
+			and name in (select supplier from `tabSales Order Item` where parent = %(parent)s)
+		order by
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			if(locate(%(_txt)s, supplier_name), locate(%(_txt)s, supplier_name), 99999),
+			name, supplier_name
+		limit %(start)s, %(page_len)s """.format(**{
+			'field': fields,
+			'key': searchfield
+		}), {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len,
+			'parent': filters.get('parent')
+		})
+
+@frappe.whitelist()
+def update_status(status, name):
+	so = frappe.get_doc("Sales Order", name)
+	so.update_status(status)

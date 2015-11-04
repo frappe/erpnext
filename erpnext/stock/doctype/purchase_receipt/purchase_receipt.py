@@ -11,6 +11,7 @@ import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
+from frappe.desk.notifications import clear_doctype_notifications
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -67,7 +68,7 @@ class PurchaseReceipt(BuyingController):
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		pc_obj.validate_for_items(self)
-		self.check_for_stopped_status(pc_obj)
+		self.check_for_stopped_or_closed_status(pc_obj)
 
 		# sub-contracting
 		self.validate_for_subcontracting()
@@ -219,12 +220,12 @@ class PurchaseReceipt(BuyingController):
 					raise frappe.ValidationError
 
 	# Check for Stopped status
-	def check_for_stopped_status(self, pc_obj):
+	def check_for_stopped_or_closed_status(self, pc_obj):
 		check_list =[]
 		for d in self.get('items'):
 			if d.meta.get_field('prevdoc_docname') and d.prevdoc_docname and d.prevdoc_docname not in check_list:
 				check_list.append(d.prevdoc_docname)
-				pc_obj.check_for_stopped_status(d.prevdoc_doctype, d.prevdoc_docname)
+				pc_obj.check_for_stopped_or_closed_status(d.prevdoc_doctype, d.prevdoc_docname)
 
 	# on submit
 	def on_submit(self):
@@ -260,7 +261,7 @@ class PurchaseReceipt(BuyingController):
 	def on_cancel(self):
 		pc_obj = frappe.get_doc('Purchase Common')
 
-		self.check_for_stopped_status(pc_obj)
+		self.check_for_stopped_or_closed_status(pc_obj)
 		# Check if Purchase Invoice has been submitted against current Purchase Order
 		submitted = frappe.db.sql("""select t1.name
 			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
@@ -427,6 +428,10 @@ class PurchaseReceipt(BuyingController):
 
 		return process_gl_map(gl_entries)
 
+	def update_status(self, status):
+		self.set_status(update=True, status = status)
+		self.notify_update()
+		clear_doctype_notifications(self)
 
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
@@ -487,3 +492,9 @@ def get_invoiced_qty_map(purchase_receipt):
 def make_purchase_return(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Purchase Receipt", source_name, target_doc)
+
+
+@frappe.whitelist()
+def update_purchase_receipt_status(docname, status):
+	pr = frappe.get_doc("Purchase Receipt", docname)
+	pr.update_status(status)

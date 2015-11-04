@@ -30,7 +30,7 @@ def get_item_details(args):
 			"is_subcontracted": "Yes" / "No",
 			"transaction_type": "selling",
 			"ignore_pricing_rule": 0/1
-			"project_name": "",
+			"project_name": ""
 		}
 	"""
 	args = process_args(args)
@@ -69,7 +69,7 @@ def get_item_details(args):
 
 	if args.get("is_subcontracted") == "Yes":
 		out.bom = get_default_bom(args.item_code)
-
+		
 	return out
 
 def process_args(args):
@@ -172,7 +172,9 @@ def get_basic_details(args, item):
 		"base_amount": 0.0,
 		"net_rate": 0.0,
 		"net_amount": 0.0,
-		"discount_percentage": 0.0
+		"discount_percentage": 0.0,
+		"supplier": item.default_supplier,
+		"delivered_by_supplier": item.delivered_by_supplier,
 	})
 
 	# if default specified in item is for another company, fetch from company

@@ -111,7 +111,8 @@ class EmailDigest(Document):
 		"""Set standard digest style"""
 		context.text_muted = '#8D99A6'
 		context.text_color = '#36414C'
-		context.h1 = 'margin-bottom: 30px; margin-bottom: 0; margin-top: 40px; font-weight: 400;'
+		context.h1 = 'margin-bottom: 30px; margin-top: 40px; font-weight: 400; font-size: 30px;'
+		context.h2 = 'margin-bottom: 30px; margin-top: -20px; font-weight: 400; font-size: 20px;'
 		context.label_css = '''display: inline-block; color: {text_muted};
 			padding: 3px 7px; margin-right: 7px;'''.format(text_muted = context.text_muted)
 		context.section_head = 'margin-top: 60px; font-size: 16px;'
@@ -152,7 +153,7 @@ class EmailDigest(Document):
 
 		todo_list = frappe.db.sql("""select *
 			from `tabToDo` where (owner=%s or assigned_by=%s) and status="Open"
-			order by field(priority, 'High', 'Medium', 'Low') asc, date asc""",
+			order by field(priority, 'High', 'Medium', 'Low') asc, date asc limit 20""",
 			(user_id, user_id), as_dict=True)
 
 		for t in todo_list:
@@ -289,6 +290,7 @@ class EmailDigest(Document):
 		elif self.frequency == "Weekly":
 			# from date is the previous week's monday
 			from_date = today - timedelta(days=today.weekday(), weeks=1)
+
 			# to date is sunday i.e. the previous day
 			to_date = from_date + timedelta(days=6)
 		else:
@@ -300,32 +302,18 @@ class EmailDigest(Document):
 		return from_date, to_date
 
 	def set_dates(self):
-		today = now_datetime().date()
+		self.future_from_date, self.future_to_date = self.from_date, self.to_date
 
 		# decide from date based on email digest frequency
 		if self.frequency == "Daily":
-			# from date, to_date is today
-			self.future_from_date = self.future_to_date = today
-			self.past_from_date = self.past_to_date = today - relativedelta(days = 1)
+			self.past_from_date = self.past_to_date = self.future_from_date - relativedelta(days = 1)
 
 		elif self.frequency == "Weekly":
-			# from date is the current week's monday
-			self.future_from_date = today - relativedelta(days=today.weekday())
-
-			# to date is the current week's sunday
-			self.future_to_date = self.future_from_date + relativedelta(days=6)
-
-			self.past_from_date = self.future_from_date - relativedelta(days=7)
-			self.past_to_date = self.future_to_date - relativedelta(days=7)
+			self.past_from_date = self.future_from_date - relativedelta(weeks=1)
+			self.past_to_date = self.future_from_date - relativedelta(days=1)
 		else:
-			# from date is the 1st day of the current month
-			self.future_from_date = today - relativedelta(days=today.day-1)
-
-			# to date is the last day of the current month
-			self.future_to_date = self.future_from_date + relativedelta(days=-1, months=1)
-
-			self.past_from_date = self.future_from_date - relativedelta(month=1)
-			self.past_to_date = self.future_to_date - relativedelta(month=1)
+			self.past_from_date = self.future_from_date - relativedelta(months=1)
+			self.past_to_date = self.future_from_date - relativedelta(days=1)
 
 	def get_next_sending(self):
 		from_date, to_date = self.get_from_to_date()

@@ -28,21 +28,6 @@ frappe.ui.form.on("Leave Application", {
 			frm.set_value("status", "Open");
 			frm.trigger("calculate_total_days");
 		}
-
-		frm.set_intro("");
-		if (frm.is_new() && !in_list(user_roles, "HR User")) {
-			frm.set_intro(__("Fill the form and save it"));
-		} else {
-			if(frm.doc.docstatus==0 && frm.doc.status=="Open") {
-				if(user==frm.doc.leave_approver) {
-					frm.set_intro(__("You are the Leave Approver for this record. Please Update the 'Status' and Save"));
-					frm.toggle_enable("status", true);
-				} else {
-					frm.set_intro(__("This Leave Application is pending approval. Only the Leave Approver can update status."))
-					frm.toggle_enable("status", false);
-				}
-			}
-		}
 	},
 
 	leave_approver: function(frm) {
@@ -50,10 +35,6 @@ frappe.ui.form.on("Leave Application", {
 	},
 
 	employee: function(frm) {
-		frm.trigger("get_leave_balance");
-	},
-
-	fiscal_year: function(frm) {
 		frm.trigger("get_leave_balance");
 	},
 
@@ -85,12 +66,13 @@ frappe.ui.form.on("Leave Application", {
 	},
 
 	get_leave_balance: function(frm) {
-		if(frm.doc.docstatus==0 && frm.doc.employee && frm.doc.leave_type && frm.doc.fiscal_year) {
+		if(frm.doc.docstatus==0 && frm.doc.employee && frm.doc.leave_type && frm.doc.from_date && frm.doc.to_date) {
 			return frm.call({
 				method: "get_leave_balance",
 				args: {
 					employee: frm.doc.employee,
-					fiscal_year: frm.doc.fiscal_year,
+					from_date: frm.doc.from_date,
+					to_date: frm.doc.to_date,
 					leave_type: frm.doc.leave_type
 				}
 			});
@@ -109,6 +91,7 @@ frappe.ui.form.on("Leave Application", {
 					callback: function(response) {
 						if (response && response.message) {
 							frm.set_value('total_leave_days', response.message.total_leave_days);
+							frm.trigger("get_leave_balance");
 						}
 					}
 				});

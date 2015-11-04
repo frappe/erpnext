@@ -28,7 +28,8 @@ class TimeLogBatch(Document):
 		d.update({
 			"hours": tl.hours,
 			"activity_type": tl.activity_type,
-			"billing_amount": tl.billing_amount
+			"billing_amount": tl.billing_amount,
+			"note": tl.note
 		})
 
 	def validate_time_log_is_submitted(self, tl):

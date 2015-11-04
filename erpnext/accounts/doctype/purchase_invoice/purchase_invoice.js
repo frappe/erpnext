@@ -38,7 +38,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 						get_query_filters: {
 							supplier: cur_frm.doc.supplier || undefined,
 							docstatus: 1,
-							status: ["!=", "Stopped"],
+							status: ["not in", ["Stopped", "Closed"]],
 							per_billed: ["<", 99.99],
 							company: cur_frm.doc.company
 						}
@@ -52,6 +52,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 						get_query_filters: {
 							supplier: cur_frm.doc.supplier || undefined,
 							docstatus: 1,
+							status: ["!=", "Closed"],
 							company: cur_frm.doc.company
 						}
 					})
@@ -135,9 +136,10 @@ cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
 
 cur_frm.cscript.make_bank_entry = function() {
 	return frappe.call({
-		method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_from_purchase_invoice",
+		method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_invoice",
 		args: {
-			"purchase_invoice": cur_frm.doc.name,
+			"dt": "Purchase Invoice",
+			"dn": cur_frm.doc.name
 		},
 		callback: function(r) {
 			var doclist = frappe.model.sync(r.message);

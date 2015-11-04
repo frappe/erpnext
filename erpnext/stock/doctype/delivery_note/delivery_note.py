@@ -10,6 +10,8 @@ from frappe import msgprint, _
 import frappe.defaults
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
+from frappe.desk.notifications import clear_doctype_notifications
+
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -106,7 +108,7 @@ class DeliveryNote(SellingController):
 		self.set_status()
 		self.so_required()
 		self.validate_proj_cust()
-		self.check_stop_sales_order("against_sales_order")
+		self.check_stop_or_close_sales_order("against_sales_order")
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "qty")
@@ -203,7 +205,7 @@ class DeliveryNote(SellingController):
 
 
 	def on_cancel(self):
-		self.check_stop_sales_order("against_sales_order")
+		self.check_stop_or_close_sales_order("against_sales_order")
 		self.check_next_docstatus()
 
 		self.update_prevdoc_status()
@@ -214,10 +216,10 @@ class DeliveryNote(SellingController):
 		self.cancel_packing_slips()
 
 		self.make_gl_entries_on_cancel()
-		
+
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
-		
+
 		validate_against_credit_limit = False
 		for d in self.get("items"):
 			if not (d.against_sales_order or d.against_sales_invoice):
@@ -267,6 +269,11 @@ class DeliveryNote(SellingController):
 				ps = frappe.get_doc('Packing Slip', r[0])
 				ps.cancel()
 			frappe.msgprint(_("Packing Slip(s) cancelled"))
+
+	def update_status(self, status):
+		self.set_status(update=True, status=status)
+		self.notify_update()
+		clear_doctype_notifications(self)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -386,3 +393,9 @@ def make_packing_slip(source_name, target_doc=None):
 def make_sales_return(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Delivery Note", source_name, target_doc)
+
+
+@frappe.whitelist()
+def update_delivery_note_status(docname, status):
+	dn = frappe.get_doc("Delivery Note", docname)
+	dn.update_status(status)
