@@ -398,12 +398,12 @@ class TestDeliveryNote(unittest.TestCase):
 		set_perpetual_inventory(0)
 		
 	def test_closed_delivery_note(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import close_delivery_note
+		from erpnext.stock.doctype.delivery_note.delivery_note import update_delivery_note_status
 		
 		dn = create_delivery_note(do_not_submit=True)
 		dn.submit()
 		
-		close_delivery_note(dn.name, "Closed")
+		update_delivery_note_status(dn.name, "Closed")
 		self.assertEquals(frappe.db.get_value("Delivery Note", dn.name, "Status"), "Closed")
 
 def create_delivery_note(**args):

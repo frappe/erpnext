@@ -314,7 +314,7 @@ class TestSalesOrder(unittest.TestCase):
 		so_items = [
 			{
 				"item_code": po_item.item_code,
-				"warehouse": "_Test Warehouse - _TC",
+				"warehouse": "",
 				"qty": 2,
 				"rate": 400,
 				"delivered_by_supplier": 1,
@@ -360,13 +360,13 @@ class TestSalesOrder(unittest.TestCase):
 		ordered_qty, reserved_qty = frappe.db.get_value("Bin", 
 			{"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
 		
-		self.assertEquals(abs(ordered_qty), existing_ordered_qty + so_items[0]['qty'])			
-		self.assertEquals(abs(reserved_qty), existing_reserved_qty + so_items[0]['qty'])
+		self.assertEquals(abs(flt(ordered_qty)), existing_ordered_qty + so_items[0]['qty'])			
+		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty)
 		
 		reserved_qty = frappe.db.get_value("Bin", 
 					{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
 		
-		self.assertEquals(abs(reserved_qty), existing_reserved_qty_for_dn_item + 1)
+		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item + 1)
 		
 		#test po_item length
 		self.assertEquals(len(po.items), 1)
@@ -380,7 +380,7 @@ class TestSalesOrder(unittest.TestCase):
 		reserved_qty = frappe.db.get_value("Bin", 
 			{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
 		
-		self.assertEquals(abs(reserved_qty), existing_reserved_qty_for_dn_item)
+		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item)
 		
 		#test after closing so
 		so.db_set('status', "Closed")
@@ -389,13 +389,13 @@ class TestSalesOrder(unittest.TestCase):
 		ordered_qty, reserved_qty = frappe.db.get_value("Bin", 
 			{"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
 		
-		self.assertEquals(abs(ordered_qty), existing_ordered_qty)			
-		self.assertEquals(abs(reserved_qty), existing_reserved_qty)
+		self.assertEquals(abs(flt(ordered_qty)), existing_ordered_qty)			
+		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty)
 		
 		reserved_qty = frappe.db.get_value("Bin", 
 			{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
 		
-		self.assertEquals(abs(reserved_qty), existing_reserved_qty)
+		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty)
 		
 	def test_reserved_qty_for_closing_so(self):
 		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}, 

@@ -177,12 +177,12 @@ class TestPurchaseReceipt(unittest.TestCase):
 		})
 	
 	def test_closed_purchase_receipt(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import close_purchase_receipt
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_purchase_receipt_status
 		
 		pr = make_purchase_receipt(do_not_submit=True)
 		pr.submit()
 		
-		close_purchase_receipt(pr.name, "Closed")
+		update_purchase_receipt_status(pr.name, "Closed")
 		self.assertEquals(frappe.db.get_value("Purchase Receipt", pr.name, "status"), "Closed")
 		
 def get_gl_entries(voucher_type, voucher_no):

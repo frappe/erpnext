@@ -68,7 +68,7 @@ class SalesOrder(SellingController):
 
 			if (frappe.db.get_value("Item", d.item_code, "is_stock_item")==1 or
 				(self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
-				and not d.warehouse:
+				and not d.warehouse and not cint(d.delivered_by_supplier):
 				frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code),
 					WarehouseRequired)
 
