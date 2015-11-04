@@ -397,6 +397,6 @@ def make_sales_return(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def close_delivery_note(docname, status):
+def update_delivery_note_status(docname, status):
 	dn = frappe.get_doc("Delivery Note", docname)
 	dn.update_status(status)

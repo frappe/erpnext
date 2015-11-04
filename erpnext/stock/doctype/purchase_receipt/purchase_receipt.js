@@ -59,7 +59,12 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 				cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt)
 			}
 		}
-
+		
+		
+		if(this.frm.doc.docstatus==1 && this.frm.doc.status === "Closed") {
+			cur_frm.add_custom_button(__('Re-open'), this.reopen_delivery_note)
+		}
+		
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
 	},
 
@@ -124,21 +129,32 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	},
 	
 	close_purchase_receipt: function() {
-		frappe.call({
-			method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.close_purchase_receipt",
-			args: {"docname": cur_frm.doc.name, "status":"Closed"},
-			callback: function(r){
-				if(!r.exc)
-					cur_frm.reload_doc();
-			}
-		})
+		cur_frm.cscript.update_status("Closed");
+	},
+	
+	reopen_delivery_note: function() {
+		cur_frm.cscript.update_status("Submitted");
 	}
 
 });
 
-
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.stock.PurchaseReceiptController({frm: cur_frm}));
+
+cur_frm.cscript.update_status = function(status) {
+	frappe.ui.form.is_saving = true;
+	frappe.call({
+		method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.update_purchase_order_status",
+		args: {docname: cur_frm.doc.name, status: status},
+		callback: function(r){
+			if(!r.exc)
+				cur_frm.reload_doc();
+		},
+		always: function(){
+			frappe.ui.form.is_saving = false;
+		}
+	})
+}
 
 cur_frm.fields_dict['supplier_address'].get_query = function(doc, cdt, cdn) {
 	return {

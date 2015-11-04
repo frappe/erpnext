@@ -60,6 +60,9 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				cur_frm.add_custom_button(__('Invoice'), this.make_sales_invoice).addClass("btn-primary");
 		}
 
+		if(doc.docstatus==1 && doc.status === "Closed") {
+			cur_frm.add_custom_button(__('Re-open'), this.reopen_delivery_note)
+		}
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
 
 		// unhide expense_account and cost_center is auto_accounting_for_stock enabled
@@ -97,14 +100,11 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 	},
 	
 	close_delivery_note: function(doc){
-		frappe.call({
-			method:"erpnext.stock.doctype.delivery_note.delivery_note.close_delivery_note",
-			args: {docname: cur_frm.doc.name, status:"Closed"},
-			callback: function(r){
-				if(!r.exc)
-					cur_frm.reload_doc();
-			}
-		})
+		cur_frm.cscript.update_status("Closed")
+	},
+	
+	reopen_delivery_note : function() {
+		cur_frm.cscript.update_status("Submitted")
 	}
 
 });
@@ -119,6 +119,21 @@ cur_frm.cscript.new_contact = function(){
 	loaddoc('Contact', tn);
 }
 
+
+cur_frm.cscript.update_status = function(status) {
+	frappe.ui.form.is_saving = true;
+	frappe.call({
+		method:"erpnext.stock.doctype.delivery_note.delivery_note.update_delivery_note_status",
+		args: {docname: cur_frm.doc.name, status: status},
+		callback: function(r){
+			if(!r.exc)
+				cur_frm.reload_doc();
+		},
+		always: function(){
+			frappe.ui.form.is_saving = false;
+		}
+	})
+}
 
 // ***************** Get project name *****************
 cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
