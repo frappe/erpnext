@@ -143,22 +143,23 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 	make_purchase_order: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
-			frm: cur_frm
-		})
+			frm: cur_frm,
+			run_link_triggers: true
+		});
 	},
 
 	make_supplier_quotation: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation",
 			frm: cur_frm
-		})
+		});
 	},
 
 	make_stock_entry: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
 			frm: cur_frm
-		})
+		});
 	}
 });
 
