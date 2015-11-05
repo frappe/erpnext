@@ -398,9 +398,6 @@ class Item(WebsiteGenerator):
 			item_description=%s, modified=NOW() where item_code=%s""",
 			(self.item_name, self.description, self.name))
 
-	def get_tax_rate(self, tax_type):
-		return { "tax_rate": frappe.db.get_value("Account", tax_type, "tax_rate") }
-
 	def on_trash(self):
 		super(Item, self).on_trash()
 		frappe.db.sql("""delete from tabBin where item_code=%s""", self.item_code)

@@ -78,11 +78,6 @@ frappe.ui.form.on("Item", {
 			frm.set_value("description", frm.doc.item_code);
 	},
 
-	tax_type: function(frm, cdt, cdn){
-		var d = locals[cdt][cdn];
-		return get_server_fields('get_tax_rate', d.tax_type, 'taxes', doc, cdt, cdn, 1);
-	},
-
 	copy_from_item_group: function(frm) {
 		return frm.call({
 			doc: frm.doc,
@@ -315,3 +310,4 @@ cur_frm.add_fetch('attribute', 'numeric_values', 'numeric_values');
 cur_frm.add_fetch('attribute', 'from_range', 'from_range');
 cur_frm.add_fetch('attribute', 'to_range', 'to_range');
 cur_frm.add_fetch('attribute', 'increment', 'increment');
+cur_frm.add_fetch('tax_type', 'tax_rate', 'tax_rate');
