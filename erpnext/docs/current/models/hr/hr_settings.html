@@ -1,0 +1,153 @@
+<!-- title: HR Settings -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.7.1</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/hr/doctype/hr_settings"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+<span class="label label-info">Single</span>
+
+
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered" style="table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr class="info">
+            <td>1</td>
+            <td ><code>employee_settings</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Employee Settings
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>emp_created_by</code></td>
+            <td >
+                Select</td>
+            <td >
+                Employee Records to be created by
+                <p class="text-muted small">
+                    Employee record is created using selected field. </p>
+            </td>
+            <td>
+                <pre>Naming Series
+Employee Number</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>stop_birthday_reminders</code></td>
+            <td >
+                Check</td>
+            <td >
+                Stop Birthday Reminders
+                <p class="text-muted small">
+                    Don't send Employee Birthday Reminders</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>4</td>
+            <td ><code>payroll_settings</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Payroll Settings
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>include_holidays_in_total_working_days</code></td>
+            <td >
+                Check</td>
+            <td >
+                Include holidays in Total no. of Working Days
+                <p class="text-muted small">
+                    If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day</p>
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.hr.doctype.hr_settings.hr_settings</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>HRSettings</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate" href="#validate" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+
+    
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

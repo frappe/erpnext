@@ -1,0 +1,6 @@
+lead
+customer
+opportunity
+contact
+newsletter
+setup
