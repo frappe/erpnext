@@ -1,0 +1,634 @@
+<!-- title: Warehouse -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.7.1</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/stock/doctype/warehouse"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+
+
+
+    <p><b>Table Name:</b> <code>tabWarehouse</code></p>
+
+
+A logical Warehouse against which stock entries are made.
+
+<h3>Fields</h3>
+
+<table class="table table-bordered" style="table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr class="info">
+            <td>1</td>
+            <td ><code>warehouse_detail</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Warehouse Detail
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td class="danger" title="Mandatory"><code>warehouse_name</code></td>
+            <td >
+                Data</td>
+            <td >
+                Warehouse Name
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td class="danger" title="Mandatory"><code>company</code></td>
+            <td >
+                Link</td>
+            <td >
+                Company
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/company">Company</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>create_account_under</code></td>
+            <td >
+                Link</td>
+            <td >
+                Parent Account
+                <p class="text-muted small">
+                    Account for the warehouse (Perpetual Inventory) will be created under this Account.</p>
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/account">Account</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>disabled</code></td>
+            <td >
+                Check</td>
+            <td >
+                Disabled
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>6</td>
+            <td ><code>warehouse_contact_info</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Warehouse Contact Info
+                <p class="text-muted small">
+                    For Reference Only.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>7</td>
+            <td ><code>email_id</code></td>
+            <td >
+                Data</td>
+            <td class="text-muted" title="Hidden">
+                Email Id
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>phone_no</code></td>
+            <td >
+                Data</td>
+            <td >
+                Phone No
+                
+            </td>
+            <td>
+                <pre>Phone</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>mobile_no</code></td>
+            <td >
+                Data</td>
+            <td >
+                Mobile No
+                
+            </td>
+            <td>
+                <pre>Phone</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>column_break0</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
+            <td ><code>address_line_1</code></td>
+            <td >
+                Data</td>
+            <td >
+                Address Line 1
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
+            <td ><code>address_line_2</code></td>
+            <td >
+                Data</td>
+            <td >
+                Address Line 2
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
+            <td ><code>city</code></td>
+            <td >
+                Data</td>
+            <td >
+                City
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
+            <td ><code>state</code></td>
+            <td >
+                Data</td>
+            <td >
+                State
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>15</td>
+            <td ><code>pin</code></td>
+            <td >
+                Int</td>
+            <td >
+                PIN
+                
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.stock.doctype.warehouse.warehouse</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>Warehouse</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="add_abbr_if_missing" href="#add_abbr_if_missing" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>add_abbr_if_missing</b>
+        <i class="text-muted">(self, dn)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="after_rename" href="#after_rename" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>after_rename</b>
+        <i class="text-muted">(self, olddn, newdn, merge=False)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="autoname" href="#autoname" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>autoname</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="before_rename" href="#before_rename" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>before_rename</b>
+        <i class="text-muted">(self, olddn, newdn, merge=False)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="create_account_head" href="#create_account_head" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>create_account_head</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_account" href="#get_account" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_account</b>
+        <i class="text-muted">(self, warehouse)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="on_trash" href="#on_trash" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>on_trash</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="on_update" href="#on_update" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>on_update</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="recalculate_bin_qty" href="#recalculate_bin_qty" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>recalculate_bin_qty</b>
+        <i class="text-muted">(self, newdn)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="rename_account_for" href="#rename_account_for" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>rename_account_for</b>
+        <i class="text-muted">(self, olddn, newdn, merge)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_parent_account" href="#update_parent_account" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_parent_account</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate" href="#validate" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_parent_account" href="#validate_parent_account" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_parent_account</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+
+    
+    
+        <h4>Linked In:</h4>
+        <ul>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/stock_reconciliation_item">Stock Reconciliation Item</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/stock_ledger_entry">Stock Ledger Entry</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/stock_entry_detail">Stock Entry Detail</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/stock_entry">Stock Entry</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/serial_no">Serial No</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/purchase_receipt_item">Purchase Receipt Item</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/purchase_receipt">Purchase Receipt</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/packed_item">Packed Item</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/material_request_item">Material Request Item</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/item_reorder">Item Reorder</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/item">Item</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/delivery_note_item">Delivery Note Item</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/delivery_note">Delivery Note</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/bin">Bin</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_planning_tool">Production Planning Tool</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_plan_item">Production Plan Item</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_order">Production Order</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/manufacturing_settings">Manufacturing Settings</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/selling/sales_order_item">Sales Order Item</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/supplier_quotation_item">Supplier Quotation Item</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/purchase_order_item">Purchase Order Item</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/sales_invoice_item">Sales Invoice Item</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/pos_profile">POS Profile</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/account">Account</a>
+
+</li>
+        
+        </ul>
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->
