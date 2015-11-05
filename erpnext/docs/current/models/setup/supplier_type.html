@@ -1,0 +1,166 @@
+<!-- title: Supplier Type -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.7.1</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/setup/doctype/supplier_type"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+
+
+
+    <p><b>Table Name:</b> <code>tabSupplier Type</code></p>
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered" style="table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td class="danger" title="Mandatory"><code>supplier_type</code></td>
+            <td >
+                Data</td>
+            <td >
+                Supplier Type
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>credit_days</code></td>
+            <td >
+                Int</td>
+            <td >
+                Credit Days
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>3</td>
+            <td ><code>default_payable_account</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Default Payable Account
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>accounts</code></td>
+            <td >
+                Table</td>
+            <td >
+                Accounts
+                <p class="text-muted small">
+                    Mention if non-standard receivable account applicable</p>
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/party_account">Party Account</a>
+
+
+                
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.setup.doctype.supplier_type.supplier_type</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>SupplierType</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+
+    
+    
+        <h4>Linked In:</h4>
+        <ul>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/supplier">Supplier</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/buying_settings">Buying Settings</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/tax_rule">Tax Rule</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/pricing_rule">Pricing Rule</a>
+
+</li>
+        
+        </ul>
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

@@ -1,0 +1,511 @@
+<!-- title: Quality Inspection -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.7.1</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/buying/doctype/quality_inspection"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+
+
+
+    <p><b>Table Name:</b> <code>tabQuality Inspection</code></p>
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered" style="table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td class="danger" title="Mandatory"><code>naming_series</code></td>
+            <td >
+                Select</td>
+            <td >
+                Series
+                
+            </td>
+            <td>
+                <pre>QI-</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td class="danger" title="Mandatory"><code>report_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Report Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>column_break_4</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td class="danger" title="Mandatory"><code>inspection_type</code></td>
+            <td >
+                Select</td>
+            <td >
+                Inspection Type
+                
+            </td>
+            <td>
+                <pre>
+Incoming
+Outgoing
+In Process</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>purchase_receipt_no</code></td>
+            <td >
+                Link</td>
+            <td >
+                Purchase Receipt No
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/purchase_receipt">Purchase Receipt</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>delivery_note_no</code></td>
+            <td >
+                Link</td>
+            <td >
+                Delivery Note No
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/delivery_note">Delivery Note</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>7</td>
+            <td ><code>section_break_7</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td class="danger" title="Mandatory"><code>item_code</code></td>
+            <td >
+                Link</td>
+            <td >
+                Item Code
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/item">Item</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>item_serial_no</code></td>
+            <td >
+                Link</td>
+            <td >
+                Item Serial No
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/serial_no">Serial No</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>batch_no</code></td>
+            <td >
+                Link</td>
+            <td >
+                Batch No
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/batch">Batch</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
+            <td class="danger" title="Mandatory"><code>sample_size</code></td>
+            <td >
+                Float</td>
+            <td >
+                Sample Size
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
+            <td ><code>column_break1</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
+            <td ><code>item_name</code></td>
+            <td >
+                Data</td>
+            <td >
+                Item Name
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
+            <td ><code>description</code></td>
+            <td >
+                Small Text</td>
+            <td >
+                Description
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>15</td>
+            <td ><code>section_break_14</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>16</td>
+            <td class="danger" title="Mandatory"><code>inspected_by</code></td>
+            <td >
+                Link</td>
+            <td >
+                Inspected By
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/core/user">User</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
+            <td ><code>verified_by</code></td>
+            <td >
+                Data</td>
+            <td >
+                Verified By
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
+            <td ><code>column_break_17</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
+            <td ><code>remarks</code></td>
+            <td >
+                Text</td>
+            <td >
+                Remarks
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>20</td>
+            <td ><code>amended_from</code></td>
+            <td >
+                Link</td>
+            <td >
+                Amended From
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/quality_inspection">Quality Inspection</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>21</td>
+            <td ><code>specification_details</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td>
+                <pre>Simple</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>22</td>
+            <td ><code>get_specification_details</code></td>
+            <td >
+                Button</td>
+            <td >
+                Get Specification Details
+                
+            </td>
+            <td>
+                <pre>get_item_specification_details</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>23</td>
+            <td ><code>readings</code></td>
+            <td >
+                Table</td>
+            <td >
+                Readings
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/quality_inspection_reading">Quality Inspection Reading</a>
+
+
+                
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.buying.doctype.quality_inspection.quality_inspection</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>QualityInspection</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_item_specification_details" href="#get_item_specification_details" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_item_specification_details</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="on_cancel" href="#on_cancel" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>on_cancel</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="on_submit" href="#on_submit" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>on_submit</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.buying.doctype.quality_inspection.quality_inspection.item_query" href="#erpnext.buying.doctype.quality_inspection.quality_inspection.item_query" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.buying.doctype.quality_inspection.quality_inspection.<b>item_query</b>
+        <i class="text-muted">(doctype, txt, searchfield, start, page_len, filters)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+
+    
+    
+        <h4>Linked In:</h4>
+        <ul>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/purchase_receipt_item">Purchase Receipt Item</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/quality_inspection">Quality Inspection</a>
+
+</li>
+        
+        </ul>
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

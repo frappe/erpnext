@@ -1,0 +1,284 @@
+<!-- title: Stock UOM Replace Utility -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.7.1</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/stock/doctype/stock_uom_replace_utility"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+<span class="label label-info">Single</span>
+
+
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered" style="table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td ><code>item_code</code></td>
+            <td >
+                Link</td>
+            <td >
+                Item
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/item">Item</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>current_stock_uom</code></td>
+            <td >
+                Link</td>
+            <td >
+                Current Stock UOM
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/uom">UOM</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>new_stock_uom</code></td>
+            <td >
+                Link</td>
+            <td >
+                New Stock UOM
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/uom">UOM</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>conversion_factor</code></td>
+            <td >
+                Float</td>
+            <td >
+                Conversion Factor
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>update</code></td>
+            <td >
+                Button</td>
+            <td >
+                Update
+                
+            </td>
+            <td>
+                <pre>update_stock_uom</pre>
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.stock.doctype.stock_uom_replace_utility.stock_uom_replace_utility</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>StockUOMReplaceUtility</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_stock_uom" href="#update_stock_uom" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_stock_uom</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_item" href="#validate_item" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_item</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_mandatory" href="#validate_mandatory" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_mandatory</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_uom_integer_type" href="#validate_uom_integer_type" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_uom_integer_type</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.doctype.stock_uom_replace_utility.stock_uom_replace_utility.get_stock_uom</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.doctype.stock_uom_replace_utility.stock_uom_replace_utility.get_stock_uom" href="#erpnext.stock.doctype.stock_uom_replace_utility.stock_uom_replace_utility.get_stock_uom" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.doctype.stock_uom_replace_utility.stock_uom_replace_utility.<b>get_stock_uom</b>
+        <i class="text-muted">(item_code)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.doctype.stock_uom_replace_utility.stock_uom_replace_utility.update_bin" href="#erpnext.stock.doctype.stock_uom_replace_utility.stock_uom_replace_utility.update_bin" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.doctype.stock_uom_replace_utility.stock_uom_replace_utility.<b>update_bin</b>
+        <i class="text-muted">(item_code, new_stock_uom, conversion_factor)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.doctype.stock_uom_replace_utility.stock_uom_replace_utility.update_item_master" href="#erpnext.stock.doctype.stock_uom_replace_utility.stock_uom_replace_utility.update_item_master" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.doctype.stock_uom_replace_utility.stock_uom_replace_utility.<b>update_item_master</b>
+        <i class="text-muted">(item_code, new_stock_uom, conversion_factor)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.doctype.stock_uom_replace_utility.stock_uom_replace_utility.update_stock_ledger_entry" href="#erpnext.stock.doctype.stock_uom_replace_utility.stock_uom_replace_utility.update_stock_ledger_entry" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.doctype.stock_uom_replace_utility.stock_uom_replace_utility.<b>update_stock_ledger_entry</b>
+        <i class="text-muted">(item_code, new_stock_uom, conversion_factor)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+
+    
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

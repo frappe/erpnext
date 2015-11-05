@@ -1,0 +1,1103 @@
+<!-- title: Time Log -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.7.1</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/projects/doctype/time_log"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+
+
+
+    <p><b>Table Name:</b> <code>tabTime Log</code></p>
+
+
+Log of Activities performed by users against Tasks that can be used for tracking time, billing.
+
+<h3>Fields</h3>
+
+<table class="table table-bordered" style="table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td class="danger" title="Mandatory"><code>naming_series</code></td>
+            <td >
+                Select</td>
+            <td >
+                Series
+                
+            </td>
+            <td>
+                <pre>TL-</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>column_break_2</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>status</code></td>
+            <td >
+                Select</td>
+            <td >
+                Status
+                
+            </td>
+            <td>
+                <pre>Draft
+Submitted
+Batched for Billing
+Billed
+Cancelled</pre>
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>4</td>
+            <td ><code>section_break_4</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td class="danger" title="Mandatory"><code>from_time</code></td>
+            <td >
+                Datetime</td>
+            <td >
+                From Time
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>hours</code></td>
+            <td >
+                Float</td>
+            <td >
+                Hours
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>7</td>
+            <td class="danger" title="Mandatory"><code>to_time</code></td>
+            <td >
+                Datetime</td>
+            <td >
+                To Time
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>column_break_8</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>activity_type</code></td>
+            <td >
+                Link</td>
+            <td >
+                Activity Type
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/projects/activity_type">Activity Type</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>project</code></td>
+            <td >
+                Link</td>
+            <td >
+                Project
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/projects/project">Project</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
+            <td ><code>task</code></td>
+            <td >
+                Link</td>
+            <td >
+                Task
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/projects/task">Task</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>12</td>
+            <td ><code>section_break_12</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
+            <td ><code>user</code></td>
+            <td >
+                Link</td>
+            <td >
+                User
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/core/user">User</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
+            <td ><code>employee</code></td>
+            <td >
+                Link</td>
+            <td >
+                Employee
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/employee">Employee</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>15</td>
+            <td ><code>column_break_3</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>16</td>
+            <td ><code>for_manufacturing</code></td>
+            <td >
+                Check</td>
+            <td class="text-muted" title="Hidden">
+                For Manufacturing
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
+            <td ><code>billable</code></td>
+            <td >
+                Check</td>
+            <td >
+                Billable
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>18</td>
+            <td ><code>section_break_11</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
+            <td ><code>production_order</code></td>
+            <td >
+                Link</td>
+            <td >
+                Production Order
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_order">Production Order</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>20</td>
+            <td ><code>operation</code></td>
+            <td >
+                Link</td>
+            <td >
+                Operation
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/operation">Operation</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>21</td>
+            <td ><code>operation_id</code></td>
+            <td >
+                Data</td>
+            <td class="text-muted" title="Hidden">
+                Operation ID
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>22</td>
+            <td ><code>column_break_14</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>23</td>
+            <td ><code>workstation</code></td>
+            <td >
+                Link</td>
+            <td >
+                Workstation
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/workstation">Workstation</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>24</td>
+            <td ><code>completed_qty</code></td>
+            <td >
+                Float</td>
+            <td >
+                Completed Qty
+                <p class="text-muted small">
+                    Operation completed for how many finished goods?</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>25</td>
+            <td ><code>section_break_7</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>26</td>
+            <td ><code>note</code></td>
+            <td >
+                Text Editor</td>
+            <td >
+                Note
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>27</td>
+            <td ><code>section_break_24</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>28</td>
+            <td ><code>costing_rate</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Costing Rate based on Activity Type (per hour)
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>29</td>
+            <td ><code>costing_amount</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Costing Amount
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>30</td>
+            <td ><code>column_break_25</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>31</td>
+            <td ><code>billing_rate</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Billing Rate based on Activity Type (per hour)
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>32</td>
+            <td ><code>billing_amount</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Billing Amount
+                <p class="text-muted small">
+                    Will be updated only if Time Log is 'Billable'</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>33</td>
+            <td ><code>section_break_29</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>34</td>
+            <td ><code>time_log_batch</code></td>
+            <td >
+                Link</td>
+            <td >
+                Time Log Batch
+                <p class="text-muted small">
+                    Will be updated when batched.</p>
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/projects/time_log_batch">Time Log Batch</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>35</td>
+            <td ><code>sales_invoice</code></td>
+            <td >
+                Link</td>
+            <td >
+                Sales Invoice
+                <p class="text-muted small">
+                    Will be updated when billed.</p>
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/sales_invoice">Sales Invoice</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>36</td>
+            <td ><code>amended_from</code></td>
+            <td >
+                Link</td>
+            <td >
+                Amended From
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/projects/time_log">Time Log</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>37</td>
+            <td ><code>title</code></td>
+            <td >
+                Data</td>
+            <td class="text-muted" title="Hidden">
+                Title
+                
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.projects.doctype.time_log.time_log</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>NegativeHoursError</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>NotSubmittedError</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>OverProductionLoggedError</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>OverlapError</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>TimeLog</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="before_cancel" href="#before_cancel" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>before_cancel</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="before_update_after_submit" href="#before_update_after_submit" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>before_update_after_submit</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="calculate_total_hours" href="#calculate_total_hours" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>calculate_total_hours</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="check_workstation_timings" href="#check_workstation_timings" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>check_workstation_timings</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Checks if <strong>Time Log</strong> is between operating hours of the <strong>Workstation</strong>.</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_operation_start_end_time" href="#get_operation_start_end_time" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_operation_start_end_time</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Returns Min From and Max To Dates of Time Logs against a specific Operation. </p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_overlap_for" href="#get_overlap_for" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_overlap_for</b>
+        <i class="text-muted">(self, fieldname)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_time_log_summary" href="#get_time_log_summary" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_time_log_summary</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Returns 'Actual Operating Time'. </p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="move_to_next_day" href="#move_to_next_day" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>move_to_next_day</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Move start and end time one day forward</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="move_to_next_non_overlapping_slot" href="#move_to_next_non_overlapping_slot" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>move_to_next_non_overlapping_slot</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>If in overlap, set start as the end point of the overlapping time log</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="move_to_next_working_slot" href="#move_to_next_working_slot" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>move_to_next_working_slot</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Move to next working slot from workstation</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="on_cancel" href="#on_cancel" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>on_cancel</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="on_submit" href="#on_submit" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>on_submit</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_project_if_missing" href="#set_project_if_missing" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>set_project_if_missing</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Set project if task is set</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_status" href="#set_status" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>set_status</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_title" href="#set_title" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>set_title</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Set default title for the Time Log</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_cost" href="#update_cost" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_cost</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_production_order" href="#update_production_order" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_production_order</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Updates <code>start_date</code>, <code>end_date</code>, <code>status</code> for operation in Production Order.</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_task_and_project" href="#update_task_and_project" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_task_and_project</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Update costing rate in Task or Project if either is set</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate" href="#validate" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_manufacturing" href="#validate_manufacturing" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_manufacturing</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_overlap" href="#validate_overlap" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_overlap</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Checks if 'Time Log' entries overlap for a user, workstation. </p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_overlap_for" href="#validate_overlap_for" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_overlap_for</b>
+        <i class="text-muted">(self, fieldname)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_production_order" href="#validate_production_order" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_production_order</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Throws 'NotSubmittedError' if <strong>production order</strong> is not submitted. </p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_time_log_for" href="#validate_time_log_for" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_time_log_for</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_timings" href="#validate_timings" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_timings</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.projects.doctype.time_log.time_log.get_activity_cost</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.projects.doctype.time_log.time_log.get_activity_cost" href="#erpnext.projects.doctype.time_log.time_log.get_activity_cost" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.projects.doctype.time_log.time_log.<b>get_activity_cost</b>
+        <i class="text-muted">(employee=None, activity_type=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.projects.doctype.time_log.time_log.get_events</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.projects.doctype.time_log.time_log.get_events" href="#erpnext.projects.doctype.time_log.time_log.get_events" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.projects.doctype.time_log.time_log.<b>get_events</b>
+        <i class="text-muted">(start, end, filters=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Returns events for Gantt / Calendar view rendering.</p>
+
+<p><strong>Parameters:</strong></p>
+
+<ul>
+<li><strong><code>start</code></strong> -  Start date-time.</li>
+<li><strong><code>end</code></strong> -  End date-time.</li>
+<li><strong><code>filters</code></strong> -  Filters like workstation, project etc.</li>
+</ul>
+</div>
+	<br>
+
+	
+
+
+    
+    
+        <h4>Linked In:</h4>
+        <ul>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/projects/time_log_batch_detail">Time Log Batch Detail</a>
+
+</li>
+        
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/projects/time_log">Time Log</a>
+
+</li>
+        
+        </ul>
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

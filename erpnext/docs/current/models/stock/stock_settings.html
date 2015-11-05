@@ -1,0 +1,337 @@
+<!-- title: Stock Settings -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.7.1</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/stock/doctype/stock_settings"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+<span class="label label-info">Single</span>
+
+
+
+
+Settings
+
+<h3>Fields</h3>
+
+<table class="table table-bordered" style="table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td ><code>item_naming_by</code></td>
+            <td >
+                Select</td>
+            <td >
+                Item Naming By
+                
+            </td>
+            <td>
+                <pre>Item Code
+Naming Series</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>item_group</code></td>
+            <td >
+                Link</td>
+            <td >
+                Default Item Group
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/item_group">Item Group</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>stock_uom</code></td>
+            <td >
+                Link</td>
+            <td >
+                Default Stock UOM
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/uom">UOM</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>column_break_4</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>valuation_method</code></td>
+            <td >
+                Select</td>
+            <td >
+                Default Valuation Method
+                
+            </td>
+            <td>
+                <pre>FIFO
+Moving Average</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>tolerance</code></td>
+            <td >
+                Float</td>
+            <td >
+                Allowance Percent
+                <p class="text-muted small">
+                    Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>7</td>
+            <td ><code>section_break_7</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>auto_insert_price_list_rate_if_missing</code></td>
+            <td >
+                Check</td>
+            <td >
+                Auto insert Price List rate if missing
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>allow_negative_stock</code></td>
+            <td >
+                Check</td>
+            <td >
+                Allow Negative Stock
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>column_break_10</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
+            <td ><code>automatically_set_serial_nos_based_on_fifo</code></td>
+            <td >
+                Check</td>
+            <td >
+                Automatically Set Serial Nos based on FIFO
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>12</td>
+            <td ><code>auto_material_request</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Auto Material Request
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
+            <td ><code>auto_indent</code></td>
+            <td >
+                Check</td>
+            <td >
+                Raise Material Request when stock reaches re-order level
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
+            <td ><code>reorder_email_notify</code></td>
+            <td >
+                Check</td>
+            <td >
+                Notify by Email on creation of automatic Material Request
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>15</td>
+            <td ><code>freeze_stock_entries</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Freeze Stock Entries
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>16</td>
+            <td ><code>stock_frozen_upto</code></td>
+            <td >
+                Date</td>
+            <td >
+                Stock Frozen Upto
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
+            <td ><code>stock_frozen_upto_days</code></td>
+            <td >
+                Int</td>
+            <td >
+                Freeze Stocks Older Than [Days]
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
+            <td ><code>stock_auth_role</code></td>
+            <td >
+                Link</td>
+            <td >
+                Role Allowed to edit frozen stock
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/core/role">Role</a>
+
+
+                
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.stock.doctype.stock_settings.stock_settings</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>StockSettings</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate" href="#validate" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+
+    
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

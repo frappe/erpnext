@@ -4,10 +4,6 @@
 
 {% block content %}
 <div class="user-content" style="max-width: 500px;">
-    <ul class="breadcrumb">
-    	<li><a href="/index">Home</a></li>
-    	<li class="active"><i class="icon-user icon-fixed-width"></i> My Profile</li>
-    </ul>
 	<div class="alert alert-warning" id="message" style="display: none;"></div>
 	<form>
 		<fieldset>
@@ -34,7 +30,7 @@ $(document).ready(function() {
 	$("#fullname").val(getCookie("full_name") || "");
 	$("#update_user").click(function() {
 		frappe.call({
-			method: "erpnext.templates.pages.user.update_user",
+			method: "erpnext.templates.pages.edit_profile.update_user",
 			type: "POST",
 			args: {
 				fullname: $("#fullname").val(),
