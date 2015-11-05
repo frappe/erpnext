@@ -85,6 +85,8 @@ class Item(WebsiteGenerator):
 
 	def make_thumbnail(self):
 		"""Make a thumbnail of `website_image`"""
+		import requests.exceptions
+
 		if not self.is_new() and self.website_image != frappe.db.get_value(self.doctype, self.name, "website_image"):
 			self.thumbnail = None
 
@@ -102,8 +104,12 @@ class Item(WebsiteGenerator):
 				# cleanup
 				frappe.local.message_log.pop()
 
+			except requests.exceptions.HTTPError:
+				frappe.msgprint(_("Warning: Invalid Attachment {0}").format(self.website_image))
+				self.website_image = None
+
 			# for CSV import
-			if not file_doc:
+			if self.website_image and not file_doc:
 				try:
 					file_doc = frappe.get_doc({
 						"doctype": "File",
