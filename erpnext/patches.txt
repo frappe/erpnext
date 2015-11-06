@@ -230,3 +230,4 @@ erpnext.patches.v6_5.show_in_website_for_template_item
 erpnext.patches.v6_4.fix_expense_included_in_valuation
 execute:frappe.delete_doc_if_exists("Report", "Item-wise Last Purchase Rate")
 erpnext.patches.v6_6.fix_website_image
+erpnext.patches.v6_6.remove_fiscal_year_from_leave_allocation
