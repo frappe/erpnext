@@ -23,12 +23,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				$.each(cur_frm.doc.items, function(i, item){
 					if(item.delivered_by_supplier == 1 || item.supplier){
-						if(item.qty > flt(item.ordered_qty))
+						if(item.qty > flt(item.ordered_qty)
+							&& item.qty > flt(item.delivered_qty)) {
 							is_delivered_by_supplier = true;
+						}
 					}
 					else{
-						if(item.qty > flt(item.delivered_qty))
+						if(item.qty > flt(item.delivered_qty)) {
 							is_delivery_note = true;
+						}
 					}
 				})
 
