@@ -4,7 +4,7 @@ To create a new Job Opening go to
 
 > Human Resource > Job Opening > New
 
-<img class="screenshot" alt="Job Opening" src="assets/img/human-resources/job-opening.png">
+<img class="screenshot" alt="Job Opening" src="{{url_prefix}}/assets/img/human-resources/job-opening.png">
 
 
 {next}

@@ -4,7 +4,7 @@ To create a new Earning Type
 
 > Human Resource > Setup > Earning Type > New
 
-<img class="screenshot" alt="Earning Type" src="assets/img/human-resources/earning-type.png">
+<img class="screenshot" alt="Earning Type" src="{{url_prefix}}/assets/img/human-resources/earning-type.png">
 
 
 {next}

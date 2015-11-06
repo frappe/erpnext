@@ -3,10 +3,10 @@ If you send a message to a user, and the user is logged in, it will appear as
 a popup message and the unread messages counter in the top toolbar will be
 updated.
 
-![Message List](assets/old_images/erpnext/message-list.png)
+![Message List]({{url_prefix}}/assets/old_images/erpnext/message-list.png)
 
 You can choose to send message to all the users, or to specific user.
 
-![Messsage To](assets/old_images/erpnext/message-to.png)
+![Messsage To]({{url_prefix}}/assets/old_images/erpnext/message-to.png)
 
 {next}

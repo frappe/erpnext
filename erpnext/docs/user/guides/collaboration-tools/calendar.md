@@ -11,7 +11,7 @@ To create event manually, you should first determine Calender View. If Event's s
 
 This view will 24 hours of a day broken in various slots. You should click on slot for Event Start Time, and drag it down till you reach event end time.
 
-![Calender Event Manually](assets/old_images/erpnext/calender-event-manually.png)
+![Calender Event Manually]({{url_prefix}}/assets/old_images/erpnext/calender-event-manually.png)
 
 Based on the selection of time slot, Start Time and End Time will be updated in the Event master. Then you can set subject for an event, and save it.
 
@@ -19,7 +19,7 @@ Based on the selection of time slot, Start Time and End Time will be updated in 
 
 In the Lead form, you will find a field called Next Contact By and Next Contact Date. Event will be auto created for date and person person specified in this field.
 
-![Calender Event Lead](assets/old_images/erpnext/calender-event-lead.png)
+![Calender Event Lead]({{url_prefix}}/assets/old_images/erpnext/calender-event-lead.png)
 
 ####Birthday Event
 
@@ -30,7 +30,7 @@ Birthday Event is created based on Date of Birth specified in the Employee maste
 You can set events as recurring in specific interval by Checking the "Repeat This
 Event".
 
-![Calender Event Recurring](assets/old_images/erpnext/calender-event-recurring.png)
+![Calender Event Recurring]({{url_prefix}}/assets/old_images/erpnext/calender-event-recurring.png)
 
 ###Permission for Event
 
@@ -38,7 +38,7 @@ You can set Event as Private or Public. Private Events will be visible only to y
 
 Public Event, like Birthday will be visible to all.
 
-![Calender Event Permission](assets/old_images/erpnext/calender-event-permission.png)
+![Calender Event Permission]({{url_prefix}}/assets/old_images/erpnext/calender-event-permission.png)
 
 ###Event Reminders
 
@@ -48,7 +48,7 @@ There are two ways you can receive email reminder for an event.
 
 In the Event master, checking "Send an email reminder in the morning" will trigger notifcation email to all the participants for this event.
 
-![Calender Event Notification](assets/old_images/erpnext/calender-event-notification.png)
+![Calender Event Notification]({{url_prefix}}/assets/old_images/erpnext/calender-event-notification.png)
 
 ####Create Email Digest
 
@@ -58,6 +58,6 @@ Email Digest can be set from:
 
 `Setup > Email > Email Digest`
 
-![Calender Email Digest](assets/old_images/erpnext/calender-email-digest.png)
+![Calender Email Digest]({{url_prefix}}/assets/old_images/erpnext/calender-email-digest.png)
 
 {next}

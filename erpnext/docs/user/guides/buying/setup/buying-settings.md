@@ -1,6 +1,6 @@
 Buying Settings is where you can define properties which will be applied in the Buying module's transactions. 
 
-![Buying Settings](assets/img/buying/buying-settings.png)
+![Buying Settings]({{url_prefix}}/assets/img/buying/buying-settings.png)
 
 Let us look at the various options that can be configured:
 
@@ -14,7 +14,7 @@ You can define or select the Naming Series pattern from:
 
 > Setup > Settings > Naming Series
 
-[Click here to know more about defining a Naming Series.](/contents/setting-up/settings/naming-series)
+[Click here to know more about defining a Naming Series.]({{url_prefix}}/user/guides/setting-up/settings/naming-series.html)
 
 ### 2. Default Supplier Type
 

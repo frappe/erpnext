@@ -16,13 +16,13 @@ Select a Cost Center and click on Open.
 
 #### Step 1: Click on Edit.
 
-![](assets/old_images/erpnext/budgeting-1.png)  
+![]({{url_prefix}}/assets/old_images/erpnext/budgeting-1.png)  
 
-<img alt="Accounts Receivable" class="screenshot" src="assets/img/accounts/accounts-receivable.png">
+<img alt="Accounts Receivable" class="screenshot" src="{{url_prefix}}/assets/img/accounts/accounts-receivable.png">
 
 #### Step 2: Enter Monthly Distribution.
 
-![](assets/old_images/erpnext/budgeting-2-1.png)
+![]({{url_prefix}}/assets/old_images/erpnext/budgeting-2-1.png)
 
 
 If you leave the** **distribution ID blank, ERPNext will calculate on a yearly
@@ -32,7 +32,7 @@ basis or in equal proportion for every month.
 
 
 
-![](assets/old_images/erpnext/budgeting-3.png)  
+![]({{url_prefix}}/assets/old_images/erpnext/budgeting-3.png)  
 
 
 
@@ -41,13 +41,13 @@ basis or in equal proportion for every month.
 ERPNext allows you to take a few budget actions. It signifies whether to stop
 , warn or Ignore  if you exceed budgets.  
 
-![](assets/old_images/erpnext/budgeting-4.png)
+![]({{url_prefix}}/assets/old_images/erpnext/budgeting-4.png)
 
 
 
 These can be defined from the Company record.
 
-![](assets/old_images/erpnext/budgeting-4-1.png)  
+![]({{url_prefix}}/assets/old_images/erpnext/budgeting-4-1.png)  
 
 
 

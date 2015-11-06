@@ -2,7 +2,7 @@
 
 > Manufacturing > Production Order > Setup > Manufacturing Settings
 
-<img class="screenshot" alt="Manufacturing Settings" src="assets/img/manufacturing/manufacturing-settings.png">
+<img class="screenshot" alt="Manufacturing Settings" src="{{url_prefix}}/assets/img/manufacturing/manufacturing-settings.png">
 
 * Allow Overtime - Specify if workstations are to allow overtime.(schedule operations outside working hours)
 

@@ -14,10 +14,10 @@ You can create / manage Letter Heads from:
 
 ### Example
 
-<img class="screenshot" alt="Print Heading" src="assets/img/setup/print/letter-head.png">
+<img class="screenshot" alt="Print Heading" src="{{url_prefix}}/assets/img/setup/print/letter-head.png">
 
 This is how the letter head looks in a document print:
 
-<img class="screenshot" alt="Print Heading" src="assets/img/setup/print/letter-head-1.png">
+<img class="screenshot" alt="Print Heading" src="{{url_prefix}}/assets/img/setup/print/letter-head-1.png">
 
 {next}

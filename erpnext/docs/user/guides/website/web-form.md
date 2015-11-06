@@ -17,7 +17,7 @@ To create a new **Web Form** go to:
 1. Select if you require the user to login, edit records, manage multiple records etc.
 1. Add the fields you want in the record.
 
-<img class="screenshot" alt="Web Form" src="assets/img/website/web-form.png">
+<img class="screenshot" alt="Web Form" src="{{url_prefix}}/assets/img/website/web-form.png">
 
 ---
 
@@ -25,7 +25,7 @@ To create a new **Web Form** go to:
 
 Once you create the web form, you can view it on the url and test it out!
 
-<img class="screenshot" alt="Web form" src="assets/img/website/web-form-view.png">
+<img class="screenshot" alt="Web form" src="{{url_prefix}}/assets/img/website/web-form-view.png">
 
 ---
 

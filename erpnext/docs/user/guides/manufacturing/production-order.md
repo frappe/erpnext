@@ -10,7 +10,7 @@ by:
 
 > Manufacturing > Documents > Production Order > New
 
-<img class="screenshot" alt="Production Order" src="assets/img/manufacturing/production-order.png">
+<img class="screenshot" alt="Production Order" src="{{url_prefix}}/assets/img/manufacturing/production-order.png">
 
 ### Creating Production Orders
 
@@ -26,11 +26,11 @@ by:
 
 * By default the system fetchs workstation and duration for Production Order Operations from the selected BOM.
 
-<img class="screenshot" alt="PO Opeartions" src="assets/img/manufacturing/PO-operations.png">
+<img class="screenshot" alt="PO Opeartions" src="{{url_prefix}}/assets/img/manufacturing/PO-operations.png">
 
 * If you wish to reassign the wrokstation for a particular opeeration in the Production Order, you can do so before submitting the Production Order.
 
-<img class="screenshot" alt="PO reassigning Operations" src="assets/img/manufacturing/PO-reassigning-operations.png">
+<img class="screenshot" alt="PO reassigning Operations" src="{{url_prefix}}/assets/img/manufacturing/PO-reassigning-operations.png">
 
 * Select the respective operation, and change its workstation.
 * You can also change the Operating Time for that operation
@@ -47,28 +47,28 @@ by:
 
 * Click on 'Transfer Materials for Manufacturing'.
 
-<img class="screenshot" alt="Transfer Materials" src="assets/img/manufacturing/PO-material-transfer.png">
+<img class="screenshot" alt="Transfer Materials" src="{{url_prefix}}/assets/img/manufacturing/PO-material-transfer.png">
 
 * Mention the quantity of materials to be transfered.
 
-<img class="screenshot" alt="Material Transfer Qty" src="assets/img/manufacturing/PO-material-transfer-qty.png">
+<img class="screenshot" alt="Material Transfer Qty" src="{{url_prefix}}/assets/img/manufacturing/PO-material-transfer-qty.png">
 
 * Submit the Stock Entry
 
-<img class="screenshot" alt="Stock Entry for PO" src="assets/img/manufacturing/PO-SE-for-material-transfer.png">
+<img class="screenshot" alt="Stock Entry for PO" src="{{url_prefix}}/assets/img/manufacturing/PO-SE-for-material-transfer.png">
 
 * Material Transfered for Manufacturing will be updated in the Production Order based on the Stock Entry.
 
-<img class="screenshot" alt="Stock Entry for PO" src="assets/img/manufacturing/PO-material-transfer-updated.png">
+<img class="screenshot" alt="Stock Entry for PO" src="{{url_prefix}}/assets/img/manufacturing/PO-material-transfer-updated.png">
 
 ### Making Time Logs
 
-* Progress in the Production Order can be tracked using [Time Log](/contents/projects/time-log)
+* Progress in the Production Order can be tracked using [Time Log]({{url_prefix}}/user/guides/projects/time-log.html)
 * Time Logs are created against Production Order Operations.
 * Drafts of Time Logs are also created based on the scheduled operations when an Production Order is Submitted.
 * To create more Time Logs against an operation select 'Make TIme Log' in the respective operation.
 
-<img class="screenshot" alt="Make TL against PO" src="assets/img/manufacturing/PO-operations-make-tl.png">
+<img class="screenshot" alt="Make TL against PO" src="{{url_prefix}}/assets/img/manufacturing/PO-operations-make-tl.png">
 
 ###Updating Finished Goods
 
@@ -76,11 +76,11 @@ by:
 * This will create a Stock Entry that will deduct all the sub-Items from the WIP Warehouse and add them to the Finished Goods Warehouse.
 * Click on 'Update Finished Goods'.
 
-<img class="screenshot" alt="Update Finished Goods" src="assets/img/manufacturing/PO-FG-update.png">
+<img class="screenshot" alt="Update Finished Goods" src="{{url_prefix}}/assets/img/manufacturing/PO-FG-update.png">
 
 * Mention the quantity of materials to be transfered.
 
-<img class="screenshot" alt="Update Finished Goods Qty" src="assets/img/manufacturing/PO-FG-update-qty.png">
+<img class="screenshot" alt="Update Finished Goods Qty" src="{{url_prefix}}/assets/img/manufacturing/PO-FG-update-qty.png">
 
  > Tip : You can also partially complete a Production Order by updating the Finished Goods stock creating a Stock Entry.
  
@@ -95,7 +95,7 @@ by:
   4. Update Finished Goods: This will create a Stock Entry that will deduct all the sub-Items from the WIP Warehouse and add them to the Finished Goods Warehouse.
   5. To check all Time Logs made against the Production Order click on 'Show Time Logs'
 
-<img class="screenshot" alt="PO - stop" src="assets/img/manufacturing/PO-stop.png">
+<img class="screenshot" alt="PO - stop" src="{{url_prefix}}/assets/img/manufacturing/PO-stop.png">
 
 * You can Also re-start a stopped Production Order.
 

@@ -22,7 +22,7 @@ your Chart of Accounts.
 Financial statement of your company is easily viewable in ERPNext. An Example
 of a financial statement is given below:
 
-<img class="screenshot" alt="Financial Analytics Balance Sheet" src="assets/img/accounts/financial-analytics-bl.png">
+<img class="screenshot" alt="Financial Analytics Balance Sheet" src="{{url_prefix}}/assets/img/accounts/financial-analytics-bl.png">
 
 To edit your Chart of Accounts in ERPNext go to:
 
@@ -37,7 +37,7 @@ based on statutory (tax, compliance to government regulations) requirements.
 
 Let us understand the main groups of the Chart of Accounts.
 
-<img class="screenshot" alt="Chart of Accounts" src="assets/img/accounts/chart-of-accounts-1.png">
+<img class="screenshot" alt="Chart of Accounts" src="{{url_prefix}}/assets/img/accounts/chart-of-accounts-1.png">
 
 ### Balance Sheet Accounts
 
@@ -75,7 +75,7 @@ beginning and end of your Fiscal Year, they become zero.
 In ERPNext it is easy to create a Profit and Loss analysis chart. An example
 of a Profit and Loss analysis chart is given below:
 
-<img class="screenshot" alt="Financial Analytics Profit and Loss Statement" src="assets/img/accounts/financial-analytics-pl.png">
+<img class="screenshot" alt="Financial Analytics Profit and Loss Statement" src="{{url_prefix}}/assets/img/accounts/financial-analytics-pl.png">
 
 (On the first day of the year you have not made any profit or loss, but you
 still have assets, hence balance sheet accounts never become zero at the
@@ -95,7 +95,7 @@ Supplier).
 
 > Note: An Account “Ledger” is also sometimes called as Account “Head”.
 
-<img class="screenshot" alt="Chart of Accounts" src="assets/img/accounts/chart-of-accounts-2.png">
+<img class="screenshot" alt="Chart of Accounts" src="{{url_prefix}}/assets/img/accounts/chart-of-accounts-2.png">
 
 ### Other Account Types
 
@@ -110,7 +110,7 @@ To create new Accounts, explore your Chart of Accounts and click on an Account
 group under which you want to create the new Account. On the right side, you
 will see an option to “Open” or “Add Child” a new Account.
 
-<img class="screenshot" alt="Chart of Accounts" src="assets/img/accounts/chart-of-accounts-3.png">
+<img class="screenshot" alt="Chart of Accounts" src="{{url_prefix}}/assets/img/accounts/chart-of-accounts-3.png">
 
 Option to create will only appear if you click on a Group (folder) type
 Account.

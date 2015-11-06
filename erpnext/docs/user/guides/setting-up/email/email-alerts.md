@@ -33,9 +33,9 @@ To setup an Email Alert:
 ### Example
 
 1. Defining the Criteria
-    <img class="screenshot" alt="Defining Criteria" src="assets/img/setup/email/email-alert-1.png">
+    <img class="screenshot" alt="Defining Criteria" src="{{url_prefix}}/assets/img/setup/email/email-alert-1.png">
 
 1. Setting the Recipients and Message
-    <img class="screenshot" alt="Set Message" src="assets/img/setup/email/email-alert-2.png">
+    <img class="screenshot" alt="Set Message" src="{{url_prefix}}/assets/img/setup/email/email-alert-2.png">
 
 {next}

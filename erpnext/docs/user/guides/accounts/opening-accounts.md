@@ -23,7 +23,7 @@ Based on Voucher Type
 
 You can select accounts based on the voucher type. In such a scenario, your balance sheet should be balanced.
 
-<img class="screenshot" alt="Opening Account" src="assets/img/accounts/opening-account-1.png">
+<img class="screenshot" alt="Opening Account" src="{{url_prefix}}/assets/img/accounts/opening-account-1.png">
 
  Also, note that if there are more than 300 ledgers, the system will crash. Thus to avoid such a situation, you can open accounts by using temporary accounts.
 
@@ -46,16 +46,16 @@ Note: Make sure to set “Is Opening” as “Yes” in the More Info section.
 
 Complete Journal Entries on the Debit and Credit side.
 
-![Opening Entry](assets/old_images/erpnext/opening-entry-1.png)
+![Opening Entry]({{url_prefix}}/assets/old_images/erpnext/opening-entry-1.png)
 
  To update opening balance is to make Journal Entry for an individual/group of accounts.
 
 For example, if you want to update balance in three bank accounts, then make Journal Entrys in this manner.
 
-![Opening Temp Entry](assets/old_images/erpnext/image-temp-opening.png)
+![Opening Temp Entry]({{url_prefix}}/assets/old_images/erpnext/image-temp-opening.png)
 
 
-![Opening Entry](assets/old_images/erpnext/opening-entry-2.png)
+![Opening Entry]({{url_prefix}}/assets/old_images/erpnext/opening-entry-2.png)
 
 Temporary Asset and Liability account is used for balancing purpose. When you update opening balance in Liability Account, you can use Temporary Asset Account for balancing.
 
@@ -72,7 +72,7 @@ After completing the accounting entries, the trial balance report will look
 like the one given below:
 
 
-![Trial Balance](assets/old_images/erpnext/trial-balance-1.png)
+![Trial Balance]({{url_prefix}}/assets/old_images/erpnext/trial-balance-1.png)
 
 #### Outstanding Invoices
 

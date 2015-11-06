@@ -2,7 +2,7 @@
 
 Set your country name, currency and timezone.
 
-<img alt="Currency" class="screenshot" src="assets/img/setup-wizard/step-2.png">
+<img alt="Currency" class="screenshot" src="{{url_prefix}}/assets/img/setup-wizard/step-2.png">
 
 ---
 

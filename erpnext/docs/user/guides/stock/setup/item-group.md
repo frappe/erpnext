@@ -5,7 +5,7 @@ product is used as a raw-material, you have to name it under the Raw-material
 category. In case, your product is used only in trading, you can categorise it
 under Trading.
 
-<img class="screenshot" alt="Item Group Tree" src="assets/img/stock/item-group-tree.png">
+<img class="screenshot" alt="Item Group Tree" src="{{url_prefix}}/assets/img/stock/item-group-tree.png">
 
 ### Create a Item Group
 
@@ -13,7 +13,7 @@ under Trading.
 
 * Select 'Add Child'
 
-<img class="screenshot" alt="Add Item Group" src="assets/img/stock/item-group-new.gif">
+<img class="screenshot" alt="Add Item Group" src="{{url_prefix}}/assets/img/stock/item-group-new.gif">
 
 ### Delete an Item Group
 
@@ -21,6 +21,6 @@ under Trading.
 
 * Select 'delete'
 
-<img class="screenshot" alt="Add Item Group" src="assets/img/stock/item-group-del.gif">
+<img class="screenshot" alt="Add Item Group" src="{{url_prefix}}/assets/img/stock/item-group-del.gif">
 
 {next}

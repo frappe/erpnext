@@ -11,13 +11,13 @@ You can go to Customize Form from:
 
 System Manager will find Customize Form option in the Sales Order list (or any other form for that matter) view as well.
 
-![Customize Form List View](assets/old_images/erpnext/customize-form-list-view.png)
+![Customize Form List View]({{url_prefix}}/assets/old_images/erpnext/customize-form-list-view.png)
 
 ####Step 2: Select Docytpe/Document
 
 You should select Docytpe/Document which has field-to-be-customized located in it.
 
-![Customize Form Document](assets/old_images/erpnext/customize-form-document.png)
+![Customize Form Document]({{url_prefix}}/assets/old_images/erpnext/customize-form-document.png)
 
 ####Step 3:Edit Property
 
@@ -25,7 +25,7 @@ On selecting Doctype/table, you will have all the fields of the table updated as
 
 On clicking Project Name row, fields to set various property for this field will be shown. To Customize the mandatory property for a field, there is a field called "Mandatory". Checking this field will set Project Name field as mandatory in the Quotation form.
 
-![Customize Form Mandatory](assets/old_images/erpnext/customize-form-mandatory.png)
+![Customize Form Mandatory]({{url_prefix}}/assets/old_images/erpnext/customize-form-mandatory.png)
 
 Like this, you can customize following properties of the field.
 
@@ -38,7 +38,7 @@ Like this, you can customize following properties of the field.
 
 ####Step 4: Update
 
-![Customize Form Update](assets/old_images/erpnext/customize-form-update.png)
+![Customize Form Update]({{url_prefix}}/assets/old_images/erpnext/customize-form-update.png)
 
 Before checking Sales Order form, you should clear cache and refresh browser tab for customization to take effect.
 

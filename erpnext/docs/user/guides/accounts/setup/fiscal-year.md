@@ -18,6 +18,6 @@ choose to start its fiscal year on October 1. That way, they know what their
 income will be for that year, and can adjust their expenses to maintain their
 desired profit margins.
 
-<img class="screenshot" alt="Fiscal Year" src="assets/img/accounts/fiscal-year.png">
+<img class="screenshot" alt="Fiscal Year" src="{{url_prefix}}/assets/img/accounts/fiscal-year.png">
 
 {next}

@@ -9,7 +9,7 @@ To make a new Purchase Invoice, go to:
 
 or click on “Make Purchase Invoice” in Purchase Order or Purchase Receipt.
 
-<img class="screenshot" alt="Purchase Invoice" src="assets/img/accounts/purchase-invoice.png">
+<img class="screenshot" alt="Purchase Invoice" src="{{url_prefix}}/assets/img/accounts/purchase-invoice.png">
 
 The concept of “Posting Date” is again same as Sales Invoice. “Bill No” and
 “Bill Date” helps to track the bill number as set by your Supplier for

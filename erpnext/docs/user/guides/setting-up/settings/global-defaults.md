@@ -6,6 +6,6 @@ You can set default values for your documents from Global Defaults
 
 Whenever a new document is created, these values will be set as default.
 
-<img class="screenshot" alt="Global Defaults" src="assets/img/setup/settings/global-defaults.png">
+<img class="screenshot" alt="Global Defaults" src="{{url_prefix}}/assets/img/setup/settings/global-defaults.png">
 
 {next}

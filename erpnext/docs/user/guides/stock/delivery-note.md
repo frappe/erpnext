@@ -13,7 +13,7 @@ create a new Delivery Note from:
 or from a “Submitted” Sales Order (that is not already shipped) by clicking on
 “Make Delivery Note”.
 
-<img class="screenshot" alt="Delivery Note" src="assets/img/stock/delivery-note.png">
+<img class="screenshot" alt="Delivery Note" src="{{url_prefix}}/assets/img/stock/delivery-note.png">
 
 You can also “fetch” the details from an unshipped Sales Order.
 
@@ -22,7 +22,7 @@ details are carried over from your Sales Order.
 
 ### Shipping Packets or Items with Product Bundle
 
-If you are shipping Items that have a [Product Bundle](/contents/selling/setup/sales-bom), ERPNext will automatically
+If you are shipping Items that have a [Product Bundle]({{url_prefix}}/user/guides/selling/setup/sales-bom.html), ERPNext will automatically
 create a “Packing List” table for you based on the sub-Items in that Item.
 
 If your Items are serialized, then for Product Bundle type of Items, you will have

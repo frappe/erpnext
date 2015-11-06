@@ -10,7 +10,7 @@ ERPNext will create templates for a bunch of email accounts by default. Not all 
 
 There are 2 types of email accounts, outgoing and incoming. Outgoing email accounts use an SMTP service to send emails and emails are retrived from your inbox using a POP service. Most email providers such as GMail, Outlook or Yahoo provide these services.
 
-<img class="screenshot" alt="Defining Criteria" src="assets/img/setup/email/email-account-list.png">
+<img class="screenshot" alt="Defining Criteria" src="{{url_prefix}}/assets/img/setup/email/email-account-list.png">
 
 ### Outgoing Email Accounts
 
@@ -18,13 +18,13 @@ All emails sent from the system, either by the user to a contact or notification
 
 To setup an outgoing Email Account, check on **Enable Outgoing** and set your SMTP server settings, if you are using a popular email service, these will be preset for you.
 
-<img class="screenshot" alt="Outgoing EMail" src="assets/img/setup/email/email-account-sending.png">
+<img class="screenshot" alt="Outgoing EMail" src="{{url_prefix}}/assets/img/setup/email/email-account-sending.png">
 
 ### Incoming Email Accounts
 
 To setup an incoming Email Account, check on **Enable Incoming** and set your POP3 settings, if you are using a popular email service, these will be preset for you.
 
-<img class="screenshot" alt="Incoming EMail" src="assets/img/setup/email/email-account-incoming.png">
+<img class="screenshot" alt="Incoming EMail" src="{{url_prefix}}/assets/img/setup/email/email-account-incoming.png">
 
 ### How ERPNext handles replies
 
@@ -34,6 +34,6 @@ In ERPNext when you send an email to a contact like a customer, the sender will 
 
 If you would like ERPNext to notify you if an email is unreplied for a certain amount of time, then you can set **Notify if Unreplied**. Here you can set the number of minutes to wait before notifications are sent and whom the notifications must go to.
 
-<img class="screenshot" alt="Incoming EMail" src="assets/img/setup/email/email-account-unreplied.png">
+<img class="screenshot" alt="Incoming EMail" src="{{url_prefix}}/assets/img/setup/email/email-account-unreplied.png">
 
 {next}

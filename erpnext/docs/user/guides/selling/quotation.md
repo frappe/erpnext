@@ -11,11 +11,11 @@ To create a new Quotation go to:
 
 You can also create a Quotation from an Opportunity.
 
-<img class="screenshot" alt="Make Quotation from Opportunity" src="assets/img/selling/make-quote-from-opp.png">
+<img class="screenshot" alt="Make Quotation from Opportunity" src="{{url_prefix}}/assets/img/selling/make-quote-from-opp.png">
 
 Or You can create a new Quotation and pull details from an Opportunity.
 
-<img class="screenshot" alt="Make Quotation from Opportunity" src="assets/img/selling/make-quotation.gif">
+<img class="screenshot" alt="Make Quotation from Opportunity" src="{{url_prefix}}/assets/img/selling/make-quotation.gif">
 
 A Quotation contains details about:
 
@@ -35,7 +35,7 @@ attach the corresponding image in the Item master.
 
 The rates you quote may depend on two things.
 
-  * The Price List: If you have multiple Price Lists, you can select a Price List or tag it to the Customer (so that it is auto-selected). Your Item prices will automatically be updated from the Price List.For details refer [Price List](/contents/setting-up/price-lists)
+  * The Price List: If you have multiple Price Lists, you can select a Price List or tag it to the Customer (so that it is auto-selected). Your Item prices will automatically be updated from the Price List.For details refer [Price List]({{url_prefix}}/user/guides/setting-up/price-lists.html)
 
   * The Currency: If you are quoting to a Customer in a different currency, you will have to update the conversion rates to enable ERPNext to save the information in your standard Currency. This will help you to analyze the value of your Quotations in standard Currency.
 
@@ -43,7 +43,7 @@ The rates you quote may depend on two things.
 
 To add taxes to your Quotation, you can either select a tax template, Sales
 Taxes and Charges Template or add the taxes on your own. To understand taxes in
-detail visit [Taxes](/contents/setting-up/setting-up-taxes)
+detail visit [Taxes]({{url_prefix}}/user/guides/setting-up/setting-up-taxes.html)
 
 You can add taxes in the same manner as the Sales Taxes and Charges Template.
 

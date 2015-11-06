@@ -5,12 +5,12 @@ To create a new Contact go to ,
 
 > CRM > Contact > New
 
-<img class="screenshot" alt="Contact" src="assets/img/crm/contact.png">
+<img class="screenshot" alt="Contact" src="{{url_prefix}}/assets/img/crm/contact.png">
 
 Or you can add a Contact or Address directly from the Customer record, click on “New
 Contact” or “New Address”.
 
-<img class="screenshot" alt="Contact" src="assets/img/crm/contact-from-cust.png">
+<img class="screenshot" alt="Contact" src="{{url_prefix}}/assets/img/crm/contact-from-cust.png">
 
 > Tip: When you select a Customer in any transaction, one Contact and Address
 gets pre-selected. This is the “Default Contact or Address”.

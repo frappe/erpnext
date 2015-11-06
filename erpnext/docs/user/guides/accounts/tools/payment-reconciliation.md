@@ -11,7 +11,7 @@ To use Payment Reconciliation Tool go to,
 
 Accounts > Tools > Payment Reconciliation
 
-<img class="screenshot" alt="Payment Reconciliation" src="assets/img/accounts/payment-reconcile-tool.png">
+<img class="screenshot" alt="Payment Reconciliation" src="{{url_prefix}}/assets/img/accounts/payment-reconcile-tool.png">
 
 __Step 1:__ Select the Account against whom the payments need to be reconciled.
 

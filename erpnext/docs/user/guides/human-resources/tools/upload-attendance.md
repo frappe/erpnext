@@ -4,6 +4,6 @@ To upload the attendance go to:
 
 > Human Resources > Upload Attendance
 
-<img class="screenshot" alt="Attendence upload" src="assets/img/human-resources/attendence-upload.png">
+<img class="screenshot" alt="Attendence upload" src="{{url_prefix}}/assets/img/human-resources/attendence-upload.png">
 
 {next}

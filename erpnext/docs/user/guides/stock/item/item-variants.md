@@ -6,19 +6,19 @@ To use Item Variants in ERPNext, create an Item and check 'Has Variants'
 
 * The Item shall then be referred as a 'Template'
 
-<img class="screenshot" alt="Has Variants" src="assets/img/stock/item-has-variants.png">
+<img class="screenshot" alt="Has Variants" src="{{url_prefix}}/assets/img/stock/item-has-variants.png">
 
 On selecting 'Has Variants' a table shall appear. Specify the variant attributes for the Item in the table.
 In case the attribute has Numeric Values, you can specify the range and increment values here. 
 
-<img class="screenshot" alt="Valid Attributes" src="assets/img/stock/item-attributes.png">
+<img class="screenshot" alt="Valid Attributes" src="{{url_prefix}}/assets/img/stock/item-attributes.png">
 
 > Note: You cannot make Transactions against a 'Template'
 
 To create 'Item Variants' against a 'Template' select 'Make Variants'
 
-<img class="screenshot" alt="Make Variants" src="assets/img/stock/make-variant.png">
+<img class="screenshot" alt="Make Variants" src="{{url_prefix}}/assets/img/stock/make-variant.png">
 
-<img class="screenshot" alt="Make Variants" src="assets/img/stock/make-variant-1.png">
+<img class="screenshot" alt="Make Variants" src="{{url_prefix}}/assets/img/stock/make-variant-1.png">
 
-To learn more about setting Attributes Master check [Item Attributes](/contents/stock/setup/item-attribute)
+To learn more about setting Attributes Master check [Item Attributes]({{url_prefix}}/user/guides/stock/setup/item-attribute.html)

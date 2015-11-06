@@ -24,7 +24,7 @@ To setup your outgoing mails, go to
 
 #### Figure 1: Set up outgoing mail server.
 
-![Email Settings](assets/old_images/erpnext/email-settings1.png)
+![Email Settings]({{url_prefix}}/assets/old_images/erpnext/email-settings1.png)
 
 Set your outgoing mail server settings here. These are the same settings you
 would use in your Outlook, Thunderbird, Apple Mail or other such email
@@ -51,7 +51,7 @@ To setup your Support integration, go to:
 
 #### Figure 2: Setup support Integration
 
-![Email Settings](assets/old_images/erpnext/email-settings2.png)
+![Email Settings]({{url_prefix}}/assets/old_images/erpnext/email-settings2.png)
 
 To make ERPNext pull emails from your mail box, enter the POP3 settings. (POP3
 is a way of extracting emails from your mailbox. It should be fairly easy to
@@ -69,7 +69,7 @@ contact mentioned in the document. To set this up, go to:
 
 #### Figure 3: Set Auto Notification
 
-![Auto Notification](assets/old_images/erpnext/auto-notification.png)
+![Auto Notification]({{url_prefix}}/assets/old_images/erpnext/auto-notification.png)
 
 Check on the transactions you want to send via email directly on Submission
 and add a custom message if you want on these documents.
@@ -91,5 +91,5 @@ To setup Email Digests, go to:
 
 #### Figure 4: Set up Email Digest
 
-![Email Digest](assets/old_images/erpnext/email-digest.png)
+![Email Digest]({{url_prefix}}/assets/old_images/erpnext/email-digest.png)
 

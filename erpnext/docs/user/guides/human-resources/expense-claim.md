@@ -6,7 +6,7 @@ To make a new Expense Claim, go to:
 
 > HR > Expense Claim > New Expense Claim
 
-<img class="screenshot" alt="Expense Claim" src="assets/img/human-resources/expense_claim.png">
+<img class="screenshot" alt="Expense Claim" src="{{url_prefix}}/assets/img/human-resources/expense_claim.png">
 
 Set the Employee ID, date and the list of expenses that are to be claimed and
 “Submit” the record.
@@ -34,6 +34,6 @@ because the amount will then be taxable to the Employee.
 
 * To Link Expense Claim with Task or Project specify the Task or the Project while making an Expense Claim
 
-<img class="screenshot" alt="Expense Claim - Project Link" src="assets/img/project/project_expense_claim_link.png">
+<img class="screenshot" alt="Expense Claim - Project Link" src="{{url_prefix}}/assets/img/project/project_expense_claim_link.png">
 
 {next}

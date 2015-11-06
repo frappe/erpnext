@@ -6,7 +6,7 @@ You can create a Sales Invoice directly from
 
 or Click on Make Invoice at the right hand corner of the Delivery Note.
 
-<img class="screenshot" alt="Sales Invoice" src="assets/img/accounts/sales-invoice.png">
+<img class="screenshot" alt="Sales Invoice" src="{{url_prefix}}/assets/img/accounts/sales-invoice.png">
 
 #### Accounting Impact
 

@@ -5,18 +5,18 @@ conversation.
 
 #### Empty Ticket List
 
-![Ticket List](assets/old_images/erpnext/portal-ticket-list-empty.png)
+![Ticket List]({{url_prefix}}/assets/old_images/erpnext/portal-ticket-list-empty.png)
 
 #### New Issue
 
-![New Ticket](assets/old_images/erpnext/portal-new-ticket.png)
+![New Ticket]({{url_prefix}}/assets/old_images/erpnext/portal-new-ticket.png)
 
 #### Open Issue
 
-![Open Issue](assets/old_images/erpnext/portal-ticket-1.png)
+![Open Issue]({{url_prefix}}/assets/old_images/erpnext/portal-ticket-1.png)
 
 #### Reply on Issue
 
-![Reply Issue](assets/old_images/erpnext/portal-ticket-reply.png)
+![Reply Issue]({{url_prefix}}/assets/old_images/erpnext/portal-ticket-reply.png)
 
 {next}

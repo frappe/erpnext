@@ -11,7 +11,7 @@ will get an indication that the HR department has Accepted or Rejected. The
 Manager, who is the approving authority, will either Approve or Reject this
 request. Accordingly,the user will get his Approved or Rejected status.
 
-![Workflow](assets/old_images/erpnext/workflow-leave-fl.jpg)
+![Workflow]({{url_prefix}}/assets/old_images/erpnext/workflow-leave-fl.jpg)
 
 To make this Workflow and transition rules go to :
 
@@ -19,11 +19,11 @@ To make this Workflow and transition rules go to :
 
 #### Step 1: Enter the different states of Leave Approval Process.
 
-<img class="screenshot" alt="Workflow" src="assets/img/setup/workflow-1.png">
+<img class="screenshot" alt="Workflow" src="{{url_prefix}}/assets/img/setup/workflow-1.png">
 
 #### Step 2: Enter Transition Rules.
 
-<img class="screenshot" alt="Workflow" src="assets/img/setup/workflow-2.png">
+<img class="screenshot" alt="Workflow" src="{{url_prefix}}/assets/img/setup/workflow-2.png">
 
 #### Notes:
 
@@ -50,17 +50,17 @@ Leave.
 When a Leave Application is submitted, the status on the right hand corner of
 the page shows as "Applied"
 
-![Workflow Employee LA](assets/old_images/erpnext/workflow-employee-la.png)
+![Workflow Employee LA]({{url_prefix}}/assets/old_images/erpnext/workflow-employee-la.png)
 
 When the HR User logs in, he can either Approve or Reject. If approved the
 status on the right hand corner of the page shows as Approved. However, a blue
 band of information is displayed saying approval is pending by leave approver.
 
-![Leave Approver](assets/old_images/erpnext/workflow-hr-user-la.png)
+![Leave Approver]({{url_prefix}}/assets/old_images/erpnext/workflow-hr-user-la.png)
 
 When the leave approver opens the Leave Application page, he should select the
 status and convert to Approved or Rejected.
 
-![Workflow Leave Approver](assets/old_images/erpnext/workflow-leave-approver-la.png)
+![Workflow Leave Approver]({{url_prefix}}/assets/old_images/erpnext/workflow-leave-approver-la.png)
 
 {next}

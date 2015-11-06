@@ -5,7 +5,7 @@ You can create a new Supplier via:
 
 > Buying > Documents > Supplier > New Supplier
 
-<img class="screenshot" alt="Supplier Master" src="assets/img/buying/supplier-master.png">
+<img class="screenshot" alt="Supplier Master" src="{{url_prefix}}/assets/img/buying/supplier-master.png">
 
 ### Contacts and Addresses
 

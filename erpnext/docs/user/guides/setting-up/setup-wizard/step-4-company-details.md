@@ -3,7 +3,7 @@
 Enter Company Details like Name, Abbreviation and Financial Year Details.
 
 <img alt="Company Details" class="screenshot"
-src="assets/img/setup-wizard/step-4.png">
+src="{{url_prefix}}/assets/img/setup-wizard/step-4.png">
 
 ---
 

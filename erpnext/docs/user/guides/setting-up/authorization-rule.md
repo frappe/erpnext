@@ -34,7 +34,7 @@ Select approvers Role. It will be Sales Manager role which if assigned to user, 
 
 Set Above Value. Given the exmaple, Above Value will be set as 10000.
 
-<img class="screenshot" alt="Authorization Rule" src="assets/img/setup/auth-rule.png">
+<img class="screenshot" alt="Authorization Rule" src="{{url_prefix}}/assets/img/setup/auth-rule.png">
 
 If Sales User tries submitting Sales Order of value higher than 10000, then he will get error message.
 

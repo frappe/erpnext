@@ -8,12 +8,12 @@ You can also create a Workstation by:
 
 > Manufacturing > Documents > Workstation > New
 
-<img class="screenshot" alt="Workstation" src="assets/img/manufacturing/workstation.png">
+<img class="screenshot" alt="Workstation" src="{{url_prefix}}/assets/img/manufacturing/workstation.png">
 
 In workstation specify the workstation working hours under the 'working hour' section. 
 You can also specify the working hours based on shifts.
 While scheduling Production Order, system will check for the availability of the workstation based on the working hours specified.	
 
-> Note : You can enable overtime for your workstation in [Manufacturing Settings](/contents/manufacturing/setup/manufacturing-settings)
+> Note : You can enable overtime for your workstation in [Manufacturing Settings]({{url_prefix}}/user/guides/manufacturing/setup/manufacturing-settings.html)
 
 {next}

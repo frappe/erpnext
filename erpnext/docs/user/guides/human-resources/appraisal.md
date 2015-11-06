@@ -6,13 +6,13 @@ giving appropriate weightage to each parameter.
 
 #### Step 1: Select an Appraisal Template
 
-<img class="screenshot" alt="Appraisal" src="assets/img/human-resources/appraisal.png">
+<img class="screenshot" alt="Appraisal" src="{{url_prefix}}/assets/img/human-resources/appraisal.png">
 
 After you select the template, the remaining form appears.
 
 #### Step 2: Enter Employee Details
 
-<img class="screenshot" alt="Appraisal" src="assets/img/human-resources/appraisal-employee.png">
+<img class="screenshot" alt="Appraisal" src="{{url_prefix}}/assets/img/human-resources/appraisal-employee.png">
 
 Once the Appraisal Template is completed, you can create Appraisal records for
 each period where you track performance. You can give points out of 5 for each

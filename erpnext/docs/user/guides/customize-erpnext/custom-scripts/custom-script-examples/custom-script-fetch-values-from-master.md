@@ -20,6 +20,6 @@ Then in the Sales Invoice Custom Script, add this line:
 
 * * *
 
-See: [How to create a custom script](/contents/customize-erpnext/custom-scripts)
+See: [How to create a custom script]({{url_prefix}}/user/guides/customize-erpnext/custom-scripts.html)
 
 {next}

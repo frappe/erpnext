@@ -1,7 +1,7 @@
 A Material Request is a simple document identifying a requirement of a set of
 Items (products or services) for a particular reason.
 
-![Workflow](assets/old_images/erpnext/material-request-workflow.jpg)
+![Workflow]({{url_prefix}}/assets/old_images/erpnext/material-request-workflow.jpg)
 
 To generate a Material Request manually go to:
 
@@ -9,14 +9,14 @@ To generate a Material Request manually go to:
 
 #### Creating Material Request 
 
-<img class="screenshot" alt="Material Request" src="assets/img/buying/material-request.png">
+<img class="screenshot" alt="Material Request" src="{{url_prefix}}/assets/img/buying/material-request.png">
 
 A Material Request can be generated:
 
   * Automatically from a Sales Order.
   * Automatically when the Projected Quantity of an Item in stores reaches a particular level.
   * Automatically from your Bill of Materials if you use Production Plan to plan your manufacturing activities.
-  * If your Items are inventory items, you must also mention the Warehouse where you expect these Items to be delivered. This helps to keep track of the [Projected Quantity](/contents/stock/projected-quantity) for this Item.
+  * If your Items are inventory items, you must also mention the Warehouse where you expect these Items to be delivered. This helps to keep track of the [Projected Quantity]({{url_prefix}}/user/guides/stock/projected-quantity.html) for this Item.
 
 A Material Request can be of type:
 

@@ -7,7 +7,7 @@ To create a Journal Entry go to:
 
 > Accounts > Documents > Journal Entry > New
 
-<img class="screenshot" alt="Journal Entry" src="assets/img/accounts/journal-entry.png">
+<img class="screenshot" alt="Journal Entry" src="{{url_prefix}}/assets/img/accounts/journal-entry.png">
 
 In a Journal Entry, you must select.
 

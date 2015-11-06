@@ -16,7 +16,7 @@ Batch master is created before creation of Purchase Receipt.
 Hence eveytime there is Purchase Receipt or Production entry being made for a batch item, 
 you will first create its Batch No, and then select it in Purcase order or Production Entry.
 
-<img class="screenshot" alt="batch" src="assets/img/stock/batch.png">
+<img class="screenshot" alt="batch" src="{{url_prefix}}/assets/img/stock/batch.png">
 
 > Note: In stock transactions, Batch IDs will be filtered based on Item Code, Warehouse, 
 Batch Expiry Date (compared with Posting date of a transaction) and Actual Qty in Warehouse. 

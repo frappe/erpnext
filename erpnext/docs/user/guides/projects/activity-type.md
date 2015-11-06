@@ -1,6 +1,6 @@
 Activity Type makes a list of the different types of activities against which a Time Log can be made.
 
-<img class="screenshot" alt="Activity Type" src="assets/img/project/activity_type.png">
+<img class="screenshot" alt="Activity Type" src="{{url_prefix}}/assets/img/project/activity_type.png">
 
 By default the following Activity Types are created.
 

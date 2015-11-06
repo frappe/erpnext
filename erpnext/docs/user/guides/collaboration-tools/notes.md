@@ -8,13 +8,13 @@ You can store your long notes under this section. It can contain your partner li
 
 Enter Title and Context.
 
-![Note](assets/old_images/erpnext/note.png)
+![Note]({{url_prefix}}/assets/old_images/erpnext/note.png)
 
 ####Set Permissions to select Users
 
 To make Note accessible for all, check "Public" under links section. If specific Note is to be made accessible to specific user, they shall be selected in the Share With table.
 
-![Note Permission](assets/old_images/erpnext/note-permission.png)
+![Note Permission]({{url_prefix}}/assets/old_images/erpnext/note-permission.png)
 
 <div class=well>Notes can also be used as a knowledge base internally. You can also attach file in the Notes, and make it accessible to specific set of users only.</div>
 

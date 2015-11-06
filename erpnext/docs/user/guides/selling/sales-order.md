@@ -11,7 +11,7 @@ a Sales Order.
 
 ### Sales Order Flow-Chart
 
-![Sales Order](assets/old_images/erpnext/sales-order-f.jpg)
+![Sales Order]({{url_prefix}}/assets/old_images/erpnext/sales-order-f.jpg)
 
 To create a new Sales Order go to:
 
@@ -21,11 +21,11 @@ To create a new Sales Order go to:
 
 You can also create a Sales Order from a submitted Quotation.
 
-<img class="screenshot" alt="Make Sales Order from Quotation" src="assets/img/selling/make-SO-from-quote.png">
+<img class="screenshot" alt="Make Sales Order from Quotation" src="{{url_prefix}}/assets/img/selling/make-SO-from-quote.png">
 
 Or you can create a new Sales Order and pull details from an Quotation.
 
-<img class="screenshot" alt="Make Sales Order from Quotation" src="assets/img/selling/make-so.gif">
+<img class="screenshot" alt="Make Sales Order from Quotation" src="{{url_prefix}}/assets/img/selling/make-so.gif">
 
 Most of the information in your Sales Order is the same as the Quotation.
 There are a few amongst other things that a Sales Order will ask you to
@@ -72,7 +72,7 @@ On updating the Sales Order, a Recurring ID will be generated which will be same
 
 ERPNext will automatically create new Order and mail a notification to the email IDs you set in the 'Notification Email Address'field.
 
-<img class="screenshot" alt="Reccuring Sales Order" src="assets/img/selling/recurring-sales-order.png">
+<img class="screenshot" alt="Reccuring Sales Order" src="{{url_prefix}}/assets/img/selling/recurring-sales-order.png">
 
 ### Next Steps
 

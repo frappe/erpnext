@@ -7,7 +7,7 @@ They can be used to track the following
 * Project
 * Internal References
 
-<img class="screenshot" alt="Time Log" src="assets/img/project/time_log.png">
+<img class="screenshot" alt="Time Log" src="{{url_prefix}}/assets/img/project/time_log.png">
 
 ###Creating Time Logs
 
@@ -18,15 +18,15 @@ They can be used to track the following
 
 To create Time Logs via Calender, go to Time Log and select Calendar.
 
-<img class="screenshot" alt="Time Log - View Calender" src="assets/img/project/time_log_view_calendar.png">
+<img class="screenshot" alt="Time Log - View Calender" src="{{url_prefix}}/assets/img/project/time_log_view_calendar.png">
 
 * To create a Time Log for multiple days, click and drag the cursor across days.
 
-<img class="screenshot" alt="Time Log - Drag Calender" src="assets/img/project/time_log_calendar_day.gif">
+<img class="screenshot" alt="Time Log - Drag Calender" src="{{url_prefix}}/assets/img/project/time_log_calendar_day.gif">
 
 * You can also create Time Logs from 'week' and 'day' view of the calender.
 
-<img class="screenshot" alt="Time Log - Drag Calender" src="assets/img/project/time_log_calendar_week.gif">
+<img class="screenshot" alt="Time Log - Drag Calender" src="{{url_prefix}}/assets/img/project/time_log_calendar_week.gif">
 
 * Time Logs for Manufacturing processes needs to be created from the Production Order. 
 * To create more Time Logs against Operations select the respective operation and click on the 'Make Time Log' button.
@@ -35,15 +35,15 @@ To create Time Logs via Calender, go to Time Log and select Calendar.
 
 * If you wish to bill against a Time Log you need to select the 'Billable' option.
 
-* In the costing section, the system will pull up the Costing & Billing rate from [Activity Cost](/contents/projects/activity-cost) 
+* In the costing section, the system will pull up the Costing & Billing rate from [Activity Cost]({{url_prefix}}/user/guides/projects/activity-cost.html) 
 	based on the Employee and Activity Type specified.
 
 * The system shall then calculate the Costing and Billing amount based on the Hours mentioned in the Time Log.
 
 * If 'Billable' is not selected, the system shall display the 'Billing Amount' as 0.
 
-<img class="screenshot" alt="Time Log - Costing" src="assets/img/project/time_log_costing.png">
+<img class="screenshot" alt="Time Log - Costing" src="{{url_prefix}}/assets/img/project/time_log_costing.png">
 
-* After submitting the Time Log, you need to create [Time Log batch](/contents/projects/time-log-batch) to further bill the Time Log.
+* After submitting the Time Log, you need to create [Time Log batch]({{url_prefix}}/user/guides/projects/time-log-batch.html) to further bill the Time Log.
 
 {next}

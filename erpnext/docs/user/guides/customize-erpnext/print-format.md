@@ -18,7 +18,7 @@ To create your own versions, open an existing template from:
 
 > Setup > Printing > Print Formats
 
-![Print Format](assets/old_images/erpnext/customize/print-format.png)
+![Print Format]({{url_prefix}}/assets/old_images/erpnext/customize/print-format.png)
 
 Select the type of Print Format you want to edit and click on the “Copy”
 button on the right column. A new Print Format will open up with “Is Standard”
@@ -45,7 +45,7 @@ To edit / update your print and PDF settings, go to:
 
 > Setup > Printing and Branding > Print Settings
 
-![Print Format](assets/old_images/erpnext/customize/print-settings.png)
+![Print Format]({{url_prefix}}/assets/old_images/erpnext/customize/print-settings.png)
 
 #### Example
 

@@ -6,7 +6,7 @@ clicking on “Make Payment Entry” button on “Submitted” invoices.
   3. Enter the cheque number, cheque date.
   4. Save and Submit.
 
-<img class="screenshot" alt="Manking Payment" src="assets/img/accounts/make-payment.png">
+<img class="screenshot" alt="Manking Payment" src="{{url_prefix}}/assets/img/accounts/make-payment.png">
 
 Payments can also be made independent of invoices by creating a new Journal
 Voucher and selecting the type of payment.
@@ -29,7 +29,7 @@ For payments to Suppliers,
 
 ### Example Payment Journal Entry
 
-<img class="screenshot" alt="Manking Payment" src="assets/img/accounts/new-bank-entry.png">
+<img class="screenshot" alt="Manking Payment" src="{{url_prefix}}/assets/img/accounts/new-bank-entry.png">
 
 * * *
 

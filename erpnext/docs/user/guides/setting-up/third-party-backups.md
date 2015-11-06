@@ -9,7 +9,7 @@ __Step 2:__ Click on Manage Third Party Backup
 
 #### Figure 1: Manage Third Party Backup
 
-![Third Party Backups](assets/old_images/erpnext/third-party-backups.png)
+![Third Party Backups]({{url_prefix}}/assets/old_images/erpnext/third-party-backups.png)
 
 On the Backup Manager page, enter the email addresses of those people whom you
 wish to notify about the upload status. Under the topic 'Sync with Dropbox',
@@ -22,11 +22,11 @@ then select the Never option.
 
 #### Figure 2: Allow Dropbox Access
 
-![Backup Manager](assets/old_images/erpnext/backup-manager.png)
+![Backup Manager]({{url_prefix}}/assets/old_images/erpnext/backup-manager.png)
 
 You need to login to your dropbox account, with your user id and password.
 
-![Dropbox Access](assets/old_images/erpnext/dropbox-access.png)
+![Dropbox Access]({{url_prefix}}/assets/old_images/erpnext/dropbox-access.png)
 
 ## Open Source Users
 

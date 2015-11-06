@@ -4,7 +4,7 @@ To create a new Web Page, go to:
 
 > Website > Web Page > New
 
-<img class="screenshot" alt="Web Page" src="assets/img/website/web-page.png">
+<img class="screenshot" alt="Web Page" src="{{url_prefix}}/assets/img/website/web-page.png">
 
 #### Title
 

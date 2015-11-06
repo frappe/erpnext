@@ -11,7 +11,7 @@ To use the Production Planning Tool, go to:
 
 > Manufacturing > Tools > Production Planning Tool
 
-<img class="screenshot" alt="Production Planing Tool" src="assets/img/manufacturing/ppt.png">
+<img class="screenshot" alt="Production Planing Tool" src="{{url_prefix}}/assets/img/manufacturing/ppt.png">
 
 
 
@@ -20,7 +20,7 @@ To use the Production Planning Tool, go to:
 * Select sales orders for MRP using filters (Time, Item, and Customer)
 * Click on Get Sales Order to generate a list.
 
-<img class="screenshot" alt="Production Planing Tool" src="assets/img/manufacturing/ppt-get-sales-orders.png">
+<img class="screenshot" alt="Production Planing Tool" src="{{url_prefix}}/assets/img/manufacturing/ppt-get-sales-orders.png">
 
 
 
@@ -28,11 +28,11 @@ To use the Production Planning Tool, go to:
 
 You can add/remove or change quantity of these Items.
 
-<img class="screenshot" alt="Production Planing Tool" src="assets/img/manufacturing/ppt-get-item.png">
+<img class="screenshot" alt="Production Planing Tool" src="{{url_prefix}}/assets/img/manufacturing/ppt-get-item.png">
 
 #### Step 3: Create Production Orders
 
-<img class="screenshot" alt="Production Planing Tool" src="assets/img/manufacturing/ppt-create-production-order.png">
+<img class="screenshot" alt="Production Planing Tool" src="{{url_prefix}}/assets/img/manufacturing/ppt-create-production-order.png">
 
 
 
@@ -40,7 +40,7 @@ You can add/remove or change quantity of these Items.
 
 Create Material Request for Items with projected shortfall.
 
-<img class="screenshot" alt="Production Planing Tool" src="assets/img/manufacturing/ppt-create-material-request.png">
+<img class="screenshot" alt="Production Planing Tool" src="{{url_prefix}}/assets/img/manufacturing/ppt-create-material-request.png">
 
 
 

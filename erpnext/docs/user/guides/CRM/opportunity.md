@@ -9,13 +9,13 @@ or open a “Open” Lead and click on “Create Opportunity” button.
 
 #### Figure 1: Create Opportunity 
 
-<img class="screenshot" alt="Opportunity" src="assets/img/crm/opportunity.png">
+<img class="screenshot" alt="Opportunity" src="{{url_prefix}}/assets/img/crm/opportunity.png">
 
 You can also open a “Open” Lead and click on “Create Opportunity” button.
 
 #### Figure 2: Create Opportunity from an open Lead
 
-<img class="screenshot" alt="Opportunity" src="assets/img/crm/lead-to-opportunity.png">
+<img class="screenshot" alt="Opportunity" src="{{url_prefix}}/assets/img/crm/lead-to-opportunity.png">
 
 An Opportunity can also come from an existing Customer. You can create
 multiple Opportunities against the same Lead. In Opportunity, apart from the

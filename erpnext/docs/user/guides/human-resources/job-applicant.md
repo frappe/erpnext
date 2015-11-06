@@ -1,10 +1,10 @@
-You can mantain a list of People who have applied for a [Job Opening](/contents/human-resources/job-opening).
+You can mantain a list of People who have applied for a [Job Opening]({{url_prefix}}/user/guides/human-resources/job-opening.html).
 
 To create a new Job Applicant go to 
 
 > Human Resource > Job Applicant > New
 
-<img class="screenshot" alt="Job Applicant" src="assets/img/human-resources/job-applicant.png">
+<img class="screenshot" alt="Job Applicant" src="{{url_prefix}}/assets/img/human-resources/job-applicant.png">
 
 ### Linking with an Email Account
 
@@ -20,6 +20,6 @@ system shall create a New Job Applicant against each email received on the mailb
 
 * In 'Append To' select 'Job Applicant'
 
-<img class="screenshot" alt="Email Account" src="assets/img/human-resources/email-account.png">
+<img class="screenshot" alt="Email Account" src="{{url_prefix}}/assets/img/human-resources/email-account.png">
 
 {next}

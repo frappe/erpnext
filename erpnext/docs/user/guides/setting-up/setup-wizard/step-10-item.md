@@ -3,7 +3,7 @@
 In this final step, please enter the names of the Items you buy or sell.
 
 <img alt="Add Items" class="screenshot"
-src="assets/img/setup-wizard/step-10.png">
+src="{{url_prefix}}/assets/img/setup-wizard/step-10.png">
 
 Please set the group of the item (Product / Service) and unit of measure. Don't worry you will be able to edit all of this later.
 

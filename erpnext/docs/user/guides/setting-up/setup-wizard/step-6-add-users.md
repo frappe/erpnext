@@ -3,6 +3,6 @@
 Add other users and assign them roles based on their job responsibilities.
 
 <img alt="Users" class="screenshot"
-src="assets/img/setup-wizard/step-6.png">
+src="{{url_prefix}}/assets/img/setup-wizard/step-6.png">
 
 {next}

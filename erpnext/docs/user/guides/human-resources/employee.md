@@ -4,6 +4,6 @@ To create new Employee go to:
 
 > Human Resources > Employee > New
 
-<img class="screenshot" alt="Employee" src="assets/img/human-resources/employee.png">
+<img class="screenshot" alt="Employee" src="{{url_prefix}}/assets/img/human-resources/employee.png">
 
 {next}

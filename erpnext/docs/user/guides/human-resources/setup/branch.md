@@ -1,5 +1,5 @@
 Branches of your organization
 
-<img class="screenshot" alt="Branch" src="assets/img/human-resources/branch.png">
+<img class="screenshot" alt="Branch" src="{{url_prefix}}/assets/img/human-resources/branch.png">
 
 {next}

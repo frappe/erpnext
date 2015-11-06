@@ -7,7 +7,7 @@ dont require, go to:
 
 > Setup > Tools > Hide/Unhide Features
 
-![Hide Features](assets/old_images/erpnext/hide-features.png)
+![Hide Features]({{url_prefix}}/assets/old_images/erpnext/hide-features.png)
 
 Check / uncheck the features you want to use and refresh your page for the
 changes to take effect.
@@ -20,7 +20,7 @@ To hide modules (icons) from the home page, go to:
 
 Setup > Tools> Modules Setup
 
-![Hide/Unhide Modules](assets/old_images/erpnext/hide-module.png)
+![Hide/Unhide Modules]({{url_prefix}}/assets/old_images/erpnext/hide-module.png)
 
 > Note: Modules are automatically hidden for users that have no permissions on
 the documents within that module. For example, if a user has no permissions on

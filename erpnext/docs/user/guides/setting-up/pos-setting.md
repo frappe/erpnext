@@ -14,10 +14,10 @@ from:
 
 Set default values as defined.
 
-<img class="screenshot" alt="POS Setting" src="assets/img/pos-setting/pos-setting.png">
+<img class="screenshot" alt="POS Setting" src="{{url_prefix}}/assets/img/pos-setting/pos-setting.png">
 
 > Important : If you specify a particular User, the POS setting will be
 applied only to that User. If the User option is left blank, the setting will
-be set for all users. To understand POS in detail visit [Point of Sale](/contents/accounts/point-of-sale-pos-invoice)
+be set for all users. To understand POS in detail visit [Point of Sale]({{url_prefix}}/user/guides/accounts/point-of-sale-pos-invoice.html)
 
 {next}

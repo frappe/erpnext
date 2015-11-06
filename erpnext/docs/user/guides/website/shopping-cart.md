@@ -12,13 +12,13 @@ To set up a shopping cart, go to the selling module.
 
 #### Step 1: Enter Company Details and Default Territory.
 
-![Shopping Cart](assets/old_images/erpnext/shopping-cart-1.png)
+![Shopping Cart]({{url_prefix}}/assets/old_images/erpnext/shopping-cart-1.png)
 
   
 
 #### Step 2: Enter Price List, Tax Master and Shipping Rule.
 
-![Shopping Cart](assets/old_images/erpnext/shopping-cart-2.png)
+![Shopping Cart]({{url_prefix}}/assets/old_images/erpnext/shopping-cart-2.png)
 
   
 
@@ -29,13 +29,13 @@ Customers can click on the cart and enter the amount of quantity they wish to
 buy. The Item number will be stored on the right hand corner of the page, next
 to the flower sign.
 
-![Shopping Cart](assets/old_images/erpnext/shopping-cart-display-1.png)
+![Shopping Cart]({{url_prefix}}/assets/old_images/erpnext/shopping-cart-display-1.png)
 
   
 
 Click on the flower sign on the right hand side to see the cart details. Click
 on the cart to get the final amount details.
 
-![Shopping Cart](assets/old_images/erpnext/shopping-cart-display-amount.png)
+![Shopping Cart]({{url_prefix}}/assets/old_images/erpnext/shopping-cart-display-amount.png)
 
 {next}

@@ -19,7 +19,7 @@ balance. This improves accuracy of Balance Sheet and Profit and Loss
 statement.
 
 To check accounting entries for a particular stock transaction, please check
-[examples](/contents/stock/accounting-of-inventory-stock/perpetual-inventory)
+[examples]({{url_prefix}}/user/guides/stock/accounting-of-inventory-stock/perpetual-inventory.html)
 
 #### **Advantages**
 
@@ -64,6 +64,6 @@ This complete process is called Periodic Inventory.
 
 If you are an existing user using Periodic Inventory and want to use Perpetual
 Inventory, you have to follow some steps to migrate. For details, check
-[Migration From Periodic Inventory](/contents/stock/accounting-of-inventory-stock/migrate-to-perpetual-inventory).
+[Migration From Periodic Inventory]({{url_prefix}}/user/guides/stock/accounting-of-inventory-stock/migrate-to-perpetual-inventory.html).
 
 {next}

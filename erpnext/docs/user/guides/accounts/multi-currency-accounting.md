@@ -4,15 +4,15 @@ In ERPNext, you can make accounting entries in multiple currency. For example, i
 
 To get started with multi-currency accounting, you need to assign accounting currency in Account record. You can define Currency from Chart of Accounts while creating Account.
 
-<img class="screenshot" alt="Set Currency from Chart of Accounts"  	src="assets/img/accounts/multi-currency/chart-of-accounts.png">
+<img class="screenshot" alt="Set Currency from Chart of Accounts"  	src="{{url_prefix}}/assets/img/accounts/multi-currency/chart-of-accounts.png">
 
 You can also assign / modify the currency by opening specific Account record for existing Accounts.
 
-<img class="screenshot" alt="Modify Account Currency"  	src="assets/img/accounts/multi-currency/account.png">
+<img class="screenshot" alt="Modify Account Currency"  	src="{{url_prefix}}/assets/img/accounts/multi-currency/account.png">
 
 For Customer / Supplier (Party), you can also define it's accounting currency in the Party record. If the Party's accounting currency is different from Company Currency, you have to mention Default Receivable / Payable Account in that currency.
 
-<img class="screenshot" alt="Customer Accounting Currency"  	src="assets/img/accounts/multi-currency/customer.png">
+<img class="screenshot" alt="Customer Accounting Currency"  	src="{{url_prefix}}/assets/img/accounts/multi-currency/customer.png">
 
 
 Once you defined Accounting Currency in Party / Account record, you are ready to make transactions against them. If Party's accounting currency is different from Company Currency, system will restrict to make transaction for that party with that currency only. If accounting currency is same as Company Currency, you can make transactions for that Party in any currency. But accounting entries (GL Entries) will always be in Party's Accounting Currency. In any case, currency of Receivable Account will always be same as accounting currency of the Party.
@@ -31,7 +31,7 @@ Now, in POS, Paid Amount will be enetered in transaction currency, instead of ea
 
 Outstanding Amount and Advance Amount will always be calculated and shown in Customer's Account Currency.
 
-<img class="screenshot" alt="Sales Invoice Outstanding"  	src="assets/img/accounts/multi-currency/sales-invoice.png">
+<img class="screenshot" alt="Sales Invoice Outstanding"  	src="{{url_prefix}}/assets/img/accounts/multi-currency/sales-invoice.png">
 
 ### Purchase Invoice
 
@@ -41,14 +41,14 @@ Similarly, in Purchase Invoice, accounting entries will be made based on Supplie
 
 In Journal Entry, you can make transactions in different currencies. There is a checkbox "Multi Currency", to enable multi-currency entries. If "Multi Currency" option selected, you will be able to select accounts with different currencies.
 
-<img class="screenshot" alt="Journal Entry Exchange Rate"  	src="assets/img/accounts/multi-currency/journal-entry-multi-currency.png">
+<img class="screenshot" alt="Journal Entry Exchange Rate"  	src="{{url_prefix}}/assets/img/accounts/multi-currency/journal-entry-multi-currency.png">
 
  
 In Accounts table, on selection of foreign currency account, system will show Currency section and fetch Account Currency and Exchange Rate automatically. You can change / modify the Exchange Rate later manually.
 
 In a single Journal Entry, you can select accounts with only one alternate currency, apart from accounts in Company Currency. Debit / Credit amount should be entered in Account Currency, system will calculate and show the Debit / Credit amount in Company Currency automatically.
 
-<img class="screenshot" alt="Journal Entry in multi currency"  	src="assets/img/accounts/multi-currency/journal-entry-row.png">
+<img class="screenshot" alt="Journal Entry in multi currency"  	src="{{url_prefix}}/assets/img/accounts/multi-currency/journal-entry-row.png">
 
 #### Example 1: Payment Entry  Against Customer With Alternate Currency
 
@@ -56,7 +56,7 @@ Suppose, default currency of the company is INR and customer's accounting curren
 
 Exchange Rate in the payment entry should always be same as invoice (60), even if exchange rate on the payment date is 62. The bank account will be credited by the amount considering exchange rate as 62. Hence, Exchnage Gain / Loss will be booked based on exchange rate difference.
 
-<img class="screenshot" alt="Payment Entry"  	src="assets/img/accounts/multi-currency/payment-entry.png">
+<img class="screenshot" alt="Payment Entry"  	src="{{url_prefix}}/assets/img/accounts/multi-currency/payment-entry.png">
 
 #### Example 2: Inter-bank Transfer (USD -> INR)
 
@@ -101,7 +101,7 @@ Lets say, Paypal account debited by following amounts over the week, which has n
 
 Suppose, Exchange Rate on the payment date is 62 and Bank Transfer Entry will be look like below:
 
-<img class="screenshot" alt="Inter Bank Transfer"  	src="assets/img/accounts/multi-currency/bank-transfer.png">
+<img class="screenshot" alt="Inter Bank Transfer"  	src="{{url_prefix}}/assets/img/accounts/multi-currency/bank-transfer.png">
 
 
 ## Reports
@@ -110,10 +110,10 @@ Suppose, Exchange Rate on the payment date is 62 and Bank Transfer Entry will be
 
 In General Ledger, system shows debit / credit amount in both currency if filtered by an Account and Account Currency is different from Company Currency.
 
-<img class="screenshot" alt="General Ledger Report"  	src="assets/img/accounts/multi-currency/general-ledger.png">
+<img class="screenshot" alt="General Ledger Report"  	src="{{url_prefix}}/assets/img/accounts/multi-currency/general-ledger.png">
 
 ### Accounts Receivable / Payable
 
 In Accounts Receivable / Payable report, system shows all the amounts in Party / Account Currency.
 
-<img class="screenshot" alt="Accounts Receivable Report"  	src="assets/img/accounts/multi-currency/accounts-receivable.png">
+<img class="screenshot" alt="Accounts Receivable Report"  	src="{{url_prefix}}/assets/img/accounts/multi-currency/accounts-receivable.png">

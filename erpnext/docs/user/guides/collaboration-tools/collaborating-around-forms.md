@@ -4,7 +4,7 @@ You can email any transaction from the system by clicking on the â€œAssigned toâ
 button in the right sidebar. A log of all your sent emails will be maintained
 in Communication.
 
-![Forms](assets/old_images/erpnext/forms.png)
+![Forms]({{url_prefix}}/assets/old_images/erpnext/forms.png)
 
 ### Comments
 
@@ -14,6 +14,6 @@ be added in the right sidebar.
 
 ### Tags
 
-[Read more about Tags](/contents/collaboration-tools/tags)  
+[Read more about Tags]({{url_prefix}}/user/guides/collaboration-tools/tags.html)  
 
 {next}

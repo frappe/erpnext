@@ -1,7 +1,7 @@
 Selling Setting is where you can define propertiese which will be applied in your selling transactions. 
 Let's check into each property one by one.
 
-<img class="screenshot" alt="Selling Settings" src="assets/img/selling/selling-settings.png">
+<img class="screenshot" alt="Selling Settings" src="{{url_prefix}}/assets/img/selling/selling-settings.png">
 
 ####1. Customer Naming By
 

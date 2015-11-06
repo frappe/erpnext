@@ -5,11 +5,11 @@ ERPNext is optimized for itemized management of your sales and purchase. If you 
 ## Item Properties
 
   * **Item Name:** Item name is the actual name of your product or service.
-  * **Item Code:** Item Code is a short-form to denote your Item. If you have very few Items, it is advisable to keep the Item Name and the Item Code same. This helps new users to recognise and update Item details in all transactions. In case you have lot of Items with long names and the list runs in hundreds, it is advisable to code. To understand naming Item codes see [Item Codification](/contents/stock/item/item-codification)
-  * **Item Group:** Item Group is used to categorize an Item under various criterias like products, raw materials, services, sub-assemblies, consumables or all Item groups. Create your default Item Group list under Setup> Item Group and pre-select the option while filling your New Item details under [Item Group](/contents/stock/setup/item-group)
+  * **Item Code:** Item Code is a short-form to denote your Item. If you have very few Items, it is advisable to keep the Item Name and the Item Code same. This helps new users to recognise and update Item details in all transactions. In case you have lot of Items with long names and the list runs in hundreds, it is advisable to code. To understand naming Item codes see [Item Codification]({{url_prefix}}/user/guides/stock/item/item-codification.html)
+  * **Item Group:** Item Group is used to categorize an Item under various criterias like products, raw materials, services, sub-assemblies, consumables or all Item groups. Create your default Item Group list under Setup> Item Group and pre-select the option while filling your New Item details under [Item Group]({{url_prefix}}/user/guides/stock/setup/item-group.html)
   * **Default Unit of Measure:** This is the default measuring unit that you will use for your product. It could be in nos, kgs, meters, etc. You can store all the UOM’s that your product will require under Set Up> Master Data > UOM. These can be preselected while filling New Item by using % sign to get a pop up of the UOM list.
   * **Brand:** If you have more than one brand save them under Set Up> Master Data> Brand and pre-select them while filling a New Item.
-  * **Variant:** A Item Variant is a different version of a Item.To learn more about managing varaints see [Item Variants](/contents/stock/item/item-variants)
+  * **Variant:** A Item Variant is a different version of a Item.To learn more about managing varaints see [Item Variants]({{url_prefix}}/user/guides/stock/item/item-variants.html)
   
 ### Upload an Image
 
@@ -34,7 +34,7 @@ These numbers help to track individual units or batches of Items which you sell.
 
 > Important: Once you mark an item as serialized or batched or neither, you cannot change it after you have made any stock entry.
 
-  * [Discussion on Serialized Inventory](/contents/setting-up/stock-reconciliation-for-non-serialized-item)  
+  * [Discussion on Serialized Inventory]({{url_prefix}}/user/guides/setting-up/stock-reconciliation-for-non-serialized-item.html)  
 
 ### Re Ordering
 
@@ -50,7 +50,7 @@ tax Account, “VAT 10%” and this particular Item is exempted from tax, then y
 select “VAT 10%” in the first column, and set “0” as the tax rate in the
 second column.
 
-Go to [Setting Up Taxes](/contents/setting-up/setting-up-taxes) to understand this topic in detail.
+Go to [Setting Up Taxes]({{url_prefix}}/user/guides/setting-up/setting-up-taxes.html) to understand this topic in detail.
 
 ### Inspection
 
@@ -66,7 +66,7 @@ Length, Finish etc.
 
 ### Purchase Details
 
-![Purchase Details](assets/old_images/erpnext/item-purchase.png)
+![Purchase Details]({{url_prefix}}/assets/old_images/erpnext/item-purchase.png)
 
 **Lead time days:** Lead time days are the number of days required for the Item to reach the warehouse.
 
@@ -76,7 +76,7 @@ Length, Finish etc.
 
 ### Sales Details
 
-![Sales Details](assets/old_images/erpnext/item-sales.png)
+![Sales Details]({{url_prefix}}/assets/old_images/erpnext/item-sales.png)
 
 **Default Income Account:** Income account selected here will be fetched automatically in sales invoice for this item.
 
@@ -84,8 +84,8 @@ Length, Finish etc.
 
 ### Manufacturing And Website
 
-![Manufacturing](assets/old_images/erpnext/item-manufacturing-website.png)
+![Manufacturing]({{url_prefix}}/assets/old_images/erpnext/item-manufacturing-website.png)
 
-Visit [Manufacturing](/contents/manufacturing) and [Website ](/contents/website)to understand these topics in detail.
+Visit [Manufacturing]({{url_prefix}}/user/guides/manufacturing.html) and [Website ]({{url_prefix}}/user/guides/website.html)to understand these topics in detail.
 
 {next}

@@ -4,7 +4,7 @@ Maintenance Visit from:
 
 > Support > Maintenance Visit > New Maintenance Visit
 
-<img class="screenshot" alt="Maintenance Visit" src="assets/img/support/maintenance-visit.png">
+<img class="screenshot" alt="Maintenance Visit" src="{{url_prefix}}/assets/img/support/maintenance-visit.png">
 
 The Maintenance Visit contains information about the:
 

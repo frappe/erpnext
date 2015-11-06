@@ -1,6 +1,6 @@
-You can define which [Tax Template](/contents/setting-up/setting-up-taxes) must be applied on a Sales / Purchase transaction using Tax Rule.
+You can define which [Tax Template]({{url_prefix}}/user/guides/setting-up/setting-up-taxes.html) must be applied on a Sales / Purchase transaction using Tax Rule.
 
-<img class="screenshot" alt="Tax Rule" src="assets/img/accounts/tax-rule.png">
+<img class="screenshot" alt="Tax Rule" src="{{url_prefix}}/assets/img/accounts/tax-rule.png">
 
 You can define Tax Rules for Sales or Purchase Taxes. 
 While making a Transaction the system will select and apply tax template based on the tax rule defined.
@@ -10,9 +10,9 @@ Let us consider a senario to understand Tax Rule Better.
 
 Suppose we define 2 Tax Rules as below.
 
-<img class="screenshot" alt="Tax Rule" src="assets/img/accounts/tax-rule-1.png">
+<img class="screenshot" alt="Tax Rule" src="{{url_prefix}}/assets/img/accounts/tax-rule-1.png">
 
-<img class="screenshot" alt="Tax Rule" src="assets/img/accounts/tax-rule-2.png">
+<img class="screenshot" alt="Tax Rule" src="{{url_prefix}}/assets/img/accounts/tax-rule-2.png">
 
 Here Tax Rule 1 has Billing Country as India and Tax Rule 2 has Billing Country as United Kingdom
 

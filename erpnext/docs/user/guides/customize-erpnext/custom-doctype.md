@@ -19,7 +19,7 @@ in the Sales Order Doctype, then you should check Is Child Table. Else no.
 not be able to re-produce.
 1. Custom?: This field will be checked by default when adding Custom Doctype.
 
-![Doctype Basic](assets/img/setup/customize/doctype-basics.png)
+![Doctype Basic]({{url_prefix}}/assets/img/setup/customize/doctype-basics.png)
 
 #### Fields
 
@@ -34,7 +34,7 @@ Fields are much more than database columns, they can be:
 1. Actions (button)
 1. Attachments or Images
 
-![Doctype fields](assets/img/setup/customize/Doctype-all-fields.png)
+![Doctype fields]({{url_prefix}}/assets/img/setup/customize/Doctype-all-fields.png)
 
 When you add fields, you need to enter the **Type**. **Label** is optional for Section Break and Column Break. **Name** (`fieldname`) is the name of the database table column.
 
@@ -44,19 +44,19 @@ You can also set other properties of the field like whether it is mandatory, rea
 
 In this section, you can define criteria based on which document for this doctype will be named. There are multiple criterion based on which document can be named, like naming based on the value in the specific field, or based on Naming Series, or based on value provided by the user in the prompt, which will be shown when saving document. In the following example, we are doing naming based on the value in the field **book_name**.
 
-![Doctype Naming](assets/img/setup/customize/doctype-field-naming.png)
+![Doctype Naming]({{url_prefix}}/assets/img/setup/customize/doctype-field-naming.png)
 
 #### Permission
 
 In this table, you should select roles and define permission roles for them for this Doctype.
 
-![Doctype Permissions](assets/img/setup/customize/Doctype-permissions.png)
+![Doctype Permissions]({{url_prefix}}/assets/img/setup/customize/Doctype-permissions.png)
 
 #### Save Doctype
 
 On saving doctype, you will get pop-up to provide name for this Doctype.
 
-![Doctype Save](assets/img/setup/customize/Doctype-save.png)
+![Doctype Save]({{url_prefix}}/assets/img/setup/customize/Doctype-save.png)
 
 #### Doctype in System
 
@@ -65,10 +65,10 @@ Human Resource module, to access this doctype, go to:
 
 `Human Resource > Document > Book`
 
-![Doctype List](assets/img/setup/customize/Doctype-list-view.png)
+![Doctype List]({{url_prefix}}/assets/img/setup/customize/Doctype-list-view.png)
 
 #### Book master
 
 Using the fields entered, following is the master one book.
 
-![Doctype List](assets/img/setup/customize/Doctype-book-added.png)
+![Doctype List]({{url_prefix}}/assets/img/setup/customize/Doctype-book-added.png)

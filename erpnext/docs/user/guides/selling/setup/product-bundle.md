@@ -13,7 +13,7 @@ To create new Product Bundle, Go to:
 
 Selling > Setup > Product Bundle > New
 
-<img class="screenshot" alt="Product Bundle" src="assets/img/selling/product-bundle.png">
+<img class="screenshot" alt="Product Bundle" src="{{url_prefix}}/assets/img/selling/product-bundle.png">
 
 ###Select Parent Item
 
@@ -33,7 +33,7 @@ In Package Item section, you will list all the child items for which we maintain
 When making Sales transactions like Sales Invoice, Sales Order and Delivery Note, 
 Parent Item will be selected in the main item table.
 
-<img class="screenshot" alt="Product Bundle" src="assets/img/selling/product-bundle.gif">
+<img class="screenshot" alt="Product Bundle" src="{{url_prefix}}/assets/img/selling/product-bundle.gif">
 
 On selection on Parent Item in the main item table, its child items will be fetched in Packing List 
 table of the transaction. If child item is the serialized item, you will be able to specify its Serial Mo. 

@@ -44,7 +44,7 @@ To create a new Salary Structure go to:
 
 #### Figure 1:Salary Structure
 
-<img class="screenshot" alt="Salary Structure" src="assets/img/human-resources/salary-structure.png">
+<img class="screenshot" alt="Salary Structure" src="{{url_prefix}}/assets/img/human-resources/salary-structure.png">
 
 ### In the Salary Structure,
 
@@ -76,7 +76,7 @@ Slip.
 
 #### Figure 2: Salary Slip
 
-<img class="screenshot" alt="Salary Slip" src="assets/img/human-resources/salary-slip.png">
+<img class="screenshot" alt="Salary Slip" src="{{url_prefix}}/assets/img/human-resources/salary-slip.png">
 
 You can also create salary slip for multiple employees using Process Payroll:
 
@@ -84,7 +84,7 @@ You can also create salary slip for multiple employees using Process Payroll:
 
 #### Figure 3: Process Payroll
 
-<img class="screenshot" alt="Process Payroll" src="assets/img/human-resources/process-payroll.png">
+<img class="screenshot" alt="Process Payroll" src="{{url_prefix}}/assets/img/human-resources/process-payroll.png">
 
 In Process Payroll,
 

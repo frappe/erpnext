@@ -11,7 +11,7 @@ maintained to serve unexpected demands.
 Having a tight control of the projected inventory is crucial to determine
 shortages and to calculate the right order quantity.
 
-![Projected Quantity Stock Report](assets/old_images/erpnext/projected-quantity-stock-report.png)
+![Projected Quantity Stock Report]({{url_prefix}}/assets/old_images/erpnext/projected-quantity-stock-report.png)
 
 
 > Projected Qty = Actual Qty + Planned Qty + Requested Qty + Ordered Qty -
