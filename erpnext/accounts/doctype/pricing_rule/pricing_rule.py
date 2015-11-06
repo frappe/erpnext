@@ -168,7 +168,11 @@ def get_pricing_rules(args):
 		field = frappe.scrub(parenttype)
 		condition = ""
 		if args.get(field):
-			lft, rgt = frappe.db.get_value(parenttype, args[field], ["lft", "rgt"])
+			try:
+				lft, rgt = frappe.db.get_value(parenttype, args[field], ["lft", "rgt"])
+			except TypeError:
+				frappe.throw(_("Invalid {0}").format(args[field]))
+
 			parent_groups = frappe.db.sql_list("""select name from `tab%s`
 				where lft<=%s and rgt>=%s""" % (parenttype, '%s', '%s'), (lft, rgt))
 
