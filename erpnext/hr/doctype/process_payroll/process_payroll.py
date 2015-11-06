@@ -196,11 +196,11 @@ class ProcessPayroll(Document):
 		journal_entry.set("accounts", [
 			{
 				"account": salary_account,
-				"debit": amount
+				"debit_in_account_currency": amount
 			},
 			{
 				"account": default_bank_account,
-				"credit": amount
+				"credit_in_account_currency": amount
 			},
 		])
 
