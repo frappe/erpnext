@@ -1,3 +1,3 @@
-# User Manual
+# User Manual and Videos
 
 {index}
