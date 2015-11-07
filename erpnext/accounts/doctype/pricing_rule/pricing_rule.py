@@ -59,7 +59,7 @@ class PricingRule(Document):
 					self.set(f, None)
 
 	def validate_price_or_discount(self):
-		for field in ["Price", "Discount Percentage"]:
+		for field in ["Price"]:
 			if flt(self.get(frappe.scrub(field))) < 0:
 				throw(_("{0} can not be negative").format(field))
 
