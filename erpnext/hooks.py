@@ -29,7 +29,7 @@ blogs.
 """
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "6.7.5"
+app_version = "6.7.6"
 source_link = "https://github.com/frappe/erpnext"
 
 error_report_email = "support@erpnext.com"
