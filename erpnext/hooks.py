@@ -39,6 +39,10 @@ app_include_css = "assets/css/erpnext.css"
 web_include_js = "assets/js/erpnext-web.min.js"
 web_include_css = "assets/erpnext/css/website.css"
 
+# setup wizard
+setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
+setup_wizard_complete = "erpnext.setup.setup_wizard.setup_wizard.setup_complete"
+
 after_install = "erpnext.setup.install.after_install"
 
 boot_session = "erpnext.startup.boot.boot_session"
@@ -148,6 +152,5 @@ default_mail_footer = """<div style="text-align: center;">
 </div>"""
 
 get_translated_dict = {
-	("page", "setup-wizard"): "frappe.geo.country_info.get_translated_dict",
 	("doctype", "Global Defaults"): "frappe.geo.country_info.get_translated_dict"
 }

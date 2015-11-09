@@ -177,7 +177,7 @@ def install(country=None):
 		{'doctype': "Print Heading", 'print_heading': _("Debit Note")}
 	]
 
-	from erpnext.setup.page.setup_wizard.fixtures.industry_type import get_industry_types
+	from erpnext.setup.setup_wizard.industry_type import get_industry_types
 	records += [{"doctype":"Industry Type", "industry": d} for d in get_industry_types()]
 	# records += [{"doctype":"Operation", "operation": d} for d in get_operations()]
 
