@@ -22,13 +22,18 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			if(doc.status != 'Stopped' && doc.status != 'Closed') {
 
 				$.each(cur_frm.doc.items, function(i, item){
+					// if delivered_by_supplier and supplier both set then it will ask to create purchase order. 
+									
 					if(item.delivered_by_supplier == 1 || item.supplier){
 						if(item.qty > flt(item.ordered_qty)
 							&& item.qty > flt(item.delivered_qty)) {
 							is_delivered_by_supplier = true;
 						}
 					}
-					else{
+					
+					// if only supplier is mentioned then allow both options, create purchase order or create delivery note.
+					
+					if(!item.delivered_by_supplier) {
 						if(item.qty > flt(item.delivered_qty)) {
 							is_delivery_note = true;
 						}
