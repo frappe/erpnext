@@ -15,25 +15,31 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	refresh: function(doc, dt, dn) {
 		this._super();
 		this.frm.dashboard.reset();
-		var is_delivered_by_supplier = false;
-		var is_delivery_note = false;
+		var allow_purchase = false;
+		var allow_delivery = false;
 
 		if(doc.docstatus==1) {
 			if(doc.status != 'Stopped' && doc.status != 'Closed') {
 
-				$.each(cur_frm.doc.items, function(i, item){
-					if(item.delivered_by_supplier == 1 || item.supplier){
+				for (var i in cur_frm.doc.items) {
+					var item = cur_frm.doc.items[i];
+					if(item.delivered_by_supplier === 1 || item.supplier){
 						if(item.qty > flt(item.ordered_qty)
 							&& item.qty > flt(item.delivered_qty)) {
-							is_delivered_by_supplier = true;
+							allow_purchase = true;
 						}
 					}
-					else{
+
+					if (item.delivered_by_supplier===0) {
 						if(item.qty > flt(item.delivered_qty)) {
-							is_delivery_note = true;
+							allow_delivery = true;
 						}
 					}
-				})
+
+					if (allow_delivery && allow_purchase) {
+						break;
+					}
+				}
 
 				// material request
 				if(!doc.order_type || ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1
@@ -42,7 +48,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 
 				// make purchase order
-				if(flt(doc.per_delivered, 2) < 100 && is_delivered_by_supplier) {
+				if(flt(doc.per_delivered, 2) < 100 && allow_purchase) {
 					cur_frm.add_custom_button(__('Purchase Order'), cur_frm.cscript.make_purchase_order);
 				}
 
@@ -65,7 +71,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 
 				// delivery note
-				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && is_delivery_note) {
+				if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
 					cur_frm.add_custom_button(__('Delivery'), this.make_delivery_note).addClass("btn-primary");
 				}
 
