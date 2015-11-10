@@ -1,0 +1,1 @@
+erpnext.hub_node

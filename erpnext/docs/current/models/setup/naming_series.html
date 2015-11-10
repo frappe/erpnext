@@ -1,0 +1,386 @@
+<!-- title: Naming Series -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.7.7</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/setup/doctype/naming_series"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+<span class="label label-info">Single</span>
+
+
+
+
+Set prefix for numbering series on your transactions
+
+<h3>Fields</h3>
+
+<table class="table table-bordered" style="table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr class="info">
+            <td>1</td>
+            <td ><code>setup_series</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Setup Series
+                <p class="text-muted small">
+                    Set prefix for numbering series on your transactions</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>select_doc_for_series</code></td>
+            <td >
+                Select</td>
+            <td >
+                Select Transaction
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>help_html</code></td>
+            <td >
+                HTML</td>
+            <td >
+                Help HTML
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>set_options</code></td>
+            <td >
+                Text</td>
+            <td >
+                Series List for this Transaction
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>user_must_always_select</code></td>
+            <td >
+                Check</td>
+            <td >
+                User must always select
+                <p class="text-muted small">
+                    Check this if you want to force the user to select a series before saving. There will be no default if you check this.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>update</code></td>
+            <td >
+                Button</td>
+            <td >
+                Update
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>7</td>
+            <td ><code>update_series</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Update Series
+                <p class="text-muted small">
+                    Change the starting / current sequence number of an existing series.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>prefix</code></td>
+            <td >
+                Select</td>
+            <td >
+                Prefix
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>current_value</code></td>
+            <td >
+                Int</td>
+            <td >
+                Current Value
+                <p class="text-muted small">
+                    This is the number of the last created transaction with this prefix</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>update_series_start</code></td>
+            <td >
+                Button</td>
+            <td >
+                Update Series Number
+                
+            </td>
+            <td>
+                <pre>update_series_start</pre>
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.setup.doctype.naming_series.naming_series</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>NamingSeries</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="check_duplicate" href="#check_duplicate" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>check_duplicate</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_current" href="#get_current" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_current</b>
+        <i class="text-muted">(self, arg=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p>get series current</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_options" href="#get_options" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_options</b>
+        <i class="text-muted">(self, arg=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="get_transactions" href="#get_transactions" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>get_transactions</b>
+        <i class="text-muted">(self, arg=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="insert_series" href="#insert_series" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>insert_series</b>
+        <i class="text-muted">(self, series)</i>
+    </p>
+	<div class="docs-attr-desc"><p>insert series if missing</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="scrub_options_list" href="#scrub_options_list" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>scrub_options_list</b>
+        <i class="text-muted">(self, ol)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_series_for" href="#set_series_for" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>set_series_for</b>
+        <i class="text-muted">(self, doctype, ol)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_series" href="#update_series" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_series</b>
+        <i class="text-muted">(self, arg=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p>update series list</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_series_start" href="#update_series_start" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_series_start</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_series_name" href="#validate_series_name" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_series_name</b>
+        <i class="text-muted">(self, n)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>NamingSeriesNotSetError</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.setup.doctype.naming_series.naming_series.get_default_naming_series" href="#erpnext.setup.doctype.naming_series.naming_series.get_default_naming_series" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.setup.doctype.naming_series.naming_series.<b>get_default_naming_series</b>
+        <i class="text-muted">(doctype)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.setup.doctype.naming_series.naming_series.set_by_naming_series" href="#erpnext.setup.doctype.naming_series.naming_series.set_by_naming_series" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.setup.doctype.naming_series.naming_series.<b>set_by_naming_series</b>
+        <i class="text-muted">(doctype, fieldname, naming_series, hide_name_field=True)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+
+    
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

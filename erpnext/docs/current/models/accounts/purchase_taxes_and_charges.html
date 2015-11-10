@@ -1,0 +1,387 @@
+<!-- title: Purchase Taxes and Charges -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.7.7</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/accounts/doctype/purchase_taxes_and_charges"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+<span class="label label-info">Child Table</span>
+
+
+    <p><b>Table Name:</b> <code>tabPurchase Taxes and Charges</code></p>
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered" style="table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td class="danger" title="Mandatory"><code>category</code></td>
+            <td >
+                Select</td>
+            <td >
+                Consider Tax or Charge for
+                
+            </td>
+            <td>
+                <pre>Valuation and Total
+Valuation
+Total</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td class="danger" title="Mandatory"><code>add_deduct_tax</code></td>
+            <td >
+                Select</td>
+            <td >
+                Add or Deduct
+                
+            </td>
+            <td>
+                <pre>Add
+Deduct</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td class="danger" title="Mandatory"><code>charge_type</code></td>
+            <td >
+                Select</td>
+            <td >
+                Type
+                
+            </td>
+            <td>
+                <pre>
+Actual
+On Net Total
+On Previous Row Amount
+On Previous Row Total</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>row_id</code></td>
+            <td >
+                Data</td>
+            <td >
+                Reference Row #
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>included_in_print_rate</code></td>
+            <td >
+                Check</td>
+            <td >
+                Is this Tax included in Basic Rate?
+                <p class="text-muted small">
+                    If checked, the tax amount will be considered as already included in the Print Rate / Print Amount</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>col_break1</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>7</td>
+            <td class="danger" title="Mandatory"><code>account_head</code></td>
+            <td >
+                Link</td>
+            <td >
+                Account Head
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/account">Account</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>cost_center</code></td>
+            <td >
+                Link</td>
+            <td >
+                Cost Center
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/cost_center">Cost Center</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td class="danger" title="Mandatory"><code>description</code></td>
+            <td >
+                Text Editor</td>
+            <td >
+                Description
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>10</td>
+            <td ><code>section_break_10</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
+            <td ><code>rate</code></td>
+            <td >
+                Float</td>
+            <td >
+                Rate
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>12</td>
+            <td ><code>section_break_9</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
+            <td ><code>tax_amount</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Amount
+                
+            </td>
+            <td>
+                <pre>currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
+            <td ><code>tax_amount_after_discount_amount</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Tax Amount After Discount Amount
+                
+            </td>
+            <td>
+                <pre>currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>15</td>
+            <td ><code>total</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Total
+                
+            </td>
+            <td>
+                <pre>currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>16</td>
+            <td ><code>column_break_14</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
+            <td ><code>base_tax_amount</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Amount (Company Currency)
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
+            <td ><code>base_total</code></td>
+            <td >
+                Currency</td>
+            <td class="text-muted" title="Hidden">
+                Total (Company Currency)
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
+            <td ><code>base_tax_amount_after_discount_amount</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Tax Amount After Discount Amount
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>20</td>
+            <td ><code>item_wise_tax_detail</code></td>
+            <td >
+                Small Text</td>
+            <td class="text-muted" title="Hidden">
+                Item Wise Tax Detail 
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>21</td>
+            <td ><code>parenttype</code></td>
+            <td >
+                Data</td>
+            <td class="text-muted" title="Hidden">
+                Parenttype
+                
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    
+    
+    <h4>Child Table Of</h4>
+    <ul>
+    
+        <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/purchase_invoice">Purchase Invoice</a>
+
+</li>
+    
+        <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/purchase_order">Purchase Order</a>
+
+</li>
+    
+        <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/purchase_receipt">Purchase Receipt</a>
+
+</li>
+    
+        <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/purchase_taxes_and_charges_template">Purchase Taxes and Charges Template</a>
+
+</li>
+    
+        <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/buying/supplier_quotation">Supplier Quotation</a>
+
+</li>
+    
+    </ul>
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->
