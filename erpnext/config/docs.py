@@ -20,8 +20,6 @@ Among other things, ERPNext will help you to:
 And a lot lot lot more."""
 
 def get_context(context):
-	context.title = "ERPNext"
-
 	context.top_bar_items = [
 		{"label": "Contents", "url": context.docs_base_url + "/contents.html", "right": 1},
 		{"label": "User Guide", "url": context.docs_base_url + "/user/guides", "right": 1},
