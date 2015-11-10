@@ -258,10 +258,19 @@ def get_leave_balance(employee, leave_type, from_date, to_date):
 
 	leave_all = leave_all and flt(leave_all[0][0]) or 0
 
+	from erpnext.hr.report.employee_leave_balance.employee_leave_balance import get_leave_allocation_record
+	
+	la = get_leave_allocation_record(from_date)
+
 	leave_app = frappe.db.sql("""select SUM(total_leave_days)
 		from `tabLeave Application`
-		where employee = %s and leave_type = %s and to_date>=%s and from_date<=%s
-		and status="Approved" and docstatus = 1""", (employee, leave_type, from_date, to_date))
+		where employee = '%(employee)s' and leave_type = '%(leave_type)s' 
+			and (from_date between '%(from_date)s' and '%(to_date)s' 
+				or to_date between '%(from_date)s' and '%(to_date)s') 
+			and to_date < '%(to_date)s'
+		and status="Approved" and docstatus = 1"""% {"employee": employee, 
+			"leave_type": leave_type, "from_date": la.from_date, "to_date": from_date})
+			
 	leave_app = leave_app and flt(leave_app[0][0]) or 0
 
 	ret = {'leave_balance': leave_all - leave_app}
