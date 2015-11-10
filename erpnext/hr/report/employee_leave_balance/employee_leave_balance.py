@@ -28,7 +28,7 @@ def execute(filters=None):
 
 	allocations = frappe.db.sql("""select employee, leave_type, sum(new_leaves_allocated) as leaves_allocated
 	 	from `tabLeave Allocation`
-		where docstatus=1 and employee in (%s) and from_date >= '%s' and to_date <= '%s'""" %
+		where docstatus=1 and employee in (%s) and to_date >= '%s' and from_date <= '%s' """ %
 		(','.join(['%s']*len(employee_names)), filters.get("from_date"),
 		 filters.get("to_date")), employee_names, as_dict=True)
 		
@@ -36,7 +36,7 @@ def execute(filters=None):
 			SUM(total_leave_days) as leaves
 		from `tabLeave Application`
 		where status="Approved" and docstatus = 1 and employee in (%s)
-		and from_date >= '%s' and to_date <= '%s'
+		and to_date >= '%s' and from_date <= '%s' 
 		group by employee, leave_type""" %
 		(','.join(['%s']*len(employee_names)), filters.get("from_date"),
 		 filters.get("to_date")), employee_names, as_dict=True)
