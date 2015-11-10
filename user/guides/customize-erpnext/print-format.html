@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Print Format</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Print Format" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize/print-format.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="Print Formats are the layouts that are generated when you want to Print or Email a transaction like a Sales Invoice. There are two types of Print Formats, The auto-generated “Standard” Print Format: This type of format follows the same layout as the form and is generated automatically by ERPNext. Based on the Print Format document. There are templates in HTML that will be rendered with data. ERPNext comes with a number of pre-defined te" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize/print-format.png" data-html-block="meta_block">
+<meta name="og:title" content="Print Format" data-html-block="meta_block">
+<meta name="twitter:title" content="Print Format" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize/print-format.png" data-html-block="meta_block">
+<meta name="twitter:description" content="Print Formats are the layouts that are generated when you want to Print or Email a transaction like a Sales Invoice. There are two types of Print Formats, The auto-generated “Standard” Print Format: This type of format follows the same layout as the form and is generated automatically by ERPNext. Based on the Print Format document. There are templates in HTML that will be rendered with data. ERPNext comes with a number of pre-defined te" data-html-block="meta_block">
+<meta name="description" content="Print Formats are the layouts that are generated when you want to Print or Email a transaction like a Sales Invoice. There are two types of Print Formats, The auto-generated “Standard” Print Format: This type of format follows the same layout as the form and is generated automatically by ERPNext. Based on the Print Format document. There are templates in HTML that will be rendered with data. ERPNext comes with a number of pre-defined te" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-print-format" data-path="user/guides/customize-erpnext/print-format"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Print Format</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/customize-erpnext">
+		Customize ERPNext</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="print-format" style="text-align: Left">
+	<!-- no-jinja -->
+
+<p>Print Formats are the layouts that are generated when you want to Print or
+Email a transaction like a Sales Invoice. There are two types of Print
+Formats,</p>
+
+<ul>
+<li>The auto-generated “Standard” Print Format: This type of format follows the same layout as the form and is generated automatically by ERPNext.</li>
+<li>Based on the Print Format document. There are templates in HTML that will be rendered with data.</li>
+</ul>
+
+<p>ERPNext comes with a number of pre-defined templates in three styles: Modern,
+Classic and Standard.</p>
+
+<p>You can modify the templates or create your own. Editing
+ERPNext templates is not allowed because they may be over-written in an
+upcoming release.</p>
+
+<p>To create your own versions, open an existing template from:</p>
+
+<blockquote>
+  <p>Setup &gt; Printing &gt; Print Formats</p>
+</blockquote>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize/print-format.png" alt="Print Format" /></p>
+
+<p>Select the type of Print Format you want to edit and click on the “Copy”
+button on the right column. A new Print Format will open up with “Is Standard”
+set as “No” and you can edit the Print Format.</p>
+
+<p>Editing a Print Format is a long discussion and you will have to know a bit of
+HTML, CSS, Python to learn this. For help, please post on our forum.</p>
+
+<p>Print Formats are rendered on the server side using the <a href="http://jinja.pocoo.org/docs/templates/">Jinja Templating Language</a>. All forms have access to the doc object which contains information about the document that is being formatted. You can also access common utilities via the frappe module.</p>
+
+<p>For styling, the <a href="http://getbootstrap.com/">Boostrap CSS Framework</a> is provided and you can enjoy the full range of classes.</p>
+
+<blockquote>
+  <p>Note: Pre-printed stationary is usually not a good idea because your Prints
+  will look incomplete (inconsistent) when you send them by mail.</p>
+</blockquote>
+
+<h4>References</h4>
+
+<ol>
+<li><a href="http://jinja.pocoo.org/docs/templates/">Jinja Tempalting Language: Reference</a></li>
+<li><a href="http://getbootstrap.com/">Bootstrap CSS Framework</a></li>
+</ol>
+
+<h4>Print Settings</h4>
+
+<p>To edit / update your print and PDF settings, go to:</p>
+
+<blockquote>
+  <p>Setup &gt; Printing and Branding &gt; Print Settings</p>
+</blockquote>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize/print-settings.png" alt="Print Format" /></p>
+
+<h4>Example</h4>
+
+<p></p>
+
+<pre><code>&lt;h3&gt;{{ doc.select&lt;em&gt;print&lt;/em&gt;heading or &#34;Invoice&#34; }}&lt;/h3&gt;
+    &lt;div class=&#34;row&#34;&gt;
+        &lt;div class=&#34;col-md-3 text-right&#34;&gt;Customer Name&lt;/div&gt;
+        &lt;div class=&#34;col-md-9&#34;&gt;{{ doc.customer&lt;em&gt;name }}&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&#34;row&#34;&gt;
+        &lt;div class=&#34;col-md-3 text-right&#34;&gt;Date&lt;/div&gt;
+        &lt;div class=&#34;col-md-9&#34;&gt;{{ doc.get&lt;/em&gt;formatted(&#34;invoice&lt;em&gt;date&#34;) }}&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;table class=&#34;table table-bordered&#34;&gt;
+        &lt;tbody&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Sr&lt;/th&gt;
+                &lt;th&gt;Item Name&lt;/th&gt;
+                &lt;th&gt;Description&lt;/th&gt;
+                &lt;th class=&#34;text-right&#34;&gt;Qty&lt;/th&gt;
+                &lt;th class=&#34;text-right&#34;&gt;Rate&lt;/th&gt;
+                &lt;th class=&#34;text-right&#34;&gt;Amount&lt;/th&gt;
+            &lt;/tr&gt;
+            {%- for row in doc.items -%}
+            &lt;tr&gt;
+                &lt;td style=&#34;width: 3%;&#34;&gt;{{ row.idx }}&lt;/td&gt;
+                &lt;td style=&#34;width: 20%;&#34;&gt;
+                    {{ row.item&lt;/em&gt;name }}
+                    {% if row.item&lt;em&gt;code != row.item&lt;/em&gt;name -%}
+                    &lt;br&gt;Item Code: {{ row.item&lt;em&gt;code}}
+                    {%- endif %}
+                &lt;/td&gt;
+                &lt;td style=&#34;width: 37%;&#34;&gt;
+                    &lt;div style=&#34;border: 0px;&#34;&gt;{{ row.description }}&lt;/div&gt;&lt;/td&gt;
+                &lt;td style=&#34;width: 10%; text-align: right;&#34;&gt;{{ row.qty }} {{ row.uom or row.stock&lt;/em&gt;uom }}&lt;/td&gt;
+                &lt;td style=&#34;width: 15%; text-align: right;&#34;&gt;{{
+                    row.get&lt;em&gt;formatted(&#34;rate&#34;, doc) }}&lt;/td&gt;
+                &lt;td style=&#34;width: 15%; text-align: right;&#34;&gt;{{
+                    row.get&lt;/em&gt;formatted(&#34;amount&#34;, doc) }}&lt;/td&gt;
+            &lt;/tr&gt;
+            {%- endfor -%}
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+</code></pre>
+
+<h4>Notes</h4>
+
+<ol>
+<li>To get date and currency formatted values use, <code>doc.get_formatted("fieldname")</code></li>
+<li>For translatable strings, us <code>This string is translated</code></li>
+</ol>
+
+<h4>Footers</h4>
+
+<p>Many times you may want to have a standard footer for your prints with your
+address and contact information. Unfortunately due to the limited print
+support in HTML pages, it is not possible unless you get it scripted. Either
+you can use pre-printed stationary or add this information in your header.</p>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="videos">Next: ERPNext Videos</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/customize-erpnext/print-format.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

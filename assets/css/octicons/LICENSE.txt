@@ -1,0 +1,9 @@
+(c) 2012-2014 GitHub
+
+When using the GitHub logos, be sure to follow the GitHub logo guidelines (https://github.com/logos)
+
+Font License: SIL OFL 1.1 (http://scripts.sil.org/OFL)
+Applies to all font files
+
+Code License: MIT (http://choosealicense.com/licenses/mit/)
+Applies to all other files

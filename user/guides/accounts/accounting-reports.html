@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Accounting Reports</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Accounting Reports" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/accounts/general-ledger.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="Some of the major accounting reports are: General Ledger General Ledger is based on the table GL Entry and can be filtered by Account and between a period. This will help you to get a full update for all entries done in that period for that Account. Trial Balance Trial Balance is the list of Account balances for all your Ac" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/accounts/general-ledger.png" data-html-block="meta_block">
+<meta name="og:title" content="Accounting Reports" data-html-block="meta_block">
+<meta name="twitter:title" content="Accounting Reports" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/accounts/general-ledger.png" data-html-block="meta_block">
+<meta name="twitter:description" content="Some of the major accounting reports are: General Ledger General Ledger is based on the table GL Entry and can be filtered by Account and between a period. This will help you to get a full update for all entries done in that period for that Account. Trial Balance Trial Balance is the list of Account balances for all your Ac" data-html-block="meta_block">
+<meta name="description" content="Some of the major accounting reports are: General Ledger General Ledger is based on the table GL Entry and can be filtered by Account and between a period. This will help you to get a full update for all entries done in that period for that Account. Trial Balance Trial Balance is the list of Account balances for all your Ac" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-accounting-reports" data-path="user/guides/accounts/accounting-reports"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Accounting Reports</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/accounts">
+		Accounts</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="accounting-reports" style="text-align: Left">
+	<p>Some of the major accounting reports are:</p>
+
+<h3>General Ledger</h3>
+
+<p>General Ledger is based on the table GL Entry and can be filtered by Account
+and between a period. This will help you to get a full update for all entries
+done in that period for that Account.</p>
+
+<p><img alt="General Ledger" class="screenshot"
+    src="https://frappe.github.io/erpnext/assets/img/accounts/general-ledger.png"></p>
+
+<h3>Trial Balance</h3>
+
+<p>Trial Balance is the list of Account balances for all your Accounts
+(“Ledger” and “Group”) on a particular date. For each Account it will give you
+the:</p>
+
+<ul>
+<li>Opening</li>
+<li>Debits</li>
+<li>Credits</li>
+<li>Closing</li>
+</ul>
+
+<p><img alt="Trial Balance" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/accounts/trial-balance.png"></p>
+
+<p>The sum of all closing balances in a Trial Balance must be zero.</p>
+
+<h3>Accounts Payable and Accounts Receivable (AP / AR)</h3>
+
+<p>These reports help you to track the outstanding invoices sent to Customer and
+Suppliers. In this report, you will get your outstanding amounts period wise.
+i.e. between 0-30 days, 30-60 days and so on.</p>
+
+<p><img alt="Accounts Receivable" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/accounts/accounts-receivable.png"></p>
+
+<h3>Sales and Purchase Register</h3>
+
+<p>In this report, each tax Account is transposed in columns. For each Invoice and
+invoice Item, you will get the amount of individual tax that has been paid,
+based on the Taxes and Charges table.</p>
+
+<p><img alt="Sales Register" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/accounts/sales-register.png"></p>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="accounting-entries.html">Next: Accounting Entries</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/accounts/accounting-reports.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

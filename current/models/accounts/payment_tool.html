@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Payment Tool</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Payment Tool" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="twitter:description" content="Version 6.7.7 Source Single Fields &lt;table class=&#34;table t" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="Version 6.7.7 Source Single Fields &lt;table class=&#34;table t" data-html-block="meta_block">
+<meta name="og:title" content="Payment Tool" data-html-block="meta_block">
+<meta name="twitter:title" content="Payment Tool" data-html-block="meta_block">
+<meta name="description" content="Version 6.7.7 Source Single Fields &lt;table class=&#34;table t" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-payment_tool" data-path="current/models/accounts/payment_tool"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Payment Tool</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/current/models/accounts">
+		Module accounts</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="payment_tool" style="text-align: Left">
+	<!-- title: Payment Tool -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.7.7</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/accounts/doctype/payment_tool"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+<span class="label label-info">Single</span>
+
+
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered" style="table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr class="info">
+            <td>1</td>
+            <td ><code>sec_break1</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Find Invoices to Match
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td class="danger" title="Mandatory"><code>company</code></td>
+            <td >
+                Link</td>
+            <td >
+                Company
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/company">Company</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td class="danger" title="Mandatory"><code>party_type</code></td>
+            <td >
+                Link</td>
+            <td >
+                Party Type
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/core/doctype">DocType</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td class="danger" title="Mandatory"><code>received_or_paid</code></td>
+            <td >
+                Select</td>
+            <td >
+                Received Or Paid
+                
+            </td>
+            <td>
+                <pre>Received
+Paid</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>col_break1</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td class="danger" title="Mandatory"><code>party</code></td>
+            <td >
+                Dynamic Link</td>
+            <td >
+                Party
+                
+            </td>
+            <td>
+                <pre>party_type</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>7</td>
+            <td class="danger" title="Mandatory"><code>party_account</code></td>
+            <td >
+                Link</td>
+            <td >
+                Party Account
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/account">Account</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>party_account_currency</code></td>
+            <td >
+                Link</td>
+            <td class="text-muted" title="Hidden">
+                Party Account Currency
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/geo/currency">Currency</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>set_payment_amount</code></td>
+            <td >
+                Check</td>
+            <td >
+                Set Payment Amount = Outstanding Amount
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>get_outstanding_vouchers</code></td>
+            <td >
+                Button</td>
+            <td >
+                Get Outstanding Vouchers
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>11</td>
+            <td ><code>sec_break3</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Set Matching Amounts
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
+            <td ><code>vouchers</code></td>
+            <td >
+                Table</td>
+            <td >
+                Against Vouchers
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/payment_tool_detail">Payment Tool Detail</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>13</td>
+            <td ><code>section_break_19</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Make Payment Entry
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
+            <td ><code>payment_mode</code></td>
+            <td >
+                Link</td>
+            <td >
+                Payment Mode
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/mode_of_payment">Mode of Payment</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>15</td>
+            <td ><code>payment_account</code></td>
+            <td >
+                Link</td>
+            <td >
+                Payment Account
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/account">Account</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>16</td>
+            <td ><code>total_payment_amount</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Total Payment Amount
+                
+            </td>
+            <td>
+                <pre>party_account_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
+            <td ><code>data_22</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
+            <td ><code>reference_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Reference Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
+            <td ><code>reference_no</code></td>
+            <td >
+                Data</td>
+            <td >
+                Reference No
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>20</td>
+            <td ><code>make_journal_entry</code></td>
+            <td >
+                Button</td>
+            <td >
+                Make Journal Entry
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>21</td>
+            <td ><code>section_break_21</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>22</td>
+            <td ><code>make_jv_help</code></td>
+            <td >
+                Small Text</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.accounts.doctype.payment_tool.payment_tool</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>PaymentTool</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="make_journal_entry" href="#make_journal_entry" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>make_journal_entry</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.accounts.doctype.payment_tool.payment_tool.get_against_voucher_amount</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.payment_tool.payment_tool.get_against_voucher_amount" href="#erpnext.accounts.doctype.payment_tool.payment_tool.get_against_voucher_amount" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.payment_tool.payment_tool.<b>get_against_voucher_amount</b>
+        <i class="text-muted">(against_voucher_type, against_voucher_no, party_account, company)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.payment_tool.payment_tool.get_orders_to_be_billed" href="#erpnext.accounts.doctype.payment_tool.payment_tool.get_orders_to_be_billed" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.payment_tool.payment_tool.<b>get_orders_to_be_billed</b>
+        <i class="text-muted">(party_type, party, party_account_currency, company_currency)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.accounts.doctype.payment_tool.payment_tool.get_outstanding_vouchers</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.accounts.doctype.payment_tool.payment_tool.get_outstanding_vouchers" href="#erpnext.accounts.doctype.payment_tool.payment_tool.get_outstanding_vouchers" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.accounts.doctype.payment_tool.payment_tool.<b>get_outstanding_vouchers</b>
+        <i class="text-muted">(args)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+
+    
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <!-- edit-link -->
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

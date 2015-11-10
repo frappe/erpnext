@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Journal Entry</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Journal Entry" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/accounts/journal-entry.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="All types of accounting entries other than Sales Invoice and Purchase Invoice are made using the Journal Entry. A Journal Entry is a standard accounting transaction that affects multiple Accounts and the sum of debits is equal to the sum of credits. To create a Journal Entry go to: Accounts &gt; Documents &gt; Journal Entry &gt; New &lt;img class=&#34;screenshot&#34; alt=&#34;Journal Ent" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/accounts/journal-entry.png" data-html-block="meta_block">
+<meta name="og:title" content="Journal Entry" data-html-block="meta_block">
+<meta name="twitter:title" content="Journal Entry" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/accounts/journal-entry.png" data-html-block="meta_block">
+<meta name="twitter:description" content="All types of accounting entries other than Sales Invoice and Purchase Invoice are made using the Journal Entry. A Journal Entry is a standard accounting transaction that affects multiple Accounts and the sum of debits is equal to the sum of credits. To create a Journal Entry go to: Accounts &gt; Documents &gt; Journal Entry &gt; New &lt;img class=&#34;screenshot&#34; alt=&#34;Journal Ent" data-html-block="meta_block">
+<meta name="description" content="All types of accounting entries other than Sales Invoice and Purchase Invoice are made using the Journal Entry. A Journal Entry is a standard accounting transaction that affects multiple Accounts and the sum of debits is equal to the sum of credits. To create a Journal Entry go to: Accounts &gt; Documents &gt; Journal Entry &gt; New &lt;img class=&#34;screenshot&#34; alt=&#34;Journal Ent" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-journal-entry" data-path="user/guides/accounts/journal-entry"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Journal Entry</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/accounts">
+		Accounts</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="journal-entry" style="text-align: Left">
+	<p>All types of accounting entries other than <strong>Sales Invoice</strong> and <strong>Purchase
+Invoice</strong> are made using the <strong>Journal Entry</strong>. A <strong>Journal Entry</strong> 
+is a standard accounting transaction that affects
+multiple Accounts and the sum of debits is equal to the sum of credits.</p>
+
+<p>To create a Journal Entry go to:</p>
+
+<blockquote>
+  <p>Accounts &gt; Documents &gt; Journal Entry &gt; New</p>
+</blockquote>
+
+<p><img class="screenshot" alt="Journal Entry" src="https://frappe.github.io/erpnext/assets/img/accounts/journal-entry.png"></p>
+
+<p>In a Journal Entry, you must select.</p>
+
+<ul>
+<li>Type of Voucher from the drop down.</li>
+<li>Add rows for the individual accounting entries. In each row, you must specify: 
+<ul>
+<li>The Account that will be affected</li>
+<li>The amount to Debit or Credit</li>
+<li>The Cost Center (if it is an Income or Expense)</li>
+<li>Against Voucher: Link it to a voucher or invoice if it affects the “outstanding” amount of that invoice.</li>
+<li>Is Advance: Select “Yes” if you want to make it selectable in an Invoice. Other information in case it is a Bank Payment or a bill.</li>
+</ul></li>
+</ul>
+
+<h4>Difference</h4>
+
+<p>The “Difference” field is the difference between the Debit and Credit amounts.
+This should be zero if the Journal Entry is to be “Submitted”. If this
+number is not zero, you can click on “Make Difference Entry” to add a new row
+with the amount required to make the total as zero.</p>
+
+<hr />
+
+<h2>Common Entries</h2>
+
+<p>A look at some of the common accounting entries that can be done via Journal
+Voucher.</p>
+
+<h4>Expenses (non accruing)</h4>
+
+<p>Many times it may not be necessary to accrue an expense, but it can be
+directly booked against an expense Account on payment. For example a travel
+allowance or a telephone bill. You can directly debit Telephone Expense
+(instead of your telephone company) and credit your Bank on payment.</p>
+
+<ul>
+<li>Debit: Expense Account (like Telephone expense)</li>
+<li>Credit: Bank or Cash Account</li>
+</ul>
+
+<h4>Bad Debts or Write Offs</h4>
+
+<p>If you are writing off an Invoice as a bad debt, you can create a Journal
+Voucher similar to a Payment, except instead of debiting your Bank, you can
+debit an Expense Account called Bad Debts.</p>
+
+<ul>
+<li>Debit: Bad Debts Written Off</li>
+<li>Credit: Customer</li>
+</ul>
+
+<blockquote>
+  <p>Note: There may be regulations in your country before you can write off bad
+  debts.</p>
+</blockquote>
+
+<h4>Depreciation</h4>
+
+<p>Depreciation is when you write off certain value of your assets as an expense.
+For example if you have a computer that you will use for say 5 years, you can
+distribute its expense over the period and pass a Journal Entry at the end
+of each year reducing its value by a certain percentage.</p>
+
+<ul>
+<li>Debit: Depreciation (Expense)</li>
+<li>Credit: Asset (the Account under which you had booked the asset to be depreciated)</li>
+</ul>
+
+<blockquote>
+  <p>Note: There may be regulations in your country that define by how much
+  amount you can depreciate a class of Assets.</p>
+</blockquote>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="sales-invoice.html">Next: Sales Invoice</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/accounts/journal-entry.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Bank Reconciliation</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Bank Reconciliation" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/bank-reconciliation-2.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="Bank Reconciliation Statement A Bank Reconciliation is a process that explains the difference between the bank balance shown in an organisation&#39;s bank statement, as supplied by the bank, and the corresponding amount shown in the organisation&#39;s own accounting records at a particular point in time. Such differences may occur, for example, because a cheque or a list of cheques issued by the organisation has not been presented to the bank, a banking transaction, such as a cred" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/bank-reconciliation-2.png" data-html-block="meta_block">
+<meta name="og:title" content="Bank Reconciliation" data-html-block="meta_block">
+<meta name="twitter:title" content="Bank Reconciliation" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/bank-reconciliation-2.png" data-html-block="meta_block">
+<meta name="twitter:description" content="Bank Reconciliation Statement A Bank Reconciliation is a process that explains the difference between the bank balance shown in an organisation&#39;s bank statement, as supplied by the bank, and the corresponding amount shown in the organisation&#39;s own accounting records at a particular point in time. Such differences may occur, for example, because a cheque or a list of cheques issued by the organisation has not been presented to the bank, a banking transaction, such as a cred" data-html-block="meta_block">
+<meta name="description" content="Bank Reconciliation Statement A Bank Reconciliation is a process that explains the difference between the bank balance shown in an organisation&#39;s bank statement, as supplied by the bank, and the corresponding amount shown in the organisation&#39;s own accounting records at a particular point in time. Such differences may occur, for example, because a cheque or a list of cheques issued by the organisation has not been presented to the bank, a banking transaction, such as a cred" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-bank-reconciliation" data-path="user/guides/accounts/tools/bank-reconciliation"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Bank Reconciliation</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/accounts/tools">
+		Tools</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="bank-reconciliation" style="text-align: Left">
+	<h3>Bank Reconciliation Statement</h3>
+
+<p>A Bank Reconciliation is a process that explains the difference between the
+bank balance shown in an organisation's bank statement, as supplied by the
+bank, and the corresponding amount shown in the organisation's own accounting
+records at a particular point in time.  </p>
+
+<p>Such differences may occur, for example, because a cheque or a list of cheques
+issued by the organisation has not been presented to the bank, a banking
+transaction, such as a credit received, or a charge made by the bank, has not
+yet been recorded in the organisations books, or either the bank or the
+organisation itself has made an error.</p>
+
+<p>The Bank Reconciliation statement in ERPNext comes in the form of a report.</p>
+
+<h4>Figure 1: Bank Reconciliation Statement</h4>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/bank-reconciliation-2.png" alt="" />  </p>
+
+<p>When you get the report, check whether the field 'Balance as per bank' matches
+the Bank Account Statement. If there is a match then all the clearance dates
+are updated. If there is a mismatch then check clearance dates and journal
+entries.</p>
+
+<p>To add clearance entries go to Accounts &gt; Tools &gt; Bank Reconciliation</p>
+
+<h3>Bank Reconciliation Tool</h3>
+
+<p>The Bank Reconciliation tool in ERPNext, helps add clearance dates to the
+account statements. To Reconcile cheque payments go to Accounts and click on
+Bank Reconciliation.  </p>
+
+<p><strong>Step 1:</strong> Select the Bank Account against which you intend to reconcile. For
+example; HDFC Bank, ICICI Bank, or Citibank etc.</p>
+
+<p><strong>Step 2:</strong> Select the Date range that you wish to reconcile for.</p>
+
+<p><strong>Step 3:</strong> Click on 'Get Reconciled Entries'</p>
+
+<p>All the entries in the specified date range will be shown in a table below.</p>
+
+<p><strong>Step 4:</strong> Click on the JV from the table and update clearance date.</p>
+
+<h4>Figure 2: Bank Reconciliation Tool</h4>
+
+<p><img class="screenshot" alt="Bank Reconciliation" src="https://frappe.github.io/erpnext/assets/img/accounts/bank-reconciliation.png"></p>
+
+<p><strong>Step 5:</strong> Click on the button 'Update Clearance Date'.</p>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="payment-reconciliation.html">Next: Payment Reconciliation</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/accounts/tools/bank-reconciliation.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

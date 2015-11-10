@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Implementation Strategy</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Implementation Strategy" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="twitter:description" content="Before you start managing your Operations in EPRNext, you must first become familiar with the system and the terms used. For this we recommend implementation should happen in two phases. A Test Phase, where you enter dummy records representing your day to day transactions and a Live Phase, where we start entering live data. Test Phase Read the Manual Create a free account at h" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="Before you start managing your Operations in EPRNext, you must first become familiar with the system and the terms used. For this we recommend implementation should happen in two phases. A Test Phase, where you enter dummy records representing your day to day transactions and a Live Phase, where we start entering live data. Test Phase Read the Manual Create a free account at h" data-html-block="meta_block">
+<meta name="og:title" content="Implementation Strategy" data-html-block="meta_block">
+<meta name="twitter:title" content="Implementation Strategy" data-html-block="meta_block">
+<meta name="description" content="Before you start managing your Operations in EPRNext, you must first become familiar with the system and the terms used. For this we recommend implementation should happen in two phases. A Test Phase, where you enter dummy records representing your day to day transactions and a Live Phase, where we start entering live data. Test Phase Read the Manual Create a free account at h" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-implementation-strategy" data-path="user/guides/introduction/implementation-strategy"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Implementation Strategy</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/introduction">
+		Introduction</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="implementation-strategy" style="text-align: Left">
+	<p>Before you start managing your Operations in EPRNext, you must first become
+familiar with the system and the terms used. For this we recommend
+implementation should happen in two phases.</p>
+
+<ul>
+<li>A <strong>Test Phase</strong>, where you enter dummy records representing your day to day transactions and a <strong>Live Phase</strong>, where we start entering live data.</li>
+</ul>
+
+<h3>Test Phase</h3>
+
+<ul>
+<li>Read the Manual</li>
+<li>Create a free account at <a href="https://erpnext.com">https://erpnext.com</a> (the easiest way to experiment).</li>
+<li>Create your first Customer, Supplier and Item. Add a few more so you get familiar with them.</li>
+<li>Create Customer Groups, Item Groups, Warehouses, Supplier Groups, so that you can classify your Items.</li>
+<li>Complete a standard sales cycle - Lead &gt; Opportunity &gt; Quotation &gt; Sales Order &gt; Delivery Note &gt; Sales Invoice &gt; Payment (Journal Entry)</li>
+<li>Complete a standard purchase cycle - Material Request &gt; Purchase Order &gt; Purchase Receipt &gt; Payment (Journal Entry).</li>
+<li>Complete a manufacturing cycle (if applicable) - BOM &gt; Production Planning Tool &gt; Production Order &gt; Material Issue</li>
+<li>Replicate a real life scenario into the system.</li>
+<li>Create custom fields, print formats etc as required.</li>
+</ul>
+
+<h3>Live Phase</h3>
+
+<p>Once you are familiar with ERPNext, start entering your live data!</p>
+
+<ul>
+<li>Clean up the account of test data or better, start a fresh install.</li>
+<li>If you just want to clear your transactions and not your master data like Item, Customer, Supplier, BOM etc, you can click delete the Company against which you have made the transactions and start with a fresh Bill of Materials. To delete a company, open the Company Record via Setup &gt; Masters &gt; Company and delete the company by clicking on the <strong>Delete Company</strong> button at the bottom.</li>
+<li>You can also setup a new account at <a href="https://erpnext.com">https://erpnext.com</a>, and use the 30-day free trial. <a href="/introduction/getting-started-with-erpnext">Find out more ways of deploying ERPNext</a></li>
+<li>Setup all the modules with Customer Groups, Item Groups, Warehouses, BOMs etc.</li>
+<li>Import Customers, Suppliers, Items, Contacts and Addresses using Data Import Tool.</li>
+<li>Import opening stock using Stock Reconciliation Tool.</li>
+<li>Create opening accounting entries via Journal Entry and create outstanding Sales Invoices and Purchase Invoices.</li>
+<li>If you need help, <a href="https://erpnext.com/pricing">you can buy support</a> or <a href="https://discuss.erpnext.com">ask in the user forum</a>.</li>
+</ul>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="key-workflows.html">Next: Flow Chart Of Transactions In ERPNext</a></p></p>
+
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/introduction/implementation-strategy.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Data Import Tool</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Data Import Tool" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/setup/data-import/data-import-1.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="The Data Import Tool is a great way to upload (or edit) bulk data, specially master data, into the system. To Open the data import tool, you either go to Setup or go to the Transaction you want to Import. If Data Import is allowed, you will see an Import Button: The tool has two sections, one to download a template and the second to upload t" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/setup/data-import/data-import-1.png" data-html-block="meta_block">
+<meta name="og:title" content="Data Import Tool" data-html-block="meta_block">
+<meta name="twitter:title" content="Data Import Tool" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/setup/data-import/data-import-1.png" data-html-block="meta_block">
+<meta name="twitter:description" content="The Data Import Tool is a great way to upload (or edit) bulk data, specially master data, into the system. To Open the data import tool, you either go to Setup or go to the Transaction you want to Import. If Data Import is allowed, you will see an Import Button: The tool has two sections, one to download a template and the second to upload t" data-html-block="meta_block">
+<meta name="description" content="The Data Import Tool is a great way to upload (or edit) bulk data, specially master data, into the system. To Open the data import tool, you either go to Setup or go to the Transaction you want to Import. If Data Import is allowed, you will see an Import Button: The tool has two sections, one to download a template and the second to upload t" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-data-import-tool" data-path="user/guides/setting-up/data/data-import-tool"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Data Import Tool</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/setting-up/data">
+		Data Management</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="data-import-tool" style="text-align: Left">
+	<p>The Data Import Tool is a great way to upload (or edit) bulk data, specially
+master data, into the system.</p>
+
+<p>To Open the data import tool, you either go to Setup or go to the Transaction
+you want to Import. If Data Import is allowed, you will see an Import Button:</p>
+
+<p><img alt="Start Import" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/setup/data-import/data-import-1.png"></p>
+
+<p>The tool has two sections, one to download a template and the second to upload
+the data.</p>
+
+<p>(Note: Only those DocTypes are allowed for Import whose Document Type is
+"Master" or Allow Import property is set.)</p>
+
+<h3>1. Downloading The Template</h3>
+
+<p>Data in ERPNext is stored in tables, much like a spreadsheet with columns and
+rows of data. Each entity in ERPNext can have multiple child tables associated
+with it too. The child tables are linked to the parent tables and are
+implemented where there are multiple values for any property. For example an
+Item can have multiple prices, An Invoice has multiple Items and so on.</p>
+
+<p><img alt="Download Template" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/setup/data-import/data-import-2.png"></p>
+
+<ul>
+<li>Click on the table you want to download or "All Tables"</li>
+<li>For bulk editing, you can click on "Download With Data"</li>
+</ul>
+
+<h3>2. Fill in the Template</h3>
+
+<p>After downloading the template, open it in a spreadsheet application and fill
+in the data below the column headings.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/import-3.png" alt="Spreadsheet" /></p>
+
+<p>Then export your template or save it as a <strong>Comma Separated Values</strong> (CSV)
+file.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/import-4.png" alt="Spreadsheet" /></p>
+
+<h3>3. Upload the .csv File</h3>
+
+<p>Finally attach the .csv file in the section. Click on the "Upload and Import"
+button.</p>
+
+<p><img alt="Upload" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/setup/data-import/data-import-3.png"></p>
+
+<h4>Notes:</h4>
+
+<ol>
+<li>Make sure that if your application allows, use encoding as UTF-8.</li>
+<li>Keep the ID column blank for new records.</li>
+</ol>
+
+<h3>4. Uploading All Tables (Main + Child)</h3>
+
+<p>If you select all tables, you will get columns belonging to all the tables in
+one row separated by <code>~</code> columns.</p>
+
+<p>If you have multiple child rows then you must start a new main item on a new
+row. See the example:</p>
+
+<pre><code>Main Table                          ~   Child Table
+Column 1    Column 2    Column 3    ~   Column 1    Column 2    Column 3
+v11         v12         v13             c11         c12         c13
+                                        c14         c15         c17
+v21         v22         v23             c21         c22         c23
+</code></pre>
+
+<blockquote>
+  <p>To see how its done, enter a few records manually using forms and export
+  "All Tables" with "Download with Data"</p>
+</blockquote>
+
+<h3>5. Overwriting</h3>
+
+<p>ERPNext also allows you to overwrite all / certain columns. If you want to
+update certain columns, you can download the template with data. Remember to
+check on the “Overwrite” box before uploading.</p>
+
+<blockquote>
+  <p>Note: For child records, if you select Overwrite, it will delete all the
+  child records of that parent.</p>
+</blockquote>
+
+<h3>6. Upload Limitations</h3>
+
+<p>ERPNext restricts the amount of data you can upload in one file. Though the
+number may vary based on the type of data. It is usually safe to upload around
+1000 rows of a table at one go. If the system will not accept, then you will
+see an error.</p>
+
+<p>Why is this? Uploading a lot of data can cause your system to crash, specially
+if there are other users doing things in parallel. Hence ERPNext restricts the
+number of “writes” you can process in one request.</p>
+
+<hr />
+
+<h4>How to Attach files?</h4>
+
+<p>When you open a form, on the right sidebar, you will see a section to attach
+files. Click on “Add” and select the file you want to attach. Click on
+“Upload” and you are set.</p>
+
+<h4>What is a CSV file?</h4>
+
+<p>A CSV (Comma Separated Value) file is a data file that you can upload into
+ERPNext to update various data. Any spreadsheet file from popular spreadsheet
+applications like MS Excel or Open Office Spreadsheet can be saved as a CSV
+file.</p>
+
+<p>If you are using Microsoft Excel and using non-English characters, make sure
+to save your file encoded as UTF-8. For older versions of Excel, there is no
+clear way of saving as UTF-8. So save your file as a CSV, then open it in
+Notepad, and save as “UTF-8”. (Sorry blame Microsoft for this!)</p>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="bulk-rename.html">Next: Bulk Renaming of Records</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/setting-up/data/data-import-tool.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

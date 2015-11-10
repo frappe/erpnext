@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Salary And Payroll</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Salary And Payroll" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/human-resources/salary-structure.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="Salary is a fixed amount of money or compensation paid to an employee by an employer in return for the work performed . Payroll is the administration of financial records of employees&#39; salaries, wages, bonuses, net pay, and deductions. To process Payroll in ERPNext, Create Salary Structures for all Employees. Generate Salary Slips via Process Payroll. Book the Salary in your Accounts. Salary Structure The Salary Structu" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/human-resources/salary-structure.png" data-html-block="meta_block">
+<meta name="og:title" content="Salary And Payroll" data-html-block="meta_block">
+<meta name="twitter:title" content="Salary And Payroll" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/human-resources/salary-structure.png" data-html-block="meta_block">
+<meta name="twitter:description" content="Salary is a fixed amount of money or compensation paid to an employee by an employer in return for the work performed . Payroll is the administration of financial records of employees&#39; salaries, wages, bonuses, net pay, and deductions. To process Payroll in ERPNext, Create Salary Structures for all Employees. Generate Salary Slips via Process Payroll. Book the Salary in your Accounts. Salary Structure The Salary Structu" data-html-block="meta_block">
+<meta name="description" content="Salary is a fixed amount of money or compensation paid to an employee by an employer in return for the work performed . Payroll is the administration of financial records of employees&#39; salaries, wages, bonuses, net pay, and deductions. To process Payroll in ERPNext, Create Salary Structures for all Employees. Generate Salary Slips via Process Payroll. Book the Salary in your Accounts. Salary Structure The Salary Structu" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-salary-and-payroll" data-path="user/guides/human-resources/salary-and-payroll"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Salary And Payroll</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/human-resources">
+		Human Resources</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="salary-and-payroll" style="text-align: Left">
+	<p>Salary is a fixed amount of money or compensation paid to an employee by an employer in return for the work performed . </p>
+
+<p>Payroll is the administration of financial records of employees' salaries, wages, bonuses, net pay, and deductions.</p>
+
+<p>To process Payroll in ERPNext,</p>
+
+<ol>
+<li>Create Salary Structures for all Employees.</li>
+<li>Generate Salary Slips via Process Payroll.</li>
+<li>Book the Salary in your Accounts.</li>
+</ol>
+
+<h3>Salary Structure</h3>
+
+<p>The Salary Structure represents how Salaries are calculated based on Earnings
+and Deductions. </p>
+
+<p>Salary structures are used to help organizations:
+  1. Maintain pay levels that are competitive with the external labor market,
+  2. Maintain internal pay relationships among jobs,
+  3. Recognize and reward differences in level of responsibility, skill, and performance, and manage pay expenditures.</p>
+
+<p>The usual components of the salary structure (in india) include:</p>
+
+<p><strong>Basic Salary:</strong> It is the taxable base income and generally not more than 40% of CTC.</p>
+
+<p><strong>House Rent Allowance:</strong> The HRA constitutes 40 to 50% of the basic salary.</p>
+
+<p><strong>Special Allowances:</strong> Makes up for the remainder part of the salary, mostly smaller than the basic salary which is completely taxable.</p>
+
+<p><strong>Leave Travel Allowance:</strong> The non-taxable amount paid by the employer to the employee for vacation/trips with family within India.</p>
+
+<p><strong>Gratuity:</strong> It is basically a lump sum amount paid by the employer when the employee resigns from the organization or retires.</p>
+
+<p><strong>PF:</strong> Fund collected during emergency or old age. 12% of the basic salary is automatically deducted and goes to the employee provident fund.</p>
+
+<p><strong>Medical Allowance:</strong> The employer pays the employee for the medical expenditures incurred. It is tax free up to Rs.15,000.</p>
+
+<p><strong>Bonus:</strong> Taxable part of the CTC, usually a once a year lump sum amount, given to the employee based on the individual’s as well as the organizational performance for the year.</p>
+
+<p><strong>Employee Stock Options:</strong> ESOPS are Free/discounted shares given by the company to the employees. This is done to primarily increase employee retention.</p>
+
+<p>To create a new Salary Structure go to:</p>
+
+<blockquote>
+  <p>Human Resources &gt; Setup &gt; Salary Structure &gt; New Salary Structure</p>
+</blockquote>
+
+<h4>Figure 1:Salary Structure</h4>
+
+<p><img class="screenshot" alt="Salary Structure" src="https://frappe.github.io/erpnext/assets/img/human-resources/salary-structure.png"></p>
+
+<h3>In the Salary Structure,</h3>
+
+<ul>
+<li>Select the Employee</li>
+<li>Set the starting date from which this is valid (Note: There can only be one Salary Structure that can be “Active” for an Employee during any period)</li>
+<li>In the “Earnings” and “Deductions” table all your defined Earning Type and Deductions Type will be auto-populated. Set the values of the Earnings and Deductions and save the Salary Structure.</li>
+</ul>
+
+<h3>Leave Without Pay (LWP)</h3>
+
+<p>Leave Without Pay (LWP) happens when an Employee runs out of allocated leaves
+or takes a leave without an approval (via Leave Application). If you want
+ERPNext to automatically deduct salary in case of LWP, then you must check on
+the “Apply LWP” column in the Earning Type and Deduction Type masters. The
+amount of pay cut is the proportion of LWP days divided by the total working
+days for the month (based on the Holiday List).</p>
+
+<p>If you don’t want ERPNext to manage LWP, just don’t click on LWP in any of the
+Earning Types and Deduction Types.</p>
+
+<hr />
+
+<h3>Creating Salary Slips</h3>
+
+<p>Once the Salary Structure is created, you can make a salary slip from the same
+form or you can process your payroll for the month using Process Payroll.</p>
+
+<p>To create a salary slip from Salary Structure, click on the button Make Salary
+Slip.</p>
+
+<h4>Figure 2: Salary Slip</h4>
+
+<p><img class="screenshot" alt="Salary Slip" src="https://frappe.github.io/erpnext/assets/img/human-resources/salary-slip.png"></p>
+
+<p>You can also create salary slip for multiple employees using Process Payroll:</p>
+
+<blockquote>
+  <p>Human Resources &gt; Process Payroll</p>
+</blockquote>
+
+<h4>Figure 3: Process Payroll</h4>
+
+<p><img class="screenshot" alt="Process Payroll" src="https://frappe.github.io/erpnext/assets/img/human-resources/process-payroll.png"></p>
+
+<p>In Process Payroll,</p>
+
+<ol>
+<li>Select the Company for which you want to create the Salary Slips.</li>
+<li>Select the Month and the Year for which you want to create the Salary Slips.</li>
+<li>Click on “Create Salary Slips”. This will create Salary Slip records for each active Employee for the month selected. If the Salary Slips are created, the system will not create any more Salary Slips. All updates will be shown in the “Activity Log” section.</li>
+<li>Once all Salary Slips are created, you can check if they are created correctly or edit it if you want to deduct Leave Without Pay (LWP).</li>
+<li>After checking, you can “Submit” them all together by clicking on “Submit Salary Slips”. 1. If you want them to be automatically emailed to the Employee, make sure to check the “Send Email” box.</li>
+</ol>
+
+<h3>Booking Salaries in Accounts</h3>
+
+<p>The final step is to book the Salaries in your Accounts.</p>
+
+<p>Salaries in businesses are usually dealt with extreme privacy. In most cases,
+the companies issues a single payment to the bank combining all salaries and
+the bank distributes the salaries to each employee’s salary account. This way
+there is only one payment entry in the company’s books of accounts and anyone
+with access to the company’s accounts will not have access to the individual
+salaries.</p>
+
+<p>The salary payment entry is a Journal Entry entry that debits the total
+salary of all Employees to the Salary Account and credits the company’s bank
+Account.</p>
+
+<p>To generate your salary payment voucher from Process Payroll, click on
+“Make Bank Voucher” and a new Journal Entry with the total salaries will be
+created.</p>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="appraisal.html">Next: Appraisal</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/human-resources/salary-and-payroll.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

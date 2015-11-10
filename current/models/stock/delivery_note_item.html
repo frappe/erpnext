@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Delivery Note Item</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Delivery Note Item" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="twitter:description" content="Version 6.7.7 Source Child Table Table Name: &lt;" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="Version 6.7.7 Source Child Table Table Name: &lt;" data-html-block="meta_block">
+<meta name="og:title" content="Delivery Note Item" data-html-block="meta_block">
+<meta name="twitter:title" content="Delivery Note Item" data-html-block="meta_block">
+<meta name="description" content="Version 6.7.7 Source Child Table Table Name: &lt;" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-delivery_note_item" data-path="current/models/stock/delivery_note_item"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Delivery Note Item</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/current/models/stock">
+		Module stock</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="delivery_note_item" style="text-align: Left">
+	<!-- title: Delivery Note Item -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.7.7</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/stock/doctype/delivery_note_item"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+<span class="label label-info">Child Table</span>
+
+
+    <p><b>Table Name:</b> <code>tabDelivery Note Item</code></p>
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered" style="table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td ><code>barcode</code></td>
+            <td >
+                Data</td>
+            <td >
+                Barcode
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td class="danger" title="Mandatory"><code>item_code</code></td>
+            <td >
+                Link</td>
+            <td >
+                Item Code
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/item">Item</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td class="danger" title="Mandatory"><code>item_name</code></td>
+            <td >
+                Data</td>
+            <td >
+                Item Name
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>col_break1</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>customer_item_code</code></td>
+            <td >
+                Data</td>
+            <td class="text-muted" title="Hidden">
+                Customer's Item Code
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>6</td>
+            <td ><code>section_break_6</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Description
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>7</td>
+            <td class="danger" title="Mandatory"><code>description</code></td>
+            <td >
+                Text Editor</td>
+            <td >
+                Description
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>column_break_8</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>image</code></td>
+            <td >
+                Attach</td>
+            <td class="text-muted" title="Hidden">
+                Image
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>image_view</code></td>
+            <td >
+                Image</td>
+            <td >
+                Image View
+                
+            </td>
+            <td>
+                <pre>image</pre>
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>11</td>
+            <td ><code>quantity_and_rate</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Quantity and Rate
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
+            <td class="danger" title="Mandatory"><code>qty</code></td>
+            <td >
+                Float</td>
+            <td >
+                Quantity
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
+            <td ><code>price_list_rate</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Price List Rate
+                
+            </td>
+            <td>
+                <pre>currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
+            <td ><code>discount_percentage</code></td>
+            <td >
+                Float</td>
+            <td >
+                Discount on Price List Rate (%)
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>15</td>
+            <td ><code>col_break2</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>16</td>
+            <td class="danger" title="Mandatory"><code>stock_uom</code></td>
+            <td >
+                Link</td>
+            <td >
+                UOM
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/uom">UOM</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
+            <td ><code>base_price_list_rate</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Price List Rate (Company Currency)
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>18</td>
+            <td ><code>section_break_1</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
+            <td ><code>rate</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Rate
+                
+            </td>
+            <td>
+                <pre>currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>20</td>
+            <td ><code>amount</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Amount
+                
+            </td>
+            <td>
+                <pre>currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>21</td>
+            <td ><code>col_break3</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>22</td>
+            <td ><code>base_rate</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Rate (Company Currency)
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>23</td>
+            <td ><code>base_amount</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Amount (Company Currency)
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>24</td>
+            <td ><code>pricing_rule</code></td>
+            <td >
+                Link</td>
+            <td >
+                Pricing Rule
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/pricing_rule">Pricing Rule</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>25</td>
+            <td ><code>section_break_25</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>26</td>
+            <td ><code>net_rate</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Net Rate
+                
+            </td>
+            <td>
+                <pre>currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>27</td>
+            <td ><code>net_amount</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Net Amount
+                
+            </td>
+            <td>
+                <pre>currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>28</td>
+            <td ><code>column_break_28</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>29</td>
+            <td ><code>base_net_rate</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Net Rate (Company Currency)
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>30</td>
+            <td ><code>base_net_amount</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Net Amount (Company Currency)
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>31</td>
+            <td ><code>warehouse_and_reference</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Warehouse and Reference
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>32</td>
+            <td ><code>warehouse</code></td>
+            <td >
+                Link</td>
+            <td >
+                From Warehouse
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/warehouse">Warehouse</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>33</td>
+            <td ><code>target_warehouse</code></td>
+            <td >
+                Link</td>
+            <td >
+                To Warehouse (Optional)
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/warehouse">Warehouse</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>34</td>
+            <td ><code>serial_no</code></td>
+            <td >
+                Text</td>
+            <td >
+                Serial No
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>35</td>
+            <td ><code>batch_no</code></td>
+            <td >
+                Link</td>
+            <td >
+                Batch No
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/batch">Batch</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>36</td>
+            <td ><code>actual_qty</code></td>
+            <td >
+                Float</td>
+            <td >
+                Available Qty at From Warehouse
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>37</td>
+            <td ><code>actual_batch_qty</code></td>
+            <td >
+                Float</td>
+            <td >
+                Available Batch Qty at From Warehouse
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>38</td>
+            <td ><code>item_group</code></td>
+            <td >
+                Link</td>
+            <td class="text-muted" title="Hidden">
+                Item Group
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/item_group">Item Group</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>39</td>
+            <td ><code>brand</code></td>
+            <td >
+                Link</td>
+            <td class="text-muted" title="Hidden">
+                Brand Name
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/brand">Brand</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>40</td>
+            <td ><code>item_tax_rate</code></td>
+            <td >
+                Small Text</td>
+            <td class="text-muted" title="Hidden">
+                Item Tax Rate
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>41</td>
+            <td ><code>col_break4</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>42</td>
+            <td ><code>expense_account</code></td>
+            <td >
+                Link</td>
+            <td >
+                Expense Account
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/account">Account</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>43</td>
+            <td ><code>cost_center</code></td>
+            <td >
+                Link</td>
+            <td >
+                Cost Center
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/cost_center">Cost Center</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>44</td>
+            <td ><code>against_sales_order</code></td>
+            <td >
+                Link</td>
+            <td >
+                Against Sales Order
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/selling/sales_order">Sales Order</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>45</td>
+            <td ><code>against_sales_invoice</code></td>
+            <td >
+                Link</td>
+            <td >
+                Against Sales Invoice
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/sales_invoice">Sales Invoice</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>46</td>
+            <td ><code>so_detail</code></td>
+            <td >
+                Data</td>
+            <td class="text-muted" title="Hidden">
+                Against Sales Order Item
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>47</td>
+            <td ><code>si_detail</code></td>
+            <td >
+                Data</td>
+            <td class="text-muted" title="Hidden">
+                Against Sales Invoice Item
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>48</td>
+            <td ><code>installed_qty</code></td>
+            <td >
+                Float</td>
+            <td >
+                Installed Qty
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>49</td>
+            <td ><code>page_break</code></td>
+            <td >
+                Check</td>
+            <td >
+                Page Break
+                
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    
+    
+    <h4>Child Table Of</h4>
+    <ul>
+    
+        <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/stock/delivery_note">Delivery Note</a>
+
+</li>
+    
+    </ul>
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <!-- edit-link -->
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

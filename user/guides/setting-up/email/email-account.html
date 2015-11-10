@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Email Accounts</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Email Accounts" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/setup/email/email-account-list.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="You can manage multiple incoming and outgoing Email Accounts in ERPNext. There has to be atleast one default outgoing account and one default incoming account. If you are on the ERPNext cloud, the default outgoing email is set by us. Note for self implementers: For outgoing emails, you should setup your own SMTP server or sign up with an SMTP relay service like mandrill.com or sendgrid.com that allows a larger number of transactional emails to be sent." data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/setup/email/email-account-list.png" data-html-block="meta_block">
+<meta name="og:title" content="Email Accounts" data-html-block="meta_block">
+<meta name="twitter:title" content="Email Accounts" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/setup/email/email-account-list.png" data-html-block="meta_block">
+<meta name="twitter:description" content="You can manage multiple incoming and outgoing Email Accounts in ERPNext. There has to be atleast one default outgoing account and one default incoming account. If you are on the ERPNext cloud, the default outgoing email is set by us. Note for self implementers: For outgoing emails, you should setup your own SMTP server or sign up with an SMTP relay service like mandrill.com or sendgrid.com that allows a larger number of transactional emails to be sent." data-html-block="meta_block">
+<meta name="description" content="You can manage multiple incoming and outgoing Email Accounts in ERPNext. There has to be atleast one default outgoing account and one default incoming account. If you are on the ERPNext cloud, the default outgoing email is set by us. Note for self implementers: For outgoing emails, you should setup your own SMTP server or sign up with an SMTP relay service like mandrill.com or sendgrid.com that allows a larger number of transactional emails to be sent." data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-email-account" data-path="user/guides/setting-up/email/email-account"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Email Accounts</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/setting-up/email">
+		Email</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="email-account" style="text-align: Left">
+	<p>You can manage multiple incoming and outgoing Email Accounts in ERPNext. There has to be atleast one default outgoing account and one default incoming account. If you are on the ERPNext cloud, the default outgoing email is set by us.</p>
+
+<blockquote>
+  <p><strong>Note for self implementers:</strong> For outgoing emails, you should setup your own SMTP server or sign up with an SMTP relay service like mandrill.com or sendgrid.com that allows a larger number of transactional emails to be sent. Regular email services like GMail will restrict you to a limited number of emails per day.</p>
+</blockquote>
+
+<h3>Default Email Accounts</h3>
+
+<p>ERPNext will create templates for a bunch of email accounts by default. Not all of them are enabled. To enable them, you must set your account details.</p>
+
+<p>There are 2 types of email accounts, outgoing and incoming. Outgoing email accounts use an SMTP service to send emails and emails are retrived from your inbox using a POP service. Most email providers such as GMail, Outlook or Yahoo provide these services.</p>
+
+<p><img class="screenshot" alt="Defining Criteria" src="https://frappe.github.io/erpnext/assets/img/setup/email/email-account-list.png"></p>
+
+<h3>Outgoing Email Accounts</h3>
+
+<p>All emails sent from the system, either by the user to a contact or notifications or transaction emails, will be sent from an Outgoing Email Account.</p>
+
+<p>To setup an outgoing Email Account, check on <strong>Enable Outgoing</strong> and set your SMTP server settings, if you are using a popular email service, these will be preset for you.</p>
+
+<p><img class="screenshot" alt="Outgoing EMail" src="https://frappe.github.io/erpnext/assets/img/setup/email/email-account-sending.png"></p>
+
+<h3>Incoming Email Accounts</h3>
+
+<p>To setup an incoming Email Account, check on <strong>Enable Incoming</strong> and set your POP3 settings, if you are using a popular email service, these will be preset for you.</p>
+
+<p><img class="screenshot" alt="Incoming EMail" src="https://frappe.github.io/erpnext/assets/img/setup/email/email-account-incoming.png"></p>
+
+<h3>How ERPNext handles replies</h3>
+
+<p>In ERPNext when you send an email to a contact like a customer, the sender will be the user who sent the email. In the <strong>Reply-To</strong> property, the email id will be of the default incoming account (like <code>replies@yourcompany.com</code>). ERPNext will automatically extract these emails from the incoming account and tag it to the relvant communication</p>
+
+<h3>Notification for unreplied messages</h3>
+
+<p>If you would like ERPNext to notify you if an email is unreplied for a certain amount of time, then you can set <strong>Notify if Unreplied</strong>. Here you can set the number of minutes to wait before notifications are sent and whom the notifications must go to.</p>
+
+<p><img class="screenshot" alt="Incoming EMail" src="https://frappe.github.io/erpnext/assets/img/setup/email/email-account-unreplied.png"></p>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="email-alerts.html">Next: Email Alerts</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/setting-up/email/email-account.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

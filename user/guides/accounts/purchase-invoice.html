@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Purchase Invoice</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Purchase Invoice" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/accounts/purchase-invoice.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="Purchase Invoice is the exact opposite of your Sales Invoice. It is the bill that your Supplier sends you for products or services delivered. Here you accrue expenses to your Supplier. Making a Purchase Invoice is very similar to making a Purchase Order. To make a new Purchase Invoice, go to: Accounts &gt; Documents &gt; Purchase Invoice &gt; New Purchase Invoice or click on “Make Purchase Invoice” in Purchase Order or Purchase Receipt." data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/accounts/purchase-invoice.png" data-html-block="meta_block">
+<meta name="og:title" content="Purchase Invoice" data-html-block="meta_block">
+<meta name="twitter:title" content="Purchase Invoice" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/accounts/purchase-invoice.png" data-html-block="meta_block">
+<meta name="twitter:description" content="Purchase Invoice is the exact opposite of your Sales Invoice. It is the bill that your Supplier sends you for products or services delivered. Here you accrue expenses to your Supplier. Making a Purchase Invoice is very similar to making a Purchase Order. To make a new Purchase Invoice, go to: Accounts &gt; Documents &gt; Purchase Invoice &gt; New Purchase Invoice or click on “Make Purchase Invoice” in Purchase Order or Purchase Receipt." data-html-block="meta_block">
+<meta name="description" content="Purchase Invoice is the exact opposite of your Sales Invoice. It is the bill that your Supplier sends you for products or services delivered. Here you accrue expenses to your Supplier. Making a Purchase Invoice is very similar to making a Purchase Order. To make a new Purchase Invoice, go to: Accounts &gt; Documents &gt; Purchase Invoice &gt; New Purchase Invoice or click on “Make Purchase Invoice” in Purchase Order or Purchase Receipt." data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-purchase-invoice" data-path="user/guides/accounts/purchase-invoice"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Purchase Invoice</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/accounts">
+		Accounts</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="purchase-invoice" style="text-align: Left">
+	<p>Purchase Invoice is the exact opposite of your Sales Invoice. It is the bill
+that your Supplier sends you for products or services delivered. Here you
+accrue expenses to your Supplier. Making a Purchase Invoice is very similar to
+making a Purchase Order.</p>
+
+<p>To make a new Purchase Invoice, go to:</p>
+
+<blockquote>
+  <p>Accounts &gt; Documents &gt; Purchase Invoice &gt; New Purchase Invoice</p>
+</blockquote>
+
+<p>or click on “Make Purchase Invoice” in Purchase Order or Purchase Receipt.</p>
+
+<p><img class="screenshot" alt="Purchase Invoice" src="https://frappe.github.io/erpnext/assets/img/accounts/purchase-invoice.png"></p>
+
+<p>The concept of “Posting Date” is again same as Sales Invoice. “Bill No” and
+“Bill Date” helps to track the bill number as set by your Supplier for
+reference.</p>
+
+<h4>Accounting Impact</h4>
+
+<p>Like in Sales Invoice, you have to enter an Expense or an Asset account for
+each row in your Items table. This helps to indicate if the Item is an Asset
+or an Expense. You must also enter a Cost Center. These can also be set in the
+Item master.</p>
+
+<p>The Purchase Invoice will affect your accounts as follows:</p>
+
+<p>Accounting entries (GL Entry) for a typical double entry “purchase”:</p>
+
+<p>Debits:</p>
+
+<ul>
+<li>Expense or Asset (net totals, excluding taxes)</li>
+<li>Taxes (/assets if VAT-type or expense again).</li>
+</ul>
+
+<p>Credits:</p>
+
+<ul>
+<li>Supplier</li>
+</ul>
+
+<p>To see entries in your Purchase Invoice after you “Submit”, click on “View
+Ledger”.</p>
+
+<hr />
+
+<h4>Is purchase an “Expense” or an “Asset”?</h4>
+
+<p>If the Item is consumed immediately on purchase, or if it is a service, then
+the purchase becomes an “Expense”. For example, a telephone bill or travel
+bill is an “Expense” - it is already consumed.</p>
+
+<p>For inventory Items, that have a value, these purchases are not yet “Expense”,
+because they still have a value while they remain in your stock. They are
+“Assets”. If they are raw-materials (used in a process), they will become
+“Expense” the moment they are consumed in the process. If they are to be sold
+to a Customer, they become “Expense” when you ship them to the Customer.</p>
+
+<hr />
+
+<h4>Deducting Taxes at Source</h4>
+
+<p>In many countries, the law may require you to deduct taxes, while paying your
+suppliers. These taxes could be based on a standard rate. Under these type of
+schemes, typically if a Supplier crosses a certain threshold of payment, and
+if the type of product is taxable, you may have to deduct some tax (which you
+pay back to your government, on your Supplier’s behalf).</p>
+
+<p>To do this, you will have to make a new Tax Account under “Tax Liabilities” or
+similar and credit this Account by the percent you are bound to deduct for
+every transaction.</p>
+
+<p>For more help, please contact your Accountant!</p>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="chart-of-accounts.html">Next: Chart Of Accounts</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/accounts/purchase-invoice.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

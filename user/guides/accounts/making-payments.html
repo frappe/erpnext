@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Making Payments</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Making Payments" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/accounts/make-payment.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="Payments made against Sales Invoices or Purchase Invoices can be made by clicking on “Make Payment Entry” button on “Submitted” invoices. Update the “Bank Account” (you can also set the default account in the Company master). Update posting date. Enter the cheque number, cheque date. Save and Submit. Payments" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/accounts/make-payment.png" data-html-block="meta_block">
+<meta name="og:title" content="Making Payments" data-html-block="meta_block">
+<meta name="twitter:title" content="Making Payments" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/accounts/make-payment.png" data-html-block="meta_block">
+<meta name="twitter:description" content="Payments made against Sales Invoices or Purchase Invoices can be made by clicking on “Make Payment Entry” button on “Submitted” invoices. Update the “Bank Account” (you can also set the default account in the Company master). Update posting date. Enter the cheque number, cheque date. Save and Submit. Payments" data-html-block="meta_block">
+<meta name="description" content="Payments made against Sales Invoices or Purchase Invoices can be made by clicking on “Make Payment Entry” button on “Submitted” invoices. Update the “Bank Account” (you can also set the default account in the Company master). Update posting date. Enter the cheque number, cheque date. Save and Submit. Payments" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-making-payments" data-path="user/guides/accounts/making-payments"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Making Payments</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/accounts">
+		Accounts</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="making-payments" style="text-align: Left">
+	<p>Payments made against Sales Invoices or Purchase Invoices can be made by
+clicking on “Make Payment Entry” button on “Submitted” invoices.</p>
+
+<ol>
+<li>Update the “Bank Account” (you can also set the default account in the Company master).</li>
+<li>Update posting date.</li>
+<li>Enter the cheque number, cheque date.</li>
+<li>Save and Submit.</li>
+</ol>
+
+<p><img class="screenshot" alt="Manking Payment" src="https://frappe.github.io/erpnext/assets/img/accounts/make-payment.png"></p>
+
+<p>Payments can also be made independent of invoices by creating a new Journal
+Voucher and selecting the type of payment.</p>
+
+<h4>Incoming Payment</h4>
+
+<p>For payments from Customers,</p>
+
+<ul>
+<li>Debit: Bank or Cash Account</li>
+<li>Credit: Customer</li>
+</ul>
+
+<blockquote>
+  <p>Note: Remember to add “Against Sales Invoice” or “Is Advance” as applicable.</p>
+</blockquote>
+
+<h4>Outgoing Payment</h4>
+
+<p>For payments to Suppliers,</p>
+
+<ul>
+<li>Debit: Supplier</li>
+<li>Credit: Bank or Cash Account</li>
+</ul>
+
+<h3>Example Payment Journal Entry</h3>
+
+<p><img class="screenshot" alt="Manking Payment" src="https://frappe.github.io/erpnext/assets/img/accounts/new-bank-entry.png"></p>
+
+<hr />
+
+<h3>Reconciling Cheque Payments</h3>
+
+<p>If you are receiving payments or making payments via cheques, the bank
+statements will not accurately match the dates of your entry, this is because
+the bank usually takes time to “clear” these payments. Also you may have
+mailed a cheque to your Supplier and it may be a few days before it is
+received and deposited by the Supplier. In ERPNext you can synchronize your
+bank statements and your Journal Entrys using the “Bank Reconciliation”
+tool.</p>
+
+<p>To use this, go to:</p>
+
+<blockquote>
+  <p>Accounts &gt; Tools &gt; Bank Reconciliation</p>
+</blockquote>
+
+<p>Select your “Bank” Account and enter the dates of your statement. Here you
+will get all the “Bank Voucher” type entries. In each of the entry on the
+right most column, update the “Clearance Date” and click on “Update”.</p>
+
+<p>By doing this you will be able to sync your bank statements and entries into
+the system.</p>
+
+<hr />
+
+<h2>Managing Outstanding Payments</h2>
+
+<p>In most cases, apart from retail sales, billing and payments are separate
+activities. There are several combinations in which these payments are done.
+These cases apply to both sales and purchases.</p>
+
+<ul>
+<li>They can be upfront (100% in advance).</li>
+<li>Post shipment. Either on delivery or within a few days of delivery.</li>
+<li>Part in advance and part on or post delivery.</li>
+<li>Payments can be made together for a bunch of invoices.</li>
+<li>Advances can be given together for a bunch of invoices (and can be split across invoices).</li>
+</ul>
+
+<p>ERPNext allows you to manage all these scenarios. All accounting entries (GL
+Entry) can be made against a Sales Invoice, Purchase Invoice or Journal
+Vouchers (in special cases, an invoice can be made via a Sales Invoice too).</p>
+
+<p>The total outstanding amount against an invoice is the sum of all the
+accounting entries that are made “against” (or are linked to) that invoice.
+This way you can combine or split payments in Journal Entrys to manage the
+scenarios.</p>
+
+<h3>Matching Payments to Invoices</h3>
+
+<p>In complex scenarios, especially in the capital goods industry, sometimes
+there is no direct link between payments and invoices. You send invoices to
+your Customers and your Customer sends you block payments or payments based on
+some schedule that is not linked to your invoices.</p>
+
+<p>In such cases, you can use the Payment to Invoice Matching Tool.</p>
+
+<blockquote>
+  <p>Accounts &gt; Tools &gt; Payment Reconciliation</p>
+</blockquote>
+
+<p>In this tool, you can select an account (your Customer’s account) and click on
+“Pull Payment Entries” and it will select all un-linked Journal Entrys and
+Sales Invoices from that Customer.</p>
+
+<p>To cancel off some payments and invoices, select the Invoices and Journal
+Vouchers and click on “Reconcile”.</p>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="advance-payment-entry.html">Next: Advance Payment Entry</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/accounts/making-payments.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

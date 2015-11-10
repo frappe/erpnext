@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Workflows</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Workflows" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/workflow-leave-fl.jpg" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="In order to allow multiple people to submit multiple requests, for approvals, by multiple users, ERPNext requires you to fill the workflow conditions. ERPNext tracks the multiple permissions before submission. Example of a leave application workflow is given below: If an user applies for a leave, then his request will be sent to the HR department. The HR department(HR User) will either reject or approve this request. Once this process is completed, the user&#39;s Manager(leave app" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/workflow-leave-fl.jpg" data-html-block="meta_block">
+<meta name="og:title" content="Workflows" data-html-block="meta_block">
+<meta name="twitter:title" content="Workflows" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/workflow-leave-fl.jpg" data-html-block="meta_block">
+<meta name="twitter:description" content="In order to allow multiple people to submit multiple requests, for approvals, by multiple users, ERPNext requires you to fill the workflow conditions. ERPNext tracks the multiple permissions before submission. Example of a leave application workflow is given below: If an user applies for a leave, then his request will be sent to the HR department. The HR department(HR User) will either reject or approve this request. Once this process is completed, the user&#39;s Manager(leave app" data-html-block="meta_block">
+<meta name="description" content="In order to allow multiple people to submit multiple requests, for approvals, by multiple users, ERPNext requires you to fill the workflow conditions. ERPNext tracks the multiple permissions before submission. Example of a leave application workflow is given below: If an user applies for a leave, then his request will be sent to the HR department. The HR department(HR User) will either reject or approve this request. Once this process is completed, the user&#39;s Manager(leave app" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-workflows" data-path="user/guides/setting-up/workflows"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Workflows</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/setting-up">
+		Setting Up</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="workflows" style="text-align: Left">
+	<p>In order to allow multiple people to submit multiple requests, for approvals,
+by multiple users, ERPNext requires you to fill the workflow conditions.
+ERPNext tracks the multiple permissions before submission.</p>
+
+<p>Example of a leave application workflow is given below:</p>
+
+<p>If an user applies for a leave, then his request will be sent to the HR
+department. The HR department(HR User) will either reject or approve this
+request. Once this process is completed, the user's Manager(leave approver)
+will get an indication that the HR department has Accepted or Rejected. The
+Manager, who is the approving authority, will either Approve or Reject this
+request. Accordingly,the user will get his Approved or Rejected status.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/workflow-leave-fl.jpg" alt="Workflow" /></p>
+
+<p>To make this Workflow and transition rules go to :</p>
+
+<blockquote>
+  <p>Setup &gt; Workflow &gt; New Workflow</p>
+</blockquote>
+
+<h4>Step 1: Enter the different states of Leave Approval Process.</h4>
+
+<p><img class="screenshot" alt="Workflow" src="https://frappe.github.io/erpnext/assets/img/setup/workflow-1.png"></p>
+
+<h4>Step 2: Enter Transition Rules.</h4>
+
+<p><img class="screenshot" alt="Workflow" src="https://frappe.github.io/erpnext/assets/img/setup/workflow-2.png"></p>
+
+<h4>Notes:</h4>
+
+<blockquote>
+  <p>Note 1: When you make a workflow you essentially overwrite the code that is
+  written for that document. Thus the document will function based on your
+  workflow and not based on the pre-set code settings. Hence there might be no
+  submit button / option if you have not specified it in the workflow.</p>
+  
+  <p>Note 2: Document status of saved is 0, of submitted is 1, and of cancelled is
+  2.</p>
+  
+  <p>Note 3: A document cannot be cancelled unless it is submitted.</p>
+  
+  <p>Note 4: If you wish to give the option to cancel, you will have to write a
+  workflow transition step that says from submitted you can cancel.</p>
+</blockquote>
+
+<h4>Example of a Leave Application Process:</h4>
+
+<p>Go to the Human Resources Module and click on Leave Application. Apply for a
+Leave.</p>
+
+<p>When a Leave Application is submitted, the status on the right hand corner of
+the page shows as "Applied"</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/workflow-employee-la.png" alt="Workflow Employee LA" /></p>
+
+<p>When the HR User logs in, he can either Approve or Reject. If approved the
+status on the right hand corner of the page shows as Approved. However, a blue
+band of information is displayed saying approval is pending by leave approver.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/workflow-hr-user-la.png" alt="Leave Approver" /></p>
+
+<p>When the leave approver opens the Leave Application page, he should select the
+status and convert to Approved or Rejected.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/workflow-leave-approver-la.png" alt="Workflow Leave Approver" /></p>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="bar-code.html">Next: Bar Code</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/setting-up/workflows.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

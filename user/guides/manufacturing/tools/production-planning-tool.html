@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Production Planning Tool</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Production Planning Tool" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="Production Planning Tool helps you plan production and purchase of Items for a period (usually a week or a month). This list of Items can be generated from the open Sales Orders in the system and will generate: Production Orders for each Item. Purchase Requests for Items whose Projected Quantity is likely to fall below zero. To use the Production Planning Tool, go to: Manufacturing &gt; Tools &gt; Production Planning Tool&lt;/p" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt.png" data-html-block="meta_block">
+<meta name="og:title" content="Production Planning Tool" data-html-block="meta_block">
+<meta name="twitter:title" content="Production Planning Tool" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt.png" data-html-block="meta_block">
+<meta name="twitter:description" content="Production Planning Tool helps you plan production and purchase of Items for a period (usually a week or a month). This list of Items can be generated from the open Sales Orders in the system and will generate: Production Orders for each Item. Purchase Requests for Items whose Projected Quantity is likely to fall below zero. To use the Production Planning Tool, go to: Manufacturing &gt; Tools &gt; Production Planning Tool&lt;/p" data-html-block="meta_block">
+<meta name="description" content="Production Planning Tool helps you plan production and purchase of Items for a period (usually a week or a month). This list of Items can be generated from the open Sales Orders in the system and will generate: Production Orders for each Item. Purchase Requests for Items whose Projected Quantity is likely to fall below zero. To use the Production Planning Tool, go to: Manufacturing &gt; Tools &gt; Production Planning Tool&lt;/p" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-production-planning-tool" data-path="user/guides/manufacturing/tools/production-planning-tool"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Production Planning Tool</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/manufacturing/tools">
+		Tools</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="production-planning-tool" style="text-align: Left">
+	<p>Production Planning Tool helps you plan production and purchase of Items for a
+period (usually a week or a month).</p>
+
+<p>This list of Items can be generated from the open Sales Orders in the system
+and will generate:</p>
+
+<ul>
+<li>Production Orders for each Item.</li>
+<li>Purchase Requests for Items whose Projected Quantity is likely to fall below zero.</li>
+</ul>
+
+<p>To use the Production Planning Tool, go to:</p>
+
+<blockquote>
+  <p>Manufacturing &gt; Tools &gt; Production Planning Tool</p>
+</blockquote>
+
+<p><img class="screenshot" alt="Production Planing Tool" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt.png"></p>
+
+<h4>Step 1: Select and get Sales Order</h4>
+
+<ul>
+<li>Select sales orders for MRP using filters (Time, Item, and Customer)</li>
+<li>Click on Get Sales Order to generate a list.</li>
+</ul>
+
+<p><img class="screenshot" alt="Production Planing Tool" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt-get-sales-orders.png"></p>
+
+<h4>Step 2: Get Item from Sales Orders.</h4>
+
+<p>You can add/remove or change quantity of these Items.</p>
+
+<p><img class="screenshot" alt="Production Planing Tool" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt-get-item.png"></p>
+
+<h4>Step 3: Create Production Orders</h4>
+
+<p><img class="screenshot" alt="Production Planing Tool" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt-create-production-order.png"></p>
+
+<h4>Step 4: Create Material Request</h4>
+
+<p>Create Material Request for Items with projected shortfall.</p>
+
+<p><img class="screenshot" alt="Production Planing Tool" src="https://frappe.github.io/erpnext/assets/img/manufacturing/ppt-create-material-request.png"></p>
+
+<p>The Production Planning Tool is used in two stages:</p>
+
+<ul>
+<li>Selection of Open Sales Orders for the period based on “Expected Delivery Date”.</li>
+<li>Selection of Items from those Sales Orders.</li>
+</ul>
+
+<p>The tool will update if you have already created Production Orders for a
+particular Item against its Sales Order (“Planned Quantity”).</p>
+
+<p>You can always edit the Item list and increase / reduce quantities to plan
+your production.</p>
+
+<blockquote>
+  <p>Note: How do you change a Production Plan? The output of the Production
+  Planning Tool is the Production Order. Once your orders are created, you can
+  change them by amending the Production Orders.</p>
+</blockquote>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="bom-replace-tool.html">Next: BOM Replace Tool</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/manufacturing/tools/production-planning-tool.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

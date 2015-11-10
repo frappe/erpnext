@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>erpnext.stock.get_item_details</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="erpnext.stock.get_item_details" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="twitter:description" content="Version 6.7.7 Source Public API" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="Version 6.7.7 Source Public API" data-html-block="meta_block">
+<meta name="og:title" content="erpnext.stock.get_item_details" data-html-block="meta_block">
+<meta name="twitter:title" content="erpnext.stock.get_item_details" data-html-block="meta_block">
+<meta name="description" content="Version 6.7.7 Source Public API" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-erpnext.stock.get_item_details" data-path="current/api/stock/erpnext.stock.get_item_details"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>erpnext.stock.get_item_details</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/current/api/stock">
+		stock</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="erpnext.stock.get_item_details" style="text-align: Left">
+	<!-- title: erpnext.stock.get_item_details --><div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.7.7</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/blob/develop/erpnext/stock/get_item_details.py"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+
+
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.get_item_details.apply_price_list</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.apply_price_list" href="#erpnext.stock.get_item_details.apply_price_list" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>apply_price_list</b>
+        <i class="text-muted">(args)</i>
+    </p>
+	<div class="docs-attr-desc"><p>args = {
+    "item<em>list": [{"doctype": "", "name": "", "item</em>code": "", "brand": "", "item<em>group": ""}, ...],
+    "conversion</em>rate": 1.0,
+    "selling<em>price</em>list": None,
+    "price<em>list</em>currency": None,
+    "plc<em>conversion</em>rate": 1.0,
+    "parenttype": "",
+    "parent": "",
+    "supplier": None,
+    "transaction<em>date": None,
+    "conversion</em>rate": 1.0,
+    "buying<em>price</em>list": None,
+    "transaction<em>type": "selling",
+    "ignore</em>pricing_rule": 0/1
+}</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.apply_price_list_on_item" href="#erpnext.stock.get_item_details.apply_price_list_on_item" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>apply_price_list_on_item</b>
+        <i class="text-muted">(args)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_actual_batch_qty" href="#erpnext.stock.get_item_details.get_actual_batch_qty" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_actual_batch_qty</b>
+        <i class="text-muted">(batch_no, warehouse, item_code)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.get_item_details.get_available_qty</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_available_qty" href="#erpnext.stock.get_item_details.get_available_qty" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_available_qty</b>
+        <i class="text-muted">(item_code, warehouse)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_basic_details" href="#erpnext.stock.get_item_details.get_basic_details" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_basic_details</b>
+        <i class="text-muted">(args, item)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.get_item_details.get_batch_qty</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_batch_qty" href="#erpnext.stock.get_item_details.get_batch_qty" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_batch_qty</b>
+        <i class="text-muted">(batch_no, warehouse, item_code)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.get_item_details.get_conversion_factor</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_conversion_factor" href="#erpnext.stock.get_item_details.get_conversion_factor" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_conversion_factor</b>
+        <i class="text-muted">(item_code, uom)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.get_item_details.get_default_bom</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_default_bom" href="#erpnext.stock.get_item_details.get_default_bom" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_default_bom</b>
+        <i class="text-muted">(item_code=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_default_cost_center" href="#erpnext.stock.get_item_details.get_default_cost_center" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_default_cost_center</b>
+        <i class="text-muted">(args, item)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_default_expense_account" href="#erpnext.stock.get_item_details.get_default_expense_account" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_default_expense_account</b>
+        <i class="text-muted">(args, item)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_default_income_account" href="#erpnext.stock.get_item_details.get_default_income_account" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_default_income_account</b>
+        <i class="text-muted">(args, item)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.get_item_details.get_item_code</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_item_code" href="#erpnext.stock.get_item_details.get_item_code" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_item_code</b>
+        <i class="text-muted">(barcode=None, serial_no=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.get_item_details.get_item_details</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_item_details" href="#erpnext.stock.get_item_details.get_item_details" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_item_details</b>
+        <i class="text-muted">(args)</i>
+    </p>
+	<div class="docs-attr-desc"><p>args = {
+    "item<em>code": "",
+    "warehouse": None,
+    "customer": "",
+    "conversion</em>rate": 1.0,
+    "selling<em>price</em>list": None,
+    "price<em>list</em>currency": None,
+    "plc<em>conversion</em>rate": 1.0,
+    "parenttype": "",
+    "parent": "",
+    "supplier": None,
+    "transaction<em>date": None,
+    "conversion</em>rate": 1.0,
+    "buying<em>price</em>list": None,
+    "is<em>subcontracted": "Yes" / "No",
+    "transaction</em>type": "selling",
+    "ignore<em>pricing</em>rule": 0/1
+    "project_name": ""
+}</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_party_item_code" href="#erpnext.stock.get_item_details.get_party_item_code" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_party_item_code</b>
+        <i class="text-muted">(args, item_doc, out)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.get_item_details.get_pos_profile</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_pos_profile" href="#erpnext.stock.get_item_details.get_pos_profile" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_pos_profile</b>
+        <i class="text-muted">(company)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_pos_profile_item_details" href="#erpnext.stock.get_item_details.get_pos_profile_item_details" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_pos_profile_item_details</b>
+        <i class="text-muted">(company, args, pos_profile=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_price_list_currency" href="#erpnext.stock.get_item_details.get_price_list_currency" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_price_list_currency</b>
+        <i class="text-muted">(price_list)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_price_list_currency_and_exchange_rate" href="#erpnext.stock.get_item_details.get_price_list_currency_and_exchange_rate" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_price_list_currency_and_exchange_rate</b>
+        <i class="text-muted">(args)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_price_list_rate" href="#erpnext.stock.get_item_details.get_price_list_rate" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_price_list_rate</b>
+        <i class="text-muted">(args, item_doc, out)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_price_list_rate_for" href="#erpnext.stock.get_item_details.get_price_list_rate_for" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_price_list_rate_for</b>
+        <i class="text-muted">(args, item_code)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.stock.get_item_details.get_projected_qty</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_projected_qty" href="#erpnext.stock.get_item_details.get_projected_qty" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_projected_qty</b>
+        <i class="text-muted">(item_code, warehouse)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.get_serial_nos_by_fifo" href="#erpnext.stock.get_item_details.get_serial_nos_by_fifo" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>get_serial_nos_by_fifo</b>
+        <i class="text-muted">(args, item_doc)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.insert_item_price" href="#erpnext.stock.get_item_details.insert_item_price" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>insert_item_price</b>
+        <i class="text-muted">(args)</i>
+    </p>
+	<div class="docs-attr-desc"><p>Insert Item Price if Price List and Price List Rate are specified and currency is the same</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.process_args" href="#erpnext.stock.get_item_details.process_args" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>process_args</b>
+        <i class="text-muted">(args)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.validate_conversion_rate" href="#erpnext.stock.get_item_details.validate_conversion_rate" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>validate_conversion_rate</b>
+        <i class="text-muted">(args, meta)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.validate_item_details" href="#erpnext.stock.get_item_details.validate_item_details" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>validate_item_details</b>
+        <i class="text-muted">(args, item)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.stock.get_item_details.validate_price_list" href="#erpnext.stock.get_item_details.validate_price_list" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.stock.get_item_details.<b>validate_price_list</b>
+        <i class="text-muted">(args)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+
+
+<!-- autodoc -->
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <!-- edit-link -->
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

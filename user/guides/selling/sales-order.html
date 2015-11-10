@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Sales Order</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Sales Order" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/sales-order-f.jpg" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="The Sales Order confirms your sales and triggers purchase (Material Request) shipment (Delivery Note), billing (Sales Invoice) and manufacturing (Production Plan) A Sales Order is usually a binding Contract with your Customer. Once your customer confirms the Quotation you can convert your Quotation into a Sales Order. Sales Order Flow-Chart &lt;img src=&#34;https://frappe.github.io/erpnext/assets/ol" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/sales-order-f.jpg" data-html-block="meta_block">
+<meta name="og:title" content="Sales Order" data-html-block="meta_block">
+<meta name="twitter:title" content="Sales Order" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/sales-order-f.jpg" data-html-block="meta_block">
+<meta name="twitter:description" content="The Sales Order confirms your sales and triggers purchase (Material Request) shipment (Delivery Note), billing (Sales Invoice) and manufacturing (Production Plan) A Sales Order is usually a binding Contract with your Customer. Once your customer confirms the Quotation you can convert your Quotation into a Sales Order. Sales Order Flow-Chart &lt;img src=&#34;https://frappe.github.io/erpnext/assets/ol" data-html-block="meta_block">
+<meta name="description" content="The Sales Order confirms your sales and triggers purchase (Material Request) shipment (Delivery Note), billing (Sales Invoice) and manufacturing (Production Plan) A Sales Order is usually a binding Contract with your Customer. Once your customer confirms the Quotation you can convert your Quotation into a Sales Order. Sales Order Flow-Chart &lt;img src=&#34;https://frappe.github.io/erpnext/assets/ol" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-sales-order" data-path="user/guides/selling/sales-order"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Sales Order</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/selling">
+		Selling</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="sales-order" style="text-align: Left">
+	<p>The Sales Order confirms your sales and triggers purchase (<strong>Material
+Request</strong>) shipment (<strong>Delivery Note</strong>), billing (<strong>Sales Invoice</strong>) and
+manufacturing (<strong>Production Plan</strong>)</p>
+
+<p>A Sales Order is usually a binding Contract with your Customer.</p>
+
+<p>Once your customer confirms the Quotation you can convert your Quotation into
+a Sales Order.</p>
+
+<h3>Sales Order Flow-Chart</h3>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/sales-order-f.jpg" alt="Sales Order" /></p>
+
+<p>To create a new Sales Order go to:</p>
+
+<blockquote>
+  <p>Selling &gt; Sales Order &gt; New Sales Order</p>
+</blockquote>
+
+<h3>Creating Sales Order from Quotation</h3>
+
+<p>You can also create a Sales Order from a submitted Quotation.</p>
+
+<p><img class="screenshot" alt="Make Sales Order from Quotation" src="https://frappe.github.io/erpnext/assets/img/selling/make-SO-from-quote.png"></p>
+
+<p>Or you can create a new Sales Order and pull details from an Quotation.</p>
+
+<p><img class="screenshot" alt="Make Sales Order from Quotation" src="https://frappe.github.io/erpnext/assets/img/selling/make-so.gif"></p>
+
+<p>Most of the information in your Sales Order is the same as the Quotation.
+There are a few amongst other things that a Sales Order will ask you to
+update.</p>
+
+<ul>
+<li>Expected date of delivery.</li>
+<li>Customer Purchase Order number: If your customer has sent you a Purchase Order, you can update its number for future reference (in billing).</li>
+</ul>
+
+<h3>Packing List</h3>
+
+<p>The “Packing List” table will be automatically updated when you “Save” the
+Sales Order. If any Items in your table are Product Bundle (packets), then the
+“Packing List” will contain the exploded (detailed) list of your Items.</p>
+
+<h3>Reservation and Warehouses</h3>
+
+<p>If your Sales Order contains Items for which inventory is tracked (Is Stock
+Item is “Yes”) then, ERPNext will ask you for “Reservation Warehouse”. If you
+have set a default Warehouse for the Item, it will automatically set this
+Warehouse here.</p>
+
+<p>This “reserved” quantity will help you project what is the quantity you need
+to purchase based on all your commitments.</p>
+
+<h3>Sales Team</h3>
+
+<p><strong>Sales Partner:</strong> If this Sale was booked via a Sales Partner, you can update the Sales Partner’s details with commission and other info that you can aggregate.</p>
+
+<p><strong>Sales Persons:</strong> ERPNext allows you to tag multiple Sales Persons who may have worked on this deal. You can also split the amount in targets of different Sales Persons and track how much incentives they earned on this deal.</p>
+
+<h3>Recurring Sales Orders</h3>
+
+<p>If you have a recurring contract with a Customer where you are required to generate a Sales Order on a monthly, quarterly, half-yearly or annual basis, you can check the “Convert To Recurring Order” box. </p>
+
+<p>Here you can fill in the details like; of how frequently you want to generate an Order in the 'Recurring Type' field, specify the day of of the month on which the Order needs to be generated in the 'Repeat On Day Of Month' field and the date on which the recurring orders should stop in the 'End Date' field.</p>
+
+<p><strong>Recurring Type:</strong> Here you can update how frequently you want to generate an Order.</p>
+
+<p><strong>Repeat On Day Of Month:</strong> You can specify the day of of the month on which the Order needs to be generated.</p>
+
+<p><strong>End Date:</strong> The date on which the recurring orders should stop can be specified here.</p>
+
+<p>On updating the Sales Order, a Recurring ID will be generated which will be same for all recurring orders generated from this particular Sales Order.</p>
+
+<p>ERPNext will automatically create new Order and mail a notification to the email IDs you set in the 'Notification Email Address'field.</p>
+
+<p><img class="screenshot" alt="Reccuring Sales Order" src="https://frappe.github.io/erpnext/assets/img/selling/recurring-sales-order.png"></p>
+
+<h3>Next Steps</h3>
+
+<p>Once you “Submit” your Sales Order, you can now trigger different aspects of
+your organization:</p>
+
+<ul>
+<li>To begin purchase click on “Make Purchase Request”</li>
+<li>To make a shipment entry click on “Make Delivery Note”</li>
+<li>To bill, make “Make Sales Invoice”</li>
+<li>To stop further process on this Sales Order, click on “Stop”</li>
+</ul>
+
+<h3>Submission</h3>
+
+<p>Sales Order is a “Submittable” transaction. See Document Stages. You will be
+able to execute dependent steps (like making a Delivery Note) only after
+“Submitting” this Sales Order.</p>
+
+<h3>Sales Order with Order type Maintenance</h3>
+
+<p>When the 'Order Type' of the Sales Order is 'Maintenance' follow the steps
+given below:</p>
+
+<p><strong>Step 1:</strong> Enter Currency, Price list and Item details.</p>
+
+<p><strong>Step 2:</strong> Mention taxes and other information.</p>
+
+<p><strong>Step 3:</strong> Save and Submit the form</p>
+
+<p><strong>Step 4:</strong> Once the form is submitted, the Action button will provide three
+choices.i) Maintenance Visit ii) Maintenance Schedule iii) Invoice.</p>
+
+<blockquote>
+  <p><strong>Note 1:</strong> <br />
+  By clicking on the Action button and selecting 'Maintenance Visit' you can directly fill the visit form. The Sales Order details will be fetched directly.    </p>
+  
+  <p><strong>Note 2:</strong> <br />
+  By clicking on the Action button and selecting 'Maintenance Schedule' you can fill the schedule details. The Sales Order details will be fetched directly.</p>
+  
+  <p><strong>Note 3:</strong> <br />
+  By clicking on the Invoice button you can make an Invoice for your
+  services . The sales orders details will be fetched directly.</p>
+</blockquote>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="setup">Next: Setup</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/selling/sales-order.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

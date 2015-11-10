@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Point of Sale Invoice</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Point of Sale Invoice" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/pos-add-item.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="Point of Sale (POS) is the place where a retail transaction is completed. It is the point at which a customer makes a payment to the merchant in exchange for goods or services. For retail operations, the delivery of goods, accrual of sale and payment all happens in one event, that is usually called the “Point of Sale”. You can make a Sales Invoice of type POS by checking on “Is POS”. When you check this, you will notice that some fields get hidden and some new ones emerge. &lt;block" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/pos-add-item.png" data-html-block="meta_block">
+<meta name="og:title" content="Point of Sale Invoice" data-html-block="meta_block">
+<meta name="twitter:title" content="Point of Sale Invoice" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/pos-add-item.png" data-html-block="meta_block">
+<meta name="twitter:description" content="Point of Sale (POS) is the place where a retail transaction is completed. It is the point at which a customer makes a payment to the merchant in exchange for goods or services. For retail operations, the delivery of goods, accrual of sale and payment all happens in one event, that is usually called the “Point of Sale”. You can make a Sales Invoice of type POS by checking on “Is POS”. When you check this, you will notice that some fields get hidden and some new ones emerge. &lt;block" data-html-block="meta_block">
+<meta name="description" content="Point of Sale (POS) is the place where a retail transaction is completed. It is the point at which a customer makes a payment to the merchant in exchange for goods or services. For retail operations, the delivery of goods, accrual of sale and payment all happens in one event, that is usually called the “Point of Sale”. You can make a Sales Invoice of type POS by checking on “Is POS”. When you check this, you will notice that some fields get hidden and some new ones emerge. &lt;block" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-point-of-sale-pos-invoice" data-path="user/guides/accounts/point-of-sale-pos-invoice"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Point of Sale Invoice</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/accounts">
+		Accounts</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="point-of-sale-pos-invoice" style="text-align: Left">
+	<p>Point of Sale (POS) is the place where a retail transaction is completed. It
+is the point at which a customer makes a payment to the merchant in exchange
+for goods or services. For retail operations, the delivery of goods, accrual
+of sale and payment all happens in one event, that is usually called the
+“Point of Sale”.</p>
+
+<p>You can make a Sales Invoice of type POS by checking on “Is POS”. When you
+check this, you will notice that some fields get hidden and some new ones
+emerge.</p>
+
+<blockquote>
+  <p>Tip: In retail, you may not create a separate Customer record for each
+  customer. You can create a general Customer called “Walk-in Customer” and make
+  all your transactions against this Customer record.</p>
+</blockquote>
+
+<h4>Setting Up POS</h4>
+
+<p>In ERPNext all Sales and Purchase transactions, like Sales Invoice, Quotation, Sales Order, Purchase Order etc. can be edited via the POS. There two steps to Setup POS:</p>
+
+<ol>
+<li>Enable POS View via (Setup &gt; Customize &gt; Feature Setup)</li>
+<li>Create a <a href="https://frappe.github.io/erpnext/user/guides/setting-up/pos-setting.html">POS Setting</a> record</li>
+</ol>
+
+<h4>Switch to POS View</h4>
+
+<p>Open any sales / purchase transaction. Click on the Computer <i class="icon-desktop"></i> Icon.</p>
+
+<h4>Different sections of the POS</h4>
+
+<ul>
+<li>Update Stock: If this is checked, Stock Ledger Entries will be made when you “Submit” this Sales Invoice thereby eliminating the need for a separate Delivery Note.</li>
+<li>In your Items table, update inventory information like Warehouse (saved as default), Serial Number, or Batch Number if applicable.</li>
+<li>Update Payment Details like your Bank / Cash Account, Paid amount etc.</li>
+<li>If you are writing off certain amount. For example when you receive extra cash as a result of not having exact denomination of change, check on ‘Write off Outstanding Amount’ and set the Account.</li>
+</ul>
+
+<h3>Adding an Item</h3>
+
+<p>At the billing counter, the retailer needs to select Items which the consumer
+buys. In the POS interface you can select an Item by two methods. One, is by
+clicking on the Item image and the other, is through the Barcode / Serial No.</p>
+
+<p><strong>Select Item</strong> - To select a product click on the Item image and add it into the cart. A cart is an area that prepares a customer for checkout by allowing to edit product information, adjust taxes and add discounts.</p>
+
+<p><strong>Barcode / Serial No</strong> - A Barcode / Serial No is an optical machine-readable representation of data relating to the object to which it is attached. Enter Barcode / Serial No in the box as shown in the image below and pause for a second, the item will be automatically added to the cart.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/pos-add-item.png" alt="POS" /></p>
+
+<blockquote>
+  <p>Tip: To change the quantity of an Item, enter your desired quantity in the
+  quantity box. These are mostly used if the same Item is purchased in bulk.</p>
+</blockquote>
+
+<p>If your product list is very long use the Search field, type the product name
+in Search box.</p>
+
+<h3>Removing an Item</h3>
+
+<p>There are two ways to remove an Item.</p>
+
+<ul>
+<li><p>Select an Item by clicking on the row of that Item from Item cart. Then click on “Del” button. OR</p></li>
+<li><p>Enter 0(zero) quantity of any item to delete that item.</p></li>
+</ul>
+
+<p>To remove multiple Items together, select multiple rows &amp; click on “Del”
+button.</p>
+
+<blockquote>
+  <p>Delete button appears only when Items are selected.</p>
+</blockquote>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/pos-remove-item.png" alt="POS" /></p>
+
+<h3>Make Payment</h3>
+
+<p>After all the Items and their quantities are added into the cart, you are
+ready to make the Payment. Payment process is divided into 3 steps -</p>
+
+<ol>
+<li>Click on “Make Payment” to get the Payment window.</li>
+<li>Select your “Mode of Payment”.</li>
+<li>Click on “Pay” button to Save the document.</li>
+</ol>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/pos-make-payment.png" alt="POS Payment" /></p>
+
+<p>Submit the document to finalise the record. After the document is submitted,
+you can either print or email it directly to the customer.</p>
+
+<h4>Accounting entries (GL Entry) for a Point of Sale:</h4>
+
+<p>Debits:</p>
+
+<ul>
+<li>Customer (grand total) </li>
+<li>Bank / Cash (payment)</li>
+</ul>
+
+<p>Credits:</p>
+
+<ul>
+<li>Income (net total, minus taxes for each Item) </li>
+<li>Taxes (liabilities to be paid to the government)</li>
+<li>Customer (payment)</li>
+<li>Write Off (optional)</li>
+</ul>
+
+<p>To see entries after “Submit”, click on “View Ledger”.</p>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="multi-currency-accounting.html">Next: Multi Currency Accounting</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/accounts/point-of-sale-pos-invoice.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

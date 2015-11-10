@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Multi Currency Accounting</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Multi Currency Accounting" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/chart-of-accounts.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="In ERPNext, you can make accounting entries in multiple currency. For example, if you have a bank account in foreign currency, you can make transactions in that currency and system will show bank balance in that specific currency only. Setup To get started with multi-currency accounting, you need to assign accounting currency in Account record. You can define Currency from Chart of Accounts while creating Account. &lt;img class=&#34;screenshot&#34; alt=&#34;Set Currency from Chart" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/chart-of-accounts.png" data-html-block="meta_block">
+<meta name="og:title" content="Multi Currency Accounting" data-html-block="meta_block">
+<meta name="twitter:title" content="Multi Currency Accounting" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/chart-of-accounts.png" data-html-block="meta_block">
+<meta name="twitter:description" content="In ERPNext, you can make accounting entries in multiple currency. For example, if you have a bank account in foreign currency, you can make transactions in that currency and system will show bank balance in that specific currency only. Setup To get started with multi-currency accounting, you need to assign accounting currency in Account record. You can define Currency from Chart of Accounts while creating Account. &lt;img class=&#34;screenshot&#34; alt=&#34;Set Currency from Chart" data-html-block="meta_block">
+<meta name="description" content="In ERPNext, you can make accounting entries in multiple currency. For example, if you have a bank account in foreign currency, you can make transactions in that currency and system will show bank balance in that specific currency only. Setup To get started with multi-currency accounting, you need to assign accounting currency in Account record. You can define Currency from Chart of Accounts while creating Account. &lt;img class=&#34;screenshot&#34; alt=&#34;Set Currency from Chart" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-multi-currency-accounting" data-path="user/guides/accounts/multi-currency-accounting"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Multi Currency Accounting</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/accounts">
+		Accounts</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="multi-currency-accounting" style="text-align: Left">
+	<p>In ERPNext, you can make accounting entries in multiple currency. For example, if you have a bank account in foreign currency, you can make transactions in that currency and system will show bank balance in that specific currency only.</p>
+
+<h2>Setup</h2>
+
+<p>To get started with multi-currency accounting, you need to assign accounting currency in Account record. You can define Currency from Chart of Accounts while creating Account.</p>
+
+<p><img class="screenshot" alt="Set Currency from Chart of Accounts"   src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/chart-of-accounts.png"></p>
+
+<p>You can also assign / modify the currency by opening specific Account record for existing Accounts.</p>
+
+<p><img class="screenshot" alt="Modify Account Currency"   src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/account.png"></p>
+
+<p>For Customer / Supplier (Party), you can also define it's accounting currency in the Party record. If the Party's accounting currency is different from Company Currency, you have to mention Default Receivable / Payable Account in that currency.</p>
+
+<p><img class="screenshot" alt="Customer Accounting Currency"      src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/customer.png"></p>
+
+<p>Once you defined Accounting Currency in Party / Account record, you are ready to make transactions against them. If Party's accounting currency is different from Company Currency, system will restrict to make transaction for that party with that currency only. If accounting currency is same as Company Currency, you can make transactions for that Party in any currency. But accounting entries (GL Entries) will always be in Party's Accounting Currency. In any case, currency of Receivable Account will always be same as accounting currency of the Party.</p>
+
+<p>You can change accounting currency in Party / Account record, until making any transactions against them. After making accounting entries, system will not allow to change the accounting currency for both Party / Account record.</p>
+
+<p>In case of multi-company setup, accounting currency of Party must be same for all the companies.</p>
+
+<h2>Transactions</h2>
+
+<h3>Sales Invoice</h3>
+
+<p>In Sales Invoice, transaction currency must be same as accounting currency of Customer if Customer's accounting currency is other than Company Currency. Otherwise, you can select any currency in Invoice. On selection of Customer, system will fetch Receivable account from Customer / Company. The currency of receivable account must be same as Customer's accounting currency.</p>
+
+<p>Now, in POS, Paid Amount will be enetered in transaction currency, instead of earlier Company Currency. Write Off Amount will also be entered in transaction currency.</p>
+
+<p>Outstanding Amount and Advance Amount will always be calculated and shown in Customer's Account Currency.</p>
+
+<p><img class="screenshot" alt="Sales Invoice Outstanding"     src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/sales-invoice.png"></p>
+
+<h3>Purchase Invoice</h3>
+
+<p>Similarly, in Purchase Invoice, accounting entries will be made based on Supplier's accounting currency. Outstanding Amount and Advance Amount will also be shown in the supplier's accounting currency. Write Off Amount will now be entered in transaction currency.</p>
+
+<h3>Journal Entry</h3>
+
+<p>In Journal Entry, you can make transactions in different currencies. There is a checkbox "Multi Currency", to enable multi-currency entries. If "Multi Currency" option selected, you will be able to select accounts with different currencies.</p>
+
+<p><img class="screenshot" alt="Journal Entry Exchange Rate"   src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/journal-entry-multi-currency.png"></p>
+
+<p>In Accounts table, on selection of foreign currency account, system will show Currency section and fetch Account Currency and Exchange Rate automatically. You can change / modify the Exchange Rate later manually.</p>
+
+<p>In a single Journal Entry, you can select accounts with only one alternate currency, apart from accounts in Company Currency. Debit / Credit amount should be entered in Account Currency, system will calculate and show the Debit / Credit amount in Company Currency automatically.</p>
+
+<p><img class="screenshot" alt="Journal Entry in multi currency"   src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/journal-entry-row.png"></p>
+
+<h4>Example 1: Payment Entry  Against Customer With Alternate Currency</h4>
+
+<p>Suppose, default currency of the company is INR and customer's accounting currency is USD. Customer made full payment against an outstanding invoice of USD 100. Exchange Rate (USD -> INR) in Sales Invoice was 60.</p>
+
+<p>Exchange Rate in the payment entry should always be same as invoice (60), even if exchange rate on the payment date is 62. The bank account will be credited by the amount considering exchange rate as 62. Hence, Exchnage Gain / Loss will be booked based on exchange rate difference.</p>
+
+<p><img class="screenshot" alt="Payment Entry"     src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/payment-entry.png"></p>
+
+<h4>Example 2: Inter-bank Transfer (USD -> INR)</h4>
+
+<p>Suppose, default currency of the company is INR. You have an Paypal account for which Currency is USD. You receive payments in the paypal account and lets say, paypal transfers amount once in a week to your other bank account which is managed in INR. </p>
+
+<p>Paypal account gets debited on different date with different exchange rate, but on transfer date the exchange rate can be different. Hence, there is generally Exchange Loss / Gain on the transfer entry.
+In the bank transfer entry, system sets exchange rate based on the average incoming exchange rate Paypal account. You need to calculate and enter Exchange Loss / Gain based on the average exchange rate and the exchange rate on the transfer date.</p>
+
+<p>Lets say, Paypal account debited by following amounts over the week, which has not been transferred to your other bank account.</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <td>Date</td>
+            <td>Account</td>
+            <td>Debit (USD)</td>
+            <td>Exchange Rate</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>2015-09-02</td>
+            <td>Paypal</td>
+            <td>100</td>
+            <td>60</td>
+        </tr>
+        <tr>
+            <td>2015-09-02</td>
+            <td>Paypal</td>
+            <td>100</td>
+            <td>61</td>
+        </tr>
+        <tr>
+            <td>2015-09-02</td>
+            <td>Paypal</td>
+            <td>100</td>
+            <td>64</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>Suppose, Exchange Rate on the payment date is 62 and Bank Transfer Entry will be look like below:</p>
+
+<p><img class="screenshot" alt="Inter Bank Transfer"   src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/bank-transfer.png"></p>
+
+<h2>Reports</h2>
+
+<h3>General Ledger</h3>
+
+<p>In General Ledger, system shows debit / credit amount in both currency if filtered by an Account and Account Currency is different from Company Currency.</p>
+
+<p><img class="screenshot" alt="General Ledger Report"     src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/general-ledger.png"></p>
+
+<h3>Accounts Receivable / Payable</h3>
+
+<p>In Accounts Receivable / Payable report, system shows all the amounts in Party / Account Currency.</p>
+
+<p><img class="screenshot" alt="Accounts Receivable Report"    src="https://frappe.github.io/erpnext/assets/img/accounts/multi-currency/accounts-receivable.png"></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/accounts/multi-currency-accounting.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

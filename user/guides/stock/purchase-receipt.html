@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Purchase Receipt</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Purchase Receipt" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/stock/purchase-receipt.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="Purchase Receipts are made when you accept material from your Supplier usually against a Purchase Order. You can also accept Purchase Receipts directly ( Set Purchase Order Required as “No” in Global Defaults). You can make a Purchase Receipt directly from: Stock &gt; Purchase Receipt &gt; New Purchase Receipt or from a “Submitted” Purchase Order, by clicking on “Make Purchase Receipt”. &lt;img class=&#34;screenshot&#34; alt=&#34;Purchase" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/stock/purchase-receipt.png" data-html-block="meta_block">
+<meta name="og:title" content="Purchase Receipt" data-html-block="meta_block">
+<meta name="twitter:title" content="Purchase Receipt" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/stock/purchase-receipt.png" data-html-block="meta_block">
+<meta name="twitter:description" content="Purchase Receipts are made when you accept material from your Supplier usually against a Purchase Order. You can also accept Purchase Receipts directly ( Set Purchase Order Required as “No” in Global Defaults). You can make a Purchase Receipt directly from: Stock &gt; Purchase Receipt &gt; New Purchase Receipt or from a “Submitted” Purchase Order, by clicking on “Make Purchase Receipt”. &lt;img class=&#34;screenshot&#34; alt=&#34;Purchase" data-html-block="meta_block">
+<meta name="description" content="Purchase Receipts are made when you accept material from your Supplier usually against a Purchase Order. You can also accept Purchase Receipts directly ( Set Purchase Order Required as “No” in Global Defaults). You can make a Purchase Receipt directly from: Stock &gt; Purchase Receipt &gt; New Purchase Receipt or from a “Submitted” Purchase Order, by clicking on “Make Purchase Receipt”. &lt;img class=&#34;screenshot&#34; alt=&#34;Purchase" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-purchase-receipt" data-path="user/guides/stock/purchase-receipt"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Purchase Receipt</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/stock">
+		Stock</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="purchase-receipt" style="text-align: Left">
+	<p>Purchase Receipts are made when you accept material from your Supplier usually
+against a Purchase Order.</p>
+
+<p>You can also accept Purchase Receipts directly ( Set Purchase Order
+Required as “No” in Global Defaults).</p>
+
+<p>You can make a Purchase Receipt directly from:</p>
+
+<blockquote>
+  <p>Stock &gt; Purchase Receipt &gt; New Purchase Receipt</p>
+</blockquote>
+
+<p>or from a “Submitted” Purchase Order, by clicking on “Make Purchase Receipt”.</p>
+
+<p><img class="screenshot" alt="Purchase Receipt" src="https://frappe.github.io/erpnext/assets/img/stock/purchase-receipt.png"></p>
+
+<h3>Rejections</h3>
+
+<p>In the Purchase Receipt, you are required to enter whether all the materials
+you receive are of acceptable quality (in case you check). If you have any
+rejections, update the “Rejected Quantity” column in the Items table.</p>
+
+<p>If you reject, you are required to enter a “Rejected Warehouse” to indicate
+where you are storing the rejected Items.</p>
+
+<h3>Quality Inspections</h3>
+
+<p>If for certain Items, it is mandatory to record Quality Inspections (if you
+have set it in your Item master), you will need to update the “Quality
+Inspection No” (QA No) column. The system will only allow you to “Submit” the
+Purchase Receipt if you update the “Quality Inspection No”.</p>
+
+<h3>UOM Conversions</h3>
+
+<p>If your Purchase Order for an Item is in a different Unit of Measure (UOM)
+than what you stock (Stock UOM), then you will need to update the “UOM
+Conversion Factor”. </p>
+
+<h3>Currency Conversions</h3>
+
+<p>Since the incoming Item affects the value of your inventory, it is important
+to convert it into your base Currency, if you have ordered in another
+Currency. You will need to update the Currency Conversion Rate if applicable.</p>
+
+<h3>Taxes and Valuation</h3>
+
+<p>Some of your taxes and charges may affect your Items value. For example, a Tax
+may not be added to your Item’s valuation, because if you sell the Item, you
+will have to add the tax at that time. So make sure to mark all your taxes in
+the Taxes and Charges table correctly for accurate valuation.</p>
+
+<h3>Serial Numbers and Batches</h3>
+
+<p>If your Item is serialized or batched, you will have to enter Serial Number
+and Batch in the Item's table. You are allowed to enter multiple Serial Numbers
+in one row (each on a separate line) and you must enter the same number of
+Serial Numbers as the quantity. You must enter each Batch number on a separate
+line.</p>
+
+<hr />
+
+<h4>What happens when the Purchase Receipt is “Submitted”?</h4>
+
+<p>A Stock Ledger Entry is created for each Item adding the Item in the Warehouse
+by the “Accepted Quantity” If you have rejections, a Stock Ledger Entry is
+made for each Rejection. The “Pending Quantity” is updated in the Purchase
+Order.</p>
+
+<hr />
+
+<h4>Adding value to your Items post Purchase Receipt:</h4>
+
+<p>Some times, certain expenses that add value to your purchased Items are known
+only after a while. Common example is, if you are importing the Items, you
+will come to know of Customs Duty etc only when your “Clearing Agent” sends
+you a bill. If you want to attribute this cost to your purchased Items, you
+will have to use the Landed Cost Wizard. Why “Landed Cost”? Because it
+represents the charges that you paid when it landed in your possession.</p>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="installation-note.html">Next: Installation Note</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/stock/purchase-receipt.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

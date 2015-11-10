@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Custom Field</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Custom Field" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize-form-custom-field.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="Custom Field feature allows you to insert fields in the existing masters and transactions as per your requirement. While inseting custom field, you can define its properties like. Field Name/Label Field Type Mandatory/Non-Mandatory Insert After Field To add a Custom Field, go to: Setup &gt; Customize &gt; Custom Field &gt; New Custom Field You can also insert new Custom Field from &lt;a href=&#34;htt" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize-form-custom-field.png" data-html-block="meta_block">
+<meta name="og:title" content="Custom Field" data-html-block="meta_block">
+<meta name="twitter:title" content="Custom Field" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize-form-custom-field.png" data-html-block="meta_block">
+<meta name="twitter:description" content="Custom Field feature allows you to insert fields in the existing masters and transactions as per your requirement. While inseting custom field, you can define its properties like. Field Name/Label Field Type Mandatory/Non-Mandatory Insert After Field To add a Custom Field, go to: Setup &gt; Customize &gt; Custom Field &gt; New Custom Field You can also insert new Custom Field from &lt;a href=&#34;htt" data-html-block="meta_block">
+<meta name="description" content="Custom Field feature allows you to insert fields in the existing masters and transactions as per your requirement. While inseting custom field, you can define its properties like. Field Name/Label Field Type Mandatory/Non-Mandatory Insert After Field To add a Custom Field, go to: Setup &gt; Customize &gt; Custom Field &gt; New Custom Field You can also insert new Custom Field from &lt;a href=&#34;htt" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-custom-field" data-path="user/guides/customize-erpnext/custom-field"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Custom Field</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/customize-erpnext">
+		Customize ERPNext</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="custom-field" style="text-align: Left">
+	<p>Custom Field feature allows you to insert fields in the existing masters and transactions as per your requirement. While inseting custom field, you can define its properties like.</p>
+
+<ul>
+<li>Field Name/Label</li>
+<li>Field Type</li>
+<li>Mandatory/Non-Mandatory</li>
+<li>Insert After Field</li>
+</ul>
+
+<p>To add a Custom Field, go to:</p>
+
+<blockquote>
+  <p>Setup &gt; Customize &gt; Custom Field &gt; New Custom Field</p>
+</blockquote>
+
+<p>You can also insert new Custom Field from <a href="https://erpnext.com/customize-erpnext/customize-form">Customize Form</a> tool.</p>
+
+<p>In Customize Form, for each field, you will find plus (+) option. When click on it, new row will be inserted above that field. You can enter properties for your Custom Field in the newly added blank row.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/customize-form-custom-field.png" alt="Customize Form Custom Field" /></p>
+
+<p>Following are the steps to insert Custom Field in the existing form.</p>
+
+<h4>New Custom Field form / Row in Customize Form</h4>
+
+<p>As mentioned above, you can insert Custom Field from Custom Field form, and also from Customize Form.</p>
+
+<h4>Select Document/Form</h4>
+
+<p>You should select transaction or master in which you want to insert custom field. Let's assume you need to insert a custom link field in the Quotation form. In this case, Document will be "Quotation".</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/custom-field-document.png" alt="Custom Field Document" /></p>
+
+<h4>Set Field Label</h4>
+
+<p>Custom Field's name will be set based on its Label. If you want to create Custom Field with specific name, but with different label, then you should first set Label as you want Field Name to be set. After Custom Field is saved, you can edit the Field Label again.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/custom-field-label.png" alt="Custom Field Label" /></p>
+
+<h4>Select Insert After</h4>
+
+<p>This field will have all the existing field of the form/doctype selected. Your Custom Field will be placed after field you select in the Insert After field.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/custom-field-insert.png" alt="Custom Field Insert" /></p>
+
+<h4>Select Field Type</h4>
+
+<p>Click <a href="https://erpnext.com/kb/customize/field-types">here</a> to learn more about types of field you can set for your Custom Field.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/custom-field-type.png" alt="Custom Field Type" /></p>
+
+<h4>Set Option</h4>
+
+<p>If you are creating a Link field, then Doctype name with which this field will be linked to will be entered in the Option field. Click <a href="https://erpnext.com/kb/customize/creating-custom-link-field">here</a> to learn more about creating custom link field.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/custom-field-link.png" alt="Custom Field Link" /></p>
+
+<p>If field type is set as Select (drop down field), then all he possible result for this field should be listed in the Options field. Each possible result should be separate by row.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/custom-field-option.png" alt="Custom Field Option" /></p>
+
+<p>For other field types, like Data, Date, Currency etc., Opton field will be left blank.</p>
+
+<h4>Set More Properties</h4>
+
+<p>You can set properties as:</p>
+
+<ol>
+<li>Mandatory: Should this field be mandatory or non-mandatory.</li>
+<li>Print Hide: Should this field be visible in the print format or no.</li>
+<li>Field Description: It will be short field description which will appear just below that field.</li>
+<li>Default Value: Value entered in this field will be auto-updated in this field.</li>
+<li>Read Only: Checking this option will make custom field non-editable.</li>
+<li>Allow on Submit: Checking this option will allow editing value in the field when in submitted transaction.</li>
+</ol>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/custom-field-properties.png" alt="Custom Field Properties" /></p>
+
+<h4>Deleting Custom Field</h4>
+
+<p>Given a permission, user will be able to delete Custom Fields. Incase, it was deleted by default, if you add another Custom Field with same name. Then you shall see new field auto-mapped with old-deleted Custom Field.</p>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="custom-doctype.html">Next: Custom Doctype</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/customize-erpnext/custom-field.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Perpetual Inventory</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Perpetual Inventory" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-2.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="In perpetual inventory, system creates accounting entries for each stock transactions, so that stock and account balance will always remain same. The account balance will be posted against their respective account heads for each Warehouse. On saving of a Warehouse, the system will automatically create an account head with the same name as warehouse. As account balance is maintained for each Warehouse, you should create Warehouses, based on the type of items (Current / Fixed Assets) it stores." data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-2.png" data-html-block="meta_block">
+<meta name="og:title" content="Perpetual Inventory" data-html-block="meta_block">
+<meta name="twitter:title" content="Perpetual Inventory" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-2.png" data-html-block="meta_block">
+<meta name="twitter:description" content="In perpetual inventory, system creates accounting entries for each stock transactions, so that stock and account balance will always remain same. The account balance will be posted against their respective account heads for each Warehouse. On saving of a Warehouse, the system will automatically create an account head with the same name as warehouse. As account balance is maintained for each Warehouse, you should create Warehouses, based on the type of items (Current / Fixed Assets) it stores." data-html-block="meta_block">
+<meta name="description" content="In perpetual inventory, system creates accounting entries for each stock transactions, so that stock and account balance will always remain same. The account balance will be posted against their respective account heads for each Warehouse. On saving of a Warehouse, the system will automatically create an account head with the same name as warehouse. As account balance is maintained for each Warehouse, you should create Warehouses, based on the type of items (Current / Fixed Assets) it stores." data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-perpetual-inventory" data-path="user/guides/stock/accounting-of-inventory-stock/perpetual-inventory"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Perpetual Inventory</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/stock/accounting-of-inventory-stock">
+		Accounting Of Inventory Stock</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="perpetual-inventory" style="text-align: Left">
+	<p>In perpetual inventory, system creates accounting entries for each stock
+transactions, so that stock and account balance will always remain same. The
+account balance will be posted against their respective account heads for each
+Warehouse. On saving of a Warehouse, the system will automatically create an
+account head with the same name as warehouse. As account balance is maintained
+for each Warehouse, you should create Warehouses, based on the type of items
+(Current / Fixed Assets) it stores.</p>
+
+<p>At the time of items received in a particular warehouse, the balance of asset
+account (linked to that warehouse) will be increased. Similarly when you
+deliver some items from that warehouse, an expense will be booked and the
+asset account will be reduced, based on the valuation amount of those items.</p>
+
+<h2><strong>Activation</strong></h2>
+
+<ol>
+<li><p>Setup the following default accounts for each Company </p>
+
+<ul>
+<li>Stock Received But Not Billed</li>
+<li>Stock Adjustment Account</li>
+<li>Expenses Included In Valuation</li>
+<li>Cost Center</li>
+</ul></li>
+<li><p>In perpetual inventory, the system will maintain seperate account balance for each warehouse under separate account head. To create that account head, enter "Create Account Under" in Warehouse master.</p></li>
+<li><p>Activate Perpetual Inventory</p></li>
+</ol>
+
+<blockquote>
+  <p>Setup &gt; Accounts Settings &gt; Make Accounting Entry For Every Stock Movement</p>
+</blockquote>
+
+<hr />
+
+<h2><strong>Example</strong></h2>
+
+<p>Consider following Chart of Accounts and Warehouse setup for your company:</p>
+
+<h4>Chart of Accounts</h4>
+
+<ul>
+<li>Assets (Dr) 
+<ul>
+<li>Current Assets</li>
+<li>Accounts Receivable 
+<ul>
+<li>Jane Doe</li>
+</ul></li>
+<li>Stock Assets 
+<ul>
+<li>Stores</li>
+<li>Finished Goods</li>
+<li>Work In Progress</li>
+</ul></li>
+<li>Tax Assets 
+<ul>
+<li>VAT</li>
+</ul></li>
+<li>Fixed Assets</li>
+<li>Fixed Asset Warehouse</li>
+</ul></li>
+<li>Liabilities (Cr) 
+<ul>
+<li>Current Liabilities</li>
+<li>Accounts Payable 
+<ul>
+<li>East Wind Inc.</li>
+</ul></li>
+<li>Stock Liabilities 
+<ul>
+<li>Stock Received But Not Billed</li>
+</ul></li>
+<li>Tax Liabilities 
+<ul>
+<li>Service Tax</li>
+</ul></li>
+</ul></li>
+<li>Income (Cr) 
+<ul>
+<li>Direct Income</li>
+<li>Sales Account</li>
+</ul></li>
+<li>Expenses (Dr) 
+<ul>
+<li>Direct Expenses</li>
+<li>Stock Expenses 
+<ul>
+<li>Cost of Goods Sold</li>
+<li>Expenses Included In Valuation</li>
+<li>Stock Adjustment</li>
+<li>Shipping Charges</li>
+<li>Customs Duty</li>
+</ul></li>
+</ul></li>
+</ul>
+
+<h4>Warehouse - Account Configuration</h4>
+
+<ul>
+<li>Stores</li>
+<li>Work In Progress</li>
+<li>Finished Goods</li>
+<li>Fixed Asset Warehouse</li>
+</ul>
+
+<h3><strong>Purchase Receipt</strong></h3>
+
+<p>Suppose you have purchased <em>10 nos</em> of item "RM0001" at <em>$200</em> and <em>5 nos</em> of
+item "Desktop" at <strong>$100</strong> from supplier "East Wind Inc". Following are the
+details of Purchase Receipt:</p>
+
+<p><strong>Supplier:</strong> East Wind Inc.</p>
+
+<p><strong>Items:</strong></p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Warehouse</th>
+            <th>Qty</th>
+            <th>Rate</th>
+            <th>Amount</th>
+            <th>Valuation Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>RM0001</td>
+            <td>Stores</td>
+            <td>10</td>
+            <td>200</td>
+            <td>2000</td>
+            <td>2200</td>
+        </tr>
+        <tr>
+            <td>Desktop</td>
+            <td>Fixed Asset Warehouse</td>
+            <td>5</td>
+            <td>100</td>
+            <td>500</td>
+            <td>550</td>
+        </tr>
+    </tbody>
+</table>
+
+<p><strong>Taxes:</strong>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Account</th>
+            <th>Amount</th>
+            <th>Category</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Shipping Charges</td>
+            <td>100</td>
+            <td>Total and Valuation</td>
+        </tr>
+        <tr>
+            <td>VAT</td>
+            <td>120</td>
+            <td>Total</td>
+        </tr>
+        <tr>
+            <td>Customs Duty</td>
+            <td>150</td>
+            <td>Valuation</td>
+        </tr>
+    </tbody>
+</table>
+
+<p><strong>Stock Ledger</strong>
+</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-2.png" alt="pr&lt;em&gt;stock&lt;/em&gt;ledger" /></p>
+
+<p><strong>General Ledger</strong></p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-3.png" alt="pr&lt;em&gt;general&lt;/em&gt;ledger" /></p>
+
+<p>As stock balance increases through Purchase Receipt, "Store" and "Fixed Asset
+Warehouse" accounts are debited and a temporary account "Stock Receipt But Not
+Billed" account is credited, to maintain double entry accounting system. At the same time, negative expense is booked in account "Expense included in Valuation" for the amount added for valuation purpose, to avoid double expense booking.</p>
+
+<hr />
+
+<h3><strong>Purchase Invoice</strong></h3>
+
+<p>On receiving Bill from supplier, for the above Purchase Receipt, you will make
+Purchase Invoice for the same. The general ledger entries are as follows:</p>
+
+<p><strong>General Ledger</strong></p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-4.png" alt="pi&lt;em&gt;general&lt;/em&gt;ledger" /></p>
+
+<p>Here "Stock Received But Not Billed" account is debited and nullified the
+effect of Purchase Receipt.</p>
+
+<hr />
+
+<h3><strong>Delivery Note</strong></h3>
+
+<p>Lets say, you have an order from "Jane Doe" to deliver 5 nos of item "RM0001"
+at $300. Following are the details of Delivery Note:</p>
+
+<p><strong>Customer:</strong> Jane Doe</p>
+
+<p><strong>Items:</strong></p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Warehouse</th>
+            <th>Qty</th>
+            <th>Rate</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>RM0001</td>
+            <td>Stores</td>
+            <td>5</td>
+            <td>300</td>
+            <td>1500</td>
+        </tr>
+    </tbody>
+</table>
+
+<p><strong>Taxes:</strong>
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Account</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Service Tax</td>
+            <td>150</td>
+        </tr>
+        <tr>
+            <td>VAT</td>
+            <td>100</td>
+        </tr>
+    </tbody>
+</table>
+
+<p><strong>Stock Ledger</strong></p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-5.png" alt="dn&lt;em&gt;stock&lt;/em&gt;ledger" /></p>
+
+<p><strong>General Ledger</strong></p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-6.png" alt="dn&lt;em&gt;general&lt;/em&gt;ledger" /></p>
+
+<p>As item is delivered from "Stores" warehouse, "Stores" account is credited and
+equal amount is debited to the expense account "Cost of Goods Sold". The
+debit/credit amount is equal to the total valuation amount (buying cost) of
+the selling items. And valuation amount is calculated based on your prefferred
+valuation method (FIFO / Moving Average) or actual cost of serialized items.</p>
+
+<pre><code>In this example, we have considered valuation method as FIFO. 
+Valuation Rate  = Purchase Rate + Charges Included in Valuation 
+                = 200 + (250 * (2000 / 2500) / 10) 
+                = 220
+Total Valuation Amount  = 220 * 5 
+                        = 1100
+</code></pre>
+
+<hr />
+
+<h3><strong>Sales Invoice with Update Stock</strong></h3>
+
+<p>Lets say, you did not make Delivery Note against the above order and instead
+you have made Sales Invoice directly, with "Update Stock" options. The details
+of the Sales Invoice are same as the above Delivery Note.</p>
+
+<p><strong>Stock Ledger</strong></p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-7.png" alt="si&lt;em&gt;stock&lt;/em&gt;ledger" /></p>
+
+<p><strong>General Ledger</strong></p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-8.png" alt="si&lt;em&gt;general&lt;/em&gt;ledger" /></p>
+
+<p>Here, apart from normal account entries for invoice, "Stores" and "Cost of
+Goods Sold" accounts are also affected based on the valuation amount.</p>
+
+<hr />
+
+<h3><strong>Stock Entry (Material Receipt)</strong></h3>
+
+<p><strong>Items:</strong></p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Target Warehouse</th>
+            <th>Qty</th>
+            <th>Rate</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>RM0001</td>
+            <td>Stores</td>
+            <td>50</td>
+            <td>220</td>
+            <td>11000</td>
+        </tr>
+    </tbody>
+</table>
+
+<p><strong>Stock Ledger</strong></p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-9.png" alt="mr&lt;em&gt;stock&lt;/em&gt;ledger" /></p>
+
+<p><strong>General Ledger</strong></p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-10.png" alt="mr&lt;em&gt;stock&lt;/em&gt;ledger" /></p>
+
+<hr />
+
+<h3><strong>Stock Entry (Material Issue)</strong></h3>
+
+<p><strong>Items:</strong></p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Source Warehouse</th>
+            <th>Qty</th>
+            <th>Rate</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>RM0001</td>
+            <td>Stores</td>
+            <td>10</td>
+            <td>220</td>
+            <td>2200</td>
+        </tr>
+    </tbody>
+</table>
+
+<p><strong>Stock Ledger</strong></p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-11.png" alt="mi&lt;em&gt;stock&lt;/em&gt;ledger" /></p>
+
+<p><strong>General Ledger</strong></p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-12.png" alt="mi&lt;em&gt;stock&lt;/em&gt;ledger" /></p>
+
+<hr />
+
+<h3><strong>Stock Entry (Material Transfer)</strong></h3>
+
+<p><strong>Items:</strong></p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Source Warehouse</th>
+            <th>Target Warehouse</th>
+            <th>Qty</th>
+            <th>Rate</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>RM0001</td>
+            <td>Stores</td>
+            <td>Work In Progress</td>
+            <td>10</td>
+            <td>220</td>
+            <td>2200</td>
+        </tr>
+    </tbody>
+</table>
+
+<p><strong>Stock Ledger</strong></p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-13.png" alt="mtn&lt;em&gt;stock&lt;/em&gt;ledger" /></p>
+
+<p><strong>General Ledger</strong></p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/old_images/erpnext/accounting-for-stock-14.png" alt="mtn&lt;em&gt;general&lt;/em&gt;ledger" /></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/stock/accounting-of-inventory-stock/perpetual-inventory.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>

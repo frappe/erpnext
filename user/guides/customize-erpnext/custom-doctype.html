@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Custom Doctype</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Custom Doctype" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/setup/customize/doctype-basics.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:description" content="DocType or Document Type is a tool to insert form in ERPNext. The forms like Sales Order, Sales Invoices, Production Order are added as Doctype in the backend. Let&#39;s assume we are creating a Custom Doctype for a Book. Custom Doctype allows you to insert custom forms in ERPNext as per your requirement. To create a new DocType, go to: Setup &gt; Customize &gt; Doctype &gt; New Doctype Detail Module: Select module in w" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/setup/customize/doctype-basics.png" data-html-block="meta_block">
+<meta name="og:title" content="Custom Doctype" data-html-block="meta_block">
+<meta name="twitter:title" content="Custom Doctype" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/setup/customize/doctype-basics.png" data-html-block="meta_block">
+<meta name="twitter:description" content="DocType or Document Type is a tool to insert form in ERPNext. The forms like Sales Order, Sales Invoices, Production Order are added as Doctype in the backend. Let&#39;s assume we are creating a Custom Doctype for a Book. Custom Doctype allows you to insert custom forms in ERPNext as per your requirement. To create a new DocType, go to: Setup &gt; Customize &gt; Doctype &gt; New Doctype Detail Module: Select module in w" data-html-block="meta_block">
+<meta name="description" content="DocType or Document Type is a tool to insert form in ERPNext. The forms like Sales Order, Sales Invoices, Production Order are added as Doctype in the backend. Let&#39;s assume we are creating a Custom Doctype for a Book. Custom Doctype allows you to insert custom forms in ERPNext as per your requirement. To create a new DocType, go to: Setup &gt; Customize &gt; Doctype &gt; New Doctype Detail Module: Select module in w" data-html-block="meta_block">
+
+		
+			<style data-html-block="style"></style></head>
+<body>
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
+                        
+                            <div class="container">
+                            <div class="page-container" id="page-custom-doctype" data-path="user/guides/customize-erpnext/custom-doctype"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+            		<div class="page-header-block" data-html-block="header"><h1>Custom Doctype</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/guides/customize-erpnext">
+		Customize ERPNext</a>
+	</li>
+	
+</ul>
+</div>
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="custom-doctype" style="text-align: Left">
+	<p>DocType or Document Type is a tool to insert form in ERPNext. The forms like Sales Order,
+Sales Invoices, Production Order are added as Doctype in the backend. Let's assume we are
+creating a Custom Doctype for a Book.</p>
+
+<p>Custom Doctype allows you to insert custom forms in ERPNext as per your requirement.</p>
+
+<p>To create a new <strong>DocType</strong>, go to:</p>
+
+<p><code>Setup &gt; Customize &gt; Doctype &gt; New</code></p>
+
+<h4>Doctype Detail</h4>
+
+<ol>
+<li>Module: Select module in which this Doctype should be placed.</li>
+<li>Document Type: Specify if this Doctype will be to carry master data, or to track transactions. Doctype
+for book will be added as Master.</li>
+<li>Is Child table: If this Doctype is to be inserted as table into another Doctype, like Item table
+in the Sales Order Doctype, then you should check Is Child Table. Else no.</li>
+<li>Is Single: If checked, this Doctype will become a single form, like Selling Setting, which user will
+not be able to re-produce.</li>
+<li>Custom?: This field will be checked by default when adding Custom Doctype.</li>
+</ol>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/setup/customize/doctype-basics.png" alt="Doctype Basic" /></p>
+
+<h4>Fields</h4>
+
+<p>In the Fields Table, you can add the fields (properties) of the DocType (Article).</p>
+
+<p>Fields are much more than database columns, they can be:</p>
+
+<ol>
+<li>Columns in the database</li>
+<li>For Layout (section / column breaks)</li>
+<li>Child tables (Table type field)</li>
+<li>HTML</li>
+<li>Actions (button)</li>
+<li>Attachments or Images</li>
+</ol>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/setup/customize/Doctype-all-fields.png" alt="Doctype fields" /></p>
+
+<p>When you add fields, you need to enter the <strong>Type</strong>. <strong>Label</strong> is optional for Section Break and Column Break. <strong>Name</strong> (<code>fieldname</code>) is the name of the database table column.</p>
+
+<p>You can also set other properties of the field like whether it is mandatory, read only etc.</p>
+
+<h4>Naming</h4>
+
+<p>In this section, you can define criteria based on which document for this doctype will be named. There are multiple criterion based on which document can be named, like naming based on the value in the specific field, or based on Naming Series, or based on value provided by the user in the prompt, which will be shown when saving document. In the following example, we are doing naming based on the value in the field <strong>book_name</strong>.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/setup/customize/doctype-field-naming.png" alt="Doctype Naming" /></p>
+
+<h4>Permission</h4>
+
+<p>In this table, you should select roles and define permission roles for them for this Doctype.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/setup/customize/Doctype-permissions.png" alt="Doctype Permissions" /></p>
+
+<h4>Save Doctype</h4>
+
+<p>On saving doctype, you will get pop-up to provide name for this Doctype.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/setup/customize/Doctype-save.png" alt="Doctype Save" /></p>
+
+<h4>Doctype in System</h4>
+
+<p>To check this Doctype, open Module defined for this doctype. Since we have added Books doctype in the
+Human Resource module, to access this doctype, go to:</p>
+
+<p><code>Human Resource &gt; Document &gt; Book</code></p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/setup/customize/Doctype-list-view.png" alt="Doctype List" /></p>
+
+<h4>Book master</h4>
+
+<p>Using the fields entered, following is the master one book.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/setup/customize/Doctype-book-added.png" alt="Doctype List" /></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/customize-erpnext/custom-doctype.md">Improve this page</a></p>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><br>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="built-with-frappe text-center">
+                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
+                        </div>
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
+	<a href="https://frappe.github.io/erpnext/contents.html"
+		
+		>
+	Contents</a></li><li data-label='User Guide' >
+	<a href="https://frappe.github.io/erpnext/user/guides"
+		
+		>
+	User Guide</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+    <script>
+    $(function() {
+	if(hljs) {
+		$('pre code').each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	}
+
+	$(".toggle-sidebar").on("click", function() {
+		$(".offcanvas").addClass("active-right");
+		return false;
+	});
+
+	// collapse offcanvas sidebars!
+	$(".offcanvas .sidebar").on("click", "a", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+	});
+
+	$(".offcanvas-main-section-overlay").on("click", function() {
+		$(".offcanvas").removeClass("active-left active-right");
+		return false;
+	});
+
+});
+    </script>
+		<script data-html-block="script"></script>
+
+	<!-- csrf_token --></body>
+</html>
