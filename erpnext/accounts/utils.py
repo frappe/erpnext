@@ -211,7 +211,7 @@ def update_against_doc(d, jv_obj):
 
 	if d['allocated_amt'] < d['unadjusted_amt']:
 		jvd = frappe.db.sql("""
-			select cost_center, balance, against_account, is_advance, 
+			select cost_center, balance, against_account, is_advance,
 				account_type, exchange_rate, account_currency
 			from `tabJournal Entry Account` where name = %s
 		""", d['voucher_detail_no'], as_dict=True)
@@ -415,47 +415,63 @@ def get_stock_rbnb_difference(posting_date, company):
 	# Amount should be credited
 	return flt(stock_rbnb) + flt(sys_bal)
 
-def get_outstanding_invoices(amount_query, account, party_type, party):
-	all_outstanding_vouchers = []
-	outstanding_voucher_list = frappe.db.sql("""
-		select
-			voucher_no, voucher_type, posting_date,
-			ifnull(sum({amount_query}), 0) as invoice_amount
+def get_outstanding_invoices(party_type, party, account, condition=None):
+	outstanding_invoices = []
+	precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
+
+	if party_type=="Customer":
+		dr_or_cr = "ifnull(debit_in_account_currency, 0) - ifnull(credit_in_account_currency, 0)"
+		payment_dr_or_cr = "ifnull(payment_gl_entry.credit_in_account_currency, 0) - ifnull(payment_gl_entry.debit_in_account_currency, 0)"
+	else:
+		dr_or_cr = "ifnull(credit_in_account_currency, 0) - ifnull(debit_in_account_currency, 0)"
+		payment_dr_or_cr = "ifnull(payment_gl_entry.debit_in_account_currency, 0) - ifnull(payment_gl_entry.credit_in_account_currency, 0)"
+
+	invoice_list = frappe.db.sql("""select
+			voucher_no,	voucher_type, posting_date,
+			ifnull(sum({dr_or_cr}), 0) as invoice_amount,
+			(
+				select
+					ifnull(sum(ifnull({payment_dr_or_cr}, 0)), 0)
+				from `tabGL Entry` payment_gl_entry
+				where
+					payment_gl_entry.against_voucher_type = invoice_gl_entry.voucher_type
+					and payment_gl_entry.against_voucher = invoice_gl_entry.voucher_no
+					and payment_gl_entry.party_type = invoice_gl_entry.party_type
+					and payment_gl_entry.party = invoice_gl_entry.party
+					and payment_gl_entry.account = invoice_gl_entry.account
+					and {payment_dr_or_cr} > 0
+			) as payment_amount
 		from
-			`tabGL Entry`
+			`tabGL Entry` invoice_gl_entry
 		where
-			account = %s and party_type=%s and party=%s and {amount_query} > 0
-			and (CASE
-					WHEN voucher_type = 'Journal Entry'
-					THEN ifnull(against_voucher, '') = ''
-					ELSE 1=1
-				END)
+			party_type = %(party_type)s
+			and party = %(party)s
+			and account = %(account)s
+			and {dr_or_cr} > 0
+			{condition}
+			and ((voucher_type = 'Journal Entry'
+					and (against_voucher = ''
+						or against_voucher is null))
+				or (voucher_type != 'Journal Entry'))
 		group by voucher_type, voucher_no
-		""".format(amount_query = amount_query), (account, party_type, party), as_dict = True)
+		having (invoice_amount - payment_amount) > 0.005""".format(
+			dr_or_cr = dr_or_cr,
+			payment_dr_or_cr = payment_dr_or_cr,
+			condition = condition or ""
+		), {
+			"party_type": party_type,
+			"party": party,
+			"account": account,
+		}, as_dict=True)
 
-	for d in outstanding_voucher_list:
-		payment_amount = frappe.db.sql("""
-			select ifnull(sum({amount_query}), 0)
-			from
-				`tabGL Entry`
-			where
-				account = %s and party_type=%s and party=%s and {amount_query} < 0
-				and against_voucher_type = %s and ifnull(against_voucher, '') = %s
-			""".format(**{
-			"amount_query": amount_query
-			}), (account, party_type, party, d.voucher_type, d.voucher_no))
+	for d in invoice_list:
+		outstanding_invoices.append({
+			'voucher_no': d.voucher_no,
+			'voucher_type': d.voucher_type,
+			'posting_date': d.posting_date,
+			'invoice_amount': flt(d.invoice_amount),
+			'payment_amount': flt(d.payment_amount),
+			'outstanding_amount': flt(d.invoice_amount - d.payment_amount, precision)
+		})
 
-		payment_amount = -1*payment_amount[0][0] if payment_amount else 0
-		precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
-
-		if d.invoice_amount > payment_amount:
-
-			all_outstanding_vouchers.append({
-				'voucher_no': d.voucher_no,
-				'voucher_type': d.voucher_type,
-				'posting_date': d.posting_date,
-				'invoice_amount': flt(d.invoice_amount, precision),
-				'outstanding_amount': flt(d.invoice_amount - payment_amount, precision)
-			})
-
-	return all_outstanding_vouchers
+	return outstanding_invoices
