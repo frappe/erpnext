@@ -11,9 +11,8 @@ default_mail_footer = """<div style="padding: 7px; text-align: right; color: #88
 def after_install():
 	frappe.get_doc({'doctype': "Role", "role_name": "Analytics"}).insert()
 	set_single_defaults()
-	frappe.db.set_default('desktop:home_page', 'setup-wizard');
 	feature_setup()
-	from erpnext.setup.page.setup_wizard.setup_wizard import add_all_roles_to
+	from erpnext.setup.setup_wizard.setup_wizard import add_all_roles_to
 	add_all_roles_to("Administrator")
 	add_web_forms()
 	frappe.db.commit()
