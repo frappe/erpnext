@@ -2,122 +2,60 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json, copy
+import frappe, copy
 
-from frappe.utils import cstr, flt, getdate, strip
+from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.utils.file_manager import save_file
-from frappe.translate import (set_default_language, get_dict,
-	get_lang_dict, send_translations, get_language_from_code)
+from frappe.translate import set_default_language
 from frappe.geo.country_info import get_country_info
-from frappe.utils.nestedset import get_root_of
 from .default_website import website_maker
 import install_fixtures
 from .sample_data import make_sample_data
 from erpnext.accounts.utils import FiscalYearError
 from erpnext.accounts.doctype.account.account import RootNotEditable
 
-@frappe.whitelist()
-def setup_account(args=None):
-	try:
-		if frappe.db.sql("select name from tabCompany"):
-			frappe.throw(_("Setup Already Complete!!"))
+def setup_complete(args=None):
+	if frappe.db.sql("select name from tabCompany"):
+		frappe.throw(_("Setup Already Complete!!"))
 
-		args = process_args(args)
+	if args.language and args.language != "english":
+		set_default_language(args.language)
 
-		if args.language and args.language != "english":
-			set_default_language(args.language)
+	frappe.clear_cache()
 
-		frappe.clear_cache()
+	install_fixtures.install(args.get("country"))
 
-		install_fixtures.install(args.get("country"))
+	update_user_name(args)
+	create_fiscal_year_and_company(args)
+	create_users(args)
+	set_defaults(args)
+	create_territories()
+	create_price_lists(args)
+	create_feed_and_todo()
+	create_email_digest()
+	create_letter_head(args)
+	create_taxes(args)
+	create_items(args)
+	create_customers(args)
+	create_suppliers(args)
+	frappe.local.message_log = []
 
-		update_user_name(args)
-		frappe.local.message_log = []
+	website_maker(args.company_name.strip(), args.company_tagline, args.name)
+	create_logo(args)
 
-		create_fiscal_year_and_company(args)
-		frappe.local.message_log = []
+	frappe.db.commit()
+	login_as_first_user(args)
+	frappe.db.commit()
+	frappe.clear_cache()
 
-		create_users(args)
-		frappe.local.message_log = []
+	if args.get("add_sample_data"):
+		try:
+			make_sample_data()
+			frappe.clear_cache()
+		except FiscalYearError:
+			pass
 
-		set_defaults(args)
-		frappe.local.message_log = []
-
-		create_territories()
-		frappe.local.message_log = []
-
-		create_price_lists(args)
-		frappe.local.message_log = []
-
-		create_feed_and_todo()
-		frappe.local.message_log = []
-
-		create_email_digest()
-		frappe.local.message_log = []
-
-		create_letter_head(args)
-		frappe.local.message_log = []
-
-		create_taxes(args)
-		frappe.local.message_log = []
-
-		create_items(args)
-		frappe.local.message_log = []
-
-		create_customers(args)
-		frappe.local.message_log = []
-
-		create_suppliers(args)
-		frappe.local.message_log = []
-
-		frappe.db.set_default('desktop:home_page', 'desktop')
-
-		website_maker(args.company_name.strip(), args.company_tagline, args.name)
-		create_logo(args)
-
-		frappe.db.commit()
-
-		login_as_first_user(args)
-
-		frappe.db.commit()
-
-		frappe.clear_cache()
-
-		if args.get("add_sample_data"):
-			try:
-				make_sample_data()
-				frappe.clear_cache()
-			except FiscalYearError:
-				pass
-
-	except:
-		if args:
-			traceback = frappe.get_traceback()
-			for hook in frappe.get_hooks("setup_wizard_exception"):
-				frappe.get_attr(hook)(traceback, args)
-
-		raise
-
-	else:
-		for hook in frappe.get_hooks("setup_wizard_success"):
-			frappe.get_attr(hook)(args)
-
-
-def process_args(args):
-	if not args:
-		args = frappe.local.form_dict
-	if isinstance(args, basestring):
-		args = json.loads(args)
-
-	args = frappe._dict(args)
-
-	# strip the whitespace
-	for key, value in args.items():
-		if isinstance(value, basestring):
-			args[key] = strip(value)
-
-	return args
 
 def update_user_name(args):
 	if args.get("email"):
@@ -583,18 +521,3 @@ def create_users(args):
 				emp.flags.ignore_mandatory = True
 				emp.insert(ignore_permissions = True)
 
-@frappe.whitelist()
-def load_messages(language):
-	frappe.clear_cache()
-	set_default_language(language)
-	m = get_dict("page", "setup-wizard")
-	m.update(get_dict("boot"))
-	send_translations(m)
-	return frappe.local.lang
-
-@frappe.whitelist()
-def load_languages():
-	return {
-		"default_language": get_language_from_code(frappe.local.lang),
-		"languages": sorted(get_lang_dict().keys())
-	}
