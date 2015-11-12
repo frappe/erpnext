@@ -255,7 +255,7 @@ def create_taxes(args):
 	for i in xrange(1,6):
 		if args.get("tax_" + str(i)):
 			# replace % in case someone also enters the % symbol
-			tax_rate = (args.get("tax_rate_" + str(i)) or "").replace("%", "")
+			tax_rate = cstr(args.get("tax_rate_" + str(i)) or "").replace("%", "")
 
 			try:
 				tax_group = frappe.db.get_value("Account", {"company": args.get("company_name"),
