@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.desk.page.setup_wizard.test_setup_data import args
+from erpnext.setup.setup_wizard.test_setup_data import args
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 import frappe.utils.scheduler
 
