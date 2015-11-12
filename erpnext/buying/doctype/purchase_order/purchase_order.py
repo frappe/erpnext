@@ -33,6 +33,9 @@ class PurchaseOrder(BuyingController):
 			'overflow_type': 'order'
 		}]
 
+	def onload(self):
+		self.set_onload("has_stock_item", len(self.get_stock_items()) > 0)
+
 	def validate(self):
 		super(PurchaseOrder, self).validate()
 

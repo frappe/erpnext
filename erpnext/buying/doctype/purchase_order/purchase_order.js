@@ -21,11 +21,13 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 		if(doc.docstatus == 1 && !in_list(["Stopped", "Closed", "Delivered"], doc.status)) {
 
-			if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) {
-				cur_frm.add_custom_button(__('Stop'), this.stop_purchase_order);
-			}
+			if (this.frm.has_perm("submit")) {
+				if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) {
+					cur_frm.add_custom_button(__('Stop'), this.stop_purchase_order);
+				}
 
-			cur_frm.add_custom_button(__('Close'), this.close_purchase_order);
+				cur_frm.add_custom_button(__('Close'), this.close_purchase_order);
+			}
 
 			if(doc.delivered_by_supplier && doc.status!="Delivered"){
 				cur_frm.add_custom_button(__('Mark as Delivered'), this.delivered_by_supplier);
@@ -35,7 +37,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry);
 			}
 
-			if(flt(doc.per_received, 2) < 100) {
+			if(flt(doc.per_received, 2) < 100 && this.frm.doc.__onload.has_stock_item) {
 				cur_frm.add_custom_button(__('Receive'), this.make_purchase_receipt).addClass("btn-primary");
 
 				if(doc.is_subcontracted==="Yes") {
@@ -53,7 +55,9 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		}
 
 		if(doc.docstatus == 1 && in_list(["Stopped", "Closed", "Delivered"], doc.status)) {
-			cur_frm.add_custom_button(__('Re-open'), this.unstop_purchase_order);
+			if (this.frm.has_perm("submit")) {
+				cur_frm.add_custom_button(__('Re-open'), this.unstop_purchase_order);
+			}
 		}
 	},
 
