@@ -63,20 +63,18 @@ def get_outstanding_vouchers(args):
 	party_account_currency = get_account_currency(args.get("party_account"))
 	company_currency = frappe.db.get_value("Company", args.get("company"), "default_currency")
 
-	if args.get("party_type") == "Customer" and args.get("received_or_paid") == "Received":
-		amount_query = "ifnull(debit_in_account_currency, 0) - ifnull(credit_in_account_currency, 0)"
-	elif args.get("party_type") == "Supplier" and args.get("received_or_paid") == "Paid":
-		amount_query = "ifnull(credit_in_account_currency, 0) - ifnull(debit_in_account_currency, 0)"
-	else:
+	if ((args.get("party_type") == "Customer" and args.get("received_or_paid") == "Paid")
+		or (args.get("party_type") == "Supplier" and args.get("received_or_paid") == "Received")):
+
 		frappe.throw(_("Please enter the Against Vouchers manually"))
 
 	# Get all outstanding sales /purchase invoices
-	outstanding_invoices = get_outstanding_invoices(amount_query, args.get("party_account"),
-		args.get("party_type"), args.get("party"))
+	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"), args.get("party_account"))
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
 	orders_to_be_billed = get_orders_to_be_billed(args.get("party_type"), args.get("party"),
 		party_account_currency, company_currency)
+
 	return outstanding_invoices + orders_to_be_billed
 
 def get_orders_to_be_billed(party_type, party, party_account_currency, company_currency):
