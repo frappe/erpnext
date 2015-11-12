@@ -173,8 +173,7 @@ apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +115,Acc
 DocType: Item,Supply Raw Materials for Purchase,Supply Grondstoffen voor Aankoop
 apps/erpnext/erpnext/stock/get_item_details.py +133,Item {0} must be a Purchase Item,Artikel {0} moet een inkoopbaar artikel zijn
 DocType: Upload Attendance,"Download the Template, fill appropriate data and attach the modified file.
-All dates and employee combination in the selected period will come in the template, with existing attendance records","Download de Template, vul de juiste gegevens en bevestig het gewijzigde bestand.
- Alle data en werknemer combinatie in de geselecteerde periode zal komen in de sjabloon, met bestaande presentielijsten"
+All dates and employee combination in the selected period will come in the template, with existing attendance records","Download de Template, vul de juiste gegevens in en voeg het gewijzigde bestand bij. Alle data en toegewezen werknemer in de geselecteerde periode zullen in de sjabloon komen, met bestaande presentielijsten"
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +446,Item {0} is not active or end of life has been reached,ARtikel {0} is niet actief of heeft einde levensduur bereikt
 DocType: Time Log Batch,Will be updated after Sales Invoice is Submitted.,Zal worden bijgewerkt zodra verkoopfactuur is ingediend.
 apps/erpnext/erpnext/controllers/accounts_controller.py +493,"To include tax in row {0} in Item rate, taxes in rows {1} must also be included","Om Belastingen op te nemen in het Artikeltarief in rij {0}, moeten de belastingen in rijen {1} ook worden opgenomen "
@@ -251,7 +250,7 @@ DocType: Item Website Specification,Item Website Specification,Artikel Website S
 DocType: Dropbox Backup,Dropbox Access Key,Dropbox Access Key
 DocType: Payment Tool,Reference No,Referentienummer
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +348,Leave Blocked,Verlof Geblokkeerd
-apps/erpnext/erpnext/stock/doctype/item/item.py +532,Item {0} has reached its end of life on {1},Artikel {0} heeft het einde van zijn levensduur bereikt op {1}
+apps/erpnext/erpnext/stock/doctype/item/item.py +535,Item {0} has reached its end of life on {1},Artikel {0} heeft het einde van zijn levensduur bereikt op {1}
 apps/erpnext/erpnext/accounts/utils.py +339,Annual,jaar-
 DocType: Stock Reconciliation Item,Stock Reconciliation Item,Voorraad Afletteren Artikel
 DocType: Stock Entry,Sales Invoice No,Verkoopfactuur nr.
@@ -263,7 +262,7 @@ DocType: Item,Minimum Order Qty,Minimum bestel aantal
 DocType: Pricing Rule,Supplier Type,Leverancier Type
 DocType: Item,Publish in Hub,Publiceren in Hub
 ,Terretory,Regio
-apps/erpnext/erpnext/stock/doctype/item/item.py +552,Item {0} is cancelled,Artikel {0} is geannuleerd
+apps/erpnext/erpnext/stock/doctype/item/item.py +555,Item {0} is cancelled,Artikel {0} is geannuleerd
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +598,Material Request,"Materiaal Aanvraag
 "
 DocType: Bank Reconciliation,Update Clearance Date,Werk Clearance Datum
@@ -323,7 +322,7 @@ DocType: Sales Invoice Item,Delivery Note,Vrachtbrief
 DocType: Dropbox Backup,Allow Dropbox Access,Laat Dropbox Access
 apps/erpnext/erpnext/config/learn.py +72,Setting up Taxes,Het opzetten van Belastingen
 apps/erpnext/erpnext/accounts/utils.py +189,Payment Entry has been modified after you pulled it. Please pull it again.,Betaling Bericht is gewijzigd nadat u het getrokken. Neem dan trekt het weer.
-apps/erpnext/erpnext/stock/doctype/item/item.py +337,{0} entered twice in Item Tax,{0} twee keer opgenomen in Artikel BTW
+apps/erpnext/erpnext/stock/doctype/item/item.py +343,{0} entered twice in Item Tax,{0} twee keer opgenomen in Artikel BTW
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +105,Summary for this week and pending activities,Samenvatting voor deze week en in afwachting van activiteiten
 DocType: Workstation,Rent Cost,Huurkosten
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +74,Please select month and year,Selecteer maand en jaar
@@ -418,7 +417,7 @@ DocType: Sales Taxes and Charges Template,Sales Master Manager,Sales Master Mana
 apps/erpnext/erpnext/config/manufacturing.py +74,Global settings for all manufacturing processes.,Algemene instellingen voor alle productieprocessen.
 DocType: Accounts Settings,Accounts Frozen Upto,Rekeningen bevroren tot
 DocType: SMS Log,Sent On,Verzonden op
-apps/erpnext/erpnext/stock/doctype/item/item.py +509,Attribute {0} selected multiple times in Attributes Table,Kenmerk {0} meerdere keren geselecteerd in Attributes Tabel
+apps/erpnext/erpnext/stock/doctype/item/item.py +512,Attribute {0} selected multiple times in Attributes Table,Kenmerk {0} meerdere keren geselecteerd in Attributes Tabel
 DocType: Sales Order,Not Applicable,Niet van toepassing
 apps/erpnext/erpnext/config/hr.py +140,Holiday master.,Vakantie meester .
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +19,Shell molding,Shell moulding
@@ -461,7 +460,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_p
 DocType: Production Order,Additional Operating Cost,Additionele Operationele Kosten
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +20,Cosmetics,Cosmetica
 DocType: DocField,Type,Type
-apps/erpnext/erpnext/stock/doctype/item/item.py +414,"To merge, following properties must be same for both items","Om samen te voegen, moeten de volgende eigenschappen hetzelfde zijn voor beide artikelen"
+apps/erpnext/erpnext/stock/doctype/item/item.py +417,"To merge, following properties must be same for both items","Om samen te voegen, moeten de volgende eigenschappen hetzelfde zijn voor beide artikelen"
 DocType: Communication,Subject,Onderwerp
 DocType: Shipping Rule,Net Weight,Netto Gewicht
 DocType: Employee,Emergency Phone,Noodgeval Telefoonnummer
@@ -486,7 +485,7 @@ apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +85,I
 apps/erpnext/erpnext/controllers/recurring_document.py +188,"{0} is an invalid email address in 'Notification \
 					Email Address'","{0} is een ongeldig e-mailadres in 'Notification \
  Email Address'"
-apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +43,Total Billing This Year:,Totaal Billing Dit Jaar:
+apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +44,Total Billing This Year:,Totaal Billing Dit Jaar:
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Toevoegen / Bewerken Belastingen en Heffingen
 DocType: Purchase Invoice,Supplier Invoice No,Factuurnr. Leverancier
 DocType: Territory,For reference,Ter referentie
@@ -619,7 +618,7 @@ DocType: Employee,Provide email id registered in company,Zorg voor een bedrijfs 
 DocType: Hub Settings,Seller City,Verkoper Stad
 DocType: Email Digest,Next email will be sent on:,Volgende e-mail wordt verzonden op:
 DocType: Offer Letter Term,Offer Letter Term,Aanbod Letter Term
-apps/erpnext/erpnext/stock/doctype/item/item.py +489,Item has variants.,Item heeft varianten.
+apps/erpnext/erpnext/stock/doctype/item/item.py +492,Item has variants.,Item heeft varianten.
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +65,Item {0} not found,Artikel {0} niet gevonden
 DocType: Bin,Stock Value,Voorraad Waarde
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +88,Tree Type,Boom Type
@@ -725,6 +724,7 @@ DocType: Company,Default Cost of Goods Sold Account,Standaard kosten van verkoch
 apps/erpnext/erpnext/stock/get_item_details.py +262,Price List not selected,Prijslijst niet geselecteerd
 DocType: Employee,Family Background,Familie Achtergrond
 DocType: Process Payroll,Send Email,E-mail verzenden
+apps/erpnext/erpnext/stock/doctype/item/item.py +108,Warning: Invalid Attachment {0},Waarschuwing: Invalid Attachment {0}
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +88,No Permission,Geen toestemming
 DocType: Company,Default Bank Account,Standaard bankrekening
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +47,"To filter based on Party, select Party Type first","Om te filteren op basis van Party, selecteer Party Typ eerst"
@@ -744,7 +744,7 @@ apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +27,Send Now,Nu 
 DocType: Item,Website Warehouse,Website Magazijn
 DocType: Sales Invoice,"The day of the month on which auto invoice will be generated e.g. 05, 28 etc","De dag van de maand waarop de automatische factuur zal bijvoorbeeld 05, 28 etc worden gegenereerd"
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.js +49,Score must be less than or equal to 5,Score moet lager dan of gelijk aan 5 zijn
-apps/erpnext/erpnext/config/accounts.py +169,C-Form records,C -Form regels
+apps/erpnext/erpnext/config/accounts.py +169,C-Form records,C -Form records
 apps/erpnext/erpnext/config/selling.py +294,Customer and Supplier,Klant en leverancier
 DocType: Email Digest,Email Digest Settings,E-mail Digest Instellingen
 apps/erpnext/erpnext/config/support.py +13,Support queries from customers.,Support vragen van klanten.
@@ -769,7 +769,7 @@ apps/erpnext/erpnext/config/learn.py +172,Purchase Order to Payment,Aanschaffen 
 DocType: Sales Order Item,Projected Qty,Verwachte Aantal
 DocType: Sales Invoice,Payment Due Date,Betaling Vervaldatum
 DocType: Newsletter,Newsletter Manager,Nieuwsbrief Manager
-apps/erpnext/erpnext/stock/doctype/item/item.js +234,Item Variant {0} already exists with same attributes,Item Variant {0} bestaat al met dezelfde kenmerken
+apps/erpnext/erpnext/stock/doctype/item/item.js +229,Item Variant {0} already exists with same attributes,Item Variant {0} bestaat al met dezelfde kenmerken
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +95,'Opening',&#39;Opening&#39;
 DocType: Notification Control,Delivery Note Message,Vrachtbrief Bericht
 DocType: Expense Claim,Expenses,Uitgaven
@@ -834,7 +834,7 @@ DocType: Purchase Receipt,Range,Reeks
 DocType: Supplier,Default Payable Accounts,Standaard Crediteuren Accounts
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +40,Employee {0} is not active or does not exist,Werknemer {0} is niet actief of bestaat niet
 DocType: Features Setup,Item Barcode,Artikel Barcode
-apps/erpnext/erpnext/stock/doctype/item/item.py +484,Item Variants {0} updated,Item Varianten {0} bijgewerkt
+apps/erpnext/erpnext/stock/doctype/item/item.py +487,Item Variants {0} updated,Item Varianten {0} bijgewerkt
 DocType: Quality Inspection Reading,Reading 6,Meting 6
 DocType: Purchase Invoice Advance,Purchase Invoice Advance,Inkoopfactuur Voorschot
 DocType: Address,Shop,Winkelen
@@ -855,7 +855,7 @@ DocType: Lead,Request for Information,Informatieaanvraag
 DocType: Payment Tool,Paid,Betaald
 DocType: Salary Slip,Total in words,Totaal in woorden
 DocType: Material Request Item,Lead Time Date,Lead Tijd Datum
-apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +54, is mandatory. Maybe Currency Exchange record is not created for ,is verplicht. Misschien Valutawissel record is niet gemaakt voor
+apps/erpnext/erpnext/public/js/controllers/taxes_and_totals.js +54, is mandatory. Maybe Currency Exchange record is not created for ,is verplicht. Misschien is dit Valuta record niet gemaakt voor
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +111,Row #{0}: Please specify Serial No for Item {1},Rij #{0}: Voer serienummer in voor artikel {1}
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +538,"For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.","Voor &#39;Product Bundel&#39; items, Warehouse, Serienummer en Batch Geen zal worden beschouwd van de &#39;Packing List&#39; tafel. Als Warehouse en Batch Geen zijn hetzelfde voor alle verpakking items voor welke &#39;Product Bundle&#39; punt, kunnen die waarden in de belangrijkste Item tafel worden ingevoerd, wordt waarden worden gekopieerd naar &quot;Packing List &#39;tafel."
 apps/erpnext/erpnext/config/stock.py +28,Shipments to customers.,Verzendingen naar klanten.
@@ -912,7 +912,7 @@ DocType: Packing Slip Item,Packing Slip Item,Pakbon Artikel
 DocType: POS Profile,Cash/Bank Account,Kas/Bankrekening
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +63,Removed items with no change in quantity or value.,Verwijderde items met geen verandering in de hoeveelheid of waarde.
 DocType: Delivery Note,Delivery To,Leveren Aan
-apps/erpnext/erpnext/stock/doctype/item/item.py +506,Attribute table is mandatory,Attributentabel is verplicht
+apps/erpnext/erpnext/stock/doctype/item/item.py +509,Attribute table is mandatory,Attributentabel is verplicht
 DocType: Production Planning Tool,Get Sales Orders,Get Verkooporders
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +64,{0} can not be negative,{0} kan niet negatief zijn
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +103,Filing,Archiveren
@@ -1060,7 +1060,7 @@ DocType: Communication,Sent,verzonden
 apps/erpnext/erpnext/accounts/doctype/account/account.js +57,View Ledger,Bekijk Grootboek
 DocType: File,Lft,lft
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +41,Earliest,Vroegst
-apps/erpnext/erpnext/stock/doctype/item/item.py +388,"An Item Group exists with same name, please change the item name or rename the item group","Een artikel Group bestaat met dezelfde naam , moet u de naam van het item of de naam van de artikelgroep"
+apps/erpnext/erpnext/stock/doctype/item/item.py +394,"An Item Group exists with same name, please change the item name or rename the item group","Een artikel Group bestaat met dezelfde naam , moet u de naam van het item of de naam van de artikelgroep"
 DocType: Communication,Delivery Status,Verzendstatus
 DocType: Production Order,Manufacture against Sales Order,Produceren tegen Verkooporder
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.py +517,Rest Of The World,Rest van de Wereld
@@ -1224,7 +1224,7 @@ DocType: Sales Invoice,Shipping Address Name,Verzenden Adres Naam
 apps/erpnext/erpnext/accounts/doctype/account/account.js +50,Chart of Accounts,Rekeningschema
 DocType: Material Request,Terms and Conditions Content,Algemene Voorwaarden Inhoud
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +471,cannot be greater than 100,mag niet groter zijn dan 100
-apps/erpnext/erpnext/stock/doctype/item/item.py +543,Item {0} is not a stock Item,Artikel {0} is geen voorraadartikel
+apps/erpnext/erpnext/stock/doctype/item/item.py +546,Item {0} is not a stock Item,Artikel {0} is geen voorraadartikel
 DocType: Maintenance Visit,Unscheduled,Ongeplande
 DocType: Employee,Owned,Eigendom
 DocType: Salary Slip Deduction,Depends on Leave Without Pay,Afhankelijk van onbetaald verlof
@@ -1369,7 +1369,7 @@ DocType: Features Setup,To track items using barcode. You will be able to enter 
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +477,Mark as Delivered,Markeren als geleverd
 apps/erpnext/erpnext/crm/doctype/lead/lead.js +34,Make Quotation,Maak Offerte
 DocType: Dependent Task,Dependent Task,Afhankelijke Task
-apps/erpnext/erpnext/stock/doctype/item/item.py +300,Conversion factor for default Unit of Measure must be 1 in row {0},Conversiefactor voor Standaard meeteenheid moet 1 zijn in rij {0}
+apps/erpnext/erpnext/stock/doctype/item/item.py +306,Conversion factor for default Unit of Measure must be 1 in row {0},Conversiefactor voor Standaard meeteenheid moet 1 zijn in rij {0}
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +141,Leave of type {0} cannot be longer than {1},Verlof van type {0} kan niet langer zijn dan {1}
 DocType: Manufacturing Settings,Try planning operations for X days in advance.,Probeer plan operaties voor X dagen van tevoren.
 DocType: HR Settings,Stop Birthday Reminders,Stop verjaardagsherinneringen
@@ -1379,7 +1379,7 @@ apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sa
 apps/erpnext/erpnext/public/js/pos/pos.js +491,{0} View,{0} View
 DocType: Salary Structure Deduction,Salary Structure Deduction,Salaris Structuur Aftrek
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +158,Selective laser sintering,Selectieve lasersintering
-apps/erpnext/erpnext/stock/doctype/item/item.py +295,Unit of Measure {0} has been entered more than once in Conversion Factor Table,Eenheid {0} is meer dan eens ingevoerd in Conversie Factor Tabel
+apps/erpnext/erpnext/stock/doctype/item/item.py +301,Unit of Measure {0} has been entered more than once in Conversion Factor Table,Eenheid {0} is meer dan eens ingevoerd in Conversie Factor Tabel
 apps/frappe/frappe/core/page/data_import_tool/data_import_tool.js +108,Import Successful!,Importeren succesvol!
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +27,Cost of Issued Items,Kosten van Items Afgegeven
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +185,Quantity must not be more than {0},Hoeveelheid mag niet meer zijn dan {0}
@@ -1457,7 +1457,7 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py 
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.js +50,"Company, Month and Fiscal Year is mandatory","Bedrijf , maand en het fiscale jaar is verplicht"
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +102,Marketing Expenses,Marketingkosten
 ,Item Shortage Report,Artikel Tekort Rapport
-apps/erpnext/erpnext/stock/doctype/item/item.js +188,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Het gewicht wordt vermeld, \n Vermeld ""Gewicht UOM"" te"
+apps/erpnext/erpnext/stock/doctype/item/item.js +183,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Het gewicht wordt vermeld, \n Vermeld ""Gewicht UOM"" te"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Materiaal Aanvraag is gebruikt om deze Voorraad  Entry te maken
 apps/erpnext/erpnext/config/support.py +43,Single unit of an Item.,Enkel stuks van een artikel. 
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +212,Time Log Batch {0} must be 'Submitted',Tijd Log Batch {0} moet worden 'Ingediend'
@@ -1503,7 +1503,7 @@ apps/erpnext/erpnext/stock/doctype/item/item_list.js +13,Variant,Variant
 apps/frappe/frappe/public/js/frappe/form/toolbar.js +165,New {0},Nieuwe {0}
 DocType: Naming Series,Set prefix for numbering series on your transactions,Instellen voorvoegsel voor nummerreeksen voor uw transacties
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +169,Stopped order cannot be cancelled. Unstop to cancel.,Gestopte order kan niet worden geannuleerd. Terugdraaien om te annuleren .
-apps/erpnext/erpnext/stock/doctype/item/item.py +317,Default BOM ({0}) must be active for this item or its template,Default BOM ({0}) moet actief voor dit artikel of zijn template
+apps/erpnext/erpnext/stock/doctype/item/item.py +323,Default BOM ({0}) must be active for this item or its template,Default BOM ({0}) moet actief voor dit artikel of zijn template
 DocType: Employee,Leave Encashed?,Verlof verzilverd?
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +32,Opportunity From field is mandatory,Opportunity Van veld is verplicht
 DocType: Item,Variants,Varianten
@@ -1670,7 +1670,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +44,Embossin
 ,Quotation Trends,Offerte Trends
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +139,Item Group not mentioned in item master for item {0},Artikelgroep niet genoemd in Artikelstam voor Artikel {0}
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +302,Debit To account must be a Receivable account,Debet Om rekening moet een vordering-account
-apps/erpnext/erpnext/stock/doctype/item/item.py +304,"As Production Order can be made for this item, it must be a stock item.","Zoals productieorder kan worden gemaakt voor dit punt, moet het een voorraad item."
+apps/erpnext/erpnext/stock/doctype/item/item.py +310,"As Production Order can be made for this item, it must be a stock item.","Zoals productieorder kan worden gemaakt voor dit punt, moet het een voorraad item."
 DocType: Shipping Rule Condition,Shipping Amount,Verzendbedrag
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +140,Joining,Aansluiting
 DocType: Authorization Rule,Above Value,Boven waarde
@@ -1980,7 +1980,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py 
 DocType: Shipping Rule,Shipping Rule Label,Verzendregel Label
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +209,Raw Materials cannot be blank.,Grondstoffen kan niet leeg zijn.
 DocType: Newsletter,Test,Test
-apps/erpnext/erpnext/stock/doctype/item/item.py +358,"As there are existing stock transactions for this item, \
+apps/erpnext/erpnext/stock/doctype/item/item.py +364,"As there are existing stock transactions for this item, \
 							you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'","Omdat er bestaande voorraad transacties voor deze post, \ u de waarden van het niet kunnen veranderen &#39;Heeft Serial No&#39;, &#39;Heeft Batch Nee&#39;, &#39;Is Stock Item&#39; en &#39;Valuation Method&#39;"
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +448,Quick Journal Entry,Quick Journal Entry
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +92,You can not change rate if BOM mentioned agianst any item,U kunt het tarief niet veranderen als een artikel Stuklijst-gerelateerd is.
@@ -2209,7 +2209,7 @@ DocType: Stock Settings,Default Valuation Method,Standaard Waarderingsmethode
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +127,Polishing,Polijsten
 DocType: Production Order Operation,Planned Start Time,Geplande Starttijd
 apps/erpnext/erpnext/config/accounts.py +63,Close Balance Sheet and book Profit or Loss.,Sluiten Balans en boek Winst of verlies .
-apps/erpnext/erpnext/stock/doctype/item/item.py +658,"Default Unit of Measure for Item {0} cannot be changed directly because \
+apps/erpnext/erpnext/stock/doctype/item/item.py +661,"Default Unit of Measure for Item {0} cannot be changed directly because \
 			you have already made some transaction(s) with another UOM. To change default UOM, \
 			use 'UOM Replace Utility' tool under Stock module.","Standaard maateenheid voor post {0} kan niet direct worden gewijzigd omdat \ heb je al enkele transactie (s) met een andere UOM gemaakt. Om standaard UOM wijzigen, \ gebruik &#39;UOM Vervang Utility&#39; hulpmiddel onder Stock module."
 DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,Specificeer Wisselkoers om een ​​valuta om te zetten in een andere
@@ -2311,7 +2311,7 @@ DocType: Bank Reconciliation,Get Relevant Entries,Haal relevante gegevens op
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +407,Accounting Entry for Stock,Boekingen voor Voorraad
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +64,Coining,Coining
 DocType: Sales Invoice,Sales Team1,Verkoop Team1
-apps/erpnext/erpnext/stock/doctype/item/item.py +409,Item {0} does not exist,Artikel {0} bestaat niet
+apps/erpnext/erpnext/stock/doctype/item/item.py +412,Item {0} does not exist,Artikel {0} bestaat niet
 DocType: Sales Invoice,Customer Address,Klant Adres
 apps/frappe/frappe/desk/query_report.py +136,Total,Totaal
 DocType: Purchase Invoice,Apply Additional Discount On,Breng Extra Korting op
@@ -2487,7 +2487,7 @@ DocType: Sales Invoice Item,Available Qty at Warehouse,Qty bij Warehouse
 DocType: Bank Reconciliation,Bank Reconciliation,Bank Aflettering
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +9,Get Updates,Krijg Updates
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +129,Material Request {0} is cancelled or stopped,Materiaal Aanvraag {0} is geannuleerd of gestopt
-apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +641,Add a few sample records,Voeg een paar monster verslagen
+apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +641,Add a few sample records,Voeg een paar voorbeeld records toe
 apps/erpnext/erpnext/config/hr.py +210,Leave Management,Laat management
 DocType: Event,Groups,Groepen
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +81,Group by Account,Groeperen per Rekening
@@ -2766,7 +2766,7 @@ DocType: Task,Actual Start Date (via Time Logs),Werkelijke Startdatum (via Time 
 DocType: Stock Reconciliation Item,Before reconciliation,Voordat verzoening
 apps/erpnext/erpnext/support/doctype/maintenance_visit/maintenance_visit.py +12,To {0},Naar {0}
 DocType: Purchase Invoice,Taxes and Charges Added (Company Currency),Belastingen en Toeslagen toegevoegd (Bedrijfsvaluta)
-apps/erpnext/erpnext/stock/doctype/item/item.py +334,Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,Item Tax Rij {0} moet rekening houden met het type belasting of inkomsten of uitgaven of Chargeable
+apps/erpnext/erpnext/stock/doctype/item/item.py +340,Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,Item Tax Rij {0} moet rekening houden met het type belasting of inkomsten of uitgaven of Chargeable
 DocType: Sales Order,Partly Billed,Deels Gefactureerd
 DocType: Item,Default BOM,Standaard Stuklijst
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +79,Decambering,Decambering
@@ -3068,7 +3068,7 @@ apps/erpnext/erpnext/setup/doctype/company/company.js +38,Successfully deleted a
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +21,As on Date,Op Date
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +111,Honing,Honing
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +58,Probation,proeftijd
-apps/erpnext/erpnext/stock/doctype/item/item.py +258,Default Warehouse is mandatory for stock Item.,Standaard Magazijn is verplicht voor voorraadartikel .
+apps/erpnext/erpnext/stock/doctype/item/item.py +264,Default Warehouse is mandatory for stock Item.,Standaard Magazijn is verplicht voor voorraadartikel .
 DocType: Feed,Full Name,Volledige naam
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +148,Clinching,Clinchen
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +191,Payment of salary for the month {0} and year {1},Betaling van salaris voor de maand {0} en jaar {1} 
@@ -3137,7 +3137,7 @@ DocType: Purchase Order Item,Supplier Quotation,Leverancier Offerte
 DocType: Quotation,In Words will be visible once you save the Quotation.,In Woorden zijn zichtbaar zodra u de Offerte opslaat.
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +68,Ironing,Strijken
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +217,{0} {1} is stopped,{0} {1} is gestopt
-apps/erpnext/erpnext/stock/doctype/item/item.py +346,Barcode {0} already used in Item {1},Barcode {0} is al in gebruik in post {1}
+apps/erpnext/erpnext/stock/doctype/item/item.py +352,Barcode {0} already used in Item {1},Barcode {0} is al in gebruik in post {1}
 DocType: Lead,Add to calendar on this date,Toevoegen aan agenda op deze datum
 apps/erpnext/erpnext/config/selling.py +132,Rules for adding shipping costs.,Regels voor het toevoegen van verzendkosten.
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +40,Upcoming Events,aankomende evenementen
@@ -3264,7 +3264,7 @@ DocType: Account,Auditor,Revisor
 DocType: Purchase Order,End date of current order's period,Einddatum van de periode huidige bestelling's
 apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.js +17,Make Offer Letter,Bod uitbrengen Letter
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js +10,Return,Terugkeer
-apps/erpnext/erpnext/stock/doctype/item/item.py +500,Default Unit of Measure for Variant must be same as Template,Standaard maateenheid voor Variant moet hetzelfde zijn als sjabloon
+apps/erpnext/erpnext/stock/doctype/item/item.py +503,Default Unit of Measure for Variant must be same as Template,Standaard maateenheid voor Variant moet hetzelfde zijn als sjabloon
 DocType: DocField,Fold,Vouw
 DocType: Production Order Operation,Production Order Operation,Productie Order Operatie
 DocType: Pricing Rule,Disable,Uitschakelen
@@ -3401,7 +3401,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +427,Transaction n
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.js +19,"To set this Fiscal Year as Default, click on 'Set as Default'","Om dit boekjaar in te stellen als standaard, klik op 'Als standaard instellen'"
 apps/erpnext/erpnext/config/support.py +54,Setup incoming server for support email id. (e.g. support@example.com),Setup inkomende server voor ondersteuning e-id . ( b.v. support@example.com )
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py +19,Shortage Qty,Tekort Aantal
-apps/erpnext/erpnext/stock/doctype/item/item.py +525,Item variant {0} exists with same attributes,Item variant {0} bestaat met dezelfde kenmerken
+apps/erpnext/erpnext/stock/doctype/item/item.py +528,Item variant {0} exists with same attributes,Item variant {0} bestaat met dezelfde kenmerken
 DocType: Salary Slip,Salary Slip,Salarisstrook
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +116,Burnishing,Polijsten
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +54,'To Date' is required,'Tot Datum' is vereist
@@ -3442,7 +3442,7 @@ apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/custome
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +161,Blasting,Ontploffing
 DocType: Company,Warn,Waarschuwen
 apps/erpnext/erpnext/stock/doctype/stock_uom_replace_utility/stock_uom_replace_utility.py +111,Item valuation updated,Artikelwaardering bijgewerkt
-DocType: Appraisal,"Any other remarks, noteworthy effort that should go in the records.","Eventuele andere opmerkingen, opmerkelijke inspanning die moet gaan in de administratie."
+DocType: Appraisal,"Any other remarks, noteworthy effort that should go in the records.","Eventuele andere opmerkingen, noemenswaardig voor in de boekhouding, "
 DocType: BOM,Manufacturing User,Productie Gebruiker
 DocType: Purchase Order,Raw Materials Supplied,Grondstoffen Geleverd
 DocType: Purchase Invoice,Recurring Print Format,Terugkerende Print Format
@@ -3498,7 +3498,7 @@ DocType: Tax Rule,Purchase Tax Template,Kopen Tax Template
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +166,Maintenance Schedule {0} exists against {0},Onderhoudsschema {0} bestaat tegen {0}
 DocType: Stock Entry Detail,Actual Qty (at source/target),Werkelijke Aantal (bij de bron / doel)
 DocType: Item Customer Detail,Ref Code,Ref Code
-apps/erpnext/erpnext/config/hr.py +13,Employee records.,Werknemer records.
+apps/erpnext/erpnext/config/hr.py +13,Employee records.,Werknemer regel.
 DocType: HR Settings,Payroll Settings,Loonadministratie Instellingen
 apps/erpnext/erpnext/config/accounts.py +58,Match non-linked Invoices and Payments.,Match niet-gekoppelde facturen en betalingen.
 apps/erpnext/erpnext/templates/pages/cart.html +13,Place Order,Plaats bestelling
@@ -3537,7 +3537,7 @@ DocType: Employee,Educational Qualification,Educatieve Kwalificatie
 DocType: Workstation,Operating Costs,Bedrijfskosten
 DocType: Employee Leave Approver,Employee Leave Approver,Werknemer Verlof Fiatteur
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +166,{0} has been successfully added to our Newsletter list.,{0} is succesvol toegevoegd aan onze nieuwsbrief lijst.
-apps/erpnext/erpnext/stock/doctype/item/item.py +377,Row {0}: An Reorder entry already exists for this warehouse {1},Rij {0}: Er bestaat al een nabestelling voor dit magazijn {1}
+apps/erpnext/erpnext/stock/doctype/item/item.py +383,Row {0}: An Reorder entry already exists for this warehouse {1},Rij {0}: Er bestaat al een nabestelling voor dit magazijn {1}
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +67,"Cannot declare as lost, because Quotation has been made.","Kan niet als verloren verklaren, omdat Offerte is gemaakt."
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +133,Electron beam machining,Elektronenbundel bewerkingscentra
 DocType: Purchase Taxes and Charges Template,Purchase Master Manager,Aankoop Master Manager
@@ -3547,7 +3547,7 @@ apps/erpnext/erpnext/config/stock.py +141,Main Reports,Hoofdrapporten
 apps/erpnext/erpnext/stock/doctype/stock_uom_replace_utility/stock_uom_replace_utility.py +102,Stock Ledger entries balances updated,Voorraad Dagboek saldi bijgewerkt
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.js +16,To date cannot be before from date,Tot Datum kan niet eerder zijn dan Van Datum
 DocType: Purchase Receipt Item,Prevdoc DocType,Prevdoc DocType
-apps/erpnext/erpnext/stock/doctype/item/item.js +181,Add / Edit Prices,Toevoegen / bewerken Prijzen
+apps/erpnext/erpnext/stock/doctype/item/item.js +176,Add / Edit Prices,Toevoegen / bewerken Prijzen
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +53,Chart of Cost Centers,Kostenplaatsenschema
 ,Requested Items To Be Ordered,Aangevraagde Artikelen in te kopen
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +298,My Orders,Mijn Bestellingen
@@ -3614,7 +3614,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +396,What does it d
 DocType: Delivery Note,To Warehouse,Tot Magazijn
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +45,Account {0} has been entered more than once for fiscal year {1},Rekening {0} is meer dan één keer ingevoerd voor het boekjaar {1}
 ,Average Commission Rate,Gemiddelde Commissie Rate
-apps/erpnext/erpnext/stock/doctype/item/item.py +307,'Has Serial No' can not be 'Yes' for non-stock item,'Heeft Serienummer' kan niet 'ja' zijn voor niet- voorraad artikel
+apps/erpnext/erpnext/stock/doctype/item/item.py +313,'Has Serial No' can not be 'Yes' for non-stock item,'Heeft Serienummer' kan niet 'ja' zijn voor niet- voorraad artikel
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +34,Attendance can not be marked for future dates,Aanwezigheid kan niet aangemerkt worden voor toekomstige data
 DocType: Pricing Rule,Pricing Rule Help,Prijsbepalingsregel Help
 DocType: Purchase Taxes and Charges,Account Head,Hoofdrekening
@@ -3643,7 +3643,7 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +35,Delivery Not
 DocType: Notification Control,Sales Invoice Message,Verkoopfactuur bericht
 DocType: Authorization Rule,Based On,Gebaseerd op
 DocType: Sales Order Item,Ordered Qty,Besteld Aantal
-apps/erpnext/erpnext/stock/doctype/item/item.py +536,Item {0} is disabled,Punt {0} is uitgeschakeld
+apps/erpnext/erpnext/stock/doctype/item/item.py +539,Item {0} is disabled,Punt {0} is uitgeschakeld
 DocType: Stock Settings,Stock Frozen Upto,Voorraad Bevroren Tot
 apps/erpnext/erpnext/controllers/recurring_document.py +166,Period From and Period To dates mandatory for recurring {0},Periode Van en periode te data verplicht voor terugkerende {0}
 apps/erpnext/erpnext/config/projects.py +13,Project activity / task.,Project activiteit / taak.
@@ -3793,7 +3793,7 @@ apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +56,Show zer
 DocType: BOM,Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,Hoeveelheid product verkregen na productie / herverpakken van de gegeven hoeveelheden grondstoffen
 DocType: Payment Reconciliation,Receivable / Payable Account,Vorderingen / Crediteuren Account
 DocType: Delivery Note Item,Against Sales Order Item,Tegen Sales Order Item
-apps/erpnext/erpnext/stock/doctype/item/item.py +518,Please specify Attribute Value for attribute {0},Geef aub attribuut Waarde voor kenmerk {0}
+apps/erpnext/erpnext/stock/doctype/item/item.py +521,Please specify Attribute Value for attribute {0},Geef aub attribuut Waarde voor kenmerk {0}
 DocType: Item,Default Warehouse,Standaard Magazijn
 DocType: Task,Actual End Date (via Time Logs),Werkelijke Einddatum (via Time Logs)
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +37,Budget cannot be assigned against Group Account {0},Budget kan niet tegen Group rekening worden toegewezen {0}
@@ -3929,7 +3929,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.py +24,Please en
 DocType: POS Profile,POS Profile,POS Profiel
 apps/erpnext/erpnext/config/accounts.py +153,"Seasonality for setting budgets, targets etc.","Seizoensgebondenheid voor het vaststellen van budgetten, doelstellingen etc."
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.js +238,Row {0}: Payment Amount cannot be greater than Outstanding Amount,Rij {0}: kan Betaling bedrag niet groter is dan openstaande bedrag zijn
-apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +45,Total Unpaid,Totaal Onbetaalde
+apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +46,Total Unpaid,Totaal Onbetaalde
 apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +21,Time Log is not billable,Tijd Log is niet factureerbaar
 apps/erpnext/erpnext/stock/get_item_details.py +128,"Item {0} is a template, please select one of its variants","Item {0} is een sjabloon, selecteert u één van de varianten"
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +528,Purchaser,Koper
@@ -3982,7 +3982,7 @@ apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +383,Cos
 DocType: Item,Automatically create Material Request if quantity falls below this level,Maak automatisch Materiaal aanvragen als de hoeveelheid lager niveau
 ,Item-wise Purchase Register,Artikelgebaseerde Inkoop Register
 DocType: Batch,Expiry Date,Vervaldatum
-apps/erpnext/erpnext/stock/doctype/item/item.py +369,"To set reorder level, item must be a Purchase Item or Manufacturing Item","Om bestelniveau stellen, moet onderdeel van een aankoop Item of Manufacturing Item zijn"
+apps/erpnext/erpnext/stock/doctype/item/item.py +375,"To set reorder level, item must be a Purchase Item or Manufacturing Item","Om bestelniveau stellen, moet onderdeel van een aankoop Item of Manufacturing Item zijn"
 ,Supplier Addresses and Contacts,Leverancier Adressen en Contacten
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +268,Please select Category first,Selecteer eerst een Categorie
 apps/erpnext/erpnext/config/projects.py +18,Project master.,Project stam.

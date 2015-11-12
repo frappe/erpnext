@@ -250,7 +250,7 @@ DocType: Item Website Specification,Item Website Specification,Προδιαγρ�
 DocType: Dropbox Backup,Dropbox Access Key,Dropbox access key
 DocType: Payment Tool,Reference No,Αριθμός αναφοράς
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +348,Leave Blocked,Η άδεια εμποδίστηκε
-apps/erpnext/erpnext/stock/doctype/item/item.py +532,Item {0} has reached its end of life on {1},Το είδος {0} έχει φτάσει στο τέλος της διάρκειας ζωής του στο {1}
+apps/erpnext/erpnext/stock/doctype/item/item.py +535,Item {0} has reached its end of life on {1},Το είδος {0} έχει φτάσει στο τέλος της διάρκειας ζωής του στο {1}
 apps/erpnext/erpnext/accounts/utils.py +339,Annual,Ετήσιος
 DocType: Stock Reconciliation Item,Stock Reconciliation Item,Είδος συμφωνίας αποθέματος
 DocType: Stock Entry,Sales Invoice No,Αρ. Τιμολογίου πώλησης
@@ -262,7 +262,7 @@ DocType: Item,Minimum Order Qty,Ελάχιστη ποσότητα παραγγε
 DocType: Pricing Rule,Supplier Type,Τύπος προμηθευτή
 DocType: Item,Publish in Hub,Δημοσίευση στο hub
 ,Terretory,Περιοχή
-apps/erpnext/erpnext/stock/doctype/item/item.py +552,Item {0} is cancelled,Το είδος {0} είναι ακυρωμένο
+apps/erpnext/erpnext/stock/doctype/item/item.py +555,Item {0} is cancelled,Το είδος {0} είναι ακυρωμένο
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js +598,Material Request,Αίτηση υλικού
 DocType: Bank Reconciliation,Update Clearance Date,Ενημέρωση ημερομηνίας εκκαθάρισης
 DocType: Item,Purchase Details,Λεπτομέρειες αγοράς
@@ -321,7 +321,7 @@ DocType: Sales Invoice Item,Delivery Note,Δελτίο αποστολής
 DocType: Dropbox Backup,Allow Dropbox Access,Επίτρεψε πρόσβαση στο dropbox
 apps/erpnext/erpnext/config/learn.py +72,Setting up Taxes,Ρύθμιση Φόροι
 apps/erpnext/erpnext/accounts/utils.py +189,Payment Entry has been modified after you pulled it. Please pull it again.,Η καταχώηρση πληρωμής έχει τροποποιηθεί μετά την λήψη της. Παρακαλώ επαναλάβετε τη λήψη.
-apps/erpnext/erpnext/stock/doctype/item/item.py +337,{0} entered twice in Item Tax,Το {0} εισήχθηκε δύο φορές στο φόρο είδους
+apps/erpnext/erpnext/stock/doctype/item/item.py +343,{0} entered twice in Item Tax,Το {0} εισήχθηκε δύο φορές στο φόρο είδους
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +105,Summary for this week and pending activities,Περίληψη για αυτή την εβδομάδα και εν αναμονή δραστηριότητες
 DocType: Workstation,Rent Cost,Κόστος ενοικίασης
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +74,Please select month and year,Παρακαλώ επιλέξτε μήνα και έτος
@@ -415,7 +415,7 @@ DocType: Sales Taxes and Charges Template,Sales Master Manager,Διαχειρι�
 apps/erpnext/erpnext/config/manufacturing.py +74,Global settings for all manufacturing processes.,Παγκόσμια ρυθμίσεις για όλες τις διαδικασίες κατασκευής.
 DocType: Accounts Settings,Accounts Frozen Upto,Παγωμένοι λογαριασμοί μέχρι
 DocType: SMS Log,Sent On,Εστάλη στις
-apps/erpnext/erpnext/stock/doctype/item/item.py +509,Attribute {0} selected multiple times in Attributes Table,Χαρακτηριστικό {0} πολλές φορές σε πίνακα Χαρακτηριστικά
+apps/erpnext/erpnext/stock/doctype/item/item.py +512,Attribute {0} selected multiple times in Attributes Table,Χαρακτηριστικό {0} πολλές φορές σε πίνακα Χαρακτηριστικά
 DocType: Sales Order,Not Applicable,Μη εφαρμόσιμο
 apps/erpnext/erpnext/config/hr.py +140,Holiday master.,Κύρια εγγραφή αργιών.
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +19,Shell molding,Χύτευση κέλυφος
@@ -458,7 +458,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_p
 DocType: Production Order,Additional Operating Cost,Πρόσθετο λειτουργικό κόστος
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/industry_type.py +20,Cosmetics,Καλλυντικά
 DocType: DocField,Type,Τύπος
-apps/erpnext/erpnext/stock/doctype/item/item.py +414,"To merge, following properties must be same for both items","Για τη συγχώνευση, οι ακόλουθες ιδιότητες πρέπει να είναι ίδιες για τα δύο είδη"
+apps/erpnext/erpnext/stock/doctype/item/item.py +417,"To merge, following properties must be same for both items","Για τη συγχώνευση, οι ακόλουθες ιδιότητες πρέπει να είναι ίδιες για τα δύο είδη"
 DocType: Communication,Subject,Θέμα
 DocType: Shipping Rule,Net Weight,Καθαρό βάρος
 DocType: Employee,Emergency Phone,Τηλέφωνο έκτακτης ανάγκης
@@ -482,7 +482,7 @@ DocType: Company,Delete Company Transactions,Διαγραφή Συναλλαγέ
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +85,Item {0} is not Purchase Item,Το είδος {0} δεν είναι είδος αγοράς
 apps/erpnext/erpnext/controllers/recurring_document.py +188,"{0} is an invalid email address in 'Notification \
 					Email Address'",Η {0} είναι μια μη έγκυρη διεύθυνση email στην ηλεκτρονική διεύθυνση κοινοποίησης
-apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +43,Total Billing This Year:,Συνολική τιμολόγηση αυτό το έτος:
+apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +44,Total Billing This Year:,Συνολική τιμολόγηση αυτό το έτος:
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Προσθήκη / επεξεργασία φόρων και επιβαρύνσεων
 DocType: Purchase Invoice,Supplier Invoice No,Αρ. τιμολογίου του προμηθευτή
 DocType: Territory,For reference,Για αναφορά
@@ -617,7 +617,7 @@ DocType: Employee,Provide email id registered in company,Παρέχετε ένα
 DocType: Hub Settings,Seller City,Πόλη πωλητή
 DocType: Email Digest,Next email will be sent on:,Το επόμενο μήνυμα email θα αποσταλεί στις:
 DocType: Offer Letter Term,Offer Letter Term,Προσφορά Επιστολή Όρος
-apps/erpnext/erpnext/stock/doctype/item/item.py +489,Item has variants.,Στοιχείο έχει παραλλαγές.
+apps/erpnext/erpnext/stock/doctype/item/item.py +492,Item has variants.,Στοιχείο έχει παραλλαγές.
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +65,Item {0} not found,Το είδος {0} δεν βρέθηκε
 DocType: Bin,Stock Value,Αξία των αποθεμάτων
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +88,Tree Type,Τύπος δέντρου
@@ -724,6 +724,7 @@ DocType: Company,Default Cost of Goods Sold Account,Προεπιλογή Κόσ�
 apps/erpnext/erpnext/stock/get_item_details.py +262,Price List not selected,Ο τιμοκατάλογος δεν έχει επιλεγεί
 DocType: Employee,Family Background,Ιστορικό οικογένειας
 DocType: Process Payroll,Send Email,Αποστολή email
+apps/erpnext/erpnext/stock/doctype/item/item.py +108,Warning: Invalid Attachment {0},Προειδοποίηση: Μη έγκυρη Συνημμένο {0}
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +88,No Permission,Δεν έχετε άδεια
 DocType: Company,Default Bank Account,Προεπιλεγμένος τραπεζικός λογαριασμός
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +47,"To filter based on Party, select Party Type first","Για να φιλτράρετε με βάση Κόμμα, επιλέξτε Τύπος Πάρτυ πρώτα"
@@ -768,7 +769,7 @@ apps/erpnext/erpnext/config/learn.py +172,Purchase Order to Payment,Εντολή
 DocType: Sales Order Item,Projected Qty,Προβλεπόμενη ποσότητα
 DocType: Sales Invoice,Payment Due Date,Ημερομηνία λήξης προθεσμίας πληρωμής
 DocType: Newsletter,Newsletter Manager,Ενημερωτικό Δελτίο Διευθυντής
-apps/erpnext/erpnext/stock/doctype/item/item.js +234,Item Variant {0} already exists with same attributes,Θέση Παραλλαγή {0} υπάρχει ήδη με ίδια χαρακτηριστικά
+apps/erpnext/erpnext/stock/doctype/item/item.js +229,Item Variant {0} already exists with same attributes,Θέση Παραλλαγή {0} υπάρχει ήδη με ίδια χαρακτηριστικά
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +95,'Opening',«Άνοιγμα»
 DocType: Notification Control,Delivery Note Message,Μήνυμα δελτίου αποστολής
 DocType: Expense Claim,Expenses,Δαπάνες
@@ -833,7 +834,7 @@ DocType: Purchase Receipt,Range,Εύρος
 DocType: Supplier,Default Payable Accounts,Προεπιλεγμένοι λογαριασμοί πληρωτέων
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +40,Employee {0} is not active or does not exist,Ο υπάλληλος {0} δεν είναι ενεργός ή δεν υπάρχει
 DocType: Features Setup,Item Barcode,Barcode είδους
-apps/erpnext/erpnext/stock/doctype/item/item.py +484,Item Variants {0} updated,Οι παραλλαγές είδους {0} ενημερώθηκαν
+apps/erpnext/erpnext/stock/doctype/item/item.py +487,Item Variants {0} updated,Οι παραλλαγές είδους {0} ενημερώθηκαν
 DocType: Quality Inspection Reading,Reading 6,Μέτρηση 6
 DocType: Purchase Invoice Advance,Purchase Invoice Advance,Προκαταβολή τιμολογίου αγοράς 
 DocType: Address,Shop,Κατάστημα
@@ -911,7 +912,7 @@ DocType: Packing Slip Item,Packing Slip Item,Είδος δελτίου συσκ�
 DocType: POS Profile,Cash/Bank Account,Λογαριασμός μετρητών/τραπέζης
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +63,Removed items with no change in quantity or value.,Που αφαιρούνται χωρίς καμία αλλαγή στην ποσότητα ή την αξία.
 DocType: Delivery Note,Delivery To,Παράδοση προς
-apps/erpnext/erpnext/stock/doctype/item/item.py +506,Attribute table is mandatory,Τραπέζι χαρακτηριστικό γνώρισμα είναι υποχρεωτικό
+apps/erpnext/erpnext/stock/doctype/item/item.py +509,Attribute table is mandatory,Τραπέζι χαρακτηριστικό γνώρισμα είναι υποχρεωτικό
 DocType: Production Planning Tool,Get Sales Orders,Βρες παραγγελίες πώλησης
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +64,{0} can not be negative,Η {0} δεν μπορεί να είναι αρνητική
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +103,Filing,Υποβολή
@@ -1059,7 +1060,7 @@ DocType: Communication,Sent,Εστάλη
 apps/erpnext/erpnext/accounts/doctype/account/account.js +57,View Ledger,Προβολή καθολικού
 DocType: File,Lft,Lft
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +41,Earliest,Η πιο παλιά
-apps/erpnext/erpnext/stock/doctype/item/item.py +388,"An Item Group exists with same name, please change the item name or rename the item group","Μια ομάδα ειδών υπάρχει με το ίδιο όνομα, μπορείτε να αλλάξετε το όνομα του είδους ή να μετονομάσετε την ομάδα ειδών"
+apps/erpnext/erpnext/stock/doctype/item/item.py +394,"An Item Group exists with same name, please change the item name or rename the item group","Μια ομάδα ειδών υπάρχει με το ίδιο όνομα, μπορείτε να αλλάξετε το όνομα του είδους ή να μετονομάσετε την ομάδα ειδών"
 DocType: Communication,Delivery Status,Κατάσταση παράδοσης
 DocType: Production Order,Manufacture against Sales Order,Παραγωγή κατά παραγγελία πώλησης
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.py +517,Rest Of The World,Τρίτες χώρες
@@ -1223,7 +1224,7 @@ DocType: Sales Invoice,Shipping Address Name,Όνομα διεύθυνσης α�
 apps/erpnext/erpnext/accounts/doctype/account/account.js +50,Chart of Accounts,Λογιστικό σχέδιο
 DocType: Material Request,Terms and Conditions Content,Περιεχόμενο όρων και προϋποθέσεων
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +471,cannot be greater than 100,Δεν μπορεί να είναι μεγαλύτερη από 100
-apps/erpnext/erpnext/stock/doctype/item/item.py +543,Item {0} is not a stock Item,Το είδος {0} δεν είναι ένα αποθηκεύσιμο είδος
+apps/erpnext/erpnext/stock/doctype/item/item.py +546,Item {0} is not a stock Item,Το είδος {0} δεν είναι ένα αποθηκεύσιμο είδος
 DocType: Maintenance Visit,Unscheduled,Έκτακτες
 DocType: Employee,Owned,Ανήκουν
 DocType: Salary Slip Deduction,Depends on Leave Without Pay,Εξαρτάται από άδειας άνευ αποδοχών
@@ -1367,7 +1368,7 @@ DocType: Features Setup,To track items using barcode. You will be able to enter 
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +477,Mark as Delivered,Επισήμανση ως Δημοσιεύθηκε
 apps/erpnext/erpnext/crm/doctype/lead/lead.js +34,Make Quotation,Κάντε Προσφορά
 DocType: Dependent Task,Dependent Task,Εξαρτημένη Εργασία
-apps/erpnext/erpnext/stock/doctype/item/item.py +300,Conversion factor for default Unit of Measure must be 1 in row {0},Ο συντελεστής μετατροπής για την προεπιλεγμένη μονάδα μέτρησης πρέπει να είναι 1 στη γραμμή {0}
+apps/erpnext/erpnext/stock/doctype/item/item.py +306,Conversion factor for default Unit of Measure must be 1 in row {0},Ο συντελεστής μετατροπής για την προεπιλεγμένη μονάδα μέτρησης πρέπει να είναι 1 στη γραμμή {0}
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +141,Leave of type {0} cannot be longer than {1},Η άδεια του τύπου {0} δεν μπορεί να είναι μεγαλύτερη από {1}
 DocType: Manufacturing Settings,Try planning operations for X days in advance.,Δοκιμάστε τον προγραμματισμό εργασιών για το X ημέρες νωρίτερα.
 DocType: HR Settings,Stop Birthday Reminders,Διακοπή υπενθυμίσεων γενεθλίων
@@ -1377,7 +1378,7 @@ apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sa
 apps/erpnext/erpnext/public/js/pos/pos.js +491,{0} View,{0} Προβολή
 DocType: Salary Structure Deduction,Salary Structure Deduction,Παρακρατήσεις στο μισθολόγιο
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +158,Selective laser sintering,Επιλεκτική πυροσυσσωμάτωση λέιζερ
-apps/erpnext/erpnext/stock/doctype/item/item.py +295,Unit of Measure {0} has been entered more than once in Conversion Factor Table,Η μονάδα μέτρησης {0} έχει εισαχθεί περισσότερες από μία φορές στον πίνακας παραγόντων μετατροπής
+apps/erpnext/erpnext/stock/doctype/item/item.py +301,Unit of Measure {0} has been entered more than once in Conversion Factor Table,Η μονάδα μέτρησης {0} έχει εισαχθεί περισσότερες από μία φορές στον πίνακας παραγόντων μετατροπής
 apps/frappe/frappe/core/page/data_import_tool/data_import_tool.js +108,Import Successful!,Εισαγωγή επιτυχής!
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +27,Cost of Issued Items,Κόστος ειδών που εκδόθηκαν
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +185,Quantity must not be more than {0},Η ποσότητα δεν πρέπει να είναι μεγαλύτερη από {0}
@@ -1455,7 +1456,7 @@ apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py 
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.js +50,"Company, Month and Fiscal Year is mandatory","Η εταιρεία, ο μήνας και η χρήση είναι απαραίτητα"
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +102,Marketing Expenses,Δαπάνες marketing
 ,Item Shortage Report,Αναφορά έλλειψης είδους 
-apps/erpnext/erpnext/stock/doctype/item/item.js +188,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Το βάρος αναφέρεται, \nπαρακαλώ, αναφέρετε επίσης και τη μονάδα μέτρησης βάρους'"
+apps/erpnext/erpnext/stock/doctype/item/item.js +183,"Weight is mentioned,\nPlease mention ""Weight UOM"" too","Το βάρος αναφέρεται, \nπαρακαλώ, αναφέρετε επίσης και τη μονάδα μέτρησης βάρους'"
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,Αίτηση υλικού που χρησιμοποιείται για να γίνει αυτήν η καταχώρnση αποθέματος
 apps/erpnext/erpnext/config/support.py +43,Single unit of an Item.,Μία μονάδα ενός είδους
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +212,Time Log Batch {0} must be 'Submitted',Η παρτίδα αρχείων καταγραφής χρονολογίου {0} πρέπει να 'υποβληθεί'
@@ -1501,7 +1502,7 @@ apps/erpnext/erpnext/stock/doctype/item/item_list.js +13,Variant,Παραλλα�
 apps/frappe/frappe/public/js/frappe/form/toolbar.js +165,New {0},Νέο {0}
 DocType: Naming Series,Set prefix for numbering series on your transactions,Ορίστε πρόθεμα για τη σειρά αρίθμησης για τις συναλλαγές σας
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +169,Stopped order cannot be cancelled. Unstop to cancel.,Μια σταματημένη παραγγελία δεν μπορεί να ακυρωθεί. Συνεχίστε την προκειμένου να την ακυρώσετε.
-apps/erpnext/erpnext/stock/doctype/item/item.py +317,Default BOM ({0}) must be active for this item or its template,Προεπιλογή BOM ({0}) πρέπει να είναι ενεργή για αυτό το στοιχείο ή το πρότυπο της
+apps/erpnext/erpnext/stock/doctype/item/item.py +323,Default BOM ({0}) must be active for this item or its template,Προεπιλογή BOM ({0}) πρέπει να είναι ενεργή για αυτό το στοιχείο ή το πρότυπο της
 DocType: Employee,Leave Encashed?,Η άδεια εισπράχθηκε;
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +32,Opportunity From field is mandatory,Το πεδίο 'ευκαιρία από' είναι υποχρεωτικό
 DocType: Item,Variants,Παραλλαγές
@@ -1667,7 +1668,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +44,Embossin
 ,Quotation Trends,Τάσεις προσφορών
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +139,Item Group not mentioned in item master for item {0},Η ομάδα είδους δεν αναφέρεται στην κύρια εγγραφή είδους για το είδος {0}
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +302,Debit To account must be a Receivable account,Ο 'λογαριασμός χρέωσης προς' Χρέωση του λογαριασμού πρέπει να είναι λογαριασμός απαιτήσεων
-apps/erpnext/erpnext/stock/doctype/item/item.py +304,"As Production Order can be made for this item, it must be a stock item.","Εφόσον μπορεί να γίνει παραγωγής παραγγελίας για το συγκεκριμένο προϊόν, θα πρέπει να είναι ένα είδος αποθέματος."
+apps/erpnext/erpnext/stock/doctype/item/item.py +310,"As Production Order can be made for this item, it must be a stock item.","Εφόσον μπορεί να γίνει παραγωγής παραγγελίας για το συγκεκριμένο προϊόν, θα πρέπει να είναι ένα είδος αποθέματος."
 DocType: Shipping Rule Condition,Shipping Amount,Κόστος αποστολής
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +140,Joining,Συμμετοχή
 DocType: Authorization Rule,Above Value,Παραπάνω Αξία 
@@ -1977,7 +1978,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py 
 DocType: Shipping Rule,Shipping Rule Label,Ετικέτα κανόνα αποστολής
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +209,Raw Materials cannot be blank.,Το πεδίο πρώτων ύλών δεν μπορεί να είναι κενό.
 DocType: Newsletter,Test,Δοκιμή
-apps/erpnext/erpnext/stock/doctype/item/item.py +358,"As there are existing stock transactions for this item, \
+apps/erpnext/erpnext/stock/doctype/item/item.py +364,"As there are existing stock transactions for this item, \
 							you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'","Δεδομένου ότι υπάρχουν χρηματιστηριακές συναλλαγές για αυτό το προϊόν, \ δεν μπορείτε να αλλάξετε τις τιμές των «Έχει Αύξων αριθμός», «Έχει Παρτίδα No», «Είναι αναντικατάστατο» και «Μέθοδος αποτίμησης»"
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +448,Quick Journal Entry,Γρήγορη Εφημερίδα Είσοδος
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +92,You can not change rate if BOM mentioned agianst any item,"Δεν μπορείτε να αλλάξετε τιμοκατάλογο, αν η λίστα υλικών αναφέρεται σε οποιουδήποτε είδος"
@@ -2206,7 +2207,7 @@ DocType: Stock Settings,Default Valuation Method,Προεπιλεγμένη μέ
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +127,Polishing,Στίλβωσης
 DocType: Production Order Operation,Planned Start Time,Προγραμματισμένη ώρα έναρξης
 apps/erpnext/erpnext/config/accounts.py +63,Close Balance Sheet and book Profit or Loss.,Κλείσιμο ισολογισμού και καταγραφή κέρδους ή ζημίας
-apps/erpnext/erpnext/stock/doctype/item/item.py +658,"Default Unit of Measure for Item {0} cannot be changed directly because \
+apps/erpnext/erpnext/stock/doctype/item/item.py +661,"Default Unit of Measure for Item {0} cannot be changed directly because \
 			you have already made some transaction(s) with another UOM. To change default UOM, \
 			use 'UOM Replace Utility' tool under Stock module.","Προεπιλεγμένη μονάδα μέτρησης για τη θέση {0} δεν μπορεί να αλλάξει άμεσα, διότι \ έχετε ήδη κάνει κάποια συναλλαγή (ες) με μια άλλη UOM. Για να αλλάξετε την προεπιλεγμένη UOM, \ χρήση »UOM αντικατάστασης χρησιμότητα» εργαλείο στο πλαίσιο της μονάδας Χρηματιστήριο."
 DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,Καθορίστε την ισοτιμία να μετατραπεί ένα νόμισμα σε ένα άλλο
@@ -2308,7 +2309,7 @@ DocType: Bank Reconciliation,Get Relevant Entries,Βρες σχετικές κα
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +407,Accounting Entry for Stock,Λογιστική εγγραφή για απόθεμα
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +64,Coining,Νομισματοκοπίας
 DocType: Sales Invoice,Sales Team1,Ομάδα πωλήσεων 1
-apps/erpnext/erpnext/stock/doctype/item/item.py +409,Item {0} does not exist,Το είδος {0} δεν υπάρχει
+apps/erpnext/erpnext/stock/doctype/item/item.py +412,Item {0} does not exist,Το είδος {0} δεν υπάρχει
 DocType: Sales Invoice,Customer Address,Διεύθυνση πελάτη
 apps/frappe/frappe/desk/query_report.py +136,Total,Σύνολο
 DocType: Purchase Invoice,Apply Additional Discount On,Εφαρμόστε επιπλέον έκπτωση On
@@ -2762,7 +2763,7 @@ DocType: Task,Actual Start Date (via Time Logs),Πραγματική Ημερο�
 DocType: Stock Reconciliation Item,Before reconciliation,Πριν συμφιλίωση
 apps/erpnext/erpnext/support/doctype/maintenance_visit/maintenance_visit.py +12,To {0},Έως {0}
 DocType: Purchase Invoice,Taxes and Charges Added (Company Currency),Φόροι και επιβαρύνσεις που προστέθηκαν (νόμισμα της εταιρείας)
-apps/erpnext/erpnext/stock/doctype/item/item.py +334,Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,Η γραμμή φόρου είδους {0} πρέπει να έχει λογαριασμό τύπου φόρος ή έσοδα ή δαπάνη ή χρέωση
+apps/erpnext/erpnext/stock/doctype/item/item.py +340,Item Tax Row {0} must have account of type Tax or Income or Expense or Chargeable,Η γραμμή φόρου είδους {0} πρέπει να έχει λογαριασμό τύπου φόρος ή έσοδα ή δαπάνη ή χρέωση
 DocType: Sales Order,Partly Billed,Μερικώς τιμολογημένος
 DocType: Item,Default BOM,Προεπιλεγμένη Λ.Υ. 
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +79,Decambering,Decambering
@@ -3063,7 +3064,7 @@ apps/erpnext/erpnext/setup/doctype/company/company.js +38,Successfully deleted a
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js +21,As on Date,Ως ημερομηνία για
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +111,Honing,Ακονίζοντας
 apps/erpnext/erpnext/setup/page/setup_wizard/install_fixtures.py +58,Probation,Επιτήρηση
-apps/erpnext/erpnext/stock/doctype/item/item.py +258,Default Warehouse is mandatory for stock Item.,Η προεπιλεγμένη αποθήκη είναι απαραίτητη για αποθηκεύσιμα είδη.
+apps/erpnext/erpnext/stock/doctype/item/item.py +264,Default Warehouse is mandatory for stock Item.,Η προεπιλεγμένη αποθήκη είναι απαραίτητη για αποθηκεύσιμα είδη.
 DocType: Feed,Full Name,Ονοματεπώνυμο
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +148,Clinching,Στερεώνοντας
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.py +191,Payment of salary for the month {0} and year {1},Πληρωμή του μισθού για τον μήνα {0} και έτος {1}
@@ -3132,7 +3133,7 @@ DocType: Purchase Order Item,Supplier Quotation,Προσφορά προμηθε�
 DocType: Quotation,In Words will be visible once you save the Quotation.,Με λόγια θα είναι ορατά αφού αποθηκεύσετε το πρόσημο.
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +68,Ironing,Σιδερώματος
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +217,{0} {1} is stopped,{0} {1} Είναι σταματημένο
-apps/erpnext/erpnext/stock/doctype/item/item.py +346,Barcode {0} already used in Item {1},Το barcode {0} έχει ήδη χρησιμοποιηθεί στο είδος {1}
+apps/erpnext/erpnext/stock/doctype/item/item.py +352,Barcode {0} already used in Item {1},Το barcode {0} έχει ήδη χρησιμοποιηθεί στο είδος {1}
 DocType: Lead,Add to calendar on this date,Προσθήκη στο ημερολόγιο την ημερομηνία αυτή
 apps/erpnext/erpnext/config/selling.py +132,Rules for adding shipping costs.,Κανόνες για την προσθήκη εξόδων αποστολής.
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +40,Upcoming Events,Ανερχόμενες εκδηλώσεις
@@ -3259,7 +3260,7 @@ DocType: Account,Auditor,Ελεγκτής
 DocType: Purchase Order,End date of current order's period,Ημερομηνία λήξης της περιόδου της τρέχουσας παραγγελίας
 apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.js +17,Make Offer Letter,Πραγματοποίηση προσφοράς Επιστολή
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js +10,Return,Απόδοση
-apps/erpnext/erpnext/stock/doctype/item/item.py +500,Default Unit of Measure for Variant must be same as Template,Προεπιλεγμένη μονάδα μέτρησης για την παραλλαγή πρέπει να είναι ίδιο με το Πρότυπο
+apps/erpnext/erpnext/stock/doctype/item/item.py +503,Default Unit of Measure for Variant must be same as Template,Προεπιλεγμένη μονάδα μέτρησης για την παραλλαγή πρέπει να είναι ίδιο με το Πρότυπο
 DocType: DocField,Fold,Αναδίπλωση
 DocType: Production Order Operation,Production Order Operation,Λειτουργία παραγγελίας παραγωγής
 DocType: Pricing Rule,Disable,Απενεργοποίηση
@@ -3396,7 +3397,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +427,Transaction n
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year.js +19,"To set this Fiscal Year as Default, click on 'Set as Default'","Για να ορίσετε την τρέχουσα χρήση ως προεπιλογή, κάντε κλικ στο 'ορισμός ως προεπιλογή'"
 apps/erpnext/erpnext/config/support.py +54,Setup incoming server for support email id. (e.g. support@example.com),Ρύθμιση διακομιστή εισερχομένων για το email ID υποστήριξης. ( Π.Χ. Support@example.Com )
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py +19,Shortage Qty,Έλλειψη ποσότητας
-apps/erpnext/erpnext/stock/doctype/item/item.py +525,Item variant {0} exists with same attributes,Παραλλαγή Θέση {0} υπάρχει με ίδια χαρακτηριστικά
+apps/erpnext/erpnext/stock/doctype/item/item.py +528,Item variant {0} exists with same attributes,Παραλλαγή Θέση {0} υπάρχει με ίδια χαρακτηριστικά
 DocType: Salary Slip,Salary Slip,Βεβαίωση αποδοχών
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +116,Burnishing,Γυάλισμα
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py +54,'To Date' is required,Το πεδίο 'έως ημερομηνία' είναι απαραίτητο.
@@ -3532,7 +3533,7 @@ DocType: Employee,Educational Qualification,Εκπαιδευτικά προσό�
 DocType: Workstation,Operating Costs,Λειτουργικά έξοδα
 DocType: Employee Leave Approver,Employee Leave Approver,Υπεύθυνος έγκρισης αδειών υπαλλήλου
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +166,{0} has been successfully added to our Newsletter list.,{0} έχει προστεθεί με επιτυχία στην λίστα ενημερωτικών δελτίων μας.
-apps/erpnext/erpnext/stock/doctype/item/item.py +377,Row {0}: An Reorder entry already exists for this warehouse {1},Γραμμή {0}: μια καταχώρηση αναδιάταξης υπάρχει ήδη για αυτή την αποθήκη {1}
+apps/erpnext/erpnext/stock/doctype/item/item.py +383,Row {0}: An Reorder entry already exists for this warehouse {1},Γραμμή {0}: μια καταχώρηση αναδιάταξης υπάρχει ήδη για αυτή την αποθήκη {1}
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +67,"Cannot declare as lost, because Quotation has been made.","Δεν μπορεί να δηλώθει ως απολεσθέν, επειδή έχει γίνει προσφορά."
 apps/erpnext/erpnext/setup/page/setup_wizard/fixtures/operations.py +133,Electron beam machining,Μηχανουργική κατεργασία με δέσμη ηλεκτρονίων
 DocType: Purchase Taxes and Charges Template,Purchase Master Manager,Κύρια εγγραφή υπευθύνου αγορών
@@ -3542,7 +3543,7 @@ apps/erpnext/erpnext/config/stock.py +141,Main Reports,Κύριες εκθέσε
 apps/erpnext/erpnext/stock/doctype/stock_uom_replace_utility/stock_uom_replace_utility.py +102,Stock Ledger entries balances updated,Ενημερώθηκαν τα υπόλοιπα για καθολικές καταχωρήσεις αποθέματος
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.js +16,To date cannot be before from date,Το πεδίο έως ημερομηνία δεν μπορεί να είναι προγενέστερο από το πεδίο από ημερομηνία
 DocType: Purchase Receipt Item,Prevdoc DocType,Τύπος εγγράφου του προηγούμενου εγγράφου
-apps/erpnext/erpnext/stock/doctype/item/item.js +181,Add / Edit Prices,Προσθήκη / επεξεργασία τιμών
+apps/erpnext/erpnext/stock/doctype/item/item.js +176,Add / Edit Prices,Προσθήκη / επεξεργασία τιμών
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.js +53,Chart of Cost Centers,Διάγραμμα των κέντρων κόστους
 ,Requested Items To Be Ordered,Είδη που ζητήθηκε να παραγγελθούν
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +298,My Orders,Οι παραγγελίες μου
@@ -3609,7 +3610,7 @@ apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +396,What does it d
 DocType: Delivery Note,To Warehouse,Προς αποθήκη
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +45,Account {0} has been entered more than once for fiscal year {1},Ο λογαριασμός {0} έχει εισαχθεί περισσότερες από μία φορά για τη χρήση {1}
 ,Average Commission Rate,Μέσος συντελεστής προμήθειας
-apps/erpnext/erpnext/stock/doctype/item/item.py +307,'Has Serial No' can not be 'Yes' for non-stock item,"Το πεδίο ""έχει σειριακό αριθμό"" δεν μπορεί να είναι ""ναι"" για μη αποθηκεύσιμα είδη."
+apps/erpnext/erpnext/stock/doctype/item/item.py +313,'Has Serial No' can not be 'Yes' for non-stock item,"Το πεδίο ""έχει σειριακό αριθμό"" δεν μπορεί να είναι ""ναι"" για μη αποθηκεύσιμα είδη."
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py +34,Attendance can not be marked for future dates,Η συμμετοχή δεν μπορεί να σημειωθεί για μελλοντικές ημερομηνίες
 DocType: Pricing Rule,Pricing Rule Help,Βοήθεια για τον κανόνα τιμολόγησης
 DocType: Purchase Taxes and Charges,Account Head,Κύρια εγγραφή λογαριασμού
@@ -3638,7 +3639,7 @@ apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +35,Delivery Not
 DocType: Notification Control,Sales Invoice Message,Μήνυμα τιμολογίου πώλησης
 DocType: Authorization Rule,Based On,Με βάση την
 DocType: Sales Order Item,Ordered Qty,Παραγγελθείσα ποσότητα
-apps/erpnext/erpnext/stock/doctype/item/item.py +536,Item {0} is disabled,Θέση {0} είναι απενεργοποιημένη
+apps/erpnext/erpnext/stock/doctype/item/item.py +539,Item {0} is disabled,Θέση {0} είναι απενεργοποιημένη
 DocType: Stock Settings,Stock Frozen Upto,Παγωμένο απόθεμα μέχρι 
 apps/erpnext/erpnext/controllers/recurring_document.py +166,Period From and Period To dates mandatory for recurring {0},Περίοδος Από και χρονική περίοδος ημερομηνίες υποχρεωτική για τις επαναλαμβανόμενες {0}
 apps/erpnext/erpnext/config/projects.py +13,Project activity / task.,Δραστηριότητες / εργασίες έργου
@@ -3788,7 +3789,7 @@ apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.js +56,Show zer
 DocType: BOM,Quantity of item obtained after manufacturing / repacking from given quantities of raw materials,Ποσότητα του είδους που αποκτήθηκε μετά την παραγωγή / ανασυσκευασία από συγκεκριμένες ποσότητες πρώτων υλών
 DocType: Payment Reconciliation,Receivable / Payable Account,Εισπρακτέοι / πληρωτέοι λογαριασμού
 DocType: Delivery Note Item,Against Sales Order Item,Κατά το είδος στην παραγγελία πώλησης
-apps/erpnext/erpnext/stock/doctype/item/item.py +518,Please specify Attribute Value for attribute {0},Παρακαλείστε να αναφέρετε Χαρακτηριστικό γνώρισμα Σχέση {0}
+apps/erpnext/erpnext/stock/doctype/item/item.py +521,Please specify Attribute Value for attribute {0},Παρακαλείστε να αναφέρετε Χαρακτηριστικό γνώρισμα Σχέση {0}
 DocType: Item,Default Warehouse,Προεπιλεγμένη αποθήκη 
 DocType: Task,Actual End Date (via Time Logs),Πραγματική Ημερομηνία λήξης (μέσω χρόνος Καταγράφει)
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +37,Budget cannot be assigned against Group Account {0},Ο προϋπολογισμός δεν μπορεί να αποδοθεί κατά του λογαριασμού του Ομίλου {0}
@@ -3924,7 +3925,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.py +24,Please en
 DocType: POS Profile,POS Profile,POS Προφίλ
 apps/erpnext/erpnext/config/accounts.py +153,"Seasonality for setting budgets, targets etc.","Εποχικότητα για τον καθορισμό των προϋπολογισμών, στόχων κλπ"
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.js +238,Row {0}: Payment Amount cannot be greater than Outstanding Amount,"Γραμμή {0}:το ποσό πληρωμής δεν μπορεί να είναι μεγαλύτερο από ό,τι το οφειλόμενο ποσό"
-apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +45,Total Unpaid,Το σύνολο των απλήρωτων
+apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +46,Total Unpaid,Το σύνολο των απλήρωτων
 apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +21,Time Log is not billable,Το αρχείο καταγραφής χρονολογίου δεν είναι χρεώσιμο
 apps/erpnext/erpnext/stock/get_item_details.py +128,"Item {0} is a template, please select one of its variants","Θέση {0} είναι ένα πρότυπο, επιλέξτε μία από τις παραλλαγές του"
 apps/erpnext/erpnext/setup/page/setup_wizard/setup_wizard.js +528,Purchaser,Αγοραστής
@@ -3977,7 +3978,7 @@ apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +383,Cos
 DocType: Item,Automatically create Material Request if quantity falls below this level,Αυτόματη δημιουργία Υλικό Αίτημα εάν η ποσότητα πέσει κάτω από αυτό το επίπεδο
 ,Item-wise Purchase Register,Ταμείο αγορών ανά είδος
 DocType: Batch,Expiry Date,Ημερομηνία λήξης
-apps/erpnext/erpnext/stock/doctype/item/item.py +369,"To set reorder level, item must be a Purchase Item or Manufacturing Item","Για να ορίσετε το επίπεδο αναπαραγγελίας, στοιχείο πρέπει να είναι ένα στοιχείο αγοράς ή κατασκευής του Είδους"
+apps/erpnext/erpnext/stock/doctype/item/item.py +375,"To set reorder level, item must be a Purchase Item or Manufacturing Item","Για να ορίσετε το επίπεδο αναπαραγγελίας, στοιχείο πρέπει να είναι ένα στοιχείο αγοράς ή κατασκευής του Είδους"
 ,Supplier Addresses and Contacts,Διευθύνσεις προμηθευτή και επαφές
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +268,Please select Category first,Παρακαλώ επιλέξτε πρώτα την κατηγορία
 apps/erpnext/erpnext/config/projects.py +18,Project master.,Κύρια εγγραφή έργου.

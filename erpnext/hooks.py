@@ -29,7 +29,9 @@ blogs.
 """
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "6.7.8"
+app_version = "6.8.0"
+app_email = "info@erpnext.com"
+app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
 
 error_report_email = "support@erpnext.com"
@@ -38,6 +40,10 @@ app_include_js = "assets/js/erpnext.min.js"
 app_include_css = "assets/css/erpnext.css"
 web_include_js = "assets/js/erpnext-web.min.js"
 web_include_css = "assets/erpnext/css/website.css"
+
+# setup wizard
+setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
+setup_wizard_complete = "erpnext.setup.setup_wizard.setup_wizard.setup_complete"
 
 after_install = "erpnext.setup.install.after_install"
 
@@ -148,6 +154,5 @@ default_mail_footer = """<div style="text-align: center;">
 </div>"""
 
 get_translated_dict = {
-	("page", "setup-wizard"): "frappe.geo.country_info.get_translated_dict",
 	("doctype", "Global Defaults"): "frappe.geo.country_info.get_translated_dict"
 }

@@ -1,0 +1,4 @@
+selling-settings
+sales-partner
+shipping-rule
+product-bundle
