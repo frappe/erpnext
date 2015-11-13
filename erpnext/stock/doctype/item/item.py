@@ -105,7 +105,11 @@ class Item(WebsiteGenerator):
 				frappe.local.message_log.pop()
 
 			except requests.exceptions.HTTPError:
-				frappe.msgprint(_("Warning: Invalid Attachment {0}").format(self.website_image))
+				frappe.msgprint(_("Warning: Invalid attachment {0}").format(self.website_image))
+				self.website_image = None
+
+			except requests.exceptions.SSLError:
+				frappe.msgprint(_("Warning: Invalid SSL certificate on attachment {0}").format(self.website_image))
 				self.website_image = None
 
 			# for CSV import
