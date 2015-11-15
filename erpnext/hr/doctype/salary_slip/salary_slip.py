@@ -10,6 +10,7 @@ from frappe.model.naming import make_autoname
 from frappe import msgprint, _
 from erpnext.setup.utils import get_company_currency
 from erpnext.hr.utils import set_employee_name
+from erpnext.hr.doctype.process_payroll.process_payroll import get_month_details
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -25,11 +26,17 @@ class SalarySlip(TransactionBase):
 				self.pull_sal_struct(struct)
 
 	def check_sal_struct(self):
+		m = get_month_details(self.fiscal_year, self.month)
 		struct = frappe.db.sql("""select name from `tabSalary Structure`
-			where employee=%s and is_active = 'Yes'""", self.employee)
+			where employee=%s and is_active = 'Yes' 
+			and from_date <= %s and (to_date is null or to_date >= %s)""", 
+			(self.employee, m.month_start_date, m.month_end_date))
+		
 		if not struct:
-			msgprint(_("Please create Salary Structure for employee {0}").format(self.employee))
+			msgprint(_("No active Salary Structure found for employee {0} and the month")
+				.format(self.employee))
 			self.employee = None
+		
 		return struct and struct[0][0] or ''
 
 	def pull_sal_struct(self, struct):
@@ -49,7 +56,7 @@ class SalarySlip(TransactionBase):
 		if not self.month:
 			self.month = "%02d" % getdate(nowdate()).month
 
-		m = frappe.get_doc('Process Payroll').get_month_details(self.fiscal_year, self.month)
+		m = get_month_details(self.fiscal_year, self.month)
 		holidays = self.get_holidays_for_employee(m)
 
 		if not cint(frappe.db.get_value("HR Settings", "HR Settings",
