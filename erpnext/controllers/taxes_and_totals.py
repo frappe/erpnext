@@ -398,17 +398,18 @@ class calculate_taxes_and_totals(object):
 			return
 		
 		self.doc.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount"])
-		total_amount_to_pay = flt(self.doc.grand_total  - self.doc.total_advance - self.doc.write_off_amount,
-			self.doc.precision("grand_total"))
+		if self.doc.party_account_currency == self.doc.currency:
+			total_amount_to_pay = flt(self.doc.grand_total  - self.doc.total_advance 
+				- flt(self.doc.write_off_amount), self.doc.precision("grand_total"))
+		else:
+			total_amount_to_pay = flt(self.doc.base_grand_total  - self.doc.total_advance 
+				- flt(self.doc.base_write_off_amount), self.doc.precision("grand_total"))
 			
 		if self.doc.doctype == "Sales Invoice":
 			self.doc.round_floats_in(self.doc, ["paid_amount"])
-			outstanding_amount = flt(total_amount_to_pay - self.doc.paid_amount, self.doc.precision("outstanding_amount"))
-		elif self.doc.doctype == "Purchase Invoice":
-			outstanding_amount = flt(total_amount_to_pay, self.doc.precision("outstanding_amount"))
-		
-		if self.doc.party_account_currency == self.doc.currency:
-			self.doc.outstanding_amount = outstanding_amount
-		else:
-			self.doc.outstanding_amount = flt(outstanding_amount * self.doc.conversion_rate, 
+			paid_amount = self.doc.paid_amount \
+				if self.doc.party_account_currency == self.doc.currency else self.doc.base_paid_amount
+			self.doc.outstanding_amount = flt(total_amount_to_pay - flt(paid_amount), 
 				self.doc.precision("outstanding_amount"))
+		elif self.doc.doctype == "Purchase Invoice":
+			self.doc.outstanding_amount = flt(total_amount_to_pay, self.doc.precision("outstanding_amount"))

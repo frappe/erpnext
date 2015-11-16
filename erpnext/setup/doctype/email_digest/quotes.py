@@ -27,6 +27,7 @@ def get_random_quote():
 		("There is more to life than increasing its speed.", "Mahatma Gandhi"),
 		("A small body of determined spirits fired by an unquenchable faith in their mission can alter the course of history.", "Mahatma Gandhi"),
 		("If two wrongs don't make a right, try three.", "Laurence J. Peter"),
+		("Inspiration exists, but it has to find you working.", "Pablo Picasso"),
 	]
 
 	return random.choice(quotes)

@@ -29,7 +29,7 @@ blogs.
 """
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "6.8.4"
+app_version = "6.9.0"
 app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
@@ -96,7 +96,8 @@ has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Sales Invoice": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Delivery Note": "erpnext.controllers.website_list_for_contact.has_website_permission",
-	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission"
+	"Issue": "erpnext.support.doctype.issue.issue.has_website_permission",
+	"Address": "erpnext.utilities.doctype.address.address.has_website_permission"
 }
 
 permission_query_conditions = {
