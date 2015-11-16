@@ -69,7 +69,10 @@ class DeliveryNote(SellingController):
 			where docstatus=1 and delivery_note=%s""", self.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.get("items")))
-			self.get("__onload").billing_complete = (billed_qty[0][0] == total_qty)
+			self.set_onload("billing_complete", (billed_qty[0][0] == total_qty))
+			
+		self.set_onload("has_return_entry", len(frappe.db.exists({"doctype": "Delivery Note", 
+			"is_return": 1, "return_against": self.name, "docstatus": 1})))
 
 	def before_print(self):
 		def toggle_print_hide(meta, fieldname):
