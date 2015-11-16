@@ -49,6 +49,8 @@ class LeaveApplication(Document):
 	def on_submit(self):
 		if self.status != "Approved":
 			frappe.throw(_("Only Leave Applications with status 'Approved' can be submitted"))
+			
+		self.validate_back_dated_application()
 
 		# notify leave applier about approval
 		self.notify_employee(self.status)
@@ -87,7 +89,7 @@ class LeaveApplication(Document):
 			and carry_forward=1""", (self.employee, self.leave_type, self.to_date), as_dict=1)
 		
 		if future_allocation:
-			frappe.throw(_("Leave cannot be applied before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}")
+			frappe.throw(_("Leave cannot be applied/cancelled before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}")
 				.format(formatdate(future_allocation[0].from_date), future_allocation[0].name))
 
 	def show_block_day_warning(self):

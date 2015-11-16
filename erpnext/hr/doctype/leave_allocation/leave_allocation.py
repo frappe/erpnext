@@ -9,6 +9,12 @@ from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
 from erpnext.hr.doctype.leave_application.leave_application import get_approved_leaves_for_period
 
+class OverlapError(frappe.ValidationError): pass
+class BackDatedAllocationError(frappe.ValidationError): pass
+class OverAllocationError(frappe.ValidationError): pass
+class LessAllocationError(frappe.ValidationError): pass
+class ValueMultiplierError(frappe.ValidationError): pass
+
 class LeaveAllocation(Document):
 	def validate(self):
 		self.validate_period()
@@ -35,7 +41,7 @@ class LeaveAllocation(Document):
 	def validate_new_leaves_allocated_value(self):
 		"""validate that leave allocation is in multiples of 0.5"""
 		if flt(self.new_leaves_allocated) % 0.5:
-			frappe.throw(_("Leaves must be allocated in multiples of 0.5"))
+			frappe.throw(_("Leaves must be allocated in multiples of 0.5"), ValueMultiplierError)
 
 	def validate_allocation_overlap(self):
 		leave_allocation = frappe.db.sql("""
@@ -49,7 +55,7 @@ class LeaveAllocation(Document):
 				.format(self.leave_type, self.employee, formatdate(self.from_date), formatdate(self.to_date)))
 			
 			frappe.throw(_('Reference') + ': <a href="#Form/Leave Allocation/{0}">{0}</a>'
-				.format(leave_allocation[0][0]))
+				.format(leave_allocation[0][0]), OverlapError)
 				
 	def validate_back_dated_allocation(self):
 		future_allocation = frappe.db.sql("""select name, from_date from `tabLeave Allocation`
@@ -58,7 +64,8 @@ class LeaveAllocation(Document):
 		
 		if future_allocation:
 			frappe.throw(_("Leave cannot be allocated before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}")
-				.format(formatdate(future_allocation[0].from_date), future_allocation[0].name))
+				.format(formatdate(future_allocation[0].from_date), future_allocation[0].name), 
+					BackDatedAllocationError)
 
 	def set_total_leaves_allocated(self):
 		self.carry_forwarded_leaves = get_carry_forwarded_leaves(self.employee, 
@@ -71,14 +78,14 @@ class LeaveAllocation(Document):
 
 	def validate_total_leaves_allocated(self):
 		if date_diff(self.to_date, self.from_date) <= flt(self.total_leaves_allocated):
-			frappe.throw(_("Total allocated leaves are more than days in the period"))
+			frappe.throw(_("Total allocated leaves are more than days in the period"), OverAllocationError)
 			
 	def validate_against_leave_applications(self):
 		leaves_taken = get_approved_leaves_for_period(self.employee, self.leave_type, 
 			self.from_date, self.to_date)
 		
 		if flt(leaves_taken) > flt(self.total_leaves_allocated):
-			frappe.throw(_("Total allocated leaves {0} cannot be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken))
+			frappe.throw(_("Total allocated leaves {0} cannot be less than already approved leaves {1} for the period").format(self.total_leaves_allocated, leaves_taken), LessAllocationError)
 
 @frappe.whitelist()
 def get_carry_forwarded_leaves(employee, leave_type, date, carry_forward=None):
