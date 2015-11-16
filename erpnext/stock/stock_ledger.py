@@ -214,7 +214,7 @@ class update_entries_after(object):
 			if flt(sle.actual_qty) < 0:
 				# In case of delivery/stock issue, get average purchase rate
 				# of serial nos of current entry
-				incoming_rate = flt(frappe.db.sql("""select avg(ifnull(purchase_rate, 0))
+				incoming_rate = flt(frappe.db.sql("""select avg(purchase_rate)
 					from `tabSerial No` where name in (%s)""" % (", ".join(["%s"]*len(serial_no))),
 					tuple(serial_no))[0][0])
 
@@ -387,13 +387,13 @@ def get_valuation_rate(item_code, warehouse, allow_zero_rate=False):
 	last_valuation_rate = frappe.db.sql("""select valuation_rate
 		from `tabStock Ledger Entry`
 		where item_code = %s and warehouse = %s
-		and ifnull(valuation_rate, 0) > 0
+		and valuation_rate > 0
 		order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse))
 
 	if not last_valuation_rate:
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
-			where item_code = %s and ifnull(valuation_rate, 0) > 0
+			where item_code = %s and valuation_rate > 0
 			order by posting_date desc, posting_time desc, name desc limit 1""", item_code)
 
 	valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0

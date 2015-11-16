@@ -123,8 +123,8 @@ def get_orders_to_be_billed(party_type, party, party_account_currency, company_c
 	orders = frappe.db.sql("""
 		select
 			name as voucher_no,
-			ifnull({ref_field}, 0) as invoice_amount,
-			(ifnull({ref_field}, 0) - ifnull(advance_paid, 0)) as outstanding_amount,
+			{ref_field} as invoice_amount,
+			({ref_field} - advance_paid) as outstanding_amount,
 			transaction_date as posting_date
 		from
 			`tab{voucher_type}`
@@ -132,8 +132,8 @@ def get_orders_to_be_billed(party_type, party, party_account_currency, company_c
 			{party_type} = %s
 			and docstatus = 1
 			and ifnull(status, "") != "Stopped"
-			and ifnull({ref_field}, 0) > ifnull(advance_paid, 0)
-			and abs(100 - ifnull(per_billed, 0)) > 0.01
+			and {ref_field} > advance_paid
+			and abs(100 - per_billed) > 0.01
 		""".format(**{
 			"ref_field": ref_field,
 			"voucher_type": voucher_type,
@@ -154,7 +154,7 @@ def get_against_voucher_amount(against_voucher_type, against_voucher_no, party_a
 	ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
 
 	if against_voucher_type in ["Sales Order", "Purchase Order"]:
-		select_cond = "{0} as total_amount, ifnull({0}, 0) - ifnull(advance_paid, 0) as outstanding_amount"\
+		select_cond = "{0} as total_amount, {0} - advance_paid as outstanding_amount"\
 			.format(ref_field)
 	elif against_voucher_type in ["Sales Invoice", "Purchase Invoice"]:
 		select_cond = "{0} as total_amount, outstanding_amount".format(ref_field)

@@ -163,7 +163,7 @@ class BOM(Document):
 		if valuation_rate <= 0:
 			last_valuation_rate = frappe.db.sql("""select valuation_rate
 				from `tabStock Ledger Entry`
-				where item_code = %s and ifnull(valuation_rate, 0) > 0
+				where item_code = %s and valuation_rate > 0
 				order by posting_date desc, posting_time desc, name desc limit 1""", args['item_code'])
 
 			valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
@@ -323,7 +323,7 @@ class BOM(Document):
 		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 		child_fb_items = frappe.db.sql("""select bom_item.item_code, bom_item.item_name, bom_item.description,
 			bom_item.stock_uom, bom_item.qty, bom_item.rate,
-			ifnull(bom_item.qty, 0 ) / ifnull(bom.quantity, 1) as qty_consumed_per_unit
+			bom_item.qty / ifnull(bom.quantity, 1) as qty_consumed_per_unit
 			from `tabBOM Explosion Item` bom_item, tabBOM bom
 			where bom_item.parent = bom.name and bom.name = %s and bom.docstatus = 1""", bom_no, as_dict = 1)
 
@@ -371,7 +371,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1):
 	query = """select
 				bom_item.item_code,
 				item.item_name,
-				sum(ifnull(bom_item.qty, 0)/ifnull(bom.quantity, 1)) * %(qty)s as qty,
+				sum(bom_item.qty/ifnull(bom.quantity, 1)) * %(qty)s as qty,
 				item.description,
 				item.image,
 				item.stock_uom,

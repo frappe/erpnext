@@ -48,7 +48,7 @@ def get_items(price_list, sales_or_purchase, item=None):
 		ON
 			(item_det.item_code=i.name or item_det.item_code=i.variant_of)
 		where
-			ifnull(i.has_variants, 0) = 0 and
+			i.has_variants = 0 and
 			{condition}
 		order by
 			{order_by}

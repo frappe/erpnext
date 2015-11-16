@@ -152,13 +152,14 @@ class AccountsController(TransactionBase):
 					ret = get_item_details(args)
 
 					for fieldname, value in ret.items():
-						if item.meta.get_field(fieldname) and \
-							(item.get(fieldname) is None or fieldname in force_item_fields) \
-								and value is not None:
+						if item.meta.get_field(fieldname) and value is not None:
+							if (item.get(fieldname) is None or fieldname in force_item_fields):
 								item.set(fieldname, value)
 
-						if fieldname == "cost_center" and item.meta.get_field("cost_center") \
-							and not item.get("cost_center") and value is not None:
+							elif fieldname == "cost_center" and not item.get("cost_center"):
+								item.set(fieldname, value)
+
+							elif fieldname == "conversion_factor" and not item.get("conversion_factor"):
 								item.set(fieldname, value)
 
 					if ret.get("pricing_rule"):
@@ -257,7 +258,7 @@ class AccountsController(TransactionBase):
 		self.set(parentfield, self.get(parentfield, {"allocated_amount": ["not in", [0, None, ""]]}))
 
 		frappe.db.sql("""delete from `tab%s` where parentfield=%s and parent = %s
-			and ifnull(allocated_amount, 0) = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
+			and allocated_amount = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
 	def get_advances(self, account_head, party_type, party, child_doctype, parentfield, dr_or_cr, against_order_field):
 		"""Returns list of advances against Account, Party, Reference"""
@@ -375,7 +376,7 @@ class AccountsController(TransactionBase):
 
 		advance_paid = frappe.db.sql("""
 			select
-				sum(ifnull({dr_or_cr}, 0))
+				sum({dr_or_cr})
 			from
 				`tabJournal Entry Account`
 			where

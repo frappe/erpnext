@@ -155,7 +155,7 @@ class SalesInvoice(SellingController):
 				'second_join_field': 'so_detail',
 				'overflow_type': 'delivery',
 				'extra_cond': """ and exists(select name from `tabSales Invoice`
-					where name=`tabSales Invoice Item`.parent and ifnull(update_stock, 0) = 1)"""
+					where name=`tabSales Invoice Item`.parent and update_stock = 1)"""
 			},
 			{
 				'source_dt': 'Sales Invoice Item',
@@ -359,8 +359,8 @@ class SalesInvoice(SellingController):
 		"""check for does customer belong to same project as entered.."""
 		if self.project_name and self.customer:
 			res = frappe.db.sql("""select name from `tabProject`
-				where name = %s and (customer = %s or
-					ifnull(customer,'')='')""", (self.project_name, self.customer))
+				where name = %s and (customer = %s or customer is null or customer = '')""",
+				(self.project_name, self.customer))
 			if not res:
 				throw(_("Customer {0} does not belong to project {1}").format(self.customer,self.project_name))
 
@@ -436,7 +436,7 @@ class SalesInvoice(SellingController):
 
 		if not warehouse:
 			global_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
-				where ifnull(user,'') = '' and company = %s""", self.company)
+				where (user is null or user = '') and company = %s""", self.company)
 
 			if global_pos_profile:
 				warehouse = global_pos_profile[0][1]

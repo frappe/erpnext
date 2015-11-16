@@ -121,7 +121,7 @@ class JournalEntry(AccountsController):
 
 				against_entries = frappe.db.sql("""select * from `tabJournal Entry Account`
 					where account = %s and docstatus = 1 and parent = %s
-					and ifnull(reference_type, '') in ("", "Sales Order", "Purchase Order")
+					and (reference_type is null or reference_type in ("", "Sales Order", "Purchase Order"))
 					""", (d.account, d.reference_name), as_dict=True)
 
 				if not against_entries:
@@ -257,7 +257,7 @@ class JournalEntry(AccountsController):
 		if self.difference:
 			frappe.throw(_("Total Debit must be equal to Total Credit. The difference is {0}")
 				.format(self.difference))
-				
+
 	def set_total_debit_credit(self):
 		self.total_debit, self.total_credit, self.difference = 0, 0, 0
 		for d in self.get("accounts"):
@@ -567,8 +567,8 @@ def get_payment_entry_against_invoice(dt, dn):
 	else:
 		party_type = "Supplier"
 		party_account = ref_doc.credit_to
-		
-		
+
+
 	if (dt=="Sales Invoice" and ref_doc.outstanding_amount > 0) \
 		or (dt=="Purchase Invoice" and ref_doc.outstanding_amount < 0):
 			amount_field_party = "credit_in_account_currency"
@@ -654,7 +654,7 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select jv.name, jv.posting_date, jv.user_remark
 		from `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
 		where jv_detail.parent = jv.name and jv_detail.account = %s and ifnull(jv_detail.party, '') = %s
-		and ifnull(jv_detail.reference_type, '') = ''
+		and (jv_detail.reference_type is null or jv_detail.reference_type = '')
 		and jv.docstatus = 1 and jv.`{0}` like %s order by jv.name desc limit %s, %s""".format(frappe.db.escape(searchfield)),
 		(filters.get("account"), cstr(filters.get("party")), "%{0}%".format(txt), start, page_len))
 
@@ -672,9 +672,9 @@ def get_outstanding(args):
 		condition = " and party=%(party)s" if args.get("party") else ""
 
 		against_jv_amount = frappe.db.sql("""
-			select sum(ifnull(debit_in_account_currency, 0)) - sum(ifnull(credit_in_account_currency, 0))
+			select sum(debit_in_account_currency) - sum(credit_in_account_currency)
 			from `tabJournal Entry Account` where parent=%(docname)s and account=%(account)s {0}
-			and ifnull(reference_type, '')=''""".format(condition), args)
+			and (reference_type is null or reference_type = '')""".format(condition), args)
 
 		against_jv_amount = flt(against_jv_amount[0][0]) if against_jv_amount else 0
 		amount_field = "credit_in_account_currency" if against_jv_amount > 0 else "debit_in_account_currency"

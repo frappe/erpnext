@@ -105,7 +105,7 @@ class SalarySlip(TransactionBase):
 		if not holidays:
 			holidays = frappe.db.sql("""select t1.holiday_date
 				from `tabHoliday` t1, `tabHoliday List` t2
-				where t1.parent = t2.name and ifnull(t2.is_default, 0) = 1
+				where t1.parent = t2.name and t2.is_default = 1
 				and t2.fiscal_year = %s
 				and t1.holiday_date between %s and %s""", (self.fiscal_year,
 					m['month_start_date'], m['month_end_date']))
@@ -121,7 +121,7 @@ class SalarySlip(TransactionBase):
 					select t1.name, t1.half_day
 					from `tabLeave Application` t1, `tabLeave Type` t2
 					where t2.name = t1.leave_type
-					and ifnull(t2.is_lwp, 0) = 1
+					and t2.is_lwp = 1
 					and t1.docstatus = 1
 					and t1.employee = %s
 					and %s between from_date and to_date

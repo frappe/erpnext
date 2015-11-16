@@ -76,7 +76,7 @@ def get_data(filters, show_party_name):
 	
 def get_opening_balances(filters):
 	gle = frappe.db.sql("""
-		select party, sum(ifnull(debit, 0)) as opening_debit, sum(ifnull(credit, 0)) as opening_credit 
+		select party, sum(debit) as opening_debit, sum(credit) as opening_credit 
 		from `tabGL Entry`
 		where company=%(company)s 
 			and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
@@ -96,7 +96,7 @@ def get_opening_balances(filters):
 	
 def get_balances_within_period(filters):
 	gle = frappe.db.sql("""
-		select party, sum(ifnull(debit, 0)) as debit, sum(ifnull(credit, 0)) as credit 
+		select party, sum(debit) as debit, sum(credit) as credit 
 		from `tabGL Entry`
 		where company=%(company)s 
 			and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''

@@ -47,7 +47,7 @@ class PurchaseReceipt(BuyingController):
 		}]
 
 	def onload(self):
-		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabPurchase Invoice Item`
+		billed_qty = frappe.db.sql("""select sum(qty) from `tabPurchase Invoice Item`
 			where purchase_receipt=%s and docstatus=1""", self.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.get("items")))
@@ -82,7 +82,7 @@ class PurchaseReceipt(BuyingController):
 
 	def set_landed_cost_voucher_amount(self):
 		for d in self.get("items"):
-			lc_voucher_amount = frappe.db.sql("""select sum(ifnull(applicable_charges, 0))
+			lc_voucher_amount = frappe.db.sql("""select sum(applicable_charges)
 				from `tabLanded Cost Item`
 				where docstatus = 1 and purchase_receipt_item = %s""", d.name)
 			d.landed_cost_voucher_amount = lc_voucher_amount[0][0] if lc_voucher_amount else 0.0

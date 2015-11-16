@@ -111,7 +111,7 @@ def get_parent_item_groups(item_group_name):
 	item_group = frappe.get_doc("Item Group", item_group_name)
 	return frappe.db.sql("""select name, page_name from `tabItem Group`
 		where lft <= %s and rgt >= %s
-		and ifnull(show_in_website,0)=1
+		and show_in_website=1
 		order by lft asc""", (item_group.lft, item_group.rgt), as_dict=True)
 
 def invalidate_cache_for(doc, item_group=None):

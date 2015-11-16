@@ -27,25 +27,25 @@ def process_gl_map(gl_map, merge_entries=True):
 		gl_map = merge_similar_entries(gl_map)
 
 	for entry in gl_map:
-		# toggle debit, credit if negative entry		
+		# toggle debit, credit if negative entry
 		if flt(entry.debit) < 0:
 			entry.credit = flt(entry.credit) - flt(entry.debit)
 			entry.debit = 0.0
-			
+
 		if flt(entry.debit_in_account_currency) < 0:
 			entry.credit_in_account_currency = \
 				flt(entry.credit_in_account_currency) - flt(entry.debit_in_account_currency)
 			entry.debit_in_account_currency = 0.0
-		
+
 		if flt(entry.credit) < 0:
 			entry.debit = flt(entry.debit) - flt(entry.credit)
 			entry.credit = 0.0
-			
+
 		if flt(entry.credit_in_account_currency) < 0:
 			entry.debit_in_account_currency = \
 				flt(entry.debit_in_account_currency) - flt(entry.credit_in_account_currency)
 			entry.credit_in_account_currency = 0.0
-			
+
 	return gl_map
 
 def merge_similar_entries(gl_map):
@@ -81,7 +81,7 @@ def check_if_in_list(gle, gl_map):
 def save_entries(gl_map, adv_adj, update_outstanding):
 	validate_account_for_auto_accounting_for_stock(gl_map)
 	round_off_debit_credit(gl_map)
-	
+
 	for entry in gl_map:
 		make_entry(entry, adv_adj, update_outstanding)
 		# check against budget
@@ -99,7 +99,7 @@ def validate_account_for_auto_accounting_for_stock(gl_map):
 	if cint(frappe.db.get_single_value("Accounts Settings", "auto_accounting_for_stock")) \
 		and gl_map[0].voucher_type=="Journal Entry":
 			aii_accounts = [d[0] for d in frappe.db.sql("""select name from tabAccount
-				where account_type = 'Warehouse' and ifnull(warehouse, '')!=''""")]
+				where account_type = 'Warehouse' and (warehouse != '' and warehouse is not null)""")]
 
 			for entry in gl_map:
 				if entry.account in aii_accounts:
@@ -109,36 +109,36 @@ def validate_account_for_auto_accounting_for_stock(gl_map):
 def round_off_debit_credit(gl_map):
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
 		currency=frappe.db.get_value("Company", gl_map[0].company, "default_currency", cache=True))
-	
+
 	debit_credit_diff = 0.0
 	for entry in gl_map:
 		entry.debit = flt(entry.debit, precision)
 		entry.credit = flt(entry.credit, precision)
 		debit_credit_diff += entry.debit - entry.credit
-	
+
 	debit_credit_diff = flt(debit_credit_diff, precision)
 	if abs(debit_credit_diff) >= (5.0 / (10**precision)):
 		frappe.throw(_("Debit and Credit not equal for {0} #{1}. Difference is {2}.")
 			.format(gl_map[0].voucher_type, gl_map[0].voucher_no, debit_credit_diff))
-		
+
 	elif abs(debit_credit_diff) >= (1.0 / (10**precision)):
 		make_round_off_gle(gl_map, debit_credit_diff)
-		
+
 def make_round_off_gle(gl_map, debit_credit_diff):
-	round_off_account, round_off_cost_center = frappe.db.get_value("Company", gl_map[0].company, 
+	round_off_account, round_off_cost_center = frappe.db.get_value("Company", gl_map[0].company,
 		["round_off_account", "round_off_cost_center"]) or [None, None]
 	if not round_off_account:
 		frappe.throw(_("Please mention Round Off Account in Company"))
-		
+
 	if not round_off_cost_center:
 		frappe.throw(_("Please mention Round Off Cost Center in Company"))
-		
-	
+
+
 	round_off_gle = frappe._dict()
-	for k in ["voucher_type", "voucher_no", "company", 
+	for k in ["voucher_type", "voucher_no", "company",
 		"posting_date", "remarks", "fiscal_year", "is_opening"]:
 			round_off_gle[k] = gl_map[0][k]
-	
+
 	round_off_gle.update({
 		"account": round_off_account,
 		"debit": abs(debit_credit_diff) if debit_credit_diff < 0 else 0,
@@ -149,7 +149,7 @@ def make_round_off_gle(gl_map, debit_credit_diff):
 		"against_voucher_type": None,
 		"against_voucher": None
 	})
-	
+
 	gl_map.append(round_off_gle)
 
 

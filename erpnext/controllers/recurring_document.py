@@ -37,7 +37,7 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 	condition = " and ifnull(status, '') != 'Stopped'" if doctype in ("Sales Order", "Purchase Order") else ""
 
 	recurring_documents = frappe.db.sql("""select name, recurring_id
-		from `tab{0}` where ifnull(is_recurring, 0)=1
+		from `tab{0}` where is_recurring=1
 		and docstatus=1 and next_date=%s
 		and next_date <= ifnull(end_date, '2199-12-31') {1}""".format(doctype, condition), next_date)
 

@@ -137,7 +137,7 @@ def get_dashboard_info(customer):
 			{"customer": customer, "docstatus": ["!=", 2] }, "count(*)")
 
 	billing_this_year = frappe.db.sql("""
-		select sum(ifnull(debit_in_account_currency, 0)) - sum(ifnull(credit_in_account_currency, 0))
+		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
 		from `tabGL Entry`
 		where voucher_type='Sales Invoice' and party_type = 'Customer'
 			and party=%s and fiscal_year = %s""",
@@ -189,17 +189,17 @@ def check_credit_limit(customer, company):
 
 def get_customer_outstanding(customer, company):
 	# Outstanding based on GL Entries
-	outstanding_based_on_gle = frappe.db.sql("""select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+	outstanding_based_on_gle = frappe.db.sql("""select sum(debit) - sum(credit)
 		from `tabGL Entry` where party_type = 'Customer' and party = %s and company=%s""", (customer, company))
 
 	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
 
 	# Outstanding based on Sales Order
 	outstanding_based_on_so = frappe.db.sql("""
-		select sum(base_grand_total*(100 - ifnull(per_billed, 0))/100)
+		select sum(base_grand_total*(100 - per_billed)/100)
 		from `tabSales Order`
 		where customer=%s and docstatus = 1 and company=%s
-		and ifnull(per_billed, 0) < 100 and status != 'Stopped'""", (customer, company))
+		and per_billed < 100 and status != 'Stopped'""", (customer, company))
 
 	outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0.0
 
@@ -217,7 +217,7 @@ def get_customer_outstanding(customer, company):
 	outstanding_based_on_dn = 0.0
 
 	for dn_item in unmarked_delivery_note_items:
-		si_amount = frappe.db.sql("""select sum(ifnull(amount, 0))
+		si_amount = frappe.db.sql("""select sum(amount)
 			from `tabSales Invoice Item`
 			where dn_detail = %s and docstatus = 1""", dn_item.name)[0][0]
 
