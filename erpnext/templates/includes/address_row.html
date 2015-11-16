@@ -1,5 +1,5 @@
 <div class="web-list-item">
-    <a href="/addresses?name={{ doc.name }}" no-pjax class="no-decoration">
+    <a href="/addresses?name={{ doc.name | urlencode }}" no-pjax class="no-decoration">
         <h4 class="strong">{{ doc.address_title }}</h4>
         <p class="text-muted small">
             {{ frappe.get_doc(doc).get_display() }}
