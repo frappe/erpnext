@@ -311,7 +311,7 @@ class Item(WebsiteGenerator):
 
 	def validate_item_type(self):
 		if self.is_pro_applicable == 1 and self.is_stock_item==0:
-			frappe.throw(_("As Production Order can be made for this item, it must be a stock item."))
+			self.is_pro_applicable = 0
 
 		if self.has_serial_no == 1 and self.is_stock_item == 0:
 			msgprint(_("'Has Serial No' can not be 'Yes' for non-stock item"), raise_exception=1)
