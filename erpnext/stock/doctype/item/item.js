@@ -87,6 +87,8 @@ frappe.ui.form.on("Item", {
 
 	is_stock_item: function(frm) {
 		erpnext.item.toggle_reqd(frm);
+		if(frm.doc.is_pro_applicable && !frm.doc.is_stock_item)
+			frm.set_value("is_pro_applicable", 0);
 	},
 
 	has_variants: function(frm) {
