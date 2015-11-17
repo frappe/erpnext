@@ -18,9 +18,25 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		var me = this;
 		this._super();
 		// this.frm.dashboard.reset();
+		var allow_receipt = false;
+		var allow_delivery = false;
+
+		for (var i in cur_frm.doc.items) {
+			var item = cur_frm.doc.items[i];
+			if(item.delivered_by_supplier !== 1) {
+				allow_receipt = true;
+			}
+			
+			if(item.delivered_by_supplier === 1) {
+				allow_delivery = true
+			}
+			
+			if(allow_delivery && allow_receipt) {
+				break;
+			}
+		}
 
 		if(doc.docstatus == 1 && !in_list(["Stopped", "Closed", "Delivered"], doc.status)) {
-
 			if (this.frm.has_perm("submit")) {
 				if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) {
 					cur_frm.add_custom_button(__('Stop'), this.stop_purchase_order);
@@ -29,7 +45,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				cur_frm.add_custom_button(__('Close'), this.close_purchase_order);
 			}
 
-			if(doc.delivered_by_supplier && doc.status!="Delivered"){
+			if(allow_delivery && doc.status!="Delivered"){
 				cur_frm.add_custom_button(__('Mark as Delivered'), this.delivered_by_supplier);
 			}
 
@@ -37,7 +53,12 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry);
 			}
 
-			if(flt(doc.per_received, 2) < 100 && this.frm.doc.__onload.has_stock_item) {
+		} else if(doc.docstatus===0) {
+			cur_frm.cscript.add_from_mappers();
+		} 
+		
+		if(doc.docstatus == 1 && !in_list(["Stopped", "Closed"], doc.status)) {
+			if(flt(doc.per_received, 2) < 100 && this.frm.doc.__onload.has_stock_item && allow_receipt) {
 				cur_frm.add_custom_button(__('Receive'), this.make_purchase_receipt).addClass("btn-primary");
 
 				if(doc.is_subcontracted==="Yes") {
@@ -47,13 +68,9 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			}
 
 			if(flt(doc.per_billed, 2) < 100)
-				cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice);
-
-
-		} else if(doc.docstatus===0) {
-			cur_frm.cscript.add_from_mappers();
+				cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice);	
 		}
-
+		
 		if(doc.docstatus == 1 && in_list(["Stopped", "Closed", "Delivered"], doc.status)) {
 			if (this.frm.has_perm("submit")) {
 				cur_frm.add_custom_button(__('Re-open'), this.unstop_purchase_order);
