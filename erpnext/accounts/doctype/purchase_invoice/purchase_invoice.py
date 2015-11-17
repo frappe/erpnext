@@ -176,9 +176,10 @@ class PurchaseInvoice(BuyingController):
 					 throw(_("Purchse Order number required for Item {0}").format(d.item_code))
 
 	def pr_required(self):
+		stock_items = self.get_stock_items()
 		if frappe.db.get_value("Buying Settings", None, "pr_required") == 'Yes':
 			 for d in self.get('items'):
-				 if not d.purchase_receipt:
+				 if not d.purchase_receipt and d.item_code in stock_items:
 					 throw(_("Purchase Receipt number required for Item {0}").format(d.item_code))
 
 	def validate_write_off_account(self):
