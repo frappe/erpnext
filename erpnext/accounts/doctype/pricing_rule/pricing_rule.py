@@ -179,7 +179,7 @@ def get_pricing_rules(args):
 			if parent_groups:
 				if allow_blank: parent_groups.append('')
 				condition = " ifnull("+field+", '') in ('" + \
-					"', '".join([d.replace("'", "\\'").replace('"', '\\"').replace("%", "%%") for d in parent_groups])+"')"
+					"', '".join([frappe.db.escape(d) for d in parent_groups])+"')"
 		return condition
 
 

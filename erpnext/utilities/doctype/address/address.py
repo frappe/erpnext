@@ -35,7 +35,7 @@ class Address(Document):
 			for fieldname in self.link_fields:
 				if self.get(fieldname):
 					if not frappe.db.sql("""select name from `tabAddress` where is_primary_address=1
-						and `%s`=%s and name!=%s""" % (fieldname, "%s", "%s"),
+						and `%s`=%s and name!=%s""" % (frappe.db.escape(fieldname), "%s", "%s"),
 						(self.get(fieldname), self.name)):
 							self.is_primary_address = 1
 					break

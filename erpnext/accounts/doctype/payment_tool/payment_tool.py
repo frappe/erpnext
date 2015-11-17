@@ -125,6 +125,6 @@ def get_against_voucher_amount(against_voucher_type, against_voucher_no, party_a
 		select_cond = "{0} as total_amount".format(ref_field)
 
 	details = frappe.db.sql("""select {0} from `tab{1}` where name = %s"""
-		.format(select_cond, against_voucher_type), against_voucher_no, as_dict=1)
+		.format(select_cond, frappe.db.escape(against_voucher_type)), against_voucher_no, as_dict=1)
 
 	return details[0] if details else {}

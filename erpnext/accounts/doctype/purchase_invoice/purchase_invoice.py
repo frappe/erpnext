@@ -106,7 +106,7 @@ class PurchaseInvoice(BuyingController):
 	def check_for_stopped_or_closed_status(self):
 		check_list = []
 		pc_obj = frappe.get_doc('Purchase Common')
-		
+
 		for d in self.get('items'):
 			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
 				check_list.append(d.purchase_order)
@@ -395,7 +395,7 @@ class PurchaseInvoice(BuyingController):
 
 	def on_cancel(self):
 		self.check_for_stopped_or_closed_status()
-		
+
 		if not self.is_return:
 			from erpnext.accounts.utils import remove_against_link_from_jv
 			remove_against_link_from_jv(self.doctype, self.name)
@@ -438,10 +438,10 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 					or tabAccount.account_type in ("Expense Account", "Fixed Asset", "Temporary"))
 				and tabAccount.is_group=0
 				and tabAccount.docstatus!=2
-				and tabAccount.company = '%(company)s'
-				and tabAccount.%(key)s LIKE '%(txt)s'
-				%(mcond)s""" % {'company': filters['company'], 'key': searchfield,
-			'txt': "%%%s%%" % frappe.db.escape(txt), 'mcond':get_match_cond(doctype)})
+				and tabAccount.company = %(company)s
+				and tabAccount.{key} LIKE %(txt)s
+				{mcond}""".format( key=frappe.db.escape(searchfield), mcond=get_match_cond(doctype) ),
+				{ 'company': filters['company'], 'txt': "%%%s%%" % frappe.db.escape(txt) })
 
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):

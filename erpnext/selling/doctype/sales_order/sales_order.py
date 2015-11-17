@@ -607,7 +607,7 @@ def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 			name, supplier_name
 		limit %(start)s, %(page_len)s """.format(**{
 			'field': fields,
-			'key': searchfield
+			'key': frappe.db.escape(searchfield)
 		}), {
 			'txt': "%%%s%%" % txt,
 			'_txt': txt.replace("%", ""),

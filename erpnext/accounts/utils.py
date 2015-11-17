@@ -65,7 +65,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 
 	cond = []
 	if date:
-		cond.append("posting_date <= '%s'" % date)
+		cond.append("posting_date <= '%s'" % frappe.db.escape(date))
 	else:
 		# get balance of all entries that exist
 		date = nowdate()
@@ -105,11 +105,11 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 			if acc.account_currency == frappe.db.get_value("Company", acc.company, "default_currency"):
 				in_account_currency = False
 		else:
-			cond.append("""gle.account = "%s" """ % (account.replace('"', '\\"'), ))
+			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account), ))
 
 	if party_type and party:
 		cond.append("""gle.party_type = "%s" and gle.party = "%s" """ %
-			(party_type.replace('"', '\\"'), party.replace('"', '\\"')))
+			(frappe.db.escape(party_type), frappe.db.escape(party)))
 
 	if account or (party_type and party):
 		if in_account_currency:
