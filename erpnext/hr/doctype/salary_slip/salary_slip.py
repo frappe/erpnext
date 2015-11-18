@@ -23,25 +23,27 @@ class SalarySlip(TransactionBase):
 			self.get_leave_details()
 			struct = self.check_sal_struct()
 			if struct:
+				self.set("earnings", [])
+				self.set("deduction", [])
 				self.pull_sal_struct(struct)
 
 	def check_sal_struct(self):
 		m = get_month_details(self.fiscal_year, self.month)
 		struct = frappe.db.sql("""select name from `tabSalary Structure`
-			where employee=%s and is_active = 'Yes' 
-			and from_date <= %s and (to_date is null or to_date >= %s)""", 
+			where employee=%s and is_active = 'Yes'
+			and from_date <= %s and (to_date is null or to_date >= %s)""",
 			(self.employee, m.month_start_date, m.month_end_date))
-		
+
 		if not struct:
 			msgprint(_("No active Salary Structure found for employee {0} and the month")
 				.format(self.employee))
 			self.employee = None
-		
+
 		return struct and struct[0][0] or ''
 
 	def pull_sal_struct(self, struct):
 		from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
-		self.update(make_salary_slip(struct, self).as_dict())
+		make_salary_slip(struct, self)
 
 	def pull_emp_details(self):
 		emp = frappe.db.get_value("Employee", self.employee,
