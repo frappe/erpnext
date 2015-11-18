@@ -2,22 +2,18 @@ source_link = "https://github.com/frappe/erpnext"
 docs_base_url = "https://frappe.github.io/erpnext"
 headline = "Learn ERPNext Inside Out"
 sub_heading = "Find detailed explanation for all ERPNext features"
-long_description = """
-ERPNext helps you to manage all your business information in one application and use it to manage operations and take decisions based on data.
+long_description = """ERPNext is a fully featured ERP system designed for Small and Medium Sized
+business. ERPNext covers a wide range of features including Accounting, CRM,
+Inventory management, Selling, Purchasing, Manufacturing, Projects, HR &
+Payroll, Website, E-Commerce and much more.
 
-Among other things, ERPNext will help you to:
+ERPNext is based on the Frappe Framework is highly customizable and extendable.
+You can create Custom Form, Fields, Scripts and can also create your own Apps
+to extend ERPNext functionality.
 
-- Track all Invoices and Payments.
-- Know what quantity of which product is available in stock.
-- Identify open customer queries.
-- Manage payroll.
-- Assign tasks and follow up on them.
-- Maintain a database of all your customers, suppliers and their contacts.
-- Prepare quotes.
-- Get reminders on maintenance schedules.
-- Publish your website.
-
-And a lot lot lot more."""
+ERPNext is Open Source under the GNU General Public Licence v3 and has been
+listed as one of the Best Open Source Softwares in the world by my online
+blogs."""
 
 def get_context(context):
 	context.top_bar_items = [
