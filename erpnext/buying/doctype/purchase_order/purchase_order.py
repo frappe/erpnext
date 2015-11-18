@@ -51,7 +51,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_for_subcontracting()
 		self.validate_minimum_order_qty()
 		self.create_raw_materials_supplied("supplied_items")
-		self.set_received_qtyand_billed_amount_for_drop_ship_items()
+		self.set_received_qty_and_billed_amount_for_drop_ship_items()
 
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc({
@@ -254,7 +254,7 @@ class PurchaseOrder(BuyingController):
 		
 		return is_drop_ship
 	
-	def set_received_qtyand_billed_amount_for_drop_ship_items(self):
+	def set_received_qty_and_billed_amount_for_drop_ship_items(self):
 		for item in self.items:
 			if item.delivered_by_supplier == 1:
 				item.received_qty = item.qty

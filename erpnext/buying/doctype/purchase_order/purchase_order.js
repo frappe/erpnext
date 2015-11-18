@@ -35,7 +35,9 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				break;
 			}
 		}
-
+		
+		cur_frm.set_df_property("drop_ship", "hidden", !allow_delivery);
+		
 		if(doc.docstatus == 1 && !in_list(["Stopped", "Closed", "Delivered"], doc.status)) {
 			if (this.frm.has_perm("submit")) {
 				if(flt(doc.per_billed, 2) < 100 || doc.per_received < 100) {
