@@ -24,13 +24,5 @@ class ModeofPayment(Document):
 	def validate_accounts(self):
 		for entry in self.accounts:
 			"""Error when Company of Ledger account doesn't match with Company Selected"""
-			account = frappe.get_list("Account",
-				fields=["name"],
-				filters = {
-					"company": entry.company,
-					"name": entry.default_account
-				})
-			try:
-				account[0].name
-			except IndexError:
+			if frappe.db.get_value("Account", entry.default_account, "company") != entry.company:
 				frappe.throw(_("Account does not match with Company"))
