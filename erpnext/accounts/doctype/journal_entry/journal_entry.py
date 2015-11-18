@@ -564,11 +564,16 @@ def get_payment_entry_against_invoice(dt, dn):
 	if dt == "Sales Invoice":
 		party_type = "Customer"
 		party_account = ref_doc.debit_to
-		amount_field_party = "credit_in_account_currency"
-		amount_field_bank = "debit_in_account_currency"
 	else:
 		party_type = "Supplier"
 		party_account = ref_doc.credit_to
+		
+		
+	if (dt=="Sales Invoice" and ref_doc.outstanding_amount > 0) \
+		or (dt=="Purchase Invoice" and ref_doc.outstanding_amount < 0):
+			amount_field_party = "credit_in_account_currency"
+			amount_field_bank = "debit_in_account_currency"
+	else:
 		amount_field_party = "debit_in_account_currency"
 		amount_field_bank = "credit_in_account_currency"
 
@@ -578,7 +583,7 @@ def get_payment_entry_against_invoice(dt, dn):
 		"party_account_currency": ref_doc.party_account_currency,
 		"amount_field_party": amount_field_party,
 		"amount_field_bank": amount_field_bank,
-		"amount": ref_doc.outstanding_amount,
+		"amount": abs(ref_doc.outstanding_amount),
 		"remarks": 'Payment received against {0} {1}. {2}'.format(dt, dn, ref_doc.remarks),
 		"is_advance": "No"
 	})
