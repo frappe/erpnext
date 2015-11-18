@@ -138,9 +138,11 @@ class PurchaseOrder(BuyingController):
 		"""update requested qty (before ordered_qty is updated)"""
 		item_wh_list = []
 		for d in self.get("items"):
-			if (not po_item_rows or d.name in po_item_rows) and [d.item_code, d.warehouse] not in item_wh_list \
-					and frappe.db.get_value("Item", d.item_code, "is_stock_item") and d.warehouse:
-				item_wh_list.append([d.item_code, d.warehouse])
+			if (not po_item_rows or d.name in po_item_rows) \
+				and [d.item_code, d.warehouse] not in item_wh_list \
+				and frappe.db.get_value("Item", d.item_code, "is_stock_item") \
+				and d.warehouse and not d.delivered_by_supplier:
+					item_wh_list.append([d.item_code, d.warehouse])
 
 		for item_code, warehouse in item_wh_list:
 			update_bin_qty(item_code, warehouse, {
@@ -165,7 +167,7 @@ class PurchaseOrder(BuyingController):
 		clear_doctype_notifications(self)
 
 	def on_submit(self):
-		if self.is_drop_ship_item():
+		if self.has_drop_ship_item():
 			self.update_status_updater()
 
 		super(PurchaseOrder, self).on_submit()
@@ -182,7 +184,7 @@ class PurchaseOrder(BuyingController):
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 
 	def on_cancel(self):
-		if self.is_drop_ship_item():
+		if self.has_drop_ship_item():
 			self.update_status_updater()
 
 		pc_obj = frappe.get_doc('Purchase Common')
@@ -245,7 +247,7 @@ class PurchaseOrder(BuyingController):
 			so.set_status(update=True)
 			so.notify_update()
 
-	def is_drop_ship_item(self):
+	def has_drop_ship_item(self):
 		is_drop_ship = False
 		
 		for item in self.items:

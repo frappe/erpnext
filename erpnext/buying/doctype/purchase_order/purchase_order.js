@@ -19,7 +19,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		this._super();
 		// this.frm.dashboard.reset();
 		var allow_receipt = false;
-		var allow_delivery = false;
+		var is_drop_ship = false;
 
 		for (var i in cur_frm.doc.items) {
 			var item = cur_frm.doc.items[i];
@@ -27,16 +27,16 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				allow_receipt = true;
 			}
 			
-			if(item.delivered_by_supplier === 1) {
-				allow_delivery = true
+			else {
+				is_drop_ship = true
 			}
 			
-			if(allow_delivery && allow_receipt) {
+			if(is_drop_ship && allow_receipt) {
 				break;
 			}
 		}
 		
-		cur_frm.set_df_property("drop_ship", "hidden", !allow_delivery);
+		cur_frm.set_df_property("drop_ship", "hidden", !is_drop_ship);
 		
 		if(doc.docstatus == 1 && !in_list(["Stopped", "Closed", "Delivered"], doc.status)) {
 			if (this.frm.has_perm("submit")) {
@@ -47,7 +47,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				cur_frm.add_custom_button(__('Close'), this.close_purchase_order);
 			}
 
-			if(allow_delivery && doc.status!="Delivered"){
+			if(is_drop_ship && doc.status!="Delivered"){
 				cur_frm.add_custom_button(__('Mark as Delivered'), this.delivered_by_supplier);
 			}
 
