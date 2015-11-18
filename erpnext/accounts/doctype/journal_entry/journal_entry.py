@@ -28,7 +28,7 @@ class JournalEntry(AccountsController):
 		self.validate_entries_for_advance()
 		self.validate_multi_currency()
 		self.set_amounts_in_company_currency()
-		self.validate_debit_and_credit()
+		self.validate_total_debit_and_credit()
 		self.validate_against_jv()
 		self.validate_reference_doc()
 		self.set_against_account()
@@ -252,7 +252,13 @@ class JournalEntry(AccountsController):
 			if flt(d.debit > 0): d.against_account = ", ".join(list(set(accounts_credited)))
 			if flt(d.credit > 0): d.against_account = ", ".join(list(set(accounts_debited)))
 
-	def validate_debit_and_credit(self):
+	def validate_total_debit_and_credit(self):
+		self.set_total_debit_credit()
+		if self.difference:
+			frappe.throw(_("Total Debit must be equal to Total Credit. The difference is {0}")
+				.format(self.difference))
+				
+	def set_total_debit_credit(self):
 		self.total_debit, self.total_credit, self.difference = 0, 0, 0
 		for d in self.get("accounts"):
 			if d.debit and d.credit:
@@ -263,10 +269,6 @@ class JournalEntry(AccountsController):
 
 		self.difference = flt(self.total_debit, self.precision("total_debit")) - \
 			flt(self.total_credit, self.precision("total_credit"))
-
-		if self.difference:
-			frappe.throw(_("Total Debit must be equal to Total Credit. The difference is {0}")
-				.format(self.difference))
 
 	def validate_multi_currency(self):
 		alternate_currency = []
@@ -404,7 +406,7 @@ class JournalEntry(AccountsController):
 					blank_row.debit_in_account_currency = abs(diff)
 					blank_row.debit = abs(diff)
 
-			self.validate_debit_and_credit()
+			self.validate_total_debit_and_credit()
 
 	def get_outstanding_invoices(self):
 		self.set('accounts', [])
@@ -432,7 +434,7 @@ class JournalEntry(AccountsController):
 		elif self.write_off_based_on == 'Accounts Payable':
 			jd2.credit = total
 
-		self.validate_debit_and_credit()
+		self.validate_total_debit_and_credit()
 
 
 	def get_values(self):
@@ -601,7 +603,7 @@ def get_payment_entry(ref_doc, args):
 		"account_type": frappe.db.get_value("Account", args.get("party_account"), "account_type"),
 		"account_currency": args.get("party_account_currency") or \
 			get_account_currency(args.get("party_account")),
-		"account_balance": get_balance_on(args.get("party_account")),
+		"balance": get_balance_on(args.get("party_account")),
 		"party_balance": get_balance_on(party=args.get("party"), party_type=args.get("party_type")),
 		"exchange_rate": exchange_rate,
 		args.get("amount_field_party"): args.get("amount"),
@@ -630,6 +632,7 @@ def get_payment_entry(ref_doc, args):
 			jv.multi_currency = 1
 
 	jv.set_amounts_in_company_currency()
+	jv.set_total_debit_credit()
 
 	return jv.as_dict()
 
