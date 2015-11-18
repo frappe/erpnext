@@ -358,7 +358,7 @@ class TestSalesOrder(unittest.TestCase):
 		ordered_qty, reserved_qty = frappe.db.get_value("Bin",
 			{"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"}, ["ordered_qty", "reserved_qty"])
 
-		self.assertEquals(abs(flt(ordered_qty)), existing_ordered_qty + so_items[0]['qty'])
+		self.assertEquals(abs(flt(ordered_qty)), existing_ordered_qty)
 		self.assertEquals(abs(flt(reserved_qty)), existing_reserved_qty)
 
 		reserved_qty = frappe.db.get_value("Bin",
