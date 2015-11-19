@@ -37,7 +37,7 @@ class DeliveryNote(SellingController):
 			'second_join_field': 'so_detail',
 			'overflow_type': 'delivery',
 			'second_source_extra_cond': """ and exists(select name from `tabSales Invoice`
-				where name=`tabSales Invoice Item`.parent and ifnull(update_stock, 0) = 1)"""
+				where name=`tabSales Invoice Item`.parent and update_stock = 1)"""
 		},
 		{
 			'source_dt': 'Delivery Note Item',
@@ -65,7 +65,7 @@ class DeliveryNote(SellingController):
 		}]
 
 	def onload(self):
-		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabSales Invoice Item`
+		billed_qty = frappe.db.sql("""select sum(qty) from `tabSales Invoice Item`
 			where docstatus=1 and delivery_note=%s""", self.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.get("items")))

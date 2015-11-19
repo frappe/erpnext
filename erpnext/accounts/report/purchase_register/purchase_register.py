@@ -29,7 +29,7 @@ def execute(filters=None):
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
 		project_name = list(set(invoice_po_pr_map.get(inv.name, {}).get("project_name", [])))
 
-		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name, 
+		row = [inv.name, inv.posting_date, inv.supplier, inv.supplier_name,
 			supplier_details.get(inv.supplier),
 			inv.credit_to, ", ".join(project_name), inv.bill_no, inv.bill_date, inv.remarks,
 			", ".join(purchase_order), ", ".join(purchase_receipt)]
@@ -54,7 +54,7 @@ def execute(filters=None):
 
 		# total tax, grand total, outstanding amount & rounded total
 		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 2), inv.outstanding_amount]
-		data.append(row)		
+		data.append(row)
 
 	return columns, data
 
@@ -71,13 +71,15 @@ def get_columns(invoice_list):
 
 	if invoice_list:
 		expense_accounts = frappe.db.sql_list("""select distinct expense_account
-			from `tabPurchase Invoice Item` where docstatus = 1 and ifnull(expense_account, '') != ''
+			from `tabPurchase Invoice Item` where docstatus = 1
+			and (expense_account is not null and expense_account != '')
 			and parent in (%s) order by expense_account""" %
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 
 		tax_accounts = 	frappe.db.sql_list("""select distinct account_head
 			from `tabPurchase Taxes and Charges` where parenttype = 'Purchase Invoice'
-			and docstatus = 1 and ifnull(account_head, '') != '' and category in ('Total', 'Valuation and Total')
+			and docstatus = 1 and (account_head is not null and account_head != '')
+			and category in ('Total', 'Valuation and Total')
 			and parent in (%s) order by account_head""" %
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 
@@ -143,7 +145,7 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 	return invoice_expense_map, invoice_tax_map
 
 def get_invoice_po_pr_map(invoice_list):
-	pi_items = frappe.db.sql("""select parent, purchase_order, purchase_receipt, po_detail, 
+	pi_items = frappe.db.sql("""select parent, purchase_order, purchase_receipt, po_detail,
 		project_name from `tabPurchase Invoice Item` where parent in (%s)
 		and (ifnull(purchase_order, '') != '' or ifnull(purchase_receipt, '') != '')""" %
 		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)

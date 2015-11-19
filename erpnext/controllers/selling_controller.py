@@ -202,7 +202,7 @@ class SellingController(StockController):
 			
 		delivered_via_si = frappe.db.sql("""select sum(si_item.qty) 
 			from `tabSales Invoice Item` si_item, `tabSales Invoice` si
-			where si_item.parent = si.name and ifnull(si.update_stock, 0) = 1
+			where si_item.parent = si.name and si.update_stock = 1
 			and si_item.so_detail = %s and si.docstatus = 1 
 			and si_item.sales_order = %s
 			and si.name != %s""", (so_detail, so, current_docname))

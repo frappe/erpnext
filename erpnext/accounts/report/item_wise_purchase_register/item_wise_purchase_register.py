@@ -88,7 +88,7 @@ def get_tax_accounts(item_list, columns):
 
 	tax_details = frappe.db.sql("""select parent, account_head, item_wise_tax_detail, charge_type, base_tax_amount_after_discount_amount
 		from `tabPurchase Taxes and Charges` where parenttype = 'Purchase Invoice'
-		and docstatus = 1 and ifnull(account_head, '') != '' and category in ('Total', 'Valuation and Total')
+		and docstatus = 1 and (account_head is not null and account_head != '') and category in ('Total', 'Valuation and Total')
 		and parent in (%s)""" % ', '.join(['%s']*len(invoice_wise_items)), tuple(invoice_wise_items.keys()))
 
 	for parent, account_head, item_wise_tax_detail, charge_type, tax_amount in tax_details:

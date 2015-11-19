@@ -111,7 +111,7 @@ class MaintenanceSchedule(TransactionBase):
 				# check global holiday list
 				holiday_list = frappe.db.sql("""select h.holiday_date from
 					`tabHoliday` h, `tabHoliday List` hl
-					where h.parent=hl.name and ifnull(hl.is_default, 0) = 1
+					where h.parent=hl.name and hl.is_default = 1
 					and hl.fiscal_year=%s""", fy_details[0])
 
 			if not validated and holiday_list:

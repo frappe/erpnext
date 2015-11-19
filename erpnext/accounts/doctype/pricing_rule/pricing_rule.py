@@ -206,8 +206,8 @@ def get_pricing_rules(args):
 
 	return frappe.db.sql("""select * from `tabPricing Rule`
 		where (item_code=%(item_code)s {item_group_condition} or brand=%(brand)s)
-			and docstatus < 2 and ifnull(disable, 0) = 0
-			and ifnull({transaction_type}, 0) = 1 {conditions}
+			and docstatus < 2 and disable = 0
+			and {transaction_type} = 1 {conditions}
 		order by priority desc, name desc""".format(
 			item_group_condition=item_group_condition,
 			transaction_type=args.transaction_type, conditions=conditions), args, as_dict=1)

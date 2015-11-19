@@ -106,7 +106,7 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 
 		# check if per complete is None
-		self.assertEquals(mr.per_ordered, None)
+		self.assertEquals(mr.per_ordered, 0)
 		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
 		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
 
@@ -152,9 +152,9 @@ class TestMaterialRequest(unittest.TestCase):
 		po.cancel()
 		# check if per complete is as expected
 		mr.load_from_db()
-		self.assertEquals(mr.per_ordered, None)
-		self.assertEquals(mr.get("items")[0].ordered_qty, None)
-		self.assertEquals(mr.get("items")[1].ordered_qty, None)
+		self.assertEquals(mr.per_ordered, 0)
+		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
+		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
 
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
@@ -173,7 +173,7 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 
 		# check if per complete is None
-		self.assertEquals(mr.per_ordered, None)
+		self.assertEquals(mr.per_ordered, 0)
 		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
 		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
 
@@ -262,7 +262,7 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 
 		# check if per complete is None
-		self.assertEquals(mr.per_ordered, None)
+		self.assertEquals(mr.per_ordered, 0)
 		self.assertEquals(mr.get("items")[0].ordered_qty, 0)
 		self.assertEquals(mr.get("items")[1].ordered_qty, 0)
 

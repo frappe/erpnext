@@ -208,7 +208,7 @@ class GrossProfitGenerator(object):
 			else:
 				self.average_buying_rate[item_code] = flt(frappe.db.sql("""select avg(valuation_rate)
 					from `tabStock Ledger Entry`
-					where item_code = %s and ifnull(qty_after_transaction,0) > 0""", item_code)[0][0])
+					where item_code = %s and qty_after_transaction > 0""", item_code)[0][0])
 
 		return self.average_buying_rate[item_code]
 

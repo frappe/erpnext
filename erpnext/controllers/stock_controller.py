@@ -221,7 +221,7 @@ class StockController(AccountsController):
 	def get_incoming_rate_for_sales_return(self, item_code, warehouse, against_document):
 		incoming_rate = 0.0
 		if against_document and item_code:
-			incoming_rate = frappe.db.sql("""select abs(ifnull(stock_value_difference, 0) / actual_qty)
+			incoming_rate = frappe.db.sql("""select abs(stock_value_difference / actual_qty)
 				from `tabStock Ledger Entry`
 				where voucher_type = %s and voucher_no = %s
 					and item_code = %s and warehouse=%s limit 1""",
@@ -385,6 +385,6 @@ def get_warehouse_account():
 	warehouse_account = frappe._dict()
 
 	for d in frappe.db.sql("""select warehouse, name, account_currency from tabAccount
-		where account_type = 'Warehouse' and ifnull(warehouse, '') != ''""", as_dict=1):
+		where account_type = 'Warehouse' and (warehouse is not null and warehouse != '')""", as_dict=1):
 			warehouse_account.setdefault(d.warehouse, d)
 	return warehouse_account
