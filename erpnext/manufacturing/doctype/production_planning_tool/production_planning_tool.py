@@ -59,7 +59,7 @@ class ProductionPlanningTool(Document):
 			where so_item.parent = so.name
 				and so.docstatus = 1 and so.status != "Stopped"
 				and so.company = %(company)s
-				and ifnull(so_item.qty, 0) > ifnull(so_item.delivered_qty, 0) {0}
+				and so_item.qty > so_item.delivered_qty {0}
 				and (exists (select name from `tabItem` item where item.name=so_item.item_code
 					and (item.is_pro_applicable = 1 or item.is_sub_contracted_item = 1 {1}))
 					or exists (select name from `tabPacked Item` pi
@@ -108,9 +108,9 @@ class ProductionPlanningTool(Document):
 			item_condition = ' and so_item.item_code = "' + self.fg_item + '"'
 
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
-			(qty - ifnull(delivered_qty, 0)) as pending_qty
+			(qty - delivered_qty) as pending_qty
 			from `tabSales Order Item` so_item
-			where parent in (%s) and docstatus = 1 and ifnull(qty, 0) > ifnull(delivered_qty, 0)
+			where parent in (%s) and docstatus = 1 and qty > delivered_qty
 			and exists (select * from `tabItem` item where item.name=so_item.item_code
 				and (item.is_pro_applicable = 1
 					or item.is_sub_contracted_item = 1)) %s""" % \
@@ -120,12 +120,12 @@ class ProductionPlanningTool(Document):
 			item_condition = ' and pi.item_code = "' + self.fg_item + '"'
 
 		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
-			(((so_item.qty - ifnull(so_item.delivered_qty, 0)) * pi.qty) / so_item.qty)
+			(((so_item.qty - so_item.delivered_qty) * pi.qty) / so_item.qty)
 				as pending_qty
 			from `tabSales Order Item` so_item, `tabPacked Item` pi
 			where so_item.parent = pi.parent and so_item.docstatus = 1
 			and pi.parent_item = so_item.item_code
-			and so_item.parent in (%s) and ifnull(so_item.qty, 0) > ifnull(so_item.delivered_qty, 0)
+			and so_item.parent in (%s) and so_item.qty > so_item.delivered_qty
 			and exists (select * from `tabItem` item where item.name=pi.item_code
 				and (item.is_pro_applicable = 1
 					or item.is_sub_contracted_item = 1)) %s""" % \
@@ -243,7 +243,7 @@ class ProductionPlanningTool(Document):
 				# get all raw materials with sub assembly childs
 				# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 				for d in frappe.db.sql("""select fb.item_code,
-					ifnull(sum(ifnull(fb.qty, 0)/ifnull(bom.quantity, 1)), 0) as qty,
+					ifnull(sum(fb.qty/ifnull(bom.quantity, 1)), 0) as qty,
 					fb.description, fb.stock_uom, it.min_order_qty
 					from `tabBOM Explosion Item` fb, `tabBOM` bom, `tabItem` it
 					where bom.name = fb.parent and it.name = fb.item_code
@@ -257,7 +257,7 @@ class ProductionPlanningTool(Document):
 				# Get all raw materials considering SA items as raw materials,
 				# so no childs of SA items
 				for d in frappe.db.sql("""select bom_item.item_code,
-					ifnull(sum(ifnull(bom_item.qty, 0)/ifnull(bom.quantity, 1)), 0) as qty,
+					ifnull(sum(bom_item.qty/ifnull(bom.quantity, 1)), 0) as qty,
 					bom_item.description, bom_item.stock_uom, item.min_order_qty
 					from `tabBOM Item` bom_item, `tabBOM` bom, tabItem item
 					where bom.name = bom_item.parent and bom.name = %s and bom_item.docstatus < 2

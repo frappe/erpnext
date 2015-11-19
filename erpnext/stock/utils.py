@@ -112,7 +112,7 @@ def get_avg_purchase_rate(serial_nos):
 	"""get average value of serial numbers"""
 
 	serial_nos = get_valid_serial_nos(serial_nos)
-	return flt(frappe.db.sql("""select avg(ifnull(purchase_rate, 0)) from `tabSerial No`
+	return flt(frappe.db.sql("""select avg(purchase_rate) from `tabSerial No`
 		where name in (%s)""" % ", ".join(["%s"] * len(serial_nos)),
 		tuple(serial_nos))[0][0])
 

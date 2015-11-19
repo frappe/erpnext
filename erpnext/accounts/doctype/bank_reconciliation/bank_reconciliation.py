@@ -15,7 +15,7 @@ class BankReconciliation(Document):
 
 		condition = ""
 		if not self.include_reconciled_entries:
-			condition = "and ifnull(clearance_date, '') in ('', '0000-00-00')"
+			condition = "and (clearance_date is null or clearance_date='0000-00-00')"
 
 
 		dl = frappe.db.sql("""select t1.name, t1.cheque_no, t1.cheque_date, t2.debit,

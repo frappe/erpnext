@@ -66,12 +66,6 @@ class SalesOrder(SellingController):
 		for d in self.get('items'):
 			check_list.append(cstr(d.item_code))
 
-			if (frappe.db.get_value("Item", d.item_code, "is_stock_item")==1 or
-				(self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
-				and not d.warehouse and not cint(d.delivered_by_supplier):
-				frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code),
-					WarehouseRequired)
-
 			# used for production plan
 			d.transaction_date = self.transaction_date
 
@@ -116,14 +110,15 @@ class SalesOrder(SellingController):
 				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project_name))
 
 	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_warehouse_company
-
-		warehouses = list(set([d.warehouse for d in
-			self.get("items") if d.warehouse]))
-
-		for w in warehouses:
-			validate_warehouse_company(w, self.company)
-
+		super(SalesOrder, self).validate_warehouse()
+		
+		for d in self.get("items"):
+			if (frappe.db.get_value("Item", d.item_code, "is_stock_item")==1 or
+				(self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
+				and not d.warehouse and not cint(d.delivered_by_supplier):
+				frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code),
+					WarehouseRequired)
+			
 	def validate_with_previous_doc(self):
 		super(SalesOrder, self).validate_with_previous_doc({
 			"Quotation": {
@@ -236,13 +231,13 @@ class SalesOrder(SellingController):
 					item_wh_list.append([item_code, warehouse])
 
 		for d in self.get("items"):
-			if (not so_item_rows or d.name in so_item_rows):
-				_valid_for_reserve(d.item_code, d.warehouse)
-
+			if (not so_item_rows or d.name in so_item_rows) and not d.delivered_by_supplier:
 				if self.has_product_bundle(d.item_code):
 					for p in self.get("packed_items"):
 						if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 							_valid_for_reserve(p.item_code, p.warehouse)
+				else:
+					_valid_for_reserve(d.item_code, d.warehouse)
 
 		for item_code, warehouse in item_wh_list:
 			update_bin_qty(item_code, warehouse, {
@@ -607,7 +602,7 @@ def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 			name, supplier_name
 		limit %(start)s, %(page_len)s """.format(**{
 			'field': fields,
-			'key': searchfield
+			'key': frappe.db.escape(searchfield)
 		}), {
 			'txt': "%%%s%%" % txt,
 			'_txt': txt.replace("%", ""),

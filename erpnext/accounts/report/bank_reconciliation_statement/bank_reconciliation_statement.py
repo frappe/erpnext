@@ -24,7 +24,7 @@ def execute(filters=None):
 		total_credit += flt(d[3])
 
 	amounts_not_reflected_in_system = frappe.db.sql("""
-		select sum(ifnull(jvd.debit_in_account_currency, 0) - ifnull(jvd.credit_in_account_currency, 0))
+		select sum(jvd.debit_in_account_currency - jvd.credit_in_account_currency)
 		from `tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		where jvd.parent = jv.name and jv.docstatus=1 and jvd.account=%s
 		and jv.posting_date > %s and jv.clearance_date <= %s and ifnull(jv.is_opening, 'No') = 'No'

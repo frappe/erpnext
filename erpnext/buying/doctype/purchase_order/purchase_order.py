@@ -51,6 +51,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_for_subcontracting()
 		self.validate_minimum_order_qty()
 		self.create_raw_materials_supplied("supplied_items")
+		self.set_received_qty_and_billed_amount_for_drop_ship_items()
 
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc({
@@ -137,9 +138,11 @@ class PurchaseOrder(BuyingController):
 		"""update requested qty (before ordered_qty is updated)"""
 		item_wh_list = []
 		for d in self.get("items"):
-			if (not po_item_rows or d.name in po_item_rows) and [d.item_code, d.warehouse] not in item_wh_list \
-					and frappe.db.get_value("Item", d.item_code, "is_stock_item") and d.warehouse:
-				item_wh_list.append([d.item_code, d.warehouse])
+			if (not po_item_rows or d.name in po_item_rows) \
+				and [d.item_code, d.warehouse] not in item_wh_list \
+				and frappe.db.get_value("Item", d.item_code, "is_stock_item") \
+				and d.warehouse and not d.delivered_by_supplier:
+					item_wh_list.append([d.item_code, d.warehouse])
 
 		for item_code, warehouse in item_wh_list:
 			update_bin_qty(item_code, warehouse, {
@@ -164,13 +167,13 @@ class PurchaseOrder(BuyingController):
 		clear_doctype_notifications(self)
 
 	def on_submit(self):
-		if self.delivered_by_supplier == 1:
+		if self.has_drop_ship_item():
 			self.update_status_updater()
 
 		super(PurchaseOrder, self).on_submit()
 
 		purchase_controller = frappe.get_doc("Purchase Common")
-
+		
 		self.update_prevdoc_status()
 		self.update_requested_qty()
 		self.update_ordered_qty()
@@ -181,7 +184,7 @@ class PurchaseOrder(BuyingController):
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 
 	def on_cancel(self):
-		if self.delivered_by_supplier == 1:
+		if self.has_drop_ship_item():
 			self.update_status_updater()
 
 		pc_obj = frappe.get_doc('Purchase Common')
@@ -234,7 +237,7 @@ class PurchaseOrder(BuyingController):
 		"""Update delivered qty in Sales Order for drop ship"""
 		sales_orders_to_update = []
 		for item in self.items:
-			if item.prevdoc_doctype == "Sales Order":
+			if item.prevdoc_doctype == "Sales Order" and item.delivered_by_supplier == 1:	
 				if item.prevdoc_docname not in sales_orders_to_update:
 					sales_orders_to_update.append(item.prevdoc_docname)
 
@@ -243,6 +246,21 @@ class PurchaseOrder(BuyingController):
 			so.update_delivery_status(self.name)
 			so.set_status(update=True)
 			so.notify_update()
+
+	def has_drop_ship_item(self):
+		is_drop_ship = False
+		
+		for item in self.items:
+			if item.delivered_by_supplier == 1:
+				is_drop_ship = True
+		
+		return is_drop_ship
+	
+	def set_received_qty_and_billed_amount_for_drop_ship_items(self):
+		for item in self.items:
+			if item.delivered_by_supplier == 1:
+				item.received_qty = item.qty
+				item.billed_amt = item.amount
 
 @frappe.whitelist()
 def stop_or_unstop_purchase_orders(names, status):
@@ -261,7 +279,6 @@ def stop_or_unstop_purchase_orders(names, status):
 					po.update_status("Draft")
 
 	frappe.local.message_log = []
-
 
 def set_missing_values(source, target):
 	target.ignore_pricing_rule = 1
@@ -292,7 +309,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 				"parenttype": "prevdoc_doctype",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.received_qty < doc.qty
+			"condition": lambda doc: doc.received_qty < doc.qty and doc.delivered_by_supplier!=1
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
@@ -328,7 +345,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"parent": "purchase_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.base_amount==0 or doc.billed_amt < doc.amount
+			"condition": lambda doc: (doc.base_amount==0 or doc.billed_amt < doc.amount) and doc.delivered_by_supplier!=1
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",

@@ -85,7 +85,7 @@ def get_rootwise_opening_balances(filters, report_type):
 		
 	gle = frappe.db.sql("""
 		select 
-			account, sum(ifnull(debit, 0)) as opening_debit, sum(ifnull(credit, 0)) as opening_credit 
+			account, sum(debit) as opening_debit, sum(credit) as opening_credit 
 		from `tabGL Entry`
 		where 
 			company=%(company)s

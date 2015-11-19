@@ -229,7 +229,7 @@ class StatusUpdater(Document):
 			if args.get('target_parent_field'):
 				frappe.db.sql("""update `tab%(target_parent_dt)s`
 					set %(target_parent_field)s = round((select sum(if(%(target_ref_field)s >
-						ifnull(%(target_field)s, 0), %(target_field)s,
+						%(target_field)s, %(target_field)s,
 						%(target_ref_field)s))/sum(%(target_ref_field)s)*100
 						from `tab%(target_dt)s` where parent="%(name)s"), 2) %(set_modified)s
 					where name='%(name)s'""" % args)
@@ -237,7 +237,7 @@ class StatusUpdater(Document):
 			# update field
 			if args.get('status_field'):
 				frappe.db.sql("""update `tab%(target_parent_dt)s`
-					set %(status_field)s = if(ifnull(%(target_parent_field)s,0)<0.001,
+					set %(status_field)s = if(%(target_parent_field)s<0.001,
 						'Not %(keyword)s', if(%(target_parent_field)s>=99.99,
 						'Fully %(keyword)s', 'Partly %(keyword)s'))
 					where name='%(name)s'""" % args)
@@ -264,10 +264,10 @@ class StatusUpdater(Document):
 
 	def update_billing_status(self, zero_amount_refdoc, ref_dt, ref_fieldname):
 		for ref_dn in zero_amount_refdoc:
-			ref_doc_qty = flt(frappe.db.sql("""select sum(ifnull(qty, 0)) from `tab%s Item`
+			ref_doc_qty = flt(frappe.db.sql("""select sum(qty) from `tab%s Item`
 				where parent=%s""" % (ref_dt, '%s'), (ref_dn))[0][0])
 
-			billed_qty = flt(frappe.db.sql("""select sum(ifnull(qty, 0))
+			billed_qty = flt(frappe.db.sql("""select sum(qty)
 				from `tab%s Item` where %s=%s and docstatus=1""" %
 				(self.doctype, ref_fieldname, '%s'), (ref_dn))[0][0])
 

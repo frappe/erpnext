@@ -15,7 +15,7 @@ class RenameTool(Document):
 @frappe.whitelist()
 def get_doctypes():
 	return frappe.db.sql_list("""select name from tabDocType
-		where ifnull(allow_rename,0)=1 and module!='Core' order by name""")
+		where allow_rename=1 and module!='Core' order by name""")
 
 @frappe.whitelist()
 def upload(select_doctype=None, rows=None):

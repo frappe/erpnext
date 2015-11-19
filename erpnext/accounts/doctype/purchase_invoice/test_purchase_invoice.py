@@ -221,7 +221,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		test_recurring_document(self, test_records)
 
 	def test_total_purchase_cost_for_project(self):
-		existing_purchase_cost = frappe.db.sql("""select sum(ifnull(base_net_amount, 0))
+		existing_purchase_cost = frappe.db.sql("""select sum(base_net_amount)
 			from `tabPurchase Invoice Item` where project_name = '_Test Project' and docstatus=1""")
 		existing_purchase_cost = existing_purchase_cost and existing_purchase_cost[0][0] or 0
 

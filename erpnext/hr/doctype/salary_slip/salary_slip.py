@@ -23,25 +23,27 @@ class SalarySlip(TransactionBase):
 			self.get_leave_details()
 			struct = self.check_sal_struct()
 			if struct:
+				self.set("earnings", [])
+				self.set("deduction", [])
 				self.pull_sal_struct(struct)
 
 	def check_sal_struct(self):
 		m = get_month_details(self.fiscal_year, self.month)
 		struct = frappe.db.sql("""select name from `tabSalary Structure`
-			where employee=%s and is_active = 'Yes' 
-			and from_date <= %s and (to_date is null or to_date >= %s)""", 
+			where employee=%s and is_active = 'Yes'
+			and from_date <= %s and (to_date is null or to_date >= %s)""",
 			(self.employee, m.month_start_date, m.month_end_date))
-		
+
 		if not struct:
 			msgprint(_("No active Salary Structure found for employee {0} and the month")
 				.format(self.employee))
 			self.employee = None
-		
+
 		return struct and struct[0][0] or ''
 
 	def pull_sal_struct(self, struct):
 		from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
-		self.update(make_salary_slip(struct, self).as_dict())
+		make_salary_slip(struct, self)
 
 	def pull_emp_details(self):
 		emp = frappe.db.get_value("Employee", self.employee,
@@ -103,7 +105,7 @@ class SalarySlip(TransactionBase):
 		if not holidays:
 			holidays = frappe.db.sql("""select t1.holiday_date
 				from `tabHoliday` t1, `tabHoliday List` t2
-				where t1.parent = t2.name and ifnull(t2.is_default, 0) = 1
+				where t1.parent = t2.name and t2.is_default = 1
 				and t2.fiscal_year = %s
 				and t1.holiday_date between %s and %s""", (self.fiscal_year,
 					m['month_start_date'], m['month_end_date']))
@@ -119,7 +121,7 @@ class SalarySlip(TransactionBase):
 					select t1.name, t1.half_day
 					from `tabLeave Application` t1, `tabLeave Type` t2
 					where t2.name = t1.leave_type
-					and ifnull(t2.is_lwp, 0) = 1
+					and t2.is_lwp = 1
 					and t1.docstatus = 1
 					and t1.employee = %s
 					and %s between from_date and to_date

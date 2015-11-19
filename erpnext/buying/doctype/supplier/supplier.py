@@ -93,7 +93,7 @@ def get_dashboard_info(supplier):
 			{"supplier": supplier, "docstatus": ["!=", 2] }, "count(*)")
 
 	billing_this_year = frappe.db.sql("""
-		select sum(ifnull(credit_in_account_currency, 0)) - sum(ifnull(debit_in_account_currency, 0))
+		select sum(credit_in_account_currency) - sum(debit_in_account_currency)
 		from `tabGL Entry`
 		where voucher_type='Purchase Invoice' and party_type = 'Supplier'
 			and party=%s and fiscal_year = %s""",

@@ -40,13 +40,13 @@ class MaterialRequest(BuyingController):
 
 		for so_no in so_items.keys():
 			for item in so_items[so_no].keys():
-				already_indented = frappe.db.sql("""select sum(ifnull(qty, 0))
+				already_indented = frappe.db.sql("""select sum(qty)
 					from `tabMaterial Request Item`
 					where item_code = %s and sales_order_no = %s and
 					docstatus = 1 and parent != %s""", (item, so_no, self.name))
 				already_indented = already_indented and flt(already_indented[0][0]) or 0
 
-				actual_so_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabSales Order Item`
+				actual_so_qty = frappe.db.sql("""select sum(qty) from `tabSales Order Item`
 					where parent = %s and item_code = %s and docstatus = 1""", (so_no, item))
 				actual_so_qty = actual_so_qty and flt(actual_so_qty[0][0]) or 0
 
@@ -250,7 +250,7 @@ def get_material_requests_based_on_supplier(supplier):
 			where mr.name = mr_item.parent
 			and mr_item.item_code in (%s)
 			and mr.material_request_type = 'Purchase'
-			and ifnull(mr.per_ordered, 0) < 99.99
+			and mr.per_ordered < 99.99
 			and mr.docstatus = 1
 			and mr.status != 'Stopped'""" % ', '.join(['%s']*len(supplier_items)),
 			tuple(supplier_items))

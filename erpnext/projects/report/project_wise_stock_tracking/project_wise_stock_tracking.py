@@ -64,8 +64,8 @@ def get_delivered_items_cost():
 
 	si_items = frappe.db.sql("""select si.project_name, sum(si_item.base_net_amount) as amount
 		from `tabSales Invoice` si, `tabSales Invoice Item` si_item
-		where si.name = si_item.parent and si.docstatus = 1 and ifnull(si.update_stock, 0) = 1
-		and ifnull(si.is_pos, 0) = 1 and ifnull(si.project_name, '') != ''
+		where si.name = si_item.parent and si.docstatus = 1 and si.update_stock = 1
+		and si.is_pos = 1 and ifnull(si.project_name, '') != ''
 		group by si.project_name""", as_dict=1)
 
 
