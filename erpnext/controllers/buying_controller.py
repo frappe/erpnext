@@ -52,15 +52,6 @@ class BuyingController(StockController):
 					self.supplier = supplier
 					break
 
-	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_warehouse_company
-
-		warehouses = list(set([d.warehouse for d in
-			self.get("items") if getattr(d, "warehouse", None)]))
-
-		for w in warehouses:
-			validate_warehouse_company(w, self.company)
-
 	def validate_stock_or_nonstock_items(self):
 		if self.meta.get_field("taxes") and not self.get_stock_items():
 			tax_for_valuation = [d.account_head for d in self.get("taxes")

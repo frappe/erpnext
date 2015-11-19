@@ -379,6 +379,8 @@ class SalesInvoice(SellingController):
 				msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
 
 	def validate_warehouse(self):
+		super(SalesInvoice, self).validate_warehouse()
+		
 		for d in self.get('items'):
 			if not d.warehouse:
 				frappe.throw(_("Warehouse required at Row No {0}").format(d.idx))

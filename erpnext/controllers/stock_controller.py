@@ -303,6 +303,15 @@ class StockController(AccountsController):
 						}))
 
 		self.make_sl_entries(sl_entries)
+		
+	def validate_warehouse(self):
+		from erpnext.stock.utils import validate_warehouse_company
+
+		warehouses = list(set([d.warehouse for d in
+			self.get("items") if getattr(d, "warehouse", None)]))
+
+		for w in warehouses:
+			validate_warehouse_company(w, self.company)
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None):

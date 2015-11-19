@@ -233,3 +233,4 @@ erpnext.patches.v6_6.fix_website_image
 erpnext.patches.v6_6.remove_fiscal_year_from_leave_allocation
 execute:frappe.delete_doc_if_exists("DocType", "Stock UOM Replace Utility")
 erpnext.patches.v6_8.make_webform_standard
+erpnext.patches.v6_8.move_drop_ship_to_po_items
