@@ -65,7 +65,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 
 	cond = []
 	if date:
-		cond.append("posting_date <= '%s'" % frappe.db.escape(date))
+		cond.append("posting_date <= '%s'" % frappe.db.escape(cstr(date)))
 	else:
 		# get balance of all entries that exist
 		date = nowdate()
