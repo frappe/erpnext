@@ -151,7 +151,7 @@ $.extend(cur_frm.cscript, new erpnext.stock.PurchaseReceiptController({frm: cur_
 cur_frm.cscript.update_status = function(status) {
 	frappe.ui.form.is_saving = true;
 	frappe.call({
-		method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.update_purchase_order_status",
+		method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.update_purchase_receipt_status",
 		args: {docname: cur_frm.doc.name, status: status},
 		callback: function(r){
 			if(!r.exc)
