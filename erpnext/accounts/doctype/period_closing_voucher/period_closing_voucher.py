@@ -23,8 +23,8 @@ class PeriodClosingVoucher(AccountsController):
 	def validate_account_head(self):
 		closing_account_type = frappe.db.get_value("Account", self.closing_account_head, "root_type")
 
-		if closing_account_type != "Liability":
-			frappe.throw(_("Closing Account {0} must be of type 'Liability'")
+		if closing_account_type not in ["Liability", "Equity"]:
+			frappe.throw(_("Closing Account {0} must be of type Liability / Equity")
 				.format(self.closing_account_head))
 
 		account_currency = get_account_currency(self.closing_account_head)
