@@ -188,15 +188,19 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			}
 		});
 	},
+	
 	stop_purchase_order: function(){
 		cur_frm.cscript.update_status('Stop', 'Stopped')
 	},
+	
 	unstop_purchase_order: function(){
 		cur_frm.cscript.update_status('Re-open', 'Submitted')
 	},
+	
 	close_purchase_order: function(){
 		cur_frm.cscript.update_status('Close', 'Closed')
 	},
+	
 	delivered_by_supplier: function(){
 		cur_frm.cscript.update_status('Deliver', 'Delivered')
 	}
