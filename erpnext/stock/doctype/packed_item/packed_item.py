@@ -4,9 +4,9 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, json
 from frappe.utils import cstr, flt
-
+from erpnext.stock.get_item_details import get_item_details
 
 from frappe.model.document import Document
 
@@ -89,3 +89,17 @@ def cleanup_packing_list(doc, parent_items):
 	for d in packed_items:
 		if d not in delete_list:
 			doc.append("packed_items", d)
+
+@frappe.whitelist()
+def get_items_from_product_bundle(args):
+	args = json.loads(args)
+	items = []
+	bundled_items = get_product_bundle_items(args["item_code"])
+	for item in bundled_items:
+		args.update({
+			"item_code": item.item_code,
+			"qty": flt(args["quantity"]) * flt(item.qty)
+		})
+		items.append(get_item_details(args))
+		
+	return items
