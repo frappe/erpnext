@@ -29,7 +29,7 @@
   background-repeat: no-repeat;
   background-position: center top;
   border-radius: 0.5em;
-  border: 1px solid #ebeff2;
+  border: 1px solid #EBEFF2;
 }
 .product-image.missing-image {
   width: 100%;
@@ -39,7 +39,7 @@
   background-repeat: no-repeat;
   background-position: center top;
   border-radius: 0.5em;
-  border: 1px solid #ebeff2;
+  border: 1px solid #EBEFF2;
   border: 1px dashed #d1d8dd;
   position: relative;
 }
