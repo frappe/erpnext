@@ -339,15 +339,17 @@ class JournalEntry(AccountsController):
 			self.remark = ("\n").join(r) #User Remarks is not mandatory
 
 	def set_print_format_fields(self):
+		total_amount = 0.0
 		for d in self.get('accounts'):
 			if d.party_type and d.party:
 				if not self.pay_to_recd_from:
 					self.pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
 						"customer_name" if d.party_type=="Customer" else "supplier_name")
 
-					self.set_total_amount(d.debit or d.credit)
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
-				self.set_total_amount(d.debit or d.credit)
+				total_amount += (d.debit or d.credit)
+
+		self.set_total_amount(total_amount)
 
 	def set_total_amount(self, amt):
 		self.total_amount = amt
