@@ -77,11 +77,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Landed Cost Voucher",
 					"description": _("Update additional costs to calculate landed cost of items"),
-				},
-				{
-					"type": "doctype",
-					"name": "Stock UOM Replace Utility",
-					"description": _("Change UOM for an Item."),
 				}
 			]
 		},
