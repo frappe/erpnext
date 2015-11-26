@@ -3,6 +3,8 @@ who receives goods, services, products, or ideas, from a seller for a monetary
 consideration. A customer can also receive goods or services from a vendor or
 a supplier for other valuable considerations.
 
+A customer is uniquely identified by the Customer ID. Normally this ID is identical to the customer Full Name, but in case of duplicate Full Name, a Name-1 is created as ID.
+
 You can either directly create your Customers via
 
 > Selling > Customer
@@ -20,6 +22,8 @@ Contacts and Addresses in ERPNext are stored separately so that you can
 attach multiple Contacts or Addresses to Customers and Suppliers.
 
 Read [Contact]({{url_prefix}}/user/guides/crm/contact.html) to know more.
+
+Thus we may have identical Customer Names that are uniquely identified by the ID. Since the email address is not part of the customer information the linking of customer and User is through [Contacts]({{url_prefix}}/user/guides/crm/contact.html)
 
 ### Integration with Accounts
 

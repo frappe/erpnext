@@ -11,7 +11,7 @@
   "introduction_text": null,
   "is_standard": 1,
   "login_required": 1,
-  "modified": "2015-06-01 06:53:43.699336",
+  "modified": "2015-11-23 08:21:53.924318",
   "name": "addresses",
   "page_name": "addresses",
   "published": 1,
@@ -91,7 +91,7 @@
     "fieldname": "pincode",
     "fieldtype": "Data",
     "hidden": 0,
-    "label": "Pincode",
+    "label": "Postal Code",
     "options": null,
     "read_only": 0,
     "reqd": 0
@@ -100,7 +100,7 @@
     "default": null,
     "description": null,
     "fieldname": "country",
-    "fieldtype": "Data",
+    "fieldtype": "Link",
     "hidden": 0,
     "label": "Country",
     "options": "Country",
@@ -112,11 +112,11 @@
     "description": null,
     "fieldname": null,
     "fieldtype": "Column Break",
-    "hidden": null,
+    "hidden": 0,
     "label": null,
     "options": null,
-    "read_only": null,
-    "reqd": null
+    "read_only": 0,
+    "reqd": 0
    },
    {
     "default": null,

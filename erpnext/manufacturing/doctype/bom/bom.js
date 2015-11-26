@@ -19,6 +19,14 @@ frappe.ui.form.on("BOM", {
 				frappe.set_route("bom-browser", frm.doc.name);
 			});
 		}
+
+		if(frm.doc.docstatus==2) {
+			// show duplicate button when BOM is cancelled,
+			// its not very intuitive
+			frm.add_custom_button(__("Duplicate"), function() {
+				frm.copy_doc();
+			});
+		}
 	},
 	update_cost: function(frm) {
 		return frappe.call({

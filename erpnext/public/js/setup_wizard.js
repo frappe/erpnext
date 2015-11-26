@@ -163,6 +163,21 @@ function load_erpnext_slides() {
 				erpnext.wiz.org.set_fy_dates(slide);
 			},
 
+			validate: function() {
+				// validate fiscal year start and end dates
+				if (this.values.fy_start_date=='Invalid date' || this.values.fy_end_date=='Invalid date') {
+					msgprint(__("Please enter valid Financial Year Start and End Dates"));
+					return false;
+				}
+
+				if ((this.values.company_name || "").toLowerCase() == "company") {
+					msgprint(__("Company Name cannot be Company"));
+					return false;
+				}
+
+				return true;
+			},
+
 			css_class: "single-column",
 
 			set_fy_dates: function(slide) {
