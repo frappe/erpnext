@@ -22,7 +22,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py 
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +36,Currency is required for Price List {0},Moneda este necesară pentru lista de prețuri {0}
 DocType: Sales Taxes and Charges Template,* Will be calculated in the transaction.,* Va fi calculat în cadrul tranzacției.
 DocType: Purchase Order,Customer Contact,Clientul A lua legatura
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +572,From Material Request,Din Cerere de Material
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +651,From Material Request,Din Cerere de Material
 apps/erpnext/erpnext/selling/page/sales_browser/sales_browser.js +37,{0} Tree,{0} arbore
 DocType: Job Applicant,Job Applicant,Solicitant loc de muncă
 apps/erpnext/erpnext/hub_node/page/hub/hub_body.html +18,No more results.,Nu mai multe rezultate.
@@ -53,7 +53,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +134,Bank Draft,Cior
 DocType: Features Setup,1. To maintain the customer wise item code and to make them searchable based on their code use this option,1 Pentru a menține codul de client element înțelept și pentru a le face pe baza utilizării lor cod de această opțiune
 DocType: Mode of Payment Account,Mode of Payment Account,Modul de cont de plăți
 apps/erpnext/erpnext/stock/doctype/item/item.js +34,Show Variants,Arată Variante
-DocType: Sales Invoice Item,Quantity,Cantitate
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +470,Quantity,Cantitate
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +174,Loans (Liabilities),Imprumuturi (Raspunderi)
 DocType: Employee Education,Year of Passing,Ani de la promovarea
 apps/erpnext/erpnext/public/js/pos/pos_bill_item.html +12,In Stock,În Stoc
@@ -64,7 +64,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos_page.html +13,Make new POS Profile,Fa
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +31,Health Care,Servicii de Sanatate
 DocType: Purchase Invoice,Monthly,Lunar
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +66,Delay in payment (Days),Întârziere de plată (zile)
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +519,Invoice,Factură
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +598,Invoice,Factură
 DocType: Maintenance Schedule Item,Periodicity,Periodicitate
 apps/erpnext/erpnext/public/js/setup_wizard.js +107,Email Address,Adresa De E-Mail
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +21,Defense,Apărare
@@ -77,7 +77,7 @@ apps/erpnext/erpnext/public/js/pos/pos.js +528,Please select Price List,Vă rug�
 DocType: Production Order Operation,Work In Progress,Lucrări în curs
 DocType: Employee,Holiday List,Lista de Vacanță
 DocType: Time Log,Time Log,Timp Conectare
-apps/erpnext/erpnext/public/js/setup_wizard.js +274,Accountant,Contabil
+apps/erpnext/erpnext/public/js/setup_wizard.js +289,Accountant,Contabil
 DocType: Cost Center,Stock User,Stoc de utilizare
 DocType: Company,Phone No,Nu telefon
 DocType: Time Log,"Log of Activities performed by users against Tasks that can be used for tracking time, billing.","Log activităților efectuate de utilizatori, contra Sarcinile care pot fi utilizate pentru timpul de urmărire, facturare."
@@ -92,7 +92,7 @@ apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +38,
 DocType: Bin,Quantity Requested for Purchase,Cantitate solicitată de cumparare
 DocType: Rename Tool,"Attach .csv file with two columns, one for the old name and one for the new name","Atașați fișier .csv cu două coloane, una pentru denumirea veche și unul pentru denumirea nouă"
 DocType: Packed Item,Parent Detail docname,Părinte Detaliu docname
-apps/erpnext/erpnext/public/js/setup_wizard.js +362,Kg,Kg
+apps/erpnext/erpnext/public/js/setup_wizard.js +377,Kg,Kg
 apps/erpnext/erpnext/config/hr.py +48,Opening for a Job.,Deschidere pentru un loc de muncă.
 DocType: Item Attribute,Increment,Creștere
 apps/erpnext/erpnext/public/js/stock_analytics.js +63,Select Warehouse...,Selectați Depozit ...
@@ -141,7 +141,7 @@ DocType: Employee Education,Under Graduate,Sub Absolvent
 apps/erpnext/erpnext/selling/report/sales_person_target_variance_item_group_wise/sales_person_target_variance_item_group_wise.js +22,Target On,Țintă pe
 DocType: BOM,Total Cost,Cost total
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.js +9,Activity Log:,Jurnal Activitati:
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +199,Item {0} does not exist in the system or has expired,Articolul {0} nu există în sistem sau a expirat
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +194,Item {0} does not exist in the system or has expired,Articolul {0} nu există în sistem sau a expirat
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +44,Real Estate,Imobiliare
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.html +4,Statement of Account,Extras de cont
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +41,Pharmaceuticals,Produse farmaceutice
@@ -150,7 +150,7 @@ DocType: Employee,Mr,Mr
 DocType: Custom Script,Client,Client
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +33,Supplier Type / Supplier,Furnizor Tip / Furnizor
 DocType: Naming Series,Prefix,Prefix
-apps/erpnext/erpnext/public/js/setup_wizard.js +359,Consumable,Consumabile
+apps/erpnext/erpnext/public/js/setup_wizard.js +374,Consumable,Consumabile
 DocType: Upload Attendance,Import Log,Import Conectare
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.js +19,Send,Trimiteți
 DocType: Sales Invoice Item,Delivered By Supplier,Livrate de Furnizor
@@ -216,6 +216,7 @@ DocType: Naming Series,Series List for this Transaction,Lista de serie pentru ac
 DocType: Sales Invoice,Is Opening Entry,Deschiderea este de intrare
 DocType: Customer Group,Mention if non-standard receivable account applicable,Menționa dacă non-standard de cont primit aplicabil
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +154,For Warehouse is required before Submit,Pentru Depozit este necesar înainte de Inregistrare
+apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html +8,Received On,Primit la
 DocType: Sales Partner,Reseller,Reseller
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +41,Please enter Company,Va rugam sa introduceti de companie
 DocType: Delivery Note Item,Against Sales Invoice Item,Comparativ articolului facturii de vânzări
@@ -321,7 +322,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +199,Please enter 'Repeat
 DocType: Sales Invoice,Rate at which Customer Currency is converted to customer's base currency,Rata la care Clientul valuta este convertită în valuta de bază a clientului
 DocType: Features Setup,"Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","Disponibil în BOM, nota de livrare, factura de cumparare, comanda de producție, comanda de cumparare, chitanţa de cumpărare, factura de vânzare,comanda de vânzare, intrare de stoc, pontaj"
 DocType: Item Tax,Tax Rate,Cota de impozitare
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +540,Select Item,Selectați articol
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +619,Select Item,Selectați articol
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +143,"Item: {0} managed batch-wise, can not be reconciled using \
 					Stock Reconciliation, instead use Stock Entry","Postul: {0} în șarje, nu pot fi reconciliate cu ajutorul \
  stoc reconciliere, utilizați în schimb stoc intrare gestionate"
@@ -400,7 +401,7 @@ DocType: Sales Order,Not Applicable,Nu se aplică
 apps/erpnext/erpnext/config/hr.py +140,Holiday master.,Maestru de vacanta.
 DocType: Material Request Item,Required Date,Date necesare
 DocType: Delivery Note,Billing Address,Adresa de facturare
-apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js +648,Please enter Item Code.,Vă rugăm să introduceți Cod produs.
+apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js +727,Please enter Item Code.,Vă rugăm să introduceți Cod produs.
 DocType: BOM,Costing,Cost
 DocType: Purchase Taxes and Charges,"If checked, the tax amount will be considered as already included in the Print Rate / Print Amount","In cazul in care se bifeaza, suma taxelor va fi considerată ca fiind deja inclusa în Rata de Imprimare / Suma de Imprimare"
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py +48,Total Qty,Raport Cantitate
@@ -424,7 +425,7 @@ DocType: Journal Entry,Accounts Payable,Conturi de plată
 apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.js +24,Add Subscribers,Adăugaţi Abonați
 apps/erpnext/erpnext/public/js/feature_setup.js +220,""" does not exists",""" nu există"
 DocType: Pricing Rule,Valid Upto,Valid Până la
-apps/erpnext/erpnext/public/js/setup_wizard.js +304,List a few of your customers. They could be organizations or individuals.,Listeaza cativa din clienții dvs. Ei ar putea fi organizații sau persoane fizice.
+apps/erpnext/erpnext/public/js/setup_wizard.js +319,List a few of your customers. They could be organizations or individuals.,Listeaza cativa din clienții dvs. Ei ar putea fi organizații sau persoane fizice.
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +143,Direct Income,Venituri Directe
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +33,"Can not filter based on Account, if grouped by Account","Nu se poate filtra pe baza de cont, în cazul gruparii in functie de Cont"
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +88,Administrative Officer,Ofițer administrativ
@@ -537,8 +538,8 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +34,"Then Pri
 apps/frappe/frappe/integrations/doctype/dropbox_backup/dropbox_backup.py +179,Please install dropbox python module,Vă rugăm să instalați dropbox modul python
 DocType: Employee,Passport Number,Numărul de pașaport
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +82,Manager,Manager
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +494,From Purchase Receipt,Din Chitanta de Cumparare
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +219,Same item has been entered multiple times.,Same articol a fost introdus de mai multe ori.
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +573,From Purchase Receipt,Din Chitanta de Cumparare
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +214,Same item has been entered multiple times.,Same articol a fost introdus de mai multe ori.
 DocType: SMS Settings,Receiver Parameter,Receptor Parametru
 apps/erpnext/erpnext/controllers/trends.py +39,'Based On' and 'Group By' can not be same,'Bazat pe' și 'Grupat dupa' nu pot fi identice
 DocType: Sales Person,Sales Person Targets,Obiective de vânzări Persoana
@@ -563,7 +564,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +203,Maintenance
 DocType: Material Request,Material Transfer,Transfer de material
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +56,Opening (Dr),Deschidere (Dr)
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +39,Posting timestamp must be after {0},Timestamp postarea trebuie să fie după {0}
-apps/frappe/frappe/config/setup.py +59,Settings,Setări
+apps/frappe/frappe/config/setup.py +66,Settings,Setări
 DocType: Landed Cost Taxes and Charges,Landed Cost Taxes and Charges,Impozite cost debarcate și Taxe
 DocType: Production Order Operation,Actual Start Time,Timpul efectiv de începere
 DocType: BOM Operation,Operation Time,Funcționare Ora
@@ -632,7 +633,7 @@ apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +21,{0}: 
 apps/erpnext/erpnext/controllers/buying_controller.py +274,Row {0}: Conversion Factor is mandatory,Rând {0}: Factorul de conversie este obligatorie
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +27,Accounting Entries can be made against leaf nodes. Entries against Groups are not allowed.,Intrările contabile pot fi create comparativ nodurilor frunză. Intrările comparativ grupurilor nu sunt permise.
 DocType: ToDo,High,Ridicat
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +361,Cannot deactivate or cancel BOM as it is linked with other BOMs,"Nu se poate deactiva sau anula FDM, deoarece este conectat cu alte FDM-uri"
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +356,Cannot deactivate or cancel BOM as it is linked with other BOMs,"Nu se poate deactiva sau anula FDM, deoarece este conectat cu alte FDM-uri"
 DocType: Opportunity,Maintenance,Mentenanţă
 DocType: User,Male,Masculin
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +183,Purchase Receipt number required for Item {0},Număr Primirea de achiziție necesar pentru postul {0}
@@ -698,7 +699,7 @@ apps/erpnext/erpnext/buying/doctype/supplier/supplier.py +88,No Permission,Nici 
 DocType: Company,Default Bank Account,Cont Bancar Implicit
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +47,"To filter based on Party, select Party Type first","Pentru a filtra pe baza Party, selectați Party Tip primul"
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +48,'Update Stock' can not be checked because items are not delivered via {0},"&quot;Actualizare Stock&quot; nu pot fi verificate, deoarece obiectele nu sunt livrate prin {0}"
-apps/erpnext/erpnext/public/js/setup_wizard.js +362,Nos,Nos
+apps/erpnext/erpnext/public/js/setup_wizard.js +377,Nos,Nos
 DocType: Item,Items with higher weightage will be shown higher,Articole cu weightage mare va fi afișat mai mare
 DocType: Bank Reconciliation Detail,Bank Reconciliation Detail,Detaliu reconciliere bancară
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +629,My Invoices,Facturile mele
@@ -780,7 +781,7 @@ DocType: Employee,Ms,Ms
 apps/erpnext/erpnext/config/accounts.py +148,Currency exchange rate master.,Maestru cursului de schimb valutar.
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +253,Unable to find Time Slot in the next {0} days for Operation {1},Imposibilitatea de a găsi timp Slot în următorii {0} zile pentru Operațiunea {1}
 DocType: Production Order,Plan material for sub-assemblies,Material Plan de subansambluri
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +426,BOM {0} must be active,BOM {0} trebuie să fie activ
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +421,BOM {0} must be active,BOM {0} trebuie să fie activ
 apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py +26,Please select the document type first,Vă rugăm să selectați tipul de document primul
 apps/erpnext/erpnext/support/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,Anuleaza Vizite Material {0} înainte de a anula această Vizita de întreținere
 DocType: Salary Slip,Leave Encashment Amount,Suma Incasare Concediu
@@ -807,7 +808,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +167,Row {0
 DocType: Mode of Payment Account,Default Bank / Cash account will be automatically updated in POS Invoice when this mode is selected.,Contul Bancar / de Numerar implicit va fi actualizat automat în Factura POS atunci când acest mod este selectat.
 DocType: Employee,Permanent Address Is,Adresa permanentă este
 DocType: Production Order Operation,Operation completed for how many finished goods?,Funcționare completat de cât de multe bunuri finite?
-apps/erpnext/erpnext/public/js/setup_wizard.js +237,The Brand,Marca
+apps/erpnext/erpnext/public/js/setup_wizard.js +252,The Brand,Marca
 apps/erpnext/erpnext/controllers/status_updater.py +163,Allowance for over-{0} crossed for Item {1}.,Alocație mai mare decât -{0} anulată pentru articolul {1}.
 DocType: Employee,Exit Interview Details,Detalii Interviu de Iesire
 DocType: Item,Is Purchase Item,Este de cumparare Articol
@@ -830,7 +831,7 @@ DocType: Contact Us Settings,Address Line 1,Adresă Linie 1
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +53,Variance,Variație
 ,Company Name,Denumire Companie
 DocType: SMS Center,Total Message(s),Total mesaj(e)
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +538,Select Item for Transfer,Selectați Element de Transfer
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +617,Select Item for Transfer,Selectați Element de Transfer
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +24,View a list of all the help videos,Vizualizați o listă cu toate filmele de ajutor
 DocType: Bank Reconciliation,Select account head of the bank where cheque was deposited.,"Selectați contul șef al băncii, unde de verificare a fost depus."
 DocType: Selling Settings,Allow user to edit Price List Rate in transactions,Permiteţi utilizatorului să editeze lista ratelor preturilor din tranzacții
@@ -847,12 +848,12 @@ DocType: Opportunity,Walk In,Walk In
 DocType: Item,Inspection Criteria,Criteriile de inspecție
 apps/erpnext/erpnext/config/accounts.py +101,Tree of finanial Cost Centers.,Arborele de centre de cost finanial.
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +12,Transfered,Transferat
-apps/erpnext/erpnext/public/js/setup_wizard.js +238,Upload your letter head and logo. (you can edit them later).,Încărcați capul scrisoare și logo-ul. (Le puteți edita mai târziu).
+apps/erpnext/erpnext/public/js/setup_wizard.js +253,Upload your letter head and logo. (you can edit them later).,Încărcați capul scrisoare și logo-ul. (Le puteți edita mai târziu).
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,Alb
 DocType: SMS Center,All Lead (Open),Toate articolele de top (deschise)
 DocType: Purchase Invoice,Get Advances Paid,Obtine Avansurile Achitate
 apps/erpnext/erpnext/public/js/setup_wizard.js +112,Attach Your Picture,Atașați imaginea dvs.
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +540,Make ,Realizare
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +619,Make ,Realizare
 DocType: Journal Entry,Total Amount in Words,Suma totală în cuvinte
 DocType: Workflow State,Stop,Oprire
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +7,There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,Nu a fost o eroare. Un motiv probabil ar putea fi că nu ați salvat formularul. Vă rugăm să contactați support@erpnext.com dacă problema persistă.
@@ -924,7 +925,7 @@ apps/erpnext/erpnext/controllers/selling_controller.py +21,To {0} | {1} {2},Pent
 DocType: Time Log Batch,updated via Time Logs,actualizat prin timp Busteni
 apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +40,Average Age,Vârstă medie
 DocType: Opportunity,Your sales person who will contact the customer in future,Persoana de vânzări care va contacta clientul în viitor
-apps/erpnext/erpnext/public/js/setup_wizard.js +326,List a few of your suppliers. They could be organizations or individuals.,Listeaza cativa din furnizorii dvs. Ei ar putea fi organizații sau persoane fizice.
+apps/erpnext/erpnext/public/js/setup_wizard.js +341,List a few of your suppliers. They could be organizations or individuals.,Listeaza cativa din furnizorii dvs. Ei ar putea fi organizații sau persoane fizice.
 DocType: Company,Default Currency,Monedă implicită
 DocType: Contact,Enter designation of this Contact,Introduceți destinatia acestui Contact
 DocType: Contact Us Settings,Address,Adresă
@@ -1006,7 +1007,7 @@ DocType: Payment Reconciliation,Unreconciled Payment Details,Nereconciliate Deta
 DocType: Global Defaults,Current Fiscal Year,An Fiscal Curent
 DocType: Global Defaults,Disable Rounded Total,Dezactivati Totalul Rotunjit
 DocType: Lead,Call,Apelaţi
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +386,'Entries' cannot be empty,'Intrările' nu pot fi vide
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +388,'Entries' cannot be empty,'Intrările' nu pot fi vide
 apps/erpnext/erpnext/utilities/transaction_base.py +78,Duplicate row {0} with same {1},Inregistrare {0} este duplicata cu aceeași {1}
 ,Trial Balance,Balanta
 apps/erpnext/erpnext/config/hr.py +205,Setting up Employees,Configurarea angajati
@@ -1070,7 +1071,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +490,UOM coversion
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +83,Indirect Expenses,Cheltuieli indirecte
 apps/erpnext/erpnext/controllers/selling_controller.py +163,Row {0}: Qty is mandatory,Rând {0}: Cant este obligatorie
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +8,Agriculture,Agricultură
-apps/erpnext/erpnext/public/js/setup_wizard.js +347,Your Products or Services,Produsele sau serviciile dvs.
+apps/erpnext/erpnext/public/js/setup_wizard.js +362,Your Products or Services,Produsele sau serviciile dvs.
 DocType: Mode of Payment,Mode of Payment,Mod de plata
 apps/erpnext/erpnext/setup/doctype/item_group/item_group.js +31,This is a root item group and cannot be edited.,Acesta este un grup element rădăcină și nu pot fi editate.
 DocType: Journal Entry Account,Purchase Order,Comandă de aprovizionare
@@ -1092,7 +1093,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py 
 DocType: Appraisal Goal,Goal,Obiectiv
 DocType: Sales Invoice Item,Edit Description,Edit Descriere
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +318,Expected Delivery Date is lesser than Planned Start Date.,Așteptat Data de livrare este mai mică decât era planificat Începere Data.
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +602,For Supplier,Pentru furnizor
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +681,For Supplier,Pentru furnizor
 DocType: Account,Setting Account Type helps in selecting this Account in transactions.,Setarea Tipul de cont ajută în selectarea acest cont în tranzacții.
 DocType: Purchase Invoice,Grand Total (Company Currency),Total general (Valuta Companie)
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +42,Total Outgoing,Raport de ieșire
@@ -1107,7 +1108,7 @@ apps/erpnext/erpnext/stock/utils.py +162,Serial number {0} entered more than onc
 DocType: Journal Entry,Journal Entry,Intrare în jurnal
 DocType: Workstation,Workstation Name,Stație de lucru Nume
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +17,Email Digest:,Email Digest: 
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +432,BOM {0} does not belong to Item {1},BOM {0} nu aparţine articolului {1}
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +427,BOM {0} does not belong to Item {1},BOM {0} nu aparţine articolului {1}
 DocType: Sales Partner,Target Distribution,Țintă Distribuție
 apps/frappe/frappe/public/js/frappe/model/model.js +25,Comments,Comentarii
 DocType: Salary Slip,Bank Account No.,Cont bancar nr.
@@ -1142,7 +1143,7 @@ DocType: File,old_parent,old_parent
 apps/erpnext/erpnext/config/support.py +33,"Newsletters to contacts, leads.","Buletine de contacte, conduce."
 apps/erpnext/erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py +33,Currency of the Closing Account must be {0},Valuta contului de închidere trebuie să fie {0}
 apps/erpnext/erpnext/hr/doctype/appraisal_template/appraisal_template.py +21,Sum of points for all goals should be 100. It is {0},Suma de puncte pentru toate obiectivele ar trebui să fie 100. este {0}
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +365,Operations cannot be left blank.,Operațiunile nu poate fi lasat necompletat.
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +360,Operations cannot be left blank.,Operațiunile nu poate fi lasat necompletat.
 ,Delivered Items To Be Billed,Produse Livrate Pentru a fi Facturate
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +60,Warehouse cannot be changed for Serial No.,Depozit nu poate fi schimbat pentru Serial No.
 DocType: DocField,Description,Descriere
@@ -1211,7 +1212,7 @@ DocType: Job Opening,"Job profile, qualifications required etc.","Profilul postu
 DocType: Journal Entry Account,Account Balance,Soldul contului
 apps/erpnext/erpnext/config/accounts.py +112,Tax Rule for transactions.,Regula de impozit pentru tranzacțiile.
 DocType: Rename Tool,Type of document to rename.,Tip de document pentru a redenumi.
-apps/erpnext/erpnext/public/js/setup_wizard.js +366,We buy this Item,Cumparam acest articol
+apps/erpnext/erpnext/public/js/setup_wizard.js +381,We buy this Item,Cumparam acest articol
 DocType: Address,Billing,Facturare
 DocType: Bulk Email,Not Sent,Nu a fost trimis
 DocType: Purchase Invoice,Total Taxes and Charges (Company Currency),Total Impozite si Taxe (Compania valutar)
@@ -1219,7 +1220,7 @@ DocType: Shipping Rule,Shipping Account,Contul de transport maritim
 apps/erpnext/erpnext/crm/doctype/newsletter/newsletter.py +43,Scheduled to send to {0} recipients,Programat pentru a trimite la {0} destinatari
 DocType: Quality Inspection,Readings,Lecturi
 DocType: Stock Entry,Total Additional Costs,Costuri totale suplimentare
-apps/erpnext/erpnext/public/js/setup_wizard.js +359,Sub Assemblies,Sub Assemblies
+apps/erpnext/erpnext/public/js/setup_wizard.js +374,Sub Assemblies,Sub Assemblies
 DocType: Shipping Rule Condition,To Value,La valoarea
 DocType: Supplier,Stock Manager,Stock Manager
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +143,Source warehouse is mandatory for row {0},Depozit sursă este obligatorie pentru rând {0}
@@ -1263,7 +1264,7 @@ DocType: Maintenance Schedule,Schedules,Orarele
 DocType: Purchase Invoice Item,Net Amount,Cantitate netă
 DocType: Purchase Order Item Supplied,BOM Detail No,Detaliu BOM nr.
 DocType: Purchase Invoice,Additional Discount Amount (Company Currency),Discount suplimentar Suma (companie de valuta)
-apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js +541,Error: {0} > {1},Eroare: {0}> {1}
+apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js +620,Error: {0} > {1},Eroare: {0}> {1}
 apps/erpnext/erpnext/accounts/doctype/account/account.js +8,Please create new account from Chart of Accounts.,Vă rugăm să creați un cont nou de Planul de conturi.
 DocType: Maintenance Visit,Maintenance Visit,Vizita Mentenanta
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +49,Customer > Customer Group > Territory,Client> Client Group> Teritoriul
@@ -1285,7 +1286,7 @@ apps/erpnext/erpnext/config/stock.py +120,Brand master.,Deţinător marcă.
 DocType: ToDo,Due Date,Data Limita 
 DocType: Sales Invoice Item,Brand Name,Denumire marcă
 DocType: Purchase Receipt,Transporter Details,Detalii Transporter
-apps/erpnext/erpnext/public/js/setup_wizard.js +362,Box,Cutie
+apps/erpnext/erpnext/public/js/setup_wizard.js +377,Box,Cutie
 apps/erpnext/erpnext/public/js/setup_wizard.js +137,The Organization,Organizația
 DocType: Monthly Distribution,Monthly Distribution,Distributie lunar
 apps/erpnext/erpnext/selling/doctype/sms_center/sms_center.py +68,Receiver List is empty. Please create Receiver List,Receptor Lista goala. Vă rugăm să creați Receiver Lista
@@ -1316,7 +1317,7 @@ DocType: Production Planning Tool,Select Sales Orders,Selectați comenzi de vân
 ,Material Requests for which Supplier Quotations are not created,Cererile de materiale pentru care nu sunt create Cotațiile Furnizor
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +117,The day(s) on which you are applying for leave are holidays. You need not apply for leave.,A doua zi (e) pe care se aplica pentru concediu sunt sărbători. Nu trebuie să se aplice pentru concediu.
 DocType: Features Setup,To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,Pentru a urmări elemente utilizând coduri de bare. Va fi capabil de a intra articole în nota de livrare și factură de vânzare prin scanarea codului de bare de element.
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +497,Mark as Delivered,Mark livrate
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +576,Mark as Delivered,Mark livrate
 apps/erpnext/erpnext/crm/doctype/lead/lead.js +34,Make Quotation,Face ofertă
 DocType: Dependent Task,Dependent Task,Sarcina dependent
 apps/erpnext/erpnext/stock/doctype/item/item.py +310,Conversion factor for default Unit of Measure must be 1 in row {0},Factor de Conversie pentru Unitatea de Măsură implicita trebuie să fie 1 pentru inregistrarea {0}
@@ -1408,6 +1409,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +212,Time L
 DocType: Accounts Settings,Make Accounting Entry For Every Stock Movement,Realizeaza Intrare de Contabilitate Pentru Fiecare Modificare a Stocului
 DocType: Leave Allocation,Total Leaves Allocated,Totalul Frunze alocate
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +386,Warehouse required at Row No {0},Depozit necesar la Row Nu {0}
+apps/erpnext/erpnext/public/js/setup_wizard.js +169,Please enter valid Financial Year Start and End Dates,Va rugam sa introduceti valabil financiare Anul începe și a termina Perioada
 DocType: Employee,Date Of Retirement,Data Pensionare
 DocType: Upload Attendance,Get Template,Obține șablon
 DocType: Address,Postal,Poștal
@@ -1418,11 +1420,11 @@ apps/erpnext/erpnext/templates/pages/order.html +57,text {0},Textul {0}
 DocType: Territory,Parent Territory,Teritoriul părinte
 DocType: Quality Inspection Reading,Reading 2,Reading 2
 DocType: Stock Entry,Material Receipt,Primirea de material
-apps/erpnext/erpnext/public/js/setup_wizard.js +358,Products,Instrumente
+apps/erpnext/erpnext/public/js/setup_wizard.js +373,Products,Instrumente
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +47,Party Type and Party is required for Receivable / Payable account {0},Partidul Tipul și Partidul este necesar pentru creanțe / cont plateste {0}
 DocType: Item,"If this item has variants, then it cannot be selected in sales orders etc.","Dacă acest element are variante, atunci nu poate fi selectat în comenzile de vânzări, etc."
 DocType: Lead,Next Contact By,Următor Contact Prin
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +215,Quantity required for Item {0} in row {1},Cantitatea necesară pentru postul {0} în rândul {1}
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +210,Quantity required for Item {0} in row {1},Cantitatea necesară pentru postul {0} în rândul {1}
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py +85,Warehouse {0} can not be deleted as quantity exists for Item {1},Depozit {0} nu poate fi ștearsă ca exista cantitate pentru postul {1}
 DocType: Quotation,Order Type,Tip comandă
 DocType: Purchase Invoice,Notification Email Address,Notificarea Adresa de e-mail
@@ -1449,7 +1451,7 @@ apps/erpnext/erpnext/stock/doctype/item/item.py +327,Default BOM ({0}) must be a
 DocType: Employee,Leave Encashed?,Concediu Incasat ?
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +32,Opportunity From field is mandatory,Oportunitatea de la câmp este obligatoriu
 DocType: Item,Variants,Variante
-apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation.js +458,Make Purchase Order,Realizeaza Comanda de Cumparare
+apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation.js +537,Make Purchase Order,Realizeaza Comanda de Cumparare
 DocType: SMS Center,Send To,Trimite la
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +127,There is not enough leave balance for Leave Type {0},Nu există echilibru concediu suficient pentru concediul de tip {0}
 DocType: Sales Team,Contribution to Net Total,Contribuție la Total Net
@@ -1474,10 +1476,10 @@ DocType: Sales Order,To Deliver and Bill,Pentru a livra și Bill
 DocType: GL Entry,Credit Amount in Account Currency,Suma de credit în cont valutar
 apps/erpnext/erpnext/config/manufacturing.py +24,Time Logs for manufacturing.,Timp Busteni pentru productie.
 DocType: Item,Apply Warehouse-wise Reorder Level,Aplicați nivel de reorganizare tip depozit
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +429,BOM {0} must be submitted,BOM {0} trebuie să fie introdus
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +424,BOM {0} must be submitted,BOM {0} trebuie să fie introdus
 DocType: Authorization Control,Authorization Control,Control de autorizare
 apps/erpnext/erpnext/config/projects.py +23,Time Log for tasks.,Log timp de sarcini.
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +474,Payment,Plată
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +553,Payment,Plată
 DocType: Production Order Operation,Actual Time and Cost,Timp și cost efective
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +54,Material Request of maximum {0} can be made for Item {1} against Sales Order {2},Cerere de material de maximum {0} se poate face pentru postul {1} ​​împotriva comandă de vânzări {2}
 DocType: Employee,Salutation,Salut
@@ -1488,7 +1490,7 @@ apps/erpnext/erpnext/config/selling.py +153,Bundle items at time of sale.,Set de
 DocType: Sales Order Item,Actual Qty,Cant efectivă
 DocType: Sales Invoice Item,References,Referințe
 DocType: Quality Inspection Reading,Reading 10,Reading 10
-apps/erpnext/erpnext/public/js/setup_wizard.js +348,"List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start.","Lista de produse sau servicii pe care doriti sa le cumparati sau vindeti. Asigurați-vă că ati verificat Grupul Articolului, Unitatea de Măsură și alte proprietăți atunci când incepeti."
+apps/erpnext/erpnext/public/js/setup_wizard.js +363,"List your products or services that you buy or sell. Make sure to check the Item Group, Unit of Measure and other properties when you start.","Lista de produse sau servicii pe care doriti sa le cumparati sau vindeti. Asigurați-vă că ati verificat Grupul Articolului, Unitatea de Măsură și alte proprietăți atunci când incepeti."
 DocType: Hub Settings,Hub Node,Hub Node
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +78,You have entered duplicate items. Please rectify and try again.,Ați introdus elemente cu dubluri. Vă rugăm să rectifice și să încercați din nou.
 apps/erpnext/erpnext/controllers/item_variant.py +65,Value {0} for Attribute {1} does not exist in the list of valid Item Attribute Values,Valoarea {0} pentru {1} Atribut nu există în lista de la punctul valabile Valorile atributelor
@@ -1507,6 +1509,7 @@ DocType: Payment Tool,Make Payment Entry,Realizeaza Intrare de Plati
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +119,Quantity for Item {0} must be less than {1},Cantitatea pentru postul {0} trebuie să fie mai mică de {1}
 ,Sales Invoice Trends,Vânzări Tendințe factură
 DocType: Leave Application,Apply / Approve Leaves,Aplicați / aprobaţi concedii
+apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html +23,For,Pentru
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +90,Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total',Se poate face referire la inregistrare numai dacă tipul de taxa este 'Suma inregistrare precedenta' sau 'Total inregistrare precedenta'
 DocType: Sales Order Item,Delivery Warehouse,Depozit de livrare
 DocType: Stock Settings,Allowance Percent,Procent Alocație
@@ -1532,14 +1535,14 @@ DocType: Cost Center,Budget,Buget
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +41,"Budget cannot be assigned against {0}, as it's not an Income or Expense account","Bugetul nu pot fi atribuite în {0}, deoarece nu este un cont venituri sau cheltuieli"
 apps/erpnext/erpnext/selling/report/sales_person_target_variance_item_group_wise/sales_person_target_variance_item_group_wise.py +51,Achieved,Realizat
 apps/erpnext/erpnext/selling/page/sales_analytics/sales_analytics.js +65,Territory / Customer,Teritoriu / client
-apps/erpnext/erpnext/public/js/setup_wizard.js +294,e.g. 5,de exemplu 5
+apps/erpnext/erpnext/public/js/setup_wizard.js +309,e.g. 5,de exemplu 5
 DocType: Sales Invoice,In Words will be visible once you save the Sales Invoice.,În cuvinte va fi vizibil după ce a salva de vânzări factură.
 DocType: Item,Is Sales Item,Este produs de vânzări
 apps/erpnext/erpnext/setup/doctype/item_group/item_group.js +21,Item Group Tree,Ramificatie Grup Articole
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +69,Item {0} is not setup for Serial Nos. Check Item master,Articolul {0} nu este configurat pentru Numerotare Seriala. Verificati Articolul Principal.
 DocType: Maintenance Visit,Maintenance Time,Timp Mentenanta
 ,Amount to Deliver,Sumă pentru livrare
-apps/erpnext/erpnext/public/js/setup_wizard.js +356,A Product or Service,Un Produs sau Serviciu
+apps/erpnext/erpnext/public/js/setup_wizard.js +371,A Product or Service,Un Produs sau Serviciu
 apps/frappe/frappe/desk/page/setup_wizard/setup_wizard.js +146,There were errors.,Au fost erori.
 DocType: Naming Series,Current Value,Valoare curenta
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +171,{0} created,{0} creat
@@ -1577,7 +1580,7 @@ DocType: Quality Inspection Reading,Acceptance Criteria,Criteriile de receptie
 DocType: Item Attribute,Attribute Name,Denumire atribut
 apps/erpnext/erpnext/controllers/selling_controller.py +236,Item {0} must be Sales or Service Item in {1},Articolul {0} trebuie să fie un Articol de Vanzari sau de Service in {1}
 DocType: Item Group,Show In Website,Arata pe site-ul
-apps/erpnext/erpnext/public/js/setup_wizard.js +357,Group,Grup
+apps/erpnext/erpnext/public/js/setup_wizard.js +372,Group,Grup
 DocType: Task,Expected Time (in hours),Timp de așteptat (în ore)
 ,Qty to Order,Cantitate pentru comandă
 DocType: Features Setup,"To track brand name in the following documents Delivery Note, Opportunity, Material Request, Item, Purchase Order, Purchase Voucher, Purchaser Receipt, Quotation, Sales Invoice, Product Bundle, Sales Order, Serial No","Pentru a urmări nume de brand în următoarele documente de însoțire a mărfii, oportunitate, cerere Material, Postul, comanda de achiziție, Cumpărare Voucherul, Cumpărătorul Primirea, cotatie, vânzări factură, produse Bundle, comandă de vânzări, ordine"
@@ -1586,18 +1589,18 @@ DocType: Appraisal,For Employee Name,Pentru Numele Angajatului
 DocType: Holiday List,Clear Table,Sterge Masa
 DocType: Features Setup,Brands,Mărci
 DocType: C-Form Invoice Detail,Invoice No,Factura Nu
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +480,From Purchase Order, Din Ordinul de Comanda
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +559,From Purchase Order, Din Ordinul de Comanda
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +92,"Leave cannot be applied/cancelled before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}","Lasă nu poate fi aplicat / anulata pana la {0}, ca echilibru concediu a fost deja carry transmise în viitor înregistrarea alocare concediu {1}"
 DocType: Activity Cost,Costing Rate,Costing Rate
 ,Customer Addresses And Contacts,Adrese de clienți și Contacte
 DocType: Employee,Resignation Letter Date,Scrisoare de demisie Data
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +37,Pricing Rules are further filtered based on quantity.,Regulile de stabilire a prețurilor sunt filtrate în continuare în funcție de cantitate.
-apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +137,Not Set,Nu a fost setat
+apps/frappe/frappe/desk/page/applications/applications.js +45,Not Set,Nu a fost setat
 DocType: Communication,Date,Dată
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py +61,Repeat Customer Revenue,Repetați Venituri Clienți
 apps/frappe/frappe/desk/page/setup_wizard/setup_wizard.js +115,Sit tight while your system is being setup. This may take a few moments.,Stai bine în timp ce sistemul este în curs de instalare. Acest lucru poate dura câteva momente.
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py +51,{0} ({1}) must have role 'Expense Approver',"{0} ({1}) trebuie să dețină rolul de ""aprobator cheltuieli"""
-apps/erpnext/erpnext/public/js/setup_wizard.js +362,Pair,Pereche
+apps/erpnext/erpnext/public/js/setup_wizard.js +377,Pair,Pereche
 DocType: Bank Reconciliation Detail,Against Account,Comparativ contului
 DocType: Maintenance Schedule Detail,Actual Date,Data efectiva
 DocType: Item,Has Batch No,Are nr. de Lot
@@ -1626,7 +1629,7 @@ DocType: Leave Control Panel,Leave blank if considered for all employee types,L�
 DocType: Landed Cost Voucher,Distribute Charges Based On,Împărțiți taxelor pe baza
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +312,Account {0} must be of type 'Fixed Asset' as Item {1} is an Asset Item,Contul {0} trebuie să fie de tipul 'valoare stabilită' deoarece articolul {1} este un articol de valoare
 DocType: HR Settings,HR Settings,Setări Resurse Umane
-apps/frappe/frappe/config/setup.py +130,Printing,Tipărire
+apps/frappe/frappe/config/setup.py +138,Printing,Tipărire
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +114,Expense Claim is pending approval. Only the Expense Approver can update status.,Revendicarea Cheltuielilor este în curs de aprobare. Doar Aprobatorul de Cheltuieli poate actualiza statusul.
 DocType: Purchase Invoice,Additional Discount Amount,Reducere suplimentară Suma
 apps/frappe/frappe/public/js/frappe/misc/utils.js +110,and,și
@@ -1634,7 +1637,7 @@ DocType: Leave Block List Allow,Leave Block List Allow,Permite Lista Concedii Bl
 apps/erpnext/erpnext/setup/doctype/company/company.py +236,Abbr can not be blank or space,Abbr nu poate fi gol sau spațiu
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +50,Sports,Sport
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +61,Total Actual,Raport real
-apps/erpnext/erpnext/public/js/setup_wizard.js +362,Unit,Unitate
+apps/erpnext/erpnext/public/js/setup_wizard.js +377,Unit,Unitate
 apps/frappe/frappe/integrations/doctype/dropbox_backup/dropbox_backup.py +182,Please set Dropbox access keys in your site config,Vă rugăm să setați tastele de acces Dropbox pe site-ul dvs. de configurare
 apps/erpnext/erpnext/stock/get_item_details.py +113,Please specify Company,Vă rugăm să specificați companiei
 ,Customer Acquisition and Loyalty,Achiziționare și Loialitate Client
@@ -1663,7 +1666,7 @@ apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +72,disabled use
 DocType: Opportunity,Quotation,Citat
 DocType: Salary Slip,Total Deduction,Total de deducere
 DocType: Quotation,Maintenance User,Întreținere utilizator
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +144,Cost Updated,Cost actualizat
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +139,Cost Updated,Cost actualizat
 DocType: Employee,Date of Birth,Data Nașterii
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +82,Item {0} has already been returned,Articolul {0} a fost deja returnat
 DocType: Fiscal Year,**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.,**Anul fiscal** reprezintă un an financiar. Toate intrările contabile și alte tranzacții majore sunt monitorizate comparativ cu ** Anul fiscal **.
@@ -1701,7 +1704,6 @@ DocType: Employee,Bank Name,Denumire bancă
 apps/erpnext/erpnext/accounts/report/accounts_receivable_summary/accounts_receivable_summary.py +27,-Above,de mai sus
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +135,User {0} is disabled,Utilizatorul {0} este dezactivat
 DocType: Leave Application,Total Leave Days,Total de zile de concediu
-DocType: Journal Entry Account,Credit in Account Currency,Credit în cont valutar
 DocType: Email Digest,Note: Email will not be sent to disabled users,Notă: Adresa de email nu va fi trimis la utilizatorii cu handicap
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +36,Select Company...,Selectați compania ...
 DocType: Leave Control Panel,Leave blank if considered for all departments,Lăsați necompletat dacă se consideră pentru toate departamentele
@@ -1769,7 +1771,7 @@ DocType: Time Log,To Time,La timp
 DocType: Authorization Rule,Approving Role (above authorized value),Aprobarea Rol (mai mare decât valoarea autorizată)
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +25,"To add child nodes, explore tree and click on the node under which you want to add more nodes.","Pentru a adăuga noduri copil, explora copac și faceți clic pe nodul în care doriți să adăugați mai multe noduri."
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +102,Credit To account must be a Payable account,Credit Pentru cont trebuie să fie un cont de plati
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +233,BOM recursion: {0} cannot be parent or child of {2},Recursivitate FDM: {0} nu poate fi parinte sau copil lui {2}
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +228,BOM recursion: {0} cannot be parent or child of {2},Recursivitate FDM: {0} nu poate fi parinte sau copil lui {2}
 DocType: Production Order Operation,Completed Qty,Cantitate Finalizata
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +116,"For {0}, only debit accounts can be linked against another credit entry","Pentru {0}, numai conturi de debit poate fi legat de o altă intrare în credit"
 apps/erpnext/erpnext/stock/get_item_details.py +260,Price List {0} is disabled,Lista de prețuri {0} este dezactivat
@@ -1792,7 +1794,7 @@ apps/erpnext/erpnext/hr/report/monthly_salary_register/monthly_salary_register.p
 DocType: Bin,Actual Quantity,Cantitate Efectivă
 DocType: Shipping Rule,example: Next Day Shipping,exemplu: Next Day Shipping
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +188,Serial No {0} not found,Serial nr {0} nu a fost găsit
-apps/erpnext/erpnext/public/js/setup_wizard.js +303,Your Customers,Clienții dvs.
+apps/erpnext/erpnext/public/js/setup_wizard.js +318,Your Customers,Clienții dvs.
 DocType: Leave Block List Date,Block Date,Dată blocare
 DocType: Sales Order,Not Delivered,Nu Pronunțată
 ,Bank Clearance Summary,Sumar aprobare bancă
@@ -1839,13 +1841,13 @@ DocType: Cost Center,Track separate Income and Expense for product verticals or 
 DocType: Rename Tool,Rename Tool,Redenumirea Tool
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +15,Update Cost,Actualizare Cost
 DocType: Item Reorder,Item Reorder,Reordonare Articol
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +489,Transfer Material,Material de transfer
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +568,Transfer Material,Material de transfer
 DocType: BOM,"Specify the operations, operating cost and give a unique Operation no to your operations.","Specifica operațiunilor, costurile de exploatare și să dea o operațiune unică nu pentru operațiunile dumneavoastră."
 DocType: Purchase Invoice,Price List Currency,Lista de pret Valuta
 DocType: Naming Series,User must always select,Utilizatorul trebuie să selecteze întotdeauna
 DocType: Stock Settings,Allow Negative Stock,Permiteţi stoc negativ
 DocType: Installation Note,Installation Note,Instalare Notă
-apps/erpnext/erpnext/public/js/setup_wizard.js +283,Add Taxes,Adăugaţi Taxe
+apps/erpnext/erpnext/public/js/setup_wizard.js +298,Add Taxes,Adăugaţi Taxe
 ,Financial Analytics,Analitica Financiara
 DocType: Quality Inspection,Verified By,Verificate de
 DocType: Address,Subsidiary,Filială
@@ -1895,19 +1897,18 @@ apps/frappe/frappe/public/js/frappe/model/indicator.js +30,Draft,Ciornă
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +46,Compensatory Off,Fara Masuri Compensatorii
 DocType: Quality Inspection Reading,Accepted,Acceptat
 DocType: User,Female,Feminin
-DocType: Journal Entry Account,Debit in Account Currency,Debit în contul valutar
 apps/erpnext/erpnext/setup/doctype/company/company.js +24,Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.,Vă rugăm să asigurați-vă că într-adevăr să ștergeți toate tranzacțiile pentru această companie. Datele dvs. de bază vor rămâne așa cum este. Această acțiune nu poate fi anulată.
 DocType: Print Settings,Modern,Modern
 DocType: Communication,Replied,A răspuns:
 DocType: Payment Tool,Total Payment Amount,Raport de plată Suma
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +145,{0} ({1}) cannot be greater than planned quanitity ({2}) in Production Order {3},{0} ({1}) nu poate fi mai mare decât cantitatea planificată ({2}) aferent comenzii de producție {3}
 DocType: Shipping Rule,Shipping Rule Label,Regula de transport maritim Label
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +209,Raw Materials cannot be blank.,Materii prime nu poate fi gol.
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +204,Raw Materials cannot be blank.,Materii prime nu poate fi gol.
 DocType: Newsletter,Test,Test
 apps/erpnext/erpnext/stock/doctype/item/item.py +368,"As there are existing stock transactions for this item, \
 							you can not change the values of 'Has Serial No', 'Has Batch No', 'Is Stock Item' and 'Valuation Method'","Deoarece există tranzacții bursiere existente pentru acest element, \ nu puteți schimba valorile &quot;nu are nici o serie&quot;, &quot;are lot nr&quot;, &quot;Este Piesa&quot; și &quot;Metoda de evaluare&quot;"
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +448,Quick Journal Entry,Quick Jurnal de intrare
-apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +92,You can not change rate if BOM mentioned agianst any item,Nu puteți schimba rata dacă BOM menționat agianst orice element
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +100,You can not change rate if BOM mentioned agianst any item,Nu puteți schimba rata dacă BOM menționat agianst orice element
 DocType: Employee,Previous Work Experience,Anterior Work Experience
 DocType: Stock Entry,For Quantity,Pentru Cantitate
 apps/erpnext/erpnext/manufacturing/doctype/production_planning_tool/production_planning_tool.py +157,Please enter Planned Qty for Item {0} at row {1},Va rugam sa introduceti planificate Cantitate pentru postul {0} la rândul {1}
@@ -2001,7 +2002,7 @@ DocType: Note,Note,Notă
 DocType: Purchase Receipt Item,Recd Quantity,Recd Cantitate
 DocType: Email Account,Email Ids,Email Id-urile
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +104,Cannot produce more Item {0} than Sales Order quantity {1},Nu se pot produce mai multe Articole {0} decât cantitatea din Ordinul de Vânzări {1}
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +473,Stock Entry {0} is not submitted,Stock intrare {0} nu este prezentat
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +475,Stock Entry {0} is not submitted,Stock intrare {0} nu este prezentat
 DocType: Payment Reconciliation,Bank / Cash Account,Cont bancă / numerar 
 DocType: Tax Rule,Billing City,Oraș de facturare
 DocType: Global Defaults,Hide Currency Symbol,Ascunde simbol moneda
@@ -2116,7 +2117,7 @@ DocType: Bank Reconciliation Detail,Cheque Number,Număr Cec
 DocType: Payment Tool Detail,Payment Tool Detail,Plata Instrumentul Detalii
 ,Sales Browser,Vânzări Browser
 DocType: Journal Entry,Total Credit,Total credit
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +476,Warning: Another {0} # {1} exists against stock entry {2},Atenție: Un alt {0} # {1} există împotriva intrării stoc {2}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +478,Warning: Another {0} # {1} exists against stock entry {2},Atenție: Un alt {0} # {1} există împotriva intrării stoc {2}
 apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +397,Local,Local
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +26,Loans and Advances (Assets),Împrumuturi și Avansuri (Active)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +12,Debtors,Debitorii
@@ -2239,12 +2240,12 @@ DocType: Sales Taxes and Charges,Tax Amount After Discount Amount (Company Curre
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +149,Target warehouse is mandatory for row {0},Depozit țintă este obligatorie pentru rând {0}
 DocType: Quality Inspection,Quality Inspection,Inspecție de calitate
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +144,Extra Small,Extra Small
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +458,Warning: Material Requested Qty is less than Minimum Order Qty,Atenție: Materialul solicitat Cant este mai mică decât minima pentru comanda Cantitate
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +537,Warning: Material Requested Qty is less than Minimum Order Qty,Atenție: Materialul solicitat Cant este mai mică decât minima pentru comanda Cantitate
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +191,Account {0} is frozen,Contul {0} este Blocat
 DocType: Company,Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,Entitate juridică / Filiala cu o Grafic separat de conturi aparținând Organizației.
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +29,"Food, Beverage & Tobacco","Produse Alimentare, Bauturi si Tutun"
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +20,PL or BS,PL sau BS
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +531,Can only make payment against unbilled {0},Poate face doar plata împotriva facturată {0}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +533,Can only make payment against unbilled {0},Poate face doar plata împotriva facturată {0}
 apps/erpnext/erpnext/controllers/selling_controller.py +122,Commission rate cannot be greater than 100,Rata de comision nu poate fi mai mare decat 100
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +41,Minimum Inventory Level,Nivelul minim Inventarul
 DocType: Stock Entry,Subcontract,Subcontract
@@ -2393,7 +2394,7 @@ DocType: Sales Invoice Item,Available Qty at Warehouse,Cantitate disponibilă î
 DocType: Bank Reconciliation,Bank Reconciliation,Reconciliere bancară
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +9,Get Updates,Obțineți actualizări
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +133,Material Request {0} is cancelled or stopped,Cerere de material {0} este anulată sau oprită
-apps/erpnext/erpnext/public/js/setup_wizard.js +377,Add a few sample records,Adaugă câteva înregistrări eșantion
+apps/erpnext/erpnext/public/js/setup_wizard.js +392,Add a few sample records,Adaugă câteva înregistrări eșantion
 apps/erpnext/erpnext/config/hr.py +210,Leave Management,Lasă Managementul
 DocType: Event,Groups,Grupuri
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js +81,Group by Account,Grup in functie de Cont
@@ -2413,7 +2414,7 @@ apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +150,Customer 
 DocType: Sales Order,Customer's Purchase Order,Comandă clientului
 DocType: Warranty Claim,From Company,De la Compania
 apps/erpnext/erpnext/buying/page/purchase_analytics/purchase_analytics.js +95,Value or Qty,Valoare sau Cantitate
-apps/erpnext/erpnext/public/js/setup_wizard.js +363,Minute,Minut
+apps/erpnext/erpnext/public/js/setup_wizard.js +378,Minute,Minut
 DocType: Purchase Invoice,Purchase Taxes and Charges,Taxele de cumpărare și Taxe
 ,Qty to Receive,Cantitate de a primi
 DocType: Leave Block List,Leave Block List Allowed,Lista Concedii Blocate Permise
@@ -2433,6 +2434,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/sample_home_page.html +3,Awesome Pr
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +189,Opening Balance Equity,Sold Equity
 DocType: Appraisal,Appraisal,Expertiză
 apps/erpnext/erpnext/hr/doctype/leave_block_list/leave_block_list.py +22,Date is repeated,Data se repetă
+apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html +27,Authorized Signatory,Semnatar autorizat
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +162,Leave approver must be one of {0},Aprobator Concediu trebuie să fie unul din {0}
 DocType: Hub Settings,Seller Email,Vânzător de e-mail
 DocType: Project,Total Purchase Cost (via Purchase Invoice),Cost total de achiziție (prin cumparare factură)
@@ -2509,7 +2511,7 @@ DocType: POS Profile,Write Off Account,Scrie Off cont
 apps/erpnext/erpnext/public/js/pos/pos.html +28,Discount Amount,Reducere Suma
 DocType: Purchase Invoice,Return Against Purchase Invoice,Reveni Împotriva cumparare factură
 DocType: Item,Warranty Period (in days),Perioada de garanție (în zile)
-apps/erpnext/erpnext/public/js/setup_wizard.js +292,e.g. VAT,"de exemplu, TVA"
+apps/erpnext/erpnext/public/js/setup_wizard.js +307,e.g. VAT,"de exemplu, TVA"
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js +26,Item 4,Punctul 4
 DocType: Journal Entry Account,Journal Entry Account,Jurnal de cont intrare
 DocType: Shopping Cart Settings,Quotation Series,Ofertă Series
@@ -2556,6 +2558,7 @@ DocType: Monthly Distribution Percentage,Monthly Distribution Percentage,Lunar P
 DocType: Territory,Territory Targets,Obiective Territory
 DocType: Delivery Note,Transporter Info,Info Transporter
 DocType: Purchase Order Item Supplied,Purchase Order Item Supplied,Comandă de aprovizionare Articol Livrat
+apps/erpnext/erpnext/public/js/setup_wizard.js +174,Company Name cannot be Company,Numele companiei nu poate fi companie
 apps/erpnext/erpnext/config/setup.py +27,Letter Heads for print templates.,Antete de Scrisoare de Sabloane de Imprimare.
 apps/erpnext/erpnext/config/setup.py +32,Titles for print templates e.g. Proforma Invoice.,"Titluri de șabloane de imprimare, de exemplu proforma Factura."
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +140,Valuation type charges can not marked as Inclusive,Taxele de tip evaluare nu poate marcate ca Inclusive
@@ -2763,7 +2766,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +171,Responsibilitie
 apps/erpnext/erpnext/stock/doctype/item/item_list.js +11,Template,Șablon
 DocType: Sales Person,Sales Person Name,Sales Person Nume
 apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py +54,Please enter atleast 1 invoice in the table,Va rugam sa introduceti cel putin 1 factura în tabelul
-apps/erpnext/erpnext/public/js/setup_wizard.js +255,Add Users,Adauga utilizatori
+apps/erpnext/erpnext/public/js/setup_wizard.js +270,Add Users,Adauga utilizatori
 DocType: Pricing Rule,Item Group,Grup Articol
 DocType: Task,Actual Start Date (via Time Logs),Data efectivă de început (prin Jurnale de Timp)
 DocType: Stock Reconciliation Item,Before reconciliation,Premergător reconcilierii
@@ -2802,7 +2805,7 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +246,"Multipl
  prin atribuirea prioritate. Reguli Pret: {0}"
 DocType: Account,Bank,Bancă
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +9,Airline,Linie aeriană
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +493,Issue Material,Eliberarea Material
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +572,Issue Material,Eliberarea Material
 DocType: Material Request Item,For Warehouse,Pentru Depozit
 DocType: Employee,Offer Date,Oferta Date
 DocType: Hub Settings,Access Token,Acces Token
@@ -2838,7 +2841,7 @@ DocType: Workflow State,Search,Căutare
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +54,Total cannot be zero,Totalul nu poate să fie zero
 apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/customers_not_buying_since_long_time.py +16,'Days Since Last Order' must be greater than or equal to zero,'Zile de la ultima comandă' trebuie să fie mai mare sau egal cu zero
 DocType: C-Form,Amended From,Modificat din
-apps/erpnext/erpnext/public/js/setup_wizard.js +359,Raw Material,Material brut
+apps/erpnext/erpnext/public/js/setup_wizard.js +374,Raw Material,Material brut
 DocType: Leave Application,Follow via Email,Urmați prin e-mail
 DocType: Purchase Taxes and Charges,Tax Amount After Discount Amount,Suma taxa După Discount Suma
 apps/erpnext/erpnext/accounts/doctype/account/account.py +174,Child account exists for this account. You can not delete this account.,Contul copil există pentru acest cont. Nu puteți șterge acest cont.
@@ -2853,9 +2856,9 @@ DocType: Department,Days for which Holidays are blocked for this department.,Zil
 DocType: Item,Item Code for Suppliers,Articol Cod pentru Furnizori
 DocType: Issue,Raised By (Email),Ridicate de (e-mail)
 apps/erpnext/erpnext/setup/setup_wizard/default_website.py +72,General,General
-apps/erpnext/erpnext/public/js/setup_wizard.js +241,Attach Letterhead,Atașați antet
+apps/erpnext/erpnext/public/js/setup_wizard.js +256,Attach Letterhead,Atașați antet
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +272,Cannot deduct when category is for 'Valuation' or 'Valuation and Total',Nu se poate deduce când categoria este de 'Evaluare' sau 'Evaluare și total'
-apps/erpnext/erpnext/public/js/setup_wizard.js +284,"List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later.","Lista capetele fiscale (de exemplu, TVA, vamale etc., ei ar trebui să aibă nume unice) și ratele lor standard. Acest lucru va crea un model standard, pe care le puteți edita și adăuga mai târziu."
+apps/erpnext/erpnext/public/js/setup_wizard.js +299,"List your tax heads (e.g. VAT, Customs etc; they should have unique names) and their standard rates. This will create a standard template, which you can edit and add more later.","Lista capetele fiscale (de exemplu, TVA, vamale etc., ei ar trebui să aibă nume unice) și ratele lor standard. Acest lucru va crea un model standard, pe care le puteți edita și adăuga mai târziu."
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +230,Serial Nos Required for Serialized Item {0},Serial nr necesare pentru postul serializat {0}
 DocType: Journal Entry,Bank Entry,Intrare bancară
 DocType: Authorization Rule,Applicable To (Designation),Aplicabil pentru (destinaţie)
@@ -2869,11 +2872,11 @@ DocType: Purchase Order,The date on which recurring order will be stop,Data la c
 DocType: Quality Inspection,Item Serial No,Nr. de Serie Articol
 apps/erpnext/erpnext/controllers/status_updater.py +142,{0} must be reduced by {1} or you should increase overflow tolerance,{0} trebuie să fie redus cu {1} sau dvs. ar trebui să incrementați toleranța în exces
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +57,Total Present,Raport Prezent
-apps/erpnext/erpnext/public/js/setup_wizard.js +363,Hour,Oră
+apps/erpnext/erpnext/public/js/setup_wizard.js +378,Hour,Oră
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +138,"Serialized Item {0} cannot be updated \
 					using Stock Reconciliation","Postul serializate {0} nu poate fi actualizat \
  folosind stoc Reconciliere"
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +513,Transfer Material to Supplier,Transfer de material la furnizor
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +592,Transfer Material to Supplier,Transfer de material la furnizor
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +29,New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,Noua ordine nu pot avea Warehouse. Depozit trebuie să fie stabilite de către Bursa de intrare sau de primire de cumparare
 DocType: Lead,Lead Type,Tip Conducere
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +82,Create Quotation,Creare Ofertă
@@ -2912,7 +2915,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +410,Please
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,Vă rugăm să selectați reporta dacă doriți și să includă echilibrul de anul precedent fiscal lasă în acest an fiscal
 DocType: GL Entry,Against Voucher Type,Comparativ tipului de voucher
 DocType: Item,Attributes,Atribute
-DocType: Packing Slip,Get Items,Obtine Articole
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +477,Get Items,Obtine Articole
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +187,Please enter Write Off Account,Va rugam sa introduceti Scrie Off cont
 apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/customers_not_buying_since_long_time.py +71,Last Order Date,Ultima comandă Data
 DocType: DocField,Image,Imagine
@@ -2952,7 +2955,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Cr,Cr
 DocType: Customer,Default Receivable Accounts,Implicit Conturi creanțe
 DocType: Tax Rule,Billing State,Stat de facturare
 DocType: Item Reorder,Transfer,Transfer
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +549,Fetch exploded BOM (including sub-assemblies),Obtine FDM expandat (inclusiv subansamblurile)
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +628,Fetch exploded BOM (including sub-assemblies),Obtine FDM expandat (inclusiv subansamblurile)
 DocType: Authorization Rule,Applicable To (Employee),Aplicabil pentru (angajat)
 apps/erpnext/erpnext/controllers/accounts_controller.py +101,Due Date is mandatory,Due Date este obligatorie
 apps/erpnext/erpnext/controllers/item_variant.py +51,Increment for Attribute {0} cannot be 0,Creștere pentru Atribut {0} nu poate fi 0
@@ -2966,7 +2969,7 @@ DocType: Quality Inspection,Delivery Note No,Nr. Nota de Livrare
 DocType: Company,Retail,Cu amănuntul
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +108,Customer {0} does not exist,Clientul {0} nu există
 DocType: Attendance,Absent,Absent
-DocType: Product Bundle,Product Bundle,Bundle produs
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +463,Product Bundle,Bundle produs
 DocType: Purchase Taxes and Charges Template,Purchase Taxes and Charges Template,Achiziționa impozite și taxe Template
 DocType: Upload Attendance,Download Template,Descărcați Sablon
 DocType: GL Entry,Remarks,Remarci
@@ -2994,6 +2997,7 @@ DocType: Sales Invoice,Product Bundle Help,Produs Bundle Ajutor
 ,Monthly Attendance Sheet,Lunar foaia de prezență
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +16,No record found,Nu s-au găsit înregistrări
 apps/erpnext/erpnext/controllers/stock_controller.py +175,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Center de Cost este obligatoriu pentru articolul {2}
+DocType: Purchase Invoice,Get Items from Product Bundle,Obține elemente din Bundle produse
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +79,Account {0} is inactive,Contul {0} este inactiv
 DocType: GL Entry,Is Advance,Este Advance
 apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.js +21,Attendance From Date and Attendance To Date is mandatory,Prezenţa de la data și prezența până la data sunt obligatorii
@@ -3057,7 +3061,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +137,Planning,Planif
 apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +9,Make Time Log Batch,Ora face Log lot
 apps/erpnext/erpnext/stock/doctype/material_request/material_request_list.js +14,Issued,Emis
 DocType: Project,Total Billing Amount (via Time Logs),Suma totală de facturare (prin timp Busteni)
-apps/erpnext/erpnext/public/js/setup_wizard.js +365,We sell this Item,Vindem acest articol
+apps/erpnext/erpnext/public/js/setup_wizard.js +380,We sell this Item,Vindem acest articol
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +65,Supplier Id,Furnizor Id
 DocType: Journal Entry,Cash Entry,Cash intrare
 DocType: Sales Partner,Contact Desc,Persoana de Contact Desc
@@ -3120,7 +3124,7 @@ DocType: Letter Head,Letter Head,Antet Scrisoare
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +27,Quick Entry,Intrarea rapidă
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +20,{0} is mandatory for Return,{0} este obligatorie pentru returnare
 DocType: Purchase Order,To Receive,A Primi
-apps/erpnext/erpnext/public/js/setup_wizard.js +266,user@example.com,user@example.com
+apps/erpnext/erpnext/public/js/setup_wizard.js +281,user@example.com,user@example.com
 DocType: Email Digest,Income / Expense,Venituri / cheltuieli
 DocType: Employee,Personal Email,Personal de e-mail
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +62,Total Variance,Raport Variance
@@ -3187,15 +3191,15 @@ DocType: Company,Domain,Domeniu
 DocType: Employee,Held On,Organizat In
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order_calendar.js +33,Production Item,Producția Postul
 ,Employee Information,Informații angajat
-apps/erpnext/erpnext/public/js/setup_wizard.js +294,Rate (%),Rate (%)
+apps/erpnext/erpnext/public/js/setup_wizard.js +309,Rate (%),Rate (%)
 DocType: Stock Entry Detail,Additional Cost,Cost aditional
 apps/erpnext/erpnext/public/js/setup_wizard.js +155,Financial Year End Date,Data de Incheiere An Financiar
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +36,"Can not filter based on Voucher No, if grouped by Voucher","Nu se poate filtra pe baza voucher Nr., în cazul gruparii in functie de Voucher"
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +484,Make Supplier Quotation,Realizeaza Ofertă Furnizor
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +563,Make Supplier Quotation,Realizeaza Ofertă Furnizor
 DocType: Quality Inspection,Incoming,Primite
 DocType: BOM,Materials Required (Exploded),Materiale necesare (explodat)
 DocType: Salary Structure Earning,Reduce Earning for Leave Without Pay (LWP),Reduce Câștigul salarial de concediu fără plată (LWP)
-apps/erpnext/erpnext/public/js/setup_wizard.js +256,"Add users to your organization, other than yourself","Adăugați utilizatori la organizația dvs., altele decât tine"
+apps/erpnext/erpnext/public/js/setup_wizard.js +271,"Add users to your organization, other than yourself","Adăugați utilizatori la organizația dvs., altele decât tine"
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +44,Casual Leave,Concediu Aleator
 DocType: Batch,Batch ID,ID-ul lotului
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +336,Note: {0},Notă: {0}
@@ -3262,7 +3266,6 @@ DocType: Customer,Customer Details,Detalii Client
 DocType: Employee,Reports to,Rapoarte
 DocType: SMS Settings,Enter url parameter for receiver nos,Introduceți parametru url pentru receptor nos
 DocType: Sales Invoice,Paid Amount,Suma plătită
-apps/erpnext/erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py +27,Closing Account {0} must be of type 'Liability',Inchiderea Contului {0} trebuie să fie de tip 'Răspundere'
 ,Available Stock for Packing Items,Stoc disponibil pentru articole destinate împachetării
 DocType: Item Variant,Item Variant,Postul Varianta
 apps/erpnext/erpnext/utilities/doctype/address_template/address_template.py +15,Setting this Address Template as default as there is no other default,Setarea acestei Format Adresa implicit ca nu exista nici un alt implicit
@@ -3467,7 +3470,7 @@ DocType: Sales Invoice,C-Form Applicable,Formular-C aplicabil
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +340,Operation Time must be greater than 0 for Operation {0},Funcționarea timp trebuie să fie mai mare decât 0 pentru funcționare {0}
 DocType: Supplier,Address and Contacts,Adresa si contact
 DocType: UOM Conversion Detail,UOM Conversion Detail,Detaliu UOM de conversie
-apps/erpnext/erpnext/public/js/setup_wizard.js +242,Keep it web friendly 900px (w) by 100px (h),Păstrați-l in parametrii web amiabili si anume 900px (w) pe 100px (h)
+apps/erpnext/erpnext/public/js/setup_wizard.js +257,Keep it web friendly 900px (w) by 100px (h),Păstrați-l in parametrii web amiabili si anume 900px (w) pe 100px (h)
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +329,Production Order cannot be raised against a Item Template,Producția Comanda nu poate fi ridicată pe un șablon Postul
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +44,Charges are updated in Purchase Receipt against each item,Tarifele sunt actualizate în Primirea cumparare pentru fiecare articol
 DocType: Payment Tool,Get Outstanding Vouchers,Ia restante Tichete
@@ -3488,7 +3491,7 @@ apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +4
 DocType: Dropbox Backup,Dropbox Access Allowed,Acces Dropbox Permis
 DocType: Dropbox Backup,Weekly,Săptămânal
 DocType: SMS Settings,Eg. smsgateway.com/api/send_sms.cgi,De exemplu. smsgateway.com / API / send_sms.cgi
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +510,Receive,Primi
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +589,Receive,Primi
 DocType: Maintenance Visit,Fully Completed,Completat in Intregime
 apps/erpnext/erpnext/projects/doctype/project/project_list.js +6,{0}% Complete,{0}% complet
 DocType: Employee,Educational Qualification,Detalii Calificare de Învățământ
@@ -3544,10 +3547,11 @@ DocType: Naming Series,Help HTML,Ajutor HTML
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py +50,Total weightage assigned should be 100%. It is {0},Weightage total alocat este de 100%. Este {0}
 apps/erpnext/erpnext/controllers/status_updater.py +140,Allowance for over-{0} crossed for Item {1},Alocație mai mare decât -{0} anulată pentru articolul {1}
 DocType: Address,Name of person or organization that this address belongs to.,Nume de persoană sau organizație care această adresă aparține.
-apps/erpnext/erpnext/public/js/setup_wizard.js +325,Your Suppliers,Furnizorii dumneavoastră
+apps/erpnext/erpnext/public/js/setup_wizard.js +340,Your Suppliers,Furnizorii dumneavoastră
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.py +58,Cannot set as Lost as Sales Order is made.,Nu se poate seta pierdut deoarece se intocmeste comandă de vânzări.
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +65,Another Salary Structure {0} is active for employee {1}. Please make its status 'Inactive' to proceed.,"O altă structură salarială {0} este activă pentru angajatul {1}. Vă rugăm să îi setaţi statusul ""inactiv"" pentru a continua."
 DocType: Purchase Invoice,Contact,Persoana de Contact
+apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html +9,Received From,Primit de la
 DocType: Features Setup,Exports,Exporturi
 DocType: Lead,Converted,Transformat
 DocType: Item,Has Serial No,Are nr. de serie
@@ -3593,6 +3597,7 @@ DocType: Target Detail,Target Qty,Țintă Cantitate
 DocType: Attendance,Present,Prezenta
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +35,Delivery Note {0} must not be submitted,Nota de Livrare {0} nu trebuie sa fie introdusa
 DocType: Notification Control,Sales Invoice Message,Factură de vânzări Mesaj
+apps/erpnext/erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py +27,Closing Account {0} must be of type Liability / Equity,Contul {0} de închidere trebuie să fie de tip răspunderii / capitaluri proprii
 DocType: Authorization Rule,Based On,Bazat pe
 DocType: Sales Order Item,Ordered Qty,Ordonat Cantitate
 apps/erpnext/erpnext/stock/doctype/item/item.py +543,Item {0} is disabled,Postul {0} este dezactivat
@@ -3774,6 +3779,7 @@ apps/erpnext/erpnext/config/hr.py +220,Processing Payroll,Prelucrare de salariza
 DocType: Opportunity Item,Basic Rate,Rată elementară
 DocType: GL Entry,Credit Amount,Suma de credit
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +141,Set as Lost,Setați ca Lost
+apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html +4,Payment Receipt Note,Plată Primirea Note
 DocType: Customer,Credit Days Based On,Zile de credit pe baza
 DocType: Tax Rule,Tax Rule,Regula de impozitare
 DocType: Selling Settings,Maintain Same Rate Throughout Sales Cycle,Menține Aceeași Rată in Cursul Ciclului de Vânzări
@@ -3804,7 +3810,7 @@ apps/erpnext/erpnext/accounts/party.py +25,{0}: {1} does not exists,{0}: {1} nu 
 apps/erpnext/erpnext/config/accounts.py +18,Bills raised to Customers.,Facturi cu valoarea ridicată pentru clienți.
 DocType: DocField,Default,Implicit
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +26,Project Id,Id-ul proiectului
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +468,Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2},Rândul nr {0}: Suma nu poate fi mai mare decât așteptarea Suma împotriva revendicării cheltuieli {1}. În așteptarea Suma este {2}
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +470,Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2},Rândul nr {0}: Suma nu poate fi mai mare decât așteptarea Suma împotriva revendicării cheltuieli {1}. În așteptarea Suma este {2}
 apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.py +40,{0} subscribers added,{0} abonați adăugați
 DocType: Maintenance Schedule,Schedule,Program
 DocType: Cost Center,"Define Budget for this Cost Center. To set budget action, see ""Company List""","Definirea Bugetul pentru acest centru de cost. Pentru a seta o acțiune buget, consultați &quot;Lista Firme&quot;"
@@ -3838,7 +3844,7 @@ DocType: Employee,Contract End Date,Data de Incheiere Contract
 DocType: Sales Order,Track this Sales Order against any Project,Urmareste acest Ordin de vânzări față de orice proiect
 DocType: Production Planning Tool,Pull sales orders (pending to deliver) based on the above criteria,"Trage comenzi de vânzări (în curs de a livra), pe baza criteriilor de mai sus"
 DocType: DocShare,Document Type,Tip Document
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +588,From Supplier Quotation,Din Furnizor de Ofertă
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +667,From Supplier Quotation,Din Furnizor de Ofertă
 DocType: Deduction Type,Deduction Type,Tip Deducerea
 DocType: Attendance,Half Day,Jumătate de zi
 DocType: Pricing Rule,Min Qty,Min Cantitate
@@ -3872,7 +3878,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.js +238,Row {0}:
 apps/erpnext/erpnext/buying/doctype/supplier/supplier.js +46,Total Unpaid,Totală neremunerată
 apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +21,Time Log is not billable,Timpul Conectare nu este facturabile
 apps/erpnext/erpnext/stock/get_item_details.py +128,"Item {0} is a template, please select one of its variants","Postul {0} este un șablon, vă rugăm să selectați unul dintre variantele sale"
-apps/erpnext/erpnext/public/js/setup_wizard.js +272,Purchaser,Cumpărător
+apps/erpnext/erpnext/public/js/setup_wizard.js +287,Purchaser,Cumpărător
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.py +81,Net pay cannot be negative,Salariul net nu poate fi negativ
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.py +107,Please enter the Against Vouchers manually,Va rugam sa introduceti pe baza documentelor justificative manual
 DocType: SMS Settings,Static Parameters,Parametrii statice
@@ -3898,7 +3904,7 @@ apps/erpnext/erpnext/setup/doctype/currency_exchange/currency_exchange.py +19,Fr
 DocType: Stock Entry,Repack,Reambalați
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +6,You must Save the form before proceeding,Trebuie să salvați formularul înainte de a începe
 DocType: Item Attribute,Numeric Values,Valori numerice
-apps/erpnext/erpnext/public/js/setup_wizard.js +246,Attach Logo,Atașați logo
+apps/erpnext/erpnext/public/js/setup_wizard.js +261,Attach Logo,Atașați logo
 DocType: Customer,Commission Rate,Rata de Comision
 apps/erpnext/erpnext/stock/doctype/item/item.js +38,Make Variant,Face Varianta
 apps/erpnext/erpnext/config/hr.py +145,Block leave applications by department.,Blocaţi cereri de concediu pe departamente.
@@ -3928,7 +3934,7 @@ DocType: Global Defaults,Do not show any symbol like $ etc next to currencies.,N
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +374, (Half Day),(Jumatate de zi)
 DocType: Supplier,Credit Days,Zile de Credit
 DocType: Leave Type,Is Carry Forward,Este Carry Forward
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +478,Get Items from BOM,Obține articole din FDM
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +557,Get Items from BOM,Obține articole din FDM
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +41,Lead Time Days,Timpul in Zile Conducere
 apps/erpnext/erpnext/config/manufacturing.py +120,Bill of Materials,Proiect de lege de materiale
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +77,Row {0}: Party Type and Party is required for Receivable / Payable account {1},Row {0}: Partidul Tipul și Partidul este necesar pentru creanțe / cont plateste {1}
