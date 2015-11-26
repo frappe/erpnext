@@ -64,7 +64,7 @@ website_route_rules = [
 	{"from_route": "/shipments", "to_route": "Delivery Note"},
 	{"from_route": "/shipments/<path:name>", "to_route": "order",
 		"defaults": {
-			"doctype": "Delivery Notes",
+			"doctype": "Delivery Note",
 			"parents": [{"title": _("Shipments"), "name": "shipments"}]
 		}
 	}
