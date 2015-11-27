@@ -662,7 +662,5 @@ def check_stock_uom_with_bin(item, stock_uom):
 			frappe.db.sql("""update tabBin set stock_uom=%s where item_code=%s""", (stock_uom, item))
 
 	if not matched:
-		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because \
-			you have already made some transaction(s) with another UOM. To change default UOM, \
-			use 'UOM Replace Utility' tool under Stock module.").format(item))
+		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
 

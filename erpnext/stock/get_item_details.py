@@ -69,7 +69,7 @@ def get_item_details(args):
 
 	if args.get("is_subcontracted") == "Yes":
 		out.bom = get_default_bom(args.item_code)
-		
+
 	return out
 
 def process_args(args):
@@ -427,6 +427,9 @@ def get_price_list_currency(price_list):
 		return result.currency
 
 def get_price_list_currency_and_exchange_rate(args):
+	if not args.price_list:
+		return {}
+
 	price_list_currency = get_price_list_currency(args.price_list)
 	plc_conversion_rate = args.plc_conversion_rate
 
