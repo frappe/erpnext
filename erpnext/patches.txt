@@ -236,3 +236,4 @@ erpnext.patches.v6_8.make_webform_standard #2015-11-23
 erpnext.patches.v6_8.move_drop_ship_to_po_items
 erpnext.patches.v6_10.fix_ordered_received_billed
 erpnext.patches.v6_10.fix_jv_total_amount
+erpnext.patches.v6_10.email_digest_default_quote
