@@ -347,7 +347,7 @@ class JournalEntry(AccountsController):
 						"customer_name" if d.party_type=="Customer" else "supplier_name")
 
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
-				total_amount += (d.debit or d.credit)
+				total_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
 
 		self.set_total_amount(total_amount)
 
