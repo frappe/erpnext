@@ -72,21 +72,20 @@ def get_exchange_rate(from_currency, to_currency):
 			key = "currency_exchange_rate:{0}:{1}".format(from_currency, to_currency)
 			value = cache.get(key)
 
-			print value
-
 			if not value:
 				import requests
 				response = requests.get("http://api.fixer.io/latest", params={
 					"base": from_currency,
 					"symbols": to_currency
 				})
-				# expire in 24 hours
+				# expire in 6 hours
 				response.raise_for_status()
 				value = response.json()["rates"][to_currency]
-				cache.setex(key, value, 24 * 60 * 60)
+				cache.setex(key, value, 6 * 60 * 60)
+
 			return flt(value)
 		except:
-			frappe.msgprint(_("Unable to find exchange rate"))
+			frappe.msgprint(_("Unable to find exchange rate for {0} to {1}").format(from_currency, to_currency))
 			return 0.0
 	else:
 		return value
