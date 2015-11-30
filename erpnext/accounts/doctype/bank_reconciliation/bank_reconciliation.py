@@ -18,9 +18,8 @@ class BankReconciliation(Document):
 			condition = "and (clearance_date is null or clearance_date='0000-00-00')"
 
 
-		dl = frappe.db.sql("""select t1.name, t1.cheque_no, t1.cheque_date, t2.debit,
-				t2.credit, t1.posting_date, t2.against_account, t1.clearance_date,
-				t2.reference_type, t2.reference_name
+		dl = frappe.db.sql("""select t1.name, t1.cheque_no, t1.cheque_date, t2.debit_in_account_currency,
+				t2.credit_in_account_currency, t1.posting_date, t2.against_account, t1.clearance_date
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
@@ -39,11 +38,11 @@ class BankReconciliation(Document):
 			nl.voucher_id = d.name
 			nl.cheque_number = d.cheque_no
 			nl.cheque_date = d.cheque_date
-			nl.debit = d.debit
-			nl.credit = d.credit
+			nl.debit = d.debit_in_account_currency
+			nl.credit = d.credit_in_account_currency
 			nl.against_account = d.against_account
 			nl.clearance_date = d.clearance_date
-			self.total_amount += flt(d.debit) - flt(d.credit)
+			self.total_amount += flt(d.debit_in_account_currency) - flt(d.credit_in_account_currency)
 
 	def update_details(self):
 		vouchers = []
