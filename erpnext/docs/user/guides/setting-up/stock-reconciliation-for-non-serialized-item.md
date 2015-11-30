@@ -33,11 +33,7 @@ A predefined template of an spreadsheet file should be followed for importing it
 
 ![Stock Reco Data]({{url_prefix}}/assets/old_images/erpnext/stock-reco-data.png)
 
-The csv format is case-sensitive. Do not edit the headers which are preset in the template. In the Item Code and Warehouse column, enter exact Item Code and Warehouse as created in your ERPNext account. For quatity, enter stock level you wish to set for that item, in a specific warehouse. If you do not want to change the quantity or valuation rate of an Item, you should leave it blank.
-
-Note: Make sure you do not put zero if you do not want to change the quantity
-amount or valuation amount. The system will calculate zero as zero quantity.
-So leave the field blank.
+The csv format is case-sensitive. Do not edit the headers which are preset in the template. In the Item Code and Warehouse column, enter exact Item Code and Warehouse as created in your ERPNext account. For quatity, enter stock level you wish to set for that item, in a specific warehouse.
 
 #### **Step 3: Upload file and Enter Values in Stock Reconciliation Form
 
