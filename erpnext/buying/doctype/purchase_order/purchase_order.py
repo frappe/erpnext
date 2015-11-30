@@ -48,7 +48,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_for_subcontracting()
 		self.validate_minimum_order_qty()
 		self.create_raw_materials_supplied("supplied_items")
-		self.set_received_qty_and_billed_amount_for_drop_ship_items()
+		self.set_received_qty_for_drop_ship_items()
 
 	def validate_with_previous_doc(self):
 		super(PurchaseOrder, self).validate_with_previous_doc({
@@ -253,11 +253,10 @@ class PurchaseOrder(BuyingController):
 		
 		return is_drop_ship
 	
-	def set_received_qty_and_billed_amount_for_drop_ship_items(self):
+	def set_received_qty_for_drop_ship_items(self):
 		for item in self.items:
 			if item.delivered_by_supplier == 1:
 				item.received_qty = item.qty
-				item.billed_amt = item.amount
 
 @frappe.whitelist()
 def stop_or_unstop_purchase_orders(names, status):
@@ -342,7 +341,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"parent": "purchase_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: (doc.base_amount==0 or doc.billed_amt < doc.amount) and doc.delivered_by_supplier!=1
+			"condition": lambda doc: (doc.base_amount==0 or doc.billed_amt < doc.amount)
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",

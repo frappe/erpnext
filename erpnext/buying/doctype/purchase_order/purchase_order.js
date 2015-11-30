@@ -47,14 +47,14 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				cur_frm.add_custom_button(__('Close'), this.close_purchase_order);
 			}
 
-			if(is_drop_ship && doc.status!="Delivered"){
-				cur_frm.add_custom_button(__('Mark as Delivered'), this.delivered_by_supplier);
-			}
-
 			if(flt(doc.per_billed)==0) {
 				cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_bank_entry);
 			}
-
+			
+			if(is_drop_ship && doc.status!="Delivered"){
+				cur_frm.add_custom_button(__('Mark as Delivered'),
+					 this.delivered_by_supplier).addClass("btn-primary");
+			}
 		} else if(doc.docstatus===0) {
 			cur_frm.cscript.add_from_mappers();
 		} 
@@ -70,12 +70,13 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			}
 
 			if(flt(doc.per_billed, 2) < 100)
-				cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice);	
+				cur_frm.add_custom_button(__('Invoice'), 
+					this.make_purchase_invoice).addClass("btn-primary");	
 		}
 		
 		if(doc.docstatus == 1 && in_list(["Stopped", "Closed", "Delivered"], doc.status)) {
 			if (this.frm.has_perm("submit")) {
-				cur_frm.add_custom_button(__('Re-open'), this.unstop_purchase_order);
+				cur_frm.add_custom_button(__('Re-open'), this.unstop_purchase_order).addClass("btn-primary");
 			}
 		}
 	},
