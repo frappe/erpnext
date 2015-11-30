@@ -60,7 +60,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		} 
 		
 		if(doc.docstatus == 1 && !in_list(["Stopped", "Closed"], doc.status)) {
-			if(flt(doc.per_received, 2) < 100 && this.frm.doc.__onload.has_stock_item && allow_receipt) {
+			if(flt(doc.per_received, 2) < 100 && allow_receipt) {
 				cur_frm.add_custom_button(__('Receive'), this.make_purchase_receipt).addClass("btn-primary");
 
 				if(doc.is_subcontracted==="Yes") {
