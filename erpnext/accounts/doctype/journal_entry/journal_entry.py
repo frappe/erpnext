@@ -750,6 +750,9 @@ def get_exchange_rate(account, account_currency=None, company=None,
 	account_details = frappe.db.get_value("Account", account,
 		["account_type", "root_type", "account_currency", "company"], as_dict=1)
 
+	if not account_details:
+		frappe.throw(_("Please select correct account"))
+
 	if not company:
 		company = account_details.company
 
