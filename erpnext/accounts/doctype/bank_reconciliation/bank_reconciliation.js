@@ -4,7 +4,7 @@
 frappe.ui.form.on("Bank Reconciliation", {
 	setup: function(frm) {
 		frm.get_docfield("journal_entries").allow_bulk_edit = 1;
-		frm.add_fetch("bank_account", "company", "company");
+		frm.add_fetch("bank_account", "account_currency", "account_currency");
 	},
 
 	onload: function(frm) {
