@@ -26,9 +26,9 @@ def get_children():
 		acc = frappe.db.sql(""" select
 			name as value, is_group as expandable %s
 			from `tab%s`
-			where ifnull(parent_%s,'') = ''
+			where ifnull(`parent_%s`,'') = ''
 			and `company` = %s	and docstatus<2
-			order by name""" % (select_cond, ctype, ctype.lower().replace(' ','_'), '%s'),
+			order by name""" % (select_cond, frappe.db.escape(ctype), frappe.db.escape(ctype.lower().replace(' ','_')), '%s'),
 				company, as_dict=1)
 
 		if args["parent"]=="Accounts":
@@ -38,9 +38,9 @@ def get_children():
 		acc = frappe.db.sql("""select
 			name as value, is_group as expandable
 	 		from `tab%s`
-			where ifnull(parent_%s,'') = %s
+			where ifnull(`parent_%s`,'') = %s
 			and docstatus<2
-			order by name""" % (ctype, ctype.lower().replace(' ','_'), '%s'),
+			order by name""" % (frappe.db.escape(ctype), frappe.db.escape(ctype.lower().replace(' ','_')), '%s'),
 				args['parent'], as_dict=1)
 
 	if ctype == 'Account':
