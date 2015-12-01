@@ -19,7 +19,7 @@ DocType: POS Profile,Applicable for User,អាច​ប្រើប្រាស
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +169,"Stopped Production Order cannot be cancelled, Unstop it first to cancel",បញ្ឈប់​ការ​បញ្ជា​ទិញ​ផលិត​ផល​ដែល​មិន​អាច​ត្រូវ​បាន​លុបចោល​ឮ​វា​ជា​លើក​ដំបូង​ដើម្បី​បោះបង់
 DocType: Sales Taxes and Charges Template,* Will be calculated in the transaction.,* នឹង​ត្រូវ​បាន​គណនា​ក្នុង​ប្រតិបត្តិការ​នេះ​។
 DocType: Purchase Order,Customer Contact,ទំនាក់ទំនង​អតិថិជន
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +651,From Material Request,ពី​សម្ភារៈ​ស្នើ​សុំ
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +660,From Material Request,ពី​សម្ភារៈ​ស្នើ​សុំ
 DocType: Job Applicant,Job Applicant,ការងារ​ដែល​អ្នក​ដាក់ពាក្យសុំ
 apps/erpnext/erpnext/hub_node/page/hub/hub_body.html +18,No more results.,មិន​មាន​លទ្ធផល​ជា​ច្រើន​ទៀត​។
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +34,Legal,ផ្នែក​ច្បាប់
@@ -45,7 +45,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +134,Bank Draft,ស�
 DocType: Features Setup,1. To maintain the customer wise item code and to make them searchable based on their code use this option,1. ដើម្បី​រក្សា​អតិថិជន​លេខ​កូដ​ធាតុ​ដែល​មាន​ប្រាជ្ញា​និង​ដើម្បី​ធ្វើ​ឱ្យ​ពួកគេ​អាច​ស្វែងរក​ដោយ​ផ្អែក​លើ​ការ​ប្រើ​ប្រាស់​កូដ​របស់​ពួក​គេ​ជម្រើស​នេះ
 DocType: Mode of Payment Account,Mode of Payment Account,របៀប​នៃ​ការ​ទូទាត់​គណនី
 apps/erpnext/erpnext/stock/doctype/item/item.js +34,Show Variants,បង្ហាញ​វ៉ា​រ្យ៉​ង់
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +470,Quantity,បរិមាណ​ដែល​ត្រូវ​ទទួលទាន
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +478,Quantity,បរិមាណ​ដែល​ត្រូវ​ទទួលទាន
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +174,Loans (Liabilities),ការ​ផ្តល់​ប្រាក់​កម្ចី (បំណុល​)
 DocType: Employee Education,Year of Passing,ឆ្នាំ Pass
 apps/erpnext/erpnext/public/js/pos/pos_bill_item.html +12,In Stock,នៅ​ក្នុង​ផ្សារ
@@ -55,7 +55,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos_page.html +13,Make new POS Profile,�
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +31,Health Care,ការថែទាំ​សុខភាព
 DocType: Purchase Invoice,Monthly,ប្រចាំខែ
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +66,Delay in payment (Days),ព​ន្យា​ពេល​ក្នុង​ការ​ទូទាត់ (ថ្ងៃ​)
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +598,Invoice,វិ​ក័​យ​ប័ត្រ
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +606,Invoice,វិ​ក័​យ​ប័ត្រ
 DocType: Maintenance Schedule Item,Periodicity,រយៈ​ពេល
 apps/erpnext/erpnext/public/js/setup_wizard.js +107,Email Address,អាសយដ្ឋាន​អ៊ី​ម៉ែ​ល
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +21,Defense,ការពារ​ជាតិ
@@ -90,7 +90,7 @@ apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +30,Grocery,គ្រ�
 DocType: Quality Inspection Reading,Reading 1,ការ​អាន​ទី 1
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +100,Make Bank Entry,ធ្វើ​ឱ្យ​ធាតុ​របស់​ធនាគារ
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +40,Pension Funds,មូលនិធិ​សោធន​និវត្តន៍
-apps/erpnext/erpnext/accounts/doctype/account/account.py +142,Warehouse is mandatory if account type is Warehouse,ឃ្លាំង​គឺ​ជា​ចាំបាច់​បើ​សិន​ជា​ប្រភេទ​គណនី​គឺ​ឃ្លាំង
+apps/erpnext/erpnext/accounts/doctype/account/account.py +149,Warehouse is mandatory if account type is Warehouse,ឃ្លាំង​គឺ​ជា​ចាំបាច់​បើ​សិន​ជា​ប្រភេទ​គណនី​គឺ​ឃ្លាំង
 DocType: SMS Center,All Sales Person,ការ​លក់​របស់​បុគ្គល​ទាំង​អស់
 DocType: Lead,Person Name,ឈ្មោះ​បុគ្គល
 DocType: Sales Order,"Check if recurring order, uncheck to stop recurring or put proper End Date","ពិនិត្យ​មើល​ប្រសិន​បើ​កើតឡើង​លំដាប់​, ដោះ​ធីក​ដើម្បី​បញ្ឈប់​ការ​កើតឡើង​ឬ​ដាក់​កាលបរិច្ឆេទ​បញ្ចប់​ឱ្យ​បាន​ត្រឹមត្រូវ"
@@ -113,7 +113,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +158,Openi
 DocType: Item,Copy From Item Group,ការ​ចម្លង​ពី​ធាតុ​គ្រុប
 DocType: Journal Entry,Opening Entry,ការ​បើក​ចូល
 DocType: Stock Entry,Additional Costs,ការ​ចំណាយ​បន្ថែម​ទៀត
-apps/erpnext/erpnext/accounts/doctype/account/account.py +113,Account with existing transaction can not be converted to group.,គណនី​ប្រតិបត្តិការ​ដែល​មាន​ស្រាប់​ដែល​មិន​អាច​ត្រូវ​បាន​បម្លែង​ទៅ​ជា​ក្រុម​។
+apps/erpnext/erpnext/accounts/doctype/account/account.py +120,Account with existing transaction can not be converted to group.,គណនី​ប្រតិបត្តិការ​ដែល​មាន​ស្រាប់​ដែល​មិន​អាច​ត្រូវ​បាន​បម្លែង​ទៅ​ជា​ក្រុម​។
 DocType: Lead,Product Enquiry,ផលិតផល​សំណួរ
 DocType: Standard Reply,Owner,ម្ចាស់
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +13,Please enter company first,សូម​បញ្ចូល​ក្រុមហ៊ុន​ដំបូង
@@ -159,7 +159,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +140,Execution,ក�
 apps/erpnext/erpnext/public/js/setup_wizard.js +114,The first user will become the System Manager (you can change this later).,អ្នក​ប្រើ​ដំបូង​នឹង​ក្លាយ​​​ជា​អ្នក​គ្រប់​គ្រង​ប្រព័ន្ធ (អ្នក​អាច​ផ្លាស់​ប្តូ​រ​នៅ​ពេល​ក្រោយ​នេះ​) ។
 apps/erpnext/erpnext/config/manufacturing.py +39,Details of the operations carried out.,ព​ត៌​មាន​លំអិត​នៃ​ការ​ប្រតិ​ប​ត្ដិ​ការ​នេះ​បាន​អនុវត្ត​។
 DocType: Serial No,Maintenance Status,ស្ថានភាព​ថែទាំ
-apps/erpnext/erpnext/config/stock.py +263,Items and Pricing,ធាតុ​និង​តម្លៃ
+apps/erpnext/erpnext/config/stock.py +258,Items and Pricing,ធាតុ​និង​តម្លៃ
 DocType: Appraisal,Select the Employee for whom you are creating the Appraisal.,ជ្រើស​និយោជិត​ដែល​អ្នក​កំពុង​បង្កើត​វាយតម្លៃ​នេះ​។
 DocType: Customer,Individual,បុ​គ​គ​ល
 apps/erpnext/erpnext/config/support.py +23,Plan for maintenance visits.,ផែន​ការ​សម្រាប់​ការ​មើល​ថែទាំ​។
@@ -207,7 +207,7 @@ DocType: Item Website Specification,Item Website Specification,បញ្ជា�
 DocType: Dropbox Backup,Dropbox Access Key,Dropbox គន្លឹះ​ចូល​ដំណើរ​ការ
 DocType: Payment Tool,Reference No,សេចក្តី​យោង​គ្មាន
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +392,Leave Blocked,ទុក​ឱ្យ​ទប់ស្កាត់
-apps/erpnext/erpnext/accounts/utils.py +339,Annual,ប្រចាំ​ឆ្នាំ
+apps/erpnext/erpnext/accounts/utils.py +341,Annual,ប្រចាំ​ឆ្នាំ
 DocType: Stock Reconciliation Item,Stock Reconciliation Item,ធាតុ​ភាគ​ហ៊ុន​ការផ្សះផ្សា
 DocType: Stock Entry,Sales Invoice No,ការ​លក់​វិ​ក័​យ​ប័ត្រ​គ្មាន
 DocType: Material Request Item,Min Order Qty,លោក Min លំដាប់ Qty
@@ -264,7 +264,7 @@ DocType: Payment Reconciliation Invoice,Invoice Type,ប្រភេទ​វិ
 DocType: Sales Invoice Item,Delivery Note,ដឹកជញ្ជូន​ចំណាំ
 DocType: Dropbox Backup,Allow Dropbox Access,អនុញ្ញាត​ឱ្យ​ចូល​ដំណើរ​ការ Dropbox
 apps/erpnext/erpnext/config/learn.py +72,Setting up Taxes,ការ​រៀបចំ​ពន្ធ
-apps/erpnext/erpnext/accounts/utils.py +189,Payment Entry has been modified after you pulled it. Please pull it again.,ចូល​ការ​ទូទាត់​ត្រូវ​បាន​កែ​ប្រែ​បន្ទាប់​ពី​អ្នក​បាន​ទាញ​វា​។ សូម​ទាញ​វា​ម្តង​ទៀត​។
+apps/erpnext/erpnext/accounts/utils.py +191,Payment Entry has been modified after you pulled it. Please pull it again.,ចូល​ការ​ទូទាត់​ត្រូវ​បាន​កែ​ប្រែ​បន្ទាប់​ពី​អ្នក​បាន​ទាញ​វា​។ សូម​ទាញ​វា​ម្តង​ទៀត​។
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +105,Summary for this week and pending activities,សង្ខេប​សម្រាប់​ស​ប្តា​ហ៍​នេះ​និង​សកម្មភាព​ដែល​មិន​ទាន់​សម្រេច
 DocType: Workstation,Rent Cost,ការ​ចំណាយ​ជួល
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +74,Please select month and year,សូម​ជ្រើស​ខែ​និង​ឆ្នាំ
@@ -281,7 +281,7 @@ apps/erpnext/erpnext/controllers/recurring_document.py +199,Please enter 'Repeat
 DocType: Sales Invoice,Rate at which Customer Currency is converted to customer's base currency,អត្រា​ដែល​រូបិយវត្ថុ​របស់​អតិថិជន​ត្រូវ​បាន​បម្លែង​ទៅ​ជា​រូបិយប័ណ្ណ​មូលដ្ឋាន​របស់​អតិថិជន
 DocType: Features Setup,"Available in BOM, Delivery Note, Purchase Invoice, Production Order, Purchase Order, Purchase Receipt, Sales Invoice, Sales Order, Stock Entry, Timesheet","ដែល​មាន​នៅ​ក្នុង Bom​, ដឹកជញ្ជូន​ចំណាំ​, ការ​ទិញ​វិ​ក័​យ​ប័ត្រ​, ការ​បញ្ជាទិញ​ផលិតផល​, ការ​ទិញ​លំដាប់​, ទទួល​ទិញ​, លក់​វិ​ក័​យ​ប័ត្រ​, ការ​លក់​លំដាប់​, ហ៊ុន​ធាតុ​, Timesheet"
 DocType: Item Tax,Tax Rate,អត្រា​អាករ
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +619,Select Item,ជ្រើស​ធាតុ
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +628,Select Item,ជ្រើស​ធាតុ
 apps/erpnext/erpnext/accounts/doctype/account/account.js +54,Convert to non-Group,បម្លែង​ទៅ​នឹង​ការ​មិន​គ្រុប
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +55,Purchase Receipt must be submitted,ទទួល​ទិញ​ត្រូវតែ​ត្រូវ​បាន​ដាក់​ជូន
 apps/erpnext/erpnext/config/stock.py +53,Batch (lot) of an Item.,បាច់ (ច្រើន​) នៃ​វត្ថុ​មួយ​។
@@ -290,7 +290,7 @@ DocType: GL Entry,Debit Amount,ចំនួន​ឥណពន្ធ
 apps/erpnext/erpnext/templates/includes/footer/footer_extension.html +7,Your email address,អាសយដ្ឋាន​អ៊ី​ម៉ែ​ល​របស់​អ្នក
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +203,Please see attachment,សូម​មើល​ឯកសារ​ភ្ជាប់
 DocType: Purchase Order,% Received,% បាន​ទទួល
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +20,Setup Already Complete!!,ការ​ដំឡើង​ពេញលេញ​រួច​ទៅ​ហើយ !!
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +18,Setup Already Complete!!,ការ​ដំឡើង​ពេញលេញ​រួច​ទៅ​ហើយ !!
 ,Finished Goods,ទំនិញ​បាន​បញ្ចប់
 DocType: Delivery Note,Instructions,សេចក្តី​ណែនាំ
 DocType: Quality Inspection,Inspected By,បាន​ត្រួតពិនិត្យ​ដោយ
@@ -321,7 +321,7 @@ DocType: Issue,Attachment,ឯកសារ​ភ្ជាប់
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py +29,Budget cannot be set for Group Cost Center,ថវិកា​ដែល​មិន​អាច​ត្រូវ​បាន​កំណត់​សម្រាប់​មជ្ឈមណ្ឌល​ថ្លៃដើម​គ្រុប
 DocType: Account,Cost of Goods Sold,តម្លៃ​នៃ​ការ​លក់​ទំនិញ
 DocType: Purchase Invoice,Yearly,រាល់​ឆ្នាំ
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +223,Please enter Cost Center,សូម​បញ្ចូល​មជ្ឈ​មណ្ឌល​ការ​ចំណាយ
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +230,Please enter Cost Center,សូម​បញ្ចូល​មជ្ឈ​មណ្ឌល​ការ​ចំណាយ
 DocType: Journal Entry Account,Sales Order,ស​ណ្តា​ប់​ធ្នាប់​ការ​លក់
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py +63,Avg. Selling Rate,ជាមធ្យម​។ អត្រា​ការ​លក់
 DocType: Purchase Order,Start date of current order's period,ការ​ចាប់​ផ្តើ​ម​កាល​បរិច្ឆេទ​នៃ​ការ​បញ្ជា​ទិញ​នា​ពេល​បច្ចុប្បន្ន​របស់​រយៈពេល
@@ -348,7 +348,7 @@ DocType: Sales Order,Not Applicable,ដែល​មិនអាច​អនុ�
 apps/erpnext/erpnext/config/hr.py +140,Holiday master.,ចៅហ្វាយ​ថ្ងៃ​ឈប់​សម្រាក​។
 DocType: Material Request Item,Required Date,កាលបរិច្ឆេទ​ដែល​បាន​ទាមទារ
 DocType: Delivery Note,Billing Address,វិ​ក័​យ​ប័ត្រ​អាសយដ្ឋាន
-apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js +727,Please enter Item Code.,សូម​បញ្ចូល​លេខ​កូដ​ធាតុ​។
+apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js +735,Please enter Item Code.,សូម​បញ្ចូល​លេខ​កូដ​ធាតុ​។
 DocType: BOM,Costing,ចំណាយ​ថវិកា​អស់
 DocType: Purchase Taxes and Charges,"If checked, the tax amount will be considered as already included in the Print Rate / Print Amount",ប្រសិន​បើ​បាន​ធីក​ចំនួន​ប្រាក់​ពន្ធ​ដែល​នឹង​ត្រូវ​បាន​ចាត់​ទុក​ជា​បាន​រួម​បញ្ចូល​រួច​ហើយ​នៅ​ក្នុង​អត្រា​ការ​បោះពុម្ព / បោះពុម្ព​ចំនួន​ទឹកប្រាក់
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py +48,Total Qty,សរុប Qty
@@ -392,7 +392,7 @@ DocType: Sales Order,To Deliver,ដើម្បី​រំដោះ
 DocType: Purchase Invoice Item,Item,ធាតុ
 DocType: Journal Entry,Difference (Dr - Cr),ភាព​ខុស​គ្នា (លោក​វេជ្ជបណ្ឌិត - Cr​)
 DocType: Account,Profit and Loss,ប្រាក់​ចំណេញ​និង​ការ​បាត់​បង់
-apps/erpnext/erpnext/config/stock.py +293,Managing Subcontracting,ការ​គ្រប់គ្រង​អ្នកម៉ៅការ​បន្ត
+apps/erpnext/erpnext/config/stock.py +288,Managing Subcontracting,ការ​គ្រប់គ្រង​អ្នកម៉ៅការ​បន្ត
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +47,Furniture and Fixture,គ្រឿង​សង្ហា​រឹម​និង​សម្ភារៈ
 DocType: Quotation,Rate at which Price list currency is converted to company's base currency,អត្រា​ដែល​តារាង​តំលៃ​រូបិយប័ណ្ណ​ត្រូវ​បម្លែង​ទៅ​ជា​រូបិយប័ណ្ណ​មូលដ្ឋាន​របស់​ក្រុមហ៊ុន
 DocType: Selling Settings,Default Customer Group,លំនាំ​ដើម​គ្រុប​អតិថិជន
@@ -446,7 +446,7 @@ apps/erpnext/erpnext/config/crm.py +17,Customer database.,មូលដ្ឋា�
 DocType: Quotation,Quotation To,សម្រង់​ដើម្បី
 DocType: Lead,Middle Income,ប្រាក់​ចំណូល​ពាក់​ក​ណ្តា​ល
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +58,Opening (Cr),ពិធី​បើក (Cr​)
-apps/erpnext/erpnext/accounts/utils.py +193,Allocated amount can not be negative,ចំនួន​ទឹកប្រាក់​ដែល​បាន​បម្រុង​ទុក​សម្រាប់​មិន​អាច​ជា​អវិជ្ជមាន
+apps/erpnext/erpnext/accounts/utils.py +195,Allocated amount can not be negative,ចំនួន​ទឹកប្រាក់​ដែល​បាន​បម្រុង​ទុក​សម្រាប់​មិន​អាច​ជា​អវិជ្ជមាន
 DocType: Purchase Order Item,Billed Amt,វិ​ក័​យ​ប័ត្រ AMT
 DocType: Warehouse,A logical Warehouse against which stock entries are made.,មួយ​ឃ្លាំង​សម​ប្រឆាំង​នឹង​ធាតុ​ដែល​ភាគ​ហ៊ុន​ត្រូវ​បាន​ធ្វើ​ឡើង​។
 DocType: Event,Wednesday,ថ្ងៃ​ពុធ
@@ -473,7 +473,7 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +34,"Then Pri
 apps/frappe/frappe/integrations/doctype/dropbox_backup/dropbox_backup.py +179,Please install dropbox python module,សូម​ដំឡើង​ម៉ូឌុល​ពស់ថ្លាន់ Dropbox
 DocType: Employee,Passport Number,លេខ​លិខិត​ឆ្លង​ដែន
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +82,Manager,កម្មវិធី​គ្រប់គ្រង
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +573,From Purchase Receipt,ពី​ការ​ទទួល​ទិញ
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +581,From Purchase Receipt,ពី​ការ​ទទួល​ទិញ
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py +214,Same item has been entered multiple times.,ធាតុ​ដូចគ្នា​ត្រូវ​បាន​បញ្ចូល​ច្រើន​ដង​។
 DocType: SMS Settings,Receiver Parameter,អ្នក​ទទួល​ប៉ារ៉ាម៉ែត្រ
 apps/erpnext/erpnext/controllers/trends.py +39,'Based On' and 'Group By' can not be same,&#39;ដោយ​ផ្អែក​លើ &quot;និង​&quot; ក្រុម​តាម​&#39; មិន​អាច​ជា​ដូច​គ្នា
@@ -503,7 +503,7 @@ apps/frappe/frappe/public/js/frappe/views/module/module_section.html +27,More,�
 DocType: Pricing Rule,Sales Manager,ប្រធាន​ផ្នែក​លក់
 apps/frappe/frappe/public/js/frappe/model/model.js +492,Rename,ប្តូ​រ​ឈ្មោះ
 DocType: Journal Entry,Write Off Amount,បិទ​ការ​សរសេរ​ចំនួន​ទឹកប្រាក់
-apps/frappe/frappe/core/page/user_permissions/user_permissions.js +246,Allow User,អនុញ្ញាត​ឱ្យ​អ្នក​ប្រើ
+apps/frappe/frappe/core/page/user_permissions/user_permissions.js +251,Allow User,អនុញ្ញាត​ឱ្យ​អ្នក​ប្រើ
 DocType: Journal Entry,Bill No,គ្មាន​វិ​ក័​យ​ប័ត្រ
 DocType: Purchase Invoice,Quarterly,ប្រចាំ​ត្រីមាស
 DocType: Selling Settings,Delivery Note Required,ត្រូវការ​ដឹកជញ្ជូន​ចំណាំ
@@ -529,7 +529,6 @@ DocType: Serial No,Warranty Expiry Date,ការធានា​កាលបរ�
 DocType: Material Request Item,Quantity and Warehouse,បរិមាណ​និង​ឃ្លាំង
 DocType: Sales Invoice,Commission Rate (%),អត្រា​ប្រាក់​កំរៃ (%​)
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.js +172,"Against Voucher Type must be one of Sales Order, Sales Invoice or Journal Entry","ប្រឆាំង​នឹង​ប្រភេទ​ត្រូវ​តែ​មាន​ប័ណ្ណ​មួយ​នៃ​ការ​លក់​ស​ណ្តា​ប់​ធ្នាប់​, ការ​លក់​វិ​ក័​យ​ប័ត្រ​ឬ​ធាតុ​ទិនានុប្បវត្តិ"
-apps/erpnext/erpnext/setup/utils.py +89,Unable to find exchange rate,មិន​អាច​រក​ឃើញ​អត្រា​ប្តូ​រ​ប្រាក់
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +7,Aerospace,អវកាស
 apps/frappe/frappe/desk/page/setup_wizard/setup_wizard.js +40,Welcome,សូម​ស្វា​គម​ន៏
 DocType: Journal Entry,Credit Card Entry,ចូល​កាត​ឥណទាន
@@ -548,9 +547,10 @@ apps/erpnext/erpnext/hr/doctype/holiday_list/holiday_list.py +33,Please select w
 DocType: Production Order Operation,Planned End Time,ពេលវេលា​ដែល​បាន​គ្រោង​បញ្ចប់
 ,Sales Person Target Variance Item Group-Wise,ការ​លក់​បុគ្គល​ធាតុ​គោលដៅ​អថេរ Group និង​ក្រុមហ៊ុន​ដែល​មាន​ប្រាជ្ញា
 DocType: Dropbox Backup,Daily,ជា​រៀង​រាល់​ថ្ងៃ
-apps/erpnext/erpnext/accounts/doctype/account/account.py +105,Account with existing transaction cannot be converted to ledger,គណនី​ប្រតិបត្តិការ​ដែល​មាន​ស្រាប់​ដែល​មិន​អាច​ត្រូវ​បាន​បម្លែង​ទៅ​ជា​សៀវភៅ
+apps/erpnext/erpnext/accounts/doctype/account/account.py +112,Account with existing transaction cannot be converted to ledger,គណនី​ប្រតិបត្តិការ​ដែល​មាន​ស្រាប់​ដែល​មិន​អាច​ត្រូវ​បាន​បម្លែង​ទៅ​ជា​សៀវភៅ
 DocType: Delivery Note,Customer's Purchase Order No,ការ​ទិញ​របស់​អតិថិជន​លំដាប់​គ្មាន
 DocType: Employee,Cell Number,លេខ​ទូរស័ព្ទ
+apps/erpnext/erpnext/stock/reorder_item.py +171,Auto Material Requests Generated,សម្ភារៈ​ដោយ​ស្វ័យ​ប្រវត្តិ​សំណើ​បង្កើត
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation_list.js +7,Lost,ការ​បាត់​បង់
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +120,You can not enter current voucher in 'Against Journal Entry' column,អ្នក​មិន​អាច​បញ្ចូល​ទឹក​ប្រាក់​ក្នុង​ពេល​បច្ចុប្បន្ន​នៅ​ក្នុង​ការ​ប្រឆាំង​នឹង​ការ​ធាតុ​ទិនានុប្បវត្តិ &quot;ជួរ​ឈរ
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +25,Energy,ថាមពល
@@ -657,7 +657,7 @@ apps/erpnext/erpnext/config/hr.py +38,Performance appraisal.,វាយតម្�
 DocType: Sales Invoice Item,Stock Details,ភាគ​ហ៊ុន​លំអិត
 apps/erpnext/erpnext/projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py +29,Project Value,តម្លៃ​គម្រោង
 apps/erpnext/erpnext/config/selling.py +304,Point-of-Sale,ចំណុច​នៃ​ការ​លក់
-apps/erpnext/erpnext/accounts/doctype/account/account.py +91,"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","សមតុល្យ​គណនី​រួច​ហើយ​នៅ​ក្នុង​ឥណទាន​, អ្នក​មិន​ត្រូវ​បាន​អនុញ្ញាត​ឱ្យ​កំណត់​ទឹកប្រាក់​ត្រូវតែ &quot;ជា​&quot; ឥណពន្ធ"
+apps/erpnext/erpnext/accounts/doctype/account/account.py +98,"Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'","សមតុល្យ​គណនី​រួច​ហើយ​នៅ​ក្នុង​ឥណទាន​, អ្នក​មិន​ត្រូវ​បាន​អនុញ្ញាត​ឱ្យ​កំណត់​ទឹកប្រាក់​ត្រូវតែ &quot;ជា​&quot; ឥណពន្ធ"
 DocType: Account,Balance must be,មាន​តុល្យភាព​ត្រូវ​តែ​មាន
 DocType: Hub Settings,Publish Pricing,តម្លៃ​បោះ​ពុម្ព​ផ្សាយ
 DocType: Notification Control,Expense Claim Rejected Message,សារ​ពាក្យ​ប​ណ្តឹ​ង​លើ​ការ​ចំណាយ​បាន​ច្រាន​ចោល
@@ -688,7 +688,7 @@ DocType: Production Planning Tool,Production Orders,ការ​បញ្ជា�
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py +35,Balance Value,តម្លៃ​ឱ្យ​មាន​តុល្យភាព
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py +38,Sales Price List,តារាងតម្លៃ​ការ​លក់
 apps/erpnext/erpnext/hub_node/doctype/hub_settings/hub_settings.py +69,Publish to sync items,ធ្វើ​សម​កាល​កម្ម​ធាតុ​បោះពុម្ព​ផ្សាយ
-DocType: GL Entry,Account Currency,រូបិយប័ណ្ណ​គណនី
+DocType: Bank Reconciliation,Account Currency,រូបិយប័ណ្ណ​គណនី
 apps/erpnext/erpnext/accounts/general_ledger.py +131,Please mention Round Off Account in Company,សូម​និយាយ​ពី​គណនី​បិទ​ជុំ​ទី​ក្នុង​ក្រុមហ៊ុន
 DocType: Purchase Receipt,Range,ជួរ
 DocType: Supplier,Default Payable Accounts,គណនី​ទូទាត់​លំនាំ​ដើម
@@ -721,7 +721,7 @@ DocType: Contact Us Settings,Address Line 1,អាសយដ្ឋាន​បន
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py +53,Variance,អថេរ
 ,Company Name,ឈ្មោះ​ក្រុមហ៊ុន
 DocType: SMS Center,Total Message(s),សារ​សរុប (s បាន​)
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +617,Select Item for Transfer,ជ្រើស​ធាតុ​សម្រាប់​ការ​ផ្ទេរ
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +626,Select Item for Transfer,ជ្រើស​ធាតុ​សម្រាប់​ការ​ផ្ទេរ
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html +24,View a list of all the help videos,មើល​បញ្ជី​នៃ​ការ​ជួយ​វីដេអូ​ទាំងអស់
 DocType: Bank Reconciliation,Select account head of the bank where cheque was deposited.,ជ្រើស​ប្រធាន​គណនី​របស់​ធនាគារ​នេះ​ដែល​ជា​កន្លែង​ដែល​ការ​ត្រួត​ពិនិត្យ​ត្រូវ​បាន​តម្កល់ទុក​។
 DocType: Selling Settings,Allow user to edit Price List Rate in transactions,អនុញ្ញាត​ឱ្យ​អ្នក​ប្រើ​ដើម្បី​កែ​សម្រួល​អត្រា​តំលៃ​បញ្ជី​នៅ​ក្នុង​ប្រតិបត្តិការ
@@ -742,7 +742,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +156,White,សេត
 DocType: SMS Center,All Lead (Open),អ្នក​ដឹក​នាំ​ការ​ទាំងអស់ (ការ​បើក​ចំហ​)
 DocType: Purchase Invoice,Get Advances Paid,ទទួល​បាន​ការ​វិវត្ត​បង់ប្រាក់
 apps/erpnext/erpnext/public/js/setup_wizard.js +112,Attach Your Picture,ភ្ជាប់​រូបភាព​របស់​អ្នក
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +619,Make ,ធ្វើ​ឱ្យ
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +628,Make ,ធ្វើ​ឱ្យ
 DocType: Journal Entry,Total Amount in Words,ចំនួន​សរុប​នៅ​ក្នុង​ពាក្យ
 DocType: Workflow State,Stop,បញ្ឈប់
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.js +7,There was an error. One probable reason could be that you haven't saved the form. Please contact support@erpnext.com if the problem persists.,មាន​កំហុស​។ ហេតុ​ផល​មួយ​ដែល​អាច​នឹង​ត្រូវ​បាន​ប្រហែលជា​ដែល​អ្នក​មិន​បាន​រក្សា​ទុក​សំណុំ​បែប​បទ​។ សូម​ទាក់ទង support@erpnext.com ប្រសិន​បើ​បញ្ហា​នៅតែ​បន្ត​កើតមាន​។
@@ -761,7 +761,7 @@ DocType: Landed Cost Purchase Receipt,Landed Cost Purchase Receipt,ទទួល�
 DocType: Company,Default Terms,លក្ខខណ្ឌ​លំនាំ​ដើម
 DocType: Packing Slip Item,Packing Slip Item,វេច​ខ្ចប់​ធាតុ​គ្រូពេទ្យ​ប្រហែលជា
 DocType: POS Profile,Cash/Bank Account,សាច់ប្រាក់ / គណនី​ធនាគារ
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +63,Removed items with no change in quantity or value.,ធាតុ​បាន​យក​ចេញ​ដោយ​ការ​ផ្លាស់​ប្តូ​រ​ក្នុង​បរិមាណ​ឬ​តម្លៃ​ទេ​។
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +70,Removed items with no change in quantity or value.,ធាតុ​បាន​យក​ចេញ​ដោយ​ការ​ផ្លាស់​ប្តូ​រ​ក្នុង​បរិមាណ​ឬ​តម្លៃ​ទេ​។
 DocType: Delivery Note,Delivery To,ដឹកជញ្ជូន​ដើម្បី
 apps/erpnext/erpnext/stock/doctype/item/item.py +513,Attribute table is mandatory,តារាង​គុណលក្ខណៈ​គឺ​ជា​ការ​ចាំបាច់
 DocType: Production Planning Tool,Get Sales Orders,ទទួល​បាន​ការ​បញ្ជា​ទិញ​លក់
@@ -781,19 +781,19 @@ apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js +112,You are the 
 DocType: Serial No,Creation Document No,ការ​បង្កើត​ឯកសារ​គ្មាន
 DocType: Issue,Issue,បញ្ហា
 apps/erpnext/erpnext/accounts/doctype/mode_of_payment/mode_of_payment.py +28,Account does not match with Company,គណនី​មិន​ត្រូវ​គ្នា​ជាមួយ​ក្រុមហ៊ុន
-apps/erpnext/erpnext/config/stock.py +136,"Attributes for Item Variants. e.g Size, Color etc.",គុណ​លក្ខណៈ​សម្រាប់​ធាតុ​វ៉ា​រ្យ៉​ង់​។ ឧទាហរណ៍​ដូចជា​ទំហំ​ពណ៌​ល
+apps/erpnext/erpnext/config/stock.py +131,"Attributes for Item Variants. e.g Size, Color etc.",គុណ​លក្ខណៈ​សម្រាប់​ធាតុ​វ៉ា​រ្យ៉​ង់​។ ឧទាហរណ៍​ដូចជា​ទំហំ​ពណ៌​ល
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order_calendar.js +39,WIP Warehouse,ឃ្លាំង WIP
 DocType: BOM Operation,Operation,ប្រតិ​ប​ត្ដិ​ការ
 DocType: Lead,Organization Name,ឈ្មោះ​អង្គភាព
 DocType: Tax Rule,Shipping State,រដ្ឋ​ការ​ដឹក​ជញ្ជូន
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +61,Item must be added using 'Get Items from Purchase Receipts' button,ធាតុ​ត្រូវ​បាន​បន្ថែម​ដោយ​ប្រើ &quot;ចូរ​ក្រោក​ធាតុ​ពី​ការ​ទិញ​បង្កាន់ដៃ &#39;ប៊ូតុង
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +126,Sales Expenses,ចំណាយ​ការ​លក់
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +120,Standard Buying,ទិញ​ស្ដ​ង់​ដា​រ
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +113,Standard Buying,ទិញ​ស្ដ​ង់​ដា​រ
 DocType: GL Entry,Against,ប្រឆាំង​នឹង​ការ
 DocType: Item,Default Selling Cost Center,ចំណាយ​លើ​ការ​លក់​លំនាំ​ដើម​របស់​មជ្ឈមណ្ឌល
 DocType: Sales Partner,Implementation Partner,ដៃគូ​អនុវត្ដ​ន៍
 DocType: Opportunity,Contact Info,ព​ត៌​មាន​ទំនាក់ទំនង
-apps/erpnext/erpnext/config/stock.py +278,Making Stock Entries,ការ​ធ្វើ​ឱ្យ​ធាតុ​ហ៊ុន
+apps/erpnext/erpnext/config/stock.py +273,Making Stock Entries,ការ​ធ្វើ​ឱ្យ​ធាតុ​ហ៊ុន
 DocType: Packing Slip,Net Weight UOM,សុទ្ធ​ទម្ងន់ UOM
 DocType: Item,Default Supplier,ហាងទំនិញ​លំនាំ​ដើម
 DocType: Manufacturing Settings,Over Production Allowance Percentage,លើស​ពី​ភាគរយ​សំវិធានធន​ផលិតកម្ម
@@ -881,7 +881,7 @@ DocType: Payment Reconciliation,Unreconciled Payment Details,ព​ត៌​ម�
 DocType: Global Defaults,Current Fiscal Year,ឆ្នាំ​សារពើពន្ធ​នា​ពេល​បច្ចុប្បន្ន
 DocType: Global Defaults,Disable Rounded Total,បិទ​ការ​សរុប​មូល
 DocType: Lead,Call,ការ​ហៅ
-apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +388,'Entries' cannot be empty,&quot;ធាតុ​&quot; មិន​អាច​ទទេ
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +390,'Entries' cannot be empty,&quot;ធាតុ​&quot; មិន​អាច​ទទេ
 ,Trial Balance,អង្គ​ជំនុំ​តុល្យភាព
 apps/erpnext/erpnext/config/hr.py +205,Setting up Employees,ការ​រៀបចំ​បុគ្គលិក
 apps/erpnext/erpnext/public/js/feature_setup.js +220,"Grid """,ក្រឡា​ចត្រង្គ &quot;
@@ -897,7 +897,7 @@ apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.py +41,Earliest,ដ�
 apps/erpnext/erpnext/stock/doctype/item/item.py +398,"An Item Group exists with same name, please change the item name or rename the item group",ធាតុ​មួយ​ពូល​មាន​ឈ្មោះ​ដូច​គ្នា​សូម​ប្ដូរ​ឈ្មោះ​ធាតុ​ឬ​ប្ដូរ​ឈ្មោះ​ធាតុ​ដែល​ជា​ក្រុម
 DocType: Communication,Delivery Status,ស្ថានភាព​ដឹកជញ្ជូន
 DocType: Production Order,Manufacture against Sales Order,ផលិត​ប្រឆាំង​នឹង​ការ​លក់​ស​ណ្តា​ប់​ធ្នាប់
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +455,Rest Of The World,នៅ​សល់​នៃ​ពិភពលោក
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +429,Rest Of The World,នៅ​សល់​នៃ​ពិភពលោក
 ,Budget Variance Report,របាយការណ៍​អថេរ​ថវិកា​រ
 DocType: Salary Slip,Gross Pay,បង់​សរុប​បាន
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +186,Dividends Paid,ភាគលាភ​បង់​ប្រាក់
@@ -933,6 +933,7 @@ apps/erpnext/erpnext/selling/report/sales_person_target_variance_item_group_wise
 DocType: Employee,Place of Issue,ទីកន្លែង​បញ្ហា
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +59,Contract,ការ​ចុះ​កិច្ច​សន្យា
 DocType: Report,Disabled,ជន​ពិការ
+DocType: Email Digest,Add Quote,បន្ថែម​សម្រង់
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +83,Indirect Expenses,ការ​ចំណាយ​ដោយ​ប្រយោល
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +8,Agriculture,កសិកម្ម
 apps/erpnext/erpnext/public/js/setup_wizard.js +362,Your Products or Services,ផលិតផល​ឬ​សេវាកម្ម​របស់​អ្នក
@@ -953,7 +954,7 @@ apps/erpnext/erpnext/controllers/selling_controller.py +143,Total allocated perc
 DocType: Appraisal Goal,Goal,គ្រាប់​បាល់​បញ្ចូល​ទី
 DocType: Sales Invoice Item,Edit Description,កែសម្រួល​ការ​បរិយាយ
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +318,Expected Delivery Date is lesser than Planned Start Date.,គេ​រំពឹង​ថា​កាលបរិច្ឆេទ​ដឹកជញ្ជូន​គឺ​តិច​ជាង​ចាប់​ផ្ដើម​គំរោង​កាលបរិច្ឆេទ​។
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +681,For Supplier,សម្រាប់​ផ្គត់​ផ្គង់
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +690,For Supplier,សម្រាប់​ផ្គត់​ផ្គង់
 DocType: Account,Setting Account Type helps in selecting this Account in transactions.,ការ​កំណត់​ប្រភេទ​គណនី​ជួយ​ក្នុង​ការ​ជ្រើស​គណនី​នេះ​ក្នុង​ប្រតិ​បតិ​្ត​ការ​។
 DocType: Purchase Invoice,Grand Total (Company Currency),សម្ពោធ​សរុប (ក្រុមហ៊ុន​រូបិយវត្ថុ​)
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +42,Total Outgoing,ចេញ​សរុប
@@ -1048,7 +1049,7 @@ DocType: HR Settings,Employee Settings,ការ​កំណត់​បុគ�
 ,Batch-Wise Balance History,ប្រាជ្ញា​តុល្យភាព​បាច់​ប្រវត្តិ
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html +72,To Do List,ដើម្បី​ធ្វើ​បញ្ជី
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +63,Apprentice,សិស្ស
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +99,Negative Quantity is not allowed,បរិមាណ​ដែល​ត្រូវ​ទទួលទាន​អវិជ្ជមាន​មិន​ត្រូវ​បាន​អនុញ្ញាត
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +106,Negative Quantity is not allowed,បរិមាណ​ដែល​ត្រូវ​ទទួលទាន​អវិជ្ជមាន​មិន​ត្រូវ​បាន​អនុញ្ញាត
 DocType: Purchase Invoice Item,"Tax detail table fetched from item master as a string and stored in this field.
 Used for Taxes and Charges",តារាង​ពន្ធ​លើ​ការ​ដែល​បាន​ទៅ​យក​ពី​ព័ត៌មាន​លម្អិត​ធាតុ​ដែល​ម្ចាស់​ជា​ខ្សែ​អក្សរ​មួយ​និង​បាន​រក្សា​ទុក​នៅ​ក្នុង​វាល​នេះ​។ ត្រូវ​បាន​ប្រើ​សម្រាប់​ការ​បង់ពន្ធ​និង​បន្ទុក
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +151,Employee cannot report to himself.,បុគ្គលិក​មិន​អាច​រាយ​ការណ៍​ទៅ​ខ្លួន​ឯង​។
@@ -1086,7 +1087,7 @@ DocType: Sales Invoice,"The date on which next invoice will be generated. It is 
 ",កាលបរិច្ឆេទ​ដែល​វិ​ក័​យ​ប័ត្រ​ក្រោយ​នឹង​ត្រូវ​បាន​បង្កើត​។ វា​ត្រូវ​បាន​គេ​បង្កើត​នៅ​លើ​ការ​ដាក់​ស្នើ​។
 DocType: Item Attribute,Item Attribute,គុណ​លក្ខណៈ​ធាតុ
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +105,Government,រដ្ឋា​ភិ​បាល
-apps/erpnext/erpnext/config/stock.py +268,Item Variants,វ៉ា​រ្យ៉​ង់​ធាតុ
+apps/erpnext/erpnext/config/stock.py +263,Item Variants,វ៉ា​រ្យ៉​ង់​ធាតុ
 DocType: Company,Services,ការ​ផ្តល់​សេវា
 DocType: Cost Center,Parent Cost Center,មជ្ឈមណ្ឌល​តម្លៃ​ដែល​មាតា​ឬ​បិតា
 DocType: Sales Invoice,Source,ប្រភព
@@ -1123,7 +1124,7 @@ apps/erpnext/erpnext/selling/report/sales_person_wise_transaction_summary/sales_
 DocType: Sales Invoice,Shipping Address,ការ​ដឹក​ជញ្ជូន​អាសយដ្ឋាន
 DocType: Stock Reconciliation,This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,ឧបករណ៍​នេះ​អាច​ជួយ​អ្នក​ក្នុង​ការ​ធ្វើ​ឱ្យ​ទាន់សម័យ​ឬ​ជួសជុល​បរិមាណ​និង​តម្លៃ​នៃ​ភាគ​ហ៊ុន​នៅ​ក្នុង​ប្រព័ន្ធ​។ វា​ត្រូវ​បាន​ប្រើ​ដើម្បី​ធ្វើ​សម​កាល​កម្ម​តម្លៃ​ប្រព័ន្ធ​និង​អ្វី​ដែល​ជា​ការ​ពិត​មាន​នៅ​ក្នុង​ឃ្លាំង​របស់​អ្នក​។
 DocType: Delivery Note,In Words will be visible once you save the Delivery Note.,នៅ​ក្នុង​ពាក្យ​នោះ​នឹង​ត្រូវ​បាន​មើល​ឃើញ​នៅ​ពេល​ដែល​អ្នក​រក្សា​ទុក​ចំណាំ​ដឹកជញ្ជូន​ផង​ដែរ​។
-apps/erpnext/erpnext/config/stock.py +120,Brand master.,ចៅហ្វាយ​ម៉ាក​។
+apps/erpnext/erpnext/config/stock.py +115,Brand master.,ចៅហ្វាយ​ម៉ាក​។
 DocType: ToDo,Due Date,កាលបរិច្ឆេទ​ដល់​កំណត់
 DocType: Sales Invoice Item,Brand Name,ឈ្មោះ​ម៉ាក
 DocType: Purchase Receipt,Transporter Details,សេចក្ដី​លម្អិត​ដឹកជញ្ជូន
@@ -1139,11 +1140,11 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 ,Bank Reconciliation Statement,សេចក្តី​ថ្លែង​ការ​របស់​ធនាគារ​ការផ្សះផ្សា
 DocType: Address,Lead Name,ការ​នាំ​មុខ​ឈ្មោះ
 ,POS,ម៉ាស៊ីន​ឆូត​កាត
-apps/erpnext/erpnext/config/stock.py +273,Opening Stock Balance,ការ​បើក​ផ្សារ​ហ៊ុន​តុល្យភាព
+apps/erpnext/erpnext/config/stock.py +268,Opening Stock Balance,ការ​បើក​ផ្សារ​ហ៊ុន​តុល្យភាព
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +40,No Items to pack,គ្មាន​ធាតុ​ខ្ចប់
 DocType: Shipping Rule Condition,From Value,ពី​តម្លៃ
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +552,Manufacturing Quantity is mandatory,បរិមាណ​ដែល​ត្រូវ​ទទួលទាន​គឺ​ចាំបាច់​កម្មន្តសាល
-apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +42,Amounts not reflected in bank,មាន​ចំនួន​មិន​បាន​ឆ្លុះ​បញ្ចាំង​នៅ​ក្នុង​ធនាគារ
+apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +45,Amounts not reflected in bank,មាន​ចំនួន​មិន​បាន​ឆ្លុះ​បញ្ចាំង​នៅ​ក្នុង​ធនាគារ
 DocType: Quality Inspection Reading,Reading 4,ការ​អាន​ទី 4
 apps/erpnext/erpnext/config/hr.py +23,Claims for company expense.,ពាក្យ​ប​ណ្តឹ​ង​សម្រាប់​ការ​ចំណាយ​របស់​ក្រុម​ហ៊ុន​។
 DocType: Company,Default Holiday List,បញ្ជី​ថ្ងៃ​ឈប់​សម្រាក​លំនាំដើម
@@ -1154,7 +1155,7 @@ DocType: Production Planning Tool,Select Sales Orders,ជ្រើស​កា�
 ,Material Requests for which Supplier Quotations are not created,សំណើ​សម្ភារៈ​ដែល​សម្រង់​ស​ម្តី​ផ្គត់ផ្គង់​មិន​ត្រូវ​បាន​បង្កើត
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +117,The day(s) on which you are applying for leave are holidays. You need not apply for leave.,ថ្ងៃ​នេះ (s​) បាន​នៅ​លើ​ដែល​អ្នក​កំពុង​ដាក​​់​ពាក្យ​សុំ​ឈប់​សម្រាក​គឺ​ជា​ថ្ងៃ​ឈប់​សម្រាក​។ អ្នក​ត្រូវ​ការ​ត្រូវ​បាន​អនុវត្ត​សម្រាប់​ការ​ឈប់​សម្រាក​។
 DocType: Features Setup,To track items using barcode. You will be able to enter items in Delivery Note and Sales Invoice by scanning barcode of item.,ដើម្បី​តាមដាន​ធាតុ​ដែល​បាន​ប្រើ​ប្រាស់​លេខ​កូដ​។ អ្នក​នឹង​អាច​ចូល​ទៅ​ក្នុង​ធាតុ​នៅ​ក្នុង​ការ​ចំណាំ​ដឹកជញ្ជូន​និង​ការ​លក់​វិ​ក័​យ​ប័ត្រ​ដោយ​ការ​ស្កេន​លេខ​កូដ​នៃ​ធាតុ​។
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +576,Mark as Delivered,សម្គាល់​ថា​បាន​ដឹកនាំ
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +588,Mark as Delivered,សម្គាល់​ថា​បាន​ដឹកនាំ
 apps/erpnext/erpnext/crm/doctype/lead/lead.js +34,Make Quotation,ចូរ​ធ្វើ​សម្រង់
 DocType: Dependent Task,Dependent Task,ការងារ​ពឹង​ផ្អែក
 DocType: Manufacturing Settings,Try planning operations for X days in advance.,ការ​ធ្វើ​ផែនការ​ប្រតិ​ប​ត្ដិ​ការ​សម្រាប់​ការ​ព្យាយាម​របស់ X នៅ​មុន​ថ្ងៃ​។
@@ -1199,7 +1200,7 @@ apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py +42,
 apps/erpnext/erpnext/config/accounts.py +53,Update bank payment dates with journals.,ធ្វើ​ឱ្យ​ទាន់​សម័យ​កាល​បរិច្ឆេទ​ទូទាត់​ប្រាក់​ធនាគារ​ដែល​ទិនានុប្បវត្តិ​។
 DocType: Quotation,Term Details,ព​ត៌​មាន​លំអិត​រយៈពេល
 DocType: Manufacturing Settings,Capacity Planning For (Days),ផែនការ​ការ​កសាង​សមត្ថភាព​សម្រាប់ (ថ្ងៃ​)
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +56,None of the items have any change in quantity or value.,គ្មាន​ការ​ធាតុ​មាន​ការ​ផ្លាស់​ប្តូ​ណាមួយ​ក្នុង​បរិមាណ​ឬ​តម្លៃ​។
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +63,None of the items have any change in quantity or value.,គ្មាន​ការ​ធាតុ​មាន​ការ​ផ្លាស់​ប្តូ​ណាមួយ​ក្នុង​បរិមាណ​ឬ​តម្លៃ​។
 DocType: Warranty Claim,Warranty Claim,ប​ណ្តឹ​ង​ធានា
 ,Lead Details,ព​ត៌​មាន​លំអិត​នាំ​មុខ
 DocType: Purchase Invoice,End date of current invoice's period,កាលបរិច្ឆេទ​បញ្ចប់​នៃ​រយៈ​ពេល​បច្ចុប្បន្ន​របស់​វិ​ក័​យ​ប័ត្រ
@@ -1221,7 +1222,7 @@ DocType: Sales Invoice,Paid Amount (Company Currency),ចំនួន​ទឹ�
 DocType: Purchase Invoice,Additional Discount,បញ្ចុះ​តំលៃ​បន្ថែម
 DocType: Selling Settings,Selling Settings,ការ​លក់​ការ​កំណត់
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +39,Online Auctions,ការ​ដេញ​ថ្លៃ​លើ​ប​ណ្តា​ញ
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +94,Please specify either Quantity or Valuation Rate or both,សូម​បរិមាណ​ឬ​អត្រា​វាយតម្លៃ​ឬ​ទាំង​ពីរ​បាន​បញ្ជាក់
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +101,Please specify either Quantity or Valuation Rate or both,សូម​បរិមាណ​ឬ​អត្រា​វាយតម្លៃ​ឬ​ទាំង​ពីរ​បាន​បញ្ជាក់
 apps/erpnext/erpnext/hr/doctype/process_payroll/process_payroll.js +50,"Company, Month and Fiscal Year is mandatory","ក្រុម​ហ៊ុន​, ខែ​និង​ឆ្នាំ​សារពើពន្ធ​ចាំបាច់"
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +102,Marketing Expenses,ចំណាយ​ទីផ្សារ
 ,Item Shortage Report,របាយការណ៍​កង្វះ​ធាតុ
@@ -1264,7 +1265,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +164,Stopped ord
 DocType: Employee,Leave Encashed?,ទុក​ឱ្យ Encashed​?
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +32,Opportunity From field is mandatory,ឱកាស​ក្នុង​វាល​ពី​គឺ​ចាំបាច់
 DocType: Item,Variants,វ៉ា​រ្យ៉​ង់
-apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation.js +537,Make Purchase Order,ធ្វើ​ឱ្យ​ការ​ទិញ​ស​ណ្តា​ប់​ធ្នាប់
+apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation.js +545,Make Purchase Order,ធ្វើ​ឱ្យ​ការ​ទិញ​ស​ណ្តា​ប់​ធ្នាប់
 DocType: SMS Center,Send To,បញ្ជូន​ទៅ
 DocType: Sales Team,Contribution to Net Total,ការ​ចូលរួម​ចំណែក​ក្នុង​ការ​សុទ្ធ​សរុប
 DocType: Sales Invoice Item,Customer's Item Code,ក្រម​ធាតុ​របស់​អតិថិជន
@@ -1281,14 +1282,13 @@ DocType: Shipping Rule Condition,A condition for a Shipping Rule,លក្ខខ
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +326,Item is not allowed to have Production Order.,ធាតុ​មិន​ត្រូវ​បាន​អនុញ្ញាត​ឱ្យ​មាន​ការ​បញ្ជាទិញ​ផលិតផល​។
 DocType: DocField,Attach Image,ភ្ជាប់​រូបភាព
 DocType: Packing Slip,The net weight of this package. (calculated automatically as sum of net weight of items),ទំ​ង​ន់​សុទ្ធ​កញ្ចប់​នេះ​។ (គណនា​ដោយ​ស្វ័យ​ប្រវត្តិ​ជា​ផលបូក​នៃ​ទម្ងន់​សុទ្ធ​នៃ​ធាតុ​)
-DocType: Stock Reconciliation Item,Leave blank if no change,ទុក​ឱ្យ​វា​នៅ​ទទេ​បើ​គ្មាន​ការ​ផ្លាស់​ប្តូ​រ
 DocType: Sales Order,To Deliver and Bill,ដើម្បី​ផ្តល់​និង Bill
 DocType: GL Entry,Credit Amount in Account Currency,ចំនួន​ឥណទាន​រូបិយប័ណ្ណ​គណនី
 apps/erpnext/erpnext/config/manufacturing.py +24,Time Logs for manufacturing.,កំណត់ហេតុ​សម្រាប់​ការ​ផលិត​វេលា​ម៉ោង​។
 DocType: Item,Apply Warehouse-wise Reorder Level,អនុវត្ត​ឃ្លាំង​ប្រាជ្ញា​រៀបចំ​កំរិត
 DocType: Authorization Control,Authorization Control,ការ​ត្រួត​ពិនិត្យ​សេចក្តី​អនុញ្ញាត
 apps/erpnext/erpnext/config/projects.py +23,Time Log for tasks.,កំណត់​ហេតុ​ពេលវេលា​សម្រាប់​ការងារ​។
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +553,Payment,ការ​ទូទាត់
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +561,Payment,ការ​ទូទាត់
 DocType: Production Order Operation,Actual Time and Cost,ពេល​វេលា​ពិត​ប្រាកដ​និង​ការ​ចំណាយ
 DocType: Employee,Salutation,ពាក្យ​សួរសុខទុក្ខ
 DocType: Communication,Rejected,ច្រាន​ចោល
@@ -1359,7 +1359,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +312,Please
 DocType: Item Website Specification,Table for Item that will be shown in Web Site,តារាង​សម្រាប់​ធាតុ​ដែល​នឹង​ត្រូវ​បាន​បង្ហាញ​នៅ​ក្នុង​វ៉ិ​ប​សាយ
 DocType: Purchase Order Item Supplied,Supplied Qty,ការ​ផ្គត់ផ្គង់ Qty
 DocType: Material Request Item,Material Request Item,ការ​ស្នើ​សុំ​សម្ភារៈ​ធាតុ
-apps/erpnext/erpnext/config/stock.py +103,Tree of Item Groups.,មែកធាង​នៃ​ក្រុម​ធាតុ​។
+apps/erpnext/erpnext/config/stock.py +98,Tree of Item Groups.,មែកធាង​នៃ​ក្រុម​ធាតុ​។
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +100,Cannot refer row number greater than or equal to current row number for this Charge type,មិន​អាច​យោង​លេខ​ជួរដេក​ធំ​ជាង​ឬ​ស្មើ​ទៅ​នឹង​ចំនួន​ជួរ​ដេក​បច្ចុប្បន្ន​សម្រាប់​ប្រភេទ​ការចោទប្រកាន់​នេះ
 ,Item-wise Purchase History,ប្រវត្តិ​ទិញ​ប្រាជ្ញា​ធាតុ
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +152,Red,ពណ៌​ក្រហម
@@ -1370,7 +1370,6 @@ DocType: Sales Invoice,Accounting Details,សេចក្ដី​លម្អ�
 apps/erpnext/erpnext/setup/doctype/company/company.js +44,Delete all the Transactions for this Company,លុប​ប្រតិបត្តិការ​ទាំង​អស់​សម្រាប់​ក្រុមហ៊ុន​នេះ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +57,Investments,ការ​វិនិយោគ
 DocType: Issue,Resolution Details,ព​ត៌​មាន​លំអិត​ការ​ដោះស្រាយ
-apps/erpnext/erpnext/config/stock.py +84,Change UOM for an Item.,ការ​ផ្លាស់​ប្តូ​រ UOM សម្រាប់​ធាតុ​មួយ​។
 DocType: Quality Inspection Reading,Acceptance Criteria,លក្ខណៈ​វិនិច្ឆ័យ​ក្នុង​ការ​ទទួល​យក
 DocType: Item Attribute,Attribute Name,ឈ្មោះ​គុណលក្ខណៈ
 DocType: Item Group,Show In Website,បង្ហាញ​នៅ​ក្នុង​វេ​ប​សាយ
@@ -1383,7 +1382,7 @@ DocType: Appraisal,For Employee Name,សម្រាប់​ឈ្មោះ​�
 DocType: Holiday List,Clear Table,ជម្រះ​ការ​តារាង
 DocType: Features Setup,Brands,ផលិតផល​ម៉ាក
 DocType: C-Form Invoice Detail,Invoice No,គ្មាន​វិ​ក័​យ​ប័ត្រ
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +559,From Purchase Order,បាន​មក​ពី​ការ​ទិញ​ស​ណ្តា​ប់​ធ្នាប់
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +567,From Purchase Order,បាន​មក​ពី​ការ​ទិញ​ស​ណ្តា​ប់​ធ្នាប់
 DocType: Activity Cost,Costing Rate,អត្រា​ការ​ប្រាក់​មាន​តម្លៃ
 ,Customer Addresses And Contacts,អាសយដ្ឋាន​អតិថិជន​និង​ទំនាក់ទំនង
 DocType: Employee,Resignation Letter Date,កាលបរិច្ឆេទ​លិខិត​លា​លែង​ពី​តំណែង
@@ -1440,6 +1439,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +176,Closi
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py +26,Please specify currency in Company,សូម​បញ្ជាក់​រូបិយប័ណ្ណ​នៅ​ក្នុង​ក្រុមហ៊ុន
 DocType: Workstation,Wages per hour,ប្រាក់​ឈ្នួល​ក្នុង​មួយ​ម៉ោង
 apps/erpnext/erpnext/config/setup.py +83,"Show / Hide features like Serial Nos, POS etc.",បង្ហាញ / លាក់​លក្ខណៈ​ពិសេស​ដូច​ជា​សៀរៀល NOS លោក​ម៉ាស៊ីន​ឆូត​កាត​ជាដើម
+apps/erpnext/erpnext/templates/emails/reorder_item.html +1,Following Material Requests have been raised automatically based on Item's re-order level,បន្ទាប់​ពី​ការ​សម្ភារៈ​សំណើ​ត្រូវ​បាន​លើក​ឡើង​ដោយ​ស្វ័យ​ប្រវត្តិ​ដោយ​ផ្អែក​លើ​កម្រិត​ឡើងវិញ​ដើម្បី​ធាតុ​របស់
 DocType: Salary Slip,Deduction,ការ​ដក
 DocType: Address Template,Address Template,អាសយដ្ឋាន​ទំព័រ​គំរូ
 apps/erpnext/erpnext/selling/page/sales_browser/sales_browser.js +128,Please enter Employee Id of this sales person,សូម​បញ្ចូល​និយោជិត​លេខ​សម្គាល់​នេះ​បុគ្គល​ការ​លក់
@@ -1469,10 +1469,10 @@ DocType: Appraisal,Calculate Total Score,គណនា​ពិន្ទុ​ស
 DocType: Supplier Quotation,Manufacturing Manager,កម្មវិធី​គ្រប់គ្រង​កម្មន្តសាល
 apps/erpnext/erpnext/config/stock.py +69,Split Delivery Note into packages.,ចំណាំ​ដឹកជញ្ជូន​ពុះ​ចូល​ទៅ​ក្នុង​កញ្ចប់​។
 apps/erpnext/erpnext/hooks.py +68,Shipments,ការ​នាំ​ចេញ
-DocType: Purchase Order,To be delivered to customer,ត្រូវ​បាន​បញ្ជូន​ទៅ​កាន់​អតិថិជន
+DocType: Purchase Order Item,To be delivered to customer,ត្រូវ​បាន​បញ្ជូន​ទៅ​កាន់​អតិថិជន
 apps/erpnext/erpnext/projects/doctype/time_log/time_log_list.js +25,Time Log Status must be Submitted.,ស្ថានភាព​កំណត់ហេតុ​ម៉ោង​ត្រូវ​ជូន​។
 apps/frappe/frappe/desk/page/setup_wizard/setup_wizard.js +114,Setting Up,ការ​ដំឡើង
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +150,Row # ,ជួរ​ដេក #
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +157,Row # ,ជួរ​ដេក #
 DocType: Purchase Invoice,In Words (Company Currency),នៅ​ក្នុង​ពាក្យ (ក្រុមហ៊ុន​រូបិយវត្ថុ​)
 DocType: Pricing Rule,Supplier,ក្រុមហ៊ុន​ផ្គត់ផ្គង់
 DocType: C-Form,Quarter,ត្រី​មាស
@@ -1488,7 +1488,7 @@ apps/erpnext/erpnext/config/hr.py +95,"Types of employment (permanent, contract,
 DocType: Currency Exchange,From Currency,ចាប់​ពី​រូបិយប័ណ្ណ
 DocType: DocField,Name,ឈ្មោះ
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py +158,"Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row","សូម​ជ្រើស​ចំនួន​ទឹកប្រាក់​ដែល​បាន​បម្រុង​ទុក​, ប្រភេទ​វិ​ក័​យ​ប័ត្រ​និង​លេខ​វិក្កយបត្រ​ក្នុង​មួយ​ជួរ​ដេក​យ៉ាងហោចណាស់"
-apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +43,Amounts not reflected in system,មាន​ចំនួន​មិន​បាន​ឆ្លុះ​បញ្ចាំង​នៅ​ក្នុង​ប្រព័ន្ធ
+apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +50,Amounts not reflected in system,មាន​ចំនួន​មិន​បាន​ឆ្លុះ​បញ្ចាំង​នៅ​ក្នុង​ប្រព័ន្ធ
 DocType: Purchase Invoice Item,Rate (Company Currency),អត្រា​ការ​ប្រាក់ (ក្រុមហ៊ុន​រូបិយវត្ថុ​)
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +40,Others,អ្នក​ផ្សេង​ទៀត
 DocType: POS Profile,Taxes and Charges,ពន្ធ​និង​ការ​ចោទ​ប្រកាន់
@@ -1498,14 +1498,14 @@ apps/frappe/frappe/core/doctype/doctype/boilerplate/controller_list.html +31,Com
 DocType: Web Form,Select DocType,ជ្រើស​ចង្អុល​បង្ហាញ
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +12,Banking,វិស័យ​ធនាគារ
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +38,Please click on 'Generate Schedule' to get schedule,សូម​ចុច​លើ &#39;បង្កើត​កាលវិភាគ​&#39; ដើម្បី​ទទួល​បាន​នូវ​កាលវិភាគ
-apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +283,New Cost Center,មជ្ឈមណ្ឌល​ការ​ចំណាយ​ថ្មី​មួយ
+apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +297,New Cost Center,មជ្ឈមណ្ឌល​ការ​ចំណាយ​ថ្មី​មួយ
 DocType: Bin,Ordered Quantity,បរិមាណ​ដែល​ត្រូវ​បាន​បញ្ជា​ឱ្យ
 apps/erpnext/erpnext/public/js/setup_wizard.js +145,"e.g. ""Build tools for builders""",ឧ​ទា​ហរ​ណ៏ &quot;ឧបករណ៍​សម្រាប់​អ្នក​សាងសង់​ស្ថាបនា​&quot;
 DocType: Quality Inspection,In Process,ក្នុង​ដំណើរការ
 DocType: Authorization Rule,Itemwise Discount,Itemwise បញ្ចុះ​តំលៃ
 DocType: Purchase Order Item,Reference Document Type,សេចក្តី​យោង​ប្រភេទ​ឯកសារ
 DocType: Account,Fixed Asset,ទ្រព្យសកម្ម​ថេរ
-apps/erpnext/erpnext/config/stock.py +283,Serialized Inventory,សារពើ​ភ័​ណ្ឌ​ស៊េរី
+apps/erpnext/erpnext/config/stock.py +278,Serialized Inventory,សារពើ​ភ័​ណ្ឌ​ស៊េរី
 DocType: Activity Type,Default Billing Rate,អត្រា​ការ​ប្រាក់​វិ​ក័​យ​ប័ត្រ​លំនាំ​ដើម
 DocType: Time Log Batch,Total Billing Amount,ចំនួន​ទឹកប្រាក់​សរុប​វិ​ក័​យ​ប័ត្រ
 apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py +47,Receivable Account,គណនី​ត្រូវ​ទទួល
@@ -1513,6 +1513,7 @@ apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_re
 apps/erpnext/erpnext/config/selling.py +299,Sales Order to Payment,ស​ណ្តា​ប់​ធ្នាប់​ការ​លក់​ទៅ​ការ​ទូទាត់
 DocType: Expense Claim Detail,Expense Claim Detail,ព​ត៌​មាន​លំអិត​ពាក្យ​ប​ណ្តឹ​ង​លើ​ការ​ចំណាយ
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.py +271,Time Logs created:,កំណត់ហេតុ​បង្កើត​ឡើង​វេលា​ម៉ោង​:
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +756,Please select correct account,សូម​ជ្រើស​រើស​គណនី​ដែល​ត្រឹមត្រូវ
 DocType: Item,Weight UOM,ទំ​ង​ន់ UOM
 DocType: Employee,Blood Group,ក្រុម​ឈាម
 DocType: Purchase Invoice Item,Page Break,ការ​បំបែក​ទំព័រ
@@ -1553,7 +1554,7 @@ apps/erpnext/erpnext/config/accounts.py +68,Create Payment Entries against Order
 DocType: Quality Inspection,Sample Size,ទំហំ​គំរូ
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py +446,All items have already been invoiced,ធាតុ​ទាំងអស់​ត្រូវ​បាន invoiced រួច​ទៅ​ហើយ
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py +47,Please specify a valid 'From Case No.',សូម​បញ្ជាក់​ត្រឹមត្រូវ​មួយ &quot;ពី​សំណុំ​រឿង​លេខ​&quot;
-apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +287,Further cost centers can be made under Groups but entries can be made against non-Groups,មជ្ឈ​មណ្ឌល​ការ​ចំណាយ​បន្ថែម​ទៀត​អាច​ត្រូវ​បាន​ធ្វើ​ឡើង​នៅ​ក្រោម​ការ​ក្រុម​នោះ​ទេ​ប៉ុន្តែ​ធាតុ​ដែល​អាច​ត្រូវ​បាន​ធ្វើ​ប្រឆាំង​នឹង​ការ​ដែល​មិន​មែន​ជា​ក្រុម
+apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +301,Further cost centers can be made under Groups but entries can be made against non-Groups,មជ្ឈ​មណ្ឌល​ការ​ចំណាយ​បន្ថែម​ទៀត​អាច​ត្រូវ​បាន​ធ្វើ​ឡើង​នៅ​ក្រោម​ការ​ក្រុម​នោះ​ទេ​ប៉ុន្តែ​ធាតុ​ដែល​អាច​ត្រូវ​បាន​ធ្វើ​ប្រឆាំង​នឹង​ការ​ដែល​មិន​មែន​ជា​ក្រុម
 DocType: Project,External,ខាងក្រៅ
 DocType: Features Setup,Item Serial Nos,ធាតុ​សៀរៀល Nos
 apps/erpnext/erpnext/config/setup.py +66,Users and Permissions,អ្នក​ប្រើ​និង​សិទ្ធិ
@@ -1606,7 +1607,7 @@ DocType: Cost Center,Track separate Income and Expense for product verticals or 
 DocType: Rename Tool,Rename Tool,ឧបករណ៍​ប្តូ​រ​ឈ្មោះ
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js +15,Update Cost,តម្លៃ​ដែល​ធ្វើ​ឱ្យ​ទាន់​សម័យ
 DocType: Item Reorder,Item Reorder,ធាតុ​រៀបចំ
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +568,Transfer Material,សម្ភារៈ​សេវា​ផ្ទេរ​ប្រាក់
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +576,Transfer Material,សម្ភារៈ​សេវា​ផ្ទេរ​ប្រាក់
 DocType: BOM,"Specify the operations, operating cost and give a unique Operation no to your operations.","បញ្ជាក់​ប្រតិ​ប​ត្តិ​ការ​, ការ​ចំណាយ​ប្រតិ​ប​ត្ដិ​ការ​និង​ផ្ដល់​ឱ្យ​នូវ​ប្រតិ​ប​ត្ដិ​ការ​តែ​មួយ​គត់​នោះ​ទេ​ដើម្បី​ឱ្យ​ប្រតិ​ប​ត្តិ​ការ​របស់​អ្នក​។"
 DocType: Purchase Invoice,Price List Currency,បញ្ជី​តម្លៃ​រូបិយប័ណ្ណ
 DocType: Naming Series,User must always select,អ្នក​ប្រើ​ដែល​ត្រូវ​តែ​ជ្រើស​តែងតែ
@@ -1621,7 +1622,7 @@ DocType: Quality Inspection,Purchase Receipt No,គ្មាន​បង្ក�
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +30,Earnest Money,ប្រាក់ Earnest បាន
 DocType: System Settings,In Hours,ក្នុង​ម៉ោង​ធ្វើការ
 DocType: Process Payroll,Create Salary Slip,បង្កើត​ប្រាក់ខែ​គ្រូពេទ្យ​ប្រហែលជា
-apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +45,Expected balance as per bank,តុល្យភាព​គេ​រំពឹង​ទុក​ថា​ជា​មួយ​ធ​នា​គារ
+apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +53,Expected balance as per bank,តុល្យភាព​គេ​រំពឹង​ទុក​ថា​ជា​មួយ​ធ​នា​គារ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +158,Source of Funds (Liabilities),ប្រភព​មូលនិធិ (បំណុល​)
 DocType: Appraisal,Employee,បុគ្គលិក
 apps/erpnext/erpnext/crm/doctype/newsletter_list/newsletter_list.js +10,Import Email From,នាំចូល​អ៊ីមែល​ពី
@@ -1683,7 +1684,7 @@ DocType: Delivery Note,Transporter Name,ឈ្មោះ​ដឹកជញ្ជ�
 DocType: Authorization Rule,Authorized Value,តម្លៃ​ដែល​បាន​អនុញ្ញាត
 DocType: Contact,Enter department to which this Contact belongs,បញ្ចូល​នាយកដ្ឋាន​ដែល​ទំនាក់ទំនង​នេះ​ជា​កម្មសិទ្ធិ​របស់
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +57,Total Absent,សរុប​អវត្តមាន
-apps/erpnext/erpnext/config/stock.py +109,Unit of Measure,ឯកតា​រង្វាស់
+apps/erpnext/erpnext/config/stock.py +104,Unit of Measure,ឯកតា​រង្វាស់
 DocType: Fiscal Year,Year End Date,ឆ្នាំ​បញ្ចប់​កាលបរិច្ឆេទ
 DocType: Task Depends On,Task Depends On,ភារកិច្ច​អាស្រ័យ​លើ
 DocType: Lead,Opportunity,ឱកាស​ការងារ
@@ -1742,12 +1743,12 @@ DocType: Journal Entry,Credit Note,ឥណទាន​ចំណាំ
 DocType: Features Setup,Quality,ដែល​មាន​គុណភាព
 DocType: Contact Us Settings,Introduction,សេចក្តី​ផ្តើ​ម
 DocType: Warranty Claim,Service Address,សេវា​អាសយដ្ឋាន
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +76,Max 100 rows for Stock Reconciliation.,អតិបរមា 100 ជួរដេក​សម្រាប់​ហ៊ុន​ផ្សះផ្សា​។
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +83,Max 100 rows for Stock Reconciliation.,អតិបរមា 100 ជួរដេក​សម្រាប់​ហ៊ុន​ផ្សះផ្សា​។
 DocType: Stock Entry,Manufacture,ការផលិត
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js +13,Please Delivery Note first,ជា​ដំបូង​សូម​ចំណាំ​ដឹកជញ្ជូន
 DocType: Purchase Invoice,Currency and Price List,រូបិយប័ណ្ណ​និង​តារាងតម្លៃ
 DocType: Opportunity,Customer / Lead Name,អតិថិជន​នាំ​ឱ្យ​ឈ្មោះ /
-apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py +63,Clearance Date not mentioned,ការ​បោសសំអាត​កាលបរិច្ឆេទ​មិន​បាន​លើកឡើង
+apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py +62,Clearance Date not mentioned,ការ​បោសសំអាត​កាលបរិច្ឆេទ​មិន​បាន​លើកឡើង
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +71,Production,ផលិតកម្ម
 DocType: Item,Allow Production Order,អនុញ្ញាត​ឱ្យ​មាន​ការ​បញ្ជាទិញ​ផលិតផល
 apps/erpnext/erpnext/controllers/trends.py +19,Total(Qty),សរុប (Qty​)
@@ -1760,7 +1761,7 @@ DocType: Purchase Receipt,Time at which materials were received,ពេលវេ�
 apps/erpnext/erpnext/utilities/doctype/address/address.py +113,My Addresses,អាសយដ្ឋាន​របស់ខ្ញុំ
 DocType: Stock Ledger Entry,Outgoing Rate,អត្រា​ចេញ
 apps/erpnext/erpnext/config/hr.py +100,Organization branch master.,ចៅហ្វាយ​សាខា​អង្គការ​។
-apps/erpnext/erpnext/controllers/accounts_controller.py +238, or ,ឬ
+apps/erpnext/erpnext/controllers/accounts_controller.py +255, or ,ឬ
 DocType: Sales Order,Billing Status,ស្ថានភាព​វិ​ក័​យ​ប័ត្រ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +135,Utility Expenses,ចំណាយ​ឧបករណ៍​ប្រើប្រាស់
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +65,90-Above,90 ខាង​លើ
@@ -1817,9 +1818,9 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +328,Please
 apps/erpnext/erpnext/config/selling.py +33,All Addresses.,អាសយដ្ឋាន​ទាំងអស់​។
 DocType: Company,Stock Settings,ការ​កំណត់​តម្លៃ​ភាគ​ហ៊ុន
 DocType: User,Bio,ជី​វ​ប្រវត្តិ
-apps/erpnext/erpnext/accounts/doctype/account/account.py +194,"Merging is only possible if following properties are same in both records. Is Group, Root Type, Company","រួម​បញ្ចូល​គ្នា​រវាង​គឺ​អាច​ធ្វើ​បាន​តែ​ប៉ុណ្ណោះ​ប្រសិន​បើ​មាន​លក្ខណៈ​សម្បត្តិ​ដូច​ខាង​ក្រោម​គឺ​ដូច​គ្នា​នៅ​ក្នុង​កំណត់​ត្រា​ទាំង​ពីរ​។ គឺ​ជា​ក្រុម​, ប្រភេទ​ជា Root ក្រុមហ៊ុន"
+apps/erpnext/erpnext/accounts/doctype/account/account.py +201,"Merging is only possible if following properties are same in both records. Is Group, Root Type, Company","រួម​បញ្ចូល​គ្នា​រវាង​គឺ​អាច​ធ្វើ​បាន​តែ​ប៉ុណ្ណោះ​ប្រសិន​បើ​មាន​លក្ខណៈ​សម្បត្តិ​ដូច​ខាង​ក្រោម​គឺ​ដូច​គ្នា​នៅ​ក្នុង​កំណត់​ត្រា​ទាំង​ពីរ​។ គឺ​ជា​ក្រុម​, ប្រភេទ​ជា Root ក្រុមហ៊ុន"
 apps/erpnext/erpnext/config/crm.py +72,Manage Customer Group Tree.,គ្រប់គ្រង​ក្រុម​ផ្ទាល់ខ្លួន​ដើមឈើ​។
-apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +285,New Cost Center Name,មជ្ឈមណ្ឌល​ការ​ចំណាយ​ថ្មី​របស់​ឈ្មោះ
+apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +299,New Cost Center Name,មជ្ឈមណ្ឌល​ការ​ចំណាយ​ថ្មី​របស់​ឈ្មោះ
 DocType: Leave Control Panel,Leave Control Panel,ទុក​ឱ្យ​ផ្ទាំង​បញ្ជា
 apps/erpnext/erpnext/utilities/doctype/address/address.py +90,No default Address Template found. Please create a new one from Setup > Printing and Branding > Address Template.,រក​មិន​ឃើញ​ទំព័រ​គំរូ​លំនាំ​ដើម​អាសយដ្ឋាន​។ សូម​បង្កើត​ថ្មី​មួយ​ពី​ការ​ដំឡើង​&gt; បោះពុម្ព​និង​យីហោ​&gt; អាស័យ​ពុម្ព​។
 DocType: Appraisal,HR User,ធនធានមនុស្ស​របស់​អ្នកប្រើប្រាស់
@@ -1836,7 +1837,7 @@ DocType: Bank Reconciliation Detail,Cheque Number,លេខ​មូលប្ប
 DocType: Payment Tool Detail,Payment Tool Detail,ព​ត៌​មាន​នៃ​ឧបករណ៍​ទូទាត់​ប្រាក់
 ,Sales Browser,កម្មវិធី​រុករក​ការ​លក់
 DocType: Journal Entry,Total Credit,ឥណទាន​សរុប
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +397,Local,ក្នុង​តំបន់
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +371,Local,ក្នុង​តំបន់
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +26,Loans and Advances (Assets),ឥណទាន​និង​បុរេប្រទាន (ទ្រព្យសម្បត្តិ​)
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +12,Debtors,ជំពាក់​បំណុល
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +147,Large,ដែល​មាន​ទំហំ​ធំ
@@ -1898,6 +1899,7 @@ apps/erpnext/erpnext/controllers/sales_and_purchase_return.py +103,Atleast one i
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +66,No Remarks,គ្មាន​សុន្ទរកថា
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice_list.js +13,Overdue,ហួស​កាលកំណត់
 DocType: Account,Stock Received But Not Billed,ភាគ​ហ៊ុន​បាន​ទទួល​ប៉ុន្តែ​មិន​បាន​ផ្សព្វ​ផ្សាយ
+apps/erpnext/erpnext/accounts/doctype/account/account.py +80,Root Account must be a group,គណនី root ត្រូវ​តែ​ជា​ក្រុម​មួយ
 DocType: Salary Slip,Gross Pay + Arrear Amount +Encashment Amount - Total Deduction,ចំនួន​សរុប​បាន​ចំនួន​ទឹកប្រាក់​ប្រាក់ខែ + + + + Encashment បំណុល - ការ​កាត់​សរុប
 DocType: Monthly Distribution,Distribution Name,ឈ្មោះ​ចែកចាយ
 DocType: Features Setup,Sales and Purchase,ការ​លក់​និង​ទិញ
@@ -1928,7 +1930,7 @@ DocType: BOM,Item UOM,ធាតុ UOM
 DocType: Sales Taxes and Charges,Tax Amount After Discount Amount (Company Currency),ចំនួន​ប្រាក់​ពន្ធ​បន្ទាប់​ពី​ចំនួន​ការ​បញ្ចុះ​តម្លៃ (ក្រុមហ៊ុន​រូបិយវត្ថុ​)
 DocType: Quality Inspection,Quality Inspection,ពិនិត្យ​គុណភាព
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +144,Extra Small,បន្ថែម​ទៀត​ខ្នាត​តូច
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +537,Warning: Material Requested Qty is less than Minimum Order Qty,ព្រមាន​: សម្ភារៈ​ដែល​បាន​ស្នើ Qty គឺ​តិច​ជាង​អប្បបរមា​លំដាប់ Qty
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +545,Warning: Material Requested Qty is less than Minimum Order Qty,ព្រមាន​: សម្ភារៈ​ដែល​បាន​ស្នើ Qty គឺ​តិច​ជាង​អប្បបរមា​លំដាប់ Qty
 DocType: Company,Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,ផ្នែក​ច្បាប់​អង្គភាព / តារាង​រួមផ្សំ​ជា​មួយ​នឹង​គណនី​ដាច់​ដោយ​ឡែក​មួយ​ដែល​ជា​កម្មសិទ្ធិ​របស់​អង្គការ​នេះ​។
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +29,"Food, Beverage & Tobacco","អាហារ​, ភេសជ្ជៈ​និង​ថ្នាំជក់"
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +20,PL or BS,: PL ឬ​ពាណិជ្ជកម្ម BS
@@ -1966,7 +1968,7 @@ apps/erpnext/erpnext/hr/doctype/job_applicant/job_applicant.py +23,Name or Email
 apps/erpnext/erpnext/config/stock.py +74,Incoming quality inspection.,ការ​ត្រួត​ពិនិត្យ​ដែល​មាន​គុណភាព​ចូល​។
 DocType: Purchase Order Item,Returned Qty,ត្រឡប់​មក​វិញ Qty
 DocType: Employee,Exit,ការ​ចាក​ចេញ
-apps/erpnext/erpnext/accounts/doctype/account/account.py +134,Root Type is mandatory,ប្រភេទ​ជា Root គឺ​ជា​ចាំបាច់
+apps/erpnext/erpnext/accounts/doctype/account/account.py +138,Root Type is mandatory,ប្រភេទ​ជា Root គឺ​ជា​ចាំបាច់
 DocType: Item Customer Detail,"For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes","ចំពោះ​ភាព​ងាយស្រួល​នៃ​អតិថិជន​, កូដ​ទាំង​នេះ​អាច​ត្រូវ​បាន​ប្រើ​នៅ​ក្នុង​ទ្រង់ទ្រាយ​បោះពុម្ព​ដូច​ជា​ការ​វិ​កិ​យ​ប័ត្រ​និង​ដឹកជញ្ជូន​ចំណាំ"
 DocType: Employee,You can enter any date manually,អ្នក​អាច​បញ្ចូល​កាលបរិច្ឆេទ​ណា​មួយ​ដោយ​ដៃ
 DocType: Sales Invoice,Advertisement,ការ​ផ្សព្វផ្សាយ
@@ -1991,13 +1993,13 @@ apps/erpnext/erpnext/support/page/support_analytics/support_analytics.js +31,Sel
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +43,Reorder Level,រៀបចំ​វគ្គ
 DocType: Attendance,Attendance Date,ការ​ចូលរួម​កាលបរិច្ឆេទ
 DocType: Salary Structure,Salary breakup based on Earning and Deduction.,ការ​បែកបាក់​គ្នា​ដោយ​ផ្អែក​លើ​ការ​រក​ប្រាក់​ចំណូល​បាន​ប្រាក់​ខែ​និង​ការ​កាត់​។
-apps/erpnext/erpnext/accounts/doctype/account/account.py +103,Account with child nodes cannot be converted to ledger,គណនី​ជាមួយ​ថ្នាំង​ជា​កុមារ​មិន​អាច​ត្រូវ​បាន​បម្លែង​ទៅ​សៀវភៅ
+apps/erpnext/erpnext/accounts/doctype/account/account.py +110,Account with child nodes cannot be converted to ledger,គណនី​ជាមួយ​ថ្នាំង​ជា​កុមារ​មិន​អាច​ត្រូវ​បាន​បម្លែង​ទៅ​សៀវភៅ
 DocType: Address,Preferred Shipping Address,ការ​ដឹក​ជញ្ជូន​អាសយដ្ឋាន​ដែល​ពេញ​ចិត្ត
 DocType: Purchase Receipt Item,Accepted Warehouse,ឃ្លាំង​ទទួល​យក
 DocType: Bank Reconciliation Detail,Posting Date,ការ​ប្រកាស​កាលបរិច្ឆេទ
 DocType: Item,Valuation Method,វិធី​សា​ស្រ្ត​វាយតម្លៃ
 DocType: Sales Invoice,Sales Team,ការ​លក់​ក្រុមការងារ
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +81,Duplicate entry,ធាតុ​ស្ទួន
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +88,Duplicate entry,ធាតុ​ស្ទួន
 DocType: Serial No,Under Warranty,នៅ​ក្រោម​ការធានា
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js +414,[Error],[កំហុស​ក្នុង​ការ​]
 DocType: Sales Order,In Words will be visible once you save the Sales Order.,នៅ​ក្នុង​ពាក្យ​នោះ​នឹង​ត្រូវ​បាន​មើល​ឃើញ​នៅ​ពេល​ដែល​អ្នក​រក្សា​ស​ណ្តា​ប់​ធ្នាប់​ការ​លក់​។
@@ -2042,7 +2044,7 @@ DocType: Quality Inspection,Outgoing,ចេញ
 DocType: Material Request,Requested For,ស្នើ​សម្រាប់
 DocType: Quotation Item,Against Doctype,ប្រឆាំង​នឹង​ការ DOCTYPE
 DocType: Delivery Note,Track this Delivery Note against any Project,តាមដាន​ការ​ដឹកជញ្ជូន​ចំណាំ​នេះ​ប្រឆាំង​នឹង​គម្រោង​ណាមួយ​ឡើយ
-apps/erpnext/erpnext/accounts/doctype/account/account.py +169,Root account can not be deleted,គណនី root មិន​អាច​ត្រូវ​បាន​លុប
+apps/erpnext/erpnext/accounts/doctype/account/account.py +176,Root account can not be deleted,គណនី root មិន​អាច​ត្រូវ​បាន​លុប
 apps/erpnext/erpnext/manufacturing/doctype/production_order/production_order.js +75,Show Stock Entries,បង្ហាញ​ធាតុ​ហ៊ុន
 ,Is Primary Address,គឺ​ជា​អាសយដ្ឋាន​បឋមសិក្សា
 DocType: Production Order,Work-in-Progress Warehouse,ការងារ​ក្នុង​វឌ្ឍនភាព​ឃ្លាំង
@@ -2078,7 +2080,7 @@ DocType: Period Closing Voucher,"The account head under Liability, in which Prof
 DocType: Payment Tool,Against Vouchers,ប្រឆាំង​នឹង​ប័ណ្ណ​ទូទាត់
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +23,Quick Help,ជំនួយ​រហ័ស
 DocType: Features Setup,Sales Extras,ការ​លក់​បន្ថែម
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +236,"Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry",គណនី​មាន​ភាព​ខុស​គ្នា​ត្រូវ​តែ​ជា​គណនី​ប្រភេទ​ទ្រព្យសកម្ម / ការទទួលខុសត្រូវ​ចាប់​តាំង​ពី​ការ​ផ្សះផ្សា​នេះ​គឺ​ផ្សារ​ភាគ​ហ៊ុន​ការ​បើក​ជា​មួយ​ធាតុ
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +243,"Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry",គណនី​មាន​ភាព​ខុស​គ្នា​ត្រូវ​តែ​ជា​គណនី​ប្រភេទ​ទ្រព្យសកម្ម / ការទទួលខុសត្រូវ​ចាប់​តាំង​ពី​ការ​ផ្សះផ្សា​នេះ​គឺ​ផ្សារ​ភាគ​ហ៊ុន​ការ​បើក​ជា​មួយ​ធាតុ
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +18,'From Date' must be after 'To Date',&quot;ពី​កាល​បរិច្ឆេទ​&quot; ត្រូវ​តែ​មាន​បន្ទាប់ &#39;ដើម្បី​កាលបរិច្ឆេទ &quot;
 ,Stock Projected Qty,គម្រោង Qty ផ្សារ​ភាគ​ហ៊ុន
 DocType: Sales Order,Customer's Purchase Order,ទិញ​លំដាប់​របស់​អតិថិជន
@@ -2202,7 +2204,7 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py +46,Min Qty c
 DocType: Stock Entry,Customer or Supplier Details,សេចក្ដី​លម្អិត​អតិថិជន​ឬ​ផ្គត់​ផ្គង់
 apps/frappe/frappe/core/page/permission_manager/permission_manager.js +428,Set,កំណត់
 DocType: Lead,Lead Owner,ការ​នាំ​មុខ​ម្ចាស់
-apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +248,Warehouse is required,ឃ្លាំង​ត្រូវ​បាន​ទាមទារ
+apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +254,Warehouse is required,ឃ្លាំង​ត្រូវ​បាន​ទាមទារ
 DocType: Employee,Marital Status,ស្ថានភាព​គ្រួសារ
 DocType: Stock Settings,Auto Material Request,សម្ភារៈ​ស្នើ​សុំ​ដោយ​ស្វ័យ​ប្រវត្តិ
 DocType: Time Log,Will be updated when billed.,នឹង​ត្រូវ​បាន​ធ្វើ​បច្ចុប្បន្នភាព​នៅ​ពេល​ដែល​បាន​ផ្សព្វ​ផ្សាយ​។
@@ -2225,7 +2227,7 @@ apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py +85,
 apps/erpnext/erpnext/config/crm.py +37,"Record of all communications of type email, phone, chat, visit, etc.","កំណត់ហេតុ​នៃ​ការ​ទំនាក់ទំនង​ទាំង​អស់​នៃ​ប្រភេទ​អ៊ីមែល​ទូរស័ព្ទ​ជជែក​កំសាន្ត​, ដំណើរ​ទស្សនកិច្ច​, ល"
 apps/erpnext/erpnext/accounts/general_ledger.py +134,Please mention Round Off Cost Center in Company,សូម​និយាយ​ពី​មជ្ឈ​មណ្ឌល​ការ​ចំណាយ​មូល​បិទ​ក្នុង​ក្រុមហ៊ុន
 DocType: Purchase Invoice,Terms,លក្ខខណ្ឌ
-apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +242,Create New,បង្កើត​ថ្មី
+apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +248,Create New,បង្កើត​ថ្មី
 DocType: Buying Settings,Purchase Order Required,ទិញ​លំដាប់​ដែល​បាន​ទាមទារ
 ,Item-wise Sales History,ប្រវត្តិ​លក់​ធាតុ​ប្រាជ្ញា
 DocType: Expense Claim,Total Sanctioned Amount,ចំនួន​ទឹកប្រាក់​ដែល​បាន​អនុញ្ញាត​សរុប
@@ -2260,7 +2262,7 @@ apps/frappe/frappe/core/doctype/user/user.js +130,Loading,កំពុង​ផ�
 DocType: BOM Replace Tool,BOM Replace Tool,Bom ជំនួស​ឧបករណ៍
 apps/erpnext/erpnext/config/setup.py +37,Country wise default Address Templates,ប្រទេស​អាស័យ​ដ្ឋាន​ពុម្ព​លំនាំ​ដើម​របស់​អ្នក​មាន​ប្រាជ្ញា
 DocType: Sales Order Item,Supplier delivers to Customer,ក្រុមហ៊ុន​ផ្គត់​ផ្គង់​បាន​ផ្ដល់​នូវ​ការ​ទៅ​ឱ្យ​អតិថិជន
-apps/erpnext/erpnext/public/js/controllers/transaction.js +726,Show tax break-up,សម្រាក​ឡើង​ពន្ធ​លើ​ការ​បង្ហាញ
+apps/erpnext/erpnext/public/js/controllers/transaction.js +735,Show tax break-up,សម្រាក​ឡើង​ពន្ធ​លើ​ការ​បង្ហាញ
 apps/erpnext/erpnext/config/setup.py +51,Data Import and Export,នាំចូល​ទិន្នន័យ​និង​ការ​នាំ​ចេញ
 DocType: Features Setup,If you involve in manufacturing activity. Enables Item 'Is Manufactured',ប្រសិន​បើ​លោក​អ្នក​មាន​ការ​ចូលរួម​ក្នុង​សកម្មភាព​ផលិតកម្ម​។ អនុញ្ញាត​ឱ្យ​មាន​ធាតុ &quot;ត្រូវ​បាន​ផលិត​&quot;
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +54,Invoice Posting Date,កាលបរិច្ឆេទ​វិ​ក្ក័​យ​ប័ត្រ
@@ -2321,13 +2323,13 @@ DocType: Stock Entry,From BOM,ចាប់​ពី Bom
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +34,Basic,ជា​មូលដ្ឋាន
 apps/erpnext/erpnext/support/doctype/maintenance_schedule/maintenance_schedule.py +217,Please click on 'Generate Schedule',សូម​ចុច​លើ &#39;បង្កើត​កាលវិភាគ &quot;
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.js +61,To Date should be same as From Date for Half Day leave,គួរ​មាន​កាលបរិច្ឆេទ​ដូច​គ្នា​ជា​ពី​កាល​បរិច្ឆេទ​ការ​ឈប់​ពាក់​ក​ណ្តា​ល​ថ្ងៃ
-apps/erpnext/erpnext/config/stock.py +110,"e.g. Kg, Unit, Nos, m","ឧ​គីឡូក្រាម​, អង្គភាព​, NOS លោក​ម៉ែត្រ"
+apps/erpnext/erpnext/config/stock.py +105,"e.g. Kg, Unit, Nos, m","ឧ​គីឡូក្រាម​, អង្គភាព​, NOS លោក​ម៉ែត្រ"
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +96,Reference No is mandatory if you entered Reference Date,សេចក្តី​យោង​មិន​មាន​ជា​ការ​ចាំបាច់​បំផុត​ប្រសិន​បើ​អ្នក​បាន​បញ្ចូល​សេចក្តី​យោង​កាលបរិច្ឆេទ
 apps/erpnext/erpnext/hr/doctype/employee/employee.py +108,Date of Joining must be greater than Date of Birth,កាលបរិច្ឆេទ​នៃ​ការ​ចូលរួម​ត្រូវ​តែ​ធំ​ជាង​ថ្ងៃខែ​ឆ្នាំ​កំណើត
 DocType: Salary Structure,Salary Structure,រចនាសម្ព័ន្ធ​ប្រាក់​បៀវត្ស
 DocType: Account,Bank,ធនាគារ
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +9,Airline,ក្រុមហ៊ុន​អាកាស​ចរ​ណ៍
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +572,Issue Material,សម្ភារៈ​បញ្ហា
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +580,Issue Material,សម្ភារៈ​បញ្ហា
 DocType: Material Request Item,For Warehouse,សម្រាប់​ឃ្លាំង
 DocType: Employee,Offer Date,ការ​ផ្តល់​ជូន​កាលបរិច្ឆេទ
 DocType: Hub Settings,Access Token,ការ​ចូល​ដំណើរ​ការ Token
@@ -2365,7 +2367,7 @@ DocType: C-Form,Amended From,ធ្វើ​វិសោធនកម្ម​ព
 apps/erpnext/erpnext/public/js/setup_wizard.js +374,Raw Material,វត្ថុ​ធាតុ​ដើម
 DocType: Leave Application,Follow via Email,សូម​អនុវត្ត​តាម​រយៈ​អ៊ី​ម៉ែ​ល
 DocType: Purchase Taxes and Charges,Tax Amount After Discount Amount,ចំនួន​ប្រាក់​ពន្ធ​បន្ទាប់​ពី​ចំនួន​ទឹកប្រាក់​ដែល​បញ្ចុះតម្លៃ
-apps/erpnext/erpnext/accounts/doctype/account/account.py +174,Child account exists for this account. You can not delete this account.,គណនី​កុមារ​ដែល​មាន​សម្រាប់​គណនី​នេះ​។ អ្នក​មិន​អាច​លុប​គណនី​នេះ​។
+apps/erpnext/erpnext/accounts/doctype/account/account.py +181,Child account exists for this account. You can not delete this account.,គណនី​កុមារ​ដែល​មាន​សម្រាប់​គណនី​នេះ​។ អ្នក​មិន​អាច​លុប​គណនី​នេះ​។
 apps/erpnext/erpnext/setup/doctype/territory/territory.py +19,Either target qty or target amount is mandatory,ទាំង qty គោលដៅ​ឬ​ចំនួន​គោល​ដៅ​គឺ​ជា​ចាំបាច់
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +335,Please select Posting Date first,សូម​ជ្រើសរើស​កាលបរិច្ឆេទ​ដំបូង​គេ​បង្អស់
 apps/erpnext/erpnext/public/js/account_tree_grid.js +211,Opening Date should be before Closing Date,បើក​កាលបរិច្ឆេទ​គួរ​តែ​មាន​មុន​កាល​បរិចេ្ឆទ​ផុតកំណត់
@@ -2391,7 +2393,7 @@ DocType: Purchase Order,The date on which recurring order will be stop,ថ្ង
 DocType: Quality Inspection,Item Serial No,គ្មាន​សៀរៀល​ធាតុ
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py +57,Total Present,បច្ចុប្បន្ន​សរុប
 apps/erpnext/erpnext/public/js/setup_wizard.js +378,Hour,ហួរ
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +592,Transfer Material to Supplier,ផ្ទេរ​សម្ភារៈ​ដើម្បី​ផ្គត់​ផ្គង់
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +600,Transfer Material to Supplier,ផ្ទេរ​សម្ភារៈ​ដើម្បី​ផ្គត់​ផ្គង់
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py +29,New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,គ្មាន​ស៊េរី​ថ្មី​នេះ​មិន​អាច​មាន​ឃ្លាំង​។ ឃ្លាំង​ត្រូវ​តែ​ត្រូវ​បាន​កំណត់​ដោយ​បង្កាន់ដៃ​ហ៊ុន​ទិញ​ចូល​ឬ
 DocType: Lead,Lead Type,ការ​នាំ​មុខ​ប្រភេទ
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.js +82,Create Quotation,បង្កើត​សម្រង់
@@ -2401,6 +2403,7 @@ DocType: Shipping Rule,Shipping Rule Conditions,ការ​ដឹក​ជញ�
 DocType: BOM Replace Tool,The new BOM after replacement,នេះ​បន្ទាប់ពី​ការ​ជំនួស Bom
 DocType: Features Setup,Point of Sale,ចំណុច​នៃ​ការ​លក់
 DocType: Account,Tax,ការ​បង់​ពន្ធ
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +438,From Product Bundle,ចាប់​ពី​កញ្ចប់​ផលិតផល
 DocType: Production Planning Tool,Production Planning Tool,ឧបករណ៍​ផែនការ​ផលិតកម្ម
 DocType: Quality Inspection,Report Date,របាយការណ៍​ស្តី​ពី​កាលបរិច្ឆេទ
 DocType: C-Form,Invoices,វិ​ក័​យ​ប័ត្រ
@@ -2424,8 +2427,8 @@ DocType: Customer Group,Customer Group Name,ឈ្មោះ​ក្រុម​
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,សូម​ជ្រើស​យក​ការ​ទៅ​មុខ​ផង​ដែរ​ប្រសិន​បើ​អ្នក​ចង់​រួម​បញ្ចូល​តុល្យភាព​ឆ្នាំ​មុន​សារពើពន្ធ​របស់​ទុក​នឹង​ឆ្នាំ​សារពើពន្ធ​នេះ
 DocType: GL Entry,Against Voucher Type,ប្រឆាំង​នឹង​ប្រភេទ​ប័ណ្ណ
 DocType: Item,Attributes,គុណលក្ខណៈ
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +477,Get Items,ទទួល​បាន​ធាតុ
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +187,Please enter Write Off Account,សូម​បញ្ចូល​បិទ​សរសេរ​គណនី
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +485,Get Items,ទទួល​បាន​ធាតុ
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py +191,Please enter Write Off Account,សូម​បញ្ចូល​បិទ​សរសេរ​គណនី
 apps/erpnext/erpnext/selling/report/customers_not_buying_since_long_time/customers_not_buying_since_long_time.py +71,Last Order Date,លំដាប់​ចុង​ក្រោយ​កាលបរិច្ឆេទ
 DocType: DocField,Image,រូបភាព
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js +179,Make Excise Invoice,ធ្វើ​ឱ្យ​រដ្ឋាករ​វិ​ក័​យ​ប័ត្រ
@@ -2442,7 +2445,7 @@ DocType: Leave Allocation,New Leaves Allocated,ស្លឹក​ថ្មី​
 apps/erpnext/erpnext/controllers/trends.py +257,Project-wise data is not available for Quotation,ទិន្នន័យ​គម្រោង​ប្រាជ្ញា​គឺ​មិន​អាច​ប្រើ​បាន​សម្រាប់​សម្រង់
 DocType: Project,Expected End Date,គេ​រំពឹង​ថា​នឹង​កាលបរិច្ឆេទ​បញ្ចប់
 DocType: Appraisal Template,Appraisal Template Title,ការវាយតម្លៃ​ទំព័រ​គំរូ​ចំណងជើង
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +378,Commercial,ពាណិជ្ជ
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +352,Commercial,ពាណិជ្ជ
 DocType: Cost Center,Distribution Id,លេខ​សម្គាល់​ការ​ចែកចាយ
 apps/erpnext/erpnext/setup/setup_wizard/data/sample_home_page.html +14,Awesome Services,សេវា​សេវា​ល្អ​មែន​ទែន
 apps/erpnext/erpnext/config/manufacturing.py +29,All Products or Services.,ផលិតផល​ឬ​សេវាកម្ម​ទាំងអស់​។
@@ -2460,7 +2463,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +145,Cr,CR
 DocType: Customer,Default Receivable Accounts,លំនាំ​ដើម​គណនី​អ្នក​ទទួល
 DocType: Tax Rule,Billing State,រដ្ឋ​វិ​ក័​យ​ប័ត្រ
 DocType: Item Reorder,Transfer,សេវា​ផ្ទេរ​ប្រាក់
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +628,Fetch exploded BOM (including sub-assemblies),យក Bom ផ្ទុះ (រួម​បញ្ចូល​ទាំង​សភា​អនុ​)
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +636,Fetch exploded BOM (including sub-assemblies),យក Bom ផ្ទុះ (រួម​បញ្ចូល​ទាំង​សភា​អនុ​)
 DocType: Authorization Rule,Applicable To (Employee),ដែល​អាច​អនុវត្ត​ទៅ (បុគ្គលិក​)
 apps/erpnext/erpnext/controllers/accounts_controller.py +101,Due Date is mandatory,កាលបរិច្ឆេទ​ដល់​កំណត់​គឺ​ជា​ចាំបាច់
 DocType: Journal Entry,Pay To / Recd From,ចំណាយ​ប្រាក់​ដើម្បី / Recd ពី
@@ -2472,7 +2475,7 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js +27,How Prici
 DocType: Quality Inspection,Delivery Note No,ដឹកជញ្ជូន​ចំណាំ​គ្មាន
 DocType: Company,Retail,ការ​លក់​រាយ
 DocType: Attendance,Absent,អវត្តមាន
-apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +463,Product Bundle,កញ្ចប់​ផលិតផល
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +471,Product Bundle,កញ្ចប់​ផលិតផល
 DocType: Purchase Taxes and Charges Template,Purchase Taxes and Charges Template,ទិញ​ពន្ធ​និង​ការ​ចោទ​ប្រកាន់​ពី​ទំព័រ​គំរូ
 DocType: Upload Attendance,Download Template,ទំព័រ​គំរូ​ទាញ​យក
 DocType: GL Entry,Remarks,សុន្ទរកថា
@@ -2485,8 +2488,8 @@ DocType: Offer Letter,Awaiting Response,រង់ចាំ​ការ​ឆ្�
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py +53,Above,ខាង​លើ
 DocType: Salary Slip,Earning & Deduction,ការ​រក​ប្រាក់​ចំណូល​និង​ការ​កាត់​បន​ថយ
 apps/frappe/frappe/desk/page/setup_wizard/setup_wizard.js +314,Region,តំបន់
-apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +213,Optional. This setting will be used to filter in various transactions.,ស្រេច​ចិត្ត​។ ការ​កំណត់​នេះ​នឹង​ត្រូវ​បាន​ប្រើ​ដើម្បី​ត្រង​នៅ​ក្នុង​ប្រតិបត្តិការ​នានា​។
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +104,Negative Valuation Rate is not allowed,អត្រា​វាយតម្លៃ​អវិជ្ជមាន​មិន​ត្រូវ​បាន​អនុញ្ញាត
+apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +216,Optional. This setting will be used to filter in various transactions.,ស្រេច​ចិត្ត​។ ការ​កំណត់​នេះ​នឹង​ត្រូវ​បាន​ប្រើ​ដើម្បី​ត្រង​នៅ​ក្នុង​ប្រតិបត្តិការ​នានា​។
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +111,Negative Valuation Rate is not allowed,អត្រា​វាយតម្លៃ​អវិជ្ជមាន​មិន​ត្រូវ​បាន​អនុញ្ញាត
 DocType: Holiday List,Weekly Off,បិទ​ប្រចាំ​ស​ប្តា​ហ៍
 DocType: Fiscal Year,"For e.g. 2012, 2012-13","ឧទាហរណ៍​ៈ​ឆ្នាំ 201​​2​, 2012-13"
 apps/erpnext/erpnext/accounts/report/balance_sheet/balance_sheet.py +32,Provisional Profit / Loss (Credit),ប្រាក់​ចំ​នេ​ញ​ជា​ប​ណ្តោះ​អាសន្ន / បាត់បង់ (ឥណទាន​)
@@ -2497,7 +2500,7 @@ apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_ac
 DocType: Sales Invoice,Product Bundle Help,កញ្ចប់​ជំនួយ​ផលិតផល
 ,Monthly Attendance Sheet,សន្លឹក​វត​​្តមាន​ប្រចាំ​ខែ
 apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py +16,No record found,បាន​រក​ឃើញ​ថា​គ្មាន​កំណត់ត្រា
-DocType: Purchase Invoice,Get Items from Product Bundle,ទទួល​បាន​ធាតុ​ពី​កញ្ចប់​ផលិតផល
+apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +467,Get Items from Product Bundle,ទទួល​បាន​ធាតុ​ពី​កញ្ចប់​ផលិតផល
 DocType: GL Entry,Is Advance,តើ​ការ​ជាមុន
 apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.js +21,Attendance From Date and Attendance To Date is mandatory,ការ​ចូល​រួម​ពី​កាលបរិច្ឆេទ​និង​ចូលរួម​កាលបរិច្ឆេទ​គឺ​ជា​ចាំបាច់
 apps/erpnext/erpnext/controllers/buying_controller.py +122,Please enter 'Is Subcontracted' as Yes or No,សូម​បញ្ចូល &lt;តើ​កិច្ចសន្យា​ប​ន្ដ &#39;ជា​បាទ​ឬ​ទេ
@@ -2525,7 +2528,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py +61,Age,ដែល​មាន​អាយុ
 DocType: Time Log,Billing Amount,ចំនួន​វិ​ក័​យ​ប័ត្រ
 apps/erpnext/erpnext/config/hr.py +18,Applications for leave.,កម្មវិធី​សម្រាប់​ការ​ឈប់​សម្រាក​។
-apps/erpnext/erpnext/accounts/doctype/account/account.py +172,Account with existing transaction can not be deleted,គណនី​ប្រតិបត្តិការ​ដែល​មាន​ស្រាប់​ដែល​មិន​អាច​ត្រូវ​បាន​លុប
+apps/erpnext/erpnext/accounts/doctype/account/account.py +179,Account with existing transaction can not be deleted,គណនី​ប្រតិបត្តិការ​ដែល​មាន​ស្រាប់​ដែល​មិន​អាច​ត្រូវ​បាន​លុប
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +99,Legal Expenses,ការ​ចំណាយ​ផ្នែក​ច្បាប់
 DocType: Sales Order,"The day of the month on which auto order will be generated e.g. 05, 28 etc","ថ្ងៃ​នៃ​ខែ​ដែល​ការ​បញ្ជាទិញ​នឹង​ត្រូវ​បាន​បង្កើត​ដោយ​ស្វ័យ​ប្រវត្តិ​របស់​ឧ 05​, 28 ល"
 DocType: Sales Invoice,Posting Time,ម៉ោង​ប្រកាស
@@ -2621,7 +2624,7 @@ apps/erpnext/erpnext/config/manufacturing.py +19,Orders released for production.
 apps/erpnext/erpnext/accounts/page/financial_analytics/financial_analytics.js +42,Select Fiscal Year...,ជ្រើស​ឆ្នាំ​សារពើពន្ធ ...
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +444,POS Profile required to make POS Entry,ម៉ាស៊ីន​ឆូត​កាត​ព​ត៌​មាន​ផ្ទាល់ខ្លួន​ត្រូវ​បាន​ទាមទារ​ដើម្បី​ធ្វើ​ឱ្យ​ធាតុ​របស់​ម៉ាស៊ីន​ឆូត​កាត
 DocType: Hub Settings,Name Token,ឈ្មោះ​និមិត្ត​សញ្ញា
-apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +120,Standard Selling,ស្តង់​ដា​លក់
+apps/erpnext/erpnext/setup/setup_wizard/setup_wizard.py +113,Standard Selling,ស្តង់​ដា​លក់
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +137,Atleast one warehouse is mandatory,យ៉ាងហោចណាស់​មាន​ម្នាក់​ឃ្លាំង​គឺ​ជា​ចាំបាច់
 DocType: Serial No,Out of Warranty,ចេញ​ពី​ការធានា
 DocType: BOM Replace Tool,Replace,ជំនួស
@@ -2673,7 +2676,7 @@ apps/erpnext/erpnext/public/js/setup_wizard.js +309,Rate (%),អត្រា​�
 DocType: Stock Entry Detail,Additional Cost,ការ​ចំណាយ​បន្ថែម​ទៀត
 apps/erpnext/erpnext/public/js/setup_wizard.js +155,Financial Year End Date,កាលបរិច្ឆេទ​ឆ្នាំ​ហិរញ្ញវត្ថុ​បញ្ចប់
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py +36,"Can not filter based on Voucher No, if grouped by Voucher",មិន​អាច​ត្រង​ដោយ​ផ្អែក​លើ​ប័ណ្ណ​គ្មាន​ប្រសិនបើ​ដាក់​ជា​ក្រុម​តាម​ប័ណ្ណ
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +563,Make Supplier Quotation,ធ្វើ​ឱ្យ​សម្រង់​ផ្គត់ផ្គង់
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +571,Make Supplier Quotation,ធ្វើ​ឱ្យ​សម្រង់​ផ្គត់ផ្គង់
 DocType: Quality Inspection,Incoming,មក​ដល់
 DocType: BOM,Materials Required (Exploded),សំភារៈ​ទាមទារ (ផ្ទុះ​)
 DocType: Salary Structure Earning,Reduce Earning for Leave Without Pay (LWP),កាត់​បន្ថយ​រក​ស្នើសុំ​ការអនុញ្ញាត​ដោយ​គ្មាន​ការ​បង់ (LWP​)
@@ -2739,7 +2742,7 @@ DocType: Sales Invoice,Paid Amount,ចំនួន​ទឹកប្រាក់
 ,Available Stock for Packing Items,អាច​រក​បាន​សម្រាប់​វេច​ខ្ចប់​ហ៊ុន​របស់របរ
 DocType: Item Variant,Item Variant,ធាតុ​វ៉ារ្យង់
 apps/erpnext/erpnext/utilities/doctype/address_template/address_template.py +15,Setting this Address Template as default as there is no other default,ការ​កំណត់​អាសយដ្ឋាន​ទំព័រ​គំរូ​ជា​លំនាំ​ដើម​នេះ​ដូច​ជា​មិន​មាន​ការ​លំនាំ​ដើម​ផ្សេង​ទៀត
-apps/erpnext/erpnext/accounts/doctype/account/account.py +89,"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","សមតុល្យ​គណនី​រួច​ហើយ​នៅ​ក្នុង​ឥណពន្ធ​, អ្នក​មិន​ត្រូវ​បាន​អនុញ្ញាត​ឱ្យ​កំណត់​ទឹកប្រាក់​ត្រូវតែ &quot;ជា​&quot; ឥណទាន &quot;"
+apps/erpnext/erpnext/accounts/doctype/account/account.py +96,"Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'","សមតុល្យ​គណនី​រួច​ហើយ​នៅ​ក្នុង​ឥណពន្ធ​, អ្នក​មិន​ត្រូវ​បាន​អនុញ្ញាត​ឱ្យ​កំណត់​ទឹកប្រាក់​ត្រូវតែ &quot;ជា​&quot; ឥណទាន &quot;"
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +76,Quality Management,គ្រប់គ្រង​គុណភាព
 DocType: Production Planning Tool,Filter based on customer,តម្រង​ផ្អែក​លើ​ការ​អតិថិជន
 DocType: Payment Tool Detail,Against Voucher No,ប្រឆាំង​នឹង​ប័ណ្ណ​គ្មាន
@@ -2748,7 +2751,7 @@ DocType: Tax Rule,Purchase,ការ​ទិញ
 apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py +36,Balance Qty,មាន​តុល្យភាព Qty
 DocType: Item Group,Parent Item Group,ធាតុ​មេ​គ្រុប
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +96,Cost Centers,មជ្ឈមណ្ឌល​ការ​ចំណាយ
-apps/erpnext/erpnext/config/stock.py +115,Warehouses.,ឃ្លាំង​។
+apps/erpnext/erpnext/config/stock.py +110,Warehouses.,ឃ្លាំង​។
 DocType: Purchase Receipt,Rate at which supplier's currency is converted to company's base currency,អត្រា​រូបិយប័ណ្ណ​ក្រុមហ៊ុន​ផ្គត់ផ្គង់​ដែល​ត្រូវ​បាន​បម្លែង​ទៅ​ជា​រូបិយប័ណ្ណ​មូលដ្ឋាន​របស់​ក្រុមហ៊ុន
 DocType: Opportunity,Next Contact,ទំនាក់ទំនង​បន្ទាប់
 DocType: Employee,Employment Type,ប្រភេទ​ការងារ​ធ្វើ
@@ -2834,7 +2837,7 @@ DocType: Features Setup,Item Advanced,ធាតុ​កម្រិត​ខ្
 DocType: Notification Control,"When any of the checked transactions are ""Submitted"", an email pop-up automatically opened to send an email to the associated ""Contact"" in that transaction, with the transaction as an attachment. The user may or may not send the email.",នៅ​ពេល​ណា​ដែល​ប្រតិ​ប​ត្តិ​ការ​ដែល​បាន​ធីក​ត្រូវ​បាន &quot;ផ្តល់​ជូន​&quot; ដែល​ជា​ការ​លេច​ឡើង​អ៊ី​ម៉ែ​ល​ដែល​បាន​បើក​ដោយ​ស្វ័យ​ប្រវត្តិ​ដើម្បី​ផ្ញើ​អ៊ីមែល​ទៅ​ជាប់​ទាក់ទង &quot;ទំនាក់ទំនង​&quot; នៅ​ក្នុង​ប្រតិបត្តិការ​នោះ​ដោយ​មាន​ប្រតិ​ប​ត្តិ​ការ​ជា​មួយ​ការ​ភ្ជាប់​នេះ​។ អ្នក​ប្រើ​ដែល​អាច​ឬ​មិន​អាច​ផ្ញើ​អ៊ីមែល​។
 apps/erpnext/erpnext/config/setup.py +14,Global Settings,ការ​កំណត់​សកល
 DocType: Employee Education,Employee Education,បុគ្គលិក​អប់រំ
-apps/erpnext/erpnext/public/js/controllers/transaction.js +742,It is needed to fetch Item Details.,វា​ត្រូវ​បាន​គេ​ត្រូវការ​ដើម្បី​ទៅ​យក​លំអិត​ធាតុ​។
+apps/erpnext/erpnext/public/js/controllers/transaction.js +751,It is needed to fetch Item Details.,វា​ត្រូវ​បាន​គេ​ត្រូវការ​ដើម្បី​ទៅ​យក​លំអិត​ធាតុ​។
 DocType: Salary Slip,Net Pay,ប្រាក់​ចំណេញ​សុទ្ធ
 DocType: Account,Account,គណនី
 ,Requested Items To Be Transferred,ធាតុ​ដែល​បាន​ស្នើ​សុំ​ឱ្យ​គេ​បញ្ជូន
@@ -2846,7 +2849,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +48,Sick Leave,ស�
 DocType: Email Digest,Email Digest,អ៊ី​ម៉ែ​ល​សង្ខេប
 DocType: Delivery Note,Billing Address Name,វិ​ក័​យ​ប័ត្រ​ឈ្មោះ​អាសយដ្ឋាន
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +22,Department Stores,ហាង​លក់​នាយកដ្ឋាន
-apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +40,System Balance,តុល្យភាព​របស់​ប្រព័ន្ធ
+apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +42,System Balance,តុល្យភាព​របស់​ប្រព័ន្ធ
 DocType: Workflow,Is Active,គឺ​ជា​សកម្ម
 apps/erpnext/erpnext/controllers/stock_controller.py +71,No accounting entries for the following warehouses,គ្មាន​ការ​បញ្ចូល​គណនី​សម្រាប់​ឃ្លាំង​ដូច​ខាងក្រោម​នេះ
 apps/erpnext/erpnext/projects/doctype/project/project.js +22,Save the document first.,រក្សា​ទុក​ឯកសារ​ជា​លើក​ដំបូង​។
@@ -2889,7 +2892,7 @@ DocType: Address Template,"<h4>Default Template</h4>
 {% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}
 </code></pre>","<h4> ទំព័រ​គំរូ​លំនាំ​ដើម </h4><p> ប្រើ <a href=""http://jinja.pocoo.org/docs/templates/"">Jinja ពុម្ព</a> និង​វាល​ទាំង​អស់​នៃ​អាសយដ្ឋាន (រួម​ទាំង​វាល​ផ្ទាល់ខ្លួន​បើ​មាន​) នឹង​អាច​រក​បាន </p><pre> <code>{{ address_line1 }}&lt;br&gt; {% if address_line2 %}{{ address_line2 }}&lt;br&gt;{% endif -%} {{ city }}&lt;br&gt; {% if state %}{{ state }}&lt;br&gt;{% endif -%} {% if pincode %} PIN: {{ pincode }}&lt;br&gt;{% endif -%} {{ country }}&lt;br&gt; {% if phone %}Phone: {{ phone }}&lt;br&gt;{% endif -%} {% if fax %}Fax: {{ fax }}&lt;br&gt;{% endif -%} {% if email_id %}Email: {{ email_id }}&lt;br&gt;{% endif -%}</code> </pre>"
 DocType: Salary Slip Deduction,Default Amount,ចំនួន​លំនាំ​ដើម
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +89,Warehouse not found in the system,រក​មិន​ឃើញ​ឃ្លាំង​ក្នុង​ប្រព័ន្ធ
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +96,Warehouse not found in the system,រក​មិន​ឃើញ​ឃ្លាំង​ក្នុង​ប្រព័ន្ធ
 apps/erpnext/erpnext/setup/doctype/email_digest/email_digest.py +107,This Month's Summary,សង្ខេប​ខែ​នេះ
 DocType: Quality Inspection Reading,Quality Inspection Reading,កំ​រោង​អាន​គម្ពីរ​មាន​គុណភាព​អធិការកិច្ច
 apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py +26,`Freeze Stocks Older Than` should be smaller than %d days.,`បង្ក​ក​ដែល​មាន​វ័យ​ចំណាស់ Than` ភាគហ៊ុន​គួរ​មាន​ទំហំ​តូច​ជាង​ថ្ងៃ​% d ។
@@ -2926,14 +2929,14 @@ apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js +4
 DocType: Dropbox Backup,Dropbox Access Allowed,Dropbox បាន​អនុញ្ញាត​ការ​ចូល​ដំណើរ​ការ
 DocType: Dropbox Backup,Weekly,ប្រចាំ​ស​ប្តា​ហ៍
 DocType: SMS Settings,Eg. smsgateway.com/api/send_sms.cgi,ឧ​ទា​ហរ​ណ៏​។ smsgateway.com/api/send_sms.cgi
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +589,Receive,ទទួល​បាន
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +597,Receive,ទទួល​បាន
 DocType: Maintenance Visit,Fully Completed,បាន​បញ្ចប់​យ៉ាង​ពេញលេញ
 DocType: Employee,Educational Qualification,គុណវុឌ្ឍិ​អប់រំ
 DocType: Workstation,Operating Costs,ចំណាយ​ប្រតិបត្តិការ
 DocType: Employee Leave Approver,Employee Leave Approver,ទុក​ឱ្យ​ការ​អនុម័ត​បុគ្គលិក
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +67,"Cannot declare as lost, because Quotation has been made.",មិន​អាច​ប្រកាស​បាត់បង់​នោះ​ទេ​ព្រោះ​សម្រង់​ត្រូវ​បាន​ធ្វើ​ឡើង​។
 DocType: Purchase Taxes and Charges Template,Purchase Master Manager,ការ​ទិញ​កម្មវិធី​គ្រប់គ្រង​អនុបណ្ឌិត
-apps/erpnext/erpnext/config/stock.py +141,Main Reports,របាយ​ការ​ណ៏​ដ៏​សំខាន់
+apps/erpnext/erpnext/config/stock.py +136,Main Reports,របាយ​ការ​ណ៏​ដ៏​សំខាន់
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.js +16,To date cannot be before from date,ដើម្បី​កាលបរិច្ឆេទ​មិន​អាច​មាន​មុន​ពេល​ចេញ​ពី​កាលបរិច្ឆេទ
 DocType: Purchase Receipt Item,Prevdoc DocType,ចង្អុល​បង្ហាញ Prevdoc
 apps/erpnext/erpnext/stock/doctype/item/item.js +178,Add / Edit Prices,បន្ថែម / កែសម្រួល​តម្លៃ​ទំនិញ
@@ -2985,7 +2988,7 @@ DocType: Issue,Content Type,ប្រភេទ​មាតិកា​រ
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +17,Computer,កុំ​ព្យូ​ទ័​រ
 DocType: Item,List this Item in multiple groups on the website.,រាយ​ធាតុ​នេះ​នៅ​ក្នុង​ក្រុម​ជា​ច្រើន​នៅ​លើ​គេហទំព័រ​។
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +285,Please check Multi Currency option to allow accounts with other currency,សូម​ពិនិត្យ​មើល​ជម្រើស​រូបិយវត្ថុ​ពហុ​ដើម្បី​អនុញ្ញាត​ឱ្យ​គណនី​ជា​រូបិយប័ណ្ណ​ផ្សេង​ទៀត
-apps/erpnext/erpnext/accounts/doctype/account/account.py +81,You are not authorized to set Frozen value,អ្នក​មិន​ត្រូវ​បាន​អនុញ្ញាត​ឱ្យ​កំណត់​តម្លៃ​ទឹកកក
+apps/erpnext/erpnext/accounts/doctype/account/account.py +88,You are not authorized to set Frozen value,អ្នក​មិន​ត្រូវ​បាន​អនុញ្ញាត​ឱ្យ​កំណត់​តម្លៃ​ទឹកកក
 DocType: Payment Reconciliation,Get Unreconciled Entries,ទទួល​បាន​ធាតុ Unreconciled
 DocType: Cost Center,Budgets,ថវិកា
 apps/frappe/frappe/core/page/modules_setup/modules_setup.py +11,Updated,ធ្វើ​ឱ្យ​ទាន់​សម័យ
@@ -3094,7 +3097,7 @@ apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +57,Part-time,ពេ
 DocType: Employee,Applicable Holiday List,បញ្ជី​ថ្ងៃ​ឈប់​សម្រាក​ដែល​អាច​អនុវត្ត​បាន
 DocType: Employee,Cheque,មូលប្បទានប័ត្រ
 apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py +56,Series Updated,បាន​បន្ទាន់​សម័យ​ស៊េរី
-apps/erpnext/erpnext/accounts/doctype/account/account.py +131,Report Type is mandatory,របាយ​ការ​ណ៏​ចាំបាច់​ប្រភេទ
+apps/erpnext/erpnext/accounts/doctype/account/account.py +141,Report Type is mandatory,របាយ​ការ​ណ៏​ចាំបាច់​ប្រភេទ
 DocType: Item,Serial Number Series,កម្រង​ឯកសារ​លេខ​សៀរៀល
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +45,Retail & Wholesale,ការ​លក់​រាយ​លក់ដុំ​និង​ចែកចាយ
 DocType: Issue,First Responded On,ជា​លើក​ដំបូង​បាន​ឆ្លើយ​តប​នៅ​លើ
@@ -3114,14 +3117,14 @@ apps/erpnext/erpnext/config/buying.py +79,Tax template for buying transactions.,
 ,Item Prices,តម្លៃ​ធាតុ
 DocType: Purchase Order,In Words will be visible once you save the Purchase Order.,នៅ​ក្នុង​ពាក្យ​នោះ​នឹង​ត្រូវ​បាន​មើល​ឃើញ​នៅ​ពេល​ដែល​អ្នក​រក្សា​ទុក​ការ​បញ្ជា​ទិញ​នេះ​។
 DocType: Period Closing Voucher,Period Closing Voucher,ប័ណ្ណ​បិទ​រយៈ​ពេល
-apps/erpnext/erpnext/config/stock.py +125,Price List master.,ចៅហ្វាយ​បញ្ជី​តម្លៃ​។
+apps/erpnext/erpnext/config/stock.py +120,Price List master.,ចៅហ្វាយ​បញ្ជី​តម្លៃ​។
 DocType: Task,Review Date,ពិនិត្យ​ឡើងវិញ​កាលបរិច្ឆេទ
 DocType: Purchase Invoice,Advance Payments,ការ​ទូទាត់​ជាមុន
 DocType: DocPerm,Level,កំរិត
 DocType: Purchase Taxes and Charges,On Net Total,នៅ​លើ​សុទ្ធ​សរុប
 apps/erpnext/erpnext/accounts/doctype/payment_tool/payment_tool.py +97,No permission to use Payment Tool,មិន​មាន​ការ​អនុញ្ញាត​ឱ្យ​ប្រើ​ឧបករណ៍​ការ​ទូទាត់
 apps/erpnext/erpnext/controllers/recurring_document.py +192,'Notification Email Addresses' not specified for recurring %s,&quot;ការ​ជូន​ដំណឹង​អាសយដ្ឋាន​អ៊ីមែល &#39;មិន​ត្រូវ​បាន​បញ្ជាក់​សម្រាប់​% s ដែល​កើតឡើង
-apps/erpnext/erpnext/accounts/doctype/account/account.py +99,Currency can not be changed after making entries using some other currency,រូបិយ​ប័ណ្ណ​មិន​អាច​ត្រូវ​បាន​ផ្លាស់​ប្តូ​រ​បន្ទាប់​ពី​ធ្វើ​ការ​ធាតុ​ប្រើ​ប្រាស់​រូបិយ​ប័ណ្ណ​ផ្សេង​ទៀត​មួយ​ចំនួន
+apps/erpnext/erpnext/accounts/doctype/account/account.py +106,Currency can not be changed after making entries using some other currency,រូបិយ​ប័ណ្ណ​មិន​អាច​ត្រូវ​បាន​ផ្លាស់​ប្តូ​រ​បន្ទាប់​ពី​ធ្វើ​ការ​ធាតុ​ប្រើ​ប្រាស់​រូបិយ​ប័ណ្ណ​ផ្សេង​ទៀត​មួយ​ចំនួន
 DocType: Company,Round Off Account,បិទ​ការ​ប្រកួត​ជុំ​ទី​គណនី
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +84,Administrative Expenses,ចំណាយ​រដ្ឋបាល
 apps/erpnext/erpnext/setup/setup_wizard/industry_type.py +18,Consulting,ការ​ប្រឹក្សា​យោបល់
@@ -3181,7 +3184,6 @@ DocType: Tax Rule,Tax Rule,ច្បាប់​ពន្ធ
 DocType: Selling Settings,Maintain Same Rate Throughout Sales Cycle,រក្សា​អត្រា​ការ​វ​ដ្ត​នៃ​ការ​លក់​ពេញ​មួយ​ដូចគ្នា
 DocType: Manufacturing Settings,Plan time logs outside Workstation Working Hours.,គម្រោង​ការ​កំណត់​ហេតុ​ពេល​វេលា​ដែល​នៅ​ក្រៅ​ម៉ោង​ស្ថានីយ​ការងារ​ការងារ​។
 ,Items To Be Requested,ធាតុ​ដែល​នឹង​ត្រូវ​បាន​ស្នើ
-DocType: Purchase Order,Get Last Purchase Rate,ទទួល​បាន​អត្រា​ការ​ទិញ​ចុង​ក្រោយ
 DocType: Time Log,Billing Rate based on Activity Type (per hour),អត្រា​ការ​ប្រាក់​វិ​ក័​យ​ប័ត្រ​ដែល​មាន​មូលដ្ឋាន​លើ​ប្រភេទ​សកម្មភាព (ក្នុង​មួយ​ម៉ោង​)
 DocType: Company,Company Info,ព​ត៌​មាន​របស់​ក្រុមហ៊ុន
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +206,"Company Email ID not found, hence mail not sent",រក​មិន​ឃើញ​អ៊ី​ម៉ែ​ល​ដែល​ជា​ក្រុម​ហ៊ុន​លេខ​សម្គាល់​ដូចនេះ mail មិនបាន​ចាត់
@@ -3191,7 +3193,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js +451,Debit 
 DocType: Fiscal Year,Year Start Date,នៅ​ឆ្នាំ​កាលបរិច្ឆេទ​ចាប់​ផ្តើ​ម
 DocType: Attendance,Employee Name,ឈ្មោះ​បុគ្គលិក
 DocType: Sales Invoice,Rounded Total (Company Currency),សរុប​មូល (ក្រុមហ៊ុន​រូបិយវត្ថុ​)
-apps/erpnext/erpnext/accounts/doctype/account/account.py +115,Cannot covert to Group because Account Type is selected.,មិន​អាច​សម្ងាត់​មួយ​ដើម្បី​ពូល​ដោយ​សារ​តែ​ប្រភេទ​គណនី​ត្រូវ​បាន​ជ្រើស​។
+apps/erpnext/erpnext/accounts/doctype/account/account.py +122,Cannot covert to Group because Account Type is selected.,មិន​អាច​សម្ងាត់​មួយ​ដើម្បី​ពូល​ដោយ​សារ​តែ​ប្រភេទ​គណនី​ត្រូវ​បាន​ជ្រើស​។
 DocType: Purchase Common,Purchase Common,ទិញ​ទូទៅ
 DocType: Leave Block List,Stop users from making Leave Applications on following days.,បញ្ឈប់​ការ​របស់​អ្នក​ប្រើ​ពី​ការ​ធ្វើ​ឱ្យ​កម្មវិធី​ដែល​បាន​ចាកចេញ​នៅ​ថ្ងៃ​បន្ទាប់​។
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.js +591,From Opportunity,ពី​ឱកាស
@@ -3215,24 +3217,24 @@ DocType: Item,"Selecting ""Yes"" will give a unique identity to each entity of t
 DocType: Employee,Education,ការ​អប់រំ
 DocType: Selling Settings,Campaign Naming By,ដាក់​​​ឈ្មោះ​ការ​ឃោសនា​ដោយ
 DocType: Employee,Current Address Is,អាសយដ្ឋាន​បច្ចុប្បន្ន​គឺ
-apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +217,"Optional. Sets company's default currency, if not specified.",ស្រេច​ចិត្ត​។ កំណត់​រូបិយប័ណ្ណ​លំនាំដើម​របស់​ក្រុម​ហ៊ុន​ប្រសិន​បើ​មិន​បាន​បញ្ជាក់​។
+apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +220,"Optional. Sets company's default currency, if not specified.",ស្រេច​ចិត្ត​។ កំណត់​រូបិយប័ណ្ណ​លំនាំដើម​របស់​ក្រុម​ហ៊ុន​ប្រសិន​បើ​មិន​បាន​បញ្ជាក់​។
 DocType: Address,Office,ការិយាល័យ
 apps/frappe/frappe/desk/moduleview.py +67,Standard Reports,របាយ​ការ​ណ៏​ស្ដ​ង់​ដា​រ
 apps/erpnext/erpnext/config/accounts.py +13,Accounting journal entries.,ធាតុ​ទិនានុប្បវត្តិ​គណនេយ្យ​។
 DocType: Delivery Note Item,Available Qty at From Warehouse,ដែល​អាច​ប្រើ​បាន​នៅ​ពី​ឃ្លាំង Qty
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +224,Please select Employee Record first.,សូម​ជ្រើសរើស​បុគ្គលិក​កំណត់ត្រា​ដំបូង​។
 apps/erpnext/erpnext/accounts/page/accounts_browser/accounts_browser.js +35,To create a Tax Account,ដើម្បី​បង្កើត​គណនី​អាករ
-apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +233,Please enter Expense Account,សូម​បញ្ចូល​ចំណាយ​តាម​គណនី
+apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py +240,Please enter Expense Account,សូម​បញ្ចូល​ចំណាយ​តាម​គណនី
 DocType: Account,Stock,ភាគ​ហ៊ុន
 DocType: Employee,Current Address,អាសយដ្ឋាន​បច្ចុប្បន្ន
 DocType: Item,"If item is a variant of another item then description, image, pricing, taxes etc will be set from the template unless explicitly specified","ប្រសិន​បើ​មាន​ធាតុ​គឺ​វ៉ា​រ្យ៉​ង់​នៃ​ធាតុ​ផ្សេង​ទៀត​បន្ទាប់​មក​ពិពណ៌នា​, រូបភាព​, ការ​កំណត់​តម្លៃ​ពន្ធ​ល​នឹង​ត្រូវ​បាន​កំណត់​ពី​ពុម្ព​មួយ​នេះ​ទេ​លុះ​ត្រា​តែ​បាន​បញ្ជាក់​យ៉ាង​ជាក់លាក់"
 DocType: Serial No,Purchase / Manufacture Details,ទិញ / ព​ត៌​មាន​លំអិត​ការផលិត
-apps/erpnext/erpnext/config/stock.py +288,Batch Inventory,សារពើ​ភ័​ណ្ឌ​បាច់
+apps/erpnext/erpnext/config/stock.py +283,Batch Inventory,សារពើ​ភ័​ណ្ឌ​បាច់
 DocType: Employee,Contract End Date,កាលបរិច្ឆេទ​ការ​ចុះ​កិច្ច​សន្យា​បញ្ចប់
 DocType: Sales Order,Track this Sales Order against any Project,តាមដាន​ការ​បញ្ជា​ទិញ​លក់​នេះ​ប្រឆាំង​នឹង​គម្រោង​ណាមួយ​ឡើយ
 DocType: Production Planning Tool,Pull sales orders (pending to deliver) based on the above criteria,ការ​បញ្ជា​ទិញ​ការ​លក់​ទាញ (ដែល​មិន​ទាន់​សម្រេច​បាន​នូវ​ការ​ផ្តល់​) ដោយ​ផ្អែក​លើ​លក្ខណៈ​វិនិច្ឆ័យ​ដូច​ខាងលើ​នេះ
 DocType: DocShare,Document Type,ប្រភេទ​ឯកសារ
-apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +667,From Supplier Quotation,ចាប់​ពី​សម្រង់​ផ្គត់ផ្គង់
+apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js +676,From Supplier Quotation,ចាប់​ពី​សម្រង់​ផ្គត់ផ្គង់
 DocType: Deduction Type,Deduction Type,ប្រភេទ​កាត់កង
 DocType: Attendance,Half Day,ពាក់​ក​ណ្តា​ល​ថ្ងៃ
 DocType: Pricing Rule,Min Qty,លោក Min Qty
@@ -3275,7 +3277,7 @@ DocType: Purchase Taxes and Charges,Consider Tax or Charge for,សូម​ព�
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py +57,Actual Qty is mandatory,ជាក់​ស្តែ Qty ចាំបាច់
 apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +132,Credit Card,កាត​ឥណទាន
 DocType: BOM,Item to be manufactured or repacked,ធាតុ​នឹង​ត្រូវ​បាន​ផលិត​ឬ repacked
-apps/erpnext/erpnext/config/stock.py +95,Default settings for stock transactions.,ការ​កំណត់​លំនាំ​ដើម​សម្រាប់​ប្រតិបត្តិការ​ភាគហ៊ុន​។
+apps/erpnext/erpnext/config/stock.py +90,Default settings for stock transactions.,ការ​កំណត់​លំនាំ​ដើម​សម្រាប់​ប្រតិបត្តិការ​ភាគហ៊ុន​។
 DocType: Purchase Invoice,Next Date,កាលបរិច្ឆេទ​បន្ទាប់
 DocType: Employee Education,Major/Optional Subjects,ដ៏​ធំ​ប្រធានបទ / ស្រេច​ចិត្ត
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py +49,Please enter Taxes and Charges,សូម​បញ្ចូល​ពន្ធ​និង​ការ​ចោទ​ប្រកាន់
@@ -3294,8 +3296,8 @@ apps/erpnext/erpnext/stock/doctype/item/item.js +38,Make Variant,ធ្វើ​
 apps/erpnext/erpnext/config/hr.py +145,Block leave applications by department.,កម្មវិធី​ដែល​បាន​ឈប់​សម្រាក​ប្លុក​ដោយ​នាយកដ្ឋាន​។
 apps/erpnext/erpnext/templates/pages/cart.html +42,Cart is Empty,រទេះ​ទទេ
 DocType: Production Order,Actual Operating Cost,ការ​ចំណាយ​ប្រតិបត្តិការ​បាន​ពិត​ប្រាកដ
-apps/erpnext/erpnext/accounts/doctype/account/account.py +73,Root cannot be edited.,ជា root មិន​អាច​ត្រូវ​បាន​កែសម្រួល​។
-apps/erpnext/erpnext/accounts/utils.py +195,Allocated amount can not greater than unadusted amount,ចំនួន​ទឹកប្រាក់​ដែល​បាន​បម្រុង​ទុក​សម្រាប់​មិន​អាច​ធំជាង​ចំនួន​សរុប unadusted
+apps/erpnext/erpnext/accounts/doctype/account/account.py +77,Root cannot be edited.,ជា root មិន​អាច​ត្រូវ​បាន​កែសម្រួល​។
+apps/erpnext/erpnext/accounts/utils.py +197,Allocated amount can not greater than unadusted amount,ចំនួន​ទឹកប្រាក់​ដែល​បាន​បម្រុង​ទុក​សម្រាប់​មិន​អាច​ធំជាង​ចំនួន​សរុប unadusted
 DocType: Manufacturing Settings,Allow Production on Holidays,ផលិតកម្ម​នៅ​លើ​ថ្ងៃ​ឈប់​សម្រាក​អនុញ្ញាត​ឱ្យ
 DocType: Sales Order,Customer's Purchase Order Date,របស់​អតិថិជន​ទិញ​លំដាប់​កាលបរិច្ឆេទ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +183,Capital Stock,រាជធានី​ហ៊ុន
@@ -3317,11 +3319,11 @@ DocType: Global Defaults,Do not show any symbol like $ etc next to currencies.,�
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +374, (Half Day),(ពាក់​ក​ណ្តា​ល​ថ្ងៃ​)
 DocType: Supplier,Credit Days,ថ្ងៃ​ឥណទាន
 DocType: Leave Type,Is Carry Forward,គឺ​ត្រូវ​បាន​អនុវត្ត​ទៅ​មុខ
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +557,Get Items from BOM,ទទួល​បាន​ធាតុ​ពី Bom
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +565,Get Items from BOM,ទទួល​បាន​ធាតុ​ពី Bom
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +41,Lead Time Days,Lead ពេល​ថ្ងៃ
 apps/erpnext/erpnext/config/manufacturing.py +120,Bill of Materials,វិ​ក័​យ​ប័ត្រ​នៃ​សម្ភារៈ
 DocType: Dropbox Backup,Send Notifications To,ផ្ញើ​ការ​ជូន​ដំណឹង​ដើម្បី
-apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +54,Ref Date,យោង​កាលបរិច្ឆេទ
+apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +102,Ref Date,យោង​កាលបរិច្ឆេទ
 DocType: Employee,Reason for Leaving,ហេតុផល​សម្រាប់​ការ​ចាកចេញ
 DocType: Expense Claim Detail,Sanctioned Amount,ចំនួន​ទឹកប្រាក់​ដែល​បាន​អនុញ្ញាត
 DocType: GL Entry,Is Opening,តើ​ការ​បើក
