@@ -50,7 +50,7 @@ def get_balance_on(account=None, date=None):
 
 	cond = []
 	if date:
-		cond.append("posting_date <= '%s'" % date)
+		cond.append("posting_date <= '%s'" % frappe.db.escape(date))
 	else:
 		# get balance of all entries that exist
 		date = nowdate()
@@ -79,7 +79,7 @@ def get_balance_on(account=None, date=None):
 			and ac.lft >= %s and ac.rgt <= %s
 		)""" % (acc.lft, acc.rgt))
 	else:
-		cond.append("""gle.account = "%s" """ % (account.replace('"', '\\"'), ))
+		cond.append("""gle.account = "%s" """ % (frappe.db.escape(account), ))
 
 	bal = frappe.db.sql("""
 		SELECT sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
