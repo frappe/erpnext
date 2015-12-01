@@ -340,6 +340,7 @@ class JournalEntry(AccountsController):
 
 	def set_print_format_fields(self):
 		total_amount = 0.0
+		bank_account_currency = None
 		for d in self.get('accounts'):
 			if d.party_type and d.party:
 				if not self.pay_to_recd_from:
@@ -347,14 +348,15 @@ class JournalEntry(AccountsController):
 						"customer_name" if d.party_type=="Customer" else "supplier_name")
 
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
-				total_amount += (d.debit or d.credit)
+				total_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
+				bank_account_currency = d.account_currency
+				
+		self.set_total_amount(total_amount, bank_account_currency)
 
-		self.set_total_amount(total_amount)
-
-	def set_total_amount(self, amt):
+	def set_total_amount(self, amt, currency):
 		self.total_amount = amt
 		from frappe.utils import money_in_words
-		self.total_amount_in_words = money_in_words(amt, self.company_currency)
+		self.total_amount_in_words = money_in_words(amt, currency)
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
@@ -749,6 +751,9 @@ def get_exchange_rate(account, account_currency=None, company=None,
 	from erpnext.setup.utils import get_exchange_rate
 	account_details = frappe.db.get_value("Account", account,
 		["account_type", "root_type", "account_currency", "company"], as_dict=1)
+
+	if not account_details:
+		frappe.throw(_("Please select correct account"))
 
 	if not company:
 		company = account_details.company

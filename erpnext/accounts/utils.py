@@ -134,6 +134,8 @@ def add_ac(args=None):
 	ac.update(args)
 	ac.old_parent = ""
 	ac.freeze_account = "No"
+	if ac.get("is_root"):
+		ac.flags.ignore_mandatory = True
 	ac.insert()
 
 	return ac.name

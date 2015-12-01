@@ -45,6 +45,13 @@ class StockReconciliation(StockController):
 			if (item.qty==None or item.qty==qty) and (item.valuation_rate==None or item.valuation_rate==rate):
 				return False
 			else:
+				# set default as current rates
+				if item.qty==None:
+					item.qty = qty
+
+				if item.valuation_rate==None:
+					item.valuation_rate = rate
+
 				item.current_qty = qty
 				item.current_valuation_rate = rate
 				self.difference_amount += (flt(item.qty or qty) * flt(item.valuation_rate or rate) - (flt(qty) * flt(rate)))
@@ -254,3 +261,15 @@ def get_items(warehouse, posting_date, posting_time):
 		del item["name"]
 
 	return items
+
+@frappe.whitelist()
+def get_stock_balance_for(item_code, warehouse, posting_date, posting_time):
+	frappe.has_permission("Stock Reconciliation", "write", throw = True)
+
+	qty, rate = get_stock_balance(item_code, warehouse,
+		posting_date, posting_time, with_valuation_rate=True)
+
+	return {
+		'qty': qty,
+		'rate': rate
+	}
