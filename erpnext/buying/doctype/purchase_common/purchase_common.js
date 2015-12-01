@@ -58,6 +58,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	refresh: function(doc) {
 		this.frm.toggle_display("supplier_name",
 			(this.supplier_name && this.frm.doc.supplier_name!==this.frm.doc.supplier));
+
+		if(this.frm.doctype==="Purchase Order" || this.frm.doctype==="Material Request") {
+			this.set_from_product_bundle();
+		}
+
 		this._super();
 	},
 
@@ -158,9 +163,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	add_deduct_tax: function(doc, cdt, cdn) {
 		this.calculate_taxes_and_totals();
 	},
-	
-	get_items_from_product_bundle: function() {
-		erpnext.buying.get_items_from_product_bundle(this.frm)
+
+	set_from_product_bundle: function() {
+		var me = this;
+		this.frm.add_custom_button(__("From Product Bundle"), function() {
+			erpnext.buying.get_items_from_product_bundle(me.frm);
+		});
 	}
 });
 
@@ -190,23 +198,23 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 		title: __("Get Items from Product Bundle"),
 		fields: [
 			{
-				"fieldtype": "Link", 
-				"label": __("Product Bundle"), 
-				"fieldname": "product_bundle", 
+				"fieldtype": "Link",
+				"label": __("Product Bundle"),
+				"fieldname": "product_bundle",
 				"options":"Product Bundle",
-				"reqd": 1 
+				"reqd": 1
 			},
 			{
-				"fieldtype": "Currency", 
-				"label": __("Quantity"), 
-				"fieldname": "quantity", 
+				"fieldtype": "Currency",
+				"label": __("Quantity"),
+				"fieldname": "quantity",
 				"reqd": 1,
 				"default": 1
 			},
 			{
-				"fieldtype": "Button", 
-				"label": __("Get Items"), 
-				"fieldname": "get_items", 
+				"fieldtype": "Button",
+				"label": __("Get Items"),
+				"fieldname": "get_items",
 				"cssClass": "btn-primary"
 			}
 		]
