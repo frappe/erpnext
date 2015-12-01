@@ -85,29 +85,6 @@ class PurchaseOrder(BuyingController):
 				d.schedule_date = frappe.db.get_value("Material Request Item",
 						d.prevdoc_detail_docname, "schedule_date")
 
-	def get_last_purchase_rate(self):
-		"""get last purchase rates for all items"""
-		conversion_rate = flt(self.get('conversion_rate')) or 1.0
-
-		for d in self.get("items"):
-			if d.item_code:
-				last_purchase_details = get_last_purchase_details(d.item_code, self.name)
-
-				if last_purchase_details:
-					d.base_price_list_rate = last_purchase_details['base_price_list_rate'] * (flt(d.conversion_factor) or 1.0)
-					d.discount_percentage = last_purchase_details['discount_percentage']
-					d.base_rate = last_purchase_details['base_rate'] * (flt(d.conversion_factor) or 1.0)
-					d.price_list_rate = d.base_price_list_rate / conversion_rate
-					d.rate = d.base_rate / conversion_rate
-				else:
-					# if no last purchase found, reset all values to 0
-					d.base_price_list_rate = d.base_rate = d.price_list_rate = d.rate = d.discount_percentage = 0
-
-					item_last_purchase_rate = frappe.db.get_value("Item", d.item_code, "last_purchase_rate")
-					if item_last_purchase_rate:
-						d.base_price_list_rate = d.base_rate = d.price_list_rate \
-							= d.rate = item_last_purchase_rate
-
 	# Check for Stopped status
 	def check_for_stopped_or_closed_status(self, pc_obj):
 		check_list =[]
@@ -170,7 +147,7 @@ class PurchaseOrder(BuyingController):
 		super(PurchaseOrder, self).on_submit()
 
 		purchase_controller = frappe.get_doc("Purchase Common")
-		
+
 		self.update_prevdoc_status()
 		self.update_requested_qty()
 		self.update_ordered_qty()
@@ -234,7 +211,7 @@ class PurchaseOrder(BuyingController):
 		"""Update delivered qty in Sales Order for drop ship"""
 		sales_orders_to_update = []
 		for item in self.items:
-			if item.prevdoc_doctype == "Sales Order" and item.delivered_by_supplier == 1:	
+			if item.prevdoc_doctype == "Sales Order" and item.delivered_by_supplier == 1:
 				if item.prevdoc_docname not in sales_orders_to_update:
 					sales_orders_to_update.append(item.prevdoc_docname)
 
@@ -246,13 +223,13 @@ class PurchaseOrder(BuyingController):
 
 	def has_drop_ship_item(self):
 		is_drop_ship = False
-		
+
 		for item in self.items:
 			if item.delivered_by_supplier == 1:
 				is_drop_ship = True
-		
+
 		return is_drop_ship
-	
+
 	def set_received_qty_for_drop_ship_items(self):
 		for item in self.items:
 			if item.delivered_by_supplier == 1:
