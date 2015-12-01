@@ -368,10 +368,6 @@ frappe.ui.form.on("Journal Entry Account", {
 
 	credit: function(frm, dt, dn) {
 		cur_frm.cscript.update_totals(frm.doc);
-	},
-
-	exchange_rate: function(frm, cdt, cdn) {
-		erpnext.journal_entry.set_debit_credit_in_company_currency(frm, cdt, cdn);
 	}
 })
 
@@ -418,7 +414,7 @@ $.extend(erpnext.journal_entry, {
 
 		if(row.account_currency == company_currency || !frm.doc.multi_currency) {
 			frappe.model.set_value(cdt, cdn, "exchange_rate", 1);
-		} else if (!row.exchange_rate || row.account_type == "Bank") {
+		} else if (!row.exchange_rate || row.exchange_rate == 1 || row.account_type == "Bank") {
 			frappe.call({
 				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_exchange_rate",
 				args: {
