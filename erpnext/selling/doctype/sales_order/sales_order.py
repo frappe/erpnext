@@ -384,7 +384,7 @@ def make_delivery_note(source_name, target_doc=None):
 				"parent": "against_sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.delivered_qty < doc.qty and doc.delivered_by_supplier!=1
+			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
@@ -430,7 +430,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				"parent": "sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.qty and (doc.base_amount==0 or doc.billed_amt < doc.amount)
+			"condition": lambda doc: doc.qty and (doc.base_amount==0 or abs(doc.billed_amt) < abs(doc.amount))
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
