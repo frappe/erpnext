@@ -29,10 +29,15 @@ class SalarySlip(TransactionBase):
 
 	def check_sal_struct(self):
 		m = get_month_details(self.fiscal_year, self.month)
+		
+		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee, 
+			["date_of_joining", "relieving_date"])
+		
 		struct = frappe.db.sql("""select name from `tabSalary Structure`
 			where employee=%s and is_active = 'Yes'
-			and from_date <= %s and (to_date is null or to_date >= %s)""",
-			(self.employee, m.month_start_date, m.month_end_date))
+			and (from_date <= %s or from_date <= %s) 
+			and (to_date is null or to_date >= %s or to_date >= %s)""",
+			(self.employee, m.month_start_date, joining_date, m.month_end_date, relieving_date))
 
 		if not struct:
 			msgprint(_("No active Salary Structure found for employee {0} and the month")

@@ -378,6 +378,13 @@ class Item(WebsiteGenerator):
 			if not (self.is_purchase_item or self.is_pro_applicable):
 				frappe.throw(_("""To set reorder level, item must be a Purchase Item or Manufacturing Item"""))
 
+		if self.re_order_level and not self.re_order_qty:
+			frappe.throw(_("Please set reorder quantity"))
+		for d in self.get("reorder_levels"):
+			if d.warehouse_reorder_level and not d.warehouse_reorder_qty:
+				frappe.throw(_("Row #{0}: Please set reorder quantity").format(d.idx))
+					
+
 	def validate_warehouse_for_reorder(self):
 		warehouse = []
 		for i in self.get("reorder_levels"):
