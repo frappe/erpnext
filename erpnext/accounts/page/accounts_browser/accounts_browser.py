@@ -44,7 +44,12 @@ def get_children():
 				args['parent'], as_dict=1)
 
 	if ctype == 'Account':
+		company_currency = frappe.db.get_value("Company", company, "default_currency")
 		for each in acc:
-			each["balance"] = flt(get_balance_on(each.get("value")))
+			each["company_currency"] = company_currency
+			each["balance"] = flt(get_balance_on(each.get("value"), in_account_currency=False))
+			
+			if each.account_currency != company_currency:
+				each["balance_in_account_currency"] = flt(get_balance_on(each.get("value")))
 
 	return acc
