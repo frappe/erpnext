@@ -350,7 +350,7 @@ class JournalEntry(AccountsController):
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
 				total_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
 				bank_account_currency = d.account_currency
-				
+
 		self.set_total_amount(total_amount, bank_account_currency)
 
 	def set_total_amount(self, amt, currency):
@@ -743,6 +743,11 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 		"exchange_rate": get_exchange_rate(account, account_details.account_currency,
 			company, debit=debit, credit=credit, exchange_rate=exchange_rate)
 	}
+
+	# un-set party if not party type
+	if not party_type:
+		grid_values["party"] = ""
+
 	return grid_values
 
 @frappe.whitelist()

@@ -4,6 +4,9 @@ def execute():
 	frappe.reload_doctype("Purchase Order")
 	frappe.reload_doctype("Purchase Order Item")
 
+	if not frappe.db.has_column("Purchase Order", "delivered_by_supplier"):
+		return
+
 	for po in frappe.get_all("Purchase Order", filters={"delivered_by_supplier": 1}, fields=["name"]):
 		purchase_order = frappe.get_doc("Purchase Order", po)
 
