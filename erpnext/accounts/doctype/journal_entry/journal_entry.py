@@ -295,7 +295,7 @@ class JournalEntry(AccountsController):
 		for d in self.get("accounts"):
 			if d.account_currency == self.company_currency:
 				d.exchange_rate = 1
-			elif not d.exchange_rate or d.account_type=="Bank" or \
+			elif not d.exchange_rate or d.exchange_rate == 1 or \
 				(d.reference_type in ("Sales Invoice", "Purchase Invoice") and d.reference_name):
 					d.exchange_rate = get_exchange_rate(d.account, d.account_currency, self.company,
 						d.reference_type, d.reference_name, d.debit, d.credit, d.exchange_rate)
