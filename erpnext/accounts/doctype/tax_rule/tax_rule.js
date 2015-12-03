@@ -4,19 +4,26 @@
 cur_frm.add_fetch("customer", "customer_group", "customer_group" );
 cur_frm.add_fetch("supplier", "supplier_type", "supplier_type" );
 
-cur_frm.toggle_reqd("sales_tax_template", cur_frm.doc.tax_type=="Sales");
-cur_frm.toggle_reqd("purchase_tax_template", cur_frm.doc.tax_type=="Purchase");
-
+frappe.ui.form.on("Tax Rule", "tax_type", function(frm) {
+	frm.toggle_reqd("sales_tax_template", frm.doc.tax_type=="Sales");
+	frm.toggle_reqd("purchase_tax_template", frm.doc.tax_type=="Purchase");
+})
 
 frappe.ui.form.on("Tax Rule", "onload", function(frm) {
-	if(frm.doc.__islocal){
+	if(frm.doc.__islocal) {
 		frm.set_value("use_for_shopping_cart", 1);
 	}
 })
 
+frappe.ui.form.on("Tax Rule", "refresh", function(frm) {
+	frappe.ui.form.trigger("Tax Rule", "tax_type");
+})
+
 frappe.ui.form.on("Tax Rule", "use_for_shopping_cart", function(frm) {
-	if(!frm.doc.use_for_shopping_cart && (frappe.get_list("Tax Rule", {"use_for_shopping_cart":1}).length == 0)){
-		frappe.model.get_value("Shopping Cart Settings", "Shopping Cart Settings", "enabled", function(docfield) {
+	if(!frm.doc.use_for_shopping_cart && 
+			(frappe.get_list("Tax Rule", {"use_for_shopping_cart":1}).length == 0)) {
+		frappe.model.get_value("Shopping Cart Settings", "Shopping Cart Settings", 
+				"enabled", function(docfield) {
 			if(docfield.enabled){
 				frm.set_value("use_for_shopping_cart", 1);
 				frappe.throw(__("Shopping Cart is enabled"));
