@@ -1,1 +1,1 @@
-{content}
+{index}
