@@ -170,10 +170,8 @@ class StockEntry(StockController):
 	def validate_production_order(self):
 		if self.purpose in ("Manufacture", "Material Transfer for Manufacture"):
 			# check if production order is entered
-			if not self.production_order:
-				frappe.throw(_("Production order number is mandatory for stock entry purpose manufacture"))
-			# check for double entry
-			if self.purpose=="Manufacture":
+
+			if self.purpose=="Manufacture" and self.production_order:
 				if not self.fg_completed_qty:
 					frappe.throw(_("For Quantity (Manufactured Qty) is mandatory"))
 				self.check_if_operations_completed()
