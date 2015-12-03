@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, nowdate, rounded
+from frappe.utils import add_days, cint, cstr, flt, getdate, nowdate, rounded, date_diff
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
@@ -20,18 +20,19 @@ class SalarySlip(TransactionBase):
 
 	def get_emp_and_leave_details(self):
 		if self.employee:
-			self.get_leave_details()
-			struct = self.check_sal_struct()
+			joining_date, relieving_date = frappe.db.get_value("Employee", self.employee, 
+				["date_of_joining", "relieving_date"])
+				
+			self.get_leave_details(joining_date, relieving_date)
+			
+			struct = self.check_sal_struct(joining_date, relieving_date)
 			if struct:
 				self.set("earnings", [])
 				self.set("deduction", [])
 				self.pull_sal_struct(struct)
 
-	def check_sal_struct(self):
+	def check_sal_struct(self, joining_date, relieving_date):
 		m = get_month_details(self.fiscal_year, self.month)
-		
-		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee, 
-			["date_of_joining", "relieving_date"])
 		
 		struct = frappe.db.sql("""select name from `tabSalary Structure`
 			where employee=%s and is_active = 'Yes'
@@ -51,69 +52,76 @@ class SalarySlip(TransactionBase):
 		make_salary_slip(struct, self)
 
 	def pull_emp_details(self):
-		emp = frappe.db.get_value("Employee", self.employee,
-			["bank_name", "bank_ac_no"], as_dict=1)
+		emp = frappe.db.get_value("Employee", self.employee, ["bank_name", "bank_ac_no"], as_dict=1)
 		if emp:
 			self.bank_name = emp.bank_name
 			self.bank_account_no = emp.bank_ac_no
 
-	def get_leave_details(self, lwp=None):
+	def get_leave_details(self, joining_date=None, relieving_date=None, lwp=None):
 		if not self.fiscal_year:
 			self.fiscal_year = frappe.db.get_default("fiscal_year")
 		if not self.month:
 			self.month = "%02d" % getdate(nowdate()).month
+			
+		if not joining_date:
+			joining_date, relieving_date = frappe.db.get_value("Employee", self.employee, 
+				["date_of_joining", "relieving_date"])
 
 		m = get_month_details(self.fiscal_year, self.month)
-		holidays = self.get_holidays_for_employee(m)
+		holidays = self.get_holidays_for_employee(m['month_start_date'], m['month_end_date'])
 
-		if not cint(frappe.db.get_value("HR Settings", "HR Settings",
-			"include_holidays_in_total_working_days")):
-				m["month_days"] -= len(holidays)
-				if m["month_days"] < 0:
-					frappe.throw(_("There are more holidays than working days this month."))
+		working_days = m["month_days"]
+		if not cint(frappe.db.get_value("HR Settings", None, "include_holidays_in_total_working_days")):
+			working_days -= len(holidays)
+			if working_days < 0:
+				frappe.throw(_("There are more holidays than working days this month."))
 
 		if not lwp:
 			lwp = self.calculate_lwp(holidays, m)
-		self.total_days_in_month = m['month_days']
+		self.total_days_in_month = working_days
 		self.leave_without_pay = lwp
-		payment_days = flt(self.get_payment_days(m)) - flt(lwp)
+		payment_days = flt(self.get_payment_days(m, joining_date, relieving_date)) - flt(lwp)
 		self.payment_days = payment_days > 0 and payment_days or 0
+		
+	def get_payment_days(self, month, joining_date, relieving_date):
+		start_date = month['month_start_date']
+		if joining_date:
+			if joining_date > month['month_start_date']:
+				start_date = joining_date
+			elif joining_date > month['month_end_date']:
+				return
+		
+		if relieving_date:
+			if relieving_date > start_date and relieving_date < month['month_end_date']:
+				end_date = relieving_date
+			elif relieving_date < month['month_start_date']:
+				frappe.throw(_("Employee relieved on {0} must be set as 'Left'").format(relieving_date))
+		else:
+			end_date = month['month_end_date']
+			
+		payment_days = date_diff(end_date, start_date) + 1
 
-
-	def get_payment_days(self, m):
-		payment_days = m['month_days']
-		emp = frappe.db.sql("select date_of_joining, relieving_date from `tabEmployee` \
-			where name = %s", self.employee, as_dict=1)[0]
-
-		if emp['relieving_date']:
-			if getdate(emp['relieving_date']) > m['month_start_date'] and \
-				getdate(emp['relieving_date']) < m['month_end_date']:
-					payment_days = getdate(emp['relieving_date']).day
-			elif getdate(emp['relieving_date']) < m['month_start_date']:
-				frappe.throw(_("Employee relieved on {0} must be set as 'Left'").format(emp["relieving_date"]))
-
-		if emp['date_of_joining']:
-			if getdate(emp['date_of_joining']) > m['month_start_date'] and \
-				getdate(emp['date_of_joining']) < m['month_end_date']:
-					payment_days = payment_days - getdate(emp['date_of_joining']).day + 1
-			elif getdate(emp['date_of_joining']) > m['month_end_date']:
-				payment_days = 0
+		if not cint(frappe.db.get_value("HR Settings", None, "include_holidays_in_total_working_days")):
+			holidays = self.get_holidays_for_employee(start_date, end_date)
+			payment_days -= len(holidays)
 
 		return payment_days
 
-	def get_holidays_for_employee(self, m):
+	def get_holidays_for_employee(self, start_date, end_date):
 		holidays = frappe.db.sql("""select t1.holiday_date
 			from `tabHoliday` t1, tabEmployee t2
 			where t1.parent = t2.holiday_list and t2.name = %s
 			and t1.holiday_date between %s and %s""",
-			(self.employee, m['month_start_date'], m['month_end_date']))
+			(self.employee, start_date, end_date))
+			
 		if not holidays:
 			holidays = frappe.db.sql("""select t1.holiday_date
 				from `tabHoliday` t1, `tabHoliday List` t2
 				where t1.parent = t2.name and t2.is_default = 1
 				and t2.fiscal_year = %s
-				and t1.holiday_date between %s and %s""", (self.fiscal_year,
-					m['month_start_date'], m['month_end_date']))
+				and t1.holiday_date between %s and %s""", 
+				(self.fiscal_year, start_date, end_date))
+		
 		holidays = [cstr(i[0]) for i in holidays]
 		return holidays
 
@@ -148,11 +156,10 @@ class SalarySlip(TransactionBase):
 		from frappe.utils import money_in_words
 		self.check_existing()
 
-		if not (len(self.get("earnings")) or
-			len(self.get("deductions"))):
-				self.get_emp_and_leave_details()
+		if not (len(self.get("earnings")) or len(self.get("deductions"))):
+			self.get_emp_and_leave_details()
 		else:
-			self.get_leave_details(self.leave_without_pay)
+			self.get_leave_details(lwp = self.leave_without_pay)
 
 		if not self.net_pay:
 			self.calculate_net_pay()

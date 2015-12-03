@@ -10,7 +10,7 @@
  "fields": [
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "account", 
    "fieldtype": "Link", 
@@ -334,7 +334,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "debit_in_account_currency", 
    "fieldtype": "Currency", 
@@ -359,7 +359,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "debit", 
    "fieldtype": "Currency", 
@@ -408,7 +408,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "credit_in_account_currency", 
    "fieldtype": "Currency", 
@@ -433,7 +433,7 @@
   }, 
   {
    "allow_on_submit": 0, 
-   "bold": 0, 
+   "bold": 1, 
    "collapsible": 0, 
    "fieldname": "credit", 
    "fieldtype": "Currency", 
@@ -614,7 +614,7 @@
  "issingle": 0, 
  "istable": 1, 
  "max_attachments": 0, 
- "modified": "2015-11-24 02:36:05.804010", 
+ "modified": "2015-12-02 04:14:37.571883", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Journal Entry Account", 
