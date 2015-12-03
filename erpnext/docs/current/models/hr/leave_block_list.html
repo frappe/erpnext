@@ -1,0 +1,288 @@
+<!-- title: Leave Block List -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.x.x</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/hr/doctype/leave_block_list"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+
+
+
+    <p><b>Table Name:</b> <code>tabLeave Block List</code></p>
+
+
+Block Holidays on important days.
+
+<h3>Fields</h3>
+
+<table class="table table-bordered" style="table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr >
+            <td>1</td>
+            <td class="danger" title="Mandatory"><code>leave_block_list_name</code></td>
+            <td >
+                Data</td>
+            <td >
+                Leave Block List Name
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td class="danger" title="Mandatory"><code>year</code></td>
+            <td >
+                Link</td>
+            <td >
+                Year
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/accounts/fiscal_year">Fiscal Year</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td class="danger" title="Mandatory"><code>company</code></td>
+            <td >
+                Link</td>
+            <td >
+                Company
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/company">Company</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>applies_to_all_departments</code></td>
+            <td >
+                Check</td>
+            <td >
+                Applies to Company
+                <p class="text-muted small">
+                    If not checked, the list will have to be added to each Department where it has to be applied.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>5</td>
+            <td ><code>block_days</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Block Days
+                <p class="text-muted small">
+                    Stop users from making Leave Applications on following days.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>leave_block_list_dates</code></td>
+            <td >
+                Table</td>
+            <td >
+                Leave Block List Dates
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/leave_block_list_date">Leave Block List Date</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>7</td>
+            <td ><code>allow_list</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Allow Users
+                <p class="text-muted small">
+                    Allow the following users to approve Leave Applications for block days.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>leave_block_list_allowed</code></td>
+            <td >
+                Table</td>
+            <td >
+                Leave Block List Allowed
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/leave_block_list_allow">Leave Block List Allow</a>
+
+
+                
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.hr.doctype.leave_block_list.leave_block_list</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>LeaveBlockList</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate" href="#validate" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.hr.doctype.leave_block_list.leave_block_list.get_applicable_block_dates</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.leave_block_list.leave_block_list.get_applicable_block_dates" href="#erpnext.hr.doctype.leave_block_list.leave_block_list.get_applicable_block_dates" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.leave_block_list.leave_block_list.<b>get_applicable_block_dates</b>
+        <i class="text-muted">(from_date, to_date, employee=None, company=None, all_lists=False)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.leave_block_list.leave_block_list.get_applicable_block_lists" href="#erpnext.hr.doctype.leave_block_list.leave_block_list.get_applicable_block_lists" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.leave_block_list.leave_block_list.<b>get_applicable_block_lists</b>
+        <i class="text-muted">(employee=None, company=None, all_lists=False)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.leave_block_list.leave_block_list.is_user_in_allow_list" href="#erpnext.hr.doctype.leave_block_list.leave_block_list.is_user_in_allow_list" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.leave_block_list.leave_block_list.<b>is_user_in_allow_list</b>
+        <i class="text-muted">(block_list)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+
+    
+    
+        <h4>Linked In:</h4>
+        <ul>
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/department">Department</a>
+
+</li>
+			
+        
+        </ul>
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

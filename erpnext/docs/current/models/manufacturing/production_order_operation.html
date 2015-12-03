@@ -1,0 +1,359 @@
+<!-- title: Production Order Operation -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.x.x</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/manufacturing/doctype/production_order_operation"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+<span class="label label-info">Child Table</span>
+
+
+    <p><b>Table Name:</b> <code>tabProduction Order Operation</code></p>
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered" style="table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr class="info">
+            <td>1</td>
+            <td ><code>details</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>operation</code></td>
+            <td >
+                Link</td>
+            <td >
+                Operation
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/operation">Operation</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td class="danger" title="Mandatory"><code>description</code></td>
+            <td >
+                Text Editor</td>
+            <td >
+                Operation Description
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>col_break1</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>completed_qty</code></td>
+            <td >
+                Float</td>
+            <td >
+                Completed Qty
+                <p class="text-muted small">
+                    Operation completed for how many finished goods?</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td ><code>status</code></td>
+            <td >
+                Select</td>
+            <td >
+                Status
+                
+            </td>
+            <td>
+                <pre>Pending
+Work in Progress
+Completed</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>7</td>
+            <td ><code>workstation</code></td>
+            <td >
+                Link</td>
+            <td >
+                Workstation
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/workstation">Workstation</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>show_time_logs</code></td>
+            <td >
+                Button</td>
+            <td >
+                Show Time Logs
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>9</td>
+            <td ><code>estimated_time_and_cost</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Estimated Time and Cost
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>planned_start_time</code></td>
+            <td >
+                Datetime</td>
+            <td >
+                Planned Start Time
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
+            <td ><code>planned_end_time</code></td>
+            <td >
+                Datetime</td>
+            <td >
+                Planned End Time
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
+            <td ><code>column_break_10</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
+            <td class="danger" title="Mandatory"><code>time_in_mins</code></td>
+            <td >
+                Float</td>
+            <td >
+                Operation Time
+                <p class="text-muted small">
+                    in Minutes</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
+            <td ><code>hour_rate</code></td>
+            <td >
+                Float</td>
+            <td >
+                Hour Rate
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>15</td>
+            <td ><code>planned_operating_cost</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Planned Operating Cost
+                
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>16</td>
+            <td ><code>section_break_9</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Actual Time and Cost
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
+            <td ><code>actual_start_time</code></td>
+            <td >
+                Datetime</td>
+            <td >
+                Actual Start Time
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
+            <td ><code>actual_end_time</code></td>
+            <td >
+                Datetime</td>
+            <td >
+                Actual End Time
+                <p class="text-muted small">
+                    Updated via 'Time Log'</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
+            <td ><code>column_break_11</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>20</td>
+            <td ><code>actual_operation_time</code></td>
+            <td >
+                Float</td>
+            <td >
+                Actual Operation Time
+                <p class="text-muted small">
+                    in Minutes
+Updated via 'Time Log'</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>21</td>
+            <td ><code>actual_operating_cost</code></td>
+            <td >
+                Currency</td>
+            <td >
+                Actual Operating Cost
+                <p class="text-muted small">
+                    (Hour Rate / 60) * Actual Operation Time</p>
+            </td>
+            <td>
+                <pre>Company:company:default_currency</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>22</td>
+            <td ><code>make_time_log</code></td>
+            <td >
+                Button</td>
+            <td >
+                Make Time Log
+                
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    
+    
+    <h4>Child Table Of</h4>
+    <ul>
+    
+        <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/manufacturing/production_order">Production Order</a>
+
+</li>
+    
+    </ul>
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->
