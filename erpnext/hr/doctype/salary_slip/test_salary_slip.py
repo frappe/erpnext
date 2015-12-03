@@ -25,11 +25,11 @@ class TestSalarySlip(unittest.TestCase):
 		la.submit()
 
 	def tearDown(self):
-		frappe.db.set_value("HR Settings", "HR Settings", "include_holidays_in_total_working_days", 0)
+		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
 		frappe.set_user("Administrator")
 
 	def test_salary_slip_with_holidays_included(self):
-		frappe.db.set_value("HR Settings", "HR Settings", "include_holidays_in_total_working_days", 1)
+		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 1)
 		ss = frappe.copy_doc(test_records[0])
 		ss.insert()
 		
@@ -43,18 +43,46 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEquals(ss.net_pay, 14867.74)
 
 	def test_salary_slip_with_holidays_excluded(self):
-		frappe.db.set_value("HR Settings", "HR Settings", "include_holidays_in_total_working_days", 0)
+		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
 		ss = frappe.copy_doc(test_records[0])
 		ss.insert()
 		
-		self.assertEquals(ss.total_days_in_month, 30)
-		self.assertEquals(ss.payment_days, 29)
-		self.assertEquals(ss.earnings[0].e_modified_amount, 14500)
+		self.assertEquals(ss.total_days_in_month, 29)
+		self.assertEquals(ss.payment_days, 28)
+		self.assertEquals(ss.earnings[0].e_modified_amount, 14482.76)
 		self.assertEquals(ss.earnings[1].e_modified_amount, 500)
 		self.assertEquals(ss.deductions[0].d_modified_amount, 100)
-		self.assertEquals(ss.deductions[1].d_modified_amount, 48.33)
-		self.assertEquals(ss.gross_pay, 15000)
-		self.assertEquals(ss.net_pay, 14851.67)
+		self.assertEquals(ss.deductions[1].d_modified_amount, 48.28)
+		self.assertEquals(ss.gross_pay, 14982.76)
+		self.assertEquals(ss.net_pay, 14834.48)
+		
+	def test_payment_days(self):
+		# Holidays not included in working days
+		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
+		
+		# set joinng date in the same month
+		frappe.db.set_value("Employee", "_T-Employee-0001", "date_of_joining", "2013-01-11")
+		
+		ss = frappe.copy_doc(test_records[0])
+		ss.insert()
+		
+		self.assertEquals(ss.total_days_in_month, 29)
+		self.assertEquals(ss.payment_days, 19)
+		
+		# set relieving date in the same month
+		frappe.db.set_value("Employee", "_T-Employee-0001", "relieving_date", "2013-01-28")
+		ss.save()
+		self.assertEquals(ss.total_days_in_month, 29)
+		self.assertEquals(ss.payment_days, 16)
+		
+		# Holidays included in working days
+		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 1)
+		ss.save()
+		self.assertEquals(ss.total_days_in_month, 31)
+		self.assertEquals(ss.payment_days, 17)
+		
+		frappe.db.set_value("Employee", "_T-Employee-0001", "date_of_joining", "2001-01-11")
+		frappe.db.set_value("Employee", "_T-Employee-0001", "relieving_date", None)
 
 	def test_employee_salary_slip_read_permission(self):
 		self.make_employee("test_employee@example.com")
