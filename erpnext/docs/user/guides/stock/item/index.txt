@@ -1,2 +1,0 @@
-item-codification
-item-variants

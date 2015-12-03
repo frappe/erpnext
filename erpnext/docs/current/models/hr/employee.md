@@ -1,0 +1,1684 @@
+<!-- title: Employee -->
+
+
+
+
+
+<div class="dev-header">
+
+<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
+	Version 6.x.x</a>
+
+
+	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/hr/doctype/employee"
+		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
+
+</div>
+
+
+
+
+
+    <p><b>Table Name:</b> <code>tabEmployee</code></p>
+
+
+
+
+<h3>Fields</h3>
+
+<table class="table table-bordered" style="table-layout: fixed;">
+    <thead>
+        <tr>
+            <th style="width: 5%">Sr</th>
+            <th style="width: 25%">Fieldname</th>
+            <th style="width: 20%">Type</th>
+            <th style="width: 25%">Label</th>
+            <th style="width: 25%">Options</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr class="info">
+            <td>1</td>
+            <td ><code>basic_information</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td ><code>column_break0</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>employee</code></td>
+            <td >
+                Data</td>
+            <td class="text-muted" title="Hidden">
+                Employee
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>naming_series</code></td>
+            <td >
+                Select</td>
+            <td >
+                Series
+                
+            </td>
+            <td>
+                <pre>EMP/</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>salutation</code></td>
+            <td >
+                Select</td>
+            <td >
+                Salutation
+                
+            </td>
+            <td>
+                <pre>
+Mr
+Ms</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
+            <td class="danger" title="Mandatory"><code>employee_name</code></td>
+            <td >
+                Data</td>
+            <td >
+                Full Name
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>7</td>
+            <td ><code>image</code></td>
+            <td >
+                Attach</td>
+            <td >
+                Image
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
+            <td ><code>image_view</code></td>
+            <td >
+                Image</td>
+            <td >
+                Image View
+                
+            </td>
+            <td>
+                <pre>image</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>column_break1</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>10</td>
+            <td ><code>user_id</code></td>
+            <td >
+                Link</td>
+            <td >
+                User ID
+                <p class="text-muted small">
+                    System User (login) ID. If set, it will become default for all HR forms.</p>
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/core/user">User</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>11</td>
+            <td ><code>employee_number</code></td>
+            <td >
+                Data</td>
+            <td >
+                Employee Number
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
+            <td class="danger" title="Mandatory"><code>date_of_joining</code></td>
+            <td >
+                Date</td>
+            <td >
+                Date of Joining
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
+            <td class="danger" title="Mandatory"><code>date_of_birth</code></td>
+            <td >
+                Date</td>
+            <td >
+                Date of Birth
+                <p class="text-muted small">
+                    You can enter any date manually</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>14</td>
+            <td class="danger" title="Mandatory"><code>gender</code></td>
+            <td >
+                Select</td>
+            <td >
+                Gender
+                
+            </td>
+            <td>
+                <pre>
+Male
+Female</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>15</td>
+            <td class="danger" title="Mandatory"><code>company</code></td>
+            <td >
+                Link</td>
+            <td >
+                Company
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/company">Company</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>16</td>
+            <td ><code>employment_details</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Employment Details
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>17</td>
+            <td ><code>col_break_21</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
+            <td class="danger" title="Mandatory"><code>status</code></td>
+            <td >
+                Select</td>
+            <td >
+                Status
+                
+            </td>
+            <td>
+                <pre>
+Active
+Left</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>19</td>
+            <td ><code>employment_type</code></td>
+            <td >
+                Link</td>
+            <td >
+                Employment Type
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/employment_type">Employment Type</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>20</td>
+            <td ><code>holiday_list</code></td>
+            <td >
+                Link</td>
+            <td >
+                Holiday List
+                <p class="text-muted small">
+                    Applicable Holiday List</p>
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/holiday_list">Holiday List</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>21</td>
+            <td ><code>col_break_22</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>22</td>
+            <td ><code>scheduled_confirmation_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Offer Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>23</td>
+            <td ><code>final_confirmation_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Confirmation Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>24</td>
+            <td ><code>contract_end_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Contract End Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>25</td>
+            <td ><code>date_of_retirement</code></td>
+            <td >
+                Date</td>
+            <td >
+                Date Of Retirement
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>26</td>
+            <td ><code>job_profile</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Job Profile
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>27</td>
+            <td ><code>column_break2</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>28</td>
+            <td ><code>branch</code></td>
+            <td >
+                Link</td>
+            <td >
+                Branch
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/branch">Branch</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>29</td>
+            <td ><code>department</code></td>
+            <td >
+                Link</td>
+            <td >
+                Department
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/department">Department</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>30</td>
+            <td ><code>designation</code></td>
+            <td >
+                Link</td>
+            <td >
+                Designation
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/designation">Designation</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>31</td>
+            <td ><code>company_email</code></td>
+            <td >
+                Data</td>
+            <td >
+                Company Email
+                <p class="text-muted small">
+                    Provide email id registered in company</p>
+            </td>
+            <td>
+                <pre>Email</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>32</td>
+            <td ><code>notice_number_of_days</code></td>
+            <td >
+                Int</td>
+            <td >
+                Notice (days)
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>33</td>
+            <td ><code>salary_information</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                Salary Information
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>34</td>
+            <td ><code>salary_mode</code></td>
+            <td >
+                Select</td>
+            <td >
+                Salary Mode
+                
+            </td>
+            <td>
+                <pre>
+Bank
+Cash
+Cheque</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>35</td>
+            <td ><code>bank_name</code></td>
+            <td >
+                Data</td>
+            <td >
+                Bank Name
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>36</td>
+            <td ><code>bank_ac_no</code></td>
+            <td >
+                Data</td>
+            <td >
+                Bank A/C No.
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>37</td>
+            <td ><code>organization_profile</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Organization Profile
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>38</td>
+            <td ><code>reports_to</code></td>
+            <td >
+                Link</td>
+            <td >
+                Reports to
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/employee">Employee</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>39</td>
+            <td ><code>leave_approvers</code></td>
+            <td >
+                Table</td>
+            <td >
+                Leave Approvers
+                <p class="text-muted small">
+                    The first Leave Approver in the list will be set as the default Leave Approver</p>
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/employee_leave_approver">Employee Leave Approver</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>40</td>
+            <td ><code>contact_details</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Contact Details
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>41</td>
+            <td ><code>column_break3</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>42</td>
+            <td ><code>cell_number</code></td>
+            <td >
+                Data</td>
+            <td >
+                Cell Number
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>43</td>
+            <td ><code>personal_email</code></td>
+            <td >
+                Data</td>
+            <td >
+                Personal Email
+                
+            </td>
+            <td>
+                <pre>Email</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>44</td>
+            <td ><code>unsubscribed</code></td>
+            <td >
+                Check</td>
+            <td >
+                Unsubscribed
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>45</td>
+            <td ><code>emergency_contact_details</code></td>
+            <td >
+                HTML</td>
+            <td >
+                Emergency Contact Details
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>46</td>
+            <td ><code>person_to_be_contacted</code></td>
+            <td >
+                Data</td>
+            <td >
+                Emergency Contact
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>47</td>
+            <td ><code>relation</code></td>
+            <td >
+                Data</td>
+            <td >
+                Relation
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>48</td>
+            <td ><code>emergency_phone_number</code></td>
+            <td >
+                Data</td>
+            <td >
+                Emergency Phone
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>49</td>
+            <td ><code>column_break4</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>50</td>
+            <td ><code>permanent_accommodation_type</code></td>
+            <td >
+                Select</td>
+            <td >
+                Permanent Address Is
+                
+            </td>
+            <td>
+                <pre>
+Rented
+Owned</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>51</td>
+            <td ><code>permanent_address</code></td>
+            <td >
+                Small Text</td>
+            <td >
+                Permanent Address
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>52</td>
+            <td ><code>current_accommodation_type</code></td>
+            <td >
+                Select</td>
+            <td >
+                Current Address Is
+                
+            </td>
+            <td>
+                <pre>
+Rented
+Owned</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>53</td>
+            <td ><code>current_address</code></td>
+            <td >
+                Small Text</td>
+            <td >
+                Current Address
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>54</td>
+            <td ><code>sb53</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>55</td>
+            <td ><code>bio</code></td>
+            <td >
+                Text Editor</td>
+            <td >
+                Bio
+                <p class="text-muted small">
+                    Short biography for website and other publications.</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>56</td>
+            <td ><code>personal_details</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Personal Details
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>57</td>
+            <td ><code>column_break5</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>58</td>
+            <td ><code>passport_number</code></td>
+            <td >
+                Data</td>
+            <td >
+                Passport Number
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>59</td>
+            <td ><code>date_of_issue</code></td>
+            <td >
+                Date</td>
+            <td >
+                Date of Issue
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>60</td>
+            <td ><code>valid_upto</code></td>
+            <td >
+                Date</td>
+            <td >
+                Valid Upto
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>61</td>
+            <td ><code>place_of_issue</code></td>
+            <td >
+                Data</td>
+            <td >
+                Place of Issue
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>62</td>
+            <td ><code>column_break6</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>63</td>
+            <td ><code>marital_status</code></td>
+            <td >
+                Select</td>
+            <td >
+                Marital Status
+                
+            </td>
+            <td>
+                <pre>
+Single
+Married
+Divorced
+Widowed</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>64</td>
+            <td ><code>blood_group</code></td>
+            <td >
+                Select</td>
+            <td >
+                Blood Group
+                
+            </td>
+            <td>
+                <pre>
+A+
+A-
+B+
+B-
+AB+
+AB-
+O+
+O-</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>65</td>
+            <td ><code>family_background</code></td>
+            <td >
+                Small Text</td>
+            <td >
+                Family Background
+                <p class="text-muted small">
+                    Here you can maintain family details like name and occupation of parent, spouse and children</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>66</td>
+            <td ><code>health_details</code></td>
+            <td >
+                Small Text</td>
+            <td >
+                Health Details
+                <p class="text-muted small">
+                    Here you can maintain height, weight, allergies, medical concerns etc</p>
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>67</td>
+            <td ><code>educational_qualification</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Educational Qualification
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>68</td>
+            <td ><code>education</code></td>
+            <td >
+                Table</td>
+            <td >
+                Education
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/employee_education">Employee Education</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>69</td>
+            <td ><code>previous_work_experience</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Previous Work Experience
+                
+            </td>
+            <td>
+                <pre>Simple</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>70</td>
+            <td ><code>external_work_history</code></td>
+            <td >
+                Table</td>
+            <td >
+                External Work History
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/employee_external_work_history">Employee External Work History</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>71</td>
+            <td ><code>history_in_company</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                History In Company
+                
+            </td>
+            <td>
+                <pre>Simple</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>72</td>
+            <td ><code>internal_work_history</code></td>
+            <td >
+                Table</td>
+            <td >
+                Internal Work History
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/employee_internal_work_history">Employee Internal Work History</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr class="info">
+            <td>73</td>
+            <td ><code>exit</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                Exit
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>74</td>
+            <td ><code>column_break7</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>75</td>
+            <td ><code>resignation_letter_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Resignation Letter Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>76</td>
+            <td ><code>relieving_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Relieving Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>77</td>
+            <td ><code>reason_for_leaving</code></td>
+            <td >
+                Data</td>
+            <td >
+                Reason for Leaving
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>78</td>
+            <td ><code>leave_encashed</code></td>
+            <td >
+                Select</td>
+            <td >
+                Leave Encashed?
+                
+            </td>
+            <td>
+                <pre>
+Yes
+No</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>79</td>
+            <td ><code>encashment_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Encashment Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>80</td>
+            <td ><code>exit_interview_details</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                Exit Interview Details
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>81</td>
+            <td ><code>held_on</code></td>
+            <td >
+                Date</td>
+            <td >
+                Held On
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>82</td>
+            <td ><code>reason_for_resignation</code></td>
+            <td >
+                Select</td>
+            <td >
+                Reason for Resignation
+                
+            </td>
+            <td>
+                <pre>
+Better Prospects
+Health Concerns</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>83</td>
+            <td ><code>new_workplace</code></td>
+            <td >
+                Data</td>
+            <td >
+                New Workplace
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>84</td>
+            <td ><code>feedback</code></td>
+            <td >
+                Small Text</td>
+            <td >
+                Feedback
+                
+            </td>
+            <td></td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+    <hr>
+    <h3>Controller</h3>
+    <h4>erpnext.hr.doctype.employee.employee</h4>
+
+    
+
+
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>Employee</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.model.document.Document</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="autoname" href="#autoname" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>autoname</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="on_trash" href="#on_trash" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>on_trash</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="on_update" href="#on_update" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>on_update</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="onload" href="#onload" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>onload</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_user" href="#update_user" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_user</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="update_user_permissions" href="#update_user_permissions" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>update_user_permissions</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate" href="#validate" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_date" href="#validate_date" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_date</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_duplicate_user_id" href="#validate_duplicate_user_id" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_duplicate_user_id</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_email" href="#validate_email" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_email</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_employee_leave_approver" href="#validate_employee_leave_approver" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_employee_leave_approver</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_for_enabled_user_id" href="#validate_for_enabled_user_id" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_for_enabled_user_id</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_reports_to" href="#validate_reports_to" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_reports_to</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_status" href="#validate_status" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_status</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+	<h3 style="font-weight: normal;">Class <b>EmployeeUserDisabledError</b></h3>
+    
+    <p style="padding-left: 30px;"><i>Inherits from frappe.exceptions.ValidationError</i></h4>
+    
+    <div class="docs-attr-desc"><p></p>
+</div>
+    <div style="padding-left: 30px;">
+        
+    </div>
+    <hr>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.employee.employee.get_employees_who_are_born_today" href="#erpnext.hr.doctype.employee.employee.get_employees_who_are_born_today" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.employee.employee.<b>get_employees_who_are_born_today</b>
+        <i class="text-muted">()</i>
+    </p>
+	<div class="docs-attr-desc"><p>Get Employee properties whose birthday is today.</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.hr.doctype.employee.employee.get_retirement_date</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.employee.employee.get_retirement_date" href="#erpnext.hr.doctype.employee.employee.get_retirement_date" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.employee.employee.<b>get_retirement_date</b>
+        <i class="text-muted">(date_of_birth=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    <p><span class="label label-info">Public API</span>
+        <br><code>/api/method/erpnext.hr.doctype.employee.employee.make_salary_structure</code>
+    </p>
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.employee.employee.make_salary_structure" href="#erpnext.hr.doctype.employee.employee.make_salary_structure" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.employee.employee.<b>make_salary_structure</b>
+        <i class="text-muted">(source_name, target=None)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.employee.employee.send_birthday_reminders" href="#erpnext.hr.doctype.employee.employee.send_birthday_reminders" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.employee.employee.<b>send_birthday_reminders</b>
+        <i class="text-muted">()</i>
+    </p>
+	<div class="docs-attr-desc"><p>Send Employee birthday reminders if no 'Stop Birthday Reminders' is not set.</p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.employee.employee.update_user_permissions" href="#erpnext.hr.doctype.employee.employee.update_user_permissions" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.employee.employee.<b>update_user_permissions</b>
+        <i class="text-muted">(doc, method)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+	
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="erpnext.hr.doctype.employee.employee.validate_employee_role" href="#erpnext.hr.doctype.employee.employee.validate_employee_role" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		erpnext.hr.doctype.employee.employee.<b>validate_employee_role</b>
+        <i class="text-muted">(doc, method)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+	
+
+
+    
+    
+        <h4>Linked In:</h4>
+        <ul>
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/projects/activity_cost">Activity Cost</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/appraisal">Appraisal</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/attendance">Attendance</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/authorization_rule">Authorization Rule</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/employee">Employee</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/expense_claim">Expense Claim</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/leave_allocation">Leave Allocation</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/leave_application">Leave Application</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/salary_slip">Salary Slip</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/salary_structure">Salary Structure</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/setup/sales_person">Sales Person</a>
+
+</li>
+			
+        
+			
+            <li>
+
+
+<a href="https://frappe.github.io/erpnext/current/models/projects/time_log">Time Log</a>
+
+</li>
+			
+        
+        </ul>
+    
+
+
+<!-- autodoc -->
+<!-- jinja -->
+<!-- static -->

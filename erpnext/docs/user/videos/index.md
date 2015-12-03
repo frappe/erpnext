@@ -1,13 +1,13 @@
 # ERPNext Videos
 
 <h3>
-	<a class="no-decoration" href="{{url_prefix}}/user/videos/learn">Learn ERPNext</a>
+	<a class="no-decoration" href="{{docs_base_url}}/user/videos/learn">Learn ERPNext</a>
 </h3>
 
 <div class="row">
     <div class="col-sm-4">
-        <a href="{{url_prefix}}/user/videos/learn">
-            <img src="{{url_prefix}}/assets/img/videos/learn.jpg" class="img-responsive" style="margin-top: 0px;">
+        <a href="{{docs_base_url}}/user/videos/learn">
+            <img src="{{docs_base_url}}/assets/img/videos/learn.jpg" class="img-responsive" style="margin-top: 0px;">
         </a>
     </div>
     <div class="col-sm-8">
@@ -24,7 +24,7 @@
 <div class="row">
     <div class="col-sm-4">
         <a href="https://conf.erpnext.com/2014/videos">
-            <img src="{{url_prefix}}/assets/img/videos/conf-2014.jpg" class="img-responsive" style="margin-top: 0px;">
+            <img src="{{docs_base_url}}/assets/img/videos/conf-2014.jpg" class="img-responsive" style="margin-top: 0px;">
         </a>
     </div>
     <div class="col-sm-8">

@@ -1,0 +1,6 @@
+item-codification
+item-variants
+purchase-details.md
+reorder.md
+purchase-details.md
+reorder.md

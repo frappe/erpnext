@@ -1,0 +1,34 @@
+<h1>Purchase Tax or Charges Categories</h1>
+
+Consider Tax or Charge field in Purchase Taxes and Charges master has three values.<br><br><ol>
+    <li>Total</li>
+    <li>Valuation</li>
+    <li>Total and Valuation<br><br><img src="{{docs_base_path}}/assets/img/articles/Screen Shot 2015-04-15 at 6.04.02 pm.png"><br></li>
+</ol>
+<p>Let's consider an example to understand an effect of value selected in Consider Tax or Charge field.</p>
+<p>We purchase 10 units of item, at the rate of 800, total purchase amount would be 800. Purchased item has 4% VAT tax and INR 100 transportation charges were incurred.
+
+</p><h4>Total:</h4>
+
+<p>An amount of tax/charge categorized Total will be accounted in the total of purchase transactions, but not in the value of purchased item.</p>
+<p>If VAT 4% is applied on item, it will amount to INR 32. Since VAT is the <a href="https://frappe.io/blog/erpnext-features/managing-consumption-tax" target="_blank">consumption tax</a>, its should be added value of Purchase Order/Invoice, since it will
+    be included in payable towards supplier, but its should not be added to the value of Purchased item.</p>
+<p>Hence for tax or charge you wish to be added to transaction total but not to the valuation of item, it should be categorized as Total.</p>
+<p>When Purchase Invoice is submitted, value of tax/charge is booked in respective account.
+    <br>
+</p>
+<h4>Valuation:</h4>
+<p>An amount of tax/charge categorized as Valuation will be added in the value of purchased item, but will not be added to the value of purchase transaction.</p>
+<p>Transportation charge of INR 100 should be categorized as valuation. With this, the value of purchased item will be increased from 800 to 900. Also, it will be not be added to the total of purchase transaction, because it should not be reflected to supplier,
+    as it will be irrelevant for them.
+    <br>
+</p>
+<p>When Purchase Invoice is submitted, value of tax/charge is booked in respective account. Transportation expense will be booked
+    <br>
+</p>
+<h4>Total and Valuation:</h4>
+<p>An amount of tax/charge categorized as for Total and Valuation will be added in the value of purchase item, as well as will be included in the totals of purchase transactions.</p>
+<p>Let's assume that transporter was arranged by our supplier, but we need to pay transportation charges to them. In that case, for transportation charges, category selected should be Total and Valuation. With this INR 100 transportation charges will be
+    added to actual purchase amount of INR 800. Also, INR 100 will reflect in the total, as it will be payable for us towards supplier.
+    <br>
+</p>
