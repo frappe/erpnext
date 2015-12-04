@@ -15,6 +15,7 @@
 	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
 	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
 
     
 	<link rel="shortcut icon"
@@ -26,16 +27,14 @@
     
 <meta name="name" content="Material Request" data-html-block="meta_block">
 <meta name="twitter:card" content="summary" data-html-block="meta_block">
-<meta name="twitter:description" content="Version 6.8.4 Source Table Name: tabMaterial Request Fields&lt;/h" data-html-block="meta_block">
 <meta name="og:type" content="article" data-html-block="meta_block">
-<meta name="og:description" content="Version 6.8.4 Source Table Name: tabMaterial Request Fields&lt;/h" data-html-block="meta_block">
 <meta name="og:title" content="Material Request" data-html-block="meta_block">
 <meta name="twitter:title" content="Material Request" data-html-block="meta_block">
-<meta name="description" content="Version 6.8.4 Source Table Name: tabMaterial Request Fields&lt;/h" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
 
 		
-			<style data-html-block="style"></style></head>
-<body>
+			<style></style></head>
+<body data-path="current/models/stock/material_request">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -55,15 +54,15 @@
 				
 				<ul class="nav navbar-nav navbar-left">
 </ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
-	<a href="https://frappe.github.io/erpnext/contents.html"
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
 		
 		>
-	Contents</a></li><li data-label='User Guide' >
-	<a href="https://frappe.github.io/erpnext/user/guides"
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
 		
 		>
-	User Guide</a></li><li data-label='Videos' >
+	User Manual</a></li><li data-label='Videos' >
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
@@ -81,22 +80,17 @@
 		</div>
 	</nav>
 </header>
-<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
-                        
-                            <div class="container">
-                            <div class="page-container" id="page-material_request" data-path="current/models/stock/material_request"
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-material_request" data-path="current/models/stock/material_request"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
             <div class="row">
                 <div class="col-sm-8">
-            		<div class="page-header-block" data-html-block="header"><h1>Material Request</h1></div>
-                </div>
-                <div class="col-sm-4">
-            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
-                </div>
-            </div>
-    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
 <ul class="breadcrumb">
 	<li>
 		<span class="icon icon-angle-left"></span>
@@ -106,6 +100,13 @@
 	
 </ul>
 </div>
+            		<div class="page-header-block" data-html-block="header"><h1>Material Request</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
@@ -119,7 +120,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.8.4</a>
+	Version 6.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/stock/doctype/material_request"
@@ -295,8 +296,20 @@ Material Issue</pre>
             </td>
         </tr>
         
-        <tr class="info">
+        <tr >
             <td>10</td>
+            <td ><code>get_items_from_product_bundle</code></td>
+            <td >
+                Button</td>
+            <td >
+                Get Items from Product Bundle
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>11</td>
             <td ><code>more_info</code></td>
             <td >
                 Section Break</td>
@@ -310,7 +323,7 @@ Material Issue</pre>
         </tr>
         
         <tr >
-            <td>11</td>
+            <td>12</td>
             <td ><code>requested_by</code></td>
             <td >
                 Data</td>
@@ -322,7 +335,7 @@ Material Issue</pre>
         </tr>
         
         <tr >
-            <td>12</td>
+            <td>13</td>
             <td class="danger" title="Mandatory"><code>transaction_date</code></td>
             <td >
                 Date</td>
@@ -334,7 +347,7 @@ Material Issue</pre>
         </tr>
         
         <tr >
-            <td>13</td>
+            <td>14</td>
             <td ><code>column_break2</code></td>
             <td class="info">
                 Column Break</td>
@@ -346,7 +359,7 @@ Material Issue</pre>
         </tr>
         
         <tr >
-            <td>14</td>
+            <td>15</td>
             <td ><code>status</code></td>
             <td >
                 Select</td>
@@ -364,7 +377,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>15</td>
+            <td>16</td>
             <td ><code>per_ordered</code></td>
             <td >
                 Percent</td>
@@ -376,7 +389,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>16</td>
+            <td>17</td>
             <td ><code>printing_details</code></td>
             <td >
                 Section Break</td>
@@ -388,7 +401,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>17</td>
+            <td>18</td>
             <td ><code>letter_head</code></td>
             <td >
                 Link</td>
@@ -409,7 +422,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>18</td>
+            <td>19</td>
             <td ><code>select_print_heading</code></td>
             <td >
                 Link</td>
@@ -430,7 +443,7 @@ Cancelled</pre>
         </tr>
         
         <tr class="info">
-            <td>19</td>
+            <td>20</td>
             <td ><code>terms_section_break</code></td>
             <td >
                 Section Break</td>
@@ -444,7 +457,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>20</td>
+            <td>21</td>
             <td ><code>tc_name</code></td>
             <td >
                 Link</td>
@@ -465,7 +478,7 @@ Cancelled</pre>
         </tr>
         
         <tr >
-            <td>21</td>
+            <td>22</td>
             <td ><code>terms</code></td>
             <td >
                 Text Editor</td>
@@ -840,12 +853,15 @@ Cancelled</pre>
     	</div>
 	</div>
 </div>
-                            <!-- edit-link -->
+                               <!-- edit-link -->
                             </div>
                         
                     </div>
 					<footer class="docs-footer">
-						<div class="container"><br>
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
                                 <li>
@@ -870,9 +886,7 @@ Cancelled</pre>
                                 </li>
                             </ul>
                         </div>
-                        <div class="built-with-frappe text-center">
-                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
-                        </div>
+
                     </div>
 					</footer>
 				</div>
@@ -882,15 +896,15 @@ Cancelled</pre>
 				<div class="sidebar-navbar-items">
 					<ul class="nav navbar-nav navbar-left">
 </ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
-	<a href="https://frappe.github.io/erpnext/contents.html"
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
 		
 		>
-	Contents</a></li><li data-label='User Guide' >
-	<a href="https://frappe.github.io/erpnext/user/guides"
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
 		
 		>
-	User Guide</a></li><li data-label='Videos' >
+	User Manual</a></li><li data-label='Videos' >
 	<a href="https://frappe.github.io/erpnext/user/videos"
 		
 		>
@@ -909,32 +923,8 @@ Cancelled</pre>
 	</div>
 
 	<!-- js should be loaded in body! -->
-    <script>
-    $(function() {
-	if(hljs) {
-		$('pre code').each(function(i, block) {
-			hljs.highlightBlock(block);
-		});
-	}
-
-	$(".toggle-sidebar").on("click", function() {
-		$(".offcanvas").addClass("active-right");
-		return false;
-	});
-
-	// collapse offcanvas sidebars!
-	$(".offcanvas .sidebar").on("click", "a", function() {
-		$(".offcanvas").removeClass("active-left active-right");
-	});
-
-	$(".offcanvas-main-section-overlay").on("click", function() {
-		$(".offcanvas").removeClass("active-left active-right");
-		return false;
-	});
-
-});
-    </script>
-		<script data-html-block="script"></script>
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
 
 	<!-- csrf_token --></body>
 </html>

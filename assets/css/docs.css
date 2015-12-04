@@ -38,7 +38,7 @@ body {
 .offcanvas .sidebar .divider {
   height: 1px;
   overflow: hidden;
-  background-color: #ebeff2;
+  background-color: #EBEFF2;
   width: 100%;
   margin: 0px;
 }
@@ -52,7 +52,7 @@ body {
 .offcanvas .sidebar .dropdown-menu > li > a:focus,
 .offcanvas .sidebar .sidebar-menu > li > a:active,
 .offcanvas .sidebar .dropdown-menu > li > a:active {
-  background-color: #f0f4f7;
+  background-color: #F0F4F7;
 }
 @media (max-width: 767px) {
   .page-content {
@@ -124,7 +124,7 @@ body {
   }
   .offcanvas .sidebar-label {
     text-transform: uppercase;
-    color: #8d99a6;
+    color: #8D99A6;
     font-size: 85%;
     margin: 0px;
     font-weight: bold;
@@ -175,7 +175,7 @@ body {
   background-color: rgba(255, 255, 255, 0.9);
 }
 .navbar .navbar-search-icon {
-  color: #6c7680;
+  color: #6C7680;
   font-size: inherit;
   position: relative;
   right: 24px;
@@ -194,7 +194,7 @@ body {
 }
 .navbar-center {
   float: left;
-  color: #6c7680;
+  color: #6C7680;
 }
 #navbar-breadcrumbs > li > a:before {
   font-family: FontAwesome;
@@ -211,12 +211,12 @@ body {
   top: 3px;
   content: "\f105";
   margin-right: 10px;
-  color: #c0c9d2;
+  color: #C0C9D2;
 }
 #navbar-breadcrumbs > li > a:hover:before,
 #navbar-breadcrumbs > li > a:focus:before,
 #navbar-breadcrumbs > li > a:active:before {
-  color: #36414c;
+  color: #36414C;
 }
 #navbar-breadcrumbs > li > a {
   padding: 6px 15px 10px 0px;
@@ -237,33 +237,209 @@ body {
 body {
   font-size: 16px;
   line-height: 1.65em;
+  color: #454e57;
+  -webkit-font-smoothing: antialiased;
 }
 .container {
-  max-width: 800px;
+  max-width: 870px;
+}
+.splash {
+  background-color: #36414C;
+  background-image: url('https://frappe.github.io/erpnext/assets/img/background.png');
+  color: #ffffff;
+  padding-top: 128px;
+  margin-top: -92px;
+}
+.splash .jumbotron {
+  background-color: transparent;
+  padding: 14px 0 60px 0;
+  text-align: center;
+  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.7);
+}
+.splash .jumbotron h1 {
+  font-size: 42px;
+  font-weight: 400;
+  opacity: 0.9;
+}
+.splash .jumbotron p {
+  font-size: 24px;
+  font-color: #8D99A6 !important;
+  letter-spacing: 0px;
+  opacity: 0.7;
+  margin-top: 20px;
+  font-weight: 300;
+  line-height: 1.4em;
+}
+.splash .section {
+  padding: 30px 0 0 0;
+}
+.page-container {
+  padding-top: 38px;
+  margin: 0 auto;
+  max-width: 870px;
+}
+.page-container .webpage-content ol > li,
+.page-container .webpage-content ul > li {
+  margin: 13px auto;
+}
+.page-container .webpage-content ol > li li,
+.page-container .webpage-content ul > li li {
+  margin: 4px auto;
+}
+.page-container .webpage-content ol li ol {
+  list-style-type: disc;
+}
+.page-container .webpage-content ul,
+.page-container .webpage-content ol {
+  margin-bottom: 32px;
+}
+@media (min-width: 768px) {
+  .page-container .page-content {
+    width: 83%;
+    margin: 0 auto;
+  }
+}
+#page-index {
+  padding-top: 0;
+  width: 100%;
+  margin: 0;
+}
+#page-index .page-content {
+  width: 100%;
+  margin: 0;
+}
+body[data-path="index"] .navbar .toggle-sidebar i {
+  color: #fff;
+}
+code {
+  color: #e66a12;
+  background: #fff6df;
+}
+pre {
+  background: #fafbfc;
+  border: 1px solid #e1e9f0;
+  border-radius: 2px;
+}
+.hljs {
+  background: transparent;
+  border: none;
+  padding: 1.2em 1.5em 1.5em;
+  color: #454e57;
+}
+.hljs-keyword,
+.hljs-tag,
+.css .hljs-class,
+.css .hljs-id,
+.lisp .hljs-title,
+.nginx .hljs-title,
+.hljs-request,
+.hljs-status,
+.clojure .hljs-attribute {
+  color: #e66a12;
+}
+.diff .hljs-deletion,
+.hljs-string,
+.hljs-tag .hljs-value,
+.hljs-preprocessor,
+.hljs-pragma,
+.hljs-built_in,
+.hljs-javadoc,
+.smalltalk .hljs-class,
+.smalltalk .hljs-localvars,
+.smalltalk .hljs-array,
+.css .hljs-rules .hljs-value,
+.hljs-attr_selector,
+.hljs-pseudo,
+.apache .hljs-cbracket,
+.tex .hljs-formula,
+.coffeescript .hljs-attribute {
+  color: #dd4a68;
+}
+.hljs-number,
+.hljs-date,
+.hljs-regexp,
+.hljs-literal,
+.hljs-hexcolor,
+.smalltalk .hljs-symbol,
+.smalltalk .hljs-char,
+.go .hljs-constant,
+.hljs-change,
+.lasso .hljs-variable,
+.makefile .hljs-variable,
+.asciidoc .hljs-bullet,
+.markdown .hljs-bullet,
+.asciidoc .hljs-link_url,
+.markdown .hljs-link_url {
+  color: #7575ff;
+}
+.hljs-shebang,
+.diff .hljs-addition,
+.hljs-comment,
+.hljs-annotation,
+.hljs-template_comment,
+.hljs-pi,
+.hljs-doctype {
+  color: #6a906a;
+}
+.dos .hljs-keyword,
+.hljs-decorator,
+.hljs-title,
+.hljs-type,
+.diff .hljs-header,
+.ruby .hljs-class .hljs-parent,
+.apache .hljs-tag,
+.nginx .hljs-built_in,
+.tex .hljs-command,
+.hljs-prompt {
+  color: #4f4fa4;
+}
+.navbar {
+  max-width: 870px;
+  margin-left: auto;
+  margin-right: auto;
 }
 .navbar a {
   font-size: 16px;
   font-weight: normal;
 }
+.navbar a.navbar-brand {
+  font-weight: bold;
+}
+.navbar a.toggle-sidebar {
+  margin-top: 8px;
+}
+.sidebar a {
+  font-size: 14px;
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
+}
 .breadcrumb {
-  line-height: 1.5em;
-  color: #8d99a6;
+  line-height: 1em;
+  color: #8D99A6;
   background-color: transparent;
-  margin-bottom: 10px;
+  margin-bottom: 32px;
   padding: 0px;
+  padding-left: 20px;
+  background: url('https://frappe.github.io/erpnext/assets/img/up.png') 0% 30% no-repeat;
+}
+.breadcrumb .icon {
+  display: none;
 }
 .breadcrumb a,
 .breadcrumb a:hover,
 .breadcrumb a:focus,
 .breadcrumb a:visited {
-  color: inherit;
-  font-size: 14px;
+  color: #7575ff;
+  font-size: 16px;
 }
-a,
-a:hover,
-a:focus,
-a:visited {
-  color: #5e64ff;
+.hero-and-content a,
+.hero-and-content a:hover,
+.hero-and-content a:focus,
+.hero-and-content a:visited {
+  color: #5E64FF;
+}
+.hero-and-content a.btn {
+  color: inherit;
 }
 a.btn-primary {
   color: #fff;
@@ -273,57 +449,73 @@ a.btn-primary:focus,
 a.btn-primary:visited {
   color: #fff;
 }
+.btn-next-wrapper {
+  margin: 32px 0 16px;
+}
 h2 {
+  margin-top: 48px;
   font-size: 24px;
+}
+h3,
+h4 {
+  margin-top: 48px;
+}
+p {
+  margin-bottom: 16px;
+}
+.hero-and-content > p {
+  max-width: 723px;
+  margin: 0 auto;
 }
 .navbar {
   background-color: transparent;
   border: none;
   padding: 15px 0px;
   border-radius: 0px;
-  border-top: 5px solid #7575ff;
   border-bottom: 1px solid #d1d8dd;
 }
 .section {
-  padding: 30px;
-  max-width: 800px;
-  margin: auto;
+  padding: 64px 0 0 0;
 }
 .dev-header {
   margin-bottom: 30px;
 }
 .docs-footer {
-  margin-top: 50px;
   padding: 30px 0px 60px 0px;
   border-top: 1px solid #d1d8dd;
+  max-width: 870px;
+  margin: 0 auto;
+  margin-top: 80px;
+  font-size: 14px;
+}
+.docs-footer h3 {
+  margin-top: 24px;
+  font-size: 16px;
+}
+.docs-footer img.frappe-bird {
+  width: 40px;
+  height: 40px;
+  background: #fff;
+  margin-bottom: 10px;
+  padding: 5px;
 }
 .docs-footer a {
-  color: #8d99a6;
+  color: #8D99A6;
 }
 .docs-footer li {
   display: inline-block;
-  margin: 0 15px;
+  margin: 0 10px;
 }
-.jumbotron {
-  background-color: transparent;
-  padding: 80px 30px;
-  text-align: center;
-}
-.jumbotron h1 {
-  font-size: 32px;
-  font-weight: 700;
-}
-.jumbotron p {
-  font-color: #8d99a6 !important;
+.docs-footer .built-with-frappe {
+  margin-top: -50px;
 }
 .browser-image {
-  min-height: 300px;
+  min-height: 200px;
   border: 1px solid #d1d8dd;
 }
 .fake-browser-frame {
   position: relative;
-  margin: 40px auto;
-  max-width: 600px;
+  margin: 24px auto 0px;
 }
 .fake-browser-frame::before {
   content: "";
@@ -333,6 +525,7 @@ h2 {
   left: 0px;
   right: 0px;
   border: 1px solid #d1d8dd;
+  background: #ffffff;
   border-bottom: none;
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
@@ -370,11 +563,41 @@ h2 {
   border-radius: 15px;
 }
 .screenshot {
-  border: 2px solid #d1d8dd;
+  border: 1px solid #d1d8dd;
   box-shadow: 1px 1px 7px rgba(0, 0, 0, 0.15);
-  margin: 30px 0px;
+  margin: 8px 0px;
   max-width: 100%;
 }
 hr {
-  margin: 30px 0px;
+  margin: 48px 0px 30px;
+}
+.edit {
+  padding-left: 20px;
+  background: url('https://frappe.github.io/erpnext/assets/img/smiley.png') 0% 50% no-repeat;
+  color: #8d99a6;
+  display: block;
+  margin-top: -22px;
+}
+a.edit,
+a.edit:hover,
+a.edit:focus,
+a.edit:visited {
+  color: #8d99a6;
+}
+.btn-next {
+  margin-top: 16px;
+  float: right;
+}
+.btn-next:after {
+  content: " \2192";
+}
+#current td {
+  font-weight: bold;
+}
+#current td code {
+  font-weight: normal;
+  background: transparent;
+  font-family: "Helvetica Neue", Helvetica, Arial, "Open Sans", sans-serif;
+  color: #454e57;
+  font-size: 16px;
 }

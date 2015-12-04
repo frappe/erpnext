@@ -6,15 +6,16 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Production Order</title>
 	<meta name="generator" content="frappe">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/docs.css">
 
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="/assets/js/docs.js"></script>
 
     
 	<link rel="shortcut icon"
@@ -26,19 +27,19 @@
     
 <meta name="name" content="Production Order" data-html-block="meta_block">
 <meta name="twitter:card" content="summary" data-html-block="meta_block">
-<meta name="image" content="https://frappe.github.io/erpnext/assets/img/manufacturing/production-order.png" data-html-block="meta_block">
+<meta name="image" content="/assets/img/manufacturing/production-order.png" data-html-block="meta_block">
 <meta name="og:type" content="article" data-html-block="meta_block">
 <meta name="og:description" content="Production Order (also called as Work Order) is a document that is given to the manufacturing shop floor by the Production Planner as a signal to produce a certain quantity of a certain Item. Production Order also helps to generate the material requirements (Stock Entry) for the Item to be produced from its Bill of Materials. The Production Order is generated from the Production Planning Tool based on Sales Orders. You can also create" data-html-block="meta_block">
-<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/manufacturing/production-order.png" data-html-block="meta_block">
+<meta name="twitter:image:src" content="/assets/img/manufacturing/production-order.png" data-html-block="meta_block">
 <meta name="og:title" content="Production Order" data-html-block="meta_block">
 <meta name="twitter:title" content="Production Order" data-html-block="meta_block">
-<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/manufacturing/production-order.png" data-html-block="meta_block">
+<meta name="og:image" content="/assets/img/manufacturing/production-order.png" data-html-block="meta_block">
 <meta name="twitter:description" content="Production Order (also called as Work Order) is a document that is given to the manufacturing shop floor by the Production Planner as a signal to produce a certain quantity of a certain Item. Production Order also helps to generate the material requirements (Stock Entry) for the Item to be produced from its Bill of Materials. The Production Order is generated from the Production Planning Tool based on Sales Orders. You can also create" data-html-block="meta_block">
 <meta name="description" content="Production Order (also called as Work Order) is a document that is given to the manufacturing shop floor by the Production Planner as a signal to produce a certain quantity of a certain Item. Production Order also helps to generate the material requirements (Stock Entry) for the Item to be produced from its Bill of Materials. The Production Order is generated from the Production Planning Tool based on Sales Orders. You can also create" data-html-block="meta_block">
 
 		
-			<style data-html-block="style"></style></head>
-<body>
+			<style></style></head>
+<body data-path="user/guides/manufacturing/production-order">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -47,7 +48,7 @@
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<a class="navbar-brand ellipsis" href="/">
 					<span>ERPNext</span>
 				</a>
 				<a class="pull-right toggle-sidebar visible-xs">
@@ -58,20 +59,20 @@
 				
 				<ul class="nav navbar-nav navbar-left">
 </ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
-	<a href="https://frappe.github.io/erpnext/contents.html"
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
 		
 		>
-	Contents</a></li><li data-label='User Guide' >
-	<a href="https://frappe.github.io/erpnext/user/guides"
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="/user/manual"
 		
 		>
-	User Guide</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
+	User Manual</a></li><li data-label='Videos' >
+	<a href="/user/videos"
 		
 		>
 	Videos</a></li><li data-label='Developer Docs' >
-	<a href="https://frappe.github.io/erpnext/current"
+	<a href="/current"
 		
 		>
 	Developer Docs</a></li>
@@ -84,31 +85,33 @@
 		</div>
 	</nav>
 </header>
-<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
-                        
-                            <div class="container">
-                            <div class="page-container" id="page-production-order" data-path="user/guides/manufacturing/production-order"
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-production-order" data-path="user/guides/manufacturing/production-order"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
             <div class="row">
                 <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="/user/guides/manufacturing">
+		Manufacturing</a>
+	</li>
+	
+</ul>
+</div>
             		<div class="page-header-block" data-html-block="header"><h1>Production Order</h1></div>
                 </div>
                 <div class="col-sm-4">
             		<div class="page-header-actions-block" data-html-block="header-actions"></div>
                 </div>
             </div>
-    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
-<ul class="breadcrumb">
-	<li>
-		<span class="icon icon-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext/user/guides/manufacturing">
-		Manufacturing</a>
-	</li>
-	
-</ul>
-</div>
+    		
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
@@ -127,7 +130,7 @@ by:</p>
   <p>Manufacturing &gt; Documents &gt; Production Order &gt; New</p>
 </blockquote>
 
-<p><img class="screenshot" alt="Production Order" src="https://frappe.github.io/erpnext/assets/img/manufacturing/production-order.png"></p>
+<p><img class="screenshot" alt="Production Order" src="/assets/img/manufacturing/production-order.png"></p>
 
 <h3>Creating Production Orders</h3>
 
@@ -149,13 +152,13 @@ by:</p>
 <li>By default the system fetchs workstation and duration for Production Order Operations from the selected BOM.</li>
 </ul>
 
-<p><img class="screenshot" alt="PO Opeartions" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-operations.png"></p>
+<p><img class="screenshot" alt="PO Opeartions" src="/assets/img/manufacturing/PO-operations.png"></p>
 
 <ul>
 <li>If you wish to reassign the wrokstation for a particular opeeration in the Production Order, you can do so before submitting the Production Order.</li>
 </ul>
 
-<p><img class="screenshot" alt="PO reassigning Operations" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-reassigning-operations.png"></p>
+<p><img class="screenshot" alt="PO reassigning Operations" src="/assets/img/manufacturing/PO-reassigning-operations.png"></p>
 
 <ul>
 <li>Select the respective operation, and change its workstation.</li>
@@ -177,36 +180,36 @@ by:</p>
 <li><p>Click on 'Transfer Materials for Manufacturing'.</p></li>
 </ul>
 
-<p><img class="screenshot" alt="Transfer Materials" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-material-transfer.png"></p>
+<p><img class="screenshot" alt="Transfer Materials" src="/assets/img/manufacturing/PO-material-transfer.png"></p>
 
 <ul>
 <li>Mention the quantity of materials to be transfered.</li>
 </ul>
 
-<p><img class="screenshot" alt="Material Transfer Qty" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-material-transfer-qty.png"></p>
+<p><img class="screenshot" alt="Material Transfer Qty" src="/assets/img/manufacturing/PO-material-transfer-qty.png"></p>
 
 <ul>
 <li>Submit the Stock Entry</li>
 </ul>
 
-<p><img class="screenshot" alt="Stock Entry for PO" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-SE-for-material-transfer.png"></p>
+<p><img class="screenshot" alt="Stock Entry for PO" src="/assets/img/manufacturing/PO-SE-for-material-transfer.png"></p>
 
 <ul>
 <li>Material Transfered for Manufacturing will be updated in the Production Order based on the Stock Entry.</li>
 </ul>
 
-<p><img class="screenshot" alt="Stock Entry for PO" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-material-transfer-updated.png"></p>
+<p><img class="screenshot" alt="Stock Entry for PO" src="/assets/img/manufacturing/PO-material-transfer-updated.png"></p>
 
 <h3>Making Time Logs</h3>
 
 <ul>
-<li>Progress in the Production Order can be tracked using <a href="https://frappe.github.io/erpnext/user/guides/projects/time-log.html">Time Log</a></li>
+<li>Progress in the Production Order can be tracked using <a href="/user/guides/projects/time-log.html">Time Log</a></li>
 <li>Time Logs are created against Production Order Operations.</li>
 <li>Drafts of Time Logs are also created based on the scheduled operations when an Production Order is Submitted.</li>
 <li>To create more Time Logs against an operation select 'Make TIme Log' in the respective operation.</li>
 </ul>
 
-<p><img class="screenshot" alt="Make TL against PO" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-operations-make-tl.png"></p>
+<p><img class="screenshot" alt="Make TL against PO" src="/assets/img/manufacturing/PO-operations-make-tl.png"></p>
 
 <h3>Updating Finished Goods</h3>
 
@@ -216,13 +219,13 @@ by:</p>
 <li>Click on 'Update Finished Goods'.</li>
 </ul>
 
-<p><img class="screenshot" alt="Update Finished Goods" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-FG-update.png"></p>
+<p><img class="screenshot" alt="Update Finished Goods" src="/assets/img/manufacturing/PO-FG-update.png"></p>
 
 <ul>
 <li>Mention the quantity of materials to be transfered.</li>
 </ul>
 
-<p><img class="screenshot" alt="Update Finished Goods Qty" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-FG-update-qty.png"></p>
+<p><img class="screenshot" alt="Update Finished Goods Qty" src="/assets/img/manufacturing/PO-FG-update-qty.png"></p>
 
 <blockquote>
   <p>Tip : You can also partially complete a Production Order by updating the Finished Goods stock creating a Stock Entry.</p>
@@ -243,7 +246,7 @@ by:</p>
 </ol></li>
 </ul>
 
-<p><img class="screenshot" alt="PO - stop" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-stop.png"></p>
+<p><img class="screenshot" alt="PO - stop" src="/assets/img/manufacturing/PO-stop.png"></p>
 
 <ul>
 <li>You can Also re-start a stopped Production Order.</li>
@@ -263,12 +266,21 @@ by:</p>
     	</div>
 	</div>
 </div>
-                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/manufacturing/production-order.md">Improve this page</a></p>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/manufacturing/production-order.md">
+		Improve this page</a>
+	</div>
+</div>
                             </div>
                         
                     </div>
 					<footer class="docs-footer">
-						<div class="container"><br>
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
                                 <li>
@@ -280,7 +292,7 @@ by:</p>
                                     Issues</a>
                                 </li>
                                 <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    <a href="/license.html">
                                     License</a>
                                 </li>
                                 <li>
@@ -293,9 +305,7 @@ by:</p>
                                 </li>
                             </ul>
                         </div>
-                        <div class="built-with-frappe text-center">
-                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
-                        </div>
+
                     </div>
 					</footer>
 				</div>
@@ -305,20 +315,20 @@ by:</p>
 				<div class="sidebar-navbar-items">
 					<ul class="nav navbar-nav navbar-left">
 </ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
-	<a href="https://frappe.github.io/erpnext/contents.html"
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
 		
 		>
-	Contents</a></li><li data-label='User Guide' >
-	<a href="https://frappe.github.io/erpnext/user/guides"
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="/user/manual"
 		
 		>
-	User Guide</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
+	User Manual</a></li><li data-label='Videos' >
+	<a href="/user/videos"
 		
 		>
 	Videos</a></li><li data-label='Developer Docs' >
-	<a href="https://frappe.github.io/erpnext/current"
+	<a href="/current"
 		
 		>
 	Developer Docs</a></li>
@@ -332,32 +342,8 @@ by:</p>
 	</div>
 
 	<!-- js should be loaded in body! -->
-    <script>
-    $(function() {
-	if(hljs) {
-		$('pre code').each(function(i, block) {
-			hljs.highlightBlock(block);
-		});
-	}
-
-	$(".toggle-sidebar").on("click", function() {
-		$(".offcanvas").addClass("active-right");
-		return false;
-	});
-
-	// collapse offcanvas sidebars!
-	$(".offcanvas .sidebar").on("click", "a", function() {
-		$(".offcanvas").removeClass("active-left active-right");
-	});
-
-	$(".offcanvas-main-section-overlay").on("click", function() {
-		$(".offcanvas").removeClass("active-left active-right");
-		return false;
-	});
-
-});
-    </script>
-		<script data-html-block="script"></script>
+		<script>
+        window.docs_base_url = "";</script>
 
 	<!-- csrf_token --></body>
 </html>

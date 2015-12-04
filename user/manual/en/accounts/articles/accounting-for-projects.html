@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Accounting For Projects</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Accounting For Projects" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-26 at 3.52.10 pm.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-26 at 3.52.10 pm.png" data-html-block="meta_block">
+<meta name="og:title" content="Accounting For Projects" data-html-block="meta_block">
+<meta name="twitter:title" content="Accounting For Projects" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-26 at 3.52.10 pm.png" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/en/accounts/articles/accounting-for-projects">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-accounting-for-projects" data-path="user/manual/en/accounts/articles/accounting-for-projects"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/en/accounts/articles">
+		Articles</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="accounting-for-projects" style="text-align: Left">
+	<h1>Accounting for Projects</h1>
+
+<p>Accounting for the projects is tracked via Cost Center in ERPNext. This will require you creating separate Cost Center for each Project. Separate Cost Center for each Project all allow:&lt;</p>
+
+<ul>
+<li>Allocating budget against specific Cost Center.</li>
+<li>Getting Profitability Report for each Project.</li>
+</ul>
+
+<p>Let's check steps on how Project and Cost Center should be linked, and used in the sales and purchase transactions.</p>
+
+<h3>1. Linking Project and Cost Center</h3>
+
+<h4>1.1 Create Project</h4>
+
+<p>You should first create new Project from:</p>
+
+<p><code>Projects &gt; Project &gt; New</code></p>
+
+<p>In the Project, you will find field to set default Cost Center for this Project.</p>
+
+<h4>1.2 Create Cost Center</h4>
+
+<p>Since budgeting and costing for each Project will be managed separately, you should create separate Cost Center for each Project.</p>
+
+<p>To create new Cost Center, go to:</p>
+
+<p><code>Accounts &gt; Setup &gt; Cost Center</code></p>
+
+<p><a href="https://erpnext.com/user-guide/accounts/cost-centers-and-budgeting">Click here to learn on how to add new Cost Center</a>.</p>
+
+<h4>1.3 Update Cost Center in the Project</h4>
+
+<p>After creating Cost Center, come back to Project master, and select Cost Center creating for this Project under Default Cost Center field.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-26 at 3.52.10 pm.png" alt="Project Default Cost Center" /></p>
+
+<p>With this, you will have Cost Center being fetched automatically in the Sales and Purchase transactions based on selection of Cost Center.</p>
+
+<p>Let's check how this setting will affect your sales and purchase entries.</p>
+
+<h3>2. Selecting Project and Cost Center in the Sales and Purchase Transactions</h3>
+
+<h4>2.1 Selecting Project in the Sales Transactions</h4>
+
+<p>In the sales transactions (which are Sales Order, Delivery Note and Sales Invoice), Project will be selected in the More Info section. On selection of a Project, respective Cost Center will be updated for all the items in that transaction.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-26 at 3.58.45 pm.png" alt="Cost Center in Sales" /></p>
+
+<h4>2.2 Selecting Project in the Purchase Cycle Transactions</h4>
+
+<p>In the purchase transactions, Project will be define for each item. This is because you can create a consolidated purchase entry of materials for various projects. Just like it works in sales cycle, same way in the purchase transactions, on selection of Project, its default cost center will be fetched automatically.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-26 at 4.20.30 pm.png" alt="Cost Center in Purchase" /></p>
+
+<h3>3. Accounting Report for a Project</h3>
+
+<h4>3.1 Projectwise Profitability</h4>
+
+<p>Since Project's Cost Center has been updated in both sales and purchase entries made for a specific transaction, system will provide you a projectwise profitability report. Profitability for a Project will be derived based on total value income booked minus total value of expense booked where common Cost Center (of a Project) is tagged.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Screen Shot 2015-02-26 at 4.10.37 pm.png" alt="Financial Analytics for a Project" /></p>
+
+<h4>3.2 Projectwise Budgeting</h4>
+
+<p>If you have also define budgets in the Cost Center of a Project, you will get Budget Variance Report for a Cost Center of a Project.</p>
+
+<p>To check Budget Variance report, go to:</p>
+
+<p><code>Accounts &gt; Standard Reports &gt; Budget Variance Report</code></p>
+
+<p><a href="https://erpnext.com/user-guide/accounts/budgeting">Click here for detailed help on how to do budgeting from Cost Center</a>.</p>
+
+<!-- markdown -->
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/accounts/articles/accounting-for-projects.md">
+		Improve this page</a>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

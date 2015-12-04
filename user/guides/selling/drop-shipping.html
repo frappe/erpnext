@@ -6,15 +6,16 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Drop Shipping</title>
 	<meta name="generator" content="frappe">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/docs.css">
 
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="/assets/js/docs.js"></script>
 
     
 	<link rel="shortcut icon"
@@ -26,19 +27,19 @@
     
 <meta name="name" content="Drop Shipping" data-html-block="meta_block">
 <meta name="twitter:card" content="summary" data-html-block="meta_block">
-<meta name="image" content="https://frappe.github.io/erpnext/assets/img/selling/setup-drop-ship-on-item-master.png" data-html-block="meta_block">
+<meta name="image" content="/assets/img/selling/setup-drop-ship-on-item-master.png" data-html-block="meta_block">
 <meta name="og:type" content="article" data-html-block="meta_block">
 <meta name="og:description" content="Drop shipping is a supply chain management technique in which the retailer does not keep goods in stock. Instead they transfer customer orders and shipment details to either the manufacturer, another retailer, or a wholesaler, who then ships the goods directly to the customer In ERPNext, you can create a Drop Shipping by creating Purchase Order against Sales Order. Selling &gt; Documents &gt; Sales Order &gt; Purchase Order &lt;h" data-html-block="meta_block">
-<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/selling/setup-drop-ship-on-item-master.png" data-html-block="meta_block">
+<meta name="twitter:image:src" content="/assets/img/selling/setup-drop-ship-on-item-master.png" data-html-block="meta_block">
 <meta name="og:title" content="Drop Shipping" data-html-block="meta_block">
 <meta name="twitter:title" content="Drop Shipping" data-html-block="meta_block">
-<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/selling/setup-drop-ship-on-item-master.png" data-html-block="meta_block">
+<meta name="og:image" content="/assets/img/selling/setup-drop-ship-on-item-master.png" data-html-block="meta_block">
 <meta name="twitter:description" content="Drop shipping is a supply chain management technique in which the retailer does not keep goods in stock. Instead they transfer customer orders and shipment details to either the manufacturer, another retailer, or a wholesaler, who then ships the goods directly to the customer In ERPNext, you can create a Drop Shipping by creating Purchase Order against Sales Order. Selling &gt; Documents &gt; Sales Order &gt; Purchase Order &lt;h" data-html-block="meta_block">
 <meta name="description" content="Drop shipping is a supply chain management technique in which the retailer does not keep goods in stock. Instead they transfer customer orders and shipment details to either the manufacturer, another retailer, or a wholesaler, who then ships the goods directly to the customer In ERPNext, you can create a Drop Shipping by creating Purchase Order against Sales Order. Selling &gt; Documents &gt; Sales Order &gt; Purchase Order &lt;h" data-html-block="meta_block">
 
 		
-			<style data-html-block="style"></style></head>
-<body>
+			<style></style></head>
+<body data-path="user/guides/selling/drop-shipping">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -47,7 +48,7 @@
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<a class="navbar-brand ellipsis" href="/">
 					<span>ERPNext</span>
 				</a>
 				<a class="pull-right toggle-sidebar visible-xs">
@@ -58,20 +59,20 @@
 				
 				<ul class="nav navbar-nav navbar-left">
 </ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
-	<a href="https://frappe.github.io/erpnext/contents.html"
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
 		
 		>
-	Contents</a></li><li data-label='User Guide' >
-	<a href="https://frappe.github.io/erpnext/user/guides"
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="/user/manual"
 		
 		>
-	User Guide</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
+	User Manual</a></li><li data-label='Videos' >
+	<a href="/user/videos"
 		
 		>
 	Videos</a></li><li data-label='Developer Docs' >
-	<a href="https://frappe.github.io/erpnext/current"
+	<a href="/current"
 		
 		>
 	Developer Docs</a></li>
@@ -84,31 +85,33 @@
 		</div>
 	</nav>
 </header>
-<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
-                        
-                            <div class="container">
-                            <div class="page-container" id="page-drop-shipping" data-path="user/guides/selling/drop-shipping"
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-drop-shipping" data-path="user/guides/selling/drop-shipping"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
             <div class="row">
                 <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="/user/guides/selling">
+		Selling</a>
+	</li>
+	
+</ul>
+</div>
             		<div class="page-header-block" data-html-block="header"><h1>Drop Shipping</h1></div>
                 </div>
                 <div class="col-sm-4">
             		<div class="page-header-actions-block" data-html-block="header-actions"></div>
                 </div>
             </div>
-    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
-<ul class="breadcrumb">
-	<li>
-		<span class="icon icon-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext/user/guides/selling">
-		Selling</a>
-	</li>
-	
-</ul>
-</div>
+    		
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
@@ -124,34 +127,34 @@
 <h4>Setup on Item Master</h4>
 
 <p>Set <strong><em>Delivered by Supplier (Drop Ship)</em></strong> and <strong><em>Default Supplier</em></strong> in Item Master.
-<img class="screenshot" alt="Setup Item Master" src="https://frappe.github.io/erpnext/assets/img/selling/setup-drop-ship-on-item-master.png"></p>
+<img class="screenshot" alt="Setup Item Master" src="/assets/img/selling/setup-drop-ship-on-item-master.png"></p>
 
 <h4>Setup on Sales Order</h4>
 
 <p>If Drop Shipping has set on Item master, it will automatically set <strong>Supplier delivers to Customer</strong> and <strong>Supplier</strong> on Salse Order Item.</p>
 
 <p>You can setup Drop Shipping, on Sales Order Item. Under <strong>Drop Ship</strong> section, set <strong>Supplier delivers to Customer</strong> and select <strong>Supplier</strong> agaist which Purchase Order will get created.
-<img class="screenshot" alt="Setup Drop Shipping on Sales Order Item" src="https://frappe.github.io/erpnext/assets/img/selling/setup-drop-ship-on-sales-order-item.png"></p>
+<img class="screenshot" alt="Setup Drop Shipping on Sales Order Item" src="/assets/img/selling/setup-drop-ship-on-sales-order-item.png"></p>
 
 <h4>Create Purchase Order</h4>
 
 <p>After submitting a Sales Order, create Puchase Order.<br> 
-<img class="screenshot" alt="Setup Drop Shipping on Sales Order Item" src="https://frappe.github.io/erpnext/assets/img/selling/drop-ship-sales-order.png"></p>
+<img class="screenshot" alt="Setup Drop Shipping on Sales Order Item" src="/assets/img/selling/drop-ship-sales-order.png"></p>
 
 <p>From Sales Order, all items, having <strong>Supplier delivers to Customer</strong>  checked or <strong>Supplier</strong>(matching with supplier selected on For Supplier popup) mentioned, will get mapped onto Purchase Order. </p>
 
 <p>It will automatically set Customer, Customer Address and Contact Person.</p>
 
 <p>After submitting Purchase Order, to update delivery status, use <strong>Mark as Delivered</strong> button on Purchase Order. It will update delivery percetage and delivered quantity on Sales Order.
-<img class="screenshot" alt="Purchase Order for Drop Shipping" src="https://frappe.github.io/erpnext/assets/img/selling/drop-ship-purchase-order.png"></p>
+<img class="screenshot" alt="Purchase Order for Drop Shipping" src="/assets/img/selling/drop-ship-purchase-order.png"></p>
 
 <p><span style="color:#18B52D"><strong><em>Close</em></strong></span>, is a new feature introduced on <strong>Purchase Order</strong> and <strong>Sales Order</strong>, to close or to mark fulfillment.
-<img class="screenshot" alt="Close Sales Order" src="https://frappe.github.io/erpnext/assets/img/selling/close-sales-order.png"></p>
+<img class="screenshot" alt="Close Sales Order" src="/assets/img/selling/close-sales-order.png"></p>
 
 <h3>Drop Shipping Print Format</h3>
 
 <p>You can notify, Suppliers by sending a email after submitting Purchase Order by attaching Drop Shipping print format.
-<img class="screenshot" alt="Drop Dhip Print Format" src="https://frappe.github.io/erpnext/assets/img/selling/drop-ship-print-format.png"></p>
+<img class="screenshot" alt="Drop Dhip Print Format" src="/assets/img/selling/drop-ship-print-format.png"></p>
 	</article>
 	
 </div>
@@ -159,12 +162,21 @@
     	</div>
 	</div>
 </div>
-                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/selling/drop-shipping.md">Improve this page</a></p>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/selling/drop-shipping.md">
+		Improve this page</a>
+	</div>
+</div>
                             </div>
                         
                     </div>
 					<footer class="docs-footer">
-						<div class="container"><br>
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
                                 <li>
@@ -176,7 +188,7 @@
                                     Issues</a>
                                 </li>
                                 <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    <a href="/license.html">
                                     License</a>
                                 </li>
                                 <li>
@@ -189,9 +201,7 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="built-with-frappe text-center">
-                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
-                        </div>
+
                     </div>
 					</footer>
 				</div>
@@ -201,20 +211,20 @@
 				<div class="sidebar-navbar-items">
 					<ul class="nav navbar-nav navbar-left">
 </ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
-	<a href="https://frappe.github.io/erpnext/contents.html"
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
 		
 		>
-	Contents</a></li><li data-label='User Guide' >
-	<a href="https://frappe.github.io/erpnext/user/guides"
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="/user/manual"
 		
 		>
-	User Guide</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
+	User Manual</a></li><li data-label='Videos' >
+	<a href="/user/videos"
 		
 		>
 	Videos</a></li><li data-label='Developer Docs' >
-	<a href="https://frappe.github.io/erpnext/current"
+	<a href="/current"
 		
 		>
 	Developer Docs</a></li>
@@ -228,32 +238,8 @@
 	</div>
 
 	<!-- js should be loaded in body! -->
-    <script>
-    $(function() {
-	if(hljs) {
-		$('pre code').each(function(i, block) {
-			hljs.highlightBlock(block);
-		});
-	}
-
-	$(".toggle-sidebar").on("click", function() {
-		$(".offcanvas").addClass("active-right");
-		return false;
-	});
-
-	// collapse offcanvas sidebars!
-	$(".offcanvas .sidebar").on("click", "a", function() {
-		$(".offcanvas").removeClass("active-left active-right");
-	});
-
-	$(".offcanvas-main-section-overlay").on("click", function() {
-		$(".offcanvas").removeClass("active-left active-right");
-		return false;
-	});
-
-});
-    </script>
-		<script data-html-block="script"></script>
+		<script>
+        window.docs_base_url = "";</script>
 
 	<!-- csrf_token --></body>
 </html>

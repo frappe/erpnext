@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Leave Calculation In Salary Slip</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Leave Calculation In Salary Slip" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/articles/SGrab_282.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/articles/SGrab_282.png" data-html-block="meta_block">
+<meta name="og:title" content="Leave Calculation In Salary Slip" data-html-block="meta_block">
+<meta name="twitter:title" content="Leave Calculation In Salary Slip" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/articles/SGrab_282.png" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/en/human-resources/articles/leave-calculation-in-salary-slip">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-leave-calculation-in-salary-slip" data-path="user/manual/en/human-resources/articles/leave-calculation-in-salary-slip"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/en/human-resources/articles">
+		Articles</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="leave-calculation-in-salary-slip" style="text-align: Left">
+	<h1>Leave Calculation In Salary Slip</h1>
+
+<p>There are two types of leave which user can apply for.
+<br>
+<br></p>
+
+<ol>
+    <li>Paid Leave (Sick Leave, Privilege Leave, Casual Leave etc.)</li>
+    <li>Unpaid Leave
+        <br>
+    </li>
+</ol>Paid Leave are firstly allocated by HR manager. As and when Employee creates Leave Application, leaves allocated to him/her are deducted. These leaves doesn't have impact on the employee's Salary Slip.
+<br>
+<br>When Employee is out of paid leave, he create Leave Application for unpaid leave. The term used for unpaid leave in ERPNext is Leave Without Pay (LWP). These leaves does have impact on the Employee's Salary Slip.
+<br>
+<br>
+<div class="well">Just marking Absent in the Attendance record do not have impact on salary calculation of an Employee, as that absenteeism could be because of paid leave. Hence creating Leave Application should be created incase of absenteeism.<br></div>Let's consider
+a scenario to understand how leaves impact employees Salary Slip.
+<br>
+<br><b>Masters:</b>
+
+<br>
+<br>
+<ol>
+    <li>Setup Employee</li>
+    <li>Allocate him paid leaves</li>
+    <li>Create Salary Structure for that Employee. In the Earning and Deduction table, select which component of salary should be affected if Employee takes LWP.</li>
+    <li>Create Holiday List (if any), and link it with Employee master.</li>
+</ol>
+
+<p>When creating Salary Slip for an Employee, following is what you will see:</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/SGrab_282.png">
+<br>
+<br><b>Working Days:</b> Working Days in Salary Slip are calculated based on number of days selected above. If you don't wish to consider holiday in Working Days, then you should do following setting.
+<br>
+<br>
+<div class="well">Human Resource &gt;&gt; Setup &gt;&gt; HR Setting
+    <br>
+    <br>Uncheck field "Include Holidays in Total No. of Working Days"
+    <br>
+</div>Holidays are counted based on Holiday List attached to the Employee's master.<b><br><br>Leave Without Pay: </b>Leave Without Pay is updated based on Leave Application made for this Employee, in the month for which Salary Slip is created, and which has
+Leave Type as "Leave Without Pay".
+<br>
+<br><b>Payment Days:</b> Following is how Payment Days are calculated:
+<br>
+<br>Payment Days = Working Days - Leave Without Pay
+<br>
+<br>As indicated above, if you have LWP checked for components in the earning and deducted table, you will notice a reduction in Amount based on no. of LWP of an Employee for that month.
+<br>
+<br>
+<img src="https://frappe.github.io/erpnext/assets/img/articles/SGrab_283.png" width="760"><br></p>
+
+<!-- markdown -->
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/human-resources/articles/leave-calculation-in-salary-slip.md">
+		Improve this page</a>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

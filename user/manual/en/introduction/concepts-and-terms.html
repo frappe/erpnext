@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Concepts And Terms</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Concepts And Terms" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="og:title" content="Concepts And Terms" data-html-block="meta_block">
+<meta name="twitter:title" content="Concepts And Terms" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/en/introduction/concepts-and-terms">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-concepts-and-terms" data-path="user/manual/en/introduction/concepts-and-terms"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/en/introduction">
+		Introduction</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"><h1>Concepts And Terms</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="concepts-and-terms" style="text-align: Left">
+	<p>Before you start implementation, lets get familiar with the terminology that
+is used and some basic concepts in ERPNext.</p>
+
+<hr />
+
+<h3>Basic Concepts</h3>
+
+<h4>Company</h4>
+
+<p>This represents the Company records for which ERPNext is setup. With this same
+setup, you can create multiple Company records, each representing a different
+legal entity. The accounting for each Company will be different, but they will
+share the Customer, Supplier and Item records.</p>
+
+<blockquote>
+  <p>Setup &gt; Company</p>
+</blockquote>
+
+<h4>Customer</h4>
+
+<p>Represents a customer. A Customer can be an individual or an organizations.
+You can create multiple Contacts and Addresses for each Customer.</p>
+
+<blockquote>
+  <p>Selling &gt; Customer</p>
+</blockquote>
+
+<h4>Supplier</h4>
+
+<p>Represents a supplier of goods or services. Your telephone company is a
+Supplier, so is your raw materials Supplier. Again, a Supplier can be an
+individual or an organization and has multiple Contacts and Addresses.</p>
+
+<blockquote>
+  <p>Buying &gt; Supplier</p>
+</blockquote>
+
+<h4>Item</h4>
+
+<p>A Product, sub-product or Service that is either bought, sold or manufactured
+and is uniquely identified.</p>
+
+<blockquote>
+  <p>Stock &gt; Item</p>
+</blockquote>
+
+<h4>Account</h4>
+
+<p>An Account is a heading under which financial and business transactions are
+carried on. For example, “Travel Expense” is an account, “Customer Zoe”,
+“Supplier Mae” are accounts. ERPNext creates accounts for Customers and
+Suppliers automatically.</p>
+
+<blockquote>
+  <p>Accounts &gt; Chart of Accounts</p>
+</blockquote>
+
+<h4>Address</h4>
+
+<p>An address represents location details of a Customer or Supplier. These can be
+of different locations such as Head Office, Factory, Warehouse, Shop etc.</p>
+
+<blockquote>
+  <p>Selling &gt; Address</p>
+</blockquote>
+
+<h4>Contact</h4>
+
+<p>An individual Contact belongs to a Customer or Supplier or is just an
+independent. A Contact has a name and contact details like email and phone
+number.</p>
+
+<blockquote>
+  <p>Selling &gt; Contact</p>
+</blockquote>
+
+<h4>Communication</h4>
+
+<p>A list of all Communication with a Contact or Lead. All emails sent from the
+system are added to the Communication table.</p>
+
+<blockquote>
+  <p>Support &gt; Communication</p>
+</blockquote>
+
+<h4>Price List</h4>
+
+<p>A Price List is a place where different rate plans can be stored. It’s a name
+you give to a set of Item Prices stored under a particular List.</p>
+
+<blockquote>
+  <p>Selling &gt; Price List</p>
+  
+  <p>Buying &gt; Price List</p>
+</blockquote>
+
+<hr />
+
+<h3>Accounting</h3>
+
+<h4>Fiscal Year</h4>
+
+<p>Represents a Financial Year or Accounting Year. You can operate multiple
+Fiscal Years at the same time. Each Fiscal Year has a start date and an end
+date and transactions can only be recorded in this period. When you “close” a
+fiscal year, it's balances are transferred as “opening” balances for the next
+fiscal year.</p>
+
+<blockquote>
+  <p>Setup &gt; Company &gt; Fiscal Year</p>
+</blockquote>
+
+<h4>Cost Center</h4>
+
+<p>A Cost Center is like an Account, but the only difference is that its
+structure represents your business more closely than Accounts.
+For example, in your Chart of Accounts, you can separate your expenses by its type 
+(i.e., travel, marketing, etc.). In your Chart of Cost Centers, you can separate 
+them by product line or business group (e.g., online sales, retail sales, etc.).</p>
+
+<blockquote>
+  <p>Accounts &gt; Chart of Cost Centers</p>
+</blockquote>
+
+<h4>Journal Entry</h4>
+
+<p>A document that contains General Ledger (GL) entries and the sum of Debits and
+Credits of those entries is the same. In ERPNext you can update Payments,
+Returns, etc., using Journal Entrys.</p>
+
+<blockquote>
+  <p>Accounts &gt; Journal Entry</p>
+</blockquote>
+
+<h4>Sales Invoice</h4>
+
+<p>A bill sent to Customers for delivery of Items (goods or services).</p>
+
+<blockquote>
+  <p>Accounts &gt; Sales Invoice</p>
+</blockquote>
+
+<h4>Purchase Invoice</h4>
+
+<p>A bill sent by a Supplier for delivery of Items (goods or services).</p>
+
+<blockquote>
+  <p>Accounts &gt; Purchase Invoice</p>
+</blockquote>
+
+<h4>Currency</h4>
+
+<p>ERPNext allows you to book transactions in multiple currencies. There is only
+one currency for your book of accounts though. While posting your Invoices with
+payments in different currencies, the amount is converted to the default
+currency by the specified conversion rate.</p>
+
+<blockquote>
+  <p>Setup &gt; Currency</p>
+</blockquote>
+
+<hr />
+
+<h3>Selling</h3>
+
+<h4>Customer Group</h4>
+
+<p>A classification of Customers, usually based on market segment.</p>
+
+<blockquote>
+  <p>Selling &gt; Setup &gt; Customer Group</p>
+</blockquote>
+
+<h4>Lead</h4>
+
+<p>A person who could be a future source of business. A Lead may generate
+Opportunities. (from: “may lead to a sale”).</p>
+
+<blockquote>
+  <p>Selling &gt; Lead</p>
+</blockquote>
+
+<h4>Opportunity</h4>
+
+<p>A potential sale. (from: “opportunity for a business”).</p>
+
+<blockquote>
+  <p>Selling &gt; Opportunity</p>
+</blockquote>
+
+<h4>Sales Order</h4>
+
+<p>A note confirming the terms of delivery and price of an Item (product or
+service) by the Customer. Deliveries, Production Orders and Invoices are made
+on basis of Sales Orders.</p>
+
+<blockquote>
+  <p>Selling &gt; Sales Order</p>
+</blockquote>
+
+<h4>Territory</h4>
+
+<p>A geographical area classification for sales management. You can set targets
+for Territories and each sale is linked to a Territory.</p>
+
+<blockquote>
+  <p>Selling &gt; Setup &gt; Territory</p>
+</blockquote>
+
+<h4>Sales Partner</h4>
+
+<p>A third party distributer / dealer / affiliate / commission agent who sells
+the company’s products usually for a commission.</p>
+
+<blockquote>
+  <p>Selling &gt; Setup &gt; Sales Partner</p>
+</blockquote>
+
+<h4>Sales Person</h4>
+
+<p>Someone who pitches to the Customer and closes deals. You can set targets for
+Sales Persons and tag them in transactions.</p>
+
+<blockquote>
+  <p>Selling &gt; Setup &gt; Sales Person</p>
+</blockquote>
+
+<hr />
+
+<h3>Buying</h3>
+
+<h4>Purchase Order</h4>
+
+<p>A contract given to a Supplier to deliver the specified Items at the specified
+cost, quantity, dates and other terms.</p>
+
+<blockquote>
+  <p>Buying &gt; Purchase Order</p>
+</blockquote>
+
+<h4>Material Request</h4>
+
+<p>A request made by a system User, or automatically generated by ERPNext based
+on reorder level or projected quantity in Production Plan for purchasing a set
+of Items.</p>
+
+<blockquote>
+  <p>Buying &gt; Material Request</p>
+</blockquote>
+
+<hr />
+
+<h3>Stock (Inventory)</h3>
+
+<h4>Warehouse</h4>
+
+<p>A logical Warehouse against which stock entries are made.</p>
+
+<blockquote>
+  <p>Stock &gt; Warehouse</p>
+</blockquote>
+
+<h4>Stock Entry</h4>
+
+<p>Material transfer from a Warehouse, to a Warehouse or from one Warehouse to
+another.</p>
+
+<blockquote>
+  <p>Stock &gt; Stock Entry</p>
+</blockquote>
+
+<h4>Delivery Note</h4>
+
+<p>A list of Items with quantities for shipment. A Delivery Note will reduce the
+stock of Items for the Warehouse from where you ship. A Delivery Note is
+usually made against a Sales Order.</p>
+
+<blockquote>
+  <p>Stock &gt; Delivery Note</p>
+</blockquote>
+
+<h4>Purchase Receipt</h4>
+
+<p>A note stating that a particular set of Items were received from the Supplier,
+most likely against a Purchase Order.</p>
+
+<blockquote>
+  <p>Stock &gt; Purchase Receipt</p>
+</blockquote>
+
+<h4>Serial Number</h4>
+
+<p>A unique number given to a particular unit of an Item.</p>
+
+<blockquote>
+  <p>Stock &gt; Serial Number</p>
+</blockquote>
+
+<h4>Batch</h4>
+
+<p>A number given to a group of units of a particular Item that may be purchased
+or manufactured in a group.</p>
+
+<blockquote>
+  <p>Stock &gt; Batch</p>
+</blockquote>
+
+<h4>Stock Ledger Entry</h4>
+
+<p>A unified table for all material movement from one warehouse to another. This
+is the table that is updated when a Stock Entry, Delivery Note, Purchase
+Receipt, and Sales Invoice (POS) is made.</p>
+
+<h4>Stock Reconciliation</h4>
+
+<p>Update Stock of multiple Items from a spreadsheet (CSV) file.</p>
+
+<blockquote>
+  <p>Stock &gt; Stock Reconciliation</p>
+</blockquote>
+
+<h4>Quality Inspection</h4>
+
+<p>A note prepared to record certain parameters of an Item at the time of Receipt
+from Supplier, or Delivery to Customer.</p>
+
+<blockquote>
+  <p>Stock &gt; Quality Inspection</p>
+</blockquote>
+
+<h4>Item Group</h4>
+
+<p>A classification of Item.</p>
+
+<blockquote>
+  <p>Stock &gt; Setup &gt; Item Group</p>
+</blockquote>
+
+<hr />
+
+<h3>Human Resource Management</h3>
+
+<h4>Employee</h4>
+
+<p>Record of a person who has been in present or past, in the employment of the
+company.</p>
+
+<blockquote>
+  <p>Human Resources &gt; Employee</p>
+</blockquote>
+
+<h4>Leave Application</h4>
+
+<p>A record of an approved or rejected request for leave.</p>
+
+<blockquote>
+  <p>Human Resource &gt; Leave Application</p>
+</blockquote>
+
+<h4>Leave Type</h4>
+
+<p>A type of leave (e.g., Sick Leave, Maternity Leave, etc.).</p>
+
+<blockquote>
+  <p>Human Resource &gt; Leave and Attendance &gt; Leave Type</p>
+</blockquote>
+
+<h4>Process Payroll</h4>
+
+<p>A tool that helps in creation of multiple Salary Slips for Employees.</p>
+
+<blockquote>
+  <p>Human Resource &gt; Salary and Payroll &gt; Process Payroll</p>
+</blockquote>
+
+<h4>Salary Slip</h4>
+
+<p>A record of the monthly salary given to an Employee.</p>
+
+<blockquote>
+  <p>Human Resource &gt; Salary Slip</p>
+</blockquote>
+
+<h4>Salary Structure</h4>
+
+<p>A template identifying all the components of an Employees' salary (earnings), 
+tax and other social security deductions.</p>
+
+<blockquote>
+  <p>Human Resource &gt; Salary and Payroll &gt; Salary Structure</p>
+</blockquote>
+
+<h4>Appraisal</h4>
+
+<p>A record of the performance of an Employee over a specified period based on
+certain parameters.</p>
+
+<blockquote>
+  <p>Human Resources &gt; Appraisal</p>
+</blockquote>
+
+<h4>Appraisal Template</h4>
+
+<p>A template recording the different parameters of an Employees' performance and
+their weightage for a particular role.</p>
+
+<blockquote>
+  <p>Human Resources &gt; Employee Setup &gt; Appraisal Template</p>
+</blockquote>
+
+<h4>Attendance</h4>
+
+<p>A record indicating presence or absence of an Employee on a particular day.</p>
+
+<blockquote>
+  <p>Human Resources &gt; Attendance</p>
+</blockquote>
+
+<hr />
+
+<h3>Manufacturing</h3>
+
+<h4>Bill of Materials (BOM)</h4>
+
+<p>A list of Operations and Items with their quantities, that are required to
+produce another Item. A Bill of Materials (BOM) is used to plan purchases and
+do product costing.</p>
+
+<blockquote>
+  <p>Manufacturing &gt; BOM</p>
+</blockquote>
+
+<h4>Workstation</h4>
+
+<p>A place where a BOM operation takes place. It is useful to calculate the
+direct cost of the product.</p>
+
+<blockquote>
+  <p>Manufacturing &gt; Workstation</p>
+</blockquote>
+
+<h4>Production Order</h4>
+
+<p>A document signaling production (manufacture) of a particular Item with
+specified quantities.</p>
+
+<blockquote>
+  <p>Manufacturing &gt; Production Order</p>
+</blockquote>
+
+<h4>Production Planning Tool</h4>
+
+<p>A tool for automatic creation of Production Orders and Purchase Requests based
+on Open Sales Orders in a given period.</p>
+
+<blockquote>
+  <p>Manufacturing &gt; Production Planning Tool</p>
+</blockquote>
+
+<hr />
+
+<h3>Website</h3>
+
+<h4>Blog Post</h4>
+
+<p>A short article that appears in the “Blog” section of the website generated
+from the ERPNext website module. Blog is a short form of “Web Log”.</p>
+
+<blockquote>
+  <p>Website &gt; Blog Post</p>
+</blockquote>
+
+<h4>Web Page</h4>
+
+<p>A web page with a unique URL (web address) on the website generated from
+ERPNext.</p>
+
+<blockquote>
+  <p>Website &gt; Web Page</p>
+</blockquote>
+
+<hr />
+
+<h3>Setup / Customization</h3>
+
+<h4>Custom Field</h4>
+
+<p>A user defined field on a form / table.</p>
+
+<blockquote>
+  <p>Setup &gt; Customize ERPNext &gt; Custom Field</p>
+</blockquote>
+
+<h4>Global Defaults</h4>
+
+<p>This is the section where you set default values for various parameters of the
+system.</p>
+
+<blockquote>
+  <p>Setup &gt; Data &gt; Global Defaults</p>
+</blockquote>
+
+<h4>Print Heading</h4>
+
+<p>A title that can be set on a transaction just for printing. For example, you
+want to print a Quotation with a title “Proposal” or “Pro forma Invoice”.</p>
+
+<blockquote>
+  <p>Setup &gt; Branding and Printing &gt; Print Headings</p>
+</blockquote>
+
+<h4>Terms and Conditions</h4>
+
+<p>Text of your terms of contract.</p>
+
+<blockquote>
+  <p>Selling &gt; Setup &gt; Terms and Conditions</p>
+</blockquote>
+
+<h4>Unit of Measure (UOM)</h4>
+
+<p>How quantity is measured for an Item. E.g., Kg, No., Pair, Packet, etc.</p>
+
+<blockquote>
+  <p>Stock &gt; Setup &gt; UOM</p>
+</blockquote>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="setting-up">Next: Setting Up</a></p></p>
+
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/introduction/concepts-and-terms.md">
+		Improve this page</a>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

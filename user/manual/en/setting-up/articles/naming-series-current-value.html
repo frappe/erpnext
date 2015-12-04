@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Naming Series Current Value</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Naming Series Current Value" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_420.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_420.png" data-html-block="meta_block">
+<meta name="og:title" content="Naming Series Current Value" data-html-block="meta_block">
+<meta name="twitter:title" content="Naming Series Current Value" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_420.png" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/en/setting-up/articles/naming-series-current-value">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-naming-series-current-value" data-path="user/manual/en/setting-up/articles/naming-series-current-value"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/en/setting-up/articles">
+		Articles</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="naming-series-current-value" style="text-align: Left">
+	<h1>Setting the Current Value for Naming Series</h1>
+
+<h1>Setting the Current Value for Naming Series</h1>
+
+<p>Naming Series feature allows you to define prefix for number series of documents. For example, if a Sales Order has prefix "SO", then the series will be generated as SO00001, SO00002... and so on. Click <a href="https://erpnext.com/user-guide/setting-up/document-naming-series">here</a> to learn how you can customize Number Series for a transaction/master in ERPNext.</p>
+
+<h3>1. Setting the Current Value</h3>
+
+<p>Naming Series feature also offers a tool where you can set Current Value for specific prefix. This is generally required if you have recently started using ERPNext, and have old transactions in the previous system, and you want the numbering series to start in from where it ended in the old system. Let's consider a scenario to learn this better.</p>
+
+<p>For example, you have 322 Sales Orders created in your old system with SO00322 as highest Sales Order Id. In ERPNext, you need the first Sales Order to pick up #323 when it is saved. To enable this, you should set Current Value for SO series in following steps.</p>
+
+<h4>Go to Naming Series Tool</h4>
+
+<p><code>Setup &gt; System &gt; Naming Series</code></p>
+
+<h4>Update Series Section</h4>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_420.png" alt="Update Series Section" /></p>
+
+<h4>Select Prefix</h4>
+
+<p>Considering our scenario, prefix for Sales Order will be "SO".</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_418.png" alt="Series Prefix" /></p>
+
+<h4>Current Value</h4>
+
+<p>If you have currently 12 Sales Orders created in your account, then current value updated will be 12. You can edit Current Value to 322, and then click on Update Series Number.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/$SGrab_419.png" alt="Series Current Value" /></p>
+
+<p>With this setting, you will have numbering for the New Sales Orders starting with #323.</p>
+
+<h3>2. Error Due Series Number</h3>
+
+<p>If you receive a Duplicate Name error while saving a transaction, for example, while saving Item Price, you receive an error saying:</p>
+
+<p><code>Duplicate name Item Price RFD/00016</code></p>
+
+<p>This error message indicates that when you are saving Item Price, system is trying to allocate "RFD/00016" to that Item Price record. But it is finding that Item Price with this ID is already existing in your system.</p>
+
+<p>This error could arise because Current Value for Series/Prefix of Item Price is disturbed and not in sync with actual Current Value. While actual Current Value for Item Price could be 20 (or any number more than 16), someone has set Current Value for this series as 15. </p>
+
+<p>To confirm actual Current Value for particular Series, you should check report for document in question (Item Price in this case), and check for the Item Price ID with highest value. </p>
+
+<p>Let's assume we find that actual Current Value for Item price is 22, then you go Naming Series, and set Current Value for the Prefix/Series of Item Price to 22, and Update Series Number.</p>
+
+<p>These instructions is applicable for all the documents in ERPNext for which user can customize Series and its Current Value.</p>
+
+<p>Let's consider another scenario to learn this better. On assigning a document to another user, error message says:</p>
+
+<p><code>Duplicate name ToDo TDI00014286</code></p>
+
+<p>This indicate the Current Value for Series/Prefix of ToDo (TDI) has been disturbed. You should follow these steps to correct value for Current Value for TDI prefix.</p>
+
+<ol>
+<li>Check ToDo report for the highest ToDo id value.</li>
+<li>Setup &gt;&gt; Settings &gt;&gt; Naming Series</li>
+<li>Check section B of Update Series</li>
+<li>Select Prefix for ToDo "TDI"</li>
+<li>Ensure that highest number for ToDo is updated as Current Value in Naming Series. If not, correct Current Value, and click on "Update Series Numbering".</li>
+</ol>
+
+<!-- markdown -->
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/setting-up/articles/naming-series-current-value.md">
+		Improve this page</a>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

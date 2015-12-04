@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Managing Multiple Companies</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Managing Multiple Companies" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/articles/SGrab_343.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/articles/SGrab_343.png" data-html-block="meta_block">
+<meta name="og:title" content="Managing Multiple Companies" data-html-block="meta_block">
+<meta name="twitter:title" content="Managing Multiple Companies" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/articles/SGrab_343.png" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/en/setting-up/articles/managing-multiple-companies">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-managing-multiple-companies" data-path="user/manual/en/setting-up/articles/managing-multiple-companies"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/en/setting-up/articles">
+		Articles</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="managing-multiple-companies" style="text-align: Left">
+	<h1>Managing Multiple Companies</h1>
+
+<h1>Managing Multiple Companies</h1>
+
+<p>ERPNext allows you to create multiple companies in the same/common ERPNext account.</p>
+
+<p>With this, you will find option to select Company in your transactions. While most of the transactions will be separated based on Company, there are few masters like Item, Item Group, Customer Group, Territory etc. which can be used across all the companies.</p>
+
+<p>If you have separate teams working on each company, you can also restrict the access of user to the data of specific company. Click <a href="https://manual.erpnext.com/search?txt=user%20permission">here</a> to know more about how to set permission to achieve the same.</p>
+
+<p>Following are the steps to create companies in your ERPNext account.</p>
+
+<h4>Go to Setup Module</h4>
+
+<p><code>Setup &amp;gt; Masters &amp;gt; Company &amp;gt; New</code></p>
+
+<h4>Enter Company Details</h4>
+
+<p>Company master will be saved with Company Name provided at the time of its creation. </p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/SGrab_343.png" alt="New Company" /></p>
+
+<p>Also, you can define other properties for new company like:</p>
+
+<ul>
+<li>Country</li>
+<li>Currency</li>
+<li>Default Cash and Bank Account</li>
+<li>Income/Expense Account</li>
+<li>Company Registration Details</li>
+</ul>
+
+<p>Value will be auto-filled in most of these field to define company-wise defaults. You can edit/customize it as per your requirement. </p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/SGrab_344.png" alt="New Company" /></p>
+
+<h4>Chart of Account for New Company</h4>
+
+<p>A separate Chart of Account master will be set for each company in the ERPNext. This allows you managing Accounts/Ledger master separately for each company. Also it allows you avail financial statement and reports like Balance Sheet and Profit and Loss Statement separately for each company.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/SGrab_342.png" alt="Company" /></p>
+
+<!-- markdown -->
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/setting-up/articles/managing-multiple-companies.md">
+		Improve this page</a>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

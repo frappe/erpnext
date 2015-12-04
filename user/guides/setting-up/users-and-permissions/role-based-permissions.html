@@ -6,15 +6,16 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Role Based Permissions</title>
 	<meta name="generator" content="frappe">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/docs.css">
 
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="/assets/js/docs.js"></script>
 
     
 	<link rel="shortcut icon"
@@ -26,19 +27,19 @@
     
 <meta name="name" content="Role Based Permissions" data-html-block="meta_block">
 <meta name="twitter:card" content="summary" data-html-block="meta_block">
-<meta name="image" content="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-leave-application.png" data-html-block="meta_block">
+<meta name="image" content="/assets/img/users-and-permissions/setting-up-permissions-leave-application.png" data-html-block="meta_block">
 <meta name="og:type" content="article" data-html-block="meta_block">
 <meta name="og:description" content="ERPNext has a role-based permission system. It means that you can assign Roles to Users, and set Permissions on Roles. The permission structure also allows you to define different permission rules for different fields, using a concept called Permission &#34;Level&#34; of a field. Once roles are assigned to a user, it gives you the ability to limit access for a user to only specific documents. To start with, go to: Setup &gt; Permissions &gt; Role Permis" data-html-block="meta_block">
-<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-leave-application.png" data-html-block="meta_block">
+<meta name="twitter:image:src" content="/assets/img/users-and-permissions/setting-up-permissions-leave-application.png" data-html-block="meta_block">
 <meta name="og:title" content="Role Based Permissions" data-html-block="meta_block">
 <meta name="twitter:title" content="Role Based Permissions" data-html-block="meta_block">
-<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-leave-application.png" data-html-block="meta_block">
+<meta name="og:image" content="/assets/img/users-and-permissions/setting-up-permissions-leave-application.png" data-html-block="meta_block">
 <meta name="twitter:description" content="ERPNext has a role-based permission system. It means that you can assign Roles to Users, and set Permissions on Roles. The permission structure also allows you to define different permission rules for different fields, using a concept called Permission &#34;Level&#34; of a field. Once roles are assigned to a user, it gives you the ability to limit access for a user to only specific documents. To start with, go to: Setup &gt; Permissions &gt; Role Permis" data-html-block="meta_block">
 <meta name="description" content="ERPNext has a role-based permission system. It means that you can assign Roles to Users, and set Permissions on Roles. The permission structure also allows you to define different permission rules for different fields, using a concept called Permission &#34;Level&#34; of a field. Once roles are assigned to a user, it gives you the ability to limit access for a user to only specific documents. To start with, go to: Setup &gt; Permissions &gt; Role Permis" data-html-block="meta_block">
 
 		
-			<style data-html-block="style"></style></head>
-<body>
+			<style></style></head>
+<body data-path="user/guides/setting-up/users-and-permissions/role-based-permissions">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -47,7 +48,7 @@
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<a class="navbar-brand ellipsis" href="/">
 					<span>ERPNext</span>
 				</a>
 				<a class="pull-right toggle-sidebar visible-xs">
@@ -58,20 +59,20 @@
 				
 				<ul class="nav navbar-nav navbar-left">
 </ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
-	<a href="https://frappe.github.io/erpnext/contents.html"
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
 		
 		>
-	Contents</a></li><li data-label='User Guide' >
-	<a href="https://frappe.github.io/erpnext/user/guides"
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="/user/manual"
 		
 		>
-	User Guide</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
+	User Manual</a></li><li data-label='Videos' >
+	<a href="/user/videos"
 		
 		>
 	Videos</a></li><li data-label='Developer Docs' >
-	<a href="https://frappe.github.io/erpnext/current"
+	<a href="/current"
 		
 		>
 	Developer Docs</a></li>
@@ -84,31 +85,33 @@
 		</div>
 	</nav>
 </header>
-<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
-                        
-                            <div class="container">
-                            <div class="page-container" id="page-role-based-permissions" data-path="user/guides/setting-up/users-and-permissions/role-based-permissions"
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-role-based-permissions" data-path="user/guides/setting-up/users-and-permissions/role-based-permissions"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
             <div class="row">
                 <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="/user/guides/setting-up/users-and-permissions">
+		Users And Permissions</a>
+	</li>
+	
+</ul>
+</div>
             		<div class="page-header-block" data-html-block="header"><h1>Role Based Permissions</h1></div>
                 </div>
                 <div class="col-sm-4">
             		<div class="page-header-actions-block" data-html-block="header-actions"></div>
                 </div>
             </div>
-    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
-<ul class="breadcrumb">
-	<li>
-		<span class="icon icon-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext/user/guides/setting-up/users-and-permissions">
-		Users And Permissions</a>
-	</li>
-	
-</ul>
-</div>
+    		
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
@@ -121,7 +124,7 @@
   <p>Setup &gt; Permissions &gt; Role Permissions Manager</p>
 </blockquote>
 
-<p><img alt="Manage Read, Write, Create, Submit, Amend access using the Role Permissions Manager" class="screenshot" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-leave-application.png"></p>
+<p><img alt="Manage Read, Write, Create, Submit, Amend access using the Role Permissions Manager" class="screenshot" src="/assets/img/users-and-permissions/setting-up-permissions-leave-application.png"></p>
 
 <p>Permissions are applied on a combination of:</p>
 
@@ -143,7 +146,7 @@
 <p>To set, User Permissions go to:</p>
 
 <blockquote>
-  <p>Setup &gt; Permissions &gt; <a href="https://frappe.github.io/erpnext/user/guides/setting-up/users-and-permissions/user-permissions.html">User Permissions Manager</a></p>
+  <p>Setup &gt; Permissions &gt; <a href="/user/guides/setting-up/users-and-permissions/user-permissions.html">User Permissions Manager</a></p>
 </blockquote></li>
 </ul>
 
@@ -155,49 +158,49 @@
 
 <p>Leave Application is a good <strong>example</strong> that encompasses all areas of Permission System.</p>
 
-<p><img class="screenshot" alt="Leave Application Form should be created by an Employee, and approved by Leave Approver or HR User" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-leave-application-form.png"></p>
+<p><img class="screenshot" alt="Leave Application Form should be created by an Employee, and approved by Leave Approver or HR User" src="/assets/img/users-and-permissions/setting-up-permissions-leave-application-form.png"></p>
 
 <ol>
 <li><strong>It should be created by an Employee.</strong>
  For this, Employee Role should be given Read, Write, Create permissions.</li>
 </ol>
 
-<p><img class="screenshot" alt="Giving Read, Write and Create Permissions to Employee for Leave Application"  src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-employee-role.png"></p>
+<p><img class="screenshot" alt="Giving Read, Write and Create Permissions to Employee for Leave Application"  src="/assets/img/users-and-permissions/setting-up-permissions-employee-role.png"></p>
 
 <ol>
 <li><strong>An Employee should only be able to access his/her Leave Application.</strong>
  Hence, Apply User Permissions should be enabled for Employee Role, and a User Permission record should be created for each User Employee combination. (This effort is reduced for Employee Document Type, by programmatically creating User Permission records.)</li>
 </ol>
 
-<p><img class="screenshot" alt="Limiting access to Leave Applications for a user with Employee Role via User Permissions Manager" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/setting-up-permissions-employee-user-permissions.png"></p>
+<p><img class="screenshot" alt="Limiting access to Leave Applications for a user with Employee Role via User Permissions Manager" src="/assets/old_images/erpnext/setting-up-permissions-employee-user-permissions.png"></p>
 
 <ol>
 <li><strong>HR Manager should be able to see all Leave Applications.</strong>
  Create a Permission Rule for HR Manager at Level 0, with Read permissions. Apply User Permissions should be disabled.</li>
 </ol>
 
-<p><img class="screenshot" alt="Giving Submit and Cancel permissions to HR Manager for Leave Applications. 'Apply User Permissions' is unchecked to give full access." src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-hr-manager-role.png"></p>
+<p><img class="screenshot" alt="Giving Submit and Cancel permissions to HR Manager for Leave Applications. 'Apply User Permissions' is unchecked to give full access." src="/assets/img/users-and-permissions/setting-up-permissions-hr-manager-role.png"></p>
 
 <ol>
 <li><strong>Leave Approver should be able to see and update Leave Applications applicable to him/her.</strong>
  Leave Approver is given Read and Write access at Level 0, with Apply User Permissions enabled. Relevant Employee Documents should be enlisted in the User Permissions of Leave Approvers. (This effort is reduced for Leave Approvers mentioned in Employee Documents, by programmatically creating User Permission records.)</li>
 </ol>
 
-<p><img class="screenshot" alt="Giving Read, Write and Submit permissions to Leave Approver for Leave Applications.'Apply User Permissions' is checked to limit access based on Employee." src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-leave-approver-role.png"></p>
+<p><img class="screenshot" alt="Giving Read, Write and Submit permissions to Leave Approver for Leave Applications.'Apply User Permissions' is checked to limit access based on Employee." src="/assets/img/users-and-permissions/setting-up-permissions-leave-approver-role.png"></p>
 
 <ol>
 <li><strong>It should be Approved / Rejected only by HR User or Leave Approver.</strong>
  The Status field of Leave Application is set at Level 1. HR User and Leave Approver are given Read and Write permissions for Level 1, while everyone else (All) are given Read permission for Level 1.</li>
 </ol>
 
-<p><img class="screenshot" alt="Limiting read access for a set of fields to certain Roles" src="https://frappe.github.io/erpnext/assets/old_images/erpnext/setting-up-permissions-level-1.png"></p>
+<p><img class="screenshot" alt="Limiting read access for a set of fields to certain Roles" src="/assets/old_images/erpnext/setting-up-permissions-level-1.png"></p>
 
 <ol>
 <li><strong>HR User should be able to delegate Leave Applications to his/her subordinates</strong>
  HR User is given the right to Set User Permissions. A User with HR User role would be able to defined User Permissions on Leave Application for other users.</li>
 </ol>
 
-<p><img class="screenshot" alt="Let HR User delegate access to Leave Applications by checking 'Set User Permissions'. This will allow HR User to access User Permissions Manager for 'Leave Application'" src="https://frappe.github.io/erpnext/assets/img/users-and-permissions/setting-up-permissions-hr-user-role.png"></p>
+<p><img class="screenshot" alt="Let HR User delegate access to Leave Applications by checking 'Set User Permissions'. This will allow HR User to access User Permissions Manager for 'Leave Application'" src="/assets/img/users-and-permissions/setting-up-permissions-hr-user-role.png"></p>
 
 <p><p class="btn-next-wrapper"><a class="btn-next" href="user-permissions.html">Next: User Permissions</a></p></p>
 	</article>
@@ -207,12 +210,21 @@
     	</div>
 	</div>
 </div>
-                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/setting-up/users-and-permissions/role-based-permissions.md">Improve this page</a></p>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/setting-up/users-and-permissions/role-based-permissions.md">
+		Improve this page</a>
+	</div>
+</div>
                             </div>
                         
                     </div>
 					<footer class="docs-footer">
-						<div class="container"><br>
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
                                 <li>
@@ -224,7 +236,7 @@
                                     Issues</a>
                                 </li>
                                 <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    <a href="/license.html">
                                     License</a>
                                 </li>
                                 <li>
@@ -237,9 +249,7 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="built-with-frappe text-center">
-                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
-                        </div>
+
                     </div>
 					</footer>
 				</div>
@@ -249,20 +259,20 @@
 				<div class="sidebar-navbar-items">
 					<ul class="nav navbar-nav navbar-left">
 </ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
-	<a href="https://frappe.github.io/erpnext/contents.html"
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
 		
 		>
-	Contents</a></li><li data-label='User Guide' >
-	<a href="https://frappe.github.io/erpnext/user/guides"
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="/user/manual"
 		
 		>
-	User Guide</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
+	User Manual</a></li><li data-label='Videos' >
+	<a href="/user/videos"
 		
 		>
 	Videos</a></li><li data-label='Developer Docs' >
-	<a href="https://frappe.github.io/erpnext/current"
+	<a href="/current"
 		
 		>
 	Developer Docs</a></li>
@@ -276,32 +286,8 @@
 	</div>
 
 	<!-- js should be loaded in body! -->
-    <script>
-    $(function() {
-	if(hljs) {
-		$('pre code').each(function(i, block) {
-			hljs.highlightBlock(block);
-		});
-	}
-
-	$(".toggle-sidebar").on("click", function() {
-		$(".offcanvas").addClass("active-right");
-		return false;
-	});
-
-	// collapse offcanvas sidebars!
-	$(".offcanvas .sidebar").on("click", "a", function() {
-		$(".offcanvas").removeClass("active-left active-right");
-	});
-
-	$(".offcanvas-main-section-overlay").on("click", function() {
-		$(".offcanvas").removeClass("active-left active-right");
-		return false;
-	});
-
-});
-    </script>
-		<script data-html-block="script"></script>
+		<script>
+        window.docs_base_url = "";</script>
 
 	<!-- csrf_token --></body>
 </html>

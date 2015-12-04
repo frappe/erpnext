@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Production Order</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Production Order" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/manufacturing/production-order.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/manufacturing/production-order.png" data-html-block="meta_block">
+<meta name="og:title" content="Production Order" data-html-block="meta_block">
+<meta name="twitter:title" content="Production Order" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/manufacturing/production-order.png" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/en/manufacturing/production-order">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-production-order" data-path="user/manual/en/manufacturing/production-order"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/en/manufacturing">
+		Manufacturing</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"><h1>Production Order</h1></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="production-order" style="text-align: Left">
+	<p>Production Order (also called as Work Order) is a document that is given to
+the manufacturing shop floor by the Production Planner as a signal to produce
+a certain quantity of a certain Item. Production Order also helps to generate
+the material requirements (Stock Entry) for the Item to be produced from its
+<strong>Bill of Materials</strong>.</p>
+
+<p>The <strong>Production Order</strong> is generated from the <strong>Production Planning
+Tool</strong> based on Sales Orders. You can also create a direct Production Order
+by:</p>
+
+<blockquote>
+  <p>Manufacturing &gt; Documents &gt; Production Order &gt; New</p>
+</blockquote>
+
+<p><img class="screenshot" alt="Production Order" src="https://frappe.github.io/erpnext/assets/img/manufacturing/production-order.png"></p>
+
+<h3>Creating Production Orders</h3>
+
+<ul>
+<li>Select the Item to be produced.</li>
+<li>The default BOM for that item will be fetched by the system. You can also change BOM.</li>
+<li>If the selected BOM has operartion mentioned in it, the system shall fetch all operations from BOM.</li>
+<li>Mention the Planned Start Date (an Estimated Date at which you want the Production to begin.)</li>
+<li>Select Warehouses. Work-in-Progress Warehouse is where your Items will be transferred when you begin production and Target Warehouse is  where you store finished Items before they are shipped.</li>
+</ul>
+
+<blockquote>
+  <p>Note : You can save a Production Order without selecting the warehouses, but warehouses are mandatory for submitting a Production Order</p>
+</blockquote>
+
+<h3>Reassigning Workstation/Duration for Operations</h3>
+
+<ul>
+<li>By default the system fetchs workstation and duration for Production Order Operations from the selected BOM.</li>
+</ul>
+
+<p><img class="screenshot" alt="PO Opeartions" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-operations.png"></p>
+
+<ul>
+<li>If you wish to reassign the wrokstation for a particular opeeration in the Production Order, you can do so before submitting the Production Order.</li>
+</ul>
+
+<p><img class="screenshot" alt="PO reassigning Operations" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-reassigning-operations.png"></p>
+
+<ul>
+<li>Select the respective operation, and change its workstation.</li>
+<li>You can also change the Operating Time for that operation</li>
+</ul>
+
+<h3>Capacity Planning in Production Order</h3>
+
+<ul>
+<li>When a Production Order is submitted, based on the Planned Start Date and the availability of the workstations, system schedules all operations for the Production Order (if Production Order has operations specified).</li>
+<li>Drafts of Time Logs are also created based on the scheduled operations.</li>
+</ul>
+
+<h3>Transfering Materials for Manufacturing</h3>
+
+<ul>
+<li>Once you have submitted your Production Order, you need to Transfer the Raw Materials to initiate the Manufacturing Process.</li>
+<li><p>This will create a Stock Entry with all the Items required to complete this Production Order to be added to the WIP Warehouse. (this will add sub-Items with BOM as one Item or explode their children based on your setting above).</p></li>
+<li><p>Click on 'Transfer Materials for Manufacturing'.</p></li>
+</ul>
+
+<p><img class="screenshot" alt="Transfer Materials" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-material-transfer.png"></p>
+
+<ul>
+<li>Mention the quantity of materials to be transfered.</li>
+</ul>
+
+<p><img class="screenshot" alt="Material Transfer Qty" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-material-transfer-qty.png"></p>
+
+<ul>
+<li>Submit the Stock Entry</li>
+</ul>
+
+<p><img class="screenshot" alt="Stock Entry for PO" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-SE-for-material-transfer.png"></p>
+
+<ul>
+<li>Material Transfered for Manufacturing will be updated in the Production Order based on the Stock Entry.</li>
+</ul>
+
+<p><img class="screenshot" alt="Stock Entry for PO" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-material-transfer-updated.png"></p>
+
+<h3>Making Time Logs</h3>
+
+<ul>
+<li>Progress in the Production Order can be tracked using <a href="https://frappe.github.io/erpnext/user/manual/en/projects/time-log.html">Time Log</a></li>
+<li>Time Logs are created against Production Order Operations.</li>
+<li>Drafts of Time Logs are also created based on the scheduled operations when an Production Order is Submitted.</li>
+<li>To create more Time Logs against an operation select 'Make TIme Log' in the respective operation.</li>
+</ul>
+
+<p><img class="screenshot" alt="Make TL against PO" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-operations-make-tl.png"></p>
+
+<h3>Updating Finished Goods</h3>
+
+<ul>
+<li>Once you are done with the Production Order you need to update the Finished Goods.</li>
+<li>This will create a Stock Entry that will deduct all the sub-Items from the WIP Warehouse and add them to the Finished Goods Warehouse.</li>
+<li>Click on 'Update Finished Goods'.</li>
+</ul>
+
+<p><img class="screenshot" alt="Update Finished Goods" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-FG-update.png"></p>
+
+<ul>
+<li>Mention the quantity of materials to be transfered.</li>
+</ul>
+
+<p><img class="screenshot" alt="Update Finished Goods Qty" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-FG-update-qty.png"></p>
+
+<blockquote>
+  <p>Tip : You can also partially complete a Production Order by updating the Finished Goods stock creating a Stock Entry.</p>
+</blockquote>
+
+<h3>Stopping a Production Order</h3>
+
+<ul>
+<li>When you stop a Production Order its status is changed to Stop indicating that all production process against that Production Order is to be ceased.</li>
+<li><p>To stop the Production Order click on the 'stop' Button</p>
+
+<ol>
+<li>On Submitting the Production Order, the system will reserve a slot for each of the Production Order Operations serially after the planned start date based on the workstation availability. The Workstation availability depends on the Workstation timings, holiday list and if some other Production Order Operation was scheduled in that slot. You can mention the number of days for the system to try scheduling the operations in the Manufacturing Settings. This is set to 30 Days by default. If the operation requires time exceeding the available slot, system shall ask you to break the operations. Once the scheduling is done system shall create Time Logs and save them. You can Modify them and submit them later.</li>
+<li>You can also create additional time logs against an Operation. For doing so select the respective operation and click on 'Make Time Log'</li>
+<li>Transfer Raw Material: This will create a Stock Entry with all the Items required to complete this Production Order to be added to the WIP Warehouse. (this will add sub-Items with BOM as one Item or explode their children based on your setting above).</li>
+<li>Update Finished Goods: This will create a Stock Entry that will deduct all the sub-Items from the WIP Warehouse and add them to the Finished Goods Warehouse.</li>
+<li>To check all Time Logs made against the Production Order click on 'Show Time Logs'</li>
+</ol></li>
+</ul>
+
+<p><img class="screenshot" alt="PO - stop" src="https://frappe.github.io/erpnext/assets/img/manufacturing/PO-stop.png"></p>
+
+<ul>
+<li>You can Also re-start a stopped Production Order.</li>
+</ul>
+
+<blockquote>
+  <p>Note : In order to make a Production Order against an Item you must specify 'Yes' to "Allow Production Order" on the Item form.</p>
+  
+  <p>Note : In order to make a Production Order against an Item you must specify 'Yes' to "Allow Production Order" on the Item form.</p>
+</blockquote>
+
+<p><p class="btn-next-wrapper"><a class="btn-next" href="workstation.html">Next: Workstation</a></p></p>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/manufacturing/production-order.md">
+		Improve this page</a>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>C Form</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="C Form" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="https://frappe.github.io/erpnext/assets/img/articles/Selection_0028c9f9a.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/articles/Selection_0028c9f9a.png" data-html-block="meta_block">
+<meta name="og:title" content="C Form" data-html-block="meta_block">
+<meta name="twitter:title" content="C Form" data-html-block="meta_block">
+<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/articles/Selection_0028c9f9a.png" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/en/accounts/articles/c-form">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-c-form" data-path="user/manual/en/accounts/articles/c-form"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/en/accounts/articles">
+		Articles</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="c-form" style="text-align: Left">
+	<h1>C-Form</h1>
+
+<p>C-Form functionality is only applicable for Indian customers.</p>
+
+<p><strong>What is C-Form?</strong></p>
+
+<p>C-Form is issued by the Customer. If Customer Issues C-Form, supplier applies discounted CST (central sales tax) in the invoice. C-Form is only applicable on the inter-state transactions.</p>
+
+<p>C-Form functionality in ERPNext allows Supplier to update C-Form No. as received from Customer in the submitted Sales Invoice. Also you can create report on Sales Invoice and track invoices for which C-Form has not yet been received from Customer.</p>
+
+<p>Following are step to manage C-Form related sales in ERPNext.</p>
+
+<h4>Set C-Form Applicability</h4>
+
+<p>While creating Sales invoice for the customer, set C-Form applicability in Sales Invoice. In More Info section of Sales Invoice, set field called <strong>Is C-Form Applicable</strong> as <strong>Yes</strong>. Bydefault, this field will have No for a value.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_0028c9f9a.png" alt="C-form" /></p>
+
+<p>Updating this field as Yes will allow you to pull this Sales Invoice in the C-Form Tool, and update C-Form No. as received from the Customer.</p>
+
+<h4>Create C-Form Record</h4>
+
+<p>After receiving C-Form from your Customer, you should update that C-Form no. in the Sales Invoice by creating C-Form record.</p>
+
+<p>Go to <code>Accounts &gt; Setup &gt; C-Form &gt; New</code></p>
+
+<p>Enter details like C-Form No, Received Date, State and Amount etc. Select Customer and pull related Sales Invoices under provided table.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_020f01c1e.png" alt="New C-Form" /></p>
+
+<h4>Save &amp; Submit C-Form</h4>
+
+<p>After entering details, save and submit C-Form record. On save system will generate C-Form record and on submission update that C-Form No. in the Sales Invoice.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_02178f9d6.png" alt="C-Form" /></p>
+
+<p>C-Form serial no will be updated in related invoice under the field 'C-Form No'.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_022b7c6d5.png" alt="C-Form No" /></p>
+
+<h4>Tracking Pending Invoice for C-Form</h4>
+
+<p>To track invoices for which C-Form has not yet been received from Customer, you can create custom report on Sales Invoice. In this report, you can filter invoices which doesn't have C-Form updated in them yet, and followup with the customer accordingly.</p>
+
+<p><img src="https://frappe.github.io/erpnext/assets/img/articles/Selection_026.png" alt="C-Form Report" /></p>
+
+<!-- markdown -->
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/accounts/articles/c-form.md">
+		Improve this page</a>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

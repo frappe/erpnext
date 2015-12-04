@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<!-- Built on Frappe. https://frappe.io/ -->
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Field Types</title>
+	<meta name="generator" content="frappe">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/docs.js"></script>
+
+    
+	<link rel="shortcut icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+	<link rel="icon"
+		href="/assets/img/favicon.ico"
+		type="image/x-icon">
+    
+<meta name="name" content="Field Types" data-html-block="meta_block">
+<meta name="twitter:card" content="summary" data-html-block="meta_block">
+<meta name="image" content="{{ docs_base_path }}/assets/img/articles/$SGrab_184.png" data-html-block="meta_block">
+<meta name="og:type" content="article" data-html-block="meta_block">
+<meta name="twitter:image:src" content="{{ docs_base_path }}/assets/img/articles/$SGrab_184.png" data-html-block="meta_block">
+<meta name="og:title" content="Field Types" data-html-block="meta_block">
+<meta name="twitter:title" content="Field Types" data-html-block="meta_block">
+<meta name="og:image" content="{{ docs_base_path }}/assets/img/articles/$SGrab_184.png" data-html-block="meta_block">
+<meta name="description" content="" data-html-block="meta_block">
+
+		
+			<style></style></head>
+<body data-path="user/manual/en/customize-erpnext/articles/field-types">
+	<div class="offcanvas-container">
+		<div class="offcanvas">
+			<div class="offcanvas-main-section">
+				<div>
+						<header>
+	<nav class="navbar navbar-default navbar-main" role="navigation">
+		<div class="container">
+			<div class="navbar-header">
+				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+					<span>ERPNext</span>
+				</a>
+				<a class="pull-right toggle-sidebar visible-xs">
+					<i class="octicon octicon-three-bars"></i>
+				</a>
+			</div>
+			<div class="hidden-xs">
+				
+				<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				
+			</div>
+		</div>
+	</nav>
+</header>
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-field-types" data-path="user/manual/en/customize-erpnext/articles/field-types"
+    data-doctype="Web Page">
+	<div class="page-content">
+    	<div class="page-content-wrapper">
+            <div class="row">
+                <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/en/customize-erpnext/articles">
+		Articles</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"></div>
+                </div>
+                <div class="col-sm-4">
+            		<div class="page-header-actions-block" data-html-block="header-actions"></div>
+                </div>
+            </div>
+    		
+    	    <div class="page-content-block">
+<div class="webpage-content">
+	
+	<article class="web-page-content" id="field-types" style="text-align: Left">
+	<h1>Field Types</h1>
+
+<p>Following are the types of fields you can define while creating new ones, or while amend standard ones.</p>
+<ul>
+    <li><b>Attach:</b>
+
+        <br>
+        <br>Attach field allows you browsing file from File Manager and attach in the transaction.
+        <br>
+        <br>
+        <img src="{{ docs_base_path }}/assets/img/articles/$SGrab_184.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Button:</b>
+
+        <br>
+        <br>This Field Type will generate a Button, on clicking which you can execute some function.
+        <br>
+        <br>
+    </li>
+    <li><b>Check:</b>
+
+        <br>
+        <br>Check will generate a check box field.
+        <br>
+        <br>
+        <img src="{{ docs_base_path }}/assets/img/articles/$SGrab_185.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Column Break:</b>
+
+        <br>
+        <br>Since ERPNext has two column layout, using Column Break fields, you can divide set of fields on either side.
+        <br>
+        <br>
+        <img src="{{ docs_base_path }}/assets/img/articles/$SGrab_186.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Currency:</b>
+
+        <br>
+        <br>Currency field holds numeric value, upto two decimal place. Also you can have currency symbol being shown for the currency field.
+        <br>
+        <br>
+        <img src="{{ docs_base_path }}/assets/img/articles/$SGrab_187.png">
+        <br>
+        <br>
+    </li>
+</ul>
+<ul>
+    <li><b>Data:</b>
+
+        <br>
+        <br>Data field allows you entering value upto 255 character.
+        <br>
+        <br>
+        <img src="{{ docs_base_path }}/assets/img/articles/$SGrab_183.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Date and Time:<br><br></b>This field will give you date and time picker, with value for current date and time (as provided by your computer) set by default.
+        <br>
+        <br><b><img src="{{ docs_base_path }}/assets/img/articles/$SGrab_188.png"><br><br></b>
+
+    </li>
+    <li><b>Dynamic Link:<br><br></b>Link field is one which pulls data from another master/table. Dynamic link field is connected with multiple masters at the same time. Its link is determined based on value selected in the previous field.
+        <br>
+        <br>Example: Customer will be Dynamic field in the Quotation form. If use selects Quotation made for Customer, then Customer field will be linked to Customer master, and suggest records accordingly. If user selects that Quotation is for Lead, then same Customer
+        field will be linked to Lead master.
+        <br>
+        <br>
+    </li>
+    <li><b>Float:</b>
+
+        <br>
+        <br>Float field carries numeric value, upto six decimal place. Float Precision set in Setup &gt;&gt; Settings &gt;&gt; System Setting will be applicable on all the link field. For float field, decimal places generated will be as define in Float Precision.
+        <br>
+        <br>
+        <img src="{{ docs_base_path }}/assets/img/articles/$SGrab_189.png">
+        <br>If you need more than two decimal place in the Currency field, you can change its field type to Float field from Customize Form.
+        <br>
+        <br>
+    </li>
+    <li><b>Image:</b>
+
+        <br>
+        <br>Image field will render an image file selected in another attach field.
+        <br>
+        <br>
+        <img src="{{ docs_base_path }}/assets/img/articles/$SGrab_190b611f3.png">
+        <br>
+        <br>For the Image field, under Option, Attach field name should be provide which this field will refer to for image file, and render that image file.
+        <br>
+        <br>
+    </li>
+    <li><b>Int (Integer):</b>
+
+        <br>
+        <br>Integer field holds numeric value, without decimal place.
+        <br>
+        <br>
+    </li>
+    <li>Link Field:
+        <br>
+        <br>Link field is connected with another master from where it fetches data.
+        <br>
+        <br>
+        <img src="{{ docs_base_path }}/assets/img/articles/$SGrab_191.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Password:<br><br></b>Password field will decode value in it. Extra coding will be required for validating password of specific user.<b><br><br></b>
+
+    </li>
+    <li><b>Read Only:<br><br></b>Read Only field will carry data fetched from another form, but they themselves will be non-editable. You should set Read Only as field type if its source for value is predetermined.
+        <br>
+        <br>
+    </li>
+    <li><b>Section Break:</b>
+
+        <br>
+        <br>Section Break can be used to divide form in multiple section.
+        <br>
+        <br>
+        <img src="{{ docs_base_path }}/assets/img/articles/$SGrab_192.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Select:<br><br></b>Select will be the drop-down field, with possible results (separate by row) define in the Option.
+        <br>
+        <br>
+        <img src="{{ docs_base_path }}/assets/img/articles/$SGrab_193.png">
+        <br><b><br></b>
+
+    </li>
+    <li><b>Small Text:</b>
+
+        <br>
+        <br>Small Text field carries general text content, has little more character limit than Data field.
+        <br>
+        <br>
+        <img src="{{ docs_base_path }}/assets/img/articles/$SGrab_194.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Table:</b>
+
+        <br>
+        <br>Table will be (sort of) Link field which will render another docytpe within the current form. For example, Item table in the Sales Order form is Table field, which is linked to Sales Order Item doctype.
+        <br>
+        <br>
+        <img src="{{ docs_base_path }}/assets/img/articles/$SGrab_196.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Text Editor:</b>
+
+        <br>
+        <br>Text Editor will be large text field, with tools to format text.
+        <br>
+        <br>
+        <img src="{{ docs_base_path }}/assets/img/articles/$SGrab_198.png">
+        <br>
+    </li>
+</ul>
+	</article>
+	
+</div>
+</div>
+    	</div>
+	</div>
+</div>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/customize-erpnext/articles/field-types.html">
+		Improve this page</a>
+	</div>
+</div>
+                            </div>
+                        
+                    </div>
+					<footer class="docs-footer">
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
+                        <div class="text-center">
+                            <ul class="list-unstyled">
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext">
+                                    Source</a>
+                                </li>
+                                <li>
+                                    <a href="https://github.com/frappe/erpnext/issues">
+                                    Issues</a>
+                                </li>
+                                <li>
+                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    License</a>
+                                </li>
+                                <li>
+                                    <a href="https://discuss.erpnext.com">
+                                    Forum</a>
+                                </li>
+                                <li>
+                                    <a href="https://apps.frappe.io">
+                                    Frappe Apps</a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+					</footer>
+				</div>
+			</div>
+			<div class="modal-backdrop offcanvas-main-section-overlay"></div>
+			<div class="sidebar sidebar-right visible-xs">
+				<div class="sidebar-navbar-items">
+					<ul class="nav navbar-nav navbar-left">
+</ul>
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
+		
+		>
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="https://frappe.github.io/erpnext/user/manual"
+		
+		>
+	User Manual</a></li><li data-label='Videos' >
+	<a href="https://frappe.github.io/erpnext/user/videos"
+		
+		>
+	Videos</a></li><li data-label='Developer Docs' >
+	<a href="https://frappe.github.io/erpnext/current"
+		
+		>
+	Developer Docs</a></li>
+	<!-- post login tools -->
+
+</ul>
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- js should be loaded in body! -->
+		<script>
+        window.docs_base_url = "https://frappe.github.io/erpnext";</script>
+
+	<!-- csrf_token --></body>
+</html>

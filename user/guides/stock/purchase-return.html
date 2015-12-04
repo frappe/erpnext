@@ -6,15 +6,16 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Purchase Return</title>
 	<meta name="generator" content="frappe">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/font-awesome.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/octicons/octicons.css">
-    <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/docs.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/bootstrap.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/hljs.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/font-awesome.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/octicons/octicons.css">
+    <link type="text/css" rel="stylesheet" href="/assets/css/docs.css">
 
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/jquery.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="https://frappe.github.io/erpnext/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="/assets/js/jquery.min.js"></script>
+	<script type="text/javascript" src="/assets/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/assets/js/highlight.pack.js"></script>
+	<script type="text/javascript" src="/assets/js/docs.js"></script>
 
     
 	<link rel="shortcut icon"
@@ -26,19 +27,19 @@
     
 <meta name="name" content="Purchase Return" data-html-block="meta_block">
 <meta name="twitter:card" content="summary" data-html-block="meta_block">
-<meta name="image" content="https://frappe.github.io/erpnext/assets/img/stock/purchase-return-original-purchase-receipt.png" data-html-block="meta_block">
+<meta name="image" content="/assets/img/stock/purchase-return-original-purchase-receipt.png" data-html-block="meta_block">
 <meta name="og:type" content="article" data-html-block="meta_block">
-<meta name="og:description" content="ERPNext has an option for products that are need to be returned to the supplier. This may be on account of a number of reasons like defects in goods, quality not matching, the buyer not needing the stock, etc. You can create a Purchase Return by simply making a Purchase Receipt with negative quantity. First open the original Purchase Receipt, against which supplier delivered the items. &lt;img class=&#34;screenshot&#34; alt=&#34;Original Purchase Receipt&#34; src=&#34;https://frappe.github.i" data-html-block="meta_block">
-<meta name="twitter:image:src" content="https://frappe.github.io/erpnext/assets/img/stock/purchase-return-original-purchase-receipt.png" data-html-block="meta_block">
+<meta name="og:description" content="ERPNext has an option for products that are need to be returned to the supplier. This may be on account of a number of reasons like defects in goods, quality not matching, the buyer not needing the stock, etc. You can create a Purchase Return by simply making a Purchase Receipt with negative quantity. First open the original Purchase Receipt, against which supplier delivered the items. &lt;img class=&#34;screenshot&#34; alt=&#34;Original Purchase Receipt&#34; src=&#34;/assets/img/stock/purch" data-html-block="meta_block">
+<meta name="twitter:image:src" content="/assets/img/stock/purchase-return-original-purchase-receipt.png" data-html-block="meta_block">
 <meta name="og:title" content="Purchase Return" data-html-block="meta_block">
 <meta name="twitter:title" content="Purchase Return" data-html-block="meta_block">
-<meta name="og:image" content="https://frappe.github.io/erpnext/assets/img/stock/purchase-return-original-purchase-receipt.png" data-html-block="meta_block">
-<meta name="twitter:description" content="ERPNext has an option for products that are need to be returned to the supplier. This may be on account of a number of reasons like defects in goods, quality not matching, the buyer not needing the stock, etc. You can create a Purchase Return by simply making a Purchase Receipt with negative quantity. First open the original Purchase Receipt, against which supplier delivered the items. &lt;img class=&#34;screenshot&#34; alt=&#34;Original Purchase Receipt&#34; src=&#34;https://frappe.github.i" data-html-block="meta_block">
-<meta name="description" content="ERPNext has an option for products that are need to be returned to the supplier. This may be on account of a number of reasons like defects in goods, quality not matching, the buyer not needing the stock, etc. You can create a Purchase Return by simply making a Purchase Receipt with negative quantity. First open the original Purchase Receipt, against which supplier delivered the items. &lt;img class=&#34;screenshot&#34; alt=&#34;Original Purchase Receipt&#34; src=&#34;https://frappe.github.i" data-html-block="meta_block">
+<meta name="og:image" content="/assets/img/stock/purchase-return-original-purchase-receipt.png" data-html-block="meta_block">
+<meta name="twitter:description" content="ERPNext has an option for products that are need to be returned to the supplier. This may be on account of a number of reasons like defects in goods, quality not matching, the buyer not needing the stock, etc. You can create a Purchase Return by simply making a Purchase Receipt with negative quantity. First open the original Purchase Receipt, against which supplier delivered the items. &lt;img class=&#34;screenshot&#34; alt=&#34;Original Purchase Receipt&#34; src=&#34;/assets/img/stock/purch" data-html-block="meta_block">
+<meta name="description" content="ERPNext has an option for products that are need to be returned to the supplier. This may be on account of a number of reasons like defects in goods, quality not matching, the buyer not needing the stock, etc. You can create a Purchase Return by simply making a Purchase Receipt with negative quantity. First open the original Purchase Receipt, against which supplier delivered the items. &lt;img class=&#34;screenshot&#34; alt=&#34;Original Purchase Receipt&#34; src=&#34;/assets/img/stock/purch" data-html-block="meta_block">
 
 		
-			<style data-html-block="style"></style></head>
-<body>
+			<style></style></head>
+<body data-path="user/guides/stock/purchase-return">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -47,7 +48,7 @@
 	<nav class="navbar navbar-default navbar-main" role="navigation">
 		<div class="container">
 			<div class="navbar-header">
-				<a class="navbar-brand ellipsis" href="https://frappe.github.io/erpnext/">
+				<a class="navbar-brand ellipsis" href="/">
 					<span>ERPNext</span>
 				</a>
 				<a class="pull-right toggle-sidebar visible-xs">
@@ -58,20 +59,20 @@
 				
 				<ul class="nav navbar-nav navbar-left">
 </ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
-	<a href="https://frappe.github.io/erpnext/contents.html"
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
 		
 		>
-	Contents</a></li><li data-label='User Guide' >
-	<a href="https://frappe.github.io/erpnext/user/guides"
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="/user/manual"
 		
 		>
-	User Guide</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
+	User Manual</a></li><li data-label='Videos' >
+	<a href="/user/videos"
 		
 		>
 	Videos</a></li><li data-label='Developer Docs' >
-	<a href="https://frappe.github.io/erpnext/current"
+	<a href="/current"
 		
 		>
 	Developer Docs</a></li>
@@ -84,31 +85,33 @@
 		</div>
 	</nav>
 </header>
-<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content">
-                        
-                            <div class="container">
-                            <div class="page-container" id="page-purchase-return" data-path="user/guides/stock/purchase-return"
+<script>$(function() { $('.dropdown-toggle').dropdown(); });</script><div class="hero-and-content"><div data-html-block="hero">
+                                
+                            </div>
+							<div class="container">
+                               <div class="page-container" id="page-purchase-return" data-path="user/guides/stock/purchase-return"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
             <div class="row">
                 <div class="col-sm-8">
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="/user/guides/stock">
+		Stock</a>
+	</li>
+	
+</ul>
+</div>
             		<div class="page-header-block" data-html-block="header"><h1>Purchase Return</h1></div>
                 </div>
                 <div class="col-sm-4">
             		<div class="page-header-actions-block" data-html-block="header-actions"></div>
                 </div>
             </div>
-    		<div class="page-breadcrumbs" data-html-block="breadcrumbs">
-<ul class="breadcrumb">
-	<li>
-		<span class="icon icon-angle-left"></span>
-		<a href="https://frappe.github.io/erpnext/user/guides/stock">
-		Stock</a>
-	</li>
-	
-</ul>
-</div>
+    		
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
@@ -121,19 +124,19 @@ quality not matching, the buyer not needing the stock, etc.</p>
 
 <p>First open the original Purchase Receipt, against which supplier delivered the items.</p>
 
-<p><img class="screenshot" alt="Original Purchase Receipt" src="https://frappe.github.io/erpnext/assets/img/stock/purchase-return-original-purchase-receipt.png"></p>
+<p><img class="screenshot" alt="Original Purchase Receipt" src="/assets/img/stock/purchase-return-original-purchase-receipt.png"></p>
 
 <p>Then click on "Make Purchase Return", it will open a new Purchase Receipt with "Is Return" checked, items and taxes with negative amount.</p>
 
-<p><img class="screenshot" alt="Return Against Purchase Receipt" src="https://frappe.github.io/erpnext/assets/img/stock/purchase-return-against-purchase-receipt.png"></p>
+<p><img class="screenshot" alt="Return Against Purchase Receipt" src="/assets/img/stock/purchase-return-against-purchase-receipt.png"></p>
 
 <p>On submission of Return Purchase Return, system will decrease item qty from the mentioned warehouse. To maintain correct stock valuation, stock balance will also go up according to the original purchase rate of the returned items.</p>
 
-<p><img class="screenshot" alt="Return Stock Ledger" src="https://frappe.github.io/erpnext/assets/img/stock/purchase-return-stock-ledger.png"></p>
+<p><img class="screenshot" alt="Return Stock Ledger" src="/assets/img/stock/purchase-return-stock-ledger.png"></p>
 
 <p>If Perpetual Inventory enabled, system will also post accounting entry against warehouse account to sync warehouse account balance with stock balance as per Stock Ledger.</p>
 
-<p><img class="screenshot" alt="Return Stock Ledger" src="https://frappe.github.io/erpnext/assets/img/stock/purchase-return-general-ledger.png"></p>
+<p><img class="screenshot" alt="Return Stock Ledger" src="/assets/img/stock/purchase-return-general-ledger.png"></p>
 	</article>
 	
 </div>
@@ -141,12 +144,21 @@ quality not matching, the buyer not needing the stock, etc.</p>
     	</div>
 	</div>
 </div>
-                            <p><br><a class="text-muted" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/stock/purchase-return.md">Improve this page</a></p>
+                               
+<div class="page-container">
+	<div class="page-content">
+	<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/guides/stock/purchase-return.md">
+		Improve this page</a>
+	</div>
+</div>
                             </div>
                         
                     </div>
 					<footer class="docs-footer">
-						<div class="container"><br>
+						<div class="container"><div class="built-with-frappe text-center">
+                            <img class="frappe-bird" src="/assets/img/frappe-bird-grey.svg">
+                            <h3>By Frappe Technologies</h3>
+                        </div>
                         <div class="text-center">
                             <ul class="list-unstyled">
                                 <li>
@@ -158,7 +170,7 @@ quality not matching, the buyer not needing the stock, etc.</p>
                                     Issues</a>
                                 </li>
                                 <li>
-                                    <a href="https://frappe.github.io/erpnext/license.html">
+                                    <a href="/license.html">
                                     License</a>
                                 </li>
                                 <li>
@@ -171,9 +183,7 @@ quality not matching, the buyer not needing the stock, etc.</p>
                                 </li>
                             </ul>
                         </div>
-                        <div class="built-with-frappe text-center">
-                            <img src="https://frappe.github.io/erpnext/assets/img/frappe-bird-grey.svg" style="width: 40px; height: 40px; margin-top: 20px;">
-                        </div>
+
                     </div>
 					</footer>
 				</div>
@@ -183,20 +193,20 @@ quality not matching, the buyer not needing the stock, etc.</p>
 				<div class="sidebar-navbar-items">
 					<ul class="nav navbar-nav navbar-left">
 </ul>
-<ul class="nav navbar-nav navbar-right"><li data-label='Contents' >
-	<a href="https://frappe.github.io/erpnext/contents.html"
+<ul class="nav navbar-nav navbar-right"><li data-label='<i class="octicon octicon-search"></i>' >
+	<a href="/#"
 		
 		>
-	Contents</a></li><li data-label='User Guide' >
-	<a href="https://frappe.github.io/erpnext/user/guides"
+	<i class="octicon octicon-search"></i></a></li><li data-label='User Manual' >
+	<a href="/user/manual"
 		
 		>
-	User Guide</a></li><li data-label='Videos' >
-	<a href="https://frappe.github.io/erpnext/user/videos"
+	User Manual</a></li><li data-label='Videos' >
+	<a href="/user/videos"
 		
 		>
 	Videos</a></li><li data-label='Developer Docs' >
-	<a href="https://frappe.github.io/erpnext/current"
+	<a href="/current"
 		
 		>
 	Developer Docs</a></li>
@@ -210,32 +220,8 @@ quality not matching, the buyer not needing the stock, etc.</p>
 	</div>
 
 	<!-- js should be loaded in body! -->
-    <script>
-    $(function() {
-	if(hljs) {
-		$('pre code').each(function(i, block) {
-			hljs.highlightBlock(block);
-		});
-	}
-
-	$(".toggle-sidebar").on("click", function() {
-		$(".offcanvas").addClass("active-right");
-		return false;
-	});
-
-	// collapse offcanvas sidebars!
-	$(".offcanvas .sidebar").on("click", "a", function() {
-		$(".offcanvas").removeClass("active-left active-right");
-	});
-
-	$(".offcanvas-main-section-overlay").on("click", function() {
-		$(".offcanvas").removeClass("active-left active-right");
-		return false;
-	});
-
-});
-    </script>
-		<script data-html-block="script"></script>
+		<script>
+        window.docs_base_url = "";</script>
 
 	<!-- csrf_token --></body>
 </html>
