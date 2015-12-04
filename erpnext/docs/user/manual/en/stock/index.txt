@@ -14,7 +14,5 @@ setup
 sales-return
 purchase-return
 articles
-item-price
-item-valuation-fifo-and-moving-average
 opening-stock
 stock-how-to

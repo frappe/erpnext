@@ -16,7 +16,7 @@ A Material Request can be generated:
   * Automatically from a Sales Order.
   * Automatically when the Projected Quantity of an Item in stores reaches a particular level.
   * Automatically from your Bill of Materials if you use Production Plan to plan your manufacturing activities.
-  * If your Items are inventory items, you must also mention the Warehouse where you expect these Items to be delivered. This helps to keep track of the [Projected Quantity]({{docs_base_url}}/user/guides/stock/projected-quantity.html) for this Item.
+  * If your Items are inventory items, you must also mention the Warehouse where you expect these Items to be delivered. This helps to keep track of the [Projected Quantity]({{docs_base_url}}/user/manual/en/stock/projected-quantity.html) for this Item.
 
 A Material Request can be of type:
 

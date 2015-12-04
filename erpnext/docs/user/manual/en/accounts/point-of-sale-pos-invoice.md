@@ -19,7 +19,7 @@ all your transactions against this Customer record.
 In ERPNext all Sales and Purchase transactions, like Sales Invoice, Quotation, Sales Order, Purchase Order etc. can be edited via the POS. There two steps to Setup POS:
 
 1. Enable POS View via (Setup > Customize > Feature Setup)
-2. Create a [POS Setting]({{docs_base_url}}/user/guides/setting-up/pos-setting.html) record
+2. Create a [POS Setting]({{docs_base_url}}/user/manual/en/setting-up/pos-setting.html) record
 
 #### Switch to POS View
 

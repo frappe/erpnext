@@ -4,7 +4,7 @@ Project management in ERPNext is Task driven. You can create Project and assign 
 
 ### Managing tasks
 Project can be divided into multiple Tasks.
-Task can be created via Project document itself or can be created via  [Task]({{docs_base_url}}/user/guides/projects/tasks.html)
+Task can be created via Project document itself or can be created via  [Task]({{docs_base_url}}/user/manual/en/projects/tasks.html)
 
 <img class="screenshot" alt="Project" src="{{docs_base_url}}/assets/img/project/project_task.png">
 
@@ -20,7 +20,7 @@ Task can be created via Project document itself or can be created via  [Task]({{
 
 ### Managing time
 
-ERPNext uses [Time Log]({{docs_base_url}}/user/guides/projects/time-log.html) to track the progress of a Project.
+ERPNext uses [Time Log]({{docs_base_url}}/user/manual/en/projects/time-log.html) to track the progress of a Project.
 You can create Time Logs against each task.
 The Actual Start and End Time along with the costing shall then be updated based on the Time Log.
 
@@ -36,7 +36,7 @@ The Actual Start and End Time along with the costing shall then be updated based
 
 ### Managing expenses
 
-You can book [Expense Claim]({{docs_base_url}}/user/guides/human-resources/expense-claim.html) against a project task.
+You can book [Expense Claim]({{docs_base_url}}/user/manual/en/human-resources/expense-claim.html) against a project task.
 The system shall update the total amount from expense claims in the project costing section.
 
 * To view Expense Claims made against a Project click on 'Expense Claims'
@@ -53,7 +53,7 @@ The system shall update the total amount from expense claims in the project cost
 
 ### Cost Center
 
-You can make a [Cost Center]({{docs_base_url}}/user/guides/accounts/setup/cost-center.html) against a Project or use an existing cost center to track all expenses made against that project.
+You can make a [Cost Center]({{docs_base_url}}/user/manual/en/accounts/setup/cost-center.html) against a Project or use an existing cost center to track all expenses made against that project.
 
 <img class="screenshot" alt="Project - Cost Center" src="{{docs_base_url}}/assets/img/project/project_cost_center.png">
 
@@ -69,7 +69,7 @@ The Project Costing section helps you track the time and expenses incurred again
 
 ###Billing
 
-You can make/link a [Sales Order]({{docs_base_url}}/user/guides/selling/sales-order.html) against a project. Once linked you can use the standard sales module to bill your customer against the Project.
+You can make/link a [Sales Order]({{docs_base_url}}/user/manual/en/selling/sales-order.html) against a project. Once linked you can use the standard sales module to bill your customer against the Project.
 
 <img class="screenshot" alt="Project - Sales Order" src="{{docs_base_url}}/assets/img/project/project_sales_order.png">
 

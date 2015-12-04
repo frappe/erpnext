@@ -63,7 +63,7 @@ by:
 
 ### Making Time Logs
 
-* Progress in the Production Order can be tracked using [Time Log]({{docs_base_url}}/user/guides/projects/time-log.html)
+* Progress in the Production Order can be tracked using [Time Log]({{docs_base_url}}/user/manual/en/projects/time-log.html)
 * Time Logs are created against Production Order Operations.
 * Drafts of Time Logs are also created based on the scheduled operations when an Production Order is Submitted.
 * To create more Time Logs against an operation select 'Make TIme Log' in the respective operation.

@@ -4,7 +4,7 @@ Most of the website related settings can be defined here.
 
 ####Landing Page
 
-* Home Page: You can specify which [Web Page]({{docs_base_url}}/user/guides/website/web-page.html) must be the homepage of the website
+* Home Page: You can specify which [Web Page]({{docs_base_url}}/user/manual/en/website/web-page.html) must be the homepage of the website
 
 * Home Page is Products: if Checked, the Home page will be the default Item Group for the website.
 

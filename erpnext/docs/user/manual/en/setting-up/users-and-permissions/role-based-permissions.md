@@ -28,7 +28,7 @@ Permissions are applied on a combination of:
 	If enabled, a user with that role will be able to access only specific Documents for that Document Type. Such specific Document access is defined in the list of User Permissions. Additionally, User Permissions defined for other Document Types also get applied if they are related to the current Document Type through Link Fields.
 
 	To set, User Permissions go to:
-    > Setup > Permissions > [User Permissions Manager]({{docs_base_url}}/user/guides/setting-up/users-and-permissions/user-permissions.html)
+    > Setup > Permissions > [User Permissions Manager]({{docs_base_url}}/user/manual/en/setting-up/users-and-permissions/user-permissions.html)
 
 ---
 

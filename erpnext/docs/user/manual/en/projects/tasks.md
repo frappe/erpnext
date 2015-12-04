@@ -25,7 +25,7 @@ You can specify a list of dependent task under the 'Depends On' section.
 
 ### Managing Time
 
-ERPNext uses [Time Log]({{docs_base_url}}/user/guides/projects/time-log.html) to track the progress of a Task.
+ERPNext uses [Time Log]({{docs_base_url}}/user/manual/en/projects/time-log.html) to track the progress of a Task.
 You can create multiple Time Logs against each task.
 The Actual Start and End Time along with the costing shall then be updated based on the Time Log.
 
@@ -41,7 +41,7 @@ The Actual Start and End Time along with the costing shall then be updated based
 
 ### Managing Expenses
 
-You can book [Expense Claim]({{docs_base_url}}/user/guides/human-resource-management/expense-claim.html) against a task.
+You can book [Expense Claim]({{docs_base_url}}/user/manual/en/human-resource-management/expense-claim.html) against a task.
 The system shall update the total amount from expense claims in the costing section.
 
 * To view Expense Claims made against a Task click on 'Expense Claims'

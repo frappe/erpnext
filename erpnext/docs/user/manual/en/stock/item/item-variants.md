@@ -21,4 +21,4 @@ To create 'Item Variants' against a 'Template' select 'Make Variants'
 
 <img class="screenshot" alt="Make Variants" src="{{docs_base_url}}/assets/img/stock/make-variant-1.png">
 
-To learn more about setting Attributes Master check [Item Attributes]({{docs_base_url}}/user/guides/stock/setup/item-attribute.html)
+To learn more about setting Attributes Master check [Item Attributes]({{docs_base_url}}/user/manual/en/stock/setup/item-attribute.html)

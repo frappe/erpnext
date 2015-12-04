@@ -7,7 +7,7 @@ In ERPNext you can make a record of the Offer Letters that you can given to cand
 
 <img class="screenshot" alt="Offer Letter" src="{{docs_base_url}}/assets/img/human-resources/offer-letter.png">
 
-> Note: An offer letter can be made only against a [Job Applicant]({{docs_base_url}}/user/guides/human-resources/job-applicant.html)
+> Note: An offer letter can be made only against a [Job Applicant]({{docs_base_url}}/user/manual/en/human-resources/job-applicant.html)
 
 There is a pre-designed print format to print you offer letter.
 

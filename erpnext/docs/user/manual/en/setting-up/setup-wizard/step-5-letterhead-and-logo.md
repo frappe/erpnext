@@ -15,7 +15,7 @@ Click on the box ‘Attach Letterhead’ . Select the image file from the place 
 
 You may choose to skip this step if your letterhead is not ready.
 
-To select letterhead later through the setup module, read [Letter-head]({{docs_base_url}}/user/guides/setting-up/print/letter-head.html)
+To select letterhead later through the setup module, read [Letter-head]({{docs_base_url}}/user/manual/en/setting-up/print/letter-head.html)
 
 #### To "attach as web-link"
 

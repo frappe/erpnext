@@ -35,7 +35,7 @@ To create Time Logs via Calender, go to Time Log and select Calendar.
 
 * If you wish to bill against a Time Log you need to select the 'Billable' option.
 
-* In the costing section, the system will pull up the Costing & Billing rate from [Activity Cost]({{docs_base_url}}/user/guides/projects/activity-cost.html) 
+* In the costing section, the system will pull up the Costing & Billing rate from [Activity Cost]({{docs_base_url}}/user/manual/en/projects/activity-cost.html) 
 	based on the Employee and Activity Type specified.
 
 * The system shall then calculate the Costing and Billing amount based on the Hours mentioned in the Time Log.
@@ -44,6 +44,6 @@ To create Time Logs via Calender, go to Time Log and select Calendar.
 
 <img class="screenshot" alt="Time Log - Costing" src="{{docs_base_url}}/assets/img/project/time_log_costing.png">
 
-* After submitting the Time Log, you need to create [Time Log batch]({{docs_base_url}}/user/guides/projects/time-log-batch.html) to further bill the Time Log.
+* After submitting the Time Log, you need to create [Time Log batch]({{docs_base_url}}/user/manual/en/projects/time-log-batch.html) to further bill the Time Log.
 
 {next}

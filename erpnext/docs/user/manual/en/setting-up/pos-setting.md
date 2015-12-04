@@ -18,6 +18,6 @@ Set default values as defined.
 
 > Important : If you specify a particular User, the POS setting will be
 applied only to that User. If the User option is left blank, the setting will
-be set for all users. To understand POS in detail visit [Point of Sale]({{docs_base_url}}/user/guides/accounts/point-of-sale-pos-invoice.html)
+be set for all users. To understand POS in detail visit [Point of Sale]({{docs_base_url}}/user/manual/en/accounts/point-of-sale-pos-invoice.html)
 
 {next}

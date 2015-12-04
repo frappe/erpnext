@@ -14,7 +14,7 @@ You can define or select the Naming Series pattern from:
 
 > Setup > Settings > Naming Series
 
-[Click here to know more about defining a Naming Series.]({{docs_base_url}}/user/guides/setting-up/settings/naming-series.html)
+[Click here to know more about defining a Naming Series.]({{docs_base_url}}/user/manual/en/setting-up/settings/naming-series.html)
 
 ### 2. Default Supplier Type
 

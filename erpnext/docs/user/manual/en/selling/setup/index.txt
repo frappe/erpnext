@@ -2,7 +2,5 @@ selling-settings
 sales-partner
 shipping-rule
 product-bundle
-item-price.md
-sales-person-target-allocation.md
-item-price.md
-sales-person-target-allocation.md
+item-price
+sales-person-target-allocation

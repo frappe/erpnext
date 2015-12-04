@@ -14,6 +14,6 @@ In workstation specify the workstation working hours under the 'working hour' se
 You can also specify the working hours based on shifts.
 While scheduling Production Order, system will check for the availability of the workstation based on the working hours specified.	
 
-> Note : You can enable overtime for your workstation in [Manufacturing Settings]({{docs_base_url}}/user/guides/manufacturing/setup/manufacturing-settings.html)
+> Note : You can enable overtime for your workstation in [Manufacturing Settings]({{docs_base_url}}/user/manual/en/manufacturing/setup/manufacturing-settings.html)
 
 {next}

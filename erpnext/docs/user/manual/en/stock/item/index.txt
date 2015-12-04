@@ -1,6 +1,6 @@
+item-price
 item-codification
 item-variants
-purchase-details.md
-reorder.md
-purchase-details.md
-reorder.md
+purchase-details
+reorder
+item-valuation-fifo-and-moving-average
