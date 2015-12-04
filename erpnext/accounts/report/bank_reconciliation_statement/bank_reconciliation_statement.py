@@ -22,8 +22,8 @@ def execute(filters=None):
 
 	total_debit, total_credit = 0,0
 	for d in data:
-		total_debit += flt(d.debit_in_account_currency)
-		total_credit += flt(d.credit_in_account_currency)
+		total_debit += flt(d.debit)
+		total_credit += flt(d.credit)
 
 	amounts_not_reflected_in_system = frappe.db.sql("""
 		select sum(jvd.debit_in_account_currency - jvd.credit_in_account_currency)
