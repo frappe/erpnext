@@ -63,6 +63,9 @@ def before_tests():
 
 @frappe.whitelist()
 def get_exchange_rate(from_currency, to_currency):
+	if from_currency == to_currency:
+		return 1
+	
 	exchange = "%s-%s" % (from_currency, to_currency)
 	value = flt(frappe.db.get_value("Currency Exchange", exchange, "exchange_rate"))
 
