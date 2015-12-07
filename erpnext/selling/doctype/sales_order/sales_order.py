@@ -531,8 +531,14 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 		default_price_list = frappe.get_value("Supplier", for_supplier, "default_price_list")
 		if default_price_list:
 			target.buying_price_list = default_price_list
+			
+		if source.shipping_address_name:
+			target.customer_address = source.shipping_address_name
+			target.customer_address_display = source.shipping_address
+		else:
+			target.customer_address = source.customer_address
+			target.customer_address_display = source.address_display
 
-		target.delivered_by_supplier = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
@@ -544,9 +550,7 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 		"Sales Order": {
 			"doctype": "Purchase Order",
 			"field_map": {
-				"customer_address": "customer_address",
 				"contact_person": "customer_contact_person",
-				"address_display": "customer_address_display",
 				"contact_display": "customer_contact_display",
 				"contact_mobile": "customer_contact_mobile",
 				"contact_email": "customer_contact_email",
