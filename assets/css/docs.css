@@ -244,29 +244,27 @@ body {
   max-width: 870px;
 }
 .splash {
-  background-color: #36414C;
-  background-image: url('https://frappe.github.io/erpnext/assets/img/background.png');
-  color: #ffffff;
   padding-top: 128px;
   margin-top: -92px;
+  border-bottom: 1px solid #d1d8dd;
 }
 .splash .jumbotron {
   background-color: transparent;
-  padding: 14px 0 60px 0;
+  padding: 40px 0 60px 0;
   text-align: center;
-  text-shadow: 0px 1px 2px rgba(0, 0, 0, 0.7);
 }
 .splash .jumbotron h1 {
-  font-size: 42px;
+  font-size: 48px;
   font-weight: 400;
   opacity: 0.9;
+  color: #2E3338;
 }
 .splash .jumbotron p {
   font-size: 24px;
   font-color: #8D99A6 !important;
   letter-spacing: 0px;
   opacity: 0.7;
-  margin-top: 20px;
+  margin-bottom: 90px;
   font-weight: 300;
   line-height: 1.4em;
 }
@@ -512,6 +510,7 @@ p {
 .browser-image {
   min-height: 200px;
   border: 1px solid #d1d8dd;
+  border-bottom: 0px;
 }
 .fake-browser-frame {
   position: relative;
