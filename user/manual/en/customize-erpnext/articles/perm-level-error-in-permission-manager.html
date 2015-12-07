@@ -4,7 +4,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>ERPNext: Developer Docs</title>
+	<title>Perm Level Error In Permission Manager</title>
 	<meta name="generator" content="frappe">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/bootstrap.css">
     <link type="text/css" rel="stylesheet" href="https://frappe.github.io/erpnext/assets/css/hljs.css">
@@ -25,16 +25,16 @@
 		href="/assets/img/favicon.ico"
 		type="image/x-icon">
     
-<meta name="name" content="ERPNext: Developer Docs" data-html-block="meta_block">
+<meta name="name" content="Perm Level Error In Permission Manager" data-html-block="meta_block">
 <meta name="twitter:card" content="summary" data-html-block="meta_block">
 <meta name="og:type" content="article" data-html-block="meta_block">
-<meta name="og:title" content="ERPNext: Developer Docs" data-html-block="meta_block">
-<meta name="twitter:title" content="ERPNext: Developer Docs" data-html-block="meta_block">
+<meta name="og:title" content="Perm Level Error In Permission Manager" data-html-block="meta_block">
+<meta name="twitter:title" content="Perm Level Error In Permission Manager" data-html-block="meta_block">
 <meta name="description" content="" data-html-block="meta_block">
 
 		
 			<style></style></head>
-<body data-path="current">
+<body data-path="user/manual/en/customize-erpnext/articles/perm-level-error-in-permission-manager">
 	<div class="offcanvas-container">
 		<div class="offcanvas">
 			<div class="offcanvas-main-section">
@@ -84,14 +84,23 @@
                                 
                             </div>
 							<div class="container">
-                               <div class="page-container" id="page-current" data-path="current"
+                               <div class="page-container" id="page-perm-level-error-in-permission-manager" data-path="user/manual/en/customize-erpnext/articles/perm-level-error-in-permission-manager"
     data-doctype="Web Page">
 	<div class="page-content">
     	<div class="page-content-wrapper">
             <div class="row">
                 <div class="col-sm-8">
-                 <div class="page-breadcrumbs" data-html-block="breadcrumbs"></div>
-            		<div class="page-header-block" data-html-block="header"><h1>ERPNext: Developer Docs</h1></div>
+                 <div class="page-breadcrumbs" data-html-block="breadcrumbs">
+<ul class="breadcrumb">
+	<li>
+		<span class="icon icon-angle-left"></span>
+		<a href="https://frappe.github.io/erpnext/user/manual/en/customize-erpnext/articles">
+		Articles</a>
+	</li>
+	
+</ul>
+</div>
+            		<div class="page-header-block" data-html-block="header"></div>
                 </div>
                 <div class="col-sm-4">
             		<div class="page-header-actions-block" data-html-block="header-actions"></div>
@@ -101,62 +110,31 @@
     	    <div class="page-content-block">
 <div class="webpage-content">
 	
-	<article class="web-page-content" id="current" style="text-align: Left">
-	<!-- title: ERPNext: Developer Docs -->
-<!-- no-breadcrumbs -->
+	<article class="web-page-content" id="perm-level-error-in-permission-manager" style="text-align: Left">
+	<h1>Perm Level Error in Permission Manager</h1>
 
+<p>While customizing rules in the <a href="https://erpnext.com/user-guide/setting-up/permissions/role-based-permissions">Permission Manager</a>, you might receive an error message saying:</p>
 
-<div class="dev-header">
+<p><code>For System Manager_ (or other role) _at level 2_ (or other level) _in Customer_ (or document) _in row 8: Permission at level 0 must be set before higher levels are set</code>.</p>
 
-<a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.x.x</a>
+<p>Error message indicates problem in the existing permission setting for this document.</p>
 
+<p>For any role, before assigning permission at Perm Level 1, 2, permission at Perm Level 0 must be assigned. Error message says that System Manager has been assigned permission at Perm Level 1 and 2, but not at level 0. You should first correct the permission for System Manager's role by:</p>
 
-	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext"
-		target="_blank" style="margin-left: 10px; margin-bottom: 10px;"><i class="octicon octicon-mark-github"></i> Source</a>
-
-</div>
-
-<table class="table table-bordered">
-	<tr>
-		<td style="width: 20%">
-			App Name
-		</td>
-		<td>
-			<code>erpnext</code>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			Publisher
-		</td>
-		<td>
-			<code>Frappe Technologies Pvt. Ltd.</code>
-		</td>
-	</tr>
-	<tr>
-		<td>
-			Version
-		</td>
-		<td>
-			<code>6.12.4</code>
-		</td>
-	</tr>
-</table>
-
-<h3>Contents</h3>
 <ul>
-	<li>
-		<a href="models">Models (DocTypes)</a>
-	</li>
-	<li>
-		<a href="api">Server-side API</a>
-	</li>
+<li>Assigning permission to System Manager at level 0.</li>
 </ul>
 
-<!-- autodoc -->
-<!-- jinja -->
-<!-- static -->
+<p>Or</p>
+
+<ul>
+<li>By removing permission at level 1 and 2.</li>
+</ul>
+
+<p>After executing one of the above step, you should try adding additional rules in the Role Permission Manager.</p>
+
+<!-- markdown -->
+
 	</article>
 	
 </div>
@@ -164,7 +142,13 @@
     	</div>
 	</div>
 </div>
-                               <!-- edit-link -->
+                               
+<div class="page-container">
+	<div class="page-content">
+	<a class="text-muted edit" href="https://github.com/frappe/erpnext/blob/develop/erpnext/docs/user/manual/en/customize-erpnext/articles/perm-level-error-in-permission-manager.md">
+		Improve this page</a>
+	</div>
+</div>
                             </div>
                         
                     </div>
