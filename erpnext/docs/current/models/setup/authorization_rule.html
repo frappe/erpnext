@@ -7,7 +7,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.7.7</a>
+	Version 6.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/setup/doctype/authorization_rule"
@@ -40,6 +40,88 @@
         
         <tr >
             <td>1</td>
+            <td class="danger" title="Mandatory"><code>transaction</code></td>
+            <td >
+                Select</td>
+            <td >
+                Transaction
+                
+            </td>
+            <td>
+                <pre>
+Sales Order
+Purchase Order
+Quotation
+Delivery Note
+Sales Invoice
+Purchase Invoice
+Purchase Receipt
+Appraisal</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>2</td>
+            <td class="danger" title="Mandatory"><code>based_on</code></td>
+            <td >
+                Select</td>
+            <td >
+                Based On
+                
+            </td>
+            <td>
+                <pre>
+Grand Total
+Average Discount
+Customerwise Discount
+Itemwise Discount
+Not Applicable</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>3</td>
+            <td ><code>customer_or_item</code></td>
+            <td >
+                Select</td>
+            <td class="text-muted" title="Hidden">
+                Customer or Item
+                
+            </td>
+            <td>
+                <pre>Customer
+Item</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>4</td>
+            <td ><code>master_name</code></td>
+            <td >
+                Dynamic Link</td>
+            <td >
+                Customer / Item Name
+                
+            </td>
+            <td>
+                <pre>customer_or_item</pre>
+            </td>
+        </tr>
+        
+        <tr >
+            <td>5</td>
+            <td ><code>column_break_3</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>6</td>
             <td ><code>company</code></td>
             <td >
                 Link</td>
@@ -59,68 +141,44 @@
             </td>
         </tr>
         
-        <tr >
-            <td>2</td>
-            <td class="danger" title="Mandatory"><code>transaction</code></td>
+        <tr class="info">
+            <td>7</td>
+            <td ><code>section_break_17</code></td>
             <td >
-                Select</td>
+                Section Break</td>
             <td >
-                Transaction
+                
                 
             </td>
-            <td>
-                <pre>
-Delivery Note
-Purchase Invoice
-Purchase Order
-Purchase Receipt
-Quotation
-Sales Invoice
-Sales Order
-Appraisal</pre>
-            </td>
+            <td></td>
         </tr>
         
         <tr >
-            <td>3</td>
-            <td class="danger" title="Mandatory"><code>based_on</code></td>
+            <td>8</td>
+            <td ><code>value</code></td>
             <td >
-                Select</td>
+                Float</td>
             <td >
-                Based On
+                Authorized Value
                 
             </td>
-            <td>
-                <pre>
-Grand Total
-Average Discount
-Customerwise Discount
-Itemwise Discount
-Not Applicable</pre>
+            <td></td>
+        </tr>
+        
+        <tr class="info">
+            <td>9</td>
+            <td ><code>section_break_7</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
             </td>
+            <td></td>
         </tr>
         
         <tr >
-            <td>4</td>
-            <td ><code>master_name</code></td>
-            <td >
-                Link</td>
-            <td >
-                Customer / Item Name
-                
-            </td>
-            <td>
-                
-                
-
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>5</td>
+            <td>10</td>
             <td ><code>system_role</code></td>
             <td >
                 Link</td>
@@ -141,7 +199,40 @@ Not Applicable</pre>
         </tr>
         
         <tr >
-            <td>6</td>
+            <td>11</td>
+            <td ><code>to_emp</code></td>
+            <td >
+                Link</td>
+            <td >
+                Applicable To (Employee)
+                
+            </td>
+            <td>
+                
+                
+
+
+<a href="https://frappe.github.io/erpnext/current/models/hr/employee">Employee</a>
+
+
+                
+            </td>
+        </tr>
+        
+        <tr >
+            <td>12</td>
+            <td ><code>column_break_10</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>13</td>
             <td ><code>system_user</code></td>
             <td >
                 Link</td>
@@ -162,36 +253,13 @@ Not Applicable</pre>
         </tr>
         
         <tr >
-            <td>7</td>
-            <td ><code>to_emp</code></td>
-            <td >
-                Link</td>
-            <td >
-                Applicable To (Employee)
-                <p class="text-muted small">
-                    This will be used for setting rule in HR module</p>
-            </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/hr/employee">Employee</a>
-
-
-                
-            </td>
-        </tr>
-        
-        <tr >
-            <td>8</td>
+            <td>14</td>
             <td ><code>to_designation</code></td>
             <td >
                 Link</td>
             <td >
                 Applicable To (Designation)
-                <p class="text-muted small">
-                    This will be used for setting rule in HR module</p>
+                
             </td>
             <td>
                 
@@ -205,13 +273,25 @@ Not Applicable</pre>
             </td>
         </tr>
         
+        <tr class="info">
+            <td>15</td>
+            <td ><code>section_break_13</code></td>
+            <td >
+                Section Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
         <tr >
-            <td>9</td>
+            <td>16</td>
             <td ><code>approving_role</code></td>
             <td >
                 Link</td>
             <td >
-                Approving Role
+                Approving Role (above authorized value)
                 
             </td>
             <td>
@@ -227,12 +307,24 @@ Not Applicable</pre>
         </tr>
         
         <tr >
-            <td>10</td>
+            <td>17</td>
+            <td ><code>column_break_15</code></td>
+            <td class="info">
+                Column Break</td>
+            <td >
+                
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>18</td>
             <td ><code>approving_user</code></td>
             <td >
                 Link</td>
             <td >
-                Approving User
+                Approving User  (above authorized value)
                 
             </td>
             <td>
@@ -245,18 +337,6 @@ Not Applicable</pre>
 
                 
             </td>
-        </tr>
-        
-        <tr >
-            <td>11</td>
-            <td ><code>value</code></td>
-            <td >
-                Float</td>
-            <td >
-                Above Value
-                
-            </td>
-            <td></td>
         </tr>
         
     </tbody>

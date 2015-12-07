@@ -72,7 +72,8 @@ frappe.ui.form.on("Leave Application", {
 				args: {
 					employee: frm.doc.employee,
 					date: frm.doc.from_date,
-					leave_type: frm.doc.leave_type
+					leave_type: frm.doc.leave_type,
+					consider_all_leaves_in_the_allocation_period: true
 				},
 				callback: function(r) {
 					if (!r.exc && r.message) {

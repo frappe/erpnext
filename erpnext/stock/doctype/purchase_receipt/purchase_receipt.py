@@ -469,7 +469,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"prevdoc_docname": "purchase_order",
 			},
 			"postprocess": update_item,
-			"filter": lambda d: d.qty - invoiced_qty_map.get(d.name, 0)<=0
+			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",

@@ -89,6 +89,9 @@ class TransactionBase(StatusUpdater):
 				prevdoc_values = frappe.db.get_value(reference_doctype, reference_name,
 					[d[0] for d in fields], as_dict=1)
 
+				if not prevdoc_values:
+					frappe.throw(_("Invalid reference {0} {1}").format(reference_doctype, reference_name))
+
 				for field, condition in fields:
 					if prevdoc_values[field] is not None:
 						self.validate_value(field, condition, prevdoc_values[field], doc)

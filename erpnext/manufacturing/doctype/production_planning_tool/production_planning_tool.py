@@ -247,8 +247,8 @@ class ProductionPlanningTool(Document):
 					fb.description, fb.stock_uom, it.min_order_qty
 					from `tabBOM Explosion Item` fb, `tabBOM` bom, `tabItem` it
 					where bom.name = fb.parent and it.name = fb.item_code
-					and is_pro_applicable = 0
-					and is_sub_contracted_item = 0
+					and (is_pro_applicable = 0 or ifnull(default_bom, "")="")
+					and (is_sub_contracted_item = 0 or ifnull(default_bom, "")="")
 					and is_stock_item = 1
 					and fb.docstatus<2 and bom.name=%s
 					group by item_code, stock_uom""", bom, as_dict=1):

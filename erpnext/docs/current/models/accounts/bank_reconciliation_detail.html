@@ -7,7 +7,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.7.7</a>
+	Version 6.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/accounts/doctype/bank_reconciliation_detail"
@@ -61,18 +61,6 @@
         
         <tr >
             <td>2</td>
-            <td ><code>clearance_date</code></td>
-            <td >
-                Date</td>
-            <td >
-                Clearance Date
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>3</td>
             <td ><code>against_account</code></td>
             <td >
                 Data</td>
@@ -84,19 +72,7 @@
         </tr>
         
         <tr >
-            <td>4</td>
-            <td ><code>cheque_number</code></td>
-            <td >
-                Data</td>
-            <td >
-                Cheque Number
-                
-            </td>
-            <td></td>
-        </tr>
-        
-        <tr >
-            <td>5</td>
+            <td>3</td>
             <td ><code>debit</code></td>
             <td >
                 Currency</td>
@@ -105,12 +81,12 @@
                 
             </td>
             <td>
-                <pre>Company:company:default_currency</pre>
+                <pre>account_currency</pre>
             </td>
         </tr>
         
         <tr >
-            <td>6</td>
+            <td>4</td>
             <td ><code>credit</code></td>
             <td >
                 Currency</td>
@@ -119,47 +95,24 @@
                 
             </td>
             <td>
-                <pre>Company:company:default_currency</pre>
+                <pre>account_currency</pre>
             </td>
         </tr>
         
         <tr >
-            <td>7</td>
-            <td ><code>reference_type</code></td>
+            <td>5</td>
+            <td ><code>column_break_5</code></td>
+            <td class="info">
+                Column Break</td>
             <td >
-                Link</td>
-            <td >
-                Reference Type
+                
                 
             </td>
-            <td>
-                
-                
-
-
-<a href="https://frappe.github.io/erpnext/current/models/core/doctype">DocType</a>
-
-
-                
-            </td>
+            <td></td>
         </tr>
         
         <tr >
-            <td>8</td>
-            <td ><code>reference_name</code></td>
-            <td >
-                Dynamic Link</td>
-            <td >
-                Reference Name
-                
-            </td>
-            <td>
-                <pre>reference_type</pre>
-            </td>
-        </tr>
-        
-        <tr >
-            <td>9</td>
+            <td>6</td>
             <td ><code>posting_date</code></td>
             <td >
                 Date</td>
@@ -171,12 +124,36 @@
         </tr>
         
         <tr >
-            <td>10</td>
+            <td>7</td>
+            <td ><code>cheque_number</code></td>
+            <td >
+                Data</td>
+            <td >
+                Cheque Number
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>8</td>
             <td ><code>cheque_date</code></td>
             <td >
                 Date</td>
             <td >
                 Cheque Date
+                
+            </td>
+            <td></td>
+        </tr>
+        
+        <tr >
+            <td>9</td>
+            <td ><code>clearance_date</code></td>
+            <td >
+                Date</td>
+            <td >
+                Clearance Date
                 
             </td>
             <td></td>

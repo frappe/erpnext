@@ -85,12 +85,9 @@ def make_new_document(ref_wrapper, date_field, posting_date):
 
 	# get last day of the month to maintain period if the from date is first day of its own month
 	# and to date is the last day of its own month
-	if (cstr(get_first_day(ref_wrapper.from_date)) == \
-			cstr(ref_wrapper.from_date)) and \
-		(cstr(get_last_day(ref_wrapper.to_date)) == \
-			cstr(ref_wrapper.to_date)):
-		to_date = get_last_day(get_next_date(ref_wrapper.to_date,
-			mcount))
+	if (cstr(get_first_day(ref_wrapper.from_date)) == cstr(ref_wrapper.from_date)) and \
+		(cstr(get_last_day(ref_wrapper.to_date)) == cstr(ref_wrapper.to_date)):
+			to_date = get_last_day(get_next_date(ref_wrapper.to_date, mcount))
 	else:
 		to_date = get_next_date(ref_wrapper.to_date, mcount)
 

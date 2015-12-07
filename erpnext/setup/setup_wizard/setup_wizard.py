@@ -7,8 +7,6 @@ import frappe, copy
 from frappe.utils import cstr, flt, getdate
 from frappe import _
 from frappe.utils.file_manager import save_file
-from frappe.translate import set_default_language
-from frappe.geo.country_info import get_country_info
 from .default_website import website_maker
 import install_fixtures
 from .sample_data import make_sample_data
@@ -18,11 +16,6 @@ from erpnext.accounts.doctype.account.account import RootNotEditable
 def setup_complete(args=None):
 	if frappe.db.sql("select name from tabCompany"):
 		frappe.throw(_("Setup Already Complete!!"))
-
-	if args.language and args.language != "english":
-		set_default_language(args.language)
-
-	frappe.clear_cache()
 
 	install_fixtures.install(args.get("country"))
 
@@ -141,26 +134,7 @@ def set_defaults(args):
 
 	global_defaults.save()
 
-	number_format = get_country_info(args.get("country")).get("number_format", "#,###.##")
-
-	# replace these as float number formats, as they have 0 precision
-	# and are currency number formats and not for floats
-	if number_format=="#.###":
-		number_format = "#.###,##"
-	elif number_format=="#,###":
-		number_format = "#,###.##"
-
-	system_settings = frappe.get_doc("System Settings", "System Settings")
-	system_settings.update({
-		"language": args.get("language"),
-		"time_zone": args.get("timezone"),
-		"float_precision": 3,
-		"email_footer_address": args.get("company"),
-		'date_format': frappe.db.get_value("Country", args.get("country"), "date_format"),
-		'number_format': number_format,
-		'enable_scheduler': 1 if not frappe.flags.in_test else 0
-	})
-	system_settings.save()
+	frappe.db.set_value("System Settings", None, "email_footer_address", args.get("company"))
 
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.auto_accounting_for_stock = 1

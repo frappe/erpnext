@@ -295,7 +295,7 @@ class JournalEntry(AccountsController):
 		for d in self.get("accounts"):
 			if d.account_currency == self.company_currency:
 				d.exchange_rate = 1
-			elif not d.exchange_rate or d.account_type=="Bank" or \
+			elif not d.exchange_rate or d.exchange_rate == 1 or \
 				(d.reference_type in ("Sales Invoice", "Purchase Invoice") and d.reference_name):
 					d.exchange_rate = get_exchange_rate(d.account, d.account_currency, self.company,
 						d.reference_type, d.reference_name, d.debit, d.credit, d.exchange_rate)
@@ -339,20 +339,24 @@ class JournalEntry(AccountsController):
 			self.remark = ("\n").join(r) #User Remarks is not mandatory
 
 	def set_print_format_fields(self):
+		total_amount = 0.0
+		bank_account_currency = None
 		for d in self.get('accounts'):
 			if d.party_type and d.party:
 				if not self.pay_to_recd_from:
 					self.pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
 						"customer_name" if d.party_type=="Customer" else "supplier_name")
 
-					self.set_total_amount(d.debit or d.credit)
 			elif frappe.db.get_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
-				self.set_total_amount(d.debit or d.credit)
+				total_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
+				bank_account_currency = d.account_currency
 
-	def set_total_amount(self, amt):
+		self.set_total_amount(total_amount, bank_account_currency)
+
+	def set_total_amount(self, amt, currency):
 		self.total_amount = amt
 		from frappe.utils import money_in_words
-		self.total_amount_in_words = money_in_words(amt, self.company_currency)
+		self.total_amount_in_words = money_in_words(amt, currency)
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
@@ -739,6 +743,11 @@ def get_account_balance_and_party_type(account, date, company, debit=None, credi
 		"exchange_rate": get_exchange_rate(account, account_details.account_currency,
 			company, debit=debit, credit=credit, exchange_rate=exchange_rate)
 	}
+
+	# un-set party if not party type
+	if not party_type:
+		grid_values["party"] = ""
+
 	return grid_values
 
 @frappe.whitelist()
@@ -747,6 +756,9 @@ def get_exchange_rate(account, account_currency=None, company=None,
 	from erpnext.setup.utils import get_exchange_rate
 	account_details = frappe.db.get_value("Account", account,
 		["account_type", "root_type", "account_currency", "company"], as_dict=1)
+
+	if not account_details:
+		frappe.throw(_("Please select correct account"))
 
 	if not company:
 		company = account_details.company

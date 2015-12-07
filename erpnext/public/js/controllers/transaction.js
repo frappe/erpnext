@@ -76,7 +76,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(this.frm.doc.__islocal && !(this.frm.doc.taxes || []).length
 			&& !(this.frm.doc.__onload ? this.frm.doc.__onload.load_after_mapping : false)) {
 				this.apply_default_taxes();
-		} else if(this.frm.doc.__islocal && this.frm.doc.company && this.frm.doc["items"] 
+		} else if(this.frm.doc.__islocal && this.frm.doc.company && this.frm.doc["items"]
 			&& !this.frm.doc.is_pos) {
 				me.calculate_taxes_and_totals();
 		}
@@ -507,7 +507,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		if(this.frm.fields_dict["advances"]) {
-			setup_field_label_map(["advance_amount", "allocated_amount"], 
+			setup_field_label_map(["advance_amount", "allocated_amount"],
 				this.frm.doc.party_account_currency, "advances");
 		}
 
@@ -558,9 +558,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	apply_pricing_rule: function(item, calculate_taxes_and_totals) {
 		var me = this;
+		var args = this._get_args(item);
+		if (!(args.item_list && args.item_list.length)) {
+			if(calculate_taxes_and_totals) me.calculate_taxes_and_totals();
+			return;
+		}
+
 		return this.frm.call({
 			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
-			args: {	args: this._get_args(item) },
+			args: {	args: args },
 			callback: function(r) {
 				if (!r.exc && r.message) {
 					me._set_values_for_item_list(r.message);
@@ -648,6 +654,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	apply_price_list: function(item) {
 		var me = this;
 		var args = this._get_args(item);
+		if (!((args.item_list && args.item_list.length) || args.price_list)) {
+			return;
+		}
 
 		return this.frm.call({
 			method: "erpnext.stock.get_item_details.apply_price_list",

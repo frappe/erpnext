@@ -1,0 +1,8 @@
+erpnext.setup.setup_wizard.default_website
+erpnext.setup.setup_wizard
+erpnext.setup.setup_wizard.industry_type
+erpnext.setup.setup_wizard.install_fixtures
+erpnext.setup.setup_wizard.sample_data
+erpnext.setup.setup_wizard.setup_wizard
+erpnext.setup.setup_wizard.test_setup_data
+erpnext.setup.setup_wizard.test_setup_wizard

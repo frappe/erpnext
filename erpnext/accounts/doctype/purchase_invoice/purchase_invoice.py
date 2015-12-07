@@ -150,10 +150,14 @@ class PurchaseInvoice(BuyingController):
 		against_accounts = []
 		stock_items = self.get_stock_items()
 		for item in self.get("items"):
+			# in case of auto inventory accounting, 
+			# against expense account is always "Stock Received But Not Billed"
+			# for a stock item and if not epening entry and not drop-ship entry
+			
 			if auto_accounting_for_stock and item.item_code in stock_items \
-					and self.is_opening == 'No':
-				# in case of auto inventory accounting, against expense account is always
-				# Stock Received But Not Billed for a stock item
+				and self.is_opening == 'No' and (not item.po_detail or 
+					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
+				
 				item.expense_account = stock_not_billed_account
 				item.cost_center = None
 

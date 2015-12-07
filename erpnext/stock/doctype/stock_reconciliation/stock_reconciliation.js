@@ -5,28 +5,89 @@ frappe.require("assets/erpnext/js/controllers/stock_controller.js");
 frappe.require("assets/erpnext/js/utils.js");
 frappe.provide("erpnext.stock");
 
-frappe.ui.form.on("Stock Reconciliation", "get_items", function(frm) {
-	frappe.prompt({label:"Warehouse", fieldtype:"Link", options:"Warehouse", reqd: 1},
-		function(data) {
+frappe.ui.form.on("Stock Reconciliation", {
+	onload: function(frm) {
+		// end of life
+		frm.set_query("item_code", "items", function(doc, cdt, cdn) {
+			return {
+				filters:[
+					['Item', 'end_of_life', '>=', frappe.datetime.nowdate()]
+				]
+			}
+		});
+	},
+
+	refresh: function(frm) {
+		if(frm.doc.docstatus < 1) {
+			frm.add_custom_button(__("Get Items"), function() {
+				frm.events.get_items(frm);
+			});
+		}
+	},
+
+	company: function(frm) {
+		erpnext.get_fiscal_year(frm.doc.company, frm.doc.posting_date);
+	},
+
+	posting_date: function(frm) {
+		erpnext.get_fiscal_year(frm.doc.company, frm.doc.posting_date);
+	},
+
+	get_items: function(frm) {
+		frappe.prompt({label:"Warehouse", fieldtype:"Link", options:"Warehouse", reqd: 1},
+			function(data) {
+				frappe.call({
+					method:"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_items",
+					args: {
+						warehouse: data.warehouse,
+						posting_date: frm.doc.posting_date,
+						posting_time: frm.doc.posting_time
+					},
+					callback: function(r) {
+						var items = [];
+						frm.clear_table("items");
+						for(var i=0; i< r.message.length; i++) {
+							var d = frm.add_child("items");
+							$.extend(d, r.message[i]);
+							if(!d.qty) d.qty = null;
+							if(!d.valuation_rate) d.valuation_rate = null;
+						}
+						frm.refresh_field("items");
+					}
+				});
+			}
+		, __("Get Items"), __("Update"));
+	},
+
+	set_valuation_rate_and_qty: function(frm, cdt, cdn) {
+		var d = frappe.model.get_doc(cdt, cdn);
+		if(d.item_code && d.warehouse) {
 			frappe.call({
-				method:"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_items",
+				method: "erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_stock_balance_for",
 				args: {
-					warehouse: data.warehouse,
+					item_code: d.item_code,
+					warehouse: d.warehouse,
 					posting_date: frm.doc.posting_date,
 					posting_time: frm.doc.posting_time
 				},
 				callback: function(r) {
-					var items = [];
-					frm.clear_table("items");
-					for(var i=0; i< r.message.length; i++) {
-						var d = frm.add_child("items");
-						$.extend(d, r.message[i]);
-					}
-					frm.refresh_field("items");
+					frappe.model.set_value(cdt, cdn, "qty", r.message.qty);
+					frappe.model.set_value(cdt, cdn, "valuation_rate", r.message.rate);
+					frappe.model.set_value(cdt, cdn, "current_qty", r.message.qty);
+					frappe.model.set_value(cdt, cdn, "current_valuation_rate", r.message.rate);
 				}
 			});
 		}
-	, __("Get Items"), __("Update"));
+	}
+});
+
+frappe.ui.form.on("Stock Reconciliation Item", {
+	warehouse: function(frm, cdt, cdn) {
+		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
+	},
+	item_code: function(frm, cdt, cdn) {
+		frm.events.set_valuation_rate_and_qty(frm, cdt, cdn);
+	}
 });
 
 erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
@@ -93,19 +154,3 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 });
 
 cur_frm.cscript = new erpnext.stock.StockReconciliation({frm: cur_frm});
-
-cur_frm.cscript.company = function(doc, cdt, cdn) {
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
-}
-
-cur_frm.cscript.posting_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc.company, doc.posting_date);
-}
-
-cur_frm.fields_dict.items.grid.get_field('item_code').get_query = function(doc, cdt, cdn) {
-	return {
-		filters:[
-			['Item', 'end_of_life', '>=', frappe.datetime.nowdate()]
-		]
-	}
-}

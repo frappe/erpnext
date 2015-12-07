@@ -1,0 +1,168 @@
+<h1>Field Types</h1>
+
+<p>Following are the types of fields you can define while creating new ones, or while amend standard ones.</p>
+<ul>
+    <li><b>Attach:</b>
+
+        <br>
+        <br>Attach field allows you browsing file from File Manager and attach in the transaction.
+        <br>
+        <br>
+        <img src="{{docs_base_path}}/assets/img/articles/$SGrab_184.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Button:</b>
+
+        <br>
+        <br>This Field Type will generate a Button, on clicking which you can execute some function.
+        <br>
+        <br>
+    </li>
+    <li><b>Check:</b>
+
+        <br>
+        <br>Check will generate a check box field.
+        <br>
+        <br>
+        <img src="{{docs_base_path}}/assets/img/articles/$SGrab_185.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Column Break:</b>
+
+        <br>
+        <br>Since ERPNext has two column layout, using Column Break fields, you can divide set of fields on either side.
+        <br>
+        <br>
+        <img src="{{docs_base_path}}/assets/img/articles/$SGrab_186.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Currency:</b>
+
+        <br>
+        <br>Currency field holds numeric value, upto two decimal place. Also you can have currency symbol being shown for the currency field.
+        <br>
+        <br>
+        <img src="{{docs_base_path}}/assets/img/articles/$SGrab_187.png">
+        <br>
+        <br>
+    </li>
+</ul>
+<ul>
+    <li><b>Data:</b>
+
+        <br>
+        <br>Data field allows you entering value upto 255 character.
+        <br>
+        <br>
+        <img src="{{docs_base_path}}/assets/img/articles/$SGrab_183.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Date and Time:<br><br></b>This field will give you date and time picker, with value for current date and time (as provided by your computer) set by default.
+        <br>
+        <br><b><img src="{{docs_base_path}}/assets/img/articles/$SGrab_188.png"><br><br></b>
+
+    </li>
+    <li><b>Dynamic Link:<br><br></b>Link field is one which pulls data from another master/table. Dynamic link field is connected with multiple masters at the same time. Its link is determined based on value selected in the previous field.
+        <br>
+        <br>Example: Customer will be Dynamic field in the Quotation form. If use selects Quotation made for Customer, then Customer field will be linked to Customer master, and suggest records accordingly. If user selects that Quotation is for Lead, then same Customer
+        field will be linked to Lead master.
+        <br>
+        <br>
+    </li>
+    <li><b>Float:</b>
+
+        <br>
+        <br>Float field carries numeric value, upto six decimal place. Float Precision set in Setup &gt;&gt; Settings &gt;&gt; System Setting will be applicable on all the link field. For float field, decimal places generated will be as define in Float Precision.
+        <br>
+        <br>
+        <img src="{{docs_base_path}}/assets/img/articles/$SGrab_189.png">
+        <br>If you need more than two decimal place in the Currency field, you can change its field type to Float field from Customize Form.
+        <br>
+        <br>
+    </li>
+    <li><b>Image:</b>
+
+        <br>
+        <br>Image field will render an image file selected in another attach field.
+        <br>
+        <br>
+        <img src="{{docs_base_path}}/assets/img/articles/$SGrab_190b611f3.png">
+        <br>
+        <br>For the Image field, under Option, Attach field name should be provide which this field will refer to for image file, and render that image file.
+        <br>
+        <br>
+    </li>
+    <li><b>Int (Integer):</b>
+
+        <br>
+        <br>Integer field holds numeric value, without decimal place.
+        <br>
+        <br>
+    </li>
+    <li>Link Field:
+        <br>
+        <br>Link field is connected with another master from where it fetches data.
+        <br>
+        <br>
+        <img src="{{docs_base_path}}/assets/img/articles/$SGrab_191.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Password:<br><br></b>Password field will decode value in it. Extra coding will be required for validating password of specific user.<b><br><br></b>
+
+    </li>
+    <li><b>Read Only:<br><br></b>Read Only field will carry data fetched from another form, but they themselves will be non-editable. You should set Read Only as field type if its source for value is predetermined.
+        <br>
+        <br>
+    </li>
+    <li><b>Section Break:</b>
+
+        <br>
+        <br>Section Break can be used to divide form in multiple section.
+        <br>
+        <br>
+        <img src="{{docs_base_path}}/assets/img/articles/$SGrab_192.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Select:<br><br></b>Select will be the drop-down field, with possible results (separate by row) define in the Option.
+        <br>
+        <br>
+        <img src="{{docs_base_path}}/assets/img/articles/$SGrab_193.png">
+        <br><b><br></b>
+
+    </li>
+    <li><b>Small Text:</b>
+
+        <br>
+        <br>Small Text field carries general text content, has little more character limit than Data field.
+        <br>
+        <br>
+        <img src="{{docs_base_path}}/assets/img/articles/$SGrab_194.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Table:</b>
+
+        <br>
+        <br>Table will be (sort of) Link field which will render another docytpe within the current form. For example, Item table in the Sales Order form is Table field, which is linked to Sales Order Item doctype.
+        <br>
+        <br>
+        <img src="{{docs_base_path}}/assets/img/articles/$SGrab_196.png">
+        <br>
+        <br>
+    </li>
+    <li><b>Text Editor:</b>
+
+        <br>
+        <br>Text Editor will be large text field, with tools to format text.
+        <br>
+        <br>
+        <img src="{{docs_base_path}}/assets/img/articles/$SGrab_198.png">
+        <br>
+    </li>
+</ul>

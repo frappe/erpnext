@@ -332,7 +332,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				"serial_no": "serial_no"
 			},
 			"postprocess": update_item,
-			"filter": lambda d: d.qty - invoiced_qty_map.get(d.name, 0)<=0
+			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

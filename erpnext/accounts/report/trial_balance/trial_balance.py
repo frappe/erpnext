@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cint, flt, getdate, formatdate, cstr
-from erpnext.accounts.report.financial_statements import filter_accounts, get_gl_entries
+from erpnext.accounts.report.financial_statements import filter_accounts, set_gl_entries_by_account
 
 value_fields = ("opening_debit", "opening_credit", "debit", "credit", "closing_debit", "closing_credit")
 
@@ -45,7 +45,7 @@ def validate_filters(filters):
 		filters.to_date = filters.year_end_date
 
 def get_data(filters):
-	accounts = frappe.db.sql("""select name, parent_account, account_name, root_type, report_type, lft, rgt 
+	accounts = frappe.db.sql("""select name, parent_account, account_name, root_type, report_type, lft, rgt
 		from `tabAccount` where company=%s order by lft""", filters.company, as_dict=True)
 
 	if not accounts:
@@ -56,8 +56,10 @@ def get_data(filters):
 	min_lft, max_rgt = frappe.db.sql("""select min(lft), max(rgt) from `tabAccount`
 		where company=%s""", (filters.company,))[0]
 
-	gl_entries_by_account = get_gl_entries(filters.company, filters.from_date, filters.to_date, min_lft, max_rgt,
-		ignore_closing_entries=not flt(filters.with_period_closing_entry))
+	gl_entries_by_account = {}
+
+	set_gl_entries_by_account(filters.company, filters.from_date,
+		filters.to_date, min_lft, max_rgt, gl_entries_by_account, ignore_closing_entries=not flt(filters.with_period_closing_entry))
 
 	opening_balances = get_opening_balances(filters)
 
@@ -67,27 +69,27 @@ def get_data(filters):
 	data = prepare_data(accounts, filters, total_row)
 
 	return data
-	
+
 def get_opening_balances(filters):
 	balance_sheet_opening = get_rootwise_opening_balances(filters, "Balance Sheet")
 	pl_opening = get_rootwise_opening_balances(filters, "Profit and Loss")
-	
+
 	balance_sheet_opening.update(pl_opening)
 	return balance_sheet_opening
-	
-	
+
+
 def get_rootwise_opening_balances(filters, report_type):
 	additional_conditions = " and posting_date >= %(year_start_date)s" \
 		if report_type == "Profit and Loss" else ""
-		
+
 	if not flt(filters.with_period_closing_entry):
 		additional_conditions += " and ifnull(voucher_type, '')!='Period Closing Voucher'"
-		
+
 	gle = frappe.db.sql("""
-		select 
-			account, sum(debit) as opening_debit, sum(credit) as opening_credit 
+		select
+			account, sum(debit) as opening_debit, sum(credit) as opening_credit
 		from `tabGL Entry`
-		where 
+		where
 			company=%(company)s
 			{additional_conditions}
 			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
@@ -100,11 +102,11 @@ def get_rootwise_opening_balances(filters, report_type):
 			"year_start_date": filters.year_start_date
 		},
 		as_dict=True)
-		
+
 	opening = frappe._dict()
 	for d in gle:
 		opening.setdefault(d.account, d)
-		
+
 	return opening
 
 def calculate_values(accounts, gl_entries_by_account, opening_balances, filters):
@@ -139,7 +141,7 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters)
 
 		total_row["debit"] += d["debit"]
 		total_row["credit"] += d["credit"]
-		
+
 
 	return total_row
 

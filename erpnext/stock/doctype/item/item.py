@@ -378,6 +378,13 @@ class Item(WebsiteGenerator):
 			if not (self.is_purchase_item or self.is_pro_applicable):
 				frappe.throw(_("""To set reorder level, item must be a Purchase Item or Manufacturing Item"""))
 
+		if self.re_order_level and not self.re_order_qty:
+			frappe.throw(_("Please set reorder quantity"))
+		for d in self.get("reorder_levels"):
+			if d.warehouse_reorder_level and not d.warehouse_reorder_qty:
+				frappe.throw(_("Row #{0}: Please set reorder quantity").format(d.idx))
+					
+
 	def validate_warehouse_for_reorder(self):
 		warehouse = []
 		for i in self.get("reorder_levels"):
@@ -662,7 +669,5 @@ def check_stock_uom_with_bin(item, stock_uom):
 			frappe.db.sql("""update tabBin set stock_uom=%s where item_code=%s""", (stock_uom, item))
 
 	if not matched:
-		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because \
-			you have already made some transaction(s) with another UOM. To change default UOM, \
-			use 'UOM Replace Utility' tool under Stock module.").format(item))
+		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
 

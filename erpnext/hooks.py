@@ -7,7 +7,7 @@ app_publisher = "Frappe Technologies Pvt. Ltd."
 app_description = """ERP made simple"""
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "6.10.2"
+app_version = "6.12.3"
 app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
@@ -64,7 +64,7 @@ website_route_rules = [
 	{"from_route": "/shipments", "to_route": "Delivery Note"},
 	{"from_route": "/shipments/<path:name>", "to_route": "order",
 		"defaults": {
-			"doctype": "Delivery Notes",
+			"doctype": "Delivery Note",
 			"parents": [{"title": _("Shipments"), "name": "shipments"}]
 		}
 	}
