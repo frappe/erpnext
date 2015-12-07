@@ -1,1 +1,0 @@
-erpnext.buying.print_format.drop_shipping
