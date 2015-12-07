@@ -1,7 +1,7 @@
 source_link = "https://github.com/frappe/erpnext"
 docs_base_url = "https://frappe.github.io/erpnext"
-headline = "Learn ERPNext Inside Out"
-sub_heading = "Find detailed explanation for all ERPNext features"
+headline = "ERPNext Documentation"
+sub_heading = "Detailed explanation for all ERPNext features and developer API"
 long_description = """ERPNext is a fully featured ERP system designed for Small and Medium Sized
 business. ERPNext covers a wide range of features including Accounting, CRM,
 Inventory management, Selling, Purchasing, Manufacturing, Projects, HR &
@@ -15,10 +15,13 @@ ERPNext is Open Source under the GNU General Public Licence v3 and has been
 listed as one of the Best Open Source Softwares in the world by my online
 blogs."""
 
+docs_version = "6.x.x"
+splash_light_background = True
+
 def get_context(context):
+	context.app.splash_light_background = True
 	context.top_bar_items = [
-		{"label": "Contents", "url": context.docs_base_url + "/contents.html", "right": 1},
-		{"label": "User Guide", "url": context.docs_base_url + "/user/guides", "right": 1},
+		{"label": "User Manual", "url": context.docs_base_url + "/user/manual", "right": 1},
 		{"label": "Videos", "url": context.docs_base_url + "/user/videos", "right": 1},
 		{"label": "Developer Docs", "url": context.docs_base_url + "/current", "right": 1}
 	]

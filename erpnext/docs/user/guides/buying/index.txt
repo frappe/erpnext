@@ -1,4 +1,0 @@
-supplier
-supplier-quotation
-purchase-order
-setup

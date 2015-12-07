@@ -1,3 +1,0 @@
-# User Manual
-
-{index}

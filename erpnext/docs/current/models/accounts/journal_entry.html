@@ -7,7 +7,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.7.7</a>
+	Version 6.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/accounts/doctype/journal_entry"
@@ -295,9 +295,7 @@ Opening Entry</pre>
                 Total Amount
                 
             </td>
-            <td>
-                <pre>Company:company:default_currency</pre>
-            </td>
+            <td></td>
         </tr>
         
         <tr >
@@ -921,7 +919,21 @@ Yes</pre>
         <a name="set_total_amount" href="#set_total_amount" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>set_total_amount</b>
-        <i class="text-muted">(self, amt)</i>
+        <i class="text-muted">(self, amt, currency)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="set_total_debit_credit" href="#set_total_debit_credit" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>set_total_debit_credit</b>
+        <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -1005,20 +1017,6 @@ Yes</pre>
         <a name="validate_credit_debit_note" href="#validate_credit_debit_note" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>validate_credit_debit_note</b>
-        <i class="text-muted">(self)</i>
-    </p>
-	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
-</div>
-	<br>
-
-        
-        
-    
-    
-	<p class="docs-attr-name">
-        <a name="validate_debit_and_credit" href="#validate_debit_and_credit" class="text-muted small">
-            <i class="icon-link small" style="color: #ccc;"></i></a>
-		<b>validate_debit_and_credit</b>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
@@ -1134,6 +1132,20 @@ Yes</pre>
         <i class="text-muted">(self)</i>
     </p>
 	<div class="docs-attr-desc"><p>Validates reference document</p>
+</div>
+	<br>
+
+        
+        
+    
+    
+	<p class="docs-attr-name">
+        <a name="validate_total_debit_and_credit" href="#validate_total_debit_and_credit" class="text-muted small">
+            <i class="icon-link small" style="color: #ccc;"></i></a>
+		<b>validate_total_debit_and_credit</b>
+        <i class="text-muted">(self)</i>
+    </p>
+	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
 	<br>
 

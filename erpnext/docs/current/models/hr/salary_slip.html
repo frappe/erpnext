@@ -7,7 +7,7 @@
 <div class="dev-header">
 
 <a class="btn btn-default btn-sm" disabled style="margin-bottom: 10px;">
-	Version 6.7.7</a>
+	Version 6.x.x</a>
 
 
 	<a class="btn btn-default btn-sm" href="https://github.com/frappe/erpnext/tree/develop/erpnext/hr/doctype/salary_slip"
@@ -689,7 +689,7 @@
         <a name="check_sal_struct" href="#check_sal_struct" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>check_sal_struct</b>
-        <i class="text-muted">(self)</i>
+        <i class="text-muted">(self, joining_date, relieving_date)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -717,7 +717,7 @@
         <a name="get_holidays_for_employee" href="#get_holidays_for_employee" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>get_holidays_for_employee</b>
-        <i class="text-muted">(self, m)</i>
+        <i class="text-muted">(self, start_date, end_date)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -731,7 +731,7 @@
         <a name="get_leave_details" href="#get_leave_details" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>get_leave_details</b>
-        <i class="text-muted">(self, lwp=None)</i>
+        <i class="text-muted">(self, joining_date=None, relieving_date=None, lwp=None)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
@@ -745,7 +745,7 @@
         <a name="get_payment_days" href="#get_payment_days" class="text-muted small">
             <i class="icon-link small" style="color: #ccc;"></i></a>
 		<b>get_payment_days</b>
-        <i class="text-muted">(self, m)</i>
+        <i class="text-muted">(self, month, joining_date, relieving_date)</i>
     </p>
 	<div class="docs-attr-desc"><p><span class="text-muted">No docs</span></p>
 </div>
