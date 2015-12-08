@@ -10,6 +10,9 @@ from frappe.utils import cstr
 from frappe.model.document import Document
 
 class Address(Document):
+	def __setup__(self):
+		self.flags.linked = False
+
 	def autoname(self):
 		if not self.address_title:
 			self.address_title = self.customer \
@@ -42,13 +45,10 @@ class Address(Document):
 
 	def link_address(self):
 		"""Link address based on owner"""
-		linked = False
-		for fieldname in self.link_fields:
-			if self.get(fieldname):
-				linked = True
-				break
+		if not self.flags.linked:
+			self.check_if_linked()
 
-		if not linked:
+		if not self.flags.linked:
 			contact = frappe.db.get_value("Contact", {"email_id": self.owner},
 				("name", "customer", "supplier"), as_dict = True)
 			if contact:
@@ -57,6 +57,11 @@ class Address(Document):
 
 			self.lead = frappe.db.get_value("Lead", {"email_id": self.owner})
 
+	def check_if_linked(self):
+		for fieldname in self.link_fields:
+			if self.get(fieldname):
+				self.flags.linked = True
+				break
 
 	def validate_shipping_address(self):
 		"""Validate that there can only be one shipping address for particular customer, supplier"""

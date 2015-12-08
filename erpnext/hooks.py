@@ -111,6 +111,9 @@ doc_events = {
 	"Price List": {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
 	},
+	"Address": {
+		"validate": "erpnext.shopping_cart.cart.set_customer_in_address"
+	}
 }
 
 scheduler_events = {
