@@ -265,27 +265,29 @@ class SalesOrder(SellingController):
 		if exc_list:
 			frappe.throw('\n'.join(exc_list))
 
-	def update_delivery_status(self, po_name):
+	def update_delivery_status(self):
 		"""Update delivery status from Purchase Order for drop shipping"""
 		tot_qty, delivered_qty = 0.0, 0.0
 
 		for item in self.items:
 			if item.delivered_by_supplier:
-				item_delivered_qty  = frappe.db.sql("""select received_qty
+				item_delivered_qty  = frappe.db.sql("""select sum(qty)
 					from `tabPurchase Order Item` poi, `tabPurchase Order` po
 					where poi.prevdoc_detail_docname = %s
 						and poi.prevdoc_doctype = 'Sales Order'
 						and poi.item_code = %s
 						and poi.parent = po.name
+						and po.docstatus = 1
 						and po.status = 'Delivered'""", (item.name, item.item_code))
 
 				item_delivered_qty = item_delivered_qty[0][0] if item_delivered_qty else 0
-				item.db_set("delivered_qty", item_delivered_qty)
+				item.db_set("delivered_qty", flt(item_delivered_qty), update_modified=False)
 
 			delivered_qty += item.delivered_qty
 			tot_qty += item.qty
-
-		frappe.db.set_value("Sales Order", self.name, "per_delivered", flt(delivered_qty/tot_qty) * 100)
+			
+		frappe.db.set_value("Sales Order", self.name, "per_delivered", flt(delivered_qty/tot_qty) * 100, 
+		update_modified=False)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

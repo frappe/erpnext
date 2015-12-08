@@ -76,10 +76,10 @@ class StatusUpdater(Document):
 		self.update_qty()
 		self.validate_qty()
 
-	def set_status(self, update=False, status=None):
+	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
 			return
-
+				
 		if self.doctype in status_map:
 			_status = self.status
 
@@ -102,9 +102,10 @@ class StatusUpdater(Document):
 
 			if self.status != _status and self.status not in ("Submitted", "Cancelled"):
 				self.add_comment("Label", _(self.status))
-
+			
 			if update:
-				frappe.db.set_value(self.doctype, self.name, "status", self.status)
+				frappe.db.set_value(self.doctype, self.name, "status", self.status, 
+					update_modified=update_modified)
 
 	def validate_qty(self):
 		"""Validates qty at row level"""
