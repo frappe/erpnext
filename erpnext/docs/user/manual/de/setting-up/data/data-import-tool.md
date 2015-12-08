@@ -46,11 +46,13 @@ Wenn Sie alle Tabellen auswählen, dann erhalten Sie Spalten für alle Tabellen 
 
 Wenn Sie mehrere verschiedene Unterzeilen haben, dann müssen Sie einen neuen Hauptartikel in einer neuen Zeile eintragen. Sehen Sie hierzu das Beispiel unten:
 
-Main Table                          ~   Child Table
-Column 1    Column 2    Column 3    ~   Column 1    Column 2    Column 3
-v11         v12         v13             c11         c12         c13
-                                        c14         c15         c17
-v21         v22         v23             c21         c22         c23
+
+    Main Table                          ~   Child Table
+    Spalte 1    Spalte 2    Spalte 3    ~   Spalte 1    Spalte 2    Spalte 3
+    v11         v12         v13             c11         c12         c13
+                                            c14         c15         c17
+    v21         v22         v23             c21         c22         c23
+
 
 Um zu sehen, wie das gemacht wird, geben Sie manuell über Formulare einige Datensätze ein und exportieren Sie "Alle Tabellen" über "Mit Daten herunterladen".
 
