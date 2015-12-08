@@ -66,6 +66,6 @@ Der Urlaubsantrag ist ein gutes **Beispiel**, welches alle Bereiche des Berechti
 
 6\. **Der Mitarbeiter der Personalverwaltung sollte die Möglichkeit haben Urlaubsanträge an seine Untergebenen zu delegieren.** Er erhält die Erlaubis Benutzerberechtigungen einzustellen. Ein Nutzer mit der Rolle "Benutzer Personalverwaltung" wäre dann also in der Lage Benutzer-Berechtigungen und Urlaubsanträge für andere Benutzer zu definieren.
 
-<img class="screenshot" alt="Es dem Benutzer der Personalverwaltung ermöglochen, den Zugriff auf Urlaubsanträge zu delegieren, indem er 'Benutzerberechtigungen einstellen' markiert. Dies erlaubt es dem Benutzer der Personalverwaltung auf den Benutzerberechtigungen-Manager für 'Urlaubsanträge' zuzugreifen" src="{{docs_base_url}}/assets/img/users-and-permissions/setting-up-permissions-hr-user-role.png">
+<img class="screenshot" alt="Es dem Benutzer der Personalverwaltung ermöglichen, den Zugriff auf Urlaubsanträge zu delegieren, indem er 'Benutzerberechtigungen einstellen' markiert. Dies erlaubt es dem Benutzer der Personalverwaltung auf den Benutzerberechtigungen-Manager für 'Urlaubsanträge' zuzugreifen" src="{{docs_base_url}}/assets/img/users-and-permissions/setting-up-permissions-hr-user-role.png">
 
 {next}
