@@ -2,7 +2,7 @@
 
 Sie können global bestimmte Desktop-Module an- und ausschalten über:
 
-Einstellungen > Einstellungen > Module anzeigen / ausblenden
+> Einstellungen > Einstellungen > Module anzeigen / ausblenden
 
 Beispiel: Wenn Sie im Dienstleistungsbereich arbeiten, möchten Sie evtl. das Fertigungsmodul ausblenden. Dies können Sie über **Module anzeigen / ausblenden** tun.
 
