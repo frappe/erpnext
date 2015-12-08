@@ -159,6 +159,8 @@ class PurchaseOrder(BuyingController):
 	def on_cancel(self):
 		if self.has_drop_ship_item():
 			self.update_status_updater()
+			self.reset_received_qty_for_drop_ship_items()
+			self.update_delivered_qty_in_sales_order()
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		self.check_for_stopped_or_closed_status(pc_obj)
@@ -233,7 +235,12 @@ class PurchaseOrder(BuyingController):
 		for item in self.items:
 			if item.delivered_by_supplier == 1:
 				item.received_qty = item.qty
-
+	
+	def reset_received_qty_for_drop_ship_items(self):
+		for item in self.items:
+			if item.delivered_by_supplier == 1:
+				frappe.db.set_value("Purchase Order Item", item.name, "received_qty", 0.0)
+				
 @frappe.whitelist()
 def stop_or_unstop_purchase_orders(names, status):
 	if not frappe.has_permission("Purchase Order", "write"):

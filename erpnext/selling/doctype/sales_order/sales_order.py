@@ -271,13 +271,13 @@ class SalesOrder(SellingController):
 
 		for item in self.items:
 			if item.delivered_by_supplier:
-				item_delivered_qty  = frappe.db.sql("""select qty
+				item_delivered_qty  = frappe.db.sql("""select received_qty
 					from `tabPurchase Order Item` poi, `tabPurchase Order` po
-					where poi.prevdoc_docname = %s
+					where poi.prevdoc_detail_docname = %s
 						and poi.prevdoc_doctype = 'Sales Order'
 						and poi.item_code = %s
 						and poi.parent = po.name
-						and po.status = 'Delivered'""", (self.name, item.item_code))
+						and po.status = 'Delivered'""", (item.name, item.item_code))
 
 				item_delivered_qty = item_delivered_qty[0][0] if item_delivered_qty else 0
 				item.db_set("delivered_qty", item_delivered_qty)
