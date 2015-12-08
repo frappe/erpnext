@@ -25,7 +25,9 @@ Sie müssen auch die Kostenstelle angeben, auf die Ihr Ertrag gebucht wird. Erin
 So verbuchen Sie einen Verkauf aufgeschlüsselt:
 
 **Soll:** Kunde (Gesamtsumme) 
+
 **Haben:** Ertrag (Nettosumme, abzüglich Steuern für jeden Artikel) 
+
 **Haben:** Steuern (Verbindlichkeiten gegenüber dem Staat)
 
 > Um die Buchungen zu Ihrer Ausgangsrechnung nach dem Übertragen sehen zu können, klicken Sie auf Rechnungswesen > Hauptberichte > Hauptbuch.
