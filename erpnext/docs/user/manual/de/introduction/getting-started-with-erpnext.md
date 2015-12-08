@@ -4,7 +4,7 @@ Es gibt viele Ansatzpunkte für eine Einführung in ERPNext.
 
 ### 1\. Schauen Sie sich das Demoprogramm an
 
-Wenn Sie die Benutzerschnittstelle ausprobieren wollen und wissen wollen, wie sich die Software anfühlt, schauen Sie sich einfach die Demo an:
+Wenn Sie die Benutzerschnittstelle ausprobieren wollen und wissen wollen, wie sich die Software **anfühlt**, schauen Sie sich einfach die Demo an:
 
 * https://demo.erpnext.com
 
