@@ -14,7 +14,7 @@ https://github.com/frappe/erpnext
 
 Alternativen
 Es gibt viele Freie ERP-Systeme. Einige bekannte sind:
-1. Odoo
+1. Odoo<BR>
 2. OpenBravo
 3. Apache OfBiz
 4. xTuple
