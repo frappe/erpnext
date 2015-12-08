@@ -237,5 +237,5 @@ erpnext.patches.v6_10.fix_ordered_received_billed
 erpnext.patches.v6_10.fix_jv_total_amount #2015-11-30
 erpnext.patches.v6_10.email_digest_default_quote
 erpnext.patches.v6_10.fix_billed_amount_in_drop_ship_po
-erpnext.patches.v6_10.fix_delivery_status_of_drop_ship_item
+erpnext.patches.v6_10.fix_delivery_status_of_drop_ship_item #2015-12-08
 erpnext.patches.v5_8.tax_rule #2015-12-08

@@ -579,7 +579,7 @@ DocType: Lead,Campaign Name,Kampány neve
 ,Reserved,Fenntartott
 DocType: Purchase Order,Supply Raw Materials,Supply nyersanyagok
 DocType: Purchase Invoice,The date on which next invoice will be generated. It is generated on submit.,"Az időpont, amikor a következő számlán kerül előállításra. Úgy keletkezett benyújtani."
-apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +10,Current Assets,Befektetett eszközök
+apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py +10,Current Assets,Jelenlegi eszközök
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +92,{0} is not a stock Item,{0} nem Stock tétel
 DocType: Mode of Payment Account,Default Account,Alapértelmezett számla
 apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +157,Lead must be set if Opportunity is made from Lead,"Lead kell állítani, ha Opportunity készült Lead"
