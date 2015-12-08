@@ -2,31 +2,31 @@
 
 Machen Sie sich mit der Terminologie, die verwendet wird, und mit einigen Grundbegriffen von ERPNext vertraut, bevor Sie mit der Realisierung beginnen.
 
+* * *
 
+### Grundbegriffe
 
-Grundbegriffe
-
-Firma
+#### Firma
 Bezeichnung für die Firmendatensätze, die unter ERPNext verwendet werden. In ein und derselben Installation können Sie mehrere Firmendatensätze anlegen, die alle unterschiedliche juristische Personen darstellen. Die Buchführung wird für jede Firma unterschiedlich sein, aber sie teilen sich die Datensätze zu Kunden, Lieferanten und Artikeln.
 Rechnungswesen > Einstellungen > Firma
 
-Kunde
+#### Kunde
 Bezeichnung eines Kunden. Ein Kunde kann eine Einzelperson oder eine Organisation sein. Sie können für jeden Kunden mehrere verschiedene Kontakte und Adressen erstellen.
 Vertrieb > Dokumente > Kunde
 
-Lieferant
+#### Lieferant
 Bezeichnung eines Lieferanten von Waren oder Dienstleistungen. Ihr Telekommunikationsanbieter ist ein Lieferant, genauso wie Ihr Lieferant für Rohmaterial. Auch in diesem Fall kann der Lieferant eine Einzelperson oder eine Organisation sein und mehrere verschiedene Kontakte und Adressen haben.
 Einkauf > Dokumente > Lieferant
 
-Artikel
+#### Artikel
 Ein Produkt, ein Unterprodukt oder eine Dienstleistung, welche(s) entweder eingekauft, verkauft oder hergestellt wird, wird eindeutig identifiziert.
 Lagerbestand > Dokumente > Artikel
 
-Konto
+#### Konto
 Ein Konto ist der Oberbegriff, unter dem Finanztransaktionen und Unternehmensvorgänge ausgeführt werden. Beispiel: "Reisekosten" ist ein Konto, Der Kunde "Zoe", der Lieferant "Mae" sind Konten. ERPNext erstellt automatisch Konten für Kunden und Lieferanten.
 Rechnungswesen > Dokumente > Kontenplan
 
-Adresse
+#### Adresse
 Eine Adresse bezeichnet Einzelheiten zum Sitz eines Kunden oder Lieferanten. Dies können unterschiedliche Orte sein, wie z. B. Hauptbüro, Fertigung, Lager, Ladengeschäft etc.
 Vertrieb > Dokumente > Adresse
 
