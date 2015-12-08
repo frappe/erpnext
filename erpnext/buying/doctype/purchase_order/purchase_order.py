@@ -159,6 +159,7 @@ class PurchaseOrder(BuyingController):
 	def on_cancel(self):
 		if self.has_drop_ship_item():
 			self.update_status_updater()
+			self.update_delivered_qty_in_sales_order()
 
 		pc_obj = frappe.get_doc('Purchase Common')
 		self.check_for_stopped_or_closed_status(pc_obj)
@@ -216,7 +217,7 @@ class PurchaseOrder(BuyingController):
 
 		for so_name in sales_orders_to_update:
 			so = frappe.get_doc("Sales Order", so_name)
-			so.update_delivery_status(self.name)
+			so.update_delivery_status()
 			so.set_status(update=True)
 			so.notify_update()
 

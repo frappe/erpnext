@@ -280,6 +280,7 @@ def get_customer(user=None):
 		user = frappe.session.user
 
 	customer = frappe.db.get_value("Contact", {"email_id": user}, "customer")
+
 	if customer:
 		return frappe.get_doc("Customer", customer)
 
@@ -319,6 +320,17 @@ def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_
 		address.display = get_address_display(address)
 
 	return address_docs
+
+def set_customer_in_address(doc, method=None):
+	if doc.flags.linked:
+		return
+
+	doc.check_if_linked()
+
+	if not doc.flags.linked and (frappe.db.get_value("User", frappe.session.user, "user_type") == "Website User"):
+		# creates a customer if one does not exist
+		get_customer()
+		doc.link_address()
 
 @frappe.whitelist()
 def apply_shipping_rule(shipping_rule):

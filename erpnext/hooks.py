@@ -7,7 +7,7 @@ app_publisher = "Frappe Technologies Pvt. Ltd."
 app_description = """ERP made simple"""
 app_icon = "icon-th"
 app_color = "#e74c3c"
-app_version = "6.12.3"
+app_version = "6.12.4"
 app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
@@ -111,6 +111,9 @@ doc_events = {
 	"Price List": {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
 	},
+	"Address": {
+		"validate": "erpnext.shopping_cart.cart.set_customer_in_address"
+	}
 }
 
 scheduler_events = {

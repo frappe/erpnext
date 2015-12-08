@@ -9,7 +9,7 @@ make-field-visible-in-print-format
 making-custom-reports-in-erpnext
 managing-dynamic-link-fields
 module-visibility
-perm-level-error-in-permission-manager-1
+perm-level-error-in-permission-manager
 search-record-by-specific-field
 set-language
 set-precision-for-float-currency-and-percent-fields
