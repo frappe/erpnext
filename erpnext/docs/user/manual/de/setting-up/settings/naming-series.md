@@ -18,7 +18,7 @@ usw. Sie können auch für jeden Kundentyp oder für jedes Ihrer Einzelhandelsge
 
 Um einen Nummernkreis einzustellen, gehen Sie zu:
 
-Einstellungen > Daten > Nummernkreis
+> Einstellungen > Daten > Nummernkreis
 
 In diesem Formular,
 
