@@ -515,6 +515,7 @@ p {
 .fake-browser-frame {
   position: relative;
   margin: 24px auto 0px;
+  box-shadow: 0px -6px 100px 1px rgba(0, 0, 0, 0.1);
 }
 .fake-browser-frame::before {
   content: "";
@@ -524,13 +525,13 @@ p {
   left: 0px;
   right: 0px;
   border: 1px solid #d1d8dd;
-  background: #ffffff;
+  background: #f5f7fa;
   border-bottom: none;
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
 }
 .fake-browser-frame::after {
-  content: '\f111  \f111  \f111';
+  content: '\f111 \00a0\00a0 \f111 \00a0\00a0 \f111';
   position: absolute;
   color: #d1d8dd;
   top: -15px;
@@ -599,4 +600,7 @@ a.edit:visited {
   font-family: "Helvetica Neue", Helvetica, Arial, "Open Sans", sans-serif;
   color: #454e57;
   font-size: 16px;
+}
+.hero-and-content [data-html-block="hero"] {
+  overflow-y: hidden;
 }
