@@ -2,7 +2,7 @@
 
 Sie können Standardwerte für Ihre Dokumente über die globalen Voreinstellungen setzen
 
-Einstellungen > Einstellungen > Allgemeine Einstellungen
+> Einstellungen > Einstellungen > Allgemeine Einstellungen
 
 Immer dann, wenn ein neues Dokument erstellt wird, werden diese Werte als Standardeinstellungen verwendet.
 
