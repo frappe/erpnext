@@ -2,7 +2,7 @@
 
 Geben Sie Details zum Benutzerprofil, wie Name, Benutzer-ID und das bevorzugte Passwort ein.
 
-<img alt="User" class="screenshot"
+<img alt="Benutzer" class="screenshot"
 src="{{docs_base_url}}/assets/img/setup-wizard/step-3.png">
 
 ---
