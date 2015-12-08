@@ -4,7 +4,7 @@ Sie können ERPNext so lokalisieren, dass bestimmte Zeitzonen-, Datums-, Zahlen-
 
 Um die Systemeinstellungen zu öffnen, gehen Sie zu:
 
-Einstellungen > Einstellungen > Systemeinstellungen
+> Einstellungen > Einstellungen > Systemeinstellungen
 
 <img class="screenshot" alt="Systemeinstellungen" src="{{docs_base_url}}/assets/img/setup/settings/system-settings.png">
 
