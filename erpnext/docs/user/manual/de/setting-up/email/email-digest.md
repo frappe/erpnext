@@ -6,7 +6,7 @@ E-Mail-Berichte sind für Führungskräfte eine tolle Sache, um wichtige Kennzah
 
 Um einen E-Mail-Bericht einzurichten, gehen Sie zu:
 
-< Einstellungen > E-Mail > Täglicher E-Mail-Bericht
+> Einstellungen > E-Mail > Täglicher E-Mail-Bericht
 
 ### Beispiel
 
