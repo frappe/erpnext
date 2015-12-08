@@ -23,8 +23,11 @@ Um einen Workflow und Übergangsregeln zu erstellen, gehen Sie zu:
 Hinweise:
 
 > Hinweis 1: Wenn Sie einen Workflow erstellen überschreiben Sie grundlegend den Kode, der für dieses Dokument erstellt wurde. Dementsprechend arbeitet das Dokument dann nach Ihrem Workflow und nicht mehr auf dem voreingestellten Kode. Deshalb gibt es wahrscheinlich keine Schaltfläche zum Übertragen, wenn Sie diese nicht im Workflow definiert haben.
+
 > Hinweis 2: Der Dokumentenstatus für "Gespeichert" ist "0", für "Übertragen" "1" und für "Storniert" "2".
+
 > Hinweis 3: Ein Dokument kann nicht storniert werden bis es übertragen wurde.
+
 > Hinweis 4: Wenn Sie die Möglichkeit haben wollen zu stornieren, dann müssen Sie einen Workflow-Übergang erstellen, der Ihnen nach dem Übertragen das Stornieren anbietet.
 
 #### Beispiel eines Urlaubsantrags-Prozesses
