@@ -69,26 +69,26 @@ Artikelnummer: ABC001, Lager: Mumbai. Nehmen wir an, dass der Lagerbestand zum 1
  <table border="1" cellspacing="0px">
             <tbody>
                 <tr align="center" bgcolor="#EEE">
-                    <td><b>Posting Date</b>
+                    <td><b>Buchungsdatum</b>
                     </td>
-                    <td><b>Qty</b>
+                    <td><b>Menge</b>
                     </td>
-                    <td><b>Balance Qty</b>
+                    <td><b>Bestandsmenge</b>
                     </td>
-                    <td><b>Voucher Type</b>
+                    <td><b>Belegart</b>
                     </td>
                 </tr>
                 <tr>
-                    <td>10/01/2014</td>
+                    <td>10.01.2014</td>
                     <td align="center">100</td>
                     <td>100&nbsp;</td>
-                    <td>Purchase Receipt</td>
+                    <td>Kaufbeleg</td>
                 </tr>
                 <tr>
-                    <td>12/01/2014</td>
+                    <td>12.01.2014</td>
                     <td align="center">50</td>
                     <td>150</td>
-                    <td>Stock Reconciliation</td>
+                    <td>Bestandsabgleich</td>
                 </tr>
             </tbody>
         </table>
@@ -100,28 +100,28 @@ Nehmen wir an, dass zum 5. Januar 2014 eine Buchung zu einem Kaufbeleg erfolgt. 
 	<table border="1" cellspacing="0px">
         <tbody>
             <tr align="center" bgcolor="#EEE">
-                <td><b>Posting Date</b></td>
-                <td><b>Qty</b></td>
-                <td><b>Balance Qty</b></td>
-                <td><b>Voucher Type</b></td>
+                <td><b>Buchungsdatum</b></td>
+                <td><b>Menge</b></td>
+                <td><b>Bestandsmenge</b></td>
+                <td><b>Belegart</b></td>
             </tr>
             <tr>
-                <td>05/01/2014</td>
+                <td>05.01.2014</td>
                 <td align="center">20</td>
                 <td style="text-align: center;">20</td>
-                <td>Purchase Receipt</td>
+                <td>Kaufbeleg</td>
             </tr>
             <tr>
-                <td>10/01/2014</td>
+                <td>10.01.2014</td>
                 <td align="center">100</td>
                 <td style="text-align: center;">120</td>
-                <td>Purchase Receipt</td>
+                <td>Kaufbeleg</td>
             </tr>
             <tr>
-                <td>12/01/2014</td>
+                <td>12.01.2014</td>
                 <td align="center"><br></td>
                 <td style="text-align: center;"><b>150</b></td>
-                <td>Stock Reconciliation<br></td>
+                <td>Bestandsabgleich<br></td>
             </tr>
         </tbody>
 	</table>
