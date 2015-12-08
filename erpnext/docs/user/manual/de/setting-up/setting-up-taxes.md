@@ -42,7 +42,15 @@ Der Steuersatz, den Sie hier definieren, wird zum Standardsteuersatz für alle A
 In jeder Zeile müssen Sie folgendes angeben:
 
 * Typ der Kalulation:
-** Auf Nettosumme: Hier wird auf Basis der Nettogesamtsumme (Gesamtbetrag ohne Steuern) kalkuliert.
+
+    * Auf Nettosumme: Hier wird auf Basis der Nettogesamtsumme (Gesamtbetrag ohne Steuern) kalkuliert.
+    * Auf vorherige Zeilensumme/vorherigen Zeilenbetrag: Sie können Steuern auf Basis der vorherigen Zeilensumme/des vorherigen Zeilenbetrags ermitteln. Wenn Sie diese Option auswählen, wird die Steuer als Prozenzsatz der vorherigen Zeilensumme/des vorherigen Zeilenbetrags (in der Steuertabelle) angewandt. "Vorheriger Zeilenbetrag" meint hierbei einen bestimmten Steuerbetrag. Und "Vorherige Zeilensumme" bezeichnet die Nettosumme zuzüglich der zutreffenden Steuern in dieser Zeile. Geben Sie über das Feld "Zeile eingeben" die Zeilennummer an auf die die aktuell ausgewählte Steuer angewendet werden soll. Wenn Sie die Steuer auf die dritte Zeile anwenden wollengeben Sie im Eingabefeld "3" ein.
+
+    * Geben Sie in die Spalte "Satz" den aktuellen Wert für den Steuersatz ein.
+ 
+
+
+
 ** Auf vorherige Zeilensumme/vorherigen Zeilenbetrag: Sie können Steuern auf Basis der vorherigen Zeilensumme/des vorherigen Zeilenbetrags ermitteln. Wenn Sie diese Option auswählen, wird die Steuer als Prozenzsatz der vorherigen Zeilensumme/des vorherigen Zeilenbetrags (in der Steuertabelle) angewandt. "Vorheriger Zeilenbetrag" meint hierbei einen bestimmten Steuerbetrag. Und "Vorherige Zeilensumme" bezeichnet die Nettosumme zuzüglich der zutreffenden Steuern in dieser Zeile. Geben Sie über das Feld "Zeile eingeben" die Zeilennummer an auf die die aktuell ausgewählte Steuer angewendet werden soll. Wenn Sie die Steuer auf die dritte Zeile anwenden wollengeben Sie im Eingabefeld "3" ein.
 ** Geben Sie in die Spalte "Satz" den aktuellen Wert für den Steuersatz ein.
 * Kontenbezeichnung: Die Bezeichnung des Kontos, unter dem diee Steuer verbucht werden soll.
