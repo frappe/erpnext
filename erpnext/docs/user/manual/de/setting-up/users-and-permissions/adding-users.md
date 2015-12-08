@@ -10,7 +10,7 @@ Einstellungen > Benutzer > Benutzer
 
 ### 1. Übersicht der Benutzer
 
-<img class="screenshot" src="{{docs_base_url}}/assets/img/setup/users/user-1.png" alt="User List">
+<img class="screenshot" src="{{docs_base_url}}/assets/img/setup/users/user-1.png" alt="Benutzerliste">
 
 
 Um einen neuen Benutzer hinzuzufügen, klicken Sie auf "Neu".
@@ -27,18 +27,18 @@ Nach dem Hinzufügen dieser Details bitte den Benutzer abspeichern.
 
 Nach dem Speichern sehen Sie eine Liste der Rollen und daneben jeweils eine Schaltfläche zum Anklicken. Markieren Sie alle Rollen, von denen Sie möchten, dass sie der Benutzer bekommt, und speichern Sie das Dokument ab. Um zu sehen, welche Berechtigungen die einzelnen Rollen haben, klicken Sie auf den Rollennamen.
 
-<img class="screenshot" src="{{docs_base_url}}/assets/img/setup/users/user-2.png" alt="User Roles">
+<img class="screenshot" src="{{docs_base_url}}/assets/img/setup/users/user-2.png" alt="Benutzerrollen">
 
 ### 4. Zugriff auf Module einstellen
 
 Benutzer haben Zugriff auf alle Module, für die sie aufgrund Ihrer Rollen Berechtigungen haben. Wenn Sie bestimmte Module für den Zugriff sperren möchten, entfernen Sie die Markierung in der Liste.
 
-<img class="screenshot" src="{{docs_base_url}}/assets/img/setup/users/user-3.png" alt="User Block Module">
+<img class="screenshot" src="{{docs_base_url}}/assets/img/setup/users/user-3.png" alt="Geblockte Module für Benutzer">
 
 ### 5. Sicherheitseinstellungen
 
 Wenn Sie dem Benutzer nur zu bestimmten Bürozeiten oder an Wochenenden Zugriff auf das System gewähren möchten, stellen Sie das unter den Sicherheitseinstellungen ein.
 
-<img class="screenshot" src="{{docs_base_url}}/assets/img/setup/users/user-4.png" alt="User Security">
+<img class="screenshot" src="{{docs_base_url}}/assets/img/setup/users/user-4.png" alt="Sicherheitseinstellungen für Benutzer">
 
 {next}
