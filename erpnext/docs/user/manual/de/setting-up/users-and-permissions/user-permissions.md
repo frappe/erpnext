@@ -8,6 +8,7 @@ Beginnen Sie wie folgt:
 
 Einstellungen > Berechtigungen > Benutzerrechte-Manager
 
+
 Abbildung: Übersicht aus dem Benutzerberechtigungs-Manager die aufzeigt, wie Benutzer nur auf bestimmte Firmen zugreifen können
 
 #### Beispiel:
