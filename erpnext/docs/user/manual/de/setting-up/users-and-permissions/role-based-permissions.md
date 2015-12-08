@@ -4,7 +4,7 @@ ERPNext arbeitet mit einem rollenbasierten Berechtigungssystem. Das heißt, dass
 
 Wenn Sie das tun wollen, gehen Sie zu:
 
-Einstellungen > Berechtigungen > Rollenberechtigungen-Manager
+> Einstellungen > Berechtigungen > Rollenberechtigungen-Manager
 
 <img alt="Berechtigungen für Lesen, Schreiben, Erstellen, Übertragen und Abändern mit Hilfe des Rollenberechtigungen-Managers einstellen" class="screenshot" src="{{docs_base_url}}/assets/img/users-and-permissions/setting-up-permissions-leave-application.png">
 
@@ -30,7 +30,7 @@ Wenn dieser Punkt aktiviert ist, kann ein Benutzer mit dieser Rolle nur auf best
 
 Um Benutzerberechtigungen zu setzen, gehen Sie zu:
 
-Einstellungen > Berechtigungen > [Benutzerrechte-Manager]({{docs_base_url}}/user/manual/en/setting-up/users-and-permissions/user-permissions.html)
+> Einstellungen > Berechtigungen > [Benutzerrechte-Manager]({{docs_base_url}}/user/manual/en/setting-up/users-and-permissions/user-permissions.html)
 
 
 
