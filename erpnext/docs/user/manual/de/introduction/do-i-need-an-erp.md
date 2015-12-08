@@ -10,8 +10,8 @@ ERPNext ist ein modernes Werkzeug, welches nicht nur den Bereich Rechnungswesen 
 
 ### Vorteile gegenüber großen ERP-Systemen
 * $$$ - Geld sparen.
-* Leichtere Konfiguration: Große ERP-Systeme sind fast immer schwer einzurichten und stellen Ihnen unzählige Fragen, bevor Sie etwas Sinnvolles tun können.
-* Leichter zu nutzen: Eine moderne Webschnittstelle sorgt dafür, dass Ihre Mitarbeiter glücklich sind und sich auf bekanntem Territorium bewegen.
-* Freie Software: Diese Software ist frei und Sie kann installiert werden, wo immer Sie wollen.
+* **Leichtere Konfiguration:** Große ERP-Systeme sind fast immer schwer einzurichten und stellen Ihnen unzählige Fragen, bevor Sie etwas Sinnvolles tun können.
+* **Leichter zu nutzen:** Eine moderne Webschnittstelle sorgt dafür, dass Ihre Mitarbeiter glücklich sind und sich auf bekanntem Territorium bewegen.
+* **Freie Software:** Diese Software ist frei und Sie kann installiert werden, wo immer Sie wollen.
 
 {next}
