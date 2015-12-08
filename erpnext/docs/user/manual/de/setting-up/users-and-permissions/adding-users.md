@@ -6,7 +6,7 @@ Es gibt zwei Hauptarten von Benutzern: Webbenutzer und Systembenutzer. Systemben
 
 Für einen Benutzer können viele Informationen eingegeben werden. Im Sinne der Anwenderfreundlichkeit ist die Menge an Informationen, die für Webbenutzer eingegeben werden können, gering: Der Vorname und die Email-Adresse. Wichtig ist, dass Sie erkennen, dass die Email-Adresse der eindeutige Schlüssel (ID) dafür ist, einen Benutzer zu identifizieren.
 
-Einstellungen > Benutzer > Benutzer
+> Einstellungen > Benutzer > Benutzer
 
 ### 1. Übersicht der Benutzer
 
