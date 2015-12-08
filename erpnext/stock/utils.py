@@ -92,6 +92,9 @@ def update_bin(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 def get_incoming_rate(args):
 	"""Get Incoming Rate based on valuation method"""
 	from erpnext.stock.stock_ledger import get_previous_sle
+	
+	if isinstance(args, basestring):
+		args = json.loads(args)
 
 	in_rate = 0
 	if (args.get("serial_no") or "").strip():
