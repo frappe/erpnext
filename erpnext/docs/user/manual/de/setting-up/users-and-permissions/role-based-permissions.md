@@ -54,7 +54,7 @@ Der Urlaubsantrag ist ein gutes **Beispiel**, welches alle Bereiche des Berechti
 
 3\. **Der Personalmanager sollte alle Urlaubsanträge sehen können.** Erstellen Sie für den Personalmanager eine Berechtigungsregel auf der Ebene 0 mit Lese-Rechten. Die Option "Benutzerberechtigungen anwenden" sollte deaktiviert sein.
 
-<img class="screenshot" alt="Einem Personalmanager Rechte für Übertragen und Stornierene für Urlaubsanträge geben. 'Benutzerberechtigungen anwenden' ist demarkiert umd vollen Zugriff zu ermöglichen." src="{{docs_base_url}}/assets/img/users-and-permissions/setting-up-permissions-hr-manager-role.png">
+<img class="screenshot" alt="Einem Personalmanager Rechte für Übertragen und Stornieren für Urlaubsanträge geben. 'Benutzerberechtigungen anwenden' ist demarkiert um vollen Zugriff zu ermöglichen." src="{{docs_base_url}}/assets/img/users-and-permissions/setting-up-permissions-hr-manager-role.png">
 
 4\. **Der Urlaubsgenehmiger sollte die ihn betreffenden Urlaubsanträge lesen und aktualisieren können.** Der Urlaubsgenehmiger erhält Lese- und Schreibzugriff auf Ebene 0, und die Option "Benutzerberechtigungen anwenden" wird aktiviert. Zutreffende Mitarbeiter-Dokumente sollten in den Benutzerberechtigungen des Urlaubsgenehmigers aufgelistet sein. (Dieser Aufwand reduziert sich für Urlaubsgenehmiger, die in Mitarbeiterdokumenten aufgeführt werden, indem über das Programm Datensätze für Benutzerberechtigungen erstellt werden.)
 
