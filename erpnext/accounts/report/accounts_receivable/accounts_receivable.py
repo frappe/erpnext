@@ -24,7 +24,7 @@ class ReceivablePayableReport(object):
 		if party_naming_by == "Naming Series":
 			columns += [args.get("party_type") + " Name::110"]
 
-		columns += [_("Voucher Type") + "::110", _("Voucher No") + ":Dynamic Link/Voucher Type:120",
+		columns += [_("Voucher Type") + "::110", _("Voucher No") + ":Dynamic Link/"+_("Voucher Type")+":120",
 			_("Due Date") + ":Date:80"]
 
 		if args.get("party_type") == "Supplier":
