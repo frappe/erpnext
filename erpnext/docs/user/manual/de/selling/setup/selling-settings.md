@@ -2,7 +2,7 @@
 
 In den Vertriebseinstellungen können Sie Eigenheiten angeben, die bei Ihren Vertriebstransaktionen mit berücksichtigt werden. Im Folgenden sprechen wir jeden einzelnen Punkt an.
 
-
+##<img class="screenshot" alt="Vertriebseinstellungen" src="{{docs_base_url}}/assets/img/selling/selling-settings.png">#
 
 ### 1\. Benennung der Kunden nach
 
@@ -10,7 +10,7 @@ Wenn ein Kunde abgespeichert wird, generiert das System eine einzigartige ID fü
 
 Als Standardeinstellung wird der Kunde mit dem Kundennamen abgespeichert. When Sie möchten, dass der Kunde unter Verwendung eines Nummernkreises abgespeichert wird, sollten Sie "Benennung der Kunden nach" auf "Nummernkreis" einstellen.
 
-Hier ein Beispiel für Kunden-IDs, die über einen Nummernkreis abgespeichert werden: CUST00001, CUST00002, CUST00003 ... und so weiter.
+Hier ein Beispiel für Kunden-IDs, die über einen Nummernkreis abgespeichert werden: `CUST00001, CUST00002, CUST00003 ...` und so weiter.
 
 Sie können den Nummernkreis für die Kundenbenennung wie folgt einstellen:
 
@@ -28,18 +28,18 @@ Die Kundengruppe in diesem Feld wird automatisch aktualisiert, wenn Sie ein Neuk
 Die Region, die in diesem Feld angegeben wird, wird automatisch im Feld "Region" im Kundenstamm eingetragen.
 Wie in der Kundengruppe, wird die Region auch angefragt, wenn das System im Hintergrund versucht einen Kunden anzulegen.
 
-5. Standardpreisliste
+### 5\. Standardpreisliste
 Die Preisliste, die in diesem Feld eingetragen wird, wird automatisch in das Preislistenfeld bei Vertriebstransaktionen übernommen.
 
-6. Kundenauftrag erforderlich
+### 6\. Kundenauftrag erforderlich
 Wenn Sie möchten, dass die Anlage eines Kundenauftrages zwingend erforderlich ist, bevor eine Ausgangsrechnung erstellt wird, dann sollten Sie im Feld "Kundenauftrag benötigt" JA auswählen. Standardmäßig ist der Wert auf NEIN voreingestellt.
 
-7. Lieferschein erforderlich
+### 7\. Lieferschein erforderlich
 Wenn Sie möchten, dass die Anlage eines Lieferscheins zwingend erforderlich ist, bevor eine Ausgangsrechnung erstellt wird, dann sollten Sie im Feld "Lieferschein benötigt" JA auswählen. Standardmäßig ist der Wert auf NEIN voreingestellt.
 
-8. Gleiche Preise während des gesamten Verkaufszyklus beibehalten
+### 8\. Gleiche Preise während des gesamten Verkaufszyklus beibehalten
 Das System geht standardmäßig davon aus, dass der Preis während des gesamten Vertriebszyklus (Kundenbestellung - Lieferschein - Ausgangsrechnung) gleich bleibt. Wenn Sie bemerken, dass sich der Preis währen des Zyklus ändern könnte, und Sie die Einstellung des gleichbleibenden Preises umgehen müssen, sollten Sie dieses Feld deaktivieren und speichern.
 
-9. Benutzer erlauben, die Preisliste zu Transaktionen zu bearbeiten
+### 9\. Benutzer erlauben, die Preisliste zu Transaktionen zu bearbeiten
 Die Artikeltabelle einer Vertriebstransaktion hat ein Feld, das als Preislisten-Preis bezeichnet wird. Dieses Feld kann standardmäßig in keiner Vertriebstransaktion bearbeitet werden. Damit wird sicher gestellt, dass der Preis für alle Artikel aus dem Datensatz für den Artikelpreis erstellt wird, und der Benutzer keine Möglichkeit hat, hier einzuwirken.
 Wenn Sie einem Benutzer ermöglichen müssen, den Artikelpreis, der aus der Preisliste gezogen wird, zu ändern, sollten Sie dieses Feld deaktivieren.
