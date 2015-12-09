@@ -228,44 +228,142 @@ Nehmen wir an, dass Sie eine Kundenbestellung von "Jane Doe" über 5 Stück des 
 
 Da der Artikel aus dem Lager "In Verkaufsstellen" geliefert wird, wird das Konto "In Verkaufsstellen" entlastet und ein Betrag in gleicher Höhe dem Aufwandskonto "Selbstkosten" belastet. Der belastete/entlastete Betrag ist gleich dem Gesamtwert (Einkaufskosten) des Verkaufsartikels. Und der Wert wird gemäß der bevorzugten Bewertungsmethode (FIFO/Gleitender Durchschnitt) oder den tatsächlichen Kosten eines serialisierten Artikels kalkuliert.
 
-Ausgangsrechnung mit Lageraktualisierung
+
+    
+    
+        
+    In diesem Beispiel gehen wir davon aus, dass wir als Berwertungsmethode FIFO verwenden. 
+    Bewertungpreis  = Einkaufpreis + In der Bewertung enthaltene Abgaben/Gebühren 
+                    = 200 + (250 * (2000 / 2500) / 10) 
+                    = 220
+    Gesamtsumme der Bewertung = 220 * 5 
+                            = 1100
+        
+    
+
+* * *
+
+### Ausgangsrechnung mit Lageraktualisierung
 Nehmen wir an, dass Sie zur obigen Bestellung keinen Lieferschein erstellt haben sondern direkt eine Ausgangsrechnung mit der Option "Lager aktualisieren" erstellt haben. Die Details der Ausgangsrechnung sind die gleichen wie bei obigem Lieferschein.
 
-Lagerbuch
+**Lagerbuch**
 
-Hauptbuch
+![si<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-7.png)
+
+**Hauptbuch**
+
+![si<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-8.png)
 
 Hier werden, im Gegensatz zu den normalen Buchungen für Rechnungen, die Konten "In Verkaufsstellen" und "Selbstkosten" basierend auf der Bewertung beeinflusst.
 
-Lagerbuchung (Materialschein)
+* * *
 
-Artikel:
-Artikel                   Eingangslager            Menge    Preis   Summe
-RM0001                    In den Verkaufsstellen   50       220     11.000
+### Lagerbuchung (Materialschein)
 
-Lagerbuch
+**Artikel:**
 
-Hauptbuch
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Artikel/th>
+            <th>Eingangslager</th>
+            <th>Menge</th>
+            <th>Preis</th>
+            <th>Summe</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>RM0001</td>
+            <td>In den Verkaufsstellen</td>
+            <td>50</td>
+            <td>220</td>
+            <td>11000</td>
+        </tr>
+    </tbody>
+</table>
 
-Lagerbuchung (Materialanfrage)
+**Lagerbuch**
 
-Artikel:
-Artikel                   Ausgangslager            Menge    Preis   Summe
-RM0001                    In den Verkaufsstellen   10       220     2.200
+![mr<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-9.png)
 
-Lagerbuch
+**Hauptbuch**
 
-Hauptbuch
+![mr<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-10.png)
 
-Lagerbuchung (Materialübertrag)
+* * *
 
-Artikel:
-Artikel                   Ausgangslager            Eingangslager  Menge    Preis   Summe
-RM0001                    In den Verkaufsstellen   Fertigung      10       220     2.200
+### Lagerbuchung (Materialanfrage)
 
-Lagerbuch
+**Artikel:**
 
-Hauptbuch
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Artikel</th>
+            <th>Ausgangslager</th>
+            <th>Menge</th>
+            <th>Preis</th>
+            <th>Summe</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>RM0001</td>
+            <td>In den Verkaufsstellen</td>
+            <td>10</td>
+            <td>220</td>
+            <td>2200</td>
+        </tr>
+    </tbody>
+</table>
+
+**Lagerbuch**
+
+![mi<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-11.png)
+
+**Hauptbuch**
+
+![mi<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-12.png)
+
+* * *
+
+### Lagerbuchung (Materialübertrag)
+
+**Artikel:**
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Artikel</th>
+            <th>Ausgangslager</th>
+            <th>Eingangslager</th>
+            <th>Menge</th>
+            <th>Preis</th>
+            <th>Summe</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>RM0001</td>
+            <td>In den Verkaufsstellen</td>
+            <td>Fertigung</td>
+            <td>10</td>
+            <td>220</td>
+            <td>2200</td>
+        </tr>
+    </tbody>
+</table>
+
+**Lagerbuch**
+
+![mtn<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-13.png)
+
+**Hauptbuch**
+
+![mtn<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-14.png)
+
+
 
 
 
