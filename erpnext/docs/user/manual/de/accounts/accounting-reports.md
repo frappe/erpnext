@@ -9,7 +9,7 @@ Das Hauptbuch basiert auf der Tabelle der Hauptbucheinträge und kann nach einem
 <img alt="Hauptbuch" class="screenshot"
     src="{{docs_base_url}}/assets/img/accounts/general-ledger.png">
 
-### Probebilanzz
+### Probebilanz
 
 Eine Probebilanz ist eine Liste von Kontoständen aller Konten (Bücher und Gruppen) zu einem bestimmten Datum. Für jedes Konto wird folgendes angezeigt:
 
