@@ -71,7 +71,7 @@ Nehmen wir an, dass das Paypal-Konto folgende Beträge, die noch nicht auf Ihr a
 		<tr>
 			<td>Datum</td>
 			<td>Konto</td>
-			<td>Soll (EUR)</td>
+			<td>Soll (USD)</td>
 			<td>Wechselkurs</td>
 		</tr>
 	</thead>
