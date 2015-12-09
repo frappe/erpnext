@@ -47,19 +47,6 @@ Beispiel: Wenn Sie die Kontenstände von drei Bankkonten einpflegen möchten, da
 
 ![Eröffnungsbuchung]({{docs_base_url}}/assets/old_images/erpnext/opening-entry-2.png)
 
-Belegart: Journalbuchung
-
-Konto      			Soll      Haben
-------------------------------------------------
-Bank 1     			xxx
-Bank 2     			xxx
-Bank 3     			xxx
-Temporäre Verbindlichkeit		  xxx
-------------------------------------------------
-				xxx	  xxx
-
-Ist Eröffnung: Ja
-
 Um einen Ausgleich herzustellen, wird ein temporäres Konto für Vermögen und Verbindlichkeiten verwendet. Wenn Sie einen Anfangsbestand in einem Verbindlichkeitenkonto einpflegen, können Sie zum Ausgleich ein temporäres Vermögenskonto verwenden.
 
 Auf diese Art und Weise können Sie den Anfangsbestand auf Vermögens- und Verbindlichkeitenkonten erstellen.
