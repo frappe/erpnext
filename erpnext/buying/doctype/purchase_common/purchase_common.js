@@ -58,6 +58,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	refresh: function(doc) {
 		this.frm.toggle_display("supplier_name",
 			(this.supplier_name && this.frm.doc.supplier_name!==this.frm.doc.supplier));
+
+		if(this.frm.doctype==="Purchase Order" || this.frm.doctype==="Material Request") {
+			this.set_from_product_bundle();
+		}
+
 		this._super();
 	},
 
@@ -157,6 +162,13 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	},
 	add_deduct_tax: function(doc, cdt, cdn) {
 		this.calculate_taxes_and_totals();
+	},
+
+	set_from_product_bundle: function() {
+		var me = this;
+		this.frm.add_custom_button(__("From Product Bundle"), function() {
+			erpnext.buying.get_items_from_product_bundle(me.frm);
+		});
 	}
 });
 
@@ -179,4 +191,79 @@ erpnext.buying.get_default_bom = function(frm) {
 			})
 		}
 	});
+}
+
+erpnext.buying.get_items_from_product_bundle = function(frm) {
+	var dialog = new frappe.ui.Dialog({
+		title: __("Get Items from Product Bundle"),
+		fields: [
+			{
+				"fieldtype": "Link",
+				"label": __("Product Bundle"),
+				"fieldname": "product_bundle",
+				"options":"Product Bundle",
+				"reqd": 1
+			},
+			{
+				"fieldtype": "Currency",
+				"label": __("Quantity"),
+				"fieldname": "quantity",
+				"reqd": 1,
+				"default": 1
+			},
+			{
+				"fieldtype": "Button",
+				"label": __("Get Items"),
+				"fieldname": "get_items",
+				"cssClass": "btn-primary"
+			}
+		]
+	});
+
+	dialog.fields_dict.get_items.$input.click(function() {
+		args = dialog.get_values();
+		if(!args) return;
+		dialog.hide();
+		return frappe.call({
+			type: "GET",
+			method: "erpnext.stock.doctype.packed_item.packed_item.get_items_from_product_bundle",
+			args: {
+				args: {
+					item_code: args.product_bundle,
+					quantity: args.quantity,
+					parenttype: frm.doc.doctype,
+					parent: frm.doc.name,
+					supplier: frm.doc.supplier,
+					currency: frm.doc.currency,
+					conversion_rate: frm.doc.conversion_rate,
+					price_list: frm.doc.buying_price_list,
+					price_list_currency: frm.doc.price_list_currency,
+					plc_conversion_rate: frm.doc.plc_conversion_rate,
+					company: frm.doc.company,
+					is_subcontracted: frm.doc.is_subcontracted,
+					transaction_date: frm.doc.transaction_date || frm.doc.posting_date,
+					ignore_pricing_rule: frm.doc.ignore_pricing_rule
+				}
+			},
+			freeze: true,
+			callback: function(r) {
+				if(!r.exc && r.message) {
+					for ( var i=0; i< r.message.length; i++ ) {
+						var d = frm.add_child("items");
+						var item = r.message[i];
+						for ( var key in  item) {
+							if ( !is_null(item[key]) ) {
+								d[key] = item[key];
+							}
+						}
+						if(frappe.meta.get_docfield(d.doctype, "price_list_rate", d.name)) {
+							frm.script_manager.trigger("price_list_rate", d.doctype, d.name);
+						}
+					}
+					frm.refresh_field("items");
+				}
+			}
+		})
+	});
+	dialog.show();
 }

@@ -2,7 +2,7 @@
 	{%= frappe.boot.letter_heads[frappe.defaults.get_default("letter_head")] %}
 </div>
 <h2 class="text-center">{%= __("Bank Reconciliation Statement") %}</h2>
-<h4 class="text-center">{%= filters.account && (filters.account + ", ")  || "" %} {%= filters.company %}</h4>
+<h4 class="text-center">{%= filters.account %}</h4>
 <hr>
 <table class="table table-bordered">
 	<thead>
@@ -16,31 +16,31 @@
 	</thead>
 	<tbody>
 		{% for(var i=0, l=data.length; i<l; i++) { %}
-			{% if (data[i][__("Posting Date")]) { %}
+			{% if (data[i]["posting_date"]) { %}
 			<tr>
-				<td>{%= dateutil.str_to_user(data[i][__("Posting Date")]) %}</td>
-				<td>{%= data[i][__("Journal Entry")] %}</td>
-				<td>{%= __("Against") %}: {%= data[i][__("Against Account")] %}
-					{% if (data[i][__("Reference")]) { %}
-						<br>{%= __("Reference") %}: {%= data[i][__("Reference")] %}
-						{% if (data[i][__("Ref Date")]) { %}
-							<br>{%= __("Reference Date") %}: {%= dateutil.str_to_user(data[i][__("Ref Date")]) %}
+				<td>{%= dateutil.str_to_user(data[i]["posting_date"]) %}</td>
+				<td>{%= data[i]["journal_entry"] %}</td>
+				<td>{%= __("Against") %}: {%= data[i]["against_account"] %}
+					{% if (data[i]["reference"]) { %}
+						<br>{%= __("Reference") %}: {%= data[i]["reference"] %}
+						{% if (data[i]["ref_date"]) { %}
+							<br>{%= __("Reference Date") %}: {%= dateutil.str_to_user(data[i]["ref_date"]) %}
 						{% } %}
 					{% } %}
-					{% if (data[i][__("Clearance Date")]) { %}
-						<br>{%= __("Clearance Date") %}: {%= dateutil.str_to_user(data[i][__("Clearance Date")]) %}
+					{% if (data[i]["clearance_date"]) { %}
+						<br>{%= __("Clearance Date") %}: {%= dateutil.str_to_user(data[i]["clearance_date"]) %}
 					{% } %}
 				</td>
-				<td style="text-align: right">{%= format_currency(data[i][__("Debit")]) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i][__("Credit")]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["debit"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["credit"]) %}</td>
 			</tr>
 			{% } else { %}
 			<tr>
 				<td></td>
 				<td></td>
-				<td>{%= data[i][__("Journal Entry")] %}</td>
-				<td style="text-align: right">{%= format_currency(data[i][__("Debit")]) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i][__("Credit")]) %}</td>
+				<td>{%= data[i]["journal_entry"] %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["debit"]) %}</td>
+				<td style="text-align: right">{%= format_currency(data[i]["credit"]) %}</td>
 			</tr>
 			{% } %}
 		{% } %}

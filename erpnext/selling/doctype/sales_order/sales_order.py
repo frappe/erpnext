@@ -66,12 +66,6 @@ class SalesOrder(SellingController):
 		for d in self.get('items'):
 			check_list.append(cstr(d.item_code))
 
-			if (frappe.db.get_value("Item", d.item_code, "is_stock_item")==1 or
-				(self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
-				and not d.warehouse and not cint(d.delivered_by_supplier):
-				frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code),
-					WarehouseRequired)
-
 			# used for production plan
 			d.transaction_date = self.transaction_date
 
@@ -116,14 +110,15 @@ class SalesOrder(SellingController):
 				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project_name))
 
 	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_warehouse_company
-
-		warehouses = list(set([d.warehouse for d in
-			self.get("items") if d.warehouse]))
-
-		for w in warehouses:
-			validate_warehouse_company(w, self.company)
-
+		super(SalesOrder, self).validate_warehouse()
+		
+		for d in self.get("items"):
+			if (frappe.db.get_value("Item", d.item_code, "is_stock_item")==1 or
+				(self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))) \
+				and not d.warehouse and not cint(d.delivered_by_supplier):
+				frappe.throw(_("Delivery warehouse required for stock item {0}").format(d.item_code),
+					WarehouseRequired)
+			
 	def validate_with_previous_doc(self):
 		super(SalesOrder, self).validate_with_previous_doc({
 			"Quotation": {
@@ -236,13 +231,13 @@ class SalesOrder(SellingController):
 					item_wh_list.append([item_code, warehouse])
 
 		for d in self.get("items"):
-			if (not so_item_rows or d.name in so_item_rows):
-				_valid_for_reserve(d.item_code, d.warehouse)
-
+			if (not so_item_rows or d.name in so_item_rows) and not d.delivered_by_supplier:
 				if self.has_product_bundle(d.item_code):
 					for p in self.get("packed_items"):
 						if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
 							_valid_for_reserve(p.item_code, p.warehouse)
+				else:
+					_valid_for_reserve(d.item_code, d.warehouse)
 
 		for item_code, warehouse in item_wh_list:
 			update_bin_qty(item_code, warehouse, {
@@ -270,27 +265,29 @@ class SalesOrder(SellingController):
 		if exc_list:
 			frappe.throw('\n'.join(exc_list))
 
-	def update_delivery_status(self, po_name):
+	def update_delivery_status(self):
 		"""Update delivery status from Purchase Order for drop shipping"""
 		tot_qty, delivered_qty = 0.0, 0.0
 
 		for item in self.items:
 			if item.delivered_by_supplier:
-				item_delivered_qty  = frappe.db.sql("""select qty
+				item_delivered_qty  = frappe.db.sql("""select sum(qty)
 					from `tabPurchase Order Item` poi, `tabPurchase Order` po
-					where poi.prevdoc_docname = %s
+					where poi.prevdoc_detail_docname = %s
 						and poi.prevdoc_doctype = 'Sales Order'
 						and poi.item_code = %s
 						and poi.parent = po.name
-						and po.status = 'Delivered'""", (self.name, item.item_code))
+						and po.docstatus = 1
+						and po.status = 'Delivered'""", (item.name, item.item_code))
 
 				item_delivered_qty = item_delivered_qty[0][0] if item_delivered_qty else 0
-				item.db_set("delivered_qty", item_delivered_qty)
+				item.db_set("delivered_qty", flt(item_delivered_qty), update_modified=False)
 
 			delivered_qty += item.delivered_qty
 			tot_qty += item.qty
-
-		frappe.db.set_value("Sales Order", self.name, "per_delivered", flt(delivered_qty/tot_qty) * 100)
+			
+		frappe.db.set_value("Sales Order", self.name, "per_delivered", flt(delivered_qty/tot_qty) * 100, 
+		update_modified=False)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -389,7 +386,7 @@ def make_delivery_note(source_name, target_doc=None):
 				"parent": "against_sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.delivered_qty < doc.qty and doc.delivered_by_supplier!=1
+			"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
@@ -435,7 +432,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				"parent": "sales_order",
 			},
 			"postprocess": update_item,
-			"condition": lambda doc: doc.qty and (doc.base_amount==0 or doc.billed_amt < doc.amount)
+			"condition": lambda doc: doc.qty and (doc.base_amount==0 or abs(doc.billed_amt) < abs(doc.amount))
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",
@@ -536,8 +533,14 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 		default_price_list = frappe.get_value("Supplier", for_supplier, "default_price_list")
 		if default_price_list:
 			target.buying_price_list = default_price_list
+			
+		if source.shipping_address_name:
+			target.customer_address = source.shipping_address_name
+			target.customer_address_display = source.shipping_address
+		else:
+			target.customer_address = source.customer_address
+			target.customer_address_display = source.address_display
 
-		target.delivered_by_supplier = 1
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
@@ -549,9 +552,7 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 		"Sales Order": {
 			"doctype": "Purchase Order",
 			"field_map": {
-				"customer_address": "customer_address",
 				"contact_person": "customer_contact_person",
-				"address_display": "customer_address_display",
 				"contact_display": "customer_contact_display",
 				"contact_mobile": "customer_contact_mobile",
 				"contact_email": "customer_contact_email",
@@ -607,7 +608,7 @@ def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 			name, supplier_name
 		limit %(start)s, %(page_len)s """.format(**{
 			'field': fields,
-			'key': searchfield
+			'key': frappe.db.escape(searchfield)
 		}), {
 			'txt': "%%%s%%" % txt,
 			'_txt': txt.replace("%", ""),

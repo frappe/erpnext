@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.utils import flt, cstr, nowdate, add_days, cint
+from frappe import _
 
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
@@ -48,7 +49,7 @@ def _reorder_item():
 		# projected_qty will be 0 if Bin does not exist
 		projected_qty = flt(item_warehouse_projected_qty.get(item_code, {}).get(warehouse))
 
-		if reorder_level and projected_qty < reorder_level:
+		if reorder_level and projected_qty <= reorder_level:
 			deficiency = reorder_level - projected_qty
 			if deficiency > reorder_qty:
 				reorder_qty = deficiency
@@ -114,7 +115,7 @@ def create_material_request(material_requests):
 				mr.update({
 					"company": company,
 					"transaction_date": nowdate(),
-					"material_request_type": request_type
+					"material_request_type": "Material Transfer" if request_type=="Transfer" else request_type
 				})
 
 				for d in items:
@@ -162,17 +163,12 @@ def send_email_notification(mr_list):
 		and r.role in ('Purchase Manager','Stock Manager')
 		and p.name not in ('Administrator', 'All', 'Guest')""")
 
-	msg="""<h3>Following Material Requests has been raised automatically \
-		based on item reorder level:</h3>"""
-	for mr in mr_list:
-		msg += "<p><b><u>" + mr.name + """</u></b></p><table class='table table-bordered'><tr>
-			<th>Item Code</th><th>Warehouse</th><th>Qty</th><th>UOM</th></tr>"""
-		for item in mr.get("items"):
-			msg += "<tr><td>" + item.item_code + "</td><td>" + item.warehouse + "</td><td>" + \
-				cstr(item.qty) + "</td><td>" + cstr(item.uom) + "</td></tr>"
-		msg += "</table>"
+	msg = frappe.render_template("templates/emails/reorder_item.html", {
+		"mr_list": mr_list
+	})
+
 	frappe.sendmail(recipients=email_list,
-		subject='Auto Material Request Generation Notification', message = msg)
+		subject=_('Auto Material Requests Generated'), message = msg)
 
 def notify_errors(exceptions_list):
 	subject = "[Important] [ERPNext] Auto Reorder Errors"

@@ -64,6 +64,7 @@ class SalesInvoice(SellingController):
 			self.validate_pos()
 
 		if cint(self.update_stock):
+			self.validate_dropship_item()
 			self.validate_item_code()
 			self.validate_warehouse()
 			self.update_current_stock()
@@ -155,7 +156,7 @@ class SalesInvoice(SellingController):
 				'second_join_field': 'so_detail',
 				'overflow_type': 'delivery',
 				'extra_cond': """ and exists(select name from `tabSales Invoice`
-					where name=`tabSales Invoice Item`.parent and ifnull(update_stock, 0) = 1)"""
+					where name=`tabSales Invoice Item`.parent and update_stock = 1)"""
 			},
 			{
 				'source_dt': 'Sales Invoice Item',
@@ -359,8 +360,8 @@ class SalesInvoice(SellingController):
 		"""check for does customer belong to same project as entered.."""
 		if self.project_name and self.customer:
 			res = frappe.db.sql("""select name from `tabProject`
-				where name = %s and (customer = %s or
-					ifnull(customer,'')='')""", (self.project_name, self.customer))
+				where name = %s and (customer = %s or customer is null or customer = '')""",
+				(self.project_name, self.customer))
 			if not res:
 				throw(_("Customer {0} does not belong to project {1}").format(self.customer,self.project_name))
 
@@ -379,6 +380,8 @@ class SalesInvoice(SellingController):
 				msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
 
 	def validate_warehouse(self):
+		super(SalesInvoice, self).validate_warehouse()
+		
 		for d in self.get('items'):
 			if not d.warehouse:
 				frappe.throw(_("Warehouse required at Row No {0}").format(d.idx))
@@ -407,6 +410,12 @@ class SalesInvoice(SellingController):
 		if self.c_form_applicable == 'Yes' and self.c_form_no:
 			msgprint(_("Please remove this Invoice {0} from C-Form {1}")
 				.format(self.name, self.c_form_no), raise_exception = 1)
+	
+	def validate_dropship_item(self):
+		for item in self.items:
+			if item.sales_order:
+				if frappe.db.get_value("Sales Order Item", item.so_detail, "delivered_by_supplier"):
+					frappe.throw(_("Could not update stock, invoice contains drop shipping item."))
 
 	def update_current_stock(self):
 		for d in self.get('items'):
@@ -434,7 +443,7 @@ class SalesInvoice(SellingController):
 
 		if not warehouse:
 			global_pos_profile = frappe.db.sql("""select name, warehouse from `tabPOS Profile`
-				where ifnull(user,'') = '' and company = %s""", self.company)
+				where (user is null or user = '') and company = %s""", self.company)
 
 			if global_pos_profile:
 				warehouse = global_pos_profile[0][1]

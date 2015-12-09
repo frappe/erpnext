@@ -148,11 +148,11 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 					$.each(["from_bom", "bom_no", "fg_completed_qty", "use_multi_level_bom"], function(i, field) {
 						me.frm.set_value(field, r.message[field]);
 					})
-					
+
 					if (me.frm.doc.purpose == "Material Transfer for Manufacture" && !me.frm.doc.to_warehouse)
 						me.frm.set_value("to_warehouse", r.message["wip_warehouse"]);
-					
-					
+
+
 					if (me.frm.doc.purpose == "Manufacture") {
 						if(r.message["additional_costs"].length) {
 							$.each(r.message["additional_costs"], function(i, row) {
@@ -160,7 +160,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 							})
 							refresh_field("additional_costs");
 						}
-						
+
 						if (!me.frm.doc.from_warehouse) me.frm.set_value("from_warehouse", r.message["wip_warehouse"]);
 						if (!me.frm.doc.to_warehouse) me.frm.set_value("to_warehouse", r.message["fg_warehouse"]);
 					}
@@ -171,7 +171,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	toggle_enable_bom: function() {
-		this.frm.toggle_enable("bom_no", !in_list(["Manufacture", "Material Transfer for Manufacture"], this.frm.doc.purpose));
+		this.frm.toggle_enable("bom_no", !!!this.frm.doc.production_order);
 	},
 
 	add_excise_button: function() {
@@ -252,11 +252,11 @@ cur_frm.cscript.toggle_related_fields = function(doc) {
 	if(doc.purpose == "Material Receipt") {
 		cur_frm.set_value("from_bom", 0);
 	}
-	
+
 	// Addition costs based on purpose
-	cur_frm.toggle_display(["additional_costs", "total_additional_costs", "additional_costs_section"], 
+	cur_frm.toggle_display(["additional_costs", "total_additional_costs", "additional_costs_section"],
 		doc.purpose!='Material Issue');
-	
+
 	cur_frm.fields_dict["items"].grid.set_column_disp("additional_cost", doc.purpose!='Material Issue');
 }
 

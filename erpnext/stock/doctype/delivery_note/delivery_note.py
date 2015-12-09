@@ -37,7 +37,7 @@ class DeliveryNote(SellingController):
 			'second_join_field': 'so_detail',
 			'overflow_type': 'delivery',
 			'second_source_extra_cond': """ and exists(select name from `tabSales Invoice`
-				where name=`tabSales Invoice Item`.parent and ifnull(update_stock, 0) = 1)"""
+				where name=`tabSales Invoice Item`.parent and update_stock = 1)"""
 		},
 		{
 			'source_dt': 'Delivery Note Item',
@@ -65,11 +65,14 @@ class DeliveryNote(SellingController):
 		}]
 
 	def onload(self):
-		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabSales Invoice Item`
+		billed_qty = frappe.db.sql("""select sum(qty) from `tabSales Invoice Item`
 			where docstatus=1 and delivery_note=%s""", self.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.get("items")))
-			self.get("__onload").billing_complete = (billed_qty[0][0] == total_qty)
+			self.set_onload("billing_complete", (billed_qty[0][0] == total_qty))
+			
+		self.set_onload("has_return_entry", len(frappe.db.exists({"doctype": "Delivery Note", 
+			"is_return": 1, "return_against": self.name, "docstatus": 1})))
 
 	def before_print(self):
 		def toggle_print_hide(meta, fieldname):
@@ -167,6 +170,8 @@ class DeliveryNote(SellingController):
 					chk_dupl_itm.append(f)
 
 	def validate_warehouse(self):
+		super(DeliveryNote, self).validate_warehouse()
+		
 		for d in self.get_item_list():
 			if frappe.db.get_value("Item", d['item_code'], "is_stock_item") == 1:
 				if not d['warehouse']:
@@ -327,7 +332,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				"serial_no": "serial_no"
 			},
 			"postprocess": update_item,
-			"filter": lambda d: d.qty - invoiced_qty_map.get(d.name, 0)<=0
+			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

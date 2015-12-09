@@ -21,7 +21,7 @@ def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1, compan
 
 def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verbose=1, company=None):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
-	cond = " ifnull(disabled, 0) = 0"
+	cond = " disabled = 0"
 	if fiscal_year:
 		cond += " and fy.name = %(fiscal_year)s"
 	else:
@@ -65,7 +65,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 
 	cond = []
 	if date:
-		cond.append("posting_date <= '%s'" % date)
+		cond.append("posting_date <= '%s'" % frappe.db.escape(cstr(date)))
 	else:
 		# get balance of all entries that exist
 		date = nowdate()
@@ -105,17 +105,17 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 			if acc.account_currency == frappe.db.get_value("Company", acc.company, "default_currency"):
 				in_account_currency = False
 		else:
-			cond.append("""gle.account = "%s" """ % (account.replace('"', '\\"'), ))
+			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account), ))
 
 	if party_type and party:
 		cond.append("""gle.party_type = "%s" and gle.party = "%s" """ %
-			(party_type.replace('"', '\\"'), party.replace('"', '\\"')))
+			(frappe.db.escape(party_type), frappe.db.escape(party)))
 
 	if account or (party_type and party):
 		if in_account_currency:
-			select_field = "sum(ifnull(debit_in_account_currency, 0)) - sum(ifnull(credit_in_account_currency, 0))"
+			select_field = "sum(debit_in_account_currency) - sum(credit_in_account_currency)"
 		else:
-			select_field = "sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))"
+			select_field = "sum(debit) - sum(credit)"
 		bal = frappe.db.sql("""
 			SELECT {0}
 			FROM `tabGL Entry` gle
@@ -134,6 +134,8 @@ def add_ac(args=None):
 	ac.update(args)
 	ac.old_parent = ""
 	ac.freeze_account = "No"
+	if ac.get("is_root"):
+		ac.flags.ignore_mandatory = True
 	ac.insert()
 
 	return ac.name
@@ -181,7 +183,7 @@ def check_if_jv_modified(args):
 		select t2.{dr_or_cr} from `tabJournal Entry` t1, `tabJournal Entry Account` t2
 		where t1.name = t2.parent and t2.account = %(account)s
 		and t2.party_type = %(party_type)s and t2.party = %(party)s
-		and ifnull(t2.reference_type, '') in ("", "Sales Order", "Purchase Order")
+		and (t2.reference_type is null or t2.reference_type in ("", "Sales Order", "Purchase Order"))
 		and t1.name = %(voucher_no)s and t2.name = %(voucher_detail_no)s
 		and t1.docstatus=1 """.format(dr_or_cr = args.get("dr_or_cr")), args)
 
@@ -211,7 +213,7 @@ def update_against_doc(d, jv_obj):
 
 	if d['allocated_amt'] < d['unadjusted_amt']:
 		jvd = frappe.db.sql("""
-			select cost_center, balance, against_account, is_advance, 
+			select cost_center, balance, against_account, is_advance,
 				account_type, exchange_rate, account_currency
 			from `tabJournal Entry Account` where name = %s
 		""", d['voucher_detail_no'], as_dict=True)
@@ -282,7 +284,7 @@ def fix_total_debit_credit():
 		sum(debit) - sum(credit) as diff
 		from `tabGL Entry`
 		group by voucher_type, voucher_no
-		having sum(ifnull(debit, 0)) != sum(ifnull(credit, 0))""", as_dict=1)
+		having sum(debit) != sum(credit)""", as_dict=1)
 
 	for d in vouchers:
 		if abs(d.diff) > 0:
@@ -301,7 +303,7 @@ def get_stock_and_account_difference(account_list=None, posting_date=None):
 	difference = {}
 
 	account_warehouse = dict(frappe.db.sql("""select name, warehouse from tabAccount
-		where account_type = 'Warehouse' and ifnull(warehouse, '') != ''
+		where account_type = 'Warehouse' and (warehouse is not null and warehouse != '')
 		and name in (%s)""" % ', '.join(['%s']*len(account_list)), account_list))
 
 	for account, warehouse in account_warehouse.items():
@@ -372,7 +374,7 @@ def get_actual_expense(args):
 		if args.get("month_end_date") else ""
 
 	return flt(frappe.db.sql("""
-		select sum(ifnull(debit, 0)) - sum(ifnull(credit, 0))
+		select sum(debit) - sum(credit)
 		from `tabGL Entry`
 		where account='%(account)s' and cost_center='%(cost_center)s'
 		and fiscal_year='%(fiscal_year)s' and company='%(company)s' %(condition)s
@@ -392,14 +394,14 @@ def get_stock_rbnb_difference(posting_date, company):
 		from `tabStock Ledger Entry` where company=%s""", company)
 
 	pr_valuation_amount = frappe.db.sql("""
-		select sum(ifnull(pr_item.valuation_rate, 0) * ifnull(pr_item.qty, 0) * ifnull(pr_item.conversion_factor, 0))
+		select sum(pr_item.valuation_rate * pr_item.qty * pr_item.conversion_factor)
 		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
 	    where pr.name = pr_item.parent and pr.docstatus=1 and pr.company=%s
 		and pr.posting_date <= %s and pr_item.item_code in (%s)""" %
 	    ('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
 
 	pi_valuation_amount = frappe.db.sql("""
-		select sum(ifnull(pi_item.valuation_rate, 0) * ifnull(pi_item.qty, 0) * ifnull(pi_item.conversion_factor, 0))
+		select sum(pi_item.valuation_rate * pi_item.qty * pi_item.conversion_factor)
 		from `tabPurchase Invoice Item` pi_item, `tabPurchase Invoice` pi
 	    where pi.name = pi_item.parent and pi.docstatus=1 and pi.company=%s
 		and pi.posting_date <= %s and pi_item.item_code in (%s)""" %
@@ -415,47 +417,63 @@ def get_stock_rbnb_difference(posting_date, company):
 	# Amount should be credited
 	return flt(stock_rbnb) + flt(sys_bal)
 
-def get_outstanding_invoices(amount_query, account, party_type, party):
-	all_outstanding_vouchers = []
-	outstanding_voucher_list = frappe.db.sql("""
-		select
-			voucher_no, voucher_type, posting_date,
-			ifnull(sum({amount_query}), 0) as invoice_amount
+def get_outstanding_invoices(party_type, party, account, condition=None):
+	outstanding_invoices = []
+	precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
+
+	if party_type=="Customer":
+		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
+		payment_dr_or_cr = "payment_gl_entry.credit_in_account_currency - payment_gl_entry.debit_in_account_currency"
+	else:
+		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
+		payment_dr_or_cr = "payment_gl_entry.debit_in_account_currency - payment_gl_entry.credit_in_account_currency"
+
+	invoice_list = frappe.db.sql("""select
+			voucher_no,	voucher_type, posting_date,
+			ifnull(sum({dr_or_cr}), 0) as invoice_amount,
+			(
+				select
+					ifnull(sum({payment_dr_or_cr}), 0)
+				from `tabGL Entry` payment_gl_entry
+				where
+					payment_gl_entry.against_voucher_type = invoice_gl_entry.voucher_type
+					and payment_gl_entry.against_voucher = invoice_gl_entry.voucher_no
+					and payment_gl_entry.party_type = invoice_gl_entry.party_type
+					and payment_gl_entry.party = invoice_gl_entry.party
+					and payment_gl_entry.account = invoice_gl_entry.account
+					and {payment_dr_or_cr} > 0
+			) as payment_amount
 		from
-			`tabGL Entry`
+			`tabGL Entry` invoice_gl_entry
 		where
-			account = %s and party_type=%s and party=%s and {amount_query} > 0
-			and (CASE
-					WHEN voucher_type = 'Journal Entry'
-					THEN ifnull(against_voucher, '') = ''
-					ELSE 1=1
-				END)
+			party_type = %(party_type)s
+			and party = %(party)s
+			and account = %(account)s
+			and {dr_or_cr} > 0
+			{condition}
+			and ((voucher_type = 'Journal Entry'
+					and (against_voucher = ''
+						or against_voucher is null))
+				or (voucher_type != 'Journal Entry'))
 		group by voucher_type, voucher_no
-		""".format(amount_query = amount_query), (account, party_type, party), as_dict = True)
+		having (invoice_amount - payment_amount) > 0.005""".format(
+			dr_or_cr = dr_or_cr,
+			payment_dr_or_cr = payment_dr_or_cr,
+			condition = condition or ""
+		), {
+			"party_type": party_type,
+			"party": party,
+			"account": account,
+		}, as_dict=True)
 
-	for d in outstanding_voucher_list:
-		payment_amount = frappe.db.sql("""
-			select ifnull(sum({amount_query}), 0)
-			from
-				`tabGL Entry`
-			where
-				account = %s and party_type=%s and party=%s and {amount_query} < 0
-				and against_voucher_type = %s and ifnull(against_voucher, '') = %s
-			""".format(**{
-			"amount_query": amount_query
-			}), (account, party_type, party, d.voucher_type, d.voucher_no))
+	for d in invoice_list:
+		outstanding_invoices.append({
+			'voucher_no': d.voucher_no,
+			'voucher_type': d.voucher_type,
+			'posting_date': d.posting_date,
+			'invoice_amount': flt(d.invoice_amount),
+			'payment_amount': flt(d.payment_amount),
+			'outstanding_amount': flt(d.invoice_amount - d.payment_amount, precision)
+		})
 
-		payment_amount = -1*payment_amount[0][0] if payment_amount else 0
-		precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
-
-		if d.invoice_amount > payment_amount:
-
-			all_outstanding_vouchers.append({
-				'voucher_no': d.voucher_no,
-				'voucher_type': d.voucher_type,
-				'posting_date': d.posting_date,
-				'invoice_amount': flt(d.invoice_amount, precision),
-				'outstanding_amount': flt(d.invoice_amount - payment_amount, precision)
-			})
-
-	return all_outstanding_vouchers
+	return outstanding_invoices

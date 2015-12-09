@@ -57,14 +57,18 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			if(this.frm.doc.docstatus == 1 && this.frm.doc.status!="Closed") {
 				cur_frm.add_custom_button(__('Return'), this.make_purchase_return);
 				if(this.frm.doc.__onload && !this.frm.doc.__onload.billing_complete) {
-					cur_frm.add_custom_button(__('Invoice'), this.make_purchase_invoice).addClass("btn-primary");
+					cur_frm.add_custom_button(__('Invoice'),
+						 this.make_purchase_invoice).addClass("btn-primary");
 				}
-				cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt)
+				if (this.frm.has_perm("submit") && 
+					this.frm.doc.__onload && this.frm.doc.__onload.has_return_entry) {
+						cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt)
+				}
 			}
 		}
 
 
-		if(this.frm.doc.docstatus==1 && this.frm.doc.status === "Closed") {
+		if(this.frm.doc.docstatus==1 && this.frm.doc.status === "Closed" && this.frm.has_perm("submit")) {
 			cur_frm.add_custom_button(__('Re-open'), this.reopen_purchase_receipt)
 		}
 
@@ -147,7 +151,7 @@ $.extend(cur_frm.cscript, new erpnext.stock.PurchaseReceiptController({frm: cur_
 cur_frm.cscript.update_status = function(status) {
 	frappe.ui.form.is_saving = true;
 	frappe.call({
-		method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.update_purchase_order_status",
+		method:"erpnext.stock.doctype.purchase_receipt.purchase_receipt.update_purchase_receipt_status",
 		args: {docname: cur_frm.doc.name, status: status},
 		callback: function(r){
 			if(!r.exc)

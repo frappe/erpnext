@@ -1,0 +1,74 @@
+<h1>Setting Up Dropbox Backups</h1>
+
+<h1>Setting Up Dropbox Backups</h1>
+
+<p style="font-family: 'Noto Sans', sans-serif; line-height: 23.7999992370605px;">If you wish to store your backups on a periodic basis,on Dropbox, you can do it directly through ERPNext.</p>
+<blockquote style="font-family: 'Noto Sans', sans-serif; line-height: 23.7999992370605px; background-color: rgb(247, 247, 247);">
+    <p>Setup &gt; Manage 3rd Party Backups</p>
+</blockquote>
+<p style="font-family: 'Noto Sans', sans-serif; line-height: 23.7999992370605px;"><strong>Step 1:</strong>&nbsp;Click on Integrations &gt; Backup Manager
+    <br>
+</p>
+<br>
+<div>
+    <p style="font-family: 'Noto Sans', sans-serif; line-height: 23.7999992370605px;">In the Backup Manager page, enter the email addresses of those people whom you wish to notify about the upload status. Under the topic 'Sync with Dropbox', select whether you wish to upload Daily, Weekly or Never.</p>
+    <p style="font-family: 'Noto Sans', sans-serif; line-height: 23.7999992370605px;"><strong>Step 2</strong> Click on&nbsp;<strong>Allow Dropbox Access</strong>.</p>
+    <blockquote style="font-family: 'Noto Sans', sans-serif; line-height: 23.7999992370605px; background-color: rgb(247, 247, 247);">
+        <p>Tip: In future, if you wish to discontinue uploading backups to dropbox, then select the Never option.</p>
+    </blockquote>
+    <img src="{{docs_base_path}}/assets/img/articles/Screen Shot 2015-09-23 at 1.02.52 pm.png">
+</div>
+<div>&nbsp;
+    <br>
+</div>
+<div><b>
+    Step 3</b>
+    <br>
+</div>
+<div>
+    <p style="font-family: 'Noto Sans', sans-serif; line-height: 23.7999992370605px;">You need to login to your dropbox account, with your user id and password.</p>
+</div>
+<div>
+    <img src="{{docs_base_path}}/assets/img/articles/dropbox-access.png" style="line-height: 1.42857143;">&nbsp;
+    <br>
+</div>
+<div>
+    <br>
+    <hr>
+</div>
+<div>
+     <h3 style="font-family: 'Noto Sans', Helvetica, Arial, sans-serif; color: rgb(51, 51, 51);">Open Source Users</h3>
+
+</div>
+<div>
+    <br>
+</div>
+<div><b>Step 1: </b>Go to&nbsp;<a href="https://www.dropbox.com/developers/apps" target="_blank" style="line-height: 1.42857143;">https://www.dropbox.com/developers/apps</a>
+
+</div>
+<div><b>Step 2:</b> Create a new app</div>
+<div>
+    <img src="{{docs_base_path}}/assets/img/articles/Screen Shot 2014-11-11 at 11.22.38 pm.png">
+    <br>
+</div>
+<div><b>Step 3: </b>Fill in details for the app.</div>
+<div>
+    <img src="{{docs_base_path}}/assets/img/articles/Screen Shot 2014-11-11 at 11.23.32 pm.png">
+    <br>
+</div>
+<div>
+    <br>
+</div>
+<div><b>Step 4: </b>After the app is created, note the app key and app secret and enter in `sites/{sitename}/site_config.json` as follows,</div>
+<div>
+    <br>
+</div>
+<div><pre><code>{ 
+ "db_name": "demo", 
+ "db_password": "DZ1Idd55xJ9qvkHvUH", 
+ "dropbox_access_key": "ACCESSKEY", 
+ "dropbox_secret_key": "SECRECTKEY" 
+} </code></pre>
+    <br>
+</div>
+<div><b>Step 5: </b>Setup dropbox backups from the backup manager as shown in previous section.</div>

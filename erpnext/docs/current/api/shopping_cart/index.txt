@@ -1,0 +1,5 @@
+erpnext.shopping_cart.cart
+erpnext.shopping_cart
+erpnext.shopping_cart.product
+erpnext.shopping_cart.test_shopping_cart
+erpnext.shopping_cart.utils

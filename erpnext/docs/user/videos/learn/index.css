@@ -1,0 +1,17 @@
+.hero-and-content .page-container {
+	max-width: 100%;
+}
+
+.video-list li {
+	margin: 0px;
+	padding: 10px 0px;
+	border-bottom: 1px solid #d1d8dd;
+}
+
+.video-list li:last-child {
+	border-bottom: 0px;
+}
+
+.manual-feedback {
+	display: none;
+}

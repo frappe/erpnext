@@ -74,11 +74,12 @@ class TestStockEntry(unittest.TestCase):
 		from erpnext.stock.doctype.item.test_item import make_item_variant
 		make_item_variant()
 		self._test_auto_material_request("_Test Item")
+		self._test_auto_material_request("_Test Item", material_request_type="Transfer")
 
 	def test_auto_material_request_for_variant(self):
 		self._test_auto_material_request("_Test Variant Item-S")
 
-	def _test_auto_material_request(self, item_code):
+	def _test_auto_material_request(self, item_code, material_request_type="Purchase"):
 		item = frappe.get_doc("Item", item_code)
 
 		if item.variant_of:
@@ -101,6 +102,7 @@ class TestStockEntry(unittest.TestCase):
 		# update re-level qty so that it is more than projected_qty
 		if projected_qty >= template.reorder_levels[0].warehouse_reorder_level:
 			template.reorder_levels[0].warehouse_reorder_level += projected_qty
+			template.reorder_levels[0].material_request_type = material_request_type
 			template.save()
 
 		from erpnext.stock.reorder_item import reorder_item

@@ -4,7 +4,9 @@ import unittest
 from frappe.utils import getdate
 
 class TestLeaveAllocation(unittest.TestCase):
-	def test_overlapping_allocation(self):		
+	def test_overlapping_allocation(self):
+		frappe.db.sql("delete from `tabLeave Allocation`")
+				
 		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from tabEmployee limit 1")[0])
 		leaves = [
 			{
@@ -13,7 +15,7 @@ class TestLeaveAllocation(unittest.TestCase):
 				"employee": employee.name,
 				"employee_name": employee.employee_name,
 				"leave_type": "_Test Leave Type",
-				"from_date": getdate("2015-10-1"),
+				"from_date": getdate("2015-10-01"),
 				"to_date": getdate("2015-10-31"),
 				"new_leaves_allocated": 5,
 				"docstatus": 1			
@@ -24,7 +26,7 @@ class TestLeaveAllocation(unittest.TestCase):
 				"employee": employee.name,
 				"employee_name": employee.employee_name,
 				"leave_type": "_Test Leave Type",
-				"from_date": getdate("2015-09-1"),
+				"from_date": getdate("2015-09-01"),
 				"to_date": getdate("2015-11-30"),
 				"new_leaves_allocated": 5			
 			}

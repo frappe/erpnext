@@ -35,7 +35,7 @@ def execute():
 			"enable_incoming": "sync_support_mails",
 			"email_id": "mail_login",
 			"password": "mail_password",
-			"pop3_server": "mail_server",
+			"email_server": "mail_server",
 			"use_ssl": "use_ssl",
 			"signature": "support_signature",
 			"enable_auto_reply": "send_autoreply",
@@ -59,7 +59,7 @@ def execute():
 				"enable_incoming": "extract_emails",
 				"email_id": "username",
 				"password": "password",
-				"pop3_server": "host",
+				"email_server": "host",
 				"use_ssl": "use_ssl",
 			}
 

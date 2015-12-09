@@ -105,7 +105,11 @@ class Item(WebsiteGenerator):
 				frappe.local.message_log.pop()
 
 			except requests.exceptions.HTTPError:
-				frappe.msgprint(_("Warning: Invalid Attachment {0}").format(self.website_image))
+				frappe.msgprint(_("Warning: Invalid attachment {0}").format(self.website_image))
+				self.website_image = None
+
+			except requests.exceptions.SSLError:
+				frappe.msgprint(_("Warning: Invalid SSL certificate on attachment {0}").format(self.website_image))
 				self.website_image = None
 
 			# for CSV import
@@ -307,7 +311,7 @@ class Item(WebsiteGenerator):
 
 	def validate_item_type(self):
 		if self.is_pro_applicable == 1 and self.is_stock_item==0:
-			frappe.throw(_("As Production Order can be made for this item, it must be a stock item."))
+			self.is_pro_applicable = 0
 
 		if self.has_serial_no == 1 and self.is_stock_item == 0:
 			msgprint(_("'Has Serial No' can not be 'Yes' for non-stock item"), raise_exception=1)
@@ -373,6 +377,13 @@ class Item(WebsiteGenerator):
 		if self.re_order_level or len(self.get("reorder_levels", {"material_request_type": "Purchase"})):
 			if not (self.is_purchase_item or self.is_pro_applicable):
 				frappe.throw(_("""To set reorder level, item must be a Purchase Item or Manufacturing Item"""))
+
+		if self.re_order_level and not self.re_order_qty:
+			frappe.throw(_("Please set reorder quantity"))
+		for d in self.get("reorder_levels"):
+			if d.warehouse_reorder_level and not d.warehouse_reorder_qty:
+				frappe.throw(_("Row #{0}: Please set reorder quantity").format(d.idx))
+					
 
 	def validate_warehouse_for_reorder(self):
 		warehouse = []
@@ -658,7 +669,5 @@ def check_stock_uom_with_bin(item, stock_uom):
 			frappe.db.sql("""update tabBin set stock_uom=%s where item_code=%s""", (stock_uom, item))
 
 	if not matched:
-		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because \
-			you have already made some transaction(s) with another UOM. To change default UOM, \
-			use 'UOM Replace Utility' tool under Stock module.").format(item))
+		frappe.throw(_("Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.").format(item))
 

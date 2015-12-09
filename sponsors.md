@@ -53,5 +53,13 @@
 				Leave Allocation based on Arbitrary Dates <a href="https://github.com/frappe/erpnext/issues/1938">#1938</a>
 			</td>
 		</tr>
+		<tr>
+			<td style="width: 30%">
+				<a href="http://agtech.com.sq">AG Technologies, Singapore</a>
+			</td>
+			<td>
+				Bulk edit via export-import in Bank Reconciliation <a href="https://github.com/frappe/erpnext/issues/1938">#4356</a>
+			</td>
+		</tr>
 	</tbody>
 </table>

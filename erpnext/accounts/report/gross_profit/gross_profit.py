@@ -98,16 +98,17 @@ class GrossProfitGenerator(object):
 
 			row.base_amount = flt(row.base_net_amount)
 
+			product_bundles = []
 			if row.update_stock:
 				product_bundles = self.product_bundles.get(row.parenttype, {}).get(row.parent, frappe._dict())
 			elif row.dn_detail:
 				product_bundles = self.product_bundles.get("Delivery Note", {})\
 					.get(row.delivery_note, frappe._dict())
 				row.item_row = row.dn_detail
-			
+
 			# get buying amount
 			if row.item_code in product_bundles:
-				row.buying_amount = self.get_buying_amount_from_product_bundle(row, 
+				row.buying_amount = self.get_buying_amount_from_product_bundle(row,
 					product_bundles[row.item_code])
 			else:
 				row.buying_amount = self.get_buying_amount(row, row.item_code)
@@ -184,7 +185,7 @@ class GrossProfitGenerator(object):
 				parenttype, parent = row.parenttype, row.parent
 				if row.dn_detail:
 					parenttype, parent = "Delivery Note", row.delivery_note
-				
+
 				for i, sle in enumerate(my_sle):
 					# find the stock valution rate from stock ledger entry
 					if sle.voucher_type == parenttype and parent == sle.voucher_no and \
@@ -207,7 +208,7 @@ class GrossProfitGenerator(object):
 			else:
 				self.average_buying_rate[item_code] = flt(frappe.db.sql("""select avg(valuation_rate)
 					from `tabStock Ledger Entry`
-					where item_code = %s and ifnull(qty_after_transaction,0) > 0""", item_code)[0][0])
+					where item_code = %s and qty_after_transaction > 0""", item_code)[0][0])
 
 		return self.average_buying_rate[item_code]
 

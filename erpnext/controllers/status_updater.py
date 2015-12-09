@@ -76,10 +76,10 @@ class StatusUpdater(Document):
 		self.update_qty()
 		self.validate_qty()
 
-	def set_status(self, update=False, status=None):
+	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
 			return
-
+				
 		if self.doctype in status_map:
 			_status = self.status
 
@@ -102,9 +102,10 @@ class StatusUpdater(Document):
 
 			if self.status != _status and self.status not in ("Submitted", "Cancelled"):
 				self.add_comment("Label", _(self.status))
-
+			
 			if update:
-				frappe.db.set_value(self.doctype, self.name, "status", self.status)
+				frappe.db.set_value(self.doctype, self.name, "status", self.status, 
+					update_modified=update_modified)
 
 	def validate_qty(self):
 		"""Validates qty at row level"""
@@ -177,6 +178,7 @@ class StatusUpdater(Document):
 			else:
 				args['cond'] = ' and parent!="%s"' % self.name.replace('"', '\"')
 
+			args['set_modified'] = ''
 			if change_modified:
 				args['set_modified'] = ', modified = now(), modified_by = "{0}"'\
 					.format(frappe.db.escape(frappe.session.user))
@@ -210,7 +212,7 @@ class StatusUpdater(Document):
 				if not args.get("extra_cond"): args["extra_cond"] = ""
 
 				frappe.db.sql("""update `tab%(target_dt)s`
-					set %(target_field)s = (select sum(%(source_field)s)
+					set %(target_field)s = (select ifnull(sum(%(source_field)s), 0)
 						from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s"
 						and (docstatus=1 %(cond)s) %(extra_cond)s) %(second_source_condition)s
 					where name='%(detail_id)s'""" % args)
@@ -228,16 +230,18 @@ class StatusUpdater(Document):
 			# update percent complete in the parent table
 			if args.get('target_parent_field'):
 				frappe.db.sql("""update `tab%(target_parent_dt)s`
-					set %(target_parent_field)s = round((select sum(if(%(target_ref_field)s >
-						ifnull(%(target_field)s, 0), %(target_field)s,
-						%(target_ref_field)s))/sum(%(target_ref_field)s)*100
-						from `tab%(target_dt)s` where parent="%(name)s"), 2) %(set_modified)s
+					set %(target_parent_field)s = round(
+						ifnull((select
+							ifnull(sum(if(%(target_ref_field)s > %(target_field)s, %(target_field)s, %(target_ref_field)s)), 0)
+							/ sum(%(target_ref_field)s) * 100
+						from `tab%(target_dt)s` where parent="%(name)s"), 0), 2)
+						%(set_modified)s
 					where name='%(name)s'""" % args)
 
 			# update field
 			if args.get('status_field'):
 				frappe.db.sql("""update `tab%(target_parent_dt)s`
-					set %(status_field)s = if(ifnull(%(target_parent_field)s,0)<0.001,
+					set %(status_field)s = if(%(target_parent_field)s<0.001,
 						'Not %(keyword)s', if(%(target_parent_field)s>=99.99,
 						'Fully %(keyword)s', 'Partly %(keyword)s'))
 					where name='%(name)s'""" % args)
@@ -264,10 +268,10 @@ class StatusUpdater(Document):
 
 	def update_billing_status(self, zero_amount_refdoc, ref_dt, ref_fieldname):
 		for ref_dn in zero_amount_refdoc:
-			ref_doc_qty = flt(frappe.db.sql("""select sum(ifnull(qty, 0)) from `tab%s Item`
+			ref_doc_qty = flt(frappe.db.sql("""select ifnull(sum(qty), 0) from `tab%s Item`
 				where parent=%s""" % (ref_dt, '%s'), (ref_dn))[0][0])
 
-			billed_qty = flt(frappe.db.sql("""select sum(ifnull(qty, 0))
+			billed_qty = flt(frappe.db.sql("""select ifnull(sum(qty), 0)
 				from `tab%s Item` where %s=%s and docstatus=1""" %
 				(self.doctype, ref_fieldname, '%s'), (ref_dn))[0][0])
 

@@ -66,7 +66,6 @@ $.extend(shopping_cart, {
 						$(".cart-items").html(r.message.items);
 						$(".cart-tax-items").html(r.message.taxes);
 					}
-					$(".tax-grand-total").temp_highlight();
 				},
 			});
 		});

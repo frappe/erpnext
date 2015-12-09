@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr
+from frappe import _
 
 from erpnext.controllers.status_updater import StatusUpdater
 
@@ -61,6 +62,10 @@ class Contact(StatusUpdater):
 @frappe.whitelist()
 def invite_user(contact):
 	contact = frappe.get_doc("Contact", contact)
+
+	if not contact.email_id:
+		frappe.throw(_("Please set Email ID"))
+
 	if contact.has_permission("write"):
 		user = frappe.get_doc({
 			"doctype": "User",

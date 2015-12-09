@@ -24,7 +24,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 		if(!doc.is_return) {
 			if(doc.docstatus==1) {
-				if(doc.outstanding_amount > 0) {
+				if(doc.outstanding_amount != 0) {
 					this.frm.add_custom_button(__('Payment'), this.make_bank_entry).addClass("btn-primary");
 				}
 				cur_frm.add_custom_button(__('Debit Note'), this.make_debit_note);

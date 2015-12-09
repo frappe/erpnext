@@ -50,8 +50,7 @@ cur_frm.fields_dict['contact_person'].get_query = function(doc, cdt, cdn) {
 cur_frm.fields_dict['serial_no'].get_query = function(doc, cdt, cdn) {
 	var cond = [];
 	var filter = [
-		['Serial No', 'docstatus', '!=', 2],
-		['Serial No', 'warehouse', '=', ""]
+		['Serial No', 'docstatus', '!=', 2]
 	];
 	if(doc.item_code) {
 		cond = ['Serial No', 'item_code', '=', doc.item_code];

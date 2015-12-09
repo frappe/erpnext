@@ -203,7 +203,7 @@ class TimeLog(Document):
 	def get_time_log_summary(self):
 		"""Returns 'Actual Operating Time'. """
 		return frappe.db.sql("""select
-			sum(hours*60) as mins, sum(ifnull(completed_qty, 0)) as completed_qty
+			sum(hours*60) as mins, sum(completed_qty) as completed_qty
 			from `tabTime Log`
 			where production_order = %s and operation_id = %s and docstatus=1""",
 			(self.production_order, self.operation_id), as_dict=1)[0]

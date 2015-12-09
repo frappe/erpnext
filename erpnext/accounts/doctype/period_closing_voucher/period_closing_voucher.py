@@ -22,21 +22,21 @@ class PeriodClosingVoucher(AccountsController):
 
 	def validate_account_head(self):
 		closing_account_type = frappe.db.get_value("Account", self.closing_account_head, "root_type")
-		
-		if closing_account_type != "Liability":
-			frappe.throw(_("Closing Account {0} must be of type 'Liability'")
+
+		if closing_account_type not in ["Liability", "Equity"]:
+			frappe.throw(_("Closing Account {0} must be of type Liability / Equity")
 				.format(self.closing_account_head))
 
 		account_currency = get_account_currency(self.closing_account_head)
-		company_currency = frappe.db.get_value("Company", self.company, "default_currency")		
+		company_currency = frappe.db.get_value("Company", self.company, "default_currency")
 		if account_currency != company_currency:
 			frappe.throw(_("Currency of the Closing Account must be {0}").format(company_currency))
 
 	def validate_posting_date(self):
 		from erpnext.accounts.utils import get_fiscal_year, validate_fiscal_year
-		
+
 		validate_fiscal_year(self.posting_date, self.fiscal_year, label=_("Posting Date"), doc=self)
-		
+
 		self.year_start_date = get_fiscal_year(self.posting_date, self.fiscal_year)[1]
 
 		pce = frappe.db.sql("""select name from `tabPeriod Closing Voucher`
@@ -50,7 +50,7 @@ class PeriodClosingVoucher(AccountsController):
 		gl_entries = []
 		net_pl_balance = 0
 		pl_accounts = self.get_pl_balances()
-		
+
 		for acc in pl_accounts:
 			if flt(acc.balance_in_company_currency):
 				gl_entries.append(self.get_gl_dict({
@@ -67,7 +67,7 @@ class PeriodClosingVoucher(AccountsController):
 				}))
 
 				net_pl_balance += flt(acc.balance_in_company_currency)
-		
+
 		if net_pl_balance:
 			gl_entries.append(self.get_gl_dict({
 				"account": self.closing_account_head,
@@ -76,19 +76,19 @@ class PeriodClosingVoucher(AccountsController):
 				"credit_in_account_currency": abs(net_pl_balance) if net_pl_balance < 0 else 0,
 				"credit": abs(net_pl_balance) if net_pl_balance < 0 else 0
 			}))
-		
+
 		from erpnext.accounts.general_ledger import make_gl_entries
 		make_gl_entries(gl_entries)
 
 	def get_pl_balances(self):
 		"""Get balance for pl accounts"""
 		return frappe.db.sql("""
-			select 
-				t1.account, t2.account_currency,  				sum(ifnull(t1.debit_in_account_currency,0))-sum(ifnull(t1.credit_in_account_currency,0)) 
-					as balance_in_account_currency,
-				sum(ifnull(t1.debit,0))-sum(ifnull(t1.credit,0)) as balance_in_company_currency
+			select
+				t1.account, t2.account_currency,
+				sum(t1.debit_in_account_currency) - sum(t1.credit_in_account_currency) as balance_in_account_currency,
+				sum(t1.debit) - sum(t1.credit) as balance_in_company_currency
 			from `tabGL Entry` t1, `tabAccount` t2
-			where t1.account = t2.name and ifnull(t2.report_type, '') = 'Profit and Loss'
+			where t1.account = t2.name and t2.report_type = 'Profit and Loss'
 			and t2.docstatus < 2 and t2.company = %s
 			and t1.posting_date between %s and %s
 			group by t1.account

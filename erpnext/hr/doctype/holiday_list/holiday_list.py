@@ -60,7 +60,7 @@ class HolidayList(Document):
 
 	def update_default_holiday_list(self):
 		frappe.db.sql("""update `tabHoliday List` set is_default = 0
-			where ifnull(is_default, 0) = 1 and fiscal_year = %s""", (self.fiscal_year,))
+			where is_default = 1 and fiscal_year = %s""", (self.fiscal_year,))
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

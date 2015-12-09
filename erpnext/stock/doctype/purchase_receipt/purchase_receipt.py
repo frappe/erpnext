@@ -47,11 +47,14 @@ class PurchaseReceipt(BuyingController):
 		}]
 
 	def onload(self):
-		billed_qty = frappe.db.sql("""select sum(ifnull(qty, 0)) from `tabPurchase Invoice Item`
+		billed_qty = frappe.db.sql("""select sum(qty) from `tabPurchase Invoice Item`
 			where purchase_receipt=%s and docstatus=1""", self.name)
 		if billed_qty:
 			total_qty = sum((item.qty for item in self.get("items")))
-			self.get("__onload").billing_complete = (billed_qty[0][0] == total_qty)
+			self.set_onload("billing_complete", (billed_qty[0][0] == total_qty))
+			
+		self.set_onload("has_return_entry", len(frappe.db.exists({"doctype": "Purchase Receipt", 
+			"is_return": 1, "return_against": self.name, "docstatus": 1})))
 
 	def validate(self):
 		super(PurchaseReceipt, self).validate()
@@ -79,7 +82,7 @@ class PurchaseReceipt(BuyingController):
 
 	def set_landed_cost_voucher_amount(self):
 		for d in self.get("items"):
-			lc_voucher_amount = frappe.db.sql("""select sum(ifnull(applicable_charges, 0))
+			lc_voucher_amount = frappe.db.sql("""select sum(applicable_charges)
 				from `tabLanded Cost Item`
 				where docstatus = 1 and purchase_receipt_item = %s""", d.name)
 			d.landed_cost_voucher_amount = lc_voucher_amount[0][0] if lc_voucher_amount else 0.0
@@ -466,7 +469,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"prevdoc_docname": "purchase_order",
 			},
 			"postprocess": update_item,
-			"filter": lambda d: d.qty - invoiced_qty_map.get(d.name, 0)<=0
+			"filter": lambda d: abs(d.qty) - abs(invoiced_qty_map.get(d.name, 0))<=0
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",

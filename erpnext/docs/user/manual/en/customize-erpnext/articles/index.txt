@@ -1,0 +1,16 @@
+allow-fields-to-be-changed-after-submit
+creating-custom-link-field
+customizing-sorting-order-in-the-list-view
+deleting-custom-reports
+disable-rounded-total
+field-types
+increase-max-attachments
+make-field-visible-in-print-format
+making-custom-reports-in-erpnext
+managing-dynamic-link-fields
+module-visibility
+perm-level-error-in-permission-manager
+search-record-by-specific-field
+set-language
+set-precision-for-float-currency-and-percent-fields
+user-restriction

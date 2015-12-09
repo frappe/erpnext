@@ -117,7 +117,7 @@ erpnext.AccountsChart = Class.extend({
 					}
 				},
 				{
-					condition: function(node) { return !node.root && node.expandable; },
+					condition: function(node) { return node.expandable; },
 					label: __("Add Child"),
 					click: function() {
 						me.make_new()
@@ -166,7 +166,10 @@ erpnext.AccountsChart = Class.extend({
 				var dr_or_cr = node.data.balance < 0 ? "Cr" : "Dr";
 				if (me.ctype == 'Account' && node.data && node.data.balance!==undefined) {
 					$('<span class="balance-area pull-right text-muted small">'
-						+ format_currency(Math.abs(node.data.balance), node.data.account_currency)
+						+ (node.data.balance_in_account_currency ? 
+							(format_currency(Math.abs(node.data.balance_in_account_currency), 
+								node.data.account_currency) + " / ") : "")
+						+ format_currency(Math.abs(node.data.balance), node.data.company_currency)
 						+ " " + dr_or_cr
 						+ '</span>').insertBefore(node.$ul);
 				}
@@ -208,6 +211,9 @@ erpnext.AccountsChart = Class.extend({
 					description: __("Name of new Account. Note: Please don't create accounts for Customers and Suppliers")},
 				{fieldtype:'Check', fieldname:'is_group', label:__('Is Group'),
 					description: __('Further accounts can be made under Groups, but entries can be made against non-Groups')},
+				{fieldtype:'Select', fieldname:'root_type', label:__('Root Type'),
+					options: ['Asset', 'Liability', 'Equity', 'Income', 'Expense'].join('\n'),
+				},
 				{fieldtype:'Select', fieldname:'account_type', label:__('Account Type'),
 					options: ['', 'Bank', 'Cash', 'Warehouse', 'Tax', 'Chargeable'].join('\n'),
 					description: __("Optional. This setting will be used to filter in various transactions.") },
@@ -237,6 +243,9 @@ erpnext.AccountsChart = Class.extend({
 			$(fd.tax_rate.wrapper).toggle(fd.account_type.get_value()==='Tax');
 			$(fd.warehouse.wrapper).toggle(fd.account_type.get_value()==='Warehouse');
 		})
+		
+		// root type if root
+		$(fd.root_type.wrapper).toggle(node.root);
 
 		// create
 		d.set_primary_action(__("Create New"), function() {
@@ -252,6 +261,14 @@ erpnext.AccountsChart = Class.extend({
 			var node = me.tree.get_selected_node();
 			v.parent_account = node.label;
 			v.company = me.company;
+			
+			if(node.root) {
+				v.is_root = true;
+				v.parent_account = null;
+			} else {
+				v.is_root = false;
+				v.root_type = null;
+			}
 
 			return frappe.call({
 				args: v,

@@ -90,15 +90,15 @@ class Project(Document):
 
 	def update_costing(self):
 		from_time_log = frappe.db.sql("""select
-			sum(ifnull(costing_amount, 0)) as costing_amount,
-			sum(ifnull(billing_amount, 0)) as billing_amount,
+			sum(costing_amount) as costing_amount,
+			sum(billing_amount) as billing_amount,
 			min(from_time) as start_date,
 			max(to_time) as end_date,
 			sum(hours) as time
 			from `tabTime Log` where project = %s and docstatus = 1""", self.name, as_dict=1)[0]
 
 		from_expense_claim = frappe.db.sql("""select
-			sum(ifnull(total_sanctioned_amount, 0)) as total_sanctioned_amount
+			sum(total_sanctioned_amount) as total_sanctioned_amount
 			from `tabExpense Claim` where project = %s and approval_status='Approved'
 			and docstatus = 1""",
 			self.name, as_dict=1)[0]
@@ -118,7 +118,7 @@ class Project(Document):
 			self.per_gross_margin = (self.gross_margin / flt(self.total_billing_amount)) *100
 
 	def update_purchase_costing(self):
-		total_purchase_cost = frappe.db.sql("""select sum(ifnull(base_net_amount, 0))
+		total_purchase_cost = frappe.db.sql("""select sum(base_net_amount)
 			from `tabPurchase Invoice Item` where project_name = %s and docstatus=1""", self.name)
 
 		self.total_purchase_cost = total_purchase_cost and total_purchase_cost[0][0] or 0

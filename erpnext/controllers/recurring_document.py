@@ -37,7 +37,7 @@ def manage_recurring_documents(doctype, next_date=None, commit=True):
 	condition = " and ifnull(status, '') != 'Stopped'" if doctype in ("Sales Order", "Purchase Order") else ""
 
 	recurring_documents = frappe.db.sql("""select name, recurring_id
-		from `tab{0}` where ifnull(is_recurring, 0)=1
+		from `tab{0}` where is_recurring=1
 		and docstatus=1 and next_date=%s
 		and next_date <= ifnull(end_date, '2199-12-31') {1}""".format(doctype, condition), next_date)
 
@@ -85,12 +85,9 @@ def make_new_document(ref_wrapper, date_field, posting_date):
 
 	# get last day of the month to maintain period if the from date is first day of its own month
 	# and to date is the last day of its own month
-	if (cstr(get_first_day(ref_wrapper.from_date)) == \
-			cstr(ref_wrapper.from_date)) and \
-		(cstr(get_last_day(ref_wrapper.to_date)) == \
-			cstr(ref_wrapper.to_date)):
-		to_date = get_last_day(get_next_date(ref_wrapper.to_date,
-			mcount))
+	if (cstr(get_first_day(ref_wrapper.from_date)) == cstr(ref_wrapper.from_date)) and \
+		(cstr(get_last_day(ref_wrapper.to_date)) == cstr(ref_wrapper.to_date)):
+			to_date = get_last_day(get_next_date(ref_wrapper.to_date, mcount))
 	else:
 		to_date = get_next_date(ref_wrapper.to_date, mcount)
 

@@ -1,0 +1,29 @@
+<h1>Owner Restriction</h1>
+
+To restricting user based on Owner (creator of record),&nbsp; form/document should have field linked with User master. If that document is not linked with user, then you should create <a href="https://erpnext.com/user-guide/customize-erpnext/custom-field" target="_blank">custom field</a> and link it with User master.
+<br>
+<br>Following are the steps to restrict User based on Owner.
+<br>
+<br><b>Step 1: </b>Go to:
+<br>
+<br>Setup &gt; Permissions &gt; Role Permissions Manager
+<br>
+<br><b>Step 2:</b> Select Document Type for which you want to set user permission. After permissions are loaded for selected document, scroll to role for which you want to set restriction.
+<br>&nbsp;
+<img src="{{docs_base_path}}/assets/img/articles/Selection_0045d151c.png"><br>
+<br><b>Step 3:</b> For Role to be resricted (Sales User in this case), check "Apply User Restriction". On checking Apply User Permission, two links will be show up called:
+<br>
+<br>- Select Document Type
+<br>- Select User Permissions
+<br>
+<br>Click on "Select Document Type".
+<br>
+<br>
+<img src="{{docs_base_path}}/assets/img/articles/Selection_0028834c2.png" height="168" width="691">
+<br>
+<br><b>Step 4:</b> Check mark on User, and un-check for others. If you want user to be restricted based on some other criteria as well, like territory, customer groups, then that should be checked as well.
+<br>
+<br>
+<img src="{{docs_base_path}}/assets/img/articles/Selection_003fea339.png">&nbsp;
+<br>
+<div class="well">When restricting User based on User master itself, then there is no need to create User Permission Setting.</div>
