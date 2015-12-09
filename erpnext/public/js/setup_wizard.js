@@ -109,7 +109,7 @@ function load_erpnext_slides() {
 				{"fieldname": "password", "label": __("Password"), "fieldtype": "Password",
 					reqd:1},
 				{fieldtype:"Attach Image", fieldname:"attach_user",
-					label: __("Attach Your Picture")},
+					label: __("Attach Your Picture"), is_private: 0},
 			],
 			help: __('The first user will become the System Manager (you can change this later).'),
 			onload: function(slide) {
@@ -254,12 +254,15 @@ function load_erpnext_slides() {
 			fields: [
 				{fieldtype:"Attach Image", fieldname:"attach_letterhead",
 					label: __("Attach Letterhead"),
-					description: __("Keep it web friendly 900px (w) by 100px (h)")
+					description: __("Keep it web friendly 900px (w) by 100px (h)"),
+					is_private: 0
 				},
 				{fieldtype: "Column Break"},
 				{fieldtype:"Attach Image", fieldname:"attach_logo",
 					label:__("Attach Logo"),
-					description: __("100px by 100px")},
+					description: __("100px by 100px"),
+					is_private: 0
+				},
 			],
 
 			css_class: "two-column"
@@ -381,7 +384,7 @@ function load_erpnext_slides() {
 						{fieldtype: "Check", fieldname: "is_purchase_item_" + i, label:__("We buy this Item")},
 						{fieldtype:"Column Break"},
 						{fieldtype:"Currency", fieldname:"item_price_" + i, label:__("Rate")},
-						{fieldtype:"Attach Image", fieldname:"item_img_" + i, label:__("Attach Image")},
+						{fieldtype:"Attach Image", fieldname:"item_img_" + i, label:__("Attach Image"), is_private: 0},
 					])
 				}
 				slide.fields[1].reqd = 1;
