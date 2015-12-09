@@ -15,6 +15,7 @@ Schritte:
     * Lagerabgleichskonto
     * Aufwendungen in Bewertung enthalten
     * Kostenstelle
+    
   * Aktivieren Sie die Ständige Inventur
 
 > Einstellungen > Rechnungswesen > Konteneinstellungen > Eine  Buchung für jede Lagerbewegung erstellen
