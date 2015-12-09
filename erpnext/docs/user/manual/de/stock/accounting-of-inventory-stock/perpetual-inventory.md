@@ -26,10 +26,10 @@ Wenn Artikel in einem bestimmten Lager ankommen, erhöht sich der Stand des Verm
 Wir nehmen folgenden Kontenplan und folgende Lagereinstellungen für Ihre Firma an:
 
 Kontenplan
-* Vermögen (Soll)
-** Umlaufvermögen
-** Forderungen
-*** Jane Doe
+- Vermögen (Soll)
+  * Umlaufvermögen
+  * Forderungen
+    O Jane Doe
   * Lagervermögenswerte
     O In Verkaufsstellen
     O Fertigerzeugnisse
