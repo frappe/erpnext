@@ -68,7 +68,7 @@ Kontenplan
 
 #### Kaufbeleg
 
-Nehmen wir an, Sie haben 10 Stück des Artikels "RM0001" zu 200€ und 5 Stück des Artikels "Tisch" zu 100€ vom Lieferanten "East Wind Inc." eingekauft. Im Folgenden finden Sie die Details des Kaufbelegs:
+Nehmen wir an, Sie haben 10 Stück des Artikels "RM0001" zu 200€ und 5 Stück des Artikels "Tisch" zu **100€** vom Lieferanten "East Wind Inc." eingekauft. Im Folgenden finden Sie die Details des Kaufbelegs:
 
 **Supplier:** East Wind Inc.
 
