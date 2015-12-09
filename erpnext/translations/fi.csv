@@ -2084,7 +2084,7 @@ DocType: BOM,Item UOM,tuote UOM
 DocType: Sales Taxes and Charges,Tax Amount After Discount Amount (Company Currency),veron arvomäärä alennusten jälkeen (yrityksen valuutta)
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py +149,Target warehouse is mandatory for row {0},tavoite varasto on pakollinen rivin {0}
 DocType: Quality Inspection,Quality Inspection,laatutarkistus
-apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +144,Extra Small,erittäin suuri
+apps/erpnext/erpnext/setup/setup_wizard/install_fixtures.py +144,Extra Small,erittäin pieni
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js +545,Warning: Material Requested Qty is less than Minimum Order Qty,varoitus: pyydetty materiaali yksikkömäärä on pienempi kuin vähimmäis ostotilausmäärä
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py +191,Account {0} is frozen,tili {0} on jäädytetty
 DocType: Company,Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization.,"juridinen hlö / tytäryhtiö, jolla on erillinen tilikartta kuuluu organisaatioon"
