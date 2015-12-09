@@ -34,19 +34,25 @@ Kontenplan
   * Lagervermögenswerte
   
     O In Verkaufsstellen
+
     O Fertigerzeugnisse
+    
     O In der Fertigung
   * Steuervermögenswerte
+  
     O Umsatzsteuer (Vorsteuer)
   * Anlagevermögen
   * Anlagevermögen im Lager
 - Verbindlichkeiten (Haben)
   * Kurzfristige Verbindlichkeiten
   * Verbindlichkeiten aus Lieferungen und Leistungen
+  
     O East Wind Inc.
   * Lagerverbindlichkeiten
+  
     O Lagerware erhalten aber noch nicht abgerechnet
   * Steuerverbindlichkeiten
+  
     O Dienstleistungssteuer
 - Erträge (Haben)
   * Direkte Erträge
@@ -54,10 +60,15 @@ Kontenplan
 - Aufwendungen (Soll)
   * Direkte Aufwendungen
   * Lageraufwendungen
+  
     O Selbstkosten
+
     O In der Bewertung enthaltene Kosten
+    
     O Bestandsveränderungen
+    
     O Versandgebühren
+    
     O Zoll
 
 Kontenkonfiguration des Lagers:
