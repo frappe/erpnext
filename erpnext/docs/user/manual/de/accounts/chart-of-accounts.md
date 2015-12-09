@@ -80,7 +80,7 @@ Typischerweise werden Sie vielleicht Konten hierfür anlegen wollen:
 
 * Aufwandskonten (Reisen, Gehälter, Telefon) unter Aufwände
 * Steuern (Mehrwertsteuer, Verkaufssteuer je nach Ihrem Land) unter kurzfristige Verbindlichkeiten
-* Verkaufsarten (z. B. Propuktverkäufe, Dienstleistungsverkäufe) unter Erträge
+* Verkaufsarten (z. B. Produktverkäufe, Dienstleistungsverkäufe) unter Erträge
 * Vermögenstypen (Gebäude, Maschinen, Geschäftsausstattung) unter Anlagevermögen
 
 {next}
