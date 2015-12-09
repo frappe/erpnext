@@ -147,11 +147,11 @@ Nehmen wir an, Sie haben 10 Stück des Artikels "RM0001" zu 200€ und 5 Stück 
 <p><strong>Lagerbuch</strong>
 </p>
 
-![pr<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-2.png)
+![Lagerbuch]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-2.png)
 
 **Hauptbuch:**
 
-![pr<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-3.png)
+![Hauptbuch]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-3.png)
 
 Um ein System der doppelten Buchhaltung zu erhalten, werden dadurch, dass sich der Kontensaldo durch den Kaufbeleg erhöht, die Konten "In Verkaufsstellen" und "Anlagevermögen im Lager" belastet und das temporäre Konto "Lagerware erhalten aber noch nicht abgerechnet" entlastet. Zum selben Zeitpunkt wird eine negative Aufwendung auf das Konto "In der Bewertung enthaltene Kosten" verbucht, um die Bewertung hinzuzufügen und um eine doppelte Aufwandsverbuchung zu vermeiden.
 
@@ -163,7 +163,7 @@ Wenn eine Rechnung des Lieferanten für den oben angesprochenen Kaufbeleg eintri
 
 #### Hauptbuch
 
-![pi<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-4.png)
+![Hauptbuch]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-4.png)
 
 Hier wird das Konto "Lagerware erhalten aber noch nicht bewertet" belastet und hebt den Effekt des Kaufbeleges auf.
 
@@ -220,11 +220,11 @@ Nehmen wir an, dass Sie eine Kundenbestellung von "Jane Doe" über 5 Stück des 
 
 **Lagerbuch**
 
-![dn<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-5.png)
+![Lagerbuch]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-5.png)
 
 **Hauptbuch**
 
-![dn<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-6.png)
+![Hauptbuch]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-6.png)
 
 Da der Artikel aus dem Lager "In Verkaufsstellen" geliefert wird, wird das Konto "In Verkaufsstellen" entlastet und ein Betrag in gleicher Höhe dem Aufwandskonto "Selbstkosten" belastet. Der belastete/entlastete Betrag ist gleich dem Gesamtwert (Einkaufskosten) des Verkaufsartikels. Und der Wert wird gemäß der bevorzugten Bewertungsmethode (FIFO/Gleitender Durchschnitt) oder den tatsächlichen Kosten eines serialisierten Artikels kalkuliert.
 
@@ -248,11 +248,11 @@ Nehmen wir an, dass Sie zur obigen Bestellung keinen Lieferschein erstellt haben
 
 **Lagerbuch**
 
-![si<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-7.png)
+![Lagerbuch]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-7.png)
 
 **Hauptbuch**
 
-![si<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-8.png)
+![Hauptbuch]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-8.png)
 
 Hier werden, im Gegensatz zu den normalen Buchungen für Rechnungen, die Konten "In Verkaufsstellen" und "Selbstkosten" basierend auf der Bewertung beeinflusst.
 
@@ -285,11 +285,11 @@ Hier werden, im Gegensatz zu den normalen Buchungen für Rechnungen, die Konten 
 
 **Lagerbuch**
 
-![mr<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-9.png)
+![Lagerbuch]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-9.png)
 
 **Hauptbuch**
 
-![mr<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-10.png)
+![Hauptbuch({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-10.png)
 
 * * *
 
@@ -320,11 +320,11 @@ Hier werden, im Gegensatz zu den normalen Buchungen für Rechnungen, die Konten 
 
 **Lagerbuch**
 
-![mi<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-11.png)
+![Lagerbuch]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-11.png)
 
 **Hauptbuch**
 
-![mi<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-12.png)
+![Hauptbuch]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-12.png)
 
 * * *
 
@@ -357,11 +357,11 @@ Hier werden, im Gegensatz zu den normalen Buchungen für Rechnungen, die Konten 
 
 **Lagerbuch**
 
-![mtn<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-13.png)
+![Lagerbuch]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-13.png)
 
 **Hauptbuch**
 
-![mtn<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-14.png)
+![Hauptbuch]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-14.png)
 
 
 
