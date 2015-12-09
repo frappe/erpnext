@@ -29,8 +29,10 @@ Kontenplan
 - Vermögen (Soll)
   * Umlaufvermögen
   * Forderungen
+  
     O Jane Doe
   * Lagervermögenswerte
+  
     O In Verkaufsstellen
     O Fertigerzeugnisse
     O In der Fertigung
