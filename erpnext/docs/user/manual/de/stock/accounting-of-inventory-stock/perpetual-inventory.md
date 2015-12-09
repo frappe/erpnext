@@ -26,50 +26,38 @@ Wenn Artikel in einem bestimmten Lager ankommen, erhöht sich der Stand des Verm
 Wir nehmen folgenden Kontenplan und folgende Lagereinstellungen für Ihre Firma an:
 
 Kontenplan
-- Vermögen (Soll)
-  * Umlaufvermögen
-  * Forderungen
-  
-    O Jane Doe
-  * Lagervermögenswerte
-  
-    O In Verkaufsstellen
 
-    O Fertigerzeugnisse
-    
-    O In der Fertigung
-  * Steuervermögenswerte
-  
-    O Umsatzsteuer (Vorsteuer)
-  * Anlagevermögen
-  * Anlagevermögen im Lager
-- Verbindlichkeiten (Haben)
-  * Kurzfristige Verbindlichkeiten
-  * Verbindlichkeiten aus Lieferungen und Leistungen
-  
-    O East Wind Inc.
-  * Lagerverbindlichkeiten
-  
-    O Lagerware erhalten aber noch nicht abgerechnet
-  * Steuerverbindlichkeiten
-  
-    O Dienstleistungssteuer
-- Erträge (Haben)
-  * Direkte Erträge
-  * Verkäufe
-- Aufwendungen (Soll)
-  * Direkte Aufwendungen
-  * Lageraufwendungen
-  
-    O Selbstkosten
-
-    O In der Bewertung enthaltene Kosten
-    
-    O Bestandsveränderungen
-    
-    O Versandgebühren
-    
-    O Zoll
+  * Vermögen (Soll) 
+    * Umlaufvermögen
+    * Forderungen
+      * Jane Doe
+    * Lagervermögenswerte
+      * In Verkaufsstellen
+      * Fertigerzeugnisse
+      * In der Fertigung
+    * Steuervermögenswerte
+      * Umsatzsteuer (Vorsteuer)
+    * Anlagevermögen
+    * Anlagevermögen im Lager
+  * Verbindlichkeiten (Haben)
+    * Kurzfristige Verbindlichkeiten
+    * Verbindlichkeiten aus Lieferungen und Leistungen
+      * East Wind Inc.
+    * Lagerverbindlichkeiten 
+      * Lagerware erhalten aber noch nicht abgerechnet
+    * Steuerverbindlichkeiten
+      * Dienstleistungssteuer
+  * Erträge (Haben)
+    * Direkte Erträge
+    * Verkäufe
+  * Aufwendungen (Soll)
+    * Direkte Aufwendungen
+    * Lageraufwendungen
+      * Selbstkosten
+      * In der Bewertung enthaltene Kosten
+      * Bestandsveränderungen
+      * Versandgebühren
+      * Zoll
 
 #### Kontenkonfiguration des Lagers:
 
@@ -289,7 +277,7 @@ Hier werden, im Gegensatz zu den normalen Buchungen für Rechnungen, die Konten 
 
 **Hauptbuch**
 
-![Hauptbuch({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-10.png)
+![Hauptbuch]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-10.png)
 
 * * *
 
