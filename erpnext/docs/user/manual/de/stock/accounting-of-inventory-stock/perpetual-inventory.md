@@ -89,7 +89,7 @@ Nehmen wir an, Sie haben 10 Stück des Artikels "RM0001" zu 200€ und 5 Stück 
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>>Artikel</th>
+            <th>Artikel</th>
             <th>Lager</th>
             <th>Menge</th>
             <th>Preis</th>
@@ -144,53 +144,87 @@ Nehmen wir an, Sie haben 10 Stück des Artikels "RM0001" zu 200€ und 5 Stück 
         </tr>
     </tbody>
 </table>
-<p><strong>Stock Ledger</strong>
+<p><strong>Lagerbuch</strong>
 </p>
 
 ![pr<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-2.png)
 
+**Hauptbuch:**
 
-
-
-
-
-
-Lagerbuch:
-Laufende Nr Artikel-Kode Lager                    Tatsächl. Menge Menge nach Transaktion  Beleg-Nr.
-1           Tisch        Anlagevermögen im Lager  5         10                            PREC-00016
-2           RM0001       In Verkaufsstellen       10        20                            PREC-00016
-
-Hauptbuch:
-L.Nr.  Buchungsdatum  Konto                              Soll   Haben  Belegart             Beleg-Nr.
-1      17.09.2013     In Verkaufsstellen                 2.200  0      Kaufbeleg            PREC-00016
-2      17.09.2013     In der Bewertung enthaltene Kosten 0      250    Kaufbeleg            PREC-00016
-3      17.09.2013     Anlagevermögen im Lager            550    0      Kaufbeleg            PREC-00016
-4      17.09.2013     Lagerware erhalten aber noch nic.. 0      2500   Kaufbeleg            PREC-00016
-5                     Gesamt                             2.750  2.750
+![pr<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-3.png)
 
 Um ein System der doppelten Buchhaltung zu erhalten, werden dadurch, dass sich der Kontensaldo durch den Kaufbeleg erhöht, die Konten "In Verkaufsstellen" und "Anlagevermögen im Lager" belastet und das temporäre Konto "Lagerware erhalten aber noch nicht abgerechnet" entlastet. Zum selben Zeitpunkt wird eine negative Aufwendung auf das Konto "In der Bewertung enthaltene Kosten" verbucht, um die Bewertung hinzuzufügen und um eine doppelte Aufwandsverbuchung zu vermeiden.
 
-Eingangsrechnung
+---
+
+### Eingangsrechnung
+
 Wenn eine Rechnung des Lieferanten für den oben angesprochenen Kaufbeleg eintrifft, wird hierzu eine Eingangsrechnung erstellt. Die Buchungen im Hauptbuch sind folgende:
 
-Hauptbuch
+#### Hauptbuch
+
+![pi<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-4.png)
+
 Hier wird das Konto "Lagerware erhalten aber noch nicht bewertet" belastet und hebt den Effekt des Kaufbeleges auf.
 
-Lieferschein
+* * *
+
+### Lieferschein
+
 Nehmen wir an, dass Sie eine Kundenbestellung von "Jane Doe" über 5 Stück des Artikels "RM0001" zu 300€ haben. Im Folgenden sehen Sie die Details des Lieferscheins.
 
-Kunde: Jane Doe
-Artikel:
-Artikel      Lager               Menge    Preis   Summe
-RM0001       In Verkaufsstellen  5        300     1.500
-Steuern:
-Konto                            Menge
-Dienstleistungssteuern           150
-Umsatzsteuer                     100
+**Kunde:** Jane Doe
 
-Lagerbuch
+**Artikel:**
 
-Hauptbuch
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Artikel</th>
+            <th>Lager</th>
+            <th>Menge</th>
+            <th>Preis</th>
+            <th>Summe</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>RM0001</td>
+            <td>In Verkaufsstellen</td>
+            <td>5</td>
+            <td>300</td>
+            <td>1500</td>
+        </tr>
+    </tbody>
+</table>
+<p><strong>Steuern:</strong>
+</p>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Konto</th>
+            <th>Menge</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Dienstleistungssteuer</td>
+            <td>150</td>
+        </tr>
+        <tr>
+            <td>MwSt</td>
+            <td>100</td>
+        </tr>
+    </tbody>
+</table>
+
+**Lagerbuch**
+
+![dn<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-5.png)
+
+**Hauptbuch**
+
+![dn<em>general</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-6.png)
 
 Da der Artikel aus dem Lager "In Verkaufsstellen" geliefert wird, wird das Konto "In Verkaufsstellen" entlastet und ein Betrag in gleicher Höhe dem Aufwandskonto "Selbstkosten" belastet. Der belastete/entlastete Betrag ist gleich dem Gesamtwert (Einkaufskosten) des Verkaufsartikels. Und der Wert wird gemäß der bevorzugten Bewertungsmethode (FIFO/Gleitender Durchschnitt) oder den tatsächlichen Kosten eines serialisierten Artikels kalkuliert.
 
