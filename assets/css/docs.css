@@ -515,7 +515,7 @@ p {
 .fake-browser-frame {
   position: relative;
   margin: 24px auto 0px;
-  box-shadow: 0px -6px 100px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px -6px 100px 1px rgba(0, 0, 0, 0.1), 0px -6px 50px 1px rgba(0, 0, 0, 0.4);
 }
 .fake-browser-frame::before {
   content: "";
