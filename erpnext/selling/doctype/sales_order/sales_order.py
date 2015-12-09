@@ -533,13 +533,23 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 		default_price_list = frappe.get_value("Supplier", for_supplier, "default_price_list")
 		if default_price_list:
 			target.buying_price_list = default_price_list
+		
+		if any( item.delivered_by_supplier==1 for item in source.items):
+			if source.shipping_address_name:
+				target.customer_address = source.shipping_address_name
+				target.customer_address_display = source.shipping_address
+			else:
+				target.customer_address = source.customer_address
+				target.customer_address_display = source.address_display
 			
-		if source.shipping_address_name:
-			target.customer_address = source.shipping_address_name
-			target.customer_address_display = source.shipping_address
+			target.customer_contact_person = source.contact_person
+			target.customer_contact_display = source.contact_display
+			target.customer_contact_mobile = source.contact_mobile
+			target.customer_contact_email = source.contact_email
+			
 		else:
-			target.customer_address = source.customer_address
-			target.customer_address_display = source.address_display
+			target.customer = ""
+			target.customer_name = ""
 
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
@@ -551,12 +561,6 @@ def make_purchase_order_for_drop_shipment(source_name, for_supplier, target_doc=
 	doclist = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
 			"doctype": "Purchase Order",
-			"field_map": {
-				"contact_person": "customer_contact_person",
-				"contact_display": "customer_contact_display",
-				"contact_mobile": "customer_contact_mobile",
-				"contact_email": "customer_contact_email",
-			},
 			"field_no_map": [
 				"address_display",
 				"contact_display",
