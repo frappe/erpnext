@@ -1,0 +1,170 @@
+## 4.11.1 Ständige Inventur
+
+In der Ständigen Inventur erstellt das System Buchungen für jede Lagertransaktion, so dass das Lager und der Kontostand immer synchron bleiben. Der Kontostand wird für jedes Lager mit der zutreffenden  Kontobezeichnung verbucht. Wenn das Lager gespeichert wird, erstellt das System automatisch eine Kontobezeichnung mit dem selben Namen wie das Lager. Da für jedes Lager ein Kontostand verwaltet wird, sollten Sie Lager auf Basis der in ihnen eingelagerten Artikel (Umlaufvermögen/Anlagevermögen) erstellen.
+
+Wenn Artikel in einem bestimmten Lager ankommen, erhöht sich der Stand des Vermögenskontos (das mit dem Lager verknüpft ist). Analog dazu wird ein Aufwand verbucht, wenn Sie Waren ausliefern, und der Stand des Vermögenskontos nimmt ab, basierend auf der Bewertung der entsprechenden Artikel. 
+
+### Aktivierung
+
+1\. Richten Sie die folgenden Standard-Konten für jede Firma ein:
+
+* Lagerwaren erhalten aber noch nicht abgerechnet
+* Lagerabgleichskonto
+* In der Bewertung enthaltene Kosten
+* Kostenstelle
+
+2\. In der Ständigen Inventur verwaltet das System für jedes Lager einen eigenen Kontostand unter einer eigenen Kontobezeichnung. Um diese Kontobezeichnung zu erstellen, gehen Sie zu "Konto erstellen unter" in den Lagerstammdaten.
+
+3\. Aktivieren Sie die Ständige Inventur.
+
+> Einstellungen > Rechnungswesen > Kontoeinstellungen > Eine Buchung für jede Lagerbewegung erstellen
+
+---
+
+### Beispiel:
+
+Wir nehmen folgenden Kontenplan und folgende Lagereinstellungen für Ihre Firma an:
+
+Kontenplan
+* Vermögen (Soll)
+** Umlaufvermögen
+** Forderungen
+*** Jane Doe
+  * Lagervermögenswerte
+    O In Verkaufsstellen
+    O Fertigerzeugnisse
+    O In der Fertigung
+  * Steuervermögenswerte
+    O Umsatzsteuer (Vorsteuer)
+  * Anlagevermögen
+  * Anlagevermögen im Lager
+- Verbindlichkeiten (Haben)
+  * Kurzfristige Verbindlichkeiten
+  * Verbindlichkeiten aus Lieferungen und Leistungen
+    O East Wind Inc.
+  * Lagerverbindlichkeiten
+    O Lagerware erhalten aber noch nicht abgerechnet
+  * Steuerverbindlichkeiten
+    O Dienstleistungssteuer
+- Erträge (Haben)
+  * Direkte Erträge
+  * Verkäufe
+- Aufwendungen (Soll)
+  * Direkte Aufwendungen
+  * Lageraufwendungen
+    O Selbstkosten
+    O In der Bewertung enthaltene Kosten
+    O Bestandsveränderungen
+    O Versandgebühren
+    O Zoll
+
+Kontenkonfiguration des Lagers:
+- In Verkaufsstellen
+- In der Fertigung
+- Fertigerzeugnisse
+- Anlagevermögen im Lager
+
+Kaufbeleg
+Nehmen wir an, Sie haben 10 Stück des Artikels "RM0001" zu 200€ und 5 Stück des Artikels "Tisch" zu 100€ vom Lieferanten "East Wind Inc." eingekauft. Im Folgenden finden Sie die Details des Kaufbelegs:
+
+Supplier: East Wind Inc.
+Artikel:
+Artikel    Lager                      Menge  Preis  Gesamtmenge Wertansatz
+RM0001     In Verkaufsstellen         10     200    2000        2200
+Tisch      Anlagevermögen im Lager    5      100    500         550
+
+Steuern:
+Konto                                 Betrag    Kategorie
+Versandgebühren                       100       Gesamtsumme und Bewertung
+Umsatzsteuer (Vorsteuer)              120       Gesamtsumme
+Zoll                                  150       Bewertung
+
+Lagerbuch:
+Laufende Nr Artikel-Kode Lager                    Tatsächl. Menge Menge nach Transaktion  Beleg-Nr.
+1           Tisch        Anlagevermögen im Lager  5         10                            PREC-00016
+2           RM0001       In Verkaufsstellen       10        20                            PREC-00016
+
+Hauptbuch:
+L.Nr.  Buchungsdatum  Konto                              Soll   Haben  Belegart             Beleg-Nr.
+1      17.09.2013     In Verkaufsstellen                 2.200  0      Kaufbeleg            PREC-00016
+2      17.09.2013     In der Bewertung enthaltene Kosten 0      250    Kaufbeleg            PREC-00016
+3      17.09.2013     Anlagevermögen im Lager            550    0      Kaufbeleg            PREC-00016
+4      17.09.2013     Lagerware erhalten aber noch nic.. 0      2500   Kaufbeleg            PREC-00016
+5                     Gesamt                             2.750  2.750
+
+Um ein System der doppelten Buchhaltung zu erhalten, werden dadurch, dass sich der Kontensaldo durch den Kaufbeleg erhöht, die Konten "In Verkaufsstellen" und "Anlagevermögen im Lager" belastet und das temporäre Konto "Lagerware erhalten aber noch nicht abgerechnet" entlastet. Zum selben Zeitpunkt wird eine negative Aufwendung auf das Konto "In der Bewertung enthaltene Kosten" verbucht, um die Bewertung hinzuzufügen und um eine doppelte Aufwandsverbuchung zu vermeiden.
+
+Eingangsrechnung
+Wenn eine Rechnung des Lieferanten für den oben angesprochenen Kaufbeleg eintrifft, wird hierzu eine Eingangsrechnung erstellt. Die Buchungen im Hauptbuch sind folgende:
+
+Hauptbuch
+Hier wird das Konto "Lagerware erhalten aber noch nicht bewertet" belastet und hebt den Effekt des Kaufbeleges auf.
+
+Lieferschein
+Nehmen wir an, dass Sie eine Kundenbestellung von "Jane Doe" über 5 Stück des Artikels "RM0001" zu 300€ haben. Im Folgenden sehen Sie die Details des Lieferscheins.
+
+Kunde: Jane Doe
+Artikel:
+Artikel      Lager               Menge    Preis   Summe
+RM0001       In Verkaufsstellen  5        300     1.500
+Steuern:
+Konto                            Menge
+Dienstleistungssteuern           150
+Umsatzsteuer                     100
+
+Lagerbuch
+
+Hauptbuch
+
+Da der Artikel aus dem Lager "In Verkaufsstellen" geliefert wird, wird das Konto "In Verkaufsstellen" entlastet und ein Betrag in gleicher Höhe dem Aufwandskonto "Selbstkosten" belastet. Der belastete/entlastete Betrag ist gleich dem Gesamtwert (Einkaufskosten) des Verkaufsartikels. Und der Wert wird gemäß der bevorzugten Bewertungsmethode (FIFO/Gleitender Durchschnitt) oder den tatsächlichen Kosten eines serialisierten Artikels kalkuliert.
+
+Ausgangsrechnung mit Lageraktualisierung
+Nehmen wir an, dass Sie zur obigen Bestellung keinen Lieferschein erstellt haben sondern direkt eine Ausgangsrechnung mit der Option "Lager aktualisieren" erstellt haben. Die Details der Ausgangsrechnung sind die gleichen wie bei obigem Lieferschein.
+
+Lagerbuch
+
+Hauptbuch
+
+Hier werden, im Gegensatz zu den normalen Buchungen für Rechnungen, die Konten "In Verkaufsstellen" und "Selbstkosten" basierend auf der Bewertung beeinflusst.
+
+Lagerbuchung (Materialschein)
+
+Artikel:
+Artikel                   Eingangslager            Menge    Preis   Summe
+RM0001                    In den Verkaufsstellen   50       220     11.000
+
+Lagerbuch
+
+Hauptbuch
+
+Lagerbuchung (Materialanfrage)
+
+Artikel:
+Artikel                   Ausgangslager            Menge    Preis   Summe
+RM0001                    In den Verkaufsstellen   10       220     2.200
+
+Lagerbuch
+
+Hauptbuch
+
+Lagerbuchung (Materialübertrag)
+
+Artikel:
+Artikel                   Ausgangslager            Eingangslager  Menge    Preis   Summe
+RM0001                    In den Verkaufsstellen   Fertigung      10       220     2.200
+
+Lagerbuch
+
+Hauptbuch
+
+
+
+
+
+
+
+
+
+
+
+
