@@ -71,26 +71,89 @@ Kontenplan
     
     O Zoll
 
-Kontenkonfiguration des Lagers:
-- In Verkaufsstellen
-- In der Fertigung
-- Fertigerzeugnisse
-- Anlagevermögen im Lager
+#### Kontenkonfiguration des Lagers:
 
-Kaufbeleg
+* In Verkaufsstellen
+* In der Fertigung
+* Fertigerzeugnisse
+* Anlagevermögen im Lager
+
+#### Kaufbeleg
+
 Nehmen wir an, Sie haben 10 Stück des Artikels "RM0001" zu 200€ und 5 Stück des Artikels "Tisch" zu 100€ vom Lieferanten "East Wind Inc." eingekauft. Im Folgenden finden Sie die Details des Kaufbelegs:
 
-Supplier: East Wind Inc.
-Artikel:
-Artikel    Lager                      Menge  Preis  Gesamtmenge Wertansatz
-RM0001     In Verkaufsstellen         10     200    2000        2200
-Tisch      Anlagevermögen im Lager    5      100    500         550
+**Supplier:** East Wind Inc.
 
-Steuern:
-Konto                                 Betrag    Kategorie
-Versandgebühren                       100       Gesamtsumme und Bewertung
-Umsatzsteuer (Vorsteuer)              120       Gesamtsumme
-Zoll                                  150       Bewertung
+**Artikel:**
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>>Artikel</th>
+            <th>Lager</th>
+            <th>Menge</th>
+            <th>Preis</th>
+            <th>Gesamtmenge</th>
+            <th>Wertansatz</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>RM0001</td>
+            <td>In Verkaufsstellen</td>
+            <td>10</td>
+            <td>200</td>
+            <td>2000</td>
+            <td>2200</td>
+        </tr>
+        <tr>
+            <td>Tisch</td>
+            <td>Anlagevermögen im Lager</td>
+            <td>5</td>
+            <td>100</td>
+            <td>500</td>
+            <td>550</td>
+        </tr>
+    </tbody>
+</table>
+<p><strong>Steuern:</strong>
+</p>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Konto</th>
+            <th>Betrag</th>
+            <th>Kategorie</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Versandgebühren</td>
+            <td>100</td>
+            <td>Gesamtsumme und Bewertung</td>
+        </tr>
+        <tr>
+            <td>MwSt</td>
+            <td>120</td>
+            <td>Gesamtsumme</td>
+        </tr>
+        <tr>
+            <td>Zoll</td>
+            <td>150</td>
+            <td>Bewertung</td>
+        </tr>
+    </tbody>
+</table>
+<p><strong>Stock Ledger</strong>
+</p>
+
+![pr<em>stock</em>ledger]({{docs_base_url}}/assets/old_images/erpnext/accounting-for-stock-2.png)
+
+
+
+
+
+
 
 Lagerbuch:
 Laufende Nr Artikel-Kode Lager                    Tatsächl. Menge Menge nach Transaktion  Beleg-Nr.
