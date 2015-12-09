@@ -10,7 +10,7 @@ Um ein neues Produkt-Bundle zu erstellen, gehen Sie zu:
 
 > Vertrieb > Einstellungen > Produkt-Bundle > Neu
 
-<img class="screenshot" alt="-Produkt-Bundle" src="{{docs_base_url}}/assets/img/selling/product-bundle.png">
+<img class="screenshot" alt="Produkt-Bundle" src="{{docs_base_url}}/assets/img/selling/product-bundle.png">
 
 ### Hauptartikel auswählen
 
