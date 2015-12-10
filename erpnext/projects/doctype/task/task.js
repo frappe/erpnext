@@ -8,6 +8,13 @@ cur_frm.add_fetch("project", "company", "company");
 frappe.ui.form.on("Task", {
 	refresh: function(frm) {
 		var doc = frm.doc;
+		if(doc.__islocal) {
+			if(!frm.doc.exp_end_date) {
+				frm.set_value("exp_end_date", frappe.datetime.add_days(new Date(), 7));
+			}
+		}
+
+
 		if(!doc.__islocal) {
 			if(frappe.model.can_read("Time Log")) {
 				frm.add_custom_button(__("Time Logs"), function() {
