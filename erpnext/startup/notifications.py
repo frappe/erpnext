@@ -8,7 +8,7 @@ def get_notification_config():
 		{
 			"Issue": {"status": "Open"},
 			"Warranty Claim": {"status": "Open"},
-			"Task": {"status": "Open"},
+			"Task": {"status": "Overdue"},
 			"Project": {"status": "Open"},
 			"Lead": {"status": "Open"},
 			"Contact": {"status": "Open"},

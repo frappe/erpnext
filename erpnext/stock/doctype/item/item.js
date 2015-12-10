@@ -10,6 +10,9 @@ frappe.ui.form.on("Item", {
 			frm.fields_dict["attributes"].grid.set_column_disp("attribute_value", true);
 		}
 
+		// should never check Private
+		frm.fields_dict["website_image"].df.is_private = 0;
+
 	},
 
 	refresh: function(frm) {
