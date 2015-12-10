@@ -90,14 +90,14 @@ class SalarySlip(TransactionBase):
 				start_date = joining_date
 			elif joining_date > month['month_end_date']:
 				return
-		
+				
+		end_date = month['month_end_date']
 		if relieving_date:
 			if relieving_date > start_date and relieving_date < month['month_end_date']:
 				end_date = relieving_date
 			elif relieving_date < month['month_start_date']:
-				frappe.throw(_("Employee relieved on {0} must be set as 'Left'").format(relieving_date))
-		else:
-			end_date = month['month_end_date']
+				frappe.throw(_("Employee relieved on {0} must be set as 'Left'")
+					.format(relieving_date))			
 			
 		payment_days = date_diff(end_date, start_date) + 1
 
