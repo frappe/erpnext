@@ -30,7 +30,7 @@ frappe.ui.form.on("Task", {
 			}
 
 			if(frm.perm[0].write) {
-				if(frm.doc.status==="Open") {
+				if(frm.doc.status!=="Closed" && frm.doc.status!=="Cancelled") {
 					frm.add_custom_button("Close", function() {
 						frm.set_value("status", "Closed");
 						frm.save();
