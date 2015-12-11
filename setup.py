@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 from pip.req import parse_requirements
 
-version = "6.12.9"
+version = "6.12.10"
 requirements = parse_requirements("requirements.txt", session="")
 
 setup(
