@@ -95,7 +95,7 @@ class Item(WebsiteGenerator):
 		# find if website image url exists as public
 		file = frappe.get_all("File", filters={
 			"file_url": self.website_image
-		}, fields=["name", "is_private"], order_by="is_private asc", limit_poge_length=1)
+		}, fields=["name", "is_private"], order_by="is_private asc", limit_page_length=1)
 
 		if file:
 			file = file[0]
