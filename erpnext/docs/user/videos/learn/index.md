@@ -31,7 +31,7 @@
         <li><a href="{{docs_base_url}}/user/videos/learn/data-import-tool.html">
             Data Import Tool</a>
             <span class="text-muted pull-right">3:24</span>
-    </li>
+    	</li>
         <li><a href="{{docs_base_url}}/user/videos/learn/printing-and-branding.html">
             Printing and Branding</a>
             <span class="text-muted pull-right">4:00</span>
@@ -48,6 +48,10 @@
             Opening Stock</a>
             <span class="text-muted pull-right">2:06</span>
         </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/chart-of-accounts.html">
+            Chart of Accounts</a>
+            <span class="text-muted pull-right">2:26</span>
+        </li>
         <li><a href="{{docs_base_url}}/user/videos/learn/opening-account-balances.html">
             Opening Account Balances</a>
             <span class="text-muted pull-right">3:46</span>
@@ -55,6 +59,10 @@
         <li><a href="{{docs_base_url}}/user/videos/learn/email-account.html">
             Email Account</a>
             <span class="text-muted pull-right">2:27</span>
+        </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/file-manager.html">
+            File Manager</a>
+            <span class="text-muted pull-right">2:24</span>
         </li>
     </ul>
     <br>
@@ -79,6 +87,10 @@
         <li><a href="{{docs_base_url}}/user/videos/learn/taxes.html">
             Taxes</a>
             <span class="text-muted pull-right">3:00</span>
+        </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/drop-ship.html">
+			Drop Ship</a>
+            <span class="text-muted pull-right">2:26</span>
         </li>
     </ul>
     <br>
@@ -148,6 +160,10 @@
             Taxes</a>
               <span class="text-muted pull-right">3:00</span>
         </li>
+        <li><a href="{{docs_base_url}}/user/videos/learn/advance-payments.html">
+            Advance Payments</a>
+              <span class="text-muted pull-right">2:52</span>
+        </li>
     </ul>
     <br>
     <h3>Manufacturing</h3>
@@ -202,6 +218,13 @@
         </li>
     </ul>
     <br>
+    <h3>Website</h3>
+    <ul class="list-unstyled video-list">
+        <li><a href="{{docs_base_url}}/user/videos/learn/publish-items-on-website.html">
+            Publish Items on Website</a>
+            <span class="text-muted pull-right">5:14</span>
+        </li>
+    </ul>
     <h3>Customization</h3>
     <ul class="list-unstyled video-list">
         <li><a href="{{docs_base_url}}/user/videos/learn/field-customization.html">
