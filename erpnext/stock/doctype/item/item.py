@@ -89,21 +89,23 @@ class Item(WebsiteGenerator):
 			auto_set_website_image = True
 			self.website_image = self.image
 
-		file = frappe.db.get_value("File", filters={
-			"file_url": self.website_image,
-			"attached_to_doctype": self.doctype,
-			"attached_to_name": self.name
-		}, fieldname=["name", "is_private"], as_dict=True)
+		if self.website_image:
+			file = frappe.db.get_value("File", filters={
+				"file_url": self.website_image,
+				"attached_to_doctype": self.doctype,
+				"attached_to_name": self.name
+			}, fieldname=["name", "is_private"], as_dict=True)
 
-		if not file:
-			self.website_image = None
-			if not auto_set_website_image:
-				frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found").format(self.website_image, self.name))
+			if not file:
+				if not auto_set_website_image:
+					frappe.msgprint(_("Website Image {0} attached to Item {1} cannot be found")
+						.format(self.website_image, self.name))
+				self.website_image = None
 
-		elif file.is_private:
-			self.website_image = None
-			if not auto_set_website_image:
-				frappe.msgprint(_("Website Image should be a public file or website URL"))
+			elif file.is_private:
+				self.website_image = None
+				if not auto_set_website_image:
+					frappe.msgprint(_("Website Image should be a public file or website URL"))
 
 	def make_thumbnail(self):
 		"""Make a thumbnail of `website_image`"""
