@@ -66,7 +66,7 @@ def execute(filters=None):
 
         add_total_row_account(data, section_data, cash_flow_account['section_footer'], period_list)
 
-    add_total_row_account(data, data, _("Cash end of period"), period_list)
+    add_total_row_account(data, data, _("Net Change in Cash"), period_list)
     columns = get_columns(period_list)
 
     return columns, data
