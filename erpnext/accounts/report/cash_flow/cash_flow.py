@@ -50,7 +50,7 @@ def execute(filters=None):
                  "indent": 0.0, "account": cash_flow_account['section_header']}
         data.append(value)
 
-        if not data:
+        if len(data) == 1:
             # add first net income in operations section
             if net_profit_loss:
                 net_profit_loss.update({"indent": 1, "parent_account": operation_accounts['section_header']})
@@ -66,7 +66,7 @@ def execute(filters=None):
 
         add_total_row_account(data, section_data, cash_flow_account['section_footer'], period_list)
 
-    add_total_row_account(data, data, _("Net Change in Cash"), period_list)
+    add_total_row_account(data, data, _("Cash end of period"), period_list)
     columns = get_columns(period_list)
 
     return columns, data
