@@ -1,5 +1,5 @@
 Customer Portal is designed to give easy accesibility to customers of a
-company.
+organization.
 
 This portal allows customers to login and find out information relevant to them.They can trace communication history of their mails. They can also check order status by logging into the website.
 

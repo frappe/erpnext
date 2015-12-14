@@ -19,7 +19,7 @@ entries.
 
 Since the customer has given $5000 as cash advance,it will be recorded as a
 credit entry against the customer. To balance it with the debit entry [Double
-accounting Entry] enter $5000 as debit against the company's cash account. In
+accounting Entry] enter $5000 as debit against the organization's cash account. In
 the row "Is Advance" click 'Yes'.
 
 #### Figure 1 : Journal Entry -Advance Entry  

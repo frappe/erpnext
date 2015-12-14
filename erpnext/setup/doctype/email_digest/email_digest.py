@@ -22,7 +22,7 @@ class EmailDigest(Document):
 		self.from_date, self.to_date = self.get_from_to_date()
 		self.set_dates()
 		self._accounts = {}
-		self.currency = frappe.db.get_value("Company", self.company,
+		self.currency = frappe.db.get_value("organization", self.organization,
 			"default_currency")
 
 	def get_users(self):
@@ -169,7 +169,7 @@ class EmailDigest(Document):
 		for key in ("income", "expenses_booked", "income_year_to_date", "expense_year_to_date",
 			"invoiced_amount", "payables", "bank_balance"):
 			if self.get(key):
-				cache_key = "email_digest:card:{0}:{1}".format(self.company, key)
+				cache_key = "email_digest:card:{0}:{1}".format(self.organization, key)
 				card = cache.get(cache_key)
 
 				if card:
@@ -260,7 +260,7 @@ class EmailDigest(Document):
 	def get_type_balance(self, fieldname, account_type):
 		accounts = [d.name for d in \
 			frappe.db.get_all("Account", filters={"account_type": account_type,
-				"company": self.company, "is_group": 0})]
+				"organization": self.organization, "is_group": 0})]
 
 		balance = prev_balance = 0.0
 		for account in accounts:
@@ -277,7 +277,7 @@ class EmailDigest(Document):
 		if not root_type in self._accounts:
 			self._accounts[root_type] = [d.name for d in \
 				frappe.db.get_all("Account", filters={"root_type": root_type.title(),
-					"company": self.company, "is_group": 0})]
+					"organization": self.organization, "is_group": 0})]
 		return self._accounts[root_type]
 
 	def get_from_to_date(self):

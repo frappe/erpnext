@@ -1,5 +1,5 @@
 Expense Claim is made when Employee’s make expenses out of their pocket on
-behalf of the company. For example, if they take a customer out for lunch,
+behalf of the organization. For example, if they take a customer out for lunch,
 they can make a request for reimbursement via the Expense Claim form.
 
 To make a new Expense Claim, go to:

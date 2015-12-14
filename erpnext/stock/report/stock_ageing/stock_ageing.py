@@ -77,7 +77,7 @@ def get_stock_ledger_entries(filters):
 			(select name, item_name, description, stock_uom, brand, item_group
 				from `tabItem` {item_conditions}) item
 		where item_code = item.name and
-			company = %(company)s and
+			organization = %(organization)s and
 			posting_date <= %(to_date)s
 			{sle_conditions}
 			order by posting_date, posting_time, sle.name"""\

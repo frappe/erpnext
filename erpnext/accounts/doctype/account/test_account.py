@@ -44,12 +44,12 @@ def _make_test_records(verbose):
 		["_Test Payable USD", "Current Liabilities", 0, "Payable", "USD"]
 	]
 
-	for company, abbr in [["_Test Company", "_TC"], ["_Test Company 1", "_TC1"]]:
+	for organization, abbr in [["_Test organization", "_TC"], ["_Test organization 1", "_TC1"]]:
 		test_objects = make_test_objects("Account", [{
 				"doctype": "Account",
 				"account_name": account_name,
 				"parent_account": parent_account + " - " + abbr,
-				"company": company,
+				"organization": organization,
 				"is_group": is_group,
 				"account_type": account_type,
 				"account_currency": currency

@@ -9,14 +9,14 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 		return frappe.call({
 			method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
 			args: {
-				"company": cur_frm.doc.company,
+				"organization": cur_frm.doc.organization,
 				"voucher_type": "Bank Entry"
 			},
 			callback: function(r) {
 				var jv = frappe.model.make_new_doc_and_get_name('Journal Entry');
 				jv = locals['Journal Entry'][jv];
 				jv.voucher_type = 'Bank Entry';
-				jv.company = cur_frm.doc.company;
+				jv.organization = cur_frm.doc.organization;
 				jv.remark = 'Payment against Expense Claim: ' + cur_frm.doc.name;
 				var expense = cur_frm.doc.expenses || [];
 				for(var i = 0; i < expense.length; i++){
@@ -47,7 +47,7 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 
 $.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}));
 
-cur_frm.add_fetch('employee', 'company', 'company');
+cur_frm.add_fetch('employee', 'organization', 'organization');
 cur_frm.add_fetch('employee','employee_name','employee_name');
 cur_frm.add_fetch('expense_type', 'default_account', 'default_account');
 

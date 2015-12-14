@@ -74,7 +74,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 	def submit_landed_cost_voucher(self, pr):
 		lcv = frappe.new_doc("Landed Cost Voucher")
-		lcv.company = "_Test Company"
+		lcv.organization = "_Test organization"
 		lcv.set("purchase_receipts", [{
 			"purchase_receipt": pr.name,
 			"supplier": pr.supplier,

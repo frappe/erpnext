@@ -23,7 +23,7 @@ erpnext.support.MaintenanceVisit = frappe.ui.form.Controller.extend({
 						get_query_filters: {
 							docstatus: 1,
 							customer: cur_frm.doc.customer || undefined,
-							company: cur_frm.doc.company
+							organization: cur_frm.doc.organization
 						}
 					})
 				}, "icon-download", "btn-default");
@@ -35,7 +35,7 @@ erpnext.support.MaintenanceVisit = frappe.ui.form.Controller.extend({
 						get_query_filters: {
 							status: ["in", "Open, Work in Progress"],
 							customer: cur_frm.doc.customer || undefined,
-							company: cur_frm.doc.company
+							organization: cur_frm.doc.organization
 						}
 					})
 				}, "icon-download", "btn-default");
@@ -48,7 +48,7 @@ erpnext.support.MaintenanceVisit = frappe.ui.form.Controller.extend({
 							docstatus: 1,
 							order_type: cur_frm.doc.order_type,
 							customer: cur_frm.doc.customer || undefined,
-							company: cur_frm.doc.company
+							organization: cur_frm.doc.organization
 						}
 					})
 				}, "icon-download", "btn-default");
@@ -89,10 +89,10 @@ cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
 	return {query: "erpnext.controllers.queries.customer_query" }
 }
 
-cur_frm.cscript.company = function(doc, cdt, cdn) {
-	erpnext.get_fiscal_year(doc.company, doc.mntc_date);
+cur_frm.cscript.organization = function(doc, cdt, cdn) {
+	erpnext.get_fiscal_year(doc.organization, doc.mntc_date);
 }
 
 cur_frm.cscript.mntc_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc.company, doc.mntc_date);
+	erpnext.get_fiscal_year(doc.organization, doc.mntc_date);
 }

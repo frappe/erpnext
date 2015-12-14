@@ -26,7 +26,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 					as balance_in_account_currency
 			from `tabGL Entry` t1, `tabAccount` t2
 			where t1.account = t2.name and t2.root_type = 'Expense'
-				and t2.docstatus < 2 and t2.company = '_Test Company'
+				and t2.docstatus < 2 and t2.organization = '_Test organization'
 				and t1.posting_date between %s and %s
 			group by t1.account
 			having sum(t1.debit) > sum(t1.credit)
@@ -35,7 +35,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		profit_or_loss = frappe.db.sql("""select sum(t1.debit) - sum(t1.credit) as balance
 			from `tabGL Entry` t1, `tabAccount` t2
 			where t1.account = t2.name and t2.report_type = 'Profit and Loss'
-			and t2.docstatus < 2 and t2.company = '_Test Company'
+			and t2.docstatus < 2 and t2.organization = '_Test organization'
 			and t1.posting_date between %s and %s""", (year_start_date, today()))
 
 		profit_or_loss = flt(profit_or_loss[0][0]) if profit_or_loss else 0
@@ -70,7 +70,7 @@ class TestPeriodClosingVoucher(unittest.TestCase):
 		pcv = frappe.get_doc({
 			"doctype": "Period Closing Voucher",
 			"closing_account_head": "_Test Account Reserves and Surplus - _TC",
-			"company": "_Test Company",
+			"organization": "_Test organization",
 			"fiscal_year": get_fiscal_year(today())[0],
 			"posting_date": today(),
 			"remarks": "test"

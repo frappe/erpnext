@@ -199,7 +199,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
-		frappe.permissions.add_user_permission("Company", "_Test Company 1", "test2@example.com")
+		frappe.permissions.add_user_permission("organization", "_Test organization 1", "test2@example.com")
 
 		test_user = frappe.get_doc("User", "test@example.com")
 		test_user.add_roles("Sales User", "Stock User")
@@ -211,7 +211,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		frappe.set_user("test@example.com")
 
-		so = make_sales_order(company="_Test Company 1",
+		so = make_sales_order(organization="_Test organization 1",
 			warehouse="_Test Warehouse 2 - _TC1", do_not_save=True)
 		so.conversion_rate = 0.02
 		so.plc_conversion_rate = 0.02
@@ -222,7 +222,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
 		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
-		frappe.permissions.remove_user_permission("Company", "_Test Company 1", "test2@example.com")
+		frappe.permissions.remove_user_permission("organization", "_Test organization 1", "test2@example.com")
 
 	def test_block_delivery_note_against_cancelled_sales_order(self):
 		so = make_sales_order()
@@ -422,7 +422,7 @@ def make_sales_order(**args):
 	if args.transaction_date:
 		so.transaction_date = args.transaction_date
 
-	so.company = args.company or "_Test Company"
+	so.organization = args.organization or "_Test organization"
 	so.customer = args.customer or "_Test Customer"
 	so.delivery_date = add_days(so.transaction_date, 10)
 	so.currency = args.currency or "INR"

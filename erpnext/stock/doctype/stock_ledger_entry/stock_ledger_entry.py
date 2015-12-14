@@ -17,11 +17,11 @@ exclude_from_linked_with = True
 class StockLedgerEntry(Document):
 	def validate(self):
 		self.flags.ignore_submit_comment = True
-		from erpnext.stock.utils import validate_warehouse_company
+		from erpnext.stock.utils import validate_warehouse_organization
 		self.validate_mandatory()
 		self.validate_item()
 		self.validate_batch()
-		validate_warehouse_company(self.warehouse, self.company)
+		validate_warehouse_organization(self.warehouse, self.organization)
 		self.scrub_posting_time()
 
 		from erpnext.accounts.utils import validate_fiscal_year
@@ -48,7 +48,7 @@ class StockLedgerEntry(Document):
 					.format(self.batch_no, batch_bal_after_transaction, self.item_code, self.warehouse))
 
 	def validate_mandatory(self):
-		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','company']
+		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','organization']
 		for k in mandatory:
 			if not self.get(k):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))

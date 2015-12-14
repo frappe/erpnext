@@ -23,7 +23,7 @@ same way.
 
 Thus when you do your analysis you get a better understanding as to which side
 of your business is doing better. Since ERPNext has an option to add multiple
-Companies, you can create Cost Centers for each Company and manage it
+Companies, you can create Cost Centers for each organization and manage it
 separately.
 
 Chart of Cost Centers
@@ -65,7 +65,7 @@ ERPNext allows you to either:
 
 if you exceed budgets.
 
-These can be defined from the Company record.
+These can be defined from the organization record.
 
 Even if you choose to “ignore” budget overruns, you will get a wealth of
 information from the “Budget vs Actual” variance report.

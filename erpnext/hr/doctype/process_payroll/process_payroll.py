@@ -33,7 +33,7 @@ class ProcessPayroll(Document):
 		self.check_mandatory()
 
 		cond = ''
-		for f in ['company', 'branch', 'department', 'designation']:
+		for f in ['organization', 'branch', 'department', 'designation']:
 			if self.get(f):
 				cond += " and t1." + f + " = '" + self.get(f).replace("'", "\'") + "'"
 
@@ -50,7 +50,7 @@ class ProcessPayroll(Document):
 
 
 	def check_mandatory(self):
-		for f in ['company', 'month', 'fiscal_year']:
+		for f in ['organization', 'month', 'fiscal_year']:
 			if not self.get(f):
 				frappe.throw(_("Please set {0}").format(f))
 
@@ -63,15 +63,15 @@ class ProcessPayroll(Document):
 		ss_list = []
 		for emp in emp_list:
 			if not frappe.db.sql("""select name from `tabSalary Slip`
-					where docstatus!= 2 and employee = %s and month = %s and fiscal_year = %s and company = %s
-					""", (emp[0], self.month, self.fiscal_year, self.company)):
+					where docstatus!= 2 and employee = %s and month = %s and fiscal_year = %s and organization = %s
+					""", (emp[0], self.month, self.fiscal_year, self.organization)):
 				ss = frappe.get_doc({
 					"doctype": "Salary Slip",
 					"fiscal_year": self.fiscal_year,
 					"employee": emp[0],
 					"month": self.month,
 					"email_check": self.send_email,
-					"company": self.company,
+					"organization": self.organization,
 				})
 				ss.insert()
 				ss_list.append(ss.name)
@@ -139,7 +139,7 @@ class ProcessPayroll(Document):
 				<b>Not Submitted Salary Slips: </b>\
 				<br><br> %s <br><br> \
 				Reason: <br>\
-				May be company email id specified in employee master is not valid. <br> \
+				May be organization email id specified in employee master is not valid. <br> \
 				Please mention correct email id in employee master or if you don't want to \
 				send mail, uncheck 'Send Email' checkbox. <br>\
 				Then try to submit Salary Slip again.
@@ -165,7 +165,7 @@ class ProcessPayroll(Document):
 
 	def make_journal_entry(self, salary_account = None):
 		amount = self.get_total_salary()
-		default_bank_account = frappe.db.get_value("Company", self.company,
+		default_bank_account = frappe.db.get_value("organization", self.organization,
 			"default_bank_account")
 
 		journal_entry = frappe.new_doc('Journal Entry')
@@ -173,7 +173,7 @@ class ProcessPayroll(Document):
 		journal_entry.user_remark = _('Payment of salary for the month {0} and year {1}').format(self.month,
 			self.fiscal_year)
 		journal_entry.fiscal_year = self.fiscal_year
-		journal_entry.company = self.company
+		journal_entry.organization = self.organization
 		journal_entry.posting_date = nowdate()
 		journal_entry.set("accounts", [
 			{

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 
-def install(company):
+def install(organization):
 	docs = [
 		{'doctype': 'Deduction Type', 'name': 'Professional Tax', 'description': 'Professional Tax', 'deduction_name': 'Professional Tax'},
 		{'doctype': 'Deduction Type', 'name': 'Provident Fund', 'description': 'Provident fund', 'deduction_name': 'Provident Fund'},

@@ -1,6 +1,6 @@
 [
  {
-  "company": "_Test Company", 
+  "organization": "_Test organization", 
   "doctype": "Leave Block List", 
   "leave_block_list_allowed": [
    {

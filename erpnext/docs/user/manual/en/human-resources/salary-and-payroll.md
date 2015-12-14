@@ -36,7 +36,7 @@ __Medical Allowance:__ The employer pays the employee for the medical expenditur
 
 __Bonus:__ Taxable part of the CTC, usually a once a year lump sum amount, given to the employee based on the individual’s as well as the organizational performance for the year.
 
-__Employee Stock Options:__ ESOPS are Free/discounted shares given by the company to the employees. This is done to primarily increase employee retention.
+__Employee Stock Options:__ ESOPS are Free/discounted shares given by the organization to the employees. This is done to primarily increase employee retention.
 
 To create a new Salary Structure go to:
 
@@ -88,7 +88,7 @@ You can also create salary slip for multiple employees using Process Payroll:
 
 In Process Payroll,
 
-  1. Select the Company for which you want to create the Salary Slips.
+  1. Select the organization for which you want to create the Salary Slips.
   2. Select the Month and the Year for which you want to create the Salary Slips.
   3. Click on “Create Salary Slips”. This will create Salary Slip records for each active Employee for the month selected. If the Salary Slips are created, the system will not create any more Salary Slips. All updates will be shown in the “Activity Log” section.
   4. Once all Salary Slips are created, you can check if they are created correctly or edit it if you want to deduct Leave Without Pay (LWP).
@@ -101,12 +101,12 @@ The final step is to book the Salaries in your Accounts.
 Salaries in businesses are usually dealt with extreme privacy. In most cases,
 the companies issues a single payment to the bank combining all salaries and
 the bank distributes the salaries to each employee’s salary account. This way
-there is only one payment entry in the company’s books of accounts and anyone
-with access to the company’s accounts will not have access to the individual
+there is only one payment entry in the organization’s books of accounts and anyone
+with access to the organization’s accounts will not have access to the individual
 salaries.
 
 The salary payment entry is a Journal Entry entry that debits the total
-salary of all Employees to the Salary Account and credits the company’s bank
+salary of all Employees to the Salary Account and credits the organization’s bank
 Account.
 
 To generate your salary payment voucher from Process Payroll, click on

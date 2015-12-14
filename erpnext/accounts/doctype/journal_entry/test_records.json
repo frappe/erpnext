@@ -2,7 +2,7 @@
  {
   "cheque_date": "2013-03-14",
   "cheque_no": "33",
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "doctype": "Journal Entry",
   "accounts": [
    {
@@ -33,7 +33,7 @@
  {
   "cheque_date": "2013-02-14",
   "cheque_no": "33",
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "doctype": "Journal Entry",
   "accounts": [
    {
@@ -64,7 +64,7 @@
  {
   "cheque_date": "2013-02-14",
   "cheque_no": "33",
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "doctype": "Journal Entry",
   "accounts": [
    {

@@ -1,6 +1,6 @@
 [
  {
-  "company": "_Test Company", 
+  "organization": "_Test organization", 
   "doctype": "Material Request", 
   "fiscal_year": "_Test Fiscal Year 2013", 
   "items": [

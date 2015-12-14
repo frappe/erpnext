@@ -45,7 +45,7 @@ ERPNext allows you to take a few budget actions. It signifies whether to stop
 
 
 
-These can be defined from the Company record.
+These can be defined from the organization record.
 
 ![]({{docs_base_url}}/assets/old_images/erpnext/budgeting-4-1.png)  
 

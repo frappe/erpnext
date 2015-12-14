@@ -22,7 +22,7 @@ def execute(filters=None):
 			continue
 
 		row = [emp, emp_det.employee_name, emp_det.branch, emp_det.department, emp_det.designation,
-			emp_det.company]
+			emp_det.organization]
 
 		total_p = total_a = 0.0
 		for day in range(filters["total_days_in_month"]):
@@ -48,7 +48,7 @@ def get_columns(filters):
 	columns = [
 		_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", _("Branch")+ ":Link/Branch:120",
 		_("Department") + ":Link/Department:120", _("Designation") + ":Link/Designation:120",
-		 _("Company") + ":Link/Company:120"
+		 _("organization") + ":Link/organization:120"
 	]
 
 	for day in range(filters["total_days_in_month"]):
@@ -88,7 +88,7 @@ def get_conditions(filters):
 
 	conditions = " and month(att_date) = %(month)s and fiscal_year = %(fiscal_year)s"
 
-	if filters.get("company"): conditions += " and company = %(company)s"
+	if filters.get("organization"): conditions += " and organization = %(organization)s"
 	if filters.get("employee"): conditions += " and employee = %(employee)s"
 
 	return conditions, filters
@@ -96,7 +96,7 @@ def get_conditions(filters):
 def get_employee_details():
 	emp_map = frappe._dict()
 	for d in frappe.db.sql("""select name, employee_name, designation,
-		department, branch, company
+		department, branch, organization
 		from tabEmployee where docstatus < 2
 		and status = 'Active'""", as_dict=1):
 		emp_map.setdefault(d.name, d)

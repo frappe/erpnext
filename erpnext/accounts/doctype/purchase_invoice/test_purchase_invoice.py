@@ -322,7 +322,7 @@ def make_purchase_invoice(**args):
 		pi.posting_date = args.posting_date
 	if args.posting_time:
 		pi.posting_time = args.posting_time
-	pi.company = args.company or "_Test Company"
+	pi.organization = args.organization or "_Test organization"
 	pi.supplier = args.supplier or "_Test Supplier"
 	pi.currency = args.currency or "INR"
 	pi.conversion_rate = args.conversion_rate or 1

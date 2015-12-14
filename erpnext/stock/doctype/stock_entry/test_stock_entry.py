@@ -447,17 +447,17 @@ class TestStockEntry(unittest.TestCase):
 		serial_no = get_serial_nos(se.get("items")[0].serial_no)[0]
 		self.assertFalse(frappe.db.get_value("Serial No", serial_no, "warehouse"))
 
-	def test_warehouse_company_validation(self):
+	def test_warehouse_organization_validation(self):
 		set_perpetual_inventory(0)
 		frappe.get_doc("User", "test2@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Stock User", "Stock Manager")
 		frappe.set_user("test2@example.com")
 
-		from erpnext.stock.utils import InvalidWarehouseCompany
+		from erpnext.stock.utils import InvalidWarehouseorganization
 		st1 = frappe.copy_doc(test_records[0])
 		st1.get("items")[0].t_warehouse="_Test Warehouse 2 - _TC1"
 		st1.insert()
-		self.assertRaises(InvalidWarehouseCompany, st1.submit)
+		self.assertRaises(InvalidWarehouseorganization, st1.submit)
 
 	# permission tests
 	def test_warehouse_user(self):
@@ -478,13 +478,13 @@ class TestStockEntry(unittest.TestCase):
 
 		frappe.set_user("test@example.com")
 		st1 = frappe.copy_doc(test_records[0])
-		st1.company = "_Test Company 1"
+		st1.organization = "_Test organization 1"
 		st1.get("items")[0].t_warehouse="_Test Warehouse 2 - _TC1"
 		self.assertRaises(frappe.PermissionError, st1.insert)
 
 		frappe.set_user("test2@example.com")
 		st1 = frappe.copy_doc(test_records[0])
-		st1.company = "_Test Company 1"
+		st1.organization = "_Test organization 1"
 		st1.get("items")[0].t_warehouse="_Test Warehouse 2 - _TC1"
 		st1.insert()
 		st1.submit()
@@ -520,7 +520,7 @@ class TestStockEntry(unittest.TestCase):
 
 		production_order = frappe.new_doc("Production Order")
 		production_order.update({
-			"company": "_Test Company",
+			"organization": "_Test organization",
 			"fg_warehouse": "_Test Warehouse 1 - _TC",
 			"production_item": "_Test FG Item 2",
 			"bom_no": bom_no,
@@ -552,7 +552,7 @@ class TestStockEntry(unittest.TestCase):
 
 		production_order = frappe.new_doc("Production Order")
 		production_order.update({
-			"company": "_Test Company",
+			"organization": "_Test organization",
 			"fg_warehouse": "_Test Warehouse 1 - _TC",
 			"production_item": "_Test Variant Item-S",
 			"bom_no": bom_no,
@@ -624,7 +624,7 @@ def make_stock_entry(**args):
 	else:
 		s.purpose = args.purpose
 
-	s.company = args.company or "_Test Company"
+	s.organization = args.organization or "_Test organization"
 	s.fiscal_year = get_fiscal_year(s.posting_date)[0]
 	s.purchase_receipt_no = args.purchase_receipt_no
 	s.delivery_note_no = args.delivery_note_no

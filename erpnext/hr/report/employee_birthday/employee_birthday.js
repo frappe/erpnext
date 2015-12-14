@@ -12,11 +12,11 @@ frappe.query_reports["Employee Birthday"] = {
 				"Dec"][frappe.datetime.str_to_obj(frappe.datetime.get_today()).getMonth()],
 		},
 		{
-			"fieldname":"company",
-			"label": __("Company"),
+			"fieldname":"organization",
+			"label": __("organization"),
 			"fieldtype": "Link",
-			"options": "Company",
-			"default": frappe.defaults.get_user_default("company")
+			"options": "organization",
+			"default": frappe.defaults.get_user_default("organization")
 		}
 	]
 }

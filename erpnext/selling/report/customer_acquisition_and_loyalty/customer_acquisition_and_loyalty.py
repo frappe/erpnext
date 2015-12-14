@@ -12,14 +12,14 @@ def execute(filters=None):
 	new_customers_in = {}
 	repeat_customers_in = {}
 	customers = []
-	company_condition = ""
+	organization_condition = ""
 
-	if filters.get("company"):
-		company_condition = ' and company=%(company)s'
+	if filters.get("organization"):
+		organization_condition = ' and organization=%(organization)s'
 
 	for si in frappe.db.sql("""select posting_date, customer, base_grand_total from `tabSales Invoice`
 		where docstatus=1 and posting_date <= %(to_date)s
-		{company_condition} order by posting_date""".format(company_condition=company_condition),
+		{organization_condition} order by posting_date""".format(organization_condition=organization_condition),
 		filters, as_dict=1):
 
 		key = si.posting_date.strftime("%Y-%m")

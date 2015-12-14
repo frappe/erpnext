@@ -38,7 +38,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 							enquiry_type: cur_frm.doc.order_type,
 							customer: cur_frm.doc.customer || undefined,
 							lead: cur_frm.doc.lead || undefined,
-							company: cur_frm.doc.company
+							organization: cur_frm.doc.organization
 						}
 					})
 				}, "icon-download", "btn-default");
@@ -78,7 +78,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		this.get_terms();
 	},
 
-	validate_company_and_party: function(party_field) {
+	validate_organization_and_party: function(party_field) {
 		if(!this.frm.doc.quotation_to) {
 			msgprint(__("Please select a value for {0} quotation_to {1}", [this.frm.doc.doctype, this.frm.doc.name]));
 			return false;

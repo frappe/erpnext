@@ -11,10 +11,10 @@ could also go to the Setup module and click on Warehouse under Master Data.
 
 <img class="screenshot" alt="Warehouse" src="{{docs_base_url}}/assets/img/stock/warehouse.png">
 
-In ERPNext, every Warehouse must belong to a specific company, to maintain
-company wise stock balance. The Warehouses are saved with their respective
-company’s abbreviations. This facilitates in identifying which Warehouse
-belongs to which company, at a glance.
+In ERPNext, every Warehouse must belong to a specific organization, to maintain
+organization wise stock balance. The Warehouses are saved with their respective
+organization’s abbreviations. This facilitates in identifying which Warehouse
+belongs to which organization, at a glance.
 
 You can include user restrictions for these Warehouses. In case you do not
 wish a particular user to operate on a particular Warehouse, you can refrain

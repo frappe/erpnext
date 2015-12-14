@@ -24,9 +24,9 @@ class LeaveBlockList(Document):
 
 @frappe.whitelist()
 def get_applicable_block_dates(from_date, to_date, employee=None,
-	company=None, all_lists=False):
+	organization=None, all_lists=False):
 	block_dates = []
-	for block_list in get_applicable_block_lists(employee, company, all_lists):
+	for block_list in get_applicable_block_lists(employee, organization, all_lists):
 		block_dates.extend(frappe.db.sql("""select block_date, reason
 			from `tabLeave Block List Date` where parent=%s
 			and block_date between %s and %s""", (block_list, from_date, to_date),
@@ -34,7 +34,7 @@ def get_applicable_block_dates(from_date, to_date, employee=None,
 
 	return block_dates
 
-def get_applicable_block_lists(employee=None, company=None, all_lists=False):
+def get_applicable_block_lists(employee=None, organization=None, all_lists=False):
 	block_lists = []
 
 	if not employee:
@@ -42,8 +42,8 @@ def get_applicable_block_lists(employee=None, company=None, all_lists=False):
 		if not employee:
 			return []
 
-	if not company:
-		company = frappe.db.get_value("Employee", employee, "company")
+	if not organization:
+		organization = frappe.db.get_value("Employee", employee, "organization")
 
 	def add_block_list(block_list):
 		if block_list:
@@ -58,7 +58,7 @@ def get_applicable_block_lists(employee=None, company=None, all_lists=False):
 
 	# global
 	for block_list in frappe.db.sql_list("""select name from `tabLeave Block List`
-		where applies_to_all_departments=1 and company=%s""", company):
+		where applies_to_all_departments=1 and organization=%s""", organization):
 		add_block_list(block_list)
 
 	return list(set(block_lists))

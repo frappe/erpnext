@@ -10,7 +10,7 @@ from frappe.model.document import Document
 
 class Warehouse(Document):
 	def autoname(self):
-		suffix = " - " + frappe.db.get_value("Company", self.company, "abbr")
+		suffix = " - " + frappe.db.get_value("organization", self.organization, "abbr")
 		if not self.warehouse_name.endswith(suffix):
 			self.name = self.warehouse_name + suffix
 
@@ -27,7 +27,7 @@ class Warehouse(Document):
 				self.validate_parent_account()
 
 				warehouse_account = frappe.db.get_value("Account",
-					{"account_type": "Warehouse", "company": self.company, "warehouse": self.name},
+					{"account_type": "Warehouse", "organization": self.organization, "warehouse": self.name},
 					["name", "parent_account"])
 
 				if warehouse_account and warehouse_account[1] != self.create_account_under:
@@ -49,7 +49,7 @@ class Warehouse(Document):
 						'account_name': self.warehouse_name,
 						'parent_account': self.create_account_under,
 						'is_group':0,
-						'company':self.company,
+						'organization':self.organization,
 						"account_type": "Warehouse",
 						"warehouse": self.name,
 						"freeze_account": "No"
@@ -59,20 +59,20 @@ class Warehouse(Document):
 					msgprint(_("Account head {0} created").format(ac_doc.name))
 
 	def validate_parent_account(self):
-		if not self.company:
-			frappe.throw(_("Warehouse {0}: Company is mandatory").format(self.name))
+		if not self.organization:
+			frappe.throw(_("Warehouse {0}: organization is mandatory").format(self.name))
 
 		if not self.create_account_under:
 			parent_account = frappe.db.get_value("Account",
-				{"account_name": "Stock Assets", "company": self.company})
+				{"account_name": "Stock Assets", "organization": self.organization})
 
 			if parent_account:
 				self.create_account_under = parent_account
 			else:
 				frappe.throw(_("Please enter parent account group for warehouse {0}").format(self.name))
-		elif frappe.db.get_value("Account", self.create_account_under, "company") != self.company:
-			frappe.throw(_("Warehouse {0}: Parent account {1} does not bolong to the company {2}")
-				.format(self.name, self.create_account_under, self.company))
+		elif frappe.db.get_value("Account", self.create_account_under, "organization") != self.organization:
+			frappe.throw(_("Warehouse {0}: Parent account {1} does not bolong to the organization {2}")
+				.format(self.name, self.create_account_under, self.organization))
 
 
 	def on_trash(self):
@@ -95,16 +95,16 @@ class Warehouse(Document):
 			throw(_("Warehouse can not be deleted as stock ledger entry exists for this warehouse."))
 
 	def before_rename(self, olddn, newdn, merge=False):
-		# Add company abbr if not provided
-		from erpnext.setup.doctype.company.company import get_name_with_abbr
-		new_warehouse = get_name_with_abbr(newdn, self.company)
+		# Add organization abbr if not provided
+		from erpnext.setup.doctype.organization.organization import get_name_with_abbr
+		new_warehouse = get_name_with_abbr(newdn, self.organization)
 
 		if merge:
 			if not frappe.db.exists("Warehouse", new_warehouse):
 				frappe.throw(_("Warehouse {0} does not exist").format(new_warehouse))
 
-			if self.company != frappe.db.get_value("Warehouse", new_warehouse, "company"):
-				frappe.throw(_("Both Warehouse must belong to same Company"))
+			if self.organization != frappe.db.get_value("Warehouse", new_warehouse, "organization"):
+				frappe.throw(_("Both Warehouse must belong to same organization"))
 
 			frappe.db.sql("delete from `tabBin` where warehouse=%s", olddn)
 
@@ -128,12 +128,12 @@ class Warehouse(Document):
 			frappe.db.set_value("Account", new_account or old_account, "warehouse", newdn)
 
 	def add_abbr_if_missing(self, dn):
-		from erpnext.setup.doctype.company.company import get_name_with_abbr
-		return get_name_with_abbr(dn, self.company)
+		from erpnext.setup.doctype.organization.organization import get_name_with_abbr
+		return get_name_with_abbr(dn, self.organization)
 
 	def get_account(self, warehouse):
 		return frappe.db.get_value("Account", {"account_type": "Warehouse",
-			"warehouse": warehouse, "company": self.company})
+			"warehouse": warehouse, "organization": self.organization})
 
 	def after_rename(self, olddn, newdn, merge=False):
 		if merge:

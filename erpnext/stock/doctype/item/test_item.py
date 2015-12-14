@@ -85,7 +85,7 @@ class TestItem(unittest.TestCase):
 
 		details = get_item_details({
 			"item_code": "_Test Item",
-			"company": "_Test Company",
+			"organization": "_Test organization",
 			"price_list": "_Test Price List",
 			"currency": "_Test Currency",
 			"parenttype": "Sales Order",

@@ -16,12 +16,12 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 		});
 
 		this.frm.set_query('receivable_payable_account', function() {
-			if(!me.frm.doc.company || !me.frm.doc.party_type) {
-				msgprint(__("Please select Company and Party Type first"));
+			if(!me.frm.doc.organization || !me.frm.doc.party_type) {
+				msgprint(__("Please select organization and Party Type first"));
 			} else {
 				return{
 					filters: {
-						"company": me.frm.doc.company,
+						"organization": me.frm.doc.organization,
 						"is_group": 0,
 						"account_type": (me.frm.doc.party_type == "Customer" ? "Receivable" : "Payable")
 					}
@@ -31,12 +31,12 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 		});
 
 		this.frm.set_query('bank_cash_account', function() {
-			if(!me.frm.doc.company) {
-				msgprint(__("Please select Company first"));
+			if(!me.frm.doc.organization) {
+				msgprint(__("Please select organization first"));
 			} else {
 				return{
 					filters:[
-						['Account', 'company', '=', me.frm.doc.company],
+						['Account', 'organization', '=', me.frm.doc.organization],
 						['Account', 'is_group', '=', 0],
 						['Account', 'account_type', 'in', ['Bank', 'Cash']]
 					]
@@ -55,7 +55,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 			return frappe.call({
 				method: "erpnext.accounts.party.get_party_account",
 				args: {
-					company: me.frm.doc.company,
+					organization: me.frm.doc.organization,
 					party_type: me.frm.doc.party_type,
 					party: me.frm.doc.party
 				},

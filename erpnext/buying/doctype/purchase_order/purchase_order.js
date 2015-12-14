@@ -134,7 +134,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						docstatus: 1,
 						status: ["!=", "Stopped"],
 						per_ordered: ["<", 99.99],
-						company: cur_frm.doc.company
+						organization: cur_frm.doc.organization
 					}
 				})
 			}
@@ -148,7 +148,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					get_query_filters: {
 						docstatus: 1,
 						status: ["!=", "Stopped"],
-						company: cur_frm.doc.company
+						organization: cur_frm.doc.organization
 					}
 				})
 			}

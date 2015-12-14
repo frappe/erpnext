@@ -1,4 +1,4 @@
-The value of available inventory is treated as an Asset in company's Chart of
+The value of available inventory is treated as an Asset in organization's Chart of
 Accounts. Depending on the type of items, it can be treated as Fixed Asset or
 Current Asset. To prepare Balance Sheet, you should make the accounting
 entries for those assets. There are generally two different methods of
@@ -10,7 +10,7 @@ In this process, for each stock transactions, the system posts relevant
 accounting entries to sync stock balance and accounting balance. This is the
 default setting in ERPNext for new accounts.
 
-When you buy and receive items, those items are booked as the company’s assets
+When you buy and receive items, those items are booked as the organization’s assets
 (stock-in-hand / fixed-assets). When you sell and deliver those items, an
 expense (cost-of-goods-sold) equal to the buying cost of the items is booked.
 General Ledger entries are made after every stock transaction. As a result,
@@ -24,7 +24,7 @@ To check accounting entries for a particular stock transaction, please check
 #### **Advantages**
 
 Perpetual Inventory system will make it easier for you to maintain accuracy of
-company's asset and expense values. Stock balances will always be synced with
+organization's asset and expense values. Stock balances will always be synced with
 relevant account balances, so no more periodic manual entry has to be done to
 balance them.
 
@@ -52,7 +52,7 @@ In an accounting period, when you buy and receive items, an expense is booked
 in your accounting system. You sell and deliver some of these items.
 
 At the end of an accounting period, the total value of items to be sold, need
-to be booked as the company’s assets, often known as stock-in-hand.
+to be booked as the organization’s assets, often known as stock-in-hand.
 
 The difference between the value of the items remaining to be sold and the
 previous period’s stock-in-hand value can be positive or negative. If

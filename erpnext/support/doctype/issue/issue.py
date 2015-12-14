@@ -39,9 +39,9 @@ class Issue(Document):
 				if values:
 					self.contact, self.customer = values
 
-			if not self.company:
-				self.company = frappe.db.get_value("Lead", self.lead, "company") or \
-					frappe.db.get_default("company")
+			if not self.organization:
+				self.organization = frappe.db.get_value("Lead", self.lead, "organization") or \
+					frappe.db.get_default("organization")
 
 	def update_status(self):
 		status = frappe.db.get_value("Issue", self.name, "status")

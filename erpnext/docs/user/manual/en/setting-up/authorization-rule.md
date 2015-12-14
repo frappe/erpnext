@@ -16,7 +16,7 @@ Open new Authorization Rule
 
 **Step 2:**
 
-Select Company and Transaction on which Authorization Rule will be applicable. This functionality is available for limited transactions only.
+Select organization and Transaction on which Authorization Rule will be applicable. This functionality is available for limited transactions only.
 
 **Step 3:**
 

@@ -1,6 +1,6 @@
 [
  {
-  "company": "_Test Company", 
+  "organization": "_Test organization", 
   "deductions": [
    {
     "d_amount": 100, 

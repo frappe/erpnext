@@ -131,7 +131,7 @@ class DeliveryNote(SellingController):
 				super(DeliveryNote, self).validate_with_previous_doc({
 					fn[0]: {
 						"ref_dn_field": fn[1],
-						"compare_fields": [["customer", "="], ["company", "="], ["project_name", "="],
+						"compare_fields": [["customer", "="], ["organization", "="], ["project_name", "="],
 							["currency", "="]],
 					},
 				})
@@ -195,7 +195,7 @@ class DeliveryNote(SellingController):
 		self.validate_packed_qty()
 
 		# Check for Approving Authority
-		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.company, self.base_grand_total, self)
+		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype, self.organization, self.base_grand_total, self)
 
 		# update delivered qty in sales order
 		self.update_prevdoc_status()
@@ -231,7 +231,7 @@ class DeliveryNote(SellingController):
 				validate_against_credit_limit = True
 				break
 		if validate_against_credit_limit:
-			check_credit_limit(self.customer, self.company)
+			check_credit_limit(self.customer, self.organization)
 
 	def validate_packed_qty(self):
 		"""

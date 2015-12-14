@@ -18,7 +18,7 @@ If shipping charges are applied based on Shipping Rule, then more values like Sh
 
 ![Shipping Rule Filters]({{docs_base_url}}/assets/img/articles/$SGrab_260.png)
 
-Apart from price range, Shipping Rule will also validate if its territory and company matches with that of Customer's territory and company.
+Apart from price range, Shipping Rule will also validate if its territory and organization matches with that of Customer's territory and organization.
 
 Following is an example of how shipping charges are auto-applied on sales order based on Shipping Rule.
 

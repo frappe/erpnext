@@ -114,7 +114,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						status: ["not in", ["Stopped", "Closed"]],
 						per_billed: ["<", 99.99],
 						customer: cur_frm.doc.customer || undefined,
-						company: cur_frm.doc.company
+						organization: cur_frm.doc.organization
 					}
 				})
 			});
@@ -128,7 +128,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					source_doctype: "Delivery Note",
 					get_query: function() {
 						var filters = {
-							company: cur_frm.doc.company
+							organization: cur_frm.doc.organization
 						};
 						if(cur_frm.doc.customer) filters["customer"] = cur_frm.doc.customer;
 						return {
@@ -148,9 +148,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		cur_frm.cscript.hide_fields(this.frm.doc);
 		if(cur_frm.doc.__missing_values_set) return;
 		if(cint(this.frm.doc.is_pos)) {
-			if(!this.frm.doc.company) {
+			if(!this.frm.doc.organization) {
 				this.frm.set_value("is_pos", 0);
-				msgprint(__("Please specify Company to proceed"));
+				msgprint(__("Please specify organization to proceed"));
 			} else {
 				var me = this;
 				return this.frm.call({
@@ -236,12 +236,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	write_off_amount: function() {
-		this.set_in_company_currency(this.frm.doc, ["write_off_amount"]);
+		this.set_in_organization_currency(this.frm.doc, ["write_off_amount"]);
 		this.write_off_outstanding_amount_automatically();
 	},
 
 	paid_amount: function() {
-		this.set_in_company_currency(this.frm.doc, ["paid_amount"]);
+		this.set_in_organization_currency(this.frm.doc, ["paid_amount"]);
 		this.write_off_outstanding_amount_automatically();
 	},
 
@@ -305,7 +305,7 @@ cur_frm.cscript.mode_of_payment = function(doc) {
 			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
 			args: {
 				"mode_of_payment": doc.mode_of_payment,
-				"company": doc.company
+				"organization": doc.organization
 			 },
 			 callback: function(r, rt) {
 				if(r.message) {
@@ -348,7 +348,7 @@ cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 			["Account", "account_type", "in", ["Cash", "Bank"]],
 			["Account", "root_type", "=", "Asset"],
 			["Account", "is_group", "=",0],
-			["Account", "company", "=", doc.company]
+			["Account", "organization", "=", doc.organization]
 		]
 	}
 }
@@ -358,7 +358,7 @@ cur_frm.fields_dict.write_off_account.get_query = function(doc) {
 		filters:{
 			'report_type': 'Profit and Loss',
 			'is_group': 0,
-			'company': doc.company
+			'organization': doc.organization
 		}
 	}
 }
@@ -369,7 +369,7 @@ cur_frm.fields_dict.write_off_cost_center.get_query = function(doc) {
 	return{
 		filters:{
 			'is_group': 0,
-			'company': doc.company
+			'organization': doc.organization
 		}
 	}
 }
@@ -388,7 +388,7 @@ cur_frm.fields_dict['project_name'].get_query = function(doc, cdt, cdn) {
 cur_frm.set_query("income_account", "items", function(doc) {
 	return{
 		query: "erpnext.controllers.queries.get_income_account",
-		filters: {'company': doc.company}
+		filters: {'organization': doc.organization}
 	}
 });
 
@@ -398,7 +398,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 		return {
 			filters: {
 				'report_type': 'Profit and Loss',
-				'company': doc.company,
+				'organization': doc.organization,
 				"is_group": 0
 			}
 		}
@@ -411,7 +411,7 @@ if (sys_defaults.auto_accounting_for_stock) {
 cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(doc) {
 	return {
 		filters: {
-			'company': doc.company,
+			'organization': doc.organization,
 			"is_group": 0
 		}
 	}
@@ -451,7 +451,7 @@ cur_frm.set_query("debit_to", function(doc) {
 			filters: {
 				'account_type': 'Receivable',
 				'is_group': 0,
-				'company': doc.company
+				'organization': doc.organization
 			}
 		}
 	} else {
@@ -459,7 +459,7 @@ cur_frm.set_query("debit_to", function(doc) {
 			filters: {
 				'report_type': 'Balance Sheet',
 				'is_group': 0,
-				'company': doc.company
+				'organization': doc.organization
 			}
 		}
 	}

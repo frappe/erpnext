@@ -20,7 +20,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Expense Claim",
-					"description": _("Claims for company expense."),
+					"description": _("Claims for organization expense."),
 				},
 				{
 					"type": "doctype",

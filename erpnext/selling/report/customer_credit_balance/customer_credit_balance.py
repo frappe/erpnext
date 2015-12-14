@@ -19,8 +19,8 @@ def execute(filters=None):
 
 	for d in customer_list:
 		row = []
-		outstanding_amt = get_customer_outstanding(d.name, filters.get("company"))
-		credit_limit = get_credit_limit(d.name, filters.get("company"))
+		outstanding_amt = get_customer_outstanding(d.name, filters.get("organization"))
+		credit_limit = get_credit_limit(d.name, filters.get("organization"))
 		bal = flt(credit_limit) - flt(outstanding_amt)
 
 		if customer_naming_type == "Naming Series":

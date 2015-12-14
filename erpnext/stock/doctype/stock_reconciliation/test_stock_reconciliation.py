@@ -96,7 +96,7 @@ def create_stock_reconciliation(**args):
 	sr = frappe.new_doc("Stock Reconciliation")
 	sr.posting_date = args.posting_date or nowdate()
 	sr.posting_time = args.posting_time or nowtime()
-	sr.company = args.company or "_Test Company"
+	sr.organization = args.organization or "_Test organization"
 	sr.fiscal_year = get_fiscal_year(sr.posting_date)[0]
 	sr.expense_account = args.expense_account or \
 		("Stock Adjustment - _TC" if frappe.get_all("Stock Ledger Entry") else "Temporary Opening - _TC")
@@ -117,7 +117,7 @@ def create_stock_reconciliation(**args):
 def set_valuation_method(item_code, valuation_method):
 	frappe.db.set_value("Item", item_code, "valuation_method", valuation_method)
 
-	for warehouse in frappe.get_all("Warehouse", filters={"company": "_Test Company"}):
+	for warehouse in frappe.get_all("Warehouse", filters={"organization": "_Test organization"}):
 		update_entries_after({
 			"item_code": item_code,
 			"warehouse": warehouse.name

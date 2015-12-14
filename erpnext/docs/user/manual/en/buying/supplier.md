@@ -20,16 +20,16 @@ set your defaults correctly!
 ### Integration with Accounts
 
 In ERPNext, there is a separate Account record for each Supplier, of Each
-company.
+organization.
 
 When you create a new Supplier, ERPNext will automatically create an Account
-Ledger for the Supplier under “Accounts Payable” in the Company set in the
+Ledger for the Supplier under “Accounts Payable” in the organization set in the
 Supplier record.
 
 > Advanced Tip: If you want to change the Account Group under which the
-Supplier Account is created, you can set it in the Company master.
+Supplier Account is created, you can set it in the organization master.
 
-If you want to create an Account in another Company, just change the Company
+If you want to create an Account in another organization, just change the organization
 value and “Save” the Supplier again.
 
 > Tip: You can also import from the Data Import Tool

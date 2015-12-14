@@ -53,7 +53,7 @@ class PurchaseOrder(BuyingController):
 		super(PurchaseOrder, self).validate_with_previous_doc({
 			"Supplier Quotation": {
 				"ref_dn_field": "supplier_quotation",
-				"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
+				"compare_fields": [["supplier", "="], ["organization", "="], ["currency", "="]],
 			},
 			"Supplier Quotation Item": {
 				"ref_dn_field": "supplier_quotation_item",
@@ -152,7 +152,7 @@ class PurchaseOrder(BuyingController):
 		self.update_ordered_qty()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
-			self.company, self.base_grand_total)
+			self.organization, self.base_grand_total)
 
 		purchase_controller.update_last_purchase_rate(self, is_submit = 1)
 
@@ -338,7 +338,7 @@ def make_stock_entry(purchase_order, item_code):
 	stock_entry.supplier = purchase_order.supplier
 	stock_entry.supplier_name = purchase_order.supplier_name
 	stock_entry.supplier_address = purchase_order.address_display
-	stock_entry.company = purchase_order.company
+	stock_entry.organization = purchase_order.organization
 	stock_entry.from_bom = 1
 	po_item = [d for d in purchase_order.items if d.item_code == item_code][0]
 	stock_entry.fg_completed_qty = po_item.qty

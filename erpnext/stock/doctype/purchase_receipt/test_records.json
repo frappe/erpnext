@@ -1,7 +1,7 @@
 [
  {
   "buying_price_list": "_Test Price List",
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "conversion_rate": 1.0,
   "currency": "INR",
   "doctype": "Purchase Receipt",
@@ -88,7 +88,7 @@
 
  {
   "buying_price_list": "_Test Price List",
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "conversion_rate": 1.0,
   "currency": "INR",
   "doctype": "Purchase Receipt",

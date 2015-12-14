@@ -8,7 +8,7 @@ from frappe.utils import flt, fmt_money, getdate, formatdate
 from frappe.model.document import Document
 from erpnext.accounts.party import validate_party_gle_currency
 from erpnext.accounts.utils import get_account_currency
-from erpnext.setup.doctype.company.company import get_company_currency
+from erpnext.setup.doctype.organization.organization import get_organization_currency
 from erpnext.exceptions import InvalidAccountCurrency, CustomerFrozen
 
 exclude_from_linked_with = True
@@ -37,7 +37,7 @@ class GLEntry(Document):
 					self.against_voucher)
 
 	def check_mandatory(self):
-		mandatory = ['account','remarks','voucher_type','voucher_no','fiscal_year','company']
+		mandatory = ['account','remarks','voucher_type','voucher_no','fiscal_year','organization']
 		for k in mandatory:
 			if not self.get(k):
 				frappe.throw(_("{0} is required").format(self.meta.get_label(k)))
@@ -69,7 +69,7 @@ class GLEntry(Document):
 	def validate_account_details(self, adv_adj):
 		"""Account must be ledger, active and not freezed"""
 
-		ret = frappe.db.sql("""select is_group, docstatus, company
+		ret = frappe.db.sql("""select is_group, docstatus, organization
 			from tabAccount where name=%s""", self.account, as_dict=1)[0]
 
 		if ret.is_group==1:
@@ -78,22 +78,22 @@ class GLEntry(Document):
 		if ret.docstatus==2:
 			frappe.throw(_("Account {0} is inactive").format(self.account))
 
-		if ret.company != self.company:
-			frappe.throw(_("Account {0} does not belong to Company {1}").format(self.account, self.company))
+		if ret.organization != self.organization:
+			frappe.throw(_("Account {0} does not belong to organization {1}").format(self.account, self.organization))
 
 	def validate_cost_center(self):
-		if not hasattr(self, "cost_center_company"):
-			self.cost_center_company = {}
+		if not hasattr(self, "cost_center_organization"):
+			self.cost_center_organization = {}
 
-		def _get_cost_center_company():
-			if not self.cost_center_company.get(self.cost_center):
-				self.cost_center_company[self.cost_center] = frappe.db.get_value(
-					"Cost Center", self.cost_center, "company")
+		def _get_cost_center_organization():
+			if not self.cost_center_organization.get(self.cost_center):
+				self.cost_center_organization[self.cost_center] = frappe.db.get_value(
+					"Cost Center", self.cost_center, "organization")
 
-			return self.cost_center_company[self.cost_center]
+			return self.cost_center_organization[self.cost_center]
 
-		if self.cost_center and _get_cost_center_company() != self.company:
-			frappe.throw(_("Cost Center {0} does not belong to Company {1}").format(self.cost_center, self.company))
+		if self.cost_center and _get_cost_center_organization() != self.organization:
+			frappe.throw(_("Cost Center {0} does not belong to organization {1}").format(self.cost_center, self.organization))
 
 	def validate_party(self):
 		if self.party_type and self.party:
@@ -103,18 +103,18 @@ class GLEntry(Document):
 					frappe.throw("{0} {1} is frozen".format(self.party_type, self.party), CustomerFrozen)
 
 	def validate_currency(self):
-		company_currency = get_company_currency(self.company)
+		organization_currency = get_organization_currency(self.organization)
 		account_currency = get_account_currency(self.account)
 
 		if not self.account_currency:
-			self.account_currency = company_currency
+			self.account_currency = organization_currency
 
 		if account_currency != self.account_currency:
 			frappe.throw(_("Accounting Entry for {0} can only be made in currency: {1}")
-				.format(self.account, (account_currency or company_currency)), InvalidAccountCurrency)
+				.format(self.account, (account_currency or organization_currency)), InvalidAccountCurrency)
 
 		if self.party_type and self.party:
-			validate_party_gle_currency(self.party_type, self.party, self.company, self.account_currency)
+			validate_party_gle_currency(self.party_type, self.party, self.organization, self.account_currency)
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:

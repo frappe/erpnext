@@ -1,30 +1,30 @@
 [
  {
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "create_account_under": "Stock Assets - _TC",
   "doctype": "Warehouse",
   "warehouse_name": "_Test Warehouse"
  },
  {
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "create_account_under": "Fixed Assets - _TC",
   "doctype": "Warehouse",
   "warehouse_name": "_Test Warehouse 1"
  },
  {
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "create_account_under": "Stock Assets - _TC",
   "doctype": "Warehouse",
   "warehouse_name": "_Test Rejected Warehouse"
  },
  {
-  "company": "_Test Company 1",
+  "organization": "_Test organization 1",
   "create_account_under": "Stock Assets - _TC1",
   "doctype": "Warehouse",
   "warehouse_name": "_Test Warehouse 2"
  },
  {
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "doctype": "Warehouse",
   "warehouse_name": "_Test Warehouse No Account"
  }

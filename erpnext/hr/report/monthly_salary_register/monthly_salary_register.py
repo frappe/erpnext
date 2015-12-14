@@ -18,7 +18,7 @@ def execute(filters=None):
 	data = []
 	for ss in salary_slips:
 		row = [ss.employee, ss.employee_name, ss.branch, ss.department, ss.designation, 
-			ss.company, ss.month, ss.leave_withut_pay, ss.payment_days]
+			ss.organization, ss.month, ss.leave_withut_pay, ss.payment_days]
 			
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
@@ -38,7 +38,7 @@ def get_columns(salary_slips):
 	columns = [
 		_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", _("Branch") + ":Link/Branch:120", 
 		_("Department") + ":Link/Department:120", _("Designation") + ":Link/Designation:120",
-		 _("Company") + ":Link/Company:120", _("Month") + "::80", _("Leave Without Pay") + ":Float:130", 
+		 _("organization") + ":Link/organization:120", _("Month") + "::80", _("Leave Without Pay") + ":Float:130", 
 		_("Payment Days") + ":Float:120"
 	]
 	
@@ -77,7 +77,7 @@ def get_conditions(filters):
 		conditions += " and month = %(month)s"
 	
 	if filters.get("fiscal_year"): conditions += " and fiscal_year = %(fiscal_year)s"
-	if filters.get("company"): conditions += " and company = %(company)s"
+	if filters.get("organization"): conditions += " and organization = %(organization)s"
 	if filters.get("employee"): conditions += " and employee = %(employee)s"
 	
 	return conditions, filters

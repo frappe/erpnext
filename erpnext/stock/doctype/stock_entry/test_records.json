@@ -1,6 +1,6 @@
 [
  {
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "doctype": "Stock Entry",
   "items": [
    {
@@ -23,7 +23,7 @@
 
 
  {
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "doctype": "Stock Entry",
   "fiscal_year": "_Test Fiscal Year 2013",
   "items": [
@@ -48,7 +48,7 @@
 
 
  {
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "doctype": "Stock Entry",
   "fiscal_year": "_Test Fiscal Year 2013",
   "items": [
@@ -74,7 +74,7 @@
 
 
  {
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "doctype": "Stock Entry",
   "fiscal_year": "_Test Fiscal Year 2013",
   "items": [

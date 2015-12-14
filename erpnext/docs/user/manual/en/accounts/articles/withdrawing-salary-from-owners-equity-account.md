@@ -2,7 +2,7 @@
 
 ### Question
 
-After meeting with my accountant here in the US, I was informed that with my company being a sole member, I should not pay myself a salary that would hit the direct expenses account but instead should take a "draw" that hits the balance sheet and not the expenses. Can you please advise how I should set this up in ERP Next please?
+After meeting with my accountant here in the US, I was informed that with my organization being a sole member, I should not pay myself a salary that would hit the direct expenses account but instead should take a "draw" that hits the balance sheet and not the expenses. Can you please advise how I should set this up in ERP Next please?
 
 ### Answer
 

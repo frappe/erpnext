@@ -7,6 +7,6 @@ src="{{docs_base_url}}/assets/img/setup-wizard/step-3.png">
 
 ---
 
-Note: Add your own photograph, not your company's
+Note: Add your own photograph, not your organization's
 
 {next}

@@ -29,8 +29,8 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 
 		if(!this.frm.doc.status)
 			set_multiple(cdt, cdn, { status:'Draft' });
-		if(!this.frm.doc.company && frappe.defaults.get_user_default("company"))
-			set_multiple(cdt, cdn, { company:frappe.defaults.get_user_default("company") });
+		if(!this.frm.doc.organization && frappe.defaults.get_user_default("organization"))
+			set_multiple(cdt, cdn, { organization:frappe.defaults.get_user_default("organization") });
 		if(!this.frm.doc.fiscal_year && sys_defaults.fiscal_year)
 			set_multiple(cdt, cdn, { fiscal_year:sys_defaults.fiscal_year });
 
@@ -169,10 +169,10 @@ cur_frm.cscript['Declare Opportunity Lost'] = function() {
 
 
 
-cur_frm.cscript.company = function(doc, cdt, cdn) {
-	erpnext.get_fiscal_year(doc.company, doc.transaction_date);
+cur_frm.cscript.organization = function(doc, cdt, cdn) {
+	erpnext.get_fiscal_year(doc.organization, doc.transaction_date);
 }
 
 cur_frm.cscript.transaction_date = function(doc, cdt, cdn){
-	erpnext.get_fiscal_year(doc.company, doc.transaction_date);
+	erpnext.get_fiscal_year(doc.organization, doc.transaction_date);
 }

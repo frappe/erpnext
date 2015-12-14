@@ -29,11 +29,11 @@ frappe.query_reports["Sales Person-wise Transaction Summary"] = {
 			default: get_today()
 		},
 		{
-			fieldname:"company",
-			label: __("Company"),
+			fieldname:"organization",
+			label: __("organization"),
 			fieldtype: "Link",
-			options: "Company",
-			default: frappe.defaults.get_user_default("company")
+			options: "organization",
+			default: frappe.defaults.get_user_default("organization")
 		},
 		{
 			fieldname:"item_group",

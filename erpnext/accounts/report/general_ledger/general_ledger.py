@@ -52,22 +52,22 @@ def set_account_currency(filters):
 	if not (filters.get("account") or filters.get("party")):
 		return filters
 	else:
-		filters["company_currency"] = frappe.db.get_value("Company", filters.company, "default_currency")
+		filters["organization_currency"] = frappe.db.get_value("organization", filters.organization, "default_currency")
 		account_currency = None
 
 		if filters.get("account"):
 			account_currency = get_account_currency(filters.account)
 		elif filters.get("party"):
 			gle_currency = frappe.db.get_value("GL Entry", {"party_type": filters.party_type,
-				"party": filters.party, "company": filters.company}, "account_currency")
+				"party": filters.party, "organization": filters.organization}, "account_currency")
 			if gle_currency:
 				account_currency = gle_currency
 			else:
 				account_currency = frappe.db.get_value(filters.party_type, filters.party, "default_currency")
 
-		filters["account_currency"] = account_currency or filters.company_currency
+		filters["account_currency"] = account_currency or filters.organization_currency
 
-		if filters.account_currency != filters.company_currency:
+		if filters.account_currency != filters.organization_currency:
 			filters["show_in_account_currency"] = 1
 
 		return filters
@@ -113,7 +113,7 @@ def get_gl_entries(filters):
 			sum(debit) as debit, sum(credit) as credit,
 			voucher_type, voucher_no, cost_center, remarks, against, is_opening {select_fields}
 		from `tabGL Entry`
-		where company=%(company)s {conditions}
+		where organization=%(organization)s {conditions}
 		{group_by_condition}
 		order by posting_date, account"""\
 		.format(select_fields=select_fields, conditions=get_conditions(filters),

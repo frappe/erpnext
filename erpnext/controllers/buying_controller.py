@@ -6,7 +6,7 @@ import frappe
 from frappe import _, msgprint
 from frappe.utils import flt
 
-from erpnext.setup.utils import get_company_currency
+from erpnext.setup.utils import get_organization_currency
 from erpnext.accounts.party import get_party_details
 from erpnext.stock.get_item_details import get_conversion_factor
 
@@ -61,9 +61,9 @@ class BuyingController(StockController):
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
-		company_currency = get_company_currency(self.company)
+		organization_currency = get_organization_currency(self.organization)
 		if self.meta.get_field("base_in_words"):
-			self.base_in_words = money_in_words(self.base_grand_total, company_currency)
+			self.base_in_words = money_in_words(self.base_grand_total, organization_currency)
 		if self.meta.get_field("in_words"):
 			self.in_words = money_in_words(self.grand_total, self.currency)
 

@@ -9,25 +9,25 @@
     "parentfield": "budgets"
    }
   ],
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "cost_center_name": "_Test Cost Center",
   "distribution_id": "_Test Distribution",
   "doctype": "Cost Center",
   "is_group": 0,
-  "parent_cost_center": "_Test Company - _TC"
+  "parent_cost_center": "_Test organization - _TC"
  },
  {
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "cost_center_name": "_Test Cost Center 2",
   "doctype": "Cost Center",
   "is_group": 0,
-  "parent_cost_center": "_Test Company - _TC"
+  "parent_cost_center": "_Test organization - _TC"
  },
  {
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "cost_center_name": "_Test Write Off Cost Center",
   "doctype": "Cost Center",
   "is_group": 0,
-  "parent_cost_center": "_Test Company - _TC"
+  "parent_cost_center": "_Test organization - _TC"
  }
 ]

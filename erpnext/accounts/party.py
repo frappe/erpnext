@@ -15,7 +15,7 @@ from erpnext.exceptions import InvalidAccountCurrency
 class DuplicatePartyAccountError(frappe.ValidationError): pass
 
 @frappe.whitelist()
-def get_party_details(party=None, account=None, party_type="Customer", company=None,
+def get_party_details(party=None, account=None, party_type="Customer", organization=None,
 	posting_date=None, price_list=None, currency=None, doctype=None):
 
 	if not party:
@@ -25,12 +25,12 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 
 	return _get_party_details(party, account, party_type,
-		company, posting_date, price_list, currency, doctype)
+		organization, posting_date, price_list, currency, doctype)
 
-def _get_party_details(party=None, account=None, party_type="Customer", company=None,
+def _get_party_details(party=None, account=None, party_type="Customer", organization=None,
 	posting_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False):
 
-	out = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, doctype))
+	out = frappe._dict(set_account_and_due_date(party, account, party_type, organization, posting_date, doctype))
 
 	party = out[party_type.lower()]
 
@@ -43,7 +43,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	set_contact_details(out, party, party_type)
 	set_other_values(out, party, party_type)
 	set_price_list(out, party, party_type, price_list)
-	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, out.customer_group, out.supplier_type)
+	out["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, organization, out.customer_group, out.supplier_type)
 
 	if not out.get("currency"):
 		out["currency"] = currency
@@ -135,7 +135,7 @@ def set_price_list(out, party, party_type, given_price_list):
 	out["selling_price_list" if party.doctype=="Customer" else "buying_price_list"] = price_list
 
 
-def set_account_and_due_date(party, account, party_type, company, posting_date, doctype):
+def set_account_and_due_date(party, account, party_type, organization, posting_date, doctype):
 	if doctype not in ["Sales Invoice", "Purchase Invoice"]:
 		# not an invoice
 		return {
@@ -143,73 +143,73 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 		}
 
 	if party:
-		account = get_party_account(party_type, party, company)
+		account = get_party_account(party_type, party, organization)
 
 	account_fieldname = "debit_to" if party_type=="Customer" else "credit_to"
 
 	out = {
 		party_type.lower(): party,
 		account_fieldname : account,
-		"due_date": get_due_date(posting_date, party_type, party, company)
+		"due_date": get_due_date(posting_date, party_type, party, organization)
 	}
 	return out
 
-def get_company_currency():
-	company_currency = frappe._dict()
-	for d in frappe.get_all("Company", fields=["name", "default_currency"]):
-		company_currency.setdefault(d.name, d.default_currency)
+def get_organization_currency():
+	organization_currency = frappe._dict()
+	for d in frappe.get_all("organization", fields=["name", "default_currency"]):
+		organization_currency.setdefault(d.name, d.default_currency)
 
-	return company_currency
+	return organization_currency
 
 @frappe.whitelist()
-def get_party_account(party_type, party, company):
+def get_party_account(party_type, party, organization):
 	"""Returns the account for the given `party`.
 		Will first search in party (Customer / Supplier) record, if not found,
 		will search in group (Customer Group / Supplier Type),
 		finally will return default."""
-	if not company:
-		frappe.throw(_("Please select a Company"))
+	if not organization:
+		frappe.throw(_("Please select a organization"))
 
 	if party:
 		account = frappe.db.get_value("Party Account",
-			{"parenttype": party_type, "parent": party, "company": company}, "account")
+			{"parenttype": party_type, "parent": party, "organization": organization}, "account")
 
 		if not account:
 			party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Type"
 			group = frappe.db.get_value(party_type, party, scrub(party_group_doctype))
 			account = frappe.db.get_value("Party Account",
-				{"parenttype": party_group_doctype, "parent": group, "company": company}, "account")
+				{"parenttype": party_group_doctype, "parent": group, "organization": organization}, "account")
 
 		if not account:
 			default_account_name = "default_receivable_account" if party_type=="Customer" else "default_payable_account"
-			account = frappe.db.get_value("Company", company, default_account_name)
+			account = frappe.db.get_value("organization", organization, default_account_name)
 
 		return account
 
-def get_party_account_currency(party_type, party, company):
+def get_party_account_currency(party_type, party, organization):
 	def generator():
-		party_account = get_party_account(party_type, party, company)
+		party_account = get_party_account(party_type, party, organization)
 		return frappe.db.get_value("Account", party_account, "account_currency")
 
-	return frappe.local_cache("party_account_currency", (party_type, party, company), generator)
+	return frappe.local_cache("party_account_currency", (party_type, party, organization), generator)
 
-def get_party_gle_currency(party_type, party, company):
+def get_party_gle_currency(party_type, party, organization):
 	def generator():
 		existing_gle_currency = frappe.db.sql("""select account_currency from `tabGL Entry`
-			where docstatus=1 and company=%(company)s and party_type=%(party_type)s and party=%(party)s
-			limit 1""", { "company": company, "party_type": party_type, "party": party })
+			where docstatus=1 and organization=%(organization)s and party_type=%(party_type)s and party=%(party)s
+			limit 1""", { "organization": organization, "party_type": party_type, "party": party })
 
 		return existing_gle_currency[0][0] if existing_gle_currency else None
 
-	return frappe.local_cache("party_gle_currency", (party_type, party, company), generator,
+	return frappe.local_cache("party_gle_currency", (party_type, party, organization), generator,
 		regenerate_if_none=True)
 
-def validate_party_gle_currency(party_type, party, company, party_account_currency=None):
+def validate_party_gle_currency(party_type, party, organization, party_account_currency=None):
 	"""Validate party account currency with existing GL Entry's currency"""
 	if not party_account_currency:
-		party_account_currency = get_party_account_currency(party_type, party, company)
+		party_account_currency = get_party_account_currency(party_type, party, organization)
 
-	existing_gle_currency = get_party_gle_currency(party_type, party, company)
+	existing_gle_currency = get_party_gle_currency(party_type, party, organization)
 
 	if existing_gle_currency and party_account_currency != existing_gle_currency:
 		frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
@@ -219,38 +219,38 @@ def validate_party_accounts(doc):
 	companies = []
 
 	for account in doc.get("accounts"):
-		if account.company in companies:
-			frappe.throw(_("There can only be 1 Account per Company in {0} {1}")
+		if account.organization in companies:
+			frappe.throw(_("There can only be 1 Account per organization in {0} {1}")
 				.format(doc.doctype, doc.name), DuplicatePartyAccountError)
 		else:
-			companies.append(account.company)
+			companies.append(account.organization)
 
 		party_account_currency = frappe.db.get_value("Account", account.account, "account_currency")
-		existing_gle_currency = get_party_gle_currency(doc.doctype, doc.name, account.company)
+		existing_gle_currency = get_party_gle_currency(doc.doctype, doc.name, account.organization)
 
 		if existing_gle_currency and party_account_currency != existing_gle_currency:
-			frappe.throw(_("Accounting entries have already been made in currency {0} for company {1}. Please select a receivable or payable account with currency {0}.").format(existing_gle_currency, account.company))
+			frappe.throw(_("Accounting entries have already been made in currency {0} for organization {1}. Please select a receivable or payable account with currency {0}.").format(existing_gle_currency, account.organization))
 
 @frappe.whitelist()
-def get_due_date(posting_date, party_type, party, company):
+def get_due_date(posting_date, party_type, party, organization):
 	"""Set Due Date = Posting Date + Credit Days"""
 	due_date = None
 	if posting_date and party:
 		due_date = posting_date
 		if party_type=="Customer":
-			credit_days_based_on, credit_days = get_credit_days(party_type, party, company)
+			credit_days_based_on, credit_days = get_credit_days(party_type, party, organization)
 			if credit_days_based_on == "Fixed Days" and credit_days:
 				due_date = add_days(posting_date, credit_days)
 			elif credit_days_based_on == "Last Day of the Next Month":
 				due_date = (get_first_day(posting_date, 0, 2) + datetime.timedelta(-1)).strftime("%Y-%m-%d")
 		else:
-			credit_days = get_credit_days(party_type, party, company)
+			credit_days = get_credit_days(party_type, party, organization)
 			if credit_days:
 				due_date = add_days(posting_date, credit_days)
 
 	return due_date
 
-def get_credit_days(party_type, party, company):
+def get_credit_days(party_type, party, organization):
 	if party_type and party:
 		if party_type == "Customer":
 			credit_days_based_on, credit_days, customer_group = \
@@ -259,22 +259,22 @@ def get_credit_days(party_type, party, company):
 			if not credit_days_based_on:
 				credit_days_based_on, credit_days = \
 					frappe.db.get_value("Customer Group", customer_group, ["credit_days_based_on", "credit_days"]) \
-					or frappe.db.get_value("Company", company, ["credit_days_based_on", "credit_days"])
+					or frappe.db.get_value("organization", organization, ["credit_days_based_on", "credit_days"])
 
 			return credit_days_based_on, credit_days
 		else:
 			credit_days, supplier_type = frappe.db.get_value(party_type, party, ["credit_days", "supplier_type"])
 			if not credit_days:
 				credit_days = frappe.db.get_value("Supplier Type", supplier_type, "credit_days") \
-					or frappe.db.get_value("Company", company, "credit_days")
+					or frappe.db.get_value("organization", organization, "credit_days")
 
 			return credit_days
 
-def validate_due_date(posting_date, due_date, party_type, party, company):
+def validate_due_date(posting_date, due_date, party_type, party, organization):
 	if getdate(due_date) < getdate(posting_date):
 		frappe.throw(_("Due Date cannot be before Posting Date"))
 	else:
-		default_due_date = get_due_date(posting_date, party_type, party, company)
+		default_due_date = get_due_date(posting_date, party_type, party, organization)
 		if not default_due_date:
 			return
 
@@ -287,14 +287,14 @@ def validate_due_date(posting_date, due_date, party_type, party, company):
 				frappe.throw(_("Due / Reference Date cannot be after {0}").format(formatdate(default_due_date)))
 
 @frappe.whitelist()
-def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_type=None,
+def set_taxes(party, party_type, posting_date, organization, customer_group=None, supplier_type=None,
 	billing_address=None, shipping_address=None, use_for_shopping_cart=None):
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
 		party_type.lower(): party,
 		"customer_group":	customer_group,
 		"supplier_type":	supplier_type,
-		"company":			company
+		"organization":			organization
 	}
 
 	if billing_address or shipping_address:

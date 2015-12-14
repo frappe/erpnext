@@ -75,8 +75,8 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Company",
-					"description": _("Company (not Customer or Supplier) master.")
+					"name": "organization",
+					"description": _("organization (not Customer or Supplier) master.")
 				},
 				{
 					"type": "doctype",

@@ -61,10 +61,10 @@ class TestPurchaseOrder(unittest.TestCase):
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
 		self.assertEquals(len(po.get("supplied_items")), 2)
 
-	def test_warehouse_company_validation(self):
-		from erpnext.stock.utils import InvalidWarehouseCompany
-		po = create_purchase_order(company="_Test Company 1", do_not_save=True)
-		self.assertRaises(InvalidWarehouseCompany, po.insert)
+	def test_warehouse_organization_validation(self):
+		from erpnext.stock.utils import InvalidWarehouseorganization
+		po = create_purchase_order(organization="_Test organization 1", do_not_save=True)
+		self.assertRaises(InvalidWarehouseorganization, po.insert)
 
 	def test_uom_integer_validation(self):
 		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
@@ -91,10 +91,10 @@ def create_purchase_order(**args):
 	if args.transaction_date:
 		po.transaction_date = args.transaction_date
 
-	po.company = args.company or "_Test Company"
+	po.organization = args.organization or "_Test organization"
 	po.supplier = args.customer or "_Test Supplier"
 	po.is_subcontracted = args.is_subcontracted or "No"
-	po.currency = args.currency or frappe.db.get_value("Company", po.company, "default_currency")
+	po.currency = args.currency or frappe.db.get_value("organization", po.organization, "default_currency")
 	po.conversion_factor = args.conversion_factor or 1
 
 	po.append("items", {

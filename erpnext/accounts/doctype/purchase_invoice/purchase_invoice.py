@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, formatdate, flt, getdate
 from frappe import msgprint, _, throw
-from erpnext.setup.utils import get_company_currency
+from erpnext.setup.utils import get_organization_currency
 import frappe.defaults
 
 from erpnext.controllers.buying_controller import BuyingController
@@ -67,9 +67,9 @@ class PurchaseInvoice(BuyingController):
 
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
-			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
+			self.credit_to = get_party_account("Supplier", self.supplier, self.organization)
 		if not self.due_date:
-			self.due_date = get_due_date(self.posting_date, "Supplier", self.supplier, self.company)
+			self.due_date = get_due_date(self.posting_date, "Supplier", self.supplier, self.organization)
 
 		super(PurchaseInvoice, self).set_missing_values(for_validate)
 
@@ -85,9 +85,9 @@ class PurchaseInvoice(BuyingController):
 					msgprint(_("Item {0} is not Purchase Item").format(d.item_code), raise_exception=True)
 
 	def check_conversion_rate(self):
-		default_currency = get_company_currency(self.company)
+		default_currency = get_organization_currency(self.organization)
 		if not default_currency:
-			throw(_('Please enter default currency in Company Master'))
+			throw(_('Please enter default currency in organization Master'))
 		if (self.currency == default_currency and flt(self.conversion_rate) != 1.00) or not self.conversion_rate or (self.currency != default_currency and flt(self.conversion_rate) == 1.00):
 			throw(_("Conversion rate cannot be 0 or 1"))
 
@@ -116,7 +116,7 @@ class PurchaseInvoice(BuyingController):
 		super(PurchaseInvoice, self).validate_with_previous_doc({
 			"Purchase Order": {
 				"ref_dn_field": "purchase_order",
-				"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
+				"compare_fields": [["supplier", "="], ["organization", "="], ["currency", "="]],
 			},
 			"Purchase Order Item": {
 				"ref_dn_field": "po_detail",
@@ -126,7 +126,7 @@ class PurchaseInvoice(BuyingController):
 			},
 			"Purchase Receipt": {
 				"ref_dn_field": "purchase_receipt",
-				"compare_fields": [["supplier", "="], ["company", "="], ["currency", "="]],
+				"compare_fields": [["supplier", "="], ["organization", "="], ["currency", "="]],
 			},
 			"Purchase Receipt Item": {
 				"ref_dn_field": "pr_detail",
@@ -145,7 +145,7 @@ class PurchaseInvoice(BuyingController):
 		auto_accounting_for_stock = cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 
 		if auto_accounting_for_stock:
-			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
+			stock_not_billed_account = self.get_organization_default("stock_received_but_not_billed")
 
 		against_accounts = []
 		stock_items = self.get_stock_items()
@@ -238,7 +238,7 @@ class PurchaseInvoice(BuyingController):
 		self.check_prev_docstatus()
 
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
-			self.company, self.base_grand_total)
+			self.organization, self.base_grand_total)
 
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
@@ -253,8 +253,8 @@ class PurchaseInvoice(BuyingController):
 		auto_accounting_for_stock = \
 			cint(frappe.defaults.get_global_default("auto_accounting_for_stock"))
 
-		stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
-		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+		stock_received_but_not_billed = self.get_organization_default("stock_received_but_not_billed")
+		expenses_included_in_valuation = self.get_organization_default("expenses_included_in_valuation")
 
 		gl_entries = []
 
@@ -268,7 +268,7 @@ class PurchaseInvoice(BuyingController):
 					"against": self.against_expense_account,
 					"credit": self.base_grand_total,
 					"credit_in_account_currency": self.base_grand_total \
-						if self.party_account_currency==self.company_currency else self.grand_total,
+						if self.party_account_currency==self.organization_currency else self.grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
@@ -288,7 +288,7 @@ class PurchaseInvoice(BuyingController):
 						"against": self.supplier,
 						dr_or_cr: tax.base_tax_amount_after_discount_amount,
 						dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount \
-							if account_currency==self.company_currency \
+							if account_currency==self.organization_currency \
 							else tax.tax_amount_after_discount_amount,
 						"cost_center": tax.cost_center
 					}, account_currency)
@@ -314,7 +314,7 @@ class PurchaseInvoice(BuyingController):
 						"against": self.supplier,
 						"debit": item.base_net_amount,
 						"debit_in_account_currency": item.base_net_amount \
-							if account_currency==self.company_currency else item.net_amount,
+							if account_currency==self.organization_currency else item.net_amount,
 						"cost_center": item.cost_center
 					}, account_currency)
 				)
@@ -378,7 +378,7 @@ class PurchaseInvoice(BuyingController):
 					"against": self.write_off_account,
 					"debit": self.base_write_off_amount,
 					"debit_in_account_currency": self.base_write_off_amount \
-						if self.party_account_currency==self.company_currency else self.write_off_amount,
+						if self.party_account_currency==self.organization_currency else self.write_off_amount,
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 				}, self.party_account_currency)
@@ -389,7 +389,7 @@ class PurchaseInvoice(BuyingController):
 					"against": self.supplier,
 					"credit": flt(self.base_write_off_amount),
 					"credit_in_account_currency": self.base_write_off_amount \
-						if write_off_account_currency==self.company_currency else self.write_off_amount,
+						if write_off_account_currency==self.organization_currency else self.write_off_amount,
 					"cost_center": self.write_off_cost_center
 				})
 			)
@@ -443,10 +443,10 @@ def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
 					or tabAccount.account_type in ("Expense Account", "Fixed Asset", "Temporary"))
 				and tabAccount.is_group=0
 				and tabAccount.docstatus!=2
-				and tabAccount.company = %(company)s
+				and tabAccount.organization = %(organization)s
 				and tabAccount.{key} LIKE %(txt)s
 				{mcond}""".format( key=frappe.db.escape(searchfield), mcond=get_match_cond(doctype) ),
-				{ 'company': filters['company'], 'txt': "%%%s%%" % frappe.db.escape(txt) })
+				{ 'organization': filters['organization'], 'txt': "%%%s%%" % frappe.db.escape(txt) })
 
 @frappe.whitelist()
 def make_debit_note(source_name, target_doc=None):

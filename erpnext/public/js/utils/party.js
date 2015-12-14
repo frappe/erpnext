@@ -33,7 +33,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	}
 	
 	args.currency = frm.doc.currency;
-	args.company = frm.doc.company;
+	args.organization = frm.doc.organization;
 	args.doctype = frm.doc.doctype;
 	frappe.call({
 		method: method,
@@ -84,7 +84,7 @@ erpnext.utils.get_address_display = function(frm, address_field, display_field) 
 						"party": frm.doc.customer || frm.doc.supplier,
 						"party_type": (frm.doc.customer ? "Customer" : "Supplier"),
 						"posting_date": frm.doc.posting_date || frm.doc.transaction_date,
-						"company": frm.doc.company,
+						"organization": frm.doc.organization,
 						"billing_address": ((frm.doc.customer) ? (frm.doc.customer_address) : (frm.doc.supplier_address)),
 						"shipping_address": frm.doc.shipping_address_name
 					},

@@ -30,8 +30,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					me.frm.set_value(fieldname, value);
 			});
 
-			if(this.frm.doc.company && !this.frm.doc.amended_from) {
-				cur_frm.script_manager.trigger("company");
+			if(this.frm.doc.organization && !this.frm.doc.amended_from) {
+				cur_frm.script_manager.trigger("organization");
 			}
 		}
 
@@ -58,7 +58,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				var filters = {
 					"docstatus": 1,
 					"is_return": 0,
-					"company": doc.company
+					"organization": doc.organization
 				};
 				if (me.frm.fields_dict["customer"] && doc.customer) filters["customer"] = doc.customer;
 				if (me.frm.fields_dict["supplier"] && doc.supplier) filters["supplier"] = doc.supplier;
@@ -76,7 +76,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(this.frm.doc.__islocal && !(this.frm.doc.taxes || []).length
 			&& !(this.frm.doc.__onload ? this.frm.doc.__onload.load_after_mapping : false)) {
 				this.apply_default_taxes();
-		} else if(this.frm.doc.__islocal && this.frm.doc.company && this.frm.doc["items"]
+		} else if(this.frm.doc.__islocal && this.frm.doc.organization && this.frm.doc["items"]
 			&& !this.frm.doc.is_pos) {
 				me.calculate_taxes_and_totals();
 		}
@@ -87,7 +87,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	refresh: function() {
 		erpnext.toggle_naming_series();
-		erpnext.hide_company();
+		erpnext.hide_organization();
 		this.show_item_wise_taxes();
 		this.set_dynamic_labels();
 		erpnext.pos.make_pos_btn(this.frm);
@@ -158,7 +158,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
 		if(item.item_code || item.barcode || item.serial_no) {
-			if(!this.validate_company_and_party()) {
+			if(!this.validate_organization_and_party()) {
 				cur_frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
 			} else {
 				return this.frm.call({
@@ -180,7 +180,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								 me.frm.doc.buying_price_list,
 							price_list_currency: me.frm.doc.price_list_currency,
 							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
-							company: me.frm.doc.company,
+							organization: me.frm.doc.organization,
 							order_type: me.frm.doc.order_type,
 							is_pos: cint(me.frm.doc.is_pos),
 							is_subcontracted: me.frm.doc.is_subcontracted,
@@ -243,29 +243,29 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.calculate_taxes_and_totals(false);
 	},
 
-	company: function() {
+	organization: function() {
 		var me = this;
 		var fn = function() {
-			if(me.frm.doc.company && me.frm.fields_dict.currency) {
-				var company_currency = me.get_company_currency();
-				var company_doc = frappe.get_doc(":Company", me.frm.doc.company);
+			if(me.frm.doc.organization && me.frm.fields_dict.currency) {
+				var organization_currency = me.get_organization_currency();
+				var organization_doc = frappe.get_doc(":organization", me.frm.doc.organization);
 				if (!me.frm.doc.currency) {
-					me.frm.set_value("currency", company_currency);
+					me.frm.set_value("currency", organization_currency);
 				}
 
-				if (me.frm.doc.currency == company_currency) {
+				if (me.frm.doc.currency == organization_currency) {
 					me.frm.set_value("conversion_rate", 1.0);
 				}
-				if (me.frm.doc.price_list_currency == company_currency) {
+				if (me.frm.doc.price_list_currency == organization_currency) {
 					me.frm.set_value('plc_conversion_rate', 1.0);
 				}
-				if (company_doc.default_letter_head) {
+				if (organization_doc.default_letter_head) {
 					if(me.frm.fields_dict.letter_head) {
-						me.frm.set_value("letter_head", company_doc.default_letter_head);
+						me.frm.set_value("letter_head", organization_doc.default_letter_head);
 					}
 				}
-				if (company_doc.default_terms && me.frm.doc.doctype != "Purchase Invoice") {
-					me.frm.set_value("tc_name", company_doc.default_terms);
+				if (organization_doc.default_terms && me.frm.doc.doctype != "Purchase Invoice") {
+					me.frm.set_value("tc_name", organization_doc.default_terms);
 				}
 
 				me.frm.script_manager.trigger("currency");
@@ -275,10 +275,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		if (this.frm.doc.posting_date) var date = this.frm.doc.posting_date;
 		else var date = this.frm.doc.transaction_date;
-		erpnext.get_fiscal_year(this.frm.doc.company, date, fn);
+		erpnext.get_fiscal_year(this.frm.doc.organization, date, fn);
 
-		if(this.frm.doc.company) {
-			erpnext.last_selected_company = this.frm.doc.company;
+		if(this.frm.doc.organization) {
+			erpnext.last_selected_organization = this.frm.doc.organization;
 		}
 	},
 
@@ -287,7 +287,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.frm.transaction_date = this.frm.doc.transaction_date;
 		}
 
-		erpnext.get_fiscal_year(this.frm.doc.company, this.frm.doc.transaction_date);
+		erpnext.get_fiscal_year(this.frm.doc.organization, this.frm.doc.transaction_date);
 	},
 
 	posting_date: function() {
@@ -303,23 +303,23 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						"posting_date": me.frm.doc.posting_date,
 						"party_type": me.frm.doc.doctype == "Sales Invoice" ? "Customer" : "Supplier",
 						"party": me.frm.doc.doctype == "Sales Invoice" ? me.frm.doc.customer : me.frm.doc.supplier,
-						"company": me.frm.doc.company
+						"organization": me.frm.doc.organization
 					},
 					callback: function(r, rt) {
 						if(r.message) {
 							me.frm.set_value("due_date", r.message);
 						}
-						erpnext.get_fiscal_year(me.frm.doc.company, me.frm.doc.posting_date);
+						erpnext.get_fiscal_year(me.frm.doc.organization, me.frm.doc.posting_date);
 					}
 				})
 			} else {
-				erpnext.get_fiscal_year(me.frm.doc.company, me.frm.doc.posting_date);
+				erpnext.get_fiscal_year(me.frm.doc.organization, me.frm.doc.posting_date);
 			}
 		}
 	},
 
-	get_company_currency: function() {
-		return erpnext.get_currency(this.frm.doc.company);
+	get_organization_currency: function() {
+		return erpnext.get_currency(this.frm.doc.organization);
 	},
 
 	contact_person: function() {
@@ -330,10 +330,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me = this;
 		this.set_dynamic_labels();
 
-		var company_currency = this.get_company_currency();
+		var organization_currency = this.get_organization_currency();
 		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
-		if(this.frm.doc.currency !== company_currency && !this.frm.doc.ignore_pricing_rule) {
-			this.get_exchange_rate(this.frm.doc.currency, company_currency,
+		if(this.frm.doc.currency !== organization_currency && !this.frm.doc.ignore_pricing_rule) {
+			this.get_exchange_rate(this.frm.doc.currency, organization_currency,
 				function(exchange_rate) {
 					me.frm.set_value("conversion_rate", exchange_rate);
 				});
@@ -343,7 +343,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	conversion_rate: function() {
-		if(this.frm.doc.currency === this.get_company_currency()) {
+		if(this.frm.doc.currency === this.get_organization_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
 		}
 		if(this.frm.doc.currency === this.frm.doc.price_list_currency &&
@@ -378,10 +378,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var me=this;
 		this.set_dynamic_labels();
 
-		var company_currency = this.get_company_currency();
+		var organization_currency = this.get_organization_currency();
 		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
-		if(this.frm.doc.price_list_currency !== company_currency  && !this.frm.doc.ignore_pricing_rule) {
-			this.get_exchange_rate(this.frm.doc.price_list_currency, company_currency,
+		if(this.frm.doc.price_list_currency !== organization_currency  && !this.frm.doc.ignore_pricing_rule) {
+			this.get_exchange_rate(this.frm.doc.price_list_currency, organization_currency,
 				function(exchange_rate) {
 					me.frm.set_value("plc_conversion_rate", exchange_rate);
 				});
@@ -391,7 +391,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	plc_conversion_rate: function() {
-		if(this.frm.doc.price_list_currency === this.get_company_currency()) {
+		if(this.frm.doc.price_list_currency === this.get_organization_currency()) {
 			this.frm.set_value("plc_conversion_rate", 1.0);
 		} else if(this.frm.doc.price_list_currency === this.frm.doc.currency
 			&& this.frm.doc.plc_conversion_rate && cint(this.frm.doc.plc_conversion_rate) != 1 &&
@@ -413,13 +413,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.frm.toggle_reqd("plc_conversion_rate",
 			!!(this.frm.doc.price_list_name && this.frm.doc.price_list_currency));
 
-		var company_currency = this.get_company_currency();
-		this.change_form_labels(company_currency);
-		this.change_grid_labels(company_currency);
+		var organization_currency = this.get_organization_currency();
+		this.change_form_labels(organization_currency);
+		this.change_grid_labels(organization_currency);
 		this.frm.refresh_fields();
 	},
 
-	change_form_labels: function(company_currency) {
+	change_form_labels: function(organization_currency) {
 		var me = this;
 		var field_label_map = {};
 
@@ -436,7 +436,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"base_discount_amount", "base_grand_total", "base_rounded_total", "base_in_words",
 			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted", "total_amount_to_pay",
 			"base_paid_amount", "base_write_off_amount"
-		], company_currency);
+		], organization_currency);
 
 		setup_field_label_map(["total", "net_total", "total_taxes_and_charges", "discount_amount",
 			"grand_total", "taxes_and_charges_added", "taxes_and_charges_deducted",
@@ -445,11 +445,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		setup_field_label_map(["outstanding_amount", "total_advance"], this.frm.doc.party_account_currency);
 
 		cur_frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency
-			+ " = [?] " + company_currency)
+			+ " = [?] " + organization_currency)
 
-		if(this.frm.doc.price_list_currency && this.frm.doc.price_list_currency!=company_currency) {
+		if(this.frm.doc.price_list_currency && this.frm.doc.price_list_currency!=organization_currency) {
 			cur_frm.set_df_property("plc_conversion_rate", "description", "1 " + this.frm.doc.price_list_currency
-				+ " = [?] " + company_currency)
+				+ " = [?] " + organization_currency)
 		}
 
 		// toggle fields
@@ -457,10 +457,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"base_taxes_and_charges_added", "base_taxes_and_charges_deducted",
 			"base_grand_total", "base_rounded_total", "base_in_words", "base_discount_amount",
 			"base_paid_amount", "base_write_off_amount"],
-			this.frm.doc.currency != company_currency);
+			this.frm.doc.currency != organization_currency);
 
 		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"],
-			this.frm.doc.price_list_currency != company_currency);
+			this.frm.doc.price_list_currency != organization_currency);
 
 		// set labels
 		$.each(field_label_map, function(fname, label) {
@@ -474,11 +474,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			cur_frm.toggle_display("net_total", show);
 
 		if(frappe.meta.get_docfield(cur_frm.doctype, "base_net_total"))
-			cur_frm.toggle_display("base_net_total", (show && (me.frm.doc.currency != company_currency)));
+			cur_frm.toggle_display("base_net_total", (show && (me.frm.doc.currency != organization_currency)));
 
 	},
 
-	change_grid_labels: function(company_currency) {
+	change_grid_labels: function(organization_currency) {
 		var me = this;
 		var field_label_map = {};
 
@@ -495,7 +495,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		setup_field_label_map(["base_rate", "base_net_rate", "base_price_list_rate", "base_amount", "base_net_amount"],
-			company_currency, "items");
+			organization_currency, "items");
 
 		setup_field_label_map(["rate", "net_rate", "price_list_rate", "amount", "net_amount"],
 			this.frm.doc.currency, "items");
@@ -503,7 +503,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(this.frm.fields_dict["taxes"]) {
 			setup_field_label_map(["tax_amount", "total", "tax_amount_after_discount"], this.frm.doc.currency, "taxes");
 
-			setup_field_label_map(["base_tax_amount", "base_total", "base_tax_amount_after_discount"], company_currency, "taxes");
+			setup_field_label_map(["base_tax_amount", "base_total", "base_tax_amount_after_discount"], organization_currency, "taxes");
 		}
 
 		if(this.frm.fields_dict["advances"]) {
@@ -515,7 +515,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var item_grid = this.frm.fields_dict["items"].grid;
 		$.each(["base_rate", "base_price_list_rate", "base_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
-				item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
+				item_grid.set_column_disp(fname, me.frm.doc.currency != organization_currency);
 		});
 
 		var show = (cint(cur_frm.doc.discount_amount)) ||
@@ -528,7 +528,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		$.each(["base_net_rate", "base_net_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
-				item_grid.set_column_disp(fname, (show && (me.frm.doc.currency != company_currency)));
+				item_grid.set_column_disp(fname, (show && (me.frm.doc.currency != organization_currency)));
 		});
 
 		// set labels
@@ -590,7 +590,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			"price_list": me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
 			"price_list_currency": me.frm.doc.price_list_currency,
 			"plc_conversion_rate": me.frm.doc.plc_conversion_rate,
-			"company": me.frm.doc.company,
+			"organization": me.frm.doc.organization,
 			"transaction_date": me.frm.doc.transaction_date || me.frm.doc.posting_date,
 			"campaign": me.frm.doc.campaign,
 			"sales_partner": me.frm.doc.sales_partner,
@@ -679,7 +679,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	get_item_wise_taxes_html: function() {
 		var item_tax = {};
 		var tax_accounts = [];
-		var company_currency = this.get_company_currency();
+		var organization_currency = this.get_organization_currency();
 
 		$.each(this.frm.doc["taxes"] || [], function(i, tax) {
 			var tax_amount_precision = precision("tax_amount", tax);
@@ -691,10 +691,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						var tax_rate = "";
 						if(tax_data[0] != null) {
 							tax_rate = (tax.charge_type === "Actual") ?
-								format_currency(flt(tax_data[0], tax_amount_precision), company_currency, tax_amount_precision) :
+								format_currency(flt(tax_data[0], tax_amount_precision), organization_currency, tax_amount_precision) :
 								(flt(tax_data[0], tax_rate_precision) + "%");
 						}
-						var tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), company_currency,
+						var tax_amount = format_currency(flt(tax_data[1], tax_amount_precision), organization_currency,
 							tax_amount_precision);
 
 						item_tax[item_code][tax.name] = [tax_rate, tax_amount];
@@ -739,11 +739,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		</table></div>';
 	},
 
-	validate_company_and_party: function() {
+	validate_organization_and_party: function() {
 		var me = this;
 		var valid = true;
 
-		$.each(["company", "customer"], function(i, fieldname) {
+		$.each(["organization", "customer"], function(i, fieldname) {
 			if(frappe.meta.has_field(me.frm.doc.doctype, fieldname && me.frm.doc.doctype != "Purchase Order")) {
 				if (!me.frm.doc[fieldname]) {
 					msgprint(__("Please specify") + ": " +

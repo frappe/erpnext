@@ -40,7 +40,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 							docstatus: 1,
 							status: ["not in", ["Stopped", "Closed"]],
 							per_billed: ["<", 99.99],
-							company: cur_frm.doc.company
+							organization: cur_frm.doc.organization
 						}
 					})
 				});
@@ -53,7 +53,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 							supplier: cur_frm.doc.supplier || undefined,
 							docstatus: 1,
 							status: ["!=", "Closed"],
-							company: cur_frm.doc.company
+							organization: cur_frm.doc.organization
 						}
 					})
 				});
@@ -98,7 +98,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 
 	write_off_amount: function() {
-		this.set_in_company_currency(this.frm.doc, ["write_off_amount"]);
+		this.set_in_organization_currency(this.frm.doc, ["write_off_amount"]);
 		this.calculate_outstanding_amount();
 		this.frm.refresh_fields();
 	},
@@ -177,7 +177,7 @@ cur_frm.fields_dict['credit_to'].get_query = function(doc) {
 			filters: {
 				'account_type': 'Payable',
 				'is_group': 0,
-				'company': doc.company
+				'organization': doc.organization
 			}
 		}
 	} else {
@@ -185,7 +185,7 @@ cur_frm.fields_dict['credit_to'].get_query = function(doc) {
 			filters: {
 				'report_type': 'Balance Sheet',
 				'is_group': 0,
-				'company': doc.company
+				'organization': doc.organization
 			}
 		}
 	}
@@ -203,7 +203,7 @@ return{
 cur_frm.set_query("expense_account", "items", function(doc) {
 	return{
 		query: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.get_expense_account",
-		filters: {'company': doc.company}
+		filters: {'organization': doc.organization}
 	}
 });
 
@@ -221,7 +221,7 @@ cur_frm.cscript.expense_account = function(doc, cdt, cdn){
 cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function(doc) {
 	return {
 		filters: {
-			'company': doc.company,
+			'organization': doc.organization,
 			'is_group': 0
 		}
 

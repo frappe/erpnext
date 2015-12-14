@@ -9,7 +9,7 @@ https://conf.erpnext.com/2014/videos/umair-sayyed
 
 ###Master Setup
 
-Between the service and trading company, the most differentiating master is an item master. While trading and manufacturing business has stock item, with warehouse and other stock details, service items will have none of these details.
+Between the service and trading organization, the most differentiating master is an item master. While trading and manufacturing business has stock item, with warehouse and other stock details, service items will have none of these details.
 
 To create a services item, which will be non-stock item, in the Item master, you should set "Is Stock Item" field as "No".
 

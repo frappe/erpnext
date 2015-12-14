@@ -2,7 +2,7 @@
  {
   "account": "_Test Account Shipping Charges - _TC",
   "calculate_based_on": "Net Total",
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "cost_center": "_Test Cost Center - _TC",
   "doctype": "Shipping Rule",
   "label": "_Test Shipping Rule",
@@ -34,7 +34,7 @@
  {
   "account": "_Test Account Shipping Charges - _TC",
   "calculate_based_on": "Net Total",
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "cost_center": "_Test Cost Center - _TC",
   "doctype": "Shipping Rule",
   "label": "_Test Shipping Rule - India",
@@ -68,7 +68,7 @@
  {
   "account": "_Test Account Shipping Charges - _TC",
   "calculate_based_on": "Net Total",
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "cost_center": "_Test Cost Center - _TC",
   "doctype": "Shipping Rule",
   "label": "_Test Shipping Rule - Rest of the World",

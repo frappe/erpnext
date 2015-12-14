@@ -14,7 +14,7 @@ selenium_tests = True
 #
 # 	def test_material_request(self):
 # 		sel.new_doc("Stock", "Material Request")
-# 		sel.set_field("company", "_Test Company")
+# 		sel.set_field("organization", "_Test organization")
 # 		sel.add_child("items")
 # 		sel.set_field("item_code", "_Test Item")
 # 		sel.set_field("qty", "1")

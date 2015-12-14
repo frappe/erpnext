@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doc("setup", 'doctype', "company")
+	frappe.reload_doc("setup", 'doctype', "organization")
 	frappe.reload_doc("accounts", 'doctype', "account")
 
 	frappe.db.sql("""update tabAccount set account_type='Cash'

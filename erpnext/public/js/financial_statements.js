@@ -3,11 +3,11 @@ frappe.provide("erpnext.financial_statements");
 erpnext.financial_statements = {
 	"filters": [
 		{
-			"fieldname":"company",
-			"label": __("Company"),
+			"fieldname":"organization",
+			"label": __("organization"),
 			"fieldtype": "Link",
-			"options": "Company",
-			"default": frappe.defaults.get_user_default("company"),
+			"options": "organization",
+			"default": frappe.defaults.get_user_default("organization"),
 			"reqd": 1
 		},
 		{
@@ -53,7 +53,7 @@ erpnext.financial_statements = {
 
 		frappe.route_options = {
 			"account": data.account,
-			"company": frappe.query_report.filters_by_name.company.get_value(),
+			"organization": frappe.query_report.filters_by_name.organization.get_value(),
 			"from_date": data.from_date,
 			"to_date": data.to_date
 		};

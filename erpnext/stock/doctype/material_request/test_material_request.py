@@ -60,7 +60,7 @@ class TestMaterialRequest(unittest.TestCase):
 
 	def _insert_stock_entry(self, qty1, qty2, warehouse = None ):
 		se = frappe.get_doc({
-				"company": "_Test Company",
+				"organization": "_Test organization",
 				"doctype": "Stock Entry",
 				"posting_date": "2013-03-01",
 				"posting_time": "00:00:00",
@@ -374,11 +374,11 @@ class TestMaterialRequest(unittest.TestCase):
 		se_doc = make_stock_entry(mr.name)
 		self.assertEquals(se_doc.get("items")[0].s_warehouse, "_Test Warehouse - _TC")
 
-	def test_warehouse_company_validation(self):
-		from erpnext.stock.utils import InvalidWarehouseCompany
+	def test_warehouse_organization_validation(self):
+		from erpnext.stock.utils import InvalidWarehouseorganization
 		mr = frappe.copy_doc(test_records[0])
-		mr.company = "_Test Company 1"
-		self.assertRaises(InvalidWarehouseCompany, mr.insert)
+		mr.organization = "_Test organization 1"
+		self.assertRaises(InvalidWarehouseorganization, mr.insert)
 
 	def _get_requested_qty(self, item_code, warehouse):
 		return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "indented_qty"))

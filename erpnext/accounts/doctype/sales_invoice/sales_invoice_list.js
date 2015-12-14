@@ -3,7 +3,7 @@
 
 // render
 frappe.listview_settings['Sales Invoice'] = {
-	add_fields: ["customer", "customer_name", "base_grand_total", "outstanding_amount", "due_date", "company",
+	add_fields: ["customer", "customer_name", "base_grand_total", "outstanding_amount", "due_date", "organization",
 		"currency", "is_return"],
 	get_indicator: function(doc) {
 		if(cint(doc.is_return)==1) {

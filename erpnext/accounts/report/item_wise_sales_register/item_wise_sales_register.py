@@ -25,7 +25,7 @@ def execute(filters=None):
 			from `tabDelivery Note Item` where docstatus=1 and so_detail=%s""", d.so_detail))
 
 		row = [d.item_code, d.item_name, d.item_group, d.parent, d.posting_date, d.customer, d.customer_name,
-			d.customer_group, d.debit_to, d.territory, d.project_name, d.company, d.sales_order,
+			d.customer_group, d.debit_to, d.territory, d.project_name, d.organization, d.sales_order,
 			delivery_note, d.income_account, d.qty, d.base_net_rate, d.base_net_amount]
 
 		for tax in tax_accounts:
@@ -45,7 +45,7 @@ def get_columns():
 		_("Posting Date") + ":Date:80", _("Customer") + ":Link/Customer:120",
 		_("Customer Name") + "::120", _("Customer Group") + ":Link/Customer Group:120",
 		_("Receivable Account") + ":Link/Account:120", _("Territory") + ":Link/Territory:80",
-		_("Project") + ":Link/Project:80", _("Company") + ":Link/Company:100",
+		_("Project") + ":Link/Project:80", _("organization") + ":Link/organization:100",
 		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
 		_("Income Account") + ":Link/Account:140", _("Qty") + ":Float:120",
 		_("Rate") + ":Currency:120", _("Amount") + ":Currency:120"
@@ -54,7 +54,7 @@ def get_columns():
 def get_conditions(filters):
 	conditions = ""
 
-	for opts in (("company", " and company=%(company)s"),
+	for opts in (("organization", " and organization=%(organization)s"),
 		("customer", " and si.customer = %(customer)s"),
 		("item_code", " and si_item.item_code = %(item_code)s"),
 		("from_date", " and si.posting_date>=%(from_date)s"),
@@ -67,7 +67,7 @@ def get_conditions(filters):
 def get_items(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select si_item.parent, si.posting_date, si.debit_to, si.project_name,
-		si.customer, si.remarks, si.territory, si.company, si.base_net_total, si_item.item_code, si_item.item_name,
+		si.customer, si.remarks, si.territory, si.organization, si.base_net_total, si_item.item_code, si_item.item_name,
 		si_item.item_group, si_item.sales_order, si_item.delivery_note, si_item.income_account,
 		si_item.qty, si_item.base_net_rate, si_item.base_net_amount, si.customer_name,
 		si.customer_group, si_item.so_detail

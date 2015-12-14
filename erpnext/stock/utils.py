@@ -7,7 +7,7 @@ from frappe import _
 import json
 from frappe.utils import flt, cstr, nowdate, nowtime
 
-class InvalidWarehouseCompany(frappe.ValidationError): pass
+class InvalidWarehouseorganization(frappe.ValidationError): pass
 
 def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 	if not posting_date: posting_date = nowdate()
@@ -172,8 +172,8 @@ def get_valid_serial_nos(sr_nos, qty=0, item_code=''):
 
 	return valid_serial_nos
 
-def validate_warehouse_company(warehouse, company):
-	warehouse_company = frappe.db.get_value("Warehouse", warehouse, "company")
-	if warehouse_company and warehouse_company != company:
-		frappe.throw(_("Warehouse {0} does not belong to company {1}").format(warehouse, company),
-			InvalidWarehouseCompany)
+def validate_warehouse_organization(warehouse, organization):
+	warehouse_organization = frappe.db.get_value("Warehouse", warehouse, "organization")
+	if warehouse_organization and warehouse_organization != organization:
+		frappe.throw(_("Warehouse {0} does not belong to organization {1}").format(warehouse, organization),
+			InvalidWarehouseorganization)

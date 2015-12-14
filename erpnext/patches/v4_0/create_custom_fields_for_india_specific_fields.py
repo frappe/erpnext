@@ -26,12 +26,12 @@ def execute():
 			"label": "PAN Number",
 			"fieldname": "pan_number",
 			"fieldtype": "Data",
-			"insert_after": "company_email"
+			"insert_after": "organization_email"
 		}, {
 			"label": "Gratuity LIC Id",
 			"fieldname": "gratuity_lic_id",
 			"fieldtype": "Data",
-			"insert_after": "company_email"
+			"insert_after": "organization_email"
 		}, {
 			"label": "Esic Card No",
 			"fieldname": "esic_card_no",

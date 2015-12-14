@@ -36,7 +36,7 @@ cur_frm.cscript.load_defaults = function(doc, dt, dn) {
 	if(fields_to_refresh) { refresh_many(fields_to_refresh); }
 }
 
-cur_frm.add_fetch('lead_name', 'company_name', 'customer_name');
+cur_frm.add_fetch('lead_name', 'organization_name', 'customer_name');
 cur_frm.add_fetch('default_sales_partner','commission_rate','default_commission_rate');
 
 cur_frm.cscript.validate = function(doc, dt, dn) {
@@ -99,7 +99,7 @@ cur_frm.fields_dict['accounts'].grid.get_field('account').get_query = function(d
 	var d  = locals[cdt][cdn];
 	var filters = {
 		'account_type': 'Receivable',
-		'company': d.company,
+		'organization': d.organization,
 		"is_group": 0
 	};
 

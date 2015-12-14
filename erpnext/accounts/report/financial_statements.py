@@ -74,8 +74,8 @@ def get_period_list(fiscal_year, periodicity, from_beginning=False):
 
 	return period_list
 
-def get_data(company, root_type, balance_must_be, period_list, ignore_closing_entries=False):
-	accounts = get_accounts(company, root_type)
+def get_data(organization, root_type, balance_must_be, period_list, ignore_closing_entries=False):
+	accounts = get_accounts(organization, root_type)
 	if not accounts:
 		return None
 
@@ -84,7 +84,7 @@ def get_data(company, root_type, balance_must_be, period_list, ignore_closing_en
 	gl_entries_by_account = {}
 	for root in frappe.db.sql("""select lft, rgt from tabAccount
 			where root_type=%s and ifnull(parent_account, '') = ''""", root_type, as_dict=1):
-		set_gl_entries_by_account(company, period_list[0]["from_date"],
+		set_gl_entries_by_account(organization, period_list[0]["from_date"],
 			period_list[-1]["to_date"],root.lft, root.rgt, gl_entries_by_account,
 			ignore_closing_entries=ignore_closing_entries)
 
@@ -165,9 +165,9 @@ def add_total_row(out, balance_must_be, period_list):
 	# blank row after Total
 	out.append({})
 
-def get_accounts(company, root_type):
+def get_accounts(organization, root_type):
 	return frappe.db.sql("""select name, parent_account, lft, rgt, root_type, report_type, account_name from `tabAccount`
-		where company=%s and root_type=%s order by lft""", (company, root_type), as_dict=True)
+		where organization=%s and root_type=%s order by lft""", (organization, root_type), as_dict=True)
 
 def filter_accounts(accounts, depth=10):
 	parent_children_map = {}
@@ -209,7 +209,7 @@ def sort_root_accounts(roots):
 
 	roots.sort(compare_roots)
 
-def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, gl_entries_by_account,
+def set_gl_entries_by_account(organization, from_date, to_date, root_lft, root_rgt, gl_entries_by_account,
 		ignore_closing_entries=False):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 	additional_conditions = []
@@ -221,14 +221,14 @@ def set_gl_entries_by_account(company, from_date, to_date, root_lft, root_rgt, g
 		additional_conditions.append("and posting_date >= %(from_date)s")
 
 	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening from `tabGL Entry`
-		where company=%(company)s
+		where organization=%(organization)s
 		{additional_conditions}
 		and posting_date <= %(to_date)s
 		and account in (select name from `tabAccount`
 			where lft >= %(lft)s and rgt <= %(rgt)s)
 		order by account, posting_date""".format(additional_conditions="\n".join(additional_conditions)),
 		{
-			"company": company,
+			"organization": organization,
 			"from_date": from_date,
 			"to_date": to_date,
 			"lft": root_lft,

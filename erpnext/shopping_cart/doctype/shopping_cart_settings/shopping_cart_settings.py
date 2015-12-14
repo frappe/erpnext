@@ -20,10 +20,10 @@ class ShoppingCartSettings(Document):
 			self.validate_exchange_rates_exist()
 
 	def validate_exchange_rates_exist(self):
-		"""check if exchange rates exist for all Price List currencies (to company's currency)"""
-		company_currency = frappe.db.get_value("Company", self.company, "default_currency")
-		if not company_currency:
-			msgprint(_("Please specify currency in Company") + ": " + self.company,
+		"""check if exchange rates exist for all Price List currencies (to organization's currency)"""
+		organization_currency = frappe.db.get_value("organization", self.organization, "default_currency")
+		if not organization_currency:
+			msgprint(_("Please specify currency in organization") + ": " + self.organization,
 				raise_exception=ShoppingCartSetupError)
 
 		price_list_currency_map = frappe.db.get_values("Price List",
@@ -35,9 +35,9 @@ class ShoppingCartSettings(Document):
 			if not currency:
 				frappe.throw(_("Currency is required for Price List {0}").format(price_list))
 
-		expected_to_exist = [currency + "-" + company_currency
+		expected_to_exist = [currency + "-" + organization_currency
 			for currency in price_list_currency_map.values()
-			if currency != company_currency]
+			if currency != organization_currency]
 
 		if expected_to_exist:
 			exists = frappe.db.sql_list("""select name from `tabCurrency Exchange`

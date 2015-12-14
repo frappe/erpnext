@@ -50,7 +50,7 @@ def get_item_details(args):
 	get_price_list_rate(args, item_doc, out)
 
 	if args.transaction_type == "selling" and cint(args.is_pos):
-		out.update(get_pos_profile_item_details(args.company, args))
+		out.update(get_pos_profile_item_details(args.organization, args))
 
 	# update args with out, if key or value not exists
 	for key, value in out.iteritems():
@@ -109,8 +109,8 @@ def get_item_code(barcode=None, serial_no=None):
 	return item_code
 
 def validate_item_details(args, item):
-	if not args.company:
-		throw(_("Please specify Company"))
+	if not args.organization:
+		throw(_("Please specify organization"))
 
 	from erpnext.stock.doctype.item.item import validate_end_of_life
 	validate_end_of_life(item.name, item.end_of_life, item.disabled)
@@ -177,12 +177,12 @@ def get_basic_details(args, item):
 		"delivered_by_supplier": item.delivered_by_supplier,
 	})
 
-	# if default specified in item is for another company, fetch from company
+	# if default specified in item is for another organization, fetch from organization
 	for d in [["Account", "income_account", "default_income_account"], ["Account", "expense_account", "default_expense_account"],
 		["Cost Center", "cost_center", "cost_center"], ["Warehouse", "warehouse", ""]]:
-			company = frappe.db.get_value(d[0], out.get(d[1]), "company")
-			if not out[d[1]] or (company and args.company != company):
-				out[d[1]] = frappe.db.get_value("Company", args.company, d[2]) if d[2] else None
+			organization = frappe.db.get_value(d[0], out.get(d[1]), "organization")
+			if not out[d[1]] or (organization and args.organization != organization):
+				out[d[1]] = frappe.db.get_value("organization", args.organization, d[2]) if d[2] else None
 
 	for fieldname in ("item_name", "item_group", "barcode", "brand", "stock_uom"):
 		out[fieldname] = item.get(fieldname)
@@ -265,12 +265,12 @@ def validate_conversion_rate(args, meta):
 	from erpnext.controllers.accounts_controller import validate_conversion_rate
 
 	if (not args.conversion_rate
-		and args.currency==frappe.db.get_value("Company", args.company, "default_currency")):
+		and args.currency==frappe.db.get_value("organization", args.organization, "default_currency")):
 		args.conversion_rate = 1.0
 
 	# validate currency conversion rate
 	validate_conversion_rate(args.currency, args.conversion_rate,
-		meta.get_label("conversion_rate"), args.company)
+		meta.get_label("conversion_rate"), args.organization)
 
 	args.conversion_rate = flt(args.conversion_rate,
 		get_field_precision(meta.get_field("conversion_rate"),
@@ -281,7 +281,7 @@ def validate_conversion_rate(args, meta):
 		throw(_("Price List Currency not selected"))
 	else:
 		validate_conversion_rate(args.price_list_currency, args.plc_conversion_rate,
-			meta.get_label("plc_conversion_rate"), args.company)
+			meta.get_label("plc_conversion_rate"), args.organization)
 
 		args.plc_conversion_rate = flt(args.plc_conversion_rate,
 			get_field_precision(meta.get_field("plc_conversion_rate"),
@@ -295,11 +295,11 @@ def get_party_item_code(args, item_doc, out):
 		item_supplier = item_doc.get("supplier_items", {"supplier": args.supplier})
 		out.supplier_part_no = item_supplier[0].supplier_part_no if item_supplier else None
 
-def get_pos_profile_item_details(company, args, pos_profile=None):
+def get_pos_profile_item_details(organization, args, pos_profile=None):
 	res = frappe._dict()
 
 	if not pos_profile:
-		pos_profile = get_pos_profile(company)
+		pos_profile = get_pos_profile(organization)
 
 	if pos_profile:
 		for fieldname in ("income_account", "cost_center", "warehouse", "expense_account"):
@@ -313,13 +313,13 @@ def get_pos_profile_item_details(company, args, pos_profile=None):
 	return res
 
 @frappe.whitelist()
-def get_pos_profile(company):
+def get_pos_profile(organization):
 	pos_profile = frappe.db.sql("""select * from `tabPOS Profile` where user = %s
-		and company = %s""", (frappe.session['user'], company), as_dict=1)
+		and organization = %s""", (frappe.session['user'], organization), as_dict=1)
 
 	if not pos_profile:
 		pos_profile = frappe.db.sql("""select * from `tabPOS Profile`
-			where ifnull(user,'') = '' and company = %s""", company, as_dict=1)
+			where ifnull(user,'') = '' and organization = %s""", organization, as_dict=1)
 
 	return pos_profile and pos_profile[0] or None
 

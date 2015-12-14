@@ -1,7 +1,7 @@
 Payments made against Sales Invoices or Purchase Invoices can be made by
 clicking on “Make Payment Entry” button on “Submitted” invoices.
 
-  1. Update the “Bank Account” (you can also set the default account in the Company master).
+  1. Update the “Bank Account” (you can also set the default account in the organization master).
   2. Update posting date.
   3. Enter the cheque number, cheque date.
   4. Save and Submit.

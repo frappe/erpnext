@@ -46,7 +46,7 @@ def validate_filters(filters):
 
 def get_data(filters):
 	accounts = frappe.db.sql("""select name, parent_account, account_name, root_type, report_type, lft, rgt
-		from `tabAccount` where company=%s order by lft""", filters.company, as_dict=True)
+		from `tabAccount` where organization=%s order by lft""", filters.organization, as_dict=True)
 
 	if not accounts:
 		return None
@@ -54,11 +54,11 @@ def get_data(filters):
 	accounts, accounts_by_name = filter_accounts(accounts)
 
 	min_lft, max_rgt = frappe.db.sql("""select min(lft), max(rgt) from `tabAccount`
-		where company=%s""", (filters.company,))[0]
+		where organization=%s""", (filters.organization,))[0]
 
 	gl_entries_by_account = {}
 
-	set_gl_entries_by_account(filters.company, filters.from_date,
+	set_gl_entries_by_account(filters.organization, filters.from_date,
 		filters.to_date, min_lft, max_rgt, gl_entries_by_account, ignore_closing_entries=not flt(filters.with_period_closing_entry))
 
 	opening_balances = get_opening_balances(filters)
@@ -90,13 +90,13 @@ def get_rootwise_opening_balances(filters, report_type):
 			account, sum(debit) as opening_debit, sum(credit) as opening_credit
 		from `tabGL Entry`
 		where
-			company=%(company)s
+			organization=%(organization)s
 			{additional_conditions}
 			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
 			and account in (select name from `tabAccount` where report_type=%(report_type)s)
 		group by account""".format(additional_conditions=additional_conditions),
 		{
-			"company": filters.company,
+			"organization": filters.organization,
 			"from_date": filters.from_date,
 			"report_type": report_type,
 			"year_start_date": filters.year_start_date

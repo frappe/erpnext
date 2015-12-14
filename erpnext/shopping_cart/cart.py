@@ -40,7 +40,7 @@ def get_cart_quotation(doc=None):
 @frappe.whitelist()
 def place_order():
 	quotation = _get_cart_quotation()
-	quotation.company = frappe.db.get_value("Shopping Cart Settings", None, "company")
+	quotation.organization = frappe.db.get_value("Shopping Cart Settings", None, "organization")
 	for fieldname in ["customer_address", "shipping_address_name"]:
 		if not quotation.get(fieldname):
 			throw(_("{0} is required").format(quotation.meta.get_label(fieldname)))
@@ -49,8 +49,8 @@ def place_order():
 	quotation.submit()
 
 	if quotation.lead:
-		# company used to create customer accounts
-		frappe.defaults.set_user_default("company", quotation.company)
+		# organization used to create customer accounts
+		frappe.defaults.set_user_default("organization", quotation.organization)
 
 	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
@@ -162,7 +162,7 @@ def _get_cart_quotation(party=None):
 			"doctype": "Quotation",
 			"naming_series": get_shopping_cart_settings().quotation_series or "QTN-CART-",
 			"quotation_to": party.doctype,
-			"company": frappe.db.get_value("Shopping Cart Settings", None, "company"),
+			"organization": frappe.db.get_value("Shopping Cart Settings", None, "organization"),
 			"order_type": "Shopping Cart",
 			"status": "Draft",
 			"docstatus": 0,
@@ -180,11 +180,11 @@ def _get_cart_quotation(party=None):
 
 	return qdoc
 
-def update_party(fullname, company_name=None, mobile_no=None, phone=None):
+def update_party(fullname, organization_name=None, mobile_no=None, phone=None):
 	party = get_customer()
 
-	party.customer_name = company_name or fullname
-	party.customer_type == "Company" if company_name else "Individual"
+	party.customer_name = organization_name or fullname
+	party.customer_type == "organization" if organization_name else "Individual"
 
 	contact_name = frappe.db.get_value("Contact", {"email_id": frappe.session.user,
 		"customer": party.name})
@@ -203,7 +203,7 @@ def update_party(fullname, company_name=None, mobile_no=None, phone=None):
 
 	qdoc = _get_cart_quotation(party)
 	if not qdoc.get("__islocal"):
-		qdoc.customer_name = company_name or fullname
+		qdoc.customer_name = organization_name or fullname
 		qdoc.run_method("set_missing_lead_customer_details")
 		qdoc.flags.ignore_permissions = True
 		qdoc.save()
@@ -266,7 +266,7 @@ def set_taxes(quotation, cart_settings):
 	customer_group = frappe.db.get_value("Customer", quotation.customer, "customer_group")
 
 	quotation.taxes_and_charges = set_taxes(quotation.customer, "Customer", \
-		quotation.transaction_date, quotation.company, customer_group, None, \
+		quotation.transaction_date, quotation.organization, customer_group, None, \
 		quotation.customer_address, quotation.shipping_address_name, 1)
 #
 # 	# clear table

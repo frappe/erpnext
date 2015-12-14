@@ -113,7 +113,7 @@ class TestSalarySlip(unittest.TestCase):
 				"naming_series": "_T-Employee-",
 				"employee_name": user,
 				"user_id": user,
-				"company": "_Test Company",
+				"organization": "_Test organization",
 				"date_of_birth": "1990-05-08",
 				"date_of_joining": "2013-01-01",
 				"department": "_Test Department 1",

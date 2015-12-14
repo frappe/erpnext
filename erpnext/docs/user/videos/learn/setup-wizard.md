@@ -4,5 +4,5 @@
 
 **Duration: 2:28**
 
-After successful setup of ERPNext account, on the first login, you will see Setup Wizard. The Setup Wizard helps you quickly setup your masters like your company, Items, Customer,
+After successful setup of ERPNext account, on the first login, you will see Setup Wizard. The Setup Wizard helps you quickly setup your masters like your organization, Items, Customer,
 Suppliers and will also setup a basic website with this data.

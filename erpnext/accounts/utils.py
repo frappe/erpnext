@@ -16,10 +16,10 @@ class FiscalYearError(frappe.ValidationError): pass
 class BudgetError(frappe.ValidationError): pass
 
 @frappe.whitelist()
-def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1, company=None):
-	return get_fiscal_years(date, fiscal_year, label, verbose, company)[0]
+def get_fiscal_year(date=None, fiscal_year=None, label="Date", verbose=1, organization=None):
+	return get_fiscal_years(date, fiscal_year, label, verbose, organization)[0]
 
-def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verbose=1, company=None):
+def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verbose=1, organization=None):
 	# if year start date is 2012-04-01, year end date should be 2013-03-31 (hence subdate)
 	cond = " disabled = 0"
 	if fiscal_year:
@@ -27,15 +27,15 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 	else:
 		cond += " and %(transaction_date)s >= fy.year_start_date and %(transaction_date)s <= fy.year_end_date"
 
-	if company:
-		cond += """ and (not exists(select name from `tabFiscal Year Company` fyc where fyc.parent = fy.name)
-			or exists(select company from `tabFiscal Year Company` fyc where fyc.parent = fy.name and fyc.company=%(company)s ))"""
+	if organization:
+		cond += """ and (not exists(select name from `tabFiscal Year organization` fyc where fyc.parent = fy.name)
+			or exists(select organization from `tabFiscal Year organization` fyc where fyc.parent = fy.name and fyc.organization=%(organization)s ))"""
 
 	fy = frappe.db.sql("""select fy.name, fy.year_start_date, fy.year_end_date from `tabFiscal Year` fy
 		where %s order by fy.year_start_date desc""" % cond, {
 			"fiscal_year": fiscal_year,
 			"transaction_date": transaction_date,
-			"company": company
+			"organization": organization
 		})
 
 	if not fy:
@@ -100,9 +100,9 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, in_acco
 				and ac.lft >= %s and ac.rgt <= %s
 			)""" % (acc.lft, acc.rgt))
 
-			# If group and currency same as company,
-			# always return balance based on debit and credit in company currency
-			if acc.account_currency == frappe.db.get_value("Company", acc.company, "default_currency"):
+			# If group and currency same as organization,
+			# always return balance based on debit and credit in organization currency
+			if acc.account_currency == frappe.db.get_value("organization", acc.organization, "default_currency"):
 				in_account_currency = False
 		else:
 			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account), ))
@@ -219,7 +219,7 @@ def update_against_doc(d, jv_obj):
 		""", d['voucher_detail_no'], as_dict=True)
 
 		amount_in_account_currency = flt(d['unadjusted_amt']) - flt(d['allocated_amt'])
-		amount_in_company_currency = amount_in_account_currency * flt(jvd[0]['exchange_rate'])
+		amount_in_organization_currency = amount_in_account_currency * flt(jvd[0]['exchange_rate'])
 
 		# new entry with balance amount
 		ch = jv_obj.append("accounts")
@@ -233,7 +233,7 @@ def update_against_doc(d, jv_obj):
 		ch.balance = flt(jvd[0]["balance"])
 
 		ch.set(d['dr_or_cr'], amount_in_account_currency)
-		ch.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit', amount_in_company_currency)
+		ch.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit', amount_in_organization_currency)
 
 		ch.set('credit_in_account_currency' if d['dr_or_cr']== 'debit_in_account_currency'
 			else 'debit_in_account_currency', 0)
@@ -271,11 +271,11 @@ def remove_against_link_from_jv(ref_type, ref_no):
 
 
 @frappe.whitelist()
-def get_company_default(company, fieldname):
-	value = frappe.db.get_value("Company", company, fieldname)
+def get_organization_default(organization, fieldname):
+	value = frappe.db.get_value("organization", organization, fieldname)
 
 	if not value:
-		throw(_("Please set default value {0} in Company {1}").format(frappe.get_meta("Company").get_label(fieldname), company))
+		throw(_("Please set default value {0} in organization {1}").format(frappe.get_meta("organization").get_label(fieldname), organization))
 
 	return value
 
@@ -324,7 +324,7 @@ def validate_expense_against_budget(args):
 			""", (args.cost_center, args.account, args.fiscal_year), as_dict=True)
 
 			if budget and budget[0].budget_allocated:
-				yearly_action, monthly_action = frappe.db.get_value("Company", args.company,
+				yearly_action, monthly_action = frappe.db.get_value("organization", args.organization,
 					["yearly_bgt_flag", "monthly_bgt_flag"])
 				action_for = action = ""
 
@@ -377,41 +377,41 @@ def get_actual_expense(args):
 		select sum(debit) - sum(credit)
 		from `tabGL Entry`
 		where account='%(account)s' and cost_center='%(cost_center)s'
-		and fiscal_year='%(fiscal_year)s' and company='%(company)s' %(condition)s
+		and fiscal_year='%(fiscal_year)s' and organization='%(organization)s' %(condition)s
 	""" % (args))[0][0])
 
 def get_currency_precision(currency=None):
 	if not currency:
-		currency = frappe.db.get_value("Company",
-			frappe.db.get_default("company"), "default_currency", cache=True)
+		currency = frappe.db.get_value("organization",
+			frappe.db.get_default("organization"), "default_currency", cache=True)
 	currency_format = frappe.db.get_value("Currency", currency, "number_format", cache=True)
 
 	from frappe.utils import get_number_format_info
 	return get_number_format_info(currency_format)[2]
 
-def get_stock_rbnb_difference(posting_date, company):
+def get_stock_rbnb_difference(posting_date, organization):
 	stock_items = frappe.db.sql_list("""select distinct item_code
-		from `tabStock Ledger Entry` where company=%s""", company)
+		from `tabStock Ledger Entry` where organization=%s""", organization)
 
 	pr_valuation_amount = frappe.db.sql("""
 		select sum(pr_item.valuation_rate * pr_item.qty * pr_item.conversion_factor)
 		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
-	    where pr.name = pr_item.parent and pr.docstatus=1 and pr.company=%s
+	    where pr.name = pr_item.parent and pr.docstatus=1 and pr.organization=%s
 		and pr.posting_date <= %s and pr_item.item_code in (%s)""" %
-	    ('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
+	    ('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([organization, posting_date] + stock_items))[0][0]
 
 	pi_valuation_amount = frappe.db.sql("""
 		select sum(pi_item.valuation_rate * pi_item.qty * pi_item.conversion_factor)
 		from `tabPurchase Invoice Item` pi_item, `tabPurchase Invoice` pi
-	    where pi.name = pi_item.parent and pi.docstatus=1 and pi.company=%s
+	    where pi.name = pi_item.parent and pi.docstatus=1 and pi.organization=%s
 		and pi.posting_date <= %s and pi_item.item_code in (%s)""" %
-	    ('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([company, posting_date] + stock_items))[0][0]
+	    ('%s', '%s', ', '.join(['%s']*len(stock_items))), tuple([organization, posting_date] + stock_items))[0][0]
 
 	# Balance should be
 	stock_rbnb = flt(pr_valuation_amount, 2) - flt(pi_valuation_amount, 2)
 
 	# Balance as per system
-	stock_rbnb_account = "Stock Received But Not Billed - " + frappe.db.get_value("Company", company, "abbr")
+	stock_rbnb_account = "Stock Received But Not Billed - " + frappe.db.get_value("organization", organization, "abbr")
 	sys_bal = get_balance_on(stock_rbnb_account, posting_date, in_account_currency=False)
 
 	# Amount should be credited

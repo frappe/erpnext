@@ -14,7 +14,7 @@ In the payment voucher, update invoice amount against Customer or Supplier accou
 
 ####Scenario
 
-Below is the Sales Invoice for a customer in Europe. The base currency of a Company in USD. Sales Invoice is  made at the exchange rate (USD to Eur) of 1.128.
+Below is the Sales Invoice for a customer in Europe. The base currency of a organization in USD. Sales Invoice is  made at the exchange rate (USD to Eur) of 1.128.
 
 ![Sales Invoice]({{docs_base_url}}/assets/img/articles/Selection_576.png)
 

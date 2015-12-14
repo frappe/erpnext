@@ -10,12 +10,12 @@ def execute():
 		"Journal Entry Account", "Sales Invoice", "Purchase Invoice", "Customer", "Supplier"):
 			frappe.reload_doctype(dt)
 
-	company_list = frappe.get_all("Company", fields=["name", "default_currency", "default_receivable_account"])
-	for company in company_list:
+	organization_list = frappe.get_all("organization", fields=["name", "default_currency", "default_receivable_account"])
+	for organization in organization_list:
 
-		# update currency in account and gl entry as per company currency
+		# update currency in account and gl entry as per organization currency
 		frappe.db.sql("""update `tabAccount` set account_currency = %s
-			where ifnull(account_currency, '') = '' and company=%s""", (company.default_currency, company.name))
+			where ifnull(account_currency, '') = '' and organization=%s""", (organization.default_currency, organization.name))
 
 		# update newly introduced field's value in sales / purchase invoice
 		frappe.db.sql("""
@@ -25,8 +25,8 @@ def execute():
 				base_paid_amount=paid_amount,
 				base_write_off_amount=write_off_amount,
 				party_account_currency=%s
-			where company=%s
-		""", (company.default_currency, company.name))
+			where organization=%s
+		""", (organization.default_currency, organization.name))
 
 		frappe.db.sql("""
 			update
@@ -34,8 +34,8 @@ def execute():
 			set
 				base_write_off_amount=write_off_amount,
 				party_account_currency=%s
-			where company=%s
-		""", (company.default_currency, company.name))
+			where organization=%s
+		""", (organization.default_currency, organization.name))
 
 		# update exchange rate, debit/credit in account currency in Journal Entry
 		frappe.db.sql("""
@@ -49,8 +49,8 @@ def execute():
 		frappe.db.sql("""
 			update `tabJournal Entry Account` jea, `tabJournal Entry` je
 			set account_currency=%s
-			where jea.parent = je.name and je.company=%s
-		""", (company.default_currency, company.name))
+			where jea.parent = je.name and je.organization=%s
+		""", (organization.default_currency, organization.name))
 
 		# update debit/credit in account currency in GL Entry
 		frappe.db.sql("""
@@ -61,5 +61,5 @@ def execute():
 				credit_in_account_currency=credit,
 				account_currency=%s
 			where
-				company=%s
-		""", (company.default_currency, company.name))
+				organization=%s
+		""", (organization.default_currency, organization.name))

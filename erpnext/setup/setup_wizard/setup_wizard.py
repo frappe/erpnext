@@ -14,13 +14,13 @@ from erpnext.accounts.utils import FiscalYearError
 from erpnext.accounts.doctype.account.account import RootNotEditable
 
 def setup_complete(args=None):
-	if frappe.db.sql("select name from tabCompany"):
+	if frappe.db.sql("select name from taborganization"):
 		frappe.throw(_("Setup Already Complete!!"))
 
 	install_fixtures.install(args.get("country"))
 
 	update_user_name(args)
-	create_fiscal_year_and_company(args)
+	create_fiscal_year_and_organization(args)
 	create_users(args)
 	set_defaults(args)
 	create_territories()
@@ -34,7 +34,7 @@ def setup_complete(args=None):
 	create_suppliers(args)
 	frappe.local.message_log = []
 
-	website_maker(args.company_name.strip(), args.company_tagline, args.name)
+	website_maker(args.organization_name.strip(), args.organization_tagline, args.name)
 	create_logo(args)
 
 	frappe.db.commit()
@@ -85,7 +85,7 @@ def update_user_name(args):
 
 	add_all_roles_to(args.get("name"))
 
-def create_fiscal_year_and_company(args):
+def create_fiscal_year_and_organization(args):
 	curr_fiscal_year = get_fy_details(args.get('fy_start_date'), args.get('fy_end_date'))
 	frappe.get_doc({
 		"doctype":"Fiscal Year",
@@ -94,12 +94,12 @@ def create_fiscal_year_and_company(args):
 		'year_end_date': args.get('fy_end_date'),
 	}).insert()
 
-	# Company
+	# organization
 	frappe.get_doc({
-		"doctype":"Company",
+		"doctype":"organization",
 		'domain': args.get("industry"),
-		'company_name':args.get('company_name').strip(),
-		'abbr':args.get('company_abbr'),
+		'organization_name':args.get('organization_name').strip(),
+		'abbr':args.get('organization_abbr'),
 		'default_currency':args.get('currency'),
 		'country': args.get('country'),
 		'chart_of_accounts': args.get(('chart_of_accounts')),
@@ -128,13 +128,13 @@ def set_defaults(args):
 	global_defaults.update({
 		'current_fiscal_year': args.curr_fiscal_year,
 		'default_currency': args.get('currency'),
-		'default_company':args.get('company_name').strip(),
+		'default_organization':args.get('organization_name').strip(),
 		"country": args.get("country"),
 	})
 
 	global_defaults.save()
 
-	frappe.db.set_value("System Settings", None, "email_footer_address", args.get("company"))
+	frappe.db.set_value("System Settings", None, "email_footer_address", args.get("organization"))
 
 	accounts_settings = frappe.get_doc("Accounts Settings")
 	accounts_settings.auto_accounting_for_stock = 1
@@ -186,13 +186,13 @@ def create_email_digest():
 	if not system_managers:
 		return
 
-	companies = frappe.db.sql_list("select name FROM `tabCompany`")
-	for company in companies:
-		if not frappe.db.exists("Email Digest", "Default Weekly Digest - " + company):
+	companies = frappe.db.sql_list("select name FROM `taborganization`")
+	for organization in companies:
+		if not frappe.db.exists("Email Digest", "Default Weekly Digest - " + organization):
 			edigest = frappe.get_doc({
 				"doctype": "Email Digest",
-				"name": "Default Weekly Digest - " + company,
-				"company": company,
+				"name": "Default Weekly Digest - " + organization,
+				"organization": organization,
 				"frequency": "Weekly",
 				"recipient_list": "\n".join(system_managers)
 			})
@@ -208,7 +208,7 @@ def create_email_digest():
 		edigest = frappe.new_doc("Email Digest")
 		edigest.update({
 			"name": "Scheduler Errors",
-			"company": companies[0],
+			"organization": companies[0],
 			"frequency": "Daily",
 			"recipient_list": "\n".join(system_managers),
 			"scheduler_errors": 1,
@@ -232,7 +232,7 @@ def create_taxes(args):
 			tax_rate = cstr(args.get("tax_rate_" + str(i)) or "").replace("%", "")
 
 			try:
-				tax_group = frappe.db.get_value("Account", {"company": args.get("company_name"),
+				tax_group = frappe.db.get_value("Account", {"organization": args.get("organization_name"),
 					"is_group": 1, "account_type": "Tax", "root_type": "Liability"})
 				if tax_group:
 					account = make_tax_head(args, i, tax_group, tax_rate)
@@ -249,7 +249,7 @@ def create_taxes(args):
 def make_tax_head(args, i, tax_group, tax_rate):
 	return frappe.get_doc({
 		"doctype":"Account",
-		"company": args.get("company_name").strip(),
+		"organization": args.get("organization_name").strip(),
 		"parent_account": tax_group,
 		"account_name": args.get("tax_" + str(i)),
 		"is_group": 0,
@@ -291,7 +291,7 @@ def create_items(args):
 			if is_stock_item:
 				default_warehouse = frappe.db.get_value("Warehouse", filters={
 					"warehouse_name": _("Finished Goods") if is_sales_item else _("Stores"),
-					"company": args.get("company_name").strip()
+					"organization": args.get("organization_name").strip()
 				})
 
 			try:
@@ -348,10 +348,10 @@ def create_customers(args):
 				frappe.get_doc({
 					"doctype":"Customer",
 					"customer_name": customer,
-					"customer_type": "Company",
+					"customer_type": "organization",
 					"customer_group": _("Commercial"),
 					"territory": args.get("country"),
-					"company": args.get("company_name").strip()
+					"organization": args.get("organization_name").strip()
 				}).insert()
 
 				if args.get("customer_contact_" + str(i)):
@@ -369,7 +369,7 @@ def create_suppliers(args):
 					"doctype":"Supplier",
 					"supplier_name": supplier,
 					"supplier_type": _("Local"),
-					"company": args.get("company_name").strip()
+					"organization": args.get("organization_name").strip()
 				}).insert()
 
 				if args.get("supplier_contact_" + str(i)):
@@ -411,7 +411,7 @@ def create_logo(args):
 			fileurl = save_file(filename, content, "Website Settings", "Website Settings",
 				decode=True).file_url
 			frappe.db.set_value("Website Settings", "Website Settings", "brand_html",
-				"<img src='{0}' style='max-width: 40px; max-height: 25px;'> {1}".format(fileurl, args.get("company_name").strip()))
+				"<img src='{0}' style='max-width: 40px; max-height: 25px;'> {1}".format(fileurl, args.get("organization_name").strip()))
 
 def add_all_roles_to(name):
 	user = frappe.get_doc("User", name)
@@ -446,7 +446,7 @@ def create_users(args):
 		"full_name": " ".join(filter(None, [args.get("first_name"), args.get("last_name")])),
 		"user_id": frappe.session.user,
 		"status": "Active",
-		"company": args.get("company_name")
+		"organization": args.get("organization_name")
 	})
 	emp.flags.ignore_mandatory = True
 	emp.insert(ignore_permissions = True)
@@ -490,7 +490,7 @@ def create_users(args):
 					"full_name": fullname,
 					"user_id": email,
 					"status": "Active",
-					"company": args.get("company_name")
+					"organization": args.get("organization_name")
 				})
 				emp.flags.ignore_mandatory = True
 				emp.insert(ignore_permissions = True)

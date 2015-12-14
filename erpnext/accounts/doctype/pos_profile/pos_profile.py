@@ -15,15 +15,15 @@ class POSProfile(Document):
 
 	def check_for_duplicate(self):
 		res = frappe.db.sql("""select name, user from `tabPOS Profile`
-			where ifnull(user, '') = %s and name != %s and company = %s""",
-			(self.user, self.name, self.company))
+			where ifnull(user, '') = %s and name != %s and organization = %s""",
+			(self.user, self.name, self.organization))
 		if res:
 			if res[0][1]:
-				msgprint(_("POS Profile {0} already created for user: {1} and company {2}").format(res[0][0],
-					res[0][1], self.company), raise_exception=1)
+				msgprint(_("POS Profile {0} already created for user: {1} and organization {2}").format(res[0][0],
+					res[0][1], self.organization), raise_exception=1)
 			else:
-				msgprint(_("Global POS Profile {0} already created for company {1}").format(res[0][0],
-					self.company), raise_exception=1)
+				msgprint(_("Global POS Profile {0} already created for organization {1}").format(res[0][0],
+					self.organization), raise_exception=1)
 
 	def validate_all_link_fields(self):
 		accounts = {"Account": [self.cash_bank_account, self.income_account,
@@ -33,8 +33,8 @@ class POSProfile(Document):
 		for link_dt, dn_list in accounts.items():
 			for link_dn in dn_list:
 				if link_dn and not frappe.db.exists({"doctype": link_dt,
-						"company": self.company, "name": link_dn}):
-					frappe.throw(_("{0} does not belong to Company {1}").format(link_dn, self.company))
+						"organization": self.organization, "name": link_dn}):
+					frappe.throw(_("{0} does not belong to organization {1}").format(link_dn, self.organization))
 
 	def on_update(self):
 		self.set_defaults()

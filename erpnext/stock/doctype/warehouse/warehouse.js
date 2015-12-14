@@ -8,7 +8,7 @@ cur_frm.cscript.refresh = function(doc) {
 cur_frm.set_query("create_account_under", function() {
 	return {
 		filters: {
-			"company": cur_frm.doc.company,
+			"organization": cur_frm.doc.organization,
 			'is_group': 1
 		}
 	}

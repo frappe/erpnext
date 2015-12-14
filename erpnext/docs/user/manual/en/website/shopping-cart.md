@@ -10,7 +10,7 @@ To set up a shopping cart, go to the selling module.
 
 > Selling > Shopping Cart Settings
 
-#### Step 1: Enter Company Details and Default Territory.
+#### Step 1: Enter organization Details and Default Territory.
 
 ![Shopping Cart]({{docs_base_url}}/assets/old_images/erpnext/shopping-cart-1.png)
 

@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 # "remember to add indexes!"
 
 data_map = {
-	"Company": {
+	"organization": {
 		"columns": ["name"],
 		"conditions": ["docstatus < 2"]
 	},
@@ -19,11 +19,11 @@ data_map = {
 	# Accounts
 	"Account": {
 		"columns": ["name", "parent_account", "lft", "rgt", "report_type",
-			"company", "is_group"],
+			"organization", "is_group"],
 		"conditions": ["docstatus < 2"],
 		"order_by": "lft",
 		"links": {
-			"company": ["Company", "name"],
+			"organization": ["organization", "name"],
 		}
 
 	},
@@ -34,11 +34,11 @@ data_map = {
 	},
 	"GL Entry": {
 		"columns": ["name", "account", "posting_date", "cost_center", "debit", "credit",
-			"is_opening", "company", "voucher_type", "voucher_no", "remarks"],
+			"is_opening", "organization", "voucher_type", "voucher_no", "remarks"],
 		"order_by": "posting_date, account",
 		"links": {
 			"account": ["Account", "name"],
-			"company": ["Company", "name"],
+			"organization": ["organization", "name"],
 			"cost_center": ["Cost Center", "name"]
 		}
 	},
@@ -165,12 +165,12 @@ data_map = {
 		"order_by": "lft"
 	},
 	"Sales Invoice": {
-		"columns": ["name", "customer", "posting_date", "company"],
+		"columns": ["name", "customer", "posting_date", "organization"],
 		"conditions": ["docstatus=1"],
 		"order_by": "posting_date",
 		"links": {
 			"customer": ["Customer", "name"],
-			"company":["Company", "name"]
+			"organization":["organization", "name"]
 		}
 	},
 	"Sales Invoice Item": {
@@ -183,12 +183,12 @@ data_map = {
 		}
 	},
 	"Sales Order": {
-		"columns": ["name", "customer", "transaction_date as posting_date", "company"],
+		"columns": ["name", "customer", "transaction_date as posting_date", "organization"],
 		"conditions": ["docstatus=1"],
 		"order_by": "transaction_date",
 		"links": {
 			"customer": ["Customer", "name"],
-			"company":["Company", "name"]
+			"organization":["organization", "name"]
 		}
 	},
 	"Sales Order Item[Sales Analytics]": {
@@ -201,12 +201,12 @@ data_map = {
 		}
 	},
 	"Delivery Note": {
-		"columns": ["name", "customer", "posting_date", "company"],
+		"columns": ["name", "customer", "posting_date", "organization"],
 		"conditions": ["docstatus=1"],
 		"order_by": "posting_date",
 		"links": {
 			"customer": ["Customer", "name"],
-			"company":["Company", "name"]
+			"organization":["organization", "name"]
 		}
 	},
 	"Delivery Note Item[Sales Analytics]": {
@@ -233,12 +233,12 @@ data_map = {
 		"order_by": "name"
 	},
 	"Purchase Invoice": {
-		"columns": ["name", "supplier", "posting_date", "company"],
+		"columns": ["name", "supplier", "posting_date", "organization"],
 		"conditions": ["docstatus=1"],
 		"order_by": "posting_date",
 		"links": {
 			"supplier": ["Supplier", "name"],
-			"company":["Company", "name"]
+			"organization":["organization", "name"]
 		}
 	},
 	"Purchase Invoice Item": {
@@ -251,12 +251,12 @@ data_map = {
 		}
 	},
 	"Purchase Order": {
-		"columns": ["name", "supplier", "transaction_date as posting_date", "company"],
+		"columns": ["name", "supplier", "transaction_date as posting_date", "organization"],
 		"conditions": ["docstatus=1"],
 		"order_by": "posting_date",
 		"links": {
 			"supplier": ["Supplier", "name"],
-			"company":["Company", "name"]
+			"organization":["organization", "name"]
 		}
 	},
 	"Purchase Order Item[Purchase Analytics]": {
@@ -269,12 +269,12 @@ data_map = {
 		}
 	},
 	"Purchase Receipt": {
-		"columns": ["name", "supplier", "posting_date", "company"],
+		"columns": ["name", "supplier", "posting_date", "organization"],
 		"conditions": ["docstatus=1"],
 		"order_by": "posting_date",
 		"links": {
 			"supplier": ["Supplier", "name"],
-			"company":["Company", "name"]
+			"organization":["organization", "name"]
 		}
 	},
 	"Purchase Receipt Item[Purchase Analytics]": {

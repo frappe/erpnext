@@ -14,10 +14,10 @@ def execute(filters=None):
 	iwb_map = get_item_warehouse_map(filters)
 
 	data = []
-	for company in sorted(iwb_map):
-		for item in sorted(iwb_map[company]):
-			for wh in sorted(iwb_map[company][item]):
-				qty_dict = iwb_map[company][item][wh]
+	for organization in sorted(iwb_map):
+		for item in sorted(iwb_map[organization]):
+			for wh in sorted(iwb_map[organization][item]):
+				qty_dict = iwb_map[organization][item][wh]
 				data.append([item, item_map[item]["item_name"],
 					item_map[item]["item_group"],
 					item_map[item]["brand"],
@@ -27,7 +27,7 @@ def execute(filters=None):
 					qty_dict.in_val, qty_dict.out_qty,
 					qty_dict.out_val, qty_dict.bal_qty,
 					qty_dict.bal_val, qty_dict.val_rate,
-					company
+					organization
 				])
 
 	return columns, data
@@ -39,7 +39,7 @@ def get_columns(filters):
 	"Description::140", "Warehouse:Link/Warehouse:100", "Stock UOM:Link/UOM:90", "Opening Qty:Float:100", \
 	"Opening Value:Float:110", "In Qty:Float:80", "In Value:Float:80", "Out Qty:Float:80", \
 	"Out Value:Float:80", "Balance Qty:Float:100", "Balance Value:Float:100", \
-	"Valuation Rate:Float:90", "Company:Link/Company:100"]
+	"Valuation Rate:Float:90", "organization:Link/organization:100"]
 
 	return columns
 
@@ -62,7 +62,7 @@ def get_conditions(filters):
 def get_stock_ledger_entries(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""select item_code, warehouse, posting_date, actual_qty, valuation_rate,
-	company, voucher_type, qty_after_transaction, stock_value_difference
+	organization, voucher_type, qty_after_transaction, stock_value_difference
 		from `tabStock Ledger Entry`
 		where docstatus < 2 %s order by posting_date, posting_time, name""" %
 		conditions, as_dict=1)
@@ -72,7 +72,7 @@ def get_item_warehouse_map(filters):
 	iwb_map = {}
 
 	for d in sle:
-		iwb_map.setdefault(d.company, {}).setdefault(d.item_code, {}).\
+		iwb_map.setdefault(d.organization, {}).setdefault(d.item_code, {}).\
 		setdefault(d.warehouse, frappe._dict({\
 				"opening_qty": 0.0, "opening_val": 0.0,
 				"in_qty": 0.0, "in_val": 0.0,
@@ -80,7 +80,7 @@ def get_item_warehouse_map(filters):
 				"bal_qty": 0.0, "bal_val": 0.0,
 				"val_rate": 0.0, "uom": None
 			}))
-		qty_dict = iwb_map[d.company][d.item_code][d.warehouse]
+		qty_dict = iwb_map[d.organization][d.item_code][d.warehouse]
 
 		if d.voucher_type == "Stock Reconciliation":
 			qty_diff = flt(d.qty_after_transaction) - qty_dict.bal_qty

@@ -10,7 +10,7 @@ Steps:
 
   * As existing warehouses are linked to stock transactions which does not have corresponding accounting entries, those warehouses can not be used for perpetual inventory. You have to create new warehouses for the future stock transactions which will be linked to their respective accounts. While creating new warehouses, select an account group under which the child account for the warehouse will be created.
 
-  * Setup the following default accounts for each Company 
+  * Setup the following default accounts for each organization 
 
     * Stock Received But Not Billed
     * Stock Adjustment Account

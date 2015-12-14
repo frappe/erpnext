@@ -10,9 +10,9 @@ from erpnext.accounts.report.financial_statements import (get_period_list, get_c
 def execute(filters=None):
 	period_list = get_period_list(filters.fiscal_year, filters.periodicity, from_beginning=True)
 
-	asset = get_data(filters.company, "Asset", "Debit", period_list)
-	liability = get_data(filters.company, "Liability", "Credit", period_list)
-	equity = get_data(filters.company, "Equity", "Credit", period_list)
+	asset = get_data(filters.organization, "Asset", "Debit", period_list)
+	liability = get_data(filters.organization, "Liability", "Credit", period_list)
+	equity = get_data(filters.organization, "Equity", "Credit", period_list)
 	provisional_profit_loss = get_provisional_profit_loss(asset, liability, equity, period_list)
 
 	data = []

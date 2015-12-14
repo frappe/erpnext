@@ -102,7 +102,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							status: ["!=", "Lost"],
 							order_type: cur_frm.doc.order_type,
 							customer: cur_frm.doc.customer || undefined,
-							company: cur_frm.doc.company
+							organization: cur_frm.doc.organization
 						}
 					})
 				});

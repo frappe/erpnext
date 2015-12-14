@@ -108,7 +108,7 @@ def validate_account_for_auto_accounting_for_stock(gl_map):
 
 def round_off_debit_credit(gl_map):
 	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
-		currency=frappe.db.get_value("Company", gl_map[0].company, "default_currency", cache=True))
+		currency=frappe.db.get_value("organization", gl_map[0].organization, "default_currency", cache=True))
 
 	debit_credit_diff = 0.0
 	for entry in gl_map:
@@ -125,17 +125,17 @@ def round_off_debit_credit(gl_map):
 		make_round_off_gle(gl_map, debit_credit_diff)
 
 def make_round_off_gle(gl_map, debit_credit_diff):
-	round_off_account, round_off_cost_center = frappe.db.get_value("Company", gl_map[0].company,
+	round_off_account, round_off_cost_center = frappe.db.get_value("organization", gl_map[0].organization,
 		["round_off_account", "round_off_cost_center"]) or [None, None]
 	if not round_off_account:
-		frappe.throw(_("Please mention Round Off Account in Company"))
+		frappe.throw(_("Please mention Round Off Account in organization"))
 
 	if not round_off_cost_center:
-		frappe.throw(_("Please mention Round Off Cost Center in Company"))
+		frappe.throw(_("Please mention Round Off Cost Center in organization"))
 
 
 	round_off_gle = frappe._dict()
-	for k in ["voucher_type", "voucher_no", "company",
+	for k in ["voucher_type", "voucher_no", "organization",
 		"posting_date", "remarks", "fiscal_year", "is_opening"]:
 			round_off_gle[k] = gl_map[0][k]
 

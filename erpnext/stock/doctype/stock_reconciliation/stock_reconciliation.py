@@ -20,9 +20,9 @@ class StockReconciliation(StockController):
 
 	def validate(self):
 		if not self.expense_account:
-			self.expense_account = frappe.db.get_value("Company", self.company, "stock_adjustment_account")
+			self.expense_account = frappe.db.get_value("organization", self.organization, "stock_adjustment_account")
 		if not self.cost_center:
-			self.cost_center = frappe.db.get_value("Company", self.company, "cost_center")
+			self.cost_center = frappe.db.get_value("organization", self.organization, "cost_center")
 		self.validate_posting_time()
 		self.remove_items_with_no_change()
 		self.validate_data()
@@ -195,7 +195,7 @@ class StockReconciliation(StockController):
 			"posting_time": self.posting_time,
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
-			"company": self.company,
+			"organization": self.organization,
 			"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
 			"fiscal_year": self.fiscal_year,
 			"is_cancelled": "No",

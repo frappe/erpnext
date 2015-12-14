@@ -22,16 +22,16 @@ def boot_session(bootinfo):
 		bootinfo.notification_settings = frappe.get_doc("Notification Control",
 			"Notification Control")
 
-		# if no company, show a dialog box to create a new company
+		# if no organization, show a dialog box to create a new organization
 		bootinfo.customer_count = frappe.db.sql("""select count(*) from tabCustomer""")[0][0]
 
 		if not bootinfo.customer_count:
 			bootinfo.setup_complete = frappe.db.sql("""select name from
-				tabCompany limit 1""") and 'Yes' or 'No'
+				taborganization limit 1""") and 'Yes' or 'No'
 
 		bootinfo.docs += frappe.db.sql("""select name, default_currency, cost_center,
-			default_terms, default_letter_head from `tabCompany`""",
-			as_dict=1, update={"doctype":":Company"})
+			default_terms, default_letter_head from `taborganization`""",
+			as_dict=1, update={"doctype":":organization"})
 
 def load_country_and_currency(bootinfo):
 	country = frappe.db.get_default("country")

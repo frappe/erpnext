@@ -1,7 +1,7 @@
 The Chart of Accounts forms the blueprint of your organization. The overall
 structure of your Chart of Accounts is based on a system of double entry
 accounting that has become a standard all over the world to quantify how a
-company is doing financially.
+organization is doing financially.
 
 The Chart of Accounts helps you to answer:
 
@@ -19,7 +19,7 @@ figure this out) it's a good opportunity to start learning about this. It will
 be worth the effort. You can also take the help of your accountant to setup
 your Chart of Accounts.
 
-Financial statement of your company is easily viewable in ERPNext. An Example
+Financial statement of your organization is easily viewable in ERPNext. An Example
 of a financial statement is given below:
 
 <img class="screenshot" alt="Financial Analytics Balance Sheet" src="{{docs_base_url}}/assets/img/accounts/financial-analytics-bl.png">
@@ -29,9 +29,9 @@ To edit your Chart of Accounts in ERPNext go to:
 >  Accounts > Setup > Chart of Accounts
 
 Chart of Accounts is a tree view of the names of the Accounts (Ledgers and
-Groups) that a Company requires to manage its books of accounts. ERPNext sets
-up a simple chart of accounts for each Company you create, but you have to
-modify it according to your needs and legal requirements. For each company,
+Groups) that a organization requires to manage its books of accounts. ERPNext sets
+up a simple chart of accounts for each organization you create, but you have to
+modify it according to your needs and legal requirements. For each organization,
 Chart of Accounts signifies the way to classify the accounting entries, mostly
 based on statutory (tax, compliance to government regulations) requirements.
 
@@ -42,21 +42,21 @@ Let us understand the main groups of the Chart of Accounts.
 ### Balance Sheet Accounts
 
 The Balance Sheet has Application of Funds (/assets) and Sources of Funds
-(Liabilities) that signify the net-worth of your company at any given time.
+(Liabilities) that signify the net-worth of your organization at any given time.
 When you begin or end a financial period, all the Assets are equal to the
 Liabilities.
 
 > Accounting: If you are new to accounting, you might be wondering, how can
-Assets be equal to Liabilities? That would mean the company has nothing of its
-own. Thats right. All the “investment” made in the company to buy assets (like
+Assets be equal to Liabilities? That would mean the organization has nothing of its
+own. Thats right. All the “investment” made in the organization to buy assets (like
 land, furniture, machines) is made by the owners and is a liability to the
-company. If the company would want to shut down, it would need to sell all the
+organization. If the organization would want to shut down, it would need to sell all the
 assets and pay back all the liabilities (including profits) to the owners,
 leaving itself with nothing.
 
-All the accounts under this represent an asset owned by the company like "Bank
+All the accounts under this represent an asset owned by the organization like "Bank
 Account", "Land and Property", "Furniture" or a liability (funds that the
-company owes to others) like "Owners funds", "Debt" etc.
+organization owes to others) like "Owners funds", "Debt" etc.
 
 Two special accounts to note here are Accounts Receivable (money you have to
 collect from your customers) and Accounts Payable (money you have to pay to
@@ -115,7 +115,7 @@ will see an option to “Open” or “Add Child” a new Account.
 Option to create will only appear if you click on a Group (folder) type
 Account.
 
-ERPNext creates a standard structure for you when the Company is created but
+ERPNext creates a standard structure for you when the organization is created but
 it is up to you to modify or add or remove accounts.
 
 Typically, you might want to create Accounts for

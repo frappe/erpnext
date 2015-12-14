@@ -5,7 +5,7 @@ import frappe
 from frappe.utils import money_in_words
 
 def execute():
-	company_currency = dict(frappe.db.sql("select name, default_currency from `tabCompany`"))
+	organization_currency = dict(frappe.db.sql("select name, default_currency from `taborganization`"))
 	bank_or_cash_accounts = frappe.db.sql_list("""select name from `tabAccount`
 		where account_type in ('Bank', 'Cash') and docstatus < 2""")
 
@@ -18,7 +18,7 @@ def execute():
 			if (d.party_type and d.party) or d.account in bank_or_cash_accounts:
 				total_amount = d.debit or d.credit
 				if total_amount:
-					total_amount_in_words = money_in_words(total_amount, company_currency.get(je_doc.company))
+					total_amount_in_words = money_in_words(total_amount, organization_currency.get(je_doc.organization))
 
 		if total_amount:
 			frappe.db.sql("""update `tabJournal Entry` set total_amount=%s, total_amount_in_words=%s

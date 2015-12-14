@@ -25,12 +25,12 @@ frappe.ui.form.on("Stock Reconciliation", {
 		}
 	},
 
-	company: function(frm) {
-		erpnext.get_fiscal_year(frm.doc.company, frm.doc.posting_date);
+	organization: function(frm) {
+		erpnext.get_fiscal_year(frm.doc.organization, frm.doc.posting_date);
 	},
 
 	posting_date: function(frm) {
-		erpnext.get_fiscal_year(frm.doc.company, frm.doc.posting_date);
+		erpnext.get_fiscal_year(frm.doc.organization, frm.doc.posting_date);
 	},
 
 	get_items: function(frm) {
@@ -97,13 +97,13 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 
 	set_default_expense_account: function() {
 		var me = this;
-		if(this.frm.doc.company) {
+		if(this.frm.doc.organization) {
 			if (sys_defaults.auto_accounting_for_stock && !this.frm.doc.expense_account) {
 				return this.frm.call({
-					method: "erpnext.accounts.utils.get_company_default",
+					method: "erpnext.accounts.utils.get_organization_default",
 					args: {
 						"fieldname": "stock_adjustment_account",
-						"company": this.frm.doc.company
+						"organization": this.frm.doc.organization
 					},
 					callback: function(r) {
 						if (!r.exc) {
@@ -120,13 +120,13 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 		this.frm.get_docfield("items").allow_bulk_edit = 1;
 
 		if (sys_defaults.auto_accounting_for_stock) {
-			this.frm.add_fetch("company", "stock_adjustment_account", "expense_account");
-			this.frm.add_fetch("company", "cost_center", "cost_center");
+			this.frm.add_fetch("organization", "stock_adjustment_account", "expense_account");
+			this.frm.add_fetch("organization", "cost_center", "cost_center");
 
 			this.frm.fields_dict["expense_account"].get_query = function() {
 				return {
 					"filters": {
-						'company': me.frm.doc.company,
+						'organization': me.frm.doc.organization,
 						"is_group": 0
 					}
 				}
@@ -134,7 +134,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 			this.frm.fields_dict["cost_center"].get_query = function() {
 				return {
 					"filters": {
-						'company': me.frm.doc.company,
+						'organization': me.frm.doc.organization,
 						"is_group": 0
 					}
 				}

@@ -85,7 +85,7 @@ class TestPaymentTool(unittest.TestCase):
 		}
 
 		args = {
-			"company": "_Test Company",
+			"organization": "_Test organization",
 			"party_type": "Customer",
 			"received_or_paid": "Received",
 			"party": "_Test Customer 3",

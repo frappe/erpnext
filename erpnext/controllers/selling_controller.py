@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, flt, cstr, comma_or
-from erpnext.setup.utils import get_company_currency
+from erpnext.setup.utils import get_organization_currency
 from frappe import _, throw
 from erpnext.stock.get_item_details import get_available_qty
 
@@ -104,13 +104,13 @@ class SellingController(StockController):
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
-		company_currency = get_company_currency(self.company)
+		organization_currency = get_organization_currency(self.organization)
 
 		disable_rounded_total = cint(frappe.db.get_value("Global Defaults", None, "disable_rounded_total"))
 
 		if self.meta.get_field("base_in_words"):
 			self.base_in_words = money_in_words(disable_rounded_total and
-				abs(self.base_grand_total) or abs(self.base_rounded_total), company_currency)
+				abs(self.base_grand_total) or abs(self.base_rounded_total), organization_currency)
 		if self.meta.get_field("in_words"):
 			self.in_words = money_in_words(disable_rounded_total and
 				abs(self.grand_total) or abs(self.rounded_total), self.currency)

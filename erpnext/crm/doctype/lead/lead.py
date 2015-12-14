@@ -83,9 +83,9 @@ def make_customer(source_name, target_doc=None):
 
 def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 	def set_missing_values(source, target):
-		if source.company_name:
-			target.customer_type = "Company"
-			target.customer_name = source.company_name
+		if source.organization_name:
+			target.customer_type = "organization"
+			target.customer_name = source.organization_name
 		else:
 			target.customer_type = "Individual"
 			target.customer_name = source.lead_name
@@ -97,7 +97,7 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 			"doctype": "Customer",
 			"field_map": {
 				"name": "lead_name",
-				"company_name": "customer_name",
+				"organization_name": "customer_name",
 				"contact_no": "phone_1",
 				"fax": "fax_1"
 			}
@@ -115,7 +115,7 @@ def make_opportunity(source_name, target_doc=None):
 				"doctype": "enquiry_from",
 				"name": "lead",
 				"lead_name": "contact_display",
-				"company_name": "customer_name",
+				"organization_name": "customer_name",
 				"email_id": "contact_email",
 				"mobile_no": "contact_mobile"
 			}
@@ -149,7 +149,7 @@ def get_lead_details(lead):
 
 	out.update({
 		"territory": lead.territory,
-		"customer_name": lead.company_name or lead.lead_name,
+		"customer_name": lead.organization_name or lead.lead_name,
 		"contact_display": lead.lead_name,
 		"contact_email": lead.email_id,
 		"contact_mobile": lead.mobile_no,

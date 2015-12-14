@@ -155,7 +155,7 @@ def make_prod_order_test_record(**args):
 	pro_order.qty = args.qty or 10
 	pro_order.wip_warehouse = args.wip_warehouse or "_Test Warehouse - _TC"
 	pro_order.fg_warehouse = args.fg_warehouse or "_Test Warehouse 1 - _TC"
-	pro_order.company = args.company or "_Test Company"
+	pro_order.organization = args.organization or "_Test organization"
 	pro_order.stock_uom = "_Test UOM"
 	if args.planned_start_date:
 		pro_order.planned_start_date = args.planned_start_date

@@ -497,7 +497,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def make_pos_profile(self):
 		pos_profile = frappe.get_doc({
 			"cash_bank_account": "_Test Bank - _TC",
-			"company": "_Test Company",
+			"organization": "_Test organization",
 			"cost_center": "_Test Cost Center - _TC",
 			"currency": "INR",
 			"doctype": "POS Profile",
@@ -916,7 +916,7 @@ def create_sales_invoice(**args):
 	if args.posting_date:
 		si.posting_date = args.posting_date or nowdate()
 
-	si.company = args.company or "_Test Company"
+	si.organization = args.organization or "_Test organization"
 	si.customer = args.customer or "_Test Customer"
 	si.debit_to = args.debit_to or "Debtors - _TC"
 	si.update_stock = args.update_stock

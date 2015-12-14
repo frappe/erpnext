@@ -12,7 +12,7 @@ test_dependencies = ["Leave Allocation", "Leave Block List"]
 
 _test_records = [
  {
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "doctype": "Leave Application",
   "employee": "_T-Employee-0001",
   "fiscal_year": "_Test Fiscal Year 2013",
@@ -22,7 +22,7 @@ _test_records = [
   "to_date": "2013-05-05"
  },
  {
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "doctype": "Leave Application",
   "employee": "_T-Employee-0002",
   "fiscal_year": "_Test Fiscal Year 2013",
@@ -32,7 +32,7 @@ _test_records = [
   "to_date": "2013-05-05"
  },
  {
-  "company": "_Test Company",
+  "organization": "_Test organization",
   "doctype": "Leave Application",
   "employee": "_T-Employee-0001",
   "fiscal_year": "_Test Fiscal Year 2013",

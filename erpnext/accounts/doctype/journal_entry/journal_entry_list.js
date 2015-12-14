@@ -1,5 +1,5 @@
 frappe.listview_settings['Journal Entry'] = {
-	add_fields: ["voucher_type", "posting_date", "total_debit", "company", "user_remark"],
+	add_fields: ["voucher_type", "posting_date", "total_debit", "organization", "user_remark"],
 	get_indicator: function(doc) {
 		if(doc.docstatus==0) {
 			return [__("Draft", "red", "docstatus,=,0")]

@@ -34,7 +34,7 @@ def get_data(filters, leave_types):
 	allocation_records_based_on_to_date = get_leave_allocation_records(filters.to_date)
 
 	active_employees = frappe.get_all("Employee", 
-		filters = { "status": "Active", "company": filters.company}, 
+		filters = { "status": "Active", "organization": filters.organization}, 
 		fields = ["name", "employee_name", "department"])
 	
 	data = []

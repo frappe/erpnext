@@ -23,7 +23,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 							docstatus: 1,
 							status: ["!=", "Stopped"],
 							per_ordered: ["<", 99.99],
-							company: cur_frm.doc.company
+							organization: cur_frm.doc.organization
 						}
 					})
 				}, "icon-download", "btn-default");

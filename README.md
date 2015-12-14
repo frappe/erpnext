@@ -52,7 +52,7 @@ Frappe Technologies Pvt. Ltd. (Frappe) owns and oversees the trademarks for the 
 
 ### Frappe Trademark Usage Policy
 
-Permission from Frappe is required to use the ERPNext name or logo as part of any project, product, service, domain or company name.
+Permission from Frappe is required to use the ERPNext name or logo as part of any project, product, service, domain or organization name.
 
 We will grant permission to use the ERPNext name and logo for projects that meet the following criteria:
 
@@ -63,9 +63,9 @@ Your project neither promotes nor is associated with entities that currently fai
 
 Use of the ERPNext name and logo is additionally allowed in the following situations:
 
-All other ERPNext-related businesses or projects can use the ERPNext name and logo to refer to and explain their services, but they cannot use them as part of a product, project, service, domain, or company name and they cannot use them in any way that suggests an affiliation with or endorsement by the ERPNext or WebNotes or the ERPNext open source project. For example, a consulting company can describe its business as “123 Web Services, offering ERPNext consulting for small businesses,” but cannot call its business “The ERPNext Consulting Company.”
+All other ERPNext-related businesses or projects can use the ERPNext name and logo to refer to and explain their services, but they cannot use them as part of a product, project, service, domain, or organization name and they cannot use them in any way that suggests an affiliation with or endorsement by the ERPNext or WebNotes or the ERPNext open source project. For example, a consulting organization can describe its business as “123 Web Services, offering ERPNext consulting for small businesses,” but cannot call its business “The ERPNext Consulting organization.”
 
-Similarly, it’s OK to use the ERPNext logo as part of a page that describes your products or services, but it is not OK to use it as part of your company or product logo or branding itself. Under no circumstances is it permitted to use ERPNext as part of a top-level domain name.
+Similarly, it’s OK to use the ERPNext logo as part of a page that describes your products or services, but it is not OK to use it as part of your organization or product logo or branding itself. Under no circumstances is it permitted to use ERPNext as part of a top-level domain name.
 
 We do not allow the use of the trademark in advertising, including AdSense/AdWords.
 

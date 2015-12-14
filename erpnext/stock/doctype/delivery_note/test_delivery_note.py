@@ -414,7 +414,7 @@ def create_delivery_note(**args):
 	if args.posting_time:
 		dn.posting_time = args.posting_time
 
-	dn.company = args.company or "_Test Company"
+	dn.organization = args.organization or "_Test organization"
 	dn.customer = args.customer or "_Test Customer"
 	dn.currency = args.currency or "INR"
 	dn.is_return = args.is_return

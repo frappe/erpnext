@@ -120,7 +120,7 @@ class PaymentReconciliation(Document):
 			self.get_unreconciled_entries()
 
 	def check_mandatory_to_fetch(self):
-		for fieldname in ["company", "party_type", "party", "receivable_payable_account"]:
+		for fieldname in ["organization", "party_type", "party", "receivable_payable_account"]:
 			if not self.get(fieldname):
 				frappe.throw(_("Please select {0} first").format(self.meta.get_label(fieldname)))
 

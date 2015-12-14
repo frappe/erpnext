@@ -65,7 +65,7 @@ you have a standard set of terms. You can do this by going to:
   * Returns Policy.
   * Terms of shipping, if applicable.
   * Ways of addressing disputes, indemnity, liability, etc.
-  * Address and Contact of your Company.
+  * Address and Contact of your organization.
 
 ### Submission
 

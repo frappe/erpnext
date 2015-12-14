@@ -15,7 +15,7 @@ Go to the purchase details section of the Item form, and enter the number on the
 
 > Stock > Item
 
-A manufacturer part number is a series of numbers and /or letters that has been given to a part by the manufacturer. The manufacturer part number belongs to the manufacturer and helps distinguish the part from other manufacturers. If two parts come from different manufacturers, they will have different MPNs. This allows businesses to identify which company made the part.
+A manufacturer part number is a series of numbers and /or letters that has been given to a part by the manufacturer. The manufacturer part number belongs to the manufacturer and helps distinguish the part from other manufacturers. If two parts come from different manufacturers, they will have different MPNs. This allows businesses to identify which organization made the part.
 
 ![Part No]({{docs_base_url}}/assets/old_images/erpnext/faq-manufacturer-part-no.png)
 

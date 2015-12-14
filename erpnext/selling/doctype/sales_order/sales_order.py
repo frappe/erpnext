@@ -123,7 +123,7 @@ class SalesOrder(SellingController):
 		super(SalesOrder, self).validate_with_previous_doc({
 			"Quotation": {
 				"ref_dn_field": "prevdoc_docname",
-				"compare_fields": [["company", "="], ["currency", "="]]
+				"compare_fields": [["organization", "="], ["currency", "="]]
 			}
 		})
 
@@ -172,7 +172,7 @@ class SalesOrder(SellingController):
 
 	def check_credit_limit(self):
 		from erpnext.selling.doctype.customer.customer import check_credit_limit
-		check_credit_limit(self.customer, self.company)
+		check_credit_limit(self.customer, self.organization)
 
 	def check_nextdoc_docstatus(self):
 		# Checks Delivery Note

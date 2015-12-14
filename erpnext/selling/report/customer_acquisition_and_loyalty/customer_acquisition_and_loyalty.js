@@ -4,11 +4,11 @@
 frappe.query_reports["Customer Acquisition and Loyalty"] = {
 	"filters": [
 		{
-			"fieldname":"company",
-			"label": __("Company"),
+			"fieldname":"organization",
+			"label": __("organization"),
 			"fieldtype": "Link",
-			"options": "Company",
-			"default": frappe.defaults.get_user_default("company"),
+			"options": "organization",
+			"default": frappe.defaults.get_user_default("organization"),
 			"reqd": 1
 		},
 		{

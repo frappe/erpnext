@@ -21,7 +21,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 			page: wrapper,
 			parent: $(wrapper).find('.layout-main'),
 			page: wrapper.page,
-			doctypes: ["Company", "Fiscal Year", "Account", "GL Entry", "Cost Center"],
+			doctypes: ["organization", "Fiscal Year", "Account", "GL Entry", "Cost Center"],
 			tree_grid: {
 				show: true,
 				parent_field: "parent_account",
@@ -55,10 +55,10 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 
 	},
 	filters: [
-		{fieldtype: "Select", label: __("Company"), link:"Company", fieldname: "company",
-			default_value: __("Select Company..."),
+		{fieldtype: "Select", label: __("organization"), link:"organization", fieldname: "organization",
+			default_value: __("Select organization..."),
 			filter: function(val, item, opts, me) {
-				if (item.company == val || val == opts.default_value) {
+				if (item.organization == val || val == opts.default_value) {
 					return me.apply_zero_filter(val, item, opts, me);
 				}
 				return false;
@@ -230,7 +230,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 	show_general_ledger: function(account) {
 		frappe.route_options = {
 			account: account,
-			company: this.company,
+			organization: this.organization,
 			from_date: this.from_date,
 			to_date: this.to_date
 		};
