@@ -37,8 +37,8 @@ Eine Gehaltsstruktur kann folgende Komponenten enthalten:
 * **Solidaritätszuschlag**
 * **Steuern**
 * **Boni**: Steuerbare Beträge, die dem Arbeitnehmer aufgrund guter individueller Leistungen gezahlt werden.
-(* **Mietzulage**)
-(* **Aktienoptionen für Mitarbeiter**)
+* **Mietzulage**
+* **Aktienoptionen für Mitarbeiter**
 
 Um eine neue Gehaltsstruktur zu erstellen, gehen Sie zu:
 
