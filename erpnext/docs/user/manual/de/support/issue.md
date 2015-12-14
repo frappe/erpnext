@@ -1,4 +1,4 @@
-10.1 Fall
+## 10.1 Fall
 
 Bei einem Fall handelt es ich um eine eingehende Nachricht vom Kunden, normalerweise per Email oder aus der Kontaktschnittstelle Ihrer Webseite (Um das Supportticket vollständig in Ihre Emails einzubinden, lesen Sie bitte bei "Email-Einstellungen" nach).
 
