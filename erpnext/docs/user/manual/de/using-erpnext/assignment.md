@@ -14,7 +14,9 @@ Die Option "Zuweisen zu" befindet sich in der Fußzeile des Dokuments. Wenn Sie 
 
 ![Zugewiesen zu]({{docs_base_url}}/assets/old_images/erpnext/assigned-to.png)
 
-### Schritt 2: Im Abschnitt "Zuweisen zu" können Sie einen Benutzer auswählen, dem das Dokument zugeordnet werden soll. Sie können ein Dokument gleichzeitig mehreren verschiedenen Menschen zuordnen.
+### Schritt 2: Zu einem Benutzer zuweisen
+
+Im Abschnitt "Zuweisen zu" können Sie einen Benutzer auswählen, dem das Dokument zugeordnet werden soll. Sie können ein Dokument gleichzeitig mehreren verschiedenen Menschen zuordnen.
 
 Bei der Zuordnung können Sie auch einen Kommentar für denjenigen hinterlassen, dem das Dokument zugeordnet wird.
 
