@@ -1,6 +1,6 @@
-11.12.4 Abteilung
+11.12.4 Filiale
 
-Abteilungen Ihres Unternehmens
+Filialen Ihres Unternehmens
 
 <img class="screenshot" alt="Filiale" src="{{docs_base_url}}/assets/img/human-resources/branch.png">
 
