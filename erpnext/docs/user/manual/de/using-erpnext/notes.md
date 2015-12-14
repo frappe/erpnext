@@ -6,7 +6,7 @@ In diesem Bereich können Sie lange Anmerkungen abspeichern. Diese können z. B.
 
 > Werkzeuge > Anmerkung > Neu
 
-### Eimnzelheiten der Anmerkungen
+### Einzelheiten der Anmerkungen
 
 Geben Sie Titel und Inhalt ein.
 
