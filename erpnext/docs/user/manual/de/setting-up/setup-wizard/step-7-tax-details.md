@@ -20,3 +20,7 @@ Das Anliegen der Mehrwertsteuer ist es, für den Staat ähnlich der Körperschaf
 Um im Einstellungsassistenten die Mehrwertsteuer einzustellen, geben Sie einfach den Prozentsatz der vom Staat erhoben wird, ein. Um die Mehrwertsteuer zu einem späteren Zeitpunkt einzustellen, lesen Sie bitte den Abschnitt [Einstellen von Steuern]({{docs_base_url}}/user/manual/en/setting-up/setting-up-taxes.html).
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
