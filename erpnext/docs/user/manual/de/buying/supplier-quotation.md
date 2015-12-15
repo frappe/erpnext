@@ -24,3 +24,7 @@ Wenn Sie mehrere verschiedene Lieferanten, die Ihnen den selben Artikel liefern,
 Für die meisten kleinen Geschäfte sind Lieferantenangebote nicht notwendig. Stellen Sie immer die Kosten der Informationsbeschaffung dem Wert des Auftrags gegenüber. Sie sollten das nur für hochpreisige Artikel tun.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
