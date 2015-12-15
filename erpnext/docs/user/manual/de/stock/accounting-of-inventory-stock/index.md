@@ -35,3 +35,7 @@ Dieser Gesamtprozess wird als Stichtagsinventur bezeichnet.
 Wenn Sie als bereits existierender Benutzer die Stichtagsinventur nutzen aber zur Ständigen Inventur wechseln möchten, müssen Sie der Migrationsanleitung folgen. Für weitere Details lesen Sie [Migration aus der Stichtagsinventur]({{docs_base_url}}/user/manual/en/stock/accounting-of-inventory-stock/migrate-to-perpetual-inventory.html).
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
