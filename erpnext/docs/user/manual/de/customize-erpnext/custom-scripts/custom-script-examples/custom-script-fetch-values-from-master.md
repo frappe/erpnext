@@ -17,3 +17,7 @@ Fügen Sie also im Skript Ausgangsrechnung Kunde Folgendes hinzu:
 Sehen Sie hierzu auch: [Wie man ein benutzerdefiniertes Skript erstellt]({{docs_base_url}}/user/manual/en/customize-erpnext/custom-scripts.html).
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
