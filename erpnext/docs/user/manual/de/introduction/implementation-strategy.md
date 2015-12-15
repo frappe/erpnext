@@ -27,7 +27,7 @@ Wenn Sie sich  mit ERPNext vertraut gemacht haben, beginnen Sie mit dem Eingeben
 * Richten Sie Kundengruppen, Artikelgruppen, Läger und Stücklisten für alle Module ein.
 * Importieren Sie Kunden, Lieferanten, Artikel, Kontakte und Adressen mit Hilfe des Datenimportwerkzeuges.
 * Importieren Sie den Anfangsbestand des Lagers über das Werkzeug zum Lagerabgleich.
-* Erstellen Sie Eröffnungsbuchungen über Journalbuchungen und geben Sie offene Ausgangs- und Eingangsrechnungen ein.
+* Erstellen Sie Eröffnungsbuchungen über Journalbuchungen/Buchungssätze und geben Sie offene Ausgangs- und Eingangsrechnungen ein.
 * Wenn Sie Hilfe benötigen, [können Sie sich Supportdienstleistungen kaufen](https://erpnext.com/pricing), oder [im Benutzerforum nachlesen](https://discuss.erpnext.com).
 
 {next}
