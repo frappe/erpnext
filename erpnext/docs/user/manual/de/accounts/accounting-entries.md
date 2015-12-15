@@ -31,3 +31,7 @@ Im Laufe des Monats kauft die Firma weiteres Rohmaterial für die Geschäftstät
 Erklärung: Die Nettoumsätze und Aufwände der Firme belaufen sich auf 40.000 bzw. 20.000 Euro. Die Firma hat also einen Gewinn von 20.000 Euro erwirtschaftet. Bei der Verbuchung des Gewinns wird dieser auf dem Konto GuV im Soll gebucht und die Gegenbuchung auf dem Konto "Eigenkapital" im Haben. Der Saldo des Kassenkontos der Firma beträgt 44.000 Euro und es ist Rohmaterial im Wert von 1.000 Euro übrig.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
