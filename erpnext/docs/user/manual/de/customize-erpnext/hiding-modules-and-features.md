@@ -23,3 +23,7 @@ Um Module (Symbole) auf der Homepage zu verbergen, gehen Sie zu:
 > Anmerkung: Module werden automatisch für Benutzer verborgen, die keine Berechtigungen für Dokumente dieses Moduls haben. Beispiel: Wenn ein Benutzer keine Berechtigungen für Lieferantenauftrag, Materialanfrage und Lieferant hat, dann wird das Modul "Einkauf" automatisch verborgen.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
