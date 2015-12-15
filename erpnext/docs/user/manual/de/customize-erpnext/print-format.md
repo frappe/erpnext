@@ -13,23 +13,23 @@ Um Ihre eigenen Versionen zu erstellen, öffnen Sie eine bereits vorhandene Vorl
 
 > Einstellungen > Druck > Druckformate
 
-
+![Druckformat]({{docs_base_url}}/assets/old_images/erpnext/customize/print-format.png)
 
 Wählen Sie den Typ des Druckformats, welches Sie bearbeiten wollen, und klicken Sie auf die Schaltfläche "Kopieren" in der rechten Spalte. Es öffnet sich ein neues Druckformat mit der Einstellung NEIN für "für "Ist Standard" und Sie kännen das Druckformat bearbeiten.
 
 Ein Druckformat zu bearbeiten ist eine langwierige Angelegenheit und Sie müssen etwas Grundwissen über HTML, CSS und Python mitbringen, um dies verstehen zu können. Wenn Sie Hilfe benötigen, erstellen Sie bitte im Forum eine Anfrage.
 
-Printformate werden auf der Serverseite über die Programmiersprache Jinja Templating erstellt. Alle Formulare haben Zugriff auf doc object, das Informationen über das Dokument enthält, welches formatiert wird. Sie können über das Frappe-Modul auch auf oft verwendete Hilfswerkzeuge zugreifen.
+Printformate werden auf der Serverseite über die [Programmiersprache Jinja Templating](http://jinja.pocoo.org/docs/templates/) erstellt. Alle Formulare haben Zugriff auf doc object, das Informationen über das Dokument enthält, welches formatiert wird. Sie können über das Frappe-Modul auch auf oft verwendete Hilfswerkzeuge zugreifen.
 
-Zum Bearbeiten des Erscheinungsbildes bietet sich das Bootstrap CSS Framework an und Sie können die volle Bandbreite dieses Werkzeuges nutzen.
+Zum Bearbeiten des Erscheinungsbildes bietet sich das [Bootstrap CSS Framework](http://getbootstrap.com/)  an und Sie können die volle Bandbreite dieses Werkzeuges nutzen.
 
 > Anmerkung: Vorgedrucktes Briefpapier zu verwenden ist normalerweise keine gute Idee, weil Ihre Ausdrucke unfertig (inkonsistent) aussehen, wenn Sie per E-mail verschickt werden.
 
 ### Referenzen:
 
-1\. Programmiersprache Jinja Templating: Referenz
+1\. [Programmiersprache Jinja Templating: Referenz](http://jinja.pocoo.org/docs/templates/)
 
-2\. Bootstrap CSS Framework
+2\. [Bootstrap CSS Framework](http://getbootstrap.com/)
 
 ### Druckeinstellungen
 
@@ -37,7 +37,7 @@ Um Ihre Druck- und PDF-Einstellungen zu bearbeiten/zu aktualisieren, gehen Sie z
 
 > Einstellungen > Druck und Branding > Druckeinstellungen
 
-
+![Druckformat]({{docs_base_url}}/assets/old_images/erpnext/customize/print-settings.png)
 
 ### Beispiel:
 
@@ -83,9 +83,9 @@ Um Ihre Druck- und PDF-Einstellungen zu bearbeiten/zu aktualisieren, gehen Sie z
 
 ### Anmerkungen
 
-1\. Um nach Datum und Währung formatiert Werte zu erhalten, verwenden Sie: doc.get_formatted("fieldname")
+1\. Um nach Datum und Währung formatiert Werte zu erhalten, verwenden Sie: `doc.get_formatted("fieldname")`
 
-2\. Für übersetzbare Zeichenfolgen verwenden Sie: This string is translated
+2\. Für übersetzbare Zeichenfolgen verwenden Sie: `{{ _("This string is translated") }}`
 
 ### Fußzeilen
 
