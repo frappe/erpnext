@@ -1,0 +1,15 @@
+## 5.6.3 Vertriebsmitarbeiter
+
+Vertriebsmitarbeiter verhalten sich wie Regionen. Sie können ein Organigramm der Vertriebsmitarbeiter erstellen, in dem individuell das Vertriebsziel des Vertriebsmitarbeiters vermerkt werden kann. Genauso wie in der Region muss das Ziel einer Artikelgruppe zugeordnet werden.
+
+<img class="screenshot" alt="Baumstruktur der Vertriebsmitarbeiter" src="{{docs_base_url}}/assets/img/crm/sales-person-tree.png">
+
+### Vertriebspersonen in Transaktionen
+
+Sie können einen Vertriebsmitarbeiter wie im Kundenauftrag, dem Lieferschein und der Ausgangsrechnung in Kunden- und Verkaufstransaktionen nutzen. Klicken Sie hier, um mehr darüber zu erfahren, wie Vertriebsmitarbeiter in den Transaktionen eines Verkaufszyklus verwendet werden.
+
+{next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>

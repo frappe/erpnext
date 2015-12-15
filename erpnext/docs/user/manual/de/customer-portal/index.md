@@ -1,0 +1,13 @@
+## 12. Kundenportal
+
+Das Kundenportal wurde so entworfen, dass Kunden einen einfachen Zugriff auf für sie relevanten Informationen haben.
+
+Dieses Portal erlaubt es Kunden sich anzumelden und zutreffende Informationen herauszufinden, die sie betreffen. Sie können z. B. die Historie der Kommunikation durch E-Mails nachverfolgen oder den Status Ihrer Bestellung herausfinden.
+
+### Themen
+
+{index}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>

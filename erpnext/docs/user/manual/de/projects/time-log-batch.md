@@ -1,0 +1,29 @@
+## 9.4 Zeitprotokollstapel
+
+Sie können Zeitprotokolle abrechnen, indem Sie sie zusammenbündeln. Das gibt Ihnen die Flexibiliät die Abrechnung an den Kunden so zu handhaben wie sie es wollen. Um einen neuen Zeitprotokollstapel zu erstellen, gehen Sie zu:
+
+>Projekte > Dokumente > Zeitprotokollstapel > Neuer Zeitprotokollstapel
+
+ODER
+
+Öffnen Sie einfach Ihre Übersicht der Zeitprotokolle und kreuzen Sie die Artikel an, die Sie dem Zeitprotokollstapel hinzufügen möchten. Klicken Sie dann auf die Schaltfläche "Zeitprotokollstapel erstellen" und diese Zeitprotokolle werden ausgewählt.
+
+<img class="screenshot" alt="Zeitprotokoll - Kalender aufziehen" src="{{docs_base_url}}/assets/img/project/time_log_batch.gif">
+
+### Ausgangsrechnungen erstellen
+
+* Sobald Sie einen Zeitprotokollstapel übertragen haben, sollte die Schaltfläche "Rechnung erstellen" erscheinen.
+
+<img class="screenshot" alt="Zeitprotokoll - Kalender aufziehen" src="{{docs_base_url}}/assets/img/project/time_log_batch_make_invoice.png">
+
+* Klicken Sie auf diese Schaltfläche und erstellen Sie eine Ausgangsrechnung zu einem Zeitprotokollstapel.
+
+<img class="screenshot" alt="Zeitprotokoll - Kalender aufziehen" src="{{docs_base_url}}/assets/img/project/time_log_batch_sales_invoice.png">
+
+* Wenn Sie die Ausgangsrechnung "übertragen", wird die Nummer der Ausgangsrechnung in den Zeitprotokollen und im Zeitprotokollstapel aktualisiert und ihr Status wird auf "abgerechnet" geändert.
+
+{next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
