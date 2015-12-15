@@ -11,3 +11,7 @@ Wählen Sie die Liste der Empfänger aus, an die Sie die E-Mail senden wollen. T
 <img class="screenshot" alt="Newsletter - Test" src="{{docs_base_url}}/assets/img/crm/newsletter-test.png">
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
