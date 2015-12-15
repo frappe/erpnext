@@ -1,4 +1,5 @@
-## 5.2 Kunde
+# Kunde
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Ein Kunde, manchmal auch als Auftraggeber, Käufer oder Besteller bezeichnet, ist diejenige Person, die von einem Verkäufer für eine monetäre Gegenleistung Waren, Dienstleistungen, Produkte oder Ideen bekommt. Ein Kunde kann von einem Hersteller oder Lieferanten auch aufgrund einer anderen (nicht monetären) Vergütung waren oder Dienstleistungen erhalten.
 

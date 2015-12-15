@@ -1,4 +1,5 @@
-## 3.11 Budgetierung
+# Budgetierung
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 ERPNext hilft Ihnen dabei Budgets in Ihren Kostenstellen zu erstellen und zu verwalten. Das ist zum Beispiel dann nützlich, wenn Sie Online-Umsätze tätigen. Sie haben Werbebudgets für Suchmaschinen und Sie möchten dass ERPNext Sie davon abhält oder warnt mehr auszugeben, als im Budget vorgesehen ist.
 

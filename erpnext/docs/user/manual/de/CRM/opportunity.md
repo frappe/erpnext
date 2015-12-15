@@ -1,4 +1,5 @@
-## 5.3 Opportunity
+# Opportunity
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Wenn Sie wissen, dass ein Lead auf der Suche nach neuen Produkten oder Dienstleistungen ist, dann bezeichnet man das als Opportunity.
 

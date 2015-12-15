@@ -1,4 +1,5 @@
-## 11.4 Anwesenheit
+# Anwesenheit
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Ein Anwesenheitsdatensatz der wiedergibt, dass ein Mitarbeiter zu einem bestimmten Termin anwesend war, kann manuell erstellt werden über:
 

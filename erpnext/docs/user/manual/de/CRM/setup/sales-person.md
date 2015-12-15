@@ -1,4 +1,5 @@
-## 5.6.3 Vertriebsmitarbeiter
+# Vertriebsmitarbeiter
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Vertriebsmitarbeiter verhalten sich wie Regionen. Sie können ein Organigramm der Vertriebsmitarbeiter erstellen, in dem individuell das Vertriebsziel des Vertriebsmitarbeiters vermerkt werden kann. Genauso wie in der Region muss das Ziel einer Artikelgruppe zugeordnet werden.
 

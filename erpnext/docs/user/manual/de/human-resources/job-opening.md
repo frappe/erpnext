@@ -1,4 +1,5 @@
-## 11.8 Offene Stellen
+# Offene Stellen
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Sie können einen Datensatz zu den offenen Stellen in Ihrem Unternehmen über den Menüpunkt "Offene Stellen" erstellen.
 

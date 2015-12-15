@@ -1,4 +1,5 @@
-## 2.1.4 Schritt 4: Unternehmensdetails
+# Schritt 4: Unternehmensdetails
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Geben Sie Details zum Unternehmen wie Name, Kürzel und Geschäftsjahr ein.
 

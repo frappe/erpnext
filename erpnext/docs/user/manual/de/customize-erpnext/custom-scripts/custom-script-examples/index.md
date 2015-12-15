@@ -1,4 +1,5 @@
-## 15.3.1 Beispiele für benutzerdefinierte Skripte
+# Beispiele für benutzerdefinierte Skripte
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Wie erstellt man ein benutzerdefiniertes Skript?
 

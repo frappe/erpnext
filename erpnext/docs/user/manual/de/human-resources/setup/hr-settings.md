@@ -1,4 +1,5 @@
-## 11.12.1 Einstellungen zum Modul Personalwesen
+# Einstellungen zum Modul Personalwesen
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Globale Einstellungen zu Dokumenten des Personalwesens
 

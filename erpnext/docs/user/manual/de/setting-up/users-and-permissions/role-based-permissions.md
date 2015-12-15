@@ -1,4 +1,5 @@
-## 2.2.2 Rollenbasierte Berechtigungen
+# Rollenbasierte Berechtigungen
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 ERPNext arbeitet mit einem rollenbasierten Berechtigungssystem. Das heißt, dass Sie Benutzern Rollen zuordnen können und Rollen Berechtigungen erteilen können. Die Struktur der Berechtigungen erlaubt es Ihnen weiterhin verschiedene Berechtigungsregeln für unterschiedliche Felder zu definieren, wobei das **Konzept der Berechtigungsebenen** für Felder verwendet wird. Wenn einem Kunden einmal Rollen zugeordnet worden sind, haben Sie darüber die Möglichkeit, den Zugriff eines Benutzers auf bestimmte Dokumente zu beschränken.
 

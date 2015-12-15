@@ -1,4 +1,5 @@
-## 2.14 Drittpartei-Datensicherungen
+# Drittpartei-Datensicherungen
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Wenn Sie Ihre Daten regelmäßig auf Dropbox sichern möchten, können Sie das direkt über ERPNext tun.
 

@@ -1,4 +1,5 @@
-## 2.2 Benutzer und Berechtigungen
+# Benutzer und Berechtigungen
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 In ERPNext können Sie mehrere verschiedene Benutzer anlegen und ihnen unterschiedliche Rollen zuweisen. Es gibt einige Benutzer, die nur auf den öffentlichen Teil von ERPNext (d. h. die Webseite) zugreifen können. Diese Benutzer werden "Webseiten-Benutzer" genannt.
 

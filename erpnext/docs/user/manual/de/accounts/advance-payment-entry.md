@@ -1,4 +1,5 @@
-## 3.6 Buchung von Vorkasse
+# Buchung von Vorkasse
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Eine Zahlung, die vom Kunden vor dem Versand des Produktes geleistet wird wird als Zahlung im Voraus bezeichnet. Für Bestellungen mit hohem Auftragswert erwarten Lieferanten normalerweise eine Anzahlung.
 

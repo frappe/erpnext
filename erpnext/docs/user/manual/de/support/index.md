@@ -1,4 +1,5 @@
-## 10. Support
+# Support
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Guter Kundensupport und Wartung sind das Herzstück jeden erfolgreichen kleineren Geschäftes. ERPNext stellt Ihnen Werkzeuge zur Verfügung um alle eingehenden Anfragen und Sorgen Ihrer Kunden so zu erfassen, dass Sie schnell reagieren können. Die Datenbank Ihrer eingehenden Anfragen wird Ihnen auch dabei helfen festzustellen, wo die größten Möglichkeiten für Verbesserungen bestehen.
 

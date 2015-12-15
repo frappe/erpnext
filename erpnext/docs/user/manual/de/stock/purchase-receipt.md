@@ -1,4 +1,5 @@
-## 4.4 Kaufbeleg
+# Kaufbeleg
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Kaufbelege werden erstellt, wenn Sie Material von einem Lieferanten annehmen, normalerweise aufgrund einer Einkaufsbestellung.
 

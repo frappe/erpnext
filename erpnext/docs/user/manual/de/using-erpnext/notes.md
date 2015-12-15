@@ -1,4 +1,5 @@
-## 14.4 Anmerkungen
+# Anmerkungen
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 In diesem Bereich können Sie lange Anmerkungen abspeichern. Diese können z. B. eine Liste Ihrer Partner, häufig genutzte Passwörter, Geschäftsbedingungen oder andere Dokumente sein, die gemeinsam genutzt werden müssen.
 

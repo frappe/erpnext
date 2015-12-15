@@ -1,4 +1,5 @@
-## 2.6.5 Adressvorlagen
+# Adressvorlagen
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Jede Region hat Ihre eigene Art und Weise, wie eine Adresse aussieht. Um mehrere verschiedene Adressformate für Ihre Dokumente (wie Angebot, Lieferantenauftrag, etc.) zu verwalten, können Sie landesspezifische **Adressvorlagen** erstellen.
 

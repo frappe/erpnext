@@ -1,4 +1,5 @@
-## 7.4.2 Lieferantentyp
+# Lieferantentyp
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Ein Lieferant kann von einem Vertragspartner oder Unterauftragnehmer, der normalerweise Waren veredelt, unterschieden werden. Ein Lieferant wird auch als Anbieter beszeichnet. Es gibt unterschiedliche Typen von Lieferanten, je nach Art der Waren und Produkte.
 

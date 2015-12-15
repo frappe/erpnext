@@ -1,4 +1,5 @@
-## 4.13.3 Artikelattribute
+# Artikelattribute
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Sie können Attribute und Attributwerte für Ihre Artikelvarianten hier auswählen.
 

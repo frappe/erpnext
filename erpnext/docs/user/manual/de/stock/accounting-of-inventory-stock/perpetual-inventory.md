@@ -1,4 +1,5 @@
-## 4.11.1 Ständige Inventur
+# Ständige Inventur
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 In der Ständigen Inventur erstellt das System Buchungen für jede Lagertransaktion, so dass das Lager und der Kontostand immer synchron bleiben. Der Kontostand wird für jedes Lager mit der zutreffenden  Kontobezeichnung verbucht. Wenn das Lager gespeichert wird, erstellt das System automatisch eine Kontobezeichnung mit dem selben Namen wie das Lager. Da für jedes Lager ein Kontostand verwaltet wird, sollten Sie Lager auf Basis der in ihnen eingelagerten Artikel (Umlaufvermögen/Anlagevermögen) erstellen.
 

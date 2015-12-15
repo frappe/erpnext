@@ -1,4 +1,5 @@
-## 5.6.2 Kundengruppe
+# Kundengruppe
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Kundengruppen versetzen Sie in die Lage Ihre Kunden zu organisieren. Sie können auch Rabatte auf der Basis von Kundengruppen berechnen. Außerdem können Sie Trendanalysen für jede Gruppe erstellen. Typischerweise werden Kunden nach Marktsegmenten gruppiert (das basiert normalerweise auf Ihrer Domäne).
 

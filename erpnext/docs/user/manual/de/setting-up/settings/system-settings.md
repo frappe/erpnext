@@ -1,4 +1,5 @@
-## 2.3.1 Systemeinstellungen
+# Systemeinstellungen
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Sie können ERPNext so lokalisieren, dass bestimmte Zeitzonen-, Datums-, Zahlen- und Währungsformate benutzt werden, und außerdem den globalen Auslauf von Sitzungen über die Systemeinstellungen festlegen.
 

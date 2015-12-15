@@ -1,4 +1,5 @@
-## 3.16.1 Kontenabgleich
+# Kontenabgleich
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 ### Kontoauszug
 

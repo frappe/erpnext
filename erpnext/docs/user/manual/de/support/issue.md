@@ -1,4 +1,5 @@
-## 10.1 Fall
+# Fall
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Bei einem Fall handelt es ich um eine eingehende Nachricht vom Kunden, normalerweise per Email oder aus der Kontaktschnittstelle Ihrer Webseite (Um das Supportticket vollständig in Ihre Emails einzubinden, lesen Sie bitte bei "Email-Einstellungen" nach).
 

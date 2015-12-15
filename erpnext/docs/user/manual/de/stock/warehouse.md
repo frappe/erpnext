@@ -1,4 +1,5 @@
-## 4.7 Lager
+# Lager
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Ein Lager ist ein geschäftlich genutztes Gebäude zum Lagern von Waren. Läger werden von Herstellern, Importeuren, Exporteuren, Großhändlern, Transporteuren, vom Zoll, usw. genutzt. Es handelt sich normalerweise um große, flache Gebäude in Industriegebieten von Städten und Ortschaften. Meistens verfügen sie über Ladestationen um Waren auf LKWs zu verladen und sie aus LKWs zu entladen.
 

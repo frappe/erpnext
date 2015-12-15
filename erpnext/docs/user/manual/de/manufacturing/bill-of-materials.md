@@ -1,4 +1,5 @@
-## 8.2 Stückliste
+# Stückliste
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Das Herz des Fertigungssystems bildet die Stückliste. Die **Stückliste** ist eine Auflistung aller Materialien (egal ob gekauft oder selbst hergestellt) und Arbeitsgänge die in das fertige Erzeugnis oder Untererzeugnis einfliessen. In ERPNext kann eine Komponente ihre eigene Stückliste haben, und formt somit eine mehrstufige Baumstruktur.
 

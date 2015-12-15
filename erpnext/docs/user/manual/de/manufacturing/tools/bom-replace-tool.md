@@ -1,4 +1,5 @@
-## 8.7.2 Stücklisten-Austauschwerkzeug
+# Stücklisten-Austauschwerkzeug
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Das Stücklisten-Austauschwerkzeug ist ein Werkzeug zum Austauschen von Stücklisten bei Unterartikeln, die bereits in der Stückliste eines Fertigerzeugnisses aktualisiert wurden.
 

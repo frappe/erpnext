@@ -1,4 +1,5 @@
-## 3.13 Artikelbezogene Steuer
+# Artikelbezogene Steuer
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Wenn Sie über die Einstellung "Steuern und andere Abgaben" Steuern auswählen, werden diese in Transaktionen auf alle Artikel angewendet. Wenn jedoch unterschiedliche Steuern auf bestimmte Artikel in Transaktionen angewendet werden sollen, sollten Sie die Stammdaten für Ihre Artikel und Steuern wie folgt einstellen.
 

@@ -1,4 +1,5 @@
-## 8.6 Fremdvergabe
+# Fremdvergabe
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Fremdvergabe ist eine Art Arbeitsvertrag bei dem bestimmte Arbeiten an andere Unternehmen ausgelagert werden. Das ermöglicht es mehr als eine Phase eines Projektes zum selben Zeitpunkt abzuarbeiten, was oftmals zu einer schnelleren Fertigstellung führt. Fremdvergabe von Arbeiten wird in vielen Industriebranchen praktiziert. So vergeben z. B. Hersteller, die eine Vielzahl von Produkten aus anspruchsvollen Bestandteilen erstellen, Unteraufträge zur Herstellung von Komponenten und verarbeiten diese dann in Ihren Fabrikationsanlagen.
 

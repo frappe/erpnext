@@ -1,4 +1,5 @@
-## 3.17.4 Steuerregeln
+# Steuerregeln
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Sie können festlegen, welche [Steuervorlage]({{docs_base_url}}/user/manual/en/setting-up/setting-up-taxes.html) auf eine Verkaufs-/Einkaufstransaktion angewendet wird, wenn Sie die Funktion Steuerregel verwenden.
 

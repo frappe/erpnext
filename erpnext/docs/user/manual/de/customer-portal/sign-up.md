@@ -1,4 +1,5 @@
-## 12.3 Registrieren
+# Registrieren
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Kunden müssen sich über die Webseite als Kunden registrieren.
 

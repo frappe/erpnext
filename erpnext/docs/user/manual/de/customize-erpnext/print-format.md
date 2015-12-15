@@ -1,4 +1,5 @@
-## 15.7 Druckformat
+# Druckformat
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Druckformate sind die Erscheinungsbilder der Ausdrucke, wenn Sie eine E-Mail oder eine Transaktion wie eine Ausgangsrechnung drucken. Es gibt zwei Arten von Druckformaten:
 

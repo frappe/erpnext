@@ -1,4 +1,5 @@
-## 5.1 Lead / Interessent
+# Lead / Interessent
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Um den Kunden durch die Tür zu bekommen, könnten Sie alle oder zumindest einige der folgenden Dinge tun:
 

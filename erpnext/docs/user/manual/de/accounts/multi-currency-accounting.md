@@ -1,4 +1,5 @@
-## 3.15 Buchungen in unterschiedlichen Währungen
+# Buchungen in unterschiedlichen Währungen
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 In ERPNext können Sie Buchungen in unterschiedlichen Währungen erstellen. Beispiel: Wenn Sie ein Bankkonto in einer Fremdwährung haben, dann können Sie Transaktionen in dieser Währung durchführen und das System zeigt Ihnen den Kontostand der Bank nur in dieser speziellen Währung an.
 

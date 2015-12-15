@@ -1,4 +1,5 @@
-## 15.5 Dokumentenbezeichnung
+# Dokumentenbezeichnung
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Sie können die Bezeichnung von Dokumenten basierend auf den Einstellungen anpassen, so dass Sie für die Listenansichten eine sinnvolle Bedeutung erhalten.
 

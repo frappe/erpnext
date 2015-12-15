@@ -1,4 +1,5 @@
-## 2.3.4 Allgemeine Einstellungen
+# Allgemeine Einstellungen
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Sie können Standardwerte für Ihre Dokumente über die globalen Voreinstellungen setzen
 

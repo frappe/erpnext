@@ -1,4 +1,5 @@
-## 1.5 Strategie zur Einführung
+# Strategie zur Einführung
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Bevor Sie damit beginnen, Ihre Arbeiten über ERPNext abzuwickeln, müssen Sie sich zuerst mit dem System und den benutzten Begriffen vertraut machen. Aus diesem Grund empfehlen wir Ihnen, die Einführung in zwei Phasen durchzuführen:
 

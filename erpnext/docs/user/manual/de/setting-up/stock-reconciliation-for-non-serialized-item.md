@@ -1,4 +1,5 @@
-## 2.12 Bestandsabgleich bei nichtserialisierten Artikeln
+# Bestandsabgleich bei nichtserialisierten Artikeln
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Bestandsabgleich ist der Prozess über den der Lagerbestand gezählt und bewertet wird. Er wird normalerweise zum Ende des Geschäftsjahres durchgeführt um den Gesamtwert des Lagers für die Abschlussbuchung zu ermitteln. In diesem Prozess werden die tatsächlichen Lagerbestände geprüft und im System aufgezeichnet. Der tatsächliche Lagerbestand und der Lagerbestand im System sollten übereinstimmen oder zumindest ähnlich sein. Wenn sie das nicht sind, können Sie das Werkzeug zum Bestandsabgleich verwenden, um den Lagerbestand und den Wert mit den tatsächlichen Begebenheiten in Einklang zu bringen.
 

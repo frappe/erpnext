@@ -1,4 +1,5 @@
-## 15.1 Benutzerdefiniertes Feld
+# Benutzerdefiniertes Feld
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Die Funktion "Benutzerdefiniertes Feld" erlaubt es Ihnen Felder in bestehenden Vorlagen und Transaktionen nach Ihren Wünschen zu gestalten. Wenn Sie ein benutzerdefiniertes Feld einfügen, können Sie seine Eigenschaften angeben:
 

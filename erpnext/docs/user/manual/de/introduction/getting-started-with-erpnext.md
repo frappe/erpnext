@@ -1,4 +1,5 @@
-## 1.3 Einführung in ERPNext
+# Einführung in ERPNext
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Es gibt viele Möglichkeiten für den Einstieg in ERPNext.
 

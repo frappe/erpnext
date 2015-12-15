@@ -1,4 +1,5 @@
 
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 ## 4.6.2 Artikelvarianten
 
 Eine Artikelvariante ist eine Version eines Artikels, die sich zum Beispiel durch eine andere Größe oder eine andere Farbe vom eigentlichen Artikel unterscheidet. Ohne Varianten müssten Sie die kleinen, mittleren und großen Versionen eines T-Shirts jeweils als eigenständigen Artikel anlegen. Artikelvarianten versetzen Sie in die Lage, kleine, mittlere und große Versionen des T-Shirts als Abwandlungen des selben Artikels zu verwalten.

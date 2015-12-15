@@ -1,4 +1,5 @@
-## 2.6.2 Hilfsprogramm zum Erstellen von Druckformaten
+# Hilfsprogramm zum Erstellen von Druckformaten
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Das Hilfsprogramm zum Erstellen von Druckformaten hilft Ihnen dabei, schnell ein einfaches benutzerdefiniertes Druckformat zu erstellen, indem Sie per Drag & Drop Daten- und Textfelder (Standardtext oder HTML) anordnen.
 

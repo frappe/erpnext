@@ -1,4 +1,5 @@
-## 8.3 Fertigungsauftrag
+# Fertigungsauftrag
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Der Fertigungsauftrag (auch als Arbeitsauftrag bezeichnet) ist ein Dokument welches vom Produktionsplaner als Startsignal in die Fertigung gegeben wird, um eine bestimmte Anzahl eines bestimmten Artikels zu produzieren. Der Fertigungsauftrag unterstützt Sie auch dabei den Materialbedarf (Lagerbuchung) für diesen Artikel aus der **Stückliste** zu generieren.
 

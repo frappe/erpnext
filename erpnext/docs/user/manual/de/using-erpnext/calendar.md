@@ -1,4 +1,5 @@
-## 14.5 Kalender
+# Kalender
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Der Kalender ist ein Werkzeug, mit dem Sie Ereignisse erstellen und teilen können und auch automatisch aus dem System erstellte Ereignisse sehen können.
 

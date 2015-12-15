@@ -1,4 +1,5 @@
-## 2.3.2 Module anzeigen / ausblenden
+# Module anzeigen / ausblenden
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Sie können global bestimmte Desktop-Module an- und ausschalten über:
 

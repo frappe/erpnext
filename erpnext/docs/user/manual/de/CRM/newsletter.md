@@ -1,4 +1,5 @@
-## 5.5 Newsletter
+# Newsletter
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Ein Newsletter ist ein Bericht in Kurzform, der über die letzten Aktivitäten einer Organisation informiert. Er wird normalerweise an die Mitglieder der Organisation versandt, sowie an potenzielle Kunden und Leads.
 

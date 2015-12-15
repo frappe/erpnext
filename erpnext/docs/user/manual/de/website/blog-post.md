@@ -1,4 +1,5 @@
-## 13.2 Blogeinträge
+# Blogeinträge
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Blogs sind eine großartige Möglichkeit die eigenen Gedanken zu Geschäftsaktivitäten mit anderen zu teilen und Ihre Kunden und Leser auf einem aktuellen Stand zu Ihren Vorhaben zu halten.
 

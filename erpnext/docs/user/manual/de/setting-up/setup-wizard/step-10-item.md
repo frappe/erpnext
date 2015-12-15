@@ -1,4 +1,5 @@
-## 2.1.10 Schritt 10: Artikelbezeichnungen
+# Schritt 10: Artikelbezeichnungen
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 In diesem letzten Schritt geben Sie bitte die Bezeichnungen der Artikel ein, die Sie kaufen oder verkaufen.
 

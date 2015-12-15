@@ -1,4 +1,5 @@
-## 2.7 Steuern einrichten
+# Steuern einrichten
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Eine der hauptsächlichen Antriebskräfte für die zwingende Verwendung des Buchhaltungswerkzeuges ist die Kalkulation von Steuern. Egal ob Sie Geld verdienen oder nicht, Ihre Regierung tut es (und hilft damit Ihrem Land sicher und wohlhabend zu sein). Und wenn Sie Ihre Steuern nicht richtig berechnen, dann ist sie sehr unglücklich. Gut, lassen wir die Philosophie mal beiseite. ERPNext ermöglicht es Ihnen konfigurierbare Steuervorlagen zu erstellen, die Sie bei Ihren Ver- und Einkäufen verwenden können.
 

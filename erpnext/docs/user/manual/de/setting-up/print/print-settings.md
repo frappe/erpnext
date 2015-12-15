@@ -1,4 +1,5 @@
-## 2.6.1 Druckeinstellungen
+# Druckeinstellungen
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Über die Druckeinstellungen können Sie Ihre Standarddruckeinstellungen wie Papiergröße, Standardgröße für Text, Ausgabe als PDF oder als HTLM, etc. einstellen.
 

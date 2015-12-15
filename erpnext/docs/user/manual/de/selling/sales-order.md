@@ -1,4 +1,5 @@
-## 6.2 Kundenauftrag
+# Kundenauftrag
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Der Kundenauftrag bestätigt Ihren Verkauf und stößt Einkauf (**Materialanfrage**), Versand (**Lieferschein**), Abrechnung (**Ausgangsrechnung**) und Fertigung (**Produktionsplan**) an.
 

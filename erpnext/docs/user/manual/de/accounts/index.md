@@ -1,4 +1,5 @@
-## 3. Rechnungswesen
+# Rechnungswesen
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Am Ende eines jeden Vertriebs- und Beschaffungsvorgangs stehen die Abrechnung und die Bezahlung. Möglicherweise haben Sie einen Buchhalter in Ihrem Team, oder Sie machen die Buchhaltung selbst, oder sie haben die Buchhaltung fremdvergeben. In allen diesen Fällen ist die Finanzbuchhaltung der Kern jeden Systems wie einem ERP.
 

@@ -1,4 +1,5 @@
-## 2.1.5 Schritt 5: Briefkopf und Logo
+# Schritt 5: Briefkopf und Logo
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Fügen Sie einen Firmenbriefkopf und ein Firmenlogo hinzu.
 

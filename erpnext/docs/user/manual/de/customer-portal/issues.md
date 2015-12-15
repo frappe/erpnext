@@ -1,4 +1,5 @@
-## 12.4 Fälle
+# Fälle
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Kunden können über das Kundenportal sehr einfach Fälle eröffnen. Eine einfaches und intuitive Schnittstelle ermöglichst es dem Kunden ihre Probleme und Anliegen zu schildern. Sie können weiterhin den kompletten Kommunikationsvorgang nachverfolgen.
 

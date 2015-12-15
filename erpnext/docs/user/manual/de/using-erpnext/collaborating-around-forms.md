@@ -1,4 +1,5 @@
-## 14.2 Zusammenarbeit über Formulare
+# Zusammenarbeit über Formulare
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 ### Zugeordnet zu
 

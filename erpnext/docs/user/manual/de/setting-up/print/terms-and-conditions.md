@@ -1,4 +1,5 @@
-## 2.6.6 Allgemeine Geschäftsbedingungen
+# Allgemeine Geschäftsbedingungen
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Die Allgemeinen Geschäftsbedingungen sind sowohl allgemeingültige als auch spezielle Vereinbarungen, Bestimmungen, Anforderungen, Regeln, Spezifikationen und Standards, denen eine Firma folgt. Diese Spezifikationen sind ein Bestandteil der Vereinbarungen und Verträge, die die Firma mit Kunden, Lieferanten und Partnern abschliesst.
 

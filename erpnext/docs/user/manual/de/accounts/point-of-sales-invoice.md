@@ -1,4 +1,5 @@
-## 3.14 POS-Rechnung
+# POS-Rechnung
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Der Point of Sale (POS) ist der Ort, wo ein Endkundengeschäft durchgeführt wird. Es handelt sich um den Ort, an dem ein Kunde im Austausch für Waren oder Dienstleistungen eine Zahlung an den Händler leistet. Für Endkundengeschäfte laufen die Lieferung von Waren, die Anbahnung des Verkaufs und die Zahlung alle am selben Ort ab, der im allgemeinen als "Point of Sale" bezeichnet wird.
 

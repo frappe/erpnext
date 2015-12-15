@@ -1,4 +1,5 @@
-## 15.3.1.8 ID der Ausgangsrechnung auf Grundlage der ID des Kundenauftrags
+# ID der Ausgangsrechnung auf Grundlage der ID des Kundenauftrags
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Das unten abgebildete Skript erlaubt es Ihnen die Benamungsserien der Ausgangsrechnungen und der zugehörigen Eingangsrechnungen gleich zu schalten. Die Ausgangsrechnung verwendet das Präfix M- aber die Nummer kopiert den Namen (die Nummer) des Kundenauftrags.
 

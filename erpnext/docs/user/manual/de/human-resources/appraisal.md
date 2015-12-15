@@ -1,4 +1,5 @@
-## 11.6 Mitarbeiterbeurteilung
+# Mitarbeiterbeurteilung
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 In ERPNext können Sie Mitarbeiterbeurteilungen verwalten, in dem Sie für jede Rolle eine Bewertungsvorlage mit Paramtern zur Beurteilung der Leistungsfähigkeit und deren Gewichtung erstellen.
 

@@ -1,4 +1,5 @@
-## 7.1 Lieferant
+# Lieferant
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Lieferanten sind Firmen oder Einzelpersonen die Sie mit Produkten oder Dienstleistungen versorgen. Sie werden in ERPNext auf die selbe Art und Weise behandelt wie Kunden.
 

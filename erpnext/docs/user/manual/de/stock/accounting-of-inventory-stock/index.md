@@ -1,4 +1,5 @@
-## 4.11 Bewertung des Lagerbestandes
+# Bewertung des Lagerbestandes
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Der Wert des verfügbaren Lagerbestandes wird im Kontenplan des Unternehmens als Vermögenswert behandelt. Abhängig von der Art der Artikel wird hier zwischen Anlagevermögen und Umlaufvermögen unterschieden. Um eine Bilanz vorzubereiten, sollten Sie die Buchungen für diese Vermögen erstellen. Es gibt generell zwei unterschiedliche Methoden den Lagerbestand zu bewerten:
 

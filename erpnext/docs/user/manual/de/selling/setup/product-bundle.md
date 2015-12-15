@@ -1,4 +1,5 @@
-## 6.3.4 Produkt-Bundle
+# Produkt-Bundle
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Der Begriff "Produkt-Bundle" ist gleichbedeutend mit der Stückliste des Vertriebs. Es handelt sich dabei um eine Vorlage, in der Sie Artikel zusammenstellen können, die zusammengepackt werden und als ein Artikel verkauft werden. Beispiel: Wenn ein Laptop geliefert wird, müssen Sie sicher stellen, dass das Ladekabel, die Maus und die Tragetasche mitgeliefert werden und der Lagerbestand dieser Artikel dementsprechend bearbeitet wird. Um dieses Szenario abzubilden, können Sie für den Hauptartikel, z. B. den Laptop, die Option "Produkt-Bundle"einstellen, und die zu liefernden Artikel wie Laptop + Ladekabel + anderes Zubehör als Unterartikel auflisten.
 

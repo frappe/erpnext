@@ -1,4 +1,5 @@
-## 3.16.4 Zahlungswerkzeug
+# Zahlungswerkzeug
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 ### Zahlungswerkzeug
 

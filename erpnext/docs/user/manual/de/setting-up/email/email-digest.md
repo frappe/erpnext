@@ -1,4 +1,5 @@
-## 2.5.3 Täglicher E-Mail-Bericht
+# Täglicher E-Mail-Bericht
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 E-Mail-Berichte erlauben es Ihnen regelmäßig Aktualisierungen zu Ihren Verkäufen, Ausgaben oder anderen wichtigen Zahlen direkt in Ihren Posteingang zu erhalten.
 

@@ -1,4 +1,5 @@
-## 3.17.2 Kostenstellenplan
+# Kostenstellenplan
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Ihr Kontenplan ist hauptsächlich darauf ausgelegt, Berichte für den Staat und Steuerbehörden zu erstellen. Die meisten Unternehmen haben viele verschiedene Aktivitäten wie unterschiedliche Produktlinien, Marktsegmente, Geschäftsfelder, usw., die sich einen gemeinsamen Überbau teilen. Sie sollten idealerweise ihre eigene Struktur haben, zu berichten, ob sie gewinnbringend arbeiten oder nicht. Aus diesem Grund, gibt es eine alternative Struktur, die Kostenstellenplan genannt wird.
 

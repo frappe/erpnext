@@ -1,4 +1,5 @@
-## 10.4 Wartungsplan
+# Wartungsplan
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Alle Maschinen benötigen regalmäßige Wartung, im besonderen diejenigen, die viele bewegliche Teile beinhalten. Wenn Sie also mit der Wartung dieser Artikel Geschäfte machen oder selbst welche besitzen, stellt der Wartungsplan ein nützliches Hilfsmittel dar, um die entsprechenden Wartungsarbeiten zu planen.
 

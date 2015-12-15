@@ -1,4 +1,5 @@
-## 11.12.5 Bezeichnung
+# Bezeichnung
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Stellenbezeichnungen in Ihrem Unternehmen
 

@@ -1,4 +1,5 @@
-## 3.8 Eröffnungsbuchung
+# Eröffnungsbuchung
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Wenn Sie eine neue Firma erstellen, dann können Sie das ERPNext-Modul Rechnungswesen starten, indem Sie in den Kontenplan gehen.
 

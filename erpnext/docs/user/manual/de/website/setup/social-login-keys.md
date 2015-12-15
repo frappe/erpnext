@@ -1,4 +1,5 @@
-## 13.5.2 Zugang zu sozialen Netzwerken
+# Zugang zu sozialen Netzwerken
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Soziale Netwerke versetzen Benutzer in die Lage sich in ERPNext über Google, Facebook oder GitHub einzuloggen.
 

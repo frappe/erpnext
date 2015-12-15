@@ -1,4 +1,5 @@
-## 4.1 Materialanfrage
+# Materialanfrage
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Eine Materialanfrage ist ein einfaches Dokument, welches einen Bedarf an Artikeln (Produkte oder Dienstleistungen) für einen bestimmten Zweck erfasst.
 

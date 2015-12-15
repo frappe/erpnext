@@ -1,4 +1,5 @@
-## 4.11.2 Zur Ständigen Inventur wechseln
+# Zur Ständigen Inventur wechseln
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Bestehende Benutzer müssen sich an folgende Schritte halten um das neue System der Ständigen Inventur zu aktivieren. Da die Ständige Inventur immer auf einer Synchronisation zwischen Lager und Kontostand aufbaut, ist es nicht möglich diese Option in einer bestehenden Lagereinstellung zu übernehmen. Sie müssen einen komplett neuen Satz von Lägern erstellen, jedes davon verbunden mit dem betreffenden Konto.
 

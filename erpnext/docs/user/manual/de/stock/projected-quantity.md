@@ -1,4 +1,5 @@
-## 4.10 Projizierte Menge
+# Projizierte Menge
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Die projizierte Menge ist der Lagerbestand der für einen bestimmten Artikel vorhergesagt wird, basierend auf dem aktuellen Lagerbestand und anderen Bedarfen. Es handelt sich dabei um den Bruttobestand und berücksichtig Angebot und Nachfrage aus der Vergangenheit, die mit in den Planungsprozess einbezogen werden.
 

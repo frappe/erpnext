@@ -1,4 +1,5 @@
-## 11.3 Aufwandsabrechnung
+# Aufwandsabrechnung
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Eine Aufwandsabrechnung wird dann erstellt, wenn ein Mitarbeiter Ausgaben für die Firma über seinen eigenen Geldbeutel tätigt. Beispiel: Wenn Sie einen Kunden zum Essen einladen, können Sie über das Formular zur Aufwandsabrechnung eine Erstattung beantragen.
 

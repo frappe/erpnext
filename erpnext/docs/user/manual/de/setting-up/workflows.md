@@ -1,4 +1,5 @@
-## 2.15 Workflows
+# Workflows
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Um es mehreren unterschiedlichen Personen zu erlauben viele verschiedene Anfragen zu übertragen, die dann von unterschiedlichen Benutzern genehmigt werden müssen, folgt ERPNext den Bedingungen eines Workflows. ERPNext protokolliert die unterschiedlichen Berechtigungen vor dem Übertragen mit.
 

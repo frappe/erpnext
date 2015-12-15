@@ -1,4 +1,5 @@
-## 4.15 Lieferantenreklamation
+# Lieferantenreklamation
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 In ERPNext gibt es eine Option für Produkte, die zurück zum Lieferanten geschickt werden müssen. Die Gründe dafür können vielfältig sein, z. B. defekte Waren, nicht ausreichende Qualität, der Käufer braucht die Ware nicht (mehr), usw.
 

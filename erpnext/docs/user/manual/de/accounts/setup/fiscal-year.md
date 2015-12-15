@@ -1,4 +1,5 @@
-## 3.17.1 Geschäftsjahr
+# Geschäftsjahr
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Ein Geschäftsjahr wird auch als Finanzjahr oder Budgetjahr bezeichnet. Es wird verwendet um Finanzaussagen für ein Geschäft oder eine Organisation zu treffen. Das Geschäftsjahr kann gleich dem Kalenderjahr sein, muss aber nicht. Aus steuerrechtlichen Gründen können sich Firmen für Steuerzahlungen nach dem Kalenderjahr oder nach dem Geschäftsjahr entscheiden. In den meisten Rechtssystemen schreiben Finanzgesetze solche Berichte alle 12 Monate vor. Es ist jedoch nicht zwingend erforderlich, dass es sich dabei um ein Kalenderjahr (also vom 1. Januar bis 31. Dezember) handelt.
 

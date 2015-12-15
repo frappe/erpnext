@@ -1,4 +1,5 @@
-## 9. Projekte
+# Projekte
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 ERPNext unterstützt Sie dabei Ihre Projekte abzuwickeln, indem es diese in Aufgaben aufteilt und diese unterschiedlichen Personen zuteilt.
 

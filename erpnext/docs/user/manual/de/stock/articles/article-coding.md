@@ -1,4 +1,5 @@
-## 4.6.1 Artikelkodierung
+# Artikelkodierung
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Wenn Sie bereits einer ausgewachsenen Geschäftstätigkeit mit einer Anzahl an physischen Produkten nachgehen, haben Sie Ihre Artikel vielleicht schon kodifiziert. Wenn nicht, haben Sie die Wahl. Wir empfehlen Ihnen, Artikel zu kodieren, wenn Sie viele Produkte mit langen oder komplizierten Namen haben. Für den Fall, dass sie wenige Produkte mit kurzen Namen haben, übernimmt man vorzugsweise den Artikelnamen für den Artikelcode.
 

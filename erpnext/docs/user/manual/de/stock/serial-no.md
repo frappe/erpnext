@@ -1,4 +1,5 @@
-## 4.8 Seriennummer
+# Seriennummer
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Wie bereits im Abschnitt **Artikel** besprochen, wird ein Datensatz **Seriennummer** (S/N) für jede Menge eines Artikels vorgehalten, wenn ein **Artikel serialisiert** wird. Diese Information ist hilfreich um den Standort der Seriennummer nachzuvollziehen, wenn es um Garantiethemen geht und um Informationen zur Lebensdauer (Verfallsdatum).
 

@@ -1,4 +1,5 @@
-## 6.3.2 Vertriebspartner
+# Vertriebspartner
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Menschen, die Sie dabei unterstützen Geschäfte abzuschliessen, werden als Vertriebspartner bezeichnet. Vertriebspartner können durch unterschiedliche Namen in ERPNext repräsentiert werden. Sie können Sie als Channelpartner, Distributor, Händler, Agent, Einzelhändler, Umsetzungspartner, Wiederverkäufer, usw. bezeichnen.
 

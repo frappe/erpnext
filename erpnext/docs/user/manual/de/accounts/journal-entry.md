@@ -1,4 +1,5 @@
-## 3.1 Journalbuchung / Buchungssatz
+# Journalbuchung / Buchungssatz
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Außer der **Ausgangsrechnung** und der **Eingangsrechnung** werden alle Buchungsvorgänge als **Journalbuchung / Buchungssatz** erstellt. Ein **Buchungssatz** ist ein Standard-Geschäftsvorfall aus dem Rechnungswesen, der sich auf mehrere verschiedene Konten auswirkt und bei dem die Summen von Soll und Haben gleich groß sind.
 

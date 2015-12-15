@@ -1,4 +1,5 @@
-## 4.3 Lieferschein
+# Lieferschein
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Ein Lieferschein wird dann erstellt, wenn ein Versand vom Lager der Firma statt findet.
 

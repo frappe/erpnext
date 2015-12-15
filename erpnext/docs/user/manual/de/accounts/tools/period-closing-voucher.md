@@ -1,4 +1,5 @@
-## 3.16.3 Periodenabschlussbeleg
+# Periodenabschlussbeleg
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Zum Ende eines jeden Jahres (oder evtl. auch vierteljährlich oder monatlich) und nachdem Sie die Bücher geprüft haben, können Sie Ihre Kontenbücher abschliessen. Das heißt, dass Sie die besonderen Abschlussbuchungen durchführen können, z. B.:
 

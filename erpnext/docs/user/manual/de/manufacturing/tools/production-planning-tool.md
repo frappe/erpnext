@@ -1,4 +1,5 @@
-## 8.7.1 Werkzeug zur Fertigungsplanung
+# Werkzeug zur Fertigungsplanung
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Das Werkzeug zur Fertigungsplanung unterstützt Sie dabei die Fertigung zu planen und Artikel für eine Periode einzukaufen (normalerweise eine Woche oder ein Monat).
 

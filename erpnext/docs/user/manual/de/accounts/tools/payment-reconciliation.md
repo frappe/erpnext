@@ -1,4 +1,5 @@
-## 3.16.2 Zahlungsabgleich
+# Zahlungsabgleich
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Ein Abgleich ist ein Buchhaltungsprozess, der dazu verwendet wird zwei Datensätze zu vergleichen und sicher zu stellen, dass die Zahlen übereinstimmen und ihre Richtigkeit haben. Es handelt sich hierbei um den Schlüsselprozess, der verwendet wird um zu ermitteln, ob das Geld, was von einem Konto abfliesst, mit dem Betrag übereinstimmt, der ausgegeben wird. Dies stellt sicher, dass die beiden Werte zum Ende eines Aufzeichnungszeitraums ausgegelichen sind. Beim Zahlungsabgleich, werden die Rechnungen mit den Bankzahlungen abgeglichen. Sie können hierzu das Werkzeug zum Zahlungsabgleich verwenden, wenn Sie viele Zahlungen haben, die nicht mit den zugehörigen Rechnungen abgeglichen wurden.
 

@@ -1,4 +1,5 @@
-## 11.5 Gehalt und Gehaltsabrechung
+# Gehalt und Gehaltsabrechung
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Ein Gehalt ist ein fester Geldbetrag oder eine Ersatzvergütung die vom Arbeitsgeber für die Arbeitsleistung des Arbeitnehmers an diesen gezahlt wird.
 

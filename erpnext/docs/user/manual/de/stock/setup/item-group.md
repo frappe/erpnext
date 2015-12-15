@@ -1,4 +1,5 @@
-## 4.13.2 Artikelgruppe
+# Artikelgruppe
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Die Artikelgruppe ist die Klassifikationskategorie. Ordnen Sie ein Produkt abhängig von seiner Art in einen entsprechenden Bereich ein. Wenn das Produkt dienstleistungsorientiert ist, ordnen Sie es unter dem Hauptpunkt Dienstleistung ein. Wenn das Produkt als Rohmaterial verwendet wird, müssen Sie es in der Kategorie Rohmaterial einordnen. Für den Fall, dass es sich bei dem Produkt um reine Handelsware handelt, können Sie es im Bereich Handelsware einordnen.
 

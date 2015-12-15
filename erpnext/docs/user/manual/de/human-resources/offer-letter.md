@@ -1,4 +1,5 @@
-## 11.9 Angebotsschreiben
+# Angebotsschreiben
+<span class="text-muted contributed-by">Beigetragen von CWT Connector & Wire Technology GmbH</span>
 
 Ein Bewerber erhält ein Angebotsschreiben nach dem Vorstellungsgespräch und der Auswahl. Es gibt das angebotene Gehaltspaket, die Stellenbezeichnung, den Rang, die Bezeichnung der Abteilung und die vereinbarten Urlaubstage wieder.
 
