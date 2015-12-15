@@ -27,3 +27,7 @@ Schritte:
 Das System wird für bereits existierende Lagertransaktionen keine Buchungssätze erstellen, wenn sie vor der Aktivierung der Ständigen Inventur übertragen wurden, da die alten Läger nicht mit Konten verknüpft werden. Wenn Sie eine neue Transaktion mit einem alten Lager erstellen oder eine existierende Transaktion ändern, gibt es keine korrespondierenden Buchungssätze. Sie müssen Lager und Kontostände manuell über das Journal synchronisieren.
 
 > Anmerkung: Wenn Sie bereits das alte System der Ständigen Inventur nutzen, wird dieses automatisch deaktiviert. Sie müssen den Schritten oben folgen um es wieder zu aktivieren.
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
