@@ -18,3 +18,7 @@ Sie können in einer Kampagne [Leads]({{docs_base_url}}/user/manual/en/crm/lead.
 <img class="screenshot" alt="Kampagne - Neuer Lead" src="{{docs_base_url}}/assets/img/crm/campaign-new-lead.png">
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
