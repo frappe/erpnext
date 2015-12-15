@@ -96,3 +96,7 @@ Der **Fertigungsauftrag** wird aus dem **Werkzeug zur Fertigungsplanung** generi
 > Anmerkung: Um einen Fertigungsauftrag zu einem Artikel zu erstellen müssen Sie auf dem Artikelformular das Feld "Fertigungsauftrag zulassen" ankreuzen.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
