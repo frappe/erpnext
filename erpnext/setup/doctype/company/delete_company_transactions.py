@@ -88,7 +88,8 @@ def delete_time_logs(company_name):
 
 def delete_lead_addresses(company_name):
 	"""Delete addresses to which leads are linked"""
-	frappe.db.sql("""delete from `tabAddress`
-		where (customer='' or customer is null) and (supplier='' or supplier is null) and (lead != '' and lead is not null)""")
+	for lead in frappe.get_all("Lead", filters={"company": company_name}):
+		frappe.db.sql("""delete from `tabAddress`
+			where lead=%s and (customer='' or customer is null) and (supplier='' or supplier is null)""", lead.name)
 
-	frappe.db.sql("""update `tabAddress` set lead=null, lead_name=null""")
+		frappe.db.sql("""update `tabAddress` set lead=null, lead_name=null where lead=%s""", lead.name)
