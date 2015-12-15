@@ -37,3 +37,7 @@ Das kann über die Firmenstammdaten eingestellt werden.
 Auch dann, wenn Sie für überschrittene Budgets "ignorieren" auswählen, bekommen Sie eine Fülle von Informationen über den Bericht zur Abweichung zwischen Budget und Istwert. Dieser Bericht zeigt Ihnen auf monatlicher Basis die tatsächlichen Ausgaben verglichen mit den budgetierten Ausgaben.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
