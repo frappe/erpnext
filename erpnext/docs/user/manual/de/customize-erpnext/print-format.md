@@ -92,3 +92,7 @@ Um Ihre Druck- und PDF-Einstellungen zu bearbeiten/zu aktualisieren, gehen Sie z
 Sie werden des öfteren eine Standard-Fußzeile mit Ihrer Adresse und Ihren Kontaktinformationen bei Ihren Ausdrucken haben wollen. Leider ist es aufgrund der beschränkten Druckunterstützung auf HTML-Seiten nicht möglich dies ohne Skripte umzusetzen. Entweder Sie verwenden dann vorgedrucktes Briefpapier oder Sie fügen diese Informationen dem Briefkopf hinzu.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
