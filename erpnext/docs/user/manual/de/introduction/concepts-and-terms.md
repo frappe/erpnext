@@ -22,7 +22,7 @@ Bezeichnung eines Lieferanten von Waren oder Dienstleistungen. Ihr Telekommunika
 > Einkauf > Dokumente > Lieferant
 
 #### Artikel
-Ein Produkt, ein Unterprodukt oder eine Dienstleistung, welche(s) entweder eingekauft, verkauft oder hergestellt wird, wird eindeutig identifiziert.
+Ein Produkt, ein Unterprodukt oder eine Dienstleistung, welche(s) entweder eingekauft, verkauft oder hergestellt wird, und eindeutig identifizierbar ist.
 
 > Lagerbestand > Dokumente > Artikel
 
