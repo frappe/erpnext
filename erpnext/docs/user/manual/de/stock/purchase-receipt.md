@@ -51,3 +51,7 @@ Für jeden Artikel wird eine Buchung im Lagerhauptbuch vorgenommen. Diese fügt 
 Manchmal weis man bestimmte Aufwendungen, die den Wert eines eingekauften Artikels erhöhen, erst nach einiger Zeit. Ein häufiges Beispiel ist folgendes: Wenn Sie Artikel importieren wissen Sie den Zollbetrag erst dann, wenn Ihnen der Abwicklungs-Agent eine Rechnung schickt. Wenn Sie diese Kosten den gekauften Artikeln hinzufügen wollen, müssem Sie den Einstandskosten-Assistenten benutzen. Warum Einstandskosten? Weil sie die Gebühren beinhalten, die Sie bezahlt haben, wenn die Ware in Ihren Besitz gelangt.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
