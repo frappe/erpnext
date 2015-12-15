@@ -21,3 +21,7 @@ So sieht der Briefkopf eines Ausdruckes aus:
 <img class="screenshot" alt="Briefkopf" src="{{docs_base_url}}/assets/img/setup/print/letter-head-1.png">
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
