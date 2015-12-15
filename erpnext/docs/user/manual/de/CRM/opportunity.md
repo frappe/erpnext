@@ -21,3 +21,7 @@ Eine Opportunity kann auch aus einem bereits vorhandenen Kunden heraus entstehen
 > Ein Tipp aus der Erfahrung heraus: Leads und Opportunities werden oft als Ihre "Vertriebspipeline" bezeichnet. Sie brauchen diese Option um vorhersehen zu können wieviel Geschäft in der Zukunft generiert werden kann. Es ist also immer eine gute Idee diese Daten festzuhalten um Ihre Resourcen an die Nachfrage anzupassen.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
