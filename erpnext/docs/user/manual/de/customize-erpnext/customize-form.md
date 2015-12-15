@@ -73,7 +73,7 @@ Im Folgenden erhalten Sie eine Auflistung der Eigenschaften, die Sie für ein be
       <td>Klicken Sie <a href="https://erpnext.com/kb/customize/field-types">hier</a> um mehr über Feldtypen zu erfahren.</td>
     </tr>
     <tr>
-      <td>Optionen/td>
+      <td>Optionen</td>
       <td>Hier können Sie Auswahlmöglichkeiten eines DropDown-Feldes auflisten. Für ein Verknüpfungsfeld kann auch der zutreffende DocType mit angegeben werden.</td>
     </tr>
     <tr>
