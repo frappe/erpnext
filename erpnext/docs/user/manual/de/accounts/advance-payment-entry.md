@@ -37,3 +37,7 @@ Um die Ausgangsrechnung mit einem Buchungssatz zu verknüpfen, der die Buchung z
 Speichern und übertragen Sie die Ausgangsrechnung
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
