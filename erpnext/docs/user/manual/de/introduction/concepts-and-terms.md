@@ -155,7 +155,7 @@ Materialübertrag von einem Lager, in ein Lager oder zwischen mehreren Lägern.
 > Lagerbestand > Dokumente > Lagerbuchung
 
 #### Lieferschein
-Eine Liste von Artikeln mit Mengenangaben für den Versand. Ein Lieferschein reduziert die Lagermenge eines Artikels auf dem Lager, von dem er versendet wird. Ein Lieferschein wird normalerweise zu einem Kundenauftrag erstellt.
+Eine Liste von Artikeln mit Mengenangaben für die Auslieferung an den Kunden. Ein Lieferschein reduziert die Lagermenge eines Artikels auf dem Lager, von dem er versendet wird. Ein Lieferschein wird normalerweise zu einem Kundenauftrag erstellt.
 
 > Lagerbestand > Dokumente > Lieferschein
 
