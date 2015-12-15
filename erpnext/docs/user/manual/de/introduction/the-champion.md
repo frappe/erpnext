@@ -10,7 +10,7 @@ Stellen wir einen Vergleich an
 
 Der menschliche Körper scheint weder heute noch morgen Training zu benötigen, aber auf lange Sicht sollten Sie doch in die Gänge kommen, wenn Sie Ihren Körper und Ihre Gesundheit erhalten möchten. 
 
-In der gleichen Art und Weise verbessert ein ERP-System die Gesundheit Ihrer Organisation über einen langen Zeitraum, indem es sie fit und effizient hält. Je länger Sie warten, Dinge in Ordnung zu bringen, umso mehr Zeit verlieren Sie, und um so näher kommen Sie einer größeren Katastrophe.
+In der gleichen Art und Weise verbessert ein ERP-System die Gesundheit Ihrer Organisation über einen langen Zeitraum, indem es diese fit und effizient hält. Je länger Sie warten, Dinge in Ordnung zu bringen, umso mehr Zeit verlieren Sie, und um so näher kommen Sie einer größeren Katastrophe.
 
 Wenn Sie also damit beginnen, ein ERP-System einzuführen, dann richten Sie Ihren Blick auf die langfristigen Vorteile. Wie das tägliche Training, ist es auf kurze Sicht anstrengend, bewirkt auf lange Sicht aber Wunder, wenn Sie auf Kurs bleiben.
 
