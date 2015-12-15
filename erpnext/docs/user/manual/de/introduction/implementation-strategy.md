@@ -8,7 +8,7 @@ Bevor Sie damit beginnen, Ihre Arbeiten über ERPNext abzuwickeln, müssen Sie s
 ### Testphase
 
 * Lesen Sie das Handbuch.
-* Legen Sie ein kostenloses Konto auf [https://erpnext.com](https://erpnext.com) an. (Das ist der einfachste Weg zu experimentieren.)
+* Legen Sie ein kostenloses Konto auf [https://erpnext.com](https://erpnext.com) an. (Das ist der einfachste Weg um zu experimentieren.)
 * Legen Sie Ihre ersten Kunden, Lieferanten und Artikel an. Erstellen Sie weitere, um sich mit diesen Verfahren vertraut zu machen.
 * Legen Sie Kundengruppen, Artikelgruppen, Läger und Lieferantengruppen an, damit Sie Ihre Artikel klassifizieren können.
 * Durchlaufen Sie einen Standard-Vertriebszyklus: Lead -> Opportunity -> Angebot -> Kundenauftrag -> Lieferschein -> Ausgangsrechnung -> Zahlung (Journalbuchung)
