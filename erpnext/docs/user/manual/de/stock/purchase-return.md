@@ -23,3 +23,7 @@ Wenn die st√§ndige Inventur aktiviert ist, erstellt das System auch Buchungen f√
 <img class="screenshot" alt="Reklamation und Lagerbuch" src="{{docs_base_url}}/assets/img/stock/purchase-return-general-ledger.png">
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
