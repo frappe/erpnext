@@ -146,7 +146,7 @@ erpnext.AccountsChart = Class.extend({
 					label: __("Rename"),
 					click: function(node) {
 						frappe.model.rename_doc(me.ctype, node.label, function(new_name) {
-							node.reload();
+							node.reload_parent();
 						});
 					},
 					btnClass: "hidden-xs"
@@ -166,8 +166,8 @@ erpnext.AccountsChart = Class.extend({
 				var dr_or_cr = node.data.balance < 0 ? "Cr" : "Dr";
 				if (me.ctype == 'Account' && node.data && node.data.balance!==undefined) {
 					$('<span class="balance-area pull-right text-muted small">'
-						+ (node.data.balance_in_account_currency ? 
-							(format_currency(Math.abs(node.data.balance_in_account_currency), 
+						+ (node.data.balance_in_account_currency ?
+							(format_currency(Math.abs(node.data.balance_in_account_currency),
 								node.data.account_currency) + " / ") : "")
 						+ format_currency(Math.abs(node.data.balance), node.data.company_currency)
 						+ " " + dr_or_cr
@@ -219,7 +219,7 @@ erpnext.AccountsChart = Class.extend({
 					description: __("Optional. This setting will be used to filter in various transactions.") },
 				{fieldtype:'Float', fieldname:'tax_rate', label:__('Tax Rate')},
 				{fieldtype:'Link', fieldname:'warehouse', label:__('Warehouse'), options:"Warehouse"},
-				{fieldtype:'Link', fieldname:'account_currency', label:__('Currency'), options:"Currency", 
+				{fieldtype:'Link', fieldname:'account_currency', label:__('Currency'), options:"Currency",
 					description: __("Optional. Sets company's default currency, if not specified.")}
 			]
 		})
@@ -243,7 +243,7 @@ erpnext.AccountsChart = Class.extend({
 			$(fd.tax_rate.wrapper).toggle(fd.account_type.get_value()==='Tax');
 			$(fd.warehouse.wrapper).toggle(fd.account_type.get_value()==='Warehouse');
 		})
-		
+
 		// root type if root
 		$(fd.root_type.wrapper).toggle(node.root);
 
@@ -261,7 +261,7 @@ erpnext.AccountsChart = Class.extend({
 			var node = me.tree.get_selected_node();
 			v.parent_account = node.label;
 			v.company = me.company;
-			
+
 			if(node.root) {
 				v.is_root = true;
 				v.parent_account = null;
@@ -278,7 +278,7 @@ erpnext.AccountsChart = Class.extend({
 					if(node.expanded) {
 						node.toggle_node();
 					}
-					node.reload();
+					node.load();
 				}
 			});
 		});
@@ -324,7 +324,7 @@ erpnext.AccountsChart = Class.extend({
 					if(node.expanded) {
 						node.toggle_node();
 					}
-					node.reload();
+					node.load();
 				}
 			});
 		});
