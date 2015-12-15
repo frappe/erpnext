@@ -9,3 +9,7 @@ Vertriebsmitarbeiter verhalten sich wie Regionen. Sie können ein Organigramm de
 Sie können einen Vertriebsmitarbeiter wie im Kundenauftrag, dem Lieferschein und der Ausgangsrechnung in Kunden- und Verkaufstransaktionen nutzen. Klicken Sie hier, um mehr darüber zu erfahren, wie Vertriebsmitarbeiter in den Transaktionen eines Verkaufszyklus verwendet werden.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
