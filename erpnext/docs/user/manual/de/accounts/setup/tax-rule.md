@@ -17,3 +17,7 @@ Angenommen wird haben zwei Steuerregeln wie unten abgebildet erstellt.
 In unserem Beispiel gilt Regel 1 für Indien und Regel 2 für Großbritannien.
 
 Wenn wir nun annehmen, dass wir einen Kundenauftrag für einen Kunden erstellen wollen, dessen Standard-Abrechnungsland Indien ist, dann sollte das System Regel 1 anwenden. Für den Fall, dass das Abrechnungsland des Kunden Großbritannien ist, wird Regel 2 ausgewählt.
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
