@@ -122,7 +122,7 @@ Eine Drittpartei, ein Händler, ein Partnerunternehmen oder ein Handelsvertreter
 > Vertrieb > Einstellungen > Vertriebspartner
 
 #### Vertriebsmitarbeiter
-Eine Person, die mit einem Kunden Gespräche führt und Geschäfte abschliesst. Sie können für Vertriebsmitarbeiter Ziele definieren und sie bei Transaktionen mit angeben.
+Eine Person, die mit einem Kunden Gespräche führt und Geschäfte abschliesst. Sie können für Vertriebsmitarbeiter Ziele definieren und die Vertriebsmitarbeiter bei Transaktionen mit angeben.
 
 > Vertrieb > Einstellungen > Vertriebsmitarbeiter
 
