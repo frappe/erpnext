@@ -18,3 +18,7 @@ Sobald eine Bestellung aufgegeben wurde, entweder über den Einkaufswagen oder a
 ![Rechnung berechnet]({{docs_base_url}}/assets/old_images/erpnext/portal-order-billed.png)
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
