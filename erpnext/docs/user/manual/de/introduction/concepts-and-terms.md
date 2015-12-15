@@ -308,5 +308,8 @@ Hier wird festgelegt, in welcher Einheit ein Artikel gemessen wird. Z. B. kg, St
 
 > Lagerbestand > Einstellungen > Maßeinheit
 
-
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
