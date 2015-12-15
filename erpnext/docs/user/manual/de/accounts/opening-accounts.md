@@ -75,3 +75,7 @@ Wenn es Ihnen egal ist, welche Artikel in diesen Rechnungen enthalten sind, dann
 Wenn Sie alle Ihre Rechnungen eingegeben haben, hat Ihr Eröffnungskonto einen Stand von 0.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
