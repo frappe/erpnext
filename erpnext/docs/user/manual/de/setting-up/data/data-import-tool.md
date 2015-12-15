@@ -79,3 +79,7 @@ Eine CSV (Durch Kommas getrennte Werte)-Datei ist ein Datensatz, den Sie in ERPN
 Wenn Sie Microsoft Excel benutzen und nicht-englische Zeichen verwenden, dann sollten Sie Ihre Datei UTF-8-kodiert abspeichern. Bei älteren Versionen von Excel gibt es keinen eindeutigen Weg als UTF-8 zu speichern. Deshalb können Sie die Datei auch ganz einfach als CSV abspeichern, dann mit Notepad öffnen und als UTF-8 abspeichern. (Microsoft Excel kann das leider nicht.)
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
