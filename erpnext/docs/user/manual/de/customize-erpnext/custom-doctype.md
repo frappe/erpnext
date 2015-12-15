@@ -79,3 +79,7 @@ Wenn Sie die Felder ausfüllen, schaut das ganze dann so aus.
 ![Übersicht der DocTypes]({{docs_base_url}}/assets/img/setup/customize/Doctype-book-added.png)
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
