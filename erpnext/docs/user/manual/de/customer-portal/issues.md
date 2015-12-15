@@ -19,3 +19,7 @@ Kunden können über das Kundenportal sehr einfach Fälle eröffnen. Eine einfac
 ![Fall beantworten]({{docs_base_url}}/assets/old_images/erpnext/portal-ticket-reply.png)
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
