@@ -1,6 +1,6 @@
 ## 1.7 Konzepte und Begriffe
 
-Machen Sie sich mit der Terminologie, die verwendet wird, und mit einigen Grundbegriffen von ERPNext vertraut, bevor Sie mit der Realisierung beginnen.
+Machen Sie sich mit der Terminologie, die verwendet wird, und mit einigen Grundbegriffen von ERPNext vertraut, bevor Sie mit der Einführung beginnen.
 
 * * *
 
