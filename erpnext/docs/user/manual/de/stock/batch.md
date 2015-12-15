@@ -17,3 +17,7 @@ Die Chargenstammdaten werden vor der Ausfertigung des Kaufbelegs erstellt. Somit
 > Anmerkung: Bei Lagertransaktionen werden die Chargen-IDs basierend auf dem Code, dem Lager, dem Verfallsdatum der Charge (verglichen mit dem Veröffentlichungsdatum der Transaktion) und der aktuellen Menge im Lager gefiltert.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
