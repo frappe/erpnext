@@ -7,3 +7,7 @@ Ein Geschäftsjahr startet normalerweise zu Beginn eines Quartals, wie zum Beisp
 <img class="screenshot" alt="Geschäftsjahr" src="{{docs_base_url}}/assets/img/accounts/fiscal-year.png">
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
