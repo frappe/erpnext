@@ -27,3 +27,7 @@ Wenn Sie bei Ihrer Tätigkeit bestimmte Prozesse an eine Drittpartei, bei der Si
 > Anmerkung 2: ERPNext fügt zur Bewertung automatisch den Wert des Rohmaterials hinzu, wenn die fertigen Erzeugnisse in Ihrem Lager ankommen.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
