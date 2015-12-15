@@ -63,7 +63,7 @@ Bezeichnet ein Geschäfts- oder Buchungsjahr. Sie können mehrere verschiedene G
 > Rechnungswesen > Einstellungen > Geschäftsjahr
 
 #### Kostenstelle
-Eine Kostenstelle entspricht einem Konto. Im Unterschied dazu gibt ihr Aufbau Ihre Geschäftstätigkeit noch etwas besser wieder als ein Konto. Beispiel: Sie können in Ihrem Kontenplan Ihre Aufwände nach Typ aufteilen (z. B. Reisen, Marketing). Im Kostenstellenplan können Sie Aufwände nach Produktlinie oder Geschäftseinheiten (z. B. Onlinevertrieb, Einzelhandel, etc.) unterscheiden.
+Eine Kostenstelle entspricht einem Konto. Im Unterschied dazu gibt ihr Aufbau die Geschäftstätigkeit Ihres Unternehmens noch etwas besser wieder als ein Konto. Beispiel: Sie können in Ihrem Kontenplan Ihre Aufwände nach Typ aufteilen (z. B. Reisen, Marketing). Im Kostenstellenplan können Sie Aufwände nach Produktlinien oder Geschäftseinheiten (z. B. Onlinevertrieb, Einzelhandel, etc.) unterscheiden.
 
 > Rechnungswesen > Einstellungen > Kostenstellenplan 
 
