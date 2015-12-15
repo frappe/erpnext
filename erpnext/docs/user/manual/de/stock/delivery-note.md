@@ -41,3 +41,7 @@ Wenn Sie Ihre Lieferscheine ohne Mengenangabe ausdrucken wollen (das ist dann si
 Für jeden Artikel wird eine Buchung im Lagerhauptbuch erstellt und der Lagerbestand wird aktualisiert. Ebenfalls wird die Ausstehende Menge im Kundenauftrag (sofern zutreffend) aktualisiert.
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
