@@ -132,3 +132,7 @@ Nach der Aktualisierungslogik wird der Kontostand, der durch den Bestandsabgleic
 > Sehen Sie hierzu die Videoanleitung auf https://www.youtube.com/watch?v=0yPgrtfeCTs
 
 {next}
+
+Contributed by <A HREF="http://www.cwt-kabel.de">CWT connector & wire technology GmbH</A>
+
+<A HREF="http://www.cwt-kabel.de"><IMG alt="logo" src="http://www.cwt-assembly.com/sites/all/images/logo.png" height=100></A>
